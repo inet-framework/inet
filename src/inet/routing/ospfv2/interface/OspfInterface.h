@@ -113,8 +113,8 @@ class INET_API Interface
     void processEvent(InterfaceEventType event);
     void reset();
     void sendHelloPacket(Ipv4Address destination, short ttl = 1);
-    void sendLSAcknowledgement(const OspfLsaHeader *lsaHeader, Ipv4Address destination);
-    Neighbor *getNeighborByID(RouterId neighborID);
+    void sendLsAcknowledgement(const OspfLsaHeader *lsaHeader, Ipv4Address destination);
+    Neighbor *getNeighborById(RouterId neighborID);
     Neighbor *getNeighborByAddress(Ipv4Address address);
     void addNeighbor(Neighbor *neighbor);
     InterfaceStateType getState() const;
@@ -122,10 +122,10 @@ class INET_API Interface
     bool hasAnyNeighborInStates(int states) const;
     void removeFromAllRetransmissionLists(LsaKeyType lsaKey);
     bool isOnAnyRetransmissionList(LsaKeyType lsaKey) const;
-    bool floodLSA(const OspfLsa *lsa, Interface *intf = nullptr, Neighbor *neighbor = nullptr);
+    bool floodLsa(const OspfLsa *lsa, Interface *intf = nullptr, Neighbor *neighbor = nullptr);
     void addDelayedAcknowledgement(const OspfLsaHeader& lsaHeader);
     void sendDelayedAcknowledgements();
-    void ageTransmittedLSALists();
+    void ageTransmittedLsaLists();
 
     Packet *createUpdatePacket(const OspfLsa *lsa);
 
@@ -133,12 +133,12 @@ class INET_API Interface
     OspfInterfaceType getType() const { return interfaceType; }
     void setIfIndex(IInterfaceTable *ift, int index);
     int getIfIndex() const { return ifIndex; }
-    void setMTU(unsigned short ifMTU) { mtu = ifMTU; }
-    unsigned short getMTU() const { return mtu; }
-    void setAreaID(AreaId areaId) { areaID = areaId; }
-    AreaId getAreaID() const { return areaID; }
-    void setTransitAreaID(AreaId areaId) { transitAreaID = areaId; }
-    AreaId getTransitAreaID() const { return transitAreaID; }
+    void setMtu(unsigned short ifMTU) { mtu = ifMTU; }
+    unsigned short getMtu() const { return mtu; }
+    void setAreaId(AreaId areaId) { areaID = areaId; }
+    AreaId getAreaId() const { return areaID; }
+    void setTransitAreaId(AreaId areaId) { transitAreaID = areaId; }
+    AreaId getTransitAreaId() const { return transitAreaID; }
     void setOutputCost(Metric cost) { interfaceOutputCost = cost; }
     Metric getOutputCost() const { return interfaceOutputCost; }
     void setRetransmissionInterval(short interval) { retransmissionInterval = interval; }

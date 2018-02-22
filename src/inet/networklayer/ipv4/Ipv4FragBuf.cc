@@ -21,7 +21,7 @@
 #include "inet/networklayer/ipv4/Ipv4FragBuf.h"
 
 #include "inet/networklayer/ipv4/Icmp.h"
-#include "inet/networklayer/ipv4/Ipv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 
 namespace inet {
 

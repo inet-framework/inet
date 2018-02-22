@@ -40,7 +40,7 @@ void LMac::initialize(int stage)
         queueLength = par("queueLength");
         slotDuration = par("slotDuration");
         bitrate = par("bitrate");
-        headerLength = par("headerLength");
+        headerLength = b(par("headerLength"));
         EV << "headerLength is: " << headerLength << endl;
         numSlots = par("numSlots");
         // the first N slots are reserved for mobile nodes to be able to function normally
@@ -53,10 +53,10 @@ void LMac::initialize(int stage)
         slotChange = new cOutVector("slotChange");
 
         // how long does it take to send/receive a control packet
-        controlDuration = ((double)headerLength + (double)numSlots + 16) / (double)bitrate;
+        controlDuration = (double)(headerLength.get() + numSlots + 16) / (double)bitrate;     //FIXME replace 16 to a constant
         EV << "Control packets take : " << controlDuration << " seconds to transmit\n";
 
-        initializeMACAddress();
+        initializeMacAddress();
         registerInterface();
 
         cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
@@ -118,7 +118,7 @@ LMac::~LMac()
     macQueue.clear();
 }
 
-void LMac::initializeMACAddress()
+void LMac::initializeMacAddress()
 {
     const char *addrstr = par("address");
 
@@ -142,7 +142,7 @@ InterfaceEntry *LMac::createInterfaceEntry()
     e->setDatarate(bitrate);
 
     // generate a link-layer address to be used as interface token for IPv6
-    e->setMACAddress(address);
+    e->setMacAddress(address);
     e->setInterfaceToken(address.formInterfaceIdentifier());
 
     // capabilities
@@ -176,7 +176,7 @@ void LMac::handleUpperPacket(Packet *packet)
         PacketDropDetails details;
         details.setReason(QUEUE_OVERFLOW);
         details.setLimit(queueLength);
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
         EV_DETAIL << "ERROR: Queue is full, forced to delete.\n";
     }
@@ -359,7 +359,7 @@ void LMac::handleSelfMessage(cMessage *msg)
                     EV_DETAIL << "packet not for me, deleting...\n";
                     PacketDropDetails details;
                     details.setReason(NOT_ADDRESSED_TO_US);
-                    emit(packetDropSignal, packet, &details);
+                    emit(packetDroppedSignal, packet, &details);
                     delete packet;
                 }
                 // in any case, go back to sleep
@@ -483,7 +483,7 @@ void LMac::handleSelfMessage(cMessage *msg)
 
                 control->setSrcAddr(address);
                 control->setMySlot(mySlot);
-                control->setChunkLength(b(headerLength + numSlots));
+                control->setChunkLength(headerLength + b(numSlots));    //FIXME check it: add only 1 bit / slot?
                 control->setOccupiedSlotsArraySize(numSlots);
                 for (int i = 0; i < numSlots; i++)
                     control->setOccupiedSlots(i, occSlotsDirect[i]);
@@ -505,7 +505,7 @@ void LMac::handleSelfMessage(cMessage *msg)
                     return;
                 }
                 Packet *data = new Packet();
-                data->insertAtEnd(macQueue.front()->peekAt(b(headerLength)));
+                data->insertAtEnd(macQueue.front()->peekAt(headerLength));
                 data->setKind(LMAC_DATA);
                 const auto& lmacHeader = staticPtrCast<LMacHeader>(macQueue.front()->peekHeader<LMacHeader>()->dupShared());
                 lmacHeader->setMySlot(mySlot);
@@ -559,7 +559,7 @@ void LMac::handleSelfMessage(cMessage *msg)
                     EV_DETAIL << "packet not for me, deleting...\n";
                     PacketDropDetails details;
                     details.setReason(NOT_ADDRESSED_TO_US);
-                    emit(packetDropSignal, packet, &details);
+                    emit(packetDroppedSignal, packet, &details);
                     delete packet;
                 }
                 // in any case, go back to sleep
@@ -594,7 +594,7 @@ void LMac::handleLowerPacket(Packet *packet)
         EV << "Received " << packet << " contains bit errors or collision, dropping it\n";
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
         return;
     }
@@ -666,9 +666,9 @@ void LMac::decapsulate(Packet *packet)
     const auto& lmacHeader = packet->popHeader<LMacHeader>();
     packet->addTagIfAbsent<MacAddressInd>()->setSrcAddress(lmacHeader->getSrcAddr());
     packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-    auto protocol = ProtocolGroup::ethertype.getProtocol(lmacHeader->getNetworkProtocol());
-    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);
+    auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(lmacHeader->getNetworkProtocol());
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
     EV_DETAIL << " message decapsulated " << endl;
 }
 
@@ -680,7 +680,7 @@ void LMac::decapsulate(Packet *packet)
 void LMac::encapsulate(Packet *netwPkt)
 {
     auto pkt = makeShared<LMacHeader>();
-    pkt->setChunkLength(b(headerLength));
+    pkt->setChunkLength(headerLength);
 
     // copy dest address from the Control Info attached to the network
     // message by the network layer

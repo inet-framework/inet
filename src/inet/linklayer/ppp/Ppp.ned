@@ -50,24 +50,21 @@ simple Ppp
         bool sendRawBytes = default(false); // when true packets are serialized into a sequence of bytes before sending out
         int txQueueLimit = default(1000);  // only used if queueModule==""; zero means infinite
         string queueModule = default("");  // path of external (QoS,RED,etc) queue module
-        int mtu @unit("B") = default(4470B);
+        int mtu @unit(B) = default(4470B);
         @display("i=block/rxtx");
 
-        @signal[txState](type=long);    // 1:transmit, 0:idle
+        @signal[transmissionStateChanged](type=long);    // 1:transmit, 0:idle
         @signal[rxPkOk](type=Packet);
-        @signal[packetDrop](type=Packet);
+        @signal[packetDropped](type=Packet);
         @signal[packetSentToLower](type=Packet);
         @signal[packetReceivedFromLower](type=cPacket);
         @signal[packetSentToUpper](type=cPacket);
         @signal[packetReceivedFromUpper](type=cPacket);
-        @signal[ppTxBegin](type=TxNotifDetails);
-        @signal[ppTxEnd](type=TxNotifDetails);
-        @signal[ppRxEnd](type=TxNotifDetails);
-        @statistic[txState](title="tx state"; record=timeavg,vector; interpolationmode=sample-hold);
+        @statistic[transmissionState](title="tx state"; source=transmissionStateChanged; record=timeavg,vector; interpolationmode=sample-hold);
         @statistic[txPk](title="packets transmitted"; source=packetSentToLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[rxPkOk](title="packets received OK"; source=rxPkOk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[packetDropIncorrectlyReceived](title="packet drop: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-        @statistic[packetDropInterfaceDown](title="packet drop: interface down"; source=packetDropReasonIsInterfaceDown(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropIncorrectlyReceived](title="packet drop: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropInterfaceDown](title="packet drop: interface down"; source=packetDropReasonIsInterfaceDown(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[rcvdPkFromHl](title="packets received from higher layer"; source=packetReceivedFromUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[passedUpPk](title="packets passed to higher layer"; source=packetSentToUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
 

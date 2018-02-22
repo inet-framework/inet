@@ -54,7 +54,7 @@ void AckingMac::flushQueue()
         cMessage *msg = queueModule->pop();
         PacketDropDetails details;
         details.setReason(INTERFACE_DOWN);
-        emit(packetDropSignal, msg, &details);
+        emit(packetDroppedSignal, msg, &details);
         delete msg;
     }
     queueModule->clear();    // clear request count
@@ -88,7 +88,7 @@ void AckingMac::initialize(int stage)
         cGate *queueOut = gate("upperLayerIn")->getPathStartGate();
         queueModule = dynamic_cast<IPassiveQueue *>(queueOut->getOwnerModule());
 
-        initializeMACAddress();
+        initializeMacAddress();
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         radio->setRadioMode(fullDuplex ? IRadio::RADIO_MODE_TRANSCEIVER : IRadio::RADIO_MODE_RECEIVER);
@@ -100,7 +100,7 @@ void AckingMac::initialize(int stage)
     }
 }
 
-void AckingMac::initializeMACAddress()
+void AckingMac::initializeMacAddress()
 {
     const char *addrstr = par("address");
 
@@ -124,7 +124,7 @@ InterfaceEntry *AckingMac::createInterfaceEntry()
     e->setDatarate(bitrate);
 
     // generate a link-layer address to be used as interface token for IPv6
-    e->setMACAddress(address);
+    e->setMacAddress(address);
     e->setInterfaceToken(address.formInterfaceIdentifier());
 
     // MTU: typical values are 576 (Internet de facto), 1500 (Ethernet-friendly),
@@ -204,7 +204,7 @@ void AckingMac::handleLowerPacket(Packet *packet)
         EV << "Received frame '" << packet->getName() << "' contains bit errors or collision, dropping it\n";
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
         return;
     }
@@ -229,7 +229,7 @@ void AckingMac::handleSelfMessage(cMessage *message)
         auto macHeader = lastSentPk->popHeader<AckingMacHeader>();
         lastSentPk->addTagIfAbsent<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(macHeader->getNetworkProtocol()));
         // packet lost
-        emit(linkBreakSignal, lastSentPk);
+        emit(linkBrokenSignal, lastSentPk);
         delete lastSentPk;
         lastSentPk = nullptr;
         if (queueModule != nullptr)
@@ -297,7 +297,7 @@ bool AckingMac::dropFrameNotForUs(Packet *packet)
     EV << "Frame '" << packet->getName() << "' not destined to us, discarding\n";
     PacketDropDetails details;
     details.setReason(NOT_ADDRESSED_TO_US);
-    emit(packetDropSignal, packet, &details);
+    emit(packetDroppedSignal, packet, &details);
     delete packet;
     return true;
 }
@@ -309,8 +309,9 @@ void AckingMac::decapsulate(Packet *packet)
     macAddressInd->setSrcAddress(macHeader->getSrc());
     macAddressInd->setDestAddress(macHeader->getDest());
     packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(ProtocolGroup::ethertype.getProtocol(macHeader->getNetworkProtocol()));
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(macHeader->getNetworkProtocol()));
+    auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(macHeader->getNetworkProtocol());
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
 }
 
 } // namespace inet

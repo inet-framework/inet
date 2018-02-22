@@ -74,7 +74,7 @@ void XMac::initialize(int stage)
         WATCH(macState);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
-        initializeMACAddress();
+        initializeMacAddress();
         registerInterface();
 
         wakeup = new cMessage("wakeup");
@@ -177,7 +177,7 @@ void XMac::finish()
     }
 }
 
-void XMac::initializeMACAddress()
+void XMac::initializeMacAddress()
 {
     const char *addrstr = par("address");
 
@@ -201,7 +201,7 @@ InterfaceEntry *XMac::createInterfaceEntry()
     e->setDatarate(bitrate);
 
     // generate a link-layer address to be used as interface token for IPv6
-    e->setMACAddress(address);
+    e->setMacAddress(address);
     e->setInterfaceToken(address.formInterfaceIdentifier());
 
     // capabilities
@@ -637,7 +637,7 @@ bool XMac::addToQueue(Packet *packet)
                   " deleted\n";
         PacketDropDetails details;
         details.setReason(QUEUE_OVERFLOW);
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
         nbDroppedDataPackets++;
         return false;
@@ -667,22 +667,36 @@ void XMac::changeDisplayColor(XMAC_COLORS color)
     if (!animation)
         return;
     cDisplayString& dispStr = getContainingNode(this)->getDisplayString();
-    //b=40,40,rect,black,black,2"
-    if (color == GREEN)
-        dispStr.setTagArg("b", 3, "green");
-        //dispStr.parse("b=40,40,rect,green,green,2");
-    if (color == BLUE)
-        dispStr.setTagArg("b", 3, "blue");
-                //dispStr.parse("b=40,40,rect,blue,blue,2");
-    if (color == RED)
-        dispStr.setTagArg("b", 3, "red");
-                //dispStr.parse("b=40,40,rect,red,red,2");
-    if (color == BLACK)
-        dispStr.setTagArg("b", 3, "black");
-                //dispStr.parse("b=40,40,rect,black,black,2");
-    if (color == YELLOW)
-        dispStr.setTagArg("b", 3, "yellow");
-                //dispStr.parse("b=40,40,rect,yellow,yellow,2");
+    switch (macState) {
+        case INIT:
+            dispStr.setTagArg("t", 0, "INIT");
+            break;
+
+        case SLEEP:
+            dispStr.setTagArg("t", 0, "SLEEP");
+            break;
+
+        case CCA:
+            dispStr.setTagArg("t", 0, "CCA");
+            break;
+
+        case SEND_ACK:
+        case SEND_PREAMBLE:
+        case SEND_DATA:
+            dispStr.setTagArg("t", 0, "SEND");
+            break;
+
+        case WAIT_ACK:
+        case WAIT_DATA:
+        case WAIT_TX_DATA_OVER:
+        case WAIT_ACK_TX:
+            dispStr.setTagArg("t", 0, "WAIT");
+            break;
+
+        default:
+            dispStr.setTagArg("t", 0, "");
+            break;
+    }
 }
 
 
@@ -691,9 +705,9 @@ void XMac::decapsulate(Packet *packet)
     const auto& xmacHeader = packet->popHeader<XMacHeader>();
     packet->addTagIfAbsent<MacAddressInd>()->setSrcAddress(xmacHeader->getSrcAddr());
     packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-    auto protocol = ProtocolGroup::ethertype.getProtocol(xmacHeader->getNetworkProtocol());
-    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);
+    auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(xmacHeader->getNetworkProtocol());
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
     EV_DETAIL << " message decapsulated " << endl;
 }
 

@@ -147,7 +147,7 @@ void Hcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtH
         PacketDropDetails details;
         details.setReason(QUEUE_OVERFLOW);
         details.setLimit(edcaPendingQueues[ac]->getMaxQueueSize());
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
     }
 }
@@ -180,7 +180,7 @@ void Hcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&
             EV_INFO << "This frame is not for us" << std::endl;
             PacketDropDetails details;
             details.setReason(NOT_ADDRESSED_TO_US);
-            emit(packetDropSignal, packet, &details);
+            emit(packetDroppedSignal, packet, &details);
             delete packet;
         }
         cancelEvent(startRxTimer);
@@ -193,7 +193,7 @@ void Hcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&
         EV_INFO << "This frame is not for us" << std::endl;
         PacketDropDetails details;
         details.setReason(NOT_ADDRESSED_TO_US);
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
     }
 }
@@ -257,8 +257,8 @@ void Hcf::handleInternalCollision(std::vector<Edcaf*> internallyCollidedEdcafs)
             PacketDropDetails details;
             details.setReason(RETRY_LIMIT_REACHED);
             details.setLimit(-1); // TODO:
-            emit(packetDropSignal, internallyCollidedFrame, &details);
-            emit(linkBreakSignal, internallyCollidedFrame);
+            emit(packetDroppedSignal, internallyCollidedFrame, &details);
+            emit(linkBrokenSignal, internallyCollidedFrame);
             edcaInProgressFrames[ac]->dropFrame(internallyCollidedFrame);
             if (hasFrameToTransmit(ac))
                 edcaf->requestChannel(this);
@@ -394,8 +394,8 @@ void Hcf::originatorProcessRtsProtectionFailed(Packet *packet)
             PacketDropDetails details;
             details.setReason(RETRY_LIMIT_REACHED);
             details.setLimit(-1); // TODO:
-            emit(packetDropSignal, packet, &details);
-            emit(linkBreakSignal, packet);
+            emit(packetDroppedSignal, packet, &details);
+            emit(linkBrokenSignal, packet);
         }
     }
     else
@@ -513,8 +513,8 @@ void Hcf::originatorProcessFailedFrame(Packet *failedPacket)
             PacketDropDetails details;
             details.setReason(RETRY_LIMIT_REACHED);
             details.setLimit(-1); // TODO:
-            emit(packetDropSignal, failedPacket, &details);
-            emit(linkBreakSignal, failedPacket);
+            emit(packetDroppedSignal, failedPacket, &details);
+            emit(linkBrokenSignal, failedPacket);
         }
         else {
             auto h = failedPacket->removeHeader<Ieee80211DataOrMgmtHeader>();

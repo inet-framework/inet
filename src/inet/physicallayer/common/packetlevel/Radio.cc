@@ -466,7 +466,6 @@ void Radio::endReception(cMessage *timer)
         EV_INFO << "Reception ended: " << (isReceptionSuccessful ? "successfully" : "unsuccessfully") << " for " << (ISignal *)signal << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
         auto macFrame = medium->receivePacket(this, signal);
         decapsulate(macFrame);
-        emit(packetSentToUpperSignal, macFrame);
         sendUp(macFrame);
         receptionTimer = nullptr;
         emit(receptionEndedSignal, check_and_cast<const cObject *>(reception));
@@ -500,15 +499,8 @@ void Radio::captureReception(cMessage *timer)
 
 void Radio::sendUp(Packet *macFrame)
 {
-    emit(minSnirSignal, macFrame->getTag<SnirInd>()->getMinimumSnir());
-    auto errorRateInd = macFrame->getTag<ErrorRateInd>();
-    if (!std::isnan(errorRateInd->getPacketErrorRate()))
-        emit(packetErrorRateSignal, errorRateInd->getPacketErrorRate());
-    if (!std::isnan(errorRateInd->getBitErrorRate()))
-        emit(bitErrorRateSignal, errorRateInd->getBitErrorRate());
-    if (!std::isnan(errorRateInd->getSymbolErrorRate()))
-        emit(symbolErrorRateSignal, errorRateInd->getSymbolErrorRate());
     EV_INFO << "Sending up " << macFrame << endl;
+    emit(packetSentToUpperSignal, macFrame);
     send(macFrame, upperLayerOut);
 }
 

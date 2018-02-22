@@ -17,7 +17,7 @@ simple TestApp
 #include "inet/common/INETDefs.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/networklayer/ipv4/Ipv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 
 namespace diffserv_dscpmarker_1

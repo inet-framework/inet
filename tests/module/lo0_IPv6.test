@@ -65,35 +65,35 @@ scalar LocalUDP.host.app[0] echoedPk:count 800
 attr
 
 %contains: results/General-0.sca
-scalar LocalUDP.host.app[1] sentPk:count 200
+scalar LocalUDP.host.app[1] packetSent:count 200
 attr
 
 %contains: results/General-0.sca
-scalar LocalUDP.host.app[1] rcvdPk:count 200
+scalar LocalUDP.host.app[1] packetReceived:count 200
 attr
 
 %contains: results/General-0.sca
-scalar LocalUDP.host.app[2] sentPk:count 200
+scalar LocalUDP.host.app[2] packetSent:count 200
 attr
 
 %contains: results/General-0.sca
-scalar LocalUDP.host.app[2] rcvdPk:count 200
+scalar LocalUDP.host.app[2] packetReceived:count 200
 attr
 
 %contains: results/General-0.sca
-scalar LocalUDP.host.app[3] sentPk:count 200
+scalar LocalUDP.host.app[3] packetSent:count 200
 attr
 
 %contains: results/General-0.sca
-scalar LocalUDP.host.app[3] rcvdPk:count 200
+scalar LocalUDP.host.app[3] packetReceived:count 200
 attr
 
 %contains: results/General-0.sca
-scalar LocalUDP.host.app[4] sentPk:count 200
+scalar LocalUDP.host.app[4] packetSent:count 200
 attr
 
 %contains: results/General-0.sca
-scalar LocalUDP.host.app[4] rcvdPk:count 200
+scalar LocalUDP.host.app[4] packetReceived:count 200
 attr
 
 %contains: results/General-0.sca
@@ -101,11 +101,11 @@ scalar LocalUDP.host.udp passedUpPk:count 1600
 attr
 
 %contains: results/General-0.sca
-scalar LocalUDP.host.udp sentPk:count 1600
+scalar LocalUDP.host.udp packetSent:count 1600
 attr
 
 %contains: results/General-0.sca
-scalar LocalUDP.host.udp rcvdPk:count 1600
+scalar LocalUDP.host.udp packetReceived:count 1600
 attr
 
 %#--------------------------------------------------------------------------------------------------------------

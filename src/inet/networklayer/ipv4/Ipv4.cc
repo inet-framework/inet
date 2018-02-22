@@ -45,7 +45,7 @@
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
 #include "inet/networklayer/ipv4/IcmpHeader_m.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
-#include "inet/networklayer/ipv4/Ipv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
@@ -249,7 +249,7 @@ const InterfaceEntry *Ipv4::getDestInterface(Packet *packet)
 Ipv4Address Ipv4::getNextHop(Packet *packet)
 {
     auto tag = packet->findTag<NextHopAddressReq>();
-    return tag != nullptr ? tag->getNextHopAddress().toIPv4() : Ipv4Address::UNSPECIFIED_ADDRESS;
+    return tag != nullptr ? tag->getNextHopAddress().toIpv4() : Ipv4Address::UNSPECIFIED_ADDRESS;
 }
 
 void Ipv4::handleIncomingDatagram(Packet *packet)
@@ -373,7 +373,7 @@ void Ipv4::preroutingFinish(Packet *packet)
             numDropped++;
             PacketDropDetails details;
             details.setReason(FORWARDING_DISABLED);
-            emit(packetDropSignal, packet, &details);
+            emit(packetDroppedSignal, packet, &details);
             delete packet;
         }
         else {
@@ -394,7 +394,7 @@ void Ipv4::handlePacketFromHL(Packet *packet)
         numDropped++;
         PacketDropDetails details;
         details.setReason(NO_INTERFACE_FOUND);
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
         return;
     }
@@ -451,7 +451,7 @@ void Ipv4::datagramLocalOut(Packet *packet)
             numUnroutable++;
             PacketDropDetails details;
             details.setReason(NO_INTERFACE_FOUND);
-            emit(packetDropSignal, packet, &details);
+            emit(packetDroppedSignal, packet, &details);
             delete packet;
         }
     }
@@ -555,7 +555,7 @@ void Ipv4::routeUnicastPacket(Packet *packet)
         numUnroutable++;
         PacketDropDetails details;
         details.setReason(NO_ROUTE_FOUND);
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         sendIcmpError(packet, fromIE ? fromIE->getInterfaceId() : -1, ICMP_DESTINATION_UNREACHABLE, 0);
     }
     else {    // fragment and send
@@ -602,7 +602,7 @@ void Ipv4::routeLocalBroadcastPacket(Packet *packet)
         numDropped++;
         PacketDropDetails details;
         details.setReason(NO_INTERFACE_FOUND);
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
     }
 }
@@ -639,7 +639,7 @@ void Ipv4::forwardMulticastPacket(Packet *packet)
             numUnroutable++;
             PacketDropDetails details;
             details.setReason(NO_ROUTE_FOUND);
-            emit(packetDropSignal, packet, &details);
+            emit(packetDroppedSignal, packet, &details);
             delete packet;
             return;
         }
@@ -651,7 +651,7 @@ void Ipv4::forwardMulticastPacket(Packet *packet)
         emit(ipv4DataOnNonrpfSignal, ipv4Header.get(), const_cast<InterfaceEntry *>(fromIE));
         numDropped++;
         PacketDropDetails details;
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
     }
     // backward compatible: no parent means shortest path interface to source (RPB routing)
@@ -659,7 +659,7 @@ void Ipv4::forwardMulticastPacket(Packet *packet)
         EV_ERROR << "Did not arrive on shortest path, packet dropped.\n";
         numDropped++;
         PacketDropDetails details;
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
     }
     else {
@@ -834,14 +834,14 @@ void Ipv4::fragmentAndSend(Packet *packet)
         // drop datagram, destruction responsibility in ICMP
         PacketDropDetails details;
         details.setReason(HOP_LIMIT_REACHED);
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         EV_WARN << "datagram TTL reached zero, sending ICMP_TIME_EXCEEDED\n";
         sendIcmpError(packet, -1    /*TODO*/, ICMP_TIME_EXCEEDED, 0);
         numDropped++;
         return;
     }
 
-    int mtu = destIE->getMTU();
+    int mtu = destIE->getMtu();
 
     // send datagram straight out if it doesn't require fragmentation (note: mtu==0 means infinite mtu)
     if (mtu == 0 || packet->getByteLength() <= mtu) {
@@ -852,7 +852,7 @@ void Ipv4::fragmentAndSend(Packet *packet)
     // if "don't fragment" bit is set, throw datagram away and send ICMP error message
     if (ipv4Header->getDontFragment()) {
         PacketDropDetails details;
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         EV_WARN << "datagram larger than MTU and don't fragment bit set, sending ICMP_DESTINATION_UNREACHABLE\n";
         sendIcmpError(packet, -1    /*TODO*/, ICMP_DESTINATION_UNREACHABLE,
                 ICMP_DU_FRAGMENTATION_NEEDED);
@@ -921,8 +921,8 @@ void Ipv4::encapsulate(Packet *transportPacket)
     const auto& ipv4Header = makeShared<Ipv4Header>();
 
     auto l3AddressReq = transportPacket->removeTag<L3AddressReq>();
-    Ipv4Address src = l3AddressReq->getSrcAddress().toIPv4();
-    Ipv4Address dest = l3AddressReq->getDestAddress().toIPv4();
+    Ipv4Address src = l3AddressReq->getSrcAddress().toIpv4();
+    Ipv4Address dest = l3AddressReq->getDestAddress().toIpv4();
     delete l3AddressReq;
 
     ipv4Header->setProtocolId((IpProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getTag<PacketProtocolTag>()->getProtocol()));
@@ -1003,7 +1003,7 @@ void Ipv4::sendDatagramToOutput(Packet *packet)
 {
     const InterfaceEntry *ie = ift->getInterfaceById(packet->getTag<InterfaceReq>()->getInterfaceId());
     auto nextHopAddressReq = packet->removeTag<NextHopAddressReq>();
-    Ipv4Address nextHopAddr = nextHopAddressReq->getNextHopAddress().toIPv4();
+    Ipv4Address nextHopAddr = nextHopAddressReq->getNextHopAddress().toIpv4();
     delete nextHopAddressReq;
     if (!ie->isBroadcast() || ie->getMacAddress().isUnspecified()) // we can't do ARP
         sendPacketToNIC(packet);
@@ -1025,7 +1025,7 @@ void Ipv4::arpResolutionCompleted(IArp::Notification *entry)
 {
     if (entry->l3Address.getType() != L3Address::Ipv4)
         return;
-    auto it = pendingPackets.find(entry->l3Address.toIPv4());
+    auto it = pendingPackets.find(entry->l3Address.toIpv4());
     if (it != pendingPackets.end()) {
         cPacketQueue& packetQueue = it->second;
         EV << "ARP resolution completed for " << entry->l3Address << ". Sending " << packetQueue.getLength()
@@ -1046,7 +1046,7 @@ void Ipv4::arpResolutionTimedOut(IArp::Notification *entry)
 {
     if (entry->l3Address.getType() != L3Address::Ipv4)
         return;
-    auto it = pendingPackets.find(entry->l3Address.toIPv4());
+    auto it = pendingPackets.find(entry->l3Address.toIpv4());
     if (it != pendingPackets.end()) {
         cPacketQueue& packetQueue = it->second;
         EV << "ARP resolution failed for " << entry->l3Address << ",  dropping " << packetQueue.getLength() << " packets\n";
@@ -1054,7 +1054,7 @@ void Ipv4::arpResolutionTimedOut(IArp::Notification *entry)
             auto packet = packetQueue.get(i);
             PacketDropDetails details;
             details.setReason(ADDRESS_RESOLUTION_FAILED);
-            emit(packetDropSignal, packet, &details);
+            emit(packetDroppedSignal, packet, &details);
         }
         packetQueue.clear();
         pendingPackets.erase(it);

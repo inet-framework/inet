@@ -212,7 +212,7 @@ void MessageHandler::processPacket(Packet *pk, Interface *unused1, Neighbor *unu
                         intf = area->findVirtualLink(packet->getRouterID());
 
                         if (intf != nullptr) {
-                            Area *virtualLinkTransitArea = router->getAreaByID(intf->getTransitAreaID());
+                            Area *virtualLinkTransitArea = router->getAreaByID(intf->getTransitAreaId());
 
                             if (virtualLinkTransitArea != nullptr) {
                                 // the receiving interface must attach to the virtual link's configured transit area
@@ -230,8 +230,8 @@ void MessageHandler::processPacket(Packet *pk, Interface *unused1, Neighbor *unu
                 }
             }
             if (intf != nullptr) {
-                Ipv4Address sourceAddress = pk->getTag<L3AddressInd>()->getSrcAddress().toIPv4();
-                Ipv4Address destinationAddress = pk->getTag<L3AddressInd>()->getDestAddress().toIPv4();
+                Ipv4Address sourceAddress = pk->getTag<L3AddressInd>()->getSrcAddress().toIpv4();
+                Ipv4Address destinationAddress = pk->getTag<L3AddressInd>()->getDestAddress().toIpv4();
                 Ipv4Address allDRouters = Ipv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST;
                 Interface::InterfaceStateType interfaceState = intf->getState();
 
@@ -262,7 +262,7 @@ void MessageHandler::processPacket(Packet *pk, Interface *unused1, Neighbor *unu
 
                                 case Interface::POINTTOPOINT:
                                 case Interface::VIRTUAL:
-                                    neighbor = intf->getNeighborByID(packet->getRouterID());
+                                    neighbor = intf->getNeighborById(packet->getRouterID());
                                     break;
 
                                 default:

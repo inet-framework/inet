@@ -131,7 +131,7 @@ simple EtherMacFullDuplex like IEtherMac
         int txQueueLimit = default(1000);   // maximum number of frames queued up for transmission in the internal queue
                                             // (only used if queueModule==""); additional frames cause a runtime error
         string queueModule = default("");   // name of optional external queue module
-        int mtu @unit("B") = default(1500B);
+        int mtu @unit(B) = default(1500B);
         @display("i=block/rxtx");
 
         @signal[txPk](type=Packet);
@@ -139,23 +139,23 @@ simple EtherMacFullDuplex like IEtherMac
         @signal[txPausePkUnits](type=long);
         @signal[rxPausePkUnits](type=long);
         @signal[rxPkFromHl](type=Packet);
-        @signal[packetDrop](type=Packet);
+        @signal[packetDropped](type=Packet);
         @signal[packetSentToLower](type=Packet);
         @signal[packetReceivedFromLower](type=Packet);
         @signal[packetSentToUpper](type=Packet);
         @signal[packetReceivedFromUpper](type=Packet);
-        @signal[transmitState](type=long); // enum=MacTransmitState
-        @signal[receiveState](type=long); // enum=MacReceiveState
+        @signal[transmissionStateChanged](type=long); // enum=MacTransmitState
+        @signal[receptionStateChanged](type=long); // enum=MacReceiveState
 
-        @statistic[txPk](title="packets transmitted"; source=txPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[txPk](title="packets transmitted"; source=packetSentToLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[rxPkOk](title="packets received OK"; source=rxPkOk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[passedUpPk](title="packets passed to higher layer"; source=packetSentToUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[txPausePkUnits](title="pause units sent"; record=count,sum,vector; interpolationmode=none);
         @statistic[rxPausePkUnits](title="pause units received"; record=count,sum,vector; interpolationmode=none);
-        @statistic[rxPkFromHl](title="packet bytes from higher layer"; source=rxPkFromHl; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[packetDropIncorrectlyReceived](title="packet drop: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-        @statistic[packetDropInterfaceDown](title="packet drop: interface down"; source=packetDropReasonIsInterfaceDown(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-        @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetReceivedFromUpper](title="packet bytes from higher layer"; source=packetReceivedFromUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[packetDropIncorrectlyReceived](title="packet drop: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropInterfaceDown](title="packet drop: interface down"; source=packetDropReasonIsInterfaceDown(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
 
     gates:
         input upperLayerIn @labels(EtherFrame);    // to ~EtherLlc or ~EtherEncap or ~IMacRelayUnit

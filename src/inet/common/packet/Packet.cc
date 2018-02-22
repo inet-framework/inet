@@ -169,6 +169,7 @@ void Packet::insertAtBeginning(const Ptr<const Chunk>& chunk)
     CHUNK_CHECK_USAGE(headerIterator.getPosition() == b(0) && (headerIterator.getIndex() == 0 || headerIterator.getIndex() == -1), "popped header length is non-zero");
     constPtrCast<Chunk>(chunk)->markImmutable();
     if (contents == EmptyChunk::singleton) {
+        CHUNK_CHECK_USAGE(chunk->getChunkLength() > b(0), "chunk is empty");
         contents = chunk;
         totalLength = contents->getChunkLength();
     }
@@ -198,6 +199,7 @@ void Packet::insertAtEnd(const Ptr<const Chunk>& chunk)
     CHUNK_CHECK_USAGE(trailerIterator.getPosition() == b(0) && (trailerIterator.getIndex() == 0 || trailerIterator.getIndex() == -1), "popped trailer length is non-zero");
     constPtrCast<Chunk>(chunk)->markImmutable();
     if (contents == EmptyChunk::singleton) {
+        CHUNK_CHECK_USAGE(chunk->getChunkLength() > b(0), "chunk is empty");
         contents = chunk;
         totalLength = contents->getChunkLength();
     }
@@ -286,6 +288,14 @@ void Packet::removeAll()
     trailerIterator = Chunk::BackwardIterator(b(0), 0);
     totalLength = b(0);
     CHUNK_CHECK_IMPLEMENTATION(contents->isImmutable());
+}
+
+//(inet::Packet)UdpBasicAppData-0 (5000 bytes)
+std::string Packet::str() const
+{
+    std::ostringstream out;
+    out << "(" << getClassName() << ")" << getName() << " (" << getByteLength() << " bytes) [" << contents->str() << "]";
+    return out.str();
 }
 
 // TODO: move?

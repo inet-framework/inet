@@ -18,6 +18,7 @@
 #ifndef __INET_LINKOSGVISUALIZERBASE_H
 #define __INET_LINKOSGVISUALIZERBASE_H
 
+#include "inet/common/OsgUtils.h"
 #include "inet/visualizer/base/LinkVisualizerBase.h"
 
 namespace inet {
@@ -31,14 +32,15 @@ class INET_API LinkOsgVisualizerBase : public LinkVisualizerBase
   protected:
     class INET_API LinkOsgVisualization : public LinkVisualization {
       public:
-        osg::Node *node = nullptr;
+        inet::osg::LineNode *node = nullptr;
 
       public:
-        LinkOsgVisualization(osg::Node *node, int sourceModuleId, int destinationModuleId);
+        LinkOsgVisualization(inet::osg::LineNode *node, int sourceModuleId, int destinationModuleId);
         virtual ~LinkOsgVisualization();
     };
 
   protected:
+    virtual void initialize(int stage) override;
     virtual void refreshDisplay() const override;
 
     virtual const LinkVisualization *createLinkVisualization(cModule *source, cModule *destination, cPacket *packet) const override;

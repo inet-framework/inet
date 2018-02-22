@@ -18,7 +18,7 @@
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/common/serializer/ipv6/headers/ip6.h"
 #include "inet/common/serializer/ipv6/Ipv6HeaderSerializer.h"
-#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders.h"
+#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders_m.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 
 #if defined(_MSC_VER)
@@ -92,7 +92,7 @@ void Ipv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                 stream.writeByte(hdr->getRoutingType());
                 stream.writeByte(hdr->getSegmentsLeft());
                 for (unsigned int j = 0; j < hdr->getAddressArraySize(); j++) {
-                    stream.writeIPv6Address(hdr->getAddress(j));
+                    stream.writeIpv6Address(hdr->getAddress(j));
                 }
                 stream.writeByteRepeatedly(0, 4);
                 break;

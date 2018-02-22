@@ -43,9 +43,9 @@ namespace inet {
  * http://www.eecs.harvard.edu/~htk/publication/2000-mobi-karp-kung.pdf
  */
 // TODO: optimize internal data structures for performance to use less lookups and be more prepared for routing a packet
+// TODO: implement position piggybacking that is all packets should carry the position of the sender, all packets act as a beacon and reset beacon timer
+// TODO: implement promiscuous mode, all receivers should process all packets with respect to neighbor positions
 // KLUDGE: implement position registry protocol instead of using a global variable
-// KLUDGE: the GPSR packet is now used to wrap the content of network datagrams
-// KLUDGE: we should rather add these fields as header extensions
 class INET_API Gpsr : public cSimpleModule, public ILifecycle, public cListener, public NetfilterBase::HookBase
 {
   private:
@@ -99,12 +99,12 @@ class INET_API Gpsr : public cSimpleModule, public ILifecycle, public cListener,
     void processPurgeNeighborsTimer();
 
     // handling UDP packets
-    void sendUDPPacket(Packet *packet, double delay);
+    void sendUDPPacket(Packet *packet);
     void processUDPPacket(Packet *packet);
 
     // handling beacons
     const Ptr<GpsrBeacon> createBeacon();
-    void sendBeacon(const Ptr<GpsrBeacon>& beacon, double delay);
+    void sendBeacon(const Ptr<GpsrBeacon>& beacon);
     void processBeacon(Packet *packet);
 
     // handling packets
@@ -125,15 +125,15 @@ class INET_API Gpsr : public cSimpleModule, public ILifecycle, public cListener,
     void configureInterfaces();
 
     // position
-    bool isConnectingLineSegments(Coord& begin1, Coord& end1, Coord& begin2, Coord& end2) const;
-    Coord computeRealIntersectionForLineSegments(Coord& begin1, Coord& end1, Coord& begin2, Coord& end2) const;
-    Coord getDestinationPosition(const L3Address& address) const;
+    Coord lookupPositionInGlobalRegistry(const L3Address& address) const;
+    void storePositionInGlobalRegistry(const L3Address& address, const Coord& position) const;
+    void storeSelfPositionInGlobalRegistry() const;
+    Coord computeIntersectionInsideLineSegments(Coord& begin1, Coord& end1, Coord& begin2, Coord& end2) const;
     Coord getNeighborPosition(const L3Address& address) const;
 
     // angle
-    static double getVectorAngle(Coord vector);
-    double getDestinationAngle(const L3Address& address);
-    double getNeighborAngle(const L3Address& address);
+    double getVectorAngle(Coord vector) const;
+    double getNeighborAngle(const L3Address& address) const;
 
     // address
     std::string getHostName() const;
@@ -143,8 +143,8 @@ class INET_API Gpsr : public cSimpleModule, public ILifecycle, public cListener,
     // neighbor
     simtime_t getNextNeighborExpiration();
     void purgeNeighbors();
-    std::vector<L3Address> getPlanarNeighbors();
-    L3Address getNextPlanarNeighborCounterClockwise(const L3Address& startNeighborAddress, double startNeighborAngle);
+    std::vector<L3Address> getPlanarNeighbors() const;
+    std::vector<L3Address> getPlanarNeighborsCounterClockwise(double startAngle) const;
 
     // next hop
     L3Address findNextHop(const Ptr<const NetworkHeaderBase>& networkHeader, const L3Address& destination);

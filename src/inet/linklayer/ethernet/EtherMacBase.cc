@@ -117,14 +117,12 @@ const EtherMacBase::EtherDescr EtherMacBase::etherDescrs[NUM_OF_ETHERDESCRS] = {
     }
 };
 
-simsignal_t EtherMacBase::txPkSignal = registerSignal("txPk");
 simsignal_t EtherMacBase::rxPkOkSignal = registerSignal("rxPkOk");
 simsignal_t EtherMacBase::txPausePkUnitsSignal = registerSignal("txPausePkUnits");
 simsignal_t EtherMacBase::rxPausePkUnitsSignal = registerSignal("rxPausePkUnits");
-simsignal_t EtherMacBase::rxPkFromHlSignal = registerSignal("rxPkFromHl");
 
-simsignal_t EtherMacBase::transmitStateSignal = registerSignal("transmitState");
-simsignal_t EtherMacBase::receiveStateSignal = registerSignal("receiveState");
+simsignal_t EtherMacBase::transmissionStateChangedSignal = registerSignal("transmissionStateChanged");
+simsignal_t EtherMacBase::receptionStateChangedSignal = registerSignal("receptionStateChanged");
 
 EtherMacBase::EtherMacBase()
 {
@@ -154,7 +152,7 @@ void EtherMacBase::initialize(int stage)
 
         initializeFlags();
 
-        initializeMACAddress();
+        initializeMacAddress();
         initializeStatistics();
 
         lastTxFinishTime = -1.0;    // not equals with current simtime.
@@ -206,7 +204,7 @@ void EtherMacBase::initializeQueueModule()
     }
 }
 
-void EtherMacBase::initializeMACAddress()
+void EtherMacBase::initializeMacAddress()
 {
     const char *addrstr = par("address");
 
@@ -276,7 +274,7 @@ InterfaceEntry *EtherMacBase::createInterfaceEntry()
     InterfaceEntry *interfaceEntry = getContainingNicModule(this);
 
     // generate a link-layer address to be used as interface token for IPv6
-    interfaceEntry->setMACAddress(address);
+    interfaceEntry->setMacAddress(address);
     interfaceEntry->setInterfaceToken(address.formInterfaceIdentifier());
     //InterfaceToken token(0, getSimulation()->getUniqueNumber(), 64);
     //interfaceEntry->setInterfaceToken(token);
@@ -298,7 +296,7 @@ bool EtherMacBase::handleOperationStage(LifecycleOperation *operation, int stage
     if (dynamic_cast<NodeStartOperation *>(operation)) {
         if ((NodeStartOperation::Stage)stage == NodeStartOperation::STAGE_LINK_LAYER) {
             initializeFlags();
-            initializeMACAddress();
+            initializeMacAddress();
             initializeQueueModule();
         }
     }
@@ -353,6 +351,11 @@ void EtherMacBase::processConnectDisconnect()
         cancelEvent(endPauseMsg);
 
         if (curTxFrame) {
+            EV_DETAIL << "Interface is not connected, dropping packet " << curTxFrame << endl;
+            numDroppedPkFromHLIfaceDown++;
+            PacketDropDetails details;
+            details.setReason(INTERFACE_DOWN);
+            emit(packetDroppedSignal, curTxFrame, &details);
             delete curTxFrame;
             curTxFrame = nullptr;
             lastTxFinishTime = -1.0;    // so that it never equals to the current simtime, used for Burst mode detection.
@@ -371,16 +374,15 @@ void EtherMacBase::processConnectDisconnect()
                 numDroppedPkFromHLIfaceDown++;
                 PacketDropDetails details;
                 details.setReason(INTERFACE_DOWN);
-                emit(packetDropSignal, msg, &details);
+                emit(packetDroppedSignal, msg, &details);
                 delete msg;
             }
         }
 
-        transmitState = TX_IDLE_STATE;
-        emit(transmitStateSignal, TX_IDLE_STATE);
-        receiveState = RX_IDLE_STATE;
-        emit(receiveStateSignal, RX_IDLE_STATE);
+        changeTransmissionState(TX_IDLE_STATE);         //FIXME replace status to OFF
+        changeReceptionState(RX_IDLE_STATE);
     }
+    //FIXME when connect, set statuses to RECONNECT or IDLE
 }
 
 void EtherMacBase::encapsulate(Packet *frame)
@@ -447,7 +449,7 @@ void EtherMacBase::flushQueue()
             cMessage *msg = (cMessage *)txQueue.innerQueue->pop();
             PacketDropDetails details;
             details.setReason(INTERFACE_DOWN);
-            emit(packetDropSignal, msg, &details);
+            emit(packetDroppedSignal, msg, &details);
             delete msg;
         }
     }
@@ -456,7 +458,7 @@ void EtherMacBase::flushQueue()
             cMessage *msg = txQueue.extQueue->pop();
             PacketDropDetails details;
             details.setReason(INTERFACE_DOWN);
-            emit(packetDropSignal, msg, &details);
+            emit(packetDroppedSignal, msg, &details);
             delete msg;
         }
         txQueue.extQueue->clear();    // clear request count
@@ -516,7 +518,7 @@ bool EtherMacBase::dropFrameNotForUs(Packet *packet, const Ptr<const EthernetMac
     numDroppedNotForUs++;
     PacketDropDetails details;
     details.setReason(NOT_ADDRESSED_TO_US);
-    emit(packetDropSignal, packet, &details);
+    emit(packetDroppedSignal, packet, &details);
     delete packet;
     return true;
 }
@@ -675,6 +677,18 @@ int EtherMacBase::InnerQueue::packetCompare(cObject *a, cObject *b)
     int ac = (ah->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL) ? 0 : 1;
     int bc = (bh->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL) ? 0 : 1;
     return ac - bc;
+}
+
+void EtherMacBase::changeTransmissionState(MacTransmitState newState)
+{
+    transmitState = newState;
+    emit(transmissionStateChangedSignal, newState);
+}
+
+void EtherMacBase::changeReceptionState(MacReceiveState newState)
+{
+    receiveState = newState;
+    emit(receptionStateChangedSignal, newState);
 }
 
 } // namespace inet

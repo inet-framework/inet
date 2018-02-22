@@ -479,7 +479,7 @@ void Ipv6InterfaceData::joinMulticastGroup(const Ipv6Address& multicastAddress)
     cModule *m = ownerp ? dynamic_cast<cModule *>(ownerp->getInterfaceTable()) : nullptr;
     if (m) {
         Ipv6MulticastGroupInfo info(ownerp, multicastAddress);
-        m->emit(ipv6McastJoinSignal, &info);
+        m->emit(ipv6MulticastGroupJoinedSignal, &info);
     }
 }
 
@@ -501,7 +501,7 @@ void Ipv6InterfaceData::leaveMulticastGroup(const Ipv6Address& multicastAddress)
                 cModule *m = ownerp ? dynamic_cast<cModule *>(ownerp->getInterfaceTable()) : nullptr;
                 if (m) {
                     Ipv6MulticastGroupInfo info(ownerp, multicastAddress);
-                    m->emit(ipv6McastLeaveSignal, &info);
+                    m->emit(ipv6MulticastGroupLeftSignal, &info);
                 }
             }
         }

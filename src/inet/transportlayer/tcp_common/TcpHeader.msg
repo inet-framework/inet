@@ -100,8 +100,17 @@ class SackItem extends cObject
 
 class Sack extends SackItem
 {
-    @customize;
 }
+
+cplusplus(Sack) {{
+  public:
+    Sack(unsigned int start_par, unsigned int end_par) { setSegment(start_par, end_par); }
+    virtual bool empty() const;
+    virtual bool contains(const Sack& other) const;
+    virtual void clear();
+    virtual void setSegment(unsigned int start_par, unsigned int end_par);
+    virtual std::string str() const override;
+}}
 
 // Header Options (optional):
 class TcpOption extends cObject
@@ -179,7 +188,6 @@ class TcpOptionUnknown extends TcpOption
 //
 class TcpHeader extends TransportHeaderBase
 {
-    @customize;
     chunkLength = B(TCP_HEADER_OCTETS);
 
     // Source Port
@@ -227,6 +235,29 @@ class TcpHeader extends TransportHeaderBase
 
     // Header options (optional)
     // Currently only EOL, NOP, MSS, WS, SACK_PERMITTED, SACK and TS are implemented
-    abstract TcpOption *headerOption[];
+    TcpOption *headerOption[] @owned @clone(->dup());
 }
+
+cplusplus(TcpHeader) {{
+  public:
+    /**
+     * Returns RFC 793 specified SEG.LEN:
+     *     SEG.LEN = the number of octets occupied by the data in the segment
+     *               (counting SYN and FIN)
+     *
+     */
+    uint32_t getSynFinLen() const { return (finBit ? 1 : 0) + (synBit ? 1 : 0); }
+
+    /** Calculate Length of TCP Options Array in bytes */
+    virtual unsigned short getHeaderOptionArrayLength();
+
+    /** Drops all TCP options of the TCP segment */
+    virtual void dropHeaderOptions();
+
+    // implements TransportHeaderBase functions:
+    virtual unsigned int getSourcePort() const override { return getSrcPort(); }
+    virtual void setSourcePort(unsigned int port) override { setSrcPort(port); }
+    virtual unsigned int getDestinationPort() const override { return getDestPort(); }
+    virtual void setDestinationPort(unsigned int port) override { setDestPort(port); }
+}}
 

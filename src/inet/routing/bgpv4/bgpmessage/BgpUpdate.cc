@@ -27,6 +27,7 @@ void BgpUpdateMessage::setWithdrawnRoutesArraySize(size_t size)
 {
     unsigned short delta_size = size - getWithdrawnRoutesArraySize();
     unsigned short delta_bytes = delta_size * 5;    // 5 = Withdrawn Route length
+    BgpUpdateMessage_Base::setWithdrawnRoutesArraySize(size);
     setChunkLength(getChunkLength() + B(delta_bytes));
 }
 
@@ -63,6 +64,7 @@ void BgpUpdateMessage::setPathAttributeList(const BgpUpdatePathAttributeList& pa
 
 void BgpUpdateMessage::setNLRI(const BgpUpdateNlri& NLRI_var)
 {
+    //FIXME bug: the length always incremented
     setChunkLength(getChunkLength() + B(5));    //5 = NLRI (length (1) + Ipv4Address (4))
     BgpUpdateMessage_Base::NLRI = NLRI_var;
 }

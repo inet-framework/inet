@@ -22,11 +22,17 @@ namespace inet {
 
 namespace visualizer {
 
-std::map<const cCanvas *, LineManager> LineManager::lineManagers;
+std::map<const cCanvas *, LineManager> LineManager::canvasLineManagers;
+std::map<const cCanvas *, LineManager> LineManager::osgLineManagers;
 
-LineManager *LineManager::getLineManager(const cCanvas *canvas)
+LineManager *LineManager::getCanvasLineManager(const cCanvas *canvas)
 {
-    return &lineManagers[canvas];
+    return &canvasLineManagers[canvas];
+}
+
+LineManager *LineManager::getOsgLineManager(const cCanvas *canvas)
+{
+    return &osgLineManagers[canvas];
 }
 
 bool LineManager::compareModuleLines(const ModuleLine *moduleLine1, const ModuleLine *moduleLine2)

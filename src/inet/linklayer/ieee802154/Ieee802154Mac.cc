@@ -105,7 +105,7 @@ void Ieee802154Mac::initialize(int stage)
         macState = IDLE_1;
         txAttempts = 0;
 
-        initializeMACAddress();
+        initializeMacAddress();
         registerInterface();
 
         cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
@@ -168,7 +168,7 @@ Ieee802154Mac::~Ieee802154Mac()
     }
 }
 
-void Ieee802154Mac::initializeMACAddress()
+void Ieee802154Mac::initializeMacAddress()
 {
     const char *addrstr = par("address");
 
@@ -192,7 +192,7 @@ InterfaceEntry *Ieee802154Mac::createInterfaceEntry()
     e->setDatarate(bitrate);
 
     // generate a link-layer address to be used as interface token for IPv6
-    e->setMACAddress(address);
+    e->setMacAddress(address);
     e->setInterfaceToken(address.formInterfaceIdentifier());
 
     // capabilities
@@ -245,7 +245,7 @@ void Ieee802154Mac::updateStatusIdle(t_mac_event event, cMessage *msg)
 {
     switch (event) {
         case EV_SEND_REQUEST:
-            if (macQueue.size() <= queueLength) {
+            if (macQueue.size() < queueLength) {
                 macQueue.push_back(static_cast<Packet *>(msg));
                 EV_DETAIL << "(1) FSM State IDLE_1, EV_SEND_REQUEST and [TxBuff avail]: startTimerBackOff -> BACKOFF." << endl;
                 updateMacState(BACKOFF_2);
@@ -259,7 +259,7 @@ void Ieee802154Mac::updateStatusIdle(t_mac_event event, cMessage *msg)
                 PacketDropDetails details;
                 details.setReason(QUEUE_OVERFLOW);
                 details.setLimit(queueLength);
-                emit(packetDropSignal, msg, &details);
+                emit(packetDroppedSignal, msg, &details);
                 delete msg;
                 updateMacState(IDLE_1);
             }
@@ -422,7 +422,7 @@ void Ieee802154Mac::updateStatusCCA(t_mac_event event, cMessage *msg)
                     PacketDropDetails details;
                     details.setReason(RETRY_LIMIT_REACHED);
                     details.setLimit(macMaxCSMABackoffs);
-                    emit(packetDropSignal, mac, &details);
+                    emit(packetDroppedSignal, mac, &details);
                     delete mac;
                     manageQueue();
                 }
@@ -587,8 +587,8 @@ void Ieee802154Mac::manageMissingAck(t_mac_event    /*event*/, cMessage *    /*m
         PacketDropDetails details;
         details.setReason(RETRY_LIMIT_REACHED);
         details.setLimit(macMaxFrameRetries);
-        emit(packetDropSignal, mac, &details);
-        emit(linkBreakSignal, mac);
+        emit(packetDroppedSignal, mac, &details);
+        emit(linkBrokenSignal, mac);
         delete mac;
     }
     manageQueue();
@@ -650,7 +650,7 @@ void Ieee802154Mac::updateStatusTransmitAck(t_mac_event event, cMessage *msg)
 void Ieee802154Mac::updateStatusNotIdle(cMessage *msg)
 {
     EV_DETAIL << "(20) FSM State NOT IDLE, EV_SEND_REQUEST. Is a TxBuffer available ?" << endl;
-    if (macQueue.size() <= queueLength) {
+    if (macQueue.size() < queueLength) {
         macQueue.push_back(static_cast<Packet *>(msg));
         EV_DETAIL << "(21) FSM State NOT IDLE, EV_SEND_REQUEST"
                   << " and [TxBuff avail]: enqueue packet and don't move." << endl;
@@ -663,7 +663,7 @@ void Ieee802154Mac::updateStatusNotIdle(cMessage *msg)
         PacketDropDetails details;
         details.setReason(QUEUE_OVERFLOW);
         details.setLimit(queueLength);
-        emit(packetDropSignal, msg, &details);
+        emit(packetDroppedSignal, msg, &details);
         delete msg;
     }
 }
@@ -854,7 +854,7 @@ void Ieee802154Mac::handleLowerPacket(Packet *packet)
         EV << "Received " << packet << " contains bit errors or collision, dropping it\n";
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
         return;
     }
@@ -944,7 +944,7 @@ void Ieee802154Mac::handleLowerPacket(Packet *packet)
         EV_DETAIL << "packet not for me, deleting...\n";
         PacketDropDetails details;
         details.setReason(NOT_ADDRESSED_TO_US);
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
     }
 }
@@ -967,9 +967,9 @@ void Ieee802154Mac::decapsulate(Packet *packet)
     const auto& csmaHeader = packet->popHeader<Ieee802154MacHeader>();
     packet->addTagIfAbsent<MacAddressInd>()->setSrcAddress(csmaHeader->getSrcAddr());
     packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-    auto protocol = ProtocolGroup::ethertype.getProtocol(csmaHeader->getNetworkProtocol());
-    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);
+    auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(csmaHeader->getNetworkProtocol());
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
 }
 
 } // namespace inet

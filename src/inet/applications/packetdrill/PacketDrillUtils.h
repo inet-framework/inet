@@ -23,7 +23,7 @@
 #include "omnetpp/platdep/sockets.h"
 
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/common/ByteArray.h"
+#include "inet/common/ByteArray_m.h"
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
  #include <sys/socket.h>
 #endif

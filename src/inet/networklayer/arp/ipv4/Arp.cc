@@ -28,13 +28,13 @@
 #include "inet/networklayer/arp/ipv4/ArpPacket_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
-#include "inet/networklayer/ipv4/Ipv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 
 namespace inet {
 
-simsignal_t Arp::sentRequestSignal = registerSignal("sentRequest");
-simsignal_t Arp::sentReplySignal = registerSignal("sentReply");
+simsignal_t Arp::arpRequestSentSignal = registerSignal("arpRequestSent");
+simsignal_t Arp::arpReplySentSignal = registerSignal("arpReplySent");
 
 static std::ostream& operator<<(std::ostream& out, cMessage *msg)
 {
@@ -204,19 +204,6 @@ void Arp::initiateARPResolution(ArpCacheEntry *entry)
     emit(arpResolutionInitiatedSignal, &signal);
 }
 
-void Arp::sendPacketToNIC(Packet *msg, const InterfaceEntry *ie, const MacAddress& macAddress)
-{
-    // add control info with MAC address
-    msg->addTagIfAbsent<MacAddressReq>()->setDestAddress(macAddress);
-    delete msg->removeTagIfPresent<DispatchProtocolReq>();
-    msg->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
-    msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::arp);
-
-    // send out
-    EV_INFO << "Sending " << msg << " to network protocol.\n";
-    send(msg, "ifOut");
-}
-
 void Arp::sendARPRequest(const InterfaceEntry *ie, Ipv4Address ipAddress)
 {
     // find our own IPv4 address and MAC address on the given interface
@@ -231,14 +218,19 @@ void Arp::sendARPRequest(const InterfaceEntry *ie, Ipv4Address ipAddress)
     Packet *packet = new Packet("arpREQ");
     const auto& arp = makeShared<ArpPacket>();
     arp->setOpcode(ARP_REQUEST);
-    arp->setSrcMACAddress(myMACAddress);
-    arp->setSrcIPAddress(myIPAddress);
-    arp->setDestIPAddress(ipAddress);
+    arp->setSrcMacAddress(myMACAddress);
+    arp->setSrcIpAddress(myIPAddress);
+    arp->setDestIpAddress(ipAddress);
     packet->insertHeader(arp);
 
-    sendPacketToNIC(packet, ie, MacAddress::BROADCAST_ADDRESS);
+    packet->addTag<MacAddressReq>()->setDestAddress(MacAddress::BROADCAST_ADDRESS);
+    packet->addTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+    packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::arp);
+    // send out
+    EV_INFO << "Sending " << packet << " to network protocol.\n";
+    emit(arpRequestSentSignal, packet);
+    send(packet, "ifOut");
     numRequestsSent++;
-    emit(sentRequestSignal, 1L);
 }
 
 void Arp::requestTimedOut(cMessage *selfmsg)
@@ -285,19 +277,14 @@ bool Arp::addressRecognized(Ipv4Address destAddr, InterfaceEntry *ie)
 void Arp::dumpARPPacket(const ArpPacket *arp)
 {
     EV_DETAIL << (arp->getOpcode() == ARP_REQUEST ? "ARP_REQ" : arp->getOpcode() == ARP_REPLY ? "ARP_REPLY" : "unknown type")
-              << "  src=" << arp->getSrcIPAddress() << " / " << arp->getSrcMACAddress()
-              << "  dest=" << arp->getDestIPAddress() << " / " << arp->getDestMACAddress() << "\n";
+              << "  src=" << arp->getSrcIpAddress() << " / " << arp->getSrcMacAddress()
+              << "  dest=" << arp->getDestIpAddress() << " / " << arp->getDestMacAddress() << "\n";
 }
 
 void Arp::processARPPacket(Packet *packet)
 {
     EV_INFO << "Received " << packet << " from network protocol.\n";
     const auto& arp = packet->peekHeader<ArpPacket>();
-    if (arp == nullptr) {
-        EV_ERROR << "ARP received a non-arp packet: " << packet->getName() << endl;
-        delete packet;
-        return;
-    }
     dumpARPPacket(arp.get());
 
     // extract input port
@@ -331,8 +318,8 @@ void Arp::processARPPacket(Packet *packet)
     //             the same hardware on which the request was received.
     //
 
-    MacAddress srcMACAddress = arp->getSrcMACAddress();
-    Ipv4Address srcIPAddress = arp->getSrcIPAddress();
+    MacAddress srcMACAddress = arp->getSrcMacAddress();
+    Ipv4Address srcIPAddress = arp->getSrcIpAddress();
 
     if (srcMACAddress.isUnspecified())
         throw cRuntimeError("wrong ARP packet: source MAC address is empty");
@@ -351,7 +338,7 @@ void Arp::processARPPacket(Packet *packet)
 
     // "?Am I the target protocol address?"
     // if Proxy ARP is enabled, we also have to reply if we're a router to the dest IPv4 address
-    if (addressRecognized(arp->getDestIPAddress(), ie)) {
+    if (addressRecognized(arp->getDestIpAddress(), ie)) {
         // "If Merge_flag is false, add the triplet protocol type, sender
         // protocol address, sender hardware address to the translation table"
         if (!mergeFlag) {
@@ -383,17 +370,23 @@ void Arp::processARPPacket(Packet *packet)
 
                 // "Swap hardware and protocol fields", etc.
                 const auto& arpReply = makeShared<ArpPacket>();
-                Ipv4Address origDestAddress = arp->getDestIPAddress();
-                arpReply->setDestIPAddress(srcIPAddress);
-                arpReply->setDestMACAddress(srcMACAddress);
-                arpReply->setSrcIPAddress(origDestAddress);
-                arpReply->setSrcMACAddress(myMACAddress);
+                Ipv4Address origDestAddress = arp->getDestIpAddress();
+                arpReply->setDestIpAddress(srcIPAddress);
+                arpReply->setDestMacAddress(srcMACAddress);
+                arpReply->setSrcIpAddress(origDestAddress);
+                arpReply->setSrcMacAddress(myMACAddress);
                 arpReply->setOpcode(ARP_REPLY);
                 Packet *outPk = new Packet("arpREPLY");
                 outPk->insertHeader(arpReply);
-                sendPacketToNIC(outPk, ie, srcMACAddress);
+                outPk->addTag<MacAddressReq>()->setDestAddress(srcMACAddress);
+                outPk->addTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+                outPk->addTag<PacketProtocolTag>()->setProtocol(&Protocol::arp);
+
+                // send out
+                EV_INFO << "Sending " << outPk << " to network protocol.\n";
+                emit(arpReplySentSignal, outPk);
+                send(outPk, "ifOut");
                 numRepliesSent++;
-                emit(sentReplySignal, 1L);
                 break;
             }
 
@@ -414,7 +407,7 @@ void Arp::processARPPacket(Packet *packet)
     }
     else {
         // address not recognized
-        EV_INFO << "IPv4 address " << arp->getDestIPAddress() << " not recognized, dropping ARP packet\n";
+        EV_INFO << "IPv4 address " << arp->getDestIpAddress() << " not recognized, dropping ARP packet\n";
     }
     delete packet;
 }
@@ -440,7 +433,7 @@ MacAddress Arp::resolveL3Address(const L3Address& address, const InterfaceEntry 
 {
     Enter_Method("resolveMACAddress(%s,%s)", address.str().c_str(), ie->getInterfaceName());
 
-    Ipv4Address addr = address.toIPv4();
+    Ipv4Address addr = address.toIpv4();
     ArpCache::const_iterator it = arpCache.find(addr);
     if (it == arpCache.end()) {
         // no cache entry: launch ARP request

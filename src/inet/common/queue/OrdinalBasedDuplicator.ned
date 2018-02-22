@@ -31,11 +31,11 @@ simple OrdinalBasedDuplicator like IHook
         string duplicatesVector = default(""); // the duplicatesVector format is "<packetNumber>;<packetNumber>;...;"
                                                // packet numbers in ascending order e.g. "5;6;12;13;"
         @display("i=status/busy");
-        @signal[rcvdPk](type=cMessage);
-        @signal[sentPk](type=cMessage);
+        @signal[packetReceived](type=cMessage);
+        @signal[packetSent](type=cMessage);
         @signal[duplPk](type=cMessage);
-        @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[duplPk](title="packets duplicated"; source=duplPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
     gates:
         input in;

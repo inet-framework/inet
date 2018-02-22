@@ -58,7 +58,7 @@ class INET_API MacBase : public cSimpleModule, public ILifecycle, public cListen
     virtual InterfaceEntry *createInterfaceEntry() = 0;
 
     /**
-     * should clear queue and emit signal "packetDrop" with entire packets
+     * should clear queue and emit signal "packetDropped" with entire packets
      */
     virtual void flushQueue() = 0;
 

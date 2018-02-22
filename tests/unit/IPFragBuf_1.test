@@ -6,7 +6,7 @@ Test the IP fragmentation reassembly buffer (Ipv4FragBuf class)
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/networklayer/ipv4/Ipv4FragBuf.h"
-#include "inet/networklayer/ipv4/Ipv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 
 %global:
 

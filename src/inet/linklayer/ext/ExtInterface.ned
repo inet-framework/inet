@@ -33,7 +33,7 @@ simple ExtInterface like IExternalInterface
         string interfaceTableModule;   // The path to the InterfaceTable module
         string filterString;
         string device;
-        int mtu @unit("B") = default(1500B);
+        int mtu @unit(B) = default(1500B);
     gates:
         input upperLayerIn;
         output upperLayerOut;

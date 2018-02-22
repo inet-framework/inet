@@ -48,17 +48,17 @@ inline Coord toCoord(const Vec3d& vec3d) { return Coord(vec3d.x(), vec3d.y(), ve
 Vec3Array *createCircleVertices(const Coord& center, double radius, int polygonSize);
 Vec3Array *createAnnulusVertices(const Coord& center, double outerRadius, double innerRadius, int polygonSize);
 
-Geometry *createLineGeometry(const Coord& begin, const Coord& end);
-Geometry *createArrowheadGeometry(const Coord& begin, const Coord& end, double width = 10.0, double height = 20.0);
+Geometry *createLineGeometry(const Coord& start, const Coord& end);
+Geometry *createArrowheadGeometry(const Coord& start, const Coord& end, double width, double height);
 Geometry *createPolylineGeometry(const std::vector<Coord>& coords);
 Geometry *createCircleGeometry(const Coord& center, double radius, int polygonSize);
 Geometry *createAnnulusGeometry(const Coord& center, double outerRadius, double innerRadius, int polygonSize);
-Geometry *createQuadGeometry(const Coord& begin, const Coord& end);
+Geometry *createQuadGeometry(const Coord& start, const Coord& end);
 Geometry *createPolygonGeometry(const std::vector<Coord>& points, const Coord& translation = Coord::ZERO);
 
-Node *createArrowhead(const Coord& begin, const Coord &end);
-Node *createLine(const Coord& begin, const Coord& end, cFigure::Arrowhead beginArrowhead, cFigure::Arrowhead endArrowhead);
-Node *createPolyline(const std::vector<Coord>& coords, cFigure::Arrowhead beginArrowhead, cFigure::Arrowhead endArrowhead);
+Node *createArrowhead(const Coord& start, const Coord &end, double width = 10.0, double height = 20.0);
+Node *createLine(const Coord& start, const Coord& end, cFigure::Arrowhead startArrowhead, cFigure::Arrowhead endArrowhead);
+Node *createPolyline(const std::vector<Coord>& coords, cFigure::Arrowhead startArrowhead, cFigure::Arrowhead endArrowhead);
 osgText::Text *createText(const char *string, const Coord& position, const cFigure::Color& color);
 
 AutoTransform *createAutoTransform(Drawable *drawable, AutoTransform::AutoRotateMode mode, bool autoScaleToScreen, const Coord& position = Coord::ZERO);
@@ -69,6 +69,33 @@ Texture2D *createTexture(const char *name, bool repeat);
 
 StateSet *createStateSet(const cFigure::Color& color, double opacity, bool cullBackFace = true);
 StateSet *createLineStateSet(const cFigure::Color& color, const cFigure::LineStyle& style, double width);
+
+// TODO: move to separate file, recreate node similar to omnetpp figures as a set of basic building blocks
+class INET_API LineNode : public Group
+{
+  protected:
+    double lineWidth;
+    cFigure::Arrowhead startArrowhead;
+    cFigure::Arrowhead endArrowhead;
+
+  protected:
+    Geode *getLineGeode() { return static_cast<Geode *>(getChild(0)); }
+    Geode *getStartArrowheadGeode() { return static_cast<Geode *>(getStartArrowheadAutoTransform()->getChild(0)); }
+    Geode *getEndArrowheadGeode() { return static_cast<Geode *>(getEndArrowheadAutoTransform()->getChild(0)); }
+
+    Geometry *getLineGeometry() { return static_cast<Geometry *>(getLineGeode()->getDrawable(0)); }
+    Geometry *getStartArrowheadGeometry() { return static_cast<Geometry *>(getStartArrowheadGeode()->getDrawable(0)); }
+    Geometry *getEndArrowheadGeometry() { return static_cast<Geometry *>(getEndArrowheadGeode()->getDrawable(0)); }
+
+    AutoTransform *getStartArrowheadAutoTransform() { return static_cast<AutoTransform *>(getChild(1)); }
+    AutoTransform *getEndArrowheadAutoTransform() { return static_cast<AutoTransform *>(getChild(startArrowhead ? 2 : 1)); }
+
+  public:
+    LineNode(const Coord& start, const Coord& end, cFigure::Arrowhead startArrowhead, cFigure::Arrowhead endArrowhead, double lineWidth);
+
+    void setStart(const Coord& start);
+    void setEnd(const Coord& end);
+};
 
 #endif // ifdef WITH_OSG
 

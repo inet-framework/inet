@@ -69,7 +69,7 @@ void RtpApplication::initialize(int stage)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
 
         // the ip address to connect to (unicast or multicast)
-        destinationAddress = L3AddressResolver().resolve(par("destinationAddress")).toIPv4();
+        destinationAddress = L3AddressResolver().resolve(par("destinationAddress")).toIpv4();
 
         EV_DETAIL << "commonName" << commonName << endl
                   << "profileName" << profileName << endl

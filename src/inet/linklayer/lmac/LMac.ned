@@ -30,8 +30,8 @@ simple LMac extends MacProtocolBase like IMacProtocol
                                           // a generated MAC address in init stage 0.
         // how long is a slot?
         double slotDuration @unit(s) = default(100ms);
-        int headerLength @unit(B) = default(10B);
-        int mtu @unit("B") = default(0B);
+        int headerLength @unit(b) = default(10b);
+        int mtu @unit(B) = default(0B);
         // length of MAC header
         int queueLength = default(10);
         // default channel
@@ -46,6 +46,6 @@ simple LMac extends MacProtocolBase like IMacProtocol
         string radioModule = default("^.radio");   // The path to the Radio module  //FIXME remove default value
 
         @class(LMac);
-        @statistic[packetDropIncorrectlyReceived](title="packet drop: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-        @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropIncorrectlyReceived](title="packet drop: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
 }

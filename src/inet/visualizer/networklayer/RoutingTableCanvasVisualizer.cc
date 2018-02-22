@@ -41,6 +41,7 @@ void RoutingTableCanvasVisualizer::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         zIndex = par("zIndex");
         auto canvas = visualizerTargetModule->getCanvas();
+        lineManager = LineManager::getCanvasLineManager(canvas);
         canvasProjection = CanvasProjection::getCanvasProjection(canvas);
         routeGroup = new cGroupFigure("routing tables");
         routeGroup->setZIndex(zIndex);

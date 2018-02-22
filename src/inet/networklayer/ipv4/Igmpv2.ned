@@ -107,16 +107,16 @@ simple Igmpv2 like IIgmp
         string routingTableModule;
         bool enabled = default(true);
         int    robustnessVariable = default(2); // IGMP is roboust to (roboustnessVariable-1) packet loss
-        double queryInterval @unit("s") = default(125s);
-        double queryResponseInterval @unit("s") = default(10s);
-        double groupMembershipInterval @unit("s") = default((robustnessVariable * queryInterval) + queryResponseInterval);
-        double otherQuerierPresentInterval @unit("s") = default((robustnessVariable * queryInterval) + (queryResponseInterval / 2));
-        double startupQueryInterval @unit("s") = default(queryInterval / 4);
+        double queryInterval @unit(s) = default(125s);
+        double queryResponseInterval @unit(s) = default(10s);
+        double groupMembershipInterval @unit(s) = default((robustnessVariable * queryInterval) + queryResponseInterval);
+        double otherQuerierPresentInterval @unit(s) = default((robustnessVariable * queryInterval) + (queryResponseInterval / 2));
+        double startupQueryInterval @unit(s) = default(queryInterval / 4);
         int    startupQueryCount = default(robustnessVariable);
-        double lastMemberQueryInterval @unit("s") = default(1s);
+        double lastMemberQueryInterval @unit(s) = default(1s);
         int    lastMemberQueryCount = default(robustnessVariable);
-        double unsolicitedReportInterval @unit("s") = default(10s);
-//      double version1RouterPresentInterval @unit("s") = default(400s);
+        double unsolicitedReportInterval @unit(s) = default(10s);
+//      double version1RouterPresentInterval @unit(s) = default(400s);
         @display("i=block/cogwheel");
 
     gates:

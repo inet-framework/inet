@@ -71,7 +71,7 @@ simple Ipv6
         string ipv6NeighbourDiscoveryModule;
         string icmpv6Module;
         string ipv6TunnelingModule;
-        double procDelay @unit("s") = default(0s);
+        double procDelay @unit(s) = default(0s);
         @display("i=block/network2");
     gates:
         input transportIn @labels(Ipv6ControlInfo/down,TcpHeader,UdpHeader);

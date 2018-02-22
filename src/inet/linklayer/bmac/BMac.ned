@@ -51,8 +51,8 @@ simple BMac extends MacProtocolBase like IMacProtocol
         // how long is one slot?
         double slotDuration @unit(s) = default(0.1s);
 
-        int headerLength @unit(B) = default(10B);
-        int mtu @unit("B") = default(0B);
+        int headerLength @unit(b) = default(10b);
+        int mtu @unit(B) = default(0B);
 
         // how long is the check interval (CCA)?
         double checkInterval @unit(s) = default(0.01s);
@@ -78,9 +78,9 @@ simple BMac extends MacProtocolBase like IMacProtocol
         int maxTxAttempts = default(2);     //  Maximum transmission attempts per data packet, when ACKs are used
 
         @class(BMac);
-        @signal[linkBreak](type=Packet);
-        @statistic[linkBreak](title="link break"; source=linkBreak; record=count; interpolationmode=none);
-        @statistic[packetDropIncorrectlyReceived](title="packet drop: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-        @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-        @statistic[packetDropQueueOverlow](title="packet drop: queue overflow"; source=packetDropReasonIsQueueOverflow(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @signal[linkBroken](type=Packet);
+        @statistic[linkBroken](title="link break"; source=linkBroken; record=count; interpolationmode=none);
+        @statistic[packetDropIncorrectlyReceived](title="packet drop: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropQueueOverlow](title="packet drop: queue overflow"; source=packetDropReasonIsQueueOverflow(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
 }

@@ -63,14 +63,13 @@ SctpPathVariables::SctpPathVariables(const L3Address& addr, SctpAssociation *ass
     queuedBytes = 0;
     outstandingBytes = 0;
 
-  /*  rtie = rt->getOutputInterfaceForDestination(remoteAddress);
+    rtie = rt->getOutputInterfaceForDestination(remoteAddress);
 
     if (rtie == nullptr) {
         throw cRuntimeError("No interface for remote address %s found!", remoteAddress.str().c_str());
     }
 
-    pmtu = rtie->getMTU();*/
-    pmtu = 1500;
+    pmtu = rtie->getMTU();
     rttvar = 0.0;
 
     cwndTimeout = pathRto;

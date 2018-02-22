@@ -88,13 +88,13 @@ void VoipStreamReceiver::handleMessage(cMessage *msg)
     }
 
     if (ok) {
-        emit(rcvdPkSignal, pk);
+        emit(packetReceivedSignal, pk);
         decodePacket(pk);
     }
     else {
         PacketDropDetails details;
         details.setReason(CONGESTION);
-        emit(packetDropSignal, msg, &details);
+        emit(packetDroppedSignal, msg, &details);
     }
 
     delete msg;

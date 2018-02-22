@@ -55,21 +55,21 @@ class INET_API L3AddressResolver
 {
   protected:
     // internal
-    virtual bool getIPv4AddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask);
+    virtual bool getIpv4AddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask);
     // internal
-    virtual bool getIPv6AddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask);
+    virtual bool getIpv6AddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask);
     // internal
-    virtual bool getMACAddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask);
+    virtual bool getMacAddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask);
     // internal
     virtual bool getModulePathAddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask);
     // internal
     virtual bool getModuleIdAddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask);
     // internal
-    virtual bool getInterfaceIPv4Address(L3Address& ret, InterfaceEntry *ie, bool mask);
+    virtual bool getInterfaceIpv4Address(L3Address& ret, InterfaceEntry *ie, bool mask);
     // internal
-    virtual bool getInterfaceIPv6Address(L3Address& ret, InterfaceEntry *ie, bool mask);
+    virtual bool getInterfaceIpv6Address(L3Address& ret, InterfaceEntry *ie, bool mask);
     // internal
-    virtual bool getInterfaceMACAddress(L3Address& ret, InterfaceEntry *ie, bool mask);
+    virtual bool getInterfaceMacAddress(L3Address& ret, InterfaceEntry *ie, bool mask);
     // internal
     virtual bool getInterfaceModulePathAddress(L3Address& ret, InterfaceEntry *ie, bool mask);
     // internal
@@ -165,14 +165,14 @@ class INET_API L3AddressResolver
      * <tt>"routingTable"</tt> or <tt>"networkLayer.routingTable"</tt> within
      * the host/router module. Throws an error if not found.
      */
-    virtual IIpv4RoutingTable *routingTableOf(cModule *host);
+    virtual IIpv4RoutingTable *getIpv4RoutingTableOf(cModule *host);
 
     /**
      * The function tries to look up the Ipv6RoutingTable module as submodule
      * <tt>"routingTable6"</tt> or <tt>"networkLayer.routingTable6"</tt> within
      * the host/router module. Throws an error if not found.
      */
-    virtual Ipv6RoutingTable *routingTable6Of(cModule *host);
+    virtual Ipv6RoutingTable *getIpv6RoutingTableOf(cModule *host);
 
     /**
      * Like interfaceTableOf(), but doesn't throw error if not found.
@@ -182,12 +182,12 @@ class INET_API L3AddressResolver
     /**
      * Like routingTableOf(), but doesn't throw error if not found.
      */
-    virtual IIpv4RoutingTable *findIPv4RoutingTableOf(cModule *host);
+    virtual IIpv4RoutingTable *findIpv4RoutingTableOf(cModule *host);
 
     /**
      * Like interfaceTableOf(), but doesn't throw error if not found.
      */
-    virtual Ipv6RoutingTable *findIPv6RoutingTableOf(cModule *host);
+    virtual Ipv6RoutingTable *findIpv6RoutingTableOf(cModule *host);
 
     /**
      * Like interfaceTableOf(), but doesn't throw error if not found.

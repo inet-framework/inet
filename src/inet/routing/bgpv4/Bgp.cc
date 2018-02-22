@@ -166,7 +166,7 @@ void Bgp::processMessageFromTCP(cMessage *msg)
     if (!socket) {
         socket = new TcpSocket(msg);
         socket->setOutputGate(gate("socketOut"));
-        Ipv4Address peerAddr = socket->getRemoteAddress().toIPv4();
+        Ipv4Address peerAddr = socket->getRemoteAddress().toIpv4();
         SessionId i = findIdFromPeerAddr(_BGPSessions, peerAddr);
         if (i == (SessionId)-1) {
             socket->close();

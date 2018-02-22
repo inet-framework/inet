@@ -192,7 +192,7 @@ class INET_API InterfaceEntry : public cModule
     const char *getInterfaceName() const { return interfaceName.c_str(); }
     int getNodeOutputGateId() const { return nodeOutputGateId; }
     int getNodeInputGateId() const { return nodeInputGateId; }
-    int getMTU() const { return mtu; }
+    int getMtu() const { return mtu; }
     bool hasCarrier() const { return carrier; }
     bool isBroadcast() const { return broadcast; }
     bool isMulticast() const { return multicast; }
@@ -216,14 +216,14 @@ class INET_API InterfaceEntry : public cModule
     virtual void setPointToPoint(bool b) { if (pointToPoint != b) { pointToPoint = b; configChanged(F_POINTTOPOINT); } }
     virtual void setLoopback(bool b) { if (loopback != b) { loopback = b; configChanged(F_LOOPBACK); } }
     virtual void setDatarate(double d) { if (datarate != d) { datarate = d; configChanged(F_DATARATE); } }
-    virtual void setMACAddress(const MacAddress& addr) { if (macAddr != addr) { macAddr = addr; configChanged(F_MACADDRESS); } }
+    virtual void setMacAddress(const MacAddress& addr) { if (macAddr != addr) { macAddr = addr; configChanged(F_MACADDRESS); } }
     virtual void setInterfaceToken(const InterfaceToken& t) { token = t; configChanged(F_TOKEN); }
     //@}
 
     /** @name Accessing protocol-specific interface data. Note methods are non-virtual, for performance reasons. */
     //@{
     Ipv4InterfaceData *ipv4Data() const { return ipv4data; }
-    Ipv4Address getIPv4Address() const;
+    Ipv4Address getIpv4Address() const;
     Ipv6InterfaceData *ipv6Data() const { return ipv6data; }
     GenericNetworkProtocolInterfaceData *getGenericNetworkProtocolData() const { return genericNetworkProtocolData; }
     TrillInterfaceData *trillData() const { return trilldata; }
@@ -238,11 +238,11 @@ class INET_API InterfaceEntry : public cModule
 
     /** @name Installing protocol-specific interface data */
     //@{
-    virtual void setIPv4Data(Ipv4InterfaceData *p);
-    virtual void setIPv6Data(Ipv6InterfaceData *p);
+    virtual void setIpv4Data(Ipv4InterfaceData *p);
+    virtual void setIpv6Data(Ipv6InterfaceData *p);
     virtual void setGenericNetworkProtocolData(GenericNetworkProtocolInterfaceData *p);
-    virtual void setTRILLInterfaceData(TrillInterfaceData *p);
-    virtual void setISISInterfaceData(IsisInterfaceData *p);
+    virtual void setTrillInterfaceData(TrillInterfaceData *p);
+    virtual void setIsisInterfaceData(IsisInterfaceData *p);
     virtual void setIeee8021dInterfaceData(Ieee8021dInterfaceData *p);
     //@}
 

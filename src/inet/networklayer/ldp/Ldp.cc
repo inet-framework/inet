@@ -593,7 +593,7 @@ void Ldp::processMessageFromTCP(cMessage *msg)
         // FIXME there seems to be some confusion here. Is it sure that
         // routerIds we use as peerAddrs are the same as IP addresses
         // the routing is based on? --Andras
-        Ipv4Address peerAddr = socket->getRemoteAddress().toIPv4();
+        Ipv4Address peerAddr = socket->getRemoteAddress().toIpv4();
 
         int i = findPeer(peerAddr);
         if (i == -1 || myPeers[i].socket) {

@@ -224,7 +224,7 @@ class BgpUpdatePathAttributeList extends cObject
 //
 class BgpUpdateMessage extends BgpHeader
 {
-    @customize;
+    @customize;     // update chunkLength when changed   //FIXME setNLRI() always increment length with 5 bytes
     type = BGP_UPDATE;
     chunkLength = B(BGP_HEADER_OCTETS + BGP_EMPTY_UPDATE_OCTETS);
 

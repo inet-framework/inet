@@ -201,7 +201,7 @@ class INET_API BMac : public MacProtocolBase, public IMacProtocol
     /** @brief The duration of the slot in secs. */
     double slotDuration = 0;
     /** @brief Length of the header*/
-    int headerLength = 0;
+    b headerLength = b(0);
     /** @brief The bitrate of transmission */
     double bitrate = 0;
     /** @brief The duration of CCA */
@@ -215,7 +215,7 @@ class INET_API BMac : public MacProtocolBase, public IMacProtocol
     bool stats = false;
 
     /** @brief Generate new interface address*/
-    virtual void initializeMACAddress();
+    virtual void initializeMacAddress();
     virtual InterfaceEntry *createInterfaceEntry() override;
     virtual void handleCommand(cMessage *msg) {}
 

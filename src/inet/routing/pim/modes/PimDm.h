@@ -233,7 +233,7 @@ class INET_API PimDm : public PimBase, protected cListener
     void restartTimer(cMessage *timer, double interval);
     void cancelAndDeleteTimer(cMessage *& timer);
     PimInterface *getIncomingInterface(InterfaceEntry *fromIE);
-    Ipv4MulticastRoute *findIPv4MulticastRoute(Ipv4Address group, Ipv4Address source);
+    Ipv4MulticastRoute *findIpv4MulticastRoute(Ipv4Address group, Ipv4Address source);
     Route *findRoute(Ipv4Address source, Ipv4Address group);
     void deleteRoute(Ipv4Address source, Ipv4Address group);
     void clearRoutes();

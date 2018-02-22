@@ -157,26 +157,26 @@ class INET_API Dymo : public cSimpleModule, public ILifecycle, public cListener,
     b computeRteMsgLength(const Ptr<RteMsg>& rteMsg);
 
     // handling RREQ packets
-    const Ptr<RREQ> createRREQ(const L3Address& target, int retryCount);
-    void sendRREQ(const Ptr<RREQ>& rreq);
-    void processRREQ(Packet *packet, const Ptr<const RREQ>& rreq);
-    b computeRREQLength(const Ptr<RREQ> &rreq);
+    const Ptr<Rreq> createRREQ(const L3Address& target, int retryCount);
+    void sendRREQ(const Ptr<Rreq>& rreq);
+    void processRREQ(Packet *packet, const Ptr<const Rreq>& rreq);
+    b computeRREQLength(const Ptr<Rreq> &rreq);
 
     // handling RREP packets
-    const Ptr<RREP> createRREP(const Ptr<const RteMsg>& rteMsg);
-    const Ptr<RREP> createRREP(const Ptr<const RteMsg>& rteMsg, IRoute *route);
-    void sendRREP(const Ptr<RREP>& rrep);
-    void sendRREP(const Ptr<RREP>& rrep, IRoute *route);
-    void processRREP(Packet *packet, const Ptr<const RREP>& rrep);
-    b computeRREPLength(const Ptr<RREP> &rrep);
+    const Ptr<Rrep> createRREP(const Ptr<const RteMsg>& rteMsg);
+    const Ptr<Rrep> createRREP(const Ptr<const RteMsg>& rteMsg, IRoute *route);
+    void sendRREP(const Ptr<Rrep>& rrep);
+    void sendRREP(const Ptr<Rrep>& rrep, IRoute *route);
+    void processRREP(Packet *packet, const Ptr<const Rrep>& rrep);
+    b computeRREPLength(const Ptr<Rrep> &rrep);
 
     // handling RERR packets
-    const Ptr<RERR> createRERR(std::vector<L3Address>& addresses);
-    void sendRERR(const Ptr<RERR>& rerr);
+    const Ptr<Rerr> createRERR(std::vector<L3Address>& addresses);
+    void sendRERR(const Ptr<Rerr>& rerr);
     void sendRERRForUndeliverablePacket(const L3Address& destination);
     void sendRERRForBrokenLink(const InterfaceEntry *interfaceEntry, const L3Address& nextHop);
-    void processRERR(Packet *packet, const Ptr<const RERR>& rerr);
-    b computeRERRLength(const Ptr<RERR>& rerr);
+    void processRERR(Packet *packet, const Ptr<const Rerr>& rerr);
+    b computeRERRLength(const Ptr<Rerr>& rerr);
 
     // handling routes
     IRoute *createRoute(Packet *packet, const Ptr<const RteMsg>& rteMsg, const AddressBlock& addressBlock);

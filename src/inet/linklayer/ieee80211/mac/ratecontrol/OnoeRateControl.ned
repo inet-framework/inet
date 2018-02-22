@@ -22,8 +22,8 @@ import inet.linklayer.ieee80211.mac.contract.IRateControl;
 simple OnoeRateControl like IRateControl
 {
     parameters:
-        double initialRate @unit("bps") = default(-1bps); // -1 means fastest mandatory rate
-        double interval @unit("s") = default(1s);
+        double initialRate @unit(bps) = default(-1bps); // -1 means fastest mandatory rate
+        double interval @unit(s) = default(1s);
         @display("i=block/cogwheel");
         @signal[datarate];
         @statistic[datarate](record=vector);

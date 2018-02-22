@@ -33,6 +33,7 @@
 #include <map>
 
 namespace inet {
+namespace aodv {
 
 /*
  * This class implements AODV routing protocol and Netfilter hooks
@@ -151,29 +152,29 @@ class INET_API Aodv : public cSimpleModule, public ILifecycle, public NetfilterB
     void expungeRoutes();
 
     /* Control packet creators */
-    const Ptr<AodvRrepAck> createRREPACK();
-    const Ptr<AodvRrep> createHelloMessage();
-    const Ptr<AodvRreq> createRREQ(const L3Address& destAddr);
-    const Ptr<AodvRrep> createRREP(const Ptr<AodvRreq>& rreq, IRoute *destRoute, IRoute *originatorRoute, const L3Address& sourceAddr);
-    const Ptr<AodvRrep> createGratuitousRREP(const Ptr<AodvRreq>& rreq, IRoute *originatorRoute);
-    const Ptr<AodvRerr> createRERR(const std::vector<UnreachableNode>& unreachableNodes);
+    const Ptr<RrepAck> createRREPACK();
+    const Ptr<Rrep> createHelloMessage();
+    const Ptr<Rreq> createRREQ(const L3Address& destAddr);
+    const Ptr<Rrep> createRREP(const Ptr<Rreq>& rreq, IRoute *destRoute, IRoute *originatorRoute, const L3Address& sourceAddr);
+    const Ptr<Rrep> createGratuitousRREP(const Ptr<Rreq>& rreq, IRoute *originatorRoute);
+    const Ptr<Rerr> createRERR(const std::vector<UnreachableNode>& unreachableNodes);
 
     /* Control Packet handlers */
-    void handleRREP(const Ptr<AodvRrep>& rrep, const L3Address& sourceAddr);
-    void handleRREQ(const Ptr<AodvRreq>& rreq, const L3Address& sourceAddr, unsigned int timeToLive);
-    void handleRERR(const Ptr<const AodvRerr>& rerr, const L3Address& sourceAddr);
-    void handleHelloMessage(const Ptr<AodvRrep>& helloMessage);
-    void handleRREPACK(const Ptr<const AodvRrepAck>& rrepACK, const L3Address& neighborAddr);
+    void handleRREP(const Ptr<Rrep>& rrep, const L3Address& sourceAddr);
+    void handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsigned int timeToLive);
+    void handleRERR(const Ptr<const Rerr>& rerr, const L3Address& sourceAddr);
+    void handleHelloMessage(const Ptr<Rrep>& helloMessage);
+    void handleRREPACK(const Ptr<const RrepAck>& rrepACK, const L3Address& neighborAddr);
 
     /* Control Packet sender methods */
-    void sendRREQ(const Ptr<AodvRreq>& rreq, const L3Address& destAddr, unsigned int timeToLive);
-    void sendRREPACK(const Ptr<AodvRrepAck>& rrepACK, const L3Address& destAddr);
-    void sendRREP(const Ptr<AodvRrep>& rrep, const L3Address& destAddr, unsigned int timeToLive);
-    void sendGRREP(const Ptr<AodvRrep>& grrep, const L3Address& destAddr, unsigned int timeToLive);
+    void sendRREQ(const Ptr<Rreq>& rreq, const L3Address& destAddr, unsigned int timeToLive);
+    void sendRREPACK(const Ptr<RrepAck>& rrepACK, const L3Address& destAddr);
+    void sendRREP(const Ptr<Rrep>& rrep, const L3Address& destAddr, unsigned int timeToLive);
+    void sendGRREP(const Ptr<Rrep>& grrep, const L3Address& destAddr, unsigned int timeToLive);
 
     /* Control Packet forwarders */
-    void forwardRREP(const Ptr<AodvRrep>& rrep, const L3Address& destAddr, unsigned int timeToLive);
-    void forwardRREQ(const Ptr<AodvRreq>& rreq, unsigned int timeToLive);
+    void forwardRREP(const Ptr<Rrep>& rrep, const L3Address& destAddr, unsigned int timeToLive);
+    void forwardRREQ(const Ptr<Rreq>& rreq, unsigned int timeToLive);
 
     /* Self message handlers */
     void handleRREPACKTimer();
@@ -208,6 +209,7 @@ class INET_API Aodv : public cSimpleModule, public ILifecycle, public NetfilterB
     virtual ~Aodv();
 };
 
+} // namespace aodv
 } // namespace inet
 
 #endif    // ifndef AODVROUTING_H_

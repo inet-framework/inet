@@ -51,9 +51,9 @@ class ArpPacket extends FieldsChunk
     // ARP header length for IPv4 (4-byte addresses) and 802 LANs (6-byte MAC addrs)
     chunkLength = B(28);
     ArpOpcode opcode;
-    MacAddress srcMACAddress;
-    MacAddress destMACAddress;
-    Ipv4Address srcIPAddress;
-    Ipv4Address destIPAddress;
+    MacAddress srcMacAddress;
+    MacAddress destMacAddress;
+    Ipv4Address srcIpAddress;
+    Ipv4Address destIpAddress;
 }
 

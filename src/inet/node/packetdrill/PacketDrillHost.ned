@@ -43,6 +43,7 @@ module PacketDrillHost extends StandardHost
     submodules:
         tunApp[numTunInterfaces]: PacketDrillApp {
             parameters:
+                interface = "tun"+string(index);
                 @display("p=800,100");
         }
 

@@ -90,7 +90,7 @@ std::string InterfaceEntry::str() const
     std::stringstream out;
     out << getInterfaceName();
     out << "  ID:" << getInterfaceId();
-    out << "  MTU:" << getMTU();
+    out << "  MTU:" << getMtu();
     if (!isUp())
         out << " DOWN";
     if (isBroadcast())
@@ -129,7 +129,7 @@ std::string InterfaceEntry::detailedInfo() const
     std::stringstream out;
     out << "name:" << getInterfaceName();
     out << "  ID:" << getInterfaceId();
-    out << "  MTU: " << getMTU() << " \t";
+    out << "  MTU: " << getMtu() << " \t";
     if (!isUp())
         out << "DOWN ";
     if (isBroadcast())
@@ -248,7 +248,7 @@ const L3Address InterfaceEntry::getNetworkAddress() const
     return getModulePathAddress();
 }
 
-void InterfaceEntry::setIPv4Data(Ipv4InterfaceData *p)
+void InterfaceEntry::setIpv4Data(Ipv4InterfaceData *p)
 {
 #ifdef WITH_IPv4
     if (ipv4data && ipv4data->ownerp == this)
@@ -261,7 +261,7 @@ void InterfaceEntry::setIPv4Data(Ipv4InterfaceData *p)
 #endif // ifdef WITH_IPv4
 }
 
-void InterfaceEntry::setIPv6Data(Ipv6InterfaceData *p)
+void InterfaceEntry::setIpv6Data(Ipv6InterfaceData *p)
 {
 #ifdef WITH_IPv6
     if (ipv6data && ipv6data->ownerp == this)
@@ -274,7 +274,7 @@ void InterfaceEntry::setIPv6Data(Ipv6InterfaceData *p)
 #endif // ifdef WITH_IPv6
 }
 
-void InterfaceEntry::setTRILLInterfaceData(TrillInterfaceData *p)
+void InterfaceEntry::setTrillInterfaceData(TrillInterfaceData *p)
 {
     if (trilldata && ((InterfaceProtocolData *)trilldata)->ownerp == this) // Khmm...
         delete (InterfaceProtocolData *)trilldata; // Khmm...
@@ -283,7 +283,7 @@ void InterfaceEntry::setTRILLInterfaceData(TrillInterfaceData *p)
     configChanged(F_TRILL_DATA);
 }
 
-void InterfaceEntry::setISISInterfaceData(IsisInterfaceData *p)
+void InterfaceEntry::setIsisInterfaceData(IsisInterfaceData *p)
 {
     if (isisdata && ((InterfaceProtocolData *)isisdata)->ownerp == this) // Khmm...
         delete (InterfaceProtocolData *)isisdata; // Khmm...
@@ -327,13 +327,13 @@ void InterfaceEntry::joinMulticastGroup(const L3Address& address) const
     switch (address.getType()) {
 #ifdef WITH_IPv4
         case L3Address::Ipv4:
-            ipv4Data()->joinMulticastGroup(address.toIPv4());
+            ipv4Data()->joinMulticastGroup(address.toIpv4());
             break;
 
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
         case L3Address::Ipv6:
-            ipv6Data()->joinMulticastGroup(address.toIPv6());
+            ipv6Data()->joinMulticastGroup(address.toIpv6());
             break;
 
 #endif // ifdef WITH_IPv6
@@ -350,11 +350,11 @@ void InterfaceEntry::joinMulticastGroup(const L3Address& address) const
     }
 }
 
-static void toIPv4AddressVector(const std::vector<L3Address>& addresses, std::vector<Ipv4Address>& result)
+static void toIpv4AddressVector(const std::vector<L3Address>& addresses, std::vector<Ipv4Address>& result)
 {
     result.reserve(addresses.size());
     for (auto & addresse : addresses)
-        result.push_back(addresse.toIPv4());
+        result.push_back(addresse.toIpv4());
 }
 
 void InterfaceEntry::changeMulticastGroupMembership(const L3Address& multicastAddress,
@@ -365,9 +365,9 @@ void InterfaceEntry::changeMulticastGroupMembership(const L3Address& multicastAd
 #ifdef WITH_IPv4
         case L3Address::Ipv4: {
             std::vector<Ipv4Address> oldIPv4SourceList, newIPv4SourceList;
-            toIPv4AddressVector(oldSourceList, oldIPv4SourceList);
-            toIPv4AddressVector(newSourceList, newIPv4SourceList);
-            ipv4Data()->changeMulticastGroupMembership(multicastAddress.toIPv4(),
+            toIpv4AddressVector(oldSourceList, oldIPv4SourceList);
+            toIpv4AddressVector(newSourceList, newIPv4SourceList);
+            ipv4Data()->changeMulticastGroupMembership(multicastAddress.toIpv4(),
                     oldFilterMode, oldIPv4SourceList, newFilterMode, newIPv4SourceList);
             break;
         }
@@ -392,7 +392,7 @@ void InterfaceEntry::changeMulticastGroupMembership(const L3Address& multicastAd
     }
 }
 
-Ipv4Address InterfaceEntry::getIPv4Address() const {
+Ipv4Address InterfaceEntry::getIpv4Address() const {
 #ifdef WITH_IPv4
     return ipv4data == nullptr ? Ipv4Address::UNSPECIFIED_ADDRESS : ipv4data->getIPAddress();
 #else

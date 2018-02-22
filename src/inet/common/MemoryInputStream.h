@@ -364,7 +364,7 @@ class INET_API MemoryInputStream {
      * Reads a MAC address at the current position of the stream in big endian
      * byte order and MSB to LSB bit order.
      */
-    MacAddress readMACAddress() {
+    MacAddress readMacAddress() {
         MacAddress address;
         for (int i = 0; i < MAC_ADDRESS_SIZE; i++)
             address.setAddressByte(i, readByte());
@@ -375,7 +375,7 @@ class INET_API MemoryInputStream {
      * Reads an Ipv4 address at the current position of the stream in big endian
      * byte order and MSB to LSB bit order.
      */
-    Ipv4Address readIPv4Address() {
+    Ipv4Address readIpv4Address() {
         return Ipv4Address(readUint32Be());
     }
 
@@ -383,7 +383,7 @@ class INET_API MemoryInputStream {
      * Reads an Ipv6 address at the current position of the stream in big endian
      * byte order and MSB to LSB bit order.
      */
-    Ipv6Address readIPv6Address() {
+    Ipv6Address readIpv6Address() {
         uint32_t d[4];
         for (auto & element : d)
             element = readUint32Be();

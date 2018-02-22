@@ -327,7 +327,7 @@ void SctpClient::socketDataArrived(int, void *, Packet *msg, bool)
 
     EV_INFO << "Client received packet Nr " << packetsRcvd << " from SCTP\n";
     SctpCommandReq *ind = msg->getTag<SctpCommandReq>();
-    emit(rcvdPkSignal, msg);
+    emit(packetReceivedSignal, msg);
     bytesRcvd += msg->getByteLength();
 
     if (echo) {
@@ -403,6 +403,43 @@ void SctpClient::sendRequest(bool last)
     std::cout << "Call socket.sendMsg\n";
     socket.sendMsg(applicationPacket);
     std::cout << "socket.sendMsg returned\n";
+
+    cmsg->insertAtEnd(payload);
+    cmsg->setKind(ordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);*/
+
+    Packet *cmsg = new Packet("SCTP_C_SEND");
+    SctpSimpleMessage *msg = new SctpSimpleMessage("data");
+
+    msg->setDataArraySize(sendBytes);
+
+    for (unsigned int i = 0; i < sendBytes; i++)
+        msg->setData(i, 'a');
+
+    msg->setDataLen(sendBytes);
+    msg->setEncaps(false);
+    msg->setByteLength(sendBytes);
+    msg->setCreationTime(simTime());
+    cmsg->encapsulate(msg);
+    cmsg->setKind(ordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);
+
+    // send SCTPHeader with SctpSimpleMessage enclosed
+    EV_INFO << "Sending request ..." << endl;
+    bufferSize -= sendBytes;
+
+    if (bufferSize < 0)
+        last = true;
+
+    SctpSendInfo* sendCommand = new SctpSendInfo;
+    sendCommand->setLast(last);
+    sendCommand->setPrMethod(par("prMethod"));
+    sendCommand->setPrValue(par("prValue"));
+    sendCommand->setSid(nextStream);
+    cmsg->setControlInfo(sendCommand);
+EV_INFO << "vor emit\n";
+    emit(packetSentSignal, msg);
+    EV_INFO << "nach emit\n";
+    socket.sendMsg(cmsg);
+>>>>>>> upstream/integration
     bytesSent += sendBytes;
 }
 

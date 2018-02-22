@@ -27,6 +27,8 @@ module Ieee802154NarrowbandScalarRadioMedium extends RadioMedium
         analogModelType = default("ScalarAnalogModel");
         backgroundNoiseType = default("IsotropicScalarBackgroundNoise");
 
+        mediumLimitCache.carrierFrequency = 2450 MHz;
+
         // 802.15.4-2006, page 266
         pathLossType = default("BreakpointPathLoss");
         pathLoss.breakpointDistance = 8 m;

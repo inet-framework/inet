@@ -112,7 +112,7 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
     virtual void clearQueue();
     virtual InterfaceEntry *createInterfaceEntry() override;
     //@}
-    virtual void initializeMACAddress();
+    virtual void initializeMacAddress();
 
     /** @brief A queue to store packets from upper layer in case another
     packet is still waiting for transmission.*/

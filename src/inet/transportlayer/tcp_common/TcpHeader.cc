@@ -52,8 +52,6 @@ std::string Sack::str() const
     return out.str();
 }
 
-Register_Class(TcpHeader);
-
 unsigned short TcpHeader::getHeaderOptionArrayLength()
 {
     unsigned short usedLength = 0;
@@ -64,83 +62,9 @@ unsigned short TcpHeader::getHeaderOptionArrayLength()
     return usedLength;
 }
 
-TcpHeader& TcpHeader::operator=(const TcpHeader& other)
-{
-    if (this == &other)
-        return *this;
-    clean();
-    TcpHeader_Base::operator=(other);
-    copy(other);
-    return *this;
-}
-
-void TcpHeader::copy(const TcpHeader& other)
-{
-    for (const auto opt: other.headerOptionList)
-        headerOptionList.push_back(opt->dup());
-}
-
-TcpHeader::~TcpHeader()
-{
-    for (auto opt : headerOptionList)
-        delete opt;
-}
-
-void TcpHeader::clean()
-{
-    dropHeaderOptions();
-    setHeaderLength(TCP_HEADER_OCTETS);
-    setChunkLength(B(TCP_HEADER_OCTETS));
-}
-
-void TcpHeader::parsimPack(cCommBuffer *b) const
-{
-    TcpHeader_Base::parsimPack(b);
-    b->pack((int)headerOptionList.size());
-    for (const auto opt: headerOptionList) {
-        b->packObject(opt);
-    }
-}
-
-void TcpHeader::parsimUnpack(cCommBuffer *b)
-{
-    TcpHeader_Base::parsimUnpack(b);
-    int i, n;
-    b->unpack(n);
-    for (i = 0; i < n; i++) {
-        TcpOption *opt = check_and_cast<TcpOption*>(b->unpackObject());
-        headerOptionList.push_back(opt);
-    }
-}
-
-void TcpHeader::insertHeaderOption(TcpOption *option)
-{
-    handleChange();
-    headerOptionList.push_back(option);
-    headerLength += option->getLength();
-    setChunkLength(B(headerLength));
-}
-
-void TcpHeader::setHeaderOptionArraySize(size_t size)
-{
-    throw cRuntimeError(this, "setHeaderOptionArraySize() not supported, use addHeaderOption()");
-}
-
-size_t TcpHeader::getHeaderOptionArraySize() const
-{
-    return headerOptionList.size();
-}
-
-void TcpHeader::setHeaderOption(size_t k, TcpOption *headerOption)
-{
-    throw cRuntimeError(this, "setHeaderOption() not supported, use addHeaderOption()");
-}
-
 void TcpHeader::dropHeaderOptions()
 {
-    for (auto opt : headerOptionList)
-        delete opt;
-    headerOptionList.clear();
+    setHeaderOptionArraySize(0);
     setHeaderLength(TCP_HEADER_OCTETS);
     setChunkLength(B(TCP_HEADER_OCTETS));
 }

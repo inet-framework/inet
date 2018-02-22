@@ -204,12 +204,12 @@ inline bool LsaKeyType_Less::operator()(LsaKeyType leftKey, LsaKeyType rightKey)
 
 inline Ipv4Address ipv4AddressFromAddressString(const char *charForm)
 {
-    return L3AddressResolver().resolve(charForm, L3AddressResolver::ADDR_IPv4).toIPv4();
+    return L3AddressResolver().resolve(charForm, L3AddressResolver::ADDR_IPv4).toIpv4();
 }
 
 inline Ipv4Address ipv4NetmaskFromAddressString(const char *charForm)
 {
-    return L3AddressResolver().resolve(charForm, L3AddressResolver::ADDR_IPv4 | L3AddressResolver::ADDR_MASK).toIPv4();
+    return L3AddressResolver().resolve(charForm, L3AddressResolver::ADDR_IPv4 | L3AddressResolver::ADDR_MASK).toIpv4();
 }
 
 inline char hexCharToByte(char hex)

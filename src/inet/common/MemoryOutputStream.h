@@ -272,7 +272,7 @@ class INET_API MemoryOutputStream {
      * Writes a MAC address to the end of the stream in big endian byte order
      * and MSB to LSB bit order.
      */
-    void writeMACAddress(MacAddress address) {
+    void writeMacAddress(MacAddress address) {
         for (int i = 0; i < MAC_ADDRESS_SIZE; i++)
             writeByte(address.getAddressByte(i));
     }
@@ -281,7 +281,7 @@ class INET_API MemoryOutputStream {
      * Writes an Ipv4 address to the end of the stream in big endian byte order
      * and MSB to LSB bit order.
      */
-    void writeIPv4Address(Ipv4Address address) {
+    void writeIpv4Address(Ipv4Address address) {
         writeUint32Be(address.getInt());
     }
 
@@ -289,7 +289,7 @@ class INET_API MemoryOutputStream {
      * Writes an Ipv6 address to the end of the stream in big endian byte order
      * and MSB to LSB bit order.
      */
-    void writeIPv6Address(Ipv6Address address) {
+    void writeIpv6Address(Ipv6Address address) {
         for (int i = 0; i < 4; i++)
             writeUint32Be(address.words()[i]);
     }

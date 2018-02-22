@@ -26,8 +26,6 @@ namespace inet {
 
 Define_Module(UdpEchoApp);
 
-simsignal_t UdpEchoApp::pkSignal = registerSignal("pk");
-
 void UdpEchoApp::initialize(int stage)
 {
     ApplicationBase::initialize(stage);
@@ -47,9 +45,6 @@ void UdpEchoApp::handleMessageWhenUp(cMessage *msg)
     }
     else if (msg->getKind() == UDP_I_DATA) {
         Packet *pk = check_and_cast<Packet *>(msg);
-        // statistics
-        numEchoed++;
-        emit(pkSignal, pk);
 
         // determine its source address/port
         L3Address remoteAddress = pk->getTag<L3AddressInd>()->getSrcAddress();
@@ -57,6 +52,9 @@ void UdpEchoApp::handleMessageWhenUp(cMessage *msg)
         pk->clearTags();
         pk->removePoppedChunks();
 
+        // statistics
+        numEchoed++;
+        emit(packetSentSignal, pk);
         // send back
         socket.sendTo(pk, remoteAddress, srcPort);
     }

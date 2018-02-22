@@ -43,6 +43,7 @@ void LinkCanvasVisualizerBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         zIndex = par("zIndex");
         auto canvas = visualizerTargetModule->getCanvas();
+        lineManager = LineManager::getCanvasLineManager(canvas);
         canvasProjection = CanvasProjection::getCanvasProjection(canvas);
         linkGroup = new cGroupFigure("links");
         linkGroup->setZIndex(zIndex);

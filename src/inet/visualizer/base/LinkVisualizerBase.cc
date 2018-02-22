@@ -83,7 +83,6 @@ void LinkVisualizerBase::initialize(int stage)
         fadeOutTime = par("fadeOutTime");
         fadeOutAnimationSpeed = par("fadeOutAnimationSpeed");
         holdAnimationTime = par("holdAnimationTime");
-        lineManager = LineManager::getLineManager(visualizerTargetModule->getCanvas());
         if (displayLinks)
             subscribe();
     }

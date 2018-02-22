@@ -24,7 +24,6 @@ import inet.common.packet.chunk.Chunk;
 import inet.networklayer.common.L3Address;
 
 cplusplus {{
-#include "inet/common/TlvOptions.h"
 #include "inet/routing/gpsr/GpsrDefs.h"
 }}
 
@@ -36,8 +35,9 @@ enum GpsrForwardingMode {
 };
 
 enum GpsrPlanarizationMode {
-    GPSR_GG_PLANARIZATION = 0;
-    GPSR_RNG_PLANARIZATION = 1;
+    GPSR_NO_PLANARIZATION = 0;
+    GPSR_GG_PLANARIZATION = 1;
+    GPSR_RNG_PLANARIZATION = 2;
 };
 
 //

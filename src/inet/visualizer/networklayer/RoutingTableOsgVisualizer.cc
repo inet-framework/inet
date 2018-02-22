@@ -43,6 +43,16 @@ RoutingTableOsgVisualizer::RouteOsgVisualization::~RouteOsgVisualization()
     // TODO: delete node;
 }
 
+void RoutingTableOsgVisualizer::initialize(int stage)
+{
+    RoutingTableVisualizerBase::initialize(stage);
+    if (!hasGUI()) return;
+    if (stage == INITSTAGE_LOCAL) {
+        auto canvas = visualizerTargetModule->getCanvas();
+        lineManager = LineManager::getOsgLineManager(canvas);
+    }
+}
+
 const RoutingTableVisualizerBase::RouteVisualization *RoutingTableOsgVisualizer::createRouteVisualization(Ipv4Route *route, cModule *node, cModule *nextHop) const
 {
     auto nodePosition = getPosition(node);

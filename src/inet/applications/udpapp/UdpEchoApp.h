@@ -33,7 +33,6 @@ class INET_API UdpEchoApp : public ApplicationBase
   protected:
     UdpSocket socket;
     int numEchoed;    // just for WATCH
-    static simsignal_t pkSignal;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

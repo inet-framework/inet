@@ -119,9 +119,8 @@ class PimPacket extends FieldsChunk
 // DM, SM
 class PimHello extends PimPacket
 {
-    @customize;
     type = Hello;
-    abstract HelloOption *options[];
+    HelloOption *options[] @owned @allowReplace;
 }
 
 // Join/Prune message

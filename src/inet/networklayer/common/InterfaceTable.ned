@@ -45,12 +45,12 @@ simple InterfaceTable
         @signal[interfaceIpv4ConfigChanged](type=InterfaceEntryChangeDetails);
         @signal[interfaceIpv6ConfigChanged](type=InterfaceEntryChangeDetails);
         @signal[interfaceGnpConfigChanged](type=InterfaceEntryChangeDetails);
-        @signal[ipv4McastJoin](type=Ipv4MulticastGroupInfo);
-        @signal[ipv4McastLeave](type=Ipv4MulticastGroupInfo);
+        @signal[ipv4MulticastGroupJoined](type=Ipv4MulticastGroupInfo);
+        @signal[ipv4MulticastGroupLeft](type=Ipv4MulticastGroupInfo);
         @signal[ipv4McastChange](type=Ipv4MulticastGroupSourceInfo);
-        @signal[ipv4McastRegistered](type=Ipv4MulticastGroupInfo);
-        @signal[ipv4McastUnregistered](type=Ipv4MulticastGroupInfo);
-        @signal[ipv6McastJoin](type=Ipv6MulticastGroupInfo);
-        @signal[ipv6McastLeave](type=Ipv6MulticastGroupInfo);
+        @signal[ipv4MulticastGroupRegistered](type=Ipv4MulticastGroupInfo);
+        @signal[ipv4MulticastGroupUnregistered](type=Ipv4MulticastGroupInfo);
+        @signal[ipv6MulticastGroupJoined](type=Ipv6MulticastGroupInfo);
+        @signal[ipv6MulticastGroupLeft](type=Ipv6MulticastGroupInfo);
 }
 

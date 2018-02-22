@@ -17,7 +17,7 @@
 #define __INET_IPV4HEADERSERIALIZER_H
 
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
-#include "inet/networklayer/ipv4/Ipv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 
 namespace inet {
 

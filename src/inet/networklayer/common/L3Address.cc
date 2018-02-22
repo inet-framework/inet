@@ -90,13 +90,13 @@ std::string L3Address::str() const
             return "<none>";
 
         case L3Address::Ipv4:
-            return toIPv4().str();
+            return toIpv4().str();
 
         case L3Address::Ipv6:
-            return toIPv6().str();
+            return toIpv6().str();
 
         case L3Address::MAC:
-            return toMAC().str();
+            return toMac().str();
 
         case L3Address::MODULEID:
             return toModuleId().str();
@@ -137,13 +137,13 @@ bool L3Address::isUnspecified() const
             return true;
 
         case L3Address::Ipv4:
-            return toIPv4().isUnspecified();
+            return toIpv4().isUnspecified();
 
         case L3Address::Ipv6:
-            return toIPv6().isUnspecified();
+            return toIpv6().isUnspecified();
 
         case L3Address::MAC:
-            return toMAC().isUnspecified();
+            return toMac().isUnspecified();
 
         case L3Address::MODULEID:
             return toModuleId().isUnspecified();
@@ -163,13 +163,13 @@ bool L3Address::isUnicast() const
             throw cRuntimeError("Address contains no value");
 
         case L3Address::Ipv4:
-            return !toIPv4().isMulticast() && !toIPv4().isLimitedBroadcastAddress();    // TODO: move to Ipv4Address
+            return !toIpv4().isMulticast() && !toIpv4().isLimitedBroadcastAddress();    // TODO: move to Ipv4Address
 
         case L3Address::Ipv6:
-            return toIPv6().isUnicast();
+            return toIpv6().isUnicast();
 
         case L3Address::MAC:
-            return !toMAC().isBroadcast() && !toMAC().isMulticast();    // TODO: move to MacAddress
+            return !toMac().isBroadcast() && !toMac().isMulticast();    // TODO: move to MacAddress
 
         case L3Address::MODULEID:
             return toModuleId().isUnicast();
@@ -189,13 +189,13 @@ bool L3Address::isMulticast() const
             throw cRuntimeError("Address contains no value");
 
         case L3Address::Ipv4:
-            return toIPv4().isMulticast();
+            return toIpv4().isMulticast();
 
         case L3Address::Ipv6:
-            return toIPv6().isMulticast();
+            return toIpv6().isMulticast();
 
         case L3Address::MAC:
-            return toMAC().isMulticast();
+            return toMac().isMulticast();
 
         case L3Address::MODULEID:
             return toModuleId().isMulticast();
@@ -215,14 +215,14 @@ bool L3Address::isBroadcast() const
             throw cRuntimeError("Address contains no value");
 
         case L3Address::Ipv4:
-            return toIPv4().isLimitedBroadcastAddress();
+            return toIpv4().isLimitedBroadcastAddress();
 
         case L3Address::Ipv6:
             return false;
 
         //throw cRuntimeError("Ipv6 isBroadcast() unimplemented");
         case L3Address::MAC:
-            return toMAC().isBroadcast();
+            return toMac().isBroadcast();
 
         case L3Address::MODULEID:
             return toModuleId().isBroadcast();
@@ -245,7 +245,7 @@ bool L3Address::isLinkLocal() const
             return false;
 
         case L3Address::Ipv6:
-            return toIPv6().isLinkLocal();
+            return toIpv6().isLinkLocal();
 
         case L3Address::MAC:
             return true;
@@ -273,13 +273,13 @@ bool L3Address::operator<(const L3Address& other) const
                 throw cRuntimeError("Address contains no value");
 
             case L3Address::Ipv4:
-                return toIPv4() < other.toIPv4();
+                return toIpv4() < other.toIpv4();
 
             case L3Address::Ipv6:
-                return toIPv6() < other.toIPv6();
+                return toIpv6() < other.toIpv6();
 
             case L3Address::MAC:
-                return toMAC() < other.toMAC();
+                return toMac() < other.toMac();
 
             case L3Address::MODULEID:
                 return toModuleId() < other.toModuleId();
@@ -304,13 +304,13 @@ bool L3Address::operator==(const L3Address& other) const
                 return true;
 
             case L3Address::Ipv4:
-                return toIPv4() == other.toIPv4();
+                return toIpv4() == other.toIpv4();
 
             case L3Address::Ipv6:
-                return toIPv6() == other.toIPv6();
+                return toIpv6() == other.toIpv6();
 
             case L3Address::MAC:
-                return toMAC() == other.toMAC();
+                return toMac() == other.toMac();
 
             case L3Address::MODULEID:
                 return toModuleId() == other.toModuleId();
@@ -336,13 +336,13 @@ bool L3Address::matches(const L3Address& other, int prefixLength) const
             throw cRuntimeError("Address contains no value");
 
         case L3Address::Ipv4:
-            return Ipv4Address::maskedAddrAreEqual(toIPv4(), other.toIPv4(), Ipv4Address::makeNetmask(prefixLength));    //FIXME !!!!!
+            return Ipv4Address::maskedAddrAreEqual(toIpv4(), other.toIpv4(), Ipv4Address::makeNetmask(prefixLength));    //FIXME !!!!!
 
         case L3Address::Ipv6:
-            return toIPv6().matches(other.toIPv6(), prefixLength);
+            return toIpv6().matches(other.toIpv6(), prefixLength);
 
         case L3Address::MAC:
-            return toMAC() == other.toMAC();
+            return toMac() == other.toMac();
 
         case L3Address::MODULEID:
             return toModuleId() == other.toModuleId();
@@ -362,10 +362,10 @@ L3Address L3Address::getPrefix(int prefixLength) const
             return *this;
 
         case L3Address::Ipv4:
-            return L3Address(toIPv4().getPrefix(prefixLength));
+            return L3Address(toIpv4().getPrefix(prefixLength));
 
         case L3Address::Ipv6:
-            return L3Address(toIPv6().getPrefix(prefixLength));
+            return L3Address(toIpv6().getPrefix(prefixLength));
 
         case L3Address::MAC:
             if (prefixLength != 48)

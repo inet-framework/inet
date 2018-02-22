@@ -24,6 +24,7 @@
 #include "inet/common/INETDefs.h"
 
 namespace inet {
+namespace aodv {
 
 class INET_API AodvRouteData : public cObject
 {
@@ -68,6 +69,7 @@ class INET_API AodvRouteData : public cObject
 
 std::ostream& operator<<(std::ostream& out, const AodvRouteData *data);
 
+} // namespace aodv
 } // namespace inet
 
 #endif    // ifndef AODVROUTEDATA_H_

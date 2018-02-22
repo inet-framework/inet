@@ -39,7 +39,7 @@ void DatabaseDescriptionHandler::processPacket(Packet *packet, Interface *intf, 
 
     Neighbor::NeighborStateType neighborState = neighbor->getState();
 
-    if ((ddPacket->getInterfaceMTU() <= intf->getMTU()) &&
+    if ((ddPacket->getInterfaceMTU() <= intf->getMtu()) &&
         (neighborState > Neighbor::ATTEMPT_STATE))
     {
         switch (neighborState) {

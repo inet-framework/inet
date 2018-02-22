@@ -61,7 +61,7 @@ void PacketDropCanvasVisualizer::refreshDisplay() const
 const PacketDropVisualizerBase::PacketDropVisualization *PacketDropCanvasVisualizer::createPacketDropVisualization(PacketDrop *packetDrop) const
 {
     std::string icon(this->icon);
-    auto labeledIconFigure = new LabeledIconFigure("packetDrop");
+    auto labeledIconFigure = new LabeledIconFigure("packetDropped");
     labeledIconFigure->setTags((std::string("packet_drop ") + tags).c_str());
     labeledIconFigure->setAssociatedObject(packetDrop);
     labeledIconFigure->setZIndex(zIndex);

@@ -84,10 +84,6 @@ class INET_API SequenceChunk : public Chunk
 
     /** @name Overridden flag functions */
     //@{
-    virtual bool isMutable() const override;
-    virtual bool isImmutable() const override { return !isMutable(); }
-    virtual void markImmutable() override;
-
     virtual bool isComplete() const override { return !isIncomplete(); }
     virtual bool isIncomplete() const override;
 
@@ -120,6 +116,7 @@ class INET_API SequenceChunk : public Chunk
     //@{
     virtual ChunkType getChunkType() const override { return CT_SEQUENCE; }
     virtual b getChunkLength() const override;
+    virtual bool isEmpty() const override { return chunks.size() != 0; }
     //@}
 
     virtual std::string str() const override;

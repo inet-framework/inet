@@ -286,7 +286,7 @@ class INET_API xMIPv6 : public cSimpleModule
      * Initiates the Mobile IP protocol.
      * Method to be used when we have moved to a new access network and the new CoA is available for that interface.
      */
-    void initiateMIPv6Protocol(InterfaceEntry *ie, const Ipv6Address& CoA);
+    void initiateMipv6Protocol(InterfaceEntry *ie, const Ipv6Address& CoA);
 
     /**
      * This method destroys all tunnels associated to the previous CoA

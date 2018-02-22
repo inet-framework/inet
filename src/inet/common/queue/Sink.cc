@@ -40,7 +40,7 @@ void Sink::handleMessage(cMessage *msg)
     numPackets++;
     cPacket *packet = PK(msg);
     numBits += packet->getBitLength();
-    emit(rcvdPkSignal, packet);
+    emit(packetReceivedSignal, packet);
     throughput = numBits / simTime();
     packetPerSec = numPackets / simTime();
 

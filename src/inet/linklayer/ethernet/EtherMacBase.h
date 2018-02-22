@@ -51,6 +51,7 @@ class INET_API EtherMacBase : public MacBase
             JAMMING_STATE,
             BACKOFF_STATE,
             PAUSE_STATE
+            //FIXME add TX_OFF_STATE
         };
 
         enum MacReceiveState {
@@ -58,6 +59,7 @@ class INET_API EtherMacBase : public MacBase
             RECEIVING_STATE,
             RX_COLLISION_STATE,
             RX_RECONNECT_STATE
+            //FIXME add RX_OFF_STATE
         };
 
   protected:
@@ -170,14 +172,12 @@ class INET_API EtherMacBase : public MacBase
     unsigned long numPauseFramesRcvd = 0;    // PAUSE frames received from network
     unsigned long numPauseFramesSent = 0;    // PAUSE frames sent
 
-    static simsignal_t txPkSignal;
     static simsignal_t rxPkOkSignal;
     static simsignal_t txPausePkUnitsSignal;
     static simsignal_t rxPausePkUnitsSignal;
-    static simsignal_t rxPkFromHlSignal;
 
-    static simsignal_t transmitStateSignal;
-    static simsignal_t receiveStateSignal;
+    static simsignal_t transmissionStateChangedSignal;
+    static simsignal_t receptionStateChangedSignal;
 
   public:
     static const double SPEED_OF_LIGHT_IN_CABLE;
@@ -186,7 +186,7 @@ class INET_API EtherMacBase : public MacBase
     EtherMacBase();
     virtual ~EtherMacBase();
 
-    virtual MacAddress getMACAddress() { return address; }
+    virtual MacAddress getMacAddress() { return address; }
 
     double getTxRate() { return curEtherDescr->txrate; }
     bool isActive() { return connected && !disabled; }
@@ -201,7 +201,7 @@ class INET_API EtherMacBase : public MacBase
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initializeFlags();
-    virtual void initializeMACAddress();
+    virtual void initializeMacAddress();
     virtual void initializeQueueModule();
     virtual void initializeStatistics();
 
@@ -240,6 +240,9 @@ class INET_API EtherMacBase : public MacBase
     // model change related functions
     virtual void receiveSignal(cComponent *src, simsignal_t signalId, cObject *obj, cObject *details) override;
     virtual void refreshConnection();
+
+    void changeTransmissionState(MacTransmitState newState);
+    void changeReceptionState(MacReceiveState newState);
 };
 
 } // namespace inet

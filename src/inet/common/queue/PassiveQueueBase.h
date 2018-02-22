@@ -46,9 +46,9 @@ class INET_API PassiveQueueBase : public cSimpleModule, public IPassiveQueue
 
   public:
     /** Signal with packet when enqueued it */
-    static simsignal_t enqueuePkSignal;
+    static simsignal_t packetEnqueuedSignal;
     /** Signal with packet when sent out it */
-    static simsignal_t dequeuePkSignal;
+    static simsignal_t packetDequeuedSignal;
     /** Signal with value of delaying time when sent out a packet. */
     static simsignal_t queueingTimeSignal;
 

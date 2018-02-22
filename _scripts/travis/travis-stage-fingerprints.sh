@@ -1,9 +1,9 @@
 #!/bin/env bash
 
-# This script runs the jobs on Travis.
+# This script runs the fingerprints stage on Travis.
+# All arguments are passed to the fingerprinttest script.
 #
 # The following environment variables must be set when invoked:
-#    TARGET_PLATFORM        - must be one of "linux", "windows", "macosx"
 #    MODE                   - must be "debug" or "release"
 #
 #    TRAVIS_REPO_SLUG       - this is provided by Travis, most likely has the
@@ -14,30 +14,35 @@ set -e # make the script exit with error if any executed command exits with erro
 
 echo -e "\nccache summary:\n"
 ccache -s
-echo -e "\n----\n"
+echo -e ""
 
-export PATH="/root/omnetpp-5.3p2-$TARGET_PLATFORM/bin:/usr/lib/ccache:$PATH"
+export PATH="/root/omnetpp-5.3p2-linux/bin:/usr/lib/ccache:$PATH"
 
 # this is where the cloned INET repo is mounted into the container (as prescribed in /.travis.yml)
 cd /$TRAVIS_REPO_SLUG
 
 cp -r /root/nsc-0.5.3 3rdparty
 
-# only enabling some features only with native compilation, because we don't [want to?] have cross-compiled ffmpeg and NSC
-if [ "$TARGET_PLATFORM" = "linux" ]; then
-    opp_featuretool enable VoIPStream VoIPStream_examples TCP_NSC TCP_lwIP
-fi
+opp_featuretool enable VoIPStream VoIPStream_examples TCP_NSC TCP_lwIP
 
-make makefiles
-make MODE=$MODE USE_PRECOMPILED_HEADER=no -j $(nproc)
+# We have to explicitly enable diagnostics coloring to make ccache work,
+# since we redirect stderr here, but not in the build stage.
+# See https://github.com/ccache/ccache/issues/222
+echo -e "CFLAGS += -fcolor-diagnostics\n\n$(cat src/makefrag)" > src/makefrag
+
+echo -e "\nBuilding (silently)...\n"
+make makefiles > /dev/null 2>&1
+make MODE=$MODE USE_PRECOMPILED_HEADER=no -j $(nproc) > /dev/null 2>&1
 
 echo -e "\nccache summary:\n"
 ccache -s
-echo -e "\n---- build finished, starting fingerprint tests ----\n"
+
+echo -e "\nBuild finished, starting fingerprint tests..."
+echo -e "Additional arguments passed to fingerprint test script: " $@ "\n"
 
 cd tests/fingerprint
 if [ "$MODE" = "debug" ]; then
-    ./fingerprinttest -d
+    ./fingerprinttest -d "$@"
 else
-    ./fingerprinttest
+    ./fingerprinttest "$@"
 fi

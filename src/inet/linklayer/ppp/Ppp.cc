@@ -34,7 +34,7 @@ namespace inet {
 
 Define_Module(Ppp);
 
-simsignal_t Ppp::txStateSignal = registerSignal("txState");
+simsignal_t Ppp::transmissionStateChangedSignal = registerSignal("transmissionStateChanged");
 simsignal_t Ppp::rxPkOkSignal = registerSignal("rxPkOk");
 
 Ppp::~Ppp()
@@ -62,7 +62,7 @@ void Ppp::initialize(int stage)
 
         subscribe(POST_MODEL_CHANGE, this);
 
-        emit(txStateSignal, 0L);
+        emit(transmissionStateChangedSignal, 0L);
 
         // find queueModule
         queueModule = nullptr;
@@ -88,9 +88,6 @@ void Ppp::initialize(int stage)
     else if (stage == INITSTAGE_LINK_LAYER) {
         // register our interface entry in IInterfaceTable
         registerInterface();
-
-        // prepare to fire notifications
-        notifDetails.setInterfaceEntry(interfaceEntry);
 
         // request first frame to send
         if (queueModule && 0 == queueModule->getNumPendingRequests()) {
@@ -178,7 +175,7 @@ void Ppp::refreshOutGateConnection(bool connected)
                 numDroppedIfaceDown++;
                 PacketDropDetails details;
                 details.setReason(INTERFACE_DOWN);
-                emit(packetDropSignal, msg, &details);
+                emit(packetDroppedSignal, msg, &details);
                 delete msg;
             }
         }
@@ -207,13 +204,9 @@ void Ppp::startTransmitting(Packet *msg)
     // if there's any control info, remove it; then encapsulate the packet
     Packet *pppFrame = encapsulate(msg);
 
-    // fire notification
-    notifDetails.setPacket(pppFrame);
-    emit(ppTxBeginSignal, &notifDetails);
-
     // send
     EV_INFO << "Transmission of " << pppFrame << " started.\n";
-    emit(txStateSignal, 1L);
+    emit(transmissionStateChangedSignal, 1L);
     emit(packetSentToLowerSignal, pppFrame);
     pppFrame->clearTags();
     if (sendRawBytes) {
@@ -242,11 +235,7 @@ void Ppp::handleMessage(cMessage *msg)
     if (msg == endTransmissionEvent) {
         // Transmission finished, we can start next one.
         EV_INFO << "Transmission successfully completed.\n";
-        emit(txStateSignal, 0L);
-
-        // fire notification
-        notifDetails.setPacket(nullptr);
-        emit(ppTxEndSignal, &notifDetails);
+        emit(transmissionStateChangedSignal, 0L);
 
         if (!txQueue.isEmpty()) {
             auto packet = check_and_cast<Packet *>(txQueue.pop());
@@ -261,10 +250,6 @@ void Ppp::handleMessage(cMessage *msg)
         //TODO: if incoming gate is not connected now, then the link has benn deleted
         // during packet transmission --> discard incomplete packet.
 
-        // fire notification
-        notifDetails.setPacket(PK(msg));
-        emit(ppRxEndSignal, &notifDetails);
-
         auto packet = check_and_cast<Packet *>(msg);
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ppp);
         emit(packetReceivedFromLowerSignal, msg);
@@ -274,7 +259,7 @@ void Ppp::handleMessage(cMessage *msg)
             EV_WARN << "Bit error in " << msg << endl;
             PacketDropDetails details;
             details.setReason(INCORRECTLY_RECEIVED);
-            emit(packetDropSignal, msg, &details);
+            emit(packetDroppedSignal, msg, &details);
             numBitErr++;
             delete msg;
         }
@@ -299,7 +284,7 @@ void Ppp::handleMessage(cMessage *msg)
             numDroppedIfaceDown++;
             PacketDropDetails details;
             details.setReason(INTERFACE_DOWN);
-            emit(packetDropSignal, msg, &details);
+            emit(packetDroppedSignal, msg, &details);
             delete msg;
 
             if (queueModule && 0 == queueModule->getNumPendingRequests())
@@ -384,9 +369,9 @@ cPacket *Ppp::decapsulate(Packet *packet)
     //TODO check CRC
     packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
 
-    auto protocol = ProtocolGroup::pppprotocol.getProtocol(pppHeader->getProtocol());
-    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);
+    auto payloadProtocol = ProtocolGroup::pppprotocol.getProtocol(pppHeader->getProtocol());
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
     return packet;
 }
 
@@ -398,7 +383,7 @@ void Ppp::flushQueue()
             cMessage *msg = queueModule->pop();
             PacketDropDetails details;
             details.setReason(INTERFACE_DOWN);
-            emit(packetDropSignal, msg, &details); //FIXME this signal lumps together packets from the network and packets from higher layers! separate them
+            emit(packetDroppedSignal, msg, &details); //FIXME this signal lumps together packets from the network and packets from higher layers! separate them
             delete msg;
         }
         queueModule->clear();    // clear request count
@@ -409,7 +394,7 @@ void Ppp::flushQueue()
             cMessage *msg = (cMessage *)txQueue.pop();
             PacketDropDetails details;
             details.setReason(INTERFACE_DOWN);
-            emit(packetDropSignal, msg, &details); //FIXME this signal lumps together packets from the network and packets from higher layers! separate them
+            emit(packetDroppedSignal, msg, &details); //FIXME this signal lumps together packets from the network and packets from higher layers! separate them
             delete msg;
         }
     }

@@ -19,7 +19,7 @@
 #include <string.h>
 
 #include "inet/common/packet/chunk/ByteCountChunk.h"
-#include "inet/transportlayer/rtp/RtpInnerPacket.h"
+#include "inet/transportlayer/rtp/RtpInnerPacket_m.h"
 #include "inet/transportlayer/rtp/RtpPacket_m.h"
 #include "inet/transportlayer/rtp/profiles/avprofile/RtpAvProfilePayload32Sender.h"
 #include "inet/transportlayer/rtp/profiles/avprofile/RtpMpegPacket_m.h"

@@ -24,7 +24,6 @@ import inet.networklayer.ipv6.Ipv6Header;
 import inet.networklayer.contract.ipv6.Ipv6Address;
 
 cplusplus {{
-#include "inet/common/TlvOptions.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 }}
 
@@ -64,7 +63,6 @@ class Ipv6HopByHopOptionsHeader extends Ipv6ExtensionHeader
 //
 class Ipv6RoutingHeader extends Ipv6ExtensionHeader
 {
-    @customize;
     extensionType = IP_PROT_IPv6EXT_ROUTING;
     byteLength = 8;
     //byteLength = 8+16*getAddressArraySize() when routingType == 0

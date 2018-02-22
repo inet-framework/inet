@@ -15,7 +15,7 @@
 #ifndef __INET_BYTEARRAYBUFFER_H
 #define __INET_BYTEARRAYBUFFER_H
 
-#include "inet/common/ByteArray.h"
+#include "inet/common/ByteArray_m.h"
 
 namespace inet {
 

@@ -75,7 +75,6 @@ void PathVisualizerBase::initialize(int stage)
         fadeOutMode = par("fadeOutMode");
         fadeOutTime = par("fadeOutTime");
         fadeOutAnimationSpeed = par("fadeOutAnimationSpeed");
-        lineManager = LineManager::getLineManager(visualizerTargetModule->getCanvas());
         if (displayRoutes)
             subscribe();
     }

@@ -119,8 +119,8 @@ void xMIPv6::initialize(int stage)
         // set the MIPv6 flag as soon as possible for use
         // with other modules.
         cModule *host = getContainingNode(this);
-        rt6 = L3AddressResolver().routingTable6Of(host);
-        rt6->setMIPv6Support(true);    // 4.9.07 - CB
+        rt6 = L3AddressResolver().getIpv6RoutingTableOf(host);
+        rt6->setMipv6Support(true);    // 4.9.07 - CB
 
         // moved init stuff from rt6 to here as this is actually
         // the right place for these parameters
@@ -241,12 +241,12 @@ void xMIPv6::processMobilityMessage(Packet *inPacket)
         EV_WARN << "Unrecognised mobility message... Dropping" << endl;
         PacketDropDetails details;
         details.setReason(OTHER_PACKET_DROP);
-        emit(packetDropSignal, inPacket, &details);
+        emit(packetDroppedSignal, inPacket, &details);
         delete inPacket;
     }
 }
 
-void xMIPv6::initiateMIPv6Protocol(InterfaceEntry *ie, const Ipv6Address& CoA)
+void xMIPv6::initiateMipv6Protocol(InterfaceEntry *ie, const Ipv6Address& CoA)
 {
     Enter_Method_Silent();    // can be called by NeighborDiscovery module
 
@@ -337,12 +337,12 @@ void xMIPv6::createBUTimer(const Ipv6Address& buDest, InterfaceEntry *ie)
     // update lifetime, 14.9.07
     //if (homeRegistration)
     if (buDest == ie->ipv6Data()->getHomeAgentAddress())
-        createBUTimer(buDest, ie, ie->ipv6Data()->_getMaxHABindingLifeTime(), true);
+        createBUTimer(buDest, ie, ie->ipv6Data()->_getMaxHaBindingLifeTime(), true);
     else {
         if (bulEntry->state == BindingUpdateList::DEREGISTER)
             createDeregisterBUTimer(buDest, ie);
         else
-            createBUTimer(buDest, ie, ie->ipv6Data()->_getMaxRRBindingLifeTime(), false);
+            createBUTimer(buDest, ie, ie->ipv6Data()->_getMaxRrBindingLifeTime(), false);
     }
 }
 
@@ -718,8 +718,8 @@ void xMIPv6::processBUMessage(Packet *inPacket, const Ptr<const BindingUpdate>& 
         auto ifTag = inPacket->getTag<InterfaceInd>();
         auto addrTag = inPacket->getTag<L3AddressInd>();
         const Ipv6Address& HoA = bu->getHomeAddressMN();
-        Ipv6Address CoA = addrTag->getSrcAddress().toIPv6();
-        Ipv6Address destAddress = addrTag->getDestAddress().toIPv6();
+        Ipv6Address CoA = addrTag->getSrcAddress().toIpv6();
+        Ipv6Address destAddress = addrTag->getDestAddress().toIpv6();
         uint buLifetime = bu->getLifetime() * 4;    /* 6.1.7 One time unit is 4 seconds. */
         uint buSequence = bu->getSequence();
         bool homeRegistration = bu->getHomeRegistrationFlag();
@@ -961,7 +961,7 @@ bool xMIPv6::validateBUMessage(Packet *packet, const Ptr<const BindingUpdate>& b
 
     EV_INFO << "\n<<<<<<<<<ROUTINE WHERE BU GETS VALIDATED>>>>>>>>>>>>>>><<\n";
 
-    Ipv6Address src = packet->getTag<L3AddressInd>()->getSrcAddress().toIPv6();
+    Ipv6Address src = packet->getTag<L3AddressInd>()->getSrcAddress().toIpv6();
     Ipv6Address homeAddress = bu->getHomeAddressMN();    //confirm whether it is getHomeAddressMN() or simply homeAddress()
     uint seqNumber = bu->getSequence();    //The seq Number of the recieved BU
     uint bcSeqNumber = bc->readBCSequenceNumber(homeAddress);    //The seq Number of the last recieved BU in the Binding cache
@@ -997,7 +997,7 @@ bool xMIPv6::validateBUMessage(Packet *packet, const Ptr<const BindingUpdate>& b
            address, then the receiving node MUST send back a Binding
            Acknowledgement with status code 135, and the last accepted sequence
            number in the Sequence Number field of the Binding Acknowledgement.*/
-        Ipv6Address destAddress = packet->getTag<L3AddressInd>()->getDestAddress().toIPv6();
+        Ipv6Address destAddress = packet->getTag<L3AddressInd>()->getDestAddress().toIpv6();
         createAndSendBAMessage(destAddress, homeAddress, ifTag->getInterfaceId(), REGISTRATION_TYPE_CHANGE_DISALLOWED,
                 bu->getBindingAuthorizationData(), bcSeqNumber, 0);
 
@@ -1140,7 +1140,7 @@ void xMIPv6::processBAMessage(Packet *inPacket, const Ptr<const BindingAcknowled
 {
     EV_TRACE << "\n<<<<<<<<<This is where BA gets processed>>>>>>>>>\n";
     //bool retransmitBU = false;
-    Ipv6Address baSource = inPacket->getTag<L3AddressInd>()->getSrcAddress().toIPv6();
+    Ipv6Address baSource = inPacket->getTag<L3AddressInd>()->getSrcAddress().toIpv6();
     auto ifTag = inPacket->getTag<InterfaceInd>();
     InterfaceEntry *ie = ift->getInterfaceById(ifTag->getInterfaceId());    //the interface on which the BAck was received
 
@@ -1181,7 +1181,7 @@ void xMIPv6::processBAMessage(Packet *inPacket, const Ptr<const BindingAcknowled
                          the all-nodes multicast address) a Neighbor Advertisement [12], to
                          advertise the mobile node's own link-layer address for its own home
                          address.*/
-                    ipv6nd->sendUnsolicitedNA(ie);
+                    ipv6nd->sendUnsolicitedNa(ie);
 
                     // statistic collection
                     /*statVectorBAfromHA.record(2);*/
@@ -1337,7 +1337,7 @@ bool xMIPv6::validateBAck(Packet *packet, const BindingAcknowledgement& ba)
          protection is used.  If the Binding Update was sent to the
          correspondent node, the Binding Authorization Data mobility option
          MUST be present and have a valid value.*/
-    Ipv6Address cnAddress = packet->getTag<L3AddressInd>()->getSrcAddress().toIPv6();
+    Ipv6Address cnAddress = packet->getTag<L3AddressInd>()->getSrcAddress().toIpv6();
     auto ifTag = packet->getTag<InterfaceInd>();
     InterfaceEntry *ie = ift->getInterfaceById(ifTag->getInterfaceId());
 
@@ -1719,8 +1719,8 @@ void xMIPv6::createAndSendCoTIMessage(const Ipv6Address& cnDest, InterfaceEntry 
 void xMIPv6::processHoTIMessage(Packet *inPacket, const Ptr<const HomeTestInit>& homeTestInit)
 {
     // 9.4.1 & 9.4.3
-    Ipv6Address srcAddr = inPacket->getTag<L3AddressInd>()->getSrcAddress().toIPv6();
-    Ipv6Address HoA = inPacket->getTag<L3AddressInd>()->getDestAddress().toIPv6();
+    Ipv6Address srcAddr = inPacket->getTag<L3AddressInd>()->getSrcAddress().toIpv6();
+    Ipv6Address HoA = inPacket->getTag<L3AddressInd>()->getDestAddress().toIpv6();
 
     auto outPacket = new Packet("HoT");
     const auto& homeTest = makeShared<HomeTest>();
@@ -1743,8 +1743,8 @@ void xMIPv6::processHoTIMessage(Packet *inPacket, const Ptr<const HomeTestInit>&
 void xMIPv6::processCoTIMessage(Packet *inPacket, const Ptr<const CareOfTestInit>& coti)
 {
     // 9.4.2 & 9.4.4
-    Ipv6Address srcAddr = inPacket->getTag<L3AddressInd>()->getSrcAddress().toIPv6();
-    Ipv6Address coa = inPacket->getTag<L3AddressInd>()->getDestAddress().toIPv6();
+    Ipv6Address srcAddr = inPacket->getTag<L3AddressInd>()->getSrcAddress().toIpv6();
+    Ipv6Address coa = inPacket->getTag<L3AddressInd>()->getDestAddress().toIpv6();
 
     auto outPacket = new Packet("CoT");
     const auto& cot = makeShared<CareOfTest>();
@@ -1770,11 +1770,11 @@ void xMIPv6::processHoTMessage(Packet *inPacket, const Ptr<const HomeTest>& home
         EV_WARN << "HoT validation not passed: dropping message" << endl;
         PacketDropDetails details;
         details.setReason(OTHER_PACKET_DROP);
-        emit(packetDropSignal, inPacket, &details);
+        emit(packetDroppedSignal, inPacket, &details);
     }
     else {
         EV_WARN << "HoT validation passed: updating BUL" << endl;
-        Ipv6Address srcAddr = inPacket->getTag<L3AddressInd>()->getSrcAddress().toIPv6();
+        Ipv6Address srcAddr = inPacket->getTag<L3AddressInd>()->getSrcAddress().toIpv6();
         //Ipv6Address& destAddr = ctrlInfo->destAddr();
         int interfaceID = inPacket->getTag<InterfaceInd>()->getInterfaceId();
         InterfaceEntry *ie = ift->getInterfaceById(interfaceID);
@@ -1807,8 +1807,8 @@ void xMIPv6::processHoTMessage(Packet *inPacket, const Ptr<const HomeTest>& home
 bool xMIPv6::validateHoTMessage(Packet *inPacket, const HomeTest& homeTest)
 {
     // RFC - 11.6.2
-    Ipv6Address srcAddr = inPacket->getTag<L3AddressInd>()->getSrcAddress().toIPv6();
-    Ipv6Address destAddr = inPacket->getTag<L3AddressInd>()->getDestAddress().toIPv6();
+    Ipv6Address srcAddr = inPacket->getTag<L3AddressInd>()->getSrcAddress().toIpv6();
+    Ipv6Address destAddr = inPacket->getTag<L3AddressInd>()->getDestAddress().toIpv6();
     //int interfaceID = ctrlInfo->interfaceId();
 
     /* The Source Address of the packet belongs to a correspondent node
@@ -1857,12 +1857,12 @@ void xMIPv6::processCoTMessage(Packet * inPacket, const Ptr<const CareOfTest>& C
         EV_WARN << "CoT validation not passed: dropping message" << endl;
         PacketDropDetails details;
         details.setReason(OTHER_PACKET_DROP);
-        emit(packetDropSignal, inPacket, &details);
+        emit(packetDroppedSignal, inPacket, &details);
     }
     else {
         EV_INFO << "CoT validation passed: updating BUL" << endl;
 
-        Ipv6Address srcAddr = inPacket->getTag<L3AddressInd>()->getSrcAddress().toIPv6();
+        Ipv6Address srcAddr = inPacket->getTag<L3AddressInd>()->getSrcAddress().toIpv6();
         //Ipv6Address& destAddr = ctrlInfo->destAddr();
         auto ifTag = inPacket->getTag<InterfaceInd>();
         int interfaceID = ifTag->getInterfaceId();
@@ -1904,8 +1904,8 @@ void xMIPv6::processCoTMessage(Packet * inPacket, const Ptr<const CareOfTest>& C
 bool xMIPv6::validateCoTMessage(Packet *inPacket, const CareOfTest& CoT)
 {
     // RFC - 11.6.2
-    Ipv6Address srcAddr = inPacket->getTag<L3AddressInd>()->getSrcAddress().toIPv6();
-    Ipv6Address destAddr = inPacket->getTag<L3AddressInd>()->getDestAddress().toIPv6();
+    Ipv6Address srcAddr = inPacket->getTag<L3AddressInd>()->getSrcAddress().toIpv6();
+    Ipv6Address destAddr = inPacket->getTag<L3AddressInd>()->getDestAddress().toIpv6();
     auto ifTag = inPacket->getTag<InterfaceInd>();
     int interfaceID = ifTag->getInterfaceId();
 
@@ -2041,7 +2041,7 @@ void xMIPv6::processType2RH(Packet *packet, Ipv6RoutingHeader *rh)
     if (!validateType2RH(*ipv6Header.get(), *rh)) {
         PacketDropDetails details;
         details.setReason(OTHER_PACKET_DROP);
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
         return;
     }
@@ -2065,7 +2065,7 @@ void xMIPv6::processType2RH(Packet *packet, Ipv6RoutingHeader *rh)
         EV_WARN << "Invalid RH2 - segments left field must be 1. Dropping packet." << endl;
         PacketDropDetails details;
         details.setReason(OTHER_PACKET_DROP);
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
         return;
     }
@@ -2104,7 +2104,7 @@ void xMIPv6::processType2RH(Packet *packet, Ipv6RoutingHeader *rh)
     else {
         PacketDropDetails details;
         details.setReason(OTHER_PACKET_DROP);
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
     }
 }
@@ -2187,7 +2187,7 @@ void xMIPv6::processHoAOpt(Packet *packet, HomeAddressOption *hoaOpt)
     else {
         PacketDropDetails details;
         details.setReason(OTHER_PACKET_DROP);
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
     }
 }
@@ -2499,14 +2499,14 @@ void xMIPv6::processBRRMessage(Packet *inPacket, const Ptr<const BindingRefreshR
        the source of the Binding Refresh Request, and the mobile node wants
        to retain its binding cache entry at the correspondent node, then the
        mobile node should start a return routability procedure.*/
-    Ipv6Address cnAddress = inPacket->getTag<L3AddressInd>()->getSrcAddress().toIPv6();
-    Ipv6Address HoA = inPacket->getTag<L3AddressInd>()->getDestAddress().toIPv6();
+    Ipv6Address cnAddress = inPacket->getTag<L3AddressInd>()->getSrcAddress().toIpv6();
+    Ipv6Address HoA = inPacket->getTag<L3AddressInd>()->getDestAddress().toIpv6();
 
     if (!bul->isInBindingUpdateList(cnAddress, HoA)) {
         EV_WARN << "BRR not accepted - no binding for this CN. Dropping message." << endl;
         PacketDropDetails details;
         details.setReason(OTHER_PACKET_DROP);
-        emit(packetDropSignal, inPacket, &details);
+        emit(packetDroppedSignal, inPacket, &details);
     }
     else {
         auto ifTag = inPacket->getTag<InterfaceInd>();

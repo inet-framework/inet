@@ -120,7 +120,7 @@ void Ieee80211MgmtFrameSerializer::serialize(MemoryOutputStream& stream, const P
         // 2    Listen interval
         stream.writeUint16Be(0);    //FIXME
         // 3    Current AP address
-        stream.writeMACAddress(reassociationRequestFrame->getCurrentAP());
+        stream.writeMacAddress(reassociationRequestFrame->getCurrentAP());
         // 4    SSID
         const char *SSID = reassociationRequestFrame->getSSID();
         unsigned int length = strlen(SSID);
@@ -355,7 +355,7 @@ const Ptr<Chunk> Ieee80211MgmtFrameSerializer::deserialize(MemoryInputStream& st
             stream.readUint16Be();
             stream.readUint16Be();
 
-            frame->setCurrentAP(stream.readMACAddress());
+            frame->setCurrentAP(stream.readMacAddress());
 
             char SSID[256];
             stream.readByte();

@@ -45,7 +45,7 @@ void Ds::processDataFrame(Packet *frame, const Ptr<const Ieee80211DataHeader>& h
                 EV << "Frame is not for us (toDS=false) -- discarding\n";
                 PacketDropDetails details;
                 details.setReason(NOT_ADDRESSED_TO_US);
-                emit(packetDropSignal, frame, &details);
+                emit(packetDroppedSignal, frame, &details);
                 delete frame;
                 return;
             }

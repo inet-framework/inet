@@ -20,7 +20,7 @@
 
 #include "inet/common/IInterfaceRegistrationListener.h"
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "packet/Message.h"
+#include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 
 namespace inet {
@@ -30,33 +30,50 @@ namespace inet {
  */
 class INET_API MessageDispatcher : public cSimpleModule, public IProtocolRegistrationListener, public IInterfaceRegistrationListener
 {
-    protected:
-        std::map<int, int> socketIdToGateIndex;
-        std::map<int, int> interfaceIdToGateIndex;
-        std::map<std::pair<int, ServicePrimitive>, int> serviceToGateIndex;
-        std::map<std::pair<int, ServicePrimitive>, int> protocolToGateIndex;
+  public:
+    class Key
+    {
+      protected:
+        int protocolId;
+        int servicePrimitive;
 
-    protected:
-        virtual void initialize() override;
-        virtual void arrived(cMessage *message, cGate *inGate, simtime_t t) override;
-        virtual cGate *handlePacket(Packet *packet, cGate *inGate);
-        virtual cGate *handleMessage(Message *request, cGate *inGate);
+      public:
+        Key(int protocolId, ServicePrimitive servicePrimitive) : protocolId(protocolId), servicePrimitive(servicePrimitive) {}
 
-        virtual int computeSocketReqSocketId(Packet *packet);
-        virtual int computeSocketIndSocketId(Packet *packet);
-        virtual int computeInterfaceId(Packet *packet);
-        virtual std::pair<int, ServicePrimitive> computeDispatch(Packet *packet);
+        bool operator<(const MessageDispatcher::Key& other) const {
+            if (protocolId < other.protocolId)
+                return true;
+            else if (protocolId > other.protocolId)
+                return false;
+            else
+                return servicePrimitive < other.servicePrimitive;
+        }
+        friend std::ostream& operator<<(std::ostream& out, const MessageDispatcher::Key& foo);
+    };
 
-        virtual int computeSocketReqSocketId(Message *message);
-        virtual int computeSocketIndSocketId(Message *message);
-        virtual int computeInterfaceId(Message *message);
-        virtual std::pair<int, ServicePrimitive> computeDispatch(Message *message);
+  protected:
+    std::map<int, int> socketIdToGateIndex;
+    std::map<int, int> interfaceIdToGateIndex;
+    std::map<Key, int> serviceToGateIndex;
+    std::map<Key, int> protocolToGateIndex;
+    std::map<std::pair<int, int>, int> xxx;
 
-    public:
-        virtual void handleRegisterInterface(const InterfaceEntry &interface, cGate *out, cGate *in) override;
-        virtual void handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive) override;
-        virtual void handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive) override;
+  protected:
+    virtual void initialize() override;
+    virtual void arrived(cMessage *message, cGate *inGate, simtime_t t) override;
+    virtual cGate *handlePacket(Packet *packet, cGate *inGate);
+    virtual cGate *handleMessage(Message *request, cGate *inGate);
+
+  public:
+    virtual void handleRegisterInterface(const InterfaceEntry &interface, cGate *out, cGate *in) override;
+    virtual void handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive) override;
+    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive) override;
 };
+
+std::ostream& operator<<(std::ostream& out, const MessageDispatcher::Key& foo) {
+    out << "[" << foo.protocolId << ", " << omnetpp::cEnum::get("inet::ServicePrimitive")->getStringFor(foo.servicePrimitive) << "]";
+    return out;
+}
 
 } // namespace inet
 

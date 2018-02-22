@@ -21,8 +21,8 @@
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/transportlayer/rtp/RtcpPacket.h"
-#include "inet/transportlayer/rtp/RtpInnerPacket.h"
+#include "inet/transportlayer/rtp/RtcpPacket_m.h"
+#include "inet/transportlayer/rtp/RtpInnerPacket_m.h"
 #include "inet/transportlayer/rtp/RtpParticipantInfo.h"
 #include "inet/transportlayer/rtp/RtpReceiverInfo.h"
 #include "inet/transportlayer/rtp/RtpSenderInfo.h"
@@ -154,7 +154,7 @@ void Rtcp::handleSelfMessage(cMessage *msg)
 
 void Rtcp::handleInitializeRTCP(RtpInnerPacket *rinp)
 {
-    _mtu = rinp->getMTU();
+    _mtu = rinp->getMtu();
     _bandwidth = rinp->getBandwidth();
     _rtcpPercentage = rinp->getRtcpPercentage();
     _destinationAddress = rinp->getAddress();
@@ -205,7 +205,7 @@ void Rtcp::connectRet()
 
 void Rtcp::readRet(Packet *sifpIn)
 {
-    emit(rcvdPkSignal, sifpIn);
+    emit(packetReceivedSignal, sifpIn);
     processIncomingRTCPPacket(sifpIn, Ipv4Address(_destinationAddress), _port);
 }
 
@@ -290,12 +290,14 @@ void Rtcp::createPacket()
             }
         }
     }
+    reportPacket->paddingAndSetLength();
 
     // insert source description items (at least common name)
     const auto& sdesPacket = makeShared<RtcpSdesPacket>();
 
     SdesChunk *chunk = _senderInfo->getSDESChunk();
     sdesPacket->addSDESChunk(chunk);
+    sdesPacket->paddingAndSetLength();
 
     Packet *compoundPacket = new Packet("RtcpCompoundPacket");
 
@@ -306,6 +308,7 @@ void Rtcp::createPacket()
     if (_leaveSession) {
         const auto& byePacket = makeShared<RtcpByePacket>();
         byePacket->setSsrc(_senderInfo->getSsrc());
+        byePacket->paddingAndSetLength();
         compoundPacket->insertTrailer(byePacket);
     }
 

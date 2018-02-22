@@ -91,7 +91,7 @@ void TcpAppBase::close()
 void TcpAppBase::sendPacket(Packet *msg)
 {
     int numBytes = msg->getByteLength();
-    emit(sentPkSignal, msg);
+    emit(packetSentSignal, msg);
     socket.send(msg);
 
     packetsSent++;
@@ -114,7 +114,7 @@ void TcpAppBase::socketDataArrived(int, void *, Packet *msg, bool)
     // *redefine* to perform or schedule next sending
     packetsRcvd++;
     bytesRcvd += msg->getByteLength();
-    emit(rcvdPkSignal, msg);
+    emit(packetReceivedSignal, msg);
     delete msg;
 }
 

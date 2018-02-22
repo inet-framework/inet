@@ -103,7 +103,7 @@ void IpvxTrafSink::printPacket(Packet *msg)
 
 void IpvxTrafSink::processPacket(Packet *msg)
 {
-    emit(rcvdPkSignal, msg);
+    emit(packetReceivedSignal, msg);
     EV_INFO << "Received packet: ";
     printPacket(msg);
     delete msg;

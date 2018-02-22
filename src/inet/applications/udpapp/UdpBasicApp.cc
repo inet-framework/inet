@@ -114,7 +114,7 @@ void UdpBasicApp::sendPacket()
     creationTimeTag->setCreationTime(simTime());
     packet->insertAtEnd(payload);
     L3Address destAddr = chooseDestAddr();
-    emit(sentPkSignal, packet);
+    emit(packetSentSignal, packet);
     socket.sendTo(packet, destAddr, destPort);
     numSent++;
 }
@@ -213,7 +213,7 @@ void UdpBasicApp::refreshDisplay() const
 
 void UdpBasicApp::processPacket(Packet *pk)
 {
-    emit(rcvdPkSignal, pk);
+    emit(packetReceivedSignal, pk);
     EV_INFO << "Received packet: " << UdpSocket::getReceivedPacketInfo(pk) << endl;
     delete pk;
     numReceived++;

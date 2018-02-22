@@ -47,7 +47,7 @@
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/Icmp.h"
 #include "inet/networklayer/ipv4/IcmpHeader.h"
-#include "inet/networklayer/ipv4/Ipv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #endif // ifdef WITH_IPv4
 
@@ -55,7 +55,7 @@
 #include "inet/networklayer/icmpv6/Icmpv6.h"
 #include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 #include "inet/networklayer/ipv6/Ipv6Header.h"
-#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders.h"
+#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders_m.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #endif // ifdef WITH_IPv6
 
@@ -394,7 +394,7 @@ void Udp::processPacketFromApp(Packet *packet)
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(l3Protocol);
 
     EV_INFO << "Sending app packet " << packet->getName() << " over " << l3Protocol->getName() << ".\n";
-    emit(sentPkSignal, packet);
+    emit(packetSentSignal, packet);
     emit(packetSentToLowerSignal, packet);
     send(packet, "ipOut");
     numSent++;
@@ -404,7 +404,7 @@ void Udp::processUDPPacket(Packet *udpPacket)
 {
     ASSERT(udpPacket->getControlInfo() == nullptr);
     emit(packetReceivedFromLowerSignal, udpPacket);
-    emit(rcvdPkSignal, udpPacket);
+    emit(packetReceivedSignal, udpPacket);
 
     b udpHeaderPopPosition = udpPacket->getHeaderPopOffset();
     const auto& udpHeader = udpPacket->popHeader<UdpHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT);
@@ -425,7 +425,7 @@ void Udp::processUDPPacket(Packet *udpPacket)
         EV_WARN << "Packet has bit error, discarding\n";
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);
-        emit(packetDropSignal, udpPacket, &details);
+        emit(packetDroppedSignal, udpPacket, &details);
         numDroppedBadChecksum++;
         delete udpPacket;
         return;
@@ -580,7 +580,7 @@ void Udp::processUndeliverablePacket(Packet *udpPacket)
     const auto& udpHeader = udpPacket->peekHeader<UdpHeader>();
     PacketDropDetails details;
     details.setReason(NO_PORT_FOUND);
-    emit(packetDropSignal, udpPacket, &details);
+    emit(packetDroppedSignal, udpPacket, &details);
     numDroppedWrongPort++;
 
     // send back ICMP PORT_UNREACHABLE
@@ -954,12 +954,12 @@ void Udp::addMulticastAddressToInterface(InterfaceEntry *ie, const L3Address& mu
 
     if (multicastAddr.getType() == L3Address::Ipv4) {
 #ifdef WITH_IPv4
-        ie->ipv4Data()->joinMulticastGroup(multicastAddr.toIPv4());
+        ie->ipv4Data()->joinMulticastGroup(multicastAddr.toIpv4());
 #endif // ifdef WITH_IPv4
     }
     else if (multicastAddr.getType() == L3Address::Ipv6) {
 #ifdef WITH_IPv6
-        ie->ipv6Data()->assignAddress(multicastAddr.toIPv6(), false, SimTime::getMaxTime(), SimTime::getMaxTime());
+        ie->ipv6Data()->assignAddress(multicastAddr.toIpv6(), false, SimTime::getMaxTime(), SimTime::getMaxTime());
 #endif // ifdef WITH_IPv6
     }
     else

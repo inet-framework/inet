@@ -28,7 +28,7 @@
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/routing/pim/tables/PimNeighborTable.h"
 #include "inet/routing/pim/tables/PimInterfaceTable.h"
-#include "inet/routing/pim/PimPacket.h"
+#include "inet/routing/pim/PimPacket_m.h"
 
 namespace inet {
 

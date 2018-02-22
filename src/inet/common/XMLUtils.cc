@@ -121,7 +121,7 @@ Ipv4Address getParameterIPAddressValue(const cXMLElement *ptr, const char *name,
 {
     const cXMLElement *xvalue = getUniqueChildIfExists(ptr, name);
     if (xvalue)
-        return L3AddressResolver().resolve(xvalue->getNodeValue()).toIPv4();
+        return L3AddressResolver().resolve(xvalue->getNodeValue()).toIpv4();
     else
         return def;
 }
@@ -129,7 +129,7 @@ Ipv4Address getParameterIPAddressValue(const cXMLElement *ptr, const char *name,
 Ipv4Address getParameterIPAddressValue(const cXMLElement *ptr, const char *name)
 {
     const cXMLElement *xvalue = getUniqueChild(ptr, name);
-    return L3AddressResolver().resolve(xvalue->getNodeValue()).toIPv4();
+    return L3AddressResolver().resolve(xvalue->getNodeValue()).toIpv4();
 }
 
 double getParameterDoubleValue(const cXMLElement *ptr, const char *name, double def)

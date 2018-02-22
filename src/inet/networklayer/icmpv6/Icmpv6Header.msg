@@ -54,11 +54,6 @@ enum Icmpv6Type
 }
 
 
-//cplusplus {{
-//typedef int ICMPv6Code;
-//}}
-
-
 //
 // ICMPv6 "codes" for type ICMPv6_DESTINATION_UNREACHABLE
 //

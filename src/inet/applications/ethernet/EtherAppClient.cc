@@ -206,7 +206,7 @@ void EtherAppClient::sendPacket()
     ieee802SapReq->setSsap(localSAP);
     ieee802SapReq->setDsap(remoteSAP);
 
-    emit(sentPkSignal, datapacket);
+    emit(packetSentSignal, datapacket);
     send(datapacket, "out");
     packetsSent++;
 }
@@ -216,7 +216,7 @@ void EtherAppClient::receivePacket(Packet *msg)
     EV_INFO << "Received packet `" << msg->getName() << "'\n";
 
     packetsReceived++;
-    emit(rcvdPkSignal, msg);
+    emit(packetReceivedSignal, msg);
     delete msg;
 }
 

@@ -237,7 +237,7 @@ bool Area::hasVirtualLink(AreaId withTransitArea) const
     int interfaceNum = associatedInterfaces.size();
     for (int i = 0; i < interfaceNum; i++) {
         if ((associatedInterfaces[i]->getType() == Interface::VIRTUAL) &&
-            (associatedInterfaces[i]->getTransitAreaID() == withTransitArea))
+            (associatedInterfaces[i]->getTransitAreaId() == withTransitArea))
         {
             return true;
         }
@@ -250,7 +250,7 @@ Interface *Area::findVirtualLink(RouterId routerID)
     int interfaceNum = associatedInterfaces.size();
     for (int i = 0; i < interfaceNum; i++) {
         if ((associatedInterfaces[i]->getType() == Interface::VIRTUAL) &&
-            (associatedInterfaces[i]->getNeighborByID(routerID) != nullptr))
+            (associatedInterfaces[i]->getNeighborById(routerID) != nullptr))
         {
             return associatedInterfaces[i];
         }
@@ -685,7 +685,7 @@ void Area::ageDatabase()
 
     long interfaceCount = associatedInterfaces.size();
     for (long m = 0; m < interfaceCount; m++) {
-        associatedInterfaces[m]->ageTransmittedLSALists();
+        associatedInterfaces[m]->ageTransmittedLsaLists();
     }
 
     if (shouldRebuildRoutingTable) {
@@ -729,7 +729,7 @@ bool Area::floodLSA(const OspfLsa *lsa, Interface *intf, Neighbor *neighbor)
     long interfaceCount = associatedInterfaces.size();
 
     for (long i = 0; i < interfaceCount; i++) {
-        if (associatedInterfaces[i]->floodLSA(lsa, intf, neighbor)) {
+        if (associatedInterfaces[i]->floodLsa(lsa, intf, neighbor)) {
             floodedBackOut = true;
         }
     }
@@ -1115,7 +1115,7 @@ SummaryLsa *Area::originateSummaryLSA(const RoutingTableEntry *entry,
 
     for (unsigned int i = 0; i < nextHopCount; i++) {
         Interface *nextHopInterface = parentRouter->getNonVirtualInterface(entry->getNextHop(i).ifIndex);
-        if ((nextHopInterface != nullptr) && (nextHopInterface->getAreaID() != areaID)) {
+        if ((nextHopInterface != nullptr) && (nextHopInterface->getAreaId() != areaID)) {
             allNextHopsInThisArea = false;
             break;
         }
@@ -1680,7 +1680,7 @@ void Area::calculateShortestPathTree(std::vector<RoutingTableEntry *>& newRoutin
                     }
                     if (backbone != nullptr) {
                         Interface *virtualIntf = backbone->findVirtualLink(destinationID);
-                        if ((virtualIntf != nullptr) && (virtualIntf->getTransitAreaID() == areaID)) {
+                        if ((virtualIntf != nullptr) && (virtualIntf->getTransitAreaId() == areaID)) {
                             Ipv4AddressRange range;
                             range.address = getInterface(routerLSA->getNextHop(0).ifIndex)->getAddressRange().address;
                             range.mask = Ipv4Address::ALLONES_ADDRESS;
@@ -1921,7 +1921,7 @@ std::vector<NextHop> *Area::calculateNextHops(OspfLsa *destination, OspfLsa *par
                         }
                     }
                     if (intfType == Interface::POINTTOMULTIPOINT) {
-                        Neighbor *ptmpNeighbor = associatedInterfaces[i]->getNeighborByID(destinationRouterLSA->getHeader().getLinkStateID());
+                        Neighbor *ptmpNeighbor = associatedInterfaces[i]->getNeighborById(destinationRouterLSA->getHeader().getLinkStateID());
                         if (ptmpNeighbor != nullptr) {
                             unsigned int linkCount = destinationRouterLSA->getLinksArraySize();
                             Ipv4Address rootID = Ipv4Address(parentRouter->getRouterID());
@@ -1998,7 +1998,7 @@ std::vector<NextHop> *Area::calculateNextHops(OspfLsa *destination, OspfLsa *par
                                      (intfType == Interface::NBMA)) &&
                                     (associatedInterfaces[j]->getDesignatedRouter().ipInterfaceAddress == parentLinkStateID))
                                 {
-                                    Neighbor *nextHopNeighbor = associatedInterfaces[j]->getNeighborByID(destinationRouterID);
+                                    Neighbor *nextHopNeighbor = associatedInterfaces[j]->getNeighborById(destinationRouterID);
                                     if (nextHopNeighbor != nullptr) {
                                         nextHop.ifIndex = associatedInterfaces[j]->getIfIndex();
                                         nextHop.hopAddress = nextHopNeighbor->getAddress();
@@ -2087,7 +2087,7 @@ std::vector<NextHop> *Area::calculateNextHops(const Link& destination, OspfLsa *
                     }
                 }
                 if (destination.getType() == POINTTOPOINT_LINK) {
-                    Neighbor *neighbor = interface->getNeighborByID(destination.getLinkID());
+                    Neighbor *neighbor = interface->getNeighborById(destination.getLinkID());
                     if (neighbor != nullptr) {
                         NextHop nextHop;
                         nextHop.ifIndex = interface->getIfIndex();

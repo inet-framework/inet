@@ -120,7 +120,7 @@ void Ipv4HeaderSerializer::serializeOption(MemoryOutputStream& stream, const Tlv
             stream.writeByte(flagbyte);
             for (unsigned int count = 0; count < opt->getRecordTimestampArraySize(); count++) {
                 if (bytes == 8)
-                    stream.writeIPv4Address(opt->getRecordAddress(count));
+                    stream.writeIpv4Address(opt->getRecordAddress(count));
                 stream.writeUint32Be(opt->getRecordTimestamp(count).inUnit(SIMTIME_MS));
             }
             break;
@@ -134,7 +134,7 @@ void Ipv4HeaderSerializer::serializeOption(MemoryOutputStream& stream, const Tlv
             uint8_t pointer = 4 + opt->getNextAddressIdx() * 4;
             stream.writeByte(pointer);
             for (unsigned int count = 0; count < opt->getRecordAddressArraySize(); count++) {
-                stream.writeIPv4Address(opt->getRecordAddress(count));
+                stream.writeIpv4Address(opt->getRecordAddress(count));
             }
             break;
         }
@@ -249,7 +249,7 @@ TlvOptionBase *Ipv4HeaderSerializer::deserializeOption(MemoryInputStream& stream
                 option->setNextIdx((pointer-5) / bytes);
                 for (unsigned int count = 0; count < option->getRecordAddressArraySize(); count++) {
                     if (bytes == 8)
-                        option->setRecordAddress(count, stream.readIPv4Address());
+                        option->setRecordAddress(count, stream.readIpv4Address());
                     option->setRecordTimestamp(count, SimTime(stream.readUint32Be(), SIMTIME_MS));
                 }
                 return option;
@@ -269,7 +269,7 @@ TlvOptionBase *Ipv4HeaderSerializer::deserializeOption(MemoryInputStream& stream
                 option->setRecordAddressArraySize((length - 3) / 4);
                 option->setNextAddressIdx((pointer-4) / 4);
                 for (unsigned int count = 0; count < option->getRecordAddressArraySize(); count++) {
-                    option->setRecordAddress(count, stream.readIPv4Address());
+                    option->setRecordAddress(count, stream.readIpv4Address());
                 }
                 return option;
             }

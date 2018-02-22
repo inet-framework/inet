@@ -16,11 +16,11 @@ using namespace units::values;
 
 //namespace inet::units::values;
 
-class b    { @primitive; @existingClass; @fromString(b(string2long($)));      @toString(long2string($.get()));   @defaultValue(b(-1)); }
-class B    { @primitive; @existingClass; @fromString(B(string2long($)));      @toString(long2string($.get()));   @defaultValue(B(-1)); }
-class bps  { @primitive; @existingClass; @fromString(bps(string2double($)));  @toString(double2string($.get())); @defaultValue(bps(NaN)); }
-class Hz   { @primitive; @existingClass; @fromString(Hz(string2double($)));   @toString(double2string($.get())); @defaultValue(Hz(NaN)); }
-class m    { @primitive; @existingClass; @fromString(m(string2double($)));    @toString(double2string($.get())); @defaultValue(m(NaN)); }
-class Ohmm { @primitive; @existingClass; @fromString(Ohmm(string2double($))); @toString(double2string($.get())); @defaultValue(Ohmm(NaN)); }
-class W    { @primitive; @existingClass; @fromString(W(string2double($)));    @toString(double2string($.get())); @defaultValue(W(NaN)); }
+class b    { @existingClass; @primitive; @fromString(b(string2long($)));      @toString(long2string($.get()));   @defaultValue(b(-1)); }
+class B    { @existingClass; @primitive; @fromString(B(string2long($)));      @toString(long2string($.get()));   @defaultValue(B(-1)); }
+class bps  { @existingClass; @primitive; @fromString(bps(string2double($)));  @toString(double2string($.get())); @defaultValue(bps(NaN)); }
+class Hz   { @existingClass; @primitive; @fromString(Hz(string2double($)));   @toString(double2string($.get())); @defaultValue(Hz(NaN)); }
+class m    { @existingClass; @primitive; @fromString(m(string2double($)));    @toString(double2string($.get())); @defaultValue(m(NaN)); }
+class Ohmm { @existingClass; @primitive; @fromString(Ohmm(string2double($))); @toString(double2string($.get())); @defaultValue(Ohmm(NaN)); }
+class W    { @existingClass; @primitive; @fromString(W(string2double($)));    @toString(double2string($.get())); @defaultValue(W(NaN)); }
 

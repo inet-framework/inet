@@ -24,13 +24,13 @@ simple RateSelection like IRateSelection
     parameters:
         string rateControlModule;
 
-        double multicastFrameBitrate @unit("bps") = default(-1bps);
+        double multicastFrameBitrate @unit(bps) = default(-1bps);
         
-        double responseAckFrameBitrate @unit("bps") = default(-1bps);
-        double responseCtsFrameBitrate @unit("bps") = default(-1bps);
+        double responseAckFrameBitrate @unit(bps) = default(-1bps);
+        double responseCtsFrameBitrate @unit(bps) = default(-1bps);
         
-        double dataFrameBitrate @unit("bps") = default(-1bps); // fastest
-        double mgmtFrameBitrate @unit("bps") = default(-1bps); // fastest
-        double controlFrameBitrate @unit("bps") = default(-1bps);
+        double dataFrameBitrate @unit(bps) = default(-1bps); // fastest
+        double mgmtFrameBitrate @unit(bps) = default(-1bps); // fastest
+        double controlFrameBitrate @unit(bps) = default(-1bps);
         @display("i=block/cogwheel");
 }

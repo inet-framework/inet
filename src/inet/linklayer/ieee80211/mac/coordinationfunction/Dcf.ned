@@ -47,8 +47,8 @@ module Dcf
 
         @class(Dcf);
         @display("i=block/queue");
-        @signal[linkBreak](type=Packet);
-        @signal[packetDrop](type=Packet);
+        @signal[linkBroken](type=Packet);
+        @signal[packetDropped](type=Packet);
 
     submodules:
         channelAccess: Dcaf {

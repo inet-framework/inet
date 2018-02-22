@@ -22,7 +22,7 @@
 
 #include "inet/routing/bgpv4/BgpCommon_m.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
-#include "inet/networklayer/ipv4/Ipv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 
 namespace inet {
 

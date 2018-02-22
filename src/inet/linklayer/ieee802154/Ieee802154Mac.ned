@@ -40,7 +40,7 @@ simple Ieee802154Mac extends MacProtocolBase like IMacProtocol
 
         // length of MAC header
         int headerLength @unit(bit) = default(72 bit);
-        int mtu @unit("B") = default(0B);
+        int mtu @unit(B) = default(0B);
         // size of the MAC queue (maximum number of packets in Tx buffer)
         int queueLength = default(100);
         // bit rate
@@ -93,10 +93,10 @@ simple Ieee802154Mac extends MacProtocolBase like IMacProtocol
         string radioModule = default("^.radio");   // The path to the Radio module  //FIXME remove default value
 
         @class(Ieee802154Mac);
-        @signal[linkBreak](type=Packet);
-        @statistic[linkBreak](title="link break"; source=linkBreak; record=count; interpolationmode=none);
-        @statistic[packetDropNotAddressToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-        @statistic[packetDropIncorrectlyReceived](title="packet drop: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-        @statistic[packetDropQueueOverlow](title="packet drop: queue overflow"; source=packetDropReasonIsQueueOverflow(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-        @statistic[packetDropRetryLimitReached](title="packet drop: retry limit reached"; source=packetDropReasonIsRetryLimitReached(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @signal[linkBroken](type=Packet);
+        @statistic[linkBroken](title="link break"; source=linkBroken; record=count; interpolationmode=none);
+        @statistic[packetDropNotAddressToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropIncorrectlyReceived](title="packet drop: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropQueueOverlow](title="packet drop: queue overflow"; source=packetDropReasonIsQueueOverflow(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropRetryLimitReached](title="packet drop: retry limit reached"; source=packetDropReasonIsRetryLimitReached(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
 }

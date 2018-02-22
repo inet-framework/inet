@@ -16,98 +16,44 @@
 //
 
 #include "inet/networklayer/ipv6/Ipv6Header.h"
-#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders.h"
+#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders_m.h"
 
 namespace inet {
-
-Register_Class(Ipv6Header);
 
 std::ostream& operator<<(std::ostream& os, Ipv6ExtensionHeader *eh)
 {
     return os << "(" << eh->getClassName() << ") " << eh->str();
 }
 
-Ipv6Header& Ipv6Header::operator=(const Ipv6Header& other)
-{
-    if (this == &other)
-        return *this;
-    clean();
-    Ipv6Header_Base::operator=(other);
-    copy(other);
-    return *this;
-}
-
-void Ipv6Header::copy(const Ipv6Header& other)
-{
-    for (const auto & elem : other.extensionHeaders)
-        addExtensionHeader((elem)->dup());
-}
-
-void Ipv6Header::setExtensionHeaderArraySize(size_t size)
-{
-    throw cRuntimeError(this, "setExtensionHeaderArraySize() not supported, use addExtensionHeader()");
-}
-
-size_t Ipv6Header::getExtensionHeaderArraySize() const
-{
-    return extensionHeaders.size();
-}
-
-Ipv6ExtensionHeader *Ipv6Header::getExtensionHeaderForUpdate(size_t k)
-{
-    handleChange();
-    if (k >= extensionHeaders.size())
-        return nullptr;
-    return extensionHeaders[k];
-}
-
-const Ipv6ExtensionHeader *Ipv6Header::getExtensionHeader(size_t k) const
-{
-    if (k >= extensionHeaders.size())
-        return nullptr;
-    return extensionHeaders[k];
-}
-
 Ipv6ExtensionHeader *Ipv6Header::findExtensionHeaderByTypeForUpdate(IpProtocolId extensionType, int index)
 {
-    for (auto & elem : extensionHeaders)
-        if ((elem)->getExtensionType() == extensionType) {
-            if (index == 0)
-                return elem;
-            else
-                index--;
-        }
-    return nullptr;
+    handleChange();
+    return const_cast<Ipv6ExtensionHeader *>(const_cast<Ipv6Header*>(this)->findExtensionHeaderByType(extensionType, index));
 }
 
 const Ipv6ExtensionHeader *Ipv6Header::findExtensionHeaderByType(IpProtocolId extensionType, int index) const
 {
-    for (const auto & elem : extensionHeaders)
-        if ((elem)->getExtensionType() == extensionType) {
+    for (size_t i=0; i < extensionHeader_arraysize; i++)
+        if (extensionHeader[i]->getExtensionType() == extensionType) {
             if (index == 0)
-                return elem;
+                return extensionHeader[i];
             else
                 index--;
         }
     return nullptr;
-}
-
-void Ipv6Header::setExtensionHeader(size_t k, Ipv6ExtensionHeader *extensionHeader_var)
-{
-    throw cRuntimeError(this, "setExtensionHeader() not supported, use addExtensionHeader()");
 }
 
 void Ipv6Header::addExtensionHeader(Ipv6ExtensionHeader *eh)
 {
     ASSERT((eh->getByteLength() >= 1) && (eh->getByteLength() % 8 == 0));
-    int thisOrder = getExtensionHeaderOrder(eh);
+    int thisOrder = eh->getOrder();
     size_t i;
-    for (i = 0; i < extensionHeaders.size(); i++) {
-        int thatOrder = getExtensionHeaderOrder(extensionHeaders[i]);
+    for (i = 0; i < extensionHeader_arraysize; i++) {
+        int thatOrder = extensionHeader[i]->getOrder();
         if (thisOrder != -1 && thatOrder > thisOrder)
             break;
         else if (thisOrder == thatOrder) {
-            if (thisOrder == 1)
+            if (thisOrder == 1)   // first IP_PROT_IPv6EXT_DEST has order 1, second IP_PROT_IPv6EXT_DEST has order 6
                 thisOrder = 6;
             else if (thisOrder != -1)
                 throw cRuntimeError(this, "addExtensionHeader() duplicate extension header: %d",
@@ -116,7 +62,7 @@ void Ipv6Header::addExtensionHeader(Ipv6ExtensionHeader *eh)
     }
 
     // insert at position atPos, shift up the rest of the array
-    extensionHeaders.insert(extensionHeaders.begin() + i, eh);
+    insertExtensionHeader(i, eh);
 }
 
 /*
@@ -124,9 +70,9 @@ void Ipv6Header::addExtensionHeader(Ipv6ExtensionHeader *eh)
  *  Note that Destination Options header may come both after the Hop-by-Hop
  *  extension and before the payload (if Routing presents).
  */
-int Ipv6Header::getExtensionHeaderOrder(Ipv6ExtensionHeader *eh)
+int Ipv6ExtensionHeader::getOrder() const
 {
-    switch (eh->getExtensionType()) {
+    switch (extensionType) {
         case IP_PROT_IPv6EXT_HOP:
             return 0;
 
@@ -146,6 +92,7 @@ int Ipv6Header::getExtensionHeaderOrder(Ipv6ExtensionHeader *eh)
             return 5;
 
         // second IP_PROT_IPv6EXT_DEST has order 6
+
         case IP_PROT_IPv6EXT_MOB:
             return 7;
 
@@ -157,8 +104,8 @@ int Ipv6Header::getExtensionHeaderOrder(Ipv6ExtensionHeader *eh)
 int Ipv6Header::calculateHeaderByteLength() const
 {
     int len = 40;
-    for (auto & elem : extensionHeaders)
-        len += elem->getByteLength();
+    for (size_t i = 0; i < extensionHeader_arraysize; i++)
+        len += extensionHeader[i]->getByteLength();
     return len;
 }
 
@@ -167,18 +114,18 @@ int Ipv6Header::calculateHeaderByteLength() const
  */
 int Ipv6Header::calculateUnfragmentableHeaderByteLength() const
 {
-    int lastUnfragmentableExtensionIndex = -1;
-    for (int i = ((int)extensionHeaders.size()) - 1; i >= 0; i--) {
-        int type = extensionHeaders[i]->getExtensionType();
+    size_t firstFragmentableExtensionIndex = 0;
+    for (size_t i = extensionHeader_arraysize; i > 0; i--) {
+        int type = extensionHeader[i-1]->getExtensionType();
         if (type == IP_PROT_IPv6EXT_ROUTING || type == IP_PROT_IPv6EXT_HOP) {
-            lastUnfragmentableExtensionIndex = i;
+            firstFragmentableExtensionIndex = i;
             break;
         }
     }
 
     int len = 40;
-    for (int i = 0; i <= lastUnfragmentableExtensionIndex; i++)
-        len += extensionHeaders[i]->getByteLength();
+    for (size_t i = 0; i < firstFragmentableExtensionIndex; i++)
+        len += extensionHeader[i]->getByteLength();
     return len;
 }
 
@@ -189,52 +136,50 @@ int Ipv6Header::calculateFragmentLength() const
 {
     int len = B(getChunkLength()).get() - IPv6_HEADER_BYTES;
     size_t i;
-    for (i = 0; i < extensionHeaders.size(); i++) {
-        len -= extensionHeaders[i]->getByteLength();
-        if (extensionHeaders[i]->getExtensionType() == IP_PROT_IPv6EXT_FRAGMENT)
+    for (i = 0; i < extensionHeader_arraysize; i++) {
+        len -= extensionHeader[i]->getByteLength();
+        if (extensionHeader[i]->getExtensionType() == IP_PROT_IPv6EXT_FRAGMENT)
             break;
     }
-    ASSERT2(i < extensionHeaders.size(), "IPv6Datagram::calculateFragmentLength() called on non-fragment datagram");
+    ASSERT2(i < extensionHeader_arraysize, "IPv6Datagram::calculateFragmentLength() called on non-fragment datagram");
     return len;
 }
 
 Ipv6ExtensionHeader *Ipv6Header::removeFirstExtensionHeader()
 {
     handleChange();
-    if (extensionHeaders.empty())
+    if (extensionHeader_arraysize == 0)
         return nullptr;
-    Ipv6ExtensionHeader *eh = extensionHeaders.front();
-    extensionHeaders.erase(extensionHeaders.begin());
+    Ipv6ExtensionHeader *eh = dropExtensionHeader(0);
+    eraseExtensionHeader(0);
     return eh;
 }
 
 Ipv6ExtensionHeader *Ipv6Header::removeExtensionHeader(IpProtocolId extensionType)
 {
     handleChange();
-    for (size_t i = 0; i < extensionHeaders.size(); i++) {
-        if (extensionHeaders[i]->getExtensionType() == extensionType) {
-            Ipv6ExtensionHeader *eh = extensionHeaders[i];
-            extensionHeaders.erase(extensionHeaders.begin() + i);
+    if (extensionHeader_arraysize == 0)
+        return nullptr;
+
+    for (size_t i = 0; i < extensionHeader_arraysize; i++) {
+        if (extensionHeader[i]->getExtensionType() == extensionType) {
+            Ipv6ExtensionHeader *eh = dropExtensionHeader(i);
+            eraseExtensionHeader(i);
             return eh;
         }
     }
     return nullptr;
 }
 
-Ipv6Header::~Ipv6Header()
+short Ipv6Header::getTrafficClass() const
 {
-    clean();
+    return (getExplicitCongestionNotification() & 0xc0) | (getDiffServCodePoint() & 0x3f);
 }
 
-void Ipv6Header::clean()
+void Ipv6Header::setTrafficClass(short trafficClass)
 {
-    Ipv6ExtensionHeader *eh;
-
-    while (!extensionHeaders.empty()) {
-        eh = extensionHeaders.back();
-        extensionHeaders.pop_back();    // remove pointer element from container
-        delete eh;    // delete the header
-    }
+    setDiffServCodePoint(trafficClass & 0x3f);
+    setExplicitCongestionNotification((trafficClass >> 6) & 0x03);
 }
 
 std::ostream& operator<<(std::ostream& out, const Ipv6ExtensionHeader& h)

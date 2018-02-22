@@ -175,7 +175,7 @@ void EtherLlc::processFrameFromMAC(Packet *packet)
         packet->setHeaderPopOffset(headerPopOffset);    // restore original packet
         PacketDropDetails details;
         details.setReason(NO_PROTOCOL_FOUND);
-        emit(packetDropSignal, packet, &details);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
         return;
     }

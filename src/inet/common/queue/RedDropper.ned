@@ -56,8 +56,8 @@ simple RedDropper
         string maxps = default("0.02");  // maximum value for pbs (one number for each gate, last one repeated if needed)
         string pkrates = default("150");  // average packet rate for calculations when queue is empty
         @display("i=block/downarrow");
-        @signal[packetDrop](type=cPacket);
-        @statistic[packetDropCongestion](title="packet drop: congestion"; source=packetDropReasonIsCongestion(packetDrop); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @signal[packetDropped](type=cPacket);
+        @statistic[packetDropCongestion](title="packet drop: congestion"; source=packetDropReasonIsCongestion(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
 
     gates:
         input in[numGates];

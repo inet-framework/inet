@@ -338,8 +338,8 @@ void Igmpv2::initialize(int stage)
 
         cModule *host = getContainingNode(this);
         host->subscribe(interfaceDeletedSignal, this);
-        host->subscribe(ipv4McastJoinSignal, this);
-        host->subscribe(ipv4McastLeaveSignal, this);
+        host->subscribe(ipv4MulticastGroupJoinedSignal, this);
+        host->subscribe(ipv4MulticastGroupLeftSignal, this);
 
         externalRouter = false;
         enabled = par("enabled");
@@ -429,11 +429,11 @@ void Igmpv2::receiveSignal(cComponent *source, simsignal_t signalID, cObject *ob
             deleteRouterInterfaceData(interfaceId);
         }
     }
-    else if (signalID == ipv4McastJoinSignal) {
+    else if (signalID == ipv4MulticastGroupJoinedSignal) {
         info = check_and_cast<const Ipv4MulticastGroupInfo *>(obj);
         multicastGroupJoined(info->ie, info->groupAddress);
     }
-    else if (signalID == ipv4McastLeaveSignal) {
+    else if (signalID == ipv4MulticastGroupLeftSignal) {
         info = check_and_cast<const Ipv4MulticastGroupInfo *>(obj);
         multicastGroupLeft(info->ie, info->groupAddress);
     }
@@ -720,7 +720,7 @@ void Igmpv2::processQuery(InterfaceEntry *ie, Packet *packet)
 {
     ASSERT(ie->isMulticast());
 
-    Ipv4Address sender = packet->getTag<L3AddressInd>()->getSrcAddress().toIPv4();
+    Ipv4Address sender = packet->getTag<L3AddressInd>()->getSrcAddress().toIpv4();
     HostInterfaceData *interfaceData = getHostInterfaceData(ie);
     const auto& igmpQry = packet->peekHeader<IgmpQuery>(b(packet->getBitLength()));   //peek entire igmp packet
 

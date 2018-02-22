@@ -40,7 +40,7 @@
 #ifdef WITH_IPv4
 #include "inet/networklayer/arp/ipv4/ArpPacket_m.h"
 #include "inet/networklayer/ipv4/IcmpHeader.h"
-#include "inet/networklayer/ipv4/Ipv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
@@ -379,21 +379,21 @@ void PacketDump::dumpPacket(bool l2r, cPacket *msg)
         if (const auto& ipv4Hdr = dynamicPtrCast<const Ipv4Header>(chunk)) {
             leftAddr = ipv4Hdr->getSourceAddress().str();
             rightAddr = ipv4Hdr->getDestinationAddress().str();
-            dumpIPv4(l2r, "", ipv4Hdr, "");
+            dumpIpv4(l2r, "", ipv4Hdr, "");
         }
         else
         if (const auto& arpPacket = dynamicPtrCast<const ArpPacket>(chunk)) {
-            dumpARP(l2r, "", arpPacket, "");
+            dumpArp(l2r, "", arpPacket, "");
         }
         else
-        if (const auto& icmpHeader = dynamicPtrCast<const IcmpHeader>(chunk)) {
+        if (dynamicPtrCast<const IcmpHeader>(chunk)) {
             out << "ICMPMessage " << packet->getName() << (packet->hasBitError() ? " (BitError)" : "") << endl;
         }
         else
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
         if (const auto& ipv6Hdr = dynamicPtrCast<const Ipv6Header>(chunk)) {
-            dumpIPv6(l2r, "", ipv6Hdr);
+            dumpIpv6(l2r, "", ipv6Hdr);
         }
         else
 #endif // ifdef WITH_IPv6
@@ -459,16 +459,16 @@ void PacketDump::udpDump(bool l2r, const char *label, const Ptr<const UdpHeader>
 #endif // ifdef WITH_UDP
 
 #ifdef WITH_IPv4
-void PacketDump::dumpARP(bool l2r, const char *label, const Ptr<const ArpPacket>& arp, const char *comment)
+void PacketDump::dumpArp(bool l2r, const char *label, const Ptr<const ArpPacket>& arp, const char *comment)
 {
     std::ostream& out = *outp;
     char buf[30];
     sprintf(buf, "[%.3f%s] ", simTime().dbl(), label);
-    out << buf << " src: " << arp->getSrcIPAddress() << ", " << arp->getSrcMACAddress()
-        << "; dest: " << arp->getDestIPAddress() << ", " << arp->getDestMACAddress() << endl;
+    out << buf << " src: " << arp->getSrcIpAddress() << ", " << arp->getSrcMacAddress()
+        << "; dest: " << arp->getDestIpAddress() << ", " << arp->getDestMacAddress() << endl;
 }
 
-void PacketDump::dumpIPv4(bool l2r, const char *label, const Ptr<const Ipv4Header>& ipv4Header, const  char *comment)
+void PacketDump::dumpIpv4(bool l2r, const char *label, const Ptr<const Ipv4Header>& ipv4Header, const  char *comment)
 {
     std::ostream& out = *outp;
     char buf[30];
@@ -501,7 +501,7 @@ void PacketDump::dumpIPv4(bool l2r, const char *label, const Ptr<const Ipv4Heade
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-void PacketDump::dumpIPv6(bool l2r, const char *label, const Ptr<const Ipv6Header>& ipv6Header, const char *comment)
+void PacketDump::dumpIpv6(bool l2r, const char *label, const Ptr<const Ipv6Header>& ipv6Header, const char *comment)
 {
     using namespace tcp;
 

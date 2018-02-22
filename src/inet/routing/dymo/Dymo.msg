@@ -97,13 +97,13 @@ class RteMsg extends DymoPacket {
 //
 // Dymo RREQ packet
 //
-class RREQ extends RteMsg {
+class Rreq extends RteMsg {
 }
 
 //
 // Dymo RREP packet
 //
-class RREP extends RteMsg {
+class Rrep extends RteMsg {
 }
 
 //
@@ -115,6 +115,6 @@ class RrepAck extends DymoPacket {
 //
 // Dymo RERR packet
 //
-class RERR extends DymoPacket {
+class Rerr extends DymoPacket {
     AddressBlock unreachableNode[];
 }

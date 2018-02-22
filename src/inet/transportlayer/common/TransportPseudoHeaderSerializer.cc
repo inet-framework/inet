@@ -31,8 +31,8 @@ void TransportPseudoHeaderSerializer::serialize(MemoryOutputStream& stream, cons
     auto nwProtId = transportPseudoHeader->getNetworkProtocolId();
     if (nwProtId == Protocol::ipv4.getId()) {
         ASSERT(transportPseudoHeader->getChunkLength() == B(12));
-        stream.writeIPv4Address(transportPseudoHeader->getSrcAddress().toIPv4());
-        stream.writeIPv4Address(transportPseudoHeader->getDestAddress().toIPv4());
+        stream.writeIpv4Address(transportPseudoHeader->getSrcAddress().toIpv4());
+        stream.writeIpv4Address(transportPseudoHeader->getDestAddress().toIpv4());
         stream.writeByte(0);
         stream.writeByte(transportPseudoHeader->getProtocolId());
         stream.writeUint16Be(transportPseudoHeader->getPacketLength());
@@ -40,8 +40,8 @@ void TransportPseudoHeaderSerializer::serialize(MemoryOutputStream& stream, cons
     else
     if (nwProtId == Protocol::ipv6.getId()) {
         ASSERT(transportPseudoHeader->getChunkLength() == B(40));
-        stream.writeIPv6Address(transportPseudoHeader->getSrcAddress().toIPv6());
-        stream.writeIPv6Address(transportPseudoHeader->getDestAddress().toIPv6());
+        stream.writeIpv6Address(transportPseudoHeader->getSrcAddress().toIpv6());
+        stream.writeIpv6Address(transportPseudoHeader->getDestAddress().toIpv6());
         stream.writeUint32Be(transportPseudoHeader->getPacketLength());
         stream.writeByte(0);
         stream.writeByte(0);

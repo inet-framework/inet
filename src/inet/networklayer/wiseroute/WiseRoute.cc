@@ -347,8 +347,9 @@ void WiseRoute::updateRouteTable(const L3Address& origin, const L3Address& lastH
 void WiseRoute::decapsulate(Packet *packet)
 {
     auto wiseRouteHeader = packet->popHeader<WiseRouteHeader>();
-    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(wiseRouteHeader->getProtocol());
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(wiseRouteHeader->getProtocol());
+    auto payloadProtocol = wiseRouteHeader->getProtocol();
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
     packet->addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
     packet->addTagIfAbsent<L3AddressInd>()->setSrcAddress(wiseRouteHeader->getInitialSrcAddr());
     nbHops = nbHops + wiseRouteHeader->getNbHops();

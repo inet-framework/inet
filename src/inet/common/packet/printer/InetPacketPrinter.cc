@@ -24,7 +24,7 @@
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/IcmpHeader.h"
-#include "inet/networklayer/ipv4/Ipv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_TCP_COMMON

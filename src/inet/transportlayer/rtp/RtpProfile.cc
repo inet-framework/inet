@@ -19,7 +19,7 @@
 
 #include "inet/transportlayer/rtp/RtpProfile.h"
 
-#include "inet/transportlayer/rtp/RtpInnerPacket.h"
+#include "inet/transportlayer/rtp/RtpInnerPacket_m.h"
 #include "inet/transportlayer/rtp/RtpPayloadReceiver.h"
 #include "inet/transportlayer/rtp/RtpPayloadSender.h"
 
@@ -138,7 +138,7 @@ void RtpProfile::handleMessageFromPayloadReceiver(cMessage *msg)
 void RtpProfile::initializeProfile(RtpInnerPacket *rinp)
 {
     EV_TRACE << "initializeProfile Enter" << endl;
-    _mtu = rinp->getMTU();
+    _mtu = rinp->getMtu();
     delete rinp;
     RtpInnerPacket *rinpOut = new RtpInnerPacket("profileInitialized()");
     rinpOut->setProfileInitializedPkt(_rtcpPercentage, _preferredPort);

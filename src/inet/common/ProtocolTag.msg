@@ -4,11 +4,11 @@
 
 import inet.common.INETDefs;
 import inet.common.TagBase;
+import inet.common.packet.chunk.Chunk;
 
 cplusplus{{
 #include "inet/common/Protocol.h"
 #include "inet/common/Units.h"      //FIXME Why? Units unused in this file.
-#include "inet/common/packet/chunk/Chunk.h"
 }}
 
 namespace inet;
@@ -19,8 +19,17 @@ typedef Ptr<const Chunk> ChunkPtr;
 using namespace units::values;      //FIXME Why? Units unused in this file.
 }}
 
-class ChunkPtr { @existingClass; }
-class Protocol { @existingClass; }
+class ChunkPtr
+{
+    @existingClass;
+    @descriptor(readonly);
+    Chunk *content @getter(get);
+}
+
+class Protocol
+{
+    @existingClass;
+}
 
 //
 // This is an abstract base class that should not be directly added as a tag.

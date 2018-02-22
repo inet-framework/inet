@@ -51,7 +51,7 @@ void AlgorithmicDropperBase::dropPacket(cPacket *packet)
     // TODO statistics
     PacketDropDetails details;
     details.setReason(CONGESTION);
-    emit(packetDropSignal, packet, &details);
+    emit(packetDroppedSignal, packet, &details);
     delete packet;
 }
 

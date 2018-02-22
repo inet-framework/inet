@@ -190,7 +190,7 @@ InterfaceEntry *CsmaCaMac::createInterfaceEntry()
     e->setDatarate(bitrate);
 
     // generate a link-layer address to be used as interface token for IPv6
-    e->setMACAddress(address);
+    e->setMacAddress(address);
     e->setInterfaceToken(address.formInterfaceIdentifier());
 
     // capabilities
@@ -595,7 +595,7 @@ void CsmaCaMac::giveUpCurrentTransmission()
 {
     auto packet = getCurrentTransmission();
     emitPacketDropSignal(packet, RETRY_LIMIT_REACHED, retryLimit);
-    emit(linkBreakSignal, packet);
+    emit(linkBrokenSignal, packet);
     popTransmissionQueue();
     resetTransmissionVariables();
     numGivenUp++;
@@ -636,7 +636,7 @@ void CsmaCaMac::emitPacketDropSignal(Packet *frame, PacketDropReason reason, int
     PacketDropDetails details;
     details.setReason(reason);
     details.setLimit(limit);
-    emit(packetDropSignal, frame, &details);
+    emit(packetDroppedSignal, frame, &details);
 }
 
 bool CsmaCaMac::isMediumFree()

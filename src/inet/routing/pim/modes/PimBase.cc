@@ -27,7 +27,7 @@
 #include "inet/networklayer/common/InterfaceTable.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
-#include "inet/networklayer/ipv4/Ipv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 
 namespace inet {
@@ -196,7 +196,7 @@ void PimBase::processHelloPacket(Packet *packet)
 {
     int interfaceId = packet->getTag<InterfaceInd>()->getInterfaceId();
 
-    Ipv4Address address = packet->getTag<L3AddressInd>()->getSrcAddress().toIPv4();
+    Ipv4Address address = packet->getTag<L3AddressInd>()->getSrcAddress().toIpv4();
     const auto& pimPacket = packet->peekHeader<PimHello>();
     int version = pimPacket->getVersion();
 

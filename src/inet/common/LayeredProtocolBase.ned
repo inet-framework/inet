@@ -27,5 +27,5 @@ simple LayeredProtocolBase
         @signal[packetReceivedFromUpper](type=cPacket);
         @signal[packetSentToLower](type=cPacket);
         @signal[packetReceivedFromLower](type=cPacket);
-        @signal[packetDrop](type=cPacket);
+        @signal[packetDropped](type=cPacket);
 }

@@ -145,6 +145,14 @@ void PacketDrillApp::initialize(int stage)
         tunInterfaceId = interfaceEntry->getInterfaceId();
         tunSocketId = tunSocket.getSocketId();
 
+        const char *interface = par("interface");
+        IInterfaceTable *interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        InterfaceEntry *interfaceEntry = interfaceTable->getInterfaceByName(interface);
+        if (interfaceEntry == nullptr)
+            throw cRuntimeError("TUN interface not found: %s", interface);
+        tunSocket.setOutputGate(gate("socketOut"));
+        tunSocket.open(interfaceEntry->getInterfaceId());
+
         cMessage* timeMsg = new cMessage("PacketDrillAppTimer");
         timeMsg->setKind(MSGKIND_START);
         scheduleAt((simtime_t)par("startTime"), timeMsg);
@@ -208,6 +216,7 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                 delete msg;
             }
         } else if (socketId == udpSocketId) {
+            // received from UDP
             PacketDrillEvent *event = (PacketDrillEvent *)(script->getEventList()->get(eventCounter));
             if (verifyTime((enum eventTime_t) event->getTimeType(), event->getEventTime(), event->getEventTimeEnd(),
                     event->getEventOffset(), getSimulation()->getSimTime(), "inbound packet") == STATUS_ERR) {
@@ -244,16 +253,13 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                     if (listenSet) {
                         if (acceptSet) {
                             tcpSocket.setState(TcpSocket::CONNECTED);
-                            tcpConnId = msg->getTag<SocketInd>()->getSocketId();
                             listenSet = false;
                             acceptSet = false;
                         } else {
-                            tcpConnId = msg->getTag<SocketInd>()->getSocketId();
                             establishedPending = true;
                         }
                     } else {
                         tcpSocket.setState(TcpSocket::CONNECTED);
-                        tcpConnId = msg->getTag<SocketInd>()->getSocketId();
                     }
                     delete msg;
                     break;
@@ -301,6 +307,12 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                             listenSet = false;
                             acceptSet = false;
                         } else {
+                            sctpAssocId = check_and_cast<SctpCommand *>(msg->getControlInfo())->getSocketId();
+                            listenSet = false;
+                            acceptSet = false;
+                        } else {
+                            sctpAssocId = check_and_cast<SctpCommand *>(msg->getControlInfo())->getSocketId();
+>>>>>>> upstream/integration
                             establishedPending = true;
                         }
                     } else {
@@ -313,6 +325,11 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                              sctpSocket.setInboundStreams(connectInfo->getInboundStreams());
                             sctpSocket.setOutboundStreams(connectInfo->getOutboundStreams());
                         }
+                        SctpConnectInfo *connectInfo = check_and_cast<SctpConnectInfo *>(msg->removeControlInfo());
+                        sctpAssocId = connectInfo->getSocketId();
+                        sctpSocket.setInboundStreams(connectInfo->getInboundStreams());
+                        sctpSocket.setOutboundStreams(connectInfo->getOutboundStreams());
+                        delete connectInfo;
                     }
                     break;
                 }
@@ -640,8 +657,8 @@ void PacketDrillApp::closeAllSockets()
     sctpmsg->insertSctpChunks(abortChunk);
     pk->insertHeader(sctpmsg);
     auto ipv4Header = makeShared<Ipv4Header>();
-    ipv4Header->setSrcAddress(remoteAddress.toIPv4());
-    ipv4Header->setDestAddress(localAddress.toIPv4());
+    ipv4Header->setSrcAddress(remoteAddress.toIpv4());
+    ipv4Header->setDestAddress(localAddress.toIpv4());
     ipv4Header->setIdentification(0);
     ipv4Header->setVersion(4);
     ipv4Header->setHeaderLength(20);
@@ -1611,7 +1628,8 @@ bool PacketDrillApp::compareDatagram(Packet *storedPacket, Packet *livePacket)
 {
     const auto& storedDatagram = storedPacket->peekHeader<Ipv4Header>();
     const auto& liveDatagram = livePacket->peekHeader<Ipv4Header>();
-  /*  if (!(storedDatagram->getSrcAddress() == liveDatagram->getSrcAddress())) {
+
+   /* if (!(storedDatagram->getSrcAddress() == liveDatagram->getSrcAddress())) {
         return false;
     }*/
     std::cout << __LINE__ << endl;

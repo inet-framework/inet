@@ -76,8 +76,8 @@ class INET_API Arp : public cSimpleModule, public IArp, public ILifecycle
     long numRequestsSent = 0;
     long numRepliesSent = 0;
 
-    static simsignal_t sentRequestSignal;
-    static simsignal_t sentReplySignal;
+    static simsignal_t arpRequestSentSignal;
+    static simsignal_t arpReplySentSignal;
 
     ArpCache arpCache;
 
@@ -109,8 +109,6 @@ class INET_API Arp : public cSimpleModule, public IArp, public ILifecycle
     virtual void stop();
     virtual void start();
     virtual void flush();
-
-    virtual void sendPacketToNIC(Packet *msg, const InterfaceEntry *ie, const MacAddress& macAddress);
 
     virtual void initiateARPResolution(ArpCacheEntry *entry);
     virtual void sendARPRequest(const InterfaceEntry *ie, Ipv4Address ipAddress);

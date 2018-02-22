@@ -85,7 +85,7 @@ void UdpVideoStreamClient::requestStream()
 void UdpVideoStreamClient::receiveStream(Packet *pk)
 {
     EV_INFO << "Video stream packet: " << UdpSocket::getReceivedPacketInfo(pk) << endl;
-    emit(rcvdPkSignal, pk);
+    emit(packetReceivedSignal, pk);
     delete pk;
 }
 

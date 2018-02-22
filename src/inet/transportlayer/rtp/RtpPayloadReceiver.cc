@@ -19,7 +19,7 @@
 
 #include "inet/transportlayer/rtp/RtpPayloadReceiver.h"
 
-#include "inet/transportlayer/rtp/RtpInnerPacket.h"
+#include "inet/transportlayer/rtp/RtpInnerPacket_m.h"
 #include "inet/transportlayer/rtp/RtpPacket_m.h"
 
 namespace inet {
@@ -28,7 +28,7 @@ namespace rtp {
 
 Define_Module(RtpPayloadReceiver);
 
-simsignal_t RtpPayloadReceiver::_rcvdPkRtpTimestampSignal = registerSignal("rcvdPkRtpTimestamp");
+simsignal_t RtpPayloadReceiver::rcvdPkRtpTimestampSignal = registerSignal("rcvdPkRtpTimestamp");
 
 RtpPayloadReceiver::~RtpPayloadReceiver()
 {
@@ -66,7 +66,7 @@ void RtpPayloadReceiver::handleMessage(cMessage *msg)
 void RtpPayloadReceiver::processRtpPacket(Packet *packet)
 {
     const auto& rtpHeader = packet->peekHeader<RtpHeader>();
-    emit(_rcvdPkRtpTimestampSignal, (double)(rtpHeader->getTimeStamp()));
+    emit(rcvdPkRtpTimestampSignal, (double)(rtpHeader->getTimeStamp()));
 }
 
 void RtpPayloadReceiver::openOutputFile(const char *fileName)

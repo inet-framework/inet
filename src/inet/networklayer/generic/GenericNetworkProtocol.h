@@ -22,6 +22,7 @@
 #include <list>
 #include <map>
 
+#include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/networklayer/contract/IArp.h"
@@ -177,7 +178,7 @@ class INET_API GenericNetworkProtocol : public QueueBase, public NetfilterBase, 
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
     virtual void handleMessage(cMessage *msg) override;
-    void handleCommand(cMessage *msg);
+    void handleCommand(Request *msg);
 
     /**
      * Processing of generic datagrams. Called when a datagram reaches the front

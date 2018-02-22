@@ -91,7 +91,9 @@ const Ptr<Chunk> SequenceChunk::peekUnchecked(PeekPredicate predicate, PeekConve
 const Ptr<Chunk> SequenceChunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, b offset, b length, int flags)
 {
     auto sequenceChunk = makeShared<SequenceChunk>();
-    sequenceChunk->insertAtEnd(makeShared<SliceChunk>(chunk, offset, length));
+    auto sliceChunk = makeShared<SliceChunk>(chunk, offset, length);
+    sliceChunk->markImmutable();
+    sequenceChunk->insertAtEnd(sliceChunk);
     return sequenceChunk;
 }
 
@@ -107,23 +109,6 @@ void SequenceChunk::setChunks(const std::deque<Ptr<const Chunk>>& chunks)
 {
     handleChange();
     this->chunks = chunks;
-}
-
-bool SequenceChunk::isMutable() const
-{
-    if (Chunk::isMutable())
-        return true;
-    for (const auto& chunk : chunks)
-        if (chunk->isMutable())
-            return true;
-    return false;
-}
-
-void SequenceChunk::markImmutable()
-{
-    Chunk::markImmutable();
-    for (const auto& chunk : chunks)
-        constPtrCast<Chunk>(chunk)->markImmutable();
 }
 
 bool SequenceChunk::isIncomplete() const
@@ -202,6 +187,7 @@ void SequenceChunk::moveIterator(Iterator& iterator, b length) const
 
 void SequenceChunk::doInsertToBeginning(const Ptr<const Chunk>& chunk)
 {
+    CHUNK_CHECK_USAGE(chunk->isImmutable(), "chunk is mutable");
     CHUNK_CHECK_USAGE(chunk->getChunkLength() > b(0), "chunk is empty");
     if (chunks.empty())
         chunks.push_front(chunk);
@@ -263,6 +249,7 @@ void SequenceChunk::doInsertAtBeginning(const Ptr<const Chunk>& chunk)
 
 void SequenceChunk::doInsertToEnd(const Ptr<const Chunk>& chunk)
 {
+    CHUNK_CHECK_USAGE(chunk->isImmutable(), "chunk is mutable");
     CHUNK_CHECK_USAGE(chunk->getChunkLength() > b(0), "chunk is empty");
     if (chunks.empty())
         chunks.push_back(chunk);

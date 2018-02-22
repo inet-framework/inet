@@ -122,7 +122,7 @@ InterfaceEntry *Ieee80211Mac::createInterfaceEntry()
 {
     InterfaceEntry *e = getContainingNicModule(this);
     // address
-    e->setMACAddress(mib->address);
+    e->setMacAddress(mib->address);
     e->setInterfaceToken(mib->address.formInterfaceIdentifier());
     e->setMtu(par("mtu"));
     // capabilities
@@ -259,7 +259,7 @@ void Ieee80211Mac::encapsulate(Packet *packet)
     if (auto userPriorityReq = packet->findTag<UserPriorityReq>()) {
         // make it a QoS frame, and set TID
         header->setType(ST_DATA_WITH_QOS);
-        header->setChunkLength(header->getChunkLength() + b(QOSCONTROL_BITS));
+        header->setChunkLength(header->getChunkLength() + QOSCONTROL_PART_LENGTH);
         header->setTid(userPriorityReq->getUserPriority());
     }
     packet->insertHeader(header);

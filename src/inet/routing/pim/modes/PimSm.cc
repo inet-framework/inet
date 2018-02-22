@@ -25,7 +25,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/networklayer/ipv4/Ipv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 
@@ -134,8 +134,8 @@ bool PimSm::handleNodeStart(IDoneCallback *doneCallback)
         host->subscribe(ipv4MdataRegisterSignal, this);
         host->subscribe(ipv4DataOnRpfSignal, this);
         host->subscribe(ipv4DataOnNonrpfSignal, this);
-        host->subscribe(ipv4McastRegisteredSignal, this);
-        host->subscribe(ipv4McastUnregisteredSignal, this);
+        host->subscribe(ipv4MulticastGroupRegisteredSignal, this);
+        host->subscribe(ipv4MulticastGroupUnregisteredSignal, this);
         host->subscribe(pimNeighborAddedSignal, this);
         host->subscribe(pimNeighborDeletedSignal, this);
         host->subscribe(pimNeighborChangedSignal, this);
@@ -167,8 +167,8 @@ void PimSm::stopPIMRouting()
         host->unsubscribe(ipv4MdataRegisterSignal, this);
         host->unsubscribe(ipv4DataOnRpfSignal, this);
         host->unsubscribe(ipv4DataOnNonrpfSignal, this);
-        host->unsubscribe(ipv4McastRegisteredSignal, this);
-        host->unsubscribe(ipv4McastUnregisteredSignal, this);
+        host->unsubscribe(ipv4MulticastGroupRegisteredSignal, this);
+        host->unsubscribe(ipv4MulticastGroupUnregisteredSignal, this);
         host->unsubscribe(pimNeighborAddedSignal, this);
         host->unsubscribe(pimNeighborDeletedSignal, this);
         host->unsubscribe(pimNeighborChangedSignal, this);
@@ -282,14 +282,14 @@ void PimSm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
     const Ipv4Header *ipv4Header;
     PimInterface *pimInterface;
 
-    if (signalID == ipv4McastRegisteredSignal) {
+    if (signalID == ipv4MulticastGroupRegisteredSignal) {
         EV << "pimSM::receiveChangeNotification - NEW IGMP ADDED" << endl;
         const Ipv4MulticastGroupInfo *info = check_and_cast<const Ipv4MulticastGroupInfo *>(obj);
         pimInterface = pimIft->getInterfaceById(info->ie->getInterfaceId());
         if (pimInterface && pimInterface->getMode() == PimInterface::SparseMode)
             multicastReceiverAdded(info->ie, info->groupAddress);
     }
-    else if (signalID == ipv4McastUnregisteredSignal) {
+    else if (signalID == ipv4MulticastGroupUnregisteredSignal) {
         EV << "pimSM::receiveChangeNotification - IGMP REMOVED" << endl;
         const Ipv4MulticastGroupInfo *info = check_and_cast<const Ipv4MulticastGroupInfo *>(obj);
         pimInterface = pimIft->getInterfaceById(info->ie->getInterfaceId());
@@ -596,8 +596,8 @@ void PimSm::processRegisterPacket(Packet *pk)
 
     emit(rcvdRegisterPkSignal, pk);
 
-    Ipv4Address srcAddr = pk->getTag<L3AddressInd>()->getSrcAddress().toIPv4();
-    Ipv4Address destAddr = pk->getTag<L3AddressInd>()->getDestAddress().toIPv4();
+    Ipv4Address srcAddr = pk->getTag<L3AddressInd>()->getSrcAddress().toIpv4();
+    Ipv4Address destAddr = pk->getTag<L3AddressInd>()->getDestAddress().toIpv4();
     const auto& encapData = pk->peekHeader<Ipv4Header>();
     Ipv4Address source = encapData->getSrcAddress();
     Ipv4Address group = encapData->getDestAddress();
@@ -686,7 +686,7 @@ void PimSm::processAssertPacket(Packet *pk)
     int incomingInterfaceId = pk->getTag<InterfaceInd>()->getInterfaceId();
     Ipv4Address source = pkt->getSourceAddress();
     Ipv4Address group = pkt->getGroupAddress();
-    AssertMetric receivedMetric = AssertMetric(pkt->getR(), pkt->getMetricPreference(), pkt->getMetric(), pk->getTag<L3AddressInd>()->getSrcAddress().toIPv4());
+    AssertMetric receivedMetric = AssertMetric(pkt->getR(), pkt->getMetricPreference(), pkt->getMetric(), pk->getTag<L3AddressInd>()->getSrcAddress().toIpv4());
 
     EV_INFO << "Received Assert(" << (source.isUnspecified() ? "*" : source.str()) << ", " << group << ")"
             << " packet on interface '" << ift->getInterfaceById(incomingInterfaceId)->getInterfaceName() << "'.\n";
@@ -1729,7 +1729,7 @@ bool PimSm::deleteMulticastRoute(Route *route)
 {
     if (removeRoute(route)) {
         // remove route from Ipv4 routing table
-        Ipv4MulticastRoute *ipv4Route = findIPv4Route(route->source, route->group);
+        Ipv4MulticastRoute *ipv4Route = findIpv4Route(route->source, route->group);
         if (ipv4Route)
             rt->deleteMulticastRoute(ipv4Route);
 
@@ -1810,7 +1810,7 @@ PimSm::Route *PimSm::addNewRouteG(Ipv4Address group, int flags)
 
     SourceAndGroup sg(Ipv4Address::UNSPECIFIED_ADDRESS, group);
     gRoutes[sg] = newRouteG;
-    rt->addMulticastRoute(createIPv4Route(newRouteG));
+    rt->addMulticastRoute(createIpv4Route(newRouteG));
 
     // set (*,G) route in (S,G) and (S,G,rpt) routes
     for (auto & elem : sgRoutes) {
@@ -1864,7 +1864,7 @@ PimSm::Route *PimSm::addNewRouteSG(Ipv4Address source, Ipv4Address group, int fl
 
     SourceAndGroup sg(source, group);
     sgRoutes[sg] = newRouteSG;
-    rt->addMulticastRoute(createIPv4Route(newRouteSG));
+    rt->addMulticastRoute(createIpv4Route(newRouteSG));
 
     // set (*,G) route if exists
     newRouteSG->gRoute = findRouteG(group);
@@ -1881,7 +1881,7 @@ PimSm::Route *PimSm::addNewRouteSG(Ipv4Address source, Ipv4Address group, int fl
     return newRouteSG;
 }
 
-Ipv4MulticastRoute *PimSm::createIPv4Route(Route *route)
+Ipv4MulticastRoute *PimSm::createIpv4Route(Route *route)
 {
     Ipv4MulticastRoute *newRoute = new Ipv4MulticastRoute();
     newRoute->setOrigin(route->source);
@@ -1923,7 +1923,7 @@ PimSm::Route *PimSm::findRouteSG(Ipv4Address source, Ipv4Address group)
     return it != sgRoutes.end() ? it->second : nullptr;
 }
 
-Ipv4MulticastRoute *PimSm::findIPv4Route(Ipv4Address source, Ipv4Address group)
+Ipv4MulticastRoute *PimSm::findIpv4Route(Ipv4Address source, Ipv4Address group)
 {
     unsigned int numMulticastRoutes = rt->getNumMulticastRoutes();
     for (unsigned int i = 0; i < numMulticastRoutes; ++i) {
@@ -2055,7 +2055,7 @@ void PimSm::Route::removeDownstreamInterface(unsigned int i)
 {
     // remove corresponding out interface from the Ipv4 route,
     // because it refers to the downstream interface to be deleted
-    Ipv4MulticastRoute *ipv4Route = pimsm()->findIPv4Route(source, group);
+    Ipv4MulticastRoute *ipv4Route = pimsm()->findIpv4Route(source, group);
     ipv4Route->removeOutInterface(i);
 
     DownstreamInterface *outInterface = downstreamInterfaces[i];

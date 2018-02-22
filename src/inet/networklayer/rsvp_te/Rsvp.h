@@ -21,10 +21,10 @@
 
 #include "inet/common/scenario/IScriptable.h"
 #include "inet/networklayer/rsvp_te/IntServ_m.h"
-#include "RsvpPathMsg.h"
-#include "RsvpResvMsg.h"
-#include "RsvpHelloMsg.h"
-#include "SignallingMsg_m.h"
+#include "inet/networklayer/rsvp_te/RsvpPathMsg_m.h"
+#include "inet/networklayer/rsvp_te/RsvpResvMsg_m.h"
+#include "inet/networklayer/rsvp_te/RsvpHelloMsg_m.h"
+#include "inet/networklayer/rsvp_te/SignallingMsg_m.h"
 #include "inet/networklayer/rsvp_te/IRsvpClassifier.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 

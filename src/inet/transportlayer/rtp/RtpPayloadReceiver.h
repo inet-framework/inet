@@ -93,7 +93,7 @@ class INET_API RtpPayloadReceiver : public cSimpleModule
     /**
      * An output signal used to store arrival of rtp data packets.
      */
-    static simsignal_t _rcvdPkRtpTimestampSignal;
+    static simsignal_t rcvdPkRtpTimestampSignal;
 };
 
 } // namespace rtp

@@ -20,12 +20,6 @@
 
 namespace inet {
 
-simsignal_t ppTxBeginSignal = cComponent::registerSignal("ppTxBegin");
-simsignal_t ppTxEndSignal = cComponent::registerSignal("ppTxEnd");
-simsignal_t ppRxEndSignal = cComponent::registerSignal("ppRxEnd");
-simsignal_t txAckedSignal = cComponent::registerSignal("txAcked");
-simsignal_t l2QDropSignal = cComponent::registerSignal("l2QDrop");
-simsignal_t macBecameIdleSignal = cComponent::registerSignal("macBecameIdle");
 simsignal_t l2BeaconLostSignal = cComponent::registerSignal("l2BeaconLost");
 simsignal_t l2AssociatedSignal = cComponent::registerSignal("l2Associated");
 simsignal_t l2AssociatedNewApSignal = cComponent::registerSignal("l2AssociatedNewAp");
@@ -34,9 +28,7 @@ simsignal_t l2DisassociatedSignal = cComponent::registerSignal("l2Disassociated"
 simsignal_t l2ApAssociatedSignal = cComponent::registerSignal("l2ApAssociated");
 simsignal_t l2ApDisassociatedSignal = cComponent::registerSignal("l2ApDisassociated");
 
-simsignal_t linkBreakSignal = cComponent::registerSignal("linkBreak");
-simsignal_t linkPromiscuousSignal = cComponent::registerSignal("linkPromiscuous");
-simsignal_t linkFullPromiscuousSignal = cComponent::registerSignal("linkFullPromiscuous");
+simsignal_t linkBrokenSignal = cComponent::registerSignal("linkBroken");
 
 simsignal_t modesetChangedSignal = cComponent::registerSignal("modesetChanged");
 
@@ -59,11 +51,11 @@ simsignal_t mrouteDeletedSignal = cComponent::registerSignal("mrouteDeleted");
 simsignal_t mrouteChangedSignal = cComponent::registerSignal("mrouteChanged");
 
 // layer 3 - Ipv4
-simsignal_t ipv4McastJoinSignal = cComponent::registerSignal("ipv4McastJoin");
-simsignal_t ipv4McastLeaveSignal = cComponent::registerSignal("ipv4McastLeave");
+simsignal_t ipv4MulticastGroupJoinedSignal = cComponent::registerSignal("ipv4MulticastGroupJoined");
+simsignal_t ipv4MulticastGroupLeftSignal = cComponent::registerSignal("ipv4MulticastGroupLeft");
 simsignal_t ipv4McastChangeSignal = cComponent::registerSignal("ipv4McastChange");
-simsignal_t ipv4McastRegisteredSignal = cComponent::registerSignal("ipv4McastRegistered");
-simsignal_t ipv4McastUnregisteredSignal = cComponent::registerSignal("ipv4McastUnregistered");
+simsignal_t ipv4MulticastGroupRegisteredSignal = cComponent::registerSignal("ipv4MulticastGroupRegistered");
+simsignal_t ipv4MulticastGroupUnregisteredSignal = cComponent::registerSignal("ipv4MulticastGroupUnregistered");
 
 // for PIM
 simsignal_t ipv4NewMulticastSignal = cComponent::registerSignal("ipv4NewMulticast");
@@ -77,10 +69,10 @@ simsignal_t pimNeighborChangedSignal = cComponent::registerSignal("pimNeighborCh
 // layer 3 - Ipv6
 simsignal_t ipv6HandoverOccurredSignal = cComponent::registerSignal("ipv6HandoverOccurred");
 simsignal_t mipv6RoCompletedSignal = cComponent::registerSignal("mipv6RoCompleted");
-simsignal_t ipv6McastJoinSignal = cComponent::registerSignal("ipv6McastJoin");
-simsignal_t ipv6McastLeaveSignal = cComponent::registerSignal("ipv6McastLeave");
-simsignal_t ipv6McastRegisteredSignal = cComponent::registerSignal("ipv6McastRegistered");
-simsignal_t ipv6McastUnregisteredSignal = cComponent::registerSignal("ipv6McastUnregistered");
+simsignal_t ipv6MulticastGroupJoinedSignal = cComponent::registerSignal("ipv6MulticastGroupJoined");
+simsignal_t ipv6MulticastGroupLeftSignal = cComponent::registerSignal("ipv6MulticastGroupLeft");
+simsignal_t ipv6MulticastGroupRegisteredSignal = cComponent::registerSignal("ipv6MulticastGroupRegistered");
+simsignal_t ipv6MulticastGroupUnregisteredSignal = cComponent::registerSignal("ipv6MulticastGroupUnregistered");
 
 // - layer 4 (transport)
 //...
@@ -89,7 +81,7 @@ simsignal_t ipv6McastUnregisteredSignal = cComponent::registerSignal("ipv6McastU
 //...
 
 // general
-simsignal_t packetDropSignal = cComponent::registerSignal("packetDrop");
+simsignal_t packetDroppedSignal = cComponent::registerSignal("packetDropped");
 
 simsignal_t packetSentToUpperSignal = cComponent::registerSignal("packetSentToUpper");
 simsignal_t packetReceivedFromUpperSignal = cComponent::registerSignal("packetReceivedFromUpper");
@@ -100,8 +92,8 @@ simsignal_t packetReceivedFromLowerSignal = cComponent::registerSignal("packetRe
 simsignal_t packetSentToPeerSignal = cComponent::registerSignal("packetSentToPeer");
 simsignal_t packetReceivedFromPeerSignal = cComponent::registerSignal("packetReceivedFromPeer");
 
-simsignal_t sentPkSignal = cComponent::registerSignal("sentPk");
-simsignal_t rcvdPkSignal = cComponent::registerSignal("rcvdPk");
+simsignal_t packetSentSignal = cComponent::registerSignal("packetSent");
+simsignal_t packetReceivedSignal = cComponent::registerSignal("packetReceived");
 
 void printSignalBanner(simsignal_t signalID, const cObject *obj)
 {

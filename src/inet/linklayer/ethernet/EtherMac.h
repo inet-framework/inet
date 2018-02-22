@@ -83,7 +83,7 @@ class INET_API EtherMac : public EtherMacBase
     long bytesSentInBurst = 0;    // Number of bytes transmitted in current frame burst
 
     static simsignal_t collisionSignal;
-    static simsignal_t backoffSignal;
+    static simsignal_t backoffSlotsGeneratedSignal;
 
   protected:
     // event handlers
