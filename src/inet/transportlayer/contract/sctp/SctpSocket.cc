@@ -496,7 +496,6 @@ void SctpSocket::setCallbackObject(CallbackInterface *callback, void *yourPointe
 
 void SctpSocket::processMessage(cMessage *msg)
 {
-    SctpStatusInfo *status;
     switch (msg->getKind()) {
         case SCTP_I_DATA:
             EV_INFO << "SCTP_I_DATA\n";

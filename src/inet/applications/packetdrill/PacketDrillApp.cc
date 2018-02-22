@@ -236,7 +236,7 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                     scheduleEvent();
                 }
             }
-        } else if (socketId == tcpSocketId) {
+        } else if (socketId == tcpConnId) {
             // received from TCP
             switch (msg->getKind()) {
                 case TCP_I_ESTABLISHED:

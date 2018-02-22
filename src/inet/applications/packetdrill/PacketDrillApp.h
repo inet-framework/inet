@@ -88,6 +88,7 @@ class INET_API PacketDrillApp : public TcpSessionApp, public ILifecycle
         int tcpConnId;
         int sctpAssocId;
         int tunSocketId;
+        int udpSocketId;
         int tunInterfaceId;
         UdpSocket udpSocket;
         TcpSocket tcpSocket;
