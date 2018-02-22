@@ -90,7 +90,7 @@ void PacketPrinter::printPacket(std::ostream& stream, Packet *packet) const
 //    Options options;
 //    options.enabledTags = getDefaultEnabledTags();
 //    printMessage(stream, message, &options);
-    printPacket(stream, message, nullptr);
+    printPacket(stream, packet, nullptr);
 }
 
 void PacketPrinter::printPacket(std::ostream& stream, Packet *packet, const Options *options) const
