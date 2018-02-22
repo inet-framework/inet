@@ -187,9 +187,9 @@ void IpvxTrafGen::sendPacket()
     L3Address destAddr = chooseDestAddr();
 
     IL3AddressType *addressType = destAddr.getAddressType();
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);
-    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
-    packet->addTagIfAbsent<L3AddressReq>()->setDestAddress(destAddr);
+    packet->addTag<PacketProtocolTag>()->setProtocol(protocol);
+    packet->addTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    packet->addTag<L3AddressReq>()->setDestAddress(destAddr);
 
     EV_INFO << "Sending packet: ";
     printPacket(packet);
