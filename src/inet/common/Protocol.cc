@@ -109,6 +109,7 @@ const Protocol Protocol::sctp("sctp", "SCTP");
 const Protocol Protocol::stp("stp", "STP");
 const Protocol Protocol::tcp("tcp", "TCP");
 const Protocol Protocol::udp("udp", "UDP");
+const Protocol Protocol::unitdisk("unitdisk", "UNITDISK");      // INET specific
 const Protocol Protocol::xmac("xmac", "X-MAC");
 const Protocol Protocol::xtp("xtp", "XTP");
 

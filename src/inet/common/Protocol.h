@@ -92,6 +92,7 @@ class INET_API Protocol
     static const Protocol stp;
     static const Protocol tcp;
     static const Protocol udp;
+    static const Protocol unitdisk;
     static const Protocol xmac;
     static const Protocol xtp;
 };

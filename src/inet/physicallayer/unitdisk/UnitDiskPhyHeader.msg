@@ -16,10 +16,12 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.Protocol;
 import inet.common.packet.chunk.Chunk;
 
 namespace inet;
 
 class UnitDiskPhyHeader extends FieldsChunk
 {
+    const Protocol *payloadProtocol @toString("->str()") = nullptr; // specifies a protocol (internal class with an artificial identifier)
 }
