@@ -1419,5 +1419,21 @@ uint16_t Udp::computeCrc(const Protocol *networkProtocol, const L3Address& srcAd
     return crc == 0x0000 ? 0xFFFF : crc;
 }
 
+bool Udp::isCorrectPacket(Packet *packet, const Ptr<const UdpHeader>& udpHeader)
+{
+    auto trailerPopOffset = packet->getTrailerPopOffset();
+    auto udpHeaderOffset = packet->getHeaderPopOffset() - udpHeader->getChunkLength();
+    if (B(udpHeader->getTotalLengthField()) > trailerPopOffset - udpHeaderOffset)
+        return false;
+    else {
+        auto l3AddressInd = packet->findTag<L3AddressInd>();
+        auto networkProtocolInd = packet->findTag<NetworkProtocolInd>();
+        if (l3AddressInd != nullptr && networkProtocolInd != nullptr)
+            return !verifyCrc(networkProtocolInd->getProtocol(), udpHeader, packet);
+        else
+            return udpHeader->getCrcMode() != CrcMode::CRC_DECLARED_INCORRECT;
+    }
+}
+
 } // namespace inet
 
