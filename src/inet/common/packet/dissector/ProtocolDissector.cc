@@ -42,38 +42,10 @@ Register_Protocol_Dissector(&Protocol::tcp, TcpDissector);
 
 void DefaultDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    const auto& header = packet->peekHeader();
-    // TODO: use signal tag as opposed to protocol tag?! e.g. IEEE 802. 11 signal -> means 802.11 PHY header
-    if (const auto& ethernetPhyHeader = dynamicPtrCast<const inet::EthernetPhyHeader>(header)) {
-        packet->setHeaderPopOffset(packet->getHeaderPopOffset() + ethernetPhyHeader->getChunkLength());
-        callback.startProtocolDataUnit(nullptr);
-        callback.visitChunk(header, nullptr);
-        callback.dissectPacket(packet, &Protocol::ethernetMac);
-        callback.endProtocolDataUnit(nullptr);
-    }
-    else if (const auto& pppHeader = dynamicPtrCast<const inet::PppHeader>(header)) {
-        callback.dissectPacket(packet, &Protocol::ppp);
-    }
-    else if (const auto& ieee80211PhyHeader = dynamicPtrCast<const inet::physicallayer::Ieee80211PhyHeader>(header)) {
-        callback.startProtocolDataUnit(nullptr);
-        packet->setHeaderPopOffset(packet->getHeaderPopOffset() + ieee80211PhyHeader->getChunkLength());
-        callback.visitChunk(header, nullptr);
-        const auto& trailer = packet->peekTrailer();
-        // TODO: KLUDGE: padding length
-        auto ieee80211PhyPadding = dynamicPtrCast<const BitCountChunk>(trailer);
-        if (ieee80211PhyPadding != nullptr)
-            packet->setTrailerPopOffset(packet->getTrailerPopOffset() - ieee80211PhyPadding->getChunkLength());
-        callback.dissectPacket(packet, &Protocol::ieee80211Phy);
-        if (ieee80211PhyPadding != nullptr)
-            callback.visitChunk(ieee80211PhyPadding, nullptr);
-        callback.endProtocolDataUnit(nullptr);
-    }
-    else {
-        callback.startProtocolDataUnit(nullptr);
-        callback.visitChunk(packet->peekData(), nullptr);
-        packet->setHeaderPopOffset(packet->getTrailerPopOffset());
-        callback.endProtocolDataUnit(nullptr);
-    }
+    callback.startProtocolDataUnit(nullptr);
+    callback.visitChunk(packet->peekData(), nullptr);
+    packet->setHeaderPopOffset(packet->getTrailerPopOffset());
+    callback.endProtocolDataUnit(nullptr);
 }
 
 void Ieee80211PhyDissector::dissect(Packet *packet, ICallback& callback) const
