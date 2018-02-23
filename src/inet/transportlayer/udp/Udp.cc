@@ -1420,7 +1420,7 @@ bool Udp::isCorrectPacket(Packet *packet, const Ptr<const UdpHeader>& udpHeader)
         auto l3AddressInd = packet->findTag<L3AddressInd>();
         auto networkProtocolInd = packet->findTag<NetworkProtocolInd>();
         if (l3AddressInd != nullptr && networkProtocolInd != nullptr)
-            return !verifyCrc(networkProtocolInd->getProtocol(), udpHeader, packet);
+            return verifyCrc(networkProtocolInd->getProtocol(), udpHeader, packet);
         else
             return udpHeader->getCrcMode() != CrcMode::CRC_DECLARED_INCORRECT;
     }
