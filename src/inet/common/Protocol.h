@@ -89,6 +89,8 @@ class INET_API Protocol
     static const Protocol ppp;
     static const Protocol rsvp;
     static const Protocol sctp;
+    static const Protocol shortcutMac;
+    static const Protocol shortcutPhy;
     static const Protocol stp;
     static const Protocol tcp;
     static const Protocol udp;

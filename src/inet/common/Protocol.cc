@@ -106,6 +106,8 @@ const Protocol Protocol::pim("pim", "PIM");
 const Protocol Protocol::ppp("ppp", "PPP");
 const Protocol Protocol::rsvp("rsvp", "RSVP");
 const Protocol Protocol::sctp("sctp", "SCTP");
+const Protocol Protocol::shortcutMac("shortcutmac", "Shortcut MAC"); // INET specific
+const Protocol Protocol::shortcutPhy("shortcutphy", "Shortcut PHY"); // INET specific
 const Protocol Protocol::stp("stp", "STP");
 const Protocol Protocol::tcp("tcp", "TCP");
 const Protocol Protocol::udp("udp", "UDP");
