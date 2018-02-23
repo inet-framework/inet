@@ -74,15 +74,27 @@ class INET_API UdpDissector : public ProtocolDissector
 void UdpDissector::dissect(Packet *packet, ICallback& callback) const
 {
     auto trailerPopOffset = packet->getTrailerPopOffset();
-    auto udpEndOffset = packet->getHeaderPopOffset();
-    const auto& header = packet->popHeader<UdpHeader>();
-    udpEndOffset += B(header->getTotalLengthField());
-    packet->setTrailerPopOffset(udpEndOffset);
+    auto udpHeaderOffset = packet->getHeaderPopOffset();
+    auto header = packet->popHeader<UdpHeader>();
+    if (header->getCrcMode() == CrcMode::CRC_DECLARED_INCORRECT) {
+        //TODO crc error
+        packet->setHeaderPopOffset(udpHeaderOffset);
+        callback.dissectPacket(packet, nullptr);
+        return;
+    }
+    if (B(header->getTotalLengthField()) > trailerPopOffset - udpHeaderOffset) {
+        //TODO field error: totalLengthField larger than available data.
+        packet->setHeaderPopOffset(udpHeaderOffset);
+        callback.dissectPacket(packet, nullptr);
+        return;
+    }
+    auto udpPayloadEndOffset = udpHeaderOffset + B(header->getTotalLengthField());
     callback.startProtocolDataUnit(&Protocol::udp);
+    packet->setTrailerPopOffset(udpPayloadEndOffset);
     callback.visitChunk(header, &Protocol::udp);
     callback.dissectPacket(packet, nullptr);
     ASSERT(packet->getDataLength() == B(0));
-    packet->setHeaderPopOffset(udpEndOffset);
+    packet->setHeaderPopOffset(udpPayloadEndOffset);
     packet->setTrailerPopOffset(trailerPopOffset);
     callback.endProtocolDataUnit(&Protocol::udp);
 }
