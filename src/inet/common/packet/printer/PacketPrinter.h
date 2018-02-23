@@ -30,6 +30,7 @@ class INET_API PacketPrinter : public cMessagePrinter
   protected:
     class Context {
       public:
+        bool isCorrect = true;
         std::stringstream sourceColumn;
         std::stringstream destinationColumn;
         std::string protocolColumn;

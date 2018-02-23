@@ -109,12 +109,15 @@ void PacketPrinter::printPacket(std::ostream& stream, Packet *packet, const Opti
         context.protocolColumn = "mixed";
         const_cast<PacketPrinter *>(this)->printPacketLeftToRight(pduTreeBuilder.getTopLevelPdu(), context);
     }
-    stream << context.sourceColumn.str() << "\t" << context.destinationColumn.str() << "\t\x1b[34m" << context.protocolColumn << "\x1b[0m\t" << context.infoColumn.str() << std::endl;
+    if (!context.isCorrect)
+        stream << "\x1b[103m";
+    stream << "\x1b[30m" << context.sourceColumn.str() << "\t" << context.destinationColumn.str() << "\t\x1b[34m" << context.protocolColumn << "\x1b[30m\t" << context.infoColumn.str() << std::endl;
 }
 
 void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, Context& context)
 {
     auto protocol = protocolDataUnit->getProtocol();
+    context.isCorrect &= protocolDataUnit->isCorrect();
     for (const auto& chunk : protocolDataUnit->getChunks()) {
         if (auto childLevel = dynamicPtrCast<const PacketDissector::ProtocolDataUnit>(chunk))
             printPacketInsideOut(childLevel, context);
@@ -228,6 +231,7 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
 void PacketPrinter::printPacketLeftToRight(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, Context& context)
 {
     auto protocol = protocolDataUnit->getProtocol();
+    context.isCorrect &= protocolDataUnit->isCorrect();
     for (const auto& chunk : protocolDataUnit->getChunks()) {
         if (auto childLevel = dynamicPtrCast<const PacketDissector::ProtocolDataUnit>(chunk))
             printPacketLeftToRight(childLevel, context);
