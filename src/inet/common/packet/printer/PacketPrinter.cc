@@ -13,6 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
+#include "inet/common/packet/chunk/BitCountChunk.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/ProtocolTag_m.h"
 
@@ -62,6 +64,18 @@ std::vector<std::string> PacketPrinter::getColumnNames(const Options *options) c
     return {"source", "destination", "protocol", "info"};
 }
 
+void PacketPrinter::printContext(std::ostream& stream, Context& context) const
+{
+    if (!context.isCorrect)
+        stream << "\x1b[103m";
+    stream << "\x1b[30m"
+           << context.sourceColumn.str() << "\t"
+           << context.destinationColumn.str() << "\t\x1b[34m"
+           << context.protocolColumn << "\x1b[30m\t"
+           << context.infoColumn.str()
+           << std::endl;
+}
+
 void PacketPrinter::printMessage(std::ostream& stream, cMessage *message) const
 {
     // TODO: enable when migrating to new printer API
@@ -73,15 +87,37 @@ void PacketPrinter::printMessage(std::ostream& stream, cMessage *message) const
 
 void PacketPrinter::printMessage(std::ostream& stream, cMessage *message, const Options *options) const
 {
-    auto separator = "";
+    Context context;
     for (auto cpacket = dynamic_cast<cPacket *>(message); cpacket != nullptr; cpacket = cpacket->getEncapsulatedPacket()) {
-        stream << separator;
-        if (auto packet = dynamic_cast<Packet *>(cpacket))
-            printPacket(stream, packet, options);
+        if (auto signal = dynamic_cast<inet::physicallayer::Signal *>(cpacket))
+            printSignal(signal, options, context);
+        else if (auto packet = dynamic_cast<Packet *>(cpacket))
+            printPacket(packet, options, context);
         else
-            stream << separator << cpacket->getClassName() << ":" << cpacket->getByteLength() << " bytes";
-        separator = "  \t";
+            context.infoColumn << cpacket->str();
     }
+    printContext(stream, context);
+}
+
+void PacketPrinter::printSignal(std::ostream& stream, inet::physicallayer::Signal *signal) const
+{
+    // TODO: enable when migrating to new printer API
+//    Options options;
+//    options.enabledTags = getDefaultEnabledTags();
+//    printMessage(stream, message, &options);
+    printSignal(stream, signal, nullptr);
+}
+
+void PacketPrinter::printSignal(std::ostream& stream, inet::physicallayer::Signal *signal, const Options *options) const
+{
+    Context context;
+    printSignal(signal, options, context);
+    printContext(stream, context);
+}
+
+void PacketPrinter::printSignal(inet::physicallayer::Signal *signal, const Options *options, Context& context) const
+{
+    context.infoColumn << signal->str();
 }
 
 void PacketPrinter::printPacket(std::ostream& stream, Packet *packet) const
@@ -95,26 +131,25 @@ void PacketPrinter::printPacket(std::ostream& stream, Packet *packet) const
 
 void PacketPrinter::printPacket(std::ostream& stream, Packet *packet, const Options *options) const
 {
+    Context context;
+    printPacket(packet, options, context);
+    printContext(stream, context);
+}
+
+void PacketPrinter::printPacket(Packet *packet, const Options *options, Context& context) const
+{
     PacketDissector::PduTreeBuilder pduTreeBuilder;
     auto packetProtocolTag = packet->findTag<PacketProtocolTag>();
     auto protocol = packetProtocolTag != nullptr ? packetProtocolTag->getProtocol() : nullptr;
     PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, pduTreeBuilder);
     packetDissector.dissectPacket(packet, protocol);
-    Context context;
     if (pduTreeBuilder.isSimplyEncapsulatedPacket())
         const_cast<PacketPrinter *>(this)->printPacketInsideOut(pduTreeBuilder.getTopLevelPdu(), context);
-    else {
-        context.sourceColumn << "mixed";
-        context.destinationColumn << "mixed";
-        context.protocolColumn = "mixed";
+    else
         const_cast<PacketPrinter *>(this)->printPacketLeftToRight(pduTreeBuilder.getTopLevelPdu(), context);
-    }
-    if (!context.isCorrect)
-        stream << "\x1b[103m";
-    stream << "\x1b[30m" << context.sourceColumn.str() << "\t" << context.destinationColumn.str() << "\t\x1b[34m" << context.protocolColumn << "\x1b[30m\t" << context.infoColumn.str() << std::endl;
 }
 
-void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, Context& context)
+void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, Context& context) const
 {
     auto protocol = protocolDataUnit->getProtocol();
     context.isCorrect &= protocolDataUnit->isCorrect();
@@ -134,17 +169,34 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
                 // TODO: printEthernetChunk(context.infoColumn, chunk);
             }
         }
-        else if (protocol == &Protocol::ieee80211Mac) {
-            auto header = dynamicPtrCast<const ieee80211::Ieee80211TwoAddressHeader>(chunk);
-            if (header != nullptr) {
-                context.sourceColumn << header->getTransmitterAddress();
-                context.destinationColumn << header->getReceiverAddress();
+        else if (protocol == &Protocol::ieee80211Phy) {
+            if (protocolDataUnit->getLevel() > context.infoLevel) {
+                context.infoLevel = protocolDataUnit->getLevel();
+                context.protocolColumn = protocol->getDescriptiveName();
+                context.infoColumn.str("");
+                printIeee80211PhyChunk(context.infoColumn, chunk);
             }
+        }
+        else if (protocol == &Protocol::ieee80211Mac) {
+            auto oneAddressHeader = dynamicPtrCast<const ieee80211::Ieee80211OneAddressHeader>(chunk);
+            if (oneAddressHeader != nullptr)
+                context.destinationColumn << oneAddressHeader->getReceiverAddress();
+            auto twoAddressHeader = dynamicPtrCast<const ieee80211::Ieee80211TwoAddressHeader>(chunk);
+            if (twoAddressHeader != nullptr)
+                context.sourceColumn << twoAddressHeader->getTransmitterAddress();
             if (protocolDataUnit->getLevel() > context.infoLevel) {
                 context.infoLevel = protocolDataUnit->getLevel();
                 context.protocolColumn = protocol->getDescriptiveName();
                 context.infoColumn.str("");
                 printIeee80211MacChunk(context.infoColumn, chunk);
+            }
+        }
+        else if (protocol == &Protocol::ieee80211Mgmt) {
+            if (protocolDataUnit->getLevel() > context.infoLevel) {
+                context.infoLevel = protocolDataUnit->getLevel();
+                context.protocolColumn = protocol->getDescriptiveName();
+                context.infoColumn.str("");
+                printIeee80211MgmtChunk(context.infoColumn, chunk);
             }
         }
         else if (protocol == &Protocol::ieee8022) {
@@ -228,7 +280,7 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
     }
 }
 
-void PacketPrinter::printPacketLeftToRight(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, Context& context)
+void PacketPrinter::printPacketLeftToRight(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, Context& context) const
 {
     auto protocol = protocolDataUnit->getProtocol();
     context.isCorrect &= protocolDataUnit->isCorrect();
@@ -260,7 +312,40 @@ void PacketPrinter::printPacketLeftToRight(const Ptr<const PacketDissector::Prot
 
 void PacketPrinter::printIeee80211MacChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const
 {
-    stream << "(IEEE 802.11 Mac) " << chunk;
+    using namespace ieee80211;
+    if (auto macHeader = dynamicPtrCast<const inet::ieee80211::Ieee80211MacHeader>(chunk)) {
+        stream << "WLAN ";
+        switch (macHeader->getType()) {
+            case ST_RTS: {
+                stream << "RTS";
+                break;
+            }
+            case ST_CTS:
+                stream << "CTS";
+                break;
+
+            case ST_ACK:
+                stream << "ACK";
+                break;
+
+            case ST_BLOCKACK_REQ:
+                stream << "BlockAckReq";
+                break;
+
+            case ST_BLOCKACK:
+                stream << "BlockAck";
+                break;
+
+            case ST_DATA:
+            case ST_DATA_WITH_QOS:
+                stream << "DATA";
+                break;
+
+            default:
+                stream << "???";
+                break;
+        }
+    }
 }
 
 void PacketPrinter::printIeee80211MgmtChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const
@@ -338,7 +423,12 @@ void PacketPrinter::printUnimplementedProtocolChunk(std::ostream& stream, const 
 
 void PacketPrinter::printUnknownProtocolChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const
 {
-    stream << "(UNKNOWN) " << chunk;
+    if (auto byteCountChunk = dynamicPtrCast<const ByteCountChunk>(chunk))
+        stream << byteCountChunk->getChunkLength();
+    else if (auto bitCountChunk = dynamicPtrCast<const BitCountChunk>(chunk))
+        stream << bitCountChunk->getChunkLength();
+    else
+        stream << "(UNKNOWN) " << chunk;
 }
 
 } // namespace

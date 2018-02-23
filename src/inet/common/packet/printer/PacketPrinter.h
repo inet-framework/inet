@@ -19,6 +19,7 @@
 #include <stack>
 #include "inet/common/packet/chunk/SequenceChunk.h"
 #include "inet/common/packet/dissector/PacketDissector.h"
+#include "inet/physicallayer/common/packetlevel/Signal.h"
 
 namespace inet {
 
@@ -39,8 +40,11 @@ class INET_API PacketPrinter : public cMessagePrinter
     };
 
   protected:
-    virtual void printPacketInsideOut(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolLevel, Context& context);
-    virtual void printPacketLeftToRight(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolLevel, Context& context);
+    virtual void printContext(std::ostream& stream, Context& context) const;
+    virtual void printPacketInsideOut(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolLevel, Context& context) const;
+    virtual void printPacketLeftToRight(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolLevel, Context& context) const;
+    virtual void printSignal(inet::physicallayer::Signal *signal, const Options *options, Context& context) const;
+    virtual void printPacket(Packet *packet, const Options *options, Context& context) const;
 
   public:
     virtual int getScoreFor(cMessage *msg) const override;
@@ -48,10 +52,16 @@ class INET_API PacketPrinter : public cMessagePrinter
     virtual std::vector<std::string> getSupportedTags() const;
     virtual std::vector<std::string> getDefaultEnabledTags() const;
     virtual std::vector<std::string> getColumnNames(const Options *options) const;
+
     virtual void printMessage(std::ostream& stream, cMessage *message) const;
     virtual void printMessage(std::ostream& stream, cMessage *message, const Options *options) const; //TODO override;
+
+    virtual void printSignal(std::ostream& stream, inet::physicallayer::Signal *signal) const;
+    virtual void printSignal(std::ostream& stream, inet::physicallayer::Signal *signal, const Options *options) const;
+
     virtual void printPacket(std::ostream& stream, Packet *packet) const;
     virtual void printPacket(std::ostream& stream, Packet *packet, const Options *options) const;
+
     virtual void printIeee80211MacChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const;
     virtual void printIeee80211MgmtChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const;
     virtual void printIeee80211PhyChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const;
