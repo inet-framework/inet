@@ -73,6 +73,7 @@ const Protocol *Protocol::getProtocol(const char *name)
 
 const Protocol Protocol::ackingmac("ackingmac", "Acking MAC"); // INET specific
 const Protocol Protocol::aodv("aodv", "AODV");
+const Protocol Protocol::apskPhy("apskphy", "APSK PHY"); // INET specific
 const Protocol Protocol::arp("arp", "ARP");
 const Protocol Protocol::bgp("bgp", "BGP");
 const Protocol Protocol::bmac("bmac", "B-MAC");
