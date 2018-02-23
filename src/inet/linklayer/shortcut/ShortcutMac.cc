@@ -21,6 +21,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/shortcut/ShortcutMac.h"
+#include "inet/linklayer/shortcut/ShortcutMacHeader_m.h"
 
 namespace inet {
 
@@ -113,8 +114,17 @@ void ShortcutMac::sendToPeer(Packet *packet, ShortcutMac *peer)
     }
     else {
         auto length = b(lengthOverhead->intValue());
-        if (length != b(0))
-            packet->insertHeader(makeShared<BitCountChunk>(length));
+        auto packetProtocol = packet->getTag<PacketProtocolTag>()->getProtocol();
+        packet->clearTags();
+        if (length != b(0)) {
+            auto header = makeShared<ShortcutMacHeader>();
+            header->setChunkLength(length);
+            header->setPayloadProtocol(packetProtocol);
+            packet->insertHeader(header);
+            packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::shortcutMac);
+        }
+        else
+            packet->addTag<PacketProtocolTag>()->setProtocol(packetProtocol);
         simtime_t transmissionDuration = packet->getBitLength() / bitrate + durationOverhead->doubleValue();
         packet->setDuration(transmissionDuration);
         sendDirect(packet, propagationDelay->doubleValue(), transmissionDuration, peer->gate("peerIn"));
@@ -123,12 +133,15 @@ void ShortcutMac::sendToPeer(Packet *packet, ShortcutMac *peer)
 
 void ShortcutMac::receiveFromPeer(Packet *packet)
 {
-    auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-    packet->clearTags();
-    packet->addTag<PacketProtocolTag>()->setProtocol(protocol);
-    packet->addTag<DispatchProtocolReq>()->setProtocol(protocol);
+    auto packetProtocolTag = packet->getTag<PacketProtocolTag>();
+    auto packetProtocol = packetProtocolTag->getProtocol();
+    if (packetProtocol == &Protocol::shortcutMac) {
+        const auto& header = packet->popHeader<ShortcutMacHeader>();
+        packetProtocol = header->getPayloadProtocol();
+        packetProtocolTag->setProtocol(packetProtocol);
+    }
+    packet->addTag<DispatchProtocolReq>()->setProtocol(packetProtocol);
     packet->addTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-    packet->popHeader<BitCountChunk>();
     sendUp(packet);
 }
 
