@@ -57,6 +57,12 @@ int ProtocolGroup::getProtocolNumber(const Protocol *protocol) const
         throw cRuntimeError("Unknown protocol: id = %d, name = %s", protocol->getId(), protocol->getName());
 }
 
+void ProtocolGroup::addProtocol(int protocolId, const Protocol *protocol)
+{
+    protocolNumberToProtocol[protocolId] = protocol;
+    protocolToProtocolNumber[protocol] = protocolId;
+}
+
 
 //FIXME use constants instead of numbers
 
@@ -78,7 +84,7 @@ const ProtocolGroup ProtocolGroup::pppprotocol("pppprotocol", {
 });
 
 // excerpt from http://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
-const ProtocolGroup ProtocolGroup::ipprotocol("ipprotocol", {
+ProtocolGroup ProtocolGroup::ipprotocol("ipprotocol", {
     { 1, &Protocol::icmpv4 },
     { 2, &Protocol::igmp },
     { 4, &Protocol::ipv4 },
