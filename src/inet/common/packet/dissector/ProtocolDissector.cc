@@ -80,13 +80,11 @@ void Ieee80211PhyDissector::dissect(Packet *packet, ICallback& callback) const
 {
     const auto& header = packet->popHeader<inet::physicallayer::Ieee80211PhyHeader>();
     callback.startProtocolDataUnit(&Protocol::ieee80211Phy);
-    callback.visitChunk(header, nullptr);
     const auto& trailer = packet->peekTrailer();
     // TODO: KLUDGE: padding length
     auto ieee80211PhyPadding = dynamicPtrCast<const BitCountChunk>(trailer);
     if (ieee80211PhyPadding != nullptr)
         packet->setTrailerPopOffset(packet->getTrailerPopOffset() - ieee80211PhyPadding->getChunkLength());
-
     callback.visitChunk(header, &Protocol::ieee80211Phy);
     callback.dissectPacket(packet, &Protocol::ieee80211Mac);
     if (ieee80211PhyPadding != nullptr)
@@ -129,7 +127,7 @@ void Ieee80211MacDissector::dissect(Packet *packet, ICallback& callback) const
     else
         ASSERT(packet->getDataLength() == b(0));
     callback.visitChunk(trailer, &Protocol::ieee80211Mac);
-    callback.startProtocolDataUnit(&Protocol::ieee80211Mac);
+    callback.endProtocolDataUnit(&Protocol::ieee80211Mac);
 }
 
 void Ieee80211MgmtDissector::dissect(Packet *packet, ICallback& callback) const
