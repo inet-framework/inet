@@ -121,6 +121,8 @@ void Ieee80211MacDissector::dissect(Packet *packet, ICallback& callback) const
         else
             callback.dissectPacket(packet, &Protocol::ieee8022);
     }
+    else if (dynamicPtrCast<const inet::ieee80211::Ieee80211ActionFrame>(header))
+        ASSERT(packet->getDataLength() == b(0));
     else if (dynamicPtrCast<const inet::ieee80211::Ieee80211MgmtHeader>(header))
         callback.dissectPacket(packet, &Protocol::ieee80211Mgmt);
     // TODO: else if (dynamicPtrCast<const inet::ieee80211::Ieee80211ControlFrame>(header))
