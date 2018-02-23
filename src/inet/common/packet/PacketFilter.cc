@@ -65,6 +65,10 @@ void PacketFilter::PacketDissectorCallback::endProtocolDataUnit(const Protocol *
 {
 }
 
+void PacketFilter::PacketDissectorCallback::markIncorrect()
+{
+}
+
 void PacketFilter::PacketDissectorCallback::visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol)
 {
     MatchableObject matchableObject(MatchableObject::ATTRIBUTE_CLASSNAME, chunk.get());

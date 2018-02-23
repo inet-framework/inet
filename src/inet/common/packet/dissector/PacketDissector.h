@@ -53,6 +53,11 @@ class INET_API PacketDissector
         virtual void endProtocolDataUnit(const Protocol *protocol) = 0;
 
         /**
+         * Marks the current protocol data unit as incorrect (e.g. bad CRC/FCS, incorrect length field, bit error).
+         */
+        virtual void markIncorrect() = 0;
+
+        /**
          * Notifies about a new chunk in the current protocol data unit (PDU).
          */
         virtual void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) = 0;
@@ -68,6 +73,7 @@ class INET_API PacketDissector
 
         virtual void startProtocolDataUnit(const Protocol *protocol) override;
         virtual void endProtocolDataUnit(const Protocol *protocol) override;
+        virtual void markIncorrect() override;
         virtual void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) override;
         virtual void dissectPacket(Packet *packet, const Protocol *protocol) override;
     };
@@ -76,6 +82,7 @@ class INET_API PacketDissector
     {
       protected:
         int level;
+        bool isCorrect_ = true;
         const Protocol *protocol;
         std::deque<Ptr<const Chunk>> chunks;
 
@@ -83,6 +90,7 @@ class INET_API PacketDissector
         ProtocolDataUnit(int level, const Protocol* protocol);
 
         int getLevel() const { return level; }
+        bool isCorrect() const { return isCorrect_; }
         const Protocol *getProtocol() const { return protocol; }
         const std::deque<Ptr<const Chunk>>& getChunks() const { return chunks; }
 
@@ -90,6 +98,7 @@ class INET_API PacketDissector
         virtual b getChunkLength() const { throw cRuntimeError("Invalid operation"); }
         virtual const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const { throw cRuntimeError("Invalid operation"); }
 
+        void markIncorrect() { isCorrect_ = false; }
         void insert(const Ptr<const Chunk>& chunk) { chunks.push_back(chunk); }
     };
 
@@ -110,6 +119,7 @@ class INET_API PacketDissector
 
         virtual void startProtocolDataUnit(const Protocol *protocol) override;
         virtual void endProtocolDataUnit(const Protocol *protocol) override;
+        virtual void markIncorrect() override;
         virtual void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) override;
     };
 

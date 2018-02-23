@@ -34,6 +34,11 @@ void PacketDissector::ProtocolDissectorCallback::endProtocolDataUnit(const Proto
     packetDissector.callback.endProtocolDataUnit(protocol);
 }
 
+void PacketDissector::ProtocolDissectorCallback::markIncorrect()
+{
+    packetDissector.callback.markIncorrect();
+}
+
 void PacketDissector::ProtocolDissectorCallback::visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol)
 {
     packetDissector.callback.visitChunk(chunk, protocol);
@@ -76,6 +81,11 @@ void PacketDissector::PduTreeBuilder::endProtocolDataUnit(const Protocol *protoc
 {
     isEndProtocolDataUnitCalled = true;
     pduLevels.pop();
+}
+
+void PacketDissector::PduTreeBuilder::markIncorrect()
+{
+    pduLevels.top()->markIncorrect();
 }
 
 void PacketDissector::PduTreeBuilder::visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol)

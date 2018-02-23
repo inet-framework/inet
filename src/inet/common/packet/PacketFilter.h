@@ -45,6 +45,7 @@ class INET_API PacketFilter
 
         virtual void startProtocolDataUnit(const Protocol *protocol) override;
         virtual void endProtocolDataUnit(const Protocol *protocol) override;
+        virtual void markIncorrect() override;
         virtual void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) override;
     };
 
