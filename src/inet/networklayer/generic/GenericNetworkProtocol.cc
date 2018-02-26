@@ -168,7 +168,13 @@ const InterfaceEntry *GenericNetworkProtocol::getSourceInterfaceFrom(Packet *pac
 void GenericNetworkProtocol::handlePacketFromNetwork(Packet *packet)
 {
     if (packet->hasBitError()) {
-        //TODO discard
+        //TODO emit packetDropped signal
+        EV_WARN << "CRC error found, drop packet\n";
+        PacketDropDetails details;
+        details.setReason(INCORRECTLY_RECEIVED);
+        emit(packetDroppedSignal, packet, &details);
+        delete packet;
+        return;
     }
 
     const auto& header = packet->peekHeader<GenericDatagramHeader>();
@@ -176,6 +182,9 @@ void GenericNetworkProtocol::handlePacketFromNetwork(Packet *packet)
     packet->addTagIfAbsent<NetworkProtocolInd>()->setNetworkProtocolHeader(header);
     if (header->getTotalLengthField() > packet->getDataLength()) {
         EV_WARN << "length error found, drop packet\n";
+        PacketDropDetails details;
+        details.setReason(INCORRECTLY_RECEIVED);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
         return;
     }
@@ -206,6 +215,9 @@ void GenericNetworkProtocol::handlePacketFromHL(Packet *packet)
     // if no interface exists, do not send datagram
     if (interfaceTable->getNumInterfaces() == 0) {
         EV_INFO << "No interfaces exist, dropping packet\n";
+        PacketDropDetails details;
+        details.setReason(NO_INTERFACE_FOUND);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
         return;
     }
@@ -282,6 +294,9 @@ void GenericNetworkProtocol::routePacket(Packet *datagram, const InterfaceEntry 
         if (re == nullptr) {
             EV_INFO << "unroutable, discarding packet\n";
             numUnroutable++;
+            PacketDropDetails details;
+            details.setReason(NO_ROUTE_FOUND);
+            emit(packetDroppedSignal, datagram, &details);
             delete datagram;
             return;
         }
