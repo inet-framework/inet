@@ -174,6 +174,16 @@ void GenericNetworkProtocol::handlePacketFromNetwork(Packet *packet)
     const auto& header = packet->peekHeader<GenericDatagramHeader>();
     packet->addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
     packet->addTagIfAbsent<NetworkProtocolInd>()->setNetworkProtocolHeader(header);
+    if (header->getTotalLengthField() > packet->getDataLength()) {
+        EV_WARN << "length error found, drop packet\n";
+        delete packet;
+        return;
+    }
+
+    // remove lower layer paddings:
+    if (header->getTotalLengthField() < packet->getDataLength()) {
+        packet->setTrailerPopOffset(packet->getHeaderPopOffset() + header->getTotalLengthField());
+    }
 
     const InterfaceEntry *inIE = interfaceTable->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
     const InterfaceEntry *destIE = nullptr;
@@ -510,6 +520,7 @@ void GenericNetworkProtocol::encapsulate(Packet *transportPacket, const Interfac
     // setting GenericNetworkProtocol options is currently not supported
 
     delete transportPacket->removeControlInfo();
+    header->setTotalLengthField(header->getChunkLength()+transportPacket->getDataLength());
 
     insertNetworkProtocolHeader(transportPacket, Protocol::gnp, header);
 }
