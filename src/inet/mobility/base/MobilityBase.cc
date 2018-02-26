@@ -63,11 +63,9 @@ MobilityBase::MobilityBase() :
 const char *MobilityBase::DirectiveResolver::resolveDirective(char directive)
 {
     switch (directive) {
-//        case 'p':
-//            Coord coord;
-//            coord = mobility->getCurrentPosition();
-//            result = coord.str();
-//            break;
+        case 'p':
+            result = mobility->getCurrentPosition().str();
+            break;
 //        case 'a':
 //            result = mobility->getFullPath();
 //            break;
@@ -103,7 +101,7 @@ void MobilityBase::initialize(int stage)
         constraintAreaMax.x = par("constraintAreaMaxX");
         constraintAreaMax.y = par("constraintAreaMaxY");
         constraintAreaMax.z = par("constraintAreaMaxZ");
-//        format.parseFormat(par("displayStringTextFormat"));
+        format.parseFormat(par("displayStringTextFormat"));
         bool visualizeMobility = par("visualizeMobility");
         if (visualizeMobility)
             visualRepresentation = findVisualRepresentation();
@@ -119,7 +117,7 @@ void MobilityBase::initialize(int stage)
         initializeOrientation();
         initializePosition();
     }
-//    refreshDisplayStringText();
+    refreshDisplayStringText();
 }
 
 void MobilityBase::initializePosition()

@@ -91,11 +91,11 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
 
     class DirectiveResolver : public inet::visualizer::StringFormat::IDirectiveResolver {
       protected:
-        const IMobility *mobility = nullptr;
+        IMobility *mobility = nullptr;
         std::string result;
 
       public:
-        DirectiveResolver(const IMobility *mobility) : mobility(mobility) { }
+        DirectiveResolver(IMobility *mobility) : mobility(mobility) { }
 
         virtual const char *resolveDirective(char directive) override;
     };
