@@ -22,12 +22,8 @@
 #include "inet/transportlayer/udp/Udp.h"
 
 #include "inet/applications/common/SocketTag_m.h"
-#include "inet/common/packet/chunk/BytesChunk.h"
-#include "inet/common/packet/dissector/ProtocolDissector.h"
-#include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeOperations.h"
@@ -62,36 +58,7 @@
 #endif // ifdef WITH_IPv6
 
 
-
 namespace inet {
-
-class INET_API UdpDissector : public ProtocolDissector
-{
-  public:
-    virtual void dissect(Packet *packet, ICallback& callback) const override;
-};
-
-void UdpDissector::dissect(Packet *packet, ICallback& callback) const
-{
-    auto originalTrailerPopOffset = packet->getTrailerPopOffset();
-    auto udpHeaderOffset = packet->getHeaderPopOffset();
-    auto header = packet->popHeader<UdpHeader>();
-    callback.startProtocolDataUnit(&Protocol::udp);
-    bool isCorrectPacket = Udp::isCorrectPacket(packet, header);
-    if (!isCorrectPacket)
-        callback.markIncorrect();
-    callback.visitChunk(header, &Protocol::udp);
-    auto udpPayloadEndOffset = udpHeaderOffset + B(header->getTotalLengthField());
-    packet->setTrailerPopOffset(udpPayloadEndOffset);
-    callback.dissectPacket(packet, nullptr);
-    ASSERT(packet->getDataLength() == B(0));
-    packet->setHeaderPopOffset(udpPayloadEndOffset);
-    packet->setTrailerPopOffset(originalTrailerPopOffset);
-    callback.endProtocolDataUnit(&Protocol::udp);
-}
-
-Register_Protocol_Dissector(&Protocol::udp, UdpDissector);
-
 
 Define_Module(Udp);
 
