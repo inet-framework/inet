@@ -53,7 +53,8 @@ class INET_API Icmpv6 : public cSimpleModule, public ILifecycle, public IProtoco
      *  Code Types have different semantics for each error type. See RFC 2463.
      */
     virtual void sendErrorMessage(Packet *datagram, Icmpv6Type type, int code);
-    bool verifyCrc(const Packet *packet);
+
+    static bool verifyCrc(const Packet *packet);
 
   protected:
     // internal helper functions
