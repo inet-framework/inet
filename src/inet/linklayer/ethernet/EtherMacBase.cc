@@ -19,10 +19,8 @@
 #include <stdlib.h>
 #include "inet/linklayer/ethernet/EtherMacBase.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/ProtocolGroup.h"
+//#include "inet/common/ProtocolGroup.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
-#include "inet/common/packet/dissector/ProtocolDissector.h"
-#include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/common/serializer/EthernetCRC.h"
 #include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
@@ -34,58 +32,6 @@
 #include "inet/common/INETUtils.h"
 
 namespace inet {
-
-class INET_API EthernetMacDissector : public ProtocolDissector
-{
-  public:
-    virtual void dissect(Packet *packet, ICallback& callback) const override;
-};
-
-class INET_API EthernetPhyDissector : public ProtocolDissector
-{
-  public:
-    virtual void dissect(Packet *packet, ICallback& callback) const override;
-};
-
-void EthernetPhyDissector::dissect(Packet *packet, ICallback& callback) const
-{
-    const auto& header = packet->popHeader<EthernetPhyHeader>();
-    callback.startProtocolDataUnit(&Protocol::ethernetPhy);
-    callback.visitChunk(header, &Protocol::ethernetPhy);
-    callback.dissectPacket(packet, &Protocol::ethernetMac);
-    callback.endProtocolDataUnit(&Protocol::ethernetPhy);
-}
-
-void EthernetMacDissector::dissect(Packet *packet, ICallback& callback) const
-{
-    const auto& header = packet->popHeader<EthernetMacHeader>();
-    callback.startProtocolDataUnit(&Protocol::ethernetMac);
-    callback.visitChunk(header, &Protocol::ethernetMac);
-    const auto& fcs = packet->popTrailer<EthernetFcs>(B(4));
-    if (isEth2Header(*header)) {
-        auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(header->getTypeOrLength());
-        callback.dissectPacket(packet, payloadProtocol);
-    }
-    else {
-        // LLC header
-        auto ethEndOffset = packet->getHeaderPopOffset() + B(header->getTypeOrLength());
-        auto trailerOffset = packet->getTrailerPopOffset();
-        packet->setTrailerPopOffset(ethEndOffset);
-        callback.dissectPacket(packet, &Protocol::ieee8022);
-        packet->setTrailerPopOffset(trailerOffset);
-    }
-    auto paddingLength = packet->getDataLength();
-    if (paddingLength > b(0)) {
-        const auto& padding = packet->popHeader(paddingLength);        // remove padding (type is not EthernetPadding!)
-        callback.visitChunk(padding, &Protocol::ethernetMac);
-    }
-    callback.visitChunk(fcs, &Protocol::ethernetMac);
-    callback.endProtocolDataUnit(&Protocol::ethernetMac);
-}
-
-Register_Protocol_Dissector(&Protocol::ethernetPhy, EthernetPhyDissector);
-
-Register_Protocol_Dissector(&Protocol::ethernetMac, EthernetMacDissector);
 
 const double EtherMacBase::SPEED_OF_LIGHT_IN_CABLE = 200000000.0;
 
