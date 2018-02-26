@@ -104,7 +104,10 @@ void PacketDropCanvasVisualizer::setAlpha(const PacketDropVisualization *packetD
     double px = 4 * dx * (1 - alpha);
     double py = a * px * px + b * px;
     auto& position = packetDropVisualization->packetDrop->getPosition();
-    figure->setPosition(canvasProjection->computeCanvasPoint(position) + cFigure::Point(px, -py));
+    double zoomLevel = getEnvir()->getZoomLevel(packetDropCanvasVisualization->packetDrop->getNetworkNode()->getParentModule());
+    if (std::isnan(zoomLevel))
+        zoomLevel = 1;
+    figure->setPosition(canvasProjection->computeCanvasPoint(position) + cFigure::Point(px, -py) / zoomLevel);
 }
 
 } // namespace visualizer
