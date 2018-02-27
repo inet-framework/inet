@@ -3,7 +3,7 @@
 
 # Re-encodes video using ffmpeg with the encoding used in tutorials and showcases
 
-if [ $1 == -h ];
+if [[ $1 == -h || $# == 0 ]];
 then
 echo $'Re-encodes video using ffmpeg with the encoding used in tutorials and showcases'
 echo $'Arguments: input-file output-file'

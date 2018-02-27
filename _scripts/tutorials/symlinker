@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [[ $1 == "-h" ]]; then
+if [[ $1 == -h || $# == 0 ]]; then
   echo "Creates symlink in this directory to the corresponding showcase directory in /_docs"
 fi
 

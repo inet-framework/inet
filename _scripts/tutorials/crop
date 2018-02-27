@@ -3,7 +3,7 @@
 
 # This script can be used to crop videos with ffmpeg. Specify the number of pixels to crop from the top, bottom, left and right as arguments. 
 
-if [ $1 == -h ];
+if [[ $1 == -h || $# == 0 ]];
 then
 echo "Arguments: input-file, output-file, top, bottom, left, right"
 else 
