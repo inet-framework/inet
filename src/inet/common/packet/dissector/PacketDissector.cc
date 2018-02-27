@@ -57,6 +57,14 @@ PacketDissector::ProtocolDataUnit::ProtocolDataUnit(int level, const Protocol* p
 {
 }
 
+b PacketDissector::ProtocolDataUnit::getChunkLength() const
+{
+    b length = b(0);
+    for (const auto& chunk : chunks)
+        length += chunk->getChunkLength();
+    return length;
+}
+
 // PduTreeBuilder
 
 void PacketDissector::PduTreeBuilder::startProtocolDataUnit(const Protocol *protocol)

@@ -95,7 +95,7 @@ class INET_API PacketDissector
         const std::deque<Ptr<const Chunk>>& getChunks() const { return chunks; }
 
         virtual ChunkType getChunkType() const { throw cRuntimeError("Invalid operation"); }
-        virtual b getChunkLength() const { throw cRuntimeError("Invalid operation"); }
+        virtual b getChunkLength() const;
         virtual const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const { throw cRuntimeError("Invalid operation"); }
 
         void markIncorrect() { isCorrect_ = false; }
