@@ -66,9 +66,9 @@ const char *MobilityBase::DirectiveResolver::resolveDirective(char directive)
         case 'p':
             result = mobility->getCurrentPosition().str();
             break;
-//        case 'a':
-//            result = mobility->getFullPath();
-//            break;
+        case 'v':
+            result = mobility->getCurrentSpeed().str();
+            break;
 //        case 's':
 //            result = mobility->str();
 //            break;
