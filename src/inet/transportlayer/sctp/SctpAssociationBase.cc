@@ -69,7 +69,7 @@ SctpPathVariables::SctpPathVariables(const L3Address& addr, SctpAssociation *ass
         throw cRuntimeError("No interface for remote address %s found!", remoteAddress.str().c_str());
     }
 
-    pmtu = rtie->getMTU();
+    pmtu = rtie->getMtu();
     rttvar = 0.0;
 
     cwndTimeout = pathRto;
@@ -144,7 +144,7 @@ SctpPathVariables::SctpPathVariables(const L3Address& addr, SctpAssociation *ass
     snprintf(str, sizeof(str), "RTX_TIMER %d:%s", assoc->assocId, addr.str().c_str());
     T3_RtxTimer = new cMessage(str);
     snprintf(str, sizeof(str), "Reset_TIMER %d:%s", assoc->assocId, addr.str().c_str());
-    ResetTimer = new cMessage(str);
+    ResetTimer = new cPacket(str);
     ResetTimer->setContextPointer(association);
     snprintf(str, sizeof(str), "ASCONF_TIMER %d:%s", assoc->assocId, addr.str().c_str());
     AsconfTimer = new cMessage(str);
@@ -985,7 +985,7 @@ bool SctpAssociation::processSctpMessage(const Ptr<const SctpHeader>& sctpmsg,
         const L3Address& msgDestAddr)
 {
     printAssocBrief();
-
+    EV_INFO << "SctpAssociation::processSctpMessage\n";
     localAddr = msgDestAddr;
     localPort = sctpmsg->getDestPort();
     remoteAddr = msgSrcAddr;
@@ -1000,7 +1000,7 @@ bool SctpAssociation::processSctpMessage(const Ptr<const SctpHeader>& sctpmsg,
             }
         }
         if (!found) {
-            EV_INFO << "destAddr " << msgDestAddr << " is not bound to host\n";
+            std::cout << "destAddr " << msgDestAddr << " is not bound to host\n";
             return true;
         }
     }

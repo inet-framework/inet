@@ -20,8 +20,8 @@
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/transportlayer/sctp/SctpHeader.h"
 #include "inet/transportlayer/sctp/SctpCrcInsertionHook.h"
-//#include "inet/common/serializer/sctp/headers/sctphdr.h"
 #include "inet/common/serializer/SctpChecksum.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
 
 
 
@@ -29,9 +29,9 @@ namespace inet {
 
 namespace sctp {
 
+
 INetfilter::IHook::Result SctpCrcInsertion::datagramPostRoutingHook(Packet *packet)
 {
-std::cout << "SctpCrcInsertion::datagramPostRoutingHook\n";
     auto networkProtocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     const auto& networkHeader = getNetworkProtocolHeader(packet);
     if (networkHeader->getProtocol() == &Protocol::sctp) {

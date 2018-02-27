@@ -523,6 +523,7 @@ void SctpAssociation::sendStreamResetRequest(SctpResetReq *rinfo)
             break;
 
         case RESET_INCOMING:
+            EV_INFO << "RESET_INCOMING\n";
             state->requests[srsn].result = 100;
             state->requests[srsn].type = INCOMING_RESET_REQUEST_PARAMETER;
             state->requests[srsn].sn = srsn;
@@ -538,6 +539,7 @@ void SctpAssociation::sendStreamResetRequest(SctpResetReq *rinfo)
             break;
 
         case RESET_BOTH:
+            EV_INFO << "RESET_BOTH\n";
             SctpParameter *outParam;
             state->requests[srsn].result = 100;
             state->requests[srsn].type = OUTGOING_RESET_REQUEST_PARAMETER;
@@ -574,6 +576,7 @@ void SctpAssociation::sendStreamResetRequest(SctpResetReq *rinfo)
 
         case ADD_INCOMING:
         case ADD_OUTGOING:
+            EV_INFO << "ADD_INCOMING or ADD_OUTGOING\n";
             state->requests[srsn].result = 100;
             param = makeAddStreamsRequestParameter(srsn, rinfo);
             resetChunk->addParameter(param);

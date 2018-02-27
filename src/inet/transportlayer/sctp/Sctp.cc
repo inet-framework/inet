@@ -125,8 +125,9 @@ void Sctp::initialize(int stage)
         if (crcMode == CRC_COMPUTED) {
 #ifdef WITH_IPv4
             auto ipv4 = dynamic_cast<INetfilter *>(getModuleByPath("^.ipv4.ip"));
-            if (ipv4 != nullptr)
+            if (ipv4 != nullptr) {
                 ipv4->registerHook(0, &crcInsertion);
+            }
 #endif
 #ifdef WITH_IPv6
             auto ipv6 = dynamic_cast<INetfilter *>(getModuleByPath("^.ipv6.ipv6"));
@@ -194,82 +195,68 @@ void Sctp::handleMessage(cMessage *msg)
         Packet *packet = check_and_cast<Packet *>(msg);
         auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
         if (protocol == &Protocol::sctp) {
-            // must be a SctpHeader
+            // must be an SctpHeader
             auto sctpmsg = packet->peekHeader<SctpHeader>();
-      //  }
 
-       // SctpHeader *sctpmsg = check_and_cast<SctpHeader *>(msg);
-
-        numPacketsReceived++;
+            numPacketsReceived++;
 #if 0
-        if (!pktdrop && (sctpmsg->hasBitError() || !(sctpmsg->getChecksumOk()))) {
-            EV_WARN << "Packet has bit-error. delete it\n";
+			if (!pktdrop && (sctpmsg->hasBitError() || !(sctpmsg->getChecksumOk()))) {
+				EV_WARN << "Packet has bit-error. delete it\n";
 
-            numPacketsDropped++;
-            delete msg;
-            return;
-        }
+				numPacketsDropped++;
+				delete msg;
+				return;
+			}
 #endif
-     /*   if (par("udpEncapsEnabled")) {
-            EV_DETAIL << "Size of SCTPMSG=" << B(sctpmsg->getChunkLength()).get() << "\n";
-            srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress();
-            destAddr = packet->getTag<L3AddressInd>()->getDestAddress();
-            EV_INFO << "controlInfo srcAddr=" << srcAddr << "  destAddr=" << destAddr << "\n";
-            EV_DETAIL << "VTag=" << sctpmsg->getTag() << "\n";
-        } else {*/
-            auto controlInfo = msg->removeControlInfo();
-            srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress();
-            destAddr = packet->getTag<L3AddressInd>()->getDestAddress();
-            delete controlInfo;
-            EV_INFO << "controlInfo srcAddr=" << srcAddr << "   destAddr=" << destAddr << "\n";
-       // }
+			auto controlInfo = msg->removeControlInfo();
+			srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress();
+			destAddr = packet->getTag<L3AddressInd>()->getDestAddress();
+			delete controlInfo;
+			EV_INFO << "srcAddr=" << srcAddr << "   destAddr=" << destAddr << "\n";
+			if (B(sctpmsg->getChunkLength()).get() > (SCTP_COMMON_HEADER)) {
+				if (((SctpChunk *)(sctpmsg->getSctpChunks(0)))->getSctpChunkType() == INIT || ((SctpChunk *)(sctpmsg->getSctpChunks(0)))->getSctpChunkType() == INIT_ACK)
+					findListen = true;
 
-        EV_INFO << "srcAddr=" << srcAddr << " destAddr=" << destAddr << "\n";
-        EV_INFO << "Laenge sctpmsg = " << B(sctpmsg->getChunkLength()).get() << endl;
-        if (B(sctpmsg->getChunkLength()).get() > (SCTP_COMMON_HEADER)) {
-            if (((SctpChunk *)(sctpmsg->getSctpChunks(0)))->getSctpChunkType() == INIT || ((SctpChunk *)(sctpmsg->getSctpChunks(0)))->getSctpChunkType() == INIT_ACK)
-                findListen = true;
-
-            SctpAssociation *assoc = findAssocForMessage(srcAddr, destAddr, sctpmsg->getSrcPort(), sctpmsg->getDestPort(), findListen);
-            if (!assoc && sctpAssocMap.size() > 0 && (((SctpChunk *)(sctpmsg->getSctpChunks(0)))->getSctpChunkType() == INIT_ACK)) {
-                SctpInitAckChunk* initack = check_and_cast<SctpInitAckChunk *>((SctpChunk *)(sctpmsg->getSctpChunks(0)));
-                assoc = findAssocForInitAck(initack, srcAddr, destAddr, sctpmsg->getSrcPort(), sctpmsg->getDestPort(), findListen);
-            }
-            if (!assoc && sctpAssocMap.size() > 0 && (((SctpChunk *)(sctpmsg->getSctpChunks(0)))->getSctpChunkType() == ERRORTYPE
-                                                      || (sctpmsg->getSctpChunksArraySize() > 1 &&
-                                                          (((SctpChunk *)(sctpmsg->getSctpChunks(1)))->getSctpChunkType() == ASCONF || ((SctpChunk *)(sctpmsg->getSctpChunks(1)))->getSctpChunkType() == ASCONF_ACK))))
-            {
-                assoc = findAssocWithVTag(sctpmsg->getVTag(), sctpmsg->getSrcPort(), sctpmsg->getDestPort());
-            }
-            if (!assoc) {
-                EV_INFO << "no assoc found msg=" << sctpmsg->getName() << "\n";
+				SctpAssociation *assoc = findAssocForMessage(srcAddr, destAddr, sctpmsg->getSrcPort(), sctpmsg->getDestPort(), findListen);
+				if (!assoc && sctpAssocMap.size() > 0 && (((SctpChunk *)(sctpmsg->getSctpChunks(0)))->getSctpChunkType() == INIT_ACK)) {
+					SctpInitAckChunk* initack = check_and_cast<SctpInitAckChunk *>((SctpChunk *)(sctpmsg->getSctpChunks(0)));
+					assoc = findAssocForInitAck(initack, srcAddr, destAddr, sctpmsg->getSrcPort(), sctpmsg->getDestPort(), findListen);
+				}
+				if (!assoc && sctpAssocMap.size() > 0 && (((SctpChunk *)(sctpmsg->getSctpChunks(0)))->getSctpChunkType() == ERRORTYPE
+														  || (sctpmsg->getSctpChunksArraySize() > 1 &&
+															  (((SctpChunk *)(sctpmsg->getSctpChunks(1)))->getSctpChunkType() == ASCONF || ((SctpChunk *)(sctpmsg->getSctpChunks(1)))->getSctpChunkType() == ASCONF_ACK))))
+				{
+					assoc = findAssocWithVTag(sctpmsg->getVTag(), sctpmsg->getSrcPort(), sctpmsg->getDestPort());
+				}
+				if (!assoc) {
+					EV_INFO << "no assoc found msg=" << sctpmsg->getName() << "\n";
 #if 0
-                if (sctpmsg->hasBitError() || !(sctpmsg->getChecksumOk())) {
-                    delete sctpmsg;
-                    return;
-                }
+					if (sctpmsg->hasBitError() || !(sctpmsg->getChecksumOk())) {
+						delete sctpmsg;
+						return;
+					}
 #endif
-                if (((SctpChunk *)(sctpmsg->getSctpChunks(0)))->getSctpChunkType() == SHUTDOWN_ACK)
-                    sendShutdownCompleteFromMain((Ptr<SctpHeader>&)sctpmsg, destAddr, srcAddr);
-                else if (((SctpChunk *)(sctpmsg->getSctpChunks(0)))->getSctpChunkType() != ABORT &&
-                         ((SctpChunk *)(sctpmsg->getSctpChunks(0)))->getSctpChunkType() != SHUTDOWN_COMPLETE) {
-                    sendAbortFromMain((Ptr<SctpHeader>&)sctpmsg, destAddr, srcAddr);
-                }
-                delete packet;
-            }
-            else {
-                EV_INFO << "assoc " << assoc->assocId << " found\n";
-                bool ret = assoc->processSctpMessage(sctpmsg, srcAddr, destAddr);
-                if (!ret) {
-                    EV_DEBUG << "SctpMain:: removeAssociation \n";
-                    removeAssociation(assoc);
-                    delete packet;
-                }
-                else {
-                    delete packet;
-                }
-            }
-        }
+					if (((SctpChunk *)(sctpmsg->getSctpChunks(0)))->getSctpChunkType() == SHUTDOWN_ACK)
+						sendShutdownCompleteFromMain((Ptr<SctpHeader>&)sctpmsg, destAddr, srcAddr);
+					else if (((SctpChunk *)(sctpmsg->getSctpChunks(0)))->getSctpChunkType() != ABORT &&
+							 ((SctpChunk *)(sctpmsg->getSctpChunks(0)))->getSctpChunkType() != SHUTDOWN_COMPLETE) {
+						sendAbortFromMain((Ptr<SctpHeader>&)sctpmsg, destAddr, srcAddr);
+					}
+					delete packet;
+				}
+				else {
+					EV_INFO << "assoc " << assoc->assocId << " found\n";
+					bool ret = assoc->processSctpMessage(sctpmsg, srcAddr, destAddr);
+					if (!ret) {
+						EV_DEBUG << "SctpMain:: removeAssociation \n";
+						removeAssociation(assoc);
+						delete packet;
+					}
+					else {
+						delete packet;
+					}
+				}
+			}
         }
         else {
             delete packet;
@@ -286,7 +273,6 @@ void Sctp::handleMessage(cMessage *msg)
             auto& indtags = getTags(cmsg);
             auto indication = indtags.addTagIfAbsent<SctpCommandReq>();
             indication->setSocketId(controlInfo->getSocketId());
-           // cmsg->setControlInfo(indication);
             socketOptions = collectSocketOptions();
             cmsg->setContextPointer((void*) socketOptions);
             cmsg->addTagIfAbsent<SocketInd>()->setSocketId(assocId);
@@ -303,7 +289,13 @@ void Sctp::handleMessage(cMessage *msg)
                         if (!controlInfo) {
                             controlInfo = tags.findTag<SctpAvailableReq>();
                             if (!controlInfo) {
-                                std::cout << "!!!!!!!!!Unknown Tag!!!!!!!!\n";
+                                controlInfo = tags.findTag<SctpResetReq>();
+                                if (!controlInfo) {
+                                    controlInfo = tags.findTag<SctpInfoReq>();
+                                    if (!controlInfo) {
+                                        std::cout << "!!!!!!!!!Unknown Tag!!!!!!!!\n";
+                                    }
+                                }
                             }
                         }
                     }
@@ -316,7 +308,7 @@ void Sctp::handleMessage(cMessage *msg)
                         fd = controlInfo->getFd();
                         assocId = findAssocForFd(fd);
                     }
-            std::cout << "msg arrived from app for assoc " << assocId << "\n";
+            EV_INFO << "msg arrived from app for assoc " << assocId << "\n";
             SctpAssociation *assoc = findAssocForApp(appGateIndex, assocId);
 
             if (!assoc) {
@@ -325,9 +317,8 @@ void Sctp::handleMessage(cMessage *msg)
                 if (strcmp(msg->getName(), "PassiveOPEN") == 0 || strcmp(msg->getName(), "Associate") == 0) {
                     if (assocList.size() > 0) {
                         assoc = nullptr;
-                        std::cout << "assocList.size() > 0\n";
                         SctpOpenReq *open = tags.findTag<SctpOpenReq>();
-                        std::cout << "Looking for assoc with remoteAddr=" << open->getRemoteAddr() << ", remotePort=" << open->getRemotePort() << ", localPort=" << open->getLocalPort() << "\n";
+                        EV_INFO << "Looking for assoc with remoteAddr=" << open->getRemoteAddr() << ", remotePort=" << open->getRemotePort() << ", localPort=" << open->getLocalPort() << "\n";
                         for (auto & elem : assocList) {
                             EV_DETAIL << "remoteAddr=" << (elem)->remoteAddr << ", remotePort=" << (elem)->remotePort << ", localPort=" << (elem)->localPort << "\n";
                             if ((elem)->remoteAddr == open->getRemoteAddr() && (elem)->localPort == open->getLocalPort() && (elem)->remotePort == open->getRemotePort()) {
@@ -343,7 +334,7 @@ void Sctp::handleMessage(cMessage *msg)
                         key.appGateIndex = appGateIndex;
                         key.assocId = assocId;
                         sctpAppAssocMap[key] = assoc;
-                        std::cout << "SCTP association created for appGateIndex " << appGateIndex << " and assoc " << assocId << "\n";
+                        EV_INFO << "SCTP association created for appGateIndex " << appGateIndex << " and assoc " << assocId << "\n";
                         bool ret = assoc->processAppCommand(msg, controlInfo);
                         if (!ret) {
                             removeAssociation(assoc);
@@ -351,7 +342,7 @@ void Sctp::handleMessage(cMessage *msg)
                     }
                 }
             } else {
-                std::cout << "assoc found\n";
+                EV_INFO << "assoc found\n";
                 bool ret = assoc->processAppCommand(msg, controlInfo);
                 if (!ret) {
                     removeAssociation(assoc);
@@ -384,8 +375,7 @@ SocketOptions* Sctp::collectSocketOptions()
 
 void Sctp::sendAbortFromMain(Ptr<SctpHeader>& sctpmsg, L3Address fromAddr, L3Address toAddr)
 {
-#if 0
-    SctpHeader *msg = new SctpHeader();
+    const auto& msg = makeShared<SctpHeader>();
 
     EV_DEBUG << "\n\nSctp::sendAbortFromMain()\n";
 
@@ -399,11 +389,11 @@ void Sctp::sendAbortFromMain(Ptr<SctpHeader>& sctpmsg, L3Address fromAddr, L3Add
     if (sctpmsg->getSctpChunksArraySize() > 0 && ((SctpChunk *)(sctpmsg->getSctpChunks(0)))->getSctpChunkType() == INIT) {
         SctpInitChunk *initChunk = (SctpInitChunk *)(sctpmsg->getSctpChunks(0));
         abortChunk->setT_Bit(0);
-        msg->setTag(initChunk->getInitTag());
+        msg->setVTag(initChunk->getInitTag());
     }
     else {
         abortChunk->setT_Bit(1);
-        msg->setTag(sctpmsg->getTag());
+        msg->setVTag(sctpmsg->getVTag());
     }
     abortChunk->setByteLength(SCTP_ABORT_CHUNK_LENGTH);
     msg->insertSctpChunks(abortChunk);
@@ -415,20 +405,18 @@ void Sctp::sendAbortFromMain(Ptr<SctpHeader>& sctpmsg, L3Address fromAddr, L3Add
        // udpSocket.sendTo(pkt, toAddr, SCTP_UDP_PORT);
     //}
    // else {
-        pkt->ensureTag<TransportProtocolInd>()->setProtocol(&Protocol::sctp);
         auto addresses = pkt->addTagIfAbsent<L3AddressReq>();
         addresses->setSrcAddress(fromAddr);
         addresses->setDestAddress(toAddr);
-	pkt->insertAtEnd(msg);
+        IL3AddressType *addressType = toAddr.getAddressType();
+        pkt->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+        insertTransportProtocolHeader(pkt, Protocol::sctp, msg);
         send_to_ip(pkt);
-  // }
-#endif
 }
 
 void Sctp::sendShutdownCompleteFromMain(Ptr<SctpHeader>& sctpmsg, L3Address fromAddr, L3Address toAddr)
 {
-#if 0
-    SctpHeader *msg = new SctpHeader();
+    const auto& msg = makeShared<SctpHeader>();
 
     EV_DEBUG << "\n\nSCTP:sendShutdownCompleteFromMain \n";
 
@@ -440,19 +428,19 @@ void Sctp::sendShutdownCompleteFromMain(Ptr<SctpHeader>& sctpmsg, L3Address from
     SctpShutdownCompleteChunk *scChunk = new SctpShutdownCompleteChunk();
     scChunk->setSctpChunkType(SHUTDOWN_COMPLETE);
     scChunk->setTBit(1);
-    msg->setTag(sctpmsg->getTag());
+    msg->setVTag(sctpmsg->getVTag());
 
     scChunk->setByteLength(SCTP_SHUTDOWN_ACK_LENGTH);
     msg->insertSctpChunks(scChunk);
 
     Packet *pkt = new Packet("SHUTDOWN_COMPLETE");
-    pkt->addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::sctp);
     auto addresses = pkt->addTagIfAbsent<L3AddressReq>();
     addresses->setSrcAddress(fromAddr);
     addresses->setDestAddress(toAddr);
-    pkt->insertAtEnd(msg);
+    IL3AddressType *addressType = toAddr.getAddressType();
+    pkt->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    insertTransportProtocolHeader(pkt, Protocol::sctp, msg);
     send_to_ip(pkt);
-#endif
 }
 
 void Sctp::send_to_ip(Packet *msg)
@@ -465,6 +453,7 @@ void Sctp::send_to_ip(Packet *msg)
     serializer::SctpSerializer().serializePacket(msg, b, ctx);
     ASSERT(b.getPos() == msg->getByteLength());
 #endif
+    EV_INFO << "send packet " << msg << " to IP\n";
     send(msg, "ipOut");
 }
 

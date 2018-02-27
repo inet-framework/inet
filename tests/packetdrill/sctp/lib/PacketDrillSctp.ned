@@ -20,6 +20,7 @@
 
 
 import inet.node.packetdrill.PacketDrillHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 
 
 network PacketDrillSctp
@@ -27,8 +28,16 @@ network PacketDrillSctp
     submodules:
         pdhost: PacketDrillHost {
             parameters:
-                networkLayer.configurator.networkConfiguratorModule = "";
+              //  ipv4.configurator.networkConfiguratorModule = "";
                 @display("p=544,194;i=device/server_l");
+        }
+        configurator: Ipv4NetworkConfigurator {
+            parameters:
+                addDefaultRoutes = false;
+                addStaticRoutes = false;
+                addSubnetRoutes = false;
+                config = xmldoc("../../lib/Ipv4Config.xml");
+                @display("p=185,50");
         }
     connections:
 }

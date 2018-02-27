@@ -32,12 +32,7 @@ class INET_API SctpChecksum
   public:
     SctpChecksum() {}
 
-    static uint16_t checksum(const void *addr, unsigned int count)
-    {
-        return ~_checksum(addr, count);
-    }
-
-    static uint16_t _checksum(const void *addr, unsigned int count);
+    static uint32_t checksum(const void *addr, unsigned int count);
 };
 
 } // namespace serializer

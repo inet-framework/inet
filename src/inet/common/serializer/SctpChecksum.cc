@@ -22,7 +22,7 @@
 namespace inet {
 namespace serializer {
 
-uint16_t SctpChecksum::_checksum(const void *addr, unsigned int len)
+uint32_t SctpChecksum::checksum(const void *addr, unsigned int len)
 {
     uint32 h;
     const uint8_t *buf = static_cast<const uint8_t *>(addr);

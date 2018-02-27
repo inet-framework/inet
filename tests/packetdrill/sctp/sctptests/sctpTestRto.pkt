@@ -9,8 +9,8 @@
 +0.00  > sctp: DATA[flgs=BE, len=1016, tsn=0, sid=0, ssn=0, ppid=0] // Other flags allowed: IU
 +0.05  < sctp: SACK[flgs=0, cum_tsn=0, a_rwnd=100000, gaps=[], dups=[]]
 +0.25    write(3, ..., 1000) = 1000
-+0.00  > sctp: DATA[flgs=BE, len=1016, tsn=1, sid=1, ssn=0, ppid=0]
-+0.05 ~ +0.15 > sctp: DATA[flgs=BE, len=1016, tsn=1, sid=1, ssn=0, ppid=0]
++0.00  > sctp: DATA[flgs=BE, len=1016, tsn=1, sid=0, ssn=1, ppid=0]
++0.05 ~ +0.15 > sctp: DATA[flgs=BE, len=1016, tsn=1, sid=0, ssn=1, ppid=0]
 +0  < sctp: SACK[flgs=0, cum_tsn=1, a_rwnd=100000, gaps=[], dups=[1 : 1]]
 +0.25    close(3) = 0
 +0  > sctp: SHUTDOWN[flgs=0, cum_tsn=...]

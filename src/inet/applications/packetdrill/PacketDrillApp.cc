@@ -27,7 +27,7 @@
 #include "PacketDrillUtils.h"
 #include "PacketDrillInfo_m.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
-#include "inet/networklayer/ipv4/Ipv4Header.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
 #include "inet/transportlayer/sctp/SctpAssociation.h"
 #include "inet/common/TimeTag_m.h"
@@ -125,13 +125,13 @@ void PacketDrillApp::initialize(int stage)
         localPort = par("localPort");
         remotePort = par("remotePort");
         const char *crcModeString = par("crcMode");
-        if (!strcmp(crcModeString, "declared"))
+        if (!strcmp(crcModeString, "declared")) {
             crcMode = CRC_DECLARED_CORRECT;
-        else if (!strcmp(crcModeString, "computed"))
+        } else if (!strcmp(crcModeString, "computed")) {
             crcMode = CRC_COMPUTED;
-        else
+        } else {
             throw cRuntimeError("Unknown crc mode: '%s'", crcModeString);
-
+        }
         const char *interface = par("interface");
         const char *interfaceTableModule = par("interfaceTableModule");
         IInterfaceTable *interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
@@ -139,19 +139,11 @@ void PacketDrillApp::initialize(int stage)
         if (interfaceEntry == nullptr)
             throw cRuntimeError("TUN interface not found: %s", interface);
         Ipv4InterfaceData *idat = interfaceEntry->ipv4Data();
-        idat->setIPAddress(localAddress.toIPv4());
+        idat->setIPAddress(localAddress.toIpv4());
         tunSocket.setOutputGate(gate("socketOut"));
         tunSocket.open(interfaceEntry->getInterfaceId());
         tunInterfaceId = interfaceEntry->getInterfaceId();
         tunSocketId = tunSocket.getSocketId();
-
-        const char *interface = par("interface");
-        IInterfaceTable *interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        InterfaceEntry *interfaceEntry = interfaceTable->getInterfaceByName(interface);
-        if (interfaceEntry == nullptr)
-            throw cRuntimeError("TUN interface not found: %s", interface);
-        tunSocket.setOutputGate(gate("socketOut"));
-        tunSocket.open(interfaceEntry->getInterfaceId());
 
         cMessage* timeMsg = new cMessage("PacketDrillAppTimer");
         timeMsg->setKind(MSGKIND_START);
@@ -299,20 +291,14 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                     return;
                 }
                 case SCTP_I_ESTABLISHED: {
+                    EV_INFO << "SCTP_I_ESTABLISHED" << endl;
                     if (listenSet) {
-                        sctpAssocId = msg->getTag<SocketInd>()->getSocketId();
+                        sctpAssocId = check_and_cast<Indication *>(msg)->getTag<SocketInd>()->getSocketId();
                         if (acceptSet) {
                             sctpSocket.setState(SctpSocket::CONNECTED);
-                            sctpAssocId = msg->getTag<SocketInd>()->getSocketId();
                             listenSet = false;
                             acceptSet = false;
                         } else {
-                            sctpAssocId = check_and_cast<SctpCommand *>(msg->getControlInfo())->getSocketId();
-                            listenSet = false;
-                            acceptSet = false;
-                        } else {
-                            sctpAssocId = check_and_cast<SctpCommand *>(msg->getControlInfo())->getSocketId();
->>>>>>> upstream/integration
                             establishedPending = true;
                         }
                     } else {
@@ -325,12 +311,25 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                              sctpSocket.setInboundStreams(connectInfo->getInboundStreams());
                             sctpSocket.setOutboundStreams(connectInfo->getOutboundStreams());
                         }
-                        SctpConnectInfo *connectInfo = check_and_cast<SctpConnectInfo *>(msg->removeControlInfo());
-                        sctpAssocId = connectInfo->getSocketId();
-                        sctpSocket.setInboundStreams(connectInfo->getInboundStreams());
-                        sctpSocket.setOutboundStreams(connectInfo->getOutboundStreams());
-                        delete connectInfo;
                     }
+                    break;
+                }
+                case SCTP_I_AVAILABLE: {
+                    Message *message = check_and_cast<Message *>(msg);
+                    auto& intags = getTags(message);
+                    Request *cmsg = new Request("SCTP_C_ACCEPT_SOCKET_ID");
+                    auto& outtags = cmsg->getTags();
+                    auto availableInfo = outtags.addTagIfAbsent<SctpAvailableReq>();
+                    SctpAvailableReq *avInfo = intags.findTag<SctpAvailableReq>();
+                    int newSockId = avInfo->getNewSocketId();
+                    availableInfo->setSocketId(newSockId);
+                    cmsg->setKind(SCTP_C_ACCEPT_SOCKET_ID);
+                    cmsg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
+                    cmsg->addTagIfAbsent<SocketReq>()->setSocketId(newSockId);
+                    sctpAssocId = newSockId;
+                    EV_INFO << "Sending accept socket id request ..." << endl;
+
+                    send(cmsg, "socketOut");
                     break;
                 }
                 case SCTP_I_DATA_NOTIFICATION: {
@@ -376,6 +375,7 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                 case SCTP_I_ABORT:
                 case SCTP_I_SEND_STREAMS_RESETTED:
                 case SCTP_I_RCV_STREAMS_RESETTED:
+                case SCTP_I_RESET_REQUEST_FAILED:
                 case SCTP_I_PEER_CLOSED: {
                     break;
                 }
@@ -477,12 +477,12 @@ void PacketDrillApp::runEvent(PacketDrillEvent* event)
                         case COOKIE_ECHO: {
                             SctpCookieEchoChunk* cookieEcho = check_and_cast<SctpCookieEchoChunk*>(chunk);
                             int tempLength = cookieEcho->getByteLength();
-                            printf("copy peerCookie %p\n", peerCookie);
                             peerCookie->setName("CookieEchoStateCookie");
                             cookieEcho->setStateCookie(peerCookie);
                             peerCookie = nullptr;
                             cookieEcho->setByteLength(SCTP_COOKIE_ACK_LENGTH + peerCookieLength);
-                            sctpHeader->setChunkLength(sctpHeader->getChunkLength() - B(tempLength + cookieEcho->getByteLength()));
+                            int length = B(sctpHeader->getChunkLength()).get() - tempLength + cookieEcho->getByteLength();
+                            sctpHeader->setChunkLength(B(length));
                             break;
                         }
                         case SACK: {
@@ -517,9 +517,6 @@ void PacketDrillApp::runEvent(PacketDrillEvent* event)
                                     }
                                     case OUTGOING_RESET_REQUEST_PARAMETER: {
                                         auto *param = check_and_cast<SctpOutgoingSsnResetRequestParameter *>(parameter);
-                                      /*  for (const auto & elem : seqNumMap) {
-                                            std::cout << " myNum = " << elem.first << "  liveNum = " << elem.second << endl;
-                                        }*/
                                         if (findSeqNumMap(param->getSrResSn())) {
                                             param->setSrResSn(seqNumMap[param->getSrResSn()]);
                                         }
@@ -652,7 +649,6 @@ void PacketDrillApp::closeAllSockets()
     sctpmsg->setVTag(peerVTag);
     pk->setName("SCTPCleanUp");
     sctpmsg->setChecksumOk(true);
-    sctpmsg->setChecksumOk(true);
     sctpmsg->setCrcMode(crcMode);
     sctpmsg->insertSctpChunks(abortChunk);
     pk->insertHeader(sctpmsg);
@@ -673,6 +669,7 @@ void PacketDrillApp::closeAllSockets()
     ipv4Header->setTotalLengthField(B(ipv4Header->getChunkLength()).get() + pk->getByteLength());
     pk->insertHeader(ipv4Header);
     EV_DETAIL << "Send Abort to cleanup association." << endl;
+
     tunSocket.send(pk);
 }
 
@@ -789,7 +786,7 @@ int PacketDrillApp::syscallSocket(struct syscall_spec *syscall, cQueue *args, ch
             if (sctpSocket.getInboundStreams() == -1) {
                 sctpSocket.setInboundStreams((int) par("inboundStreams"));
             }
-            sctpSocket.bind(localPort);
+            sctpSocket.bind(localAddress, localPort);
             break;
         default:
             throw cRuntimeError("Protocol type not supported for the socket system call");
@@ -1870,8 +1867,6 @@ bool PacketDrillApp::compareSctpPacket(const Ptr<const SctpHeader>& storedSctp, 
                     printf("COOKIE_ECHO chunks should be compared\n");
                 else
                     printf("Do not check cookie echo chunks\n");
-                if (numberOfChunks == 1)
-                    delete liveHeader;  //FIXME Why?
                 break;
             }
             case SHUTDOWN: {

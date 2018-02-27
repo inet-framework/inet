@@ -81,15 +81,11 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
     out << srcAddr << "." << sctpmsg->getSrcPort() << " > "
         << destAddr << "." << sctpmsg->getDestPort() << ": ";
 
-   /* if (sctpmsg->hasBitError()) {
-        sctpmsg->setChecksumOk(false);
-    }*/
-
     numberOfChunks = sctpmsg->getSctpChunksArraySize();
     out << "numberOfChunks=" << numberOfChunks << " VTag=" << sctpmsg->getVTag() << "\n";
 
-  /*  if (sctpmsg->hasBitError())
-        out << "Packet has bit error!!\n";*/
+    if (pk->hasBitError())
+        out << "Packet has bit error!!\n";
 
     for (uint32 i = 0; i < numberOfChunks; i++) {
         chunk = (SctpChunk *)sctpmsg->getSctpChunks(i);

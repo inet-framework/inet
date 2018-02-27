@@ -133,13 +133,12 @@ void SctpSocket::sendToSctp(cMessage *msg)
 
 void SctpSocket::getSocketOptions()
 {
-EV_INFO << "getSocketOptions\n";
+    EV_INFO << "getSocketOptions\n";
     Request* cmsg = new Request("GetSocketOptions", SCTP_C_GETSOCKETOPTIONS);
     auto sctpSendReq = cmsg->addTagIfAbsent<SctpSendReq>();
     sctpSendReq->setSocketId(assocId);
     sctpSendReq->setSid(0);
     sendToSctp(cmsg);
-    EV_INFO << "getSocketOptions sent\n";
 }
 
 void SctpSocket::bind(int lPort)
@@ -150,9 +149,7 @@ void SctpSocket::bind(int lPort)
     localAddresses.push_back(L3Address());    // Unspecified address
     localPrt = lPort;
     sockstate = CLOSED;
-    EV_INFO << "bind: vor getSocketOptions\n";
     getSocketOptions();
-    EV_INFO << "bind: nach getSocketOptions\n";
 }
 
 void SctpSocket::bind(L3Address lAddr, int lPort)
@@ -475,7 +472,7 @@ void SctpSocket::requestStatus()
 
 bool SctpSocket::belongsToSocket(cMessage *msg)
 {
-    bool ret = (msg->getTag<SocketInd>()->getSocketId() == assocId);
+    bool ret = (check_and_cast<Indication *>(msg)->getTag<SocketInd>()->getSocketId() == assocId);
     return ret;
 }
 

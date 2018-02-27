@@ -80,7 +80,7 @@ bool SctpAssociation::process_RCV_Message(const Ptr<const SctpHeader>& sctpmsg,
              << " remoteAddr=" << remoteAddr << endl;
     state->pktDropSent = false;
 #if 0
-    if ((sctpmsg->hasBitError() || !sctpmsg->getChecksumOk())) {
+    if (!sctpmsg->getChecksumOk()) {
         if (((SctpChunk *)(sctpmsg->getChunks(0)))->getSctpChunkType() == INIT_ACK) {
             stopTimer(T1_InitTimer);
             EV_WARN << "InitAck with bit-error. Retransmit Init" << endl;
@@ -138,10 +138,10 @@ bool SctpAssociation::process_RCV_Message(const Ptr<const SctpHeader>& sctpmsg,
     bool shutdownCalled = false;
     bool sackWasReceived = false;
     for (uint32 i = 0; i < numberOfChunks; i++) {
+        SctpChunk *header = (SctpChunk *)(sctpmsg->getSctpChunks(i));
        // SctpChunk *header = (SctpChunk *)(sctpmsg->removeChunk());
-        SctpChunk *header = (SctpChunk *)(sctpmsg->getSctpChunks(0));
-  //      sctpmsg->removeChunk();
         const uint8 type = header->getSctpChunkType();
+        EV_DEBUG << "Header length: " << header->getByteLength() << endl;
 
         if ((type != INIT) &&
             (type != ABORT) &&
@@ -244,6 +244,7 @@ bool SctpAssociation::process_RCV_Message(const Ptr<const SctpHeader>& sctpmsg,
             case DATA:
                 EV_INFO << "DATA received" << endl;
                 if (fsm->getState() == SCTP_S_CLOSED) {
+                    EV_INFO << "DATA in state closed: send ABORT\n";
                     sendAbort(1);
                     sctpMain->removeAssociation(this);
                     return true;
@@ -311,15 +312,14 @@ bool SctpAssociation::process_RCV_Message(const Ptr<const SctpHeader>& sctpmsg,
 
             case SACK:
             case NR_SACK: {
-                EV_INFO << "SACK received" << endl;
-                const int32 scount = qCounter.roomSumSendStreams;
+                EV_INFO << "SACK chunk received" << endl;
                 SctpSackChunk *sackChunk;
                 sackChunk = check_and_cast<SctpSackChunk *>(header);
                 processSackArrived(sackChunk);
                 trans = true;
                 sendAllowed = true;
               //  delete sackChunk;
-                if (getOutstandingBytes() == 0 && transmissionQ->getQueueSize() == 0 && scount == 0) {
+                if (getOutstandingBytes() == 0 && transmissionQ->getQueueSize() == 0 && qCounter.roomSumSendStreams == 0) {
                     if (fsm->getState() == SCTP_S_SHUTDOWN_PENDING) {
                         EV_DETAIL << "No more packets: send SHUTDOWN" << endl;
                         sendShutdown();
@@ -533,7 +533,8 @@ bool SctpAssociation::process_RCV_Message(const Ptr<const SctpHeader>& sctpmsg,
         {
             sendOnAllPaths(state->getPrimaryPath());
         }
-    }
+
+    } // end of for-loop
     if (state->sendResponse > 0) {
         if (state->sendResponse == PERFORMED_WITH_OPTION) {
             resetExpectedSsns();
@@ -852,7 +853,7 @@ bool SctpAssociation::processCookieEchoArrived(SctpCookieEchoChunk *cookieEcho, 
 
    // SctpCookie *cookie = check_and_cast<SctpCookie *>(cookieEcho->getStateCookie());
     SctpCookie *cookie = (SctpCookie *)(cookieEcho->getStateCookie());
-    if (cookie->getCreationTime() + (int32)sctpMain->par("validCookieLifetime") < simTime()) {
+    if (cookie->getCreationTime() + (double)sctpMain->par("validCookieLifetime") < simTime()) {
         EV_INFO << "stale Cookie: sendAbort\n";
         sendAbort();
         delete cookie;
@@ -2165,17 +2166,15 @@ SctpEventCode SctpAssociation::processDataArrived(SctpDataChunk *dataChunk)
     }
     state->lastDataSourcePath = path;
 
-    EV_DETAIL << simTime() << " SctpAssociation::processDataArrived TSN=" << tsn << endl;
+    std::cout << simTime() << " SctpAssociation::processDataArrived TSN=" << tsn << endl;
     path->vectorPathReceivedTsn->record(tsn);
     if (dataChunk->getIBit()) {
         state->ackState = sackFrequency;
     }
     calculateRcvBuffer();
 
-    SctpSimpleMessage *smsg = check_and_cast<SctpSimpleMessage *>(dataChunk->decapsulate());
-    dataChunk->setByteLength(SCTP_DATA_CHUNK_LENGTH);
-    dataChunk->encapsulate((cPacket *)smsg);
     const uint32 payloadLength = dataChunk->getByteLength() - SCTP_DATA_CHUNK_LENGTH;
+
     EV_DETAIL << "state->bytesRcvd=" << state->bytesRcvd << endl;
     if (payloadLength == 0) {
         EV_DETAIL << "No user data. Send ABORT" << endl;
@@ -2185,7 +2184,7 @@ SctpEventCode SctpAssociation::processDataArrived(SctpDataChunk *dataChunk)
     EV_DETAIL << "state->bytesRcvd now=" << state->bytesRcvd << endl;
     path->numberOfBytesReceived += payloadLength;
     auto iter = sctpMain->assocStatMap.find(assocId);
-    iter->second.rcvdBytes += dataChunk->getByteLength() - SCTP_DATA_CHUNK_LENGTH;
+    iter->second.rcvdBytes += payloadLength;
 
     if (state->stopReceiving) {
         return SCTP_E_SEND;
@@ -2204,9 +2203,7 @@ SctpEventCode SctpAssociation::processDataArrived(SctpDataChunk *dataChunk)
             state->dupList.push_back(tsn);
             state->dupList.unique();
             path->numberOfDuplicates++;
-#if 0
-            delete check_and_cast<SctpSimpleMessage *>(dataChunk->decapsulate());
-#endif
+
             return SCTP_E_DUP_RECEIVED;
         }
     }
@@ -2546,7 +2543,7 @@ void SctpAssociation::processResetResponseArrived(SctpStreamResetResponseParamet
     if (getPath(remoteAddr)->ResetTimer->isScheduled()) {
         if (PK(getPath(remoteAddr)->ResetTimer)->hasEncapsulatedPacket() &&
             (state->numResetRequests == 0 || (state->getNumRequestsNotPerformed() == 1 && responseParam->getResult() != DEFERRED))) {
-            SctpResetTimer *tm = check_and_cast<SctpResetTimer *>(PK(getPath(remoteAddr)->ResetTimer)->decapsulate());
+            SctpResetTimer *tm = (SctpResetTimer *)getPath(remoteAddr)->ResetTimer->decapsulate();
             EV_DETAIL << "SrResSn=" << responseParam->getSrResSn() << " tmOut=" << tm->getOutSN() << " tmIn= " << tm->getInSN() << "\n";
             if (tm->getOutSN() == responseParam->getSrResSn() || tm->getInSN() == responseParam->getSrResSn() || responseParam->getResult() > DEFERRED) {
                 stopTimer(getPath(remoteAddr)->ResetTimer);
@@ -2810,12 +2807,11 @@ SctpEventCode SctpAssociation::processOutAndResponseArrived(SctpOutgoingSsnReset
 
 SctpEventCode SctpAssociation::processStreamResetArrived(SctpStreamResetChunk *resetChunk)
 {
+    EV_TRACE << "processStreamResetArrived\n";
     SctpParameter *parameter, *nextParam;
     bool requestReceived = false;
     std::map<uint32, SctpStateVariables::RequestData>::reverse_iterator rit;
     uint32 numberOfParameters = resetChunk->getParametersArraySize();
-    EV_TRACE << "processStreamResetArrived\n";
-
     if (numberOfParameters == 0)
         return SCTP_E_IGNORE;
     for (uint16 i = 0; i < numberOfParameters; i++) {

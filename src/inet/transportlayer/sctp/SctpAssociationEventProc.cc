@@ -24,7 +24,7 @@
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/TimeTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/common/packet/Message.h"<
+#include "inet/common/packet/Message.h"
 
 namespace inet {
 
@@ -57,6 +57,7 @@ std::cout << "SctpAssociation::process_ASSOCIATE\n";
             initAssociation(openCmd);
             state->active = true;
             localAddressList = openCmd->getLocalAddresses();
+            EV_INFO << "process_ASSOCIATE: number of local addresses=" << localAddressList.size() << "\n";
             lAddr = openCmd->getLocalAddresses().front();
             if (!(openCmd->getRemoteAddresses().empty())) {
                 remoteAddressList = openCmd->getRemoteAddresses();
@@ -158,10 +159,8 @@ void SctpAssociation::process_SEND(SctpEventCode& event, SctpCommandReq *sctpCom
     Packet *applicationPacket = (Packet *)msg;
     const auto& applicationData = staticPtrCast<const BytesChunk>(applicationPacket->peekData());
     int sendBytes = applicationData->getChunkLength().get() / 8;
-    std::cout << "got msg of length " << applicationData->getChunkLength().get() << "sendBytes=" << sendBytes << endl;
-    std::cout << "got data msg of length " << applicationPacket->getDataLength().get() <<  endl;
-   // SctpSimpleMessage *smsg = check_and_cast<SctpSimpleMessage *>((PK(msg)->decapsulate()));
-    std::cout << "Cast successful\n";
+    EV_INFO << "got msg of length " << applicationData->getChunkLength().get() << "sendBytes=" << sendBytes << endl;
+
     auto iter = sctpMain->assocStatMap.find(assocId);
     iter->second.sentBytes += sendBytes;
 
@@ -192,8 +191,7 @@ void SctpAssociation::process_SEND(SctpEventCode& event, SctpCommandReq *sctpCom
     smsg->setEncaps(false);
     smsg->setByteLength(sendBytes);
     auto creationTimeTag = applicationData->findTag<CreationTimeTag>();
-    smsg->setCreationTime(creationTimeTag->getCreationTime()); // ToDo : get CreationTime from Tag
-    std::cout << "SMSG set creationTime: " << smsg->getCreationTime() << endl;
+    smsg->setCreationTime(creationTimeTag->getCreationTime()); // TODO : get CreationTime from Tag
     datMsg->encapsulate((cPacket *)smsg);
     datMsg->setSid(streamId);
     datMsg->setPpid(ppid);
@@ -297,7 +295,7 @@ void SctpAssociation::process_SEND(SctpEventCode& event, SctpCommandReq *sctpCom
 
         sendQueue->record(stream->getStreamQ()->getLength());
     }
-EV_INFO << "Size of send queue " << stream->getStreamQ()->getLength() << endl;
+    EV_INFO << "Size of send queue " << stream->getStreamQ()->getLength() << endl;
     // ------ Send buffer full? -------------------------------------------
     if ((state->appSendAllowed) &&
         (state->sendQueueLimit > 0) &&
@@ -332,13 +330,12 @@ EV_INFO << "Size of send queue " << stream->getStreamQ()->getLength() << endl;
 
 void SctpAssociation::process_RECEIVE_REQUEST(SctpEventCode& event, SctpCommandReq *sctpCommand)
 {
-    std::cout << "SctpAssociation::process_RECEIVE_REQUEST\n";
+    EV_INFO << "SctpAssociation::process_RECEIVE_REQUEST\n";
     SctpSendReq *sendCommand = (SctpSendReq *)(sctpCommand);
     if ((uint32)sendCommand->getSid() > inboundStreams || sendCommand->getSid() < 0) {
         EV_DEBUG << "Application tries to read from invalid stream id....\n";
     }
     state->numMsgsReq[sendCommand->getSid()] += sendCommand->getNumMsgs();
-    std::cout << "Call pushUlp\n";
     pushUlp();
 }
 

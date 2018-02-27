@@ -128,9 +128,9 @@ PacketDrillExpression::PacketDrillExpression(enum expression_t type_)
 PacketDrillExpression::~PacketDrillExpression()
 {
     if (type == EXPR_LIST) {
-        for (cQueue::Iterator iter(*value.list); !iter.end(); iter++)
-            value.list->remove((*iter));
-        delete value.list;
+        for (cQueue::Iterator iter(*list); !iter.end(); iter++)
+            list->remove((*iter));
+        delete list;
     }
 }
 

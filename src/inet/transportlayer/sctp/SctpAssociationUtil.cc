@@ -205,6 +205,7 @@ const char *SctpAssociation::eventName(const int32 event)
         CASE(SCTP_E_SEND_ASCONF);
         CASE(SCTP_E_SET_STREAM_PRIO);
         CASE(SCTP_E_ACCEPT);
+        CASE(SCTP_E_ACCEPT_SOCKET_ID);
     }
     return s;
 #undef CASE
@@ -399,23 +400,25 @@ void SctpAssociation::sendToIP(Packet *pkt, const Ptr<SctpHeader>& sctpmsg,
         udpHeader->setDestinationPort(SCTP_UDP_PORT);
         udpHeader->setTotalLengthField(B(udpHeader->getChunkLength() + pkt->getTotalLength()).get());
         EV_INFO << "Packet: " << pkt << endl;
-        udpHeader->setCrc(0x0000);
+        udpHeader->setCrcMode(CRC_COMPUTED);
         insertTransportProtocolHeader(pkt, Protocol::udp, udpHeader);
         EV_INFO << "After udp header added " << pkt << endl;
+        pkt->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::udp);
+    } else {
+        pkt->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::sctp);
     }
 
         IL3AddressType *addressType = dest.getAddressType();
         pkt->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
-        pkt->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::sctp);
-        std::cout << "sctpMain->getInterfaceId()=" << sctpMain->getInterfaceId() << endl;
+
         if (sctpMain->getInterfaceId() != -1) {
             pkt->addTagIfAbsent<InterfaceReq>()->setInterfaceId(sctpMain->getInterfaceId());
         }
-        //pkt->ensureTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
         auto addresses = pkt->addTagIfAbsent<L3AddressReq>();
-        addresses->setSrcAddress(localAddr);
+       // addresses->setSrcAddress(localAddr);
         addresses->setDestAddress(dest);
         pkt->addTagIfAbsent<SocketReq>()->setSocketId(assocId);
+        EV_INFO << "send packet " << pkt << " to ipOut\n";
         check_and_cast<Sctp *>(getSimulation()->getContextModule())->send(pkt, "ipOut");
 
         if (chunkType == HEARTBEAT) {
@@ -481,7 +484,7 @@ void SctpAssociation::sendAvailableIndicationToApp()
 void SctpAssociation::sendEstabIndicationToApp()
 {
     EV_INFO << "sendEstabIndicationToApp: localPort="
-            << localPort << " remotePort=" << remotePort << endl;
+            << localPort << " remotePort=" << remotePort << " assocId=" << assocId << endl;
 
     Indication *msg = new Indication(indicationName(SCTP_I_ESTABLISHED));
     msg->setKind(SCTP_I_ESTABLISHED);
@@ -1624,6 +1627,7 @@ SctpSackChunk *SctpAssociation::createSack()
         sackChunk->setSctpChunkType(SACK);
     }
     sackChunk->setCumTsnAck(state->gapList.getCumAckTsn());
+    EV_DEBUG << "SACK: set cumTsnAck to " << sackChunk->getCumTsnAck() << endl;
     sackChunk->setA_rwnd(arwnd);
     sackChunk->setIsNrSack(state->nrSack);
     sackChunk->setSackSeqNum(++state->outgoingSackSeqNum);
@@ -2040,16 +2044,6 @@ void SctpAssociation::pushUlp()
             }
             EV_DETAIL << "Push TSN " << chunk->tsn
                       << ": sid=" << chunk->sid << " ssn=" << chunk->ssn << endl;
-        /*    auto applicationPacket = new Packet("ApplicationPacket");
-            std::vector<uint8_t> vec;
-    vec.resize(sendBytes);
-    for (int i = 0; i < sendBytes; i++)
-        vec[i] = (bytesSent + i) & 0xFF;
-    applicationData->setBytes(vec);
-    applicationData->setChunkLength(B(sendBytes))
-            auto applicationData = makeShared<ByteCountChunk>(B(sendBytes), 'a');
-    applicationPacket->insertAtEnd(applicationData);
-    auto sctpSendReq = applicationPacket->addTagIfAbsent<SctpSendReq>();*/
 
             SctpSimpleMessage *smsg = (SctpSimpleMessage *)chunk->userData;
             std::cout << "CreationTime : " << smsg->getCreationTime() << endl;
@@ -2136,6 +2130,7 @@ SctpDataChunk *SctpAssociation::transformDataChunk(SctpDataVariables *chunk)
     dataChunk->setByteLength(SCTP_DATA_CHUNK_LENGTH);
     msg->setByteLength(chunk->len / 8);
     dataChunk->encapsulate((cPacket *)msg);
+    dataChunk->setLength(dataChunk->getByteLength());
     return dataChunk;
 }
 

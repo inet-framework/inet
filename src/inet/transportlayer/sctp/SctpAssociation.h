@@ -324,7 +324,7 @@ class INET_API SctpPathVariables : public cObject
     cMessage *CwndTimer;
     cMessage *T3_RtxTimer;
     cMessage *BlockingTimer;
-    cMessage *ResetTimer;
+    cPacket *ResetTimer;
     cMessage *AsconfTimer;
     // ====== High-Speed CC ===============================================
     unsigned int highSpeedCCThresholdIdx;
