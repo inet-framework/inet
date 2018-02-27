@@ -219,7 +219,9 @@ void LMac::handleSelfMessage(cMessage *msg)
 
                 EV_DETAIL << "ID: " << FindModule<>::findHost(this)->getId() << ". Picked random slot: " << mySlot << endl;
                 cDisplayString& dispStr = getContainingNode(this)->getDisplayString();
-                dispStr.setTagArg("t", 0, mySlot);
+                char buf[10];
+                sprintf(buf,"mySlot: %d",mySlot);
+                dispStr.setTagArg("t", 0, buf);
 
                 macState = SLEEP;
                 EV_DETAIL << "Old state: INIT, New state: SLEEP" << endl;
@@ -666,7 +668,9 @@ void LMac::findNewSlot()
     EV << "ERROR: I needed to find new slot\n";
     slotChange->recordWithTimestamp(simTime(), FindModule<>::findHost(this)->getId() - 4);
     cDisplayString& dispStr = getContainingNode(this)->getDisplayString();
-                    dispStr.setTagArg("t", 0, mySlot);
+    char buf[10];
+    sprintf(buf,"mySlot: %d",mySlot);
+                    dispStr.setTagArg("t", 0, buf);
 }
 
 void LMac::decapsulate(Packet *packet)
