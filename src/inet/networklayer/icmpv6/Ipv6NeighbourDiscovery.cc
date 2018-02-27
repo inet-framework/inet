@@ -89,7 +89,16 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_NETWORK_LAYER) {
+    if (stage == INITSTAGE_LOCAL) {
+        const char *crcModeString = par("crcMode");
+        if (!strcmp(crcModeString, "declared"))
+            crcMode = CRC_DECLARED_CORRECT;
+        else if (!strcmp(crcModeString, "computed"))
+            crcMode = CRC_COMPUTED;
+        else
+            throw cRuntimeError("unknown CRC mode: '%s'", crcModeString);
+    }
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
@@ -986,6 +995,7 @@ void Ipv6NeighbourDiscovery::createAndSendRsPacket(InterfaceEntry *ie)
 
     //Construct a Router Solicitation message
     auto packet = new Packet("RSpacket");
+    Icmpv6::insertCrc(crcMode, rs, packet);
     packet->insertAtEnd(rs);
     sendPacketToIpv6Module(packet, destAddr, myIPv6Address, ie->getInterfaceId());
 }
@@ -1283,6 +1293,7 @@ void Ipv6NeighbourDiscovery::createAndSendRaPacket(const Ipv6Address& destAddr, 
         ra->setChunkLength(B(ICMPv6_HEADER_BYTES + numAdvPrefixes * IPv6ND_PREFIX_INFORMATION_OPTION_LENGTH));
 
         auto packet = new Packet("RApacket");
+        Icmpv6::insertCrc(crcMode, ra, packet);
         packet->insertAtEnd(ra);
         sendPacketToIpv6Module(packet, destAddr, sourceAddr, ie->getInterfaceId());
     }
@@ -1821,8 +1832,8 @@ void Ipv6NeighbourDiscovery::createAndSendNsPacket(const Ipv6Address& nsTargetAd
         ns->setSourceLinkLayerAddress(myMacAddr);
         ns->setChunkLength(ns->getChunkLength() + B(IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH));
     }
-
     auto packet = new Packet("NSpacket");
+    Icmpv6::insertCrc(crcMode, ns, packet);
     packet->insertAtEnd(ns);
     sendPacketToIpv6Module(packet, dgDestAddr, dgSrcAddr, ie->getInterfaceId());
 
@@ -2062,6 +2073,7 @@ void Ipv6NeighbourDiscovery::sendSolicitedNa(Packet *packet, const Ipv6Neighbour
     Ipv6Address myIPv6Addr = ie->ipv6Data()->getPreferredAddress();
 
     auto naPacket = new Packet("NApacket");
+    Icmpv6::insertCrc(crcMode, na, packet);
     naPacket->insertAtEnd(na);
     sendPacketToIpv6Module(naPacket, naDestAddr, myIPv6Addr, ie->getInterfaceId());
 }
@@ -2147,6 +2159,7 @@ void Ipv6NeighbourDiscovery::sendUnsolicitedNa(InterfaceEntry *ie)
     // slightly longer.
 #ifdef WITH_xMIPv6
     auto packet = new Packet("NApacket");
+    Icmpv6::insertCrc(crcMode, na, packet);
     packet->insertAtEnd(na);
     sendPacketToIpv6Module(packet, Ipv6Address::ALL_NODES_2, myIPv6Addr, ie->getInterfaceId());
 #endif /* WITH_xMIPv6 */
