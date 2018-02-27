@@ -210,7 +210,7 @@ void BMac::sendPreamble()
 
     //attach signal and send down
     auto packet = new Packet();
-    packet->setKind(BMAC_PREAMBLE);
+    preamble->setType(BMAC_PREAMBLE);
     packet->insertHeader(preamble);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::bmac);
     attachSignal(packet);
@@ -230,7 +230,7 @@ void BMac::sendMacAck()
 
     //attach signal and send down
     auto packet = new Packet();
-    packet->setKind(BMAC_ACK);
+    ack->setType(BMAC_ACK);
     packet->insertHeader(ack);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::bmac);
     attachSignal(packet);
@@ -571,9 +571,12 @@ void BMac::handleLowerPacket(Packet *packet)
         delete packet;
         return;
     }
-    else
+    else {
+        const auto& hdr = packet->peekHeader<BMacHeader>();
+        packet->setKind(hdr->getType());
         // simply pass the massage as self message, to be processed by the FSM.
         handleSelfMessage(packet);
+    }
 }
 
 void BMac::sendDataPacket()
@@ -581,8 +584,9 @@ void BMac::sendDataPacket()
     nbTxDataPackets++;
     Packet *pkt = macQueue.front()->dup();
     attachSignal(pkt);
-    lastDataPktDestAddr = pkt->peekHeader<BMacHeader>()->getDestAddr();
-    pkt->setKind(BMAC_DATA);
+    const auto& hdr = pkt->peekHeader<BMacHeader>();
+    lastDataPktDestAddr = hdr->getDestAddr();
+    ASSERT(hdr->getType() == BMAC_DATA);
     sendDown(pkt);
 }
 
@@ -757,6 +761,7 @@ void BMac::encapsulate(Packet *packet)
     auto pkt = makeShared<BMacHeader>();
     pkt->setChunkLength(headerLength);
 
+    pkt->setType(BMAC_DATA);
     // copy dest address from the Control Info attached to the network
     // message by the network layer
     auto dest = packet->getTag<MacAddressReq>()->getDestAddress();
