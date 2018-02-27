@@ -29,6 +29,8 @@ SHOULD:
  - add meaningful display strings to at least the top level submodules of network nodes
  - fix mobility non-determinism caused by interpolation from last position during animation
  - consider renaming peekHeader to peekFront, peekTrailer to peekBack, etc. in Packet
+ - consider renaming Ieee80211MacTrailer to Ieee80211MacFcs?
+ - finish renaming of IdealRadio (e.g. Ieee80211IdealRadio)
 
  - move extra functions that doesn't really belong to L3AddressResolver (e.g. findInterfaceTableOf, findIPv4RoutingTableOf)
  - revise protocol base class hierarchy (e.g. LayeredProtocolBase vs IPv4 base class, etc.)
