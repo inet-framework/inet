@@ -489,7 +489,7 @@ void LMac::handleSelfMessage(cMessage *msg)
                     control->setOccupiedSlots(i, occSlotsDirect[i]);
 
                 Packet *packet = new Packet();
-                packet->setKind(LMAC_CONTROL);
+                control->setType(LMAC_CONTROL);
                 packet->insertHeader(control);
                 packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::lmac);
                 sendDown(packet);
@@ -507,8 +507,8 @@ void LMac::handleSelfMessage(cMessage *msg)
                 }
                 Packet *data = new Packet();
                 data->insertAtEnd(macQueue.front()->peekAt(headerLength));
-                data->setKind(LMAC_DATA);
                 const auto& lmacHeader = staticPtrCast<LMacHeader>(macQueue.front()->peekHeader<LMacHeader>()->dupShared());
+                lmacHeader->setType(LMAC_DATA);
                 lmacHeader->setMySlot(mySlot);
                 lmacHeader->setOccupiedSlotsArraySize(numSlots);
                 for (int i = 0; i < numSlots; i++)
@@ -601,6 +601,8 @@ void LMac::handleLowerPacket(Packet *packet)
         return;
     }
     // simply pass the massage as self message, to be processed by the FSM.
+    const auto& hdr = packet->peekHeader<LMacHeader>();
+    packet->setKind(hdr->getType());
     handleSelfMessage(packet);
 }
 

@@ -33,8 +33,10 @@ void LMacDissector::dissect(Packet *packet, ICallback& callback) const
     auto header = packet->popHeader<LMacHeader>();
     callback.startProtocolDataUnit(&Protocol::lmac);
     callback.visitChunk(header, &Protocol::lmac);
-    auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(header->getNetworkProtocol());
-    callback.dissectPacket(packet, payloadProtocol);
+    if (header->getType() == LMAC_DATA) {
+        auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(header->getNetworkProtocol());
+        callback.dissectPacket(packet, payloadProtocol);
+    }
     ASSERT(packet->getDataLength() == B(0));
     callback.endProtocolDataUnit(&Protocol::lmac);
 }
