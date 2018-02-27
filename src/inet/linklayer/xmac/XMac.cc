@@ -241,9 +241,9 @@ void XMac::sendPreamble(MacAddress preamble_address)
     preamble->setSrcAddr(address);
     preamble->setDestAddr(preamble_address);
     preamble->setChunkLength(b(headerLength));
+    preamble->setType(XMAC_PREAMBLE);
     auto packet = new Packet("Preamble", preamble);
     packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::xmac);
-    packet->setKind(XMAC_PREAMBLE);
     attachSignal(packet, simTime());
     sendDown(packet);
     nbTxPreambles++;
@@ -259,9 +259,9 @@ void XMac::sendMacAck()
     //~ diff with XMAC, ack_preamble_based
     ack->setDestAddr(lastPreamblePktSrcAddr);
     ack->setChunkLength(b(headerLength));
+    ack->setType(XMAC_ACK);
     auto packet = new Packet("Acknowledgment", ack);
     packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::xmac);
-    packet->setKind(XMAC_ACK);
     attachSignal(packet, simTime());
     sendDown(packet);
     nbTxAcks++;
@@ -580,6 +580,8 @@ void XMac::handleLowerPacket(Packet *msg)
         return;
     }
     // simply pass the massage as self message, to be processed by the FSM.
+    const auto& hdr = msg->peekHeader<XMacHeader>();
+    msg->setKind(hdr->getType());
     handleSelfMessage(msg);
 }
 
@@ -587,8 +589,9 @@ void XMac::sendDataPacket()
 {
     nbTxDataPackets++;
     auto packet = macQueue.front()->dup();
-    lastDataPktDestAddr = packet->peekHeader<XMacHeader>()->getDestAddr();
-    packet->setKind(XMAC_DATA);
+    const auto& hdr = packet->peekHeader<XMacHeader>();
+    lastDataPktDestAddr = hdr->getDestAddr();
+    ASSERT(hdr->getType() == XMAC_DATA);
     attachSignal(packet, simTime());
     sendDown(packet);
 }
@@ -730,6 +733,9 @@ void XMac::encapsulate(Packet *packet)
 
     //set the src address to own mac address (nic module getId())
     pkt->setSrcAddr(address);
+
+    pkt->setType(XMAC_DATA);
+    packet->setKind(XMAC_DATA);
 
     //encapsulate the network packet
     packet->insertHeader(pkt);
