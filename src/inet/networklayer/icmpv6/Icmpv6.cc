@@ -377,13 +377,15 @@ void Icmpv6::insertCrc(CrcMode crcMode, const Ptr<Icmpv6Header>& icmpHeader, Pac
             MemoryOutputStream icmpHeaderStream;
             Chunk::serialize(icmpHeaderStream, icmpHeader);
             const auto& icmpHeaderBytes = icmpHeaderStream.getData();
-            auto icmpDataBytes = packet->peekDataBytes()->getBytes();
             auto icmpHeaderLength = icmpHeaderBytes.size();
-            auto icmpDataLength =  icmpDataBytes.size();
+            auto icmpDataLength =  packet->getByteLength();
             auto bufferLength = icmpHeaderLength + icmpDataLength;
             auto buffer = new uint8_t[bufferLength];
             std::copy(icmpHeaderBytes.begin(), icmpHeaderBytes.end(), buffer);
-            std::copy(icmpDataBytes.begin(), icmpDataBytes.end(), buffer + icmpHeaderLength);
+            if (icmpDataLength > 0) {
+                auto icmpDataBytes = packet->peekDataBytes()->getBytes();
+                std::copy(icmpDataBytes.begin(), icmpDataBytes.end(), buffer + icmpHeaderLength);
+            }
             uint16_t crc = inet::serializer::TcpIpChecksum::checksum(buffer, bufferLength);
             delete [] buffer;
             icmpHeader->setChksum(crc);
