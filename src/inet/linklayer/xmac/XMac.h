@@ -103,6 +103,8 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
 
     void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
 
+    bool bubbles = false;
+
   protected:
     typedef std::list<Packet *> MacQueue;
 
