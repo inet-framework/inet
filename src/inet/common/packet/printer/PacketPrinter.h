@@ -35,12 +35,14 @@ class INET_API PacketPrinter : public cMessagePrinter
         std::stringstream sourceColumn;
         std::stringstream destinationColumn;
         std::string protocolColumn;
+        std::stringstream lengthColumn;
         std::stringstream infoColumn;
         int infoLevel = -1;
     };
 
   protected:
-    virtual void printContext(std::ostream& stream, Context& context) const;
+    virtual bool isEnabledOption(const Options *options, const char *name) const;
+    virtual void printContext(std::ostream& stream, const Options *options, Context& context) const;
     virtual void printPacketInsideOut(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolLevel, Context& context) const;
     virtual void printPacketLeftToRight(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolLevel, Context& context) const;
     virtual void printSignal(inet::physicallayer::Signal *signal, const Options *options, Context& context) const;

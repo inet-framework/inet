@@ -13,6 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
+#include <algorithm>
 #include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/packet/printer/PacketPrinter.h"
@@ -49,31 +50,56 @@ int PacketPrinter::getScoreFor(cMessage *msg) const
     return msg->isPacket() ? 100 : 0;
 }
 
+bool PacketPrinter::isEnabledOption(const Options *options, const char *name) const
+{
+    // TODO: reenable when new omnet is released
+    // return std::find(options->enabledTags.begin(), options->enabledTags.end(), name) != options->enabledTags.end();
+    return true;
+}
+
 std::vector<std::string> PacketPrinter::getSupportedTags() const
 {
-    return {"insideOut"};
+    return {"source_column", "destination_column", "protocol_column", "length_column", "info_column",
+            "inside_out", "left_to_right"};
 }
 
 std::vector<std::string> PacketPrinter::getDefaultEnabledTags() const
 {
-    return {"insideOut"};
+    return {"source_column", "destination_column", "protocol_column", "length_column", "info_column", "inside_out"};
 }
 
 std::vector<std::string> PacketPrinter::getColumnNames(const Options *options) const
 {
-    return {"source", "destination", "protocol", "info"};
+    std::vector<std::string> columnNames;
+    if (isEnabledOption(options, "source_column"))
+        columnNames.push_back("Source");
+    if (isEnabledOption(options, "destination_column"))
+        columnNames.push_back("Destination");
+    if (isEnabledOption(options, "protocol_column"))
+        columnNames.push_back("Protocol");
+    if (isEnabledOption(options, "length_column"))
+        columnNames.push_back("Length");
+    if (isEnabledOption(options, "info_column"))
+        columnNames.push_back("Info");
+    return columnNames;
 }
 
-void PacketPrinter::printContext(std::ostream& stream, Context& context) const
+void PacketPrinter::printContext(std::ostream& stream, const Options *options, Context& context) const
 {
     if (!context.isCorrect)
         stream << "\x1b[103m";
-    stream << "\x1b[30m"
-           << context.sourceColumn.str() << "\t"
-           << context.destinationColumn.str() << "\t\x1b[34m"
-           << context.protocolColumn << "\x1b[30m\t"
-           << context.infoColumn.str()
-           << std::endl;
+    stream << "\x1b[30m";
+    if (isEnabledOption(options, "source_column"))
+       stream << context.sourceColumn.str() << "\t";
+    if (isEnabledOption(options, "destination_column"))
+       stream << context.destinationColumn.str() << "\t";
+    if (isEnabledOption(options, "protocol_column"))
+       stream << "\x1b[34m" << context.protocolColumn << "\x1b[30m\t";
+    if (isEnabledOption(options, "length_column"))
+       stream << context.lengthColumn.str() << "\t";
+    if (isEnabledOption(options, "info_column"))
+       stream << context.infoColumn.str();
+    stream << std::endl;
 }
 
 void PacketPrinter::printMessage(std::ostream& stream, cMessage *message) const
@@ -96,7 +122,7 @@ void PacketPrinter::printMessage(std::ostream& stream, cMessage *message, const 
         else
             context.infoColumn << cpacket->str();
     }
-    printContext(stream, context);
+    printContext(stream, options, context);
 }
 
 void PacketPrinter::printSignal(std::ostream& stream, inet::physicallayer::Signal *signal) const
@@ -112,7 +138,7 @@ void PacketPrinter::printSignal(std::ostream& stream, inet::physicallayer::Signa
 {
     Context context;
     printSignal(signal, options, context);
-    printContext(stream, context);
+    printContext(stream, options, context);
 }
 
 void PacketPrinter::printSignal(inet::physicallayer::Signal *signal, const Options *options, Context& context) const
@@ -133,7 +159,7 @@ void PacketPrinter::printPacket(std::ostream& stream, Packet *packet, const Opti
 {
     Context context;
     printPacket(packet, options, context);
-    printContext(stream, context);
+    printContext(stream, options, context);
 }
 
 void PacketPrinter::printPacket(Packet *packet, const Options *options, Context& context) const
@@ -143,10 +169,12 @@ void PacketPrinter::printPacket(Packet *packet, const Options *options, Context&
     auto protocol = packetProtocolTag != nullptr ? packetProtocolTag->getProtocol() : nullptr;
     PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, pduTreeBuilder);
     packetDissector.dissectPacket(packet, protocol);
+    auto& protocolDataUnit = pduTreeBuilder.getTopLevelPdu();
+    context.lengthColumn << protocolDataUnit->getChunkLength();
     if (pduTreeBuilder.isSimplyEncapsulatedPacket())
-        const_cast<PacketPrinter *>(this)->printPacketInsideOut(pduTreeBuilder.getTopLevelPdu(), context);
+        const_cast<PacketPrinter *>(this)->printPacketInsideOut(protocolDataUnit, context);
     else
-        const_cast<PacketPrinter *>(this)->printPacketLeftToRight(pduTreeBuilder.getTopLevelPdu(), context);
+        const_cast<PacketPrinter *>(this)->printPacketLeftToRight(protocolDataUnit, context);
 }
 
 void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, Context& context) const
