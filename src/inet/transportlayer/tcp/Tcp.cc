@@ -63,6 +63,13 @@ static std::ostream& operator<<(std::ostream& os, const Tcp::SockPair& sp)
     return os;
 }
 
+//std::string operator<<(std::string str, const Tcp::SockPair& sp)
+//{
+//    char buf[80];
+//    sprintf(buf,strlen(buf),"loc=%s:%d rem=%s:%d",sp.localAddr.str(),sp.localPort,sp.remoteAddr.str(),sp.remotePort);
+//    return buf;
+//}
+
 static std::ostream& operator<<(std::ostream& os, const Tcp::AppConnKey& app)
 {
     os << "socketId=" << app.socketId;
