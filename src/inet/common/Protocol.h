@@ -98,6 +98,11 @@ class INET_API Protocol
     static const Protocol unitdisk;
     static const Protocol xmac;
     static const Protocol xtp;
+
+    // INET specific protocols: (in alphanumeric order)
+    static const Protocol flood;
+    static const Protocol probabilistic;
+    static const Protocol wise;
 };
 
 } // namespace inet

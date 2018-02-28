@@ -116,5 +116,10 @@ const Protocol Protocol::unitdisk("unitdisk", "UNITDISK");      // INET specific
 const Protocol Protocol::xmac("xmac", "X-MAC");
 const Protocol Protocol::xtp("xtp", "XTP");
 
+// INET specific protocols:
+const Protocol Protocol::flood("flood", "Flood"); // INET specific Flood Network Protocol
+const Protocol Protocol::probabilistic("probabilistic", "Probabilistic"); // INET specific Probabilistic Network Protocol
+const Protocol Protocol::wise("wise", "Wise"); // INET specific WiseRoute Network Protocol
+
 } // namespace inet
 
