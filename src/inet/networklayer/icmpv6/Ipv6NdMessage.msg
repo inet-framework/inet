@@ -94,6 +94,7 @@ class Ipv6NdMessage extends Icmpv6Header
 //
 class Ipv6RouterSolicitation extends Ipv6NdMessage
 {
+    type = ICMPv6_ROUTER_SOL;
     //Possible Options   //FIXME these fields are TLV options!
 
     // The link-layer address of the sender, if known.
@@ -109,6 +110,7 @@ class Ipv6RouterSolicitation extends Ipv6NdMessage
 //
 class Ipv6RouterAdvertisement extends Ipv6NdMessage
 {
+    type = ICMPv6_ROUTER_AD;
     //Additional ICMP fields
     unsigned short curHopLimit;
     bool managedAddrConfFlag;    //M-bit
@@ -133,6 +135,7 @@ class Ipv6RouterAdvertisement extends Ipv6NdMessage
 //
 class Ipv6NeighbourSolicitation extends Ipv6NdMessage
 {
+    type = ICMPv6_NEIGHBOUR_SOL;
     //Additional ICMP fields
     Ipv6Address targetAddress;// MUST NOT be a multicast address.
 
@@ -151,6 +154,7 @@ class Ipv6NeighbourSolicitation extends Ipv6NdMessage
 //
 class Ipv6NeighbourAdvertisement extends Ipv6NdMessage
 {
+    type = ICMPv6_NEIGHBOUR_AD;
     //Additional ICMP fields
     bool routerFlag;    //R-flag
     bool solicitedFlag;    //S-flag
@@ -168,6 +172,7 @@ class Ipv6NeighbourAdvertisement extends Ipv6NdMessage
 //
 class Ipv6Redirect extends Ipv6NdMessage
 {
+    type = ICMPv6_REDIRECT;
     //Additional ICMP fields
     Ipv6Address targetAddress;
     Ipv6Address destinationAddress;

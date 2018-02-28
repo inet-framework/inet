@@ -983,7 +983,6 @@ void Ipv6NeighbourDiscovery::createAndSendRsPacket(InterfaceEntry *ie)
 
     Ipv6Address destAddr = Ipv6Address::ALL_ROUTERS_2;    //all_routers multicast
     auto rs = makeShared<Ipv6RouterSolicitation>();
-    rs->setType(ICMPv6_ROUTER_SOL);
     rs->setChunkLength(B(ICMPv6_HEADER_BYTES));
 
     //The Source Link-Layer Address option SHOULD be set to the host's link-layer
@@ -1202,7 +1201,6 @@ void Ipv6NeighbourDiscovery::createAndSendRaPacket(const Ipv6Address& destAddr, 
     if (ie->ipv6Data()->getAdvSendAdvertisements()) {    //if this is an advertising interface
         //Construct a Router Advertisment message
         auto ra = makeShared<Ipv6RouterAdvertisement>();
-        ra->setType(ICMPv6_ROUTER_AD);
 
         //RFC 2461: Section 6.2.3 Router Advertisment Message Content
         /*A router sends periodic as well as solicited Router Advertisements out
@@ -1818,7 +1816,6 @@ void Ipv6NeighbourDiscovery::createAndSendNsPacket(const Ipv6Address& nsTargetAd
 
     //Construct a Neighbour Solicitation message
     auto ns = makeShared<Ipv6NeighbourSolicitation>();
-    ns->setType(ICMPv6_NEIGHBOUR_SOL);
 
     //Neighbour Solicitation Specific Information
     ns->setTargetAddress(nsTargetAddr);
@@ -2391,7 +2388,6 @@ void Ipv6NeighbourDiscovery::createAndSendRedirectPacket(InterfaceEntry *ie)
 {
     //Construct a Redirect message
     auto redirect = makeShared<Ipv6Redirect>(); // TODO: "redirectMsg");
-    redirect->setType(ICMPv6_REDIRECT);
     redirect->setChunkLength(B(ICMPv6_HEADER_BYTES + 2 * IPv6_ADDRESS_SIZE));   // RFC 2461, Section 4.5
 
 //FIXME incomplete code
