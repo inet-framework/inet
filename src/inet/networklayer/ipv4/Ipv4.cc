@@ -224,9 +224,7 @@ bool Ipv4::verifyCrc(const Ptr<const Ipv4Header>& ipv4Header)
                 // 2. compute the CRC
                 auto computedCrc = inet::serializer::TcpIpChecksum::checksum(buffer, bufferLength);
                 delete [] buffer;
-                //TODO Why is the crc not correct?
-                //return computedCrc == 0;
-                return true;
+                return computedCrc == 0;
             }
             else {
                 return false;
