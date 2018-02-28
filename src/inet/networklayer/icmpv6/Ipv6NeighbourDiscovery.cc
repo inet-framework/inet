@@ -995,7 +995,7 @@ void Ipv6NeighbourDiscovery::createAndSendRsPacket(InterfaceEntry *ie)
     //Construct a Router Solicitation message
     auto packet = new Packet("RSpacket");
     Icmpv6::insertCrc(crcMode, rs, packet);
-    packet->insertAtEnd(rs);
+    packet->insertHeader(rs);
     sendPacketToIpv6Module(packet, destAddr, myIPv6Address, ie->getInterfaceId());
 }
 
@@ -1292,7 +1292,7 @@ void Ipv6NeighbourDiscovery::createAndSendRaPacket(const Ipv6Address& destAddr, 
 
         auto packet = new Packet("RApacket");
         Icmpv6::insertCrc(crcMode, ra, packet);
-        packet->insertAtEnd(ra);
+        packet->insertHeader(ra);
         sendPacketToIpv6Module(packet, destAddr, sourceAddr, ie->getInterfaceId());
     }
 }
@@ -1831,7 +1831,7 @@ void Ipv6NeighbourDiscovery::createAndSendNsPacket(const Ipv6Address& nsTargetAd
     }
     auto packet = new Packet("NSpacket");
     Icmpv6::insertCrc(crcMode, ns, packet);
-    packet->insertAtEnd(ns);
+    packet->insertHeader(ns);
     sendPacketToIpv6Module(packet, dgDestAddr, dgSrcAddr, ie->getInterfaceId());
 
 }
@@ -2071,7 +2071,7 @@ void Ipv6NeighbourDiscovery::sendSolicitedNa(Packet *packet, const Ipv6Neighbour
 
     auto naPacket = new Packet("NApacket");
     Icmpv6::insertCrc(crcMode, na, packet);
-    naPacket->insertAtEnd(na);
+    naPacket->insertHeader(na);
     sendPacketToIpv6Module(naPacket, naDestAddr, myIPv6Addr, ie->getInterfaceId());
 }
 
@@ -2157,7 +2157,7 @@ void Ipv6NeighbourDiscovery::sendUnsolicitedNa(InterfaceEntry *ie)
 #ifdef WITH_xMIPv6
     auto packet = new Packet("NApacket");
     Icmpv6::insertCrc(crcMode, na, packet);
-    packet->insertAtEnd(na);
+    packet->insertHeader(na);
     sendPacketToIpv6Module(packet, Ipv6Address::ALL_NODES_2, myIPv6Addr, ie->getInterfaceId());
 #endif /* WITH_xMIPv6 */
 }
