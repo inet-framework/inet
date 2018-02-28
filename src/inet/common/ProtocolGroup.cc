@@ -69,7 +69,7 @@ void ProtocolGroup::addProtocol(int protocolId, const Protocol *protocol)
 // excerpt from http://www.iana.org/assignments/ieee-802-numbers/ieee-802-numbers.xhtml
 const ProtocolGroup ProtocolGroup::ethertype("ethertype", {
     { 0x0800, &Protocol::ipv4 },
-    { 0x0806, &Protocol::arp},
+    { 0x0806, &Protocol::arp },
     { 0x86DD, &Protocol::ipv6 },
     { 0x36FC, &Protocol::flood },         // ETHERTYPE_INET_FLOOD, not in any standards
     { 0x86FD, &Protocol::probabilistic },         // ETHERTYPE_INET_PROBABILISTIC, not in any standards
@@ -82,11 +82,11 @@ const ProtocolGroup ProtocolGroup::ethertype("ethertype", {
 const ProtocolGroup ProtocolGroup::pppprotocol("pppprotocol", {
     { 0x0021, &Protocol::ipv4 },
     { 0x0057, &Protocol::ipv6 },
-    { 0x39FF, &Protocol::gnp },         // INET_GENERIC, not in any standards
     { 0x0281, &Protocol::mpls },        // MPLS unicast
     { 0x39FC, &Protocol::flood },         // INET_FLOOD, not in any standards
     { 0x39FD, &Protocol::probabilistic },         // INET_PROBABILISTIC, not in any standards
     { 0x39FE, &Protocol::wise },         // INET_WISE, not in any standards
+    { 0x39FF, &Protocol::gnp },         // INET_GENERIC, not in any standards
 });
 
 // excerpt from http://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
@@ -105,8 +105,8 @@ ProtocolGroup ProtocolGroup::ipprotocol("ipprotocol", {
     { 58, &Protocol::icmpv6 },
     { 89, &Protocol::ospf },
     { 103, &Protocol::pim },
-    { 132, &Protocol::sctp},
-    { 135, &Protocol::mobileipv6},
+    { 132, &Protocol::sctp },
+    { 135, &Protocol::mobileipv6 },
     { 138, &Protocol::manet },
 
     { 250, &Protocol::flood },    // INET specific: Probabilistic Network Protocol
