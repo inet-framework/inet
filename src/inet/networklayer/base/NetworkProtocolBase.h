@@ -62,6 +62,8 @@ class INET_API NetworkProtocolBase : public LayeredProtocolBase, public IProtoco
 
     virtual void handleUpperCommand(cMessage *msg) override;
 
+    virtual const Protocol& getProtocol() const = 0;
+
   public:
     virtual void handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive) override;
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive) override;

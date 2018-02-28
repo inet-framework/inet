@@ -38,8 +38,8 @@ void NetworkProtocolBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL)
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     else if (stage == INITSTAGE_NETWORK_LAYER) {
-        registerService(Protocol::gnp, gate("transportIn"), gate("queueIn"));
-        registerProtocol(Protocol::gnp, gate("queueOut"), gate("transportOut"));
+        registerService(getProtocol(), gate("transportIn"), gate("queueIn"));
+        registerProtocol(getProtocol(), gate("queueOut"), gate("transportOut"));
     }
 }
 
