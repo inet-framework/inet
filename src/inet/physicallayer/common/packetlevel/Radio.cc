@@ -477,8 +477,11 @@ void Radio::endReception(cMessage *timer)
         sendUp(macFrame);
         receptionTimer = nullptr;
     }
-    else
+    else {
         EV_INFO << "Reception ended: ignoring " << (IRadioFrame *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
+        if (timer == receptionTimer)
+            receptionTimer = nullptr;
+    }
     updateTransceiverState();
     updateTransceiverPart();
     check_and_cast<RadioMedium *>(medium)->emit(IRadioMedium::receptionEndedSignal, check_and_cast<const cObject *>(reception));
