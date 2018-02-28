@@ -79,7 +79,7 @@ void EchoProtocol::processEchoRequest(Packet *request)
     addressReq->setSrcAddress(addressInd->getDestAddress());
     addressReq->setDestAddress(addressInd->getSrcAddress());
 
-    reply->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::gnp);
+    reply->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(request->getTag<NetworkProtocolInd>()->getProtocol());
     reply->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::echo);
     send(reply, "ipOut");
     delete request;
