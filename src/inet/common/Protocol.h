@@ -53,22 +53,17 @@ class INET_API Protocol
     static const Protocol *getProtocol(const char *name);
 
   public:
-    // in alphanumeric order
-    static const Protocol ackingmac;
+    // Standard protocols: (in alphanumeric order)
     static const Protocol aodv;
-    static const Protocol apskPhy;
     static const Protocol arp;
     static const Protocol bgp;
     static const Protocol bmac;
-    static const Protocol csmacamac;
     static const Protocol dsdv2;
     static const Protocol dsr;
     static const Protocol dymo;
-    static const Protocol echo;
     static const Protocol egp;
     static const Protocol ethernetMac;
     static const Protocol ethernetPhy;
-    static const Protocol gnp;
     static const Protocol gpsr;
     static const Protocol icmpv4;
     static const Protocol icmpv6;
@@ -90,18 +85,23 @@ class INET_API Protocol
     static const Protocol ppp;
     static const Protocol rsvp;
     static const Protocol sctp;
-    static const Protocol shortcutMac;
-    static const Protocol shortcutPhy;
     static const Protocol stp;
     static const Protocol tcp;
     static const Protocol udp;
-    static const Protocol unitdisk;
     static const Protocol xmac;
     static const Protocol xtp;
 
     // INET specific protocols: (in alphanumeric order)
+    static const Protocol ackingmac;
+    static const Protocol apskPhy;
+    static const Protocol csmacamac;
+    static const Protocol echo;
     static const Protocol flood;
+    static const Protocol gnp;
     static const Protocol probabilistic;
+    static const Protocol shortcutMac;
+    static const Protocol shortcutPhy;
+    static const Protocol unitdisk;
     static const Protocol wise;
 };
 
