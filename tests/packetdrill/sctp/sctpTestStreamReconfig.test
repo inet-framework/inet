@@ -45,6 +45,12 @@ ned-path = .;../../../../../src;../../lib
 **.swsLimit=1
 **.sackPeriod = 100ms
 
+**.pdhost.pcapRecorder[0].pcapNetwork = 101
+
+**.pdhost.tunApp[0].crcMode = "computed"
+**.sctp.crcMode = "computed"
+**.ipv4.**.crcMode = "computed"
+
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: test.out
 Packetdrill error:

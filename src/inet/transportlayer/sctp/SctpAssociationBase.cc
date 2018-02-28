@@ -144,7 +144,7 @@ SctpPathVariables::SctpPathVariables(const L3Address& addr, SctpAssociation *ass
     snprintf(str, sizeof(str), "RTX_TIMER %d:%s", assoc->assocId, addr.str().c_str());
     T3_RtxTimer = new cMessage(str);
     snprintf(str, sizeof(str), "Reset_TIMER %d:%s", assoc->assocId, addr.str().c_str());
-    ResetTimer = new cMessage(str);
+    ResetTimer = new cPacket(str);
     ResetTimer->setContextPointer(association);
     snprintf(str, sizeof(str), "ASCONF_TIMER %d:%s", assoc->assocId, addr.str().c_str());
     AsconfTimer = new cMessage(str);
@@ -985,7 +985,7 @@ bool SctpAssociation::processSctpMessage(const Ptr<const SctpHeader>& sctpmsg,
         const L3Address& msgDestAddr)
 {
     printAssocBrief();
-
+    EV_INFO << "SctpAssociation::processSctpMessage\n";
     localAddr = msgDestAddr;
     localPort = sctpmsg->getDestPort();
     remoteAddr = msgSrcAddr;
@@ -1000,7 +1000,7 @@ bool SctpAssociation::processSctpMessage(const Ptr<const SctpHeader>& sctpmsg,
             }
         }
         if (!found) {
-            EV_INFO << "destAddr " << msgDestAddr << " is not bound to host\n";
+            std::cout << "destAddr " << msgDestAddr << " is not bound to host\n";
             return true;
         }
     }
@@ -1080,15 +1080,22 @@ SctpEventCode SctpAssociation::preanalyseAppCommandEvent(int32 commandCode)
     }
 }
 
-bool SctpAssociation::processAppCommand(cMessage *msg)
+bool SctpAssociation::processAppCommand(cMessage *msg, SctpCommandReq* sctpCommand)
 {
     printAssocBrief();
 
     // first do actions
-    SctpCommand *sctpCommand = (SctpCommand *)(msg->removeControlInfo());
+  /*  auto& tags = getTags(msg);
+    SctpCommandReq *sctpCommand = tags.findTag<SctpCommandReq>();
+    if (!sctpCommand) {
+        sctpCommand = tags.findTag<SctpOpenReq>();
+    } else {
+        std::cout << "got sctpCommand\n";
+    }*/
+   // SctpCommand *sctpCommand = (SctpCommand *)(msg->removeControlInfo());
     SctpEventCode event = preanalyseAppCommandEvent(msg->getKind());
 
-    EV_INFO << "App command: " << eventName(event) << "\n";
+    std::cout << "App command: " << eventName(event) << "\n";
 
     switch (event) {
         case SCTP_E_ASSOCIATE:
@@ -1096,6 +1103,7 @@ bool SctpAssociation::processAppCommand(cMessage *msg)
             break;
 
         case SCTP_E_OPEN_PASSIVE:
+        std::cout << "call process_OPEN_PASSIVE\n";
             process_OPEN_PASSIVE(event, sctpCommand, msg);
             break;
 
@@ -1129,8 +1137,8 @@ bool SctpAssociation::processAppCommand(cMessage *msg)
             break;
 
         case SCTP_E_SET_STREAM_PRIO:
-            state->ssPriorityMap[((SctpSendInfo *)sctpCommand)->getSid()] =
-                ((SctpSendInfo *)sctpCommand)->getPpid();
+            state->ssPriorityMap[((SctpSendReq *)sctpCommand)->getSid()] =
+                ((SctpSendReq *)sctpCommand)->getPpid();
             break;
 
         case SCTP_E_QUEUE_BYTES_LIMIT:
@@ -1174,15 +1182,15 @@ bool SctpAssociation::processAppCommand(cMessage *msg)
             break;
 
         case SCTP_E_SET_RTO_INFO:
-            sctpMain->setRtoInitial(((SctpRtoInfo *)sctpCommand)->getRtoInitial());
-            sctpMain->setRtoMin(((SctpRtoInfo *)sctpCommand)->getRtoMin());
-            sctpMain->setRtoMax(((SctpRtoInfo *)sctpCommand)->getRtoMax());
+            sctpMain->setRtoInitial(((SctpRtoReq *)sctpCommand)->getRtoInitial());
+            sctpMain->setRtoMin(((SctpRtoReq *)sctpCommand)->getRtoMin());
+            sctpMain->setRtoMax(((SctpRtoReq *)sctpCommand)->getRtoMax());
             break;
         default:
             throw cRuntimeError("Wrong event code");
     }
 
-    delete sctpCommand;
+   // delete sctpCommand;
     // then state transitions
     return performStateTransition(event);
 }

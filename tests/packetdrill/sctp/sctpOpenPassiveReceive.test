@@ -25,7 +25,7 @@ ned-path = .;../../../../../src;../../lib
 
 **.startTime = 2s
 
-**.pdhost.routingTable.routingFile = "../../lib/pdhost.mrt"
+#**.pdhost.routingTable.routingFile = "../../lib/pdhost.mrt"
 **.pdhost.tunApp[0].localPort = 1000
 **.pdhost.tunApp[0].remotePort = 2000
 **.pdhost.tunApp[0].localAddress = "192.168.0.1"
@@ -44,6 +44,12 @@ ned-path = .;../../../../../src;../../lib
 
 **.sctp.arwnd = 100000
 **.sctp.nagleEnabled = false
+
+**.pdhost.pcapRecorder[0].pcapNetwork = 101
+
+**.pdhost.tunApp[0].crcMode = "computed"
+**.sctp.crcMode = "computed"
+**.ipv4.**.crcMode = "computed"
 
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: test.out

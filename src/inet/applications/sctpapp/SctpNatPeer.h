@@ -19,7 +19,7 @@
 #include "inet/transportlayer/contract/sctp/SctpSocket.h"
 
 namespace inet {
-
+#if 0
 /**
  * Accepts any number of incoming connections, and sends back whatever
  * arrives on them.
@@ -133,7 +133,7 @@ class INET_API SctpNatPeer : public cSimpleModule, public SctpSocket::CallbackIn
     void addressAddedArrived(int32 assocId, L3Address localAddr, L3Address remoteAddr) override;
     void setStatusString(const char *s);
 };
-
+#endif
 } // namespace inet
 
 #endif // ifndef __INET_SCTPNATPEER_H

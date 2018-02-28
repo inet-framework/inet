@@ -99,7 +99,7 @@ class INET_API SctpClient : public cSimpleModule, public SctpSocket::CallbackInt
     void socketPeerClosed(int connId, void *yourPtr) override;
     void socketClosed(int connId, void *yourPtr) override;
     void socketFailure(int connId, void *yourPtr, int code) override;
-    void socketStatusArrived(int connId, void *yourPtr, SctpStatusInfo *status) override;
+    void socketStatusArrived(int connId, void *yourPtr, SctpStatusReq *status) override;
 
     void setPrimaryPath(const char *addr);
     void sendRequestArrived() override;

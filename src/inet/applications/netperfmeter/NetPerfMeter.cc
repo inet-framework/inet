@@ -33,7 +33,7 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 
 namespace inet {
-
+#if 0
 Define_Module(NetPerfMeter);
 
 
@@ -1251,5 +1251,5 @@ opp_string NetPerfMeter::format(const char* formatString, ...)
    va_end(args);
    return(opp_string(str));
 }
-
+#endif
 } // namespace inet

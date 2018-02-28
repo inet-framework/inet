@@ -74,7 +74,7 @@ class INET_API SctpSocket
         virtual void socketPeerClosed(int assocId, void *yourPtr) {}
         virtual void socketClosed(int assocId, void *yourPtr) {}
         virtual void socketFailure(int assocId, void *yourPtr, int code) {}
-        virtual void socketStatusArrived(int assocId, void *yourPtr, SctpStatusInfo *status) { delete status; }
+        virtual void socketStatusArrived(int assocId, void *yourPtr, SctpStatusReq *status) { delete status; }
         virtual void socketDeleted(int assocId, void *yourPtr) {}
         virtual void sendRequestArrived() {}
         virtual void msgAbandonedArrived(int assocId) {}
@@ -115,6 +115,7 @@ class INET_API SctpSocket
 
   public:
     cGate *gateToSctp;
+    int interfaceIdToTun = -1;
     /**
      * Constructor. The connectionId() method returns a valid Id right after
      * constructor call.
@@ -367,6 +368,10 @@ class INET_API SctpSocket
     //@}
 
     void setState(int state) { sockstate = state; };
+
+    void setTunInterface(int id) { interfaceIdToTun = id; };
+
+    int getTunInterface() { return interfaceIdToTun; };
 };
 
 } // namespace inet

@@ -67,6 +67,7 @@ class INET_API PacketDrillApp : public TcpSessionApp, public ILifecycle
     void setSeqNumMap(uint32 ownNum, uint32 liveNum) { seqNumMap[ownNum] = liveNum; };
     uint32 getSeqNumMap(uint32 ownNum) { return seqNumMap[ownNum]; };
     bool findSeqNumMap(uint32 num);
+    CrcMode getCrcMode() { return crcMode; };
 
     protected:
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -86,6 +87,9 @@ class INET_API PacketDrillApp : public TcpSessionApp, public ILifecycle
         int protocol;
         int tcpConnId;
         int sctpAssocId;
+        int tunSocketId;
+        int udpSocketId;
+        int tunInterfaceId;
         UdpSocket udpSocket;
         TcpSocket tcpSocket;
         SctpSocket sctpSocket;
@@ -125,6 +129,7 @@ class INET_API PacketDrillApp : public TcpSessionApp, public ILifecycle
         std::map<uint32, uint32> seqNumMap;
         simtime_t peerHeartbeatTime;
         cMessage *eventTimer;
+        CrcMode crcMode = (CrcMode)-1;
 
 
         void scheduleEvent();

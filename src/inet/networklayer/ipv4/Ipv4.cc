@@ -226,8 +226,9 @@ bool Ipv4::verifyCrc(const Ptr<const Ipv4Header>& ipv4Header)
                 delete [] buffer;
                 return computedCrc == 0;
             }
-            else
+            else {
                 return false;
+            }
         }
         default:
             throw cRuntimeError("Unknown CRC mode");

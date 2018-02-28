@@ -61,7 +61,6 @@ PacketDump::~PacketDump()
 }
 
 #ifdef WITH_SCTP
-#if 0
 void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::SctpHeader>& sctpmsg,
         const std::string& srcAddr, const std::string& destAddr, const char *comment)
 {
@@ -82,19 +81,15 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
     out << srcAddr << "." << sctpmsg->getSrcPort() << " > "
         << destAddr << "." << sctpmsg->getDestPort() << ": ";
 
-    if (sctpmsg->hasBitError()) {
-        sctpmsg->setChecksumOk(false);
-    }
+    numberOfChunks = sctpmsg->getSctpChunksArraySize();
+    out << "numberOfChunks=" << numberOfChunks << " VTag=" << sctpmsg->getVTag() << "\n";
 
-    numberOfChunks = sctpmsg->getChunksArraySize();
-    out << "numberOfChunks=" << numberOfChunks << " VTag=" << sctpmsg->getTag() << "\n";
-
-    if (sctpmsg->hasBitError())
+    if (pk->hasBitError())
         out << "Packet has bit error!!\n";
 
     for (uint32 i = 0; i < numberOfChunks; i++) {
-        chunk = (SctpChunk *)sctpmsg->getChunks(i);
-        type = chunk->getChunkType();
+        chunk = (SctpChunk *)sctpmsg->getSctpChunks(i);
+        type = chunk->getSctpChunkType();
 
         // FIXME create a getChunkTypeName(SctpChunkType x) function in SCTP code and use it!
         switch (type) {
@@ -156,8 +151,8 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
         out << endl;
 
         for (uint32 i = 0; i < numberOfChunks; i++) {
-            chunk = (SctpChunk *)sctpmsg->getChunks(i);
-            type = chunk->getChunkType();
+            chunk = (SctpChunk *)sctpmsg->getSctpChunks(i);
+            type = chunk->getSctpChunkType();
 
             sprintf(buf, "   %3u: ", i + 1);
             out << buf;
@@ -175,7 +170,7 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
                     out << "; IS=";
                     out << initChunk->getNoInStreams();
                     out << "; InitialTSN=";
-                    out << initChunk->getInitTSN();
+                    out << initChunk->getInitTsn();
 
                     if (initChunk->getAddressesArraySize() > 0) {
                         out << "; Addresses=";
@@ -207,7 +202,7 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
                     out << "; IS=";
                     out << initackChunk->getNoInStreams();
                     out << "; InitialTSN=";
-                    out << initackChunk->getInitTSN();
+                    out << initackChunk->getInitTsn();
                     out << "; CookieLength=";
                     out << initackChunk->getCookieArraySize();
 
@@ -228,7 +223,7 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
 
                 case COOKIE_ECHO:
                     out << "COOKIE_ECHO[CookieLength=";
-                    out << chunk->getBitLength() / 8 - 4;
+                    out << chunk->getLength() - 4;
                     out << "]";
                     break;
 
@@ -248,7 +243,7 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
                     out << "; PPID=";
                     out << dataChunk->getPpid();
                     out << "; PayloadLength=";
-                    out << dataChunk->getBitLength() / 8 - 16;
+                    out << dataChunk->getLength() - 16;
                     out << "]";
                     break;
                 }
@@ -291,7 +286,7 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
                     SctpHeartbeatChunk *heartbeatChunk;
                     heartbeatChunk = check_and_cast<SctpHeartbeatChunk *>(chunk);
                     out << "HEARTBEAT[InfoLength=";
-                    out << chunk->getBitLength() / 8 - 4;
+                    out << chunk->getLength() - 4;
                     out << "; time=";
                     out << heartbeatChunk->getTimeField();
                     out << "]";
@@ -299,7 +294,7 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
 
                 case HEARTBEAT_ACK:
                     out << "HEARTBEAT_ACK[InfoLength=";
-                    out << chunk->getBitLength() / 8 - 4;
+                    out << chunk->getLength() - 4;
                     out << "]";
                     break;
 
@@ -353,7 +348,6 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
     out << endl;
 }
 #endif // ifndef WITH_SCTP
-#endif
 
 void PacketDump::dump(const char *label, const char *msg)
 {
@@ -400,12 +394,10 @@ void PacketDump::dumpPacket(bool l2r, cPacket *msg)
         else
 #endif // ifdef WITH_IPv6
 #ifdef WITH_SCTP
-#if 0
         if (const auto& sctpMessage = dynamicPtrCast<const sctp::SctpHeader>(chunk)) {
             sctpDump("", packet, sctpMessage, std::string(l2r ? leftAddr : rightAddr), std::string(l2r ?  rightAddr: leftAddr));
         }
         else
-#endif
 #endif // ifdef WITH_SCTP
 #ifdef WITH_TCP_COMMON
         if (const auto& tcpHdr = dynamicPtrCast<const tcp::TcpHeader>(chunk)) {

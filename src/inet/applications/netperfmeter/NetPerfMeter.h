@@ -40,7 +40,7 @@
 #include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 
 namespace inet {
-
+#if 0
 
 /**
  * Implementation of NetPerfMeter. See NED file for more details.
@@ -213,7 +213,7 @@ class INET_API NetPerfMeter : public cSimpleModule
    void createAndBindSocket();
    void handleTimer(cMessage* msg);
 };
-
+#endif
 } // namespace inet
 
 #endif

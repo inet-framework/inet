@@ -30,6 +30,9 @@
 #include "inet/transportlayer/tcp_common/TcpHeader_m.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/common/serializer/TcpIpChecksum.h"
+#include "inet/networklayer/common/L3Tools.h"
 
 namespace inet {
 
@@ -74,6 +77,24 @@ Ptr<Ipv4Header> PacketDrill::makeIpv4Header(IpProtocolId protocol, enum directio
     ipv4Header->setTypeOfService(0);
     ipv4Header->setChunkLength(B(20));
     ipv4Header->setTotalLengthField(20);
+    ipv4Header->setCrcMode(pdapp->getCrcMode());
+    ipv4Header->setCrc(0);
+    if (pdapp->getCrcMode() == CRC_COMPUTED) {
+        MemoryOutputStream ipv4HeaderStream;
+        Chunk::serialize(ipv4HeaderStream, ipv4Header);
+        ipv4Header->setCrc(0);
+        auto ipv4HeaderBytes = ipv4HeaderStream.getData();
+        auto bufferLength = ipv4HeaderBytes.size();
+        auto buffer = new uint8_t[bufferLength];
+        // 1. fill in the data
+        std::copy(ipv4HeaderBytes.begin(), ipv4HeaderBytes.end(), (uint8_t *)buffer);
+        // 2. compute the CRC
+        uint16_t crc = serializer::TcpIpChecksum::checksum(buffer, bufferLength);
+        std::cout << "IPHeader crc: " << crc << endl;
+        delete [] buffer;
+        ipv4Header->setCrc(crc);
+    }
+
     return ipv4Header;
 }
 
@@ -250,15 +271,17 @@ Packet* PacketDrill::buildTCPPacket(int address_family, enum direction_t directi
 Packet* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direction, cQueue *chunks)
 {
     Packet *packet = new Packet("SCTPInject");
-#if 0   //FIXME temporary disabled code
     PacketDrillApp *app = PacketDrill::pdapp;
-    SctpHeader *sctpmsg = new SctpHeader();
-    sctpmsg->setByteLength(SCTP_COMMON_HEADER);
+    auto sctpmsg = makeShared<SctpHeader>();
+    sctpmsg->setChunkLength(B(SCTP_COMMON_HEADER));
     if (direction == DIRECTION_INBOUND) {
         sctpmsg->setSrcPort(app->getRemotePort());
         sctpmsg->setDestPort(app->getLocalPort());
-        sctpmsg->setTag(app->getPeerVTag());
-        sctpmsg->setName("SCTPInbound");
+        auto addressReq = packet->addTagIfAbsent<L3AddressReq>();
+        addressReq->setSrcAddress(app->getRemoteAddress());
+        addressReq->setDestAddress(app->getLocalAddress());
+        sctpmsg->setVTag(app->getPeerVTag());
+        packet->setName("SCTPInbound");
         for (cQueue::Iterator iter(*chunks); !iter.end(); iter++) {
             PacketDrillSctpChunk *chunk = (PacketDrillSctpChunk *) (*iter);
             SctpChunk *sctpchunk = chunk->getChunk();
@@ -382,16 +405,19 @@ Packet* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direct
     } else if (direction == DIRECTION_OUTBOUND) {
         sctpmsg->setSrcPort(app->getLocalPort());
         sctpmsg->setDestPort(app->getRemotePort());
-        sctpmsg->setTag(app->getLocalVTag());
-        sctpmsg->setName("SCTPOutbound");
+        auto addressReq = packet->addTagIfAbsent<L3AddressReq>();
+        addressReq->setSrcAddress(app->getLocalAddress());
+        addressReq->setDestAddress(app->getRemoteAddress());
+        sctpmsg->setVTag(app->getLocalVTag());
+        packet->setName("SCTPOutbound");
         for (cQueue::Iterator iter(*chunks); !iter.end(); iter++) {
             PacketDrillSctpChunk *chunk = (PacketDrillSctpChunk *) (*iter);
-            SctpChunk *sctpchunk = chunk->getSctpChunk();
+            SctpChunk *sctpchunk = chunk->getChunk();
             switch (sctpchunk->getSctpChunkType()) {
                 case SCTP_RECONFIG_CHUNK_TYPE:
                     SctpStreamResetChunk* reconfig = check_and_cast<SctpStreamResetChunk*>(sctpchunk);
                     for (unsigned int i = 0; i < reconfig->getParametersArraySize(); i++) {
-                        SctpParameter *parameter = check_and_cast<SctpParameter *>(reconfig->getParameters(i));
+                        SctpParameter *parameter = (SctpParameter *) (reconfig->getParameters(i));
                         switch (parameter->getParameterType()) {
                             case OUTGOING_RESET_REQUEST_PARAMETER: {
                                 printf("OUTGOING_RESET_REQUEST_PARAMETER\n");
@@ -440,19 +466,21 @@ Packet* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direct
         }
     }
     sctpmsg->setChecksumOk(true);
+    sctpmsg->setCrcMode(pdapp->getCrcMode());
+    sctpmsg->setCrc(0);
 
     for (cQueue::Iterator iter(*chunks); !iter.end(); iter++) {
         PacketDrillSctpChunk *chunk = (PacketDrillSctpChunk *)(*iter);
         sctpmsg->insertSctpChunks(chunk->getChunk());
     }
 
-    Ipv4Header *ipDatagram = PacketDrill::makeIpv4Header(IP_PROT_SCTP, direction, app->getLocalAddress(),
+    packet->insertHeader(sctpmsg);
+    auto ipHeader = PacketDrill::makeIpv4Header(IP_PROT_SCTP, direction, app->getLocalAddress(),
             app->getRemoteAddress());
-    ipDatagram->encapsulate(sctpmsg);
-    Packet* pkt = ipDatagram->dup();
-    delete ipDatagram;
+    ipHeader->setTotalLengthField(ipHeader->getTotalLengthField() + packet->getByteLength());
+    insertNetworkProtocolHeader(packet, Protocol::ipv4, ipHeader);
+    EV_INFO << "SCTP packet " << packet << endl;
     delete chunks;
-#endif
     return packet;
 }
 
@@ -1497,7 +1525,6 @@ int PacketDrill::evaluate(PacketDrillExpression *in, PacketDrillExpression *out,
     case EXPR_SCTP_RESET_STREAMS: {
         assert(in->getType() == EXPR_SCTP_RESET_STREAMS);
         assert(out->getType() == EXPR_SCTP_RESET_STREAMS);
-        printf("evaluate EXPR_SCTP_RESET_STREAMS\n");
         struct sctp_reset_streams_expr *rs = (struct sctp_reset_streams_expr *) malloc(sizeof(struct sctp_reset_streams_expr));
         rs->srs_assoc_id = new PacketDrillExpression(in->getResetStreams()->srs_assoc_id->getType());
         if (evaluate(in->getResetStreams()->srs_assoc_id, rs->srs_assoc_id, error)) {
@@ -1520,11 +1547,10 @@ int PacketDrill::evaluate(PacketDrillExpression *in, PacketDrillExpression *out,
             free (rs);
             return STATUS_ERR;
         }
-        printf("srs_number_streams = %" PRId64 "\n", rs->srs_number_streams->getNum());
         if (rs->srs_number_streams->getNum() > 0) {
             rs->srs_stream_list = new PacketDrillExpression(in->getResetStreams()->srs_stream_list->getType());
             if (evaluate(in->getResetStreams()->srs_stream_list, rs->srs_stream_list, error)) {
-            printf("Fehler in evaluate\n");
+                EV_WARN << "Error in evaluate\n";
                 delete (rs->srs_assoc_id);
                 delete (rs->srs_flags);
                 delete (rs->srs_number_streams);
@@ -1662,18 +1688,17 @@ int PacketDrill::evaluate(PacketDrillExpression *in, PacketDrillExpression *out,
 
     case EXPR_BINARY:
         if (evaluate_binary_expression(in, out, error)) {
-            printf("Fehler in EXPR_BINARY\n");
+            printf("Error in EXPR_BINARY\n");
         }
         break;
 
     case EXPR_LIST:
         if (evaluateListExpression(in, out, error)) {
-            printf("Fehler in EXPR_LIST\n");
+            printf("Error in EXPR_LIST\n");
         }
         break;
 
     case EXPR_SOCKET_ADDRESS_IPV4:
-        printf("name=%s\n", out->getName());
         break;
     case EXPR_NONE:
         break;

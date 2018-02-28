@@ -18,9 +18,8 @@
 #ifndef __INET_SCTPSERIALIZER_H
 #define __INET_SCTPSERIALIZER_H
 
-#if 0
-#include "inet/common/serializer/SerializerBase.h"
-#include "inet/transportlayer/sctp/SCTPMessage.h"
+#include "inet/common/packet/serializer/FieldsChunkSerializer.h"
+#include "inet/transportlayer/sctp/SctpHeader.h"
 
 namespace inet {
 
@@ -29,14 +28,16 @@ namespace serializer {
 /**
  * Converts between SCTPMessage and binary (network byte order) SCTP header.
  */
-class INET_API SCTPSerializer : public SerializerBase
+class INET_API SctpSerializer : public FieldsChunkSerializer
 {
   protected:
-    virtual void serialize(const cPacket *pkt, Buffer &b, Context& context) override;
-    virtual cPacket* deserialize(const Buffer &b, Context& context) override;
+    virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
+  //  virtual void serialize(const cPacket *pkt, Buffer &b, Context& context) override;
+    virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
+   // virtual cPacket* deserialize(const Buffer &b, Context& context) override;
 
   public:
-    SCTPSerializer(const char *name = nullptr) : SerializerBase(name) {}
+    SctpSerializer(const char *name = nullptr) : FieldsChunkSerializer() {}
 
     /**
      * Serializes an SCTPMessage for transmission on the wire.
@@ -44,12 +45,12 @@ class INET_API SCTPSerializer : public SerializerBase
      * the frame over a raw socket.)
      * Returns the length of data written into buffer.
      */
-    int32 serialize(const sctp::SCTPMessage *msg, uint8 *buf, uint32 bufsize);
+   // int32 serialize(const sctp::SctpHeader *msg, uint8 *buf, uint32 bufsize);
 
     /**
      * Puts a packet sniffed from the wire into an SCTPMessage.
      */
-    void parse(const uint8 *buf, uint32 bufsize, sctp::SCTPMessage *dest);
+  //  void parse(const uint8 *buf, uint32 bufsize, sctp::SctpHeader *dest);
 
     static uint32 checksum(const uint8 *buf, register uint32 len);
     static void hmacSha1(const uint8 *buf, uint32 buflen, const uint8 *key, uint32 keylen, uint8 *digest);
@@ -67,6 +68,6 @@ class INET_API SCTPSerializer : public SerializerBase
 } // namespace serializer
 
 } // namespace inet
-#endif
+
 #endif // ifndef __INET_SCTPSERIALIZER_H
 

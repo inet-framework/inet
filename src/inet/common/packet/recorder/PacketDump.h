@@ -32,7 +32,7 @@ class Ipv6Header;
 namespace tcp { class TcpHeader; }
 class UdpHeader;
 class ArpPacket;
-namespace sctp { class SCTPMessage; }
+namespace sctp { class SctpHeader; }
 
 /**
  * Utility class that provides tcpdump-like functionality. It prints
@@ -110,8 +110,8 @@ class INET_API PacketDump
     /**
      * Dumps info about the given SCTP message.
      */
-    void sctpDump(const char *label, Packet *pk, const std::string& srcAddr,
-            const std::string& destAddr, const char *comment = nullptr);
+     void sctpDump(const char *label, Packet * pk, const Ptr<const sctp::SctpHeader>& sctpmsg,
+        const std::string& srcAddr, const std::string& destAddr, const char *comment = nullptr);
 
 #endif // ifdef WITH_SCTP
 

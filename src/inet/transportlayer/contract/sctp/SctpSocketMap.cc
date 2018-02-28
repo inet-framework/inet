@@ -24,7 +24,8 @@ namespace inet {
 
 SctpSocket *SctpSocketMap::findSocketFor(cMessage *msg)
 {
-    SctpCommand *ind = dynamic_cast<SctpCommand *>(msg->getControlInfo());
+    auto& tags = getTags(msg);
+    SctpCommandReq *ind = tags.findTag<SctpCommandReq>();
     if (!ind)
         throw cRuntimeError("SctpSocketMap: findSocketFor(): no SctpCommand control info in message (not from SCTP?)");
 

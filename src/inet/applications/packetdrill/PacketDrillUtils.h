@@ -551,8 +551,8 @@ class INET_API PacketDrillExpression : public cObject
             struct sctp_add_streams_expr *sctp_addstreams;
             struct sctp_status_expr *sctp_status;
             L3Address *ip_address;
-            cQueue *list;
         } value;
+        cQueue *list;
         const char *format; /* the printf format for printing the value */
 
     public:
@@ -564,8 +564,8 @@ class INET_API PacketDrillExpression : public cObject
         const char* getString() const { return value.string; };
         void setFormat(const char* format_) { format = format_; };
         const char* getFormat() const { return format; };
-        cQueue* getList() { return value.list; };
-        void setList(cQueue* queue) { value.list = queue; };
+        cQueue* getList() { return list; };
+        void setList(cQueue* queue) { list = queue; };
         struct binary_expression* getBinary() { return value.binary; };
         void setBinary(struct binary_expression* bin) { value.binary = bin; };
         void setRtoinfo(struct sctp_rtoinfo_expr *exp) { value.sctp_rtoinfo = exp; };
