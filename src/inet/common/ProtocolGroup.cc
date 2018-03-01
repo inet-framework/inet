@@ -110,6 +110,7 @@ ProtocolGroup ProtocolGroup::ipprotocol("ipprotocol", {
     { 135, &Protocol::mobileipv6 },
     { 138, &Protocol::manet },
 
+    { 249, &Protocol::linkstaterouting },    // INET specific: Link State Routing Protocol
     { 250, &Protocol::flood },    // INET specific: Probabilistic Network Protocol
     { 251, &Protocol::probabilistic },    // INET specific: Probabilistic Network Protocol
     { 252, &Protocol::wiseroute },    // INET specific: Probabilistic Network Protocol

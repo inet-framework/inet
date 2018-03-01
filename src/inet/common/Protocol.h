@@ -98,6 +98,7 @@ class INET_API Protocol
     static const Protocol echo;
     static const Protocol flood;
     static const Protocol gnp;
+    static const Protocol linkstaterouting;
     static const Protocol probabilistic;
     static const Protocol shortcutMac;
     static const Protocol shortcutPhy;

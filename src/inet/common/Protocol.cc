@@ -116,6 +116,7 @@ const Protocol Protocol::csmacamac("csmacamac", "CSMA/CA MAC"); // INET specific
 const Protocol Protocol::echo("echo", "Echo");  // INET specific echo protocol (ping request/reply)
 const Protocol Protocol::flood("flood", "Flood"); // INET specific Flood Network Protocol
 const Protocol Protocol::gnp("gnp", "GNP"); // INET specific Generic Network Protocol
+const Protocol Protocol::linkstaterouting("linkstaterouting", "LinkStateRouting");
 const Protocol Protocol::probabilistic("probabilistic", "Probabilistic"); // INET specific Probabilistic Network Protocol
 const Protocol Protocol::shortcutMac("shortcutmac", "Shortcut MAC"); // INET specific
 const Protocol Protocol::shortcutPhy("shortcutphy", "Shortcut PHY"); // INET specific
