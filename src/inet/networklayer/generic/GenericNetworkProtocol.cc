@@ -180,7 +180,8 @@ void GenericNetworkProtocol::handlePacketFromNetwork(Packet *packet)
     const auto& header = packet->peekHeader<GenericDatagramHeader>();
     packet->addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
     packet->addTagIfAbsent<NetworkProtocolInd>()->setNetworkProtocolHeader(header);
-    if (header->getTotalLengthField() > packet->getDataLength()) {
+    B totalLength = header->getChunkLength() + header->getPayloadLengthField();
+    if (totalLength > packet->getDataLength()) {
         EV_WARN << "length error found, drop packet\n";
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);
@@ -190,8 +191,8 @@ void GenericNetworkProtocol::handlePacketFromNetwork(Packet *packet)
     }
 
     // remove lower layer paddings:
-    if (header->getTotalLengthField() < packet->getDataLength()) {
-        packet->setTrailerPopOffset(packet->getHeaderPopOffset() + header->getTotalLengthField());
+    if (totalLength < packet->getDataLength()) {
+        packet->setTrailerPopOffset(packet->getHeaderPopOffset() + totalLength);
     }
 
     const InterfaceEntry *inIE = interfaceTable->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
@@ -476,6 +477,10 @@ void GenericNetworkProtocol::decapsulate(Packet *packet)
         ifTag->setInterfaceId(fromIE->getInterfaceId());
     }
 
+    ASSERT(header->getPayloadLengthField() <= packet->getDataLength());
+    // drop padding
+    packet->setTrailerPopOffset(packet->getHeaderPopOffset() + header->getPayloadLengthField());
+
     // attach control info
     auto payloadProtocol = header->getProtocol();
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
@@ -535,7 +540,7 @@ void GenericNetworkProtocol::encapsulate(Packet *transportPacket, const Interfac
     // setting GenericNetworkProtocol options is currently not supported
 
     delete transportPacket->removeControlInfo();
-    header->setTotalLengthField(header->getChunkLength()+transportPacket->getDataLength());
+    header->setPayloadLengthField(transportPacket->getDataLength());
 
     insertNetworkProtocolHeader(transportPacket, Protocol::gnp, header);
 }

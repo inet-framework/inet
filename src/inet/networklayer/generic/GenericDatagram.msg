@@ -48,7 +48,7 @@ class GenericDatagramHeader extends NetworkHeaderBase
     L3Address destAddr;
     IpProtocolId protocolId = IP_PROT_NONE;
     short hopLimit;
-    B totalLengthField;
+    B payloadLengthField;
     TlvOptions tlvOptions;
 }
 

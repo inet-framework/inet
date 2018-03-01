@@ -29,10 +29,9 @@ Register_Protocol_Dissector(&Protocol::gnp, GnpDissector);
 
 void GnpDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    auto trailerPopOffset = packet->getTrailerPopOffset();
-    auto gnpEndOffset = packet->getHeaderPopOffset();
     auto header = packet->popHeader<GenericDatagramHeader>();
-    gnpEndOffset += header->getTotalLengthField();
+    auto trailerPopOffset = packet->getTrailerPopOffset();
+    auto gnpEndOffset = packet->getHeaderPopOffset() + header->getPayloadLengthField();
     callback.startProtocolDataUnit(&Protocol::gnp);
     callback.visitChunk(header, &Protocol::gnp);
     packet->setTrailerPopOffset(gnpEndOffset);
