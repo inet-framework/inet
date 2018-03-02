@@ -102,7 +102,7 @@ class INET_API Protocol
     static const Protocol shortcutMac;
     static const Protocol shortcutPhy;
     static const Protocol unitdisk;
-    static const Protocol wise;
+    static const Protocol wiseroute;
 };
 
 } // namespace inet

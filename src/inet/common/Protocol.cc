@@ -120,7 +120,7 @@ const Protocol Protocol::probabilistic("probabilistic", "Probabilistic"); // INE
 const Protocol Protocol::shortcutMac("shortcutmac", "Shortcut MAC"); // INET specific
 const Protocol Protocol::shortcutPhy("shortcutphy", "Shortcut PHY"); // INET specific
 const Protocol Protocol::unitdisk("unitdisk", "UnitDisk");      // INET specific
-const Protocol Protocol::wise("wise", "Wise"); // INET specific WiseRoute Network Protocol
+const Protocol Protocol::wiseroute("wiseroute", "WiseRoute"); // INET specific WiseRoute Network Protocol
 
 } // namespace inet
 

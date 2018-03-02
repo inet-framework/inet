@@ -70,7 +70,7 @@ class INET_API WiseRoute : public NetworkProtocolBase, public INetworkProtocol
 
     virtual ~WiseRoute();
 
-    const Protocol& getProtocol() const override { return Protocol::wise; }
+    const Protocol& getProtocol() const override { return Protocol::wiseroute; }
 
   protected:
     enum messagesTypes {

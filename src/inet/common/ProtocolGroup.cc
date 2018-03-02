@@ -73,7 +73,7 @@ const ProtocolGroup ProtocolGroup::ethertype("ethertype", {
     { 0x86DD, &Protocol::ipv6 },
     { 0x36FC, &Protocol::flood },         // ETHERTYPE_INET_FLOOD, not in any standards
     { 0x86FD, &Protocol::probabilistic },         // ETHERTYPE_INET_PROBABILISTIC, not in any standards
-    { 0x86FE, &Protocol::wise },         // ETHERTYPE_INET_WISE, not in any standards
+    { 0x86FE, &Protocol::wiseroute },         // ETHERTYPE_INET_WISE, not in any standards
     { 0x86FF, &Protocol::gnp },         // ETHERTYPE_INET_GENERIC
     { 0x8847, &Protocol::mpls },
 });
@@ -85,7 +85,7 @@ const ProtocolGroup ProtocolGroup::pppprotocol("pppprotocol", {
     { 0x0281, &Protocol::mpls },        // MPLS unicast
     { 0x39FC, &Protocol::flood },         // INET_FLOOD, not in any standards
     { 0x39FD, &Protocol::probabilistic },         // INET_PROBABILISTIC, not in any standards
-    { 0x39FE, &Protocol::wise },         // INET_WISE, not in any standards
+    { 0x39FE, &Protocol::wiseroute },         // INET_WISE, not in any standards
     { 0x39FF, &Protocol::gnp },         // INET_GENERIC, not in any standards
 });
 
@@ -111,7 +111,7 @@ ProtocolGroup ProtocolGroup::ipprotocol("ipprotocol", {
 
     { 250, &Protocol::flood },    // INET specific: Probabilistic Network Protocol
     { 251, &Protocol::probabilistic },    // INET specific: Probabilistic Network Protocol
-    { 252, &Protocol::wise },    // INET specific: Probabilistic Network Protocol
+    { 252, &Protocol::wiseroute },    // INET specific: Probabilistic Network Protocol
     { 253, &Protocol::gnp },    // INET specific: Generic Network Protocol
     { 254, &Protocol::echo },    // INET specific: Echo Protocol
 });
