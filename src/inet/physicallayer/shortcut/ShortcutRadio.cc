@@ -16,10 +16,12 @@
 //
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/physicallayer/shortcut/ShortcutRadio.h"
+#include "inet/physicallayer/shortcut/ShortcutPhyHeader_m.h"
 
 namespace inet {
 
@@ -91,8 +93,16 @@ void ShortcutRadio::sendToPeer(Packet *packet, ShortcutRadio *peer)
     }
     else {
         auto length = b(lengthOverhead->intValue());
-        if (length != b(0))
-            packet->insertHeader(makeShared<BitCountChunk>(length));
+        if (length < b(0))
+            throw cRuntimeError("invalid lengthOverhead value: %li bit", length.get());
+        if (length > b(0)) {
+            auto protocolTag = packet->getTag<PacketProtocolTag>();
+            auto header = makeShared<ShortcutPhyHeader>();
+            header->setChunkLength(length);
+            header->setPayloadProtocol(protocolTag->getProtocol());
+            packet->insertHeader(header);
+            protocolTag->setProtocol(&Protocol::shortcutPhy);
+        }
         simtime_t transmissionDuration = packet->getBitLength() / bitrate + durationOverhead->doubleValue();
         packet->setDuration(transmissionDuration);
         sendDirect(packet, propagationDelay->doubleValue(), transmissionDuration, peer->gate("radioIn")->getPathStartGate());
@@ -101,7 +111,11 @@ void ShortcutRadio::sendToPeer(Packet *packet, ShortcutRadio *peer)
 
 void ShortcutRadio::receiveFromPeer(Packet *packet)
 {
-    packet->popHeader<BitCountChunk>();
+    auto packetProtocolTag = packet->getTag<PacketProtocolTag>();
+    if (packetProtocolTag->getProtocol() == &Protocol::shortcutPhy) {
+        const auto& header = packet->popHeader<ShortcutPhyHeader>();
+        packetProtocolTag->setProtocol(header->getPayloadProtocol());
+    }
     emit(packetSentToUpperSignal, packet);
     send(packet, gate("upperLayerOut"));
 }
