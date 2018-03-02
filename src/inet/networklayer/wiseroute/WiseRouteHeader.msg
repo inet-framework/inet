@@ -35,6 +35,7 @@ class WiseRouteHeader extends NetworkHeaderBase
     IpProtocolId     protocolId = (IpProtocolId)-1;
     L3Address finalDestAddr;
     L3Address initialSrcAddr;
+    B         payloadLengthField;
 }
 
 cplusplus(WiseRouteHeader) {{
