@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/ProtocolGroup.h"
+#include "inet/networklayer/common/IpProtocolId_m.h"
 
 namespace inet {
 

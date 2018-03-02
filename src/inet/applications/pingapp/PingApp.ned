@@ -73,6 +73,7 @@ simple PingApp like IApp
         bool continuous = default(false);  // whether to continuously ping the destinations in a round-robin fashion
         bool printPing = default(false); // log to stdout
         string crcMode @enum("declared", "computed") = default("declared");
+        string networkProtocol = default(""); // uses specified network protocol for communication; uses the address-specified default network protocol when the parameter is empty
         @display("i=block/app");
         @signal[rtt](type=simtime_t);
         @signal[numLost](type=long);
