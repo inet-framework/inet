@@ -358,10 +358,10 @@ void WiseRoute::decapsulate(Packet *packet)
     if (packet->getDataLength() > payloadLength)
         packet->setTrailerPopOffset(packet->getHeaderPopOffset() + payloadLength);
     auto payloadProtocol = wiseRouteHeader->getProtocol();
+    packet->addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&getProtocol());
     packet->addTagIfAbsent<NetworkProtocolInd>()->setNetworkProtocolHeader(wiseRouteHeader);
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
-    packet->addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
     packet->addTagIfAbsent<L3AddressInd>()->setSrcAddress(wiseRouteHeader->getInitialSrcAddr());
     nbHops = nbHops + wiseRouteHeader->getNbHops();
 }
@@ -406,8 +406,8 @@ WiseRoute::tFloodTable::key_type WiseRoute::getRoute(const tFloodTable::key_type
 void WiseRoute::setDownControlInfo(Packet *const pMsg, const MacAddress& pDestAddr)
 {
     pMsg->addTagIfAbsent<MacAddressReq>()->setDestAddress(pDestAddr);
-    pMsg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::gnp);
-    pMsg->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::gnp);
+    pMsg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&getProtocol());
+    pMsg->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&getProtocol());
 }
 
 } // namespace inet
