@@ -257,10 +257,17 @@ bool Flood::notBroadcasted(const FloodHeader *msg)
 void Flood::decapsulate(Packet *packet)
 {
     auto floodHeader = packet->popHeader<FloodHeader>();
+    auto payloadLength = floodHeader->getPayloadLengthField();
+    if (packet->getDataLength() < payloadLength) {
+        throw cRuntimeError("Data error: illegal payload length");     //FIXME packet drop
+    }
+    if (packet->getDataLength() > payloadLength)
+        packet->setTrailerPopOffset(packet->getHeaderPopOffset() + payloadLength);
     auto payloadProtocol = floodHeader->getProtocol();
+    packet->addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&getProtocol());
+    packet->addTagIfAbsent<NetworkProtocolInd>()->setNetworkProtocolHeader(floodHeader);
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
-    packet->addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
     auto addressInd = packet->addTagIfAbsent<L3AddressInd>();
     addressInd->setSrcAddress(floodHeader->getSourceAddress());
     addressInd->setDestAddress(floodHeader->getDestinationAddress());
@@ -311,6 +318,8 @@ void Flood::encapsulate(Packet *appPkt)
     EV << "sendDown: nHop=L3BROADCAST -> message has to be broadcasted"
        << " -> set destMac=L2BROADCAST" << endl;
 
+    pkt->setPayloadLengthField(appPkt->getDataLength());
+
     //encapsulate the application packet
     setDownControlInfo(appPkt, MacAddress::BROADCAST_ADDRESS);
 
@@ -324,8 +333,8 @@ void Flood::encapsulate(Packet *appPkt)
 void Flood::setDownControlInfo(Packet *const pMsg, const MacAddress& pDestAddr)
 {
     pMsg->addTagIfAbsent<MacAddressReq>()->setDestAddress(pDestAddr);
-    pMsg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::gnp);
-    pMsg->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::gnp);
+    pMsg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&getProtocol());
+    pMsg->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&getProtocol());
 }
 
 } // namespace inet

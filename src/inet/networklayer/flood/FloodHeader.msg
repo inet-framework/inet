@@ -16,6 +16,7 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.Units;
 import inet.networklayer.contract.NetworkHeaderBase;
 import inet.networklayer.common.L3Address;
 import inet.networklayer.common.IpProtocolId;
@@ -33,6 +34,7 @@ class FloodHeader extends NetworkHeaderBase
     int           ttl = 1;    // time to live field
     unsigned long seqNum = 0; // sequence number
     IpProtocolId  protocolId = (IpProtocolId)-1;
+    B             payloadLengthField;
 }
 
 cplusplus(FloodHeader) {{
