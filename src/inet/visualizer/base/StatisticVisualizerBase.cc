@@ -209,6 +209,8 @@ void StatisticVisualizerBase::processSignal(cComponent *source, simsignal_t sign
             if (resultFilter == nullptr)
                 source->subscribe(registerSignal(signalName), statisticVisualization->recorder);
             else
+                // TODO: when we are adding a delegate to a count(packet) filter chain, the the incoming value will be NaN (due to the signal being about a packet)
+                // TODO: but the count is already 1 at this point and we have no way of getting it, and we will be notified only with the next emit when it becomes 2, never receiving 1 here
                 resultFilter->addDelegate(statisticVisualization->recorder);
             addStatisticVisualization(statisticVisualization);
             refreshStatisticVisualization(statisticVisualization);
