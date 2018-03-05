@@ -15,36 +15,32 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IEEE80211IDEALTRANSMITTER_H
-#define __INET_IEEE80211IDEALTRANSMITTER_H
+#ifndef __INET_IEEE80211UNITDISKRECEIVER_H
+#define __INET_IEEE80211UNITDISKRECEIVER_H
 
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211TransmitterBase.h"
+#include "inet/physicallayer/unitdisk/UnitDiskReceiver.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211IdealTransmitter : public Ieee80211TransmitterBase
+// TODO: Ieee80211ReceiverBase
+class INET_API Ieee80211UnitDiskReceiver : public UnitDiskReceiver
 {
-  protected:
-    m communicationRange = m(NaN);
-    m interferenceRange = m(NaN);
-    m detectionRange = m(NaN);
-
   protected:
     virtual void initialize(int stage) override;
 
   public:
-    Ieee80211IdealTransmitter();
+    Ieee80211UnitDiskReceiver();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
-    virtual const ITransmission *createTransmission(const IRadio *radio, const Packet *packet, simtime_t startTime) const override;
+    virtual const IReceptionResult *computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const override;
 };
 
 } // namespace physicallayer
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211IDEALTRANSMITTER_H
+#endif // ifndef __INET_IEEE80211UNITDISKRECEIVER_H
 

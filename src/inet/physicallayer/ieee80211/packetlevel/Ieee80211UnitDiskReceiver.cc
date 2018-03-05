@@ -22,7 +22,7 @@
 #include "inet/physicallayer/unitdisk/UnitDiskReception.h"
 #include "inet/physicallayer/unitdisk/UnitDiskTransmission.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211IdealReceiver.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211UnitDiskReceiver.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211TransmissionBase.h"
 
@@ -30,26 +30,26 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(Ieee80211IdealReceiver);
+Define_Module(Ieee80211UnitDiskReceiver);
 
-Ieee80211IdealReceiver::Ieee80211IdealReceiver() :
+Ieee80211UnitDiskReceiver::Ieee80211UnitDiskReceiver() :
     UnitDiskReceiver()
 {
 }
 
-void Ieee80211IdealReceiver::initialize(int stage)
+void Ieee80211UnitDiskReceiver::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
     }
 }
 
-std::ostream& Ieee80211IdealReceiver::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211UnitDiskReceiver::printToStream(std::ostream& stream, int level) const
 {
-    stream << "Ieee80211IdealReceiver";
+    stream << "Ieee80211UnitDiskReceiver";
     return UnitDiskReceiver::printToStream(stream, level);
 }
 
-const IReceptionResult *Ieee80211IdealReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
+const IReceptionResult *Ieee80211UnitDiskReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
     auto transmission = check_and_cast<const Ieee80211TransmissionBase *>(reception->getTransmission());
     auto receptionResult = UnitDiskReceiver::computeReceptionResult(listening, reception, interference, snir, decisions);

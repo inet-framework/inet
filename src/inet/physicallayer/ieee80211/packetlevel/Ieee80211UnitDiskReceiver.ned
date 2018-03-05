@@ -18,16 +18,10 @@
 package inet.physicallayer.ieee80211.packetlevel;
 
 //
-// This radio model uses ideal analog representation.
-// It must be used in conjunction with the ~UnitDiskRadioMedium model.
+// See also ~Ieee80211UnitDiskTransmitter, ~Ieee80211UnitDiskRadio, and ~UnitDiskRadioMedium.
 //
-// See also ~UnitDiskRadioMedium, ~Ieee80211IdealTransmitter,
-// ~UnitDiskReceiver, and ~UnitDiskAnalogModel.
-//
-module Ieee80211IdealRadio extends Ieee80211Radio
+module Ieee80211UnitDiskReceiver extends Ieee80211ReceiverBase
 {
     parameters:
-        transmitterType = default("Ieee80211IdealTransmitter");
-        receiverType = default("Ieee80211IdealReceiver");
-        @class(Radio);
+        @class(Ieee80211UnitDiskReceiver);
 }

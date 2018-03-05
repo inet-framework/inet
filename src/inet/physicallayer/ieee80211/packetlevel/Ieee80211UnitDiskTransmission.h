@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IEEE80211IDEALTRANSMISSION_H
-#define __INET_IEEE80211IDEALTRANSMISSION_H
+#ifndef __INET_IEEE80211UNITDISKTRANSMISSION_H
+#define __INET_IEEE80211UNITDISKTRANSMISSION_H
 
 #include "inet/physicallayer/unitdisk/UnitDiskTransmission.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211TransmissionBase.h"
@@ -26,10 +26,10 @@ namespace inet {
 namespace physicallayer {
 
 // TODO: IdealTransmissionBase
-class INET_API Ieee80211IdealTransmission : public UnitDiskTransmission, public Ieee80211TransmissionBase
+class INET_API Ieee80211UnitDiskTransmission : public UnitDiskTransmission, public Ieee80211TransmissionBase
 {
   public:
-    Ieee80211IdealTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, m communicationRange, m interferenceRange, m detectionRange, const IIeee80211Mode *mode, const Ieee80211Channel *channel);
+    Ieee80211UnitDiskTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, m communicationRange, m interferenceRange, m detectionRange, const IIeee80211Mode *mode, const Ieee80211Channel *channel);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 };
@@ -38,5 +38,5 @@ class INET_API Ieee80211IdealTransmission : public UnitDiskTransmission, public 
 
 } // namespace inet
 
-#endif // ifndef __INET_IEEE80211IDEALTRANSMISSION_H
+#endif // ifndef __INET_IEEE80211UNITDISKTRANSMISSION_H
 
