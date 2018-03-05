@@ -26,8 +26,10 @@ module Ieee802154NarrowbandInterface like IWirelessInterface
     parameters:
         @class(InterfaceEntry);
         string interfaceTableModule;
+        string energySourceModule = default("");
         string radioType = default("Ieee802154NarrowbandScalarRadio");
         *.interfaceTableModule = default(absPath(interfaceTableModule));
+        *.energySourceModule = default(absPath(energySourceModule));
         @display("i=block/ifcard");
     gates:
         input upperLayerIn;
