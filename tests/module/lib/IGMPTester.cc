@@ -123,7 +123,7 @@ void IGMPTester::initialize(int stage)
         interfaceEntry = getContainingNicModule(this);
         interfaceEntry->setInterfaceName("eth0");
         MacAddress address("AA:00:00:00:00:01");
-        interfaceEntry->setMACAddress(address);
+        interfaceEntry->setMacAddress(address);
         interfaceEntry->setInterfaceToken(address.formInterfaceIdentifier());
         interfaceEntry->setMtu(par("mtu"));
         interfaceEntry->setMulticast(true);
