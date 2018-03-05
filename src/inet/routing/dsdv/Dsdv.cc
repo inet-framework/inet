@@ -65,7 +65,7 @@ void Dsdv::initialize(int stage)
     {
         registerService(Protocol::manet, nullptr, gate("ipIn"));
         registerProtocol(Protocol::manet, gate("ipOut"), nullptr);
-        L3Socket socket(Protocol::manet.getId(), gate("ipOut"));
+        L3Socket socket(&Protocol::manet, gate("ipOut"));
         forwardList = new std::list<ForwardEntry *>();
         event = new cMessage("event");
         if (isNodeUp())

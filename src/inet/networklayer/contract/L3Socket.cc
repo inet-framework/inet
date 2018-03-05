@@ -24,17 +24,17 @@
 
 namespace inet {
 
-L3Socket::L3Socket(int controlInfoProtocolId, cGate *outputGate) :
-    controlInfoProtocolId(controlInfoProtocolId),
+L3Socket::L3Socket(const Protocol *controlInfoProtocol, cGate *outputGate) :
+    l3Protocol(controlInfoProtocol),
     socketId(getEnvir()->getUniqueNumber()),
     outputGate(outputGate)
 {
 }
 
-void L3Socket::setControlInfoProtocolId(int _controlInfoProtocolId)
+void L3Socket::setL3Protocol(const Protocol *controlInfoProtocol)
 {
     ASSERT(!bound);
-    controlInfoProtocolId = _controlInfoProtocolId;
+    l3Protocol = controlInfoProtocol;
 }
 
 void L3Socket::sendToOutput(cMessage *message)
@@ -42,17 +42,17 @@ void L3Socket::sendToOutput(cMessage *message)
     if (!outputGate)
         throw cRuntimeError("L3Socket: setOutputGate() must be invoked before the socket can be used");
     auto& tags = getTags(message);
-    tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(Protocol::getProtocol(controlInfoProtocolId));
+    tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(l3Protocol);
     tags.addTagIfAbsent<SocketReq>()->setSocketId(socketId);
     check_and_cast<cSimpleModule *>(outputGate->getOwnerModule())->send(message, outputGate);
 }
 
-void L3Socket::bind(int protocolId)
+void L3Socket::bind(const Protocol *protocol)
 {
     ASSERT(!bound);
-    ASSERT(controlInfoProtocolId != -1);
+    ASSERT(l3Protocol != nullptr);
     L3SocketBindCommand *command = new L3SocketBindCommand();
-    command->setProtocolId(protocolId);
+    command->setProtocol(protocol);
     auto request = new Request("bind", L3_C_BIND);
     request->setControlInfo(command);
     sendToOutput(request);
@@ -67,7 +67,7 @@ void L3Socket::send(cPacket *msg)
 void L3Socket::close()
 {
     ASSERT(bound);
-    ASSERT(controlInfoProtocolId != -1);
+    ASSERT(l3Protocol != nullptr);
     L3SocketCloseCommand *command = new L3SocketCloseCommand();
     auto request = new Request("close", L3_C_CLOSE);
     request->setControlInfo(command);

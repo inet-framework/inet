@@ -126,9 +126,7 @@ void Ipv6::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePr
 {
     Enter_Method("handleRegisterProtocol");
     if (!strcmp("transportIn", in->getBaseName())) {
-        int protocolNumber = ProtocolGroup::ipprotocol.findProtocolNumber(&protocol);
-        if (protocolNumber != -1)
-            mapping.addProtocolMapping(protocolNumber, in->getIndex());
+        mapping.addProtocolMapping(protocol.getId(), in->getIndex());
     }
 }
 
@@ -137,9 +135,9 @@ void Ipv6::handleMessage(cMessage *msg)
     auto request = dynamic_cast<Request *>(msg);
     if (L3SocketBindCommand *command = dynamic_cast<L3SocketBindCommand *>(msg->getControlInfo())) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
-        SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocolId());
+        SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocol()->getId());
         socketIdToSocketDescriptor[socketId] = descriptor;
-        protocolIdToSocketDescriptors.insert(std::pair<int, SocketDescriptor *>(command->getProtocolId(), descriptor));
+        protocolIdToSocketDescriptors.insert(std::pair<int, SocketDescriptor *>(command->getProtocol()->getId(), descriptor));
         delete msg;
     }
     else if (dynamic_cast<L3SocketCloseCommand *>(msg->getControlInfo()) != nullptr) {
@@ -671,7 +669,7 @@ void Ipv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
 #endif /* WITH_xMIPv6 */
 
     auto origPacket = packet->dup();
-    int protocol = ipv6Header->getProtocolId();
+    int protocol = ipv6Header->getProtocol()->getId();
     decapsulate(packet);
     auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol);
     auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol);
@@ -682,11 +680,11 @@ void Ipv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
         send(packetCopy, "transportOut");
     }
 
-    if (protocol == IP_PROT_IPv6_ICMP) {
+    if (protocol == Protocol::icmpv6.getId()) {
         handleReceivedIcmp(packet);
     }    //Added by WEI to forward ICMPv6 msgs to ICMPv6 module.
 #ifdef WITH_xMIPv6
-    else if (protocol == IP_PROT_IPv6EXT_MOB) {       //FIXME this dynamic_cast always returns nullptr. MobilityHeader should become to FieldChunk
+    else if (protocol == Protocol::mobileipv6.getId()) {       //FIXME this dynamic_cast always returns nullptr. MobilityHeader should become to FieldChunk
         // added check for MIPv6 support to prevent nodes w/o the
         // xMIP module from processing related messages, 4.9.07 - CB
         if (rt->hasMipv6Support()) {
@@ -703,7 +701,7 @@ void Ipv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
         }
     }
 #endif /* WITH_xMIPv6 */
-    else if (protocol == IP_PROT_IP || protocol == IP_PROT_IPv6) {
+    else if (protocol == Protocol::ipv4.getId() || protocol == Protocol::ipv6.getId()) {
         EV_INFO << "Tunnelled IP datagram\n";
         send(packet, "upperTunnelingOut");
     }

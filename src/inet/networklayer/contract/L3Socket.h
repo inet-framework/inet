@@ -19,6 +19,7 @@
 #define __INET_L3SOCKET_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/Protocol.h"
 
 namespace inet {
 
@@ -29,7 +30,7 @@ class INET_API L3Socket
 {
   protected:
     bool bound = false;
-    int controlInfoProtocolId = -1;
+    const Protocol *l3Protocol = nullptr;
     int socketId = -1;
     cGate *outputGate = nullptr;
 
@@ -37,15 +38,15 @@ class INET_API L3Socket
     void sendToOutput(cMessage *message);
 
   public:
-    L3Socket(int controlInfoProtocolId = -1, cGate *outputGate = nullptr);
+    L3Socket(const Protocol *l3ProtocolId = nullptr, cGate *outputGate = nullptr);
     virtual ~L3Socket() {}
 
     /**
      * Sets controlInfoProtocolId, for example setControlInfoProtocolId(Protocol::ipv4.getId())
      */
-    void setControlInfoProtocolId(int controlInfoProtocolId);
+    void setL3Protocol(const Protocol *l3Protocol);
 
-    int getControlInfoProtocolId() const { return controlInfoProtocolId;}
+    const Protocol *getL3Protocol() const { return l3Protocol; }
 
     /**
      * Returns the internal socket Id.
@@ -61,7 +62,7 @@ class INET_API L3Socket
     /**
      * Bind the socket to a protocol.
      */
-    void bind(int protocolId);
+    void bind(const Protocol *protocol);
 
     /**
      * Sends a data packet.

@@ -91,9 +91,7 @@ void GenericNetworkProtocol::handleRegisterProtocol(const Protocol& protocol, cG
 {
     Enter_Method("handleRegisterProtocol");
     if (!strcmp("transportIn", in->getBaseName())) {
-        int protocolNumber = ProtocolGroup::ipprotocol.findProtocolNumber(&protocol);
-        if (protocolNumber != -1)
-            mapping.addProtocolMapping(protocolNumber, in->getIndex());
+        mapping.addProtocolMapping(protocol.getId(), in->getIndex());
     }
 }
 
@@ -123,9 +121,9 @@ void GenericNetworkProtocol::handleCommand(Request *request)
 {
     if (L3SocketBindCommand *command = dynamic_cast<L3SocketBindCommand *>(request->getControlInfo())) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
-        SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocolId());
+        SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocol()->getId());
         socketIdToSocketDescriptor[socketId] = descriptor;
-        protocolIdToSocketDescriptors.insert(std::pair<int, SocketDescriptor *>(command->getProtocolId(), descriptor));
+        protocolIdToSocketDescriptors.insert(std::pair<int, SocketDescriptor *>(command->getProtocol()->getId(), descriptor));
         delete request;
     }
     else if (dynamic_cast<L3SocketCloseCommand *>(request->getControlInfo()) != nullptr) {
@@ -548,25 +546,27 @@ void GenericNetworkProtocol::encapsulate(Packet *transportPacket, const Interfac
 void GenericNetworkProtocol::sendDatagramToHL(Packet *packet)
 {
     const auto& header = packet->peekHeader<GenericDatagramHeader>();
-    int protocol = header->getProtocolId();
+    const Protocol *protocol = header->getProtocol();
     decapsulate(packet);
     // deliver to sockets
-    auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol);
-    auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol);
+    auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol->getId());
+    auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol->getId());
     bool hasSocket = lowerBound != upperBound;
     for (auto it = lowerBound; it != upperBound; it++) {
         auto *packetCopy = packet->dup();
         packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(it->second->socketId);
         send(packetCopy, "transportOut");
     }
-    if (mapping.findOutputGateForProtocol(protocol) >= 0) {
+    if (mapping.findOutputGateForProtocol(protocol->getId()) >= 0) {
         send(packet, "transportOut");
         numLocalDeliver++;
     }
-    else if (!hasSocket) {
-        EV_ERROR << "Transport protocol ID=" << protocol << " not connected, discarding packet\n";
-        //TODO send an ICMP error: protocol unreachable
-        // sendToIcmp(datagram, inputInterfaceId, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
+    else {
+        if (!hasSocket) {
+            EV_ERROR << "Transport protocol '" << protocol->getName() << "' not connected, discarding packet\n";
+            //TODO send an ICMP error: protocol unreachable
+            // sendToIcmp(datagram, inputInterfaceId, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
+        }
         delete packet;
     }
 }

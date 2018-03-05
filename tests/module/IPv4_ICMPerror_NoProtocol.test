@@ -51,7 +51,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %subst: /ERROR: //
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-Transport protocol ID=17 not connected, discarding packet
+Transport protocol 'udp' not connected, discarding packet
 sending ICMP error ICMP-error-#1-type3-code2
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout

@@ -54,8 +54,8 @@ void TunnelApp::initialize(int stage)
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         if (protocol == &Protocol::ipv4) {
             l3Socket.setOutputGate(gate("socketOut"));
-            l3Socket.setControlInfoProtocolId(Protocol::ipv4.getId());
-            l3Socket.bind(IP_PROT_IP);
+            l3Socket.setL3Protocol(&Protocol::ipv4);
+            l3Socket.bind(&Protocol::ipv4);
         }
         if (protocol == &Protocol::udp) {
             serverSocket.setOutputGate(gate("socketOut"));

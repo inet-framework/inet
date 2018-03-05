@@ -62,13 +62,13 @@ simsignal_t PingApp::numOutOfOrderArrivalsSignal = registerSignal("numOutOfOrder
 simsignal_t PingApp::pingTxSeqSignal = registerSignal("pingTxSeq");
 simsignal_t PingApp::pingRxSeqSignal = registerSignal("pingRxSeq");
 
-const std::map<const Protocol *, int> PingApp::l3Echo( {
-    { &Protocol::ipv4, IP_PROT_ICMP },
-    { &Protocol::ipv6, IP_PROT_IPv6_ICMP },
-    { &Protocol::flood, IP_PROT_ECHO },
-    { &Protocol::gnp, IP_PROT_ECHO },
-    { &Protocol::probabilistic, IP_PROT_ECHO },
-    { &Protocol::wiseroute, IP_PROT_ECHO },
+const std::map<const Protocol *, const Protocol *> PingApp::l3Echo( {
+    { &Protocol::ipv4, &Protocol::icmpv4 },
+    { &Protocol::ipv6, &Protocol::icmpv6 },
+    { &Protocol::flood, &Protocol::echo },
+    { &Protocol::gnp, &Protocol::echo },
+    { &Protocol::probabilistic, &Protocol::echo },
+    { &Protocol::wiseroute, &Protocol::echo },
 });
 
 enum PingSelfKinds {
@@ -193,7 +193,6 @@ void PingApp::handleMessage(cMessage *msg)
             EV_INFO << "Starting up: dest=" << destAddr << "  src=" << srcAddr << "seqNo=" << sendSeqNo << endl;
             ASSERT(!destAddr.isUnspecified());
             const Protocol *l3Protocol = nullptr;
-            int l3ProtocolId = -1;
             const char *networkProtocol = par("networkProtocol");
             if (*networkProtocol) {
                 l3Protocol = Protocol::getProtocol(networkProtocol);
@@ -208,15 +207,14 @@ void PingApp::handleMessage(cMessage *msg)
                     default: throw cRuntimeError("unknown address type: %d(%s)", (int)destAddr.getType(), L3Address::getTypeName(destAddr.getType()));
                 }
             }
-            l3ProtocolId = l3Protocol->getId();
-            int icmp = l3Echo.at(l3Protocol);
+            const Protocol *icmp = l3Echo.at(l3Protocol);
 
-            if (!l3Socket || l3Socket->getControlInfoProtocolId() != l3ProtocolId) {
+            if (!l3Socket || l3Socket->getL3Protocol()->getId() != l3Protocol->getId()) {
                 if (l3Socket) {
                     l3Socket->close();
                     delete l3Socket;
                 }
-                l3Socket = new L3Socket(l3ProtocolId, gate("socketOut"));
+                l3Socket = new L3Socket(l3Protocol, gate("socketOut"));
                 l3Socket->bind(icmp);
             }
             msg->setKind(PING_SEND);

@@ -70,7 +70,7 @@ class INET_API PingApp : public cSimpleModule, public ILifecycle
     simtime_t sendTimeHistory[PING_HISTORY_SIZE];    // times of when the requests were sent
     bool pongReceived[PING_HISTORY_SIZE];
 
-    static const std::map<const Protocol *, int> l3Echo;
+    static const std::map<const Protocol *, const Protocol *> l3Echo;
 
     // statistics
     cStdDev rttStat;

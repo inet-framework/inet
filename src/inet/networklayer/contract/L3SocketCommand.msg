@@ -16,6 +16,7 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.Protocol;
 
 namespace inet;
 
@@ -31,9 +32,10 @@ class L3SocketCommand extends cObject
 
 class L3SocketBindCommand extends L3SocketCommand
 {
-    int protocolId;
+    const Protocol *protocol;
 }
 
 class L3SocketCloseCommand extends L3SocketCommand
 {
 }
+
