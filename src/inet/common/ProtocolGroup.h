@@ -42,11 +42,11 @@ class INET_API ProtocolGroup
 
   public:
     // in alphanumeric order
-    static const ProtocolGroup ethertype;
-    static const ProtocolGroup pppprotocol;
+    static ProtocolGroup ethertype;
+    static ProtocolGroup pppprotocol;
     static ProtocolGroup ipprotocol;
-    static const ProtocolGroup ieee8022protocol;
-    static const ProtocolGroup snapOui;
+    static ProtocolGroup ieee8022protocol;
+    static ProtocolGroup snapOui;
 };
 
 } // namespace inet

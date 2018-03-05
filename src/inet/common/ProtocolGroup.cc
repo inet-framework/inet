@@ -68,7 +68,7 @@ void ProtocolGroup::addProtocol(int protocolId, const Protocol *protocol)
 //FIXME use constants instead of numbers
 
 // excerpt from http://www.iana.org/assignments/ieee-802-numbers/ieee-802-numbers.xhtml
-const ProtocolGroup ProtocolGroup::ethertype("ethertype", {
+ProtocolGroup ProtocolGroup::ethertype("ethertype", {
     { 0x0800, &Protocol::ipv4 },
     { 0x0806, &Protocol::arp },
     { 0x86DD, &Protocol::ipv6 },
@@ -80,7 +80,7 @@ const ProtocolGroup ProtocolGroup::ethertype("ethertype", {
 });
 
 // excerpt from http://www.iana.org/assignments/ppp-numbers/ppp-numbers.xhtml#ppp-numbers-2
-const ProtocolGroup ProtocolGroup::pppprotocol("pppprotocol", {
+ProtocolGroup ProtocolGroup::pppprotocol("pppprotocol", {
     { 0x0021, &Protocol::ipv4 },
     { 0x0057, &Protocol::ipv6 },
     { 0x0281, &Protocol::mpls },        // MPLS unicast
@@ -118,12 +118,12 @@ ProtocolGroup ProtocolGroup::ipprotocol("ipprotocol", {
     { 254, &Protocol::echo },    // INET specific: Echo Protocol
 });
 
-const ProtocolGroup ProtocolGroup::snapOui("snapOui", {
+ProtocolGroup ProtocolGroup::snapOui("snapOui", {
     //TODO do not add {0, .... }, it is a  special value: the protocolId contains the ethertype value
     // { 0x00000C, &Protocol::ciscoSnap } //TODO
 });
 
-const ProtocolGroup ProtocolGroup::ieee8022protocol("ieee8022protocol", {
+ProtocolGroup ProtocolGroup::ieee8022protocol("ieee8022protocol", {
     { 0x4242, &Protocol::stp },
 });
 
