@@ -31,7 +31,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 # sctp apps
 **.Peer_1.numApps=1
 **.Peer_2.numApps=1
-**.Peer_*.app[*].typename="SCTPNatPeer"
+**.Peer_*.app[*].typename="SctpNatPeer"
 **.Peer_1.app[*].localAddress="10.1.1.1"
 **.Peer_2.app[0].localAddress="10.1.2.1"
 **.Peer_1.app[0].localPort=6000
@@ -55,7 +55,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.Peer_*.app[0].multi=true
 
 **.Server.numApps=2
-**.Server.app[*].typename="SCTPNatServer"
+**.Server.app[*].typename="SctpNatServer"
 **.Server.app[*].queueSize = 0
 **.Server.app[*].lifetime=0s
 **.Server.app[*].address=""
@@ -72,7 +72,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 # sctp settings
 **.hasSctp = true
-**.sctp.sctpAlgorithmClass="SCTPAlg"
+**.sctp.sctpAlgorithmClass="SctpAlg"
 **.sctp.auth = true
 **.Peer_*.sctp.addIP = true
 **.Server.sctp.addTime = 0
