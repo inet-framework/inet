@@ -229,7 +229,7 @@ void BMac::sendMacAck()
     ack->setChunkLength(headerLength);
 
     //attach signal and send down
-    auto packet = new Packet("Ack");
+    auto packet = new Packet("BMacAck");
     ack->setType(BMAC_ACK);
     packet->insertAtFront(ack);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::bmac);
