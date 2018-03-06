@@ -18,14 +18,11 @@
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 
 // TODO: move individual dissectors into their respective protocol folders
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 
 namespace inet {
 
 Register_Protocol_Dissector(nullptr, DefaultDissector);
-Register_Protocol_Dissector(&Protocol::ieee80211Phy, Ieee80211PhyDissector);
 Register_Protocol_Dissector(&Protocol::tcp, TcpDissector);
 
 void DefaultDissector::dissect(Packet *packet, ICallback& callback) const
@@ -34,22 +31,6 @@ void DefaultDissector::dissect(Packet *packet, ICallback& callback) const
     callback.visitChunk(packet->peekData(), nullptr);
     packet->setHeaderPopOffset(packet->getTrailerPopOffset());
     callback.endProtocolDataUnit(nullptr);
-}
-
-void Ieee80211PhyDissector::dissect(Packet *packet, ICallback& callback) const
-{
-    const auto& header = packet->popHeader<inet::physicallayer::Ieee80211PhyHeader>();
-    callback.startProtocolDataUnit(&Protocol::ieee80211Phy);
-    const auto& trailer = packet->peekTrailer();
-    // TODO: KLUDGE: padding length
-    auto ieee80211PhyPadding = dynamicPtrCast<const BitCountChunk>(trailer);
-    if (ieee80211PhyPadding != nullptr)
-        packet->setTrailerPopOffset(packet->getTrailerPopOffset() - ieee80211PhyPadding->getChunkLength());
-    callback.visitChunk(header, &Protocol::ieee80211Phy);
-    callback.dissectPacket(packet, &Protocol::ieee80211Mac);
-    if (ieee80211PhyPadding != nullptr)
-        callback.visitChunk(ieee80211PhyPadding, nullptr);
-    callback.endProtocolDataUnit(&Protocol::ieee80211Phy);
 }
 
 void TcpDissector::dissect(Packet *packet, ICallback& callback) const
