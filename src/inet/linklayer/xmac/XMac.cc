@@ -260,7 +260,7 @@ void XMac::sendMacAck()
     ack->setDestAddr(lastPreamblePktSrcAddr);
     ack->setChunkLength(b(headerLength));
     ack->setType(XMAC_ACK);
-    auto packet = new Packet("Ack", ack);
+    auto packet = new Packet("XMacAck", ack);
     packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::xmac);
     attachSignal(packet, simTime());
     sendDown(packet);
