@@ -27,7 +27,6 @@
 namespace inet {
 
 Register_Protocol_Dissector(nullptr, DefaultDissector);
-Register_Protocol_Dissector(&Protocol::ieee80211Mgmt, Ieee80211MgmtDissector);
 Register_Protocol_Dissector(&Protocol::ieee80211Phy, Ieee80211PhyDissector);
 Register_Protocol_Dissector(&Protocol::ieee8022, Ieee802LlcDissector);
 Register_Protocol_Dissector(&Protocol::tcp, TcpDissector);
@@ -54,14 +53,6 @@ void Ieee80211PhyDissector::dissect(Packet *packet, ICallback& callback) const
     if (ieee80211PhyPadding != nullptr)
         callback.visitChunk(ieee80211PhyPadding, nullptr);
     callback.endProtocolDataUnit(&Protocol::ieee80211Phy);
-}
-
-void Ieee80211MgmtDissector::dissect(Packet *packet, ICallback& callback) const
-{
-    callback.startProtocolDataUnit(&Protocol::ieee80211Mgmt);
-    callback.visitChunk(packet->peekData(), &Protocol::ieee80211Mgmt);
-    packet->setHeaderPopOffset(packet->getTrailerPopOffset());
-    callback.endProtocolDataUnit(&Protocol::ieee80211Mgmt);
 }
 
 void Ieee802LlcDissector::dissect(Packet *packet, ICallback& callback) const
