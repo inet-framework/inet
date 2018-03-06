@@ -20,7 +20,6 @@
 // TODO: move individual dissectors into their respective protocol folders
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022Llc.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
 #include "inet/linklayer/ppp/PppFrame_m.h"
@@ -34,7 +33,6 @@
 namespace inet {
 
 Register_Protocol_Dissector(nullptr, DefaultDissector);
-Register_Protocol_Dissector(&Protocol::ieee80211Mac, Ieee80211MacDissector);
 Register_Protocol_Dissector(&Protocol::ieee80211Mgmt, Ieee80211MgmtDissector);
 Register_Protocol_Dissector(&Protocol::ieee80211Phy, Ieee80211PhyDissector);
 Register_Protocol_Dissector(&Protocol::ieee8022, Ieee802LlcDissector);
@@ -62,44 +60,6 @@ void Ieee80211PhyDissector::dissect(Packet *packet, ICallback& callback) const
     if (ieee80211PhyPadding != nullptr)
         callback.visitChunk(ieee80211PhyPadding, nullptr);
     callback.endProtocolDataUnit(&Protocol::ieee80211Phy);
-}
-
-void Ieee80211MacDissector::dissect(Packet *packet, ICallback& callback) const
-{
-    const auto& header = packet->popHeader<inet::ieee80211::Ieee80211MacHeader>();
-    const auto& trailer = packet->popTrailer<inet::ieee80211::Ieee80211MacTrailer>(B(4));
-    callback.startProtocolDataUnit(&Protocol::ieee80211Mac);
-    callback.visitChunk(header, &Protocol::ieee80211Mac);
-    // TODO: fragmentation & aggregation
-    if (auto dataHeader = dynamicPtrCast<const inet::ieee80211::Ieee80211DataHeader>(header)) {
-        if (dataHeader->getMoreFragments() || dataHeader->getFragmentNumber() != 0)
-            callback.dissectPacket(packet, nullptr);
-        else if (dataHeader->getAMsduPresent()) {
-            auto originalTrailerPopOffset = packet->getTrailerPopOffset();
-            int paddingLength = 0;
-            while (packet->getDataLength() > B(0)) {
-                packet->setHeaderPopOffset(packet->getHeaderPopOffset() + B(paddingLength == 4 ? 0 : paddingLength));
-                const auto& msduSubframeHeader = packet->popHeader<ieee80211::Ieee80211MsduSubframeHeader>();
-                auto msduEndOffset = packet->getHeaderPopOffset() + B(msduSubframeHeader->getLength());
-                packet->setTrailerPopOffset(msduEndOffset);
-                callback.dissectPacket(packet, &Protocol::ieee8022);
-                paddingLength = 4 - B(msduSubframeHeader->getChunkLength() + B(msduSubframeHeader->getLength())).get() % 4;
-                packet->setTrailerPopOffset(originalTrailerPopOffset);
-                packet->setHeaderPopOffset(msduEndOffset);
-            }
-        }
-        else
-            callback.dissectPacket(packet, &Protocol::ieee8022);
-    }
-    else if (dynamicPtrCast<const inet::ieee80211::Ieee80211ActionFrame>(header))
-        ASSERT(packet->getDataLength() == b(0));
-    else if (dynamicPtrCast<const inet::ieee80211::Ieee80211MgmtHeader>(header))
-        callback.dissectPacket(packet, &Protocol::ieee80211Mgmt);
-    // TODO: else if (dynamicPtrCast<const inet::ieee80211::Ieee80211ControlFrame>(header))
-    else
-        ASSERT(packet->getDataLength() == b(0));
-    callback.visitChunk(trailer, &Protocol::ieee80211Mac);
-    callback.endProtocolDataUnit(&Protocol::ieee80211Mac);
 }
 
 void Ieee80211MgmtDissector::dissect(Packet *packet, ICallback& callback) const
