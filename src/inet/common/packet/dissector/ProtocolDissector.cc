@@ -18,8 +18,6 @@
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 
 // TODO: move individual dissectors into their respective protocol folders
-#include "inet/linklayer/ieee8022/Ieee8022Llc.h"
-#include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
@@ -28,7 +26,6 @@ namespace inet {
 
 Register_Protocol_Dissector(nullptr, DefaultDissector);
 Register_Protocol_Dissector(&Protocol::ieee80211Phy, Ieee80211PhyDissector);
-Register_Protocol_Dissector(&Protocol::ieee8022, Ieee802LlcDissector);
 Register_Protocol_Dissector(&Protocol::tcp, TcpDissector);
 
 void DefaultDissector::dissect(Packet *packet, ICallback& callback) const
@@ -53,16 +50,6 @@ void Ieee80211PhyDissector::dissect(Packet *packet, ICallback& callback) const
     if (ieee80211PhyPadding != nullptr)
         callback.visitChunk(ieee80211PhyPadding, nullptr);
     callback.endProtocolDataUnit(&Protocol::ieee80211Phy);
-}
-
-void Ieee802LlcDissector::dissect(Packet *packet, ICallback& callback) const
-{
-    const auto& header = packet->popHeader<inet::Ieee8022LlcHeader>();
-    callback.startProtocolDataUnit(&Protocol::ieee8022);
-    callback.visitChunk(header, &Protocol::ieee8022);
-    auto protocol = Ieee8022Llc::getProtocol(header);
-    callback.dissectPacket(packet, protocol);
-    callback.endProtocolDataUnit(&Protocol::ieee8022);
 }
 
 void TcpDissector::dissect(Packet *packet, ICallback& callback) const
