@@ -18,14 +18,8 @@
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 
 // TODO: move individual dissectors into their respective protocol folders
-#include "inet/linklayer/ethernet/EtherFrame_m.h"
-#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022Llc.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
-#include "inet/linklayer/ppp/PppFrame_m.h"
-#include "inet/networklayer/arp/ipv4/ArpPacket_m.h"
-#include "inet/networklayer/ipv4/IcmpHeader.h"
-#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
