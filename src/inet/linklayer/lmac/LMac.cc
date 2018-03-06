@@ -488,7 +488,7 @@ void LMac::handleSelfMessage(cMessage *msg)
                 for (int i = 0; i < numSlots; i++)
                     control->setOccupiedSlots(i, occSlotsDirect[i]);
 
-                Packet *packet = new Packet();
+                Packet *packet = new Packet("Control");
                 control->setType(LMAC_CONTROL);
                 packet->insertHeader(control);
                 packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::lmac);
@@ -505,7 +505,7 @@ void LMac::handleSelfMessage(cMessage *msg)
                         cancelEvent(timeout);
                     return;
                 }
-                Packet *data = new Packet();
+                Packet *data = new Packet("Data");
                 data->insertAtEnd(macQueue.front()->peekAt(headerLength));
                 const auto& lmacHeader = staticPtrCast<LMacHeader>(macQueue.front()->peekHeader<LMacHeader>()->dupShared());
                 lmacHeader->setType(LMAC_DATA);
