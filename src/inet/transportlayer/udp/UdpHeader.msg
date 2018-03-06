@@ -42,6 +42,8 @@ class UdpHeader extends TransportHeaderBase
 
 cplusplus(UdpHeader) {{
   public:
+    virtual std::string str() const override;
+
     virtual unsigned int getSourcePort() const override { return getSrcPort(); }
     virtual void setSourcePort(unsigned int port) override { setSrcPort(port); }
     virtual unsigned int getDestinationPort() const override { return getDestPort(); }

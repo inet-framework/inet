@@ -288,7 +288,7 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
                 context.infoLevel = protocolDataUnit->getLevel();
                 context.protocolColumn = protocol->getDescriptiveName();
                 context.infoColumn.str("");
-                // TODO: printTcpChunk(context.infoColumn, chunk);
+                printTcpChunk(context.infoColumn, chunk);
             }
         }
         else if (protocol != nullptr) {
@@ -419,7 +419,10 @@ void PacketPrinter::printTcpChunk(std::ostream& stream, const Ptr<const Chunk>& 
 
 void PacketPrinter::printUdpChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const
 {
-    stream << "(UDP) " << chunk;
+    if (auto packet = dynamicPtrCast<const UdpHeader>(chunk))
+        stream << packet->str();
+    else
+        stream << "(UDP) " << chunk;
 }
 
 void PacketPrinter::printUnimplementedProtocolChunk(std::ostream& stream, const Ptr<const Chunk>& chunk, const Protocol* protocol) const
