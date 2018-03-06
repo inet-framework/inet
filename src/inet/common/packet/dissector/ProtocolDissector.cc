@@ -17,13 +17,10 @@
 #include "inet/common/packet/dissector/ProtocolDissector.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 
-// TODO: move individual dissectors into their respective protocol folders
-#include "inet/transportlayer/tcp_common/TcpHeader.h"
 
 namespace inet {
 
 Register_Protocol_Dissector(nullptr, DefaultDissector);
-Register_Protocol_Dissector(&Protocol::tcp, TcpDissector);
 
 void DefaultDissector::dissect(Packet *packet, ICallback& callback) const
 {
@@ -31,16 +28,6 @@ void DefaultDissector::dissect(Packet *packet, ICallback& callback) const
     callback.visitChunk(packet->peekData(), nullptr);
     packet->setHeaderPopOffset(packet->getTrailerPopOffset());
     callback.endProtocolDataUnit(nullptr);
-}
-
-void TcpDissector::dissect(Packet *packet, ICallback& callback) const
-{
-    const auto& header = packet->popHeader<tcp::TcpHeader>();
-    callback.startProtocolDataUnit(&Protocol::tcp);
-    callback.visitChunk(header, &Protocol::tcp);
-    if (packet->getDataLength() != b(0))
-        callback.dissectPacket(packet, nullptr);
-    callback.endProtocolDataUnit(&Protocol::tcp);
 }
 
 } // namespace
