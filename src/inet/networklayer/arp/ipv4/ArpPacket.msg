@@ -57,3 +57,8 @@ class ArpPacket extends FieldsChunk
     Ipv4Address destIpAddress;
 }
 
+cplusplus(ArpPacket) {{
+  public:
+    virtual std::string str() const override;
+}}
+

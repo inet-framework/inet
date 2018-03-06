@@ -393,38 +393,8 @@ void PacketPrinter::printIeee8022Chunk(std::ostream& stream, const Ptr<const Chu
 
 void PacketPrinter::printArpChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const
 {
-    if (auto packet = dynamicPtrCast<const ArpPacket>(chunk)) {
-        switch (packet->getOpcode()) {
-            case ARP_REQUEST:
-                stream << "ARP req: " << packet->getDestIpAddress()
-                       << "=? (s=" << packet->getSrcIpAddress() << "(" << packet->getSrcMacAddress() << "))";
-                break;
-
-            case ARP_REPLY:
-                stream << "ARP reply: "
-                       << packet->getSrcIpAddress() << "=" << packet->getSrcMacAddress()
-                       << " (d=" << packet->getDestIpAddress() << "(" << packet->getDestMacAddress() << "))";
-                break;
-
-            case ARP_RARP_REQUEST:
-                stream << "RARP req: " << packet->getDestMacAddress()
-                       << "=? (s=" << packet->getSrcIpAddress() << "(" << packet->getSrcMacAddress() << "))";
-                break;
-
-            case ARP_RARP_REPLY:
-                stream << "RARP reply: "
-                       << packet->getSrcMacAddress() << "=" << packet->getSrcIpAddress()
-                       << " (d=" << packet->getDestIpAddress() << "(" << packet->getDestMacAddress() << "))";
-                break;
-
-            default:
-                stream << "ARP op=" << packet->getOpcode() << ": d=" << packet->getDestIpAddress()
-                       << "(" << packet->getDestMacAddress()
-                       << ") s=" << packet->getSrcIpAddress()
-                       << "(" << packet->getSrcMacAddress() << ")";
-                break;
-        }
-    }
+    if (auto packet = dynamicPtrCast<const ArpPacket>(chunk))
+        stream << packet->str();
     else
         stream << "(ARP) " << chunk;
 }
