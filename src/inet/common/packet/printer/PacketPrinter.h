@@ -71,6 +71,7 @@ class INET_API PacketPrinter : public cMessagePrinter
     virtual void printArpChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const;
     virtual void printIpv4Chunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const;
     virtual void printIcmpChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const;
+    virtual void printTcpChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const;
     virtual void printUdpChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const;
     virtual void printUnimplementedProtocolChunk(std::ostream& stream, const Ptr<const Chunk>& chunk, const Protocol* protocol) const;
     virtual void printUnknownProtocolChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const;

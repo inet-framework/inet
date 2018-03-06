@@ -409,6 +409,14 @@ void PacketPrinter::printIcmpChunk(std::ostream& stream, const Ptr<const Chunk>&
     stream << "(ICMP) " << chunk;
 }
 
+void PacketPrinter::printTcpChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const
+{
+    if (auto packet = dynamicPtrCast<const tcp::TcpHeader>(chunk))
+        stream << packet->str();
+    else
+        stream << "(TCP) " << chunk;
+}
+
 void PacketPrinter::printUdpChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const
 {
     stream << "(UDP) " << chunk;

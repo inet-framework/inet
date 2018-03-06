@@ -259,5 +259,7 @@ cplusplus(TcpHeader) {{
     virtual void setSourcePort(unsigned int port) override { setSrcPort(port); }
     virtual unsigned int getDestinationPort() const override { return getDestPort(); }
     virtual void setDestinationPort(unsigned int port) override { setDestPort(port); }
+
+    virtual std::string str() const override;
 }}
 

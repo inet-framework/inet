@@ -69,6 +69,47 @@ void TcpHeader::dropHeaderOptions()
     setChunkLength(B(TCP_HEADER_OCTETS));
 }
 
+std::string TcpHeader::str() const
+{
+    std::ostringstream stream;
+    stream << getSrcPort() << "->" << getDestPort();
+    char separ = '[';
+    if (getUrgBit()) {
+        stream << separ << " Urg=" << getUrgentPointer();
+        separ = ' ';
+    }
+    if (getSynBit()) {
+        stream << separ << "Syn";
+        separ = ' ';
+    }
+    if (getAckBit()) {
+        stream << separ << "Ack=" << getAckNo();
+        separ = ' ';
+    }
+    if (getPshBit()) {
+        stream << separ << "Psh";
+        separ = ' ';
+    }
+    if (getRstBit()) {
+        stream << separ << "Rst";
+        separ = ' ';
+    }
+    if (getFinBit()) {
+        stream << separ << "Fin";
+        separ = ' ';
+    }
+    if (separ != '[') {
+        stream << ']';
+    }
+
+    stream << " Seq=" << getSequenceNo()
+           << " Win=" << getWindow();
+
+    //TODO show TCP Options
+
+    return stream.str();
+}
+
 
 } // namespace tcp
 
