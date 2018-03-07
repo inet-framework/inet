@@ -195,8 +195,10 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
             printPacketInsideOut(childLevel, options, context);
         else {
             auto& protocolPrinter = getProtocolPrinter(protocol);
-            if (protocolDataUnit->getLevel() > context.infoLevel)
+            if (protocolDataUnit->getLevel() > context.infoLevel && protocol != nullptr)
                 context.infoColumn.str("");
+            else if (protocolDataUnit->getLevel() > 0)
+                context.infoColumn << " | ";
             if (protocol == &Protocol::ethernetMac) {
                 auto header = dynamicPtrCast<const EthernetMacHeader>(chunk);
                 if (header != nullptr) {
