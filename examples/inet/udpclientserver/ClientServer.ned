@@ -41,6 +41,7 @@ network UdpClientServer
         client1: StandardHost {
             parameters:
                 @display("p=53,67;i=device/pc3");
+                numEthInterfaces = 3;
         }
         server: StandardHost {
             parameters:
@@ -65,7 +66,7 @@ network UdpClientServer
         netAnimTrace: NetAnimTrace {
             @display("p=184,142");
         }
-    connections:
+    connections allowunconnected:
         client1.pppg++ <--> C <--> server.pppg++;
         unavserver.pppg++ <--> C <--> unavserver2.pppg++;
 }

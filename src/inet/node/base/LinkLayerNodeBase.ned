@@ -33,7 +33,9 @@ module LinkLayerNodeBase extends NodeBase
         int numPcapRecorders = default(0);
         int numLoInterfaces = default(1);
         int numWlanInterfaces = default(0);
+        int numEthInterfaces = default(0);  // minimum number of ethernet interfaces
         int numExtInterfaces = default(0);
+        int numPppInterfaces = default(0);  // minimum number of PPP interfaces
         int numTunInterfaces = default(0);
         mobilityType = default(numWlanInterfaces > 0 ? "StationaryMobility" : "");
         *.interfaceTableModule = default(absPath(".interfaceTable"));
@@ -42,8 +44,8 @@ module LinkLayerNodeBase extends NodeBase
 
     gates:
         input radioIn[numWlanInterfaces] @directIn;
-        inout pppg[] @labels(PppFrame-conn);
-        inout ethg[] @labels(EtherFrame-conn);
+        inout pppg[numPppInterfaces] @labels(PppFrame-conn) @allowUnconnected;
+        inout ethg[numEthInterfaces] @labels(EtherFrame-conn) @allowUnconnected;
 
     submodules:
         interfaceTable: InterfaceTable {
