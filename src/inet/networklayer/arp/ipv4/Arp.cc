@@ -35,23 +35,6 @@
 
 namespace inet {
 
-class INET_API ArpDissector : public ProtocolDissector
-{
-  public:
-    virtual void dissect(Packet *packet, ICallback& callback) const override;
-};
-
-void ArpDissector::dissect(Packet *packet, ICallback& callback) const
-{
-    const auto& arpPacket = packet->popHeader<ArpPacket>();
-    callback.startProtocolDataUnit(&Protocol::arp);
-    callback.visitChunk(arpPacket, &Protocol::arp);
-    callback.endProtocolDataUnit(&Protocol::arp);
-}
-
-Register_Protocol_Dissector(&Protocol::arp, ArpDissector);
-
-
 simsignal_t Arp::arpRequestSentSignal = registerSignal("arpRequestSent");
 simsignal_t Arp::arpReplySentSignal = registerSignal("arpReplySent");
 
