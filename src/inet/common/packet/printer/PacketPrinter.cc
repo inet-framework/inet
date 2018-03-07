@@ -247,11 +247,6 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
                     printIpv4Chunk(context.infoColumn, chunk);
                 }
             }
-            else if (protocol == &Protocol::icmpv4) {
-                if (protocolDataUnit->getLevel() > context.infoLevel) {
-                    printIcmpChunk(context.infoColumn, chunk);
-                }
-            }
             else {
                 if (protocolDataUnit->getLevel() > context.infoLevel)
                     protocolPrinter.print(chunk, protocol, options, context);
@@ -333,11 +328,6 @@ void PacketPrinter::printIeee8022Chunk(std::ostream& stream, const Ptr<const Chu
 void PacketPrinter::printIpv4Chunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const
 {
     stream << "(IPv4) " << chunk;
-}
-
-void PacketPrinter::printIcmpChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const
-{
-    stream << "(ICMP) " << chunk;
 }
 
 } // namespace
