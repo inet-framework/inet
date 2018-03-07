@@ -233,11 +233,6 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
                     printIeee8022Chunk(context.infoColumn, chunk);
                 }
             }
-            else if (protocol == &Protocol::arp) {
-                if (protocolDataUnit->getLevel() > context.infoLevel) {
-                    printArpChunk(context.infoColumn, chunk);
-                }
-            }
             else if (protocol == &Protocol::ipv4) {
                 auto header = dynamicPtrCast<const Ipv4Header>(chunk);
                 if (header != nullptr) {
@@ -351,14 +346,6 @@ void PacketPrinter::printIeee80211PhyChunk(std::ostream& stream, const Ptr<const
 void PacketPrinter::printIeee8022Chunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const
 {
     stream << "(IEEE 802.2) " << chunk;
-}
-
-void PacketPrinter::printArpChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const
-{
-    if (auto packet = dynamicPtrCast<const ArpPacket>(chunk))
-        stream << packet->str();
-    else
-        stream << "(ARP) " << chunk;
 }
 
 void PacketPrinter::printIpv4Chunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const
