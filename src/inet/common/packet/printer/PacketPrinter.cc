@@ -235,18 +235,6 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
                     printIeee8022Chunk(context.infoColumn, chunk);
                 }
             }
-            else if (protocol == &Protocol::ipv4) {
-                auto header = dynamicPtrCast<const Ipv4Header>(chunk);
-                if (header != nullptr) {
-                    context.sourceColumn.str("");
-                    context.sourceColumn << header->getSrcAddress();
-                    context.destinationColumn.str("");
-                    context.destinationColumn << header->getDestAddress();
-                }
-                if (protocolDataUnit->getLevel() > context.infoLevel) {
-                    printIpv4Chunk(context.infoColumn, chunk);
-                }
-            }
             else {
                 if (protocolDataUnit->getLevel() > context.infoLevel)
                     protocolPrinter.print(chunk, protocol, options, context);
@@ -323,11 +311,6 @@ void PacketPrinter::printIeee80211PhyChunk(std::ostream& stream, const Ptr<const
 void PacketPrinter::printIeee8022Chunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const
 {
     stream << "(IEEE 802.2) " << chunk;
-}
-
-void PacketPrinter::printIpv4Chunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const
-{
-    stream << "(IPv4) " << chunk;
 }
 
 } // namespace
