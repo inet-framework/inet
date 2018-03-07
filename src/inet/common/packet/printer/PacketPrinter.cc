@@ -66,13 +66,13 @@ const ProtocolPrinter& PacketPrinter::getProtocolPrinter(const Protocol *protoco
     return *protocolPrinter;
 }
 
-std::vector<std::string> PacketPrinter::getSupportedTags() const
+std::set<std::string> PacketPrinter::getSupportedTags() const
 {
     return {"source_column", "destination_column", "protocol_column", "length_column", "info_column",
             "inside_out", "left_to_right"};
 }
 
-std::vector<std::string> PacketPrinter::getDefaultEnabledTags() const
+std::set<std::string> PacketPrinter::getDefaultEnabledTags() const
 {
     return {"source_column", "destination_column", "protocol_column", "length_column", "info_column", "inside_out"};
 }

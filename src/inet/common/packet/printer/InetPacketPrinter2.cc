@@ -92,7 +92,7 @@ class INET_API InetPacketPrinter2 : public cMessagePrinter
     InetPacketPrinter2() {}
     virtual ~InetPacketPrinter2() {}
     virtual int getScoreFor(cMessage *msg) const override;
-    virtual void printMessage(std::ostream& os, cMessage *msg) const override;
+    virtual void printMessage(std::ostream& os, cMessage *msg, const Options *options) const override;
 };
 
 Register_MessagePrinter(InetPacketPrinter2);
@@ -105,7 +105,7 @@ int InetPacketPrinter2::getScoreFor(cMessage *msg) const
     return msg->isPacket() ? 21 : 0;
 }
 
-void InetPacketPrinter2::printMessage(std::ostream& os, cMessage *msg) const
+void InetPacketPrinter2::printMessage(std::ostream& os, cMessage *msg, const Options *options) const
 {
     std::string outs;
 

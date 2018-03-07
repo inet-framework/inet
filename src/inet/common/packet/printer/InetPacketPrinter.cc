@@ -55,7 +55,7 @@ class INET_API InetPacketPrinter : public cMessagePrinter
     InetPacketPrinter() {}
     virtual ~InetPacketPrinter() {}
     virtual int getScoreFor(cMessage *msg) const override;
-    virtual void printMessage(std::ostream& os, cMessage *msg) const override;
+    virtual void printMessage(std::ostream& os, cMessage *msg, const Options *options) const override;
 };
 
 Register_MessagePrinter(InetPacketPrinter);
@@ -65,7 +65,7 @@ int InetPacketPrinter::getScoreFor(cMessage *msg) const
     return msg->isPacket() ? 20 : 0;
 }
 
-void InetPacketPrinter::printMessage(std::ostream& os, cMessage *msg) const
+void InetPacketPrinter::printMessage(std::ostream& os, cMessage *msg, const Options *options) const
 {
     L3Address srcAddr, destAddr;
 

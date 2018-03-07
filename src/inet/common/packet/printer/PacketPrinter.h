@@ -49,12 +49,12 @@ class INET_API PacketPrinter : public cMessagePrinter
   public:
     virtual int getScoreFor(cMessage *msg) const override;
 
-    virtual std::vector<std::string> getSupportedTags() const;
-    virtual std::vector<std::string> getDefaultEnabledTags() const;
-    virtual std::vector<std::string> getColumnNames(const Options *options) const;
+    virtual std::set<std::string> getSupportedTags() const override;
+    virtual std::set<std::string> getDefaultEnabledTags() const override;
+    virtual std::vector<std::string> getColumnNames(const Options *options) const override;
 
     virtual void printMessage(std::ostream& stream, cMessage *message) const;
-    virtual void printMessage(std::ostream& stream, cMessage *message, const Options *options) const; //TODO override;
+    virtual void printMessage(std::ostream& stream, cMessage *message, const Options *options) const override;
 
     virtual void printSignal(std::ostream& stream, inet::physicallayer::Signal *signal) const;
     virtual void printSignal(std::ostream& stream, inet::physicallayer::Signal *signal, const Options *options) const;

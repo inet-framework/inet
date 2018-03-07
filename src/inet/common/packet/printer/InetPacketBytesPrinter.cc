@@ -28,7 +28,7 @@ class INET_API InetPacketBytesPrinter : public cMessagePrinter
     InetPacketBytesPrinter() { showEncapsulatedPackets = true; }
     virtual ~InetPacketBytesPrinter() {}
     virtual int getScoreFor(cMessage *msg) const override;
-    virtual void printMessage(std::ostream& os, cMessage *msg) const override;
+    virtual void printMessage(std::ostream& os, cMessage *msg, const Options *options) const override;
 };
 
 Register_MessagePrinter(InetPacketBytesPrinter);
@@ -41,7 +41,7 @@ int InetPacketBytesPrinter::getScoreFor(cMessage *msg) const
     return msg->isPacket() ? 18 : 0;
 }
 
-void InetPacketBytesPrinter::printMessage(std::ostream& os, cMessage *msg) const
+void InetPacketBytesPrinter::printMessage(std::ostream& os, cMessage *msg, const Options *options) const
 {
     std::string outs;
 
