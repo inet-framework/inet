@@ -250,16 +250,6 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
                     printIcmpChunk(context.infoColumn, chunk);
                 }
             }
-            else if (protocol == &Protocol::tcp) {
-                auto header = dynamicPtrCast<const tcp::TcpHeader>(chunk);
-                if (header != nullptr) {
-                    context.sourceColumn << ":" << header->getSrcPort();
-                    context.destinationColumn << ":" << header->getDestPort();
-                }
-                if (protocolDataUnit->getLevel() > context.infoLevel) {
-                    printTcpChunk(context.infoColumn, chunk);
-                }
-            }
             else {
                 if (protocolDataUnit->getLevel() > context.infoLevel)
                     protocolPrinter.print(chunk, protocol, options, context);
@@ -346,14 +336,6 @@ void PacketPrinter::printIpv4Chunk(std::ostream& stream, const Ptr<const Chunk>&
 void PacketPrinter::printIcmpChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const
 {
     stream << "(ICMP) " << chunk;
-}
-
-void PacketPrinter::printTcpChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const
-{
-    if (auto packet = dynamicPtrCast<const tcp::TcpHeader>(chunk))
-        stream << packet->str();
-    else
-        stream << "(TCP) " << chunk;
 }
 
 } // namespace

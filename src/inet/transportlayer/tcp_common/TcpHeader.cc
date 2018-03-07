@@ -72,38 +72,42 @@ void TcpHeader::dropHeaderOptions()
 std::string TcpHeader::str() const
 {
     std::ostringstream stream;
+    stream << getClassName() << ", ";
+    static const char *flagStart = " [";
+    static const char *flagSepar = " ";
+    static const char *flagEnd = "]";
     stream << getSrcPort() << "->" << getDestPort();
-    char separ = '[';
+    const char *separ = flagStart;
     if (getUrgBit()) {
-        stream << separ << " Urg=" << getUrgentPointer();
-        separ = ' ';
+        stream << separ << "Urg=" << getUrgentPointer();
+        separ = flagSepar;
     }
     if (getSynBit()) {
         stream << separ << "Syn";
-        separ = ' ';
+        separ = flagSepar;
     }
     if (getAckBit()) {
         stream << separ << "Ack=" << getAckNo();
-        separ = ' ';
+        separ = flagSepar;
     }
     if (getPshBit()) {
         stream << separ << "Psh";
-        separ = ' ';
+        separ = flagSepar;
     }
     if (getRstBit()) {
         stream << separ << "Rst";
-        separ = ' ';
+        separ = flagSepar;
     }
     if (getFinBit()) {
         stream << separ << "Fin";
-        separ = ' ';
+        separ = flagSepar;
     }
-    if (separ != '[') {
-        stream << ']';
-    }
+    if (separ == flagSepar)
+        stream << flagEnd;
 
     stream << " Seq=" << getSequenceNo()
-           << " Win=" << getWindow();
+           << " Win=" << getWindow()
+           << ", length = " << getChunkLength();
 
     //TODO show TCP Options
 
