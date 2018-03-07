@@ -23,10 +23,10 @@ namespace inet {
 
 std::string UdpHeader::str() const
 {
-    std::ostringstream stream;
-    stream << " Udp " << getSrcPort() << "->" << getDestPort() << " Len=" << (B(getTotalLengthField()) - getChunkLength());
+    std::ostringstream os;
+    os << getClassName() << ", port:" <<  getSourcePort() << "->" << getDestPort() << ", payloadLength:" << (B(getTotalLengthField()) - getChunkLength()) << ", length = " << getChunkLength();
 
-    return stream.str();
+    return os.str();
 }
 
 } // namespace inet
