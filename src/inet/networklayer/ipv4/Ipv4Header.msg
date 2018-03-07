@@ -175,7 +175,7 @@ class Ipv4Header extends NetworkHeaderBase
     chunkLength = B(IP_HEADER_BYTES);
 
     short version = 4;
-    short headerLength = IP_HEADER_BYTES;
+    short headerLength = IP_HEADER_BYTES;         // bytes, must be multiple of 4
 
     Ipv4Address srcAddress;
     Ipv4Address destAddress;
