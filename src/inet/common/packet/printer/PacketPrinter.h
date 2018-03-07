@@ -19,6 +19,7 @@
 #include <stack>
 #include "inet/common/packet/chunk/SequenceChunk.h"
 #include "inet/common/packet/dissector/PacketDissector.h"
+#include "inet/common/packet/printer/ProtocolPrinter.h"
 #include "inet/physicallayer/common/packetlevel/Signal.h"
 
 namespace inet {
@@ -26,27 +27,27 @@ namespace inet {
 // TODO: remove when migrating to new printer API
 class Options;
 
+class PacketPrinterContext {
+  public:
+    bool isCorrect = true;
+    std::stringstream sourceColumn;
+    std::stringstream destinationColumn;
+    std::string protocolColumn;
+    std::stringstream lengthColumn;
+    std::stringstream infoColumn;
+    int infoLevel = -1;
+};
+
 class INET_API PacketPrinter : public cMessagePrinter
 {
   protected:
-    class Context {
-      public:
-        bool isCorrect = true;
-        std::stringstream sourceColumn;
-        std::stringstream destinationColumn;
-        std::string protocolColumn;
-        std::stringstream lengthColumn;
-        std::stringstream infoColumn;
-        int infoLevel = -1;
-    };
-
-  protected:
     virtual bool isEnabledOption(const Options *options, const char *name) const;
-    virtual void printContext(std::ostream& stream, const Options *options, Context& context) const;
-    virtual void printPacketInsideOut(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolLevel, Context& context) const;
-    virtual void printPacketLeftToRight(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolLevel, Context& context) const;
-    virtual void printSignal(inet::physicallayer::Signal *signal, const Options *options, Context& context) const;
-    virtual void printPacket(Packet *packet, const Options *options, Context& context) const;
+    virtual const ProtocolPrinter& getProtocolPrinter(const Protocol *protocol) const;
+    virtual void printContext(std::ostream& stream, const Options *options, PacketPrinterContext& context) const;
+    virtual void printPacketInsideOut(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolLevel, const Options *options, PacketPrinterContext& context) const;
+    virtual void printPacketLeftToRight(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolLevel, const Options *options, PacketPrinterContext& context) const;
+    virtual void printSignal(inet::physicallayer::Signal *signal, const Options *options, PacketPrinterContext& context) const;
+    virtual void printPacket(Packet *packet, const Options *options, PacketPrinterContext& context) const;
 
   public:
     virtual int getScoreFor(cMessage *msg) const override;
@@ -73,8 +74,6 @@ class INET_API PacketPrinter : public cMessagePrinter
     virtual void printIcmpChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const;
     virtual void printTcpChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const;
     virtual void printUdpChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const;
-    virtual void printUnimplementedProtocolChunk(std::ostream& stream, const Ptr<const Chunk>& chunk, const Protocol* protocol) const;
-    virtual void printUnknownProtocolChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const;
 };
 
 } // namespace
