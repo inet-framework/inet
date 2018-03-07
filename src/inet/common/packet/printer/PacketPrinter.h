@@ -69,7 +69,6 @@ class INET_API PacketPrinter : public cMessagePrinter
     virtual void printIpv4Chunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const;
     virtual void printIcmpChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const;
     virtual void printTcpChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const;
-    virtual void printUdpChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const;
 };
 
 } // namespace
