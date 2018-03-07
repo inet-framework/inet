@@ -24,9 +24,6 @@
 
 namespace inet {
 
-// TODO: remove when migrating to new printer API
-class Options;
-
 class PacketPrinterContext {
   public:
     bool isCorrect = true;
