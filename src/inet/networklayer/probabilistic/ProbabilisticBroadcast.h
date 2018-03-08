@@ -66,6 +66,8 @@ class INET_API ProbabilisticBroadcast : public NetworkProtocolBase, public INetw
 
     virtual void finish() override;
 
+    const Protocol& getProtocol() const override { return Protocol::probabilistic; }
+
   protected:
     enum messagesTypes {
         UNKNOWN = 0,

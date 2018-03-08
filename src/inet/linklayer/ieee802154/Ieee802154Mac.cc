@@ -28,16 +28,16 @@
 
 #include <cassert>
 
-#include "inet/common/INETUtils.h"
-#include "inet/common/INETMath.h"
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/ProtocolTag_m.h"
-#include "inet/common/ProtocolGroup.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/common/FindModule.h"
-#include "inet/linklayer/ieee802154/Ieee802154MacHeader_m.h"
+#include "inet/common/INETMath.h"
+#include "inet/common/INETUtils.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolGroup.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
+#include "inet/linklayer/ieee802154/Ieee802154MacHeader_m.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
 
@@ -237,7 +237,8 @@ void Ieee802154Mac::handleUpperPacket(Packet *packet)
     //RadioAccNoise3PhyControlInfo *pco = new RadioAccNoise3PhyControlInfo(bitrate);
     //macPkt->setControlInfo(pco);
     packet->insertHeader(macPkt);
-    EV_DETAIL << "pkt encapsulated, length: " << macPkt->getChunkLength() * 8 << "\n";
+    packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee802154);
+    EV_DETAIL << "pkt encapsulated, length: " << macPkt->getChunkLength() << "\n";
     executeMac(EV_SEND_REQUEST, packet);
 }
 

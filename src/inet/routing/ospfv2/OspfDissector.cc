@@ -1,5 +1,5 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2018 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -14,34 +14,29 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
+// @author: Zoltan Bojthe
+//
 
-#ifndef __INET_PACKETFILTER_H
-#define __INET_PACKETFILTER_H
+#include "inet/routing/ospfv2/OspfDissector.h"
 
-#include "inet/common/MatchableObject.h"
+#include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
+#include "inet/routing/ospfv2/OspfPacket_m.h"
+
 
 namespace inet {
+namespace ospf {
 
-namespace visualizer {
 
-/**
- * This class provides a generic filter for packets. The filter is expressed
- * as a pattern using the cMatchExpression format.
- */
-class INET_API PacketFilter
+Register_Protocol_Dissector(&Protocol::ospf, OspfDissector);
+
+void OspfDissector::dissect(Packet *packet, ICallback& callback) const
 {
-  protected:
-    cMatchExpression matchExpression;
+    auto header = packet->popHeader<OspfPacket>();
+    callback.startProtocolDataUnit(&Protocol::ospf);
+    callback.visitChunk(header, &Protocol::ospf);
+    callback.endProtocolDataUnit(&Protocol::ospf);
+}
 
-  public:
-    void setPattern(const char *pattern);
-
-    bool matches(const cPacket *packet) const;
-};
-
-} // namespace visualizer
-
+} // namespace ospf
 } // namespace inet
-
-#endif // ifndef __INET_PACKETFILTER_H
 

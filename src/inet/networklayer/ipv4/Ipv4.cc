@@ -116,6 +116,7 @@ void Ipv4::initialize(int stage)
         WATCH(numUnroutable);
         WATCH(numForwarded);
         WATCH_MAP(pendingPackets);
+        WATCH_MAP(socketIdToSocketDescriptor);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         isUp = isNodeUp();
@@ -133,9 +134,7 @@ void Ipv4::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePr
 {
     Enter_Method("handleRegisterProtocol");
     if (!strcmp("transportIn", in->getBaseName())) {
-        int protocolNumber = ProtocolGroup::ipprotocol.findProtocolNumber(&protocol);
-        if (protocolNumber != -1)
-            mapping.addProtocolMapping(protocolNumber, in->getIndex());
+        mapping.addProtocolMapping(protocol.getId(), in->getIndex());
     }
 }
 
@@ -160,9 +159,9 @@ void Ipv4::handleMessage(cMessage *msg)
     auto request = dynamic_cast<Request *>(msg);
     if (L3SocketBindCommand *command = dynamic_cast<L3SocketBindCommand *>(msg->getControlInfo())) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
-        SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocolId());
+        SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocol()->getId());
         socketIdToSocketDescriptor[socketId] = descriptor;
-        protocolIdToSocketDescriptors.insert(std::pair<int, SocketDescriptor *>(command->getProtocolId(), descriptor));
+        protocolIdToSocketDescriptors.insert(std::pair<int, SocketDescriptor *>(command->getProtocol()->getId(), descriptor));
         delete msg;
     }
     else if (dynamic_cast<L3SocketCloseCommand *>(msg->getControlInfo()) != nullptr) {
@@ -269,6 +268,9 @@ void Ipv4::handleIncomingDatagram(Packet *packet)
 
     if (!verifyCrc(ipv4Header)) {
         EV_WARN << "CRC error found, drop packet\n";
+        PacketDropDetails details;
+        details.setReason(INCORRECTLY_RECEIVED);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
         return;
     }
@@ -731,10 +733,10 @@ void Ipv4::reassembleAndDeliverFinish(Packet *packet)
 {
     auto ipv4HeaderPosition = packet->getHeaderPopOffset();
     const auto& ipv4Header = packet->peekHeader<Ipv4Header>();
-    int protocol = ipv4Header->getProtocolId();
+    const Protocol *protocol = ipv4Header->getProtocol();
     decapsulate(packet);
-    auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol);
-    auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol);
+    auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol->getId());
+    auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol->getId());
     bool hasSocket = lowerBound != upperBound;
     for (auto it = lowerBound; it != upperBound; it++) {
         auto *packetCopy = packet->dup();
@@ -742,7 +744,7 @@ void Ipv4::reassembleAndDeliverFinish(Packet *packet)
         emit(packetSentToUpperSignal, packetCopy);
         send(packetCopy, "transportOut");
     }
-    if (mapping.findOutputGateForProtocol(protocol) >= 0) {
+    if (mapping.findOutputGateForProtocol(protocol->getId()) >= 0) {
         emit(packetSentToUpperSignal, packet);
         send(packet, "transportOut");
         numLocalDeliver++;
@@ -751,7 +753,7 @@ void Ipv4::reassembleAndDeliverFinish(Packet *packet)
         delete packet;
     }
     else {
-        EV_ERROR << "Transport protocol ID=" << protocol << " not connected, discarding packet\n";
+        EV_ERROR << "Transport protocol '" << protocol->getName() << "' not connected, discarding packet\n";
         packet->setHeaderPopOffset(ipv4HeaderPosition);
         const InterfaceEntry* fromIE = getSourceInterface(packet);
         sendIcmpError(packet, fromIE ? fromIE->getInterfaceId() : -1, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);

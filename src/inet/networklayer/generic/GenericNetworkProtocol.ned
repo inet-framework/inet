@@ -33,6 +33,7 @@ simple GenericNetworkProtocol
         int hopLimit = default(32);
         int headerLength @unit(B) = default(10B);
         @display("i=block/routing");
+        @signal[packetDropped](type=Packet);
     gates:
         input transportIn @labels(TcpHeader,UdpHeader);
         output transportOut @labels(TcpHeader,UdpHeader);

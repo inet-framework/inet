@@ -19,12 +19,13 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/EthernetFcsMode_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
-#include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/portal/Ieee80211Portal.h"
+#include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
 
 #ifdef WITH_ETHERNET
 #include "inet/linklayer/ethernet/EtherEncap.h"
+#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #endif // ifdef WITH_ETHERNET
 
 namespace inet {
@@ -77,6 +78,7 @@ void Ieee80211Portal::encapsulate(Packet *packet)
         ieee8022SnapHeader->setOui(0);
         ieee8022SnapHeader->setProtocolId(ethernetHeader->getTypeOrLength());
         packet->insertHeader(ieee8022SnapHeader);
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee8022);
     }
     else
         throw cRuntimeError("Unknown packet: '%s'", packet->getFullName());
@@ -107,8 +109,8 @@ void Ieee80211Portal::decapsulate(Packet *packet)
     ethernetHeader->setTypeOrLength(typeOrLength);
     packet->insertHeader(ethernetHeader);
     EtherEncap::addPaddingAndFcs(packet, fcsMode);
-    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ethernet);
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
 #else // ifdef WITH_ETHERNET
     throw cRuntimeError("INET compiled without ETHERNET feature!");
 #endif // ifdef WITH_ETHERNET

@@ -488,9 +488,10 @@ void LMac::handleSelfMessage(cMessage *msg)
                 for (int i = 0; i < numSlots; i++)
                     control->setOccupiedSlots(i, occSlotsDirect[i]);
 
-                Packet *packet = new Packet();
-                packet->setKind(LMAC_CONTROL);
+                Packet *packet = new Packet("Control");
+                control->setType(LMAC_CONTROL);
                 packet->insertHeader(control);
+                packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::lmac);
                 sendDown(packet);
                 if ((macQueue.size() > 0) && (!SETUP_PHASE))
                     scheduleAt(simTime() + controlDuration, sendData);
@@ -504,16 +505,17 @@ void LMac::handleSelfMessage(cMessage *msg)
                         cancelEvent(timeout);
                     return;
                 }
-                Packet *data = new Packet();
+                Packet *data = new Packet("Data");
                 data->insertAtEnd(macQueue.front()->peekAt(headerLength));
-                data->setKind(LMAC_DATA);
                 const auto& lmacHeader = staticPtrCast<LMacHeader>(macQueue.front()->peekHeader<LMacHeader>()->dupShared());
+                lmacHeader->setType(LMAC_DATA);
                 lmacHeader->setMySlot(mySlot);
                 lmacHeader->setOccupiedSlotsArraySize(numSlots);
                 for (int i = 0; i < numSlots; i++)
                     lmacHeader->setOccupiedSlots(i, occSlotsDirect[i]);
 
                 data->insertHeader(lmacHeader);
+                data->addTag<PacketProtocolTag>()->setProtocol(&Protocol::lmac);
                 EV << "Sending down data packet\n";
                 sendDown(data);
                 delete macQueue.front();
@@ -599,6 +601,8 @@ void LMac::handleLowerPacket(Packet *packet)
         return;
     }
     // simply pass the massage as self message, to be processed by the FSM.
+    const auto& hdr = packet->peekHeader<LMacHeader>();
+    packet->setKind(hdr->getType());
     handleSelfMessage(packet);
 }
 

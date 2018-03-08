@@ -38,14 +38,15 @@ class INET_API ProtocolGroup
     const Protocol *getProtocol(int protocolNumber) const;
     int findProtocolNumber(const Protocol *protocol) const;
     int getProtocolNumber(const Protocol *protocol) const;
+    void addProtocol(int protocolId, const Protocol *protocol);
 
   public:
     // in alphanumeric order
-    static const ProtocolGroup ethertype;
-    static const ProtocolGroup pppprotocol;
-    static const ProtocolGroup ipprotocol;
-    static const ProtocolGroup ieee8022protocol;
-    static const ProtocolGroup snapOui;
+    static ProtocolGroup ethertype;
+    static ProtocolGroup pppprotocol;
+    static ProtocolGroup ipprotocol;
+    static ProtocolGroup ieee8022protocol;
+    static ProtocolGroup snapOui;
 };
 
 } // namespace inet

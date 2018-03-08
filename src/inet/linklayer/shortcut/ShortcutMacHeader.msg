@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd
+// Copyright (C) 2012 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,13 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ieee80211.packetlevel;
+import inet.common.INETDefs;
+import inet.common.Protocol;
+import inet.common.packet.chunk.Chunk;
 
-//
-// See also ~Ieee80211IdealTransmitter, ~Ieee80211IdealRadio, and ~UnitDiskRadioMedium.
-//
-module Ieee80211IdealReceiver extends Ieee80211ReceiverBase
+namespace inet;
+
+class ShortcutMacHeader extends FieldsChunk
 {
-    parameters:
-        @class(Ieee80211IdealReceiver);
+    const Protocol *payloadProtocol = nullptr;
 }

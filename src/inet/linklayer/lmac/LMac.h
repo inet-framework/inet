@@ -140,19 +140,6 @@ class INET_API LMac : public MacProtocolBase, public IMacProtocol
         INIT, SLEEP, CCA, WAIT_CONTROL, WAIT_DATA, SEND_CONTROL, SEND_DATA
     };
 
-    enum TYPES {
-        LMAC_CONTROL = 167,
-        LMAC_TIMEOUT = 168,
-        LMAC_WAKEUP = 169,
-        LMAC_SEND_DATA = 170,
-        LMAC_SETUP_PHASE_END = 171,
-        LMAC_CHECK_CHANNEL = 172,
-        LMAC_SOMEBODY = 173,
-        LMAC_DATA = 174,
-        LMAC_START_LMAC = 175,
-        LMAC_SEND_CONTROL = 176
-    };
-
     /** @brief dummy receiver address to indicate no pending packets in the control packet */
     static const MacAddress LMAC_NO_RECEIVER;
     static const MacAddress LMAC_FREE_SLOT;

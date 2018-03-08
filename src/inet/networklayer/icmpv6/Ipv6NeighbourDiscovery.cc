@@ -89,7 +89,16 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_NETWORK_LAYER) {
+    if (stage == INITSTAGE_LOCAL) {
+        const char *crcModeString = par("crcMode");
+        if (!strcmp(crcModeString, "declared"))
+            crcMode = CRC_DECLARED_CORRECT;
+        else if (!strcmp(crcModeString, "computed"))
+            crcMode = CRC_COMPUTED;
+        else
+            throw cRuntimeError("unknown CRC mode: '%s'", crcModeString);
+    }
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
@@ -974,7 +983,6 @@ void Ipv6NeighbourDiscovery::createAndSendRsPacket(InterfaceEntry *ie)
 
     Ipv6Address destAddr = Ipv6Address::ALL_ROUTERS_2;    //all_routers multicast
     auto rs = makeShared<Ipv6RouterSolicitation>();
-    rs->setType(ICMPv6_ROUTER_SOL);
     rs->setChunkLength(B(ICMPv6_HEADER_BYTES));
 
     //The Source Link-Layer Address option SHOULD be set to the host's link-layer
@@ -986,7 +994,8 @@ void Ipv6NeighbourDiscovery::createAndSendRsPacket(InterfaceEntry *ie)
 
     //Construct a Router Solicitation message
     auto packet = new Packet("RSpacket");
-    packet->insertAtEnd(rs);
+    Icmpv6::insertCrc(crcMode, rs, packet);
+    packet->insertHeader(rs);
     sendPacketToIpv6Module(packet, destAddr, myIPv6Address, ie->getInterfaceId());
 }
 
@@ -1192,7 +1201,6 @@ void Ipv6NeighbourDiscovery::createAndSendRaPacket(const Ipv6Address& destAddr, 
     if (ie->ipv6Data()->getAdvSendAdvertisements()) {    //if this is an advertising interface
         //Construct a Router Advertisment message
         auto ra = makeShared<Ipv6RouterAdvertisement>();
-        ra->setType(ICMPv6_ROUTER_AD);
 
         //RFC 2461: Section 6.2.3 Router Advertisment Message Content
         /*A router sends periodic as well as solicited Router Advertisements out
@@ -1283,7 +1291,8 @@ void Ipv6NeighbourDiscovery::createAndSendRaPacket(const Ipv6Address& destAddr, 
         ra->setChunkLength(B(ICMPv6_HEADER_BYTES + numAdvPrefixes * IPv6ND_PREFIX_INFORMATION_OPTION_LENGTH));
 
         auto packet = new Packet("RApacket");
-        packet->insertAtEnd(ra);
+        Icmpv6::insertCrc(crcMode, ra, packet);
+        packet->insertHeader(ra);
         sendPacketToIpv6Module(packet, destAddr, sourceAddr, ie->getInterfaceId());
     }
 }
@@ -1807,7 +1816,6 @@ void Ipv6NeighbourDiscovery::createAndSendNsPacket(const Ipv6Address& nsTargetAd
 
     //Construct a Neighbour Solicitation message
     auto ns = makeShared<Ipv6NeighbourSolicitation>();
-    ns->setType(ICMPv6_NEIGHBOUR_SOL);
 
     //Neighbour Solicitation Specific Information
     ns->setTargetAddress(nsTargetAddr);
@@ -1821,9 +1829,9 @@ void Ipv6NeighbourDiscovery::createAndSendNsPacket(const Ipv6Address& nsTargetAd
         ns->setSourceLinkLayerAddress(myMacAddr);
         ns->setChunkLength(ns->getChunkLength() + B(IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH));
     }
-
     auto packet = new Packet("NSpacket");
-    packet->insertAtEnd(ns);
+    Icmpv6::insertCrc(crcMode, ns, packet);
+    packet->insertHeader(ns);
     sendPacketToIpv6Module(packet, dgDestAddr, dgSrcAddr, ie->getInterfaceId());
 
 }
@@ -2062,7 +2070,8 @@ void Ipv6NeighbourDiscovery::sendSolicitedNa(Packet *packet, const Ipv6Neighbour
     Ipv6Address myIPv6Addr = ie->ipv6Data()->getPreferredAddress();
 
     auto naPacket = new Packet("NApacket");
-    naPacket->insertAtEnd(na);
+    Icmpv6::insertCrc(crcMode, na, packet);
+    naPacket->insertHeader(na);
     sendPacketToIpv6Module(naPacket, naDestAddr, myIPv6Addr, ie->getInterfaceId());
 }
 
@@ -2147,7 +2156,8 @@ void Ipv6NeighbourDiscovery::sendUnsolicitedNa(InterfaceEntry *ie)
     // slightly longer.
 #ifdef WITH_xMIPv6
     auto packet = new Packet("NApacket");
-    packet->insertAtEnd(na);
+    Icmpv6::insertCrc(crcMode, na, packet);
+    packet->insertHeader(na);
     sendPacketToIpv6Module(packet, Ipv6Address::ALL_NODES_2, myIPv6Addr, ie->getInterfaceId());
 #endif /* WITH_xMIPv6 */
 }
@@ -2378,7 +2388,6 @@ void Ipv6NeighbourDiscovery::createAndSendRedirectPacket(InterfaceEntry *ie)
 {
     //Construct a Redirect message
     auto redirect = makeShared<Ipv6Redirect>(); // TODO: "redirectMsg");
-    redirect->setType(ICMPv6_REDIRECT);
     redirect->setChunkLength(B(ICMPv6_HEADER_BYTES + 2 * IPv6_ADDRESS_SIZE));   // RFC 2461, Section 4.5
 
 //FIXME incomplete code

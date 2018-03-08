@@ -77,7 +77,7 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
     /** @brief The last position that was reported. */
     Coord lastPosition;
 
-    /** @brief The last position that was reported. */
+    /** @brief The last orientation that was reported. */
     EulerAngles lastOrientation;
 
   protected:

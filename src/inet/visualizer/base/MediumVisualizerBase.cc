@@ -48,7 +48,7 @@ void MediumVisualizerBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         networkNodeFilter.setPattern(par("nodeFilter"));
         interfaceFilter.setPattern(par("interfaceFilter"));
-        packetFilter.setPattern(par("packetFilter"));
+        packetFilter.setPattern(par("packetFilter"), par("packetDataFilter"));
         displaySignals = par("displaySignals");
         signalColorSet.parseColors(par("signalColor"));
         signalPropagationAnimationSpeed = par("signalPropagationAnimationSpeed");
@@ -102,7 +102,7 @@ void MediumVisualizerBase::handleParameterChange(const char *name)
         else if (!strcmp(name, "interfaceFilter"))
             interfaceFilter.setPattern(par("interfaceFilter"));
         else if (!strcmp(name, "packetFilter"))
-            packetFilter.setPattern(par("packetFilter"));
+            packetFilter.setPattern(par("packetFilter"), par("packetDataFilter"));
         else if (!strcmp(name, "signalPropagationAnimationSpeed"))
             signalPropagationAnimationSpeed = par("signalPropagationAnimationSpeed");
         else if (!strcmp(name, "signalTransmissionAnimationSpeed"))

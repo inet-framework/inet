@@ -18,13 +18,13 @@
 #ifndef __INET_LINKBREAKVISUALIZERBASE_H
 #define __INET_LINKBREAKVISUALIZERBASE_H
 
+#include "inet/common/packet/PacketFilter.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/visualizer/base/VisualizerBase.h"
 #include "inet/visualizer/util/AnimationPosition.h"
 #include "inet/visualizer/util/InterfaceFilter.h"
 #include "inet/visualizer/util/LineManager.h"
 #include "inet/visualizer/util/NetworkNodeFilter.h"
-#include "inet/visualizer/util/PacketFilter.h"
 
 namespace inet {
 

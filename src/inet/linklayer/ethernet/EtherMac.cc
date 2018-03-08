@@ -533,11 +533,17 @@ void EtherMac::startFrameTransmission()
     encapsulate(frame);
 
     int64_t sentFrameByteLength = frame->getByteLength();
+    auto oldPacketProtocolTag = frame->removeTag<PacketProtocolTag>();
     frame->clearTags();
+    auto newPacketProtocolTag = frame->addTag<PacketProtocolTag>();
+    *newPacketProtocolTag = *oldPacketProtocolTag;
+    delete oldPacketProtocolTag;
     auto signal = new EthernetSignal(frame->getName());
     currentSendPkTreeID = signal->getTreeId();
     if (sendRawBytes) {
-        signal->encapsulate(new Packet(frame->getName(), frame->peekAllBytes()));
+        auto rawFrame = new Packet(frame->getName(), frame->peekAllBytes());
+        rawFrame->copyTags(*frame);
+        signal->encapsulate(rawFrame);
         delete frame;
     }
     else
@@ -848,7 +854,8 @@ void EtherMac::processReceivedDataFrame(Packet *packet)
     numBytesReceivedOK += curBytes;
     emit(rxPkOkSignal, packet);
 
-    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ethernet);
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
     if (interfaceEntry)
         packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
 

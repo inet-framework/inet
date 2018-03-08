@@ -38,8 +38,8 @@ void NetworkProtocolBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL)
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     else if (stage == INITSTAGE_NETWORK_LAYER) {
-        registerService(Protocol::gnp, gate("transportIn"), gate("queueIn"));
-        registerProtocol(Protocol::gnp, gate("queueOut"), gate("transportOut"));
+        registerService(getProtocol(), gate("transportIn"), gate("queueIn"));
+        registerProtocol(getProtocol(), gate("queueOut"), gate("transportOut"));
     }
 }
 
@@ -51,15 +51,15 @@ void NetworkProtocolBase::handleRegisterService(const Protocol& protocol, cGate 
 void NetworkProtocolBase::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
-    protocolMapping.addProtocolMapping(ProtocolGroup::ipprotocol.getProtocolNumber(&protocol), in->getIndex());
+    protocolMapping.addProtocolMapping(protocol.getId(), in->getIndex());
 }
 
 void NetworkProtocolBase::sendUp(cMessage *message)
 {
     if (Packet *packet = dynamic_cast<Packet *>(message)) {
-        int protocol = ProtocolGroup::ipprotocol.getProtocolNumber(packet->getTag<PacketProtocolTag>()->getProtocol());
-        auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol);
-        auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol);
+        const Protocol *protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
+        auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol->getId());
+        auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol->getId());
         bool hasSocket = lowerBound != upperBound;
         for (auto it = lowerBound; it != upperBound; it++) {
             Packet *packetCopy = packet->dup();
@@ -67,18 +67,18 @@ void NetworkProtocolBase::sendUp(cMessage *message)
             emit(packetSentToUpperSignal, packetCopy);
             send(packetCopy, "transportOut");
         }
-        if (protocolMapping.findOutputGateForProtocol(protocol) >= 0) {
+        if (protocolMapping.findOutputGateForProtocol(protocol->getId()) >= 0) {
             emit(packetSentToUpperSignal, packet);
             send(packet, "transportOut");
         }
-        else if (!hasSocket) {
-            EV_ERROR << "Transport protocol ID=" << protocol << " not connected, discarding packet\n";
-            //TODO send an ICMP error: protocol unreachable
-            // sendToIcmp(datagram, inputInterfaceId, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
+        else {
+            if (!hasSocket) {
+                EV_ERROR << "Transport protocol '" << protocol->getName() << "' not connected, discarding packet\n";
+                //TODO send an ICMP error: protocol unreachable
+                // sendToIcmp(datagram, inputInterfaceId, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
+            }
             delete packet;
         }
-        else
-            delete packet;
     }
     else
         send(message, "transportOut");
@@ -124,9 +124,9 @@ void NetworkProtocolBase::handleUpperCommand(cMessage *msg)
     auto request = dynamic_cast<Request *>(msg);
     if (L3SocketBindCommand *command = dynamic_cast<L3SocketBindCommand *>(msg->getControlInfo())) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
-        SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocolId());
+        SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocol()->getId());
         socketIdToSocketDescriptor[socketId] = descriptor;
-        protocolIdToSocketDescriptors.insert(std::pair<int, SocketDescriptor *>(command->getProtocolId(), descriptor));
+        protocolIdToSocketDescriptors.insert(std::pair<int, SocketDescriptor *>(command->getProtocol()->getId(), descriptor));
         delete msg;
     }
     else if (dynamic_cast<L3SocketCloseCommand *>(msg->getControlInfo()) != nullptr) {

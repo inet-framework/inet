@@ -91,9 +91,7 @@ void GenericNetworkProtocol::handleRegisterProtocol(const Protocol& protocol, cG
 {
     Enter_Method("handleRegisterProtocol");
     if (!strcmp("transportIn", in->getBaseName())) {
-        int protocolNumber = ProtocolGroup::ipprotocol.findProtocolNumber(&protocol);
-        if (protocolNumber != -1)
-            mapping.addProtocolMapping(protocolNumber, in->getIndex());
+        mapping.addProtocolMapping(protocol.getId(), in->getIndex());
     }
 }
 
@@ -123,9 +121,9 @@ void GenericNetworkProtocol::handleCommand(Request *request)
 {
     if (L3SocketBindCommand *command = dynamic_cast<L3SocketBindCommand *>(request->getControlInfo())) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
-        SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocolId());
+        SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocol()->getId());
         socketIdToSocketDescriptor[socketId] = descriptor;
-        protocolIdToSocketDescriptors.insert(std::pair<int, SocketDescriptor *>(command->getProtocolId(), descriptor));
+        protocolIdToSocketDescriptors.insert(std::pair<int, SocketDescriptor *>(command->getProtocol()->getId(), descriptor));
         delete request;
     }
     else if (dynamic_cast<L3SocketCloseCommand *>(request->getControlInfo()) != nullptr) {
@@ -168,12 +166,32 @@ const InterfaceEntry *GenericNetworkProtocol::getSourceInterfaceFrom(Packet *pac
 void GenericNetworkProtocol::handlePacketFromNetwork(Packet *packet)
 {
     if (packet->hasBitError()) {
-        //TODO discard
+        //TODO emit packetDropped signal
+        EV_WARN << "CRC error found, drop packet\n";
+        PacketDropDetails details;
+        details.setReason(INCORRECTLY_RECEIVED);
+        emit(packetDroppedSignal, packet, &details);
+        delete packet;
+        return;
     }
 
     const auto& header = packet->peekHeader<GenericDatagramHeader>();
     packet->addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
     packet->addTagIfAbsent<NetworkProtocolInd>()->setNetworkProtocolHeader(header);
+    B totalLength = header->getChunkLength() + header->getPayloadLengthField();
+    if (totalLength > packet->getDataLength()) {
+        EV_WARN << "length error found, drop packet\n";
+        PacketDropDetails details;
+        details.setReason(INCORRECTLY_RECEIVED);
+        emit(packetDroppedSignal, packet, &details);
+        delete packet;
+        return;
+    }
+
+    // remove lower layer paddings:
+    if (totalLength < packet->getDataLength()) {
+        packet->setTrailerPopOffset(packet->getHeaderPopOffset() + totalLength);
+    }
 
     const InterfaceEntry *inIE = interfaceTable->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
     const InterfaceEntry *destIE = nullptr;
@@ -196,6 +214,9 @@ void GenericNetworkProtocol::handlePacketFromHL(Packet *packet)
     // if no interface exists, do not send datagram
     if (interfaceTable->getNumInterfaces() == 0) {
         EV_INFO << "No interfaces exist, dropping packet\n";
+        PacketDropDetails details;
+        details.setReason(NO_INTERFACE_FOUND);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
         return;
     }
@@ -272,6 +293,9 @@ void GenericNetworkProtocol::routePacket(Packet *datagram, const InterfaceEntry 
         if (re == nullptr) {
             EV_INFO << "unroutable, discarding packet\n";
             numUnroutable++;
+            PacketDropDetails details;
+            details.setReason(NO_ROUTE_FOUND);
+            emit(packetDroppedSignal, datagram, &details);
             delete datagram;
             return;
         }
@@ -451,6 +475,10 @@ void GenericNetworkProtocol::decapsulate(Packet *packet)
         ifTag->setInterfaceId(fromIE->getInterfaceId());
     }
 
+    ASSERT(header->getPayloadLengthField() <= packet->getDataLength());
+    // drop padding
+    packet->setTrailerPopOffset(packet->getHeaderPopOffset() + header->getPayloadLengthField());
+
     // attach control info
     auto payloadProtocol = header->getProtocol();
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
@@ -510,6 +538,7 @@ void GenericNetworkProtocol::encapsulate(Packet *transportPacket, const Interfac
     // setting GenericNetworkProtocol options is currently not supported
 
     delete transportPacket->removeControlInfo();
+    header->setPayloadLengthField(transportPacket->getDataLength());
 
     insertNetworkProtocolHeader(transportPacket, Protocol::gnp, header);
 }
@@ -517,25 +546,27 @@ void GenericNetworkProtocol::encapsulate(Packet *transportPacket, const Interfac
 void GenericNetworkProtocol::sendDatagramToHL(Packet *packet)
 {
     const auto& header = packet->peekHeader<GenericDatagramHeader>();
-    int protocol = header->getProtocolId();
+    const Protocol *protocol = header->getProtocol();
     decapsulate(packet);
     // deliver to sockets
-    auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol);
-    auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol);
+    auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol->getId());
+    auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol->getId());
     bool hasSocket = lowerBound != upperBound;
     for (auto it = lowerBound; it != upperBound; it++) {
         auto *packetCopy = packet->dup();
         packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(it->second->socketId);
         send(packetCopy, "transportOut");
     }
-    if (mapping.findOutputGateForProtocol(protocol) >= 0) {
+    if (mapping.findOutputGateForProtocol(protocol->getId()) >= 0) {
         send(packet, "transportOut");
         numLocalDeliver++;
     }
-    else if (!hasSocket) {
-        EV_ERROR << "Transport protocol ID=" << protocol << " not connected, discarding packet\n";
-        //TODO send an ICMP error: protocol unreachable
-        // sendToIcmp(datagram, inputInterfaceId, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
+    else {
+        if (!hasSocket) {
+            EV_ERROR << "Transport protocol '" << protocol->getName() << "' not connected, discarding packet\n";
+            //TODO send an ICMP error: protocol unreachable
+            // sendToIcmp(datagram, inputInterfaceId, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
+        }
         delete packet;
     }
 }

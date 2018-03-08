@@ -32,15 +32,17 @@ class INET_API Protocol
   protected:
     const int id;
     const char *name;
+    const char *descriptiveName;
 
   public:
-    Protocol(const char *name);
+    Protocol(const char *name, const char *descriptiveName);
 
     bool operator==(const Protocol& other) const { return id == other.id; }
     bool operator!=(const Protocol& other) const { return id != other.id; }
 
     int getId() const { return id; }
     const char *getName() const { return name; }
+    const char *getDescriptiveName() const { return descriptiveName; }
 
     std::string str() const;
 
@@ -50,28 +52,31 @@ class INET_API Protocol
     static const Protocol *findProtocol(const char *name);
     static const Protocol *getProtocol(const char *name);
 
-
   public:
-    // in alphanumeric order
+    // Standard protocols: (in alphanumeric order)
     static const Protocol aodv;
     static const Protocol arp;
     static const Protocol bgp;
+    static const Protocol bmac;
     static const Protocol dsdv2;
     static const Protocol dsr;
     static const Protocol dymo;
-    static const Protocol echo;
     static const Protocol egp;
-    static const Protocol ethernet;
-    static const Protocol gnp;
+    static const Protocol ethernetMac;
+    static const Protocol ethernetPhy;
     static const Protocol gpsr;
     static const Protocol icmpv4;
     static const Protocol icmpv6;
-    static const Protocol ieee80211;
+    static const Protocol ieee80211Mac;
+    static const Protocol ieee80211Mgmt;
+    static const Protocol ieee80211Phy;
+    static const Protocol ieee802154;
     static const Protocol ieee8022;
     static const Protocol igmp;
     static const Protocol igp;
     static const Protocol ipv4;
     static const Protocol ipv6;
+    static const Protocol lmac;
     static const Protocol manet;
     static const Protocol mobileipv6;
     static const Protocol mpls;
@@ -83,7 +88,22 @@ class INET_API Protocol
     static const Protocol stp;
     static const Protocol tcp;
     static const Protocol udp;
+    static const Protocol xmac;
     static const Protocol xtp;
+
+    // INET specific protocols: (in alphanumeric order)
+    static const Protocol ackingmac;
+    static const Protocol apskPhy;
+    static const Protocol csmacamac;
+    static const Protocol echo;
+    static const Protocol flood;
+    static const Protocol gnp;
+    static const Protocol linkstaterouting;
+    static const Protocol probabilistic;
+    static const Protocol shortcutMac;
+    static const Protocol shortcutPhy;
+    static const Protocol unitdisk;
+    static const Protocol wiseroute;
 };
 
 } // namespace inet

@@ -21,8 +21,7 @@
 #ifndef __INET_PCAPRECORDER_H
 #define __INET_PCAPRECORDER_H
 
-#include "inet/common/INETDefs.h"
-
+#include "inet/common/packet/PacketFilter.h"
 #include "inet/common/packet/recorder/PacketDump.h"
 #include "inet/common/packet/recorder/PcapDump.h"
 
@@ -41,6 +40,7 @@ class INET_API PcapRecorder : public cSimpleModule, protected cListener
     PcapDump pcapDumper;
     unsigned int snaplen = 0;
     bool dumpBadFrames = false;
+    PacketFilter packetFilter;
 
   public:
     PcapRecorder();

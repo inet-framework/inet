@@ -8,7 +8,7 @@ messages with higher TSNs have to be dropped to make room for the expected ones.
 %inifile: omnetpp.ini
 
 [General]
-network=SctpFeatureTest
+network=SCTPFeatureTest
 cmdenv-event-banners=false
 cmdenv-express-mode = false
 tkenv-plugin-path = ../../../etc/plugins
@@ -29,7 +29,6 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 # sctp apps
 **.sctp_client.numApps = 1
-#**.sctp_client.sctpType="sctp"
 **.sctp_client.app[0].typename = "SctpClient"
 **.sctp_client.app[0].localAddress = "10.1.1.1"
 **.sctp_client.app[0].connectAddress = "10.1.3.1"
@@ -45,7 +44,6 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.app[0].inboundStreams = 4
 
 **.sctp_server.numApps = 1
-#**.sctp_server.sctpType="SCTP"
 **.sctp_server.app[0].typename = "SctpServer"
 **.sctp_server.app[0].localAddress = "10.1.3.1"
 **.sctp_server.app[0].localPort = 6666
@@ -72,16 +70,9 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.sctp.bytesToAddPerRcvdChunk = 250
 **.sctp.bytesToAddPerPeerChunk = 250
 
-# NIC configuration
-#**.ppp[*].queueType = "DropTailQueue" # in routers
-#**.ppp[*].queue.frameCapacity = 100  # in routers
-#**.ppp[*].ppp.mtu = 1500 B
-
-#**.vector-recording = false
 
 
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: results/General-0.sca
 scalar SctpFeatureTest.sctp_server.sctp "Drops Because New TSN Greater Than Highest TSN" [1-9][0-9]*
-
 %#--------------------------------------------------------------------------------------------------------------

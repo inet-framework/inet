@@ -122,7 +122,11 @@ void EtherMacFullDuplex::startFrameTransmission()
 
     // send
     EV_INFO << "Transmission of " << frame << " started.\n";
+    auto oldPacketProtocolTag = frame->removeTag<PacketProtocolTag>();
     frame->clearTags();
+    auto newPacketProtocolTag = frame->addTag<PacketProtocolTag>();
+    *newPacketProtocolTag = *oldPacketProtocolTag;
+    delete oldPacketProtocolTag;
     auto signal = new EthernetSignal(frame->getName());
     if (sendRawBytes) {
         signal->encapsulate(new Packet(frame->getName(), frame->peekAllBytes()));
@@ -343,7 +347,8 @@ void EtherMacFullDuplex::processReceivedDataFrame(Packet *packet, const Ptr<cons
     numBytesReceivedOK += curBytes;
     emit(rxPkOkSignal, packet);
 
-    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ethernet);
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
     if (interfaceEntry)
         packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
 

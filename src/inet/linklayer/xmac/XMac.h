@@ -166,30 +166,6 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
     /** @brief The current state of the protocol */
     States macState;
 
-    /** @brief Types of messages (self messages and packets) the node can
-     * process **/
-    enum TYPES {
-        // packet types
-        XMAC_PREAMBLE = 191,
-        XMAC_DATA,
-        XMAC_ACK,
-        // self message types
-        XMAC_RESEND_DATA,
-        XMAC_ACK_TIMEOUT,
-        XMAC_START_XMAC,
-        XMAC_WAKE_UP,
-        XMAC_SEND_ACK,
-        XMAC_CCA_TIMEOUT,   // 199
-        XMAC_ACK_TX_OVER,
-        XMAC_SEND_PREAMBLE,
-        XMAC_STOP_PREAMBLES, // 202
-        XMAC_DATA_TX_OVER,
-        XMAC_DATA_TIMEOUT,
-        SWITCH_PREAMBLE_PHASE, // 205
-        DELAY_FOR_ACK_WITHIN_REMOTE_RX,
-        XMAC_SWITCHING_FINISHED,
-    };
-
     // messages used in the FSM
     cMessage *resend_data;
     cMessage *ack_timeout;

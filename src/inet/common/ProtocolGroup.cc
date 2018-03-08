@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/ProtocolGroup.h"
+#include "inet/networklayer/common/IpProtocolId_m.h"
 
 namespace inet {
 
@@ -57,28 +58,40 @@ int ProtocolGroup::getProtocolNumber(const Protocol *protocol) const
         throw cRuntimeError("Unknown protocol: id = %d, name = %s", protocol->getId(), protocol->getName());
 }
 
+void ProtocolGroup::addProtocol(int protocolId, const Protocol *protocol)
+{
+    protocolNumberToProtocol[protocolId] = protocol;
+    protocolToProtocolNumber[protocol] = protocolId;
+}
+
 
 //FIXME use constants instead of numbers
 
 // excerpt from http://www.iana.org/assignments/ieee-802-numbers/ieee-802-numbers.xhtml
-const ProtocolGroup ProtocolGroup::ethertype("ethertype", {
+ProtocolGroup ProtocolGroup::ethertype("ethertype", {
     { 0x0800, &Protocol::ipv4 },
-    { 0x0806, &Protocol::arp},
+    { 0x0806, &Protocol::arp },
     { 0x86DD, &Protocol::ipv6 },
+    { 0x36FC, &Protocol::flood },         // ETHERTYPE_INET_FLOOD, not in any standards
+    { 0x86FD, &Protocol::probabilistic },         // ETHERTYPE_INET_PROBABILISTIC, not in any standards
+    { 0x86FE, &Protocol::wiseroute },         // ETHERTYPE_INET_WISE, not in any standards
     { 0x86FF, &Protocol::gnp },         // ETHERTYPE_INET_GENERIC
     { 0x8847, &Protocol::mpls },
 });
 
 // excerpt from http://www.iana.org/assignments/ppp-numbers/ppp-numbers.xhtml#ppp-numbers-2
-const ProtocolGroup ProtocolGroup::pppprotocol("pppprotocol", {
+ProtocolGroup ProtocolGroup::pppprotocol("pppprotocol", {
     { 0x0021, &Protocol::ipv4 },
     { 0x0057, &Protocol::ipv6 },
-    { 0x39FF, &Protocol::gnp },         // INET_GENERIC, not in any standards
     { 0x0281, &Protocol::mpls },        // MPLS unicast
+    { 0x39FC, &Protocol::flood },         // INET_FLOOD, not in any standards
+    { 0x39FD, &Protocol::probabilistic },         // INET_PROBABILISTIC, not in any standards
+    { 0x39FE, &Protocol::wiseroute },         // INET_WISE, not in any standards
+    { 0x39FF, &Protocol::gnp },         // INET_GENERIC, not in any standards
 });
 
 // excerpt from http://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
-const ProtocolGroup ProtocolGroup::ipprotocol("ipprotocol", {
+ProtocolGroup ProtocolGroup::ipprotocol("ipprotocol", {
     { 1, &Protocol::icmpv4 },
     { 2, &Protocol::igmp },
     { 4, &Protocol::ipv4 },
@@ -93,20 +106,24 @@ const ProtocolGroup ProtocolGroup::ipprotocol("ipprotocol", {
     { 58, &Protocol::icmpv6 },
     { 89, &Protocol::ospf },
     { 103, &Protocol::pim },
-    { 132, &Protocol::sctp},
-    { 135, &Protocol::mobileipv6},
+    { 132, &Protocol::sctp },
+    { 135, &Protocol::mobileipv6 },
     { 138, &Protocol::manet },
 
+    { 249, &Protocol::linkstaterouting },    // INET specific: Link State Routing Protocol
+    { 250, &Protocol::flood },    // INET specific: Probabilistic Network Protocol
+    { 251, &Protocol::probabilistic },    // INET specific: Probabilistic Network Protocol
+    { 252, &Protocol::wiseroute },    // INET specific: Probabilistic Network Protocol
     { 253, &Protocol::gnp },    // INET specific: Generic Network Protocol
     { 254, &Protocol::echo },    // INET specific: Echo Protocol
 });
 
-const ProtocolGroup ProtocolGroup::snapOui("snapOui", {
+ProtocolGroup ProtocolGroup::snapOui("snapOui", {
     //TODO do not add {0, .... }, it is a  special value: the protocolId contains the ethertype value
     // { 0x00000C, &Protocol::ciscoSnap } //TODO
 });
 
-const ProtocolGroup ProtocolGroup::ieee8022protocol("ieee8022protocol", {
+ProtocolGroup ProtocolGroup::ieee8022protocol("ieee8022protocol", {
     { 0x4242, &Protocol::stp },
 });
 

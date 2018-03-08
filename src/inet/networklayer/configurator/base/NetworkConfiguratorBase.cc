@@ -20,6 +20,7 @@
 
 #include <set>
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/stlutils.h"
@@ -396,6 +397,7 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const char
             Packet *transmittedFrame = new Packet();
             auto byteCountChunk = makeShared<ByteCountChunk>(B(transmitterInterfaceInfo->interfaceEntry->getMtu()));
             transmittedFrame->insertAtEnd(byteCountChunk);
+            transmittedFrame->addTag<PacketProtocolTag>()->setProtocol(nullptr);      //FIXME kludge
             // TODO: KLUDGE: review
             check_and_cast<const Radio *>(transmitterRadio)->encapsulate(transmittedFrame);
             const ITransmission *transmission = transmitterRadio->getTransmitter()->createTransmission(transmitterRadio, transmittedFrame, simTime());

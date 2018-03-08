@@ -17,8 +17,9 @@
 
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/Simsignals.h"
 #include "inet/common/packet/chunk/FieldsChunk.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/Simsignals.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/physicallayer/common/bitlevel/LayeredTransmission.h"
@@ -515,7 +516,11 @@ ISignal *RadioMedium::createTransmitterSignal(const IRadio *radio, Packet *packe
     Enter_Method_Silent();
     take(packet);
     auto transmission = radio->getTransmitter()->createTransmission(radio, packet, simTime());
+    auto oldPacketProtocolTag = packet->removeTag<PacketProtocolTag>();
     packet->clearTags();
+    auto newPacketProtocolTag = packet->addTag<PacketProtocolTag>();
+    *newPacketProtocolTag = *oldPacketProtocolTag;
+    delete oldPacketProtocolTag;
     auto signal = new Signal(transmission);
     signal->setName(packet->getName());
     signal->setDuration(transmission->getDuration());

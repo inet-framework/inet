@@ -33,9 +33,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 # sctp apps
 **.sctp_client.numApps = 1
 **.sctp_client.app[0].typename = "SctpClient"
-
 **.sctp_client.app[*].localAddress = "10.1.1.1 10.2.1.1"
-
 **.sctp_client.app[0].localAddress = "10.1.1.1 10.2.1.1"
 **.sctp_client.app[0].connectAddress = "10.1.3.1"
 **.sctp_client.app[0].primaryPath = "10.1.3.1"

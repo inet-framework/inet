@@ -11,7 +11,7 @@ The number of rejected AUTH chunks should be equal to 0.
 %inifile: omnetpp.ini
 
 [General]
-network=SctpFeatureTest
+network=SCTPFeatureTest
 cmdenv-event-banners=false
 cmdenv-express-mode = false
 tkenv-plugin-path = ../../../etc/plugins
@@ -58,13 +58,6 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.sctp.sctpAlgorithmClass = "SctpAlg"
 **.sctp.auth = true
 **.sctp.chunks = "SACK,DATA"
-
-# NIC configuration
-#**.ppp[*].queueType = "DropTailQueue" # in routers
-#**.ppp[*].queue.frameCapacity = 100  # in routers
-#**.ppp[*].ppp.mtu = 1500 B
-
-#**.vector-recording = false
 
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: results/General-0.sca

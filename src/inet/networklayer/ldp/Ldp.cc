@@ -1098,6 +1098,7 @@ void Ldp::processLABEL_WITHDRAW(Packet *pk)
     pk->clearTags();
     reply->setType(LABEL_RELEASE);
     pk->insertHeader(reply);
+    // pk->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ldp) //FIXME
 
     // send msg to peer over TCP
     sendToPeer(fromIP, pk);

@@ -57,9 +57,9 @@ void Tun::handleMessage(cMessage *message)
             if (socketReq != nullptr && contains(socketIds, sId)) {
                 // TODO: should we determine the network protocol by looking at the packet?!
                 packet->clearTags();
-                packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-                packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
-                packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+                packet->addTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+                packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+                packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
                 emit(packetSentToUpperSignal, packet);
                 send(packet, "upperLayerOut");
             }

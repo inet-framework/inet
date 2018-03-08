@@ -147,27 +147,6 @@ class INET_API BMac : public MacProtocolBase, public IMacProtocol
     /** @brief The current state of the protocol */
     States macState = (States)-1;
 
-    /** @brief Types of messages (self messages and packets) the node can
-     * process **/
-    enum TYPES {
-        // packet types
-        BMAC_PREAMBLE = 191,
-        BMAC_DATA,
-        BMAC_ACK,
-        // self message types
-        BMAC_RESEND_DATA,
-        BMAC_ACK_TIMEOUT,
-        BMAC_START_BMAC,
-        BMAC_WAKE_UP,
-        BMAC_SEND_ACK,
-        BMAC_CCA_TIMEOUT,
-        BMAC_ACK_TX_OVER,
-        BMAC_SEND_PREAMBLE,
-        BMAC_STOP_PREAMBLES,
-        BMAC_DATA_TX_OVER,
-        BMAC_DATA_TIMEOUT
-    };
-
     // messages used in the FSM
     cMessage *resend_data = nullptr;
     cMessage *ack_timeout = nullptr;

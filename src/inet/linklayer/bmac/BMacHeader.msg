@@ -20,7 +20,30 @@ import inet.linklayer.base.MacHeaderBase;
 
 namespace inet;
 
+// @brief Types of messages (self messages and packets) the node can process
+//TODO split to 2 enums: for packets / for self messages
+enum BMacType {
+    // packet types
+    BMAC_PREAMBLE = 191;
+    BMAC_DATA = 192;
+    BMAC_ACK = 193;
+    // self message types
+    BMAC_RESEND_DATA = 194;
+    BMAC_ACK_TIMEOUT = 195;
+    BMAC_START_BMAC = 196;
+    BMAC_WAKE_UP = 197;
+    BMAC_SEND_ACK = 198;
+    BMAC_CCA_TIMEOUT = 199;
+    BMAC_ACK_TX_OVER = 200;
+    BMAC_SEND_PREAMBLE = 201;
+    BMAC_STOP_PREAMBLES = 202;
+    BMAC_DATA_TX_OVER = 203;
+    BMAC_DATA_TIMEOUT = 204;
+};
+
+
 class BMacHeader extends MacHeaderBase
 {
+    BMacType   type;
 }
 

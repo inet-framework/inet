@@ -176,7 +176,7 @@ static bool testRecords(const char* filename, bool fcs = true)
             }
             const Protocol *protocol = nullptr;
             if (fileHeader.network == LINKTYPE_ETHERNET)
-                protocol = &Protocol::ethernet;
+                protocol = &Protocol::ethernetMac;
 //            else if (fileHeader.network == XYZ)
 //                protocol = &Protocol::XYZ;
             else
@@ -245,7 +245,7 @@ static Packet *deserialize(const Protocol *protocol, Packet *pk)
             outPk->insertAtEnd(chunk);
         }
     }
-    else if (*protocol == Protocol::ethernet) {
+    else if (*protocol == Protocol::ethernetMac) {
         const auto& header = pk->popHeader<EthernetMacHeader>();
         Ptr<const Ieee8022LlcHeader> llcHeader;
         const auto& fcs = pk->popTrailer<EthernetFcs>(B(ETHER_FCS_BYTES));

@@ -16,6 +16,7 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.TagBase;
 import inet.common.packet.chunk.Chunk;
 import inet.linklayer.common.MacAddress;
 

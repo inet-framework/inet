@@ -209,9 +209,10 @@ void BMac::sendPreamble()
     preamble->setChunkLength(headerLength);
 
     //attach signal and send down
-    auto packet = new Packet();
-    packet->setKind(BMAC_PREAMBLE);
+    auto packet = new Packet("Preamble");
+    preamble->setType(BMAC_PREAMBLE);
     packet->insertHeader(preamble);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::bmac);
     attachSignal(packet);
     sendDown(packet);
     nbTxPreambles++;
@@ -228,9 +229,10 @@ void BMac::sendMacAck()
     ack->setChunkLength(headerLength);
 
     //attach signal and send down
-    auto packet = new Packet();
-    packet->setKind(BMAC_ACK);
+    auto packet = new Packet("Ack");
+    ack->setType(BMAC_ACK);
     packet->insertHeader(ack);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::bmac);
     attachSignal(packet);
     sendDown(packet);
     nbTxAcks++;
@@ -569,9 +571,12 @@ void BMac::handleLowerPacket(Packet *packet)
         delete packet;
         return;
     }
-    else
+    else {
+        const auto& hdr = packet->peekHeader<BMacHeader>();
+        packet->setKind(hdr->getType());
         // simply pass the massage as self message, to be processed by the FSM.
         handleSelfMessage(packet);
+    }
 }
 
 void BMac::sendDataPacket()
@@ -579,8 +584,9 @@ void BMac::sendDataPacket()
     nbTxDataPackets++;
     Packet *pkt = macQueue.front()->dup();
     attachSignal(pkt);
-    lastDataPktDestAddr = pkt->peekHeader<BMacHeader>()->getDestAddr();
-    pkt->setKind(BMAC_DATA);
+    const auto& hdr = pkt->peekHeader<BMacHeader>();
+    lastDataPktDestAddr = hdr->getDestAddr();
+    ASSERT(hdr->getType() == BMAC_DATA);
     sendDown(pkt);
 }
 
@@ -755,6 +761,7 @@ void BMac::encapsulate(Packet *packet)
     auto pkt = makeShared<BMacHeader>();
     pkt->setChunkLength(headerLength);
 
+    pkt->setType(BMAC_DATA);
     // copy dest address from the Control Info attached to the network
     // message by the network layer
     auto dest = packet->getTag<MacAddressReq>()->getDestAddress();
@@ -771,6 +778,7 @@ void BMac::encapsulate(Packet *packet)
     //encapsulate the network packet
     packet->insertHeader(pkt);
     EV_DETAIL << "pkt encapsulated\n";
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::bmac);
 }
 
 } // namespace inet

@@ -1,5 +1,5 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) OpenSim Ltd
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,24 +15,21 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/visualizer/util/PacketFilter.h"
+#ifndef __INET_SHORTCUTMACDISSECTOR_H
+#define __INET_SHORTCUTMACDISSECTOR_H
+
+#include "inet/common/packet/dissector/ProtocolDissector.h"
 
 namespace inet {
 
-namespace visualizer {
-
-void PacketFilter::setPattern(const char* pattern)
+class INET_API ShortcutPhyDissector : public ProtocolDissector
 {
-    matchExpression.setPattern(pattern, false, true, true);
-}
+  public:
+    virtual void dissect(Packet *packet, ICallback& callback) const override;
+};
 
-bool PacketFilter::matches(const cPacket *packet) const
-{
-    MatchableObject matchableObject(MatchableObject::ATTRIBUTE_FULLNAME, packet);
-    // TODO: eliminate const_cast when cMatchExpression::matches becomes const
-    return const_cast<PacketFilter *>(this)->matchExpression.matches(&matchableObject);
-}
-
-} // namespace visualizer
 
 } // namespace inet
+
+#endif // ifndef __INET_SHORTCUTMACDISSECTOR_H
+

@@ -3,11 +3,11 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.Protocol;
 import inet.common.TagBase;
 import inet.common.packet.chunk.Chunk;
 
 cplusplus{{
-#include "inet/common/Protocol.h"
 #include "inet/common/Units.h"      //FIXME Why? Units unused in this file.
 }}
 
@@ -24,11 +24,6 @@ class ChunkPtr
     @existingClass;
     @descriptor(readonly);
     Chunk *content @getter(get);
-}
-
-class Protocol
-{
-    @existingClass;
 }
 
 //

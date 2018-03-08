@@ -59,7 +59,9 @@ simple PcapRecorder
         string moduleNamePatterns = default("wlan[*] eth[*] ppp[*] ext[*]"); // space-separated list of sibling module names to listen on
         string sendingSignalNames = default("packetSentToLower"); // space-separated list of outbound packet signals to subscribe to
         string receivingSignalNames = default("packetReceivedFromLower"); // space-separated list of inbound packet signals to subscribe to
-        string dumpProtocols = default("ethernet ppp ieee80211"); // space-separated list of protocol names as defined in the Protocol class
+        string dumpProtocols = default("ethernetmac ppp ieee80211mac"); // space-separated list of protocol names as defined in the Protocol class
+        string packetFilter = default("*"); // which packets are considered, matches all packets by default
+        string packetDataFilter = default("*"); // which packets are considered based on the data they contain, matches all packets by default
         bool alwaysFlush = default(false); // flush the pcapFile after each write to ensure that all packets are captured in case of a crash
         @display("i=block/blackboard");
 }

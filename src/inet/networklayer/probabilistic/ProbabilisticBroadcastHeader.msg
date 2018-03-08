@@ -16,6 +16,7 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.Units;
 import inet.networklayer.common.IpProtocolId;
 import inet.networklayer.contract.NetworkHeaderBase;
 
@@ -35,6 +36,7 @@ class ProbabilisticBroadcastHeader extends NetworkHeaderBase
     simtime_t appTtl;   // Message time-to-live set by application.
     L3Address   initialSrcAddr;
     L3Address   finalDestAddr;
+    B payloadLengthField;
 }
 
 cplusplus(ProbabilisticBroadcastHeader) {{

@@ -20,6 +20,7 @@
 #define __INET_PINGAPP_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/Protocol.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/NodeStatus.h"
@@ -68,6 +69,8 @@ class INET_API PingApp : public cSimpleModule, public ILifecycle
     long expectedReplySeqNo = 0;
     simtime_t sendTimeHistory[PING_HISTORY_SIZE];    // times of when the requests were sent
     bool pongReceived[PING_HISTORY_SIZE];
+
+    static const std::map<const Protocol *, const Protocol *> l3Echo;
 
     // statistics
     cStdDev rttStat;

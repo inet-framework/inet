@@ -32,12 +32,12 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.sender[*].trafGen.sendInterval = 0.4s
 **.sender[0].trafGen.numPackets = 15
 **.sender[1].trafGen.stopTime = 7s
-**.sender[*].trafGen.protocol = 17
+**.sender[*].trafGen.protocol = 150
 **.sender[*].trafGen.packetLength = 800B
 
 **.sender[*].trafGen.destAddresses = "recip"
 
-**.recip.trafGen.protocol = 17
+**.recip.trafGen.protocol = 150
 
 **.router.ppp[*].frameCapacity = 300
 **.router.ppp[*].bitCapacity = 0
@@ -66,7 +66,7 @@ module TrafGenHost extends NetworkLayerNodeBase
     submodules:
         trafGen: <trafGenType> like IIpvxTrafficGenerator {
             parameters:
-                protocol = 17;    // UDP
+                protocol = 150;
                 @display("p=329,81");
         }
     connections allowunconnected:

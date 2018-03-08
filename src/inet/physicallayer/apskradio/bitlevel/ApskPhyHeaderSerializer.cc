@@ -32,8 +32,9 @@ void ApskPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<co
     stream.writeUint16Be(phyHeader->getLengthField());
     auto crcMode = phyHeader->getCrcMode();
     if (crcMode != CRC_DISABLED && crcMode != CRC_COMPUTED)
-        throw cRuntimeError("Cannot serialize Udp header without turned off or properly computed CRC, try changing the value of crcMode parameter for Udp");
+        throw cRuntimeError("Cannot serialize Apsk Phy header without turned off or properly computed CRC, try changing the value of crcMode parameter for Udp");
     stream.writeUint16Be(phyHeader->getCrc());
+    //TODO write protocol
 }
 
 const Ptr<Chunk> ApskPhyHeaderSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
@@ -45,6 +46,7 @@ const Ptr<Chunk> ApskPhyHeaderSerializer::deserialize(MemoryInputStream& stream,
     phyHeader->setCrc(crc);
     phyHeader->setCrcMode(crc == 0 ? CRC_DISABLED : CRC_COMPUTED);
     return phyHeader;
+    //TODO read protocol
 }
 
 } // namespace physicallayer

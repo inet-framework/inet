@@ -15,17 +15,21 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/ModuleAccess.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtBase.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
 namespace inet {
 
 namespace ieee80211 {
+
+using namespace inet::physicallayer;
 
 void Ieee80211MgmtBase::initialize(int stage)
 {
@@ -80,6 +84,7 @@ void Ieee80211MgmtBase::handleMessage(cMessage *msg)
 void Ieee80211MgmtBase::sendDown(Packet *frame)
 {
     ASSERT(isOperational);
+    frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mgmt);
     send(frame, "macOut");
 }
 
@@ -88,13 +93,6 @@ void Ieee80211MgmtBase::dropManagementFrame(Packet *frame)
     EV << "ignoring management frame: " << (cMessage *)frame << "\n";
     delete frame;
     numMgmtFramesDropped++;
-}
-
-void Ieee80211MgmtBase::sendUp(cMessage *msg)
-{
-    ASSERT(isOperational);
-    check_and_cast<Packet *>(msg)->addTagIfAbsent<InterfaceInd>()->setInterfaceId(myIface->getInterfaceId());
-    send(msg, "upperLayerOut");
 }
 
 void Ieee80211MgmtBase::processFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header)

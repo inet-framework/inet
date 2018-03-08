@@ -290,6 +290,7 @@ class INET_API Chunk : public cObject,
         PF_ALLOW_INCORRECT              = (1 << 2),
         PF_ALLOW_IMPROPERLY_REPRESENTED = (1 << 3),
         PF_ALLOW_SERIALIZATION          = (1 << 4),
+        PF_ALLOW_ALL                    = -1
     };
 
     class INET_API Iterator
@@ -745,7 +746,7 @@ const Ptr<T> makeExclusivelyOwnedMutableChunk(const Ptr<const T>& chunk)
         return staticPtrCast<T>(chunk->dupShared());
 }
 
-inline std::ostream& operator<<(std::ostream& os, const Chunk *chunk) { return os << chunk->str(); }
+inline std::ostream& operator<<(std::ostream& os, const Chunk *chunk) { if (chunk != nullptr) return os << chunk->str(); else return os << "<nullptr>"; }
 
 inline std::ostream& operator<<(std::ostream& os, const Chunk& chunk) { return os << chunk.str(); }
 

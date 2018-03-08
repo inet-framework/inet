@@ -54,8 +54,8 @@ void TunnelApp::initialize(int stage)
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         if (protocol == &Protocol::ipv4) {
             l3Socket.setOutputGate(gate("socketOut"));
-            l3Socket.setControlInfoProtocolId(Protocol::ipv4.getId());
-            l3Socket.bind(IP_PROT_IP);
+            l3Socket.setL3Protocol(&Protocol::ipv4);
+            l3Socket.bind(&Protocol::ipv4);
         }
         if (protocol == &Protocol::udp) {
             serverSocket.setOutputGate(gate("socketOut"));
@@ -86,8 +86,8 @@ void TunnelApp::handleMessageWhenUp(cMessage *message)
             // InterfaceInd says packet is from tunnel interface and socket id is present and equals to tunSocket
             if (protocol == &Protocol::ipv4) {
                 packet->clearTags();
-                packet->addTagIfAbsent<L3AddressReq>()->setDestAddress(L3AddressResolver().resolve(destinationAddress));
-                packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+                packet->addTag<L3AddressReq>()->setDestAddress(L3AddressResolver().resolve(destinationAddress));
+                packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
                 l3Socket.send(packet);
             }
             else if (protocol == &Protocol::udp) {
@@ -98,8 +98,9 @@ void TunnelApp::handleMessageWhenUp(cMessage *message)
                 throw cRuntimeError("Unknown protocol: %s", protocol->getName());;
         }
         else {
-            auto packetProtocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-            if (packetProtocol == protocol) {
+            auto transportProtocolTag = packet->findTag<TransportProtocolInd>();
+            auto packetProtocol = transportProtocolTag ? transportProtocolTag->getProtocol() : packet->getTag<NetworkProtocolInd>()->getProtocol();
+            if (protocol == packetProtocol) {
                 delete message->removeControlInfo();
                 packet->clearTags();
                 tunSocket.send(packet);

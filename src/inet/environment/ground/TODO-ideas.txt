@@ -1,0 +1,13 @@
+Ideas related to IGround:
+    - Add support to enable the ground to act as a radio obstacle
+        - Option 1: Using LineOfSight Node, calculate loss from intersection points
+            - given how unstable osgEarth can be between versions, this might not be ideal from a repeatability perspective
+        - Option 2: Map a section of the ground as a triangle mesh in INET, calculate the intersections there
+            - this might be better, and we could save and load arbitrary geometries independent of osgEarth
+    - Add support for ground-aware behavior to more mobility models
+        - currently only VehicleMobility has this (possibly still only in a topic branch)
+    - Add some more IGround implementations
+        - Procedural: Infinite sine/cosine bumpy land (even dynamic), multi-octave perlin noise, etc.
+        - Loaded from file, as a heightfield texture or similar
+    - Add GroundVisualizer which approximates the IGround with a triangle mesh of some (configurable) resolution
+        - Sort of what osgEarth already does, but should work without osgEarth as well

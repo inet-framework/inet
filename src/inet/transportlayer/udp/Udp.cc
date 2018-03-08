@@ -22,10 +22,8 @@
 #include "inet/transportlayer/udp/Udp.h"
 
 #include "inet/applications/common/SocketTag_m.h"
-#include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeOperations.h"
@@ -406,8 +404,9 @@ void Udp::processUDPPacket(Packet *udpPacket)
     emit(packetReceivedFromLowerSignal, udpPacket);
     emit(packetReceivedSignal, udpPacket);
 
+    delete udpPacket->removeTagIfPresent<PacketProtocolTag>();
     b udpHeaderPopPosition = udpPacket->getHeaderPopOffset();
-    const auto& udpHeader = udpPacket->popHeader<UdpHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT);
+    auto udpHeader = udpPacket->popHeader<UdpHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT);
 
     // simulate checksum: discard packet if it has bit error
     EV_INFO << "Packet " << udpPacket->getName() << " received from network, dest port " << udpHeader->getDestinationPort() << "\n";
@@ -443,7 +442,7 @@ void Udp::processUDPPacket(Packet *udpPacket)
             return;
         }
         else {
-            sendUp(udpPacket, sd, srcPort, destPort);
+            sendUp(udpHeader, udpPacket, sd, srcPort, destPort);
         }
     }
     else {
@@ -458,8 +457,8 @@ void Udp::processUDPPacket(Packet *udpPacket)
         else {
             unsigned int i;
             for (i = 0; i < sds.size() - 1; i++) // sds.size() >= 1
-                sendUp(udpPacket->dup(), sds[i], srcPort, destPort); // dup() to all but the last one
-            sendUp(udpPacket, sds[i], srcPort, destPort);    // send original to last socket
+                sendUp(udpHeader, udpPacket->dup(), sds[i], srcPort, destPort); // dup() to all but the last one
+            sendUp(udpHeader, udpPacket, sds[i], srcPort, destPort);    // send original to last socket
         }
     }
 }
@@ -820,7 +819,7 @@ std::vector<Udp::SockDesc *> Udp::findSocketsForMcastBcastPacket(const L3Address
     return result;
 }
 
-void Udp::sendUp(Packet *payload, SockDesc *sd, ushort srcPort, ushort destPort)
+void Udp::sendUp(Ptr<const UdpHeader>& header, Packet *payload, SockDesc *sd, ushort srcPort, ushort destPort)
 {
     EV_INFO << "Sending payload up to socket sockId=" << sd->sockId << "\n";
 
@@ -829,6 +828,7 @@ void Udp::sendUp(Packet *payload, SockDesc *sd, ushort srcPort, ushort destPort)
     delete payload->removeTagIfPresent<DispatchProtocolReq>();
     payload->addTagIfAbsent<SocketInd>()->setSocketId(sd->sockId);
     payload->addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::udp);
+    payload->addTagIfAbsent<TransportProtocolInd>()->setTransportProtocolHeader(header);
     payload->addTagIfAbsent<L4PortInd>()->setSrcPort(srcPort);
     payload->addTagIfAbsent<L4PortInd>()->setDestPort(destPort);
 
@@ -1375,6 +1375,22 @@ uint16_t Udp::computeCrc(const Protocol *networkProtocol, const L3Address& srcAd
     // checksum  value means that the transmitter  generated  no checksum  (for
     // debugging or for higher level protocols that don't care).
     return crc == 0x0000 ? 0xFFFF : crc;
+}
+
+bool Udp::isCorrectPacket(Packet *packet, const Ptr<const UdpHeader>& udpHeader)
+{
+    auto trailerPopOffset = packet->getTrailerPopOffset();
+    auto udpHeaderOffset = packet->getHeaderPopOffset() - udpHeader->getChunkLength();
+    if (B(udpHeader->getTotalLengthField()) > trailerPopOffset - udpHeaderOffset)
+        return false;
+    else {
+        auto l3AddressInd = packet->findTag<L3AddressInd>();
+        auto networkProtocolInd = packet->findTag<NetworkProtocolInd>();
+        if (l3AddressInd != nullptr && networkProtocolInd != nullptr)
+            return verifyCrc(networkProtocolInd->getProtocol(), udpHeader, packet);
+        else
+            return udpHeader->getCrcMode() != CrcMode::CRC_DECLARED_INCORRECT;
+    }
 }
 
 } // namespace inet

@@ -15,21 +15,21 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211IdealTransmission.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211UnitDiskTransmission.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-Ieee80211IdealTransmission::Ieee80211IdealTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, m communicationRange, m interferenceRange, m detectionRange, const IIeee80211Mode *mode, const Ieee80211Channel *channel) :
+Ieee80211UnitDiskTransmission::Ieee80211UnitDiskTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, m communicationRange, m interferenceRange, m detectionRange, const IIeee80211Mode *mode, const Ieee80211Channel *channel) :
     UnitDiskTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, communicationRange, interferenceRange, detectionRange),
     Ieee80211TransmissionBase(mode, channel)
 {
 }
 
-std::ostream& Ieee80211IdealTransmission::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211UnitDiskTransmission::printToStream(std::ostream& stream, int level) const
 {
-    stream << "Ieee80211IdealTransmission";
+    stream << "Ieee80211UnitDiskTransmission";
     Ieee80211TransmissionBase::printToStream(stream, level);
     return UnitDiskTransmission::printToStream(stream, level);
 }

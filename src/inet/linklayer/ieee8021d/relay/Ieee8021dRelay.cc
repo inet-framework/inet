@@ -23,6 +23,7 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
 #include "inet/linklayer/ethernet/EtherEncap.h"
+#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #include "inet/linklayer/ieee8021d/relay/Ieee8021dRelay.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
@@ -44,8 +45,8 @@ void Ieee8021dRelay::initialize(int stage)
         fcsMode = parseEthernetFcsMode(par("fcsMode"));
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
-        registerService(Protocol::ethernet, gate("stpIn"), gate("ifIn"));
-        registerProtocol(Protocol::ethernet, gate("ifOut"), gate("stpOut"));
+        registerService(Protocol::ethernetMac, gate("stpIn"), gate("ifIn"));
+        registerProtocol(Protocol::ethernetMac, gate("ifOut"), gate("stpOut"));
     }
     else if (stage == INITSTAGE_LINK_LAYER_2) {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
@@ -202,8 +203,12 @@ void Ieee8021dRelay::dispatch(Packet *packet, InterfaceEntry *ie)
     EV_INFO << "Sending frame " << packet << " on output interface " << ie->getFullName() << " with destination = " << frame->getDest() << endl;
 
     numDispatchedNonBPDUFrames++;
+    auto oldPacketProtocolTag = packet->removeTag<PacketProtocolTag>();
     packet->clearTags();
-    packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+    auto newPacketProtocolTag = packet->addTag<PacketProtocolTag>();
+    *newPacketProtocolTag = *oldPacketProtocolTag;
+    delete oldPacketProtocolTag;
+    packet->addTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
     packet->removePoppedChunks();
     emit(packetSentToLowerSignal, packet);
     send(packet, "ifOut");
@@ -241,7 +246,7 @@ void Ieee8021dRelay::dispatchBPDU(Packet *packet)
     packet->insertHeader(header);
 
     EtherEncap::addPaddingAndFcs(packet, fcsMode);
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
 
     EV_INFO << "Sending BPDU frame " << packet << " with destination = " << header->getDest() << ", port = " << portNum << endl;
     numDispatchedBDPUFrames++;

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd
+// Copyright (C) 2018 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,19 +15,21 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.ieee80211.packetlevel;
+#ifndef __INET_ICMPV6DISSECTOR_H
+#define __INET_ICMPV6DISSECTOR_H
 
-//
-// This radio model uses ideal analog representation.
-// It must be used in conjunction with the ~UnitDiskRadioMedium model.
-//
-// See also ~UnitDiskRadioMedium, ~Ieee80211IdealTransmitter,
-// ~UnitDiskReceiver, and ~UnitDiskAnalogModel.
-//
-module Ieee80211IdealRadio extends Ieee80211Radio
+#include "inet/common/INETDefs.h"
+#include "inet/common/packet/dissector/ProtocolDissector.h"
+
+namespace inet {
+
+class INET_API Icmpv6Dissector : public ProtocolDissector
 {
-    parameters:
-        transmitterType = default("Ieee80211IdealTransmitter");
-        receiverType = default("Ieee80211IdealReceiver");
-        @class(Radio);
-}
+  public:
+    virtual void dissect(Packet *packet, ICallback& callback) const override;
+};
+
+} // namespace inet
+
+#endif // __INET_ICMPV6DISSECTOR_H
+

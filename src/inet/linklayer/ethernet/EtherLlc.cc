@@ -25,6 +25,7 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ethernet/EtherEncap.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
+#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
 
@@ -145,7 +146,7 @@ void EtherLlc::processPacketFromHigherLayer(Packet *packet)
     packet->insertHeader(eth);
 
     EtherEncap::addPaddingAndFcs(packet, fcsMode);
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
 
     send(packet, "lowerLayerOut");
 }
@@ -160,6 +161,7 @@ void EtherLlc::processFrameFromMAC(Packet *packet)
 
     if (isIeee8023Header(*ethHeader)) {
         llc = packet->popHeader<Ieee8022LlcHeader>();
+        delete packet->removeTagIfPresent<PacketProtocolTag>();
     }
     else {
         EV << "Incoming packet does not have an LLC ethernet header, dropped. Header is " << (ethHeader ? ethHeader->getClassName() : "nullptr") << "\n";
@@ -268,7 +270,7 @@ void EtherLlc::handleSendPause(cMessage *msg)
     hdr->setTypeOrLength(ETHERTYPE_FLOW_CONTROL);
     packet->insertHeader(hdr);
     EtherEncap::addPaddingAndFcs(packet, FCS_DECLARED_CORRECT);         //FIXME fcs mode
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
+    packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
 
     EV_INFO << "Sending " << frame << " to lower layer.\n";
     send(packet, "lowerLayerOut");

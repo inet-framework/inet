@@ -17,6 +17,7 @@
 
 #include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/physicallayer/apskradio/bitlevel/ApskEncoder.h"
 #include "inet/physicallayer/apskradio/bitlevel/ApskLayeredTransmitter.h"
 #include "inet/physicallayer/apskradio/packetlevel/ApskPhyHeader_m.h"
@@ -73,6 +74,7 @@ void ApskRadio::encapsulate(Packet *packet) const
     phyHeader->setCrc(0);
     phyHeader->setCrcMode(CRC_DISABLED);
     phyHeader->setLengthField(packet->getByteLength());
+    phyHeader->setPayloadProtocol(packet->getTag<PacketProtocolTag>()->getProtocol());
     b headerLength = phyHeader->getChunkLength();
     if (auto flatTransmitter = dynamic_cast<const FlatTransmitterBase *>(transmitter)) {
         headerLength = flatTransmitter->getHeaderLength();
@@ -83,6 +85,7 @@ void ApskRadio::encapsulate(Packet *packet) const
     auto paddingLength = computePaddingLength(headerLength + B(phyHeader->getLengthField()), nullptr, getModulation());
     if (paddingLength != b(0))
         packet->insertTrailer(makeShared<BitCountChunk>(paddingLength));
+    packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::apskPhy);
 }
 
 void ApskRadio::decapsulate(Packet *packet) const
@@ -97,6 +100,7 @@ void ApskRadio::decapsulate(Packet *packet) const
     auto paddingLength = computePaddingLength(headerLength + B(phyHeader->getLengthField()), nullptr, getModulation());
     if (paddingLength != b(0))
         packet->popTrailer(paddingLength);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(phyHeader->getPayloadProtocol());
 }
 
 } // namespace physicallayer

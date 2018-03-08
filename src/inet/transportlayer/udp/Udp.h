@@ -168,7 +168,7 @@ class INET_API Udp : public cSimpleModule, public ILifecycle
     virtual SockDesc *findSocketForUnicastPacket(const L3Address& localAddr, ushort localPort, const L3Address& remoteAddr, ushort remotePort);
     virtual std::vector<SockDesc *> findSocketsForMcastBcastPacket(const L3Address& localAddr, ushort localPort, const L3Address& remoteAddr, ushort remotePort, bool isMulticast, bool isBroadcast);
     virtual SockDesc *findFirstSocketByLocalAddress(const L3Address& localAddr, ushort localPort);
-    virtual void sendUp(Packet *payload, SockDesc *sd, ushort srcPort, ushort destPort);
+    virtual void sendUp(Ptr<const UdpHeader>& header, Packet *payload, SockDesc *sd, ushort srcPort, ushort destPort);
     virtual void processUndeliverablePacket(Packet *udpPacket);
     virtual void sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort localPort, const L3Address& remoteAddr, ushort remotePort);
 
@@ -192,13 +192,15 @@ class INET_API Udp : public cSimpleModule, public ILifecycle
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
     // crc
-    virtual bool verifyCrc(const Protocol *networkProtocol, const Ptr<const UdpHeader>& udpHeader, Packet *packet);
     virtual void insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<UdpHeader>& udpHeader, Packet *packet);
-    virtual uint16_t computeCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const std::vector<uint8_t>& udpHeaderBytes, const std::vector<uint8_t>& udpDataBytes);
+    static bool verifyCrc(const Protocol *networkProtocol, const Ptr<const UdpHeader>& udpHeader, Packet *packet);
+    static uint16_t computeCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const std::vector<uint8_t>& udpHeaderBytes, const std::vector<uint8_t>& udpDataBytes);
 
   public:
     Udp();
     virtual ~Udp();
+
+    static bool isCorrectPacket(Packet *packet, const Ptr<const UdpHeader>& udpHeader);
 
   protected:
     virtual void initialize(int stage) override;

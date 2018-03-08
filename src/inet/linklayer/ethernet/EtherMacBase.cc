@@ -17,10 +17,9 @@
 //
 
 #include <stdlib.h>
-
 #include "inet/linklayer/ethernet/EtherMacBase.h"
-
 #include "inet/common/ProtocolTag_m.h"
+//#include "inet/common/ProtocolGroup.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/serializer/EthernetCRC.h"
 #include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
@@ -390,6 +389,7 @@ void EtherMacBase::encapsulate(Packet *frame)
     auto phyHeader = makeShared<EthernetPhyHeader>();
     phyHeader->setSrcMacFullDuplex(duplexMode);
     frame->insertHeader(phyHeader);
+    frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetPhy);
 }
 
 void EtherMacBase::decapsulate(Packet *packet)
@@ -397,7 +397,7 @@ void EtherMacBase::decapsulate(Packet *packet)
     auto phyHeader = packet->popHeader<EthernetPhyHeader>();
     if (phyHeader->getSrcMacFullDuplex() != duplexMode)
         throw cRuntimeError("Ethernet misconfiguration: MACs on the same link must be all in full duplex mode, or all in half-duplex mode");
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernet);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
 }
 
 //FIXME should use it in EtherMac, EtherMacFullDuplex, etc. modules. But should not use it in EtherBus, EtherHub.

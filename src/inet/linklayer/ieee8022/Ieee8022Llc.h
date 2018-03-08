@@ -32,6 +32,9 @@ class INET_API Ieee8022Llc : public cSimpleModule
 
     virtual void encapsulate(Packet *frame);
     virtual void decapsulate(Packet *frame);
+
+  public:
+    static const Protocol *getProtocol(const Ptr<const Ieee8022LlcHeader>& header);
 };
 
 } // namespace inet

@@ -115,6 +115,8 @@ class INET_API Flood : public NetworkProtocolBase, public INetworkProtocol
 
     virtual void finish() override;
 
+    const Protocol& getProtocol() const override { return Protocol::flood; }
+
   protected:
 
     /** @brief Handle messages from upper layer */

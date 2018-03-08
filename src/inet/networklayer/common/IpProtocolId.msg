@@ -55,6 +55,10 @@ enum IpProtocolId
     IP_PROT_IPv6EXT_ESP = 50;      // Encapsulating security payload.
     IP_PROT_IPv6EXT_MOB = 135;      // Mobility Header for MIPv6 support.
 
-    IP_PROT_GNP = 254; // INET specific: Generic Network Protocol
+    IP_PROT_FLOOD = 250;    // INET specific: Probabilistic Network Protocol
+    IP_PROT_PROBABILISTIC = 251;    // INET specific: Probabilistic Network Protocol
+    IP_PROT_WISE = 252;    // INET specific: Probabilistic Network Protocol
+    IP_PROT_GNP = 253; // INET specific: Generic Network Protocol
     IP_PROT_ECHO = 254; // INET specific: Echo Protocol
 }
+

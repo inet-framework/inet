@@ -169,6 +169,7 @@ void WiseRoute::handleLowerPacket(Packet *packet)
                 auto p = new Packet(packet->getName(), packet->getKind());
                 packet->popHeader<WiseRouteHeader>();
                 p->insertAtEnd(packet->peekDataAt(b(0), packet->getDataLength()));
+                wiseRouteHeader->setPayloadLengthField(p->getDataLength());
                 p->insertHeader(wiseRouteHeader);
                 setDownControlInfo(p, MacAddress::BROADCAST_ADDRESS);
                 sendDown(p);
@@ -197,6 +198,7 @@ void WiseRoute::handleLowerPacket(Packet *packet)
                 auto p = new Packet(packet->getName(), packet->getKind());
                 packet->popHeader<WiseRouteHeader>();
                 p->insertAtEnd(packet->peekDataAt(b(0), packet->getDataLength()));
+                wiseRouteHeader->setPayloadLengthField(p->getDataLength());
                 p->insertHeader(wiseRouteHeader);
                 setDownControlInfo(p, MacAddress::BROADCAST_ADDRESS);
                 sendDown(p);
@@ -220,6 +222,7 @@ void WiseRoute::handleLowerPacket(Packet *packet)
                 auto p = new Packet(packet->getName(), packet->getKind());
                 packet->popHeader<WiseRouteHeader>();
                 p->insertAtEnd(packet->peekDataAt(b(0), packet->getDataLength()));
+                wiseRouteHeader->setPayloadLengthField(p->getDataLength());
                 p->insertHeader(wiseRouteHeader);
                 setDownControlInfo(p, nextHopMacAddr);
                 sendDown(p);
@@ -283,6 +286,7 @@ void WiseRoute::handleUpperPacket(Packet *packet)
         if (nextHopMacAddr.isUnspecified())
             throw cRuntimeError("Cannot immediately resolve MAC address. Please configure a GenericArp module.");
     }
+    pkt->setPayloadLengthField(packet->getDataLength());
     packet->insertHeader(pkt);
     packet->setKind(DATA);
     setDownControlInfo(packet, nextHopMacAddr);
@@ -347,10 +351,17 @@ void WiseRoute::updateRouteTable(const L3Address& origin, const L3Address& lastH
 void WiseRoute::decapsulate(Packet *packet)
 {
     auto wiseRouteHeader = packet->popHeader<WiseRouteHeader>();
+    auto payloadLength = wiseRouteHeader->getPayloadLengthField();
+    if (packet->getDataLength() < payloadLength) {
+        throw cRuntimeError("Data error: illegal payload length");     //FIXME packet drop
+    }
+    if (packet->getDataLength() > payloadLength)
+        packet->setTrailerPopOffset(packet->getHeaderPopOffset() + payloadLength);
     auto payloadProtocol = wiseRouteHeader->getProtocol();
+    packet->addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&getProtocol());
+    packet->addTagIfAbsent<NetworkProtocolInd>()->setNetworkProtocolHeader(wiseRouteHeader);
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
-    packet->addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
     packet->addTagIfAbsent<L3AddressInd>()->setSrcAddress(wiseRouteHeader->getInitialSrcAddr());
     nbHops = nbHops + wiseRouteHeader->getNbHops();
 }
@@ -395,8 +406,8 @@ WiseRoute::tFloodTable::key_type WiseRoute::getRoute(const tFloodTable::key_type
 void WiseRoute::setDownControlInfo(Packet *const pMsg, const MacAddress& pDestAddr)
 {
     pMsg->addTagIfAbsent<MacAddressReq>()->setDestAddress(pDestAddr);
-    pMsg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::gnp);
-    pMsg->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::gnp);
+    pMsg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&getProtocol());
+    pMsg->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&getProtocol());
 }
 
 } // namespace inet

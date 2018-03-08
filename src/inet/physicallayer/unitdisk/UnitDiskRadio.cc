@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/physicallayer/unitdisk/UnitDiskPhyHeader_m.h"
@@ -37,12 +38,15 @@ void UnitDiskRadio::encapsulate(Packet *packet) const
     auto idealTransmitter = check_and_cast<const UnitDiskTransmitter *>(transmitter);
     auto phyHeader = makeShared<UnitDiskPhyHeader>();
     phyHeader->setChunkLength(idealTransmitter->getHeaderLength());
+    phyHeader->setPayloadProtocol(packet->getTag<PacketProtocolTag>()->getProtocol());
     packet->insertHeader(phyHeader);
+    packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::unitdisk);
 }
 
 void UnitDiskRadio::decapsulate(Packet *packet) const
 {
-    packet->popHeader<UnitDiskPhyHeader>();
+    const auto& phyHeader = packet->popHeader<UnitDiskPhyHeader>();
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(phyHeader->getPayloadProtocol());
 }
 
 } // namespace physicallayer

@@ -44,8 +44,8 @@ void MacRelayUnit::initialize(int stage)
     else if (stage == INITSTAGE_LINK_LAYER) {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-        registerService(Protocol::ethernet, nullptr, gate("ifIn"));
-        registerProtocol(Protocol::ethernet, gate("ifOut"), nullptr);
+        registerService(Protocol::ethernetMac, nullptr, gate("ifIn"));
+        registerProtocol(Protocol::ethernetMac, gate("ifOut"), nullptr);
     }
 }
 
@@ -96,7 +96,11 @@ void MacRelayUnit::handleAndDispatchFrame(Packet *packet, const Ptr<const Ethern
 
     if (outputInterfaceId >= 0) {
         EV << "Sending frame " << frame << " with dest address " << frame->getDest() << " to port " << outputInterfaceId << endl;
+        auto oldPacketProtocolTag = packet->removeTag<PacketProtocolTag>();
         packet->clearTags();
+        auto newPacketProtocolTag = packet->addTag<PacketProtocolTag>();
+        *newPacketProtocolTag = *oldPacketProtocolTag;
+        delete oldPacketProtocolTag;
         packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outputInterfaceId);
         packet->removePoppedChunks();
         emit(packetSentToLowerSignal, packet);
@@ -110,7 +114,11 @@ void MacRelayUnit::handleAndDispatchFrame(Packet *packet, const Ptr<const Ethern
 
 void MacRelayUnit::broadcastFrame(Packet *packet, int inputInterfaceId)
 {
+    auto oldPacketProtocolTag = packet->removeTag<PacketProtocolTag>();
     packet->clearTags();
+    auto newPacketProtocolTag = packet->addTag<PacketProtocolTag>();
+    *newPacketProtocolTag = *oldPacketProtocolTag;
+    delete oldPacketProtocolTag;
     packet->removePoppedChunks();
     int numPorts = ift->getNumInterfaces();
     for (int i = 0; i < numPorts; ++i) {

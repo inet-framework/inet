@@ -19,21 +19,21 @@
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
 #include "inet/physicallayer/unitdisk/UnitDiskTransmission.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211IdealTransmission.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211IdealTransmitter.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211UnitDiskTransmission.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211UnitDiskTransmitter.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-Define_Module(Ieee80211IdealTransmitter);
+Define_Module(Ieee80211UnitDiskTransmitter);
 
-Ieee80211IdealTransmitter::Ieee80211IdealTransmitter() :
+Ieee80211UnitDiskTransmitter::Ieee80211UnitDiskTransmitter() :
     Ieee80211TransmitterBase()
 {
 }
 
-void Ieee80211IdealTransmitter::initialize(int stage)
+void Ieee80211UnitDiskTransmitter::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         communicationRange = m(par("communicationRange"));
@@ -42,9 +42,9 @@ void Ieee80211IdealTransmitter::initialize(int stage)
     }
 }
 
-std::ostream& Ieee80211IdealTransmitter::printToStream(std::ostream& stream, int level) const
+std::ostream& Ieee80211UnitDiskTransmitter::printToStream(std::ostream& stream, int level) const
 {
-    stream << "Ieee80211IdealTransmitter";
+    stream << "Ieee80211UnitDiskTransmitter";
     if (level <= PRINT_LEVEL_INFO)
         stream << ", communicationRange = " << communicationRange;
     if (level <= PRINT_LEVEL_TRACE)
@@ -53,7 +53,7 @@ std::ostream& Ieee80211IdealTransmitter::printToStream(std::ostream& stream, int
     return Ieee80211TransmitterBase::printToStream(stream, level);
 }
 
-const ITransmission *Ieee80211IdealTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, simtime_t startTime) const
+const ITransmission *Ieee80211UnitDiskTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, simtime_t startTime) const
 {
     const IIeee80211Mode *transmissionMode = computeTransmissionMode(packet);
     if (transmissionMode->getDataMode()->getNumberOfSpatialStreams() > transmitter->getAntenna()->getNumAntennas())
@@ -68,7 +68,7 @@ const ITransmission *Ieee80211IdealTransmitter::createTransmission(const IRadio 
     const simtime_t preambleDuration = transmissionMode->getPreambleMode()->getDuration();
     const simtime_t headerDuration = transmissionMode->getHeaderMode()->getDuration();
     const simtime_t dataDuration = duration - headerDuration - preambleDuration;
-    return new Ieee80211IdealTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, communicationRange, interferenceRange, detectionRange, transmissionMode, channel);
+    return new Ieee80211UnitDiskTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, communicationRange, interferenceRange, detectionRange, transmissionMode, channel);
 }
 
 } // namespace physicallayer
