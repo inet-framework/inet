@@ -1042,7 +1042,8 @@ class INET_API SctpAssociation : public cObject
      * of false means that the connection structure must be deleted by the
      * caller (SCTP).
      */
-    bool processSctpMessage(const Ptr<const SctpHeader>& sctpmsg, const L3Address& srcAddr, const L3Address& destAddr);
+   // bool processSctpMessage(const Ptr<const SctpHeader>& sctpmsg, const L3Address& srcAddr, const L3Address& destAddr);
+   bool processSctpMessage(SctpHeader *sctpmsg, const L3Address& srcAddr, const L3Address& destAddr);
     /**
      * Process commands from the application.
      * Normally returns true. A return value of false means that the
@@ -1111,7 +1112,8 @@ class INET_API SctpAssociation : public cObject
 
     /** @name Processing Sctp message arrivals. Invoked from processSctpHeader(). */
     //@{
-    bool process_RCV_Message(const Ptr<const SctpHeader>& sctpmsg, const L3Address& src, const L3Address& dest);
+   // bool process_RCV_Message(const Ptr<const SctpHeader>& sctpmsg, const L3Address& src, const L3Address& dest);
+   bool process_RCV_Message(SctpHeader *sctpmsg, const L3Address& src, const L3Address& dest);
     /**
      * Process incoming SCTP packets. Invoked from process_RCV_Message
      */
@@ -1249,6 +1251,7 @@ class INET_API SctpAssociation : public cObject
     void sendAddInAndOutStreamsRequest(SctpResetReq *info);
     void sendDoubleStreamResetResponse(uint32 insrrsn, uint16 inresult, uint32 outsrrsn, uint16 outresult);
     void checkStreamsToReset();
+    bool streamIsPending(int32 sid);
     void sendPacketDrop(const bool flag);
     void sendHMacError(const uint16 id);
     void sendInvalidStreamError(uint16 sid);
@@ -1332,6 +1335,7 @@ class INET_API SctpAssociation : public cObject
             const simtime_t& rttEstimation);
 
     void disposeOf(SctpHeader *sctpmsg);
+    void removeFirstChunk(SctpHeader *sctpmsg);
 
     /** Methods for Stream Reset **/
     void resetSsns();

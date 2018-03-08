@@ -70,7 +70,8 @@ void SctpAssociation::decreaseOutstandingBytes(SctpDataVariables *chunk)
     }
 }
 
-bool SctpAssociation::process_RCV_Message(const Ptr<const SctpHeader>& sctpmsg,
+//bool SctpAssociation::process_RCV_Message(const Ptr<const SctpHeader>& sctpmsg,
+bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
         const L3Address& src,
         const L3Address& dest)
 {
@@ -138,8 +139,8 @@ bool SctpAssociation::process_RCV_Message(const Ptr<const SctpHeader>& sctpmsg,
     bool shutdownCalled = false;
     bool sackWasReceived = false;
     for (uint32 i = 0; i < numberOfChunks; i++) {
-        SctpChunk *header = (SctpChunk *)(sctpmsg->getSctpChunks(i));
-       // SctpChunk *header = (SctpChunk *)(sctpmsg->removeChunk());
+       // SctpChunk *header = (SctpChunk *)(sctpmsg->getSctpChunks(0));
+        SctpChunk *header = (SctpChunk *)sctpmsg->getFirstChunk();
         const uint8 type = header->getSctpChunkType();
         EV_DEBUG << "Header length: " << header->getByteLength() << endl;
 
@@ -162,7 +163,7 @@ bool SctpAssociation::process_RCV_Message(const Ptr<const SctpHeader>& sctpmsg,
                     sendHMacError(authChunk->getHMacIdentifier());
                     auto it = sctpMain->assocStatMap.find(assocId);
                     it->second.numAuthChunksRejected++;
-                    delete authChunk;
+                   // delete authChunk;
                     return true;
                 }
                 if (authChunk->getHMacOk() == false) {
@@ -186,7 +187,7 @@ bool SctpAssociation::process_RCV_Message(const Ptr<const SctpHeader>& sctpmsg,
 
         switch (type) {
             case INIT:
-                EV_INFO << "INIT received" << endl;
+                EV_INFO<< "INIT received" << endl;
                 SctpInitChunk *initChunk;
                 initChunk = check_and_cast<SctpInitChunk *>(header);
                 if ((initChunk->getNoInStreams() != 0) &&
@@ -196,7 +197,7 @@ bool SctpAssociation::process_RCV_Message(const Ptr<const SctpHeader>& sctpmsg,
                     trans = processInitArrived(initChunk, srcPort, destPort);
                 }
                 i = numberOfChunks - 1;
-              //  delete initChunk;
+                //delete initChunk;
                 break;
 
             case INIT_ACK:
@@ -216,7 +217,7 @@ bool SctpAssociation::process_RCV_Message(const Ptr<const SctpHeader>& sctpmsg,
                         return true;
                     }
                     i = numberOfChunks - 1;
-                  //  delete initAckChunk;
+                   // delete initAckChunk;
                 }
                 else {
                     EV_INFO << "INIT_ACK will be ignored" << endl;
@@ -228,7 +229,7 @@ bool SctpAssociation::process_RCV_Message(const Ptr<const SctpHeader>& sctpmsg,
                 SctpCookieEchoChunk *cookieEchoChunk;
                 cookieEchoChunk = check_and_cast<SctpCookieEchoChunk *>(header);
                 trans = processCookieEchoArrived(cookieEchoChunk, src);
-               // delete cookieEchoChunk;
+                //delete cookieEchoChunk;
                 break;
 
             case COOKIE_ACK:
@@ -237,7 +238,7 @@ bool SctpAssociation::process_RCV_Message(const Ptr<const SctpHeader>& sctpmsg,
                     SctpCookieAckChunk *cookieAckChunk;
                     cookieAckChunk = check_and_cast<SctpCookieAckChunk *>(header);
                     trans = processCookieAckArrived();
-                  //  delete cookieAckChunk;
+                   // delete cookieAckChunk;
                 }
                 break;
 
@@ -257,7 +258,7 @@ bool SctpAssociation::process_RCV_Message(const Ptr<const SctpHeader>& sctpmsg,
                       //  delete state->shutdownChunk;
                         state->shutdownChunk = nullptr;
                     }
-                   // delete header;
+                    delete header;
                     sendAbort();
                     if (state->sctpmsg) {
                         delete state->sctpmsg;
@@ -318,7 +319,7 @@ bool SctpAssociation::process_RCV_Message(const Ptr<const SctpHeader>& sctpmsg,
                 processSackArrived(sackChunk);
                 trans = true;
                 sendAllowed = true;
-              //  delete sackChunk;
+               // delete sackChunk;
                 if (getOutstandingBytes() == 0 && transmissionQ->getQueueSize() == 0 && qCounter.roomSumSendStreams == 0) {
                     if (fsm->getState() == SCTP_S_SHUTDOWN_PENDING) {
                         EV_DETAIL << "No more packets: send SHUTDOWN" << endl;
@@ -344,7 +345,7 @@ bool SctpAssociation::process_RCV_Message(const Ptr<const SctpHeader>& sctpmsg,
                     sendIndicationToApp(SCTP_I_ABORT);
                     trans = performStateTransition(SCTP_E_ABORT);
                 }
-               // delete abortChunk;
+              //  delete abortChunk;
                 break;
 
             case HEARTBEAT:
@@ -434,7 +435,7 @@ bool SctpAssociation::process_RCV_Message(const Ptr<const SctpHeader>& sctpmsg,
                 stopTimer(T2_ShutdownTimer);
                 stopTimer(T5_ShutdownGuardTimer);
                 delete state->shutdownAckChunk;
-              //  delete shutdownCompleteChunk;
+               // delete shutdownCompleteChunk;
                 break;
 
             case FORWARD_TSN:
@@ -445,13 +446,13 @@ bool SctpAssociation::process_RCV_Message(const Ptr<const SctpHeader>& sctpmsg,
                 trans = true;
                 sendAllowed = true;
                 dataChunkReceived = true;
-              //  delete forwChunk;
+               // delete forwChunk;
                 break;
 
             case RE_CONFIG:
                 EV_INFO << "StreamReset received" << endl;
-                if (fsm->getState() != SCTP_S_ESTABLISHED) {
-                   // delete header;
+                if (fsm->getState() != SCTP_S_ESTABLISHED && fsm->getState() != SCTP_S_SHUTDOWN_PENDING) {
+                    delete header;
                     break;
                 }
                 SctpStreamResetChunk *strResChunk;
@@ -494,7 +495,7 @@ bool SctpAssociation::process_RCV_Message(const Ptr<const SctpHeader>& sctpmsg,
 
                     trans = true;
                     sendAllowed = true;
-                  //  delete packetDropChunk;
+                   // delete packetDropChunk;
                 }
                 break;
 
@@ -504,7 +505,7 @@ bool SctpAssociation::process_RCV_Message(const Ptr<const SctpHeader>& sctpmsg,
                 errorChunk = check_and_cast<SctpErrorChunk *>(header);
                 processErrorArrived(errorChunk);
                 trans = true;
-              //  delete errorChunk;
+               // delete errorChunk;
                 break;
 
             default:
@@ -616,6 +617,7 @@ bool SctpAssociation::processInitArrived(SctpInitChunk *initchunk, int32 srcPort
                 state->initialPeerMsgRwnd = initchunk->getMsg_rwnd();
                 state->peerMsgRwnd = state->initialPeerMsgRwnd;
             }
+            state->expectedStreamResetSequenceNumber = initPeerTsn;
             state->peerRwnd = state->initialPeerRwnd;
             statisticsPeerRwnd->record(state->peerRwnd);
             localVTag = initchunk->getInitTag();
@@ -1449,7 +1451,9 @@ SctpEventCode SctpAssociation::processSackArrived(SctpSackChunk *sackChunk)
     else {
         state->peerRwnd = arwnd - osb;
     }
-
+    if ((int32)(state->peerRwnd) < 0) {
+        state->peerRwnd = 0;
+    }
     // position of statement changed 20.07.05 I.R.
     if ((int32)(state->peerRwnd) < 0) {
         state->peerRwnd = 0;
@@ -2031,7 +2035,7 @@ void SctpAssociation::generateSendQueueAbatedIndication(const uint64 bytes)
         // Only send indication if the sendBuffer size has dropped below the sendQueueLimit
         // assert(state->lastSendQueueAbated < simTime());
         state->appSendAllowed = true;
-        EV_DETAIL << simTime() << ":\tSCTP_I_SENDQUEUE_ABATED("
+        EV_INFO << simTime() << ":\tSCTP_I_SENDQUEUE_ABATED("
                   << bytes << ") to refill buffer "
                   << state->sendBuffer << "/" << state->sendQueueLimit << endl;
 
@@ -2102,7 +2106,7 @@ void SctpAssociation::dequeueAckedChunks(const uint32 tsna,
         iterator = retransmissionQ->payloadQueue.begin();
     }
 
-    EV_DEBUG << "dequeueAckedChunks(): rttEstimation=" << rttEstimation << endl;
+    EV_INFO << "dequeueAckedChunks(): rttEstimation=" << rttEstimation << endl;
 }
 
 SctpEventCode SctpAssociation::processForwardTsnArrived(SctpForwardTsnChunk *fwChunk)
@@ -2166,7 +2170,7 @@ SctpEventCode SctpAssociation::processDataArrived(SctpDataChunk *dataChunk)
     }
     state->lastDataSourcePath = path;
 
-    std::cout << simTime() << " SctpAssociation::processDataArrived TSN=" << tsn << endl;
+    EV_INFO << simTime() << " SctpAssociation::processDataArrived TSN=" << tsn << endl;
     path->vectorPathReceivedTsn->record(tsn);
     if (dataChunk->getIBit()) {
         state->ackState = sackFrequency;
@@ -2539,12 +2543,12 @@ void SctpAssociation::processSsnTsnResetRequestArrived(SctpSsnTsnResetRequestPar
 
 void SctpAssociation::processResetResponseArrived(SctpStreamResetResponseParameter *responseParam)
 {
-    EV_TRACE << "processResetResponseArrived \n";
+    EV_INFO << "processResetResponseArrived \n";
     if (getPath(remoteAddr)->ResetTimer->isScheduled()) {
         if (PK(getPath(remoteAddr)->ResetTimer)->hasEncapsulatedPacket() &&
             (state->numResetRequests == 0 || (state->getNumRequestsNotPerformed() == 1 && responseParam->getResult() != DEFERRED))) {
             SctpResetTimer *tm = (SctpResetTimer *)getPath(remoteAddr)->ResetTimer->decapsulate();
-            EV_DETAIL << "SrResSn=" << responseParam->getSrResSn() << " tmOut=" << tm->getOutSN() << " tmIn= " << tm->getInSN() << "\n";
+            EV_INFO << "SrResSn=" << responseParam->getSrResSn() << " tmOut=" << tm->getOutSN() << " tmIn= " << tm->getInSN() << "\n";
             if (tm->getOutSN() == responseParam->getSrResSn() || tm->getInSN() == responseParam->getSrResSn() || responseParam->getResult() > DEFERRED) {
                 stopTimer(getPath(remoteAddr)->ResetTimer);
                 delete state->resetChunk;
@@ -2769,10 +2773,10 @@ void SctpAssociation::processAddInAndOutResetRequestArrived(SctpAddStreamsReques
 SctpEventCode SctpAssociation::processOutAndResponseArrived(SctpOutgoingSsnResetRequestParameter *outRequestParam,
         SctpStreamResetResponseParameter *responseParam)
 {
-    EV_TRACE << "processOutAndResponseArrived\n";
+    EV_INFO << "processOutAndResponseArrived\n";
     if (getPath(remoteAddr)->ResetTimer->isScheduled()) {
         if (state->numResetRequests == 0) {
-            SctpResetTimer *tm = check_and_cast<SctpResetTimer *>(PK(getPath(remoteAddr)->ResetTimer)->decapsulate());
+            SctpResetTimer *tm = (SctpResetTimer *)(PK(getPath(remoteAddr)->ResetTimer)->decapsulate());
             if (tm->getOutSN() == responseParam->getSrResSn()) {
                 stopTimer(getPath(remoteAddr)->ResetTimer);
                 delete state->resetChunk;
@@ -2782,13 +2786,26 @@ SctpEventCode SctpAssociation::processOutAndResponseArrived(SctpOutgoingSsnReset
         }
     }
     if (state->requests[outRequestParam->getSrResSn()].result != PERFORMED) {
-        resetExpectedSsns();
+        if (outRequestParam->getStreamNumbersArraySize() > 0) {
+            for (uint16 i = 0; i < outRequestParam->getStreamNumbersArraySize(); i++) {
+                resetExpectedSsn(outRequestParam->getStreamNumbers(i));
+            }
+        } else {
+            resetExpectedSsns();
+        }
         state->requests[outRequestParam->getSrResSn()].result = PERFORMED;
     }
     sendStreamResetResponse(outRequestParam->getSrReqSn(), PERFORMED);
     if (responseParam->getResult() == PERFORMED) {
         if (state->requests[responseParam->getSrResSn()].result != PERFORMED) {
-            resetSsns();
+            std::list<uint16>::iterator iter;
+            if (state->requests[responseParam->getSrResSn()].streams.size() > 0) {
+                for (iter = state->requests[responseParam->getSrResSn()].streams.begin(); iter != state->requests[responseParam->getSrResSn()].streams.end(); iter++) {
+                    resetSsn((*iter));
+                }
+            } else {
+                resetSsns();
+            }
           //  resetExpectedSsns();
             state->resetPending = false;
             sendIndicationToApp(SCTP_I_SEND_STREAMS_RESETTED);
@@ -2807,7 +2824,7 @@ SctpEventCode SctpAssociation::processOutAndResponseArrived(SctpOutgoingSsnReset
 
 SctpEventCode SctpAssociation::processStreamResetArrived(SctpStreamResetChunk *resetChunk)
 {
-    EV_TRACE << "processStreamResetArrived\n";
+    EV_INFO << "processStreamResetArrived\n";
     SctpParameter *parameter, *nextParam;
     bool requestReceived = false;
     std::map<uint32, SctpStateVariables::RequestData>::reverse_iterator rit;
@@ -3203,8 +3220,6 @@ SctpEventCode SctpAssociation::processAsconfArrived(SctpAsconfChunk *asconfChunk
                     }
                     else
                         path->confirmed = true;
-/****** ToDo Irene                   asconfAckChunk->addAsconfResponse(createSuccessIndication(ipParam->getRequestCorrelationId()));
-*/
                     delete ipParam;
                     break;
 
@@ -3215,7 +3230,6 @@ SctpEventCode SctpAssociation::processAsconfArrived(SctpAsconfChunk *asconfChunk
                     if (state->localAddresses.size() == 1) {
                         SctpErrorCauseParameter *errorParam;
                         errorParam = new SctpErrorCauseParameter("ErrorCause");
-                       // errorParam = new SctpErrorCauseParameter();
                         errorParam->setParameterType(ERROR_CAUSE_INDICATION);
                         errorParam->setResponseCorrelationId(delParam->getRequestCorrelationId());
                         errorParam->setErrorCauseType(ERROR_DELETE_LAST_IP_ADDRESS);
@@ -3869,7 +3883,7 @@ void SctpAssociation::process_TIMEOUT_RTX(SctpPathVariables *path)
 
 void SctpAssociation::process_TIMEOUT_BLOCKING(SctpPathVariables *path)
 {
-    std::cout << "TIMEOUT_BLOCKING on " << path->remoteAddress
+    EV_INFO << "TIMEOUT_BLOCKING on " << path->remoteAddress
               << " cwnd=" << path->cwnd << endl;
     path->blockingTimeout = -1.0;
     sendOnAllPaths(path);

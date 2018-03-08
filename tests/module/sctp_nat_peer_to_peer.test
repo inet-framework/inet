@@ -86,21 +86,26 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.Peer_*.sctp.natFriendly = true
 **.sctp.enableHeartbeats=true
 
-**.Peer_1.routingTable.routingFile="../../lib/nat_peer1.mrt"
-**.Peer_2.routingTable.routingFile="../../lib/nat_peer2.mrt"
-**.Server.routingTable.routingFile="../../lib/nat_server.mrt"
-**.Nat_1_1.routingTable.routingFile="../../lib/nat1_1.mrt"
-**.Nat_1_2.routingTable.routingFile="../../lib/nat1_2.mrt"
-**.Nat_2_1.routingTable.routingFile="../../lib/nat2_1.mrt"
-**.Nat_2_2.routingTable.routingFile="../../lib/nat2_2.mrt"
-**.Router_1.routingTable.routingFile="../../lib/nat_router_1.mrt"
-**.Router_2.routingTable.routingFile="../../lib/nat_router_2.mrt"
+**.sctp.crcMode = "computed"
+**.ipv4.**.crcMode = "computed"
+
+**.Server.numPcapRecorders = 1
+**.Server.pcapRecorder[0].pcapFile = "Server.pcap"
+**.Server.pcapRecorder[0].alwaysFlush = true
+**.Peer_1.numPcapRecorders = 1
+**.Peer_1.pcapRecorder[0].pcapFile = "Peer_1.pcap"
+**.Peer_1.pcapRecorder[0].alwaysFlush = true
+
+**.Server.pcapRecorder[0].pcapNetwork = 204
+**.Peer_1.pcapRecorder[0].pcapNetwork = 204
 
 %#--------------------------------------------------------------------------------------------------------------
-%contains-regex: stdout
-Association 1: sent bytes=14520, acked bytes=14520
-%contains-regex: stdout
-Association 9: sent bytes=16, acked bytes=16
-%contains-regex: stdout
-Association 10: sent bytes=16, acked bytes=16
+%contains-regex: results/General-0.sca
+scalar multiRendezvous.Peer_1.sctp "Acked Bytes" 14520
+%contains-regex: results/General-0.sca
+scalar multiRendezvous.Peer_1.sctp "Transmitted Bytes" 14520
+%contains-regex: results/General-0.sca
+scalar multiRendezvous.Server.sctp "Acked Bytes" 24
+%contains-regex: results/General-0.sca
+scalar multiRendezvous.Server.sctp "Transmitted Bytes" 24
 %#--------------------------------------------------------------------------------------------------------------

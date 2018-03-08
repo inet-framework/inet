@@ -980,12 +980,12 @@ bool SctpAssociation::processTimer(cMessage *msg)
     return performStateTransition(event);
 }
 
-bool SctpAssociation::processSctpMessage(const Ptr<const SctpHeader>& sctpmsg,
+//bool SctpAssociation::processSctpMessage(const Ptr<const SctpHeader>& sctpmsg,
+bool SctpAssociation::processSctpMessage(SctpHeader *sctpmsg,
         const L3Address& msgSrcAddr,
         const L3Address& msgDestAddr)
 {
     printAssocBrief();
-    EV_INFO << "SctpAssociation::processSctpMessage\n";
     localAddr = msgDestAddr;
     localPort = sctpmsg->getDestPort();
     remoteAddr = msgSrcAddr;
@@ -1000,7 +1000,7 @@ bool SctpAssociation::processSctpMessage(const Ptr<const SctpHeader>& sctpmsg,
             }
         }
         if (!found) {
-            std::cout << "destAddr " << msgDestAddr << " is not bound to host\n";
+            EV_INFO << "destAddr " << msgDestAddr << " is not bound to host\n";
             return true;
         }
     }
@@ -1084,18 +1084,9 @@ bool SctpAssociation::processAppCommand(cMessage *msg, SctpCommandReq* sctpComma
 {
     printAssocBrief();
 
-    // first do actions
-  /*  auto& tags = getTags(msg);
-    SctpCommandReq *sctpCommand = tags.findTag<SctpCommandReq>();
-    if (!sctpCommand) {
-        sctpCommand = tags.findTag<SctpOpenReq>();
-    } else {
-        std::cout << "got sctpCommand\n";
-    }*/
-   // SctpCommand *sctpCommand = (SctpCommand *)(msg->removeControlInfo());
     SctpEventCode event = preanalyseAppCommandEvent(msg->getKind());
 
-    std::cout << "App command: " << eventName(event) << "\n";
+    EV_INFO << "App command: " << eventName(event) << "\n";
 
     switch (event) {
         case SCTP_E_ASSOCIATE:
@@ -1103,7 +1094,6 @@ bool SctpAssociation::processAppCommand(cMessage *msg, SctpCommandReq* sctpComma
             break;
 
         case SCTP_E_OPEN_PASSIVE:
-        std::cout << "call process_OPEN_PASSIVE\n";
             process_OPEN_PASSIVE(event, sctpCommand, msg);
             break;
 

@@ -19,160 +19,183 @@
 #include <stdio.h>
 
 #include "inet/applications/sctpapp/SctpNatServer.h"
+#include "inet/applications/sctpapp/SctpNatPeer.h"
 
 #include "inet/transportlayer/sctp/SctpAssociation.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
-//#include "inet/transportlayer/sctp/SctpMessage_m.h"
 #include "inet/transportlayer/contract/sctp/SctpSocket.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/sctp/SctpNatTable.h"
+#include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/TimeTag_m.h"
+#include "inet/common/packet/Message.h"
 
 namespace inet {
-#if 0
+
 using namespace sctp;
 
 Define_Module(SctpNatServer);
 
 NatVector SctpNatServer::natVector;
 
-void SctpNatServer::initialize()
+void SctpNatServer::initialize(int stage)
 {
     numSessions = packetsSent = packetsRcvd = bytesSent = notifications = 0;
-    WATCH(numSessions);
-    WATCH(packetsSent);
-    WATCH(packetsRcvd);
-    WATCH(bytesSent);
-    WATCH(numRequestsToSend);
+    EV_DEBUG << "initialize SCTP NAT Server stage " << stage << endl;
 
-    // parameters
-    const char *addressesString = par("localAddress");
-    AddressVector addresses = L3AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
-    int32 port = par("localPort");
-    inboundStreams = par("inboundStreams");
-    outboundStreams = par("outboundStreams");
-    ordered = (bool)par("ordered");
-    lastStream = 0;
+    cSimpleModule::initialize(stage);
+    if (stage == INITSTAGE_LOCAL) {
+        WATCH(numSessions);
+        WATCH(packetsSent);
+        WATCH(packetsRcvd);
+        WATCH(bytesSent);
+        WATCH(numRequestsToSend);
+        inboundStreams = par("inboundStreams");
+        outboundStreams = par("outboundStreams");
+    } else if (stage == INITSTAGE_APPLICATION_LAYER) {
+        // parameters
+        const char *addressesString = par("localAddress");
+        AddressVector addresses = L3AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
+        int32 port = par("localPort");
 
-    socket = new SctpSocket();
-    socket->setOutputGate(gate("socketOut"));
-    socket->setInboundStreams(inboundStreams);
-    socket->setOutboundStreams(outboundStreams);
+        ordered = (bool)par("ordered");
+        lastStream = 0;
 
-    if (addresses.size() == 0)
-        socket->bind(port);
-    else
-        socket->bindx(addresses, port);
-    socket->listen(true, false, par("numPacketsToSendPerClient"));
-    EV << "SctpNatServer::initialized listen port=" << port << "\n";
+        socket = new SctpSocket();
+        socket->setOutputGate(gate("socketOut"));
+        socket->setInboundStreams(inboundStreams);
+        socket->setOutboundStreams(outboundStreams);
 
-    shutdownReceived = false;
+        if (addresses.size() == 0)
+            socket->bind(port);
+        else
+            socket->bindx(addresses, port);
+        socket->listen(true, false, par("numPacketsToSendPerClient"));
+        EV << "SctpNatServer::initialized listen port=" << port << "\n";
+
+        shutdownReceived = false;
+    }
 }
 
 void SctpNatServer::sendInfo(NatInfo *info)
 {
-    NatMessage *msg = new NatMessage("Rendezvous");
-    msg->setKind(SCTP_C_NAT_INFO);
-    msg->setMulti(info->multi);
-    msg->setPeer1(info->peer1);
-    msg->setPeer1AddressesArraySize(2);
-    msg->setPeer1Addresses(0, info->peer1Address1);
-    msg->setPeer1Addresses(1, info->peer1Address2);
-    msg->setPortPeer1(info->peer1Port);
-    msg->setPeer2(info->peer2);
-    msg->setPeer2AddressesArraySize(2);
-    msg->setPeer2Addresses(0, info->peer2Address1);
-    msg->setPeer2Addresses(1, info->peer2Address2);
-    msg->setPortPeer2(info->peer2Port);
-    EV << "Info for peer1: peer1-1=" << msg->getPeer1Addresses(0) << " peer2-1=" << msg->getPeer2Addresses(0) << "\n";
+    uint8_t buffer[100], buffer2[100];
+    int buflen = 16;
+    struct nat_message *nat = (struct nat_message *)(buffer);
+    nat->peer1 = info->peer1;
+    nat->peer2 = info->peer2;
+    nat->portPeer1 = info->peer1Port;
+    nat->portPeer2 = info->peer2Port;
+    nat->numAddrPeer1 = 2;
+    nat->numAddrPeer1 = 2;
+    nat->multi = info->multi;
+    buflen = ADD_PADDING(buflen + 4 * (nat->numAddrPeer1 + nat->numAddrPeer2));
+    nat->peer1Addresses[0] = info->peer1Address1.toIpv4().getInt();
+    nat->peer1Addresses[1] = info->peer1Address2.toIpv4().getInt();
+    nat->peer2Addresses[0] = info->peer2Address1.toIpv4().getInt();
+    nat->peer2Addresses[1] = info->peer2Address2.toIpv4().getInt();
+
+    EV << "Info for peer1: peer1-1=" << Ipv4Address(nat->peer1Addresses[0]).str() << " peer2-1=" << Ipv4Address(nat->peer2Addresses[0]).str() << "\n";
     if (info->multi)
-        EV << " peer1-2=" << msg->getPeer1Addresses(1) << " peer2-2=" << msg->getPeer2Addresses(1) << endl;
-    Packet *cmsg = new Packet(msg->getName());
-    SctpSimpleMessage *smsg = new SctpSimpleMessage();
-    smsg->setEncaps(true);
-    smsg->encapsulate(msg);
-    smsg->setCreationTime(simTime());
-    smsg->setByteLength(16);
-    smsg->setDataLen(16);
-    cmsg->encapsulate(PK(smsg));
-    SctpSendInfo *cmd = new SctpSendInfo();
-    cmd->setSocketId(info->peer1Assoc);
-    cmd->setGate(info->peer1Gate);
-    cmd->setSendUnordered(COMPLETE_MESG_UNORDERED);
-    cmd->setSid(0);
-    cmd->setLast(true);
-    cmsg->setKind(SCTP_C_SEND);
-    cmsg->setControlInfo(cmd);
-    send(cmsg, "socketOut");
+        EV << " peer1-2=" << Ipv4Address(nat->peer1Addresses[1]).str() << " peer2-2=" << Ipv4Address(nat->peer2Addresses[1]).str() << endl;
+
+    auto applicationData = makeShared<BytesChunk>(buffer, buflen);
+    auto applicationPacket = new Packet("ApplicationPacket");
+    applicationPacket->insertAtEnd(applicationData);
+    auto sctpSendReq = applicationPacket->addTagIfAbsent<SctpSendReq>();
+    sctpSendReq->setLast(true);
+    sctpSendReq->setPrMethod(0);
+    sctpSendReq->setPrValue(0);
+    sctpSendReq->setSid(0);
+    auto creationTimeTag = applicationData->addTag<CreationTimeTag>();
+    creationTimeTag->setCreationTime(simTime());
+    applicationPacket->setKind(SCTP_C_SEND_ORDERED);
+    auto& tags = getTags(applicationPacket);
+    tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
+    tags.addTagIfAbsent<SocketReq>()->setSocketId(info->peer1Assoc);
+    send(applicationPacket, "socketOut");
     EV << "info sent to peer1\n";
 
-    cMessage *abortMsg = new cMessage("abortPeer1", SCTP_C_SHUTDOWN);
-    abortMsg->setControlInfo(cmd->dup());
-    send(abortMsg, "socketOut");
+    EV << "SctpNatServer::shutdown peer1\n";
+
+    Request *msg = new Request("SHUTDOWN", SCTP_C_SHUTDOWN);
+    auto& stags = getTags(msg);
+    SctpCommandReq *cmd = stags.addTagIfAbsent<SctpCommandReq>();
+    cmd->setSocketId(info->peer1Assoc);
+    stags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
+    stags.addTagIfAbsent<SocketReq>()->setSocketId(info->peer1Assoc);
+    send(msg, "socketOut");
     EV << "abortMsg sent to peer1\n";
 
-    msg = new NatMessage("Rendezvous");
-    msg->setKind(SCTP_C_NAT_INFO);
-    msg->setMulti(info->multi);
-    msg->setPeer1(info->peer2);
-    msg->setPeer1AddressesArraySize(2);
-    msg->setPeer1Addresses(0, info->peer2Address1);
-    msg->setPeer1Addresses(1, info->peer2Address2);
-    msg->setPortPeer1(info->peer2Port);
-    msg->setPeer2(info->peer1);
-    msg->setPeer2AddressesArraySize(2);
-    msg->setPeer2Addresses(0, info->peer1Address1);
-    msg->setPeer2Addresses(1, info->peer1Address2);
-    msg->setPortPeer2(info->peer1Port);
-    EV << "Info for peer2: peer1-1=" << msg->getPeer1Addresses(0) << " peer2-1=" << msg->getPeer2Addresses(0) << "\n";
-    if (info->multi)
-        EV << " peer1-2=" << msg->getPeer1Addresses(1) << " peer2-2=" << msg->getPeer2Addresses(1) << endl;
-    cmsg = new Packet(msg->getName());
-    smsg = new SctpSimpleMessage();
-    smsg->setEncaps(true);
-    smsg->encapsulate(msg);
-    smsg->setCreationTime(simTime());
-    smsg->setByteLength(16);
-    smsg->setDataLen(16);
-    cmsg->encapsulate(PK(smsg));
-    cmd = new SctpSendInfo();
-    cmd->setSocketId(info->peer2Assoc);
-    cmd->setGate(info->peer2Gate);
-    cmd->setSendUnordered(COMPLETE_MESG_UNORDERED);
-    cmd->setSid(0);
-    cmd->setLast(true);
-    cmsg->setKind(SCTP_C_SEND);
-    cmsg->setControlInfo(cmd);
+
+    struct nat_message *nat2 = (struct nat_message *)(buffer2);
+    buflen = 16;
+    nat2->peer1 = info->peer2;
+    nat2->peer2 = info->peer1;
+    nat2->portPeer1 = info->peer2Port;
+    nat2->portPeer2 = info->peer1Port;
+    nat2->numAddrPeer1 = 2;
+    nat2->numAddrPeer1 = 2;
+    nat2->multi = info->multi;
+    buflen = ADD_PADDING(buflen + 4 * (nat2->numAddrPeer1 + nat2->numAddrPeer2));
+    nat2->peer1Addresses[0] = info->peer2Address1.toIpv4().getInt();
+    nat2->peer1Addresses[1] = info->peer2Address2.toIpv4().getInt();
+    nat2->peer2Addresses[0] = info->peer1Address1.toIpv4().getInt();
+    nat2->peer2Addresses[1] = info->peer1Address2.toIpv4().getInt();
+
+    EV << "Info for peer2: peer1-1=" << Ipv4Address(nat2->peer1Addresses[0]).str() << " peer2-1=" << Ipv4Address(nat2->peer2Addresses[0]).str() << "\n";
+
+    auto applicationData2 = makeShared<BytesChunk>(buffer2, buflen);
+    auto applicationPacket2 = new Packet("ApplicationPacket");
+    applicationPacket2->insertAtEnd(applicationData2);
+    auto sctpSendReq2 = applicationPacket2->addTagIfAbsent<SctpSendReq>();
+    sctpSendReq2->setLast(true);
+    sctpSendReq2->setPrMethod(0);
+    sctpSendReq2->setPrValue(0);
+    sctpSendReq2->setSid(0);
+    auto creationTimeTag2 = applicationData2->addTag<CreationTimeTag>();
+    creationTimeTag2->setCreationTime(simTime());
+    applicationPacket2->setKind(SCTP_C_SEND_ORDERED);
+    auto& tags2 = getTags(applicationPacket2);
+    tags2.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
+    tags2.addTagIfAbsent<SocketReq>()->setSocketId(info->peer2Assoc);
+    send(applicationPacket2, "socketOut");
     EV << "info sent to peer2\n";
-    send(cmsg, "socketOut");
-    abortMsg = new Packet("abortPeer2", SCTP_C_SHUTDOWN);
-    abortMsg->setControlInfo(cmd->dup());
-    send(abortMsg, "socketOut");
+
+    EV << "SctpNatServer::shutdown peer2\n";
+
+    Request *msg2 = new Request("SHUTDOWN", SCTP_C_SHUTDOWN);
+    auto& stags2 = getTags(msg2);
+    SctpCommandReq *cmd2 = stags2.addTagIfAbsent<SctpCommandReq>();
+    cmd2->setSocketId(info->peer2Assoc);
+    stags2.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
+    stags2.addTagIfAbsent<SocketReq>()->setSocketId(info->peer2Assoc);
+    send(msg2, "socketOut");
     EV << "abortMsg sent to peer2\n";
 }
 
 void SctpNatServer::generateAndSend()
 {
-    Packet *cmsg = new Packet("SCTP_C_SEND");
-    SctpSimpleMessage *msg = new SctpSimpleMessage();
-    int numBytes = (int)par("requestLength");
-    msg->setDataArraySize(numBytes);
+    auto cmsg = new Packet("ApplicationPacket");
+    auto msg = makeShared<BytesChunk>();
+    int numBytes = par("requestLength");
+    std::vector<uint8_t> vec;
+    vec.resize(numBytes);
     for (int i = 0; i < numBytes; i++)
-        msg->setData(i, 's');
+        vec[i] = (numBytes + i) & 0xFF;
+    msg->setBytes(vec);
+    cmsg->insertAtEnd(msg);
 
-    msg->setDataLen(numBytes);
-    msg->setEncaps(false);
-    msg->setByteLength(numBytes);
-    cmsg->encapsulate(msg);
-    SctpSendInfo *cmd = new SctpSendInfo("Send1");
+    auto cmd = cmsg->addTagIfAbsent<SctpSendReq>();
     cmd->setSocketId(assocId);
     cmd->setSendUnordered(ordered ? COMPLETE_MESG_ORDERED : COMPLETE_MESG_UNORDERED);
     lastStream = (lastStream + 1) % outboundStreams;
     cmd->setSid(lastStream);
     cmd->setLast(true);
     cmsg->setKind(SCTP_C_SEND);
-    cmsg->setControlInfo(cmd);
     packetsSent++;
-    bytesSent += msg->getByteLength();
+    bytesSent += numBytes;
     send(cmsg, "socketOut");
 }
 
@@ -188,15 +211,19 @@ void SctpNatServer::handleMessage(cMessage *msg)
         switch (msg->getKind()) {
             case SCTP_I_PEER_CLOSED:
             case SCTP_I_ABORT: {
-                SctpCommand *ind = check_and_cast<SctpCommand *>(msg->getControlInfo()->dup());
-                cMessage *cmsg = new cMessage("SCTP_C_ABORT");
-                SctpSendInfo *cmd = new SctpSendInfo();
+                Message *message = check_and_cast<Message *>(msg);
+                assocId = message->getTag<SocketInd>()->getSocketId();
+                auto& indtags = getTags(message);
+                SctpCommandReq *ind = indtags.findTag<SctpCommandReq>();
+
+                Request *cmsg = new Request("SCTP_C_ABORT");
+                auto& tags = getTags(cmsg);
+                SctpSendReq *cmd = tags.addTagIfAbsent<SctpSendReq>();
+
                 id = ind->getSocketId();
                 cmd->setSocketId(id);
                 cmd->setSid(ind->getSid());
                 cmd->setNumMsgs(ind->getNumMsgs());
-                cmsg->setControlInfo(cmd);
-                delete ind;
                 delete msg;
                 cmsg->setKind(SCTP_C_ABORT);
                 send(cmsg, "socketOut");
@@ -204,32 +231,58 @@ void SctpNatServer::handleMessage(cMessage *msg)
             }
 
             case SCTP_I_ESTABLISHED: {
-                SctpConnectInfo *connectInfo = check_and_cast<SctpConnectInfo *>(msg->removeControlInfo());
+                Message *message = check_and_cast<Message *>(msg);
+                auto& tags = getTags(message);
+                SctpConnectReq *connectInfo = tags.findTag<SctpConnectReq>();
                 numSessions++;
                 assocId = connectInfo->getSocketId();
                 id = assocId;
                 inboundStreams = connectInfo->getInboundStreams();
                 outboundStreams = connectInfo->getOutboundStreams();
 
-                delete connectInfo;
                 delete msg;
 
                 break;
             }
 
+            case SCTP_I_AVAILABLE: {
+                EV_DETAIL << "SCTP_I_AVAILABLE arrived at server\n";
+                Message *message = check_and_cast<Message *>(msg);
+                auto& intags = getTags(message);
+                Request *cmsg = new Request("SCTP_C_ACCEPT_SOCKET_ID");
+                auto& outtags = cmsg->getTags();
+                auto availableInfo = outtags.addTagIfAbsent<SctpAvailableReq>();
+                SctpAvailableReq *avInfo = intags.findTag<SctpAvailableReq>();
+                int newSockId = avInfo->getNewSocketId();
+                EV_DETAIL << "new socket id = " << newSockId << endl;
+                availableInfo->setSocketId(newSockId);
+                cmsg->setKind(SCTP_C_ACCEPT_SOCKET_ID);
+                cmsg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
+                cmsg->addTagIfAbsent<SocketReq>()->setSocketId(newSockId);
+                EV_INFO << "Sending accept socket id request ..." << endl;
+
+                send(cmsg, "socketOut");
+                delete msg;
+                break;
+            }
+
             case SCTP_I_DATA_NOTIFICATION: {
+                EV_DETAIL << "SCTP_I_DATA_NOTIFICATION arrived at server\n";
                 notifications++;
-                SctpCommand *ind = check_and_cast<SctpCommand *>(msg->removeControlInfo());
-                cMessage *cmsg = new cMessage("SCTP_C_RECEIVE");
-                SctpSendInfo *cmd = new SctpSendInfo();
+                Message *message = check_and_cast<Message *>(msg);
+                auto& intags = getTags(message);
+                SctpCommandReq *ind = intags.findTag<SctpCommandReq>();
+                Request *cmsg = new Request("ReceiveRequest");
+                auto& outtags = getTags(cmsg);
+                auto cmd = outtags.addTagIfAbsent<SctpSendReq>();
                 id = ind->getSocketId();
                 cmd->setSocketId(id);
                 cmd->setSid(ind->getSid());
                 cmd->setNumMsgs(ind->getNumMsgs());
                 cmsg->setKind(SCTP_C_RECEIVE);
-                cmsg->setControlInfo(cmd);
-                delete ind;
                 delete msg;
+                outtags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
+                outtags.addTagIfAbsent<SocketReq>()->setSocketId(id);
                 send(cmsg, "socketOut");
                 break;
             }
@@ -237,27 +290,35 @@ void SctpNatServer::handleMessage(cMessage *msg)
             case SCTP_I_DATA: {
                 EV << "\nData arrived at server: assoc=" << assocId << "\n";
                 printNatVector();
-                SctpCommand *ind = check_and_cast<SctpCommand *>(msg->removeControlInfo());
+                Packet *message = check_and_cast<Packet *>(msg);
+                auto& tags = getTags(message);
+                SctpRcvReq *ind = tags.findTag<SctpRcvReq>();
                 id = ind->getSocketId();
-                SctpSimpleMessage *smsg = check_and_cast<SctpSimpleMessage *>(msg);
-                NatMessage *nat = check_and_cast<NatMessage *>(smsg->decapsulate());
+                const auto& smsg = staticPtrCast<const BytesChunk>(message->peekData());
+                int bufferlen = B(smsg->getChunkLength()).get();
+                uint8_t buffer[bufferlen];
+                std::vector<uint8_t> vec = smsg->getBytes();
+                for (unsigned int i = 0; i < bufferlen; i++) {
+                    buffer[i] = vec[i];
+                }
+                struct nat_message *nat = (struct nat_message *) buffer;
                 bool found = false;
                 if (natVector.size() > 0) {
                     for (auto & elem : natVector) {
-                        if ((elem)->peer1 == nat->getPeer1() || (elem)->peer1Assoc == assocId) {
-                            EV << "found entry: info: Peer1 = " << nat->getPeer1() << "  peer1Address1=" << nat->getPeer1Addresses(0) << " peer2=" << nat->getPeer2() << " peer2Address1=" << nat->getPeer2Addresses(0) << "\n";
-                            if (nat->getMulti() && nat->getPeer1AddressesArraySize() > 1 && nat->getPeer2AddressesArraySize() > 1) {
-                                EV << " peer1Address2=" << nat->getPeer1Addresses(1) << " peer2Address2=" << nat->getPeer2Addresses(1) << endl;
+                        if ((elem)->peer1 == nat->peer1 || (elem)->peer1Assoc == assocId) {
+                            EV << "found entry: info: Peer1 = " << nat->peer1 << "  peer1Address1=" << nat->peer1Addresses[0] << " peer2=" << nat->peer2 << " peer2Address1=" << nat->peer2Addresses[0] << "\n";
+                            if (nat->multi && nat->numAddrPeer1 > 1 && nat->numAddrPeer2 > 1) {
+                                EV << " peer1Address2=" << Ipv4Address(nat->peer1Addresses[1]).str() << " peer2Address2=" << Ipv4Address(nat->peer2Addresses[1]).str() << endl;
                             }
                             if ((elem)->peer1 == 0 && !(elem)->peer1Address2.isUnspecified()) {
-                                (elem)->peer1 = nat->getPeer1();
+                                (elem)->peer1 = nat->peer1;
                                 (elem)->peer1Address1 = ind->getRemoteAddr();
-                                (elem)->peer1Port = nat->getPortPeer1();
+                                (elem)->peer1Port = nat->portPeer1;
                                 if ((elem)->peer2 == 0) {
-                                    (elem)->peer2 = nat->getPeer2();
+                                    (elem)->peer2 = nat->peer2;
                                 }
                             }
-                            if (nat->getMulti() && (elem)->peer1Address2.isUnspecified()) {
+                            if (nat->multi && (elem)->peer1Address2.isUnspecified()) {
                                 (elem)->peer1Address2 = ind->getRemoteAddr();
                             }
                             if (!(elem)->peer2Address1.isUnspecified() && !(elem)->peer1Address1.isUnspecified()) {
@@ -269,23 +330,23 @@ void SctpNatServer::handleMessage(cMessage *msg)
                             found = true;
                             break;
                         }
-                        if ((elem)->peer2 == nat->getPeer1() || (elem)->peer2Assoc == assocId) {
-                            EV << "opposite way:  info: Peer1 = " << nat->getPeer1() << "  peer1Address1=" << nat->getPeer1Addresses(0) << " peer2=" << nat->getPeer2() << " peer2Address1=" << nat->getPeer2Addresses(0) << "\n";
-                            if (nat->getMulti() && nat->getPeer1AddressesArraySize() > 1 && nat->getPeer2AddressesArraySize() > 1) {
-                                EV << " peer1Address2=" << nat->getPeer1Addresses(1) << " peer2Address2=" << nat->getPeer2Addresses(1) << endl;
+                        if ((elem)->peer2 == nat->peer1 || (elem)->peer2Assoc == assocId) {
+                            EV << "opposite way:  info: Peer1 = " << nat->peer1 << "  peer1Address1=" << Ipv4Address(nat->peer1Addresses[0]).str() << " peer2=" << nat->peer2 << " peer2Address1=" << Ipv4Address(nat->peer2Addresses[0]).str() << "\n";
+                            if (nat->multi && nat->numAddrPeer1 > 1 && nat->numAddrPeer2 > 1) {
+                                EV << " peer1Address2=" << Ipv4Address(nat->peer1Addresses[1]).str() << " peer2Address2=" << Ipv4Address(nat->peer2Addresses[1]).str() << endl;
                             }
                             if ((elem)->peer2 == 0) {
-                                (elem)->peer2 = nat->getPeer1();
+                                (elem)->peer2 = nat->peer1;
                             }
                             if ((elem)->peer1 == 0) {
-                                (elem)->peer1 = nat->getPeer2();
+                                (elem)->peer1 = nat->peer2;
                             }
                             if ((elem)->peer2Address1.isUnspecified()) {
                                 (elem)->peer2Address1 = ind->getRemoteAddr();
                                 (elem)->peer2Assoc = assocId;
-                                (elem)->peer2Port = nat->getPortPeer1();
+                                (elem)->peer2Port = nat->portPeer1;
                                 (elem)->peer2Gate = ind->getGate();
-                                EV << "set peer2Address1=" << ind->getRemoteAddr() << " peer2Assoc=" << assocId << " peer2Port=" << nat->getPortPeer1() << "\n";
+                                EV << "set peer2Address1=" << ind->getRemoteAddr() << " peer2Assoc=" << assocId << " peer2Port=" << nat->portPeer1 << "\n";
                             }
                             else if ((elem)->multi && !(elem)->peer2Address2.isUnspecified())
                                 (elem)->peer2Address2 = ind->getRemoteAddr();
@@ -293,7 +354,7 @@ void SctpNatServer::handleMessage(cMessage *msg)
                             if (!(elem)->multi || ((elem)->multi && !(elem)->peer2Address2.isUnspecified() && !(elem)->peer1Address2.isUnspecified()
                                                   && !(elem)->peer2Address1.isUnspecified() && !(elem)->peer1Address1.isUnspecified()))
                             {
-                                EV << "entry now: Peer1=" << (elem)->peer1 << " Peer2=" << (elem)->peer2 << " peer1Address1=" << (elem)->peer1Address1 << " peer1Address2=" << (elem)->peer1Address2 << " peer2Address1=" << (elem)->peer2Address1 << " peer2Address2=" << (elem)->peer2Address2 << " peer1Port=" << (elem)->peer1Port << "peer2Port=" << (elem)->peer2Port << "\n";
+                                EV << "entry now: Peer1=" << (elem)->peer1 << " Peer2=" << (elem)->peer2 << " peer1Address1=" << (elem)->peer1Address1 << " peer1Address2=" << (elem)->peer1Address2 << " peer2Address1=" << (elem)->peer2Address1 << " peer2Address2=" << (elem)->peer2Address2 << " peer1Port=" << (elem)->peer1Port << " peer2Port=" << (elem)->peer2Port << "\n";
                                 sendInfo((elem));
                             }
                             found = true;
@@ -304,19 +365,19 @@ void SctpNatServer::handleMessage(cMessage *msg)
                 if (natVector.size() == 0 || !found) {
                     EV << "make new Info for ";
                     NatInfo *info = new NatInfo();
-                    info->peer1 = nat->getPeer1();
+                    info->peer1 = nat->peer1;
                     EV << info->peer1 << " and assoc " << assocId << "\n";
                     ;
-                    info->multi = nat->getMulti();
+                    info->multi = nat->multi;
                     info->peer1Address1 = ind->getRemoteAddr();
                     if (info->multi) {
                         info->peer1Address2 = L3Address();
                         info->peer2Address2 = L3Address();
                     }
-                    info->peer1Port = nat->getPortPeer1();
+                    info->peer1Port = nat->portPeer1;
                     info->peer1Assoc = assocId;
                     info->peer1Gate = ind->getGate();
-                    info->peer2 = nat->getPeer2();
+                    info->peer2 = nat->peer2;
                     info->peer2Address1 = L3Address();
                     info->peer2Port = 0;
                     info->peer2Assoc = 0;
@@ -326,26 +387,23 @@ void SctpNatServer::handleMessage(cMessage *msg)
                 }
                 EV << "\n";
                 printNatVector();
-                delete nat;
 
                 delete msg;
-
-                delete ind;
                 break;
             }
 
             case SCTP_I_SHUTDOWN_RECEIVED: {
-                SctpCommand *command = check_and_cast<SctpCommand *>(msg->removeControlInfo());
-                id = command->getSocketId();
+                Message *message = check_and_cast<Message *>(msg);
+                id = message->getTag<SocketInd>()->getSocketId();
                 EV << "server: SCTP_I_SHUTDOWN_RECEIVED for assoc " << id << "\n";
-                cMessage *cmsg = new cMessage("SCTP_C_NO_OUTSTANDING");
-                SctpInfo *qinfo = new SctpInfo("Info");
+                Request *cmsg = new Request("SCTP_C_NO_OUTSTANDING");
+                auto& tags = getTags(cmsg);
+                SctpCommandReq *qinfo = tags.addTagIfAbsent<SctpCommandReq>();
                 cmsg->setKind(SCTP_C_NO_OUTSTANDING);
                 qinfo->setSocketId(id);
-                cmsg->setControlInfo(qinfo);
                 send(cmsg, "socketOut");
 
-                delete command;
+               // delete command;
                 shutdownReceived = true;
                 delete msg;
                 break;
@@ -363,7 +421,9 @@ void SctpNatServer::handleMessage(cMessage *msg)
                 break;
 
             case SCTP_I_ADDRESS_ADDED: {
-                SctpCommand *ind = check_and_cast<SctpCommand *>(msg->removeControlInfo());
+                Message *message = check_and_cast<Message *>(msg);
+                auto& intags = getTags(message);
+                SctpCommandReq *ind = intags.findTag<SctpCommandReq>();
                 bool found = false;
                 printNatVector();
                 EV << " address added: LOCAL=" << ind->getLocalAddr() << ", remote=" << ind->getRemoteAddr() << " assoc=" << assocId << "\n";
@@ -428,7 +488,6 @@ void SctpNatServer::handleMessage(cMessage *msg)
                     natVector.push_back(info);
                     EV << "Info: peer1=" << info->peer1 << " peer1Address1=" << info->peer1Address1 << " peer1Address2=" << info->peer1Address2 << " peer1Assoc=" << info->peer1Assoc << "\n peer2=" << info->peer1 << " peer2Address1=" << info->peer2Address1 << " peer2Address2=" << info->peer2Address2 << " peer2Assoc=" << info->peer2Assoc << "\n";
                 }
-                delete ind;
                 delete msg;
                 printNatVector();
                 break;
@@ -436,16 +495,15 @@ void SctpNatServer::handleMessage(cMessage *msg)
 
             default:
                 EV << "Message type " << SctpAssociation::indicationName(msg->getKind()) << " not implemented\n";
+                delete msg;
         }
     }
 }
 
 void SctpNatServer::handleTimer(cMessage *msg)
 {
-    cMessage *cmsg;
     int32 id;
 
-    SctpConnectInfo *connectInfo = dynamic_cast<SctpConnectInfo *>(msg->getControlInfo());
     switch (msg->getKind()) {
         case SCTP_C_SEND:
             if (numRequestsToSend > 0) {
@@ -455,11 +513,11 @@ void SctpNatServer::handleTimer(cMessage *msg)
             break;
 
         case SCTP_I_ABORT: {
-            cmsg = new cMessage("SCTP_C_CLOSE", SCTP_C_CLOSE);
-            SctpCommand *cmd = new SctpCommand();
+            Request *cmsg = new Request("SCTP_C_CLOSE", SCTP_C_CLOSE);
+            auto& tags = getTags(cmsg);
+            SctpCommandReq *cmd = tags.addTagIfAbsent<SctpCommandReq>();
             id = atoi(msg->getName());
             cmd->setSocketId(id);
-            cmsg->setControlInfo(cmd);
             send(cmsg, "socketOut");
             break;
         }
@@ -471,7 +529,6 @@ void SctpNatServer::handleTimer(cMessage *msg)
         default:
             break;
     }
-    delete connectInfo;
 }
 
 void SctpNatServer::printNatVector(void)
@@ -490,6 +547,6 @@ void SctpNatServer::finish()
     EV << getFullPath() << "Over all " << packetsRcvd << " packets received\n ";
     EV << getFullPath() << "Over all " << notifications << " notifications received\n ";
 }
-#endif
+
 } // namespace inet
 

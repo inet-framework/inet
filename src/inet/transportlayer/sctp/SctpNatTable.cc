@@ -30,7 +30,7 @@
 namespace inet {
 
 namespace sctp {
-#if 0
+
 uint32 SctpNatTable::nextEntryNumber = 0;
 
 Define_Module(SctpNatTable);
@@ -133,7 +133,7 @@ void SctpNatTable::removeEntry(SctpNatEntry *entry)
 void SctpNatTable::printNatTable()
 {
     for (auto & elem : natEntries) {
-        EV << "localAddr:" << (elem)->getLocalAddress() << "  globalAddr:" << (elem)->getGlobalAddress() << "  localPort:" << (elem)->getLocalPort() << "  globalPort:" << (elem)->getGlobalPort() << "  nattedAddr:" << (elem)->getNattedAddress() << "  nattedPort:" << (elem)->getNattedPort() << "  localVtag:" << (elem)->getLocalVTag() << "  globalVtag:" << (elem)->getGlobalVTag() << "\n";
+        EV_INFO << "localAddr:" << (elem)->getLocalAddress() << "  globalAddr:" << (elem)->getGlobalAddress() << "  localPort:" << (elem)->getLocalPort() << "  globalPort:" << (elem)->getGlobalPort() << "  nattedAddr:" << (elem)->getNattedAddress() << "  nattedPort:" << (elem)->getNattedPort() << "  localVtag:" << (elem)->getLocalVTag() << "  globalVtag:" << (elem)->getGlobalVTag() << "\n";
     }
 }
 
@@ -153,7 +153,7 @@ SctpNatEntry::SctpNatEntry()
 SctpNatEntry::~SctpNatEntry()
 {
 }
-#endif
+
 } // namespace sctp
 
 } // namespace inet

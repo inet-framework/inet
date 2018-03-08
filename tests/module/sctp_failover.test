@@ -1,7 +1,7 @@
 %description:
-Testing SCTP failover: Client and server are multi-homed. When the connection to the server is lost, 
+Testing SCTP failover: Client and server are multi-homed. When the connection to the server is lost,
 the client will retransmit the data and finally switch to the second path. Thus there will be timer-based
-retransmissions, but still the expected amount of data. 
+retransmissions, but still the expected amount of data.
 %#--------------------------------------------------------------------------------------------------------------
 
 
@@ -32,11 +32,8 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 # sctp apps
 **.sctp_client.numApps = 1
-**.sctp_client.sctpType="Sctp"
 **.sctp_client.app[0].typename = "SctpClient"
-
 **.sctp_client.app[*].localAddress = "10.1.1.1 10.2.1.1"
-
 **.sctp_client.app[0].localAddress = "10.1.1.1 10.2.1.1"
 **.sctp_client.app[0].connectAddress = "10.1.3.1"
 **.sctp_client.app[0].primaryPath = "10.1.3.1"
@@ -48,7 +45,6 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.sctp_client.app[0].queueSize = 0
 
 **.sctp_server.numApps = 1
-**.sctp_server.sctpType="Sctp"
 **.sctp_server.app[0].typename = "SctpServer"
 **.sctp_server.app[*].localAddress = "10.1.3.1 10.2.3.1"
 **.sctp_server.app[0].localPort = 6666

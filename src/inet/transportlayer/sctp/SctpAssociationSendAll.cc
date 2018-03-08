@@ -62,19 +62,19 @@ void SctpAssociation::storePacket(SctpPathVariables *pathVar,
     uint32 packetBytes = 0;
     for (uint16 i = 0; i < sctpMsg->getSctpChunksArraySize(); i++) {
         const SctpChunk *chunkPtr = sctpMsg->getSctpChunks(i);
-        //SctpDataChunk* dataChunk = dynamic_cast<SctpDataChunk*>(chunkPtr);
-        SctpDataChunk* dataChunk = (SctpDataChunk*)(chunkPtr);
-        if(dataChunk != nullptr) {
-            const uint32_t tsn = dataChunk->getTsn();
-            SctpDataVariables* chunk = retransmissionQ->payloadQueue.find(tsn)->second;
-            assert(chunk != nullptr);
-            decreaseOutstandingBytes(chunk);
-            chunk->queuedOnPath->queuedBytes -= chunk->booksize;
-            chunk->queuedOnPath = nullptr;
-            packetBytes += chunk->booksize;
+        if (chunkPtr->getSctpChunkType() == 0) {
+            SctpDataChunk* dataChunk = (SctpDataChunk*)(chunkPtr);
+            if(dataChunk != nullptr) {
+                const uint32_t tsn = dataChunk->getTsn();
+                SctpDataVariables* chunk = retransmissionQ->payloadQueue.find(tsn)->second;
+                assert(chunk != nullptr);
+                decreaseOutstandingBytes(chunk);
+                chunk->queuedOnPath->queuedBytes -= chunk->booksize;
+                chunk->queuedOnPath = nullptr;
+                packetBytes += chunk->booksize;
+            }
         }
     }
-
     state->sctpMsg = sctpMsg->dup();
     state->chunksAdded = chunksAdded;
     state->dataChunksAdded = dataChunksAdded;
@@ -113,17 +113,18 @@ void SctpAssociation::loadPacket(SctpPathVariables *pathVar,
 
     for (uint16 i = 0; i < (*sctpMsg)->getSctpChunksArraySize(); i++) {
         const SctpChunk *chunkPtr = (*sctpMsg)->getSctpChunks(i);
-       // SctpDataChunk* dataChunk = dynamic_cast<SctpDataChunk*>(chunkPtr);
-        SctpDataChunk* dataChunk = (SctpDataChunk*)(chunkPtr);
-        if(dataChunk != nullptr) {
-            const uint32_t tsn = dataChunk->getTsn();
-            SctpDataVariables* chunk = retransmissionQ->payloadQueue.find(tsn)->second;
-            assert(chunk != nullptr);
-            chunk->queuedOnPath = pathVar;
-            chunk->queuedOnPath->queuedBytes += chunk->booksize;
-            chunk->setLastDestination(pathVar);
-            increaseOutstandingBytes(chunk, pathVar);
-            chunk->countsAsOutstanding = true;
+        if (chunkPtr->getSctpChunkType() == 0) {
+            SctpDataChunk* dataChunk = (SctpDataChunk*)(chunkPtr);
+            if(dataChunk != nullptr) {
+                const uint32_t tsn = dataChunk->getTsn();
+                SctpDataVariables* chunk = retransmissionQ->payloadQueue.find(tsn)->second;
+                assert(chunk != nullptr);
+                chunk->queuedOnPath = pathVar;
+                chunk->queuedOnPath->queuedBytes += chunk->booksize;
+                chunk->setLastDestination(pathVar);
+                increaseOutstandingBytes(chunk, pathVar);
+                chunk->countsAsOutstanding = true;
+            }
         }
     }
 }
@@ -977,7 +978,7 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
                                         path->pmtu - B(sctpMsg->getChunkLength()).get() + sackChunk->getByteLength() - 20,
                                         (bytes.packet == true) ? path->pmtu : allowance);
                             if (!sackOnly) {
-                                sctpMsg->removeChunk();
+                                sctpMsg->removeFirstChunk();
                                 EV_DETAIL << "RTX: Remove SACK chunk\n";
                                 delete sackChunk;
                                 chunksAdded--;
@@ -1112,8 +1113,8 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
                                 datMsg = dequeueOutboundDataMsg(path, path->pmtu - B(sctpMsg->getChunkLength()).get() + sackChunk->getByteLength() - 20,
                                             allowance);
                                 if (!sackOnly) {
-                                    sctpMsg->removeChunk();
-                                    EV_DETAIL << assocId << ": delete SACK chunk to make room for datMsg (" << &datMsg << "). scount=" << scount << "\n";
+                                    sctpMsg->removeFirstChunk();
+                                    EV_INFO << assocId << ": delete SACK chunk to make room for datMsg (" << &datMsg << "). scount=" << scount << "\n";
                                     delete sackChunk;
                                     chunksAdded--;
                                     sackAdded = false;

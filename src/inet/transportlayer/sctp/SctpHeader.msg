@@ -20,6 +20,7 @@ import inet.common.INETDefs;
 import inet.networklayer.common.L3Address;
 import inet.transportlayer.contract.TransportHeaderBase;
 import inet.transportlayer.common.CRC;
+import inet.common.packet.Message;
 
 namespace inet::sctp;
 
@@ -372,7 +373,7 @@ class SctpSuccessIndication extends SctpParameter
     uint32 responseCorrelationId;
 }
 
-class NatMessage extends FieldsChunk
+class NatMessage extends cMessage
 {
     bool        multi;
     uint16      peer1;

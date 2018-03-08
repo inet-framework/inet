@@ -33,6 +33,7 @@
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/common/serializer/TcpIpChecksum.h"
 #include "inet/networklayer/common/L3Tools.h"
+#include "inet/transportlayer/common/L4Tools.h"
 
 namespace inet {
 
@@ -474,7 +475,7 @@ Packet* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direct
         sctpmsg->insertSctpChunks(chunk->getChunk());
     }
 
-    packet->insertHeader(sctpmsg);
+    insertTransportProtocolHeader(packet, Protocol::sctp, sctpmsg);
     auto ipHeader = PacketDrill::makeIpv4Header(IP_PROT_SCTP, direction, app->getLocalAddress(),
             app->getRemoteAddress());
     ipHeader->setTotalLengthField(ipHeader->getTotalLengthField() + packet->getByteLength());

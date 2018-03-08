@@ -17,15 +17,32 @@
 #include "inet/transportlayer/sctp/SctpAssociation.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
 #include "inet/transportlayer/contract/sctp/SctpSocket.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
 
 namespace inet {
-#if 0
+
+struct nat_message
+{
+
+    uint16      multi;
+    uint16      reserved = 0;
+    uint16      peer1;
+    uint16      peer2;
+    uint16      portPeer1;
+    uint16      portPeer2;
+    uint16      numAddrPeer1;
+    uint16      numAddrPeer2;
+    uint32_t    peer1Addresses[0];
+    uint32_t    peer2Addresses[0];
+};
+
 /**
  * Accepts any number of incoming connections, and sends back whatever
  * arrives on them.
  */
 
-class INET_API SctpNatPeer : public cSimpleModule, public SctpSocket::CallbackInterface
+class INET_API SctpNatPeer : public cSimpleModule, public SctpSocket::CallbackInterface, public ILifecycle
 {
   protected:
     //SctpAssociation* assoc;
@@ -89,7 +106,8 @@ class INET_API SctpNatPeer : public cSimpleModule, public SctpSocket::CallbackIn
     typedef std::map<L3Address, pathStatus> SctpPathStatus;
     SctpPathStatus sctpPathStatus;
     //virtual void socketStatusArrived(int32 assocId, void *yourPtr, SctpStatusInfo *status);
-    void initialize() override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    void initialize(int stage) override;
     void handleMessage(cMessage *msg) override;
     void finish() override;
     void handleTimer(cMessage *msg);
@@ -108,7 +126,7 @@ class INET_API SctpNatPeer : public cSimpleModule, public SctpSocket::CallbackIn
      */
     void socketDataArrived(int32 connId, void *yourPtr, Packet *msg, bool urgent) override;
 
-    void socketDataNotificationArrived(int32 connId, void *yourPtr, Packet *msg) override;
+    void socketDataNotificationArrived(int connId, void *yourPtr, Message *msg) override;
     /** Since remote SCTP closed, invokes close(). Redefine if you want to do something else. */
     void socketPeerClosed(int32 connId, void *yourPtr) override;
 
@@ -119,7 +137,7 @@ class INET_API SctpNatPeer : public cSimpleModule, public SctpSocket::CallbackIn
     void socketFailure(int32 connId, void *yourPtr, int32 code) override;
 
     /** Redefine to handle incoming SctpStatusInfo. */
-    void socketStatusArrived(int32 connId, void *yourPtr, SctpStatusInfo *status) override;
+    void socketStatusArrived(int connId, void *yourPtr, SctpStatusReq *status) override;
     //@}
     void msgAbandonedArrived(int32 assocId) override;
     //void setAssociation(SctpAssociation *_assoc) {assoc = _assoc;};
@@ -132,8 +150,11 @@ class INET_API SctpNatPeer : public cSimpleModule, public SctpSocket::CallbackIn
     void sendqueueFullArrived(int32 connId) override;
     void addressAddedArrived(int32 assocId, L3Address localAddr, L3Address remoteAddr) override;
     void setStatusString(const char *s);
+
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override
+    { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 };
-#endif
+
 } // namespace inet
 
 #endif // ifndef __INET_SCTPNATPEER_H

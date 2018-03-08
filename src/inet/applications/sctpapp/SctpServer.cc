@@ -32,6 +32,7 @@
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/TimeTag_m.h"
+#include "inet/common/packet/Message.h"
 
 namespace inet {
 
@@ -120,40 +121,46 @@ void SctpServer::sendOrSchedule(Message *msg)
         scheduleAt(simTime() + delay, msg);
 }
 
+void SctpServer::sendOrSchedule(Packet *pkt)
+{
+    pkt->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
+    pkt->addTagIfAbsent<SocketReq>()->setSocketId(assocId);
+    if (delay == 0)
+        send(pkt, "socketOut");
+    else
+        scheduleAt(simTime() + delay, pkt);
+}
+
 void SctpServer::generateAndSend()
 {
-   std::cout << "************* To Do *****************\n";
-   /* Packet *cmsg = new Packet("SCTP_C_SEND");
-    const auto& msg = makeShared<BytesChunk>();
+    auto applicationPacket = new Packet("ApplicationPacket");
+    auto applicationData = makeShared<BytesChunk>();
     int numBytes = par("requestLength");
     std::vector<uint8_t> vec;
     vec.resize(numBytes);
     for (int i = 0; i < numBytes; i++)
-        vec[i] = (numBytes + i) & 0xFF;
-    msg->setBytes(vec);*/
-
-   // msg->setEncaps(false);
-  /*  Ptr<Chunk> payload = makeShared<ByteCountChunk>(B(numBytes));
-    payload = msg;
-    cmsg->insertAtEnd(payload);
-    SctpSendInfo *cmd = new SctpSendInfo("Send1");
-    cmd->setSocketId(assocId);
-    cmd->setSendUnordered(ordered ? COMPLETE_MESG_ORDERED : COMPLETE_MESG_UNORDERED);
-    lastStream = (lastStream + 1) % outboundStreams;
-    cmd->setSid(lastStream);
-    cmd->setPrValue(par("prValue"));
-    cmd->setPrMethod(par("prMethod"));
-
+        vec[i] = (bytesSent + i) & 0xFF;
+    applicationData->setBytes(vec);
+    applicationPacket->insertAtEnd(applicationData);
+    auto sctpSendReq = applicationPacket->addTagIfAbsent<SctpSendReq>();
     if (queueSize > 0 && numRequestsToSend > 0 && count < queueSize * 2)
-        cmd->setLast(false);
+        sctpSendReq->setLast(false);
     else
-        cmd->setLast(true);
-
-    cmsg->setKind(SCTP_C_SEND);
-    cmsg->setControlInfo(cmd);
+        sctpSendReq->setLast(true);
+    sctpSendReq->setPrMethod(par("prMethod"));
+    sctpSendReq->setPrValue(par("prValue"));
+    lastStream = (lastStream + 1) % outboundStreams;
+    sctpSendReq->setSid(lastStream);
+    sctpSendReq->setSocketId(assocId);
+    auto creationTimeTag = applicationData->addTag<CreationTimeTag>();
+    creationTimeTag->setCreationTime(simTime());
+    applicationPacket->setKind(ordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);
+    auto& tags = getTags(applicationPacket);
+    tags.addTagIfAbsent<SocketReq>()->setSocketId(assocId);
+    tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
+    bytesSent += numBytes;
     packetsSent++;
-    bytesSent += B(msg->getChunkLength()).get();
-    sendOrSchedule(cmsg);*/
+    sendOrSchedule(applicationPacket);
 }
 
 Message *SctpServer::makeReceiveRequest(cMessage *msg)
@@ -174,13 +181,12 @@ Message *SctpServer::makeReceiveRequest(cMessage *msg)
 Message *SctpServer::makeDefaultReceive()
 {
     Request *cmsg = new Request("DefaultReceive");
-    std::cout << "**************ToDo: ****\n";
-   /* SctpSendInfo *cmd = new SctpSendInfo("Send3");
+    auto& tags = getTags(cmsg);
+    SctpCommandReq *cmd = tags.addTagIfAbsent<SctpCommandReq>();
     cmd->setSocketId(assocId);
     cmd->setSid(0);
     cmd->setNumMsgs(1);
     cmsg->setKind(SCTP_C_RECEIVE);
-    cmsg->setControlInfo(cmd);*/
     return cmsg;
 }
 
@@ -232,6 +238,7 @@ void SctpServer::handleMessage(cMessage *msg)
                     cancelEvent(delayTimer);
                 if (delayFirstReadTimer->isScheduled())
                     cancelEvent(delayFirstReadTimer);
+                delete msg;
                 break;
             }
             case SCTP_I_AVAILABLE: {
@@ -243,13 +250,13 @@ void SctpServer::handleMessage(cMessage *msg)
                 auto availableInfo = outtags.addTagIfAbsent<SctpAvailableReq>();
                 SctpAvailableReq *avInfo = intags.findTag<SctpAvailableReq>();
                 int newSockId = avInfo->getNewSocketId();
-                std::cout << "new socket id = " << newSockId << endl;
+                EV_INFO << "new socket id = " << newSockId << endl;
                 availableInfo->setSocketId(newSockId);
                 cmsg->setKind(SCTP_C_ACCEPT_SOCKET_ID);
                 cmsg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
                 cmsg->addTagIfAbsent<SocketReq>()->setSocketId(newSockId);
                 EV_INFO << "Sending accept socket id request ..." << endl;
-
+                delete msg;
                 send(cmsg, "socketOut");
                 break;
             }
@@ -409,27 +416,25 @@ void SctpServer::handleMessage(cMessage *msg)
                     }
                 }
                 else {
-                std::cout << "****************To Do **************\n";
-                /*    SctpSendInfo *cmd = new SctpSendInfo("SCTP_C_SEND");
-                    cmd->setSocketId(id);
-                    SctpSimpleMessage *smsg = check_and_cast<SctpSimpleMessage *>(msg);
-                    auto n = endToEndDelay.find(id);
-                    n->second->record(simTime() - smsg->getCreationTime());
-                    Packet *cmsg = new Packet("SCTP_C_SEND");
-                    bytesSent += smsg->getByteLength();
-                    cmd->setSendUnordered(cmd->getSendUnordered());
+                    auto m = endToEndDelay.find(id);
+                    const auto& smsg = staticPtrCast<const BytesChunk>(message->peekData());
+                    auto creationTimeTag = smsg->findTag<CreationTimeTag>();
+                    m->second->record(simTime() - creationTimeTag->getCreationTime());
+                    creationTimeTag->setCreationTime(simTime());
+                    auto cmsg = new Packet("ApplicationPacket");
+                    cmsg->insertAtEnd(smsg);
+                    auto cmd = cmsg->addTagIfAbsent<SctpSendReq>();
                     lastStream = (lastStream + 1) % outboundStreams;
+                    cmd->setLast(true);
+                    cmd->setSocketId(id);
                     cmd->setPrValue(0);
                     cmd->setSid(lastStream);
-                    cmd->setLast(true);
-                   // cmsg->insertAtEnd(smsg);
-                    cmsg->encapsulate(smsg);
-                    cmsg->setKind(SCTP_C_SEND);
-                    cmsg->setControlInfo(cmd);
+                    cmsg->setKind(cmd->getSendUnordered() ? SCTP_C_SEND_UNORDERED : SCTP_C_SEND_ORDERED);
+                    bytesSent += B(smsg->getChunkLength()).get();
                     packetsSent++;
-                    sendOrSchedule(cmsg);*/
+                    sendOrSchedule(cmsg);
                 }
-                delete ind;
+                delete msg;
                 break;
             }
 
@@ -449,6 +454,7 @@ void SctpServer::handleMessage(cMessage *msg)
                     i->second.lifeTime = i->second.stop - i->second.start;
                 }
                 shutdownReceived = true;
+                delete msg;
                 break;
             }
 
@@ -470,10 +476,12 @@ void SctpServer::handleMessage(cMessage *msg)
                     cancelEvent(delayTimer);
                 if (finishEndsSimulation)
                     endSimulation();
+                delete msg;
                 break;
             }
 
             default:
+                delete msg;
                 break;
         }
     }
@@ -482,14 +490,14 @@ void SctpServer::handleMessage(cMessage *msg)
 void SctpServer::handleTimer(cMessage *msg)
 {
     if (msg == delayTimer) {
-        EV_INFO << simTime() << " delayTimer expired\n";
-        sendOrSchedule(makeDefaultReceive());
-        scheduleAt(simTime() + par("readingInterval"), delayTimer);
+        if (delayFirstRead == 0) {
+            sendOrSchedule(makeDefaultReceive());
+            scheduleAt(simTime() + par("readingInterval"), delayTimer);
+        }
         return;
     }
     else if (msg == delayFirstReadTimer) {
         delayFirstRead = 0;
-
         if (readInt && !delayTimer->isScheduled()) {
             double tempInterval = par("readingInterval");
             scheduleAt(simTime() + (simtime_t)tempInterval, delayTimer);
