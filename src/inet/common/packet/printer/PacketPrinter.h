@@ -37,12 +37,15 @@ class INET_API PacketPrinter : public cMessagePrinter
 {
   protected:
     virtual bool isEnabledOption(const Options *options, const char *name) const;
+    virtual bool isEnabledInfo(const Options *options, const Protocol *protocol) const;
     virtual const ProtocolPrinter& getProtocolPrinter(const Protocol *protocol) const;
     virtual void printContext(std::ostream& stream, const Options *options, PacketPrinterContext& context) const;
     virtual void printSignal(inet::physicallayer::Signal *signal, const Options *options, PacketPrinterContext& context) const;
     virtual void printPacket(Packet *packet, const Options *options, PacketPrinterContext& context) const;
     virtual void printPacketInsideOut(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, const Options *options, PacketPrinterContext& context) const;
     virtual void printPacketLeftToRight(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, const Options *options, PacketPrinterContext& context) const;
+    virtual void printSourceColumn(const std::string source, const Options *options, PacketPrinterContext& context) const;
+    virtual void printDestinationColumn(const std::string destination, const Options *options, PacketPrinterContext& context) const;
     virtual void printProtocolColumn(const Protocol *protocol, const Options *options, PacketPrinterContext& context) const;
     virtual void printLengthColumn(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, const Options *options, PacketPrinterContext& context) const;
 

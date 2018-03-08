@@ -31,6 +31,38 @@ bool PacketPrinter::isEnabledOption(const Options *options, const char *name) co
     return options->enabledTags.find(name) != options->enabledTags.end();
 }
 
+static bool isPhysicalLayerProtocol(const Protocol *protocol)
+{
+    return protocol == &Protocol::ethernetPhy || protocol == &Protocol::ieee80211Phy;
+}
+
+static bool isLinkLayerProtocol(const Protocol *protocol)
+{
+    return protocol == &Protocol::ethernetMac || protocol == &Protocol::ppp ||
+           protocol == &Protocol::ieee80211Mac || protocol == &Protocol::ieee80211Mgmt ||
+           protocol == &Protocol::ieee8022;
+}
+
+static bool isNetworkLayerProtocol(const Protocol *protocol)
+{
+    return protocol == &Protocol::ipv4 || protocol == &Protocol::icmpv4 || protocol == &Protocol::arp || protocol == &Protocol::igmp ||
+           protocol == &Protocol::ipv6 || protocol == &Protocol::icmpv6;
+}
+
+static bool isTransportLayerProtocol(const Protocol *protocol)
+{
+    return protocol == &Protocol::udp || protocol == &Protocol::tcp || protocol == &Protocol::sctp;
+}
+
+bool PacketPrinter::isEnabledInfo(const Options *options, const Protocol *protocol) const
+{
+    return isEnabledOption(options, "Show all info") ||
+          (isEnabledOption(options, "Show physical layer info") && isPhysicalLayerProtocol(protocol)) ||
+          (isEnabledOption(options, "Show link layer info") && isLinkLayerProtocol(protocol)) ||
+          (isEnabledOption(options, "Show network layer info") && isNetworkLayerProtocol(protocol)) ||
+          (isEnabledOption(options, "Show transport layer info") && isTransportLayerProtocol(protocol));
+}
+
 const ProtocolPrinter& PacketPrinter::getProtocolPrinter(const Protocol *protocol) const
 {
     auto protocolPrinter = ProtocolPrinterRegistry::globalRegistry.findProtocolPrinter(protocol);
@@ -43,13 +75,13 @@ std::set<std::string> PacketPrinter::getSupportedTags() const
 {
     return {"Print inside out", "Print left to right",
             "Show 'Source' column", "Show 'Destination' column", "Show 'Protocol' column", "Show 'Length' column", "Show 'Info' column",
-            "Show all protocols", "Show all lengths",
-            "Show physical layer info", "Show link layer info", "Show network layer info", "Show transport layer info"};
+            "Show all PDU source fields", "Show all PDU destination fields", "Show all PDU protocols", "Show all PDU lengths",
+            "Show physical layer info", "Show link layer info", "Show network layer info", "Show transport layer info", "Show all info", "Show innermost info"};
 }
 
 std::set<std::string> PacketPrinter::getDefaultEnabledTags() const
 {
-    return {"Show 'Source' column", "Show 'Destination' column", "Show 'Protocol' column", "Show 'Length' column", "Show 'Info' column", "Print inside out"};
+    return {"Show 'Source' column", "Show 'Destination' column", "Show 'Protocol' column", "Show 'Length' column", "Show 'Info' column", "Print inside out", "Show innermost info"};
 }
 
 std::vector<std::string> PacketPrinter::getColumnNames(const Options *options) const
@@ -164,14 +196,22 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
             printPacketInsideOut(childLevel, options, context);
         else {
             auto& protocolPrinter = getProtocolPrinter(protocol);
-            if (protocolDataUnit->getLevel() > context.infoLevel && protocol != nullptr)
-                context.infoColumn.str("");
-            else if (protocolDataUnit->getLevel() > 0)
-                context.infoColumn << " | ";
+            PacketPrinterContext protocolContext;
+            protocolPrinter.print(chunk, protocol, options, protocolContext);
             if (protocolDataUnit->getLevel() > context.infoLevel) {
                 context.infoLevel = protocolDataUnit->getLevel();
+                printSourceColumn(protocolContext.sourceColumn.str(), options, context);
+                printDestinationColumn(protocolContext.destinationColumn.str(), options, context);
                 printProtocolColumn(protocol, options, context);
-                protocolPrinter.print(chunk, protocol, options, context);
+                // prepend info column
+                bool showInnermostInfo = isEnabledOption(options, "Show innermost info");
+                if (showInnermostInfo)
+                    context.infoColumn.str("");
+                if (showInnermostInfo || isEnabledInfo(options, protocol)) {
+                    if (context.infoColumn.str().length() != 0)
+                        protocolContext.infoColumn << " | ";
+                    context.infoColumn.str(protocolContext.infoColumn.str() + context.infoColumn.str());
+                }
             }
         }
     }
@@ -186,22 +226,54 @@ void PacketPrinter::printPacketLeftToRight(const Ptr<const PacketDissector::Prot
         if (auto childLevel = dynamicPtrCast<const PacketDissector::ProtocolDataUnit>(chunk))
             printPacketLeftToRight(childLevel, options, context);
         else {
-            getProtocolPrinter(protocol).print(chunk, protocol, options, context);
+            auto& protocolPrinter = getProtocolPrinter(protocol);
+            PacketPrinterContext protocolContext;
+            protocolPrinter.print(chunk, protocol, options, protocolContext);
             if (protocolDataUnit->getLevel() > context.infoLevel) {
                 context.infoLevel = protocolDataUnit->getLevel();
+                printSourceColumn(protocolContext.sourceColumn.str(), options, context);
+                printDestinationColumn(protocolContext.destinationColumn.str(), options, context);
                 printProtocolColumn(protocol, options, context);
             }
+            // append info column
+            if (isEnabledInfo(options, protocol)) {
+                if (context.infoColumn.str().length() != 0)
+                    context.infoColumn << " | ";
+                context.infoColumn << protocolContext.infoColumn.str();
+            }
         }
+    }
+}
+
+void PacketPrinter::printSourceColumn(const std::string source, const Options *options, PacketPrinterContext& context) const
+{
+    if (source.length() != 0) {
+        if (!isEnabledOption(options, "Show all PDU source fields"))
+            context.sourceColumn.str("");
+        else if (context.sourceColumn.str().length() != 0)
+            context.sourceColumn << ":";
+        context.sourceColumn << source;
+    }
+}
+
+void PacketPrinter::printDestinationColumn(const std::string destination, const Options *options, PacketPrinterContext& context) const
+{
+    if (destination.length() != 0) {
+        if (!isEnabledOption(options, "Show all PDU destination fields"))
+            context.destinationColumn.str("");
+        else if (context.destinationColumn.str().length() != 0)
+            context.destinationColumn << ":";
+        context.destinationColumn << destination;
     }
 }
 
 void PacketPrinter::printProtocolColumn(const Protocol *protocol, const Options *options, PacketPrinterContext& context) const
 {
     if (protocol != nullptr) {
-        if (context.protocolColumn.str().length() != 0 && isEnabledOption(options, "Show all protocols"))
-            context.protocolColumn << ", ";
-        else
+        if (!isEnabledOption(options, "Show all PDU protocols"))
             context.protocolColumn.str("");
+        else if (context.protocolColumn.str().length() != 0)
+            context.protocolColumn << ", ";
         context.protocolColumn << protocol->getDescriptiveName();
     }
 }
@@ -209,7 +281,7 @@ void PacketPrinter::printProtocolColumn(const Protocol *protocol, const Options 
 void PacketPrinter::printLengthColumn(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, const Options *options, PacketPrinterContext& context) const
 {
     auto lengthColumnLength = context.lengthColumn.str().length();
-    if (lengthColumnLength == 0 || isEnabledOption(options, "Show all lengths")) {
+    if (lengthColumnLength == 0 || isEnabledOption(options, "Show all PDU lengths")) {
         if (lengthColumnLength != 0)
             context.lengthColumn << ", ";
         context.lengthColumn << protocolDataUnit->getChunkLength();
