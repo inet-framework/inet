@@ -41,7 +41,6 @@ network UdpClientServer
         client1: StandardHost {
             parameters:
                 @display("p=53,67;i=device/pc3");
-                numEthInterfaces = 3;
         }
         server: StandardHost {
             parameters:
