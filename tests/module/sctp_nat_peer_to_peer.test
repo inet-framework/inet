@@ -90,10 +90,10 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.ipv4.**.crcMode = "computed"
 
 **.Server.numPcapRecorders = 1
-**.Server.pcapRecorder[0].pcapFile = "results/Server.pcap"
+**.Server.pcapRecorder[0].pcapFile = "Server.pcap"
 **.Server.pcapRecorder[0].alwaysFlush = true
 **.Peer_1.numPcapRecorders = 1
-**.Peer_1.pcapRecorder[0].pcapFile = "results/Peer_1.pcap"
+**.Peer_1.pcapRecorder[0].pcapFile = "Peer_1.pcap"
 **.Peer_1.pcapRecorder[0].alwaysFlush = true
 
 **.Server.pcapRecorder[0].pcapNetwork = 204

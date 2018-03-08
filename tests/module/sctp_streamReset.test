@@ -73,9 +73,9 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.ipv4.**.crcMode = "computed"
 
 **.sctp_server.numPcapRecorders = 1
-**.sctp_server.pcapRecorder[0].pcapFile = "results/server1.pcap"
+**.sctp_server.pcapRecorder[0].pcapFile = "server1.pcap"
 **.sctp_client.numPcapRecorders = 1
-**.sctp_client.pcapRecorder[0].pcapFile = "results/client1.pcap"
+**.sctp_client.pcapRecorder[0].pcapFile = "client1.pcap"
 
 **.sctp_server.pcapRecorder[0].pcapNetwork = 204
 **.sctp_client.pcapRecorder[0].pcapNetwork = 204
