@@ -20,24 +20,6 @@
 #include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
 #include "inet/common/ProtocolTag_m.h"
 
-#ifdef WITH_ETHERNET
-#include "inet/linklayer/ethernet/EtherFrame_m.h"
-#endif // ifdef WITH_ETHERNET
-
-#ifdef WITH_IPv4
-#include "inet/networklayer/arp/ipv4/ArpPacket_m.h"
-#include "inet/networklayer/ipv4/IcmpHeader.h"
-#include "inet/networklayer/ipv4/Ipv4Header_m.h"
-#endif // ifdef WITH_IPv4
-
-#ifdef WITH_TCP_COMMON
-#include "inet/transportlayer/tcp_common/TcpHeader.h"
-#endif // ifdef WITH_TCP_COMMON
-
-#ifdef WITH_UDP
-#include "inet/transportlayer/udp/UdpHeader_m.h"
-#endif // ifdef WITH_UDP
-
 namespace inet {
 
 Register_MessagePrinter(PacketPrinter);
