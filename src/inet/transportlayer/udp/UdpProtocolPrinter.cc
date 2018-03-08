@@ -30,8 +30,8 @@ Register_Protocol_Printer(&Protocol::udp, UdpProtocolPrinter);
 void UdpProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, PacketPrinterContext& context) const
 {
     if (auto header = dynamicPtrCast<const UdpHeader>(chunk)) {
-        context.sourceColumn << ":" << header->getSrcPort();
-        context.destinationColumn << ":" << header->getDestPort();
+        context.sourceColumn << header->getSrcPort();
+        context.destinationColumn << header->getDestPort();
         context.infoColumn << header->getSrcPort() << "->" << header->getDestPort() << ", payload:" << (B(header->getTotalLengthField()) - header->getChunkLength());
     }
     else

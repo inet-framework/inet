@@ -32,8 +32,8 @@ void TcpProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *pr
     using namespace tcp;
 
     if (auto header = dynamicPtrCast<const TcpHeader>(chunk)) {
-        context.sourceColumn << ":" << header->getSrcPort();
-        context.destinationColumn << ":" << header->getDestPort();
+        context.sourceColumn << header->getSrcPort();
+        context.destinationColumn << header->getDestPort();
         static const char *flagStart = " [";
         static const char *flagSepar = " ";
         static const char *flagEnd = "]";
