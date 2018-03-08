@@ -62,9 +62,6 @@ class INET_API PacketPrinter : public cMessagePrinter
     virtual void printPacket(std::ostream& stream, Packet *packet) const;
     virtual void printPacket(std::ostream& stream, Packet *packet, const Options *options) const;
 
-    virtual void printIeee80211MacChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const;
-    virtual void printIeee80211MgmtChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const;
-    virtual void printIeee80211PhyChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const;
     virtual void printIeee8022Chunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const;
 };
 

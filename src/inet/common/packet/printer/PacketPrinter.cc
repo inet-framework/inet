@@ -24,10 +24,6 @@
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #endif // ifdef WITH_ETHERNET
 
-#ifdef WITH_IEEE80211
-#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
-#endif // ifdef WITH_IEEE80211
-
 #ifdef WITH_IPv4
 #include "inet/networklayer/arp/ipv4/ArpPacket_m.h"
 #include "inet/networklayer/ipv4/IcmpHeader.h"
@@ -209,27 +205,6 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
                     // TODO: printEthernetChunk(context.infoColumn, chunk);
                 }
             }
-            else if (protocol == &Protocol::ieee80211Phy) {
-                if (protocolDataUnit->getLevel() > context.infoLevel) {
-                    printIeee80211PhyChunk(context.infoColumn, chunk);
-                }
-            }
-            else if (protocol == &Protocol::ieee80211Mac) {
-                auto oneAddressHeader = dynamicPtrCast<const ieee80211::Ieee80211OneAddressHeader>(chunk);
-                if (oneAddressHeader != nullptr)
-                    context.destinationColumn << oneAddressHeader->getReceiverAddress();
-                auto twoAddressHeader = dynamicPtrCast<const ieee80211::Ieee80211TwoAddressHeader>(chunk);
-                if (twoAddressHeader != nullptr)
-                    context.sourceColumn << twoAddressHeader->getTransmitterAddress();
-                if (protocolDataUnit->getLevel() > context.infoLevel) {
-                    printIeee80211MacChunk(context.infoColumn, chunk);
-                }
-            }
-            else if (protocol == &Protocol::ieee80211Mgmt) {
-                if (protocolDataUnit->getLevel() > context.infoLevel) {
-                    printIeee80211MgmtChunk(context.infoColumn, chunk);
-                }
-            }
             else if (protocol == &Protocol::ieee8022) {
                 if (protocolDataUnit->getLevel() > context.infoLevel) {
                     printIeee8022Chunk(context.infoColumn, chunk);
@@ -258,54 +233,6 @@ void PacketPrinter::printPacketLeftToRight(const Ptr<const PacketDissector::Prot
         else
             getProtocolPrinter(protocol).print(chunk, protocol, options, context);
     }
-}
-
-void PacketPrinter::printIeee80211MacChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const
-{
-    using namespace ieee80211;
-    if (auto macHeader = dynamicPtrCast<const inet::ieee80211::Ieee80211MacHeader>(chunk)) {
-        stream << "WLAN ";
-        switch (macHeader->getType()) {
-            case ST_RTS: {
-                stream << "RTS";
-                break;
-            }
-            case ST_CTS:
-                stream << "CTS";
-                break;
-
-            case ST_ACK:
-                stream << "ACK";
-                break;
-
-            case ST_BLOCKACK_REQ:
-                stream << "BlockAckReq";
-                break;
-
-            case ST_BLOCKACK:
-                stream << "BlockAck";
-                break;
-
-            case ST_DATA:
-            case ST_DATA_WITH_QOS:
-                stream << "DATA";
-                break;
-
-            default:
-                stream << "???";
-                break;
-        }
-    }
-}
-
-void PacketPrinter::printIeee80211MgmtChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const
-{
-    stream << "(IEEE 802.11 Mgmt) " << chunk;
-}
-
-void PacketPrinter::printIeee80211PhyChunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const
-{
-    stream << "(IEEE 802.11 Phy) " << chunk;
 }
 
 void PacketPrinter::printIeee8022Chunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const
