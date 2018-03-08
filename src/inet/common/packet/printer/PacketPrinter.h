@@ -39,10 +39,12 @@ class INET_API PacketPrinter : public cMessagePrinter
     virtual bool isEnabledOption(const Options *options, const char *name) const;
     virtual const ProtocolPrinter& getProtocolPrinter(const Protocol *protocol) const;
     virtual void printContext(std::ostream& stream, const Options *options, PacketPrinterContext& context) const;
-    virtual void printPacketInsideOut(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolLevel, const Options *options, PacketPrinterContext& context) const;
-    virtual void printPacketLeftToRight(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolLevel, const Options *options, PacketPrinterContext& context) const;
     virtual void printSignal(inet::physicallayer::Signal *signal, const Options *options, PacketPrinterContext& context) const;
     virtual void printPacket(Packet *packet, const Options *options, PacketPrinterContext& context) const;
+    virtual void printPacketInsideOut(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, const Options *options, PacketPrinterContext& context) const;
+    virtual void printPacketLeftToRight(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, const Options *options, PacketPrinterContext& context) const;
+    virtual void printProtocolColumn(const Protocol *protocol, const Options *options, PacketPrinterContext& context) const;
+    virtual void printLengthColumn(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, const Options *options, PacketPrinterContext& context) const;
 
   public:
     virtual int getScoreFor(cMessage *msg) const override;

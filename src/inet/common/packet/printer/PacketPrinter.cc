@@ -154,7 +154,7 @@ void PacketPrinter::printPacket(Packet *packet, const Options *options, PacketPr
     PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, pduTreeBuilder);
     packetDissector.dissectPacket(packet, protocol);
     auto& protocolDataUnit = pduTreeBuilder.getTopLevelPdu();
-    if (pduTreeBuilder.isSimplyEncapsulatedPacket())
+    if (pduTreeBuilder.isSimplyEncapsulatedPacket() && isEnabledOption(options, "Print inside out"))
         const_cast<PacketPrinter *>(this)->printPacketInsideOut(protocolDataUnit, options, context);
     else
         const_cast<PacketPrinter *>(this)->printPacketLeftToRight(protocolDataUnit, options, context);
@@ -164,12 +164,7 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
 {
     auto protocol = protocolDataUnit->getProtocol();
     context.isCorrect &= protocolDataUnit->isCorrect();
-    auto lengthColumnLength = context.lengthColumn.str().length();
-    if (lengthColumnLength == 0 || isEnabledOption(options, "Show all lengths")) {
-        if (lengthColumnLength != 0)
-            context.lengthColumn << ", ";
-        context.lengthColumn << protocolDataUnit->getChunkLength();
-    }
+    printLengthColumn(protocolDataUnit, options, context);
     for (const auto& chunk : protocolDataUnit->getChunks()) {
         if (auto childLevel = dynamicPtrCast<const PacketDissector::ProtocolDataUnit>(chunk))
             printPacketInsideOut(childLevel, options, context);
@@ -179,17 +174,10 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
                 context.infoColumn.str("");
             else if (protocolDataUnit->getLevel() > 0)
                 context.infoColumn << " | ";
-            if (protocolDataUnit->getLevel() > context.infoLevel)
-                protocolPrinter.print(chunk, protocol, options, context);
             if (protocolDataUnit->getLevel() > context.infoLevel) {
                 context.infoLevel = protocolDataUnit->getLevel();
-                if (protocol != nullptr) {
-                    if (context.protocolColumn.str().length() != 0 && isEnabledOption(options, "Show all protocols"))
-                        context.protocolColumn << ", ";
-                    else
-                        context.protocolColumn.str("");
-                    context.protocolColumn << protocol->getDescriptiveName();
-                }
+                printProtocolColumn(protocol, options, context);
+                protocolPrinter.print(chunk, protocol, options, context);
             }
         }
     }
@@ -199,11 +187,38 @@ void PacketPrinter::printPacketLeftToRight(const Ptr<const PacketDissector::Prot
 {
     auto protocol = protocolDataUnit->getProtocol();
     context.isCorrect &= protocolDataUnit->isCorrect();
+    printLengthColumn(protocolDataUnit, options, context);
     for (const auto& chunk : protocolDataUnit->getChunks()) {
         if (auto childLevel = dynamicPtrCast<const PacketDissector::ProtocolDataUnit>(chunk))
             printPacketLeftToRight(childLevel, options, context);
-        else
+        else {
             getProtocolPrinter(protocol).print(chunk, protocol, options, context);
+            if (protocolDataUnit->getLevel() > context.infoLevel) {
+                context.infoLevel = protocolDataUnit->getLevel();
+                printProtocolColumn(protocol, options, context);
+            }
+        }
+    }
+}
+
+void PacketPrinter::printProtocolColumn(const Protocol *protocol, const Options *options, PacketPrinterContext& context) const
+{
+    if (protocol != nullptr) {
+        if (context.protocolColumn.str().length() != 0 && isEnabledOption(options, "Show all protocols"))
+            context.protocolColumn << ", ";
+        else
+            context.protocolColumn.str("");
+        context.protocolColumn << protocol->getDescriptiveName();
+    }
+}
+
+void PacketPrinter::printLengthColumn(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, const Options *options, PacketPrinterContext& context) const
+{
+    auto lengthColumnLength = context.lengthColumn.str().length();
+    if (lengthColumnLength == 0 || isEnabledOption(options, "Show all lengths")) {
+        if (lengthColumnLength != 0)
+            context.lengthColumn << ", ";
+        context.lengthColumn << protocolDataUnit->getChunkLength();
     }
 }
 
