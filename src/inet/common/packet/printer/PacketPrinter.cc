@@ -76,12 +76,15 @@ std::set<std::string> PacketPrinter::getSupportedTags() const
     return {"Print inside out", "Print left to right",
             "Show 'Source' column", "Show 'Destination' column", "Show 'Protocol' column", "Show 'Length' column", "Show 'Info' column",
             "Show all PDU source fields", "Show all PDU destination fields", "Show all PDU protocols", "Show all PDU lengths",
-            "Show physical layer info", "Show link layer info", "Show network layer info", "Show transport layer info", "Show all info", "Show innermost info"};
+            "Show physical layer info", "Show link layer info", "Show network layer info", "Show transport layer info", "Show all info", "Show innermost info",
+            "Show auto source fields", "Show auto destination fields", "Show auto info"};
 }
 
 std::set<std::string> PacketPrinter::getDefaultEnabledTags() const
 {
-    return {"Show 'Source' column", "Show 'Destination' column", "Show 'Protocol' column", "Show 'Length' column", "Show 'Info' column", "Print inside out", "Show innermost info"};
+    return {"Print inside out",
+            "Show 'Source' column", "Show 'Destination' column", "Show 'Protocol' column", "Show 'Length' column", "Show 'Info' column",
+            "Show auto source fields", "Show auto destination fields", "Show auto info"};
 }
 
 std::vector<std::string> PacketPrinter::getColumnNames(const Options *options) const
@@ -200,14 +203,15 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
             protocolPrinter.print(chunk, protocol, options, protocolContext);
             if (protocolDataUnit->getLevel() > context.infoLevel) {
                 context.infoLevel = protocolDataUnit->getLevel();
-                printSourceColumn(protocolContext.sourceColumn.str(), options, context);
-                printDestinationColumn(protocolContext.destinationColumn.str(), options, context);
+                printSourceColumn(protocolContext.sourceColumn.str(), protocol, options, context);
+                printDestinationColumn(protocolContext.destinationColumn.str(), protocol, options, context);
                 printProtocolColumn(protocol, options, context);
                 // prepend info column
+                bool showAutoInfo = isEnabledOption(options, "Show auto info");
                 bool showInnermostInfo = isEnabledOption(options, "Show innermost info");
-                if (showInnermostInfo)
-                    context.infoColumn.str("");
-                if (showInnermostInfo || isEnabledInfo(options, protocol)) {
+                if (showAutoInfo || showInnermostInfo || isEnabledInfo(options, protocol)) {
+                    if (showInnermostInfo && !(showAutoInfo && protocol == nullptr))
+                        context.infoColumn.str("");
                     if (context.infoColumn.str().length() != 0)
                         protocolContext.infoColumn << " | ";
                     context.infoColumn.str(protocolContext.infoColumn.str() + context.infoColumn.str());
@@ -231,8 +235,8 @@ void PacketPrinter::printPacketLeftToRight(const Ptr<const PacketDissector::Prot
             protocolPrinter.print(chunk, protocol, options, protocolContext);
             if (protocolDataUnit->getLevel() > context.infoLevel) {
                 context.infoLevel = protocolDataUnit->getLevel();
-                printSourceColumn(protocolContext.sourceColumn.str(), options, context);
-                printDestinationColumn(protocolContext.destinationColumn.str(), options, context);
+                printSourceColumn(protocolContext.sourceColumn.str(), protocol, options, context);
+                printDestinationColumn(protocolContext.destinationColumn.str(), protocol, options, context);
                 printProtocolColumn(protocol, options, context);
             }
             // append info column
@@ -245,10 +249,12 @@ void PacketPrinter::printPacketLeftToRight(const Ptr<const PacketDissector::Prot
     }
 }
 
-void PacketPrinter::printSourceColumn(const std::string source, const Options *options, Context& context) const
+void PacketPrinter::printSourceColumn(const std::string source, const Protocol *protocol, const Options *options, Context& context) const
 {
     if (source.length() != 0) {
-        if (!isEnabledOption(options, "Show all PDU source fields"))
+        bool concatenate = isEnabledOption(options, "Show all PDU source fields") ||
+                          (isEnabledOption(options, "Show auto source fields") && !isNetworkLayerProtocol(protocol));
+        if (!concatenate)
             context.sourceColumn.str("");
         else if (context.sourceColumn.str().length() != 0)
             context.sourceColumn << ":";
@@ -256,10 +262,12 @@ void PacketPrinter::printSourceColumn(const std::string source, const Options *o
     }
 }
 
-void PacketPrinter::printDestinationColumn(const std::string destination, const Options *options, Context& context) const
+void PacketPrinter::printDestinationColumn(const std::string destination, const Protocol *protocol, const Options *options, Context& context) const
 {
     if (destination.length() != 0) {
-        if (!isEnabledOption(options, "Show all PDU destination fields"))
+        bool concatenate = isEnabledOption(options, "Show all PDU destination fields") ||
+                          (isEnabledOption(options, "Show auto destination fields") && !isNetworkLayerProtocol(protocol));
+        if (!concatenate)
             context.destinationColumn.str("");
         else if (context.destinationColumn.str().length() != 0)
             context.destinationColumn << ":";

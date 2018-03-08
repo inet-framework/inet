@@ -46,8 +46,8 @@ class INET_API PacketPrinter : public cMessagePrinter
     virtual void printPacket(Packet *packet, const Options *options, Context& context) const;
     virtual void printPacketInsideOut(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, const Options *options, Context& context) const;
     virtual void printPacketLeftToRight(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, const Options *options, Context& context) const;
-    virtual void printSourceColumn(const std::string source, const Options *options, Context& context) const;
-    virtual void printDestinationColumn(const std::string destination, const Options *options, Context& context) const;
+    virtual void printSourceColumn(const std::string source, const Protocol *protocol, const Options *options, Context& context) const;
+    virtual void printDestinationColumn(const std::string destination, const Protocol *protocol, const Options *options, Context& context) const;
     virtual void printProtocolColumn(const Protocol *protocol, const Options *options, Context& context) const;
     virtual void printLengthColumn(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, const Options *options, Context& context) const;
 
