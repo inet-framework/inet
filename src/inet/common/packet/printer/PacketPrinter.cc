@@ -68,27 +68,27 @@ const ProtocolPrinter& PacketPrinter::getProtocolPrinter(const Protocol *protoco
 
 std::set<std::string> PacketPrinter::getSupportedTags() const
 {
-    return {"source_column", "destination_column", "protocol_column", "length_column", "info_column",
-            "inside_out", "left_to_right"};
+    return {"Show Source column", "Show Destination column", "Show Protocol column", "Show Length column", "Show Info column",
+            "Print inside out", "Print left to right"};
 }
 
 std::set<std::string> PacketPrinter::getDefaultEnabledTags() const
 {
-    return {"source_column", "destination_column", "protocol_column", "length_column", "info_column", "inside_out"};
+    return {"Show Source column", "Show Destination column", "Show Protocol column", "Show Length column", "Show Info column", "Print inside out"};
 }
 
 std::vector<std::string> PacketPrinter::getColumnNames(const Options *options) const
 {
     std::vector<std::string> columnNames;
-    if (isEnabledOption(options, "source_column"))
+    if (isEnabledOption(options, "Show Source column"))
         columnNames.push_back("Source");
-    if (isEnabledOption(options, "destination_column"))
+    if (isEnabledOption(options, "Show Destination column"))
         columnNames.push_back("Destination");
-    if (isEnabledOption(options, "protocol_column"))
+    if (isEnabledOption(options, "Show Protocol column"))
         columnNames.push_back("Protocol");
-    if (isEnabledOption(options, "length_column"))
+    if (isEnabledOption(options, "Show Length column"))
         columnNames.push_back("Length");
-    if (isEnabledOption(options, "info_column"))
+    if (isEnabledOption(options, "Show Info column"))
         columnNames.push_back("Info");
     return columnNames;
 }
@@ -98,15 +98,15 @@ void PacketPrinter::printContext(std::ostream& stream, const Options *options, P
     if (!context.isCorrect)
         stream << "\x1b[103m";
     stream << "\x1b[30m";
-    if (isEnabledOption(options, "source_column"))
+    if (isEnabledOption(options, "Show Source column"))
        stream << context.sourceColumn.str() << "\t";
-    if (isEnabledOption(options, "destination_column"))
+    if (isEnabledOption(options, "Show Destination column"))
        stream << context.destinationColumn.str() << "\t";
-    if (isEnabledOption(options, "protocol_column"))
+    if (isEnabledOption(options, "Show Protocol column"))
        stream << "\x1b[34m" << context.protocolColumn << "\x1b[30m\t";
-    if (isEnabledOption(options, "length_column"))
+    if (isEnabledOption(options, "Show Length column"))
        stream << context.lengthColumn.str() << "\t";
-    if (isEnabledOption(options, "info_column"))
+    if (isEnabledOption(options, "Show Info column"))
        stream << context.infoColumn.str();
     stream << std::endl;
 }
