@@ -47,6 +47,10 @@ class INET_API TcpIpChecksum
     }
 
     static uint16_t _checksum(const void *addr, unsigned int count);
+
+    static uint16_t _checksum(const std::vector<uint8_t>& vec);
+    static uint16_t checksum(const std::vector<uint8_t>& vec) { return ~_checksum(vec); }
+
 };
 
 } // namespace serializer
