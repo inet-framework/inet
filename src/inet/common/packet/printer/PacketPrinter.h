@@ -16,8 +16,6 @@
 #ifndef __INET_PACKETPRINTER_H_
 #define __INET_PACKETPRINTER_H_
 
-#include <stack>
-#include "inet/common/packet/chunk/SequenceChunk.h"
 #include "inet/common/packet/dissector/PacketDissector.h"
 #include "inet/common/packet/printer/ProtocolPrinter.h"
 #include "inet/physicallayer/common/packetlevel/Signal.h"
@@ -29,7 +27,7 @@ class PacketPrinterContext {
     bool isCorrect = true;
     std::stringstream sourceColumn;
     std::stringstream destinationColumn;
-    std::string protocolColumn;
+    std::stringstream protocolColumn;
     std::stringstream lengthColumn;
     std::stringstream infoColumn;
     int infoLevel = -1;

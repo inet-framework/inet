@@ -13,9 +13,6 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include <algorithm>
-#include "inet/common/packet/chunk/BitCountChunk.h"
-#include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -31,9 +28,7 @@ int PacketPrinter::getScoreFor(cMessage *msg) const
 
 bool PacketPrinter::isEnabledOption(const Options *options, const char *name) const
 {
-    // TODO: reenable when new omnet is released
-    // return std::find(options->enabledTags.begin(), options->enabledTags.end(), name) != options->enabledTags.end();
-    return true;
+    return options->enabledTags.find(name) != options->enabledTags.end();
 }
 
 const ProtocolPrinter& PacketPrinter::getProtocolPrinter(const Protocol *protocol) const
@@ -46,27 +41,29 @@ const ProtocolPrinter& PacketPrinter::getProtocolPrinter(const Protocol *protoco
 
 std::set<std::string> PacketPrinter::getSupportedTags() const
 {
-    return {"Show Source column", "Show Destination column", "Show Protocol column", "Show Length column", "Show Info column",
-            "Print inside out", "Print left to right"};
+    return {"Print inside out", "Print left to right",
+            "Show 'Source' column", "Show 'Destination' column", "Show 'Protocol' column", "Show 'Length' column", "Show 'Info' column",
+            "Show all protocols", "Show all lengths",
+            "Show physical layer info", "Show link layer info", "Show network layer info", "Show transport layer info"};
 }
 
 std::set<std::string> PacketPrinter::getDefaultEnabledTags() const
 {
-    return {"Show Source column", "Show Destination column", "Show Protocol column", "Show Length column", "Show Info column", "Print inside out"};
+    return {"Show 'Source' column", "Show 'Destination' column", "Show 'Protocol' column", "Show 'Length' column", "Show 'Info' column", "Print inside out"};
 }
 
 std::vector<std::string> PacketPrinter::getColumnNames(const Options *options) const
 {
     std::vector<std::string> columnNames;
-    if (isEnabledOption(options, "Show Source column"))
+    if (isEnabledOption(options, "Show 'Source' column"))
         columnNames.push_back("Source");
-    if (isEnabledOption(options, "Show Destination column"))
+    if (isEnabledOption(options, "Show 'Destination' column"))
         columnNames.push_back("Destination");
-    if (isEnabledOption(options, "Show Protocol column"))
+    if (isEnabledOption(options, "Show 'Protocol' column"))
         columnNames.push_back("Protocol");
-    if (isEnabledOption(options, "Show Length column"))
+    if (isEnabledOption(options, "Show 'Length' column"))
         columnNames.push_back("Length");
-    if (isEnabledOption(options, "Show Info column"))
+    if (isEnabledOption(options, "Show 'Info' column"))
         columnNames.push_back("Info");
     return columnNames;
 }
@@ -76,15 +73,15 @@ void PacketPrinter::printContext(std::ostream& stream, const Options *options, P
     if (!context.isCorrect)
         stream << "\x1b[103m";
     stream << "\x1b[30m";
-    if (isEnabledOption(options, "Show Source column"))
+    if (isEnabledOption(options, "Show 'Source' column"))
        stream << context.sourceColumn.str() << "\t";
-    if (isEnabledOption(options, "Show Destination column"))
+    if (isEnabledOption(options, "Show 'Destination' column"))
        stream << context.destinationColumn.str() << "\t";
-    if (isEnabledOption(options, "Show Protocol column"))
-       stream << "\x1b[34m" << context.protocolColumn << "\x1b[30m\t";
-    if (isEnabledOption(options, "Show Length column"))
+    if (isEnabledOption(options, "Show 'Protocol' column"))
+       stream << "\x1b[34m" << context.protocolColumn.str() << "\x1b[30m\t";
+    if (isEnabledOption(options, "Show 'Length' column"))
        stream << context.lengthColumn.str() << "\t";
-    if (isEnabledOption(options, "Show Info column"))
+    if (isEnabledOption(options, "Show 'Info' column"))
        stream << context.infoColumn.str();
     stream << std::endl;
 }
@@ -157,7 +154,6 @@ void PacketPrinter::printPacket(Packet *packet, const Options *options, PacketPr
     PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, pduTreeBuilder);
     packetDissector.dissectPacket(packet, protocol);
     auto& protocolDataUnit = pduTreeBuilder.getTopLevelPdu();
-    context.lengthColumn << protocolDataUnit->getChunkLength();
     if (pduTreeBuilder.isSimplyEncapsulatedPacket())
         const_cast<PacketPrinter *>(this)->printPacketInsideOut(protocolDataUnit, options, context);
     else
@@ -168,6 +164,12 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
 {
     auto protocol = protocolDataUnit->getProtocol();
     context.isCorrect &= protocolDataUnit->isCorrect();
+    auto lengthColumnLength = context.lengthColumn.str().length();
+    if (lengthColumnLength == 0 || isEnabledOption(options, "Show all lengths")) {
+        if (lengthColumnLength != 0)
+            context.lengthColumn << ", ";
+        context.lengthColumn << protocolDataUnit->getChunkLength();
+    }
     for (const auto& chunk : protocolDataUnit->getChunks()) {
         if (auto childLevel = dynamicPtrCast<const PacketDissector::ProtocolDataUnit>(chunk))
             printPacketInsideOut(childLevel, options, context);
@@ -181,8 +183,13 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
                 protocolPrinter.print(chunk, protocol, options, context);
             if (protocolDataUnit->getLevel() > context.infoLevel) {
                 context.infoLevel = protocolDataUnit->getLevel();
-                if (protocol != nullptr)
-                    context.protocolColumn = protocol->getDescriptiveName();
+                if (protocol != nullptr) {
+                    if (context.protocolColumn.str().length() != 0 && isEnabledOption(options, "Show all protocols"))
+                        context.protocolColumn << ", ";
+                    else
+                        context.protocolColumn.str("");
+                    context.protocolColumn << protocol->getDescriptiveName();
+                }
             }
         }
     }
