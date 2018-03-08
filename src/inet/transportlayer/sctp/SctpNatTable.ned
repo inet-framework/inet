@@ -18,6 +18,6 @@
 package inet.transportlayer.sctp;
 
 
-simple SCTPNatTable
+simple SctpNatTable
 {
 }

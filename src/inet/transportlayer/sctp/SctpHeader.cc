@@ -58,16 +58,20 @@ SctpHeader::~SctpHeader()
 
 void SctpHeader::clean()
 {
-   /* SctpChunk *chunk;
-    if (this->getSctpChunksArraySize() > 0)
-        for (uint32 i = 0; i < this->getSctpChunksArraySize(); i++) {
-            chunk = (SctpChunk *)this->getSctpChunks(i);
-            dropAndDelete(chunk);
-        }*/
+    handleChange();
 
-    sctpChunkList.clear();
+    if (this->getSctpChunksArraySize() > 0) {
+        auto iterator = sctpChunkList.begin();
+        while (iterator != sctpChunkList.end()) {
+            SctpChunk *chunk = (*iterator);
+            sctpChunkList.erase(iterator);
+           // delete chunk;
+        }
+    }
+
+   /* sctpChunkList.clear();
     setHeaderLength(SCTP_COMMON_HEADER);
-    setChunkLength(B(SCTP_COMMON_HEADER));
+    setChunkLength(B(SCTP_COMMON_HEADER));*/
 }
 
 void SctpHeader::setSctpChunksArraySize(size_t size)
@@ -128,11 +132,35 @@ SctpChunk *SctpHeader::removeChunk()
     if (sctpChunkList.empty())
         return nullptr;
 
-    handleChange();
     SctpChunk *msg = sctpChunkList.front();
     headerLength -= ADD_PADDING(msg->getByteLength());
     sctpChunkList.erase(sctpChunkList.begin());
     drop(msg);
+    setChunkLength(B(headerLength));
+    return msg;
+}
+
+void SctpHeader::removeFirstChunk()
+{
+    handleChange();
+    if (sctpChunkList.empty())
+        return;
+
+    SctpChunk *msg = sctpChunkList.front();
+    headerLength -= ADD_PADDING(msg->getByteLength());
+    sctpChunkList.erase(sctpChunkList.begin());
+    setChunkLength(B(headerLength));
+}
+
+SctpChunk *SctpHeader::getFirstChunk()
+{
+    handleChange();
+    if (sctpChunkList.empty())
+        return nullptr;
+
+    SctpChunk *msg = sctpChunkList.front();
+    headerLength -= ADD_PADDING(msg->getByteLength());
+    sctpChunkList.erase(sctpChunkList.begin());
     setChunkLength(B(headerLength));
     return msg;
 }
@@ -150,7 +178,7 @@ SctpChunk *SctpHeader::removeLastChunk()
     return msg;
 }
 
-SctpChunk *SctpHeader::peekFirstChunk()
+SctpChunk *SctpHeader::peekFirstChunk() const
 {
     if (sctpChunkList.empty())
         return nullptr;
@@ -159,7 +187,7 @@ SctpChunk *SctpHeader::peekFirstChunk()
     return msg;
 }
 
-SctpChunk *SctpHeader::peekLastChunk()
+SctpChunk *SctpHeader::peekLastChunk() const
 {
     if (sctpChunkList.empty())
         return nullptr;

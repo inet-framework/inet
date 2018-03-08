@@ -25,6 +25,7 @@
 
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
+#include "inet/common/packet/Message.h"
 
 namespace inet {
 
@@ -69,7 +70,7 @@ class INET_API SctpSocket
       public:
         virtual ~CallbackInterface() {}
         virtual void socketDataArrived(int assocId, void *yourPtr, Packet *msg, bool urgent) = 0;
-        virtual void socketDataNotificationArrived(int assocId, void *yourPtr, Packet *msg) = 0;
+        virtual void socketDataNotificationArrived(int assocId, void *yourPtr, Message *msg) = 0;
         virtual void socketEstablished(int assocId, void *yourPtr, unsigned long int buffer) {}
         virtual void socketPeerClosed(int assocId, void *yourPtr) {}
         virtual void socketClosed(int assocId, void *yourPtr) {}

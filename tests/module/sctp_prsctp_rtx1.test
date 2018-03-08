@@ -7,7 +7,7 @@ Testing PR-SCTP: prMethod=PR_RTX prValue=1
 %inifile: omnetpp.ini
 
 [General]
-network=SCTPFeatureTest
+network=SctpFeatureTest
 cmdenv-event-banners=false
 cmdenv-express-mode = false
 tkenv-plugin-path = ../../../etc/plugins
@@ -28,8 +28,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 # sctp apps
 **.sctp_client.numApps = 1
-**.sctp_client.sctpType="SCTP"
-**.sctp_client.app[0].typename = "SCTPClient"
+**.sctp_client.app[0].typename = "SctpClient"
 **.sctp_client.app[0].localAddress = "10.1.1.1"
 **.sctp_client.app[0].connectAddress = "10.1.3.1"
 **.sctp_client.app[0].primaryPath = "10.1.3.1"
@@ -45,8 +44,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 
 **.sctp_server.numApps = 1
-**.sctp_server.sctpType="SCTP"
-**.sctp_server.app[0].typename = "SCTPServer"
+**.sctp_server.app[0].typename = "SctpServer"
 **.sctp_server.app[0].localAddress = "10.1.3.1"
 **.sctp_server.app[0].localPort = 6666
 **.sctp_server.app[*].queueSize = 0 #Size of sendQueue before App is notified to send new data
@@ -56,7 +54,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 # sctp settings
 **.hasSctp = true
-**.sctp.sctpAlgorithmClass = "SCTPAlg"
+**.sctp.sctpAlgorithmClass = "SctpAlg"
 
 
 %#--------------------------------------------------------------------------------------------------------------

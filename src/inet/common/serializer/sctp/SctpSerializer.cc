@@ -87,6 +87,7 @@ void SctpSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk
     std::cout << "Number of chunks: " << noChunks << endl;
     for (int32 cc = 0; cc < noChunks; cc++) {
         SctpChunk *chunk = const_cast<SctpChunk *>(check_and_cast<const SctpChunk *>((msg)->getSctpChunks(cc)));
+        printf("sctpChunkPtr=%p\n", (void *)chunk);
         unsigned char chunkType = chunk->getSctpChunkType();
         switch (chunkType) {
             case DATA: {
@@ -127,10 +128,11 @@ void SctpSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk
             }
 
             case INIT: {
-                std::cout << "serialize INIT sizeKeyVector=" << sizeKeyVector << "\n";
+                std::cout << "serialize INIT size=" << (unsigned long)B(msg->getChunkLength()).get() <<  "\n";
+
                 // source data from internal struct:
                 SctpInitChunk *initChunk = check_and_cast<SctpInitChunk *>(chunk);
-                //sctpEV3<<simulation.simTime()<<" SctpAssociation:: Init sent \n";
+                printf("Ptr initChunk: %p\n", (void *)initChunk);
                 // destination is send buffer:
                 struct init_chunk *ic = (struct init_chunk *)(buffer + writtenbytes);    // append data to buffer
                 uint16_t padding_last = 0;
@@ -199,10 +201,19 @@ void SctpSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk
                     for (int i = 0; i < chunkcount; i++) {
                         supext->chunk_type[i] = initChunk->getSepChunks(i);
                     }
-                    parPtr += ADD_PADDING(sizeof(struct supported_extensions_parameter) + chunkcount);
+                    printf("parPtr vor padding: %d\n", parPtr);
+                  //  parPtr += ADD_PADDING(sizeof(struct supported_extensions_parameter) + chunkcount);
+                    parPtr += sizeof(struct supported_extensions_parameter) + chunkcount;
+                    printf("parPtr nach padding: %d\n", parPtr);
                     padding_last = ADD_PADDING(sizeof(struct supported_extensions_parameter) + chunkcount) - (sizeof(struct supported_extensions_parameter) + chunkcount);
+                    printf("padding_last=%d\n", padding_last);
                 }
                 if (initChunk->getHmacTypesArraySize() > 0) {
+                printf("Hmac > 0\n");
+                    if (padding_last > 0) {
+                        parPtr += padding_last;
+                        padding_last = 0;
+                    }
                     struct random_parameter *random = (struct random_parameter *)(((unsigned char *)ic) + size_init_chunk + parPtr);
                     random->type = htons(RANDOM);
                     unsigned char *vector = (unsigned char *)malloc(64);
@@ -246,14 +257,19 @@ void SctpSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk
                     }
                     parPtr += ADD_PADDING(4 + 2 * initChunk->getHmacTypesArraySize());
                     padding_last = ADD_PADDING(4 + 2 * initChunk->getHmacTypesArraySize()) - (4 + 2 * initChunk->getHmacTypesArraySize());
+                    parPtr -= padding_last;
 
                     for (unsigned int k = 0; k < sizeKeyVector; k++) {
                         keyVector[k] = vector[k];
                     }
+                    printf("parPtr now %d\n", parPtr);
                     free(vector);
                 }
-                ic->length = htons(SCTP_INIT_CHUNK_LENGTH + parPtr - padding_last);
-                writtenbytes += SCTP_INIT_CHUNK_LENGTH + parPtr;
+
+                ic->length = htons(SCTP_INIT_CHUNK_LENGTH + parPtr);
+                printf("start with writtenbytes=%d\n", writtenbytes);
+                printf("SCTP_INIT_CHUNK_LENGTH=%d parPtr=%d padding_last=%d\n", SCTP_INIT_CHUNK_LENGTH, parPtr, padding_last);
+                writtenbytes += SCTP_INIT_CHUNK_LENGTH + parPtr + padding_last;
                 break;
             }
 
@@ -272,6 +288,7 @@ void SctpSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk
                 iac->initial_tsn = htonl(initAckChunk->getInitTsn());
                 // Var.-Len. Parameters
                 int32 parPtr = 0;
+                printf("start with writtenbytes=%d\n", writtenbytes);
                 if (initAckChunk->getIpv4Supported() || initAckChunk->getIpv6Supported()) {
                     struct supported_address_types_parameter *sup_addr = (struct supported_address_types_parameter *)(((unsigned char *)iac) + size_init_chunk + parPtr);
                     sup_addr->type = htons(INIT_SUPPORTED_ADDRESS);
@@ -328,10 +345,11 @@ void SctpSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk
                         supext->chunk_type[i] = initAckChunk->getSepChunks(i);
                     }
                     parPtr += ADD_PADDING(sizeof(struct supported_extensions_parameter) + chunkcount);
+                    printf("nach padding supExt parPtr=%d\n", parPtr);
                 }
                 uint32 uLen = initAckChunk->getUnrecognizedParametersArraySize();
                 if (uLen > 0) {
-                    //sctpEV3<<"uLen="<<uLen<<"\n";
+                    std::cout<<"uLen="<<uLen<<"\n";
                     int32 k = 0;
                     uint32 pLen = 0;
                     while (uLen > 0) {
@@ -347,6 +365,7 @@ void SctpSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk
                     }
                 }
                 if (initAckChunk->getHmacTypesArraySize() > 0) {
+                printf("Hmac > 0\n");
                     unsigned int sizeVector;
                     struct random_parameter *random = (struct random_parameter *)(((unsigned char *)iac) + size_init_chunk + parPtr);
                     random->type = htons(RANDOM);
@@ -359,6 +378,7 @@ void SctpSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk
                         rp->random[i] = (initAckChunk->getRandom(i));
                     }
                     parPtr += ADD_PADDING(sizeof(struct random_parameter) + randomsize);
+                    printf("sizeof(struct random_parameter) + randomsize=%lu mit Padding: %lu\n", sizeof(struct random_parameter) + randomsize, ADD_PADDING(sizeof(struct random_parameter) + randomsize));
                     random->length = htons(sizeof(struct random_parameter) + randomsize);
                     rp->length = htons(sizeof(struct random_parameter) + randomsize);
                     sizeVector = ntohs(rp->length);
@@ -375,6 +395,7 @@ void SctpSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk
                     cp->length = htons(sizeof(struct tlv) + chunksize);
                     sizeVector += sizeof(struct tlv) + chunksize;
                     parPtr += ADD_PADDING(sizeof(struct tlv) + chunksize);
+                    printf("sizeof(struct tlv) + chunksize=%lu mit Padding: %lu\n", sizeof(struct tlv) + chunksize, ADD_PADDING(sizeof(struct tlv) + chunksize));
                     struct hmac_algo *hmac = (struct hmac_algo *)(((unsigned char *)iac) + size_init_chunk + parPtr);
                     struct hmac_algo *hp = (struct hmac_algo *)(((unsigned char *)(vector)) + 36 + sizeof(struct tlv) + chunksize);
                     hmac->type = htons(HMAC_ALGO);
@@ -387,6 +408,7 @@ void SctpSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk
                         hp->ident[i] = htons(initAckChunk->getHmacTypes(i));
                     }
                     parPtr += ADD_PADDING(4 + 2 * initAckChunk->getHmacTypesArraySize());
+                    printf("4 + 2 * initAckChunk->getHmacTypesArraySize()=%lu mit Padding: %lu\n", 4 + 2 * initAckChunk->getHmacTypesArraySize(), ADD_PADDING(4 + 2 * initAckChunk->getHmacTypesArraySize()));
                     for (unsigned int k = 0; k < min(sizeVector, 64); k++) {
                         if (sizeKeyVector != 0)
                             peerKeyVector[k] = vector[k];
@@ -401,9 +423,11 @@ void SctpSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk
                  /* ToDo */
                  //   calculateSharedKey();
                     free(vector);
+                    printf("parPtr now %d\n", parPtr);
                 }
                 int32 cookielen = initAckChunk->getCookieArraySize();
                 if (cookielen == 0) {
+                printf("cookielen=0\n");
                     SctpCookie *stateCookie = (SctpCookie *)(initAckChunk->getStateCookie());
                   //  SctpCookie *stateCookie = check_and_cast<SctpCookie *>(initAckChunk->getStateCookie());
                     struct init_cookie_parameter *cookie = (struct init_cookie_parameter *)(((unsigned char *)iac) + size_init_chunk + parPtr);
@@ -417,8 +441,10 @@ void SctpSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk
                         cookie->peerTieTag[i] = stateCookie->getPeerTieTag(i);
                     }
                     parPtr += (SCTP_COOKIE_LENGTH + 4);
+                    printf("SCTP_COOKIE_LENGTH + 4=%d\n", SCTP_COOKIE_LENGTH + 4);
                 } else {
                     struct tlv *cookie = (struct tlv *)(((unsigned char *)iac) + size_init_chunk + parPtr);
+                    printf("cookielen != 0\n");
                     cookie->type = htons(INIT_PARAM_COOKIE);
                     cookie->length = htons(cookielen + 4);
                     for (int32 i = 0; i < cookielen; i++)
@@ -426,6 +452,7 @@ void SctpSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk
                     parPtr += cookielen + 4;
                 }
                 iac->length = htons(SCTP_INIT_CHUNK_LENGTH + parPtr);
+                printf("add %d to writtenbytes\n", SCTP_INIT_CHUNK_LENGTH + parPtr);
                 writtenbytes += SCTP_INIT_CHUNK_LENGTH + parPtr;
                 break;
             }

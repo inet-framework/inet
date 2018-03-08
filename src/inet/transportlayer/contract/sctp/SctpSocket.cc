@@ -207,7 +207,6 @@ void SctpSocket::listen(bool fork, bool reset, uint32 requests, uint32 messagesT
     openCmd->setMessagesToPush(messagesToPush);
 
     EV_INFO << "Assoc " << openCmd->getSocketId() << ": PassiveOPEN to SCTP from SctpSocket:listen()\n";
-
     sendToSctp(cmsg);
     sockstate = LISTENING;
 }
@@ -505,7 +504,7 @@ void SctpSocket::processMessage(cMessage *msg)
         case SCTP_I_DATA_NOTIFICATION:
             EV_INFO << "SCTP_I_NOTIFICATION\n";
             if (cb) {
-                cb->socketDataNotificationArrived(assocId, yourPtr, check_and_cast<Packet *>(msg));
+                cb->socketDataNotificationArrived(assocId, yourPtr, check_and_cast<Message *>(msg));
             }
             break;
 
@@ -530,13 +529,12 @@ void SctpSocket::processMessage(cMessage *msg)
             appOptions->inboundStreams = connectInfo->getInboundStreams();
             appOptions->outboundStreams = connectInfo->getOutboundStreams();
             assocId = tags.getTag<SocketInd>()->getSocketId();
-           // assocId = msg->getMandatoryTag<SocketInd>()->getSocketId();
 
             if (cb) {
             EV_INFO << "call cb->socketEstablished\n";
                 cb->socketEstablished(assocId, yourPtr, connectInfo->getNumMsgs());
             }
-            delete connectInfo;
+            delete message;
             break;
         }
 
@@ -548,6 +546,7 @@ void SctpSocket::processMessage(cMessage *msg)
             if (cb) {
                 cb->socketPeerClosed(assocId, yourPtr);
             }
+            delete msg;
             break;
 
         case SCTP_I_ABORT:
@@ -558,6 +557,7 @@ void SctpSocket::processMessage(cMessage *msg)
             if (cb) {
                 cb->socketClosed(assocId, yourPtr);
             }
+            delete msg;
             break;
 
         case SCTP_I_CONNECTION_REFUSED:
@@ -583,6 +583,7 @@ void SctpSocket::processMessage(cMessage *msg)
             if (cb) {
                 cb->msgAbandonedArrived(assocId);
             }
+            delete msg;
             break;
 
         case SCTP_I_SHUTDOWN_RECEIVED:
@@ -612,16 +613,17 @@ void SctpSocket::processMessage(cMessage *msg)
         case SCTP_I_SEND_STREAMS_RESETTED:
         case SCTP_I_RESET_REQUEST_FAILED:
         case SCTP_I_SENDSOCKETOPTIONS:
+            delete msg;
             break;
 
         case SCTP_I_ADDRESS_ADDED: {
-        std::cout << "SCTP_I_ADDRESS_ADDED\n";
+            EV_INFO << "SCTP_I_ADDRESS_ADDED\n";
             auto& tags = getTags(msg);
             SctpCommandReq *cmd = tags.getTag<SctpCommandReq>();
             if (cb) {
                 cb->addressAddedArrived(assocId, cmd->getLocalAddr(), remoteAddr);
             }
-            delete cmd;
+           // delete cmd;
             break;
         }
 

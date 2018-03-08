@@ -1,6 +1,6 @@
 %description:
 Testing SCTP Packet Drop Reporting
-Flow Control is simulated. If the advertised receiver window drops to zero packet drop 
+Flow Control is simulated. If the advertised receiver window drops to zero packet drop
 reports should be sent.
 %#--------------------------------------------------------------------------------------------------------------
 
@@ -13,7 +13,7 @@ network=SCTPFeatureTest
 cmdenv-event-banners=false
 cmdenv-express-mode = false
 tkenv-plugin-path = ../../../etc/plugins
-ned-path = .;../../../../src;../../lib
+ned-path = .;../../../../src;../../sctpLib
 
 #omnetpp 5.0 - 5.1 compatibility:
 eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"

@@ -9,7 +9,7 @@ reset requests performed.
 %inifile: omnetpp.ini
 
 [General]
-network=SCTPFeatureTest
+network=SctpFeatureTest
 cmdenv-event-banners=false
 cmdenv-express-mode = false
 tkenv-plugin-path = ../../../etc/plugins
@@ -30,8 +30,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 # sctp apps
 **.sctp_client.numApps = 1
-**.sctp_client.sctpType="SCTP"
-**.sctp_client.app[0].typename = "SCTPClient"
+**.sctp_client.app[0].typename = "SctpClient"
 **.sctp_client.app[0].localAddress = "10.1.1.1"
 **.sctp_client.app[0].connectAddress = "10.1.3.1"
 **.sctp_client.app[0].primaryPath = "10.1.3.1"
@@ -41,27 +40,27 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.sctp_client.app[0].stopTime = truncnormal(20s,1s)
 **.sctp_client.app[0].numRequestsPerSession = 10000
 **.sctp_client.app[0].queueSize = 100
-**.sctp_client.app[0].outboundStreams = 1
+**.sctp_client.app[0].outboundStreams = 4
 **.sctp_client.app[0].streamReset = true
 **.sctp_client.app[0].streamRequestTime = 5s
-**.sctp_client.app[0].streamResetType =8  #NO_RESET=5, RESET_OUTGOING=6, RESET_INCOMING=7, RESET_BOTH=8, SSN_TSN=9
-**.sctp_client.app[0].streamAnswer = true
+**.sctp_client.app[0].streamResetType =9  #NO_RESET=5, RESET_OUTGOING=7, RESET_INCOMING=8, RESET_BOTH=9, SSN_TSN=10
+**.sctp_client.app[0].streamToReset = 2
 
 
 **.sctp_server.numApps = 1
-**.sctp_server.sctpType="SCTP"
-**.sctp_server.app[0].typename = "SCTPServer"
+**.sctp_server.app[0].typename = "SctpServer"
 **.sctp_server.app[0].localAddress = "10.1.3.1"
 **.sctp_server.app[0].localPort = 6666
-**.sctp_server.app[*].queueSize = 0 #Size of sendQueue before App is notified to send new data
+**.sctp_server.app[*].queueSize = 100 #Size of sendQueue before App is notified to send new data
 **.sctp_server.app[*].numPacketsToSendPerClient = 10000
 **.sctp_server.app[*].numPacketsToReceivePerClient = 0
-**.sctp_server.app[*].outboundStreams = 1
+**.sctp_server.app[*].outboundStreams = 4
 **.sctp_server.app[0].streamReset = true
 
 # sctp settings
 **.hasSctp = true
-**.sctp.sctpAlgorithmClass = "SCTPAlg"
+**.sctp.sctpAlgorithmClass = "SctpAlg"
+**.sctp.arwnd = 200000
 
 # NIC configuration
 #**.ppp[*].queueType = "DropTailQueue" # in routers
@@ -70,11 +69,23 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 #**.vector-recording = false
 
+**.sctp.crcMode = "computed"
+**.ipv4.**.crcMode = "computed"
+
+**.sctp_server.numPcapRecorders = 1
+**.sctp_server.pcapRecorder[0].pcapFile = "results/server1.pcap"
+**.sctp_client.numPcapRecorders = 1
+**.sctp_client.pcapRecorder[0].pcapFile = "results/client1.pcap"
+
+**.sctp_server.pcapRecorder[0].pcapNetwork = 204
+**.sctp_client.pcapRecorder[0].pcapNetwork = 204
+
+
 %#--------------------------------------------------------------------------------------------------------------
 %contains: results/General-0.sca
-scalar SCTPFeatureTest.sctp_client.sctp "Number of StreamReset requests sent" 2
-scalar SCTPFeatureTest.sctp_client.sctp "Number of StreamReset requests performed 1
+scalar SctpFeatureTest.sctp_client.sctp "Number of StreamReset requests sent" 2
+scalar SctpFeatureTest.sctp_client.sctp "Number of StreamReset requests performed" 1
 %contains: results/General-0.sca
-scalar SCTPFeatureTest.sctp_server.sctp "Number of StreamReset requests sent" 0
-scalar SCTPFeatureTest.sctp_server.sctp "Number of StreamReset requests performed" 1
+scalar SctpFeatureTest.sctp_server.sctp "Number of StreamReset requests sent" 1
+scalar SctpFeatureTest.sctp_server.sctp "Number of StreamReset requests performed" 1
 %#--------------------------------------------------------------------------------------------------------------

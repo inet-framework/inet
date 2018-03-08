@@ -18,6 +18,8 @@
 #include "inet/transportlayer/sctp/SctpAssociation.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
 #include "inet/transportlayer/contract/sctp/SctpSocket.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
 
 namespace inet {
 
@@ -44,7 +46,7 @@ typedef struct natInfo
 } NatInfo;
 typedef std::vector<NatInfo *> NatVector;
 
-class INET_API SctpNatServer : public cSimpleModule
+class INET_API SctpNatServer : public cSimpleModule, public ILifecycle
 {
   protected:
     int32 notifications;
@@ -73,13 +75,16 @@ class INET_API SctpNatServer : public cSimpleModule
         L3Address pid;
     };
 
-    void initialize() override;
+    void initialize(int stage) override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     void handleMessage(cMessage *msg) override;
     void finish() override;
     void handleTimer(cMessage *msg);
     void generateAndSend();
     void sendInfo(NatInfo *info);
     void printNatVector();
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override
+    { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 };
 
 } // namespace inet

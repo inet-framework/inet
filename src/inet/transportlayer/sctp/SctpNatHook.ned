@@ -2,9 +2,9 @@ package inet.transportlayer.sctp;
 
 
 //
-// SCTPNatHook module.
+// SctpNatHook module.
 //
-simple SCTPNatHook
+simple SctpNatHook
 {
     parameters:
         string interfaceTableModule;
