@@ -58,7 +58,7 @@ simple SctpNatPeer like IApp
         bool streamReset = default(false);
         double streamRequestTime @unit(s) = default(0s);
         int streamResetType = default(5);  //NO_RESET=5, RESET_OUTGOING=6, RESET_INCOMING=7, RESET_BOTH=8, SSN_TSN=9
-        bool streamAnswer = default(false);
+        //bool streamAnswer = default(false);
         double prValue = default(0); //for PR-SCTP
         //double stopTime @unit(s) = default(0s);
         double echoDelay @unit(s) = default(0s);

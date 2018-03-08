@@ -1,6 +1,6 @@
 %description:
 Testing SCTP Packet Drop Reporting
-Flow Control is simulated. If the advertised receiver window drops to zero packet drop 
+Flow Control is simulated. If the advertised receiver window drops to zero packet drop
 reports should be sent.
 %#--------------------------------------------------------------------------------------------------------------
 
@@ -30,7 +30,6 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 # sctp apps
 **.sctp_client.numApps = 1
-**.sctp_client.sctpType="Sctp"
 **.sctp_client.app[0].typename = "SctpClient"
 **.sctp_client.app[0].localAddress = "10.1.1.1"
 **.sctp_client.app[0].connectAddress = "10.1.3.1"
@@ -47,7 +46,6 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 
 **.sctp_server.numApps = 1
-**.sctp_server.sctpType="Sctp"
 **.sctp_server.app[0].typename = "SctpServer"
 **.sctp_server.app[0].localAddress = "10.1.3.1"
 **.sctp_server.app[0].localPort = 6666

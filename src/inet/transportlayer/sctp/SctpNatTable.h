@@ -27,7 +27,7 @@
 namespace inet {
 
 namespace sctp {
-#if 0
+
 class INET_API SctpNatEntry : public cObject
 {
   protected:
@@ -97,7 +97,7 @@ class INET_API SctpNatTable : public cSimpleModule
 
     static uint32 getNextEntryNumber() { return nextEntryNumber++; };
 };
-#endif
+
 } // namespace sctp
 
 } // namespace inet

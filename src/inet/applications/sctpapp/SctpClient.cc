@@ -173,7 +173,7 @@ void SctpClient::connect()
     if (streamReset) {
         cMessage *cmsg = new cMessage("StreamReset");
         cmsg->setKind(MSGKIND_RESET);
-        EV_INFO << "StreamReset Timer scheduled at " << simTime() << "\n";
+        EV_INFO << "StreamReset Timer scheduled at " << simTime() + par("streamRequestTime") << "\n";
         scheduleAt(simTime() + par("streamRequestTime"), cmsg);
     }
 
@@ -214,11 +214,18 @@ void SctpClient::socketEstablished(int, void *, unsigned long int buffer)
     // determine number of requests in this session
     numRequestsToSend = par("numRequestsPerSession");
     numPacketsToReceive = par("numPacketsToReceive");
+    if (numRequestsToSend == 0) {
+        sendAllowed = false;
+    }
 
     if (numRequestsToSend < 1)
         numRequestsToSend = 0;
 
-    EV_INFO << "SctpClient:numRequestsToSend=" << numRequestsToSend << "\n";
+    EV_INFO << "SctpClient:numRequestsToSend=" << numRequestsToSend << " queueSize= " << queueSize << "\n";
+
+    if (queueSize > 0) {
+        sendQueueRequest();
+    }
 
     // perform first request (next one will be sent when reply arrives)
     if ((numRequestsToSend > 0 && !timer) || timer) {
@@ -246,9 +253,6 @@ void SctpClient::socketEstablished(int, void *, unsigned long int buffer)
                             sendAllowed = false;
                     }
                 }
-
-                if (((!timer && numRequestsToSend > 0) || timer) && sendAllowed)
-                    sendQueueRequest();
             }
             else {
                 while ((((!timer && numRequestsToSend > 0) || timer) && sendAllowed && bufferSize > 0) ||
@@ -292,7 +296,6 @@ void SctpClient::sendQueueRequest()
     qinfo->setText(queueSize);
     cmsg->setKind(SCTP_C_QUEUE_MSGS_LIMIT);
     qinfo->setSocketId(socket.getConnectionId());
-    EV_INFO << "Sending queue request ..." << endl;
     socket.sendRequest(cmsg);
 }
 
@@ -326,20 +329,21 @@ void SctpClient::socketDataArrived(int, void *, Packet *msg, bool)
     packetsRcvd++;
 
     EV_INFO << "Client received packet Nr " << packetsRcvd << " from SCTP\n";
-    SctpCommandReq *ind = msg->getTag<SctpCommandReq>();
+    SctpRcvReq *ind = msg->getTag<SctpRcvReq>();
     emit(packetReceivedSignal, msg);
     bytesRcvd += msg->getByteLength();
 
     if (echo) {
-
-       // auto& smsg = msg->peekDataAt(B(0), B(msg->getByteLength()));
-
-        SctpSimpleMessage *smsg = check_and_cast<SctpSimpleMessage *>(msg);
-        cPacket *cmsg = new cPacket("SCTP_C_SEND");
-        echoedBytesSent += smsg->getByteLength();
-        emit(echoedPkSignal, msg);
-        cmsg->encapsulate(smsg);
-       // cmsg->insertAtEnd(smsg);
+        const auto& smsg = staticPtrCast<const BytesChunk>(msg->peekData());
+        auto creationTimeTag = smsg->findTag<CreationTimeTag>();
+        creationTimeTag->setCreationTime(simTime());
+        auto cmsg = new Packet("ApplicationPacket");
+        cmsg->insertAtEnd(smsg);
+        auto cmd = cmsg->addTagIfAbsent<SctpSendReq>();
+        cmd->setLast(true);
+        cmd->setSocketId(ind->getSocketId());
+        cmd->setPrValue(0);
+        cmd->setSid(ind->getSid());
         cmsg->setKind(ind->getSendUnordered() ? SCTP_C_SEND_UNORDERED : SCTP_C_SEND_ORDERED);
         packetsSent++;
         socket.sendMsg(cmsg);
@@ -351,7 +355,7 @@ void SctpClient::socketDataArrived(int, void *, Packet *msg, bool)
             close();
     }
 
-    delete ind;
+    delete msg;
 }
 
 void SctpClient::sendRequest(bool last)
@@ -398,12 +402,9 @@ void SctpClient::sendRequest(bool last)
     sctpSendReq->setSid(nextStream);
     auto creationTimeTag = applicationData->addTag<CreationTimeTag>();
     creationTimeTag->setCreationTime(simTime());
-    std::cout << "CreationTimeTag : " << creationTimeTag->getCreationTime() << endl;
     applicationPacket->setKind(ordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);
   //  emit(packetSentSignal, msg);
-    std::cout << "Call socket.sendMsg\n";
     socket.sendMsg(applicationPacket);
-    std::cout << "socket.sendMsg returned\n";
 
     bytesSent += sendBytes;
 }
@@ -456,7 +457,6 @@ void SctpClient::handleTimer(cMessage *msg)
             break;
 
         case MSGKIND_RESET:
-            EV_INFO << "StreamReset Timer expired at Client at " << simTime() << "...send notification\n";
             sendStreamResetNotification();
             delete msg;
             break;
@@ -481,19 +481,20 @@ void SctpClient::handleTimer(cMessage *msg)
     }
 }
 
-void SctpClient::socketDataNotificationArrived(int connId, void *ptr, Packet *msg)
+void SctpClient::socketDataNotificationArrived(int connId, void *ptr, Message *msg)
 {
- std::cout << "***********To Do: socketDataNotificationArrived********\n";
- /*   SctpCommand *ind = check_and_cast<SctpCommand *>(msg->removeControlInfo());
-    cMessage *cmsg = new cMessage("SCTP_C_RECEIVE");
-    SctpSendInfo *cmd = new SctpSendInfo();
+    Message *message = check_and_cast<Message *>(msg);
+    auto& intags = getTags(message);
+    SctpCommandReq *ind = intags.findTag<SctpCommandReq>();
+    Request *cmesg = new Request("SCTP_C_RECEIVE");
+    auto& outtags = getTags(cmesg);
+    SctpSendReq *cmd = outtags.addTagIfAbsent<SctpSendReq>();
     cmd->setSocketId(ind->getSocketId());
     cmd->setSid(ind->getSid());
     cmd->setNumMsgs(ind->getNumMsgs());
-    cmsg->setKind(SCTP_C_RECEIVE);
-    cmsg->setControlInfo(cmd);
-    delete ind;
-    socket.sendNotification(cmsg);*/
+    cmesg->setKind(SCTP_C_RECEIVE);
+    delete msg;
+    socket.sendNotification(cmesg);
 }
 
 void SctpClient::shutdownReceivedArrived(int connId)
@@ -592,6 +593,8 @@ void SctpClient::sendStreamResetNotification()
         rinfo->setSocketId(socket.getConnectionId());
         rinfo->setRemoteAddr(socket.getRemoteAddr());
         rinfo->setRequestType((unsigned short int)type);
+        rinfo->setStreamsArraySize(1);
+        rinfo->setStreams(0, par("streamToReset"));
         cmsg->setKind(SCTP_C_STREAM_RESET);
         socket.sendNotification(cmsg);
     }

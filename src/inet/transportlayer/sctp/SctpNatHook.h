@@ -10,7 +10,7 @@ namespace inet {
 class IPv4;
 
 namespace sctp {
-#if 0
+
 class INET_API SctpNatHook : public cSimpleModule, NetfilterBase::HookBase
 {
   protected:
@@ -23,18 +23,19 @@ class INET_API SctpNatHook : public cSimpleModule, NetfilterBase::HookBase
     void finish() override;
 
   protected:
-    void sendBackError(Ipv4Header *dgram);
+   // void sendBackError(const Ptr<const Ipv4Header>& dgram, SctpHeader* sctp);
+    void sendBackError(SctpHeader* sctp);
 
   public:
     SctpNatHook();
     virtual ~SctpNatHook();
-    IHook::Result datagramPreRoutingHook(INetworkHeader *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr) override;
-    IHook::Result datagramForwardHook(INetworkHeader *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr) override;
-    IHook::Result datagramPostRoutingHook(INetworkHeader *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr) override;
-    IHook::Result datagramLocalInHook(INetworkHeader *datagram, const InterfaceEntry *inIE) override;
-    IHook::Result datagramLocalOutHook(INetworkHeader *datagram, const InterfaceEntry *& outIE, L3Address& nextHopAddr) override;
+    virtual Result datagramPreRoutingHook(Packet *packet) override;
+    virtual Result datagramForwardHook(Packet *packet) override;
+    virtual Result datagramPostRoutingHook(Packet *packet) override { return ACCEPT; }
+    virtual Result datagramLocalInHook(Packet *packet) override { return ACCEPT; }
+    virtual Result datagramLocalOutHook(Packet *packet) override { return ACCEPT; }
 };
-#endif
+
 } // namespace sctp
 
 } // namespace inet

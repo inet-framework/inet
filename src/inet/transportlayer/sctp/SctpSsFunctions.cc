@@ -118,6 +118,10 @@ int32 SctpAssociation::streamScheduler(SctpPathVariables *path, bool peek)    //
         do {
             testsid = (testsid + 1) % outboundStreams;
 
+            if (streamIsPending(testsid)) {
+                continue;
+            }
+
             if (sendStreams.find(testsid)->second->getUnorderedStreamQ()->getLength() > 0 ||
                 sendStreams.find(testsid)->second->getStreamQ()->getLength() > 0)
             {
@@ -164,6 +168,10 @@ int32 SctpAssociation::streamSchedulerRoundRobinPacket(SctpPathVariables *path, 
 
         do {
             testsid = (testsid + 1) % outboundStreams;
+
+            if (streamIsPending(testsid)) {
+                continue;
+            }
 
             if (sendStreams.find(testsid)->second->getUnorderedStreamQ()->getLength() > 0 ||
                 sendStreams.find(testsid)->second->getStreamQ()->getLength() > 0)

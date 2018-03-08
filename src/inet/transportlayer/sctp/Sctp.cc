@@ -176,7 +176,7 @@ void Sctp::handleMessage(cMessage *msg)
     L3Address srcAddr;
     bool findListen = false;
 
-    EV_DEBUG << "\n\nSctpMain handleMessage at " << getFullPath() << "\n";
+    EV_INFO << "\n\nSctpMain handleMessage at " << getFullPath() << "\n";
 
     if (msg->isSelfMessage()) {
         EV_DEBUG << "selfMessage\n";
@@ -196,8 +196,7 @@ void Sctp::handleMessage(cMessage *msg)
         auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
         if (protocol == &Protocol::sctp) {
             // must be an SctpHeader
-            auto sctpmsg = packet->peekHeader<SctpHeader>();
-
+            SctpHeader *sctpmsg = (SctpHeader *)(packet->peekHeader<SctpHeader>().get());
             numPacketsReceived++;
 #if 0
 			if (!pktdrop && (sctpmsg->hasBitError() || !(sctpmsg->getChecksumOk()))) {

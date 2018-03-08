@@ -37,14 +37,12 @@ namespace sctp {
 void SctpAssociation::process_ASSOCIATE(SctpEventCode& event, SctpCommandReq *sctpCommand, cMessage *msg)
 {
     L3Address lAddr, rAddr;
-std::cout << "SctpAssociation::process_ASSOCIATE\n";
     SctpOpenReq *openCmd = check_and_cast<SctpOpenReq *>(sctpCommand);
     auto request = check_and_cast<Request *>(msg);
     auto& tags = getTags(request);
     auto interfaceReq = tags.findTag<InterfaceReq>();
     if (interfaceReq && interfaceReq->getInterfaceId() != -1) {
         sctpMain->setInterfaceId(interfaceReq->getInterfaceId());
-        std::cout << "InterfaceId set to " << sctpMain->getInterfaceId() << endl;
     }
 
     EV_INFO << "SctpAssociationEventProc:process_ASSOCIATE\n";
@@ -137,7 +135,6 @@ void SctpAssociation::process_OPEN_PASSIVE(SctpEventCode& event, SctpCommandReq 
 
 void SctpAssociation::process_SEND(SctpEventCode& event, SctpCommandReq *sctpCommand, cMessage *msg)
 {
-    std::cout << "SctpAssociation::process_SEND\n";
     SctpSendReq *sendCommand = check_and_cast<SctpSendReq *>(sctpCommand);
 
     if (fsm->getState() != SCTP_S_ESTABLISHED) {
@@ -147,7 +144,7 @@ void SctpAssociation::process_SEND(SctpEventCode& event, SctpCommandReq *sctpCom
         return;
     }
 
-    std::cout << "process_SEND:"
+    EV_INFO << "process_SEND:"
              << " assocId=" << assocId
              << " localAddr=" << localAddr
              << " remoteAddr=" << remoteAddr
@@ -312,7 +309,7 @@ void SctpAssociation::process_SEND(SctpEventCode& event, SctpCommandReq *sctpCom
     if ((state->queueLimit > 0) && (state->queuedMessages > state->queueLimit)) {
         state->queueUpdate = false;
     }
-    EV_DEBUG << "process_SEND:"
+    EV_INFO << "process_SEND:"
              << " last=" << sendCommand->getLast()
              << "    queueLimit=" << state->queueLimit << endl;
 
@@ -347,7 +344,7 @@ void SctpAssociation::process_PRIMARY(SctpEventCode& event, SctpCommandReq *sctp
 
 void SctpAssociation::process_STREAM_RESET(SctpCommandReq *sctpCommand)
 {
-    EV_DEBUG << "process_STREAM_RESET request arriving from App\n";
+    EV_INFO << "process_STREAM_RESET request arriving from App\n";
     SctpResetReq *rinfo = (SctpResetReq *)(sctpCommand);
     if (!(getPath(remoteAddr)->ResetTimer->isScheduled())) {
         if (rinfo->getRequestType() == ADD_BOTH) {
@@ -360,7 +357,7 @@ void SctpAssociation::process_STREAM_RESET(SctpCommandReq *sctpCommand)
                 state->resetPending = true;
             }
         } else if (state->outstandingBytes > 0) {
-            if (rinfo->getRequestType() == RESET_OUTGOING || rinfo->getRequestType() == RESET_INCOMING) {
+            if (rinfo->getRequestType() == RESET_OUTGOING || rinfo->getRequestType() == RESET_INCOMING || rinfo->getRequestType() == RESET_BOTH) {
                 if (rinfo->getStreamsArraySize() > 0) {
                     for (uint16 i = 0; i < rinfo->getStreamsArraySize(); i++) {
                         if ((getBytesInFlightOfStream(rinfo->getStreams(i)) > 0) ||
@@ -410,7 +407,6 @@ void SctpAssociation::process_QUEUE_MSGS_LIMIT(const SctpCommandReq *sctpCommand
 {
     const SctpInfoReq *qinfo = (const SctpInfoReq *)(sctpCommand);
     state->queueLimit = qinfo->getText();
-    EV_DEBUG << "state->queueLimit set to " << state->queueLimit << "\n";
 }
 
 void SctpAssociation::process_QUEUE_BYTES_LIMIT(const SctpCommandReq *sctpCommand)

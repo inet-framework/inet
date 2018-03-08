@@ -142,7 +142,7 @@ void SctpAssociation::sendAsconf(const char *type, const bool remote)
                 }
 
                 default:
-                    printf("type %d not known\n", atoi(token));
+                    EV_INFO << "type " <<  atoi(token) << "not known\n";
                     break;
             }
         }

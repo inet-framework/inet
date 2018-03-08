@@ -80,46 +80,7 @@ void SctpCrcInsertion::insertCrc(const Protocol *networkProtocol, const L3Addres
     }
 }
 
-
-#if 0
-uint16_t TcpCrcInsertion::computeCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const std::vector<uint8_t>& tcpHeaderBytes, const std::vector<uint8_t>& tcpDataBytes)
-{
-    auto pseudoHeader = makeShared<TransportPseudoHeader>();
-    pseudoHeader->setSrcAddress(srcAddress);
-    pseudoHeader->setDestAddress(destAddress);
-    pseudoHeader->setNetworkProtocolId(networkProtocol->getId());
-    pseudoHeader->setProtocolId(IP_PROT_TCP);
-    pseudoHeader->setPacketLength(tcpHeaderBytes.size() + tcpDataBytes.size());
-    // pseudoHeader length: ipv4: 12 bytes, ipv6: 40 bytes, generic: ???
-    if (networkProtocol == &Protocol::ipv4)
-        pseudoHeader->setChunkLength(B(12));
-    else if (networkProtocol == &Protocol::ipv6)
-        pseudoHeader->setChunkLength(B(40));
-    else
-        throw cRuntimeError("Unknown network protocol: %s", networkProtocol->getName());
-    auto pseudoHeaderBytes = pseudoHeader->Chunk::peek<BytesChunk>(B(0), pseudoHeader->getChunkLength())->getBytes();
-    // Excerpt from RFC 768:
-    // Checksum is the 16-bit one's complement of the one's complement sum of a
-    // pseudo header of information from the IP header, the UDP header, and the
-    // data,  padded  with zero octets  at the end (if  necessary)  to  make  a
-    // multiple of two octets.
-    auto pseudoHeaderLength = pseudoHeaderBytes.size();
-    auto tcpHeaderLength = tcpHeaderBytes.size();
-    auto tcpDataLength =  tcpDataBytes.size();
-    auto bufferLength = pseudoHeaderLength + tcpHeaderLength + tcpDataLength;
-    auto buffer = new uint8_t[bufferLength];
-    // 1. fill in the data
-    std::copy(pseudoHeaderBytes.begin(), pseudoHeaderBytes.end(), (uint8_t *)buffer);
-    std::copy(tcpHeaderBytes.begin(), tcpHeaderBytes.end(), (uint8_t *)buffer + pseudoHeaderLength);
-    std::copy(tcpDataBytes.begin(), tcpDataBytes.end(), (uint8_t *)buffer + pseudoHeaderLength + tcpHeaderLength);
-    // 2. compute the CRC
-    uint16_t crc = inet::serializer::TcpIpChecksum::checksum(buffer, bufferLength);
-    delete [] buffer;
-    return crc;
-}
-#endif
-
-} // namespace tcp
+} // namespace sctp
 
 } // namespace inet
 

@@ -24,18 +24,18 @@ import inet.node.inet.StandardHost;
 //
 // \IP router.
 //
-module SCTPNatRouter extends StandardHost
+module SctpNatRouter extends StandardHost
 {
     parameters:
         forwarding = true;
         natHook.networkProtocolModule = default(absPath(".ipv4.ip"));
         natHook.natTableModule = default(absPath(".natTable"));
         submodules:
-        natHook: SCTPNatHook {
+        natHook: SctpNatHook {
             parameters:
                 @display( "p=160,132;i=block/table");
         }
-        natTable: SCTPNatTable {
+        natTable: SctpNatTable {
             parameters:
                 @display( "p=60,132;i=block/table");
         }
