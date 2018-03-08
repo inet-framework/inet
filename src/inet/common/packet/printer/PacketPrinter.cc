@@ -88,11 +88,9 @@ void PacketPrinter::printContext(std::ostream& stream, const Options *options, P
 
 void PacketPrinter::printMessage(std::ostream& stream, cMessage *message) const
 {
-    // TODO: enable when migrating to new printer API
-//    Options options;
-//    options.enabledTags = getDefaultEnabledTags();
-//    printMessage(stream, message, &options);
-    printMessage(stream, message, nullptr);
+    Options options;
+    options.enabledTags = getDefaultEnabledTags();
+    printMessage(stream, message, &options);
 }
 
 void PacketPrinter::printMessage(std::ostream& stream, cMessage *message, const Options *options) const
@@ -111,11 +109,9 @@ void PacketPrinter::printMessage(std::ostream& stream, cMessage *message, const 
 
 void PacketPrinter::printSignal(std::ostream& stream, inet::physicallayer::Signal *signal) const
 {
-    // TODO: enable when migrating to new printer API
-//    Options options;
-//    options.enabledTags = getDefaultEnabledTags();
-//    printMessage(stream, message, &options);
-    printSignal(stream, signal, nullptr);
+    Options options;
+    options.enabledTags = getDefaultEnabledTags();
+    printSignal(stream, signal, &options);
 }
 
 void PacketPrinter::printSignal(std::ostream& stream, inet::physicallayer::Signal *signal, const Options *options) const
@@ -132,11 +128,9 @@ void PacketPrinter::printSignal(inet::physicallayer::Signal *signal, const Optio
 
 void PacketPrinter::printPacket(std::ostream& stream, Packet *packet) const
 {
-    // TODO: enable when migrating to new printer API
-//    Options options;
-//    options.enabledTags = getDefaultEnabledTags();
-//    printMessage(stream, message, &options);
-    printPacket(stream, packet, nullptr);
+    Options options;
+    options.enabledTags = getDefaultEnabledTags();
+    printPacket(stream, packet, &options);
 }
 
 void PacketPrinter::printPacket(std::ostream& stream, Packet *packet, const Options *options) const
