@@ -80,6 +80,8 @@ void ApskRadio::encapsulate(Packet *packet) const
         headerLength = flatTransmitter->getHeaderLength();
         if (headerLength > phyHeader->getChunkLength())
             packet->insertHeader(makeShared<BitCountChunk>(headerLength - phyHeader->getChunkLength()));
+        else
+            throw cRuntimeError("Header length too short");
     }
     packet->insertHeader(phyHeader);
     auto paddingLength = computePaddingLength(headerLength + B(phyHeader->getLengthField()), nullptr, getModulation());
