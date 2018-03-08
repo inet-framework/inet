@@ -100,7 +100,7 @@ std::vector<std::string> PacketPrinter::getColumnNames(const Options *options) c
     return columnNames;
 }
 
-void PacketPrinter::printContext(std::ostream& stream, const Options *options, PacketPrinterContext& context) const
+void PacketPrinter::printContext(std::ostream& stream, const Options *options, Context& context) const
 {
     if (!context.isCorrect)
         stream << "\x1b[103m";
@@ -127,7 +127,7 @@ void PacketPrinter::printMessage(std::ostream& stream, cMessage *message) const
 
 void PacketPrinter::printMessage(std::ostream& stream, cMessage *message, const Options *options) const
 {
-    PacketPrinterContext context;
+    Context context;
     for (auto cpacket = dynamic_cast<cPacket *>(message); cpacket != nullptr; cpacket = cpacket->getEncapsulatedPacket()) {
         if (auto signal = dynamic_cast<inet::physicallayer::Signal *>(cpacket))
             printSignal(signal, options, context);
@@ -148,12 +148,12 @@ void PacketPrinter::printSignal(std::ostream& stream, inet::physicallayer::Signa
 
 void PacketPrinter::printSignal(std::ostream& stream, inet::physicallayer::Signal *signal, const Options *options) const
 {
-    PacketPrinterContext context;
+    Context context;
     printSignal(signal, options, context);
     printContext(stream, options, context);
 }
 
-void PacketPrinter::printSignal(inet::physicallayer::Signal *signal, const Options *options, PacketPrinterContext& context) const
+void PacketPrinter::printSignal(inet::physicallayer::Signal *signal, const Options *options, Context& context) const
 {
     context.infoColumn << signal->str();
 }
@@ -167,12 +167,12 @@ void PacketPrinter::printPacket(std::ostream& stream, Packet *packet) const
 
 void PacketPrinter::printPacket(std::ostream& stream, Packet *packet, const Options *options) const
 {
-    PacketPrinterContext context;
+    Context context;
     printPacket(packet, options, context);
     printContext(stream, options, context);
 }
 
-void PacketPrinter::printPacket(Packet *packet, const Options *options, PacketPrinterContext& context) const
+void PacketPrinter::printPacket(Packet *packet, const Options *options, Context& context) const
 {
     PacketDissector::PduTreeBuilder pduTreeBuilder;
     auto packetProtocolTag = packet->findTag<PacketProtocolTag>();
@@ -186,7 +186,7 @@ void PacketPrinter::printPacket(Packet *packet, const Options *options, PacketPr
         const_cast<PacketPrinter *>(this)->printPacketLeftToRight(protocolDataUnit, options, context);
 }
 
-void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, const Options *options, PacketPrinterContext& context) const
+void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, const Options *options, Context& context) const
 {
     auto protocol = protocolDataUnit->getProtocol();
     context.isCorrect &= protocolDataUnit->isCorrect();
@@ -196,7 +196,7 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
             printPacketInsideOut(childLevel, options, context);
         else {
             auto& protocolPrinter = getProtocolPrinter(protocol);
-            PacketPrinterContext protocolContext;
+            ProtocolPrinter::Context protocolContext;
             protocolPrinter.print(chunk, protocol, options, protocolContext);
             if (protocolDataUnit->getLevel() > context.infoLevel) {
                 context.infoLevel = protocolDataUnit->getLevel();
@@ -217,7 +217,7 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
     }
 }
 
-void PacketPrinter::printPacketLeftToRight(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, const Options *options, PacketPrinterContext& context) const
+void PacketPrinter::printPacketLeftToRight(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, const Options *options, Context& context) const
 {
     auto protocol = protocolDataUnit->getProtocol();
     context.isCorrect &= protocolDataUnit->isCorrect();
@@ -227,7 +227,7 @@ void PacketPrinter::printPacketLeftToRight(const Ptr<const PacketDissector::Prot
             printPacketLeftToRight(childLevel, options, context);
         else {
             auto& protocolPrinter = getProtocolPrinter(protocol);
-            PacketPrinterContext protocolContext;
+            ProtocolPrinter::Context protocolContext;
             protocolPrinter.print(chunk, protocol, options, protocolContext);
             if (protocolDataUnit->getLevel() > context.infoLevel) {
                 context.infoLevel = protocolDataUnit->getLevel();
@@ -245,7 +245,7 @@ void PacketPrinter::printPacketLeftToRight(const Ptr<const PacketDissector::Prot
     }
 }
 
-void PacketPrinter::printSourceColumn(const std::string source, const Options *options, PacketPrinterContext& context) const
+void PacketPrinter::printSourceColumn(const std::string source, const Options *options, Context& context) const
 {
     if (source.length() != 0) {
         if (!isEnabledOption(options, "Show all PDU source fields"))
@@ -256,7 +256,7 @@ void PacketPrinter::printSourceColumn(const std::string source, const Options *o
     }
 }
 
-void PacketPrinter::printDestinationColumn(const std::string destination, const Options *options, PacketPrinterContext& context) const
+void PacketPrinter::printDestinationColumn(const std::string destination, const Options *options, Context& context) const
 {
     if (destination.length() != 0) {
         if (!isEnabledOption(options, "Show all PDU destination fields"))
@@ -267,7 +267,7 @@ void PacketPrinter::printDestinationColumn(const std::string destination, const 
     }
 }
 
-void PacketPrinter::printProtocolColumn(const Protocol *protocol, const Options *options, PacketPrinterContext& context) const
+void PacketPrinter::printProtocolColumn(const Protocol *protocol, const Options *options, Context& context) const
 {
     if (protocol != nullptr) {
         if (!isEnabledOption(options, "Show all PDU protocols"))
@@ -278,7 +278,7 @@ void PacketPrinter::printProtocolColumn(const Protocol *protocol, const Options 
     }
 }
 
-void PacketPrinter::printLengthColumn(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, const Options *options, PacketPrinterContext& context) const
+void PacketPrinter::printLengthColumn(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, const Options *options, Context& context) const
 {
     auto lengthColumnLength = context.lengthColumn.str().length();
     if (lengthColumnLength == 0 || isEnabledOption(options, "Show all PDU lengths")) {

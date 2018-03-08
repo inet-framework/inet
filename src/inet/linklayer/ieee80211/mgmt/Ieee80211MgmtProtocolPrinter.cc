@@ -28,7 +28,7 @@ namespace ieee80211 {
 
 Register_Protocol_Printer(&Protocol::ieee80211Mgmt, Ieee80211MgmtProtocolPrinter);
 
-void Ieee80211MgmtProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, PacketPrinterContext& context) const
+void Ieee80211MgmtProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, Context& context) const
 {
     context.infoColumn << "(IEEE 802.11 Mgmt) " << chunk;
 }

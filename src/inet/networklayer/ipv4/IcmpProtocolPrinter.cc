@@ -27,7 +27,7 @@ namespace inet {
 
 Register_Protocol_Printer(&Protocol::icmpv4, IcmpProtocolPrinter);
 
-void IcmpProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, PacketPrinterContext& context) const
+void IcmpProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, Context& context) const
 {
     if (auto header = dynamicPtrCast<const IcmpHeader>(chunk)) {
         switch (header->getType()) {

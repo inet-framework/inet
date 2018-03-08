@@ -27,7 +27,7 @@ namespace inet {
 
 Register_Protocol_Printer(&Protocol::tcp, TcpProtocolPrinter);
 
-void TcpProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, PacketPrinterContext& context) const
+void TcpProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, Context& context) const
 {
     using namespace tcp;
 

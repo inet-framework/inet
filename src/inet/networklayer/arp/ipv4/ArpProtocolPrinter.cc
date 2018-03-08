@@ -27,7 +27,7 @@ namespace inet {
 
 Register_Protocol_Printer(&Protocol::arp, ArpProtocolPrinter);
 
-void ArpProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, PacketPrinterContext& context) const
+void ArpProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, Context& context) const
 {
     if (auto arpPacket = dynamicPtrCast<const ArpPacket>(chunk)) {
         context.infoColumn << arpPacket->str();

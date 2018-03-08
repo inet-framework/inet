@@ -27,7 +27,7 @@ namespace inet {
 
 Register_Protocol_Printer(&Protocol::udp, UdpProtocolPrinter);
 
-void UdpProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, PacketPrinterContext& context) const
+void UdpProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, Context& context) const
 {
     if (auto header = dynamicPtrCast<const UdpHeader>(chunk)) {
         context.sourceColumn << header->getSrcPort();

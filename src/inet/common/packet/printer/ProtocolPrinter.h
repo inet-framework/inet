@@ -21,24 +21,31 @@
 
 namespace inet {
 
-class PacketPrinterContext;
-
 /**
  * Protocol printer classes print protocol specific chunks into a context.
  */
 class INET_API ProtocolPrinter : public cObject
 {
   public:
+    class INET_API Context
+    {
+      public:
+        std::stringstream sourceColumn;
+        std::stringstream destinationColumn;
+        std::stringstream infoColumn;
+    };
+
+  public:
     /**
      * Prints the given chunk of protocol according to options into context.
      */
-    virtual void print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, PacketPrinterContext& context) const = 0;
+    virtual void print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, Context& context) const = 0;
 };
 
 class INET_API DefaultProtocolPrinter : public ProtocolPrinter
 {
   public:
-    virtual void print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, PacketPrinterContext& context) const override;
+    virtual void print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, Context& context) const override;
 };
 
 } // namespace

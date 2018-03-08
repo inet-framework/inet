@@ -27,7 +27,7 @@ namespace inet {
 
 Register_Protocol_Printer(&Protocol::ieee8022, Ieee8022LlcProtocolPrinter);
 
-void Ieee8022LlcProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, PacketPrinterContext& context) const
+void Ieee8022LlcProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, Context& context) const
 {
     if (auto header = dynamicPtrCast<const Ieee8022LlcHeader>(chunk)) {
         context.infoColumn << "ssap:" << header->getSsap() << " dsap:" << header->getDsap() << " ctrl:" << header->getControl();

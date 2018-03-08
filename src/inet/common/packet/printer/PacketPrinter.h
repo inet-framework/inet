@@ -22,32 +22,34 @@
 
 namespace inet {
 
-class PacketPrinterContext {
-  public:
-    bool isCorrect = true;
-    std::stringstream sourceColumn;
-    std::stringstream destinationColumn;
-    std::stringstream protocolColumn;
-    std::stringstream lengthColumn;
-    std::stringstream infoColumn;
-    int infoLevel = -1;
-};
-
 class INET_API PacketPrinter : public cMessagePrinter
 {
+  protected:
+    class INET_API Context
+    {
+      public:
+        int infoLevel = -1;
+        bool isCorrect = true;
+        std::stringstream sourceColumn;
+        std::stringstream destinationColumn;
+        std::stringstream protocolColumn;
+        std::stringstream lengthColumn;
+        std::stringstream infoColumn;
+    };
+
   protected:
     virtual bool isEnabledOption(const Options *options, const char *name) const;
     virtual bool isEnabledInfo(const Options *options, const Protocol *protocol) const;
     virtual const ProtocolPrinter& getProtocolPrinter(const Protocol *protocol) const;
-    virtual void printContext(std::ostream& stream, const Options *options, PacketPrinterContext& context) const;
-    virtual void printSignal(inet::physicallayer::Signal *signal, const Options *options, PacketPrinterContext& context) const;
-    virtual void printPacket(Packet *packet, const Options *options, PacketPrinterContext& context) const;
-    virtual void printPacketInsideOut(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, const Options *options, PacketPrinterContext& context) const;
-    virtual void printPacketLeftToRight(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, const Options *options, PacketPrinterContext& context) const;
-    virtual void printSourceColumn(const std::string source, const Options *options, PacketPrinterContext& context) const;
-    virtual void printDestinationColumn(const std::string destination, const Options *options, PacketPrinterContext& context) const;
-    virtual void printProtocolColumn(const Protocol *protocol, const Options *options, PacketPrinterContext& context) const;
-    virtual void printLengthColumn(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, const Options *options, PacketPrinterContext& context) const;
+    virtual void printContext(std::ostream& stream, const Options *options, Context& context) const;
+    virtual void printSignal(inet::physicallayer::Signal *signal, const Options *options, Context& context) const;
+    virtual void printPacket(Packet *packet, const Options *options, Context& context) const;
+    virtual void printPacketInsideOut(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, const Options *options, Context& context) const;
+    virtual void printPacketLeftToRight(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, const Options *options, Context& context) const;
+    virtual void printSourceColumn(const std::string source, const Options *options, Context& context) const;
+    virtual void printDestinationColumn(const std::string destination, const Options *options, Context& context) const;
+    virtual void printProtocolColumn(const Protocol *protocol, const Options *options, Context& context) const;
+    virtual void printLengthColumn(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, const Options *options, Context& context) const;
 
   public:
     virtual int getScoreFor(cMessage *msg) const override;

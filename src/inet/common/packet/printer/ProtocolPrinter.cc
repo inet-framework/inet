@@ -23,7 +23,7 @@ namespace inet {
 
 Register_Protocol_Printer(nullptr, DefaultProtocolPrinter);
 
-void DefaultProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, PacketPrinterContext& context) const
+void DefaultProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, Context& context) const
 {
     if (protocol == nullptr)
         context.infoColumn << "(UNKNOWN) ";

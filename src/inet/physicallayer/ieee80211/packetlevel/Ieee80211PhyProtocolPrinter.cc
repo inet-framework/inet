@@ -28,7 +28,7 @@ namespace physicallayer {
 
 Register_Protocol_Printer(&Protocol::ieee80211Phy, Ieee80211PhyProtocolPrinter);
 
-void Ieee80211PhyProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, PacketPrinterContext& context) const
+void Ieee80211PhyProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, Context& context) const
 {
     context.infoColumn << "(IEEE 802.11 Phy) " << chunk;
 }

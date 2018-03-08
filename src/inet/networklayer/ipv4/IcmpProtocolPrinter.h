@@ -26,7 +26,7 @@ namespace inet {
 class INET_API IcmpProtocolPrinter : public ProtocolPrinter
 {
   public:
-    virtual void print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, PacketPrinterContext& context) const override;
+    virtual void print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, Context& context) const override;
 };
 
 } // namespace inet
