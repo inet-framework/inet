@@ -205,11 +205,6 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
                     // TODO: printEthernetChunk(context.infoColumn, chunk);
                 }
             }
-            else if (protocol == &Protocol::ieee8022) {
-                if (protocolDataUnit->getLevel() > context.infoLevel) {
-                    printIeee8022Chunk(context.infoColumn, chunk);
-                }
-            }
             else {
                 if (protocolDataUnit->getLevel() > context.infoLevel)
                     protocolPrinter.print(chunk, protocol, options, context);
@@ -233,11 +228,6 @@ void PacketPrinter::printPacketLeftToRight(const Ptr<const PacketDissector::Prot
         else
             getProtocolPrinter(protocol).print(chunk, protocol, options, context);
     }
-}
-
-void PacketPrinter::printIeee8022Chunk(std::ostream& stream, const Ptr<const Chunk>& chunk) const
-{
-    stream << "(IEEE 802.2) " << chunk;
 }
 
 } // namespace
