@@ -275,7 +275,6 @@ void SctpSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk
 
             case INIT_ACK: {
                 SctpInitAckChunk *initAckChunk = check_and_cast<SctpInitAckChunk *>(chunk);
-                //sctpEV3<<simulation.simTime()<<" SctpAssociation:: InitAck sent \n";
                 // destination is send buffer:
                 struct init_ack_chunk *iac = (struct init_ack_chunk *)(buffer + writtenbytes);    // append data to buffer
                 // fill buffer with data from Sctp init ack chunk structure
@@ -978,7 +977,7 @@ void SctpSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk
                           /*  if (check_and_cast<Ipv4Header *>(ecp->getEncapsulatedPacket()) != nullptr) {
                                 Buffer b((unsigned char *)error + sizeof(struct error_chunk) + 4, ecp->getByteLength() - 4);
                                 Context c;
-                                IPv4Serializer().serializePacket(ecp->getEncapsulatedPacket(), b, c);
+                                Ipv4Serializer().serializePacket(ecp->getEncapsulatedPacket(), b, c);
                             }*/
                             errorc->length = htons(ecp->getByteLength());
                             break;
@@ -1171,7 +1170,6 @@ void SctpSerializer::hmacSha1(const uint8 *buf, uint32 buflen, const uint8 *key,
 
 const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
 {
-#if 0
     int32 size_common_header = sizeof(struct common_header);
     int32 size_init_chunk = sizeof(struct init_chunk);
     int32 size_init_ack_chunk = sizeof(struct init_ack_chunk);
@@ -1190,13 +1188,22 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
     int size_stream_reset_chunk = sizeof(struct stream_reset_chunk);
     uint16 paramType;
     int32 parptr, chunklen, cLen, woPadding;
-    struct common_header *common_header = (struct common_header *)(buf);
+
+    auto position = stream.getPosition();
+    int bufsize = B(stream.getRemainingLength()).get() / 8;
+    printf("bufsize=%d\n", bufsize);
+    uint8_t buffer[bufsize];
+    stream.readBytes(buffer, B(bufsize));
+    auto dest = makeShared<SctpHeader>();
+    //const struct tcphdr& tcp = *static_cast<const struct tcphdr *>((void *)&buffer);
+
+    struct common_header *common_header = (struct common_header *)((void *)&buffer);
     int32 tempChecksum = common_header->checksum;
     common_header->checksum = 0;
-    int32 chksum = checksum((unsigned char *)common_header, bufsize);
+    int32 chksum = inet::serializer::SctpChecksum::checksum((unsigned char *)common_header, bufsize);
     common_header->checksum = tempChecksum;
 
-    const unsigned char *chunks = (unsigned char *)(buf + size_common_header);
+    const unsigned char *chunks = (unsigned char *)(buffer + size_common_header);
     EV_TRACE << "SctpSerializer::parse SctpHeader\n";
     if (tempChecksum == chksum)
         dest->setChecksumOk(true);
@@ -1205,8 +1212,9 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
     EV_DETAIL << "checksumOK=" << dest->getChecksumOk() << "\n";
     dest->setSrcPort(ntohs(common_header->source_port));
     dest->setDestPort(ntohs(common_header->destination_port));
-    dest->setTag(ntohl(common_header->verification_tag));
-    dest->setBitLength(SCTP_COMMON_HEADER * 8);
+    dest->setVTag(ntohl(common_header->verification_tag));
+    dest->setChunkLength(B(SCTP_COMMON_HEADER));
+    dest->setCrcMode(CRC_COMPUTED);
     // chunks
     uint32 chunkPtr = 0;
 
@@ -1224,7 +1232,7 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                 if (cLen == 0)
                     throw new cRuntimeError("Incoming SCTP packet contains data chunk with length==0");
                 SctpDataChunk *chunk = new SctpDataChunk("DATA");
-                chunk->setChunkType(chunkType);
+                chunk->setSctpChunkType(chunkType);
                 chunk->setUBit(dc->flags & UNORDERED_BIT);
                 chunk->setBBit(dc->flags & BEGIN_BIT);
                 chunk->setEBit(dc->flags & END_BIT);
@@ -1247,7 +1255,7 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                     chunk->encapsulate(msg);
                 }
                 EV_DETAIL << "datachunkLength=" << chunk->getByteLength() << "\n";
-                dest->addChunk(chunk);
+                dest->insertSctpChunks(chunk);
                 break;
             }
 
@@ -1260,13 +1268,13 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                 unsigned int rplen = 0, hplen = 0, cplen = 0;
                 chunklen = SCTP_INIT_CHUNK_LENGTH;
                 SctpInitChunk *chunk = new SctpInitChunk("INIT");
-                chunk->setChunkType(chunkType);
+                chunk->setSctpChunkType(chunkType);
                 chunk->setName("INIT");
                 chunk->setInitTag(ntohl(init_chunk->initiate_tag));
                 chunk->setA_rwnd(ntohl(init_chunk->a_rwnd));
                 chunk->setNoOutStreams(ntohs(init_chunk->mos));
                 chunk->setNoInStreams(ntohs(init_chunk->mis));
-                chunk->setInitTSN(ntohl(init_chunk->initial_tsn));
+                chunk->setInitTsn(ntohl(init_chunk->initial_tsn));
                 chunk->setAddressesArraySize(0);
                 chunk->setUnrecognizedParametersArraySize(0);
                 //sctpEV3<<"INIT arrived from wire\n";
@@ -1303,7 +1311,7 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                                 const struct init_ipv4_address_parameter *v4addr;
                                 v4addr = (struct init_ipv4_address_parameter *)(((unsigned char *)init_chunk) + size_init_chunk + parptr);
                                 chunk->setAddressesArraySize(++addrcounter);
-                                L3Address localv4Addr(IPv4Address(ntohl(v4addr->address)));
+                                L3Address localv4Addr(Ipv4Address(ntohl(v4addr->address)));
                                 chunk->setAddresses(addrcounter - 1, localv4Addr);
                                 chunklen += 8;
                                 break;
@@ -1313,7 +1321,7 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                                 EV_INFO << "IPv6\n";
                                 const struct init_ipv6_address_parameter *ipv6addr;
                                 ipv6addr = (struct init_ipv6_address_parameter *)(((unsigned char *)init_chunk) + size_init_chunk + parptr);
-                                IPv6Address ipv6Addr = IPv6Address(ipv6addr->address[0], ipv6addr->address[1],
+                                Ipv6Address ipv6Addr = Ipv6Address(ipv6addr->address[0], ipv6addr->address[1],
                                             ipv6addr->address[2], ipv6addr->address[3]);
                                 L3Address localv6Addr(ipv6Addr);
                                 EV_INFO << "address" << ipv6Addr << "\n";
@@ -1343,9 +1351,9 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
 
                             case FORWARD_TSN_SUPPORTED_PARAMETER: {
                                 EV_INFO << "Forward TSN\n";
-                                int size = chunk->getChunkTypesArraySize();
-                                chunk->setChunkTypesArraySize(size + 1);
-                                chunk->setChunkTypes(size, FORWARD_TSN_SUPPORTED_PARAMETER);
+                                int size = chunk->getSctpChunkTypesArraySize();
+                                chunk->setSctpChunkTypesArraySize(size + 1);
+                                chunk->setSctpChunkTypes(size, FORWARD_TSN_SUPPORTED_PARAMETER);
                                 chunklen += ntohs(parameter->length);
                                 break;
                             }
@@ -1399,9 +1407,9 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                                 cplen = ntohs(chunks->length);
                                 cp->length = chunks->length;
                                 int num = cplen - 4;
-                                chunk->setChunkTypesArraySize(num);
+                                chunk->setSctpChunkTypesArraySize(num);
                                 for (int i = 0; i < num; i++) {
-                                    chunk->setChunkTypes(i, (chunks->value[i]));
+                                    chunk->setSctpChunkTypes(i, (chunks->value[i]));
                                     cp->value[i] = chunks->value[i];
                                 }
                                 chunklen += ADD_PADDING(ntohs(parameter->length));
@@ -1457,7 +1465,7 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                 }
                 chunk->setBitLength(chunklen * 8);
                 EV_INFO << "chunklen: " << chunk->getByteLength() << endl;
-                dest->addChunk(chunk);
+                dest->insertSctpChunks(chunk);
                 //chunkPtr += cLen;
                 break;
             }
@@ -1470,12 +1478,12 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                 unsigned int rplen = 0, hplen = 0, cplen = 0;
                 chunklen = SCTP_INIT_CHUNK_LENGTH;
                 SctpInitAckChunk *chunk = new SctpInitAckChunk("INIT_ACK");
-                chunk->setChunkType(chunkType);
+                chunk->setSctpChunkType(chunkType);
                 chunk->setInitTag(ntohl(iac->initiate_tag));
                 chunk->setA_rwnd(ntohl(iac->a_rwnd));
                 chunk->setNoOutStreams(ntohs(iac->mos));
                 chunk->setNoInStreams(ntohs(iac->mis));
-                chunk->setInitTSN(ntohl(iac->initial_tsn));
+                chunk->setInitTsn(ntohl(iac->initial_tsn));
                 chunk->setUnrecognizedParametersArraySize(0);
                 if (cLen > size_init_ack_chunk) {
                     int32 parcounter = 0, addrcounter = 0;
@@ -1511,7 +1519,7 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                                 const struct init_ipv4_address_parameter *v4addr;
                                 v4addr = (struct init_ipv4_address_parameter *)(((unsigned char *)iac) + size_init_ack_chunk + parptr);
                                 chunk->setAddressesArraySize(++addrcounter);
-                                L3Address localv4Addr(IPv4Address(ntohl(v4addr->address)));
+                                L3Address localv4Addr(Ipv4Address(ntohl(v4addr->address)));
                                 chunk->setAddresses(addrcounter - 1, localv4Addr);
                                 chunklen += 8;
                                 break;
@@ -1521,7 +1529,7 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                                 EV_INFO << "IPv6\n";
                                 const struct init_ipv6_address_parameter *ipv6addr;
                                 ipv6addr = (struct init_ipv6_address_parameter *)(((unsigned char *)iac) + size_init_chunk + parptr);
-                                IPv6Address ipv6Addr = IPv6Address(ipv6addr->address[0], ipv6addr->address[1],
+                                Ipv6Address ipv6Addr = Ipv6Address(ipv6addr->address[0], ipv6addr->address[1],
                                             ipv6addr->address[2], ipv6addr->address[3]);
                                 EV_INFO << "address" << ipv6Addr << "\n";
                                 L3Address localv6Addr(ipv6Addr);
@@ -1571,13 +1579,13 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                                 const struct tlv *chunks;
                                 chunks = (struct tlv *)(((unsigned char *)iac) + size_init_ack_chunk + parptr);
                                 int num = ntohs(chunks->length) - 4;
-                                chunk->setChunkTypesArraySize(num);
+                                chunk->setSctpChunkTypesArraySize(num);
                                 cp = (struct tlv *)((unsigned char *)malloc(64));
                                 cp->type = chunks->type;
                                 cplen = ntohs(chunks->length);
                                 cp->length = chunks->length;
                                 for (int i = 0; i < num; i++) {
-                                    chunk->setChunkTypes(i, chunks->value[i]);
+                                    chunk->setSctpChunkTypes(i, chunks->value[i]);
                                     cp->value[i] = chunks->value[i];
                                 }
                                 chunklen += ADD_PADDING(ntohs(parameter->length));
@@ -1613,9 +1621,9 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                             }
 
                             case FORWARD_TSN_SUPPORTED_PARAMETER: {
-                                int size = chunk->getChunkTypesArraySize();
-                                chunk->setChunkTypesArraySize(size + 1);
-                                chunk->setChunkTypes(size, FORWARD_TSN_SUPPORTED_PARAMETER);
+                                int size = chunk->getSctpChunkTypesArraySize();
+                                chunk->setSctpChunkTypesArraySize(size + 1);
+                                chunk->setSctpChunkTypes(size, FORWARD_TSN_SUPPORTED_PARAMETER);
                                 chunklen++;
                                 break;
                             }
@@ -1683,10 +1691,10 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                     }
                     free(hp);
                     sizePeerKeyVector += hplen;
-                    calculateSharedKey();
+                    //calculateSharedKey();
                 }
-                chunk->setBitLength(chunklen * 8);
-                dest->addChunk(chunk);
+                chunk->setByteLength(chunklen);
+                dest->insertSctpChunks(chunk);
                 break;
             }
 
@@ -1694,7 +1702,7 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                 EV << "SctpHeader: SACK received\n";
                 const struct sack_chunk *sac = (struct sack_chunk *)(chunks + chunkPtr);
                 SctpSackChunk *chunk = new SctpSackChunk("SACK");
-                chunk->setChunkType(chunkType);
+                chunk->setSctpChunkType(chunkType);
                 uint32 cumtsnack = ntohl(sac->cum_tsn_ack);
                 chunk->setCumTsnAck(cumtsnack);
                 chunk->setA_rwnd(ntohl(sac->a_rwnd));
@@ -1719,24 +1727,21 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                 }
 
                 chunk->setBitLength(cLen * 8);
-                dest->addChunk(chunk);
+                dest->insertSctpChunks(chunk);
                 break;
             }
 
             case HEARTBEAT: {
-                //sctpEV3<<"SctpMessage: Heartbeat received\n";
                 const struct heartbeat_chunk *hbc = (struct heartbeat_chunk *)(chunks + chunkPtr);
                 SctpHeartbeatChunk *chunk = new SctpHeartbeatChunk("HEARTBEAT");
-                chunk->setChunkType(chunkType);
+                chunk->setSctpChunkType(chunkType);
                 if (cLen > size_heartbeat_chunk) {
                     int32 parcounter = 0;
                     parptr = 0;
                     while (cLen > size_heartbeat_chunk + parptr) {
                         // we supppose type 1 here
-                        //sctpEV3<<"HB-chunk+parptr="<<size_heartbeat_chunk+parptr<<"\n";
                         const struct heartbeat_info *hbi = (struct heartbeat_info *)(((unsigned char *)hbc) + size_heartbeat_chunk + parptr);
                         if (ntohs(hbi->type) == 1) {    // sender specific hb info
-                            //sctpEV3<<"HBInfo\n";
                             int32 infoLen = ntohs(hbi->length) - 4;
                             parptr += ADD_PADDING(infoLen) + 4;
                             parcounter++;
@@ -1752,7 +1757,7 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                     }
                 }
                 chunk->setBitLength(cLen * 8);
-                dest->addChunk(chunk);
+                dest->insertSctpChunks(chunk);
                 break;
             }
 
@@ -1760,7 +1765,7 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                 EV << "SctpHeader: Heartbeat_Ack received\n";
                 const struct heartbeat_ack_chunk *hbac = (struct heartbeat_ack_chunk *)(chunks + chunkPtr);
                 SctpHeartbeatAckChunk *chunk = new SctpHeartbeatAckChunk("HEARTBEAT_ACK");
-                chunk->setChunkType(chunkType);
+                chunk->setSctpChunkType(chunkType);
                 if (cLen > size_heartbeat_ack_chunk) {
                     int32 parcounter = 0;
                     parptr = 0;
@@ -1773,7 +1778,7 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                             uint16 infoLen = ilen - 4;
                             parptr += ADD_PADDING(infoLen) + 4;
                             parcounter++;
-                            chunk->setRemoteAddr(L3Address(IPv4Address(ntohl(HBI_ADDR(hbi).v4addr.address))));
+                            chunk->setRemoteAddr(L3Address(Ipv4Address(ntohl(HBI_ADDR(hbi).v4addr.address))));
                             chunk->setTimeField(ntohl((uint32)HBI_TIME(hbi)));
                             chunk->setInfoArraySize(infoLen);
                             for (int32 i = 0; i < infoLen; i++)
@@ -1787,7 +1792,7 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                     }
                 }
                 chunk->setBitLength(cLen * 8);
-                dest->addChunk(chunk);
+                dest->insertSctpChunks(chunk);
                 break;
             }
 
@@ -1796,19 +1801,19 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                 const struct abort_chunk *ac = (struct abort_chunk *)(chunks + chunkPtr);
                 cLen = ntohs(ac->length);
                 SctpAbortChunk *chunk = new SctpAbortChunk("ABORT");
-                chunk->setChunkType(chunkType);
+                chunk->setSctpChunkType(chunkType);
                 chunk->setT_Bit(ac->flags & T_BIT);
                 if (cLen > size_abort_chunk) {
                     // TODO: handle attached error causes
                 }
                 chunk->setBitLength(cLen * 8);
-                dest->addChunk(chunk);
+                dest->insertSctpChunks(chunk);
                 break;
             }
 
             case COOKIE_ECHO: {
                 SctpCookieEchoChunk *chunk = new SctpCookieEchoChunk("COOKIE_ECHO");
-                chunk->setChunkType(chunkType);
+                chunk->setSctpChunkType(chunkType);
                 EV_INFO << "Parse Cookie-Echo\n";
                 if (cLen > size_cookie_echo_chunk) {
                     int32 cookieSize = woPadding - size_cookie_echo_chunk;
@@ -1824,20 +1829,20 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                         stateCookie->setLocalTieTag(i, cookie->localTieTag[i]);
                         stateCookie->setPeerTieTag(i, cookie->peerTieTag[i]);
                     }
-                    stateCookie->setBitLength(SCTP_COOKIE_LENGTH * 8);
+                    stateCookie->setLength(SCTP_COOKIE_LENGTH);
                     chunk->setStateCookie(stateCookie);
                 }
                 chunk->setBitLength(woPadding * 8);
-                dest->addChunk(chunk);
+                dest->insertSctpChunks(chunk);
                 break;
             }
 
             case COOKIE_ACK: {
                 EV << "SctpHeader: Cookie_Ack received\n";
                 SctpCookieAckChunk *chunk = new SctpCookieAckChunk("COOKIE_ACK");
-                chunk->setChunkType(chunkType);
+                chunk->setSctpChunkType(chunkType);
                 chunk->setBitLength(cLen * 8);
-                dest->addChunk(chunk);
+                dest->insertSctpChunks(chunk);
                 break;
             }
 
@@ -1845,20 +1850,20 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                 EV << "SctpHeader: Shutdown received\n";
                 const struct shutdown_chunk *sc = (struct shutdown_chunk *)(chunks + chunkPtr);
                 SctpShutdownChunk *chunk = new SctpShutdownChunk("SHUTDOWN");
-                chunk->setChunkType(chunkType);
+                chunk->setSctpChunkType(chunkType);
                 uint32 cumtsnack = ntohl(sc->cumulative_tsn_ack);
                 chunk->setCumTsnAck(cumtsnack);
                 chunk->setBitLength(cLen * 8);
-                dest->addChunk(chunk);
+                dest->insertSctpChunks(chunk);
                 break;
             }
 
             case SHUTDOWN_ACK: {
                 EV << "SctpHeader: ShutdownAck received\n";
                 SctpShutdownAckChunk *chunk = new SctpShutdownAckChunk("SHUTDOWN_ACK");
-                chunk->setChunkType(chunkType);
+                chunk->setSctpChunkType(chunkType);
                 chunk->setBitLength(cLen * 8);
-                dest->addChunk(chunk);
+                dest->insertSctpChunks(chunk);
                 break;
             }
 
@@ -1866,10 +1871,10 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                 EV << "SctpHeader: ShutdownComplete received\n";
                 const struct shutdown_complete_chunk *scc = (struct shutdown_complete_chunk *)(chunks + chunkPtr);
                 SctpShutdownCompleteChunk *chunk = new SctpShutdownCompleteChunk("SHUTDOWN_COMPLETE");
-                chunk->setChunkType(chunkType);
+                chunk->setSctpChunkType(chunkType);
                 chunk->setTBit(scc->flags & T_BIT);
                 chunk->setBitLength(cLen * 8);
-                dest->addChunk(chunk);
+                dest->insertSctpChunks(chunk);
                 break;
             }
 
@@ -1878,7 +1883,7 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                 error = (struct error_chunk *)(chunks + chunkPtr);
                 SctpErrorChunk *errorchunk;
                 errorchunk = new SctpErrorChunk("ERROR");
-                errorchunk->setChunkType(chunkType);
+                errorchunk->setSctpChunkType(chunkType);
                 errorchunk->setBitLength(SCTP_ERROR_CHUNK_LENGTH * 8);
                 parptr = 0;
                 const struct error_cause *err = (struct error_cause *)(((unsigned char *)error) + size_error_chunk + parptr);
@@ -1889,7 +1894,7 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                     errParam->setByteLength(err->length);
                     errorchunk->addParameters(errParam);
                 }
-                dest->addChunk(errorchunk);
+                dest->insertSctpChunks(errorchunk);
                 break;
             }
 
@@ -1899,7 +1904,7 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                 forward_tsn_chunk = (struct forward_tsn_chunk *)(chunks + chunkPtr);
                 SctpForwardTsnChunk *chunk;
                 chunk = new SctpForwardTsnChunk("FORWARD_TSN");
-                chunk->setChunkType(chunkType);
+                chunk->setSctpChunkType(chunkType);
                 chunk->setName("FORWARD_TSN");
                 chunk->setNewCumTsn(ntohl(forward_tsn_chunk->cum_tsn));
                 int streamNumber = 0, streamptr = 0;
@@ -1912,7 +1917,7 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                     streamptr += sizeof(struct forward_tsn_streams);
                 }
                 chunk->setByteLength(cLen);
-                dest->addChunk(chunk);
+                dest->insertSctpChunks(chunk);
                 break;
             }
 
@@ -1920,7 +1925,7 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                 int hmacSize;
                 struct auth_chunk *ac = (struct auth_chunk *)(chunks + chunkPtr);
                 SctpAuthenticationChunk *chunk = new SctpAuthenticationChunk("AUTH");
-                chunk->setChunkType(chunkType);
+                chunk->setSctpChunkType(chunkType);
                 chunk->setSharedKey(ntohs(ac->shared_key));
                 chunk->setHMacIdentifier(ntohs(ac->hmac_identifier));
                 if (cLen > size_auth_chunk) {
@@ -1948,7 +1953,7 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                     }
                 }
                 chunk->setByteLength(woPadding);
-                dest->addChunk(chunk);
+                dest->insertSctpChunks(chunk);
                 break;
             }
 
@@ -1956,7 +1961,7 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                 const struct asconf_chunk *asconf_chunk = (struct asconf_chunk *)(chunks + chunkPtr);    // (recvBuffer + size_ip + size_common_header);
                 int paramLength = 0;
                 SctpAsconfChunk *chunk = new SctpAsconfChunk("ASCONF");
-                chunk->setChunkType(chunkType);
+                chunk->setSctpChunkType(chunkType);
                 chunk->setName("ASCONF");
                 chunk->setSerialNumber(ntohl(asconf_chunk->serial));
                 if (cLen > size_asconf_chunk) {
@@ -1974,7 +1979,7 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                         continue;
                     }
                     else {
-                        L3Address localAddr(IPv4Address(ntohl(ipv4addr->address)));
+                        L3Address localAddr(Ipv4Address(ntohl(ipv4addr->address)));
                         chunk->setAddressParam(localAddr);
                     }
                     while (cLen > size_asconf_chunk + parptr) {
@@ -1990,7 +1995,7 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                                 addip->setRequestCorrelationId(ntohl(ipparam->correlation_id));
                                 const struct init_ipv4_address_parameter *v4addr1;
                                 v4addr1 = (struct init_ipv4_address_parameter *)(((unsigned char *)asconf_chunk) + size_asconf_chunk + parptr + size_addip_parameter);
-                                L3Address localAddr(IPv4Address(ntohl(v4addr1->address)));
+                                L3Address localAddr(Ipv4Address(ntohl(v4addr1->address)));
                                 addip->setAddressParam(localAddr);
                                 chunk->addAsconfParam(addip);
                                 break;
@@ -2004,7 +2009,7 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                                 deleteip->setRequestCorrelationId(ntohl(ipparam->correlation_id));
                                 const struct init_ipv4_address_parameter *v4addr2;
                                 v4addr2 = (struct init_ipv4_address_parameter *)(((unsigned char *)asconf_chunk) + size_asconf_chunk + parptr + size_addip_parameter);
-                                L3Address localAddr(IPv4Address(ntohl(v4addr2->address)));
+                                L3Address localAddr(Ipv4Address(ntohl(v4addr2->address)));
                                 deleteip->setAddressParam(localAddr);
                                 chunk->addAsconfParam(deleteip);
                                 break;
@@ -2018,7 +2023,7 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                                 priip->setRequestCorrelationId(ntohl(ipparam->correlation_id));
                                 const struct init_ipv4_address_parameter *v4addr3;
                                 v4addr3 = (struct init_ipv4_address_parameter *)(((unsigned char *)asconf_chunk) + size_asconf_chunk + parptr + size_addip_parameter);
-                                L3Address localAddr(IPv4Address(ntohl(v4addr3->address)));
+                                L3Address localAddr(Ipv4Address(ntohl(v4addr3->address)));
                                 priip->setAddressParam(localAddr);
                                 chunk->addAsconfParam(priip);
                                 break;
@@ -2035,7 +2040,7 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                     }
                 }
                 chunk->setByteLength(cLen);
-                dest->addChunk(chunk);
+                dest->insertSctpChunks(chunk);
                 break;
             }
 
@@ -2043,7 +2048,7 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                 const struct asconf_ack_chunk *asconf_ack_chunk = (struct asconf_ack_chunk *)(chunks + chunkPtr);    // (recvBuffer + size_ip + size_common_header);
                 int paramLength = 0;
                 SctpAsconfAckChunk *chunk = new SctpAsconfAckChunk("ASCONF_ACK");
-                chunk->setChunkType(chunkType);
+                chunk->setSctpChunkType(chunkType);
                 chunk->setName("ASCONF_ACK");
                 chunk->setSerialNumber(ntohl(asconf_ack_chunk->serial));
                 if (cLen > size_asconf_ack_chunk) {
@@ -2086,7 +2091,7 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                     }
                 }
                 chunk->setByteLength(cLen);
-                dest->addChunk(chunk);
+                dest->insertSctpChunks(chunk);
                 break;
             }
 
@@ -2095,7 +2100,7 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                 stream_reset_chunk = (struct stream_reset_chunk *)(chunks + chunkPtr);
                 SctpStreamResetChunk *chunk;
                 chunk = new SctpStreamResetChunk("RE_CONFIG");
-                chunk->setChunkType(chunkType);
+                chunk->setSctpChunkType(chunkType);
                 chunk->setName("RE_CONFIG");
                 chunk->setByteLength(SCTP_STREAM_RESET_CHUNK_LENGTH);
                 chunklen = SCTP_STREAM_RESET_CHUNK_LENGTH;
@@ -2112,8 +2117,8 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                             case OUTGOING_RESET_REQUEST_PARAMETER: {
                                 const struct outgoing_reset_request_parameter *outrr;
                                 outrr = (struct outgoing_reset_request_parameter *)(((unsigned char *)stream_reset_chunk) + size_stream_reset_chunk + parptr);
-                                SctpOutgoingSSNResetRequestParameter *outstrrst;
-                                outstrrst = new SctpOutgoingSSNResetRequestParameter("OUT_STR_RST");
+                                SctpOutgoingSsnResetRequestParameter *outstrrst;
+                                outstrrst = new SctpOutgoingSsnResetRequestParameter("OUT_STR_RST");
                                 outstrrst->setParameterType(OUTGOING_RESET_REQUEST_PARAMETER);
                                 outstrrst->setSrReqSn(ntohl(outrr->srReqSn));    //Stream Reset Request Sequence Number
                                 outstrrst->setSrResSn(ntohl(outrr->srResSn));    //Stream Reset Response Sequence Number
@@ -2135,8 +2140,8 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                             case INCOMING_RESET_REQUEST_PARAMETER: {
                                 const struct incoming_reset_request_parameter *inrr;
                                 inrr = (struct incoming_reset_request_parameter *)(((unsigned char *)stream_reset_chunk) + size_stream_reset_chunk + parptr);
-                                SctpIncomingSSNResetRequestParameter *instrrst;
-                                instrrst = new SctpIncomingSSNResetRequestParameter("IN_STR_RST");
+                                SctpIncomingSsnResetRequestParameter *instrrst;
+                                instrrst = new SctpIncomingSsnResetRequestParameter("IN_STR_RST");
                                 instrrst->setParameterType(INCOMING_RESET_REQUEST_PARAMETER);
                                 instrrst->setSrReqSn(ntohl(inrr->srReqSn));    //Stream Reset Request Sequence Number
                                 chunklen += SCTP_OUTGOING_RESET_REQUEST_PARAMETER_LENGTH;
@@ -2156,8 +2161,8 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                             case SSN_TSN_RESET_REQUEST_PARAMETER: {
                                 const struct ssn_tsn_reset_request_parameter *ssnrr;
                                 ssnrr = (struct ssn_tsn_reset_request_parameter *)(((unsigned char *)stream_reset_chunk) + size_stream_reset_chunk + parptr);
-                                SCTPSSNTSNResetRequestParameter *ssnstrrst;
-                                ssnstrrst = new SCTPSSNTSNResetRequestParameter("SSN_STR_RST");
+                                SctpSsnTsnResetRequestParameter *ssnstrrst;
+                                ssnstrrst = new SctpSsnTsnResetRequestParameter("SSN_STR_RST");
                                 ssnstrrst->setParameterType(SSN_TSN_RESET_REQUEST_PARAMETER);
                                 ssnstrrst->setSrReqSn(ntohl(ssnrr->srReqSn));
                                 chunklen += SCTP_SSN_TSN_RESET_REQUEST_PARAMETER_LENGTH;
@@ -2168,7 +2173,7 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                             case STREAM_RESET_RESPONSE_PARAMETER: {
                                 const struct stream_reset_response_parameter *resp;
                                 resp = (struct stream_reset_response_parameter *)(((unsigned char *)stream_reset_chunk) + size_stream_reset_chunk + parptr);
-                                SCTPStreamResetResponseParameter *strrst;
+                                SctpStreamResetResponseParameter *strrst;
                                 strrst = new SctpStreamResetResponseParameter("STR_RST_RESPONSE");
                                 strrst->setParameterType(STREAM_RESET_RESPONSE_PARAMETER);
                                 strrst->setSrResSn(ntohl(resp->srResSn));
@@ -2189,16 +2194,16 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                     }
                 }
                 chunk->setByteLength(cLen);
-                dest->addChunk(chunk);
+                dest->insertSctpChunks(chunk);
                 break;
             }
 
             case PKTDROP: {
-                const struct pktdrop_chunk *drop;
+             /*   const struct pktdrop_chunk *drop;
                 drop = (struct pktdrop_chunk *)(chunks + chunkPtr);
                 SctpPacketDropChunk *dropChunk;
                 dropChunk = new SctpPacketDropChunk("PKTDROP");
-                dropChunk->setChunkType(PKTDROP);
+                dropChunk->setSctpChunkType(PKTDROP);
                 dropChunk->setCFlag(drop->flags & C_FLAG);
                 dropChunk->setTFlag(drop->flags & T_FLAG);
                 dropChunk->setBFlag(drop->flags & B_FLAG);
@@ -2209,7 +2214,7 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                 EV_INFO << "SctpSerializer::pktdrop: parse SctpHeader\n";
                 SctpHeader *msg;
                 msg = new SctpHeader();
-                parse((unsigned char *)chunks + chunkPtr + 16, bufsize - size_common_header - chunkPtr - 16, msg);
+                parse((unsigned char *)chunks + chunkPtr + 16, bufsize - size_common_header - chunkPtr - 16, msg);*/
                 break;
             }
 
@@ -2220,8 +2225,7 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
         }    // end of switch(chunkType)
         chunkPtr += cLen;
     }    // end of while()
-    EV_INFO << "SctpSerializer - pkt info - " << dest->getByteLength() << " bytes" << endl;
-#endif
+    EV_INFO << "SctpSerializer - pkt info - " << B(dest->getChunkLength()).get() << " bytes" << endl;
      return nullptr;
 }
 
