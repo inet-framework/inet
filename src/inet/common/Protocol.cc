@@ -23,10 +23,11 @@ int Protocol::nextId = 0;
 std::map<int, const Protocol *> Protocol::idToProtocol;
 std::map<std::string, const Protocol *> Protocol::nameToProtocol;
 
-Protocol::Protocol(const char *name, const char *descriptiveName) :
+Protocol::Protocol(const char *name, const char *descriptiveName, Layer layer) :
     id(nextId++),
     name(name),
-    descriptiveName(descriptiveName)
+    descriptiveName(descriptiveName),
+    layer(layer)
 {
     idToProtocol[id] = this;
     nameToProtocol[name] = this;
@@ -73,53 +74,53 @@ const Protocol *Protocol::getProtocol(const char *name)
 
 // Standard protocols:
 const Protocol Protocol::aodv("aodv", "AODV");
-const Protocol Protocol::arp("arp", "ARP");
+const Protocol Protocol::arp("arp", "ARP", Protocol::NetworkLayer);
 const Protocol Protocol::bgp("bgp", "BGP");
-const Protocol Protocol::bmac("bmac", "B-MAC");
+const Protocol Protocol::bmac("bmac", "B-MAC", Protocol::LinkLayer);
 const Protocol Protocol::dsdv2("dsdv2", "DSDV 2");
 const Protocol Protocol::dsr("dsr", "DSR");
 const Protocol Protocol::dymo("dymo", "DYMO");
 const Protocol Protocol::egp("egp", "EGP");
-const Protocol Protocol::ethernetPhy("ethernetphy", "Ethernet PHY");
-const Protocol Protocol::ethernetMac("ethernetmac", "Ethernet MAC");
+const Protocol Protocol::ethernetPhy("ethernetphy", "Ethernet PHY", Protocol::PhysicalLayer);
+const Protocol Protocol::ethernetMac("ethernetmac", "Ethernet MAC", Protocol::LinkLayer);
 const Protocol Protocol::gpsr("gpsr", "GPSR");
-const Protocol Protocol::icmpv4("icmpv4", "ICMP v4");
-const Protocol Protocol::icmpv6("icmpv6", "ICMP v6");
-const Protocol Protocol::ieee80211Mac("ieee80211mac", "IEEE 802.11 MAC");
-const Protocol Protocol::ieee80211Mgmt("ieee80211mgmt", "IEEE 802.11 MGMT");
-const Protocol Protocol::ieee80211Phy("ieee80211phy", "IEEE 802.11 PHY");
+const Protocol Protocol::icmpv4("icmpv4", "ICMP v4", Protocol::NetworkLayer);
+const Protocol Protocol::icmpv6("icmpv6", "ICMP v6", Protocol::NetworkLayer);
+const Protocol Protocol::ieee80211Mac("ieee80211mac", "IEEE 802.11 MAC", Protocol::LinkLayer);
+const Protocol Protocol::ieee80211Mgmt("ieee80211mgmt", "IEEE 802.11 MGMT", Protocol::LinkLayer);
+const Protocol Protocol::ieee80211Phy("ieee80211phy", "IEEE 802.11 PHY", Protocol::PhysicalLayer);
 const Protocol Protocol::ieee802154("ieee802154", "IEEE 802.15.4");
-const Protocol Protocol::ieee8022("ieee8022", "IEEE 802.2");
-const Protocol Protocol::igmp("igmp", "IGMP");
+const Protocol Protocol::ieee8022("ieee8022", "IEEE 802.2", Protocol::LinkLayer);
+const Protocol Protocol::igmp("igmp", "IGMP", Protocol::NetworkLayer);
 const Protocol Protocol::igp("igp", "IGP");
-const Protocol Protocol::ipv4("ipv4", "IP v4");
-const Protocol Protocol::ipv6("ipv6", "IP v6");
+const Protocol Protocol::ipv4("ipv4", "IP v4", Protocol::NetworkLayer);
+const Protocol Protocol::ipv6("ipv6", "IP v6", Protocol::NetworkLayer);
 const Protocol Protocol::lmac("lmac", "L-MAC");
 const Protocol Protocol::manet("manet", "MANET");
 const Protocol Protocol::mobileipv6("mobileipv6", "Mobile IP v6");
 const Protocol Protocol::mpls("mpls", "MPLS");
 const Protocol Protocol::ospf("ospf", "OSPF");
 const Protocol Protocol::pim("pim", "PIM");
-const Protocol Protocol::ppp("ppp", "PPP");
+const Protocol Protocol::ppp("ppp", "PPP", Protocol::LinkLayer);
 const Protocol Protocol::rsvp("rsvp", "RSVP");
-const Protocol Protocol::sctp("sctp", "SCTP");
+const Protocol Protocol::sctp("sctp", "SCTP", Protocol::TransportLayer);
 const Protocol Protocol::stp("stp", "STP");
-const Protocol Protocol::tcp("tcp", "TCP");
-const Protocol Protocol::udp("udp", "UDP");
+const Protocol Protocol::tcp("tcp", "TCP", Protocol::TransportLayer);
+const Protocol Protocol::udp("udp", "UDP", Protocol::TransportLayer);
 const Protocol Protocol::xmac("xmac", "X-MAC");
 const Protocol Protocol::xtp("xtp", "XTP");
 
 // INET specific protocols:
 const Protocol Protocol::ackingmac("ackingmac", "Acking MAC"); // INET specific
-const Protocol Protocol::apskPhy("apskphy", "APSK PHY"); // INET specific
+const Protocol Protocol::apskPhy("apskphy", "APSK PHY", Protocol::PhysicalLayer); // INET specific
 const Protocol Protocol::csmacamac("csmacamac", "CSMA/CA MAC"); // INET specific
 const Protocol Protocol::echo("echo", "Echo");  // INET specific echo protocol (ping request/reply)
-const Protocol Protocol::flood("flood", "Flood"); // INET specific Flood Network Protocol
+const Protocol Protocol::flood("flood", "Flood", Protocol::NetworkLayer); // INET specific Flood Network Protocol
 const Protocol Protocol::gnp("gnp", "GNP"); // INET specific Generic Network Protocol
 const Protocol Protocol::linkstaterouting("linkstaterouting", "LinkStateRouting");
-const Protocol Protocol::probabilistic("probabilistic", "Probabilistic"); // INET specific Probabilistic Network Protocol
+const Protocol Protocol::probabilistic("probabilistic", "Probabilistic", Protocol::NetworkLayer); // INET specific Probabilistic Network Protocol
 const Protocol Protocol::shortcutMac("shortcutmac", "Shortcut MAC"); // INET specific
-const Protocol Protocol::shortcutPhy("shortcutphy", "Shortcut PHY"); // INET specific
+const Protocol Protocol::shortcutPhy("shortcutphy", "Shortcut PHY", Protocol::PhysicalLayer); // INET specific
 const Protocol Protocol::unitdisk("unitdisk", "UnitDisk");      // INET specific
 const Protocol Protocol::wiseroute("wiseroute", "WiseRoute"); // INET specific WiseRoute Network Protocol
 

@@ -29,13 +29,17 @@ class INET_API Protocol
     static std::map<int, const Protocol *> idToProtocol;
     static std::map<std::string, const Protocol *> nameToProtocol;
 
+  public:
+    enum Layer { PhysicalLayer, LinkLayer, NetworkLayer, TransportLayer, UnspecifiedLayer };
+
   protected:
     const int id;
     const char *name;
     const char *descriptiveName;
+    Layer layer;
 
   public:
-    Protocol(const char *name, const char *descriptiveName);
+    Protocol(const char *name, const char *descriptiveName, Layer layer = UnspecifiedLayer);
 
     bool operator==(const Protocol& other) const { return id == other.id; }
     bool operator!=(const Protocol& other) const { return id != other.id; }
@@ -43,6 +47,7 @@ class INET_API Protocol
     int getId() const { return id; }
     const char *getName() const { return name; }
     const char *getDescriptiveName() const { return descriptiveName; }
+    Layer getLayer() const { return layer; }
 
     std::string str() const;
 
