@@ -274,7 +274,7 @@
 # /examples/inet/udpclientserver/,     -f omnetpp.ini -c _ipv6 -r 0,                  10s,             0000-0000/tplx, PASS,   # _ipv6 extended
 # /examples/inet/udpclientserver/,     -f omnetpp.ini -c _gn -r 0,                  10s,             0000-0000/tplx, PASS,   # _gn extended
 /examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_ipv4 -r 0,            10s,             3044-a573/tplx, PASS,
-/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Fragment_ipv4 -r 0,      10s,             9329-84f4/tplx, PASS,
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Fragment_ipv4 -r 0,      10s,             13eb-b5e8/tplx, PASS,
 /examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Port_Unav_ipv4 -r 0,     10s,             5294-5b20/tplx, PASS,
 /examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Host_Unav_ipv4 -r 0,     10s,             5f78-4a56/tplx, PASS,
 /examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_ipv6 -r 0,            10s,             2f35-65b8/tplx, PASS,

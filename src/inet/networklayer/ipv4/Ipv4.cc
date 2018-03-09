@@ -722,6 +722,11 @@ void Ipv4::reassembleAndDeliver(Packet *packet)
             EV_DETAIL << "No complete datagram yet.\n";
             return;
         }
+        if (packet->peekHeader<Ipv4Header>()->getCrcMode() == CRC_COMPUTED) {
+            auto ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
+            setComputedCrc(ipv4Header);
+            insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
+        }
         EV_DETAIL << "This fragment completes the datagram.\n";
     }
 
@@ -793,6 +798,23 @@ void Ipv4::fragmentPostRouting(Packet *packet)
         fragmentAndSend(packet);
 }
 
+void Ipv4::setComputedCrc(Ptr<Ipv4Header>& ipv4Header)
+{
+    ASSERT(crcMode == CRC_COMPUTED);
+    ipv4Header->setCrc(0);
+    MemoryOutputStream ipv4HeaderStream;
+    Chunk::serialize(ipv4HeaderStream, ipv4Header);
+    auto ipv4HeaderBytes = ipv4HeaderStream.getData();
+    auto bufferLength = ipv4HeaderBytes.size();
+    auto buffer = new uint8_t[bufferLength];
+    // 1. fill in the data
+    std::copy(ipv4HeaderBytes.begin(), ipv4HeaderBytes.end(), (uint8_t *)buffer);
+    // 2. compute the CRC
+    uint16_t crc = inet::serializer::TcpIpChecksum::checksum(buffer, bufferLength);
+    delete [] buffer;
+    ipv4Header->setCrc(crc);
+}
+
 void Ipv4::fragmentAndSend(Packet *packet)
 {
     const InterfaceEntry *destIE = ift->getInterfaceById(packet->getTag<InterfaceReq>()->getInterfaceId());
@@ -810,24 +832,6 @@ void Ipv4::fragmentAndSend(Packet *packet)
         else
             throw cRuntimeError(packet, "Cannot send datagram on broadcast interface: no next-hop address and Proxy ARP is disabled");
         packet->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(nextHopAddr);
-    }
-
-    if (crcMode == CRC_COMPUTED) {
-        packet->removePoppedHeaders();
-        const auto& ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
-        ipv4Header->setCrc(0);
-        MemoryOutputStream ipv4HeaderStream;
-        Chunk::serialize(ipv4HeaderStream, ipv4Header);
-        auto ipv4HeaderBytes = ipv4HeaderStream.getData();
-        auto bufferLength = ipv4HeaderBytes.size();
-        auto buffer = new uint8_t[bufferLength];
-        // 1. fill in the data
-        std::copy(ipv4HeaderBytes.begin(), ipv4HeaderBytes.end(), (uint8_t *)buffer);
-        // 2. compute the CRC
-        uint16_t crc = inet::serializer::TcpIpChecksum::checksum(buffer, bufferLength);
-        delete [] buffer;
-        ipv4Header->setCrc(crc);
-        insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
     }
 
     const auto& ipv4Header = packet->peekHeader<Ipv4Header>();
@@ -848,6 +852,11 @@ void Ipv4::fragmentAndSend(Packet *packet)
 
     // send datagram straight out if it doesn't require fragmentation (note: mtu==0 means infinite mtu)
     if (mtu == 0 || packet->getByteLength() <= mtu) {
+        if (crcMode == CRC_COMPUTED) {
+            auto ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
+            setComputedCrc(ipv4Header);
+            insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
+        }
         sendDatagramToOutput(packet);
         return;
     }
@@ -897,7 +906,7 @@ void Ipv4::fragmentAndSend(Packet *packet)
         }
 
         ASSERT(fragment->getByteLength() == 0);
-        const auto& fraghdr = staticPtrCast<Ipv4Header>(ipv4Header->dupShared());
+        auto fraghdr = staticPtrCast<Ipv4Header>(ipv4Header->dupShared());
         const auto& fragData = packet->peekDataAt(B(headerLength + offset), B(thisFragmentLength));
         ASSERT(B(fragData->getChunkLength()).get() == thisFragmentLength);
         fragment->insertAtEnd(fragData);
@@ -908,7 +917,8 @@ void Ipv4::fragmentAndSend(Packet *packet)
 
         fraghdr->setFragmentOffset(offsetBase + offset);
         fraghdr->setTotalLengthField(headerLength + thisFragmentLength);
-
+        if (crcMode == CRC_COMPUTED)
+            setComputedCrc(fraghdr);
 
         fragment->insertAtBeginning(fraghdr);
         ASSERT(fragment->getByteLength() == headerLength + thisFragmentLength);

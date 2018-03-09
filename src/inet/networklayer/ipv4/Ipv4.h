@@ -127,6 +127,9 @@ class INET_API Ipv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     // utility: verifying CRC
     bool verifyCrc(const Ptr<const Ipv4Header>& ipv4Header);
 
+    // utility: calculate and set CRC
+    void setComputedCrc(Ptr<Ipv4Header>& ipv4Header);
+
     /**
      * Encapsulate packet coming from higher layers into Ipv4Header, using
      * the given control info. Override if you subclassed controlInfo and/or
