@@ -198,15 +198,19 @@ void Sctp::handleMessage(cMessage *msg)
             // must be an SctpHeader
             SctpHeader *sctpmsg = (SctpHeader *)(packet->peekHeader<SctpHeader>().get());
             numPacketsReceived++;
-#if 0
-			if (!pktdrop && (sctpmsg->hasBitError() || !(sctpmsg->getChecksumOk()))) {
+
+			if (!pktdrop && (packet->hasBitError())) {
 				EV_WARN << "Packet has bit-error. delete it\n";
 
 				numPacketsDropped++;
 				delete msg;
 				return;
 			}
-#endif
+
+            if (pktdrop && packet->hasBitError()) {
+                EV_WARN << "Packet has bit-error. Call Pktdrop\n";
+            }
+
 			auto controlInfo = msg->removeControlInfo();
 			srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress();
 			destAddr = packet->getTag<L3AddressInd>()->getDestAddress();
@@ -229,12 +233,12 @@ void Sctp::handleMessage(cMessage *msg)
 				}
 				if (!assoc) {
 					EV_INFO << "no assoc found msg=" << sctpmsg->getName() << "\n";
-#if 0
-					if (sctpmsg->hasBitError() || !(sctpmsg->getChecksumOk())) {
+
+					if (!pktdrop && packet->hasBitError()) {
 						delete sctpmsg;
 						return;
 					}
-#endif
+
 					if (((SctpChunk *)(sctpmsg->getSctpChunks(0)))->getSctpChunkType() == SHUTDOWN_ACK)
 						sendShutdownCompleteFromMain((Ptr<SctpHeader>&)sctpmsg, destAddr, srcAddr);
 					else if (((SctpChunk *)(sctpmsg->getSctpChunks(0)))->getSctpChunkType() != ABORT &&
