@@ -33,25 +33,22 @@ bool PacketPrinter::isEnabledOption(const Options *options, const char *name) co
 
 static bool isPhysicalLayerProtocol(const Protocol *protocol)
 {
-    return protocol == &Protocol::ethernetPhy || protocol == &Protocol::ieee80211Phy;
+    return protocol && protocol->getLayer() == Protocol::PhysicalLayer;
 }
 
 static bool isLinkLayerProtocol(const Protocol *protocol)
 {
-    return protocol == &Protocol::ethernetMac || protocol == &Protocol::ppp ||
-           protocol == &Protocol::ieee80211Mac || protocol == &Protocol::ieee80211Mgmt ||
-           protocol == &Protocol::ieee8022;
+    return protocol && protocol->getLayer() == Protocol::LinkLayer;
 }
 
 static bool isNetworkLayerProtocol(const Protocol *protocol)
 {
-    return protocol == &Protocol::ipv4 || protocol == &Protocol::icmpv4 || protocol == &Protocol::arp || protocol == &Protocol::igmp ||
-           protocol == &Protocol::ipv6 || protocol == &Protocol::icmpv6;
+    return protocol && protocol->getLayer() == Protocol::NetworkLayer;
 }
 
 static bool isTransportLayerProtocol(const Protocol *protocol)
 {
-    return protocol == &Protocol::udp || protocol == &Protocol::tcp || protocol == &Protocol::sctp;
+    return protocol && protocol->getLayer() == Protocol::TransportLayer;
 }
 
 bool PacketPrinter::isEnabledInfo(const Options *options, const Protocol *protocol) const
