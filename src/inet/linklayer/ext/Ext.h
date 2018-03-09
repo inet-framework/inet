@@ -18,8 +18,8 @@
 
 // This file is based on the Ppp.h of INET written by Andras Varga.
 
-#ifndef __INET_EXTINTERFACE_H
-#define __INET_EXTINTERFACE_H
+#ifndef __INET_EXT_H
+#define __INET_EXT_H
 
 #ifndef MAX_MTU_SIZE
 #define MAX_MTU_SIZE    4000
@@ -45,7 +45,7 @@ class InterfaceEntry;
  *
  * See NED file for more details.
  */
-class INET_API ExtInterface : public MacBase
+class INET_API Ext : public MacBase
 {
   protected:
     bool connected;

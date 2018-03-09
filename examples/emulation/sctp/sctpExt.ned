@@ -16,7 +16,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-package inet.examples.emulation.extclient;
+package inet.examples.emulation.sctp;
 
 import inet.node.inet.StandardHost;
 
@@ -31,9 +31,8 @@ network ExtClient
             parameters:
                 forwarding = false;
                 ipv4.routingTable.routingFile = "cli1d.mrt";
-                ipv4.configurator.networkConfiguratorModule = "";
                 numExtInterfaces = 1;
-                @display("i=old/laptop3;p=128,317");
+                @display("p=29,90;i=old/laptop3");
         }
     connections allowunconnected:
 }

@@ -1,0 +1,18 @@
+The external interface makes it possible to connect the simulation with real
+networks.
+
+In this example the network consists of only one host. Currently the host
+can be used to run ICMP and SCTP as echo server or discard server.
+
+To run this example, some parameters have to be adjusted in the omnetpp.ini.
+
+- Make sure that you have libpcap-dev (v1.5.3 or later) installed on your machine. 
+- Turn on the "Network Emulation" feature (In IDE / INET Project Properties / Project Features
+  (if you forget this you will receive a 'Class "inet::cSocketRTScheduler" not found' error)
+- Rebuild INET.
+- Set **.ext[0].device to the device name of the interface of the computer
+  running the simulation.
+- On your server, add a route to the host 10.1.1.1 and set the gateway to the
+  IP address of the computer, on which the simulation is running.
+
+Start the simulation with root privileges.

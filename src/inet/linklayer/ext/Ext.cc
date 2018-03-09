@@ -33,21 +33,23 @@
 #include "inet/common/packet/chunk/BytesChunk.h"
 
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/linklayer/ext/ExtInterface.h"
+#include "inet/linklayer/ext/Ext.h"
 
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/common/InterfaceTable.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 
+#include <arpa/inet.h>
+
 namespace inet {
 
-Define_Module(ExtInterface);
+Define_Module(Ext);
 
-void ExtInterface::initialize(int stage)
+void Ext::initialize(int stage)
 {
     MacBase::initialize(stage);
-
+printf("ExtInterface::initialize\n");
     // subscribe at scheduler for external messages
     if (stage == INITSTAGE_LOCAL) {
         if (auto scheduler = dynamic_cast<cSocketRTScheduler *>(getSimulation()->getScheduler())) {
@@ -67,12 +69,14 @@ void ExtInterface::initialize(int stage)
         WATCH(numDropped);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
+    printf("call registerInterface\n");
         registerInterface();
     }
 }
 
-InterfaceEntry *ExtInterface::createInterfaceEntry()
+InterfaceEntry *Ext::createInterfaceEntry()
 {
+printf("ExtInterface::createInterfaceEntry\n");
     InterfaceEntry *e = getContainingNicModule(this);
 
     e->setMtu(par("mtu"));
@@ -82,10 +86,10 @@ InterfaceEntry *ExtInterface::createInterfaceEntry()
     return e;
 }
 
-void ExtInterface::handleMessage(cMessage *msg)
+void Ext::handleMessage(cMessage *msg)
 {
     using namespace serializer;
-
+printf("Ext::handleMessage\n");
     if (!isOperational) {
         handleMessageWhenDown(msg);
         return;
@@ -122,13 +126,13 @@ void ExtInterface::handleMessage(cMessage *msg)
 #if !defined(linux) && !defined(__linux) && !defined(_WIN32)
             addr.sin_len = sizeof(struct sockaddr_in);
 #endif // if !defined(linux) && !defined(__linux) && !defined(_WIN32)
-            addr.sin_port = 0;
+            addr.sin_port = htons(5001);
             addr.sin_addr.s_addr = htonl(ipv4Header->getDestAddress().getInt());
             auto bytesChunk = packet->peekAllBytes();
             size_t packetLength = bytesChunk->copyToBuffer(buffer, sizeof(buffer));
             ASSERT(packetLength == packet->getByteLength());
 
-            EV << "Delivering an IPv4 packet from "
+            std::cout << "Delivering an IPv4 packet from "
                << ipv4Header->getSrcAddress()
                << " to "
                << ipv4Header->getDestAddress()
@@ -146,21 +150,21 @@ void ExtInterface::handleMessage(cMessage *msg)
     delete (msg);
 }
 
-void ExtInterface::displayBusy()
+void Ext::displayBusy()
 {
     getDisplayString().setTagArg("i", 1, "yellow");
     gate("physOut")->getDisplayString().setTagArg("ls", 0, "yellow");
     gate("physOut")->getDisplayString().setTagArg("ls", 1, "3");
 }
 
-void ExtInterface::displayIdle()
+void Ext::displayIdle()
 {
     getDisplayString().setTagArg("i", 1, "");
     gate("physOut")->getDisplayString().setTagArg("ls", 0, "black");
     gate("physOut")->getDisplayString().setTagArg("ls", 1, "1");
 }
 
-void ExtInterface::refreshDisplay() const
+void Ext::refreshDisplay() const
 {
     if (connected) {
         char buf[80];
@@ -174,18 +178,18 @@ void ExtInterface::refreshDisplay() const
     }
 }
 
-void ExtInterface::finish()
+void Ext::finish()
 {
     std::cout << getFullPath() << ": " << numSent << " packets sent, "
               << numRcvd << " packets received, " << numDropped << " packets dropped.\n";
 }
 
-void ExtInterface::flushQueue()
+void Ext::flushQueue()
 {
     // does not have a queue, do nothing
 }
 
-void ExtInterface::clearQueue()
+void Ext::clearQueue()
 {
     // does not have a queue, do nothing
 }

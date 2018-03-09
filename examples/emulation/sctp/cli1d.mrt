@@ -1,0 +1,19 @@
+ifconfig:
+
+# ethernet card (modelled by point-to-point link) 0 to router
+name: ext0  
+    inet_addr: 10.1.1.1
+    Mask: 255.255.255.0
+    MTU: 1500
+    Metric: 1
+    POINTTOPOINT MULTICAST
+
+
+ifconfigend.
+
+route:
+#Destination     Gateway          Genmask          Flags  Metric  Iface
+0.0.0.0          *                0.0.0.0          G      0       ext0
+
+routeend.
+
