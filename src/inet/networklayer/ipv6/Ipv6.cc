@@ -198,7 +198,7 @@ void Ipv6::endService(cPacket *msg)
         else {
             // address is not tentative anymore - send out datagram
             numForwarded++;
-            fragmentAndSend(sDgram->removeDatagram(), sDgram->getIE(), sDgram->getMacAddress(), sDgram->getFromHL());
+            fragmentPostRouting(sDgram->removeDatagram(), sDgram->getIE(), sDgram->getMacAddress(), sDgram->getFromHL());
             delete sDgram;
         }
     }
@@ -353,7 +353,7 @@ void Ipv6::datagramLocalOut(Packet *packet, const InterfaceEntry *destIE, Ipv6Ad
     const auto& ipv6Header = packet->peekHeader<Ipv6Header>();
     // route packet
     if (destIE != nullptr)
-        fragmentAndSend(packet, destIE, MacAddress::BROADCAST_ADDRESS, true); // FIXME what MAC address to use?
+        fragmentPostRouting(packet, destIE, MacAddress::BROADCAST_ADDRESS, true); // FIXME what MAC address to use?
     else if (!ipv6Header->getDestAddress().isMulticast())
         routePacket(packet, destIE, nullptr, requestedNextHopAddress, true);
     else
@@ -503,7 +503,7 @@ void Ipv6::resolveMACAddressAndSendPacket(Packet *packet, int interfaceId, Ipv6A
 
     // send out datagram
     numForwarded++;
-    fragmentAndSend(packet, ie, macAddr, fromHL);
+    fragmentPostRouting(packet, ie, macAddr, fromHL);
 }
 
 void Ipv6::routeMulticastPacket(Packet *packet, const InterfaceEntry *destIE, const InterfaceEntry *fromIE, bool fromHL)
@@ -554,7 +554,7 @@ void Ipv6::routeMulticastPacket(Packet *packet, const InterfaceEntry *destIE, co
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
         InterfaceEntry *ie = ift->getInterface(i);
         if (fromIE != ie && !ie->isLoopback())
-            fragmentAndSend(packet->dup(), ie, MacAddress::BROADCAST_ADDRESS, fromHL);
+            fragmentPostRouting(packet->dup(), ie, MacAddress::BROADCAST_ADDRESS, fromHL);
     }
     delete packet;
 
@@ -622,7 +622,7 @@ void Ipv6::routeMulticastPacket(Packet *packet, const InterfaceEntry *destIE, co
 
                 // send
                 Ipv6Address nextHopAddr = routes[i].gateway;
-                fragmentAndSend(datagramCopy, outputGateIndex, macAddr, fromHL);
+                fragmentPostRouting(datagramCopy, outputGateIndex, macAddr, fromHL);
             }
         }
 
@@ -806,6 +806,32 @@ void Ipv6::encapsulate(Packet *transportPacket)
     transportPacket->removePoppedHeaders();
     insertNetworkProtocolHeader(transportPacket, Protocol::ipv6, ipv6Header);
     // setting IP options is currently not supported
+}
+
+void Ipv6::fragmentPostRouting(Packet *packet, const InterfaceEntry *ie, const MacAddress& nextHopAddr, bool fromHL)
+{
+//    const InterfaceEntry *destIE = ift->getInterfaceById(packet->getTag<InterfaceReq>()->getInterfaceId());
+    auto ipv6Header = packet->peekHeader<Ipv6Header>();
+    // ensure source address is filled
+    if (fromHL && ipv6Header->getSrcAddress().isUnspecified() &&
+        !ipv6Header->getDestAddress().isSolicitedNodeMulticastAddress())
+    {
+        // source address can be unspecified during DAD
+        const Ipv6Address& srcAddr = ie->ipv6Data()->getPreferredAddress();
+        ASSERT(!srcAddr.isUnspecified());    // FIXME what if we don't have an address yet?
+
+        // TODO: factor out
+        ipv6Header = nullptr;
+        auto newIpv6Header = removeNetworkProtocolHeader<Ipv6Header>(packet);
+        newIpv6Header->setSrcAddress(srcAddr);
+        insertNetworkProtocolHeader(packet, Protocol::ipv6, newIpv6Header);
+        ipv6Header = newIpv6Header;
+    }
+    const InterfaceEntry *fromIe = fromHL ? nullptr : ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
+    L3Address nextHopAddr_(nextHopAddr);
+    if (datagramPostRoutingHook(packet, fromIe, ie, nextHopAddr_) == INetfilter::IHook::ACCEPT) {
+        fragmentAndSend(packet, ie, nextHopAddr_.toMac(), fromHL);
+    }
 }
 
 void Ipv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MacAddress& nextHopAddr, bool fromHL)

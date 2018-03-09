@@ -161,6 +161,8 @@ class INET_API Ipv6 : public QueueBase, public NetfilterBase, public ILifecycle,
      */
     virtual void routeMulticastPacket(Packet *packet, const InterfaceEntry *destIE, const InterfaceEntry *fromIE, bool fromHL);
 
+    virtual void fragmentPostRouting(Packet *packet, const InterfaceEntry *ie, const MacAddress& nextHopAddr, bool fromHL);
+
     /**
      * Performs fragmentation if needed, and sends the original datagram or the fragments
      * through the specified interface.
