@@ -215,14 +215,9 @@ bool Ipv4::verifyCrc(const Ptr<const Ipv4Header>& ipv4Header)
         case CRC_COMPUTED: {
             if (ipv4Header->isCorrect()) {
                 // compute the CRC, the check passes if the result is 0xFFFF (includes the received CRC) and the chunks are correct
-                auto ipv4HeaderBytes = ipv4Header->Chunk::peek<BytesChunk>(B(0), ipv4Header->getChunkLength());
-                auto bufferLength = B(ipv4HeaderBytes->getChunkLength()).get();
-                auto buffer = new uint8_t[bufferLength];
-                // 1. fill in the data
-                ipv4HeaderBytes->copyToBuffer(buffer, bufferLength);
-                // 2. compute the CRC
-                auto computedCrc = inet::serializer::TcpIpChecksum::checksum(buffer, bufferLength);
-                delete [] buffer;
+                MemoryOutputStream ipv4HeaderStream;
+                Chunk::serialize(ipv4HeaderStream, ipv4Header);
+                uint16_t computedCrc = inet::serializer::TcpIpChecksum::checksum(ipv4HeaderStream.getData());
                 return computedCrc == 0;
             }
             else {
@@ -804,14 +799,8 @@ void Ipv4::setComputedCrc(Ptr<Ipv4Header>& ipv4Header)
     ipv4Header->setCrc(0);
     MemoryOutputStream ipv4HeaderStream;
     Chunk::serialize(ipv4HeaderStream, ipv4Header);
-    auto ipv4HeaderBytes = ipv4HeaderStream.getData();
-    auto bufferLength = ipv4HeaderBytes.size();
-    auto buffer = new uint8_t[bufferLength];
-    // 1. fill in the data
-    std::copy(ipv4HeaderBytes.begin(), ipv4HeaderBytes.end(), (uint8_t *)buffer);
-    // 2. compute the CRC
-    uint16_t crc = inet::serializer::TcpIpChecksum::checksum(buffer, bufferLength);
-    delete [] buffer;
+    // compute the CRC
+    uint16_t crc = inet::serializer::TcpIpChecksum::checksum(ipv4HeaderStream.getData());
     ipv4Header->setCrc(crc);
 }
 

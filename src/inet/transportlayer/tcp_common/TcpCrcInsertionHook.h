@@ -33,7 +33,7 @@ class TcpCrcInsertion : public NetfilterBase::HookBase {
     TcpCrcInsertion() {}
     void setCrcMode(CrcMode crcModeP) { crcMode = crcModeP; }
     void insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<TcpHeader>& tcpHeader, Packet *packet);
-    uint16_t computeCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const std::vector<uint8_t>& tcpHeaderBytes, const std::vector<uint8_t>& tcpDataBytes);
+    uint16_t computeCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<const TcpHeader>& tcpHeader, const Ptr<const Chunk>& tcpData);
 
   public:
     virtual Result datagramPreRoutingHook(Packet *packet) override { return ACCEPT; }

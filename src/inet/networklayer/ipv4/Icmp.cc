@@ -317,18 +317,10 @@ void Icmp::insertCrc(CrcMode crcMode, const Ptr<IcmpHeader>& icmpHeader, Packet 
         case CRC_COMPUTED: {
             // if the CRC mode is computed, then compute the CRC and set it
             icmpHeader->setChksum(0x0000); // make sure that the CRC is 0 in the header before computing the CRC
-            MemoryOutputStream icmpHeaderStream;
-            Chunk::serialize(icmpHeaderStream, icmpHeader);
-            const auto& icmpHeaderBytes = icmpHeaderStream.getData();
-            auto icmpDataBytes = packet->peekDataAsBytes()->getBytes();
-            auto icmpHeaderLength = icmpHeaderBytes.size();
-            auto icmpDataLength =  icmpDataBytes.size();
-            auto bufferLength = icmpHeaderLength + icmpDataLength;
-            auto buffer = new uint8_t[bufferLength];
-            std::copy(icmpHeaderBytes.begin(), icmpHeaderBytes.end(), buffer);
-            std::copy(icmpDataBytes.begin(), icmpDataBytes.end(), buffer + icmpHeaderLength);
-            uint16_t crc = inet::serializer::TcpIpChecksum::checksum(buffer, bufferLength);
-            delete [] buffer;
+            MemoryOutputStream icmpStream;
+            Chunk::serialize(icmpStream, icmpHeader);
+            Chunk::serialize(icmpStream, packet->peekDataAsBytes());
+            uint16_t crc = inet::serializer::TcpIpChecksum::checksum(icmpStream.getData());
             icmpHeader->setChksum(crc);
             break;
         }
@@ -350,11 +342,7 @@ bool Icmp::verifyCrc(const Packet *packet)
         case CRC_COMPUTED: {
             // otherwise compute the CRC, the check passes if the result is 0xFFFF (includes the received CRC)
             auto dataBytes = packet->peekDataAsBytes(Chunk::PF_ALLOW_INCORRECT);
-            size_t bufferLength = B(dataBytes->getChunkLength()).get();
-            auto buffer = new uint8_t[bufferLength];
-            dataBytes->copyToBuffer(buffer, bufferLength);
-            uint16_t crc = inet::serializer::TcpIpChecksum::checksum(buffer, bufferLength);
-            delete [] buffer;
+            uint16_t crc = inet::serializer::TcpIpChecksum::checksum(dataBytes->getBytes());
             // TODO: delete these isCorrect calls, rely on CRC only
             return crc == 0 && icmpHeader->isCorrect();
         }

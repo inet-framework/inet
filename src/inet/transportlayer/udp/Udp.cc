@@ -1285,11 +1285,8 @@ void Udp::insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress
             // if the CRC mode is computed, then compute the CRC and set it
             // this computation is delayed after the routing decision, see INetfilter hook
             udpHeader->setCrc(0x0000); // make sure that the CRC is 0 in the Udp header before computing the CRC
-            MemoryOutputStream udpHeaderStream;
-            Chunk::serialize(udpHeaderStream, udpHeader);
-            auto udpHeaderBytes = udpHeaderStream.getData();
-            auto udpDataBytes = packet->peekDataAsBytes()->getBytes();
-            auto crc = computeCrc(networkProtocol, srcAddress, destAddress, udpHeaderBytes, udpDataBytes);
+            auto udpData = packet->peekData();
+            auto crc = computeCrc(networkProtocol, srcAddress, destAddress, udpHeader, udpData);
             udpHeader->setCrc(crc);
             break;
         }
@@ -1322,11 +1319,9 @@ bool Udp::verifyCrc(const Protocol *networkProtocol, const Ptr<const UdpHeader>&
                 auto l3AddressInd = packet->getTag<L3AddressInd>();
                 auto srcAddress = l3AddressInd->getSrcAddress();
                 auto destAddress = l3AddressInd->getDestAddress();
-                auto udpHeaderBytes = udpHeader->Chunk::peek<BytesChunk>(B(0), udpHeader->getChunkLength())->getBytes();
                 auto totalLength = udpHeader->getTotalLengthField();
                 auto udpData = packet->peekDataAt<BytesChunk>(B(0), B(totalLength) - udpHeader->getChunkLength(), Chunk::PF_ALLOW_INCORRECT);
-                auto udpDataBytes = udpData->getBytes();
-                auto computedCrc = computeCrc(networkProtocol, srcAddress, destAddress, udpHeaderBytes, udpDataBytes);
+                auto computedCrc = computeCrc(networkProtocol, srcAddress, destAddress, udpHeader, udpData);
                 // TODO: delete these isCorrect calls, rely on CRC only
                 return computedCrc == 0xFFFF && udpHeader->isCorrect() && udpData->isCorrect();
             }
@@ -1336,14 +1331,14 @@ bool Udp::verifyCrc(const Protocol *networkProtocol, const Ptr<const UdpHeader>&
     }
 }
 
-uint16_t Udp::computeCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const std::vector<uint8_t>& udpHeaderBytes, const std::vector<uint8_t>& udpDataBytes)
+uint16_t Udp::computeCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<const UdpHeader>& udpHeader, const Ptr<const Chunk>& udpData)
 {
     auto pseudoHeader = makeShared<TransportPseudoHeader>();
     pseudoHeader->setSrcAddress(srcAddress);
     pseudoHeader->setDestAddress(destAddress);
     pseudoHeader->setNetworkProtocolId(networkProtocol->getId());
     pseudoHeader->setProtocolId(IP_PROT_UDP);
-    pseudoHeader->setPacketLength(udpHeaderBytes.size() + udpDataBytes.size());
+    pseudoHeader->setPacketLength(B(udpHeader->getChunkLength() + udpData->getChunkLength()).get());
     // pseudoHeader length: ipv4: 12 bytes, ipv6: 40 bytes, other: ???
     if (networkProtocol == &Protocol::ipv4)
         pseudoHeader->setChunkLength(B(12));
@@ -1351,24 +1346,13 @@ uint16_t Udp::computeCrc(const Protocol *networkProtocol, const L3Address& srcAd
         pseudoHeader->setChunkLength(B(40));
     else
         throw cRuntimeError("Unknown network protocol: %s", networkProtocol->getName());
-    auto pseudoHeaderBytes = pseudoHeader->Chunk::peek<BytesChunk>(B(0), pseudoHeader->getChunkLength())->getBytes();
-    // Excerpt from RFC 768:
-    // Checksum is the 16-bit one's complement of the one's complement sum of a
-    // pseudo header of information from the IP header, the Udp header, and the
-    // data,  padded  with zero octets  at the end (if  necessary)  to  make  a
-    // multiple of two octets.
-    auto pseudoHeaderLength = pseudoHeaderBytes.size();
-    auto udpHeaderLength = udpHeaderBytes.size();
-    auto udpDataLength =  udpDataBytes.size();
-    auto bufferLength = pseudoHeaderLength + udpHeaderLength + udpDataLength;
-    auto buffer = new uint8_t[bufferLength];
-    // 1. fill in the data
-    std::copy(pseudoHeaderBytes.begin(), pseudoHeaderBytes.end(), (uint8_t *)buffer);
-    std::copy(udpHeaderBytes.begin(), udpHeaderBytes.end(), (uint8_t *)buffer + pseudoHeaderLength);
-    std::copy(udpDataBytes.begin(), udpDataBytes.end(), (uint8_t *)buffer + pseudoHeaderLength + udpHeaderLength);
-    // 2. compute the CRC
-    uint16_t crc = inet::serializer::TcpIpChecksum::checksum(buffer, bufferLength);
-    delete [] buffer;
+
+    MemoryOutputStream stream;
+    Chunk::serialize(stream, pseudoHeader);
+    Chunk::serialize(stream, udpHeader);
+    Chunk::serialize(stream, udpData);
+    uint16_t crc = inet::serializer::TcpIpChecksum::checksum(stream.getData());
+
     // Excerpt from RFC 768:
     // If the computed  checksum  is zero,  it is transmitted  as all ones (the
     // equivalent  in one's complement  arithmetic).   An all zero  transmitted
