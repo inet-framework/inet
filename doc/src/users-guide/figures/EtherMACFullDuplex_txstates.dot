@@ -1,0 +1,18 @@
+digraph g {
+  fontsize=10; size="4"; rankdir="TB"
+  node[ shape = "ellipse" ]
+  
+  TX_IDLE -> PAUSE    [ label="PAUSE frame rcvd" ]
+  TX_IDLE -> WAIT_IFG [ label="frame rcvd from upper layer" ]
+
+  PAUSE -> TX_IDLE    [ label="pause time elapsed" ]
+  PAUSE -> PAUSE      [ label="PAUSE frame rcvd" ]
+  PAUSE -> WAIT_IFG   [ label="pause time elapsed\nqueued msgs" ]
+  
+  WAIT_IFG -> TRANSMITTING [ label="96 bittime elapsed" ]
+  
+  TRANSMITTING -> TX_IDLE  [ label="tx finished\nno queued msgs" ]
+  TRANSMITTING -> WAIT_IFG [ label="tx finished\nqueued msgs, no PAUSE" ]
+  TRANSMITTING -> PAUSE    [ label="tx finished\nPAUSE frame rcvd" ]
+}
+

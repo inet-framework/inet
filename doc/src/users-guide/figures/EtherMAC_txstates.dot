@@ -1,0 +1,24 @@
+digraph g {
+  fontsize=10; size="4"; rankdir="TB"
+  node[ shape = "ellipse" ]
+  
+  TX_IDLE; WAIT_IFG; SEND_IFG; TRANSMITTING; JAMMING; BACKOFF;
+  
+  TX_IDLE -> SEND_IFG [ label="msg from upper\nin burst" ]
+  TX_IDLE -> WAIT_IFG [ label="msg from upper\nno burst" ]
+
+  WAIT_IFG -> TRANSMITTING [ label="gap time elapsed" ]
+  SEND_IFG -> TRANSMITTING [ label="gap sent" ]
+  SEND_IFG -> JAMMING [ label="collision" ]
+  
+  TRANSMITTING -> TX_IDLE [ label="tx finished" ]
+  TRANSMITTING -> SEND_IFG [ label="tx finished\nnext in burst" ]
+  TRANSMITTING -> WAIT_IFG [ label="tx finished\nnext" ]
+  TRANSMITTING -> JAMMING [ label="collision" ]
+  
+  JAMMING -> BACKOFF [ label="jam sent" ]
+  JAMMING -> TX_IDLE [ label="too many attempts" ]
+  
+  BACKOFF -> WAIT_IFG [ label="no carrier" ]
+  BACKOFF -> TX_IDLE [ label="carrier detected"]
+}

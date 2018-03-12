@@ -63,6 +63,28 @@ coordinates of the node and is responsible for updating the position
 periodically and emitting the \ttt{mobilityStateChanged} signal
 when the position changed.
 
+Many mobility models allow the user to define a cubic volume that the node 
+can not leave. The volume is configured by setting the \fpar{constraintAreaX}, 
+\fpar{constraintAreaY}, \fpar{constraintAreaZ},
+\fpar{constraintAreaWidth}, \fpar{constraintAreaHeight} and
+\fpar{constraintAreaDepth} parameters.
+
+If the \fpar{initFromDisplayString} parameter, the initial position is taken from
+the display string. Otherwise the position can be given as the \fpar{initialX},
+\fpar{initialY} and \fpar{initialZ} parameters. If neither of these parameters
+are given, a random initial position is choosen within the contraint area.
+
+When the node reaches the boundary of the constraint area, the mobility
+component has to prevent the node to exit. Many mobility models offer the 
+following policies:
+
+\begin{itemize}
+  \item reflect of the wall
+  \item reappear at the opposite edge (torus area)
+  \item placed at a randomly chosen position of the area
+  \item stop the simulation with an error
+\end{itemize}
+
 The p[0] and p[1] fields of the display string of the node is
 also updated, so if the simulation run is animated, the node is
 actually moving on the screen. The current position of the node
@@ -92,86 +114,6 @@ implement the \nedtype{IMobility} interface.
 %       It would be better (backward compatibility)
 %       to initialize them to 0. (contsraintAreaDepth=0 not handled everywhere)
 
-\subsection{MobilityBase class}
-
-The abstract \cppclass{MobilityBase} class is the base of the mobility
-modules defined in the INET framework. This class allows to define
-a cubic volume that the node can not leave. The volume is configured
-by setting the \fpar{constraintAreaX}, \fpar{constraintAreaY},
-\fpar{constraintAreaZ},
-\fpar{constraintAreaWidth}, \fpar{constraintAreaHeight} and
-\fpar{constraintAreaDepth} parameters.
-
-When the module is initialized it sets the initial position of the node
-by calling the \ffunc{initializePosition()} method.
-The default implementation of this method sets the position from the
-display string if the \fpar{initFromDisplayString} parameter is true.
-Otherwise the position can be given as the \fpar{initialX},
-\fpar{initialY} and \fpar{initialZ} parameters.
-If neither of these parameters are given,
-a random initial position is choosen within the contraint area.
-
-The module is responsible for periodically updating the position.
-For this purpose it should send timer messages to itself. These messages
-are processed in the \ffunc{handleSelfMessage} method. In derived
-classes, \ffunc{handleSelfMessage} should compute the new position
-and update the display string and publish the new position by calling
-the \ffunc{positionUpdated} method.
-
-When the node reaches the boundary of the constraint area, the mobility
-component has to prevent the node to exit. It can call the
-\ffunc{handleIfOutside} method, that offers the following policies:
-
-\begin{itemize}
-  \item reflect of the wall
-  \item reappear at the opposite edge (torus area)
-  \item placed at a randomly chosen position of the area
-  \item stop the simulation with an error
-\end{itemize}
-
-\subsection{MovingMobilityBase}
-
-The abstract \cppclass{MovingMobilityBase} class can be used to model
-mobilities when the node moves on a continous trajectory and
-updates its position periodically. Subclasses only need to implement
-the \ffunc{move} method that is responsible to update the current
-position and speed of the node.
-
-The abstract \ffunc{move} method is called autmotically in every
-\fpar{updateInterval} steps. The method is also called when a client
-requested the current position or speed or when the \ffunc{move} method
-requested an update at a future moment by setting the \fvar{nextChange}
-field. This can be used when the state of the motion changes at a
-specific time that is not a multiple of \fpar{updateInterval}.
-The method can set the \fpar{stationary} field to \ttt{true} to
-indicate that the node reached its final position and no more position
-update is needed.
-
-% TODO draw a plot of t-position function marking the points when
-%      move() is called, stationary set to true, etc.
-
-\subsection{LineSegmentsMobilityBase}
-
-The path of a mobile node often consist of linear movements of constant
-speed. The node moves with some speed for some time, then with another
-speed for another duration and so on. If a mobility model fits this
-description, it might be suitable to derive the implementing C++ class
-from \cppclass{LineSegmentsMobilityBase}.
-
-The module first choose a target position and a target time by calling
-the \ffunc{setTargetPosition} method. If the target position differs
-from the current position, it starts to move toward the target and
-updates the position in the configured \fpar{updateInterval} intervals.
-When the target position reached, it chooses a new target.
-
-% TODO draw a plot like above, but containing linear segments, mark
-%      the points when setTargetPosition called.
-
-% FIXME LineSegmentsMobilityBase should not schedule the self message at updateInterval
-%       when lastPosition==targetPosition (the node is waiting at the current position,
-%       e.g. every second step in RandomWPMobility)
-% TODO Consider an updateInterval computed from an updateDistance and speed, because position change
-%      may be irrevelant during a preconfigured updateInterval.
 
 \section{Implemented models}
 

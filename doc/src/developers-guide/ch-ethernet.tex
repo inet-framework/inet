@@ -1,0 +1,126 @@
+% last synchronized to 'dbc28949bf4332ac86d84b95705fbea9af4f84f7'
+\chapter{The Ethernet Model}
+\label{cha:ethernet}
+
+\section{Sending Ethernet Frames}
+
+TODO tags etc
+
+\section{Receiving Ethernet Frames}
+
+TODO tags etc
+
+\section{Frames}
+
+The INET defines these frames in the \ffilename{EtherFrame.msg} file.
+The models supports Ethernet II, 803.2 with LLC header, and 803.3 with LLC and SNAP headers.
+The corresponding classes are:
+\msgtype{EthernetIIFrame}, \msgtype{EtherFrameWithLLC} and \msgtype{EtherFrameWithSNAP}. They all class
+from \msgtype{EtherFrame} which only represents the basic MAC frame with source and
+destination addresses. \nedtype{EtherMAC} only deals with \msgtype{EtherFrame}s, and does not
+care about the specific subclass.
+
+Ethernet frames carry data packets as encapsulated cMessage objects.
+Data packets can be of any message type (cMessage or cMessage subclass).
+
+The model encapsulates data packets in Ethernet frames using the \ttt{encapsulate()}
+method of cMessage. Encapsulate() updates the length of the Ethernet frame too,
+so the model doesn't have to take care of that.
+
+The fields of the Ethernet header are passed in a \cppclass{Ieee802Ctrl}
+control structure to the LLC by the network layer.
+
+
+EtherJam, EtherPadding (interframe gap), EtherPauseFrame?
+
+
+\subsection{EtherLLC}
+
+EtherFrameWithLLC
+
+SAP registration
+
+% TODO delete EtherLLC, because LLC without SNAP is not used with IP (no ARP,IPv6 SAP)
+% TODO modify EtherEncap to handle EtherFrameWithSNAP frames too (we can not send EtherFrameWithSNAP now)
+
+\subsubsection{\nedtype{EtherLLC} and higher layers}
+
+The \nedtype{EtherLLC} module can serve several applications (higher layer protocols),
+and dispatch data to them. Higher layers are identified by DSAP.
+See section "Application registration" for more info.
+
+\nedtype{EtherEncap} doesn't have the functionality to dispatch to different
+higher layers because in practice it'll always be used with IP.
+
+\subsubsection{Communication between LLC and Higher Layers}
+
+Higher layers (applications or protocols) talk to the \nedtype{EtherLLC} module.
+
+When a higher layer wants to send a packet via Ethernet, it just
+passes the data packet (a cMessage or any subclass) to \nedtype{EtherLLC}.
+The message kind has to be set to IEEE802CTRL\_DATA.
+
+In general, if \nedtype{EtherLLC} receives a packet from the higher layers,
+it interprets the message kind as a command. The commands include
+IEEE802CTRL\_DATA (send a frame), IEEE802CTRL\_REGISTER\_DSAP (register highher layer)
+IEEE802CTRL\_DEREGISTER\_DSAP (deregister higher layer) and IEEE802CTRL\_SENDPAUSE
+(send PAUSE frame) -- see EtherLLC for a more complete list.
+
+The arguments to the command are NOT inside the data packet but
+in a "control info" data structure of class \cppclass{Ieee802Ctrl}, attached to
+the packet. See controlInfo() method of cMessage (OMNeT++ 3.0).
+
+For example, to send a packet to a given MAC address and protocol
+identifier, the application sets the data packet's message kind
+to ETH\_DATA ("please send this data packet" command),
+fills in the \nedtype{Ieee802Ctrl} structure with the destination MAC address and
+the protocol identifier, adds the control info to the message, then sends
+the packet to \nedtype{EtherLLC}.
+
+When the command doesn't involve a data packet (e.g.
+IEEE802CTRL\_(DE)REGISTER\_DSAP, IEEE802CTRL\_SENDPAUSE), a dummy packet
+(empty cMessage) is used.
+
+\subsubsection{Rationale}
+
+The alternative of the above communications would be:
+
+\begin{itemize}
+  \item adding the parameters such as destination address into the data
+    packet. This would be a poor solution since it would make the
+    higher layers specific to the Ethernet model.
+  \item encapsulating a data packet into an \textit{interface packet} which
+    contains the destination address and other parameters. The
+    disadvantages of this approach is the overhead associated with
+    creating and destroying the interface packets.
+\end{itemize}
+
+Using a control structure is more efficient than the interface packet
+approach, because the control structure can be created once inside
+the higher layer and be reused for every packet.
+
+It may also appear to be more intuitive in Tkenv because one can observe
+data packets travelling between the higher layer and Ethernet
+modules -- as opposed to "interface" packets.
+
+
+\subsubsection{EtherLLC: SAP Registration}
+
+The Ethernet model supports multiple applications or higher layer
+protocols.
+
+So that data arriving from the network can be dispatched to the
+correct applications (higher layer protocols), applications
+have to register themselves in \nedtype{EtherLLC}. The registration
+is done with the IEEE802CTRL\_REGISTER\_DSAP command
+(see section "Communication between LLC and higher layers")
+which associates a SAP with the LLC port. Different applications
+have to connect to different ports of \nedtype{EtherLLC}.
+
+The ETHERCTRL\_REGISTER\_DSAP/IEEE802CTRL\_DEREGISTER\_DSAP commands use only the
+dsap field in the \cppclass{Ieee802Ctrl} structure.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "usman"
+%%% End:
