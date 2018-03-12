@@ -244,7 +244,7 @@ bool cSocketRTScheduler::receiveWithTimeout(long usec)
         if (!(FD_ISSET(fd[i], &rdfds)))
             continue;
 #endif // ifdef __linux__
-        if ((n = pcap_dispatch(pds.at(i), 1, packet_handler, (uint8 *)&i)) < 0)
+        if ((n = pcap_dispatch(pds.at(i), 0, packet_handler, (uint8 *)&i)) < 0)
             throw cRuntimeError("cSocketRTScheduler::pcap_dispatch(): An error occured: %s", pcap_geterr(pds.at(i)));
         if (n > 0)
             found = true;
@@ -261,7 +261,7 @@ int cSocketRTScheduler::receiveUntil(int64_t targetTime)
     // if there's more than 2*UI_REFRESH_TIME to wait, wait in UI_REFRESH_TIME chunks
     // in order to keep UI responsiveness by invoking getEnvir()->idle()
     int64_t curTime = opp_get_monotonic_clock_usecs();
-
+printf("receiveUntil\n");
     while ((targetTime - curTime) >= 2000000 || (targetTime - curTime) >= 2*UI_REFRESH_TIME)
     {
         if (receiveWithTimeout(UI_REFRESH_TIME))
@@ -287,7 +287,7 @@ cEvent *cSocketRTScheduler::guessNextEvent()
 cEvent *cSocketRTScheduler::takeNextEvent()
 {
     int64_t targetTime;
-
+printf("takeNextEvent\n");
     // calculate target time
     cEvent *event = FES(sim)->peekFirst();
     if (!event) {

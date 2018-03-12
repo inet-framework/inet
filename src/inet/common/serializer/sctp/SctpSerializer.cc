@@ -1170,6 +1170,7 @@ void SctpSerializer::hmacSha1(const uint8 *buf, uint32 buflen, const uint8 *key,
 
 const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
 {
+    printf("SctpSerializer::deserialize\n");
     int32 size_common_header = sizeof(struct common_header);
     int32 size_init_chunk = sizeof(struct init_chunk);
     int32 size_init_ack_chunk = sizeof(struct init_ack_chunk);

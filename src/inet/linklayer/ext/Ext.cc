@@ -98,9 +98,10 @@ printf("Ext::handleMessage\n");
     Packet *packet = check_and_cast<Packet *>(msg);
 
     if (msg->isSelfMessage()) {
+    printf("selfMessage\n");
         // incoming real packet from wire (captured by pcap)
         const auto& nwHeader = packet->peekHeader<Ipv4Header>();
-        EV << "Delivering a packet from "
+        std::cout << "Delivering a packet from "
            << nwHeader->getSourceAddress()
            << " to "
            << nwHeader->getDestinationAddress()
@@ -143,7 +144,7 @@ printf("Ext::handleMessage\n");
             numSent++;
         }
         else {
-            EV << "Interface is not connected, dropping packet " << msg << endl;
+            std::cout << "Interface is not connected, dropping packet " << msg << endl;
             numDropped++;
         }
     }

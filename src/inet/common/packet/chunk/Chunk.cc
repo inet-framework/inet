@@ -169,7 +169,9 @@ const Ptr<Chunk> Chunk::deserialize(MemoryInputStream& stream, const std::type_i
 #if CHUNK_CHECK_IMPLEMENTATION_ENABLED
     auto startPosition = B(stream.getPosition());
 #endif
+printf("Chunk::deserialize call serializer->deserialize\n");
     auto chunk = serializer->deserialize(stream, typeInfo);
+printf("done!\n");
 #if CHUNK_CHECK_IMPLEMENTATION_ENABLED
     auto endPosition = B(stream.getPosition());
     CHUNK_CHECK_IMPLEMENTATION(chunk->getChunkLength() == endPosition - startPosition);

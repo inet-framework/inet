@@ -39,6 +39,7 @@ void EthernetMacHeaderSerializer::serialize(MemoryOutputStream& stream, const Pt
 
 const Ptr<Chunk> EthernetMacHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
+printf("EthernetMacHeaderSerializer::deserialize\n");
     Ptr<EthernetMacHeader> ethernetMacHeader = makeShared<EthernetMacHeader>();
     MacAddress destAddr = stream.readMacAddress();
     MacAddress srcAddr = stream.readMacAddress();
@@ -64,6 +65,7 @@ void EthernetControlFrameSerializer::serialize(MemoryOutputStream& stream, const
 
 const Ptr<Chunk> EthernetControlFrameSerializer::deserialize(MemoryInputStream& stream) const
 {
+printf("EthernetControlFrameSerializer::deserialize\n");
     Ptr<EthernetControlFrame> controlFrame = nullptr;
     uint16_t opCode = stream.readUint16Be();
     if (opCode == ETHERNET_CONTROL_PAUSE) {

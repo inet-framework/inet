@@ -31,6 +31,7 @@ void BytesChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
 
 const Ptr<Chunk> BytesChunkSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
 {
+printf("BytesChunkSerializer::deserialize\n");
     auto bytesChunk = makeShared<BytesChunk>();
     B length = stream.getRemainingLength();
     std::vector<uint8_t> chunkBytes;
