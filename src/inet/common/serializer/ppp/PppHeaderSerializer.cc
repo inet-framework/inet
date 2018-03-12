@@ -35,6 +35,7 @@ void PppHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
 
 const Ptr<Chunk> PppHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
+printf("PppHeaderSerializer::deserialize\n");
     auto pppHeader = makeShared<PppHeader>();
     pppHeader->setFlag(stream.readUint8());
     pppHeader->setAddress(stream.readUint8());

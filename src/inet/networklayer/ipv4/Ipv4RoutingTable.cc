@@ -449,7 +449,7 @@ void Ipv4RoutingTable::purge()
 Ipv4Route *Ipv4RoutingTable::findBestMatchingRoute(const Ipv4Address& dest) const
 {
     Enter_Method("findBestMatchingRoute(%u.%u.%u.%u)", dest.getDByte(0), dest.getDByte(1), dest.getDByte(2), dest.getDByte(3));    // note: str().c_str() too slow here
-
+printf("Ipv4RoutingTable::findBestMatchingRoute\n");
     auto it = routingCache.find(dest);
     if (it != routingCache.end()) {
         if (it->second == nullptr || it->second->isValid())
@@ -475,7 +475,7 @@ Ipv4Route *Ipv4RoutingTable::findBestMatchingRoute(const Ipv4Address& dest) cons
 InterfaceEntry *Ipv4RoutingTable::getInterfaceForDestAddr(const Ipv4Address& dest) const
 {
     Enter_Method("getInterfaceForDestAddr(%u.%u.%u.%u)", dest.getDByte(0), dest.getDByte(1), dest.getDByte(2), dest.getDByte(3));    // note: str().c_str() too slow here
-
+printf("Ipv4RoutingTable::getInterfaceForDestAddr\n");
     const Ipv4Route *e = findBestMatchingRoute(dest);
     return e ? e->getInterface() : nullptr;
 }

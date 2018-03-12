@@ -156,6 +156,7 @@ void Ipv4::refreshDisplay() const
 
 void Ipv4::handleMessage(cMessage *msg)
 {
+printf("Ipv4::handleMessage\n");
     auto request = dynamic_cast<Request *>(msg);
     if (L3SocketBindCommand *command = dynamic_cast<L3SocketBindCommand *>(msg->getControlInfo())) {
         int socketId = request->getTag<SocketReq>()->getSocketId();

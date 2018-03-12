@@ -175,7 +175,7 @@ void Sctp::handleMessage(cMessage *msg)
     L3Address destAddr;
     L3Address srcAddr;
     bool findListen = false;
-
+printf("\n\nSctpMain handleMessage\n");
     EV_INFO << "\n\nSctpMain handleMessage at " << getFullPath() << "\n";
 
     if (msg->isSelfMessage()) {
