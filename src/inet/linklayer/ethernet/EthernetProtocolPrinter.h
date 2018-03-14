@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IEEE8022LLCPROTOCOLPRINTER_H
-#define __INET_IEEE8022LLCPROTOCOLPRINTER_H
+#ifndef __INET_ETHERNETPROTOCOLPRINTER_H
+#define __INET_ETHERNETPROTOCOLPRINTER_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/printer/ProtocolPrinter.h"
@@ -31,5 +31,5 @@ class INET_API EthernetProtocolPrinter : public ProtocolPrinter
 
 } // namespace inet
 
-#endif // __INET_IEEE8022LLCPROTOCOLPRINTER_H
+#endif // __INET_ETHERNETPROTOCOLPRINTER_H
 
