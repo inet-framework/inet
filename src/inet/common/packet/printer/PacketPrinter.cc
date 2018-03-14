@@ -31,33 +31,20 @@ bool PacketPrinter::isEnabledOption(const Options *options, const char *name) co
     return options->enabledTags.find(name) != options->enabledTags.end();
 }
 
-static bool isPhysicalLayerProtocol(const Protocol *protocol)
-{
-    return protocol && protocol->getLayer() == Protocol::PhysicalLayer;
-}
-
-static bool isLinkLayerProtocol(const Protocol *protocol)
-{
-    return protocol && protocol->getLayer() == Protocol::LinkLayer;
-}
-
-static bool isNetworkLayerProtocol(const Protocol *protocol)
-{
-    return protocol && protocol->getLayer() == Protocol::NetworkLayer;
-}
-
-static bool isTransportLayerProtocol(const Protocol *protocol)
-{
-    return protocol && protocol->getLayer() == Protocol::TransportLayer;
-}
-
 bool PacketPrinter::isEnabledInfo(const Options *options, const Protocol *protocol) const
 {
-    return isEnabledOption(options, "Show all info") ||
-          (isEnabledOption(options, "Show physical layer info") && isPhysicalLayerProtocol(protocol)) ||
-          (isEnabledOption(options, "Show link layer info") && isLinkLayerProtocol(protocol)) ||
-          (isEnabledOption(options, "Show network layer info") && isNetworkLayerProtocol(protocol)) ||
-          (isEnabledOption(options, "Show transport layer info") && isTransportLayerProtocol(protocol));
+    if (isEnabledOption(options, "Show all info"))
+        return true;
+    if (protocol) {
+        switch (protocol->getLayer()) {
+            case Protocol::PhysicalLayer: return isEnabledOption(options, "Show physical layer info");
+            case Protocol::LinkLayer: return isEnabledOption(options, "Show link layer info");
+            case Protocol::NetworkLayer: return isEnabledOption(options, "Show network layer info");
+            case Protocol::TransportLayer: return isEnabledOption(options, "Show transport layer info");
+            default: break;
+        }
+    }
+    return false;
 }
 
 const ProtocolPrinter& PacketPrinter::getProtocolPrinter(const Protocol *protocol) const
@@ -250,7 +237,7 @@ void PacketPrinter::printSourceColumn(const std::string source, const Protocol *
 {
     if (source.length() != 0) {
         bool concatenate = isEnabledOption(options, "Show all PDU source fields") ||
-                          (isEnabledOption(options, "Show auto source fields") && !isNetworkLayerProtocol(protocol));
+                          (isEnabledOption(options, "Show auto source fields") && !(protocol && protocol->getLayer() == Protocol::NetworkLayer));
         if (!concatenate)
             context.sourceColumn.str("");
         else if (context.sourceColumn.str().length() != 0)
@@ -263,7 +250,7 @@ void PacketPrinter::printDestinationColumn(const std::string destination, const 
 {
     if (destination.length() != 0) {
         bool concatenate = isEnabledOption(options, "Show all PDU destination fields") ||
-                          (isEnabledOption(options, "Show auto destination fields") && !isNetworkLayerProtocol(protocol));
+                          (isEnabledOption(options, "Show auto destination fields") && !(protocol && protocol->getLayer() == Protocol::NetworkLayer));
         if (!concatenate)
             context.destinationColumn.str("");
         else if (context.destinationColumn.str().length() != 0)
