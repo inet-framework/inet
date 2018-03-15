@@ -39,7 +39,6 @@ void GenericAppMsgSerializer::serialize(MemoryOutputStream& stream, const Ptr<co
 
 const Ptr<Chunk> GenericAppMsgSerializer::deserialize(MemoryInputStream& stream) const
 {
-printf("GenericAppMsgSerializer::deserialize\n");
     auto startPosition = stream.getPosition();
     auto msg = makeShared<GenericAppMsg>();
     B dataLength = B(stream.readUint32Be());

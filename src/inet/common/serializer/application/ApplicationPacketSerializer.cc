@@ -37,7 +37,6 @@ void ApplicationPacketSerializer::serialize(MemoryOutputStream& stream, const Pt
 
 const Ptr<Chunk> ApplicationPacketSerializer::deserialize(MemoryInputStream& stream) const
 {
-printf("ApplicationPacketSerializer::deserialize\n");
     auto startPosition = stream.getPosition();
     auto applicationPacket = makeShared<ApplicationPacket>();
     B dataLength = B(stream.readUint32Be());
