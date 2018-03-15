@@ -53,7 +53,7 @@ void SctpAssociation::increaseOutstandingBytes(SctpDataVariables *chunk,
 }
 
 void SctpAssociation::storePacket(SctpPathVariables *pathVar,
-		const Ptr<SctpHeader>& sctp,
+        const Ptr<SctpHeader>& sctp,
         const uint16 chunksAdded,
         const uint16 dataChunksAdded,
         const bool authAdded)
@@ -798,7 +798,7 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
         // As there is at least a SACK to be sent, a header can be created
 
         if (state->sctpMsg) {
-            EV_DETAIL << __LINE__ << "packet was stored -> load packet" << endl;
+            EV_DETAIL << "packet was stored -> load packet" << endl;
             loadPacket(path, &sctpMsg, &chunksAdded, &dataChunksAdded, &authAdded);
             headerCreated = true;
         }
