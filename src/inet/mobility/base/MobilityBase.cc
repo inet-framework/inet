@@ -72,18 +72,19 @@ void MobilityBase::initialize(int stage)
         constraintAreaMax.y = par("constraintAreaMaxY");
         constraintAreaMax.z = par("constraintAreaMaxZ");
         bool visualizeMobility = par("visualizeMobility");
-        if (visualizeMobility)
+        if (visualizeMobility) {
             visualRepresentation = findVisualRepresentation();
+            if (visualRepresentation != nullptr) {
+                auto visualizationTarget = visualRepresentation->getParentModule();
+                canvasProjection = CanvasProjection::getCanvasProjection(visualizationTarget->getCanvas());
+            }
+        }
         WATCH(constraintAreaMin);
         WATCH(constraintAreaMax);
         WATCH(lastPosition);
         WATCH(lastOrientation);
     }
     else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT_2) {
-        if (visualRepresentation != nullptr) {
-            auto visualizationTarget = visualRepresentation->getParentModule();
-            canvasProjection = CanvasProjection::getCanvasProjection(visualizationTarget->getCanvas());
-        }
         initializeOrientation();
         initializePosition();
     }
