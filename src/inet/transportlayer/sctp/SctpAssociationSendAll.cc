@@ -53,16 +53,16 @@ void SctpAssociation::increaseOutstandingBytes(SctpDataVariables *chunk,
 }
 
 void SctpAssociation::storePacket(SctpPathVariables *pathVar,
-		const Ptr<SctpHeader>& sctpMsg,
-       // SctpHeader *sctpMsg,
+		const Ptr<SctpHeader>& sctp,
         const uint16 chunksAdded,
         const uint16 dataChunksAdded,
         const bool authAdded)
 {
     uint32 packetBytes = 0;
+    SctpHeader *sctpMsg = (SctpHeader *)sctp.get();
     for (uint16 i = 0; i < sctpMsg->getSctpChunksArraySize(); i++) {
         const SctpChunk *chunkPtr = sctpMsg->getSctpChunks(i);
-        if (chunkPtr->getSctpChunkType() == 0) {
+        if (chunkPtr->getSctpChunkType() == DATA) {
             SctpDataChunk* dataChunk = (SctpDataChunk*)(chunkPtr);
             if(dataChunk != nullptr) {
                 const uint32_t tsn = dataChunk->getTsn();
@@ -798,7 +798,7 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
         // As there is at least a SACK to be sent, a header can be created
 
         if (state->sctpMsg) {
-            EV_DETAIL << "packet was stored -> load packet" << endl;
+            EV_DETAIL << __LINE__ << "packet was stored -> load packet" << endl;
             loadPacket(path, &sctpMsg, &chunksAdded, &dataChunksAdded, &authAdded);
             headerCreated = true;
         }

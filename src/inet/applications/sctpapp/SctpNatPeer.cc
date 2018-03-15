@@ -146,7 +146,7 @@ void SctpNatPeer::generateAndSend()
     lastStream = (lastStream + 1) % outboundStreams;
     sctpSendReq->setSid(lastStream);
     sctpSendReq->setSocketId(serverAssocId);
-    auto creationTimeTag = applicationData->addTag<CreationTimeTag>();
+    auto creationTimeTag = applicationPacket->addTagIfAbsent<CreationTimeTag>();
     creationTimeTag->setCreationTime(simTime());
     applicationPacket->setKind(ordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);
     auto& tags = getTags(applicationPacket);
@@ -502,7 +502,6 @@ void SctpNatPeer::handleMessage(cMessage *msg)
 
 void SctpNatPeer::handleTimer(cMessage *msg)
 {
-    cMessage *cmsg;
     int32 id;
 
     EV << "SctpNatPeer::handleTimer\n";
@@ -671,7 +670,6 @@ void SctpNatPeer::setStatusString(const char *s)
 void SctpNatPeer::sendRequest(bool last)
 {
     EV << "sending request, " << numRequestsToSend - 1 << " more to go\n";
-    uint32 i;
     int64 numBytes = (int64)(long)par("requestLength");
     if (numBytes < 1)
         numBytes = 1;
@@ -686,7 +684,7 @@ void SctpNatPeer::sendRequest(bool last)
         vec[i] = (bytesSent + i) & 0xFF;
     msg->setBytes(vec);
     cmsg->insertAtEnd(msg);
-    auto creationTimeTag = msg->addTag<CreationTimeTag>();
+    auto creationTimeTag = cmsg->addTagIfAbsent<CreationTimeTag>();
     creationTimeTag->setCreationTime(simTime());
     cmsg->setKind(ordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);
     auto sendCommand = cmsg->addTagIfAbsent<SctpSendReq>();
@@ -731,7 +729,7 @@ void SctpNatPeer::socketEstablished(int32, void *, unsigned long int buffer)
         sctpSendReq->setPrMethod(0);
         sctpSendReq->setPrValue(0);
         sctpSendReq->setSid(0);
-        auto creationTimeTag = applicationData->addTag<CreationTimeTag>();
+        auto creationTimeTag = applicationPacket->addTagIfAbsent<CreationTimeTag>();
         creationTimeTag->setCreationTime(simTime());
         applicationPacket->setKind(SCTP_C_SEND_ORDERED);
         clientSocket.sendMsg(applicationPacket);
@@ -837,7 +835,7 @@ void SctpNatPeer::socketDataArrived(int32, void *, Packet *msg, bool)
 
     if (echo) {
         const auto& smsg = staticPtrCast<const BytesChunk>(msg->peekData());
-        auto creationTimeTag = smsg->findTag<CreationTimeTag>();
+        auto creationTimeTag = msg->findTag<CreationTimeTag>();
         creationTimeTag->setCreationTime(simTime());
         auto cmsg = new Packet("ApplicationPacket");
         cmsg->insertAtEnd(smsg);
@@ -916,7 +914,7 @@ void SctpNatPeer::addressAddedArrived(int32 assocId, L3Address localAddr, L3Addr
         sctpSendReq->setPrMethod(0);
         sctpSendReq->setPrValue(0);
         sctpSendReq->setSid(0);
-        auto creationTimeTag = applicationData->addTag<CreationTimeTag>();
+        auto creationTimeTag = applicationPacket->addTagIfAbsent<CreationTimeTag>();
         creationTimeTag->setCreationTime(simTime());
         applicationPacket->setKind(SCTP_C_SEND_ORDERED);
         clientSocket.sendMsg(applicationPacket);

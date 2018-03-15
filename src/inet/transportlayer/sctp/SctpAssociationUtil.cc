@@ -402,7 +402,7 @@ void SctpAssociation::sendToIP(Packet *pkt, const Ptr<SctpHeader>& sctpmsg,
         udpHeader->setDestinationPort(SCTP_UDP_PORT);
         udpHeader->setTotalLengthField(B(udpHeader->getChunkLength() + pkt->getTotalLength()).get());
         EV_INFO << "Packet: " << pkt << endl;
-        udpHeader->setCrcMode(CRC_COMPUTED);
+        udpHeader->setCrcMode(sctpMain->crcMode);
         insertTransportProtocolHeader(pkt, Protocol::udp, udpHeader);
         EV_INFO << "After udp header added " << pkt << endl;
         pkt->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::udp);
@@ -1257,12 +1257,13 @@ void SctpAssociation::retransmitShutdownAck()
 
 void SctpAssociation::sendPacketDrop(const bool flag)
 {
+#if 0
     EV_INFO << "sendPacketDrop:\t";
     SctpHeader *drop = (SctpHeader *)state->sctpmsg->dup();        //FIXME is the c-style conversion need here?
     if (drop->getSctpChunksArraySize() == 1) {
         SctpChunk *header = (SctpChunk *)(drop->getSctpChunks(0));
         if (header->getSctpChunkType() == PKTDROP) {
-            disposeOf(state->sctpmsg);
+          //  disposeOf(state->sctpmsg);
             delete drop;
             return;
         }
@@ -1306,7 +1307,7 @@ void SctpAssociation::sendPacketDrop(const bool flag)
             else if (drop->getSctpChunksArraySize() == 1) {
                 delete sctpchunk;
                 delete pktdrop;
-                disposeOf(state->sctpmsg);
+               // disposeOf(state->sctpmsg);
                 EV_DETAIL << "laenge=" << B(drop->getChunkLength()).get() << " numberOfChunks=1\n";
                 disposeOf(drop);
                 return;
@@ -1314,7 +1315,7 @@ void SctpAssociation::sendPacketDrop(const bool flag)
         }
         else {
             delete pktdrop;
-            disposeOf(state->sctpmsg);
+           // disposeOf(state->sctpmsg);
             EV_DETAIL << "laenge=" << B(drop->getChunkLength()).get() << " numberOfChunks=1\n";
             disposeOf(drop);
             return;
@@ -1328,11 +1329,12 @@ void SctpAssociation::sendPacketDrop(const bool flag)
     EV_DETAIL << "length of PKTDROP chunk=" << pktdrop->getByteLength() << "\n";
     sctpmsg->insertSctpChunks(pktdrop);
     EV_DETAIL << "total length now " << B(sctpmsg->getChunkLength()).get() << "\n";
-    disposeOf(state->sctpmsg);
+   // disposeOf(state->sctpmsg);
     state->pktDropSent = true;
     sctpMain->numPktDropReports++;
     Packet *fp = new Packet("PKTDROP");
     sendToIP(fp, sctpmsg);
+#endif
 }
 
 void SctpAssociation::scheduleSack()
@@ -2063,7 +2065,7 @@ void SctpAssociation::pushUlp()
             cmd->setPpid(chunk->ppid);
             cmd->setTsn(chunk->tsn);
             cmd->setCumTsn(state->lastTsnAck);
-            auto creationTimeTag = applicationData->addTag<CreationTimeTag>();
+            auto creationTimeTag = applicationPacket->addTagIfAbsent<CreationTimeTag>();
             creationTimeTag->setCreationTime(smsg->getCreationTime());
             applicationPacket->insertAtEnd(applicationData);
             state->numMsgsReq[count]--;

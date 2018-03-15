@@ -200,17 +200,17 @@ INetfilter::IHook::Result SctpNatHook::datagramPreRoutingHook(Packet *datagram)
                 }
             }
             else {
-                SctpChunk *schunk;
+               /* SctpChunk *schunk = nullptr;
                 if (numberOfChunks > 0) {
                     EV << "number of chunks=" << numberOfChunks << "\n";
                     for (uint32 i = 0; i < numberOfChunks; i++) {
-                       // schunk = (SctpChunk *)(sctpMsg->removeChunk());
+                        schunk = (SctpChunk *)(sctpMsg->removeChunk());
                         if (schunk->getSctpChunkType() == DATA)
                             delete (SctpSimpleMessage *)schunk->decapsulate();
                         EV << "delete chunk " << schunk->getName() << "\n";
                         delete schunk;
                     }
-                }
+                }*/
                 insertTransportProtocolHeader(datagram, Protocol::sctp, (const Ptr<inet::TransportHeaderBase>) sctp);
                 insertNetworkProtocolHeader(datagram, Protocol::ipv4, (const Ptr<NetworkHeaderBase>&) networkHeader);
                 return INetfilter::IHook::DROP;

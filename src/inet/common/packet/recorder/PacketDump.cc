@@ -436,16 +436,6 @@ void PacketDump::udpDump(bool l2r, const char *label, const Ptr<const UdpHeader>
     //out << endl;
     out << "UDP: Payload length=" << udpHeader->getTotalLengthField() - UDP_HEADER_BYTES << endl;
 
-#ifdef WITH_SCTP
-#if 0
-    if (udpHeader->getSourcePort() == 9899 || udpHeader->getDestinationPort() == 9899) {
-        if (dynamic_cast<sctp::SctpHeader *>(udpHeader->getEncapsulatedPacket()))
-            sctpDump("", (sctp::SctpHeader *)(udpHeader->getEncapsulatedPacket()),
-                    std::string(l2r ? "A" : "B"), std::string(l2r ? "B" : "A"));
-    }
-#endif
-#endif // ifdef WITH_SCTP
-
     // comment
     if (comment)
         out << "# " << comment;

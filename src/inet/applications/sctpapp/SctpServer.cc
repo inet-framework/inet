@@ -152,7 +152,7 @@ void SctpServer::generateAndSend()
     lastStream = (lastStream + 1) % outboundStreams;
     sctpSendReq->setSid(lastStream);
     sctpSendReq->setSocketId(assocId);
-    auto creationTimeTag = applicationData->addTag<CreationTimeTag>();
+    auto creationTimeTag = applicationPacket->addTagIfAbsent<CreationTimeTag>();
     creationTimeTag->setCreationTime(simTime());
     applicationPacket->setKind(ordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);
     auto& tags = getTags(applicationPacket);
@@ -207,7 +207,6 @@ void SctpServer::handleMessage(cMessage *msg)
 {
     // TODO: there is another memory leak somewhere...
     int id = 0;
-    cMessage *cmsg;
     EV_INFO << "SctpServer::handleMessage\n";
     if (msg->isSelfMessage())
         handleTimer(msg);
@@ -389,8 +388,8 @@ void SctpServer::handleMessage(cMessage *msg)
                         j->second.rcvdPackets--;
 
                         auto m = endToEndDelay.find(id);
-                        const auto& smsg = staticPtrCast<const BytesChunk>(message->peekData());
-                        auto creationTimeTag = smsg->findTag<CreationTimeTag>();
+                       // const auto& smsg = staticPtrCast<const BytesChunk>(message->peekData());
+                        auto creationTimeTag = message->findTag<CreationTimeTag>();
                         m->second->record(simTime() - creationTimeTag->getCreationTime());
                         EV_INFO << "server: Data received. Left packets to receive=" << j->second.rcvdPackets << "\n";
 
@@ -418,7 +417,7 @@ void SctpServer::handleMessage(cMessage *msg)
                 else {
                     auto m = endToEndDelay.find(id);
                     const auto& smsg = staticPtrCast<const BytesChunk>(message->peekData());
-                    auto creationTimeTag = smsg->findTag<CreationTimeTag>();
+                    auto creationTimeTag = message->findTag<CreationTimeTag>();
                     m->second->record(simTime() - creationTimeTag->getCreationTime());
                     creationTimeTag->setCreationTime(simTime());
                     auto cmsg = new Packet("ApplicationPacket");

@@ -49,7 +49,7 @@ Define_Module(Ext);
 void Ext::initialize(int stage)
 {
     MacBase::initialize(stage);
-printf("ExtInterface::initialize\n");
+
     // subscribe at scheduler for external messages
     if (stage == INITSTAGE_LOCAL) {
         if (auto scheduler = dynamic_cast<cSocketRTScheduler *>(getSimulation()->getScheduler())) {
@@ -69,14 +69,12 @@ printf("ExtInterface::initialize\n");
         WATCH(numDropped);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
-    printf("call registerInterface\n");
         registerInterface();
     }
 }
 
 InterfaceEntry *Ext::createInterfaceEntry()
 {
-printf("ExtInterface::createInterfaceEntry\n");
     InterfaceEntry *e = getContainingNicModule(this);
 
     e->setMtu(par("mtu"));
@@ -89,7 +87,6 @@ printf("ExtInterface::createInterfaceEntry\n");
 void Ext::handleMessage(cMessage *msg)
 {
     using namespace serializer;
-printf("Ext::handleMessage\n");
     if (!isOperational) {
         handleMessageWhenDown(msg);
         return;
@@ -98,10 +95,9 @@ printf("Ext::handleMessage\n");
     Packet *packet = check_and_cast<Packet *>(msg);
 
     if (msg->isSelfMessage()) {
-    printf("selfMessage\n");
         // incoming real packet from wire (captured by pcap)
         const auto& nwHeader = packet->peekHeader<Ipv4Header>();
-        std::cout << "Delivering a packet from "
+        EV << "Delivering a packet from "
            << nwHeader->getSourceAddress()
            << " to "
            << nwHeader->getDestinationAddress()
@@ -133,7 +129,7 @@ printf("Ext::handleMessage\n");
             size_t packetLength = bytesChunk->copyToBuffer(buffer, sizeof(buffer));
             ASSERT(packetLength == packet->getByteLength());
 
-            std::cout << "Delivering an IPv4 packet from "
+            EV << "Delivering an IPv4 packet from "
                << ipv4Header->getSrcAddress()
                << " to "
                << ipv4Header->getDestAddress()
@@ -142,13 +138,13 @@ printf("Ext::handleMessage\n");
                << " bytes to link layer.\n";
             rtScheduler->sendBytes(buffer, packetLength, (struct sockaddr *)&addr, sizeof(struct sockaddr_in));
             numSent++;
+            delete packet;
         }
         else {
-            std::cout << "Interface is not connected, dropping packet " << msg << endl;
+            EV << "Interface is not connected, dropping packet " << msg << endl;
             numDropped++;
         }
     }
-    delete (msg);
 }
 
 void Ext::displayBusy()

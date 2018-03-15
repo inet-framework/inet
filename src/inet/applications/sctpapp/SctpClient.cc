@@ -335,7 +335,7 @@ void SctpClient::socketDataArrived(int, void *, Packet *msg, bool)
 
     if (echo) {
         const auto& smsg = staticPtrCast<const BytesChunk>(msg->peekData());
-        auto creationTimeTag = smsg->findTag<CreationTimeTag>();
+        auto creationTimeTag = msg->findTag<CreationTimeTag>();
         creationTimeTag->setCreationTime(simTime());
         auto cmsg = new Packet("ApplicationPacket");
         cmsg->insertAtEnd(smsg);
@@ -362,6 +362,7 @@ void SctpClient::sendRequest(bool last)
 {
     // find next stream
     unsigned int nextStream = 0;
+
     for (unsigned int i = 0; i < outStreams; i++) {
         if (streamRequestRatioSendMap[i] > streamRequestRatioSendMap[nextStream])
             nextStream = i;
@@ -394,16 +395,15 @@ void SctpClient::sendRequest(bool last)
         vec[i] = (bytesSent + i) & 0xFF;
     applicationData->setBytes(vec);
     applicationPacket->insertAtEnd(applicationData);
-   // applicationPacket->setDataLength(B(sendBytes));
     auto sctpSendReq = applicationPacket->addTagIfAbsent<SctpSendReq>();
     sctpSendReq->setLast(last);
     sctpSendReq->setPrMethod(par("prMethod"));
     sctpSendReq->setPrValue(par("prValue"));
     sctpSendReq->setSid(nextStream);
-    auto creationTimeTag = applicationData->addTag<CreationTimeTag>();
+    auto creationTimeTag = applicationPacket->addTagIfAbsent<CreationTimeTag>();
     creationTimeTag->setCreationTime(simTime());
     applicationPacket->setKind(ordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);
-  //  emit(packetSentSignal, msg);
+    emit(packetSentSignal, applicationPacket);
     socket.sendMsg(applicationPacket);
 
     bytesSent += sendBytes;

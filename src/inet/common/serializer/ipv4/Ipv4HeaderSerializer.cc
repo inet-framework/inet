@@ -50,11 +50,9 @@ void Ipv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     iphdr.ip_p = ipv4Header->getProtocolId();
     iphdr.ip_src.s_addr = htonl(ipv4Header->getSrcAddress().getInt());
     iphdr.ip_dst.s_addr = htonl(ipv4Header->getDestAddress().getInt());
-#if defined(linux) || defined(__linux__) || defined(__linux)
+
     iphdr.ip_len = htons(ipv4Header->getTotalLengthField());
-#else
-    iphdr.ip_len = ipv4Header->getTotalLengthField();
-#endif
+
     if (ipv4Header->getCrcMode() != CRC_COMPUTED)
         throw cRuntimeError("Cannot serialize Ipv4 header without a properly computed CRC");
     iphdr.ip_sum = htons(ipv4Header->getCrc());
@@ -153,7 +151,6 @@ void Ipv4HeaderSerializer::serializeOption(MemoryOutputStream& stream, const Tlv
 
 const Ptr<Chunk> Ipv4HeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
-printf("Ipv4HeaderSerializer::deserialize\n");
     auto position = stream.getPosition();
     B bufsize = stream.getRemainingLength();
     uint8_t buffer[IP_HEADER_BYTES];

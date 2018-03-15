@@ -1,7 +1,7 @@
 ifconfig:
 
 # ethernet card (modelled by point-to-point link) 0 to router
-name: ext0  
+name: ext0
     inet_addr: 10.1.1.1
     Mask: 255.255.255.0
     MTU: 1500

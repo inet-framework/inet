@@ -174,10 +174,6 @@ void SctpAssociation::process_SEND(SctpEventCode& event, SctpCommandReq *sctpCom
         throw cRuntimeError("Stream with id %d not found", streamId);
     }
 
-   /* char name[64];
-    snprintf(name, sizeof(name), "SDATA-%d-%d", streamId, state->msgNum);
-    smsg->setName(name);*/
-
     SctpDataMsg *datMsg = new SctpDataMsg();
     SctpSimpleMessage *smsg = new SctpSimpleMessage();
     smsg->setDataArraySize(sendBytes);
@@ -187,7 +183,7 @@ void SctpAssociation::process_SEND(SctpEventCode& event, SctpCommandReq *sctpCom
     smsg->setDataLen(sendBytes);
     smsg->setEncaps(false);
     smsg->setByteLength(sendBytes);
-    auto creationTimeTag = applicationData->findTag<CreationTimeTag>();
+    auto creationTimeTag = applicationPacket->findTag<CreationTimeTag>();
     smsg->setCreationTime(creationTimeTag->getCreationTime()); // TODO : get CreationTime from Tag
     datMsg->encapsulate((cPacket *)smsg);
     datMsg->setSid(streamId);

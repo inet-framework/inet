@@ -108,7 +108,7 @@ void SctpNatServer::sendInfo(NatInfo *info)
     sctpSendReq->setPrMethod(0);
     sctpSendReq->setPrValue(0);
     sctpSendReq->setSid(0);
-    auto creationTimeTag = applicationData->addTag<CreationTimeTag>();
+    auto creationTimeTag = applicationPacket->addTagIfAbsent<CreationTimeTag>();
     creationTimeTag->setCreationTime(simTime());
     applicationPacket->setKind(SCTP_C_SEND_ORDERED);
     auto& tags = getTags(applicationPacket);
@@ -154,7 +154,7 @@ void SctpNatServer::sendInfo(NatInfo *info)
     sctpSendReq2->setPrMethod(0);
     sctpSendReq2->setPrValue(0);
     sctpSendReq2->setSid(0);
-    auto creationTimeTag2 = applicationData2->addTag<CreationTimeTag>();
+    auto creationTimeTag2 = applicationPacket2->addTagIfAbsent<CreationTimeTag>();
     creationTimeTag2->setCreationTime(simTime());
     applicationPacket2->setKind(SCTP_C_SEND_ORDERED);
     auto& tags2 = getTags(applicationPacket2);

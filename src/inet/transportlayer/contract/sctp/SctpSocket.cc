@@ -349,36 +349,7 @@ void SctpSocket::connectx(AddressVector remoteAddressList, int32 remotePort, boo
     remoteAddresses = remoteAddressList;
     connect(remoteAddressList.front(), remotePort, streamReset, prMethod, numRequests);
 }
-#if 0
-void SctpSocket::send(SctpSimpleMessage *msg, int32 prMethod, double prValue, int32 streamId, bool last, bool primary)
-{
-    if (oneToOne && sockstate != CONNECTED && sockstate != CONNECTING && sockstate != PEER_CLOSED) {
-        throw cRuntimeError("SctpSocket::send(): not connected or connecting");
-    }
-    else if (!oneToOne && sockstate != LISTENING) {
-        throw cRuntimeError("SctpSocket::send(): one-to-many style socket must be listening");
-    }
 
-#if 0   //FIXME KLUDGE
-    SctpSendInfo *sendCommand = new SctpSendInfo();
-    sendCommand->setSocketId(assocId);
-    sendCommand->setSid(streamId);
-    sendCommand->setPrValue(prValue);
-    sendCommand->setPrMethod(prMethod);
-    sendCommand->setLast(last);
-    sendCommand->setPrimary(primary);
-    sendCommand->setSendUnordered( (msg->getKind() == SCTP_C_SEND_UNORDERED) ?
-                                   COMPLETE_MESG_UNORDERED : COMPLETE_MESG_ORDERED );
-
-    cPacket* cmsg = new cPacket("SCTP_C_SEND");
-    cmsg->setKind(SCTP_C_SEND);
-    cmsg->encapsulate(msg);
-    cmsg->setControlInfo(sendCommand);
-
-    sendToSctp(cmsg);
-#endif
-}
-#endif
 
 void SctpSocket::sendMsg(cMessage *cmsg)
 {
@@ -515,7 +486,7 @@ void SctpSocket::processMessage(cMessage *msg)
             break;
 
         case SCTP_I_ESTABLISHED: {
-        EV_INFO << "SCTP_I_ESTABLISHED\n";
+            EV_INFO << "SCTP_I_ESTABLISHED\n";
             if (oneToOne)
                 sockstate = CONNECTED;
             Message *message = check_and_cast<Message *>(msg);
@@ -529,9 +500,7 @@ void SctpSocket::processMessage(cMessage *msg)
             appOptions->inboundStreams = connectInfo->getInboundStreams();
             appOptions->outboundStreams = connectInfo->getOutboundStreams();
             assocId = tags.getTag<SocketInd>()->getSocketId();
-
             if (cb) {
-            EV_INFO << "call cb->socketEstablished\n";
                 cb->socketEstablished(assocId, yourPtr, connectInfo->getNumMsgs());
             }
             delete message;

@@ -198,7 +198,7 @@ class INET_API SctpSocket
     void setFragPoint(int option) { sOptions->fragPoint = option; };
     void setNagle(int option) { sOptions->nagle = option; };
     void setPathMaxRetrans(int option) { sOptions->pathMaxRetrans = option; };
-    void setEnableHeartbeats(bool option) { sOptions->enableHeartbeats = option; printf("enableHeartbeats set to %d\n", sOptions->enableHeartbeats);};
+    void setEnableHeartbeats(bool option) { sOptions->enableHeartbeats = option; };
     void setHbInterval(double option) { sOptions->hbInterval = option; };
     void setRtoInfo(double initial, double max, double min);
     void setAssocMaxRtx(int option) { sOptions->assocMaxRtx = option; };
@@ -267,13 +267,9 @@ class INET_API SctpSocket
     void connectx(AddressVector remoteAddresses, int32 remotePort, bool streamReset = false, int32 prMethod = 0, uint32 numRequests = 0);
 
     void accept(int32 assocId, int32 fd);
-    /**
-     * Send data message.
-     */
-   /* void send(SctpSimpleMessage *msg, int prMethod = 0, double prValue = 0.0, int32 streamId = 0, bool last = true, bool primary = true);*/
 
     /**
-     * Send data message (provided within control message).
+     * Send data message
      */
     void sendMsg(cMessage *cmsg);
 
