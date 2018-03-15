@@ -77,6 +77,7 @@ void MobilityBase::initialize(int stage)
         WATCH(constraintAreaMin);
         WATCH(constraintAreaMax);
         WATCH(lastPosition);
+        WATCH(lastOrientation);
     }
     else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT_2) {
         if (visualRepresentation != nullptr) {
