@@ -28,7 +28,7 @@ class INET_API Quaternion
 {
 public:
 
-    double s = 0; //!< the real component
+    double s = 1; //!< the real component
     Coord v; //!< the imaginary components
 
     //! basic ctors
