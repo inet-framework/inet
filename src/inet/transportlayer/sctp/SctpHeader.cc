@@ -38,7 +38,7 @@ SctpHeader& SctpHeader::operator=(const SctpHeader& other)
 
 void SctpHeader::copy(const SctpHeader& other)
 {
-    handleChange();
+   // handleChange();
     setVTag(other.getVTag());
     setSrcPort(other.getSrcPort());
     setDestPort(other.getDestPort());
@@ -58,12 +58,12 @@ SctpHeader::~SctpHeader()
 
 void SctpHeader::clean()
 {
-    handleChange();
+  // handleChange();
 
     if (this->getSctpChunksArraySize() > 0) {
         auto iterator = sctpChunkList.begin();
         while (iterator != sctpChunkList.end()) {
-            SctpChunk *chunk = (*iterator);
+           // SctpChunk *chunk = (*iterator);
             sctpChunkList.erase(iterator);
            // delete chunk;
         }
@@ -128,7 +128,7 @@ void SctpHeader::insertSctpChunks(size_t k, SctpChunk * chunk)
 //void SctpHeader::eraseSctpChunks(size_t k)
 SctpChunk *SctpHeader::removeChunk()
 {
-    handleChange();
+   // handleChange();
     if (sctpChunkList.empty())
         return nullptr;
 
@@ -142,7 +142,7 @@ SctpChunk *SctpHeader::removeChunk()
 
 void SctpHeader::removeFirstChunk()
 {
-    handleChange();
+   // handleChange();
     if (sctpChunkList.empty())
         return;
 
@@ -154,7 +154,7 @@ void SctpHeader::removeFirstChunk()
 
 SctpChunk *SctpHeader::getFirstChunk()
 {
-    handleChange();
+   // handleChange();
     if (sctpChunkList.empty())
         return nullptr;
 

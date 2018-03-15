@@ -80,44 +80,17 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
              << " localAddr=" << localAddr
              << " remoteAddr=" << remoteAddr << endl;
     state->pktDropSent = false;
-#if 0
-    if (!sctpmsg->getChecksumOk()) {
-        if (((SctpChunk *)(sctpmsg->getChunks(0)))->getSctpChunkType() == INIT_ACK) {
-            stopTimer(T1_InitTimer);
-            EV_WARN << "InitAck with bit-error. Retransmit Init" << endl;
-            retransmitInit();
-            startTimer(T1_InitTimer, state->initRexmitTimeout);
-        }
-        if (((SctpChunk *)(sctpmsg->getChunks(0)))->getSctpChunkType() == COOKIE_ACK) {
-            stopTimer(T1_InitTimer);
-            EV_WARN << "CookieAck with bit-error. Retransmit CookieEcho" << endl;
-            retransmitCookieEcho();
-            startTimer(T1_InitTimer, state->initRexmitTimeout);
-        }
-        if (!(sctpMain->pktdrop) || !state->peerPktDrop) {
-            EV_WARN << "Packet has bit-error. Return\n";
-            return true;
-        }
-    }
-#endif
+
     SctpPathVariables *path = getPath(src);
     const uint16 srcPort = sctpmsg->getDestPort();
     const uint16 destPort = sctpmsg->getSrcPort();
     const uint32 numberOfChunks = sctpmsg->getSctpChunksArraySize();
     EV_DETAIL << "numberOfChunks=" << numberOfChunks << endl;
 
-    state->sctpmsg = sctpmsg->dup();
+   // state->sctpmsg = sctpmsg->dup();
     bool authenticationNecessary = state->peerAuth;
     state->sackAlreadySent = false;
-#if 0
-    if ((sctpmsg->getChecksumOk() == false || sctpmsg->hasBitError()) &&
-        (sctpMain->pktdrop) &&
-        (state->peerPktDrop))
-    {
-        sendPacketDrop(true);
-        return true;
-    }
-#endif
+
     if (fsm->getState() != SCTP_S_CLOSED &&
         fsm->getState() != SCTP_S_COOKIE_WAIT &&
         fsm->getState() != SCTP_S_COOKIE_ECHOED &&
@@ -260,10 +233,10 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
                     }
                     delete header;
                     sendAbort();
-                    if (state->sctpmsg) {
+                  /*  if (state->sctpmsg) {
                         delete state->sctpmsg;
                         state->sctpmsg = nullptr;
-                    }
+                    }*/
                     sctpMain->removeAssociation(this);
                     return true;
                 }
@@ -391,9 +364,9 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
                 sendIndicationToApp(SCTP_I_SHUTDOWN_RECEIVED);
                 trans = true;
                // delete shutdownChunk;
-                if (state->resetChunk != nullptr) {
+               /* if (state->resetChunk != nullptr) {
                     delete state->resetChunk;
-                }
+                }*/
                 break;
 
             case SHUTDOWN_ACK:
@@ -452,7 +425,7 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
             case RE_CONFIG:
                 EV_INFO << "StreamReset received" << endl;
                 if (fsm->getState() != SCTP_S_ESTABLISHED && fsm->getState() != SCTP_S_SHUTDOWN_PENDING) {
-                    delete header;
+                   // delete header;
                     break;
                 }
                 SctpStreamResetChunk *strResChunk;
@@ -557,10 +530,10 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
     }
 
     // ====== Clean-up =======================================================
-    if (!state->pktDropSent) {
+  /*  if (!state->pktDropSent) {
         disposeOf(state->sctpmsg);
         EV_DEBUG << "state->sctpmsg was disposed" << endl;
-    }
+    }*/
     return trans;
 }
 
@@ -853,7 +826,6 @@ bool SctpAssociation::processCookieEchoArrived(SctpCookieEchoChunk *cookieEcho, 
 {
     bool trans = false;
 
-   // SctpCookie *cookie = check_and_cast<SctpCookie *>(cookieEcho->getStateCookie());
     SctpCookie *cookie = (SctpCookie *)(cookieEcho->getStateCookie());
     if (cookie->getCreationTime() + (double)sctpMain->par("validCookieLifetime") < simTime()) {
         EV_INFO << "stale Cookie: sendAbort\n";

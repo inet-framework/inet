@@ -175,8 +175,8 @@ void Sctp::handleMessage(cMessage *msg)
     L3Address destAddr;
     L3Address srcAddr;
     bool findListen = false;
-printf("\n\nSctpMain handleMessage\n");
-    EV_INFO << "\n\nSctpMain handleMessage at " << getFullPath() << "\n";
+
+    EV_DEBUG << "\n\nSctpMain handleMessage at " << getFullPath() << "\n";
 
     if (msg->isSelfMessage()) {
         EV_DEBUG << "selfMessage\n";
@@ -196,7 +196,9 @@ printf("\n\nSctpMain handleMessage\n");
         auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
         if (protocol == &Protocol::sctp) {
             // must be an SctpHeader
-            SctpHeader *sctpmsg = (SctpHeader *)(packet->peekHeader<SctpHeader>().get());
+          //  auto sctpmsg = packet->peekHeader<SctpHeader>();
+            SctpHeader *sctpmsg = (SctpHeader *)(packet->peekHeader<SctpHeader>().get()->dup());
+            int chunkLength = B(sctpmsg->getChunkLength()).get();
             numPacketsReceived++;
 
 			if (!pktdrop && (packet->hasBitError())) {
@@ -211,12 +213,10 @@ printf("\n\nSctpMain handleMessage\n");
                 EV_WARN << "Packet has bit-error. Call Pktdrop\n";
             }
 
-			auto controlInfo = msg->removeControlInfo();
 			srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress();
 			destAddr = packet->getTag<L3AddressInd>()->getDestAddress();
-			delete controlInfo;
 			EV_INFO << "srcAddr=" << srcAddr << "   destAddr=" << destAddr << "\n";
-			if (B(sctpmsg->getChunkLength()).get() > (SCTP_COMMON_HEADER)) {
+			if (chunkLength > SCTP_COMMON_HEADER) {
 				if (((SctpChunk *)(sctpmsg->getSctpChunks(0)))->getSctpChunkType() == INIT || ((SctpChunk *)(sctpmsg->getSctpChunks(0)))->getSctpChunkType() == INIT_ACK)
 					findListen = true;
 
@@ -235,7 +235,7 @@ printf("\n\nSctpMain handleMessage\n");
 					EV_INFO << "no assoc found msg=" << sctpmsg->getName() << "\n";
 
 					if (!pktdrop && packet->hasBitError()) {
-						delete sctpmsg;
+						//delete sctpmsg;
 						return;
 					}
 
@@ -402,19 +402,13 @@ void Sctp::sendAbortFromMain(Ptr<SctpHeader>& sctpmsg, L3Address fromAddr, L3Add
     msg->insertSctpChunks(abortChunk);
     Packet *pkt = new Packet("ABORT");
 
-   // if ((bool)par("udpEncapsEnabled")) {
-   //     EV_DETAIL << "VTag=" << msg->getTag() << "\n";
-       // insertTransportProtocolHeader(pkt, Protocol::sctp, msg);
-       // udpSocket.sendTo(pkt, toAddr, SCTP_UDP_PORT);
-    //}
-   // else {
-        auto addresses = pkt->addTagIfAbsent<L3AddressReq>();
-        addresses->setSrcAddress(fromAddr);
-        addresses->setDestAddress(toAddr);
-        IL3AddressType *addressType = toAddr.getAddressType();
-        pkt->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
-        insertTransportProtocolHeader(pkt, Protocol::sctp, msg);
-        send_to_ip(pkt);
+    auto addresses = pkt->addTagIfAbsent<L3AddressReq>();
+    addresses->setSrcAddress(fromAddr);
+    addresses->setDestAddress(toAddr);
+    IL3AddressType *addressType = toAddr.getAddressType();
+    pkt->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
+    insertTransportProtocolHeader(pkt, Protocol::sctp, msg);
+    send_to_ip(pkt);
 }
 
 void Sctp::sendShutdownCompleteFromMain(Ptr<SctpHeader>& sctpmsg, L3Address fromAddr, L3Address toAddr)

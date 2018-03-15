@@ -45,7 +45,7 @@ network Traceroute
         cli1: StandardHost {
             parameters:
                 forwarding = false;
-                routingTable.routingFile = "cli1.mrt";
+                ipv4.routingTable.routingFile = "cli1.mrt";
                 @display("p=37,62;i=old/laptop3");
             gates:
                 ethg[1];
@@ -53,7 +53,7 @@ network Traceroute
         cli2: StandardHost {
             parameters:
                 forwarding = false;
-                routingTable.routingFile = "cli2.mrt";
+                ipv4.routingTable.routingFile = "cli2.mrt";
                 @display("p=35,131;i=old/laptop3");
             gates:
                 ethg[1];
@@ -61,7 +61,7 @@ network Traceroute
         cli3: StandardHost {
             parameters:
                 forwarding = false;
-                routingTable.routingFile = "cli3.mrt";
+                ipv4.routingTable.routingFile = "cli3.mrt";
                 @display("p=40,223;i=old/laptop3");
             gates:
                 ethg[1];
@@ -69,7 +69,7 @@ network Traceroute
         cli4: StandardHost {
             parameters:
                 forwarding = false;
-                routingTable.routingFile = "cli4.mrt";
+                ipv4.routingTable.routingFile = "cli4.mrt";
                 @display("p=40,295;i=old/laptop3");
             gates:
                 ethg[1];
@@ -77,7 +77,7 @@ network Traceroute
         cli5: StandardHost {
             parameters:
                 forwarding = false;
-                routingTable.routingFile = "cli5.mrt";
+                ipv4.routingTable.routingFile = "cli5.mrt";
                 @display("p=40,383;i=old/laptop3");
             gates:
                 ethg[1];
@@ -85,7 +85,7 @@ network Traceroute
         cli6: StandardHost {
             parameters:
                 forwarding = false;
-                routingTable.routingFile = "cli6.mrt";
+                ipv4.routingTable.routingFile = "cli6.mrt";
                 @display("p=40,439;i=old/laptop3");
             gates:
                 ethg[1];
@@ -93,7 +93,7 @@ network Traceroute
         cli7: StandardHost {
             parameters:
                 forwarding = false;
-                routingTable.routingFile = "cli7.mrt";
+                ipv4.routingTable.routingFile = "cli7.mrt";
                 @display("p=40,511;i=old/laptop3");
             gates:
                 ethg[1];
@@ -101,7 +101,7 @@ network Traceroute
         cli8: StandardHost {
             parameters:
                 forwarding = false;
-                routingTable.routingFile = "cli8.mrt";
+                ipv4.routingTable.routingFile = "cli8.mrt";
                 @display("p=40,575;i=old/laptop3");
             gates:
                 ethg[1];
@@ -132,7 +132,7 @@ network Traceroute
         }
         router1: Router {
             parameters:
-                routingTable.routingFile = "router1.mrt";
+                ipv4.routingTable.routingFile = "router1.mrt";
                 @display("p=220,101;i=device/router_s");
             gates:
                 pppg[1];
@@ -140,7 +140,7 @@ network Traceroute
         }
         router2: Router {
             parameters:
-                routingTable.routingFile = "router2.mrt";
+                ipv4.routingTable.routingFile = "router2.mrt";
                 @display("p=236,253;i=device/router_s");
             gates:
                 pppg[1];
@@ -148,7 +148,7 @@ network Traceroute
         }
         router3: Router {
             parameters:
-                routingTable.routingFile = "router3.mrt";
+                ipv4.routingTable.routingFile = "router3.mrt";
                 @display("p=252,397;i=device/router_s");
             gates:
                 pppg[1];
@@ -156,7 +156,7 @@ network Traceroute
         }
         router4: Router {
             parameters:
-                routingTable.routingFile = "router4.mrt";
+                ipv4.routingTable.routingFile = "router4.mrt";
                 @display("p=268,533;i=device/router_s");
             gates:
                 pppg[1];
@@ -164,21 +164,21 @@ network Traceroute
         }
         Router5: Router {
             parameters:
-                routingTable.routingFile = "Router5.mrt";
+                ipv4.routingTable.routingFile = "Router5.mrt";
                 @display("p=372,165;i=device/router");
             gates:
                 pppg[3];
         }
         Router6: Router {
             parameters:
-                routingTable.routingFile = "Router6.mrt";
+                ipv4.routingTable.routingFile = "Router6.mrt";
                 @display("p=396,445;i=device/router");
             gates:
                 pppg[3];
         }
         extRouter: Router {
             parameters:
-                routingTable.routingFile = "extRouter.mrt";
+                ipv4.routingTable.routingFile = "extRouter.mrt";
                 numExtInterfaces = 1;
                 @display("p=500,293;i=device/router_l");
             gates:

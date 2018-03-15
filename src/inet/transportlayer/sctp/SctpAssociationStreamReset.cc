@@ -24,17 +24,18 @@ namespace inet {
 namespace sctp {
 void SctpAssociation::retransmitReset()
 {
-    const auto& sctpmsg = makeShared<SctpHeader>();
-    sctpmsg->setChunkLength(B(SCTP_COMMON_HEADER));
-    SctpStreamResetChunk *sctpreset = check_and_cast<SctpStreamResetChunk *>(state->resetChunk->dup());
-    state->numResetRequests = sctpreset->getParametersArraySize();
-   // sctpreset->setName("RESETRetransmit");
-    sctpreset->setSctpChunkType(RE_CONFIG);
-    sctpmsg->insertSctpChunks(sctpreset);
-    state->waitForResponse = true;
-    EV_INFO << "retransmitStreamReset localAddr=" << localAddr << "  remoteAddr" << remoteAddr << "\n";
-    Packet *pkt = new Packet("RE_CONFIG");
-    sendToIP(pkt, sctpmsg);
+    if (fsm->getState() == SCTP_S_SHUTDOWN_PENDING || fsm->getState() == SCTP_S_ESTABLISHED) {
+        const auto& sctpmsg = makeShared<SctpHeader>();
+        sctpmsg->setChunkLength(B(SCTP_COMMON_HEADER));
+        SctpStreamResetChunk *sctpreset = check_and_cast<SctpStreamResetChunk *>(state->resetChunk->dup());
+        state->numResetRequests = sctpreset->getParametersArraySize();
+        sctpreset->setSctpChunkType(RE_CONFIG);
+        sctpmsg->insertSctpChunks(sctpreset);
+        state->waitForResponse = true;
+        EV_INFO << "retransmitStreamReset localAddr=" << localAddr << "  remoteAddr" << remoteAddr << "\n";
+        Packet *pkt = new Packet("RE_CONFIG");
+        sendToIP(pkt, sctpmsg);
+    }
 }
 
 bool SctpAssociation::streamIsPending(int32 sid)
@@ -208,7 +209,6 @@ void SctpAssociation::sendOutgoingResetRequest(SctpIncomingSsnResetRequestParame
         if (qCounter.roomSumSendStreams != 0) {
             storePacket(getPath(remoteAddr), msg, 1, 0, false);
             state->bundleReset = true;
-           // rt->setName("bundleReset");
             sendOnPath(getPath(remoteAddr), true);
             state->bundleReset = false;
         } else {
@@ -301,7 +301,6 @@ void SctpAssociation::sendBundledOutgoingResetAndResponse(SctpIncomingSsnResetRe
         if (qCounter.roomSumSendStreams != 0) {
             storePacket(getPath(remoteAddr), msg, 1, 0, false);
             state->bundleReset = true;
-           // rt->setName("bundleReset");
             sendOnPath(getPath(remoteAddr), true);
             state->bundleReset = false;
         } else {
@@ -440,7 +439,6 @@ void SctpAssociation::sendOutgoingRequestAndResponse(uint32 inRequestSn, uint32 
         state->resetChunk = nullptr;
     }
     state->resetChunk = check_and_cast<SctpStreamResetChunk *>(resChunk->dup());
-    //state->resetChunk->setName("stateRstChunk");
     msg->insertSctpChunks(resChunk);
     Packet *pkt = new Packet("RE_CONFIG");
     sendToIP(pkt, msg, remoteAddr);

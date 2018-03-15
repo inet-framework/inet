@@ -34,7 +34,6 @@ void MessageDispatcher::initialize()
 
 void MessageDispatcher::arrived(cMessage *message, cGate *inGate, simtime_t t)
 {
-printf("MessageDispatcher::arrived\n");
     Enter_Method_Silent();
     cGate *outGate = nullptr;
     if (message->isPacket())
@@ -46,57 +45,40 @@ printf("MessageDispatcher::arrived\n");
 
 cGate *MessageDispatcher::handlePacket(Packet *packet, cGate *inGate)
 {
-printf("MessageDispatcher::handlePacket\n");
-EV_DETAIL << "Packet " << packet << endl;
-EV_INFO << "Packet " << packet << endl;
     auto socketInd = packet->findTag<SocketInd>();
     if (socketInd != nullptr) {
         int socketId = socketInd->getSocketId();
         auto it = socketIdToGateIndex.find(socketId);
-        if (it != socketIdToGateIndex.end()) {
-        printf("%d\n", __LINE__);
+        if (it != socketIdToGateIndex.end())
             return gate("out", it->second);
-        } else
+        else
             throw cRuntimeError("handlePacket(): Unknown socket, id = %d", socketId);
     }
     auto dispatchProtocolReq = packet->findTag<DispatchProtocolReq>();;
     if (dispatchProtocolReq != nullptr) {
-    printf("%d\n", __LINE__);
         auto packetProtocolTag = packet->findTag<PacketProtocolTag>();;
         auto servicePrimitive = dispatchProtocolReq->getServicePrimitive();
         // TODO: KLUDGE: eliminate this by adding ServicePrimitive to every DispatchProtocolReq
         if (servicePrimitive == (ServicePrimitive)-1) {
-        printf("%d\n", __LINE__);
-            if (packetProtocolTag != nullptr && dispatchProtocolReq->getProtocol() == packetProtocolTag->getProtocol()) {
-            printf("%d\n", __LINE__);
+            if (packetProtocolTag != nullptr && dispatchProtocolReq->getProtocol() == packetProtocolTag->getProtocol())
                 servicePrimitive = SP_INDICATION;
-            } else {
-            printf("%d\n", __LINE__);
+            else
                 servicePrimitive = SP_REQUEST;
-            }
         }
         auto protocol = dispatchProtocolReq->getProtocol();
-        printf("%d\n", __LINE__);
         auto it = serviceToGateIndex.find(Key(protocol->getId(), servicePrimitive));
-        printf("%d\n", __LINE__);
-        if (it != serviceToGateIndex.end()) {
-        printf("%d\n", __LINE__);
+        if (it != serviceToGateIndex.end())
             return gate("out", it->second);
-        } else
+        else
             throw cRuntimeError("handlePacket(): Unknown protocol: id = %d, name = %s", protocol->getId(), protocol->getName());
     }
     auto interfaceReq = packet->findTag<InterfaceReq>();
-    printf("%d\n", __LINE__);
     if (interfaceReq != nullptr) {
-    printf("%d\n", __LINE__);
         int interfaceId = interfaceReq->getInterfaceId();
-        printf("%d\n", __LINE__);
         auto it = interfaceIdToGateIndex.find(interfaceId);
-        printf("%d\n", __LINE__);
-        if (it != interfaceIdToGateIndex.end()) {
-        printf("%d\n", __LINE__);
+        if (it != interfaceIdToGateIndex.end())
             return gate("out", it->second);
-        } else
+        else
             throw cRuntimeError("handlePacket(): Unknown interface: id = %d", interfaceId);
     }
     throw cRuntimeError("handlePacket(): Unknown packet: %s(%s)", packet->getName(), packet->getClassName());
@@ -104,7 +86,6 @@ EV_INFO << "Packet " << packet << endl;
 
 cGate *MessageDispatcher::handleMessage(Message *message, cGate *inGate)
 {
-printf("MessageDispatcher::handleMessage\n");
     auto socketReq = message->findTag<SocketReq>();
     if (socketReq != nullptr) {
         int socketReqId = socketReq->getSocketId();

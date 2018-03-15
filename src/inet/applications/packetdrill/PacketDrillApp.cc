@@ -133,7 +133,7 @@ void PacketDrillApp::initialize(int stage)
             throw cRuntimeError("Unknown crc mode: '%s'", crcModeString);
         }
         const char *interface = par("interface");
-        const char *interfaceTableModule = par("interfaceTableModule");
+        //const char *interfaceTableModule = par("interfaceTableModule");
         IInterfaceTable *interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         InterfaceEntry *interfaceEntry = interfaceTable->getInterfaceByName(interface);
         if (interfaceEntry == nullptr)
@@ -187,9 +187,9 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                 }
             } else {
                 Packet *ipv4Packet = check_and_cast<Packet *>(outboundPackets->pop());
-                const auto& ipv4Header = ipv4Packet->peekHeader<Ipv4Header>();
+               // const auto& ipv4Header = ipv4Packet->peekHeader<Ipv4Header>();
                 Packet *liveIpv4Packet = check_and_cast<Packet*>(msg);
-                const auto& liveIpv4Header = liveIpv4Packet->peekHeader<Ipv4Header>();
+               // const auto& liveIpv4Header = liveIpv4Packet->peekHeader<Ipv4Header>();
                 PacketDrillInfo *info = (PacketDrillInfo *)ipv4Packet->getContextPointer();
                 if (verifyTime((enum eventTime_t) info->getTimeType(), info->getScriptTime(),
                         info->getScriptTimeEnd(), info->getOffset(), getSimulation()->getSimTime(), "outbound packet")

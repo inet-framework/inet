@@ -31,9 +31,8 @@ network ExtClient
             parameters:
                 forwarding = false;
                 ipv4.routingTable.routingFile = "cli1d.mrt";
-                ipv4.configurator.networkConfiguratorModule = "";
                 numExtInterfaces = 1;
-                @display("i=old/laptop3;p=128,317");
+                @display("p=29,90;i=old/laptop3");
         }
     connections allowunconnected:
 }

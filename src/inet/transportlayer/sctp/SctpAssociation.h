@@ -656,7 +656,7 @@ class INET_API SctpStateVariables : public cObject
     /** pointer to the resetChunk (for retransmission) */
     SctpShutdownChunk *shutdownChunk;
     SctpShutdownAckChunk *shutdownAckChunk;
-    SctpHeader *sctpmsg;
+   // SctpHeader *sctpmsg;
     uint64 sendQueueLimit;
     uint64 sendBuffer;
     bool appSendAllowed;
@@ -667,6 +667,7 @@ class INET_API SctpStateVariables : public cObject
     bool enableHeartbeats;
     bool sendHeartbeatsOnActivePaths;
     SctpHeader *sctpMsg;
+   // const Ptr<SctpHeader>& sctpMsg;
     uint16 chunksAdded;
     uint16 dataChunksAdded;
     uint32 packetBytes;
@@ -1433,7 +1434,7 @@ class INET_API SctpAssociation : public cObject
             SctpPathVariables *path);
     int32 calculateBytesToSendOnPath(const SctpPathVariables *pathVar);
     void storePacket(SctpPathVariables *pathVar,
-            //SctpHeader *sctpMsg,
+           // SctpHeader *sctpMsg,
             const Ptr<SctpHeader>& sctpMsg,
             const uint16 chunksAdded,
             const uint16 dataChunksAdded,

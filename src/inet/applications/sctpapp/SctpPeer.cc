@@ -172,7 +172,7 @@ void SctpPeer::generateAndSend()
     lastStream = (lastStream + 1) % outboundStreams;
     sctpSendReq->setSid(lastStream);
     sctpSendReq->setSocketId(serverAssocId);
-    auto creationTimeTag = applicationData->addTag<CreationTimeTag>();
+    auto creationTimeTag = applicationPacket->addTagIfAbsent<CreationTimeTag>();
     creationTimeTag->setCreationTime(simTime());
     applicationPacket->setKind(ordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);
     auto& tags = getTags(applicationPacket);
@@ -392,7 +392,7 @@ void SctpPeer::handleMessage(cMessage *msg)
                 else {
                     auto m = endToEndDelay.find(id);
                     const auto& smsg = staticPtrCast<const BytesChunk>(message->peekData());
-                    auto creationTimeTag = smsg->findTag<CreationTimeTag>();
+                    auto creationTimeTag = message->findTag<CreationTimeTag>();
                     m->second->record(simTime() - creationTimeTag->getCreationTime());
                     auto k = histEndToEndDelay.find(id);
                     k->second->collect(simTime() - creationTimeTag->getCreationTime());
@@ -581,7 +581,7 @@ void SctpPeer::sendRequest(bool last)
         vec[i] = (bytesSent + i) & 0xFF;
     msg->setBytes(vec);
     cmsg->insertAtEnd(msg);
-    auto creationTimeTag = msg->addTag<CreationTimeTag>();
+    auto creationTimeTag = cmsg->addTagIfAbsent<CreationTimeTag>();
     creationTimeTag->setCreationTime(simTime());
     cmsg->setKind(ordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);
     auto sendCommand = cmsg->addTagIfAbsent<SctpSendReq>();
@@ -687,7 +687,7 @@ void SctpPeer::socketDataArrived(int, void *, Packet *msg, bool)
 
     if (echo) {
         const auto& smsg = staticPtrCast<const BytesChunk>(msg->peekData());
-        auto creationTimeTag = smsg->findTag<CreationTimeTag>();
+        auto creationTimeTag = msg->findTag<CreationTimeTag>();
         creationTimeTag->setCreationTime(simTime());
         auto cmsg = new Packet("ApplicationPacket");
         cmsg->insertAtEnd(smsg);

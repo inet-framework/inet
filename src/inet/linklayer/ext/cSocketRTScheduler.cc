@@ -71,7 +71,6 @@ void cSocketRTScheduler::startRun()
     if (fd == INVALID_SOCKET)
         throw cRuntimeError("cSocketRTScheduler: Root privileges needed");
     const int32 on = 1;
-    printf("opened socket %d\n", fd);
     if (setsockopt(fd, IPPROTO_IP, IP_HDRINCL, (char *)&on, sizeof(on)) < 0)
         throw cRuntimeError("cSocketRTScheduler: couldn't set sockopt for raw socket");
 }
@@ -119,7 +118,7 @@ void cSocketRTScheduler::setInterfaceModule(cModule *mod, const char *dev, const
     if ((pd = pcap_create(dev, errbuf)) == nullptr)
         throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot create pcap device, error = %s", errbuf);
     else if (strlen(errbuf) > 0)
-        std::cout << "cSocketRTScheduler::setInterfaceModule(): pcap_open_live returned warning: " << errbuf << "\n";
+        EV << "cSocketRTScheduler::setInterfaceModule(): pcap_open_live returned warning: " << errbuf << "\n";
 
     /* apply the immediate mode to pcap */
     if (pcap_set_immediate_mode(pd, 1) != 0)
@@ -147,22 +146,18 @@ void cSocketRTScheduler::setInterfaceModule(cModule *mod, const char *dev, const
 
     switch (datalink) {
         case DLT_NULL:
-        printf("DLT_NULL\n");
             headerLength = 4;
             break;
 
         case DLT_EN10MB:
-        printf("DLT_EN10MB\n");
             headerLength = 14;
             break;
 
         case DLT_SLIP:
-        printf("DLT_EN10MB\n");
             headerLength = 24;
             break;
 
         case DLT_PPP:
-        printf("DLT_PPP\n");
             headerLength = 24;
             break;
 
@@ -174,7 +169,7 @@ void cSocketRTScheduler::setInterfaceModule(cModule *mod, const char *dev, const
     datalinks.push_back(datalink);
     headerLengths.push_back(headerLength);
 
-    std::cout << "Opened pcap device " << dev << " with filter " << filter << " and datalink " << datalink << ".\n";
+    EV << "Opened pcap device " << dev << " with filter " << filter << " and datalink " << datalink << ".\n";
 }
 
 static void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_char *bytes)
@@ -183,7 +178,7 @@ static void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_
     int32 headerLength;
     int32 datalink;
     cModule *module;
-printf("packet_handler\n");
+
     i = *(uint16 *)user;
     datalink = cSocketRTScheduler::datalinks.at(i);
     headerLength = cSocketRTScheduler::headerLengths.at(i);
@@ -261,7 +256,7 @@ int cSocketRTScheduler::receiveUntil(int64_t targetTime)
     // if there's more than 2*UI_REFRESH_TIME to wait, wait in UI_REFRESH_TIME chunks
     // in order to keep UI responsiveness by invoking getEnvir()->idle()
     int64_t curTime = opp_get_monotonic_clock_usecs();
-printf("receiveUntil\n");
+
     while ((targetTime - curTime) >= 2000000 || (targetTime - curTime) >= 2*UI_REFRESH_TIME)
     {
         if (receiveWithTimeout(UI_REFRESH_TIME))
@@ -287,7 +282,7 @@ cEvent *cSocketRTScheduler::guessNextEvent()
 cEvent *cSocketRTScheduler::takeNextEvent()
 {
     int64_t targetTime;
-printf("takeNextEvent\n");
+
     // calculate target time
     cEvent *event = FES(sim)->peekFirst();
     if (!event) {
@@ -338,9 +333,9 @@ void cSocketRTScheduler::sendBytes(uint8 *buf, size_t numBytes, struct sockaddr 
     int sent = sendto(fd, (const void *)buf, numBytes, 0, (const struct sockaddr *)to, sizeof(struct sockaddr));
 
     if ((size_t)sent == numBytes)
-        std::cout << "Sent an IP packet with length of " << sent << " bytes.\n";
+        EV << "Sent an IP packet with length of " << sent << " bytes.\n";
     else
-        std::cout << "Sending of an IP packet FAILED! (sendto returned " << sent << " (" << strerror(errno) << ") instead of " << numBytes << ").\n";
+        EV << "Sending of an IP packet FAILED! (sendto returned " << sent << " (" << strerror(errno) << ") instead of " << numBytes << ").\n";
 }
 
 } // namespace inet
