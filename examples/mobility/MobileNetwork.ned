@@ -18,12 +18,19 @@
 
 package inet.examples.mobility;
 
+import inet.visualizer.integrated.IntegratedCanvasVisualizer;
+
 network MobileNetwork
 {
     parameters:
         int numHosts;
+        bool hasVisualizer = default(false);
         @display("bgb=600,400");
     submodules:
+        visualizer: IntegratedCanvasVisualizer if hasVisualizer {
+            parameters:
+                @display("p=50,50");
+        }
         host[numHosts]: MobileHost {
             parameters:
                 @display("p=300,300;r=,,#707070");
