@@ -500,6 +500,7 @@ void SctpSocket::processMessage(cMessage *msg)
             appOptions->inboundStreams = connectInfo->getInboundStreams();
             appOptions->outboundStreams = connectInfo->getOutboundStreams();
             assocId = tags.getTag<SocketInd>()->getSocketId();
+
             if (cb) {
                 cb->socketEstablished(assocId, yourPtr, connectInfo->getNumMsgs());
             }

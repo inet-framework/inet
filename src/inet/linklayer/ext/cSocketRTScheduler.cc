@@ -124,9 +124,8 @@ void cSocketRTScheduler::setInterfaceModule(cModule *mod, const char *dev, const
     if (pcap_set_immediate_mode(pd, 1) != 0)
             throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot set immediate mode to pcap device");
 
-    if (pcap_activate(pd) != 0) {
+    if (pcap_activate(pd) != 0)
         throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot activate pcap device");
-    }
 
     /* compile this command into a filter program */
     if (pcap_compile(pd, &fcode, (char *)filter, 0, 0) < 0)
@@ -239,7 +238,7 @@ bool cSocketRTScheduler::receiveWithTimeout(long usec)
         if (!(FD_ISSET(fd[i], &rdfds)))
             continue;
 #endif // ifdef __linux__
-        if ((n = pcap_dispatch(pds.at(i), 0, packet_handler, (uint8 *)&i)) < 0)
+        if ((n = pcap_dispatch(pds.at(i), 1, packet_handler, (uint8 *)&i)) < 0)
             throw cRuntimeError("cSocketRTScheduler::pcap_dispatch(): An error occured: %s", pcap_geterr(pds.at(i)));
         if (n > 0)
             found = true;
@@ -329,8 +328,7 @@ void cSocketRTScheduler::sendBytes(uint8 *buf, size_t numBytes, struct sockaddr 
     if (fd == INVALID_SOCKET)
         throw cRuntimeError("cSocketRTScheduler::sendBytes(): no raw socket.");
 
-   // int sent = sendto(fd, (char *)buf, numBytes, 0, to, addrlen);    //note: no ssize_t on MSVC
-    int sent = sendto(fd, (const void *)buf, numBytes, 0, (const struct sockaddr *)to, sizeof(struct sockaddr));
+    int sent = sendto(fd, (char *)buf, numBytes, 0, to, addrlen);    //note: no ssize_t on MSVC
 
     if ((size_t)sent == numBytes)
         EV << "Sent an IP packet with length of " << sent << " bytes.\n";

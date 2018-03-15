@@ -667,7 +667,6 @@ class INET_API SctpStateVariables : public cObject
     bool enableHeartbeats;
     bool sendHeartbeatsOnActivePaths;
     SctpHeader *sctpMsg;
-   // const Ptr<SctpHeader>& sctpMsg;
     uint16 chunksAdded;
     uint16 dataChunksAdded;
     uint32 packetBytes;
@@ -1434,7 +1433,6 @@ class INET_API SctpAssociation : public cObject
             SctpPathVariables *path);
     int32 calculateBytesToSendOnPath(const SctpPathVariables *pathVar);
     void storePacket(SctpPathVariables *pathVar,
-           // SctpHeader *sctpMsg,
             const Ptr<SctpHeader>& sctpMsg,
             const uint16 chunksAdded,
             const uint16 dataChunksAdded,

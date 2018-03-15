@@ -31,7 +31,6 @@ void BitCountChunkSerializer::serialize(MemoryOutputStream& stream, const Ptr<co
 
 const Ptr<Chunk> BitCountChunkSerializer::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo) const
 {
-printf("BitCountChunkSerializer::deserialize\n");
     auto bitCountChunk = makeShared<BitCountChunk>();
     b length = stream.getRemainingLength();
     stream.readBitRepeatedly(bitCountChunk->getData(), b(length).get());

@@ -123,7 +123,7 @@ void Ext::handleMessage(cMessage *msg)
 #if !defined(linux) && !defined(__linux) && !defined(_WIN32)
             addr.sin_len = sizeof(struct sockaddr_in);
 #endif // if !defined(linux) && !defined(__linux) && !defined(_WIN32)
-            addr.sin_port = htons(5001);
+            addr.sin_port = htons(0);
             addr.sin_addr.s_addr = htonl(ipv4Header->getDestAddress().getInt());
             auto bytesChunk = packet->peekAllBytes();
             size_t packetLength = bytesChunk->copyToBuffer(buffer, sizeof(buffer));
