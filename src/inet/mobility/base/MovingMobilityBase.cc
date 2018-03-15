@@ -30,7 +30,8 @@ MovingMobilityBase::MovingMobilityBase() :
     stationary(false),
     lastSpeed(Coord::ZERO),
     lastUpdate(0),
-    nextChange(-1)
+    nextChange(-1),
+    faceForward(false)
 {
 }
 
@@ -46,6 +47,7 @@ void MovingMobilityBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         moveTimer = new cMessage("move");
         updateInterval = par("updateInterval");
+        faceForward = par("faceForward");
     }
 }
 
@@ -70,12 +72,14 @@ void MovingMobilityBase::moveAndUpdate()
 
 void MovingMobilityBase::orient()
 {
-    // determine orientation based on direction
-    Coord direction = lastSpeed;
-    direction.normalize();
-    lastOrientation.alpha = atan2(direction.y, direction.x);
-    lastOrientation.beta = -asin(direction.z);
-    lastOrientation.gamma = 0.0;
+    if (faceForward) {
+        // determine orientation based on direction
+        Coord direction = lastSpeed;
+        direction.normalize();
+        lastOrientation.alpha = atan2(direction.y, direction.x);
+        lastOrientation.beta = -asin(direction.z);
+        lastOrientation.gamma = 0.0;
+    }
 }
 
 void MovingMobilityBase::handleSelfMessage(cMessage *message)

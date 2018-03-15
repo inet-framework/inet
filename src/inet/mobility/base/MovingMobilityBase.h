@@ -59,6 +59,8 @@ class INET_API MovingMobilityBase : public MobilityBase
      * The -1 value turns off sending a self message for the next mobility state change. */
     simtime_t nextChange;
 
+    bool faceForward;
+
   protected:
     MovingMobilityBase();
 
