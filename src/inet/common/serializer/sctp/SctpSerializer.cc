@@ -957,7 +957,7 @@ void SctpSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk
                             errorc->reserved = 0;
                             break;
                         }
-                        default: printf("Error cause %d not implemented\n", parameter->getParameterType());
+                        default: EV_WARN << "Error cause " << parameter->getParameterType() << " not implemented\n";
                     }
                     writtenbytes += errorchunk->getByteLength();
                 }
@@ -1101,7 +1101,6 @@ void SctpSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk
             }
 
             default:
-                printf("Serialize TODO: Implement for outgoing chunk type %d!\n", chunkType);
                 throw new cRuntimeError("TODO: unknown chunktype in outgoing packet on external interface! Implement it!");
         }
     }
@@ -1996,7 +1995,6 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                             }
 
                             default:
-                                printf("TODO: Implement parameter type %d!\n", paramType);
                                 EV << "ExtInterface: Unknown Sctp parameter type " << paramType;
                                 /*throw new cRuntimeError("TODO: unknown parametertype in incoming packet from external interface! Implement it!");*/
                                 break;
@@ -2048,7 +2046,6 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                             }
 
                             default:
-                                printf("TODO: Implement parameter type %d!\n", paramType);
                                 EV << "ExtInterface: Unknown Sctp parameter type " << paramType;
                                 break;
                         }
