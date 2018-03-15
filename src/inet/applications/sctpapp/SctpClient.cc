@@ -362,7 +362,6 @@ void SctpClient::sendRequest(bool last)
 {
     // find next stream
     unsigned int nextStream = 0;
-
     for (unsigned int i = 0; i < outStreams; i++) {
         if (streamRequestRatioSendMap[i] > streamRequestRatioSendMap[nextStream])
             nextStream = i;
