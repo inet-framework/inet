@@ -106,6 +106,10 @@ osg::Geode *SceneOsgVisualizerBase::createPlayground(const Coord& min, const Coo
 {
     auto dx = max.x - min.x;
     auto dy = max.y - min.y;
+
+    if (!std::isfinite(dx) || !std::isfinite(dy))
+        return new osg::Geode();
+
     auto d = shading ? sqrt(dx * dx + dy * dy) : 0;
     auto width = dx + 2 * d;
     auto height = dy + 2 * d;
