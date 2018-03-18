@@ -16,21 +16,14 @@
 //
 
 #include "inet/common/geometry/common/Rotation.h"
+#include "inet/common/geometry/common/Quaternion.h"
 
 namespace inet {
 
 Rotation::Rotation(const EulerAngles& eulerAngle)
 {
-    // Note that, we don't need to use our Quaternion class since we don't use its operators
-    double q0 = cos(eulerAngle.alpha/2) * cos(eulerAngle.beta/2) * cos(eulerAngle.gamma/2) +
-                sin(eulerAngle.alpha/2) * sin(eulerAngle.beta/2) * sin(eulerAngle.gamma/2);
-    double q1 = sin(eulerAngle.alpha/2) * cos(eulerAngle.beta/2) * cos(eulerAngle.gamma/2) -
-                cos(eulerAngle.alpha/2) * sin(eulerAngle.beta/2) * sin(eulerAngle.gamma/2);
-    double q2 = cos(eulerAngle.alpha/2) * sin(eulerAngle.beta/2) * cos(eulerAngle.gamma/2) +
-                sin(eulerAngle.alpha/2) * cos(eulerAngle.beta/2) * sin(eulerAngle.gamma/2);
-    double q3 = cos(eulerAngle.alpha/2) * cos(eulerAngle.beta/2) * sin(eulerAngle.gamma/2) -
-                sin(eulerAngle.alpha/2) * sin(eulerAngle.beta/2) * cos(eulerAngle.gamma/2);
-    computeRotationMatrices(q0, q1, q2, q3);
+    Quaternion q(eulerAngle);
+    computeRotationMatrices(q.s, q.v.x, q.v.y, q.v.z);
 }
 
 void Rotation::computeRotationMatrices(const double& q0, const double& q1, const double& q2, const double& q3)

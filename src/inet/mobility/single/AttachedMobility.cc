@@ -48,9 +48,7 @@ Coord AttachedMobility::getCurrentPosition()
     if (isZeroOffset)
         return mobility->getCurrentPosition();
     else {
-        EulerAngles a = mobility->getCurrentAngularPosition();
-        std::swap(a.alpha, a.gamma);
-        Rotation rotation(a);
+        Rotation rotation(mobility->getCurrentAngularPosition());
         return mobility->getCurrentPosition() + rotation.rotateVectorClockwise(offset);
     }
 }
