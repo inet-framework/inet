@@ -27,6 +27,7 @@ class INET_API AttachedMobility : public MobilityBase, public cListener
   protected:
     IMobility *mobility = nullptr;
     Coord offset = Coord::NIL;
+    EulerAngles orientationOffset = EulerAngles::NIL;
     bool isZeroOffset = false;
 
   protected:

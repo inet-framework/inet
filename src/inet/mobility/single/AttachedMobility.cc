@@ -15,7 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "AttachedMobility.h"
+#include "inet/common/geometry/common/Quaternion.h"
+#include "inet/mobility/single/AttachedMobility.h"
 
 namespace inet {
 
@@ -27,6 +28,11 @@ void AttachedMobility::initialize(int stage)
     EV_TRACE << "initializing AttachedMobility stage " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {
         mobility = getModuleFromPar<IMobility>(par("mobilityModule"), this, true);
+        orientationOffset.alpha = par("offsetHeading");
+        double offsetElevation = par("offsetElevation");
+        // NOTE: negation is needed, see IMobility comments on orientation
+        orientationOffset.beta = -offsetElevation;
+        orientationOffset.gamma = par("offsetBank");
         offset.x = par("offsetX");
         offset.y = par("offsetY");
         offset.z = par("offsetZ");
@@ -75,7 +81,9 @@ Coord AttachedMobility::getCurrentAcceleration()
 
 EulerAngles AttachedMobility::getCurrentAngularPosition()
 {
-    return mobility->getCurrentAngularPosition();
+    Quaternion angularPosition(mobility->getCurrentAngularPosition());
+    angularPosition *= Quaternion(orientationOffset);
+    return angularPosition.toEulerAngles();
 }
 
 EulerAngles AttachedMobility::getCurrentAngularSpeed()
