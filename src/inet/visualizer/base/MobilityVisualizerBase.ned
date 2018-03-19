@@ -36,11 +36,13 @@ simple MobilityVisualizerBase extends VisualizerBase
         
         string moduleFilter = default("**"); // which mobilities are considered, matches all mobilities by default
 
-        bool displayOrientations = default(false); // display an arc indicating the current orientation, disabled by default
-        double orientationArcSize = default(0.25); // relative size of the arc compared to the full circle 
+        bool displayOrientations = default(false); // display an pie indicating the current orientation, disabled by default
+        double orientationPieSize = default(0.2); // relative size of the pie compared to the full circle 
+        double orientationPieOpacity = default(0.25);
         string orientationLineColor = default("black"); // orientation line color, black by default
         string orientationLineStyle = default("solid"); // orientation line style (solid, dashed, dotted)
         double orientationLineWidth = default(1); // orientation line width
+        string orientationFillColor = default("blue"); // orientation fill color, blue by default
 
         bool displayVelocities = default(false); // display an arrow indicating the current velocity, disabled by default
         double velocityArrowScale = default(1); // velocity scaling factor to pixels

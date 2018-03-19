@@ -43,10 +43,12 @@ void MobilityVisualizerBase::initialize(int stage)
         moduleFilter.setPattern(par("moduleFilter"));
         // orientation
         displayOrientations = par("displayOrientations");
-        orientationArcSize = par("orientationArcSize");
+        orientationPieSize = par("orientationPieSize");
+        orientationPieOpacity = par("orientationPieOpacity");
         orientationLineColor = cFigure::parseColor(par("orientationLineColor"));
         orientationLineStyle = cFigure::parseLineStyle(par("orientationLineStyle"));
         orientationLineWidth = par("orientationLineWidth");
+        orientationFillColor = cFigure::parseColor(par("orientationFillColor"));
         // velocity
         displayVelocities = par("displayVelocities");
         velocityArrowScale = par("velocityArrowScale");

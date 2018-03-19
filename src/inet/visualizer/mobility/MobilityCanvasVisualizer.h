@@ -35,12 +35,12 @@ class INET_API MobilityCanvasVisualizer : public MobilityVisualizerBase
       public:
         NetworkNodeCanvasVisualization *networkNodeVisualization = nullptr;
         cModule *visualRepresentation = nullptr;
-        cArcFigure *orientationFigure = nullptr;
+        cPieSliceFigure *orientationFigure = nullptr;
         cLineFigure *veloctiyFigure = nullptr;
         TrailFigure *trailFigure = nullptr;
 
       public:
-        MobilityCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, cModule *visualRepresentation, cArcFigure *orientationFigure, cLineFigure *veloctiyFigure, TrailFigure *trailFigure, IMobility *mobility);
+        MobilityCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, cModule *visualRepresentation, cPieSliceFigure *orientationFigure, cLineFigure *veloctiyFigure, TrailFigure *trailFigure, IMobility *mobility);
     };
 
   protected:
@@ -54,6 +54,7 @@ class INET_API MobilityCanvasVisualizer : public MobilityVisualizerBase
     virtual void refreshDisplay() const override;
 
     virtual cModule *findVisualRepresentation(cModule *module) const;
+    virtual double getOrientationPieRadius(cModule *module) const;
 
     virtual MobilityCanvasVisualization *getMobilityVisualization(const IMobility *mobility) const;
     virtual void setMobilityVisualization(const IMobility *mobility, MobilityCanvasVisualization *entry);

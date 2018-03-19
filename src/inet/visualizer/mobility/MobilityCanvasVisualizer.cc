@@ -24,7 +24,7 @@ namespace visualizer {
 
 Define_Module(MobilityCanvasVisualizer);
 
-MobilityCanvasVisualizer::MobilityCanvasVisualization::MobilityCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, cModule *visualRepresentation, cArcFigure *orientationFigure, cLineFigure *veloctiyFigure, TrailFigure *trailFigure, IMobility *mobility) :
+MobilityCanvasVisualizer::MobilityCanvasVisualization::MobilityCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, cModule *visualRepresentation, cPieSliceFigure *orientationFigure, cLineFigure *veloctiyFigure, TrailFigure *trailFigure, IMobility *mobility) :
     MobilityVisualization(mobility),
     networkNodeVisualization(networkNodeVisualization),
     visualRepresentation(visualRepresentation),
@@ -64,10 +64,12 @@ void MobilityCanvasVisualizer::refreshDisplay() const
         if (mobilityVisualization->visualRepresentation != nullptr)
             setPosition(mobilityVisualization->visualRepresentation, position);
         if (displayOrientations) {
-            // NOTE: this negation cancels out the (incorrect) CCW angle handling of cArcFigure (see bug https://dev.omnetpp.org/bugs/view.php?id=1030)
+            // NOTE: this negation cancels out the (incorrect) CCW angle handling of cPieSliceFigure (see bug https://dev.omnetpp.org/bugs/view.php?id=1030)
             double angle = -orientation.alpha;
-            mobilityVisualization->orientationFigure->setStartAngle(angle - M_PI * orientationArcSize);
-            mobilityVisualization->orientationFigure->setEndAngle(angle + M_PI * orientationArcSize);
+            mobilityVisualization->orientationFigure->setStartAngle(angle - M_PI * orientationPieSize);
+            mobilityVisualization->orientationFigure->setEndAngle(angle + M_PI * orientationPieSize);
+            double radius = getOrientationPieRadius(mobilityVisualization->visualRepresentation);
+            mobilityVisualization->orientationFigure->setBounds(cFigure::Rectangle(-radius, -radius, 2 * radius, 2 * radius));
         }
         if (displayVelocities) {
             mobilityVisualization->veloctiyFigure->setEnd(velocity * velocityArrowScale);
@@ -114,18 +116,21 @@ MobilityCanvasVisualizer::MobilityCanvasVisualization* MobilityCanvasVisualizer:
         auto visualRepresentation = findVisualRepresentation(module);
         auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(getContainingNode(module));
         if (networkNodeVisualization != nullptr) {
-            cArcFigure *orientationFigure = nullptr;
+            cPieSliceFigure *orientationFigure = nullptr;
             if (displayOrientations) {
-                auto rectangle = getSimulation()->getEnvir()->getSubmoduleBounds(visualRepresentation);
-                int radius = rectangle.getSize().getLength() * 1.25 / 2;
-                orientationFigure = new cArcFigure("orientation");
+                double radius = getOrientationPieRadius(visualRepresentation);
+                orientationFigure = new cPieSliceFigure("orientation");
                 orientationFigure->setTags((std::string("orientation ") + tags).c_str());
                 orientationFigure->setTooltip("This arc represents the current orientation of the mobility model");
                 orientationFigure->setZIndex(zIndex);
                 orientationFigure->setBounds(cFigure::Rectangle(-radius, -radius, 2 * radius, 2 * radius));
+                orientationFigure->setLineOpacity(orientationPieOpacity);
                 orientationFigure->setLineColor(orientationLineColor);
                 orientationFigure->setLineStyle(orientationLineStyle);
                 orientationFigure->setLineWidth(orientationLineWidth);
+                orientationFigure->setFilled(true);
+                orientationFigure->setFillOpacity(orientationPieOpacity);
+                orientationFigure->setFillColor(orientationFillColor);
                 networkNodeVisualization->addFigure(orientationFigure);
             }
             cLineFigure *velocityFigure = nullptr;
@@ -201,6 +206,12 @@ void MobilityCanvasVisualizer::setPosition(cModule* visualRepresentation, cFigur
     snprintf(buf, sizeof(buf), "%lf", position.y);
     buf[sizeof(buf) - 1] = 0;
     visualRepresentation->getDisplayString().setTagArg("p", 1, buf);
+}
+
+double MobilityCanvasVisualizer::getOrientationPieRadius(cModule *module) const
+{
+    auto rectangle = getSimulation()->getEnvir()->getSubmoduleBounds(module);
+    return rectangle.getSize().getLength() * 1.5 / 2;
 }
 
 } // namespace visualizer

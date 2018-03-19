@@ -45,10 +45,12 @@ class INET_API MobilityVisualizerBase : public VisualizerBase, public cListener
     ModuleFilter moduleFilter;
     // orientation
     bool displayOrientations = false;
-    double orientationArcSize = NaN;
+    double orientationPieSize = NaN;
+    double orientationPieOpacity = NaN;
     cFigure::Color orientationLineColor;
     cFigure::LineStyle orientationLineStyle;
     double orientationLineWidth = NaN;
+    cFigure::Color orientationFillColor;
     // velocity
     bool displayVelocities = false;
     double velocityArrowScale = NaN;
