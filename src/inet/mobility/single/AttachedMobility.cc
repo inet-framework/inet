@@ -28,15 +28,15 @@ void AttachedMobility::initialize(int stage)
     EV_TRACE << "initializing AttachedMobility stage " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {
         mobility = getModuleFromPar<IMobility>(par("mobilityModule"), this, true);
+        positionOffset.x = par("offsetX");
+        positionOffset.y = par("offsetY");
+        positionOffset.z = par("offsetZ");
         orientationOffset.alpha = par("offsetHeading");
         double offsetElevation = par("offsetElevation");
         // NOTE: negation is needed, see IMobility comments on orientation
         orientationOffset.beta = -offsetElevation;
         orientationOffset.gamma = par("offsetBank");
-        offset.x = par("offsetX");
-        offset.y = par("offsetY");
-        offset.z = par("offsetZ");
-        isZeroOffset = offset == Coord::ZERO;
+        isZeroOffset = positionOffset == Coord::ZERO;
         check_and_cast<cModule *>(mobility)->subscribe(IMobility::mobilityStateChangedSignal, this);
     }
 }
@@ -55,7 +55,7 @@ Coord AttachedMobility::getCurrentPosition()
         return mobility->getCurrentPosition();
     else {
         Rotation rotation(mobility->getCurrentAngularPosition());
-        return mobility->getCurrentPosition() + rotation.rotateVector(offset);
+        return mobility->getCurrentPosition() + rotation.rotateVector(positionOffset);
     }
 }
 
@@ -64,8 +64,13 @@ Coord AttachedMobility::getCurrentSpeed()
     if (isZeroOffset)
         return mobility->getCurrentSpeed();
     else {
-        // TODO:
-        return Coord::NIL;
+        Rotation rotation(mobility->getCurrentAngularPosition());
+        Coord rotatedOffset = rotation.rotateVector(positionOffset);
+        Quaternion quaternion(mobility->getCurrentAngularSpeed());
+        Coord rotationAxis;
+        double rotationAngle;
+        quaternion.toAxisAngle(rotationAxis, rotationAngle);
+        return mobility->getCurrentSpeed() + rotationAxis % rotatedOffset * rotationAngle;
     }
 }
 
