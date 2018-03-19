@@ -35,6 +35,7 @@ SHOULD:
  - rename function in IGround
  - validate Rotation, Quaternion, EulerAngles against each other and documentation
  - validate positioning and orientation IMobility, PhysicalEnvironment, ObstacleLoss
+ - replace ObjectLocatorNode with GeoTransform (PositionAttitudeTransform) to work with osgEarth 2.9
 
  - move extra functions that doesn't really belong to L3AddressResolver (e.g. findInterfaceTableOf, findIPv4RoutingTableOf)
  - revise protocol base class hierarchy (e.g. LayeredProtocolBase vs IPv4 base class, etc.)
