@@ -457,7 +457,7 @@ void Polyhedron::computeVisibleFaces(std::vector<std::vector<Coord> >& faces, co
 bool Polyhedron::isVisibleFromView(const PolyhedronFace *face, const Rotation& viewRotation, const Rotation& rotation) const
 {
     Coord zNormal(0,0,1);
-    Coord rotatedFaceNormal = viewRotation.rotateVectorClockwise(rotation.rotateVectorClockwise(face->getOutwardNormalVector()));
+    Coord rotatedFaceNormal = viewRotation.rotateVector(rotation.rotateVector(face->getOutwardNormalVector()));
     return rotatedFaceNormal * zNormal > 0;
 }
 

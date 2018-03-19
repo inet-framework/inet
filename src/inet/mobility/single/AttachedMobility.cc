@@ -49,7 +49,7 @@ Coord AttachedMobility::getCurrentPosition()
         return mobility->getCurrentPosition();
     else {
         Rotation rotation(mobility->getCurrentAngularPosition());
-        return mobility->getCurrentPosition() + rotation.rotateVectorClockwise(offset);
+        return mobility->getCurrentPosition() + rotation.rotateVector(offset);
     }
 }
 

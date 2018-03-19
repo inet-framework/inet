@@ -64,8 +64,8 @@ const TracingObstacleLossVisualizerBase::ObstacleLossVisualization *TracingObsta
     auto loss = obstaclePenetratedEvent->loss;
     const Rotation rotation(object->getOrientation());
     const Coord& position = object->getPosition();
-    const Coord rotatedIntersection1 = rotation.rotateVectorClockwise(intersection1);
-    const Coord rotatedIntersection2 = rotation.rotateVectorClockwise(intersection2);
+    const Coord rotatedIntersection1 = rotation.rotateVector(intersection1);
+    const Coord rotatedIntersection2 = rotation.rotateVector(intersection2);
     double intersectionDistance = intersection2.distance(intersection1);
     auto group = new osg::Group();
     if (displayIntersections) {
@@ -78,8 +78,8 @@ const TracingObstacleLossVisualizerBase::ObstacleLossVisualization *TracingObsta
     if (displayFaceNormalVectors) {
         Coord normalVisualization1 = normal1 / normal1.length() * intersectionDistance / 10;
         Coord normalVisualization2 = normal2 / normal2.length() * intersectionDistance / 10;
-        auto geometry1 = inet::osg::createLineGeometry(rotatedIntersection1 + position, rotatedIntersection1 + position + rotation.rotateVectorClockwise(normalVisualization1));
-        auto geometry2 = inet::osg::createLineGeometry(rotatedIntersection2 + position, rotatedIntersection2 + position + rotation.rotateVectorClockwise(normalVisualization2));
+        auto geometry1 = inet::osg::createLineGeometry(rotatedIntersection1 + position, rotatedIntersection1 + position + rotation.rotateVector(normalVisualization1));
+        auto geometry2 = inet::osg::createLineGeometry(rotatedIntersection2 + position, rotatedIntersection2 + position + rotation.rotateVector(normalVisualization2));
         auto geode = new osg::Geode();
         geode->addDrawable(geometry1);
         geode->addDrawable(geometry2);

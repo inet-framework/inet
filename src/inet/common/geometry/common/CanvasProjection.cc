@@ -31,7 +31,7 @@ CanvasProjection::CanvasProjection(Rotation rotation, cFigure::Point translation
 
 cFigure::Point CanvasProjection::computeCanvasPoint(const Coord& point) const
 {
-    Coord rotatedPoint = rotation.rotateVectorClockwise(point);
+    Coord rotatedPoint = rotation.rotateVector(point);
     return cFigure::Point(rotatedPoint.x * scale.x + translation.x, rotatedPoint.y * scale.y + translation.y);
 }
 

@@ -98,14 +98,14 @@ bool Prism::isVisibleFromPoint(unsigned int faceId, const Coord& point, const Ro
     const std::vector<Coord>& polygonPoints = faces.at(faceId).getPoints();
     Coord facePoint = polygonPoints.at(0);
     Coord facePointPoint = point - facePoint;
-    Coord rotatedFaceNormal = rotation.rotateVectorClockwise(normalVectorsForFaces.at(faceId));
+    Coord rotatedFaceNormal = rotation.rotateVector(normalVectorsForFaces.at(faceId));
     return facePointPoint * rotatedFaceNormal > 0;
 }
 
 bool Prism::isVisibleFromView(unsigned int faceId, const Rotation& viewRotation, const Rotation& rotation) const
 {
     Coord zNormal(0,0,1);
-    Coord rotatedFaceNormal = viewRotation.rotateVectorClockwise(rotation.rotateVectorClockwise(normalVectorsForFaces.at(faceId)));
+    Coord rotatedFaceNormal = viewRotation.rotateVector(rotation.rotateVector(normalVectorsForFaces.at(faceId)));
     return rotatedFaceNormal * zNormal > 0;
 }
 

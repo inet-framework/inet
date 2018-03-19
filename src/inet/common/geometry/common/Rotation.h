@@ -18,8 +18,8 @@
 #ifndef __INET_ROTATION_H
 #define __INET_ROTATION_H
 
-#include "inet/common/geometry/common/EulerAngles.h"
 #include "inet/common/geometry/common/Coord.h"
+#include "inet/common/geometry/common/EulerAngles.h"
 
 namespace inet {
 
@@ -29,16 +29,17 @@ namespace inet {
 class INET_API Rotation
 {
     protected:
-        double rotationMatrix[3][3];
-        void computeRotationMatrices(const double& q0, const double& q1, const double& q2, const double& q3);
-        Coord matrixMultiplication(const double matrix[3][3], const Coord& vector) const;
-        Coord matrixTransposeMultiplication(const double matrix[3][3], const Coord& vector) const;
+        double matrix[3][3];
+
+    protected:
+        void computeRotationMatrix(const double& q0, const double& q1, const double& q2, const double& q3);
 
     public:
         Rotation();
         Rotation(const EulerAngles& eulerAngle);
-        Coord rotateVectorClockwise(const Coord& vector) const;
-        Coord rotateVectorCounterClockwise(const Coord& vector) const;
+
+        Coord rotateVector(const Coord& vector) const;
+        Coord rotateVectorInverse(const Coord& vector) const;
 };
 
 } /* namespace inet */

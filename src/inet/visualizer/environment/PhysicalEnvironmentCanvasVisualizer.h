@@ -38,7 +38,7 @@ class INET_API PhysicalEnvironmentCanvasVisualizer : public PhysicalEnvironmentV
 
         bool operator() (const physicalenvironment::IPhysicalObject *left, const physicalenvironment::IPhysicalObject *right) const
         {
-            return viewRotation.rotateVectorClockwise(left->getPosition()).z < viewRotation.rotateVectorClockwise(right->getPosition()).z;
+            return viewRotation.rotateVector(left->getPosition()).z < viewRotation.rotateVector(right->getPosition()).z;
         }
     };
 
