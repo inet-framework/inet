@@ -25,7 +25,7 @@
 #include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
 #include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
 #include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
-#include "../mode/Ieee80211OfdmCode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmCode.h"
 
 namespace inet {
 

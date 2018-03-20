@@ -29,7 +29,7 @@
 #include "inet/physicallayer/contract/bitlevel/IAnalogDigitalConverter.h"
 #include "inet/physicallayer/contract/packetlevel/IErrorModel.h"
 #include "inet/physicallayer/contract/bitlevel/ILayeredErrorModel.h"
-#include "../mode/Ieee80211OfdmMode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmMode.h"
 
 namespace inet {
 

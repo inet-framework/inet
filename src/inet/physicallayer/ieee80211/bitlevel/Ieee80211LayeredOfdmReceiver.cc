@@ -35,8 +35,8 @@
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDemodulatorModule.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmSymbol.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmSymbolModel.h"
-#include "../mode/Ieee80211OfdmMode.h"
-#include "../mode/Ieee80211OfdmModulation.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmMode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmModulation.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
 #include "inet/physicallayer/modulation/BpskModulation.h"
 

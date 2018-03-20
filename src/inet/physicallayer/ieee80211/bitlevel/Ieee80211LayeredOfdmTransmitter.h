@@ -25,7 +25,7 @@
 #include "inet/physicallayer/contract/bitlevel/IModulator.h"
 #include "inet/physicallayer/contract/bitlevel/IPulseShaper.h"
 #include "inet/physicallayer/contract/packetlevel/ITransmitter.h"
-#include "../mode/Ieee80211OfdmMode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmMode.h"
 
 namespace inet {
 

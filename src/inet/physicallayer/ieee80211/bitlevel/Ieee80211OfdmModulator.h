@@ -23,7 +23,7 @@
 #include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
 #include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmSymbol.h"
-#include "../mode/Ieee80211OfdmModulation.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmModulation.h"
 
 namespace inet {
 

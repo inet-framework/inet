@@ -22,7 +22,7 @@
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDefs.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmEncoder.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmInterleaver.h"
-#include "../mode/Ieee80211OfdmModulation.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmModulation.h"
 #include "inet/physicallayer/modulation/BpskModulation.h"
 #include "inet/physicallayer/modulation/Qam16Modulation.h"
 #include "inet/physicallayer/modulation/Qam64Modulation.h"
