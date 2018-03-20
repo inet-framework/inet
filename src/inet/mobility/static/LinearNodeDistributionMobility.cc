@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#include "inet/mobility/single/LinearNodeDistributionMobility.h"
+#include "inet/mobility/static/LinearNodeDistributionMobility.h"
 
 namespace inet {
 
