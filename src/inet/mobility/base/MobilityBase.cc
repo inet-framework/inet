@@ -20,7 +20,7 @@
  * part of:     framework implementation developed by tkn
  **************************************************************************/
 
-#include "inet/common/geometry/common/CoordinateSystem.h"
+#include "inet/common/geometry/common/GeographicCoordinateSystem.h"
 #include "inet/common/INETMath.h"
 #include "inet/mobility/base/MobilityBase.h"
 #ifdef WITH_VISUALIZERS

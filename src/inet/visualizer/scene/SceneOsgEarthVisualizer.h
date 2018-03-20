@@ -18,7 +18,7 @@
 #ifndef __INET_SCENEOSGEARTHVISUALIZER_H
 #define __INET_SCENEOSGEARTHVISUALIZER_H
 
-#include "inet/common/geometry/common/CoordinateSystem.h"
+#include "inet/common/geometry/common/GeographicCoordinateSystem.h"
 #include "inet/visualizer/base/SceneOsgVisualizerBase.h"
 
 #ifdef WITH_OSG

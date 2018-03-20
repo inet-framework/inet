@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/geometry/common/CoordinateSystem.h"
+#include "inet/common/geometry/common/GeographicCoordinateSystem.h"
 #include "inet/common/geometry/common/Quaternion.h"
 #include "inet/mobility/single/VehicleMobility.h"
 #include <fstream>

@@ -19,9 +19,9 @@
 
 #ifdef WITH_OSGEARTH
 
-#include "inet/common/geometry/common/CoordinateSystem.h"
-#include "inet/visualizer/scene/SceneOsgEarthVisualizer.h"
+#include "inet/common/geometry/common/GeographicCoordinateSystem.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/visualizer/scene/SceneOsgEarthVisualizer.h"
 
 
 namespace inet {

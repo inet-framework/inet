@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/geometry/common/CoordinateSystem.h"
+#include "inet/common/geometry/common/GeographicCoordinateSystem.h"
 
 #if defined(WITH_OSGEARTH) && defined(WITH_VISUALIZERS)
 #include <osgEarthUtil/ObjectLocator>

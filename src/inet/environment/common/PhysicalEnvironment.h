@@ -19,7 +19,7 @@
 #define __INET_PHYSICALENVIRONMENT_H
 
 #include "inet/common/geometry/base/ShapeBase.h"
-#include "inet/common/geometry/common/CoordinateSystem.h"
+#include "inet/common/geometry/common/GeographicCoordinateSystem.h"
 #include "inet/common/geometry/common/Rotation.h"
 #include "inet/common/geometry/object/LineSegment.h"
 #include "inet/common/IVisitor.h"

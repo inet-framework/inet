@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_COORDINATESYSTEM_H
-#define __INET_COORDINATESYSTEM_H
+#ifndef __INET_GEOGRAPHICCOORDINATESYSTEM_H
+#define __INET_GEOGRAPHICCOORDINATESYSTEM_H
 
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/geometry/common/EulerAngles.h"
@@ -99,5 +99,5 @@ class INET_API OsgGeographicCoordinateSystem : public cSimpleModule, public IGeo
 
 } // namespace inet
 
-#endif // ifndef __INET_COORDINATESYSTEM_H
+#endif // ifndef __INET_GEOGRAPHICCOORDINATESYSTEM_H
 
