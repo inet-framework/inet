@@ -128,7 +128,7 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
      * Decision is made on pos, but the variables passed as args will
      * also be updated. (Pass dummies you don't have some of them).
      */
-    virtual void reflectIfOutside(Coord& targetPosition, Coord& speed, double& angle);
+    virtual void reflectIfOutside(Coord& targetPosition, Coord& velocity, double& angle);
 
     /** @brief Utility function to wrap the node to the opposite edge
      * (torus) if it goes outside the constraint area.
@@ -154,7 +154,7 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
     /** @brief Invokes one of reflectIfOutside(), wrapIfOutside() and
      * placeRandomlyIfOutside(), depending on the given border policy.
      */
-    virtual void handleIfOutside(BorderPolicy policy, Coord& targetPosition, Coord& speed, double& angle);
+    virtual void handleIfOutside(BorderPolicy policy, Coord& targetPosition, Coord& velocity, double& angle);
 
   public:
     virtual double getMaxSpeed() const override { return NaN; }

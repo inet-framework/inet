@@ -95,7 +95,7 @@ class INET_API MoBanLocal : public LineSegmentsMobilityBase
 
     virtual Coord getCurrentPosition() override;
 
-    virtual Coord getCurrentSpeed() override;
+    virtual Coord getCurrentVelocity() override;
 
     void setCoordinator(MoBanCoordinator *coordinator) { this->coordinator = coordinator; }
 

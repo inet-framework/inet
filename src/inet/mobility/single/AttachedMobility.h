@@ -37,11 +37,11 @@ class INET_API AttachedMobility : public MobilityBase, public cListener
 
   public:
     virtual Coord getCurrentPosition();
-    virtual Coord getCurrentSpeed();
+    virtual Coord getCurrentVelocity();
     virtual Coord getCurrentAcceleration();
 
     virtual EulerAngles getCurrentAngularPosition();
-    virtual EulerAngles getCurrentAngularSpeed();
+    virtual EulerAngles getCurrentAngularVelocity();
     virtual EulerAngles getCurrentAngularAcceleration();
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;

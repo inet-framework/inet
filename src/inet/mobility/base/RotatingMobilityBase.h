@@ -36,8 +36,8 @@ class INET_API RotatingMobilityBase : public MobilityBase
      * The true value disables sending self messages. */
     bool stationary;
 
-    /** @brief The last speed that was reported at lastUpdate. */
-    EulerAngles lastAngularSpeed;
+    /** @brief The last velocity that was reported at lastUpdate. */
+    EulerAngles lastAngularVelocity;
 
     /** @brief The simulation time when the mobility state was last updated. */
     simtime_t lastUpdate;
@@ -66,7 +66,7 @@ class INET_API RotatingMobilityBase : public MobilityBase
 
     /** @brief Moves according to the mobility model to the current simulation time.
      *
-     * Subclasses must override and update lastPosition, lastSpeed, lastUpdate, nextChange
+     * Subclasses must override and update lastPosition, lastVelocity, lastUpdate, nextChange
      * and other state according to the mobility model.
      */
     virtual void rotate() = 0;
@@ -75,8 +75,8 @@ class INET_API RotatingMobilityBase : public MobilityBase
     /** @brief Returns the current angular position at the current simulation time. */
     virtual EulerAngles getCurrentAngularPosition() override;
 
-    /** @brief Returns the current angular speed at the current simulation time. */
-    virtual EulerAngles getCurrentAngularSpeed() override;
+    /** @brief Returns the current angular velocity at the current simulation time. */
+    virtual EulerAngles getCurrentAngularVelocity() override;
 };
 
 } // namespace inet

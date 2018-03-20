@@ -59,18 +59,18 @@ Coord AttachedMobility::getCurrentPosition()
     }
 }
 
-Coord AttachedMobility::getCurrentSpeed()
+Coord AttachedMobility::getCurrentVelocity()
 {
     if (isZeroOffset)
-        return mobility->getCurrentSpeed();
+        return mobility->getCurrentVelocity();
     else {
         Rotation rotation(mobility->getCurrentAngularPosition());
         Coord rotatedOffset = rotation.rotateVector(positionOffset);
-        Quaternion quaternion(mobility->getCurrentAngularSpeed());
+        Quaternion quaternion(mobility->getCurrentAngularVelocity());
         Coord rotationAxis;
         double rotationAngle;
         quaternion.toAxisAngle(rotationAxis, rotationAngle);
-        return mobility->getCurrentSpeed() + rotationAxis % rotatedOffset * rotationAngle;
+        return mobility->getCurrentVelocity() + rotationAxis % rotatedOffset * rotationAngle;
     }
 }
 
@@ -91,9 +91,9 @@ EulerAngles AttachedMobility::getCurrentAngularPosition()
     return angularPosition.toEulerAngles();
 }
 
-EulerAngles AttachedMobility::getCurrentAngularSpeed()
+EulerAngles AttachedMobility::getCurrentAngularVelocity()
 {
-    return mobility->getCurrentAngularSpeed();
+    return mobility->getCurrentAngularVelocity();
 }
 
 EulerAngles AttachedMobility::getCurrentAngularAcceleration()

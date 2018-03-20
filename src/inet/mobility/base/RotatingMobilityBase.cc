@@ -90,10 +90,10 @@ EulerAngles RotatingMobilityBase::getCurrentAngularPosition()
     return lastOrientation;
 }
 
-EulerAngles RotatingMobilityBase::getCurrentAngularSpeed()
+EulerAngles RotatingMobilityBase::getCurrentAngularVelocity()
 {
     rotateAndUpdate();
-    return lastAngularSpeed;
+    return lastAngularVelocity;
 }
 
 } // namespace inet

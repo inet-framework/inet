@@ -123,7 +123,7 @@ void MoBanLocal::setMoBANParameters(Coord referencePoint, double radius, double 
     this->radius = radius;
     this->speed = speed;
     setTargetPosition();
-    lastSpeed = (targetPosition - lastPosition) / (nextChange - simTime()).dbl();
+    lastVelocity = (targetPosition - lastPosition) / (nextChange - simTime()).dbl();
     scheduleUpdate();
 }
 
@@ -132,9 +132,9 @@ Coord MoBanLocal::getCurrentPosition()
     return LineSegmentsMobilityBase::getCurrentPosition() + coordinator->getCurrentPosition();
 }
 
-Coord MoBanLocal::getCurrentSpeed()
+Coord MoBanLocal::getCurrentVelocity()
 {
-    return LineSegmentsMobilityBase::getCurrentSpeed() + coordinator->getCurrentSpeed();
+    return LineSegmentsMobilityBase::getCurrentVelocity() + coordinator->getCurrentVelocity();
 }
 
 

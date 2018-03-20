@@ -209,22 +209,22 @@ static int reflect(double min, double max, double& coordinate, double& speed)
     return sign;
 }
 
-void MobilityBase::reflectIfOutside(Coord& targetPosition, Coord& speed, double& angle)
+void MobilityBase::reflectIfOutside(Coord& targetPosition, Coord& velocity, double& angle)
 {
     int sign;
     double dummy = NaN;
     if (lastPosition.x < constraintAreaMin.x || constraintAreaMax.x < lastPosition.x) {
-        sign = reflect(constraintAreaMin.x, constraintAreaMax.x, lastPosition.x, speed.x);
+        sign = reflect(constraintAreaMin.x, constraintAreaMax.x, lastPosition.x, velocity.x);
         reflect(constraintAreaMin.x, constraintAreaMax.x, targetPosition.x, dummy);
         angle = 90 + sign * (angle - 90);
     }
     if (lastPosition.y < constraintAreaMin.y || constraintAreaMax.y < lastPosition.y) {
-        sign = reflect(constraintAreaMin.y, constraintAreaMax.y, lastPosition.y, speed.y);
+        sign = reflect(constraintAreaMin.y, constraintAreaMax.y, lastPosition.y, velocity.y);
         reflect(constraintAreaMin.y, constraintAreaMax.y, targetPosition.y, dummy);
         angle = sign * angle;
     }
     if (lastPosition.z < constraintAreaMin.z || constraintAreaMax.z < lastPosition.z) {
-        sign = reflect(constraintAreaMin.z, constraintAreaMax.z, lastPosition.z, speed.z);
+        sign = reflect(constraintAreaMin.z, constraintAreaMax.z, lastPosition.z, velocity.z);
         reflect(constraintAreaMin.z, constraintAreaMax.z, targetPosition.z, dummy);
         // NOTE: angle is not affected
     }
@@ -270,11 +270,11 @@ void MobilityBase::raiseErrorIfOutside()
     }
 }
 
-void MobilityBase::handleIfOutside(BorderPolicy policy, Coord& targetPosition, Coord& speed, double& angle)
+void MobilityBase::handleIfOutside(BorderPolicy policy, Coord& targetPosition, Coord& velocity, double& angle)
 {
     switch (policy) {
         case REFLECT:
-            reflectIfOutside(targetPosition, speed, angle);
+            reflectIfOutside(targetPosition, velocity, angle);
             break;
 
         case WRAP:

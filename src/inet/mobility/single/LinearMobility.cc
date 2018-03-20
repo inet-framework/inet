@@ -47,9 +47,9 @@ void LinearMobility::move()
 {
     double rad = M_PI * angle / 180;
     Coord direction(cos(rad), sin(rad));
-    lastSpeed = direction * speed;
+    lastVelocity = direction * speed;
     double elapsedTime = (simTime() - lastUpdate).dbl();
-    lastPosition += lastSpeed * elapsedTime;
+    lastPosition += lastVelocity * elapsedTime;
 
     // do something if we reach the wall
     Coord dummy;

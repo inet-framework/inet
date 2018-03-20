@@ -52,12 +52,12 @@ Coord SuperpositioningMobility::getCurrentPosition()
     return position;
 }
 
-Coord SuperpositioningMobility::getCurrentSpeed()
+Coord SuperpositioningMobility::getCurrentVelocity()
 {
-    Coord speed;
+    Coord velocity;
     for (auto element : elements)
-        speed += element->getCurrentSpeed();
-    return speed;
+        velocity += element->getCurrentVelocity();
+    return velocity;
 }
 
 Coord SuperpositioningMobility::getCurrentAcceleration()
@@ -77,12 +77,12 @@ EulerAngles SuperpositioningMobility::getCurrentAngularPosition()
     return lastOrientation;
 }
 
-EulerAngles SuperpositioningMobility::getCurrentAngularSpeed()
+EulerAngles SuperpositioningMobility::getCurrentAngularVelocity()
 {
-    Quaternion angularSpeed;
+    Quaternion angularVelocity;
     for (auto element : elements)
-        angularSpeed *= Quaternion(element->getCurrentAngularSpeed());
-    return angularSpeed.toEulerAngles();
+        angularVelocity *= Quaternion(element->getCurrentAngularVelocity());
+    return angularVelocity.toEulerAngles();
 }
 
 EulerAngles SuperpositioningMobility::getCurrentAngularAcceleration()

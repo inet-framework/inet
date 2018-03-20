@@ -28,7 +28,7 @@ MovingMobilityBase::MovingMobilityBase() :
     moveTimer(nullptr),
     updateInterval(0),
     stationary(false),
-    lastSpeed(Coord::ZERO),
+    lastVelocity(Coord::ZERO),
     lastUpdate(0),
     nextChange(-1),
     faceForward(false)
@@ -74,7 +74,7 @@ void MovingMobilityBase::orient()
 {
     if (faceForward) {
         // determine orientation based on direction
-        Coord direction = lastSpeed;
+        Coord direction = lastVelocity;
         direction.normalize();
         lastOrientation.alpha = atan2(direction.y, direction.x);
         lastOrientation.beta = -asin(direction.z);
@@ -112,10 +112,10 @@ Coord MovingMobilityBase::getCurrentPosition()
     return lastPosition;
 }
 
-Coord MovingMobilityBase::getCurrentSpeed()
+Coord MovingMobilityBase::getCurrentVelocity()
 {
     moveAndUpdate();
-    return lastSpeed;
+    return lastVelocity;
 }
 
 EulerAngles MovingMobilityBase::getCurrentAngularPosition()

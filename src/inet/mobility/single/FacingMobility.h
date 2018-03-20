@@ -35,11 +35,11 @@ class INET_API FacingMobility : public MobilityBase
 
   public:
     virtual Coord getCurrentPosition() override { return lastPosition; }
-    virtual Coord getCurrentSpeed() override { return Coord::ZERO; }
+    virtual Coord getCurrentVelocity() override { return Coord::ZERO; }
     virtual Coord getCurrentAcceleration() override { return Coord::ZERO; }
 
     virtual EulerAngles getCurrentAngularPosition() override;
-    virtual EulerAngles getCurrentAngularSpeed() override { return EulerAngles::NIL; }
+    virtual EulerAngles getCurrentAngularVelocity() override { return EulerAngles::NIL; }
     virtual EulerAngles getCurrentAngularAcceleration() override { return EulerAngles::NIL; }
 };
 

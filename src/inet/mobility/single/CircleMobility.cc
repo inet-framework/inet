@@ -63,9 +63,9 @@ void CircleMobility::move()
     lastPosition.x = cx + r * cos(angle);
     lastPosition.y = cy + r * sin(angle);
     lastPosition.z = cz;
-    lastSpeed.x = -sin(angle) * speed;
-    lastSpeed.y = cos(angle) * speed;
-    lastSpeed.z = 0;
+    lastVelocity.x = -sin(angle) * speed;
+    lastVelocity.y = cos(angle) * speed;
+    lastVelocity.z = 0;
     // do something if we reach the wall
     Coord dummyCoord;
     double dummyAngle;

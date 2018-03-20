@@ -48,12 +48,12 @@ void VehicleMobility::setInitialPosition()
 {
     lastPosition.x = waypoints[targetPointIndex].x;
     lastPosition.y = waypoints[targetPointIndex].y;
-    lastSpeed.x = speed * cos(M_PI * heading / 180);
-    lastSpeed.y = speed * sin(M_PI * heading / 180);
+    lastVelocity.x = speed * cos(M_PI * heading / 180);
+    lastVelocity.y = speed * sin(M_PI * heading / 180);
 
     if (ground) {
         lastPosition = ground->projectToGround(lastPosition);
-        lastSpeed = ground->projectToGround(lastPosition + lastSpeed) - lastPosition;
+        lastVelocity = ground->projectToGround(lastPosition + lastVelocity) - lastPosition;
     }
 }
 
@@ -113,7 +113,7 @@ void VehicleMobility::move()
     if (ground)
         tempPosition = ground->projectToGround(tempPosition);
 
-    lastSpeed = tempPosition - lastPosition;
+    lastVelocity = tempPosition - lastPosition;
     lastPosition = tempPosition;
 }
 
@@ -125,7 +125,7 @@ void VehicleMobility::orient()
         // this will make the wheels follow the ground
         Quaternion quat = Quaternion::rotationFromTo(Coord(0, 0, 1), groundNormal);
 
-        Coord groundTangent = groundNormal % lastSpeed;
+        Coord groundTangent = groundNormal % lastVelocity;
         groundTangent.normalize();
         Coord direction = groundTangent % groundNormal;
         direction.normalize(); // this is lastSpeed, normalized and adjusted to be perpendicular to groundNormal
