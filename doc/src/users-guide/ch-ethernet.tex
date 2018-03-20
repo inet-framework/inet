@@ -616,42 +616,6 @@ components similarly to the \nedtype{PPPInterface} module.
 
 % TODO there is no IWiredNic with EtherLLC
 
-\section{Ethernet applications}
-
-The \nedtype{inet.applications.ethernet} package contains modules
-for a simple client-server application. The \nedtype{EtherAppCli} is a simple
-traffic generator that peridically sends \msgtype{EtherAppReq} messages
-whose length can be configured. destAddress, startTime,waitType, reqLength, respLength
-
-The server component of the model (\nedtype{EtherAppSrv}) responds with a
-\msgtype{EtherAppResp} message of the requested length. If the response does
-not fit into one ethernet frame, the client receives the data in multiple
-chunks.
-
-% FIXME reqLength>1500 causes an error in the LLC module
-% FIXME numFrames field of EtherAppRes is not used
-% FIXME server always sends 1497 byte chunks, it should depend on the framing (1497 is for LLC)
-% FIXME if registerSAP is false (default), the and EtherLLC used, then the client won't receive messages (auto config?)
-% FIXME Ieee802Nic -> EthernetInterface in the NED comment
-
-Both applications have a \fpar{registerSAP} boolean parameter.
-This parameter should be set to \ttt{true} if the application is connected
-to the \nedtype{EtherLLC} module which requires registration of the SAP
-before sending frames.
-
-Both applications collects the following statistics: sentPkBytes, rcvdPkBytes,
-endToEndDelay.
-
-The client and server application works with any model that accepts
-Ieee802Ctrl control info on the packets (e.g. the 802.11 model).
-The applications should be connected directly to the \nedtype{EtherLLC}
-or an EthernetInterface NIC module.
-
-The model also contains a host component that groups the applications
-and the LLC and MAC components together (\nedtype{EtherHost}). This node does
-not contain higher layer protocols, it generates Ethernet traffic directly.
-By default it is configured to use half duplex MAC (CSMA/CD).
-
 
 %%% Local Variables:
 %%% mode: latex
