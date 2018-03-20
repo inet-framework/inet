@@ -40,7 +40,7 @@ void OsgEarthGround::initialize()
     coordinateSystem = getModuleFromPar<IGeographicCoordinateSystem>(par("coordinateSystemModule"), this);
 }
 
-Coord OsgEarthGround::projectToGround(const Coord &position) const
+Coord OsgEarthGround::computeGroundProjection(const Coord &position) const
 {
     double elevation = 0;
 
@@ -57,7 +57,7 @@ Coord OsgEarthGround::projectToGround(const Coord &position) const
     return coordinateSystem->computePlaygroundCoordinate(geoCoord);
 }
 
-Coord OsgEarthGround::groundNormalAt(const Coord &position) const
+Coord OsgEarthGround::computeGroundNormal(const Coord &position) const
 {
     // we take 3 samples, one at position, and 2 at a distance from it in different directions
     // then compute a cross product to get the normal
@@ -65,9 +65,9 @@ Coord OsgEarthGround::groundNormalAt(const Coord &position) const
     // ??? Make this configurable somehow?
     double distance = 1; // how far the other samples are from the center one, in meters.
 
-    Coord A = projectToGround(position);
-    Coord B = projectToGround(position + Coord(distance, 0, 0));
-    Coord C = projectToGround(position + Coord(0, distance, 0));
+    Coord A = computeGroundProjection(position);
+    Coord B = computeGroundProjection(position + Coord(distance, 0, 0));
+    Coord C = computeGroundProjection(position + Coord(0, distance, 0));
 
     Coord V1 = B - A;
     Coord V2 = C - A;

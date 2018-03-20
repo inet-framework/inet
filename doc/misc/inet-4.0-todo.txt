@@ -31,7 +31,6 @@ SHOULD:
  - consider renaming peekHeader to peekFront, peekTrailer to peekBack, etc. in Packet
  - consider renaming Ieee80211MacTrailer to Ieee80211MacFcs?
  - finish renaming of IdealRadio (e.g. Ieee80211IdealRadio)
- - rename function in IGround
  - validate Rotation, Quaternion, EulerAngles against each other and documentation
  - validate positioning and orientation IMobility, PhysicalEnvironment, ObstacleLoss
  - replace ObjectLocatorNode with GeoTransform (PositionAttitudeTransform) to work with osgEarth 2.9

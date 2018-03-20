@@ -52,8 +52,8 @@ void VehicleMobility::setInitialPosition()
     lastVelocity.y = speed * sin(M_PI * heading / 180);
 
     if (ground) {
-        lastPosition = ground->projectToGround(lastPosition);
-        lastVelocity = ground->projectToGround(lastPosition + lastVelocity) - lastPosition;
+        lastPosition = ground->computeGroundProjection(lastPosition);
+        lastVelocity = ground->computeGroundProjection(lastPosition + lastVelocity) - lastPosition;
     }
 }
 
@@ -111,7 +111,7 @@ void VehicleMobility::move()
     Coord tempPosition = lastPosition + tempSpeed * timeStep;
 
     if (ground)
-        tempPosition = ground->projectToGround(tempPosition);
+        tempPosition = ground->computeGroundProjection(tempPosition);
 
     lastVelocity = tempPosition - lastPosition;
     lastPosition = tempPosition;
@@ -120,7 +120,7 @@ void VehicleMobility::move()
 void VehicleMobility::orient()
 {
     if (ground) {
-        Coord groundNormal = ground->groundNormalAt(lastPosition);
+        Coord groundNormal = ground->computeGroundNormal(lastPosition);
 
         // this will make the wheels follow the ground
         Quaternion quat = Quaternion::rotationFromTo(Coord(0, 0, 1), groundNormal);
