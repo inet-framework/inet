@@ -17,6 +17,7 @@
 
 package inet.linklayer.ext;
 
+import inet.common.IHook;
 import inet.linklayer.contract.IExternalInterface;
 
 //
