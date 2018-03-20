@@ -26,10 +26,10 @@ import inet.mobility.static.StationaryMobility;
 //
 // @author Alfonso Ariza
 //
-simple LinearNodeDistributionMobility extends StationaryMobility
+simple StaticLinearMobility extends StationaryMobility
 {
     parameters:
         double separation @unit(m);
         double orientation @unit(deg) = default(0deg);
-        @class(LinearNodeDistributionMobility);
+        @class(StaticLinearMobility);
 }

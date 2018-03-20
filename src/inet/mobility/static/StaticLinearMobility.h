@@ -16,8 +16,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef __INET_LINEARNODEDISTRIBUTIONMOBILITY_H
-#define __INET_LINEARNODEDISTRIBUTIONMOBILITY_H
+#ifndef __INET_STATICLINEARMOBILITY_H
+#define __INET_STATICLINEARMOBILITY_H
 
 #include "inet/common/INETDefs.h"
 
@@ -32,7 +32,7 @@ namespace inet {
  * @ingroup mobility
  * @author Alfonso Ariza
  */
-class INET_API LinearNodeDistributionMobility : public StationaryMobility
+class INET_API StaticLinearMobility : public StationaryMobility
 {
   protected:
 
@@ -54,10 +54,10 @@ class INET_API LinearNodeDistributionMobility : public StationaryMobility
     virtual void finish() override;
 
   public:
-    LinearNodeDistributionMobility();
+    StaticLinearMobility();
 };
 
 } // namespace inet
 
-#endif // ifndef __INET_LINEARNODEDISTRIBUTIONMOBILITY_H
+#endif // ifndef __INET_STATICLINEARMOBILITY_H
 

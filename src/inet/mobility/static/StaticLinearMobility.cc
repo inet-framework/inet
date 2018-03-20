@@ -16,13 +16,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#include "inet/mobility/static/LinearNodeDistributionMobility.h"
+#include "inet/mobility/static/StaticLinearMobility.h"
 
 namespace inet {
 
-Define_Module(LinearNodeDistributionMobility);
+Define_Module(StaticLinearMobility);
 
-LinearNodeDistributionMobility::LinearNodeDistributionMobility()
+StaticLinearMobility::StaticLinearMobility()
 {
     initialX = 0;
     initialY = 0;
@@ -30,11 +30,11 @@ LinearNodeDistributionMobility::LinearNodeDistributionMobility()
     orientation = 0;
 }
 
-void LinearNodeDistributionMobility::initialize(int stage)
+void StaticLinearMobility::initialize(int stage)
 {
     StationaryMobility::initialize(stage);
 
-    EV_TRACE << "initializing LinearNodeDistributionMobility stage " << stage << endl;
+    EV_TRACE << "initializing StaticLinearMobility stage " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {
         initialX = par("initialX");
         initialY = par("initialY");
@@ -43,7 +43,7 @@ void LinearNodeDistributionMobility::initialize(int stage)
     }
 }
 
-void LinearNodeDistributionMobility::setInitialPosition()
+void StaticLinearMobility::setInitialPosition()
 {
     int index = visualRepresentation->getIndex();
     double rad = M_PI * orientation / 180.0;
@@ -60,7 +60,7 @@ void LinearNodeDistributionMobility::setInitialPosition()
     lastPosition.z = 0;
 }
 
-void LinearNodeDistributionMobility::finish()
+void StaticLinearMobility::finish()
 {
     MobilityBase::finish();
     recordScalar("x", lastPosition.x);
