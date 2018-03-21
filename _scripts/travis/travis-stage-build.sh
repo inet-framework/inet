@@ -25,7 +25,7 @@ else
     ccache -cCz
 fi
 
-export PATH="/root/omnetpp-5.3p2-$TARGET_PLATFORM/bin:/usr/lib/ccache:$PATH"
+export PATH="/root/omnetpp-5.3p4-$TARGET_PLATFORM/bin:/usr/lib/ccache:$PATH"
 
 # this is where the cloned INET repo is mounted into the container (as prescribed in /.travis.yml)
 cd /$TRAVIS_REPO_SLUG
