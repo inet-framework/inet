@@ -2,7 +2,7 @@ version: 2
 jobs:
   build: # the name is misleading, but has to be "build", so it is used outside of workflows
     docker:
-      - image: omnetpp/travis-inet:5.3p3-180209
+      - image: omnetpp/travis-inet:5.3p4-180321
     parallelism: 4 # make use of all our free containers
     steps:
       - checkout
@@ -11,7 +11,7 @@ jobs:
           command: git submodule update --init
       - run:
           name: Setting up PATH environment variable
-          command: echo 'export PATH=/root/omnetpp-5.3p3-linux/bin:$PATH' >> $BASH_ENV
+          command: echo 'export PATH=/root/omnetpp-5.3p4-linux/bin:$PATH' >> $BASH_ENV
       - run:
           name: Copying NSC into INET
           command: cp -r /root/nsc-0.5.3 3rdparty
