@@ -10,7 +10,7 @@
 
 Variations: 10Mb/s ethernet, fast ethernet, Gigabit Ethernet, Fast Gigabit Ethernet, full duplex
 
-The Ethernet model contains a MAC model (\nedtype{EtherMAC}), LLC model (\nedtype{EtherLLC}) as well
+The Ethernet model contains a MAC model (\nedtype{EtherMac}), LLC model (\nedtype{EtherLlc}) as well
 as a bus (\nedtype{EtherBus}, for modelling coaxial cable) and a hub (\nedtype{EtherHub}) model.
 A switch model (\nedtype{EtherSwitch}) is also provided.
 
@@ -18,9 +18,9 @@ A switch model (\nedtype{EtherSwitch}) is also provided.
   \item \nedtype{EtherHost} is a sample node with an Ethernet NIC;
   \item \nedtype{EtherSwitch}, \nedtype{EtherBus}, \nedtype{EtherHub} model switching hub, repeating hub and
         the old coxial cable;
-  \item basic compnents of the model: \nedtype{EtherMAC}, \nedtype{EtherLLC}/\nedtype{EtherEncap} module types,
-        \nedtype{MACRelayUnit} (\nedtype{MACRelayUnitNP} and \nedtype{MACRelayUnitPP}), \nedtype{EtherFrame} message type,
-        \cppclass{MACAddress} class
+  \item basic compnents of the model: \nedtype{EtherMac}, \nedtype{EtherLlc}/\nedtype{EtherEncap} module types,
+        \nedtype{MacRelayUnit} (\nedtype{MACRelayUnitNP} and \nedtype{MACRelayUnitPP}), \nedtype{EtherFrame} message type,
+        \cppclass{MacAddress} class
 \end{itemize}
 
 Sample simulations:
@@ -118,7 +118,7 @@ The Ethernet MAC (Media Access Control) layer transmits the Ethernet frames on
 the physical media. This is a sublayer within the data link layer. Because
 encapsulation/decapsulation is not always needed (e.g. switches does not do
 encapsulation/decapsulation), it is implemented in a separate modules
-(\nedtype{EtherEncap} and \nedtype{EtherLLC}) that are part of the LLC layer.
+(\nedtype{EtherEncap} and \nedtype{EtherLlc}) that are part of the LLC layer.
 
 \begin{center}
 \setlength{\unitlength}{1mm}
@@ -146,14 +146,14 @@ point-to-point connections between hosts and switches. This means
 that there are no collisions, and the behaviour of the MAC component
 is much simpler than in classic Ethernet that used coaxial cables and
 hubs. The INET framework contains two MAC modules for Ethernet:
-the \nedtype{EtherMACFullDuplex} is simpler to understand and easier to extend,
-because it supports only full-duplex connections. The \nedtype{EtherMAC}
+the \nedtype{EtherMacFullDuplex} is simpler to understand and easier to extend,
+because it supports only full-duplex connections. The \nedtype{EtherMac}
 module implements the full MAC functionality including CSMA/CD, it
 can operate both half-duplex and full-duplex mode.
 
 \subsection*{Packets and frames}
 
-The environment of the MAC modules is described by the \nedtype{IEtherMAC}
+The environment of the MAC modules is described by the \nedtype{IEtherMac}
 module interface. Each MAC modules has gates to connect to the physical
 layer (\ttt{phys\$i} and \ttt{phys\$o}) and to connect to the upper layer
 (LLC module is hosts, relay units in switches): \ttt{upperLayerIn} and
@@ -207,13 +207,13 @@ transmitter's pause timer expires, the receiver may elect to send
 another PAUSE frame to the transmitter with a timer value of zero,
 allowing the transmitter to resume immediately.
 
-\nedtype{EtherMAC} will properly respond to PAUSE frames it receives
+\nedtype{EtherMac} will properly respond to PAUSE frames it receives
 (\msgtype{EtherPauseFrame} class),
 however it will never send a PAUSE frame by itself. (For one thing,
 it doesn't have an input buffer that can overflow.)
 
-\nedtype{EtherMAC}, however, transmits PAUSE frames received by higher layers,
-and \nedtype{EtherLLC} can be instructed by a command to send a PAUSE frame to MAC.
+\nedtype{EtherMac}, however, transmits PAUSE frames received by higher layers,
+and \nedtype{EtherLlc} can be instructed by a command to send a PAUSE frame to MAC.
 
 % FIXME PAUSE frames should only be sent on full-duplex ethernet.
 %       If a switch uses half-duplex mode to connect to hosts, it can ask sending hosts
@@ -289,9 +289,9 @@ and gray in paused state.
 
 
 
-\subsection{EtherMACFullDuplex}
+\subsection{EtherMacFullDuplex}
 
-From the two MAC implementation \nedtype{EtherMACFullDuplex} is the simpler one,
+From the two MAC implementation \nedtype{EtherMacFullDuplex} is the simpler one,
 it operates only in full-duplex mode (its \fpar{duplexEnabled} parameter fixed to
 \ttt{true} in its NED definition). This module does not need to implement
 CSMA/CD, so there is no collision detection, retransmission with exponential backoff,
@@ -301,7 +301,7 @@ carrier extension and frame bursting. Flow control works as described in section
 % FIXME remove frameBursting from NED def, or fix it to false
 %       currently setting it to 'true' has no effect
 
-In the \nedtype{EtherMACFullDuplex} module,
+In the \nedtype{EtherMacFullDuplex} module,
 packets arrived at the \ttt{phys\$i} gate are handled when their last bit received.
 
 Outgoing packets are transmitted according to the following state diagram:
@@ -310,7 +310,7 @@ Outgoing packets are transmitted according to the following state diagram:
 \includegraphics{figures/EtherMACFullDuplex_txstates}
 \end{center}
 
-The \nedtype{EtherMACFullDuplex} module records two scalars in addition to the
+The \nedtype{EtherMacFullDuplex} module records two scalars in addition to the
 ones mentioned earlier:
 \begin{itemize}
 \item \ttt{rx channel idle (\%)}: reception channel idle time
@@ -319,23 +319,23 @@ ones mentioned earlier:
         time as a percentage of the total simulation time
 \end{itemize}
 
-\subsection{EtherMAC}
+\subsection{EtherMac}
 
 Ethernet MAC layer implementing CSMA/CD. It supports both half-duplex and full-duplex operations;
-in full-duplex mode it behaves as \nedtype{EtherMACFullDuplex}. In half-duplex  mode
+in full-duplex mode it behaves as \nedtype{EtherMacFullDuplex}. In half-duplex  mode
 it detects collisions, sends jam messages and retransmit frames upon collisions using
 the exponential backoff algorithm. In Gigabit Ethernet networks it supports carrier
 extension and frame bursting. Carrier extension can be turned off by setting the
 \fpar{carrierExtension} parameter to \ttt{false}.
 
-Unlike \nedtype{EtherMACFullDuplex}, this MAC module processes the incoming packets when their
+Unlike \nedtype{EtherMacFullDuplex}, this MAC module processes the incoming packets when their
 first bit is received. The end of the reception is calculated by the MAC and
 detected by scheduling a self message.
 
 When frames collide the transmission is aborted -- in this case the transmitting
 station transmits a jam signal. Jam signals are represented
 by a \msgtype{EtherJam} message. The jam message contains the tree identifier
-of the frame whose transmission is aborted. When the \nedtype{EtherMAC} receives a jam
+of the frame whose transmission is aborted. When the \nedtype{EtherMac} receives a jam
 signal, it knows that the corresponding transmission ended in jamming and have
 been aborted. Thus when it receives as many jams as collided frames, it can
 be sure that the channel is free again. (Receiving a jam message marks the
@@ -391,9 +391,9 @@ CSMA/CD is not needed and the channel utilization can be high.
 
 \subsection{MAC relay units}
 
-INET framework ethernet switches are built from \nedtype{IMACRelayUnit}
+INET framework ethernet switches are built from \nedtype{IMacRelayUnit}
 components. Each relay unit has N input and output gates for sending/receiving
-Ethernet frames. They should be connected to \nedtype{IEtherMAC} modules.
+Ethernet frames. They should be connected to \nedtype{IEtherMac} modules.
 
 Internally the relay unit holds a table for the destination address -> output
 port mapping. When it receives a data frame it updates the table with the
@@ -422,14 +422,14 @@ target already received the original frame. The only exception if the frame
 arrived through a radio channel, in this case the target can be out of range.
 The port range 0..\fpar{numWirelessPorts}-1 are reserved for wireless connections.
 
-The \nedtype{IMACRelayUnit} module is not a concrete implementation,
-it just defines gates and parameters an \nedtype{IMACRelayUnit} should have.
+The \nedtype{IMacRelayUnit} module is not a concrete implementation,
+it just defines gates and parameters an \nedtype{IMacRelayUnit} should have.
 Concrete inplementations add
 capacity and performance aspects to the model (number of frames processed
 per second, amount of memory available in the switch, etc.)
 C++ implementations can subclass from the class \cppclass{MACRelayUnitBase}.
 
-There are two versions of \nedtype{IMACRelayUnit}:
+There are two versions of \nedtype{IMacRelayUnit}:
 
 \begin{description}
   \item[\nedtype{MACRelayUnitNP}] models one or more CPUs with shared memory,
@@ -603,16 +603,16 @@ The \nedtype{EtherEncap} module generates \msgtype{EthernetIIFrame} messages.
 
 EtherFrameII
 
-\subsection{EtherLLC}
+\subsection{EtherLlc}
 
 TODO what it does
 
 \subsection{EthernetInterface module}
 
-The \nedtype{EthernetInterface} compound module implements the \nedtype{IWiredNic}
-interface. Complements \nedtype{EtherMAC} and \nedtype{EtherEncap} with an output queue
+The \nedtype{EthernetInterface} compound module implements the \nedtype{IWiredInterface}
+interface. Complements \nedtype{EtherMac} and \nedtype{EtherEncap} with an output queue
 for QoS and RED support. It also has configurable input/output filters as \nedtype{IHook}
-components similarly to the \nedtype{PPPInterface} module.
+components similarly to the \nedtype{PppInterface} module.
 
 % TODO there is no IWiredNic with EtherLLC
 

@@ -1,11 +1,11 @@
-\chapter{IPv4}
+\chapter{Ipv4}
 \label{cha:ipv4}
 
 \section{The IPv4 Module}
 
 \subsection{Processing time}
 
-The C++ class of the \nedtype{IPv4} module is derived from \cppclass{QueueBase}.
+The C++ class of the \nedtype{Ipv4} module is derived from \cppclass{QueueBase}.
 There is a processing time associated with each incoming packet.
 This processing time is specified by the \fpar{procDelay} module parameter.
 If a packet arrives, when the processing of a previous has not been
@@ -24,19 +24,19 @@ the module implementation (the IP class), and:
 \subsection{Interface with higher layer}
 
 Higher layer protocols should be connected to the \ttt{transportIn}/\ttt{transportOut}
-gates of the \nedtype{IPv4} module.
+gates of the \nedtype{Ipv4} module.
 
 \subsubsection*{Sending packets}
 
-Higher layer protocols can send a packet by attaching a \cppclass{IPv4ControlInfo}
-object to their packet and sending it to the \nedtype{IPv4} module.
+Higher layer protocols can send a packet by attaching a \cppclass{Ipv4ControlInfo}
+object to their packet and sending it to the \nedtype{Ipv4} module.
 
 % receiving IP datagrams from higher layer?
 
 The following fields must be set in the control info:
 \begin{itemize}
   \item \fvar{procotol}: the \ttt{Protocol} field of the IP datagram. Valid values
-        are defined in the \ttt{IPProtocolId} enumeration.
+        are defined in the \ttt{IpProtocolId} enumeration.
   \item \fvar{destAddr}: the \ttt{Destination Address} of the IP datagram.
 \end{itemize}
 
@@ -73,7 +73,7 @@ with a specified next hop address, or broadcasted on one or all of the network i
 The details of the routing is described in the next subsection (\ref{subsec:ip_routing})
 in detail.
 
-Before sending the datagram on a specific interface, the \nedtype{IPv4} module
+Before sending the datagram on a specific interface, the \nedtype{Ipv4} module
 checks if the packet length is smaller than the \ttt{MTU} of the interface.
 If not, then the datagram is fragmented. When the \ttt{Don't Fragment} flag
 forbids fragmentation, an \ttt{Destination Unreachable} ICMP error is generated
@@ -83,14 +83,14 @@ Each fragment will encapsulate the whole higher layer datagram, although the
 length of the IP datagram corresponds to the fragment length.
 \end{note}
 
-The fragments are sent to the \nedtype{ARP} module through the \ttt{queueOut} gate.
-The \nedtype{ARP} module forwards the datagram immediately to point-to-point interface
+The fragments are sent to the \nedtype{Arp} module through the \ttt{queueOut} gate.
+The \nedtype{Arp} module forwards the datagram immediately to point-to-point interface
 cards. If the outgoing interface is a 802.x card, then before forwarding the datagram
 it performs address resolution to obtain the MAC address of the destination.
 
 \subsubsection*{Receiving packets}
 
-The \nedtype{IPv4} module of hosts processes the datagrams received from the network
+The \nedtype{Ipv4} module of hosts processes the datagrams received from the network
 in three steps:
 \begin{enumerate}
   \item Reassemble fragments
@@ -106,7 +106,7 @@ purged from the buffer. The default value of the timeout is 60s. The
 timeout is only checked when a fragment is received, and at least 10s
 elapsed since the last check.
 
-An \msgtype{IPv4ControlInfo} attached to the decapsulated transport layer packet.
+An \msgtype{Ipv4ControlInfo} attached to the decapsulated transport layer packet.
 The control info contains fields copied from the IP header (source and destination
 address, protocol, TTL, ToS) as well as the interface id through it was received.
 The control info also stores the original IP datagram, because the transport
@@ -119,7 +119,7 @@ datagram is passed to the DSR module instead.
 
 After decapsulation, the transport layer packet will be passed to the appropriate
 transport protocol. It must be connected to one of the \ttt{transportOut[]} gate.
-The \nedtype{IPv4} module finds the gate using the \ttt{protocol id}$\rightarrow$
+The \nedtype{Ipv4} module finds the gate using the \ttt{protocol id}$\rightarrow$
 \ttt{gate index} mapping given in the \fpar{protocolMapping} string parameter.
 The value must be a comma separated list of ''<protocol\_id>:<gate\_index>'' items.
 For example the following line in the ini file maps TCP (6) to gate 0, UDP (17)
@@ -134,9 +134,9 @@ is not connected, the datagram will be silently dropped.
 
 Some protocols are handled differently:
 \begin{itemize}
-  \item \ttt{ICMP}: ICMP errors are delivered to the protocol
+  \item \ttt{Icmp}: ICMP errors are delivered to the protocol
         whose packet triggered the error. Only ICMP query
-        requests and responses are sent to the \nedtype{ICMP} module.
+        requests and responses are sent to the \nedtype{Icmp} module.
   \item \ttt{IP}: sent through \ttt{preRoutingOut} gate. (bug!)
   \item \ttt{DSR}: ??? (subsection about Manet routing?)
 \end{itemize}
@@ -149,12 +149,12 @@ Some protocols are handled differently:
 \label{subsec:ip_routing}
 
 The output of the network interfaces are connected to the
-\ttt{queueIn} gates of the \nedtype{IPv4} module. The incoming
+\ttt{queueIn} gates of the \nedtype{Ipv4} module. The incoming
 packets are either IP datagrams or ARP responses. The IP datagrams
-are processed by the \nedtype{IPv4} module, the ARP
-responses are forwarded to the \nedtype{ARP}.
+are processed by the \nedtype{Ipv4} module, the ARP
+responses are forwarded to the \nedtype{Arp}.
 
-The \nedtype{IPv4} module first checks the error bit of the
+The \nedtype{Ipv4} module first checks the error bit of the
 incoming IP datagrams. There is a $header length/packet length$
 probability that the IP header contains the error (assuming
 1~bit error). With this probability an ICMP \ttt{Parameter Problem}
@@ -174,11 +174,11 @@ that the destination address is multicast address or not.
 When the datagram is decided to be sent up, it is processed
 as described in the previous subsection (Receiving packets).
 If it is decided to be sent out through some interface, it
-is actually sent to the \nedtype{ARP} module through the
+is actually sent to the \nedtype{Arp} module through the
 \ttt{queueOut} gate. An \msgtype{IPv4RoutingDecision} control
 info is attached to the outgoing packet, containing the
 outgoing interface id, and the IP address of the next hop.
-The \nedtype{ARP} module resolve the IP address to a hardware
+The \nedtype{Arp} module resolve the IP address to a hardware
 address if needed, and forwards the datagram to next hop.
 
 \subsubsection*{Unicast/broadcast routing}
@@ -288,10 +288,10 @@ also fill in or overwrite interface settings. The route table can also
 be read and modified during simulation, typically by routing protocol
 implementations (e.g. OSPF).
 
-Entries in the route table are represented by \cppclass{IPv4Route} objects.
-\cppclass{IPv4Route} objects can be polymorphic: if a routing protocol needs
-to store additional data, it can simply subclass from \cppclass{IPv4Route},
-and add the derived object to the table. The \cppclass{IPv4Route} object
+Entries in the route table are represented by \cppclass{Ipv4Route} objects.
+\cppclass{Ipv4Route} objects can be polymorphic: if a routing protocol needs
+to store additional data, it can simply subclass from \cppclass{Ipv4Route},
+and add the derived object to the table. The \cppclass{Ipv4Route} object
 has the following fields:
 \begin{itemize}
   \item \ttt{host} is the IP address of the target of the route (can be a host or network).
@@ -323,8 +323,8 @@ has the following fields:
 % TODO describe Reverse Path Forwarding
 
 In multicast routers the routing table contains multicast routes too.
-A multicast route is represented by an instance of the \cppclass{IPv4MulticastRoute}
-class. The \cppclass{IPv4MulticastRoute} instance stores the following fields:
+A multicast route is represented by an instance of the \cppclass{Ipv4MulticastRoute}
+class. The \cppclass{Ipv4MulticastRoute} instance stores the following fields:
 \begin{itemize}
   \item \fvar{origin} IP address of the network of the source of the datagram
   \item \fvar{originNetmask} netmask of the source network
@@ -352,7 +352,7 @@ of the datagram, then the forwarding algorithm chooses the one with the
 
 \section{The ICMP Module}
 
-The \nedtype{ICMP} module has two methods which can be used by other modules
+The \nedtype{Icmp} module has two methods which can be used by other modules
 to send ICMP error messages:
 \begin{itemize}
   \item \ffunc[sendErrorMessage]{sendErrorMessage(IPv4Datagram*, ICMPType, ICMPCode)}
@@ -364,16 +364,16 @@ to send ICMP error messages:
         packet will be encapsulated into an IP datagram before wrapping it into the ICMP message.
 \end{itemize}
 
-The \nedtype{ICMP} module can be accessed from other modules of the node by calling
+The \nedtype{Icmp} module can be accessed from other modules of the node by calling
 \ffunc{ICMPAccess::get()}.
 
-When an incoming ICMP error message is received, the \nedtype{ICMP} module
+When an incoming ICMP error message is received, the \nedtype{Icmp} module
 sends it out on the \ttt{errorOut} gate unchanged. It is assumed that an
 external module is connected to \ttt{errOut} that can process the error
 packet. There is a simple module (\nedtype{ErrorHandling}) that simply
-logs the error and drops the message. Note that the \nedtype{IPv4} module
+logs the error and drops the message. Note that the \nedtype{Ipv4} module
 does not send REDIRECT, DESTINATION\_UNREACHABLE,
-TIME\_EXCEEDED and PARAMETER\_PROBLEM messages to the \nedtype{ICMP} module,
+TIME\_EXCEEDED and PARAMETER\_PROBLEM messages to the \nedtype{Icmp} module,
 it will send them to the transport layer module that sent the bogus
 packet encapsulated in the ICMP message.
 \begin{note}
@@ -386,20 +386,20 @@ use \ffunc{getEncapsulatedMsg()} to access the IP packet that caused the ICMP
 error.
 \end{note}
 
-The \nedtype{ICMP} module receives ping commands on the \ttt{pingIn}
+The \nedtype{Icmp} module receives ping commands on the \ttt{pingIn}
 gate from the application. The ping command can be any packet
-having an \cppclass{IPv4ControlInfo} control info. The packet
+having an \cppclass{Ipv4ControlInfo} control info. The packet
 will be encapsulated with an \msgtype{ICMPMessage} and
 handed over to the IP.
 
-If \nedtype{ICMP} receives an echo request from IP, the original
+If \nedtype{Icmp} receives an echo request from IP, the original
 message object will be returned as the echo reply. Of course,
 before sending back the object to IP, the source and destination
 addresses are swapped and the message type changed to ICMP\_ECHO\_REPLY.
 
 When an ICMP echo reply received, the application message decapsulated
 from it and passed to the application through the \ttt{pingOut} gate.
-The \cppclass{IPv4ControlInfo} also copied from the \msgtype{ICMPMessage}
+The \cppclass{Ipv4ControlInfo} also copied from the \msgtype{ICMPMessage}
 to the application message.
 
 % FIXME ICMP TIMESTAMP requests are processed as ECHO requests

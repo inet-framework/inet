@@ -1,6 +1,6 @@
 % based on 'integration' branch: 446a1265c28822456bc0230d362bbabdee7778ba (2012-03-19)
 
-\chapter{IPv4}
+\chapter{Ipv4}
 \label{cha:ipv4}
 
 
@@ -39,27 +39,27 @@ layer.
 The INET framework contains several modules to build the
 IPv4 network layer of hosts and routers:
 \begin{itemize}
-  \item \nedtype{IPv4} is the main module that implements RFC791. This
+  \item \nedtype{Ipv4} is the main module that implements RFC791. This
         module performs IP encapsulation/decapsulation, fragmentation
         and assembly, and routing of IP datagrams.
-  \item The \nedtype{IPv4RoutingTable} is a helper module that manages the routing
-        table of the node. It is queried by the \nedtype{IPv4} module
+  \item The \nedtype{Ipv4RoutingTable} is a helper module that manages the routing
+        table of the node. It is queried by the \nedtype{Ipv4} module
         for best routes, and updated by the routing daemons implementing
         RIP, OSPF, Manet, etc. protocols.
-  \item The \nedtype{ICMP} module can be used to generate ICMP error packets. It also
+  \item The \nedtype{Icmp} module can be used to generate ICMP error packets. It also
         supports ICMP echo applications.
-  \item The \nedtype{ARP} module performs the dynamic translation of IP addresses
+  \item The \nedtype{Arp} module performs the dynamic translation of IP addresses
         to MAC addresses.
-  \item The \nedtype{IGMPv2} module to generate and process multicast group
+  \item The \nedtype{Igmpv2} module to generate and process multicast group
         membership reports.
 \end{itemize}
 
 These modules are assembled into a complete network layer module
-called \nedtype{IPv4NetworkLayer}. This module has
+called \nedtype{Ipv4NetworkLayer}. This module has
 dedicated gates for TCP, UDP, SCTP, RSVP, OSPF, Manet, and Ping
 higher layer protocols. It can be connected to several network
 interface cards: Ethernet, PPP, Wlan, or external interfaces.
-The \nedtype{IPv4NetworkLayer} module is used to build IPv4 hosts
+The \nedtype{Ipv4NetworkLayer} module is used to build IPv4 hosts
 (\nedtype{StandardHost}) and routers (\nedtype{Router}).
 
 The implementation of these modules are based on the following RFCs:
@@ -75,12 +75,12 @@ The subsequent sections describe the IPv4 modules in detail.
 
 \section{The IPv4 Module}
 
-The \nedtype{IPv4} module implements the IPv4 protocol.
+The \nedtype{Ipv4} module implements the IPv4 protocol.
 
-For connecting the upper layer protocols the \nedtype{IPv4} module
+For connecting the upper layer protocols the \nedtype{Ipv4} module
 has \emph{transportIn[]} and \emph{transportOut[]} gate vectors.
 
-The IP packets are sent to the \nedtype{ARP} module through the
+The IP packets are sent to the \nedtype{Arp} module through the
 \emph{queueOut} gate. The incoming IP packets are received
 directly from the network interface cards through the
 \emph{queueIn[]} gates. Each interface card knows its own
@@ -167,7 +167,7 @@ It contains variables corresponding the fields of the IP header, except:
 The \fvar{Type of Service} field is called \ttt{diffServCodePoint} in
 \nedtype{IPv4Datagram}.
 
-Before sending the \msgtype{IPv4Datagram} through the network, the \nedtype{IPv4}
+Before sending the \msgtype{IPv4Datagram} through the network, the \nedtype{Ipv4}
 module attaches a \cppclass{IPv4RoutingDecision} control info.
 The control info contains the IP address of the next hop, and the
 identifier of the interface it should be sent. The ARP module translate
@@ -177,7 +177,7 @@ interface and forwards the datagram to the interface card.
 
 \subsection{Parameters}
 
-The \nedtype{IPv4} module has the following parameters:
+The \nedtype{Ipv4} module has the following parameters:
 \begin{itemize}
   \item \fpar{procDelay} processing time of each incoming datagram.
   \item \fpar{timeToLive} default TTL of unicast datagrams.
@@ -195,7 +195,7 @@ The \nedtype{IPv4} module has the following parameters:
 
 \subsection{Statistics}
 
-The \nedtype{IPv4} module does not write any statistics into files,
+The \nedtype{Ipv4} module does not write any statistics into files,
 but it has some statistical information that can be watched during
 the simulation in the gui environment.
 \begin{itemize}
@@ -211,13 +211,13 @@ the simulation in the gui environment.
         route to the destination. (But if outgoing interface is specified it is routed!)
 \end{itemize}
 
-In the graphical interface the bubble of the \nedtype{IPv4} module
+In the graphical interface the bubble of the \nedtype{Ipv4} module
 also displays these counters.
 
 
 \section{The IPv4RoutingTable module}
 
-The \nedtype{IPv4RoutingTable} module represents the routing table.
+The \nedtype{Ipv4RoutingTable} module represents the routing table.
 IP hosts and routers contain one instance of this class. It has
 methods to manage the routing table and the interface table,
 so one can achieve functionality similar to the \fprog{route} and
@@ -230,7 +230,7 @@ and multicast routing.
 
 \subsection*{Parameters}
 
-The \nedtype{IPv4RoutingTable} module has the following parameters:
+The \nedtype{Ipv4RoutingTable} module has the following parameters:
 
 \begin{itemize}
   \item \fpar{routerId}: for routers, the router id using IPv4 address dotted notation;
@@ -247,8 +247,8 @@ The \nedtype{IPv4RoutingTable} module has the following parameters:
 
 \begin{warning}
 The \fpar{routingFile} parameter is obsolete. The prefered method for network configuration
-is to use \nedtype{IPv4NetworkConfigurator}. The old config files should be replaced
-with the XML configuration of \nedtype{IPv4NetworkConfigurator}. Section \ref{subsec:ipv4configurator}
+is to use \nedtype{Ipv4NetworkConfigurator}. The old config files should be replaced
+with the XML configuration of \nedtype{Ipv4NetworkConfigurator}. Section \ref{subsec:ipv4configurator}
 describes the format of the new configuration files.
 \end{warning}
 
@@ -269,7 +269,7 @@ It uses the services of IP, so it is a transport layer protocol, but unlike
 TCP or UDP it is not used to transfer user data. It can not be separated
 from the IP, because the routing errors are reported by ICMP.
 
-The \nedtype{ICMP} module can be used to send error messages and ping
+The \nedtype{Icmp} module can be used to send error messages and ping
 request. It can also respond to incoming ICMP messages.
 
 Each ICMP message is encapsulated within an IP datagram, so its delivery
@@ -313,12 +313,12 @@ triggered the error, or the data of the ping request/reply.
 
 \section{The ARP module}
 
-The \nedtype{ARP} module implements the Address Resolution Protocol (RFC826).
+The \nedtype{Arp} module implements the Address Resolution Protocol (RFC826).
 The ARP protocol is designed to translate a local protocol address
 to a hardware address. Altough the ARP protocol can be used with
 several network protocol and hardware addressing schemes, in practice
 they are almost always IPv4 and 802.3 addresses. The INET implementation
-of the ARP protocol (the \nedtype{ARP} module) supports only
+of the ARP protocol (the \nedtype{Arp} module) supports only
 IP address $\rightarrow$ MAC address translation.
 
 If a node wants to send an IP packet to a node whose MAC address is unknown,
@@ -336,9 +336,9 @@ and PLEN (protocol address length) are constants: HTYPE=Ethernet (1), PTYPE=IPv4
 PLEN=4. The OPER (operation) field is 1 for an ARP request and 2 for an ARP response.
 The SHA field contains the 48-bit hardware address of the sender, SPA field is
 the 32-bit IP address of the sender; THA and TPA are the addresses of the target.
-The message class corresponding to the ARP frame is \msgtype{ARPPacket}.
+The message class corresponding to the ARP frame is \msgtype{ArpPacket}.
 In this class only the OPER, SHA, SPA, THA and TPA fields are stored.
-The length of an \msgtype{ARPPacket} is 28 bytes.
+The length of an \msgtype{ArpPacket} is 28 bytes.
 
 \begin{figure}[h]
 \begin{center}
@@ -359,7 +359,7 @@ The length of an \msgtype{ARPPacket} is 28 bytes.
 \end{center}
 \end{figure}
 
-The \nedtype{ARP} module receives IP datagrams and ARP responses from \nedtype{IPv4}
+The \nedtype{Arp} module receives IP datagrams and ARP responses from \nedtype{Ipv4}
 on the \ttt{ipIn} gate and transmits IP datagrams and ARP requests on the \ttt{nicOut[]} gates
 towards the network interface cards. ARP broadcasts the requests on the local network,
 so the NIC's entry in the \nedtype{InterfaceTable} should have \ffunc{isBroadcast()} flag
@@ -374,7 +374,7 @@ addresses are mapped using the ARP procotol.
 If the hardware address is found
 in the ARP cache, then the packet is transmitted to the addressed interface immediately.
 Otherwise the packet is queued and an address resolution takes place.
-The \nedtype{ARP} module creates an \msgtype{ARPPacket} object, sets the sender
+The \nedtype{Arp} module creates an \msgtype{ArpPacket} object, sets the sender
 MAC and IP address to its own address, sets the destination IP address
 to the address of the target of the IP datagram, leave the destination MAC address
 blank and broadcasts the packet on each network interface with broadcast capability.
@@ -393,15 +393,15 @@ ARP cache, and if the packet is a request a response is created and sent directl
 to the originator. If proxy ARP is enabled, the request can be responded
 with our MAC address if we can route IP packets to the destination.
 
-Usually each \nedtype{ARP} module maintains a local ARP cache.
+Usually each \nedtype{Arp} module maintains a local ARP cache.
 However it is possible to use a global cache. The global cache is filled
 in with entries of the IP and MAC addresses of the known interfaces
 when the ARP modules are initiated (at simulation time 0).
-\nedtype{ARP} modules that are using the global ARP cache
+\nedtype{Arp} modules that are using the global ARP cache
 never initiate an address resolution; if an IP address not
 found in the global cache, the simulation stops with an error.
 However they will respond to ARP request, so the simulation can
-be configured so that some \nedtype{ARP}s use local, while others
+be configured so that some \nedtype{Arp}s use local, while others
 the global cache.
 
 When an entry is inserted or updated in the local ARP cache,
@@ -410,7 +410,7 @@ entry is not used after the configured \fpar{cacheTimeout}
 elapsed. This parameter does not affect the entries of
 the global cache however.
 
-The module parameters of \nedtype{ARP} are:
+The module parameters of \nedtype{Arp} are:
 
 \begin{itemize}
   \item \fpar{retryTimeout}: number of seconds ARP waits between retries to resolve an IPv4 address (default is 1s)
@@ -420,7 +420,7 @@ The module parameters of \nedtype{ARP} are:
   \item \fpar{globalARP}: use global ARP cache (default is \fkeyword{false})
 \end{itemize}
 
-The \nedtype{ARP} module emits four signals:
+The \nedtype{Arp} module emits four signals:
 
 \begin{itemize}
   \item \ttt{sentReq}: emits 1 each time an ARP request is sent
@@ -444,7 +444,7 @@ receive those multicast datagrams. The IGMP module of multicast
 routers processes these IGMP reports: it updates the list of
 groups, that has members on the link of the incoming message.
 
-The \nedtype{IIGMP} module interface defines the connections
+The \nedtype{IIgmp} module interface defines the connections
 of IGMP modules.
 IGMP reports are transmitted by IP, so the module contains
 gates to be connected to the IP module (\ttt{ipIn/ipOut}). The IP
@@ -455,7 +455,7 @@ connected to the \ttt{routerIn/routerOut} gates of the IGMP module.
 The IGMP module delivers the IGMP messages not processed by itself
 to the connected routing module.
 
-The \nedtype{IGMPv2} module implements version 2 of the IGMP protocol
+The \nedtype{Igmpv2} module implements version 2 of the IGMP protocol
 (RFC 2236). Next we describe its behaviour in host and routers in details.
 Note that multicast routers behaves as hosts too, i.e. they are sending
 reports to other routers when joining or leaving a multicast group.
@@ -523,7 +523,7 @@ assumes that the group has no local members.
 
 \subsection{Disabling IGMP}
 
-The IPv4 \nedtype{IPv4NetworkLayer} contains an instance of the IGMP
+The IPv4 \nedtype{Ipv4NetworkLayer} contains an instance of the IGMP
 module. IGMP can be turned off by setting the \fpar{enabled}
 parameter to false. When disabled, then no IGMP message
 is generated, and incoming IGMP messages are ignored.
@@ -573,11 +573,11 @@ Router timeouts are configured by these parameters:
 
 \section{The IPv4NetworkLayer module}
 
-The \nedtype{IPv4NetworkLayer} module packs the \nedtype{IP}, \nedtype{ICMP},
-\nedtype{ARP}, and \nedtype{IGMP} modules into one compound module.
+The \nedtype{Ipv4NetworkLayer} module packs the \nedtype{IP}, \nedtype{Icmp},
+\nedtype{Arp}, and \nedtype{IGMP} modules into one compound module.
 The compound module defines gates for connecting UDP, TCP, SCTP, RSVP and
 OSPF transport protocols. The \ttt{pingIn} and \ttt{pingOut} gates of the
-\nedtype{ICMP} module are also available, while its \ttt{errorOut} gate
+\nedtype{Icmp} module are also available, while its \ttt{errorOut} gate
 is connected to an inner \nedtype{ErrorHandling} component that writes
 the ICMP errors to the log.
 

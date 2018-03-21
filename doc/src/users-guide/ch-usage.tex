@@ -75,8 +75,8 @@ themselves, and are being composed of a queue, a MAC, and possibly other
 simple modules. See \nedtype{EthernetInterface} as an example.
 
 Not all modules implement protocols. There are modules which hold data (for
-example \nedtype{IPv4RoutingTable}), perform autoconfiguration of a network
-(\nedtype{IPv4NetworkConfigurator}), move a mobile node around (for example
+example \nedtype{Ipv4RoutingTable}), perform autoconfiguration of a network
+(\nedtype{Ipv4NetworkConfigurator}), move a mobile node around (for example
 \nedtype{ConstSpeedMobility}), and perform housekeeping associated with
 radio signals in wireless simulations (\nedtype{RadioMedium}).
 
@@ -168,7 +168,7 @@ how to configure result collection
 \section{TODO}
 Some modules have only one instance, at global network level:
 
-\nedtype{IPv4NetworkConfigurator} assigns IP addresses to hosts and routers,
+\nedtype{Ipv4NetworkConfigurator} assigns IP addresses to hosts and routers,
 and sets up static routing.
 
 \nedtype{ScenarioManager} makes simulations scriptable. Modules can be made to support
@@ -186,7 +186,7 @@ you'll find info about them in later chapters.)
 
 Such a network can be assembled using the predefined \nedtype{StandardHost}
 and \nedtype{Router} modules. For automatic IP address assignment and
-static IP routing we can use the \nedtype{IPv4NetworkConfigurator} utility
+static IP routing we can use the \nedtype{Ipv4NetworkConfigurator} utility
 module.
 
 \ifdraft TODO

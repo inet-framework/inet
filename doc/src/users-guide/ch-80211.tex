@@ -11,7 +11,7 @@ in their role (ad-hoc station, infrastructure mode station, or
 access point) and their level of detail:
 
 \begin{enumerate}
- \item \nedtype{Ieee80211Nic}: a generic (configurable) NIC
+ \item \nedtype{Ieee80211Interface}: a generic (configurable) NIC
  \item \nedtype{Ieee80211NicAdhoc}: for ad-hoc mode
  \item \nedtype{Ieee80211NicAP}, \nedtype{Ieee80211NicAPSimplified}: for use in an access point
  \item \nedtype{Ieee80211NicSTA}, \nedtype{Ieee80211NicSTASimplified}: for use in an
@@ -50,8 +50,8 @@ probe responses.
 
 The management layer has several implementations which differ in their role
 (STA/AP/ad-hoc) and level of detail: \nedtype{Ieee80211MgmtAdhoc},
-\nedtype{Ieee80211MgmtAP}, \nedtype{Ieee80211MgmtAPSimplified}, \nedtype{Ieee80211MgmtSTA},
-\nedtype{Ieee80211MgmtSTASimplified}. The ..Simplified ones differ from the others
+\nedtype{Ieee80211MgmtAp}, \nedtype{Ieee80211MgmtApSimplified}, \nedtype{Ieee80211MgmtSta},
+\nedtype{Ieee80211MgmtStaSimplified}. The ..Simplified ones differ from the others
 in that they do not model the scan-authenticate-associate process,
 so they cannot be used in experiments involving handover.
 
@@ -61,7 +61,7 @@ just carries out these commands by performing the scanning, authentication
 and association procedures, and reports back the results to the agent.
 
 The agent layer is currenly only present in the \nedtype{Ieee80211NicSTA} NIC module,
-as an \nedtype{Ieee80211AgentSTA} module. The managament entities in other NIC
+as an \nedtype{Ieee80211AgentSta} module. The managament entities in other NIC
 variants do not have as much freedom as to need an agent to control them.
 
 By modifying or replacing the agent, one can alter the dynamic behaviour

@@ -15,9 +15,9 @@ TODO tags etc
 The INET defines these frames in the \ffilename{EtherFrame.msg} file.
 The models supports Ethernet II, 803.2 with LLC header, and 803.3 with LLC and SNAP headers.
 The corresponding classes are:
-\msgtype{EthernetIIFrame}, \msgtype{EtherFrameWithLLC} and \msgtype{EtherFrameWithSNAP}. They all class
+\msgtype{EthernetIIFrame}, \msgtype{EtherFrameWithLlc} and \msgtype{EtherFrameWithSNAP}. They all class
 from \msgtype{EtherFrame} which only represents the basic MAC frame with source and
-destination addresses. \nedtype{EtherMAC} only deals with \msgtype{EtherFrame}s, and does not
+destination addresses. \nedtype{EtherMac} only deals with \msgtype{EtherFrame}s, and does not
 care about the specific subclass.
 
 Ethernet frames carry data packets as encapsulated cMessage objects.
@@ -34,7 +34,7 @@ control structure to the LLC by the network layer.
 EtherJam, EtherPadding (interframe gap), EtherPauseFrame?
 
 
-\subsection{EtherLLC}
+\subsection{EtherLlc}
 
 EtherFrameWithLLC
 
@@ -43,9 +43,9 @@ SAP registration
 % TODO delete EtherLLC, because LLC without SNAP is not used with IP (no ARP,IPv6 SAP)
 % TODO modify EtherEncap to handle EtherFrameWithSNAP frames too (we can not send EtherFrameWithSNAP now)
 
-\subsubsection{\nedtype{EtherLLC} and higher layers}
+\subsubsection{\nedtype{EtherLlc} and higher layers}
 
-The \nedtype{EtherLLC} module can serve several applications (higher layer protocols),
+The \nedtype{EtherLlc} module can serve several applications (higher layer protocols),
 and dispatch data to them. Higher layers are identified by DSAP.
 See section "Application registration" for more info.
 
@@ -54,13 +54,13 @@ higher layers because in practice it'll always be used with IP.
 
 \subsubsection{Communication between LLC and Higher Layers}
 
-Higher layers (applications or protocols) talk to the \nedtype{EtherLLC} module.
+Higher layers (applications or protocols) talk to the \nedtype{EtherLlc} module.
 
 When a higher layer wants to send a packet via Ethernet, it just
-passes the data packet (a cMessage or any subclass) to \nedtype{EtherLLC}.
+passes the data packet (a cMessage or any subclass) to \nedtype{EtherLlc}.
 The message kind has to be set to IEEE802CTRL\_DATA.
 
-In general, if \nedtype{EtherLLC} receives a packet from the higher layers,
+In general, if \nedtype{EtherLlc} receives a packet from the higher layers,
 it interprets the message kind as a command. The commands include
 IEEE802CTRL\_DATA (send a frame), IEEE802CTRL\_REGISTER\_DSAP (register highher layer)
 IEEE802CTRL\_DEREGISTER\_DSAP (deregister higher layer) and IEEE802CTRL\_SENDPAUSE
@@ -75,7 +75,7 @@ identifier, the application sets the data packet's message kind
 to ETH\_DATA ("please send this data packet" command),
 fills in the \nedtype{Ieee802Ctrl} structure with the destination MAC address and
 the protocol identifier, adds the control info to the message, then sends
-the packet to \nedtype{EtherLLC}.
+the packet to \nedtype{EtherLlc}.
 
 When the command doesn't involve a data packet (e.g.
 IEEE802CTRL\_(DE)REGISTER\_DSAP, IEEE802CTRL\_SENDPAUSE), a dummy packet
@@ -111,11 +111,11 @@ protocols.
 
 So that data arriving from the network can be dispatched to the
 correct applications (higher layer protocols), applications
-have to register themselves in \nedtype{EtherLLC}. The registration
+have to register themselves in \nedtype{EtherLlc}. The registration
 is done with the IEEE802CTRL\_REGISTER\_DSAP command
 (see section "Communication between LLC and higher layers")
 which associates a SAP with the LLC port. Different applications
-have to connect to different ports of \nedtype{EtherLLC}.
+have to connect to different ports of \nedtype{EtherLlc}.
 
 The ETHERCTRL\_REGISTER\_DSAP/IEEE802CTRL\_DEREGISTER\_DSAP commands use only the
 dsap field in the \cppclass{Ieee802Ctrl} structure.

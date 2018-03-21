@@ -17,15 +17,15 @@ Interfaces are registered dynamically during the initialization phase by
 modules that represent network interface cards (NICs). Other modules access
 interface information via a C++ class interface.
 
-\item \tbf{Routing Table (\nedtype{IPv4RoutingTable})}. This module contains
+\item \tbf{Routing Table (\nedtype{Ipv4RoutingTable})}. This module contains
 the IPv4 routing table. It is also accessed from other modules via a C++ interface.
 The interface contains member functions for adding, removing, enumerating
 and looking up routes, and finding the best matching route for a given
 destination IPv4 address. The IPv4 module calls the latter function for
 routing packets, and routing protocols such as OSPF or BGP call the route
 manipulation methods to add and manage discovered routes. For IPv6
-simulations, \nedtype{IPv4RoutingTable} is replaced (or co-exists) with
-a \nedtype{IPv6RoutingTable} module, possibly with a \nedtype{BindingCache}
+simulations, \nedtype{Ipv4RoutingTable} is replaced (or co-exists) with
+a \nedtype{Ipv6RoutingTable} module, possibly with a \nedtype{BindingCache}
 module as well.
 
 \ifdraft TODO
@@ -52,7 +52,7 @@ configuration (\ttt{"mobility: <mobilityType> like IMobility"}).
 \item \tbf{NICs}. Network interfaces are usually compound modules
 themselves, composed of a queue and a MAC module (and in the case of
 wireless NICs, a radio module or modules). Examples are
-\nedtype{PPPInterface}, \nedtype{EthernetInterface}, and WLAN interfaces
+\nedtype{PppInterface}, \nedtype{EthernetInterface}, and WLAN interfaces
 such as \nedtype{Ieee80211NicSTA}. The queue submodule stores packets
 waiting for transmission, and it is usually defined as having parametric
 type as it has multiple implementations to accommodate different needs
@@ -63,35 +63,35 @@ entry in the host's \nedtype{InterfaceTable} is usually registered by the
 MAC module at the beginning of the simulation.
 
 \item \tbf{Network layer}. Modules that represent protocols of the network
-layer are usually grouped into a compound module: \nedtype{IPv4NetworkLayer}
-for IPv4, and \nedtype{IPv6NetworkLayer} for IPv6. \nedtype{IPv4NetworkLayer}
-contains the modules \nedtype{IPv4}, \nedtype{ARP}, \nedtype{ICMP} and
-\nedtype{ErrorHandling}. The \nedtype{IPv4} module performs IP
+layer are usually grouped into a compound module: \nedtype{Ipv4NetworkLayer}
+for IPv4, and \nedtype{Ipv6NetworkLayer} for IPv6. \nedtype{Ipv4NetworkLayer}
+contains the modules \nedtype{Ipv4}, \nedtype{Arp}, \nedtype{Icmp} and
+\nedtype{ErrorHandling}. The \nedtype{Ipv4} module performs IP
 encapsulation/decapsulation and routing of datagrams; for the latter it
-accesses the C++ function call interface of the \nedtype{IPv4RoutingTable}.
+accesses the C++ function call interface of the \nedtype{Ipv4RoutingTable}.
 Packet forwarding can be turned on/off via a module parameter. The
-\nedtype{ARP} module is put into the path of packets leaving the network
+\nedtype{Arp} module is put into the path of packets leaving the network
 layer towards the NICs, and performs address resolution for interfaces that
-need it (e.g. Ethernet). \nedtype{ICMP} deals with sending and receiving
+need it (e.g. Ethernet). \nedtype{Icmp} deals with sending and receiving
 ICMP packets. The \nedtype{ErrorHandling} module receives and logs ICMP
-error replies. The IPv6 network layer, \nedtype{IPv6NetworkLayer} contains the
-modules \nedtype{IPv6}, \nedtype{ICMPv6}, \nedtype{IPv6NeighbourDiscovery}
-and \nedtype{IPv6ErrorHandling}. For Mobile IPv6 simulations 
+error replies. The IPv6 network layer, \nedtype{Ipv6NetworkLayer} contains the
+modules \nedtype{Ipv6}, \nedtype{Icmpv6}, \nedtype{Ipv6NeighbourDiscovery}
+and \nedtype{Ipv6ErrorHandling}. For Mobile IPv6 simulations 
 
 \ifdraft TODO
 (xMIPv6 project [TODO]),
 \fi
 
-\nedtype{IPv6NetworkLayer} is extended with further modules.
+\nedtype{Ipv6NetworkLayer} is extended with further modules.
 
 \item \tbf{Transport layer protocols}. Transport protocols are represented
 by modules connected to the network layer; currently TCP, UDP and SCTP are
-supported. TCP has several implementations: \nedtype{TCP} is the OMNeT++
+supported. TCP has several implementations: \nedtype{Tcp} is the OMNeT++
 native implementation; the \nedtype{TCP\_lwip} module wraps the lwIP TCP
 stack \ifdraft [TODO] \fi; and the \nedtype{TCP\_NSC} module wraps the Network
 Simulation Cradle library \ifdraft [TODO] \fi. For this reason, the \ttt{tcp} 
 submodule is usually defined with a parametric submodule type (\ttt{"tcp:
-<tcpType> like ITCP"}). UDP and SCTP are implemented by the \nedtype{UDP} and
+<tcpType> like ITCP"}). UDP and SCTP are implemented by the \nedtype{Udp} and
 \nedtype{SCTP} modules, respectively.
 
 \item \sloppypar \tbf{Applications}. Application modules typically connect to TCP
@@ -108,19 +108,19 @@ are typically not present in router models.
 \item \tbf{Routing protocols}. Router models typically contain modules that
 implement routing protocols such as OSPF or BGP. These modules are
 connected to the TCP and/or the UDP module, and manipulate routes in the
-\nedtype{IPv4RoutingTable} module via C++ function calls.
+\nedtype{Ipv4RoutingTable} module via C++ function calls.
 
 \item \tbf{MPLS modules}. Additional modules are needed for MPLS
-simulations. The \nedtype{MPLS} module is placed between the network layer
-and NICs, and implements label switching. \nedtype{MPLS} requires a
+simulations. The \nedtype{Mpls} module is placed between the network layer
+and NICs, and implements label switching. \nedtype{Mpls} requires a
 \nedtype{LIB} module (Label Information Base) to be present in the router
 which it accesses via C++ function calls. MPLS control protocol
-implementations (e.g. the \nedtype{RSVP} module) manage the information in
+implementations (e.g. the \nedtype{Rsvp} module) manage the information in
 \nedtype{LIB} via C++ calls.
 
 \item \tbf{Relay unit}. Ethernet (and possibly other) switch models may
 contain a relay unit, which switches frames among Ethernet (and other
-IEEE 802) NICs. Concrete relay unit types include \nedtype{MACRelayUnit}
+IEEE 802) NICs. Concrete relay unit types include \nedtype{MacRelayUnit}
 and \nedtype{Ieee8021dRelay}, which differ in their performance models.
 
 \ifdraft TODO
@@ -140,13 +140,13 @@ valid approach to create custom node models.
 Most modules are optional, i.e. can be left out of hosts or other node
 models when not needed in the given scenario. For example, switch models do
 not need a network layer, a routing table or interface table. Some NICs (e.g.
-\nedtype{EtherMAC}) can be used without and interface table and queue models as
+\nedtype{EtherMac}) can be used without and interface table and queue models as
 well.
 
 \ifdraft TODO
 The notification board (\nedtype{NotificationBoard}) and the interface
 table (\nedtype{InterfaceTable}) will be described later in this chapter.
-Other modules are covered in later chapters, i.e. \nedtype{IPv4RoutingTable}
+Other modules are covered in later chapters, i.e. \nedtype{Ipv4RoutingTable}
 in the IPv4 chapter.
 \fi
 

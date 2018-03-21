@@ -649,22 +649,22 @@ dropped a previously SACKed segment.
 
 \section{TCP module}
 
-The \nedtype{TCP} simple module is the main implementation of the TCP protocol in the INET framework.
+The \nedtype{Tcp} simple module is the main implementation of the TCP protocol in the INET framework.
 Other implementation are described in section \ref{sec:other_tcp}.
-The \nedtype{TCP} module as other transport protocols work above the network layer and below the application
+The \nedtype{Tcp} module as other transport protocols work above the network layer and below the application
 layer, therefore it has gates to be connected with the IPv4 or IPv6 network (ipIn/ipOut or ipv6In/ipv6Out),
 and with the applications (appIn[k], appOut[k]).
-One \nedtype{TCP} module can serve several application modules, and several
-connections per application. The $k$th application connects to \nedtype{TCP}'s
+One \nedtype{Tcp} module can serve several application modules, and several
+connections per application. The $k$th application connects to \nedtype{Tcp}'s
 \ttt{appIn[k]} and \ttt{appOut[k]} ports.
 
 The TCP module usually specified by its module interface
-(\nedtype{ITCP}) in the NED definition of hosts, so it can be replaced with any implementation
+(\nedtype{ITcp}) in the NED definition of hosts, so it can be replaced with any implementation
 that communicates through the same gates.
 
 \subsection{Statistics}
 
-The \nedtype{TCP} module collects the following vectors:
+The \nedtype{Tcp} module collects the following vectors:
 
 \begin{tabular}{l p{10cm}}
   \ttt{send window} & $SND.WND$ \\
@@ -708,7 +708,7 @@ of these output vectors are generated.
 
 INET contains two other implementation of the TCP protocol:
 \nedtype{TCP\_lwIP} and \nedtype{TCP\_NSC}.
-All TCP modules implements the \nedtype{ITCP} interface and
+All TCP modules implements the \nedtype{ITcp} interface and
 communicate with the application and the IP layer through the
 same interface. Therefore they can be interchanged and can
 operate with each other. See \ffilename{examples/inet/tcpclientserver/omnetpp.ini}

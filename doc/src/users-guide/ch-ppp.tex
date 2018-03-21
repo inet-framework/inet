@@ -24,16 +24,16 @@ The modules of the PPP model can be found in the \nedtype{inet.linklayer.ppp}
 package:
 
 \begin{description}
-\item[\nedtype{PPP}] This simple module performs encapsulation
+\item[\nedtype{Ppp}] This simple module performs encapsulation
 of network datagrams into PPP frames and decapsulation of
 the incoming PPP frames. It can be connected to the network
 layer directly or can be configured to get the outgoing messages
 from an output queue. The module collects statistics about
 the transmitted and dropped packages.
 
-\item[\nedtype{PPPInterface}] is a compound module complementing
-the \nedtype{PPP} module with an output queue. It implements
-the \nedtype{IWiredNic} interface. Input and output hooks can be configured
+\item[\nedtype{PppInterface}] is a compound module complementing
+the \nedtype{Ppp} module with an output queue. It implements
+the \nedtype{IWiredInterface} interface. Input and output hooks can be configured
 for further processing of the network messages.
 
 \end{description}
@@ -54,10 +54,10 @@ According to RFC1662 the PPP frames contain the following fields:
 \bitbox[ltb]{14}{Inter-frame Fill \\ or next Address}
 \end{bytefield}
 
-The corresponding message type in the INET framework is \msgtype{PPPFrame}.
+The corresponding message type in the INET framework is \msgtype{PppFrame}.
 It contains the Information field as an encapsulated \cppclass{cMessage}
 object. The Flag, Address and Control fields are omitted
-from \msgtype{PPPFrame} because they are constants. The FCS field is
+from \msgtype{PppFrame} because they are constants. The FCS field is
 omitted because no CRC computed during the simulation, the bit error
 attribute of the \cppclass{cMessage} used instead. The Protocol
 field is omitted because the protocol is determined from the class
@@ -77,8 +77,8 @@ needed per frame
 \section{PPP module}
 
 The PPP module receives packets from the upper layer in the \fvar{netwIn}
-gate, encapsulates them into \msgtype{PPPFrame}s, and send it to the
-physical layer through the \fvar{phys} gate. The \msgtype{PPPFrame}s
+gate, encapsulates them into \msgtype{PppFrame}s, and send it to the
+physical layer through the \fvar{phys} gate. The \msgtype{PppFrame}s
 received from the \fvar{phys} gate are decapsulated and sent to the upper
 layer immediately through the \fvar{netwOut} gate.
 
@@ -88,7 +88,7 @@ In routers, PPP relies on an external queue module (implementing
 and requests packets from this external queue one-by-one. The name
 of this queue is given as the \fpar{queueModule} parameter.
 
-In hosts, no such queue is used, so \nedtype{PPP} contains an internal
+In hosts, no such queue is used, so \nedtype{Ppp} contains an internal
 queue named txQueue to queue up packets wainting for transmission.
 Conceptually txQueue is of inifinite size, but for better diagnostics
 one can specify a hard limit in the \fpar{txQueueLimit} parameter -- if
@@ -139,8 +139,8 @@ of the module icon and the connection (yellow=transmitting).
 
 \section{PPPInterface module}
 
-The \nedtype{PPPInterface} is a compound module implementing the \nedtype{IWiredNic}
-interface. It contains a \nedtype{PPP} module and a passive queue for the messages
+The \nedtype{PppInterface} is a compound module implementing the \nedtype{IWiredInterface}
+interface. It contains a \nedtype{Ppp} module and a passive queue for the messages
 received from the network layer.
 
 The queue type is specified by the \fpar{queueType} parameter.
@@ -148,11 +148,11 @@ It can be set to \nedtype{NoQueue} or to a module type implementing
 the \nedtype{IOutputQueue} interface. There are implementations
 with QoS and RED support.
 
-In typical use of the \nedtype{PPP} module it is augmented with other nodes
+In typical use of the \nedtype{Ppp} module it is augmented with other nodes
 that monitor the traffic or simulate package loss and duplication.
-The \nedtype{PPPInterface} module abstract that usage by adding
+The \nedtype{PppInterface} module abstract that usage by adding
 \nedtype{IHook} components to the network input and output of the
-\nedtype{PPP} component. Any number of hook can be added by
+\nedtype{Ppp} component. Any number of hook can be added by
 specifying the \fpar{numOutputHooks} and \fpar{numInputHooks}
 parameters and the types of the \fvar{outputHook} and \fvar{inputHook}
 components. The hooks are chained in their numeric order.

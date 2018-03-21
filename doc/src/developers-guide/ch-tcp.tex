@@ -3,10 +3,10 @@
 
 \section{The TCP Module}
 
-The \nedtype{TCP} model relies on sending and receiving \cppclass{IPControlInfo} objects
+The \nedtype{Tcp} model relies on sending and receiving \cppclass{IPControlInfo} objects
 attached to TCP segment objects as control info (see \ffunc{cMessage::setControlInfo()}).
 
-The \nedtype{TCP} module manages several \cppclass{TCPConnection} object each
+The \nedtype{Tcp} module manages several \cppclass{TcpConnection} object each
 holding the state of one connection. The connections are identified
 by a connection identifier which is choosen by the application.
 If the connection is established it can also be identified by
@@ -17,7 +17,7 @@ the corresponding object.
 \subsection{TCP packets}
 \label{subsec:tcp_packets}
 
-The INET framework models the TCP header with the \msgtype{TCPSegment} message class.
+The INET framework models the TCP header with the \msgtype{TcpHeader} message class.
 This contains the fields of a TCP frame, except:
 \begin{compactitem}
   \item \emph{Data Offset}: represented by \ffunc{cMessage::length()}
@@ -27,7 +27,7 @@ This contains the fields of a TCP frame, except:
   \item \emph{Padding}
 \end{compactitem}
 
-The Data field can either be represented by (see \cppclass{TCPDataTransferMode}):
+The Data field can either be represented by (see \cppclass{TcpDataTransferMode}):
 \begin{compactitem}
   \item encapsulated C++ packet objects,
   \item raw bytes as a \cppclass{ByteArray} instance,
@@ -53,9 +53,9 @@ that are sent by the application to the TCP:
   \item TCP\_C\_STATUS: request status info from TCP
 \end{itemize}
 
-Each command message should have an attached control info of type \cppclass{TCPCommand}.
+Each command message should have an attached control info of type \cppclass{TcpCommand}.
 Some commands (TCP\_C\_OPEN\_xxx, TCP\_C\_SEND) use subclasses.
-The \cppclass{TCPCommand} object has a \fvar{connId} field that identifies the
+The \cppclass{TcpCommand} object has a \fvar{connId} field that identifies the
 connection locally within the application. \fvar{connId} is to be chosen by the
 application in the open command.
 
@@ -73,7 +73,7 @@ set to one of the \cppclass{TCPStatusInd} values:
   \item TCP\_I\_STATUS: status info
 \end{itemize}
 
-These messages also have an attached control info with \cppclass{TCPCommand}
+These messages also have an attached control info with \cppclass{TcpCommand}
 or derived type (TCPConnectInfo, TCPStatusInfo, TCPErrorInfo).
 
 % receive() calls are not modeled, incoming data passed to the application right away
@@ -81,7 +81,7 @@ or derived type (TCPConnectInfo, TCPStatusInfo, TCPErrorInfo).
 
 \subsection{TCP parameters}
 
-The \nedtype{TCP} module has the following parameters:
+The \nedtype{Tcp} module has the following parameters:
 \begin{itemize}
   \item \fpar{advertisedWindow} in bytes, corresponds with the maximal receiver buffer capacity (Note: normally, NIC queues should be at least this size, default is  14*mss)
   \item \fpar{delayedAcksEnabled} delayed ACK algorithm (RFC 1122) enabled/disabled
@@ -106,16 +106,16 @@ The \nedtype{TCP} module has the following parameters:
 \section{TCP connections}
 
 Most part of the TCP specification is implemented in the
-\cppclass{TCPConnection} class: takes care of the state machine,
+\cppclass{TcpConnection} class: takes care of the state machine,
 stores the state variables (TCB), sends/receives SYN, FIN, RST, ACKs, etc.
 TCPConnection itself implements the basic TCP ``machinery'',
 the details of congestion control are factored out to
-\cppclass{TCPAlgorithm} classes.
+\cppclass{TcpAlgorithm} classes.
 
-There are two additional objects the \cppclass{TCPConnection}
-relies on internally: instances of \cppclass{TCPSendQueue} and
-\cppclass{TCPReceiveQueue}. These polymorph classes manage the actual data stream,
-so \cppclass{TCPConnection} itself only works with sequence number variables.
+There are two additional objects the \cppclass{TcpConnection}
+relies on internally: instances of \cppclass{TcpSendQueue} and
+\cppclass{TcpReceiveQueue}. These polymorph classes manage the actual data stream,
+so \cppclass{TcpConnection} itself only works with sequence number variables.
 This makes it possible to easily accomodate need for various types of
 simulated data transfer: real byte stream, "virtual" bytes (byte counts
 only), and sequence of \cppclass{cMessage} objects (where every message object is
@@ -136,7 +136,7 @@ The TCP modules in the INET framework support 3 data transfer modes:
 
 \begin{itemize}
   \item \ttt{TCP\_TRANSFER\_BYTECOUNT}: only byte counts are
-        represented, no actual payload in \msgtype{TCPSegment}s.
+        represented, no actual payload in \msgtype{TcpHeader}s.
         The TCP sends as many TCP segments as needed
   \item \ttt{TCP\_TRANSFER\_BYTESTREAM}: the application can pass
         byte arrays to the TCP. The sending TCP breaks down the bytes
@@ -153,7 +153,7 @@ The TCP modules in the INET framework support 3 data transfer modes:
 \end{itemize}
 
 These values are defined in \ffilename{TCPCommand.msg} as
-the \cppclass{TCPDataTransferMode} enumeration. The application
+the \cppclass{TcpDataTransferMode} enumeration. The application
 can set the data transfer mode per connection when the connection
 is opened. The client and the server application must specify
 the same data transfer mode.
@@ -163,7 +163,7 @@ the same data transfer mode.
 
 Applications can open a local port for incoming connections by sending
 the TCP a TCP\_C\_PASSIVE\_OPEN message. The attached control info
-(an \cppclass{TCPOpenCommand}) contains the local address and port.
+(an \cppclass{TcpOpenCommand}) contains the local address and port.
 The application can specify that it wants to handle
 only one connection at a time, or multiple simultanous connections. If the
 \fvar{fork} field is true, it emulates the Unix accept(2) semantics: a new
@@ -172,14 +172,14 @@ and the connection with the old connection id remains listening.
 If \fvar{fork} is false, then the first connection is accepted
 (with the original \fvar{connId}),
 and further incoming connections will be refused by the TCP by sending an RST segment.
-The \fvar{dataTransferMode} field in \cppclass{TCPOpenCommand} specifies
+The \fvar{dataTransferMode} field in \cppclass{TcpOpenCommand} specifies
 whether the application data is transmitted as C++ objects, real bytes or byte
 counts only. The congestion control algorithm can also be specified
 on a per connection basis by setting \fvar{tcpAlgorithmClass} field to the
 name of the algorithm.
 
 The application opens a connection to a remote server by sending the TCP
-a TCP\_C\_OPEN\_ACTIVE command. The TCP creates a \cppclass{TCPConnection}
+a TCP\_C\_OPEN\_ACTIVE command. The TCP creates a \cppclass{TcpConnection}
 object an sends a SYN segment. The initial sequence number selected according
 to the simulation time: 0 at time 0, and increased by 1 in each 4$\mu$s.
 If there is no response to the SYN segment, it retry after 3s, 9s, 21s and
@@ -188,7 +188,7 @@ to the application and the connection is closed.
 
 When the connection gets established, TCP sends a TCP\_I\_ESTABLISHED
 notification to the application. The attached control info
-(a \cppclass{TCPConnectInfo} instance)
+(a \cppclass{TcpConnectInfo} instance)
 will contain the local and remote addresses and ports of the connection.
 If the connection is refused by the remote peer (e.g. the port is not open),
 then the application receives a TCP\_I\_CONNECTION\_REFUSED message.
@@ -317,9 +317,9 @@ from the old connection might be accepted in the new one.
 
 Applications can get detailed status information about an existing
 connection. For this purpose they send the TCP module a TCP\_C\_STATUS
-message attaching an \cppclass{TCPCommand} info with the identifier
+message attaching an \cppclass{TcpCommand} info with the identifier
 of the connection. The TCP will respond with a TCP\_I\_STATUS message
-with a \cppclass{TCPStatusInfo} attachement. This control info
+with a \cppclass{TcpStatusInfo} attachement. This control info
 contains the current state, local and remote addresses and ports,
 the initial sequence numbers, windows of the receiver and sender, etc.
 
@@ -342,10 +342,10 @@ the initial sequence numbers, windows of the receiver and sender, etc.
 % are the classes of receive/send queues. The appropriate queue is created based
 % on the value of the \fpar{dataTransferMode} parameter of the Open command, no
 % further configuration is needed. The retransmit queue is always an
-% instance of \cppclass{TCPSACKRexmitQueue}.
+% instance of \cppclass{TcpSackRexmitQueue}.
 %
 % The interfaces of the receive/send queues are defined by the
-% \cppclass{TCPReceiveQueue} and \cppclass{TCPSendQueue} classes.
+% \cppclass{TcpReceiveQueue} and \cppclass{TcpSendQueue} classes.
 %
 % % mapping segments into the sequence space
 %
@@ -353,25 +353,25 @@ the initial sequence numbers, windows of the receiver and sender, etc.
 \section{TCP algorithms}
 \label{sec:tcp_algorithms}
 
-The \cppclass{TCPAlgorithm} object controls
+The \cppclass{TcpAlgorithm} object controls
 retransmissions, congestion control and ACK sending: delayed acks, slow start,
-fast retransmit, etc. They are all extends the \cppclass{TCPAlgorithm} class.
-This simplifies the design of \cppclass{TCPConnection} and makes it a lot easier to
+fast retransmit, etc. They are all extends the \cppclass{TcpAlgorithm} class.
+This simplifies the design of \cppclass{TcpConnection} and makes it a lot easier to
 implement TCP variations such as Tahoe, NewReno, Vegas or LinuxTCP.
 
-Currently implemented algorithm classes are \cppclass{TCPReno},
-\cppclass{TCPTahoe}, \cppclass{TCPNewReno}, \cppclass{TCPNoCongestionControl}
-and \cppclass{DumbTCP}. It is also possible to add new TCP variations
-by implementing \cppclass{TCPAlgorithm}.
+Currently implemented algorithm classes are \cppclass{TcpReno},
+\cppclass{TcpTahoe}, \cppclass{TcpNewReno}, \cppclass{TcpNoCongestionControl}
+and \cppclass{DumbTcp}. It is also possible to add new TCP variations
+by implementing \cppclass{TcpAlgorithm}.
 
 \includegraphics{figures/tcp_algorithms}
 
 The concrete TCP algorithm class to use can be chosen per connection (in OPEN)
 or in a module parameter.
 
-\subsection{DumbTCP}
+\subsection{DumbTcp}
 
-A very-very basic \cppclass{TCPAlgorithm} implementation, with hardcoded
+A very-very basic \cppclass{TcpAlgorithm} implementation, with hardcoded
 retransmission timeout (2 seconds) and no other sophistication. It can be
 used to demonstrate what happened if there was no adaptive
 timeout calculation, delayed acks, silly window avoidance,
@@ -379,9 +379,9 @@ congestion control, etc. Because this algorithm does not
 send duplicate ACKs when receives out-of-order segments,
 it does not work well together with other algorithms.
 
-\subsection{TCPBaseAlg}
+\subsection{TcpBaseAlg}
 
-The \cppclass{TCPBaseAlg} is the base class of the INET implementation
+The \cppclass{TcpBaseAlg} is the base class of the INET implementation
 of Tahoe, Reno and New Reno. It implements basic TCP
 algorithms for adaptive retransmissions, persistence timers,
 delayed ACKs, Nagle's algorithm, Increased Initial Window
@@ -391,7 +391,7 @@ is implemented in subclasses.
 \subsubsection*{Delayed ACK}
 
 When the \fpar{delayedAcksEnabled} parameter is set to \fkeyword{true},
-\cppclass{TCPBaseAlg} applies a 200ms delay before sending ACKs.
+\cppclass{TcpBaseAlg} applies a 200ms delay before sending ACKs.
 
 \subsubsection*{Nagle's algorithm}
 
@@ -414,7 +414,7 @@ If the \fpar{increasedIWEnabled} parameter is true, then the initial
 window is increased to 4380 bytes, but at least 2 SMSS and at most 4 SMSS.
 The congestion window is not updated afterwards; subclasses can
 add congestion control by redefining virtual methods of the
-\cppclass{TCPBaseAlg} class.
+\cppclass{TcpBaseAlg} class.
 
 \subsubsection*{Duplicate ACKs}
 
@@ -443,9 +443,9 @@ Can be used to demonstrate effect of lack of congestion control.
 %       Consequently the initial ssthresh is too small for Tahoe/Reno/NewReno,
 %       Slow Start is stopped too early first time.
 
-\subsection{TCPTahoe}
+\subsection{TcpTahoe}
 
-The \cppclass{TCPTahoe} algorithm class extends \cppclass{TCPBaseAlg}
+The \cppclass{TcpTahoe} algorithm class extends \cppclass{TcpBaseAlg}
 with \emph{Slow Start}, \emph{Congestion Avoidance} and
 \emph{Fast Retransmit} congestion control algorithms.
 This algorithm initiates a \emph{Slow Start} when a packet
@@ -475,9 +475,9 @@ and $cwnd$ is set to 1 SMSS, so it enters slow start again.
 Retransmission timeouts are handled the same way:
 $ssthresh$ will be $cwnd/2$, $cwnd$ will be 1 SMSS.
 
-\subsection{TCPReno}
+\subsection{TcpReno}
 
-The \cppclass{TCPReno} algorithm extends the behaviour \cppclass{TCPTahoe}
+The \cppclass{TcpReno} algorithm extends the behaviour \cppclass{TcpTahoe}
 with \emph{Fast Recovery}. This algorithm can also use the information
 transmitted in SACK options, which enables a much more accurate
 congestion control.
@@ -502,7 +502,7 @@ This algorithm can be used with the SACK extension.
 Set the \fpar{sackSupport} parameter to \fkeyword{true} to
 enable sending and receiving \emph{SACK} options.
 
-\subsection{TCPNewReno}
+\subsection{TcpNewReno}
 
 This class implements the TCP variant known as New Reno.
 New Reno recovers more efficiently from multiple packet losses within one RTT
@@ -514,13 +514,13 @@ reducing the $cwnd$ multiple times.
 
 \section{TCP socket}
 
-%The \cppclass{TCPSocket} C++ class is provided to simplify managing TCP connections
-%from applications. \cppclass{TCPSocket} handles the job of assembling and sending
-%command messages (OPEN, CLOSE, etc) to \nedtype{TCP}, and it also simplifies
-%the task of dealing with packets and notification messages coming from \nedtype{TCP}.
+%The \cppclass{TcpSocket} C++ class is provided to simplify managing TCP connections
+%from applications. \cppclass{TcpSocket} handles the job of assembling and sending
+%command messages (OPEN, CLOSE, etc) to \nedtype{Tcp}, and it also simplifies
+%the task of dealing with packets and notification messages coming from \nedtype{Tcp}.
 
-\cppclass{TCPSocket} is a convenience class, to make it easier to manage TCP connections
-from your application models. You'd have one (or more) \cppclass{TCPSocket} object(s)
+\cppclass{TcpSocket} is a convenience class, to make it easier to manage TCP connections
+from your application models. You'd have one (or more) \cppclass{TcpSocket} object(s)
 in your application simple module class, and call its member functions
 (bind(), listen(), connect(), etc.) to open, close or abort a TCP connection.
 
@@ -597,7 +597,7 @@ void MyModule::socketFailure(int, void *, int code) {
 
 If you need to manage a large number of sockets (e.g. in a server
 application which handles multiple incoming connections), the
-\cppclass{TCPSocketMap} class may be useful. The following code
+\cppclass{TcpSocketMap} class may be useful. The following code
 fragment to handle incoming connections is from the LDP module:
 
 \begin{cpp}

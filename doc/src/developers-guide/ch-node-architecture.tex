@@ -11,20 +11,20 @@ support the "unspecified" special value (and the \ffunc{isUnspecified()}
 method) that corresponds to the all-zeros address.
 
 \begin{itemize}
-  \item \cppclass{MACAddress} represents a 48-bit IEEE 802 MAC address. The
+  \item \cppclass{MacAddress} represents a 48-bit IEEE 802 MAC address. The
     textual notation it understands and produces is hex string.
 
-  \item \cppclass{IPv4Address} represents a 32-bit IPv4 address. It can parse
+  \item \cppclass{Ipv4Address} represents a 32-bit IPv4 address. It can parse
     and produce textual representations in the "dotted decimal" syntax.
 
-  \item \cppclass{IPv6Address} represents a 128-bit IPv6 address. It can parse
+  \item \cppclass{Ipv6Address} represents a 128-bit IPv6 address. It can parse
     and produce address strings in the canonical (RFC 3513) syntax.
 
-  \item \cppclass{L3Address} is conceptually a union of a \cppclass{IPv4Address}
-    and \cppclass{IPv6Address}: an instance stores either an IPv4 address or an
+  \item \cppclass{L3Address} is conceptually a union of a \cppclass{Ipv4Address}
+    and \cppclass{Ipv6Address}: an instance stores either an IPv4 address or an
     IPv6 address. \cppclass{L3Address} is mainly used in the transport layer and above
-    to abstract away network addresses. It can be assigned from both \cppclass{IPv4Address}
-    and \cppclass{IPv6Address}, and can also parse string representations of both.
+    to abstract away network addresses. It can be assigned from both \cppclass{Ipv4Address}
+    and \cppclass{Ipv6Address}, and can also parse string representations of both.
     The \ffunc{getType()}, \ffunc{toIPv4()} and \ffunc{toIPv6()} methods can be used
     to access the value.
 \end{itemize}
@@ -52,7 +52,7 @@ router model, and it is accessed via direct C++ method calls (not message
 exchange). Modules can \textit{subscribe} to categories of changes
 (e.g. ``routing table changed'' or ``radio channel became empty''). When
 such a change occurs, the corresponding module (e.g. the
-\nedtype{IPv4RoutingTable} or the physical layer module) will let
+\nedtype{Ipv4RoutingTable} or the physical layer module) will let
 \nedtype{NotificationBoard} know, and it will disseminate this information
 to all interested modules.
 
@@ -205,10 +205,10 @@ network-layer specific data structures. For example, there are pointers to
 IPv4 specific data, and IPv6 specific data. These objects can be accessed with
 the following \cppclass{InterfaceEntry} member functions: \ffunc{ipv4Data()},
 \ffunc{ipv6Data()}, and \ffunc{getGenericNetworkProtocolData()}.
-They return pointers of the types \cppclass{IPv4InterfaceData},
-\cppclass{IPv6InterfaceData}, and \cppclass{GenericNetworkProtocolInterfaceData},
-respectively. For illustration, \cppclass{IPv4InterfaceData} is installed
-onto the interface entries by the \nedtype{IPv4RoutingTable} module, and it
+They return pointers of the types \cppclass{Ipv4InterfaceData},
+\cppclass{Ipv6InterfaceData}, and \cppclass{GenericNetworkProtocolInterfaceData},
+respectively. For illustration, \cppclass{Ipv4InterfaceData} is installed
+onto the interface entries by the \nedtype{Ipv4RoutingTable} module, and it
 contains data such as the IP address of the interface, the netmask, link
 metric for routing, and IP multicast addresses associated with the
 interface. A protocol data pointer will be \ttt{NULL} if the corresponding

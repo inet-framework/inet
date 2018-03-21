@@ -22,7 +22,7 @@ modelled application, e.g. HTTP, SMB, database protocol) needs only to be
 present in the client, and the server model can be kept simple and dumb.
 
 
-\subsection{TCPBasicClientApp}
+\subsection{TcpBasicClientApp}
 
 Client for a generic request-response style protocol over TCP.
 May be used as a rough model of HTTP or FTP users.
@@ -32,7 +32,7 @@ the client opens a single TCP connection to the server, sends several
 requests (always waiting for the complete reply to arrive before
 sending a new request), and closes the connection.
 
-The server app should be \nedtype{TCPGenericSrvApp}; the model sends
+The server app should be \nedtype{TcpGenericServerApp}; the model sends
 \msgtype{GenericAppMsg} messages.
 
 Example settings:
@@ -62,7 +62,7 @@ serve as a realistic web client.
 Also, with HTTP 1.0 it is the server that closes the connection after
 sending the response, while in this model it is the client.
 
-\subsection{TCPSinkApp}
+\subsection{TcpSinkApp}
 
 Accepts any number of incoming TCP connections, and discards whatever
 arrives on them.
@@ -70,31 +70,31 @@ arrives on them.
 The module parameter \fpar{dataTransferMode} should be set the transfer mode in TCP layer.
 Its possible values (``bytecount'', ``object'', ``bytestream'') are described in ...
 
-\subsection{TCPGenericSrvApp}
+\subsection{TcpGenericServerApp}
 
 Generic server application for modelling TCP-based request-reply style
 protocols or applications.
 
 Requires message object preserving sendQueue/receiveQueue classes
-to be used with \nedtype{TCP} (that is, TCPMsgBasedSendQueue and TCPMsgBasedRcvQueue;
+to be used with \nedtype{Tcp} (that is, TCPMsgBasedSendQueue and TCPMsgBasedRcvQueue;
 TCPVirtualBytesSendQueue/RcvQueue are not good).
 
 The module accepts any number of incoming TCP connections, and expects
 to receive messages of class \msgtype{GenericAppMsg} on them. A message should
-contain how large the reply should be (number of bytes). \nedtype{TCPGenericSrvApp}
+contain how large the reply should be (number of bytes). \nedtype{TcpGenericServerApp}
 will just change the length of the received message accordingly, and send
 back the same message object. The reply can be delayed by a constant time
 (replyDelay parameter).
 
-\subsection{TCPEchoApp}
+\subsection{TcpEchoApp}
 
-The \nedtype{TCPEchoApp} application accepts any number of incoming TCP
+The \nedtype{TcpEchoApp} application accepts any number of incoming TCP
 connections, and sends back the messages that arrive on them, The lengths of the
 messages are multiplied by \fpar{echoFactor} before sending them back (echoFactor=1
 will result in sending back the same message unmodified.) The reply can also be
 delayed by a constant time (\fpar{echoDelay} parameter).
 
-When \nedtype{TCPEchoApp} receives data packets from TCP (and such, when they can be
+When \nedtype{TcpEchoApp} receives data packets from TCP (and such, when they can be
 echoed) depends on the dataTransferMode setting.
 With "bytecount" and "bytestream", TCP passes up data to us
 as soon as a segment arrives, so it can be echoed immediately.
@@ -103,7 +103,7 @@ messages that the sender app passed down to its TCP -- so if the sender
 app sent a single 100 MB message, it will be echoed only when all
 100 megabytes have arrived.
 
-\subsection{TCPSessionApp}
+\subsection{TcpSessionApp}
 
 Single-connection TCP application: it opens a connection, sends
 the given number of bytes, and closes. Sending may be one-off,
@@ -146,7 +146,7 @@ CLOSE will be issued.
 \subsection{TelnetApp}
 
 Models Telnet sessions with a specific user behaviour.
-The server app should be \nedtype{TCPGenericSrvApp}.
+The server app should be \nedtype{TcpGenericServerApp}.
 
 In this model the client repeats the following activity
 between \fpar{startTime} and \fpar{stopTime}:
@@ -179,27 +179,27 @@ to gather statistics from packet traces on a real network, and
 write your model accordingly.
 \end{note}
 
-\subsection{TCPSrvHostApp}
+\subsection{TcpServerHostApp}
 
 This module hosts TCP-based server applications. It dynamically creates
 and launches a new "thread" object for each incoming connection.
 
-Server threads should be subclassed from the \cppclass{TCPServerThreadBase}
+Server threads should be subclassed from the \cppclass{TcpServerThreadBase}
 C++ class, registered in the C++ code using the Register\_Class() macro,
 and the class name should be specified in the serverThreadClass
-parameter of \nedtype{TCPSrvHostApp}. The thread object will receive events
+parameter of \nedtype{TcpServerHostApp}. The thread object will receive events
 via a callback interface (methods like established(), dataArrived(),
 peerClosed(), timerExpired()), and can send packets via TCPSocket's send()
 method.
 
-Example server thread class: \cppclass{TCPGenericSrvThread}.
+Example server thread class: \cppclass{TcpGenericServerThread}.
 
 \begin{important}
 Before you try to use this module, make sure you actually need it!
-In most cases, \nedtype{TCPGenericSrvApp} and \msgtype{GenericAppMsg} will be completely
+In most cases, \nedtype{TcpGenericServerApp} and \msgtype{GenericAppMsg} will be completely
 enough, and they are a lot easier to handle. You'll want to subclass your
 client from \cppclass{TCPGenericCliAppBase} then; check \nedtype{TelnetApp} and
-\nedtype{TCPBasicClientApp} for examples.
+\nedtype{TcpBasicClientApp} for examples.
 \end{important}
 
 
@@ -210,18 +210,18 @@ so that the application of \nedtype{StandardHost} could be configured without ch
 
 The following applications are implemented in INET:
 \begin{itemize}
-\item \nedtype{UDPBasicApp} sends UDP packets to a given IP address at a given interval
-\item \nedtype{UDPBasicBurst} sends UDP packets to the given IP address(es) in bursts, or acts as a packet sink.
-\item \nedtype{UDPEchoApp} similar to \nedtype{UDPBasicApp}, but it sends back the packet after reception
-\item \nedtype{UDPSink} consumes and prints packets received from the \nedtype{UDP} module
-\item \nedtype{UDPVideoStreamCli},\nedtype{UDPVideoStreamSvr} simulates UDP streaming
+\item \nedtype{UdpBasicApp} sends UDP packets to a given IP address at a given interval
+\item \nedtype{UdpBasicBurst} sends UDP packets to the given IP address(es) in bursts, or acts as a packet sink.
+\item \nedtype{UdpEchoApp} similar to \nedtype{UdpBasicApp}, but it sends back the packet after reception
+\item \nedtype{UdpSink} consumes and prints packets received from the \nedtype{Udp} module
+\item \nedtype{UdpVideoStreamClient},\nedtype{UdpVideoStreamServer} simulates UDP streaming
 \end{itemize}
 
 The next sections describe these applications in details.
 
-\subsection{UDPBasicApp}
+\subsection{UdpBasicApp}
 
-The \nedtype{UDPBasicApp} sends UDP packets to a the IP addresses given in the
+The \nedtype{UdpBasicApp} sends UDP packets to a the IP addresses given in the
 \fpar{destAddresses} parameter. The application sends a message to one of the
 targets in each \fpar{sendInterval} interval. The interval between message and
 the message length can be given as a random variable. Before the packet is
@@ -235,31 +235,31 @@ simulation.
 
 % could be a simple packet generator without the ability to receive packets?
 
-\subsection{UDPSink}
+\subsection{UdpSink}
 
 This module binds an UDP socket to a given local port, and prints the
 source and destination and the length of each received packet.
 
 % TODO does not accept broadcast messages
 
-\subsection{UDPEchoApp}
+\subsection{UdpEchoApp}
 
-Similar to \nedtype{UDPBasicApp}, but it sends back the packet after reception.
+Similar to \nedtype{UdpBasicApp}, but it sends back the packet after reception.
 It accepts only packets with \msgtype{UDPEchoAppMsg} type, i.e. packets that
-are generated by another \nedtype{UDPEchoApp}.
+are generated by another \nedtype{UdpEchoApp}.
 
 When an echo response received, it emits an \fsignal{roundTripTime} signal.
 
-\subsection{UDPVideoStreamCli}
+\subsection{UdpVideoStreamClient}
 
 This module is a video streaming client. It send one ``video streaming request'' to
-the server at time \fpar{startTime} and receives stream from \nedtype{UDPVideoStreamSvr}.
+the server at time \fpar{startTime} and receives stream from \nedtype{UdpVideoStreamServer}.
 
 The received packets are emitted by the \fsignal{rcvdPk} signal.
 
-\subsection{UDPVideoStreamSvr}
+\subsection{UdpVideoStreamServer}
 
-This is the video stream server to be used with \nedtype{UDPVideoStreamCli}.
+This is the video stream server to be used with \nedtype{UdpVideoStreamClient}.
 
 The server will wait for incoming "video streaming requests".
 When a request arrives, it draws a random video stream size
@@ -275,7 +275,7 @@ The server can serve several clients, and several streams per client.
 % FIXME why streamVector? VideoStreamData could be deleted immediately after last byte sent
 % TODO this is video-on-demand, support multicast/broadcast video streaming too
 
-\subsection{UDPBasicBurst}
+\subsection{UdpBasicBurst}
 
 Sends UDP packets to the given IP address(es) in bursts, or acts as a
 packet sink. Compatible with both IPv4 and IPv6.
@@ -380,17 +380,17 @@ dotted decimal notation (or, for IPv6, in the usual notation with colons),
 or with the module name. (The \cppclass{L3AddressResolver} class is used to resolve
 the address.) To disable the model, set destAddresses to "".
 
-The \nedtype{IPvXTrafGen} sends messages with length \fpar{packetLength}.
+The \nedtype{IpvxTrafGen} sends messages with length \fpar{packetLength}.
 The sent packet is emitted in the \fsignal{sentPk} signal.
 The length of the sent packets can be recorded as scalars and vectors.
 
-The \nedtype{IPvXTrafSink} can be used as a receiver of the packets
+The \nedtype{IpvxTrafSink} can be used as a receiver of the packets
 generated by the traffic generator. This module emits the packet
 in the \fsignal{rcvdPacket} signal and drops it. The \ttt{rcvdPkBytes}
 and \ttt{endToEndDelay} statistics are generated from this signal.
 
-The \nedtype{IPvXTrafGen} can also be the peer of the traffic generators;
-it handles the received packets exactly like \nedtype{IPvXTrafSink}.
+The \nedtype{IpvxTrafGen} can also be the peer of the traffic generators;
+it handles the received packets exactly like \nedtype{IpvxTrafSink}.
 
 \section{The PingApp application}
 
@@ -446,11 +446,11 @@ Uses \msgtype{PingPayload} as payload for the ICMP(v6) Echo Request/Reply packet
 \section{Ethernet applications}
 
 The \nedtype{inet.applications.ethernet} package contains modules
-for a simple client-server application. The \nedtype{EtherAppCli} is a simple
+for a simple client-server application. The \nedtype{EtherAppClient} is a simple
 traffic generator that peridically sends \msgtype{EtherAppReq} messages
 whose length can be configured. destAddress, startTime,waitType, reqLength, respLength
 
-The server component of the model (\nedtype{EtherAppSrv}) responds with a
+The server component of the model (\nedtype{EtherAppServer}) responds with a
 \msgtype{EtherAppResp} message of the requested length. If the response does
 not fit into one ethernet frame, the client receives the data in multiple
 chunks.
@@ -463,7 +463,7 @@ chunks.
 
 Both applications have a \fpar{registerSAP} boolean parameter.
 This parameter should be set to \ttt{true} if the application is connected
-to the \nedtype{EtherLLC} module which requires registration of the SAP
+to the \nedtype{EtherLlc} module which requires registration of the SAP
 before sending frames.
 
 Both applications collects the following statistics: sentPkBytes, rcvdPkBytes,
@@ -471,7 +471,7 @@ endToEndDelay.
 
 The client and server application works with any model that accepts
 Ieee802Ctrl control info on the packets (e.g. the 802.11 model).
-The applications should be connected directly to the \nedtype{EtherLLC}
+The applications should be connected directly to the \nedtype{EtherLlc}
 or an EthernetInterface NIC module.
 
 The model also contains a host component that groups the applications

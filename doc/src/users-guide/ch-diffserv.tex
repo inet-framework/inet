@@ -67,7 +67,7 @@ The implementation follows these RFCs below:
 
 \section{Architecture of NICs}
 
-Network Interface Card (NIC) modules, such as \nedtype{PPPInterface} and
+Network Interface Card (NIC) modules, such as \nedtype{PppInterface} and
 \nedtype{EthernetInterface}, may contain traffic conditioners in
 their input and output data path. Traffic conditioners have one input
 and one output gate as defined in the \nedtype{ITrafficConditioner}
@@ -77,7 +77,7 @@ or mark them other way, for differentiated handling in the queues.
 
 The NICs may also contain an external queue component. If the \fpar{queueType}
 parameter is set, it must contain a module type implementing the \nedtype{IOutputQueue}
-module interface. If it is not specified, then \nedtype{PPP} and \nedtype{EtherMAC}
+module interface. If it is not specified, then \nedtype{Ppp} and \nedtype{EtherMac}
 use an internal drop tail queue to buffer the packets until the line is busy.
 
 \subsection{Traffic Conditioners}
@@ -157,7 +157,7 @@ about the arrival of new packets.
 
 \subsubsection{FIFO Queue}
 
-The \nedtype{FIFOQueue} module implements a passive
+The \nedtype{FifoQueue} module implements a passive
 FIFO queue with unlimited buffer space. It can be combined
 with algorithmic droppers and schedulers to form an
 IOutputQueue compound module.
@@ -172,7 +172,7 @@ Its capacity can be specified by the \fpar{frameCapacity}
 parameter. When the number of stored packet reached the capacity
 of the queue, further packets are dropped.
 Because this module contains a built-in dropping strategy, it
-cannot be combined with algorithmic droppers as \nedtype{FIFOQueue}
+cannot be combined with algorithmic droppers as \nedtype{FifoQueue}
 can be. However its output can be connected to schedulers.
 
 This module implements the \nedtype{IOutputQueue} interface,
@@ -190,7 +190,7 @@ arrival rate exceeds the allowed maximum. In INET the \nedtype{Sink}
 module can be used as an absolute dropper.
 
 The algorithmic droppers in INET are \nedtype{ThresholdDropper} and
-\nedtype{REDDropper}. These modules has multiple input and multiple
+\nedtype{RedDropper}. These modules has multiple input and multiple
 output gates. Packets that arrive on gate \fgate{in[i]} are forwarded
 to gate \fgate{out[i]} (unless they are dropped). However the queues
 attached to the output gates are viewed as a whole, i.e. the queue
@@ -217,14 +217,14 @@ to the output.
 
 \subsubsection*{RED Dropper}
 
-The \nedtype{REDDropper} module implements Random Early Detection
+The \nedtype{RedDropper} module implements Random Early Detection
 (\cite{Floyd93randomearly}).
 
 It has $n$ input and $n$ output gates (specified by the
 \fpar{numGates} parameter). Packets that arrive at the $i^{th}$ input
 gate are forwarded to the $i^{th}$ output gate, or dropped.
 The output gates must be connected to simple modules implementing
-the \nedtype{IQueueAccess} C++ interface (e.g. \nedtype{FIFOQueue}).
+the \nedtype{IQueueAccess} C++ interface (e.g. \nedtype{FifoQueue}).
 
 The module sums the used buffer space of the queues attached
 to the output gates. If it is below a minimum threshold,
@@ -302,7 +302,7 @@ the \ttt{EF} PHB.
 
 \subsubsection*{Weighted Round Robin Scheduler}
 
-The \nedtype{WRRScheduler} module implements a weighted
+The \nedtype{WrrScheduler} module implements a weighted
 round-robin scheduler. The scheduler visits the input gates
 in turn and selects the number of packets for transmission
 based on their weight.
@@ -317,7 +317,7 @@ and C packets on \fgate{in[2]}. If there are no packets in the current
 one when a packet is requested, then the next one is chosen that has
 enough tokens.
 
-If the size of the packets are equal, then \nedtype{WRRScheduler}
+If the size of the packets are equal, then \nedtype{WrrScheduler}
 divides the available bandwith according to the weights. In each
 case, it allocates the bandwith fairly. Each flow receives a guaranteed
 minimum bandwith, which is ensured even if other flows exceed
@@ -325,7 +325,7 @@ their share (flow isolation). It is also efficiently uses the
 channel, because if some traffic is smaller than its share of
 bandwidth, then the rest is allocated to the other flows.
 
-\nedtype{WRRScheduler} can be used to implement the \ttt{AFxy} PHBs.
+\nedtype{WrrScheduler} can be used to implement the \ttt{AFxy} PHBs.
 
 \subsection{Classifiers}
 
@@ -486,7 +486,7 @@ DSCP markers sets the codepoint of the crossing packets.
 The codepoint determines the further processing of the packet
 in the router or in the core of the DiffServ domain.
 
-The \nedtype{DSCPMarker} module sets the DSCP field
+The \nedtype{DscpMarker} module sets the DSCP field
 (lower six bit of TypeOfService/TrafficClass) of IP datagrams
 to the value specified by the \fpar{dscps} parameter.
 The \fpar{dscps} parameter is a space separated list

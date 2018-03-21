@@ -27,8 +27,8 @@ applications that want to send or receive the datagrams. The ``Data'' field
 is the encapsulated application data, the ``Length'' and ``Checksum'' fields
 are computed from the data.
 
-The INET framework contains an \nedtype{UDP} module that performs the encapsulation/decapsulation
-of user packets, an \nedtype{UDPSocket} class that provides the application the usual
+The INET framework contains an \nedtype{Udp} module that performs the encapsulation/decapsulation
+of user packets, an \nedtype{UdpSocket} class that provides the application the usual
 socket interface, and several sample applications.
 
 These components implement the following statndards:
@@ -39,9 +39,9 @@ These components implement the following statndards:
 
 \section{The UDP module}
 
-The UDP protocol is implemented by the \nedtype{UDP} simple module.
-There is a module interface (\nedtype{IUDP}) that defines the gates of the
-\nedtype{UDP} component. In the \nedtype{StandardHost} node, the UDP component
+The UDP protocol is implemented by the \nedtype{Udp} simple module.
+There is a module interface (\nedtype{IUdp}) that defines the gates of the
+\nedtype{Udp} component. In the \nedtype{StandardHost} node, the UDP component
 can be any module implementing that interface.
 
 Each UDP module has gates to connect to the IPv4 and IPv6 network layer
