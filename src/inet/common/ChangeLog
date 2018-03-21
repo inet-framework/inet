@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2018-03-21  ------ inet-3.6.4 released ------
+
 2018-03-21  Rudolf Hornig
 
 	build: made it compatible with the OMNeT++ 5.3 new packet printer API.

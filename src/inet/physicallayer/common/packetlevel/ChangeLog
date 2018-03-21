@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2018-03-21  ------ inet-3.6.4 released ------
+
 2018-02-28  Justin Goins
 
 	bugfix: corrected memory management issue in radio module

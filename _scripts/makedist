@@ -57,7 +57,7 @@ if [ "$todofiles" != "" ]; then
 fi
 
 # clean up the showcase and tutorial dir and remove the website text and videos to reduce package size
-(cd showcases && rm -rf docs start_local_server)
+(cd showcases && rm -rf docs _docs _config.yml start_local_server)
 (cd tutorials && rm -rf *.md start_local_server _config.yml _data _includes _layouts etc */doc)
 
 # pack and create tar.gz archives

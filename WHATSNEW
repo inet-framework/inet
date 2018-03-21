@@ -9,7 +9,7 @@ OMNeT++ 5.3 Preview 4 release. It requires OMNeT++ 5.1 or later.
 
 General:
 
-	- Changed some module parameters from double to int.
+  - Changed some module parameters from double to int.
 
   - Corrected memory management issue in radio module.
 
