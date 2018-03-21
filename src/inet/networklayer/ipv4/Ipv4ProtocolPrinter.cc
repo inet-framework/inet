@@ -30,9 +30,7 @@ Register_Protocol_Printer(&Protocol::ipv4, Ipv4ProtocolPrinter);
 void Ipv4ProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, Context& context) const
 {
     if (auto header = dynamicPtrCast<const Ipv4Header>(chunk)) {
-        context.sourceColumn.str("");
         context.sourceColumn << header->getSrcAddress();
-        context.destinationColumn.str("");
         context.destinationColumn << header->getDestAddress();
         B payloadLength = B(header->getTotalLengthField()) - header->getChunkLength();
         context.infoColumn << "IPv4"
