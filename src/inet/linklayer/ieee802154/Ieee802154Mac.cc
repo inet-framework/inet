@@ -896,6 +896,7 @@ void Ieee802154Mac::handleLowerPacket(Packet *packet)
                 csmaHeader->setChunkLength(b(ackLength));
                 ackMessage = new Packet("CSMA-Ack");
                 ackMessage->insertHeader(csmaHeader);
+                ackMessage->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee802154);
                 //Check for duplicates by checking expected seqNr of sender
                 if (SeqNrChild.find(src) == SeqNrChild.end()) {
                     //no record of current child -> add expected next number to map
