@@ -22,8 +22,8 @@ package inet.physicallayer.energyconsumer;
 // determined by the radio mode, the transmitter state and the receiver state
 // using constant parameters.
 //
-// This module extends StateBasedEpEnergyConsumer, and provides default values 
-// suitable for using in low power wireless sensor nodes. Roughly based on 
+// This module provides default values 
+// for low power wireless sensor nodes. Roughly based on 
 // the data sheet for the CC2500 RF transceiver.
 //
 

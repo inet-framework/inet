@@ -18,7 +18,8 @@
 package inet.physicallayer.energyconsumer;
 
 //
-// This module provides a radio power consumer model. The power consumption is
+// This module provides a radio power consumer model for IEEE 802.11 radios.
+// Default values are roughly based on CC3220 transceiver. The power consumption is
 // determined by the radio mode, the transmitter state and the receiver state
 // using constant parameters.
 //
@@ -26,7 +27,7 @@ simple Ieee80211StateBasedEpEnergyConsumer extends StateBasedEpEnergyConsumer
 {
     parameters:
         offPowerConsumption = default(0mW);
-        sleepPowerConsumption = default(0.0005mW);
+        sleepPowerConsumption = default(0.05mW);
         switchingPowerConsumption = default(100mW);		// tx/rx calibration mode
         receiverIdlePowerConsumption = default(0.5W);
         receiverBusyPowerConsumption = default(0.5W);	// no info yet
