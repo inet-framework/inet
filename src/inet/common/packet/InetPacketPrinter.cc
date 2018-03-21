@@ -56,7 +56,11 @@ class INET_API InetPacketPrinter : public cMessagePrinter
     InetPacketPrinter() {}
     virtual ~InetPacketPrinter() {}
     virtual int getScoreFor(cMessage *msg) const override;
+#if OMNETPP_BUILDNUM < 1018
     virtual void printMessage(std::ostream& os, cMessage *msg) const override;
+#else
+    virtual void printMessage(std::ostream& os, cMessage *msg, const Options *options) const override;
+#endif
 };
 
 Register_MessagePrinter(InetPacketPrinter);
@@ -66,7 +70,11 @@ int InetPacketPrinter::getScoreFor(cMessage *msg) const
     return msg->isPacket() ? 20 : 0;
 }
 
+#if OMNETPP_BUILDNUM < 1018
 void InetPacketPrinter::printMessage(std::ostream& os, cMessage *msg) const
+#else
+void InetPacketPrinter::printMessage(std::ostream& os, cMessage *msg, const Options *options = nullptr) const
+#endif
 {
     L3Address srcAddr, destAddr;
 
