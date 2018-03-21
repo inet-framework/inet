@@ -32,6 +32,8 @@ SHOULD:
  - validate Rotation, Quaternion, EulerAngles against each other and documentation
  - validate positioning and orientation IMobility, PhysicalEnvironment, ObstacleLoss
  - replace ObjectLocatorNode with GeoTransform (PositionAttitudeTransform) to work with osgEarth 2.9
+ - review all @unit(deg) parameters to actually convert to radians in the represenation, and also review all usages (e.g. sin, cos, etc.)
+ - use m instead of double in Coord? use degree instead of double in GeoCoord? use degree instead of double in EulerAngles?
 
  - move extra functions that doesn't really belong to L3AddressResolver (e.g. findInterfaceTableOf, findIPv4RoutingTableOf)
  - revise protocol base class hierarchy (e.g. LayeredProtocolBase vs IPv4 base class, etc.)
