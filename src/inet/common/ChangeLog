@@ -2,8 +2,20 @@
 
 2018-03-21  Rudolf Hornig
 
-	packet printer: made it compatible with the new message printer API
-	in OMNeT++ 5.3
+	build: made it compatible with the OMNeT++ 5.3 new packet printer API.
+
+2018-01-24  Zoltan Bojthe
+
+	bugfix: for issue "Complile Error nedf_intWithUnit -> Current Master
+	#284"
+
+2018-01-12  Zoltan Bojthe
+
+	Changed some module parameters from double to int.
+
+2018-01-12  Zoltan Bojthe
+
+	common: NedFunctions: added intWithUnit() ned function
 
 2017-12-22  ------ inet-3.6.3 released ------
 
