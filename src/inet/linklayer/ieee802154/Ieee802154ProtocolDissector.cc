@@ -33,8 +33,10 @@ void Ieee802154ProtocolDissector::dissect(Packet *packet, ICallback& callback) c
     const auto& header = packet->popAtFront<Ieee802154MacHeader>();
     callback.startProtocolDataUnit(&Protocol::ieee802154);
     callback.visitChunk(header, &Protocol::ieee802154);
-    auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(header->getNetworkProtocol());
-    callback.dissectPacket(packet, payloadProtocol);
+    if (header->getNetworkProtocol() != -1) {
+        auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(header->getNetworkProtocol());
+        callback.dissectPacket(packet, payloadProtocol);
+    }
 //    auto paddingLength = packet->getDataLength();
 //    if (paddingLength > b(0)) {
 //        const auto& padding = packet->popHeader(paddingLength);
