@@ -44,13 +44,13 @@ class INET_API SequenceChunk : public Chunk
     int getElementIndex(bool isForward, int index) const { return isForward ? index : chunks.size() - index - 1; }
     const Ptr<const Chunk>& getElementChunk(const Iterator& iterator) const { return chunks[getElementIndex(iterator.isForward(), iterator.getIndex())]; }
 
-    void doInsertToBeginning(const Ptr<const Chunk>& chunk);
-    void doInsertToBeginning(const Ptr<const SliceChunk>& chunk);
-    void doInsertToBeginning(const Ptr<const SequenceChunk>& chunk);
+    void doInsertChunkAtFront(const Ptr<const Chunk>& chunk);
+    void doInsertSliceChunkAtFront(const Ptr<const SliceChunk>& chunk);
+    void doInsertSequenceChunkAtFront(const Ptr<const SequenceChunk>& chunk);
 
-    void doInsertToEnd(const Ptr<const Chunk>& chunk);
-    void doInsertToEnd(const Ptr<const SliceChunk>& chunk);
-    void doInsertToEnd(const Ptr<const SequenceChunk>& chunk);
+    void doInsertChunkAtBack(const Ptr<const Chunk>& chunk);
+    void doInsertSliceChunkAtBack(const Ptr<const SliceChunk>& chunk);
+    void doInsertSequenceChunkAtBack(const Ptr<const SequenceChunk>& chunk);
 
     std::deque<Ptr<const Chunk>> dupChunks() const;
 
@@ -58,11 +58,11 @@ class INET_API SequenceChunk : public Chunk
 
     static const Ptr<Chunk> convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, b offset, b length, int flags);
 
-    virtual void doInsertAtBeginning(const Ptr<const Chunk>& chunk) override;
-    virtual void doInsertAtEnd(const Ptr<const Chunk>& chunk) override;
+    virtual void doInsertAtFront(const Ptr<const Chunk>& chunk) override;
+    virtual void doInsertAtBack(const Ptr<const Chunk>& chunk) override;
 
-    virtual void doRemoveFromBeginning(b length) override;
-    virtual void doRemoveFromEnd(b length) override;
+    virtual void doRemoveAtFront(b length) override;
+    virtual void doRemoveAtBack(b length) override;
 
   public:
     /** @name Constructors, destructors and duplication related functions */
@@ -102,14 +102,14 @@ class INET_API SequenceChunk : public Chunk
 
     /** @name Filling with data related functions */
     //@{
-    virtual bool canInsertAtBeginning(const Ptr<const Chunk>& chunk) const override { return true; }
-    virtual bool canInsertAtEnd(const Ptr<const Chunk>& chunk) const override { return true; }
+    virtual bool canInsertAtFront(const Ptr<const Chunk>& chunk) const override { return true; }
+    virtual bool canInsertAtBack(const Ptr<const Chunk>& chunk) const override { return true; }
     //@}
 
     /** @name Removing data related functions */
     //@{
-    virtual bool canRemoveFromBeginning(b length) const override { return true; }
-    virtual bool canRemoveFromEnd(b length) const override { return true; }
+    virtual bool canRemoveAtFront(b length) const override { return true; }
+    virtual bool canRemoveAtBack(b length) const override { return true; }
     //@}
 
     /** @name Querying data related functions */

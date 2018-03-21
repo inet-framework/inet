@@ -84,34 +84,34 @@ void BitsChunk::setBit(int index, bool bit)
     bits.at(index) = bit;
 }
 
-bool BitsChunk::canInsertAtBeginning(const Ptr<const Chunk>& chunk) const
+bool BitsChunk::canInsertAtFront(const Ptr<const Chunk>& chunk) const
 {
     return chunk->getChunkType() == CT_BITS;
 }
 
-bool BitsChunk::canInsertAtEnd(const Ptr<const Chunk>& chunk) const
+bool BitsChunk::canInsertAtBack(const Ptr<const Chunk>& chunk) const
 {
     return chunk->getChunkType() == CT_BITS;
 }
 
-void BitsChunk::doInsertAtBeginning(const Ptr<const Chunk>& chunk)
+void BitsChunk::doInsertAtFront(const Ptr<const Chunk>& chunk)
 {
     const auto& bitsChunk = staticPtrCast<const BitsChunk>(chunk);
     bits.insert(bits.begin(), bitsChunk->bits.begin(), bitsChunk->bits.end());
 }
 
-void BitsChunk::doInsertAtEnd(const Ptr<const Chunk>& chunk)
+void BitsChunk::doInsertAtBack(const Ptr<const Chunk>& chunk)
 {
     const auto& bitsChunk = staticPtrCast<const BitsChunk>(chunk);
     bits.insert(bits.end(), bitsChunk->bits.begin(), bitsChunk->bits.end());
 }
 
-void BitsChunk::doRemoveFromBeginning(b length)
+void BitsChunk::doRemoveAtFront(b length)
 {
     bits.erase(bits.begin(), bits.begin() + b(length).get());
 }
 
-void BitsChunk::doRemoveFromEnd(b length)
+void BitsChunk::doRemoveAtBack(b length)
 {
     bits.erase(bits.end() - b(length).get(), bits.end());
 }

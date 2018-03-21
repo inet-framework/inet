@@ -24,135 +24,105 @@ Register_Class(Packet);
 
 Packet::Packet(const char *name, short kind) :
     cPacket(name, kind),
-    contents(EmptyChunk::singleton),
-    headerIterator(Chunk::ForwardIterator(b(0), 0)),
-    trailerIterator(Chunk::BackwardIterator(b(0), 0)),
+    content(EmptyChunk::singleton),
+    frontIterator(Chunk::ForwardIterator(b(0), 0)),
+    backIterator(Chunk::BackwardIterator(b(0), 0)),
     totalLength(b(0))
 {
-    CHUNK_CHECK_IMPLEMENTATION(contents->isImmutable());
+    CHUNK_CHECK_IMPLEMENTATION(content->isImmutable());
 }
 
-Packet::Packet(const char *name, const Ptr<const Chunk>& contents) :
+Packet::Packet(const char *name, const Ptr<const Chunk>& content) :
     cPacket(name),
-    contents(contents),
-    headerIterator(Chunk::ForwardIterator(b(0), 0)),
-    trailerIterator(Chunk::BackwardIterator(b(0), 0)),
-    totalLength(contents->getChunkLength())
+    content(content),
+    frontIterator(Chunk::ForwardIterator(b(0), 0)),
+    backIterator(Chunk::BackwardIterator(b(0), 0)),
+    totalLength(content->getChunkLength())
 {
-    constPtrCast<Chunk>(contents)->markImmutable();
+    constPtrCast<Chunk>(content)->markImmutable();
 }
 
 Packet::Packet(const Packet& other) :
     cPacket(other),
-    contents(other.contents),
-    headerIterator(other.headerIterator),
-    trailerIterator(other.trailerIterator),
+    content(other.content),
+    frontIterator(other.frontIterator),
+    backIterator(other.backIterator),
     totalLength(other.totalLength),
     tags(other.tags)
 {
-    CHUNK_CHECK_IMPLEMENTATION(contents->isImmutable());
+    CHUNK_CHECK_IMPLEMENTATION(content->isImmutable());
 }
 
 void Packet::forEachChild(cVisitor *v)
 {
-    v->visit(const_cast<Chunk *>(contents.get()));
+    v->visit(const_cast<Chunk *>(content.get()));
 }
 
-void Packet::setHeaderPopOffset(b offset)
+void Packet::setFrontOffset(b offset)
 {
-    CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getTotalLength() - trailerIterator.getPosition(), "offset is out of range");
-    contents->seekIterator(headerIterator, offset);
+    CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getTotalLength() - backIterator.getPosition(), "offset is out of range");
+    content->seekIterator(frontIterator, offset);
     CHUNK_CHECK_IMPLEMENTATION(getDataLength() >= b(0));
 }
 
-const Ptr<const Chunk> Packet::peekHeader(b length, int flags) const
+const Ptr<const Chunk> Packet::peekAtFront(b length, int flags) const
 {
     auto dataLength = getDataLength();
     CHUNK_CHECK_USAGE(b(-1) <= length && length <= dataLength, "length is invalid");
-    const auto& chunk = contents->peek(headerIterator, length, flags);
+    const auto& chunk = content->peek(frontIterator, length, flags);
     if (chunk == nullptr || chunk->getChunkLength() <= dataLength)
         return chunk;
     else
-        return contents->peek(headerIterator, dataLength, flags);
+        return content->peek(frontIterator, dataLength, flags);
 }
 
-void Packet::insertHeader(const Ptr<const Chunk>& chunk)
-{
-    CHUNK_CHECK_USAGE(chunk != nullptr, "chunk is nullptr");
-    insertAtBeginning(chunk);
-}
-
-const Ptr<const Chunk> Packet::popHeader(b length, int flags)
+const Ptr<const Chunk> Packet::popAtFront(b length, int flags)
 {
     CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
-    const auto& chunk = peekHeader(length, flags);
+    const auto& chunk = peekAtFront(length, flags);
     if (chunk != nullptr) {
-        contents->moveIterator(headerIterator, chunk->getChunkLength());
+        content->moveIterator(frontIterator, chunk->getChunkLength());
         CHUNK_CHECK_IMPLEMENTATION(getDataLength() >= b(0));
     }
     return chunk;
 }
 
-const Ptr<Chunk> Packet::removeHeader(b length, int flags)
+void Packet::setBackOffset(b offset)
 {
-    CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
-    CHUNK_CHECK_USAGE(headerIterator.getPosition() == b(0), "popped header length is non-zero");
-    const auto& chunk = popHeader(length, flags);
-    removePoppedHeaders();
-    return makeExclusivelyOwnedMutableChunk(chunk);
-}
-
-void Packet::setTrailerPopOffset(b offset)
-{
-    CHUNK_CHECK_USAGE(headerIterator.getPosition() <= offset, "offset is out of range");
-    contents->seekIterator(trailerIterator, getTotalLength() - offset);
+    CHUNK_CHECK_USAGE(frontIterator.getPosition() <= offset, "offset is out of range");
+    content->seekIterator(backIterator, getTotalLength() - offset);
     CHUNK_CHECK_IMPLEMENTATION(getDataLength() >= b(0));
 }
 
-const Ptr<const Chunk> Packet::peekTrailer(b length, int flags) const
+const Ptr<const Chunk> Packet::peekAtBack(b length, int flags) const
 {
     auto dataLength = getDataLength();
     CHUNK_CHECK_USAGE(b(-1) <= length && length <= dataLength, "length is invalid");
-    const auto& chunk = contents->peek(trailerIterator, length, flags);
+    const auto& chunk = content->peek(backIterator, length, flags);
     if (chunk == nullptr || chunk->getChunkLength() <= dataLength)
         return chunk;
     else
-        return contents->peek(trailerIterator, dataLength, flags);
+        return content->peek(backIterator, dataLength, flags);
 }
 
-void Packet::insertTrailer(const Ptr<const Chunk>& chunk)
-{
-    CHUNK_CHECK_USAGE(chunk != nullptr, "chunk is nullptr");
-    insertAtEnd(chunk);
-}
-
-const Ptr<const Chunk> Packet::popTrailer(b length, int flags)
+const Ptr<const Chunk> Packet::popAtBack(b length, int flags)
 {
     CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
-    const auto& chunk = peekTrailer(length, flags);
+    const auto& chunk = peekAtBack(length, flags);
     if (chunk != nullptr) {
-        contents->moveIterator(trailerIterator, chunk->getChunkLength());
+        content->moveIterator(backIterator, chunk->getChunkLength());
         CHUNK_CHECK_IMPLEMENTATION(getDataLength() >= b(0));
     }
     return chunk;
-}
-
-const Ptr<Chunk> Packet::removeTrailer(b length, int flags)
-{
-    CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
-    CHUNK_CHECK_USAGE(trailerIterator.getPosition() == b(0), "popped trailer length is non-zero");
-    const auto& chunk = popTrailer(length, flags);
-    removePoppedTrailers();
-    return makeExclusivelyOwnedMutableChunk(chunk);
 }
 
 const Ptr<const Chunk> Packet::peekDataAt(b offset, b length, int flags) const
 {
     CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getDataLength(), "offset is out of range");
     CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= getDataLength(), "length is invalid");
-    b peekOffset = headerIterator.getPosition() + offset;
+    b peekOffset = frontIterator.getPosition() + offset;
     b peekLength = length == b(-1) ? getDataLength() - offset : length;
-    return contents->peek(Chunk::Iterator(true, peekOffset, -1), peekLength, flags);
+    return content->peek(Chunk::Iterator(true, peekOffset, -1), peekLength, flags);
 }
 
 const Ptr<const Chunk> Packet::peekAt(b offset, b length, int flags) const
@@ -160,141 +130,166 @@ const Ptr<const Chunk> Packet::peekAt(b offset, b length, int flags) const
     CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getTotalLength(), "offset is out of range");
     CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= getTotalLength(), "length is invalid");
     b peekLength = length == b(-1) ? getTotalLength() - offset : length;
-    return contents->peek(Chunk::Iterator(true, offset, -1), peekLength, flags);
+    return content->peek(Chunk::Iterator(true, offset, -1), peekLength, flags);
 }
 
-void Packet::insertAtBeginning(const Ptr<const Chunk>& chunk)
+void Packet::insertAtBack(const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_USAGE(chunk != nullptr, "chunk is nullptr");
-    CHUNK_CHECK_USAGE(headerIterator.getPosition() == b(0) && (headerIterator.getIndex() == 0 || headerIterator.getIndex() == -1), "popped header length is non-zero");
+    CHUNK_CHECK_USAGE(backIterator.getPosition() == b(0) && (backIterator.getIndex() == 0 || backIterator.getIndex() == -1), "popped trailer length is non-zero");
     constPtrCast<Chunk>(chunk)->markImmutable();
-    if (contents == EmptyChunk::singleton) {
+    if (content == EmptyChunk::singleton) {
         CHUNK_CHECK_USAGE(chunk->getChunkLength() > b(0), "chunk is empty");
-        contents = chunk;
-        totalLength = contents->getChunkLength();
+        content = chunk;
+        totalLength = content->getChunkLength();
     }
     else {
-        if (contents->canInsertAtBeginning(chunk)) {
-            const auto& newContents = makeExclusivelyOwnedMutableChunk(contents);
-            newContents->insertAtBeginning(chunk);
-            newContents->markImmutable();
-            contents = newContents->simplify();
+        if (content->canInsertAtBack(chunk)) {
+            const auto& newContent = makeExclusivelyOwnedMutableChunk(content);
+            newContent->insertAtBack(chunk);
+            newContent->markImmutable();
+            content = newContent->simplify();
         }
         else {
             auto sequenceChunk = makeShared<SequenceChunk>();
-            sequenceChunk->insertAtBeginning(contents);
-            sequenceChunk->insertAtBeginning(chunk);
+            sequenceChunk->insertAtBack(content);
+            sequenceChunk->insertAtBack(chunk);
             sequenceChunk->markImmutable();
-            contents = sequenceChunk;
+            content = sequenceChunk;
         }
         totalLength += chunk->getChunkLength();
     }
-    CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(headerIterator));
-    CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(trailerIterator));
+    CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(frontIterator));
+    CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(backIterator));
 }
 
-void Packet::insertAtEnd(const Ptr<const Chunk>& chunk)
+void Packet::insertAtFront(const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_USAGE(chunk != nullptr, "chunk is nullptr");
-    CHUNK_CHECK_USAGE(trailerIterator.getPosition() == b(0) && (trailerIterator.getIndex() == 0 || trailerIterator.getIndex() == -1), "popped trailer length is non-zero");
+    CHUNK_CHECK_USAGE(frontIterator.getPosition() == b(0) && (frontIterator.getIndex() == 0 || frontIterator.getIndex() == -1), "popped header length is non-zero");
     constPtrCast<Chunk>(chunk)->markImmutable();
-    if (contents == EmptyChunk::singleton) {
+    if (content == EmptyChunk::singleton) {
         CHUNK_CHECK_USAGE(chunk->getChunkLength() > b(0), "chunk is empty");
-        contents = chunk;
-        totalLength = contents->getChunkLength();
+        content = chunk;
+        totalLength = content->getChunkLength();
     }
     else {
-        if (contents->canInsertAtEnd(chunk)) {
-            const auto& newContents = makeExclusivelyOwnedMutableChunk(contents);
-            newContents->insertAtEnd(chunk);
-            newContents->markImmutable();
-            contents = newContents->simplify();
+        if (content->canInsertAtFront(chunk)) {
+            const auto& newContent = makeExclusivelyOwnedMutableChunk(content);
+            newContent->insertAtFront(chunk);
+            newContent->markImmutable();
+            content = newContent->simplify();
         }
         else {
             auto sequenceChunk = makeShared<SequenceChunk>();
-            sequenceChunk->insertAtEnd(contents);
-            sequenceChunk->insertAtEnd(chunk);
+            sequenceChunk->insertAtFront(content);
+            sequenceChunk->insertAtFront(chunk);
             sequenceChunk->markImmutable();
-            contents = sequenceChunk;
+            content = sequenceChunk;
         }
         totalLength += chunk->getChunkLength();
     }
-    CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(headerIterator));
-    CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(trailerIterator));
+    CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(frontIterator));
+    CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(backIterator));
 }
 
-void Packet::removeFromBeginning(b length)
+void Packet::eraseAtFront(b length)
 {
-    CHUNK_CHECK_USAGE(b(0) <= length && length <= getTotalLength() - trailerIterator.getPosition(), "length is invalid");
-    CHUNK_CHECK_USAGE(headerIterator.getPosition() == b(0) && (headerIterator.getIndex() == 0 || headerIterator.getIndex() == -1), "popped header length is non-zero");
-    if (contents->getChunkLength() == length)
-        contents = EmptyChunk::singleton;
-    else if (contents->canRemoveFromBeginning(length)) {
-        const auto& newContents = makeExclusivelyOwnedMutableChunk(contents);
-        newContents->removeFromBeginning(length);
-        newContents->markImmutable();
-        contents = newContents;
+    CHUNK_CHECK_USAGE(b(0) <= length && length <= getTotalLength() - backIterator.getPosition(), "length is invalid");
+    CHUNK_CHECK_USAGE(frontIterator.getPosition() == b(0) && (frontIterator.getIndex() == 0 || frontIterator.getIndex() == -1), "popped header length is non-zero");
+    if (content->getChunkLength() == length)
+        content = EmptyChunk::singleton;
+    else if (content->canRemoveAtFront(length)) {
+        const auto& newContent = makeExclusivelyOwnedMutableChunk(content);
+        newContent->removeAtFront(length);
+        newContent->markImmutable();
+        content = newContent;
     }
     else
-        contents = contents->peek(length, contents->getChunkLength() - length);
+        content = content->peek(length, content->getChunkLength() - length);
     totalLength -= length;
-    CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(headerIterator));
-    CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(trailerIterator));
+    CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(frontIterator));
+    CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(backIterator));
 }
 
-void Packet::removeFromEnd(b length)
+void Packet::eraseAtBack(b length)
 {
-    CHUNK_CHECK_USAGE(b(0) <= length && length <= getTotalLength() - headerIterator.getPosition(), "length is invalid");
-    CHUNK_CHECK_USAGE(trailerIterator.getPosition() == b(0) && (trailerIterator.getIndex() == 0 || trailerIterator.getIndex() == -1), "popped trailer length is non-zero");
-    if (contents->getChunkLength() == length)
-        contents = EmptyChunk::singleton;
-    else if (contents->canRemoveFromEnd(length)) {
-        const auto& newContents = makeExclusivelyOwnedMutableChunk(contents);
-        newContents->removeFromEnd(length);
-        newContents->markImmutable();
-        contents = newContents;
+    CHUNK_CHECK_USAGE(b(0) <= length && length <= getTotalLength() - frontIterator.getPosition(), "length is invalid");
+    CHUNK_CHECK_USAGE(backIterator.getPosition() == b(0) && (backIterator.getIndex() == 0 || backIterator.getIndex() == -1), "popped trailer length is non-zero");
+    if (content->getChunkLength() == length)
+        content = EmptyChunk::singleton;
+    else if (content->canRemoveAtBack(length)) {
+        const auto& newContent = makeExclusivelyOwnedMutableChunk(content);
+        newContent->removeAtBack(length);
+        newContent->markImmutable();
+        content = newContent;
     }
     else
-        contents = contents->peek(b(0), contents->getChunkLength() - length);
+        content = content->peek(b(0), content->getChunkLength() - length);
     totalLength -= length;
-    CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(headerIterator));
-    CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(trailerIterator));
+    CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(frontIterator));
+    CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(backIterator));
 }
 
-void Packet::removePoppedHeaders()
+void Packet::eraseAll()
 {
-    b poppedLength = getHeaderPoppedLength();
-    setHeaderPopOffset(b(0));
-    removeFromBeginning(poppedLength);
-}
-
-void Packet::removePoppedTrailers()
-{
-    b poppedLength = getTrailerPoppedLength();
-    setTrailerPopOffset(getTotalLength());
-    removeFromEnd(poppedLength);
-}
-
-void Packet::removePoppedChunks()
-{
-    removePoppedHeaders();
-    removePoppedTrailers();
-}
-
-void Packet::removeAll()
-{
-    contents = EmptyChunk::singleton;
-    headerIterator = Chunk::ForwardIterator(b(0), 0);
-    trailerIterator = Chunk::BackwardIterator(b(0), 0);
+    content = EmptyChunk::singleton;
+    frontIterator = Chunk::ForwardIterator(b(0), 0);
+    backIterator = Chunk::BackwardIterator(b(0), 0);
     totalLength = b(0);
-    CHUNK_CHECK_IMPLEMENTATION(contents->isImmutable());
+    CHUNK_CHECK_IMPLEMENTATION(content->isImmutable());
+}
+
+const Ptr<Chunk> Packet::removeAtFront(b length, int flags)
+{
+    CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
+    CHUNK_CHECK_USAGE(frontIterator.getPosition() == b(0), "popped header length is non-zero");
+    const auto& chunk = popAtFront(length, flags);
+    trimFront();
+    return makeExclusivelyOwnedMutableChunk(chunk);
+}
+
+const Ptr<Chunk> Packet::removeAtBack(b length, int flags)
+{
+    CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
+    CHUNK_CHECK_USAGE(backIterator.getPosition() == b(0), "popped trailer length is non-zero");
+    const auto& chunk = popAtBack(length, flags);
+    trimBack();
+    return makeExclusivelyOwnedMutableChunk(chunk);
+}
+
+const Ptr<Chunk> Packet::removeAll()
+{
+    const auto& oldContent = content;
+    eraseAll();
+    return makeExclusivelyOwnedMutableChunk(oldContent);
+}
+
+void Packet::trimFront()
+{
+    b length = frontIterator.getPosition();
+    setFrontOffset(b(0));
+    eraseAtFront(length);
+}
+
+void Packet::trimBack()
+{
+    b length = backIterator.getPosition();
+    setBackOffset(getTotalLength());
+    eraseAtBack(length);
+}
+
+void Packet::trim()
+{
+    trimFront();
+    trimBack();
 }
 
 //(inet::Packet)UdpBasicAppData-0 (5000 bytes)
 std::string Packet::str() const
 {
     std::ostringstream out;
-    out << "(" << getClassName() << ")" << getName() << " (" << getByteLength() << " bytes) [" << contents->str() << "]";
+    out << "(" << getClassName() << ")" << getName() << " (" << getByteLength() << " bytes) [" << content->str() << "]";
     return out.str();
 }
 

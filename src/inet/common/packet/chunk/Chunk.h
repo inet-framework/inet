@@ -378,10 +378,10 @@ class INET_API Chunk : public cObject,
     virtual int getTagsArraySize(); // only for class descriptor
     virtual const RegionTagSet::RegionTag<cObject>& getTags(int index); // only for class descriptor
 
-    virtual void doInsertAtBeginning(const Ptr<const Chunk>& chunk) { throw cRuntimeError("Invalid operation"); }
-    virtual void doInsertAtEnd(const Ptr<const Chunk>& chunk) { throw cRuntimeError("Invalid operation"); }
-    virtual void doRemoveFromBeginning(b length) { throw cRuntimeError("Invalid operation"); }
-    virtual void doRemoveFromEnd(b length) { throw cRuntimeError("Invalid operation"); }
+    virtual void doInsertAtFront(const Ptr<const Chunk>& chunk) { throw cRuntimeError("Invalid operation"); }
+    virtual void doInsertAtBack(const Ptr<const Chunk>& chunk) { throw cRuntimeError("Invalid operation"); }
+    virtual void doRemoveAtFront(b length) { throw cRuntimeError("Invalid operation"); }
+    virtual void doRemoveAtBack(b length) { throw cRuntimeError("Invalid operation"); }
 
     /**
      * Creates a new chunk of the given type that represents the designated part
@@ -482,33 +482,33 @@ class INET_API Chunk : public cObject,
     /**
      * Returns true if this chunk is capable of representing the result.
      */
-    virtual bool canInsertAtBeginning(const Ptr<const Chunk>& chunk) const { return false; }
+    virtual bool canInsertAtFront(const Ptr<const Chunk>& chunk) const { return false; }
 
     /**
      * Returns true if this chunk is capable of representing the result.
      */
-    virtual bool canInsertAtEnd(const Ptr<const Chunk>& chunk) const { return false; }
+    virtual bool canInsertAtBack(const Ptr<const Chunk>& chunk) const { return false; }
 
     /**
      * Inserts the provided chunk at the beginning of this chunk.
      */
-    void insertAtBeginning(const Ptr<const Chunk>& chunk) {
-        CHUNK_CHECK_IMPLEMENTATION(canInsertAtBeginning(chunk));
+    void insertAtFront(const Ptr<const Chunk>& chunk) {
+        CHUNK_CHECK_IMPLEMENTATION(canInsertAtFront(chunk));
         handleChange();
         auto length = chunk->getChunkLength();
         tags.moveTags(length);
         tags.copyTags(chunk->tags, b(0), b(0), length);
-        doInsertAtBeginning(chunk);
+        doInsertAtFront(chunk);
     }
 
     /**
      * Inserts the provided chunk at the end of this chunk.
      */
-    void insertAtEnd(const Ptr<const Chunk>& chunk) {
-        CHUNK_CHECK_IMPLEMENTATION(canInsertAtEnd(chunk));
+    void insertAtBack(const Ptr<const Chunk>& chunk) {
+        CHUNK_CHECK_IMPLEMENTATION(canInsertAtBack(chunk));
         handleChange();
         tags.copyTags(chunk->tags, b(0), getChunkLength(), chunk->getChunkLength());
-        doInsertAtEnd(chunk);
+        doInsertAtBack(chunk);
     }
     //@}
 
@@ -517,20 +517,20 @@ class INET_API Chunk : public cObject,
     /**
      * Returns true if this chunk is capable of representing the result.
      */
-    virtual bool canRemoveFromBeginning(b length) const { return false; }
+    virtual bool canRemoveAtFront(b length) const { return false; }
 
     /**
      * Returns true if this chunk is capable of representing the result.
      */
-    virtual bool canRemoveFromEnd(b length) const { return false; }
+    virtual bool canRemoveAtBack(b length) const { return false; }
 
     /**
      * Removes the requested part from the beginning of this chunk.
      */
-    void removeFromBeginning(b length) {
+    void removeAtFront(b length) {
         CHUNK_CHECK_USAGE(b(0) <= length && length <= getChunkLength(), "length is invalid");
         handleChange();
-        doRemoveFromBeginning(length);
+        doRemoveAtFront(length);
         tags.clearTags(b(0), length);
         tags.moveTags(-length);
     }
@@ -538,10 +538,10 @@ class INET_API Chunk : public cObject,
     /**
      * Removes the requested part from the end of this chunk.
      */
-    void removeFromEnd(b length) {
+    void removeAtBack(b length) {
         CHUNK_CHECK_USAGE(b(0) <= length && length <= getChunkLength(), "length is invalid");
         handleChange();
-        doRemoveFromEnd(length);
+        doRemoveAtBack(length);
         tags.clearTags(getChunkLength(), length);
     }
     //@}

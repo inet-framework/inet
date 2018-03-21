@@ -50,15 +50,15 @@ class INET_API ChunkQueue : public cNamedObject
      * This chunk is always immutable to allow arbitrary peeking. Nevertheless
      * it's reused if possible to allow efficient merging with newly added chunks.
      */
-    Ptr<const Chunk> contents;
+    Ptr<const Chunk> content;
     Chunk::Iterator iterator;
 
   protected:
-    const Chunk *getContents() const { return contents.get(); } // only for class descriptor
+    const Chunk *getContent() const { return content.get(); } // only for class descriptor
 
     bool isIteratorConsistent(const Chunk::Iterator& iterator) {
         Chunk::Iterator copy(iterator);
-        contents->seekIterator(copy, iterator.getPosition());
+        content->seekIterator(copy, iterator.getPosition());
         return iterator.getPosition() == copy.getPosition() && (iterator.getIndex() == -1 || iterator.getIndex() == copy.getIndex());
     }
 
@@ -68,7 +68,7 @@ class INET_API ChunkQueue : public cNamedObject
   public:
     /** @name Constructors, destructors and duplication related functions */
     //@{
-    ChunkQueue(const char *name = nullptr, const Ptr<const Chunk>& contents = EmptyChunk::singleton);
+    ChunkQueue(const char *name = nullptr, const Ptr<const Chunk>& content = EmptyChunk::singleton);
     ChunkQueue(const ChunkQueue& other);
 
     virtual ChunkQueue *dup() const override { return new ChunkQueue(*this); }
@@ -79,7 +79,7 @@ class INET_API ChunkQueue : public cNamedObject
     /**
      * Returns the total length of data currently available in the queue.
      */
-    b getLength() const { return contents->getChunkLength() - iterator.getPosition(); }
+    b getLength() const { return content->getChunkLength() - iterator.getPosition(); }
 
     /**
      * Returns the total length of data pushed into the queue so far.
@@ -115,7 +115,7 @@ class INET_API ChunkQueue : public cNamedObject
      */
     template <typename T>
     bool has(b length = b(-1)) const {
-        return contents->has<T>(iterator, length);
+        return content->has<T>(iterator, length);
     }
 
     /**
@@ -125,7 +125,7 @@ class INET_API ChunkQueue : public cNamedObject
      */
     template <typename T>
     const Ptr<const T> peek(b length = b(-1), int flags = 0) const {
-        return contents->peek<T>(iterator, length, flags);
+        return content->peek<T>(iterator, length, flags);
     }
 
     /**
@@ -137,7 +137,7 @@ class INET_API ChunkQueue : public cNamedObject
     const Ptr<const T> peekAt(b offset, b length = b(-1), int flags = 0) const {
         CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getLength(), "offset is out of range");
         CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= getLength(), "length is invalid");
-        return contents->peek<T>(Chunk::Iterator(true, iterator.getPosition() + offset, -1), length, flags);
+        return content->peek<T>(Chunk::Iterator(true, iterator.getPosition() + offset, -1), length, flags);
     }
 
     /**
@@ -152,7 +152,7 @@ class INET_API ChunkQueue : public cNamedObject
      * Returns all data in the queue in the as a sequence of bits. The length
      * of the returned chunk is the same as the value returned by getLength().
      */
-    const Ptr<const BitsChunk> peekAllBits(int flags = 0) const {
+    const Ptr<const BitsChunk> peekAllAsBits(int flags = 0) const {
         return peekAt<BitsChunk>(b(0), getLength(), flags);
     }
 
@@ -160,7 +160,7 @@ class INET_API ChunkQueue : public cNamedObject
      * Returns all data in the queue in the as a sequence of bytes. The length
      * of the returned chunk is the same as the value returned by getLength().
      */
-    const Ptr<const BytesChunk> peekAllBytes(int flags = 0) const {
+    const Ptr<const BytesChunk> peekAllAsBytes(int flags = 0) const {
         return peekAt<BytesChunk>(b(0), getLength(), flags);
     }
     //@}
@@ -205,7 +205,7 @@ class INET_API ChunkQueue : public cNamedObject
     /**
      * Returns a human readable string representation.
      */
-    virtual std::string str() const override { return iterator.getPosition() == b(0) ? contents->str() : contents->peek(iterator)->str(); }
+    virtual std::string str() const override { return iterator.getPosition() == b(0) ? content->str() : content->peek(iterator)->str(); }
 };
 
 inline std::ostream& operator<<(std::ostream& os, const ChunkQueue *queue) { return os << queue->str(); }

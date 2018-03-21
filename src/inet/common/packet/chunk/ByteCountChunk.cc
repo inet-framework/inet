@@ -86,34 +86,34 @@ void ByteCountChunk::setData(uint8_t data)
     this->data = data;
 }
 
-bool ByteCountChunk::canInsertAtBeginning(const Ptr<const Chunk>& chunk) const
+bool ByteCountChunk::canInsertAtFront(const Ptr<const Chunk>& chunk) const
 {
     return chunk->getChunkType() == CT_BYTECOUNT;
 }
 
-bool ByteCountChunk::canInsertAtEnd(const Ptr<const Chunk>& chunk) const
+bool ByteCountChunk::canInsertAtBack(const Ptr<const Chunk>& chunk) const
 {
     return chunk->getChunkType() == CT_BYTECOUNT;
 }
 
-void ByteCountChunk::doInsertAtBeginning(const Ptr<const Chunk>& chunk)
+void ByteCountChunk::doInsertAtFront(const Ptr<const Chunk>& chunk)
 {
     const auto& byteCountChunk = staticPtrCast<const ByteCountChunk>(chunk);
     length += byteCountChunk->length;
 }
 
-void ByteCountChunk::doInsertAtEnd(const Ptr<const Chunk>& chunk)
+void ByteCountChunk::doInsertAtBack(const Ptr<const Chunk>& chunk)
 {
     const auto& byteCountChunk = staticPtrCast<const ByteCountChunk>(chunk);
     length += byteCountChunk->length;
 }
 
-void ByteCountChunk::doRemoveFromBeginning(b length)
+void ByteCountChunk::doRemoveAtFront(b length)
 {
     this->length -= B(length);
 }
 
-void ByteCountChunk::doRemoveFromEnd(b length)
+void ByteCountChunk::doRemoveAtBack(b length)
 {
     this->length -= B(length);
 }

@@ -95,34 +95,34 @@ void BytesChunk::copyFromBuffer(const uint8_t *buffer, size_t bufferLength)
     bytes.assign(buffer, buffer + bufferLength);
 }
 
-bool BytesChunk::canInsertAtBeginning(const Ptr<const Chunk>& chunk) const
+bool BytesChunk::canInsertAtFront(const Ptr<const Chunk>& chunk) const
 {
     return chunk->getChunkType() == CT_BYTES;
 }
 
-bool BytesChunk::canInsertAtEnd(const Ptr<const Chunk>& chunk) const
+bool BytesChunk::canInsertAtBack(const Ptr<const Chunk>& chunk) const
 {
     return chunk->getChunkType() == CT_BYTES;
 }
 
-void BytesChunk::doInsertAtBeginning(const Ptr<const Chunk>& chunk)
+void BytesChunk::doInsertAtFront(const Ptr<const Chunk>& chunk)
 {
     const auto& bytesChunk = staticPtrCast<const BytesChunk>(chunk);
     bytes.insert(bytes.begin(), bytesChunk->bytes.begin(), bytesChunk->bytes.end());
 }
 
-void BytesChunk::doInsertAtEnd(const Ptr<const Chunk>& chunk)
+void BytesChunk::doInsertAtBack(const Ptr<const Chunk>& chunk)
 {
     const auto& bytesChunk = staticPtrCast<const BytesChunk>(chunk);
     bytes.insert(bytes.end(), bytesChunk->bytes.begin(), bytesChunk->bytes.end());
 }
 
-void BytesChunk::doRemoveFromBeginning(b length)
+void BytesChunk::doRemoveAtFront(b length)
 {
     bytes.erase(bytes.begin(), bytes.begin() + B(length).get());
 }
 
-void BytesChunk::doRemoveFromEnd(b length)
+void BytesChunk::doRemoveAtBack(b length)
 {
     bytes.erase(bytes.end() - B(length).get(), bytes.end());
 }

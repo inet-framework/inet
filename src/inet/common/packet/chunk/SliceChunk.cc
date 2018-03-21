@@ -101,7 +101,7 @@ void SliceChunk::setLength(b length)
     this->length = length;
 }
 
-bool SliceChunk::canInsertAtBeginning(const Ptr<const Chunk>& chunk) const
+bool SliceChunk::canInsertAtFront(const Ptr<const Chunk>& chunk) const
 {
     if (chunk->getChunkType() == CT_SLICE) {
         const auto& otherSliceChunk = staticPtrCast<const SliceChunk>(chunk);
@@ -111,7 +111,7 @@ bool SliceChunk::canInsertAtBeginning(const Ptr<const Chunk>& chunk) const
         return false;
 }
 
-bool SliceChunk::canInsertAtEnd(const Ptr<const Chunk>& chunk) const
+bool SliceChunk::canInsertAtBack(const Ptr<const Chunk>& chunk) const
 {
     if (chunk->getChunkType() == CT_SLICE) {
         const auto& otherSliceChunk = staticPtrCast<const SliceChunk>(chunk);
@@ -121,7 +121,7 @@ bool SliceChunk::canInsertAtEnd(const Ptr<const Chunk>& chunk) const
         return false;
 }
 
-void SliceChunk::doInsertAtBeginning(const Ptr<const Chunk>& chunk)
+void SliceChunk::doInsertAtFront(const Ptr<const Chunk>& chunk)
 {
     const auto& otherSliceChunk = staticPtrCast<const SliceChunk>(chunk);
     CHUNK_CHECK_IMPLEMENTATION(this->chunk == otherSliceChunk->chunk && offset == otherSliceChunk->offset + otherSliceChunk->length);
@@ -129,20 +129,20 @@ void SliceChunk::doInsertAtBeginning(const Ptr<const Chunk>& chunk)
     length += otherSliceChunk->length;
 }
 
-void SliceChunk::doInsertAtEnd(const Ptr<const Chunk>& chunk)
+void SliceChunk::doInsertAtBack(const Ptr<const Chunk>& chunk)
 {
     const auto& otherSliceChunk = staticPtrCast<const SliceChunk>(chunk);
     CHUNK_CHECK_IMPLEMENTATION(this->chunk == otherSliceChunk->chunk && offset + length == otherSliceChunk->offset);
     length += otherSliceChunk->length;
 }
 
-void SliceChunk::doRemoveFromBeginning(b length)
+void SliceChunk::doRemoveAtFront(b length)
 {
     this->offset += length;
     this->length -= length;
 }
 
-void SliceChunk::doRemoveFromEnd(b length)
+void SliceChunk::doRemoveAtBack(b length)
 {
     this->length -= length;
 }

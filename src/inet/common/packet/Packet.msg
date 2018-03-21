@@ -28,9 +28,9 @@ class Packet extends cPacket
     @existingClass;
     @descriptor(readonly);
     b totalLength;
-    b headerPoppedLength;
     b dataLength;
-    b trailerPoppedLength;
-    Chunk* contents @packetData @getter(getContents);
+    b frontOffset;
+    b backOffset;
+    Chunk* content @packetData @getter(getContent);
     cObject *tags[] @getter(getTag) @sizeGetter(getNumTags);
 }

@@ -93,7 +93,7 @@ const Ptr<Chunk> SequenceChunk::convertChunk(const std::type_info& typeInfo, con
     auto sequenceChunk = makeShared<SequenceChunk>();
     auto sliceChunk = makeShared<SliceChunk>(chunk, offset, length);
     sliceChunk->markImmutable();
-    sequenceChunk->insertAtEnd(sliceChunk);
+    sequenceChunk->insertAtBack(sliceChunk);
     return sequenceChunk;
 }
 
@@ -185,7 +185,7 @@ void SequenceChunk::moveIterator(Iterator& iterator, b length) const
         iterator.setIndex(-1);
 }
 
-void SequenceChunk::doInsertToBeginning(const Ptr<const Chunk>& chunk)
+void SequenceChunk::doInsertChunkAtFront(const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_USAGE(chunk->isImmutable(), "chunk is mutable");
     CHUNK_CHECK_USAGE(chunk->getChunkLength() > b(0), "chunk is empty");
@@ -193,18 +193,18 @@ void SequenceChunk::doInsertToBeginning(const Ptr<const Chunk>& chunk)
         chunks.push_front(chunk);
     else {
         const auto& firstChunk = chunks.front();
-        if (!firstChunk->canInsertAtBeginning(chunk))
+        if (!firstChunk->canInsertAtFront(chunk))
             chunks.push_front(chunk);
         else {
             const auto& mutableFirstChunk = makeExclusivelyOwnedMutableChunk(firstChunk);
-            mutableFirstChunk->insertAtBeginning(chunk);
+            mutableFirstChunk->insertAtFront(chunk);
             mutableFirstChunk->markImmutable();
             chunks.front() = mutableFirstChunk->simplify();
         }
     }
 }
 
-void SequenceChunk::doInsertToBeginning(const Ptr<const SliceChunk>& sliceChunk)
+void SequenceChunk::doInsertSliceChunkAtFront(const Ptr<const SliceChunk>& sliceChunk)
 {
     if (sliceChunk->getChunk()->getChunkType() == CT_SEQUENCE) {
         auto sequenceChunk = staticPtrCast<SequenceChunk>(sliceChunk->getChunk());
@@ -217,37 +217,37 @@ void SequenceChunk::doInsertToBeginning(const Ptr<const SliceChunk>& sliceChunk)
             b chunkBegin = offset;
             b chunkEnd = offset + elementChunk->getChunkLength();
             if (sliceChunkBegin <= chunkBegin && chunkEnd <= sliceChunkEnd)
-                doInsertToBeginning(elementChunk);
+                doInsertChunkAtFront(elementChunk);
             else if (chunkBegin < sliceChunkBegin && sliceChunkEnd < chunkEnd)
-                doInsertToBeginning(staticPtrCast<const Chunk>(elementChunk->peek(sliceChunkBegin - chunkBegin, sliceChunkEnd - sliceChunkBegin)));
+                doInsertChunkAtFront(staticPtrCast<const Chunk>(elementChunk->peek(sliceChunkBegin - chunkBegin, sliceChunkEnd - sliceChunkBegin)));
             else if (chunkBegin < sliceChunkBegin && sliceChunkBegin < chunkEnd)
-                doInsertToBeginning(staticPtrCast<const Chunk>(elementChunk->peek(sliceChunkBegin - chunkBegin, chunkEnd - sliceChunkBegin)));
+                doInsertChunkAtFront(staticPtrCast<const Chunk>(elementChunk->peek(sliceChunkBegin - chunkBegin, chunkEnd - sliceChunkBegin)));
             else if (chunkBegin < sliceChunkEnd && sliceChunkEnd < chunkEnd)
-                doInsertToBeginning(staticPtrCast<const Chunk>(elementChunk->peek(b(0), sliceChunkEnd - chunkBegin)));
+                doInsertChunkAtFront(staticPtrCast<const Chunk>(elementChunk->peek(b(0), sliceChunkEnd - chunkBegin)));
             // otherwise the element chunk is out of the slice, therefore it's ignored
         }
     }
     else
-        doInsertToBeginning(staticPtrCast<const Chunk>(sliceChunk));
+        doInsertChunkAtFront(staticPtrCast<const Chunk>(sliceChunk));
 }
 
-void SequenceChunk::doInsertToBeginning(const Ptr<const SequenceChunk>& chunk)
+void SequenceChunk::doInsertSequenceChunkAtFront(const Ptr<const SequenceChunk>& chunk)
 {
     for (auto it = chunk->chunks.rbegin(); it != chunk->chunks.rend(); it++)
-        doInsertToBeginning(*it);
+        doInsertChunkAtFront(*it);
 }
 
-void SequenceChunk::doInsertAtBeginning(const Ptr<const Chunk>& chunk)
+void SequenceChunk::doInsertAtFront(const Ptr<const Chunk>& chunk)
 {
     if (chunk->getChunkType() == CT_SLICE)
-        doInsertToBeginning(staticPtrCast<const SliceChunk>(chunk));
+        doInsertSliceChunkAtFront(staticPtrCast<const SliceChunk>(chunk));
     else if (chunk->getChunkType() == CT_SEQUENCE)
-        doInsertToBeginning(staticPtrCast<const SequenceChunk>(chunk));
+        doInsertSequenceChunkAtFront(staticPtrCast<const SequenceChunk>(chunk));
     else
-        doInsertToBeginning(chunk);
+        doInsertChunkAtFront(chunk);
 }
 
-void SequenceChunk::doInsertToEnd(const Ptr<const Chunk>& chunk)
+void SequenceChunk::doInsertChunkAtBack(const Ptr<const Chunk>& chunk)
 {
     CHUNK_CHECK_USAGE(chunk->isImmutable(), "chunk is mutable");
     CHUNK_CHECK_USAGE(chunk->getChunkLength() > b(0), "chunk is empty");
@@ -255,18 +255,18 @@ void SequenceChunk::doInsertToEnd(const Ptr<const Chunk>& chunk)
         chunks.push_back(chunk);
     else {
         const auto& lastChunk = chunks.back();
-        if (!lastChunk->canInsertAtEnd(chunk))
+        if (!lastChunk->canInsertAtBack(chunk))
             chunks.push_back(chunk);
         else {
             const auto& mutableLastChunk = makeExclusivelyOwnedMutableChunk(lastChunk);
-            mutableLastChunk->insertAtEnd(chunk);
+            mutableLastChunk->insertAtBack(chunk);
             mutableLastChunk->markImmutable();
             chunks.back() = mutableLastChunk->simplify();
         }
     }
 }
 
-void SequenceChunk::doInsertToEnd(const Ptr<const SliceChunk>& sliceChunk)
+void SequenceChunk::doInsertSliceChunkAtBack(const Ptr<const SliceChunk>& sliceChunk)
 {
     if (sliceChunk->getChunk()->getChunkType() == CT_SEQUENCE) {
         auto sequenceChunk = staticPtrCast<SequenceChunk>(sliceChunk->getChunk());
@@ -277,38 +277,38 @@ void SequenceChunk::doInsertToEnd(const Ptr<const SliceChunk>& sliceChunk)
             b chunkBegin = offset;
             b chunkEnd = offset + elementChunk->getChunkLength();
             if (sliceChunkBegin <= chunkBegin && chunkEnd <= sliceChunkEnd)
-                doInsertToEnd(elementChunk);
+                doInsertChunkAtBack(elementChunk);
             else if (chunkBegin < sliceChunkBegin && sliceChunkEnd < chunkEnd)
-                doInsertToEnd(staticPtrCast<const Chunk>(elementChunk->peek(sliceChunkBegin - chunkBegin, sliceChunkEnd - sliceChunkBegin)));
+                doInsertChunkAtBack(staticPtrCast<const Chunk>(elementChunk->peek(sliceChunkBegin - chunkBegin, sliceChunkEnd - sliceChunkBegin)));
             else if (chunkBegin < sliceChunkBegin && sliceChunkBegin < chunkEnd)
-                doInsertToEnd(staticPtrCast<const Chunk>(elementChunk->peek(sliceChunkBegin - chunkBegin, chunkEnd - sliceChunkBegin)));
+                doInsertChunkAtBack(staticPtrCast<const Chunk>(elementChunk->peek(sliceChunkBegin - chunkBegin, chunkEnd - sliceChunkBegin)));
             else if (chunkBegin < sliceChunkEnd && sliceChunkEnd < chunkEnd)
-                doInsertToEnd(staticPtrCast<const Chunk>(elementChunk->peek(b(0), sliceChunkEnd - chunkBegin)));
+                doInsertChunkAtBack(staticPtrCast<const Chunk>(elementChunk->peek(b(0), sliceChunkEnd - chunkBegin)));
             // otherwise the element chunk is out of the slice, therefore it's ignored
             offset += elementChunk->getChunkLength();
         }
     }
     else
-        doInsertToEnd(staticPtrCast<const Chunk>(sliceChunk));
+        doInsertChunkAtBack(staticPtrCast<const Chunk>(sliceChunk));
 }
 
-void SequenceChunk::doInsertToEnd(const Ptr<const SequenceChunk>& chunk)
+void SequenceChunk::doInsertSequenceChunkAtBack(const Ptr<const SequenceChunk>& chunk)
 {
     for (const auto& elementChunk : chunk->chunks)
-        doInsertToEnd(elementChunk);
+        doInsertChunkAtBack(elementChunk);
 }
 
-void SequenceChunk::doInsertAtEnd(const Ptr<const Chunk>& chunk)
+void SequenceChunk::doInsertAtBack(const Ptr<const Chunk>& chunk)
 {
     if (chunk->getChunkType() == CT_SLICE)
-        doInsertToEnd(staticPtrCast<const SliceChunk>(chunk));
+        doInsertSliceChunkAtBack(staticPtrCast<const SliceChunk>(chunk));
     else if (chunk->getChunkType() == CT_SEQUENCE)
-        doInsertToEnd(staticPtrCast<const SequenceChunk>(chunk));
+        doInsertSequenceChunkAtBack(staticPtrCast<const SequenceChunk>(chunk));
     else
-        doInsertToEnd(chunk);
+        doInsertChunkAtBack(chunk);
 }
 
-void SequenceChunk::doRemoveFromBeginning(b length)
+void SequenceChunk::doRemoveAtFront(b length)
 {
     auto it = chunks.begin();
     while (it != chunks.end()) {
@@ -328,7 +328,7 @@ void SequenceChunk::doRemoveFromBeginning(b length)
     chunks.erase(chunks.begin(), it);
 }
 
-void SequenceChunk::doRemoveFromEnd(b length)
+void SequenceChunk::doRemoveAtBack(b length)
 {
     auto it = chunks.rbegin();
     while (it != chunks.rend()) {

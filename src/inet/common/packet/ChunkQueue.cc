@@ -18,44 +18,44 @@
 
 namespace inet {
 
-ChunkQueue::ChunkQueue(const char *name, const Ptr<const Chunk>& contents) :
+ChunkQueue::ChunkQueue(const char *name, const Ptr<const Chunk>& content) :
     cNamedObject(name),
-    contents(contents),
+    content(content),
     iterator(Chunk::ForwardIterator(b(0), 0))
 {
-    constPtrCast<Chunk>(contents)->markImmutable();
+    constPtrCast<Chunk>(content)->markImmutable();
 }
 
 ChunkQueue::ChunkQueue(const ChunkQueue& other) :
     cNamedObject(other),
-    contents(other.contents),
+    content(other.content),
     iterator(other.iterator)
 {
-    CHUNK_CHECK_IMPLEMENTATION(contents->isImmutable());
+    CHUNK_CHECK_IMPLEMENTATION(content->isImmutable());
 }
 
 void ChunkQueue::remove(b length)
 {
     CHUNK_CHECK_IMPLEMENTATION(b(0) <= length && length <= iterator.getPosition());
-    if (contents->getChunkLength() == length)
-        contents = EmptyChunk::singleton;
-    else if (contents->canRemoveFromBeginning(length)) {
-        const auto& newContents = makeExclusivelyOwnedMutableChunk(contents);
-        newContents->removeFromBeginning(length);
-        newContents->markImmutable();
-        contents = newContents;
+    if (content->getChunkLength() == length)
+        content = EmptyChunk::singleton;
+    else if (content->canRemoveAtFront(length)) {
+        const auto& newContent = makeExclusivelyOwnedMutableChunk(content);
+        newContent->removeAtFront(length);
+        newContent->markImmutable();
+        content = newContent;
     }
     else
-        contents = contents->peek(length, contents->getChunkLength() - length);
-    contents->seekIterator(iterator, iterator.getPosition() - length);
+        content = content->peek(length, content->getChunkLength() - length);
+    content->seekIterator(iterator, iterator.getPosition() - length);
     CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(iterator));
 }
 
 void ChunkQueue::moveIteratorOrRemove(b length)
 {
     poppedLength += length;
-    contents->moveIterator(iterator, length);
-    if (iterator.getPosition() > contents->getChunkLength() / 2)
+    content->moveIterator(iterator, length);
+    if (iterator.getPosition() > content->getChunkLength() / 2)
         remove(iterator.getPosition());
     CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(iterator));
 }
@@ -63,14 +63,14 @@ void ChunkQueue::moveIteratorOrRemove(b length)
 const Ptr<const Chunk> ChunkQueue::peek(b length, int flags) const
 {
     CHUNK_CHECK_USAGE(b(-1) <= length && length <= getLength(), "length is invalid");
-    return contents->peek(iterator, length, flags);
+    return content->peek(iterator, length, flags);
 }
 
 const Ptr<const Chunk> ChunkQueue::peekAt(b offset, b length, int flags) const
 {
     CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getLength(), "offset is out of range");
     CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= getLength(), "length is invalid");
-    return contents->peek(Chunk::Iterator(true, iterator.getPosition() + offset, -1), length, flags);
+    return content->peek(Chunk::Iterator(true, iterator.getPosition() + offset, -1), length, flags);
 }
 
 const Ptr<const Chunk> ChunkQueue::pop(b length, int flags)
@@ -85,8 +85,8 @@ const Ptr<const Chunk> ChunkQueue::pop(b length, int flags)
 void ChunkQueue::clear()
 {
     poppedLength += getLength();
-    contents->seekIterator(iterator, b(0));
-    contents = EmptyChunk::singleton;
+    content->seekIterator(iterator, b(0));
+    content = EmptyChunk::singleton;
 }
 
 void ChunkQueue::push(const Ptr<const Chunk>& chunk)
@@ -95,22 +95,22 @@ void ChunkQueue::push(const Ptr<const Chunk>& chunk)
     CHUNK_CHECK_USAGE(chunk->getChunkLength() > b(0), "chunk is empty");
     constPtrCast<Chunk>(chunk)->markImmutable();
     pushedLength += chunk->getChunkLength();
-    if (contents == EmptyChunk::singleton)
-        contents = chunk;
+    if (content == EmptyChunk::singleton)
+        content = chunk;
     else {
-        if (contents->canInsertAtEnd(chunk)) {
-            const auto& newContents = makeExclusivelyOwnedMutableChunk(contents);
-            newContents->insertAtEnd(chunk);
-            newContents->markImmutable();
-            contents = newContents->simplify();
+        if (content->canInsertAtBack(chunk)) {
+            const auto& newContent = makeExclusivelyOwnedMutableChunk(content);
+            newContent->insertAtBack(chunk);
+            newContent->markImmutable();
+            content = newContent->simplify();
         }
         else {
             auto sequenceChunk = makeShared<SequenceChunk>();
-            sequenceChunk->insertAtEnd(contents);
-            sequenceChunk->insertAtEnd(chunk);
+            sequenceChunk->insertAtBack(content);
+            sequenceChunk->insertAtBack(chunk);
             sequenceChunk->markImmutable();
-            contents = sequenceChunk;
-            contents->seekIterator(iterator, iterator.getPosition());
+            content = sequenceChunk;
+            content->seekIterator(iterator, iterator.getPosition());
         }
     }
     CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(iterator));

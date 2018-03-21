@@ -86,34 +86,34 @@ void BitCountChunk::setData(bool data)
     this->data = data;
 }
 
-bool BitCountChunk::canInsertAtBeginning(const Ptr<const Chunk>& chunk) const
+bool BitCountChunk::canInsertAtFront(const Ptr<const Chunk>& chunk) const
 {
     return chunk->getChunkType() == CT_BITCOUNT;
 }
 
-bool BitCountChunk::canInsertAtEnd(const Ptr<const Chunk>& chunk) const
+bool BitCountChunk::canInsertAtBack(const Ptr<const Chunk>& chunk) const
 {
     return chunk->getChunkType() == CT_BITCOUNT;
 }
 
-void BitCountChunk::doInsertAtBeginning(const Ptr<const Chunk>& chunk)
+void BitCountChunk::doInsertAtFront(const Ptr<const Chunk>& chunk)
 {
     const auto& bitCountChunk = staticPtrCast<const BitCountChunk>(chunk);
     length += bitCountChunk->length;
 }
 
-void BitCountChunk::doInsertAtEnd(const Ptr<const Chunk>& chunk)
+void BitCountChunk::doInsertAtBack(const Ptr<const Chunk>& chunk)
 {
     const auto& bitCountChunk = staticPtrCast<const BitCountChunk>(chunk);
     length += bitCountChunk->length;
 }
 
-void BitCountChunk::doRemoveFromBeginning(b length)
+void BitCountChunk::doRemoveAtFront(b length)
 {
     this->length -= length;
 }
 
-void BitCountChunk::doRemoveFromEnd(b length)
+void BitCountChunk::doRemoveAtBack(b length)
 {
     this->length -= length;
 }

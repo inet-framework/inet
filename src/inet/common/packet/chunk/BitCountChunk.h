@@ -40,11 +40,11 @@ class INET_API BitCountChunk : public Chunk
 
     static const Ptr<Chunk> convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, b offset, b length, int flags);
 
-    virtual void doInsertAtBeginning(const Ptr<const Chunk>& chunk) override;
-    virtual void doInsertAtEnd(const Ptr<const Chunk>& chunk) override;
+    virtual void doInsertAtFront(const Ptr<const Chunk>& chunk) override;
+    virtual void doInsertAtBack(const Ptr<const Chunk>& chunk) override;
 
-    virtual void doRemoveFromBeginning(b length) override;
-    virtual void doRemoveFromEnd(b length) override;
+    virtual void doRemoveAtFront(b length) override;
+    virtual void doRemoveAtBack(b length) override;
 
   public:
     /** @name Constructors, destructors and duplication related functions */
@@ -71,11 +71,11 @@ class INET_API BitCountChunk : public Chunk
     virtual ChunkType getChunkType() const override { return CT_BITCOUNT; }
     virtual b getChunkLength() const override { CHUNK_CHECK_IMPLEMENTATION(length >= b(0)); return length; }
 
-    virtual bool canInsertAtBeginning(const Ptr<const Chunk>& chunk) const override;
-    virtual bool canInsertAtEnd(const Ptr<const Chunk>& chunk) const override;
+    virtual bool canInsertAtFront(const Ptr<const Chunk>& chunk) const override;
+    virtual bool canInsertAtBack(const Ptr<const Chunk>& chunk) const override;
 
-    virtual bool canRemoveFromBeginning(b length) const override { return true; }
-    virtual bool canRemoveFromEnd(b length) const override { return true; }
+    virtual bool canRemoveAtFront(b length) const override { return true; }
+    virtual bool canRemoveAtBack(b length) const override { return true; }
 
     virtual std::string str() const override;
     //@}
