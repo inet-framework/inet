@@ -119,7 +119,7 @@ module LargeLAN
         channel cabletobus extends DatarateChannel
         {
             parameters:
-                delay = 0;
+                delay = 0s;
                 datarate = 10Mbps;
         }
     submodules:
@@ -192,7 +192,7 @@ network LargeNet
         channel cabletoserver extends DatarateChannel
         {
             parameters:
-                delay = 0;
+                delay = 0s;
                 datarate = 1Gbps;
         }
     submodules:
