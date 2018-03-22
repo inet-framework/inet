@@ -1,8 +1,26 @@
-\chapter{The TCP Models}
+\chapter{Transport Protocols: TCP, UDP, SCTP}
 \label{cha:tcp}
 
+\section{TCP}
+\label{sec:tcp}
 
-\section{Overview}
+\subsection{Overview}
+\label{sec:tcp_overview}
+
+The \nedtype{Tcp} simple module is the primary implementation 
+of the TCP protocol in the INET framework.
+
+INET contains two other implementation of the TCP protocol:
+\nedtype{TCP\_lwIP} and \nedtype{TCP\_NSC}, which are based
+on external codebases.
+
+All TCP modules implements the \nedtype{ITcp} interface and
+communicate with the application and the IP layer through the
+same interface, so they can be interchanged and can also be 
+mixed in the same network.
+
+\subsection{Protocol Overview}
+\label{sec:tcp_prot}
 
 TCP protocol is the most widely used protocol of the Internet. It provides
 reliable, ordered delivery of stream of bytes from one application on one computer
@@ -36,7 +54,7 @@ RFC 3782 & The NewReno Modification to TCP's Fast Recovery Algorithm \\
 In this section we describe the features of the TCP protocol specified by these RFCs,
 the following sections deal with the implementation of the TCP in the INET framework.
 
-\subsection{TCP segments}
+\subsubsection{TCP segments}
 
 The TCP module transmits a stream of the data over the unreliable, datagram service
 that the IP layer provides. When the application writes a chunk of data into the socket,
@@ -99,7 +117,7 @@ Here
   always padded to a multiple of 4 bytes.
 \end{itemize}
 
-\subsection{TCP connections}
+\subsubsection{TCP connections}
 
 When two applications are communicating via TCP, one of the applications is the client,
 the other is the server. The server usually starts a socket with a well known local port
@@ -126,7 +144,7 @@ most TCP implementation choose the initial sequence number according to the syst
 \label{fig:tcp_states}
 \end{figure}
 
-\subsection{Flow control}
+\subsubsection{Flow control}
 \label{subsec:flow_control}
 
 The TCP module of the receiver buffers the data of incoming segments.
@@ -182,7 +200,7 @@ receiver in the response to this segment.
 
 TCP keepalive timer is used to detect dead connections.
 
-\subsection{Transmission policies}
+\subsubsection{Transmission policies}
 \label{subsec:trans_policies}
 
 \subsubsection*{Retransmissions}
@@ -330,7 +348,7 @@ The timestamp option can also be used for PAWS (protection against wrapped
 sequence numbers).
 
 
-\subsection{Congestion control}
+\subsubsection{Congestion control}
 
 Flow control allows the sender to slow down the transmission when the
 receiver can not accept them because of memory limitations. However
@@ -647,10 +665,10 @@ dropped a previously SACKed segment.
 % \end{enumerate}
 
 
-\section{TCP module}
+\subsection{The TCP module}
+\label{sec:tcp_module}
 
 The \nedtype{Tcp} simple module is the main implementation of the TCP protocol in the INET framework.
-Other implementation are described in section \ref{sec:other_tcp}.
 The \nedtype{Tcp} module as other transport protocols work above the network layer and below the application
 layer, therefore it has gates to be connected with the IPv4 or IPv6 network (ipIn/ipOut or ipv6In/ipv6Out),
 and with the applications (appIn[k], appOut[k]).
@@ -662,7 +680,7 @@ The TCP module usually specified by its module interface
 (\nedtype{ITcp}) in the NED definition of hosts, so it can be replaced with any implementation
 that communicates through the same gates.
 
-\subsection{Statistics}
+\subsubsection{Statistics}
 
 The \nedtype{Tcp} module collects the following vectors:
 
@@ -703,19 +721,8 @@ of these output vectors are generated.
 %
 % log, log verbose
 
-\section{Other TCP implementations}
-\label{sec:other_tcp}
-
-INET contains two other implementation of the TCP protocol:
-\nedtype{TCP\_lwIP} and \nedtype{TCP\_NSC}.
-All TCP modules implements the \nedtype{ITcp} interface and
-communicate with the application and the IP layer through the
-same interface. Therefore they can be interchanged and can
-operate with each other. See \ffilename{examples/inet/tcpclientserver/omnetpp.ini}
-how to parametrize \nedtype{StandardHost}s to use the different
-implementations.
-
-\subsection{TCP LWIP}
+\subsection{TCP lwIP}
+\label{sec:tcp_lwip}
 
 lwIP is a light-weight implementation of the TCP/IP protocol suite
 that was originally written by Adam Dunkels of the Swedish Institute of
@@ -782,11 +789,12 @@ parameter to \fkeyword{false}.
 
 
 \subsection{TCP NSC}
+\label{sec:tcp_nsc}
 
 Network Simulation Cradle (NSC) is a tool that allow real-world TCP/IP network stacks
 to be used in simulated networks. The NSC project is created by Sam Jansen
 and available on \url{http://research.wand.net.nz/software/nsc.php}. NSC currently
-contains Linux, FreeBSD, OpenBSD and lwIP network stacks, altough on 64-bit
+contains Linux, FreeBSD, OpenBSD and lwIP network stacks, although on 64-bit
 systems only Linux implementations can be built.
 
 To use the \nedtype{TCP\_NSC} module you should download the
@@ -853,6 +861,69 @@ data transfer mode.
 
 % FIXME connections are identified by connId, not by (appGateIndex,connId) as in TCP module.
 % FIXME TCP_NSC_Connection::getSocket() and TCP_NSC_Connection::do_checkedclose() are declared but not implemented
+
+
+
+
+\section{UDP}
+\label{sec:udp}
+
+\subsection{Overview}
+
+The UDP protocol is a very simple datagram transport protocol, which
+basically makes the services of the network layer available to the applications.
+It performs packet multiplexing and demultiplexing to ports and some basic
+error detection only.
+
+The frame format as described in RFC768:
+
+\begin{center}
+\begin{bytefield}{32}
+\bitheader{0,7,8,15,16,23,24,31} \\
+\bitbox{16}{Source Port} &
+\bitbox{16}{Destination Port} \\
+\bitbox{16}{Length} &
+\bitbox{16}{Checksum} \\
+\wordbox{3}{Data}
+\end{bytefield}
+\end{center}
+
+The ports represents the communication end points that are allocated by the
+applications that want to send or receive the datagrams. The ``Data'' field
+is the encapsulated application data, the ``Length'' and ``Checksum'' fields
+are computed from the data.
+
+The INET framework contains an \nedtype{Udp} module that performs the encapsulation/decapsulation
+of user packets, an \nedtype{UdpSocket} class that provides the application the usual
+socket interface, and several sample applications.
+
+These components implement the following statndards:
+\begin{itemize}
+\item RFC768: User Datagram Protocol
+\item RFC1122: Requirements for Internet Hosts -- Communication Layers
+\end{itemize}
+
+\subsection{The UDP module}
+
+The UDP protocol is implemented by the \nedtype{Udp} simple module.
+There is a module interface (\nedtype{IUdp}) that defines the gates of the
+\nedtype{Udp} component. In the \nedtype{StandardHost} node, the UDP component
+can be any module implementing that interface.
+
+Each UDP module has gates to connect to the IPv4 and IPv6 network layer
+(ipIn/ipOut and ipv6In/ipv6Out), and a gate array to connect to the applications
+(appIn/appOut).
+
+The UDP module can be connected to several applications, and each application
+can use several sockets to send and receive UDP datagrams.
+
+
+
+\section{SCTP}
+\label{sec:sctp}
+
+TODO
+
 
 
 %%% Local Variables:
