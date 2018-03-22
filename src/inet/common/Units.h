@@ -1045,7 +1045,6 @@ typedef scale<mps, 100, 34029> mach;
 
 // Angles
 typedef scale<rad, 180000000, 3141593> deg;
-typedef scale<rad, 200000000, 3141593> grad;
 typedef scale<deg, 60> deg_min;
 typedef scale<deg_min, 60> deg_sec;
 
@@ -1099,7 +1098,6 @@ UNIT_DISPLAY_NAME(units::kph, "km/h");
 UNIT_DISPLAY_NAME(units::knot, "knots");
 UNIT_DISPLAY_NAME(units::mach, "mach");
 UNIT_DISPLAY_NAME(units::deg, "deg");
-UNIT_DISPLAY_NAME(units::grad, "grad");
 UNIT_DISPLAY_NAME(units::deg_min, "'");
 UNIT_DISPLAY_NAME(units::deg_sec, "\"");
 UNIT_DISPLAY_NAME(units::kPa, "kPa");
@@ -1213,7 +1211,6 @@ typedef value<double, units::knot> knot;
 typedef value<double, units::mach> mach;
 
 typedef value<double, units::deg> deg;
-typedef value<double, units::grad> grad;
 typedef value<double, units::deg_min> deg_min;
 typedef value<double, units::deg_sec> deg_sec;
 
