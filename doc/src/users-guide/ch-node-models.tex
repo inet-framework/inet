@@ -32,7 +32,10 @@ are not models of physical network nodes, but are necessary
 to model other aspects:
 
 \begin{itemize}
-\item \nedtype{ScenarioManager} is ... TODO
+  \item \nedtype{ScenarioManager} allows scripted scenarios, such
+     as timed failure and recovery of network nodes.
+  \item \nedtype{Ipv4NetworkConfigurator} assigns IP addresses 
+     to hosts and routers, and sets up static routing.
 \item \nedtype{XXXVisualizer} is ...
 \item \nedtype{Medium} is ...
 \item ...
@@ -191,13 +194,23 @@ not need a network layer, a routing table or interface table. Some NICs (e.g.
 \nedtype{EtherMac}) can be used without and interface table and queue models as
 well.
 
-\ifdraft TODO
-The notification board (\nedtype{NotificationBoard}) and the interface
-table (\nedtype{InterfaceTable}) will be described later in this chapter.
-Other modules are covered in later chapters, i.e. \nedtype{Ipv4RoutingTable}
-in the IPv4 chapter.
-\fi
 
+\section{Specifying network addresses in module parameters}
+
+Nearly all application layer modules, but several other compoments as well,
+have parameters that specify network addresses. They typically accept
+addresses given with any of the following syntax variations:
+
+\begin{itemize}
+  \item literal IPv4 address: \ttt{"186.54.66.2"}
+  \item literal IPv6 address: \ttt{"3011:7cd6:750b:5fd6:aba3:c231:e9f9:6a43"}
+  \item module name: \ttt{"server"}, \ttt{"subnet.server[3]"}
+  \item interface of a host or router: \ttt{"server/eth0"}, \ttt{"subnet.server[3]/eth0"}
+  \item IPv4 or IPv6 address of a host or router: \ttt{"server(ipv4)"},
+      \ttt{"subnet.server[3](ipv6)"}
+  \item IPv4 or IPv6 address of an interface of a host or router:
+      \ttt{"server/eth0(ipv4)"}, \ttt{"subnet.server[3]/eth0(ipv6)"}
+\end{itemize}
 
 
 

@@ -3,40 +3,46 @@
 
 \section{Installation}
 
-To install the INET Framework, download the most recent INET Framework source
-release from the download link on the http://inet.omnetpp.org web site,
-unpack it, and follow the instructions in the INSTALL file in the root
-directory of the archive.
+There are several ways to install the INET Framework:
 
-\ifdraft TODO
-If you plan to simulate ad-hoc networks or you need more wireless link layer
-protocols than provided in INET, download and install the INETMANET source
-archive instead. (INETMANET aready contains a copy of the INET Framework.)
+\begin{itemize}
+  \item Let the OMNeT++ IDE download and install it for you. 
+      This is the easiest way. Just accept the offer to install INET
+      in the dialog that comes up when you first start the IDE, or
+      choose \textit{Help > Install Simulation Models} any time later.
+  \item From INET Framework web site, \textit{http://inet.omnetpp.org}. 
+      The IDE always installs the last stable version compatible with
+      your version of OMNeT++. If you need some other version, they
+      are available for download from the web site. Installation
+      instructions are also provided there.  
+  \item From GitHub. If you have experience with \textit{git}, 
+      clone the INET Framework project (\ttt{inet\--frame\-work/inet}), 
+      check out the revision of your choice, and follow the INSTALL 
+      file in the project root.
+\end{itemize}
+ 
+ 
+\section{Installing INET Extensions}
 
-If you plan to make use of other INET extensions (e.g. HttpTools, VoipTools or TraCI),
-follow the installation instructions provided with them. If there are no
-install instructions, check if the archive contains a \ttt{.project} file.
-If it does, then the project can be imported into the IDE (use File > Import >
-General > Existing Project into workspace); make sure that the project is recognized
-as an OMNeT++ project (the Project Properties dialog contains an OMNeT++ page)
-and it lists the INET or INETMANET project as dependency (check the Project References
-page in the Project Properties dialog).
+If you plan to make use of INET extensions (e.g. Veins or SimuLTE),
+follow the installation instructions provided with them. 
 
-If the extension project contains no \ttt{.project} file, create an empty OMNeT++
-project using the New OMNeT++ Project wizard in File > New, add the INET or INETMANET
-project as dependency using the Project References page in the Project Properties dialog,
-and copy the source files into the project.
-\fi
+In the absence of specific instructions, the following procedure usually works: 
 
-After installation, run the example simulations to make sure everything works
-correctly. The INSTALL file also describes how to do that.
-
+\begin{itemize}
+ \item First, check if the project root contains a file named \ttt{.project}.
+ \item If it does, then the project can be imported into the IDE (use \textit{File > Import >
+    General > Existing Project} into workspace). make sure that the project is recognized
+    as an OMNeT++ project (the \textit{Project Properties} dialog contains a page
+    titled \textit{OMNeT++}), and it lists the INET project as dependency 
+    (check the \textit{Project References} page in the \textit{Project Properties} dialog).
+ \item If there is no \ttt{.project} file, you can create an empty OMNeT++
+    project using the \textit{New OMNeT++ Project} wizard in \textit{File > New}, 
+    add the INET project as dependency using the \textit{Project References} page 
+    in the \textit{Project Properties} dialog, and copy the source files into the project.
+\end{itemize}
 
 \section{INET as an OMNeT++-based simulation framework}
-
-\ifdraft TODO
-what is documented where in the OMNeT++ manual (chapter, section title)
-\fi
 
 The INET Framework builds upon OMNeT++, and uses the same concept: modules
 that communicate by message passing. Hosts, routers, switches and other
@@ -155,25 +161,11 @@ how to run;
 C++ -> dll (opp\_run) or exe
 \fi
 
-\ifdraft TODO
 \section{Result Collection and Analysis}
 
-how to anaylize results
+how to analyize results
 
 how to configure result collection
-\fi
-
-
-\ifdraft TODO
-\section{TODO}
-Some modules have only one instance, at global network level:
-
-\nedtype{Ipv4NetworkConfigurator} assigns IP addresses to hosts and routers,
-and sets up static routing.
-
-\nedtype{ScenarioManager} makes simulations scriptable. Modules can be made to support
-scripting by implementing the \cppclass{IScriptable} C++ interface.
-\fi
 
 
 \section{Setting up wired network simulations}
@@ -189,19 +181,11 @@ and \nedtype{Router} modules. For automatic IP address assignment and
 static IP routing we can use the \nedtype{Ipv4NetworkConfigurator} utility
 module.
 
-\ifdraft TODO
-ethg, pppg;  automatically expand (++)
+TODO:  ethg, pppg;  automatically expand (++)
 
 todo which modules are needed into it, what they do, etc.
 
 how to add apps, etc
-\fi
-
-\ifdraft TODO
-\subsection{Modeling Link and Node Failures}
-
-more
-\fi
 
 
 \section{Setting up wireless network simulations}
@@ -212,36 +196,7 @@ assembled using the predefined \nedtype{WirelessHost} and \nedtype{AccessPoint}
 modules. \nedtype{RadioMedium} is also required for wireless simulations. It
 keeps track of which nodes are within interference distance of other nodes.
 
-
-\section{Specifying network addresses in module parameters}
-
-In INET, TCP, UDP and all application layer modules work with
-both IPv4 and IPv6. Internally they use the \cppclass{L3Address} C++ class, which
-can represent both IPv4 and IPv6 addresses.
-
-Most modules use the \cppclass{L3AddressResolver} C++ class to resolve addresses
-specified in module parameters in omnetpp.ini.
-\cppclass{L3AddressResolver} accepts the following syntax:
-
-\begin{itemize}
-  \item literal IPv4 address: \ttt{"186.54.66.2"}
-  \item literal IPv6 address: \ttt{"3011:7cd6:750b:5fd6:aba3:c231:e9f9:6a43"}
-  \item module name: \ttt{"server"}, \ttt{"subnet.server[3]"}
-  \item interface of a host or router: \ttt{"server/eth0"}, \ttt{"subnet.server[3]/eth0"}
-  \item IPv4 or IPv6 address of a host or router: \ttt{"server(ipv4)"},
-      \ttt{"subnet.server[3](ipv6)"}
-  \item IPv4 or IPv6 address of an interface of a host or router:
-      \ttt{"server/eth0(ipv4)"}, \ttt{"subnet.server[3]/eth0(ipv6)"}
-\end{itemize}
-
-
-\ifdraft TODO
-\section{Setting up ad-hoc network simulations}
-
-todo which modules are needed into it, what they do, etc.
-\fi
-
-
+TODO
 
 %%% Local Variables:
 %%% mode: latex
