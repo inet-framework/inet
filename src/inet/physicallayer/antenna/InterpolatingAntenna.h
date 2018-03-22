@@ -33,13 +33,13 @@ class INET_API InterpolatingAntenna : public AntennaBase
       protected:
         double minGain;
         double maxGain;
-        std::map<double, double> elevationGainMap;
-        std::map<double, double> headingGainMap;
-        std::map<double, double> bankGainMap;
+        std::map<rad, double> elevationGainMap;
+        std::map<rad, double> headingGainMap;
+        std::map<rad, double> bankGainMap;
 
       protected:
-        virtual void parseMap(std::map<double, double>& gainMap, const char *text);
-        virtual double computeGain(const std::map<double, double>& gainMap, double angle) const;
+        virtual void parseMap(std::map<rad, double>& gainMap, const char *text);
+        virtual double computeGain(const std::map<rad, double>& gainMap, rad angle) const;
 
       public:
         AntennaGain(const char *elevation, const char *heading, const char *bank);

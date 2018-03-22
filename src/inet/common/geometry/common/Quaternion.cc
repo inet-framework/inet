@@ -26,13 +26,13 @@ Quaternion::Quaternion(const Coord &axis, double angle) : Quaternion(std::cos(an
 
 Quaternion::Quaternion(const EulerAngles& angles)
 {
-    double cos_z_2 = std::cos(0.5*angles.alpha);
-    double cos_y_2 = std::cos(0.5*angles.beta);
-    double cos_x_2 = std::cos(0.5*angles.gamma);
+    double cos_z_2 = std::cos(0.5 * rad(angles.alpha).get());
+    double cos_y_2 = std::cos(0.5 * rad(angles.beta).get());
+    double cos_x_2 = std::cos(0.5 * rad(angles.gamma).get());
 
-    double sin_z_2 = std::sin(0.5*angles.alpha);
-    double sin_y_2 = std::sin(0.5*angles.beta);
-    double sin_x_2 = std::sin(0.5*angles.gamma);
+    double sin_z_2 = std::sin(0.5 * rad(angles.alpha).get());
+    double sin_y_2 = std::sin(0.5 * rad(angles.beta).get());
+    double sin_x_2 = std::sin(0.5 * rad(angles.gamma).get());
 
     // and now compute Quaternion
     s   = cos_z_2*cos_y_2*cos_x_2 + sin_z_2*sin_y_2*sin_x_2;
@@ -147,14 +147,14 @@ EulerAngles Quaternion::toEulerAngles(bool homogenous) const
 
     EulerAngles euler;
     if (homogenous) {
-        euler.gamma = std::atan2(2.0 * (v.x*v.y + v.z*s), sqx - sqy - sqz + sqw);
-        euler.beta = std::asin(-2.0 * (v.x*v.z - v.y*s));
-        euler.alpha = std::atan2(2.0 * (v.y*v.z + v.x*s), -sqx - sqy + sqz + sqw);
+        euler.gamma = rad(std::atan2(2.0 * (v.x*v.y + v.z*s), sqx - sqy - sqz + sqw));
+        euler.beta = rad(std::asin(-2.0 * (v.x*v.z - v.y*s)));
+        euler.alpha = rad(std::atan2(2.0 * (v.y*v.z + v.x*s), -sqx - sqy + sqz + sqw));
     }
     else {
-        euler.gamma = std::atan2(2.0 * (v.z*v.y + v.x*s), 1 - 2*(sqx + sqy));
-        euler.beta = std::asin(-2.0 * (v.x*v.z - v.y*s));
-        euler.alpha = std::atan2(2.0 * (v.x*v.y + v.z*s), 1 - 2*(sqy + sqz));
+        euler.gamma = rad(std::atan2(2.0 * (v.z*v.y + v.x*s), 1 - 2*(sqx + sqy)));
+        euler.beta = rad(std::asin(-2.0 * (v.x*v.z - v.y*s)));
+        euler.alpha = rad(std::atan2(2.0 * (v.x*v.y + v.z*s), 1 - 2*(sqy + sqz)));
     }
     return euler;
 }

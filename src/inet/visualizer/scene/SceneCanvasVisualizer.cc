@@ -113,22 +113,23 @@ void SceneCanvasVisualizer::handleParameterChange(const char* name)
 
 EulerAngles SceneCanvasVisualizer::computeViewAngle(const char* viewAngle)
 {
-    double x, y, z;
+    rad alpha, beta, gamma;
+    double a, b, c;
     if (!strcmp(viewAngle, "x"))
     {
-        x = 0;
-        y = M_PI / 2;
-        z = M_PI / -2;
+        alpha = rad(0);
+        beta = rad(M_PI / 2);
+        gamma = rad(M_PI / -2);
     }
     else if (!strcmp(viewAngle, "y"))
     {
-        x = M_PI / 2;
-        y = 0;
-        z = 0;
+        alpha = rad(M_PI / 2);
+        beta = rad(0);
+        gamma = rad(0);
     }
     else if (!strcmp(viewAngle, "z"))
     {
-        x = y = z = 0;
+        alpha = beta = gamma = rad(0);
     }
     else if (!strncmp(viewAngle, "isometric", 9))
     {
@@ -144,19 +145,19 @@ EulerAngles SceneCanvasVisualizer::computeViewAngle(const char* viewAngle)
         // 2nd axis can point on the 2d plane in 4 directions (the opposite direction is forbidden)
         // 3rd axis can point on the 2d plane in 2 directions
         // this results in 6 * 4 * 2 = 48 different configurations
-        x = math::deg2rad(45 + v % 4 * 90);
-        y = math::deg2rad(v / 24 % 2 ? 35.27 : -35.27);
-        z = math::deg2rad(30 + v / 4 % 6 * 60);
+        alpha = degree(45 + v % 4 * 90);
+        beta = degree(v / 24 % 2 ? 35.27 : -35.27);
+        gamma = degree(30 + v / 4 % 6 * 60);
     }
-    else if (sscanf(viewAngle, "%lf %lf %lf", &x, &y, &z) == 3)
+    else if (sscanf(viewAngle, "%lf %lf %lf", &a, &b, &c) == 3)
     {
-        x = math::deg2rad(x);
-        y = math::deg2rad(y);
-        z = math::deg2rad(z);
+        alpha = degree(a);
+        beta = degree(b);
+        gamma = degree(c);
     }
     else
         throw cRuntimeError("The viewAngle parameter must be a predefined string or a triplet representing three degrees");
-    return EulerAngles(x, y, z);
+    return EulerAngles(alpha, beta, gamma);
 }
 
 cFigure::Point SceneCanvasVisualizer::parse2D(const char* text)

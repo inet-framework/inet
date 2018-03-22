@@ -65,9 +65,9 @@ void MobilityCanvasVisualizer::refreshDisplay() const
             setPosition(mobilityVisualization->visualRepresentation, position);
         if (displayOrientations) {
             // NOTE: this negation cancels out the (incorrect) CCW angle handling of cPieSliceFigure (see bug https://dev.omnetpp.org/bugs/view.php?id=1030)
-            double angle = -orientation.alpha;
-            mobilityVisualization->orientationFigure->setStartAngle(angle - M_PI * orientationPieSize);
-            mobilityVisualization->orientationFigure->setEndAngle(angle + M_PI * orientationPieSize);
+            auto angle = -orientation.alpha;
+            mobilityVisualization->orientationFigure->setStartAngle(rad(angle - rad(M_PI) * orientationPieSize).get());
+            mobilityVisualization->orientationFigure->setEndAngle(rad(angle + rad(M_PI) * orientationPieSize).get());
             double radius = getOrientationPieRadius(mobilityVisualization->visualRepresentation);
             mobilityVisualization->orientationFigure->setBounds(cFigure::Rectangle(-radius, -radius, 2 * radius, 2 * radius));
         }

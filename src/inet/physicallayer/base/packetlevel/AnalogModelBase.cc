@@ -28,9 +28,9 @@ EulerAngles AnalogModelBase::computeTransmissionDirection(const ITransmission *t
     Coord transmissionStartDirection = arrivalStartPosition - transmissionStartPosition;
     double z = transmissionStartDirection.z;
     transmissionStartDirection.z = 0;
-    double heading = atan2(transmissionStartDirection.y, transmissionStartDirection.x);
-    double elevation = atan2(z, transmissionStartDirection.length());
-    return EulerAngles(heading, elevation, 0);
+    auto heading = rad(atan2(transmissionStartDirection.y, transmissionStartDirection.x));
+    auto elevation = rad(atan2(z, transmissionStartDirection.length()));
+    return EulerAngles(heading, elevation, rad(0));
 }
 
 } // namespace physicallayer

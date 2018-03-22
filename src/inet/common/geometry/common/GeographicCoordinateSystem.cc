@@ -64,14 +64,14 @@ void OsgGeographicCoordinateSystem::initialize(int stage)
         double playgroundLatitude = par("playgroundLatitude");
         double playgroundLongitude = par("playgroundLongitude");
         double playgroundAltitude = par("playgroundAltitude");
-        double playgroundHeading = par("playgroundHeading");
-        double playgroundElevation = par("playgroundElevation");
-        double playgroundBank = par("playgroundBank");
+        rad playgroundHeading = degree(par("playgroundHeading"));
+        rad playgroundElevation = degree(par("playgroundElevation"));
+        rad playgroundBank = degree(par("playgroundBank"));
         playgroundPosition = GeoCoord(playgroundLatitude, playgroundLongitude, playgroundAltitude);
         playgroundOrientation = EulerAngles(playgroundHeading, playgroundElevation, playgroundBank);
         auto locatorNode = new osgEarth::Util::ObjectLocatorNode(mapNode->getMap());
         locatorNode->getLocator()->setPosition(osg::Vec3d(playgroundLongitude, playgroundLatitude, playgroundAltitude));
-        locatorNode->getLocator()->setOrientation(osg::Vec3d(playgroundHeading, playgroundElevation, playgroundBank));
+        locatorNode->getLocator()->setOrientation(osg::Vec3d(rad(playgroundHeading).get(), rad(playgroundElevation).get(), rad(playgroundBank).get()));
         locatorNode->getLocator()->getLocatorMatrix(locatorMatrix);
         inverseLocatorMatrix.invert(locatorMatrix);
         delete locatorNode;

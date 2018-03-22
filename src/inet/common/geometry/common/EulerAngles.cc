@@ -6,8 +6,8 @@
 
 namespace inet {
 
-const EulerAngles EulerAngles::ZERO = EulerAngles(0.0, 0.0, 0.0);
-const EulerAngles EulerAngles::NIL = EulerAngles(NaN, NaN, NaN);
+const EulerAngles EulerAngles::ZERO = EulerAngles(rad(0.0), rad(0.0), rad(0.0));
+const EulerAngles EulerAngles::NIL = EulerAngles(rad(NaN), rad(NaN), rad(NaN));
 
 } // namespace inet
 

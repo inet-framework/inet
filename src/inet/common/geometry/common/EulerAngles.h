@@ -2,8 +2,11 @@
 #define __INET_EULERANGLES_H
 
 #include "inet/common/INETMath.h"
+#include "inet/common/Units.h"
 
 namespace inet {
+
+using namespace inet::units::values;
 
 /**
  * Orientations are represented by 3D double precision Tait-Bryan (Euler) tuples
@@ -24,9 +27,9 @@ class INET_API EulerAngles
 
   public:
     // alpha, beta and gamma angle of the orientation
-    double alpha;
-    double beta;
-    double gamma;
+    rad alpha;
+    rad beta;
+    rad gamma;
 
   private:
     void copy(const EulerAngles& other) { alpha = other.alpha; beta = other.beta; gamma = other.gamma; }
@@ -35,17 +38,17 @@ class INET_API EulerAngles
     EulerAngles()
         : alpha(0.0), beta(0.0), gamma(0.0) {}
 
-    EulerAngles(double alpha, double beta = 0.0, double gamma = 0.0)
+    EulerAngles(rad alpha, rad beta, rad gamma)
         : alpha(alpha), beta(beta), gamma(gamma) {}
 
-    double getAlpha() const { return alpha; }
-    void setAlpha(double alpha) { this->alpha = alpha; }
+    rad getAlpha() const { return alpha; }
+    void setAlpha(rad alpha) { this->alpha = alpha; }
 
-    double getBeta() const { return beta; }
-    void setBeta(double beta) { this->beta = beta; }
+    rad getBeta() const { return beta; }
+    void setBeta(rad beta) { this->beta = beta; }
 
-    double getGamma() const { return gamma; }
-    void setGamma(double gamma) { this->gamma = gamma; }
+    rad getGamma() const { return gamma; }
+    void setGamma(rad gamma) { this->gamma = gamma; }
 
     std::string str() const;
 
@@ -56,7 +59,7 @@ class INET_API EulerAngles
 
     bool isUnspecified() const
     {
-        return std::isnan(alpha) && std::isnan(beta) && std::isnan(gamma);
+        return std::isnan(alpha.get()) && std::isnan(beta.get()) && std::isnan(gamma.get());
     }
 
     EulerAngles operator+(const EulerAngles a) const { return EulerAngles(alpha + a.alpha, beta + a.beta, gamma + a.gamma); }

@@ -3,6 +3,7 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.Units;
 
 cplusplus{{
 #include "inet/common/geometry/common/Coord.h"
@@ -22,7 +23,7 @@ class Coord
 class EulerAngles
 {
     @existingClass;
-    double alpha;
-    double beta;
-    double gamma;
+    rad alpha;
+    rad beta;
+    rad gamma;
 }

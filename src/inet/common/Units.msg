@@ -22,5 +22,6 @@ class bps  { @existingClass; @primitive; @fromString(bps(string2double($)));  @t
 class Hz   { @existingClass; @primitive; @fromString(Hz(string2double($)));   @toString(double2string($.get())); @defaultValue(Hz(NaN)); }
 class m    { @existingClass; @primitive; @fromString(m(string2double($)));    @toString(double2string($.get())); @defaultValue(m(NaN)); }
 class Ohmm { @existingClass; @primitive; @fromString(Ohmm(string2double($))); @toString(double2string($.get())); @defaultValue(Ohmm(NaN)); }
+class rad  { @existingClass; @primitive; @fromString(rad(string2double($)));  @toString(double2string($.get())); @defaultValue(rad(NaN)); }
 class W    { @existingClass; @primitive; @fromString(W(string2double($)));    @toString(double2string($.get())); @defaultValue(W(NaN)); }
 

@@ -34,9 +34,9 @@ void FacingMobility::initialize(int stage)
 EulerAngles FacingMobility::getCurrentAngularPosition()
 {
     Coord direction = targetMobility->getCurrentPosition() - sourceMobility->getCurrentPosition();
-    lastOrientation.alpha = atan2(direction.y, direction.x);
-    lastOrientation.beta = -asin(direction.z);
-    lastOrientation.gamma = 0.0;
+    lastOrientation.alpha = rad(atan2(direction.y, direction.x));
+    lastOrientation.beta = rad(-asin(direction.z));
+    lastOrientation.gamma = rad(0.0);
     return lastOrientation;
 }
 

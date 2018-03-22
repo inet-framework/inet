@@ -86,7 +86,9 @@ void SceneOsgEarthVisualizer::initializeLocator()
     auto playgroundPosition = coordinateSystem->getPlaygroundPosition();
     auto playgroundOrientation = coordinateSystem->getPlaygroundOrientation();
     locatorNode->getLocator()->setPosition(osg::Vec3d(playgroundPosition.longitude, playgroundPosition.latitude, playgroundPosition.altitude));
-    locatorNode->getLocator()->setOrientation(osg::Vec3d(playgroundOrientation.alpha, playgroundOrientation.beta, playgroundOrientation.gamma));
+    locatorNode->getLocator()->setOrientation(osg::Vec3d(rad(playgroundOrientation.alpha).get(),
+                                                         rad(playgroundOrientation.beta).get(),
+                                                         rad(playgroundOrientation.gamma).get()));
 }
 
 void SceneOsgEarthVisualizer::initializeViewpoint()

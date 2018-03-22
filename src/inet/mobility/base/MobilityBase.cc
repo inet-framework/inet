@@ -142,11 +142,11 @@ void MobilityBase::checkPosition()
 void MobilityBase::initializeOrientation()
 {
     if (hasPar("initialHeading") && hasPar("initialElevation") && hasPar("initialBank")) {
-        lastOrientation.alpha = par("initialHeading");
-        double initialElevation = par("initialElevation");
+        lastOrientation.alpha = degree(par("initialHeading"));
+        auto initialElevation = degree(par("initialElevation"));
         // NOTE: negation is needed, see IMobility comments on orientation
         lastOrientation.beta = -initialElevation;
-        lastOrientation.gamma = par("initialBank");
+        lastOrientation.gamma = degree(par("initialBank"));
     }
 }
 

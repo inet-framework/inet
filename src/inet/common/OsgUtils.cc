@@ -236,9 +236,9 @@ PositionAttitudeTransform *createPositionAttitudeTransform(const Coord& position
 {
     auto pat = new PositionAttitudeTransform();
     pat->setPosition(Vec3d(position.x, position.y, position.z));
-    pat->setAttitude(Quat(orientation.alpha, Vec3d(1.0, 0.0, 0.0)) *
-                     Quat(orientation.beta, Vec3d(0.0, 1.0, 0.0)) *
-                     Quat(orientation.gamma, Vec3d(0.0, 0.0, 1.0)));
+    pat->setAttitude(Quat(rad(orientation.alpha).get(), Vec3d(1.0, 0.0, 0.0)) *
+                     Quat(rad(orientation.beta).get(), Vec3d(0.0, 1.0, 0.0)) *
+                     Quat(rad(orientation.gamma).get(), Vec3d(0.0, 0.0, 1.0)));
     return pat;
 }
 

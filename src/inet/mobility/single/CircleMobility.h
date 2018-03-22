@@ -61,7 +61,7 @@ class INET_API CircleMobility : public MovingMobilityBase
     virtual double getMaxSpeed() const override { return speed; }
     CircleMobility();
 
-    virtual EulerAngles getCurrentAngularVelocity() override { return EulerAngles(omega, 0, 0); }
+    virtual EulerAngles getCurrentAngularVelocity() override { return EulerAngles(rad(omega), rad(0), rad(0)); }
     virtual EulerAngles getCurrentAngularAcceleration() override { return EulerAngles::ZERO; }
 };
 

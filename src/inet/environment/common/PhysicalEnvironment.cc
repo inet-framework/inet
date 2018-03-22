@@ -253,13 +253,13 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
             cStringTokenizer tokenizer(orientationAttribute);
             if ((tok = tokenizer.nextToken()) == nullptr)
                 throw cRuntimeError("Missing orientation alpha at %s", element->getSourceLocation());
-            orientation.alpha = math::deg2rad(atof(tok));
+            orientation.alpha = degree(atof(tok));
             if ((tok = tokenizer.nextToken()) == nullptr)
                 throw cRuntimeError("Missing orientation beta at %s", element->getSourceLocation());
-            orientation.beta = math::deg2rad(atof(tok));
+            orientation.beta = degree(atof(tok));
             if ((tok = tokenizer.nextToken()) == nullptr)
                 throw cRuntimeError("Missing orientation gamma at %s", element->getSourceLocation());
-            orientation.gamma = math::deg2rad(atof(tok));
+            orientation.gamma = degree(atof(tok));
         }
         // shape
         Coord size = Coord::NIL;

@@ -55,7 +55,7 @@ CosineAntenna::AntennaGain::AntennaGain(double maxGain, degree beamWidth) :
 double CosineAntenna::AntennaGain::computeGain(const EulerAngles direction) const
 {
     double exponent = -3.0 / (20 * std::log10(std::cos(math::deg2rad(beamWidth.get()) / 4.0)));
-    return maxGain * std::pow(std::cos(direction.alpha / 2.0), exponent);
+    return maxGain * std::pow(std::cos(rad(direction.alpha / 2.0).get()), exponent);
 }
 
 } // namespace physicallayer
