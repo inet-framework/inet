@@ -36,7 +36,7 @@ simple Ieee80211StateBasedEpEnergyConsumer extends StateBasedEpEnergyConsumer
         receiverReceivingHeaderPowerConsumption = default(receiverReceivingPowerConsumption);
         receiverReceivingDataPowerConsumption = default(receiverReceivingPowerConsumption);
         transmitterIdlePowerConsumption = default(1W);	// no info yet
-        transmitterTransmittingPowerConsumption = default(1.5W);
+        transmitterTransmittingPowerConsumption = default(2.5W);
         transmitterTransmittingPreamblePowerConsumption = default(transmitterTransmittingPowerConsumption);
         transmitterTransmittingHeaderPowerConsumption = default(transmitterTransmittingPowerConsumption);
         transmitterTransmittingDataPowerConsumption = default(transmitterTransmittingPowerConsumption);
