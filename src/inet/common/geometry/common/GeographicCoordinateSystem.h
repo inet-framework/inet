@@ -35,13 +35,13 @@ class INET_API GeoCoord
   public:
     /** @name latitude, longitude and altitude coordinate of the position. */
     /*@{*/
-    double latitude;
-    double longitude;
+    degree latitude;
+    degree longitude;
     double altitude;
     /*@}*/
 
   public:
-    GeoCoord(double latitude, double longitude, double altitude) : latitude(latitude), longitude(longitude), altitude(altitude) { }
+    GeoCoord(degree latitude, degree longitude, double altitude) : latitude(latitude), longitude(longitude), altitude(altitude) { }
 };
 
 class INET_API IGeographicCoordinateSystem
@@ -58,8 +58,8 @@ class INET_API SimpleGeographicCoordinateSystem : public cSimpleModule, public I
 {
   protected:
     double metersPerDegree = 111320;
-    double playgroundLatitude = NaN;
-    double playgroundLongitude = NaN;
+    degree playgroundLatitude = degree(NaN);
+    degree playgroundLongitude = degree(NaN);
     double playgroundAltitude = NaN;
 
   protected:

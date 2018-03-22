@@ -85,7 +85,7 @@ void SceneOsgEarthVisualizer::initializeLocator()
 {
     auto playgroundPosition = coordinateSystem->getPlaygroundPosition();
     auto playgroundOrientation = coordinateSystem->getPlaygroundOrientation();
-    locatorNode->getLocator()->setPosition(osg::Vec3d(playgroundPosition.longitude, playgroundPosition.latitude, playgroundPosition.altitude));
+    locatorNode->getLocator()->setPosition(osg::Vec3d(degree(playgroundPosition.longitude).get(), degree(playgroundPosition.latitude).get(), playgroundPosition.altitude));
     locatorNode->getLocator()->setOrientation(osg::Vec3d(rad(playgroundOrientation.alpha).get(),
                                                          rad(playgroundOrientation.beta).get(),
                                                          rad(playgroundOrientation.gamma).get()));
@@ -99,9 +99,9 @@ void SceneOsgEarthVisualizer::initializeViewpoint()
     auto geographicSrsEye = coordinateSystem->computeGeographicCoordinate(Coord(euclideanCenter.x(), euclideanCenter.y(), euclideanCenter.z()));
     auto osgCanvas = visualizerTargetModule->getOsgCanvas();
 #if OMNETPP_BUILDNUM >= 1012
-    osgCanvas->setEarthViewpoint(cOsgCanvas::EarthViewpoint(geographicSrsEye.longitude, geographicSrsEye.latitude, geographicSrsEye.altitude, -45, -45, cameraDistanceFactor * radius));
+    osgCanvas->setEarthViewpoint(cOsgCanvas::EarthViewpoint(degree(geographicSrsEye.longitude).get(), degree(geographicSrsEye.latitude).get(), geographicSrsEye.altitude, -45, -45, cameraDistanceFactor * radius));
 #else
-    osgCanvas->setEarthViewpoint(osgEarth::Viewpoint("home", geographicSrsEye.longitude, geographicSrsEye.latitude, geographicSrsEye.altitude, -45, -45, cameraDistanceFactor * radius));
+    osgCanvas->setEarthViewpoint(osgEarth::Viewpoint("home", degree(geographicSrsEye.longitude).get(), degree(geographicSrsEye.latitude).get(), geographicSrsEye.altitude, -45, -45, cameraDistanceFactor * radius));
 #endif
 }
 
