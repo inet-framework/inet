@@ -37,13 +37,13 @@ class INET_API CircleMobility : public MovingMobilityBase
     double cy;
     double cz;
     double r;
-    double startAngle;
+    rad startAngle;
     double speed;
     /** @brief angular velocity [rad/s], derived from speed and radius. */
     double omega;
 
     /** @brief Direction from the center of the circle. */
-    double angle;
+    rad angle;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

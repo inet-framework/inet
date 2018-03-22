@@ -33,11 +33,11 @@ class INET_API GaussMarkovMobility : public LineSegmentsMobilityBase
 {
   protected:
     double speed;    ///< speed of the host
-    double angle;    ///< angle of linear motion
+    rad angle;    ///< angle of linear motion
     double alpha;    ///< alpha parameter
     int margin;    ///< margin at which the host gets repelled from the border
     double speedMean;    ///< speed mean
-    double angleMean;    ///< angle mean
+    rad angleMean;    ///< angle mean
     double variance;    ///< variance
 
   protected:

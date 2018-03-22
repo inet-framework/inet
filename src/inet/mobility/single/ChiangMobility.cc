@@ -82,7 +82,7 @@ void ChiangMobility::setTargetPosition()
 void ChiangMobility::move()
 {
     LineSegmentsMobilityBase::move();
-    double dummyAngle;
+    rad dummyAngle;
     Coord dummyPosition;
     handleIfOutside(REFLECT, dummyPosition, lastVelocity, dummyAngle);
 }

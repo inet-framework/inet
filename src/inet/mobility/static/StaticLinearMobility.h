@@ -39,7 +39,7 @@ class INET_API StaticLinearMobility : public StationaryMobility
     double separation;
     double initialX;
     double initialY;
-    double orientation;
+    rad orientation;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

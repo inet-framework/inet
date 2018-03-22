@@ -29,7 +29,7 @@ MassMobility::MassMobility()
     changeIntervalParameter = nullptr;
     changeAngleByParameter = nullptr;
     speedParameter = nullptr;
-    angle = 0;
+    angle = degree(0);
 }
 
 void MassMobility::initialize(int stage)
@@ -38,7 +38,7 @@ void MassMobility::initialize(int stage)
 
     EV_TRACE << "initializing MassMobility stage " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {
-        angle = par("startAngle");
+        angle = degree(par("startAngle"));
         changeIntervalParameter = &par("changeInterval");
         changeAngleByParameter = &par("changeAngleBy");
         speedParameter = &par("speed");
@@ -47,10 +47,9 @@ void MassMobility::initialize(int stage)
 
 void MassMobility::setTargetPosition()
 {
-    angle += changeAngleByParameter->doubleValue();
+    angle += degree(changeAngleByParameter->doubleValue());
     EV_DEBUG << "angle: " << angle << endl;
-    double rad = M_PI * angle / 180.0;
-    Coord direction(cos(rad), sin(rad));
+    Coord direction(cos(rad(angle).get()), sin(rad(angle).get()));
     simtime_t nextChangeInterval = *changeIntervalParameter;
     EV_DEBUG << "interval: " << nextChangeInterval << endl;
     sourcePosition = lastPosition;
@@ -74,7 +73,7 @@ void MassMobility::move()
         ASSERT(nextChange == -1 || now < nextChange);
         double alpha = (now - previousChange) / (nextChange - previousChange);
         lastPosition = sourcePosition * (1 - alpha) + targetPosition * alpha;
-        double dummyAngle;
+        rad dummyAngle;
         handleIfOutside(REFLECT, lastPosition, lastVelocity, dummyAngle);
     }
 }

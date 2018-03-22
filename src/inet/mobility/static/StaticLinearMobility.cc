@@ -27,7 +27,7 @@ StaticLinearMobility::StaticLinearMobility()
     initialX = 0;
     initialY = 0;
     separation = 0;
-    orientation = 0;
+    orientation = degree(0);
 }
 
 void StaticLinearMobility::initialize(int stage)
@@ -39,19 +39,18 @@ void StaticLinearMobility::initialize(int stage)
         initialX = par("initialX");
         initialY = par("initialY");
         separation = par("separation");
-        orientation = par("orientation");
+        orientation = degree(par("orientation"));
     }
 }
 
 void StaticLinearMobility::setInitialPosition()
 {
     int index = visualRepresentation->getIndex();
-    double rad = M_PI * orientation / 180.0;
     Coord initialPos;
     initialPos.x = initialX;
     initialPos.y = initialY;
     initialPos.z = 0;
-    Coord direction(cos(rad), sin(rad));
+    Coord direction(cos(rad(orientation).get()), sin(rad(orientation).get()));
     lastPosition = initialPos + (direction * (index * separation));
     if (lastPosition.x >= constraintAreaMax.x)
         lastPosition.x -= 1;
