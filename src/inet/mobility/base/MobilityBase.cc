@@ -123,7 +123,7 @@ void MobilityBase::setInitialPosition()
     else if (coordinateSystem != nullptr && hasPar("initialLatitude") && hasPar("initialLongitude") && hasPar("initialAltitude")) {
         auto initialLatitude = degree(par("initialLatitude"));
         auto initialLongitude = degree(par("initialLongitude"));
-        double initialAltitude = par("initialAltitude");
+        auto initialAltitude = m(par("initialAltitude"));
         lastPosition = coordinateSystem->computePlaygroundCoordinate(GeoCoord(initialLatitude, initialLongitude, initialAltitude));
         filled = true;
     }

@@ -23,7 +23,7 @@
 
 namespace inet {
 
-const GeoCoord GeoCoord::NIL = GeoCoord(degree(NaN), degree(NaN), NaN);
+const GeoCoord GeoCoord::NIL = GeoCoord(degree(NaN), degree(NaN), m(NaN));
 
 Define_Module(SimpleGeographicCoordinateSystem);
 
@@ -32,7 +32,7 @@ void SimpleGeographicCoordinateSystem::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         playgroundLatitude = degree(par("playgroundLatitude"));
         playgroundLongitude = degree(par("playgroundLongitude"));
-        playgroundAltitude = par("playgroundAltitude");
+        playgroundAltitude = m(par("playgroundAltitude"));
     }
 }
 
@@ -40,14 +40,14 @@ Coord SimpleGeographicCoordinateSystem::computePlaygroundCoordinate(const GeoCoo
 {
     double playgroundX = degree(geographicCoordinate.longitude - playgroundLongitude).get() * cos(fabs(rad(playgroundLatitude).get())) * metersPerDegree;
     double playgroundY = degree(playgroundLatitude - geographicCoordinate.latitude).get() * metersPerDegree;
-    return Coord(playgroundX, playgroundY, geographicCoordinate.altitude + playgroundAltitude);
+    return Coord(playgroundX, playgroundY, m(geographicCoordinate.altitude + playgroundAltitude).get());
 }
 
 GeoCoord SimpleGeographicCoordinateSystem::computeGeographicCoordinate(const Coord& playgroundCoordinate) const
 {
     auto geograpicLatitude = playgroundLatitude - degree(playgroundCoordinate.y / metersPerDegree);
     auto geograpicLongitude = playgroundLongitude + degree(playgroundCoordinate.x / metersPerDegree / cos(fabs(rad(playgroundLatitude).get())));
-    return GeoCoord(geograpicLatitude, geograpicLongitude, playgroundCoordinate.z - playgroundAltitude);
+    return GeoCoord(geograpicLatitude, geograpicLongitude, m(playgroundCoordinate.z) - playgroundAltitude);
 }
 
 #if defined(WITH_OSGEARTH) && defined(WITH_VISUALIZERS)
@@ -63,14 +63,14 @@ void OsgGeographicCoordinateSystem::initialize(int stage)
             throw cRuntimeError("Count not find map node in the scene");
         auto playgroundLatitude = degree(par("playgroundLatitude"));
         auto playgroundLongitude = degree(par("playgroundLongitude"));
-        double playgroundAltitude = par("playgroundAltitude");
+        auto playgroundAltitude = m(par("playgroundAltitude"));
         auto playgroundHeading = degree(par("playgroundHeading"));
         auto playgroundElevation = degree(par("playgroundElevation"));
         auto playgroundBank = degree(par("playgroundBank"));
         playgroundPosition = GeoCoord(playgroundLatitude, playgroundLongitude, playgroundAltitude);
         playgroundOrientation = EulerAngles(playgroundHeading, playgroundElevation, playgroundBank);
         auto locatorNode = new osgEarth::Util::ObjectLocatorNode(mapNode->getMap());
-        locatorNode->getLocator()->setPosition(osg::Vec3d(degree(playgroundLongitude).get(), degree(playgroundLatitude).get(), playgroundAltitude));
+        locatorNode->getLocator()->setPosition(osg::Vec3d(degree(playgroundLongitude).get(), degree(playgroundLatitude).get(), m(playgroundAltitude).get()));
         locatorNode->getLocator()->setOrientation(osg::Vec3d(rad(playgroundHeading).get(), rad(playgroundElevation).get(), rad(playgroundBank).get()));
         locatorNode->getLocator()->getLocatorMatrix(locatorMatrix);
         inverseLocatorMatrix.invert(locatorMatrix);
@@ -82,7 +82,7 @@ Coord OsgGeographicCoordinateSystem::computePlaygroundCoordinate(const GeoCoord&
 {
     auto mapSrs = mapNode->getMapSRS();
     osg::Vec3d ecefCoordinate;
-    osg::Vec3d osgGeographicCoordinate(degree(geographicCoordinate.longitude).get(), degree(geographicCoordinate.latitude).get(), geographicCoordinate.altitude);
+    osg::Vec3d osgGeographicCoordinate(degree(geographicCoordinate.longitude).get(), degree(geographicCoordinate.latitude).get(), m(geographicCoordinate.altitude).get());
     mapSrs->getGeographicSRS()->transform(osgGeographicCoordinate, mapSrs->getECEF(), ecefCoordinate);
     auto playgroundCoordinate = osg::Vec4d(ecefCoordinate.x(), ecefCoordinate.y(), ecefCoordinate.z(), 1.0) * inverseLocatorMatrix;
     return Coord(playgroundCoordinate.x(), playgroundCoordinate.y(), playgroundCoordinate.z());
@@ -94,7 +94,7 @@ GeoCoord OsgGeographicCoordinateSystem::computeGeographicCoordinate(const Coord&
     auto mapSrs = mapNode->getMapSRS();
     osg::Vec3d geographicCoordinate;
     mapSrs->getECEF()->transform(osg::Vec3d(ecefCoordinate.x(), ecefCoordinate.y(), ecefCoordinate.z()), mapSrs->getGeographicSRS(), geographicCoordinate);
-    return GeoCoord(degree(geographicCoordinate.y()), degree(geographicCoordinate.x()), geographicCoordinate.z());
+    return GeoCoord(degree(geographicCoordinate.y()), degree(geographicCoordinate.x()), m(geographicCoordinate.z()));
 }
 
 #endif // WITH_OSGEARTH

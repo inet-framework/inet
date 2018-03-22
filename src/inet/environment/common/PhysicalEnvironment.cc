@@ -74,13 +74,13 @@ void PhysicalEnvironment::initialize(int stage)
 
 void PhysicalEnvironment::convertPoints(std::vector<Coord>& points)
 {
-    auto originPosition = coordinateSystem == nullptr ? GeoCoord(degree(0), degree(0), 0) : coordinateSystem->computeGeographicCoordinate(Coord::ZERO);
+    auto originPosition = coordinateSystem == nullptr ? GeoCoord(degree(0), degree(0), m(0)) : coordinateSystem->computeGeographicCoordinate(Coord::ZERO);
     Box boundingBox = Box::computeBoundingBox(points);
     Coord center = boundingBox.getCenter();
     for (auto & point : points) {
         point -= center;
         if (coordinateSystem != nullptr)
-            point = coordinateSystem->computePlaygroundCoordinate(GeoCoord(degree(point.x) + originPosition.latitude, degree(point.y) + originPosition.longitude, 0));
+            point = coordinateSystem->computePlaygroundCoordinate(GeoCoord(degree(point.x) + originPosition.latitude, degree(point.y) + originPosition.longitude, m(0)));
     }
 }
 
@@ -371,7 +371,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
             else
                 throw cRuntimeError("Unknown position kind");
             if (coordinateSystem != nullptr) {
-                auto convertedPosition = coordinateSystem->computePlaygroundCoordinate(GeoCoord(degree(position.x), degree(position.y), 0));
+                auto convertedPosition = coordinateSystem->computePlaygroundCoordinate(GeoCoord(degree(position.x), degree(position.y), m(0)));
                 position.x = convertedPosition.x;
                 position.y = convertedPosition.y;
             }

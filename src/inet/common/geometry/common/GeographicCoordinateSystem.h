@@ -37,11 +37,11 @@ class INET_API GeoCoord
     /*@{*/
     degree latitude;
     degree longitude;
-    double altitude;
+    m altitude;
     /*@}*/
 
   public:
-    GeoCoord(degree latitude, degree longitude, double altitude) : latitude(latitude), longitude(longitude), altitude(altitude) { }
+    GeoCoord(degree latitude, degree longitude, m altitude) : latitude(latitude), longitude(longitude), altitude(altitude) { }
 };
 
 class INET_API IGeographicCoordinateSystem
@@ -60,7 +60,7 @@ class INET_API SimpleGeographicCoordinateSystem : public cSimpleModule, public I
     double metersPerDegree = 111320;
     degree playgroundLatitude = degree(NaN);
     degree playgroundLongitude = degree(NaN);
-    double playgroundAltitude = NaN;
+    m playgroundAltitude = m(NaN);
 
   protected:
     virtual void initialize(int stage) override;

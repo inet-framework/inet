@@ -43,17 +43,13 @@ void OsgEarthGround::initialize()
 Coord OsgEarthGround::computeGroundProjection(const Coord &position) const
 {
     double elevation = 0;
-
     auto geoCoord = coordinateSystem->computeGeographicCoordinate(position);
-
     bool success = elevationQuery->getElevation(osgEarth::GeoPoint(map->getSRS(), degree(geoCoord.longitude).get(), degree(geoCoord.latitude).get()), elevation);
-
     if (success)
-        geoCoord.altitude = elevation;
+        geoCoord.altitude = m(elevation);
     else {
         // TODO: throw cRuntimeError ?
     }
-
     return coordinateSystem->computePlaygroundCoordinate(geoCoord);
 }
 
