@@ -32,8 +32,8 @@ simple AttachedMobility extends MobilityBase
         double offsetX @unit(m) = default(0m);
         double offsetY @unit(m) = default(0m);
         double offsetZ @unit(m) = default(0m);
-        double offsetHeading @unit(rad) = default(0rad);
-        double offsetElevation @unit(rad) = default(0rad);
-        double offsetBank @unit(rad) = default(0rad);
+        double offsetHeading @unit(deg) = default(0deg);
+        double offsetElevation @unit(deg) = default(0deg);
+        double offsetBank @unit(deg) = default(0deg);
         @class(AttachedMobility);
 }
