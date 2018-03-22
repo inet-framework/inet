@@ -121,8 +121,8 @@ void MobilityBase::setInitialPosition()
         filled = true;
     }
     else if (coordinateSystem != nullptr && hasPar("initialLatitude") && hasPar("initialLongitude") && hasPar("initialAltitude")) {
-        auto initialLatitude = degree(par("initialLatitude"));
-        auto initialLongitude = degree(par("initialLongitude"));
+        auto initialLatitude = deg(par("initialLatitude"));
+        auto initialLongitude = deg(par("initialLongitude"));
         auto initialAltitude = m(par("initialAltitude"));
         lastPosition = coordinateSystem->computePlaygroundCoordinate(GeoCoord(initialLatitude, initialLongitude, initialAltitude));
         filled = true;
@@ -145,11 +145,11 @@ void MobilityBase::checkPosition()
 void MobilityBase::initializeOrientation()
 {
     if (hasPar("initialHeading") && hasPar("initialElevation") && hasPar("initialBank")) {
-        lastOrientation.alpha = degree(par("initialHeading"));
-        auto initialElevation = degree(par("initialElevation"));
+        lastOrientation.alpha = deg(par("initialHeading"));
+        auto initialElevation = deg(par("initialElevation"));
         // NOTE: negation is needed, see IMobility comments on orientation
         lastOrientation.beta = -initialElevation;
-        lastOrientation.gamma = degree(par("initialBank"));
+        lastOrientation.gamma = deg(par("initialBank"));
     }
 }
 
@@ -219,7 +219,7 @@ void MobilityBase::reflectIfOutside(Coord& targetPosition, Coord& velocity, rad&
     if (lastPosition.x < constraintAreaMin.x || constraintAreaMax.x < lastPosition.x) {
         sign = reflect(constraintAreaMin.x, constraintAreaMax.x, lastPosition.x, velocity.x);
         reflect(constraintAreaMin.x, constraintAreaMax.x, targetPosition.x, dummy);
-        angle = degree(90) + (angle - degree(90)) * sign;
+        angle = deg(90) + (angle - deg(90)) * sign;
     }
     if (lastPosition.y < constraintAreaMin.y || constraintAreaMax.y < lastPosition.y) {
         sign = reflect(constraintAreaMin.y, constraintAreaMax.y, lastPosition.y, velocity.y);

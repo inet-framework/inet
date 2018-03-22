@@ -31,16 +31,16 @@ class INET_API ParabolicAntenna : public AntennaBase
     class AntennaGain : public IAntennaGain
     {
       public:
-        AntennaGain(double maxGain, double minGain, degree beamWidth);
+        AntennaGain(double maxGain, double minGain, deg beamWidth);
         virtual double getMaxGain() const override { return maxGain; }
         virtual double getMinGain() const { return minGain; }
-        virtual degree getBeamWidth() const { return beamWidth; }
+        virtual deg getBeamWidth() const { return beamWidth; }
         virtual double computeGain(const EulerAngles direction) const override;
 
       protected:
         double maxGain;
         double minGain;
-        degree beamWidth;
+        deg beamWidth;
     };
 
     Ptr<AntennaGain> gain;

@@ -1044,10 +1044,10 @@ typedef compose<nautical_mile, pow<hour, -1> > knot;
 typedef scale<mps, 100, 34029> mach;
 
 // Angles
-typedef scale<rad, 180000000, 3141593> degree;
+typedef scale<rad, 180000000, 3141593> deg;
 typedef scale<rad, 200000000, 3141593> grad;
-typedef scale<degree, 60> degree_minute;
-typedef scale<degree_minute, 60> degree_second;
+typedef scale<deg, 60> deg_min;
+typedef scale<deg_min, 60> deg_sec;
 
 // Pressure
 typedef scale<Pa, 1, 1000> kPa;
@@ -1098,10 +1098,10 @@ UNIT_DISPLAY_NAME(units::mps, "mps");
 UNIT_DISPLAY_NAME(units::kph, "km/h");
 UNIT_DISPLAY_NAME(units::knot, "knots");
 UNIT_DISPLAY_NAME(units::mach, "mach");
-UNIT_DISPLAY_NAME(units::degree, "deg");
+UNIT_DISPLAY_NAME(units::deg, "deg");
 UNIT_DISPLAY_NAME(units::grad, "grad");
-UNIT_DISPLAY_NAME(units::degree_minute, "'");
-UNIT_DISPLAY_NAME(units::degree_second, "\"");
+UNIT_DISPLAY_NAME(units::deg_min, "'");
+UNIT_DISPLAY_NAME(units::deg_sec, "\"");
 UNIT_DISPLAY_NAME(units::kPa, "kPa");
 UNIT_DISPLAY_NAME(units::psi, "PSI");
 UNIT_DISPLAY_NAME(units::millibar, "millibars");
@@ -1212,10 +1212,10 @@ typedef value<double, units::spm> spm;
 typedef value<double, units::knot> knot;
 typedef value<double, units::mach> mach;
 
-typedef value<double, units::degree> degree;
+typedef value<double, units::deg> deg;
 typedef value<double, units::grad> grad;
-typedef value<double, units::degree_minute> degree_minute;
-typedef value<double, units::degree_second> degree_second;
+typedef value<double, units::deg_min> deg_min;
+typedef value<double, units::deg_sec> deg_sec;
 
 typedef value<double, units::kPa> kPa;
 typedef value<double, units::psi> psi;

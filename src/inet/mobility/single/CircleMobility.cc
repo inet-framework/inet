@@ -28,10 +28,10 @@ CircleMobility::CircleMobility()
     cy = 0;
     cz = 0;
     r = -1;
-    startAngle = degree(0);
+    startAngle = deg(0);
     speed = 0;
     omega = 0;
-    angle = degree(0);
+    angle = deg(0);
 }
 
 void CircleMobility::initialize(int stage)
@@ -45,7 +45,7 @@ void CircleMobility::initialize(int stage)
         cz = par("cz");
         r = par("r");
         ASSERT(r > 0);
-        startAngle = degree(par("startAngle"));
+        startAngle = deg(par("startAngle"));
         speed = par("speed");
         omega = speed / r;
         stationary = (omega == 0);

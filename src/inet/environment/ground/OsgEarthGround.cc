@@ -44,7 +44,7 @@ Coord OsgEarthGround::computeGroundProjection(const Coord &position) const
 {
     double elevation = 0;
     auto geoCoord = coordinateSystem->computeGeographicCoordinate(position);
-    bool success = elevationQuery->getElevation(osgEarth::GeoPoint(map->getSRS(), degree(geoCoord.longitude).get(), degree(geoCoord.latitude).get()), elevation);
+    bool success = elevationQuery->getElevation(osgEarth::GeoPoint(map->getSRS(), deg(geoCoord.longitude).get(), deg(geoCoord.latitude).get()), elevation);
     if (success)
         geoCoord.altitude = m(elevation);
     else {

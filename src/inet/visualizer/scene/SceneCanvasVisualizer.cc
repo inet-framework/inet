@@ -145,15 +145,15 @@ EulerAngles SceneCanvasVisualizer::computeViewAngle(const char* viewAngle)
         // 2nd axis can point on the 2d plane in 4 directions (the opposite direction is forbidden)
         // 3rd axis can point on the 2d plane in 2 directions
         // this results in 6 * 4 * 2 = 48 different configurations
-        alpha = degree(45 + v % 4 * 90);
-        beta = degree(v / 24 % 2 ? 35.27 : -35.27);
-        gamma = degree(30 + v / 4 % 6 * 60);
+        alpha = deg(45 + v % 4 * 90);
+        beta = deg(v / 24 % 2 ? 35.27 : -35.27);
+        gamma = deg(30 + v / 4 % 6 * 60);
     }
     else if (sscanf(viewAngle, "%lf %lf %lf", &a, &b, &c) == 3)
     {
-        alpha = degree(a);
-        beta = degree(b);
-        gamma = degree(c);
+        alpha = deg(a);
+        beta = deg(b);
+        gamma = deg(c);
     }
     else
         throw cRuntimeError("The viewAngle parameter must be a predefined string or a triplet representing three degrees");

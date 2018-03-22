@@ -34,7 +34,7 @@ void ParabolicAntenna::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         double maxGain = math::dB2fraction(par("maxGain"));
         double minGain = math::dB2fraction(par("minGain"));
-        degree beamWidth = degree(par("beamWidth"));
+        deg beamWidth = deg(par("beamWidth"));
         gain = makeShared<AntennaGain>(maxGain, minGain, beamWidth);
     }
 }
@@ -49,7 +49,7 @@ std::ostream& ParabolicAntenna::printToStream(std::ostream& stream, int level) c
     return AntennaBase::printToStream(stream, level);
 }
 
-ParabolicAntenna::AntennaGain::AntennaGain(double maxGain, double minGain, degree beamWidth) :
+ParabolicAntenna::AntennaGain::AntennaGain(double maxGain, double minGain, deg beamWidth) :
     maxGain(maxGain), minGain(minGain), beamWidth(beamWidth)
 {
 }

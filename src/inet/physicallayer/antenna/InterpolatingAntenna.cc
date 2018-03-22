@@ -70,7 +70,7 @@ void InterpolatingAntenna::AntennaGain::parseMap(std::map<rad, double>& gainMap,
         const char *gainString = tokenizer.nextToken();
         if (!angleString || !gainString)
             throw cRuntimeError("Insufficient number of values");
-        auto angle = degree(atof(angleString));
+        auto angle = deg(atof(angleString));
         double gain = math::dB2fraction(atof(gainString));
         if (std::isnan(minGain) || gain < minGain)
             minGain = gain;

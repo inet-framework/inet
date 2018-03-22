@@ -74,13 +74,13 @@ void PhysicalEnvironment::initialize(int stage)
 
 void PhysicalEnvironment::convertPoints(std::vector<Coord>& points)
 {
-    auto originPosition = coordinateSystem == nullptr ? GeoCoord(degree(0), degree(0), m(0)) : coordinateSystem->computeGeographicCoordinate(Coord::ZERO);
+    auto originPosition = coordinateSystem == nullptr ? GeoCoord(deg(0), deg(0), m(0)) : coordinateSystem->computeGeographicCoordinate(Coord::ZERO);
     Box boundingBox = Box::computeBoundingBox(points);
     Coord center = boundingBox.getCenter();
     for (auto & point : points) {
         point -= center;
         if (coordinateSystem != nullptr)
-            point = coordinateSystem->computePlaygroundCoordinate(GeoCoord(degree(point.x) + originPosition.latitude, degree(point.y) + originPosition.longitude, m(0)));
+            point = coordinateSystem->computePlaygroundCoordinate(GeoCoord(deg(point.x) + originPosition.latitude, deg(point.y) + originPosition.longitude, m(0)));
     }
 }
 
@@ -253,13 +253,13 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
             cStringTokenizer tokenizer(orientationAttribute);
             if ((tok = tokenizer.nextToken()) == nullptr)
                 throw cRuntimeError("Missing orientation alpha at %s", element->getSourceLocation());
-            orientation.alpha = degree(atof(tok));
+            orientation.alpha = deg(atof(tok));
             if ((tok = tokenizer.nextToken()) == nullptr)
                 throw cRuntimeError("Missing orientation beta at %s", element->getSourceLocation());
-            orientation.beta = degree(atof(tok));
+            orientation.beta = deg(atof(tok));
             if ((tok = tokenizer.nextToken()) == nullptr)
                 throw cRuntimeError("Missing orientation gamma at %s", element->getSourceLocation());
-            orientation.gamma = degree(atof(tok));
+            orientation.gamma = deg(atof(tok));
         }
         // shape
         Coord size = Coord::NIL;
@@ -371,7 +371,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
             else
                 throw cRuntimeError("Unknown position kind");
             if (coordinateSystem != nullptr) {
-                auto convertedPosition = coordinateSystem->computePlaygroundCoordinate(GeoCoord(degree(position.x), degree(position.y), m(0)));
+                auto convertedPosition = coordinateSystem->computePlaygroundCoordinate(GeoCoord(deg(position.x), deg(position.y), m(0)));
                 position.x = convertedPosition.x;
                 position.y = convertedPosition.y;
             }

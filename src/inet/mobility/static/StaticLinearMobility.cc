@@ -27,7 +27,7 @@ StaticLinearMobility::StaticLinearMobility()
     initialX = 0;
     initialY = 0;
     separation = 0;
-    orientation = degree(0);
+    orientation = deg(0);
 }
 
 void StaticLinearMobility::initialize(int stage)
@@ -39,7 +39,7 @@ void StaticLinearMobility::initialize(int stage)
         initialX = par("initialX");
         initialY = par("initialY");
         separation = par("separation");
-        orientation = degree(par("orientation"));
+        orientation = deg(par("orientation"));
     }
 }
 

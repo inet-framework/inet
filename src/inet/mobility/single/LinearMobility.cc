@@ -26,7 +26,7 @@ Define_Module(LinearMobility);
 LinearMobility::LinearMobility()
 {
     speed = 0;
-    angle = degree(0);
+    angle = deg(0);
     acceleration = 0;
 }
 
@@ -37,7 +37,7 @@ void LinearMobility::initialize(int stage)
     EV_TRACE << "initializing LinearMobility stage " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {
         speed = par("speed");
-        angle = degree(fmod((double)par("angle"), 360));
+        angle = deg(fmod((double)par("angle"), 360));
         acceleration = par("acceleration");
         stationary = (speed == 0) && (acceleration == 0.0);
     }

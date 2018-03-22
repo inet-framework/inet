@@ -26,7 +26,7 @@ TurtleMobility::TurtleMobility() :
     turtleScript(nullptr),
     nextStatement(nullptr),
     speed(0),
-    angle(degree(0)),
+    angle(deg(0)),
     borderPolicy(REFLECT),
     maxSpeed(0)
 {
@@ -53,7 +53,7 @@ void TurtleMobility::setInitialPosition()
     nextStatement = turtleScript->getFirstChild();
 
     speed = 1;
-    angle = degree(0);
+    angle = deg(0);
     borderPolicy = REFLECT;
 
     // a dirty trick to extract starting position out of the script
@@ -131,7 +131,7 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
             speed = getValue(speedAttr);
 
         if (angleAttr)
-            angle = degree(getValue(angleAttr));
+            angle = deg(getValue(angleAttr));
 
         if (xAttr)
             targetPosition.x = lastPosition.x = getValue(xAttr);
@@ -199,7 +199,7 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
         if (!angleAttr)
             throw cRuntimeError("<turn>: required attribute 'angle' missing at %s", stmt->getSourceLocation());
 
-        angle += degree(getValue(angleAttr));
+        angle += deg(getValue(angleAttr));
     }
     else if (!strcmp(tag, "wait")) {
         const char *tAttr = stmt->getAttribute("t");

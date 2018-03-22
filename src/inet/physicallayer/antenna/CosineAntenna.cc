@@ -33,7 +33,7 @@ void CosineAntenna::initialize(int stage)
     AntennaBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         double maxGain = math::dB2fraction(par("maxGain"));
-        degree beamWidth = degree(par("beamWidth"));
+        deg beamWidth = deg(par("beamWidth"));
         gain = makeShared<AntennaGain>(maxGain, beamWidth);
     }
 }
@@ -47,7 +47,7 @@ std::ostream& CosineAntenna::printToStream(std::ostream& stream, int level) cons
     return AntennaBase::printToStream(stream, level);
 }
 
-CosineAntenna::AntennaGain::AntennaGain(double maxGain, degree beamWidth) :
+CosineAntenna::AntennaGain::AntennaGain(double maxGain, deg beamWidth) :
     maxGain(maxGain), beamWidth(beamWidth)
 {
 }

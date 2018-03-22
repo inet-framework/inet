@@ -78,7 +78,7 @@ void VehicleMobility::readWaypointsFromFile(const char *fileName)
                 z = value3;
             }
             else {
-                Coord playgroundCoordinate = coordinateSystem->computePlaygroundCoordinate(GeoCoord(degree(value1), degree(value2), m(value3)));
+                Coord playgroundCoordinate = coordinateSystem->computePlaygroundCoordinate(GeoCoord(deg(value1), deg(value2), m(value3)));
                 x = playgroundCoordinate.x;
                 y = playgroundCoordinate.y;
                 z = playgroundCoordinate.z;

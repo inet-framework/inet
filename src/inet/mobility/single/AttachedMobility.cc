@@ -31,11 +31,11 @@ void AttachedMobility::initialize(int stage)
         positionOffset.x = par("offsetX");
         positionOffset.y = par("offsetY");
         positionOffset.z = par("offsetZ");
-        orientationOffset.alpha = degree(par("offsetHeading"));
-        auto offsetElevation = degree(par("offsetElevation"));
+        orientationOffset.alpha = deg(par("offsetHeading"));
+        auto offsetElevation = deg(par("offsetElevation"));
         // NOTE: negation is needed, see IMobility comments on orientation
         orientationOffset.beta = -offsetElevation;
-        orientationOffset.gamma = degree(par("offsetBank"));
+        orientationOffset.gamma = deg(par("offsetBank"));
         isZeroOffset = positionOffset == Coord::ZERO;
         check_and_cast<cModule *>(mobility)->subscribe(IMobility::mobilityStateChangedSignal, this);
     }
