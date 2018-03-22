@@ -52,6 +52,10 @@ struct compose;
 template<typename Unit, int Num, int Den = 1>
 struct scale;
 
+// Constructs a unit equivalent to F(Unit)
+template<typename Unit, double F()>
+struct fscale;
+
 // Constructs a unit equivalent to Unit*Num/Den
 template<typename Unit, int Num, int Den = 1>
 struct intscale;
@@ -367,6 +371,30 @@ struct convert3<T, scale<U, Num, Den> >
 };
 
 // Convert from a scaled unit
+template<typename T, typename U, double F()>
+struct convert2<fscale<T, F>, U>
+{
+    template<typename V>
+    static V fn(const V& v)
+    {
+        auto t = v / F();
+        return convert<T, U>::fn(t);
+    }
+};
+
+// Convert to a scaled unit
+template<typename T, typename U, double F()>
+struct convert3<T, fscale<U, F> >
+{
+    template<typename V>
+    static V fn(const V& v)
+    {
+        auto t = convert<T, U>::fn(v);
+        return t * F();
+    }
+};
+
+// Convert from a scaled unit
 template<typename T, typename U, int Num, int Den>
 struct convert2<intscale<T, Num, Den>, U>
 {
@@ -440,6 +468,14 @@ struct count_terms<Term, scale<Unit, N, D> >
     static const int den = result::den;
 };
 
+template<typename Term, typename Unit, double F()>
+struct count_terms<Term, fscale<Unit, F> >
+{
+    typedef count_terms<Term, Unit> result;
+    static const int num = result::num;
+    static const int den = result::den;
+};
+
 // count_terms ignores scaling factors - that is taken care of by scaling_factor.
 template<typename Term, typename Unit, int N, int D>
 struct count_terms<Term, intscale<Unit, N, D> >
@@ -502,6 +538,12 @@ struct check_terms_equal<pow<Unit, N, D>, T1, T2>
 
 template<typename Unit, int N, int D, typename T1, typename T2>
 struct check_terms_equal<scale<Unit, N, D>, T1, T2>
+{
+    static const bool value = check_terms_equal<Unit, T1, T2>::value;
+};
+
+template<typename Unit, double F(), typename T1, typename T2>
+struct check_terms_equal<fscale<Unit, F>, T1, T2>
 {
     static const bool value = check_terms_equal<Unit, T1, T2>::value;
 };
@@ -643,6 +685,16 @@ struct scaling_factor<scale<U, N, D> >
     }
 };
 
+template<typename U, double F()>
+struct scaling_factor<fscale<U, F> >
+{
+    template<typename T>
+    static T fn()
+    {
+        return scaling_factor<U>::template fn<T>() * F();
+    }
+};
+
 template<typename U, int N, int D>
 struct scaling_factor<intscale<U, N, D> >
 {
@@ -770,6 +822,17 @@ struct output_unit2<scale<Unit, Num, Den> >
         if (Num != 1)
             os << '/' << Num;
         os << '.';
+        output_unit<Unit>::fn(os);
+    }
+};
+
+template<typename Unit, double F()>
+struct output_unit2<fscale<Unit, F> >
+{
+    template<typename Stream>
+    static void fn(Stream& os)
+    {
+        os << F() << '.';
         output_unit<Unit>::fn(os);
     }
 };
