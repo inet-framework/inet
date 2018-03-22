@@ -882,6 +882,7 @@ struct A;    // Ampere
 struct mol;    // mole
 struct cd;    // candela
 struct b;    // bit
+struct rad; // rad;
 
 } // namespace units
 
@@ -897,7 +898,6 @@ UNIT_DISPLAY_NAME(units::b, "b");
 namespace units {
 
 // SI derived units:
-typedef compose<m, pow<m, -1> > rad;
 typedef compose<pow<m, 2>, pow<m, -2> > sr;
 typedef pow<s, -1> Hz;
 typedef compose<m, compose<kg, pow<s, -2> > > N;
@@ -1107,7 +1107,8 @@ typedef compose<nautical_mile, pow<hour, -1> > knot;
 typedef scale<mps, 100, 34029> mach;
 
 // Angles
-typedef scale<rad, 180000000, 3141593> deg;
+constexpr static double rad2degScale() { return 180 / M_PI; }
+typedef fscale<rad, rad2degScale> deg;
 typedef scale<deg, 60> deg_min;
 typedef scale<deg_min, 60> deg_sec;
 
