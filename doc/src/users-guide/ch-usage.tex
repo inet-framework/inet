@@ -42,40 +42,46 @@ In the absence of specific instructions, the following procedure usually works:
     in the \textit{Project Properties} dialog, and copy the source files into the project.
 \end{itemize}
 
-\section{INET as an OMNeT++-based simulation framework}
+\section{Getting Familiar with INET}
 
 The INET Framework builds upon OMNeT++, and uses the same concept: modules
 that communicate by message passing. Hosts, routers, switches and other
 network devices are represented by OMNeT++ compound modules. These compound
 modules are assembled from simple modules that represent protocols,
 applications, and other functional units. A network is again an OMNeT++
-compound module that contains host, router and other modules. The external
-interfaces of modules are described in NED files. NED files describe the
-parameters and gates (i.e. ports or connectors) of modules, and also the
-submodules and connections (i.e. netlist) of compound modules.
+compound module that contains host, router and other modules.
 
-Modules are organized into hierarchical \textit{packages} that directly map to
-folders under \ttt{src/}. Packages in
-INET are organized roughly according to OSI layers; the top packages
-include \ttt{inet.applications}, \ttt{inet.transportlayer},
-\ttt{inet.networklayer}, \ttt{inet.linklayer}, and \ttt{inet.physicallayer}. 
-Other packages are \ttt{inet.routing}, \ttt{inet.mobility}, \ttt{inet.power}, 
-\ttt{inet.environment}, and \ttt{inet.node}. These packages correspond to the
-\ttt{src/applications/}, \ttt{src/transportlayer/}, etc. directories in the
-INET source tree. (The \ttt{src/inet/} directory corresponds to the \ttt{inet} 
-package, as defined by the \ttt{src/inet/package.ned} file.) Subdirectories
-within the top packages usually correspond to concrete protocols or protocol
-families. The implementations of simple modules are C++ classes with the same
-name, with the source files placed in the same directory as the NED file.
+Modules are organized into a directory structure that roughly follows 
+OSI layers:
 
-Protocol headers and packet formats are described in message definition
-files (msg files), which are translated into C++ classes by OMNeT++'s
-\textit{opp\_msgc} tool. The generated message classes subclass from OMNeT++'s
-\ttt{cPacket} or \ttt{cMessage} classes.
+\begin{itemize}
+  \item \ttt{src/inet/applications/} -- traffic generators and application models
+  \item \ttt{src/inet/transportlayer/} -- transport layer protocols
+  \item \ttt{src/inet/networklayer/} -- network layer protocols and accessories
+  \item \ttt{src/inet/linklayer/} -- link layer protocols and accessories
+  \item \ttt{src/inet/physicallayer/} -- physical layer models
+  \item \ttt{src/inet/routing/} -- routing protocols (internet and ad hoc)
+  \item \ttt{src/inet/mobility/} -- mobility models
+  \item \ttt{src/inet/power/} -- energy consumption modeling
+  \item \ttt{src/inet/environment/} -- model of the physical environment
+  \item \ttt{src/inet/node/} -- preassembled network node models
+  \item \ttt{src/inet/visualizer/} -- visualization components (2D and 3D)
+  \item \ttt{src/inet/common/} -- miscellaneous utility components
+\end{itemize}
 
-\section{Setting up simulations}
+The OMNeT++ NED language uses hierarchical packages names. Packages correspond 
+to directories under \ttt{src/}, so e.g. the \ttt{src/inet/transportlayer/tcp}
+directory corresponds to the \ttt{inet.transportlayer.tcp} NED package.
 
-TODO Examples and practical  guidance: see examples, showcases, tictoc and INET tutorials.
+\section{Getting Help}
+
+Examples and practical guidance:
+
+ \ttt{examples}, 
+ showcases, 
+ tutorials.
+
+
 
 
 %%% Local Variables:
