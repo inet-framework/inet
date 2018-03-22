@@ -55,7 +55,7 @@ parameters and gates (i.e. ports or connectors) of modules, and also the
 submodules and connections (i.e. netlist) of compound modules.
 
 Modules are organized into hierarchical \textit{packages} that directly map to
-a folder tree, very much like Java packages. Packages in
+folders under \ttt{src/}. Packages in
 INET are organized roughly according to OSI layers; the top packages
 include \ttt{inet.applications}, \ttt{inet.transportlayer},
 \ttt{inet.networklayer}, \ttt{inet.linklayer}, and \ttt{inet.physicallayer}. 
@@ -68,46 +68,10 @@ within the top packages usually correspond to concrete protocols or protocol
 families. The implementations of simple modules are C++ classes with the same
 name, with the source files placed in the same directory as the NED file.
 
-The \ttt{inet.node} package contains various pre-assembled host, router,
-switch, access point, and other modules, for example
-\nedtype{StandardHost}, \nedtype{Router} and \nedtype{EtherSwitch} and
-\nedtype{AccessPoint}. These compound modules contain some customization
-options via parametric submodule types, but they are not meant to be
-universal, so it may be necessary to create your own node models for
-your particular simulation scenarios.
-
-Network interfaces (Ethernet, IEEE 802.11, etc) are usually compound modules
-themselves, and are being composed of a queue, a MAC, and possibly other
-simple modules. See \nedtype{EthernetInterface} as an example.
-
-Not all modules implement protocols. There are modules which hold data (for
-example \nedtype{Ipv4RoutingTable}), perform autoconfiguration of a network
-(\nedtype{Ipv4NetworkConfigurator}), move a mobile node around (for example
-\nedtype{ConstSpeedMobility}), and perform housekeeping associated with
-radio signals in wireless simulations (\nedtype{RadioMedium}).
-
 Protocol headers and packet formats are described in message definition
 files (msg files), which are translated into C++ classes by OMNeT++'s
 \textit{opp\_msgc} tool. The generated message classes subclass from OMNeT++'s
 \ttt{cPacket} or \ttt{cMessage} classes.
-
-The internal structure of compound modules such as host and router models
-can be customized in several ways. The first way is the use of \textit{gate
-vectors} and \textit{submodule vectors}. The sizes of vectors may come from
-parameters or derived by the number of external connections to the module.
-For example, one can have an Ethernet switch model that has as many ports
-as needed, i.e. equal to the number of Ethernet devices connected to it.
-
-The second way of customization is \textit{parametric types}, that is, the
-type of a submodule (or a channel) may be specified as a string parameter.
-For example, the relay unit inside an Ethernet switch has several
-alternative implementations, each one being a distinct module type. The
-switch model contains a parameter which allows the user to select the
-appropriate relay unit implementation.
-
-A third way of customizing modules is \textit{inheritance}: a derived
-module may add new parameters, gates, submodules or connections, and may
-set inherited unassigned parameters to specific values.
 
 
 \section{Creating and Running Simulations}
