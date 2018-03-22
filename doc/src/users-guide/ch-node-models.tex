@@ -1,8 +1,56 @@
-\chapter{Node Architecture}
-\label{cha:node-architecture}
-
+\chapter{Node Models}
+\label{cha:node-models}
 
 \section{Overview}
+
+networks are assembled from nodes plus infrastructure components like WirelessMedium
+and ScenarioManager 
+
+TODO
+
+\section{Predefined Node Types}
+
+Node models are compound modules assembled from modules representing
+protocols, application models (traffic generators) and infrastructure
+components. The user may assemble their own node models, but there
+are a few predefined ones:
+
+\begin{itemize}
+\item \nedtype{StandardHost} is ... TODO
+\item \nedtype{Router} is ...
+\item \nedtype{WirelessHost} is ...
+\item \nedtype{AccessPoint} is ...
+\item ...
+\end{itemize}
+
+TODO revise and extend list
+
+\section{Network-Level Infrastructure Components}
+
+There are some components that occur on network level, but they
+are not models of physical network nodes, but are necessary 
+to model other aspects:
+
+\begin{itemize}
+\item \nedtype{ScenarioManager} is ... TODO
+\item \nedtype{XXXVisualizer} is ...
+\item \nedtype{Medium} is ...
+\item ...
+\end{itemize}
+
+TODO revise and extend list
+
+\section{Node Architecture}
+
+Node models are compound modules assembled from modules representing
+protocols, application models (traffic generators) and infrastructure
+components.
+
+\subsection{Dispatchers}
+
+TODO explain dispatcher concept
+
+\subsection{Typical Components}
 
 This chapter describes the architecture of INET host and router models.
 
