@@ -361,7 +361,7 @@
                        The ExternalInterface module is responsible for sending/receiving
                        packets on the network. This feature requires at least version 1.5.3
                        of the libpcap-dev package."
-        initiallyEnabled = "true"
+        initiallyEnabled = "false"
         requires = "IPv4"
         labels = "nic"
         nedPackages = "
@@ -375,7 +375,7 @@
         id="ExternalInterface_examples"
         name="Network emulation examples"
         description = "Examples for network emulation"
-        initiallyEnabled = "true"
+        initiallyEnabled = "false"
         requires = "ExternalInterface Ethernet"
         labels = "nic"
         nedPackages = "
