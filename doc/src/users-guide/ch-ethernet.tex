@@ -18,19 +18,11 @@ A switch model (\nedtype{EtherSwitch}) is also provided.
   \item \nedtype{EtherHost} is a sample node with an Ethernet NIC;
   \item \nedtype{EtherSwitch}, \nedtype{EtherBus}, \nedtype{EtherHub} model switching hub, repeating hub and
         the old coxial cable;
-  \item basic compnents of the model: \nedtype{EtherMac}, \nedtype{EtherLlc}/\nedtype{EtherEncap} module types,
+  \item basic components of the model: \nedtype{EtherMac}, \nedtype{EtherLlc}/\nedtype{EtherEncap} module types,
         \nedtype{MacRelayUnit} (\nedtype{MACRelayUnitNP} and \nedtype{MACRelayUnitPP}), \nedtype{EtherFrame} message type,
         \cppclass{MacAddress} class
 \end{itemize}
 
-Sample simulations:
-
-\begin{itemize}
-  \item the \nedtype{MixedLAN} model contains hosts, switch, hub and bus
-  \item the \nedtype{LargeNet} model contains hundreds of computers, switches and hubs
-        (numbers depend on model configuration in largenet.ini) and mixes all
-        kinds of Ethernet technologies
-\end{itemize}
 
 \subsection{Implemented Standards}
 
@@ -102,14 +94,6 @@ thus the hub model is not specific to Ethernet. Messages may
 represent anything, from the beginning of a frame transmission to
 end (or abortion) of transmission.
 
-The hub module collects the following statistics:
-
-\begin{itemize}
-\item \ttt{pkBytes} handled packets length (vector)
-\item \ttt{messages/sec} number of packets per seconds (scalar)
-\end{itemize}
-
-% FIXME #356 NED comment is wrong: data rate must not be zero!
 % TODO: model delay in hubs: class I device 140 bit time, class II device 92 bit time (for fast ethernet)
 
 \section{MAC layer}
@@ -232,57 +216,6 @@ a MAC.
 CRC checks are modeled by the \fvar{bitError} flag of the packets. Erronous
 packets are dropped by the MAC.
 
-\subsection*{Signals and statistics}
-
-Both MAC modules emits the following signals:
-\begin{itemize}
-  \item \fsignal{txPk} after successful data frame transmission, the data frame
-  \item \fsignal{rxPkOk} after successful data frame reception, the data frame
-  \item \fsignal{txPausePkUnits} after PAUSE frame sent, the pause time
-  \item \fsignal{rxPausePkUnits} after PAUSE frame received, the pause time
-  \item \fsignal{rxPkFromHL} when a data frame received from higher layer,
-         the data frame
-  \item \fsignal{dropPkNotForUs} when a data frame received not addressed
-         to the MAC, the data frame
-  \item \fsignal{dropPkBitError} when a frame received with bit error, the frame
-  \item \fsignal{dropPkIfaceDown} when a message received and the MAC is not connected,
-        the dropped message
-  \item \fsignal{packetSentToLower} before starting to send a packet on phys\$o gate,
-        the packet
-  \item \fsignal{packetReceivedFromLower} after a packet received on phys\$i gate,
-        the packet (excluding PAUSE and JAM messages and dropped data frames)
-  \item \fsignal{packetSentToUpper} before sending a packet on upperLayerOut, the packet
-  \item \fsignal{packetReceivedFromUpper} after a packet received on upperLayerIn,
-        the packet
-\end{itemize}
-
-% FIXME rxPkOkSignal == packetSentToUpperSignal
-
-Apart from statistics can be generated from the signals, the modules collects
-the following scalars:
-
-\begin{itemize}
-  \item \ttt{simulated time} total simulation time
-  \item \ttt{full duplex} boolean value, indicating whether the module operated
-          in full-duplex mode
-  \item \ttt{frames/sec sent} data frames sent (not including PAUSE frames) per second
-  \item \ttt{frames/sec rcvd} data frames received (not including PAUSE frames) per second
-  \item \ttt{bits/sec sent}
-  \item \ttt{bits/sec rcvd}
-\end{itemize}
-
-Note that four of these scalars could be recorded as the count and value of the \fsignal{txPkBytesSignal}
-and \fsignal{rxPkBytesSignal} signals resp.
-
-\subsection*{Visual effects}
-
-In the graphical environment, some animation effects help to follow the simulation.
-The color of the transmission channel is changed to yellow during transmission, and
-turns to red when collision detected. The icon of disconnected MAC modules are grayed out.
-
-The icon of the Ethernet NICs are also colored according to the state of MAC module:
-yellow if transmitting, blue if receiving, red if collision detected, white in backoff
-and gray in paused state.
 
 %\subsection*{Auto-Negotiation}
 % Ethernet Auto-Negotiation not supported
@@ -472,130 +405,10 @@ medium connected to the port; if collisions are possible (it's a bus or hub)
 it must be set to false, otherwise it can be set to true.
 By default it uses half duples MAC with CSMA/CD.
 
-\ifdraft
-TODO: I think this is no longer true, because we have STP, RSTP
-\begin{note}
-Switches don't implement the Spanning Tree Protocol. You need to
-avoid cycles in the LAN topology.
-\end{note}
-\fi
+TODO STP, RSTP
 
 \section{Link Layer Control}
 \label{sec:LLC}
-% FIXME #353 there is no module for sending EtherFrameWithSNAP frames
-% FIXME ETHER_SNAP_HEADER_LENGTH is wrong in Ethernet.h (+3 bytes, ssap+dsap+control)
-
-\subsection{Frame types}
-
-The raw 802.3 frame format header contains the MAC addresses of the destination and source
-of the packet and the length of the data field. The frame footer contains the FCS
-(Frame Check Sequence) field which is a 32-bit CRC.
-
-\begin{center}
-\begin{bytefield}[bitwidth=1.2em,bitheight=2\baselineskip]{20}
-\bitbox{4}{\small MAC \\ destination} &
-\bitbox{4}{\small MAC \\ source} &
-\bitbox{4}{\small Length} &
-\bitbox{4}{\small Payload} &
-\bitbox{4}{\small FCS} \\
-\bitbox{4}{\small 6 octets} &
-\bitbox{4}{\small 6 octets} &
-\bitbox{4}{\small 2 octets} &
-\bitbox{4}{\small 46-1500 octets} &
-\bitbox{4}{\small 4 octets}
-\end{bytefield}
-\end{center}
-
-Each such frame is preceded by a 7 octet Preamble (with 10101010 octets) and
-a 1 octet SFD (Start of Frame Delimiter) field (10101011) and followed by an
-12 octet interframe gap. These fields are added and removed in the MAC layer,
-so they are omitted here.
-
-When multiple upper layer protocols use the same Ethernet line,
-the kernel has to know which which component handles the incoming frames.
-For this purpose a protocol identifier was added to the standard Ethernet
-frames.
-
-The first solution preceded the 802.3 standard and used a 2 byte protocol
-identifier in place of the Length field. This is called Ethernet II
-or DIX frame.
-Each protocol id is above 1536, so the Ethernet II frames and the 802.3
-frames can be distinguished.
-
-\begin{center}
-\begin{bytefield}[bitwidth=1.2em,bitheight=2\baselineskip]{20}
-\bitbox{4}{\small MAC \\ destination} &
-\bitbox{4}{\small MAC \\ source} &
-\bitbox{4}{\small EtherType} &
-\bitbox{4}{\small Payload} &
-\bitbox{4}{\small FCS} \\
-\bitbox{4}{\small 6 octets} &
-\bitbox{4}{\small 6 octets} &
-\bitbox{4}{\small 2 octets} &
-\bitbox{4}{\small 46-1500 octets} &
-\bitbox{4}{\small 4 octets}
-\end{bytefield}
-\end{center}
-
-The LLC frame format uses a 1 byte source, a 1 byte destination, and a 1 byte
-control information to identify the encapsulated protocol adopted from the
-802.2 standard. These fields follow the standard 802.3 header, so the maximum
-length of the payload is 1497 bytes:
-
-\begin{center}
-\begin{bytefield}[bitwidth=1.2em,bitheight=2\baselineskip]{20}
-\bitbox{4}{\small MAC \\ destination} &
-\bitbox{4}{\small MAC \\ source} &
-\bitbox{4}{\small Length} &
-\bitbox{4}{\small DSAP} &
-\bitbox{4}{\small SSAP} &
-\bitbox{4}{\small Control} &
-\bitbox{4}{\small Payload} &
-\bitbox{4}{\small FCS} \\
-\bitbox{4}{\small 6 octets} &
-\bitbox{4}{\small 6 octets} &
-\bitbox{4}{\small 2 octets} &
-\bitbox{4}{\small 1 octets} &
-\bitbox{4}{\small 1 octets} &
-\bitbox{4}{\small 1 octets} &
-\bitbox{4}{\small 43-1497 octets} &
-\bitbox{4}{\small 4 octets}
-\end{bytefield}
-\end{center}
-
-The SNAP header uses the EtherType protocol identifiers inside an LLC header.
-The SSAP and DSAP fields are filled with 0xAA (SAP\_SNAP), and the control
-field is 0x03. They are followed by a 3 byte orgnaization and a 2 byte local
-code the identify the protocol. If the organization code is 0, the local field
-contains an EtherType protocol identifier.
-
-\begin{center}
-\begin{bytefield}[bitwidth=1.2em,bitheight=2\baselineskip]{20}
-\bitbox{4}{\small MAC \\ destination} &
-\bitbox{4}{\small MAC \\ source} &
-\bitbox{4}{\small Length} &
-\bitbox{4}{\small DSAP \\ 0xAA} &
-\bitbox{4}{\small SSAP \\ 0xAA} &
-\bitbox{4}{\small Control \\ 0x03} &
-\bitbox{4}{\small OrgCode} &
-\bitbox{4}{\small Local \\ Code} &
-\bitbox{4}{\small Payload} &
-\bitbox{4}{\small FCS} \\
-\bitbox{4}{\small 6 octets} &
-\bitbox{4}{\small 6 octets} &
-\bitbox{4}{\small 2 octets} &
-\bitbox{4}{\small 1 octets} &
-\bitbox{4}{\small 1 octets} &
-\bitbox{4}{\small 1 octets} &
-\bitbox{4}{\small 3 octets} &
-\bitbox{4}{\small 2 octets} &
-\bitbox{4}{\small 38-1492 octets} &
-\bitbox{4}{\small 4 octets}
-\end{bytefield}
-\end{center}
-
-The INET defines these frames in the \ffilename{EtherFrame.msg} file.
-The models supports Ethernet II, 803.2 with LLC header, and 803.3 with LLC and SNAP headers.
 
 \subsection{EtherEncap}
 
