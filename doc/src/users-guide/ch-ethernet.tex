@@ -24,21 +24,11 @@ A switch model (\nedtype{EtherSwitch}) is also provided.
 \end{itemize}
 
 
-\subsection{Implemented Standards}
-
-The Ethernet model operates according to the following standards:
-
-\begin{itemize}
-  \item Ethernet: IEEE 802.3-1998
-  \item Fast Ethernet: IEEE 802.3u-1995
-  \item Full-Duplex Ethernet with Flow Control: IEEE 802.3x-1997
-  \item Gigabit Ethernet: IEEE 802.3z-1998
-\end{itemize}
-
 \section{Physical layer}
 
-The nodes of the Ethernet networks are connected by coaxial,
-twisted pair or fibre cables. There are several cable types specified
+Stations on an Ethernet networks are connected by coaxial,
+twisted pair or fibre cables. (Coaxial only has historical importance,
+but is supported by INET anyway.) There are several cable types specified
 in the standard.
 
 In the INET framework, the cables are represented by connections.
@@ -56,31 +46,6 @@ nodes. The datarate parameter can have four values:
 \end{itemize}
 
 
-\subsection{EtherBus}
-
-The \nedtype{EtherBus} component can model a common coaxial cable
-found in earlier Ethernet LANs. The nodes are attached at specific
-positions of the cable. If a node sends a packet, it is transmitted
-in both direction by a given propagation speed.
-
-The gates of the \nedtype{EtherBus} represent taps. The positions
-of the taps are given by the \fpar{positions} parameter as a
-space separated list of distances in metres. If there are more
-gates then positions given, the last distance is repeated.
-The bus component send the incoming message in one direction and
-a copy of the message to the other direction (except at the ends).
-The propagation delays are computed from the distances of the taps
-and the \fpar{propagationSpeed} parameter.
-
-Messages are not interpreted by the bus model in any way, thus the bus
-model is not specific to Ethernet in any way. Messages may
-represent anything, from the beginning of a frame transmission to
-end (or abortion) of transmission.
-
-% FIXME #356 NED comment is wrong: data rate must not be zero!
-% FIXME #354 default propagation speed is wrong (should be 2e8mps)
-%            btw there is a hard coded propagation speed in EtherMACBase.cc
-
 \subsection{EtherHub}
 
 Ethernet hubs are a simple broadcast devices. Messages arriving on a port
@@ -96,7 +61,44 @@ end (or abortion) of transmission.
 
 % TODO: model delay in hubs: class I device 140 bit time, class II device 92 bit time (for fast ethernet)
 
-\section{MAC layer}
+\subsection{EtherBus}
+
+The \nedtype{EtherBus} component can model a common coaxial cable
+found in early Ethernet LANs. The nodes are attached via taps at specific
+positions on the cable. When a node sends a signal, it will propagate
+along the cable in both directions at the given propagation speed.
+
+The gates of the \nedtype{EtherBus} represent taps. The positions
+of the taps are given by the \fpar{positions} parameter as a
+space separated list of distances in metres. If there are more
+gates then positions given, the last distance is repeated.
+The bus component send the incoming message in one direction and
+a copy of the message to the other direction (except at the ends).
+The propagation delays are computed from the distances of the taps
+and the \fpar{propagationSpeed} parameter.
+
+Messages are not interpreted by the bus model in any way, thus the bus
+model is not specific to Ethernet. Messages may represent anything, 
+from the beginning of a frame transmission to end (or abortion) of transmission.
+
+% FIXME #356 NED comment is wrong: data rate must not be zero!
+% FIXME #354 default propagation speed is wrong (should be 2e8mps)
+%            btw there is a hard coded propagation speed in EtherMACBase.cc
+
+
+\section{Ethernet Interfaces}
+
+\subsection{EthernetInterface}
+
+The \nedtype{EthernetInterface} compound module implements the \nedtype{IWiredInterface}
+interface. Complements \nedtype{EtherMac} and \nedtype{EtherEncap} with an output queue
+for QoS and RED support. It also has configurable input/output filters as \nedtype{IHook}
+components similarly to the \nedtype{PppInterface} module.
+
+% TODO there is no IWiredNic with EtherLLC
+
+
+\subsection{Ethernet MAC Layer}
 
 The Ethernet MAC (Media Access Control) layer transmits the Ethernet frames on
 the physical media. This is a sublayer within the data link layer. Because
@@ -104,26 +106,16 @@ encapsulation/decapsulation is not always needed (e.g. switches does not do
 encapsulation/decapsulation), it is implemented in a separate modules
 (\nedtype{EtherEncap} and \nedtype{EtherLlc}) that are part of the LLC layer.
 
-\begin{center}
-\setlength{\unitlength}{1mm}
-\begin{picture}(50,50)
-\put(2,47){Network layer}
-\put(12,35){\vector(0,1){10}}
-\put(12,45){\vector(0,-1){10}}
-\put(0,15){\line(1,0){50}}
-\put(50,15){\line(0,1){20}}
-\put(50,35){\line(-1,0){50}}
-\put(0,35){\line(0,-1){20}}
-\put(25,25){\line(0,1){10}}
-\put(0,25){\line(1,0){50}}
-\put(10,28){LLC}
-\put(27,28){MAC Relay}
-\put(22,18){MAC}
-\put(25,5){\vector(0,1){10}}
-\put(25,15){\vector(0,-1){10}}
-\put(15,2){Physical layer}
-\end{picture}
-\end{center}
+\subsection{Implemented Standards}
+
+The Ethernet model operates according to the following standards:
+
+\begin{itemize}
+  \item Ethernet: IEEE 802.3-1998
+  \item Fast Ethernet: IEEE 802.3u-1995
+  \item Full-Duplex Ethernet with Flow Control: IEEE 802.3x-1997
+  \item Gigabit Ethernet: IEEE 802.3z-1998
+\end{itemize}
 
 Nowadays almost all Ethernet networks operate using full-duplex
 point-to-point connections between hosts and switches. This means
@@ -302,6 +294,17 @@ These scalar statistics are generated about the state of the line:
   \item \ttt{backoffs} total number of backoffs (same as count of \fsignal{backoffSignal})
 \end{itemize}
 
+\subsection{EtherEncap}
+
+The \nedtype{EtherEncap} module generates \msgtype{EthernetIIFrame} messages.
+
+EtherFrameII
+
+\subsection{EtherLlc}
+
+TODO what it does
+
+
 % document error conditions (causing error() calls in the code)
 
 % FIXME handleRestransmission() comment is not true: // no beginSendFrames(), because end of jam signal sending will trigger it automatically
@@ -407,27 +410,6 @@ By default it uses half duples MAC with CSMA/CD.
 
 TODO STP, RSTP
 
-\section{Link Layer Control}
-\label{sec:LLC}
-
-\subsection{EtherEncap}
-
-The \nedtype{EtherEncap} module generates \msgtype{EthernetIIFrame} messages.
-
-EtherFrameII
-
-\subsection{EtherLlc}
-
-TODO what it does
-
-\subsection{EthernetInterface module}
-
-The \nedtype{EthernetInterface} compound module implements the \nedtype{IWiredInterface}
-interface. Complements \nedtype{EtherMac} and \nedtype{EtherEncap} with an output queue
-for QoS and RED support. It also has configurable input/output filters as \nedtype{IHook}
-components similarly to the \nedtype{PppInterface} module.
-
-% TODO there is no IWiredNic with EtherLLC
 
 
 %%% Local Variables:
