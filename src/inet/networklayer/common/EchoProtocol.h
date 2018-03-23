@@ -25,8 +25,6 @@
 
 namespace inet {
 
-class PingPayload;
-
 /**
  * TODO
  */
