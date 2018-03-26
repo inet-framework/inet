@@ -1,0 +1,160 @@
+\chapter{Networks}
+\label{cha:networks}
+
+\section{Overview}
+
+%TODO: wired, wireless, mixed wired/wireless, various topologies + generated, hierarchical, parametric
+%TODO: ethernet networks, mpls networks, vpn, tunneling, PPP networks, sensor networks
+
+INET heavily builds upon the modular architecture of OMNeT++. It provides 
+numerous domain specific and highly parameterizable components which can be
+combined in many ways. The primary means of building large custom network 
+simulations in INET is the composition of existing models with custom models,
+starting from small components and gradually forming ever larger ones up until
+the composition of the network. Users are not required to have programming 
+experience to create simulations unless they also want to implement 
+their own protocols, for example.
+
+As INET is an OMNeT++-based framework, users mainly use NED to describe the
+model topology, and ini files to provide configuration.\footnote{Some 
+components require additional configuration to be provided as separate
+files, e.g. in XML.} 
+
+\section{Assembling Simulations}
+
+Assembling an INET simulation starts with defining a module representing
+the network. Networks are compound modules which contain network nodes,
+automatic network configurators, and sometimes additionally transmission
+medium, physical environment, various visualizer, and other infrastructure
+related modules. Networks also contain connections between network nodes
+representing cables. Large hierarchical networks may be further organized
+into compound modules to directly express the hierarchy.
+
+Network nodes communicate at the network level by exchanging OMNeT++ messages 
+which are the abstract representations of physical signals on the 
+transmission medium.  Signals are either sent through OMNeT++ connections 
+in the wired case, or sent directly to the gate of the receiving network node 
+in the wireless case. Signals encapsulate INET-specific packets that represent 
+the transmitted digital data. Packets are further divided into chunks that
+provide alternative representations for smaller pieces of data (e.g. 
+protocol headers, application data).
+
+\section{Wired Networks}
+
+Wired network connections, for example \protocol{Ethernet} cables, are
+represented with standard OMNeT++ connections using the
+\nedtype{DatarateChannel} NED type. The channel's \nedtype{datarate} and
+\nedtype{delay} parameters must be provided for all wired connections.
+
+The following example shows how straightforward it is to create a model for
+a simple wired network. This network contains a server connected to a router
+using \protocol{PPP}, which in turn is connected to a switch using
+\protocol{Ethernet}. The network also contains a parameterizable number of
+clients, all connected to the switch forming a star topology. The utilized
+network nodes are all predefined modules in INET. To avoid the manual
+configuration of IP addresses and routing tables, an automatic network
+configurator is also included.
+
+\nedsnippet{WiredNetworkExample}{Wired network example}
+
+In order to run a simulation using the above network, an OMNeT++ INI file must
+be created. The INI file selects the network, sets its number of clients
+parameter, and configures a simple \protocol{TCP} application for each
+client. The server is configured to have a \protocol{TCP} application which
+echos back all data received from the clients individually.
+
+\inisnippet{WiredNetworkConfigurationExample}{Wired network configuration example}
+
+When the above simulation is run, each client application connects to the
+server using a \protocol{TCP} socket. Then each one of them sends 1MB of
+data, which in turn is echoed back by the server, and the simulation
+concludes. The default statistics are written to the \texttt{results}
+folder of the simulation for later analysis.
+
+\section{Wireless Networks}
+
+%TODO: AccessPoint, WirelessHost infrastructure mode
+
+Wireless network connections are not modeled with OMNeT++ connections due the
+dynamically changing nature of connectivity. For wireless networks, an
+additional module representing the transmission medium, is required to
+maintain connectivity information.
+
+Building a simple wireless network is somewhat different, because wireless
+nodes don't use OMNeT++ connections. In this case, the network contains an
+additional module which represents the transmission medium.
+
+\nedsnippet{WirelessNetworkExample}{Wireless network example}
+
+For the above network, the INI file configures node mobility using a
+stochastic model. In wireless simulations, some form of a mobility model is
+essential to provide positions for the transmission medium during the
+computation of signal propagation and path loss. In addition, each ad hoc
+node is configured to include a simple ping application.
+
+\inisnippet{WirelessNetworkConfigurationExample}{Wireless network configuration example}
+
+When the above simulation is run, each ad hoc node periodically sends an
+ICMP echo requests to the first node. This simulation runs indefinitely
+while it continuously prints the usual ping round trip time report on the
+standard output.
+
+\section{Ethernet Networks}
+
+%TODO: EtherHub, EtherBus, EtherSwitch, EtherHost
+
+\section{MPLS Networks}
+
+%TODO: LdpRouter, RsvpRouter
+
+\section{Mobile Ad hoc Networks}
+
+%TODO: AdhocHost, ManetRouter, AodvRouter, DymoRouter, GpsrRouter
+
+\section{Sensor Networks}
+
+%TOOD: SensorNode, SensorGateway
+
+\section{Virtual Private Networks}
+
+%TOOD: VpnIngressNode, VpnEgressNode
+
+\section{Mixed Networks}
+
+%TODO: wired + wireless
+
+\section{Complex Topologies}
+
+%TODO: wizards, generated topologies
+
+\section{Hierarchical Networks}
+
+%TODO: nested compound modules
+
+\section{//////////////////////////////////////////////////////////////////////}
+
+
+\section{Connecting Protocols}
+
+TODO describe how INET protocols are connected to each other using the built-in message dispatching mechanism.
+
+\section{Applications}
+\label{subsec:applications}
+
+TODO describe how INET models running applications as modules: ping, connectionless traffic, connection oriented traffic, voip, video, etc.
+
+\section{Protocols} % TODO: inline subsubsections one level up
+\label{subsec:protocols}
+
+TODO describe how INET models data and control plane protocols as modules in general
+
+\section{Routing Protocols}
+
+TODO briefly describe how INET models routing protocols: BGP, OSPF, RIP, AODV, etc.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "usman"
+%%% End:
+
+

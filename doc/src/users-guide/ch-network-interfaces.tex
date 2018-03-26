@@ -1,0 +1,90 @@
+\chapter{Network Interfaces}
+\label{cha:network-interfaces}
+
+\section{Overview}
+
+%TODO: MAC address, op mode, duplex mode, data rate, transmission power, queue limits, FCS mode
+
+TODO describe how INET models network interfaces as modules: ethernet cards, PPP
+interfaces, wifi cards, etc.
+
+In INET simulations, network interface modules are the primary means of
+communication between network nodes. They represent the required
+combination of software and hardware elements from an operating system
+point-of-view. Network interfaces come in two quite different kinds: wired
+and wireless.
+
+Wired interfaces have a pair of special purpose OMNeT++ gates which represent
+the capability of having an external physical connection to another network
+node (e.g., Ethernet port). In order to make wired communication work,
+these gates must be connected with special connections which represent the
+physical cable between the physical ports. The connections must use special
+OMNeT++ channels (e.g., \nedtype{DatarateChannel}) which determine datarate
+and delay parameters.
+
+\section{Built-in Network Interfaces}
+
+INET provides pre-assembled network interfaces for several standard
+protocols, protocol tunneling, hardware emulation, etc. The following list
+gives the most commonly used network interfaces.
+
+\begin{itemize}
+        \item \nedtype{EthernetInterface} contains \protocol{Ethernet} MAC and PHY protocols
+        \item \nedtype{PppInterface} provides \protocol{PPP} protocol
+        \item \nedtype{Ieee80211Interface} contains \protocol{IEEE 802.11} MGMT, MAC and PHY protocols
+        \item \nedtype{Ieee802154Interface} contains \protocol{IEEE 802.15.4} MAC and PHY protocols
+        \item \nedtype{BMacInterface}, \nedtype{LMacInterface}, \nedtype{XMacInterface} provides low-power wireless sensor protocols along with a simple hypothetical PHY protocol
+        \item \nedtype{TunInterface} provides protocol tunneling which can be directly used by applications
+        \item \nedtype{LoopbackInterface} provides local loopback within the network node
+        \item \nedtype{ExtInterface} represents real interfaces suitable for hardware-in-the-loop simulations
+\end{itemize}
+
+The internal structure of network interfaces can also be customized in
+several ways similarly to network nodes. For example,
+\nedtype{EthernetInterface} contains optional submodules for queuing and
+traffic shaping.
+
+\section{Network Interface Structure}
+
+All network interfaces in the INET Framework are OMNeT++ compound modules that
+are mainly composed of the following components:
+
+\begin{itemize}
+        \item \emph{LLC protocols}
+        \item \emph{MGMT protocols}
+        \item \emph{MAC protocols}
+        \item \emph{PHY protocols}
+        \item \emph{Traffic conditioners}
+        \item \emph{Queues}
+        \item \emph{Classifiers}
+\end{itemize}
+
+\section{Wired Network Interfaces}
+
+%TODO: explain what is specific to wired interfaces
+
+\section{Wireless Network Interfaces}
+
+%TODO: explain what is specific to wireless interfaces
+
+\section{Custom Network Interfaces}
+
+It's also possible to build custom network interfaces, the following
+example shows how to build a custom wireless interface.
+
+\nedsnippet{WirelessInterfaceExample}{Wireless interface example}
+
+The above network interface contains very simple hypothetical MAC and PHY
+protocols. The MAC protocol only provides acknowledgment without other
+services (e.g., carrier sense, collision avoidance, collision detection),
+the PHY protocol uses one of the predefined APSK modulations for the whole
+signal (preamble, header, and data) without other services (e.g.,
+scrambling, interleaving, forward error correction).
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "usman"
+%%% End:
+
+

@@ -250,6 +250,17 @@
     {\lstset{language=pseudocode,rulecolor=\color{PseudoCodeRulerColor}}}
     {}
 
+\newcommand{\xmlsnippet}[2]{%
+    \lstinputlisting[language=XML,caption={#2},linerange=<!\-\-#1\-\->-<!\-\-End\-\->,includerangemarker=false,firstnumber=0]{Snippets.xml}}
+\newcommand{\cppsnippet}[2]{%
+    \lstinputlisting[language=C++,caption={#2},linerange=//!#1-//!End,includerangemarker=false,firstnumber=0]{Snippets.cc}}
+\newcommand{\msgsnippet}[2]{%
+    \lstinputlisting[language=msg,caption={#2},linerange=//!#1-//!End,includerangemarker=false,firstnumber=0]{Snippets.msg}}
+\newcommand{\nedsnippet}[2]{%
+    \lstinputlisting[language=ned,caption={#2},linerange=//!#1-//!End,includerangemarker=false,firstnumber=0]{Snippets.ned}}
+\newcommand{\inisnippet}[2]{%
+    \lstinputlisting[language=inifile,caption={#2},linerange=\#!#1-\#!End,includerangemarker=false,firstnumber=0]{Snippets.ini}}
+
 %%
 %% some customization
 %%
@@ -288,6 +299,9 @@
 %%    or: \ffunc[take()]{take(obj)}
 %% the second form uses the bracketed word for the index entry
 %%
+
+\newcommand{\protocol}[1]{%
+    {#1}}
 
 %% NED type names
 \newcommand{\nedtype}[2][\DefaultOpt]{\def\DefaultOpt{#2}%
@@ -399,7 +413,13 @@
 \include{ch-usage}
 \cleardoublepage
 
-\include{ch-node-models}
+\include{ch-networks}
+\cleardoublepage
+
+\include{ch-network-nodes}
+\cleardoublepage
+
+\include{ch-network-interfaces}
 \cleardoublepage
 
 \include{ch-ppp}
