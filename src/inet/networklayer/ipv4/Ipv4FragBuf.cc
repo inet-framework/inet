@@ -39,7 +39,7 @@ Ipv4FragBuf::~Ipv4FragBuf()
 
 Packet *Ipv4FragBuf::addFragment(Packet *packet, simtime_t now)
 {
-    const auto& ipv4Header = packet->peekHeader<Ipv4Header>();
+    const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
     // find datagram buffer
     Key key;
     key.id = ipv4Header->getIdentification();
@@ -82,7 +82,7 @@ Packet *Ipv4FragBuf::addFragment(Packet *packet, simtime_t now)
         std::size_t found = pkName.find("-frag-");
         if (found != std::string::npos)
             pkName.resize(found);
-        auto hdr = Ptr<Ipv4Header>(curBuf->packet->peekHeader<Ipv4Header>()->dup());
+        auto hdr = Ptr<Ipv4Header>(curBuf->packet->peekAtFront<Ipv4Header>()->dup());
         Packet *pk = curBuf->packet;
         pk->setName(pkName.c_str());
         pk->removeAll();
@@ -90,8 +90,8 @@ Packet *Ipv4FragBuf::addFragment(Packet *packet, simtime_t now)
         hdr->setTotalLengthField(hdr->getHeaderLength() + B(payload->getChunkLength()).get());
         hdr->setFragmentOffset(0);
         hdr->setMoreFragments(false);
-        pk->insertAtBeginning(hdr);
-        pk->insertAtEnd(payload);
+        pk->insertAtFront(hdr);
+        pk->insertAtBack(payload);
         bufs.erase(i);
         return pk;
     }

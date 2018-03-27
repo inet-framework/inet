@@ -64,10 +64,10 @@ bool MultiFieldClassifier::Filter::matches(Packet *packet, const Ipv4Header *ipv
         const Protocol *protocolPtr = ipv4Header->getProtocol();
         if (!protocolPtr || !isTransportProtocol(*protocolPtr))
             return false;
-        auto headerOffset = packet->getHeaderPopOffset();
-        packet->setHeaderPopOffset(headerOffset + ipv4Header->getChunkLength());
+        auto headerOffset = packet->getFrontOffset();
+        packet->setFrontOffset(headerOffset + ipv4Header->getChunkLength());
         const auto& transportHeader = peekTransportProtocolHeader(packet, *protocolPtr);
-        packet->setHeaderPopOffset(headerOffset);
+        packet->setFrontOffset(headerOffset);
         srcPort = transportHeader->getSourcePort();
         destPort = transportHeader->getDestinationPort();
 
@@ -98,10 +98,10 @@ bool MultiFieldClassifier::Filter::matches(Packet *packet, const Ipv6Header *ipv
         const Protocol *protocolPtr = ipv6Header->getProtocol();
         if (!protocolPtr || !isTransportProtocol(*protocolPtr))
             return false;
-        auto headerOffset = packet->getHeaderPopOffset();
-        packet->setHeaderPopOffset(headerOffset + ipv6Header->getChunkLength());
+        auto headerOffset = packet->getFrontOffset();
+        packet->setFrontOffset(headerOffset + ipv6Header->getChunkLength());
         const auto& transportHeader = peekTransportProtocolHeader(packet, *protocolPtr);
-        packet->setHeaderPopOffset(headerOffset);
+        packet->setFrontOffset(headerOffset);
         srcPort = transportHeader->getSourcePort();
         destPort = transportHeader->getDestinationPort();
 
@@ -164,7 +164,7 @@ int MultiFieldClassifier::classifyPacket(Packet *packet)
 
 #ifdef WITH_IPv4
     if (protocol == &Protocol::ipv4) {
-        const auto& ipv4Header = packet->peekHeader<Ipv4Header>();
+        const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
         for (auto & elem : filters)
             if (elem.matches(packet, ipv4Header.get()))
                 return elem.gateIndex;
@@ -174,7 +174,7 @@ int MultiFieldClassifier::classifyPacket(Packet *packet)
 
 #ifdef WITH_IPv6
     if (protocol == &Protocol::ipv6) {
-        const auto& ipv6Header = packet->peekHeader<Ipv6Header>();
+        const auto& ipv6Header = packet->peekAtFront<Ipv6Header>();
         for (auto & elem : filters)
             if (elem.matches(packet, ipv6Header.get()))
                 return elem.gateIndex;

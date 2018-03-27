@@ -30,7 +30,7 @@ Register_Protocol_Dissector(&Protocol::bmac, BMacProtocolDissector);
 
 void BMacProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    auto header = packet->popHeader<BMacHeader>();
+    auto header = packet->popAtFront<BMacHeader>();
     callback.startProtocolDataUnit(&Protocol::bmac);
     callback.visitChunk(header, &Protocol::bmac);
     if (header->getType() == BMAC_DATA) {

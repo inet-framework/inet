@@ -28,7 +28,7 @@ void EtherFrameClassifier::handleMessage(cMessage *msg)
 {
     //FIXME msg is always Packet*, need another way to detect pause frame
     if (Packet *pk = dynamic_cast<Packet *>(msg)) {
-        auto hdr = pk->peekHeader<EthernetMacHeader>(b(-1), Chunk::PF_ALLOW_NULLPTR|Chunk::PF_ALLOW_INCOMPLETE);
+        auto hdr = pk->peekAtFront<EthernetMacHeader>(b(-1), Chunk::PF_ALLOW_NULLPTR|Chunk::PF_ALLOW_INCOMPLETE);
         if (hdr != nullptr) {
             if (hdr->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL) {
                 send(msg, "pauseOut");

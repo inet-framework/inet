@@ -1301,7 +1301,7 @@ void SctpAssociation::sendPacketDrop(const bool flag)
                 smsg->setEncaps(false);
                 smsg->setByteLength(newLength);
                 dataChunk->encapsulate((cPacket *)smsg);
-              //  dataChunk->insertAtEnd(smsg);
+              //  dataChunk->insertAtBack(smsg);
                 drop->insertSctpChunks(dataChunk);
             }
             else if (drop->getSctpChunksArraySize() == 1) {
@@ -1323,7 +1323,7 @@ void SctpAssociation::sendPacketDrop(const bool flag)
         pktdrop->setTFlag(true);
     }
 /**** ToDo Irene */
-   // pktdrop->insertAtEnd(drop);
+   // pktdrop->insertAtBack(drop);
    // pktdrop->encapsulate(drop);
 
     EV_DETAIL << "length of PKTDROP chunk=" << pktdrop->getByteLength() << "\n";
@@ -2067,7 +2067,7 @@ void SctpAssociation::pushUlp()
             cmd->setCumTsn(state->lastTsnAck);
             auto creationTimeTag = applicationPacket->addTagIfAbsent<CreationTimeTag>();
             creationTimeTag->setCreationTime(smsg->getCreationTime());
-            applicationPacket->insertAtEnd(applicationData);
+            applicationPacket->insertAtBack(applicationData);
             state->numMsgsReq[count]--;
             EndToEndDelay->record(simTime() - chunk->firstSendTime);
             auto iter = sctpMain->assocStatMap.find(assocId);
@@ -2529,7 +2529,7 @@ void SctpAssociation::fragmentOutboundDataMsgs() {
                     }
 
                     offset += msgbytes;
-                    //datMsgFragment->insertAtEnd(datMsgFragmentEncMsg);
+                    //datMsgFragment->insertAtBack(datMsgFragmentEncMsg);
                     datMsgFragment->encapsulate(datMsgFragmentEncMsg);
 
                     /* insert fragment into queue */

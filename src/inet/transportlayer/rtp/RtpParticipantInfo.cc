@@ -70,7 +70,7 @@ RtpParticipantInfo *RtpParticipantInfo::dup() const
 
 void RtpParticipantInfo::processRTPPacket(Packet *packet, int id, simtime_t arrivalTime)
 {
-    packet->peekHeader<RtpHeader>();
+    packet->peekAtFront<RtpHeader>();
     _silentIntervals = 0;
     delete packet;
 }

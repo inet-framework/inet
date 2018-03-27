@@ -301,15 +301,15 @@ void Rtcp::createPacket()
 
     Packet *compoundPacket = new Packet("RtcpCompoundPacket");
 
-    compoundPacket->insertTrailer(reportPacket);
-    compoundPacket->insertTrailer(sdesPacket);
+    compoundPacket->insertAtBack(reportPacket);
+    compoundPacket->insertAtBack(sdesPacket);
 
     // create rtcp app/bye packets if needed
     if (_leaveSession) {
         const auto& byePacket = makeShared<RtcpByePacket>();
         byePacket->setSsrc(_senderInfo->getSsrc());
         byePacket->paddingAndSetLength();
-        compoundPacket->insertTrailer(byePacket);
+        compoundPacket->insertAtBack(byePacket);
     }
 
     calculateAveragePacketSize(compoundPacket->getByteLength());
@@ -331,7 +331,7 @@ void Rtcp::processOutgoingRTPPacket(Packet *packet)
 void Rtcp::processIncomingRTPPacket(Packet *packet, Ipv4Address address, int port)
 {
     bool good = false;
-    const auto& rtpHeader = packet->peekHeader<RtpHeader>();
+    const auto& rtpHeader = packet->peekAtFront<RtpHeader>();
     uint32 ssrc = rtpHeader->getSsrc();
     RtpParticipantInfo *participantInfo = findParticipantInfo(ssrc);
     if (participantInfo == nullptr) {
@@ -369,7 +369,7 @@ void Rtcp::processIncomingRTCPPacket(Packet *packet, Ipv4Address address, int po
 
     for (int i = 0; packet->getByteLength() > 0; i++) {
         // remove the rtcp packet from the rtcp compound packet
-        const auto& rtcpPacket = packet->popHeader<RtcpPacket>();
+        const auto& rtcpPacket = packet->popAtFront<RtcpPacket>();
         if (rtcpPacket) {
             switch (rtcpPacket->getPacketType()) {
                 case RTCP_PT_SR:

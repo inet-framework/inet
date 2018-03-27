@@ -26,7 +26,7 @@ void DefaultDissector::dissect(Packet *packet, ICallback& callback) const
 {
     callback.startProtocolDataUnit(nullptr);
     callback.visitChunk(packet->peekData(), nullptr);
-    packet->setHeaderPopOffset(packet->getTrailerPopOffset());
+    packet->setFrontOffset(packet->getBackOffset());
     callback.endProtocolDataUnit(nullptr);
 }
 

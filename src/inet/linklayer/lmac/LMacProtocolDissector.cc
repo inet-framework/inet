@@ -30,7 +30,7 @@ Register_Protocol_Dissector(&Protocol::lmac, LMacProtocolDissector);
 
 void LMacProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    auto header = packet->popHeader<LMacHeader>();
+    auto header = packet->popAtFront<LMacHeader>();
     callback.startProtocolDataUnit(&Protocol::lmac);
     callback.visitChunk(header, &Protocol::lmac);
     if (header->getType() == LMAC_DATA) {

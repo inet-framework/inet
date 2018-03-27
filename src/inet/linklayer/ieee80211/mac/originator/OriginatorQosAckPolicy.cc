@@ -45,7 +45,7 @@ std::map<MacAddress, std::vector<Packet *>> OriginatorQosAckPolicy::getOutstandi
     auto outstandingFrames = inProgressFrames->getOutstandingFrames();
     std::map<MacAddress, std::vector<Packet *>> outstandingFramesPerReceiver;
     for (auto frame : outstandingFrames)
-        outstandingFramesPerReceiver[frame->peekHeader<Ieee80211MacHeader>()->getReceiverAddress()].push_back(frame);
+        outstandingFramesPerReceiver[frame->peekAtFront<Ieee80211MacHeader>()->getReceiverAddress()].push_back(frame);
     return outstandingFramesPerReceiver;
 }
 
@@ -53,9 +53,9 @@ std::map<MacAddress, std::vector<Packet *>> OriginatorQosAckPolicy::getOutstandi
 int OriginatorQosAckPolicy::computeStartingSequenceNumber(const std::vector<Packet *>& outstandingFrames) const
 {
     ASSERT(outstandingFrames.size() > 0);
-    int startingSequenceNumber = outstandingFrames[0]->peekHeader<Ieee80211DataHeader>()->getSequenceNumber();
+    int startingSequenceNumber = outstandingFrames[0]->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber();
     for (int i = 1; i < (int)outstandingFrames.size(); i++) {
-        int seqNum = outstandingFrames[i]->peekHeader<Ieee80211DataHeader>()->getSequenceNumber();
+        int seqNum = outstandingFrames[i]->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber();
         if (seqNum < startingSequenceNumber)
             startingSequenceNumber = seqNum;
     }
@@ -97,7 +97,7 @@ std::tuple<MacAddress, SequenceNumber, Tid> OriginatorQosAckPolicy::computeBlock
             }
             MacAddress receiverAddress = largestOutstandingFrames->first;
             SequenceNumber startingSequenceNumber = computeStartingSequenceNumber(largestOutstandingFrames->second);
-            Tid tid = largestOutstandingFrames->second.at(0)->peekHeader<Ieee80211DataHeader>()->getTid();
+            Tid tid = largestOutstandingFrames->second.at(0)->peekAtFront<Ieee80211DataHeader>()->getTid();
             return std::make_tuple(receiverAddress, startingSequenceNumber, tid);
         }
     }

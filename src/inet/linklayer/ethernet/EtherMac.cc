@@ -215,7 +215,7 @@ void EtherMac::processFrameFromUpperLayer(Packet *packet)
     numFramesFromHL++;
     emit(packetReceivedFromUpperSignal, packet);
 
-    auto frame = packet->peekHeader<EthernetMacHeader>();
+    auto frame = packet->peekAtFront<EthernetMacHeader>();
     if (frame->getDest().equals(address)) {
         throw cRuntimeError("Logic error: frame %s from higher layer has local MAC address as dest (%s)",
                 packet->getFullName(), frame->getDest().str().c_str());
@@ -242,11 +242,11 @@ void EtherMac::processFrameFromUpperLayer(Packet *packet)
     if (frame->getSrc().isUnspecified()) {
         //frame is immutable
         frame = nullptr;
-        auto newFrame = packet->removeHeader<EthernetMacHeader>();
+        auto newFrame = packet->removeAtFront<EthernetMacHeader>();
         newFrame->setSrc(address);
-        packet->insertHeader(newFrame);
+        packet->insertAtFront(newFrame);
         frame = newFrame;
-        auto oldFcs = packet->removeTrailer<EthernetFcs>();
+        auto oldFcs = packet->removeAtBack<EthernetFcs>();
         EtherEncap::addFcs(packet, (EthernetFcsMode)oldFcs->getFcsMode());
     }
 
@@ -517,7 +517,7 @@ void EtherMac::startFrameTransmission()
 
     Packet *frame = curTxFrame->dup();
 
-    const auto& hdr = frame->peekHeader<EthernetMacHeader>();
+    const auto& hdr = frame->peekAtFront<EthernetMacHeader>();
     ASSERT(hdr);
     ASSERT(!hdr->getSrc().isUnspecified());
 
@@ -525,7 +525,7 @@ void EtherMac::startFrameTransmission()
     int64 minFrameLength = duplexMode ? curEtherDescr->frameMinBytes : (inBurst ? curEtherDescr->frameInBurstMinBytes : curEtherDescr->halfDuplexFrameMinBytes);
 
     if (frame->getByteLength() < minFrameLength) {
-        auto oldFcs = frame->removeTrailer<EthernetFcs>();
+        auto oldFcs = frame->removeAtBack<EthernetFcs>();
         EtherEncap::addPaddingAndFcs(frame, (EthernetFcsMode)oldFcs->getFcsMode(), minFrameLength);
     }
 
@@ -541,7 +541,7 @@ void EtherMac::startFrameTransmission()
     auto signal = new EthernetSignal(frame->getName());
     currentSendPkTreeID = signal->getTreeId();
     if (sendRawBytes) {
-        auto rawFrame = new Packet(frame->getName(), frame->peekAllBytes());
+        auto rawFrame = new Packet(frame->getName(), frame->peekAllAsBytes());
         rawFrame->copyTags(*frame);
         signal->encapsulate(rawFrame);
         delete frame;
@@ -601,7 +601,7 @@ void EtherMac::handleEndTxPeriod()
     emit(packetSentToLowerSignal, curTxFrame);    //consider: emit with start time of frame
 
     bool isPauseFrame = false;
-    const auto& header = curTxFrame->peekHeader<EthernetMacHeader>();
+    const auto& header = curTxFrame->peekAtFront<EthernetMacHeader>();
     if (header->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL) {
         const auto& controlFrame = curTxFrame->peekDataAt<EthernetControlFrame>(header->getChunkLength(), b(-1));
         isPauseFrame = controlFrame->getOpCode() == ETHERNET_CONTROL_PAUSE;
@@ -833,7 +833,7 @@ void EtherMac::frameReceptionComplete()
         return;
     }
 
-    const auto& frame = packet->peekHeader<EthernetMacHeader>();
+    const auto& frame = packet->peekAtFront<EthernetMacHeader>();
     if (dropFrameNotForUs(packet, frame))
         return;
 
@@ -868,11 +868,11 @@ void EtherMac::processReceivedDataFrame(Packet *packet)
 
 void EtherMac::processReceivedControlFrame(Packet *packet)
 {
-    packet->popHeader<EthernetMacHeader>();
-    const auto& controlFrame = packet->peekHeader<EthernetControlFrame>();
+    packet->popAtFront<EthernetMacHeader>();
+    const auto& controlFrame = packet->peekAtFront<EthernetControlFrame>();
 
     if (controlFrame->getOpCode() == ETHERNET_CONTROL_PAUSE) {
-        const auto& pauseFrame = packet->peekHeader<EthernetPauseFrame>();
+        const auto& pauseFrame = packet->peekAtFront<EthernetPauseFrame>();
         int pauseUnits = pauseFrame->getPauseTime();
 
         numPauseFramesRcvd++;

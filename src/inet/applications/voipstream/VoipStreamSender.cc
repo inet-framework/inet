@@ -361,7 +361,7 @@ Packet *VoipStreamSender::generatePacket()
     vp->setSampleBits(pEncoderCtx->bits_per_coded_sample);
     vp->setSamplesPerPacket(samplesPerPacket);
     vp->setTransmitBitrate(compressedBitRate);
-    pk->insertAtEnd(vp);
+    pk->insertAtBack(vp);
 
     pktID++;
 

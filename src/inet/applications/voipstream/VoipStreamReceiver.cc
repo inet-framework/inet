@@ -78,7 +78,7 @@ void VoipStreamReceiver::handleMessage(cMessage *msg)
     }
 
     Packet *pk = check_and_cast<Packet *>(msg);
-    const auto& vp = pk->peekHeader<VoipStreamPacket>();
+    const auto& vp = pk->peekAtFront<VoipStreamPacket>();
     bool ok = true;
     if (curConn.offline)
         createConnection(pk);
@@ -146,7 +146,7 @@ void VoipStreamReceiver::createConnection(Packet *pk)
 {
     ASSERT(curConn.offline);
 
-    const auto& vp = pk->peekHeader<VoipStreamPacket>();
+    const auto& vp = pk->peekAtFront<VoipStreamPacket>();
     auto l3Addresses = pk->getTag<L3AddressInd>();
     auto ports = pk->getTag<L4PortInd>();
 
@@ -187,7 +187,7 @@ void VoipStreamReceiver::checkSourceAndParameters(Packet *pk)
 {
     ASSERT(!curConn.offline);
 
-    const auto& vp = pk->peekHeader<VoipStreamPacket>();
+    const auto& vp = pk->peekAtFront<VoipStreamPacket>();
     auto l3Addresses = pk->getTag<L3AddressInd>();
     auto ports = pk->getTag<L4PortInd>();
     L3Address srcAddr = l3Addresses->getSrcAddress();
@@ -222,7 +222,7 @@ void VoipStreamReceiver::closeConnection()
 
 void VoipStreamReceiver::decodePacket(Packet *pk)
 {
-    const auto& vp = pk->peekHeader<VoipStreamPacket>();
+    const auto& vp = pk->peekAtFront<VoipStreamPacket>();
     switch (vp->getType()) {
         case VOICE:
             emit(packetHasVoiceSignal, 1);

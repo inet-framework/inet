@@ -102,7 +102,7 @@ void SctpNatServer::sendInfo(NatInfo *info)
 
     auto applicationData = makeShared<BytesChunk>(buffer, buflen);
     auto applicationPacket = new Packet("ApplicationPacket");
-    applicationPacket->insertAtEnd(applicationData);
+    applicationPacket->insertAtBack(applicationData);
     auto sctpSendReq = applicationPacket->addTagIfAbsent<SctpSendReq>();
     sctpSendReq->setLast(true);
     sctpSendReq->setPrMethod(0);
@@ -148,7 +148,7 @@ void SctpNatServer::sendInfo(NatInfo *info)
 
     auto applicationData2 = makeShared<BytesChunk>(buffer2, buflen);
     auto applicationPacket2 = new Packet("ApplicationPacket");
-    applicationPacket2->insertAtEnd(applicationData2);
+    applicationPacket2->insertAtBack(applicationData2);
     auto sctpSendReq2 = applicationPacket2->addTagIfAbsent<SctpSendReq>();
     sctpSendReq2->setLast(true);
     sctpSendReq2->setPrMethod(0);
@@ -185,7 +185,7 @@ void SctpNatServer::generateAndSend()
     for (int i = 0; i < numBytes; i++)
         vec[i] = (numBytes + i) & 0xFF;
     msg->setBytes(vec);
-    cmsg->insertAtEnd(msg);
+    cmsg->insertAtBack(msg);
 
     auto cmd = cmsg->addTagIfAbsent<SctpSendReq>();
     cmd->setSocketId(assocId);

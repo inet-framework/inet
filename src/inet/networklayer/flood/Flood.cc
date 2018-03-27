@@ -103,7 +103,7 @@ void Flood::finish()
 void Flood::handleUpperPacket(Packet *packet)
 {
     encapsulate(packet);
-    auto floodHeader = packet->peekHeader<FloodHeader>();
+    auto floodHeader = packet->peekAtFront<FloodHeader>();
 
     if (plainFlooding) {
         if (bcMsgs.size() >= bcMaxEntries) {
@@ -143,7 +143,7 @@ void Flood::handleUpperPacket(Packet *packet)
  **/
 void Flood::handleLowerPacket(Packet *packet)
 {
-    auto floodHeader = packet->peekHeader<FloodHeader>();
+    auto floodHeader = packet->peekAtFront<FloodHeader>();
 
     //msg not broadcasted yet
     if (notBroadcasted(floodHeader.get())) {
@@ -162,9 +162,9 @@ void Flood::handleLowerPacket(Packet *packet)
                 EV << " data msg BROADCAST! ttl = " << floodHeader->getTtl()
                    << " > 1 -> rebroadcast msg & send to upper\n";
                 auto dMsg = packet->dup();
-                auto newFloodHeader = dMsg->removeHeader<FloodHeader>();
+                auto newFloodHeader = dMsg->removeAtFront<FloodHeader>();
                 newFloodHeader->setTtl(newFloodHeader->getTtl() - 1);
-                dMsg->insertHeader(newFloodHeader);
+                dMsg->insertAtFront(newFloodHeader);
                 setDownControlInfo(dMsg, MacAddress::BROADCAST_ADDRESS);
                 sendDown(dMsg);
                 nbDataPacketsForwarded++;
@@ -186,10 +186,10 @@ void Flood::handleLowerPacket(Packet *packet)
                    << " > 1 -> forward\n";
                 decapsulate(packet);
                 auto packetCopy = new Packet();
-                packetCopy->insertAtEnd(packet->peekDataAt(b(0), packet->getDataLength()));
+                packetCopy->insertAtBack(packet->peekDataAt(b(0), packet->getDataLength()));
                 auto floodHeaderCopy = staticPtrCast<FloodHeader>(floodHeader->dupShared());
                 floodHeaderCopy->setTtl(floodHeader->getTtl() - 1);
-                packetCopy->insertHeader(floodHeaderCopy);
+                packetCopy->insertAtFront(floodHeaderCopy);
                 // needs to set the next hop address again to broadcast
                 cObject *const pCtrlInfo = packetCopy->removeControlInfo();
                 if (pCtrlInfo != nullptr)
@@ -256,13 +256,13 @@ bool Flood::notBroadcasted(const FloodHeader *msg)
  **/
 void Flood::decapsulate(Packet *packet)
 {
-    auto floodHeader = packet->popHeader<FloodHeader>();
+    auto floodHeader = packet->popAtFront<FloodHeader>();
     auto payloadLength = floodHeader->getPayloadLengthField();
     if (packet->getDataLength() < payloadLength) {
         throw cRuntimeError("Data error: illegal payload length");     //FIXME packet drop
     }
     if (packet->getDataLength() > payloadLength)
-        packet->setTrailerPopOffset(packet->getHeaderPopOffset() + payloadLength);
+        packet->setBackOffset(packet->getFrontOffset() + payloadLength);
     auto payloadProtocol = floodHeader->getProtocol();
     packet->addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&getProtocol());
     packet->addTagIfAbsent<NetworkProtocolInd>()->setNetworkProtocolHeader(floodHeader);
@@ -323,7 +323,7 @@ void Flood::encapsulate(Packet *appPkt)
     //encapsulate the application packet
     setDownControlInfo(appPkt, MacAddress::BROADCAST_ADDRESS);
 
-    appPkt->insertHeader(pkt);
+    appPkt->insertAtFront(pkt);
     EV << " pkt encapsulated\n";
 }
 

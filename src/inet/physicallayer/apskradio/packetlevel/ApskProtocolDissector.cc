@@ -31,22 +31,22 @@ Register_Protocol_Dissector(&Protocol::apskPhy, ApskProtocolDissector);
 
 void ApskProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    auto header = packet->popHeader<ApskPhyHeader>();
+    auto header = packet->popAtFront<ApskPhyHeader>();
     callback.startProtocolDataUnit(&Protocol::apskPhy);
     callback.visitChunk(header, &Protocol::apskPhy);
 
     //FIXME KLUDGE: remove PhyPadding if exists
-    auto padding = dynamicPtrCast<const BitCountChunk>(packet->peekHeader());
+    auto padding = dynamicPtrCast<const BitCountChunk>(packet->peekAtFront());
     if (padding != nullptr) {
-        packet->popHeader<BitCountChunk>(padding->getChunkLength());
+        packet->popAtFront<BitCountChunk>(padding->getChunkLength());
         callback.visitChunk(padding, &Protocol::apskPhy);
     }
     // end of KLUDGE
 
     //FIXME KLUDGE: remove ApskTrailer if exists
-    auto trailer = dynamicPtrCast<const BitCountChunk>(packet->peekTrailer());
+    auto trailer = dynamicPtrCast<const BitCountChunk>(packet->peekAtBack());
     if (trailer != nullptr)
-        packet->popTrailer<BitCountChunk>(trailer->getChunkLength());
+        packet->popAtBack<BitCountChunk>(trailer->getChunkLength());
     // end of KLUDGE
 
 

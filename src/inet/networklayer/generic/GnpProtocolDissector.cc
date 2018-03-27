@@ -29,16 +29,16 @@ Register_Protocol_Dissector(&Protocol::gnp, GnpProtocolDissector);
 
 void GnpProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    auto header = packet->popHeader<GenericDatagramHeader>();
-    auto trailerPopOffset = packet->getTrailerPopOffset();
-    auto gnpEndOffset = packet->getHeaderPopOffset() + header->getPayloadLengthField();
+    auto header = packet->popAtFront<GenericDatagramHeader>();
+    auto trailerPopOffset = packet->getBackOffset();
+    auto gnpEndOffset = packet->getFrontOffset() + header->getPayloadLengthField();
     callback.startProtocolDataUnit(&Protocol::gnp);
     callback.visitChunk(header, &Protocol::gnp);
-    packet->setTrailerPopOffset(gnpEndOffset);
+    packet->setBackOffset(gnpEndOffset);
     callback.dissectPacket(packet, header->getProtocol());
     ASSERT(packet->getDataLength() == B(0));
-    packet->setHeaderPopOffset(gnpEndOffset);
-    packet->setTrailerPopOffset(trailerPopOffset);
+    packet->setFrontOffset(gnpEndOffset);
+    packet->setBackOffset(trailerPopOffset);
     callback.endProtocolDataUnit(&Protocol::gnp);
 }
 

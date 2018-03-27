@@ -55,7 +55,7 @@ void HttpBrowserDirect::sendRequestToServer(BrowseEvent be)
 
 void HttpBrowserDirect::sendRequestToServer(Packet *pk)
 {
-    const auto& request = pk->peekHeader<HttpRequestMessage>();
+    const auto& request = pk->peekAtFront<HttpRequestMessage>();
     HttpServerBase *serverModule = dynamic_cast<HttpServerBase *>(controller->getServerModule(request->getTargetUrl()));
     if (serverModule == nullptr) {
         EV_ERROR << "Failed to get server module for " << request->getTargetUrl() << endl;

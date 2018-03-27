@@ -199,7 +199,7 @@ void EtherAppClient::sendPacket()
 
     long respLen = *respLength;
     data->setResponseBytes(respLen);
-    datapacket->insertAtEnd(data);
+    datapacket->insertAtBack(data);
 
     datapacket->addTagIfAbsent<MacAddressReq>()->setDestAddress(destMACAddress);
     auto ieee802SapReq = datapacket->addTagIfAbsent<Ieee802SapReq>();

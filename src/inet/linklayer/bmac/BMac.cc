@@ -211,7 +211,7 @@ void BMac::sendPreamble()
     //attach signal and send down
     auto packet = new Packet("Preamble");
     preamble->setType(BMAC_PREAMBLE);
-    packet->insertHeader(preamble);
+    packet->insertAtFront(preamble);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::bmac);
     attachSignal(packet);
     sendDown(packet);
@@ -231,7 +231,7 @@ void BMac::sendMacAck()
     //attach signal and send down
     auto packet = new Packet("Ack");
     ack->setType(BMAC_ACK);
-    packet->insertHeader(ack);
+    packet->insertAtFront(ack);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::bmac);
     attachSignal(packet);
     sendDown(packet);
@@ -429,7 +429,7 @@ void BMac::handleSelfMessage(cMessage *msg)
             if (msg->getKind() == BMAC_ACK) {
                 EV_DETAIL << "State WAIT_ACK, message BMAC_ACK" << endl;
                 auto packet = check_and_cast<Packet *>(msg);
-                const MacAddress src = packet->peekHeader<BMacHeader>()->getSrcAddr();
+                const MacAddress src = packet->peekAtFront<BMacHeader>()->getSrcAddr();
                 // the right ACK is received..
                 EV_DETAIL << "We are waiting for ACK from : " << lastDataPktDestAddr
                           << ", and ACK came from : " << src << endl;
@@ -473,7 +473,7 @@ void BMac::handleSelfMessage(cMessage *msg)
             if (msg->getKind() == BMAC_DATA) {
                 nbRxDataPackets++;
                 auto packet = check_and_cast<Packet *>(msg);
-                const auto bmacHeader = packet->peekHeader<BMacHeader>();
+                const auto bmacHeader = packet->peekAtFront<BMacHeader>();
                 const MacAddress& dest = bmacHeader->getDestAddr();
                 const MacAddress& src = bmacHeader->getSrcAddr();
                 if ((dest == address) || dest.isBroadcast()) {
@@ -572,7 +572,7 @@ void BMac::handleLowerPacket(Packet *packet)
         return;
     }
     else {
-        const auto& hdr = packet->peekHeader<BMacHeader>();
+        const auto& hdr = packet->peekAtFront<BMacHeader>();
         packet->setKind(hdr->getType());
         // simply pass the massage as self message, to be processed by the FSM.
         handleSelfMessage(packet);
@@ -584,7 +584,7 @@ void BMac::sendDataPacket()
     nbTxDataPackets++;
     Packet *pkt = macQueue.front()->dup();
     attachSignal(pkt);
-    const auto& hdr = pkt->peekHeader<BMacHeader>();
+    const auto& hdr = pkt->peekAtFront<BMacHeader>();
     lastDataPktDestAddr = hdr->getDestAddr();
     ASSERT(hdr->getType() == BMAC_DATA);
     sendDown(pkt);
@@ -747,7 +747,7 @@ void BMac::refreshDisplay() const
 
 void BMac::decapsulate(Packet *packet)
 {
-    const auto& bmacHeader = packet->popHeader<BMacHeader>();
+    const auto& bmacHeader = packet->popAtFront<BMacHeader>();
     packet->addTagIfAbsent<MacAddressInd>()->setSrcAddress(bmacHeader->getSrcAddr());
     packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(bmacHeader->getNetworkProtocol());
@@ -776,7 +776,7 @@ void BMac::encapsulate(Packet *packet)
     pkt->setSrcAddr(address);
 
     //encapsulate the network packet
-    packet->insertHeader(pkt);
+    packet->insertAtFront(pkt);
     EV_DETAIL << "pkt encapsulated\n";
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::bmac);
 }

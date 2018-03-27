@@ -51,7 +51,7 @@ Packet *RecipientQosMacDataService::defragment(std::vector<Packet *> completeFra
 Packet *RecipientQosMacDataService::defragment(Packet *mgmtFragment)
 {
     auto packet = basicReassembly->addFragment(mgmtFragment);
-    if (packet && packet->hasHeader<Ieee80211DataOrMgmtHeader>())
+    if (packet && packet->hasAtFront<Ieee80211DataOrMgmtHeader>())
         return packet;
     else
         return nullptr;
@@ -94,7 +94,7 @@ std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *data
     std::vector<Packet *> deaggregatedFrames;
     if (aMsduDeaggregation) {
         for (auto defragmentedFrame : defragmentedFrames) {
-            auto defragmentedHeader = defragmentedFrame->peekHeader<Ieee80211DataHeader>();
+            auto defragmentedHeader = defragmentedFrame->peekAtFront<Ieee80211DataHeader>();
             if (defragmentedHeader->getAMsduPresent()) {
                 auto subframes = aMsduDeaggregation->deaggregateFrame(defragmentedFrame);
                 for (auto subframe : *subframes)
@@ -157,7 +157,7 @@ std::vector<Packet *> RecipientQosMacDataService::controlFrameReceived(Packet *c
         std::vector<Packet *> deaggregatedFrames;
         if (aMsduDeaggregation) {
             for (auto frame : defragmentedFrames) {
-                if (frame->peekHeader<Ieee80211DataHeader>()->getAMsduPresent()) {
+                if (frame->peekAtFront<Ieee80211DataHeader>()->getAMsduPresent()) {
                     auto subframes = aMsduDeaggregation->deaggregateFrame(frame);
                     for (auto subframe : *subframes)
                         deaggregatedFrames.push_back(subframe);

@@ -223,7 +223,7 @@ void Arp::sendARPRequest(const InterfaceEntry *ie, Ipv4Address ipAddress)
     arp->setSrcMacAddress(myMACAddress);
     arp->setSrcIpAddress(myIPAddress);
     arp->setDestIpAddress(ipAddress);
-    packet->insertHeader(arp);
+    packet->insertAtFront(arp);
 
     packet->addTag<MacAddressReq>()->setDestAddress(MacAddress::BROADCAST_ADDRESS);
     packet->addTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
@@ -286,7 +286,7 @@ void Arp::dumpARPPacket(const ArpPacket *arp)
 void Arp::processARPPacket(Packet *packet)
 {
     EV_INFO << "Received " << packet << " from network protocol.\n";
-    const auto& arp = packet->peekHeader<ArpPacket>();
+    const auto& arp = packet->peekAtFront<ArpPacket>();
     dumpARPPacket(arp.get());
 
     // extract input port
@@ -379,7 +379,7 @@ void Arp::processARPPacket(Packet *packet)
                 arpReply->setSrcMacAddress(myMACAddress);
                 arpReply->setOpcode(ARP_REPLY);
                 Packet *outPk = new Packet("arpREPLY");
-                outPk->insertHeader(arpReply);
+                outPk->insertAtFront(arpReply);
                 outPk->addTag<MacAddressReq>()->setDestAddress(srcMACAddress);
                 outPk->addTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
                 outPk->addTag<PacketProtocolTag>()->setProtocol(&Protocol::arp);

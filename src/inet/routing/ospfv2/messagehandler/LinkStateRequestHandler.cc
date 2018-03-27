@@ -41,7 +41,7 @@ void LinkStateRequestHandler::processPacket(Packet *packet, Interface *intf, Nei
         (neighborState == Neighbor::LOADING_STATE) ||
         (neighborState == Neighbor::FULL_STATE))
     {
-        const auto& lsRequestPacket = packet->peekHeader<OspfLinkStateRequestPacket>();
+        const auto& lsRequestPacket = packet->peekAtFront<OspfLinkStateRequestPacket>();
 
         unsigned long requestCount = lsRequestPacket->getRequestsArraySize();
         bool error = false;

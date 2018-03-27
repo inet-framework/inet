@@ -79,27 +79,27 @@ void ApskRadio::encapsulate(Packet *packet) const
     if (auto flatTransmitter = dynamic_cast<const FlatTransmitterBase *>(transmitter)) {
         headerLength = flatTransmitter->getHeaderLength();
         if (headerLength > phyHeader->getChunkLength())
-            packet->insertHeader(makeShared<BitCountChunk>(headerLength - phyHeader->getChunkLength()));
+            packet->insertAtFront(makeShared<BitCountChunk>(headerLength - phyHeader->getChunkLength()));
     }
-    packet->insertHeader(phyHeader);
+    packet->insertAtFront(phyHeader);
     auto paddingLength = computePaddingLength(headerLength + B(phyHeader->getLengthField()), nullptr, getModulation());
     if (paddingLength != b(0))
-        packet->insertTrailer(makeShared<BitCountChunk>(paddingLength));
+        packet->insertAtBack(makeShared<BitCountChunk>(paddingLength));
     packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::apskPhy);
 }
 
 void ApskRadio::decapsulate(Packet *packet) const
 {
-    const auto& phyHeader = packet->popHeader<ApskPhyHeader>();
+    const auto& phyHeader = packet->popAtFront<ApskPhyHeader>();
     b headerLength = phyHeader->getChunkLength();
     if (auto flatTransmitter = dynamic_cast<const FlatTransmitterBase *>(transmitter)) {
         headerLength = flatTransmitter->getHeaderLength();
         if (headerLength > phyHeader->getChunkLength())
-            packet->popHeader(headerLength - phyHeader->getChunkLength());
+            packet->popAtFront(headerLength - phyHeader->getChunkLength());
     }
     auto paddingLength = computePaddingLength(headerLength + B(phyHeader->getLengthField()), nullptr, getModulation());
     if (paddingLength != b(0))
-        packet->popTrailer(paddingLength);
+        packet->popAtBack(paddingLength);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(phyHeader->getPayloadProtocol());
 }
 

@@ -74,7 +74,7 @@ void InetPacketPrinter::printMessage(std::ostream& os, cMessage *msg, const Opti
         os << separ;
         if (Packet *pck = dynamic_cast<Packet *>(pk)) {
             auto packet = new Packet(pck->getName(), pck->peekData());
-            while (const auto& chunk = packet->popHeader(b(-1), Chunk::PF_ALLOW_NULLPTR)) {
+            while (const auto& chunk = packet->popAtFront(b(-1), Chunk::PF_ALLOW_NULLPTR)) {
                 if (const auto& sliceChunk = dynamicPtrCast<const SliceChunk>(chunk)) {
                     os << "slice from " << sliceChunk->getOffset() << ", length=" << sliceChunk->getLength();  //FIXME TODO show the sliced chunk
                 }

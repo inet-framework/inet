@@ -165,14 +165,14 @@ static bool testRecords(const char* filename, bool fcs = true)
         if (recordHeader.orig_len == recordHeader.incl_len) {
             const auto& bytesChunk = makeShared<BytesChunk>(readBuf, recordHeader.incl_len);
             Packet *pk = new Packet("pcap");
-            pk->insertHeader(bytesChunk);
+            pk->insertAtFront(bytesChunk);
             if (! fcs && fileHeader.network == LINKTYPE_ETHERNET) {
                 // add FCS
                 const auto& fcsChunk = makeShared<EthernetFcs>();
                 uint32_t fcs = ethernetCRC(readBuf, recordHeader.incl_len);
                 fcsChunk->setFcs(fcs);
                 fcsChunk->setFcsMode(FCS_COMPUTED);
-                pk->insertTrailer(fcsChunk);
+                pk->insertAtBack(fcsChunk);
             }
             const Protocol *protocol = nullptr;
             if (fileHeader.network == LINKTYPE_ETHERNET)
@@ -206,8 +206,8 @@ static bool testOneRecord(const Protocol *protocol, Packet *pk)
     if (pk->getDataLength() == rPk->getDataLength()) {
         EV << "Frame lengths are the same" << endl;
         bool diff = false;
-        auto bytes1 = pk->peekDataBytes();
-        auto bytes2 = rPk->peekDataBytes();
+        auto bytes1 = pk->peekDataAsBytes();
+        auto bytes2 = rPk->peekDataAsBytes();
         unsigned int i;
         for (i=0; i < pk->getByteLength(); ++i) {
             if (bytes1->getByte(i) != bytes2->getByte(i)) {
@@ -242,20 +242,20 @@ static Packet *deserialize(const Protocol *protocol, Packet *pk)
         outPk = new Packet("inet");
         if (pk->getDataLength() > b(0)) {
             const auto& chunk = pk->popHeader(pk->getDataLength());
-            outPk->insertAtEnd(chunk);
+            outPk->insertAtBack(chunk);
         }
     }
     else if (*protocol == Protocol::ethernetMac) {
-        const auto& header = pk->popHeader<EthernetMacHeader>();
+        const auto& header = pk->popAtFront<EthernetMacHeader>();
         Ptr<const Ieee8022LlcHeader> llcHeader;
-        const auto& fcs = pk->popTrailer<EthernetFcs>(B(ETHER_FCS_BYTES));
+        const auto& fcs = pk->popAtBack<EthernetFcs>(B(ETHER_FCS_BYTES));
         protocol = nullptr;
         int etherType = -1;
         if (isEth2Header(*header)) {
             etherType = header->getTypeOrLength();
         }
         else if (isIeee8023Header(*header)) {
-            llcHeader = pk->popHeader<Ieee8022LlcHeader>();
+            llcHeader = pk->popAtFront<Ieee8022LlcHeader>();
             if (llcHeader->getSsap() == 0xAA && llcHeader->getDsap() == 0xAA && llcHeader->getControl() == 0x03) {
                 const auto& snapHeader = dynamicPtrCast<const Ieee8022LlcSnapHeader>(llcHeader);
                 if (snapHeader == nullptr)
@@ -269,64 +269,64 @@ static Packet *deserialize(const Protocol *protocol, Packet *pk)
         }
         outPk = deserialize(protocol, pk);
         if (llcHeader)
-            outPk->insertHeader(llcHeader);
-        outPk->insertHeader(header);
-        outPk->insertTrailer(fcs);
+            outPk->insertAtFront(llcHeader);
+        outPk->insertAtFront(header);
+        outPk->insertAtBack(fcs);
     }
     else if (*protocol == Protocol::ipv4) {
-        const auto& header = pk->popHeader<Ipv4Header>();
+        const auto& header = pk->popAtFront<Ipv4Header>();
         b trailerLength = header->getChunkLength() + pk->getDataLength() - B(header->getTotalLengthField());
         Ptr<const Chunk> trailer = nullptr;
         if (trailerLength > b(0))
-            trailer = pk->popTrailer(trailerLength);
+            trailer = pk->popAtBack(trailerLength);
         protocol = ProtocolGroup::ipprotocol.findProtocol(header->getProtocolId());
         outPk = deserialize(protocol, pk);
-        outPk->insertHeader(header);
+        outPk->insertAtFront(header);
         if (trailer != nullptr)
-            outPk->insertTrailer(trailer);
+            outPk->insertAtBack(trailer);
     }
     else if (*protocol == Protocol::ipv6) {
-        const auto& header = pk->popHeader<Ipv6Header>();
+        const auto& header = pk->popAtFront<Ipv6Header>();
         protocol = ProtocolGroup::ipprotocol.findProtocol(header->getProtocolId());
         outPk = deserialize(protocol, pk);
-        outPk->insertHeader(header);
+        outPk->insertAtFront(header);
     }
     else if (*protocol == Protocol::tcp) {
-        const auto& header = pk->popHeader<tcp::TcpHeader>();
+        const auto& header = pk->popAtFront<tcp::TcpHeader>();
         protocol = nullptr;
         outPk = deserialize(protocol, pk);
-        outPk->insertHeader(header);
+        outPk->insertAtFront(header);
     }
     else if (*protocol == Protocol::udp) {
-        const auto& header = pk->popHeader<UdpHeader>();
+        const auto& header = pk->popAtFront<UdpHeader>();
         protocol = nullptr;
         outPk = deserialize(protocol, pk);
-        outPk->insertHeader(header);
+        outPk->insertAtFront(header);
     }
     else if (*protocol == Protocol::arp) {
-        const auto& header = pk->popHeader<ArpPacket>();
+        const auto& header = pk->popAtFront<ArpPacket>();
         protocol = nullptr;
         outPk = deserialize(protocol, pk);
-        outPk->insertHeader(header);
+        outPk->insertAtFront(header);
     }
     else if (*protocol == Protocol::icmpv4) {
-        const auto& header = pk->popHeader<IcmpHeader>();
+        const auto& header = pk->popAtFront<IcmpHeader>();
         protocol = nullptr;
         outPk = deserialize(protocol, pk);
-        outPk->insertHeader(header);
+        outPk->insertAtFront(header);
     }
     else if (*protocol == Protocol::icmpv6) {
-        const auto& header = pk->popHeader<Icmpv6Header>(b(-1), Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
+        const auto& header = pk->popAtFront<Icmpv6Header>(b(-1), Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
         protocol = nullptr;
         outPk = deserialize(protocol, pk);
-        outPk->insertHeader(header);
+        outPk->insertAtFront(header);
     }
 //    else if (*protocol == Protocol::) {
 //    }
     else {
         const auto& chunk = pk->popHeader(pk->getDataLength());
         outPk = new Packet("inet");
-        outPk->insertAtEnd(chunk);
+        outPk->insertAtBack(chunk);
     }
     return outPk;
 }

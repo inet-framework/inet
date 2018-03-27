@@ -30,7 +30,7 @@ Register_Protocol_Dissector(&Protocol::unitdisk, UnitDiskProtocolDissector);
 
 void UnitDiskProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    auto header = packet->popHeader<UnitDiskPhyHeader>();
+    auto header = packet->popAtFront<UnitDiskPhyHeader>();
     callback.startProtocolDataUnit(&Protocol::unitdisk);
     callback.visitChunk(header, &Protocol::unitdisk);
     auto payloadProtocol = header->getPayloadProtocol();

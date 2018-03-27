@@ -215,7 +215,7 @@ void Bgp::socketDataArrived(int connId, void *yourPtr, Packet *msg, bool urgent)
     _currSessionId = findIdFromSocketConnId(_BGPSessions, connId);
     if (_currSessionId != (SessionId)-1) {
         //TODO: should queuing incoming payloads, and peek from the queue
-        const auto& ptrHdr = msg->peekHeader<BgpHeader>();
+        const auto& ptrHdr = msg->peekAtFront<BgpHeader>();
         switch (ptrHdr->getType()) {
             case BGP_OPEN:
                 //BgpOpenMessage* ptrMsg = check_and_cast<BgpOpenMessage*>(msg);
@@ -438,7 +438,7 @@ void Bgp::updateSendProcess(const unsigned char type, SessionId sessionIndex, Ro
                 updateMsg->setPathAttributeListArraySize(1);
                 updateMsg->setPathAttributeList(content);
                 updateMsg->setNLRI(NLRI);
-                pk->insertHeader(updateMsg);
+                pk->insertAtFront(updateMsg);
                 (elem).second->getSocket()->send(pk);
                 (elem).second->addUpdateMsgSent();
             }

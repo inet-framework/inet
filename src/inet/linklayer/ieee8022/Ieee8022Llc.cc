@@ -78,7 +78,7 @@ void Ieee8022Llc::encapsulate(Packet *frame)
             snapHeader->setOui(snapOui);
             snapHeader->setProtocolId(-1);      //FIXME get value from a tag (e.g. protocolTag->getSubId() ???)
         }
-        frame->insertHeader(snapHeader);
+        frame->insertAtFront(snapHeader);
     }
     else {
         const auto& llcHeader = makeShared<Ieee8022LlcHeader>();
@@ -94,14 +94,14 @@ void Ieee8022Llc::encapsulate(Packet *frame)
             llcHeader->setDsap(sapReq->getDsap());
             llcHeader->setControl(3);       //TODO get from sapTag
         }
-        frame->insertHeader(llcHeader);
+        frame->insertAtFront(llcHeader);
     }
     frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee8022);
 }
 
 void Ieee8022Llc::decapsulate(Packet *frame)
 {
-    const auto& llcHeader = frame->popHeader<Ieee8022LlcHeader>();
+    const auto& llcHeader = frame->popAtFront<Ieee8022LlcHeader>();
 
     auto sapInd = frame->addTagIfAbsent<Ieee802SapInd>();
     sapInd->setSsap(llcHeader->getSsap());

@@ -108,7 +108,7 @@ void TcpBasicClientApp::sendRequest()
     payload->setChunkLength(B(requestLength));
     payload->setExpectedReplyLength(replyLength);
     payload->setServerClose(false);
-    packet->insertAtEnd(payload);
+    packet->insertAtBack(payload);
 
     EV_INFO << "sending request with " << requestLength << " bytes, expected reply length " << replyLength << " bytes,"
             << "remaining " << numRequestsToSend - 1 << " request\n";

@@ -199,7 +199,7 @@ void AckingMac::handleUpperPacket(Packet *packet)
 
 void AckingMac::handleLowerPacket(Packet *packet)
 {
-    auto macHeader = packet->peekHeader<AckingMacHeader>();
+    auto macHeader = packet->peekAtFront<AckingMacHeader>();
     if (packet->hasBitError()) {
         EV << "Received frame '" << packet->getName() << "' contains bit errors or collision, dropping it\n";
         PacketDropDetails details;
@@ -226,7 +226,7 @@ void AckingMac::handleSelfMessage(cMessage *message)
 {
     if (message == ackTimeoutMsg) {
         EV_DETAIL << "AckingMac: timeout: " << lastSentPk->getFullName() << " is lost\n";
-        auto macHeader = lastSentPk->popHeader<AckingMacHeader>();
+        auto macHeader = lastSentPk->popAtFront<AckingMacHeader>();
         lastSentPk->addTagIfAbsent<PacketProtocolTag>()->setProtocol(ProtocolGroup::ethertype.getProtocol(macHeader->getNetworkProtocol()));
         // packet lost
         emit(linkBrokenSignal, lastSentPk);
@@ -272,13 +272,13 @@ void AckingMac::encapsulate(Packet *packet)
     else
         macHeader->setSrcModuleId(getId());
     macHeader->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(packet->getTag<PacketProtocolTag>()->getProtocol()));
-    packet->insertHeader(macHeader);
+    packet->insertAtFront(macHeader);
     packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ackingmac);
 }
 
 bool AckingMac::dropFrameNotForUs(Packet *packet)
 {
-    auto macHeader = packet->peekHeader<AckingMacHeader>();
+    auto macHeader = packet->peekAtFront<AckingMacHeader>();
     // Current implementation does not support the configuration of multicast
     // MAC address groups. We rather accept all multicast frames (just like they were
     // broadcasts) and pass it up to the higher layer where they will be dropped
@@ -305,7 +305,7 @@ bool AckingMac::dropFrameNotForUs(Packet *packet)
 
 void AckingMac::decapsulate(Packet *packet)
 {
-    const auto& macHeader = packet->popHeader<AckingMacHeader>();
+    const auto& macHeader = packet->popAtFront<AckingMacHeader>();
     auto macAddressInd = packet->addTagIfAbsent<MacAddressInd>();
     macAddressInd->setSrcAddress(macHeader->getSrc());
     macAddressInd->setDestAddress(macHeader->getDest());

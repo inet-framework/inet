@@ -65,7 +65,7 @@ void Ieee80211MgmtBase::handleMessage(cMessage *msg)
         // process incoming frame
         EV << "Frame arrived from MAC: " << msg << "\n";
         auto packet = check_and_cast<Packet *>(msg);
-        const Ptr<const Ieee80211DataOrMgmtHeader>& header = packet->peekAt<Ieee80211DataOrMgmtHeader>(packet->getHeaderPopOffset() - B(24));
+        const Ptr<const Ieee80211DataOrMgmtHeader>& header = packet->peekAt<Ieee80211DataOrMgmtHeader>(packet->getFrontOffset() - B(24));
         processFrame(packet, header);
     }
     else if (msg->arrivedOn("agentIn")) {

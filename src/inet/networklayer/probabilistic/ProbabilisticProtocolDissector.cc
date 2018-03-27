@@ -29,9 +29,9 @@ Register_Protocol_Dissector(&Protocol::probabilistic, ProbabilisticProtocolDisse
 
 void ProbabilisticProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    auto header = packet->popHeader<ProbabilisticBroadcastHeader>();
-    auto trailerPopOffset = packet->getTrailerPopOffset();
-    auto payloadEndOffset = packet->getHeaderPopOffset() + header->getPayloadLengthField();
+    auto header = packet->popAtFront<ProbabilisticBroadcastHeader>();
+    auto trailerPopOffset = packet->getBackOffset();
+    auto payloadEndOffset = packet->getFrontOffset() + header->getPayloadLengthField();
     callback.startProtocolDataUnit(&Protocol::probabilistic);
     bool incorrect = (payloadEndOffset > trailerPopOffset);
     if (incorrect) {
@@ -39,13 +39,13 @@ void ProbabilisticProtocolDissector::dissect(Packet *packet, ICallback& callback
         payloadEndOffset = trailerPopOffset;
     }
     callback.visitChunk(header, &Protocol::probabilistic);
-    packet->setTrailerPopOffset(payloadEndOffset);
+    packet->setBackOffset(payloadEndOffset);
     callback.dissectPacket(packet, header->getProtocol());
     if (incorrect && packet->getDataLength() > b(0))
         callback.dissectPacket(packet, nullptr);
     ASSERT(packet->getDataLength() == B(0));
-    packet->setHeaderPopOffset(payloadEndOffset);
-    packet->setTrailerPopOffset(trailerPopOffset);
+    packet->setFrontOffset(payloadEndOffset);
+    packet->setBackOffset(trailerPopOffset);
     callback.endProtocolDataUnit(&Protocol::probabilistic);
 }
 

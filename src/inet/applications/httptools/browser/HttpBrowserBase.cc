@@ -276,7 +276,7 @@ void HttpBrowserBase::handleSelfDelayedRequestMessage(cMessage *msg)
 
 void HttpBrowserBase::handleDataMessage(Packet *pk)
 {
-    const auto& appmsg = pk->peekHeader<HttpReplyMessage>();
+    const auto& appmsg = pk->peekAtFront<HttpReplyMessage>();
     if (appmsg == nullptr)
         throw cRuntimeError("Message (%s)%s is not a valid reply message", pk->getClassName(), pk->getName());
 
@@ -413,7 +413,7 @@ Packet *HttpBrowserBase::generatePageRequest(std::string www, std::string pageNa
     msg->setChunkLength(B(requestLength + size));    // Add extra request size if specified
     msg->setKeepAlive(httpProtocol == 11);
     msg->setBadRequest(bad);    // Simulates willingly requesting a non-existing resource.
-    outPk->insertAtEnd(msg);
+    outPk->insertAtBack(msg);
     outPk->setKind(HTTPT_REQUEST_MESSAGE);
 
     logRequest(outPk);
@@ -465,7 +465,7 @@ Packet *HttpBrowserBase::generateResourceRequest(std::string www, std::string re
     msg->setChunkLength(B(requestLength));    // Add extra request size if specified
     msg->setKeepAlive(httpProtocol == 11);
     msg->setBadRequest(bad);    // Simulates willingly requesting a non-existing resource.
-    outPk->insertAtEnd(msg);
+    outPk->insertAtBack(msg);
     outPk->setKind(HTTPT_REQUEST_MESSAGE);
 
     logRequest(outPk);

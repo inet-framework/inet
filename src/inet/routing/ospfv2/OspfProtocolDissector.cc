@@ -31,7 +31,7 @@ Register_Protocol_Dissector(&Protocol::ospf, OspfProtocolDissector);
 
 void OspfProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    auto header = packet->popHeader<OspfPacket>();
+    auto header = packet->popAtFront<OspfPacket>();
     callback.startProtocolDataUnit(&Protocol::ospf);
     callback.visitChunk(header, &Protocol::ospf);
     callback.endProtocolDataUnit(&Protocol::ospf);

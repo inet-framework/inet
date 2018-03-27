@@ -284,7 +284,7 @@ void LMac::handleSelfMessage(cMessage *msg)
             }
             else if (msg->getKind() == LMAC_CONTROL) {
                 auto packet = check_and_cast<Packet *>(msg);
-                const auto& lmacHeader = packet->peekHeader<LMacHeader>();
+                const auto& lmacHeader = packet->peekAtFront<LMacHeader>();
                 const MacAddress& dest = lmacHeader->getDestAddr();
                 EV_DETAIL << " I have received a control packet from src " << lmacHeader->getSrcAddr() << " and dest " << dest << ".\n";
                 bool collision = false;
@@ -342,7 +342,7 @@ void LMac::handleSelfMessage(cMessage *msg)
             //probably it never happens
             else if (msg->getKind() == LMAC_DATA) {
                 auto packet = check_and_cast<Packet *>(msg);
-                const MacAddress& dest = packet->peekHeader<LMacHeader>()->getDestAddr();
+                const MacAddress& dest = packet->peekAtFront<LMacHeader>()->getDestAddr();
                 //bool collision = false;
                 // if we are listening to the channel and receive anything, there is a collision in the slot.
                 if (checkChannel->isScheduled()) {
@@ -390,7 +390,7 @@ void LMac::handleSelfMessage(cMessage *msg)
             }
             else if (msg->getKind() == LMAC_CONTROL) {
                 auto packet = check_and_cast<Packet *>(msg);
-                const auto& lmacHeader = packet->peekHeader<LMacHeader>();
+                const auto& lmacHeader = packet->peekAtFront<LMacHeader>();
                 const MacAddress& dest = lmacHeader->getDestAddr();
                 EV_DETAIL << " I have received a control packet from src " << lmacHeader->getSrcAddr() << " and dest " << dest << ".\n";
 
@@ -477,7 +477,7 @@ void LMac::handleSelfMessage(cMessage *msg)
                 EV << "Sending a control packet.\n";
                 auto control = makeShared<LMacHeader>();
                 if ((macQueue.size() > 0) && !SETUP_PHASE)
-                    control->setDestAddr(macQueue.front()->peekHeader<LMacHeader>()->getDestAddr());
+                    control->setDestAddr(macQueue.front()->peekAtFront<LMacHeader>()->getDestAddr());
                 else
                     control->setDestAddr(LMAC_NO_RECEIVER);
 
@@ -490,7 +490,7 @@ void LMac::handleSelfMessage(cMessage *msg)
 
                 Packet *packet = new Packet("Control");
                 control->setType(LMAC_CONTROL);
-                packet->insertHeader(control);
+                packet->insertAtFront(control);
                 packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::lmac);
                 sendDown(packet);
                 if ((macQueue.size() > 0) && (!SETUP_PHASE))
@@ -506,15 +506,15 @@ void LMac::handleSelfMessage(cMessage *msg)
                     return;
                 }
                 Packet *data = new Packet("Data");
-                data->insertAtEnd(macQueue.front()->peekAt(headerLength));
-                const auto& lmacHeader = staticPtrCast<LMacHeader>(macQueue.front()->peekHeader<LMacHeader>()->dupShared());
+                data->insertAtBack(macQueue.front()->peekAt(headerLength));
+                const auto& lmacHeader = staticPtrCast<LMacHeader>(macQueue.front()->peekAtFront<LMacHeader>()->dupShared());
                 lmacHeader->setType(LMAC_DATA);
                 lmacHeader->setMySlot(mySlot);
                 lmacHeader->setOccupiedSlotsArraySize(numSlots);
                 for (int i = 0; i < numSlots; i++)
                     lmacHeader->setOccupiedSlots(i, occSlotsDirect[i]);
 
-                data->insertHeader(lmacHeader);
+                data->insertAtFront(lmacHeader);
                 data->addTag<PacketProtocolTag>()->setProtocol(&Protocol::lmac);
                 EV << "Sending down data packet\n";
                 sendDown(data);
@@ -549,7 +549,7 @@ void LMac::handleSelfMessage(cMessage *msg)
         case WAIT_DATA:
             if (msg->getKind() == LMAC_DATA) {
                 auto packet = check_and_cast<Packet *>(msg);
-                const MacAddress& dest = packet->peekHeader<LMacHeader>()->getDestAddr();
+                const MacAddress& dest = packet->peekAtFront<LMacHeader>()->getDestAddr();
 
                 EV_DETAIL << " I have received a data packet.\n";
                 if (dest == address || dest.isBroadcast()) {
@@ -601,7 +601,7 @@ void LMac::handleLowerPacket(Packet *packet)
         return;
     }
     // simply pass the massage as self message, to be processed by the FSM.
-    const auto& hdr = packet->peekHeader<LMacHeader>();
+    const auto& hdr = packet->peekAtFront<LMacHeader>();
     packet->setKind(hdr->getType());
     handleSelfMessage(packet);
 }
@@ -667,7 +667,7 @@ void LMac::findNewSlot()
 
 void LMac::decapsulate(Packet *packet)
 {
-    const auto& lmacHeader = packet->popHeader<LMacHeader>();
+    const auto& lmacHeader = packet->popAtFront<LMacHeader>();
     packet->addTagIfAbsent<MacAddressInd>()->setSrcAddress(lmacHeader->getSrcAddr());
     packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(lmacHeader->getNetworkProtocol());
@@ -700,7 +700,7 @@ void LMac::encapsulate(Packet *netwPkt)
     pkt->setSrcAddr(address);
 
     //encapsulate the network packet
-    netwPkt->insertHeader(pkt);
+    netwPkt->insertAtFront(pkt);
     EV_DETAIL << "pkt encapsulated\n";
 }
 

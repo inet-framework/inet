@@ -107,13 +107,13 @@ void EtherMacFullDuplex::startFrameTransmission()
     EV_DETAIL << "Transmitting a copy of frame " << curTxFrame << endl;
 
     Packet *frame = curTxFrame->dup();    // note: we need to duplicate the frame because we emit a signal with it in endTxPeriod()
-    const auto& hdr = frame->peekHeader<EthernetMacHeader>();    // note: we need to duplicate the frame because we emit a signal with it in endTxPeriod()
+    const auto& hdr = frame->peekAtFront<EthernetMacHeader>();    // note: we need to duplicate the frame because we emit a signal with it in endTxPeriod()
     ASSERT(hdr);
     ASSERT(!hdr->getSrc().isUnspecified());
 
     int64 minFrameLength = curEtherDescr->frameMinBytes;
     if (frame->getByteLength() < minFrameLength) {
-        auto oldFcs = frame->removeTrailer<EthernetFcs>();
+        auto oldFcs = frame->removeAtBack<EthernetFcs>();
         EtherEncap::addPaddingAndFcs(frame, (EthernetFcsMode)oldFcs->getFcsMode(), minFrameLength);
     }
 
@@ -129,7 +129,7 @@ void EtherMacFullDuplex::startFrameTransmission()
     delete oldPacketProtocolTag;
     auto signal = new EthernetSignal(frame->getName());
     if (sendRawBytes) {
-        signal->encapsulate(new Packet(frame->getName(), frame->peekAllBytes()));
+        signal->encapsulate(new Packet(frame->getName(), frame->peekAllAsBytes()));
         delete frame;
     }
     else
@@ -149,7 +149,7 @@ void EtherMacFullDuplex::processFrameFromUpperLayer(Packet *packet)
     numFramesFromHL++;
     emit(packetReceivedFromUpperSignal, packet);
 
-    auto frame = packet->peekHeader<EthernetMacHeader>();
+    auto frame = packet->peekAtFront<EthernetMacHeader>();
     if (frame->getDest().equals(address)) {
         throw cRuntimeError("logic error: frame %s from higher layer has local MAC address as dest (%s)",
                 packet->getFullName(), frame->getDest().str().c_str());
@@ -175,11 +175,11 @@ void EtherMacFullDuplex::processFrameFromUpperLayer(Packet *packet)
     // fill in src address if not set
     if (frame->getSrc().isUnspecified()) {
         frame = nullptr; // drop shared ptr
-        auto newFrame = packet->removeHeader<EthernetMacHeader>();
+        auto newFrame = packet->removeAtFront<EthernetMacHeader>();
         newFrame->setSrc(address);
-        packet->insertHeader(newFrame);
+        packet->insertAtFront(newFrame);
         frame = newFrame;
-        auto oldFcs = packet->removeTrailer<EthernetFcs>();
+        auto oldFcs = packet->removeAtBack<EthernetFcs>();
         EtherEncap::addFcs(packet, (EthernetFcsMode)oldFcs->getFcsMode());
     }
 
@@ -246,7 +246,7 @@ void EtherMacFullDuplex::processMsgFromNetwork(EthernetSignal *signal)
         return;
     }
 
-    const auto& frame = packet->peekHeader<EthernetMacHeader>();
+    const auto& frame = packet->peekAtFront<EthernetMacHeader>();
     if (dropFrameNotForUs(packet, frame))
         return;
 
@@ -290,7 +290,7 @@ void EtherMacFullDuplex::handleEndTxPeriod()
     emit(packetSentToLowerSignal, curTxFrame);    //consider: emit with start time of frame
 
     bool isPauseFrame = false;
-    const auto& header = curTxFrame->peekHeader<EthernetMacHeader>();
+    const auto& header = curTxFrame->peekAtFront<EthernetMacHeader>();
     if (header->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL) {
         const auto& controlFrame = curTxFrame->peekDataAt<EthernetControlFrame>(header->getChunkLength(), b(-1));
         isPauseFrame = controlFrame->getOpCode() == ETHERNET_CONTROL_PAUSE;

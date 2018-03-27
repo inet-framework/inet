@@ -150,11 +150,11 @@ void Aodv::handleMessage(cMessage *msg)
         }
         else if (true) {  //FIXME protocol == ???
             Packet *udpPacket = check_and_cast<Packet *>(msg);
-            udpPacket->popHeader<UdpHeader>();
+            udpPacket->popAtFront<UdpHeader>();
             L3Address sourceAddr = udpPacket->getTag<L3AddressInd>()->getSrcAddress();
             // KLUDGE: I added this -1 after TTL decrement has been moved in Ipv4
             unsigned int arrivalPacketTTL = udpPacket->getTag<HopLimitInd>()->getHopLimit() - 1;
-            const auto& ctrlPacket = udpPacket->popHeader<AodvControlPacket>();
+            const auto& ctrlPacket = udpPacket->popAtFront<AodvControlPacket>();
 //            ctrlPacket->copyTags(*msg);
 
             switch (ctrlPacket->getPacketType()) {
@@ -729,11 +729,11 @@ void Aodv::sendAODVPacket(const Ptr<AodvControlPacket>& packet, const L3Address&
 
     auto className = packet->getClassName();
     Packet *udpPacket = new Packet(!strncmp("inet::", className, 6) ? className + 6 : className);
-    udpPacket->insertAtEnd(packet);
+    udpPacket->insertAtBack(packet);
     auto udpHeader = makeShared<UdpHeader>();
     udpHeader->setSourcePort(aodvUDPPort);
     udpHeader->setDestinationPort(aodvUDPPort);
-    udpPacket->insertHeader(udpHeader);
+    udpPacket->insertAtFront(udpHeader);
     // TODO: was udpPacket->copyTags(*packet);
     udpPacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::manet);
     udpPacket->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());

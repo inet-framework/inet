@@ -32,13 +32,13 @@ Register_Protocol_Dissector(&Protocol::ieee80211Phy, Ieee80211PhyProtocolDissect
 
 void Ieee80211PhyProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    const auto& header = packet->popHeader<inet::physicallayer::Ieee80211PhyHeader>();
+    const auto& header = packet->popAtFront<inet::physicallayer::Ieee80211PhyHeader>();
     callback.startProtocolDataUnit(&Protocol::ieee80211Phy);
-    const auto& trailer = packet->peekTrailer();
+    const auto& trailer = packet->peekAtBack();
     // TODO: KLUDGE: padding length
     auto ieee80211PhyPadding = dynamicPtrCast<const BitCountChunk>(trailer);
     if (ieee80211PhyPadding != nullptr)
-        packet->setTrailerPopOffset(packet->getTrailerPopOffset() - ieee80211PhyPadding->getChunkLength());
+        packet->setBackOffset(packet->getBackOffset() - ieee80211PhyPadding->getChunkLength());
     callback.visitChunk(header, &Protocol::ieee80211Phy);
     callback.dissectPacket(packet, &Protocol::ieee80211Mac);
     if (ieee80211PhyPadding != nullptr)

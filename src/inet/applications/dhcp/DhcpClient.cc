@@ -396,7 +396,7 @@ void DhcpClient::handleDHCPMessage(Packet *packet)
 {
     ASSERT(isOperational && ie != nullptr);
 
-    const auto& msg = packet->peekHeader<DhcpMessage>();
+    const auto& msg = packet->peekAtFront<DhcpMessage>();
     if (msg->getOp() != BOOTREPLY) {
         EV_WARN << "Client received a non-BOOTREPLY message, dropping." << endl;
         return;
@@ -578,7 +578,7 @@ void DhcpClient::sendRequest()
     }
     else
         throw cRuntimeError("Invalid state");
-    packet->insertAtEnd(request);
+    packet->insertAtBack(request);
     sendToUDP(packet, clientPort, destAddr, serverPort);
 }
 
@@ -611,7 +611,7 @@ void DhcpClient::sendDiscover()
     discover->getOptionsForUpdate().setParameterRequestList(2, DNS);
     discover->getOptionsForUpdate().setParameterRequestList(3, NTP_SRV);
 
-    packet->insertAtEnd(discover);
+    packet->insertAtBack(discover);
 
     EV_INFO << "Sending DHCPDISCOVER." << endl;
     sendToUDP(packet, clientPort, Ipv4Address::ALLONES_ADDRESS, serverPort);
@@ -636,7 +636,7 @@ void DhcpClient::sendDecline(Ipv4Address declinedIp)
     decline->getOptionsForUpdate().setMessageType(DHCPDECLINE);
     decline->getOptionsForUpdate().setRequestedIp(declinedIp);
 
-    packet->insertAtEnd(decline);
+    packet->insertAtBack(decline);
 
     EV_INFO << "Sending DHCPDECLINE." << endl;
     sendToUDP(packet, clientPort, Ipv4Address::ALLONES_ADDRESS, serverPort);

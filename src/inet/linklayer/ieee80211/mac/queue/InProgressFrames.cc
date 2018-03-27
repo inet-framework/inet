@@ -24,7 +24,7 @@ namespace ieee80211 {
 bool InProgressFrames::hasEligibleFrameToTransmit()
 {
     for (auto frame : inProgressFrames) {
-        if (ackHandler->isEligibleToTransmit(frame->peekHeader<Ieee80211DataOrMgmtHeader>()))
+        if (ackHandler->isEligibleToTransmit(frame->peekAtFront<Ieee80211DataOrMgmtHeader>()))
             return true;
     }
     return false;
@@ -41,7 +41,7 @@ void InProgressFrames::ensureHasFrameToTransmit()
         auto frames = dataService->extractFramesToTransmit(pendingQueue);
         if (frames) {
             for (auto frame : *frames) {
-                ackHandler->frameGotInProgress(frame->peekHeader<Ieee80211DataOrMgmtHeader>());
+                ackHandler->frameGotInProgress(frame->peekAtFront<Ieee80211DataOrMgmtHeader>());
                 inProgressFrames.push_back(frame);
             }
             delete frames;
@@ -53,7 +53,7 @@ Packet *InProgressFrames::getFrameToTransmit()
 {
     ensureHasFrameToTransmit();
     for (auto frame : inProgressFrames) {
-        if (ackHandler->isEligibleToTransmit(frame->peekHeader<Ieee80211DataOrMgmtHeader>()))
+        if (ackHandler->isEligibleToTransmit(frame->peekAtFront<Ieee80211DataOrMgmtHeader>()))
             return frame;
     }
     return nullptr;
@@ -62,18 +62,18 @@ Packet *InProgressFrames::getFrameToTransmit()
 Packet *InProgressFrames::getPendingFrameFor(Packet *frame)
 {
     auto frameToTransmit = getFrameToTransmit();
-    if (dynamicPtrCast<const Ieee80211RtsFrame>(frame->peekHeader<Ieee80211MacHeader>()))
+    if (dynamicPtrCast<const Ieee80211RtsFrame>(frame->peekAtFront<Ieee80211MacHeader>()))
         return frameToTransmit;
     else {
         for (auto frame : inProgressFrames) {
-            if (ackHandler->isEligibleToTransmit(frame->peekHeader<Ieee80211DataOrMgmtHeader>()) && frameToTransmit != frame)
+            if (ackHandler->isEligibleToTransmit(frame->peekAtFront<Ieee80211DataOrMgmtHeader>()) && frameToTransmit != frame)
                 return frame;
         }
         auto frames = dataService->extractFramesToTransmit(pendingQueue);
         if (frames) {
             auto firstFrame = (*frames)[0];
             for (auto frame : *frames) {
-                ackHandler->frameGotInProgress(frame->peekHeader<Ieee80211DataOrMgmtHeader>());
+                ackHandler->frameGotInProgress(frame->peekAtFront<Ieee80211DataOrMgmtHeader>());
                 inProgressFrames.push_back(frame);
             }
             delete frames;
@@ -96,7 +96,7 @@ void InProgressFrames::dropFrames(std::set<std::pair<MacAddress, std::pair<Tid, 
 {
     for (auto it = inProgressFrames.begin(); it != inProgressFrames.end();) {
         auto frame = *it;
-        auto header = frame->peekHeader<Ieee80211MacHeader>();
+        auto header = frame->peekAtFront<Ieee80211MacHeader>();
         if (header->getType() == ST_DATA_WITH_QOS) {
             auto dataheader = CHK(dynamicPtrCast<const Ieee80211DataHeader>(header));
             if (seqAndFragNums.count(std::make_pair(dataheader->getReceiverAddress(), std::make_pair(dataheader->getTid(), SequenceControlField(dataheader->getSequenceNumber(), dataheader->getFragmentNumber())))) != 0) {
@@ -115,7 +115,7 @@ std::vector<Packet *> InProgressFrames::getOutstandingFrames()
 {
     std::vector<Packet *> outstandingFrames;
     for (auto frame : inProgressFrames) {
-        if (ackHandler->isOutstandingFrame(frame->peekHeader<Ieee80211DataOrMgmtHeader>()))
+        if (ackHandler->isOutstandingFrame(frame->peekAtFront<Ieee80211DataOrMgmtHeader>()))
             outstandingFrames.push_back(frame);
     }
     return outstandingFrames;

@@ -40,11 +40,11 @@ INetfilter::IHook::Result SctpUdpHook::datagramPreRoutingHook(Packet *packet)
         EV_INFO << "Protocol is udp\n";
         const auto& ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
         EV_INFO << "network header removed. packet now " << packet << endl;
-        auto udpHeader = packet->peekHeader<UdpHeader>();
+        auto udpHeader = packet->peekAtFront<UdpHeader>();
         EV_INFO << "udp header removed. packet now " << packet << endl;
         EV_INFO << "dest port " << udpHeader->getDestPort() << endl;
         if (udpHeader->getDestPort() == SCTP_UDP_PORT) {
-            packet->removeHeader<UdpHeader>();
+            packet->removeAtFront<UdpHeader>();
             ipv4Header->setProtocolId(IP_PROT_SCTP);
         }
         insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);

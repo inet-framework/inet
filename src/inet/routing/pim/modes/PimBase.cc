@@ -179,7 +179,7 @@ void PimBase::sendHelloPacket(PimInterface *pimInterface)
     }
 
     msg->setChunkLength(B(byteLength));
-    pk->insertHeader(msg);
+    pk->insertAtFront(msg);
     pk->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::pim);
     pk->addTagIfAbsent<InterfaceReq>()->setInterfaceId(pimInterface->getInterfaceId());
     pk->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::pim);
@@ -197,7 +197,7 @@ void PimBase::processHelloPacket(Packet *packet)
     int interfaceId = packet->getTag<InterfaceInd>()->getInterfaceId();
 
     Ipv4Address address = packet->getTag<L3AddressInd>()->getSrcAddress().toIpv4();
-    const auto& pimPacket = packet->peekHeader<PimHello>();
+    const auto& pimPacket = packet->peekAtFront<PimHello>();
     int version = pimPacket->getVersion();
 
     emit(rcvdHelloPkSignal, packet);

@@ -48,7 +48,7 @@ std::ostream& ApskDimensionalTransmitter::printToStream(std::ostream& stream, in
 
 const ITransmission *ApskDimensionalTransmitter::createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const
 {
-    auto phyHeader = packet->peekHeader<ApskPhyHeader>();
+    auto phyHeader = packet->peekAtFront<ApskPhyHeader>();
     auto dataLength = packet->getTotalLength() - phyHeader->getChunkLength();
     W transmissionPower = computeTransmissionPower(packet);
     Hz transmissionCarrierFrequency = computeCarrierFrequency(packet);

@@ -284,7 +284,7 @@ const IReceptionBitModel *Ieee80211LayeredOfdmReceiver::createDataFieldBitModel(
         const ConvolutionalCode *convolutionalCode = nullptr;
         const ApskModulationBase *modulation = nullptr;
         double codeRate = NaN;
-        const auto& bytesChunk = signalFieldPacketModel->getPacket()->peekAllBytes();
+        const auto& bytesChunk = signalFieldPacketModel->getPacket()->peekAllAsBytes();
         unsigned int psduLengthInBits = getSignalFieldLength(new BitVector(bytesChunk->getBytes())) * 8;
         unsigned int dataFieldLengthInBits = psduLengthInBits + PPDU_SERVICE_FIELD_BITS_LENGTH + PPDU_TAIL_BITS_LENGTH;
         if (isCompliant) {
@@ -332,8 +332,8 @@ const IReceptionSymbolModel *Ieee80211LayeredOfdmReceiver::createCompleteSymbolM
 const IReceptionPacketModel *Ieee80211LayeredOfdmReceiver::createCompletePacketModel(const char *name, const IReceptionPacketModel *signalFieldPacketModel, const IReceptionPacketModel *dataFieldPacketModel) const
 {
     Packet *packet = new Packet(name);
-    packet->insertAtEnd(signalFieldPacketModel->getPacket()->peekAll());
-    packet->insertAtEnd(dataFieldPacketModel->getPacket()->peekAll());
+    packet->insertAtBack(signalFieldPacketModel->getPacket()->peekAll());
+    packet->insertAtBack(dataFieldPacketModel->getPacket()->peekAll());
     return new ReceptionPacketModel(packet, bps(NaN));
 }
 
@@ -362,7 +362,7 @@ const IReceptionResult *Ieee80211LayeredOfdmReceiver::computeReceptionResult(con
     const IReceptionBitModel *signalFieldBitModel = createSignalFieldBitModel(bitModel, signalFieldSymbolModel);
     const IReceptionPacketModel *signalFieldPacketModel = createSignalFieldPacketModel(signalFieldBitModel);
     if (isCompliant) {
-        const auto& signalFieldBytesChunk = signalFieldPacketModel != nullptr ? signalFieldPacketModel->getPacket()->peekAllBytes() : packetModel->getPacket()->peekAllBytes();
+        const auto& signalFieldBytesChunk = signalFieldPacketModel != nullptr ? signalFieldPacketModel->getPacket()->peekAllAsBytes() : packetModel->getPacket()->peekAllAsBytes();
         uint8_t rate = signalFieldBytesChunk->getByte(0) >> 4;
         // TODO: handle erroneous rate field
         mode = &Ieee80211OfdmCompliantModes::getCompliantMode(rate, channelSpacing);

@@ -122,12 +122,12 @@ Packet *Ipv6FragBuf::addFragment(Packet *pk, const Ipv6Header *ipv6Header, const
             pkName.resize(found);
         Packet *pk = new Packet(pkName.c_str());
         pk->copyTags(*buf->packet);
-        auto hdr = Ptr<Ipv6Header>(buf->packet->peekHeader<Ipv6Header>()->dup());
+        auto hdr = Ptr<Ipv6Header>(buf->packet->peekAtFront<Ipv6Header>()->dup());
         const auto& payload = buf->buf.getReassembledData();
         hdr->removeExtensionHeader(IP_PROT_IPv6EXT_FRAGMENT);
         hdr->setChunkLength(B(hdr->calculateUnfragmentableHeaderByteLength()));
-        pk->insertHeader(hdr);
-        pk->insertAtEnd(payload);
+        pk->insertAtFront(hdr);
+        pk->insertAtBack(payload);
         delete buf->packet;
         bufs.erase(i);
         return pk;

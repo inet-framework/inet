@@ -31,21 +31,21 @@ std::vector<Packet *> *Fragmentation::fragmentFrame(Packet *frame, const std::ve
     //
     B offset = B(0);
     std::vector<Packet *> *fragments = new std::vector<Packet *>();
-    const auto& frameHeader = frame->popHeader<Ieee80211DataOrMgmtHeader>();
-    frame->popTrailer<Ieee80211MacTrailer>();
+    const auto& frameHeader = frame->popAtFront<Ieee80211DataOrMgmtHeader>();
+    frame->popAtBack<Ieee80211MacTrailer>();
     for (int i = 0; i < (int)fragmentSizes.size(); i++) {
         bool lastFragment = i == (int)fragmentSizes.size() - 1;
         std::string name = std::string(frame->getName()) + "-frag" + std::to_string(i);
         auto fragment = new Packet(name.c_str());
         B length = B(fragmentSizes.at(i));
-        fragment->insertAtEnd(frame->peekDataAt(offset, length));
+        fragment->insertAtBack(frame->peekDataAt(offset, length));
         offset += length;
         const auto& fragmentHeader = staticPtrCast<Ieee80211DataOrMgmtHeader>(frameHeader->dupShared());
         fragmentHeader->setSequenceNumber(frameHeader->getSequenceNumber());
         fragmentHeader->setFragmentNumber(i);
         fragmentHeader->setMoreFragments(!lastFragment);
-        fragment->insertHeader(fragmentHeader);
-        fragment->insertTrailer(makeShared<Ieee80211MacTrailer>());
+        fragment->insertAtFront(fragmentHeader);
+        fragment->insertAtBack(makeShared<Ieee80211MacTrailer>());
         fragments->push_back(fragment);
     }
     delete frame;

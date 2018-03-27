@@ -170,7 +170,7 @@ void Interface::sendHelloPacket(Ipv4Address destination, short ttl)
 
     helloPacket->setChunkLength(B(OSPF_HEADER_LENGTH + OSPF_HELLO_HEADER_LENGTH + initedNeighborCount * 4));
     Packet *pk = new Packet();
-    pk->insertAtEnd(helloPacket);
+    pk->insertAtBack(helloPacket);
 
     parentArea->getRouter()->getMessageHandler()->sendPacket(pk, destination, ifIndex, ttl);
 }
@@ -193,7 +193,7 @@ void Interface::sendLsAcknowledgement(const OspfLsaHeader *lsaHeader, Ipv4Addres
 
     lsAckPacket->setChunkLength(B(OSPF_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH));
     Packet *pk = new Packet();
-    pk->insertAtEnd(lsAckPacket);
+    pk->insertAtBack(lsAckPacket);
 
     int ttl = (interfaceType == Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
     parentArea->getRouter()->getMessageHandler()->sendPacket(pk, destination, ifIndex, ttl);
@@ -525,7 +525,7 @@ Packet *Interface::createUpdatePacket(const OspfLsa *lsa)
 
         updatePacket->setChunkLength(B(packetLength));
         Packet *pk = new Packet();
-        pk->insertAtEnd(updatePacket);
+        pk->insertAtBack(updatePacket);
 
         return pk;
     }
@@ -586,7 +586,7 @@ void Interface::sendDelayedAcknowledgements()
 
                 ackPacket->setChunkLength(B(packetSize - IP_MAX_HEADER_BYTES));
                 Packet *pk = new Packet();
-                pk->insertAtEnd(ackPacket);
+                pk->insertAtBack(ackPacket);
 
                 int ttl = (interfaceType == Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
 

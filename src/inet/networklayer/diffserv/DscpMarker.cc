@@ -86,19 +86,19 @@ bool DscpMarker::markPacket(Packet *packet, int dscp)
 
 #ifdef WITH_IPv4
     if (protocol == &Protocol::ipv4) {
-        packet->removePoppedHeaders();
-        const auto& ipv4Header = packet->removeHeader<Ipv4Header>();
+        packet->trimFront();
+        const auto& ipv4Header = packet->removeAtFront<Ipv4Header>();
         ipv4Header->setDiffServCodePoint(dscp);
-        packet->insertHeader(ipv4Header);
+        packet->insertAtFront(ipv4Header);
         return true;
     }
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
     if (protocol == &Protocol::ipv6) {
-        packet->removePoppedHeaders();
-        const auto& ipv6Header = packet->removeHeader<Ipv6Header>();
+        packet->trimFront();
+        const auto& ipv6Header = packet->removeAtFront<Ipv6Header>();
         ipv6Header->setDiffServCodePoint(dscp);
-        packet->insertHeader(ipv6Header);
+        packet->insertAtFront(ipv6Header);
         return true;
     }
 #endif // ifdef WITH_IPv6

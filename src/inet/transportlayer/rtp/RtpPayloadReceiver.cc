@@ -65,7 +65,7 @@ void RtpPayloadReceiver::handleMessage(cMessage *msg)
 
 void RtpPayloadReceiver::processRtpPacket(Packet *packet)
 {
-    const auto& rtpHeader = packet->peekHeader<RtpHeader>();
+    const auto& rtpHeader = packet->peekAtFront<RtpHeader>();
     emit(rcvdPkRtpTimestampSignal, (double)(rtpHeader->getTimeStamp()));
 }
 

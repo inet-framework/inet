@@ -138,7 +138,7 @@ void SctpNatPeer::generateAndSend()
     for (int i = 0; i < numBytes; i++)
         vec[i] = (bytesSent + i) & 0xFF;
     applicationData->setBytes(vec);
-    applicationPacket->insertAtEnd(applicationData);
+    applicationPacket->insertAtBack(applicationData);
     auto sctpSendReq = applicationPacket->addTagIfAbsent<SctpSendReq>();
     sctpSendReq->setLast(true);
     sctpSendReq->setPrMethod(par("prMethod"));
@@ -683,7 +683,7 @@ void SctpNatPeer::sendRequest(bool last)
     for (int i = 0; i < numBytes; i++)
         vec[i] = (bytesSent + i) & 0xFF;
     msg->setBytes(vec);
-    cmsg->insertAtEnd(msg);
+    cmsg->insertAtBack(msg);
     auto creationTimeTag = cmsg->addTagIfAbsent<CreationTimeTag>();
     creationTimeTag->setCreationTime(simTime());
     cmsg->setKind(ordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);
@@ -723,7 +723,7 @@ void SctpNatPeer::socketEstablished(int32, void *, unsigned long int buffer)
 
         auto applicationData = makeShared<BytesChunk>(buffer, buflen);
         auto applicationPacket = new Packet("ApplicationPacket");
-        applicationPacket->insertAtEnd(applicationData);
+        applicationPacket->insertAtBack(applicationData);
         auto sctpSendReq = applicationPacket->addTagIfAbsent<SctpSendReq>();
         sctpSendReq->setLast(true);
         sctpSendReq->setPrMethod(0);
@@ -838,7 +838,7 @@ void SctpNatPeer::socketDataArrived(int32, void *, Packet *msg, bool)
         auto creationTimeTag = msg->findTag<CreationTimeTag>();
         creationTimeTag->setCreationTime(simTime());
         auto cmsg = new Packet("ApplicationPacket");
-        cmsg->insertAtEnd(smsg);
+        cmsg->insertAtBack(smsg);
         auto cmd = cmsg->addTagIfAbsent<SctpSendReq>();
         cmd->setLast(true);
         cmd->setSocketId(ind->getSocketId());
@@ -908,7 +908,7 @@ void SctpNatPeer::addressAddedArrived(int32 assocId, L3Address localAddr, L3Addr
 
         auto applicationData = makeShared<BytesChunk>(buffer, buflen);
         auto applicationPacket = new Packet("ApplicationPacket");
-        applicationPacket->insertAtEnd(applicationData);
+        applicationPacket->insertAtBack(applicationData);
         auto sctpSendReq = applicationPacket->addTagIfAbsent<SctpSendReq>();
         sctpSendReq->setLast(true);
         sctpSendReq->setPrMethod(0);

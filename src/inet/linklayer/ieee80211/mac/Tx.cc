@@ -61,14 +61,14 @@ void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& head
     this->txCallback = txCallback;
     Enter_Method("transmitFrame(\"%s\")", packet->getName());
     take(packet);
-    const auto& updatedHeader = packet->removeHeader<Ieee80211MacHeader>();
+    const auto& updatedHeader = packet->removeAtFront<Ieee80211MacHeader>();
     if (auto twoAddressHeader = dynamicPtrCast<Ieee80211TwoAddressHeader>(updatedHeader))
         twoAddressHeader->setTransmitterAddress(mac->getAddress());
-    packet->insertHeader(updatedHeader);
-    const auto& updatedTrailer = packet->removeTrailer<Ieee80211MacTrailer>();
+    packet->insertAtFront(updatedHeader);
+    const auto& updatedTrailer = packet->removeAtBack<Ieee80211MacTrailer>();
     updatedTrailer->setFcsMode(mac->getFcsMode());
     if (mac->getFcsMode() == FCS_COMPUTED) {
-        const auto& fcsBytes = packet->peekAllBytes();
+        const auto& fcsBytes = packet->peekAllAsBytes();
         auto bufferLength = B(fcsBytes->getChunkLength()).get();
         auto buffer = new uint8_t[bufferLength];
         fcsBytes->copyToBuffer(buffer, bufferLength);
@@ -76,7 +76,7 @@ void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& head
         updatedTrailer->setFcs(fcs);
         delete [] buffer;
     }
-    packet->insertTrailer(updatedTrailer);
+    packet->insertAtBack(updatedTrailer);
     this->frame = packet->dup();
     ASSERT(!endIfsTimer->isScheduled() && !transmitting);    // we are idle
     scheduleAt(simTime() + ifs, endIfsTimer);
@@ -91,13 +91,13 @@ void Tx::radioTransmissionFinished()
         EV_DETAIL << "Tx: radioTransmissionFinished()\n";
         transmitting = false;
         ASSERT(txCallback != nullptr);
-        const auto& header = frame->peekHeader<Ieee80211MacHeader>();
+        const auto& header = frame->peekAtFront<Ieee80211MacHeader>();
         auto duration = header->getDuration();
         auto tmpFrame = frame;
         auto tmpTxCallback = txCallback;
         frame = nullptr;
         txCallback = nullptr;
-        tmpTxCallback->transmissionComplete(tmpFrame, tmpFrame->peekHeader<Ieee80211MacHeader>());
+        tmpTxCallback->transmissionComplete(tmpFrame, tmpFrame->peekAtFront<Ieee80211MacHeader>());
         rx->frameTransmitted(duration);
         if (hasGUI())
             refreshDisplay();

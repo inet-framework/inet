@@ -116,7 +116,7 @@ void WiseRoute::handleSelfMessage(cMessage *msg)
         floodSeqNumber++;
         pkt->setIsFlood(1);
         auto packet = new Packet("route-flood", ROUTE_FLOOD);
-        packet->insertAtEnd(pkt);
+        packet->insertAtBack(pkt);
         setDownControlInfo(packet, MacAddress::BROADCAST_ADDRESS);
         sendDown(packet);
         nbFloodsSent++;
@@ -131,7 +131,7 @@ void WiseRoute::handleSelfMessage(cMessage *msg)
 
 void WiseRoute::handleLowerPacket(Packet *packet)
 {
-    auto wiseRouteHeader = staticPtrCast<WiseRouteHeader>(packet->peekHeader<WiseRouteHeader>()->dupShared());
+    auto wiseRouteHeader = staticPtrCast<WiseRouteHeader>(packet->peekAtFront<WiseRouteHeader>()->dupShared());
     const L3Address& finalDestAddr = wiseRouteHeader->getFinalDestAddr();
     const L3Address& initialSrcAddr = wiseRouteHeader->getInitialSrcAddr();
     const L3Address& srcAddr = wiseRouteHeader->getSourceAddress();
@@ -167,10 +167,10 @@ void WiseRoute::handleLowerPacket(Packet *packet)
                 pCtrlInfo = packet->removeControlInfo();
                 wiseRouteHeader->setNbHops(wiseRouteHeader->getNbHops() + 1);
                 auto p = new Packet(packet->getName(), packet->getKind());
-                packet->popHeader<WiseRouteHeader>();
-                p->insertAtEnd(packet->peekDataAt(b(0), packet->getDataLength()));
+                packet->popAtFront<WiseRouteHeader>();
+                p->insertAtBack(packet->peekDataAt(b(0), packet->getDataLength()));
                 wiseRouteHeader->setPayloadLengthField(p->getDataLength());
-                p->insertHeader(wiseRouteHeader);
+                p->insertAtFront(wiseRouteHeader);
                 setDownControlInfo(p, MacAddress::BROADCAST_ADDRESS);
                 sendDown(p);
                 nbDataPacketsForwarded++;
@@ -196,10 +196,10 @@ void WiseRoute::handleLowerPacket(Packet *packet)
                 pCtrlInfo = packet->removeControlInfo();
                 wiseRouteHeader->setNbHops(wiseRouteHeader->getNbHops() + 1);
                 auto p = new Packet(packet->getName(), packet->getKind());
-                packet->popHeader<WiseRouteHeader>();
-                p->insertAtEnd(packet->peekDataAt(b(0), packet->getDataLength()));
+                packet->popAtFront<WiseRouteHeader>();
+                p->insertAtBack(packet->peekDataAt(b(0), packet->getDataLength()));
                 wiseRouteHeader->setPayloadLengthField(p->getDataLength());
-                p->insertHeader(wiseRouteHeader);
+                p->insertAtFront(wiseRouteHeader);
                 setDownControlInfo(p, MacAddress::BROADCAST_ADDRESS);
                 sendDown(p);
                 nbDataPacketsForwarded++;
@@ -220,10 +220,10 @@ void WiseRoute::handleLowerPacket(Packet *packet)
                     throw cRuntimeError("Cannot immediately resolve MAC address. Please configure a GenericArp module.");
                 wiseRouteHeader->setNbHops(wiseRouteHeader->getNbHops() + 1);
                 auto p = new Packet(packet->getName(), packet->getKind());
-                packet->popHeader<WiseRouteHeader>();
-                p->insertAtEnd(packet->peekDataAt(b(0), packet->getDataLength()));
+                packet->popAtFront<WiseRouteHeader>();
+                p->insertAtBack(packet->peekDataAt(b(0), packet->getDataLength()));
                 wiseRouteHeader->setPayloadLengthField(p->getDataLength());
-                p->insertHeader(wiseRouteHeader);
+                p->insertAtFront(wiseRouteHeader);
                 setDownControlInfo(p, nextHopMacAddr);
                 sendDown(p);
                 nbDataPacketsForwarded++;
@@ -287,7 +287,7 @@ void WiseRoute::handleUpperPacket(Packet *packet)
             throw cRuntimeError("Cannot immediately resolve MAC address. Please configure a GenericArp module.");
     }
     pkt->setPayloadLengthField(packet->getDataLength());
-    packet->insertHeader(pkt);
+    packet->insertAtFront(pkt);
     packet->setKind(DATA);
     setDownControlInfo(packet, nextHopMacAddr);
     sendDown(packet);
@@ -350,13 +350,13 @@ void WiseRoute::updateRouteTable(const L3Address& origin, const L3Address& lastH
 
 void WiseRoute::decapsulate(Packet *packet)
 {
-    auto wiseRouteHeader = packet->popHeader<WiseRouteHeader>();
+    auto wiseRouteHeader = packet->popAtFront<WiseRouteHeader>();
     auto payloadLength = wiseRouteHeader->getPayloadLengthField();
     if (packet->getDataLength() < payloadLength) {
         throw cRuntimeError("Data error: illegal payload length");     //FIXME packet drop
     }
     if (packet->getDataLength() > payloadLength)
-        packet->setTrailerPopOffset(packet->getHeaderPopOffset() + payloadLength);
+        packet->setBackOffset(packet->getFrontOffset() + payloadLength);
     auto payloadProtocol = wiseRouteHeader->getProtocol();
     packet->addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&getProtocol());
     packet->addTagIfAbsent<NetworkProtocolInd>()->setNetworkProtocolHeader(wiseRouteHeader);

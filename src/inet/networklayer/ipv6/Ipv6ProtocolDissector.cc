@@ -27,9 +27,9 @@ Register_Protocol_Dissector(&Protocol::ipv6, Ipv6ProtocolDissector);
 
 void Ipv6ProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    auto trailerPopOffset = packet->getTrailerPopOffset();
-    const auto& header = packet->popHeader<Ipv6Header>();
-    auto ipv6EndOffset = packet->getHeaderPopOffset() + B(header->getPayloadLength());
+    auto trailerPopOffset = packet->getBackOffset();
+    const auto& header = packet->popAtFront<Ipv6Header>();
+    auto ipv6EndOffset = packet->getFrontOffset() + B(header->getPayloadLength());
     callback.startProtocolDataUnit(&Protocol::ipv6);
     bool incorrect = (ipv6EndOffset > trailerPopOffset);
     if (incorrect) {
@@ -37,14 +37,14 @@ void Ipv6ProtocolDissector::dissect(Packet *packet, ICallback& callback) const
         ipv6EndOffset = trailerPopOffset;
     }
     callback.visitChunk(header, &Protocol::ipv6);
-    packet->setTrailerPopOffset(ipv6EndOffset);
+    packet->setBackOffset(ipv6EndOffset);
     //TODO Fragmentation
     callback.dissectPacket(packet, header->getProtocol());
     if (incorrect && packet->getDataLength() > b(0))
         callback.dissectPacket(packet, nullptr);
     ASSERT(packet->getDataLength() == B(0));
-    packet->setHeaderPopOffset(ipv6EndOffset);
-    packet->setTrailerPopOffset(trailerPopOffset);
+    packet->setFrontOffset(ipv6EndOffset);
+    packet->setBackOffset(trailerPopOffset);
     callback.endProtocolDataUnit(&Protocol::ipv6);
 }
 

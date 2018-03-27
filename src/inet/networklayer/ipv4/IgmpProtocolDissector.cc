@@ -29,7 +29,7 @@ Register_Protocol_Dissector(&Protocol::igmp, IgmpProtocolDissector);
 
 void IgmpProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    auto igmpPacket = packet->popHeader<IgmpMessage>();
+    auto igmpPacket = packet->popAtFront<IgmpMessage>();
     callback.startProtocolDataUnit(&Protocol::igmp);
     callback.visitChunk(igmpPacket, &Protocol::igmp);
     callback.endProtocolDataUnit(&Protocol::igmp);

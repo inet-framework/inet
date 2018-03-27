@@ -50,7 +50,7 @@ void UdpEchoApp::handleMessageWhenUp(cMessage *msg)
         L3Address remoteAddress = pk->getTag<L3AddressInd>()->getSrcAddress();
         int srcPort = pk->getTag<L4PortInd>()->getSrcPort();
         pk->clearTags();
-        pk->removePoppedChunks();
+        pk->trim();
 
         // statistics
         numEchoed++;

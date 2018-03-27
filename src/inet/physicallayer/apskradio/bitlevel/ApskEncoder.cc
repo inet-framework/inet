@@ -68,14 +68,14 @@ std::ostream& ApskEncoder::printToStream(std::ostream& stream, int level) const
 const ITransmissionBitModel *ApskEncoder::encode(const ITransmissionPacketModel *packetModel) const
 {
     auto packet = packetModel->getPacket();
-    const auto& apskPhyHeader = packet->peekHeader<ApskPhyHeader>();
+    const auto& apskPhyHeader = packet->peekAtFront<ApskPhyHeader>();
     auto length = packet->getTotalLength();
     BitVector *encodedBits;
     if (b(length).get() % 8 == 0)
-        encodedBits = new BitVector(packet->peekAllBytes()->getBytes());
+        encodedBits = new BitVector(packet->peekAllAsBytes()->getBytes());
     else {
         encodedBits = new BitVector();
-        const auto& bitsChunk = packet->peekAllBits();
+        const auto& bitsChunk = packet->peekAllAsBits();
         for (int i = 0; i < b(length).get(); i++)
             encodedBits->appendBit(bitsChunk->getBit(i));
     }

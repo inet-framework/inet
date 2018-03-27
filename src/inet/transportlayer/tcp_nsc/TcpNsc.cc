@@ -353,7 +353,7 @@ void TcpNsc::handleIpInputMessage(Packet *packet)
     //int interfaceId = controlInfo->getInterfaceId();
 
     if (packet->getTag<NetworkProtocolInd>()->getProtocol()->getId() == Protocol::ipv6.getId()) {
-        const auto& tcpHdr = packet->peekHeader<TcpHeader>();
+        const auto& tcpHdr = packet->peekAtFront<TcpHeader>();
         // HACK: when IPv6, then correcting the TCPOPTION_MAXIMUM_SEGMENT_SIZE option
         //       with IP header size difference
         unsigned short numOptions = tcpHdr->getHeaderOptionArraySize();
@@ -365,15 +365,15 @@ void TcpNsc::handleIpInputMessage(Packet *packet)
                 unsigned int value = mssOption->getMaxSegmentSize();
                 value -= sizeof(struct nsc_ipv6hdr) - sizeof(struct nsc_iphdr);
                 mssOption->setMaxSegmentSize(value);
-                packet->popHeader<TcpHeader>();
-                packet->removePoppedChunks();
-                packet->insertHeader(newTcpHdr);
+                packet->popAtFront<TcpHeader>();
+                packet->trim();
+                packet->insertAtFront(newTcpHdr);
                 break;
             }
         }
     }
 
-    auto tcpHdr = packet->peekHeader<TcpHeader>();
+    auto tcpHdr = packet->peekAtFront<TcpHeader>();
 
     switch(tcpHdr->getCrcMode()) {
         case CRC_DECLARED_INCORRECT:
@@ -382,11 +382,11 @@ void TcpNsc::handleIpInputMessage(Packet *packet)
             return;
         case CRC_DECLARED_CORRECT: {
             // modify to calculated, for serializing
-            packet->removePoppedHeaders();
-            const auto& newTcpHdr = packet->removeHeader<TcpHeader>();
+            packet->trimFront();
+            const auto& newTcpHdr = packet->removeAtFront<TcpHeader>();
             newTcpHdr->setCrcMode(CRC_COMPUTED);
             newTcpHdr->setCrc(0);
-            packet->insertHeader(newTcpHdr);
+            packet->insertAtFront(newTcpHdr);
             tcpHdr = newTcpHdr;
             break;
         }
@@ -447,7 +447,7 @@ void TcpNsc::handleIpInputMessage(Packet *packet)
         conn = findConnByInetSockPair(inetSockPairAny);
     }
 
-    const auto& bytes = packet->peekDataBytes();
+    const auto& bytes = packet->peekDataAsBytes();
     totalTcpLen = bytes->copyToBuffer((uint8_t *)tcph, totalTcpLen);
 
     if (conn) {
@@ -886,16 +886,16 @@ void TcpNsc::sendToIP(const void *dataP, int lenP)
     else {
         const auto& bytes = makeShared<BytesChunk>((const uint8_t*)tcph, lenP - ipHdrLen);
         fp = new Packet(nullptr, bytes);
-        const auto& tcpHdr = fp->popHeader<TcpHeader>();
-        fp->removePoppedHeaders();
+        const auto& tcpHdr = fp->popAtFront<TcpHeader>();
+        fp->trimFront();
         int64_t numBytes = fp->getByteLength();
         ASSERT(numBytes == 0);
-        fp->insertHeader(tcpHdr);
+        fp->insertAtFront(tcpHdr);
 
         dest = mapNsc2Remote(ntohl(iph->daddr));
     }
 
-    auto tcpHdr = fp->removeHeader<TcpHeader>();
+    auto tcpHdr = fp->removeAtFront<TcpHeader>();
     tcpHdr->setCrc(0);
     ASSERT(crcMode == CRC_COMPUTED || crcMode == CRC_DECLARED_CORRECT);
     tcpHdr->setCrcMode(crcMode);

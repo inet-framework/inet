@@ -72,7 +72,7 @@ RtpSenderInfo *RtpSenderInfo::dup() const
 
 void RtpSenderInfo::processRTPPacket(Packet *packet, int id, simtime_t arrivalTime)
 {
-    const auto& rtpHeader = packet->peekHeader<RtpHeader>();
+    const auto& rtpHeader = packet->peekAtFront<RtpHeader>();
     _packetsSent++;
     _bytesSent = _bytesSent + packet->getByteLength() - B(rtpHeader->getChunkLength()).get();
 

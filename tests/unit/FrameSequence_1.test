@@ -47,7 +47,7 @@ class DataFs : public IFrameSequence
                         const auto& header = makeShared<Ieee80211MacHeader>();
                         Packet *packet = new Packet("DATA");
                         header->setType(ST_DATA);
-                        packet->insertHeader(header);
+                        packet->insertAtFront(header);
                         return new TransmitStep(packet, 0);
                     }
                     case 1:
@@ -84,7 +84,7 @@ class DataFs : public IFrameSequence
                         IReceiveStep *receiveStep = check_and_cast<IReceiveStep *>(context->getStep(firstStep + step));
                         step++;
                         Packet *pk = receiveStep->getReceivedFrame();
-                        const auto& header = pk->peekHeader<Ieee80211MacHeader>();
+                        const auto& header = pk->peekAtFront<Ieee80211MacHeader>();
                         return header->getType() == ST_DATA;
                     }
                     default:
@@ -125,7 +125,7 @@ class INET_API AckFs : public IFrameSequence
                         const auto& header = makeShared<Ieee80211MacHeader>();
                         Packet *packet = new Packet("ACK");
                         header->setType(ST_ACK);
-                        packet->insertHeader(header);
+                        packet->insertAtFront(header);
                         return new TransmitStep(packet, 0);
                     }
                     case 1:
@@ -143,7 +143,7 @@ class INET_API AckFs : public IFrameSequence
                         IReceiveStep *receiveStep = check_and_cast<IReceiveStep *>(context->getStep(firstStep + step));
                         step++;
                         Packet *pk = receiveStep->getReceivedFrame();
-                        const auto& header = pk->peekHeader<Ieee80211MacHeader>();
+                        const auto& header = pk->peekAtFront<Ieee80211MacHeader>();
                         return header->getType() == ST_ACK;
                     }
                     default:
@@ -185,7 +185,7 @@ class RtsCtsFs : public IFrameSequence
                         const auto& header = makeShared<Ieee80211MacHeader>();
                         Packet *packet = new Packet("RTS");
                         header->setType(ST_RTS);
-                        packet->insertHeader(header);
+                        packet->insertAtFront(header);
                         return new TransmitStep(packet, 0);
                     }
                     case 1:
@@ -204,7 +204,7 @@ class RtsCtsFs : public IFrameSequence
                         const auto& header = makeShared<Ieee80211MacHeader>();
                         Packet *packet = new Packet("CTS");
                         header->setType(ST_CTS);
-                        packet->insertHeader(header);
+                        packet->insertAtFront(header);
                         return new TransmitStep(packet, 0);
                     }
                     case 2:
@@ -225,7 +225,7 @@ class RtsCtsFs : public IFrameSequence
                         IReceiveStep *receiveStep = check_and_cast<IReceiveStep *>(context->getStep(firstStep + step));
                         step++;
                         Packet *pk = receiveStep->getReceivedFrame();
-                        const auto& header = pk->peekHeader<Ieee80211MacHeader>();
+                        const auto& header = pk->peekAtFront<Ieee80211MacHeader>();
                         return header->getType() == ST_CTS;
                     }
                     default:
@@ -238,7 +238,7 @@ class RtsCtsFs : public IFrameSequence
                         IReceiveStep *receiveStep = check_and_cast<IReceiveStep *>(context->getStep(firstStep + step));
                         step++;
                         Packet *pk = receiveStep->getReceivedFrame();
-                        const auto& header = pk->peekHeader<Ieee80211MacHeader>();
+                        const auto& header = pk->peekAtFront<Ieee80211MacHeader>();
                         return header->getType() == ST_RTS;
                     }
                     case 1:

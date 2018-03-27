@@ -33,7 +33,7 @@ void RecipientMacDataService::initialize()
 Packet *RecipientMacDataService::defragment(Packet *dataOrMgmtFrame)
 {
     Packet *packet = basicReassembly->addFragment(dataOrMgmtFrame);
-    if (packet && packet->peekHeader<Ieee80211DataOrMgmtHeader>())
+    if (packet && packet->peekAtFront<Ieee80211DataOrMgmtHeader>())
         return packet;
     else
         return nullptr;

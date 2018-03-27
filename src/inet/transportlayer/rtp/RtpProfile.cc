@@ -205,7 +205,7 @@ void RtpProfile::dataIn(RtpInnerPacket *rinp)
     processIncomingPacket(rinp);
 
     Packet *packet = check_and_cast<Packet *>(rinp->getEncapsulatedPacket());
-    const auto& rtpHeader = packet->peekHeader<RtpHeader>();
+    const auto& rtpHeader = packet->peekAtFront<RtpHeader>();
 
     uint32 ssrc = rtpHeader->getSsrc();
 

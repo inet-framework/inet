@@ -140,10 +140,10 @@ void EtherLlc::processPacketFromHigherLayer(Packet *packet)
     llc->setControl(0);
     llc->setSsap(ieee802SapReq->getSsap());
     llc->setDsap(ieee802SapReq->getDsap());
-    packet->insertHeader(llc);
+    packet->insertAtFront(llc);
     eth->setDest(packet->getTag<MacAddressReq>()->getDestAddress());    // src address will be filled by MAC
     eth->setTypeOrLength(packet->getByteLength());
-    packet->insertHeader(eth);
+    packet->insertAtFront(eth);
 
     EtherEncap::addPaddingAndFcs(packet, fcsMode);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
@@ -155,12 +155,12 @@ void EtherLlc::processFrameFromMAC(Packet *packet)
 {
     // decapsulate it and pass up to higher layer
 
-    auto headerPopOffset = packet->getHeaderPopOffset();
+    auto headerPopOffset = packet->getFrontOffset();
     Ptr<const Ieee8022LlcHeader> llc = nullptr;
     auto ethHeader = EtherEncap::decapsulateMacHeader(packet);
 
     if (isIeee8023Header(*ethHeader)) {
-        llc = packet->popHeader<Ieee8022LlcHeader>();
+        llc = packet->popAtFront<Ieee8022LlcHeader>();
         delete packet->removeTagIfPresent<PacketProtocolTag>();
     }
     else {
@@ -174,7 +174,7 @@ void EtherLlc::processFrameFromMAC(Packet *packet)
     if (port < 0) {
         EV << "No higher layer registered for DSAP=" << dsap << ", discarding frame `" << packet->getName() << "'\n";
         droppedUnknownDSAP++;
-        packet->setHeaderPopOffset(headerPopOffset);    // restore original packet
+        packet->setFrontOffset(headerPopOffset);    // restore original packet
         PacketDropDetails details;
         details.setReason(NO_PROTOCOL_FOUND);
         emit(packetDroppedSignal, packet, &details);
@@ -266,9 +266,9 @@ void EtherLlc::handleSendPause(cMessage *msg)
     if (dest.isUnspecified())
         dest = MacAddress::MULTICAST_PAUSE_ADDRESS;
     hdr->setDest(dest);
-    packet->insertHeader(frame);
+    packet->insertAtFront(frame);
     hdr->setTypeOrLength(ETHERTYPE_FLOW_CONTROL);
-    packet->insertHeader(hdr);
+    packet->insertAtFront(hdr);
     EtherEncap::addPaddingAndFcs(packet, FCS_DECLARED_CORRECT);         //FIXME fcs mode
     packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
 

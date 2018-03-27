@@ -62,11 +62,11 @@ void EthTestApp::createCommand(simtime_t t, int bytes)
     const auto& hdr = makeShared<EthernetMacHeader>();
     hdr->setDest(destAddr);
     hdr->setChunkLength(B(14));
-    packet->insertAtBeginning(hdr);
+    packet->insertAtFront(hdr);
     const auto& payload = makeShared<ByteCountChunk>(B(bytes-14-4));
-    packet->insertAtEnd(payload);
+    packet->insertAtBack(payload);
     const auto& fcs = makeShared<EthernetFcs>();
-    packet->insertAtEnd(fcs);
+    packet->insertAtBack(fcs);
     ASSERT(packet->getByteLength() == bytes);
     //TODO set packet->destAddr
     scheduleAt(t, packet);

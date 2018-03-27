@@ -29,7 +29,7 @@ Register_Protocol_Dissector(&Protocol::icmpv4, IcmpProtocolDissector);
 
 void IcmpProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    const auto& header = packet->popHeader<IcmpHeader>();
+    const auto& header = packet->popAtFront<IcmpHeader>();
     callback.startProtocolDataUnit(&Protocol::icmpv4);
     callback.visitChunk(header, &Protocol::icmpv4);
     switch (header->getType()) {

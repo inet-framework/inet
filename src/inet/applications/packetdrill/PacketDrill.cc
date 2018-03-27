@@ -107,7 +107,7 @@ Packet* PacketDrill::buildUDPPacket(int address_family, enum direction_t directi
     Packet *packet = new Packet("UDPInject");
     if (udpPayloadBytes) {
         auto payload = makeShared<ByteCountChunk>(B(udpPayloadBytes));
-        packet->insertAtBeginning(payload);
+        packet->insertAtFront(payload);
     }
     auto udpHeader = makeShared<UdpHeader>();
     if (direction == DIRECTION_INBOUND) {
@@ -121,10 +121,10 @@ Packet* PacketDrill::buildUDPPacket(int address_family, enum direction_t directi
     } else
         throw cRuntimeError("Unknown direction");
     udpHeader->setTotalLengthField(UDP_HEADER_BYTES + udpPayloadBytes);
-    packet->insertHeader(udpHeader);
+    packet->insertAtFront(udpHeader);
     auto ipHeader = PacketDrill::makeIpv4Header(IP_PROT_UDP, direction, app->getLocalAddress(), app->getRemoteAddress());
     ipHeader->setTotalLengthField(ipHeader->getTotalLengthField() + packet->getByteLength());
-    packet->insertHeader(ipHeader);
+    packet->insertAtFront(ipHeader);
     return packet;
 }
 
@@ -206,7 +206,7 @@ Packet* PacketDrill::buildTCPPacket(int address_family, enum direction_t directi
     PacketDrillApp *app = PacketDrill::pdapp;
     if (tcpPayloadBytes) {
         auto payload = makeShared<ByteCountChunk>(B(tcpPayloadBytes));
-        packet->insertAtBeginning(payload);
+        packet->insertAtFront(payload);
     }
     auto tcpHeader = makeShared<TcpHeader>();
 
@@ -259,12 +259,12 @@ Packet* PacketDrill::buildTCPPacket(int address_family, enum direction_t directi
     } // if options present
     tcpHeader->setHeaderLength(TCP_HEADER_OCTETS + tcpHeader->getHeaderOptionArrayLength());
     tcpHeader->setChunkLength(B(TCP_HEADER_OCTETS + tcpHeader->getHeaderOptionArrayLength()));
-    packet->insertHeader(tcpHeader);
+    packet->insertAtFront(tcpHeader);
 
     auto ipHeader = PacketDrill::makeIpv4Header(IP_PROT_TCP, direction, app->getLocalAddress(),
             app->getRemoteAddress());
     ipHeader->setTotalLengthField(ipHeader->getTotalLengthField() + packet->getByteLength());
-    packet->insertHeader(ipHeader);
+    packet->insertAtFront(ipHeader);
     delete tcpOptions;
     return packet;
 }

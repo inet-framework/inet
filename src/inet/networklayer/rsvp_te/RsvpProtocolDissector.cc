@@ -29,7 +29,7 @@ Register_Protocol_Dissector(&Protocol::rsvp, RsvpProtocolDissector);
 
 void RsvpProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    auto header = packet->popHeader<RsvpMessage>();
+    auto header = packet->popAtFront<RsvpMessage>();
     callback.startProtocolDataUnit(&Protocol::rsvp);
     callback.visitChunk(header, &Protocol::rsvp);
     ASSERT(packet->getDataLength() == B(0));

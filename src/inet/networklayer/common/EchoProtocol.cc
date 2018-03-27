@@ -44,7 +44,7 @@ void EchoProtocol::handleMessage(cMessage *msg)
 
 void EchoProtocol::processPacket(Packet *msg)
 {
-    const auto& echoHdr = msg->peekHeader<EchoPacket>();
+    const auto& echoHdr = msg->peekAtFront<EchoPacket>();
     switch (echoHdr->getType()) {
         case ECHO_PROTOCOL_REQUEST:
             processEchoRequest(msg);
@@ -62,15 +62,15 @@ void EchoProtocol::processPacket(Packet *msg)
 void EchoProtocol::processEchoRequest(Packet *request)
 {
     // turn request into a reply
-    const auto& echoReq = request->popHeader<EchoPacket>();
+    const auto& echoReq = request->popAtFront<EchoPacket>();
     Packet *reply = new Packet((std::string(request->getName()) + "-reply").c_str());
     const auto& echoReply = makeShared<EchoPacket>();
     echoReply->setChunkLength(echoReq->getChunkLength());
     echoReply->setType(ECHO_PROTOCOL_REPLY);
     echoReply->setIdentifier(echoReq->getIdentifier());
     echoReply->setSeqNumber(echoReq->getSeqNumber());
-    reply->insertAtEnd(echoReply);
-    reply->insertAtEnd(request->peekData());
+    reply->insertAtBack(echoReply);
+    reply->insertAtBack(request->peekData());
     auto addressInd = request->getTag<L3AddressInd>();
 
     // swap src and dest

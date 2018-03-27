@@ -105,7 +105,7 @@ void SimpleVoipReceiver::initialize(int stage)
 
 void SimpleVoipReceiver::startTalkspurt(Packet *packet)
 {
-    const auto& voice = packet->peekHeader<SimpleVoipPacket>();
+    const auto& voice = packet->peekAtFront<SimpleVoipPacket>();
     currentTalkspurt.startTalkspurt(voice.get());
     simtime_t endTime = simTime() + playoutDelay + (currentTalkspurt.talkspurtNumPackets - voice->getPacketID()) * currentTalkspurt.voiceDuration + mosSpareTime;
     scheduleAt(endTime, selfTalkspurtFinished);
@@ -126,7 +126,7 @@ void SimpleVoipReceiver::handleMessage(cMessage *msg)
         delete msg;
         return;
     }
-    const auto& voice = packet->peekHeader<SimpleVoipPacket>();
+    const auto& voice = packet->peekAtFront<SimpleVoipPacket>();
 
     if (currentTalkspurt.status == TalkspurtInfo::EMPTY) {
         // first talkspurt

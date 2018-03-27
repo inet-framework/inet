@@ -139,7 +139,7 @@ std::string InetPacketPrinter2::formatPacket(Packet *pk) const
     std::ostringstream out;
     const char *separ = "";
     auto packet = new Packet(pk->getName(), pk->peekData());
-    while (auto chunkref = packet->popHeader(b(-1), Chunk::PF_ALLOW_NULLPTR)) {
+    while (auto chunkref = packet->popAtFront(b(-1), Chunk::PF_ALLOW_NULLPTR)) {
         const auto chunk = chunkref.get();
         std::ostringstream out;
 
@@ -163,9 +163,9 @@ std::string InetPacketPrinter2::formatPacket(Packet *pk) const
 #ifdef WITH_ETHERNET
         else if (const auto eth = dynamic_cast<const EthernetMacHeader *>(chunk)) {
             out << "ETH: " << eth->getSrc() << " > " << eth->getDest();
-            if (const auto tc = packet->peekTrailer(b(-1), Chunk::PF_ALLOW_NULLPTR).get())
+            if (const auto tc = packet->peekAtBack(b(-1), Chunk::PF_ALLOW_NULLPTR).get())
                 if (typeid(*tc) == typeid(EthernetFcs)) {
-                    const auto& fcs = packet->popTrailer<EthernetFcs>();
+                    const auto& fcs = packet->popAtBack<EthernetFcs>();
                     (void)fcs;    //TODO do we show the FCS?
                 }
             //FIXME llc/qtag/snap/...
@@ -471,7 +471,7 @@ std::string InetPacketPrinter2::formatICMPPacket(const IcmpHeader *icmpHeader) c
             os << "ICMP dest unreachable " << srcAddr << " to " << destAddr << " type=" << icmpHeader->getType() << " code=" << icmpHeader->getCode()
                << " origin:" << INFO_SEPAR;
 //FIXME ICMP payload was showed on right side of ICMP header
-//            auto subPk = new Packet("", pk->popHeader(byte(icmpHeader->get)))
+//            auto subPk = new Packet("", pk->popAtFront(byte(icmpHeader->get)))
 //            InetPacketPrinter2().printMessage(os, subPk);
 //            showEncapsulatedPackets = false;    // stop printing
             break;

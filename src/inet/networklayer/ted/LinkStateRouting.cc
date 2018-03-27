@@ -118,7 +118,7 @@ void LinkStateRouting::processLINK_STATE_MESSAGE(Packet *pk, Ipv4Address sender)
 {
     EV_INFO << "received LINK_STATE message from " << sender << endl;
 
-    const auto& msg = pk->peekHeader<LinkStateMsg>();
+    const auto& msg = pk->peekAtFront<LinkStateMsg>();
     TeLinkStateInfoVector forward;
 
     unsigned int n = msg->getLinkInfoArraySize();
@@ -212,7 +212,7 @@ void LinkStateRouting::sendToPeer(Ipv4Address peer, const std::vector<TeLinkStat
     out->setRequest(req);
     int length = out->getLinkInfoArraySize() * 72;
     out->setChunkLength(B(length));
-    pk->insertAtEnd(out);
+    pk->insertAtBack(out);
 
     sendToIP(pk, peer);
 }

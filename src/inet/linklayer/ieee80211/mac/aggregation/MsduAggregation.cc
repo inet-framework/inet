@@ -57,7 +57,7 @@ void MsduAggregation::setSubframeAddress(const Ptr<Ieee80211MsduSubframeHeader>&
 Packet *MsduAggregation::aggregateFrames(std::vector<Packet *> *frames)
 {
     auto firstFrame = frames->at(0);
-    auto firstHeader = firstFrame->peekHeader<Ieee80211DataHeader>();
+    auto firstHeader = firstFrame->peekAtFront<Ieee80211DataHeader>();
     auto tid = firstHeader->getTid();
     auto toDS = firstHeader->getToDS();
     auto fromDS = firstHeader->getFromDS();
@@ -68,17 +68,17 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet *> *frames)
     {
         auto msduSubframeHeader = makeShared<Ieee80211MsduSubframeHeader>();
         auto frame = frames->at(i);
-        const auto& header = frame->popHeader<Ieee80211DataHeader>();
-        frame->popTrailer<Ieee80211MacTrailer>();
+        const auto& header = frame->popAtFront<Ieee80211DataHeader>();
+        frame->popAtBack<Ieee80211MacTrailer>();
         auto msdu = frame->peekData();
         msduSubframeHeader->setLength(B(msdu->getChunkLength()).get());
         setSubframeAddress(msduSubframeHeader, header);
-        aggregatedFrame->insertAtEnd(msduSubframeHeader);
-        aggregatedFrame->insertAtEnd(msdu);
+        aggregatedFrame->insertAtBack(msduSubframeHeader);
+        aggregatedFrame->insertAtBack(msdu);
         int paddingLength = 4 - B(msduSubframeHeader->getChunkLength() + msdu->getChunkLength()).get() % 4;
         if (i != (int)frames->size() - 1 && paddingLength != 4) {
             auto padding = makeShared<ByteCountChunk>(B(paddingLength));
-            aggregatedFrame->insertAtEnd(padding);
+            aggregatedFrame->insertAtBack(padding);
         }
         if (i != 0)
             aggregatedName.append("+");
@@ -97,8 +97,8 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet *> *frames)
     amsduHeader->setTid(tid);
     amsduHeader->setChunkLength(amsduHeader->getChunkLength() + QOSCONTROL_PART_LENGTH);
     // TODO: set addr3 and addr4 according to fromDS and toDS.
-    aggregatedFrame->insertHeader(amsduHeader);
-    aggregatedFrame->insertTrailer(makeShared<Ieee80211MacTrailer>());
+    aggregatedFrame->insertAtFront(amsduHeader);
+    aggregatedFrame->insertAtBack(makeShared<Ieee80211MacTrailer>());
     aggregatedFrame->setName(aggregatedName.c_str());
     return aggregatedFrame;
 }

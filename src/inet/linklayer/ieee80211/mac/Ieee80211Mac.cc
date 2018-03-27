@@ -157,8 +157,8 @@ void Ieee80211Mac::handleMgmtPacket(Packet *packet)
     header->setReceiverAddress(packet->getTag<MacAddressReq>()->getDestAddress());
     if (mib->mode == Ieee80211Mib::INFRASTRUCTURE && mib->bssStationData.stationType == Ieee80211Mib::ACCESS_POINT)
         header->setAddress3(mib->bssData.bssid);
-    packet->insertHeader(header);
-    packet->insertTrailer(makeShared<Ieee80211MacTrailer>());
+    packet->insertAtFront(header);
+    packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
     processUpperFrame(packet, header);
 }
 
@@ -170,7 +170,7 @@ void Ieee80211Mac::handleUpperPacket(Packet *packet)
         return;
     }
     encapsulate(packet);
-    const auto& header = packet->peekHeader<Ieee80211DataOrMgmtHeader>();
+    const auto& header = packet->peekAtFront<Ieee80211DataOrMgmtHeader>();
     if (mib->mode == Ieee80211Mib::INFRASTRUCTURE && mib->bssStationData.stationType == Ieee80211Mib::ACCESS_POINT) {
         auto receiverAddress = header->getReceiverAddress();
         if (!receiverAddress.isMulticast()) {
@@ -188,7 +188,7 @@ void Ieee80211Mac::handleUpperPacket(Packet *packet)
 void Ieee80211Mac::handleLowerPacket(Packet *packet)
 {
     if (rx->lowerFrameReceived(packet)) {
-        auto header = packet->peekHeader<Ieee80211MacHeader>();
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
         processLowerFrame(packet, header);
     }
     else { // corrupted frame received
@@ -263,15 +263,15 @@ void Ieee80211Mac::encapsulate(Packet *packet)
         header->setChunkLength(header->getChunkLength() + QOSCONTROL_PART_LENGTH);
         header->setTid(userPriorityReq->getUserPriority());
     }
-    packet->insertHeader(header);
-    packet->insertTrailer(makeShared<Ieee80211MacTrailer>());
+    packet->insertAtFront(header);
+    packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
     auto packetProtocolTag = packet->addTagIfAbsent<PacketProtocolTag>();
     packetProtocolTag->setProtocol(&Protocol::ieee80211Mac);
 }
 
 void Ieee80211Mac::decapsulate(Packet *packet)
 {
-    const auto& header = packet->popHeader<Ieee80211DataOrMgmtHeader>();
+    const auto& header = packet->popAtFront<Ieee80211DataOrMgmtHeader>();
     auto packetProtocolTag = packet->addTagIfAbsent<PacketProtocolTag>();
     if (dynamicPtrCast<const Ieee80211DataHeader>(header))
         packetProtocolTag->setProtocol(&Protocol::ieee8022);
@@ -303,7 +303,7 @@ void Ieee80211Mac::decapsulate(Packet *packet)
             packet->addTagIfAbsent<UserPriorityInd>()->setUserPriority(tid);
     }
     packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-    packet->popTrailer<Ieee80211MacTrailer>(B(4));
+    packet->popAtBack<Ieee80211MacTrailer>(B(4));
 }
 
 void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
@@ -349,7 +349,7 @@ void Ieee80211Mac::sendUp(cMessage *msg)
 void Ieee80211Mac::sendUpFrame(Packet *frame)
 {
     Enter_Method("sendUpFrame(\"%s\")", frame->getName());
-    const auto& header = frame->peekHeader<Ieee80211DataOrMgmtHeader>();
+    const auto& header = frame->peekAtFront<Ieee80211DataOrMgmtHeader>();
     decapsulate(frame);
     if (!(header->getType() & 0x30))
         send(frame, "mgmtOut");

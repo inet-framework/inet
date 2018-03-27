@@ -243,7 +243,7 @@ void PingApp::handleMessage(cMessage *msg)
         Packet *packet = check_and_cast<Packet *>(msg);
 #ifdef WITH_IPv4
         if (packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv4) {
-            const auto& icmpHeader = packet->popHeader<IcmpHeader>();
+            const auto& icmpHeader = packet->popAtFront<IcmpHeader>();
             if (icmpHeader->getType() == ICMP_ECHO_REPLY) {
                 const auto& echoReply = CHK(dynamicPtrCast<const IcmpEchoReply>(icmpHeader));
                 processPingResponse(echoReply->getIdentifier(), echoReply->getSeqNumber(), packet);
@@ -257,7 +257,7 @@ void PingApp::handleMessage(cMessage *msg)
 #endif
 #ifdef WITH_IPv6
         if (packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv6) {
-            const auto& icmpHeader = packet->popHeader<Icmpv6Header>();
+            const auto& icmpHeader = packet->popAtFront<Icmpv6Header>();
             if (icmpHeader->getType() == ICMPv6_ECHO_REPLY) {
                 const auto& echoReply = CHK(dynamicPtrCast<const Icmpv6EchoReplyMsg>(icmpHeader));
                 processPingResponse(echoReply->getIdentifier(), echoReply->getSeqNumber(), packet);
@@ -271,7 +271,7 @@ void PingApp::handleMessage(cMessage *msg)
 #endif
 #ifdef WITH_GENERIC
         if (packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::echo) {
-            const auto& icmpHeader = packet->popHeader<EchoPacket>();
+            const auto& icmpHeader = packet->popAtFront<EchoPacket>();
             if (icmpHeader->getType() == ECHO_PROTOCOL_REPLY) {
                 processPingResponse(icmpHeader->getIdentifier(), icmpHeader->getSeqNumber(), packet);
             }
@@ -382,9 +382,9 @@ void PingApp::sendPingRequest()
             const auto& request = makeShared<IcmpEchoRequest>();
             request->setIdentifier(pid);
             request->setSeqNumber(sendSeqNo);
-            outPacket->insertAtEnd(payload);
+            outPacket->insertAtBack(payload);
             Icmp::insertCrc(crcMode, request, outPacket);
-            outPacket->insertHeader(request);
+            outPacket->insertAtFront(request);
             outPacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);
             break;
 #else
@@ -396,9 +396,9 @@ void PingApp::sendPingRequest()
             const auto& request = makeShared<Icmpv6EchoRequestMsg>();
             request->setIdentifier(pid);
             request->setSeqNumber(sendSeqNo);
-            outPacket->insertAtEnd(payload);
+            outPacket->insertAtBack(payload);
             Icmpv6::insertCrc(crcMode, request, outPacket);
-            outPacket->insertHeader(request);
+            outPacket->insertAtFront(request);
             outPacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
             break;
 #else
@@ -413,9 +413,9 @@ void PingApp::sendPingRequest()
             request->setType(ECHO_PROTOCOL_REQUEST);
             request->setIdentifier(pid);
             request->setSeqNumber(sendSeqNo);
-            outPacket->insertAtEnd(payload);
+            outPacket->insertAtBack(payload);
             // insertCrc(crcMode, request, outPacket);
-            outPacket->insertHeader(request);
+            outPacket->insertAtFront(request);
             outPacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::echo);
             break;
 #else

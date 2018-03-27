@@ -32,13 +32,13 @@ INetfilter::IHook::Result TcpCrcInsertion::datagramPostRoutingHook(Packet *packe
     auto networkProtocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     const auto& networkHeader = getNetworkProtocolHeader(packet);
     if (networkHeader->getProtocol() == &Protocol::tcp) {
-        packet->removeFromBeginning(networkHeader->getChunkLength());
-        auto tcpHeader = packet->removeHeader<TcpHeader>();
+        packet->eraseAtFront(networkHeader->getChunkLength());
+        auto tcpHeader = packet->removeAtFront<TcpHeader>();
         const L3Address& srcAddress = networkHeader->getSourceAddress();
         const L3Address& destAddress = networkHeader->getDestinationAddress();
         insertCrc(networkProtocol, srcAddress, destAddress, tcpHeader, packet);
-        packet->insertHeader(tcpHeader);
-        packet->insertHeader(networkHeader);
+        packet->insertAtFront(tcpHeader);
+        packet->insertAtFront(networkHeader);
     }
     return ACCEPT;
 }
@@ -63,7 +63,7 @@ void TcpCrcInsertion::insertCrc(const Protocol *networkProtocol, const L3Address
             Chunk::serialize(tcpHeaderStream, tcpHeader);
             auto tcpHeaderBytes = tcpHeaderStream.getData();
             const std::vector<uint8_t> emptyData;
-            auto tcpDataBytes = (packet->getDataLength() > b(0)) ? packet->peekDataBytes()->getBytes() : emptyData;
+            auto tcpDataBytes = (packet->getDataLength() > b(0)) ? packet->peekDataAsBytes()->getBytes() : emptyData;
             auto crc = computeCrc(networkProtocol, srcAddress, destAddress, tcpHeaderBytes, tcpDataBytes);
             tcpHeader->setCrc(crc);
             break;

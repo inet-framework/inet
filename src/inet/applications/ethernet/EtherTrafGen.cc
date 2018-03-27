@@ -183,7 +183,7 @@ void EtherTrafGen::sendBurstPackets()
         Packet *datapacket = new Packet(msgname, IEEE802CTRL_DATA);
         long len = *packetLength;
         const auto& payload = makeShared<ByteCountChunk>(B(len));
-        datapacket->insertAtEnd(payload);
+        datapacket->insertAtBack(payload);
         datapacket->removeTagIfPresent<PacketProtocolTag>();
 //        datapacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(nullptr);
         datapacket->addTagIfAbsent<MacAddressReq>()->setDestAddress(destMACAddress);

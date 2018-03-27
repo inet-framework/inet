@@ -30,20 +30,20 @@ Register_Protocol_Dissector(&Protocol::udp, UdpProtocolDissector);
 
 void UdpProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    auto originalTrailerPopOffset = packet->getTrailerPopOffset();
-    auto udpHeaderOffset = packet->getHeaderPopOffset();
-    auto header = packet->popHeader<UdpHeader>();
+    auto originalTrailerPopOffset = packet->getBackOffset();
+    auto udpHeaderOffset = packet->getFrontOffset();
+    auto header = packet->popAtFront<UdpHeader>();
     callback.startProtocolDataUnit(&Protocol::udp);
     bool isCorrectPacket = Udp::isCorrectPacket(packet, header);
     if (!isCorrectPacket)
         callback.markIncorrect();
     callback.visitChunk(header, &Protocol::udp);
     auto udpPayloadEndOffset = udpHeaderOffset + B(header->getTotalLengthField());
-    packet->setTrailerPopOffset(udpPayloadEndOffset);
+    packet->setBackOffset(udpPayloadEndOffset);
     callback.dissectPacket(packet, nullptr);
     ASSERT(packet->getDataLength() == B(0));
-    packet->setHeaderPopOffset(udpPayloadEndOffset);
-    packet->setTrailerPopOffset(originalTrailerPopOffset);
+    packet->setFrontOffset(udpPayloadEndOffset);
+    packet->setBackOffset(originalTrailerPopOffset);
     callback.endProtocolDataUnit(&Protocol::udp);
 }
 

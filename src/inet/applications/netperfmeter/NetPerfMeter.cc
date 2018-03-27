@@ -896,7 +896,7 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
       const auto& tcpMessage = makeShared<NetPerfMeterDataMessage>();
       tcpMessage->setChunkLength(B(frameSize));
 
-      pk->insertAtEnd(tcpMessage);
+      pk->insertAtBack(tcpMessage);
       pk->setKind(TCP_C_SEND);
 
       if(IncomingSocketTCP) {
@@ -934,7 +934,7 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
             for (int i = 0; i < msgSize; i++)
                 vec[i] = ((i & 1) ? 'D' : 'T');
             dataMessage->setBytes(vec);
-            cmsg->insertAtEnd(dataMessage);
+            cmsg->insertAtBack(dataMessage);
 
           /*  NetPerfMeterDataMessage* dataMessage = new NetPerfMeterDataMessage;
             dataMessage->setCreationTime(simTime());
@@ -985,7 +985,7 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
             const auto& dataMessage = makeShared<NetPerfMeterDataMessage>();
 
             dataMessage->setChunkLength(B(msgSize));
-            packet->insertAtEnd(dataMessage);
+            packet->insertAtBack(dataMessage);
             SocketUDP->send(packet);
            */
             SenderStatistics* senderStatistics = getSenderStatistics(0);

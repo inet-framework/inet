@@ -271,7 +271,7 @@ void Rstp::handleBackup(const Ptr<const Bpdu>& frame, unsigned int arrivalInterf
 
 void Rstp::handleIncomingFrame(Packet *packet)
 {
-    const Ptr<const Bpdu>& frame = packet->peekHeader<Bpdu>();
+    const Ptr<const Bpdu>& frame = packet->peekAtFront<Bpdu>();
     // incoming BPDU handling
     // checking message age
     int arrivalInterfaceId = packet->getTag<InterfaceInd>()->getInterfaceId();
@@ -596,7 +596,7 @@ void Rstp::sendTCNtoRoot()
                 if (frame->getChunkLength() < B(MIN_ETHERNET_FRAME_BYTES))   //FIXME KLUDGE, unnecessary padding
                     frame->setChunkLength(B(MIN_ETHERNET_FRAME_BYTES));
 
-                packet->insertAtEnd(frame);
+                packet->insertAtBack(frame);
 
                 auto macAddressReq = packet->addTagIfAbsent<MacAddressReq>();
                 macAddressReq->setSrcAddress(bridgeAddress);
@@ -662,7 +662,7 @@ void Rstp::sendBPDU(int interfaceId)
         if (frame->getChunkLength() < B(MIN_ETHERNET_FRAME_BYTES))   //FIXME KLUDGE, unnecessary padding
             frame->setChunkLength(B(MIN_ETHERNET_FRAME_BYTES));
 
-        packet->insertAtEnd(frame);
+        packet->insertAtBack(frame);
 
         auto macAddressReq = packet->addTagIfAbsent<MacAddressReq>();
         macAddressReq->setSrcAddress(bridgeAddress);

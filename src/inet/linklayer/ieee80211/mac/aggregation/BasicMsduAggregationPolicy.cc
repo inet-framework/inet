@@ -38,7 +38,7 @@ bool BasicMsduAggregationPolicy::isAggregationPossible(int numOfFramesToAggragat
 
 bool BasicMsduAggregationPolicy::isEligible(const Ptr<const Ieee80211DataHeader>& header, Packet *testPacket, const Ptr<const Ieee80211DataHeader>& testHeader, int aMsduLength)
 {
-    const auto& testTrailer = testPacket->peekTrailer<Ieee80211MacTrailer>();
+    const auto& testTrailer = testPacket->peekAtBack<Ieee80211MacTrailer>();
 //   Only QoS data frames have a TID.
     if (qOsCheck && header->getType() != ST_DATA_WITH_QOS)
         return false;
@@ -77,8 +77,8 @@ std::vector<Packet *> *BasicMsduAggregationPolicy::computeAggregateFrames(cQueue
     for (cQueue::Iterator it(*queue); !it.end(); it++)
     {
         auto dataPacket = check_and_cast<Packet *>(*it);
-        const auto& dataHeader = dataPacket->peekHeader<Ieee80211DataOrMgmtHeader>();
-        const auto& dataTrailer = dataPacket->peekTrailer<Ieee80211MacTrailer>();
+        const auto& dataHeader = dataPacket->peekAtFront<Ieee80211DataOrMgmtHeader>();
+        const auto& dataTrailer = dataPacket->peekAtBack<Ieee80211MacTrailer>();
         if (!dynamicPtrCast<const Ieee80211DataHeader>(dataHeader))
             break;
         if (!firstFrame)

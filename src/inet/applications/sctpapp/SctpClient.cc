@@ -338,7 +338,7 @@ void SctpClient::socketDataArrived(int, void *, Packet *msg, bool)
         auto creationTimeTag = msg->findTag<CreationTimeTag>();
         creationTimeTag->setCreationTime(simTime());
         auto cmsg = new Packet("ApplicationPacket");
-        cmsg->insertAtEnd(smsg);
+        cmsg->insertAtBack(smsg);
         auto cmd = cmsg->addTagIfAbsent<SctpSendReq>();
         cmd->setLast(true);
         cmd->setSocketId(ind->getSocketId());
@@ -393,7 +393,7 @@ void SctpClient::sendRequest(bool last)
     for (int i = 0; i < sendBytes; i++)
         vec[i] = (bytesSent + i) & 0xFF;
     applicationData->setBytes(vec);
-    applicationPacket->insertAtEnd(applicationData);
+    applicationPacket->insertAtBack(applicationData);
     auto sctpSendReq = applicationPacket->addTagIfAbsent<SctpSendReq>();
     sctpSendReq->setLast(last);
     sctpSendReq->setPrMethod(par("prMethod"));

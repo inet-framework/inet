@@ -30,7 +30,7 @@ Register_Class(BasicReassembly);
  */
 Packet *BasicReassembly::addFragment(Packet *packet)
 {
-    const auto& header = packet->peekHeader<Ieee80211DataOrMgmtHeader>();
+    const auto& header = packet->peekAtFront<Ieee80211DataOrMgmtHeader>();
     // Frame is not fragmented
     if (!header->getMoreFragments() && header->getFragmentNumber() == 0)
         return packet;

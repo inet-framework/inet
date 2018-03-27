@@ -39,13 +39,13 @@ void UnitDiskRadio::encapsulate(Packet *packet) const
     auto phyHeader = makeShared<UnitDiskPhyHeader>();
     phyHeader->setChunkLength(idealTransmitter->getHeaderLength());
     phyHeader->setPayloadProtocol(packet->getTag<PacketProtocolTag>()->getProtocol());
-    packet->insertHeader(phyHeader);
+    packet->insertAtFront(phyHeader);
     packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::unitdisk);
 }
 
 void UnitDiskRadio::decapsulate(Packet *packet) const
 {
-    const auto& phyHeader = packet->popHeader<UnitDiskPhyHeader>();
+    const auto& phyHeader = packet->popAtFront<UnitDiskPhyHeader>();
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(phyHeader->getPayloadProtocol());
 }
 

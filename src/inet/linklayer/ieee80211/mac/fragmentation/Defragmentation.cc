@@ -26,11 +26,11 @@ Register_Class(Defragmentation);
 Packet *Defragmentation::defragmentFrames(std::vector<Packet *> *fragmentFrames)
 {
     auto defragmentedFrame = new Packet();
-    const auto& defragmentedHeader = staticPtrCast<Ieee80211DataOrMgmtHeader>(fragmentFrames->at(0)->peekHeader<Ieee80211DataOrMgmtHeader>()->dupShared());
+    const auto& defragmentedHeader = staticPtrCast<Ieee80211DataOrMgmtHeader>(fragmentFrames->at(0)->peekAtFront<Ieee80211DataOrMgmtHeader>()->dupShared());
     for (auto fragmentFrame : *fragmentFrames) {
-        fragmentFrame->popHeader<Ieee80211DataOrMgmtHeader>();
-        fragmentFrame->popTrailer<Ieee80211MacTrailer>();
-        defragmentedFrame->insertAtEnd(fragmentFrame->peekData());
+        fragmentFrame->popAtFront<Ieee80211DataOrMgmtHeader>();
+        fragmentFrame->popAtBack<Ieee80211MacTrailer>();
+        defragmentedFrame->insertAtBack(fragmentFrame->peekData());
         std::string defragmentedName(fragmentFrame->getName());
         auto index = defragmentedName.find("-frag");
         if (index != std::string::npos)
@@ -38,8 +38,8 @@ Packet *Defragmentation::defragmentFrames(std::vector<Packet *> *fragmentFrames)
     }
     defragmentedHeader->setFragmentNumber(0);
     defragmentedHeader->setMoreFragments(false);
-    defragmentedFrame->insertHeader(defragmentedHeader);
-    defragmentedFrame->insertTrailer(makeShared<Ieee80211MacTrailer>());
+    defragmentedFrame->insertAtFront(defragmentedHeader);
+    defragmentedFrame->insertAtBack(makeShared<Ieee80211MacTrailer>());
     return defragmentedFrame;
 }
 

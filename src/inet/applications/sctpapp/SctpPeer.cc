@@ -164,7 +164,7 @@ void SctpPeer::generateAndSend()
     for (int i = 0; i < numBytes; i++)
         vec[i] = (bytesSent + i) & 0xFF;
     applicationData->setBytes(vec);
-    applicationPacket->insertAtEnd(applicationData);
+    applicationPacket->insertAtBack(applicationData);
     auto sctpSendReq = applicationPacket->addTagIfAbsent<SctpSendReq>();
     sctpSendReq->setLast(true);
     sctpSendReq->setPrMethod(par("prMethod"));
@@ -398,7 +398,7 @@ void SctpPeer::handleMessage(cMessage *msg)
                     k->second->collect(simTime() - creationTimeTag->getCreationTime());
                     creationTimeTag->setCreationTime(simTime());
                     auto cmsg = new Packet("ApplicationPacket");
-                    cmsg->insertAtEnd(smsg);
+                    cmsg->insertAtBack(smsg);
                     auto cmd = cmsg->addTagIfAbsent<SctpSendReq>();
                     lastStream = (lastStream + 1) % outboundStreams;
                     cmd->setLast(true);
@@ -580,7 +580,7 @@ void SctpPeer::sendRequest(bool last)
     for (int i = 0; i < numBytes; i++)
         vec[i] = (bytesSent + i) & 0xFF;
     msg->setBytes(vec);
-    cmsg->insertAtEnd(msg);
+    cmsg->insertAtBack(msg);
     auto creationTimeTag = cmsg->addTagIfAbsent<CreationTimeTag>();
     creationTimeTag->setCreationTime(simTime());
     cmsg->setKind(ordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);
@@ -690,7 +690,7 @@ void SctpPeer::socketDataArrived(int, void *, Packet *msg, bool)
         auto creationTimeTag = msg->findTag<CreationTimeTag>();
         creationTimeTag->setCreationTime(simTime());
         auto cmsg = new Packet("ApplicationPacket");
-        cmsg->insertAtEnd(smsg);
+        cmsg->insertAtBack(smsg);
         auto cmd = cmsg->addTagIfAbsent<SctpSendReq>();
         cmd->setLast(true);
         cmd->setSocketId(ind->getSocketId());

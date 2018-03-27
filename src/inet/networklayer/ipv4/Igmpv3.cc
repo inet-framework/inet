@@ -548,7 +548,7 @@ void Igmpv3::handleMessage(cMessage *msg)
 
 void Igmpv3::processIgmpMessage(Packet *packet)
 {
-    const auto& msg = packet->peekHeader<IgmpMessage>();
+    const auto& msg = packet->peekAtFront<IgmpMessage>();
     switch (msg->getType()) {
         case IGMP_MEMBERSHIP_QUERY:
             processQuery(packet);
@@ -579,7 +579,7 @@ void Igmpv3::sendGeneralQuery(RouterInterfaceData *interfaceData, double maxResp
         msg->setType(IGMP_MEMBERSHIP_QUERY);
         msg->setMaxRespTime(maxRespTime);
         msg->setChunkLength(B(12));
-        packet->insertAtBeginning(msg);
+        packet->insertAtFront(msg);
         sendQueryToIP(packet, interfaceData->ie, Ipv4Address::ALL_HOSTS_MCAST);
 
         numQueriesSent++;
@@ -608,7 +608,7 @@ void Igmpv3::sendGroupSpecificQuery(RouterGroupData *groupData)
         msg->setMaxRespTime(lastMemberQueryInterval);
         msg->setSuppressRouterProc(suppressFlag);
         msg->setChunkLength(B(12));
-        packet->insertAtBeginning(msg);
+        packet->insertAtFront(msg);
         sendQueryToIP(packet, interfaceData->ie, groupData->groupAddr);
 
         numQueriesSent++;
@@ -633,7 +633,7 @@ void Igmpv3::sendGroupAndSourceSpecificQuery(RouterGroupData *groupData, const I
         msg->setMaxRespTime(lastMemberQueryInterval);
         msg->setSourceList(sources);
         msg->setChunkLength(B(12 + (4 * sources.size())));
-        packet->insertAtBeginning(msg);
+        packet->insertAtFront(msg);
         sendQueryToIP(packet, interfaceData->ie, groupData->groupAddr);
 
         numQueriesSent++;
@@ -725,7 +725,7 @@ void Igmpv3::processHostGeneralQueryTimer(cMessage *msg)
 
     if (counter != 0) {    //if no record created, dont need to send report
         EV_INFO << "Sending response to a General Query on interface '" << ie->getInterfaceName() << "'.\n";
-        outPacket->insertAtBeginning(report);
+        outPacket->insertAtFront(report);
         sendReportToIP(outPacket, ie, Ipv4Address::ALL_IGMPV3_ROUTERS_MCAST);
         numReportsSent++;
     }
@@ -859,7 +859,7 @@ void Igmpv3::multicastSourceListChanged(InterfaceEntry *ie, Ipv4Address group, c
 void Igmpv3::processQuery(Packet *packet)
 {
     InterfaceEntry *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
-    const auto& msg = packet->peekHeader<Igmpv3Query>();        //TODO should processing Igmpv1Query and Igmpv2Query, too
+    const auto& msg = packet->peekAtFront<Igmpv3Query>();        //TODO should processing Igmpv1Query and Igmpv2Query, too
     assert(msg != nullptr);
 
     Ipv4Address groupAddr = msg->getGroupAddress();
@@ -994,14 +994,14 @@ void Igmpv3::sendGroupReport(InterfaceEntry *ie, const vector<GroupRecord>& reco
         byteLength += 8 + records[i].sourceList.size() * 4;    // 8 byte header + n * 4 byte (Ipv4Address)
     }
     msg->setChunkLength(B(byteLength));
-    packet->insertAtBeginning(msg);
+    packet->insertAtFront(msg);
     sendReportToIP(packet, ie, Ipv4Address::ALL_IGMPV3_ROUTERS_MCAST);
     numReportsSent++;
 }
 
 void Igmpv3::processReport(Packet *packet)
 {
-    const auto& msg = packet->peekHeader<Igmpv3Report>();       //FIXME also accept Igmpv1Report and Igmpv2Report
+    const auto& msg = packet->peekAtFront<Igmpv3Report>();       //FIXME also accept Igmpv1Report and Igmpv2Report
     assert(msg != nullptr);
     InterfaceEntry *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
 

@@ -27,9 +27,9 @@ Register_Protocol_Dissector(&Protocol::ipv4, Ipv4ProtocolDissector);
 
 void Ipv4ProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    auto trailerPopOffset = packet->getTrailerPopOffset();
-    auto ipv4EndOffset = packet->getHeaderPopOffset();
-    const auto& header = packet->popHeader<Ipv4Header>();
+    auto trailerPopOffset = packet->getBackOffset();
+    auto ipv4EndOffset = packet->getFrontOffset();
+    const auto& header = packet->popAtFront<Ipv4Header>();
     ipv4EndOffset += B(header->getTotalLengthField());
     callback.startProtocolDataUnit(&Protocol::ipv4);
     bool incorrect = (ipv4EndOffset > trailerPopOffset);
@@ -38,7 +38,7 @@ void Ipv4ProtocolDissector::dissect(Packet *packet, ICallback& callback) const
         ipv4EndOffset = trailerPopOffset;
     }
     callback.visitChunk(header, &Protocol::ipv4);
-    packet->setTrailerPopOffset(ipv4EndOffset);
+    packet->setBackOffset(ipv4EndOffset);
     if (header->getFragmentOffset() == 0 && !header->getMoreFragments()) {
         callback.dissectPacket(packet, header->getProtocol());
     }
@@ -49,8 +49,8 @@ void Ipv4ProtocolDissector::dissect(Packet *packet, ICallback& callback) const
     if (incorrect && packet->getDataLength() > b(0))
         callback.dissectPacket(packet, nullptr);
     ASSERT(incorrect || packet->getDataLength() == b(0));
-    packet->setHeaderPopOffset(ipv4EndOffset);
-    packet->setTrailerPopOffset(trailerPopOffset);
+    packet->setFrontOffset(ipv4EndOffset);
+    packet->setBackOffset(trailerPopOffset);
     callback.endProtocolDataUnit(&Protocol::ipv4);
 }
 

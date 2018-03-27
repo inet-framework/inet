@@ -72,11 +72,11 @@ const Ptr<const TransportHeaderBase> peekTransportProtocolHeader(Packet *packet,
 {
 #ifdef WITH_TCP_COMMON
     if (protocol == Protocol::tcp)
-        return packet->peekHeader<tcp::TcpHeader>(b(-1), flags);
+        return packet->peekAtFront<tcp::TcpHeader>(b(-1), flags);
 #endif
 #ifdef WITH_UDP
     if (protocol == Protocol::udp)
-        return packet->peekHeader<UdpHeader>(b(-1), flags);
+        return packet->peekAtFront<UdpHeader>(b(-1), flags);
 #endif
     // TODO: add other L4 protocols
     if (flags & Chunk::PF_ALLOW_NULLPTR)

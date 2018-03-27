@@ -141,7 +141,7 @@ void SctpServer::generateAndSend()
     for (int i = 0; i < numBytes; i++)
         vec[i] = (bytesSent + i) & 0xFF;
     applicationData->setBytes(vec);
-    applicationPacket->insertAtEnd(applicationData);
+    applicationPacket->insertAtBack(applicationData);
     auto sctpSendReq = applicationPacket->addTagIfAbsent<SctpSendReq>();
     if (queueSize > 0 && numRequestsToSend > 0 && count < queueSize * 2)
         sctpSendReq->setLast(false);
@@ -421,7 +421,7 @@ void SctpServer::handleMessage(cMessage *msg)
                     m->second->record(simTime() - creationTimeTag->getCreationTime());
                     creationTimeTag->setCreationTime(simTime());
                     auto cmsg = new Packet("ApplicationPacket");
-                    cmsg->insertAtEnd(smsg);
+                    cmsg->insertAtBack(smsg);
                     auto cmd = cmsg->addTagIfAbsent<SctpSendReq>();
                     lastStream = (lastStream + 1) % outboundStreams;
                     cmd->setLast(true);

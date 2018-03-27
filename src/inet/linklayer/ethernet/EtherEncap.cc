@@ -127,7 +127,7 @@ void EtherEncap::processPacketFromHigherLayer(Packet *packet)
     ethHeader->setSrc(macAddressReq->getSrcAddress());    // if blank, will be filled in by MAC
     ethHeader->setDest(macAddressReq->getDestAddress());
     ethHeader->setTypeOrLength(typeOrLength);
-    packet->insertHeader(ethHeader);
+    packet->insertAtFront(ethHeader);
 
     EtherEncap::addPaddingAndFcs(packet, fcsMode);
 
@@ -142,7 +142,7 @@ void EtherEncap::addPaddingAndFcs(Packet *packet, EthernetFcsMode fcsMode, int64
     if (paddingLength > 0) {
         const auto& ethPadding = makeShared<EthernetPadding>();
         ethPadding->setChunkLength(B(paddingLength));
-        packet->insertTrailer(ethPadding);
+        packet->insertAtBack(ethPadding);
     }
     addFcs(packet, fcsMode);
 }
@@ -154,7 +154,7 @@ void EtherEncap::addFcs(Packet *packet, EthernetFcsMode fcsMode)
 
     // calculate Fcs if needed
     if (fcsMode == FCS_COMPUTED) {
-        auto ethBytes = packet->peekDataBytes();
+        auto ethBytes = packet->peekDataAsBytes();
         auto bufferLength = B(ethBytes->getChunkLength()).get();
         auto buffer = new uint8_t[bufferLength];
         // 1. fill in the data
@@ -165,13 +165,13 @@ void EtherEncap::addFcs(Packet *packet, EthernetFcsMode fcsMode)
         ethFcs->setFcs(computedFcs);
     }
 
-    packet->insertTrailer(ethFcs);
+    packet->insertAtBack(ethFcs);
 }
 
 const Ptr<const EthernetMacHeader> EtherEncap::decapsulateMacHeader(Packet *packet)
 {
-    auto ethHeader = packet->popHeader<EthernetMacHeader>();
-    packet->popTrailer<EthernetFcs>(B(ETHER_FCS_BYTES));
+    auto ethHeader = packet->popAtFront<EthernetMacHeader>();
+    packet->popAtBack<EthernetFcs>(B(ETHER_FCS_BYTES));
 
     // add Ieee802Ctrl to packet
     auto macAddressInd = packet->addTagIfAbsent<MacAddressInd>();
@@ -183,7 +183,7 @@ const Ptr<const EthernetMacHeader> EtherEncap::decapsulateMacHeader(Packet *pack
         b payloadLength = B(ethHeader->getTypeOrLength());
         if (packet->getDataLength() < payloadLength)
             throw cRuntimeError("incorrect payload length in ethernet frame");
-        packet->setTrailerPopOffset(packet->getHeaderPopOffset() + payloadLength);
+        packet->setBackOffset(packet->getFrontOffset() + payloadLength);
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee8022);
     }
     else if (isEth2Header(*ethHeader)) {
@@ -250,9 +250,9 @@ void EtherEncap::handleSendPause(cMessage *msg)
     if (dest.isUnspecified())
         dest = MacAddress::MULTICAST_PAUSE_ADDRESS;
     hdr->setDest(dest);
-    packet->insertHeader(frame);
+    packet->insertAtFront(frame);
     hdr->setTypeOrLength(ETHERTYPE_FLOW_CONTROL);
-    packet->insertHeader(hdr);
+    packet->insertAtFront(hdr);
     EtherEncap::addPaddingAndFcs(packet, fcsMode);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
 

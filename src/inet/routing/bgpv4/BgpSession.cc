@@ -124,7 +124,7 @@ void BgpSession::sendOpenMessage()
     openMsg->setMyAS(_info.ASValue);
     openMsg->setHoldTime(_holdTime);
     openMsg->setBGPIdentifier(_info.socket->getLocalAddress().toIpv4());
-    pk->insertHeader(openMsg);
+    pk->insertAtFront(openMsg);
     _info.socket->send(pk);
     _openMsgSent++;
 }
@@ -133,7 +133,7 @@ void BgpSession::sendKeepAliveMessage()
 {
     Packet *pk = new Packet("BgpKeepAlive");
     const auto &keepAliveMsg = makeShared<BgpKeepAliveMessage>();
-    pk->insertHeader(keepAliveMsg);
+    pk->insertAtFront(keepAliveMsg);
     _info.socket->send(pk);
     _keepAliveMsgSent++;
 }

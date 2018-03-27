@@ -35,7 +35,7 @@ void DatabaseDescriptionHandler::processPacket(Packet *packet, Interface *intf, 
 {
     router->getMessageHandler()->printEvent("Database Description packet received", intf, neighbor);
 
-    const auto& ddPacket = packet->peekHeader<OspfDatabaseDescriptionPacket>();
+    const auto& ddPacket = packet->peekAtFront<OspfDatabaseDescriptionPacket>();
 
     Neighbor::NeighborStateType neighborState = neighbor->getState();
 

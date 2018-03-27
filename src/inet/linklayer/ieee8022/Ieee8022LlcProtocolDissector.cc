@@ -31,7 +31,7 @@ Register_Protocol_Dissector(&Protocol::ieee8022, Ieee802LlcDissector);
 
 void Ieee802LlcDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    const auto& header = packet->popHeader<inet::Ieee8022LlcHeader>();
+    const auto& header = packet->popAtFront<inet::Ieee8022LlcHeader>();
     callback.startProtocolDataUnit(&Protocol::ieee8022);
     callback.visitChunk(header, &Protocol::ieee8022);
     auto protocol = Ieee8022Llc::getProtocol(header);

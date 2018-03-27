@@ -100,7 +100,7 @@ void ShortcutRadio::sendToPeer(Packet *packet, ShortcutRadio *peer)
             auto header = makeShared<ShortcutPhyHeader>();
             header->setChunkLength(length);
             header->setPayloadProtocol(protocolTag->getProtocol());
-            packet->insertHeader(header);
+            packet->insertAtFront(header);
             protocolTag->setProtocol(&Protocol::shortcutPhy);
         }
         simtime_t transmissionDuration = packet->getBitLength() / bitrate + durationOverhead->doubleValue();
@@ -113,7 +113,7 @@ void ShortcutRadio::receiveFromPeer(Packet *packet)
 {
     auto packetProtocolTag = packet->getTag<PacketProtocolTag>();
     if (packetProtocolTag->getProtocol() == &Protocol::shortcutPhy) {
-        const auto& header = packet->popHeader<ShortcutPhyHeader>();
+        const auto& header = packet->popAtFront<ShortcutPhyHeader>();
         packetProtocolTag->setProtocol(header->getPayloadProtocol());
     }
     emit(packetSentToUpperSignal, packet);

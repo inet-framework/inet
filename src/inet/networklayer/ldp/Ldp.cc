@@ -241,7 +241,7 @@ void Ldp::sendMappingRequest(Ipv4Address dest, Ipv4Address addr, int length)
 
     requestMsg->setReceiverAddress(dest);
     requestMsg->setSenderAddress(rt->getRouterId());
-    pk->insertAtEnd(requestMsg);
+    pk->insertAtBack(requestMsg);
 
     sendToPeer(dest, pk);
 }
@@ -432,7 +432,7 @@ void Ldp::sendHelloTo(Ipv4Address dest)
     hello->setHoldTime(SIMTIME_DBL(holdTime));
     //hello->setRbit(...);
     //hello->setTbit(...);
-    pk->insertAtEnd(hello);
+    pk->insertAtBack(hello);
     pk->addPar("color") = LDP_HELLO_TRAFFIC;
 
     if (dest.isMulticast()) {
@@ -515,7 +515,7 @@ void Ldp::processHelloTimeout(cMessage *msg)
 
 void Ldp::processLDPHello(Packet *msg)
 {
-    const auto& ldpHello = msg->peekHeader<LdpHello>();
+    const auto& ldpHello = msg->peekAtFront<LdpHello>();
     //Ipv4Address peerAddr = controlInfo->getSrcAddr().toIPv4();
     Ipv4Address peerAddr = ldpHello->getSenderAddress();
     int interfaceId = msg->getTag<InterfaceInd>()->getInterfaceId();
@@ -672,7 +672,7 @@ void Ldp::socketFailure(int, void *yourPtr, int code)
 
 void Ldp::processLDPPacketFromTCP(Packet *packet)
 {
-    const auto& ldpPacket = packet->peekHeader<LdpPacket>();
+    const auto& ldpPacket = packet->peekAtFront<LdpPacket>();
     switch (ldpPacket->getType()) {
         case HELLO:
             throw cRuntimeError("Received LDP HELLO over TCP (should arrive over UDP)");
@@ -846,7 +846,7 @@ void Ldp::sendNotify(int status, Ipv4Address dest, Ipv4Address addr, int length)
     fec.length = length;
 
     lnMessage->setFec(fec);
-    packet->insertAtEnd(lnMessage);
+    packet->insertAtBack(lnMessage);
 
     sendToPeer(dest, packet);
 }
@@ -867,14 +867,14 @@ void Ldp::sendMapping(int type, Ipv4Address dest, int label, Ipv4Address addr, i
     fec.length = length;
 
     lmMessage->setFec(fec);
-    packet->insertAtEnd(lmMessage);
+    packet->insertAtBack(lmMessage);
 
     sendToPeer(dest, packet);
 }
 
 void Ldp::processNOTIFICATION(Packet *pk)
 {
-    const auto& packet = pk->peekHeader<LdpNotify>();
+    const auto& packet = pk->peekAtFront<LdpNotify>();
     FecTlv fec = packet->getFec();
     Ipv4Address srcAddr = packet->getSenderAddress();
     int status = packet->getStatus();
@@ -929,7 +929,7 @@ void Ldp::processNOTIFICATION(Packet *pk)
 
 void Ldp::processLABEL_REQUEST(Packet *pk)
 {
-    const auto& packet = pk->peekHeader<LdpLabelRequest>();
+    const auto& packet = pk->peekAtFront<LdpLabelRequest>();
     FecTlv fec = packet->getFec();
     Ipv4Address srcAddr = packet->getSenderAddress();
 
@@ -1020,7 +1020,7 @@ void Ldp::processLABEL_REQUEST(Packet *pk)
 
 void Ldp::processLABEL_RELEASE(Packet *pk)
 {
-    const auto& packet = pk->peekHeader<LdpLabelMapping>();
+    const auto& packet = pk->peekAtFront<LdpLabelMapping>();
     FecTlv fec = packet->getFec();
     int label = packet->getLabel();
     Ipv4Address fromIP = packet->getSenderAddress();
@@ -1059,7 +1059,7 @@ void Ldp::processLABEL_RELEASE(Packet *pk)
 
 void Ldp::processLABEL_WITHDRAW(Packet *pk)
 {
-    const auto& ldpLabelMapping = pk->peekHeader<LdpLabelMapping>();
+    const auto& ldpLabelMapping = pk->peekAtFront<LdpLabelMapping>();
     FecTlv fec = ldpLabelMapping->getFec();
     int label = ldpLabelMapping->getLabel();
     Ipv4Address fromIP = ldpLabelMapping->getSenderAddress();
@@ -1092,12 +1092,12 @@ void Ldp::processLABEL_WITHDRAW(Packet *pk)
     fecDown.erase(dit);
 
     EV_INFO << "sending back relase message" << endl;
-    pk->removePoppedHeaders();
-    auto reply = pk->removeHeader<LdpLabelMapping>();
+    pk->trimFront();
+    auto reply = pk->removeAtFront<LdpLabelMapping>();
     pk->removeAll();
     pk->clearTags();
     reply->setType(LABEL_RELEASE);
-    pk->insertHeader(reply);
+    pk->insertAtFront(reply);
     // pk->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ldp) //FIXME
 
     // send msg to peer over TCP
@@ -1108,7 +1108,7 @@ void Ldp::processLABEL_WITHDRAW(Packet *pk)
 
 void Ldp::processLABEL_MAPPING(Packet *pk)
 {
-    const auto& packet = pk->peekHeader<LdpLabelMapping>();
+    const auto& packet = pk->peekAtFront<LdpLabelMapping>();
     FecTlv fec = packet->getFec();
     int label = packet->getLabel();
     Ipv4Address fromIP = packet->getSenderAddress();
@@ -1194,7 +1194,7 @@ TcpSocket *Ldp::getPeerSocket(Ipv4Address peerAddr)
 
 bool Ldp::lookupLabel(Packet *packet, LabelOpVector& outLabel, std::string& outInterface, int& color)
 {
-    const auto& ipv4Header = packet->peekHeader<Ipv4Header>();
+    const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
     Ipv4Address destAddr = ipv4Header->getDestAddress();
     int protocol = ipv4Header->getProtocolId();
 

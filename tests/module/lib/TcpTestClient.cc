@@ -193,7 +193,7 @@ void TcpTestClient::scheduleNextSend()
     commands.pop_front();
     Packet *msg = new Packet(makeMsgName().c_str(), TEST_SEND);
     const auto& bytes = makeShared<ByteCountChunk>(B(cmd.numBytes));
-    msg->insertAtEnd(bytes);
+    msg->insertAtBack(bytes);
     scheduleAt(cmd.tSend, msg);
 }
 

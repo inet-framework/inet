@@ -28,16 +28,16 @@ Register_Protocol_Dissector(&Protocol::wiseroute, WiseRouteProtocolDissector);
 
 void WiseRouteProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    auto header = packet->popHeader<WiseRouteHeader>();
-    auto trailerPopOffset = packet->getTrailerPopOffset();
-    auto payloadEndOffset = packet->getHeaderPopOffset() + header->getPayloadLengthField();
+    auto header = packet->popAtFront<WiseRouteHeader>();
+    auto trailerPopOffset = packet->getBackOffset();
+    auto payloadEndOffset = packet->getFrontOffset() + header->getPayloadLengthField();
     callback.startProtocolDataUnit(&Protocol::wiseroute);
     callback.visitChunk(header, &Protocol::wiseroute);
-    packet->setTrailerPopOffset(payloadEndOffset);
+    packet->setBackOffset(payloadEndOffset);
     callback.dissectPacket(packet, header->getProtocol());
     ASSERT(packet->getDataLength() == B(0));
-    packet->setHeaderPopOffset(payloadEndOffset);
-    packet->setTrailerPopOffset(trailerPopOffset);
+    packet->setFrontOffset(payloadEndOffset);
+    packet->setBackOffset(trailerPopOffset);
     callback.endProtocolDataUnit(&Protocol::wiseroute);
 }
 

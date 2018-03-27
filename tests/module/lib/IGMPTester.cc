@@ -141,7 +141,7 @@ void IGMPTester::initialize(int stage)
 void IGMPTester::handleMessage(cMessage *msg)
 {
     Packet *pk = check_and_cast<Packet*>(msg);
-    const auto& igmpMsg = pk->peekHeader<IgmpMessage>();
+    const auto& igmpMsg = pk->peekAtFront<IgmpMessage>();
     EV << "IGMPTester: Received: " << igmpMsg.get() << ".\n";
     delete msg;
 }
@@ -236,7 +236,7 @@ void IGMPTester::processSendCommand(const cXMLElement &node)
         msg->setMaxRespTime(0.1 * maxRespCode);
         msg->setSourceList(sources);
         msg->setChunkLength(B(12 + (4 * sources.size())));
-        packet->insertHeader(msg);
+        packet->insertAtFront(msg);
         sendIGMP(packet, ie, group.isUnspecified() ? Ipv4Address::ALL_HOSTS_MCAST : group);
     }
     else if (type == "Igmpv2Report")
@@ -277,7 +277,7 @@ void IGMPTester::processSendCommand(const cXMLElement &node)
             byteLength += 8 + record.sourceList.size() * 4;    // 8 byte header + n * 4 byte (Ipv4Address)
         }
         msg->setChunkLength(B(byteLength));
-        packet->insertHeader(msg);
+        packet->insertAtFront(msg);
 
         sendIGMP(packet, ie, Ipv4Address::ALL_IGMPV3_ROUTERS_MCAST);
     }

@@ -30,8 +30,8 @@ Register_Protocol_Dissector(&Protocol::ieee80211Mac, Ieee80211MacProtocolDissect
 
 void Ieee80211MacProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    const auto& header = packet->popHeader<inet::ieee80211::Ieee80211MacHeader>();
-    const auto& trailer = packet->popTrailer<inet::ieee80211::Ieee80211MacTrailer>(B(4));
+    const auto& header = packet->popAtFront<inet::ieee80211::Ieee80211MacHeader>();
+    const auto& trailer = packet->popAtBack<inet::ieee80211::Ieee80211MacTrailer>(B(4));
     callback.startProtocolDataUnit(&Protocol::ieee80211Mac);
     callback.visitChunk(header, &Protocol::ieee80211Mac);
     // TODO: fragmentation & aggregation
@@ -39,17 +39,17 @@ void Ieee80211MacProtocolDissector::dissect(Packet *packet, ICallback& callback)
         if (dataHeader->getMoreFragments() || dataHeader->getFragmentNumber() != 0)
             callback.dissectPacket(packet, nullptr);
         else if (dataHeader->getAMsduPresent()) {
-            auto originalTrailerPopOffset = packet->getTrailerPopOffset();
+            auto originalTrailerPopOffset = packet->getBackOffset();
             int paddingLength = 0;
             while (packet->getDataLength() > B(0)) {
-                packet->setHeaderPopOffset(packet->getHeaderPopOffset() + B(paddingLength == 4 ? 0 : paddingLength));
-                const auto& msduSubframeHeader = packet->popHeader<ieee80211::Ieee80211MsduSubframeHeader>();
-                auto msduEndOffset = packet->getHeaderPopOffset() + B(msduSubframeHeader->getLength());
-                packet->setTrailerPopOffset(msduEndOffset);
+                packet->setFrontOffset(packet->getFrontOffset() + B(paddingLength == 4 ? 0 : paddingLength));
+                const auto& msduSubframeHeader = packet->popAtFront<ieee80211::Ieee80211MsduSubframeHeader>();
+                auto msduEndOffset = packet->getFrontOffset() + B(msduSubframeHeader->getLength());
+                packet->setBackOffset(msduEndOffset);
                 callback.dissectPacket(packet, &Protocol::ieee8022);
                 paddingLength = 4 - B(msduSubframeHeader->getChunkLength() + B(msduSubframeHeader->getLength())).get() % 4;
-                packet->setTrailerPopOffset(originalTrailerPopOffset);
-                packet->setHeaderPopOffset(msduEndOffset);
+                packet->setBackOffset(originalTrailerPopOffset);
+                packet->setFrontOffset(msduEndOffset);
             }
         }
         else

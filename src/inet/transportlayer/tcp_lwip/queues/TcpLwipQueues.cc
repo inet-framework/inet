@@ -83,9 +83,9 @@ Packet *TcpLwipSendQueue::createSegmentWithBytes(const void *tcpDataP, unsigned 
 
     const auto& bytes = makeShared<BytesChunk>((const uint8_t*)tcpDataP, tcpLengthP);
     auto packet = new Packet(nullptr, bytes);
-    auto tcpHdr = packet->removeHeader<TcpHeader>();
+    auto tcpHdr = packet->removeAtFront<TcpHeader>();
     int64_t numBytes = packet->getByteLength();
-    packet->insertHeader(tcpHdr);
+    packet->insertAtFront(tcpHdr);
 
 //    auto payload = makeShared<BytesChunk>((const uint8_t*)tcpDataP, tcpLengthP);
 //    const auto& tcpHdr = payload->Chunk::peek<TcpHeader>(byte(0));
@@ -152,7 +152,7 @@ Packet *TcpLwipReceiveQueue::extractBytesUpTo()
         dataMsg = new Packet("DATA");
         dataMsg->setKind(TCP_I_DATA);
         const auto& data = dataBuffer.pop<Chunk>(queueLength);
-        dataMsg->insertAtEnd(data);
+        dataMsg->insertAtBack(data);
     }
 
     return dataMsg;

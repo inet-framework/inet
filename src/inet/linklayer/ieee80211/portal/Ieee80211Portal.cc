@@ -66,18 +66,18 @@ void Ieee80211Portal::handleMessage(cMessage *message)
 void Ieee80211Portal::encapsulate(Packet *packet)
 {
 #ifdef WITH_ETHERNET
-    auto ethernetHeader = EtherEncap::decapsulateMacHeader(packet);       // do not use const auto& : removePoppedChunks() delete it from packet
-    packet->removePoppedChunks();
+    auto ethernetHeader = EtherEncap::decapsulateMacHeader(packet);       // do not use const auto& : trimChunks() delete it from packet
+    packet->trim();
     packet->addTagIfAbsent<MacAddressReq>()->setDestAddress(ethernetHeader->getDest());
     packet->addTagIfAbsent<MacAddressReq>()->setSrcAddress(ethernetHeader->getSrc());
     if (isIeee8023Header(*ethernetHeader))
         // check that the packet already has an LLC header
-        packet->peekHeader<Ieee8022LlcHeader>();
+        packet->peekAtFront<Ieee8022LlcHeader>();
     else if (isEth2Header(*ethernetHeader)){
         const auto& ieee8022SnapHeader = makeShared<Ieee8022LlcSnapHeader>();
         ieee8022SnapHeader->setOui(0);
         ieee8022SnapHeader->setProtocolId(ethernetHeader->getTypeOrLength());
-        packet->insertHeader(ieee8022SnapHeader);
+        packet->insertAtFront(ieee8022SnapHeader);
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee8022);
     }
     else
@@ -90,9 +90,9 @@ void Ieee80211Portal::encapsulate(Packet *packet)
 void Ieee80211Portal::decapsulate(Packet *packet)
 {
 #ifdef WITH_ETHERNET
-    packet->removePoppedChunks();
+    packet->trim();
     int typeOrLength = packet->getByteLength();
-    const auto& llcHeader = packet->peekHeader<Ieee8022LlcHeader>();
+    const auto& llcHeader = packet->peekAtFront<Ieee8022LlcHeader>();
     if (llcHeader->getSsap() == 0xAA && llcHeader->getDsap() == 0xAA && llcHeader->getControl() == 0x03) {
         const auto& snapHeader = dynamicPtrCast<const Ieee8022LlcSnapHeader>(llcHeader);
         if (snapHeader == nullptr)
@@ -100,14 +100,14 @@ void Ieee80211Portal::decapsulate(Packet *packet)
         if (snapHeader->getOui() == 0) {
             // snap header with ethertype
             typeOrLength = snapHeader->getProtocolId();
-            packet->removeFromBeginning(snapHeader->getChunkLength());
+            packet->eraseAtFront(snapHeader->getChunkLength());
         }
     }
     const auto& ethernetHeader = makeShared<EthernetMacHeader>();
     ethernetHeader->setSrc(packet->getTag<MacAddressInd>()->getSrcAddress());
     ethernetHeader->setDest(packet->getTag<MacAddressInd>()->getDestAddress());
     ethernetHeader->setTypeOrLength(typeOrLength);
-    packet->insertHeader(ethernetHeader);
+    packet->insertAtFront(ethernetHeader);
     EtherEncap::addPaddingAndFcs(packet, fcsMode);
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);

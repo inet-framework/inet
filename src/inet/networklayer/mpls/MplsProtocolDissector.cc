@@ -29,7 +29,7 @@ Register_Protocol_Dissector(&Protocol::mpls, MplsProtocolDissector);
 
 void MplsProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    auto header = packet->popHeader<MplsHeader>();
+    auto header = packet->popAtFront<MplsHeader>();
     callback.startProtocolDataUnit(&Protocol::mpls);
     callback.visitChunk(header, &Protocol::mpls);
     callback.dissectPacket(packet, &Protocol::ipv4);

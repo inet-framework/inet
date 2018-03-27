@@ -55,21 +55,21 @@ void MsduDeaggregation::setExplodedFrameAddress(const Ptr<Ieee80211DataHeader>& 
 std::vector<Packet *> *MsduDeaggregation::deaggregateFrame(Packet *aggregatedFrame)
 {
     std::vector<Packet *> *frames = new std::vector<Packet *>();
-    const auto& amsduHeader = aggregatedFrame->popHeader<Ieee80211DataHeader>();
-    aggregatedFrame->popTrailer<Ieee80211MacTrailer>();
+    const auto& amsduHeader = aggregatedFrame->popAtFront<Ieee80211DataHeader>();
+    aggregatedFrame->popAtBack<Ieee80211MacTrailer>();
     int tid = amsduHeader->getTid();
     int paddingLength = 0;
     cStringTokenizer tokenizer(aggregatedFrame->getName(), "+");
     while (aggregatedFrame->getDataLength() > b(0))
     {
-        aggregatedFrame->setHeaderPopOffset(aggregatedFrame->getHeaderPopOffset() + B(paddingLength == 4 ? 0 : paddingLength));
-        const auto& msduSubframeHeader = aggregatedFrame->popHeader<Ieee80211MsduSubframeHeader>();
+        aggregatedFrame->setFrontOffset(aggregatedFrame->getFrontOffset() + B(paddingLength == 4 ? 0 : paddingLength));
+        const auto& msduSubframeHeader = aggregatedFrame->popAtFront<Ieee80211MsduSubframeHeader>();
         const auto& msdu = aggregatedFrame->peekDataAt(b(0), B(msduSubframeHeader->getLength()));
         paddingLength = 4 - B(msduSubframeHeader->getChunkLength() + msdu->getChunkLength()).get() % 4;
-        aggregatedFrame->setHeaderPopOffset(aggregatedFrame->getHeaderPopOffset() + msdu->getChunkLength());
+        aggregatedFrame->setFrontOffset(aggregatedFrame->getFrontOffset() + msdu->getChunkLength());
         auto frame = new Packet();
         frame->setName(tokenizer.nextToken());
-        frame->insertAtEnd(msdu);
+        frame->insertAtBack(msdu);
         auto header = makeShared<Ieee80211DataHeader>();
         header->setType(ST_DATA_WITH_QOS);
         header->setChunkLength(header->getChunkLength() + QOSCONTROL_PART_LENGTH);
@@ -77,8 +77,8 @@ std::vector<Packet *> *MsduDeaggregation::deaggregateFrame(Packet *aggregatedFra
         header->setFromDS(amsduHeader->getFromDS());
         header->setTid(tid);
         setExplodedFrameAddress(header, msduSubframeHeader, amsduHeader);
-        frame->insertHeader(header);
-        frame->insertTrailer(makeShared<Ieee80211MacTrailer>());
+        frame->insertAtFront(header);
+        frame->insertAtBack(makeShared<Ieee80211MacTrailer>());
         frames->push_back(frame);
     }
     delete aggregatedFrame;

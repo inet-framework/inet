@@ -405,8 +405,8 @@ void Udp::processUDPPacket(Packet *udpPacket)
     emit(packetReceivedSignal, udpPacket);
 
     delete udpPacket->removeTagIfPresent<PacketProtocolTag>();
-    b udpHeaderPopPosition = udpPacket->getHeaderPopOffset();
-    auto udpHeader = udpPacket->popHeader<UdpHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT);
+    b udpHeaderPopPosition = udpPacket->getFrontOffset();
+    auto udpHeader = udpPacket->popAtFront<UdpHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT);
 
     // simulate checksum: discard packet if it has bit error
     EV_INFO << "Packet " << udpPacket->getName() << " received from network, dest port " << udpHeader->getDestinationPort() << "\n";
@@ -437,7 +437,7 @@ void Udp::processUDPPacket(Packet *udpPacket)
         SockDesc *sd = findSocketForUnicastPacket(destAddr, destPort, srcAddr, srcPort);
         if (!sd) {
             EV_WARN << "No socket registered on port " << destPort << "\n";
-            udpPacket->setHeaderPopOffset(udpHeaderPopPosition);
+            udpPacket->setFrontOffset(udpHeaderPopPosition);
             processUndeliverablePacket(udpPacket);
             return;
         }
@@ -450,7 +450,7 @@ void Udp::processUDPPacket(Packet *udpPacket)
         std::vector<SockDesc *> sds = findSocketsForMcastBcastPacket(destAddr, destPort, srcAddr, srcPort, isMulticast, isBroadcast);
         if (sds.empty()) {
             EV_WARN << "No socket registered on port " << destPort << "\n";
-            udpPacket->setHeaderPopOffset(udpHeaderPopPosition);
+            udpPacket->setFrontOffset(udpHeaderPopPosition);
             processUndeliverablePacket(udpPacket);
             return;
         }
@@ -480,13 +480,13 @@ void Udp::processICMPv4Error(Packet *packet)
     int localPort = -1, remotePort = -1;
     bool udpHeaderAvailable = false;
 
-    const auto& icmpHeader = packet->popHeader<IcmpHeader>();
+    const auto& icmpHeader = packet->popAtFront<IcmpHeader>();
     ASSERT(icmpHeader);
     type = icmpHeader->getType();
     code = icmpHeader->getCode();
-    const auto& ipv4Header = packet->popHeader<Ipv4Header>();
+    const auto& ipv4Header = packet->popAtFront<Ipv4Header>();
     if (ipv4Header->getDontFragment() || ipv4Header->getFragmentOffset() == 0) {
-        const auto& udpHeader = packet->peekHeader<UdpHeader>(B(8), Chunk::PF_ALLOW_INCOMPLETE);
+        const auto& udpHeader = packet->peekAtFront<UdpHeader>(B(8), Chunk::PF_ALLOW_INCOMPLETE);
         localAddr = ipv4Header->getSrcAddress();
         remoteAddr = ipv4Header->getDestAddress();
         localPort = udpHeader->getSourcePort();
@@ -533,16 +533,16 @@ void Udp::processICMPv6Error(Packet *packet)
     ushort localPort, remotePort;
     bool udpHeaderAvailable = false;
 
-    const auto& icmpHeader = packet->popHeader<Icmpv6Header>();
+    const auto& icmpHeader = packet->popAtFront<Icmpv6Header>();
     ASSERT(icmpHeader);
 
     type = icmpHeader->getType();
     code = -1;    // FIXME this is dependent on getType()...
     // Note: we must NOT use decapsulate() because payload in ICMP is conceptually truncated
-    const auto& ipv6Header = packet->popHeader<Ipv6Header>();
+    const auto& ipv6Header = packet->popAtFront<Ipv6Header>();
     const Ipv6FragmentHeader *fh = dynamic_cast<const Ipv6FragmentHeader *>(ipv6Header->findExtensionHeaderByType(IP_PROT_IPv6EXT_FRAGMENT));
     if (!fh || fh->getFragmentOffset() == 0) {
-        const auto& udpHeader = packet->peekHeader<UdpHeader>(B(8), Chunk::PF_ALLOW_INCOMPLETE);
+        const auto& udpHeader = packet->peekAtFront<UdpHeader>(B(8), Chunk::PF_ALLOW_INCOMPLETE);
         localAddr = ipv6Header->getSrcAddress();
         remoteAddr = ipv6Header->getDestAddress();
         localPort = udpHeader->getSourcePort();
@@ -576,7 +576,7 @@ void Udp::processICMPv6Error(Packet *packet)
 
 void Udp::processUndeliverablePacket(Packet *udpPacket)
 {
-    const auto& udpHeader = udpPacket->peekHeader<UdpHeader>();
+    const auto& udpHeader = udpPacket->peekAtFront<UdpHeader>();
     PacketDropDetails details;
     details.setReason(NO_PORT_FOUND);
     emit(packetDroppedSignal, udpPacket, &details);
@@ -594,8 +594,8 @@ void Udp::processUndeliverablePacket(Packet *udpPacket)
     }
 
     //push back network protocol header
-    udpPacket->removePoppedChunks();
-    udpPacket->insertHeader(udpPacket->getTag<NetworkProtocolInd>()->getNetworkProtocolHeader());
+    udpPacket->trim();
+    udpPacket->insertAtFront(udpPacket->getTag<NetworkProtocolInd>()->getNetworkProtocolHeader());
     auto inIe = udpPacket->getTag<InterfaceInd>()->getInterfaceId();
 
     if (protocol->getId() == Protocol::ipv4.getId()) {
@@ -1254,13 +1254,13 @@ INetfilter::IHook::Result Udp::CrcInsertion::datagramPostRoutingHook(Packet *pac
     auto networkProtocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     const auto& networkHeader = getNetworkProtocolHeader(packet);
     if (networkHeader->getProtocol() == &Protocol::udp) {
-        packet->removeFromBeginning(networkHeader->getChunkLength());
-        auto udpHeader = packet->removeHeader<UdpHeader>();
+        packet->eraseAtFront(networkHeader->getChunkLength());
+        auto udpHeader = packet->removeAtFront<UdpHeader>();
         const L3Address& srcAddress = networkHeader->getSourceAddress();
         const L3Address& destAddress = networkHeader->getDestinationAddress();
         udp->insertCrc(networkProtocol, srcAddress, destAddress, udpHeader, packet);
-        packet->insertHeader(udpHeader);
-        packet->insertHeader(networkHeader);
+        packet->insertAtFront(udpHeader);
+        packet->insertAtFront(networkHeader);
     }
     return ACCEPT;
 }
@@ -1288,7 +1288,7 @@ void Udp::insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress
             MemoryOutputStream udpHeaderStream;
             Chunk::serialize(udpHeaderStream, udpHeader);
             auto udpHeaderBytes = udpHeaderStream.getData();
-            auto udpDataBytes = packet->peekDataBytes()->getBytes();
+            auto udpDataBytes = packet->peekDataAsBytes()->getBytes();
             auto crc = computeCrc(networkProtocol, srcAddress, destAddress, udpHeaderBytes, udpDataBytes);
             udpHeader->setCrc(crc);
             break;
@@ -1379,8 +1379,8 @@ uint16_t Udp::computeCrc(const Protocol *networkProtocol, const L3Address& srcAd
 
 bool Udp::isCorrectPacket(Packet *packet, const Ptr<const UdpHeader>& udpHeader)
 {
-    auto trailerPopOffset = packet->getTrailerPopOffset();
-    auto udpHeaderOffset = packet->getHeaderPopOffset() - udpHeader->getChunkLength();
+    auto trailerPopOffset = packet->getBackOffset();
+    auto udpHeaderOffset = packet->getFrontOffset() - udpHeader->getChunkLength();
     if (B(udpHeader->getTotalLengthField()) > trailerPopOffset - udpHeaderOffset)
         return false;
     else {

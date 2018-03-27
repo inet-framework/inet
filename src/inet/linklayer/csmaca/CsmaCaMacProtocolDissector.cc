@@ -30,8 +30,8 @@ Register_Protocol_Dissector(&Protocol::csmacamac, CsmaCaMacProtocolDissector);
 
 void CsmaCaMacProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    auto header = packet->popHeader<CsmaCaMacHeader>();
-    auto trailer = packet->popTrailer<CsmaCaMacTrailer>(B(4));
+    auto header = packet->popAtFront<CsmaCaMacHeader>();
+    auto trailer = packet->popAtBack<CsmaCaMacTrailer>(B(4));
     callback.startProtocolDataUnit(&Protocol::csmacamac);
     callback.visitChunk(header, &Protocol::csmacamac);
     if (auto dataHeader = dynamicPtrCast<const CsmaCaMacDataHeader>(header)) {

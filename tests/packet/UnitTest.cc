@@ -206,7 +206,7 @@ const Ptr<Chunk> CompoundHeaderSerializer::deserialize(MemoryInputStream& stream
     auto compoundHeader = makeShared<CompoundHeader>();
     IpHeaderSerializer ipHeaderSerializer;
     auto ipHeader = ipHeaderSerializer.deserialize(stream);
-    compoundHeader->insertAtEnd(ipHeader);
+    compoundHeader->insertAtBack(ipHeader);
     return compoundHeader;
 }
 
@@ -299,11 +299,11 @@ static void testIncomplete()
 {
     // 1. packet doesn't provide incomplete header if complete is requested but there's not enough data
     Packet packet1;
-    packet1.insertAtEnd(makeImmutableApplicationHeader(42));
+    packet1.insertAtBack(makeImmutableApplicationHeader(42));
     Packet fragment1;
-    fragment1.insertAtEnd(packet1.peekAt(B(0), B(5)));
-    ASSERT(!fragment1.hasHeader<ApplicationHeader>());
-    ASSERT_ERROR(fragment1.peekHeader<ApplicationHeader>(), "incomplete chunk is not allowed");
+    fragment1.insertAtBack(packet1.peekAt(B(0), B(5)));
+    ASSERT(!fragment1.hasAtFront<ApplicationHeader>());
+    ASSERT_ERROR(fragment1.peekAtFront<ApplicationHeader>(), "incomplete chunk is not allowed");
 
     // 2. packet provides incomplete variable length header if requested
     Packet packet2;
@@ -314,8 +314,8 @@ static void testIncomplete()
     tcpHeader1->setSrcPort(1000);
     tcpHeader1->setDestPort(1000);
     tcpHeader1->markImmutable();
-    packet2.insertAtEnd(tcpHeader1);
-    const auto& tcpHeader2 = packet2.popHeader<TcpHeader>(B(4), Chunk::PF_ALLOW_INCOMPLETE);
+    packet2.insertAtBack(tcpHeader1);
+    const auto& tcpHeader2 = packet2.popAtFront<TcpHeader>(B(4), Chunk::PF_ALLOW_INCOMPLETE);
     ASSERT(tcpHeader2->isIncomplete());
     ASSERT(tcpHeader2->getChunkLength() == B(4));
     ASSERT(tcpHeader2->getCrcMode() == CRC_COMPUTED);
@@ -328,14 +328,14 @@ static void testIncomplete()
     tcpHeader3->setLengthField(16);
     tcpHeader3->setCrcMode(CRC_COMPUTED);
     tcpHeader3->markImmutable();
-    packet3.insertAtEnd(tcpHeader3);
-    const auto& bytesChunk1 = packet3.peekAllBytes();
+    packet3.insertAtBack(tcpHeader3);
+    const auto& bytesChunk1 = packet3.peekAllAsBytes();
     ASSERT(bytesChunk1->getChunkLength() == B(8));
 
     // 4. packet provides incomplete variable length deserialized header
     Packet packet4;
-    packet4.insertAtEnd(bytesChunk1);
-    const auto& tcpHeader4 = packet4.peekHeader<TcpHeader>(b(-1), Chunk::PF_ALLOW_INCOMPLETE);
+    packet4.insertAtBack(bytesChunk1);
+    const auto& tcpHeader4 = packet4.peekAtFront<TcpHeader>(b(-1), Chunk::PF_ALLOW_INCOMPLETE);
     ASSERT(tcpHeader4->isIncomplete());
     ASSERT(tcpHeader4->getChunkLength() == B(8));
     ASSERT(tcpHeader4->getLengthField() == 16);
@@ -369,13 +369,13 @@ static void testImproperlyRepresented()
     Packet packet1;
     auto ipHeader1 = makeShared<IpHeader>();
     ipHeader1->markImmutable();
-    packet1.insertAtEnd(ipHeader1);
+    packet1.insertAtBack(ipHeader1);
     ASSERT(ipHeader1->isProperlyRepresented());
-    auto bytesChunk1 = staticPtrCast<BytesChunk>(packet1.peekAllBytes()->dupShared());
+    auto bytesChunk1 = staticPtrCast<BytesChunk>(packet1.peekAllAsBytes()->dupShared());
     bytesChunk1->setByte(0, 42);
     bytesChunk1->markImmutable();
     Packet packet2(nullptr, bytesChunk1);
-    const auto& ipHeader2 = packet2.peekHeader<IpHeader>(b(-1), Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
+    const auto& ipHeader2 = packet2.peekAtFront<IpHeader>(b(-1), Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
     ASSERT(ipHeader2->isImproperlyRepresented());
 }
 
@@ -383,47 +383,45 @@ static void testEmpty()
 {
     // 1. peeking an empty packet is an error
     Packet packet1;
-    ASSERT_ERROR(packet1.peekHeader<IpHeader>(), "empty chunk is not allowed");
-    ASSERT_ERROR(packet1.peekTrailer<IpHeader>(), "empty chunk is not allowed");
+    ASSERT_ERROR(packet1.peekAtFront<IpHeader>(), "empty chunk is not allowed");
+    ASSERT_ERROR(packet1.peekAtBack<IpHeader>(), "empty chunk is not allowed");
 
     // 2. inserting an empty chunk is an error
     Packet packet2;
-    ASSERT_ERROR(packet2.insertHeader(makeShared<ByteCountChunk>(B(0))), "chunk is empty");
-    ASSERT_ERROR(packet2.insertAtBeginning(makeShared<ByteCountChunk>(B(0))), "chunk is empty");
-    ASSERT_ERROR(packet2.insertTrailer(makeShared<ByteCountChunk>(B(0))), "chunk is empty");
-    ASSERT_ERROR(packet2.insertAtEnd(makeShared<ByteCountChunk>(B(0))), "chunk is empty");
+    ASSERT_ERROR(packet2.insertAtFront(makeShared<ByteCountChunk>(B(0))), "chunk is empty");
+    ASSERT_ERROR(packet2.insertAtBack(makeShared<ByteCountChunk>(B(0))), "chunk is empty");
 }
 
 static void testHeader()
 {
     // 1. packet contains header after chunk is inserted
     Packet packet1;
-    packet1.insertHeader(makeImmutableByteCountChunk(B(10)));
-    const auto& chunk1 = packet1.peekHeader();
+    packet1.insertAtFront(makeImmutableByteCountChunk(B(10)));
+    const auto& chunk1 = packet1.peekAtFront();
     ASSERT(chunk1 != nullptr);
     ASSERT(chunk1->getChunkLength() == B(10));
     ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk1) != nullptr);
-    const auto& chunk2 = packet1.peekHeader<ByteCountChunk>();
+    const auto& chunk2 = packet1.peekAtFront<ByteCountChunk>();
     ASSERT(chunk2 != nullptr);
     ASSERT(chunk2->getChunkLength() == B(10));
     ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk2) != nullptr);
 
     // 2. packet moves header pointer after pop
-    const auto& chunk3 = packet1.popHeader<ByteCountChunk>();
+    const auto& chunk3 = packet1.popAtFront<ByteCountChunk>();
     ASSERT(chunk3 != nullptr);
     ASSERT(chunk3->getChunkLength() == B(10));
     ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk3) != nullptr);
-    ASSERT(packet1.getHeaderPopOffset() == B(10));
-    packet1.setHeaderPopOffset(B(0));
-    packet1.popHeader(B(10));
-    ASSERT(packet1.getHeaderPopOffset() == packet1.getTotalLength());
+    ASSERT(packet1.getFrontOffset() == B(10));
+    packet1.setFrontOffset(B(0));
+    packet1.popAtFront(B(10));
+    ASSERT(packet1.getFrontOffset() == packet1.getTotalLength());
 
     // 3. packet provides headers in reverse insertion order
     Packet packet2;
-    packet2.insertHeader(makeImmutableBytesChunk(makeVector(10)));
-    packet2.insertHeader(makeImmutableByteCountChunk(B(10)));
-    const auto& chunk4 = packet2.popHeader<ByteCountChunk>();
-    const auto& chunk5 = packet2.popHeader<BytesChunk>();
+    packet2.insertAtFront(makeImmutableBytesChunk(makeVector(10)));
+    packet2.insertAtFront(makeImmutableByteCountChunk(B(10)));
+    const auto& chunk4 = packet2.popAtFront<ByteCountChunk>();
+    const auto& chunk5 = packet2.popAtFront<BytesChunk>();
     ASSERT(chunk4 != nullptr);
     ASSERT(chunk4->getChunkLength() == B(10));
     ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk4) != nullptr);
@@ -438,15 +436,15 @@ static void testHeader()
     auto bytesChunk2 = makeShared<BytesChunk>();
     bytesChunk2->setBytes({2, 4, 0, 42});
     bytesChunk2->markImmutable();
-    packet3.insertHeader(bytesChunk2);
-    auto tlvHeader1 = packet3.peekHeader<TlvHeaderInt>();
+    packet3.insertAtFront(bytesChunk2);
+    auto tlvHeader1 = packet3.peekAtFront<TlvHeaderInt>();
     ASSERT(tlvHeader1->getInt16Value() == 42);
 
     // 5. packet provides mutable headers without duplication if possible
     Packet packet4;
-    packet4.insertHeader(makeImmutableBytesChunk(makeVector(10)));
-    const auto& chunk6 = packet4.peekHeader<BytesChunk>().get();
-    const auto& chunk7 = packet4.removeHeader<BytesChunk>(B(10));
+    packet4.insertAtFront(makeImmutableBytesChunk(makeVector(10)));
+    const auto& chunk6 = packet4.peekAtFront<BytesChunk>().get();
+    const auto& chunk7 = packet4.removeAtFront<BytesChunk>(B(10));
     ASSERT(chunk7.get() == chunk6);
     ASSERT(chunk7->isMutable());
     ASSERT(chunk7->getChunkLength() == B(10));
@@ -459,32 +457,32 @@ static void testTrailer()
 {
     // 1. packet contains trailer after chunk is inserted
     Packet packet1;
-    packet1.insertTrailer(makeImmutableByteCountChunk(B(10)));
-    const auto& chunk1 = packet1.peekTrailer();
+    packet1.insertAtBack(makeImmutableByteCountChunk(B(10)));
+    const auto& chunk1 = packet1.peekAtBack();
     ASSERT(chunk1 != nullptr);
     ASSERT(chunk1->getChunkLength() == B(10));
     ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk1) != nullptr);
-    const auto& chunk2 = packet1.peekTrailer<ByteCountChunk>();
+    const auto& chunk2 = packet1.peekAtBack<ByteCountChunk>();
     ASSERT(chunk2 != nullptr);
     ASSERT(chunk2->getChunkLength() == B(10));
     ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk2) != nullptr);
 
     // 2. packet moves trailer pointer after pop
-    const auto& chunk3 = packet1.popTrailer<ByteCountChunk>();
+    const auto& chunk3 = packet1.popAtBack<ByteCountChunk>();
     ASSERT(chunk3 != nullptr);
     ASSERT(chunk3->getChunkLength() == B(10));
     ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk3) != nullptr);
-    ASSERT(packet1.getTrailerPopOffset() == b(0));
-    packet1.setTrailerPopOffset(packet1.getTotalLength());
-    packet1.popTrailer(B(10));
-    ASSERT(packet1.getTrailerPopOffset() == b(0));
+    ASSERT(packet1.getBackOffset() == b(0));
+    packet1.setBackOffset(packet1.getTotalLength());
+    packet1.popAtBack(B(10));
+    ASSERT(packet1.getBackOffset() == b(0));
 
     // 3. packet provides trailers in reverse order
     Packet packet2;
-    packet2.insertTrailer(makeImmutableBytesChunk(makeVector(10)));
-    packet2.insertTrailer(makeImmutableByteCountChunk(B(10)));
-    const auto& chunk4 = packet2.popTrailer<ByteCountChunk>();
-    const auto& chunk5 = packet2.popTrailer<BytesChunk>();
+    packet2.insertAtBack(makeImmutableBytesChunk(makeVector(10)));
+    packet2.insertAtBack(makeImmutableByteCountChunk(B(10)));
+    const auto& chunk4 = packet2.popAtBack<ByteCountChunk>();
+    const auto& chunk5 = packet2.popAtBack<BytesChunk>();
     ASSERT(chunk4 != nullptr);
     ASSERT(chunk4->getChunkLength() == B(10));
     ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk4) != nullptr);
@@ -499,16 +497,16 @@ static void testTrailer()
     auto bytesChunk2 = makeShared<BytesChunk>();
     bytesChunk2->setBytes({2, 4, 0, 42});
     bytesChunk2->markImmutable();
-    packet3.insertTrailer(bytesChunk2);
-    // TODO: ASSERT_ERROR(packet3.peekTrailer<TlvHeaderInt>(), "isForward()");
-    auto tlvTrailer1 = packet3.peekTrailer<TlvHeaderInt>(B(4));
+    packet3.insertAtBack(bytesChunk2);
+    // TODO: ASSERT_ERROR(packet3.peekAtBack<TlvHeaderInt>(), "isForward()");
+    auto tlvTrailer1 = packet3.peekAtBack<TlvHeaderInt>(B(4));
     ASSERT(tlvTrailer1->getInt16Value() == 42);
 
     // 5. packet provides mutable trailers without duplication if possible
     Packet packet4;
-    packet4.insertTrailer(makeImmutableBytesChunk(makeVector(10)));
-    const auto& chunk6 = packet4.peekTrailer<BytesChunk>().get();
-    const auto& chunk7 = packet4.removeTrailer<BytesChunk>(B(10));
+    packet4.insertAtBack(makeImmutableBytesChunk(makeVector(10)));
+    const auto& chunk6 = packet4.peekAtBack<BytesChunk>().get();
+    const auto& chunk7 = packet4.removeAtBack<BytesChunk>(B(10));
     ASSERT(chunk7.get() == chunk6);
     ASSERT(chunk7->isMutable());
     ASSERT(chunk7->getChunkLength() == B(10));
@@ -517,69 +515,69 @@ static void testTrailer()
     ASSERT(std::equal(bytesChunk3->getBytes().begin(), bytesChunk3->getBytes().end(), makeVector(10).begin()));
 }
 
-static void testHeaderPopOffset()
+static void testFrontPopOffset()
 {
     // 1. TODO
     Packet packet1;
-    packet1.insertAtEnd(makeImmutableByteCountChunk(B(10)));
-    packet1.insertAtEnd(makeImmutableBytesChunk(makeVector(10)));
-    packet1.insertAtEnd(makeImmutableApplicationHeader(42));
-    packet1.insertAtEnd(makeImmutableIpHeader());
-    packet1.setHeaderPopOffset(B(0));
-    const auto& chunk1 = packet1.peekHeader();
+    packet1.insertAtBack(makeImmutableByteCountChunk(B(10)));
+    packet1.insertAtBack(makeImmutableBytesChunk(makeVector(10)));
+    packet1.insertAtBack(makeImmutableApplicationHeader(42));
+    packet1.insertAtBack(makeImmutableIpHeader());
+    packet1.setFrontOffset(B(0));
+    const auto& chunk1 = packet1.peekAtFront();
     ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk1));
-    packet1.setHeaderPopOffset(B(10));
-    const auto& chunk2 = packet1.peekHeader();
+    packet1.setFrontOffset(B(10));
+    const auto& chunk2 = packet1.peekAtFront();
     ASSERT(dynamicPtrCast<const BytesChunk>(chunk2));
-    packet1.setHeaderPopOffset(B(20));
-    const auto& chunk3 = packet1.peekHeader();
+    packet1.setFrontOffset(B(20));
+    const auto& chunk3 = packet1.peekAtFront();
     ASSERT(dynamicPtrCast<const ApplicationHeader>(chunk3));
-    packet1.setHeaderPopOffset(B(30));
-    const auto& chunk4 = packet1.peekHeader();
+    packet1.setFrontOffset(B(30));
+    const auto& chunk4 = packet1.peekAtFront();
     ASSERT(dynamicPtrCast<const IpHeader>(chunk4));
-    packet1.setHeaderPopOffset(B(50));
-    ASSERT_ERROR(packet1.peekHeader(), "empty chunk is not allowed");
+    packet1.setFrontOffset(B(50));
+    ASSERT_ERROR(packet1.peekAtFront(), "empty chunk is not allowed");
 }
 
-static void testTrailerPopOffset()
+static void testBackPopOffset()
 {
     // 1. TODO
     Packet packet1;
-    packet1.insertAtEnd(makeImmutableByteCountChunk(B(10)));
-    packet1.insertAtEnd(makeImmutableBytesChunk(makeVector(10)));
-    packet1.insertAtEnd(makeImmutableApplicationHeader(42));
-    packet1.insertAtEnd(makeImmutableIpHeader());
-    packet1.setTrailerPopOffset(B(50));
-    const auto& chunk1 = packet1.peekTrailer();
+    packet1.insertAtBack(makeImmutableByteCountChunk(B(10)));
+    packet1.insertAtBack(makeImmutableBytesChunk(makeVector(10)));
+    packet1.insertAtBack(makeImmutableApplicationHeader(42));
+    packet1.insertAtBack(makeImmutableIpHeader());
+    packet1.setBackOffset(B(50));
+    const auto& chunk1 = packet1.peekAtBack();
     ASSERT(dynamicPtrCast<const IpHeader>(chunk1));
-    packet1.setTrailerPopOffset(B(30));
-    const auto& chunk2 = packet1.peekTrailer();
+    packet1.setBackOffset(B(30));
+    const auto& chunk2 = packet1.peekAtBack();
     ASSERT(dynamicPtrCast<const ApplicationHeader>(chunk2));
-    packet1.setTrailerPopOffset(B(20));
-    const auto& chunk3 = packet1.peekTrailer();
+    packet1.setBackOffset(B(20));
+    const auto& chunk3 = packet1.peekAtBack();
     ASSERT(dynamicPtrCast<const BytesChunk>(chunk3));
-    packet1.setTrailerPopOffset(B(10));
-    const auto& chunk4 = packet1.peekTrailer();
+    packet1.setBackOffset(B(10));
+    const auto& chunk4 = packet1.peekAtBack();
     ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk4));
-    packet1.setTrailerPopOffset(B(0));
-    ASSERT_ERROR(packet1.peekTrailer(), "empty chunk is not allowed");
+    packet1.setBackOffset(B(0));
+    ASSERT_ERROR(packet1.peekAtBack(), "empty chunk is not allowed");
 }
 
 static void testEncapsulation()
 {
     // 1. packet contains all chunks of encapsulated packet as is
     Packet packet1;
-    packet1.insertAtEnd(makeImmutableByteCountChunk(B(10)));
-    packet1.insertAtEnd(makeImmutableBytesChunk(makeVector(10)));
+    packet1.insertAtBack(makeImmutableByteCountChunk(B(10)));
+    packet1.insertAtBack(makeImmutableBytesChunk(makeVector(10)));
     // encapsulation packet with header and trailer
     auto& packet2 = packet1;
-    packet2.insertHeader(makeImmutableEthernetHeader());
-    packet2.insertTrailer(makeImmutableEthernetTrailer());
-    const auto& ethernetHeader1 = packet2.popHeader<EthernetHeader>();
-    const auto& ethernetTrailer1 = packet2.popTrailer<EthernetTrailer>();
+    packet2.insertAtFront(makeImmutableEthernetHeader());
+    packet2.insertAtBack(makeImmutableEthernetTrailer());
+    const auto& ethernetHeader1 = packet2.popAtFront<EthernetHeader>();
+    const auto& ethernetTrailer1 = packet2.popAtBack<EthernetTrailer>();
     const auto& byteCountChunk1 = packet2.peekDataAt(B(0), B(10));
     const auto& bytesChunk1 = packet2.peekDataAt(B(10), B(10));
-    const auto& dataChunk1 = packet2.peekDataBytes();
+    const auto& dataChunk1 = packet2.peekDataAsBytes();
     ASSERT(ethernetHeader1 != nullptr);
     ASSERT(ethernetTrailer1 != nullptr);
     ASSERT(byteCountChunk1 != nullptr);
@@ -595,15 +593,15 @@ static void testAggregation()
 {
     // 1. packet contains all chunks of aggregated packets as is
     Packet packet1;
-    packet1.insertAtEnd(makeImmutableByteCountChunk(B(10)));
+    packet1.insertAtBack(makeImmutableByteCountChunk(B(10)));
     Packet packet2;
-    packet2.insertAtEnd(makeImmutableBytesChunk(makeVector(10)));
+    packet2.insertAtBack(makeImmutableBytesChunk(makeVector(10)));
     Packet packet3;
-    packet3.insertAtEnd(makeImmutableIpHeader());
+    packet3.insertAtBack(makeImmutableIpHeader());
     // aggregate other packets
-    packet3.insertAtEnd(packet1.peekAt(b(0), packet2.getTotalLength()));
-    packet3.insertAtEnd(packet2.peekAt(b(0), packet2.getTotalLength()));
-    const auto& ipHeader1 = packet3.popHeader<IpHeader>();
+    packet3.insertAtBack(packet1.peekAt(b(0), packet2.getTotalLength()));
+    packet3.insertAtBack(packet2.peekAt(b(0), packet2.getTotalLength()));
+    const auto& ipHeader1 = packet3.popAtFront<IpHeader>();
     const auto& chunk1 = packet3.peekDataAt(B(0), B(10));
     const auto& chunk2 = packet3.peekDataAt(B(10), B(10));
     ASSERT(ipHeader1 != nullptr);
@@ -621,13 +619,13 @@ static void testFragmentation()
 {
     // 1. packet contains fragment of another packet
     Packet packet1;
-    packet1.insertAtEnd(makeImmutableByteCountChunk(B(10)));
-    packet1.insertAtEnd(makeImmutableBytesChunk(makeVector(10)));
+    packet1.insertAtBack(makeImmutableByteCountChunk(B(10)));
+    packet1.insertAtBack(makeImmutableBytesChunk(makeVector(10)));
     Packet packet2;
-    packet2.insertAtEnd(makeImmutableIpHeader());
+    packet2.insertAtBack(makeImmutableIpHeader());
     // insert fragment of another packet
-    packet2.insertAtEnd(packet1.peekAt(B(7), B(10)));
-    const auto& ipHeader1 = packet2.popHeader<IpHeader>();
+    packet2.insertAtBack(packet1.peekAt(B(7), B(10)));
+    const auto& ipHeader1 = packet2.popAtFront<IpHeader>();
     const auto& fragment1 = packet2.peekDataAt(b(0), packet2.getDataLength());
     const auto& chunk1 = fragment1->peek(B(0), B(3));
     const auto& chunk2 = fragment1->peek(B(3), B(7));
@@ -653,18 +651,18 @@ static void testPolymorphism()
     auto tlvHeader1 = makeShared<TlvHeaderBool>();
     tlvHeader1->setBoolValue(true);
     tlvHeader1->markImmutable();
-    packet1.insertAtEnd(tlvHeader1);
+    packet1.insertAtBack(tlvHeader1);
     auto tlvHeader2 = makeShared<TlvHeaderInt>();
     tlvHeader2->setInt16Value(42);
     tlvHeader2->markImmutable();
-    packet1.insertAtEnd(tlvHeader2);
-    const auto& tlvHeader3 = packet1.popHeader<TlvHeader>();
+    packet1.insertAtBack(tlvHeader2);
+    const auto& tlvHeader3 = packet1.popAtFront<TlvHeader>();
     ASSERT(tlvHeader3 != nullptr);
     ASSERT(tlvHeader3->getChunkLength() == B(3));
     ASSERT(dynamicPtrCast<const TlvHeaderBool>(tlvHeader3) != nullptr);
     const auto & tlvHeaderBool1 = staticPtrCast<const TlvHeaderBool>(tlvHeader3);
     ASSERT(tlvHeaderBool1->getBoolValue());
-    const auto& tlvHeader4 = packet1.popHeader<TlvHeader>();
+    const auto& tlvHeader4 = packet1.popAtFront<TlvHeader>();
     ASSERT(tlvHeader4 != nullptr);
     ASSERT(tlvHeader4->getChunkLength() == B(4));
     ASSERT(dynamicPtrCast<const TlvHeaderInt>(tlvHeader4) != nullptr);
@@ -672,14 +670,14 @@ static void testPolymorphism()
     ASSERT(tlvHeaderInt1->getInt16Value() == 42);
 
     // 2. packet provides deserialized headers in a polymorphic way after serialization
-    Packet packet2(nullptr, packet1.peekAllBytes());
-    const auto& tlvHeader5 = packet2.popHeader<TlvHeader>();
+    Packet packet2(nullptr, packet1.peekAllAsBytes());
+    const auto& tlvHeader5 = packet2.popAtFront<TlvHeader>();
     ASSERT(tlvHeader5 != nullptr);
     ASSERT(tlvHeader5->getChunkLength() == B(3));
     ASSERT(dynamicPtrCast<const TlvHeaderBool>(tlvHeader5) != nullptr);
     const auto & tlvHeaderBool2 = staticPtrCast<const TlvHeaderBool>(tlvHeader5);
     ASSERT(tlvHeaderBool2->getBoolValue());
-    const auto& tlvHeader6 = packet2.popHeader<TlvHeader>();
+    const auto& tlvHeader6 = packet2.popAtFront<TlvHeader>();
     ASSERT(tlvHeader6 != nullptr);
     ASSERT(tlvHeader6->getChunkLength() == B(4));
     ASSERT(dynamicPtrCast<const TlvHeaderInt>(tlvHeader6) != nullptr);
@@ -793,27 +791,27 @@ static void testStreaming()
     // 8. MacAddress
     MacAddress macAddress("0A:AA:01:02:03:04");
     MemoryOutputStream outputStream5;
-    outputStream5.writeMACAddress(macAddress);
+    outputStream5.writeMacAddress(macAddress);
     MemoryInputStream inputStream5(outputStream5.getData());
-    ASSERT(inputStream5.readMACAddress() ==macAddress);
+    ASSERT(inputStream5.readMacAddress() ==macAddress);
     ASSERT(!inputStream5.isReadBeyondEnd());
     ASSERT(inputStream5.getRemainingLength() == b(0));
 
     // 9. Ipv4Address
     Ipv4Address ipv4Address("192.168.10.1");
     MemoryOutputStream outputStream6;
-    outputStream6.writeIPv4Address(ipv4Address);
+    outputStream6.writeIpv4Address(ipv4Address);
     MemoryInputStream inputStream6(outputStream6.getData());
-    ASSERT(inputStream6.readIPv4Address() == ipv4Address);
+    ASSERT(inputStream6.readIpv4Address() == ipv4Address);
     ASSERT(!inputStream6.isReadBeyondEnd());
     ASSERT(inputStream6.getRemainingLength() == b(0));
 
     // 10. Ipv6Address
     Ipv6Address ipv6Address("1011:1213:1415:1617:1819:2021:2223:2425");
     MemoryOutputStream outputStream7;
-    outputStream7.writeIPv6Address(ipv6Address);
+    outputStream7.writeIpv6Address(ipv6Address);
     MemoryInputStream inputStream7(outputStream7.getData());
-    ASSERT(inputStream7.readIPv6Address() == ipv6Address);
+    ASSERT(inputStream7.readIpv6Address() == ipv6Address);
     ASSERT(!inputStream7.isReadBeyondEnd());
     ASSERT(inputStream7.getRemainingLength() == b(0));
 }
@@ -863,38 +861,38 @@ static void testConversion()
     // 1. implicit non-conversion via serialization is an error by default (would unnecessary slow down simulation)
     Packet packet1;
     auto applicationHeader1 = makeImmutableApplicationHeader(42);
-    packet1.insertAtEnd(applicationHeader1->Chunk::peek<BytesChunk>(B(0), B(5)));
-    packet1.insertAtEnd(applicationHeader1->Chunk::peek(B(5), B(5)));
-    ASSERT_ERROR(packet1.peekHeader<ApplicationHeader>(B(10)), "serialization is disabled");
+    packet1.insertAtBack(applicationHeader1->Chunk::peek<BytesChunk>(B(0), B(5)));
+    packet1.insertAtBack(applicationHeader1->Chunk::peek(B(5), B(5)));
+    ASSERT_ERROR(packet1.peekAtFront<ApplicationHeader>(B(10)), "serialization is disabled");
 
     // 2. implicit conversion via serialization is an error by default (would result in hard to debug errors)
     Packet packet2;
-    packet2.insertAtEnd(makeImmutableIpHeader());
-    ASSERT_ERROR(packet2.peekHeader<ApplicationHeader>(), "serialization is disabled");
+    packet2.insertAtBack(makeImmutableIpHeader());
+    ASSERT_ERROR(packet2.peekAtFront<ApplicationHeader>(), "serialization is disabled");
 }
 
 static void testIteration()
 {
     // 1. packet provides inserted chunks
     Packet packet1;
-    packet1.insertAtEnd(makeImmutableByteCountChunk(B(10)));
-    packet1.insertAtEnd(makeImmutableBytesChunk(makeVector(10)));
-    packet1.insertAtEnd(makeImmutableApplicationHeader(42));
+    packet1.insertAtBack(makeImmutableByteCountChunk(B(10)));
+    packet1.insertAtBack(makeImmutableBytesChunk(makeVector(10)));
+    packet1.insertAtBack(makeImmutableApplicationHeader(42));
     int index1 = 0;
-    auto chunk1 = packet1.popHeader();
+    auto chunk1 = packet1.popAtFront();
     while (chunk1 != nullptr) {
         ASSERT(chunk1 != nullptr);
         ASSERT(chunk1->getChunkLength() == B(10));
         index1++;
-        chunk1 = packet1.popHeader(b(-1), Chunk::PF_ALLOW_NULLPTR);
+        chunk1 = packet1.popAtFront(b(-1), Chunk::PF_ALLOW_NULLPTR);
     }
     ASSERT(index1 == 3);
 
     // 2. SequenceChunk optimizes forward iteration to indexing
     auto sequenceChunk1 = makeShared<SequenceChunk>();
-    sequenceChunk1->insertAtEnd(makeImmutableByteCountChunk(B(10)));
-    sequenceChunk1->insertAtEnd(makeImmutableBytesChunk(makeVector(10)));
-    sequenceChunk1->insertAtEnd(makeImmutableApplicationHeader(42));
+    sequenceChunk1->insertAtBack(makeImmutableByteCountChunk(B(10)));
+    sequenceChunk1->insertAtBack(makeImmutableBytesChunk(makeVector(10)));
+    sequenceChunk1->insertAtBack(makeImmutableApplicationHeader(42));
     sequenceChunk1->markImmutable();
     int index2 = 0;
     auto iterator2 = Chunk::ForwardIterator(b(0), 0);
@@ -914,9 +912,9 @@ static void testIteration()
 
     // 3. SequenceChunk optimizes backward iteration to indexing
     auto sequenceChunk2 = makeShared<SequenceChunk>();
-    sequenceChunk2->insertAtEnd(makeImmutableByteCountChunk(B(10)));
-    sequenceChunk2->insertAtEnd(makeImmutableBytesChunk(makeVector(10)));
-    sequenceChunk2->insertAtEnd(makeImmutableApplicationHeader(42));
+    sequenceChunk2->insertAtBack(makeImmutableByteCountChunk(B(10)));
+    sequenceChunk2->insertAtBack(makeImmutableBytesChunk(makeVector(10)));
+    sequenceChunk2->insertAtBack(makeImmutableApplicationHeader(42));
     sequenceChunk2->markImmutable();
     int index3 = 0;
     auto iterator3 = Chunk::BackwardIterator(b(0), 0);
@@ -944,11 +942,11 @@ static void testCorruption()
     const auto& chunk1 = makeImmutableByteCountChunk(B(10));
     const auto& chunk2 = makeImmutableBytesChunk(makeVector(10));
     const auto& chunk3 = makeImmutableApplicationHeader(42);
-    packet1.insertAtEnd(chunk1);
-    packet1.insertAtEnd(chunk2);
-    packet1.insertAtEnd(chunk3);
+    packet1.insertAtBack(chunk1);
+    packet1.insertAtBack(chunk2);
+    packet1.insertAtBack(chunk3);
     int index = 0;
-    auto chunk = packet1.popHeader();
+    auto chunk = packet1.popAtFront();
     Packet packet2;
     while (chunk != nullptr) {
         const auto& clone = chunk->dupShared();
@@ -956,12 +954,12 @@ static void testCorruption()
         if (random[index++] >= std::pow(1 - ber, length.get()))
             clone->markIncorrect();
         clone->markImmutable();
-        packet2.insertAtEnd(clone);
-        chunk = packet1.popHeader(b(-1), Chunk::PF_ALLOW_NULLPTR);
+        packet2.insertAtBack(clone);
+        chunk = packet1.popAtFront(b(-1), Chunk::PF_ALLOW_NULLPTR);
     }
-    ASSERT(packet2.popHeader(b(-1), Chunk::PF_ALLOW_INCORRECT)->isCorrect());
-    ASSERT(packet2.popHeader(b(-1), Chunk::PF_ALLOW_INCORRECT)->isIncorrect());
-    ASSERT(packet2.popHeader(b(-1), Chunk::PF_ALLOW_INCORRECT)->isIncorrect());
+    ASSERT(packet2.popAtFront(b(-1), Chunk::PF_ALLOW_INCORRECT)->isCorrect());
+    ASSERT(packet2.popAtFront(b(-1), Chunk::PF_ALLOW_INCORRECT)->isIncorrect());
+    ASSERT(packet2.popAtFront(b(-1), Chunk::PF_ALLOW_INCORRECT)->isIncorrect());
 }
 
 static void testDuplication()
@@ -969,7 +967,7 @@ static void testDuplication()
     // 1. copy of immutable packet shares chunk
     Packet packet1;
     const Ptr<ByteCountChunk> byteCountChunk1 = makeImmutableByteCountChunk(B(10));
-    packet1.insertAtEnd(byteCountChunk1);
+    packet1.insertAtBack(byteCountChunk1);
     auto packet2 = packet1.dup();
     ASSERT(packet2->getTotalLength() == B(10));
     ASSERT(byteCountChunk1.use_count() == 3); // 1 here + 2 in the packets
@@ -980,18 +978,18 @@ static void testDuality()
 {
     // 1. packet provides header in both fields and bytes representation
     Packet packet1;
-    packet1.insertAtEnd(makeImmutableApplicationHeader(42));
-    const auto& applicationHeader1 = packet1.peekHeader<ApplicationHeader>();
-    const auto& bytesChunk1 = packet1.peekHeader<BytesChunk>(B(10));
+    packet1.insertAtBack(makeImmutableApplicationHeader(42));
+    const auto& applicationHeader1 = packet1.peekAtFront<ApplicationHeader>();
+    const auto& bytesChunk1 = packet1.peekAtFront<BytesChunk>(B(10));
     ASSERT(applicationHeader1 != nullptr);
     ASSERT(applicationHeader1->getChunkLength() == B(10));
     ASSERT(bytesChunk1 != nullptr);
     ASSERT(bytesChunk1->getChunkLength() == B(10));
 
     // 2. packet provides header in both fields and bytes representation after serialization
-    Packet packet2(nullptr, packet1.peekAllBytes());
-    const auto& applicationHeader2 = packet2.peekHeader<ApplicationHeader>();
-    const auto& bytesChunk2 = packet2.peekHeader<BytesChunk>(B(10));
+    Packet packet2(nullptr, packet1.peekAllAsBytes());
+    const auto& applicationHeader2 = packet2.peekAtFront<ApplicationHeader>();
+    const auto& bytesChunk2 = packet2.peekAtFront<BytesChunk>(B(10));
     ASSERT(applicationHeader2 != nullptr);
     ASSERT(applicationHeader2->getChunkLength() == B(10));
     ASSERT(bytesChunk2 != nullptr);
@@ -1004,24 +1002,24 @@ static void testMerging()
 {
     // 1. packet provides complete merged header if the whole header is available
     Packet packet1;
-    packet1.insertAtEnd(makeImmutableApplicationHeader(42));
+    packet1.insertAtBack(makeImmutableApplicationHeader(42));
     Packet packet2;
-    packet2.insertAtEnd(packet1.peekAt(B(0), B(5)));
-    packet2.insertAtEnd(packet1.peekAt(B(5), B(5)));
-    const auto& chunk1 = packet2.peekHeader();
+    packet2.insertAtBack(packet1.peekAt(B(0), B(5)));
+    packet2.insertAtBack(packet1.peekAt(B(5), B(5)));
+    const auto& chunk1 = packet2.peekAtFront();
     ASSERT(chunk1 != nullptr);
     ASSERT(chunk1->isComplete());
     ASSERT(chunk1->getChunkLength() == B(10));
     ASSERT(dynamicPtrCast<const ApplicationHeader>(chunk1) != nullptr);
-    const auto& chunk2 = packet2.peekHeader<ApplicationHeader>();
+    const auto& chunk2 = packet2.peekAtFront<ApplicationHeader>();
     ASSERT(chunk2->isComplete());
     ASSERT(chunk2->getChunkLength() == B(10));
     ASSERT(dynamicPtrCast<const ApplicationHeader>(chunk2) != nullptr);
 
     // 2. packet provides compacts ByteCountChunks
     Packet packet3;
-    packet3.insertAtEnd(makeImmutableByteCountChunk(B(5)));
-    packet3.insertAtEnd(makeImmutableByteCountChunk(B(5)));
+    packet3.insertAtBack(makeImmutableByteCountChunk(B(5)));
+    packet3.insertAtBack(makeImmutableByteCountChunk(B(5)));
     const auto& chunk3 = packet3.peekAt(b(0), packet3.getTotalLength());
     const auto& chunk4 = packet3.peekAt<ByteCountChunk>(b(0), packet3.getTotalLength());
     ASSERT(chunk3 != nullptr);
@@ -1033,10 +1031,10 @@ static void testMerging()
 
     // 2. packet provides compacts ByteChunks
     Packet packet4;
-    packet4.insertAtEnd(makeImmutableBytesChunk(makeVector(5)));
-    packet4.insertAtEnd(makeImmutableBytesChunk(makeVector(5)));
+    packet4.insertAtBack(makeImmutableBytesChunk(makeVector(5)));
+    packet4.insertAtBack(makeImmutableBytesChunk(makeVector(5)));
     const auto& chunk5 = packet4.peekAt(b(0), packet4.getTotalLength());
-    const auto& chunk6 = packet4.peekAllBytes();
+    const auto& chunk6 = packet4.peekAllAsBytes();
     ASSERT(chunk5 != nullptr);
     ASSERT(chunk5->getChunkLength() == B(10));
     ASSERT(dynamicPtrCast<const BytesChunk>(chunk5) != nullptr);
@@ -1091,9 +1089,9 @@ static void testSlicing()
 
     // 4a. SequenceChunk may return an element chunk
     auto sequenceChunk1 = makeShared<SequenceChunk>();
-    sequenceChunk1->insertAtEnd(byteCountChunk1);
-    sequenceChunk1->insertAtEnd(bytesChunk1);
-    sequenceChunk1->insertAtEnd(applicationHeader1);
+    sequenceChunk1->insertAtBack(byteCountChunk1);
+    sequenceChunk1->insertAtBack(bytesChunk1);
+    sequenceChunk1->insertAtBack(applicationHeader1);
     sequenceChunk1->markImmutable();
     const auto& chunk6 = sequenceChunk1->peek(B(0), B(10));
     const auto& chunk7 = sequenceChunk1->peek(B(10), B(10));
@@ -1151,15 +1149,15 @@ static void testNesting()
     ipHeader1->setProtocol(Protocol::Tcp);
     ipHeader1->markImmutable();
     auto compoundHeader1 = makeShared<CompoundHeader>();
-    compoundHeader1->insertAtEnd(ipHeader1);
+    compoundHeader1->insertAtBack(ipHeader1);
     compoundHeader1->markImmutable();
-    packet1.insertAtEnd(compoundHeader1);
-    const auto& compoundHeader2 = packet1.peekHeader<CompoundHeader>(compoundHeader1->getChunkLength());
+    packet1.insertAtBack(compoundHeader1);
+    const auto& compoundHeader2 = packet1.peekAtFront<CompoundHeader>(compoundHeader1->getChunkLength());
     ASSERT(compoundHeader2 != nullptr);
 
     // 2. packet provides compound header after serialization
-    Packet packet2(nullptr, packet1.peekAllBytes());
-    const auto& compoundHeader3 = packet2.peekHeader<CompoundHeader>();
+    Packet packet2(nullptr, packet1.peekAllAsBytes());
+    const auto& compoundHeader3 = packet2.peekAtFront<CompoundHeader>();
     ASSERT(compoundHeader3 != nullptr);
     auto it = Chunk::ForwardIterator(b(0), 0);
     const auto& ipHeader2 = compoundHeader3->Chunk::peek<IpHeader>(it);
@@ -1171,11 +1169,11 @@ static void testPeeking()
 {
     // 1. packet provides ByteCountChunks by default if it contains a ByteCountChunk only
     Packet packet1;
-    packet1.insertAtEnd(makeImmutableByteCountChunk(B(10)));
-    packet1.insertAtEnd(makeImmutableByteCountChunk(B(10)));
-    packet1.insertAtEnd(makeImmutableByteCountChunk(B(10)));
-    const auto& chunk1 = packet1.popHeader(B(15));
-    const auto& chunk2 = packet1.popHeader(B(15));
+    packet1.insertAtBack(makeImmutableByteCountChunk(B(10)));
+    packet1.insertAtBack(makeImmutableByteCountChunk(B(10)));
+    packet1.insertAtBack(makeImmutableByteCountChunk(B(10)));
+    const auto& chunk1 = packet1.popAtFront(B(15));
+    const auto& chunk2 = packet1.popAtFront(B(15));
     ASSERT(chunk1 != nullptr);
     ASSERT(chunk1->getChunkLength() == B(15));
     ASSERT(dynamicPtrCast<const ByteCountChunk>(chunk1) != nullptr);
@@ -1185,11 +1183,11 @@ static void testPeeking()
 
     // 2. packet provides BytesChunks by default if it contains a BytesChunk only
     Packet packet2;
-    packet2.insertAtEnd(makeImmutableBytesChunk(makeVector(10)));
-    packet2.insertAtEnd(makeImmutableBytesChunk(makeVector(10)));
-    packet2.insertAtEnd(makeImmutableBytesChunk(makeVector(10)));
-    const auto& chunk3 = packet2.popHeader(B(15));
-    const auto& chunk4 = packet2.popHeader(B(15));
+    packet2.insertAtBack(makeImmutableBytesChunk(makeVector(10)));
+    packet2.insertAtBack(makeImmutableBytesChunk(makeVector(10)));
+    packet2.insertAtBack(makeImmutableBytesChunk(makeVector(10)));
+    const auto& chunk3 = packet2.popAtFront(B(15));
+    const auto& chunk4 = packet2.popAtFront(B(15));
     ASSERT(chunk3 != nullptr);
     ASSERT(chunk3->getChunkLength() == B(15));
     ASSERT(dynamicPtrCast<const BytesChunk>(chunk3) != nullptr);
@@ -1203,8 +1201,8 @@ static void testSequence()
     // 1. sequence merges immutable slices
     auto applicationHeader1 = makeImmutableApplicationHeader(42);
     auto sequenceChunk1 = makeShared<SequenceChunk>();
-    sequenceChunk1->insertAtEnd(applicationHeader1->peek(B(0), B(5)));
-    sequenceChunk1->insertAtEnd(applicationHeader1->peek(B(5), B(5)));
+    sequenceChunk1->insertAtBack(applicationHeader1->peek(B(0), B(5)));
+    sequenceChunk1->insertAtBack(applicationHeader1->peek(B(5), B(5)));
     const auto& chunk1 = sequenceChunk1->peek(b(0));
     ASSERT(dynamicPtrCast<const ApplicationHeader>(chunk1) != nullptr);
 
@@ -1212,10 +1210,10 @@ static void testSequence()
     auto sequenceChunk2 = makeShared<SequenceChunk>();
     const auto& sliceChunk1 = makeShared<SliceChunk>(applicationHeader1, B(0), B(5));
     sliceChunk1->markImmutable();
-    sequenceChunk2->insertAtEnd(sliceChunk1);
+    sequenceChunk2->insertAtBack(sliceChunk1);
     const auto& sliceChunk2 = makeShared<SliceChunk>(applicationHeader1, B(5), B(5));
     sliceChunk2->markImmutable();
-    sequenceChunk2->insertAtEnd(sliceChunk2);
+    sequenceChunk2->insertAtBack(sliceChunk2);
     const auto& chunk2 = sequenceChunk2->peek(b(0));
     ASSERT(dynamicPtrCast<const ApplicationHeader>(chunk2) != nullptr);
 }
@@ -1764,7 +1762,7 @@ static void testChunkTags()
 
     // SequenceChunk
     auto sequenceChunk = makeShared<SequenceChunk>();
-    sequenceChunk->insertAtEnd(chunk1);
+    sequenceChunk->insertAtBack(chunk1);
     ASSERT(sequenceChunk->getNumTags() == 1);
     const auto& tag4 = sequenceChunk->findTag<CreationTimeTag>();
     ASSERT(tag4 != nullptr);
@@ -1776,15 +1774,15 @@ static void testPacketTags()
     // 1. application creates packet
     Packet packet1;
     ASSERT_ERROR(packet1.getTag<CreationTimeTag>(), "is absent");
-    packet1.insertAtEnd(makeImmutableByteCountChunk(B(1000)));
+    packet1.insertAtBack(makeImmutableByteCountChunk(B(1000)));
     const auto& tag1 = packet1.addTag<CreationTimeTag>();
     ASSERT(tag1 != nullptr);
     // 2. source TCP encapsulates packet
-    packet1.insertHeader(makeImmutableTcpHeader());
+    packet1.insertAtFront(makeImmutableTcpHeader());
     const auto& tag2 = packet1.getTag<CreationTimeTag>();
     ASSERT(tag2 == tag1);
     // 3. destination TCP decapsulates packet
-    packet1.popHeader<TcpHeader>();
+    packet1.popAtFront<TcpHeader>();
     const auto& tag3 = packet1.getTag<CreationTimeTag>();
     ASSERT(tag3 == tag2);
 }
@@ -1799,20 +1797,20 @@ static void testRegionTags()
     // TODO: tag1->markImmutable();
     chunk1->markImmutable();
     Packet packet1;
-    packet1.insertAtEnd(chunk1);
+    packet1.insertAtBack(chunk1);
     // 2. source application sends packet to TCP, which enqueues data
     ChunkQueue queue1;
     queue1.push(packet1.peekData());
     // 3. source TCP creates TCP segment
     Packet packet2;
-    packet2.insertAtEnd(queue1.pop(B(1000)));
+    packet2.insertAtBack(queue1.pop(B(1000)));
     // 4. source TCP sends TCP segment, destination TCP enqueues data
     ReorderBuffer buffer1;
     buffer1.setExpectedOffset(B(0));
     buffer1.replace(B(0), packet2.peekData());
     // 5. destination TCP sends available data to application
     Packet packet3;
-    packet3.insertAtEnd(buffer1.popAvailableData());
+    packet3.insertAtBack(buffer1.popAvailableData());
     // 6. destination application processes received data
     const auto& chunk2 = packet3.peekData();
     auto regions1 = chunk2->getAllTags<CreationTimeTag>();
@@ -1828,17 +1826,17 @@ static void testRegionTags()
     // TODO: tag1->markImmutable();
     chunk3->markImmutable();
     Packet packet4;
-    packet4.insertAtEnd(chunk3);
+    packet4.insertAtBack(chunk3);
     // 8. source application sends packet to TCP, which enqueues data
     queue1.push(packet4.peekData());
     // 9. source TCP creates TCP segment
     Packet packet5;
-    packet5.insertAtEnd(queue1.pop(B(1000)));
+    packet5.insertAtBack(queue1.pop(B(1000)));
     // 10. source TCP sends TCP segment, destination TCP enqueues data
     buffer1.replace(B(1000), packet5.peekData());
     // 11. destination TCP sends available data to application
     Packet packet6;
-    packet6.insertAtEnd(buffer1.popAvailableData());
+    packet6.insertAtBack(buffer1.popAvailableData());
     // 12. destination application processes received data
     const auto& chunk4 = packet6.peekData();
     auto regions2 = chunk4->getAllTags<CreationTimeTag>();
@@ -1865,8 +1863,8 @@ void UnitTest::initialize()
     testEmpty();
     testHeader();
     testTrailer();
-    testHeaderPopOffset();
-    testTrailerPopOffset();
+    testFrontPopOffset();
+    testBackPopOffset();
     testEncapsulation();
     testAggregation();
     testFragmentation();

@@ -341,7 +341,7 @@ void Rtp::readRet(cMessage *sifp)
 {
     if (!_leaveSession) {
         Packet *pk = check_and_cast<Packet *>(sifp);
-        const auto& rtpHeader = pk->peekHeader<RtpHeader>();
+        const auto& rtpHeader = pk->peekAtFront<RtpHeader>();
 
         emit(packetReceivedSignal, pk);
 

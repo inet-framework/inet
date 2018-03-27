@@ -29,7 +29,7 @@ Register_Protocol_Dissector(&Protocol::pim, PimProtocolDissector);
 
 void PimProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    auto header = packet->popHeader<PimPacket>();
+    auto header = packet->popAtFront<PimPacket>();
     callback.startProtocolDataUnit(&Protocol::pim);
     callback.visitChunk(header, &Protocol::pim);
     if (packet->getDataLength() > b(0))

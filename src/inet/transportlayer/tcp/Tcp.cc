@@ -135,7 +135,7 @@ bool Tcp::checkCrc(const Ptr<const TcpHeader>& tcpHeader, Packet *packet)
         case CRC_COMPUTED: {
             //check CRC:
             auto networkProtocol = packet->getTag<NetworkProtocolInd>()->getProtocol();
-            const std::vector<uint8_t> tcpBytes = packet->peekDataBytes()->getBytes();
+            const std::vector<uint8_t> tcpBytes = packet->peekDataAsBytes()->getBytes();
             auto pseudoHeader = makeShared<TransportPseudoHeader>();
             L3Address srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress();
             L3Address destAddr = packet->getTag<L3AddressInd>()->getDestAddress();
@@ -198,7 +198,7 @@ void Tcp::handleMessage(cMessage *msg)
         }
         else if (protocol == &Protocol::tcp) {
             // must be a TcpHeader
-            auto tcpHeader = packet->peekHeader<TcpHeader>();
+            auto tcpHeader = packet->peekAtFront<TcpHeader>();
 
             // get src/dest addresses
             L3Address srcAddr, destAddr;

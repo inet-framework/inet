@@ -391,7 +391,7 @@ Signal *Radio::createSignal(Packet *packet) const
 {
     encapsulate(packet);
     if (sendRawBytes) {
-        auto rawPacket = new Packet(packet->getName(), packet->peekAllBytes());
+        auto rawPacket = new Packet(packet->getName(), packet->peekAllAsBytes());
         rawPacket->copyTags(*packet);
         delete packet;
         packet = rawPacket;

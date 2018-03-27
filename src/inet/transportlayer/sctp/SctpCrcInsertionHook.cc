@@ -35,13 +35,13 @@ INetfilter::IHook::Result SctpCrcInsertion::datagramPostRoutingHook(Packet *pack
     auto networkProtocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     const auto& networkHeader = getNetworkProtocolHeader(packet);
     if (networkHeader->getProtocol() == &Protocol::sctp) {
-        packet->removeFromBeginning(networkHeader->getChunkLength());
-        auto sctpHeader = packet->removeHeader<SctpHeader>();
+        packet->eraseAtFront(networkHeader->getChunkLength());
+        auto sctpHeader = packet->removeAtFront<SctpHeader>();
         const L3Address& srcAddress = networkHeader->getSourceAddress();
         const L3Address& destAddress = networkHeader->getDestinationAddress();
         insertCrc(networkProtocol, srcAddress, destAddress, sctpHeader, packet);
-        packet->insertHeader(sctpHeader);
-        packet->insertHeader(networkHeader);
+        packet->insertAtFront(sctpHeader);
+        packet->insertAtFront(networkHeader);
     }
     return ACCEPT;
 }
@@ -67,7 +67,7 @@ void SctpCrcInsertion::insertCrc(const Protocol *networkProtocol, const L3Addres
             Chunk::serialize(sctpHeaderStream, sctpHeader);
             auto sctpHeaderBytes = sctpHeaderStream.getData();
             const std::vector<uint8_t> emptyData;
-            auto sctpDataBytes = (packet->getDataLength() > b(0)) ? packet->peekDataBytes()->getBytes() : emptyData;
+            auto sctpDataBytes = (packet->getDataLength() > b(0)) ? packet->peekDataAsBytes()->getBytes() : emptyData;
             auto headerLength = sctpHeaderBytes.size();
             auto buffer = new uint8_t[headerLength];
             std::copy(sctpHeaderBytes.begin(), sctpHeaderBytes.end(), (uint8_t *)buffer);

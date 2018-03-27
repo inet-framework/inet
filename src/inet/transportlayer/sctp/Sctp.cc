@@ -196,7 +196,7 @@ void Sctp::handleMessage(cMessage *msg)
         auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
         if (protocol == &Protocol::sctp) {
             // must be an SctpHeader
-            SctpHeader *sctpmsg = (SctpHeader *)(packet->peekHeader<SctpHeader>().get()->dup());
+            SctpHeader *sctpmsg = (SctpHeader *)(packet->peekAtFront<SctpHeader>().get()->dup());
             int chunkLength = B(sctpmsg->getChunkLength()).get();
             numPacketsReceived++;
 

@@ -32,7 +32,7 @@ Register_Protocol_Dissector(&Protocol::ethernetPhy, EthernetPhyDissector);
 
 void EthernetPhyDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    const auto& header = packet->popHeader<EthernetPhyHeader>();
+    const auto& header = packet->popAtFront<EthernetPhyHeader>();
     callback.startProtocolDataUnit(&Protocol::ethernetPhy);
     callback.visitChunk(header, &Protocol::ethernetPhy);
     callback.dissectPacket(packet, &Protocol::ethernetMac);
@@ -41,25 +41,25 @@ void EthernetPhyDissector::dissect(Packet *packet, ICallback& callback) const
 
 void EthernetMacDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    const auto& header = packet->popHeader<EthernetMacHeader>();
+    const auto& header = packet->popAtFront<EthernetMacHeader>();
     callback.startProtocolDataUnit(&Protocol::ethernetMac);
     callback.visitChunk(header, &Protocol::ethernetMac);
-    const auto& fcs = packet->popTrailer<EthernetFcs>(B(4));
+    const auto& fcs = packet->popAtBack<EthernetFcs>(B(4));
     if (isEth2Header(*header)) {
         auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(header->getTypeOrLength());
         callback.dissectPacket(packet, payloadProtocol);
     }
     else {
         // LLC header
-        auto ethEndOffset = packet->getHeaderPopOffset() + B(header->getTypeOrLength());
-        auto trailerOffset = packet->getTrailerPopOffset();
-        packet->setTrailerPopOffset(ethEndOffset);
+        auto ethEndOffset = packet->getFrontOffset() + B(header->getTypeOrLength());
+        auto trailerOffset = packet->getBackOffset();
+        packet->setBackOffset(ethEndOffset);
         callback.dissectPacket(packet, &Protocol::ieee8022);
-        packet->setTrailerPopOffset(trailerOffset);
+        packet->setBackOffset(trailerOffset);
     }
     auto paddingLength = packet->getDataLength();
     if (paddingLength > b(0)) {
-        const auto& padding = packet->popHeader(paddingLength);        // remove padding (type is not EthernetPadding!)
+        const auto& padding = packet->popAtFront(paddingLength);        // remove padding (type is not EthernetPadding!)
         callback.visitChunk(padding, &Protocol::ethernetMac);
     }
     callback.visitChunk(fcs, &Protocol::ethernetMac);

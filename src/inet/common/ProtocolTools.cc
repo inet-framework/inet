@@ -38,7 +38,7 @@ void insertProtocolHeader(Packet *packet, const Protocol& protocol, const Ptr<Ch
 {
     auto packetProtocolTag = packet->addTagIfAbsent<PacketProtocolTag>();
     packetProtocolTag->setProtocol(&protocol);
-    packet->insertHeader(header);
+    packet->insertAtFront(header);
 }
 
 } // namespace inet

@@ -138,12 +138,12 @@ void Ieee80211Radio::encapsulate(Packet *packet) const
     auto phyHeader = mode->getHeaderMode()->createHeader();
     phyHeader->setChunkLength(b(mode->getHeaderMode()->getLength()));
     phyHeader->setLengthField(B(packet->getTotalLength()).get());
-    packet->insertHeader(phyHeader);
+    packet->insertAtFront(phyHeader);
     auto tailLength = dynamic_cast<const Ieee80211OfdmMode *>(mode) ? b(6) : b(0);
     auto paddingLength = mode->getDataMode()->getPaddingLength(B(phyHeader->getLengthField()));
     if (tailLength + paddingLength != b(0)) {
         const auto &phyTrailer = makeShared<BitCountChunk>(tailLength + paddingLength);
-        packet->insertTrailer(phyTrailer);
+        packet->insertAtBack(phyTrailer);
     }
     packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Phy);
 }
@@ -151,11 +151,11 @@ void Ieee80211Radio::encapsulate(Packet *packet) const
 void Ieee80211Radio::decapsulate(Packet *packet) const
 {
     auto mode = packet->getTag<Ieee80211ModeInd>()->getMode();
-    const auto& phyHeader = packet->popHeader<Ieee80211PhyHeader>();
+    const auto& phyHeader = packet->popAtFront<Ieee80211PhyHeader>();
     auto tailLength = dynamic_cast<const Ieee80211OfdmMode *>(mode) ? b(6) : b(0);
     auto paddingLength = mode->getDataMode()->getPaddingLength(B(phyHeader->getLengthField()));
     if (tailLength + paddingLength != b(0))
-        packet->popTrailer(tailLength + paddingLength);
+        packet->popAtBack(tailLength + paddingLength);
     packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
 }
 

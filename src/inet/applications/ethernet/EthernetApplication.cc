@@ -97,7 +97,7 @@ void EthernetApplication::sendPacket()
     data->setChunkLength(B(len));
     long respLen = *respLength;
     data->setResponseBytes(respLen);
-    datapacket->insertAtEnd(data);
+    datapacket->insertAtBack(data);
     datapacket->addTagIfAbsent<MacAddressReq>()->setDestAddress(destMACAddress);
     send(datapacket, "out");
     packetsSent++;
@@ -132,7 +132,7 @@ void EthernetApplication::receivePacket(cMessage *msg)
             const auto& outPayload = makeShared<EtherAppResp>();
             outPayload->setRequestId(requestId);
             outPayload->setChunkLength(B(l));
-            outPacket->insertAtEnd(outPayload);
+            outPacket->insertAtBack(outPayload);
 
             sendPacket(outPacket, srcAddr);
             packetsSent++;

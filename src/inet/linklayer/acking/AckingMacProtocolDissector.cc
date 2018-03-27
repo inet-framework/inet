@@ -30,7 +30,7 @@ Register_Protocol_Dissector(&Protocol::ackingmac, AckingMacProtocolDissector);
 
 void AckingMacProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    auto header = packet->popHeader<AckingMacHeader>();
+    auto header = packet->popAtFront<AckingMacHeader>();
     callback.startProtocolDataUnit(&Protocol::ackingmac);
     callback.visitChunk(header, &Protocol::ackingmac);
     auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(header->getNetworkProtocol());

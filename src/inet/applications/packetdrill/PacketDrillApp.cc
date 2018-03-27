@@ -187,9 +187,9 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                 }
             } else {
                 Packet *ipv4Packet = check_and_cast<Packet *>(outboundPackets->pop());
-               // const auto& ipv4Header = ipv4Packet->peekHeader<Ipv4Header>();
+               // const auto& ipv4Header = ipv4Packet->peekAtFront<Ipv4Header>();
                 Packet *liveIpv4Packet = check_and_cast<Packet*>(msg);
-               // const auto& liveIpv4Header = liveIpv4Packet->peekHeader<Ipv4Header>();
+               // const auto& liveIpv4Header = liveIpv4Packet->peekAtFront<Ipv4Header>();
                 PacketDrillInfo *info = (PacketDrillInfo *)ipv4Packet->getContextPointer();
                 if (verifyTime((enum eventTime_t) info->getTimeType(), info->getScriptTime(),
                         info->getScriptTimeEnd(), info->getOffset(), getSimulation()->getSimTime(), "outbound packet")
@@ -428,14 +428,14 @@ void PacketDrillApp::runEvent(PacketDrillEvent* event)
         Packet *pk = event->getPacket()->getInetPacket();
         if (event->getPacket()->getDirection() == DIRECTION_INBOUND) { // < injected packet, will go through the stack bottom up.
             auto packetByteLength = pk->getByteLength();
-            auto ipHeader = pk->removeHeader<Ipv4Header>();
+            auto ipHeader = pk->removeAtFront<Ipv4Header>();
             // remove lower layer paddings:
             ASSERT(B(ipHeader->getTotalLengthField()) >= ipHeader->getChunkLength());
             if (ipHeader->getTotalLengthField() < packetByteLength)
-                pk->setTrailerPopOffset(B(ipHeader->getTotalLengthField()) - ipHeader->getChunkLength());
+                pk->setBackOffset(B(ipHeader->getTotalLengthField()) - ipHeader->getChunkLength());
 
             if (protocol == IP_PROT_TCP) {
-                auto tcpHeader = pk->removeHeader<TcpHeader>();
+                auto tcpHeader = pk->removeAtFront<TcpHeader>();
                 tcpHeader->setAckNo(tcpHeader->getAckNo() + relSequenceOut);
                 if (tcpHeader->getHeaderOptionArraySize() > 0) {
                     for (unsigned int i = 0; i < tcpHeader->getHeaderOptionArraySize(); i++) {
@@ -446,12 +446,12 @@ void PacketDrillApp::runEvent(PacketDrillEvent* event)
                         }
                     }
                 }
-                pk->insertHeader(tcpHeader);
+                pk->insertAtFront(tcpHeader);
                 snprintf(str, sizeof(str), "inbound %d", eventCounter);
                 pk->setName(str);
             }
             else if (protocol == IP_PROT_SCTP) {
-                auto sctpHeader = pk->removeHeader<SctpHeader>();
+                auto sctpHeader = pk->removeAtFront<SctpHeader>();
                 sctpHeader->setVTag(peerVTag);
                 int32 noChunks = sctpHeader->getSctpChunksArraySize();
                 for (int32 cc = 0; cc < noChunks; cc++) {
@@ -528,14 +528,14 @@ void PacketDrillApp::runEvent(PacketDrillEvent* event)
                         }
                     }
                 }
-                pk->insertHeader(sctpHeader);
+                pk->insertAtFront(sctpHeader);
                 pk->setName("inboundSctp");
             }
             else {
                 // other protocol
             }
             ipHeader->setTotalLengthField(B(ipHeader->getChunkLength()).get() + pk->getByteLength());
-            pk->insertHeader(ipHeader);
+            pk->insertAtFront(ipHeader);
             tunSocket.send(pk);
         } else if (event->getPacket()->getDirection() == DIRECTION_OUTBOUND) { // >
             if (receivedPackets->getLength() > 0) {
@@ -560,7 +560,7 @@ void PacketDrillApp::runEvent(PacketDrillEvent* event)
                 delete pk;
             } else {
                 if (protocol == IP_PROT_SCTP) {
-                    const auto& ipHeader = pk->peekHeader<Ipv4Header>();
+                    const auto& ipHeader = pk->peekAtFront<Ipv4Header>();
                     const auto& sctpHeader = pk->peekDataAt<SctpHeader>(ipHeader->getChunkLength());
                     const SctpChunk *sctpChunk = sctpHeader->getSctpChunks(0);
                     if (sctpChunk->getSctpChunkType() == INIT) {
@@ -651,7 +651,7 @@ void PacketDrillApp::closeAllSockets()
     sctpmsg->setChecksumOk(true);
     sctpmsg->setCrcMode(crcMode);
     sctpmsg->insertSctpChunks(abortChunk);
-    pk->insertHeader(sctpmsg);
+    pk->insertAtFront(sctpmsg);
     auto ipv4Header = makeShared<Ipv4Header>();
     ipv4Header->setSrcAddress(remoteAddress.toIpv4());
     ipv4Header->setDestAddress(localAddress.toIpv4());
@@ -667,7 +667,7 @@ void PacketDrillApp::closeAllSockets()
     ipv4Header->setCrcMode(crcMode);
     ipv4Header->setCrc(0);
     ipv4Header->setTotalLengthField(B(ipv4Header->getChunkLength()).get() + pk->getByteLength());
-    pk->insertHeader(ipv4Header);
+    pk->insertAtFront(ipv4Header);
     EV_DETAIL << "Send Abort to cleanup association." << endl;
 
     tunSocket.send(pk);
@@ -927,7 +927,7 @@ int PacketDrillApp::syscallWrite(struct syscall_spec *syscall, cQueue *args, cha
             auto creationTimeTag = applicationData->addTag<CreationTimeTag>();
             creationTimeTag->setCreationTime(simTime());
             cmsg->setKind(SCTP_C_SEND_ORDERED);
-            cmsg->insertAtEnd(applicationData);
+            cmsg->insertAtBack(applicationData);
             auto sendCommand = cmsg->addTagIfAbsent<SctpSendReq>();
             sendCommand->setLast(true);
             sendCommand->setSocketId(-1);
@@ -1320,7 +1320,7 @@ int PacketDrillApp::syscallSctpSendmsg(struct syscall_spec *syscall, cQueue *arg
     applicationData->setBytes(vec);
     auto creationTimeTag = applicationData->addTag<CreationTimeTag>();
     creationTimeTag->setCreationTime(simTime());
-    cmsg->insertAtEnd(applicationData);
+    cmsg->insertAtBack(applicationData);
 
     auto sendCommand = cmsg->addTagIfAbsent<SctpSendReq>();
     sendCommand->setLast(true);
@@ -1373,7 +1373,7 @@ int PacketDrillApp::syscallSctpSend(struct syscall_spec *syscall, cQueue *args, 
     applicationData->setBytes(vec);
     auto creationTimeTag = applicationData->addTag<CreationTimeTag>();
     creationTimeTag->setCreationTime(simTime());
-    cmsg->insertAtEnd(applicationData);
+    cmsg->insertAtBack(applicationData);
 
     auto sendCommand = cmsg->addTagIfAbsent<SctpSendReq>();
     sendCommand->setLast(true);
@@ -1623,8 +1623,8 @@ int PacketDrillApp::verifyTime(enum eventTime_t timeType, simtime_t scriptTime, 
 
 bool PacketDrillApp::compareDatagram(Packet *storedPacket, Packet *livePacket)
 {
-    const auto& storedDatagram = storedPacket->peekHeader<Ipv4Header>();
-    const auto& liveDatagram = livePacket->peekHeader<Ipv4Header>();
+    const auto& storedDatagram = storedPacket->peekAtFront<Ipv4Header>();
+    const auto& liveDatagram = livePacket->peekAtFront<Ipv4Header>();
 
    /* if (!(storedDatagram->getSrcAddress() == liveDatagram->getSrcAddress())) {
         return false;

@@ -462,7 +462,7 @@ void Rsvp::processHELLO_TIMER(HelloTimerMsg *msg)
     length /= 10;
 
     hMsg->setChunkLength(B(length));
-    pk->insertAtEnd(hMsg);
+    pk->insertAtBack(hMsg);
 
     sendToIP(pk, peer);
 
@@ -580,7 +580,7 @@ void Rsvp::refreshPath(PathStateBlock *psbEle)
     int length = 85 + (ERO.size() * 5);
 
     pm->setChunkLength(B(length));
-    pk->insertAtEnd(pm);
+    pk->insertAtBack(pm);
 
     Ipv4Address nextHop = tedmod->getPeerByLocalAddress(OI);
 
@@ -671,7 +671,7 @@ void Rsvp::refreshResv(ResvStateBlock *rsbEle, Ipv4Address PHOP)
     length /= 10;
 
     msg->setChunkLength(B(length));
-    pk->insertAtEnd(msg);
+    pk->insertAtBack(msg);
 
     sendToIP(pk, PHOP);
 }
@@ -1274,7 +1274,7 @@ void Rsvp::handleMessage(cMessage *msg)
 
 void Rsvp::processRSVPMessage(Packet *pk)
 {
-    const auto& msg = pk->peekHeader<RsvpMessage>();
+    const auto& msg = pk->peekAtFront<RsvpMessage>();
     int kind = msg->getRsvpKind();
     switch (kind) {
         case PATH_MESSAGE:
@@ -1306,7 +1306,7 @@ void Rsvp::processHelloMsg(Packet *pk)
 {
     EV_INFO << "Received RSVP_HELLO" << endl;
     //print(msg);
-    const auto& msg = pk->peekHeader<RsvpHelloMsg>();
+    const auto& msg = pk->peekAtFront<RsvpHelloMsg>();
     Ipv4Address sender = pk->getTag<L3AddressInd>()->getSrcAddress().toIpv4();
     Ipv4Address peer = tedmod->primaryAddress(sender);
 
@@ -1392,7 +1392,7 @@ void Rsvp::processPathErrMsg(Packet *pk)
     EV_INFO << "Received PATH_ERROR" << endl;
     //print(msg);
 
-    const auto& msg = pk->peekHeader<RsvpPathError>();
+    const auto& msg = pk->peekAtFront<RsvpPathError>();
     //int lspid = msg->getLspId();
     int errCode = msg->getErrorCode();
 
@@ -1407,7 +1407,7 @@ void Rsvp::processPathErrMsg(Packet *pk)
         EV_INFO << "forwarding error message to PHOP (" << psb->Previous_Hop_Address << ")" << endl;
 
         delete pk->removeControlInfo();         //FIXME
-        pk->removePoppedChunks();
+        pk->trim();
         sendToIP(pk, psb->Previous_Hop_Address);
     }
     else {
@@ -1439,7 +1439,7 @@ void Rsvp::processPathTearMsg(Packet *pk)
     EV_INFO << "Received PATH_TEAR" << endl;
     //print(msg);
 
-    const auto& msg = pk->peekHeader<RsvpPathTear>();
+    const auto& msg = pk->peekAtFront<RsvpPathTear>();
     int lspid = msg->getLspId();
 
     PathStateBlock *psb = findPSB(msg->getSession(), msg->getSenderTemplate());
@@ -1495,7 +1495,7 @@ void Rsvp::processPathTearMsg(Packet *pk)
 void Rsvp::processPathMsg(Packet *pk)
 {
     EV_INFO << "Received PATH_MESSAGE" << endl;
-    auto msg = dynamicPtrCast<RsvpPathMsg>(pk->peekHeader<RsvpPathMsg>()->dupShared());
+    auto msg = dynamicPtrCast<RsvpPathMsg>(pk->peekAtFront<RsvpPathMsg>()->dupShared());
     print(msg.get());
 
     // process ERO *************************************************************
@@ -1555,8 +1555,8 @@ void Rsvp::processPathMsg(Packet *pk)
 void Rsvp::processResvMsg(Packet *pk)
 {
     EV_INFO << "Received RESV_MESSAGE" << endl;
-    pk->removePoppedHeaders();
-    auto msg = pk->removeHeader<RsvpResvMsg>();
+    pk->trimFront();
+    auto msg = pk->removeAtFront<RsvpResvMsg>();
     print(msg.get());
 
     Ipv4Address OI = msg->getLIH();
@@ -1851,7 +1851,7 @@ void Rsvp::sendPathTearMessage(Ipv4Address peerIP, const SessionObj& session, co
     msg->setForce(force);
     int length = 44;
     msg->setChunkLength(B(length));
-    pk->insertAtEnd(msg);
+    pk->insertAtBack(msg);
 
     sendToIP(pk, peerIP);
 }
@@ -1877,7 +1877,7 @@ void Rsvp::sendPathErrorMessage(SessionObj session, SenderTemplateObj sender, Se
     length /= 10;
 
     msg->setChunkLength(B(length));
-    pk->insertAtEnd(msg);
+    pk->insertAtBack(msg);
 
     sendToIP(pk, nextHop);
 }

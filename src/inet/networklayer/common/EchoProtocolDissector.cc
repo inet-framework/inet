@@ -29,7 +29,7 @@ Register_Protocol_Dissector(&Protocol::echo, EchoProtocolDissector);
 
 void EchoProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    auto header = packet->popHeader<EchoPacket>();
+    auto header = packet->popAtFront<EchoPacket>();
     callback.startProtocolDataUnit(&Protocol::echo);
     callback.visitChunk(header, &Protocol::echo);
     if (packet->getDataLength() > b(0))

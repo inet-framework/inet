@@ -68,7 +68,7 @@ INetfilter::IHook::Result SctpNatHook::datagramForwardHook(Packet *datagram)
     }
     const auto& networkHeader = dgram->dup();
     natTable->printNatTable();
-    auto& sctpMsg = datagram->removeHeader<SctpHeader>();
+    auto& sctpMsg = datagram->removeAtFront<SctpHeader>();
     SctpHeader *sctp = sctpMsg->dup();
     unsigned int numberOfChunks = sctpMsg->getSctpChunksArraySize();
     if (numberOfChunks == 1) {
@@ -159,7 +159,7 @@ INetfilter::IHook::Result SctpNatHook::datagramPreRoutingHook(Packet *datagram)
     }
     natTable->printNatTable();
     bool local = ((rt->isLocalAddress(dgram->getDestinationAddress())) && (SctpAssociation::getAddressLevel(dgram->getSourceAddress()) == 3));
-    auto& sctpMsg = datagram->removeHeader<SctpHeader>();
+    auto& sctpMsg = datagram->removeAtFront<SctpHeader>();
     SctpHeader *sctp = sctpMsg->dup();
     unsigned int numberOfChunks = sctpMsg->getSctpChunksArraySize();
     if (numberOfChunks == 1)

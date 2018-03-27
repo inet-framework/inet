@@ -212,7 +212,7 @@ void Gpsr::sendUDPPacket(Packet *packet)
 
 void Gpsr::processUDPPacket(Packet *packet)
 {
-    packet->popHeader<UdpHeader>();
+    packet->popAtFront<UdpHeader>();
     processBeacon(packet);
     schedulePurgeNeighborsTimer();
 }
@@ -234,11 +234,11 @@ void Gpsr::sendBeacon(const Ptr<GpsrBeacon>& beacon)
 {
     EV_INFO << "Sending beacon: address = " << beacon->getAddress() << ", position = " << beacon->getPosition() << endl;
     Packet *udpPacket = new Packet("GPSRBeacon");
-    udpPacket->insertAtEnd(beacon);
+    udpPacket->insertAtBack(beacon);
     auto udpHeader = makeShared<UdpHeader>();
     udpHeader->setSourcePort(GPSR_UDP_PORT);
     udpHeader->setDestinationPort(GPSR_UDP_PORT);
-    udpPacket->insertHeader(udpHeader);
+    udpPacket->insertAtFront(udpHeader);
     auto addresses = udpPacket->addTagIfAbsent<L3AddressReq>();
     addresses->setSrcAddress(getSelfAddress());
     addresses->setDestAddress(addressType->getLinkLocalManetRoutersMulticastAddress());
@@ -250,7 +250,7 @@ void Gpsr::sendBeacon(const Ptr<GpsrBeacon>& beacon)
 
 void Gpsr::processBeacon(Packet *packet)
 {
-    const auto& beacon = packet->peekHeader<GpsrBeacon>();
+    const auto& beacon = packet->peekAtFront<GpsrBeacon>();
     EV_INFO << "Processing beacon: address = " << beacon->getAddress() << ", position = " << beacon->getPosition() << endl;
     neighborPositionTable.setPosition(beacon->getAddress(), beacon->getPosition());
     delete packet;
@@ -622,7 +622,7 @@ INetfilter::IHook::Result Gpsr::routeDatagram(Packet *datagram)
 
 void Gpsr::setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const NetworkHeaderBase>& nwHeader)
 {
-    packet->removePoppedHeaders();
+    packet->trimFront();
     GpsrOption *gpsrOption = createGpsrOption(nwHeader->getDestinationAddress());
 #ifdef WITH_IPv4
     if (dynamicPtrCast<const Ipv4Header>(nwHeader)) {

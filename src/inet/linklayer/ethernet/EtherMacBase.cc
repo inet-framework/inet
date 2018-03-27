@@ -388,13 +388,13 @@ void EtherMacBase::encapsulate(Packet *frame)
 {
     auto phyHeader = makeShared<EthernetPhyHeader>();
     phyHeader->setSrcMacFullDuplex(duplexMode);
-    frame->insertHeader(phyHeader);
+    frame->insertAtFront(phyHeader);
     frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetPhy);
 }
 
 void EtherMacBase::decapsulate(Packet *packet)
 {
-    auto phyHeader = packet->popHeader<EthernetPhyHeader>();
+    auto phyHeader = packet->popAtFront<EthernetPhyHeader>();
     if (phyHeader->getSrcMacFullDuplex() != duplexMode)
         throw cRuntimeError("Ethernet misconfiguration: MACs on the same link must be all in full duplex mode, or all in half-duplex mode");
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
@@ -405,8 +405,8 @@ bool EtherMacBase::verifyCrcAndLength(Packet *packet)
 {
     EV_STATICCONTEXT;
 
-    auto ethHeader = packet->peekHeader<EthernetMacHeader>();          //FIXME can I use any flags?
-    const auto& ethTrailer = packet->peekTrailer<EthernetFcs>(B(ETHER_FCS_BYTES));          //FIXME can I use any flags?
+    auto ethHeader = packet->peekAtFront<EthernetMacHeader>();          //FIXME can I use any flags?
+    const auto& ethTrailer = packet->peekAtBack<EthernetFcs>(B(ETHER_FCS_BYTES));          //FIXME can I use any flags?
 
     switch(ethTrailer->getFcsMode()) {
         case FCS_DECLARED_CORRECT:
@@ -672,8 +672,8 @@ int EtherMacBase::InnerQueue::packetCompare(cObject *a, cObject *b)
 {
     Packet *ap = static_cast<Packet *>(a);
     Packet *bp = static_cast<Packet *>(b);
-    const auto& ah = ap->peekHeader<EthernetMacHeader>();
-    const auto& bh = bp->peekHeader<EthernetMacHeader>();
+    const auto& ah = ap->peekAtFront<EthernetMacHeader>();
+    const auto& bh = bp->peekAtFront<EthernetMacHeader>();
     int ac = (ah->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL) ? 0 : 1;
     int bc = (bh->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL) ? 0 : 1;
     return ac - bc;

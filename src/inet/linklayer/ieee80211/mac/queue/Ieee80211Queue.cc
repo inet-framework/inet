@@ -95,15 +95,15 @@ PendingQueue::PendingQueue(int maxQueueSize, const char *name, Priority priority
 
 int PendingQueue::cmpMgmtOverData(Packet *a, Packet *b)
 {
-    int aPri = dynamicPtrCast<const Ieee80211MgmtHeader>(a->peekHeader<Ieee80211MacHeader>()) ? 1 : 0;  //TODO there should really exist a high-performance isMgmtFrame() function!
-    int bPri = dynamicPtrCast<const Ieee80211MgmtHeader>(b->peekHeader<Ieee80211MacHeader>()) ? 1 : 0;
+    int aPri = dynamicPtrCast<const Ieee80211MgmtHeader>(a->peekAtFront<Ieee80211MacHeader>()) ? 1 : 0;  //TODO there should really exist a high-performance isMgmtFrame() function!
+    int bPri = dynamicPtrCast<const Ieee80211MgmtHeader>(b->peekAtFront<Ieee80211MacHeader>()) ? 1 : 0;
     return bPri - aPri;
 }
 
 int PendingQueue::cmpMgmtOverMulticastOverUnicast(Packet *a, Packet *b)
 {
-    const auto& aHeader = a->peekHeader<Ieee80211MacHeader>();
-    const auto& bHeader = b->peekHeader<Ieee80211MacHeader>();
+    const auto& aHeader = a->peekAtFront<Ieee80211MacHeader>();
+    const auto& bHeader = b->peekAtFront<Ieee80211MacHeader>();
     int aPri = dynamicPtrCast<const Ieee80211MgmtHeader>(aHeader) ? 2 : aHeader->getReceiverAddress().isMulticast() ? 1 : 0;
     int bPri = dynamicPtrCast<const Ieee80211MgmtHeader>(bHeader) ? 2 : bHeader->getReceiverAddress().isMulticast() ? 1 : 0;
     return bPri - aPri;

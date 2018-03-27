@@ -120,16 +120,16 @@ void PacketDissector::doDissectPacket(Packet *packet, const Protocol *protocol) 
 
 void PacketDissector::dissectPacket(Packet *packet, const Protocol *protocol) const
 {
-    auto headerPopOffset = packet->getHeaderPopOffset();
-    auto trailerPopOffset = packet->getTrailerPopOffset();
+    auto headerPopOffset = packet->getFrontOffset();
+    auto trailerPopOffset = packet->getBackOffset();
     // dissect packet data part according to protocol
     doDissectPacket(packet, protocol);
     // dissect remaining junk in packet without protocol (e.g. ethernet padding at IP level)
     if (packet->getDataLength() != b(0))
         doDissectPacket(packet, nullptr);
     ASSERT(packet->getDataLength() == b(0));
-    packet->setHeaderPopOffset(headerPopOffset);
-    packet->setTrailerPopOffset(trailerPopOffset);
+    packet->setFrontOffset(headerPopOffset);
+    packet->setBackOffset(trailerPopOffset);
 }
 
 } // namespace

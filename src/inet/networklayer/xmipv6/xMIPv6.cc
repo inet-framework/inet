@@ -202,7 +202,7 @@ void xMIPv6::handleMessage(cMessage *msg)
 
 void xMIPv6::processMobilityMessage(Packet *inPacket)
 {
-    const auto& mipv6Msg = inPacket->peekHeader<MobilityHeader>();
+    const auto& mipv6Msg = inPacket->peekAtFront<MobilityHeader>();
 
     EV_INFO << "Processing of MIPv6 related mobility message" << endl;
 
@@ -578,7 +578,7 @@ void xMIPv6::createAndSendBUMessage(const Ipv6Address& dest, InterfaceEntry *ie,
        specified in Section 11.7.2.*/
     updateBUL(bu.get(), dest, CoA, ie, simTime());
 
-    packet->insertHeader(bu);
+    packet->insertAtFront(bu);
 
     /*11.7.1
        o  The care-of address for the binding MUST be used as the Source
@@ -1115,7 +1115,7 @@ void xMIPv6::createAndSendBAMessage(const Ipv6Address& src, const Ipv6Address& d
         bindAuthSize = SIZE_BIND_AUTH_DATA + 2; // Binding Auth. Data + 6.2.3 PadN = 16 bit
 
     ba->setChunkLength(B(SIZE_MOBILITY_HEADER + SIZE_BACK + bindAuthSize));
-    packet->insertHeader(ba);
+    packet->insertAtFront(ba);
 
     /*The rules for selecting the Destination IP address (and, if required,
        routing header construction) for the Binding Acknowledgement to the
@@ -1550,7 +1550,7 @@ void xMIPv6::sendTestInit(cMessage *msg)
         // mark the current home token as invalid
         bul->resetHomeToken(tiIfEntry->dest, HoA);
         // and send message
-        outPacket->insertHeader(homeTestInit);
+        outPacket->insertAtFront(homeTestInit);
         sendMobilityMessageToIPv6Module(outPacket, tiIfEntry->dest, HoA);
 
         // statistic collection
@@ -1570,7 +1570,7 @@ void xMIPv6::sendTestInit(cMessage *msg)
         // mark the current care-of token as invalid
         bul->resetCareOfToken(tiIfEntry->dest, CoA);
         // and send message
-        outPacket->insertHeader(careOfTestInit);
+        outPacket->insertAtFront(careOfTestInit);
         sendMobilityMessageToIPv6Module(outPacket, tiIfEntry->dest, CoA, ie->getInterfaceId());
 
         // statistic collection
@@ -1729,7 +1729,7 @@ void xMIPv6::processHoTIMessage(Packet *inPacket, const Ptr<const HomeTestInit>&
     homeTest->setHomeKeyGenToken(bc->generateHomeToken(HoA, 0));    // TODO nonce
     // setting message size
     homeTest->setChunkLength(B(SIZE_MOBILITY_HEADER + SIZE_HOT));
-    outPacket->insertHeader(homeTest);
+    outPacket->insertAtFront(homeTest);
 
     EV_INFO << "\n<<======HoT MESSAGE FORMED; APPENDING CONTROL INFO=====>>\n";
     sendMobilityMessageToIPv6Module(outPacket, srcAddr, HoA);
@@ -1753,7 +1753,7 @@ void xMIPv6::processCoTIMessage(Packet *inPacket, const Ptr<const CareOfTestInit
     cot->setCareOfKeyGenToken(bc->generateCareOfToken(coa, 0));    // TODO nonce
     // setting message size
     cot->setChunkLength(B(SIZE_MOBILITY_HEADER + SIZE_COT));
-    outPacket->insertHeader(cot);
+    outPacket->insertAtFront(cot);
 
     EV_INFO << "\n<<======CoT MESSAGE FORMED; APPENDING CONTROL INFO=====>>\n";
     sendMobilityMessageToIPv6Module(outPacket, srcAddr, coa);
@@ -2035,7 +2035,7 @@ void xMIPv6::sendBUtoCN(BindingUpdateList::BindingUpdateListEntry& bulEntry, Int
 
 void xMIPv6::processType2RH(Packet *packet, Ipv6RoutingHeader *rh)
 {
-    auto ipv6Header = packet->peekHeader<Ipv6Header>();
+    auto ipv6Header = packet->peekAtFront<Ipv6Header>();
     //EV << "Processing RH2..." << endl;
 
     if (!validateType2RH(*ipv6Header.get(), *rh)) {
@@ -2082,8 +2082,8 @@ void xMIPv6::processType2RH(Packet *packet, Ipv6RoutingHeader *rh)
            decrements segments left by one from the value it had on the wire,
            and resubmits the packet to IP for processing the next header.*/
         ipv6Header = nullptr;
-        packet->removePoppedHeaders();
-        auto newIpv6Header = packet->removeHeader<Ipv6Header>();
+        packet->trimFront();
+        auto newIpv6Header = packet->removeAtFront<Ipv6Header>();
         newIpv6Header->setDestAddress(HoA);
         insertNetworkProtocolHeader(packet, Protocol::ipv6, newIpv6Header);
         validRH2 = true;
@@ -2140,7 +2140,7 @@ bool xMIPv6::validateType2RH(const Ipv6Header& ipv6Header, const Ipv6RoutingHead
 
 void xMIPv6::processHoAOpt(Packet *packet, HomeAddressOption *hoaOpt)
 {
-    auto ipv6Header = packet->peekHeader<Ipv6Header>();
+    auto ipv6Header = packet->peekAtFront<Ipv6Header>();
 
     // datagram from MN to CN
     bool validHoAOpt = false;
@@ -2158,8 +2158,8 @@ void xMIPv6::processHoAOpt(Packet *packet, HomeAddressOption *hoaOpt)
 
     if (bc->isInBindingCache(HoA, CoA)) {
         ipv6Header = nullptr;
-        packet->removePoppedHeaders();
-        auto newIpv6Header = packet->removeHeader<Ipv6Header>();
+        packet->trimFront();
+        auto newIpv6Header = packet->removeAtFront<Ipv6Header>();
         newIpv6Header->setSrcAddress(HoA);
         insertNetworkProtocolHeader(packet, Protocol::ipv6, newIpv6Header);
         validHoAOpt = true;
@@ -2203,7 +2203,7 @@ void xMIPv6::createAndSendBEMessage(const Ipv6Address& dest, const BeStatus& beS
 
     // setting message size
     be->setChunkLength(B(SIZE_MOBILITY_HEADER + SIZE_BE));
-    packet->insertHeader(be);
+    packet->insertAtFront(be);
 
     sendMobilityMessageToIPv6Module(packet, dest);
 }
@@ -2483,7 +2483,7 @@ void xMIPv6::createAndSendBRRMessage(const Ipv6Address& dest, InterfaceEntry *ie
     brr->setMobilityHeaderType(BINDING_REFRESH_REQUEST);
 
     brr->setChunkLength(B(SIZE_MOBILITY_HEADER + SIZE_BRR));
-    outPacket->insertHeader(brr);
+    outPacket->insertAtFront(brr);
 
     EV_INFO << "\n<<======BRR MESSAGE FORMED; APPENDING CONTROL INFO=====>>\n";
     Ipv6Address CoA = ie->ipv6Data()->getGlobalAddress(Ipv6InterfaceData::CoA);

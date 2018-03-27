@@ -164,7 +164,7 @@ void TcpLwip::handleIpInputMessage(Packet *packet)
     L3Address srcAddr, destAddr;
     int interfaceId = -1;
 
-    auto tcpsegP = packet->peekHeader<TcpHeader>();
+    auto tcpsegP = packet->peekAtFront<TcpHeader>();
     srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress();
     destAddr = packet->getTag<L3AddressInd>()->getDestAddress();
     interfaceId = (packet->getTag<InterfaceInd>())->getInterfaceId();
@@ -176,11 +176,11 @@ void TcpLwip::handleIpInputMessage(Packet *packet)
             return;
         case CRC_DECLARED_CORRECT: {
             // modify to calculated, for serializing
-            packet->removePoppedHeaders();
-            const auto& newTcpsegP = packet->removeHeader<TcpHeader>();
+            packet->trimFront();
+            const auto& newTcpsegP = packet->removeAtFront<TcpHeader>();
             newTcpsegP->setCrcMode(CRC_COMPUTED);
             newTcpsegP->setCrc(0);
-            packet->insertHeader(newTcpsegP);
+            packet->insertAtFront(newTcpsegP);
             tcpsegP = newTcpsegP;
             break;
         }
@@ -206,7 +206,7 @@ void TcpLwip::handleIpInputMessage(Packet *packet)
 
     size_t totalTcpLen = maxBufferSize - ipHdrLen;
 
-    const auto& bytes = packet->peekDataBytes();
+    const auto& bytes = packet->peekDataAsBytes();
     totalTcpLen = bytes->copyToBuffer((uint8_t *)data + ipHdrLen, totalTcpLen);
 
     size_t totalIpLen = ipHdrLen + totalTcpLen;
@@ -256,7 +256,7 @@ void TcpLwip::notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, u
         conn->receiveQueueM->notifyAboutIncomingSegmentProcessing(pCurTcpSegM, seqNo, dataptr, len);
     }
     else {
-        const auto& tcpHdr = pCurTcpSegM->peekHeader<TcpHeader>();
+        const auto& tcpHdr = pCurTcpSegM->peekAtFront<TcpHeader>();
         if (pCurTcpSegM->getByteLength() > tcpHdr->getHeaderLength())
             throw cRuntimeError("conn is null, and received packet has data");
 
@@ -608,16 +608,16 @@ void TcpLwip::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP, L3Add
     else {
         const auto& bytes = makeShared<BytesChunk>((const uint8_t*)dataP, lenP);
         packet = new Packet(nullptr, bytes);
-        const auto& tcpHdr = packet->popHeader<TcpHeader>();
-        packet->removePoppedHeaders();
+        const auto& tcpHdr = packet->popAtFront<TcpHeader>();
+        packet->trimFront();
         int64_t numBytes = packet->getByteLength();
         ASSERT(numBytes == 0);
-        packet->insertHeader(tcpHdr);
+        packet->insertAtFront(tcpHdr);
     }
 
     ASSERT(packet);
 
-    auto tcpHdr = packet->removeHeader<TcpHeader>();
+    auto tcpHdr = packet->removeAtFront<TcpHeader>();
     tcpHdr->setCrc(0);
     tcpHdr->setCrcMode(crcMode);
     insertTransportProtocolHeader(packet, Protocol::tcp, tcpHdr);

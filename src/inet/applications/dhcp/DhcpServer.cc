@@ -156,7 +156,7 @@ void DhcpServer::processDHCPMessage(Packet *packet)
 {
     ASSERT(isOperational && ie != nullptr);
 
-    const auto& dhcpMsg = packet->peekHeader<DhcpMessage>();
+    const auto& dhcpMsg = packet->peekAtFront<DhcpMessage>();
 
     // check that the packet arrived on the interface we are supposed to serve
     int inputInterfaceId = packet->getTag<InterfaceInd>()->getInterfaceId();
@@ -301,7 +301,7 @@ void DhcpServer::sendNAK(const Ptr<const DhcpMessage>& msg)
     nak->getOptionsForUpdate().setServerIdentifier(ie->ipv4Data()->getIPAddress());
     nak->getOptionsForUpdate().setMessageType(DHCPNAK);
 
-    pk->insertAtEnd(nak);
+    pk->insertAtBack(nak);
     /* RFC 2131, 4.1
      *
      * In all cases, when 'giaddr' is zero, the server broadcasts any DHCPNAK
@@ -347,7 +347,7 @@ void DhcpServer::sendACK(DhcpLease *lease, const Ptr<const DhcpMessage>& packet)
 
     // add the server ID as the RFC says
     ack->getOptionsForUpdate().setServerIdentifier(ie->ipv4Data()->getIPAddress());
-    pk->insertAtEnd(ack);
+    pk->insertAtBack(ack);
 
     // register the lease time
     lease->leaseTime = simTime();
@@ -418,7 +418,7 @@ void DhcpServer::sendOffer(DhcpLease *lease, const Ptr<const DhcpMessage>& packe
 
     // register the offering time // todo: ?
     lease->leaseTime = simTime();
-    pk->insertAtEnd(offer);
+    pk->insertAtBack(offer);
 
     /* RFC 2131, 4.1
      * If the 'giaddr' field in a DHCP message from a client is non-zero,

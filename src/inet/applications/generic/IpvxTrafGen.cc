@@ -191,7 +191,7 @@ void IpvxTrafGen::sendPacket()
 
     Packet *packet = new Packet(msgName);
     const auto& payload = makeShared<ByteCountChunk>(B(*packetLengthPar));
-    packet->insertAtEnd(payload);
+    packet->insertAtBack(payload);
 
     L3Address destAddr = chooseDestAddr();
 

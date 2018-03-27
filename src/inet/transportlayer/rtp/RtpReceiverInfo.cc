@@ -79,7 +79,7 @@ RtpReceiverInfo *RtpReceiverInfo::dup() const
 
 void RtpReceiverInfo::processRTPPacket(Packet *packet, int id, simtime_t arrivalTime)
 {
-    const auto& rtpHeader = packet->peekHeader<RtpHeader>();
+    const auto& rtpHeader = packet->peekAtFront<RtpHeader>();
     // this endsystem sends, it isn't inactive
     _inactiveIntervals = 0;
 

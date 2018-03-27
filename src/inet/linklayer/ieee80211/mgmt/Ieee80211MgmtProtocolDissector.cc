@@ -32,7 +32,7 @@ void Ieee80211MgmtProtocolDissector::dissect(Packet *packet, ICallback& callback
     callback.startProtocolDataUnit(&Protocol::ieee80211Mgmt);
     //TODO popHeader<Ieee80211MgmtHeader>
     callback.visitChunk(packet->peekData(), &Protocol::ieee80211Mgmt);
-    packet->setHeaderPopOffset(packet->getTrailerPopOffset());
+    packet->setFrontOffset(packet->getBackOffset());
     callback.endProtocolDataUnit(&Protocol::ieee80211Mgmt);
 }
 

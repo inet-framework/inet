@@ -43,8 +43,8 @@ class INET_API PppDissector : public ProtocolDissector
 void PppDissector::dissect(Packet *packet, ICallback& callback) const
 {
     callback.startProtocolDataUnit(&Protocol::ppp);
-    const auto& header = packet->popHeader<PppHeader>();
-    const auto& trailer = packet->popTrailer<PppTrailer>();
+    const auto& header = packet->popAtFront<PppHeader>();
+    const auto& trailer = packet->popAtBack<PppTrailer>();
     callback.visitChunk(header, &Protocol::ppp);
     auto payloadProtocol = ProtocolGroup::pppprotocol.getProtocol(header->getProtocol());
     callback.dissectPacket(packet, payloadProtocol);
@@ -237,7 +237,7 @@ void Ppp::startTransmitting(Packet *msg)
     *newPacketProtocolTag = *oldPacketProtocolTag;
     delete oldPacketProtocolTag;
     if (sendRawBytes) {
-        auto rawFrame = new Packet(pppFrame->getName(), pppFrame->peekAllBytes());
+        auto rawFrame = new Packet(pppFrame->getName(), pppFrame->peekAllAsBytes());
         rawFrame->copyTags(*pppFrame);
         send(rawFrame, physOutGate);
         delete pppFrame;
@@ -293,8 +293,8 @@ void Ppp::handleMessage(cMessage *msg)
         }
         else {
             // pass up payload
-            const auto& pppHeader = packet->peekHeader<PppHeader>();
-            const auto& pppTrailer = packet->peekTrailer<PppTrailer>(PPP_TRAILER_LENGTH);
+            const auto& pppHeader = packet->peekAtFront<PppHeader>();
+            const auto& pppTrailer = packet->peekAtBack<PppTrailer>(PPP_TRAILER_LENGTH);
             if (pppHeader == nullptr || pppTrailer == nullptr)
                 throw cRuntimeError("Invalid PPP packet: PPP header or Trailer is missing");
             emit(rxPkOkSignal, packet);
@@ -381,17 +381,17 @@ Packet *Ppp::encapsulate(Packet *msg)
     auto packet = check_and_cast<Packet*>(msg);
     auto pppHeader = makeShared<PppHeader>();
     pppHeader->setProtocol(ProtocolGroup::pppprotocol.getProtocolNumber(msg->getTag<PacketProtocolTag>()->getProtocol()));
-    packet->insertHeader(pppHeader);
+    packet->insertAtFront(pppHeader);
     auto pppTrailer = makeShared<PppTrailer>();
-    packet->insertTrailer(pppTrailer);
+    packet->insertAtBack(pppTrailer);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ppp);
     return packet;
 }
 
 cPacket *Ppp::decapsulate(Packet *packet)
 {
-    const auto& pppHeader = packet->popHeader<PppHeader>();
-    const auto& pppTrailer = packet->popTrailer<PppTrailer>(PPP_TRAILER_LENGTH);
+    const auto& pppHeader = packet->popAtFront<PppHeader>();
+    const auto& pppTrailer = packet->popAtBack<PppTrailer>(PPP_TRAILER_LENGTH);
     if (pppHeader == nullptr || pppTrailer == nullptr)
         throw cRuntimeError("Invalid PPP packet: PPP header or Trailer is missing");
     //TODO check CRC

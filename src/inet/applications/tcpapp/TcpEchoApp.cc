@@ -102,10 +102,10 @@ void TcpEchoAppThread::dataArrived(Packet *rcvdPkt, bool urgent)
 
         int64_t len = 0;
         for ( ; len + rcvdBytes <= outByteLen; len += rcvdBytes) {
-            outPkt->insertAtEnd(rcvdPkt->peekDataAt(B(0), B(rcvdBytes)));
+            outPkt->insertAtBack(rcvdPkt->peekDataAt(B(0), B(rcvdBytes)));
         }
         if (len < outByteLen)
-            outPkt->insertAtEnd(rcvdPkt->peekDataAt(B(0), B(outByteLen - len)));
+            outPkt->insertAtBack(rcvdPkt->peekDataAt(B(0), B(outByteLen - len)));
 
         ASSERT(outPkt->getByteLength() == outByteLen);
 

@@ -29,16 +29,16 @@ Register_Protocol_Dissector(&Protocol::flood, FloodProtocolDissector);
 
 void FloodProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    auto header = packet->popHeader<FloodHeader>();
-    auto trailerPopOffset = packet->getTrailerPopOffset();
-    auto payloadEndOffset = packet->getHeaderPopOffset() + header->getPayloadLengthField();
+    auto header = packet->popAtFront<FloodHeader>();
+    auto trailerPopOffset = packet->getBackOffset();
+    auto payloadEndOffset = packet->getFrontOffset() + header->getPayloadLengthField();
     callback.startProtocolDataUnit(&Protocol::flood);
     callback.visitChunk(header, &Protocol::flood);
-    packet->setTrailerPopOffset(payloadEndOffset);
+    packet->setBackOffset(payloadEndOffset);
     callback.dissectPacket(packet, header->getProtocol());
     ASSERT(packet->getDataLength() == B(0));
-    packet->setHeaderPopOffset(payloadEndOffset);
-    packet->setTrailerPopOffset(trailerPopOffset);
+    packet->setFrontOffset(payloadEndOffset);
+    packet->setBackOffset(trailerPopOffset);
     callback.endProtocolDataUnit(&Protocol::flood);
 }
 

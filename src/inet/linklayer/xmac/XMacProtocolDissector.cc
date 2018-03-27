@@ -30,7 +30,7 @@ Register_Protocol_Dissector(&Protocol::xmac, XMacProtocolDissector);
 
 void XMacProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    auto header = packet->popHeader<XMacHeader>();
+    auto header = packet->popAtFront<XMacHeader>();
     callback.startProtocolDataUnit(&Protocol::xmac);
     callback.visitChunk(header, &Protocol::xmac);
     if (header->getType() == XMAC_DATA) {

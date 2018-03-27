@@ -112,7 +112,7 @@ void UdpBasicApp::sendPacket()
     payload->setSequenceNumber(numSent);
     auto creationTimeTag = payload->addTag<CreationTimeTag>();
     creationTimeTag->setCreationTime(simTime());
-    packet->insertAtEnd(payload);
+    packet->insertAtBack(payload);
     L3Address destAddr = chooseDestAddr();
     emit(packetSentSignal, packet);
     socket.sendTo(packet, destAddr, destPort);

@@ -93,7 +93,7 @@ void PcapDump::writeFrame(simtime_t stime, const Packet *packet)
     struct pcaprec_hdr ph;
     ph.ts_sec = (int32)stime.inUnit(SIMTIME_S);
     ph.ts_usec = (uint32)(stime.inUnit(SIMTIME_US) - (uint32)1000000 * stime.inUnit(SIMTIME_S));
-    auto data = packet->peekDataBytes();
+    auto data = packet->peekDataAsBytes();
     auto bytes = data->getBytes();
     for (size_t i = 0; i < bytes.size(); i++) {
         buf[i] = bytes[i];

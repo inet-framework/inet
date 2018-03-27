@@ -236,7 +236,7 @@ void Ieee802154Mac::handleUpperPacket(Packet *packet)
 
     //RadioAccNoise3PhyControlInfo *pco = new RadioAccNoise3PhyControlInfo(bitrate);
     //macPkt->setControlInfo(pco);
-    packet->insertHeader(macPkt);
+    packet->insertAtFront(macPkt);
     packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee802154);
     EV_DETAIL << "pkt encapsulated, length: " << macPkt->getChunkLength() << "\n";
     executeMac(EV_SEND_REQUEST, packet);
@@ -495,7 +495,7 @@ void Ieee802154Mac::updateStatusTransmitFrame(t_mac_event event, cMessage *msg)
     if (event == EV_FRAME_TRANSMITTED) {
         //    delete msg;
         Packet *packet = macQueue.front();
-        const auto& csmaHeader = packet->peekHeader<Ieee802154MacHeader>();
+        const auto& csmaHeader = packet->peekAtFront<Ieee802154MacHeader>();
         radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
 
         bool expectAck = useMACAcks;
@@ -859,7 +859,7 @@ void Ieee802154Mac::handleLowerPacket(Packet *packet)
         delete packet;
         return;
     }
-    const auto& csmaHeader = packet->peekHeader<Ieee802154MacHeader>();
+    const auto& csmaHeader = packet->peekAtFront<Ieee802154MacHeader>();
     const MacAddress& src = csmaHeader->getSrcAddr();
     const MacAddress& dest = csmaHeader->getDestAddr();
     long ExpectedNr = 0;
@@ -895,7 +895,7 @@ void Ieee802154Mac::handleLowerPacket(Packet *packet)
                 csmaHeader->setDestAddr(src);
                 csmaHeader->setChunkLength(b(ackLength));
                 ackMessage = new Packet("CSMA-Ack");
-                ackMessage->insertHeader(csmaHeader);
+                ackMessage->insertAtFront(csmaHeader);
                 //Check for duplicates by checking expected seqNr of sender
                 if (SeqNrChild.find(src) == SeqNrChild.end()) {
                     //no record of current child -> add expected next number to map
@@ -922,7 +922,7 @@ void Ieee802154Mac::handleLowerPacket(Packet *packet)
                 // message is an ack, and it is for us.
                 // Is it from the right node ?
                 Packet *firstPacket = static_cast<Packet *>(macQueue.front());
-                const auto& csmaHeader = firstPacket->peekHeader<Ieee802154MacHeader>();
+                const auto& csmaHeader = firstPacket->peekAtFront<Ieee802154MacHeader>();
                 if (src == csmaHeader->getDestAddr()) {
                     nbRecvdAcks++;
                     executeMac(EV_ACK_RECEIVED, packet);
@@ -965,7 +965,7 @@ void Ieee802154Mac::receiveSignal(cComponent *source, simsignal_t signalID, long
 
 void Ieee802154Mac::decapsulate(Packet *packet)
 {
-    const auto& csmaHeader = packet->popHeader<Ieee802154MacHeader>();
+    const auto& csmaHeader = packet->popAtFront<Ieee802154MacHeader>();
     packet->addTagIfAbsent<MacAddressInd>()->setSrcAddress(csmaHeader->getSrcAddr());
     packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(csmaHeader->getNetworkProtocol());

@@ -67,7 +67,7 @@ void Stp::handleMessage(cMessage *msg)
 
     if (!msg->isSelfMessage()) {
         Packet *packet = check_and_cast<Packet*>(msg);
-        const auto& bpdu = packet->peekHeader<Bpdu>();
+        const auto& bpdu = packet->peekAtFront<Bpdu>();
 
         if (bpdu->getBpduType() == CONFIG_BDPU)
             handleBPDU(packet, bpdu);
@@ -144,7 +144,7 @@ void Stp::handleTCN(Packet *packet, const Ptr<const Bpdu>& tcn)
 
     if (!isRoot) {
         Packet *outPacket = new Packet(packet->getName());
-        outPacket->insertAtEnd(tcn);
+        outPacket->insertAtBack(tcn);
         outPacket->addTagIfAbsent<InterfaceReq>()->setInterfaceId(rootInterfaceId);
         outPacket->addTagIfAbsent<MacAddressReq>()->setSrcAddress(srcAddress);
         outPacket->addTagIfAbsent<MacAddressReq>()->setDestAddress(destAddress);
@@ -187,7 +187,7 @@ void Stp::generateBPDU(int interfaceId, const MacAddress& address, bool tcFlag, 
         }
     }
 
-    packet->insertAtEnd(bpdu);
+    packet->insertAtBack(bpdu);
     send(packet, "relayOut");
 }
 
@@ -209,7 +209,7 @@ void Stp::generateTCN()
             packet->addTagIfAbsent<MacAddressReq>()->setDestAddress(MacAddress::STP_MULTICAST_ADDRESS);
             packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(rootInterfaceId);
 
-            packet->insertAtEnd(tcn);
+            packet->insertAtBack(tcn);
             EV_INFO << "The topology has changed. Sending Topology Change Notification BPDU " << tcn << " to the Root Switch." << endl;
             send(packet, "relayOut");
         }

@@ -102,7 +102,7 @@ void EtherAppServer::handleMessage(cMessage *msg)
         const auto& outPayload = makeShared<EtherAppResp>();
         outPayload->setRequestId(requestId);
         outPayload->setChunkLength(B(l));
-        outPacket->insertAtEnd(outPayload);
+        outPacket->insertAtBack(outPayload);
 
         EV_INFO << "Send response `" << outPacket->getName() << "' to " << srcAddr << " ssap=" << localSAP << " dsap=" << srcSap << " length=" << l << "B requestId=" << requestId << "\n";
 

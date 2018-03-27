@@ -175,7 +175,7 @@ void GenericNetworkProtocol::handlePacketFromNetwork(Packet *packet)
         return;
     }
 
-    const auto& header = packet->peekHeader<GenericDatagramHeader>();
+    const auto& header = packet->peekAtFront<GenericDatagramHeader>();
     packet->addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
     packet->addTagIfAbsent<NetworkProtocolInd>()->setNetworkProtocolHeader(header);
     B totalLength = header->getChunkLength() + header->getPayloadLengthField();
@@ -190,7 +190,7 @@ void GenericNetworkProtocol::handlePacketFromNetwork(Packet *packet)
 
     // remove lower layer paddings:
     if (totalLength < packet->getDataLength()) {
-        packet->setTrailerPopOffset(packet->getHeaderPopOffset() + totalLength);
+        packet->setBackOffset(packet->getFrontOffset() + totalLength);
     }
 
     const InterfaceEntry *inIE = interfaceTable->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
@@ -241,7 +241,7 @@ void GenericNetworkProtocol::routePacket(Packet *datagram, const InterfaceEntry 
 {
     // TBD add option handling code here
 
-    auto header = datagram->peekHeader<GenericDatagramHeader>();
+    auto header = datagram->peekAtFront<GenericDatagramHeader>();
     L3Address destAddr = header->getDestinationAddress();
 
     EV_INFO << "Routing datagram `" << datagram->getName() << "' with dest=" << destAddr << ": ";
@@ -250,7 +250,7 @@ void GenericNetworkProtocol::routePacket(Packet *datagram, const InterfaceEntry 
     if (routingTable->isLocalAddress(destAddr)) {
         EV_INFO << "local delivery\n";
         if (fromHL && header->getSourceAddress().isUnspecified()) {
-            datagram->removePoppedHeaders();
+            datagram->trimFront();
             const auto& newHeader = removeNetworkProtocolHeader<GenericDatagramHeader>(datagram);
             newHeader->setSourceAddress(destAddr); // allows two apps on the same host to communicate
             insertNetworkProtocolHeader(datagram, Protocol::gnp, newHeader);
@@ -274,7 +274,7 @@ void GenericNetworkProtocol::routePacket(Packet *datagram, const InterfaceEntry 
     }
 
     if (!fromHL) {
-        datagram->removePoppedChunks();
+        datagram->trim();
     }
 
     // if output port was explicitly requested, use that, otherwise use GenericNetworkProtocol routing
@@ -306,7 +306,7 @@ void GenericNetworkProtocol::routePacket(Packet *datagram, const InterfaceEntry 
     }
 
     if (!fromHL) {
-        datagram->removePoppedHeaders();
+        datagram->trimFront();
         const auto& newHeader = removeNetworkProtocolHeader<GenericDatagramHeader>(datagram);
         newHeader->setHopLimit(header->getHopLimit() - 1);
         insertNetworkProtocolHeader(datagram, Protocol::gnp, newHeader);
@@ -315,7 +315,7 @@ void GenericNetworkProtocol::routePacket(Packet *datagram, const InterfaceEntry 
 
     // set datagram source address if not yet set
     if (header->getSourceAddress().isUnspecified()) {
-        datagram->removePoppedHeaders();
+        datagram->trimFront();
         const auto& newHeader = removeNetworkProtocolHeader<GenericDatagramHeader>(datagram);
         newHeader->setSourceAddress(destIE->getGenericNetworkProtocolData()->getAddress());
         insertNetworkProtocolHeader(datagram, Protocol::gnp, newHeader);
@@ -331,7 +331,7 @@ void GenericNetworkProtocol::routePacket(Packet *datagram, const InterfaceEntry 
 
 void GenericNetworkProtocol::routeMulticastPacket(Packet *datagram, const InterfaceEntry *destIE, const InterfaceEntry *fromIE)
 {
-    const auto& header = datagram->peekHeader<GenericDatagramHeader>();
+    const auto& header = datagram->peekAtFront<GenericDatagramHeader>();
     L3Address destAddr = header->getDestinationAddress();
     // if received from the network...
     if (fromIE != nullptr) {
@@ -467,7 +467,7 @@ void GenericNetworkProtocol::decapsulate(Packet *packet)
 {
     // decapsulate transport packet
     const InterfaceEntry *fromIE = getSourceInterfaceFrom(packet);
-    const auto& header = packet->popHeader<GenericDatagramHeader>();
+    const auto& header = packet->popAtFront<GenericDatagramHeader>();
 
     // create and fill in control info
     if (fromIE) {
@@ -477,7 +477,7 @@ void GenericNetworkProtocol::decapsulate(Packet *packet)
 
     ASSERT(header->getPayloadLengthField() <= packet->getDataLength());
     // drop padding
-    packet->setTrailerPopOffset(packet->getHeaderPopOffset() + header->getPayloadLengthField());
+    packet->setBackOffset(packet->getFrontOffset() + header->getPayloadLengthField());
 
     // attach control info
     auto payloadProtocol = header->getProtocol();
@@ -545,7 +545,7 @@ void GenericNetworkProtocol::encapsulate(Packet *transportPacket, const Interfac
 
 void GenericNetworkProtocol::sendDatagramToHL(Packet *packet)
 {
-    const auto& header = packet->peekHeader<GenericDatagramHeader>();
+    const auto& header = packet->peekAtFront<GenericDatagramHeader>();
     const Protocol *protocol = header->getProtocol();
     decapsulate(packet);
     // deliver to sockets
@@ -578,7 +578,7 @@ void GenericNetworkProtocol::sendDatagramToOutput(Packet *datagram, const Interf
     if (datagram->getByteLength() > ie->getMtu())
         throw cRuntimeError("datagram too large"); //TODO refine
 
-    const auto& header = datagram->peekHeader<GenericDatagramHeader>();
+    const auto& header = datagram->peekAtFront<GenericDatagramHeader>();
     // hop counter check
     if (header->getHopLimit() <= 0) {
         EV_INFO << "datagram hopLimit reached zero, discarding\n";
@@ -623,7 +623,7 @@ void GenericNetworkProtocol::sendDatagramToOutput(Packet *datagram, const Interf
 
 void GenericNetworkProtocol::datagramPreRouting(Packet *datagram, const InterfaceEntry *inIE, const InterfaceEntry *destIE, const L3Address& nextHop)
 {
-    const auto& header = datagram->peekHeader<GenericDatagramHeader>();
+    const auto& header = datagram->peekAtFront<GenericDatagramHeader>();
     // route packet
     if (!header->getDestinationAddress().isMulticast())
         routePacket(datagram, destIE, nextHop, false);
@@ -638,7 +638,7 @@ void GenericNetworkProtocol::datagramLocalIn(Packet *packet, const InterfaceEntr
 
 void GenericNetworkProtocol::datagramLocalOut(Packet *datagram, const InterfaceEntry *destIE, const L3Address& nextHop)
 {
-    const auto& header = datagram->peekHeader<GenericDatagramHeader>();
+    const auto& header = datagram->peekAtFront<GenericDatagramHeader>();
     // route packet
     if (!header->getDestinationAddress().isMulticast())
         routePacket(datagram, destIE, nextHop, true);

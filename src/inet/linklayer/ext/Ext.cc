@@ -96,7 +96,7 @@ void Ext::handleMessage(cMessage *msg)
 
     if (msg->isSelfMessage()) {
         // incoming real packet from wire (captured by pcap)
-        const auto& nwHeader = packet->peekHeader<Ipv4Header>();
+        const auto& nwHeader = packet->peekAtFront<Ipv4Header>();
         EV << "Delivering a packet from "
            << nwHeader->getSourceAddress()
            << " to "
@@ -115,7 +115,7 @@ void Ext::handleMessage(cMessage *msg)
         if (protocol != &Protocol::ipv4)
             throw cRuntimeError("ExtInterface accepts ipv4 packets only");
 
-        const auto& ipv4Header = packet->peekHeader<Ipv4Header>();
+        const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
 
         if (connected) {
             struct sockaddr_in addr;
@@ -125,7 +125,7 @@ void Ext::handleMessage(cMessage *msg)
 #endif // if !defined(linux) && !defined(__linux) && !defined(_WIN32)
             addr.sin_port = htons(0);
             addr.sin_addr.s_addr = htonl(ipv4Header->getDestAddress().getInt());
-            auto bytesChunk = packet->peekAllBytes();
+            auto bytesChunk = packet->peekAllAsBytes();
             size_t packetLength = bytesChunk->copyToBuffer(buffer, sizeof(buffer));
             ASSERT(packetLength == packet->getByteLength());
 

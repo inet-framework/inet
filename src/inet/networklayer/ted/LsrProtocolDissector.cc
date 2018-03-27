@@ -29,7 +29,7 @@ Register_Protocol_Dissector(&Protocol::linkstaterouting, LsrProtocolDissector);
 
 void LsrProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    auto header = packet->popHeader<LinkStateMsg>();
+    auto header = packet->popAtFront<LinkStateMsg>();
     callback.startProtocolDataUnit(&Protocol::linkstaterouting);
     callback.visitChunk(header, &Protocol::linkstaterouting);
     ASSERT(packet->getDataLength() == B(0));

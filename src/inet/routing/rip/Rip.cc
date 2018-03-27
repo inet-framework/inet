@@ -304,7 +304,7 @@ void Rip::sendRIPRequest(const RipInterfaceEntry& ripInterface)
     entry.addressFamilyId = RIP_AF_NONE;
     entry.metric = RIP_INFINITE_METRIC;
     packet->setChunkLength(B(RIP_HEADER_SIZE + RIP_RTE_SIZE * packet->getEntryArraySize()));
-    pk->insertAtEnd(packet);
+    pk->insertAtBack(packet);
     emit(sentRequestSignal, pk);
     sendPacket(pk, addressType->getLinkLocalRIPRoutersMulticastAddress(), ripUdpPort, ripInterface.ie);
 }
@@ -544,7 +544,7 @@ void Rip::handleMessage(cMessage *msg)
     }
     else if (msg->getKind() == UDP_I_DATA) {
         Packet *pk = check_and_cast<Packet *>(msg);
-        unsigned char command = pk->peekHeader<RipPacket>()->getCommand();
+        unsigned char command = pk->peekAtFront<RipPacket>()->getCommand();
         if (command == RIP_REQUEST)
             processRequest(pk);
         else if (command == RIP_RESPONSE)
@@ -600,7 +600,7 @@ void Rip::processUpdate(bool triggered)
  */
 void Rip::processRequest(Packet *packet)
 {
-    const auto& ripPacket = dynamicPtrCast<RipPacket>(packet->peekHeader<RipPacket>()->dupShared());
+    const auto& ripPacket = dynamicPtrCast<RipPacket>(packet->peekAtFront<RipPacket>()->dupShared());
 
     int numEntries = ripPacket->getEntryArraySize();
     if (numEntries == 0) {
@@ -645,7 +645,7 @@ void Rip::processRequest(Packet *packet)
 
     ripPacket->setCommand(RIP_RESPONSE);
     Packet *outPacket = new Packet("RIP response");
-    outPacket->insertAtEnd(ripPacket);
+    outPacket->insertAtBack(ripPacket);
     socket.sendTo(outPacket, srcAddr, srcPort);
 }
 
@@ -703,7 +703,7 @@ void Rip::sendRoutes(const L3Address& address, int port, const RipInterfaceEntry
         // if packet is full, then send it and allocate a new one
         if (k >= maxEntries) {
             packet->setChunkLength(B(RIP_HEADER_SIZE + RIP_RTE_SIZE * packet->getEntryArraySize()));
-            pk->insertAtEnd(packet);
+            pk->insertAtBack(packet);
 
             emit(sentUpdateSignal, pk);
             sendPacket(pk, address, port, ripInterface.ie);
@@ -719,7 +719,7 @@ void Rip::sendRoutes(const L3Address& address, int port, const RipInterfaceEntry
     if (k > 0) {
         packet->setEntryArraySize(k);
         packet->setChunkLength(B(RIP_HEADER_SIZE + RIP_RTE_SIZE * packet->getEntryArraySize()));
-        pk->insertAtEnd(packet);
+        pk->insertAtBack(packet);
 
         emit(sentUpdateSignal, pk);
         sendPacket(pk, address, port, ripInterface.ie);
@@ -779,7 +779,7 @@ void Rip::processResponse(Packet *packet)
         return;
     }
 
-    const auto& ripPacket = packet->peekHeader<RipPacket>();
+    const auto& ripPacket = packet->peekAtFront<RipPacket>();
 
     EV_INFO << "response received from " << srcAddr << "\n";
     int numEntries = ripPacket->getEntryArraySize();
@@ -844,7 +844,7 @@ bool Rip::isValidResponse(Packet *packet)
         }
     }
 
-    const auto& ripPacket = packet->peekHeader<RipPacket>();
+    const auto& ripPacket = packet->peekAtFront<RipPacket>();
     // validate entries
     int numEntries = ripPacket->getEntryArraySize();
     for (int i = 0; i < numEntries; ++i) {

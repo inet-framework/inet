@@ -34,8 +34,8 @@ template <typename T>
 const Ptr<T> removeProtocolHeader(Packet *packet)
 {
     delete packet->removeTagIfPresent<PacketProtocolTag>();
-    packet->removePoppedChunks(); // TODO: breaks fingerprints, but why not? packet->removePoppedHeaders();
-    return packet->removeHeader<T>();
+    packet->trim(); // TODO: breaks fingerprints, but why not? packet->trimHeaders();
+    return packet->removeAtFront<T>();
 }
 
 };

@@ -199,7 +199,7 @@ void HttpServerBase::handleMessage(cMessage *msg)
 
 Packet *HttpServerBase::handleReceivedMessage(Packet *msg)
 {
-    const auto& request = msg->peekHeader<HttpRequestMessage>();
+    const auto& request = msg->peekAtFront<HttpRequestMessage>();
     if (request == nullptr)
         throw cRuntimeError("Message (%s)%s is not a valid request", msg->getClassName(), msg->getName());
 
@@ -246,7 +246,7 @@ Packet *HttpServerBase::handleReceivedMessage(Packet *msg)
 
 Packet *HttpServerBase::handleGetRequest(Packet *pk, std::string resource)
 {
-    const auto& request = pk->peekHeader<HttpRequestMessage>();
+    const auto& request = pk->peekAtFront<HttpRequestMessage>();
     EV_DEBUG << "Handling GET request " << request->getName() << " resource: " << resource << endl;
 
     resource = trimLeft(resource, "/");
@@ -292,7 +292,7 @@ Packet *HttpServerBase::handleGetRequest(Packet *pk, std::string resource)
 
 Packet *HttpServerBase::generateDocument(Packet *pk, const char *resource, int size)
 {
-    const auto& request = pk->peekHeader<HttpRequestMessage>();
+    const auto& request = pk->peekAtFront<HttpRequestMessage>();
     EV_DEBUG << "Generating HTML document for request " << pk->getName() << " from " << pk->getSenderModule()->getName() << endl;
 
     char szReply[512];
@@ -322,7 +322,7 @@ Packet *HttpServerBase::generateDocument(Packet *pk, const char *resource, int s
     }
 
     replymsg->setChunkLength(B(size));
-    replyPk->insertAtEnd(replymsg);
+    replyPk->insertAtBack(replymsg);
 
     EV_DEBUG << "Serving a HTML document of length " << replyPk->getByteLength() << " bytes" << endl;
 
@@ -362,7 +362,7 @@ Packet *HttpServerBase::generateResourceMessage(const Ptr<const HttpRequestMessa
     replymsg->setResult(200);
     replymsg->setContentType(category);    // Emulates the content-type header field
     replymsg->setChunkLength(B(size)); // Set the resource size
-    replyPk->insertAtEnd(replymsg);
+    replyPk->insertAtBack(replymsg);
     replyPk->setKind(HTTPT_RESPONSE_MESSAGE);
 
     sprintf(szReply, "RESOURCE-BODY:%s", resource.c_str());
@@ -382,7 +382,7 @@ Packet *HttpServerBase::generateErrorReply(const Ptr<const HttpRequestMessage>& 
     replymsg->setSerial(request->getSerial());
     replymsg->setResult(code);
     replymsg->setChunkLength(B((int)rdErrorMsgSize->draw()));
-    replyPk->insertAtEnd(replymsg);
+    replyPk->insertAtBack(replymsg);
     replyPk->setKind(HTTPT_RESPONSE_MESSAGE);
 
     badRequests++;

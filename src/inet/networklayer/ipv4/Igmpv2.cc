@@ -490,7 +490,7 @@ void Igmpv2::handleMessage(cMessage *msg)
         send(msg, "ipOut");
     else {
         Packet *packet = check_and_cast<Packet *>(msg);
-        const auto& igmp = packet->peekHeader<IgmpMessage>();
+        const auto& igmp = packet->peekAtFront<IgmpMessage>();
         processIgmpMessage(packet, igmp);
     }
 }
@@ -582,7 +582,7 @@ void Igmpv2::sendQuery(InterfaceEntry *ie, const Ipv4Address& groupAddr, double 
         msg->setGroupAddress(groupAddr);
         msg->setMaxRespTime(maxRespTime);
         msg->setChunkLength(B(8));
-        packet->insertAtBeginning(msg);
+        packet->insertAtFront(msg);
         sendToIP(packet, ie, groupAddr.isUnspecified() ? Ipv4Address::ALL_HOSTS_MCAST : groupAddr);
 
         numQueriesSent++;
@@ -602,7 +602,7 @@ void Igmpv2::sendReport(InterfaceEntry *ie, HostGroupData *group)
     const auto& msg = makeShared<Igmpv2Report>();
     msg->setGroupAddress(group->groupAddr);
     msg->setChunkLength(B(8));
-    packet->insertAtBeginning(msg);
+    packet->insertAtFront(msg);
     sendToIP(packet, ie, group->groupAddr);
     numReportsSent++;
 }
@@ -616,7 +616,7 @@ void Igmpv2::sendLeave(InterfaceEntry *ie, HostGroupData *group)
     const auto& msg = makeShared<Igmpv2Leave>();
     msg->setGroupAddress(group->groupAddr);
     msg->setChunkLength(B(8));
-    packet->insertAtBeginning(msg);
+    packet->insertAtFront(msg);
     sendToIP(packet, ie, Ipv4Address::ALL_ROUTERS_MCAST);
     numLeavesSent++;
 }
@@ -722,7 +722,7 @@ void Igmpv2::processQuery(InterfaceEntry *ie, Packet *packet)
 
     Ipv4Address sender = packet->getTag<L3AddressInd>()->getSrcAddress().toIpv4();
     HostInterfaceData *interfaceData = getHostInterfaceData(ie);
-    const auto& igmpQry = packet->peekHeader<IgmpQuery>(b(packet->getBitLength()));   //peek entire igmp packet
+    const auto& igmpQry = packet->peekAtFront<IgmpQuery>(b(packet->getBitLength()));   //peek entire igmp packet
 
     numQueriesRecv++;
 
@@ -793,7 +793,7 @@ void Igmpv2::processV2Report(InterfaceEntry *ie, Packet *packet)
 {
     ASSERT(ie->isMulticast());
 
-    const auto& msg = packet->peekHeader<Igmpv2Report>();
+    const auto& msg = packet->peekAtFront<Igmpv2Report>();
 
     Ipv4Address groupAddr = msg->getGroupAddress();
 
@@ -850,7 +850,7 @@ void Igmpv2::processLeave(InterfaceEntry *ie, Packet *packet)
 {
     ASSERT(ie->isMulticast());
 
-    const auto& msg = packet->peekHeader<Igmpv2Leave>();
+    const auto& msg = packet->peekAtFront<Igmpv2Leave>();
 
     EV_INFO << "Igmpv2: received Leave Group for group=" << msg->getGroupAddress() << " iface=" << ie->getInterfaceName() << "\n";
 

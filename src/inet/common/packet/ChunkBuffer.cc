@@ -89,18 +89,18 @@ void ChunkBuffer::mergeRegions(Region& previousRegion, Region& nextRegion)
     CHUNK_CHECK_IMPLEMENTATION(nextRegion.data != nullptr);
     if (previousRegion.getEndOffset() == nextRegion.getStartOffset()) {
         // consecutive regions
-        if (previousRegion.data->canInsertAtEnd(nextRegion.data)) {
+        if (previousRegion.data->canInsertAtBack(nextRegion.data)) {
             // merge into previous
             const auto& newData = makeExclusivelyOwnedMutableChunk(previousRegion.data);
-            newData->insertAtEnd(nextRegion.data);
+            newData->insertAtBack(nextRegion.data);
             newData->markImmutable();
             previousRegion.data = newData->simplify();
             nextRegion.data = nullptr;
         }
-        else if (nextRegion.data->canInsertAtBeginning(previousRegion.data)) {
+        else if (nextRegion.data->canInsertAtFront(previousRegion.data)) {
             // merge into next
             const auto& newData = makeExclusivelyOwnedMutableChunk(nextRegion.data);
-            newData->insertAtBeginning(previousRegion.data);
+            newData->insertAtFront(previousRegion.data);
             newData->markImmutable();
             nextRegion.data = newData->simplify();
             nextRegion.offset = previousRegion.offset;
@@ -109,8 +109,8 @@ void ChunkBuffer::mergeRegions(Region& previousRegion, Region& nextRegion)
         else {
             // merge as a sequence
             auto sequenceChunk = makeShared<SequenceChunk>();
-            sequenceChunk->insertAtEnd(previousRegion.data);
-            sequenceChunk->insertAtEnd(nextRegion.data);
+            sequenceChunk->insertAtBack(previousRegion.data);
+            sequenceChunk->insertAtBack(nextRegion.data);
             sequenceChunk->markImmutable();
             previousRegion.data = sequenceChunk;
             nextRegion.data = nullptr;

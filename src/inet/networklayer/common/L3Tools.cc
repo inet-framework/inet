@@ -63,15 +63,15 @@ const Ptr<const NetworkHeaderBase> peekNetworkProtocolHeader(Packet *packet, con
 {
 #ifdef WITH_IPv4
     if (protocol == Protocol::ipv4)
-        return packet->peekHeader<Ipv4Header>();
+        return packet->peekAtFront<Ipv4Header>();
 #endif
 #ifdef WITH_IPv6
     if (protocol == Protocol::ipv6)
-        return packet->peekHeader<Ipv6Header>();
+        return packet->peekAtFront<Ipv6Header>();
 #endif
 #ifdef WITH_GENERIC
     if (protocol == Protocol::gnp)
-        return packet->peekHeader<GenericDatagramHeader>();
+        return packet->peekAtFront<GenericDatagramHeader>();
 #endif
     // TODO: add other L3 protocols
     throw cRuntimeError("Unknown protocol: %s", protocol.getName());

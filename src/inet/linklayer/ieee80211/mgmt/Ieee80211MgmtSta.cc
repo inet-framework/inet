@@ -238,7 +238,7 @@ void Ieee80211MgmtSta::sendManagementFrame(const char *name, const Ptr<Ieee80211
     auto packet = new Packet(name);
     packet->addTagIfAbsent<MacAddressReq>()->setDestAddress(address);
     packet->addTagIfAbsent<Ieee80211SubtypeReq>()->setSubtype(subtype);
-    packet->insertAtEnd(body);
+    packet->insertAtBack(body);
     sendDown(packet);
 }
 

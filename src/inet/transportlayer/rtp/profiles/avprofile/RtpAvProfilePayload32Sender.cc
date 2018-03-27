@@ -156,9 +156,9 @@ bool RtpAvProfilePayload32Sender::sendPacket()
 
             rtpHeader->setTimeStamp(_timeStampBase + (_initialDelay + (1 / _framesPerSecond) * (double)_frameNumber) * _clockRate);
             rtpHeader->setSsrc(_ssrc);
-            packet->insertHeader(rtpHeader);
-            packet->insertTrailer(mpegHeader);
-            packet->insertTrailer(mpegPayload);
+            packet->insertAtFront(rtpHeader);
+            packet->insertAtBack(mpegHeader);
+            packet->insertAtBack(mpegPayload);
 
             RtpInnerPacket *rinpOut = new RtpInnerPacket("dataOut()");
             rinpOut->setDataOutPkt(packet);

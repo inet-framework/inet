@@ -102,7 +102,7 @@ void HttpBrowser::sendRequestToServer(BrowseEvent be)
 
 void HttpBrowser::sendRequestToServer(Packet *pk)
 {
-    const auto& request = pk->peekHeader<HttpRequestMessage>();
+    const auto& request = pk->peekAtFront<HttpRequestMessage>();
     int connectPort;
     char szModuleName[127];
 

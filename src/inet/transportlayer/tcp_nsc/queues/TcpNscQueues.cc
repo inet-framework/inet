@@ -82,10 +82,10 @@ Packet *TcpNscSendQueue::createSegmentWithBytes(const void *tcpDataP, int tcpLen
 
     const auto& bytes = makeShared<BytesChunk>((const uint8_t*)tcpDataP, tcpLengthP);
     auto packet = new Packet(nullptr, bytes);
-    const auto& tcpHdr = packet->popHeader<TcpHeader>();
-    packet->removePoppedHeaders();
+    const auto& tcpHdr = packet->popAtFront<TcpHeader>();
+    packet->trimFront();
     int64_t numBytes = packet->getByteLength();
-    packet->insertHeader(tcpHdr);
+    packet->insertAtFront(tcpHdr);
 
 //    auto payload = makeShared<BytesChunk>((const uint8_t*)tcpDataP, tcpLengthP);
 //    const auto& tcpHdr = (payload->Chunk::peek<TcpHeader>(byte(0)));
@@ -147,7 +147,7 @@ Packet *TcpNscReceiveQueue::extractBytesUpTo()
         dataMsg = new Packet("DATA");
         dataMsg->setKind(TCP_I_DATA);
         const auto& data = dataBuffer.pop<Chunk>(queueLength);
-        dataMsg->insertAtEnd(data);
+        dataMsg->insertAtBack(data);
     }
 
     return dataMsg;

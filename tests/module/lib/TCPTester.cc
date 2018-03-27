@@ -160,7 +160,7 @@ void TCPScriptableTester::handleMessage(cMessage *msg)
 
 void TCPScriptableTester::dispatchSegment(Packet *pk)
 {
-    const auto& seg = pk->peekHeader<TcpHeader>();
+    const auto& seg = pk->peekAtFront<TcpHeader>();
     if (seg == nullptr)
         throw cRuntimeError("Unknown message");
     Command *cmd = (Command *)pk->getContextPointer();
@@ -172,7 +172,7 @@ void TCPScriptableTester::dispatchSegment(Packet *pk)
 
 void TCPScriptableTester::processIncomingSegment(Packet *pk, bool fromA)
 {
-    const auto& seg = pk->peekHeader<TcpHeader>();
+    const auto& seg = pk->peekAtFront<TcpHeader>();
     if (seg == nullptr)
         throw cRuntimeError("Unknown message");
     int segno = fromA ? ++fromASeq : ++fromBSeq;
@@ -266,7 +266,7 @@ void TCPRandomTester::handleMessage(cMessage *msg)
 
 void TCPRandomTester::dispatchSegment(Packet *pk)
 {
-    const auto& seg = pk->peekHeader<TcpHeader>();
+    const auto& seg = pk->peekAtFront<TcpHeader>();
     if (seg == nullptr)
         throw cRuntimeError("Unknown message");
     bool fromA = (bool)pk->getContextPointer();
@@ -277,7 +277,7 @@ void TCPRandomTester::dispatchSegment(Packet *pk)
 
 void TCPRandomTester::processIncomingSegment(Packet *pk, bool fromA)
 {
-    const auto& seg = pk->peekHeader<TcpHeader>();
+    const auto& seg = pk->peekAtFront<TcpHeader>();
     if (seg == nullptr)
         throw cRuntimeError("Unknown message");
     if (fromA) ++fromASeq; else ++fromBSeq;

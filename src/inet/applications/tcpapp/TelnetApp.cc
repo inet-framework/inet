@@ -145,7 +145,7 @@ void TelnetApp::sendGenericAppMsg(int numBytes, int expectedReplyBytes)
     payload->setChunkLength(B(numBytes));
     payload->setExpectedReplyLength(expectedReplyBytes);
     payload->setServerClose(false);
-    packet->insertAtEnd(payload);
+    packet->insertAtBack(payload);
 
     sendPacket(packet);
 }

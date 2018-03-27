@@ -29,7 +29,7 @@ Register_Protocol_Dissector(&Protocol::tcp, TcpProtocolDissector);
 
 void TcpProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    const auto& header = packet->popHeader<tcp::TcpHeader>();
+    const auto& header = packet->popAtFront<tcp::TcpHeader>();
     callback.startProtocolDataUnit(&Protocol::tcp);
     callback.visitChunk(header, &Protocol::tcp);
     if (packet->getDataLength() != b(0))

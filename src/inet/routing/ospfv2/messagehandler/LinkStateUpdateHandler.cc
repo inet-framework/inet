@@ -48,7 +48,7 @@ void LinkStateUpdateHandler::processPacket(Packet *packet, Interface *intf, Neig
 {
     router->getMessageHandler()->printEvent("Link State update packet received", intf, neighbor);
 
-    const auto& lsUpdatePacket = packet->peekHeader<OspfLinkStateUpdatePacket>();
+    const auto& lsUpdatePacket = packet->peekAtFront<OspfLinkStateUpdatePacket>();
     bool shouldRebuildRoutingTable = false;
 
     if (neighbor->getState() >= Neighbor::EXCHANGE_STATE) {
@@ -346,7 +346,7 @@ void LinkStateUpdateHandler::acknowledgeLSA(const OspfLsaHeader& lsaHeader,
 
         ackPacket->setChunkLength(B(OSPF_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH));
         Packet *pk = new Packet();
-        pk->insertAtEnd(ackPacket);
+        pk->insertAtBack(ackPacket);
 
         int ttl = (intf->getType() == Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
 

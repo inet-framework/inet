@@ -120,7 +120,7 @@ void ShortcutMac::sendToPeer(Packet *packet, ShortcutMac *peer)
             auto header = makeShared<ShortcutMacHeader>();
             header->setChunkLength(length);
             header->setPayloadProtocol(packetProtocol);
-            packet->insertHeader(header);
+            packet->insertAtFront(header);
             packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::shortcutMac);
         }
         else
@@ -136,7 +136,7 @@ void ShortcutMac::receiveFromPeer(Packet *packet)
     auto packetProtocolTag = packet->getTag<PacketProtocolTag>();
     auto packetProtocol = packetProtocolTag->getProtocol();
     if (packetProtocol == &Protocol::shortcutMac) {
-        const auto& header = packet->popHeader<ShortcutMacHeader>();
+        const auto& header = packet->popAtFront<ShortcutMacHeader>();
         packetProtocol = header->getPayloadProtocol();
         packetProtocolTag->setProtocol(packetProtocol);
     }

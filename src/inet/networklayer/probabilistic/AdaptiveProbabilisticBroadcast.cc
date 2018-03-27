@@ -31,7 +31,7 @@ void AdaptiveProbabilisticBroadcast::initialize(int stage)
 
 void AdaptiveProbabilisticBroadcast::handleLowerPacket(Packet *packet)
 {
-    const auto& macHeader = packet->peekHeader<ProbabilisticBroadcastHeader>();
+    const auto& macHeader = packet->peekAtFront<ProbabilisticBroadcastHeader>();
     // Update neighbors table before calling the method of the super class
     // because it may delete the message.
     updateNeighMap(macHeader.get());

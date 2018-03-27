@@ -95,9 +95,9 @@ std::vector<Packet *> *OriginatorQosMacDataService::extractFramesToTransmit(Pend
             packet = pendingQueue->pop();
         // PS Defer Queueing
         if (sequenceNumberAssigment) {
-            auto header = packet->removeHeader<Ieee80211DataOrMgmtHeader>();
+            auto header = packet->removeAtFront<Ieee80211DataOrMgmtHeader>();
             assignSequenceNumber(header);
-            packet->insertHeader(header);
+            packet->insertAtFront(header);
         }
         // if (msduIntegrityAndProtection)
         //    frame = protectMsduIfNeeded(frame);

@@ -169,7 +169,7 @@ void PimDm::handleMessageWhenUp(cMessage *msg)
     }
     else {
         Packet *pk = check_and_cast<Packet *>(msg);
-        const auto& pkt = pk->peekHeader<PimPacket>();
+        const auto& pkt = pk->peekAtFront<PimPacket>();
         if (pkt == nullptr)
             throw cRuntimeError("PimDm: received unknown message: %s (%s).", msg->getName(), msg->getClassName());
 
@@ -214,7 +214,7 @@ void PimDm::handleMessageWhenUp(cMessage *msg)
 
 void PimDm::processJoinPrunePacket(Packet *pk)
 {
-    const auto& pkt = pk->peekHeader<PimJoinPrune>();
+    const auto& pkt = pk->peekAtFront<PimJoinPrune>();
     EV_INFO << "Received JoinPrune packet.\n";
 
     emit(rcvdJoinPrunePkSignal, pk);
@@ -385,7 +385,7 @@ void PimDm::processJoin(Route *route, int intId, int numRpfNeighbors, Ipv4Addres
 
 void PimDm::processGraftPacket(Packet *pk)
 {
-    const auto& pkt = pk->peekHeader<PimGraft>();
+    const auto& pkt = pk->peekAtFront<PimGraft>();
     EV_INFO << "Received Graft packet.\n";
 
     emit(rcvdGraftPkSignal, pk);
@@ -539,7 +539,7 @@ void PimDm::processOlistNonEmptyEvent(Route *route)
 
 void PimDm::processGraftAckPacket(Packet *pk)
 {
-    const auto& pkt = pk->peekHeader<PimGraft>();
+    const auto& pkt = pk->peekAtFront<PimGraft>();
     EV_INFO << "Received GraftAck packet.\n";
 
     emit(rcvdGraftAckPkSignal, pk);
@@ -587,7 +587,7 @@ void PimDm::processGraftAckPacket(Packet *pk)
  */
 void PimDm::processStateRefreshPacket(Packet *pk)
 {
-    const auto& pkt = pk->peekHeader<PimStateRefresh>();
+    const auto& pkt = pk->peekAtFront<PimStateRefresh>();
     EV << "pimDM::processStateRefreshPacket" << endl;
 
     emit(rcvdStateRefreshPkSignal, pk);
@@ -687,7 +687,7 @@ void PimDm::processStateRefreshPacket(Packet *pk)
 
 void PimDm::processAssertPacket(Packet *pk)
 {
-    const auto& pkt = pk->peekHeader<PimAssert>();
+    const auto& pkt = pk->peekAtFront<PimAssert>();
     int incomingInterfaceId = pk->getTag<InterfaceInd>()->getInterfaceId();
     Ipv4Address srcAddrFromTag = pk->getTag<L3AddressInd>()->getSrcAddress().toIpv4();
     Ipv4Address source = pkt->getSourceAddress();
@@ -1522,7 +1522,7 @@ void PimDm::sendPrunePacket(Ipv4Address nextHop, Ipv4Address src, Ipv4Address gr
     address.IPaddress = src;
 
     msg->setChunkLength(B(PIM_HEADER_LENGTH + 8 + ENCODED_GROUP_ADDRESS_LENGTH + 4 + ENCODED_SOURCE_ADDRESS_LENGTH));
-    packet->insertHeader(msg);
+    packet->insertAtFront(msg);
 
     emit(sentJoinPrunePkSignal, packet);
 
@@ -1550,7 +1550,7 @@ void PimDm::sendJoinPacket(Ipv4Address nextHop, Ipv4Address src, Ipv4Address grp
     address.IPaddress = src;
 
     msg->setChunkLength(B(PIM_HEADER_LENGTH + 8 + ENCODED_GROUP_ADDRESS_LENGTH + 4 + ENCODED_SOURCE_ADDRESS_LENGTH));
-    packet->insertHeader(msg);
+    packet->insertAtFront(msg);
 
     emit(sentJoinPrunePkSignal, packet);
 
@@ -1580,7 +1580,7 @@ void PimDm::sendGraftPacket(Ipv4Address nextHop, Ipv4Address src, Ipv4Address gr
     address.IPaddress = src;
 
     msg->setChunkLength(B(PIM_HEADER_LENGTH + 8 + ENCODED_GROUP_ADDRESS_LENGTH + 4 + ENCODED_SOURCE_ADDRESS_LENGTH));
-    packet->insertHeader(msg);
+    packet->insertAtFront(msg);
 
     emit(sentGraftPkSignal, packet);
 
@@ -1606,7 +1606,7 @@ void PimDm::sendGraftAckPacket(Packet *pk, const Ptr<const PimGraft>& graftPacke
     Packet *packet = new Packet("PIMGraftAck");
     auto msg = dynamicPtrCast<PimGraft>(graftPacket->dupShared());
     msg->setType(GraftAck);
-    packet->insertHeader(msg);
+    packet->insertAtFront(msg);
 
     emit(sentGraftAckPkSignal, packet);
 
@@ -1633,7 +1633,7 @@ void PimDm::sendStateRefreshPacket(Ipv4Address originator, Route *route, Downstr
             + ENCODED_UNICODE_ADDRESS_LENGTH
             + ENCODED_UNICODE_ADDRESS_LENGTH
             + 12));
-    packet->insertHeader(msg);
+    packet->insertAtFront(msg);
 
     emit(sentStateRefreshPkSignal, packet);
 
@@ -1656,7 +1656,7 @@ void PimDm::sendAssertPacket(Ipv4Address source, Ipv4Address group, AssertMetric
             + ENCODED_GROUP_ADDRESS_LENGTH
             + ENCODED_UNICODE_ADDRESS_LENGTH
             + 8));
-    packet->insertHeader(pkt);
+    packet->insertAtFront(pkt);
 
     emit(sentAssertPkSignal, packet);
 

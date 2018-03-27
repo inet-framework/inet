@@ -29,7 +29,7 @@ Register_Protocol_Dissector(&Protocol::arp, ArpProtocolDissector);
 
 void ArpProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    const auto& arpPacket = packet->popHeader<ArpPacket>();
+    const auto& arpPacket = packet->popAtFront<ArpPacket>();
     callback.startProtocolDataUnit(&Protocol::arp);
     callback.visitChunk(arpPacket, &Protocol::arp);
     callback.endProtocolDataUnit(&Protocol::arp);
