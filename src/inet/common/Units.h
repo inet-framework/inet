@@ -26,6 +26,8 @@
 #include <cmath>
 #include <iostream>
 
+#include "inet/common/INETMath.h" // M_PI
+
 namespace inet {
 
 namespace units {
