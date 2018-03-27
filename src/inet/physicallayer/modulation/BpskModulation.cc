@@ -33,6 +33,7 @@ BpskModulation::BpskModulation() : MqamModulationBase(&constellation)
 
 double BpskModulation::calculateSER(double snir, Hz bandwidth, bps bitrate) const
 {
+    // https://en.wikipedia.org/wiki/Eb/N0#Relation_to_carrier-to-noise_ratio
     return 0.5 * erfc(sqrt(snir * bandwidth.get() / bitrate.get()));
 }
 
