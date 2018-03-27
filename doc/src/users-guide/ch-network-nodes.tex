@@ -112,38 +112,102 @@ mainly composed of the following components:
      \nedtype{PcapRecorder} are also available.
 \end{itemize}
 
+TODO Status
+
 \section{Node Architecture}
 
 TODO describe how INET protocols are connected to each other using the built-in message dispatching mechanism.
 
-\section{Customization}
+\section{Customizing Nodes}
 
 The built-in network nodes are written to be as versatile and customizable
-as possible. There are several mechanisms that make such flexibility possible:
+as possible. This is achieved in several ways:
 
-The simplest way is the use of \textit{gate vectors and submodule vectors}. The
-sizes of vectors may come from parameters or derived by the number of
-external connections to the network node. For example, one can have an
-\protocol{Ethernet} switch that has as many ports as needed, i.e. equal to
-the number of \protocol{Ethernet} devices connected to it.
+\subsection*{Submodule and Gate Vectors}
 
-TODO example
+One way is the use of gate vectors and submodule vectors. The sizes 
+of vectors may come from parameters or derived by the number of
+external connections to the network node. For example, a host may
+have an arbitrary number of wireless interfaces, and it will automatically
+have as many \protocol{Ethernet} interfaces as the number of \protocol{Ethernet} 
+devices connected to it.
 
-Another often used way of customization is \textit{parametric types}, that is, the
+For example, wireless interfaces for hosts are defined like this:
+
+\begin{ned}
+wlan[numWlanInterfaces]: <snip> // wlan interfaces in StandardHost etc al.
+\end{ned}
+
+Where \ttt{numWlanInterfaces} is a module parameter that defaults to 
+either 0 or 1 (this is different for e.g. \nedtype{StandardHost} and
+\nedtype{WirelessHost}.) To configure a host to have two interfaces, 
+add the following line to the ini file: 
+
+\begin{inifile}
+**.hostA.numWlanInterfaces = 2
+\end{inifile}
+
+\subsection*{Conditional Submodules}
+
+Submodules that are not vectors are often conditional. For example,
+the \protocol{TCP} protocol module in hosts is conditional on
+the \ttt{hasTcp} parameter. Thus, to disable \protocol{TCP} support
+in a host (it is enabled by default), use the following ini file line:
+
+\begin{inifile}
+**.hostA.hasTcp = false
+\end{inifile}
+
+\subsection*{Parametric Types}
+
+Another often used way of customization is parametric types, that is, the
 type of a submodule (or a channel) may be specified as a string parameter.
-For example, the relay unit inside an \protocol{Ethernet} switch has
-several alternative implementations, each one being a distinct module type.
-The switch model contains a parameter which allows the user to select the
-appropriate relay unit implementation.
+Almost all submodules in the built-in node types have parametric types.
+For example, the \protocol{TCP} protocol module is defined like this:
 
-TODO example
+\begin{ned}
+tcp: <tcpType> like ITcp if hasTcp;
+\end{ned}
 
-The most flexible way of customizing modules is \textit{inheritance}: a derived
-module may add new parameters, gates, submodules or connections, and may
-set inherited unassigned parameters to specific values.
+The \ttt{tcpType} parameter defaults to the default implementation, \nedtype{Tcp}.
+To use another implementation instead, add the following line to the ini file:
+ 
+\begin{inifile}
+**.host*.tcpType = "TcpLwip"  # use lwIP's TCP implementation
+\end{inifile}
 
-TODO example
+Submodule vectors with parametric types are defined without the use of a
+module parameter to allow elements have different types. An example
+is how applications are defined in hosts: 
 
+\begin{ned}
+app[numApps]: <> like IApp;  // applications in StandardHost et al.
+\end{ned}
+
+And applications can be added in the following way:
+
+\begin{inifile}
+**.hostA.numApps = 2
+**.hostA.apps[0].typename = "UdpBasicApp"
+**.hostA.apps[1].typename = "PingApp"
+\end{inifile}
+
+\subsection*{Inheritance}
+
+Inheritance can be use to derive new, specialized node types from existing ones.
+A derived NED type may add new parameters, gates, submodules or connections,
+and may set inherited unassigned parameters to specific values.
+
+For example, \nedtype{WirelessHost} is derived from \nedtype{StandardHost}
+in the following way:
+
+\begin{ned}
+module WirelessHost extends StandardHost 
+{
+    @display("i=device/wifilaptop");
+    numWlanInterfaces = default(1);
+}
+\end{ned}
 
 \section{[Applications]} % needed?
 \label{subsec:applications}
