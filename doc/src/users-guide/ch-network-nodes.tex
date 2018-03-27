@@ -24,48 +24,34 @@ themselves. They are further divided into smaller functional parts such as
 queues, protocol specific data storages, and protocol specific
 sub-services.
 
-OMNeT++ connections are also used within network nodes to represent
+OMNeT++ connections are used within network nodes to represent
 communication opportunities between protocols. These connections are
-primarily useful for following what is happening inside network nodes in
-the runtime user interface. Packets and messages sent through them
+also facilitate  visualizing what is happening inside network nodes in
+the runtime user interface. Packets and messages sent through the connections
 represent some software or hardware activity.
 
-There are no predefined networks in INET, because it is very easy to create
-one, and because of the vast possibilities. However, the OMNeT++ IDE provides
-several topology generator wizards for advanced scenarios.
+\section{Overview 2}
 
-\section{Built-in Network Nodes}
+The \ttt{inet.node} package contains various pre-assembled host, router,
+switch, access point, and other modules, for example
+\nedtype{StandardHost}, \nedtype{Router} and \nedtype{EtherSwitch} and
+\nedtype{AccessPoint}. These compound modules contain some customization
+options via parametric submodule types, but they are not meant to be
+universal, so it may be necessary to create your own node models for
+your particular simulation scenarios.
 
-INET provides several pre-assembled network nodes with carefully selected
-components. They support customization via parameters and parametric
-submodule types, but they are not meant to be universal. Sometimes it may
-be necessary to create special network node models for particular
-simulation scenarios. In any case, the following list gives a taste of the
-built-in network nodes.
+Network interfaces (Ethernet, IEEE 802.11, etc) are usually compound modules
+themselves, and are being composed of a queue, a MAC, and possibly other
+simple modules. See \nedtype{EthernetInterface} as an example.
 
-\begin{itemize}
-  \item \nedtype{StandardHost} contains the most common Internet protocols:
-     \protocol{UCP}, \protocol{TDP}, \protocol{IPv4}, \protocol{IPv6},
-     \protocol{Ethernet}, \protocol{IEEE 802.11}. It also supports an
-     optional mobility model, optional energy models, and any number of
-     applications which are entirely configurable from INI files.
-  \item \nedtype{EtherSwitch} models an \protocol{Ethernet} switch containing
-     a relay unit and one MAC unit per port.
-  \item \nedtype{Router} provides the most common routing protocols:
-     \protocol{OSPF}, \protocol{BGP}, \protocol{RIP}, \protocol{PIM}.
-  \item \nedtype{AccessPoint} models a Wifi access point with multiple
-     \protocol{IEEE 802.11} network interfaces and multiple \protocol{Ethernet}
-     ports.
-  \item \nedtype{WirelessHost} provides a network node with one (default)
-     \protocol{IEEE 802.11} network interface in infrastructure mode,
-     suitable for using with an \nedtype{AccessPoint}.
-  \item \nedtype{AdhocHost} is a \nedtype{WirelessHost} with the network
-     interface configured in ad-hoc mode and forwarding enabled.
-  \item \nedtype{AodvRouter} is similar to an \nedtype{AdhocHost} with
-     an additional \protocol{AODV} protocol.
-\end{itemize}
+Not all modules implement protocols. There are modules which hold data (for
+example \nedtype{Ipv4RoutingTable}), perform autoconfiguration of a network
+(\nedtype{Ipv4NetworkConfigurator}), move a mobile node around (for example
+\nedtype{ConstSpeedMobility}), and perform housekeeping associated with
+radio signals in wireless simulations (\nedtype{RadioMedium}).
 
-\section{Node Architecture}
+
+\section{Ingredients}
 
 All network nodes in the INET Framework are OMNeT++ compound modules that are
 mainly composed of the following components:
@@ -126,74 +112,52 @@ mainly composed of the following components:
      \nedtype{PcapRecorder} are also available.
 \end{itemize}
 
-\section{Customizing Nodes}
+\section{Node Architecture}
 
-The internal structure of network nodes can be customized in several ways.
-The simplest way is the use of gate vectors and submodule vectors. The
+TODO describe how INET protocols are connected to each other using the built-in message dispatching mechanism.
+
+\section{Customization}
+
+The built-in network nodes are written to be as versatile and customizable
+as possible. There are several mechanisms that make such flexibility possible:
+
+The simplest way is the use of \textit{gate vectors and submodule vectors}. The
 sizes of vectors may come from parameters or derived by the number of
 external connections to the network node. For example, one can have an
 \protocol{Ethernet} switch that has as many ports as needed, i.e. equal to
 the number of \protocol{Ethernet} devices connected to it.
 
-Another often used way of customization is parametric types, that is, the
+TODO example
+
+Another often used way of customization is \textit{parametric types}, that is, the
 type of a submodule (or a channel) may be specified as a string parameter.
 For example, the relay unit inside an \protocol{Ethernet} switch has
 several alternative implementations, each one being a distinct module type.
 The switch model contains a parameter which allows the user to select the
 appropriate relay unit implementation.
 
-The most flexible way of customizing modules is inheritance: a derived
+TODO example
+
+The most flexible way of customizing modules is \textit{inheritance}: a derived
 module may add new parameters, gates, submodules or connections, and may
 set inherited unassigned parameters to specific values.
 
-\section{Customization Examples (???)}
+TODO example
 
-\subsection{Automatic Wired Interfaces}
 
-In many wired network simulations, the number of wired interfaces need not
-be manually configured, because it can be automatically inferred from the
-actual number of connections between network nodes.
+\section{[Applications]} % needed?
+\label{subsec:applications}
 
-\nedsnippet{AutomaticWiredInterfacesExample}{Automatic wired interfaces
-example}
+TODO describe how INET models running applications as modules: ping, connectionless traffic, connection oriented traffic, voip, video, etc.
 
-\subsection{Multiple Wireless Interfaces}
+\section{[Protocols]} % needed?
+\label{subsec:protocols}
 
-All built-in wireless network nodes support multiple wireless interfaces,
-but only one is enabled by default.
+TODO describe how INET models data and control plane protocols as modules in general
 
-\inisnippet{MultipleWirelessInterfacesExample}{Multiple wireless interfaces
-example}
+\section{[Routing Protocols]} % needed?
 
-\subsection{Enabling Dual IP Stack}
-
-All built-in network nodes support dual Internet protocol stacks, that is
-both \protocol{Ipv4} and \protocol{Ipv6} are available. They are also
-supported by transport layer protocols, link layer protocols, and most
-applications. Only \protocol{Ipv4} is enabled by default, so in order to
-use \protocol{Ipv6}, it must be enabled first, and an application
-supporting \protocol{Ipv6} (e.g., \nedtype{PingApp} must be used). The
-following example shows how to configure two ping applications in a single
-node where one is using an \protocol{Ipv4} and the other is using an
-\protocol{Ipv6} destination address.
-
-\inisnippet{DualStackExample}{Dual stack example}
-
-\subsection{Enabling Packet Forwarding}
-
-In general, network nodes don't forward packets by default, only
-\nedtype{Router} and the like do. Nevertheless, it's possible to enable
-packet forwarding as simply as flipping a switch.
-
-\inisnippet{ForwardingExample}{Forwarding example}
-
-\subsection{Internet Routing Protocols}
-
-%TODO
-
-\subsection{Network Node Mobility}
-
-%TODO
+TODO briefly describe how INET models routing protocols: BGP, OSPF, RIP, AODV, etc.
 
 \section{Custom Network Nodes}
 
@@ -208,90 +172,6 @@ mechanism which is required to connect multiple protocols in a many-to-many
 relationship.
 
 \nedsnippet{NetworkNodeExample}{Network node example}
-
-
-\section{-------------------------------------}
-
-\section{Overview}
-
-networks are assembled from nodes plus infrastructure components like WirelessMedium
-and ScenarioManager 
-
-TODO
-
-The \ttt{inet.node} package contains various pre-assembled host, router,
-switch, access point, and other modules, for example
-\nedtype{StandardHost}, \nedtype{Router} and \nedtype{EtherSwitch} and
-\nedtype{AccessPoint}. These compound modules contain some customization
-options via parametric submodule types, but they are not meant to be
-universal, so it may be necessary to create your own node models for
-your particular simulation scenarios.
-
-Network interfaces (Ethernet, IEEE 802.11, etc) are usually compound modules
-themselves, and are being composed of a queue, a MAC, and possibly other
-simple modules. See \nedtype{EthernetInterface} as an example.
-
-Not all modules implement protocols. There are modules which hold data (for
-example \nedtype{Ipv4RoutingTable}), perform autoconfiguration of a network
-(\nedtype{Ipv4NetworkConfigurator}), move a mobile node around (for example
-\nedtype{ConstSpeedMobility}), and perform housekeeping associated with
-radio signals in wireless simulations (\nedtype{RadioMedium}).
-
-The internal structure of compound modules such as host and router models
-can be customized in several ways. The first way is the use of \textit{gate
-vectors} and \textit{submodule vectors}. The sizes of vectors may come from
-parameters or derived by the number of external connections to the module.
-For example, one can have an Ethernet switch model that has as many ports
-as needed, i.e. equal to the number of Ethernet devices connected to it.
-
-The second way of customization is \textit{parametric types}, that is, the
-type of a submodule (or a channel) may be specified as a string parameter.
-For example, the relay unit inside an Ethernet switch has several
-alternative implementations, each one being a distinct module type. The
-switch model contains a parameter which allows the user to select the
-appropriate relay unit implementation.
-
-A third way of customizing modules is \textit{inheritance}: a derived
-module may add new parameters, gates, submodules or connections, and may
-set inherited unassigned parameters to specific values.
-
-
-\section{Network-Level Infrastructure Components}
-
-There are some components that occur on network level, but they
-are not models of physical network nodes, but are necessary 
-to model other aspects:
-
-\begin{itemize}
-  \item \nedtype{ScenarioManager} allows scripted scenarios, such
-     as timed failure and recovery of network nodes.
-  \item \nedtype{Ipv4NetworkConfigurator} assigns IP addresses 
-     to hosts and routers, and sets up static routing.
-\item \nedtype{XXXVisualizer} is ...
-\item \nedtype{Medium} is ...
-\item ...
-\end{itemize}
-
-TODO revise and extend list
-
-
-\section{Specifying network addresses in module parameters}
-
-Nearly all application layer modules, but several other compoments as well,
-have parameters that specify network addresses. They typically accept
-addresses given with any of the following syntax variations:
-
-\begin{itemize}
-  \item literal IPv4 address: \ttt{"186.54.66.2"}
-  \item literal IPv6 address: \ttt{"3011:7cd6:750b:5fd6:aba3:c231:e9f9:6a43"}
-  \item module name: \ttt{"server"}, \ttt{"subnet.server[3]"}
-  \item interface of a host or router: \ttt{"server/eth0"}, \ttt{"subnet.server[3]/eth0"}
-  \item IPv4 or IPv6 address of a host or router: \ttt{"server(ipv4)"},
-      \ttt{"subnet.server[3](ipv6)"}
-  \item IPv4 or IPv6 address of an interface of a host or router:
-      \ttt{"server/eth0(ipv4)"}, \ttt{"subnet.server[3]/eth0(ipv6)"}
-\end{itemize}
-
 
 
 

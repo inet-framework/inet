@@ -1,6 +1,12 @@
 \chapter{Networks}
 \label{cha:networks}
 
+%
+% This chapter provides practical guidance on how to put together various 
+% networks from the built-in node models and how to configure them,
+% WITHOUT LOOKING AT THE INTERNALS OF THOSE NODES.
+%
+
 \section{Overview}
 
 %TODO: wired, wireless, mixed wired/wireless, various topologies + generated, hierarchical, parametric
@@ -15,13 +21,6 @@ the composition of the network. Users are not required to have programming
 experience to create simulations unless they also want to implement 
 their own protocols, for example.
 
-As INET is an OMNeT++-based framework, users mainly use NED to describe the
-model topology, and ini files to provide configuration.\footnote{Some 
-components require additional configuration to be provided as separate
-files, e.g. in XML.} 
-
-\section{Assembling Simulations}
-
 Assembling an INET simulation starts with defining a module representing
 the network. Networks are compound modules which contain network nodes,
 automatic network configurators, and sometimes additionally transmission
@@ -29,6 +28,46 @@ medium, physical environment, various visualizer, and other infrastructure
 related modules. Networks also contain connections between network nodes
 representing cables. Large hierarchical networks may be further organized
 into compound modules to directly express the hierarchy.
+
+There are no predefined networks in INET, because it is very easy to create
+one, and because of the vast possibilities. However, the OMNeT++ IDE provides
+several topology generator wizards for advanced scenarios.
+
+As INET is an OMNeT++-based framework, users mainly use NED to describe the
+model topology, and ini files to provide configuration.\footnote{Some 
+components require additional configuration to be provided as separate
+files, e.g. in XML.} 
+
+\section{Built-in Network Nodes and Other Top-Level Modules}
+
+INET provides several pre-assembled network nodes with carefully selected
+components. They support customization via parameters and parametric
+submodule types, but they are not meant to be universal. Sometimes it may
+be necessary to create special network node models for particular
+simulation scenarios. In any case, the following list gives a taste of the
+built-in network nodes.
+
+\begin{itemize}
+  \item \nedtype{StandardHost} contains the most common Internet protocols:
+     \protocol{UCP}, \protocol{TDP}, \protocol{IPv4}, \protocol{IPv6},
+     \protocol{Ethernet}, \protocol{IEEE 802.11}. It also supports an
+     optional mobility model, optional energy models, and any number of
+     applications which are entirely configurable from INI files.
+  \item \nedtype{EtherSwitch} models an \protocol{Ethernet} switch containing
+     a relay unit and one MAC unit per port.
+  \item \nedtype{Router} provides the most common routing protocols:
+     \protocol{OSPF}, \protocol{BGP}, \protocol{RIP}, \protocol{PIM}.
+  \item \nedtype{AccessPoint} models a Wifi access point with multiple
+     \protocol{IEEE 802.11} network interfaces and multiple \protocol{Ethernet}
+     ports.
+  \item \nedtype{WirelessHost} provides a network node with one (default)
+     \protocol{IEEE 802.11} network interface in infrastructure mode,
+     suitable for using with an \nedtype{AccessPoint}.
+  \item \nedtype{AdhocHost} is a \nedtype{WirelessHost} with the network
+     interface configured in ad-hoc mode and forwarding enabled.
+  \item \nedtype{AodvRouter} is similar to an \nedtype{AdhocHost} with
+     an additional \protocol{AODV} protocol.
+\end{itemize}
 
 Network nodes communicate at the network level by exchanging OMNeT++ messages 
 which are the abstract representations of physical signals on the 
@@ -39,7 +78,25 @@ the transmitted digital data. Packets are further divided into chunks that
 provide alternative representations for smaller pieces of data (e.g. 
 protocol headers, application data).
 
-\section{Wired Networks}
+Additionally, there are components that occur on network level, but they
+are not models of physical network nodes. They are necessary 
+to model other aspects. Some of them are:
+
+\begin{itemize}
+  \item \nedtype{ScenarioManager} allows scripted scenarios, such
+     as timed failure and recovery of network nodes.
+  \item \nedtype{Ipv4NetworkConfigurator} assigns IP addresses 
+     to hosts and routers, and sets up static routing.
+\item \nedtype{XXXVisualizer} is ...
+\item \nedtype{Medium} is ...
+\item ...
+\end{itemize}
+
+TODO revise and extend list
+
+\section{Network Examples}
+
+\subsection{Wired Networks}
 
 Wired network connections, for example \protocol{Ethernet} cables, are
 represented with standard OMNeT++ connections using the
@@ -71,7 +128,7 @@ data, which in turn is echoed back by the server, and the simulation
 concludes. The default statistics are written to the \texttt{results}
 folder of the simulation for later analysis.
 
-\section{Wireless Networks}
+\subsection{Wireless Networks}
 
 %TODO: AccessPoint, WirelessHost infrastructure mode
 
@@ -99,58 +156,114 @@ ICMP echo requests to the first node. This simulation runs indefinitely
 while it continuously prints the usual ping round trip time report on the
 standard output.
 
-\section{Ethernet Networks}
+\subsection{Ethernet Networks}
 
 %TODO: EtherHub, EtherBus, EtherSwitch, EtherHost
 
-\section{MPLS Networks}
+\subsection{MPLS Networks}
 
 %TODO: LdpRouter, RsvpRouter
 
-\section{Mobile Ad hoc Networks}
+\subsection{Mobile Ad hoc Networks}
 
 %TODO: AdhocHost, ManetRouter, AodvRouter, DymoRouter, GpsrRouter
 
-\section{Sensor Networks}
+\subsection{Sensor Networks}
 
 %TOOD: SensorNode, SensorGateway
 
-\section{Virtual Private Networks}
+\subsection{Virtual Private Networks}
 
 %TOOD: VpnIngressNode, VpnEgressNode
 
-\section{Mixed Networks}
+\subsection{Mixed Networks}
 
 %TODO: wired + wireless
 
-\section{Complex Topologies}
 
-%TODO: wizards, generated topologies
+\section{How To...}
+
+\subsection{Automatic Wired Interfaces}
+
+In many wired network simulations, the number of wired interfaces need not
+be manually configured, because it can be automatically inferred from the
+actual number of connections between network nodes.
+
+\nedsnippet{AutomaticWiredInterfacesExample}{Automatic wired interfaces
+example}
+
+\subsection{Multiple Wireless Interfaces}
+
+All built-in wireless network nodes support multiple wireless interfaces,
+but only one is enabled by default.
+
+\inisnippet{MultipleWirelessInterfacesExample}{Multiple wireless interfaces
+example}
+
+\subsection{Traffic Generation}
+
+TODO scripted, synthetic, CBR, VBR, trace-based, .... 
+TODO app[]; other ways 
+
+\subsection{Specifying Addresses}
+
+Nearly all application layer modules, but several other components as well,
+have parameters that specify network addresses. They typically accept
+addresses given with any of the following syntax variations:
+
+\begin{itemize}
+  \item literal IPv4 address: \ttt{"186.54.66.2"}
+  \item literal IPv6 address: \ttt{"3011:7cd6:750b:5fd6:aba3:c231:e9f9:6a43"}
+  \item module name: \ttt{"server"}, \ttt{"subnet.server[3]"}
+  \item interface of a host or router: \ttt{"server/eth0"}, \ttt{"subnet.server[3]/eth0"}
+  \item IPv4 or IPv6 address of a host or router: \ttt{"server(ipv4)"},
+      \ttt{"subnet.server[3](ipv6)"}
+  \item IPv4 or IPv6 address of an interface of a host or router:
+      \ttt{"server/eth0(ipv4)"}, \ttt{"subnet.server[3]/eth0(ipv6)"}
+\end{itemize}
+
+TODO ini example
+
+
+\subsection{Node Failure and Recovery}
+
+\subsection{Enabling Dual IP Stack}
+
+All built-in network nodes support dual Internet protocol stacks, that is
+both \protocol{Ipv4} and \protocol{Ipv6} are available. They are also
+supported by transport layer protocols, link layer protocols, and most
+applications. Only \protocol{Ipv4} is enabled by default, so in order to
+use \protocol{Ipv6}, it must be enabled first, and an application
+supporting \protocol{Ipv6} (e.g., \nedtype{PingApp} must be used). The
+following example shows how to configure two ping applications in a single
+node where one is using an \protocol{Ipv4} and the other is using an
+\protocol{Ipv6} destination address.
+
+\inisnippet{DualStackExample}{Dual stack example}
+
+\subsection{Enabling Packet Forwarding}
+
+In general, network nodes don't forward packets by default, only
+\nedtype{Router} and the like do. Nevertheless, it's possible to enable
+packet forwarding as simply as flipping a switch.
+
+\inisnippet{ForwardingExample}{Forwarding example}
+
+\subsection{Adding Routing Protocols}
+
+TODO internet routing and ad hoc routing
+
+\subsection{Node Mobility}
+
+TODO
+
+\section{Topology Generation}
+
+TODO: wizards, generated topologies
 
 \section{Hierarchical Networks}
 
-%TODO: nested compound modules
-
-\section{//////////////////////////////////////////////////////////////////////}
-
-
-\section{Connecting Protocols}
-
-TODO describe how INET protocols are connected to each other using the built-in message dispatching mechanism.
-
-\section{Applications}
-\label{subsec:applications}
-
-TODO describe how INET models running applications as modules: ping, connectionless traffic, connection oriented traffic, voip, video, etc.
-
-\section{Protocols} % TODO: inline subsubsections one level up
-\label{subsec:protocols}
-
-TODO describe how INET models data and control plane protocols as modules in general
-
-\section{Routing Protocols}
-
-TODO briefly describe how INET models routing protocols: BGP, OSPF, RIP, AODV, etc.
+TODO: nested compound modules
 
 %%% Local Variables:
 %%% mode: latex
