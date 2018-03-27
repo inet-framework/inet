@@ -29,27 +29,42 @@ namespace inet {
  * and serialization. The data structure also supports dual representation by
  * default: data can be accessed as raw bytes and also as field based classes.
  *
- * Internally, packet stores the data in different kind of chunks. See the
- * Chunk class and its subclasses for details. All chunks are immutable in a
- * packet. Chunks are automatically merged as they are inserted into a packet,
+ * Internally, packet stores the data in different kind of chunks. See the Chunk
+ * class and its subclasses for details. All chunks are immutable in a packet.
+ * Chunks are automatically merged if possible as they are inserted into a packet,
  * and they are also shared among packets when duplicating.
  *
- * Packets are conceptually divided into three parts during processing: headers,
- * data, and trailers. These parts are separated by iterators which are stored
- * within the packet. During packet processing, as the packet is passed through
- * the protocol layers at the receiver, headers and trailers are popped from the
- * beginning and the end. This effectively reduces the remaining unprocessed
- * data part, but it doesn't affect the data stored in the chunks. Popping
- * headers and trailers is an efficient operation, because it doesn't require
- * copying or changing chunks, only updating the header and trailer iterators.
+ * Packets are conceptually divided into three parts during processing: front
+ * popped part, data part, and back popped part. These parts are separated by
+ * iterators called front and back pointer, which are stored within the packet.
+ *
+ *     +----------------------------------------------------------------+
+ *     |                                                                |
+ *     |             Packet content is divided into 3 parts             |
+ *     |                                                                |
+ *     +---------------------+---------------------+--------------------+
+ *     |                     |                     |                    |
+ *     |  Front popped part  |      Data part      |  Back popped part  |
+ *     |                     |                     |                    |
+ *     +----------------------------------------------------------------+
+ *                           ^                     ^
+ *                           |                     |
+ *                      Front pointer          Back pointer
+ *
+ * During packet processing, as the packet is passed through the protocol layers
+ * at the receiver, headers and trailers are popped from the beginning and the
+ * end. This effectively reduces the remaining unprocessed part called the data
+ * part, but it doesn't affect the data stored in the packet. Popping headers and
+ * trailers is most often a very efficient operation, because it doesn't require
+ * copying or changing chunks, only updating the front and back iterators.
  *
  * In general, this class supports the following operations:
- *  - insert to the beginning or end
- *  - remove from the beginning or end
- *  - query the length of the whole, header, data, and trailer parts
- *  - peek, pop or remove an arbitrary chunk from the parts
+ *  - query the length of the packet and the data part
+ *  - insert to the beginning or end of the packet
+ *  - remove from the beginning or end of the packet
+ *  - peek or pop from the front or the back of the data part
  *  - serialize to and deserialize from a sequence of bits or bytes
- *  - copy to a new packet
+ *  - copy the packet, it's a cheap operation
  *  - convert to a human readable string
  */
 class INET_API Packet : public cPacket
@@ -87,13 +102,13 @@ class INET_API Packet : public cPacket
     /** @name Length querying related functions */
     //@{
     /**
-     * Returns the total packet length ignoring header and trailer iterators.
+     * Returns the total packet length ignoring front and back offsets.
      * The returned value is in the range [0, +infinity).
      */
     b getTotalLength() const { return totalLength; }
 
     /**
-     * Returns the length in bits between the header and trailer iterators.
+     * Returns the length in bits between the front and back offsets.
      * The returned value is in the range [0, +infinity).
      */
     virtual int64_t getBitLength() const override { return b(getDataLength()).get(); }
@@ -117,53 +132,37 @@ class INET_API Packet : public cPacket
     virtual void setControlInfo(cObject *p) override { throw cRuntimeError("Invalid operation"); }
     //@}
 
-    /** @name Header querying related functions */
+    /** @name Data part front querying related functions */
     //@{
     /**
-     * Returns the header pop offset measured from the beginning of the packet.
+     * Returns the front offset measured from the beginning of the packet.
      * The returned value is in the range [0, getTotalLength()].
      */
     b getFrontOffset() const { return frontIterator.getPosition(); }
 
     /**
-     * Changes the header pop offset measured from the beginning of the packet.
+     * Changes the front offset measured from the beginning of the packet.
      * The value must be in the range [0, getTotalLength()].
      */
     void setFrontOffset(b offset);
 
     /**
-     * Returns the total length of popped headers.
-     */
-
-    /**
-     * Returns the designated header as an immutable chunk in its current
+     * Returns the designated part as an immutable chunk in its current
      * representation. If the length is unspecified, then the length of the
      * result is chosen according to the internal representation.
      */
     const Ptr<const Chunk> peekAtFront(b length = b(-1), int flags = 0) const;
 
     /**
-     * Inserts the provided header at the beginning of the packet. The inserted
-     * header is automatically marked immutable. The popped header length must
-     * be zero before calling this function.
-     */
-
-    /**
-     * Pops the designated header and returns it as an immutable chunk in its
-     * current representation. If the length is unspecified, then the length of
+     * Pops the designated part and returns it as an immutable chunk in its
+     * current representation. Increases the front offset with the length of
+     * the returned chunk. If the length is unspecified, then the length of
      * the result is chosen according to the internal representation.
      */
     const Ptr<const Chunk> popAtFront(b length = b(-1), int flags = 0);
 
     /**
-     * Removes the designated header and returns it as a mutable chunk in its
-     * current representation. If the length is unspecified, then the length of
-     * the result is chosen according to the internal representation. The popped
-     * header length must be zero before calling this function.
-     */
-
-    /**
-     * Returns true if the designated header is available in the requested
+     * Returns true if the designated part is available in the requested
      * representation. If the length is unspecified, then the length of the
      * result is chosen according to the internal representation.
      */
@@ -174,7 +173,7 @@ class INET_API Packet : public cPacket
     }
 
     /**
-     * Returns the designated header as an immutable chunk in the requested
+     * Returns the designated part as an immutable chunk in the requested
      * representation. If the length is unspecified, then the length of the
      * result is chosen according to the internal representation.
      */
@@ -190,9 +189,10 @@ class INET_API Packet : public cPacket
     }
 
     /**
-     * Pops the designated header and returns it as an immutable chunk in the
-     * requested representation. If the length is unspecified, then the length
-     * of the result is chosen according to the internal representation.
+     * Pops the designated part and returns it as an immutable chunk in the
+     * requested representation. Increases the front offset with the length of
+     * the returned chunk. If the length is unspecified, then the length of the
+     * result is chosen according to the internal representation.
      */
     template <typename T>
     const Ptr<const T> popAtFront(b length = b(-1), int flags = 0) {
@@ -204,62 +204,39 @@ class INET_API Packet : public cPacket
         }
         return chunk;
     }
-
-    /**
-     * Removes the designated header and returns it as a mutable chunk in the
-     * requested representation. If the length is unspecified, then the length
-     * of the result is chosen according to the internal representation. The
-     * popped header length must be zero before calling this function.
-     */
     //@}
 
-    /** @name Trailer querying related functions */
+    /** @name Data part back querying related functions */
     //@{
     /**
-     * Returns the trailer pop offset measured from the beginning of the packet.
+     * Returns the back offset measured from the beginning of the packet.
      * The returned value is in the range [0, getTotalLength()].
      */
     b getBackOffset() const { return getTotalLength() - backIterator.getPosition(); }
 
     /**
-     * Changes the trailer pop offset measured from the beginning of the packet.
+     * Changes the back offset measured from the beginning of the packet.
      * The value must be in the range [0, getTotalLength()].
      */
     void setBackOffset(b offset);
 
     /**
-     * Returns the total length of popped trailers.
-     */
-
-    /**
-     * Returns the designated trailer as an immutable chunk in its current
+     * Returns the designated part as an immutable chunk in its current
      * representation. If the length is unspecified, then the length of the
      * result is chosen according to the internal representation.
      */
     const Ptr<const Chunk> peekAtBack(b length = b(-1), int flags = 0) const;
 
     /**
-     * Inserts the provided trailer at the end of the packet. The inserted trailer
-     * is automatically marked immutable. The popped trailer length must be zero
-     * before calling this function.
-     */
-
-    /**
-     * Pops the designated trailer and returns it as an immutable chunk in its
-     * current representation. If the length is unspecified, then the length of
-     * the result is chosen according to the internal representation.
+     * Pops the designated part and returns it as an immutable chunk in its
+     * current representation. Decreases the back offset with the length of the
+     * returned chunk. If the length is unspecified, then the length of the
+     * result is chosen according to the internal representation.
      */
     const Ptr<const Chunk> popAtBack(b length = b(-1), int flags = 0);
 
     /**
-     * Removes the designated trailer and returns it as a mutable chunk in its
-     * current representation. If the length is unspecified, then the length of
-     * the result is chosen according to the internal representation. The popped
-     * trailer length must be zero before calling this function.
-     */
-
-    /**
-     * Returns true if the designated trailer is available in the requested
+     * Returns true if the designated part is available in the requested
      * representation. If the length is unspecified, then the length of the
      * result is chosen according to the internal representation.
      */
@@ -270,9 +247,10 @@ class INET_API Packet : public cPacket
     }
 
     /**
-     * Returns the designated trailer as an immutable chunk in the requested
-     * representation. If the length is unspecified, then the length of the
-     * result is chosen according to the internal representation.
+     * Returns the designated part as an immutable chunk in the requested
+     * representation. Decreases the back offset with the length of the returned
+     * chunk. If the length is unspecified, then the length of the result is
+     * chosen according to the internal representation.
      */
     template <typename T>
     const Ptr<const T> peekAtBack(b length = b(-1), int flags = 0) const {
@@ -286,7 +264,7 @@ class INET_API Packet : public cPacket
     }
 
     /**
-     * Pops the designated trailer and returns it as an immutable chunk in the
+     * Pops the designated part and returns it as an immutable chunk in the
      * requested representation. If the length is unspecified, then the length
      * of the result is chosen according to the internal representation.
      */
@@ -300,20 +278,13 @@ class INET_API Packet : public cPacket
         }
         return chunk;
     }
-
-    /**
-     * Removes the designated trailer and returns it as a mutable chunk in the
-     * requested representation. If the length is unspecified, then the length
-     * of the result is chosen according to the internal representation. The
-     * popped trailer length must be zero before calling this function.
-     */
     //@}
 
-    /** @name Data querying related functions */
+    /** @name Data part querying related functions */
     //@{
     /**
      * Returns the current length of the data part of the packet. This is the
-     * same as the difference between the header and trailer pop offsets.
+     * same as the difference between the front and back offsets.
      * The returned value is in the range [0, getTotalLength()].
      */
     b getDataLength() const { return getTotalLength() - frontIterator.getPosition() - backIterator.getPosition(); }
@@ -350,7 +321,7 @@ class INET_API Packet : public cPacket
     }
 
     /**
-     * Returns the data part (excluding popped headers and trailers) in the
+     * Returns the whole data part (excluding front and back popped parts) in the
      * current representation. The length of the returned chunk is the same as
      * the value returned by getDataLength().
      */
@@ -359,7 +330,7 @@ class INET_API Packet : public cPacket
     }
 
     /**
-     * Returns the data part (excluding popped headers and trailers) as a
+     * Returns the whole data part (excluding front and back popped parts) as a
      * sequence of bits. The length of the returned chunk is the same as the
      * value returned by getDataLength().
      */
@@ -368,7 +339,7 @@ class INET_API Packet : public cPacket
     }
 
     /**
-     * Returns the data part (excluding popped headers and trailers) as a
+     * Returns the whole data part (excluding front and back popped parts) as a
      * sequence of bytes. The length of the returned chunk is the same as the
      * value returned by getDataLength().
      */
@@ -377,7 +348,7 @@ class INET_API Packet : public cPacket
     }
 
     /**
-     * Returns the data part (excluding popped headers and trailers) in the
+     * Returns the data part (excluding front and back popped parts) in the
      * requested representation. The length of the returned chunk is the same as
      * the value returned by getDataLength().
      */
@@ -387,7 +358,7 @@ class INET_API Packet : public cPacket
     }
     //@}
 
-    /** @name Querying related functions */
+    /** @name Content querying related functions */
     //@{
     /**
      * Returns the designated part of the packet as an immutable chunk in its
@@ -421,7 +392,7 @@ class INET_API Packet : public cPacket
     }
 
     /**
-     * Returns the whole packet (including popped headers and trailers) in the
+     * Returns the whole packet (including front and back popped parts) in the
      * current representation. The length of the returned chunk is the same as
      * the value returned by getTotalLength().
      */
@@ -430,7 +401,7 @@ class INET_API Packet : public cPacket
     }
 
     /**
-     * Returns the whole packet (including popped headers and trailers) as a
+     * Returns the whole packet (including front and back popped parts) as a
      * sequence of bits. The length of the returned chunk is the same as the
      * value returned by getTotalLength().
      */
@@ -439,7 +410,7 @@ class INET_API Packet : public cPacket
     }
 
     /**
-     * Returns the whole packet (including popped headers and trailers) as a
+     * Returns the whole packet (including front and back popped parts) as a
      * sequence of bytes. The length of the returned chunk is the same as the
      * value returned by getTotalLength().
      */
@@ -448,7 +419,7 @@ class INET_API Packet : public cPacket
     }
 
     /**
-     * Returns the whole packet (including popped headers and trailers) in the
+     * Returns the whole packet (including front and back popped parts) in the
      * requested representation. The length of the returned chunk is the same as
      * the value returned by getTotalLength().
      */
@@ -461,33 +432,82 @@ class INET_API Packet : public cPacket
     /** @name Filling with data related functions */
     //@{
     /**
-     * Inserts the provided chunk at the beginning of the packet. The popped
-     * header length must be zero before calling this function.
+     * Inserts the provided part at the beginning of the packet. The inserted
+     * part is automatically marked immutable. The length of front popped part
+     * must be zero before calling this function.
      */
     void insertAtFront(const Ptr<const Chunk>& chunk);
 
     /**
-     * Inserts the provided chunk at the end of the packet. The popped trailer
-     * length must be zero before calling this function.
+     * Inserts the provided part at the end of the packet. The inserted part is
+     * automatically marked immutable. The length of back popped part must be
+     * zero before calling this function.
      */
     void insertAtBack(const Ptr<const Chunk>& chunk);
+    //@}
+
+    /** @name Erasing data related functions */
+    //@{
+    /**
+     * Erases the requested amount of data from the beginning of the packet. The
+     * length of front popped part must be zero before calling this function.
+     */
+    void eraseAtFront(b length);
+
+    /**
+     * Erases the requested amount of data from the end of the packet. The length
+     * of back popped part must be zero before calling this function.
+     */
+    void eraseAtBack(b length);
+
+    /**
+     * Erases all data from packet and resets both front and back offsets to zero.
+     */
+    void eraseAll();
+
+    /**
+     * Erases the front popped part and sets the front offset to zero. The back
+     * popped part and the data part of the packet isn't affected.
+     */
+    void trimFront();
+
+    /**
+     * Erases the back popped part and sets the back offset to zero. The front
+     * popped part and the data part of the packet isn't affected.
+     */
+    void trimBack();
+
+    /**
+     * Removes both front and back popped parts and sets both front and back
+     * offsets to zero. The data part of the packet isn't affected.
+     */
+    void trim();
     //@}
 
     /** @name Removing data related functions */
     //@{
     /**
-     * Removes the requested amount from the beginning of the packet. The popped
-     * header length must be zero before calling this function.
-    void eraseAtFront(b length);
-    void eraseAtBack(b length);
-    void eraseAll();
+     * Removes the designated part and returns it as a mutable chunk in its
+     * current representation. If the length is unspecified, then the length of
+     * the result is chosen according to the internal representation. The length
+     * of front popped part must be zero before calling this function.
+     */
     const Ptr<Chunk> removeAtFront(b length = b(-1), int flags = 0);
+
+    /**
+     * Removes the designated part and returns it as a mutable chunk in its
+     * current representation. If the length is unspecified, then the length of
+     * the result is chosen according to the internal representation. The length
+     * of back popped part must be zero before calling this function.
      */
     const Ptr<Chunk> removeAtBack(b length = b(-1), int flags = 0);
 
     /**
-     * Removes the requested amount from the end of the packet. The popped trailer
-     * length must be zero before calling this function.
+     * Removes the designated part and returns it as a mutable chunk in the
+     * requested representation. If the length is unspecified, then the length
+     * of the result is chosen according to the internal representation. The
+     * length of front popped part must be zero before calling this function.
+     */
     template <typename T>
     const Ptr<T> removeAtFront(b length = b(-1), int flags = 0) {
         CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
@@ -496,6 +516,12 @@ class INET_API Packet : public cPacket
         trimFront();
         return makeExclusivelyOwnedMutableChunk(chunk);
     }
+
+    /**
+     * Removes the designated part and returns it as a mutable chunk in the
+     * requested representation. If the length is unspecified, then the length
+     * of the result is chosen according to the internal representation. The
+     * length of back popped part must be zero before calling this function.
      */
     template <typename T>
     const Ptr<T> removeAtBack(b length = b(-1), int flags = 0) {
@@ -507,26 +533,10 @@ class INET_API Packet : public cPacket
     }
 
     /**
-     * Removes all popped headers, and sets the header pop length to zero.
-     * The popped trailers and the data part of the packet isn't affected.
+     * Removes all data from the packet and returns it as a mutable chunk in the
+     * current representation. Resets both front and back offsets to zero.
      */
     const Ptr<Chunk> removeAll();
-
-    /**
-     * Removes all popped trailers, and sets the trailer pop length to zero.
-     * The popped headers and the data part of the packet isn't affected.
-     */
-    void trimFront();
-
-    /**
-     * Removes all popped headers and trailers, but the data part isn't affected.
-     */
-    void trimBack();
-
-    /**
-     * Removes all data from packet.
-     */
-    void trim();
     //@}
 
     /** @name Tag related functions */

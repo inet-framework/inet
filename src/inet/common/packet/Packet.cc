@@ -240,6 +240,26 @@ void Packet::eraseAll()
     CHUNK_CHECK_IMPLEMENTATION(content->isImmutable());
 }
 
+void Packet::trimFront()
+{
+    b length = frontIterator.getPosition();
+    setFrontOffset(b(0));
+    eraseAtFront(length);
+}
+
+void Packet::trimBack()
+{
+    b length = backIterator.getPosition();
+    setBackOffset(getTotalLength());
+    eraseAtBack(length);
+}
+
+void Packet::trim()
+{
+    trimFront();
+    trimBack();
+}
+
 const Ptr<Chunk> Packet::removeAtFront(b length, int flags)
 {
     CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
@@ -263,26 +283,6 @@ const Ptr<Chunk> Packet::removeAll()
     const auto& oldContent = content;
     eraseAll();
     return makeExclusivelyOwnedMutableChunk(oldContent);
-}
-
-void Packet::trimFront()
-{
-    b length = frontIterator.getPosition();
-    setFrontOffset(b(0));
-    eraseAtFront(length);
-}
-
-void Packet::trimBack()
-{
-    b length = backIterator.getPosition();
-    setBackOffset(getTotalLength());
-    eraseAtBack(length);
-}
-
-void Packet::trim()
-{
-    trimFront();
-    trimBack();
 }
 
 //(inet::Packet)UdpBasicAppData-0 (5000 bytes)

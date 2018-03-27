@@ -25,7 +25,7 @@ class INET_API Message : public cMessage
   friend class MessageDescriptor;
 
   protected:
-    TagSet tags; // TODO: replace omnet API with this one
+    TagSet tags;
 
   public:
     explicit Message(const char *name = nullptr, short kind = 0);
