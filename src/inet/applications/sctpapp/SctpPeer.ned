@@ -48,9 +48,9 @@ simple SctpPeer like IApp
         string streamPriorities = default("");
 
         @display("i=block/app");
-        @signal[packetSent](type=SctpSimpleMessage);
+        @signal[packetSent](type=Packet);
         @signal[packetReceived](type=Packet);
-        @signal[echoedPk](type=SctpSimpleMessage);
+        @signal[echoedPk](type=Packet);
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[echoedPk](title="packets echoed"; source=echoedPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
