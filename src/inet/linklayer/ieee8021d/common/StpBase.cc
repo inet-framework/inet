@@ -112,17 +112,28 @@ void StpBase::refreshDisplay() const
     if (visualize) {
         for (unsigned int i = 0; i < numPorts; i++) {
             InterfaceEntry *ie = ifTable->getInterface(i);
-            const Ieee8021dInterfaceData *port = getPortInterfaceData(ie->getInterfaceId());
-
-            // color link
-            colorLink(ie, isOperational && (port->getState() == Ieee8021dInterfaceData::FORWARDING));
-
-            // label ethernet interface with port status and role
             cModule *nicModule = ie;
-            if (nicModule != nullptr) {
-                char buf[32];
-                sprintf(buf, "%s\n%s", port->getRoleName(), port->getStateName());
-                nicModule->getDisplayString().setTagArg("t", 0, buf);
+            if (isOperational) {
+                const Ieee8021dInterfaceData *port = getPortInterfaceData(ie->getInterfaceId());
+
+                // color link
+                colorLink(ie, isOperational && (port->getState() == Ieee8021dInterfaceData::FORWARDING));
+
+                // label ethernet interface with port status and role
+                if (nicModule != nullptr) {
+                    char buf[32];
+                    sprintf(buf, "%s\n%s", port->getRoleName(), port->getStateName());
+                    nicModule->getDisplayString().setTagArg("t", 0, buf);
+                }
+            }
+            else {
+                // color link
+                colorLink(ie, false);
+
+                // label ethernet interface with port status and role
+                if (nicModule != nullptr) {
+                    nicModule->getDisplayString().setTagArg("t", 0, "");
+                }
             }
         }
 
