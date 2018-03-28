@@ -437,9 +437,9 @@
 /examples/rtp/unicast1/,             -f omnetpp.ini -c General -r 0,                1000s,           6853-75a6/tplx, PASS,
 /examples/rtp/unicast2/,             -f omnetpp.ini -c General -r 0,                500s,           d22e-c743/tplx, PASS,
 
-/examples/sctp/cmttest/,             -f omnetpp.ini -c General -r 0,                100s,            49a4-6b81/tplx, ERROR,
-/examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,            6a4c-81b2/tplx, ERROR,
-/examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0,                500s,            ead4-4685/tplx, ERROR,
+/examples/sctp/cmttest/,             -f omnetpp.ini -c General -r 0,                100s,            77a4-052f/tplx, PASS,
+/examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,            1a34-5dc9/tplx, PASS,
+/examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0,                500s,            0ed5-7b64/tplx, PASS,
 
 /examples/voip/,                     -f omnetpp.ini -c GoodChannel -r 0,            200s,            891d-24f4/tplx, PASS,
 /examples/voip/,                     -f omnetpp.ini -c BadChannel -r 0,             200s,            5cc0-9205/tplx, PASS,
