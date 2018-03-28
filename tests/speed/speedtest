@@ -559,7 +559,12 @@ def _iif(cond,t,f):
 
 def ensure_dir(f):
     if not os.path.exists(f):
-        os.makedirs(f)
+        # when using multiple threads, there is a race condition here
+        try:
+            os.makedirs(f) # in Python3 we will have exist_ok, which makes this whole function unnecessary
+        except OSError as e:
+            if e.errno != os.errno.EEXIST: # ignore "OSError: [Errno 17] File exists"
+                raise  # re-raise the exception if the error is something else
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run the tests specified in the input files.')

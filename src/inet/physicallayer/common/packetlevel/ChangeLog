@@ -126,6 +126,25 @@
 
 ====== inet-3.x ======
 
+2018-03-21  ------ inet-3.6.4 released ------
+
+2018-02-28  Justin Goins
+
+	bugfix: corrected memory management issue in radio module
+
+	Corrected a fatal bug in the radio module that can occur if the
+	separateReceptionParts mode is used.
+	 This fixes an invalid delete(void*) attempt that occurs if a packet
+	reception ends while the radio is still switching from RX --> another
+	mode. Previously the code was trying to use abortReception(cMessage*) on
+	a packet that had already been processed with endReception(cMessage*). If
+	your simulation was unlucky enough to encounter this case the simulator
+	would segfault.
+
+2018-01-12  Zoltan Bojthe
+
+	Changed some module parameters from double to int.
+
 2017-12-22  ------ inet-3.6.3 released ------
 
 2017-10-02  ------ inet-3.6.2 released ------

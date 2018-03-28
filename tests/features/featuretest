@@ -3,7 +3,7 @@
 # whether features can be enabled and disabled independently without causing
 # build or runtime failures.
 
-skipped_features="packetdrill"
+skipped_features="TCP_NSC VoIPStream"
 
 # These two variables control which feature subset is being checked.
 # This makes it easy to split a single test across multiple machines.

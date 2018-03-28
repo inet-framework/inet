@@ -204,6 +204,24 @@ Define_NED_Function2(nedf_nanToZero,
         );
 
 #if OMNETPP_VERSION <= 0x0503 && OMNETPP_BUILDNUM < 1014
+#if OMNETPP_BUILDNUM <= 1012
+static cNEDValue nedf_intWithUnit(cComponent *contextComponent, cNEDValue argv[], int argc)
+{
+    switch (argv[0].getType()) {
+        case cNEDValue::BOOL:
+            return (long)( (bool)argv[0] ? 1 : 0 );
+        case cNEDValue::DBL:
+            argv[0].setPreservingUnit(floor(argv[0].doubleValue()));
+            return argv[0];
+        case cNEDValue::STR:
+            throw cRuntimeError("intWithUnit(): Cannot convert string to int");
+        case cNEDValue::XML:
+            throw cRuntimeError("intWithUnit(): Cannot convert xml to int");
+        default:
+            throw cRuntimeError("Internal error: Invalid cNedValue type");
+    }
+}
+#else
 static cNedValue nedf_intWithUnit(cComponent *contextComponent, cNedValue argv[], int argc)
 {
     switch (argv[0].getType()) {
@@ -220,7 +238,7 @@ static cNedValue nedf_intWithUnit(cComponent *contextComponent, cNedValue argv[]
             throw cRuntimeError("Internal error: Invalid cNedValue type");
     }
 }
-
+#endif
 Define_NED_Function2(nedf_intWithUnit,
     "quantity intWithUnit(any x)",
     "conversion",

@@ -434,6 +434,25 @@ The highlights of this release are:
    after each change to ensure that all protocol behaviors have been preserved.
 
 
+INET 3.6.4 (March 2018) - stable
+--------------------------------
+
+This release contains minor bug fixes and compatibility fixes for the
+OMNeT++ 5.3 Preview 4 release. It requires OMNeT++ 5.1 or later.
+
+General:
+
+  - Changed some module parameters from double to int.
+
+  - Corrected memory management issue in radio module.
+
+  - common: added intWithUnit() ned function.
+
+Packet printer:
+
+  - made it compatible with the new message printer API in OMNeT++ 5.3
+
+
 INET 3.6.3 (December 2017) - Stable
 -----------------------------------
 
