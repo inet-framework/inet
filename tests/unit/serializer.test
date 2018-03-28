@@ -241,7 +241,7 @@ static Packet *deserialize(const Protocol *protocol, Packet *pk)
     if (protocol == nullptr) {
         outPk = new Packet("inet");
         if (pk->getDataLength() > b(0)) {
-            const auto& chunk = pk->popHeader(pk->getDataLength());
+            const auto& chunk = pk->popAtFront(pk->getDataLength());
             outPk->insertAtBack(chunk);
         }
     }
@@ -324,7 +324,7 @@ static Packet *deserialize(const Protocol *protocol, Packet *pk)
 //    else if (*protocol == Protocol::) {
 //    }
     else {
-        const auto& chunk = pk->popHeader(pk->getDataLength());
+        const auto& chunk = pk->popAtFront(pk->getDataLength());
         outPk = new Packet("inet");
         outPk->insertAtBack(chunk);
     }
