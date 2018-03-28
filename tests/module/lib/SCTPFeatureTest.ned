@@ -5,7 +5,7 @@ import ned.DatarateChannel;
 network SctpFeatureTest
 {
     parameters:
-        volatile double testTimeout;
+        volatile double testTimeout @unit(s);
         bool testing;
     types:
       channel BottlePath extends DatarateChannel

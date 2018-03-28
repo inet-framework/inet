@@ -22,7 +22,7 @@ output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 **.testing = false
-**.testTimeout = 0
+**.testTimeout = 0s
 
 **.scenarioManager.script = xmldoc("../../lib/sctp_scenario.xml")
 

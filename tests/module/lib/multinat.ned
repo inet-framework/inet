@@ -7,7 +7,7 @@ import inet.transportlayer.sctp.SctpNatRouter;
 network multinat
 {
     parameters:
-        volatile double testTimeout;
+        volatile double testTimeout @unit(s);
         bool testing;
         **.ipv4.configurator.networkConfiguratorModule = "";
     submodules:

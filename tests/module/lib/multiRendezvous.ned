@@ -5,7 +5,7 @@ import ned.DatarateChannel;
 
 network multiRendezvous {
     parameters:
-        volatile double testTimeout;
+        volatile double testTimeout @unit(s);
         bool testing;
         **.ipv4.configurator.networkConfiguratorModule = "";
     submodules:

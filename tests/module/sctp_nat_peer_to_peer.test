@@ -22,7 +22,7 @@ output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 **.testing = false
-**.testTimeout = 0
+**.testTimeout = 0s
 
 # udp app (off)
 
@@ -75,8 +75,8 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.sctp.sctpAlgorithmClass="SctpAlg"
 **.sctp.auth = true
 **.Peer_*.sctp.addIP = true
-**.Server.sctp.addTime = 0
-**.Peer_1.sctp.addTime = 0
+**.Server.sctp.addTime = 0s
+**.Peer_1.sctp.addTime = 0s
 **.Peer_1.sctp.addAddress = "10.2.1.1"
 **.Peer_1.sctp.addIpType = "49153"  #separate the type by ',' SET_PRIMARY_ADDRESS= 49156,ADD_IP_ADDRESS=49153,DELETE_IP_ADDRESS=49154
 **.Peer_2.sctp.addTime = 0s
