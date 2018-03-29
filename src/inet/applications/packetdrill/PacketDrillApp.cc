@@ -428,7 +428,7 @@ void PacketDrillApp::runEvent(PacketDrillEvent* event)
                             }
                             if (sack->getNumDupTsns() > 0) {
                                 for (int i = 0; i < sack->getNumDupTsns(); i++) {
-                                    sack->setDupTsns(i, sack->getDupTsns(i) + sack->getCumTsnAck());
+                                    sack->setDupTsns(i, sack->getDupTsns(i) + localDiffTsn);
                                 }
                             }
                             sctp->replaceChunk(sack, cc);
