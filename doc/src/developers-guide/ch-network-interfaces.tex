@@ -1,37 +1,9 @@
-\chapter{Node Architecture}
-\label{cha:node-architecture}
+\chapter{Network Interafces}
+\label{cha:network-interfaces}
 
-\section{Addresses}
+\section{Overview}
 
-The INET Framework uses a number of C++ classes to represent various
-addresses in the network. These classes support initialization and
-assignment from binary and string representation of the address, and
-accessing the address in both forms. (Storage is in binary form). They also
-support the "unspecified" special value (and the \ffunc{isUnspecified()}
-method) that corresponds to the all-zeros address.
-
-\begin{itemize}
-  \item \cppclass{MacAddress} represents a 48-bit IEEE 802 MAC address. The
-    textual notation it understands and produces is hex string.
-
-  \item \cppclass{Ipv4Address} represents a 32-bit IPv4 address. It can parse
-    and produce textual representations in the "dotted decimal" syntax.
-
-  \item \cppclass{Ipv6Address} represents a 128-bit IPv6 address. It can parse
-    and produce address strings in the canonical (RFC 3513) syntax.
-
-  \item \cppclass{L3Address} is conceptually a union of a \cppclass{Ipv4Address}
-    and \cppclass{Ipv6Address}: an instance stores either an IPv4 address or an
-    IPv6 address. \cppclass{L3Address} is mainly used in the transport layer and above
-    to abstract away network addresses. It can be assigned from both \cppclass{Ipv4Address}
-    and \cppclass{Ipv6Address}, and can also parse string representations of both.
-    The \ffunc{getType()}, \ffunc{toIPv4()} and \ffunc{toIPv6()} methods can be used
-    to access the value.
-\end{itemize}
-
-\ifdraft TODO
-TODO: Resolving addresses with L3AddressResolver
-\fi
+TODO
 
 \section{The Interface Table}
 
@@ -204,7 +176,6 @@ categories in the host's \nedtype{NotificationBoard}:
     to be removed from the interface table. This is a pre-delete
     notification so that clients have access to interface data that are
     possibly needed to react to the change
-% TODO hmmm -- rename the constant? also fire a post-change notification??
   \item \tbf{\ttt{NF\_INTERFACE\_CONFIG\_CHANGED}}: a configuration setting
     in an interface entry has changed (e.g. MTU or IP address)
   \item \tbf{\ttt{NF\_INTERFACE\_STATE\_CHANGED}}: a state variable in an
@@ -216,141 +187,6 @@ corresponding \cppclass{InterfaceEntry} object. This is even true for
 \ttt{NF\_INTERFACE\_DELETED} (which is actually a pre-delete notification).
 \fi
 
-
-\section{Communication between protocol layers}
-
-In the INET Framework, when an upper-layer protocol wants to send a data
-packet over a lower-layer protocol, the upper-layer module just sends the
-message object representing the packet to the lower-layer module, which
-will in turn encapsulate it and send it. The reverse process takes place
-when a lower layer protocol receives a packet and sends it up after
-decapsulation.
-
-It is often necessary to convey extra information with the packet. For
-example, when an application-layer module wants to send data over TCP, some
-connection identifier needs to be specified for TCP. When TCP sends a
-segment over IP, IP will need a destination address and possibly other
-parameters like TTL. When IP sends a datagram to an Ethernet interface for
-transmission, a destination MAC address must be specified. This extra
-information is attached to the message object to as \textit{control info}.
-
-Control info are small value objects, which are attached to packets
-(message objects) with its \ttt{setControlInfo()} member function.
-Control info only holds auxiliary information for the next protocol layer,
-and is not supposed to be sent over the network to other hosts and routers.
-
-
-\section{NED Conventions}
-
-\subsection{The @node Property}
-
-By convention, compound modules that implement network devices (hosts,
-routers, switches, access points, base stations, etc.) are marked with the
-\ttt{@node} NED property. As node models may themselves be hierarchical, the
-\ttt{@node} property is used by protocol implementations and other simple
-modules to determine which ancestor compound module represents the physical
-network node they live in.
-
-\subsection{The @labels Module Property}
-
-The \ttt{@labels} property can be added to modules and gates, and it
-allows the OMNeT++ graphical editor to provide better editing experience.
-First we look at \ttt{@labels} as a module property.
-
-\ttt{@labels(node)} has been added to all NED module types that may occur on
-network level. When editing a network, the graphical editor will NED types
-with \ttt{@labels(node)} to the top of the component palette, allowing the
-user to find them easier.
-
-Other labels can also be specified in the \ttt{@labels(...)} property. This
-has the effect that if one module with a particular label has already been
-added to the compound module being edited, other module types with the same
-label are also brought to the top of the palette. For example,
-\nedtype{EtherSwitch} is annotated with \ttt{@labels(node,ethernet-node)}.
-When you drop an \nedtype{EtherSwitch} into a compound module, that will
-bring \nedtype{EtherHost} (which is also tagged with the
-\ttt{ethernet-node} label) to the top of the palette, making it easier to
-find.
-
-\begin{ned}
-module EtherSwitch
-{
-    parameters:
-        @node();
-        @labels(node,ethernet-node);
-        @display("i=device/switch");
-    ...
-}
-\end{ned}
-
-Module types that are already present in the compound module also appear in
-the top part of the palette. The reason is that if you already added a
-\nedtype{StandardHost}, for example, then you are likely to add more of the
-same kind. Gate labels (see next section) also affect palette order: modules
-which can be connected to modules already added to the compound module
-will also be listed at the top of the palette. The final ordering is the
-result of a scoring algorithm.
-
-
-\subsection{The @labels Gate Property}
-
-Gates can also be labelled with \ttt{@labels()}; the purpose is to make it easier
-to connect modules in the editor. If you connect two modules in the editor,
-the gate selection menu will list gate pairs that have a label in common.
-
-\ifdraft TODO
-screenshot
-\fi
-
-For example, when connecting hosts and routers, the editor will offer connecting
-Ethernet gates with Ethernet gates, and PPP gates with PPP gates. This is the
-result of gate labelling like this:
-
-\begin{ned}
-module StandardHost
-{
-    ...
-    gates:
-        inout pppg[] @labels(PPPFrame-conn);
-        inout ethg[] @labels(EtherFrame-conn);
-    ...
-}
-\end{ned}
-
-Guidelines for choosing gate label names: For gates of modules that
-implement protocols, use the C++ class name of the packet or acompanying
-control info (see later) associated with the gate, whichever applies;
-append \ttt{/up} or \ttt{/down} to the name of the control info class. For
-gates of network nodes, use the class names of packets (frames) that travel
-on the corresponding link, with the \ttt{-conn} suffix. The suffix prevents
-protocol-level modules to be promoted in the graphical editor palette when
-a network is edited.
-
-Examples:
-
-\begin{ned}
-simple TCP like ITCP
-{
-    ...
-    gates:
-        input appIn[] @labels(TCPCommand/down);
-        output appOut[] @labels(TCPCommand/up);
-        input ipIn @labels(TCPSegment,IPv4ControlInfo/up,IPControlInfo/up);
-        output ipOut @labels(TCPSegment,IPv4ControlInfo/down,IPv6ControlInfo/up);
-}
-\end{ned}
-
-
-\begin{ned}
-simple PPP
-{
-    ...
-    gates:
-        input netwIn;
-        output netwOut;
-        inout phys @labels(PPPFrame);
-}
-\end{ned}
 
 %%% Local Variables:
 %%% mode: latex

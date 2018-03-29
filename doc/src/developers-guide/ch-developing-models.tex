@@ -1,5 +1,5 @@
-\chapter{Developing Protocol Models}
-\label{cha:developing-protocol-models}
+\chapter{Developing Protocol and Application Models}
+\label{cha:developing-models}
 
 \section{Overview}
 
@@ -16,6 +16,176 @@ Applications often need to use several different protocol services
 simultaneously. In order to spare the applications from using the default
 OMNeT++ message passing style between modules, INET provides an easy to use
 C++ socket API.
+
+\section{NED Conventions}
+
+TODO conventions for NED module definitions
+
+\subsection{The @node Property}
+
+By convention, compound modules that implement network devices (hosts,
+routers, switches, access points, base stations, etc.) are marked with the
+\ttt{@node} NED property. As node models may themselves be hierarchical, the
+\ttt{@node} property is used by protocol implementations and other simple
+modules to determine which ancestor compound module represents the physical
+network node they live in.
+
+\subsection{The @labels Module Property}
+
+The \ttt{@labels} property can be added to modules and gates, and it
+allows the OMNeT++ graphical editor to provide better editing experience.
+First we look at \ttt{@labels} as a module property.
+
+\ttt{@labels(node)} has been added to all NED module types that may occur on
+network level. When editing a network, the graphical editor will NED types
+with \ttt{@labels(node)} to the top of the component palette, allowing the
+user to find them easier.
+
+Other labels can also be specified in the \ttt{@labels(...)} property. This
+has the effect that if one module with a particular label has already been
+added to the compound module being edited, other module types with the same
+label are also brought to the top of the palette. For example,
+\nedtype{EtherSwitch} is annotated with \ttt{@labels(node,ethernet-node)}.
+When you drop an \nedtype{EtherSwitch} into a compound module, that will
+bring \nedtype{EtherHost} (which is also tagged with the
+\ttt{ethernet-node} label) to the top of the palette, making it easier to
+find.
+
+\begin{ned}
+module EtherSwitch
+{
+    parameters:
+        @node();
+        @labels(node,ethernet-node);
+        @display("i=device/switch");
+    ...
+}
+\end{ned}
+
+Module types that are already present in the compound module also appear in
+the top part of the palette. The reason is that if you already added a
+\nedtype{StandardHost}, for example, then you are likely to add more of the
+same kind. Gate labels (see next section) also affect palette order: modules
+which can be connected to modules already added to the compound module
+will also be listed at the top of the palette. The final ordering is the
+result of a scoring algorithm.
+
+
+\subsection{The @labels Gate Property}
+
+Gates can also be labelled with \ttt{@labels()}; the purpose is to make it easier
+to connect modules in the editor. If you connect two modules in the editor,
+the gate selection menu will list gate pairs that have a label in common.
+
+\ifdraft TODO
+screenshot
+\fi
+
+For example, when connecting hosts and routers, the editor will offer connecting
+Ethernet gates with Ethernet gates, and PPP gates with PPP gates. This is the
+result of gate labelling like this:
+
+\begin{ned}
+module StandardHost
+{
+    ...
+    gates:
+        inout pppg[] @labels(PPPFrame-conn);
+        inout ethg[] @labels(EtherFrame-conn);
+    ...
+}
+\end{ned}
+
+Guidelines for choosing gate label names: For gates of modules that
+implement protocols, use the C++ class name of the packet or acompanying
+control info (see later) associated with the gate, whichever applies;
+append \ttt{/up} or \ttt{/down} to the name of the control info class. For
+gates of network nodes, use the class names of packets (frames) that travel
+on the corresponding link, with the \ttt{-conn} suffix. The suffix prevents
+protocol-level modules to be promoted in the graphical editor palette when
+a network is edited.
+
+Examples:
+
+\begin{ned}
+simple TCP like ITCP
+{
+    ...
+    gates:
+        input appIn[] @labels(TCPCommand/down);
+        output appOut[] @labels(TCPCommand/up);
+        input ipIn @labels(TCPSegment,IPv4ControlInfo/up,IPControlInfo/up);
+        output ipOut @labels(TCPSegment,IPv4ControlInfo/down,IPv6ControlInfo/up);
+}
+\end{ned}
+
+
+\begin{ned}
+simple PPP
+{
+    ...
+    gates:
+        input netwIn;
+        output netwOut;
+        inout phys @labels(PPPFrame);
+}
+\end{ned}
+
+\section{Module Initialization}
+
+explain how INET supports multi-stage interdependent module initialization
+
+\cppsnippet{ModuleInitializationExample}{Module initialization example}
+
+
+\section{Addresses}
+
+\subsection{Address Types}
+
+The INET Framework uses a number of C++ classes to represent various
+addresses in the network. These classes support initialization and
+assignment from binary and string representation of the address, and
+accessing the address in both forms. (Storage is in binary form). They also
+support the "unspecified" special value (and the \ffunc{isUnspecified()}
+method) that corresponds to the all-zeros address.
+
+\begin{itemize}
+  \item \cppclass{MacAddress} represents a 48-bit IEEE 802 MAC address. The
+    textual notation it understands and produces is hex string.
+
+  \item \cppclass{Ipv4Address} represents a 32-bit IPv4 address. It can parse
+    and produce textual representations in the "dotted decimal" syntax.
+
+  \item \cppclass{Ipv6Address} represents a 128-bit IPv6 address. It can parse
+    and produce address strings in the canonical (RFC 3513) syntax.
+
+  \item \cppclass{L3Address} is conceptually a union of a \cppclass{Ipv4Address}
+    and \cppclass{Ipv6Address}: an instance stores either an IPv4 address or an
+    IPv6 address. \cppclass{L3Address} is mainly used in the transport layer and above
+    to abstract away network addresses. It can be assigned from both \cppclass{Ipv4Address}
+    and \cppclass{Ipv6Address}, and can also parse string representations of both.
+    The \ffunc{getType()}, \ffunc{toIPv4()} and \ffunc{toIPv6()} methods can be used
+    to access the value.
+\end{itemize}
+
+\subsection{Resolving Addresses}
+
+explain what kind of addresses INET provides for protocols to use: network
+and MAC addresses, related protocols: ARP, DHCP, ND, etc.
+
+address lookup by name
+
+node lookup by MAC address
+
+node lookup by L3 address
+
+
+\section{Starting and Stopping Nodes}
+
+explain how INET supports network node lifecycle management: startup, shutdown, crash, etc.
+
+\cppsnippet{LifecycleOperationExample}{Lifecycle operation example}
+
 
 \section{Working with Packets}
 
@@ -89,31 +259,6 @@ explain how INET allows connecting multiple protocols within a network node in a
 
 \cppsnippet{PacketDispatchingExample}{Packet dispatching example}
 
-
-\section{Resolving Addresses}
-
-explain what kind of addresses INET provides for protocols to use: network
-and MAC addresses, related protocols: ARP, DHCP, ND, etc.
-
-address lookup by name
-
-node lookup by MAC address
-
-node lookup by L3 address
-
-
-\section{Initializing Modules}
-
-explain how INET supports multi stage interdependent module initialization
-
-\cppsnippet{ModuleInitializationExample}{Module initialization example}
-
-
-\section{Starting and Stopping Nodes}
-
-explain how INET supports network node lifecycle management: startup, shutdown, crash, etc.
-
-\cppsnippet{LifecycleOperationExample}{Lifecycle operation example}
 
 %%%% Local Variables:
 %%% mode: latex
