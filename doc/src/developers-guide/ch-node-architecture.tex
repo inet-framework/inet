@@ -33,85 +33,6 @@ method) that corresponds to the all-zeros address.
 TODO: Resolving addresses with L3AddressResolver
 \fi
 
-
-\ifdraft TODO
-\section{The Notification Board}
-
-The \nedtype{NotificationBoard} module allows publish-subscribe
-communication among modules within a host. Using
-\nedtype{NotificationBoard}, modules can notify each other about
-events such as routing table changes, interface status changes
-(up/down), interface configuration changes, wireless handovers, changes in
-the state of the wireless channel, mobile node position changes, etc.
-\nedtype{NotificationBoard} acts as a intermediary between the module where
-the events occur and modules which are interested in learning about
-those events.
-
-\nedtype{NotificationBoard} has exactly one instance within a host or
-router model, and it is accessed via direct C++ method calls (not message
-exchange). Modules can \textit{subscribe} to categories of changes
-(e.g. ``routing table changed'' or ``radio channel became empty''). When
-such a change occurs, the corresponding module (e.g. the
-\nedtype{Ipv4RoutingTable} or the physical layer module) will let
-\nedtype{NotificationBoard} know, and it will disseminate this information
-to all interested modules.
-
-\sloppypar Notification events are grouped into \textit{categories}.
-Examples of categories are: \ttt{NF\_HOSTPOSITION\_UPDATED},
-\ttt{NF\_RADIOSTATE\_CHANGED}, \ttt{NF\_PP\_TX\_BEGIN},
-\ttt{NF\_PP\_TX\_END}, \ttt{NF\_IPv4\_ROUTE\_ADDED},
-\ttt{NF\_BEACON\_LOST}, \ttt{NF\_NODE\_FAILURE}, \ttt{NF\_NODE\_RECOVERY},
-etc. Each category is identified by an integer (right now it's assigned in
-the source code via an enum, in the future we'll convert to dynamic
-category registration).
-
-To trigger a notification, the client must obtain a pointer to the
-\nedtype{NotificationBoard} of the given host or router (explained later),
-and call its \ffunc{fireChangeNotification()} method. The notification will
-be delivered to all subscribed clients immediately, inside the
-\ffunc{fireChangeNotification()} call.
-
-Clients that wish to receive notifications should implement (subclass from)
-the \cppclass{INotifiable} interface, obtain a pointer to the
-\nedtype{NotificationBoard}, and subscribe to the categories they are
-interested in by calling the \ffunc{subscribe()} method of the
-\nedtype{NotificationBoard}. Notifications will be delivered to the
-\ffunc{receiveChangeNotification()} method of the client (redefined from
-\cppclass{INotifiable}).
-
-In cases when the category itself (an \ttt{int}) does not carry enough
-information about the notification event, one can pass additional
-information in a data class. There is no restriction on what the data class
-may contain, except that it has to be subclassed from \cppclass{cObject},
-and of course producers and consumers of notifications should agree on its
-contents. If no extra info is needed, one can pass a \ttt{NULL} pointer in
-the \ffunc{fireChangeNotification()} method.
-
-A module which implements \cppclass{INotifiable} looks like this:
-
-\begin{cpp}
-class Foo : public cSimpleModule, public INotifiable {
-    ...
-    virtual void receiveChangeNotification(int category, const cObject *details) {..}
-    ...
-};
-\end{cpp}
-
-Note: \cppclass{cObject} was called \cppclass{cPolymorphic} in earlier versions
-of OMNeT++. You may occasionally still see the latter name in source code; it
-is an alias (typedef) to \cppclass{cObject}.
-
-Obtaining a pointer to the \nedtype{NotificationBoard} module of that host/router:
-
-\begin{cpp}
-NotificationBoard *nb; // this is best made a module class member
-nb = NotificationBoardAccess().get();  // best done in initialize()
-\end{cpp}
-
-TODO how to fire a notification
-\fi
-
-
 \section{The Interface Table}
 
 The \nedtype{InterfaceTable} module holds one of the key data structures in
@@ -266,7 +187,6 @@ InterfaceEntry *PPP::registerInterface(double datarate)
 }
 \end{cpp}
 
-
 \ifdraft TODO
 \subsection{Interface Change Notifications}
 
@@ -296,27 +216,6 @@ corresponding \cppclass{InterfaceEntry} object. This is even true for
 \ttt{NF\_INTERFACE\_DELETED} (which is actually a pre-delete notification).
 \fi
 
-\ifdraft TODO
-\section{Initialization Stages}
-
-Node architecture makes it necessary to use multi-stage initialization.
-What happens in each stage is this:
-
-In stage 0, interfaces register themselves in \nedtype{InterfaceTable} modules
-
-In stage 1, routing files are read.
-
-In stage 2, network configurators (e.g. \nedtype{FlatNetworkConfiguration})
-assign addresses and set up routing tables.
-
-In stage 3, TODO...
-
-In stage 4, TODO...
-
-...
-
-The multi-stage initialization process itself is described in the OMNeT++ Manual.
-\fi
 
 \section{Communication between protocol layers}
 
@@ -339,34 +238,6 @@ Control info are small value objects, which are attached to packets
 (message objects) with its \ttt{setControlInfo()} member function.
 Control info only holds auxiliary information for the next protocol layer,
 and is not supposed to be sent over the network to other hosts and routers.
-
-
-\ifdraft TODO
-\section{Publish-Subscribe Communication within Nodes}
-
-The \nedtype{NotificationBoard} module makes it possible for several modules to
-communicate in a publish-subscribe manner. For example, the radio module
-(\nedtype{Ieee80211Radio}) fires a \textit{"radio state changed"} notification when
-the state of the radio channel changes (from TRANSMIT to IDLE, for example),
-and it will be delivered to other modules that have previously subscribed
-to that notification category. The notification mechanism uses C++ functions
-calls, no message sending is involved.
-
-The notification board submodule within the host (router) must be called
-\ttt{notificationBoard} for other modules to find it.
-\fi
-
-\ifdraft TODO
-\section{Network interfaces}
-
-todo...
-\fi
-
-\ifdraft TODO
-\section{The wireless infrastructure}
-
-todo...
-\fi
 
 
 \section{NED Conventions}
