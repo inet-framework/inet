@@ -1,0 +1,122 @@
+\chapter{Developing Protocol Models}
+\label{cha:developing-protocol-models}
+
+\section{Overview}
+
+This section introduces the most important modeling support features of
+INET. These features facilitate the implementation of applications and
+communication protocols by providing various commonly used functionality.
+Thus modeling support allows rapid implementation of new models by building
+on already existing APIs while the implementor can focus on the research
+topics. These features differ from the reusable NED modules introduced
+earlier, because they are available in the form of C++ APIs.
+
+The easy usage of protocol services is another essential modeling support.
+Applications often need to use several different protocol services
+simultaneously. In order to spare the applications from using the default
+OMNeT++ message passing style between modules, INET provides an easy to use
+C++ socket API.
+
+\section{Working with Packets}
+
+\subsection{Encapsulating Packets}
+
+TODO explain how INET packet representation supports encapsulation of packets, provide examples, etc.
+
+\cppsnippet{PacketEncapsulationExample}{Packet encapsulation example}
+
+\cppsnippet{PacketDecapsulationExample}{Packet decapsulation example}
+
+\subsection{Fragmenting Packets}
+
+explain how INET packet representation supports fragmentation of packets, provide examples, etc.
+
+\cppsnippet{PacketFragmentationExample}{Packet fragmentation example}
+
+\cppsnippet{PacketDefragmentationExample}{Packet defragmentation example}
+
+\subsection{Aggregating Packets}
+
+explain how INET packet representation supports aggregation of packets, provide examples, etc.
+
+\cppsnippet{PacketAggregationExample}{Packet aggregation example}
+
+\cppsnippet{PacketDisaggregationExample}{Packet disaggregation example}
+
+\subsection{Serializing Packets}
+
+explain how INET packet representation provides supports for serialization, provide examples, etc.
+
+\cppsnippet{PacketSerializationExample}{Packet serialization example}
+
+\cppsnippet{PacketDeserializationExample}{Packet deserialization example}
+
+
+\subsection{Emulation Support}
+
+explain how INET packet representation provides supports for emulation, provide examples, etc.
+
+\cppsnippet{EmulationPacketSendingExample}{Emulation packet sending example}
+
+\cppsnippet{EmulationPacketReceivingExample}{Emulation packet receiving example}
+
+\subsection{Queueing Packets}
+
+explain how INET supports queueing packet data arriving in order
+
+\cppsnippet{PacketQueueingExample}{Packet queueing example}
+
+
+\subsection{Buffering Packets}
+
+explain how INET supports buffering packet data arriving out of order
+
+\subsection{Reassembling Packets}
+
+explain how INET merges packet data arriving out of order into a whole
+
+\cppsnippet{PacketReassemblingExample}{Packet reassembling example}
+
+\subsection{Reordering Packets}
+
+explain how INET forms a stream from packet data arriving out of order
+
+\cppsnippet{PacketReorderingExample}{Packet reordering example}
+
+\subsection{Dispatching Packets}
+
+explain how INET allows connecting multiple protocols within a network node in a very flexible way
+
+\cppsnippet{PacketDispatchingExample}{Packet dispatching example}
+
+
+\section{Resolving Addresses}
+
+explain what kind of addresses INET provides for protocols to use: network
+and MAC addresses, related protocols: ARP, DHCP, ND, etc.
+
+address lookup by name
+
+node lookup by MAC address
+
+node lookup by L3 address
+
+
+\section{Initializing Modules}
+
+explain how INET supports multi stage interdependent module initialization
+
+\cppsnippet{ModuleInitializationExample}{Module initialization example}
+
+
+\section{Starting and Stopping Nodes}
+
+explain how INET supports network node lifecycle management: startup, shutdown, crash, etc.
+
+\cppsnippet{LifecycleOperationExample}{Lifecycle operation example}
+
+%%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "usman"
+%%% End:
+
