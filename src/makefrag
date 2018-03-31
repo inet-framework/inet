@@ -86,9 +86,9 @@ USE_PRECOMPILED_HEADER ?= yes
 PRECOMPILED_HEADER=inet/common/precompiled_$(MODE).h
 
 ifeq ($(USE_PRECOMPILED_HEADER),yes)
-  ifeq ($(CC),gcc)
+  ifneq (,$(findstring gcc,$(CC)))
     PRECOMPILED_EXT=gch
-  else ifeq ($(CC),clang)
+  else ifneq (,$(findstring clang,$(CC)))
     PRECOMPILED_EXT=pch
   else
     PRECOMPILED_EXT=
