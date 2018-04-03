@@ -1,60 +1,22 @@
 \chapter{Network Nodes}
 \label{cha:network-nodes}
 
-% TODO: automatic wired interface creation, multi wireless interface, dual stack, forwarding, SSID, manet routing, internet routing protocols, alternative mobility models, L2/L3 devices
-
-% TODO describe how INET models network nodes as modules: routers, hosts,
-% switches, mobile devices, access points, sensors, etc., how network nodes are
-% composed of smaller components modelling various hardware and software components,
-% different aspects such as behaviours, etc.
-
-% TODO describe how INET allows configuring alternative applications, routing protocols,
-% network protocols, disable/enable protocols, etc.}
-
 \section{Overview}
 
 Hosts, routers, switches, access points, mobile phones, and other network
-devices are all represented by OMNeT++ compound modules. These modules are
-assembled from other modules which represent applications, communication
-protocols, network interfaces, routing tables, mobility models, energy
-models, and other functional units. Many of these modules, including most
-of the communication protocols, are simple modules, implemented in C++.
-However, some protocols are complicated enough to be compound modules
-themselves. They are further divided into smaller functional parts such as
-queues, protocol specific data storages, and protocol specific
-sub-services.
-
-OMNeT++ connections are used within network nodes to represent
-communication opportunities between protocols. These connections are
-also facilitate  visualizing what is happening inside network nodes in
-the runtime user interface. Packets and messages sent through the connections
-represent some software or hardware activity.
-
-\section{Overview 2}
-
-The \ttt{inet.node} package contains various pre-assembled host, router,
-switch, access point, and other modules, for example
-\nedtype{StandardHost}, \nedtype{Router} and \nedtype{EtherSwitch} and
-\nedtype{AccessPoint}. These compound modules contain some customization
-options via parametric submodule types, but they are not meant to be
-universal, so it may be necessary to create your own node models for
-your particular simulation scenarios.
-
-Network interfaces (Ethernet, IEEE 802.11, etc) are usually compound modules
-themselves, and are being composed of a queue, a MAC, and possibly other
-simple modules. See \nedtype{EthernetInterface} as an example.
-
-Not all modules implement protocols. There are modules which hold data (for
-example \nedtype{Ipv4RoutingTable}), perform autoconfiguration of a network
-(\nedtype{Ipv4NetworkConfigurator}), move a mobile node around (for example
-\nedtype{ConstSpeedMobility}), and perform housekeeping associated with
-radio signals in wireless simulations (\nedtype{RadioMedium}).
-
+nodes are represented in INET with compound modules. The previous chapter 
+has introduced a few node types like \nedtype{StandardHost}, \nedtype{Router}, 
+and showed how to put together networks from them. In this chapter,
+we look at the internals of such node models, in order to provide a deeper
+understanding of their customization possibilities and to give some guidance
+on how custom nodes models can be assembled.
 
 \section{Ingredients}
 
-All network nodes in the INET Framework are OMNeT++ compound modules that are
-mainly composed of the following components:
+Node models are assembled from other modules which represent applications, 
+communication protocols, network interfaces, routing tables, mobility models, 
+energy models, and other functionality. These modules fall into the following
+broad categories:
 
 \begin{itemize}
   \item \emph{Applications} often model the user behavior as well as the
@@ -108,15 +70,29 @@ mainly composed of the following components:
   \item \emph{Energy modules} model energy storage mechanisms, energy
      consumption of devices and software processes, energy generation of devices,
      and energy management processes which shutdown and startup network nodes.
+  \item \emph{Status} (\nedtype{NodeStatus}) keeps track of the status of the
+     network node (up, down, etc.)
   \item \emph{Other modules} with particular functionality such as
      \nedtype{PcapRecorder} are also available.
 \end{itemize}
 
-TODO Status
-
 \section{Node Architecture}
 
-TODO describe how INET protocols are connected to each other using the built-in message dispatching mechanism.
+Within network nodes, OMNeT++ connections are used to represent 
+communication opportunities between protocols. Packets and 
+messages sent on these connections represent software or hardware activity.
+
+Although protocols may also be connected to each other directly, 
+in most cases they are connected via \emph{dispatcher modules}.
+Dispatchers (\nedtype{MessageDispatcher}) are small, low-overhead modules 
+that allow protocol components to be connected in one-to-many and many-to-many 
+fashion, and ensure that messages and packets sent from one component end up
+being delivered to the correct component. Dispatchers need no manual 
+configuration, as they use discovery and peek into packets.
+
+In there pre-assembled node models, dispatchers allow arbitrary
+protocol components to talk directly to each other, i.e. not only
+to ones in neighboring layers.
 
 \section{Customizing Nodes}
 
@@ -209,24 +185,10 @@ module WirelessHost extends StandardHost
 }
 \end{ned}
 
-\section{[Applications]} % needed?
-\label{subsec:applications}
-
-TODO describe how INET models running applications as modules: ping, connectionless traffic, connection oriented traffic, voip, video, etc.
-
-\section{[Protocols]} % needed?
-\label{subsec:protocols}
-
-TODO describe how INET models data and control plane protocols as modules in general
-
-\section{[Routing Protocols]} % needed?
-
-TODO briefly describe how INET models routing protocols: BGP, OSPF, RIP, AODV, etc.
-
 \section{Custom Network Nodes}
 
 Despite the many pre-assembled network nodes and the several available
-customization options, sometimes it's just easier to build a network node
+customization options, sometimes it is just easier to build a network node
 from scratch. The following example shows how easy it is to build a simple
 network node.
 
