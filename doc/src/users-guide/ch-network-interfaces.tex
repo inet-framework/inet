@@ -5,9 +5,6 @@
 
 %TODO: MAC address, op mode, duplex mode, data rate, transmission power, queue limits, FCS mode
 
-TODO describe how INET models network interfaces as modules: ethernet cards, PPP
-interfaces, wifi cards, etc.
-
 In INET simulations, network interface modules are the primary means of
 communication between network nodes. They represent the required
 combination of software and hardware elements from an operating system
@@ -21,6 +18,7 @@ these gates must be connected with special connections which represent the
 physical cable between the physical ports. The connections must use special
 OMNeT++ channels (e.g., \nedtype{DatarateChannel}) which determine datarate
 and delay parameters.
+
 
 \section{Built-in Network Interfaces}
 
@@ -58,6 +56,44 @@ are mainly composed of the following components:
         \item \emph{Queues}
         \item \emph{Classifiers}
 \end{itemize}
+
+\section{Queueing}
+
+TODO internal/external queue
+
+TODO injecting errors (via IHooks)
+
+TODO generalize this: 
+
+The PPP module receives packets from the upper layer in the \fvar{netwIn}
+gate, encapsulates them into \msgtype{PppFrame}s, and send it to the
+physical layer through the \fvar{phys} gate. The \msgtype{PppFrame}s
+received from the \fvar{phys} gate are decapsulated and sent to the upper
+layer immediately through the \fvar{netwOut} gate.
+
+Incoming datagrams are waiting in a queue if the line is currently busy.
+In routers, PPP relies on an external queue module (implementing
+\nedtype{IOutputQueue}) to model finite buffer, implement QoS and/or RED,
+and requests packets from this external queue one-by-one. The name
+of this queue is given as the \fpar{queueModule} parameter.
+
+In hosts, no such queue is used, so \nedtype{Ppp} contains an internal
+queue named txQueue to queue up packets wainting for transmission.
+Conceptually txQueue is of inifinite size, but for better diagnostics
+one can specify a hard limit in the \fpar{txQueueLimit} parameter -- if
+this is exceeded, the simulation stops with an error.
+
+The module can be used in simulations where the nodes are connected and
+disconnected dinamically. If the channel between the PPP modules is down,
+the messages received from the upper layer are dropped (including the messages
+waiting in the queue). When the connection is restored it will
+poll the queue and transmits the messages again.
+
+The PPP module registers itself in the interface table of the node.
+The \fvar{mtu} of the entry can be specified by the
+\fpar{mtu} module parameter. The module checks the state of the physical link
+and updates the entry in the interface table.
+
 
 \section{Wired Network Interfaces}
 
