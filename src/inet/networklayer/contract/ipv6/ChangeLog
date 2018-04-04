@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2018-02-12  Zoltan Bojthe
+
+	Added toString for some address descriptor.
+
+2018-01-15  Levente Mészáros
+
+	Moved extension headers under ipv6 folder.
+
 2017-12-22  ------ inet-3.99.2 released ------
 
 2017-12-20  Zoltan Bojthe
@@ -37,4 +45,3 @@
 	Added required import statements to MSG files according to new syntax.
 
 2017-11-16  ------ inet-3.99.1 released ------
-

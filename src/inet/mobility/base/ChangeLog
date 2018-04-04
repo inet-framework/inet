@@ -1,5 +1,31 @@
 ====== inet-4.x ======
 
+2018-03-22  Levente Mészáros
+
+	Replaced type of angle member variables with rad and added degree around parameters.
+
+2018-03-20  Levente Mészáros
+
+	Renamed speed to velocity where appropriate. Speed is a scalar, velocity is a vector quantity.
+
+2018-03-15  Levente Mészáros
+
+	Moved getting the canvas projection into INITSTAGE_LOCAL.
+	Fixed finding visual representation, it is optional.
+	Added a missing WATCH for orientation.
+	Added faceForward bool parameter to allow disabling automatic forward orientation.
+
+2018-02-13  TÖRÖK Attila
+
+	Factor out MovingMobilityBase::orient() to allow overriding.
+
+2018-02-06  Levente Mészáros
+
+	Added implementations for all missing IMobility functions to MovingMobilityBase.
+	Removed useless default implementations from MobilityBase for some IMobility functions.
+	Fixed default orientation computation according to the new documentation.
+	Renamed initial orientation parameters to be more specific.
+
 2017-12-22  ------ inet-3.99.2 released ------
 
 2017-12-15  Zoltan Bojthe

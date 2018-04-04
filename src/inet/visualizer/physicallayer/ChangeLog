@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2018-02-12  TÖRÖK Attila
+
+	Put the signal spheres and rings in the transparent render bin.
+
 2017-12-22  ------ inet-3.99.2 released ------
 
 2017-12-20  Zoltan Bojthe

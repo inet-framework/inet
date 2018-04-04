@@ -1,5 +1,66 @@
 ====== inet-4.x ======
 
+2018-03-08  Zoltan Bojthe
+
+	Added EthernetProtocolPrinter.
+
+2018-02-26  Zoltan Bojthe
+
+	Added EthernetProtocolDissector.
+
+2018-02-21  Zoltan Bojthe
+
+	Fixed length parameter usage, it's required for popTrailer on byte representation.
+	Changed clearing tags when sending a packet to leave the PacketProtocolTag intact.
+	Added missing PacketProtocolTag.
+
+2018-02-21  Levente Mészáros
+
+	Fixed missing PacketProtocolTag for raw packets.
+
+2018-02-19  Zoltan Bojthe
+
+	Removed PacketProtocolTag before sending up the packet.
+	Renamed functions to use camel case.
+
+2018-02-09  Zoltan Bojthe
+
+	Renamed transmitState/receiveState to transmissionStateChanged/receptionStateChanged.
+	Renamed backoffSignal to backoffSlotsGeneratedSignal.
+	Removed txPk (~packetSentToLower), rxPkFromHl (~packetReceivedFromUpper).
+
+2018-02-08  Zoltan Bojthe
+
+	Added missing emit packetDropped signal.
+	Fixed packet padding, it was incompatible with chunks in EtherMacFullDuplex.
+	Fixed txPausePkUnitsSignal and numPauseFramesSent calculation.
+
+2018-02-07  Zoltan Bojthe
+
+	Changed backoffSignal to emit slotNumber (instead of constant 1).
+	Added missing packetDropped signal.
+
+2018-02-05  Zoltan Bojthe
+
+	Renamed signal pk to packetReceived.
+
+2018-01-24  Levente Mészáros
+
+	Adapted registerProtocol calls to the new API based on OSI service primitives.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-09  Zoltan Bojthe
+
+	Renamed @statistics to use camel case.
+
+2018-01-05  Zoltan Bojthe
+
+	Renamed NF_* signals to use camel case.
+	Renamed signal variables to *Signal.
+
 2017-12-22  ------ inet-3.99.2 released ------
 
 2017-12-20  Zoltan Bojthe

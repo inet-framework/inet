@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2018-03-19  Levente Mészáros
+
+	Replaced cArcFigure with cPieSliceFigure in MobilityCanvasVisualizer.
+
+2018-02-13  TÖRÖK Attila
+
+	Fixed orientation computation in MobilityOsgVisualizer.
+
+2018-01-31  Levente Mészáros
+
+	Followed mobility orientation fix and added workaround for omnet bug.
+
 2017-12-22  ------ inet-3.99.2 released ------
 
 2017-12-20  Zoltan Bojthe

@@ -1,5 +1,29 @@
 ====== inet-4.x ======
 
+2018-03-22  Levente Mészáros
+
+	Replaced type of angle member variables with rad and added degree around parameters.
+	Replace @unit(rad) with @unit(deg) in NED files because its more human readable.
+
+2018-03-20  Levente Mészáros
+
+	Moved static LinearNodeDistributionMobility into static folder.
+	Renamed LinearNodeDistributionMobility to StaticLinearMobility.
+	Renamed speed to velocity where appropriate. Speed is a scalar, velocity is a vector quantity.
+
+2018-02-13  TÖRÖK Attila
+
+	Factor out MovingMobilityBase::orient() to allow overriding.
+
+2018-02-06  Levente Mészáros
+
+	Added initial orientation parameters to StationaryMobility at least.
+	Cleaned up how StationaryMobility implements IMobility.
+
+2018-01-12  Zoltan Bojthe
+
+	Fixed double and int inconsistency: NED vs. INI and NED vs. C++
+
 2017-12-22  ------ inet-3.99.2 released ------
 
 2017-11-16  ------ inet-3.99.1 released ------

@@ -1,5 +1,83 @@
 ====== inet-4.x ======
 
+2018-03-09  Zoltan Bojthe
+
+	Added missig postRouting hook.
+
+2018-02-27  Zoltan Bojthe
+
+	Added Ipv6ProtocolDissector.
+
+2018-02-12  Zoltan Bojthe
+
+	Renamed functions to use camel case.
+
+2018-02-06  Zoltan Bojthe
+
+	Optimized payload protocol decoding.
+
+2018-01-19  Zoltan Bojthe
+
+	Revised TlvOptions MSG customization.
+
+2018-01-26  Zoltan Bojthe
+
+	Removed @customize from Ipv6Header, Ipv6ExtHeaderTagBase and
+	Ipv6ExtensionHeaders.
+
+2018-01-26  Florian Kauer
+
+	Fix build error if xMIPv6 is not enabled.
+
+2018-01-25  Levente Mészáros
+
+	Adapted register protocol listeners to the new API based on OSI service primitives.
+
+2018-01-24  Levente Mészáros
+
+	Adapted registerProtocol calls to the new API based on OSI service primitives.
+
+2018-01-23  Levente Mészáros
+
+	Replaced MessageDispatcher lower/upper vector gates with a single one.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-17  Zoltan Bojthe
+
+	Moved src address check from encapsulate() to before the call.
+
+2018-01-16  Zoltan Bojthe
+
+	Removed unnecessary WITH_IPv6 compiler conditions for extension header.
+
+2018-01-16  Zoltan Bojthe
+
+	Fixed delete in Ipv6, it was too early.
+
+2018-01-15  Levente Mészáros
+
+	Moved extension headers under ipv6 folder.
+
+2018-01-12  Levente Mészáros
+
+	Fixed processing cMessage tags by adding required cast operations.
+
+2018-01-05  Zoltan Bojthe
+
+	Renamed NF_* signals to use camel case.
+	Renamed signal variables to *Signal.
+
+2018-01-03  Levente Mészáros
+
+	Replaced transferTagsFrom with copyTags.
+
+2018-01-02  Levente Mészáros
+
+	Replaced cPacket with Packet.
+
 2017-12-22  ------ inet-3.99.2 released ------
 
 2017-12-20  Zoltan Bojthe

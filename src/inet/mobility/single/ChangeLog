@@ -1,5 +1,38 @@
 ====== inet-4.x ======
 
+2018-03-22  Levente Mészáros
+
+	Replaced type of angle member variables with rad and added degree around parameters.
+	Replace @unit(rad) with @unit(deg) in NED files because its more human readable.
+
+2018-03-20  Levente Mészáros
+
+	Moved static LinearNodeDistributionMobility into static folder.
+	Renamed speed to velocity where appropriate. Speed is a scalar, velocity is a vector quantity.
+
+2018-03-19  Levente Mészáros
+
+	Added current speed to AttachedMobility.
+	Added orientation offset parameters to AttachedMobility.
+	Added angular speed and acceleration to CircleMobility.
+
+2018-03-18  TÖRÖK Attila
+
+	Switched to Quaternion to convert from EulerAngles to a matrix in Rotation.
+
+2018-03-15  Levente Mészáros
+
+	Added AttachedMobility which provides trajectory attached with an offset to another mobility model.
+	Added FacingMobility which provides orientation towards another mobility model.
+
+2018-03-14  Levente Mészáros
+
+	Added SuperpositioningMobility which allows combining other mobility models.
+
+2018-02-13  TÖRÖK Attila
+
+	Factored out MovingMobilityBase::orient() to allow overriding.
+
 2017-12-22  ------ inet-3.99.2 released ------
 
 2017-12-15  Zoltan Bojthe

@@ -1,5 +1,54 @@
 ====== inet-4.x ======
 
+2018-03-21  Levente Mészáros
+
+	Common: Refactored Packet API for clarity and consistency.
+
+	Removed getHeaderPoppedLength/getTrailerPoppedLength from Packet.
+	Merged insertAtBeginning into insertAtFront in Packet.
+	Merged insertAtEnd into insertAtBack in Packet.
+	Merged removeFromBeginning into removeAtFront in Packet.
+	Merged removeFromEnd into removeAtBack in Packet.
+
+	Renamed contents to content in Packet and ChunkQueue.
+
+	Renamed get/setHeaderPopOffset to get/setFrontOffset in Packet.
+	Renamed get/setTrailerPopOffset to get/setBackOffset in Packet.
+	Renamed peekHeader/peekTrailer to peekAtFront/peekAtBack in Packet.
+	Renamed popHeader/popTrailer to popAtFront/popAtBack in Packet.
+	Renamed hasHeader/hasTrailer to hasAtFront/hasAtBack in Packet.
+	Renamed removeHeader/removeTrailer to removeAtFront/removeAtBack in Packet.
+	Renamed peekDataBits/peekDataBytes to peekDataAsBits/peekDataAsBytes in Packet.
+	Renamed peekAllBits/peekAllBytes to peekAllAsBits/peekAllAsBytes in Packet.
+	Renamed removePoppedHeader/removePoppedTrailers to trimFront/trimBack in Packet.
+	Renamed removePoppedChunks to trim in Packet.
+
+2018-02-14  Levente Mészáros
+
+	Added PF_ALLOW_ALL flag that disables throwing errors from peek/pop functions.
+	Added a PacketFilter class that can filter packets based on the actual data.
+
+2018-02-01  Levente Mészáros
+
+	Disallowed inserting empty chunks into Packet, ChunkQueue and ChunkBuffer.
+
+	This may catch bugs early on in the user code.
+
+2018-01-12  Levente Mészáros
+
+	Added getTags to Packet to allow passing around the set of tags.
+	Added Message class, Request and Indication subclasses.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-02  Levente Mészáros
+
+	Added copying for tags in Packet copy constructor.
+	Added tags field to Packet descriptor.
+	Dropped header, data, trailer descriptor fields.
+
 2017-12-22  ------ inet-3.99.2 released ------
 
 2017-12-18  Levente Mészáros

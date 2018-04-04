@@ -1,3 +1,27 @@
+====== inet-4.x ======
+
+2018-01-24  Levente Mészáros
+
+	Adapted registerProtocol calls to the new API based on OSI service primitives.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-12  Levente Mészáros
+
+	Removed _DSDV postfix from parameter names.
+
+2018-01-09  Zoltan Bojthe
+
+	Added lifecycle support.
+	Fixed undisposed object errors.
+	Moved self message handler code to new handleSelfMessage() function.
+
+2018-01-03  Levente Mészáros
+
+	Ported DSDV routing from INETMANET.
+
 ====== inet-3.x ======
 
 2016-04-06  ------ inet-3.2.4 released ------

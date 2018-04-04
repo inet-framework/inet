@@ -1,5 +1,22 @@
 ====== inet-4.x ======
 
+2018-02-23  Zoltan Bojthe
+
+	Protocol parameter must be between 143 and 254 for IpvxTrafGen and IpvxTrafSink.
+	They register the new protocol to the ipprotocol protocol group if necessary.
+
+2018-01-24  Levente Mészáros
+
+	Adapted registerProtocol calls to the new API based on OSI service primitives.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-02  Levente Mészáros
+
+	Replaced cPacket with Packet.
+
 2017-12-22  ------ inet-3.99.2 released ------
 
 2017-12-20  Zoltan Bojthe

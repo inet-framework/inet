@@ -1,5 +1,18 @@
 ====== inet-4.x ======
 
+2018-02-19  Zoltan Bojthe
+
+	Renamed functions to use camel case.
+
+2018-01-18  Zoltan Bojthe
+
+	Revised MSG customizations.
+	Fixed BgpUpdateMessage::setWithdrawnRoutesArraySize(), it didn't resize the array.
+
+2018-01-12  Zoltan Bojthe
+
+	Removed 'Routing' from name of all routing protocol classes/files.
+
 2017-12-22  ------ inet-3.99.2 released ------
 
 2017-12-20  Zoltan Bojthe

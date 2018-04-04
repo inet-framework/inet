@@ -1,5 +1,99 @@
 ====== inet-4.x ======
 
+2018-03-22  Levente Mészáros
+
+	Replaced scale with fsacle in deg unit for more precision.
+	Added fscale to allow using double scaling factor in units.
+	Dropped grad unit because it uses a bad approximation for PI.
+	Renamed degree unit to deg to make it shorter.
+	Changed byte and bit display names to B and b respectively.
+
+2018-03-05  Zoltan Bojthe
+
+	Changed ProtocolGroup to be modifiable (remove const).
+	Added addProtocol() function.
+
+2018-02-28  Zoltan Bojthe
+
+	Added protocols to the list of known protocols: linkstaterouting, apskPhy,
+	flood, probabilistic, wiseroute, shortcut, bmac, lmac, xmac, ieee802154.
+	Added separate PHY, MAC, MGMT protocols where applicable.
+	Added Protocol.msg
+
+2018-02-15  Levente Mészáros
+
+	Added descriptive names to protocols.
+
+2018-02-07  Levente Mészáros
+
+	Added LineNode osg Node with same basic functionality similar to cLineFigure.
+	Added width/height parameters to createArrowhead().
+	Renamed parameter from begin to start to be consistent with omnetpp figure API.
+
+2018-02-02  Zoltan Bojthe
+
+	Changed Packet::str() format: "(<classname>) packetname (<length> B) [<chunks>]"
+
+2018-01-30  Levente Mészáros
+
+	Resurrected original messageAge result filter.
+	Renamed messageAge result filter to dataAge.
+
+2018-01-26  Levente Mészáros
+
+	Implemented inspection mechanism for MessageDispatcher protocol mapping.
+
+2018-01-25  Levente Mészáros
+
+	Redesigned MessageDispatcher for new protocol registration API based on OSI service primitives.
+
+	The new implmentation allows many different configurations from layered
+	architectures where message dispatchers separate different communication
+	layers to centralized architectures where a single message dispatcher is
+	connected to all components.
+
+2018-01-25  Levente Mészáros
+
+	Added OSI layered service primitive enum to DispatchProtocolReq.
+	Added both gates (in/out) to the interface registration API.
+	Changed protocol registration API to be based on OSI service primitives.
+
+2018-01-23  Levente Mészáros
+
+	Replaced MessageDispatcher lower/upper vector gates with a single one.
+
+2018-01-19  Zoltan Bojthe
+
+	Revised MSG customization in TlvOptions.
+	Removed customization from ByteArray.
+
+2018-01-16  Zoltan Bojthe
+
+	Disable implicit conversion from T* to IntrusivePtr<T>.
+
+2018-01-12  Levente Mészáros
+
+	Added Request and Indication subclasses for cMessage.
+
+2018-01-12  Zoltan Bojthe
+
+	Fixed double and int inconsistency: NED vs. INI and NED vs. C++
+	Added intWithUnit() NED function.
+
+2018-01-09  Levente Mészáros
+
+	Fixed emitting object pointer through integral value.
+	Fixed Coord filters.
+
+2018-01-05  Zoltan Bojthe
+
+	Renamed NF_* signals to use camel case.
+	Renamed signal variables to *Signal.
+
+2018-01-05  Zoltan Bojthe
+
+	Eliminated NF_IPv4_NEW_IGMP_(ADDED|REMOVED)(_PIMSM) signals.
+
 2017-12-22  ------ inet-3.99.2 released ------
 
 2017-12-20  Zoltan Bojthe

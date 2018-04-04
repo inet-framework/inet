@@ -1,0 +1,6 @@
+====== inet-4.x ======
+
+2018-02-15  Levente Mészáros
+
+	Added new dissector API in the form of PacketDissector, ProtocolDissector,
+	and ProtocolDissectorRegistry.

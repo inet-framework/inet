@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2017-03-08  Maximilian Köstler
+
+	Add getter for energy balance in IdealEpEnergyStorage.
+
 2017-12-22  ------ inet-3.99.2 released ------
 
 2017-11-16  ------ inet-3.99.1 released ------

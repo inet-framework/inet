@@ -1,5 +1,90 @@
 ====== inet-4.x ======
 
+2018-03-09  Zoltan Bojthe
+
+	Fixed double free in Ipv4FragBuf destructor.
+	Fixed CRC calculation for fragmented frames.
+
+2018-03-07  Zoltan Bojthe
+
+	Added Ipv4ProtocolPrinter.
+	Added IcmpProtocolPrinter.
+
+2018-02-27  Irene Ruengeler
+
+	Changed PacketDrill and improved Data handling.
+
+2018-02-26  Zoltan Bojthe
+
+	Added IgmpProtocolDissector.
+	Added missing packetDropped signal to Ipv4.
+
+2018-02-19  Zoltan Bojthe
+
+	Renamed functions to use camel case.
+
+2018-02-16  Zoltan Bojthe
+
+	Added IcmpProtocolDissector.
+	Added Ipv4ProtocolDissector.
+
+2018-02-12  Zoltan Bojthe
+
+	Removed unused code from MSG files.
+
+2018-01-25  Levente Mészáros
+
+	Added SP_INDICATION service primitive when sending error reports to transport.
+
+2018-01-25  Levente Mészáros
+
+	Adapted register protocol listeners to the new API based on OSI service primitives.
+
+2018-01-24  Levente Mészáros
+
+	Adapted registerProtocol calls to the new API based on OSI service primitives.
+
+2018-01-23  Zoltan Bojthe
+
+	Removed @customize from Ipv4Header.
+
+2018-01-23  Levente Mészáros
+
+	Replaced MessageDispatcher lower/upper vector gates with a single one.
+
+2018-01-23  Irene Ruengeler
+
+	Adapted SCTP packet flow and UDP encaps.
+
+2018-01-22  Irene Ruengeler
+
+	Adapted SCTP to the new Packet API.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-12  Zoltan Bojthe
+
+	Fixed double and int inconsistency: NED vs. INI and NED vs. C++
+
+2018-01-11  Zoltan Bojthe
+
+	Renamed all *Nic modules to *Interface.
+
+2018-01-05  Zoltan Bojthe
+
+	Renamed NF_* signals to use camel case.
+	Renamed signal variables to *Signal.
+
+2018-01-03  Levente Mészáros
+
+	Replaced transferTagsFrom with copyTags.
+
+2018-01-02  Levente Mészáros
+
+	Replaced cPacket with Packet.
+
 2017-12-22  ------ inet-3.99.2 released ------
 
 2017-12-20  Zoltan Bojthe

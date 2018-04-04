@@ -1,5 +1,25 @@
 ====== inet-4.x ======
 
+2018-02-27  Zoltan Bojthe
+
+	Added UnitDiscProtocolDissector.
+
+2018-02-22  Zoltan Bojthe
+
+	Added unitdisk to known protocols, added payloadProtocol field for UnitDiskPhyHeader.
+
+2018-01-26  Levente Mészáros
+
+	Replaced headerBitLength with headerLength where the unit is already present.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-09  Levente Mészáros
+
+	Extended analog models to be able to compute the sum of a signal and a noise.
+
 2017-12-22  ------ inet-3.99.2 released ------
 
 2017-12-20  Zoltan Bojthe

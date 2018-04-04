@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2018-01-12  Zoltan Bojthe
+
+	Removed 'Routing' from name of all routing protocol classes/files.
+
+2018-01-08  Gyorgy Szaszko
+
+	Added IManetRouting and a generic ManetRouter which supports configuring the routing protocol.
+
 2017-12-22  ------ inet-3.99.2 released ------
 
 2017-12-20  Zoltan Bojthe

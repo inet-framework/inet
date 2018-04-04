@@ -1,5 +1,30 @@
 ====== inet-4.x ======
 
+2018-03-21  Levente Mészáros
+
+	Common: Refactored Packet API for clarity and consistency.
+
+	Renamed canInsertAtBeginning to canInsertAtFront in Chunk and subclasses.
+	Renamed canInsertAtEnd to canInsertAtBack in Chunk and subclasses.
+	Renamed doInsertAtBeginning to doInsertAtFront in Chunk and subclasses.
+	Renamed doInsertAtBack to canInsertAtBack in Chunk and subclasses.
+	Renamed doRemoveFromBeginning to doRemoveAtFront in Chunk and subclasses.
+	Renamed doRemoveFromEnd to doRemoveAtBack in Chunk and subclasses.
+
+2018-02-14  Levente Mészáros
+
+	Added PF_ALLOW_ALL flag that disables throwing errors from peek/pop functions.
+
+2018-02-01  Levente Mészáros
+
+	Added Chunk::isEmpty.
+	Removed virtual qualifier from Chunk methods where it's unnecessary.
+	Changed SliceChunk and SequenceChunk to forbid using mutable chunks inside.
+
+2018-01-12  Levente Mészáros
+
+	Fixed findTag to return type in Chunk.
+
 2017-12-22  ------ inet-3.99.2 released ------
 
 2017-12-20  Zoltan Bojthe

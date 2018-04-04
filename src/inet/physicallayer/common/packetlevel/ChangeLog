@@ -1,5 +1,44 @@
 ====== inet-4.x ======
 
+2018-02-21  Levente Mészáros
+
+	Fixed missing PacketProtocolTag for raw packets.
+	Changed clearing tags when sending a packet to leave the PacketProtocolTag intact.
+
+2018-02-01  Zoltan Bojthe
+
+	Removed minSnir, packetErrorRate, bitErrorRate, symbolErrorRate signals.
+	Added signal filters to compute the same statistics from the packet.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-12  Levente Mészáros
+
+	Removed clearTags calls on Signals because they don't support tags at all.
+
+2018-01-05  Zoltan Bojthe
+
+	Renamed NF_* signals to use camel case.
+	Renamed signal variables to *Signal.
+
+2018-01-04  Levente Mészáros
+
+	Fixed crash in Signal getters when accessing a duplicated signal.
+
+	This bug was triggered by the runtime user interface when inspecting old
+	packets in the packet log.
+
+2018-01-04  Levente Mészáros
+
+	Added getTransmission by id to RadioMedium.
+	Added several missing class descriptors.
+
+2017-12-22  Levente Mészáros
+
+	Fixed memory leak during processing radio configuration commands.
+
 2017-12-22  ------ inet-3.99.2 released ------
 
 2017-12-20  Zoltan Bojthe

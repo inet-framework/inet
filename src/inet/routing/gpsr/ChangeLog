@@ -1,5 +1,50 @@
 ====== inet-4.x ======
 
+2018-02-05  Levente Mészáros
+
+	Replaced neighbor search loop in perimeter routing with a more predictable solution.
+	Changed first timer send time after initialize and startup to be beaconInterval + jitter.
+	Refactored global position registry kludge to make it more apparent.
+	Changed beacon interval jitter handling according to original paper.
+	Changed default parameters according to suggestion in the original paper.
+
+2018-02-05  Levente Mészáros
+
+	Fixed purging neighbors when received a beacon.
+
+	This bug caused schedule in the past when the validity period was shorter
+	for the newly received neighbor then the next purge event.
+
+2018-02-05  Levente Mészáros
+
+	Fixed loop exit when the next neighbor becomes the sender.
+	Removed unnecessary address parameter from getNextPlanarNeighborCounterClockwise().
+	Fixed initial position in global table when starting a node.
+
+2018-02-01  Levente Mészáros
+
+	Added more state recording according to the original paper.
+	Merged isConnectingLineSegments into computeIntersectionInsideLineSegments.
+	Added no planarization mode for easier testing of perimeter routing.
+	Fixed clearing the global position table.
+
+2018-01-24  Levente Mészáros
+
+	Adapted registerProtocol calls to the new API based on OSI service primitives.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-16  Levente Mészáros
+
+	Fixed potential infinite loop caused by numeric instability in double
+	precision computation during perimeter routing.
+
+2018-01-10  Gyorgy Szaszko
+
+	Changed to start sending beacons at simulation start.
+
 2017-12-22  ------ inet-3.99.2 released ------
 
 2017-12-20  Zoltan Bojthe

@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2018-01-31  Zoltan Bojthe
+
+	Replaced dedicated gates with dispatch mechanism in PacketDrill.
+
+2018-01-23  Levente Mészáros
+
+	Replaced MessageDispatcher lower/upper vector gates with a single one.
+
 2017-12-22  ------ inet-3.99.2 released ------
 
 2017-12-20  Zoltan Bojthe

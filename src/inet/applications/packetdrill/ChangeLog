@@ -1,5 +1,34 @@
 ====== inet-4.x ======
 
+2018-02-19  Zoltan Bojthe
+
+	Renamed functions to use camel case.
+
+2018-01-31  Zoltan Bojthe
+
+	Replaced dedicated gates in PacketDrillApp with generic dispatch mechanism.
+
+2018-01-22  Irene Ruengeler
+
+	Ported the SCTP part to the new Packet API.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-02  Levente Mészáros
+
+	Replaced cPacket with Packet.
+
+2017-12-21  Irene Ruengeler
+
+	Fix various retransmission bugs:
+
+	The transmission counter was not advanced when the data was timer based retransmitted.
+	When fast recovery was active and the cumulative TSN advanced, the miss indications were not increased.
+	In PacketDrill the counting of Gap Reports was fixed.
+	A PacketDrill test to test fast Retransmissions was added.
+
 2017-12-22  ------ inet-3.99.2 released ------
 
 2017-12-20  Zoltan Bojthe

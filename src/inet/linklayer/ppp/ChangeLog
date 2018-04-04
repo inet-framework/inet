@@ -1,5 +1,42 @@
 ====== inet-4.x ======
 
+2018-02-21  Zoltan Bojthe
+
+	Changed clearing tags when sending a packet to leave the PacketProtocolTag intact.
+
+2018-02-21  Levente Mészáros
+
+	Fixed missing PacketProtocolTag for raw packets.
+
+2018-02-16  Zoltan Bojthe
+
+	Added PppProtocolDissector.
+
+2018-02-08  Zoltan Bojthe
+
+	Renamed txStateSignal to transmissionStateChangedSignal.
+
+2018-02-05  Zoltan Bojthe
+
+	Revised signals.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-09  Zoltan Bojthe
+
+	Renamed @statistics to use camel case.
+
+2018-01-05  Zoltan Bojthe
+
+	Renamed NF_* signals to use camel case.
+	Renamed signal variables to *Signal.
+
+2018-01-02  Levente Mészáros
+
+	Replaced cPacket with Packet.
+
 2017-12-22  ------ inet-3.99.2 released ------
 
 2017-12-20  Zoltan Bojthe

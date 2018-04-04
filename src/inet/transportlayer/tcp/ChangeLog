@@ -1,5 +1,39 @@
 ====== inet-4.x ======
 
+2018-01-24  Levente Mészáros
+
+	Adapted registerProtocol calls to the new API based on OSI service primitives.
+
+2018-01-18  Zoltan Bojthe
+
+	Revised MSG customization: Sack, TcpHeader.
+	Remove @customize properties where possible.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-12  Levente Mészáros
+
+	Moved Indication kind into constructor argument.
+	Renamed indication variables.
+	Replaced cMessage commands with Request and Indication.
+
+2018-01-12  Levente Mészáros
+
+	Renamed ACK packets to TcpAck and WlanAck to avoid confusion.
+
+	For example, a TcpAck can be followed by a WlanAck which used to be an ACK
+	followed by another ACK.
+
+2018-01-03  Levente Mészáros
+
+	Switched from message pointer to packet pointer where available.
+
+2018-01-02  Levente Mészáros
+
+	Replaced cPacket with Packet.
+
 2017-12-22  ------ inet-3.99.2 released ------
 
 2017-12-20  Zoltan Bojthe
