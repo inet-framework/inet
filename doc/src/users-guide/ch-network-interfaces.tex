@@ -27,34 +27,42 @@ protocols, protocol tunneling, hardware emulation, etc. The following list
 gives the most commonly used network interfaces.
 
 \begin{itemize}
-        \item \nedtype{EthernetInterface} contains \protocol{Ethernet} MAC and PHY protocols
-        \item \nedtype{PppInterface} provides \protocol{PPP} protocol
-        \item \nedtype{Ieee80211Interface} contains \protocol{IEEE 802.11} MGMT, MAC and PHY protocols
-        \item \nedtype{Ieee802154Interface} contains \protocol{IEEE 802.15.4} MAC and PHY protocols
-        \item \nedtype{BMacInterface}, \nedtype{LMacInterface}, \nedtype{XMacInterface} provides low-power wireless sensor protocols along with a simple hypothetical PHY protocol
-        \item \nedtype{TunInterface} provides protocol tunneling which can be directly used by applications
-        \item \nedtype{LoopbackInterface} provides local loopback within the network node
-        \item \nedtype{ExtInterface} represents real interfaces suitable for hardware-in-the-loop simulations
+    \item \nedtype{EthernetInterface} represents an \protocol{Ethernet} interface
+    \item \nedtype{PppInterface} is for wired links using \protocol{PPP}
+    \item \nedtype{Ieee80211Interface} represents a Wifi (\protocol{IEEE 802.11}) interface
+    \item \nedtype{Ieee802154Interface} represents a \protocol{IEEE 802.15.4} interface
+    \item \nedtype{BMacInterface}, \nedtype{LMacInterface}, \nedtype{XMacInterface} provide 
+      low-power wireless sensor MAC protocols along with a simple hypothetical PHY protocol
+    \item \nedtype{TunInterface} is a tunneling interface that can be directly used by applications
+    \item \nedtype{LoopbackInterface} provides local loopback within the network node
+    \item \nedtype{ExtInterface} represents a real-world interface, suitable for hardware-in-the-loop simulations
 \end{itemize}
 
-The internal structure of network interfaces can also be customized in
-several ways similarly to network nodes. For example,
-\nedtype{EthernetInterface} contains optional submodules for queuing and
-traffic shaping.
+\section{Anatomy of Network Interfaces}
 
-\section{Network Interface Structure}
+Network interfaces in the INET Framework are OMNeT++ compound modules that
+contain many more components than just the corresponding layer 2 protocol
+implementation. Most of these components are optional, i.e. absent by default,
+and can be added via configuration.
 
-All network interfaces in the INET Framework are OMNeT++ compound modules that
-are mainly composed of the following components:
+Typical ingredients are:
 
 \begin{itemize}
-        \item \emph{LLC protocols}
-        \item \emph{MGMT protocols}
-        \item \emph{MAC protocols}
-        \item \emph{PHY protocols}
-        \item \emph{Traffic conditioners}
-        \item \emph{Queues}
-        \item \emph{Classifiers}
+    \item \emph{Layer 2 protocol implementation}. For some interfaces such as
+      \nedtype{PppInterface} this is a single module; for others like Ethernet
+      and Wifi it consists of separate modules for MAC, LLC protocols, and
+      possibly other protocols. 
+    \item \emph{PHY protocols}. Some interfaces also contain separate
+      module(s) that implement the physical layer. For example, 
+      \nedtype{Ieee80211Interface} contains a radio module.
+    \item \emph{Queue}. This module is also called the \emph{external queue}.
+      The queue module is optional and is absent by default, because most 
+      MAC protocol implementations already contain an internal queue which
+      is more efficient to work with. The possibility to allow an external queue 
+      primarily exists to allow experimentation: one can install bounded 
+      queue, priority queue, etc.  
+    \item \emph{Traffic conditioners}
+    \item \emph{Hooks}
 \end{itemize}
 
 \section{Queueing}
