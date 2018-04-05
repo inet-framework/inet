@@ -34,9 +34,9 @@ import inet.node.base.NetworkLayerNodeBase;
 
 
 //
-// This module is an Ipv4 router that can delay or drop packets (while retaining their order)
+// This module is an IPv4 router that can delay or drop packets (while retaining their order)
 // based on which interface card the packet arrived on and on which interface
-// it is leaving the cloud. The delayer module is replacable.
+// it is leaving the cloud. The delayer module is replaceable.
 //
 // By default the delayer module is ~MatrixCloudDelayer which lets you configure
 // the delay, drop and datarate parameters in an XML file. Packet flows, as defined
