@@ -19,8 +19,8 @@ import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.Ipv4NetworkLayer;
 import inet.networklayer.mpls.LibTable;
 import inet.networklayer.mpls.Mpls;
-import inet.networklayer.rsvp_te.RsvpTe;
-import inet.networklayer.rsvp_te.SimpleClassifier;
+import inet.networklayer.rsvpte.RsvpTe;
+import inet.networklayer.rsvpte.SimpleClassifier;
 import inet.networklayer.ted.LinkStateRouting;
 import inet.networklayer.ted.Ted;
 

@@ -19,7 +19,7 @@
 
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/ted/LinkStatePacket_m.h"
-#include "inet/networklayer/rsvp_te/IntServ_m.h"
+#include "inet/networklayer/rsvpte/IntServ_m.h"
 
 namespace inet {
 

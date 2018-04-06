@@ -394,7 +394,7 @@
         nedPackages = "
                        inet.networklayer.mpls inet.node.mpls
                        inet.networklayer.ldp
-                       inet.networklayer.rsvp_te
+                       inet.networklayer.rsvpte
                        inet.networklayer.ted
                       "
         extraSourceFolders = ""

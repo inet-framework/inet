@@ -16,7 +16,7 @@
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
 import inet.networklayer.contract.NetworkHeaderBase;
-import inet.networklayer.rsvp_te.IntServ;
+import inet.networklayer.rsvpte.IntServ;
 
 namespace inet;
 

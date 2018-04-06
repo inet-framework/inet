@@ -18,7 +18,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/networklayer/ted/Ted_m.h"
-#include "inet/networklayer/rsvp_te/IntServ_m.h"
+#include "inet/networklayer/rsvpte/IntServ_m.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {

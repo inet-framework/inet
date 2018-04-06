@@ -24,7 +24,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/mpls/IClassifier.h"
-#include "inet/networklayer/rsvp_te/Utils.h"
+#include "inet/networklayer/rsvpte/Utils.h"
 
 // FIXME temporary fix
 #include "inet/networklayer/ldp/Ldp.h"

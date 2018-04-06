@@ -13,7 +13,7 @@
 //
 
 
-package inet.networklayer.rsvp_te;
+package inet.networklayer.rsvpte;
 
 //
 // Implements RSVP-TE, a signalling protocol for MPLS. The module

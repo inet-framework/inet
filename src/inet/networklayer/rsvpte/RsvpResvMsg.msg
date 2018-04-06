@@ -15,8 +15,8 @@
 
 import inet.common.INETDefs;
 import inet.networklayer.contract.ipv4.Ipv4Address;
-import inet.networklayer.rsvp_te.IntServ;
-import inet.networklayer.rsvp_te.RsvpPacket;
+import inet.networklayer.rsvpte.IntServ;
+import inet.networklayer.rsvpte.RsvpPacket;
 
 namespace inet;
 

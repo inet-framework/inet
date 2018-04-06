@@ -17,9 +17,9 @@
 // @author: Zoltan Bojthe
 //
 
-#include "inet/networklayer/rsvp_te/RsvpProtocolDissector.h"
+#include "inet/networklayer/rsvpte/RsvpProtocolDissector.h"
 
-#include "inet/networklayer/rsvp_te/RsvpPacket_m.h"
+#include "inet/networklayer/rsvpte/RsvpPacket_m.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 
 

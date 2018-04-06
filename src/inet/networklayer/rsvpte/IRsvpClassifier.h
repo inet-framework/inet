@@ -12,18 +12,28 @@
 // See the GNU Lesser General Public License for more details.
 //
 
+#ifndef __INET_IRSVPCLASSIFIER_H
+#define __INET_IRSVPCLASSIFIER_H
 
-package inet.networklayer.rsvp_te;
+#include "inet/common/INETDefs.h"
 
-//
-// TODO documentation
-//
-simple SimpleClassifier
+#include "inet/networklayer/rsvpte/IntServ_m.h"
+#include "inet/networklayer/mpls/IClassifier.h"
+
+namespace inet {
+
+/**
+ * TODO
+ */
+class INET_API IRsvpClassifier : public IClassifier
 {
-    parameters:
-        string routingTableModule;
-        string libTableModule;
-        string rsvpModule;
-        xml config = default(xml("<fectable/>"));
-        @display("i=block/classifier");
-}
+  public:
+    virtual ~IRsvpClassifier() {}
+
+    virtual void bind(const SessionObj& session, const SenderTemplateObj& sender, int inLabel) = 0;
+};
+
+} // namespace inet
+
+#endif // ifndef __INET_IRSVPCLASSIFIER_H
+

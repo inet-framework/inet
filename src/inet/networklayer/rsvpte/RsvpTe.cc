@@ -14,10 +14,10 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/networklayer/rsvp_te/RsvpTe.h"
+#include "inet/networklayer/rsvpte/RsvpTe.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/networklayer/rsvp_te/Utils.h"
+#include "inet/networklayer/rsvpte/Utils.h"
 #include "inet/common/XMLUtils.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/common/ModuleAccess.h"
