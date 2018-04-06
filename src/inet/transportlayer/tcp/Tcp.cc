@@ -61,6 +61,13 @@ static std::ostream& operator<<(std::ostream& os, const Tcp::SockPair& sp)
     return os;
 }
 
+//std::string operator<<(std::string str, const Tcp::SockPair& sp)
+//{
+//    char buf[80];
+//    sprintf(buf,strlen(buf),"loc=%s:%d rem=%s:%d",sp.localAddr.str(),sp.localPort,sp.remoteAddr.str(),sp.remotePort);
+//    return buf;
+//}
+
 static std::ostream& operator<<(std::ostream& os, const Tcp::AppConnKey& app)
 {
     os << "socketId=" << app.socketId;
@@ -328,6 +335,11 @@ void Tcp::refreshDisplay() const
         sprintf(buf2 + strlen(buf2), "syn_rcvd:%d ", numSYN_RCVD);
     if (numESTABLISHED > 0)
         sprintf(buf2 + strlen(buf2), "estab:%d ", numESTABLISHED);
+        if(numESTABLISHED == 1)
+        {
+            auto sp = tcpConnMap.begin()->first;
+            sprintf(buf2 + strlen(buf2),"\nl=%s:%d\nr=%s:%d",sp.localAddr.str().c_str(),sp.localPort,sp.remoteAddr.str().c_str(),sp.remotePort);
+        }
     if (numCLOSE_WAIT > 0)
         sprintf(buf2 + strlen(buf2), "close_wait:%d ", numCLOSE_WAIT);
     if (numLAST_ACK > 0)
