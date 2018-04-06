@@ -92,8 +92,8 @@ void RsvpTe::initialize(int stage)
 
         // process traffic configuration
         readTrafficFromXML(par("traffic"));
-        registerService(Protocol::rsvp, nullptr, gate("ipIn"));
-        registerProtocol(Protocol::rsvp, gate("ipOut"), nullptr);
+        registerService(Protocol::rsvpte, nullptr, gate("ipIn"));
+        registerProtocol(Protocol::rsvpte, gate("ipOut"), nullptr);
     }
 }
 
@@ -1885,8 +1885,8 @@ void RsvpTe::sendPathErrorMessage(SessionObj session, SenderTemplateObj sender, 
 void RsvpTe::sendToIP(Packet *msg, Ipv4Address destAddr)
 {
     msg->addPar("color") = RSVP_TRAFFIC;
-    msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::rsvp);
-    msg->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::rsvp);
+    msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::rsvpte);
+    msg->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::rsvpte);
     msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     msg->addTagIfAbsent<L3AddressReq>()->setDestAddress(destAddr);
     send(msg, "ipOut");

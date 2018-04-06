@@ -101,7 +101,7 @@ ProtocolGroup ProtocolGroup::ipprotocol("ipprotocol", {
     { 17, &Protocol::udp },
     { 36, &Protocol::xtp },
     { 41, &Protocol::ipv6 },
-    { 46, &Protocol::rsvp },
+    { 46, &Protocol::rsvpte },
     { 48, &Protocol::dsr },
     { 58, &Protocol::icmpv6 },
     { 89, &Protocol::ospf },

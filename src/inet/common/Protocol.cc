@@ -102,7 +102,7 @@ const Protocol Protocol::mpls("mpls", "MPLS");
 const Protocol Protocol::ospf("ospf", "OSPF");
 const Protocol Protocol::pim("pim", "PIM");
 const Protocol Protocol::ppp("ppp", "PPP", Protocol::LinkLayer);
-const Protocol Protocol::rsvp("rsvp", "RSVP");
+const Protocol Protocol::rsvpte("rsvpte", "RSVP-TE");
 const Protocol Protocol::sctp("sctp", "SCTP", Protocol::TransportLayer);
 const Protocol Protocol::stp("stp", "STP");
 const Protocol Protocol::tcp("tcp", "TCP", Protocol::TransportLayer);
