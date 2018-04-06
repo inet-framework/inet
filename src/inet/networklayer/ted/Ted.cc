@@ -468,7 +468,7 @@ Ipv4AddressVector Ted::getLocalAddress()
     return interfaceAddrs;
 }
 
-Ipv4Address Ted::primaryAddress(Ipv4Address localInf)    // only used in Rsvp::processHelloMsg
+Ipv4Address Ted::primaryAddress(Ipv4Address localInf)    // only used in RsvpTe::processHelloMsg
 {
     for (auto & elem : ted) {
         if (elem.local == localInf)

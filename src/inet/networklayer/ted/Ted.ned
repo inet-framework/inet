@@ -22,7 +22,7 @@ package inet.networklayer.ted;
 // like ~LinkStateRouting or (in the future) OSPF-TE.
 //
 // Ted exposes several public methods for querying the current network state
-// and allows ~Rsvp and individual applications to calculate feasible LSPs
+// and allows ~RsvpTe and individual applications to calculate feasible LSPs
 // meeting the chosen bandwidth criteria.
 //
 simple Ted

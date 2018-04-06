@@ -18,7 +18,7 @@
 #include "inet/networklayer/mpls/LibTable.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/networklayer/rsvp_te/Rsvp.h"
+#include "inet/networklayer/rsvp_te/RsvpTe.h"
 
 namespace inet {
 
@@ -40,7 +40,7 @@ void SimpleClassifier::initialize(int stage)
 
         lt = getModuleFromPar<LibTable>(par("libTableModule"), this);
 
-        rsvp = getModuleFromPar<Rsvp>(par("rsvpModule"), this);
+        rsvp = getModuleFromPar<RsvpTe>(par("rsvpModule"), this);
 
         readTableFromXML(par("config"));
     }

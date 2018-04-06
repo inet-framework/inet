@@ -39,7 +39,7 @@ class LibTable;
 /**
  * TODO documentation
  */
-class INET_API Rsvp : public cSimpleModule, public IScriptable, public ILifecycle
+class INET_API RsvpTe : public cSimpleModule, public IScriptable, public ILifecycle
 {
   protected:
 
@@ -279,8 +279,8 @@ class INET_API Rsvp : public cSimpleModule, public IScriptable, public ILifecycl
     virtual int getInLabel(const SessionObj& session, const SenderTemplateObj& sender);
 
   public:
-    Rsvp();
-    virtual ~Rsvp();
+    RsvpTe();
+    virtual ~RsvpTe();
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

@@ -30,7 +30,7 @@
 
 namespace inet {
 
-class Rsvp;
+class RsvpTe;
 
 /**
  * TODO documentation
@@ -57,7 +57,7 @@ class INET_API SimpleClassifier : public cSimpleModule, public IScriptable, publ
 
     std::vector<FecEntry> bindings;
     LibTable *lt = nullptr;
-    Rsvp *rsvp = nullptr;
+    RsvpTe *rsvp = nullptr;
 
   public:
     SimpleClassifier() {}

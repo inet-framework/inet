@@ -19,7 +19,7 @@ import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.Ipv4NetworkLayer;
 import inet.networklayer.mpls.LibTable;
 import inet.networklayer.mpls.Mpls;
-import inet.networklayer.rsvp_te.Rsvp;
+import inet.networklayer.rsvp_te.RsvpTe;
 import inet.networklayer.rsvp_te.SimpleClassifier;
 import inet.networklayer.ted.LinkStateRouting;
 import inet.networklayer.ted.Ted;
@@ -28,8 +28,8 @@ import inet.networklayer.ted.Ted;
 //
 // An RSVP-TE capable router.
 //
-// Rsvp occupies the Transport layer; however, it is not a transport protocol
-// itself. Rsvp uses transport protocols to route packets. ~Ted is used
+// RsvpTe occupies the Transport layer; however, it is not a transport protocol
+// itself. RsvpTe uses transport protocols to route packets. ~Ted is used
 // to calculate shortest paths.
 //
 module RsvpMplsRouter
@@ -68,7 +68,7 @@ module RsvpMplsRouter
                 peers = peers;
                 @display("p=545,106");
         }
-        rsvp: Rsvp {
+        rsvp: RsvpTe {
             parameters:
                 peers = peers;
                 classifierModule = "^.classifier";

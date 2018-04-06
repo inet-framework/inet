@@ -64,7 +64,7 @@
 //  - wireless support: ~IRadioMedium, ~Ieee80211Interface
 //  - Mobility models: ~TurtleMobility,
 //    ~BonnMotionMobility, ~AnsimMobility, ~RandomWaypointMobility, ~MassMobility
-//  - Mpls models: the core modules are ~Mpls, ~LibTable, ~Ldp, ~Rsvp, ~Ted,
+//  - Mpls models: the core modules are ~Mpls, ~LibTable, ~Ldp, ~RsvpTe, ~Ted,
 //    ~LinkStateRouting; MPLS-enabled routers are ~LdpMplsRouter, ~RsvpMplsRouter;
 //    see also the list of <a href="standards.html">implemented standards</a>
 //  - dynamic routing is provided by the Daemon module (the Quagga routing
