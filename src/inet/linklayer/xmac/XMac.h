@@ -99,6 +99,13 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
 
     void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
 
+    // OperationalBase:
+    virtual void handleStartOperation(LifecycleOperation *operation) override {}    //TODO implementation
+    virtual void handleStopOperation(LifecycleOperation *operation) override {}    //TODO implementation
+    virtual void handleCrashOperation(LifecycleOperation *operation) override {}    //TODO implementation
+
+    bool bubbles = false;
+
   protected:
     /** implements MacBase functions */
     //@{
