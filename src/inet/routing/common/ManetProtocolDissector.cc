@@ -17,12 +17,10 @@
 // @author: Zoltan Bojthe
 //
 
-#include "inet/routing/manet/ManetProtocolDissector.h"
-
-#include "inet/common/ProtocolGroup.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
+#include "inet/common/ProtocolGroup.h"
+#include "inet/routing/common/ManetProtocolDissector.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
-
 
 namespace inet {
 
