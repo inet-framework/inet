@@ -21,18 +21,15 @@ Additionally, all other changes that are backward incompatible but easy to do
 should be included in INET 4.0.
 
 SHOULD:
- - port *all* protocols to the new packet API, PacketDrill and SCTP are not finished yet
  - add test and check for std::dynamic_pointer_cast<Subclass1>(chunk->peek<Subclass1>()) != nullptr always holds when peek uses a variant type deserializer
 
  - revise and rename signals to have a consistent naming scheme (e.g. NF_*)
  - revise and rename statistics to have a consistent naming scheme
  - add meaningful display strings to at least the top level submodules of network nodes
  - fix mobility non-determinism caused by interpolation from last position during animation
- - consider renaming peekHeader to peekFront, peekTrailer to peekBack, etc. in Packet
  - validate Rotation, Quaternion, EulerAngles against each other and documentation
  - validate positioning and orientation IMobility, PhysicalEnvironment, ObstacleLoss
  - replace ObjectLocatorNode with GeoTransform (PositionAttitudeTransform) to work with osgEarth 2.9
- - review all @unit(deg) parameters to actually convert to radians in the represenation, and also review all usages (e.g. sin, cos, etc.)
  - use m instead of double in Coord? use degree instead of double in GeoCoord? use degree instead of double in EulerAngles?
 
  - move extra functions that doesn't really belong to L3AddressResolver (e.g. findInterfaceTableOf, findIPv4RoutingTableOf)
@@ -69,6 +66,9 @@ NEED NOT:
  - pretty print white spaces
 
 DONE:
+ + port *all* protocols to the new packet API
+ + consider renaming peekHeader to peekFront, peekTrailer to peekBack, etc. in Packet
+ + review all @unit(deg) parameters to actually convert to radians in the represenation, and also review all usages (e.g. sin, cos, etc.)
  + replace omnet tags API with INET tags API, add separate Command class to support tags for non packet messages
  + implement all necessary omnetpp message compiler changes to avoid clutter in msg files
  + use InterfaceEntry class instead of cCompoundModule for the corresponding network interface (merge the two)
