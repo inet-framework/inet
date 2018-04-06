@@ -524,6 +524,11 @@ void Tcp::refreshDisplay() const
         sprintf(buf2 + strlen(buf2), "syn_rcvd:%d ", numSYN_RCVD);
     if (numESTABLISHED > 0)
         sprintf(buf2 + strlen(buf2), "estab:%d ", numESTABLISHED);
+	if(numESTABLISHED == 1)
+        {
+            auto sp = tcpConnMap.begin()->first;
+            sprintf(buf2 + strlen(buf2),"\nl=%s:%d\nr=%s:%d",sp.localAddr.str().c_str(),sp.localPort,sp.remoteAddr.str().c_str(),sp.remotePort);
+        }
     if (numCLOSE_WAIT > 0)
         sprintf(buf2 + strlen(buf2), "close_wait:%d ", numCLOSE_WAIT);
     if (numLAST_ACK > 0)
