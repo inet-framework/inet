@@ -25,7 +25,7 @@ module NetworkLayerNodeBase extends LinkLayerNodeBase
     parameters:
         bool hasIpv4 = default(true);
         bool hasIpv6 = default(false);
-        bool hasGn = default(false);    //FIXME redundant/unused? !!! see also networkLayerType, 
+        bool hasGn = default(false); 
         string networkLayerType = default("");
         string ipv4NetworkLayerType = default("Ipv4NetworkLayer");
         string ipv6NetworkLayerType = default("Ipv6NetworkLayer");
@@ -45,7 +45,7 @@ module NetworkLayerNodeBase extends LinkLayerNodeBase
             parameters:
                 @display("p=500,500;q=queue");
         }
-        generic: <networkLayerType> like INetworkLayer if networkLayerType != "" {
+        generic: <networkLayerType> like INetworkLayer if hasGn {
             parameters:
                 @display("p=600,500;q=queue");
         }
