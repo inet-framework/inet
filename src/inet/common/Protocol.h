@@ -58,7 +58,7 @@ class INET_API Protocol
     static const Protocol *getProtocol(const char *name);
 
   public:
-    // Standard protocols: (in alphanumeric order)
+    // Standard protocol identifiers (in alphanumeric order)
     static const Protocol aodv;
     static const Protocol arp;
     static const Protocol bgp;
@@ -96,7 +96,7 @@ class INET_API Protocol
     static const Protocol xmac;
     static const Protocol xtp;
 
-    // INET specific protocols: (in alphanumeric order)
+    // INET specific conceptual protocol identifiers (in alphanumeric order)
     static const Protocol ackingmac;
     static const Protocol apskPhy;
     static const Protocol csmacamac;
