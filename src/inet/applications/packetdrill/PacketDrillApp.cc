@@ -920,7 +920,7 @@ int PacketDrillApp::syscallWrite(struct syscall_spec *syscall, cQueue *args, cha
             uint32 sendBytes = syscall->result->getNum();
             std::vector<uint8_t> vec;
             vec.resize(sendBytes);
-            for (int i = 0; i < sendBytes; i++)
+            for (uint32 i = 0; i < sendBytes; i++)
                 vec[i] = (bytesSent + i) & 0xFF;
             applicationData->setBytes(vec);
 
@@ -1315,7 +1315,7 @@ int PacketDrillApp::syscallSctpSendmsg(struct syscall_spec *syscall, cQueue *arg
     auto applicationData = makeShared<BytesChunk>();
     std::vector<uint8_t> vec;
     vec.resize(sendBytes);
-    for (int i = 0; i < sendBytes; i++)
+    for (uint32 i = 0; i < sendBytes; i++)
         vec[i] = (bytesSent + i) & 0xFF;
     applicationData->setBytes(vec);
     auto creationTimeTag = applicationData->addTag<CreationTimeTag>();
@@ -1368,7 +1368,7 @@ int PacketDrillApp::syscallSctpSend(struct syscall_spec *syscall, cQueue *args, 
     uint32 sendBytes = syscall->result->getNum();
     std::vector<uint8_t> vec;
     vec.resize(sendBytes);
-    for (int i = 0; i < sendBytes; i++)
+    for (uint32 i = 0; i < sendBytes; i++)
         vec[i] = (bytesSent + i) & 0xFF;
     applicationData->setBytes(vec);
     auto creationTimeTag = applicationData->addTag<CreationTimeTag>();
