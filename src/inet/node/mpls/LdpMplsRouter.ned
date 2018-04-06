@@ -31,7 +31,7 @@ import inet.transportlayer.contract.IUdp;
 //
 // LDP Capable Routers are the main building blocks for an LDP MPLS network.
 //
-module LdpRouter
+module LdpMplsRouter
 {
     parameters:
         @networkNode();

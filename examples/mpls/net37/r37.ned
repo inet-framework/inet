@@ -15,7 +15,7 @@ package inet.examples.mpls.net37;
 import inet.common.misc.ThruputMeteringChannel;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
-import inet.node.mpls.RsvpRouter;
+import inet.node.mpls.RsvpMplsRouter;
 
 
 network R37
@@ -32,151 +32,151 @@ network R37
             parameters:
                 @display("p=100,100");
         }
-        LSR0: RsvpRouter {
+        LSR0: RsvpMplsRouter {
             parameters:
                 @display("p=391,225");
         }
-        LSR1: RsvpRouter {
+        LSR1: RsvpMplsRouter {
             parameters:
                 @display("p=799,589");
         }
-        LSR2: RsvpRouter {
+        LSR2: RsvpMplsRouter {
             parameters:
                 @display("p=289,472");
         }
-        LSR3: RsvpRouter {
+        LSR3: RsvpMplsRouter {
             parameters:
                 @display("p=712,418");
         }
-        LSR4: RsvpRouter {
+        LSR4: RsvpMplsRouter {
             parameters:
                 @display("p=541,228");
         }
-        LSR5: RsvpRouter {
+        LSR5: RsvpMplsRouter {
             parameters:
                 @display("p=288,169");
         }
-        LSR6: RsvpRouter {
+        LSR6: RsvpMplsRouter {
             parameters:
                 @display("p=256,394");
         }
-        LSR7: RsvpRouter {
+        LSR7: RsvpMplsRouter {
             parameters:
                 @display("p=380,263");
         }
-        LSR8: RsvpRouter {
+        LSR8: RsvpMplsRouter {
             parameters:
                 @display("p=682,348");
         }
-        LSR9: RsvpRouter {
+        LSR9: RsvpMplsRouter {
             parameters:
                 @display("p=536,142");
         }
-        LSR10: RsvpRouter {
+        LSR10: RsvpMplsRouter {
             parameters:
                 @display("p=177,170");
         }
-        LSR11: RsvpRouter {
+        LSR11: RsvpMplsRouter {
             parameters:
                 @display("p=424,262");
         }
-        LSR12: RsvpRouter {
+        LSR12: RsvpMplsRouter {
             parameters:
                 @display("p=470,279");
         }
-        LSR13: RsvpRouter {
+        LSR13: RsvpMplsRouter {
             parameters:
                 @display("p=278,91");
         }
-        LSR14: RsvpRouter {
+        LSR14: RsvpMplsRouter {
             parameters:
                 @display("p=467,214");
         }
-        LSR15: RsvpRouter {
+        LSR15: RsvpMplsRouter {
             parameters:
                 @display("p=724,19");
         }
-        LSR16: RsvpRouter {
+        LSR16: RsvpMplsRouter {
             parameters:
                 @display("p=685,287");
         }
-        LSR17: RsvpRouter {
+        LSR17: RsvpMplsRouter {
             parameters:
                 @display("p=20,519");
         }
-        LSR18: RsvpRouter {
+        LSR18: RsvpMplsRouter {
             parameters:
                 @display("p=298,236");
         }
-        LSR19: RsvpRouter {
+        LSR19: RsvpMplsRouter {
             parameters:
                 @display("p=390,390");
         }
-        LSR20: RsvpRouter {
+        LSR20: RsvpMplsRouter {
             parameters:
                 @display("p=148,502");
         }
-        LSR21: RsvpRouter {
+        LSR21: RsvpMplsRouter {
             parameters:
                 @display("p=362,448");
         }
-        LSR22: RsvpRouter {
+        LSR22: RsvpMplsRouter {
             parameters:
                 @display("p=476,397");
         }
-        LSR23: RsvpRouter {
+        LSR23: RsvpMplsRouter {
             parameters:
                 @display("p=517,325");
         }
-        LSR24: RsvpRouter {
+        LSR24: RsvpMplsRouter {
             parameters:
                 @display("p=514,34");
         }
-        LSR25: RsvpRouter {
+        LSR25: RsvpMplsRouter {
             parameters:
                 @display("p=548,599");
         }
-        LSR26: RsvpRouter {
+        LSR26: RsvpMplsRouter {
             parameters:
                 @display("p=330,301");
         }
-        LSR27: RsvpRouter {
+        LSR27: RsvpMplsRouter {
             parameters:
                 @display("p=612,310");
         }
-        LSR28: RsvpRouter {
+        LSR28: RsvpMplsRouter {
             parameters:
                 @display("p=556,502");
         }
-        LSR29: RsvpRouter {
+        LSR29: RsvpMplsRouter {
             parameters:
                 @display("p=83,570");
         }
-        LSR30: RsvpRouter {
+        LSR30: RsvpMplsRouter {
             parameters:
                 @display("p=796,466");
         }
-        LSR31: RsvpRouter {
+        LSR31: RsvpMplsRouter {
             parameters:
                 @display("p=610,65");
         }
-        LSR32: RsvpRouter {
+        LSR32: RsvpMplsRouter {
             parameters:
                 @display("p=435,321");
         }
-        LSR33: RsvpRouter {
+        LSR33: RsvpMplsRouter {
             parameters:
                 @display("p=605,337");
         }
-        LSR34: RsvpRouter {
+        LSR34: RsvpMplsRouter {
             parameters:
                 @display("p=707,227");
         }
-        LSR35: RsvpRouter {
+        LSR35: RsvpMplsRouter {
             parameters:
                 @display("p=613,405");
         }
-        LSR36: RsvpRouter {
+        LSR36: RsvpMplsRouter {
             parameters:
                 @display("p=435,361");
 

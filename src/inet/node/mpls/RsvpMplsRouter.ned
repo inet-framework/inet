@@ -32,7 +32,7 @@ import inet.networklayer.ted.Ted;
 // itself. Rsvp uses transport protocols to route packets. ~Ted is used
 // to calculate shortest paths.
 //
-module RsvpRouter
+module RsvpMplsRouter
 {
     parameters:
         @networkNode();
