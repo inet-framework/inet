@@ -60,6 +60,39 @@ MobilityBase::MobilityBase() :
 {
 }
 
+const char *MobilityBase::DirectiveResolver::resolveDirective(char directive)
+{
+    switch (directive) {
+        case 'p':
+            result = mobility->getCurrentPosition().str();
+            break;
+        case 'v':
+            result = mobility->getCurrentVelocity().str();
+            break;
+        case 'a':
+            result = mobility->getCurrentAcceleration().str();
+            break;
+        case 'P':
+            result = mobility->getCurrentAngularPosition().str();
+            break;
+        case 'V':
+            result = mobility->getCurrentAngularVelocity().str();
+            break;
+        case 'A':
+            result = mobility->getCurrentAngularAcceleration().str();
+            break;
+        default:
+            throw cRuntimeError("Unknown directive: %c", directive);
+    }
+    return result.c_str();
+}
+
+// TODO: add to refreshDisplay
+//    DirectiveResolver directiveResolver(mobility);
+//    return format.formatString(&directiveResolver);
+//    cDisplayString& dispStr = this->getDisplayString();
+//    dispStr.setTagArg("t", 0, getDisplayStringText(this));
+
 void MobilityBase::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
@@ -71,6 +104,7 @@ void MobilityBase::initialize(int stage)
         constraintAreaMax.x = par("constraintAreaMaxX");
         constraintAreaMax.y = par("constraintAreaMaxY");
         constraintAreaMax.z = par("constraintAreaMaxZ");
+        format.parseFormat(par("displayStringTextFormat"));
         bool visualizeMobility = par("visualizeMobility");
         if (visualizeMobility) {
             visualRepresentation = findVisualRepresentation();

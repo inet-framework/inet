@@ -27,6 +27,7 @@
 #include "inet/common/geometry/common/EulerAngles.h"
 #include "inet/common/geometry/common/CanvasProjection.h"
 #include "inet/mobility/contract/IMobility.h"
+#include "inet/visualizer/util/StringFormat.h"
 
 namespace inet {
 
@@ -52,6 +53,18 @@ namespace inet {
  */
 class INET_API MobilityBase : public cSimpleModule, public IMobility
 {
+  protected:
+    class DirectiveResolver : public inet::visualizer::StringFormat::IDirectiveResolver {
+      protected:
+        IMobility *mobility = nullptr;
+        std::string result;
+
+      public:
+        DirectiveResolver(IMobility *mobility) : mobility(mobility) { }
+
+        virtual const char *resolveDirective(char directive) override;
+    };
+
   public:
     /**
      * Selects how a mobility module should behave if it reaches the edge of the constraint area.
@@ -79,6 +92,8 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
 
     /** @brief The last orientation that was reported. */
     EulerAngles lastOrientation;
+
+    inet::visualizer::StringFormat format;
 
   protected:
     MobilityBase();

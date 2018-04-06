@@ -22,6 +22,14 @@ import inet.mobility.contract.IMobility;
 //
 // Abstract base module for mobility models.
 //
+// Format directives:
+//  - %p position
+//  - %v velocity
+//  - %a acceleration
+//  - %P angular position
+//  - %V angular velocity
+//  - %A angular acceleration
+//
 // @author Andras Varga
 //
 simple MobilityBase like IMobility
@@ -32,6 +40,7 @@ simple MobilityBase like IMobility
         string coordinateSystemModule = default(""); // module path of the geographic coordinate system module
         bool visualizeMobility = default(true); // false means this mobility module does no visualization
         string visualRepresentation = default("^"); // determines the module that is moved by this mobility
+        string displayStringTextFormat = default("p: %p\nv: %v");
         double constraintAreaMinX @unit(m) = default(-1m/0); // min x position of the constraint area, unconstrained by default (negative infinity)
         double constraintAreaMinY @unit(m) = default(-1m/0); // min y position of the constraint area, unconstrained by default (negative infinity)
         double constraintAreaMinZ @unit(m) = default(-1m/0); // min z position of the constraint area, unconstrained by default (negative infinity)
