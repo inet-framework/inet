@@ -101,6 +101,7 @@ class INET_API RoutingTableRecorder : public cSimpleModule, public cListener
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *) override;
+    virtual void finish() override;
     virtual void hookListeners();
     virtual void ensureRoutingLogFileOpen();
     virtual void receiveChangeNotification(cComponent *source, simsignal_t signalID, cObject *details);

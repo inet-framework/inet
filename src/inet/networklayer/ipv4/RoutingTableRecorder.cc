@@ -231,6 +231,14 @@ void RoutingTableRecorder::handleMessage(cMessage *)
     throw cRuntimeError(this, "This module doesn't process messages");
 }
 
+void RoutingTableRecorder::finish()
+{
+    if (routingLogFile != nullptr) {
+        fclose(routingLogFile);
+        routingLogFile = nullptr;
+    }
+}
+
 void RoutingTableRecorder::hookListeners()
 {
     cModule *systemModule = getSimulation()->getSystemModule();
