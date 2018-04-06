@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [[ $1 == -h ]];
+then
+echo "Copies the summaries of the latest commits in the current inet and showcase branches to the clipboard"
+else 
+
+echo "inet:" $(git -C ~/Integration/inet log --pretty=format:"%h (%s, %cd)" --date=short -1) "showcases:" $(git -C ~/Integration/inet/showcases log --pretty=format:"%h (%s, %cd)" --date=short -1) | xclip -selection c
+echo "Commit summaries copied to clipboard"
+
+fi

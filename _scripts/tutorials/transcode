@@ -1,12 +1,12 @@
 #!/bin/bash
 #17.08.14
 
-# This script creates a video from the images left by the qtenv internal video recording tool, in the /frames directory.
+# This script creates a video from the images left in the /frames directory by the qtenv internal video recording tool.
 # The video will be optimized for web release. Specify output-file as argument.
 
-if [ $1 == -h ];
+if [[ $1 == -h || $# == 0 ]];
 then
-echo "This script creates a video from the images left by the qtenv internal video recording tool, in the /frames directory.
+echo "This script creates a video from the images left in the /frames directory by the qtenv internal video recording tool.
 The video will be optimized for web release. Specify output-file as argument."
 echo ""
 echo "Arguments: output-file"

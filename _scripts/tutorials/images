@@ -1,7 +1,7 @@
 #!/bin/bash
 # 17.08.15
 
-if [ $1 == -h ];
+if [[ $1 == -h ]];
 then
 echo $'Parses all .md or .html files in current directory. Searches for images and videos NOT used in <img> tags, and moves them to /unused directory.\n'
 echo $'No input arguments. Looks for the following file types: mp4 png gif mkv m4v\n'
