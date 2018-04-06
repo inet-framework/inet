@@ -16,8 +16,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_AODVROUTING_H
-#define __INET_AODVROUTING_H
+#ifndef __INET_AODV_H
+#define __INET_AODV_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -212,5 +212,5 @@ class INET_API Aodv : public cSimpleModule, public ILifecycle, public NetfilterB
 } // namespace aodv
 } // namespace inet
 
-#endif    // ifndef AODVROUTING_H_
+#endif // ifndef __INET_AODV_H
 
