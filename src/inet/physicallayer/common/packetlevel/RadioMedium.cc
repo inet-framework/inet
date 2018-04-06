@@ -622,7 +622,7 @@ const ITransmission *RadioMedium::getTransmission(int id) const
 const IListeningDecision *RadioMedium::listenOnMedium(const IRadio *radio, const IListening *listening) const
 {
     const IListeningDecision *decision = computeListeningDecision(radio, listening, const_cast<const std::vector<const ITransmission *> *>(&transmissions));
-    EV_DEBUG << "Listening with " << listening << " on medium by " << radio << " results in " << decision << endl;
+    EV_DEBUG << "Listening results in: " << decision << " with " << listening << " on medium by " << radio << endl;
     return decision;
 }
 
