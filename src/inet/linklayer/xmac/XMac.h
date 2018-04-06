@@ -106,6 +106,8 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
     virtual void handleStopOperation(LifecycleOperation *operation) override {}    //TODO implementation
     virtual void handleCrashOperation(LifecycleOperation *operation) override {}    //TODO implementation
 
+    bool bubbles = false;
+
   protected:
     typedef std::list<Packet *> MacQueue;
 
