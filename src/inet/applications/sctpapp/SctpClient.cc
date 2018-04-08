@@ -390,7 +390,7 @@ void SctpClient::sendRequest(bool last)
     auto applicationData = makeShared<BytesChunk>();
     std::vector<uint8_t> vec;
     vec.resize(sendBytes);
-    for (int i = 0; i < sendBytes; i++)
+    for (uint32 i = 0; i < sendBytes; i++)
         vec[i] = (bytesSent + i) & 0xFF;
     applicationData->setBytes(vec);
     applicationPacket->insertAtBack(applicationData);

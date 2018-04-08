@@ -323,7 +323,7 @@ void PlotFigure::redrawValueTicks()
             valueTicks.pop_back();
         }
 
-    for (int i = 0; i < valueTicks.size(); ++i) {
+    for (uint32 i = 0; i < valueTicks.size(); ++i) {
         double x = bounds.x + bounds.width;
         double y = bounds.y + bounds.height - bounds.height * (i * valueTickSize) / std::abs(max - min);
         if (y > bounds.y && y < bounds.y + bounds.height) {
@@ -390,7 +390,7 @@ void PlotFigure::redrawTimeTicks()
             timeTicks.pop_back();
         }
 
-    for (int i = 0; i < timeTicks.size(); ++i) {
+    for (uint32 i = 0; i < timeTicks.size(); ++i) {
         double x = bounds.x + bounds.width * (i * timeTickSize + shifting) / timeWindow;
         double y = bounds.y + bounds.height;
         if (x > bounds.x && x < bounds.x + bounds.width) {
