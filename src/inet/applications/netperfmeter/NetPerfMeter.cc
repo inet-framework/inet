@@ -931,7 +931,7 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
             auto dataMessage = makeShared<BytesChunk>();
             std::vector<uint8_t> vec;
             vec.resize(msgSize);
-            for (int i = 0; i < msgSize; i++)
+            for (uint32 i = 0; i < msgSize; i++)
                 vec[i] = ((i & 1) ? 'D' : 'T');
             dataMessage->setBytes(vec);
             cmsg->insertAtBack(dataMessage);

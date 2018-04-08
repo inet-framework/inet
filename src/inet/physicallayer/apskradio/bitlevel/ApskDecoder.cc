@@ -85,7 +85,7 @@ const IReceptionPacketModel *ApskDecoder::decode(const IReceptionBitModel *bitMo
     }
     else {
         std::vector<bool> bits;
-        for (int i = 0; i < decodedBits->getSize(); i++)
+        for (uint32 i = 0; i < decodedBits->getSize(); i++)
             bits.push_back(decodedBits->getBit(i));
         const auto& bitsChunk = makeShared<BitsChunk>(bits);
         packet = new Packet(nullptr, bitsChunk);
