@@ -82,6 +82,7 @@ class INET_API Aodv : public cSimpleModule, public ILifecycle, public NetfilterB
     unsigned int aodvUDPPort = 0;
     bool askGratuitousRREP = false;
     bool useHelloMessages = false;
+    bool destinationOnlyFlag = false;
     simtime_t maxJitter;
     simtime_t activeRouteTimeout;
     simtime_t helloInterval;

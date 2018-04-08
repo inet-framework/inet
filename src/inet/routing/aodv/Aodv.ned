@@ -48,6 +48,7 @@ simple Aodv like IManetRouting
         bool askGratuitousRREP = default(false); // see RFC 3561: 6.6.3
         bool useHelloMessages = default(false); // see RFC 3561: 6.9
         bool useLocalRepair = default(false); // see RFC 3561: 6.12 *not implemented yet*
+        bool destinationOnlyFlag = default(false); // see RFC 3561: 5.1
         int udpPort = default(654);
 
         double maxPeriodicJitter @unit(s) = default(helloInterval / 4); // it MUST NOT be negative; it MUST NOT be greater than MESSAGE_INTERVAL/2; it SHOULD NOT be greater than MESSAGE_INTERVAL/4.

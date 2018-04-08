@@ -52,6 +52,7 @@ void Aodv::initialize(int stage)
         aodvUDPPort = par("udpPort");
         askGratuitousRREP = par("askGratuitousRREP");
         useHelloMessages = par("useHelloMessages");
+        destinationOnlyFlag = par("destinationOnlyFlag");
         activeRouteTimeout = par("activeRouteTimeout");
         helloInterval = par("helloInterval");
         allowedHelloLoss = par("allowedHelloLoss");
@@ -415,6 +416,10 @@ const Ptr<Rreq> Aodv::createRREQ(const L3Address& destAddr)
 
     // The Hop Count field is set to zero.
     rreqPacket->setHopCount(0);
+
+    // Destination only flag (D) indicates that only the
+    // destination may respond to this RREQ.
+    rreqPacket->setDestOnlyFlag(destinationOnlyFlag);
 
     // Before broadcasting the RREQ, the originating node buffers the RREQ
     // ID and the Originator IP address (its own address) of the RREQ for
@@ -903,25 +908,32 @@ void Aodv::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsign
             return;
         }
 
-        // create RREP
-        auto rrep = createRREP(rreq, destRoute, reverseRoute, sourceAddr);
+        // we respond to the RREQ, if the D (destination only) flag is not set
+        if(!rreq->getDestOnlyFlag())
+        {
+            // create RREP
+            auto rrep = createRREP(rreq, destRoute, reverseRoute, sourceAddr);
 
-        // send to the originator
-        sendRREP(rrep, rreq->getOriginatorAddr(), 255);
+            // send to the originator
+            sendRREP(rrep, rreq->getOriginatorAddr(), 255);
 
-        if (rreq->getGratuitousRREPFlag()) {
-            // The gratuitous RREP is then sent to the next hop along the path to
-            // the destination node, just as if the destination node had already
-            // issued a RREQ for the originating node and this RREP was produced in
-            // response to that (fictitious) RREQ.
+            if (rreq->getGratuitousRREPFlag()) {
+                // The gratuitous RREP is then sent to the next hop along the path to
+                // the destination node, just as if the destination node had already
+                // issued a RREQ for the originating node and this RREP was produced in
+                // response to that (fictitious) RREQ.
 
-            IRoute *originatorRoute = routingTable->findBestMatchingRoute(rreq->getOriginatorAddr());
-            auto grrep = createGratuitousRREP(rreq, originatorRoute);
-            sendGRREP(grrep, rreq->getDestAddr(), 100);
+                IRoute *originatorRoute = routingTable->findBestMatchingRoute(rreq->getOriginatorAddr());
+                auto grrep = createGratuitousRREP(rreq, originatorRoute);
+                sendGRREP(grrep, rreq->getDestAddr(), 100);
+            }
+
+            return;    // discard RREQ, in this case, we also do not forward it.
         }
-
-        return;    // discard RREQ, in this case, we also do not forward it.
+        else
+            EV_INFO << "The originator indicated that only the destination may respond to this RREQ (D flag is set). Forwarding ..." << endl;
     }
+
     // If a node does not generate a RREP (following the processing rules in
     // section 6.6), and if the incoming IP header has TTL larger than 1,
     // the node updates and broadcasts the RREQ to address 255.255.255.255
