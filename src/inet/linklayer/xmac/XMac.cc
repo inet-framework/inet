@@ -65,15 +65,15 @@ void XMac::initialize(int stage)
         lastDataPktDestAddr = MacAddress::BROADCAST_ADDRESS;
         lastDataPktSrcAddr  = MacAddress::BROADCAST_ADDRESS;
 
+        macState = INIT;
+        WATCH(macState);
+    }
+    else if (stage == INITSTAGE_LINK_LAYER) {
         cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
         radioModule->subscribe(IRadio::radioModeChangedSignal, this);
         radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
         radio = check_and_cast<IRadio *>(radioModule);
 
-        macState = INIT;
-        WATCH(macState);
-    }
-    else if (stage == INITSTAGE_LINK_LAYER) {
         initializeMacAddress();
         registerInterface();
 

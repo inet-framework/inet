@@ -88,15 +88,15 @@ void AckingMac::initialize(int stage)
         cGate *queueOut = gate("upperLayerIn")->getPathStartGate();
         queueModule = dynamic_cast<IPassiveQueue *>(queueOut->getOwnerModule());
 
-        initializeMacAddress();
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
+        initializeMacAddress();
+        registerInterface();
         radio->setRadioMode(fullDuplex ? IRadio::RADIO_MODE_TRANSCEIVER : IRadio::RADIO_MODE_RECEIVER);
         if (useAck)
             ackTimeoutMsg = new cMessage("link-break");
         if (queueModule != nullptr)
             getNextMsgFromHL();
-        registerInterface();
     }
 }
 

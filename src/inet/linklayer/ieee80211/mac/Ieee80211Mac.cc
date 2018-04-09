@@ -59,6 +59,16 @@ void Ieee80211Mac::initialize(int stage)
 {
     MacProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        modeSet = Ieee80211ModeSet::getModeSet(par("modeSet"));
+        const char *fcsModeString = par("fcsMode");
+        if (!strcmp(fcsModeString, "declared"))
+            fcsMode = FCS_DECLARED;
+        else if (!strcmp(fcsModeString, "computed"))
+            fcsMode = FCS_COMPUTED;
+        else
+            throw cRuntimeError("Unknown fcs mode");
+    }
+    else if (stage == INITSTAGE_LINK_LAYER) {
         mib = getModuleFromPar<Ieee80211Mib>(par("mibModule"), this);
         mib->qos = par("qosStation");
         cModule *radioModule = gate("lowerLayerOut")->getNextGate()->getOwnerModule();
@@ -77,16 +87,6 @@ void Ieee80211Mac::initialize(int stage)
             addressString = par("address");
         }
         mib->address.setAddress(addressString);
-        modeSet = Ieee80211ModeSet::getModeSet(par("modeSet"));
-        const char *fcsModeString = par("fcsMode");
-        if (!strcmp(fcsModeString, "declared"))
-            fcsMode = FCS_DECLARED;
-        else if (!strcmp(fcsModeString, "computed"))
-            fcsMode = FCS_COMPUTED;
-        else
-            throw cRuntimeError("Unknown fcs mode");
-    }
-    else if (stage == INITSTAGE_LINK_LAYER) {
         registerInterface();
         emit(modesetChangedSignal, modeSet);
         if (isOperational)

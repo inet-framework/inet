@@ -58,10 +58,9 @@ void BMac::initialize(int stage)
         lastDataPktSrcAddr = MacAddress::BROADCAST_ADDRESS;
 
         macState = INIT;
-
-        initializeMacAddress();
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
+        initializeMacAddress();
         registerInterface();
 
         cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);

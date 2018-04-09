@@ -104,11 +104,9 @@ void Ieee802154Mac::initialize(int stage)
         rxAckTimer = new cMessage("timer-rxAck");
         macState = IDLE_1;
         txAttempts = 0;
-
-        initializeMacAddress();
-
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
+        initializeMacAddress();
         registerInterface();
 
         cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);

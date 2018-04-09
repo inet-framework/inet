@@ -38,9 +38,9 @@ void ShortcutMac::initialize(int stage)
         lengthOverhead = &par("lengthOverhead");
         durationOverhead = &par("durationOverhead");
         packetLoss = &par("packetLoss");
-        initializeMacAddress();
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
+        initializeMacAddress();
         registerInterface();
     }
 }

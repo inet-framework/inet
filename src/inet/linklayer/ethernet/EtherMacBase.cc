@@ -151,7 +151,6 @@ void EtherMacBase::initialize(int stage)
 
         initializeFlags();
 
-        initializeMacAddress();
         initializeStatistics();
 
         lastTxFinishTime = -1.0;    // not equals with current simtime.
@@ -174,6 +173,7 @@ void EtherMacBase::initialize(int stage)
         subscribe(POST_MODEL_CHANGE, this);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
+        initializeMacAddress();
         registerInterface();    // needs MAC address    //FIXME why not called in MacBase::initialize()?
         initializeQueueModule();
         readChannelParameters(true);
