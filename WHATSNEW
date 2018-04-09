@@ -1,7 +1,7 @@
 Recent changes in the INET Framework
 ====================================
 
-INET-3.99.3 (March 2018) - Development
+INET-3.99.3 (April 2018) - Development
 --------------------------------------
 
 This is planned to be the last development release of the upcoming INET-4.0 version.
@@ -11,13 +11,31 @@ version is released. This version requires OMNeT++ 5.3 preview 4 or later.
 
 The highlights of this release are:
 
-1. Packet API
+1. Documentation
+
+   The somewhat outdated 'INET Framework for OMNeT++ Manual' draft has been split
+   into two documents. One is called the User's Guide and the other one is called
+   the Developer's Guide. The reason for the split is that the two documents have
+   different target audience, and they focus on introducing different aspects of
+   the INET Framework.
+
+   The User's Guide is intended for users who are mainly interested in assembling
+   simulations using the existing components provided by the INET framework. As
+   opposed to the Developer's Guide, which is intended for developers who are
+   mainly interested in developing their own protocols as an addition to the INET
+   framework. Both guides are work in progress, but many parts have been added,
+   deleted, and rewritten compared to the old manual.
+
+2. Packet API
 
    The packet API has been finalized. Several Packet and Chunk functions have been
    renamed for better consistency and more clarity. Affected C++ class level and
    function level documentation has been updated.
 
-2. Packet dissector
+   For more details, see the related patch at:
+   https://github.com/inet-framework/inet/commit/cf00e516f318893de5f396a498eb11592d8dd1b9
+
+3. Packet dissector
 
    The packet API has been extended with a new packet dissector API. The packet
    dissector analyzes a packet solely based on the assigned packet protocol and
@@ -32,7 +50,7 @@ The highlights of this release are:
    Ipv4ProtocolDissector. User defined protocols can register their own protocol
    dissector classes to provide support for the generic packet dissector.
 
-3. Packet filter
+4. Packet filter
 
    Filtering packets based on the actual data they contain is a long time missing
    functionality of INET. With the help of the new packet dissector API, it is
@@ -45,7 +63,7 @@ The highlights of this release are:
    the expression "inet::Ipv4Header and srcAddress(10.0.0.*)" matches all packets
    that contains an IPv4 header with a '10.0.0' source address prefix.
 
-4. Packet printer
+5. Packet printer
 
    Based on the new packet dissector, the INET packet printer has been reworked.
    The new packet printer is implemented in the PacketPrinter C++ class. It relies
@@ -62,7 +80,7 @@ The highlights of this release are:
    is assembled inside-out in terms of protocol nesting, but for more complicated
    packets (e.g. ones using aggregation) it is assembled left to right.
 
-5. Packet tags
+6. Packet tags
 
    With the OMNeT++ 5.3 version the old experimental packet tags API is no longer
    available. Meanwhile INET has been extended with a very similar, although not
@@ -75,7 +93,7 @@ The highlights of this release are:
    to request services from other protocols or indicate status changes to other
    protocols.
 
-6. SCTP
+7. SCTP
 
    Due to the complexity of the SCTP protocol and the missing expertise from our
    side it was left untouched so far. With this new release the last remaining
@@ -83,13 +101,13 @@ The highlights of this release are:
 
    Many thanks to Irene Rüngeler for her valuable contribution.
 
-7. Packet drill
+8. Packet drill
 
    The last remaining application has also been ported to the new packet API.
    This application is heavily used for testing UDP, TCP, and SCTP transport
    protocols. All tests under the packetdrill folder pass.
 
-8. Mobility
+9. Mobility
 
    Throughout the mobility API and implementation, speed has been renamed to
    velocity where appropriate. The reason is that speed is generally considered
@@ -106,15 +124,15 @@ The highlights of this release are:
    of several other mobility modules using superposition. The AttachedMobility
    provides a mobility that is attached to another mobility at a given offset.
 
-9. Various renames
+10. Various renames
 
-   All network interfaces have been renamed to have 'Interface' suffix in their
-   names. All signals having the old 'NF_' (obsolete NotificationBoard) prefix
-   in their names have been renamed according to the new INET signal naming scheme.
-   Moreover, many functions have been renamed (e.g. camel case) to use the INET
-   C++ naming scheme.
+    All network interfaces have been renamed to have 'Interface' suffix in their
+    names. All signals having the old 'NF_' (obsolete NotificationBoard) prefix
+    in their names have been renamed according to the new INET signal naming scheme.
+    Moreover, many functions have been renamed (e.g. camel case) to use the INET
+    C++ naming scheme.
 
-10. Visualization
+11. Visualization
 
     Physical transmission medium, data link and physical link, network path, and
     packet drop visualizers have been extended with the new packet data filtering.
@@ -122,14 +140,14 @@ The highlights of this release are:
     an IntegratedMultiCanvasVisualizer to display the path of packets with certain
     destination addresses differently.
 
-11. PCAP recording
+12. PCAP recording
 
     Similarly to visualization, PCAP recording has also been extended with the
     new packet data filtering. This allows recording only certain packets in a
     PCAP file which results in drastically reduced file size and significantly
     increased performance.
 
-12. Other notable changes
+13. Other notable changes
 
     The protocol registration C++ interface has been changed to provide better
     support for the message dispatching mechanism. The result is that protocols
