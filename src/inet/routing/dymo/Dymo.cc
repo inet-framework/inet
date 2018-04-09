@@ -410,7 +410,8 @@ void Dymo::sendDYMOPacket(const Ptr<DymoPacket>& packet, const InterfaceEntry *i
 {
     // 5.4. AODVv2 Packet Header Fields and Information Elements
     // In addition, IP Protocol Number 138 has been reserved for MANET protocols [RFC5498].
-    Packet *udpPacket = new Packet(packet->getClassName());
+    auto className = packet->getClassName();
+    Packet *udpPacket = new Packet(!strncmp("inet::", className, 6) ? className + 6 : className);
     auto udpHeader = makeShared<UdpHeader>();
     udpPacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::manet);
     // In its default mode of operation, AODVv2 uses the Udp port 269 [RFC5498] to carry protocol packets.
