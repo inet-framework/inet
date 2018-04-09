@@ -251,12 +251,12 @@ void Ipv4RoutingTable::printRoutingTable() const
     for (int i = 0; i < getNumRoutes(); i++) {
         Ipv4Route *route = getRoute(i);
         InterfaceEntry *interfacePtr = route->getInterface();
-        EV << stringf("%-16s %-16s %-16s %-4s (%s) %d\n",
+        EV << stringf("%-16s %-16s %-16s %-4s %-16s %6d\n",
                 route->getDestination().isUnspecified() ? "*" : route->getDestination().str().c_str(),
                 route->getNetmask().isUnspecified() ? "*" : route->getNetmask().str().c_str(),
                 route->getGateway().isUnspecified() ? "*" : route->getGateway().str().c_str(),
                 !interfacePtr ? "*" : interfacePtr->getInterfaceName(),
-                !interfacePtr ? "*  " : interfacePtr->ipv4Data()->getIPAddress().str().c_str(),
+                !interfacePtr ? "(*)" : (std::string("(") + interfacePtr->ipv4Data()->getIPAddress().str() + ")").c_str(),
                 route->getMetric());
     }
     EV << "\n";
