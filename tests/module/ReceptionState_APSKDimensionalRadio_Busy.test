@@ -77,6 +77,10 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 %contains: results/General-0.elog
 Changing radio reception state from IDLE to BUSY.
+
+%#--------------------------------------------------------------------------------------------------------------
+%# remove colorizing
+%subst: /\x1B\[[0-9;]*m//
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:

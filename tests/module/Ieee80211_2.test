@@ -58,12 +58,16 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.mobility.initFromDisplayString = false
 **.mobility.initialY = 500m
 **.mobility.initialZ = 0m
-        
+
 **.host1.mobility.initialX = 200m
 **.host2.mobility.initialX = 800m
 *.host1.app[0].startTime = 0s
 *.host2.app[0].startTime = 3us
 
+%#--------------------------------------------------------------------------------------------------------------
+%# remove colorizing
+%subst: /\x1B\[[0-9;]*m//
+%#--------------------------------------------------------------------------------------------------------------
 %not-contains: results/General-0.elog
 reception decision, impossible, unsuccessful
 %#--------------------------------------------------------------------------------------------------------------

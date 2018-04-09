@@ -58,13 +58,18 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.mobility.initFromDisplayString = false
 **.mobility.initialY = 500m
 **.mobility.initialZ = 0m
-        
+
 **.host1.mobility.initialX = 200m
 **.host2.mobility.initialX = 800m
 *.host*.app[0].startTime = 0s
 
+%#--------------------------------------------------------------------------------------------------------------
+%# remove colorizing
+%subst: /\x1B\[[0-9;]*m//
+%#--------------------------------------------------------------------------------------------------------------
 %contains: results/General-0.elog
 ignoring
+%#--------------------------------------------------------------------------------------------------------------
 %not-contains: results/General-0.elog
 attempting
 %#--------------------------------------------------------------------------------------------------------------
