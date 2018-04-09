@@ -26,21 +26,21 @@
 
 namespace inet {
 
-Register_Protocol_Dissector(&Protocol::csmacamac, CsmaCaMacProtocolDissector);
+Register_Protocol_Dissector(&Protocol::csmaCaMac, CsmaCaMacProtocolDissector);
 
 void CsmaCaMacProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
     auto header = packet->popAtFront<CsmaCaMacHeader>();
     auto trailer = packet->popAtBack<CsmaCaMacTrailer>(B(4));
-    callback.startProtocolDataUnit(&Protocol::csmacamac);
-    callback.visitChunk(header, &Protocol::csmacamac);
+    callback.startProtocolDataUnit(&Protocol::csmaCaMac);
+    callback.visitChunk(header, &Protocol::csmaCaMac);
     if (auto dataHeader = dynamicPtrCast<const CsmaCaMacDataHeader>(header)) {
         auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(dataHeader->getNetworkProtocol());
         callback.dissectPacket(packet, payloadProtocol);
     }
     ASSERT(packet->getDataLength() == B(0));
-    callback.visitChunk(trailer, &Protocol::csmacamac);
-    callback.endProtocolDataUnit(&Protocol::csmacamac);
+    callback.visitChunk(trailer, &Protocol::csmaCaMac);
+    callback.endProtocolDataUnit(&Protocol::csmaCaMac);
 }
 
 } // namespace inet

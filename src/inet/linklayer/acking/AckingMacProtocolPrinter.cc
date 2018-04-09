@@ -25,7 +25,7 @@
 
 namespace inet {
 
-Register_Protocol_Printer(&Protocol::ackingmac, AckingMacProtocolPrinter);
+Register_Protocol_Printer(&Protocol::ackingMac, AckingMacProtocolPrinter);
 
 void AckingMacProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, Context& context) const
 {

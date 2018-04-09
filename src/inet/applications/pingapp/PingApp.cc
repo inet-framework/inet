@@ -68,7 +68,7 @@ const std::map<const Protocol *, const Protocol *> PingApp::l3Echo( {
     { &Protocol::flood, &Protocol::echo },
     { &Protocol::gnp, &Protocol::echo },
     { &Protocol::probabilistic, &Protocol::echo },
-    { &Protocol::wiseroute, &Protocol::echo },
+    { &Protocol::wiseRoute, &Protocol::echo },
 });
 
 enum PingSelfKinds {

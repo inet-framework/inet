@@ -24,21 +24,21 @@
 
 namespace inet {
 
-Register_Protocol_Dissector(&Protocol::wiseroute, WiseRouteProtocolDissector);
+Register_Protocol_Dissector(&Protocol::wiseRoute, WiseRouteProtocolDissector);
 
 void WiseRouteProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
     auto header = packet->popAtFront<WiseRouteHeader>();
     auto trailerPopOffset = packet->getBackOffset();
     auto payloadEndOffset = packet->getFrontOffset() + header->getPayloadLengthField();
-    callback.startProtocolDataUnit(&Protocol::wiseroute);
-    callback.visitChunk(header, &Protocol::wiseroute);
+    callback.startProtocolDataUnit(&Protocol::wiseRoute);
+    callback.visitChunk(header, &Protocol::wiseRoute);
     packet->setBackOffset(payloadEndOffset);
     callback.dissectPacket(packet, header->getProtocol());
     ASSERT(packet->getDataLength() == B(0));
     packet->setFrontOffset(payloadEndOffset);
     packet->setBackOffset(trailerPopOffset);
-    callback.endProtocolDataUnit(&Protocol::wiseroute);
+    callback.endProtocolDataUnit(&Protocol::wiseRoute);
 }
 
 } // namespace inet

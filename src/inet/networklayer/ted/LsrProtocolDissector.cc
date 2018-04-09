@@ -25,15 +25,15 @@
 
 namespace inet {
 
-Register_Protocol_Dissector(&Protocol::linkstaterouting, LsrProtocolDissector);
+Register_Protocol_Dissector(&Protocol::linkStateRouting, LsrProtocolDissector);
 
 void LsrProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
     auto header = packet->popAtFront<LinkStateMsg>();
-    callback.startProtocolDataUnit(&Protocol::linkstaterouting);
-    callback.visitChunk(header, &Protocol::linkstaterouting);
+    callback.startProtocolDataUnit(&Protocol::linkStateRouting);
+    callback.visitChunk(header, &Protocol::linkStateRouting);
     ASSERT(packet->getDataLength() == B(0));
-    callback.endProtocolDataUnit(&Protocol::linkstaterouting);
+    callback.endProtocolDataUnit(&Protocol::linkStateRouting);
 }
 
 } // namespace inet

@@ -452,7 +452,7 @@ void CsmaCaMac::encapsulate(Packet *frame)
     if (fcsMode == FCS_COMPUTED)
         macTrailer->setFcs(computeFcs(frame->peekAllAsBytes()));
     frame->insertAtBack(macTrailer);
-    frame->getTag<PacketProtocolTag>()->setProtocol(&Protocol::csmacamac);
+    frame->getTag<PacketProtocolTag>()->setProtocol(&Protocol::csmaCaMac);
 }
 
 void CsmaCaMac::decapsulate(Packet *frame)
@@ -578,7 +578,7 @@ void CsmaCaMac::sendAckFrame()
     if (fcsMode == FCS_COMPUTED)
         macTrailer->setFcs(computeFcs(frame->peekAllAsBytes()));
     frame->insertAtBack(macTrailer);
-    frame->addTag<PacketProtocolTag>()->setProtocol(&Protocol::csmacamac);
+    frame->addTag<PacketProtocolTag>()->setProtocol(&Protocol::csmaCaMac);
     radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     sendDown(frame);
     delete frameToAck;

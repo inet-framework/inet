@@ -273,7 +273,7 @@ void AckingMac::encapsulate(Packet *packet)
         macHeader->setSrcModuleId(getId());
     macHeader->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(packet->getTag<PacketProtocolTag>()->getProtocol()));
     packet->insertAtFront(macHeader);
-    packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ackingmac);
+    packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ackingMac);
 }
 
 bool AckingMac::dropFrameNotForUs(Packet *packet)

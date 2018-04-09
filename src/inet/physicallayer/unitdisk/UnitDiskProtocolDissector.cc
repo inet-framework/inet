@@ -26,17 +26,17 @@
 
 namespace inet {
 
-Register_Protocol_Dissector(&Protocol::unitdisk, UnitDiskProtocolDissector);
+Register_Protocol_Dissector(&Protocol::unitDisk, UnitDiskProtocolDissector);
 
 void UnitDiskProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
     auto header = packet->popAtFront<UnitDiskPhyHeader>();
-    callback.startProtocolDataUnit(&Protocol::unitdisk);
-    callback.visitChunk(header, &Protocol::unitdisk);
+    callback.startProtocolDataUnit(&Protocol::unitDisk);
+    callback.visitChunk(header, &Protocol::unitDisk);
     auto payloadProtocol = header->getPayloadProtocol();
     callback.dissectPacket(packet, payloadProtocol);
     ASSERT(packet->getDataLength() == B(0));
-    callback.endProtocolDataUnit(&Protocol::unitdisk);
+    callback.endProtocolDataUnit(&Protocol::unitDisk);
 }
 
 } // namespace inet

@@ -40,7 +40,7 @@ void UnitDiskRadio::encapsulate(Packet *packet) const
     phyHeader->setChunkLength(idealTransmitter->getHeaderLength());
     phyHeader->setPayloadProtocol(packet->getTag<PacketProtocolTag>()->getProtocol());
     packet->insertAtFront(phyHeader);
-    packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::unitdisk);
+    packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::unitDisk);
 }
 
 void UnitDiskRadio::decapsulate(Packet *packet) const

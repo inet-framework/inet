@@ -74,7 +74,7 @@ ProtocolGroup ProtocolGroup::ethertype("ethertype", {
     { 0x86DD, &Protocol::ipv6 },
     { 0x36FC, &Protocol::flood },         // ETHERTYPE_INET_FLOOD, not in any standards
     { 0x86FD, &Protocol::probabilistic },         // ETHERTYPE_INET_PROBABILISTIC, not in any standards
-    { 0x86FE, &Protocol::wiseroute },         // ETHERTYPE_INET_WISE, not in any standards
+    { 0x86FE, &Protocol::wiseRoute },         // ETHERTYPE_INET_WISE, not in any standards
     { 0x86FF, &Protocol::gnp },         // ETHERTYPE_INET_GENERIC
     { 0x8847, &Protocol::mpls },
 });
@@ -86,7 +86,7 @@ ProtocolGroup ProtocolGroup::pppprotocol("pppprotocol", {
     { 0x0281, &Protocol::mpls },        // MPLS unicast
     { 0x39FC, &Protocol::flood },         // INET_FLOOD, not in any standards
     { 0x39FD, &Protocol::probabilistic },         // INET_PROBABILISTIC, not in any standards
-    { 0x39FE, &Protocol::wiseroute },         // INET_WISE, not in any standards
+    { 0x39FE, &Protocol::wiseRoute },         // INET_WISE, not in any standards
     { 0x39FF, &Protocol::gnp },         // INET_GENERIC, not in any standards
 });
 
@@ -101,7 +101,7 @@ ProtocolGroup ProtocolGroup::ipprotocol("ipprotocol", {
     { 17, &Protocol::udp },
     { 36, &Protocol::xtp },
     { 41, &Protocol::ipv6 },
-    { 46, &Protocol::rsvpte },
+    { 46, &Protocol::rsvpTe },
     { 48, &Protocol::dsr },
     { 58, &Protocol::icmpv6 },
     { 89, &Protocol::ospf },
@@ -110,10 +110,10 @@ ProtocolGroup ProtocolGroup::ipprotocol("ipprotocol", {
     { 135, &Protocol::mobileipv6 },
     { 138, &Protocol::manet },
 
-    { 249, &Protocol::linkstaterouting },    // INET specific: Link State Routing Protocol
+    { 249, &Protocol::linkStateRouting },    // INET specific: Link State Routing Protocol
     { 250, &Protocol::flood },    // INET specific: Probabilistic Network Protocol
     { 251, &Protocol::probabilistic },    // INET specific: Probabilistic Network Protocol
-    { 252, &Protocol::wiseroute },    // INET specific: Probabilistic Network Protocol
+    { 252, &Protocol::wiseRoute },    // INET specific: Probabilistic Network Protocol
     { 253, &Protocol::gnp },    // INET specific: Generic Network Protocol
     { 254, &Protocol::echo },    // INET specific: Echo Protocol
 });

@@ -25,7 +25,7 @@
 
 namespace inet {
 
-Register_Protocol_Printer(&Protocol::wiseroute, WiseRouteProtocolPrinter);
+Register_Protocol_Printer(&Protocol::wiseRoute, WiseRouteProtocolPrinter);
 
 void WiseRouteProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, Context& context) const
 {

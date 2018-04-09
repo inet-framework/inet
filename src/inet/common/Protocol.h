@@ -88,7 +88,7 @@ class INET_API Protocol
     static const Protocol ospf;
     static const Protocol pim;
     static const Protocol ppp;
-    static const Protocol rsvpte;
+    static const Protocol rsvpTe;
     static const Protocol sctp;
     static const Protocol stp;
     static const Protocol tcp;
@@ -97,18 +97,18 @@ class INET_API Protocol
     static const Protocol xtp;
 
     // INET specific conceptual protocol identifiers (in alphanumeric order)
-    static const Protocol ackingmac;
+    static const Protocol ackingMac;
     static const Protocol apskPhy;
-    static const Protocol csmacamac;
+    static const Protocol csmaCaMac;
     static const Protocol echo;
     static const Protocol flood;
     static const Protocol gnp;
-    static const Protocol linkstaterouting;
+    static const Protocol linkStateRouting;
     static const Protocol probabilistic;
     static const Protocol shortcutMac;
     static const Protocol shortcutPhy;
-    static const Protocol unitdisk;
-    static const Protocol wiseroute;
+    static const Protocol unitDisk;
+    static const Protocol wiseRoute;
 };
 
 } // namespace inet

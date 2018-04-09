@@ -26,17 +26,17 @@
 
 namespace inet {
 
-Register_Protocol_Dissector(&Protocol::ackingmac, AckingMacProtocolDissector);
+Register_Protocol_Dissector(&Protocol::ackingMac, AckingMacProtocolDissector);
 
 void AckingMacProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
     auto header = packet->popAtFront<AckingMacHeader>();
-    callback.startProtocolDataUnit(&Protocol::ackingmac);
-    callback.visitChunk(header, &Protocol::ackingmac);
+    callback.startProtocolDataUnit(&Protocol::ackingMac);
+    callback.visitChunk(header, &Protocol::ackingMac);
     auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(header->getNetworkProtocol());
     callback.dissectPacket(packet, payloadProtocol);
     ASSERT(packet->getDataLength() == B(0));
-    callback.endProtocolDataUnit(&Protocol::ackingmac);
+    callback.endProtocolDataUnit(&Protocol::ackingMac);
 }
 
 } // namespace inet

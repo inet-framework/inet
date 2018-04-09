@@ -25,15 +25,15 @@
 
 namespace inet {
 
-Register_Protocol_Dissector(&Protocol::rsvpte, RsvpProtocolDissector);
+Register_Protocol_Dissector(&Protocol::rsvpTe, RsvpProtocolDissector);
 
 void RsvpProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
     auto header = packet->popAtFront<RsvpMessage>();
-    callback.startProtocolDataUnit(&Protocol::rsvpte);
-    callback.visitChunk(header, &Protocol::rsvpte);
+    callback.startProtocolDataUnit(&Protocol::rsvpTe);
+    callback.visitChunk(header, &Protocol::rsvpTe);
     ASSERT(packet->getDataLength() == B(0));
-    callback.endProtocolDataUnit(&Protocol::rsvpte);
+    callback.endProtocolDataUnit(&Protocol::rsvpTe);
 }
 
 } // namespace inet

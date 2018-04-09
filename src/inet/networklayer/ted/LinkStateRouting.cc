@@ -66,8 +66,8 @@ void LinkStateRouting::initialize(int stage)
         // schedule start of flooding link state info
         announceMsg = new cMessage("announce");
         scheduleAt(simTime() + exponential(0.01), announceMsg);
-        registerService(Protocol::linkstaterouting, nullptr, gate("ipIn"));
-        registerProtocol(Protocol::linkstaterouting, gate("ipOut"), nullptr);
+        registerService(Protocol::linkStateRouting, nullptr, gate("ipIn"));
+        registerProtocol(Protocol::linkStateRouting, gate("ipOut"), nullptr);
     }
 }
 
@@ -221,8 +221,8 @@ void LinkStateRouting::sendToIP(Packet *msg, Ipv4Address destAddr)
 {
     msg->addPar("color") = TED_TRAFFIC;
 
-    msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::linkstaterouting);
-    msg->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::linkstaterouting);
+    msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::linkStateRouting);
+    msg->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::linkStateRouting);
     msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     msg->addTagIfAbsent<L3AddressReq>()->setDestAddress(destAddr);
     msg->addTagIfAbsent<L3AddressReq>()->setSrcAddress(routerId);

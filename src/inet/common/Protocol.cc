@@ -102,7 +102,7 @@ const Protocol Protocol::mpls("mpls", "MPLS");
 const Protocol Protocol::ospf("ospf", "OSPF");
 const Protocol Protocol::pim("pim", "PIM");
 const Protocol Protocol::ppp("ppp", "PPP", Protocol::LinkLayer);
-const Protocol Protocol::rsvpte("rsvpte", "RSVP-TE");
+const Protocol Protocol::rsvpTe("rsvpte", "RSVP-TE");
 const Protocol Protocol::sctp("sctp", "SCTP", Protocol::TransportLayer);
 const Protocol Protocol::stp("stp", "STP");
 const Protocol Protocol::tcp("tcp", "TCP", Protocol::TransportLayer);
@@ -111,18 +111,18 @@ const Protocol Protocol::xmac("xmac", "X-MAC");
 const Protocol Protocol::xtp("xtp", "XTP");
 
 // INET specific conceptual protocol identifiers
-const Protocol Protocol::ackingmac("ackingmac", "Acking MAC");
+const Protocol Protocol::ackingMac("ackingmac", "Acking MAC");
 const Protocol Protocol::apskPhy("apskphy", "APSK PHY", Protocol::PhysicalLayer);
-const Protocol Protocol::csmacamac("csmacamac", "CSMA/CA MAC");
+const Protocol Protocol::csmaCaMac("csmacamac", "CSMA/CA MAC");
 const Protocol Protocol::echo("echo", "Echo"); // Echo protocol (ping request/reply)
 const Protocol Protocol::flood("flood", "Flood", Protocol::NetworkLayer);
 const Protocol Protocol::gnp("gnp", "GNP"); // Generic Network Protocol
-const Protocol Protocol::linkstaterouting("linkstaterouting", "LinkStateRouting");
+const Protocol Protocol::linkStateRouting("linkstaterouting", "LinkStateRouting");
 const Protocol Protocol::probabilistic("probabilistic", "Probabilistic", Protocol::NetworkLayer); // Probabilistic Network Protocol
 const Protocol Protocol::shortcutMac("shortcutmac", "Shortcut MAC");
 const Protocol Protocol::shortcutPhy("shortcutphy", "Shortcut PHY", Protocol::PhysicalLayer);
-const Protocol Protocol::unitdisk("unitdisk", "UnitDisk");
-const Protocol Protocol::wiseroute("wiseroute", "WiseRoute"); // WiseRoute Network Protocol
+const Protocol Protocol::unitDisk("unitdisk", "UnitDisk");
+const Protocol Protocol::wiseRoute("wiseroute", "WiseRoute"); // WiseRoute Network Protocol
 
 } // namespace inet
 
