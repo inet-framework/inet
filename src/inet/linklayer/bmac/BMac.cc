@@ -60,6 +60,8 @@ void BMac::initialize(int stage)
         macState = INIT;
 
         initializeMacAddress();
+    }
+    else if (stage == INITSTAGE_LINK_LAYER) {
         registerInterface();
 
         cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
@@ -69,8 +71,7 @@ void BMac::initialize(int stage)
 
         // init the dropped packet info
         WATCH(macState);
-    }
-    else if (stage == INITSTAGE_LINK_LAYER) {
+
         wakeup = new cMessage("wakeup");
         wakeup->setKind(BMAC_WAKE_UP);
 

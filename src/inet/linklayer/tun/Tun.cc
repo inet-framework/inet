@@ -34,7 +34,7 @@ Define_Module(Tun);
 void Tun::initialize(int stage)
 {
     MacBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
+    if (stage == INITSTAGE_LINK_LAYER)
         registerInterface();
 }
 

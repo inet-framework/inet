@@ -57,6 +57,8 @@ void LMac::initialize(int stage)
         EV << "Control packets take : " << controlDuration << " seconds to transmit\n";
 
         initializeMacAddress();
+    }
+    else if (stage == INITSTAGE_LINK_LAYER) {
         registerInterface();
 
         cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
@@ -65,10 +67,6 @@ void LMac::initialize(int stage)
         radio = check_and_cast<IRadio *>(radioModule);
 
         WATCH(macState);
-    }
-    else if (stage == INITSTAGE_LINK_LAYER) {
-        //int channel;
-        //channel = hasPar("defaultChannel") ? par("defaultChannel") : 0;
 
         EV_DETAIL << "queueLength = " << queueLength
                   << " slotDuration = " << slotDuration

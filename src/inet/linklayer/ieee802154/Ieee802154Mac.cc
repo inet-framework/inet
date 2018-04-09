@@ -106,6 +106,9 @@ void Ieee802154Mac::initialize(int stage)
         txAttempts = 0;
 
         initializeMacAddress();
+
+    }
+    else if (stage == INITSTAGE_LINK_LAYER) {
         registerInterface();
 
         cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
@@ -125,9 +128,8 @@ void Ieee802154Mac::initialize(int stage)
                         SIMTIME_DBL(aTurnaroundTime), SIMTIME_DBL(rxToTx));
             }
         }
-    }
-    else if (stage == INITSTAGE_LINK_LAYER) {
         radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
+
         EV_DETAIL << "queueLength = " << queueLength
                   << " bitrate = " << bitrate
                   << " backoff method = " << par("backoffMethod").stringValue() << endl;

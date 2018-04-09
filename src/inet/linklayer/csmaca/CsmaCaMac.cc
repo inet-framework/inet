@@ -99,7 +99,6 @@ void CsmaCaMac::initialize(int stage)
         }
         else
             address.setAddress(addressString);
-        registerInterface();
 
         // subscribe for the information of the carrier sense
         cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
@@ -152,8 +151,10 @@ void CsmaCaMac::initialize(int stage)
         WATCH(numSentBroadcast);
         WATCH(numReceivedBroadcast);
     }
-    else if (stage == INITSTAGE_LINK_LAYER)
+    else if (stage == INITSTAGE_LINK_LAYER) {
+        registerInterface();
         radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
+    }
 }
 
 void CsmaCaMac::initializeQueueModule()
