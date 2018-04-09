@@ -68,6 +68,9 @@ simple XMac extends MacProtocolBase like IMacProtocol
         int headerLength @unit(b) = default(80b);
         int mtu @unit(B) = default(0B);
 
+        // Maximum transmission attempts per data packet, when ACKs are used
+        int maxTxAttempts = default(2);
+
         string radioModule = default("^.radio");   // The path to the Radio module  //FIXME remove default value 
 
         @class(XMac);

@@ -39,15 +39,15 @@ void XMac::initialize(int stage)
     MacProtocolBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        queueLength   = hasPar("queueLength")   ? par("queueLength")   : 10;
-        animation     = hasPar("animation")     ? par("animation")     : true;
-        slotDuration  = hasPar("slotDuration")  ? par("slotDuration")  : 1.;
-        bitrate       = hasPar("bitrate")       ? par("bitrate")       : 15360.;
-        headerLength = par("headerLength");
-        checkInterval = hasPar("checkInterval") ? par("checkInterval") : 0.1;
-        txPower       = hasPar("txPower")       ? par("txPower")       : 50.;
-        useMacAcks    = hasPar("useMACAcks")    ? par("useMACAcks")    : false;
-        maxTxAttempts = hasPar("maxTxAttempts") ? par("maxTxAttempts") : 2;
+        queueLength   = par("queueLength");
+        animation     = par("animation");
+        slotDuration  = par("slotDuration");
+        bitrate       = par("bitrate");
+        headerLength  = par("headerLength");
+        checkInterval = par("checkInterval");
+        txPower       = par("txPower");
+        useMacAcks    = par("useMACAcks");
+        maxTxAttempts = par("maxTxAttempts");
         EV_DEBUG << "headerLength: " << headerLength << ", bitrate: " << bitrate << endl;
 
         stats = par("stats");
