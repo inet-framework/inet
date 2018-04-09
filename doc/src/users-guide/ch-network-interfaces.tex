@@ -8,17 +8,13 @@
 In INET simulations, network interface modules are the primary means of
 communication between network nodes. They represent the required
 combination of software and hardware elements from an operating system
-point-of-view. Network interfaces come in two quite different kinds: wired
-and wireless.
+point-of-view. 
 
-Wired interfaces have a pair of special purpose OMNeT++ gates which represent
-the capability of having an external physical connection to another network
-node (e.g., Ethernet port). In order to make wired communication work,
-these gates must be connected with special connections which represent the
-physical cable between the physical ports. The connections must use special
-OMNeT++ channels (e.g., \nedtype{DatarateChannel}) which determine datarate
-and delay parameters.
-
+Network interfaces are implemented with OMNeT++ compound modules that
+conform to the \nedtype{INetworkInterface} module interface. 
+Network interfaces can be further categorized as wired and wireless;
+they conform to the \nedtype{IWiredInterface} and \nedtype{IWirelessInterface}
+NED types, respectively, which are subtypes of \nedtype{INetworkInterface}.
 
 \section{Built-in Network Interfaces}
 
@@ -50,72 +46,284 @@ Typical ingredients are:
 \begin{itemize}
     \item \emph{Layer 2 protocol implementation}. For some interfaces such as
       \nedtype{PppInterface} this is a single module; for others like Ethernet
-      and Wifi it consists of separate modules for MAC, LLC protocols, and
-      possibly other protocols. 
-    \item \emph{PHY protocols}. Some interfaces also contain separate
+      and Wifi it consists of separate modules for MAC, LLC, and possibly 
+      other subcomponents. 
+    \item \emph{PHY model}. Some interfaces also contain separate
       module(s) that implement the physical layer. For example, 
       \nedtype{Ieee80211Interface} contains a radio module.
-    \item \emph{Queue}. This module is also called the \emph{external queue}.
-      The queue module is optional and is absent by default, because most 
-      MAC protocol implementations already contain an internal queue which
-      is more efficient to work with. The possibility to allow an external queue 
-      primarily exists to allow experimentation: one can install bounded 
-      queue, priority queue, etc.  
-    \item \emph{Traffic conditioners}
-    \item \emph{Hooks}
+    \item \emph{Output queue}. This module is optional and absent by default, 
+      because most MAC protocol implementations already contain an internal queue
+      which is more efficient to work with. The possibility to plug in an 
+      external queue module allows one to experiment with different queueing policies
+      and implement QoS, RED, etc.
+    \item \emph{Traffic conditioners} allow traffic shaping and policing elements
+      to be added to the interface, for example to implement a Diffserv router.
+    \item \emph{Hooks} allow extra modules to be inserted in the incoming
+      and outgoing paths of packets. 
 \end{itemize}
 
-TODO InterfaceTable
 
-\section{Queueing}
+\subsection{Internal vs External Output Queue}
 
-TODO internal/external queue
+Network interfaces usually have the external queue module defined with a
+parametric type like this: 
 
-TODO injecting errors (via IHooks)
+\begin{ned}
+queue: <queueType> like IOutputQueue if queueType != "";
+\end{ned} 
 
-TODO generalize this: 
+When \fpar{queueType} is empty (this is the default), the external queue 
+module is absent, and the MAC (or equivalent L2) protocol will use its 
+internal queue object. Conceptually, the internal queue is of inifinite size, 
+but for better diagnostics one can often specify a hard limit for the queue
+length in a module parameter -- if this is exceeded, the simulation 
+stops with an error.
 
-The PPP module receives packets from the upper layer in the \fvar{netwIn}
-gate, encapsulates them into \msgtype{PppFrame}s, and send it to the
-physical layer through the \fvar{phys} gate. The \msgtype{PppFrame}s
-received from the \fvar{phys} gate are decapsulated and sent to the upper
-layer immediately through the \fvar{netwOut} gate.
+When \fpar{queueType} is not empty, it must name a NED type that 
+implements the \nedtype{IOutputQueue} interface. The external 
+queue module model allows modeling a finite buffer, or implement
+various queueing policies for QoS and/or RED.
 
-Incoming datagrams are waiting in a queue if the line is currently busy.
-In routers, PPP relies on an external queue module (implementing
-\nedtype{IOutputQueue}) to model finite buffer, implement QoS and/or RED,
-and requests packets from this external queue one-by-one. The name
-of this queue is given as the \fpar{queueModule} parameter.
+The most frequently used module type for external queue is 
+\nedtype{DropTailQueue}, a finite-size FIFO that drops overflowing 
+packets). Other queue types that implement queueing policies can be 
+created by assembling compound modules from DiffServ components 
+(see chapter \ref{cha:diffserv}). An example of such compound
+modules is \nedtype{DiffservQueue}.
 
-In hosts, no such queue is used, so \nedtype{Ppp} contains an internal
-queue named txQueue to queue up packets wainting for transmission.
-Conceptually txQueue is of inifinite size, but for better diagnostics
-one can specify a hard limit in the \fpar{txQueueLimit} parameter -- if
-this is exceeded, the simulation stops with an error.
+An example ini file fragment that installs drop-tail queues of size 10
+on PPP interfaces:
 
-The module can be used in simulations where the nodes are connected and
-disconnected dinamically. If the channel between the PPP modules is down,
-the messages received from the upper layer are dropped (including the messages
-waiting in the queue). When the connection is restored it will
-poll the queue and transmits the messages again.
+\begin{inifile}
+**.ppp[*].queueType = "DropTailQueue"
+**.ppp[*].queue.frameCapacity = 10
+\end{inifile}
 
-The PPP module registers itself in the interface table of the node.
-The \fvar{mtu} of the entry can be specified by the
-\fpar{mtu} module parameter. The module checks the state of the physical link
-and updates the entry in the interface table.
+\subsection{Traffic Conditioners}
+
+Many network interfaces contain optional traffic conditioner submodules
+defined with parametric types, like this: 
+
+\begin{ned}
+ingressTC: <ingressTCType> like ITrafficConditioner if ingressTCType != "";
+egressTC: <egressTCType> like ITrafficConditioner if egressTCType != "";
+\end{ned}
+
+Traffic conditioners allow one to implement the policing and shaping actions
+of a Diffserv router. They are added to the input or output packets paths  
+in the network interface. (On the output path they are added before the queue 
+module.) 
+
+Traffic conditioners must implement the \nedtype{ITrafficConditioner} module
+interface. Traffic conditioners can be assembled from DiffServ components 
+(see chapter \ref{cha:diffserv}). There is no preassembled traffic conditioner
+in INET, but you can find some in the example simulations.
+
+An example configuration with fictituous types:
+
+\begin{inifile}
+**.ppp[*].ingressTCType = "CustomIngressTC"
+**.ppp[*].egressTCType = "CustomEgressTC"
+\end{inifile}
+
+
+\subsection{Hooks}
+
+Several network interfaces allow extra modules to be inserted in the incoming
+and outgoing paths of packets at the top of the netwok interface. 
+Hooks are added as a submodule vector with parametric type, like this: 
+
+\begin{ned}
+outputHook[numOutputHooks]: <default("Nop")> like IHook if numOutputHooks>0;
+inputHook[numInputHooks]: <default("Nop")> like IHook if numInputHooks>0;
+\end{ned}
+
+This allows any number of hook modules to be added. The hook modules 
+are chained in their numeric order.
+
+Modules inserted as hooks may act as probes (for measuring or recording
+traffic) or as means of modifying or perturbing the packet flow for 
+experimentation. Module types implementing the \nedtype{IHook} NED interface
+include \nedtype{ThruputMeter}, \nedtype{Delayer}, \nedtype{OrdinalBasedDropper},
+and \nedtype{OrdinalBasedDuplicator}. 
+
+The following ini file fragment inserts two hook modules into the output
+paths of PPP interfaces, a delayer and a throughput meter:
+
+\begin{inifile}
+**.ppp[*].numOutputHooks = 2
+**.ppp[*].outputHook[0].typename = "Delayer"
+**.ppp[*].outputHook[1].typename = "ThruputMeter"
+**.ppp[*].outputHook[0].delay = 3ms
+\end{inifile}
+
+
+
+\section{The Interface Table}
+
+Network nodes normally contain an \nedtype{InterfaceTable} module.
+The interface table is a sort of registry of all the network interfaces
+in the host. It does not send or receive messages, other modules access it
+via C++ function calls. Contents of the interface table can also
+be inspected e.g. in Qtenv.
+
+Network interfaces register themselves in the interface table at the
+beginning of the simulation. Registration is usually the task of the
+MAC (or equivalent) module. 
 
 
 \section{Wired Network Interfaces}
 
-%TODO: explain what is specific to wired interfaces
+Wired interfaces have a pair of special purpose OMNeT++ gates which represent
+the capability of having an external physical connection to another network
+node (e.g. Ethernet port). In order to make wired communication work,
+these gates must be connected with special connections which represent the
+physical cable between the physical ports. The connections must use special
+OMNeT++ channels (e.g. \nedtype{DatarateChannel}) which determine datarate
+and delay parameters.
 
-TODO PPP, EthernetInterface
+Wired network interfaces are compound modules that implement the 
+\nedtype{IWiredInterface} interface. INET has the following
+wired network interfaces. 
 
-TODO MAC: Acking, CsmaCa, Shortcut 
+\subsection{PPP}
+
+Network interfaces for point-to-point links (\nedtype{PppInterface}) are 
+described in chapter \ref{cha:ppp}. They are typically used in routers.
+
+\subsection{Ethernet}
+
+Ethernet interfaces (\nedtype{EthernetInterface}), alongside with models 
+of Ethernet devices such as switches and hubs, are described in chapter
+\ref{cha:ethernet}.
 
 \section{Wireless Network Interfaces}
 
-%TODO: explain what is specific to wireless interfaces
+Wireless interfaces use direct sending\footnote{OMNeT++ \ttt{sendDirect()} calls} 
+for communication instead of links, so their compound modules do not have
+output gates at the physical layer, only an input gate dedicated to receiving. 
+Another difference from the wired case is that wireless interfaces 
+require (and collaborate with) a \textit{transmission medium} module 
+at the network level. The medium module represents the shared transmission 
+medium (electromagnetic field or acoustic medium), is responsible for 
+modeling physical effects like signal attenuation, and maintains 
+connectivity information. Also, while wired interfaces can do without
+explicit modeling of the physical layer, a PHY module is an indispensable
+part of a wireless interface.
+
+Wireless network interfaces are compound modules that implement the 
+\nedtype{IWirelessInterface} interface. In the following sections we 
+give an overview of the wireless interfaces available in INET.
+
+\subsection{Generic Wireless Interface}
+
+A generic implementation of \nedtype{IWirelessInterface} is 
+\nedtype{WirelessInterface}, where the type of the MAC protocol is a parameter.
+There are specialized versions of \nedtype{WirelessInterface} where 
+the MAC protocol is fixed to a particular value; one example is 
+\nedtype{BMacInterface}.
+
+TODO radio is configrable!!!!
+
+
+\subsection{IEEE 802.11}
+
+IEEE 802.11 or Wifi network interfaces (\nedtype{Ieee80211Interface}),
+alongside with models of devices acting as access points (AP),
+are covered in chapter \ref{cha:80211}.
+
+\subsection{IEEE 802.15.4}
+
+\nedtype{Ieee802154Interface} is covered in a separate chapter, see \ref{cha:802154}.
+
+\subsection{Wireless Sensor Networks}
+
+MAC protocols for wireless sensor networks (WSNs) and the corresponding
+network interfaces are covered in chapter \ref{cha:sensor-macs}.
+
+\subsection{CSMA/CA} 
+
+\nedtype{CsmaCaMac} implements an imaginary CSMA/CA-based MAC protocol with
+optional acknowledgements and a retry mechanism. With the appropriate settings,
+it can approximate basic 802.11b ad-hoc mode operation.
+
+\nedtype{CsmaCaMac} provides a lot of room for experimentation: 
+acknowledgements can be turned on/off, and operation parameters like
+inter-frame gap sizes, backoff behaviour (slot time, minimum and maximum 
+number of slots), maximum retry count, header and ACK frame sizes, bit rate,
+etc. can be configured via NED parameters.
+
+\nedtype{CsmaCaInterface} interface is a \nedtype{WirelessInterface} with
+the MAC type set to \nedtype{CsmaCaMac}. 
+
+\subsection{Acking MAC}
+
+\nedtype{AckingWirelessInterface} is a highly abstracted wireless
+NIC that consists of a unit disk radio and a trivial MAC protocol. It offers
+simplicity for scenarios where Layer 1 and 2 effects can be completely ignored, 
+for example testing the basic functionality of a wireless ad-hoc routing protocol.
+
+The most important parameter this model accepts is the transmission range.
+When a radio transmits a frame, all other radios within transmission range
+will receive the frame correctly, and radios that are out of range will not be
+affected at all.
+
+\nedtype{AckingMac} implements a trivial MAC protocol. It provides packet
+encapsulation and decapsulation, but does not have a real medium access
+protocol. Frames are simply transmitted on the wireless channel without any
+delay. (There is no carrier sense, collision avoidance, or collision detection
+mechanism.) Full duplex operation (transmitting and receiving
+simultaneously, i.e. transceiver radio mode) is optional. 
+
+\nedtype{AckingMac} also provides an optional out-of-band acknowledgement
+mechanism (via C++ call, not an actual wirelessly sent frame), which is turned
+on by default.
+
+
+
+
+\subsection{Shortcutting}
+
+\nedtype{ShortcutInterface}, \nedtype{ShortcutMac}
+
+ShortcutMac: This module implements a simple shortcut to peer MAC protocol that
+completely bypasses the physical layer. Packets received from the upper layer protocols
+are never lost. The MAC protocol directly sends packets to the destination
+MAC protocol without any physical layer processing. Physical layer overhead
+is simply simulated by overhead bits, overhead transmission duration and
+a propagation delay.
+
+
+
+\section{Special-Purpose Network Interfaces}
+
+ 
+\subsection{Tunnelling}
+
+\nedtype{TunInterface} is a tunneling interface that can be directly 
+used by applications.
+
+\nedtype{Tun}: 
+
+An app can set up a TUN socket, and then it will receive the packets
+sent to the TUN interface. (Routing table must be set up so that packets
+are actually sent to the TUN interface.) The app can do anything with the
+packet, for example send it to a remote interface in an UDP or plain IPv4
+packet (tunnelling). Such app is \nedtype{TunnelApp}.
+
+\nedtype{TunnelApp} sets up a tunnel to a remote interface.
+protocol ("udp", "ipv4"), destinationAddress, destinationPort
+
+
+\subsection{Local Loopback}
+
+\nedtype{LoopbackInterface} provides local loopback within the network node.
+
+\subsection{External Interface}
+
+\nedtype{ExtInterface} represents a real-world interface, suitable for 
+hardware-in-the-loop simulations. External interfaces are explained in 
+chapter \ref{cha:emulation}.
 
 \section{Custom Network Interfaces}
 
