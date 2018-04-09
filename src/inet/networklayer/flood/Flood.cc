@@ -49,18 +49,16 @@ void Flood::initialize(int stage)
         nbDataPacketsForwarded = 0;
         nbHops = 0;
         headerLength = par("headerLength");
-        hasPar("defaultTtl") ? defaultTtl = par("defaultTtl") : defaultTtl = 5;
-        hasPar("plainFlooding") ? plainFlooding = par("plainFlooding")
-            : plainFlooding = true;
+        defaultTtl = par("defaultTtl");
+        plainFlooding = par("plainFlooding");
 
         EV << "defaultTtl = " << defaultTtl
            << " plainFlooding = " << plainFlooding << endl;
 
         if (plainFlooding) {
             //these parameters are only needed for plain flooding
-            bcMaxEntries = hasPar("bcMaxEntries") ? par("bcMaxEntries") : 30;
-
-            bcDelTime = hasPar("bcDelTime") ? par("bcDelTime") : 3.0;
+            bcMaxEntries = par("bcMaxEntries");
+            bcDelTime = par("bcDelTime");
             EV << "bcMaxEntries = " << bcMaxEntries
                << " bcDelTime = " << bcDelTime << endl;
         }
