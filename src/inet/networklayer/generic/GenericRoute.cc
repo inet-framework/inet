@@ -48,6 +48,8 @@ std::string GenericRoute::str() const
     out << "  ";
     out << (nextHop.isUnspecified() ? "DIRECT" : "REMOTE");
     out << " " << IRoute::sourceTypeName(sourceType);
+    if (protocolData)
+        out << " " << protocolData->str();
 
     return out.str();
 }

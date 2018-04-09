@@ -25,9 +25,6 @@
 
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
-#ifdef WITH_AODV
-#include "inet/routing/aodv/AodvRouteData.h"
-#endif // ifdef WITH_AODV
 
 namespace inet {
 
@@ -69,12 +66,8 @@ std::string Ipv4Route::str() const
     out << "  ";
     out << (gateway.isUnspecified() ? "DIRECT" : "REMOTE");
     out << " " << IRoute::sourceTypeName(sourceType);
-
-#ifdef WITH_AODV
-    if (auto *data = dynamic_cast<aodv::AodvRouteData *>(protocolData)) {
-        out << data;
-    }
-#endif // ifdef WITH_AODV
+    if (protocolData)
+        out << " " << protocolData->str();
     return out.str();
 }
 

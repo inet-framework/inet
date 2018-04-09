@@ -34,6 +34,11 @@ std::string Ipv6Route::str() const
     out << " " << IRoute::sourceTypeName(getSourceType());
     if (getExpiryTime() > 0)
         out << " exp:" << getExpiryTime();
+    out << "  ";
+    out << (_nextHop.isUnspecified() ? "DIRECT" : "REMOTE");
+    out << " " << IRoute::sourceTypeName(_sourceType);
+    if (_protocolData)
+        out << " " << _protocolData->str();
     return out.str();
 }
 
