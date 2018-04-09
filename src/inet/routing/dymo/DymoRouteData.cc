@@ -32,7 +32,17 @@ DymoRouteData::DymoRouteData()
     metricType = HOP_COUNT;
 }
 
-} // namespace dymo
+std::string DymoRouteData::str() const
+{
+    std::ostringstream out;
+    out << "isBroken = " << getBroken()
+        << ", sequenceNumber = " << getSequenceNumber()
+        << ", lastUsed = " << getLastUsed()
+        << ", expirationTime = " << getExpirationTime()
+        << ", metricType = " << getMetricType();
+    return out.str();
+};
 
+} // namespace dymo
 } // namespace inet
 

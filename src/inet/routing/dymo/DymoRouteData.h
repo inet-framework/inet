@@ -25,7 +25,6 @@
 #include "inet/routing/dymo/Dymo_m.h"
 
 namespace inet {
-
 namespace dymo {
 
 /**
@@ -58,10 +57,11 @@ class INET_API DymoRouteData : public cObject
 
     DymoMetricType getMetricType() const { return metricType; }
     void setMetricType(DymoMetricType metricType) { this->metricType = metricType; }
+
+    virtual std::string str() const;
 };
 
 } // namespace dymo
-
 } // namespace inet
 
 #endif // ifndef __INET_DYMOROUTEDATA_H
