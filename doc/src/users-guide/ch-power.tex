@@ -1,10 +1,10 @@
-\chapter{The Power Model}
+\chapter{Modeling Power Consumption}
 \label{cha:power}
 
 \section{Overview}
 
 Modeling power consumption becomes more and more important with the increasing
-number of embedded devices and the upcoming Internet of things. Mobile personal
+number of embedded devices and the upcoming Internet of Things. Mobile personal
 medical devices, large scale wireless environment monitoring devices, electric
 vehicles, solar panels, low-power wireless sensors, etc. require paying special
 attention to power consumption. The high fidelity simulation of power
@@ -22,58 +22,102 @@ model consists of the following components:
   \item temporary energy storage models
 \end{itemize}
 
+The power model elements fall into two categories, abbreviated with \ttt{Ep}
+and \ttt{Cc} as part of their names: 
+
+\begin{itemize}
+  \item \ttt{Ep} models are simpler, and deal with energy and power quantities.
+  \item \ttt{Cc} models are more realistic, and deal with charge, current, and voltage quantities.
+\end{itemize}
+
 The following sections provide a brief overview of the power model.
 
 \section{Energy Consumer Models}
 
-These models describe the energy consumption of devices over time. For example,
-a radio consumes energy when it transmits or receives signals, or a CPU consumes
-energy when the network layer processes packets, or a display consumes energy
-when it's turned on, etc. Energy consumers connect to an energy storage that
-provides them with the required energy.
+Energy consumer models describe the energy consumption of devices over time. 
+For example, a transceiver consumes energy when it transmits or
+receives signals, a CPU consumes energy when the network protocol routes
+packets, and a display consumes energy when it's turned on.
 
-The physical layer provides a \nedtype{StateBasedEnergyConsumer} module that 
-implements a simple radio energy consumption model. This model determines the
-current power consumption of the radio using module parameters for each valid
-combination of the radio mode, the transmitter state and the receiver state.
+In INET, an energy consumer model is an OMNeT++ simple module that implements
+the energy consumption of software processes or hardware devices over time.
+Its main purpose is to provide the power or current consumption for the
+current simulation time. Most often energy consumers are included as
+submodules in the compound module of the hardware devices or software
+components.
 
-In order to support testing energy storage models a simple energy consumer model
-is implemented in the \nedtype{AlternatingEnergyConsumer} module. This energy
-consumer model alternates between two modes called consumption mode and sleep
-mode. In consumption mode it consumes a randomly selected constant power for a
-random time interval. In sleep mode it doesn't consume any energy for another
-random time interval.
- 
+INET provides only a few built-in energy consumer models:
+
+\begin{itemize}
+        \item \nedtype{AlternatingEpEnergyGenerator} is a trivial energy/power based statistical energy consumer model example.
+        \item \nedtype{StateBasedEpEnergyConsumer} is a transceiver energy consumer model based on the radio mode and transmission/reception states.
+\end{itemize}
+
+In order to simulate power consumption in a wireless network, the energy
+consumer model type must be configured for the transceivers. The following
+example demonstrates how to configure the power consumption parameters for
+a transceiver energy consumer model:
+
+\inisnippet{EnergyConsumerConfigurationExample}{Energy consumer configuration example}
+
+
 \section{Energy Generator Models}
 
-These models describe the energy generation of devices over time. A solar panel,
-for example, produces energy based on time, the panel's position on the globe,
-its orientation towards the sun and the actual weather conditions. Energy
-generators connect to an energy storage that absorbs the generated energy. 
+Energy generator models describe the energy generation of devices over time. 
+A solar panel, for example, produces energy based on time, the panel's 
+position on the globe, its orientation towards the sun and the actual weather 
+conditions. Energy generators connect to an energy storage that absorbs the 
+generated energy. 
 
-In order to support testing energy storage models a simple energy generator
-model is implemented in the \nedtype{AlternatingEnergyGenerator} module.
-This energy generator model alternates between two modes called generation mode
-and sleep mode. In generation mode it generates a randomly selected constant
-power for a random time interval. In sleep mode it doesn't generate any energy
-for another random time interval.
- 
+In INET, an energy generator model is an OMNeT++ simple module implementing
+the energy generation of a hardware device using a physical phenomena over
+time. Its main purpose is to provide the power or current generation for
+the current simulation time. Most often energy generation models are
+included as submodules in network nodes.
+
+INET provides only one trivial energy/power based statistical energy
+generator model called \nedtype{AlternatingEpEnergyGenerator}. The following
+example shows how to configure its power generation parameters:
+
+\inisnippet{EnergyGeneratorConfigurationExample}{Energy generator configuration example}
+
 \section{Energy Storage Models}
 
-These models describe devices that absorb energy produced by generators, and
-provide energy for consumers. For example, an electrochemical battery in a
+Electronic devices which are not connected to external power source must contain 
+some component to store energy. For example, an electrochemical battery in a
 mobile phone provides energy for its display, its CPU, and its communication
 devices. It might also absorb energy produced by a solar installed on its
 display, or by a portable charger plugged into the wall socket.
 
-The \nedtype{SimpleEnergyStorage} implements an energy storage model that is
-similar to a battery. It computes its residual capacity by integrating the
-difference between the total absorbed power and the total provided power over
-time. It can initiate node shutdown when the residual capacity drops below a
-configured threshold. It can also initiate node start when the residual capacity
-raises above another configured threshold. Although this model is similar to a
-real word battery it lacks some important properties such memory effect,
-self-discharge, overcharging, temperature dependence, and so on.
+In INET, an energy storage model is an OMNeT++ simple module which models
+the physical phenomena that is used to store energy produced by generators
+and provide energy for consumers. Its main purpose is to compute the amount
+of available energy or charge at the current simulation time. It maintains
+a set of connected energy consumers and energy generators, their respective
+total power consumption and total power generation.
+
+INET contains a few built-in energy storage models:
+
+\begin{itemize}
+        \item \nedtype{IdealEpEnergyStorage} is an idealistic model with infinite energy capacity and infinite power flow.
+        \item \nedtype{SimpleEpEnergyStorage} is a non-trivial model integrating the difference between the total consumed power and the total generated power over time.
+        \item \nedtype{SimpleCcBattery} is a more realistic charge/current based battery model using a charge independent ideal voltage source and internal resistance.
+\end{itemize}
+
+The following example shows how to configure a simple energy storage model:
+
+\inisnippet{EnergyStorageConfigurationExample}{Energy storage configuration example}
+
+\section{Energy Management Models}
+
+% Why energy management models are needed?
+% The energy management models monitors an energy storage, estimates its state, and controls the consumers and generators to protect the energy storage from operating outside its safe operating area.
+
+\nedtype{SimpleEpEnergyManagement}
+
+\inisnippet{EnergyManagementConfigurationExample}{Energy management configuration example}
+
+
 
 %%% Local Variables:
 %%% mode: latex
