@@ -217,14 +217,19 @@ give an overview of the wireless interfaces available in INET.
 
 \subsection{Generic Wireless Interface}
 
-A generic implementation of \nedtype{IWirelessInterface} is 
-\nedtype{WirelessInterface}, where the type of the MAC protocol is a parameter.
+The \nedtype{WirelessInterface} compound module is a generic implementation
+of \nedtype{IWirelessInterface}. In this network interface, the types of the
+MAC protocol and the PHY layer (the radio) are parameters:
+
+\begin{ned}
+mac: <macType> like IMacProtocol;
+radio: <radioType> like IRadio if radioType != "";
+\end{ned}
+
 There are specialized versions of \nedtype{WirelessInterface} where 
-the MAC protocol is fixed to a particular value; one example is 
-\nedtype{BMacInterface}.
-
-TODO radio is configrable!!!!
-
+the MAC and the radio modules are fixed to a particular value. 
+One example is \nedtype{BMacInterface}, which contains a \nedtype{BMac}
+and an \nedtype{ApskRadio}.
 
 \subsection{IEEE 802.11}
 
@@ -258,62 +263,58 @@ the MAC type set to \nedtype{CsmaCaMac}.
 
 \subsection{Acking MAC}
 
-\nedtype{AckingWirelessInterface} is a highly abstracted wireless
-NIC that consists of a unit disk radio and a trivial MAC protocol. It offers
-simplicity for scenarios where Layer 1 and 2 effects can be completely ignored, 
-for example testing the basic functionality of a wireless ad-hoc routing protocol.
+Not every simulation requires a detailed simulation of the lower layers.
+\nedtype{AckingWirelessInterface} is a highly abstracted wireless interface 
+that offers simplicity for scenarios where Layer 1 and 2 effects can be 
+completely ignored, for example testing the basic functionality of a 
+wireless ad-hoc routing protocol.
 
-The most important parameter this model accepts is the transmission range.
-When a radio transmits a frame, all other radios within transmission range
-will receive the frame correctly, and radios that are out of range will not be
-affected at all.
+\nedtype{AckingWirelessInterface} is a \nedtype{WirelessInterface} 
+parameterized to contain a unit disk radio (\nedtype{UnitDiskRadio})
+and a trivial MAC protocol (\nedtype{AckingMac}). 
 
-\nedtype{AckingMac} implements a trivial MAC protocol. It provides packet
-encapsulation and decapsulation, but does not have a real medium access
-protocol. Frames are simply transmitted on the wireless channel without any
-delay. (There is no carrier sense, collision avoidance, or collision detection
-mechanism.) Full duplex operation (transmitting and receiving
-simultaneously, i.e. transceiver radio mode) is optional. 
+The most important parameter \nedtype{UnitDiskRadio} accepts is the 
+transmission range. When a radio transmits a frame, all other radios 
+within transmission range will receive the frame correctly, 
+and radios that are out of range will not be affected at all. 
+Interference modeling (collisions) is optional.
 
-\nedtype{AckingMac} also provides an optional out-of-band acknowledgement
-mechanism (via C++ call, not an actual wirelessly sent frame), which is turned
-on by default.
+\nedtype{AckingMac} implements a trivial MAC protocol that has packet
+encapsulation and decapsulation, but no real medium access protocol. 
+Frames are simply transmitted on the wireless channel as soon as the
+transmitter becomes idle. (There is no carrier sense, collision avoidance, 
+or collison detection.) \nedtype{AckingMac} also provides an optional 
+out-of-band acknowledgement mechanism (using C++ function calls, 
+not actual wirelessly sent frames), which is turned on by default.
 
+\subsection{Shortcut}
 
+\nedtype{ShortcutMac} implements error-free ``teleportation'' of packets 
+to the peer MAC entity, with some delay computed from a transmission 
+duration and a propagation delay. The physical layer is completely bypassed.
+ The corresponding network interface type, \nedtype{ShortcutInterface},
+ does not even have a radio model.
 
-
-\subsection{Shortcutting}
-
-\nedtype{ShortcutInterface}, \nedtype{ShortcutMac}
-
-ShortcutMac: This module implements a simple shortcut to peer MAC protocol that
-completely bypasses the physical layer. Packets received from the upper layer protocols
-are never lost. The MAC protocol directly sends packets to the destination
-MAC protocol without any physical layer processing. Physical layer overhead
-is simply simulated by overhead bits, overhead transmission duration and
-a propagation delay.
-
-
+\nedtype{ShortcutInterface} is useful for modeling wireless networks
+where full connectivity is assumed, and Layer 1 and Layer 2 effects
+can be completely ignored. 
 
 \section{Special-Purpose Network Interfaces}
 
  
 \subsection{Tunnelling}
 
-\nedtype{TunInterface} is a tunneling interface that can be directly 
-used by applications.
+\nedtype{TunInterface} is a virtual network interface be used 
+for creating tunnels, but it is more powerful than that.
+It lets an application-layer module capture packets sent to 
+the TUN interface and do whatever it pleases with it (including
+sending it to a peer entity in an UDP or plain IPv4 packet.)
 
-\nedtype{Tun}: 
+To set up a tunnel, add an instance of \nedtype{TunnelApp} to 
+the node, and specify the protocol (IPv4 or UDP) and the remote
+endpoint of the tunnel (address and port) in parameters. 
 
-An app can set up a TUN socket, and then it will receive the packets
-sent to the TUN interface. (Routing table must be set up so that packets
-are actually sent to the TUN interface.) The app can do anything with the
-packet, for example send it to a remote interface in an UDP or plain IPv4
-packet (tunnelling). Such app is \nedtype{TunnelApp}.
-
-\nedtype{TunnelApp} sets up a tunnel to a remote interface.
-protocol ("udp", "ipv4"), destinationAddress, destinationPort
-
+TODO example: see examples/inet/tunnel
 
 \subsection{Local Loopback}
 
