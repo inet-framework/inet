@@ -21,14 +21,15 @@
 namespace inet {
 namespace aodv {
 
-std::ostream& operator<<(std::ostream& out, const AodvRouteData *data)
+std::string AodvRouteData::str() const
 {
-    out << " isActive = " << data->isActive()
-        << ", hasValidDestNum = " << data->hasValidDestNum()
-        << ", destNum = " << data->getDestSeqNum()
-        << ", lifetime = " << data->getLifeTime();
+    std::ostringstream out;
+    out << "isActive = " << isActive()
+        << ", hasValidDestNum = " << hasValidDestNum()
+        << ", destNum = " << getDestSeqNum()
+        << ", lifetime = " << getLifeTime();
 
-    const std::set<L3Address>& preList = data->getPrecursorList();
+    const std::set<L3Address>& preList = getPrecursorList();
 
     if (!preList.empty()) {
         out << ", precursor list: ";
@@ -37,7 +38,7 @@ std::ostream& operator<<(std::ostream& out, const AodvRouteData *data)
         for (++iter; iter != preList.end(); ++iter)
             out << "; " << *iter;
     }
-    return out;
+    return out.str();
 };
 
 } // namespace aodv
