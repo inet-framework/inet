@@ -37,29 +37,93 @@ void Ieee80211MacProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Pro
         if (auto twoAddressHeader = dynamicPtrCast<const Ieee80211TwoAddressHeader>(chunk))
             context.sourceColumn << twoAddressHeader->getTransmitterAddress();
         switch (macHeader->getType()) {
+            case ST_ASSOCIATIONREQUEST:
+                context.infoColumn << " assoc req";    //TODO
+                break;
+
+            case ST_ASSOCIATIONRESPONSE:
+                context.infoColumn << " assoc resp";    //TODO
+                break;
+
+            case ST_REASSOCIATIONREQUEST:
+                context.infoColumn << " reassoc req";    //TODO
+                break;
+
+            case ST_REASSOCIATIONRESPONSE:
+                context.infoColumn << " reassoc resp";    //TODO
+                break;
+
+            case ST_PROBEREQUEST:
+                context.infoColumn << " probe request";    //TODO
+                break;
+
+            case ST_PROBERESPONSE:
+                context.infoColumn << " probe response";    //TODO
+                break;
+
+            case ST_BEACON:
+                context.infoColumn << "beacon";    //TODO
+                break;
+
+            case ST_ATIM:
+                context.infoColumn << " atim";    //TODO
+                break;
+
+            case ST_DISASSOCIATION:
+                context.infoColumn << " disassoc";    //TODO
+                break;
+
+            case ST_AUTHENTICATION:
+                context.infoColumn << " auth";    //TODO
+                break;
+
+            case ST_DEAUTHENTICATION:
+                context.infoColumn << " deauth";    //TODO
+                break;
+
+            case ST_ACTION:
+                context.infoColumn << " action";    //TODO
+                break;
+
+            case ST_NOACKACTION:
+                context.infoColumn << " noackaction";    //TODO
+                break;
+
+            case ST_PSPOLL:
+                context.infoColumn << " pspoll";    //TODO
+            break;
+
             case ST_RTS: {
                 context.infoColumn << "RTS";
                 break;
             }
             case ST_CTS:
-                context.infoColumn << "CTS";
+                context.infoColumn << "CTS" << macHeader->getReceiverAddress();
                 break;
 
             case ST_ACK:
-                context.infoColumn << "ACK";
+                context.infoColumn << "ACK" << macHeader->getReceiverAddress();
                 break;
 
             case ST_BLOCKACK_REQ:
-                context.infoColumn << "BlockAckReq";
+                context.infoColumn << "BlockAckReq";    //TODO
                 break;
 
             case ST_BLOCKACK:
-                context.infoColumn << "BlockAck";
+                context.infoColumn << "BlockAck";    //TODO
                 break;
 
             case ST_DATA:
             case ST_DATA_WITH_QOS:
-                context.infoColumn << "DATA";
+                context.infoColumn << "DATA";    //TODO
+                break;
+
+            case ST_LBMS_REQUEST:
+                context.infoColumn << " lbms req";    //TODO
+                break;
+
+            case ST_LBMS_REPORT:
+                context.infoColumn << " lbms report";    //TODO
                 break;
 
             default:
