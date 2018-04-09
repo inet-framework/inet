@@ -12,15 +12,15 @@
 /examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 0,                 10s,             343c-8af6/tplx, PASS, wireless adhoc
 /examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 1,                 10s,             637f-b7b2/tplx, PASS, wireless adhoc
 
-/examples/aodv/,                     -f omnetpp.ini -c IPv4SlowMobility -r 0,          50s,          c77e-f40f/tplx, PASS, wireless adhoc
+/examples/aodv/,                     -f omnetpp.ini -c IPv4SlowMobility -r 0,          50s,          86e6-ec78/tplx, PASS, wireless adhoc
 /examples/aodv/,                     -f omnetpp.ini -c IPv4ModerateFastMobility -r 0,  50s,          e91a-cd0b/tplx, PASS, wireless adhoc
-/examples/aodv/,                     -f omnetpp.ini -c IPv4FastMobility -r 0,          50s,          5502-71c2/tplx, PASS, wireless adhoc
+/examples/aodv/,                     -f omnetpp.ini -c IPv4FastMobility -r 0,          50s,          2fe3-4a2f/tplx, PASS, wireless adhoc
 /examples/aodv/,                     -f omnetpp.ini -c Static -r 0,                    50s,          7569-0a49/tplx, PASS, wireless adhoc
 /examples/aodv/,                     -f omnetpp.ini -c Dynamic -r 0,                   60s,          d54e-ce9d/tplx, PASS, wireless adhoc
 /examples/aodv/,                     -f omnetpp.ini -c MoreDynamic -r 0,              100s,          4227-2378/tplx, PASS, wireless adhoc
 /examples/aodv/,                     -f omnetpp.ini -c SimpleRREQ -r 0,               100s,          482c-8649/tplx, PASS, wireless adhoc
-/examples/aodv/,                     -f omnetpp.ini -c SimpleRREQ2 -r 0,              100s,          941d-cb44/tplx, PASS, wireless adhoc
-/examples/aodv/,                     -f omnetpp.ini -c SimpleLifecycle -r 0,          100s,          0144-3103/tplx, PASS, wireless adhoc
+/examples/aodv/,                     -f omnetpp.ini -c SimpleRREQ2 -r 0,              100s,          b6b9-5da7/tplx, PASS, wireless adhoc
+/examples/aodv/,                     -f omnetpp.ini -c SimpleLifecycle -r 0,          100s,          c45d-d69d/tplx, PASS, wireless adhoc
 /examples/aodv/,                     -f omnetpp.ini -c ShortestPath -r 0,             100s,          e7eb-f942/tplx, PASS, wireless adhoc
 
 /examples/bgpv4/Bgp2RoutersInAS/,    -f omnetpp.ini -c config1 -r 0,                1000s,           d734-e4c1/tplx, PASS,
@@ -388,10 +388,10 @@
 /examples/mpls/testte_routing/,      -f omnetpp.ini -c General -r 0,                10s,             d923-66a0/tplx, PASS,
 /examples/mpls/testte_tunnel/,       -f omnetpp.ini -c General -r 0,                50s,             85d9-b803/tplx, PASS,
 
-/examples/neighborcache/,            -f omnetpp.ini -c WithoutNeighborCache -r 0,      100s,         e96f-e243/tplx, PASS, wireless
-/examples/neighborcache/,            -f omnetpp.ini -c QuadTreeNeighborCache -r 0,     100s,         67c6-79f3/tplx, PASS, wireless
-/examples/neighborcache/,            -f omnetpp.ini -c NeighborListNeighborCache -r 0, 100s,         6e8e-7e84/tplx, PASS, wireless
-/examples/neighborcache/,            -f omnetpp.ini -c GridNeighborCache -r 0,         100s,         8937-a44d/tplx, PASS, wireless
+/examples/neighborcache/,            -f omnetpp.ini -c WithoutNeighborCache -r 0,      100s,         308e-105f/tplx, PASS, wireless
+/examples/neighborcache/,            -f omnetpp.ini -c QuadTreeNeighborCache -r 0,     100s,         38e3-8760/tplx, PASS, wireless
+/examples/neighborcache/,            -f omnetpp.ini -c NeighborListNeighborCache -r 0, 100s,         b403-2fa2/tplx, PASS, wireless
+/examples/neighborcache/,            -f omnetpp.ini -c GridNeighborCache -r 0,         100s,         57dc-aa52/tplx, PASS, wireless
 
 /examples/objectcache/,              -f omnetpp.ini -c WithoutCache -r 0,           20s,             778c-aec3/tplx, PASS, wireless
 /examples/objectcache/,              -f omnetpp.ini -c GridObjectCache -r 0,        20s,             778c-aec3/tplx, PASS, wireless
