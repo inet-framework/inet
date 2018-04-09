@@ -97,7 +97,7 @@ void Aodv::initialize(int stage)
 
         expungeTimer = new cMessage("ExpungeTimer");
         counterTimer = new cMessage("CounterTimer");
-        rrepAckTimer = new cMessage("RREPACKTimer");
+        rrepAckTimer = new cMessage("RrepAckTimer");
         blacklistTimer = new cMessage("BlackListTimer");
 
         if (isOperational)
