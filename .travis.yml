@@ -18,7 +18,8 @@ cache:
     - $HOME/docker_ccache
 
 # This is not used directly by Travis (the name doesn't matter), we just reuse it in script: nodes.
-docker_command: &DOCKER_COMMAND docker run -ti --env TARGET_PLATFORM --env MODE --env TRAVIS_REPO_SLUG
+docker_command: &DOCKER_COMMAND travis_wait 30 sleep infinity &
+                  docker run -ti --env TARGET_PLATFORM --env MODE --env TRAVIS_REPO_SLUG
                   -v /home/travis/build/$TRAVIS_REPO_SLUG:/$TRAVIS_REPO_SLUG
                   -v $HOME/docker_ccache:/root/.ccache omnetpp/travis-inet:5.3p4-180321
                   /bin/bash /$TRAVIS_REPO_SLUG/_scripts/travis/travis-stage-$STAGE.sh $INNER_ARGS
