@@ -54,6 +54,17 @@ network WiredNetworkExample
 
 //!WirelessNetworkExample
 network WirelessNetworkExample
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: Ieee80211ScalarRadioMedium;
+        host1: WirelessHost { @display("p=200,100"); }
+        host2: WirelessHost { @display("p=500,100"); }
+        accessPoint: AccessPoint { @display("p=374,200"); }
+}
+//!End
+
+//!MobileAdhocNetworkExample
+network MobileAdhocNetworkExample
 {
     parameters:
         int numHosts; // number of nodes in the network

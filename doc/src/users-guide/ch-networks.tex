@@ -83,30 +83,34 @@ are not models of physical network nodes. They are necessary
 to model other aspects. Some of them are:
 
 \begin{itemize}
+  \item A \textit{radio medium} module such as \nedtype{Ieee80211RadioMedium},
+     \nedtype{ApskScalarRadioMedium} and \nedtype{UnitDiskRadioMedium} 
+     (there are a few of them) are a required component of wireless networks. 
+  \item \nedtype{PhysicalEnvironment} models the effect of the physical 
+     environment (i.e. obstacles) on radio signal propagation. It is an
+     optional component.
+  \item \textit{Configurators} such as \nedtype{Ipv4NetworkConfigurator},
+     \nedtype{L2NetworkConfigurator} and \nedtype{GenericNetworkConfigurator}
+     configure various aspects of the network. For example,  
+     \nedtype{Ipv4\-Network\-Configurator} assigns IP addresses 
+     to hosts and routers, and sets up static routing. It is used 
+     when modeling dynamic IP address assignment (e.g. via DHCP) or 
+     dynamic routing is not of importance. \nedtype{L2NetworkConfigurator} 
+     allows one to configure 802.1 LANs and provide STP/RSTP-related 
+     parameters such as link cost, port priority and the ``is-edge'' flag.
   \item \nedtype{ScenarioManager} allows scripted scenarios, such
      as timed failure and recovery of network nodes.
-  \item \nedtype{Ipv4NetworkConfigurator} assigns IP addresses 
-     to hosts and routers, and sets up static routing.
-\item \nedtype{XXXVisualizer} is ...
-\item \nedtype{Medium} is ...
-\item ...
-\item \nedtype{PhysicalEnvironment}
-\item \nedtype{L2NetworkConfigurator}
-\item \nedtype{MoBanCoordinator}
-\item \nedtype{GenericNetworkConfigurator}
-\item \nedtype{ApskLayeredScalarRadioMedium}
-\item \nedtype{IRadioMedium}
-\item \nedtype{Ieee80211LayeredScalarRadioMedium}
-\item \nedtype{Ieee80211DimensionalRadioMedium}
-\item \nedtype{Ieee80211ScalarRadioMedium}
-\item \nedtype{UnitDiskRadioMedium}
-\item \nedtype{IntegratedCanvasVisualizer}
-
+  \item \textit{Group coordinators} are needed for the operation of some 
+     group mobility mdels. For example, \nedtype{MoBanCoordinator} is 
+     the coordinator module for the MoBAN mobility model.
+  \item \textit{Visualizers} like \nedtype{PacketDropOsgVisualizer} provide
+     graphical rendering of some aspect of the simulation either in
+     2D (canvas) or 3D (using OSG or osgEarth). The usual choice is 
+     \nedtype{IntegratedVisualizer} which bundles together an instance 
+     of each specific visualizer type in a compound module.
 \end{itemize}
 
-TODO revise and extend list
-
-\section{Network Examples}
+\section{Typical Networks}
 
 \subsection{Wired Networks}
 
@@ -142,55 +146,42 @@ folder of the simulation for later analysis.
 
 \subsection{Wireless Networks}
 
-%TODO: AccessPoint, WirelessHost infrastructure mode
+TODO: AccessPoint, WirelessHost infrastructure mode
 
 Wireless network connections are not modeled with OMNeT++ connections due the
 dynamically changing nature of connectivity. For wireless networks, an
-additional module representing the transmission medium, is required to
+additional module, one that represents the transmission medium, is required to
 maintain connectivity information.
 
-Building a simple wireless network is somewhat different, because wireless
-nodes don't use OMNeT++ connections. In this case, the network contains an
-additional module which represents the transmission medium.
+TODO 
 
 \nedsnippet{WirelessNetworkExample}{Wireless network example}
 
-For the above network, the INI file configures node mobility using a
-stochastic model. In wireless simulations, some form of a mobility model is
-essential to provide positions for the transmission medium during the
-computation of signal propagation and path loss. In addition, each ad hoc
-node is configured to include a simple ping application.
+TODO adjust text: 
+
+In the above network, positions in the display strings provide 
+positions for the transmission medium during the computation of 
+signal propagation and path loss. 
+
+In addition, \ttt{host1} is configured to periodically send 
+\protocol{UDP} packets to \ttt{host2} over the AP.
 
 \inisnippet{WirelessNetworkConfigurationExample}{Wireless network configuration example}
 
-When the above simulation is run, each ad hoc node periodically sends an
-ICMP echo requests to the first node. This simulation runs indefinitely
-while it continuously prints the usual ping round trip time report on the
-standard output.
 
-\subsection{Ethernet Networks}
-
-%TODO: EtherHub, EtherBus, EtherSwitch, EtherHost
-
-\subsection{MPLS Networks}
-
-%TODO: LdpRouter, RsvpRouter
 
 \subsection{Mobile Ad hoc Networks}
 
-%TODO: AdhocHost, ManetRouter, AodvRouter, DymoRouter, GpsrRouter
+TODO commentary
 
-\subsection{Sensor Networks}
+\nedsnippet{MobileAdhocNetworkExample}{Mobile ad hoc network example}
 
-%TOOD: SensorNode, SensorGateway
+TODO
 
-\subsection{Virtual Private Networks}
+\inisnippet{MobileAdhocNetworkConfigurationExample}{Mobile ad hoc network configuration example}
 
-%TOOD: VpnIngressNode, VpnEgressNode
+TODO
 
-\subsection{Mixed Networks}
-
-%TODO: wired + wireless
 
 
 \section{Frequent Tasks (How To...)}
