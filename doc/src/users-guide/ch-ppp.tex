@@ -4,77 +4,37 @@
 
 \section{Overview}
 
-The INET Framework contains an implementation of the Point-to-Point Protocol
-as described in RFC1661 with the following limitations:
+For simulating wired point-to-point links, the INET Framework contains
+a minimal implementation of the PPP protocol and a corresponding network
+interface module. 
 
 \begin{itemize}
-\item There are no LCP messages for link configuration,
-link termination and link maintenance.
-The link can be configured by setting module parameters.
-\item PFC and ACFC are not supported, the PPP frame
-always contains the 1-byte Address and Control fields
-and a 2-byte Protocol field.
-\item PPP authentication is not supported
-\item Link quality monitoring protocols are not supported.
-\item There are no NCP messages, the network layer protocols are
-configured by other means.
+  \item \nedtype{Ppp} is a simple module that performs encapsulation
+    of network datagrams into PPP frames and decapsulation of
+    the incoming PPP frames. It can be connected to the network
+    layer directly or can be configured to get the outgoing messages
+    from an output queue. The module collects statistics about
+    the transmitted and dropped packages.
+  \item \nedtype{PppInterface} is a compound module that complements
+    the \nedtype{Ppp} module with an output queue. It implements
+    the \nedtype{IWiredInterface} interface. Input and output hooks 
+    can be configured for further processing of the network messages.
 \end{itemize}
 
-The modules of the PPP model can be found in the \nedtype{inet.linklayer.ppp}
-package:
+PPP (RFC 1661) is a complex protocol which, in addition to providing 
+a method for encapsulating multi-protocol datagrams, also contains 
+control protocols for establishing, configuring, and testing the data-link 
+connection (LCP) and for configuring different network-layer protocols (NCP). 
 
-\begin{description}
-\item[\nedtype{Ppp}] This simple module performs encapsulation
-of network datagrams into PPP frames and decapsulation of
-the incoming PPP frames. It can be connected to the network
-layer directly or can be configured to get the outgoing messages
-from an output queue. The module collects statistics about
-the transmitted and dropped packages.
+The INET implementation only covers encapsulation and decapsulation of 
+data into PPP frames. Control protocols, which do not have a significant
+effect on the links' capacity and latency during normal link operation,
+are not simulated. In addition, header field compressions (PFC and ACFC)
+are also bot supported, so a simulated PPP frame always contains 1-byte
+Address and Control fields and a 2-byte Protocol field. 
 
-\item[\nedtype{PppInterface}] is a compound module complementing
-the \nedtype{Ppp} module with an output queue. It implements
-the \nedtype{IWiredInterface} interface. Input and output hooks can be configured
-for further processing of the network messages.
 
-\end{description}
-
-\section{PPP frames}
-
-According to RFC1662 the PPP frames contain the following fields:
-
-\begin{bytefield}[bitheight=2\baselineskip]{40}
-\bitbox{8}{Flag \\ 01111110} &
-\bitbox{8}{Address \\ 11111111} &
-\bitbox{8}{Control \\ 00000011} \\
-\bitbox{8}{Protocol \\ 8/16 bits} &
-\bitbox{10}{Information \\ \textasteriskcentered } &
-\bitbox{8}{Padding \\ \textasteriskcentered } \\
-\bitbox{8}{FCS \\ 16/32 bits}
-\bitbox{8}{Flag \\ 01111110 } &
-\bitbox[ltb]{14}{Inter-frame Fill \\ or next Address}
-\end{bytefield}
-
-The corresponding message type in the INET framework is \msgtype{PppFrame}.
-It contains the Information field as an encapsulated \cppclass{cMessage}
-object. The Flag, Address and Control fields are omitted
-from \msgtype{PppFrame} because they are constants. The FCS field is
-omitted because no CRC computed during the simulation, the bit error
-attribute of the \cppclass{cMessage} used instead. The Protocol
-field is omitted because the protocol is determined from the class
-of the encapsulated message.
-
-The length of the PPP frame is equal to the length of the encapsulated
-datagram plus 7 bytes. This computation assumes that
-\begin{itemize}
-\item there is no inter-octet time fill, so only one Flag sequence
-needed per frame
-\item padding is not applied
-\item PFC and ACFC compression is not applied
-\item FCS is 16 bit
-\item no escaping was applied
-\end{itemize}
-
-\section{PPP module}
+\section{The PPP module}
 
 The PPP module receives packets from the upper layer in the \fvar{netwIn}
 gate, encapsulates them into \msgtype{PppFrame}s, and send it to the
@@ -105,19 +65,11 @@ The \fvar{mtu} of the entry can be specified by the
 \fpar{mtu} module parameter. The module checks the state of the physical link
 and updates the entry in the interface table.
 
+\section{PppInterface}
 
-When the simulation is executed with the graphical user interface
-the module displays useful statistics. If the link is operating,
-the datarate and number of received, sent and dropped messages
-show in the tooltip. When the link is broken, the number of dropped
-messages is displayed. The state of the module is indicated by the color
-of the module icon and the connection (yellow=transmitting).
-
-\section{PPPInterface module}
-
-The \nedtype{PppInterface} is a compound module implementing the \nedtype{IWiredInterface}
-interface. It contains a \nedtype{Ppp} module and a passive queue for the messages
-received from the network layer.
+\nedtype{PppInterface} is a compound module that implements the 
+\nedtype{IWiredInterface} interface. It contains a \nedtype{Ppp} 
+module and a passive queue for the messages received from the network layer.
 
 The queue type is specified by the \fpar{queueType} parameter.
 It can be set to \nedtype{NoQueue} or to a module type implementing
