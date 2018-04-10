@@ -14,7 +14,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-/*
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/packet/chunk/BitCountChunk.h"
@@ -112,23 +111,23 @@ void Mac::encapsulate(Packet *packet)
     header->setChunkLength(B(8)); // set chunk length to 8 bytes
     header->setLengthField(packet->getDataLength()); // set length field
     header->setTransmitterAddress(selfAddress); // set other header fields
-    packet->insertFront(header); // insert header into packet
+    packet->insertAtFront(header); // insert header into packet
     auto trailer = makeShared<MacTrailer>(); // create new trailer
     trailer->setChunkLength(B(4)); // set chunk length to 4 bytes
     trailer->setFcsMode(FCS_MODE_DECLARED); // set trailer fields
-    packet->insertBack(trailer); // insert trailer into packet
+    packet->insertAtBack(trailer); // insert trailer into packet
 }
 //!End
 
 //!PacketDecapsulationExample
 void Mac::decapsulate(Packet *packet)
 {
-    auto header = packet->popFront<MacHeader>(); // pop header from packet
+    auto header = packet->popAtFront<MacHeader>(); // pop header from packet
     auto lengthField = header->getLengthField();
     cout << header->getChunkLength() << endl; // print chunk length
     cout << lengthField << endl; // print header length field
     cout << header->getReceiverAddress() << endl; // print other header fields
-    auto trailer = packet->popBack<MacTrailer>(); // pop trailer from packet
+    auto trailer = packet->popAtBack<MacTrailer>(); // pop trailer from packet
     cout << trailer->getFcsMode() << endl; // print trailer fields
     assert(packet->getDataLength() == lengthField); // if the packet is correct
 }
@@ -143,11 +142,11 @@ vector<Packet *> *Mac::fragment(Packet *packet, vector<b>& sizes)
         auto fragment = new Packet("Fragment"); // header + data part + trailer
         auto header = makeShared<MacHeader>(); // create new header
         header->setFragmentOffset(offset); // set fragment offset for reassembly
-        fragment->insertFront(header); // insert header into fragment
+        fragment->insertAtFront(header); // insert header into fragment
         auto data = packet->peekAt(offset, size); // get data part from packet
-        fragment->insertBack(data); // insert data part into fragment
+        fragment->insertAtBack(data); // insert data part into fragment
         auto trailer = makeShared<MacTrailer>(); // create new trailer
-        fragment->insertBack(trailer); // insert trailer into fragment
+        fragment->insertAtBack(trailer); // insert trailer into fragment
         fragments->push_back(fragment); // collect fragment into result
         offset += size; // increment offset with size of data part
     }
@@ -160,9 +159,9 @@ Packet *Mac::defragment(vector<Packet *>& fragments)
 {
     auto packet = new Packet("Original"); // create new concatenated packet
     for (auto fragment : fragments) {
-        fragment->popFront<MacHeader>(); // pop header from fragment
-        fragment->popBack<MacTrailer>(); // pop trailer from fragment
-        packet->insertBack(fragment->peekData()); // concatenate fragment data
+        fragment->popAtFront<MacHeader>(); // pop header from fragment
+        fragment->popAtBack<MacTrailer>(); // pop trailer from fragment
+        packet->insertAtBack(fragment->peekData()); // concatenate fragment data
     }
     return packet;
 }
@@ -175,15 +174,15 @@ Packet *Mac::aggregate(vector<Packet *>& packets)
     for (auto packet : packets) { // for each received packet do
         auto header = makeShared<SubHeader>(); // create new subheader
         header->setLengthField(packet->getDataLength()); // set subframe length
-        aggregate->insertBack(header); // insert subheader into aggregate
+        aggregate->insertAtBack(header); // insert subheader into aggregate
         auto data = packet->peekData(); // get packet data
-        aggregate->insertBack(data); // insert data into aggregate
+        aggregate->insertAtBack(data); // insert data into aggregate
     }
     auto header = makeShared<MacHeader>(); // create new header
     header->setAggregate(true); // set aggregate flag
-    aggregate->insertFront(header); // insert header into aggregate
+    aggregate->insertAtFront(header); // insert header into aggregate
     auto trailer = makeShared<MacTrailer>(); // create new trailer
-    aggregate->insertBack(trailer); // insert trailer into aggregate
+    aggregate->insertAtBack(trailer); // insert trailer into aggregate
     return aggregate;
 }
 //!End
@@ -191,17 +190,17 @@ Packet *Mac::aggregate(vector<Packet *>& packets)
 //!PacketDisaggregationExample
 vector<Packet *> *Mac::disaggregate(Packet *aggregate)
 {
-    aggregate->popFront<MacHeader>(); // pop header from packet
-    aggregate->popBack<MacTrailer>(); // pop trailer from packet
+    aggregate->popAtFront<MacHeader>(); // pop header from packet
+    aggregate->popAtBack<MacTrailer>(); // pop trailer from packet
     vector<Packet *> *packets = new vector<Packet *>(); // result collection
-    b offset = aggregate->getHeaderPopOffset(); // start after header
-    while (offset != aggregate->getTrailerPopOffset()) { // up to trailer
+    b offset = aggregate->getFrontOffset(); // start after header
+    while (offset != aggregate->getBackOffset()) { // up to trailer
         auto header = aggregate->peekAt<SubHeader>(offset); // peek sub header
         offset += header->getChunkLength(); // increment with header length
         auto size = header->getLengthField(); // get length field from header
         auto data = aggregate->peekAt(offset, size); // peek following data part
         auto packet = new Packet("Original"); // create new packet
-        packet->insertBack(data); // insert data into packet
+        packet->insertAtBack(data); // insert data into packet
         packets->push_back(packet); // collect packet into result
         offset += size; // increment offset with data size
     }
@@ -242,7 +241,7 @@ const
 //!EmulationPacketSendingExample
 vector<uint8_t>& ExternalInterface::prepareToSend(Packet *packet)
 {
-    auto data = packet->peekAllBytes(); // convert to a sequence of bytes
+    auto data = packet->peekAllAsBytes(); // convert to a sequence of bytes
     return data->getBytes(); // actual bytes to send
 }
 //!End
@@ -284,11 +283,11 @@ Packet *TcpSendQueue::createSegment(b maxLength)
     auto packet = new Packet("Segment"); // create new segment
     auto header = makeShared<TcpHeader>(); // create new header
     header->setSequenceNumber(sequenceNumber); // store sequence number for reordering
-    packet->insertFront(header); // insert header into segment
+    packet->insertAtFront(header); // insert header into segment
     if (queue.getLength() < maxLength)
         maxLength = queue.getLength(); // reduce length if necessary
     auto data = queue.pop(maxLength); // pop requested amount of data
-    packet->insertBack(data); // insert data into segment
+    packet->insertAtBack(data); // insert data into segment
     sequenceNumber += data->getChunkLength(); // increase sequence number
     return packet;
 }
@@ -307,7 +306,7 @@ class TcpReceiveQueue
 
 void TcpReceiveQueue::processSegment(Packet *packet)
 {
-    auto header = packet->popFront<TcpHeader>(); // pop TCP header
+    auto header = packet->popAtFront<TcpHeader>(); // pop TCP header
     auto sequenceNumber = header->getSequenceNumber();
     auto data = packet->peekData(); // get all packet data
     buffer.replace(sequenceNumber, data); // overwrite data in buffer
@@ -340,7 +339,7 @@ class Ipv4Defragmentation
 
 void Ipv4Defragmentation::processDatagram(Packet *packet)
 {
-    auto header = packet->popFront<Ipv4Header>();
+    auto header = packet->popAtFront<Ipv4Header>();
     auto fragmentOffset = header->getFragmentOffset(); // determine offset
     auto data = packet->peekData();
     buffer.replace(fragmentOffset, data); // overwrite data in buffer
@@ -384,7 +383,7 @@ Packet *ErrorModel::corruptChunks(Packet *packet, double ber)
         auto hasErrors = hasProbabilisticError(length, ber); // decide randomly
         if (hasErrors) // if erroneous
            chunk->markIncorrect(); // set incorrect bit
-        corruptedPacket->insertBack(chunk); // append chunk to corrupt packet
+        corruptedPacket->insertAtBack(chunk); // append chunk to corrupt packet
         offset += chunk->getChunkLength(); // increment offset with chunk length
     }
     return corruptedPacket;
@@ -393,7 +392,7 @@ Packet *ErrorModel::corruptChunks(Packet *packet, double ber)
 Packet *ErrorModel::corruptBytes(Packet *packet, double ber)
 {
     vector<uint8_t> corruptedBytes; // bytes of corrupted packet
-    auto data = packet->peekAllBytes(); // data of original packet
+    auto data = packet->peekAllAsBytes(); // data of original packet
     for (auto byte : data->getBytes()) { // for each original byte do
         if (hasProbabilisticError(B(1), ber)) // if erroneous
             byte = ~byte; // invert byte (simplified corruption)
@@ -407,7 +406,7 @@ Packet *ErrorModel::corruptBytes(Packet *packet, double ber)
 Packet *ErrorModel::corruptBits(Packet *packet, double ber)
 {
     vector<bool> corruptedBits; // bits of corrupted packet
-    auto data = packet->peekAllBits(); // data of original packet
+    auto data = packet->peekAllAsBits(); // data of original packet
     for (auto bit : data->getBits()) { // for each original bit do
         if (hasProbabilisticError(b(1), ber)) // if erroneous
             bit = !bit; // flip bit
@@ -445,7 +444,7 @@ void TcpClientApp::send()
     auto creationTimeTag = data->addTag<CreationTimeTag>(); // add new tag
     creationTimeTag->setCreationTime(simTime()); // store current time
     auto packet = new Packet("Data"); // create new packet
-    packet->insertBack(data);
+    packet->insertAtBack(data);
     socket.send(packet); // send packet using TCP socket
 }
 
@@ -520,8 +519,8 @@ void chunkConcatenationExample()
 {
 //!ChunkConcatenationExample
     auto sequence = makeShared<SequenceChunk>(); // create empty sequence
-    sequence->insertBack(makeShared<UdpHeader>()); // append UDP header
-    sequence->insertBack(makeShared<ByteCountChunk>(B(10), 0)); // 10 bytes
+    sequence->insertAtBack(makeShared<UdpHeader>()); // append UDP header
+    sequence->insertAtBack(makeShared<ByteCountChunk>(B(10), 0)); // 10 bytes
 //!End
 }
 
@@ -537,8 +536,8 @@ void chunkSlicingExample()
 //{
 //!ChunkMergingExample
     auto sequence = makeShared<SequenceChunk>(); // create empty sequence
-    sequence->insertBack(firstHalf); // append first half
-    sequence->insertBack(secondHalf); // append second half
+    sequence->insertAtBack(firstHalf); // append first half
+    sequence->insertAtBack(secondHalf); // append second half
     auto merged = sequence->peek(B(0), B(8)); // automatically merge slices
 //!End
 //}
@@ -557,22 +556,24 @@ void packetConstructionExample()
     auto data = makeShared<ByteCountChunk>(B(1000));
     auto dataPacket = new Packet("DATA", data); // create new packet with data
     auto moreData = makeShared<ByteCountChunk>(B(1000));
-    dataPacket->insertBack(moreData); // insert more data at the end
+    dataPacket->insertAtBack(moreData); // insert more data at the end
     auto udpHeader = makeShared<UdpHeader>(); // create new UDP header
-    dataPacket->insertFront(udpHeader); // insert header into packet
+    dataPacket->insertAtFront(udpHeader); // insert header into packet
 //!End
+    delete emptyPacket;
 }
 
 void packetProcessingExample()
 {
     auto packet = new Packet();
 //!PacketProcessingExample
-    packet->popFront<MacHeader>(); // pop specific header from packet
+    packet->popAtFront<MacHeader>(); // pop specific header from packet
     auto data = packet->peekData(); // peek remaining data in packet
-    packet->popBack<MacTrailer>(); // pop specific trailer from packet
+    packet->popAtBack<MacTrailer>(); // pop specific trailer from packet
 //!End
 }
 
+/*
 void signalConstructionExample()
 {
     double duration = 0;
@@ -583,6 +584,7 @@ void signalConstructionExample()
     signal->encapsulate(packet);
 //!End
 }
+*/
 
 class PacketDissectorCallback : public PacketDissector::ICallback
 {
@@ -657,6 +659,34 @@ void App::tcpSocketUsageExample()
 //!End
 }
 
+static MacAddress MacAddress(const char *address)
+{
+    return MacAddress(address);
+}
+
+//!ModuleInitializationExample
+void Mac::initialize(int stage) // standard OMNeT++ API
+{
+    if (stage == INITSTAGE_LOCAL) // operations independent from other modules
+        selfAddress = MacAddress(par("address")); // store configured address
+    else if (stage == INITSTAGE_NETWORK_LAYER) // after physical before network
+        registerInterface(selfAddress); // register interface in InterfaceTable
+}
+//!End
+
+//!LifecycleOperationExample
+bool Mac::handleOperationStage
+    (LifecycleOperation *operation, int stage, IDoneCallback *callback)
+{
+    if (dynamic_cast<NodeStartOperation *>(operation))
+        handleNodeStart(stage, callback);
+    else if (dynamic_cast<NodeShutdownOperation *>(operation))
+        handleNodeShutdown(stage, callback);
+    return true;
+}
+//!End
+
+/*
 class Dcf {
   public:
     void channelGranted(IChannelAccess *channelAccess);
@@ -705,40 +735,13 @@ void Dcf::frameSequenceFinished()
 //!DcfOriginatorProcessTransmittedFrame
 void Dcf::originatorProcessTransmittedFrame(Packet *packet)
 {
-    auto transmittedHeader = packet->peekFront<Ieee80211MacHeader>();
+    auto transmittedHeader = packet->peekAtFront<Ieee80211MacHeader>();
     auto dataOrMgmtHeader = dynamicPtrCast<Ieee80211DataOrMgmtHeader>(transmittedHeader);
     if (dataOrMgmtHeader) {
         if (originatorAckPolicy->isAckNeeded(dataOrMgmtHeader)) {
             ackHandler->processTransmittedDataOrMgmtFrame(dataOrMgmtHeader);
         }
     }
-}
-//!End
-
-static MacAddress MacAddress(const char *address)
-{
-    return MacAddress(address);
-}
-
-//!ModuleInitializationExample
-void Mac::initialize(int stage) // standard OMNeT++ API
-{
-    if (stage == INITSTAGE_LOCAL) // operations independent from other modules
-        selfAddress = MacAddress(par("address")); // store configured address
-    else if (stage == INITSTAGE_NETWORK_LAYER) // after physical before network
-        registerInterface(selfAddress); // register interface in InterfaceTable
-}
-//!End
-
-//!LifecycleOperationExample
-bool Mac::handleOperationStage
-    (LifecycleOperation *operation, int stage, IDoneCallback *callback)
-{
-    if (dynamic_cast<NodeStartOperation *>(operation))
-        handleNodeStart(stage, callback);
-    else if (dynamic_cast<NodeShutdownOperation *>(operation))
-        handleNodeShutdown(stage, callback);
-    return true;
 }
 //!End
 
@@ -777,6 +780,7 @@ void Dcf::recipientProcessReceivedFrame(Packet *packet, Ptr<Ieee80211MacHeader>&
     }
 }
 //!End
+*/
 
 } // namespace inet
-*/
+

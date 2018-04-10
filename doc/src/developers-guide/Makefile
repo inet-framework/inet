@@ -10,7 +10,6 @@ DOT=dot
 
 pdf: *.tex $(PDFPICS) figures/*.png
 	pdflatex $(DOCNAME).tex
-	bibtex $(DOCNAME)
 	makeindex $(DOCNAME)
 	pdflatex $(DOCNAME).tex
 	pdflatex $(DOCNAME).tex
