@@ -29,6 +29,8 @@
 
 namespace inet {
 
+using namespace physicallayer;
+
 Define_Module(XMac);
 
 /**

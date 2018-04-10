@@ -33,8 +33,6 @@
 
 namespace inet {
 
-using namespace physicallayer;
-
 class MacPkt;
 
 /**
@@ -191,8 +189,8 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
     MacAddress address;    // MAC address
 
     /** @brief The radio. */
-    IRadio *radio;
-    IRadio::TransmissionState transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
+    physicallayer::IRadio *radio;
+    physicallayer::IRadio::TransmissionState transmissionState = physicallayer::IRadio::TRANSMISSION_STATE_UNDEFINED;
 
     int              txAttempts;
     /*@}*/
