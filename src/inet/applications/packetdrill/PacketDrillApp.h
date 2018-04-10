@@ -113,7 +113,7 @@ class INET_API PacketDrillApp : public TcpSessionApp, public ILifecycle
         uint16 peerWindow;
         uint16 peerInStreams;
         uint16 peerOutStreams;
-        SctpCookie *peerCookie;
+        sctp::SctpCookie *peerCookie;
         uint16 peerCookieLength;
         uint32 initPeerTsn;
         uint32 initLocalTsn;
@@ -174,17 +174,17 @@ class INET_API PacketDrillApp : public TcpSessionApp, public ILifecycle
 
         bool compareTcpHeader(const Ptr<const tcp::TcpHeader>& storedTcp, const Ptr<const tcp::TcpHeader>& liveTcp);
 
-        bool compareSctpPacket(const Ptr<const SctpHeader>& storedSctp, const Ptr<const SctpHeader>& liveSctp);
+        bool compareSctpPacket(const Ptr<const sctp::SctpHeader>& storedSctp, const Ptr<const sctp::SctpHeader>& liveSctp);
 
-        bool compareInitPacket(const SctpInitChunk* storedInitChunk, const SctpInitChunk* liveInitChunk);
+        bool compareInitPacket(const sctp::SctpInitChunk* storedInitChunk, const sctp::SctpInitChunk* liveInitChunk);
 
-        bool compareDataPacket(const SctpDataChunk* storedDataChunk, const SctpDataChunk* liveDataChunk);
+        bool compareDataPacket(const sctp::SctpDataChunk* storedDataChunk, const sctp::SctpDataChunk* liveDataChunk);
 
-        bool compareSackPacket(const SctpSackChunk* storedSackChunk, const SctpSackChunk* liveSackChunk);
+        bool compareSackPacket(const sctp::SctpSackChunk* storedSackChunk, const sctp::SctpSackChunk* liveSackChunk);
 
-        bool compareInitAckPacket(const SctpInitAckChunk* storedInitAckChunk, const SctpInitAckChunk* liveInitAckChunk);
+        bool compareInitAckPacket(const sctp::SctpInitAckChunk* storedInitAckChunk, const sctp::SctpInitAckChunk* liveInitAckChunk);
 
-        bool compareReconfigPacket(const SctpStreamResetChunk* storedReconfigChunk, const SctpStreamResetChunk* liveReconfigChunk);
+        bool compareReconfigPacket(const sctp::SctpStreamResetChunk* storedReconfigChunk, const sctp::SctpStreamResetChunk* liveReconfigChunk);
 
         int verifyTime(enum eventTime_t timeType,
             simtime_t script_usecs, simtime_t script_usecs_end,

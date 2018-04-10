@@ -39,6 +39,7 @@ namespace inet {
 
 Define_Module(PacketDrillApp);
 
+using namespace sctp;
 using namespace tcp;
 
 #define MSGKIND_START  0

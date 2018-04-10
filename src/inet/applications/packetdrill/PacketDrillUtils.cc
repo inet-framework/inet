@@ -30,6 +30,7 @@
 #include "PacketDrillUtils.h"
 
 namespace inet {
+using namespace sctp;
 
 /* A table of platform-specific string->int mappings. */
 struct int_symbol platform_symbols_table[] = {

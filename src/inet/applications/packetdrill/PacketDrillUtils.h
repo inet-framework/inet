@@ -32,8 +32,6 @@
 
 namespace inet {
 
-using namespace sctp;
-
 /* For tables mapping symbolic strace strings to the corresponding
  * integer values.
  */
@@ -719,15 +717,15 @@ class INET_API PacketDrillTcpOption : public cObject
 class INET_API PacketDrillSctpChunk : public cObject
 {
     public:
-        PacketDrillSctpChunk(uint8 type_, SctpChunk *sctpChunk);
+        PacketDrillSctpChunk(uint8 type_, sctp::SctpChunk *sctpChunk);
 
     private:
         uint8 type;
-        SctpChunk *chunk;
+        sctp::SctpChunk *chunk;
 
     public:
         uint8 getType() { return type; };
-        SctpChunk *getChunk() { return chunk; };
+        sctp::SctpChunk *getChunk() { return chunk; };
 };
 
 class INET_API PacketDrillSctpParameter : public cObject

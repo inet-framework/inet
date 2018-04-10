@@ -82,6 +82,7 @@
 
 
 using namespace inet;
+using namespace inet::sctp;
 
 /* This include of the bison-generated .h file must go last so that we
  * can first include all of the declarations on which it depends.
