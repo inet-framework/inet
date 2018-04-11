@@ -12,6 +12,7 @@
 %%\usepackage{sans}
 %%\usepackage{chancery}
 
+\usepackage[svgnames]{xcolor}	% for color text support
 \usepackage[T1]{fontenc}
 \usepackage[11pt]{moresize}
 \usepackage{setspace}
@@ -213,6 +214,10 @@
 \lstset{
     escapechar=`,
     basicstyle=\ttfamily,
+    identifierstyle=\color{Black},
+    stringstyle=\color{DarkBlue},
+    commentstyle=\color{SeaGreen},
+    keywordstyle=\bfseries\color{Purple},
     showstringspaces=false,
     frame=leftline,
     framesep=10pt,
