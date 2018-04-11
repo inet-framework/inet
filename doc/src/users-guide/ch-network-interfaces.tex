@@ -275,9 +275,10 @@ and a trivial MAC protocol (\nedtype{AckingMac}).
 
 The most important parameter \nedtype{UnitDiskRadio} accepts is the 
 transmission range. When a radio transmits a frame, all other radios 
-within transmission range will receive the frame correctly, 
+within transmission range are able to receive the frame correctly, 
 and radios that are out of range will not be affected at all. 
-Interference modeling (collisions) is optional.
+Interference modeling (collisions) is optional, and it is recommended
+to turn off with \nedtype{AckingMac}.
 
 \nedtype{AckingMac} implements a trivial MAC protocol that has packet
 encapsulation and decapsulation, but no real medium access protocol. 
@@ -286,14 +287,17 @@ transmitter becomes idle. (There is no carrier sense, collision avoidance,
 or collison detection.) \nedtype{AckingMac} also provides an optional 
 out-of-band acknowledgement mechanism (using C++ function calls, 
 not actual wirelessly sent frames), which is turned on by default.
+There is no retransmission: if an acknowledgement does not arrive
+after the first transmission of the packet, the MAC discards the
+packet and counts it as ``given up''. 
 
 \subsection{Shortcut}
 
 \nedtype{ShortcutMac} implements error-free ``teleportation'' of packets 
 to the peer MAC entity, with some delay computed from a transmission 
 duration and a propagation delay. The physical layer is completely bypassed.
- The corresponding network interface type, \nedtype{ShortcutInterface},
- does not even have a radio model.
+The corresponding network interface type, \nedtype{ShortcutInterface},
+does not even have a radio model.
 
 \nedtype{ShortcutInterface} is useful for modeling wireless networks
 where full connectivity is assumed, and Layer 1 and Layer 2 effects
@@ -304,7 +308,7 @@ can be completely ignored.
  
 \subsection{Tunnelling}
 
-\nedtype{TunInterface} is a virtual network interface be used 
+\nedtype{TunInterface} is a virtual network interface that can be used 
 for creating tunnels, but it is more powerful than that.
 It lets an application-layer module capture packets sent to 
 the TUN interface and do whatever it pleases with it (including
