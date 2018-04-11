@@ -513,7 +513,7 @@
                        inet.node.dymo
                       "
         extraSourceFolders = ""
-        compileFlags = ""
+        compileFlags = "-DWITH_DYMO"
         linkerFlags = ""
         />
     <feature
