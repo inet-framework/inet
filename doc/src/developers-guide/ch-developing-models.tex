@@ -147,9 +147,9 @@ simple PPP
 The INET Framework uses a number of C++ classes to represent various
 addresses in the network. These classes support initialization and
 assignment from binary and string representation of the address, and
-accessing the address in both forms. (Storage is in binary form). They also
+accessing the address in both forms. Storage is in binary form, and they also
 support the "unspecified" special value (and the \ffunc{isUnspecified()}
-method) that corresponds to the all-zeros address.
+method) that usually corresponds to the all-zeros address.
 
 \begin{itemize}
   \item \cppclass{MacAddress} represents a 48-bit IEEE 802 MAC address. The
@@ -166,7 +166,7 @@ method) that corresponds to the all-zeros address.
     IPv6 address. \cppclass{L3Address} is mainly used in the transport layer and above
     to abstract away network addresses. It can be assigned from both \cppclass{Ipv4Address}
     and \cppclass{Ipv6Address}, and can also parse string representations of both.
-    The \ffunc{getType()}, \ffunc{toIPv4()} and \ffunc{toIPv6()} methods can be used
+    The \ffunc{getType()}, \ffunc{toIpv4()} and \ffunc{toIpv6()} methods can be used
     to access the value.
 \end{itemize}
 
@@ -195,25 +195,39 @@ node lookup by L3 address
 
 \subsection{Encapsulating Packets}
 
-%TODO explain how INET packet representation supports encapsulation of packets, provide examples, etc.
+Many communication protocols work with simple packet encapsulation. They encapsulate packets with their own protocol specific headers and trailers at the sender node, and they decapsulate packets at the reciver node. The headers and trailers carry the information that is required to provide the protocol specific service.
+
+For example, when sending a packet, the Ethernet protocol encapsulates an IP datagram by prepending the packet with an Ethernet header, and also by appending the packet with an optional padding and an Ethernet FCS. The following example shows how a MAC protocol could encapsulate a packet:
 
 \cppsnippet{PacketEncapsulationExample}{Packet encapsulation example}
 
+When receiving a packet, the Ethernet protocol removes an Ethernet header and an Ethernet FCS from the received Ethernet frame, and passes the resulting IP datagram along. The following example shows how a MAC protocol could decapsulate a packet:
+
 \cppsnippet{PacketDecapsulationExample}{Packet decapsulation example}
+
+Although the \ffunc{popAtFront} and \ffunc{popAtBack} functions change the remaining unprocessed part of the packet, they don't have effect on the actual packet data.
 
 \subsection{Fragmenting Packets}
 
-%TODO explain how INET packet representation supports fragmentation of packets, provide examples, etc.
+Communication protocols often provide fragmentation to overcome various physical limits. They split packets into smaller pieces at the sender node to send them one-by-one, and they form the original packet at the receiver node.
+
+For example, the IEEE 802.11 protocol fragments packets to overcome the increasing probability of packet loss of large packets. The following example shows how a MAC protocol could fragment a packet:
 
 \cppsnippet{PacketFragmentationExample}{Packet fragmentation example}
+
+When receiving fragments, protocols need to collect the coherent fragments of the same packet until all fragments becomes available. The following example shows how a MAC protocol could form the original packet from a set of coherent fragments:
 
 \cppsnippet{PacketDefragmentationExample}{Packet defragmentation example}
 
 \subsection{Aggregating Packets}
 
-%TODO explain how INET packet representation supports aggregation of packets, provide examples, etc.
+Communication protocols often provide aggregation to better utilize the communication channel by reducing protocol overhead. They wait for several packets at the sender node to form a large aggregated packet to send at once. At the receiver node the aggregated packet is split into the original packets and they are passed along.
+
+For example, the IEEE 802.11 protocol aggregates packets for better channel utilization at both MSDU and MPDU levels. The following example shows a simplified version of how a MAC protocol could aggregate packets:
 
 \cppsnippet{PacketAggregationExample}{Packet aggregation example}
+
+The following example shows a simplified version of how a MAC protocol could disaggregate packets:
 
 \cppsnippet{PacketDisaggregationExample}{Packet disaggregation example}
 
