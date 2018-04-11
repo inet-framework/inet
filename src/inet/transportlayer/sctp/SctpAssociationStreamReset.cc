@@ -66,11 +66,13 @@ void SctpAssociation::checkStreamsToReset()
         if (state->localRequestType == RESET_OUTGOING || state->localRequestType == RESET_BOTH || state->peerRequestType == RESET_INCOMING) {
             state->streamsToReset.clear();
             std::list<uint16>::iterator it;
-            for (it = state->streamsPending.begin(); it != state->streamsPending.end(); it++) {
+            for (it = state->streamsPending.begin(); it != state->streamsPending.end(); ) {
                 if (getBytesInFlightOfStream(*it) == 0) {
                     state->streamsToReset.push_back(*it);
-                    state->streamsPending.erase(it);
+                    it = state->streamsPending.erase(it);
                 }
+                else
+                    ++it;
             }
         }
         if (!state->resetPending && state->resetRequested &&
