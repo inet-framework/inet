@@ -47,6 +47,8 @@ module AckingWirelessInterface like IWirelessInterface
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         *.energySourceModule = default(absPath(energySourceModule));
         **.bitrate = bitrate;
+        radio.receiver.ignoreInterference = true; // does not play well with AckingMac which has no retransmissions
+
     gates:
         input upperLayerIn;
         output upperLayerOut;
