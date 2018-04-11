@@ -504,7 +504,7 @@ void SctpAssociation::sendOutgoingRequestAndResponse(SctpIncomingSsnResetRequest
     if (PK(getPath(remoteAddr)->ResetTimer)->hasEncapsulatedPacket()) {
         PK(getPath(remoteAddr)->ResetTimer)->decapsulate();
     }
-    PK(getPath(remoteAddr)->ResetTimer)->encapsulate((cPacket *)rt);
+    PK(getPath(remoteAddr)->ResetTimer)->encapsulate(rt);
     startTimer(getPath(remoteAddr)->ResetTimer, getPath(remoteAddr)->pathRto);
 }
 

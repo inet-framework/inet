@@ -302,7 +302,7 @@ class SctpAddStreamsRequestParameter extends SctpParameter
     uint16 reserved = 0;
 }
 
-class SctpResetTimer extends cMessage
+class SctpResetTimer extends cPacket
 {
     uint32 inSN; //Stream Reset Response Sequence Number for Incoming Reset Request
     bool inAcked;   // false, when timer is running for the Reset Response Sequence Number, true otherwise
