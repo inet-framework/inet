@@ -5,16 +5,7 @@
 #
 
 MAKE="make MODE=debug"
-
-# Test if we are running on OMNeT++ 5.1 as we did not have the _dbg suffix for debug binaries on 5.1
-# (this can be removed if OMNeT++ 5.1 compatibility is no longer needed)
-#
-OMNETPP_51=$(grep "OMNETPP_VERSION = 5.1" $(opp_configfilepath))
-if [ -z $OMNETPP_51 ]; then
 DBG_SUFFIX="_dbg"
-else
-DBG_SUFFIX=""
-fi
 
 TESTFILES=$*
 if [ "x$TESTFILES" = "x" ]; then TESTFILES='*.test'; fi
