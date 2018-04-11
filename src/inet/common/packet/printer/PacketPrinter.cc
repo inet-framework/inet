@@ -116,8 +116,11 @@ void PacketPrinter::printMessage(std::ostream& stream, cMessage *message, const 
 {
     Context context;
     for (auto cpacket = dynamic_cast<cPacket *>(message); cpacket != nullptr; cpacket = cpacket->getEncapsulatedPacket()) {
-        if (auto signal = dynamic_cast<inet::physicallayer::Signal *>(cpacket))
+        if (false) {}
+#ifdef WITH_RADIO
+        else if (auto signal = dynamic_cast<inet::physicallayer::Signal *>(cpacket))
             printSignal(signal, options, context);
+#endif // WITH_RADIO
         else if (auto packet = dynamic_cast<Packet *>(cpacket))
             printPacket(packet, options, context);
         else
@@ -126,6 +129,7 @@ void PacketPrinter::printMessage(std::ostream& stream, cMessage *message, const 
     printContext(stream, options, context);
 }
 
+#ifdef WITH_RADIO
 void PacketPrinter::printSignal(std::ostream& stream, inet::physicallayer::Signal *signal) const
 {
     Options options;
@@ -144,6 +148,7 @@ void PacketPrinter::printSignal(inet::physicallayer::Signal *signal, const Optio
 {
     context.infoColumn << signal->str();
 }
+#endif // WITH_RADIO
 
 void PacketPrinter::printPacket(std::ostream& stream, Packet *packet) const
 {

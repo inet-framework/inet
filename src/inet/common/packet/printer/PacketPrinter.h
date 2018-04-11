@@ -18,7 +18,10 @@
 
 #include "inet/common/packet/dissector/PacketDissector.h"
 #include "inet/common/packet/printer/ProtocolPrinter.h"
+
+#ifdef WITH_RADIO
 #include "inet/physicallayer/common/packetlevel/Signal.h"
+#endif // WITH_RADIO
 
 namespace inet {
 
@@ -42,7 +45,9 @@ class INET_API PacketPrinter : public cMessagePrinter
     virtual bool isEnabledInfo(const Options *options, const Protocol *protocol) const;
     virtual const ProtocolPrinter& getProtocolPrinter(const Protocol *protocol) const;
     virtual void printContext(std::ostream& stream, const Options *options, Context& context) const;
+#ifdef WITH_RADIO
     virtual void printSignal(inet::physicallayer::Signal *signal, const Options *options, Context& context) const;
+#endif // WITH_RADIO
     virtual void printPacket(Packet *packet, const Options *options, Context& context) const;
     virtual void printPacketInsideOut(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, const Options *options, Context& context) const;
     virtual void printPacketLeftToRight(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, const Options *options, Context& context) const;
@@ -61,8 +66,10 @@ class INET_API PacketPrinter : public cMessagePrinter
     virtual void printMessage(std::ostream& stream, cMessage *message) const;
     virtual void printMessage(std::ostream& stream, cMessage *message, const Options *options) const override;
 
+#ifdef WITH_RADIO
     virtual void printSignal(std::ostream& stream, inet::physicallayer::Signal *signal) const;
     virtual void printSignal(std::ostream& stream, inet::physicallayer::Signal *signal, const Options *options) const;
+#endif // WITH_RADIO
 
     virtual void printPacket(std::ostream& stream, Packet *packet) const;
     virtual void printPacket(std::ostream& stream, Packet *packet, const Options *options) const;

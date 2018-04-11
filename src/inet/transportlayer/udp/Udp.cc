@@ -22,6 +22,7 @@
 #include "inet/transportlayer/udp/Udp.h"
 
 #include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/LayeredProtocolBase.h"
