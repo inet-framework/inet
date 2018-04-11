@@ -44,6 +44,9 @@ precompiled_*.h.*
 *.idx
 *.toc
 *.pdf
+*.ilg
+*.ind
+*.synctex.gz
 .buildlog*
 
 # ignore binary files
