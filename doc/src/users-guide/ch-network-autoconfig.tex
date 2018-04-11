@@ -5,7 +5,7 @@
 
 TODO: this describes static autoconfiguration of IPv4 networks
 
-TODO: also document L2Configurator
+\section{Configuring IPv4 Networks}
 
 An IPv4 network is composed of several nodes like hosts, routers,
 switches, hubs, Ethernet buses, or wireless access points.
@@ -29,7 +29,7 @@ supports both fully manual and fully automatic configuration. It
 can also be used with partially specified manual configurations,
 the configurator fills in the gaps automatically.
 
-The next section describes the usage of \nedtype{Ipv4NetworkConfigurator},
+The next section describes the usage of \nedtype{Ipv4NetworkConfigurator}.
 \nedtype{Ipv4FlatNetworkConfigurator} and old routing files are described
 in the following sections.
 
@@ -54,6 +54,7 @@ corresponding interface entry is named \ttt{ppp0}. This name can be used
 in the config file to refer to the interface.
 
 The configurator goes through the following steps:
+
 \begin{enumerate}
   \item  Builds a graph representing the network topology. The graph
      will have a vertex for every module that has a @node property (this
@@ -506,7 +507,7 @@ This list summarize the parameters of the \nedtype{IPv4NetorkConfigurator}:
     to speed up subsequent runs (network configurations)}
 \end{params}
 
-\subsection{Ipv4FlatNetworkConfigurator}
+\subsection{Ipv4FlatNetworkConfigurator (Legacy)}
 
 The \nedtype{Ipv4FlatNetworkConfigurator} module configures
 IP addresses and routes of IP nodes of a network.
@@ -516,8 +517,13 @@ routes are also generated from any node to any other
 node of the network. The Gateway (next hop) field of the routes
 is not filled in by these configurator, so it relies
 on proxy ARP if the network spans several LANs.
+It does not perform routing table optimization (i.e.
+merging similar routes into a single, more general route.)
 
-% no optimization of routing tables
+\begin{warning}
+\nedtype{Ipv4FlatNetworkConfigurator} is considered
+legacy, use do not use it for new projects.
+\end{warning}
 
 The \nedtype{Ipv4FlatNetworkConfigurator} module configures
 the network when it is initialized. The configuration
@@ -574,7 +580,7 @@ best matching route will be proportional to $n$.
 %       Different interfaces of a node should have different IP address.
 %       Broadcast capable interfaces should have a real netmast (not 255.255.255.255) to support subnet directed IP broadcasts.
 
-\subsection{Old routing files}
+\subsection{Routing Files (Legacy)}
 \label{subsec:routing_files}
 
 Routing files are files with \ttt{.irt} or \ttt{.mrt} extension,
@@ -584,6 +590,12 @@ to \nedtype{Ipv4RoutingTable} modules.
 Routing files may contain network interface configuration and static
 routes. Both are optional. Network interface entries in the file
 configure existing interfaces; static routes are added to the route table.
+
+\begin{warning}
+\nedtype{Routing files} are considered legacy, use do not use them for new
+projects. Their contents can be expressed in \nedtype{Ipv4NetworkConfigurator}
+config files.
+\end{warning}
 
 Interfaces themselves are represented in the simulation by modules
 (such as the PPP module). Modules automatically register themselves
@@ -700,6 +712,29 @@ interface.
 %       G = indirect/direct
 
 % TODO warn that multicast configuration has changed
+
+\section{Configuring Layer 2}
+
+\nedtype{L2Configurator}
+
+This module allows to configure network scenarios at layer 2.
+The ~Stp and ~Rstp related parameters such as link cost, port priority
+and the "is-edge" flag can be configured with XML files.
+
+This module is based on ~Ipv4NetworkConfigurator. The optional selector
+attributes: @hosts, @names, @towards, @among are also comes with this
+configurator and each of them behaves similarly to its ~Ipv4NetworkConfigurator equivalent.
+@ports selector added to configuring per-port parameters in Ieee8021dInterfaceData.
+
+The following example configures port 5 (if it exists) on all switches to cost 19 and
+priority 32768:
+<config>
+  <interface hosts='**' ports='5' cost='19' priority='32768'/>
+</config>
+
+For more information about the usage of the selector attributes see
+Ipv4NetworkConfigurator.
+
 
 
 %%% Local Variables:
