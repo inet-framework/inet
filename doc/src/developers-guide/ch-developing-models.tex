@@ -193,89 +193,236 @@ node lookup by L3 address
 
 \section{Working with Packets}
 
+The INET Packet API is designed to ease the implementation of protocols and
+applications by providing many useful components for the common tasks. In the
+following sections, we introduce some of these tasks, and give a glimpse with a
+few simplified examples into how they could be solved.
+
 \subsection{Encapsulating Packets}
 
-Many communication protocols work with simple packet encapsulation. They encapsulate packets with their own protocol specific headers and trailers at the sender node, and they decapsulate packets at the reciver node. The headers and trailers carry the information that is required to provide the protocol specific service.
+Many communication protocols work with simple packet encapsulation. They
+encapsulate packets with their own protocol specific headers and trailers at the
+sender node, and they decapsulate packets at the reciver node. The headers and
+trailers carry the information that is required to provide the protocol specific
+service.
 
-For example, when sending a packet, the Ethernet protocol encapsulates an IP datagram by prepending the packet with an Ethernet header, and also by appending the packet with an optional padding and an Ethernet FCS. The following example shows how a MAC protocol could encapsulate a packet:
+For example, when sending a packet, the Ethernet protocol encapsulates an IP
+datagram by prepending the packet with an Ethernet header, and also by appending
+the packet with an optional padding and an Ethernet FCS. The following example
+shows how a MAC protocol could encapsulate a packet:
 
 \cppsnippet{PacketEncapsulationExample}{Packet encapsulation example}
 
-When receiving a packet, the Ethernet protocol removes an Ethernet header and an Ethernet FCS from the received Ethernet frame, and passes the resulting IP datagram along. The following example shows how a MAC protocol could decapsulate a packet:
+When receiving a packet, the Ethernet protocol removes an Ethernet header and an
+Ethernet FCS from the received Ethernet frame, and passes the resulting IP
+datagram along. The following example shows how a MAC protocol could decapsulate
+a packet:
 
 \cppsnippet{PacketDecapsulationExample}{Packet decapsulation example}
 
-Although the \ffunc{popAtFront} and \ffunc{popAtBack} functions change the remaining unprocessed part of the packet, they don't have effect on the actual packet data.
+Although the \ffunc{popAtFront} and \ffunc{popAtBack} functions change the
+remaining unprocessed part of the packet, they don't have effect on the actual
+packet data. That is when the packet reaches high level protocol, it still
+contains all the received data.
 
 \subsection{Fragmenting Packets}
 
-Communication protocols often provide fragmentation to overcome various physical limits. They split packets into smaller pieces at the sender node to send them one-by-one, and they form the original packet at the receiver node.
+Communication protocols often provide fragmentation to overcome various physical
+limits (e.g. length limit, error rate). They split packets into smaller pieces
+at the sender node, which send them one-by-one. They form the original packet at
+the receiver node by combining the received fragments.
 
-For example, the IEEE 802.11 protocol fragments packets to overcome the increasing probability of packet loss of large packets. The following example shows how a MAC protocol could fragment a packet:
+For example, the IEEE 802.11 protocol fragments packets to overcome the
+increasing probability of packet loss of large packets. The following example
+shows how a MAC protocol could fragment a packet:
 
 \cppsnippet{PacketFragmentationExample}{Packet fragmentation example}
 
-When receiving fragments, protocols need to collect the coherent fragments of the same packet until all fragments becomes available. The following example shows how a MAC protocol could form the original packet from a set of coherent fragments:
+When receiving fragments, protocols need to collect the coherent fragments of
+the same packet until all fragments becomes available. The following example
+shows how a MAC protocol could form the original packet from a set of coherent
+fragments:
 
 \cppsnippet{PacketDefragmentationExample}{Packet defragmentation example}
 
 \subsection{Aggregating Packets}
 
-Communication protocols often provide aggregation to better utilize the communication channel by reducing protocol overhead. They wait for several packets at the sender node to form a large aggregated packet to send at once. At the receiver node the aggregated packet is split into the original packets and they are passed along.
+Communication protocols often provide aggregation to better utilize the
+communication channel by reducing protocol overhead. They wait for several
+packets to arrive at the sender node, then they form a large aggregated packet
+which is in turn sent at once. At the receiver node the aggregated packet is
+split into the original packets, and they are passed along.
 
-For example, the IEEE 802.11 protocol aggregates packets for better channel utilization at both MSDU and MPDU levels. The following example shows a simplified version of how a MAC protocol could aggregate packets:
+For example, the IEEE 802.11 protocol aggregates packets for better channel
+utilization at both MSDU and MPDU levels. The following example shows a version
+of how a MAC protocol could create an aggregate packet:
 
 \cppsnippet{PacketAggregationExample}{Packet aggregation example}
 
-The following example shows a simplified version of how a MAC protocol could disaggregate packets:
+The following example shows a version of how a MAC protocol could disaggregate a
+packet:
 
 \cppsnippet{PacketDisaggregationExample}{Packet disaggregation example}
 
 \subsection{Serializing Packets}
 
-%TODO explain how INET packet representation provides supports for serialization, provide examples, etc.
+In real communication systems packets are usually stored as a sequence of bytes
+directly in network byte order. In contrast, INET usually stores packets in
+small field based C++ classes (generated by the OMNeT++ MSG compiler) to ease
+debugging. In order to calculate checksums or to communicate with real hardware,
+all protocol specific parts must be serializable to a sequence of bytes.
+
+The protocol header serializers are separate classes from the actual protocol
+headers. They must be registered in the \cppclass{ChunkSerializerRegistry} in
+order to be used. The following example shows how a MAC protocol header could be
+serialized to a sequence of bytes:
 
 \cppsnippet{PacketSerializationExample}{Packet serialization example}
 
-\cppsnippet{PacketDeserializationExample}{Packet deserialization example}
+Deserialization is somewhat more complicated than serialization, because it must
+be prepared to handle incomplete or even incorrect data due to errors introduced
+by the network. The following example shows how a MAC protocol header could be
+deserialized from a sequence of bytes:
 
+\cppsnippet{PacketDeserializationExample}{Packet deserialization example}
 
 \subsection{Emulation Support}
 
-%TODO explain how INET packet representation provides supports for emulation, provide examples, etc.
+In order to be able to communicate with real hardware, packets must be converted
+to and from a sequence of bytes. The reason is that the programming interface of
+operating systems and external libraries work with sending and receiving raw
+data.
+
+All protocol headers and data chunks which are present in a packet must have a
+registered serializer to be able to create the raw sequence of bytes. Protocol
+modules must also be configured to either disable or compute checksums, because
+serializers cannot carry out the checksum calculation.
+
+The following example shows how a packet could be converted to a sequence of
+bytes to send through an external interface:
 
 \cppsnippet{EmulationPacketSendingExample}{Emulation packet sending example}
 
+The following example shows how a packet could be converted from a sequence of
+bytes when receiving from an external interface:
+
 \cppsnippet{EmulationPacketReceivingExample}{Emulation packet receiving example}
+
+In INET, all protocols automatically support hardware emulation due to the dual
+representation of packets. The above example creates a packet which contains a
+single chunk with a sequence of bytes. As the packet is passed through the
+protocols, they can interpret the data (e.g. by calling \ffunc{peekAtFront}) as
+they see fit. The packet API always provides the requested representation,
+either because it's already available in the packet, or because it gets
+automatically deserialized.
 
 \subsection{Queueing Packets}
 
-%TODO explain how INET supports queueing packet data arriving in order
+Some protocols store packet data temporarily at the sender node before actual
+processing can occur. For example, the TCP protocol must store the outgoing data
+received from the application in order to be able to provide transmission flow
+control.
+
+The following example shows how a transport protocol could store the received
+data temporarily until the data is actually used:
 
 \cppsnippet{PacketQueueingExample}{Packet queueing example}
 
+The \cppclass{ChunkQueue} class acts similarly to a binary FIFO queue except it
+works with chunks. Similarly to the \cppclass{Packet} it also automatically
+merge consecutive data and selects the most appropriate representation.
 
 \subsection{Buffering Packets}
 
-%TODO explain how INET supports buffering packet data arriving out of order
+Protocols at the receiver node often need to buffer incoming packet data until
+the actual processing can occur. For example, packets may arrive out of order,
+and the data they contain must be reassembled or reordered before it can be
+passed along.
+
+INET provides a few special purpose C++ classes to support data buffering:
+\begin{itemize}
+	\item \cppclass{ChunkBuffer} provides automatic merging for large data
+	chunks from out of order smaller data chunks.
+	\item \cppclass{ReassemblyBuffer} provides reassembling for out of order data
+	according to an expected length.
+	\item \cppclass{ReorderBuffer} provides reordering for out of order data into a
+	continuous data stream from an expected offset.
+\end{itemize}
+
+All buffers deal with only the data, represented by chunks, instead of packets.
+They automatically merge consecutive data and select the most appropriate
+representation. Protocols using these buffers automatically support all data
+representation provided by INET, and any combination thereof. For example,
+\cppclass{ByteCountChunk}, \cppclass{BytesChunk}, \cppclass{FieldsChunk}, and
+\cppclass{SliceChunk} can be freely mixed in the same buffer.
 
 \subsection{Reassembling Packets}
 
-%TODO explain how INET merges packet data arriving out of order into a whole
+Some protocols may use an unreliable service to transfer a large piece of data
+over the network. The unreliable service requires the receiver node to be
+prepared for receiving parts out of order and potentially duplicated.
+
+For example, the IP protocol must store incoming fragments at the receiver node,
+because it must wait until the datagram becomes complete, before it can be
+passed along. The IP protocol must also be prepared for receiving the individual
+fragments out of order and potentially duplicated.
+
+The following example shows how a network protocol could store and reassemble
+the data of the incoming packets into a whole packet:
 
 \cppsnippet{PacketReassemblingExample}{Packet reassembling example}
 
+The \cppclass{ReassemblyBuffer} supports replacing the stored data at a given
+offset, and it also provides the complete reassembled data with the expected
+length if available.
+
 \subsection{Reordering Packets}
 
-%TODO explain how INET forms a stream from packet data arriving out of order
+Some protocols may use an unreliable service to transfer a long data stream over
+the network. The unreliable service requires the sender node to resend
+unacknowledged parts, and it also requires the receiver node to be prepared for
+receiving parts out of order and potentially duplicated.
+
+For example, the TCP protocol must buffer the incoming data at the receiver
+node, because the TCP segments may arrive out of order and potentially
+duplicated or overlapping, and TCP is required to provide the data to the
+application in the correct order and only once.
+
+The following example shows how a transport protocol could store and reorder the
+data of incoming packets, which may arrive out of order, and also how such a
+protocol could pass along only the available data in the correct order:
 
 \cppsnippet{PacketReorderingExample}{Packet reordering example}
 
+The \cppclass{ReorderBuffer} supports replacing the stored data at a given
+offset, and it provides the available data from the expected offset if any.
+
 \subsection{Dispatching Packets}
 
-%TODO explain how INET allows connecting multiple protocols within a network node in a very flexible way
+Protocols also communicate with each other inside the network node by sending
+packets, requests, and confirmations. INET is very flexible in terms of how
+protocols can be connected to each other. Protocols can be connected directly,
+or they can be connected through one or more \nedtype{MessageDispatcher}
+modules.
+
+This flexiblity allows creating very simple network nodes where the protocol
+stack is a chain. But it also allows creating more complicated network nodes
+where protocols are grouped into protocol layers to provide many-to-one and
+many-to-many relationships. It's also possible to use dispatcher modules
+hierarchically inside compound modules, or to connect all protocols to a single
+central dispatcher module.
+
+The \cppclass{DispatchProtocolTag} must be attached to a packet, request or
+confirmation to allow the \nedtype{MessageDispatcher} to direct the message to
+the inteded recipient. The following example shows how a MAC protocol could send
+up a packet to the designated protocol without actually knowing where that
+protocol is in the network node:
 
 \cppsnippet{PacketDispatchingExample}{Packet dispatching example}
+
+The \nedtype{MessageDispatcher} finds the designated protocol module and its
+gate based on the \ffunc{registerProtocol} calls it has received during the
+initialization of all connected protocol modules.
 
 
 %%%% Local Variables:

@@ -49,10 +49,10 @@ using namespace inet::ieee80211;
 
 class Mac : public cSimpleModule
 {
-  public:
+public:
   MacAddress selfAddress;
 
-  public:
+public:
   void sendUp(Packet *packet);
   void encapsulate(Packet *packet);
   void decapsulate(Packet *packet);
@@ -76,7 +76,7 @@ class MacHeaderSerializer : public FieldsChunkSerializer
 
 class MacHeader : public FieldsChunk
 {
-  public:
+public:
   void setAggregate(bool f);
   void setFragmentOffset(b o);
   int getType() const;
@@ -91,14 +91,14 @@ class MacHeader : public FieldsChunk
 
 class MacTrailer : public FieldsChunk
 {
-  public:
+public:
   void setFcsMode(int x);
   int getFcsMode() const;
 };
 
 class SubHeader : public FieldsChunk
 {
-  public:
+public:
   void setLengthField(b l);
   b getLengthField() const;
 };
@@ -231,7 +231,7 @@ Ptr<Chunk> MacHeaderSerializer::deserialize(MemoryInputStream& stream)
 
 class ExternalInterface
 {
-  public:
+public:
   const vector<uint8_t>& prepareToSend(Packet *packet);
   Packet *prepareToReceive(vector<uint8_t>& bytes);
 };
@@ -253,34 +253,32 @@ Packet *ExternalInterface::prepareToReceive(vector<uint8_t>& bytes)
 }
 //!End
 
-class TcpHeader : public FieldsChunk
+class TransportHeader : public FieldsChunk
 {
-  public:
+public:
   B getSequenceNumber() const;
   void setSequenceNumber(B sequenceNumber);
 };
 
 //!PacketQueueingExample
-class TcpSendQueue
+class TransportSendQueue
 {
-  public:
   ChunkQueue queue; // stores application data
   B sequenceNumber; // position in stream
 
-  public:
   void enqueueApplicationData(Packet *packet);
   Packet *createSegment(b length);
 };
 
-void TcpSendQueue::enqueueApplicationData(Packet *packet)
+void TransportSendQueue::enqueueApplicationData(Packet *packet)
 {
   queue.push(packet->peekData()); // store received data
 }
 
-Packet *TcpSendQueue::createSegment(b maxLength)
+Packet *TransportSendQueue::createSegment(b maxLength)
 {
   auto packet = new Packet("Segment"); // create new segment
-  auto header = makeShared<TcpHeader>(); // create new header
+  auto header = makeShared<TransportHeader>(); // create new header
   header->setSequenceNumber(sequenceNumber); // store sequence number for reordering
   packet->insertAtFront(header); // insert header into segment
   if (queue.getLength() < maxLength)
@@ -293,25 +291,24 @@ Packet *TcpSendQueue::createSegment(b maxLength)
 //!End
 
 //!PacketReorderingExample
-class TcpReceiveQueue
+class TransportReceiveQueue
 {
   ReorderBuffer buffer; // stores receive data
   B sequenceNumber;
 
-  public:
   void processSegment(Packet *packet);
   Packet *getAvailableData();
 };
 
-void TcpReceiveQueue::processSegment(Packet *packet)
+void TransportReceiveQueue::processSegment(Packet *packet)
 {
-  auto header = packet->popAtFront<TcpHeader>(); // pop TCP header
+  auto header = packet->popAtFront<TransportHeader>(); // pop transport header
   auto sequenceNumber = header->getSequenceNumber();
   auto data = packet->peekData(); // get all packet data
   buffer.replace(sequenceNumber, data); // overwrite data in buffer
 }
 
-Packet *TcpReceiveQueue::getAvailableData()
+Packet *TransportReceiveQueue::getAvailableData()
 {
   if (buffer.getAvailableDataLength() == b(0)) // if no data available
     return nullptr;
@@ -320,34 +317,33 @@ Packet *TcpReceiveQueue::getAvailableData()
 }
 //!End
 
-class Ipv4Header : public FieldsChunk
+class NetworkProtocolHeader : public FieldsChunk
 {
-  public:
+public:
   b getFragmentOffset() const;
 };
 
 //!PacketReassemblingExample
-class Ipv4Defragmentation
+class NetworkProtocolDefragmentation
 {
   ReassemblyBuffer buffer; // stores received data
 
-  public:
-  void processDatagram(Packet *packet);
-  Packet *getReassembledDatagram();
+  void processDatagram(Packet *packet); // processes incoming packes
+  Packet *getReassembledDatagram(); // reassembles the original packet
 };
 
-void Ipv4Defragmentation::processDatagram(Packet *packet)
+void NetworkProtocolDefragmentation::processDatagram(Packet *packet)
 {
-  auto header = packet->popAtFront<Ipv4Header>();
+  auto header = packet->popAtFront<NetworkProtocolHeader>(); // remove header
   auto fragmentOffset = header->getFragmentOffset(); // determine offset
-  auto data = packet->peekData();
+  auto data = packet->peekData(); // get data from packet
   buffer.replace(fragmentOffset, data); // overwrite data in buffer
 }
 
-Packet *Ipv4Defragmentation::getReassembledDatagram()
+Packet *NetworkProtocolDefragmentation::getReassembledDatagram()
 {
-  if (!buffer.isComplete()) // if datagram isn't complete
-    return nullptr; // nothing to send yet
+  if (!buffer.isComplete()) // if reassembly isn't complete
+    return nullptr; // there's nothing to return
   auto data = buffer.getReassembledData(); // complete reassembly
   return new Packet("Datagram", data); // create new packet
 }
@@ -355,7 +351,7 @@ Packet *Ipv4Defragmentation::getReassembledDatagram()
 
 class ErrorModel
 {
-  public:
+public:
   bool hasProbabilisticError(b l, double per);
   Packet *corruptPacket(Packet *packet, double ber);
   Packet *corruptChunks(Packet *packet, double ber);
@@ -422,7 +418,7 @@ class TcpClientApp
   private:
   TcpSocket socket;
 
-  public:
+public:
   void send();
 };
 
@@ -431,7 +427,7 @@ class TcpServerApp
   private:
   TcpSocket socket;
 
-  public:
+public:
   void receive(Packet *packet);
   void updateStatistic(b offset, b length, simtime_t age);
 };
@@ -464,7 +460,7 @@ class Ipv4 : public cSimpleModule
   private:
   MacAddress selfAddress;
 
-  public:
+public:
   void sendDown(Packet *packet, Ipv4Address nextHopAddress, int interfaceId);
   MacAddress resolveMacAddress(Ipv4Address a);
 };
@@ -496,7 +492,7 @@ void Mac::sendUp(Packet *packet)
 
 class UdpHeader : public FieldsChunk
 {
-  public:
+public:
   void setSrcPort(int p) const;
 };
 
@@ -587,7 +583,7 @@ signal->encapsulate(packet);
 
 class PacketDissectorCallback : public PacketDissector::ICallback
 {
-  public:
+public:
   void startProtocolDataUnit(const Protocol *protocol) override;
   void endProtocolDataUnit(const Protocol *protocol) override;
   void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) override;
@@ -633,7 +629,7 @@ printer.printPacket(std::cout, packet);
 
 class App : public cSimpleModule
 {
-  public:
+public:
   void udpSocketUsageExample();
   void tcpSocketUsageExample();
 };
@@ -687,7 +683,7 @@ bool Mac::handleOperationStage
 
 /*
 class Dcf {
-  public:
+public:
   void channelGranted(IChannelAccess *channelAccess);
   void frameSequenceFinished();
   void originatorProcessTransmittedFrame(Packet *packet);
