@@ -7,8 +7,7 @@ INET-3.99.3 (April 2018) - Development
 This is planned to be the last development release of the upcoming INET-4.0 version.
 
 All originally planned refactorings have been completed, and we don't expect too many
-changes until the final version is released. This version requires OMNeT++ 5.3
-preview 4 or later.
+changes until the final version is released. This version requires OMNeT++ 5.3 or later.
 
 The highlights of this release are:
 
