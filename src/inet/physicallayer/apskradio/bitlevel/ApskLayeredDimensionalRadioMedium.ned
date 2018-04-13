@@ -22,7 +22,7 @@ import inet.physicallayer.common.packetlevel.RadioMedium;
 //
 // This medium model is used by a simple hypothetical layered radio.
 //
-// See also ~ApskLayeredTransmitter, ~ApskLayeredReceiver.
+// See also ~ApskLayeredDimensionalRadio, ~ApskLayeredTransmitter, ~ApskLayeredReceiver.
 //
 module ApskLayeredDimensionalRadioMedium extends RadioMedium
 {
