@@ -78,7 +78,10 @@ const ITransmission *UnitDiskTransmitter::createTransmission(const IRadio *trans
     auto endPosition = mobility->getCurrentPosition();
     auto startOrientation = mobility->getCurrentAngularPosition();
     auto endOrientation = mobility->getCurrentAngularPosition();
-    return new UnitDiskTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, communicationRange, interferenceRange, detectionRange);
+    return new UnitDiskTransmission(transmitter, packet, startTime, endTime,
+            preambleDuration, headerDuration, dataDuration,
+            startPosition, endPosition, startOrientation, endOrientation,
+            communicationRange, interferenceRange, detectionRange);
 }
 
 } // namespace physicallayer
