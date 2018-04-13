@@ -149,7 +149,8 @@ class INET_API Packet : public cPacket
     /**
      * Returns the designated part as an immutable chunk in its current
      * representation. If the length is unspecified, then the length of the
-     * result is chosen according to the internal representation.
+     * result is chosen according to the current representation. The flags
+     * parameter is a combination of Chunk::PeekFlag enumeration members.
      */
     const Ptr<const Chunk> peekAtFront(b length = b(-1), int flags = 0) const;
 
@@ -157,14 +158,15 @@ class INET_API Packet : public cPacket
      * Pops the designated part and returns it as an immutable chunk in its
      * current representation. Increases the front offset with the length of
      * the returned chunk. If the length is unspecified, then the length of
-     * the result is chosen according to the internal representation.
+     * the result is chosen according to the current representation. The
+     * flags parameter is a combination of Chunk::PeekFlag enumeration members.
      */
     const Ptr<const Chunk> popAtFront(b length = b(-1), int flags = 0);
 
     /**
      * Returns true if the designated part is available in the requested
      * representation. If the length is unspecified, then the length of the
-     * result is chosen according to the internal representation.
+     * result is chosen according to the current representation.
      */
     template <typename T>
     bool hasAtFront(b length = b(-1)) const {
@@ -175,7 +177,8 @@ class INET_API Packet : public cPacket
     /**
      * Returns the designated part as an immutable chunk in the requested
      * representation. If the length is unspecified, then the length of the
-     * result is chosen according to the internal representation.
+     * result is chosen according to the current representation. The flags
+     * parameter is a combination of Chunk::PeekFlag enumeration members.
      */
     template <typename T>
     const Ptr<const T> peekAtFront(b length = b(-1), int flags = 0) const {
@@ -192,7 +195,8 @@ class INET_API Packet : public cPacket
      * Pops the designated part and returns it as an immutable chunk in the
      * requested representation. Increases the front offset with the length of
      * the returned chunk. If the length is unspecified, then the length of the
-     * result is chosen according to the internal representation.
+     * result is chosen according to the current representation. The flags
+     * parameter is a combination of Chunk::PeekFlag enumeration members.
      */
     template <typename T>
     const Ptr<const T> popAtFront(b length = b(-1), int flags = 0) {
@@ -223,7 +227,8 @@ class INET_API Packet : public cPacket
     /**
      * Returns the designated part as an immutable chunk in its current
      * representation. If the length is unspecified, then the length of the
-     * result is chosen according to the internal representation.
+     * result is chosen according to the current representation. The flags
+     * parameter is a combination of Chunk::PeekFlag enumeration members.
      */
     const Ptr<const Chunk> peekAtBack(b length = b(-1), int flags = 0) const;
 
@@ -231,14 +236,15 @@ class INET_API Packet : public cPacket
      * Pops the designated part and returns it as an immutable chunk in its
      * current representation. Decreases the back offset with the length of the
      * returned chunk. If the length is unspecified, then the length of the
-     * result is chosen according to the internal representation.
+     * result is chosen according to the current representation. The flags
+     * parameter is a combination of Chunk::PeekFlag enumeration members.
      */
     const Ptr<const Chunk> popAtBack(b length = b(-1), int flags = 0);
 
     /**
      * Returns true if the designated part is available in the requested
      * representation. If the length is unspecified, then the length of the
-     * result is chosen according to the internal representation.
+     * result is chosen according to the current representation.
      */
     template <typename T>
     bool hasAtBack(b length = b(-1)) const {
@@ -250,7 +256,8 @@ class INET_API Packet : public cPacket
      * Returns the designated part as an immutable chunk in the requested
      * representation. Decreases the back offset with the length of the returned
      * chunk. If the length is unspecified, then the length of the result is
-     * chosen according to the internal representation.
+     * chosen according to the current representation. The flags parameter
+     * is a combination of Chunk::PeekFlag enumeration members.
      */
     template <typename T>
     const Ptr<const T> peekAtBack(b length = b(-1), int flags = 0) const {
@@ -266,7 +273,8 @@ class INET_API Packet : public cPacket
     /**
      * Pops the designated part and returns it as an immutable chunk in the
      * requested representation. If the length is unspecified, then the length
-     * of the result is chosen according to the internal representation.
+     * of the result is chosen according to the current representation. The
+     * flags parameter is a combination of Chunk::PeekFlag enumeration members.
      */
     template <typename T>
     const Ptr<const T> popAtBack(b length = b(-1), int flags = 0) {
@@ -292,14 +300,15 @@ class INET_API Packet : public cPacket
     /**
      * Returns the designated data part as an immutable chunk in its current
      * representation. If the length is unspecified, then the length of the
-     * result is chosen according to the internal representation.
+     * result is chosen according to the current representation. The flags
+     * parameter is a combination of Chunk::PeekFlag enumeration members.
      */
     const Ptr<const Chunk> peekDataAt(b offset, b length = b(-1), int flags = 0) const;
 
     /**
      * Returns true if the designated data part is available in the requested
      * representation. If the length is unspecified, then the length of the
-     * result is chosen according to the internal representation.
+     * result is chosen according to the current representation.
      */
     template <typename T>
     bool hasDataAt(b offset, b length = b(-1)) const {
@@ -311,7 +320,8 @@ class INET_API Packet : public cPacket
     /**
      * Returns the designated data part as an immutable chunk in the requested
      * representation. If the length is unspecified, then the length of the
-     * result is chosen according to the internal representation.
+     * result is chosen according to the current representation. The flags
+     * parameter is a combination of Chunk::PeekFlag enumeration members.
      */
     template <typename T>
     const Ptr<const T> peekDataAt(b offset, b length = b(-1), int flags = 0) const {
@@ -323,7 +333,8 @@ class INET_API Packet : public cPacket
     /**
      * Returns the whole data part (excluding front and back popped parts) in the
      * current representation. The length of the returned chunk is the same as
-     * the value returned by getDataLength().
+     * the value returned by getDataLength(). The flags parameter is a combination
+     * of Chunk::PeekFlag enumeration members.
      */
     const Ptr<const Chunk> peekData(int flags = 0) const {
         return peekDataAt(b(0), getDataLength(), flags);
@@ -332,7 +343,8 @@ class INET_API Packet : public cPacket
     /**
      * Returns the whole data part (excluding front and back popped parts) as a
      * sequence of bits. The length of the returned chunk is the same as the
-     * value returned by getDataLength().
+     * value returned by getDataLength(). The flags parameter is a combination
+     * of Chunk::PeekFlag enumeration members.
      */
     const Ptr<const BitsChunk> peekDataAsBits(int flags = 0) const {
         return peekDataAt<BitsChunk>(b(0), getDataLength(), flags);
@@ -341,7 +353,8 @@ class INET_API Packet : public cPacket
     /**
      * Returns the whole data part (excluding front and back popped parts) as a
      * sequence of bytes. The length of the returned chunk is the same as the
-     * value returned by getDataLength().
+     * value returned by getDataLength(). The flags parameter is a combination
+     * of Chunk::PeekFlag enumeration members.
      */
     const Ptr<const BytesChunk> peekDataAsBytes(int flags = 0) const {
         return peekDataAt<BytesChunk>(b(0), getDataLength(), flags);
@@ -350,7 +363,8 @@ class INET_API Packet : public cPacket
     /**
      * Returns the data part (excluding front and back popped parts) in the
      * requested representation. The length of the returned chunk is the same as
-     * the value returned by getDataLength().
+     * the value returned by getDataLength(). The flags parameter is a combination
+     * of Chunk::PeekFlag enumeration members.
      */
     template <typename T>
     const Ptr<const T> peekData(int flags = 0) const {
@@ -363,14 +377,15 @@ class INET_API Packet : public cPacket
     /**
      * Returns the designated part of the packet as an immutable chunk in its
      * current representation. If the length is unspecified, then the length of
-     * the result is chosen according to the internal representation.
+     * the result is chosen according to the current representation. The flags
+     * parameter is a combination of Chunk::PeekFlag enumeration members.
      */
     const Ptr<const Chunk> peekAt(b offset, b length = b(-1), int flags = 0) const;
 
     /**
      * Returns true if the designated part of the packet is available in the
      * requested representation. If the length is unspecified, then the length
-     * of the result is chosen according to the internal representation.
+     * of the result is chosen according to the current representation.
      */
     template <typename T>
     bool hasAt(b offset, b length = b(-1)) const {
@@ -382,7 +397,8 @@ class INET_API Packet : public cPacket
     /**
      * Returns the designated part of the packet as an immutable chunk in the
      * requested representation. If the length is unspecified, then the length
-     * of the result is chosen according to the internal representation.
+     * of the result is chosen according to the current representation. The
+     * flags parameter is a combination of Chunk::PeekFlag enumeration members.
      */
     template <typename T>
     const Ptr<const T> peekAt(b offset, b length = b(-1), int flags = 0) const {
@@ -394,7 +410,8 @@ class INET_API Packet : public cPacket
     /**
      * Returns the whole packet (including front and back popped parts) in the
      * current representation. The length of the returned chunk is the same as
-     * the value returned by getTotalLength().
+     * the value returned by getTotalLength(). The flags parameter is a combination
+     * of Chunk::PeekFlag enumeration members.
      */
     const Ptr<const Chunk> peekAll(int flags = 0) const {
         return peekAt(b(0), getTotalLength(), flags);
@@ -403,7 +420,8 @@ class INET_API Packet : public cPacket
     /**
      * Returns the whole packet (including front and back popped parts) as a
      * sequence of bits. The length of the returned chunk is the same as the
-     * value returned by getTotalLength().
+     * value returned by getTotalLength(). The flags parameter is a combination
+     * of Chunk::PeekFlag enumeration members.
      */
     const Ptr<const BitsChunk> peekAllAsBits(int flags = 0) const {
         return peekAt<BitsChunk>(b(0), getTotalLength(), flags);
@@ -412,7 +430,8 @@ class INET_API Packet : public cPacket
     /**
      * Returns the whole packet (including front and back popped parts) as a
      * sequence of bytes. The length of the returned chunk is the same as the
-     * value returned by getTotalLength().
+     * value returned by getTotalLength(). The flags parameter is a combination
+     * of Chunk::PeekFlag enumeration members.
      */
     const Ptr<const BytesChunk> peekAllAsBytes(int flags = 0) const {
         return peekAt<BytesChunk>(b(0), getTotalLength(), flags);
@@ -421,7 +440,8 @@ class INET_API Packet : public cPacket
     /**
      * Returns the whole packet (including front and back popped parts) in the
      * requested representation. The length of the returned chunk is the same as
-     * the value returned by getTotalLength().
+     * the value returned by getTotalLength(). The flags parameter is a combination
+     * of Chunk::PeekFlag enumeration members.
      */
     template <typename T>
     const Ptr<const T> peekAll(int flags = 0) const {
@@ -489,24 +509,27 @@ class INET_API Packet : public cPacket
     /**
      * Removes the designated part and returns it as a mutable chunk in its
      * current representation. If the length is unspecified, then the length of
-     * the result is chosen according to the internal representation. The length
-     * of front popped part must be zero before calling this function.
+     * the result is chosen according to the current representation. The length
+     * of front popped part must be zero before calling this function. The flags
+     * parameter is a combination of Chunk::PeekFlag enumeration members.
      */
     const Ptr<Chunk> removeAtFront(b length = b(-1), int flags = 0);
 
     /**
      * Removes the designated part and returns it as a mutable chunk in its
      * current representation. If the length is unspecified, then the length of
-     * the result is chosen according to the internal representation. The length
-     * of back popped part must be zero before calling this function.
+     * the result is chosen according to the current representation. The length
+     * of back popped part must be zero before calling this function. The flags
+     * parameter is a combination of Chunk::PeekFlag enumeration members.
      */
     const Ptr<Chunk> removeAtBack(b length = b(-1), int flags = 0);
 
     /**
      * Removes the designated part and returns it as a mutable chunk in the
      * requested representation. If the length is unspecified, then the length
-     * of the result is chosen according to the internal representation. The
+     * of the result is chosen according to the current representation. The
      * length of front popped part must be zero before calling this function.
+     * The flags parameter is a combination of Chunk::PeekFlag enumeration members.
      */
     template <typename T>
     const Ptr<T> removeAtFront(b length = b(-1), int flags = 0) {
@@ -520,8 +543,9 @@ class INET_API Packet : public cPacket
     /**
      * Removes the designated part and returns it as a mutable chunk in the
      * requested representation. If the length is unspecified, then the length
-     * of the result is chosen according to the internal representation. The
+     * of the result is chosen according to the current representation. The
      * length of back popped part must be zero before calling this function.
+     * The flags parameter is a combination of Chunk::PeekFlag enumeration members.
      */
     template <typename T>
     const Ptr<T> removeAtBack(b length = b(-1), int flags = 0) {
