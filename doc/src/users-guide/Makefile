@@ -15,6 +15,7 @@ pdf: *.tex $(PDFPICS) figures/*.png
 	pdflatex $(DOCNAME).tex
 	pdflatex $(DOCNAME).tex
 	rm -f *.aux *.idx *.ilg *.ind *.log *.out *.toc *.blg *.bbl
+	mv $(DOCNAME).pdf ../..
 
 %.pdf: %.svg
 	$(INKSCAPE) $< -A $@
@@ -24,7 +25,7 @@ pdf: *.tex $(PDFPICS) figures/*.png
 
 clean:
 	rm -f $(DOCNAME).pdf *.aux *.idx *.ilg *.ind *.log *.out *.toc *.bbl *.blg
-	rm -rf ../../$(DOCNAME)
+	rm -rf ../../$(DOCNAME).pdf
 	rm -f figures/*.pdf
 	rm -f `ls figures/*.svg | sed 's/svg$$/png/'`
 	rm -f `ls figures/*.dot | sed 's/dot$$/svg/'`
