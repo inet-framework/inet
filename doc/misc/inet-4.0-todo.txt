@@ -30,6 +30,7 @@ SHOULD:
  - validate positioning and orientation IMobility, PhysicalEnvironment, ObstacleLoss
  - replace ObjectLocatorNode with GeoTransform (PositionAttitudeTransform) to work with osgEarth 2.9
  - use m instead of double in Coord? use degree instead of double in GeoCoord? use degree instead of double in EulerAngles?
+ - cSocketRTScheduler refactoring for multiple sockets bound to interfaces
  - rename GenericNetworkProtocol to NextHopForwarding
  - rename Flood to Flooding? (questionable)
 
