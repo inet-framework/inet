@@ -411,8 +411,9 @@ void NetPerfMeter::handleMessage(cMessage* msg)
           break;
          // ------ Connection established -----------------------------------
          case SCTP_I_ESTABLISHED: {
-            const SctpConnectReq* connectInfo =
-               check_and_cast<const SctpConnectReq*>(msg->getControlInfo());
+             Message *message = check_and_cast<Message *>(msg);
+             auto& tags = getTags(message);
+             const SctpConnectReq *connectInfo = tags.getTag<SctpConnectReq>();
             ActualOutboundStreams = connectInfo->getOutboundStreams();
             if(ActualOutboundStreams > RequestedOutboundStreams) {
                ActualOutboundStreams = RequestedOutboundStreams;
@@ -598,8 +599,7 @@ void NetPerfMeter::successfullyEstablishedConnection(cMessage*          msg,
          IncomingSocketSCTP->setOutputGate(gate("sctpOut"));
       }
 
-      SctpConnectReq* connectInfo = check_and_cast<SctpConnectReq*>(msg->getControlInfo());
-      ConnectionID = connectInfo->getSocketId();
+      ConnectionID = check_and_cast<Indication *>(msg)->getTag<SocketInd>()->getSocketId();
       sendSCTPQueueRequest(QueueSize);   // Limit the send queue as given.
    }
 
@@ -935,6 +935,8 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
             for (uint32 i = 0; i < msgSize; i++)
                 vec[i] = ((i & 1) ? 'D' : 'T');
             dataMessage->setBytes(vec);
+            auto creationTimeTag = dataMessage->addTag<CreationTimeTag>();
+            creationTimeTag->setCreationTime(simTime());
             cmsg->insertAtBack(dataMessage);
 
           /*  NetPerfMeterDataMessage* dataMessage = new NetPerfMeterDataMessage;
@@ -961,8 +963,6 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
             command->setPrMethod( (sendUnreliable == true) ? 2 : 0 );   // PR-SCTP policy: RTX
 
             //SctpSendInfo* cmsg = new SctpSendInfo("ControlInfo");
-            auto creationTimeTag = dataMessage->addTag<CreationTimeTag>();
-            creationTimeTag->setCreationTime(simTime());
             cmsg->setKind(sendUnordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);
            /* SctpSendReq* cmsg = new SctpSendReq();
             cmsg->encapsulate(dataMessage);
