@@ -74,11 +74,6 @@ class INET_API SimpleEpEnergyStorage : public EpEnergyStorageBase
     J targetCapacity = J(NaN);
 
     /**
-     * The lifecycle controller used to shutdown and start the node.
-     */
-    LifecycleController *lifecycleController = nullptr;
-
-    /**
      * The containing node module.
      */
     cModule *networkNode = nullptr;
@@ -87,6 +82,11 @@ class INET_API SimpleEpEnergyStorage : public EpEnergyStorageBase
      * The status of the node.
      */
     NodeStatus *nodeStatus = nullptr;
+
+    /**
+     * LifecycleController.
+     */
+    LifecycleController lifecycleController;
 
   protected:
     virtual void initialize(int stage) override;

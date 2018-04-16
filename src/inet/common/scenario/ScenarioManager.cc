@@ -16,6 +16,9 @@
 //
 
 #include "inet/common/scenario/ScenarioManager.h"
+#include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/INETUtils.h"
 
 namespace inet {
 
@@ -75,6 +78,9 @@ void ScenarioManager::processCommand(cXMLElement *node)
         processConnectCommand(node);
     else if (!strcmp(tag, "disconnect"))
         processDisconnectCommand(node);
+    else if (!strcmp(tag, "initiate") || !strcmp(tag, "start") || !strcmp(tag, "startup") ||
+            !strcmp(tag, "shutdown") || !strcmp(tag, "crash"))
+        processLifecycleCommand(node);
     else
         processModuleSpecificCommand(node);
 }
@@ -226,7 +232,7 @@ void ScenarioManager::createConnection(cXMLElementList& paramList, cChannelType 
 
         // set parameters:
         for (auto child : paramList) {
-            
+
             const char *name = getRequiredAttribute(child, "name");
             const char *value = getRequiredAttribute(child, "value");
             channel->par(name).parse(value);
@@ -329,6 +335,39 @@ void ScenarioManager::processDisconnectCommand(cXMLElement *node)
         if (g && g->getOwnerModule()->getParentModule() == parentMod)
             srcGate->disconnect();
     }
+}
+
+void ScenarioManager::processLifecycleCommand(cXMLElement *node)
+{
+    // resolve target module
+    const char *target = node->getAttribute("module");
+    cModule *module = getModuleByPath(target);
+    if (!module)
+        throw cRuntimeError("Module '%s' not found", target);
+
+    // resolve operation
+    std::string tag = node->getTagName();
+    std::string operationName = (tag == "initiate") ? node->getAttribute("operation") : tag;
+    LifecycleOperation *operation;
+    if (operationName == "start" || operationName == "startup")
+        operation = new NodeStartOperation;
+    else if (operationName == "shutdown")
+        operation = new NodeShutdownOperation;
+    else if (operationName == "crash")
+        operation = new NodeCrashOperation;
+    else
+        operation = check_and_cast<LifecycleOperation *>(inet::utils::createOne(operationName.c_str()));
+
+    auto paramsCopy = node->getAttributes();
+    paramsCopy.erase("module");
+    paramsCopy.erase("t");
+    paramsCopy.erase("operation");
+    operation->initialize(module, paramsCopy);
+    if (!paramsCopy.empty())
+        throw cRuntimeError("Unknown parameter '%s' for operation %s at %s", paramsCopy.begin()->first.c_str(), operationName, node->getSourceLocation());
+
+    // do the operation
+    lifecycleController.initiateOperation(operation);
 }
 
 void ScenarioManager::refreshDisplay() const

@@ -19,7 +19,7 @@
 #define __INET_SCENARIOMANAGER_H
 
 #include "inet/common/INETDefs.h"
-
+#include "inet/common/lifecycle/LifecycleController.h"
 #include "inet/common/scenario/IScriptable.h"
 
 namespace inet {
@@ -43,6 +43,8 @@ class INET_API ScenarioManager : public cSimpleModule
     int numChanges = 0;
     int numDone = 0;
 
+    LifecycleController lifecycleController;
+
   protected:
     // utilities
     const char *getRequiredAttribute(cXMLElement *node, const char *attr);
@@ -63,6 +65,7 @@ class INET_API ScenarioManager : public cSimpleModule
     virtual void processConnectCommand(cXMLElement *node);
     virtual void processDisconnectCommand(cXMLElement *node);
     virtual void processModuleSpecificCommand(cXMLElement *node);
+    virtual void processLifecycleCommand(cXMLElement *node);
 
   public:
     ScenarioManager() {}

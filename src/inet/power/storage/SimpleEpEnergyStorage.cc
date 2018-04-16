@@ -42,9 +42,6 @@ void SimpleEpEnergyStorage::initialize(int stage)
             nodeStatus = dynamic_cast<NodeStatus *>(networkNode->getSubmodule("status"));
             if (!nodeStatus)
                 throw cRuntimeError("Cannot find node status");
-            lifecycleController = dynamic_cast<LifecycleController *>(getModuleByPath("lifecycleController"));
-            if (!lifecycleController)
-                throw cRuntimeError("Cannot find lifecycle controller");
         }
         setResidualCapacity(J(par("initialCapacity")));
         scheduleTimer();
@@ -84,7 +81,7 @@ void SimpleEpEnergyStorage::executeNodeOperation(J newResidualCapacity)
         LifecycleOperation::StringMap params;
         NodeCrashOperation *operation = new NodeCrashOperation();
         operation->initialize(networkNode, params);
-        lifecycleController->initiateOperation(operation);
+        lifecycleController.initiateOperation(operation);
     }
 }
 
