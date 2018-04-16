@@ -24,7 +24,7 @@ import inet.transportlayer.contract.ITcp;
 // TCP model based on the Network Simulation Cradle by Sam Jansen.
 // The NSC is available on the http://research.wand.net.nz/software/nsc.php page.
 // You must read the inet/3dparty/README before use this TCP implementation.
-// This model is compatible with both Ipv4 (~Ipv4) and ~Ipv6.
+// This model is compatible with both IPv4 (~Ipv4) and IPv6 (~Ipv6).
 // The TCP_TRANSFER_OBJECT data transfer mode isn't implemented yet.
 // See the ~ITcp for the TCP layer general informations.
 //

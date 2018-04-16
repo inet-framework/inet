@@ -23,7 +23,7 @@ package inet.networklayer.configurator.ipv4;
 import inet.networklayer.configurator.base.NetworkConfiguratorBase;
 
 //
-// This module assigns IP addresses and sets up static routing for an Ipv4 network.
+// This module assigns IPv4 addresses and sets up static routing for an IPv4 network.
 // It assigns per-interface IP addresses, strives to take subnets into account,
 // and can also optimize the generated routing tables by merging routing entries.
 //
@@ -58,7 +58,7 @@ import inet.networklayer.configurator.base.NetworkConfiguratorBase;
 // All routers must have their routing table (~Ipv4RoutingTable module) as their
 // "routingTable" or "networkLayer.routingTable" submodule.
 //
-// By default all interfaces in all nodes will have a unique Ipv4 address
+// By default all interfaces in all nodes will have a unique IPv4 address
 // assigned. Routing tables will be configured so that there's a route
 // following the shortest path from any node to any interface. In other words,
 // all interfaces will be reachable from all nodes (e.g. ping).
@@ -130,7 +130,7 @@ import inet.networklayer.configurator.base.NetworkConfiguratorBase;
 //     dump network topology, assigned IP addresses, routing tables and its
 //     own configuration format.
 //
-// The following example configures all interfaces in the Ipv4 address range
+// The following example configures all interfaces in the IPv4 address range
 // 10.0.0.0 - 10.255.255.255, and netmask range 255.0.0.0 - 255.255.255.255.
 // This is the default configuration.
 //
@@ -337,7 +337,7 @@ import inet.networklayer.configurator.base.NetworkConfiguratorBase;
 //      network. The default value is "*" that matches all sources.
 //
 //    - @groups
-//      Optional List of Ipv4 multicast addresses specifying the groups this entry
+//      Optional List of IPv4 multicast addresses specifying the groups this entry
 //      applies to. The default value is "*" that matches all multicast groups.
 //      e.g. "225.0.0.1 225.0.1.2".
 //

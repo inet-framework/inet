@@ -24,7 +24,7 @@ import inet.routing.contract.IOspf;
 import inet.routing.contract.IPim;
 
 //
-// Ipv4 router that supports wireless, Ethernet, PPP and external interfaces.
+// IPv4 router that supports wireless, Ethernet, PPP and external interfaces.
 // By default, no wireless and external interfaces are added; the number of
 // Ethernet and PPP ports depends on the external connections.
 //

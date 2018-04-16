@@ -24,7 +24,7 @@ import inet.applications.contract.IApp;
 
 //
 // Sends UDP packets to the given IP address(es) in bursts, or acts as a
-// packet sink. Compatible with both Ipv4 and Ipv6.
+// packet sink. Compatible with both IPv4 (~Ipv4) and IPv6 (~Ipv6).
 //
 // <b>Addressing:</b>
 //

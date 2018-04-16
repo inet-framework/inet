@@ -21,7 +21,7 @@ package inet.networklayer.configurator.ipv4;
 import inet.networklayer.configurator.contract.INetworkConfigurator;
 
 //
-// Configures Ipv4 addresses and routing tables for a "flat" network,
+// Configures IPv4 addresses and routing tables for a "flat" network,
 // "flat" meaning that all hosts and routers will have the same
 // network address and will only differ in the host part.
 //
@@ -30,7 +30,7 @@ import inet.networklayer.configurator.contract.INetworkConfigurator;
 // will only run once, at the beginning of the simulation.
 // When it runs, it will:
 //
-//   -#  assign Ipv4 addresses to hosts and routers. All hosts and
+//   -#  assign IPv4 addresses to hosts and routers. All hosts and
 //       routers will be in the same network (same network address).
 //       For simplicity, it will assign the same address to all interfaces
 //       of a router;
@@ -44,7 +44,7 @@ import inet.networklayer.configurator.contract.INetworkConfigurator;
 // picks all modules which have a @networkNode property and their connections,
 // and builds a graph from it. Then it runs Dijstra's
 // shortest path algorithm on it, and configures all modules which are
-// Ipv4 nodes.
+// IPv4 nodes.
 //
 // It is assumed that the routing table (~Ipv4RoutingTable module) is the
 // "routingTable" or "networkLayer.routingTable" submodule in all hosts

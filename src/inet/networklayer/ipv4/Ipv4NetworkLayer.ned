@@ -25,7 +25,7 @@ import inet.networklayer.contract.INetworkLayer;
 
 
 //
-// Network layer of an Ipv4 node.
+// Network layer of an IPv4 node.
 //
 //
 module Ipv4NetworkLayer like INetworkLayer
@@ -51,8 +51,6 @@ module Ipv4NetworkLayer like INetworkLayer
         output ifOut @labels(INetworkHeader);
         input transportIn @labels(Ipv4ControlInfo/down);
         output transportOut @labels(Ipv4ControlInfo/up);
-        input igmpIn;
-        output igmpOut;
 
     submodules:
         configurator: Ipv4NodeConfigurator {

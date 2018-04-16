@@ -24,7 +24,7 @@ import inet.transportlayer.contract.ITcp;
 // you'll probably have to customize it in C++ according to
 // what you want to send and when you want to send it.
 //
-// Compatible with both Ipv4 (~Ipv4) and ~Ipv6.
+// Compatible with both IPv4 (~Ipv4) and IPv6 (~Ipv6).
 //
 simple TcpSpoof like ITcp
 {

@@ -23,7 +23,7 @@ import inet.applications.contract.IApp;
 //
 // Client for a generic request-response style protocol over TCP.
 // May be used as a rough model of HTTP or FTP users.
-// Compatible with both Ipv4 (~Ipv4) and ~Ipv6.
+// Compatible with both IPv4 (~Ipv4) and IPv6 (~Ipv6).
 //
 // The model communicates with the server in sessions. During a session,
 // the client opens a single TCP connection to the server, sends several

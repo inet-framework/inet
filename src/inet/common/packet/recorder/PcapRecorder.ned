@@ -39,14 +39,12 @@ package inet.common.packet.recorder;
 // sendingSignalNames and receivingSignalNames parameters. The packets
 // themselves are expected as cPacket* signal values.
 //
-// <b>Supported packets:</b> The module handles Ipv4/Ipv6 packets (Ipv4Header/
-// IPv6Datagram classes), possibly encapsulated into other (L2, PHY, etc)
+// <b>Supported packets:</b> The module handles IPv4/IPv6 packets (~Ipv4Header/
+// ~Ipv6Header classes), possibly encapsulated into other (L2, PHY, etc)
 // frames at any depth. Packets not containing IP packets are discarded.
 // The following higher layer protocol messages (inside IP packets) are
-// recognized and dumped/recorded: Ipv4Header, SCTPMessage, TcpHeader,
-// ICMPMessage.
-//
-// <b>Bugs:</b> Ipv6 datagrams cannot be recorded into PCAP. (To be implemented).
+// recognized and dumped/recorded: Ipv4Header, SctpMessage, TcpHeader,
+// IcmpMessage.
 //
 simple PcapRecorder
 {

@@ -39,7 +39,7 @@ package inet.transportlayer.contract;
 // If there is only one app which doesn't bind to any port, it will
 // receive all packets.
 //
-// <b>Communication with the Ipv4 (Ipv4/Ipv6) layer</b>
+// <b>Communication with the IPv4 (IPv4/IPv6) layer</b>
 //
 // The ~Udp model relies on sending and receiving ~Ipv4ControlInfo/~Ipv6ControlInfo
 // objects attached to ~UdpHeader objects as control info

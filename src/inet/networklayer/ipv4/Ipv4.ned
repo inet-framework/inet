@@ -19,23 +19,23 @@
 package inet.networklayer.ipv4;
 
 //
-// Implements the Ipv4 protocol. The protocol header is represented
+// Implements the IPv4 protocol. The protocol header is represented
 // by the ~Ipv4Header message class.
 //
 // <b>Interfacing with higher layer protocols</b>
 //
-// To send a packet over Ipv4 from a higher layer protocol, the module should
+// To send a packet over IPv4 from a higher layer protocol, the module should
 // fill in an ~Ipv4ControlInfo object, attach it to the packet with cMessage's
 // setControlInfo() method, the send it to the ~Ipv4 module.
 //
 // When ~Ipv4 sends up a packet to a higher layer protocol, it will also attach
-// an ~Ipv4ControlInfo to the packet, with the source and destination Ipv4 address,
-// etc. of the Ipv4 datagram in which the packet arrived.
+// an ~Ipv4ControlInfo to the packet, with the source and destination IPv4 address,
+// etc. of the IPv4 datagram in which the packet arrived.
 //
 // ~Ipv4 can serve several higher-layer protocols. The higher layer protocols
-// should call registerProtocol with their gate towards the Ipv4 module,
+// should call registerProtocol with their gate towards the ~Ipv4 module,
 // for fill up the protocol-to-gateindex map. When delivering packets to them,
-// the output gate is determined from the Protocol in the Ipv4 header.
+// the output gate is determined from the Protocol in the IPv4 header.
 //
 // <b>Routing and interfacing with lower layers</b>
 //
@@ -55,13 +55,13 @@ package inet.networklayer.ipv4;
 // <b>Working with Arp</b>
 //
 // Ipv4 module subscribe to arpResolutionCompleted and arpResolutionFailed signals on Arp module.
-// The Arp module accessed via arpOut gate, should not insert any module between Ipv4 and Arp.
+// The ~Arp module accessed via arpOut gate, should not insert any module between ~Ipv4 and ~Arp.
 // Before Ipv4 module send down a packet to lower layer, ask MacAddress of next hop from Arp via
 // method call. If MacAddress unspecified, then start address resolution via Arp method call and
 // insert packet to a queue specified by next hop addr.
 // When received a arpResolutionCompleted, then send packets from queue of next hop addr.
 // When received a arpResolutionFailed, then drop packets from queue of next hop addr.
-// When Ipv4 module received an Arp packet from Lower Layer on some queueIn gate,
+// When Ipv4 module received an ARP packet from Lower Layer on some queueIn gate,
 // then send out this packet on arpOut gate. When received a packet on arpIn gate,
 // then send out this packet on the specified queueOut gate.
 //

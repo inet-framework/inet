@@ -21,7 +21,7 @@ package inet.transportlayer.udp;
 import inet.transportlayer.contract.IUdp;
 
 //
-// Udp protocol implementation, for Ipv4 and Ipv6.
+// Udp protocol implementation, for IPv4 (~Ipv4) and IPv6 (~Ipv6).
 //
 // The Udp protocol header is represented by the class ~UdpHeader.
 //
@@ -38,11 +38,11 @@ import inet.transportlayer.contract.IUdp;
 // arbitrary message with message kind UDP_C_BIND and an ~UdpControlInfo
 // attached with srcPort filled in.
 //
-// When Udp receives an ICMP error (~ICMPMessage or ~ICMPv6Message)
+// When UDP receives an ICMP error (~IcmpHeader or ~Icmpv6Header)
 // that refers to an Udp socket, it reports the error to the corresponding
 // application by sending a message with kind UDP_I_ERROR.
 //
-// <b>Communication with the IP (Ipv4/Ipv6) layer</b>
+// <b>Communication with the IP (IPv4/IPv6) layer</b>
 //
 // The ~Udp model relies on sending and receiving ~Ipv4ControlInfo/~Ipv6ControlInfo
 // objects attached to ~UdpHeader objects as control info.

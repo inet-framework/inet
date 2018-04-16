@@ -24,7 +24,7 @@ import inet.networklayer.contract.IRoutingTable;
 // ~InterfaceTable.)
 //
 // For hosts, the routerId module parameter should be empty (""),
-// in which case the loopback Ipv4 address will be set to 127.0.0.1/8.
+// in which case the loopback IPv4 address will be set to 127.0.0.1/8.
 // For routers which have a routerId set, the loopback address will be set to
 // routerId. (See also RFC 2072 "Router Renumbering Guide".)
 //
@@ -50,7 +50,7 @@ simple Ipv4RoutingTable like IRoutingTable
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
-        string routerId = default("auto"); // for routers, the router id using Ipv4 address dotted
+        string routerId = default("auto"); // for routers, the router id using IPv4 address dotted
                           // notation; specify "auto" to select the highest
                           // interface address; should be left empty ("") for hosts
         string netmaskRoutes = default("*"); // maintain netmask routes for interfaces

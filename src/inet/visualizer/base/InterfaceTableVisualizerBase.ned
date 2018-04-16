@@ -30,10 +30,10 @@ package inet.visualizer.base;
 // The format string can contain the following directives:
 //  - %N interface name
 //  - %m MAC address
-//  - %4 Ipv4 address
+//  - %4 IPv4 address
 //  - %6 Ipv6 address
-//  - %a Ipv4 or Ipv6 address
-//  - %l Ipv4 or Ipv6 netmask length
+//  - %a IPv4 or IPv6 address
+//  - %l IPv4 or IPv6 netmask length
 //  - %g generic address
 //  - %n network address
 //  - %i InterfaceEntry::info()
