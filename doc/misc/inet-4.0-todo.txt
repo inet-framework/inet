@@ -24,24 +24,22 @@ SHOULD:
  - add test and check for std::dynamic_pointer_cast<Subclass1>(chunk->peek<Subclass1>()) != nullptr always holds when peek uses a variant type deserializer
 
  - revise and rename statistics to have a consistent naming scheme
- - add meaningful display strings to at least the top level submodules of network nodes
  - fix mobility non-determinism caused by interpolation from last position during animation
  - validate Rotation, Quaternion, EulerAngles against each other and documentation
  - validate positioning and orientation IMobility, PhysicalEnvironment, ObstacleLoss
  - replace ObjectLocatorNode with GeoTransform (PositionAttitudeTransform) to work with osgEarth 2.9
- - use m instead of double in Coord? use degree instead of double in GeoCoord? use degree instead of double in EulerAngles?
  - cSocketRTScheduler refactoring for multiple sockets bound to interfaces
  - rename GenericNetworkProtocol to NextHopForwarding
  - rename Flood to Flooding? (questionable)
 
+NEED NOT:
  - move extra functions that doesn't really belong to L3AddressResolver (e.g. findInterfaceTableOf, findIPv4RoutingTableOf)
  - revise protocol base class hierarchy (e.g. LayeredProtocolBase vs IPv4 base class, etc.)
  - revise protocol header class hierarchy (e.g. avoid unnecessary interfaces)
  - revise NED network node module hierarchy (e.g. MPLS nodes)
-
  - compare performance with INET 3.x branch and optimize if a lot of worse
-
-NEED NOT:
+ - use m instead of double in Coord?
+ - add meaningful display strings to at least the top level submodules of network nodes
  - replace functionality of GenericAppMsg with chunk tags, or better yet get rid of it altogether!
  - use shared pointers for transmissions/receptions, etc. because the gui copies packets in the packet log and inspects them later
  - eliminate all KLUDGES introduced by the 3 main infrastructure changes
@@ -58,7 +56,6 @@ NEED NOT:
    but we should avoid having these classes for a random collections of utility functions!
  - add separate classes/functions for iterating over the network nodes in a network or
    finding a network node based on its mac address/ip address or finding the position of a network node, etc.
- - add missing interface NED files for all L2 protocols, BMacInterface
  - add missing node NED files for existing protocols (e.g. sensor nodes, IoT devices) 
  - update all NED and C++ documentation
  - nicely position submodules in compound modules, prepare for 2 info lines
@@ -68,6 +65,8 @@ NEED NOT:
  - pretty print white spaces
 
 DONE:
+ + add missing interface NED files for all L2 protocols, BMacInterface
+ + use degree instead of double in GeoCoord, use degree instead of double in EulerAngles
  + revise and rename signals to have a consistent naming scheme (e.g. NF_*)
  + port *all* protocols to the new packet API
  + consider renaming peekHeader to peekFront, peekTrailer to peekBack, etc. in Packet
