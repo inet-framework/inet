@@ -32,7 +32,7 @@ class ProbabilisticBroadcastHeader extends NetworkHeaderBase
     L3Address   destAddr;
     long      id;    // Unique message ID ~ f(node address, unique number in node scope).
     int       nbHops;
-    IpProtocolId   protocolId = (IpProtocolId)-1;
+    IpProtocolId   protocolId;
     simtime_t appTtl;   // Message time-to-live set by application.
     L3Address   initialSrcAddr;
     L3Address   finalDestAddr;
@@ -46,6 +46,6 @@ cplusplus(ProbabilisticBroadcastHeader) {{
     virtual L3Address getDestinationAddress() const override { return getDestAddr(); }
     virtual void setDestinationAddress(const L3Address& address) override { setDestAddr(address); }
     virtual const Protocol *getProtocol() const override { return ProtocolGroup::ipprotocol.findProtocol(getProtocolId()); }
-    virtual void setProtocol(const Protocol *protocol) override { setProtocolId((IpProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(protocol)); }
+    virtual void setProtocol(const Protocol *protocol) override { setProtocolId(static_cast<IpProtocolId>(ProtocolGroup::ipprotocol.getProtocolNumber(protocol))); }
 }}
 

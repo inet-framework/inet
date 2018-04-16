@@ -55,7 +55,7 @@ class AddressBlock extends cObject
     bool hasMetric;
     double metric;
     bool hasMetricType;
-    DymoMetricType metricType = (DymoMetricType)-1;
+    DymoMetricType metricType;
     bool hasSequenceNumber;
     DymoSequenceNumber sequenceNumber = 0;
 }

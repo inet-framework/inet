@@ -200,8 +200,8 @@ class INET_API MemoryOutputStream {
      * byte order and MSB to LSB bit order.
      */
     void writeUint16Be(uint16_t value) {
-        writeByte((uint8_t)(value >> 8));
-        writeByte((uint8_t)(value >> 0));
+        writeByte(static_cast<uint8_t>(value >> 8));
+        writeByte(static_cast<uint8_t>(value >> 0));
     }
 
     /**
@@ -209,8 +209,8 @@ class INET_API MemoryOutputStream {
      * byte order and MSB to LSB bit order.
      */
     void writeUint16Le(uint16_t value) {
-        writeByte((uint8_t)(value >> 0));
-        writeByte((uint8_t)(value >> 8));
+        writeByte(static_cast<uint8_t>(value >> 0));
+        writeByte(static_cast<uint8_t>(value >> 8));
     }
 
     /**
@@ -218,10 +218,10 @@ class INET_API MemoryOutputStream {
      * byte order and MSB to LSB bit order.
      */
     void writeUint32Be(uint32_t value) {
-        writeByte((uint8_t)(value >> 24));
-        writeByte((uint8_t)(value >> 16));
-        writeByte((uint8_t)(value >> 8));
-        writeByte((uint8_t)(value >> 0));
+        writeByte(static_cast<uint8_t>(value >> 24));
+        writeByte(static_cast<uint8_t>(value >> 16));
+        writeByte(static_cast<uint8_t>(value >> 8));
+        writeByte(static_cast<uint8_t>(value >> 0));
     }
 
     /**
@@ -229,10 +229,10 @@ class INET_API MemoryOutputStream {
      * byte order and MSB to LSB bit order.
      */
     void writeUint32Le(uint32_t value) {
-        writeByte((uint8_t)(value >> 0));
-        writeByte((uint8_t)(value >> 8));
-        writeByte((uint8_t)(value >> 16));
-        writeByte((uint8_t)(value >> 24));
+        writeByte(static_cast<uint8_t>(value >> 0));
+        writeByte(static_cast<uint8_t>(value >> 8));
+        writeByte(static_cast<uint8_t>(value >> 16));
+        writeByte(static_cast<uint8_t>(value >> 24));
     }
 
     /**
@@ -240,14 +240,14 @@ class INET_API MemoryOutputStream {
      * byte order and MSB to LSB bit order.
      */
     void writeUint64Be(uint64_t value) {
-        writeByte((uint8_t)(value >> 56));
-        writeByte((uint8_t)(value >> 48));
-        writeByte((uint8_t)(value >> 40));
-        writeByte((uint8_t)(value >> 32));
-        writeByte((uint8_t)(value >> 24));
-        writeByte((uint8_t)(value >> 16));
-        writeByte((uint8_t)(value >> 8));
-        writeByte((uint8_t)(value >> 0));
+        writeByte(static_cast<uint8_t>(value >> 56));
+        writeByte(static_cast<uint8_t>(value >> 48));
+        writeByte(static_cast<uint8_t>(value >> 40));
+        writeByte(static_cast<uint8_t>(value >> 32));
+        writeByte(static_cast<uint8_t>(value >> 24));
+        writeByte(static_cast<uint8_t>(value >> 16));
+        writeByte(static_cast<uint8_t>(value >> 8));
+        writeByte(static_cast<uint8_t>(value >> 0));
     }
 
     /**
@@ -255,14 +255,14 @@ class INET_API MemoryOutputStream {
      * byte order and MSB to LSB bit order.
      */
     void writeUint64Le(uint64_t value) {
-        writeByte((uint8_t)(value >> 0));
-        writeByte((uint8_t)(value >> 8));
-        writeByte((uint8_t)(value >> 16));
-        writeByte((uint8_t)(value >> 24));
-        writeByte((uint8_t)(value >> 32));
-        writeByte((uint8_t)(value >> 40));
-        writeByte((uint8_t)(value >> 48));
-        writeByte((uint8_t)(value >> 56));
+        writeByte(static_cast<uint8_t>(value >> 0));
+        writeByte(static_cast<uint8_t>(value >> 8));
+        writeByte(static_cast<uint8_t>(value >> 16));
+        writeByte(static_cast<uint8_t>(value >> 24));
+        writeByte(static_cast<uint8_t>(value >> 32));
+        writeByte(static_cast<uint8_t>(value >> 40));
+        writeByte(static_cast<uint8_t>(value >> 48));
+        writeByte(static_cast<uint8_t>(value >> 56));
     }
     //@}
 

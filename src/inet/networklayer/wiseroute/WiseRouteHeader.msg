@@ -32,7 +32,7 @@ class WiseRouteHeader extends NetworkHeaderBase
     unsigned long seqNum = 0;
     int     isFlood;
     int     nbHops;
-    IpProtocolId     protocolId = (IpProtocolId)-1;
+    IpProtocolId     protocolId;
     L3Address finalDestAddr;
     L3Address initialSrcAddr;
     B         payloadLengthField;
@@ -45,6 +45,6 @@ cplusplus(WiseRouteHeader) {{
     virtual L3Address getDestinationAddress() const override { return L3Address(getDestAddr()); }
     virtual void setDestinationAddress(const L3Address& address) override { setDestAddr(address); }
     virtual const Protocol *getProtocol() const override { return ProtocolGroup::ipprotocol.findProtocol(getProtocolId()); }
-    virtual void setProtocol(const Protocol *protocol) override { setProtocolId((IpProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(protocol)); }
+    virtual void setProtocol(const Protocol *protocol) override { setProtocolId(static_cast<IpProtocolId>(ProtocolGroup::ipprotocol.getProtocolNumber(protocol))); }
 }}
 

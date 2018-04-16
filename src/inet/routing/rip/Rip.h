@@ -42,7 +42,7 @@ struct RipRoute : public cObject
     };
 
   private:
-    RouteType type = (RouteType)-1;    // the type of the route
+    RouteType type = static_cast<RouteType>(-1);    // the type of the route
     IRoute *route = nullptr;    // the route in the host routing table that is associated with this route, may be nullptr if deleted
     L3Address dest;    // destination of the route
     int prefixLength = 0;    // prefix length of the destination
@@ -152,7 +152,7 @@ class INET_API Rip : public cSimpleModule, protected cListener, public ILifecycl
     cMessage *startupTimer = nullptr;    // timer for delayed startup
     cMessage *shutdownTimer = nullptr;    // scheduled at shutdown
     // parameters
-    Mode mode = (Mode)-1;
+    Mode mode = static_cast<Mode>(-1);
     int ripUdpPort = -1;    // UDP port RIP routers (usually 520)
     simtime_t updateInterval;    // time between regular updates
     simtime_t routeExpiryTime;    // learned routes becomes invalid if no update received in this period of time

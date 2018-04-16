@@ -193,7 +193,7 @@ bool PatternMatcher::parseNumRange(const char *& str, char closingchar, long& lo
 std::string PatternMatcher::debugStrFrom(int from)
 {
     std::string result;
-    for (int k = from; k < (int)pattern.size(); k++) {
+    for (size_t k = from; k < pattern.size(); k++) {
         Elem& e = pattern[k];
         switch (e.type) {
             case LITERALSTRING:

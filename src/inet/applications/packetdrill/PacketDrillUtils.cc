@@ -284,10 +284,10 @@ PacketDrillScript::~PacketDrillScript()
 {
     //FIXME check memory leak
     for (cQueue::Iterator iter(*eventList); !iter.end(); iter++)
-        eventList->remove((PacketDrillEvent *) (*iter));
+        eventList->remove(*iter);
     delete eventList;
     for (cQueue::Iterator iter(*optionList); !iter.end(); iter++)
-        optionList->remove((PacketDrillEvent *) (*iter));
+        optionList->remove(*iter);
     delete optionList;
 }
 

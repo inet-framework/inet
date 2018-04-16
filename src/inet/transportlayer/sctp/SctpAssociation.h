@@ -1070,23 +1070,23 @@ class INET_API SctpAssociation : public cObject
      * Compare TSNs
      */
     /* Defines see RFC1982 for details */
-    #define SCTP_UINT16_GT(a, b) (((a < b) && ((uint16_t)(b - a) > (1U<<15))) || \
-                                  ((a > b) && ((uint16_t)(a - b) < (1U<<15))))
-    #define SCTP_UINT16_GE(a, b) (SCTP_UINT16_GT(a, b) || (a == b))
-    #define SCTP_UINT32_GT(a, b) (((a < b) && ((uint32_t)(b - a) > (1U<<31))) || \
-                                  ((a > b) && ((uint32_t)(a - b) < (1U<<31))))
-    #define SCTP_UINT32_GE(a, b) (SCTP_UINT32_GT(a, b) || (a == b))
+    inline static bool SCTP_UINT16_GT(uint16 a, uint16 b) { return (((a < b) && ((b - a) > (1U<<15))) || \
+                                  ((a > b) && ((a - b) < (1U<<15)))); }
+    inline static bool SCTP_UINT16_GE(uint16 a, uint16 b) { return (a == b ) || SCTP_UINT16_GT(a, b); }
+    inline static bool SCTP_UINT32_GT(uint32 a, uint32 b) { return ((a < b) && ((b - a) > (1UL<<31))) ||
+                                  ((a > b) && ((a - b) < (1UL<<31))); }
+    inline static bool SCTP_UINT32_GE(uint32 a, uint32 b) { return SCTP_UINT32_GT(a, b) || (a == b); }
     #define SCTP_TSN_GT(a, b) SCTP_UINT32_GT(a, b)
     #define SCTP_TSN_GE(a, b) SCTP_UINT32_GE(a, b)
     #define SCTP_SSN_GT(a, b) SCTP_UINT16_GT(a, b)
     #define SCTP_SSN_GE(a, b) SCTP_UINT16_GE(a, b)
-    inline static int32 tsnGe(const uint32 tsn1, const uint32 tsn2) { return SCTP_TSN_GE(tsn1, tsn2); }
-    inline static int32 tsnGt(const uint32 tsn1, const uint32 tsn2) { return SCTP_TSN_GT(tsn1, tsn2); }
-    inline static int32 tsnLe(const uint32 tsn1, const uint32 tsn2) { return SCTP_TSN_GE(tsn2, tsn1); }
-    inline static int32 tsnLt(const uint32 tsn1, const uint32 tsn2) { return SCTP_TSN_GT(tsn2, tsn1); }
-    inline static int32 tsnBetween(const uint32 tsn1, const uint32 midtsn, const uint32 tsn2) { return (SCTP_TSN_GE(midtsn, tsn1) && SCTP_TSN_GE(tsn2, midtsn)); }
-    inline static int16 ssnGt(const uint16 ssn1, const uint16 ssn2) { return SCTP_SSN_GT(ssn1, ssn2); }
-    inline static int32 midGt(const uint32 mid1, const uint32 mid2) { return SCTP_TSN_GT(mid1, mid2); }
+    inline static bool tsnGe(const uint32 tsn1, const uint32 tsn2) { return SCTP_TSN_GE(tsn1, tsn2); }
+    inline static bool tsnGt(const uint32 tsn1, const uint32 tsn2) { return SCTP_TSN_GT(tsn1, tsn2); }
+    inline static bool tsnLe(const uint32 tsn1, const uint32 tsn2) { return SCTP_TSN_GE(tsn2, tsn1); }
+    inline static bool tsnLt(const uint32 tsn1, const uint32 tsn2) { return SCTP_TSN_GT(tsn2, tsn1); }
+    inline static bool tsnBetween(const uint32 tsn1, const uint32 midtsn, const uint32 tsn2) { return (SCTP_TSN_GE(midtsn, tsn1) && SCTP_TSN_GE(tsn2, midtsn)); }
+    inline static bool ssnGt(const uint16 ssn1, const uint16 ssn2) { return SCTP_SSN_GT(ssn1, ssn2); }
+    inline static bool midGt(const uint32 mid1, const uint32 mid2) { return SCTP_TSN_GT(mid1, mid2); }
 
   protected:
     /** @name FSM transitions: analysing events and executing state transitions */
@@ -1359,7 +1359,7 @@ class INET_API SctpAssociation : public cObject
     void processIncomingResetRequestArrived(SctpIncomingSsnResetRequestParameter *requestParam);
     void processSsnTsnResetRequestArrived(SctpSsnTsnResetRequestParameter *requestParam);
     void processResetResponseArrived(SctpStreamResetResponseParameter *responseParam);
-    void processAddInAndOutResetRequestArrived(SctpAddStreamsRequestParameter *addInRequestParam, SctpAddStreamsRequestParameter *addOutRequestParam);
+    void processAddInAndOutResetRequestArrived(const SctpAddStreamsRequestParameter *addInRequestParam, SctpAddStreamsRequestParameter *addOutRequestParam);
     uint32 getBytesInFlightOfStream(uint16 sid);
     bool getFragInProgressOfStream(uint16 sid);
     void setFragInProgressOfStream(uint16 sid, bool frag);

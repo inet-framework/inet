@@ -392,7 +392,7 @@ void Topology::calculateUnweightedSingleShortestPathsTo(Node *_target)
         q.pop_front();
 
         // for each w adjacent to v...
-        for (int i = 0; i < (int)v->inLinks.size(); i++) {
+        for (size_t i = 0; i < v->inLinks.size(); i++) {
             if (!v->inLinks[i]->enabled)
                 continue;
 

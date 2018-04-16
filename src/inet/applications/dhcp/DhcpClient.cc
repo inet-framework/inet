@@ -407,7 +407,7 @@ void DhcpClient::handleDHCPMessage(Packet *packet)
         return;
     }
 
-    DhcpMessageType messageType = (DhcpMessageType)msg->getOptions().getMessageType();
+    DhcpMessageType messageType = msg->getOptions().getMessageType();
     switch (clientState) {
         case INIT:
             EV_WARN << getAndCheckMessageTypeName(messageType) << " message arrived in INIT state. In this state, client does not wait for any message at all, dropping." << endl;
@@ -712,20 +712,20 @@ bool DhcpClient::handleOperationStage(LifecycleOperation *operation, int stage, 
 {
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if ((NodeStartOperation::Stage)stage == NodeStartOperation::STAGE_APPLICATION_LAYER) {
+        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_APPLICATION_LAYER) {
             startApp();
             isOperational = true;
         }
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if ((NodeShutdownOperation::Stage)stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
+        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
             stopApp();
             isOperational = false;
             ie = nullptr;
         }
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if ((NodeCrashOperation::Stage)stage == NodeCrashOperation::STAGE_CRASH) {
+        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH) {
             stopApp();
             isOperational = false;
             ie = nullptr;

@@ -32,7 +32,7 @@ namespace physicallayer {
 Define_Module(ApskLayeredTransmitter);
 
 ApskLayeredTransmitter::ApskLayeredTransmitter() :
-    levelOfDetail((LevelOfDetail) - 1),
+    levelOfDetail(static_cast<LevelOfDetail>(-1)),
     encoder(nullptr),
     modulator(nullptr),
     pulseShaper(nullptr),

@@ -38,8 +38,8 @@ void TwoRateThreeColorMeter::initialize(int stage)
         WATCH(numYellow);
         WATCH(numRed);
 
-        PBS = 8 * (int)par("pbs");
-        CBS = 8 * (int)par("cbs");
+        PBS = 8 * par("pbs").intValue();
+        CBS = 8 * par("cbs").intValue();
         colorAwareMode = par("colorAwareMode");
         Tp = PBS;
         Tc = CBS;

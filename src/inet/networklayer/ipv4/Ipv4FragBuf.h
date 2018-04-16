@@ -42,7 +42,7 @@ class INET_API Ipv4FragBuf
     //
     struct Key
     {
-        ushort id = (ushort)-1;
+        ushort id = static_cast<ushort>(-1);
         Ipv4Address src;
         Ipv4Address dest;
 

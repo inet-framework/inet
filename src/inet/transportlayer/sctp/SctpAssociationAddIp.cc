@@ -72,7 +72,7 @@ void SctpAssociation::sendAsconf(const char *type, const bool remote)
                     ipParam->setRequestCorrelationId(++state->corrIdNum);
                     if (nat) {
                         ipParam->setAddressParam(L3Address("0.0.0.0"));
-                        sctpMain->addLocalAddressToAllRemoteAddresses(this, L3AddressResolver().resolve(sctpMain->par("addAddress"), 1), (std::vector<L3Address>)remoteAddressList);
+                        sctpMain->addLocalAddressToAllRemoteAddresses(this, L3AddressResolver().resolve(sctpMain->par("addAddress"), 1), remoteAddressList);
                         state->localAddresses.push_back(L3AddressResolver().resolve(sctpMain->par("addAddress"), 1));
                         if (remote)
                             targetAddr = remoteAddr;

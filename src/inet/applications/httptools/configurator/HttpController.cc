@@ -76,14 +76,14 @@ void HttpController::initialize(int stage)
         EV_INFO << "Registered servers are " << webSiteList.size() << endl;
         // Finish initialization of the probability distribution objects which depend on the number of servers.
         if (rdServerSelection->getType() == dt_uniform)
-            ((rdUniform *)rdServerSelection)->setEnd(webSiteList.size());
+            check_and_cast<rdUniform *>(rdServerSelection)->setEnd(webSiteList.size());
         else if (rdServerSelection->getType() == dt_zipf)
-            ((rdZipf *)rdServerSelection)->setN(webSiteList.size());
+            check_and_cast<rdZipf *>(rdServerSelection)->setN(webSiteList.size());
 
         EV_DEBUG << "Server selection probability distribution: " << rdServerSelection->toString() << endl;
 
-        std::string optionsfile = (const char *)par("events");
-        std::string optionssection = (const char *)par("eventsSection");
+        std::string optionsfile = par("events").stdstringValue();
+        std::string optionssection = par("eventsSection").stdstringValue();
         if (optionsfile.size() != 0)
             parseOptionsFile(optionsfile, optionssection);
     }
@@ -156,7 +156,7 @@ void HttpController::registerServer(HttpServerBase *serverAppModule, const char 
             pickList.push_back(en);
         }
         else {
-            pos = (int)uniform(0, pickList.size() - 1);
+            pos = (int)uniform(0, pickList.size() - 1);         //FIXME pos = intuniform(0, pickList.size() - 1);
             pickList.insert(begin + pos, en);
         }
     }
@@ -429,7 +429,7 @@ void HttpController::parseOptionsFile(std::string file, std::string section)
                 if (res.size() != 5)
                     throw cRuntimeError("Invalid format of event config line in '%s' Line: '%s'", file.c_str(), line.c_str());
                 try {
-                    activationtime = (simtime_t)atof(res[0].c_str());
+                    activationtime = simtime_t(atof(res[0].c_str()));
                     pval = atof(res[3].c_str());
                     amortizeval = atof(res[4].c_str());
                 }

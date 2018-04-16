@@ -118,8 +118,8 @@ void Aodv::handleMessage(cMessage *msg)
     }
 
     if (msg->isSelfMessage()) {
-        if (dynamic_cast<WaitForRrep *>(msg))
-            handleWaitForRREP((WaitForRrep *)msg);
+        if (auto waitForRrep = dynamic_cast<WaitForRrep *>(msg))
+            handleWaitForRREP(waitForRrep);
         else if (msg == helloMsgTimer)
             sendHelloMessagesIfNeeded();
         else if (msg == expungeTimer)
@@ -1198,7 +1198,7 @@ bool Aodv::handleOperationStage(LifecycleOperation *operation, int stage, IDoneC
 {
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if ((NodeStartOperation::Stage)stage == NodeStartOperation::STAGE_APPLICATION_LAYER) {
+        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_APPLICATION_LAYER) {
             isOperational = true;
             rebootTime = simTime();
 
@@ -1209,13 +1209,13 @@ bool Aodv::handleOperationStage(LifecycleOperation *operation, int stage, IDoneC
         }
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if ((NodeShutdownOperation::Stage)stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
+        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
             isOperational = false;
             clearState();
         }
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if ((NodeCrashOperation::Stage)stage == NodeCrashOperation::STAGE_CRASH) {
+        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH) {
             isOperational = false;
             clearState();
         }

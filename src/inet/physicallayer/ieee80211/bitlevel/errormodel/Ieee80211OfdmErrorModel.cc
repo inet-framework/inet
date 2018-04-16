@@ -80,15 +80,13 @@ const IReceptionBitModel *Ieee80211OfdmErrorModel::computeBitModel(const Layered
     const BitVector *bits = transmissionBitModel->getBits();
     BitVector *corruptedBits = new BitVector(*bits);
     const ScalarTransmissionSignalAnalogModel *analogModel = check_and_cast<const ScalarTransmissionSignalAnalogModel *>(transmission->getAnalogModel());
-    if (dynamic_cast<const IApskModulation *>(signalModulation)) {
-        const IApskModulation *apskSignalModulation = (const IApskModulation *)signalModulation;
+    if (auto apskSignalModulation = dynamic_cast<const IApskModulation *>(signalModulation)) {
         double signalFieldBer = std::isnan(signalBitErrorRate) ? apskSignalModulation->calculateBER(snir->getMin(), analogModel->getBandwidth(), signalBitRate) : signalBitErrorRate;
         corruptBits(corruptedBits, signalFieldBer, 0, signalBitLength);
     }
     else
         throw cRuntimeError("Unknown signal modulation");
-    if (dynamic_cast<const IApskModulation *>(dataModulation)) {
-        const IApskModulation *apskDataModulation = (const IApskModulation *)signalModulation;
+    if (auto apskDataModulation = dynamic_cast<const IApskModulation *>(dataModulation)) {
         double dataFieldBer = std::isnan(dataBitErrorRate) ? apskDataModulation->calculateBER(snir->getMin(), analogModel->getBandwidth(), dataBitRate) : dataBitErrorRate;
         corruptBits(corruptedBits, dataFieldBer, signalBitLength, corruptedBits->getSize());
     }

@@ -164,12 +164,12 @@ void Dymo::processSelfMessage(cMessage *message)
 {
     if (message == expungeTimer)
         processExpungeTimer();
-    else if (dynamic_cast<RreqWaitRrepTimer *>(message))
-        processRREQWaitRREPTimer((RreqWaitRrepTimer *)message);
-    else if (dynamic_cast<RreqBackoffTimer *>(message))
-        processRREQBackoffTimer((RreqBackoffTimer *)message);
-    else if (dynamic_cast<RreqHolddownTimer *>(message))
-        processRREQHolddownTimer((RreqHolddownTimer *)message);
+    else if (auto waitRrepTimer = dynamic_cast<RreqWaitRrepTimer *>(message))
+        processRREQWaitRREPTimer(waitRrepTimer);
+    else if (auto backoffTimer = dynamic_cast<RreqBackoffTimer *>(message))
+        processRREQBackoffTimer(backoffTimer);
+    else if (auto holddownTimer = dynamic_cast<RreqHolddownTimer *>(message))
+        processRREQHolddownTimer(holddownTimer);
     else
         throw cRuntimeError("Unknown self message");
 }
@@ -1411,18 +1411,18 @@ bool Dymo::handleOperationStage(LifecycleOperation *operation, int stage, IDoneC
 {
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if ((NodeStartOperation::Stage)stage == NodeStartOperation::STAGE_APPLICATION_LAYER)
+        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_APPLICATION_LAYER)
             configureInterfaces();
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if ((NodeShutdownOperation::Stage)stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER)
+        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_APPLICATION_LAYER)
             // TODO: send a RERR to notify peers about broken routes
             for (auto & elem : targetAddressToRREQTimer)
                 cancelRouteDiscovery(elem.first);
 
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if ((NodeCrashOperation::Stage)stage == NodeCrashOperation::STAGE_CRASH) {
+        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH) {
             targetAddressToSequenceNumber.clear();
             targetAddressToRREQTimer.clear();
             targetAddressToDelayedPackets.clear();

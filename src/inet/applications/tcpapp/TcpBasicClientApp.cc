@@ -68,7 +68,7 @@ bool TcpBasicClientApp::handleOperationStage(LifecycleOperation *operation, int 
 {
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if ((NodeStartOperation::Stage)stage == NodeStartOperation::STAGE_APPLICATION_LAYER) {
+        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_APPLICATION_LAYER) {
             simtime_t now = simTime();
             simtime_t start = std::max(startTime, now);
             if (timeoutMsg && ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime))) {
@@ -78,7 +78,7 @@ bool TcpBasicClientApp::handleOperationStage(LifecycleOperation *operation, int 
         }
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if ((NodeShutdownOperation::Stage)stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
+        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
             cancelEvent(timeoutMsg);
             if (socket.getState() == TcpSocket::CONNECTED || socket.getState() == TcpSocket::CONNECTING || socket.getState() == TcpSocket::PEER_CLOSED)
                 close();
@@ -86,7 +86,7 @@ bool TcpBasicClientApp::handleOperationStage(LifecycleOperation *operation, int 
         }
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if ((NodeCrashOperation::Stage)stage == NodeCrashOperation::STAGE_CRASH)
+        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH)
             cancelEvent(timeoutMsg);
     }
     else
@@ -179,7 +179,7 @@ void TcpBasicClientApp::socketDataArrived(int connId, void *ptr, Packet *msg, bo
         EV_INFO << "reply arrived\n";
 
         if (timeoutMsg) {
-            simtime_t d = simTime() + (simtime_t)par("thinkTime");
+            simtime_t d = simTime() + par("thinkTime");
             rescheduleOrDeleteTimer(d, MSGKIND_SEND);
         }
     }
@@ -195,7 +195,7 @@ void TcpBasicClientApp::socketClosed(int connId, void *ptr)
 
     // start another session after a delay
     if (timeoutMsg) {
-        simtime_t d = simTime() + (simtime_t)par("idleInterval");
+        simtime_t d = simTime() + par("idleInterval");
         rescheduleOrDeleteTimer(d, MSGKIND_CONNECT);
     }
 }
@@ -206,7 +206,7 @@ void TcpBasicClientApp::socketFailure(int connId, void *ptr, int code)
 
     // reconnect after a delay
     if (timeoutMsg) {
-        simtime_t d = simTime() + (simtime_t)par("reconnectInterval");
+        simtime_t d = simTime() + par("reconnectInterval");
         rescheduleOrDeleteTimer(d, MSGKIND_CONNECT);
     }
 }

@@ -59,7 +59,7 @@ void Dsdv::initialize(int stage)
         rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
 
         routeLifetime = par("routeLifetime").doubleValue();
-        helloInterval = (simtime_t) par("helloInterval");
+        helloInterval = par("helloInterval");
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
     {
@@ -117,7 +117,7 @@ void Dsdv::start()
     //reads from omnetpp.ini
     //HelloForward = new DsdvHello("HelloForward");
     // schedules a random periodic event: the hello message broadcast from DSDV module
-    scheduleAt(simTime() + uniform(0, (double)par("maxVariance")), event);
+    scheduleAt(simTime() + uniform(0.0, par("maxVariance").doubleValue()), event);
 }
 
 void Dsdv::stop()
@@ -371,16 +371,16 @@ bool Dsdv::handleOperationStage(LifecycleOperation *operation, int stage, IDoneC
 {
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if ((NodeStartOperation::Stage)stage == NodeStartOperation::STAGE_APPLICATION_LAYER)
+        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_APPLICATION_LAYER)
             start();
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if ((NodeShutdownOperation::Stage)stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
+        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
             stop();
         }
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if ((NodeCrashOperation::Stage)stage == NodeCrashOperation::STAGE_CRASH) {
+        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH) {
             stop();
         }
     }

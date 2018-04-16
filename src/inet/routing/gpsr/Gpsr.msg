@@ -57,7 +57,7 @@ class GpsrBeacon extends FieldsChunk
 // http://www.eecs.harvard.edu/~htk/publication/2000-mobi-karp-kung.pdf
 //
 class GpsrOption extends TlvOptionBase {
-    GpsrForwardingMode routingMode = (GpsrForwardingMode)-1;
+    GpsrForwardingMode routingMode;
     Coord destinationPosition;               // D
     Coord perimeterRoutingStartPosition;     // Lp
     Coord perimeterRoutingForwardPosition;   // Lf

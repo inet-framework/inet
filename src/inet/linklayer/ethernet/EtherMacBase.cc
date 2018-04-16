@@ -293,20 +293,20 @@ bool EtherMacBase::handleOperationStage(LifecycleOperation *operation, int stage
 {
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if ((NodeStartOperation::Stage)stage == NodeStartOperation::STAGE_LINK_LAYER) {
+        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_LINK_LAYER) {
             initializeFlags();
             initializeMacAddress();
             initializeQueueModule();
         }
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if ((NodeShutdownOperation::Stage)stage == NodeShutdownOperation::STAGE_LINK_LAYER) {
+        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_LINK_LAYER) {
             connected = false;
             processConnectDisconnect();
         }
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if ((NodeCrashOperation::Stage)stage == NodeCrashOperation::STAGE_CRASH) {
+        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH) {
             connected = false;
             processConnectDisconnect();
         }
@@ -323,20 +323,16 @@ void EtherMacBase::receiveSignal(cComponent *source, simsignal_t signalID, cObje
     if (signalID != POST_MODEL_CHANGE)
         return;
 
-    if (dynamic_cast<cPostPathCreateNotification *>(obj)) {
-        cPostPathCreateNotification *gcobj = (cPostPathCreateNotification *)obj;
-
+    if (auto gcobj = dynamic_cast<cPostPathCreateNotification *>(obj)) {
         if ((physOutGate == gcobj->pathStartGate) || (physInGate == gcobj->pathEndGate))
             refreshConnection();
     }
-    else if (dynamic_cast<cPostPathCutNotification *>(obj)) {
-        cPostPathCutNotification *gcobj = (cPostPathCutNotification *)obj;
-
+    else if (auto gcobj = dynamic_cast<cPostPathCutNotification *>(obj)) {
         if ((physOutGate == gcobj->pathStartGate) || (physInGate == gcobj->pathEndGate))
             refreshConnection();
     }
     else if (transmissionChannel && dynamic_cast<cPostParameterChangeNotification *>(obj)) {    // note: we are subscribed to the channel object too
-        cPostParameterChangeNotification *gcobj = (cPostParameterChangeNotification *)obj;
+        cPostParameterChangeNotification *gcobj = static_cast<cPostParameterChangeNotification *>(obj);
         if (transmissionChannel == gcobj->par->getOwner())
             refreshConnection();
     }
@@ -446,7 +442,7 @@ void EtherMacBase::flushQueue()
     // code would look slightly nicer with a pop() function that returns nullptr if empty
     if (txQueue.innerQueue) {
         while (!txQueue.innerQueue->isEmpty()) {
-            cMessage *msg = (cMessage *)txQueue.innerQueue->pop();
+            cMessage *msg = static_cast<cMessage *>(txQueue.innerQueue->pop());
             PacketDropDetails details;
             details.setReason(INTERFACE_DOWN);
             emit(packetDroppedSignal, msg, &details);
@@ -613,7 +609,7 @@ void EtherMacBase::getNextFrameFromQueue()
     }
     else {
         if (!txQueue.innerQueue->isEmpty())
-            curTxFrame = (Packet *)txQueue.innerQueue->pop();
+            curTxFrame = static_cast<Packet *>(txQueue.innerQueue->pop());
     }
 }
 

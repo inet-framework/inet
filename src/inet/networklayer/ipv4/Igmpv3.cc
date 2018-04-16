@@ -90,7 +90,7 @@ static Ipv4AddressVector set_union(const Ipv4AddressVector& first, const Ipv4Add
 static ostream& operator<<(ostream& out, const Ipv4AddressVector addresses)
 {
     out << "(";
-    for (int i = 0; i < (int)addresses.size(); i++)
+    for (size_t i = 0; i < addresses.size(); i++)
         out << (i > 0 ? "," : "") << addresses[i];
     out << ")";
     return out;
@@ -441,14 +441,14 @@ void Igmpv3::initialize(int stage)
         registerProtocol(Protocol::igmp, gate("ipOut"), nullptr);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_2) {    // ipv4Data() created in INITSTAGE_NETWORK_LAYER
-        for (int i = 0; i < (int)ift->getNumInterfaces(); ++i) {
+        for (size_t i = 0; i < ift->getNumInterfaces(); ++i) {
             InterfaceEntry *ie = ift->getInterface(i);
             if (ie->isMulticast())
                 configureInterface(ie);
         }
         // in multicast routers: join to ALL_IGMPv3_ROUTERS_MCAST address on all interfaces
         if (enabled && rt->isMulticastForwardingEnabled()) {
-            for (int i = 0; i < (int)ift->getNumInterfaces(); ++i) {
+            for (size_t i = 0; i < ift->getNumInterfaces(); ++i) {
                 InterfaceEntry *ie = ift->getInterface(i);
                 if (ie->isMulticast())
                     ie->ipv4Data()->joinMulticastGroup(Ipv4Address::ALL_IGMPV3_ROUTERS_MCAST);
@@ -987,7 +987,7 @@ void Igmpv3::sendGroupReport(InterfaceEntry *ie, const vector<GroupRecord>& reco
     unsigned int byteLength = 8;   // Igmpv3Report header size
     msg->setType(IGMPV3_MEMBERSHIP_REPORT);
     msg->setGroupRecordArraySize(records.size());
-    for (int i = 0; i < (int)records.size(); ++i) {
+    for (size_t i = 0; i < records.size(); ++i) {
         Ipv4Address group = records[i].groupAddress;
         ASSERT(group.isMulticast() && !group.isLinkLocalMulticast());
         msg->setGroupRecord(i, records[i]);

@@ -99,14 +99,14 @@ void Ieee80211AgentSta::handleResponse(cMessage *msg)
 
     EV << "Processing confirmation from mgmt: " << ctrl->getClassName() << "\n";
 
-    if (dynamic_cast<Ieee80211Prim_ScanConfirm *>(ctrl))
-        processScanConfirm((Ieee80211Prim_ScanConfirm *)ctrl);
-    else if (dynamic_cast<Ieee80211Prim_AuthenticateConfirm *>(ctrl))
-        processAuthenticateConfirm((Ieee80211Prim_AuthenticateConfirm *)ctrl);
-    else if (dynamic_cast<Ieee80211Prim_AssociateConfirm *>(ctrl))
-        processAssociateConfirm((Ieee80211Prim_AssociateConfirm *)ctrl);
-    else if (dynamic_cast<Ieee80211Prim_ReassociateConfirm *>(ctrl))
-        processReassociateConfirm((Ieee80211Prim_ReassociateConfirm *)ctrl);
+    if (auto ptr = dynamic_cast<Ieee80211Prim_ScanConfirm *>(ctrl))
+        processScanConfirm(ptr);
+    else if (auto ptr = dynamic_cast<Ieee80211Prim_AuthenticateConfirm *>(ctrl))
+        processAuthenticateConfirm(ptr);
+    else if (auto ptr = dynamic_cast<Ieee80211Prim_AssociateConfirm *>(ctrl))
+        processAssociateConfirm(ptr);
+    else if (auto ptr = dynamic_cast<Ieee80211Prim_ReassociateConfirm *>(ctrl))
+        processReassociateConfirm(ptr);
     else if (ctrl)
         throw cRuntimeError("handleResponse(): unrecognized control info class `%s'", ctrl->getClassName());
     else
@@ -146,7 +146,7 @@ void Ieee80211AgentSta::sendScanRequest()
     req->setMinChannelTime(minChannelTime);
     req->setMaxChannelTime(maxChannelTime);
     req->setChannelListArraySize(channelsToScan.size());
-    for (int i = 0; i < (int)channelsToScan.size(); i++)
+    for (size_t i = 0; i < channelsToScan.size(); i++)
         req->setChannelList(i, channelsToScan[i]);
     //XXX BSSID, SSID are left at default ("any")
 
@@ -216,7 +216,7 @@ void Ieee80211AgentSta::processScanConfirm(Ieee80211Prim_ScanConfirm *resp)
     else {
         // search if the default_ssid is in the list, otherwise
         // keep searching.
-        for (int i = 0; i < (int)resp->getBssListArraySize(); i++) {
+        for (size_t i = 0; i < resp->getBssListArraySize(); i++) {
             std::string resp_ssid = resp->getBssList(i).getSSID();
             if (resp_ssid == this->default_ssid) {
                 EV << "found default SSID " << resp_ssid << endl;
@@ -244,7 +244,7 @@ void Ieee80211AgentSta::processScanConfirm(Ieee80211Prim_ScanConfirm *resp)
 void Ieee80211AgentSta::dumpAPList(Ieee80211Prim_ScanConfirm *resp)
 {
     EV << "Received AP list:\n";
-    for (int i = 0; i < (int)resp->getBssListArraySize(); i++) {
+    for (size_t i = 0; i < resp->getBssListArraySize(); i++) {
         const Ieee80211Prim_BssDescription& bssDesc = resp->getBssList(i);
         EV << "    " << i << ". "
            << " address=" << bssDesc.getBSSID()
@@ -265,7 +265,7 @@ int Ieee80211AgentSta::chooseBSS(Ieee80211Prim_ScanConfirm *resp)
     // here, just choose the one with the greatest receive power
     // TODO and which supports a good data rate we support
     int bestIndex = 0;
-    for (int i = 0; i < (int)resp->getBssListArraySize(); i++)
+    for (size_t i = 0; i < resp->getBssListArraySize(); i++)
         if (resp->getBssList(i).getRxPower() > resp->getBssList(bestIndex).getRxPower())
             bestIndex = i;
 

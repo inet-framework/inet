@@ -170,7 +170,7 @@ class INET_API PimBase : public OperationalBase
     double holdTime = 0;
     int designatedRouterPriority = 0;
 
-    PimInterface::PimMode mode = (PimInterface::PimMode)0;
+    PimInterface::PimMode mode = static_cast<PimInterface::PimMode>(0);
     uint32_t generationID = 0;
     cMessage *helloTimer = nullptr;
 

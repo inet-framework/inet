@@ -236,7 +236,7 @@ void UdpSocket::blockMulticastSources(int interfaceId, const L3Address& multicas
     ctrl->setInterfaceId(interfaceId);
     ctrl->setMulticastAddr(multicastAddr);
     ctrl->setSourceListArraySize(sourceList.size());
-    for (int i = 0; i < (int)sourceList.size(); ++i)
+    for (size_t i = 0; i < sourceList.size(); ++i)
         ctrl->setSourceList(i, sourceList[i]);
     request->setControlInfo(ctrl);
     sendToUDP(request);
@@ -249,7 +249,7 @@ void UdpSocket::unblockMulticastSources(int interfaceId, const L3Address& multic
     ctrl->setInterfaceId(interfaceId);
     ctrl->setMulticastAddr(multicastAddr);
     ctrl->setSourceListArraySize(sourceList.size());
-    for (int i = 0; i < (int)sourceList.size(); ++i)
+    for (size_t i = 0; i < sourceList.size(); ++i)
         ctrl->setSourceList(i, sourceList[i]);
     request->setControlInfo(ctrl);
     sendToUDP(request);
@@ -262,7 +262,7 @@ void UdpSocket::joinMulticastSources(int interfaceId, const L3Address& multicast
     ctrl->setInterfaceId(interfaceId);
     ctrl->setMulticastAddr(multicastAddr);
     ctrl->setSourceListArraySize(sourceList.size());
-    for (int i = 0; i < (int)sourceList.size(); ++i)
+    for (size_t i = 0; i < sourceList.size(); ++i)
         ctrl->setSourceList(i, sourceList[i]);
     request->setControlInfo(ctrl);
     sendToUDP(request);
@@ -275,7 +275,7 @@ void UdpSocket::leaveMulticastSources(int interfaceId, const L3Address& multicas
     ctrl->setInterfaceId(interfaceId);
     ctrl->setMulticastAddr(multicastAddr);
     ctrl->setSourceListArraySize(sourceList.size());
-    for (int i = 0; i < (int)sourceList.size(); ++i)
+    for (size_t i = 0; i < sourceList.size(); ++i)
         ctrl->setSourceList(i, sourceList[i]);
     request->setControlInfo(ctrl);
     sendToUDP(request);
@@ -290,7 +290,7 @@ void UdpSocket::setMulticastSourceFilter(int interfaceId, const L3Address& multi
     ctrl->setMulticastAddr(multicastAddr);
     ctrl->setFilterMode(filterMode);
     ctrl->setSourceListArraySize(sourceList.size());
-    for (int i = 0; i < (int)sourceList.size(); ++i)
+    for (size_t i = 0; i < sourceList.size(); ++i)
         ctrl->setSourceList(i, sourceList[i]);
     request->setControlInfo(ctrl);
     sendToUDP(request);

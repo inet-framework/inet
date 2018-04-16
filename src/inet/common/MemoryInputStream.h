@@ -281,8 +281,8 @@ class INET_API MemoryInputStream {
      */
     uint16_t readUint16Be() {
         uint16_t value = 0;
-        value |= ((uint16_t)(readByte()) << 8);
-        value |= ((uint16_t)(readByte()) << 0);
+        value |= (static_cast<uint16_t>(readByte()) << 8);
+        value |= (static_cast<uint16_t>(readByte()) << 0);
         return value;
     }
 
@@ -292,8 +292,8 @@ class INET_API MemoryInputStream {
      */
     uint16_t readUint16Le() {
         uint16_t value = 0;
-        value |= ((uint16_t)(readByte()) << 0);
-        value |= ((uint16_t)(readByte()) << 8);
+        value |= (static_cast<uint16_t>(readByte()) << 0);
+        value |= (static_cast<uint16_t>(readByte()) << 8);
         return value;
     }
 
@@ -303,10 +303,10 @@ class INET_API MemoryInputStream {
      */
     uint32_t readUint32Be() {
         uint32_t value = 0;
-        value |= ((uint32_t)(readByte()) << 24);
-        value |= ((uint32_t)(readByte()) << 16);
-        value |= ((uint32_t)(readByte()) << 8);
-        value |= ((uint32_t)(readByte()) << 0);
+        value |= (static_cast<uint32_t>(readByte()) << 24);
+        value |= (static_cast<uint32_t>(readByte()) << 16);
+        value |= (static_cast<uint32_t>(readByte()) << 8);
+        value |= (static_cast<uint32_t>(readByte()) << 0);
         return value;
     }
 
@@ -316,10 +316,10 @@ class INET_API MemoryInputStream {
      */
     uint32_t readUint32Le() {
         uint32_t value = 0;
-        value |= ((uint32_t)(readByte()) << 0);
-        value |= ((uint32_t)(readByte()) << 8);
-        value |= ((uint32_t)(readByte()) << 16);
-        value |= ((uint32_t)(readByte()) << 24);
+        value |= (static_cast<uint32_t>(readByte()) << 0);
+        value |= (static_cast<uint32_t>(readByte()) << 8);
+        value |= (static_cast<uint32_t>(readByte()) << 16);
+        value |= (static_cast<uint32_t>(readByte()) << 24);
         return value;
     }
 
@@ -329,14 +329,14 @@ class INET_API MemoryInputStream {
      */
     uint64_t readUint64Be() {
         uint64_t value = 0;
-        value |= ((uint64_t)(readByte()) << 56);
-        value |= ((uint64_t)(readByte()) << 48);
-        value |= ((uint64_t)(readByte()) << 40);
-        value |= ((uint64_t)(readByte()) << 32);
-        value |= ((uint64_t)(readByte()) << 24);
-        value |= ((uint64_t)(readByte()) << 16);
-        value |= ((uint64_t)(readByte()) << 8);
-        value |= ((uint64_t)(readByte()) << 0);
+        value |= (static_cast<uint64_t>(readByte()) << 56);
+        value |= (static_cast<uint64_t>(readByte()) << 48);
+        value |= (static_cast<uint64_t>(readByte()) << 40);
+        value |= (static_cast<uint64_t>(readByte()) << 32);
+        value |= (static_cast<uint64_t>(readByte()) << 24);
+        value |= (static_cast<uint64_t>(readByte()) << 16);
+        value |= (static_cast<uint64_t>(readByte()) << 8);
+        value |= (static_cast<uint64_t>(readByte()) << 0);
         return value;
     }
 
@@ -346,14 +346,14 @@ class INET_API MemoryInputStream {
      */
     uint64_t readUint64Le() {
         uint64_t value = 0;
-        value |= ((uint64_t)(readByte()) << 0);
-        value |= ((uint64_t)(readByte()) << 8);
-        value |= ((uint64_t)(readByte()) << 16);
-        value |= ((uint64_t)(readByte()) << 24);
-        value |= ((uint64_t)(readByte()) << 32);
-        value |= ((uint64_t)(readByte()) << 40);
-        value |= ((uint64_t)(readByte()) << 48);
-        value |= ((uint64_t)(readByte()) << 56);
+        value |= (static_cast<uint64_t>(readByte()) << 0);
+        value |= (static_cast<uint64_t>(readByte()) << 8);
+        value |= (static_cast<uint64_t>(readByte()) << 16);
+        value |= (static_cast<uint64_t>(readByte()) << 24);
+        value |= (static_cast<uint64_t>(readByte()) << 32);
+        value |= (static_cast<uint64_t>(readByte()) << 40);
+        value |= (static_cast<uint64_t>(readByte()) << 48);
+        value |= (static_cast<uint64_t>(readByte()) << 56);
         return value;
     }
     //@}

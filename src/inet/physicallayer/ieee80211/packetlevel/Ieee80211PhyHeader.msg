@@ -45,7 +45,7 @@ class Ieee80211FhssPhyHeader extends Ieee80211PhyHeader
     uint16_t plw;
     uint8_t psf;
     uint16_t crc;
-    CrcMode crcMode = (CrcMode)-1;
+    CrcMode crcMode;
 }
 
 //
@@ -59,7 +59,7 @@ class Ieee80211IrPhyHeader extends Ieee80211PhyHeader
 {
     // TODO: uint16_t lengthField;
     uint16_t crc;
-    CrcMode crcMode = (CrcMode)-1;
+    CrcMode crcMode;
 }
 
 //
@@ -76,7 +76,7 @@ class Ieee80211DsssPhyHeader extends Ieee80211PhyHeader
     uint8_t service;
     // TODO: uint16_t lengthField;
     uint16_t crc;
-    CrcMode crcMode = (CrcMode)-1;
+    CrcMode crcMode;
 }
 
 //

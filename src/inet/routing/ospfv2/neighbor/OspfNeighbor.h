@@ -99,7 +99,7 @@ class INET_API Neighbor
     bool updateRetransmissionTimerActive = false;
     cMessage *requestRetransmissionTimer = nullptr;
     bool requestRetransmissionTimerActive = false;
-    DatabaseExchangeRelationshipType databaseExchangeRelationship = (DatabaseExchangeRelationshipType)-1;
+    DatabaseExchangeRelationshipType databaseExchangeRelationship = static_cast<DatabaseExchangeRelationshipType>(-1);
     bool firstAdjacencyInited = false;
     unsigned long ddSequenceNumber = 0;
     DdPacketId lastReceivedDDPacket;

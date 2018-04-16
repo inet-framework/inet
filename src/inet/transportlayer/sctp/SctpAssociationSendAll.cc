@@ -59,11 +59,11 @@ void SctpAssociation::storePacket(SctpPathVariables *pathVar,
         const bool authAdded)
 {
     uint32 packetBytes = 0;
-    SctpHeader *sctpMsg = (SctpHeader *)sctp.get();
+    const SctpHeader *sctpMsg = sctp.get();
     for (uint16 i = 0; i < sctpMsg->getSctpChunksArraySize(); i++) {
         const SctpChunk *chunkPtr = sctpMsg->getSctpChunks(i);
         if (chunkPtr->getSctpChunkType() == DATA) {
-            SctpDataChunk* dataChunk = (SctpDataChunk*)(chunkPtr);
+            const SctpDataChunk* dataChunk = check_and_cast<const SctpDataChunk*>(chunkPtr);
             if(dataChunk != nullptr) {
                 const uint32_t tsn = dataChunk->getTsn();
                 SctpDataVariables* chunk = retransmissionQ->payloadQueue.find(tsn)->second;
@@ -114,7 +114,7 @@ void SctpAssociation::loadPacket(SctpPathVariables *pathVar,
     for (uint16 i = 0; i < (*sctpMsg)->getSctpChunksArraySize(); i++) {
         const SctpChunk *chunkPtr = (*sctpMsg)->getSctpChunks(i);
         if (chunkPtr->getSctpChunkType() == 0) {
-            SctpDataChunk* dataChunk = (SctpDataChunk*)(chunkPtr);
+            const SctpDataChunk* dataChunk = check_and_cast<const SctpDataChunk*>(chunkPtr);
             if(dataChunk != nullptr) {
                 const uint32_t tsn = dataChunk->getTsn();
                 SctpDataVariables* chunk = retransmissionQ->payloadQueue.find(tsn)->second;
@@ -841,7 +841,7 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
                 stopTimer(SackTimer);
                 sctpAlgorithm->sackSent();
                 state->sackAllowed = false;
-                sendSACKviaSelectedPath((const Ptr<SctpHeader>&) sctpMsg);
+                sendSACKviaSelectedPath(Ptr<SctpHeader>(sctpMsg));
                 sctpMsg = nullptr;
                 return;
             }
@@ -870,11 +870,11 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
                 }
                 if (bytesToSend == 0) {
                     Packet *pkt = new Packet("DATA");
-                    sendToIP(pkt, (const Ptr<SctpHeader>&)sctpMsg, path->remoteAddress);
+                    sendToIP(pkt, Ptr<SctpHeader>(sctpMsg), path->remoteAddress);
+                    sctpMsg = nullptr;
                     forwardPresent = false;
                     headerCreated = false;
                     chunksAdded = 0;
-                    sctpMsg = nullptr;
                 }
             }
         }

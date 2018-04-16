@@ -67,7 +67,7 @@ void SctpServer::initialize(int stage)
         delay = par("echoDelay");
         delayFirstRead = par("delayFirstRead");
         cPar *delT = &par("readingInterval");
-        if (delT->isNumeric() && (double)*delT == 0)
+        if (delT->isNumeric() && delT->doubleValue() == 0)      //FIXME why used the isNumeric() ?
             readInt = false;
         else
             readInt = true;
@@ -226,7 +226,7 @@ void SctpServer::handleMessage(cMessage *msg)
                     }
                 }
                 else {
-                    if (serverAssocStatMap[assocId].rcvdPackets == (unsigned int)par("numPacketsToReceivePerClient")
+                    if (serverAssocStatMap[assocId].rcvdPackets == static_cast<unsigned long int>(par("numPacketsToReceivePerClient"))
                         && serverAssocStatMap[assocId].abortSent == false)
                     {
                         sendOrSchedule(makeAbortNotification(command->dup()));
@@ -498,9 +498,9 @@ void SctpServer::handleTimer(cMessage *msg)
     else if (msg == delayFirstReadTimer) {
         delayFirstRead = 0;
         if (readInt && !delayTimer->isScheduled()) {
-            double tempInterval = par("readingInterval");
-            scheduleAt(simTime() + (simtime_t)tempInterval, delayTimer);
-            scheduleAt(simTime() + (simtime_t)tempInterval, makeDefaultReceive());
+            simtime_t tempInterval = par("readingInterval");
+            scheduleAt(simTime() + tempInterval, delayTimer);
+            scheduleAt(simTime() + tempInterval, makeDefaultReceive());
         }
         return;
     }

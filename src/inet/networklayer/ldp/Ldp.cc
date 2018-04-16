@@ -197,11 +197,11 @@ bool Ldp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCa
 {
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if ((NodeStartOperation::Stage)stage == NodeStartOperation::STAGE_APPLICATION_LAYER)
+        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_APPLICATION_LAYER)
             scheduleAt(simTime() + exponential(0.1), sendHelloMsg);
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if ((NodeShutdownOperation::Stage)stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
+        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
             for (auto & elem : myPeers)
                 cancelAndDelete(elem.timeout);
             myPeers.clear();
@@ -209,7 +209,7 @@ bool Ldp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCa
         }
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if ((NodeCrashOperation::Stage)stage == NodeCrashOperation::STAGE_CRASH) {
+        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH) {
         }
     }
     else
@@ -436,8 +436,8 @@ void Ldp::sendHelloTo(Ipv4Address dest)
     pk->addPar("color") = LDP_HELLO_TRAFFIC;
 
     if (dest.isMulticast()) {
-        for (int i = 0; i < (int)udpSockets.size(); ++i) {
-            Packet *msg = (i == (int)udpSockets.size() - 1) ? pk : pk->dup();
+        for (size_t i = 0; i < udpSockets.size(); ++i) {
+            Packet *msg = (i == udpSockets.size() - 1) ? pk : pk->dup();
             udpSockets[i].sendTo(msg, dest, LDP_PORT);
         }
     }

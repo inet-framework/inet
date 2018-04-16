@@ -86,7 +86,7 @@ const char *Chunk::getBytesAsString(int index)
         std::vector<uint8_t> bytes;
         outputStream.copyData(bytes);
         char tmp[3] = "  ";
-        for (int i = 0; i < (int)bytes.size(); i++) {
+        for (size_t i = 0; i < bytes.size(); i++) {
             if (i != 0)
                 asStringValue += " ";
             sprintf(tmp, "%02X", bytes[i]);

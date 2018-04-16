@@ -56,7 +56,7 @@ class INET_API Ipv4 : public QueueBase, public NetfilterBase, public ILifecycle,
         virtual ~QueuedDatagramForHook() {}
 
         Packet *packet = nullptr;
-        const IHook::Type hookType = (IHook::Type)-1;
+        const IHook::Type hookType = static_cast<IHook::Type>(-1);
     };
     typedef std::map<Ipv4Address, cPacketQueue> PendingPackets;
 
@@ -76,7 +76,7 @@ class INET_API Ipv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     int transportInGateBaseId = -1;
 
     // config
-    CrcMode crcMode = (CrcMode)-1;
+    CrcMode crcMode = static_cast<CrcMode>(-1);
     int defaultTimeToLive = -1;
     int defaultMCTimeToLive = -1;
     simtime_t fragmentTimeoutTime;

@@ -142,7 +142,7 @@ void AckingMac::receiveSignal(cComponent *source, simsignal_t signalID, long val
 {
     Enter_Method_Silent();
     if (signalID == IRadio::transmissionStateChangedSignal) {
-        IRadio::TransmissionState newRadioTransmissionState = (IRadio::TransmissionState)value;
+        IRadio::TransmissionState newRadioTransmissionState = static_cast<IRadio::TransmissionState>(value);
         if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE) {
             radio->setRadioMode(fullDuplex ? IRadio::RADIO_MODE_TRANSCEIVER : IRadio::RADIO_MODE_RECEIVER);
             if (!lastSentPk && queueModule != nullptr)

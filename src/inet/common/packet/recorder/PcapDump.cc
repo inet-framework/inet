@@ -88,7 +88,7 @@ void PcapDump::writePacket(simtime_t stime, const Packet *packet)
 
     EV << "PcapDump::writeFrame\n";
     uint8 buf[MAXBUFLENGTH];
-    memset((void *)&buf, 0, sizeof(buf));
+    memset(buf, 0, sizeof(buf));
 
     struct pcaprec_hdr ph;
     ph.ts_sec = (int32)stime.inUnit(SIMTIME_S);

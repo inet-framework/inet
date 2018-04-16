@@ -322,7 +322,7 @@ bool TcpConnection::processAppCommand(cMessage *msg)
     printConnBrief();
 
     // first do actions
-    TcpCommand *tcpCommand = (TcpCommand *)(msg->removeControlInfo());
+    TcpCommand *tcpCommand = check_and_cast_nullable<TcpCommand *>(msg->removeControlInfo());
     TcpEventCode event = preanalyseAppCommandEvent(msg->getKind());
     EV_INFO << "App command: " << eventName(event) << "\n";
 

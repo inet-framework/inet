@@ -27,6 +27,6 @@ class ApskPhyHeader extends FieldsChunk
     chunkLength = B(6);
     uint16_t lengthField;
     uint16_t crc = 0;
-    CrcMode crcMode = (CrcMode)-1;
+    CrcMode crcMode;
     const Protocol *payloadProtocol @toString("->str()") = nullptr; // specifies a protocol (internal class with an artificial identifier)
 }

@@ -75,9 +75,9 @@ bool Ipv4NodeConfigurator::handleOperationStage(LifecycleOperation *operation, i
 {
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if ((NodeStartOperation::Stage)stage == NodeStartOperation::STAGE_LINK_LAYER)
+        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_LINK_LAYER)
             prepareNode();
-        else if ((NodeStartOperation::Stage)stage == NodeStartOperation::STAGE_NETWORK_LAYER && networkConfigurator) {
+        else if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_NETWORK_LAYER && networkConfigurator) {
             configureInterface();
             configureRoutingTable();
         }

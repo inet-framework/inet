@@ -84,7 +84,7 @@ class INET_API NetPerfMeter : public cSimpleModule
       TIMER_ON       = 7
    };
 
-   Protocol                TransportProtocol  = (Protocol)-1;
+   Protocol                TransportProtocol = static_cast<Protocol>(-1);
    bool                    ActiveMode = false;
    bool                    SendingAllowed = false;
    bool                    HasFinished = false;
@@ -172,7 +172,7 @@ class INET_API NetPerfMeter : public cSimpleModule
       inline void reset() {
          ReceivedBytes    = 0;
          ReceivedMessages = 0;
-         ReceivedDelayHistogram.clearResult();
+         ReceivedDelayHistogram.clear();
       }
 
       unsigned long long ReceivedBytes = 0;

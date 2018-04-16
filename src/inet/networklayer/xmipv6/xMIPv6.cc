@@ -377,7 +377,7 @@ void xMIPv6::createBUTimer(const Ipv6Address& buDest, InterfaceEntry *ie, const 
     // check if there already exists a BUTimer entry for this key
     Key key(buDest, ie->getInterfaceId(), KEY_BU);
     // fetch a valid TimerIfEntry obect
-    BuTransmitIfEntry *buIfEntry = (BuTransmitIfEntry *)getTimerIfEntry(key, TRANSMIT_TYPE_BU);
+    BuTransmitIfEntry *buIfEntry = check_and_cast<BuTransmitIfEntry *>(getTimerIfEntry(key, TRANSMIT_TYPE_BU));
     // TODO: Investigate problem witht he following line. : runtime error because of attempted message rescheduling
     //cancelAndDelete(buIfEntry->timer);
 
@@ -1493,7 +1493,7 @@ void xMIPv6::createTestInitTimer(const Ptr<MobilityHeader> testInit, const Ipv6A
     // TODO refactor the code below, as it is also used in createBUTimer
     Key key(dest, ie->getInterfaceId(), msgType);
     // fetch a valid TimerIfEntry object
-    TestInitTransmitIfEntry *tiIfEntry = (TestInitTransmitIfEntry *)getTimerIfEntry(key, TRANSMIT_TYPE_TI);
+    TestInitTransmitIfEntry *tiIfEntry = check_and_cast<TestInitTransmitIfEntry *>(getTimerIfEntry(key, TRANSMIT_TYPE_TI));
     //delete tiIfEntry->testInitMsg;
     cancelAndDelete(tiIfEntry->timer);
 
@@ -2530,7 +2530,7 @@ void xMIPv6::createBULEntryExpiryTimer(BindingUpdateList::BindingUpdateListEntry
 
     Key key(HA, ie->getInterfaceId(), KEY_BUL_EXP);
     // fetch a valid TimerIfEntry obect
-    BulExpiryIfEntry *bulExpIfEntry = (BulExpiryIfEntry *)getTimerIfEntry(key, EXPIRY_TYPE_BUL);
+    BulExpiryIfEntry *bulExpIfEntry = check_and_cast<BulExpiryIfEntry *>(getTimerIfEntry(key, EXPIRY_TYPE_BUL));
 
     bulExpIfEntry->dest = HA;
     bulExpIfEntry->HoA = HoA;
@@ -2633,7 +2633,7 @@ void xMIPv6::createBCEntryExpiryTimer(const Ipv6Address& HoA, InterfaceEntry *ie
 
     Key key(HoA, ie->getInterfaceId(), KEY_BC_EXP);
     // fetch a valid TimerIfEntry obect
-    BcExpiryIfEntry *bcExpIfEntry = (BcExpiryIfEntry *)getTimerIfEntry(key, EXPIRY_TYPE_BC);
+    BcExpiryIfEntry *bcExpIfEntry = check_and_cast<BcExpiryIfEntry *>(getTimerIfEntry(key, EXPIRY_TYPE_BC));
 
     bcExpIfEntry->dest = HoA;
     bcExpIfEntry->HoA = HoA;
@@ -2682,7 +2682,7 @@ void xMIPv6::createTokenEntryExpiryTimer(Ipv6Address& cnAddr, InterfaceEntry *ie
 
     Key key(cnAddr, ie->getInterfaceId(), tokenType);
     // fetch a valid TimerIfEntry obect
-    TokenExpiryIfEntry *tokenExpIfEntry = (TokenExpiryIfEntry *)getTimerIfEntry(key, EXPIRY_TYPE_TOKEN);
+    TokenExpiryIfEntry *tokenExpIfEntry = check_and_cast<TokenExpiryIfEntry *>(getTimerIfEntry(key, EXPIRY_TYPE_TOKEN));
 
     tokenExpIfEntry->cnAddr = cnAddr;
     tokenExpIfEntry->ifEntry = ie;

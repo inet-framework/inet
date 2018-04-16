@@ -310,11 +310,11 @@ void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, long 
 {
     Enter_Method_Silent("receiveSignal()");
     if (signalID == IRadio::receptionStateChangedSignal) {
-        rx->receptionStateChanged((IRadio::ReceptionState)value);
+        rx->receptionStateChanged(static_cast<IRadio::ReceptionState>(value));
     }
     else if (signalID == IRadio::transmissionStateChangedSignal) {
         auto oldTransmissionState = transmissionState;
-        transmissionState = (IRadio::TransmissionState)value;
+        transmissionState = static_cast<IRadio::TransmissionState>(value);
         bool transmissionFinished = (oldTransmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && transmissionState == IRadio::TRANSMISSION_STATE_IDLE);
         if (transmissionFinished) {
             tx->radioTransmissionFinished();
@@ -324,7 +324,7 @@ void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, long 
         rx->transmissionStateChanged(transmissionState);
     }
     else if (signalID == IRadio::receivedSignalPartChangedSignal) {
-        rx->receivedSignalPartChanged((IRadioSignal::SignalPart)value);
+        rx->receivedSignalPartChanged(static_cast<IRadioSignal::SignalPart>(value));
     }
 }
 

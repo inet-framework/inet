@@ -191,7 +191,7 @@ bool Ieee80211ModeSet::getIsMandatory(const IIeee80211Mode *mode) const
 
 const IIeee80211Mode *Ieee80211ModeSet::findMode(bps bitrate) const
 {
-    for (int index = 0; index < (int)entries.size(); index++) {
+    for (size_t index = 0; index < entries.size(); index++) {
         const IIeee80211Mode *mode = entries[index].mode;
         if (mode->getDataMode()->getNetBitrate() == bitrate)
             return entries[index].mode;
@@ -238,7 +238,7 @@ const IIeee80211Mode *Ieee80211ModeSet::getFasterMode(const IIeee80211Mode *mode
 
 const IIeee80211Mode *Ieee80211ModeSet::getSlowestMandatoryMode() const
 {
-    for (int i = 0; i < (int)entries.size(); i++)
+    for (size_t i = 0; i < entries.size(); i++)
         if (entries[i].isMandatory)
             return entries[i].mode;
     return nullptr;
@@ -287,7 +287,7 @@ const Ieee80211ModeSet *Ieee80211ModeSet::getModeSet(const char *mode)
     const Ieee80211ModeSet *modeSet = findModeSet(mode);
     if (modeSet == nullptr) {
         std::string validModeSets;
-        for (int index = 0; index < (int)(&modeSets)->size(); index++) {
+        for (size_t index = 0; index < (&modeSets)->size(); index++) {
             const Ieee80211ModeSet *modeSet = &(&modeSets)->at(index);
             validModeSets += std::string("'") + modeSet->getName() + "' ";
         }

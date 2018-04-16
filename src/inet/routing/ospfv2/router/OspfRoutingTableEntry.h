@@ -54,7 +54,7 @@ class INET_API RoutingTableEntry : public Ipv4Route
     RoutingDestinationType destinationType = 0;
     OspfOptions optionalCapabilities;
     AreaId area;
-    RoutingPathType pathType = (RoutingPathType)-1;
+    RoutingPathType pathType = static_cast<RoutingPathType>(-1);
     Metric cost = 0;
     Metric type2Cost = 0;
     const OspfLsa *linkStateOrigin = nullptr;

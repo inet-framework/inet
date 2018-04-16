@@ -149,8 +149,8 @@ class INET_API EtherMacBase : public MacBase
 
     // state
     bool channelsDiffer = false;    // true when tx and rx channels differ (only one of them exists, or 'datarate' or 'disable' parameters differ) (configuration error, or between changes of tx/rx channels)
-    MacTransmitState transmitState = (MacTransmitState)-1;    // "transmit state" of the MAC
-    MacReceiveState receiveState = (MacReceiveState)-1;    // "receive state" of the MAC
+    MacTransmitState transmitState = static_cast<MacTransmitState>(-1);    // "transmit state" of the MAC
+    MacReceiveState receiveState = static_cast<MacReceiveState>(-1);    // "receive state" of the MAC
     simtime_t lastTxFinishTime;    // time of finishing the last transmission
     int pauseUnitsRequested = 0;    // requested pause duration, or zero -- examined at endTx
     Packet *curTxFrame = nullptr;    // frame being transmitted

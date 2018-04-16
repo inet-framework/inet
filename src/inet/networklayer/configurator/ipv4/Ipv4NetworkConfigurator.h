@@ -52,8 +52,8 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
       public:
         Node(cModule *module) : NetworkConfiguratorBase::Node(module) { }
         ~Node() {
-            for (int i = 0; i < (int)staticRoutes.size(); i++) delete staticRoutes[i];
-            for (int i = 0; i < (int)staticMulticastRoutes.size(); i++) delete staticMulticastRoutes[i];
+            for (size_t i = 0; i < staticRoutes.size(); i++) delete staticRoutes[i];
+            for (size_t i = 0; i < staticMulticastRoutes.size(); i++) delete staticMulticastRoutes[i];
         }
     };
 
@@ -111,7 +111,7 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
 
       public:
         RoutingTableInfo() {}
-        ~RoutingTableInfo() { for (int i = 0; i < (int)originalRouteInfos.size(); i++) delete originalRouteInfos[i]; }
+        ~RoutingTableInfo() { for (size_t i = 0; i < originalRouteInfos.size(); i++) delete originalRouteInfos[i]; }
 
         int addRouteInfo(RouteInfo *routeInfo);
         void removeRouteInfo(const RouteInfo *routeInfo) { routeInfos.erase(std::find(routeInfos.begin(), routeInfos.end(), routeInfo)); }

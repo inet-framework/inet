@@ -32,7 +32,7 @@ namespace inet {
 class INET_API EtherEncap : public Ieee8022Llc
 {
   protected:
-    EthernetFcsMode fcsMode = (EthernetFcsMode)-1;
+    EthernetFcsMode fcsMode = static_cast<EthernetFcsMode>(-1);
     int seqNum;
 
     // statistics

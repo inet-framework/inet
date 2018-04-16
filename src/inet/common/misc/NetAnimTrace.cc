@@ -76,15 +76,14 @@ void NetAnimTrace::receiveSignal(cComponent *source, simsignal_t signalID, cObje
 {
     if (signalID == messageSentSignal && !source->isModule()) {
         // record a "packet sent" line
-        cChannel *channel = (cChannel *)source;
+        cChannel *channel = static_cast<cChannel *>(source);    //FIXME check_and_cast?
         cModule *srcModule = channel->getSourceGate()->getOwnerModule();
         if (isRelevantModule(srcModule)) {
             cModule *destModule = channel->getSourceGate()->getNextGate()->getOwnerModule();
             cITimestampedValue *v = check_and_cast<cITimestampedValue *>(obj);
-            if (dynamic_cast<cDatarateChannel *>(channel)) {
-                cDatarateChannel *datarateChannel = (cDatarateChannel *)channel;
+            if (auto datarateChannel = dynamic_cast<cDatarateChannel *>(channel)) {
                 cMessage *msg = check_and_cast<cMessage *>(v->objectValue(signalID));
-                simtime_t duration = msg->isPacket() ? ((cPacket *)msg)->getBitLength() / datarateChannel->getDatarate() : 0.0;
+                simtime_t duration = msg->isPacket() ? static_cast<cPacket *>(msg)->getBitLength() / datarateChannel->getDatarate() : 0.0;
                 simtime_t delay = datarateChannel->getDelay();
                 simtime_t fbTx = v->getTimestamp(signalID);
                 simtime_t lbTx = fbTx + duration;
@@ -92,8 +91,7 @@ void NetAnimTrace::receiveSignal(cComponent *source, simsignal_t signalID, cObje
                 simtime_t lbRx = lbTx + delay;
                 f << fbTx << " P " << srcModule->getId() << " " << destModule->getId() << " " << lbTx << " " << fbRx << " " << lbRx << "\n";
             }
-            else if (dynamic_cast<cDelayChannel *>(channel)) {
-                cDelayChannel *delayChannel = (cDelayChannel *)channel;
+            else if (auto delayChannel = dynamic_cast<cDelayChannel *>(channel)) {
                 simtime_t fbTx = v->getTimestamp(signalID);
                 simtime_t fbRx = fbTx + delayChannel->getDelay();
                 f << fbTx << " P " << srcModule->getId() << " " << destModule->getId() << " " << fbTx << " " << fbRx << " " << fbRx << "\n";
@@ -112,13 +110,11 @@ void NetAnimTrace::receiveSignal(cComponent *source, simsignal_t signalID, cObje
     else if (signalID == POST_MODEL_CHANGE) {
         // record dynamic "node created" and "link created" lines.
         // note: at the time of writing, NetAnim did not support "link removed" and "node removed" lines
-        if (dynamic_cast<cPostModuleAddNotification *>(obj)) {
-            cPostModuleAddNotification *notification = (cPostModuleAddNotification *)obj;
+        if (auto notification = dynamic_cast<cPostModuleAddNotification *>(obj)) {
             if (isRelevantModule(notification->module))
                 addNode(notification->module);
         }
-        else if (dynamic_cast<cPostGateConnectNotification *>(obj)) {
-            cPostGateConnectNotification *notification = (cPostGateConnectNotification *)obj;
+        else if (auto notification = dynamic_cast<cPostGateConnectNotification *>(obj)) {
             if (isRelevantModule(notification->gate->getOwnerModule()))
                 addLink(notification->gate);
         }

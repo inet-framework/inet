@@ -169,7 +169,7 @@ bool Icmp::possiblyLocalBroadcast(const Ipv4Address& addr, int interfaceId)
     else {
         // if all interfaces are configured, we are OK
         bool allInterfacesConfigured = true;
-        for (int i = 0; i < (int)ift->getNumInterfaces(); i++)
+        for (int i = 0; i < ift->getNumInterfaces(); i++)
             if ((ift->getInterface(i)->ipv4Data() == nullptr) || ift->getInterface(i)->ipv4Data()->getIPAddress().isUnspecified())
                 allInterfacesConfigured = false;
 

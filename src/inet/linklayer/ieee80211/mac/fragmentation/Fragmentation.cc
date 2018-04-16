@@ -33,8 +33,8 @@ std::vector<Packet *> *Fragmentation::fragmentFrame(Packet *frame, const std::ve
     std::vector<Packet *> *fragments = new std::vector<Packet *>();
     const auto& frameHeader = frame->popAtFront<Ieee80211DataOrMgmtHeader>();
     frame->popAtBack<Ieee80211MacTrailer>();
-    for (int i = 0; i < (int)fragmentSizes.size(); i++) {
-        bool lastFragment = i == (int)fragmentSizes.size() - 1;
+    for (size_t i = 0; i < fragmentSizes.size(); i++) {
+        bool lastFragment = i == fragmentSizes.size() - 1;
         std::string name = std::string(frame->getName()) + "-frag" + std::to_string(i);
         auto fragment = new Packet(name.c_str());
         B length = B(fragmentSizes.at(i));

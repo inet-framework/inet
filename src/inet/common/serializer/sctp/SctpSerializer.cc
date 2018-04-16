@@ -1330,15 +1330,15 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                                 const struct random_parameter *rand;
                                 rand = (struct random_parameter *)(((unsigned char *)init_chunk) + size_init_chunk + parptr);
                                 unsigned char *rv = (unsigned char *)malloc(64);
-                                rp = (struct random_parameter *)((unsigned char *)rv);
+                                rp = (struct random_parameter *)(rv);
                                 rp->type = rand->type;
                                 rplen = ntohs(rand->length);
                                 rp->length = rand->length;
                                 int rlen = ntohs(rand->length) - 4;
                                 chunk->setRandomArraySize(rlen);
                                 for (int i = 0; i < rlen; i++) {
-                                    chunk->setRandom(i, (unsigned char)(rand->random[i]));
-                                    rp->random[i] = (unsigned char)(rand->random[i]);
+                                    chunk->setRandom(i, rand->random[i]);
+                                    rp->random[i] = rand->random[i];
                                 }
                                 EV_INFO << "adding " << ntohs(parameter->length) << " bytes" << endl;
                                 chunklen += ntohs(parameter->length);
@@ -1352,7 +1352,7 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                                 int num = (ntohs(hmac->length) - 4) / 2;
                                 chunk->setHmacTypesArraySize(num);
                                 unsigned char *hv = (unsigned char *)malloc(64);
-                                hp = (struct hmac_algo *)((unsigned char *)hv);
+                                hp = (struct hmac_algo *)(hv);
                                 hp->type = hmac->type;
                                 hplen = ntohs(hmac->length);
                                 hp->length = hmac->length;
@@ -1369,7 +1369,7 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
                                 const struct tlv *chunks;
                                 chunks = (struct tlv *)(((unsigned char *)init_chunk) + size_init_chunk + parptr);
                                 unsigned char *cv = (unsigned char *)malloc(64);
-                                cp = (struct tlv *)((unsigned char *)cv);
+                                cp = (struct tlv *)(cv);
                                 cp->type = chunks->type;
                                 cplen = ntohs(chunks->length);
                                 cp->length = chunks->length;

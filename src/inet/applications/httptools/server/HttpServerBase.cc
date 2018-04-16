@@ -46,7 +46,7 @@ void HttpServerBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         EV_DEBUG << "Initializing server component\n";
 
-        hostName = (const char *)par("hostName");
+        hostName = par("hostName").stdstringValue();
         if (hostName.empty()) {
             hostName = "www.";
             hostName += host->getFullName();
@@ -136,7 +136,7 @@ void HttpServerBase::initialize(int stage)
         activationTime = par("activationTime");
         EV_INFO << "Activation time is " << activationTime << endl;
 
-        std::string siteDefinition = (const char *)par("siteDefinition");
+        std::string siteDefinition = par("siteDefinition").stdstringValue();
         scriptedMode = !siteDefinition.empty();
         if (scriptedMode)
             readSiteDefinition(siteDefinition);

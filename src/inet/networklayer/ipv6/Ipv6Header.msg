@@ -129,6 +129,6 @@ cplusplus(Ipv6Header) {{
     virtual L3Address getDestinationAddress() const override { return L3Address(getDestAddress()); }
     virtual void setDestinationAddress(const L3Address& address) override { setDestAddress(address.toIpv6()); }
     virtual const Protocol *getProtocol() const override { return ProtocolGroup::ipprotocol.findProtocol(getProtocolId()); }
-    virtual void setProtocol(const Protocol *protocol) override { setProtocolId((IpProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(protocol)); }
+    virtual void setProtocol(const Protocol *protocol) override { setProtocolId(static_cast<IpProtocolId>(ProtocolGroup::ipprotocol.getProtocolNumber(protocol))); }
 }}
 

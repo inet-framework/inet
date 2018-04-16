@@ -36,7 +36,7 @@ void TokenBucketMeter::initialize(int stage)
         WATCH(numRcvd);
         WATCH(numRed);
 
-        CBS = 8 * (int)par("cbs");
+        CBS = 8 * par("cbs").intValue();
         colorAwareMode = par("colorAwareMode");
         Tc = CBS;
     }

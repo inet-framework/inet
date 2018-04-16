@@ -25,7 +25,7 @@ namespace inet {
 namespace physicallayer {
 
 DimensionalTransmitterBase::DimensionalTransmitterBase() :
-    interpolationMode((Mapping::InterpolationMethod)-1)
+    interpolationMode(static_cast<Mapping::InterpolationMethod>(-1))
 {
 }
 

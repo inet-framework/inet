@@ -158,7 +158,7 @@ void HttpBrowserBase::initialize(int stage)
                 activationTime += (86400.0 - rdActivityLength->draw()) / 2; // First activate after half the sleep period
             EV_INFO << "Initial activation time is " << activationTime << endl;
             eventTimer->setKind(MSGKIND_ACTIVITY_START);
-            scheduleAt(simTime() + (simtime_t)activationTime, eventTimer);
+            scheduleAt(simTime() + activationTime, eventTimer);
         }
     }
 }
@@ -218,7 +218,7 @@ void HttpBrowserBase::handleSelfActivityStart()
     double activityPeriodLength = rdActivityLength->draw();    // Get the length of the activity period
     acitivityPeriodEnd = simTime() + activityPeriodLength;    // The end of the activity period
     EV_INFO << "Activity period starts @ T=" << simTime() << ". Activity period is " << activityPeriodLength / 3600 << " hours." << endl;
-    scheduleAt(simTime() + (simtime_t)rdInterSessionInterval->draw() / 2, eventTimer);
+    scheduleAt(simTime() + simtime_t(rdInterSessionInterval->draw()) / 2, eventTimer);
 }
 
 void HttpBrowserBase::handleSelfStartSession()
@@ -289,14 +289,14 @@ void HttpBrowserBase::handleDataMessage(Packet *pk)
     std::string senderWWW = appmsg->getOriginatorUrl();
     EV_DEBUG << "Handling received message from " << senderWWW << ": " << pk->getName() << ". Received @T=" << simTime() << endl;
 
-    if (appmsg->getResult() != 200 || (HttpContentType)appmsg->getContentType() == CT_UNKNOWN) {
+    if (appmsg->getResult() != 200 || appmsg->getContentType() == CT_UNKNOWN) {
         EV_INFO << "Result for " << pk->getName() << " was other than OK. Code: " << appmsg->getResult() << endl;
         htmlErrorsReceived++;
         delete pk;
         return;
     }
     else {
-        switch ((HttpContentType)appmsg->getContentType()) {
+        switch (appmsg->getContentType()) {
             case CT_HTML:
                 EV_INFO << "HTML Document received: " << pk->getName() << "'. Size is " << pk->getByteLength() << " bytes and serial " << serial << endl;
                 if (strlen(appmsg->getPayload()) != 0)
@@ -324,15 +324,15 @@ void HttpBrowserBase::handleDataMessage(Packet *pk)
                 break;
 
             case CT_UNKNOWN:
-                EV_DEBUG << "UNKNOWN RESOURCE TYPE RECEIVED: " << (HttpContentType)appmsg->getContentType() << endl;
+                EV_DEBUG << "UNKNOWN RESOURCE TYPE RECEIVED: " << appmsg->getContentType() << endl;
                 if (hasGUI())
                     bubble("Received an unknown resource type");
                 break;
         }
         // Parse the html page body
-        if ((HttpContentType)appmsg->getContentType() == CT_HTML && strlen(appmsg->getPayload()) != 0) {
+        if (appmsg->getContentType() == CT_HTML && strlen(appmsg->getPayload()) != 0) {
             EV_DEBUG << "Processing HTML document body:\n";
-            cStringTokenizer lineTokenizer((const char *)appmsg->getPayload(), "\n");
+            cStringTokenizer lineTokenizer(appmsg->getPayload(), "\n");
             std::vector<std::string> lines = lineTokenizer.asVector();
             std::map<std::string, HttpRequestQueue> requestQueues;
             for (auto resourceLine : lines) {
@@ -482,7 +482,7 @@ void HttpBrowserBase::scheduleNextBrowseEvent()
         // The requests in the current round are done. Lets check what to do next.
         if (rdActivityLength == nullptr || simTime() < acitivityPeriodEnd) {
             // Scheduling next session start within an activity period.
-            nextEventTime = simTime() + (simtime_t)rdInterSessionInterval->draw();
+            nextEventTime = simTime() + rdInterSessionInterval->draw();
             EV_INFO << "Scheduling a new session start @ T=" << nextEventTime << endl;
             messagesInCurrentSession = 0;
             eventTimer->setKind(MSGKIND_START_SESSION);
@@ -492,7 +492,7 @@ void HttpBrowserBase::scheduleNextBrowseEvent()
             // Schedule the next activity period start. This corresponds to to a working day or home time, ie. time
             // when the user is near his workstation and periodically browsing the web. Inactivity periods then
             // correspond to sleep time or time away from the office
-            simtime_t activationTime = simTime() + (simtime_t)(86400.0 - rdActivityLength->draw());    // Sleep for a while
+            simtime_t activationTime = simTime() + (86400.0 - rdActivityLength->draw());    // Sleep for a while
             EV_INFO << "Terminating current activity @ T=" << simTime() << ". Next activation time is " << activationTime << endl;
             eventTimer->setKind(MSGKIND_ACTIVITY_START);
             scheduleAt(activationTime, eventTimer);
@@ -500,7 +500,7 @@ void HttpBrowserBase::scheduleNextBrowseEvent()
     }
     else {
         // Schedule another browse event in a while.
-        nextEventTime = simTime() + (simtime_t)rdInterRequestInterval->draw();
+        nextEventTime = simTime() + rdInterRequestInterval->draw();
         EV_INFO << "Scheduling a browse event @ T=" << nextEventTime
                 << ". Request " << reqInCurSession << " of " << reqNoInCurSession << endl;
         eventTimer->setKind(MSGKIND_NEXT_MESSAGE);
@@ -534,7 +534,7 @@ void HttpBrowserBase::readScriptedEvents(const char *filename)
         wwwpart = line.substr(pos + 1, line.size() - pos - 1);
 
         try {
-            t = (simtime_t)atof(timepart.c_str());
+            t = simtime_t(atof(timepart.c_str()));
         }
         catch (...) {
             continue;

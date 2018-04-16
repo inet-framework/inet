@@ -67,7 +67,7 @@ std::ostream& operator<<(std::ostream& os, const Ieee80211MgmtSta::ScanningInfo&
     os << " minChanTime=" << scanning.minChannelTime
        << " maxChanTime=" << scanning.maxChannelTime;
     os << " chanList={";
-    for (int i = 0; i < (int)scanning.channelList.size(); i++)
+    for (size_t i = 0; i < scanning.channelList.size(); i++)
         os << (i == 0 ? "" : " ") << scanning.channelList[i];
     os << "}";
 
@@ -179,18 +179,18 @@ void Ieee80211MgmtSta::handleTimer(cMessage *msg)
 
 void Ieee80211MgmtSta::handleCommand(int msgkind, cObject *ctrl)
 {
-    if (dynamic_cast<Ieee80211Prim_ScanRequest *>(ctrl))
-        processScanCommand((Ieee80211Prim_ScanRequest *)ctrl);
-    else if (dynamic_cast<Ieee80211Prim_AuthenticateRequest *>(ctrl))
-        processAuthenticateCommand((Ieee80211Prim_AuthenticateRequest *)ctrl);
-    else if (dynamic_cast<Ieee80211Prim_DeauthenticateRequest *>(ctrl))
-        processDeauthenticateCommand((Ieee80211Prim_DeauthenticateRequest *)ctrl);
-    else if (dynamic_cast<Ieee80211Prim_AssociateRequest *>(ctrl))
-        processAssociateCommand((Ieee80211Prim_AssociateRequest *)ctrl);
-    else if (dynamic_cast<Ieee80211Prim_ReassociateRequest *>(ctrl))
-        processReassociateCommand((Ieee80211Prim_ReassociateRequest *)ctrl);
-    else if (dynamic_cast<Ieee80211Prim_DisassociateRequest *>(ctrl))
-        processDisassociateCommand((Ieee80211Prim_DisassociateRequest *)ctrl);
+    if (auto cmd = dynamic_cast<Ieee80211Prim_ScanRequest *>(ctrl))
+        processScanCommand(cmd);
+    else if (auto cmd = dynamic_cast<Ieee80211Prim_AuthenticateRequest *>(ctrl))
+        processAuthenticateCommand(cmd);
+    else if (auto cmd = dynamic_cast<Ieee80211Prim_DeauthenticateRequest *>(ctrl))
+        processDeauthenticateCommand(cmd);
+    else if (auto cmd = dynamic_cast<Ieee80211Prim_AssociateRequest *>(ctrl))
+        processAssociateCommand(cmd);
+    else if (auto cmd = dynamic_cast<Ieee80211Prim_ReassociateRequest *>(ctrl))
+        processReassociateCommand(cmd);
+    else if (auto cmd = dynamic_cast<Ieee80211Prim_DisassociateRequest *>(ctrl))
+        processDisassociateCommand(cmd);
     else if (ctrl)
         throw cRuntimeError("handleCommand(): unrecognized control info class `%s'", ctrl->getClassName());
     else
@@ -300,7 +300,7 @@ void Ieee80211MgmtSta::receiveSignal(cComponent *source, simsignal_t signalID, l
     Enter_Method_Silent();
     // Note that we are only subscribed during scanning!
     if (signalID == IRadio::receptionStateChangedSignal) {
-        IRadio::ReceptionState newReceptionState = (IRadio::ReceptionState)value;
+        IRadio::ReceptionState newReceptionState = static_cast<IRadio::ReceptionState>(value);
         if (newReceptionState != IRadio::RECEPTION_STATE_UNDEFINED && newReceptionState != IRadio::RECEPTION_STATE_IDLE) {
             EV << "busy radio channel detected during scanning\n";
             scanning.busyChannelDetected = true;
@@ -338,7 +338,7 @@ void Ieee80211MgmtSta::processScanCommand(Ieee80211Prim_ScanRequest *ctrl)
     ASSERT(scanning.minChannelTime <= scanning.maxChannelTime);
 
     // channel list to scan (default: all channels)
-    for (int i = 0; i < (int)ctrl->getChannelListArraySize(); i++)
+    for (size_t i = 0; i < ctrl->getChannelListArraySize(); i++)
         scanning.channelList.push_back(ctrl->getChannelList(i));
     if (scanning.channelList.empty())
         for (int i = 0; i < numChannels; i++)

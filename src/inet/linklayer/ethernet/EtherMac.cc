@@ -247,7 +247,7 @@ void EtherMac::processFrameFromUpperLayer(Packet *packet)
         packet->insertAtFront(newFrame);
         frame = newFrame;
         auto oldFcs = packet->removeAtBack<EthernetFcs>();
-        EtherEncap::addFcs(packet, (EthernetFcsMode)oldFcs->getFcsMode());
+        EtherEncap::addFcs(packet, oldFcs->getFcsMode());
     }
 
     if (txQueue.extQueue) {
@@ -267,7 +267,7 @@ void EtherMac::processFrameFromUpperLayer(Packet *packet)
         txQueue.innerQueue->insertFrame(packet);
 
         if (!curTxFrame && !txQueue.innerQueue->isEmpty())
-            curTxFrame = (Packet *)txQueue.innerQueue->pop();
+            curTxFrame = static_cast<Packet *>(txQueue.innerQueue->pop());
     }
 
     if ((duplexMode || receiveState == RX_IDLE_STATE) && transmitState == TX_IDLE_STATE) {
@@ -526,7 +526,7 @@ void EtherMac::startFrameTransmission()
 
     if (frame->getByteLength() < minFrameLength) {
         auto oldFcs = frame->removeAtBack<EthernetFcs>();
-        EtherEncap::addPaddingAndFcs(frame, (EthernetFcsMode)oldFcs->getFcsMode(), minFrameLength);
+        EtherEncap::addPaddingAndFcs(frame, oldFcs->getFcsMode(), minFrameLength);
     }
 
     // add preamble and SFD (Starting Frame Delimiter), then send out

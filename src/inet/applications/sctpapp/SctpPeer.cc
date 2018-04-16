@@ -131,7 +131,7 @@ void SctpPeer::initialize(int stage)
         clientSocket.setCallbackObject(this);
         clientSocket.setOutputGate(gate("socketOut"));
 
-        if ((simtime_t)par("startTime") > SIMTIME_ZERO) {    //FIXME is invalid the startTime == 0 ????
+        if (simtime_t(par("startTime")) > SIMTIME_ZERO) {    //FIXME is invalid the startTime == 0 ????
             connectTimer = new cMessage("ConnectTimer");
             connectTimer->setKind(MSGKIND_CONNECT);
             scheduleAt(par("startTime"), connectTimer);
@@ -199,7 +199,7 @@ void SctpPeer::connect()
     if (destination.isUnspecified())
         EV << "cannot resolve destination address: " << connectAddress << endl;
     else {
-        clientSocket.connect(destination, connectPort, streamReset, (int)par("prMethod"), (unsigned int)par("numRequestsPerSession"));
+        clientSocket.connect(destination, connectPort, streamReset, par("prMethod"), par("numRequestsPerSession"));
     }
 
     if (streamReset) {

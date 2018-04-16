@@ -54,7 +54,7 @@ int OriginatorQosAckPolicy::computeStartingSequenceNumber(const std::vector<Pack
 {
     ASSERT(outstandingFrames.size() > 0);
     int startingSequenceNumber = outstandingFrames[0]->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber();
-    for (int i = 1; i < (int)outstandingFrames.size(); i++) {
+    for (size_t i = 1; i < outstandingFrames.size(); i++) {
         int seqNum = outstandingFrames[i]->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber();
         if (seqNum < startingSequenceNumber)
             startingSequenceNumber = seqNum;

@@ -187,7 +187,7 @@ template <typename T>
 inline T *RegionTagSet::findTag(b offset, b length) const
 {
     int index = getTagIndex<T>(offset, length);
-    return index == -1 ? nullptr : (T *)(*regionTags)[index].getTag();
+    return index == -1 ? nullptr : static_cast<T *>((*regionTags)[index].getTag());
 }
 
 template <typename T>
@@ -196,7 +196,7 @@ inline T *RegionTagSet::getTag(b offset, b length) const
     int index = getTagIndex<T>(offset, length);
     if (index == -1)
         throw cRuntimeError("Tag '%s' is absent", opp_typename(typeid(T)));
-    return (T *)(*regionTags)[index].getTag();
+    return static_cast<T *>((*regionTags)[index].getTag());
 }
 
 template <typename T>
@@ -225,14 +225,14 @@ inline T *RegionTagSet::removeTag(b offset, b length)
     int index = getTagIndex<T>(offset, length);
     if (index == -1)
         throw cRuntimeError("Tag '%s' is absent", opp_typename(typeid(T)));
-    return (T *)removeTag(index);
+    return static_cast<T *>(removeTag(index));
 }
 
 template <typename T>
 inline T *RegionTagSet::removeTagIfPresent(b offset, b length)
 {
     int index = getTagIndex<T>(offset, length);
-    return index == -1 ? nullptr : (T *)removeTag(index);
+    return index == -1 ? nullptr : static_cast<T *>(removeTag(index));
 }
 
 template <typename T>

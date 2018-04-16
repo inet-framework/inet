@@ -210,14 +210,14 @@ void Icmpv6::sendErrorMessage(Packet *origDatagram, Icmpv6Type type, int code)
     Packet *errorMsg;
 
     if (type == ICMPv6_DESTINATION_UNREACHABLE)
-        errorMsg = createDestUnreachableMsg((Icmpv6DestUnav)code);
+        errorMsg = createDestUnreachableMsg(static_cast<Icmpv6DestUnav>(code));
     //TODO: implement MTU support.
     else if (type == ICMPv6_PACKET_TOO_BIG)
         errorMsg = createPacketTooBigMsg(0);
     else if (type == ICMPv6_TIME_EXCEEDED)
-        errorMsg = createTimeExceededMsg((Icmpv6TimeEx)code);
+        errorMsg = createTimeExceededMsg(static_cast<Icmpv6TimeEx>(code));
     else if (type == ICMPv6_PARAMETER_PROBLEM)
-        errorMsg = createParamProblemMsg((Icmpv6ParameterProblem)code);
+        errorMsg = createParamProblemMsg(static_cast<Icmpv6ParameterProblem>(code));
     else
         throw cRuntimeError("Unknown ICMPv6 error type: %d\n", type);
 

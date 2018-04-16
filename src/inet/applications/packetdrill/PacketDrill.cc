@@ -159,8 +159,9 @@ TcpOption *setOptionValues(PacketDrillTcpOption* opt)
                 unsigned int count = 0;
                 for (int i = 0; i < 2 * opt->getBlockList()->getLength(); i += 2) {
                     SackItem si;
-                    si.setStart(((PacketDrillStruct *) opt->getBlockList()->get(i))->getValue1());
-                    si.setEnd(((PacketDrillStruct *) opt->getBlockList()->get(i))->getValue2());
+                    PacketDrillStruct *pds = check_and_cast<PacketDrillStruct *>(opt->getBlockList()->get(i));
+                    si.setStart(pds->getValue1());
+                    si.setEnd(pds->getValue2());
                     option->setSackItem(count++, si);
                 }
                 return option;
@@ -180,7 +181,7 @@ TcpOption *setOptionValues(PacketDrillTcpOption* opt)
             break;
     } // switch
     auto *option = new TcpOptionUnknown();
-    option->setKind((TcpOptionNumbers)opt->getKind());
+    option->setKind(static_cast<TcpOptionNumbers>(opt->getKind()));
     option->setLength(length);
     if (length > 2)
         option->setBytesArraySize(length - 2);
@@ -242,7 +243,7 @@ Packet* PacketDrill::buildTCPPacket(int address_family, enum direction_t directi
         TcpOption *option;
 
         for (cQueue::Iterator iter(*tcpOptions); !iter.end(); iter++) {
-            PacketDrillTcpOption* opt = (PacketDrillTcpOption*)(*iter);
+            PacketDrillTcpOption* opt = check_and_cast<PacketDrillTcpOption*>(*iter);
             option = setOptionValues(opt);
             // write option to tcp header
             tcpHeader->insertHeaderOption(option);
@@ -275,7 +276,7 @@ Packet* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direct
         sctpmsg->setVTag(app->getPeerVTag());
         packet->setName("SCTPInbound");
         for (cQueue::Iterator iter(*chunks); !iter.end(); iter++) {
-            PacketDrillSctpChunk *chunk = (PacketDrillSctpChunk *) (*iter);
+            PacketDrillSctpChunk *chunk = check_and_cast<PacketDrillSctpChunk *>(*iter);
             SctpChunk *sctpchunk = chunk->getChunk();
             switch (chunk->getType()) {
                 case SCTP_DATA_CHUNK_TYPE:
@@ -403,17 +404,17 @@ Packet* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direct
         sctpmsg->setVTag(app->getLocalVTag());
         packet->setName("SCTPOutbound");
         for (cQueue::Iterator iter(*chunks); !iter.end(); iter++) {
-            PacketDrillSctpChunk *chunk = (PacketDrillSctpChunk *) (*iter);
+            PacketDrillSctpChunk *chunk = check_and_cast<PacketDrillSctpChunk *>(*iter);
             SctpChunk *sctpchunk = chunk->getChunk();
             switch (sctpchunk->getSctpChunkType()) {
                 case SCTP_RECONFIG_CHUNK_TYPE:
                     SctpStreamResetChunk* reconfig = check_and_cast<SctpStreamResetChunk*>(sctpchunk);
                     for (unsigned int i = 0; i < reconfig->getParametersArraySize(); i++) {
-                        SctpParameter *parameter = (SctpParameter *) (reconfig->getParameters(i));
+                        const SctpParameter *parameter = reconfig->getParameters(i);
                         switch (parameter->getParameterType()) {
                             case OUTGOING_RESET_REQUEST_PARAMETER: {
                                 printf("OUTGOING_RESET_REQUEST_PARAMETER\n");
-                                SctpOutgoingSsnResetRequestParameter *outResetParam = check_and_cast<SctpOutgoingSsnResetRequestParameter *>(parameter);
+                                auto outResetParam = check_and_cast<const SctpOutgoingSsnResetRequestParameter *>(parameter);
                                 if (!(pdapp->findSeqNumMap(outResetParam->getSrReqSn()))) {
                                     pdapp->setSeqNumMap(outResetParam->getSrReqSn(), 0);
                                 }
@@ -421,7 +422,7 @@ Packet* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direct
                             }
                             case INCOMING_RESET_REQUEST_PARAMETER: {
                                 printf("INCOMING_RESET_REQUEST_PARAMETER\n");
-                                SctpIncomingSsnResetRequestParameter *inResetParam = check_and_cast<SctpIncomingSsnResetRequestParameter *>(parameter);
+                                auto inResetParam = check_and_cast<const SctpIncomingSsnResetRequestParameter *>(parameter);
                                 if (!(pdapp->findSeqNumMap(inResetParam->getSrReqSn()))) {
                                     pdapp->setSeqNumMap(inResetParam->getSrReqSn(), 0);
                                 }
@@ -429,7 +430,7 @@ Packet* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direct
                             }
                             case SSN_TSN_RESET_REQUEST_PARAMETER: {
                                 printf("SSN_TSN_RESET_REQUEST_PARAMETER\n");
-                                SctpSsnTsnResetRequestParameter *ssntsnResetParam = check_and_cast<SctpSsnTsnResetRequestParameter *>(parameter);
+                                auto ssntsnResetParam = check_and_cast<const SctpSsnTsnResetRequestParameter *>(parameter);
                                 if (!(pdapp->findSeqNumMap(ssntsnResetParam->getSrReqSn()))) {
                                     pdapp->setSeqNumMap(ssntsnResetParam->getSrReqSn(), 0);
                                 }
@@ -437,7 +438,7 @@ Packet* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direct
                             }
                             case ADD_OUTGOING_STREAMS_REQUEST_PARAMETER: {
                                 printf("ADD_OUTGOING_STREAMS_REQUEST_PARAMETER\n");
-                                SctpAddStreamsRequestParameter *addOutResetParam = check_and_cast<SctpAddStreamsRequestParameter *>(parameter);
+                                auto addOutResetParam = check_and_cast<const SctpAddStreamsRequestParameter *>(parameter);
                                 if (!(pdapp->findSeqNumMap(addOutResetParam->getSrReqSn()))) {
                                     pdapp->setSeqNumMap(addOutResetParam->getSrReqSn(), 0);
                                 }
@@ -445,7 +446,7 @@ Packet* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direct
                             }
                             case ADD_INCOMING_STREAMS_REQUEST_PARAMETER: {
                                 printf("ADD_INCOMING_STREAMS_REQUEST_PARAMETER\n");
-                                SctpAddStreamsRequestParameter *addInResetParam = check_and_cast<SctpAddStreamsRequestParameter *>(parameter);
+                                auto addInResetParam = check_and_cast<const SctpAddStreamsRequestParameter *>(parameter);
                                 if (!(pdapp->findSeqNumMap(addInResetParam->getSrReqSn()))) {
                                     pdapp->setSeqNumMap(addInResetParam->getSrReqSn(), 0);
                                 }
@@ -462,7 +463,7 @@ Packet* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direct
     sctpmsg->setCrc(0);
 
     for (cQueue::Iterator iter(*chunks); !iter.end(); iter++) {
-        PacketDrillSctpChunk *chunk = (PacketDrillSctpChunk *)(*iter);
+        PacketDrillSctpChunk *chunk = check_and_cast<PacketDrillSctpChunk *>(*iter);
         sctpmsg->insertSctpChunks(chunk->getChunk());
     }
 
@@ -586,17 +587,17 @@ PacketDrillSctpChunk* PacketDrill::buildInitChunk(int64 flgs, int64 tag, int64 a
         initchunk->setInitTsn(0);
         flags |= FLAG_INIT_CHUNK_TSN_NOCHECK;
     } else {
-        initchunk->setInitTsn((uint32) tsn);
+        initchunk->setInitTsn(tsn);
     }
 
     if (parameters != nullptr) {
         PacketDrillSctpParameter *parameter;
         uint16 parLen = 0;
         for (cQueue::Iterator iter(*parameters); !iter.end(); iter++) {
-            parameter = (PacketDrillSctpParameter*) (*iter);
+            parameter = check_and_cast<PacketDrillSctpParameter*>(*iter);
             switch (parameter->getType()) {
                 case SUPPORTED_EXTENSIONS: {
-                    ByteArray *ba = (ByteArray *)(parameter->getByteList());
+                    ByteArray *ba = parameter->getByteList();
                     parLen = ba->getDataArraySize();
                     initchunk->setSepChunksArraySize(parLen);
                     for (int i = 0; i < parLen; i++) {
@@ -678,10 +679,10 @@ PacketDrillSctpChunk* PacketDrill::buildInitAckChunk(int64 flgs, int64 tag, int6
         PacketDrillSctpParameter *parameter;
         uint16 parLen = 0;
         for (cQueue::Iterator iter(*parameters); !iter.end(); iter++) {
-            parameter = (PacketDrillSctpParameter*) (*iter);
+            parameter = check_and_cast<PacketDrillSctpParameter*>(*iter);
             switch (parameter->getType()) {
                 case SUPPORTED_EXTENSIONS: {
-                    ByteArray *ba = (ByteArray *)(parameter->getByteList());
+                    ByteArray *ba = parameter->getByteList();
                     parLen = ba->getDataArraySize();
                     initackchunk->setSepChunksArraySize(parLen);
                     for (int i = 0; i < parLen; i++) {
@@ -757,7 +758,7 @@ PacketDrillSctpChunk* PacketDrill::buildSackChunk(int64 flgs, int64 cum_tsn, int
         sackchunk->setGapStartArraySize(gaps->getLength());
         sackchunk->setGapStopArraySize(gaps->getLength());
         for (cQueue::Iterator iter(*gaps); !iter.end(); iter++) {
-            gap = (PacketDrillStruct*)(*iter);
+            gap = check_and_cast<PacketDrillStruct*>(*iter);
             sackchunk->setGapStart(num, gap->getValue1());
             sackchunk->setGapStop(num, gap->getValue2());
             num++;
@@ -779,7 +780,7 @@ PacketDrillSctpChunk* PacketDrill::buildSackChunk(int64 flgs, int64 cum_tsn, int
         sackchunk->setDupTsnsArraySize(dups->getLength());
 
         for (cQueue::Iterator iter(*dups); !iter.end(); iter++) {
-            tsn = (PacketDrillStruct*)(*iter);
+            tsn = check_and_cast<PacketDrillStruct*>(*iter);
             sackchunk->setDupTsns(num, tsn->getValue1());
             num++;
         }
@@ -837,7 +838,7 @@ PacketDrillSctpChunk* PacketDrill::buildShutdownChunk(int64 flgs, int64 cum_tsn)
         flags |= FLAG_SHUTDOWN_CHUNK_CUM_TSN_NOCHECK;
         shutdownchunk->setCumTsnAck(0);
     } else {
-        shutdownchunk->setCumTsnAck((uint32) cum_tsn);
+        shutdownchunk->setCumTsnAck(cum_tsn);
     }
     shutdownchunk->setFlags(flags);
     shutdownchunk->setByteLength(SCTP_SHUTDOWN_CHUNK_LENGTH);
@@ -892,7 +893,7 @@ PacketDrillSctpChunk* PacketDrill::buildErrorChunk(int64 flgs, cQueue *causes)
     errorChunk->setSctpChunkType(ERRORTYPE);
     errorChunk->setByteLength(SCTP_ERROR_CHUNK_LENGTH);
     for (cQueue::Iterator iter(*causes); !iter.end(); iter++) {
-        errorcause = (PacketDrillStruct*) (*iter);
+        errorcause = check_and_cast<PacketDrillStruct*>(*iter);
         auto *cause = new SctpSimpleErrorCauseParameter("Cause");
         cause->setParameterType(INVALID_STREAM_IDENTIFIER);
         cause->setByteLength(8);
@@ -970,7 +971,7 @@ PacketDrillSctpChunk* PacketDrill::buildReconfigChunk(int64 flgs, cQueue *parame
     if (parameters != nullptr) {
         PacketDrillSctpParameter *parameter;
         for (cQueue::Iterator iter(*parameters); !iter.end(); iter++) {
-            parameter = (PacketDrillSctpParameter*) (*iter);
+            parameter = check_and_cast<PacketDrillSctpParameter*>(*iter);
             switch (parameter->getType()) {
                 case OUTGOING_RESET_REQUEST_PARAMETER: {
                     auto *outResetParam = new SctpOutgoingSsnResetRequestParameter("Outgoing_Request_Param");
@@ -998,8 +999,8 @@ PacketDrillSctpChunk* PacketDrill::buildReconfigChunk(int64 flgs, cQueue *parame
                         outResetParam->setStreamNumbersArraySize(content->getStreams()->getLength());
                         unsigned int i = 0;
                         for (cQueue::Iterator it(*content->getStreams()); !it.end(); it++) {
-                            if (((PacketDrillExpression *)(*it))->getNum() != -1)
-                                outResetParam->setStreamNumbers(i++, ((PacketDrillExpression *)(*it))->getNum());
+                            if (check_and_cast<PacketDrillExpression *>(*it)->getNum() != -1)
+                                outResetParam->setStreamNumbers(i++, check_and_cast<PacketDrillExpression *>(*it)->getNum());
                             else
                                 outResetParam->setStreamNumbersArraySize(outResetParam->getStreamNumbersArraySize() - 1);
                         }
@@ -1021,8 +1022,8 @@ PacketDrillSctpChunk* PacketDrill::buildReconfigChunk(int64 flgs, cQueue *parame
                         inResetParam->setStreamNumbersArraySize(content->getStreams()->getLength());
                         unsigned int i = 0;
                         for (cQueue::Iterator it(*content->getStreams()); !it.end(); it++) {
-                            if (((PacketDrillExpression *)(*it))->getNum() != -1)
-                                inResetParam->setStreamNumbers(i++, ((PacketDrillExpression *)(*it))->getNum());
+                            if (check_and_cast<PacketDrillExpression *>(*it)->getNum() != -1)
+                                inResetParam->setStreamNumbers(i++, check_and_cast<PacketDrillExpression *>(*it)->getNum());
                             else
                                 inResetParam->setStreamNumbersArraySize(inResetParam->getStreamNumbersArraySize() - 1);
                         }
@@ -1100,7 +1101,7 @@ PacketDrillSctpChunk* PacketDrill::buildReconfigChunk(int64 flgs, cQueue *parame
             }
         }
         for (cQueue::Iterator iter(*parameters); !iter.end(); iter++)
-            parameters->remove((PacketDrillEvent *) (*iter));
+            parameters->remove(*iter);
         delete parameters;
     }
     resetChunk->setFlags(flags);
@@ -1709,8 +1710,8 @@ int PacketDrill::evaluateExpressionList(cQueue *in_list, cQueue *out_list, char 
 {
     cQueue *node_ptr = out_list;
     for (cQueue::Iterator it(*in_list); !it.end(); it++) {
-        PacketDrillExpression *outExpr = new PacketDrillExpression(((PacketDrillExpression *)(*it))->getType());
-        if (evaluate((PacketDrillExpression *)(*it), outExpr, error)) {
+        PacketDrillExpression *outExpr = new PacketDrillExpression(check_and_cast<PacketDrillExpression *>(*it)->getType());
+        if (evaluate(check_and_cast<PacketDrillExpression *>(*it), outExpr, error)) {
             delete(outExpr);
             return STATUS_ERR;
         }

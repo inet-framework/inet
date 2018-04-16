@@ -59,7 +59,7 @@ void SctpNatServer::initialize(int stage)
         AddressVector addresses = L3AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
         int32 port = par("localPort");
 
-        ordered = (bool)par("ordered");
+        ordered = par("ordered");
         lastStream = 0;
 
         socket = new SctpSocket();

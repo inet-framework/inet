@@ -185,7 +185,7 @@ ReceptionReport *RtpReceiverInfo::receptionReport(simtime_t now)
         receptionReport->setPacketsLostCumulative(packetsLost);
         receptionReport->setSequenceNumber(_sequenceNumberCycles + _highestSequenceNumber);
 
-        receptionReport->setJitter((uint32)SIMTIME_DBL(_jitter));    //XXX ??? store it in secs? --Andras
+        receptionReport->setJitter((uint32)SIMTIME_DBL(_jitter));    //FIXME //XXX ??? store it in secs? --Andras
 
         // the middle 32 bit of the ntp time stamp of the last sender report
         receptionReport->setLastSR((_lastSenderReportNTPTimeStamp >> 16) & 0xFFFFFFFF);

@@ -55,7 +55,7 @@ class INET_API PingApp : public cSimpleModule, public ILifecycle
     int destAddrIdx = -1;
     simtime_t startTime;
     simtime_t stopTime;
-    CrcMode crcMode = (CrcMode)-1;
+    CrcMode crcMode = static_cast<CrcMode>(-1);
     bool printPing = false;
     bool continuous = false;
 

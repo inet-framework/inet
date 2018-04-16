@@ -137,7 +137,7 @@ class INET_API Tcp : public cSimpleModule, public ILifecycle
     TcpAppConnMap tcpAppConnMap;
     TcpConnMap tcpConnMap;
 
-    ushort lastEphemeralPort = (ushort)-1;
+    ushort lastEphemeralPort = static_cast<ushort>(-1);
     std::multiset<ushort> usedEphemeralPorts;
 
   protected:
@@ -159,7 +159,7 @@ class INET_API Tcp : public cSimpleModule, public ILifecycle
     bool isOperational = false;    // lifecycle: node is up/down
 
     bool useDataNotification = false;
-    CrcMode crcMode = (CrcMode)-1;
+    CrcMode crcMode = static_cast<CrcMode>(-1);
 
   public:
     Tcp() {}

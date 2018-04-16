@@ -107,7 +107,7 @@ class INET_API Icmpv6 : public cSimpleModule, public ILifecycle, public IProtoco
     void insertCrc(const Ptr<Icmpv6Header>& icmpHeader, Packet *packet) { insertCrc(crcMode, icmpHeader, packet); }
 
   protected:
-    CrcMode crcMode = (CrcMode)-1;
+    CrcMode crcMode = static_cast<CrcMode>(-1);
     typedef std::map<long, int> PingMap;
     PingMap pingMap;
     std::set<int> transportProtocols;    // where to send up packets

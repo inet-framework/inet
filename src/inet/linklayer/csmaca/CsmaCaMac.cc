@@ -426,7 +426,7 @@ void CsmaCaMac::receiveSignal(cComponent *source, simsignal_t signalID, long val
     if (signalID == IRadio::receptionStateChangedSignal)
         handleWithFsm(mediumStateChange);
     else if (signalID == IRadio::transmissionStateChangedSignal) {
-        IRadio::TransmissionState newRadioTransmissionState = (IRadio::TransmissionState)value;
+        IRadio::TransmissionState newRadioTransmissionState = static_cast<IRadio::TransmissionState>(value);
         if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE) {
             handleWithFsm(endData);
             radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);

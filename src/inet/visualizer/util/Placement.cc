@@ -56,7 +56,7 @@ Placement parsePlacement(const char *s)
         else
             throw cRuntimeError("Unknown placement: %s", placement);
     }
-    return (Placement)placement;
+    return static_cast<Placement>(placement);
 }
 
 } // namespace visualizer

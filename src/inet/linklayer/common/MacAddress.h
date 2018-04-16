@@ -122,13 +122,13 @@ class INET_API MacAddress
      * Copies the address to the given pointer (array of 6 unsigned chars).
      */
     void getAddressBytes(unsigned char *addrbytes) const;
-    void getAddressBytes(char *addrbytes) const { getAddressBytes((unsigned char *)addrbytes); }
+    void getAddressBytes(char *addrbytes) const { getAddressBytes(reinterpret_cast<unsigned char *>(addrbytes)); }
 
     /**
      * Sets address bytes. The argument should point to an array of 6 unsigned chars.
      */
     void setAddressBytes(unsigned char *addrbytes);
-    void setAddressBytes(char *addrbytes) { setAddressBytes((unsigned char *)addrbytes); }
+    void setAddressBytes(char *addrbytes) { setAddressBytes(reinterpret_cast<unsigned char *>(addrbytes)); }
 
     /**
      * Sets the address to the broadcast address (hex ff:ff:ff:ff:ff:ff).

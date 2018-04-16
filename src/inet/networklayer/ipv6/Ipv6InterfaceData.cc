@@ -51,7 +51,7 @@ std::string Ipv6InterfaceData::HostMulticastData::detailedInfo()
 {
     std::stringstream out;
     out << "Joined Groups:";
-    for (int i = 0; i < (int)joinedMulticastGroups.size(); ++i)
+    for (size_t i = 0; i < joinedMulticastGroups.size(); ++i)
         out << " " << joinedMulticastGroups[i] << "(" << refCounts[i] << ")";
     out << "\n";
     return out.str();
@@ -62,7 +62,7 @@ std::string Ipv6InterfaceData::RouterMulticastData::str()
     std::stringstream out;
     if (reportedMulticastGroups.size() > 0) {
         out << "\tmcast_listeners:";
-        for (int i = 0; i < (int)reportedMulticastGroups.size(); ++i)
+        for (size_t i = 0; i < reportedMulticastGroups.size(); ++i)
             out << (i > 0 ? "," : "") << reportedMulticastGroups[i];
     }
     return out.str();

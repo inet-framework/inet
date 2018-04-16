@@ -337,10 +337,10 @@ int32 SctpAssociation::streamSchedulerFairBandwidthPacket(SctpPathVariables *pat
         if (elem.second->getUnorderedStreamQ()->getLength() > 0 || elem.second->getStreamQ()->getLength() > 0) {
             /* Get size of the first packet in stream */
             if (elem.second->getUnorderedStreamQ()->getLength() > 0) {
-                packetsize = check_and_cast<SctpSimpleMessage *>(((SctpDataMsg *)elem.second->getUnorderedStreamQ()->front())->getEncapsulatedPacket())->getByteLength();
+                packetsize = check_and_cast<SctpSimpleMessage *>(check_and_cast<SctpDataMsg *>(elem.second->getUnorderedStreamQ()->front())->getEncapsulatedPacket())->getByteLength();
             }
             else if (elem.second->getStreamQ()->getLength() > 0) {
-                packetsize = check_and_cast<SctpSimpleMessage *>(((SctpDataMsg *)elem.second->getStreamQ()->front())->getEncapsulatedPacket())->getByteLength();
+                packetsize = check_and_cast<SctpSimpleMessage *>(check_and_cast<SctpDataMsg *>(elem.second->getStreamQ()->front())->getEncapsulatedPacket())->getByteLength();
             }
 
             /* This stream is new to the map, so add it */
@@ -429,7 +429,7 @@ int32 SctpAssociation::streamSchedulerFCFS(SctpPathVariables *path, bool peek)  
         testsid = (testsid + 1) % outboundStreams;
 
         if (sendStreams.find(testsid)->second->getUnorderedStreamQ()->getLength() > 0) {
-            testTime = ((SctpDataMsg *)sendStreams.find(testsid)->second->getUnorderedStreamQ()->front())->getEnqueuingTime();
+            testTime = check_and_cast<SctpDataMsg *>(sendStreams.find(testsid)->second->getUnorderedStreamQ()->front())->getEnqueuingTime();
             if (sid < 0 || oldestEnqueuing > testTime) {
                 oldestEnqueuing = testTime;
                 sid = testsid;
@@ -438,7 +438,7 @@ int32 SctpAssociation::streamSchedulerFCFS(SctpPathVariables *path, bool peek)  
         }
 
         if (sendStreams.find(testsid)->second->getStreamQ()->getLength() > 0) {
-            testTime = ((SctpDataMsg *)sendStreams.find(testsid)->second->getStreamQ()->front())->getEnqueuingTime();
+            testTime = check_and_cast<SctpDataMsg *>(sendStreams.find(testsid)->second->getStreamQ()->front())->getEnqueuingTime();
             if (sid < 0 || oldestEnqueuing > testTime) {
                 oldestEnqueuing = testTime;
                 sid = testsid;

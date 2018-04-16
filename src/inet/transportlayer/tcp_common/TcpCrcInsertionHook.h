@@ -28,7 +28,7 @@ namespace inet {
 namespace tcp {
 
 class TcpCrcInsertion : public NetfilterBase::HookBase {
-    CrcMode crcMode = (CrcMode)-1;
+    CrcMode crcMode = static_cast<CrcMode>(-1);
   public:
     TcpCrcInsertion() {}
     void setCrcMode(CrcMode crcModeP) { crcMode = crcModeP; }

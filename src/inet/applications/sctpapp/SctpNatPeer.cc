@@ -98,7 +98,7 @@ void SctpNatPeer::initialize(int stage)
         delay = par("echoDelay");
         outboundStreams = par("outboundStreams");
         inboundStreams = par("inboundStreams");
-        ordered = (bool)par("ordered");
+        ordered = par("ordered");
         clientSocket.setOutputGate(gate("socketOut"));
         clientSocket.setCallbackObject(this);
         if (addresses.size() == 0) {
@@ -108,11 +108,11 @@ void SctpNatPeer::initialize(int stage)
             clientSocket.bindx(addresses, port);
         }
 
-        rendezvous = (bool)par("rendezvous");
-        if ((simtime_t)par("startTime") > 0) {
+        rendezvous = par("rendezvous");
+        if (par("startTime").doubleValue() > 0.0) {
             cMessage *msg = new cMessage("ConnectTimer");
             msg->setKind(MSGKIND_CONNECT);
-            scheduleAt((simtime_t)par("startTime"), msg);
+            scheduleAt(par("startTime"), msg);
         }
     }
 }
@@ -167,7 +167,7 @@ void SctpNatPeer::connectx(AddressVector connectAddressList, int32 connectPort)
     EV << "issuing OPEN command\n";
     EV << "Assoc " << clientSocket.getConnectionId() << "::connect to  port " << connectPort << "\n";
     bool streamReset = par("streamReset");
-    clientSocket.connectx(connectAddressList, connectPort, streamReset, (int32)par("prMethod"), (uint32)par("numRequestsPerSession"));
+    clientSocket.connectx(connectAddressList, connectPort, streamReset, static_cast<uint32>(par("prMethod")), static_cast<uint32>(par("numRequestsPerSession")));
     numSessions++;
 
     if (!streamReset)
@@ -176,13 +176,13 @@ void SctpNatPeer::connectx(AddressVector connectAddressList, int32 connectPort)
         cMessage *cmsg = new cMessage("StreamReset");
         cmsg->setKind(MSGKIND_RESET);
         EV << "StreamReset Timer scheduled at " << simTime() << "\n";
-        scheduleAt(simTime() + (double)par("streamRequestTime"), cmsg);
+        scheduleAt(simTime() + par("streamRequestTime").doubleValue(), cmsg);
     }
     uint32 streamNum = 0;
     cStringTokenizer tokenizer(par("streamPriorities"));
     while (tokenizer.hasMoreTokens()) {
         const char *token = tokenizer.nextToken();
-        clientSocket.setStreamPriority(streamNum, (uint32)atoi(token));
+        clientSocket.setStreamPriority(streamNum, static_cast<uint32>(atoi(token)));
 
         streamNum++;
     }
@@ -196,7 +196,7 @@ void SctpNatPeer::connect(L3Address connectAddress, int32 connectPort)
     EV << "issuing OPEN command\n";
     EV << "Assoc " << clientSocket.getConnectionId() << "::connect to address " << connectAddress << ", port " << connectPort << "\n";
     bool streamReset = par("streamReset");
-    clientSocket.connect(connectAddress, connectPort, streamReset, (int32)par("prMethod"), (uint32)par("numRequestsPerSession"));
+    clientSocket.connect(connectAddress, connectPort, streamReset, static_cast<int32>(par("prMethod")), static_cast<uint32>(par("numRequestsPerSession")));
     numSessions++;
 
     if (!streamReset)
@@ -205,13 +205,13 @@ void SctpNatPeer::connect(L3Address connectAddress, int32 connectPort)
         cMessage *cmsg = new cMessage("StreamReset");
         cmsg->setKind(MSGKIND_RESET);
         EV << "StreamReset Timer scheduled at " << simTime() << "\n";
-        scheduleAt(simTime() + (double)par("streamRequestTime"), cmsg);
+        scheduleAt(simTime() + par("streamRequestTime").doubleValue(), cmsg);
     }
     uint32 streamNum = 0;
     cStringTokenizer tokenizer(par("streamPriorities"));
     while (tokenizer.hasMoreTokens()) {
         const char *token = tokenizer.nextToken();
-        clientSocket.setStreamPriority(streamNum, (uint32)atoi(token));
+        clientSocket.setStreamPriority(streamNum, static_cast<uint32>(atoi(token)));
 
         streamNum++;
     }
@@ -271,8 +271,8 @@ void SctpNatPeer::handleMessage(cMessage *msg)
                     id = serverAssocId;
                     outboundStreams = connectInfo->getOutboundStreams();
                     inboundStreams = connectInfo->getInboundStreams();
-                    rcvdPacketsPerAssoc[serverAssocId] = (int64)(long)par("numPacketsToReceivePerClient");
-                    sentPacketsPerAssoc[serverAssocId] = (int64)(long)par("numPacketsToSendPerClient");
+                    rcvdPacketsPerAssoc[serverAssocId] = static_cast<int64>(par("numPacketsToReceivePerClient"));
+                    sentPacketsPerAssoc[serverAssocId] = static_cast<int64>(par("numPacketsToSendPerClient"));
                     char text[128];
                     sprintf(text, "App: Received Bytes of assoc %d", serverAssocId);
                     bytesPerAssoc[serverAssocId] = new cOutVector(text);
@@ -284,13 +284,13 @@ void SctpNatPeer::handleMessage(cMessage *msg)
 
                     delete msg;
 
-                    if ((int64)(long)par("numPacketsToSendPerClient") > 0) {
+                    if (static_cast<int64>(par("numPacketsToSendPerClient")) > 0) {
                         auto i = sentPacketsPerAssoc.find(serverAssocId);
                         numRequestsToSend = i->second;
-                        if ((simtime_t)par("thinkTime") > 0) {
+                        if (par("thinkTime").doubleValue() > 0.0) {
                             generateAndSend();
                             timeoutMsg->setKind(SCTP_C_SEND);
-                            scheduleAt(simTime() + (simtime_t)par("thinkTime"), timeoutMsg);
+                            scheduleAt(simTime() + par("thinkTime"), timeoutMsg);
                             numRequestsToSend--;
                             i->second = numRequestsToSend;
                         }
@@ -321,12 +321,12 @@ void SctpNatPeer::handleMessage(cMessage *msg)
                             EV << "!!!!!!!!!!!!!!!All data sent from Peer !!!!!!!!!!\n";
 
                             auto j = rcvdPacketsPerAssoc.find(serverAssocId);
-                            if (j->second == 0 && (simtime_t)par("waitToClose") > 0) {
+                            if (j->second == 0 && par("waitToClose").doubleValue() > 0.0) {
                                 char as[5];
                                 sprintf(as, "%d", serverAssocId);
                                 cMessage *abortMsg = new cMessage(as);
                                 abortMsg->setKind(SCTP_I_ABORT);
-                                scheduleAt(simTime() + (simtime_t)par("waitToClose"), abortMsg);
+                                scheduleAt(simTime() + par("waitToClose"), abortMsg);
                             }
                             else {
                                 EV << "no more packets to send, call shutdown for assoc " << serverAssocId << "\n";
@@ -361,7 +361,7 @@ void SctpNatPeer::handleMessage(cMessage *msg)
                 cmsg->setKind(SCTP_C_RECEIVE);
                 delete msg;
                 if (!cmsg->isScheduled() && schedule == false) {
-                    scheduleAt(simTime() + (simtime_t)par("delayFirstRead"), cmsg);
+                    scheduleAt(simTime() + par("delayFirstRead"), cmsg);
                 }
                 else if (schedule == true)
                     sendOrSchedule(cmsg);
@@ -378,7 +378,7 @@ void SctpNatPeer::handleMessage(cMessage *msg)
                     int bufferlen = B(smsg->getChunkLength()).get();
                     uint8_t buffer[bufferlen];
                     std::vector<uint8_t> vec = smsg->getBytes();
-                    for (unsigned int i = 0; i < bufferlen; i++) {
+                    for (int i = 0; i < bufferlen; i++) {
                         buffer[i] = vec[i];
                     }
                     struct nat_message *nat = (struct nat_message *) buffer;
@@ -405,7 +405,7 @@ void SctpNatPeer::handleMessage(cMessage *msg)
                         k->second->record(j->second);
                         packetsRcvd++;
                         if (!echo) {
-                            if ((int64)(long)par("numPacketsToReceivePerClient") > 0) {
+                            if (par("numPacketsToReceivePerClient").intValue() > 0) {
                                 auto i = rcvdPacketsPerAssoc.find(id);
                                 i->second--;
                                 SctpSimpleMessage *smsg = check_and_cast<SctpSimpleMessage *>(msg);
@@ -519,8 +519,8 @@ void SctpNatPeer::handleTimer(cMessage *msg)
 
             if (numRequestsToSend > 0) {
                 generateAndSend();
-                if ((simtime_t)par("thinkTime") > 0)
-                    scheduleAt(simTime() + (simtime_t)par("thinkTime"), timeoutMsg);
+                if (par("thinkTime").doubleValue() > 0.0)
+                    scheduleAt(simTime() + par("thinkTime"), timeoutMsg);
                 numRequestsToSend--;
             }
             break;
@@ -590,8 +590,8 @@ void SctpNatPeer::socketPeerClosed(int32, void *)
                 clientSocket.bindx(addresses, port);
                 rendezvousSocket.bindx(addresses, port);
             }
-            rendezvousSocket.listen(true, (bool)par("streamReset"), par("numPacketsToSendPerClient"));
-            if ((bool)par("multi"))
+            rendezvousSocket.listen(true, par("streamReset").boolValue(), par("numPacketsToSendPerClient"));
+            if (par("multi").boolValue())
                 connectx(peerAddressList, peerPort);
             else
                 connect(peerAddress, peerPort);
@@ -622,8 +622,8 @@ void SctpNatPeer::socketClosed(int32, void *)
             clientSocket.bindx(addresses, port);
             rendezvousSocket.bindx(addresses, port);
         }
-        rendezvousSocket.listen(true, (bool)par("streamReset"), par("numPacketsToSendPerClient"));
-        if ((bool)par("multi"))
+        rendezvousSocket.listen(true, par("streamReset").boolValue(), par("numPacketsToSendPerClient"));
+        if (par("multi").boolValue())
             connectx(peerAddressList, peerPort);
         else
             connect(peerAddress, peerPort);
@@ -641,7 +641,7 @@ void SctpNatPeer::socketFailure(int32, void *, int32 code)
 
     // reconnect after a delay
     timeMsg->setKind(MSGKIND_CONNECT);
-    scheduleAt(simTime() + (simtime_t)par("reconnectInterval"), timeMsg);
+    scheduleAt(simTime() + par("reconnectInterval"), timeMsg);
 }
 
 void SctpNatPeer::socketStatusArrived(int assocId, void *yourPtr, SctpStatusReq *status)
@@ -670,7 +670,7 @@ void SctpNatPeer::setStatusString(const char *s)
 void SctpNatPeer::sendRequest(bool last)
 {
     EV << "sending request, " << numRequestsToSend - 1 << " more to go\n";
-    int64 numBytes = (int64)(long)par("requestLength");
+    int64 numBytes = par("requestLength");
     if (numBytes < 1)
         numBytes = 1;
 
@@ -734,7 +734,7 @@ void SctpNatPeer::socketEstablished(int32, void *, unsigned long int buffer)
         applicationPacket->setKind(SCTP_C_SEND_ORDERED);
         clientSocket.sendMsg(applicationPacket);
 
-        if ((bool)par("multi")) {
+        if (par("multi").boolValue()) {
             Request *cmesg = new Request("SCTP_C_SEND_ASCONF");
             auto& tags = getTags(cmesg);
             SctpCommandReq *cmd = tags.addTagIfAbsent<SctpCommandReq>();
@@ -745,19 +745,19 @@ void SctpNatPeer::socketEstablished(int32, void *, unsigned long int buffer)
     }
     else {
         EV << " determine number of requests in this session\n";
-        numRequestsToSend = (int64)(long)par("numRequestsPerSession");
-        numPacketsToReceive = (int64)(long)par("numPacketsToReceive");
+        numRequestsToSend = par("numRequestsPerSession");
+        numPacketsToReceive = par("numPacketsToReceive");
         if (numRequestsToSend < 1)
             numRequestsToSend = 0;
         // perform first request (next one will be sent when reply arrives)
         if (numRequestsToSend > 0) {
-            if ((simtime_t)par("thinkTime") > 0) {
+            if (par("thinkTime").doubleValue() > 0.0) {
                 if (sendAllowed) {
                     sendRequest();
                     numRequestsToSend--;
                 }
                 timeMsg->setKind(MSGKIND_SEND);
-                scheduleAt(simTime() + (simtime_t)par("thinkTime"), timeMsg);
+                scheduleAt(simTime() + par("thinkTime"), timeMsg);
             }
             else {
                 if (queueSize > 0) {
@@ -778,11 +778,11 @@ void SctpNatPeer::socketEstablished(int32, void *, unsigned long int buffer)
                     }
                 }
 
-                if (numPacketsToReceive == 0 && (simtime_t)par("waitToClose") > 0) {
+                if (numPacketsToReceive == 0 && par("waitToClose").doubleValue() > 0.0) {
                     timeMsg->setKind(MSGKIND_ABORT);
-                    scheduleAt(simTime() + (simtime_t)par("waitToClose"), timeMsg);
+                    scheduleAt(simTime() + par("waitToClose"), timeMsg);
                 }
-                if (numRequestsToSend == 0 && (simtime_t)par("waitToClose") == 0) {
+                if (numRequestsToSend == 0 && par("waitToClose").doubleValue() == 0.0) {
                     EV << "socketEstablished:no more packets to send, call shutdown\n";
                     clientSocket.shutdown();
                 }
@@ -848,7 +848,7 @@ void SctpNatPeer::socketDataArrived(int32, void *, Packet *msg, bool)
         packetsSent++;
         clientSocket.sendMsg(cmsg);
     }
-    if ((int64)(long)par("numPacketsToReceive") > 0) {
+    if (par("numPacketsToReceive").intValue() > 0) {
         numPacketsToReceive--;
         delete msg;
         if (numPacketsToReceive == 0) {

@@ -61,7 +61,7 @@ void IcmpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
 const Ptr<Chunk> IcmpHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto icmpHeader = makeShared<IcmpHeader>();
-    IcmpType type = (IcmpType)stream.readByte();
+    IcmpType type = static_cast<IcmpType>(stream.readByte());
     icmpHeader->setType(type);
     icmpHeader->setCode(stream.readByte());
     icmpHeader->setChksum(stream.readUint16Be());

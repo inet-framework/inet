@@ -69,7 +69,7 @@ void LineManager::updateOffsets(const ModuleLine *moduleLine)
 
 void LineManager::updateOffsets(const ModulePath *modulePath)
 {
-    for (int index = 1; index < modulePath->moduleIds.size(); index++)
+    for (size_t index = 1; index < modulePath->moduleIds.size(); index++)
         updateOffsets(modulePath->moduleIds[index - 1], modulePath->moduleIds[index]);
 }
 
@@ -91,7 +91,7 @@ void LineManager::removeModuleLine(const ModuleLine *moduleLine)
 
 void LineManager::addModulePath(const ModulePath *modulePath)
 {
-    for (int index = 1; index < modulePath->moduleIds.size(); index++) {
+    for (size_t index = 1; index < modulePath->moduleIds.size(); index++) {
         auto key = getKey(modulePath->moduleIds[index - 1], modulePath->moduleIds[index]);
         auto value = std::pair<const ModulePath *, int>(modulePath, index - 1);
         auto& cacheEntry = cacheEntries[key];
@@ -102,7 +102,7 @@ void LineManager::addModulePath(const ModulePath *modulePath)
 
 void LineManager::removeModulePath(const ModulePath *modulePath)
 {
-    for (int index = 1; index < modulePath->moduleIds.size(); index++) {
+    for (size_t index = 1; index < modulePath->moduleIds.size(); index++) {
         auto key = getKey(modulePath->moduleIds[index - 1], modulePath->moduleIds[index]);
         auto value = std::pair<const ModulePath *, int>(modulePath, index - 1);
         auto& cacheEntry = cacheEntries[key];
@@ -139,7 +139,7 @@ Coord LineManager::getLineShift(int sourceModuleId, int destinationModuleId, con
     else {
         auto& cacheEntry = cacheEntries[getKey(sourceModuleId, destinationModuleId)];
         auto count = cacheEntry.moduleLines.size() + cacheEntry.modulePaths.size();
-        shift *= (double)shiftOffset - ((double)count - 1) / 2;
+        shift *= (shiftOffset - (count - 1)) / 2.0;
     }
 
     double zoomLevel = getEnvir()->getZoomLevel(getSimulation()->getModule(sourceModuleId)->getParentModule());

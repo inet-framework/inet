@@ -58,7 +58,7 @@ class INET_API Ipv6 : public QueueBase, public NetfilterBase, public ILifecycle,
         const InterfaceEntry *inIE = nullptr;
         const InterfaceEntry *outIE = nullptr;
         Ipv6Address nextHopAddr;
-        const IHook::Type hookType = (IHook::Type)-1;
+        const IHook::Type hookType = static_cast<IHook::Type>(-1);
     };
 
   protected:

@@ -37,7 +37,7 @@ class INET_API EtherLlc : public cSimpleModule, public ILifecycle
     int seqNum;
     typedef std::map<int, int> DsapToPortMap;    // DSAP registration table
     DsapToPortMap dsapToPort;    // DSAP registration table
-    EthernetFcsMode fcsMode = (EthernetFcsMode)-1;
+    EthernetFcsMode fcsMode = static_cast<EthernetFcsMode>(-1);
 
     // lifecycle
     bool isUp;

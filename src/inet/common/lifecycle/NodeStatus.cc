@@ -47,7 +47,7 @@ NodeStatus::State NodeStatus::getStateByName(const char *name)
     int state = e->lookup(temp.c_str(), -1);
     if (state == -1)
         throw cRuntimeError("Invalid state name '%s'", name);
-    return (State)state;
+    return static_cast<State>(state);
 }
 
 bool NodeStatus::handleOperationStage(LifecycleOperation *operation, int opStage, IDoneCallback *doneCallback)

@@ -204,7 +204,7 @@ void Ipv4NetworkConfigurator::configureInterface(InterfaceInfo *interfaceInfo)
 void Ipv4NetworkConfigurator::configureRoutingTable(Node *node)
 {
     EV_DETAIL << "Configuring routing table of " << node->getModule()->getFullPath() << ".\n";
-    for (int i = 0; i < (int)node->staticRoutes.size(); i++) {
+    for (size_t i = 0; i < node->staticRoutes.size(); i++) {
         Ipv4Route *original = node->staticRoutes[i];
         Ipv4Route *clone = new Ipv4Route();
         clone->setMetric(original->getMetric());
@@ -216,7 +216,7 @@ void Ipv4NetworkConfigurator::configureRoutingTable(Node *node)
         clone->setInterface(original->getInterface());
         node->routingTable->addRoute(clone);
     }
-    for (int i = 0; i < (int)node->staticMulticastRoutes.size(); i++) {
+    for (size_t i = 0; i < node->staticMulticastRoutes.size(); i++) {
         Ipv4MulticastRoute *original = node->staticMulticastRoutes[i];
         Ipv4MulticastRoute *clone = new Ipv4MulticastRoute();
         clone->setMetric(original->getMetric());
@@ -226,7 +226,7 @@ void Ipv4NetworkConfigurator::configureRoutingTable(Node *node)
         clone->setOriginNetmask(original->getOriginNetmask());
         clone->setInInterface(original->getInInterface());
         clone->setMulticastGroup(original->getMulticastGroup());
-        for (int j = 0; j < (int)original->getNumOutInterfaces(); j++)
+        for (size_t j = 0; j < original->getNumOutInterfaces(); j++)
             clone->addOutInterface(new IMulticastRoute::OutInterface(*original->getOutInterface(j)));
         node->routingTable->addMulticastRoute(clone);
     }
@@ -688,7 +688,7 @@ bool Ipv4NetworkConfigurator::linkContainsMatchingHostExcept(LinkInfo *linkInfo,
 
 void Ipv4NetworkConfigurator::dumpLinks(Topology& topology)
 {
-    for (int i = 0; i < (int)topology.linkInfos.size(); i++) {
+    for (size_t i = 0; i < topology.linkInfos.size(); i++) {
         EV_INFO << "Link " << i << endl;
         LinkInfo *linkInfo = topology.linkInfos[i];
         for (auto & element : linkInfo->interfaceInfos) {
@@ -700,7 +700,7 @@ void Ipv4NetworkConfigurator::dumpLinks(Topology& topology)
 
 void Ipv4NetworkConfigurator::dumpAddresses(Topology& topology)
 {
-    for (int i = 0; i < (int)topology.linkInfos.size(); i++) {
+    for (size_t i = 0; i < topology.linkInfos.size(); i++) {
         EV_INFO << "Link " << i << endl;
         LinkInfo *linkInfo = topology.linkInfos[i];
         for (auto & interfaceInfo : linkInfo->interfaceInfos) {
@@ -902,7 +902,7 @@ void Ipv4NetworkConfigurator::readMulticastGroupConfiguration(Topology& topology
             }
 
             for (auto & linkInfo : topology.linkInfos) {
-                for (int k = 0; k < (int)linkInfo->interfaceInfos.size(); k++) {
+                for (size_t k = 0; k < linkInfo->interfaceInfos.size(); k++) {
                     InterfaceInfo *interfaceInfo = static_cast<InterfaceInfo *>(linkInfo->interfaceInfos[k]);
                     cModule *hostModule = interfaceInfo->interfaceEntry->getInterfaceTable()->getHostModule();
                     std::string hostFullPath = hostModule->getFullPath();
@@ -1192,7 +1192,7 @@ Ipv4NetworkConfigurator::InterfaceInfo *Ipv4NetworkConfigurator::findInterfaceOn
 Ipv4NetworkConfigurator::LinkInfo *Ipv4NetworkConfigurator::findLinkOfInterface(Topology& topology, InterfaceEntry *ie)
 {
     for (auto & linkInfo : topology.linkInfos) {
-        for (int j = 0; j < (int)linkInfo->interfaceInfos.size(); j++)
+        for (size_t j = 0; j < linkInfo->interfaceInfos.size(); j++)
             if (linkInfo->interfaceInfos[j]->interfaceEntry == ie)
                 return linkInfo;
     }
@@ -1346,7 +1346,7 @@ void Ipv4NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
                 if (nextHopInterfaceInfo && link->destinationInterfaceInfo && link->destinationInterfaceInfo->addStaticRoute) {
                     InterfaceEntry *sourceInterfaceEntry = link->destinationInterfaceInfo->interfaceEntry;
                     // add the same routes for all destination interfaces (IP packets are accepted from any interface at the destination)
-                    for (int j = 0; j < (int)destinationNode->interfaceInfos.size(); j++) {
+                    for (size_t j = 0; j < destinationNode->interfaceInfos.size(); j++) {
                         InterfaceInfo *destinationInterfaceInfo = static_cast<InterfaceInfo *>(destinationNode->interfaceInfos[j]);
                         std::string destinationFullPath = destinationInterfaceInfo->interfaceEntry->getInterfaceFullPath();
                         std::string destinationShortenedFullPath = destinationFullPath.substr(destinationFullPath.find('.') + 1);
@@ -1407,7 +1407,7 @@ bool Ipv4NetworkConfigurator::routesHaveSameColor(Ipv4Route *route1, Ipv4Route *
  */
 int Ipv4NetworkConfigurator::findRouteIndexWithSameColor(const std::vector<Ipv4Route *>& routes, Ipv4Route *route)
 {
-    for (int i = 0; i < (int)routes.size(); i++)
+    for (size_t i = 0; i < routes.size(); i++)
         if (routesHaveSameColor(routes[i], route))
             return i;
 
@@ -1474,7 +1474,7 @@ bool Ipv4NetworkConfigurator::interruptsAnyOriginalRoute(const RoutingTableInfo&
  */
 bool Ipv4NetworkConfigurator::interruptsSubsequentOriginalRoutes(const RoutingTableInfo& routingTableInfo, int index)
 {
-    for (int i = index + 1; i < (int)routingTableInfo.routeInfos.size(); i++) {
+    for (size_t i = index + 1; i < routingTableInfo.routeInfos.size(); i++) {
         Ipv4NetworkConfigurator::RouteInfo *routeInfo = routingTableInfo.routeInfos.at(i);
         if (interruptsAnyOriginalRoute(routingTableInfo, index, index + 1, routeInfo->originalRouteInfos))
             return true;

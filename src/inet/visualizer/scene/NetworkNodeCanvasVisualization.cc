@@ -144,8 +144,7 @@ static cFigure::Rectangle createRectangle(const cFigure::Point& pt, const cFigur
 
 static void pushUnlessContains(std::vector<cFigure::Point>& pts, const std::vector<cFigure::Rectangle>& rcs, const cFigure::Point& pt)
 {
-    for (int j = 0; j < (int)rcs.size(); j++) {
-        cFigure::Rectangle rc = rcs[j];
+    for (const auto& rc: rcs) {
         if (containsPoint(rc, pt))
             return;
     }
@@ -238,9 +237,7 @@ void NetworkNodeCanvasVisualization::layout()
         cFigure::Rectangle bestRc;
 
         // for all candidate points
-        for (int j = 0; j < (int)pts.size(); j++) {
-            cFigure::Point pt = pts[j];
-
+        for (auto pt: pts) {
             // align annotation to candidate points with its various points
             for (int k = 0; k < 8; k++) {
                 cFigure::Rectangle candidateRc;
@@ -287,8 +284,7 @@ void NetworkNodeCanvasVisualization::layout()
 
                 // find an already positioned annotation which would intersect the candidate rectangle
                 bool intersects = false;
-                for (int l = 0; l < (int)rcs.size(); l++) {
-                    cFigure::Rectangle rc = rcs[l];
+                for (const auto& rc: rcs) {
                     if (intersectsRectangle(candidateRc, rc)) {
                         intersects = true;
                         break;
@@ -315,11 +311,11 @@ void NetworkNodeCanvasVisualization::layout()
         annotation.figure->setTransform(cFigure::Transform().translate(annotation.bounds.x, annotation.bounds.y));
 
         // delete candidate points covered by best rc
-        for (int j = 0; j < (int)pts.size(); j++) {
-            cFigure::Point pt = pts[j];
-
-            if (containsPoint(bestRc, pt))
-                pts.erase(pts.begin() + j--);
+        for (auto j = pts.begin(); j != pts.end(); ) {
+            if (containsPoint(bestRc, *j))
+                j = pts.erase(j);
+            else
+                ++j;
         }
 
         // push new candidates

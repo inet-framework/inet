@@ -77,7 +77,7 @@ class INET_API Ipv6NeighbourCache
         bool isHomeAgent = false;    //is the router also a Home Agent (RFC 3775-MIPv6)...Zarrar Yousaf 09.03.07
 
         // Neighbour Unreachability Detection variables
-        ReachabilityState reachabilityState = (ReachabilityState)(-1);
+        ReachabilityState reachabilityState = static_cast<ReachabilityState>(-1);
         simtime_t reachabilityExpires;    // reachabilityLastConfirmed+reachableTime
         short numProbesSent = 0;
         cMessage *nudTimeoutEvent = nullptr;    // DELAY or PROBE timer

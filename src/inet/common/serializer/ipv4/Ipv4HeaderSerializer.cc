@@ -229,7 +229,7 @@ TlvOptionBase *Ipv4HeaderSerializer::deserializeOption(MemoryInputStream& stream
             uint8_t pointer = stream.readByte();
             uint8_t flagbyte = stream.readByte();
             uint8_t overflow = flagbyte >> 4;
-            int flag = -1;
+            TimestampFlag flag = static_cast<TimestampFlag>(-1);
             int bytes = 0;
             switch (flagbyte & 0x0f) {
                 case 0: flag = IP_TIMESTAMP_TIMESTAMP_ONLY; bytes = 4; break;
@@ -241,7 +241,7 @@ TlvOptionBase *Ipv4HeaderSerializer::deserializeOption(MemoryInputStream& stream
                 auto *option = new Ipv4OptionTimestamp();
                 option->setType(type);
                 option->setLength(length);
-                option->setFlag((TimestampFlag)flag);
+                option->setFlag(flag);
                 option->setOverflow(overflow);
                 option->setRecordTimestampArraySize((length - 4) / bytes);
                 if (bytes == 8)

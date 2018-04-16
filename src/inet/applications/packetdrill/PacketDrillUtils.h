@@ -615,13 +615,13 @@ class INET_API PacketDrillScript
         void readScript();
         int parseScriptAndSetConfig(PacketDrillConfig *config, const char *script_buffer);
 
-        char *getBuffer() { return buffer; };
-        int getLength() const { return length; };
-        const char *getScriptPath() { return scriptPath; };
-        cQueue *getEventList() { return eventList; };
-        cQueue *getOptionList() { return optionList; };
-        void addEvent(PacketDrillEvent *evt) { eventList->insert(evt); };
-        void addOption(PacketDrillOption *opt) { optionList->insert((cObject *)opt); };
+        char *getBuffer() { return buffer; }
+        int getLength() const { return length; }
+        const char *getScriptPath() { return scriptPath; }
+        cQueue *getEventList() { return eventList; }
+        cQueue *getOptionList() { return optionList; }
+        void addEvent(PacketDrillEvent *evt) { eventList->insert(evt); }
+        void addOption(PacketDrillOption *opt) { optionList->insert((cObject *)opt); }  //FIXME Why needed the cast to cObject?
 };
 
 class INET_API PacketDrillStruct: public cObject
@@ -653,10 +653,10 @@ class INET_API PacketDrillOption: public cObject
     public:
         PacketDrillOption(char *name, char *value);
 
-        const char *getName() const { return name; };
-        void setName(char *name_) { free(name); name = strdup(name_); };
-        const char *getValue() const { return value; };
-        void setValue(char *value_) { free(value); value = strdup(value_); };
+        const char *getName() const { return name; }
+        void setName(char *name_) { free(name); name = strdup(name_); }
+        const char *getValue() const { return value; }
+        void setValue(char *value_) { free(value); value = strdup(value_); }
 
     private:
         char *name;

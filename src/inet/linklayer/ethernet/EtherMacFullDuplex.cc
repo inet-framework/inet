@@ -114,7 +114,7 @@ void EtherMacFullDuplex::startFrameTransmission()
     int64 minFrameLength = curEtherDescr->frameMinBytes;
     if (frame->getByteLength() < minFrameLength) {
         auto oldFcs = frame->removeAtBack<EthernetFcs>();
-        EtherEncap::addPaddingAndFcs(frame, (EthernetFcsMode)oldFcs->getFcsMode(), minFrameLength);
+        EtherEncap::addPaddingAndFcs(frame, oldFcs->getFcsMode(), minFrameLength);
     }
 
     // add preamble and SFD (Starting Frame Delimiter), then send out
@@ -180,7 +180,7 @@ void EtherMacFullDuplex::processFrameFromUpperLayer(Packet *packet)
         packet->insertAtFront(newFrame);
         frame = newFrame;
         auto oldFcs = packet->removeAtBack<EthernetFcs>();
-        EtherEncap::addFcs(packet, (EthernetFcsMode)oldFcs->getFcsMode());
+        EtherEncap::addFcs(packet, oldFcs->getFcsMode());
     }
 
     if (txQueue.extQueue) {
@@ -199,7 +199,7 @@ void EtherMacFullDuplex::processFrameFromUpperLayer(Packet *packet)
         txQueue.innerQueue->insertFrame(packet);
 
         if (!curTxFrame && !txQueue.innerQueue->isEmpty() && transmitState == TX_IDLE_STATE)
-            curTxFrame = (Packet *)txQueue.innerQueue->pop();
+            curTxFrame = check_and_cast<Packet *>(txQueue.innerQueue->pop());
     }
 
     if (transmitState == TX_IDLE_STATE)

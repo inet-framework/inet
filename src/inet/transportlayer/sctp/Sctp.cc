@@ -97,9 +97,9 @@ void Sctp::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         rt = getModuleFromPar<IRoutingTable>(par("routingTableModule"), this);
-        this->auth = (bool)par("auth");
-        this->pktdrop = (bool)par("packetDrop");
-        this->sackNow = (bool)par("sackNow");
+        auth = par("auth");
+        pktdrop = par("packetDrop");
+        sackNow = par("sackNow");
         numPktDropReports = 0;
         numPacketsReceived = 0;
         numPacketsDropped = 0;
@@ -108,7 +108,7 @@ void Sctp::initialize(int stage)
 
         cModule *netw = getSimulation()->getSystemModule();
         if (netw->hasPar("testTimeout")) {
-            testTimeout = (simtime_t)netw->par("testTimeout");
+            testTimeout = netw->par("testTimeout");
         }
         const char *crcModeString = par("crcMode");
         if (!strcmp(crcModeString, "declared"))
@@ -196,7 +196,7 @@ void Sctp::handleMessage(cMessage *msg)
         auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
         if (protocol == &Protocol::sctp) {
             // must be an SctpHeader
-            SctpHeader *sctpmsg = (SctpHeader *)(packet->peekAtFront<SctpHeader>().get()->dup());
+            SctpHeader *sctpmsg = (packet->peekAtFront<SctpHeader>().get()->dup());
             int chunkLength = B(sctpmsg->getChunkLength()).get();
             numPacketsReceived++;
 
@@ -216,17 +216,17 @@ void Sctp::handleMessage(cMessage *msg)
 			destAddr = packet->getTag<L3AddressInd>()->getDestAddress();
 			EV_INFO << "srcAddr=" << srcAddr << "   destAddr=" << destAddr << "\n";
 			if (chunkLength > SCTP_COMMON_HEADER) {
-				if (((SctpChunk *)(sctpmsg->getSctpChunks(0)))->getSctpChunkType() == INIT || ((SctpChunk *)(sctpmsg->getSctpChunks(0)))->getSctpChunkType() == INIT_ACK)
+				if (((sctpmsg->getSctpChunks(0)))->getSctpChunkType() == INIT || ((sctpmsg->getSctpChunks(0)))->getSctpChunkType() == INIT_ACK)
 					findListen = true;
 
 				SctpAssociation *assoc = findAssocForMessage(srcAddr, destAddr, sctpmsg->getSrcPort(), sctpmsg->getDestPort(), findListen);
-				if (!assoc && sctpAssocMap.size() > 0 && (((SctpChunk *)(sctpmsg->getSctpChunks(0)))->getSctpChunkType() == INIT_ACK)) {
+				if (!assoc && sctpAssocMap.size() > 0 && (((sctpmsg->getSctpChunks(0)))->getSctpChunkType() == INIT_ACK)) {
 					SctpInitAckChunk* initack = check_and_cast<SctpInitAckChunk *>((SctpChunk *)(sctpmsg->getSctpChunks(0)));
 					assoc = findAssocForInitAck(initack, srcAddr, destAddr, sctpmsg->getSrcPort(), sctpmsg->getDestPort(), findListen);
 				}
-				if (!assoc && sctpAssocMap.size() > 0 && (((SctpChunk *)(sctpmsg->getSctpChunks(0)))->getSctpChunkType() == ERRORTYPE
+				if (!assoc && sctpAssocMap.size() > 0 && (((sctpmsg->getSctpChunks(0)))->getSctpChunkType() == ERRORTYPE
 														  || (sctpmsg->getSctpChunksArraySize() > 1 &&
-															  (((SctpChunk *)(sctpmsg->getSctpChunks(1)))->getSctpChunkType() == ASCONF || ((SctpChunk *)(sctpmsg->getSctpChunks(1)))->getSctpChunkType() == ASCONF_ACK))))
+															  (((sctpmsg->getSctpChunks(1)))->getSctpChunkType() == ASCONF || ((sctpmsg->getSctpChunks(1)))->getSctpChunkType() == ASCONF_ACK))))
 				{
 					assoc = findAssocWithVTag(sctpmsg->getVTag(), sctpmsg->getSrcPort(), sctpmsg->getDestPort());
 				}
@@ -238,11 +238,12 @@ void Sctp::handleMessage(cMessage *msg)
 						return;
 					}
 
-					if (((SctpChunk *)(sctpmsg->getSctpChunks(0)))->getSctpChunkType() == SHUTDOWN_ACK)
-						sendShutdownCompleteFromMain((Ptr<SctpHeader>&)sctpmsg, destAddr, srcAddr);
-					else if (((SctpChunk *)(sctpmsg->getSctpChunks(0)))->getSctpChunkType() != ABORT &&
-							 ((SctpChunk *)(sctpmsg->getSctpChunks(0)))->getSctpChunkType() != SHUTDOWN_COMPLETE) {
-						sendAbortFromMain((Ptr<SctpHeader>&)sctpmsg, destAddr, srcAddr);
+					Ptr<SctpHeader> sctpmsgptr(sctpmsg);
+					if (((sctpmsg->getSctpChunks(0)))->getSctpChunkType() == SHUTDOWN_ACK)
+						sendShutdownCompleteFromMain(sctpmsgptr, destAddr, srcAddr);
+					else if (((sctpmsg->getSctpChunks(0)))->getSctpChunkType() != ABORT &&
+							 ((sctpmsg->getSctpChunks(0)))->getSctpChunkType() != SHUTDOWN_COMPLETE) {
+						sendAbortFromMain(sctpmsgptr, destAddr, srcAddr);
 					}
 					delete packet;
 				}
@@ -367,8 +368,8 @@ SocketOptions* Sctp::collectSocketOptions()
     sockOptions->sackPeriod = par("sackPeriod");
     sockOptions->maxBurst = par("maxBurst");
     sockOptions->fragPoint = par("fragPoint");
-    sockOptions->nagle = ((bool) par("nagleEnabled")) ? 1 : 0;
-    sockOptions->enableHeartbeats = (bool) par("enableHeartbeats");
+    sockOptions->nagle = par("nagleEnabled").boolValue() ? 1 : 0;
+    sockOptions->enableHeartbeats = par("enableHeartbeats");
     sockOptions->pathMaxRetrans = par("pathMaxRetrans");
     sockOptions->hbInterval = par("hbInterval");
     sockOptions->assocMaxRtx = par("assocMaxRetrans");
@@ -388,8 +389,8 @@ void Sctp::sendAbortFromMain(Ptr<SctpHeader>& sctpmsg, L3Address fromAddr, L3Add
 
     SctpAbortChunk *abortChunk = new SctpAbortChunk();
     abortChunk->setSctpChunkType(ABORT);
-    if (sctpmsg->getSctpChunksArraySize() > 0 && ((SctpChunk *)(sctpmsg->getSctpChunks(0)))->getSctpChunkType() == INIT) {
-        SctpInitChunk *initChunk = (SctpInitChunk *)(sctpmsg->getSctpChunks(0));
+    if (sctpmsg->getSctpChunksArraySize() > 0 && ((sctpmsg->getSctpChunks(0)))->getSctpChunkType() == INIT) {
+        const SctpInitChunk *initChunk = check_and_cast<const SctpInitChunk *>(sctpmsg->getSctpChunks(0));
         abortChunk->setT_Bit(0);
         msg->setVTag(initChunk->getInitTag());
     }
@@ -918,33 +919,33 @@ void Sctp::removeAssociation(SctpAssociation *assoc)
          pathMapIterator != assoc->sctpPathMap.end(); pathMapIterator++)
     {
         const SctpPathVariables *path = pathMapIterator->second;
-        snprintf((char *)&str, sizeof(str), "Number of Fast Retransmissions %d:%s",
+        snprintf(str, sizeof(str), "Number of Fast Retransmissions %d:%s",
                 assoc->assocId, path->remoteAddress.str().c_str());
         recordScalar(str, path->numberOfFastRetransmissions);
-        snprintf((char *)&str, sizeof(str), "Number of Timer-Based Retransmissions %d:%s",
+        snprintf(str, sizeof(str), "Number of Timer-Based Retransmissions %d:%s",
                 assoc->assocId, path->remoteAddress.str().c_str());
         recordScalar(str, path->numberOfTimerBasedRetransmissions);
-        snprintf((char *)&str, sizeof(str), "Number of Heartbeats Sent %d:%s",
+        snprintf(str, sizeof(str), "Number of Heartbeats Sent %d:%s",
                 assoc->assocId, path->remoteAddress.str().c_str());
         recordScalar(str, path->numberOfHeartbeatsSent);
-        snprintf((char *)&str, sizeof(str), "Number of Heartbeats Received %d:%s",
+        snprintf(str, sizeof(str), "Number of Heartbeats Received %d:%s",
                 assoc->assocId, path->remoteAddress.str().c_str());
         recordScalar(str, path->numberOfHeartbeatsRcvd);
-        snprintf((char *)&str, sizeof(str), "Number of Heartbeat ACKs Sent %d:%s",
+        snprintf(str, sizeof(str), "Number of Heartbeat ACKs Sent %d:%s",
                 assoc->assocId, path->remoteAddress.str().c_str());
         recordScalar(str, path->numberOfHeartbeatAcksSent);
-        snprintf((char *)&str, sizeof(str), "Number of Heartbeat ACKs Received %d:%s",
+        snprintf(str, sizeof(str), "Number of Heartbeat ACKs Received %d:%s",
                 assoc->assocId, path->remoteAddress.str().c_str());
         recordScalar(str, path->numberOfHeartbeatAcksRcvd);
-        snprintf((char *)&str, sizeof(str), "Number of Duplicates %d:%s",
+        snprintf(str, sizeof(str), "Number of Duplicates %d:%s",
                 assoc->assocId, path->remoteAddress.str().c_str());
         recordScalar(str, path->numberOfDuplicates);
-        snprintf((char *)&str, sizeof(str), "Number of Bytes received from %d:%s",
+        snprintf(str, sizeof(str), "Number of Bytes received from %d:%s",
                 assoc->assocId, path->remoteAddress.str().c_str());
         recordScalar(str, path->numberOfBytesReceived);
     }
     for (uint16 i = 0; i < assoc->inboundStreams; i++) {
-        snprintf((char *)&str, sizeof(str), "Bytes received on stream %d of assoc %d",
+        snprintf(str, sizeof(str), "Bytes received on stream %d of assoc %d",
                 i, assoc->assocId);
         recordScalar(str, assoc->getState()->streamThroughput[i]);
     }
@@ -1031,7 +1032,7 @@ void Sctp::finish()
         recordScalar("Number of AUTH chunks rejected", assoc.numAuthChunksRejected);
         recordScalar("Number of StreamReset requests sent", assoc.numResetRequestsSent);
         recordScalar("Number of StreamReset requests performed", assoc.numResetRequestsPerformed);
-        if ((double)par("fairStart") > 0) {
+        if (par("fairStart").doubleValue() > 0.0) {
             recordScalar("fair acked bytes", assoc.fairAckedBytes);
             recordScalar("fair start time", assoc.fairStart);
             recordScalar("fair stop time", assoc.fairStop);
@@ -1047,7 +1048,7 @@ void Sctp::finish()
             recordScalar("Average End to End Delay", assoc.cumEndToEndDelay / msgnum);
         }
 
-        recordScalar("RTXMethod", (long)par("RTXMethod"));
+        recordScalar("RTXMethod", par("RTXMethod").intValue());
     }
 }
 

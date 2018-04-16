@@ -392,7 +392,7 @@ void Igmpv2::initialize(int stage)
         registerProtocol(Protocol::igmp, gate("ipOut"), nullptr);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_2) {
-        for (int i = 0; i < (int)ift->getNumInterfaces(); ++i) {
+        for (int i = 0; i < ift->getNumInterfaces(); ++i) {
             InterfaceEntry *ie = ift->getInterface(i);
             if (ie->isMulticast())
                 configureInterface(ie);

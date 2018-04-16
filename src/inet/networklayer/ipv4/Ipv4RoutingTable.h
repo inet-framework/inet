@@ -323,7 +323,7 @@ class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable
     /**
      * Returns the kth multicast route.
      */
-    virtual Ipv4MulticastRoute *getMulticastRoute(int k) const override { return k < (int)multicastRoutes.size() ? multicastRoutes[k] : nullptr; }
+    virtual Ipv4MulticastRoute *getMulticastRoute(int k) const override { return k >= 0 && static_cast<size_t>(k) < multicastRoutes.size() ? multicastRoutes[k] : nullptr; }
 
     /**
      * Adds a multicast route to the routing table. Routes are allowed to be modified

@@ -148,7 +148,7 @@ inline int sign(double i) { return (i >= 0) ? 1 : -1; };
 /**
  * Returns an integer that corresponds to rounded double parameter
  */
-inline int round(double d) { return (int)(ceil(d - 0.5)); }
+inline int round(double d) { return static_cast<int>(ceil(d - 0.5)); }
 
 /**
  * Discards the fractional part of the parameter, e.g. -3.8 becomes -3

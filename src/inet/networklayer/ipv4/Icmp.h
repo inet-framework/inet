@@ -39,7 +39,7 @@ class INET_API Icmp : public cSimpleModule, public IProtocolRegistrationListener
 {
   protected:
     std::set<int> transportProtocols;    // where to send up packets
-    CrcMode crcMode = (CrcMode)-1;
+    CrcMode crcMode = static_cast<CrcMode>(-1);
   protected:
     virtual void processICMPMessage(Packet *);
     virtual void errorOut(Packet *);

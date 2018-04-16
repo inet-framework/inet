@@ -115,7 +115,7 @@ cplusplus(Sack) {{
 // Header Options (optional):
 class TcpOption extends cObject
 {
-    TcpOptionNumbers kind = (TcpOptionNumbers)-1;  // option kind
+    TcpOptionNumbers kind;            // option kind
     unsigned short length = 1;                    // option length
 }
 
@@ -168,7 +168,7 @@ class TcpOptionTimestamp extends TcpOption
 
 class TcpOptionUnknown extends TcpOption
 {
-    kind = (TcpOptionNumbers)-1;
+    kind = static_cast<TcpOptionNumbers>(-1);
     uint8_t bytes[];
 }
 
@@ -231,7 +231,7 @@ class TcpHeader extends TransportHeaderBase
     unsigned short urgentPointer;
 
     uint16_t crc = 0;
-    CrcMode crcMode = (CrcMode)-1;
+    CrcMode crcMode;
 
     // Header options (optional)
     // Currently only EOL, NOP, MSS, WS, SACK_PERMITTED, SACK and TS are implemented

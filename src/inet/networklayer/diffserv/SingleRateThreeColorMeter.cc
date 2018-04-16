@@ -38,8 +38,8 @@ void SingleRateThreeColorMeter::initialize(int stage)
         WATCH(numYellow);
         WATCH(numRed);
 
-        CBS = 8 * (int)par("cbs");
-        EBS = 8 * (int)par("ebs");
+        CBS = 8 * par("cbs").intValue();
+        EBS = 8 * par("ebs").intValue();
         colorAwareMode = par("colorAwareMode");
         Tc = CBS;
         Te = EBS;

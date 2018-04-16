@@ -287,7 +287,7 @@ RipRoute *Rip::importRoute(IRoute *route, RipRoute::RouteType type, int metric, 
     }
 
     ripRoutes.push_back(ripRoute);
-    emit(numRoutesSignal, (unsigned long)ripRoutes.size());
+    emit(numRoutesSignal, ripRoutes.size());
     return ripRoute;
 }
 
@@ -415,7 +415,7 @@ bool Rip::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCa
     Enter_Method_Silent();
 
     if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if ((NodeStartOperation::Stage)stage == NodeStartOperation::STAGE_ROUTING_PROTOCOLS) {
+        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_ROUTING_PROTOCOLS) {
             isOperational = true;
             cancelEvent(startupTimer);
             scheduleAt(simTime() + par("startupTime"), startupTimer);
@@ -423,7 +423,7 @@ bool Rip::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCa
         }
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if ((NodeShutdownOperation::Stage)stage == NodeShutdownOperation::STAGE_ROUTING_PROTOCOLS) {
+        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_ROUTING_PROTOCOLS) {
             // invalidate routes
             for (auto & elem : ripRoutes)
                 invalidateRoute(elem);
@@ -441,7 +441,7 @@ bool Rip::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCa
         }
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if ((NodeCrashOperation::Stage)stage == NodeCrashOperation::STAGE_CRASH) {
+        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH) {
             stopRIPRouting();
             isOperational = false;
             return true;
@@ -905,7 +905,7 @@ void Rip::addRoute(const L3Address& dest, int prefixLength, const InterfaceEntry
     ripRoute->setLastUpdateTime(simTime());
     ripRoute->setChanged(true);
     ripRoutes.push_back(ripRoute);
-    emit(numRoutesSignal, (unsigned long)ripRoutes.size());
+    emit(numRoutesSignal, ripRoutes.size());
     triggerUpdate();
 }
 
@@ -1045,7 +1045,7 @@ void Rip::purgeRoute(RipRoute *ripRoute)
     remove(ripRoutes, ripRoute);
     delete ripRoute;
 
-    emit(numRoutesSignal, (unsigned long)ripRoutes.size());
+    emit(numRoutesSignal, ripRoutes.size());
 }
 
 /**
@@ -1141,7 +1141,7 @@ void Rip::deleteInterface(const InterfaceEntry *ie)
             it++;
     }
     if (emitNumRoutesSignal)
-        emit(numRoutesSignal, (unsigned long)ripRoutes.size());
+        emit(numRoutesSignal, ripRoutes.size());
 }
 
 int Rip::getInterfaceMetric(InterfaceEntry *ie)

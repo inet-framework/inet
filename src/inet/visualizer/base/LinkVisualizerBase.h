@@ -64,7 +64,7 @@ class INET_API LinkVisualizerBase : public VisualizerBase, public cListener
     /** @name Parameters */
     //@{
     bool displayLinks = false;
-    ActivityLevel activityLevel = (ActivityLevel)-1;
+    ActivityLevel activityLevel = static_cast<ActivityLevel>(-1);
     NetworkNodeFilter nodeFilter;
     InterfaceFilter interfaceFilter;
     PacketFilter packetFilter;

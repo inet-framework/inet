@@ -203,7 +203,7 @@ const Ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) con
 
 TcpOption *TcpHeaderSerializer::deserializeOption(MemoryInputStream& stream) const
 {
-    TcpOptionNumbers kind = (TcpOptionNumbers)stream.readByte();
+    TcpOptionNumbers kind = static_cast<TcpOptionNumbers>(stream.readByte());
     unsigned char length = 0;
 
     switch (kind) {

@@ -120,7 +120,7 @@ template <typename T>
 inline T *TagSet::findTag() const
 {
     int index = getTagIndex<T>();
-    return index == -1 ? nullptr : (T *)(*tags)[index];
+    return index == -1 ? nullptr : static_cast<T *>((*tags)[index]);
 }
 
 template <typename T>
@@ -129,7 +129,7 @@ inline T *TagSet::getTag() const
     int index = getTagIndex<T>();
     if (index == -1)
         throw cRuntimeError("Tag '%s' is absent", opp_typename(typeid(T)));
-    return (T *)(*tags)[index];
+    return static_cast<T *>((*tags)[index]);
 }
 
 template <typename T>
@@ -158,14 +158,14 @@ inline T *TagSet::removeTag()
     int index = getTagIndex<T>();
     if (index == -1)
         throw cRuntimeError("Tag '%s' is absent", opp_typename(typeid(T)));
-    return (T *)removeTag(index);
+    return static_cast<T *>(removeTag(index));
 }
 
 template <typename T>
 inline T *TagSet::removeTagIfPresent()
 {
     int index = getTagIndex<T>();
-    return index == -1 ? nullptr : (T *)removeTag(index);
+    return index == -1 ? nullptr : static_cast<T *>(removeTag(index));
 }
 
 } // namespace

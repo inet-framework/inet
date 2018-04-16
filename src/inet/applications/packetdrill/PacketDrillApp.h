@@ -129,7 +129,7 @@ class INET_API PacketDrillApp : public TcpSessionApp, public ILifecycle
         std::map<uint32, uint32> seqNumMap;
         simtime_t peerHeartbeatTime;
         cMessage *eventTimer;
-        CrcMode crcMode = (CrcMode)-1;
+        CrcMode crcMode = static_cast<CrcMode>(-1);
 
 
         void scheduleEvent();

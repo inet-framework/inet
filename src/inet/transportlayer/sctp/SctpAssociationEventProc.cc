@@ -80,7 +80,7 @@ void SctpAssociation::process_ASSOCIATE(SctpEventCode& event, SctpCommandReq *sc
             EV_INFO << "OPEN: " << lAddr << ":" << localPort << " --> " << rAddr << ":" << remotePort << "\n";
 
             sctpMain->updateSockPair(this, lAddr, rAddr, localPort, remotePort);
-            state->localRwnd = (long)sctpMain->par("arwnd");
+            state->localRwnd = sctpMain->par("arwnd");
             sendInit();
             startTimer(T1_InitTimer, state->initRexmitTimeout);
             break;
@@ -114,7 +114,7 @@ void SctpAssociation::process_OPEN_PASSIVE(SctpEventCode& event, SctpCommandReq 
             listening = true;
             fd = openCmd->getFd();
             EV_DETAIL << "open listening socket with fd=" << fd << " and assocId=" << assocId << endl;
-            state->localRwnd = (long)sctpMain->par("arwnd");
+            state->localRwnd = sctpMain->par("arwnd");
             state->localMsgRwnd = sctpMain->par("messageAcceptLimit");
             state->streamReset = openCmd->getStreamReset();
             state->numRequests = openCmd->getNumRequests();
@@ -153,7 +153,7 @@ void SctpAssociation::process_SEND(SctpEventCode& event, SctpCommandReq *sctpCom
              << " appGateIndex=" << appGateIndex
              << " streamId=" << sendCommand->getSid() << endl;
 
-    Packet *applicationPacket = (Packet *)msg;
+    Packet *applicationPacket = check_and_cast<Packet *>(msg);
     const auto& applicationData = staticPtrCast<const BytesChunk>(applicationPacket->peekData());
     int sendBytes = applicationData->getChunkLength().get() / 8;
     EV_INFO << "got msg of length " << applicationData->getChunkLength().get() << "sendBytes=" << sendBytes << endl;
@@ -324,7 +324,7 @@ void SctpAssociation::process_SEND(SctpEventCode& event, SctpCommandReq *sctpCom
 void SctpAssociation::process_RECEIVE_REQUEST(SctpEventCode& event, SctpCommandReq *sctpCommand)
 {
     EV_INFO << "SctpAssociation::process_RECEIVE_REQUEST\n";
-    SctpSendReq *sendCommand = (SctpSendReq *)(sctpCommand);
+    SctpSendReq *sendCommand = check_and_cast<SctpSendReq *>(sctpCommand);
     if ((uint32)sendCommand->getSid() > inboundStreams || sendCommand->getSid() < 0) {
         EV_DEBUG << "Application tries to read from invalid stream id....\n";
     }
@@ -341,7 +341,7 @@ void SctpAssociation::process_PRIMARY(SctpEventCode& event, SctpCommandReq *sctp
 void SctpAssociation::process_STREAM_RESET(SctpCommandReq *sctpCommand)
 {
     EV_INFO << "process_STREAM_RESET request arriving from App\n";
-    SctpResetReq *rinfo = (SctpResetReq *)(sctpCommand);
+    SctpResetReq *rinfo = check_and_cast<SctpResetReq *>(sctpCommand);
     if (!(getPath(remoteAddr)->ResetTimer->isScheduled())) {
         if (rinfo->getRequestType() == ADD_BOTH) {
             sendAddInAndOutStreamsRequest(rinfo);
@@ -401,13 +401,13 @@ void SctpAssociation::process_STREAM_RESET(SctpCommandReq *sctpCommand)
 
 void SctpAssociation::process_QUEUE_MSGS_LIMIT(const SctpCommandReq *sctpCommand)
 {
-    const SctpInfoReq *qinfo = (const SctpInfoReq *)(sctpCommand);
+    const SctpInfoReq *qinfo = check_and_cast<const SctpInfoReq *>(sctpCommand);
     state->queueLimit = qinfo->getText();
 }
 
 void SctpAssociation::process_QUEUE_BYTES_LIMIT(const SctpCommandReq *sctpCommand)
 {
-    const SctpInfoReq *qinfo = (const SctpInfoReq *)(sctpCommand);
+    const SctpInfoReq *qinfo = check_and_cast<const SctpInfoReq *>(sctpCommand);
     state->sendQueueLimit = qinfo->getText();
 }
 

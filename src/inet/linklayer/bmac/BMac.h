@@ -145,7 +145,7 @@ class INET_API BMac : public MacProtocolBase, public IMacProtocol
         WAIT_ACK_TX    //9
     };
     /** @brief The current state of the protocol */
-    States macState = (States)-1;
+    States macState = static_cast<States>(-1);
 
     // messages used in the FSM
     cMessage *resend_data = nullptr;

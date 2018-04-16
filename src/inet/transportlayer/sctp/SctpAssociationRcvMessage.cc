@@ -113,7 +113,7 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
     bool sackWasReceived = false;
     for (uint32 i = 0; i < numberOfChunks; i++) {
        // SctpChunk *header = (SctpChunk *)(sctpmsg->getSctpChunks(0));
-        SctpChunk *header = (SctpChunk *)sctpmsg->getFirstChunk();
+        SctpChunk *header = sctpmsg->getFirstChunk();
         const uint8 type = header->getSctpChunkType();
         EV_DEBUG << "Header length: " << header->getByteLength() << endl;
 
@@ -513,11 +513,11 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
         if (state->sendResponse == PERFORMED_WITH_OPTION) {
             resetExpectedSsns();
             if (state->incomingRequest != nullptr)
-                sendStreamResetResponse((SctpSsnTsnResetRequestParameter *)state->incomingRequest, PERFORMED, true);
+                sendStreamResetResponse(check_and_cast<SctpSsnTsnResetRequestParameter *>(state->incomingRequest), PERFORMED, true);
         } else if (state->sendResponse == PERFORMED_WITH_ADDOUT) {
-            sendAddOutgoingStreamsRequest(((SctpAddStreamsRequestParameter *)state->incomingRequest)->getNumberOfStreams());
+            sendAddOutgoingStreamsRequest(check_and_cast<SctpAddStreamsRequestParameter *>(state->incomingRequest)->getNumberOfStreams());
             state->numResetRequests++;
-            sendStreamResetResponse(((SctpAddStreamsRequestParameter *)state->incomingRequest)->getSrReqSn(), PERFORMED);
+            sendStreamResetResponse(check_and_cast<SctpAddStreamsRequestParameter *>(state->incomingRequest)->getSrReqSn(), PERFORMED);
         } else {
             sendStreamResetResponse(state->responseSn, state->sendResponse);
         }
@@ -826,8 +826,8 @@ bool SctpAssociation::processCookieEchoArrived(SctpCookieEchoChunk *cookieEcho, 
 {
     bool trans = false;
 
-    SctpCookie *cookie = (SctpCookie *)(cookieEcho->getStateCookie());
-    if (cookie->getCreationTime() + (double)sctpMain->par("validCookieLifetime") < simTime()) {
+    const SctpCookie *cookie = cookieEcho->getStateCookie();
+    if (cookie->getCreationTime() + simtime_t(sctpMain->par("validCookieLifetime")) < simTime()) {
         EV_INFO << "stale Cookie: sendAbort\n";
         sendAbort();
         delete cookie;
@@ -2301,7 +2301,7 @@ SctpEventCode SctpAssociation::processHeartbeatAckArrived(SctpHeartbeatAckChunk 
         }
         path->ssthresh = state->peerRwnd;
         recordCwndUpdate(path);
-        path->heartbeatTimeout = (double)sctpMain->getHbInterval() + path->pathRto;
+        path->heartbeatTimeout = sctpMain->getHbInterval() + path->pathRto;
     }
 
     if (path->activePath == false) {
@@ -2473,7 +2473,7 @@ void SctpAssociation::processIncomingResetRequestArrived(SctpIncomingSsnResetReq
             state->incomingRequest = nullptr;
             state->incomingRequestSet = false;
         }
-        state->incomingRequest = ((SctpParameter *)requestParam)->dup();        //FIXME is the c-style conversion need here?
+        state->incomingRequest = ((SctpParameter *)requestParam)->dup();        //FIXME is the c-style conversion need here?, duplicate only SctpParameter part!!!
       //  state->incomingRequest->setName("StateIncoming");
         state->incomingRequestSet = true;
     }
@@ -2498,12 +2498,12 @@ void SctpAssociation::processSsnTsnResetRequestArrived(SctpSsnTsnResetRequestPar
             state->sendResponse = PERFORMED_WITH_OPTION;
             state->responseSn = requestParam->getSrReqSn();
             state->peerRequestType = SSN_TSN;
-            state->incomingRequest = (SctpParameter *)requestParam->dup();        //FIXME is the c-style conversion need here?
+            state->incomingRequest = requestParam->dup();
             state->incomingRequestSet = true;
         }
     } else {
         sendStreamResetResponse(requestParam, DEFERRED, true);
-        state->incomingRequest = (SctpParameter *)requestParam->dup();        //FIXME is the c-style conversion need here?
+        state->incomingRequest = requestParam->dup();
         state->incomingRequestSet = true;
        // state->incomingRequest->setName("SSNDeferred");
         state->peerRequestSn = requestParam->getSrReqSn();
@@ -2517,9 +2517,9 @@ void SctpAssociation::processResetResponseArrived(SctpStreamResetResponseParamet
 {
     EV_INFO << "processResetResponseArrived \n";
     if (getPath(remoteAddr)->ResetTimer->isScheduled()) {
-        if (PK(getPath(remoteAddr)->ResetTimer)->hasEncapsulatedPacket() &&
+        if (getPath(remoteAddr)->ResetTimer->hasEncapsulatedPacket() &&
             (state->numResetRequests == 0 || (state->getNumRequestsNotPerformed() == 1 && responseParam->getResult() != DEFERRED))) {
-            SctpResetTimer *tm = (SctpResetTimer *)getPath(remoteAddr)->ResetTimer->decapsulate();
+            SctpResetTimer *tm = check_and_cast<SctpResetTimer *>(getPath(remoteAddr)->ResetTimer->decapsulate());
             EV_INFO << "SrResSn=" << responseParam->getSrResSn() << " tmOut=" << tm->getOutSN() << " tmIn= " << tm->getInSN() << "\n";
             if (tm->getOutSN() == responseParam->getSrResSn() || tm->getInSN() == responseParam->getSrResSn() || responseParam->getResult() > DEFERRED) {
                 stopTimer(getPath(remoteAddr)->ResetTimer);
@@ -2677,7 +2677,7 @@ SctpEventCode SctpAssociation::processInAndOutResetRequestArrived(SctpIncomingSs
     return SCTP_E_IGNORE;
 }
 
-void SctpAssociation::processAddInAndOutResetRequestArrived(SctpAddStreamsRequestParameter *addInRequestParam,
+void SctpAssociation::processAddInAndOutResetRequestArrived(const SctpAddStreamsRequestParameter *addInRequestParam,
     SctpAddStreamsRequestParameter *addOutRequestParam)
 {
     const auto& msg = makeShared<SctpHeader>();
@@ -2737,7 +2737,7 @@ void SctpAssociation::processAddInAndOutResetRequestArrived(SctpAddStreamsReques
   //  state->resetChunk->setName("stateAddResetChunk");
     Packet *pkt = new Packet("RE_CONFIG");
     sendToIP(pkt, msg, remoteAddr);
-    PK(getPath(remoteAddr)->ResetTimer)->encapsulate((cPacket *)rt);
+    PK(getPath(remoteAddr)->ResetTimer)->encapsulate(rt);
     startTimer(getPath(remoteAddr)->ResetTimer, getPath(remoteAddr)->pathRto);
 }
 
@@ -2748,7 +2748,7 @@ SctpEventCode SctpAssociation::processOutAndResponseArrived(SctpOutgoingSsnReset
     EV_INFO << "processOutAndResponseArrived\n";
     if (getPath(remoteAddr)->ResetTimer->isScheduled()) {
         if (state->numResetRequests == 0) {
-            SctpResetTimer *tm = (SctpResetTimer *)(PK(getPath(remoteAddr)->ResetTimer)->decapsulate());
+            SctpResetTimer *tm = check_and_cast<SctpResetTimer *>(getPath(remoteAddr)->ResetTimer->decapsulate());
             if (tm->getOutSN() == responseParam->getSrResSn()) {
                 stopTimer(getPath(remoteAddr)->ResetTimer);
                 delete state->resetChunk;
@@ -3004,7 +3004,7 @@ SctpEventCode SctpAssociation::processStreamResetArrived(SctpStreamResetChunk *r
                 } else {
                     state->peerRequestSn = addStreamsParam->getSrReqSn();
                     state->peerRequestType = ADD_INCOMING;
-                    state->incomingRequest = ((SctpParameter *)addStreamsParam)->dup();        //FIXME is the c-style conversion need here?
+                    state->incomingRequest = ((SctpParameter *)addStreamsParam)->dup();        //FIXME is the c-style conversion need here?, this is not a correct dup, duplicate only the SctpParameter part of addStreamsParam
                     state->incomingRequestSet = true;
                   //  state->incomingRequest->setName("stateIncoming");
                     state->sendResponse = PERFORMED_WITH_ADDOUT;
@@ -3206,7 +3206,7 @@ SctpEventCode SctpAssociation::processAsconfArrived(SctpAsconfChunk *asconfChunk
                         errorParam->setResponseCorrelationId(delParam->getRequestCorrelationId());
                         errorParam->setErrorCauseType(ERROR_DELETE_LAST_IP_ADDRESS);
                         errorParam->setByteLength(SCTP_ADD_IP_PARAMETER_LENGTH + 4);
-                        errorParam->encapsulate((cPacket *)delParam->dup());
+                        errorParam->encapsulate(delParam->dup());
                               //FIXME is the c-style conversion need here?
                         asconfAckChunk->addAsconfResponse(errorParam);
                     }
@@ -3219,11 +3219,11 @@ SctpEventCode SctpAssociation::processAsconfArrived(SctpAsconfChunk *asconfChunk
                         errParam->setResponseCorrelationId(delParam->getRequestCorrelationId());
                         errParam->setErrorCauseType(ERROR_DELETE_SOURCE_ADDRESS);
                         errParam->setByteLength(SCTP_ADD_IP_PARAMETER_LENGTH + 4);
-                        errParam->encapsulate((cPacket *)delParam->dup());
+                        errParam->encapsulate(delParam->dup());
                         asconfAckChunk->addAsconfResponse(errParam);
                     }
                     else {
-                        locAddr = (std::vector<L3Address>)state->localAddresses;
+                        locAddr = state->localAddresses;
                         sctpMain->removeRemoteAddressFromAllAssociations(this, addr, locAddr);
                         removePath(addr);
                         EV_INFO << "remove path from address " << addr << "\n";
@@ -3265,7 +3265,7 @@ SctpEventCode SctpAssociation::processAsconfArrived(SctpAsconfChunk *asconfChunk
         if (StartAddIP->isScheduled()) {
             stopTimer(StartAddIP);
             state->corrIdNum = state->asconfSn;
-            const char *type = (const char *)sctpMain->par("addIpType");
+            const char *type = sctpMain->par("addIpType").stringValue();
             sendAsconf(type, false);
         }
     }
@@ -3286,9 +3286,9 @@ SctpEventCode SctpAssociation::processAsconfAckArrived(SctpAsconfAckChunk *ascon
         state->errorCount = 0;
         state->asconfOutstanding = false;
         getPath(remoteAddr)->pathErrorCount = 0;
-        std::vector<L3Address> remAddr = (std::vector<L3Address>)remoteAddressList;
+        std::vector<L3Address> remAddr = remoteAddressList;
         for (uint32 j = 0; j < asconfAckChunk->getAsconfResponseArraySize(); j++) {
-            sctpParam = (SctpParameter *)(asconfAckChunk->getAsconfResponse(j));
+            sctpParam = asconfAckChunk->getAsconfResponse(j);
             if (sctpParam->getParameterType() == ERROR_CAUSE_INDICATION) {
                 SctpErrorCauseParameter *error = check_and_cast<SctpErrorCauseParameter *>(sctpParam);
                 errorCorrId.push_back(error->getResponseCorrelationId());
@@ -3296,7 +3296,7 @@ SctpEventCode SctpAssociation::processAsconfAckArrived(SctpAsconfAckChunk *ascon
             }
         }
         for (uint32 i = 0; i < sctpasconf->getAsconfParamsArraySize(); i++) {
-            sctpParam = check_and_cast<SctpParameter *>(sctpasconf->removeAsconfParam());
+            sctpParam = CHK(sctpasconf->removeAsconfParam());
             errorFound = false;
             switch (sctpParam->getParameterType()) {
                 case ADD_IP_ADDRESS:
@@ -3492,11 +3492,11 @@ void SctpAssociation::processErrorArrived(SctpErrorChunk *errorChunk)
         parameterType = param->getParameterType();
         switch (parameterType) {
             case MISSING_NAT_ENTRY: {
-                if ((bool)sctpMain->par("addIP")) {
+                if (sctpMain->par("addIP").boolValue()) {
                     if (StartAddIP->isScheduled())
                         stopTimer(StartAddIP);
                     state->corrIdNum = state->asconfSn;
-                    const char *type = (const char *)sctpMain->par("addIpType");
+                    const char *type = sctpMain->par("addIpType").stringValue();
                     sendAsconf(type, true);
                 }
                 break;
@@ -3567,7 +3567,7 @@ void SctpAssociation::process_TIMEOUT_HEARTBEAT_INTERVAL(SctpPathVariables *path
     /* restart hb_send_timer on this path */
     stopTimer(path->HeartbeatIntervalTimer);
     stopTimer(path->HeartbeatTimer);
-    path->heartbeatIntervalTimeout = (double)sctpMain->getHbInterval() + path->pathRto;
+    path->heartbeatIntervalTimeout = sctpMain->getHbInterval() + path->pathRto;
     path->heartbeatTimeout = path->pathRto;
     startTimer(path->HeartbeatIntervalTimer, path->heartbeatIntervalTimeout);
 
@@ -3776,7 +3776,7 @@ void SctpAssociation::process_TIMEOUT_RTX(SctpPathVariables *path)
         return;
     }
     else {
-        if (path->pathErrorCount > (uint32)sctpMain->par("pathMaxRetrans")) {
+        if (path->pathErrorCount > static_cast<uint32>(sctpMain->par("pathMaxRetrans"))) {
             bool notifyUlp = false;
 
             EV_DETAIL << "pathErrorCount exceeded\n";

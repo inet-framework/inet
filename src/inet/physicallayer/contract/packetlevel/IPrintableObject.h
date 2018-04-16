@@ -47,7 +47,7 @@ class INET_API IPrintableObject
      * Function calls to operator<< with pointers or references either const
      * or not are all forwarded to this function.
      */
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const { return stream << "<object@" << (void *)this << ">"; }
+    virtual std::ostream& printToStream(std::ostream& stream, int level) const { return stream << "<object@" << static_cast<const void *>(this) << ">"; }
 
     virtual std::string getInfoStringRepresentation() const { std::stringstream s; printToStream(s, PRINT_LEVEL_INFO); return s.str(); }
 

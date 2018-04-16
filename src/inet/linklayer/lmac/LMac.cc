@@ -609,7 +609,7 @@ void LMac::handleLowerPacket(Packet *packet)
 void LMac::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
 {
     if (signalID == IRadio::transmissionStateChangedSignal) {
-        IRadio::TransmissionState newRadioTransmissionState = (IRadio::TransmissionState)value;
+        IRadio::TransmissionState newRadioTransmissionState = static_cast<IRadio::TransmissionState>(value);
         if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE) {
             // if data is scheduled for transfer, don;t do anything.
             if (sendData->isScheduled()) {

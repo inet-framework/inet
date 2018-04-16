@@ -120,7 +120,7 @@ void PacketDrillApp::initialize(int stage)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
         pd = new PacketDrill(this);
         config = new PacketDrillConfig();
-        script = new PacketDrillScript((const char *)(par("scriptFile")));
+        script = new PacketDrillScript(par("scriptFile").stringValue());
         localAddress = L3Address(par("localAddress"));
         remoteAddress = L3Address(par("remoteAddress"));
         localPort = par("localPort");
@@ -148,7 +148,7 @@ void PacketDrillApp::initialize(int stage)
 
         cMessage* timeMsg = new cMessage("PacketDrillAppTimer");
         timeMsg->setKind(MSGKIND_START);
-        scheduleAt((simtime_t)par("startTime"), timeMsg);
+        scheduleAt(par("startTime"), timeMsg);
     }
 }
 
@@ -192,7 +192,7 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                 Packet *liveIpv4Packet = check_and_cast<Packet*>(msg);
                // const auto& liveIpv4Header = liveIpv4Packet->peekAtFront<Ipv4Header>();
                 PacketDrillInfo *info = (PacketDrillInfo *)ipv4Packet->getContextPointer();
-                if (verifyTime((enum eventTime_t) info->getTimeType(), info->getScriptTime(),
+                if (verifyTime(static_cast<eventTime_t>(info->getTimeType()), info->getScriptTime(),
                         info->getScriptTimeEnd(), info->getOffset(), getSimulation()->getSimTime(), "outbound packet")
                         == STATUS_ERR) {
                     throw cTerminationException("Packetdrill error: Packet arrived at the wrong time");
@@ -210,8 +210,8 @@ void PacketDrillApp::handleMessage(cMessage *msg)
             }
         } else if (socketId == udpSocketId) {
             // received from UDP
-            PacketDrillEvent *event = (PacketDrillEvent *)(script->getEventList()->get(eventCounter));
-            if (verifyTime((enum eventTime_t) event->getTimeType(), event->getEventTime(), event->getEventTimeEnd(),
+            PacketDrillEvent *event = check_and_cast<PacketDrillEvent *>(script->getEventList()->get(eventCounter));
+            if (verifyTime(event->getTimeType(), event->getEventTime(), event->getEventTimeEnd(),
                     event->getEventOffset(), getSimulation()->getSimTime(), "inbound packet") == STATUS_ERR) {
                 delete msg;
                 throw cTerminationException("Packetdrill error: Packet arrived at the wrong time");
@@ -282,7 +282,7 @@ void PacketDrillApp::handleMessage(cMessage *msg)
             // received from SCTP
             switch (msg->getKind()) {
                 case SCTP_I_SENDSOCKETOPTIONS: {
-                    sctpSocket.setUserOptions((void*) (msg->getContextPointer()));
+                    sctpSocket.setUserOptions((SocketOptions*)(msg->getContextPointer()));
                     socketOptionsArrived = true;
                     if (!eventTimer->isScheduled() && eventCounter < numEvents - 1) {
                         eventCounter++;
@@ -354,8 +354,8 @@ void PacketDrillApp::handleMessage(cMessage *msg)
                     break;
                 }
                 case SCTP_I_DATA: {
-                    PacketDrillEvent *event = (PacketDrillEvent *) (script->getEventList()->get(eventCounter));
-                    if (verifyTime((enum eventTime_t) event->getTimeType(), event->getEventTime(), event->getEventTimeEnd(),
+                    PacketDrillEvent *event = check_and_cast<PacketDrillEvent *>(script->getEventList()->get(eventCounter));
+                    if (verifyTime(event->getTimeType(), event->getEventTime(), event->getEventTimeEnd(),
                             event->getEventOffset(), getSimulation()->getSimTime(), "inbound packet") == STATUS_ERR)
                     {
                         delete msg;
@@ -399,7 +399,7 @@ void PacketDrillApp::adjustTimes(PacketDrillEvent *event)
         event->getTimeType() == RELATIVE_TIME ||
         event->getTimeType() == RELATIVE_RANGE_TIME) {
         offset = getSimulation()->getSimTime() - simStartTime;
-        offsetLastEvent = ((PacketDrillEvent *)(script->getEventList()->get(eventCounter - 1)))->getEventTime() - simStartTime;
+        offsetLastEvent = (check_and_cast<PacketDrillEvent *>(script->getEventList()->get(eventCounter - 1)))->getEventTime() - simStartTime;
         offset = (offset.dbl() > offsetLastEvent.dbl()) ? offset : offsetLastEvent;
         event->setEventOffset(offset);
         event->setEventTime(event->getEventTime() + offset + simStartTime);
@@ -414,7 +414,7 @@ void PacketDrillApp::adjustTimes(PacketDrillEvent *event)
 
 void PacketDrillApp::scheduleEvent()
 {
-    PacketDrillEvent *event = (PacketDrillEvent *)(script->getEventList()->get(eventCounter));
+    PacketDrillEvent *event = check_and_cast<PacketDrillEvent *>(script->getEventList()->get(eventCounter));
     event->setEventNumber(eventCounter);
     adjustTimes(event);
     cancelEvent(eventTimer);
@@ -543,7 +543,7 @@ void PacketDrillApp::runEvent(PacketDrillEvent* event)
                 Packet *livePacket = check_and_cast<Packet *>(receivedPackets->pop());
                 if (pk && livePacket) {
                     PacketDrillInfo *liveInfo = (PacketDrillInfo *)livePacket->getContextPointer();
-                    if (verifyTime((enum eventTime_t) event->getTimeType(), event->getEventTime(),
+                    if (verifyTime(event->getTimeType(), event->getEventTime(),
                             event->getEventTimeEnd(), event->getEventOffset(), liveInfo->getLiveTime(),
                             "outbound packet") == STATUS_ERR) {
                         throw cTerminationException("Packetdrill error: Timing error");
@@ -711,11 +711,11 @@ void PacketDrillApp::runSystemCallEvent(PacketDrillEvent* event, struct syscall_
     } else if (!strcmp(name, "write") || !strcmp(name, "send")) {
         syscallWrite(syscall, args, &error);
     } else if (!strcmp(name, "read")) {
-        syscallRead((PacketDrillEvent*) event, syscall, args, &error);
+        syscallRead(event, syscall, args, &error);
     } else if (!strcmp(name, "sendto")) {
         syscallSendTo(syscall, args, &error);
     } else if (!strcmp(name, "recvfrom")) {
-        syscallRecvFrom((PacketDrillEvent*)event, syscall, args, &error);
+        syscallRecvFrom(event, syscall, args, &error);
     } else if (!strcmp(name, "close")) {
         syscallClose(syscall, args, &error);
     } else if (!strcmp(name, "shutdown")) {
@@ -755,15 +755,15 @@ int PacketDrillApp::syscallSocket(struct syscall_spec *syscall, cQueue *args, ch
     if (args->getLength() != 3) {
         return STATUS_ERR;
     }
-    exp = (PacketDrillExpression *)args->get(0);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(0));
     if (!exp || (exp->getType() != EXPR_ELLIPSIS)) {
         return STATUS_ERR;
     }
-    exp = (PacketDrillExpression *)args->get(1);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(1));
     if (!exp || exp->getS32(&type, error)) {
         return STATUS_ERR;
     }
-    exp = (PacketDrillExpression *)args->get(2);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(2));
     if (!exp || exp->getS32(&protocol, error)) {
         return STATUS_ERR;
     }
@@ -782,10 +782,10 @@ int PacketDrillApp::syscallSocket(struct syscall_spec *syscall, cQueue *args, ch
             sctpSocket.setOutputGate(gate("socketOut"));
             sctpAssocId = sctpSocket.getConnectionId();
             if (sctpSocket.getOutboundStreams() == -1) {
-                sctpSocket.setOutboundStreams((int) par("outboundStreams"));
+                sctpSocket.setOutboundStreams(par("outboundStreams"));
             }
             if (sctpSocket.getInboundStreams() == -1) {
-                sctpSocket.setInboundStreams((int) par("inboundStreams"));
+                sctpSocket.setInboundStreams(par("inboundStreams"));
             }
             sctpSocket.bind(localAddress, localPort);
             break;
@@ -803,13 +803,13 @@ int PacketDrillApp::syscallBind(struct syscall_spec *syscall, cQueue *args, char
 
     if (args->getLength() != 3)
         return STATUS_ERR;
-    exp = (PacketDrillExpression *)args->get(0);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(0));
     if (!exp || exp->getS32(&script_fd, error))
         return STATUS_ERR;
-    exp = (PacketDrillExpression *)args->get(1);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(1));
     if (!exp || (exp->getType() != EXPR_ELLIPSIS))
         return STATUS_ERR;
-    exp = (PacketDrillExpression *)args->get(2);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(2));
     if (!exp || (exp->getType() != EXPR_ELLIPSIS))
         return STATUS_ERR;
 
@@ -841,10 +841,10 @@ int PacketDrillApp::syscallListen(struct syscall_spec *syscall, cQueue *args, ch
 
     if (args->getLength() != 2)
         return STATUS_ERR;
-    exp = (PacketDrillExpression *)args->get(0);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(0));
     if (!exp || exp->getS32(&script_fd, error))
         return STATUS_ERR;
-    exp = (PacketDrillExpression *)args->get(1);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(1));
     if (!exp || exp->getS32(&backlog, error))
         return STATUS_ERR;
 
@@ -873,7 +873,7 @@ int PacketDrillApp::syscallAccept(struct syscall_spec *syscall, cQueue *args, ch
     if (!listenSet)
         return STATUS_ERR;
 
-    PacketDrillExpression* exp = (PacketDrillExpression *)syscall->result;
+    PacketDrillExpression* exp = syscall->result;
     if (!exp || exp->getS32(&script_accepted_fd, error))
         return STATUS_ERR;
     if (establishedPending) {
@@ -897,13 +897,13 @@ int PacketDrillApp::syscallWrite(struct syscall_spec *syscall, cQueue *args, cha
 
     if (args->getLength() > 4)
         return STATUS_ERR;
-    exp = (PacketDrillExpression *) args->get(0);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(0));
     if (!exp || exp->getS32(&script_fd, error))
         return STATUS_ERR;
-    exp = (PacketDrillExpression *) args->get(1);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(1));
     if (!exp || (exp->getType() != EXPR_ELLIPSIS))
         return STATUS_ERR;
-    exp = (PacketDrillExpression *) args->get(2);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(2));
     if (!exp || exp->getS32(&count, error))
         return STATUS_ERR;
 
@@ -954,13 +954,13 @@ int PacketDrillApp::syscallConnect(struct syscall_spec *syscall, cQueue *args, c
 
     if (args->getLength() != 3)
         return STATUS_ERR;
-    exp = (PacketDrillExpression *)args->get(0);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(0));
     if (!exp || exp->getS32(&script_fd, error))
         return STATUS_ERR;
-    exp = (PacketDrillExpression *)args->get(1);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(1));
     if (!exp || (exp->getType() != EXPR_ELLIPSIS))
         return STATUS_ERR;
-    exp = (PacketDrillExpression *)args->get(2);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(2));
     if (!exp || (exp->getType() != EXPR_ELLIPSIS))
         return STATUS_ERR;
 
@@ -993,20 +993,20 @@ int PacketDrillApp::syscallSetsockopt(struct syscall_spec *syscall, cQueue *args
     assert(protocol == IP_PROT_SCTP);
     if (args->getLength() != 5)
         return STATUS_ERR;
-    exp = (PacketDrillExpression *) args->get(0);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(0));
     if (!exp || exp->getS32(&script_fd, error))
         return STATUS_ERR;
-    exp = (PacketDrillExpression *) args->get(1);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(1));
     if (!exp || exp->getS32(&level, error))
         return STATUS_ERR;
     if (level != IPPROTO_SCTP) {
         return STATUS_ERR;
     }
-    exp = (PacketDrillExpression *) args->get(2);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(2));
     if (!exp || exp->getS32(&optname, error))
         return STATUS_ERR;
 
-    exp = (PacketDrillExpression *) args->get(3);
+    exp = check_and_cast<PacketDrillExpression *>(args->get(3));
 
     if (syscall->result->getNum() == -1) {
         if (exp->getType() == EXPR_SCTP_RESET_STREAMS) {
@@ -1067,7 +1067,7 @@ int PacketDrillApp::syscallSetsockopt(struct syscall_spec *syscall, cQueue *args
                 cQueue *qu = rs->srs_stream_list->getList();
                 uint16 i = 0;
                 for (cQueue::Iterator iter(*qu); !iter.end(); iter++, i++) {
-                    rinfo->setStreams(i, ((PacketDrillExpression *)(*iter))->getNum());
+                    rinfo->setStreams(i, check_and_cast<PacketDrillExpression *>(*iter)->getNum());
                     qu->remove((*iter));
                 }
                 qu->clear();
@@ -1154,7 +1154,7 @@ int PacketDrillApp::syscallSetsockopt(struct syscall_spec *syscall, cQueue *args
                 return STATUS_ERR;
             }
 
-            PacketDrillExpression *exp2 = (PacketDrillExpression*) (exp->getList()->pop());
+            PacketDrillExpression *exp2 = check_and_cast<PacketDrillExpression *>(exp->getList()->pop());
             exp2->getS32(&value, error);
             switch (optname)
             {
@@ -1193,20 +1193,20 @@ int PacketDrillApp::syscallGetsockopt(struct syscall_spec *syscall, cQueue *args
     assert(protocol == IP_PROT_SCTP);
     if (args->getLength() != 5)
         return STATUS_ERR;
-    exp = (PacketDrillExpression *) args->get(0);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(0));
     if (!exp || exp->getS32(&script_fd, error))
         return STATUS_ERR;
-    exp = (PacketDrillExpression *) args->get(1);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(1));
     if (!exp || exp->getS32(&level, error))
         return STATUS_ERR;
     if (level != IPPROTO_SCTP) {
         return STATUS_ERR;
     }
-    exp = (PacketDrillExpression *) args->get(2);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(2));
     if (!exp || exp->getS32(&optname, error))
         return STATUS_ERR;
 
-    exp = (PacketDrillExpression *) args->get(3);
+    exp = check_and_cast<PacketDrillExpression *>(args->get(3));
     switch (exp->getType()) {
         case EXPR_SCTP_STATUS: {
             struct sctp_status_expr *status = exp->getStatus();
@@ -1235,22 +1235,22 @@ int PacketDrillApp::syscallSendTo(struct syscall_spec *syscall, cQueue *args, ch
 
     if (args->getLength() != 6)
         return STATUS_ERR;
-    exp = (PacketDrillExpression *)args->get(0);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(0));
     if (!exp || exp->getS32(&script_fd, error))
         return STATUS_ERR;
-    exp = (PacketDrillExpression *)args->get(1);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(1));
     if (!exp || (exp->getType() != EXPR_ELLIPSIS))
         return STATUS_ERR;
-    exp = (PacketDrillExpression *)args->get(2);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(2));
     if (!exp || exp->getS32(&count, error))
         return STATUS_ERR;
-    exp = (PacketDrillExpression *)args->get(3);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(3));
     if (!exp || exp->getS32(&flags, error))
         return STATUS_ERR;
-    exp = (PacketDrillExpression *)args->get(4);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(4));
     if (!exp || (exp->getType() != EXPR_ELLIPSIS))
         return STATUS_ERR;
-    exp = (PacketDrillExpression *)args->get(5);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(5));
     if (!exp || (exp->getType() != EXPR_ELLIPSIS))
         return STATUS_ERR;
 
@@ -1278,36 +1278,36 @@ int PacketDrillApp::syscallSctpSendmsg(struct syscall_spec *syscall, cQueue *arg
 
     if (args->getLength() != 10)
         return STATUS_ERR;
-    exp = (PacketDrillExpression *)args->get(0);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(0));
     if (!exp || exp->getS32(&script_fd, error))
         return STATUS_ERR;
-    exp = (PacketDrillExpression *)args->get(1);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(1));
     if (!exp || (exp->getType() != EXPR_ELLIPSIS))
         return STATUS_ERR;
-    exp = (PacketDrillExpression *)args->get(2);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(2));
     if (!exp || exp->getS32(&count, error))
         return STATUS_ERR;
-    exp = (PacketDrillExpression *)args->get(3);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(3));
     /*ToDo: handle address parameter */
     if (!exp || (exp->getType() != EXPR_ELLIPSIS))
         return STATUS_ERR;
-    exp = (PacketDrillExpression *)args->get(4);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(4));
     /*ToDo: handle tolen parameter */
     if (!exp || (exp->getType() != EXPR_ELLIPSIS))
         return STATUS_ERR;
-    exp = (PacketDrillExpression *)args->get(5);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(5));
     if (!exp || exp->getU32(&ppid, error))
         return STATUS_ERR;
-    exp = (PacketDrillExpression *)args->get(6);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(6));
     if (!exp || exp->getU32(&flags, error))
         return STATUS_ERR;
-    exp = (PacketDrillExpression *)args->get(7);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(7));
     if (!exp || exp->getU16(&stream_no, error))
         return STATUS_ERR;
-    exp = (PacketDrillExpression *)args->get(8);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(8));
     if (!exp || exp->getU32(&ttl, error))
         return STATUS_ERR;
-    exp = (PacketDrillExpression *)args->get(9);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(9));
     if (!exp || exp->getU32(&context, error))
         return STATUS_ERR;
 
@@ -1348,16 +1348,16 @@ int PacketDrillApp::syscallSctpSend(struct syscall_spec *syscall, cQueue *args, 
     }
     if (args->getLength() != 5)
         return STATUS_ERR;
-    exp = (PacketDrillExpression *)args->get(0);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(0));
     if (!exp || exp->getS32(&script_fd, error))
         return STATUS_ERR;
-    exp = (PacketDrillExpression *)args->get(1);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(1));
     if (!exp || (exp->getType() != EXPR_ELLIPSIS))
         return STATUS_ERR;
-    exp = (PacketDrillExpression *)args->get(2);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(2));
     if (!exp || exp->getS32(&count, error))
         return STATUS_ERR;
-    exp = (PacketDrillExpression *)args->get(3);
+    exp = check_and_cast<PacketDrillExpression *>(args->get(3));
     if (exp->getType() == EXPR_SCTP_SNDRCVINFO) {
         struct sctp_sndrcvinfo_expr *info = exp->getSndRcvInfo();
         ssn = info->sinfo_ssn->getNum();
@@ -1398,13 +1398,13 @@ int PacketDrillApp::syscallRead(PacketDrillEvent *event, struct syscall_spec *sy
     }
     if (args->getLength() != 3)
         return STATUS_ERR;
-    exp = (PacketDrillExpression *) args->get(0);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(0));
     if (!exp || exp->getS32(&script_fd, error))
         return STATUS_ERR;
-    exp = (PacketDrillExpression *) args->get(1);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(1));
     if (!exp || (exp->getType() != EXPR_ELLIPSIS))
         return STATUS_ERR;
-    exp = (PacketDrillExpression *) args->get(2);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(2));
     if (!exp || exp->getS32(&count, error))
         return STATUS_ERR;
 
@@ -1463,35 +1463,35 @@ int PacketDrillApp::syscallRecvFrom(PacketDrillEvent *event, struct syscall_spec
 
     if (args->getLength() != 6)
         return STATUS_ERR;
-    exp = (PacketDrillExpression *)args->get(0);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(0));
     if (!exp || exp->getS32(&script_fd, err))
         return STATUS_ERR;
-    exp = (PacketDrillExpression *)args->get(1);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(1));
     if (!exp || (exp->getType() != EXPR_ELLIPSIS))
         return STATUS_ERR;
-    exp = (PacketDrillExpression *)args->get(2);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(2));
     if (!exp || exp->getS32(&count, err))
         return STATUS_ERR;
-    exp = (PacketDrillExpression *)args->get(3);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(3));
     if (!exp || exp->getS32(&flags, err))
         return STATUS_ERR;
-    exp = (PacketDrillExpression *)args->get(4);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(4));
     if (!exp || (exp->getType() != EXPR_ELLIPSIS))
         return STATUS_ERR;
-    exp = (PacketDrillExpression *)args->get(5);
+    exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(5));
     if (!exp || (exp->getType() != EXPR_ELLIPSIS))
         return STATUS_ERR;
 
     if (msgArrived) {
-        cMessage *msg = (cMessage*)(receivedPackets->pop());
+        cPacket *msg = (receivedPackets->pop());
         msgArrived = false;
         recvFromSet = false;
-        if (!(PK(msg)->getByteLength() == syscall->result->getNum())) {
+        if (!(msg->getByteLength() == syscall->result->getNum())) {
             delete msg;
             throw cTerminationException("Packetdrill error: Wrong payload length");
         }
         PacketDrillInfo *info = (PacketDrillInfo *)msg->getContextPointer();
-        if (verifyTime((enum eventTime_t) event->getTimeType(), event->getEventTime(), event->getEventTimeEnd(),
+        if (verifyTime(event->getTimeType(), event->getEventTime(), event->getEventTimeEnd(),
                 event->getEventOffset(), info->getLiveTime(), "inbound packet") == STATUS_ERR) {
             delete info;
             delete msg;
@@ -1512,7 +1512,7 @@ int PacketDrillApp::syscallClose(struct syscall_spec *syscall, cQueue *args, cha
 
     if (args->getLength() != 1)
         return STATUS_ERR;
-    PacketDrillExpression *exp = (PacketDrillExpression *)args->get(0);
+    PacketDrillExpression *exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(0));
     if (!exp || exp->getS32(&script_fd, error))
         return STATUS_ERR;
 
@@ -1549,7 +1549,7 @@ int PacketDrillApp::syscallShutdown(struct syscall_spec *syscall, cQueue *args, 
 printf("syscallShutdown\n");
     if (args->getLength() != 2)
         return STATUS_ERR;
-    PacketDrillExpression *exp = (PacketDrillExpression *)args->get(0);
+    PacketDrillExpression *exp = check_and_cast_nullable<PacketDrillExpression *>(args->get(0));
     if (!exp || exp->getS32(&script_fd, error))
         return STATUS_ERR;
 

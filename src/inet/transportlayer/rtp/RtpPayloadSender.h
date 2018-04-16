@@ -199,7 +199,7 @@ class INET_API RtpPayloadSender : public cSimpleModule
     /**
      * The current state of data transmission.
      */
-    SenderStatus _status = (SenderStatus)-1;
+    SenderStatus _status = static_cast<SenderStatus>(-1);
 
     /**
        A self message used as timer for the moment the next packet must be sent.

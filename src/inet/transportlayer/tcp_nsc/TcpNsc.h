@@ -176,7 +176,7 @@ class INET_API TcpNsc : public cSimpleModule, ISendCallback, IInterruptCallback,
     TcpNscConnection *curConnM;    // store current connection in connect/listen command
 
     TcpCrcInsertion crcInsertion;
-    CrcMode crcMode = (CrcMode)-1;
+    CrcMode crcMode = static_cast<CrcMode>(-1);
 
     static const L3Address localInnerIpS;    // local NSC IP addr
     static const L3Address localInnerGwS;    // local NSC gateway IP addr

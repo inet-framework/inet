@@ -38,7 +38,7 @@ void HttpServerEvilA::initialize(int stage)
 
 std::string HttpServerEvilA::generateBody()
 {
-    int numImages = badLow + (int)uniform(0, badHigh - badLow);
+    int numImages = badLow + (int)uniform(0, badHigh - badLow);         //FIXME use intuniform(...)
     double rndDelay;
     std::string result;
 

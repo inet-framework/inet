@@ -105,7 +105,7 @@ class Icmpv6Header extends FieldsChunk
     Icmpv6Type type;     // 1 byte
     //int code; // 1 byte //TODO: this should be specific to different ICMP types.
     int chksum = 0;     // 2 bytes
-    CrcMode crcMode = (CrcMode)-1;
+    CrcMode crcMode;
     // 4 bytes 'type' specific values
 }
 

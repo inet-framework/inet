@@ -97,7 +97,7 @@ T *__checknull(T *p, const char *expr, const char *file, int line)
 
 inline void printElapsedTime(const char *name, long startTime)
 {
-    EV_DEBUG << "Time spent in " << name << ": " << ((double)(clock() - startTime) / CLOCKS_PER_SEC) << "s" << endl;
+    EV_DEBUG << "Time spent in " << name << ": " << (static_cast<double>(clock() - startTime) / CLOCKS_PER_SEC) << "s" << endl;
 }
 
 #define TIME(CODE)    { long startTime = clock(); CODE; printElapsedTime( #CODE, startTime); }

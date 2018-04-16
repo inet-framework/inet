@@ -152,9 +152,9 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
     // add extra links between all pairs of wireless interfaces within a LAN (full graph)
     for (auto & entry : wirelessIdToInterfaceInfosMap) {
         std::vector<InterfaceInfo *>& interfaceInfos = entry.second;
-        for (int i = 0; i < (int)interfaceInfos.size(); i++) {
+        for (size_t i = 0; i < interfaceInfos.size(); i++) {
             InterfaceInfo *interfaceInfoI = interfaceInfos.at(i);
-            for (int j = i + 1; j < (int)interfaceInfos.size(); j++) {
+            for (size_t j = i + 1; j < interfaceInfos.size(); j++) {
                 // assume bidirectional links
                 InterfaceInfo *interfaceInfoJ = interfaceInfos.at(j);
                 Link *linkIJ = new Link();

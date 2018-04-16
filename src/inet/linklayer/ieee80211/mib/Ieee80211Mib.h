@@ -51,7 +51,7 @@ class INET_API Ieee80211Mib : public cSimpleModule
 
     class INET_API BssStationData {
       public:
-        BssStationType stationType = (BssStationType)-1;
+        BssStationType stationType = static_cast<BssStationType>(-1);
         bool isAssociated = false;
     };
 
@@ -62,7 +62,7 @@ class INET_API Ieee80211Mib : public cSimpleModule
 
   public:
     MacAddress address;
-    Mode mode = (Mode)-1;
+    Mode mode = static_cast<Mode>(-1);
     bool qos = false;
 
     BssData bssData;

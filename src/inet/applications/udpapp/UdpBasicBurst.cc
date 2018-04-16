@@ -78,7 +78,7 @@ void UdpBasicBurst::initialize(int stage)
         int addrMode = cEnum::get("inet::ChooseDestAddrMode")->lookup(addrModeStr);
         if (addrMode == -1)
             throw cRuntimeError("Invalid chooseDestAddrMode: '%s'", addrModeStr);
-        chooseDestAddrMode = (ChooseDestAddrMode)addrMode;
+        chooseDestAddrMode = static_cast<ChooseDestAddrMode>(addrMode);
 
         WATCH(numSent);
         WATCH(numReceived);
@@ -221,8 +221,8 @@ void UdpBasicBurst::processPacket(Packet *pk)
 
     if (pk->hasPar("sourceId") && pk->hasPar("msgId")) {
         // duplicate control
-        int moduleId = (int)pk->par("sourceId");
-        int msgId = (int)pk->par("msgId");
+        int moduleId = pk->par("sourceId");
+        int msgId = pk->par("msgId");
         auto it = sourceSequence.find(moduleId);
         if (it != sourceSequence.end()) {
             if (it->second >= msgId) {

@@ -49,7 +49,7 @@ SctpPathVariables::SctpPathVariables(const L3Address& addr, SctpAssociation *ass
 
     pathRto = assoc->getSctpMain()->getRtoInitial();
     heartbeatTimeout = pathRto;
-    double interval = (double)assoc->getSctpMain()->par("hbInterval");
+    double interval = assoc->getSctpMain()->par("hbInterval");
 
     if (!interval) {
         interval = HB_INTERVAL;
@@ -953,7 +953,7 @@ bool SctpAssociation::processTimer(cMessage *msg)
     }
     else if (msg == StartAddIP) {
         state->corrIdNum = state->asconfSn;
-        const char *type = (const char *)sctpMain->par("addIpType");
+        const char *type = sctpMain->par("addIpType").stringValue();
         sendAsconf(type);
     }
     else if (msg == FairStartTimer) {
@@ -1126,10 +1126,11 @@ bool SctpAssociation::processAppCommand(cMessage *msg, SctpCommandReq* sctpComma
             sendAsconf(sctpMain->par("addIpType"));
             break;
 
-        case SCTP_E_SET_STREAM_PRIO:
-            state->ssPriorityMap[((SctpSendReq *)sctpCommand)->getSid()] =
-                ((SctpSendReq *)sctpCommand)->getPpid();
+        case SCTP_E_SET_STREAM_PRIO: {
+            auto sctpSendReq = check_and_cast<SctpSendReq *>(sctpCommand);
+            state->ssPriorityMap[sctpSendReq->getSid()] = sctpSendReq->getPpid();
             break;
+        }
 
         case SCTP_E_QUEUE_BYTES_LIMIT:
             process_QUEUE_BYTES_LIMIT(sctpCommand);
@@ -1171,11 +1172,13 @@ bool SctpAssociation::processAppCommand(cMessage *msg, SctpCommandReq* sctpComma
             sendEstabIndicationToApp();
             break;
 
-        case SCTP_E_SET_RTO_INFO:
-            sctpMain->setRtoInitial(((SctpRtoReq *)sctpCommand)->getRtoInitial());
-            sctpMain->setRtoMin(((SctpRtoReq *)sctpCommand)->getRtoMin());
-            sctpMain->setRtoMax(((SctpRtoReq *)sctpCommand)->getRtoMax());
+        case SCTP_E_SET_RTO_INFO: {
+            auto sctpRtoReq = check_and_cast<SctpRtoReq *>(sctpCommand);
+            sctpMain->setRtoInitial(sctpRtoReq->getRtoInitial());
+            sctpMain->setRtoMin(sctpRtoReq->getRtoMin());
+            sctpMain->setRtoMax(sctpRtoReq->getRtoMax());
             break;
+        }
         default:
             throw cRuntimeError("Wrong event code");
     }
@@ -1443,210 +1446,218 @@ void SctpAssociation::stateEntered(int32 status)
             }
 
             state->nagleEnabled = (bool)sctpMain->getNagle();
-            state->enableHeartbeats = (bool)sctpMain->getEnableHeartbeats();
-            state->sendHeartbeatsOnActivePaths = (bool)sctpMain->par("sendHeartbeatsOnActivePaths");
+            state->enableHeartbeats = sctpMain->getEnableHeartbeats();
+            state->sendHeartbeatsOnActivePaths = sctpMain->par("sendHeartbeatsOnActivePaths");
             state->numGapReports = sctpMain->par("numGapReports");
             state->maxBurst = (uint32)sctpMain->getMaxBurst();
             state->rtxMethod = sctpMain->par("RTXMethod");
-            state->nrSack = (bool)sctpMain->par("nrSack");
-            state->disableReneging = (bool)sctpMain->par("disableReneging");
-            state->checkSackSeqNumber = (bool)sctpMain->par("checkSackSeqNumber");
+            state->nrSack = sctpMain->par("nrSack");
+            state->disableReneging = sctpMain->par("disableReneging");
+            state->checkSackSeqNumber = sctpMain->par("checkSackSeqNumber");
             state->outgoingSackSeqNum = 0;
             state->incomingSackSeqNum = 0;
             state->fragPoint = (uint32)sctpMain->getFragPoint();
-            state->highSpeedCC = (bool)sctpMain->par("highSpeedCC");
-            state->initialWindow = (uint32)sctpMain->par("initialWindow");
-            if (strcmp((const char *)sctpMain->par("maxBurstVariant"), "useItOrLoseIt") == 0) {
+            state->highSpeedCC = sctpMain->par("highSpeedCC");
+            state->initialWindow = sctpMain->par("initialWindow");
+            const char *maxBurstVariantPar = sctpMain->par("maxBurstVariant").stringValue();
+            if (strcmp(maxBurstVariantPar, "useItOrLoseIt") == 0) {
                 state->maxBurstVariant = SctpStateVariables::MBV_UseItOrLoseIt;
             }
-            else if (strcmp((const char *)sctpMain->par("maxBurstVariant"), "congestionWindowLimiting") == 0) {
+            else if (strcmp(maxBurstVariantPar, "congestionWindowLimiting") == 0) {
                 state->maxBurstVariant = SctpStateVariables::MBV_CongestionWindowLimiting;
             }
-            else if (strcmp((const char *)sctpMain->par("maxBurstVariant"), "maxBurst") == 0) {
+            else if (strcmp(maxBurstVariantPar, "maxBurst") == 0) {
                 state->maxBurstVariant = SctpStateVariables::MBV_MaxBurst;
             }
-            else if (strcmp((const char *)sctpMain->par("maxBurstVariant"), "aggressiveMaxBurst") == 0) {
+            else if (strcmp(maxBurstVariantPar, "aggressiveMaxBurst") == 0) {
                 state->maxBurstVariant = SctpStateVariables::MBV_AggressiveMaxBurst;
             }
-            else if (strcmp((const char *)sctpMain->par("maxBurstVariant"), "totalMaxBurst") == 0) {
+            else if (strcmp(maxBurstVariantPar, "totalMaxBurst") == 0) {
                 state->maxBurstVariant = SctpStateVariables::MBV_TotalMaxBurst;
             }
-            else if (strcmp((const char *)sctpMain->par("maxBurstVariant"), "useItOrLoseItTempCwnd") == 0) {
+            else if (strcmp(maxBurstVariantPar, "useItOrLoseItTempCwnd") == 0) {
                 state->maxBurstVariant = SctpStateVariables::MBV_UseItOrLoseItTempCwnd;
             }
-            else if (strcmp((const char *)sctpMain->par("maxBurstVariant"), "congestionWindowLimitingTempCwnd") == 0) {
+            else if (strcmp(maxBurstVariantPar, "congestionWindowLimitingTempCwnd") == 0) {
                 state->maxBurstVariant = SctpStateVariables::MBV_CongestionWindowLimitingTempCwnd;
             }
             else {
                 throw cRuntimeError("Invalid setting of maxBurstVariant: %s.",
-                        (const char *)sctpMain->par("maxBurstVariant"));
+                        maxBurstVariantPar);
             }
 
-            if (strcmp((const char *)sctpMain->par("cmtSendAllVariant"), "normal") == 0) {
+            const char *cmtSendAllVariantPar = sctpMain->par("cmtSendAllVariant").stringValue();
+            if (strcmp(cmtSendAllVariantPar, "normal") == 0) {
                 state->cmtSendAllComparisonFunction = nullptr;
             }
-            else if (strcmp((const char *)sctpMain->par("cmtSendAllVariant"), "smallestLastTransmission") == 0) {
+            else if (strcmp(cmtSendAllVariantPar, "smallestLastTransmission") == 0) {
                 state->cmtSendAllComparisonFunction = pathMapSmallestLastTransmission;
             }
-            else if (strcmp((const char *)sctpMain->par("cmtSendAllVariant"), "randomized") == 0) {
+            else if (strcmp(cmtSendAllVariantPar, "randomized") == 0) {
                 state->cmtSendAllComparisonFunction = pathMapRandomized;
             }
-            else if (strcmp((const char *)sctpMain->par("cmtSendAllVariant"), "largestSSThreshold") == 0) {
+            else if (strcmp(cmtSendAllVariantPar, "largestSSThreshold") == 0) {
                 state->cmtSendAllComparisonFunction = pathMapLargestSSThreshold;
             }
-            else if (strcmp((const char *)sctpMain->par("cmtSendAllVariant"), "largestSpace") == 0) {
+            else if (strcmp(cmtSendAllVariantPar, "largestSpace") == 0) {
                 state->cmtSendAllComparisonFunction = pathMapLargestSpace;
             }
-            else if (strcmp((const char *)sctpMain->par("cmtSendAllVariant"), "largestSpaceAndSSThreshold") == 0) {
+            else if (strcmp(cmtSendAllVariantPar, "largestSpaceAndSSThreshold") == 0) {
                 state->cmtSendAllComparisonFunction = pathMapLargestSpaceAndSSThreshold;
             }
             else {
                 throw cRuntimeError("Invalid setting of cmtSendAllVariant: %s.",
-                        (const char *)sctpMain->par("cmtSendAllVariant"));
+                        cmtSendAllVariantPar);
             }
 
             state->cmtRetransmissionVariant = sctpMain->par("cmtRetransmissionVariant");
-            if (strcmp((const char *)sctpMain->par("cmtCUCVariant"), "normal") == 0) {
+            const char *cmtCUCVariantPar = sctpMain->par("cmtCUCVariant").stringValue();
+            if (strcmp(cmtCUCVariantPar, "normal") == 0) {
                 state->cmtCUCVariant = SctpStateVariables::CUCV_Normal;
             }
-            else if (strcmp((const char *)sctpMain->par("cmtCUCVariant"), "pseudoCumAck") == 0) {
+            else if (strcmp(cmtCUCVariantPar, "pseudoCumAck") == 0) {
                 state->cmtCUCVariant = SctpStateVariables::CUCV_PseudoCumAck;
             }
-            else if (strcmp((const char *)sctpMain->par("cmtCUCVariant"), "pseudoCumAckV2") == 0) {
+            else if (strcmp(cmtCUCVariantPar, "pseudoCumAckV2") == 0) {
                 state->cmtCUCVariant = SctpStateVariables::CUCV_PseudoCumAckV2;
             }
             else {
                 throw cRuntimeError("Bad setting for cmtCUCVariant: %s\n",
-                        (const char *)sctpMain->par("cmtCUCVariant"));
+                        cmtCUCVariantPar);
             }
-            state->smartOverfullSACKHandling = (bool)sctpMain->par("smartOverfullSACKHandling");
+            state->smartOverfullSACKHandling = sctpMain->par("smartOverfullSACKHandling");
 
-            if (strcmp((const char *)sctpMain->par("cmtChunkReschedulingVariant"), "none") == 0) {
+            const char *cmtChunkReschedulingVariantPar = sctpMain->par("cmtChunkReschedulingVariant").stringValue();
+            if (strcmp(cmtChunkReschedulingVariantPar, "none") == 0) {
                 state->cmtChunkReschedulingVariant = SctpStateVariables::CCRV_None;
             }
-            else if (strcmp((const char *)sctpMain->par("cmtChunkReschedulingVariant"), "senderOnly") == 0) {
+            else if (strcmp(cmtChunkReschedulingVariantPar, "senderOnly") == 0) {
                 state->cmtChunkReschedulingVariant = SctpStateVariables::CCRV_SenderOnly;
             }
-            else if (strcmp((const char *)sctpMain->par("cmtChunkReschedulingVariant"), "receiverOnly") == 0) {
+            else if (strcmp(cmtChunkReschedulingVariantPar, "receiverOnly") == 0) {
                 state->cmtChunkReschedulingVariant = SctpStateVariables::CCRV_ReceiverOnly;
             }
-            else if (strcmp((const char *)sctpMain->par("cmtChunkReschedulingVariant"), "bothSides") == 0) {
+            else if (strcmp(cmtChunkReschedulingVariantPar, "bothSides") == 0) {
                 state->cmtChunkReschedulingVariant = SctpStateVariables::CCRV_BothSides;
             }
-            else if (strcmp((const char *)sctpMain->par("cmtChunkReschedulingVariant"), "test") == 0) {
+            else if (strcmp(cmtChunkReschedulingVariantPar, "test") == 0) {
                 state->cmtChunkReschedulingVariant = SctpStateVariables::CCRV_Test;
             }
             else {
                 throw cRuntimeError("Bad setting for cmtChunkReschedulingVariant: %s\n",
-                        (const char *)sctpMain->par("cmtChunkReschedulingVariant"));
+                        cmtChunkReschedulingVariantPar);
             }
 
-            if (strcmp((const char *)sctpMain->par("cmtBufferSplitVariant"), "none") == 0) {
+            const char *cmtBufferSplitVariantPar = sctpMain->par("cmtBufferSplitVariant").stringValue();
+            if (strcmp(cmtBufferSplitVariantPar, "none") == 0) {
                 state->cmtBufferSplitVariant = SctpStateVariables::CBSV_None;
             }
-            else if (strcmp((const char *)sctpMain->par("cmtBufferSplitVariant"), "senderOnly") == 0) {
+            else if (strcmp(cmtBufferSplitVariantPar, "senderOnly") == 0) {
                 state->cmtBufferSplitVariant = SctpStateVariables::CBSV_SenderOnly;
             }
-            else if (strcmp((const char *)sctpMain->par("cmtBufferSplitVariant"), "receiverOnly") == 0) {
+            else if (strcmp(cmtBufferSplitVariantPar, "receiverOnly") == 0) {
                 state->cmtBufferSplitVariant = SctpStateVariables::CBSV_ReceiverOnly;
             }
-            else if (strcmp((const char *)sctpMain->par("cmtBufferSplitVariant"), "bothSides") == 0) {
+            else if (strcmp(cmtBufferSplitVariantPar, "bothSides") == 0) {
                 state->cmtBufferSplitVariant = SctpStateVariables::CBSV_BothSides;
             }
             else {
                 throw cRuntimeError("Bad setting for cmtBufferSplitVariant: %s\n",
-                        (const char *)sctpMain->par("cmtBufferSplitVariant"));
+                        cmtBufferSplitVariantPar);
             }
-            state->cmtBufferSplittingUsesOSB = (bool)sctpMain->par("cmtBufferSplittingUsesOSB");
+            state->cmtBufferSplittingUsesOSB = sctpMain->par("cmtBufferSplittingUsesOSB");
 
-            if (strcmp((const char *)sctpMain->par("gapListOptimizationVariant"), "none") == 0) {
+            const char *gapListOptimizationVariantPar = sctpMain->par("gapListOptimizationVariant").stringValue();
+            if (strcmp(gapListOptimizationVariantPar, "none") == 0) {
                 state->gapListOptimizationVariant = SctpStateVariables::GLOV_None;
             }
-            else if (strcmp((const char *)sctpMain->par("gapListOptimizationVariant"), "optimized1") == 0) {
+            else if (strcmp(gapListOptimizationVariantPar, "optimized1") == 0) {
                 state->gapListOptimizationVariant = SctpStateVariables::GLOV_Optimized1;
             }
-            else if (strcmp((const char *)sctpMain->par("gapListOptimizationVariant"), "optimized2") == 0) {
+            else if (strcmp(gapListOptimizationVariantPar, "optimized2") == 0) {
                 state->gapListOptimizationVariant = SctpStateVariables::GLOV_Optimized2;
             }
-            else if (strcmp((const char *)sctpMain->par("gapListOptimizationVariant"), "shrunken") == 0) {
+            else if (strcmp(gapListOptimizationVariantPar, "shrunken") == 0) {
                 state->gapListOptimizationVariant = SctpStateVariables::GLOV_Shrunken;
             }
             else {
                 throw cRuntimeError("Bad setting for gapListOptimizationVariant: %s\n",
-                        (const char *)sctpMain->par("gapListOptimizationVariant"));
+                        gapListOptimizationVariantPar);
             }
 
-            state->cmtUseSFR = (bool)sctpMain->par("cmtUseSFR");
-            state->cmtUseDAC = (bool)sctpMain->par("cmtUseDAC");
-            state->cmtUseFRC = (bool)sctpMain->par("cmtUseFRC");
-            state->gapReportLimit = (uint32)sctpMain->par("gapReportLimit");
-            state->cmtSmartT3Reset = (bool)sctpMain->par("cmtSmartT3Reset");
-            state->cmtSmartReneging = (bool)sctpMain->par("cmtSmartReneging");
-            state->cmtSmartFastRTX = (bool)sctpMain->par("cmtSmartFastRTX");
-            state->cmtSlowPathRTTUpdate = (bool)sctpMain->par("cmtSlowPathRTTUpdate");
-            state->cmtMovedChunksReduceCwnd = (bool)sctpMain->par("cmtMovedChunksReduceCwnd");
-            state->cmtChunkReschedulingThreshold = (double)sctpMain->par("cmtChunkReschedulingThreshold");
-            state->movedChunkFastRTXFactor = (double)sctpMain->par("movedChunkFastRTXFactor");
-            state->strictCwndBooking = (bool)sctpMain->par("strictCwndBooking");
+            state->cmtUseSFR = sctpMain->par("cmtUseSFR");
+            state->cmtUseDAC = sctpMain->par("cmtUseDAC");
+            state->cmtUseFRC = sctpMain->par("cmtUseFRC");
+            state->gapReportLimit = sctpMain->par("gapReportLimit");
+            state->cmtSmartT3Reset = sctpMain->par("cmtSmartT3Reset");
+            state->cmtSmartReneging = sctpMain->par("cmtSmartReneging");
+            state->cmtSmartFastRTX = sctpMain->par("cmtSmartFastRTX");
+            state->cmtSlowPathRTTUpdate = sctpMain->par("cmtSlowPathRTTUpdate");
+            state->cmtMovedChunksReduceCwnd = sctpMain->par("cmtMovedChunksReduceCwnd");
+            state->cmtChunkReschedulingThreshold = sctpMain->par("cmtChunkReschedulingThreshold");
+            state->movedChunkFastRTXFactor = sctpMain->par("movedChunkFastRTXFactor");
+            state->strictCwndBooking = sctpMain->par("strictCwndBooking");
 
-            if (strcmp((const char *)sctpMain->par("cmtSackPath"), "standard") == 0) {
+            const char *cmtSackPathPar = sctpMain->par("cmtSackPath").stringValue();
+            if (strcmp(cmtSackPathPar, "standard") == 0) {
                 state->cmtSackPath = SctpStateVariables::CSP_Standard;
             }
-            else if (strcmp((const char *)sctpMain->par("cmtSackPath"), "primary") == 0) {
+            else if (strcmp(cmtSackPathPar, "primary") == 0) {
                 state->cmtSackPath = SctpStateVariables::CSP_Primary;
             }
-            else if (strcmp((const char *)sctpMain->par("cmtSackPath"), "roundRobin") == 0) {
+            else if (strcmp(cmtSackPathPar, "roundRobin") == 0) {
                 state->cmtSackPath = SctpStateVariables::CSP_RoundRobin;
             }
-            else if (strcmp((const char *)sctpMain->par("cmtSackPath"), "smallestSRTT") == 0) {
+            else if (strcmp(cmtSackPathPar, "smallestSRTT") == 0) {
                 state->cmtSackPath = SctpStateVariables::CSP_SmallestSRTT;
             }
             else {
                 throw cRuntimeError("Bad setting for cmtSackPath: %s\n",
-                        (const char *)sctpMain->par("cmtSackPath"));
+                        cmtSackPathPar);
             }
 
-            if (strcmp((const char *)sctpMain->par("cmtCCVariant"), "off") == 0) {
+            const char *cmtCCVariantPar = sctpMain->par("cmtCCVariant").stringValue();
+            if (strcmp(cmtCCVariantPar, "off") == 0) {
                 state->cmtCCVariant = SctpStateVariables::CCCV_Off;
                 state->allowCMT = false;
             }
-            else if (strcmp((const char *)sctpMain->par("cmtCCVariant"), "cmt") == 0) {
+            else if (strcmp(cmtCCVariantPar, "cmt") == 0) {
                 state->cmtCCVariant = SctpStateVariables::CCCV_CMT;
                 state->allowCMT = true;
             }
-            else if(strcmp((const char*)sctpMain->par("cmtCCVariant"), "lia") == 0){
+            else if(strcmp(sctpMain->par("cmtCCVariant").stringValue(), "lia") == 0){
                state->cmtCCVariant = SctpStateVariables::CCCV_CMT_LIA;
                state->allowCMT     = true;
             }
-            else if(strcmp((const char*)sctpMain->par("cmtCCVariant"), "olia") == 0){
+            else if(strcmp(sctpMain->par("cmtCCVariant").stringValue(), "olia") == 0){
                state->cmtCCVariant = SctpStateVariables::CCCV_CMT_OLIA;
                state->allowCMT     = true;
             }
-            else if ((strcmp((const char *)sctpMain->par("cmtCCVariant"), "cmtrp") == 0) ||
-                     (strcmp((const char *)sctpMain->par("cmtCCVariant"), "cmtrpv1") == 0))
+            else if ((strcmp(cmtCCVariantPar, "cmtrp") == 0) ||
+                     (strcmp(cmtCCVariantPar, "cmtrpv1") == 0))
             {
                 state->cmtCCVariant = SctpStateVariables::CCCV_CMTRPv1;
                 state->allowCMT = true;
             }
-            else if (strcmp((const char *)sctpMain->par("cmtCCVariant"), "cmtrpv2") == 0) {
+            else if (strcmp(cmtCCVariantPar, "cmtrpv2") == 0) {
                 state->cmtCCVariant = SctpStateVariables::CCCV_CMTRPv2;
                 state->allowCMT = true;
             }
-            else if (strcmp((const char *)sctpMain->par("cmtCCVariant"), "cmtrp-t1") == 0) {
+            else if (strcmp(cmtCCVariantPar, "cmtrp-t1") == 0) {
                 state->cmtCCVariant = SctpStateVariables::CCCV_CMTRP_Test1;
                 state->allowCMT = true;
             }
-            else if (strcmp((const char *)sctpMain->par("cmtCCVariant"), "cmtrp-t2") == 0) {
+            else if (strcmp(cmtCCVariantPar, "cmtrp-t2") == 0) {
                 state->cmtCCVariant = SctpStateVariables::CCCV_CMTRP_Test2;
                 state->allowCMT = true;
             }
             else {
                 throw cRuntimeError("Bad setting for cmtCCVariant: %s\n",
-                        (const char *)sctpMain->par("cmtCCVariant"));
+                        cmtCCVariantPar);
             }
 
-            state->rpPathBlocking = (bool)sctpMain->par("rpPathBlocking");
-            state->rpScaleBlockingTimeout = (bool)sctpMain->par("rpScaleBlockingTimeout");
+            state->rpPathBlocking = sctpMain->par("rpPathBlocking");
+            state->rpScaleBlockingTimeout = sctpMain->par("rpScaleBlockingTimeout");
             state->rpMinCwnd = sctpMain->par("rpMinCwnd");
 
             cStringTokenizer pathGroupsTokenizer(sctpMain->par("cmtCCPathGroups").stringValue());
@@ -1663,23 +1674,23 @@ void SctpAssociation::stateEntered(int32 status)
                 }
             }
 
-            state->osbWithHeader = (bool)sctpMain->par("osbWithHeader");
-            state->padding = (bool)sctpMain->par("padding");
+            state->osbWithHeader = sctpMain->par("osbWithHeader");
+            state->padding = sctpMain->par("padding");
             if (state->osbWithHeader)
                 state->header = SCTP_DATA_CHUNK_LENGTH;
             else
                 state->header = 0;
-            state->swsLimit = (uint32)sctpMain->par("swsLimit");
-            state->fastRecoverySupported = (bool)sctpMain->par("fastRecoverySupported");
-            state->reactivatePrimaryPath = (bool)sctpMain->par("reactivatePrimaryPath");
+            state->swsLimit = sctpMain->par("swsLimit");
+            state->fastRecoverySupported = sctpMain->par("fastRecoverySupported");
+            state->reactivatePrimaryPath = sctpMain->par("reactivatePrimaryPath");
             state->packetsInTotalBurst = 0;
             state->auth = sctpMain->auth;
             state->messageAcceptLimit = sctpMain->par("messageAcceptLimit");
             state->bytesToAddPerRcvdChunk = sctpMain->par("bytesToAddPerRcvdChunk");
             state->bytesToAddPerPeerChunk = sctpMain->par("bytesToAddPerPeerChunk");
             state->tellArwnd = sctpMain->par("tellArwnd");
-            state->throughputInterval = (double)sctpMain->par("throughputInterval");
-            sackPeriod = (double)sctpMain->getSackPeriod();
+            state->throughputInterval = sctpMain->par("throughputInterval");
+            sackPeriod = sctpMain->getSackPeriod();
             sackFrequency = sctpMain->getSackFrequency();
             Sctp::AssocStat stat;
             stat.assocId = assocId;
@@ -1715,8 +1726,8 @@ void SctpAssociation::stateEntered(int32 status)
             stat.fairAckedBytes = 0;
             stat.numEndToEndMessages = 0;
             stat.cumEndToEndDelay = 0;
-            stat.startEndToEndDelay = (uint32)sctpMain->par("startEndToEndDelay");
-            stat.stopEndToEndDelay = (uint32)sctpMain->par("stopEndToEndDelay");
+            stat.startEndToEndDelay = sctpMain->par("startEndToEndDelay");
+            stat.stopEndToEndDelay = sctpMain->par("stopEndToEndDelay");
             sctpMain->assocStatMap[stat.assocId] = stat;
             ccModule = sctpMain->par("ccModule");
 
@@ -1734,7 +1745,7 @@ void SctpAssociation::stateEntered(int32 status)
             }
 
             pmStartPathManagement();
-            state->sendQueueLimit = (uint32)sctpMain->par("sendQueueLimit");
+            state->sendQueueLimit = sctpMain->par("sendQueueLimit");
             EV_INFO << "stateEntered: Established socketId= " << assocId << endl;
             if (isToBeAccepted()) {
             EV_INFO << "Listening socket can accept now\n";
@@ -1743,18 +1754,19 @@ void SctpAssociation::stateEntered(int32 status)
                 sendEstabIndicationToApp();
             }
             if (sctpMain->hasPar("addIP")) {
-                const bool addIP = (bool)sctpMain->par("addIP");
-                EV_DETAIL << getFullPath() << ": addIP = " << addIP << " time = " << (double)sctpMain->par("addTime") << "\n";
-                if (addIP == true && (double)sctpMain->par("addTime") > 0) {
-                    EV_DETAIL << "startTimer addTime to expire at " << simTime() + (double)sctpMain->par("addTime") << "\n";
+                const bool addIP = sctpMain->par("addIP");
+                simtime_t addTime = sctpMain->par("addTime");
+                EV_DETAIL << getFullPath() << ": addIP = " << addIP << " time = " << addTime << "\n";
+                if (addIP == true && addTime > SIMTIME_ZERO) {
+                    EV_DETAIL << "startTimer addTime to expire at " << simTime() + addTime << "\n";
 
-                    scheduleTimeout(StartAddIP, (double)sctpMain->par("addTime"));
+                    scheduleTimeout(StartAddIP, addTime);
                 }
             }
             if ((double)sctpMain->par("fairStart") > 0) {
                 sctpMain->scheduleAt(sctpMain->par("fairStart"), FairStartTimer);
                 sctpMain->scheduleAt(sctpMain->par("fairStop"), FairStopTimer);
-                sctpMain->recordScalar("rtoMin", (double)sctpMain->par("rtoMin"));
+                sctpMain->recordScalar("rtoMin", sctpMain->par("rtoMin").doubleValue());
             }
             char str[128];
             snprintf(str, sizeof(str), "Cumulated TSN Ack of Association %d", assocId);
@@ -1763,7 +1775,7 @@ void SctpAssociation::stateEntered(int32 status)
             numGapBlocks = new cOutVector(str);
             snprintf(str, sizeof(str), "SendQueue of Association %d", assocId);
             sendQueue = new cOutVector(str);
-            state->sendQueueLimit = (uint32)sctpMain->par("sendQueueLimit");
+            state->sendQueueLimit = sctpMain->par("sendQueueLimit");
             Sctp::VTagPair vtagPair;
             vtagPair.peerVTag = peerVTag;
             vtagPair.localVTag = localVTag;

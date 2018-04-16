@@ -594,7 +594,7 @@ void BMac::receiveSignal(cComponent *source, simsignal_t signalID, long value, c
 {
     Enter_Method_Silent();
     if (signalID == IRadio::radioModeChangedSignal) {
-        IRadio::RadioMode radioMode = (IRadio::RadioMode)value;
+        IRadio::RadioMode radioMode = static_cast<IRadio::RadioMode>(value);
         if (radioMode == IRadio::RADIO_MODE_TRANSMITTER) {
             // we just switched to TX after CCA, so simply send the first
             // sendPremable self message
@@ -610,7 +610,7 @@ void BMac::receiveSignal(cComponent *source, simsignal_t signalID, long value, c
     }
     // Transmission of one packet is over
     else if (signalID == IRadio::transmissionStateChangedSignal) {
-        IRadio::TransmissionState newRadioTransmissionState = (IRadio::TransmissionState)value;
+        IRadio::TransmissionState newRadioTransmissionState = static_cast<IRadio::TransmissionState>(value);
         if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE) {
             if (macState == WAIT_TX_DATA_OVER)
                 scheduleAt(simTime(), data_tx_over);

@@ -26,7 +26,7 @@ namespace physicallayer {
 Define_Module(IsotropicDimensionalBackgroundNoise);
 
 IsotropicDimensionalBackgroundNoise::IsotropicDimensionalBackgroundNoise() :
-    interpolationMode((Mapping::InterpolationMethod)-1),
+    interpolationMode(static_cast<Mapping::InterpolationMethod>(-1)),
     power(W(NaN))
 {
 }

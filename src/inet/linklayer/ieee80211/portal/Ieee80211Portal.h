@@ -28,7 +28,7 @@ namespace ieee80211 {
 class INET_API Ieee80211Portal : public cSimpleModule
 {
   protected:
-    EthernetFcsMode fcsMode = (EthernetFcsMode)-1;
+    EthernetFcsMode fcsMode = static_cast<EthernetFcsMode>(-1);
     bool upperLayerOutConnected = false;
 
   protected:

@@ -168,7 +168,7 @@ void Bgp::processMessageFromTCP(cMessage *msg)
         socket->setOutputGate(gate("socketOut"));
         Ipv4Address peerAddr = socket->getRemoteAddress().toIpv4();
         SessionId i = findIdFromPeerAddr(_BGPSessions, peerAddr);
-        if (i == (SessionId)-1) {
+        if (i == static_cast<SessionId>(-1)) {
             socket->close();
             delete socket;
             delete msg;
@@ -187,13 +187,13 @@ void Bgp::processMessageFromTCP(cMessage *msg)
 void Bgp::socketEstablished(int connId, void *yourPtr)
 {
     _currSessionId = findIdFromSocketConnId(_BGPSessions, connId);
-    if (_currSessionId == (SessionId)-1) {
+    if (_currSessionId == static_cast<SessionId>(-1)) {
         throw cRuntimeError("socket id=%d is not established", connId);
     }
 
     //if it's an IGP Session, TCPConnectionConfirmed only if all EGP Sessions established
     if (_BGPSessions[_currSessionId]->getType() == IGP &&
-        this->findNextSession(EGP) != (SessionId)-1)
+        this->findNextSession(EGP) != static_cast<SessionId>(-1))
     {
         _BGPSessions[_currSessionId]->getFSM()->TcpConnectionFails();
     }
@@ -204,7 +204,7 @@ void Bgp::socketEstablished(int connId, void *yourPtr)
 
     if (_BGPSessions[_currSessionId]->getSocketListen()->getConnectionId() != connId &&
         _BGPSessions[_currSessionId]->getType() == EGP &&
-        this->findNextSession(EGP) != (SessionId)-1)
+        this->findNextSession(EGP) != static_cast<SessionId>(-1))
     {
         _BGPSessions[_currSessionId]->getSocketListen()->abort();
     }
@@ -213,7 +213,7 @@ void Bgp::socketEstablished(int connId, void *yourPtr)
 void Bgp::socketDataArrived(int connId, void *yourPtr, Packet *msg, bool urgent)
 {
     _currSessionId = findIdFromSocketConnId(_BGPSessions, connId);
-    if (_currSessionId != (SessionId)-1) {
+    if (_currSessionId != static_cast<SessionId>(-1)) {
         //TODO: should queuing incoming payloads, and peek from the queue
         const auto& ptrHdr = msg->peekAtFront<BgpHeader>();
         switch (ptrHdr->getType()) {
@@ -240,7 +240,7 @@ void Bgp::socketDataArrived(int connId, void *yourPtr, Packet *msg, bool urgent)
 void Bgp::socketFailure(int connId, void *yourPtr, int code)
 {
     _currSessionId = findIdFromSocketConnId(_BGPSessions, connId);
-    if (_currSessionId != (SessionId)-1) {
+    if (_currSessionId != static_cast<SessionId>(-1)) {
         _BGPSessions[_currSessionId]->getFSM()->TcpConnectionFails();
     }
 }
@@ -807,7 +807,7 @@ SessionId Bgp::findNextSession(BgpSessionType type, bool startSession)
             break;
         }
     }
-    if (startSession == true && type == IGP && sessionID != (SessionId)-1) {
+    if (startSession == true && type == IGP && sessionID != static_cast<SessionId>(-1)) {
         InterfaceEntry *linkIntf = _rt->getInterfaceForDestAddr(_BGPSessions[sessionID]->getPeerAddr());
         if (linkIntf == nullptr) {
             throw cRuntimeError("No configuration interface for peer address: %s", _BGPSessions[sessionID]->getPeerAddr().str().c_str());

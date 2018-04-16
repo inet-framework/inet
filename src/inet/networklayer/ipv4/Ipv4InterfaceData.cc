@@ -78,7 +78,7 @@ std::string Ipv4MulticastSourceList::detailedInfo() const
 {
     std::stringstream out;
     out << (filterMode == MCAST_INCLUDE_SOURCES ? "INCLUDE(" : "EXCLUDE(");
-    for (int i = 0; i < (int)sources.size(); ++i)
+    for (size_t i = 0; i < sources.size(); ++i)
         out << (i > 0 ? ", " : "") << sources[i];
     out << ")";
     return out.str();
@@ -96,7 +96,7 @@ std::string Ipv4InterfaceData::HostMulticastData::str()
     std::stringstream out;
     if (!joinedMulticastGroups.empty()) {
         out << " mcastgrps:";
-        for (int i = 0; i < (int)joinedMulticastGroups.size(); ++i) {
+        for (size_t i = 0; i < joinedMulticastGroups.size(); ++i) {
             out << (i > 0 ? "," : "") << joinedMulticastGroups[i]->multicastGroup;
             if (!joinedMulticastGroups[i]->sourceList.containsAll())
                 out << " " << joinedMulticastGroups[i]->sourceList.str();
@@ -129,7 +129,7 @@ std::string Ipv4InterfaceData::RouterMulticastData::str()
     std::stringstream out;
     if (reportedMulticastGroups.size() > 0) {
         out << " mcast_listeners:";
-        for (int i = 0; i < (int)reportedMulticastGroups.size(); ++i) {
+        for (size_t i = 0; i < reportedMulticastGroups.size(); ++i) {
             out << (i > 0 ? "," : "") << reportedMulticastGroups[i]->multicastGroup;
             if (!reportedMulticastGroups[i]->sourceList.containsAll())
                 out << " " << reportedMulticastGroups[i]->sourceList.str();

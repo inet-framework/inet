@@ -59,7 +59,7 @@ cGate *MessageDispatcher::handlePacket(Packet *packet, cGate *inGate)
         auto packetProtocolTag = packet->findTag<PacketProtocolTag>();;
         auto servicePrimitive = dispatchProtocolReq->getServicePrimitive();
         // TODO: KLUDGE: eliminate this by adding ServicePrimitive to every DispatchProtocolReq
-        if (servicePrimitive == (ServicePrimitive)-1) {
+        if (servicePrimitive == static_cast<ServicePrimitive>(-1)) {
             if (packetProtocolTag != nullptr && dispatchProtocolReq->getProtocol() == packetProtocolTag->getProtocol())
                 servicePrimitive = SP_INDICATION;
             else
@@ -108,7 +108,7 @@ cGate *MessageDispatcher::handleMessage(Message *message, cGate *inGate)
     if (dispatchProtocolReq != nullptr) {
         auto servicePrimitive = dispatchProtocolReq->getServicePrimitive();
         // TODO: KLUDGE: eliminate this by adding ServicePrimitive to every DispatchProtocolReq
-        if (servicePrimitive == (ServicePrimitive)-1)
+        if (servicePrimitive == static_cast<ServicePrimitive>(-1))
             servicePrimitive = SP_REQUEST;
         auto protocol = dispatchProtocolReq->getProtocol();
         auto it = serviceToGateIndex.find(Key(protocol->getId(), servicePrimitive));

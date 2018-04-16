@@ -85,7 +85,7 @@ void SctpClient::initialize(int stage)
         finishEndsSimulation = par("finishEndsSimulation");
         queueSize = par("queueSize");
         WATCH(numRequestsToSend);
-        recordScalar("ums", (int)par("requestLength"));
+        recordScalar("ums", par("requestLength").intValue());
 
         timeMsg = new cMessage("CliAppTimer");
         timeMsg->setKind(MSGKIND_CONNECT);
@@ -167,7 +167,7 @@ void SctpClient::connect()
     if (destination.isUnspecified())
         EV << "cannot resolve destination address: " << connectAddress << endl;
     else {
-        socket.connect(destination, connectPort, streamReset, (int)par("prMethod"), (unsigned int)par("numRequestsPerSession"));
+        socket.connect(destination, connectPort, streamReset, par("prMethod"), (unsigned int)par("numRequestsPerSession"));
     }
 
     if (streamReset) {
@@ -584,14 +584,14 @@ void SctpClient::setPrimaryPath(const char *str)
 
 void SctpClient::sendStreamResetNotification()
 {
-    unsigned int type = par("streamResetType");
+    unsigned short int type = par("streamResetType");
     if (type >= 6 && type <= 9) {
         Message *cmsg = new Message("SCTP_C_STREAM_RESET");
         auto& tags = getTags(cmsg);
         SctpResetReq *rinfo = tags.addTagIfAbsent<SctpResetReq>();
         rinfo->setSocketId(socket.getConnectionId());
         rinfo->setRemoteAddr(socket.getRemoteAddr());
-        rinfo->setRequestType((unsigned short int)type);
+        rinfo->setRequestType(type);
         rinfo->setStreamsArraySize(1);
         rinfo->setStreams(0, par("streamToReset"));
         cmsg->setKind(SCTP_C_STREAM_RESET);

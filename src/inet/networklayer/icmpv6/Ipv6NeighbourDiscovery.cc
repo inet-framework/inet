@@ -860,7 +860,7 @@ void Ipv6NeighbourDiscovery::initiateDad(const Ipv6Address& tentativeAddr, Inter
 void Ipv6NeighbourDiscovery::processDadTimeout(cMessage *msg)
 {
     DadEntry *dadEntry = (DadEntry *)msg->getContextPointer();
-    InterfaceEntry *ie = (InterfaceEntry *)ift->getInterfaceById(dadEntry->interfaceId);
+    InterfaceEntry *ie = ift->getInterfaceById(dadEntry->interfaceId);
     Ipv6Address tentativeAddr = dadEntry->address;
     //Here, we need to check how many DAD messages for the interface entry were
     //sent vs. DupAddrDetectTransmits

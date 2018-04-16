@@ -73,7 +73,7 @@ class INET_API Udp : public cSimpleModule, public ILifecycle
     {
         L3Address multicastAddress;
         int interfaceId = -1;    // -1 = all
-        UdpSourceFilterMode filterMode = (UdpSourceFilterMode)0;
+        UdpSourceFilterMode filterMode = static_cast<UdpSourceFilterMode>(0);
         std::vector<L3Address> sourceList;
 
         bool isSourceAllowed(L3Address sourceAddr);
@@ -113,7 +113,7 @@ class INET_API Udp : public cSimpleModule, public ILifecycle
     typedef std::map<int, SockDescList> SocketsByPortMap;
 
   protected:
-    CrcMode crcMode = (CrcMode)-1;
+    CrcMode crcMode = static_cast<CrcMode>(-1);
     CrcInsertion crcInsertion;
 
     // sockets

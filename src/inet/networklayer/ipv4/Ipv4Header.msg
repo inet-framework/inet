@@ -181,7 +181,7 @@ class Ipv4Header extends NetworkHeaderBase
     Ipv4Address destAddress;
 
     uint16_t crc = 0;
-    CrcMode crcMode = (CrcMode)-1;
+    CrcMode crcMode;
 
     IpProtocolId protocolId = IP_PROT_NONE;
     short timeToLive;
@@ -238,6 +238,6 @@ cplusplus(Ipv4Header) {{
     virtual L3Address getDestinationAddress() const override { return L3Address(getDestAddress()); }
     virtual void setDestinationAddress(const L3Address& address) override { setDestAddress(address.toIpv4()); }
     virtual const Protocol *getProtocol() const override { return ProtocolGroup::ipprotocol.findProtocol(getProtocolId()); }
-    virtual void setProtocol(const Protocol *protocol) override { setProtocolId((IpProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(protocol)); }
+    virtual void setProtocol(const Protocol *protocol) override { setProtocolId(static_cast<IpProtocolId>(ProtocolGroup::ipprotocol.getProtocolNumber(protocol))); }
 }}
 

@@ -194,7 +194,7 @@ void TcpLwip::handleIpInputMessage(Packet *packet)
     char *data = new char[maxBufferSize];
     memset(data, 0, maxBufferSize);
 
-    ip_hdr *ih = (ip_hdr *)data;
+    ip_hdr *ih = (ip_hdr *)(data);
     //tcphdr *tcph = (tcphdr *)(data + ipHdrLen);
 
     // set the modified lwip IP header:
@@ -251,7 +251,7 @@ void TcpLwip::handleIpInputMessage(Packet *packet)
 void TcpLwip::notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32 seqNo,
         const void *dataptr, int len)
 {
-    TcpLwipConnection *conn = (pcb != nullptr) ? (TcpLwipConnection *)(pcb->callback_arg) : nullptr;
+    TcpLwipConnection *conn = (pcb != nullptr) ? static_cast<TcpLwipConnection *>(pcb->callback_arg) : nullptr;
     if (conn) {
         conn->receiveQueueM->notifyAboutIncomingSegmentProcessing(pCurTcpSegM, seqNo, dataptr, len);
     }
@@ -266,7 +266,7 @@ void TcpLwip::notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, u
 
 void TcpLwip::lwip_free_pcb_event(LwipTcpLayer::tcp_pcb *pcb)
 {
-    TcpLwipConnection *conn = (TcpLwipConnection *)(pcb->callback_arg);
+    TcpLwipConnection *conn = static_cast<TcpLwipConnection *>(pcb->callback_arg);
     if (conn != nullptr) {
         if (conn->pcbM == pcb) {
             // conn->sendIndicationToApp(TCP_I_????); // TODO send some indication when need
@@ -278,7 +278,7 @@ void TcpLwip::lwip_free_pcb_event(LwipTcpLayer::tcp_pcb *pcb)
 err_t TcpLwip::lwip_tcp_event(void *arg, LwipTcpLayer::tcp_pcb *pcb,
         LwipTcpLayer::lwip_event event, struct pbuf *p, u16_t size, err_t err)
 {
-    TcpLwipConnection *conn = (TcpLwipConnection *)arg;
+    TcpLwipConnection *conn = static_cast<TcpLwipConnection *>(arg);
     ASSERT(conn != nullptr);
 
     switch (event) {
@@ -598,7 +598,7 @@ void TcpLwip::printConnBrief(TcpLwipConnection& connP)
 
 void TcpLwip::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP, L3Address const& destP, void *dataP, int lenP)
 {
-    TcpLwipConnection *conn = (pcb != nullptr) ? (TcpLwipConnection *)(pcb->callback_arg) : nullptr;
+    TcpLwipConnection *conn = (pcb != nullptr) ? static_cast<TcpLwipConnection *>(pcb->callback_arg) : nullptr;
 
     Packet *packet = nullptr;
 

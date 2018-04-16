@@ -37,7 +37,7 @@ void LinearMobility::initialize(int stage)
     EV_TRACE << "initializing LinearMobility stage " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {
         speed = par("speed");
-        angle = deg(fmod((double)par("angle"), 360));
+        angle = deg(fmod(par("angle").doubleValue(), 360));
         acceleration = par("acceleration");
         stationary = (speed == 0) && (acceleration == 0.0);
     }

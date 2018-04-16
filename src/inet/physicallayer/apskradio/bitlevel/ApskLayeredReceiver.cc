@@ -39,7 +39,7 @@ namespace physicallayer {
 Define_Module(ApskLayeredReceiver);
 
 ApskLayeredReceiver::ApskLayeredReceiver() :
-    levelOfDetail((LevelOfDetail) - 1),
+    levelOfDetail(static_cast<LevelOfDetail>(-1)),
     errorModel(nullptr),
     decoder(nullptr),
     demodulator(nullptr),

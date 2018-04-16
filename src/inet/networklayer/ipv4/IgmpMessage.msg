@@ -36,7 +36,7 @@ class IgmpMessage extends FieldsChunk
 {
     IgmpType type;         // 1 byte
     uint16_t crc = 0;                   // 2 bytes
-    CrcMode crcMode = (CrcMode)-1;  // 0 bytes, inet only
+    CrcMode crcMode;  // 0 bytes, inet only
 }
 
 class IgmpQuery extends IgmpMessage

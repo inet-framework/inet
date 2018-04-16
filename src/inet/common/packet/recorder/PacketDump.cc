@@ -75,7 +75,7 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
 
     out << "[sctp] " << srcAddr << " > " << destAddr;
     uint32 numberOfChunks;
-    SctpChunk *chunk;
+    const SctpChunk *chunk;
     uint8 type;
     // src/dest
     out << srcAddr << "." << sctpmsg->getSrcPort() << " > "
@@ -88,7 +88,7 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
         out << "Packet has bit error!!\n";
 
     for (uint32 i = 0; i < numberOfChunks; i++) {
-        chunk = (SctpChunk *)sctpmsg->getSctpChunks(i);
+        chunk = sctpmsg->getSctpChunks(i);
         type = chunk->getSctpChunkType();
 
         // FIXME create a getChunkTypeName(SctpChunkType x) function in SCTP code and use it!
@@ -151,7 +151,7 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
         out << endl;
 
         for (uint32 i = 0; i < numberOfChunks; i++) {
-            chunk = (SctpChunk *)sctpmsg->getSctpChunks(i);
+            chunk = sctpmsg->getSctpChunks(i);
             type = chunk->getSctpChunkType();
 
             sprintf(buf, "   %3u: ", i + 1);
@@ -159,8 +159,8 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
 
             switch (type) {
                 case INIT: {
-                    SctpInitChunk *initChunk;
-                    initChunk = check_and_cast<SctpInitChunk *>(chunk);
+                    const SctpInitChunk *initChunk;
+                    initChunk = check_and_cast<const SctpInitChunk *>(chunk);
                     out << "INIT[InitiateTag=";
                     out << initChunk->getInitTag();
                     out << "; a_rwnd=";
@@ -191,8 +191,8 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
                 }
 
                 case INIT_ACK: {
-                    SctpInitAckChunk *initackChunk;
-                    initackChunk = check_and_cast<SctpInitAckChunk *>(chunk);
+                    const SctpInitAckChunk *initackChunk;
+                    initackChunk = check_and_cast<const SctpInitAckChunk *>(chunk);
                     out << "INIT_ACK[InitiateTag=";
                     out << initackChunk->getInitTag();
                     out << "; a_rwnd=";
@@ -232,8 +232,8 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
                     break;
 
                 case DATA: {
-                    SctpDataChunk *dataChunk;
-                    dataChunk = check_and_cast<SctpDataChunk *>(chunk);
+                    const SctpDataChunk *dataChunk;
+                    dataChunk = check_and_cast<const SctpDataChunk *>(chunk);
                     out << "DATA[TSN=";
                     out << dataChunk->getTsn();
                     out << "; SID=";
@@ -249,8 +249,8 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
                 }
 
                 case SACK: {
-                    SctpSackChunk *sackChunk;
-                    sackChunk = check_and_cast<SctpSackChunk *>(chunk);
+                    const SctpSackChunk *sackChunk;
+                    sackChunk = check_and_cast<const SctpSackChunk *>(chunk);
                     out << "SACK[CumTSNAck=";
                     out << sackChunk->getCumTsnAck();
                     out << "; a_rwnd=";
@@ -283,8 +283,8 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
                 }
 
                 case HEARTBEAT:
-                    SctpHeartbeatChunk *heartbeatChunk;
-                    heartbeatChunk = check_and_cast<SctpHeartbeatChunk *>(chunk);
+                    const SctpHeartbeatChunk *heartbeatChunk;
+                    heartbeatChunk = check_and_cast<const SctpHeartbeatChunk *>(chunk);
                     out << "HEARTBEAT[InfoLength=";
                     out << chunk->getLength() - 4;
                     out << "; time=";
@@ -299,16 +299,16 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
                     break;
 
                 case ABORT:
-                    SctpAbortChunk *abortChunk;
-                    abortChunk = check_and_cast<SctpAbortChunk *>(chunk);
+                    const SctpAbortChunk *abortChunk;
+                    abortChunk = check_and_cast<const SctpAbortChunk *>(chunk);
                     out << "ABORT[T-Bit=";
                     out << abortChunk->getT_Bit();
                     out << "]";
                     break;
 
                 case SHUTDOWN:
-                    SctpShutdownChunk *shutdown;
-                    shutdown = check_and_cast<SctpShutdownChunk *>(chunk);
+                    const SctpShutdownChunk *shutdown;
+                    shutdown = check_and_cast<const SctpShutdownChunk *>(chunk);
                     out << "SHUTDOWN[CumTSNAck=";
                     out << shutdown->getCumTsnAck();
                     out << "]";
@@ -324,13 +324,13 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
 
                 case ERRORTYPE: {
                     out << "ERRORTYPE ";
-                    SctpErrorChunk *errorChunk;
-                    errorChunk = check_and_cast<SctpErrorChunk *>(chunk);
+                    const SctpErrorChunk *errorChunk;
+                    errorChunk = check_and_cast<const SctpErrorChunk *>(chunk);
                     uint32 numberOfParameters = errorChunk->getParametersArraySize();
                     uint32 parameterType;
 
                     for (uint32 i = 0; i < numberOfParameters; i++) {
-                        SctpParameter *param = (SctpParameter *)errorChunk->getParameters(i);
+                        const SctpParameter *param = errorChunk->getParameters(i);
                         parameterType = param->getParameterType();
                         out << parameterType << " ";
                     }

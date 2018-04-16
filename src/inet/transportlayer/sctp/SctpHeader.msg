@@ -42,7 +42,7 @@ class SctpHeader extends TransportHeaderBase
     uint32 vTag;
     bool checksumOk;
     uint16_t crc = 0;
-    CrcMode crcMode = (CrcMode)-1;
+    CrcMode crcMode;
     unsigned short headerLength = 12;
     abstract SctpChunk *sctpChunks[];
 }

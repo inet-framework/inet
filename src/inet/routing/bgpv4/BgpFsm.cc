@@ -441,7 +441,7 @@ void Established::entry()
 
     //when all EGP Session is in established state, start IGP Session(s)
     SessionId nextSession = session.findAndStartNextSession(EGP);
-    if (nextSession == (SessionId)-1) {
+    if (nextSession == static_cast<SessionId>(-1)) {
         session.findAndStartNextSession(IGP);
     }
 }

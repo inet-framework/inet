@@ -263,7 +263,7 @@ bool Ipv4Address::maskedAddrAreEqual(const Ipv4Address& addr1,
 {
     // return addr1.doAnd(netmask).equals(addr2.doAnd(netmask));
     // Looks weird, but is the same and is faster
-    return !(bool)((addr1.addr ^ addr2.addr) & netmask.addr);
+    return ((addr1.addr ^ addr2.addr) & netmask.addr) == 0;
 }
 
 bool Ipv4Address::isWellFormed(const char *text)
