@@ -558,7 +558,7 @@ SctpAssociation *Sctp::findAssocForInitAck(SctpInitAckChunk *initAckChunk, L3Add
     SctpAssociation *assoc = nullptr;
     int numberAddresses = initAckChunk->getAddressesArraySize();
     for (int32 j = 0; j < numberAddresses; j++) {
-        if (initAckChunk->getAddresses(j).getType() == L3Address::Ipv6)
+        if (initAckChunk->getAddresses(j).getType() == L3Address::IPv6)
             continue;
         assoc = findAssocForMessage(initAckChunk->getAddresses(j), destAddr, srcPort, destPort, findListen);
         if (assoc) {

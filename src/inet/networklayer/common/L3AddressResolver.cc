@@ -500,14 +500,14 @@ cModule *L3AddressResolver::findHostWithAddress(const L3Address& add)
                 InterfaceEntry *entry = itable->getInterface(i);
                 switch (add.getType()) {
 #ifdef WITH_IPv6
-                    case L3Address::Ipv6:
+                    case L3Address::IPv6:
                         if (entry->ipv6Data()->hasAddress(add.toIpv6()))
                             return mod;
                         break;
 
 #endif // ifdef WITH_IPv6
 #ifdef WITH_IPv4
-                    case L3Address::Ipv4:
+                    case L3Address::IPv4:
                         if (entry->ipv4Data() && entry->ipv4Data()->getIPAddress() == add.toIpv4())
                             return mod;
                         break;

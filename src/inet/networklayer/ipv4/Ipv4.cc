@@ -1025,7 +1025,7 @@ void Ipv4::sendDatagramToOutput(Packet *packet)
 
 void Ipv4::arpResolutionCompleted(IArp::Notification *entry)
 {
-    if (entry->l3Address.getType() != L3Address::Ipv4)
+    if (entry->l3Address.getType() != L3Address::IPv4)
         return;
     auto it = pendingPackets.find(entry->l3Address.toIpv4());
     if (it != pendingPackets.end()) {
@@ -1046,7 +1046,7 @@ void Ipv4::arpResolutionCompleted(IArp::Notification *entry)
 
 void Ipv4::arpResolutionTimedOut(IArp::Notification *entry)
 {
-    if (entry->l3Address.getType() != L3Address::Ipv4)
+    if (entry->l3Address.getType() != L3Address::IPv4)
         return;
     auto it = pendingPackets.find(entry->l3Address.toIpv4());
     if (it != pendingPackets.end()) {

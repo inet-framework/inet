@@ -49,10 +49,10 @@ void SctpAssociation::sendAsconf(const char *type, const bool remote)
             asconfChunk->setAddressParam(localAddr);
         }
 
-        if (localAddr.getType() == L3Address::Ipv6) {
+        if (localAddr.getType() == L3Address::IPv6) {
             chunkLength += 20;
         }
-        else if (localAddr.getType() == L3Address::Ipv4) {
+        else if (localAddr.getType() == L3Address::IPv4) {
             chunkLength += 8;
         }
         else
@@ -82,11 +82,11 @@ void SctpAssociation::sendAsconf(const char *type, const bool remote)
                     else {
                         ipParam->setAddressParam(L3AddressResolver().resolve(sctpMain->par("addAddress"), 1));
                     }
-                    if (ipParam->getAddressParam().getType() == L3Address::Ipv6) {
+                    if (ipParam->getAddressParam().getType() == L3Address::IPv6) {
                         chunkLength += 20;
                         ipParam->setByteLength(SCTP_ADD_IP_PARAMETER_LENGTH + 20);
                     }
-                    else if (ipParam->getAddressParam().getType() == L3Address::Ipv4) {
+                    else if (ipParam->getAddressParam().getType() == L3Address::IPv4) {
                         chunkLength += 8;
                         ipParam->setByteLength(SCTP_ADD_IP_PARAMETER_LENGTH + 8);
                     }
@@ -103,11 +103,11 @@ void SctpAssociation::sendAsconf(const char *type, const bool remote)
                     delParam->setParameterType(DELETE_IP_ADDRESS);
                     delParam->setRequestCorrelationId(++state->corrIdNum);
                     delParam->setAddressParam(L3AddressResolver().resolve(sctpMain->par("addAddress"), 1));
-                    if (delParam->getAddressParam().getType() == L3Address::Ipv6) {
+                    if (delParam->getAddressParam().getType() == L3Address::IPv6) {
                         chunkLength += 20;
                         delParam->setByteLength(SCTP_ADD_IP_PARAMETER_LENGTH + 20);
                     }
-                    else if (delParam->getAddressParam().getType() == L3Address::Ipv4) {
+                    else if (delParam->getAddressParam().getType() == L3Address::IPv4) {
                         chunkLength += 8;
                         delParam->setByteLength(SCTP_ADD_IP_PARAMETER_LENGTH + 8);
                     }
@@ -127,11 +127,11 @@ void SctpAssociation::sendAsconf(const char *type, const bool remote)
                     if (nat) {
                         priParam->setAddressParam(L3Address("0.0.0.0"));
                     }
-                    if (priParam->getAddressParam().getType() == L3Address::Ipv6) {
+                    if (priParam->getAddressParam().getType() == L3Address::IPv6) {
                         chunkLength += 20;
                         priParam->setByteLength(SCTP_ADD_IP_PARAMETER_LENGTH + 20);
                     }
-                    else if (priParam->getAddressParam().getType() == L3Address::Ipv4) {
+                    else if (priParam->getAddressParam().getType() == L3Address::IPv4) {
                         chunkLength += 8;
                         priParam->setByteLength(SCTP_ADD_IP_PARAMETER_LENGTH + 8);
                     }

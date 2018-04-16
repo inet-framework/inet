@@ -129,14 +129,14 @@ InterfaceEntry *InterfaceTable::findInterfaceByAddress(const L3Address& address)
 #endif // ifdef WITH_GENERIC
                 switch (addrType) {
 #ifdef WITH_IPv4
-                    case L3Address::Ipv4:
+                    case L3Address::IPv4:
                         if (ie->ipv4Data() && ie->ipv4Data()->getIPAddress() == address.toIpv4())
                             return ie;
                         break;
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-                    case L3Address::Ipv6:
+                    case L3Address::IPv6:
                         if (ie->ipv6Data() && ie->ipv6Data()->hasAddress(address.toIpv6()))
                             return ie;
                         break;
@@ -174,7 +174,7 @@ bool InterfaceTable::isNeighborAddress(const L3Address& address) const
 
     switch (address.getType()) {
 #ifdef WITH_IPv4
-        case L3Address::Ipv4:
+        case L3Address::IPv4:
             for (auto & elem : idToInterface) {
                 InterfaceEntry *ie = elem;
                 if (ie && ie->ipv4Data()) {
@@ -188,7 +188,7 @@ bool InterfaceTable::isNeighborAddress(const L3Address& address) const
 
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-        case L3Address::Ipv6:
+        case L3Address::IPv6:
             for (auto & elem : idToInterface) {
                 InterfaceEntry *ie = elem;
                 if (ie && ie->ipv6Data()) {

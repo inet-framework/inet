@@ -49,9 +49,9 @@ using namespace DiffservUtil;
 #ifdef WITH_IPv4
 bool MultiFieldClassifier::Filter::matches(Packet *packet, const Ipv4Header *ipv4Header)
 {
-    if (srcPrefixLength > 0 && (srcAddr.getType() != L3Address::Ipv4 || !ipv4Header->getSrcAddress().prefixMatches(srcAddr.toIpv4(), srcPrefixLength)))
+    if (srcPrefixLength > 0 && (srcAddr.getType() != L3Address::IPv4 || !ipv4Header->getSrcAddress().prefixMatches(srcAddr.toIpv4(), srcPrefixLength)))
         return false;
-    if (destPrefixLength > 0 && (destAddr.getType() != L3Address::Ipv4 || !ipv4Header->getDestAddress().prefixMatches(destAddr.toIpv4(), destPrefixLength)))
+    if (destPrefixLength > 0 && (destAddr.getType() != L3Address::IPv4 || !ipv4Header->getDestAddress().prefixMatches(destAddr.toIpv4(), destPrefixLength)))
         return false;
     int ipv4HeaderProtocolId = ipv4Header->getProtocolId();
     if (protocol >= 0 && ipv4HeaderProtocolId != protocol)
@@ -83,9 +83,9 @@ bool MultiFieldClassifier::Filter::matches(Packet *packet, const Ipv4Header *ipv
 #ifdef WITH_IPv6
 bool MultiFieldClassifier::Filter::matches(Packet *packet, const Ipv6Header *ipv6Header)
 {
-    if (srcPrefixLength > 0 && (srcAddr.getType() != L3Address::Ipv6 || !ipv6Header->getSrcAddress().matches(srcAddr.toIpv6(), srcPrefixLength)))
+    if (srcPrefixLength > 0 && (srcAddr.getType() != L3Address::IPv6 || !ipv6Header->getSrcAddress().matches(srcAddr.toIpv6(), srcPrefixLength)))
         return false;
-    if (destPrefixLength > 0 && (destAddr.getType() != L3Address::Ipv6 || !ipv6Header->getDestAddress().matches(destAddr.toIpv6(), destPrefixLength)))
+    if (destPrefixLength > 0 && (destAddr.getType() != L3Address::IPv6 || !ipv6Header->getDestAddress().matches(destAddr.toIpv6(), destPrefixLength)))
         return false;
     int ipv6HeaderProtocolId = ipv6Header->getProtocolId();
     if (protocol >= 0 && ipv6HeaderProtocolId != protocol)
@@ -189,11 +189,11 @@ void MultiFieldClassifier::addFilter(const Filter& filter)
 {
     if (filter.gateIndex < 0 || filter.gateIndex >= numOutGates)
         throw cRuntimeError("no output gate for gate index %d", filter.gateIndex);
-    if (!filter.srcAddr.isUnspecified() && ((filter.srcAddr.getType() == L3Address::Ipv6 && filter.srcPrefixLength > 128) ||
-                                            (filter.srcAddr.getType() == L3Address::Ipv4 && filter.srcPrefixLength > 32)))
+    if (!filter.srcAddr.isUnspecified() && ((filter.srcAddr.getType() == L3Address::IPv6 && filter.srcPrefixLength > 128) ||
+                                            (filter.srcAddr.getType() == L3Address::IPv4 && filter.srcPrefixLength > 32)))
         throw cRuntimeError("srcPrefixLength is invalid");
-    if (!filter.destAddr.isUnspecified() && ((filter.destAddr.getType() == L3Address::Ipv6 && filter.destPrefixLength > 128) ||
-                                             (filter.destAddr.getType() == L3Address::Ipv4 && filter.destPrefixLength > 32)))
+    if (!filter.destAddr.isUnspecified() && ((filter.destAddr.getType() == L3Address::IPv6 && filter.destPrefixLength > 128) ||
+                                             (filter.destAddr.getType() == L3Address::IPv4 && filter.destPrefixLength > 32)))
         throw cRuntimeError("srcPrefixLength is invalid");
     if (filter.protocol != -1 && (filter.protocol < 0 || filter.protocol > 0xff))
         throw cRuntimeError("protocol is not a valid protocol number");
@@ -246,13 +246,13 @@ void MultiFieldClassifier::configureFilters(cXMLElement *config)
             if (srcPrefixLengthAttr)
                 filter.srcPrefixLength = parseIntAttribute(srcPrefixLengthAttr, "srcPrefixLength");
             else if (srcAddrAttr)
-                filter.srcPrefixLength = filter.srcAddr.getType() == L3Address::Ipv6 ? 128 : 32;
+                filter.srcPrefixLength = filter.srcAddr.getType() == L3Address::IPv6 ? 128 : 32;
             if (destAddrAttr)
                 filter.destAddr = addressResolver.resolve(destAddrAttr);
             if (destPrefixLengthAttr)
                 filter.destPrefixLength = parseIntAttribute(destPrefixLengthAttr, "destPrefixLength");
             else if (destAddrAttr)
-                filter.destPrefixLength = filter.destAddr.getType() == L3Address::Ipv6 ? 128 : 32;
+                filter.destPrefixLength = filter.destAddr.getType() == L3Address::IPv6 ? 128 : 32;
             if (protocolAttr)
                 filter.protocol = parseProtocol(protocolAttr, "protocol");
             if (tosAttr)

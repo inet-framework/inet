@@ -45,7 +45,7 @@ void L3Address::set(const Ipv6Address& addr)
     const uint32 *words = addr.words();
     hi = ((uint64) * (words + 0) << 32) + *(words + 1);
     lo = ((uint64) * (words + 2) << 32) + *(words + 3);
-    if (getType() != Ipv6)
+    if (getType() != IPv6)
         throw cRuntimeError("Cannot set Ipv6 address");
 }
 
@@ -54,7 +54,7 @@ L3Address::AddressType L3Address::getType() const
     if (hi >> 48 == RESERVED_IPV6_ADDRESS_RANGE)
         return (AddressType)(hi & 0xFF);
     else
-        return L3Address::Ipv6;
+        return L3Address::IPv6;
 }
 
 IL3AddressType *L3Address::getAddressType() const
@@ -63,10 +63,10 @@ IL3AddressType *L3Address::getAddressType() const
         case L3Address::NONE:
             throw cRuntimeError("Address contains no value");
 
-        case L3Address::Ipv4:
+        case L3Address::IPv4:
             return &Ipv4AddressType::INSTANCE;
 
-        case L3Address::Ipv6:
+        case L3Address::IPv6:
             return &Ipv6AddressType::INSTANCE;
 
         case L3Address::MAC:
@@ -89,10 +89,10 @@ std::string L3Address::str() const
         case L3Address::NONE:
             return "<none>";
 
-        case L3Address::Ipv4:
+        case L3Address::IPv4:
             return toIpv4().str();
 
-        case L3Address::Ipv6:
+        case L3Address::IPv6:
             return toIpv6().str();
 
         case L3Address::MAC:
@@ -136,10 +136,10 @@ bool L3Address::isUnspecified() const
         case L3Address::NONE:
             return true;
 
-        case L3Address::Ipv4:
+        case L3Address::IPv4:
             return toIpv4().isUnspecified();
 
-        case L3Address::Ipv6:
+        case L3Address::IPv6:
             return toIpv6().isUnspecified();
 
         case L3Address::MAC:
@@ -162,10 +162,10 @@ bool L3Address::isUnicast() const
         case L3Address::NONE:
             throw cRuntimeError("Address contains no value");
 
-        case L3Address::Ipv4:
+        case L3Address::IPv4:
             return !toIpv4().isMulticast() && !toIpv4().isLimitedBroadcastAddress();    // TODO: move to Ipv4Address
 
-        case L3Address::Ipv6:
+        case L3Address::IPv6:
             return toIpv6().isUnicast();
 
         case L3Address::MAC:
@@ -188,10 +188,10 @@ bool L3Address::isMulticast() const
         case L3Address::NONE:
             throw cRuntimeError("Address contains no value");
 
-        case L3Address::Ipv4:
+        case L3Address::IPv4:
             return toIpv4().isMulticast();
 
-        case L3Address::Ipv6:
+        case L3Address::IPv6:
             return toIpv6().isMulticast();
 
         case L3Address::MAC:
@@ -214,10 +214,10 @@ bool L3Address::isBroadcast() const
         case L3Address::NONE:
             throw cRuntimeError("Address contains no value");
 
-        case L3Address::Ipv4:
+        case L3Address::IPv4:
             return toIpv4().isLimitedBroadcastAddress();
 
-        case L3Address::Ipv6:
+        case L3Address::IPv6:
             return false;
 
         //throw cRuntimeError("Ipv6 isBroadcast() unimplemented");
@@ -241,10 +241,10 @@ bool L3Address::isLinkLocal() const
         case L3Address::NONE:
             throw cRuntimeError("Address contains no value");
 
-        case L3Address::Ipv4:
+        case L3Address::IPv4:
             return false;
 
-        case L3Address::Ipv6:
+        case L3Address::IPv6:
             return toIpv6().isLinkLocal();
 
         case L3Address::MAC:
@@ -272,10 +272,10 @@ bool L3Address::operator<(const L3Address& other) const
             case L3Address::NONE:
                 throw cRuntimeError("Address contains no value");
 
-            case L3Address::Ipv4:
+            case L3Address::IPv4:
                 return toIpv4() < other.toIpv4();
 
-            case L3Address::Ipv6:
+            case L3Address::IPv6:
                 return toIpv6() < other.toIpv6();
 
             case L3Address::MAC:
@@ -303,10 +303,10 @@ bool L3Address::operator==(const L3Address& other) const
             case L3Address::NONE:
                 return true;
 
-            case L3Address::Ipv4:
+            case L3Address::IPv4:
                 return toIpv4() == other.toIpv4();
 
-            case L3Address::Ipv6:
+            case L3Address::IPv6:
                 return toIpv6() == other.toIpv6();
 
             case L3Address::MAC:
@@ -335,10 +335,10 @@ bool L3Address::matches(const L3Address& other, int prefixLength) const
         case L3Address::NONE:
             throw cRuntimeError("Address contains no value");
 
-        case L3Address::Ipv4:
+        case L3Address::IPv4:
             return Ipv4Address::maskedAddrAreEqual(toIpv4(), other.toIpv4(), Ipv4Address::makeNetmask(prefixLength));    //FIXME !!!!!
 
-        case L3Address::Ipv6:
+        case L3Address::IPv6:
             return toIpv6().matches(other.toIpv6(), prefixLength);
 
         case L3Address::MAC:
@@ -361,10 +361,10 @@ L3Address L3Address::getPrefix(int prefixLength) const
         case L3Address::NONE:
             return *this;
 
-        case L3Address::Ipv4:
+        case L3Address::IPv4:
             return L3Address(toIpv4().getPrefix(prefixLength));
 
-        case L3Address::Ipv6:
+        case L3Address::IPv6:
             return L3Address(toIpv6().getPrefix(prefixLength));
 
         case L3Address::MAC:
@@ -387,8 +387,8 @@ const char *L3Address::getTypeName(AddressType t)
         return #x
     switch (t) {
         CASE(NONE);
-        CASE(Ipv4);
-        CASE(Ipv6);
+        CASE(IPv4);
+        CASE(IPv6);
         CASE(MAC);
         CASE(MODULEID);
         CASE(MODULEPATH);

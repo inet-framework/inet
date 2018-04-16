@@ -643,7 +643,7 @@ void SctpAssociation::sendInit()
     if (sctpMain->hasPar("natFriendly")) {
         friendly = sctpMain->par("natFriendly");
     }
-    if (remoteAddr.getType() == L3Address::Ipv6) {
+    if (remoteAddr.getType() == L3Address::IPv6) {
         for (auto & elem : adv) {
             if (!friendly) {
                 initChunk->setAddressesArraySize(addrNum + 1);
@@ -656,7 +656,7 @@ void SctpAssociation::sendInit()
                 localAddr = (elem);
         }
     }
-    else if (remoteAddr.getType() == L3Address::Ipv4) {
+    else if (remoteAddr.getType() == L3Address::IPv4) {
         int rlevel = getAddressLevel(remoteAddr);
         EV_DETAIL << "level of remote address=" << rlevel << "\n";
         for (auto & elem : adv) {
@@ -890,9 +890,9 @@ void SctpAssociation::sendInitAck(SctpInitChunk *initChunk)
         for (auto & elem : state->localAddresses) {
             initAckChunk->setAddressesArraySize(addrNum + 1);
             initAckChunk->setAddresses(addrNum++, (elem));
-            if ((elem).getType() == L3Address::Ipv4) {
+            if ((elem).getType() == L3Address::IPv4) {
                 length += 8;
-            } else if ((elem).getType() == L3Address::Ipv6) {
+            } else if ((elem).getType() == L3Address::IPv6) {
                 length += 20;
             }
         }
@@ -1640,9 +1640,9 @@ SctpSackChunk *SctpAssociation::createSack()
     const uint32 mtu = getPath(remoteAddr)->pmtu;
 
     uint32 hdrSize;
-    if (remoteAddr.getType() == L3Address::Ipv6)
+    if (remoteAddr.getType() == L3Address::IPv6)
         hdrSize = 40;
-    else if (remoteAddr.getType() == L3Address::Ipv4)
+    else if (remoteAddr.getType() == L3Address::IPv4)
         hdrSize = 20;
     else
         throw cRuntimeError("Unknown address type");
@@ -2918,7 +2918,7 @@ void SctpAssociation::disposeOf(SctpHeader *sctpmsg)
 
 int SctpAssociation::getAddressLevel(const L3Address& addr)
 {
-    if (addr.getType() == L3Address::Ipv6) {
+    if (addr.getType() == L3Address::IPv6) {
         switch (addr.toIpv6().getScope()) {
             case Ipv6Address::UNSPECIFIED:
             case Ipv6Address::MULTICAST:
@@ -2940,7 +2940,7 @@ int SctpAssociation::getAddressLevel(const L3Address& addr)
                 throw cRuntimeError("Unknown IPv6 scope: %d", (int)(addr.toIpv6().getScope()));
         }
     }
-    else if (addr.getType() == L3Address::Ipv4) {
+    else if (addr.getType() == L3Address::IPv4) {
         switch (addr.toIpv4().getAddressCategory()) {
             case Ipv4Address::UNSPECIFIED:
             case Ipv4Address::THIS_NETWORK:

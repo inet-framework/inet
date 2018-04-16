@@ -43,8 +43,8 @@ class INET_API L3Address
   public:
     enum AddressType {
         NONE,
-        Ipv4,
-        Ipv6,
+        IPv4,
+        IPv6,
         MAC,
         MODULEPATH,
         MODULEID
@@ -68,14 +68,14 @@ class INET_API L3Address
     L3Address(const ModuleIdAddress& addr) { set(addr); }
     L3Address(const ModulePathAddress& addr) { set(addr); }
 
-    void set(const Ipv4Address& addr) { set(Ipv4, addr.getInt()); }
+    void set(const Ipv4Address& addr) { set(IPv4, addr.getInt()); }
     void set(const Ipv6Address& addr);
     void set(const MacAddress& addr) { set(MAC, addr.getInt()); }
     void set(const ModuleIdAddress& addr) { set(MODULEID, addr.getId()); }
     void set(const ModulePathAddress& addr) { set(MODULEPATH, addr.getId()); }
     void reset() { set(NONE, 0); }
 
-    Ipv4Address toIpv4() const { return getType() == NONE ? Ipv4Address() : Ipv4Address(get(Ipv4)); }
+    Ipv4Address toIpv4() const { return getType() == NONE ? Ipv4Address() : Ipv4Address(get(IPv4)); }
     Ipv6Address toIpv6() const { return getType() == NONE ? Ipv6Address() : Ipv6Address(hi, lo); }
     MacAddress toMac() const { return getType() == NONE ? MacAddress() : MacAddress(get(MAC)); }
     ModuleIdAddress toModuleId() const { return getType() == NONE ? ModuleIdAddress() : ModuleIdAddress(get(MODULEID)); }

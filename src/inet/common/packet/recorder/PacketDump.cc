@@ -179,7 +179,7 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
                             if (i > 0)
                                 out << ",";
 
-                            if (initChunk->getAddresses(i).getType() == L3Address::Ipv6)
+                            if (initChunk->getAddresses(i).getType() == L3Address::IPv6)
                                 out << initChunk->getAddresses(i).str();
                             else
                                 out << initChunk->getAddresses(i);

@@ -392,7 +392,7 @@ L3Address Gpsr::getSelfAddress() const
     //TODO choose self address based on a new 'interfaces' parameter
     L3Address ret = routingTable->getRouterIdAsGeneric();
 #ifdef WITH_IPv6
-    if (ret.getType() == L3Address::Ipv6) {
+    if (ret.getType() == L3Address::IPv6) {
         for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
             InterfaceEntry *ie = interfaceTable->getInterface(i);
             if ((!ie->isLoopback()) && ie->ipv6Data() != nullptr) {

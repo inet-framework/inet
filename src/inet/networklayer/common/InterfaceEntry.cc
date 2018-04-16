@@ -326,13 +326,13 @@ void InterfaceEntry::joinMulticastGroup(const L3Address& address) const
 {
     switch (address.getType()) {
 #ifdef WITH_IPv4
-        case L3Address::Ipv4:
+        case L3Address::IPv4:
             ipv4Data()->joinMulticastGroup(address.toIpv4());
             break;
 
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-        case L3Address::Ipv6:
+        case L3Address::IPv6:
             ipv6Data()->joinMulticastGroup(address.toIpv6());
             break;
 
@@ -363,7 +363,7 @@ void InterfaceEntry::changeMulticastGroupMembership(const L3Address& multicastAd
 {
     switch (multicastAddress.getType()) {
 #ifdef WITH_IPv4
-        case L3Address::Ipv4: {
+        case L3Address::IPv4: {
             std::vector<Ipv4Address> oldIPv4SourceList, newIPv4SourceList;
             toIpv4AddressVector(oldSourceList, oldIPv4SourceList);
             toIpv4AddressVector(newSourceList, newIPv4SourceList);
@@ -374,7 +374,7 @@ void InterfaceEntry::changeMulticastGroupMembership(const L3Address& multicastAd
 
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-        case L3Address::Ipv6:
+        case L3Address::IPv6:
             // TODO
             throw cRuntimeError("changeMulticastGroupMembership() not implemented for type %s", L3Address::getTypeName(multicastAddress.getType()));
             break;

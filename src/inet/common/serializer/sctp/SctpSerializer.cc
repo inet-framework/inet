@@ -166,7 +166,7 @@ void SctpSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk
                 int32 numaddr = initChunk->getAddressesArraySize();
                 for (int32 i = 0; i < numaddr; i++) {
 #ifdef WITH_IPv4
-                    if (initChunk->getAddresses(i).getType() == L3Address::Ipv4) {
+                    if (initChunk->getAddresses(i).getType() == L3Address::IPv4) {
                         struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter *)(((unsigned char *)ic) + size_init_chunk + parPtr);
                         ipv4addr->type = htons(INIT_PARAM_IPV4);
                         ipv4addr->length = htons(8);
@@ -175,7 +175,7 @@ void SctpSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk
                     }
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-                    if (initChunk->getAddresses(i).getType() == L3Address::Ipv6) {
+                    if (initChunk->getAddresses(i).getType() == L3Address::IPv6) {
                         struct init_ipv6_address_parameter *ipv6addr = (struct init_ipv6_address_parameter *)(((unsigned char *)ic) + size_init_chunk + parPtr);
                         ipv6addr->type = htons(INIT_PARAM_IPV6);
                         ipv6addr->length = htons(20);
@@ -299,7 +299,7 @@ void SctpSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk
                 int32 numaddr = initAckChunk->getAddressesArraySize();
                 for (int32 i = 0; i < numaddr; i++) {
 #ifdef WITH_IPv4
-                    if (initAckChunk->getAddresses(i).getType() == L3Address::Ipv4) {
+                    if (initAckChunk->getAddresses(i).getType() == L3Address::IPv4) {
                         struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter *)(((unsigned char *)iac) + size_init_chunk + parPtr);
                         ipv4addr->type = htons(INIT_PARAM_IPV4);
                         ipv4addr->length = htons(8);
@@ -308,7 +308,7 @@ void SctpSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk
                     }
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-                    if (initAckChunk->getAddresses(i).getType() == L3Address::Ipv6) {
+                    if (initAckChunk->getAddresses(i).getType() == L3Address::IPv6) {
                         struct init_ipv6_address_parameter *ipv6addr = (struct init_ipv6_address_parameter *)(((unsigned char *)iac) + size_init_chunk + parPtr);
                         ipv6addr->type = htons(INIT_PARAM_IPV6);
                         ipv6addr->length = htons(20);
@@ -517,7 +517,7 @@ void SctpSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk
                     simtime_t time = heartbeatChunk->getTimeField();
                     int32 infolen = 0;
 #ifdef WITH_IPv4
-                    if (addr.getType() == L3Address::Ipv4) {
+                    if (addr.getType() == L3Address::IPv4) {
                         infolen = sizeof(addr.toIpv4().getInt()) + sizeof(uint32);
                         hbi->type = htons(1);    // mandatory
                         hbi->length = htons(infolen + 4);
@@ -529,7 +529,7 @@ void SctpSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk
                     }
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-                    if (addr.getType() == L3Address::Ipv6) {
+                    if (addr.getType() == L3Address::IPv6) {
                         infolen = 20 + sizeof(uint32);
                         hbi->type = htons(1);    // mandatory
                         hbi->length = htons(infolen + 4);
@@ -575,7 +575,7 @@ void SctpSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk
                         simtime_t time = heartbeatAckChunk->getTimeField();
 
 #ifdef WITH_IPv4
-                        if (addr.getType() == L3Address::Ipv4) {
+                        if (addr.getType() == L3Address::IPv4) {
                             infolen = sizeof(addr.toIpv4().getInt()) + sizeof(uint32);
                             hbi->type = htons(1);    // mandatory
                             hbi->length = htons(infolen + 4);
@@ -587,7 +587,7 @@ void SctpSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk
                         }
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-                        if (addr.getType() == L3Address::Ipv6) {
+                        if (addr.getType() == L3Address::IPv6) {
                             infolen = 20 + sizeof(uint32);
                             hbi->type = htons(1);    // mandatory
                             hbi->length = htons(infolen + 4);

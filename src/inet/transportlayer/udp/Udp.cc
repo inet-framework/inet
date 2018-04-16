@@ -371,11 +371,11 @@ void Udp::processPacketFromApp(Packet *packet)
 
     const Protocol *l3Protocol = nullptr;
     // TODO: apps use ModuleIdAddress if the network interface doesn't have an IP address configured, and UDP uses GNP which results in a weird error in MessageDispatcher
-    if (destAddr.getType() == L3Address::Ipv4) {
+    if (destAddr.getType() == L3Address::IPv4) {
         // send to Ipv4
         l3Protocol = &Protocol::ipv4;
     }
-    else if (destAddr.getType() == L3Address::Ipv6) {
+    else if (destAddr.getType() == L3Address::IPv6) {
         // send to Ipv6
         l3Protocol = &Protocol::ipv6;
     }
@@ -954,12 +954,12 @@ void Udp::addMulticastAddressToInterface(InterfaceEntry *ie, const L3Address& mu
     ASSERT(ie && ie->isMulticast());
     ASSERT(multicastAddr.isMulticast());
 
-    if (multicastAddr.getType() == L3Address::Ipv4) {
+    if (multicastAddr.getType() == L3Address::IPv4) {
 #ifdef WITH_IPv4
         ie->ipv4Data()->joinMulticastGroup(multicastAddr.toIpv4());
 #endif // ifdef WITH_IPv4
     }
-    else if (multicastAddr.getType() == L3Address::Ipv6) {
+    else if (multicastAddr.getType() == L3Address::IPv6) {
 #ifdef WITH_IPv6
         ie->ipv6Data()->assignAddress(multicastAddr.toIpv6(), false, SimTime::getMaxTime(), SimTime::getMaxTime());
 #endif // ifdef WITH_IPv6

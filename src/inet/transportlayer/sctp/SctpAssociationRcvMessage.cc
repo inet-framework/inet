@@ -631,7 +631,7 @@ bool SctpAssociation::processInitArrived(SctpInitChunk *initchunk, int32 srcPort
             }
             for (uint32 j = 0; j < initchunk->getAddressesArraySize(); j++) {
                 // skip IPv6 because we can't send to them yet
-                if (initchunk->getAddresses(j).getType() == L3Address::Ipv6)
+                if (initchunk->getAddresses(j).getType() == L3Address::IPv6)
                     continue;
                 // set path variables for this pathlocalAddresses
                 if (!getPath(initchunk->getAddresses(j))) {
@@ -715,7 +715,7 @@ bool SctpAssociation::processInitArrived(SctpInitChunk *initchunk, int32 srcPort
         // check, whether a new address has been added
         bool addressPresent = false;
         for (uint32 j = 0; j < initchunk->getAddressesArraySize(); j++) {
-            if (initchunk->getAddresses(j).getType() == L3Address::Ipv6)
+            if (initchunk->getAddresses(j).getType() == L3Address::IPv6)
                 continue;
             for (auto & elem : remoteAddressList) {
                 if ((elem) == (initchunk->getAddresses(j))) {
@@ -765,7 +765,7 @@ bool SctpAssociation::processInitAckArrived(SctpInitAckChunk *initAckChunk)
             numberOfRemoteAddresses = initAckChunk->getAddressesArraySize();
             EV_INFO << "number of remote addresses in initAck=" << numberOfRemoteAddresses << "\n";
             for (uint32 j = 0; j < numberOfRemoteAddresses; j++) {
-                if (initAckChunk->getAddresses(j).getType() == L3Address::Ipv6)
+                if (initAckChunk->getAddresses(j).getType() == L3Address::IPv6)
                     continue;
                 for (auto & elem : state->localAddresses) {
                     if (!((elem).isUnspecified())) {
