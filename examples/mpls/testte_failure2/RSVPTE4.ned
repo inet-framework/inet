@@ -14,7 +14,6 @@
 
 package inet.examples.mpls.testte_failure2;
 
-import inet.common.lifecycle.LifecycleController;
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
@@ -84,10 +83,6 @@ network RSVPTE4
         scenarioManager: ScenarioManager {
             parameters:
                 @display("p=195,50");
-        }
-        lifecycleController: LifecycleController {
-            parameters:
-                @display("p=500,50");
         }
     connections:
         LSR1.pppg++ <--> {  delay = 15ms; datarate = 600kbps; } <--> LSR2.pppg++;

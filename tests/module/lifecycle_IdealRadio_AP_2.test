@@ -48,7 +48,6 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 %file: test.ned
 
-import inet.common.lifecycle.LifecycleController;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.unitdisk.UnitDiskRadioMedium;
 import inet.common.scenario.ScenarioManager;
@@ -59,7 +58,6 @@ network Test
     submodules:
         radioMedium: UnitDiskRadioMedium;
         scenarioManager: ScenarioManager;
-        lifecycleController: LifecycleController;
         host: AccessPoint;
 }
 
@@ -68,10 +66,10 @@ network Test
 
 <scenario>
     <at t="1.0">
-        <tell module="lifecycleController" target="host" operation="NodeCrashOperation"/>
+        <crash module="host"/>
     </at>
     <at t="2.0">
-        <tell module="lifecycleController" target="host" operation="NodeStartOperation"/>
+        <startup module="host"/>
     </at>
 </scenario>
 

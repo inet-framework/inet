@@ -3,7 +3,7 @@
 This test shows how the LifecycleController should be used to manage the
 turned on/off state of network nodes. The nodes in the test network contain
 three submodules: a test protocol, a test radio and a test mobility. The Nodes
-can be turned on/off using the NodeStartOperation or the NodeShutdownOperation.
+can be turned on/off using the startup or the shutdown.
 Other operations could be implemented similarly for nodes, interfaces or links.
 
 The startup and shutting process of the individual submodules takes time and
@@ -16,7 +16,6 @@ run each stage one after the other.
 
 %file: test.ned
 
-import inet.common.lifecycle.LifecycleController;
 import inet.common.lifecycle.NodeStatus;
 import inet.common.scenario.ScenarioManager;
 
@@ -25,9 +24,6 @@ network Test
     parameters:
         **.initialStatus = default("DOWN");
     submodules:
-        lifecycleController: LifecycleController {
-            @display("p=50,100");
-        }
         scenarioManager: ScenarioManager {
             script = xmldoc("scenario.xml");
             @display("p=50,50");
@@ -40,16 +36,16 @@ network Test
 
 <scenario>
     <at t="10.0">
-        <tell module="lifecycleController" target="nodeA" operation="TestNodeStartOperation"/>
+        <initiate module="nodeA" operation="TestNodeStartOperation"/>
     </at>
     <at t="20.0">
-        <tell module="lifecycleController" target="nodeB" operation="TestNodeStartOperation"/>
+        <initiate module="nodeB" operation="TestNodeStartOperation"/>
     </at>
     <at t="30.0">
-        <tell module="lifecycleController" target="nodeB" operation="TestNodeShutdownOperation"/>
+        <initiate module="nodeB" operation="TestNodeShutdownOperation"/>
     </at>
     <at t="40.0">
-        <tell module="lifecycleController" target="nodeA" operation="TestNodeShutdownOperation"/>
+        <initiate module="nodeA" operation="TestNodeShutdownOperation"/>
     </at>
 </scenario>
 

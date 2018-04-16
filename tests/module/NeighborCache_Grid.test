@@ -18,7 +18,6 @@ When NighborCache_Off test is OK, but some other NeighborCache test is FAILED, t
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import inet.common.lifecycle.LifecycleController;
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
@@ -43,10 +42,6 @@ network NeighborCacheTest
         routingTableRecorder: RoutingTableRecorder {
             parameters:
                 @display("p=50,150");
-        }
-        lifecycleController: LifecycleController {
-            parameters:
-                @display("p=50,200");
         }
         scenarioManager: ScenarioManager {
             parameters:

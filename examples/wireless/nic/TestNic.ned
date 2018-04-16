@@ -18,7 +18,6 @@
 
 package inet.examples.wireless.nic;
 
-import inet.common.lifecycle.LifecycleController;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.WirelessHost;
 import inet.physicallayer.contract.packetlevel.IRadioMedium;
@@ -42,12 +41,9 @@ network TestNic
             parameters:
                 @display("p=100,250");
         }
-        lifecycleController: LifecycleController {
-            parameters:
-                @display("p=100,350");
-        }
         host[numHosts]: WirelessHost {
             parameters:
                 @display("r=,,#707070;p=250,58");
         }
 }
+

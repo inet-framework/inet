@@ -4,7 +4,6 @@
 
 package inet.examples.rip.mixednetwork;
 
-import inet.common.lifecycle.LifecycleController;
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.Router;
@@ -58,9 +57,6 @@ network MixedNetwork
         }
         scenarioManager: ScenarioManager {
             @display("p=59,100");
-        }
-        lifecycleController: LifecycleController {
-            @display("p=59,150");
         }
     connections:
         cRouter.ethg++ <--> C <--> bRouter.ethg++;

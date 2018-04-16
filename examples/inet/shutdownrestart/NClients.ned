@@ -21,7 +21,6 @@
 
 package inet.examples.inet.shutdownrestart;
 
-import inet.common.lifecycle.LifecycleController;
 import inet.common.misc.ThruputMeteringChannel;
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
@@ -73,16 +72,13 @@ network NClients
         scenarioManager: ScenarioManager {
             @display("p=75,101");
             script = xml("<script>\n" +
-                "<at t='3s'><tell module='lifecycleController' operation='NodeShutdownOperation' target='r2'/></at>\n" +
-                "<at t='6s'><tell module='lifecycleController' operation='NodeStartOperation' target='r2'/></at>\n" +
-                "<at t='9s'><tell module='lifecycleController' operation='NodeShutdownOperation' target='r2'/></at>\n" +
-                "<at t='12s'><tell module='lifecycleController' operation='NodeStartOperation' target='r2'/></at>\n" +
-                "<at t='15s'><tell module='lifecycleController' operation='NodeShutdownOperation' target='cli[0]'/></at>\n" +
-                "<at t='18s'><tell module='lifecycleController' operation='NodeStartOperation' target='cli[0]'/></at>\n" +
+                "<at t='3s'><shutdown module='r2'/></at>\n" +
+                "<at t='6s'><startup module='r2'/></at>\n" +
+                "<at t='9s'><shutdown module='r2'/></at>\n" +
+                "<at t='12s'><startup module='r2'/></at>\n" +
+                "<at t='15s'><shutdown module='cli[0]'/></at>\n" +
+                "<at t='18s'><startup module='cli[0]'/></at>\n" +
                 "</script>");
-        }
-        lifecycleController: LifecycleController {
-            @display("p=75,155");
         }
     connections:
         for i=0..n-1 {

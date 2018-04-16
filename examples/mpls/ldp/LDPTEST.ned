@@ -14,7 +14,6 @@
 
 package inet.examples.mpls.ldp;
 
-import inet.common.lifecycle.LifecycleController;
 import inet.common.scenario.ScenarioManager;
 import inet.node.inet.StandardHost;
 import inet.node.mpls.LdpMplsRouter;
@@ -98,10 +97,6 @@ network LDPTEST
         scenarioManager: ScenarioManager {
             parameters:
                 @display("p=150,50");
-        }
-        lifecycleController: LifecycleController {
-            parameters:
-                @display("p=350,50");
         }
     connections:
         LSR1.pppg[0] <--> C15 <--> LSR2.pppg[0];

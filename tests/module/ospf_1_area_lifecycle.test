@@ -5,7 +5,6 @@ Testing OSPF routing
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import inet.common.lifecycle.LifecycleController;
 import inet.linklayer.ethernet.EtherHub;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
@@ -28,7 +27,6 @@ network Test1
         }
     submodules:
         scenarioManager: ScenarioManager;
-        lifecycleController: LifecycleController;
         H1: StandardHost {
             parameters:
                 @display("p=56,92;i=device/laptop");
@@ -173,9 +171,9 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %file: scenario.xml
 
 <scenario>
-    <tell t="20.5"  module="lifecycleController" target="R1" operation="NodeStartOperation"/>
-    <tell t="100.0" module="lifecycleController" target="R1" operation="NodeShutdownOperation"/>
-    <tell t="140.5" module="lifecycleController" target="R1" operation="NodeStartOperation"/>
+    <startup t="20.5"  module="R1"/>
+    <shutdown t="100.0" module="R1"/>
+    <startup t="140.5" module="R1"/>
 </scenario>
 
 %#--------------------------------------------------------------------------------------------------------------

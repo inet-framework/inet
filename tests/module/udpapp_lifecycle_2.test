@@ -38,7 +38,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.client.app[0].startTime = 0s
 **.client.app[0].destAddresses = "10.0.0.2"
 **.client.app[0].destPort = 1000
-**.client.app[0].messageLength = 1000B 
+**.client.app[0].messageLength = 1000B
 **.client.app[0].sendInterval = 100ms
 
 **.server.app[0].typename = "UdpSink"
@@ -49,14 +49,12 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 import inet.node.ethernet.Eth10M;
 import inet.node.inet.StandardHost;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.common.lifecycle.LifecycleController;
 import inet.common.scenario.ScenarioManager;
 
 network Test
 {
     submodules:
         scenarioManager: ScenarioManager;
-        lifecycleController: LifecycleController;
         configurator: Ipv4NetworkConfigurator;
         client: StandardHost;
         server: StandardHost;
@@ -65,13 +63,13 @@ network Test
 }
 
 %file: scenario.xml
- 
+
 <scenario>
     <at t="1">
-        <tell module="lifecycleController" target="server" operation="NodeStartOperation"/>
+        <startup module="server"/>
     </at>
     <at t="2">
-        <tell module="lifecycleController" target="client" operation="NodeStartOperation"/>
+        <startup module="client"/>
     </at>
 </scenario>
 

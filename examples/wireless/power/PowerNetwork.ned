@@ -1,6 +1,5 @@
 package inet.examples.wireless.power;
 
-import inet.common.lifecycle.LifecycleController;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
@@ -22,10 +21,6 @@ network PowerNetwork
         radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
                 @display("p=100,250");
-        }
-        lifecycleController: LifecycleController {
-            parameters:
-                @display("p=100,350");
         }
         host[numHost]: AdhocHost {
             parameters:

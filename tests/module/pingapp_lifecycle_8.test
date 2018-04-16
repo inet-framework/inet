@@ -30,14 +30,12 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %file: test.ned
 
 import inet.node.inet.StandardHost;
-import inet.common.lifecycle.LifecycleController;
 import inet.common.scenario.ScenarioManager;
 
 network Test
 {
     submodules:
         scenarioManager: ScenarioManager;
-        lifecycleController: LifecycleController;
         host: StandardHost;
 }
 
@@ -46,7 +44,7 @@ network Test
 
 <scenario>
     <at t="3.0">
-        <tell module="lifecycleController" target="host" operation="NodeShutdownOperation"/>
+        <shutdown module="host"/>
     </at>
 </scenario>
 
@@ -61,7 +59,7 @@ Sending ping request #2 to lower layer\.
 .*
 \*\* Event #\d+  t=3   Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <at> command\.\.\.
-processing <tell> command\.\.\.
+processing <shutdown> command\.\.\.
 Doing stage 0/8 of operation inet::NodeShutdownOperation on Test\.host
 Test\.host shutting down
 .*

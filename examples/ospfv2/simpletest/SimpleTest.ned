@@ -1,7 +1,6 @@
 
 package inet.examples.ospfv2.simpletest;
 
-import inet.common.lifecycle.LifecycleController;
 import inet.common.misc.ThruputMeteringChannel;
 import inet.common.scenario.ScenarioManager;
 import inet.linklayer.ethernet.EtherHub;
@@ -74,9 +73,6 @@ network SimpleTest
         }
         scenarioManager: ScenarioManager {
             @display("p=75,43");
-        }
-        lifecycleController: LifecycleController {
-            @display("p=208,43");
         }
     connections:
         H1.ethg[0] <--> C <--> N1.ethg[0];

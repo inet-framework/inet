@@ -38,7 +38,6 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import inet.common.lifecycle.LifecycleController;
 import inet.node.ethernet.EtherHost;
 import inet.node.ethernet.EtherSwitch;
 import inet.common.scenario.ScenarioManager;
@@ -49,9 +48,6 @@ network Test
     submodules:
         scenarioManager: ScenarioManager {
             @display("p=450,50");
-        }
-        lifecycleController: LifecycleController {
-            @display("p=150,50");
         }
         sender[2]: EtherHost {
             @display("p=100,350,r,150");
@@ -74,19 +70,19 @@ network Test
 %file: scenario.xml
 
 <scenario>
-    <tell t="1.7" module="lifecycleController" target="recip" operation="NodeStartOperation"/>
-    <tell t="2.0" module="lifecycleController" target="sender[0]" operation="NodeStartOperation"/>
+    <startup t="1.7" module="recip"/>
+    <startup t="2.0" module="sender[0]"/>
 
-    <tell t="3.2" module="lifecycleController" target="recip" operation="NodeShutdownOperation"/>
-    <tell t="4.2" module="lifecycleController" target="recip" operation="NodeStartOperation"/>
+    <shutdown t="3.2" module="recip"/>
+    <startup t="4.2" module="recip"/>
 
-    <tell t="5.1" module="lifecycleController" target="sender[1]" operation="NodeShutdownOperation"/>
-    <tell t="6.1" module="lifecycleController" target="sender[1]" operation="NodeStartOperation"/>
+    <shutdown t="5.1" module="sender[1]"/>
+    <startup t="6.1" module="sender[1]"/>
 
-    <tell t="7.3" module="lifecycleController" target="switch" operation="NodeShutdownOperation"/>
-    <tell t="8.3" module="lifecycleController" target="switch" operation="NodeStartOperation"/>
-    <tell t="9.0" module="lifecycleController" target="sender[0]" operation="NodeShutdownOperation"/>
-    <tell t="9.1" module="lifecycleController" target="sender[1]" operation="NodeShutdownOperation"/>
+    <shutdown t="7.3" module="switch"/>
+    <startup t="8.3" module="switch"/>
+    <shutdown t="9.0" module="sender[0]"/>
+    <shutdown t="9.1" module="sender[1]"/>
 </scenario>
 
 %#--------------------------------------------------------------------------------------------------------------
@@ -102,7 +98,7 @@ Generating packet `req-\d+-\d+'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
 \*\* Event #\d+  t=2   Test\.scenarioManager \(ScenarioManager, id=\d+\)
-processing <tell> command\.\.\.
+processing <startup> command\.\.\.
 Doing stage 0/8 of operation inet::NodeStartOperation on Test\.sender\[0\]
 Test\.sender\[0\] starting up
 Doing stage 1/8 of operation inet::NodeStartOperation on Test\.sender\[0\]
@@ -176,7 +172,7 @@ Generating packet `req-\d+-14'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
 \*\* Event #\d+  t=9   Test\.scenarioManager \(ScenarioManager, id=\d+\)
-processing <tell> command\.\.\.
+processing <shutdown> command\.\.\.
 Doing stage 0/8 of operation inet::NodeShutdownOperation on Test.sender\[0\]
 Test\.sender\[0\] shutting down
 Doing stage 1/8 of operation inet::NodeShutdownOperation on Test\.sender\[0\]
@@ -231,7 +227,7 @@ Generating packet `req-\d+-8'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
 \*\* Event #\d+  t=5\.1   Test\.scenarioManager \(ScenarioManager, id=\d+\)
-processing <tell> command\.\.\.
+processing <shutdown> command\.\.\.
 Doing stage 0/8 of operation inet::NodeShutdownOperation on Test.sender\[1\]
 Test\.sender\[1\] shutting down
 Doing stage 1/8 of operation inet::NodeShutdownOperation on Test\.sender\[1\]
@@ -250,7 +246,7 @@ Generating packet `req-\d+-\d+'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
 \*\* Event #\d+  t=6\.1   Test\.scenarioManager \(ScenarioManager, id=\d+\)
-processing <tell> command\.\.\.
+processing <startup> command\.\.\.
 Doing stage 0/8 of operation inet::NodeStartOperation on Test\.sender\[1\]
 Test\.sender\[1\] starting up
 Doing stage 1/8 of operation inet::NodeStartOperation on Test\.sender\[1\]
@@ -292,7 +288,7 @@ Generating packet `req-\d+-14'
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
 \*\* Event #\d+  t=9\.1   Test\.scenarioManager \(ScenarioManager, id=\d+\)
-processing <tell> command\.\.\.
+processing <shutdown> command\.\.\.
 Doing stage 0/8 of operation inet::NodeShutdownOperation on Test.sender\[1\]
 Test\.sender\[1\] shutting down
 Doing stage 1/8 of operation inet::NodeShutdownOperation on Test\.sender\[1\]
@@ -310,7 +306,7 @@ Test\.sender\[1\] shut down
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
 \*\* Event #\d+  t=1\.7   Test\.scenarioManager \(ScenarioManager, id=\d+\)
-processing <tell> command\.\.\.
+processing <startup> command\.\.\.
 Doing stage 0/8 of operation inet::NodeStartOperation on Test\.recip
 Test\.recip starting up
 Doing stage 1/8 of operation inet::NodeStartOperation on Test\.recip
@@ -327,7 +323,7 @@ Test\.recip started
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
 \*\* Event #\d+  t=3\.2   Test\.scenarioManager \(ScenarioManager, id=\d+\)
-processing <tell> command\.\.\.
+processing <shutdown> command\.\.\.
 Doing stage 0/8 of operation inet::NodeShutdownOperation on Test.recip
 Test\.recip shutting down
 Doing stage 1/8 of operation inet::NodeShutdownOperation on Test\.recip
@@ -344,7 +340,7 @@ Test\.recip shut down
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
 \*\* Event #\d+  t=4\.2   Test\.scenarioManager \(ScenarioManager, id=\d+\)
-processing <tell> command\.\.\.
+processing <startup> command\.\.\.
 Doing stage 0/8 of operation inet::NodeStartOperation on Test\.recip
 Test\.recip starting up
 Doing stage 1/8 of operation inet::NodeStartOperation on Test\.recip
@@ -364,7 +360,7 @@ Test\.recip started
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
 \*\* Event #\d+  t=7\.3   Test\.scenarioManager \(ScenarioManager, id=\d+\)
-processing <tell> command\.\.\.
+processing <shutdown> command\.\.\.
 Doing stage 0/8 of operation inet::NodeShutdownOperation on Test.switch
 Test\.switch shutting down
 Doing stage 1/8 of operation inet::NodeShutdownOperation on Test\.switch
@@ -379,7 +375,7 @@ Test\.switch shut down
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
 \*\* Event #\d+  t=8\.3   Test\.scenarioManager \(ScenarioManager, id=\d+\)
-processing <tell> command\.\.\.
+processing <startup> command\.\.\.
 Doing stage 0/8 of operation inet::NodeStartOperation on Test\.switch
 Test\.switch starting up
 Doing stage 1/8 of operation inet::NodeStartOperation on Test\.switch

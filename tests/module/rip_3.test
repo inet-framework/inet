@@ -20,7 +20,6 @@ It is checked that:
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import inet.common.lifecycle.LifecycleController;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
 import inet.node.rip.RipRouter;
@@ -58,7 +57,6 @@ network Test1
                 addSubnetRoutes = false;
                 addDefaultRoutes = false;
         }
-        lifecycleController: LifecycleController;
         scenarioManager: ScenarioManager;
         routingTableLogger: RoutingTableLogger;
     connections:
@@ -83,9 +81,9 @@ network Test1
 <scenario>
     <at t="0"><dump-routes module="routingTableLogger" nodes="R1" dest="10.0.0.0/8 192.0.0.0/8"/></at>
     <at t="10"><dump-routes module="routingTableLogger" nodes="R1" dest="10.0.0.0/8 192.0.0.0/8"/></at>
-    <at t="200"><tell module="lifecycleController" target="RA" operation="NodeShutdownOperation"/></at>
+    <at t="200"><shutdown module="RA"/></at>
     <at t="220"><dump-routes module="routingTableLogger" nodes="R1" dest="10.0.0.0/8 192.0.0.0/8"/></at>
-    <at t="400"><tell module="lifecycleController" target="RA" operation="NodeStartOperation"/></at>
+    <at t="400"><startup module="RA"/></at>
     <at t="430"><dump-routes module="routingTableLogger" nodes="R1" dest="10.0.0.0/8 192.0.0.0/8"/></at>
 </scenario>
 

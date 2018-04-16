@@ -37,7 +37,6 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 import inet.node.ethernet.Eth10M;
 import inet.node.inet.StandardHost;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.common.lifecycle.LifecycleController;
 import inet.common.scenario.ScenarioManager;
 
 network LifecycleTest
@@ -45,9 +44,6 @@ network LifecycleTest
     submodules:
         scenarioManager: ScenarioManager {
             @display("p=73,59");
-        }
-        lifecycleController: LifecycleController {
-            @display("p=73,185");
         }
         configurator: Ipv4NetworkConfigurator {
             parameters:
@@ -68,7 +64,7 @@ network LifecycleTest
 
 <scenario>
     <at t="190.0">
-        <tell module="lifecycleController" target="server" operation="NodeStartOperation"/>
+        <startup module="server"/>
     </at>
 </scenario>
 

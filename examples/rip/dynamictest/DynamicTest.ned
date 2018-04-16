@@ -1,7 +1,6 @@
 
 package inet.examples.rip.dynamictest;
 
-import inet.common.lifecycle.LifecycleController;
 import inet.common.misc.ThruputMeteringChannel;
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
@@ -74,9 +73,6 @@ network DynamicTest
                         + "<route hosts='R*' destination='224.0.0.0' netmask='240.0.0.0' interface='eth1'/>"
                         + "<route hosts='R1 R2' destination='224.0.0.0' netmask='240.0.0.0' interface='eth2'/>"
                         + "</config>");
-        }
-        lifecycleController: LifecycleController {
-            @display("p=532,42");
         }
         scenarioManager: ScenarioManager {
             @display("p=658,42");

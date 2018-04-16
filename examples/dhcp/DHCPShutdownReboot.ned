@@ -17,7 +17,6 @@
 
 package inet.examples.dhcp;
 
-import inet.common.lifecycle.LifecycleController;
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth10M;
@@ -29,9 +28,6 @@ network DHCPShutdownReboot
     submodules:
         scenarioManager: ScenarioManager {
             @display("p=73,59");
-        }
-        lifecycleController: LifecycleController {
-            @display("p=73,185");
         }
         configurator: Ipv4NetworkConfigurator {
             parameters:

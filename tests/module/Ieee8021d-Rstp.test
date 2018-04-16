@@ -6,7 +6,6 @@ Test Rstp treebuilding
 
 import inet.node.ethernet.Eth1G;
 import inet.node.ethernet.EtherHost;
-import inet.common.lifecycle.LifecycleController;
 import inet.node.ethernet.EtherSwitch;
 import inet.common.scenario.ScenarioManager;
 import inet.linklayer.configurator.L2NetworkConfigurator;
@@ -18,8 +17,7 @@ network LargeNet
         stpTester: StpTester;
         scenarioManager: ScenarioManager;
         l2NetworkConfigurator: L2NetworkConfigurator;
-        lifecycleController: LifecycleController;
-        
+
         switch1: EtherSwitch;
         switch2: EtherSwitch;
         switch3: EtherSwitch;
@@ -31,7 +29,7 @@ network LargeNet
         switch9: EtherSwitch;
         switch10: EtherSwitch;
         switch11: EtherSwitch;
-        
+
         host1: EtherHost;
         host2: EtherHost;
         host3: EtherHost;

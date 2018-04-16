@@ -17,7 +17,6 @@
 
 package inet.examples.aodv;
 
-import inet.common.lifecycle.LifecycleController;
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
@@ -42,10 +41,6 @@ network AODVNetwork
         routingTableRecorder: RoutingTableRecorder {
             parameters:
                 @display("p=50,150");
-        }
-        lifecycleController: LifecycleController {
-            parameters:
-                @display("p=50,200");
         }
         scenarioManager: ScenarioManager {
             parameters:

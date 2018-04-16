@@ -39,7 +39,6 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 %file: test.ned
 
-import inet.common.lifecycle.LifecycleController;
 import inet.node.inet.AdhocHost;
 import inet.node.inet.WirelessHost;
 import inet.status.NodeStatus;
@@ -51,7 +50,6 @@ network Test
     submodules:
         radioMedium: Ieee80211ScalarRadioMedium;
         scenarioManager: ScenarioManager;
-        lifecycleController: LifecycleController;
         host: AdhocHost;
 }
 
@@ -59,7 +57,7 @@ network Test
 
 <scenario>
     <at t="1.0">
-        <tell module="lifecycleController" target="host" operation="NodeStartOperation"/>
+        <startup module="host"/>
     </at>
 </scenario>
 

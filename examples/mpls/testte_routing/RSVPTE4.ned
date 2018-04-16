@@ -14,7 +14,6 @@
 
 package inet.examples.mpls.testte_routing;
 
-import inet.common.lifecycle.LifecycleController;
 import inet.common.scenario.ScenarioManager;
 import inet.node.inet.StandardHost;
 import inet.node.mpls.RsvpMplsRouter;
@@ -103,10 +102,6 @@ network RSVPTE4
         scenarioManager: ScenarioManager {
             parameters:
                 @display("p=150,50");
-        }
-        lifecycleController: LifecycleController {
-            parameters:
-                @display("p=500,50");
         }
     connections:
         LSR1.pppg[0] <--> {  delay = 15ms; datarate = 600kbps; } <--> LSR2.pppg[0];

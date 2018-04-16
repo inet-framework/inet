@@ -31,23 +31,21 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %file: test.ned
 
 import inet.node.inet.StandardHost;
-import inet.common.lifecycle.LifecycleController;
 import inet.common.scenario.ScenarioManager;
 
 network Test
 {
     submodules:
         scenarioManager: ScenarioManager;
-        lifecycleController: LifecycleController;
         host: StandardHost;
 }
 
 %#--------------------------------------------------------------------------------------------------------------
 %file: scenario.xml
- 
+
 <scenario>
     <at t="3.0">
-        <tell module="lifecycleController" target="host" operation="NodeStartOperation"/>
+        <startup module="host"/>
     </at>
 </scenario>
 
@@ -55,7 +53,7 @@ network Test
 %contains-regex: stdout
 \*\* Event #\d+  t=3   Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <at> command\.\.\.
-processing <tell> command\.\.\.
+processing <startup> command\.\.\.
 Doing stage 0/8 of operation inet::NodeStartOperation on Test\.host
 Test\.host starting up
 .*

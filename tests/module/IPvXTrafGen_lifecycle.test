@@ -50,7 +50,6 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %file: test.ned
 
 import inet.applications.generic.IIpvxTrafficGenerator;
-import inet.common.lifecycle.LifecycleController;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.networklayer.configurator.ipv4.Ipv4NodeConfigurator;
 import inet.node.base.NetworkLayerNodeBase;
@@ -79,9 +78,6 @@ network Test
 {
     submodules:
         scenarioManager: ScenarioManager;
-        lifecycleController: LifecycleController {
-            @display("p=76,50");
-        }
         sender[2]: TrafGenHost {
             @display("p=88,181,c,50");
         }
@@ -99,14 +95,14 @@ network Test
 %file: scenario.xml
 
 <scenario>
-    <tell t="1.5" module="lifecycleController" target="recip" operation="NodeStartOperation"/>
-    <tell t="2.0" module="lifecycleController" target="sender[0]" operation="NodeStartOperation"/>
+    <startup t="1.5" module="recip"/>
+    <startup t="2.0" module="sender[0]"/>
 
-    <tell t="3.0" module="lifecycleController" target="recip" operation="NodeShutdownOperation"/>
-    <tell t="4.0" module="lifecycleController" target="recip" operation="NodeStartOperation"/>
+    <shutdown t="3.0" module="recip"/>
+    <startup t="4.0" module="recip"/>
 
-    <tell t="5.0" module="lifecycleController" target="sender[1]" operation="NodeShutdownOperation"/>
-    <tell t="6.0" module="lifecycleController" target="sender[1]" operation="NodeStartOperation"/>
+    <shutdown t="5.0" module="sender[1]"/>
+    <startup t="6.0" module="sender[1]"/>
 </scenario>
 %#--------------------------------------------------------------------------------------------------------------
 %subst: /omnetpp:://

@@ -55,14 +55,12 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 import inet.node.ethernet.Eth10M;
 import inet.node.inet.StandardHost;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.common.lifecycle.LifecycleController;
 import inet.common.scenario.ScenarioManager;
 
 network Test
 {
     submodules:
         scenarioManager: ScenarioManager;
-        lifecycleController: LifecycleController;
         configurator: Ipv4NetworkConfigurator;
         client: StandardHost;
         server: StandardHost;
@@ -71,13 +69,13 @@ network Test
 }
 
 %file: scenario.xml
-  
+
 <scenario>
     <at t="1">
-        <tell module="lifecycleController" target="client" operation="NodeStartOperation"/>
+        <startup module="client"/>
     </at>
     <at t="2">
-        <tell module="lifecycleController" target="server" operation="NodeStartOperation"/>
+        <startup module="server"/>
     </at>
 </scenario>
 

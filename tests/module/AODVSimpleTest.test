@@ -3,7 +3,6 @@ This example tests a single route request with one intermediate node
 between the sender and the receiver.
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
-import inet.common.lifecycle.LifecycleController;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
 import inet.node.aodv.AodvRouter;
@@ -30,10 +29,6 @@ network AODVTest
         routingTableRecorder: RoutingTableRecorder {
             parameters:
                 @display("p=50,150");
-        }
-        lifecycleController: LifecycleController {
-            parameters:
-                @display("p=50,200");
         }
         scenarioManager: ScenarioManager {
             parameters:

@@ -15,7 +15,6 @@
 
 package inet.examples.ieee8021d;
 
-import inet.common.lifecycle.LifecycleController;
 import inet.common.scenario.ScenarioManager;
 import inet.linklayer.configurator.L2NetworkConfigurator;
 import inet.linklayer.ieee8021d.tester.StpTester;
@@ -36,9 +35,6 @@ network SwitchNetwork
         }
         l2NetworkConfigurator: L2NetworkConfigurator {
             @display("p=75,217");
-        }
-        lifecycleController: LifecycleController {
-            @display("p=75,155");
         }
 
         switch1: EtherSwitch {
