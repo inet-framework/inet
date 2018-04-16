@@ -51,7 +51,7 @@ Hz Ieee80211ArithmeticalBand::getCenterFrequency(int channelNumber) const
 {
     if (channelNumber < 0 || channelNumber >= numChannels)
         throw cRuntimeError("Invalid channel number: %d", channelNumber);
-    return start + spacing * channelNumber;
+    return start + spacing / 2 + spacing * channelNumber;
 }
 
 const Ieee80211EnumeratedBand Ieee80211CompliantBands::band2_4GHz("2.4 GHz",
