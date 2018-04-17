@@ -1279,6 +1279,8 @@ void Ipv4::flush()
         delete elem.packet;
     }
     queuedDatagramsForHooks.clear();
+
+    fragbuf.flush();
 }
 
 bool Ipv4::isNodeUp()

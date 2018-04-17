@@ -31,9 +31,13 @@ Ipv4FragBuf::Ipv4FragBuf()
 
 Ipv4FragBuf::~Ipv4FragBuf()
 {
-    for (auto i = bufs.begin(); i != bufs.end(); ++i) {
+    flush();
+}
+
+void Ipv4FragBuf::flush()
+{
+    for (auto i = bufs.begin(); i != bufs.end(); ++i)
         delete i->second.packet;
-    }
     bufs.clear();
 }
 
