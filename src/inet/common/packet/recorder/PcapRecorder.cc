@@ -136,7 +136,7 @@ void PcapRecorder::recordPacket(cPacket *msg, bool l2r)
         auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
         for (auto dumpProtocol : dumpProtocols) {
             if (protocol == dumpProtocol) {
-                pcapDumper.writeFrame(simTime(), packet);
+                pcapDumper.writePacket(simTime(), packet);
                 break;
             }
         }
