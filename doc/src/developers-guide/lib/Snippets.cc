@@ -27,6 +27,7 @@
 #include "inet/common/packet/PacketFilter.h"
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/packet/ReassemblyBuffer.h"
+#include "inet/common/packet/recorder/PcapDump.h"
 #include "inet/common/packet/ReorderBuffer.h"
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -413,7 +414,7 @@ Packet *ErrorModel::corruptBits(Packet *packet, double ber)
 }
 //!End
 
-class TcpClientApp
+class ClientApp
 {
   private:
   TcpSocket socket;
@@ -422,7 +423,7 @@ public:
   void send();
 };
 
-class TcpServerApp
+class ServerApp
 {
   private:
   TcpSocket socket;
@@ -432,18 +433,19 @@ public:
   void updateStatistic(b offset, b length, simtime_t age);
 };
 
-//!RegionTaggingExample
-void TcpClientApp::send()
+//!RegionTaggingSendExample
+void ClientApp::send()
 {
   auto data = makeShared<ByteCountChunk>(); // create new data chunk
   auto creationTimeTag = data->addTag<CreationTimeTag>(); // add new tag
   creationTimeTag->setCreationTime(simTime()); // store current time
-  auto packet = new Packet("Data"); // create new packet
-  packet->insertAtBack(data);
+  auto packet = new Packet("Data", data); // create new packet
   socket.send(packet); // send packet using TCP socket
 }
+//!End
 
-void TcpServerApp::receive(Packet *packet)
+//!RegionTaggingReceiveExample
+void ServerApp::receive(Packet *packet)
 {
   auto data = packet->peekData(); // get all data from the packet
   auto regions = data->getAllTags<CreationTimeTag>(); // get all tag regions
@@ -563,8 +565,8 @@ void packetProcessingExample()
   auto packet = new Packet();
 //!PacketProcessingExample
 packet->popAtFront<MacHeader>(); // pop specific header from packet
-auto data = packet->peekData(); // peek remaining data in packet
 packet->popAtBack<MacTrailer>(); // pop specific trailer from packet
+auto data = packet->peekData(); // peek remaining data in packet
 //!End
 }
 
@@ -573,8 +575,9 @@ void signalConstructionExample()
 {
   double duration = 0;
   auto packet = new Packet();
+  ITransmission *transmission = nullptr;
 //!SignalConstructionExample
-auto signal = new Signal();
+auto signal = new Signal(transmission);
 signal->setDuration(duration);
 signal->encapsulate(packet);
 //!End
@@ -592,6 +595,7 @@ void startProtocolDataUnit(Protocol *protocol);
 void endProtocolDataUnit(Protocol *protocol);
 void markIncorrect();
 void visitChunk(Ptr<Chunk>& chunk, Protocol *protocol);
+void dissectPacket(Packet *packet, Protocol *protocol);
 //!End
 };
 
@@ -612,9 +616,9 @@ void packetFilteringExample()
 {
   auto packet = new Packet();
 //!PacketFilteringExample
-PacketFilter filter;
-filter.setPattern("ping*", "Ipv4Header and sourceAddress(10.0.0.1)");
-filter.matches(packet);
+PacketFilter filter; // patterns for the whole packet and for the data
+filter.setPattern("ping*", "Ipv4Header and sourceAddress(10.0.0.*)");
+filter.matches(packet); // returns boolean value
 //!End
 }
 
@@ -622,8 +626,18 @@ void packetPrintingExample()
 {
   auto packet = new Packet();
 //!PacketPrintingExample
-PacketPrinter printer;
-printer.printPacket(std::cout, packet);
+PacketPrinter printer; // turns packets into human readable strings
+printer.printPacket(std::cout, packet); // print to standard output
+//!End
+}
+
+void pcapRecordingExample()
+{
+    auto packet = new Packet();
+//!PCAPRecoringExample
+PcapDump dump;
+dump.openPcap("out.pcap", 65535, 0); // maximum length and PCAP type
+dump.writePacket(simTime(), packet); // record with current time
 //!End
 }
 

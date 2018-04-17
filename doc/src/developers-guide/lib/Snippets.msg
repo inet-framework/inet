@@ -17,8 +17,21 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
+import inet.linklayer.common.MacAddress;
 
 namespace inet;
+
+class TagBase
+{
+}
+
+//!TagDefinitionExeample
+class MacAddressReq extends TagBase
+{
+    MacAddress srcAddress;  // may be unspecified
+    MacAddress destAddress; // always specified
+}
+//!End
 
 //!UdpHeaderDefinitionExample
 enum CrcMode
