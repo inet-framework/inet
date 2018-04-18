@@ -364,7 +364,7 @@ void ScenarioManager::processLifecycleCommand(cXMLElement *node)
     paramsCopy.erase("operation");
     operation->initialize(module, paramsCopy);
     if (!paramsCopy.empty())
-        throw cRuntimeError("Unknown parameter '%s' for operation %s at %s", paramsCopy.begin()->first.c_str(), operationName, node->getSourceLocation());
+        throw cRuntimeError("Unknown parameter '%s' for operation %s at %s", paramsCopy.begin()->first.c_str(), operationName.c_str(), node->getSourceLocation());
 
     // do the operation
     lifecycleController.initiateOperation(operation);
