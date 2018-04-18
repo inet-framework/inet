@@ -54,7 +54,16 @@ class INET_API cSocketRTScheduler : public cScheduler
      * Destructor.
      */
     virtual ~cSocketRTScheduler();
-    static std::vector<cModule *> modules;
+
+    struct X {
+        int fd;         // RAW socket ID,
+        cModule *module;
+        pcap_t *pd;
+        int datalink;
+        int headerLength;
+    };
+
+    static std::vector<cModule *> modules;      // ezeket egy vektorba!!!
     static std::vector<pcap_t *> pds;
     static std::vector<int> datalinks;
     static std::vector<int> headerLengths;

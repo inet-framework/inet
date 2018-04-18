@@ -138,6 +138,17 @@ void cSocketRTScheduler::setInterfaceModule(cModule *mod, const char *dev, const
     if ((datalink = pcap_datalink(pd)) < 0)
         throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot query pcap link-layer header type: %s", pcap_geterr(pd));
 
+    /* bind to interface
+     struct ifreq ifr;
+
+    memset(&ifr, 0, sizeof(ifr));
+    snprintf(ifr.ifr_name, sizeof(ifr.ifr_name), "eth0");
+    if (setsockopt(s, SOL_SOCKET, SO_BINDTODEVICE, (void *)&ifr, sizeof(ifr)) < 0) {
+        ... error handling ...
+    }
+     */
+
+
 #ifndef __linux__
     if (pcap_setnonblock(pd, 1, errbuf) < 0)
         throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot put pcap device into non-blocking mode, error: %s", errbuf);
