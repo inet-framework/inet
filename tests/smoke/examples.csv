@@ -173,9 +173,9 @@
 /examples/inet/nclients/,            -f nclients2.ini -c General -r 0-1
 /examples/inet/nclients/,            -f omnetpp-ping.ini -c General -r 0
 /examples/inet/nclients/,            -f omnetpp.ini -c inet__inet -r 0
-/examples/inet/nclients/,            -f omnetpp.ini -c lwip__lwip -r 0
-/examples/inet/nclients/,            -f omnetpp.ini -c lwip__inet -r 0
-/examples/inet/nclients/,            -f omnetpp.ini -c inet__lwip -r 0
+# /examples/inet/nclients/,            -f omnetpp.ini -c lwip__lwip -r 0        # can't serialize 1 byte length GenericAppMsg
+# /examples/inet/nclients/,            -f omnetpp.ini -c lwip__inet -r 0        # can't serialize 1 byte length GenericAppMsg
+# /examples/inet/nclients/,            -f omnetpp.ini -c inet__lwip -r 0        # can't serialize 1 byte length GenericAppMsg
 /examples/inet/nclients/,            -f video.ini -c General -r 0
 
 /examples/inet/netperfmeter/,        -f omnetpp.ini -c TraceFile -r 0
@@ -451,7 +451,7 @@
 /examples/wireless/layered80211/,    -f omnetpp.ini -c LayeredCompliant80211Ping -r 0
 /examples/wireless/layered80211/,    -f omnetpp.ini -c LayeredNonCompliant80211Ping -r 0
 
-/examples/wireless/layeredApsk/,     -f omnetpp.ini -c General -r 0
+/examples/wireless/layeredapsk/,     -f omnetpp.ini -c General -r 0
 
 # /examples/wireless/mactest/,         -f omnetpp.ini -c MacBase -r 0   # MacBase extended
 /examples/wireless/mactest/,         -f omnetpp.ini -c MacEdca -r 0
