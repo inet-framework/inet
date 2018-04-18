@@ -1,4 +1,4 @@
-\chapter{Packet API}
+\chapter{Working with Packets}
 \label{cha:packet-api}
 
 \section{Overview}
@@ -152,14 +152,34 @@ computationally cheap, to accurate, but computationally expensive solutions.
     \item change bits in raw chunks (accurate)
 \end{itemize}
 
-\cppsnippet{ErrorRepresentationExample}{Error representation example}
+The first example shows how to represent transmission erros on the packet level.
+A packet is marked as erroneous based on its length and the associated bit error
+rate. This representation doesn't give too much chance for a protocol to do
+anything else than discard an erroneous packet.
+
+\cppsnippet{CorruptingPacketsExample}{Corrupting packets example}
+
+The second example shows how to represent transmission errors on the chunk
+level. Similarly to the previous example, a chunk is also marked as erroneous
+based on its length and the associated bit error rate. This representation
+allows a protocol to discard only certain parts of the packet. For example, an
+aggregated packet may be partially discarded and processed.
+
+\cppsnippet{CorruptingChunksExample}{Corrupting chunks example}
+
+The last example shows how to actually represent transmission errors on the byte
+level. In contrast with the previous examples, this time the actual data of the
+packet is modified. This allows a protocol to discard or correct any part based
+on checksums.
+
+\cppsnippet{CorruptingBytesExample}{Corrupting bytes example}
 
 The physical layer models support the above mentioned different error
 representations via configurable parameters. Higher layer protocols detect
 errors by chechking the error bit on packets and chunks, and by standard CRC
 mechanisms.
 
-\section{Tagging Packets}
+\section{Packet Tagging}
 
 Communication between protocols inside network nodes often require passing
 around meta information along with packets. To this end, packets are also
@@ -182,12 +202,12 @@ Tags come in three flavors:
 	\item \textit{requests} carry information from higher layer to lower layer (e.g. \cppclass{MacAddressReq}).
 	\item \textit{indications} carry information from lower layer to higher layer (e.g. \cppclass{InterfaceInd}).
 	\item \textit{plain tags} contain some meta information (e.g. \cppclass{PacketProtocolTag}).
-	\item \textit{base classes} must not be attached to packets (e.g. \cppclass{ProtocolTagBase}).
+	\item \textit{base classes} must not be attached to packets (e.g. \cppclass{TagBase}).
 \end{itemize}
 
 \msgsnippet{TagDefinitionExeample}{Tag definition example}
 
-\section{Tagging Regions}
+\section{Region Tagging}
 
 In order to collect some statistics, it is required to attach meta information
 to arbitrary regions of packets. For example, computing the end-to-end delay in
@@ -513,10 +533,4 @@ protocol is in the network node:
 The \nedtype{MessageDispatcher} finds the designated protocol module and its
 gate based on the \ffunc{registerProtocol} calls it has received during the
 initialization of all connected protocol modules.
-
-
-%%%% Local Variables:
-%%% mode: latex
-%%% TeX-master: "usman"
-%%% End:
 

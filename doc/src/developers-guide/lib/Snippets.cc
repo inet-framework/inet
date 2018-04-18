@@ -360,7 +360,7 @@ public:
   Packet *corruptBits(Packet *packet, double ber);
 };
 
-//!ErrorRepresentationExample
+//!CorruptingPacketsExample
 Packet *ErrorModel::corruptPacket(Packet *packet, double ber)
 {
   auto length = packet->getTotalLength();
@@ -369,7 +369,9 @@ Packet *ErrorModel::corruptPacket(Packet *packet, double ber)
   corruptedPacket->setBitError(hasErrors); // set bit error flag
   return corruptedPacket;
 }
+//!End
 
+//!CorruptingChunksExample
 Packet *ErrorModel::corruptChunks(Packet *packet, double ber)
 {
   b offset = b(0); // start from the beginning
@@ -384,7 +386,9 @@ Packet *ErrorModel::corruptChunks(Packet *packet, double ber)
   }
   return corruptedPacket;
 }
+//!End
 
+//!CorruptingBytesExample
 Packet *ErrorModel::corruptBytes(Packet *packet, double ber)
 {
   vector<uint8_t> corruptedBytes; // bytes of corrupted packet
@@ -398,6 +402,7 @@ Packet *ErrorModel::corruptBytes(Packet *packet, double ber)
   corruptedData->setBytes(corruptedBytes); // store corrupted bits
   return new Packet("Corrupt", corruptedData); // create new packet
 }
+//!End
 
 Packet *ErrorModel::corruptBits(Packet *packet, double ber)
 {
@@ -486,7 +491,7 @@ void Ipv4::sendDown(Packet *packet, Ipv4Address nextHopAddr, int interfaceId)
 void Mac::sendUp(Packet *packet)
 {
   auto req = packet->addTagIfAbsent<DispatchProtocolReq>();
-  req->setProtocol(&Protocol::ipv4); // set designated protocol
+  req->setProtocol(&Protocol::ipv4); // set destination protocol
   req->setServicePrimitive(SP_INDICATION); // determine receiving gate
   send(packet, "upperLayerOut");
 }
