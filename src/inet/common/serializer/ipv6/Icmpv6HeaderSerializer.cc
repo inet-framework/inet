@@ -125,6 +125,7 @@ void Icmpv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
             stream.writeUint32Be(0);   // unused
             //FIXME serialize TLV options
             // TODO: incomplete
+            break;
         }
 
         default:
