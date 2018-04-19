@@ -180,6 +180,8 @@ void RadioMedium::handleMessage(cMessage *message)
 
 bool RadioMedium::isRadioMacAddress(const IRadio *radio, const MacAddress address) const
 {
+    if (address.isBroadcast() || address.isMulticast())
+        return true;
     cModule *host = getContainingNode(check_and_cast<const cModule *>(radio));
     IInterfaceTable *interfaceTable = check_and_cast<IInterfaceTable *>(host->getSubmodule("interfaceTable"));
     for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
