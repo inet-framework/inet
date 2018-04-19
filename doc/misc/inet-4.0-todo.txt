@@ -33,6 +33,12 @@ SHOULD:
  - rename Flood to Flooding? (questionable)
 
 NEED NOT:
+ - rename CallbackInterface to ICallback in TcpSocket and SctpSocket
+ - add ICallback and processMessage to UdpSocket
+ - refactor all applications to use belongsToSocket and processMessage
+ - solve dispatching to several UDP, TCP, SCTP sockets in a single application
+ - add antenna directional selectivity visualizer
+ - separate Euclidean and geographic mobilities
  - move extra functions that doesn't really belong to L3AddressResolver (e.g. findInterfaceTableOf, findIPv4RoutingTableOf)
  - revise protocol base class hierarchy (e.g. LayeredProtocolBase vs IPv4 base class, etc.)
  - revise protocol header class hierarchy (e.g. avoid unnecessary interfaces)
