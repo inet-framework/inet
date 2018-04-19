@@ -241,11 +241,6 @@ bool TcpSocket::belongsToSocket(cMessage *msg)
     return tags.getTag<SocketInd>()->getSocketId() == connId;
 }
 
-bool TcpSocket::belongsToAnyTCPSocket(cMessage *msg)
-{
-    return dynamic_cast<TcpCommand *>(msg->getControlInfo());
-}
-
 void TcpSocket::setCallbackObject(CallbackInterface *callback, void *yourPointer)
 {
     cb = callback;

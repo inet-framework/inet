@@ -346,13 +346,6 @@ class INET_API TcpSocket
     bool belongsToSocket(cMessage *msg);
 
     /**
-     * Returns true if the message belongs to any TcpSocket instance.
-     * (This basically checks if the message has a TcpCommand attached to
-     * it as getControlInfo().)
-     */
-    static bool belongsToAnyTCPSocket(cMessage *msg);
-
-    /**
      * Sets a callback object, to be used with processMessage().
      * This callback object may be your simple module itself (if it
      * multiply inherits from CallbackInterface too, that is you
