@@ -189,6 +189,8 @@ static void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_
     headerLength = cSocketRTScheduler::conn.at(i).headerLength;
     module = cSocketRTScheduler::conn.at(i).module;
 
+    //FIXME Why? Could we use the pcap for filtering incoming IPv4 packet?
+    //FIXME Why filtering IPv4 only on eth interface? why not filtering on PPP or other interfaces?
     // skip ethernet frames not encapsulating an IP packet.
     // TODO: how about ipv6 and other protocols?
     if (datalink == DLT_EN10MB && hdr->caplen > ETHER_HDR_LEN) {

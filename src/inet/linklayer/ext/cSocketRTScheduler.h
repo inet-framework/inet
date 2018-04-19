@@ -41,6 +41,7 @@ class INET_API cSocketRTScheduler : public cScheduler
   protected:
     class ExtConn {
       public:
+//        int fd = INVALID_SOCKET;         // RAW socket ID,
         cModule *module = nullptr;
         pcap_t *pd = nullptr;
         int datalink;
