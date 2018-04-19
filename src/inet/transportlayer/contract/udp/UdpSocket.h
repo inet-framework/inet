@@ -249,13 +249,6 @@ class INET_API UdpSocket
     bool belongsToSocket(cMessage *msg);
 
     /**
-     * Returns true if the message belongs to any UdpSocket instance.
-     * (This basically checks if the message has an UdpControlInfo attached to
-     * it as getControlInfo().)
-     */
-    static bool belongsToAnyUDPSocket(cMessage *msg);
-
-    /**
      * Utility function: returns a line of information about a packet received via UDP.
      */
     static std::string getReceivedPacketInfo(Packet *pk);

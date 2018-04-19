@@ -300,12 +300,7 @@ bool UdpSocket::belongsToSocket(cMessage *msg)
 {
     auto& tags = getTags(msg);
     int socketId = tags.getTag<SocketReq>()->getSocketId();
-    return dynamic_cast<UdpControlInfo *>(msg->getControlInfo()) && socketId == sockId;
-}
-
-bool UdpSocket::belongsToAnyUDPSocket(cMessage *msg)
-{
-    return dynamic_cast<UdpControlInfo *>(msg->getControlInfo());
+    return socketId == sockId;
 }
 
 std::string UdpSocket::getReceivedPacketInfo(Packet *pk)
