@@ -39,6 +39,14 @@ namespace inet {
 class INET_API cSocketRTScheduler : public cScheduler
 {
   protected:
+    class ExtConn {
+      public:
+        cModule *module = nullptr;
+        pcap_t *pd = nullptr;
+        int datalink;
+        int headerLength;
+    };
+
     int fd;
 
     virtual bool receiveWithTimeout(long usec);
@@ -55,18 +63,8 @@ class INET_API cSocketRTScheduler : public cScheduler
      */
     virtual ~cSocketRTScheduler();
 
-    struct X {
-        int fd;         // RAW socket ID,
-        cModule *module;
-        pcap_t *pd;
-        int datalink;
-        int headerLength;
-    };
+    static std::vector<ExtConn> conn;
 
-    static std::vector<cModule *> modules;      // ezeket egy vektorba!!!
-    static std::vector<pcap_t *> pds;
-    static std::vector<int> datalinks;
-    static std::vector<int> headerLengths;
     static int64_t baseTime; // in microseconds, as returned by opp_get_monotonic_clock_usecs()
 
     /**

@@ -44,10 +44,7 @@ namespace inet {
 
 #define FES(sim) (sim->getFES())
 
-std::vector<cModule *> cSocketRTScheduler::modules;
-std::vector<pcap_t *> cSocketRTScheduler::pds;
-std::vector<int32> cSocketRTScheduler::datalinks;
-std::vector<int32> cSocketRTScheduler::headerLengths;
+std::vector<cSocketRTScheduler::ExtConn> cSocketRTScheduler::conn;
 
 int64_t cSocketRTScheduler::baseTime;
 
@@ -80,20 +77,16 @@ void cSocketRTScheduler::endRun()
     close(fd);
     fd = INVALID_SOCKET;
 
-    for (uint16 i = 0; i < pds.size(); i++) {
+    for (uint16 i = 0; i < conn.size(); i++) {
         pcap_stat ps;
-        if (pcap_stats(pds.at(i), &ps) < 0)
-            throw cRuntimeError("cSocketRTScheduler::endRun(): Cannot query pcap statistics: %s", pcap_geterr(pds.at(i)));
+        if (pcap_stats(conn.at(i).pd, &ps) < 0)
+            throw cRuntimeError("cSocketRTScheduler::endRun(): Cannot query pcap statistics: %s", pcap_geterr(conn.at(i).pd));
         else
-            EV << modules.at(i)->getFullPath() << ": Received Packets: " << ps.ps_recv << " Dropped Packets: " << ps.ps_drop << ".\n";
-        pcap_close(pds.at(i));
+            EV << conn.at(i).module->getFullPath() << ": Received Packets: " << ps.ps_recv << " Dropped Packets: " << ps.ps_drop << ".\n";
+        pcap_close(conn.at(i).pd);
     }
 
-    pds.clear();
-    modules.clear();
-    pds.clear();
-    datalinks.clear();
-    headerLengths.clear();
+    conn.clear();
 }
 
 void cSocketRTScheduler::executionResumed()
@@ -174,10 +167,12 @@ void cSocketRTScheduler::setInterfaceModule(cModule *mod, const char *dev, const
         default:
             throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Unsupported datalink: %d", datalink);
     }
-    modules.push_back(mod);
-    pds.push_back(pd);
-    datalinks.push_back(datalink);
-    headerLengths.push_back(headerLength);
+    ExtConn newConn;
+    newConn.module = mod;
+    newConn.pd = pd;
+    newConn.datalink = datalink;
+    newConn.headerLength = headerLength;
+    conn.push_back(newConn);
 
     EV << "Opened pcap device " << dev << " with filter " << filter << " and datalink " << datalink << ".\n";
 }
@@ -190,9 +185,9 @@ static void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_
     cModule *module;
 
     i = *(uint16 *)user;
-    datalink = cSocketRTScheduler::datalinks.at(i);
-    headerLength = cSocketRTScheduler::headerLengths.at(i);
-    module = cSocketRTScheduler::modules.at(i);
+    datalink = cSocketRTScheduler::conn.at(i).datalink;
+    headerLength = cSocketRTScheduler::conn.at(i).headerLength;
+    module = cSocketRTScheduler::conn.at(i).module;
 
     // skip ethernet frames not encapsulating an IP packet.
     // TODO: how about ipv6 and other protocols?
@@ -224,7 +219,7 @@ bool cSocketRTScheduler::receiveWithTimeout(long usec)
     timeval timeout;
     int32 n;
 #ifdef __linux__
-    int32 fd[FD_SETSIZE], maxfd;
+    int32 fdVec[FD_SETSIZE], maxfd;
     fd_set rdfds;
 #endif
 
@@ -234,23 +229,23 @@ bool cSocketRTScheduler::receiveWithTimeout(long usec)
 #ifdef __linux__
     FD_ZERO(&rdfds);
     maxfd = -1;
-    for (uint16 i = 0; i < pds.size(); i++) {
-        fd[i] = pcap_get_selectable_fd(pds.at(i));
-        if (fd[i] > maxfd)
-            maxfd = fd[i];
-        FD_SET(fd[i], &rdfds);
+    for (uint16 i = 0; i < conn.size(); i++) {
+        fdVec[i] = pcap_get_selectable_fd(conn.at(i).pd);
+        if (fdVec[i] > maxfd)
+            maxfd = fdVec[i];
+        FD_SET(fdVec[i], &rdfds);
     }
     if (select(maxfd + 1, &rdfds, nullptr, nullptr, &timeout) < 0) {
         return found;
     }
 #endif
-    for (uint16 i = 0; i < pds.size(); i++) {
+    for (uint16 i = 0; i < conn.size(); i++) {
 #ifdef __linux__
-        if (!(FD_ISSET(fd[i], &rdfds)))
+        if (!(FD_ISSET(fdVec[i], &rdfds)))
             continue;
 #endif // ifdef __linux__
-        if ((n = pcap_dispatch(pds.at(i), 1, packet_handler, (uint8 *)&i)) < 0)
-            throw cRuntimeError("cSocketRTScheduler::pcap_dispatch(): An error occured: %s", pcap_geterr(pds.at(i)));
+        if ((n = pcap_dispatch(conn.at(i).pd, 1, packet_handler, (uint8 *)&i)) < 0)
+            throw cRuntimeError("cSocketRTScheduler::pcap_dispatch(): An error occured: %s", pcap_geterr(conn.at(i).pd));
         if (n > 0)
             found = true;
     }
