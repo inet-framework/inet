@@ -2,8 +2,6 @@
 \chapter{The Ethernet Model}
 \label{cha:ethernet}
 
-TODO: 802.1d (STP, RSTP), 802.2 (LLC), ...
-
 % TODO: comment numWirelessPorts in MacRelayUnitPP
 % TODO: comment origByteLength in EtherFrame
 % FIXME: wrong header length in EtherFrame.msg
@@ -300,12 +298,6 @@ These scalar statistics are generated about the state of the line:
 
 The \nedtype{EtherEncap} module generates \msgtype{EthernetIIFrame} messages.
 
-EtherFrameII
-
-\subsection{EtherLlc}
-
-TODO what it does
-
 
 % document error conditions (causing error() calls in the code)
 
@@ -409,8 +401,6 @@ The duplexChannel attributes of the MACs must be set according to the
 medium connected to the port; if collisions are possible (it's a bus or hub)
 it must be set to false, otherwise it can be set to true.
 By default it uses half duples MAC with CSMA/CD.
-
-TODO STP, RSTP
 
 
 

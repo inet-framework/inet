@@ -3,7 +3,7 @@
 
 \section{Overview}
 
-TODO: this describes static autoconfiguration of IPv4 networks
+This chapter describes static autoconfiguration of networks.
 
 \section{Configuring IPv4 Networks}
 
@@ -713,27 +713,6 @@ interface.
 
 % TODO warn that multicast configuration has changed
 
-\section{Configuring Layer 2}
-
-\nedtype{L2Configurator}
-
-This module allows to configure network scenarios at layer 2.
-The ~Stp and ~Rstp related parameters such as link cost, port priority
-and the "is-edge" flag can be configured with XML files.
-
-This module is based on ~Ipv4NetworkConfigurator. The optional selector
-attributes: @hosts, @names, @towards, @among are also comes with this
-configurator and each of them behaves similarly to its ~Ipv4NetworkConfigurator equivalent.
-@ports selector added to configuring per-port parameters in Ieee8021dInterfaceData.
-
-The following example configures port 5 (if it exists) on all switches to cost 19 and
-priority 32768:
-<config>
-  <interface hosts='**' ports='5' cost='19' priority='32768'/>
-</config>
-
-For more information about the usage of the selector attributes see
-Ipv4NetworkConfigurator.
 
 
 

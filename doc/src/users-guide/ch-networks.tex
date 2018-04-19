@@ -146,18 +146,12 @@ folder of the simulation for later analysis.
 
 \subsection{Wireless Networks}
 
-TODO: AccessPoint, WirelessHost infrastructure mode
-
 Wireless network connections are not modeled with OMNeT++ connections due the
 dynamically changing nature of connectivity. For wireless networks, an
 additional module, one that represents the transmission medium, is required to
 maintain connectivity information.
 
-TODO 
-
 \nedsnippet{WirelessNetworkExample}{Wireless network example}
-
-TODO adjust text: 
 
 In the above network, positions in the display strings provide 
 positions for the transmission medium during the computation of 
@@ -172,16 +166,9 @@ In addition, \ttt{host1} is configured to periodically send
 
 \subsection{Mobile Ad hoc Networks}
 
-TODO commentary
-
 \nedsnippet{MobileAdhocNetworkExample}{Mobile ad hoc network example}
 
-TODO
-
 \inisnippet{MobileAdhocNetworkConfigurationExample}{Mobile ad hoc network configuration example}
-
-TODO
-
 
 
 \section{Frequent Tasks (How To...)}
@@ -205,11 +192,6 @@ but only one is enabled by default.
 \inisnippet{MultipleWirelessInterfacesExample}{Multiple wireless interfaces
 example}
 
-\subsection{Traffic Generation}
-
-TODO scripted, synthetic, CBR, VBR, trace-based, .... 
-TODO app[]; other ways 
-
 \subsection{Specifying Addresses}
 
 Nearly all application layer modules, but several other components as well,
@@ -226,9 +208,6 @@ addresses given with any of the following syntax variations:
   \item IPv4 or IPv6 address of an interface of a host or router:
       \ttt{"server/eth0(ipv4)"}, \ttt{"subnet.server[3]/eth0(ipv6)"}
 \end{itemize}
-
-TODO ini example
-
 
 \subsection{Node Failure and Recovery}
 
@@ -254,21 +233,6 @@ packet forwarding as simply as flipping a switch.
 
 \inisnippet{ForwardingExample}{Forwarding example}
 
-\subsection{Adding Routing Protocols}
-
-TODO internet routing and ad hoc routing
-
-\subsection{Node Mobility}
-
-TODO
-
-\subsection{Topology Generation}
-
-TODO: wizards, generated topologies
-
-\subsection{Hierarchical Networks}
-
-TODO: nested compound modules
 
 %%% Local Variables:
 %%% mode: latex
