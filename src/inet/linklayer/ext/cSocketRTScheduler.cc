@@ -32,6 +32,8 @@
 #include <ws2tcpip.h>
 #endif // if defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__CYGWIN__) || defined(_WIN64)
 
+#include <net/if.h>
+
 #define PCAP_SNAPLEN    65536 /* capture all data packets with up to pcap_snaplen bytes */
 
 #ifdef __linux__
@@ -125,17 +127,6 @@ void cSocketRTScheduler::setInterfaceModule(cModule *mod, const char *dev, const
     if ((datalink = pcap_datalink(pd)) < 0)
         throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot query pcap link-layer header type: %s", pcap_geterr(pd));
 
-    /* bind to interface
-     struct ifreq ifr;
-
-    memset(&ifr, 0, sizeof(ifr));
-    snprintf(ifr.ifr_name, sizeof(ifr.ifr_name), "eth0");
-    if (setsockopt(s, SOL_SOCKET, SO_BINDTODEVICE, (void *)&ifr, sizeof(ifr)) < 0) {
-        ... error handling ...
-    }
-     */
-
-
 #ifndef __linux__
     if (pcap_setnonblock(pd, 1, errbuf) < 0)
         throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot put pcap device into non-blocking mode, error: %s", errbuf);
@@ -169,6 +160,15 @@ void cSocketRTScheduler::setInterfaceModule(cModule *mod, const char *dev, const
     const int32 on = 1;
     if (setsockopt(fd, IPPROTO_IP, IP_HDRINCL, (char *)&on, sizeof(on)) < 0)
         throw cRuntimeError("cSocketRTScheduler: couldn't set sockopt for raw socket");
+
+    // bind to interface:
+     struct ifreq ifr;
+
+    memset(&ifr, 0, sizeof(ifr));
+    snprintf(ifr.ifr_name, sizeof(ifr.ifr_name), "%s", dev);
+    if (setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, (void *)&ifr, sizeof(ifr)) < 0) {
+        throw cRuntimeError("cSocketRTScheduler: couldn't bind raw socket to '%s' interface", dev);
+    }
 
     ExtConn newConn;
     newConn.module = mod;
