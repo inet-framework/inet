@@ -136,7 +136,7 @@ void Ext::handleMessage(cMessage *msg)
                << " and length of "
                << packet->getByteLength()
                << " bytes to link layer.\n";
-            rtScheduler->sendBytes(buffer, packetLength, (struct sockaddr *)&addr, sizeof(struct sockaddr_in));
+            rtScheduler->sendBytes(this, buffer, packetLength, (struct sockaddr *)&addr, sizeof(struct sockaddr_in));
             numSent++;
             delete packet;
         }

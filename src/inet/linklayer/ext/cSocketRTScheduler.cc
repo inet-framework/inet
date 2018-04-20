@@ -52,7 +52,6 @@ Register_Class(cSocketRTScheduler);
 
 cSocketRTScheduler::cSocketRTScheduler() : cScheduler()
 {
-    fd = INVALID_SOCKET;
 }
 
 cSocketRTScheduler::~cSocketRTScheduler()
@@ -62,22 +61,17 @@ cSocketRTScheduler::~cSocketRTScheduler()
 void cSocketRTScheduler::startRun()
 {
     baseTime = opp_get_monotonic_clock_usecs();
-
-    // Enabling sending makes no sense when we can't receive...
-    fd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
-    if (fd == INVALID_SOCKET)
-        throw cRuntimeError("cSocketRTScheduler: Root privileges needed");
-    const int32 on = 1;
-    if (setsockopt(fd, IPPROTO_IP, IP_HDRINCL, (char *)&on, sizeof(on)) < 0)
-        throw cRuntimeError("cSocketRTScheduler: couldn't set sockopt for raw socket");
 }
 
 void cSocketRTScheduler::endRun()
 {
-    close(fd);
-    fd = INVALID_SOCKET;
 
     for (auto& curConn : conn) {
+        //close raw socket:
+        close(curConn.fd);
+        curConn.fd = INVALID_SOCKET;
+
+        // close pcap:
         pcap_stat ps;
         if (pcap_stats(curConn.pd, &ps) < 0)
             throw cRuntimeError("cSocketRTScheduler::endRun(): Cannot query pcap statistics: %s", pcap_geterr(curConn.pd));
@@ -167,11 +161,21 @@ void cSocketRTScheduler::setInterfaceModule(cModule *mod, const char *dev, const
         default:
             throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Unsupported datalink: %d", datalink);
     }
+
+    // Enabling sending makes no sense when we can't receive...
+    int fd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
+    if (fd == INVALID_SOCKET)
+        throw cRuntimeError("cSocketRTScheduler: Root privileges needed");
+    const int32 on = 1;
+    if (setsockopt(fd, IPPROTO_IP, IP_HDRINCL, (char *)&on, sizeof(on)) < 0)
+        throw cRuntimeError("cSocketRTScheduler: couldn't set sockopt for raw socket");
+
     ExtConn newConn;
     newConn.module = mod;
     newConn.pd = pd;
     newConn.datalink = datalink;
     newConn.headerLength = headerLength;
+    newConn.fd = fd;
     conn.push_back(newConn);
 
     EV << "Opened pcap device " << dev << " with filter " << filter << " and datalink " << datalink << ".\n";
@@ -324,17 +328,23 @@ void cSocketRTScheduler::putBackEvent(cEvent *event)
     FES(sim)->putBackFirst(event);
 }
 
-void cSocketRTScheduler::sendBytes(uint8 *buf, size_t numBytes, struct sockaddr *to, socklen_t addrlen)
+void cSocketRTScheduler::sendBytes(cModule *mod, uint8 *buf, size_t numBytes, struct sockaddr *to, socklen_t addrlen)
 {
-    if (fd == INVALID_SOCKET)
-        throw cRuntimeError("cSocketRTScheduler::sendBytes(): no raw socket.");
+    for (auto& curConn : conn) {
+        if (curConn.module == mod) {
+            if (curConn.fd == INVALID_SOCKET)
+                throw cRuntimeError("cSocketRTScheduler::sendBytes(): no raw socket.");
 
-    int sent = sendto(fd, (char *)buf, numBytes, 0, to, addrlen);    //note: no ssize_t on MSVC
+            int sent = sendto(curConn.fd, buf, numBytes, 0, to, addrlen);    //note: no ssize_t on MSVC
 
-    if ((size_t)sent == numBytes)
-        EV << "Sent an IP packet with length of " << sent << " bytes.\n";
-    else
-        EV << "Sending of an IP packet FAILED! (sendto returned " << sent << " (" << strerror(errno) << ") instead of " << numBytes << ").\n";
+            if ((size_t)sent == numBytes)
+                EV << "Sent an IP packet with length of " << sent << " bytes.\n";
+            else
+                EV << "Sending of an IP packet FAILED! (sendto returned " << sent << " (" << strerror(errno) << ") instead of " << numBytes << ").\n";
+            return;
+        }
+    }
+    throw cRuntimeError("cSocketRTScheduler::sendBytes(): no raw socket.");
 }
 
 } // namespace inet

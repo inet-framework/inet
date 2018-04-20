@@ -41,14 +41,12 @@ class INET_API cSocketRTScheduler : public cScheduler
   protected:
     class ExtConn {
       public:
-//        int fd = INVALID_SOCKET;         // RAW socket ID,
-        cModule *module = nullptr;
-        pcap_t *pd = nullptr;
+        int fd = INVALID_SOCKET;        // RAW socket ID
+        cModule *module = nullptr;      // Ext module
+        pcap_t *pd = nullptr;           // pcap socket
         int datalink;
-        int headerLength;
+        int headerLength;               // link layer header length
     };
-
-    int fd;
 
     virtual bool receiveWithTimeout(long usec);
     virtual int receiveUntil(int64_t targetTime); // in microseconds, as returned by opp_get_monotonic_clock_usecs()
@@ -108,7 +106,7 @@ class INET_API cSocketRTScheduler : public cScheduler
     /**
      * Send on the currently open connection
      */
-    void sendBytes(unsigned char *buf, size_t numBytes, struct sockaddr *from, socklen_t addrlen);
+    void sendBytes(cModule *mod, unsigned char *buf, size_t numBytes, struct sockaddr *from, socklen_t addrlen);
 };
 
 } // namespace inet
