@@ -316,7 +316,6 @@ cEvent *cSocketRTScheduler::takeNextEvent()
     ASSERT(tmp == event);
     return event;
 }
-#undef cEvent
 
 void cSocketRTScheduler::putBackEvent(cEvent *event)
 {
