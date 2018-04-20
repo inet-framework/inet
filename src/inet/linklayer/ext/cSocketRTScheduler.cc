@@ -77,13 +77,13 @@ void cSocketRTScheduler::endRun()
     close(fd);
     fd = INVALID_SOCKET;
 
-    for (uint16 i = 0; i < conn.size(); i++) {
+    for (auto& curConn : conn) {
         pcap_stat ps;
-        if (pcap_stats(conn.at(i).pd, &ps) < 0)
-            throw cRuntimeError("cSocketRTScheduler::endRun(): Cannot query pcap statistics: %s", pcap_geterr(conn.at(i).pd));
+        if (pcap_stats(curConn.pd, &ps) < 0)
+            throw cRuntimeError("cSocketRTScheduler::endRun(): Cannot query pcap statistics: %s", pcap_geterr(curConn.pd));
         else
-            EV << conn.at(i).module->getFullPath() << ": Received Packets: " << ps.ps_recv << " Dropped Packets: " << ps.ps_drop << ".\n";
-        pcap_close(conn.at(i).pd);
+            EV << curConn.module->getFullPath() << ": Received Packets: " << ps.ps_recv << " Dropped Packets: " << ps.ps_drop << ".\n";
+        pcap_close(curConn.pd);
     }
 
     conn.clear();
