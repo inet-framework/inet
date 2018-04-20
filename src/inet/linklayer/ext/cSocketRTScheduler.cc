@@ -179,15 +179,10 @@ void cSocketRTScheduler::setInterfaceModule(cModule *mod, const char *dev, const
 
 static void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_char *bytes)
 {
-    unsigned i;
-    int32 headerLength;
-    int32 datalink;
-    cModule *module;
-
-    i = *(uint16 *)user;
-    datalink = cSocketRTScheduler::conn.at(i).datalink;
-    headerLength = cSocketRTScheduler::conn.at(i).headerLength;
-    module = cSocketRTScheduler::conn.at(i).module;
+    unsigned int i = *(uint16 *)user;
+    int32_t datalink = cSocketRTScheduler::conn.at(i).datalink;
+    int32_t headerLength = cSocketRTScheduler::conn.at(i).headerLength;
+    cModule *module = cSocketRTScheduler::conn.at(i).module;
 
     //FIXME Why? Could we use the pcap for filtering incoming IPv4 packet?
     //FIXME Why filtering IPv4 only on eth interface? why not filtering on PPP or other interfaces?
@@ -217,15 +212,13 @@ static void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_
 
 bool cSocketRTScheduler::receiveWithTimeout(long usec)
 {
-    bool found;
-    timeval timeout;
-    int32 n;
 #ifdef __linux__
     int32 fdVec[FD_SETSIZE], maxfd;
     fd_set rdfds;
 #endif
 
-    found = false;
+    bool found = false;
+    timeval timeout;
     timeout.tv_sec = 0;
     timeout.tv_usec = usec;
 #ifdef __linux__
@@ -246,7 +239,8 @@ bool cSocketRTScheduler::receiveWithTimeout(long usec)
         if (!(FD_ISSET(fdVec[i], &rdfds)))
             continue;
 #endif // ifdef __linux__
-        if ((n = pcap_dispatch(conn.at(i).pd, 1, packet_handler, (uint8 *)&i)) < 0)
+        int32 n = pcap_dispatch(conn.at(i).pd, 1, packet_handler, (uint8 *)&i);
+        if (n < 0)
             throw cRuntimeError("cSocketRTScheduler::pcap_dispatch(): An error occured: %s", pcap_geterr(conn.at(i).pd));
         if (n > 0)
             found = true;
