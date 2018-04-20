@@ -193,11 +193,14 @@ static void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_
     // skip ethernet frames not encapsulating an IP packet.
     // TODO: how about ipv6 and other protocols?
     if (datalink == DLT_EN10MB && hdr->caplen > ETHER_HDR_LEN) {
+        //TODO for decapsulate, using code from EtherEncap
         uint16_t etherType = (uint16_t)(bytes[ETHER_ADDR_LEN * 2]) << 8 | bytes[ETHER_ADDR_LEN * 2 + 1];
         //TODO get ethertype from snap header when packet has snap header
         if (etherType != ETHERTYPE_IPv4) // ipv4
             return;
     }
+    //TODO for other DLT_ : decapsulate
+    //TODO or move decapsulation to Ext interface
 
     // put the IP packet from wire into Packet
     uint32_t pklen = hdr->caplen - headerLength;
@@ -330,6 +333,7 @@ void EmulationScheduler::putBackEvent(cEvent *event)
 
 void EmulationScheduler::sendBytes(cModule *mod, uint8 *buf, size_t numBytes, struct sockaddr *to, socklen_t addrlen)
 {
+    //TODO check: is this an IPv4 packet --OR-- is this packet acceptable by fd socket?
     for (auto& curConn : conn) {
         if (curConn.module == mod) {
             if (curConn.fd == INVALID_SOCKET)
