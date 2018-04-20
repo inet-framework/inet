@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_CSOCKETRTSCHEDULER_H
-#define __INET_CSOCKETRTSCHEDULER_H
+#ifndef __INET_EMULATIONSCHEDULER_H
+#define __INET_EMULATIONSCHEDULER_H
 
 #define WANT_WINSOCK2
 
@@ -37,7 +37,7 @@
 
 namespace inet {
 
-class INET_API cSocketRTScheduler : public cScheduler
+class INET_API EmulationScheduler : public cScheduler
 {
   protected:
     class ExtConn {
@@ -56,12 +56,12 @@ class INET_API cSocketRTScheduler : public cScheduler
     /**
      * Constructor.
      */
-    cSocketRTScheduler();
+    EmulationScheduler();
 
     /**
      * Destructor.
      */
-    virtual ~cSocketRTScheduler();
+    virtual ~EmulationScheduler();
 
     static std::vector<ExtConn> conn;
 
@@ -112,5 +112,5 @@ class INET_API cSocketRTScheduler : public cScheduler
 
 } // namespace inet
 
-#endif // ifndef __INET_CSOCKETRTSCHEDULER_H
+#endif // ifndef __INET_EMULATIONSCHEDULER_H
 

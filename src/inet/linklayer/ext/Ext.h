@@ -29,7 +29,7 @@
 
 #include "inet/linklayer/base/MacBase.h"
 #include "inet/linklayer/ext/ExtFrame_m.h"
-#include "inet/linklayer/ext/cSocketRTScheduler.h"
+#include "inet/linklayer/ext/EmulationScheduler.h"
 
 namespace inet {
 
@@ -41,7 +41,7 @@ class InterfaceEntry;
  * on the host running the simulation. Suitable for hardware-in-the-loop
  * simulations.
  *
- * Requires cSocketRTScheduler to be configured as scheduler in omnetpp.ini.
+ * Requires EmulationScheduler to be configured as scheduler in omnetpp.ini.
  *
  * See NED file for more details.
  */
@@ -58,7 +58,7 @@ class INET_API Ext : public MacBase
     int numDropped;
 
     // access to real network interface via Scheduler class:
-    cSocketRTScheduler *rtScheduler;
+    EmulationScheduler *rtScheduler;
 
   protected:
     void displayBusy();

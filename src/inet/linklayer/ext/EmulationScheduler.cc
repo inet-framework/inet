@@ -21,12 +21,12 @@
 // This file is based on the cSocketRTScheduler.cc of OMNeT++ written by
 // Andras Varga.
 
+#include "inet/linklayer/ext/EmulationScheduler.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/serializer/headers/ethernethdr.h"
 #include "inet/linklayer/common/Ieee802Ctrl_m.h"
 #include "inet/linklayer/common/EtherType_m.h"
-#include "inet/linklayer/ext/cSocketRTScheduler.h"
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__CYGWIN__) || defined(_WIN64)
 #include <ws2tcpip.h>
@@ -46,26 +46,26 @@ namespace inet {
 
 #define FES(sim) (sim->getFES())
 
-std::vector<cSocketRTScheduler::ExtConn> cSocketRTScheduler::conn;
+std::vector<EmulationScheduler::ExtConn> EmulationScheduler::conn;
 
-int64_t cSocketRTScheduler::baseTime;
+int64_t EmulationScheduler::baseTime;
 
-Register_Class(cSocketRTScheduler);
+Register_Class(EmulationScheduler);
 
-cSocketRTScheduler::cSocketRTScheduler() : cScheduler()
+EmulationScheduler::EmulationScheduler() : cScheduler()
 {
 }
 
-cSocketRTScheduler::~cSocketRTScheduler()
+EmulationScheduler::~EmulationScheduler()
 {
 }
 
-void cSocketRTScheduler::startRun()
+void EmulationScheduler::startRun()
 {
     baseTime = opp_get_monotonic_clock_usecs();
 }
 
-void cSocketRTScheduler::endRun()
+void EmulationScheduler::endRun()
 {
 
     for (auto& curConn : conn) {
@@ -76,7 +76,7 @@ void cSocketRTScheduler::endRun()
         // close pcap:
         pcap_stat ps;
         if (pcap_stats(curConn.pd, &ps) < 0)
-            throw cRuntimeError("cSocketRTScheduler::endRun(): Cannot query pcap statistics: %s", pcap_geterr(curConn.pd));
+            throw cRuntimeError("EmulationScheduler::endRun(): Cannot query pcap statistics: %s", pcap_geterr(curConn.pd));
         else
             EV << curConn.module->getFullPath() << ": Received Packets: " << ps.ps_recv << " Dropped Packets: " << ps.ps_drop << ".\n";
         pcap_close(curConn.pd);
@@ -85,13 +85,13 @@ void cSocketRTScheduler::endRun()
     conn.clear();
 }
 
-void cSocketRTScheduler::executionResumed()
+void EmulationScheduler::executionResumed()
 {
     baseTime = opp_get_monotonic_clock_usecs();
     baseTime = baseTime - sim->getSimTime().inUnit(SIMTIME_US);
 }
 
-void cSocketRTScheduler::setInterfaceModule(cModule *mod, const char *dev, const char *filter)
+void EmulationScheduler::setInterfaceModule(cModule *mod, const char *dev, const char *filter)
 {
     char errbuf[PCAP_ERRBUF_SIZE];
     struct bpf_program fcode;
@@ -100,36 +100,36 @@ void cSocketRTScheduler::setInterfaceModule(cModule *mod, const char *dev, const
     int32 headerLength;
 
     if (!mod || !dev || !filter)
-        throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): arguments must be non-nullptr");
+        throw cRuntimeError("EmulationScheduler::setInterfaceModule(): arguments must be non-nullptr");
 
     /* get pcap handle */
     memset(&errbuf, 0, sizeof(errbuf));
     if ((pd = pcap_create(dev, errbuf)) == nullptr)
-        throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot create pcap device, error = %s", errbuf);
+        throw cRuntimeError("EmulationScheduler::setInterfaceModule(): Cannot create pcap device, error = %s", errbuf);
     else if (strlen(errbuf) > 0)
-        EV << "cSocketRTScheduler::setInterfaceModule(): pcap_open_live returned warning: " << errbuf << "\n";
+        EV << "EmulationScheduler::setInterfaceModule(): pcap_open_live returned warning: " << errbuf << "\n";
 
     /* apply the immediate mode to pcap */
     if (pcap_set_immediate_mode(pd, 1) != 0)
-            throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot set immediate mode to pcap device");
+            throw cRuntimeError("EmulationScheduler::setInterfaceModule(): Cannot set immediate mode to pcap device");
 
     if (pcap_activate(pd) != 0)
-        throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot activate pcap device");
+        throw cRuntimeError("EmulationScheduler::setInterfaceModule(): Cannot activate pcap device");
 
     /* compile this command into a filter program */
     if (pcap_compile(pd, &fcode, (char *)filter, 0, 0) < 0)
-        throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot compile pcap filter: %s", pcap_geterr(pd));
+        throw cRuntimeError("EmulationScheduler::setInterfaceModule(): Cannot compile pcap filter: %s", pcap_geterr(pd));
 
     /* apply the compiled filter to the packet capture device */
     if (pcap_setfilter(pd, &fcode) < 0)
-        throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot apply compiled pcap filter: %s", pcap_geterr(pd));
+        throw cRuntimeError("EmulationScheduler::setInterfaceModule(): Cannot apply compiled pcap filter: %s", pcap_geterr(pd));
 
     if ((datalink = pcap_datalink(pd)) < 0)
-        throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot query pcap link-layer header type: %s", pcap_geterr(pd));
+        throw cRuntimeError("EmulationScheduler::setInterfaceModule(): Cannot query pcap link-layer header type: %s", pcap_geterr(pd));
 
 #ifndef __linux__
     if (pcap_setnonblock(pd, 1, errbuf) < 0)
-        throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot put pcap device into non-blocking mode, error: %s", errbuf);
+        throw cRuntimeError("EmulationScheduler::setInterfaceModule(): Cannot put pcap device into non-blocking mode, error: %s", errbuf);
 #endif
 
     switch (datalink) {
@@ -150,16 +150,16 @@ void cSocketRTScheduler::setInterfaceModule(cModule *mod, const char *dev, const
             break;
 
         default:
-            throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Unsupported datalink: %d", datalink);
+            throw cRuntimeError("EmulationScheduler::setInterfaceModule(): Unsupported datalink: %d", datalink);
     }
 
     // Enabling sending makes no sense when we can't receive...
     int fd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
     if (fd == INVALID_SOCKET)
-        throw cRuntimeError("cSocketRTScheduler: Root privileges needed");
+        throw cRuntimeError("EmulationScheduler: Root privileges needed");
     const int32 on = 1;
     if (setsockopt(fd, IPPROTO_IP, IP_HDRINCL, (char *)&on, sizeof(on)) < 0)
-        throw cRuntimeError("cSocketRTScheduler: couldn't set sockopt for raw socket");
+        throw cRuntimeError("EmulationScheduler: couldn't set sockopt for raw socket");
 
     // bind to interface:
      struct ifreq ifr;
@@ -167,7 +167,7 @@ void cSocketRTScheduler::setInterfaceModule(cModule *mod, const char *dev, const
     memset(&ifr, 0, sizeof(ifr));
     snprintf(ifr.ifr_name, sizeof(ifr.ifr_name), "%s", dev);
     if (setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, (void *)&ifr, sizeof(ifr)) < 0) {
-        throw cRuntimeError("cSocketRTScheduler: couldn't bind raw socket to '%s' interface", dev);
+        throw cRuntimeError("EmulationScheduler: couldn't bind raw socket to '%s' interface", dev);
     }
 
     ExtConn newConn;
@@ -184,9 +184,9 @@ void cSocketRTScheduler::setInterfaceModule(cModule *mod, const char *dev, const
 static void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_char *bytes)
 {
     unsigned int i = *(uint16 *)user;
-    int32_t datalink = cSocketRTScheduler::conn.at(i).datalink;
-    int32_t headerLength = cSocketRTScheduler::conn.at(i).headerLength;
-    cModule *module = cSocketRTScheduler::conn.at(i).module;
+    int32_t datalink = EmulationScheduler::conn.at(i).datalink;
+    int32_t headerLength = EmulationScheduler::conn.at(i).headerLength;
+    cModule *module = EmulationScheduler::conn.at(i).module;
 
     //FIXME Why? Could we use the pcap for filtering incoming IPv4 packet?
     //FIXME Why filtering IPv4 only on eth interface? why not filtering on PPP or other interfaces?
@@ -208,13 +208,13 @@ static void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_
     // signalize new incoming packet to the interface via cMessage
     EV << "Captured " << pklen << " bytes for an IP packet.\n";
     int64_t curTime = opp_get_monotonic_clock_usecs();
-    simtime_t t(curTime - cSocketRTScheduler::baseTime, SIMTIME_US);
+    simtime_t t(curTime - EmulationScheduler::baseTime, SIMTIME_US);
     // TBD assert that it's somehow not smaller than previous event's time
     notificationMsg->setArrival(module->getId(), -1, t);
     FES(getSimulation())->insert(notificationMsg);
 }
 
-bool cSocketRTScheduler::receiveWithTimeout(long usec)
+bool EmulationScheduler::receiveWithTimeout(long usec)
 {
 #ifdef __linux__
     int32 fdVec[FD_SETSIZE], maxfd;
@@ -245,7 +245,7 @@ bool cSocketRTScheduler::receiveWithTimeout(long usec)
 #endif // ifdef __linux__
         int32 n = pcap_dispatch(conn.at(i).pd, 1, packet_handler, (uint8 *)&i);
         if (n < 0)
-            throw cRuntimeError("cSocketRTScheduler::pcap_dispatch(): An error occured: %s", pcap_geterr(conn.at(i).pd));
+            throw cRuntimeError("EmulationScheduler::pcap_dispatch(): An error occured: %s", pcap_geterr(conn.at(i).pd));
         if (n > 0)
             found = true;
     }
@@ -256,7 +256,7 @@ bool cSocketRTScheduler::receiveWithTimeout(long usec)
     return found;
 }
 
-int cSocketRTScheduler::receiveUntil(int64_t targetTime)
+int EmulationScheduler::receiveUntil(int64_t targetTime)
 {
     // if there's more than 2*UI_REFRESH_TIME to wait, wait in UI_REFRESH_TIME chunks
     // in order to keep UI responsiveness by invoking getEnvir()->idle()
@@ -279,12 +279,12 @@ int cSocketRTScheduler::receiveUntil(int64_t targetTime)
     return 0;
 }
 
-cEvent *cSocketRTScheduler::guessNextEvent()
+cEvent *EmulationScheduler::guessNextEvent()
 {
     return FES(sim)->peekFirst();
 }
 
-cEvent *cSocketRTScheduler::takeNextEvent()
+cEvent *EmulationScheduler::takeNextEvent()
 {
     int64_t targetTime;
 
@@ -323,17 +323,17 @@ cEvent *cSocketRTScheduler::takeNextEvent()
     return event;
 }
 
-void cSocketRTScheduler::putBackEvent(cEvent *event)
+void EmulationScheduler::putBackEvent(cEvent *event)
 {
     FES(sim)->putBackFirst(event);
 }
 
-void cSocketRTScheduler::sendBytes(cModule *mod, uint8 *buf, size_t numBytes, struct sockaddr *to, socklen_t addrlen)
+void EmulationScheduler::sendBytes(cModule *mod, uint8 *buf, size_t numBytes, struct sockaddr *to, socklen_t addrlen)
 {
     for (auto& curConn : conn) {
         if (curConn.module == mod) {
             if (curConn.fd == INVALID_SOCKET)
-                throw cRuntimeError("cSocketRTScheduler::sendBytes(): no raw socket.");
+                throw cRuntimeError("EmulationScheduler::sendBytes(): no raw socket.");
 
             int sent = sendto(curConn.fd, buf, numBytes, 0, to, addrlen);    //note: no ssize_t on MSVC
 
@@ -344,7 +344,7 @@ void cSocketRTScheduler::sendBytes(cModule *mod, uint8 *buf, size_t numBytes, st
             return;
         }
     }
-    throw cRuntimeError("cSocketRTScheduler::sendBytes(): no raw socket.");
+    throw cRuntimeError("EmulationScheduler::sendBytes(): no raw socket.");
 }
 
 } // namespace inet

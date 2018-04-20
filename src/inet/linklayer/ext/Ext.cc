@@ -52,7 +52,7 @@ void Ext::initialize(int stage)
 
     // subscribe at scheduler for external messages
     if (stage == INITSTAGE_LOCAL) {
-        if (auto scheduler = dynamic_cast<cSocketRTScheduler *>(getSimulation()->getScheduler())) {
+        if (auto scheduler = dynamic_cast<EmulationScheduler *>(getSimulation()->getScheduler())) {
             rtScheduler = scheduler;
             device = par("device");
             const char *filter = par("filterString");

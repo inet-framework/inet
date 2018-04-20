@@ -25,7 +25,7 @@ import inet.linklayer.contract.IExternalInterface;
 // on the host running the simulation. Suitable for hardware-in-the-loop
 // simulations.
 //
-// Requires cSocketRTScheduler to be configured as scheduler in omnetpp.ini.
+// Requires EmulationScheduler to be configured as scheduler in omnetpp.ini.
 //
 module ExtInterface like IExternalInterface
 {
