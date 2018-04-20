@@ -21,8 +21,9 @@
 
 #define WANT_WINSOCK2
 
-#include <platdep/sockets.h>
 #include "inet/common/INETDefs.h"
+
+#include <omnetpp/platdep/sockets.h>
 
 // prevent pcap.h to redefine int8_t,... types on Windows
 #include "inet/common/serializer/headers/bsdint.h"
