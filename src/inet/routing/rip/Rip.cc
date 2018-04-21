@@ -287,7 +287,7 @@ RipRoute *Rip::importRoute(IRoute *route, RipRoute::RouteType type, int metric, 
     }
 
     ripRoutes.push_back(ripRoute);
-    emit(numRoutesSignal, ripRoutes.size());
+    emit(numRoutesSignal, (unsigned long)ripRoutes.size());
     return ripRoute;
 }
 
@@ -905,7 +905,7 @@ void Rip::addRoute(const L3Address& dest, int prefixLength, const InterfaceEntry
     ripRoute->setLastUpdateTime(simTime());
     ripRoute->setChanged(true);
     ripRoutes.push_back(ripRoute);
-    emit(numRoutesSignal, ripRoutes.size());
+    emit(numRoutesSignal, (unsigned long)ripRoutes.size());
     triggerUpdate();
 }
 
@@ -1045,7 +1045,7 @@ void Rip::purgeRoute(RipRoute *ripRoute)
     remove(ripRoutes, ripRoute);
     delete ripRoute;
 
-    emit(numRoutesSignal, ripRoutes.size());
+    emit(numRoutesSignal, (unsigned long)ripRoutes.size());
 }
 
 /**
@@ -1141,7 +1141,7 @@ void Rip::deleteInterface(const InterfaceEntry *ie)
             it++;
     }
     if (emitNumRoutesSignal)
-        emit(numRoutesSignal, ripRoutes.size());
+        emit(numRoutesSignal, (unsigned long)ripRoutes.size());
 }
 
 int Rip::getInterfaceMetric(InterfaceEntry *ie)
