@@ -1,0 +1,16 @@
+<!-- Config file format for the RsvpClassifier module for MPLS -->
+
+<!-- root element -->
+<!ELEMENT fectable (fecentry)+>
+
+<!-- entry ->
+<!ELEMENT fecentry (id,destination?,source?,label?,tunnel_id?,lspid?)> <!-- in arbitrary order -->
+
+<!-- entry attributes -->
+<!ELEMENT id (#PCDATA)>
+<!ELEMENT destination (#PCDATA)>
+<!ELEMENT source (#PCDATA)>
+<!ELEMENT label (#PCDATA)>
+<!ELEMENT tunnel_id (#PCDATA)>
+<!ELEMENT lspid (#PCDATA)>
+
