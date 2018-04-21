@@ -27,24 +27,23 @@
 
 namespace inet {
 
-// label operations
-#define PUSH_OPER    0
-#define SWAP_OPER    1
-#define POP_OPER     2
+enum LabelOpCode
+{
+    PUSH_OPER,
+    SWAP_OPER,
+    POP_OPER
+};
 
-/**
- * TODO documentation
- */
 struct LabelOp
 {
     int label;
-    int optcode;
+    LabelOpCode optcode;
 };
 
 typedef std::vector<LabelOp> LabelOpVector;
 
 /**
- * TODO documentation
+ * Represents the Label Information Base (LIB) for MPLS.
  */
 class INET_API LibTable : public cSimpleModule
 {
