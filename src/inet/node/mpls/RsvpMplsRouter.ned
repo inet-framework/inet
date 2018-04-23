@@ -20,7 +20,7 @@ import inet.networklayer.ipv4.Ipv4NetworkLayer;
 import inet.networklayer.mpls.LibTable;
 import inet.networklayer.mpls.Mpls;
 import inet.networklayer.rsvpte.RsvpTe;
-import inet.networklayer.rsvpte.SimpleClassifier;
+import inet.networklayer.rsvpte.RsvpClassifier;
 import inet.networklayer.ted.LinkStateRouting;
 import inet.networklayer.ted.Ted;
 
@@ -74,7 +74,7 @@ module RsvpMplsRouter
                 classifierModule = "^.classifier";
                 @display("p=458,106");
         }
-        classifier: SimpleClassifier {
+        classifier: RsvpClassifier {
             parameters:
                 @display("p=58,362;is=s");
         }

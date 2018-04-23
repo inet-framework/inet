@@ -18,14 +18,14 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/networklayer/rsvpte/IntServ_m.h"
-#include "inet/networklayer/mpls/IClassifier.h"
+#include "inet/networklayer/mpls/IIngressClassifier.h"
 
 namespace inet {
 
 /**
  * TODO
  */
-class INET_API IRsvpClassifier : public IClassifier
+class INET_API IRsvpClassifier : public IIngressClassifier
 {
   public:
     virtual ~IRsvpClassifier() {}

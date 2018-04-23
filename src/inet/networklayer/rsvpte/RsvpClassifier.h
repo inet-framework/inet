@@ -35,7 +35,7 @@ class RsvpTe;
 /**
  * TODO documentation
  */
-class INET_API SimpleClassifier : public cSimpleModule, public IScriptable, public IRsvpClassifier
+class INET_API RsvpClassifier : public cSimpleModule, public IScriptable, public IRsvpClassifier
 {
   public:
     struct FecEntry
@@ -60,7 +60,7 @@ class INET_API SimpleClassifier : public cSimpleModule, public IScriptable, publ
     RsvpTe *rsvp = nullptr;
 
   public:
-    SimpleClassifier() {}
+    RsvpClassifier() {}
 
   protected:
     virtual void initialize(int stage) override;

@@ -18,7 +18,7 @@ package inet.networklayer.rsvpte;
 //
 // TODO documentation
 //
-simple SimpleClassifier
+simple RsvpClassifier
 {
     parameters:
         string routingTableModule;

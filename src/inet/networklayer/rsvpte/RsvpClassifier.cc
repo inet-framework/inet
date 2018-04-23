@@ -13,7 +13,7 @@
 //
 
 #include <iostream>
-#include "inet/networklayer/rsvpte/SimpleClassifier.h"
+#include "inet/networklayer/rsvpte/RsvpClassifier.h"
 #include "inet/common/XMLUtils.h"
 #include "inet/networklayer/mpls/LibTable.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
@@ -22,11 +22,11 @@
 
 namespace inet {
 
-Define_Module(SimpleClassifier);
+Define_Module(RsvpClassifier);
 
 using namespace xmlutils;
 
-void SimpleClassifier::initialize(int stage)
+void RsvpClassifier::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
@@ -46,14 +46,14 @@ void SimpleClassifier::initialize(int stage)
     }
 }
 
-void SimpleClassifier::handleMessage(cMessage *)
+void RsvpClassifier::handleMessage(cMessage *)
 {
     ASSERT(false);
 }
 
-// IClassifier implementation (method invoked by MPLS)
+// IIngressClassifier implementation (method invoked by MPLS)
 
-bool SimpleClassifier::lookupLabel(Packet *packet, LabelOpVector& outLabel, std::string& outInterface, int& color)
+bool RsvpClassifier::lookupLabel(Packet *packet, LabelOpVector& outLabel, std::string& outInterface, int& color)
 {
     // never label OSPF(TED) and RSVP traffic
     const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
@@ -89,7 +89,7 @@ bool SimpleClassifier::lookupLabel(Packet *packet, LabelOpVector& outLabel, std:
 
 // IRsvpClassifier implementation (method invoked by RSVP)
 
-void SimpleClassifier::bind(const SessionObj& session, const SenderTemplateObj& sender, int inLabel)
+void RsvpClassifier::bind(const SessionObj& session, const SenderTemplateObj& sender, int inLabel)
 {
     for (auto & elem : bindings) {
         if (elem.session != session)
@@ -104,7 +104,7 @@ void SimpleClassifier::bind(const SessionObj& session, const SenderTemplateObj& 
 
 // IScriptable implementation (method invoked by ScenarioManager)
 
-void SimpleClassifier::processCommand(const cXMLElement& node)
+void RsvpClassifier::processCommand(const cXMLElement& node)
 {
     if (!strcmp(node.getTagName(), "bind-fec")) {
         readItemFromXML(&node);
@@ -115,7 +115,7 @@ void SimpleClassifier::processCommand(const cXMLElement& node)
 
 // binding configuration
 
-void SimpleClassifier::readTableFromXML(const cXMLElement *fectable)
+void RsvpClassifier::readTableFromXML(const cXMLElement *fectable)
 {
     ASSERT(fectable);
     ASSERT(!strcmp(fectable->getTagName(), "fectable"));
@@ -125,7 +125,7 @@ void SimpleClassifier::readTableFromXML(const cXMLElement *fectable)
         readItemFromXML(elem);
 }
 
-void SimpleClassifier::readItemFromXML(const cXMLElement *fec)
+void RsvpClassifier::readItemFromXML(const cXMLElement *fec)
 {
     ASSERT(fec);
     ASSERT(!strcmp(fec->getTagName(), "fecentry") || !strcmp(fec->getTagName(), "bind-fec"));
@@ -197,7 +197,7 @@ void SimpleClassifier::readItemFromXML(const cXMLElement *fec)
     }
 }
 
-std::vector<SimpleClassifier::FecEntry>::iterator SimpleClassifier::findFEC(int fecid)
+std::vector<RsvpClassifier::FecEntry>::iterator RsvpClassifier::findFEC(int fecid)
 {
     auto it = bindings.begin();
     for ( ; it != bindings.end(); it++) {
@@ -207,7 +207,7 @@ std::vector<SimpleClassifier::FecEntry>::iterator SimpleClassifier::findFEC(int 
     return it;
 }
 
-std::ostream& operator<<(std::ostream& os, const SimpleClassifier::FecEntry& fec)
+std::ostream& operator<<(std::ostream& os, const RsvpClassifier::FecEntry& fec)
 {
     os << "id:" << fec.id;
     os << "    dest:" << fec.dest;

@@ -26,7 +26,7 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/mpls/ConstType.h"
-#include "inet/networklayer/mpls/IClassifier.h"
+#include "inet/networklayer/mpls/IIngressClassifier.h"
 #include "inet/networklayer/mpls/LibTable.h"
 #include "inet/networklayer/mpls/MplsPacket_m.h"
 
@@ -45,7 +45,7 @@ class INET_API Mpls : public cSimpleModule, public IProtocolRegistrationListener
 
     LibTable *lt;
     IInterfaceTable *ift;
-    IClassifier *pct;
+    IIngressClassifier *pct;
 
   protected:
     virtual void initialize(int stage) override;

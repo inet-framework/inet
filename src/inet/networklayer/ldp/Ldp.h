@@ -26,7 +26,7 @@
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 #include "inet/transportlayer/contract/tcp/TcpSocketMap.h"
-#include "inet/networklayer/mpls/IClassifier.h"
+#include "inet/networklayer/mpls/IIngressClassifier.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 
@@ -53,7 +53,7 @@ class Ted;
 /**
  * LDP (rfc 3036) protocol implementation.
  */
-class INET_API Ldp : public cSimpleModule, public TcpSocket::CallbackInterface, public IClassifier, public cListener, public ILifecycle
+class INET_API Ldp : public cSimpleModule, public TcpSocket::CallbackInterface, public IIngressClassifier, public cListener, public ILifecycle
 {
   public:
 
@@ -215,7 +215,7 @@ class INET_API Ldp : public cSimpleModule, public TcpSocket::CallbackInterface, 
     virtual void socketStatusArrived(int connId, void *yourPtr, TcpStatusInfo *status) override { delete status; }
     //@}
 
-    // IClassifier
+    // IIngressClassifier
     virtual bool lookupLabel(Packet *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color) override;
 
     // cListener

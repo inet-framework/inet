@@ -23,7 +23,7 @@
 #include "inet/networklayer/mpls/Mpls.h"
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/networklayer/mpls/IClassifier.h"
+#include "inet/networklayer/mpls/IIngressClassifier.h"
 #include "inet/networklayer/rsvpte/Utils.h"
 
 // FIXME temporary fix
@@ -46,7 +46,7 @@ void Mpls::initialize(int stage)
 
         lt = getModuleFromPar<LibTable>(par("libTableModule"), this);
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        pct = getModuleFromPar<IClassifier>(par("classifierModule"), this);
+        pct = getModuleFromPar<IIngressClassifier>(par("classifierModule"), this);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         registerService(Protocol::mpls, gate("netwIn"), gate("ifIn"));

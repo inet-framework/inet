@@ -24,18 +24,18 @@ namespace inet {
 
 /**
  * This is an abstract interface for packet classifiers in MPLS ingress routers.
- * The ~Mpls module holds a pointer to an ~IClassifier object, and uses it to
+ * The ~Mpls module holds a pointer to an ~IIngressClassifier object, and uses it to
  * classify Ipv4 datagrams and find the right label-switched path for them.
  *
  * A known sub-interface is ~IRsvpClassifier.
  *
  * Known concrete classifier classes are the ~Ldp module class and (via ~IRsvpClassifier)
- * RSVP_TE's SimpleClassifier module class.
+ * RSVP_TE's RsvpClassifier module class.
  */
-class INET_API IClassifier
+class INET_API IIngressClassifier
 {
   public:
-    virtual ~IClassifier() {}
+    virtual ~IIngressClassifier() {}
 
     /**
      * The packet argument is an input parameter, the rest (outLabel,

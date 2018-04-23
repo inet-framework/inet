@@ -30,7 +30,7 @@
 
 namespace inet {
 
-class SimpleClassifier;
+class RsvpClassifier;
 class IIpv4RoutingTable;
 class IInterfaceTable;
 class Ted;
@@ -274,7 +274,7 @@ class INET_API RsvpTe : public cSimpleModule, public IScriptable, public ILifecy
 
   protected:
 
-    friend class SimpleClassifier;
+    friend class RsvpClassifier;
 
     virtual int getInLabel(const SessionObj& session, const SenderTemplateObj& sender);
 

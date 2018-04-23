@@ -54,7 +54,7 @@ simple Mpls
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
         string libTableModule;
-        string classifierModule; // The path to the module which implements the IClassifier C++ interface
+        string classifierModule; // The path to the module which implements the IIngressClassifier C++ interface
         @display("i=block/switch");
     gates:
         input netwIn @labels(Ipv4Header);
