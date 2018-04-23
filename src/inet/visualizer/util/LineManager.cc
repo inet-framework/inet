@@ -139,7 +139,7 @@ Coord LineManager::getLineShift(int sourceModuleId, int destinationModuleId, con
     else {
         auto& cacheEntry = cacheEntries[getKey(sourceModuleId, destinationModuleId)];
         auto count = cacheEntry.moduleLines.size() + cacheEntry.modulePaths.size();
-        shift *= (shiftOffset - (count - 1)) / 2.0;
+        shift *= shiftOffset - ((double)count - 1) / 2.0;
     }
 
     double zoomLevel = getEnvir()->getZoomLevel(getSimulation()->getModule(sourceModuleId)->getParentModule());
