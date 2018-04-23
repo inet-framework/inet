@@ -22,6 +22,7 @@
 
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/socket/ISocket.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 
@@ -123,7 +124,7 @@ class TcpStatusInfo;
  *
  * @see TcpSocketMap
  */
-class INET_API TcpSocket
+class INET_API TcpSocket : public ISocket
 {
   public:
     /**
@@ -152,19 +153,17 @@ class INET_API TcpSocket
     enum State { NOT_BOUND, BOUND, LISTENING, CONNECTING, CONNECTED, PEER_CLOSED, LOCALLY_CLOSED, CLOSED, SOCKERROR };
 
   protected:
-    int connId;
-    int sockstate;
+    int connId = -1;
+    State sockstate;
 
     L3Address localAddr;
     int localPrt;
     L3Address remoteAddr;
     int remotePrt;
 
-    ICallback *cb;
-    void *yourPtr;
-
-    cGate *gateToTcp;
-
+    ICallback *cb = nullptr;
+    void *yourPtr = nullptr;
+    cGate *gateToTcp = nullptr;
     std::string tcpAlgorithmClass;
 
   protected:
@@ -197,21 +196,21 @@ class INET_API TcpSocket
      * to identify the connection when it receives a command from the application
      * (or TcpSocket).
      */
-    int getConnectionId() const { return connId; }
+    int getConnectionId() const override { return connId; }
 
     /**
      * Returns the socket state, one of NOT_BOUND, CLOSED, LISTENING, CONNECTING,
      * CONNECTED, etc. Messages received from TCP must be routed through
      * processMessage() in order to keep socket state up-to-date.
      */
-    int getState() const { return sockstate; }
+    TcpSocket::State getState() const { return sockstate; }
 
     /**
      * Returns name of socket state code returned by getState().
      */
-    static const char *stateName(int state);
+    static const char *stateName(TcpSocket::State state);
 
-    void setState(enum State state) { sockstate = state; };
+    void setState(TcpSocket::State state) { sockstate = state; };
 
     /** @name Getter functions */
     //@{
@@ -343,7 +342,7 @@ class INET_API TcpSocket
      * has a TcpCommand as getControlInfo(), and the connId in it matches
      * that of the socket.)
      */
-    bool belongsToSocket(cMessage *msg);
+    virtual bool belongsToSocket(cMessage *msg) const override;
 
     /**
      * Sets a callback object, to be used with processMessage().

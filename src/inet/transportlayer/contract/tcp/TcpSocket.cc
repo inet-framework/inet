@@ -42,9 +42,6 @@ TcpSocket::TcpSocket(cMessage *msg)
     sockstate = CONNECTED;
 
     localPrt = remotePrt = -1;
-    cb = nullptr;
-    yourPtr = nullptr;
-    gateToTcp = nullptr;
 
     if (msg->getKind() == TCP_I_AVAILABLE) {
         TcpAvailableInfo *availableInfo = check_and_cast<TcpAvailableInfo *>(msg->getControlInfo());
@@ -73,7 +70,7 @@ TcpSocket::~TcpSocket()
         cb->socketDeleted(connId, yourPtr);
 }
 
-const char *TcpSocket::stateName(int state)
+const char *TcpSocket::stateName(TcpSocket::State state)
 {
 #define CASE(x)    case x: \
         s = #x; break
@@ -235,7 +232,7 @@ void TcpSocket::renewSocket()
     sockstate = NOT_BOUND;
 }
 
-bool TcpSocket::belongsToSocket(cMessage *msg)
+bool TcpSocket::belongsToSocket(cMessage *msg) const
 {
     auto& tags = getTags(msg);
     return tags.getTag<SocketInd>()->getSocketId() == connId;
