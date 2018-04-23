@@ -455,7 +455,7 @@ bool SctpSocket::belongsToAnySctpSocket(cMessage *msg)
        return false;
 }
 
-void SctpSocket::setCallbackObject(CallbackInterface *callback, void *yourPointer)
+void SctpSocket::setCallbackObject(ICallback *callback, void *yourPointer)
 {
     cb = callback;
     yourPtr = yourPointer;

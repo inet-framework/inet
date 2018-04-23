@@ -65,10 +65,10 @@ class INET_API SctpSocket
      * classes may have both this class and cSimpleModule as base class,
      * and cSimpleModule is already a cObject.
      */
-    class CallbackInterface
+    class ICallback
     {
       public:
-        virtual ~CallbackInterface() {}
+        virtual ~ICallback() {}
         virtual void socketDataArrived(int assocId, void *yourPtr, Packet *msg, bool urgent) = 0;
         virtual void socketDataNotificationArrived(int assocId, void *yourPtr, Message *msg) = 0;
         virtual void socketEstablished(int assocId, void *yourPtr, unsigned long int buffer) {}
@@ -108,7 +108,7 @@ class INET_API SctpSocket
     SocketOptions *sOptions;
     AppSocketOptions *appOptions;
 
-    CallbackInterface *cb;
+    ICallback *cb;
     void *yourPtr;
 
   protected:
@@ -343,7 +343,7 @@ class INET_API SctpSocket
      * in that case you don't have to look it up by assocId in the callbacks,
      * you can have it passed to you as yourPtr.
      */
-    void setCallbackObject(CallbackInterface *cb, void *yourPtr = nullptr);
+    void setCallbackObject(ICallback *cb, void *yourPtr = nullptr);
 
     /**
      * Examines the message (which should have arrived from SctpMain),
