@@ -36,7 +36,7 @@ namespace bgp {
 
 class BgpSession;
 
-class INET_API Bgp : public cSimpleModule, public ILifecycle, public TcpSocket::CallbackInterface
+class INET_API Bgp : public cSimpleModule, public ILifecycle, public TcpSocket::ICallback
 {
   public:
     Bgp() {}

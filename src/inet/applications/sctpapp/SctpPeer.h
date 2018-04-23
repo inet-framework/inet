@@ -35,7 +35,7 @@ class SctpConnectInfo;
 /**
  * Implements the SctpPeer simple module. See the NED file for more info.
  */
-class INET_API SctpPeer : public cSimpleModule, public SctpSocket::CallbackInterface, public ILifecycle
+class INET_API SctpPeer : public cSimpleModule, public SctpSocket::ICallback, public ILifecycle
 {
   protected:
     struct PathStatus

@@ -241,7 +241,7 @@ bool TcpSocket::belongsToSocket(cMessage *msg)
     return tags.getTag<SocketInd>()->getSocketId() == connId;
 }
 
-void TcpSocket::setCallbackObject(CallbackInterface *callback, void *yourPointer)
+void TcpSocket::setCallbackObject(ICallback *callback, void *yourPointer)
 {
     cb = callback;
     yourPtr = yourPointer;

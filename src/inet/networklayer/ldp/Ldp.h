@@ -53,7 +53,7 @@ class Ted;
 /**
  * LDP (rfc 3036) protocol implementation.
  */
-class INET_API Ldp : public cSimpleModule, public TcpSocket::CallbackInterface, public IIngressClassifier, public cListener, public ILifecycle
+class INET_API Ldp : public cSimpleModule, public TcpSocket::ICallback, public IIngressClassifier, public cListener, public ILifecycle
 {
   public:
 
@@ -205,7 +205,7 @@ class INET_API Ldp : public cSimpleModule, public TcpSocket::CallbackInterface, 
     virtual void processLABEL_WITHDRAW(Packet *packet);
     virtual void processNOTIFICATION(Packet *packet);
 
-    /** @name TcpSocket::CallbackInterface callback methods */
+    /** @name TcpSocket::ICallback callback methods */
     //@{
     virtual void socketEstablished(int connId, void *yourPtr) override;
     virtual void socketDataArrived(int connId, void *yourPtr, Packet *msg, bool urgent) override;

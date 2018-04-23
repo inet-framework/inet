@@ -80,7 +80,7 @@ void HttpBrowser::handleMessage(cMessage *msg)
             delete msg;
             return;
         }
-        // Submit to the socket handler. Calls the TcpSocket::CallbackInterface methods.
+        // Submit to the socket handler. Calls the TcpSocket::ICallback methods.
         // Message is deleted in the socket handler
         socket->processMessage(msg);
     }

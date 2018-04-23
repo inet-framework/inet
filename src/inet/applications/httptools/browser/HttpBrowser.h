@@ -46,14 +46,14 @@ namespace httptools {
  * @see HttpBrowserBase
  * @see HttpBrowserDirect
  */
-class INET_API HttpBrowser : public HttpBrowserBase, public TcpSocket::CallbackInterface
+class INET_API HttpBrowser : public HttpBrowserBase, public TcpSocket::ICallback
 {
   protected:
     /*
      * Data structure used to keep state for each opened socket.
      *
      * An instance of this struct is created for each opened socket and assigned to
-     * it as a myPtr. See the TcpSocket::CallbackInterface methods of HttpBrowser for more
+     * it as a myPtr. See the TcpSocket::ICallback methods of HttpBrowser for more
      * details.
      */
     struct SockData
@@ -94,7 +94,7 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TcpSocket::CallbackI
      */
     virtual void sendRequestsToServer(std::string www, HttpRequestQueue queue) override;
 
-    // TcpSocket::CallbackInterface callback methods
+    // TcpSocket::ICallback callback methods
     /*
      * Handler for socket established event.
      * Called by the socket->processMessage(msg) handler call in handleMessage.

@@ -60,14 +60,14 @@ class TcpStatusInfo;
  * messages yourself, or let TcpSocket do part of the job. For the latter,
  * you give TcpSocket a callback object on which it'll invoke the appropriate
  * member functions: socketEstablished(), socketDataArrived(), socketFailure(),
- * socketPeerClosed(), etc (these are methods of TcpSocket::CallbackInterface).,
+ * socketPeerClosed(), etc (these are methods of TcpSocket::ICallback).,
  * The callback object can be your simple module class too.
  *
  * This code skeleton example shows how to set up a TcpSocket to use the module
  * itself as callback object:
  *
  * <pre>
- * class MyModule : public cSimpleModule, public TcpSocket::CallbackInterface
+ * class MyModule : public cSimpleModule, public TcpSocket::ICallback
  * {
  *     TcpSocket socket;
  *     virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
@@ -135,10 +135,10 @@ class INET_API TcpSocket
      * and cSimpleModule is already a cObject.
      */
     // TODO: add socket parameter to all methods?
-    class CallbackInterface
+    class ICallback
     {
       public:
-        virtual ~CallbackInterface() {}
+        virtual ~ICallback() {}
         virtual void socketDataArrived(int connId, void *yourPtr, Packet *msg, bool urgent) = 0;
         virtual void socketAvailable(int connId, void *yourPtr, TcpAvailableInfo *availableInfo) {}
         virtual void socketEstablished(int connId, void *yourPtr) {}
@@ -160,7 +160,7 @@ class INET_API TcpSocket
     L3Address remoteAddr;
     int remotePrt;
 
-    CallbackInterface *cb;
+    ICallback *cb;
     void *yourPtr;
 
     cGate *gateToTcp;
@@ -348,10 +348,10 @@ class INET_API TcpSocket
     /**
      * Sets a callback object, to be used with processMessage().
      * This callback object may be your simple module itself (if it
-     * multiply inherits from CallbackInterface too, that is you
+     * multiply inherits from ICallback too, that is you
      * declared it as
      * <pre>
-     * class MyAppModule : public cSimpleModule, public TcpSocket::CallbackInterface
+     * class MyAppModule : public cSimpleModule, public TcpSocket::ICallback
      * </pre>
      * and redefined the necessary virtual functions; or you may use
      * dedicated class (and objects) for this purpose.
@@ -361,17 +361,17 @@ class INET_API TcpSocket
      *
      * YourPtr is an optional pointer. It may contain any value you wish --
      * TcpSocket will not look at it or do anything with it except passing
-     * it back to you in the CallbackInterface calls. You may find it
+     * it back to you in the ICallback calls. You may find it
      * useful if you maintain additional per-connection information:
      * in that case you don't have to look it up by connId in the callbacks,
      * you can have it passed to you as yourPtr.
      */
-    void setCallbackObject(CallbackInterface *cb, void *yourPtr = nullptr);
+    void setCallbackObject(ICallback *cb, void *yourPtr = nullptr);
 
     /**
      * Examines the message (which should have arrived from TCP),
      * updates socket state, and if there is a callback object installed
-     * (see setCallbackObject(), class CallbackInterface), dispatches
+     * (see setCallbackObject(), class ICallback), dispatches
      * to the appropriate method of it with the same yourPtr that
      * you gave in the setCallbackObject() call.
      *

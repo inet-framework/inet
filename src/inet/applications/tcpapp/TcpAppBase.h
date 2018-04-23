@@ -29,7 +29,7 @@ namespace inet {
  *
  * It needs the following NED parameters: localAddress, localPort, connectAddress, connectPort.
  */
-class INET_API TcpAppBase : public cSimpleModule, public TcpSocket::CallbackInterface
+class INET_API TcpAppBase : public cSimpleModule, public TcpSocket::ICallback
 {
   protected:
     TcpSocket socket;
@@ -57,7 +57,7 @@ class INET_API TcpAppBase : public cSimpleModule, public TcpSocket::CallbackInte
     virtual void close();
     virtual void sendPacket(Packet *pkt);
 
-    /* TcpSocket::CallbackInterface callback methods */
+    /* TcpSocket::ICallback callback methods */
     virtual void handleTimer(cMessage *msg) = 0;
     virtual void socketEstablished(int connId, void *yourPtr) override;
     virtual void socketDataArrived(int connId, void *yourPtr, Packet *msg, bool urgent) override;

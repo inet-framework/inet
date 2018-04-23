@@ -42,7 +42,7 @@ struct nat_message
  * arrives on them.
  */
 
-class INET_API SctpNatPeer : public cSimpleModule, public SctpSocket::CallbackInterface, public ILifecycle
+class INET_API SctpNatPeer : public cSimpleModule, public SctpSocket::ICallback, public ILifecycle
 {
   protected:
     //SctpAssociation* assoc;

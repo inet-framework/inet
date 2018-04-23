@@ -37,7 +37,7 @@ namespace httptools {
  *
  * @author  Kristjan V. Jonsson
  */
-class INET_API HttpServer : public HttpServerBase, public TcpSocket::CallbackInterface
+class INET_API HttpServer : public HttpServerBase, public TcpSocket::ICallback
 {
   protected:
     struct SockData

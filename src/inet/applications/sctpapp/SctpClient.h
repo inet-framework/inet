@@ -35,7 +35,7 @@ class SctpAssociation;
 /**
  * Implements the SctpClient simple module. See the NED file for more info.
  */
-class INET_API SctpClient : public cSimpleModule, public SctpSocket::CallbackInterface, public ILifecycle
+class INET_API SctpClient : public cSimpleModule, public SctpSocket::ICallback, public ILifecycle
 {
   protected:
     struct PathStatus
@@ -92,7 +92,7 @@ class INET_API SctpClient : public cSimpleModule, public SctpSocket::CallbackInt
     void close();
     void handleTimer(cMessage *msg);
 
-    /* SctpSocket::CallbackInterface callback methods */
+    /* SctpSocket::ICallback callback methods */
     void socketEstablished(int connId, void *yourPtr, unsigned long int buffer) override;    // TODO: needs a better name
     void socketDataArrived(int connId, void *yourPtr, Packet *msg, bool urgent) override;    // TODO: needs a better name
     void socketDataNotificationArrived(int connId, void *yourPtr, Message *msg) override;

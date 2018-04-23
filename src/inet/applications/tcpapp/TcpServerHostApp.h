@@ -68,13 +68,13 @@ class INET_API TcpServerHostApp : public cSimpleModule, public ILifecycle
  *
  * @see TcpServerHostApp
  */
-class INET_API TcpServerThreadBase : public cSimpleModule, public TcpSocket::CallbackInterface
+class INET_API TcpServerThreadBase : public cSimpleModule, public TcpSocket::ICallback
 {
   protected:
     TcpServerHostApp *hostmod;
     TcpSocket *sock;    // ptr into socketMap managed by TcpServerHostApp
 
-    // internal: TcpSocket::CallbackInterface methods
+    // internal: TcpSocket::ICallback methods
     virtual void socketDataArrived(int, void *, Packet *msg, bool urgent) override { dataArrived(msg, urgent); }
     virtual void socketEstablished(int, void *) override { established(); }
     virtual void socketPeerClosed(int, void *) override { peerClosed(); }
