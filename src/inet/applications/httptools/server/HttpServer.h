@@ -18,9 +18,10 @@
 #ifndef __INET_HTTPSERVER_H
 #define __INET_HTTPSERVER_H
 
+#include "inet/common/INETDefs.h"
 #include "inet/common/packet/ChunkQueue.h"
+#include "inet/common/socket/SocketMap.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
-#include "inet/transportlayer/contract/tcp/TcpSocketMap.h"
 #include "inet/applications/httptools/server/HttpServerBase.h"
 
 namespace inet {
@@ -47,7 +48,7 @@ class INET_API HttpServer : public HttpServerBase, public TcpSocket::ICallback
     };
 
     TcpSocket listensocket;
-    TcpSocketMap sockCollection;
+    SocketMap sockCollection;
     unsigned long numBroken = 0;
     unsigned long socketsOpened = 0;
 

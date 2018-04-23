@@ -583,7 +583,7 @@ void Ldp::openTCPConnectionToPeer(int peerIndex)
 
 void Ldp::processMessageFromTCP(cMessage *msg)
 {
-    TcpSocket *socket = socketMap.findSocketFor(msg);
+    TcpSocket *socket = check_and_cast_nullable<TcpSocket*>(socketMap.findSocketFor(msg));
     if (!socket) {
         // not yet in socketMap, must be new incoming connection.
         // find which peer it is and register connection

@@ -67,7 +67,7 @@ void HttpServer::handleMessage(cMessage *msg)
     }
     else {
         EV_DEBUG << "Handle inbound message " << msg->getName() << " of kind " << msg->getKind() << endl;
-        TcpSocket *socket = sockCollection.findSocketFor(msg);
+        TcpSocket *socket = check_and_cast_nullable<TcpSocket*>(sockCollection.findSocketFor(msg));
         if (!socket) {
             EV_DEBUG << "No socket found for the message. Create a new one" << endl;
             // new connection -- create new socket object and server process

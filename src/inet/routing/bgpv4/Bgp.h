@@ -21,7 +21,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
-#include "inet/transportlayer/contract/tcp/TcpSocketMap.h"
+#include "inet/common/socket/SocketMap.h"
 #include "inet/routing/bgpv4/BgpRoutingTableEntry.h"
 #include "inet/routing/bgpv4/BgpCommon.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
@@ -128,7 +128,7 @@ class INET_API Bgp : public cSimpleModule, public ILifecycle, public TcpSocket::
     SessionId findIdFromSocketConnId(std::map<SessionId, BgpSession *> sessions, int connId);
     unsigned int calculateStartDelay(int rtListSize, unsigned char rtPosition, unsigned char rtPeerPosition);
 
-    TcpSocketMap _socketMap;
+    SocketMap _socketMap;
     AsId _myAS = 0;
     SessionId _currSessionId = 0;
 

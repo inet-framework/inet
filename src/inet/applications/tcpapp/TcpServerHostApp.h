@@ -23,8 +23,8 @@
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/socket/SocketMap.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
-#include "inet/transportlayer/contract/tcp/TcpSocketMap.h"
 
 namespace inet {
 
@@ -40,7 +40,7 @@ class INET_API TcpServerHostApp : public cSimpleModule, public ILifecycle
 {
   protected:
     TcpSocket serverSocket;
-    TcpSocketMap socketMap;
+    SocketMap socketMap;
     typedef std::set<TcpServerThreadBase *> ThreadSet;
     ThreadSet threadSet;
     NodeStatus *nodeStatus = nullptr;

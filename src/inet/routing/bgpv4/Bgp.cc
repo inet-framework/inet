@@ -162,7 +162,7 @@ void Bgp::openTCPConnectionToPeer(SessionId sessionID)
 
 void Bgp::processMessageFromTCP(cMessage *msg)
 {
-    TcpSocket *socket = _socketMap.findSocketFor(msg);
+    TcpSocket *socket = check_and_cast_nullable<TcpSocket*>(_socketMap.findSocketFor(msg));
     if (!socket) {
         socket = new TcpSocket(msg);
         socket->setOutputGate(gate("socketOut"));

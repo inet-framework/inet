@@ -20,12 +20,12 @@
 
 #include "inet/common/INETDefs.h"
 
+#include "inet/applications/httptools/browser/HttpBrowserBase.h"
 #include "inet/common/packet/ChunkQueue.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/transportlayer/contract/tcp/TcpSocket.h"
-#include "inet/transportlayer/contract/tcp/TcpSocketMap.h"
+#include "inet/common/socket/SocketMap.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/applications/httptools/browser/HttpBrowserBase.h"
+#include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
 namespace inet {
 
@@ -64,7 +64,7 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TcpSocket::ICallback
         ChunkQueue queue;       // incoming queue for slices
     };
 
-    TcpSocketMap sockCollection;    // List of active sockets
+    SocketMap sockCollection;    // List of active sockets
     unsigned long numBroken = 0;    // Counter for the number of broken connections
     unsigned long socketsOpened = 0;    // Counter for opened sockets
 

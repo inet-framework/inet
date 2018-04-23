@@ -103,12 +103,12 @@ class TcpStatusInfo;
  * </pre>
  *
  * If you need to manage a large number of sockets (e.g. in a server
- * application which handles multiple incoming connections), the TcpSocketMap
+ * application which handles multiple incoming connections), the SocketMap
  * class may be useful. The following code fragment to handle incoming
  * connections is from the Ldp module:
  *
  * <pre>
- * TcpSocket *socket = socketMap.findSocketFor(msg);
+ * TcpSocket *socket = check_and_cast_nullable<TcpSocket*>socketMap.findSocketFor(msg);
  * if (!socket)
  * {
  *     // not yet in socketMap, must be new incoming connection: add to socketMap

@@ -22,10 +22,10 @@
 
 #include "inet/common/INETDefs.h"
 
+#include "inet/common/socket/SocketMap.h"
 #include "inet/networklayer/ldp/LdpPacket_m.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
-#include "inet/transportlayer/contract/tcp/TcpSocketMap.h"
 #include "inet/networklayer/mpls/IIngressClassifier.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"
@@ -128,7 +128,7 @@ class INET_API Ldp : public cSimpleModule, public TcpSocket::ICallback, public I
     UdpSocket udpSocket;    // for receiving Hello
     std::vector<UdpSocket> udpSockets;    // for sending Hello, one socket for each multicast interface
     TcpSocket serverSocket;    // for listening on LDP_PORT
-    TcpSocketMap socketMap;    // holds TCP connections with peers
+    SocketMap socketMap;    // holds TCP connections with peers
 
     // hello timeout message
     cMessage *sendHelloMsg = nullptr;

@@ -73,7 +73,7 @@ void HttpBrowser::handleMessage(cMessage *msg)
         }
 
         // Locate the socket for the incoming message. One should definitely exist.
-        TcpSocket *socket = sockCollection.findSocketFor(msg);
+        TcpSocket *socket = check_and_cast_nullable<TcpSocket*>(sockCollection.findSocketFor(msg));
         if (socket == nullptr) {
             // Handle errors. @todo error instead of warning?
             EV_WARN << "No socket found for message " << msg->getName() << endl;
