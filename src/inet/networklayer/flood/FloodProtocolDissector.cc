@@ -17,29 +17,27 @@
 // @author: Zoltan Bojthe
 //
 
-#include "inet/networklayer/flood/FloodProtocolDissector.h"
-
-#include "inet/networklayer/flood/FloodHeader_m.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
-
+#include "inet/networklayer/flood/FloodHeader_m.h"
+#include "inet/networklayer/flood/FloodProtocolDissector.h"
 
 namespace inet {
 
-Register_Protocol_Dissector(&Protocol::flood, FloodProtocolDissector);
+Register_Protocol_Dissector(&Protocol::flooding, FloodingProtocolDissector);
 
-void FloodProtocolDissector::dissect(Packet *packet, ICallback& callback) const
+void FloodingProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    auto header = packet->popAtFront<FloodHeader>();
+    auto header = packet->popAtFront<FloodingHeader>();
     auto trailerPopOffset = packet->getBackOffset();
     auto payloadEndOffset = packet->getFrontOffset() + header->getPayloadLengthField();
-    callback.startProtocolDataUnit(&Protocol::flood);
-    callback.visitChunk(header, &Protocol::flood);
+    callback.startProtocolDataUnit(&Protocol::flooding);
+    callback.visitChunk(header, &Protocol::flooding);
     packet->setBackOffset(payloadEndOffset);
     callback.dissectPacket(packet, header->getProtocol());
     ASSERT(packet->getDataLength() == B(0));
     packet->setFrontOffset(payloadEndOffset);
     packet->setBackOffset(trailerPopOffset);
-    callback.endProtocolDataUnit(&Protocol::flood);
+    callback.endProtocolDataUnit(&Protocol::flooding);
 }
 
 } // namespace inet

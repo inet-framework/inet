@@ -17,23 +17,22 @@
 // @author: Zoltan Bojthe
 //
 
-#include "inet/networklayer/flood/FloodProtocolPrinter.h"
-
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
 #include "inet/networklayer/flood/FloodHeader_m.h"
+#include "inet/networklayer/flood/FloodProtocolPrinter.h"
 
 namespace inet {
 
-Register_Protocol_Printer(&Protocol::flood, FloodProtocolPrinter);
+Register_Protocol_Printer(&Protocol::flooding, FloodingProtocolPrinter);
 
-void FloodProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, Context& context) const
+void FloodingProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, Context& context) const
 {
-    if (auto header = dynamicPtrCast<const FloodHeader>(chunk)) {
+    if (auto header = dynamicPtrCast<const FloodingHeader>(chunk)) {
         context.sourceColumn << header->getSourceAddress();
         context.destinationColumn << header->getDestinationAddress();
         B payloadLength = header->getPayloadLengthField();
-        context.infoColumn << "Flood"
+        context.infoColumn << "Flooding"
                 << " ttl:" << header->getTtl();
         auto payloadProtocol = header->getProtocol();
         if (payloadProtocol)
@@ -42,7 +41,7 @@ void FloodProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *
             context.infoColumn << " payload: protocol(" << header->getProtocolId() << ") " << payloadLength;
     }
     else
-        context.infoColumn << "(Flood) " << chunk;
+        context.infoColumn << "(Flooding) " << chunk;
 }
 
 } // namespace inet

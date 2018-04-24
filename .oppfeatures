@@ -187,18 +187,18 @@
         linkerFlags = ""
         />
     <feature
-        id="Flood"
-        name="Flood"
+        id="Flooding"
+        name="Flooding"
         description = "Provides network layer support for deterministic and probabilistic flooding"
         initiallyEnabled = "true"
         requires = ""
         labels = ""
         nedPackages = "
-                       inet.networklayer.flood
+                       inet.networklayer.flooding
                        inet.networklayer.probabilistic
                       "
         extraSourceFolders = ""
-        compileFlags = "-DWITH_FLOOD"
+        compileFlags = "-DWITH_FLOODING"
         linkerFlags = ""
         />
     <feature

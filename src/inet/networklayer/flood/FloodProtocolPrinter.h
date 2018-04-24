@@ -15,15 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_FLOODPROTOCOLPRINTER_H
-#define __INET_FLOODPROTOCOLPRINTER_H
+#ifndef __INET_FLOODINGPROTOCOLPRINTER_H
+#define __INET_FLOODIMGPROTOCOLPRINTER_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/printer/ProtocolPrinter.h"
 
 namespace inet {
 
-class INET_API FloodProtocolPrinter : public ProtocolPrinter
+class INET_API FloodingProtocolPrinter : public ProtocolPrinter
 {
   public:
     virtual void print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, Context& context) const override;
@@ -31,5 +31,5 @@ class INET_API FloodProtocolPrinter : public ProtocolPrinter
 
 } // namespace inet
 
-#endif // __INET_FLOODPROTOCOLPRINTER_H
+#endif // __INET_FLOODINGPROTOCOLPRINTER_H
 

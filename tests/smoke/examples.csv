@@ -151,7 +151,7 @@
 /examples/inet/hierarchical99/,      -f networklayer.ini -c IPv4 -r 0
 /examples/inet/hierarchical99/,      -f networklayer.ini -c IPv6 -r 0
 /examples/inet/hierarchical99/,      -f networklayer.ini -c Generic -r 0
-/examples/inet/hierarchical99/,      -f networklayer.ini -c Flood -r 0
+/examples/inet/hierarchical99/,      -f networklayer.ini -c Flooding -r 0
 /examples/inet/hierarchical99/,      -f networklayer.ini -c ProbabilisticBroadcast -r 0
 /examples/inet/hierarchical99/,      -f networklayer.ini -c AdaptiveProbabilisticBroadcast -r 0
 /examples/inet/hierarchical99/,      -f networklayer.ini -c WiseRoute -r 0

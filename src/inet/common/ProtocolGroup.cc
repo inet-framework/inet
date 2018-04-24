@@ -72,7 +72,7 @@ ProtocolGroup ProtocolGroup::ethertype("ethertype", {
     { 0x0800, &Protocol::ipv4 },
     { 0x0806, &Protocol::arp },
     { 0x86DD, &Protocol::ipv6 },
-    { 0x36FC, &Protocol::flood },         // ETHERTYPE_INET_FLOOD, not in any standards
+    { 0x36FC, &Protocol::flooding },         // ETHERTYPE_INET_FLOODING, not in any standards
     { 0x86FD, &Protocol::probabilistic },         // ETHERTYPE_INET_PROBABILISTIC, not in any standards
     { 0x86FE, &Protocol::wiseRoute },         // ETHERTYPE_INET_WISE, not in any standards
     { 0x86FF, &Protocol::gnp },         // ETHERTYPE_INET_GENERIC
@@ -84,7 +84,7 @@ ProtocolGroup ProtocolGroup::pppprotocol("pppprotocol", {
     { 0x0021, &Protocol::ipv4 },
     { 0x0057, &Protocol::ipv6 },
     { 0x0281, &Protocol::mpls },        // MPLS unicast
-    { 0x39FC, &Protocol::flood },         // INET_FLOOD, not in any standards
+    { 0x39FC, &Protocol::flooding },         // INET_FLOODING, not in any standards
     { 0x39FD, &Protocol::probabilistic },         // INET_PROBABILISTIC, not in any standards
     { 0x39FE, &Protocol::wiseRoute },         // INET_WISE, not in any standards
     { 0x39FF, &Protocol::gnp },         // INET_GENERIC, not in any standards
@@ -111,7 +111,7 @@ ProtocolGroup ProtocolGroup::ipprotocol("ipprotocol", {
     { 138, &Protocol::manet },
 
     { 249, &Protocol::linkStateRouting },    // INET specific: Link State Routing Protocol
-    { 250, &Protocol::flood },    // INET specific: Probabilistic Network Protocol
+    { 250, &Protocol::flooding },    // INET specific: Probabilistic Network Protocol
     { 251, &Protocol::probabilistic },    // INET specific: Probabilistic Network Protocol
     { 252, &Protocol::wiseRoute },    // INET specific: Probabilistic Network Protocol
     { 253, &Protocol::gnp },    // INET specific: Generic Network Protocol

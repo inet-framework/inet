@@ -1,5 +1,5 @@
 /* -*- mode:c++ -*- ********************************************************
- * file:        Flood.cc
+ * file:        Flooding.cc
  *
  * author:      Daniel Willkomm
  *
@@ -20,25 +20,24 @@
  *              the user can decide whether to use plain flooding or not
  **************************************************************************/
 
-#include "inet/networklayer/flood/Flood.h"
-
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
-#include "inet/linklayer/common/MacAddressTag_m.h"
+#include "inet/networklayer/flood/Flood.h"
 
 namespace inet {
 
 using std::endl;
 
-Define_Module(Flood);
+Define_Module(Flooding);
 
 /**
  * Reads all parameters from the ini file. If a parameter is not
  * specified in the ini file a default value will be set.
  **/
-void Flood::initialize(int stage)
+void Flooding::initialize(int stage)
 {
     NetworkProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -68,7 +67,7 @@ void Flood::initialize(int stage)
     }
 }
 
-void Flood::finish()
+void Flooding::finish()
 {
     if (plainFlooding) {
         bcMsgs.clear();
@@ -98,10 +97,10 @@ void Flood::finish()
  * If the maximum number of entries is reached the first (oldest) entry
  * is deleted.
  **/
-void Flood::handleUpperPacket(Packet *packet)
+void Flooding::handleUpperPacket(Packet *packet)
 {
     encapsulate(packet);
-    auto floodHeader = packet->peekAtFront<FloodHeader>();
+    auto floodHeader = packet->peekAtFront<FloodingHeader>();
 
     if (plainFlooding) {
         if (bcMsgs.size() >= bcMaxEntries) {
@@ -139,9 +138,9 @@ void Flood::handleUpperPacket(Packet *packet)
  * list (@ref
  * notBroadcasted). Otherwise the message will be deleted.
  **/
-void Flood::handleLowerPacket(Packet *packet)
+void Flooding::handleLowerPacket(Packet *packet)
 {
-    auto floodHeader = packet->peekAtFront<FloodHeader>();
+    auto floodHeader = packet->peekAtFront<FloodingHeader>();
 
     //msg not broadcasted yet
     if (notBroadcasted(floodHeader.get())) {
@@ -160,7 +159,7 @@ void Flood::handleLowerPacket(Packet *packet)
                 EV << " data msg BROADCAST! ttl = " << floodHeader->getTtl()
                    << " > 1 -> rebroadcast msg & send to upper\n";
                 auto dMsg = packet->dup();
-                auto newFloodHeader = dMsg->removeAtFront<FloodHeader>();
+                auto newFloodHeader = dMsg->removeAtFront<FloodingHeader>();
                 newFloodHeader->setTtl(newFloodHeader->getTtl() - 1);
                 dMsg->insertAtFront(newFloodHeader);
                 setDownControlInfo(dMsg, MacAddress::BROADCAST_ADDRESS);
@@ -185,7 +184,7 @@ void Flood::handleLowerPacket(Packet *packet)
                 decapsulate(packet);
                 auto packetCopy = new Packet();
                 packetCopy->insertAtBack(packet->peekDataAt(b(0), packet->getDataLength()));
-                auto floodHeaderCopy = staticPtrCast<FloodHeader>(floodHeader->dupShared());
+                auto floodHeaderCopy = staticPtrCast<FloodingHeader>(floodHeader->dupShared());
                 floodHeaderCopy->setTtl(floodHeader->getTtl() - 1);
                 packetCopy->insertAtFront(floodHeaderCopy);
                 // needs to set the next hop address again to broadcast
@@ -219,7 +218,7 @@ void Flood::handleLowerPacket(Packet *packet)
  * the list is full and a new message has to be entered, the oldest
  * entry is deleted.
  **/
-bool Flood::notBroadcasted(const FloodHeader *msg)
+bool Flooding::notBroadcasted(const FloodingHeader *msg)
 {
     if (!plainFlooding)
         return true;
@@ -252,9 +251,9 @@ bool Flood::notBroadcasted(const FloodHeader *msg)
 /**
  * Decapsulates the packet from the received Network packet
  **/
-void Flood::decapsulate(Packet *packet)
+void Flooding::decapsulate(Packet *packet)
 {
-    auto floodHeader = packet->popAtFront<FloodHeader>();
+    auto floodHeader = packet->popAtFront<FloodingHeader>();
     auto payloadLength = floodHeader->getPayloadLengthField();
     if (packet->getDataLength() < payloadLength) {
         throw cRuntimeError("Data error: illegal payload length");     //FIXME packet drop
@@ -276,14 +275,14 @@ void Flood::decapsulate(Packet *packet)
  * Encapsulates the received ApplPkt into a NetwPkt and set all needed
  * header fields.
  **/
-void Flood::encapsulate(Packet *appPkt)
+void Flooding::encapsulate(Packet *appPkt)
 {
     L3Address netwAddr;
 
     EV << "in encaps...\n";
 
     auto cInfo = appPkt->removeControlInfo();
-    auto pkt = makeShared<FloodHeader>(); // TODO: appPkt->getName(), appPkt->getKind());
+    auto pkt = makeShared<FloodingHeader>(); // TODO: appPkt->getName(), appPkt->getKind());
     pkt->setChunkLength(b(headerLength));
 
     auto hopLimitReq = appPkt->removeTagIfPresent<HopLimitReq>();
@@ -328,7 +327,7 @@ void Flood::encapsulate(Packet *appPkt)
 /**
  * Attaches a "control info" structure (object) to the down message pMsg.
  */
-void Flood::setDownControlInfo(Packet *const pMsg, const MacAddress& pDestAddr)
+void Flooding::setDownControlInfo(Packet *const pMsg, const MacAddress& pDestAddr)
 {
     pMsg->addTagIfAbsent<MacAddressReq>()->setDestAddress(pDestAddr);
     pMsg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&getProtocol());
