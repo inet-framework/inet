@@ -48,36 +48,43 @@ module GenericNetworkLayer like INetworkLayer
             parameters:
                 @display("p=100,100;is=s");
         }
-        gnp: GenericNetworkProtocol {
-            parameters:
-                @display("p=350,300;q=queue");
-        }
         echo: EchoProtocol {
             parameters:
-                @display("p=500,100");
+                @display("p=600,100");
+        }
+        up: MessageDispatcher {
+            parameters:
+                @display("p=450,200;b=480,5");
         }
         arp: GlobalArp {
             parameters:
-                @display("p=200,300;q=pendingQueue");
+                @display("p=300,300;q=pendingQueue");
         }
-        dp: MessageDispatcher {
+        gnp: GenericNetworkProtocol {
             parameters:
-                @display("p=350,200;b=380,5");
+                @display("p=450,300;q=queue");
+        }
+        lp: MessageDispatcher {
+            parameters:
+                @display("p=450,400;b=480,5");
         }
 
     connections allowunconnected:
-        dp.out++ --> { @display("m=n"); } --> transportOut;
-        dp.in++ <-- { @display("m=n"); } <-- transportIn;
+        up.out++ --> { @display("m=n"); } --> transportOut;
+        up.in++ <-- { @display("m=n"); } <-- transportIn;
 
-        gnp.transportOut --> dp.in++;
-        gnp.transportIn <-- dp.out++;
+        gnp.transportOut --> up.in++;
+        gnp.transportIn <-- up.out++;
 
-        dp.out++ --> echo.ipIn;
-        dp.in++ <-- echo.ipOut;
+        up.out++ --> echo.ipIn;
+        up.in++ <-- echo.ipOut;
 
-        gnp.arpOut --> arp.netwIn;
-        gnp.arpIn <-- arp.netwOut;
+        lp.out++ --> arp.ifIn;
+        lp.in++ <-- arp.ifOut;
 
-        ifIn --> { @display("m=s"); } --> gnp.queueIn;
-        gnp.queueOut --> { @display("m=s"); } --> ifOut;
+        lp.out++ --> gnp.queueIn;
+        lp.in++ <-- gnp.queueOut;
+
+        lp.in++ <-- { @display("m=s"); } <-- ifIn;
+        lp.out++ --> { @display("m=s"); } --> ifOut;
 }
