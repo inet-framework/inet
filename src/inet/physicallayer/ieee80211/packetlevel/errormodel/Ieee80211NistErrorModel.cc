@@ -224,13 +224,13 @@ double Ieee80211NistErrorModel::getOFDMAndERPOFDMChunkSuccessRate(const ApskModu
     }
     else if (subcarrierModulation == &Qam256Modulation::singleton) {
         if (convolutionalCode->getCodeRatePuncturingK() == 5 && convolutionalCode->getCodeRatePuncturingN() == 6)
-            return getFec64QamBer(snr, bitLength, 5);
+            return getFec256QamBer(snr, bitLength, 5);
         return getFec256QamBer(snr, bitLength, 3);
     }
     else if (subcarrierModulation == &Qam1024Modulation::singleton) {
         if (convolutionalCode->getCodeRatePuncturingK() == 5 && convolutionalCode->getCodeRatePuncturingN() == 6)
-            return getFec64QamBer(snr, bitLength, 5);
-        return getFec256QamBer(snr, bitLength, 3);
+            return getFec1024QamBer(snr, bitLength, 5);
+        return getFec1024QamBer(snr, bitLength, 3);
     }
     else
         throw cRuntimeError("Unknown modulation");

@@ -23,7 +23,7 @@
 #include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmMode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211HtCode.h"
-#include "Ieee80211VhtCode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211VhtCode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211HtMode.h"
 #include "inet/common/DelayedInitializer.h"
 
@@ -161,7 +161,7 @@ class INET_API Ieee80211VhtPreambleMode : public IIeee80211PreambleMode, public 
 
         virtual const simtime_t getDuration() const override;
 
-        virtual Ptr<Ieee80211PhyPreamble> createPreamble() const override { return makeShared<Ieee80211HtPhyPreamble>(); }
+        virtual Ptr<Ieee80211PhyPreamble> createPreamble() const override { return makeShared<Ieee80211VhtPhyPreamble>(); }
 
 };
 
