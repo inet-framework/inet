@@ -23,9 +23,9 @@ import inet.networklayer.common.EchoProtocol;
 import inet.networklayer.contract.INetworkLayer;
 
 //
-// This module provides the generic network layer.
+// This module provides a network layer for the next hop forwarding.
 //
-module GenericNetworkLayer like INetworkLayer
+module NextHopNetworkLayer like INetworkLayer
 {
     parameters:
         bool forwarding = default(false);
