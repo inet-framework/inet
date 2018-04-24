@@ -18,10 +18,9 @@
 package inet.networklayer.generic;
 
 import inet.common.MessageDispatcher;
-import inet.networklayer.arp.generic.GenericArp;
+import inet.networklayer.arp.ipv4.GlobalArp;
 import inet.networklayer.common.EchoProtocol;
 import inet.networklayer.contract.INetworkLayer;
-
 
 //
 // This module provides the generic network layer.
@@ -57,7 +56,7 @@ module GenericNetworkLayer like INetworkLayer
             parameters:
                 @display("p=500,100");
         }
-        arp: GenericArp {
+        arp: GlobalArp {
             parameters:
                 @display("p=200,300;q=pendingQueue");
         }

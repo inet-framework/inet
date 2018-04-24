@@ -18,10 +18,9 @@
 package inet.networklayer.wiseroute;
 
 import inet.common.MessageDispatcher;
-import inet.networklayer.arp.generic.GenericArp;
+import inet.networklayer.arp.ipv4.GlobalArp;
 import inet.networklayer.common.EchoProtocol;
 import inet.networklayer.contract.INetworkLayer;
-
 
 //
 // This module provides a simple network layer.
@@ -40,9 +39,9 @@ module WiseRouteNetworkLayer like INetworkLayer
         output transportOut @labels(ITransportPacket/up);
 
     submodules:
-        arp: GenericArp {
+        arp: GlobalArp {
             parameters:
-	            @display("p=100,300");
+                @display("p=100,300");
         }
         np: WiseRoute {
             parameters:

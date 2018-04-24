@@ -20,11 +20,8 @@
 #define __INET_GLOBALARP_H
 
 #include <map>
-#include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/linklayer/common/MacAddress.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/contract/IArp.h"
@@ -47,19 +44,20 @@ class INET_API GlobalArp : public cSimpleModule, public IArp, public ILifecycle,
       public:
         GlobalArp *owner = nullptr;    // owner module of this cache entry
         const InterfaceEntry *interfaceEntry = nullptr;    // NIC to send the packet to
-        MacAddress macAddress;
     };
 
   protected:
     bool isUp = false;
     IInterfaceTable *interfaceTable = nullptr;
+    L3Address::AddressType addressType = static_cast<L3Address::AddressType>(-1);
 
     static ArpCache globalArpCache;
     static int globalArpCacheRefCnt;
 
   protected:
-    // Maps an IP multicast address to an Ethernet multicast address.
-    MacAddress mapMulticastAddress(L3Address addr);
+    void ensureCacheEntry(const L3Address& address, const InterfaceEntry *interfaceEntry);
+    MacAddress mapUnicastAddress(L3Address address);
+    MacAddress mapMulticastAddress(L3Address address);
 
   public:
     GlobalArp();
@@ -69,7 +67,7 @@ class INET_API GlobalArp : public cSimpleModule, public IArp, public ILifecycle,
     /** @name IArp implementation */
     //@{
     virtual L3Address getL3AddressFor(const MacAddress& addr) const override;
-    virtual MacAddress resolveL3Address(const L3Address& address, const InterfaceEntry *ie) override;
+    virtual MacAddress resolveL3Address(const L3Address& address, const InterfaceEntry *interfaceEntry) override;
     // @}
 
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
