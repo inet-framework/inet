@@ -25,7 +25,7 @@
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
-#include "inet/networklayer/flood/Flood.h"
+#include "inet/networklayer/flooding/Flooding.h"
 
 namespace inet {
 

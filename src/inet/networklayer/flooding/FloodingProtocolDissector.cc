@@ -18,8 +18,8 @@
 //
 
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
-#include "inet/networklayer/flood/FloodHeader_m.h"
-#include "inet/networklayer/flood/FloodProtocolDissector.h"
+#include "inet/networklayer/flooding/FloodingHeader_m.h"
+#include "inet/networklayer/flooding/FloodingProtocolDissector.h"
 
 namespace inet {
 

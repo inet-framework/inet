@@ -21,7 +21,7 @@
 // *              the user can decide whether to use plain flooding or not
 // ***************************************************************************
 
-package inet.networklayer.flood;
+package inet.networklayer.flooding;
 
 import inet.networklayer.base.NetworkProtocolBase;
 import inet.networklayer.contract.INetworkProtocol;

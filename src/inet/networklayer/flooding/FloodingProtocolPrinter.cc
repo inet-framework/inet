@@ -19,8 +19,8 @@
 
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
-#include "inet/networklayer/flood/FloodHeader_m.h"
-#include "inet/networklayer/flood/FloodProtocolPrinter.h"
+#include "inet/networklayer/flooding/FloodingHeader_m.h"
+#include "inet/networklayer/flooding/FloodingProtocolPrinter.h"
 
 namespace inet {
 
