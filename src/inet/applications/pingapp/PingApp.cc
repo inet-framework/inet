@@ -65,7 +65,7 @@ simsignal_t PingApp::pingRxSeqSignal = registerSignal("pingRxSeq");
 const std::map<const Protocol *, const Protocol *> PingApp::l3Echo( {
     { &Protocol::ipv4, &Protocol::icmpv4 },
     { &Protocol::ipv6, &Protocol::icmpv6 },
-    { &Protocol::flood, &Protocol::echo },
+    { &Protocol::flooding, &Protocol::echo },
     { &Protocol::gnp, &Protocol::echo },
     { &Protocol::probabilistic, &Protocol::echo },
     { &Protocol::wiseRoute, &Protocol::echo },

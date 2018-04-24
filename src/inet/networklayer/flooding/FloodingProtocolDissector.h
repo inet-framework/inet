@@ -15,15 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_FLOODDISSECTOR_H
-#define __INET_FLOODDISSECTOR_H
+#ifndef __INET_FLOODINGDISSECTOR_H
+#define __INET_FLOODINGDISSECTOR_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/dissector/ProtocolDissector.h"
 
 namespace inet {
 
-class INET_API FloodProtocolDissector : public ProtocolDissector
+class INET_API FloodingProtocolDissector : public ProtocolDissector
 {
   public:
     virtual void dissect(Packet *packet, ICallback& callback) const override;
@@ -31,5 +31,5 @@ class INET_API FloodProtocolDissector : public ProtocolDissector
 
 } // namespace inet
 
-#endif // __INET_FLOODDISSECTOR_H
+#endif // __INET_FLOODINGDISSECTOR_H
 

@@ -20,86 +20,69 @@
 #define __INET_GLOBALARP_H
 
 #include <map>
-
-#include "inet/common/INETDefs.h"
-
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/contract/IArp.h"
-#include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
-#include "inet/linklayer/common/MacAddress.h"
-#include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
 
-// Forward declarations:
-class ArpPacket;
-class IInterfaceTable;
-class InterfaceEntry;
-class IIpv4RoutingTable;
-
 /**
- * ARP implementation.
+ * This class provides an IArp implementation whithout exchanging packets.
  */
 class INET_API GlobalArp : public cSimpleModule, public IArp, public ILifecycle, public cListener
 {
   public:
     class ArpCacheEntry;
     typedef std::map<L3Address, ArpCacheEntry *> ArpCache;
-    typedef std::vector<cMessage *> MsgPtrVector;
 
-    // Ipv4Address -> MacAddress table
-    // TBD should we key it on (Ipv4Address, InterfaceEntry*)?
+    // L3Address -> MacAddress
     class ArpCacheEntry
     {
       public:
-        GlobalArp *owner = nullptr;    // owner ARP module of this cache entry
-        const InterfaceEntry *ie = nullptr;    // NIC to send the packet to
-        MacAddress macAddress;    // MAC address
-        simtime_t lastUpdate;    // entries should time out after cacheTimeout
-        ArpCache::iterator myIter;    // iterator pointing to this entry
+        GlobalArp *owner = nullptr;    // owner module of this cache entry
+        const InterfaceEntry *interfaceEntry = nullptr;    // NIC to send the packet to
     };
 
   protected:
     bool isUp = false;
+    IInterfaceTable *interfaceTable = nullptr;
+    L3Address::AddressType addressType = static_cast<L3Address::AddressType>(-1);
 
     static ArpCache globalArpCache;
     static int globalArpCacheRefCnt;
 
-    IInterfaceTable *ift = nullptr;
-    IIpv4RoutingTable *rt = nullptr;    // for answering ProxyARP requests
-
   protected:
-    // Maps an IP multicast address to an Ethernet multicast address.
-    MacAddress mapMulticastAddress(L3Address addr);
+    void ensureCacheEntry(const L3Address& address, const InterfaceEntry *interfaceEntry);
+    MacAddress mapUnicastAddress(L3Address address);
+    MacAddress mapMulticastAddress(L3Address address);
 
   public:
     GlobalArp();
     virtual ~GlobalArp();
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
-    /// IARPCache implementation  @{
+    /** @name IArp implementation */
+    //@{
     virtual L3Address getL3AddressFor(const MacAddress& addr) const override;
-    virtual MacAddress resolveL3Address(const L3Address& address, const InterfaceEntry *ie) override;
-    /// @}
+    virtual MacAddress resolveL3Address(const L3Address& address, const InterfaceEntry *interfaceEntry) override;
+    // @}
 
-    // cListener
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
   protected:
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
-    virtual void finish() override;
-
-    virtual void processSelfMessage(cMessage *msg);
+    virtual void handleSelfMessage(cMessage *msg);
+    virtual void handlePacket(Packet *packet);
     virtual void handleMessageWhenDown(cMessage *msg);
 
     virtual bool isNodeUp();
     virtual void stop();
     virtual void start();
-
-    virtual void processARPPacket(ArpPacket *arp);
 };
 
 } // namespace inet

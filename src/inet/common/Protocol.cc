@@ -116,7 +116,7 @@ const Protocol Protocol::ackingMac("ackingmac", "Acking MAC");
 const Protocol Protocol::apskPhy("apskphy", "APSK PHY", Protocol::PhysicalLayer);
 const Protocol Protocol::csmaCaMac("csmacamac", "CSMA/CA MAC");
 const Protocol Protocol::echo("echo", "Echo"); // Echo protocol (ping request/reply)
-const Protocol Protocol::flood("flood", "Flood", Protocol::NetworkLayer);
+const Protocol Protocol::flooding("flooding", "Flooding", Protocol::NetworkLayer);
 const Protocol Protocol::gnp("gnp", "GNP"); // Generic Network Protocol
 const Protocol Protocol::linkStateRouting("linkstaterouting", "LinkStateRouting");
 const Protocol Protocol::probabilistic("probabilistic", "Probabilistic", Protocol::NetworkLayer); // Probabilistic Network Protocol

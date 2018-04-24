@@ -27,8 +27,8 @@ import inet.networklayer.contract.IArp;
 simple GlobalArp like IArp
 {
     parameters:
-        string interfaceTableModule;   // The path to the InterfaceTable module
-        string routingTableModule;
+        string interfaceTableModule;   // path to the InterfaceTable module
+        string addressType @enum("ipv4", "ipv6", "mac", "moduleid", "modulepath") = default("ipv4");
         @display("i=block/layer");
         @signal[arpResolutionInitiated](type=IArp::Notification);
         @signal[arpResolutionCompleted](type=IArp::Notification);

@@ -1,5 +1,5 @@
 /* -*- mode:c++ -*- ********************************************************
- * file:        Flood.h
+ * file:        Flooding.h
  *
  * author:      Daniel Willkomm
  *
@@ -20,15 +20,15 @@
  *              the user can decide whether to use plain flooding or not
  **************************************************************************/
 
-#ifndef __INET_FLOOD_H
-#define __INET_FLOOD_H
+#ifndef __INET_FLOODING_H
+#define __INET_FLOODING_H
 
 #include <list>
 #include "inet/common/packet/Packet.h"
-#include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/base/NetworkProtocolBase.h"
+#include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/contract/INetworkProtocol.h"
-#include "inet/networklayer/flood/FloodHeader_m.h"
+#include "inet/networklayer/flooding/FloodingHeader_m.h"
 
 namespace inet {
 
@@ -51,7 +51,7 @@ namespace inet {
  *
  * ported to Mixim 2.0 by Theodoros Kapourniotis
  **/
-class INET_API Flood : public NetworkProtocolBase, public INetworkProtocol
+class INET_API Flooding : public NetworkProtocolBase, public INetworkProtocol
 {
   protected:
     /** @brief Network layer sequence number*/
@@ -106,7 +106,7 @@ class INET_API Flood : public NetworkProtocolBase, public INetworkProtocol
     long nbHops = 0;
 
   public:
-    Flood() {}
+    Flooding() {}
 
     /** @brief Initialization of omnetpp.ini parameters*/
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -115,7 +115,7 @@ class INET_API Flood : public NetworkProtocolBase, public INetworkProtocol
 
     virtual void finish() override;
 
-    const Protocol& getProtocol() const override { return Protocol::flood; }
+    const Protocol& getProtocol() const override { return Protocol::flooding; }
 
   protected:
 
@@ -126,7 +126,7 @@ class INET_API Flood : public NetworkProtocolBase, public INetworkProtocol
     virtual void handleLowerPacket(Packet *packet) override;
 
     /** @brief Checks whether a message was already broadcasted*/
-    bool notBroadcasted(const FloodHeader *);
+    bool notBroadcasted(const FloodingHeader *);
 
     void decapsulate(Packet *packet);
     void encapsulate(Packet *packet);
@@ -149,5 +149,5 @@ class INET_API Flood : public NetworkProtocolBase, public INetworkProtocol
 
 } // namespace inet
 
-#endif // ifndef __INET_FLOOD_H
+#endif // ifndef __INET_FLOODING_H
 

@@ -102,7 +102,7 @@ class INET_API Protocol
     static const Protocol apskPhy;
     static const Protocol csmaCaMac;
     static const Protocol echo;
-    static const Protocol flood;
+    static const Protocol flooding;
     static const Protocol gnp;
     static const Protocol linkStateRouting;
     static const Protocol probabilistic;

@@ -27,7 +27,7 @@ cplusplus {{
 
 namespace inet;
 
-class FloodHeader extends NetworkHeaderBase
+class FloodingHeader extends NetworkHeaderBase
 {
     L3Address     srcAddr;
     L3Address     destAddr;
@@ -37,7 +37,7 @@ class FloodHeader extends NetworkHeaderBase
     B             payloadLengthField;
 }
 
-cplusplus(FloodHeader) {{
+cplusplus(FloodingHeader) {{
   public:
     virtual L3Address getSourceAddress() const override { return L3Address(getSrcAddr()); }
     virtual void setSourceAddress(const L3Address& address) override { setSrcAddr(address); }

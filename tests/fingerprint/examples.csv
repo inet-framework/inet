@@ -149,7 +149,7 @@
 /examples/inet/hierarchical99/,      -f networklayer.ini -c IPv4 -r 0,              10000s,          cead-32e3/tplx, PASS,
 /examples/inet/hierarchical99/,      -f networklayer.ini -c IPv6 -r 0,              10000s,          484d-a7e4/tplx, PASS,
 /examples/inet/hierarchical99/,      -f networklayer.ini -c Generic -r 0,           10000s,          c424-c98e/tplx, PASS,
-/examples/inet/hierarchical99/,      -f networklayer.ini -c Flood -r 0,             10000s,          c234-0e8f/tplx, PASS,
+/examples/inet/hierarchical99/,      -f networklayer.ini -c Flooding -r 0,          10000s,          c234-0e8f/tplx, PASS,
 /examples/inet/hierarchical99/,      -f networklayer.ini -c ProbabilisticBroadcast -r 0,              10000s,          05d0-b950/tplx, PASS,
 /examples/inet/hierarchical99/,      -f networklayer.ini -c AdaptiveProbabilisticBroadcast -r 0,      10000s,          09e5-2b84/tplx, PASS,
 /examples/inet/hierarchical99/,      -f networklayer.ini -c WiseRoute -r 0,         10000s,          cd6c-3a54/tplx, PASS,

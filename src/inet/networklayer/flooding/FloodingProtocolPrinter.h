@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2018 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,22 +15,21 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.networklayer.arp.generic;
+#ifndef __INET_FLOODINGPROTOCOLPRINTER_H
+#define __INET_FLOODIMGPROTOCOLPRINTER_H
 
-import inet.networklayer.contract.IArp;
+#include "inet/common/INETDefs.h"
+#include "inet/common/packet/printer/ProtocolPrinter.h"
 
+namespace inet {
 
-//
-// TODO
-//
-simple GenericArp like IArp
+class INET_API FloodingProtocolPrinter : public ProtocolPrinter
 {
-    parameters:
-        @display("i=block/layer");
-        string interfaceTableModule;   // The path to the InterfaceTable module
-    gates:
-        input netwIn @labels(IGenericDatagram); // incoming ARP requests and replies
-        output netwOut @labels(IGenericDatagram);  // outgoing ARP requests/replies, and datagrams with resolved next hop
-        input ifIn @labels(ArpPacket,Ieee802Ctrl);
-        output ifOut @labels(ArpPacket,Ieee802Ctrl);
-}
+  public:
+    virtual void print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, Context& context) const override;
+};
+
+} // namespace inet
+
+#endif // __INET_FLOODINGPROTOCOLPRINTER_H
+

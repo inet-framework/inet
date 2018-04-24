@@ -1,5 +1,5 @@
 //***************************************************************************
-// * file:        Flood.ned
+// * file:        Flooding.ned
 // *
 // * author:      Daniel Willkomm
 // *		  
@@ -21,7 +21,7 @@
 // *              the user can decide whether to use plain flooding or not
 // ***************************************************************************
 
-package inet.networklayer.flood;
+package inet.networklayer.flooding;
 
 import inet.networklayer.base.NetworkProtocolBase;
 import inet.networklayer.contract.INetworkProtocol;
@@ -44,7 +44,7 @@ import inet.networklayer.contract.INetworkProtocol;
 //
 // ported to Mixim 2.0 by Theodoros Kapourniotis
 //
-simple Flood extends NetworkProtocolBase like INetworkProtocol
+simple Flooding extends NetworkProtocolBase like INetworkProtocol
 {
     parameters:
         @display("i=block/fork");
@@ -55,6 +55,5 @@ simple Flood extends NetworkProtocolBase like INetworkProtocol
         // Time after which an entry for an already broadcasted msg can be deleted
         double bcDelTime @unit(s) = default(100 s);
         int defaultTtl = default(10); // Default time-to-live (ttl) used for this module expressed in  number of hops.
-
-        @class(Flood);
+        @class(Flooding);
 }
