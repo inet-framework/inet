@@ -47,6 +47,7 @@ class INET_API Ieee80211OfdmCompliantModulations
     static const Ieee80211OfdmModulation qpskModulation;
     static const Ieee80211OfdmModulation qam16Modulation;
     static const Ieee80211OfdmModulation qam64Modulation;
+    static const Ieee80211OfdmModulation qam256Modulation;
 };
 
 } /* namespace physicallayer */

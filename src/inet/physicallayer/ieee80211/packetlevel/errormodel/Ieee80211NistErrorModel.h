@@ -44,10 +44,14 @@ class INET_API Ieee80211NistErrorModel : public Ieee80211ErrorModelBase
     double getQpskBer(double snr) const;
     double get16QamBer(double snr) const;
     double get64QamBer(double snr) const;
+    double get256QamBer(double snr) const;
+    double get1024QamBer(double snr) const;
     double getFecBpskBer(double snr, double nbits, uint32_t bValue) const;
     double getFecQpskBer(double snr, double nbits, uint32_t bValue) const;
     double getFec16QamBer(double snr, uint32_t nbits, uint32_t bValue) const;
     double getFec64QamBer(double snr, uint32_t nbits, uint32_t bValue) const;
+    double getFec256QamBer (double snr, uint64_t nbits, uint32_t bValue) const;
+    double getFec1024QamBer (double snr, uint64_t nbits, uint32_t bValue) const;
 
     virtual double getOFDMAndERPOFDMChunkSuccessRate(const ApskModulationBase *subcarrierModulation, const ConvolutionalCode *convolutionalCode, unsigned int bitLength, double snr) const;
     virtual double getDSSSAndHrDSSSChunkSuccessRate(bps bitrate, unsigned int bitLength, double snr) const;
