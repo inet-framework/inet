@@ -166,7 +166,6 @@
         nedPackages = "
                        inet.networklayer.generic
                        inet.networklayer.configurator.generic
-                       inet.networklayer.arp.generic
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_GENERIC"
