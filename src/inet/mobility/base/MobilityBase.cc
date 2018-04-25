@@ -129,7 +129,6 @@ void MobilityBase::initializePosition()
     setInitialPosition();
     checkPosition();
     emitMobilityStateChangedSignal();
-    updateVisualRepresentation();
 }
 
 void MobilityBase::setInitialPosition()
@@ -187,31 +186,28 @@ void MobilityBase::initializeOrientation()
     }
 }
 
+void MobilityBase::refreshDisplay() const
+{
+    if (hasGUI() && visualRepresentation != nullptr) {
+        auto position = const_cast<MobilityBase *>(this)->getCurrentPosition();
+        EV_DEBUG << "current position = " << position << endl;
+        auto visualRepresentationPosition = canvasProjection->computeCanvasPoint(position);
+        char buf[32];
+        snprintf(buf, sizeof(buf), "%lf", visualRepresentationPosition.x);
+        buf[sizeof(buf) - 1] = 0;
+        visualRepresentation->getDisplayString().setTagArg("p", 0, buf);
+        snprintf(buf, sizeof(buf), "%lf", visualRepresentationPosition.y);
+        buf[sizeof(buf) - 1] = 0;
+        visualRepresentation->getDisplayString().setTagArg("p", 1, buf);
+    }
+}
+
 void MobilityBase::handleMessage(cMessage *message)
 {
     if (message->isSelfMessage())
         handleSelfMessage(message);
     else
         throw cRuntimeError("Mobility modules can only receive self messages");
-}
-
-void MobilityBase::updateVisualRepresentation()
-{
-    EV_DEBUG << "current position = " << lastPosition << endl;
-#ifdef WITH_VISUALIZERS
-    if (hasGUI() && visualRepresentation != nullptr) {
-        inet::visualizer::MobilityCanvasVisualizer::setPosition(visualRepresentation, canvasProjection->computeCanvasPoint(lastPosition));
-    }
-#else
-    auto position = canvasProjection->computeCanvasPoint(lastPosition);
-    char buf[32];
-    snprintf(buf, sizeof(buf), "%lf", position.x);
-    buf[sizeof(buf) - 1] = 0;
-    visualRepresentation->getDisplayString().setTagArg("p", 0, buf);
-    snprintf(buf, sizeof(buf), "%lf", position.y);
-    buf[sizeof(buf) - 1] = 0;
-    visualRepresentation->getDisplayString().setTagArg("p", 1, buf);
-#endif
 }
 
 void MobilityBase::emitMobilityStateChangedSignal()

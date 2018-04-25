@@ -67,10 +67,7 @@ void MoBanLocal::initialize(int stage)
         WATCH(speed);
     }
     else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT_2)
-    {
-        updateVisualRepresentation();
         computeMaxSpeed();
-    }
 }
 
 void MoBanLocal::setInitialPosition()
@@ -102,9 +99,9 @@ void MoBanLocal::setTargetPosition()
     }
 }
 
-void MoBanLocal::updateVisualRepresentation()
+void MoBanLocal::refreshDisplay() const
 {
-    if (hasGUI() && visualRepresentation) {
+    if (hasGUI() && visualRepresentation != nullptr) {
         Coord coordinatorPosition = coordinator->getCurrentPosition();
         visualRepresentation->getDisplayString().setTagArg("p", 0, lastPosition.x + coordinatorPosition.x);
         visualRepresentation->getDisplayString().setTagArg("p", 1, lastPosition.y + coordinatorPosition.y);

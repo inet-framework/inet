@@ -116,14 +116,14 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
     /** @brief Initializes the orientation from module parameters. */
     virtual void initializeOrientation();
 
+    /** @brief Moves the visual representation module's icon to the new position on the screen. */
+    virtual void refreshDisplay() const;
+
     /** @brief This modules should only receive self-messages. */
     virtual void handleMessage(cMessage *msg) override;
 
     /** @brief Called upon arrival of a self messages, subclasses must override. */
     virtual void handleSelfMessage(cMessage *msg) = 0;
-
-    /** @brief Moves the visual representation module's icon to the new position on the screen. */
-    virtual void updateVisualRepresentation();
 
     /** @brief Emits a signal with the updated mobility state. */
     virtual void emitMobilityStateChangedSignal();

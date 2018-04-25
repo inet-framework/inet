@@ -56,7 +56,6 @@ void RotatingMobilityBase::rotateAndUpdate()
         rotate();
         lastUpdate = simTime();
         emitMobilityStateChangedSignal();
-        updateVisualRepresentation();
     }
 }
 

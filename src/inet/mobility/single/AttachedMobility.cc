@@ -43,10 +43,8 @@ void AttachedMobility::initialize(int stage)
 
 void AttachedMobility::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
-    if (IMobility::mobilityStateChangedSignal == signal) {
+    if (IMobility::mobilityStateChangedSignal == signal)
         emitMobilityStateChangedSignal();
-        updateVisualRepresentation();
-    }
 }
 
 Coord AttachedMobility::getCurrentPosition()

@@ -81,13 +81,13 @@ class INET_API MoBanLocal : public LineSegmentsMobilityBase
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
+    virtual void refreshDisplay() const override;
+
     virtual void initialize(int) override;
 
     virtual void setInitialPosition() override;
 
     virtual void setTargetPosition() override;
-
-    virtual void updateVisualRepresentation() override;
 
     virtual void computeMaxSpeed();
   public:
