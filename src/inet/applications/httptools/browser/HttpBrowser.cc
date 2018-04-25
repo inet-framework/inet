@@ -153,7 +153,7 @@ void HttpBrowser::sendRequestsToServer(std::string www, HttpRequestQueue queue)
 
 void HttpBrowser::socketEstablished(TcpSocket *socket)
 {
-    int connId = socket->getConnectionId();
+    int connId = socket->getSocketId();
     EV_DEBUG << "Socket with id " << connId << " established" << endl;
 
     socketsOpened++;
@@ -185,7 +185,7 @@ void HttpBrowser::socketEstablished(TcpSocket *socket)
 
 void HttpBrowser::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
 {
-    EV_DEBUG << "Socket data arrived on connection " << socket->getConnectionId() << ": " << msg->getName() << endl;
+    EV_DEBUG << "Socket data arrived on connection " << socket->getSocketId() << ": " << msg->getName() << endl;
     SockData *sockdata = (SockData *)socket->getYourPtr();
     if (sockdata == nullptr) {
         EV_ERROR << "socketDataArrivedfailure. Null pointer" << endl;
@@ -211,12 +211,12 @@ void HttpBrowser::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
 void HttpBrowser::socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status)
 {
     // This is obviously not used at the present time.
-    EV_INFO << "SOCKET STATUS ARRIVED. Socket: " << socket->getConnectionId() << endl;
+    EV_INFO << "SOCKET STATUS ARRIVED. Socket: " << socket->getSocketId() << endl;
 }
 
 void HttpBrowser::socketPeerClosed(TcpSocket *socket)
 {
-    int connId = socket->getConnectionId();
+    int connId = socket->getSocketId();
     EV_DEBUG << "Socket " << connId << " closed by peer" << endl;
     SockData *sockdata = (SockData *)socket->getYourPtr();
     if (sockdata == nullptr) {
@@ -235,7 +235,7 @@ void HttpBrowser::socketPeerClosed(TcpSocket *socket)
 
 void HttpBrowser::socketClosed(TcpSocket *socket)
 {
-    int connId = socket->getConnectionId();
+    int connId = socket->getSocketId();
     EV_INFO << "Socket " << connId << " closed" << endl;
 
     SockData *sockdata = (SockData *)socket->getYourPtr();
@@ -251,7 +251,7 @@ void HttpBrowser::socketClosed(TcpSocket *socket)
 
 void HttpBrowser::socketFailure(TcpSocket *socket, int code)
 {
-    int connId = socket->getConnectionId();
+    int connId = socket->getSocketId();
     EV_WARN << "connection broken. Connection id " << connId << endl;
     numBroken++;
 

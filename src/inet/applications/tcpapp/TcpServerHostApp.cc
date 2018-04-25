@@ -94,7 +94,7 @@ void TcpServerHostApp::handleMessage(cMessage *msg)
             const char *serverThreadModuleType = par("serverThreadModuleType");
             cModuleType *moduleType = cModuleType::get(serverThreadModuleType);
             char name[80];
-            sprintf(name, "thread_%i", socket->getConnectionId());
+            sprintf(name, "thread_%i", socket->getSocketId());
             TcpServerThreadBase *proc = check_and_cast<TcpServerThreadBase *>(moduleType->create(name, this));
             proc->finalizeParameters();
 

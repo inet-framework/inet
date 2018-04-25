@@ -186,7 +186,7 @@ void Bgp::processMessageFromTCP(cMessage *msg)
 
 void Bgp::socketEstablished(TcpSocket *socket)
 {
-    int connId = socket->getConnectionId();
+    int connId = socket->getSocketId();
     _currSessionId = findIdFromSocketConnId(_BGPSessions, connId);
     if (_currSessionId == static_cast<SessionId>(-1)) {
         throw cRuntimeError("socket id=%d is not established", connId);
@@ -203,7 +203,7 @@ void Bgp::socketEstablished(TcpSocket *socket)
         _BGPSessions[_currSessionId]->getSocketListen()->abort();
     }
 
-    if (_BGPSessions[_currSessionId]->getSocketListen()->getConnectionId() != connId &&
+    if (_BGPSessions[_currSessionId]->getSocketListen()->getSocketId() != connId &&
         _BGPSessions[_currSessionId]->getType() == EGP &&
         this->findNextSession(EGP) != static_cast<SessionId>(-1))
     {
@@ -213,7 +213,7 @@ void Bgp::socketEstablished(TcpSocket *socket)
 
 void Bgp::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
 {
-    _currSessionId = findIdFromSocketConnId(_BGPSessions, socket->getConnectionId());
+    _currSessionId = findIdFromSocketConnId(_BGPSessions, socket->getSocketId());
     if (_currSessionId != static_cast<SessionId>(-1)) {
         //TODO: should queuing incoming payloads, and peek from the queue
         const auto& ptrHdr = msg->peekAtFront<BgpHeader>();
@@ -240,7 +240,7 @@ void Bgp::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
 
 void Bgp::socketFailure(TcpSocket *socket, int code)
 {
-    int connId = socket->getConnectionId();
+    int connId = socket->getSocketId();
     _currSessionId = findIdFromSocketConnId(_BGPSessions, connId);
     if (_currSessionId != static_cast<SessionId>(-1)) {
         _BGPSessions[_currSessionId]->getFSM()->TcpConnectionFails();
@@ -743,7 +743,7 @@ SessionId Bgp::findIdFromSocketConnId(std::map<SessionId, BgpSession *> sessions
     for (auto & session : sessions)
     {
         TcpSocket *socket = (session).second->getSocket();
-        if (socket->getConnectionId() == connId) {
+        if (socket->getSocketId() == connId) {
             return (session).first;
         }
     }

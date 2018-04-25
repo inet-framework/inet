@@ -33,7 +33,7 @@ class INET_API ISocket
     /**
      * Returns the socket Id which is unique within the network node.
      */
-    virtual int getConnectionId() const = 0;
+    virtual int getSocketId() const = 0;
 
     /**
      * Returns true if the message belongs to this socket.

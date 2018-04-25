@@ -780,7 +780,7 @@ int PacketDrillApp::syscallSocket(struct syscall_spec *syscall, cQueue *args, ch
             break;
         case IP_PROT_SCTP:
             sctpSocket.setOutputGate(gate("socketOut"));
-            sctpAssocId = sctpSocket.getConnectionId();
+            sctpAssocId = sctpSocket.getSocketId();
             if (sctpSocket.getOutboundStreams() == -1) {
                 sctpSocket.setOutboundStreams(par("outboundStreams"));
             }

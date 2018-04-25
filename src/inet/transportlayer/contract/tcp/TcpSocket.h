@@ -196,7 +196,7 @@ class INET_API TcpSocket : public ISocket
      * to identify the connection when it receives a command from the application
      * (or TcpSocket).
      */
-    int getConnectionId() const override { return connId; }
+    int getSocketId() const override { return connId; }
 
     void *getYourPtr() const { return yourPtr; }
 

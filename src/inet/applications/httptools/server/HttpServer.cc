@@ -88,7 +88,7 @@ void HttpServer::handleMessage(cMessage *msg)
 
 void HttpServer::socketEstablished(TcpSocket *socket)
 {
-    EV_INFO << "connected socket with id=" << socket->getConnectionId() << endl;
+    EV_INFO << "connected socket with id=" << socket->getSocketId() << endl;
     socketsOpened++;
 }
 
@@ -101,7 +101,7 @@ void HttpServer::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
     }
 
     // Should be a HttpReplyMessage
-    EV_DEBUG << "Socket data arrived on connection " << socket->getConnectionId() << ". Message=" << msg->getName() << ", kind=" << msg->getKind() << endl;
+    EV_DEBUG << "Socket data arrived on connection " << socket->getSocketId() << ". Message=" << msg->getName() << ", kind=" << msg->getKind() << endl;
 
     // call the message handler to process the message.
     sockdata->queue.push(msg->peekDataAt(B(0), msg->getDataLength()));
@@ -128,14 +128,14 @@ void HttpServer::socketPeerClosed(TcpSocket *socket)
 
     // close the connection (if not already closed)
     if (socket->getState() == TcpSocket::PEER_CLOSED) {
-        EV_INFO << "remote TCP closed, closing here as well. Connection id is " << socket->getConnectionId() << endl;
+        EV_INFO << "remote TCP closed, closing here as well. Connection id is " << socket->getSocketId() << endl;
         socket->close();    // Call the close method to properly dispose of the socket.
     }
 }
 
 void HttpServer::socketClosed(TcpSocket *socket)
 {
-    EV_INFO << "connection closed. Connection id " << socket->getConnectionId() << endl;
+    EV_INFO << "connection closed. Connection id " << socket->getSocketId() << endl;
 
     SockData *sockdata = (SockData *)socket->getYourPtr();
     if (sockdata == nullptr) {
@@ -150,7 +150,7 @@ void HttpServer::socketClosed(TcpSocket *socket)
 
 void HttpServer::socketFailure(TcpSocket *socket, int code)
 {
-    int connId = socket->getConnectionId();
+    int connId = socket->getSocketId();
     EV_WARN << "connection broken. Connection id " << connId << endl;
     numBroken++;
 

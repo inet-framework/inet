@@ -165,7 +165,7 @@ void SctpNatPeer::connectx(AddressVector connectAddressList, int32 connectPort)
     clientSocket.setInboundStreams(inStreams);
 
     EV << "issuing OPEN command\n";
-    EV << "Assoc " << clientSocket.getConnectionId() << "::connect to  port " << connectPort << "\n";
+    EV << "Assoc " << clientSocket.getSocketId() << "::connect to  port " << connectPort << "\n";
     bool streamReset = par("streamReset");
     clientSocket.connectx(connectAddressList, connectPort, streamReset, static_cast<uint32>(par("prMethod")), static_cast<uint32>(par("numRequestsPerSession")));
     numSessions++;
@@ -194,7 +194,7 @@ void SctpNatPeer::connect(L3Address connectAddress, int32 connectPort)
     clientSocket.setInboundStreams(inboundStreams);
 
     EV << "issuing OPEN command\n";
-    EV << "Assoc " << clientSocket.getConnectionId() << "::connect to address " << connectAddress << ", port " << connectPort << "\n";
+    EV << "Assoc " << clientSocket.getSocketId() << "::connect to address " << connectAddress << ", port " << connectPort << "\n";
     bool streamReset = par("streamReset");
     clientSocket.connect(connectAddress, connectPort, streamReset, static_cast<int32>(par("prMethod")), static_cast<uint32>(par("numRequestsPerSession")));
     numSessions++;
@@ -738,7 +738,7 @@ void SctpNatPeer::socketEstablished(SctpSocket *socket, unsigned long int buffer
             Request *cmesg = new Request("SCTP_C_SEND_ASCONF");
             auto& tags = getTags(cmesg);
             SctpCommandReq *cmd = tags.addTagIfAbsent<SctpCommandReq>();
-            cmd->setSocketId(clientSocket.getConnectionId());
+            cmd->setSocketId(clientSocket.getSocketId());
             cmesg->setKind(SCTP_C_SEND_ASCONF);
             clientSocket.sendNotification(cmesg);
         }
@@ -798,7 +798,7 @@ void SctpNatPeer::sendQueueRequest()
     SctpInfoReq *qinfo = tags.addTagIfAbsent<SctpInfoReq>();
     qinfo->setText(queueSize);
     cmsg->setKind(SCTP_C_QUEUE_MSGS_LIMIT);
-    qinfo->setSocketId(clientSocket.getConnectionId());
+    qinfo->setSocketId(clientSocket.getSocketId());
     clientSocket.sendRequest(cmsg);
 }
 
@@ -864,7 +864,7 @@ void SctpNatPeer::shutdownReceivedArrived(SctpSocket *socket)
         auto& tags = getTags(cmsg);
         SctpCommandReq *qinfo = tags.addTagIfAbsent<SctpCommandReq>();
         cmsg->setKind(SCTP_C_NO_OUTSTANDING);
-        qinfo->setSocketId(socket->getConnectionId());
+        qinfo->setSocketId(socket->getSocketId());
         clientSocket.sendNotification(cmsg);
     }
 }

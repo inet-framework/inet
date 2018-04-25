@@ -29,19 +29,19 @@ ISocket *SocketMap::findSocketFor(cMessage *msg)
     auto& tags = getTags(msg);
     int connId = tags.getTag<SocketInd>()->getSocketId();
     auto i = socketMap.find(connId);
-    ASSERT(i == socketMap.end() || i->first == i->second->getConnectionId());
+    ASSERT(i == socketMap.end() || i->first == i->second->getSocketId());
     return (i == socketMap.end()) ? nullptr : i->second;
 }
 
 void SocketMap::addSocket(ISocket *socket)
 {
-    ASSERT(socketMap.find(socket->getConnectionId()) == socketMap.end());
-    socketMap[socket->getConnectionId()] = socket;
+    ASSERT(socketMap.find(socket->getSocketId()) == socketMap.end());
+    socketMap[socket->getSocketId()] = socket;
 }
 
 ISocket *SocketMap::removeSocket(ISocket *socket)
 {
-    auto i = socketMap.find(socket->getConnectionId());
+    auto i = socketMap.find(socket->getSocketId());
     if (i != socketMap.end())
         socketMap.erase(i);
     return socket;

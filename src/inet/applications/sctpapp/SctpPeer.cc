@@ -191,7 +191,7 @@ void SctpPeer::connect()
     clientSocket.setOutboundStreams(outStreams);
 
     EV_INFO << "issuing OPEN command\n";
-    EV_INFO << "Assoc " << clientSocket.getConnectionId() << "::connect to address " << connectAddress << ", port " << connectPort << "\n";
+    EV_INFO << "Assoc " << clientSocket.getSocketId() << "::connect to address " << connectAddress << ", port " << connectPort << "\n";
     numSessions++;
     bool streamReset = par("streamReset");
     L3Address destination;
@@ -653,7 +653,7 @@ void SctpPeer::sendQueueRequest()
     SctpInfoReq *qinfo = tags.addTagIfAbsent<SctpInfoReq>();
     qinfo->setText(queueSize);
     cmsg->setKind(SCTP_C_QUEUE_MSGS_LIMIT);
-    qinfo->setSocketId(clientSocket.getConnectionId());
+    qinfo->setSocketId(clientSocket.getSocketId());
     clientSocket.sendRequest(cmsg);
 }
 
@@ -719,7 +719,7 @@ void SctpPeer::shutdownReceivedArrived(SctpSocket *socket)
         auto& tags = getTags(cmsg);
         SctpCommandReq *qinfo = tags.addTagIfAbsent<SctpCommandReq>();
         cmsg->setKind(SCTP_C_NO_OUTSTANDING);
-        qinfo->setSocketId(socket->getConnectionId());
+        qinfo->setSocketId(socket->getSocketId());
         clientSocket.sendNotification(cmsg);
     }
 }
