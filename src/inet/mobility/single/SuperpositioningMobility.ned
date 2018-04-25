@@ -40,6 +40,6 @@ module SuperpositioningMobility extends MobilityBase
     submodules:
         element[numElements]: <> like IMobility {
             parameters:
-	            @display("p=150,150,row,150");
+	            @display("p=150,150,row,200");
         }
 }
