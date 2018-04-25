@@ -87,12 +87,6 @@ const char *MobilityBase::DirectiveResolver::resolveDirective(char directive)
     return result.c_str();
 }
 
-// TODO: add to refreshDisplay
-//    DirectiveResolver directiveResolver(mobility);
-//    return format.formatString(&directiveResolver);
-//    cDisplayString& dispStr = this->getDisplayString();
-//    dispStr.setTagArg("t", 0, getDisplayStringText(this));
-
 void MobilityBase::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
@@ -188,7 +182,11 @@ void MobilityBase::initializeOrientation()
 
 void MobilityBase::refreshDisplay() const
 {
-    if (hasGUI() && visualRepresentation != nullptr) {
+    DirectiveResolver directiveResolver(const_cast<MobilityBase *>(this));
+    auto text = format.formatString(&directiveResolver);
+    cDisplayString& displayString = this->getDisplayString();
+    displayString.setTagArg("t", 0, text);
+    if (visualRepresentation != nullptr) {
         auto position = const_cast<MobilityBase *>(this)->getCurrentPosition();
         EV_DEBUG << "current position = " << position << endl;
         auto visualRepresentationPosition = canvasProjection->computeCanvasPoint(position);
