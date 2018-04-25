@@ -29,7 +29,7 @@ MobilityVisualizerBase::MobilityVisualization::MobilityVisualization(IMobility *
 
 MobilityVisualizerBase::~MobilityVisualizerBase()
 {
-    if (displayMovements)
+    if (displayMobility)
         unsubscribe();
 }
 
@@ -38,7 +38,7 @@ void MobilityVisualizerBase::initialize(int stage)
     VisualizerBase::initialize(stage);
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
-        displayMovements = par("displayMovements");
+        displayMobility = par("displayMobility");
         animationSpeed = par("animationSpeed");
         moduleFilter.setPattern(par("moduleFilter"));
         // position
@@ -67,7 +67,7 @@ void MobilityVisualizerBase::initialize(int stage)
         movementTrailLineStyle = cFigure::parseLineStyle(par("movementTrailLineStyle"));
         movementTrailLineWidth = par("movementTrailLineWidth");
         trailLength = par("trailLength");
-        if (displayMovements)
+        if (displayMobility)
             subscribe();
     }
 }

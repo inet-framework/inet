@@ -40,7 +40,7 @@ class INET_API MobilityVisualizerBase : public VisualizerBase, public cListener
   protected:
     /** @name Parameters */
     //@{
-    bool displayMovements = false;
+    bool displayMobility = false;
     double animationSpeed = NaN;
     ModuleFilter moduleFilter;
     // position
