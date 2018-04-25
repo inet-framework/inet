@@ -167,7 +167,7 @@ class INET_API TcpSocket : public ISocket
     std::string tcpAlgorithmClass;
 
   protected:
-    void sendToTCP(cMessage *msg, int c = -1);
+    void sendToTcp(cMessage *msg, int c = -1);
 
     // internal: implementation behind listen() and listenOnce()
     void listen(bool fork);

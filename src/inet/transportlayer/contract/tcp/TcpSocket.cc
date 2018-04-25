@@ -91,7 +91,7 @@ const char *TcpSocket::stateName(TcpSocket::State state)
 #undef CASE
 }
 
-void TcpSocket::sendToTCP(cMessage *msg, int connId)
+void TcpSocket::sendToTcp(cMessage *msg, int connId)
 {
     if (!gateToTcp)
         throw cRuntimeError("TcpSocket: setOutputGate() must be invoked before socket can be used");
@@ -143,7 +143,7 @@ void TcpSocket::listen(bool fork)
     openCmd->setTcpAlgorithmClass(tcpAlgorithmClass.c_str());
 
     request->setControlInfo(openCmd);
-    sendToTCP(request);
+    sendToTcp(request);
     sockstate = LISTENING;
 }
 
@@ -152,7 +152,7 @@ void TcpSocket::accept(int socketId)
     auto request = new Request("ACCEPT", TCP_C_ACCEPT);
     TcpAcceptCommand *acceptCmd = new TcpAcceptCommand();
     request->setControlInfo(acceptCmd);
-    sendToTCP(request, socketId);
+    sendToTcp(request, socketId);
 }
 
 void TcpSocket::connect(L3Address remoteAddress, int remotePort)
@@ -176,7 +176,7 @@ void TcpSocket::connect(L3Address remoteAddress, int remotePort)
     openCmd->setTcpAlgorithmClass(tcpAlgorithmClass.c_str());
 
     request->setControlInfo(openCmd);
-    sendToTCP(request);
+    sendToTcp(request);
     sockstate = CONNECTING;
 }
 
@@ -186,12 +186,12 @@ void TcpSocket::send(Packet *msg)
         throw cRuntimeError("TcpSocket::send(): socket not connected or connecting, state is %s", stateName(sockstate));
 
     msg->setKind(TCP_C_SEND);
-    sendToTCP(msg);
+    sendToTcp(msg);
 }
 
 void TcpSocket::sendCommand(Request *msg)
 {
-    sendToTCP(msg);
+    sendToTcp(msg);
 }
 
 void TcpSocket::close()
@@ -202,7 +202,7 @@ void TcpSocket::close()
     auto request = new Request("CLOSE", TCP_C_CLOSE);
     TcpCommand *cmd = new TcpCommand();
     request->setControlInfo(cmd);
-    sendToTCP(request);
+    sendToTcp(request);
     sockstate = (sockstate == CONNECTED) ? LOCALLY_CLOSED : CLOSED;
 }
 
@@ -212,7 +212,7 @@ void TcpSocket::abort()
         auto request = new Request("ABORT", TCP_C_ABORT);
         TcpCommand *cmd = new TcpCommand();
         request->setControlInfo(cmd);
-        sendToTCP(request);
+        sendToTcp(request);
     }
     sockstate = CLOSED;
 }
@@ -222,7 +222,7 @@ void TcpSocket::requestStatus()
     auto request = new Request("STATUS", TCP_C_STATUS);
     TcpCommand *cmd = new TcpCommand();
     request->setControlInfo(cmd);
-    sendToTCP(request);
+    sendToTcp(request);
 }
 
 void TcpSocket::renewSocket()
