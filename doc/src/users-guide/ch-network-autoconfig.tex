@@ -30,8 +30,8 @@ can also be used with partially specified manual configurations,
 the configurator fills in the gaps automatically.
 
 The next section describes the usage of \nedtype{Ipv4NetworkConfigurator}.
-\nedtype{Ipv4FlatNetworkConfigurator} and old routing files are described
-in the following sections.
+The legacy solutions \nedtype{Ipv4FlatNetworkConfigurator} and 
+routing files are described in subsequent sections.
 
 \subsection{Ipv4NetworkConfigurator}
 \label{subsec:ipv4configurator}
@@ -713,6 +713,28 @@ interface.
 
 % TODO warn that multicast configuration has changed
 
+\section{Configuring Layer 2}
+
+The \nedtype{L2Configurator} module allows configuring network scenarios at layer 2.
+The STP/RTP-related parameters such as link cost, port priority
+and the ``is-edge'' flag can be configured with XML files.
+
+This module is similar to \nedtype{Ipv4NetworkConfigurator}. It supports
+the selector attributes \ttt{@hosts}, \ttt{@names}, \ttt{@towards}, \ttt{@among},
+and they behave similarly to its \nedtype{Ipv4NetworkConfigurator} equivalent.
+The \ttt{@ports} selector is also supported, for configuring per-port parameters.
+
+The following example configures port 5 (if it exists) on all switches,
+and sets cost=19 and priority=32768:
+
+\begin{XML}
+<config>
+  <interface hosts='**' ports='5' cost='19' priority='32768'/>
+</config>
+\end{XML}
+
+For more information about the usage of the selector attributes see
+\nedtype{Ipv4NetworkConfigurator}.
 
 
 
