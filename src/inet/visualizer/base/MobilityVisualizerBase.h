@@ -51,6 +51,7 @@ class INET_API MobilityVisualizerBase : public VisualizerBase, public cListener
     ColorSet positionCircleFillColorSet;
     // orientation
     bool displayOrientations = false;
+    double orientationPieRadius = NaN;
     double orientationPieSize = NaN;
     double orientationPieOpacity = NaN;
     cFigure::Color orientationLineColor;

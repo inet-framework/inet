@@ -208,12 +208,6 @@ void MobilityCanvasVisualizer::setPosition(cModule* visualRepresentation, cFigur
     visualRepresentation->getDisplayString().setTagArg("p", 1, buf);
 }
 
-double MobilityCanvasVisualizer::getOrientationPieRadius(cModule *module) const
-{
-    auto rectangle = getSimulation()->getEnvir()->getSubmoduleBounds(module);
-    return rectangle.getSize().getLength() * 1.5 / 2;
-}
-
 } // namespace visualizer
 
 } // namespace inet

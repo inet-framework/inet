@@ -54,7 +54,6 @@ class INET_API MobilityCanvasVisualizer : public MobilityVisualizerBase
     virtual void refreshDisplay() const override;
 
     virtual cModule *findVisualRepresentation(cModule *module) const;
-    virtual double getOrientationPieRadius(cModule *module) const;
 
     virtual MobilityCanvasVisualization *getMobilityVisualization(const IMobility *mobility) const;
     virtual void setMobilityVisualization(const IMobility *mobility, MobilityCanvasVisualization *entry);

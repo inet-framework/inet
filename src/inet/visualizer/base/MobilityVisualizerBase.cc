@@ -49,6 +49,7 @@ void MobilityVisualizerBase::initialize(int stage)
         positionCircleFillColorSet.parseColors(par("positionCircleFillColor"));
         // orientation
         displayOrientations = par("displayOrientations");
+        orientationPieRadius = par("orientationPieRadius");
         orientationPieSize = par("orientationPieSize");
         orientationPieOpacity = par("orientationPieOpacity");
         orientationLineColor = cFigure::parseColor(par("orientationLineColor"));
