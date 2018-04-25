@@ -34,7 +34,7 @@ namespace inet {
 /**
  * Implements a DHCP client. See NED file for more details.
  */
-class INET_API DhcpClient : public cSimpleModule, public cListener, public ILifecycle
+class INET_API DhcpClient : public cSimpleModule, public cListener, public ILifecycle, public UdpSocket::ICallback
 {
   protected:
     // DHCP timer types (RFC 2131 4.4.5)
@@ -174,6 +174,10 @@ class INET_API DhcpClient : public cSimpleModule, public cListener, public ILife
      * Selects the first non-loopback interface
      */
     virtual InterfaceEntry *chooseInterface();
+
+    //UdpSocket::ICallback methods
+    virtual void socketDataArrived(UdpSocket* socket, Packet *msg) override;
+    virtual void socketErrorArrived(UdpSocket* socket, cMessage *msg) override;
 
     // Lifecycle methods
     virtual void startApp();

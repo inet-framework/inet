@@ -36,7 +36,7 @@ namespace inet {
 /**
  * Implements a DHCP server. See NED file for more details.
  */
-class INET_API DhcpServer : public cSimpleModule, public cListener, public ILifecycle
+class INET_API DhcpServer : public cSimpleModule, public cListener, public ILifecycle, public UdpSocket::ICallback
 {
   protected:
     typedef std::map<Ipv4Address, DhcpLease> DhcpLeased;
@@ -108,6 +108,10 @@ class INET_API DhcpServer : public cSimpleModule, public cListener, public ILife
     virtual void handleSelfMessages(cMessage *msg);
     virtual InterfaceEntry *chooseInterface();
     virtual void sendToUDP(Packet *msg, int srcPort, const L3Address& destAddr, int destPort);
+
+    //UdpSocket::ICallback methods
+    virtual void socketDataArrived(UdpSocket* socket, Packet *msg) override;
+    virtual void socketErrorArrived(UdpSocket* socket, cMessage *msg) override;
 
     /*
      * Signal handler for cObject, override cListener function.

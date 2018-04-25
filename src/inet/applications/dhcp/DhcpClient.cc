@@ -197,22 +197,28 @@ void DhcpClient::handleMessage(cMessage *msg)
     if (!isOperational) {
         EV_ERROR << "Message '" << msg << "' arrived when module status is down, dropping." << endl;
         delete msg;
-        return;
     }
-    if (msg->isSelfMessage()) {
+    else if (msg->isSelfMessage()) {
         handleTimer(msg);
     }
     else if (msg->arrivedOn("socketIn")) {
-        auto packet = check_and_cast<Packet *>(msg);
-        if (packet->getKind() == UDP_I_DATA)
-            handleDHCPMessage(packet);
-        else
-            throw cRuntimeError(packet, "Unexpected packet received");
-
-        delete msg;
+        socket.processMessage(msg);
     }
     else
         throw cRuntimeError("Unknown incoming gate: '%s'", msg->getArrivalGate()->getFullName());
+}
+
+void DhcpClient::socketDataArrived(UdpSocket* socket, Packet *msg)
+{
+    // process incoming packet
+    handleDHCPMessage(msg);
+    delete msg;
+}
+
+void DhcpClient::socketErrorArrived(UdpSocket* socket, cMessage *msg)
+{
+    EV_WARN << "Ignoring UDP error report " << msg->getName() << endl;
+    delete msg;
 }
 
 void DhcpClient::handleTimer(cMessage *msg)
@@ -685,6 +691,7 @@ void DhcpClient::openSocket()
     socket.setOutputGate(gate("socketOut"));
     socket.bind(clientPort);
     socket.setBroadcast(true);
+    socket.setCallbackObject(this);
     EV_INFO << "DHCP server bound to port " << serverPort << "." << endl;
 }
 
