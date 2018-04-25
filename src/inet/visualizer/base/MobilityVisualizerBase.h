@@ -43,6 +43,12 @@ class INET_API MobilityVisualizerBase : public VisualizerBase, public cListener
     bool displayMovements = false;
     double animationSpeed = NaN;
     ModuleFilter moduleFilter;
+    // position
+    bool displayPositions = false;
+    double positionCircleRadius = NaN;
+    double positionCircleLineWidth = NaN;
+    ColorSet positionCircleLineColorSet;
+    ColorSet positionCircleFillColorSet;
     // orientation
     bool displayOrientations = false;
     double orientationPieSize = NaN;

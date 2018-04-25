@@ -41,6 +41,12 @@ void MobilityVisualizerBase::initialize(int stage)
         displayMovements = par("displayMovements");
         animationSpeed = par("animationSpeed");
         moduleFilter.setPattern(par("moduleFilter"));
+        // position
+        displayPositions = par("displayPositions");
+        positionCircleRadius = par("positionCircleRadius");
+        positionCircleLineWidth = par("positionCircleLineWidth");
+        positionCircleLineColorSet.parseColors(par("positionCircleLineColor"));
+        positionCircleFillColorSet.parseColors(par("positionCircleFillColor"));
         // orientation
         displayOrientations = par("displayOrientations");
         orientationPieSize = par("orientationPieSize");

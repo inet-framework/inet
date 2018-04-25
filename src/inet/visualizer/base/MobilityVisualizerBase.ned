@@ -37,6 +37,12 @@ simple MobilityVisualizerBase extends VisualizerBase
         string moduleFilter = default("**"); // which mobilities are considered, matches all mobilities by default
 
         bool displayOrientations = default(false); // display an pie indicating the current orientation, disabled by default
+        bool displayPositions = default(false); // display a circle indicating the current position, disabled by default
+        double positionCircleRadius = default(4); // radius of the circle
+        double positionCircleLineWidth = default(1); // line width of the circle
+        string positionCircleLineColor @enum("light", "dark") = default("dark"); // position circle line color is a list of colors, a set of dark colors by default
+        string positionCircleFillColor @enum("light", "dark") = default("dark"); // position circle fill color is a list of colors, a set of dark colors by default
+
         double orientationPieSize = default(0.2); // relative size of the pie compared to the full circle 
         double orientationPieOpacity = default(0.25);
         string orientationLineColor = default("black"); // orientation line color, black by default
