@@ -21,6 +21,7 @@
 #include <vector>
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/socket/ISocket.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -60,10 +61,19 @@ namespace inet {
  * USPSocket provides some help for this with the belongsToSocket() and
  * belongsToAnyUDPSocket() methods.
  */
-class INET_API UdpSocket
+class INET_API UdpSocket : public ISocket
 {
+  public:
+    class ICallback {
+      public:
+        virtual ~ICallback() {}
+        virtual void socketDataArrived(UdpSocket *socket, Packet *packet) = 0;
+        virtual void socketErrorArrived(UdpSocket *socket, cMessage *msg) { delete msg; }
+    };
   protected:
     int sockId;
+    ICallback *cb = nullptr;
+    void *yourPtr = nullptr;
     cGate *gateToUdp;
 
   protected:
@@ -84,7 +94,7 @@ class INET_API UdpSocket
     /**
      * Returns the internal socket Id.
      */
-    int getSocketId() const { return sockId; }
+    int getSocketId() const override { return sockId; }
 
     /**
      * Generates a new socket id.
@@ -246,7 +256,32 @@ class INET_API UdpSocket
      * has a UdpControlInfo as getControlInfo(), and the sockId in it matches
      * that of the socket.)
      */
-    bool belongsToSocket(cMessage *msg);
+    virtual bool belongsToSocket(cMessage *msg) const override;
+
+    /**
+     * Sets a callback object, to be used with processMessage().
+     * This callback object may be your simple module itself (if it
+     * multiply inherits from ICallback too, that is you
+     * declared it as
+     * <pre>
+     * class MyAppModule : public cSimpleModule, public UdpSocket::ICallback
+     * </pre>
+     * and redefined the necessary virtual functions; or you may use
+     * dedicated class (and objects) for this purpose.
+     *
+     * UdpSocket doesn't delete the callback object in the destructor
+     * or on any other occasion.
+     *
+     * YourPtr is an optional pointer. It may contain any value you wish --
+     * UdpSocket will not look at it or do anything with it except passing
+     * it back to you in the ICallback calls. You may find it
+     * useful if you maintain additional per-connection information:
+     * in that case you don't have to look it up by connId in the callbacks,
+     * you can have it passed to you as yourPtr.
+     */
+    void setCallbackObject(ICallback *cb, void *yourPtr = nullptr);
+
+    virtual void processMessage(cMessage *msg) override;
 
     /**
      * Utility function: returns a line of information about a packet received via UDP.

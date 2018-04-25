@@ -296,10 +296,10 @@ void UdpSocket::setMulticastSourceFilter(int interfaceId, const L3Address& multi
     sendToUDP(request);
 }
 
-bool UdpSocket::belongsToSocket(cMessage *msg)
+bool UdpSocket::belongsToSocket(cMessage *msg) const
 {
     auto& tags = getTags(msg);
-    int socketId = tags.getTag<SocketReq>()->getSocketId();
+    int socketId = tags.getTag<SocketInd>()->getSocketId();
     return socketId == sockId;
 }
 
@@ -322,6 +322,35 @@ std::string UdpSocket::getReceivedPacketInfo(Packet *pk)
         os << " DSCP=" << dscpTag->getDifferentiatedServicesCodePoint();
     os << " on ifID=" << interfaceID;
     return os.str();
+}
+
+void UdpSocket::setCallbackObject(ICallback *callback, void *yourPointer)
+{
+    cb = callback;
+    yourPtr = yourPointer;
+}
+
+void UdpSocket::processMessage(cMessage *msg)
+{
+    ASSERT(belongsToSocket(msg));
+
+    switch (msg->getKind()) {
+        case UDP_I_DATA:
+            if (cb)
+                cb->socketDataArrived(this, check_and_cast<Packet*>(msg));
+            else
+                delete msg;
+            break;
+        case UDP_I_ERROR:
+            if (cb)
+                cb->socketErrorArrived(this, msg);
+            else
+                delete msg;
+            break;
+        default:
+            throw cRuntimeError("UdpSocket: invalid msg kind %d, one of the UDP_I_xxx constants expected", msg->getKind());
+            break;
+    }
 }
 
 } // namespace inet
