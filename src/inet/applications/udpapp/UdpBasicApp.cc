@@ -91,6 +91,7 @@ void UdpBasicApp::setSocketOptions()
         MulticastGroupList mgl = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this)->collectMulticastGroups();
         socket.joinLocalMulticastGroups(mgl);
     }
+    socket.setCallbackObject(this);
 }
 
 L3Address UdpBasicApp::chooseDestAddr()
@@ -191,17 +192,20 @@ void UdpBasicApp::handleMessageWhenUp(cMessage *msg)
                 throw cRuntimeError("Invalid kind %d in self message", (int)selfMsg->getKind());
         }
     }
-    else if (msg->getKind() == UDP_I_DATA) {
-        // process incoming packet
-        processPacket(check_and_cast<Packet *>(msg));
-    }
-    else if (msg->getKind() == UDP_I_ERROR) {
-        EV_WARN << "Ignoring UDP error report\n";
-        delete msg;
-    }
-    else {
-        throw cRuntimeError("Unrecognized message (%s)%s", msg->getClassName(), msg->getName());
-    }
+    else
+        socket.processMessage(msg);
+}
+
+void UdpBasicApp::socketDataArrived(UdpSocket* socket, Packet *msg)
+{
+    // process incoming packet
+    processPacket(msg);
+}
+
+void UdpBasicApp::socketErrorArrived(UdpSocket* socket, cMessage *msg)
+{
+    EV_WARN << "Ignoring UDP error report " << msg->getName() << endl;
+    delete msg;
 }
 
 void UdpBasicApp::refreshDisplay() const

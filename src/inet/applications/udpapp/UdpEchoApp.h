@@ -28,7 +28,7 @@ namespace inet {
 /**
  * UDP application. See NED for more info.
  */
-class INET_API UdpEchoApp : public ApplicationBase
+class INET_API UdpEchoApp : public ApplicationBase, public UdpSocket::ICallback
 {
   protected:
     UdpSocket socket;
@@ -44,6 +44,9 @@ class INET_API UdpEchoApp : public ApplicationBase
     virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
     virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
     virtual void handleNodeCrash() override;
+
+    virtual void socketDataArrived(UdpSocket* socket, Packet *msg) override;
+    virtual void socketErrorArrived(UdpSocket* socket, cMessage *msg) override;
 };
 
 } // namespace inet

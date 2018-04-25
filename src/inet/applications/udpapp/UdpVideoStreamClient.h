@@ -34,7 +34,7 @@ namespace inet {
  * Basic video stream application. Clients connect to server and get a stream of
  * video back.
  */
-class INET_API UdpVideoStreamClient : public ApplicationBase
+class INET_API UdpVideoStreamClient : public ApplicationBase, public UdpSocket::ICallback
 {
   protected:
 
@@ -55,6 +55,9 @@ class INET_API UdpVideoStreamClient : public ApplicationBase
     virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
     virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
     virtual void handleNodeCrash() override;
+
+    virtual void socketDataArrived(UdpSocket* socket, Packet *msg) override;
+    virtual void socketErrorArrived(UdpSocket* socket, cMessage *msg) override;
 
   public:
     UdpVideoStreamClient() { }

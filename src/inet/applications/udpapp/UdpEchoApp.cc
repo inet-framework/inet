@@ -39,28 +39,28 @@ void UdpEchoApp::initialize(int stage)
 
 void UdpEchoApp::handleMessageWhenUp(cMessage *msg)
 {
-    if (msg->getKind() == UDP_I_ERROR) {
-        // ICMP error report -- discard it
-        delete msg;
-    }
-    else if (msg->getKind() == UDP_I_DATA) {
-        Packet *pk = check_and_cast<Packet *>(msg);
+    socket.processMessage(msg);
+}
 
-        // determine its source address/port
-        L3Address remoteAddress = pk->getTag<L3AddressInd>()->getSrcAddress();
-        int srcPort = pk->getTag<L4PortInd>()->getSrcPort();
-        pk->clearTags();
-        pk->trim();
+void UdpEchoApp::socketDataArrived(UdpSocket* socket, Packet *pk)
+{
+    // determine its source address/port
+    L3Address remoteAddress = pk->getTag<L3AddressInd>()->getSrcAddress();
+    int srcPort = pk->getTag<L4PortInd>()->getSrcPort();
+    pk->clearTags();
+    pk->trim();
 
-        // statistics
-        numEchoed++;
-        emit(packetSentSignal, pk);
-        // send back
-        socket.sendTo(pk, remoteAddress, srcPort);
-    }
-    else {
-        throw cRuntimeError("Message received with unexpected message kind = %d", msg->getKind());
-    }
+    // statistics
+    numEchoed++;
+    emit(packetSentSignal, pk);
+    // send back
+    socket->sendTo(pk, remoteAddress, srcPort);
+}
+
+void UdpEchoApp::socketErrorArrived(UdpSocket* socket, cMessage *msg)
+{
+    EV_WARN << "Ignoring UDP error report " << msg->getName() << endl;
+    delete msg;
 }
 
 void UdpEchoApp::refreshDisplay() const
@@ -82,12 +82,14 @@ bool UdpEchoApp::handleNodeStart(IDoneCallback *doneCallback)
     socket.bind(localPort);
     MulticastGroupList mgl = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this)->collectMulticastGroups();
     socket.joinLocalMulticastGroups(mgl);
+    socket.setCallbackObject(this);
     return true;
 }
 
 bool UdpEchoApp::handleNodeShutdown(IDoneCallback *doneCallback)
 {
     //TODO if(socket.isOpened()) socket.close();
+    socket.setCallbackObject(nullptr);
     return true;
 }
 
