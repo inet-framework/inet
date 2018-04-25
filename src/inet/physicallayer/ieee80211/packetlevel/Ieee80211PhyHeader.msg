@@ -145,3 +145,12 @@ class Ieee80211HtPhyHeader extends Ieee80211PhyHeader
 {
 }
 
+// IEEE 802.11 21. High Throughput (VHT)
+//
+class Ieee80211VhtPhyPreamble extends Ieee80211PhyPreamble
+{
+}
+
+class Ieee80211VhtPhyHeader extends Ieee80211PhyHeader
+{
+}
