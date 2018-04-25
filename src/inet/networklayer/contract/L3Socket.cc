@@ -74,5 +74,28 @@ void L3Socket::close()
     sendToOutput(request);
 }
 
+bool L3Socket::belongsToSocket(cMessage *msg) const
+{
+    auto& tags = getTags(msg);
+    int msgSocketId = tags.getTag<SocketInd>()->getSocketId();
+    return socketId == msgSocketId;
+}
+
+void L3Socket::setCallbackObject(ICallback *callback, void *yourPointer)
+{
+    cb = callback;
+    yourPtr = yourPointer;
+}
+
+void L3Socket::processMessage(cMessage *msg)
+{
+    ASSERT(belongsToSocket(msg));
+
+    if (cb)
+        cb->socketDataArrived(this, check_and_cast<Packet*>(msg));
+    else
+        delete msg;
+}
+
 } // namespace inet
 
