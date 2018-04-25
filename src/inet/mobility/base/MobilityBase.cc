@@ -200,6 +200,14 @@ void MobilityBase::refreshDisplay() const
     }
 }
 
+void MobilityBase::handleParameterChange(const char *name)
+{
+    if (name != nullptr) {
+        if (!strcmp(name, "displayStringTextFormat"))
+            format.parseFormat(par("displayStringTextFormat"));
+    }
+}
+
 void MobilityBase::handleMessage(cMessage *message)
 {
     if (message->isSelfMessage())

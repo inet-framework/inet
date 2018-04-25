@@ -119,6 +119,9 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
     /** @brief Moves the visual representation module's icon to the new position on the screen. */
     virtual void refreshDisplay() const;
 
+    /** @brief Allows changing parameters from the GUI. */
+    virtual void handleParameterChange(const char *name);
+
     /** @brief This modules should only receive self-messages. */
     virtual void handleMessage(cMessage *msg) override;
 
