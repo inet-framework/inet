@@ -38,7 +38,7 @@ module Ieee802154UwbIrInterface like IWirelessInterface
             parameters:
                 @display("p=100,100;q=l2queue");
         }
-        mac: AckingMac {
+        mac: AckingMac { // TODO use Ieee802154Mac or something like Ieee802154NarrowbandMac
             parameters:
                 @display("p=250,200");
         }
