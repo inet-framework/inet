@@ -498,7 +498,7 @@ void SctpPeer::handleTimer(cMessage *msg)
     }
 }
 
-void SctpPeer::socketDataNotificationArrived(int connId, void *ptr, Message *msg)
+void SctpPeer::socketDataNotificationArrived(SctpSocket *socket, int connId, void *ptr, Message *msg)
 {
     Message *message = check_and_cast<Message *>(msg);
     auto& intags = getTags(message);
@@ -513,7 +513,7 @@ void SctpPeer::socketDataNotificationArrived(int connId, void *ptr, Message *msg
     clientSocket.sendNotification(cmesg);
 }
 
-void SctpPeer::socketPeerClosed(int, void *)
+void SctpPeer::socketPeerClosed(SctpSocket *socket, int, void *)
 {
     // close the connection (if not already closed)
     if (clientSocket.getState() == SctpSocket::PEER_CLOSED) {
@@ -523,14 +523,14 @@ void SctpPeer::socketPeerClosed(int, void *)
     }
 }
 
-void SctpPeer::socketClosed(int, void *)
+void SctpPeer::socketClosed(SctpSocket *socket, int, void *)
 {
     // *redefine* to start another session etc.
     EV_INFO << "connection closed\n";
     setStatusString("closed");
 }
 
-void SctpPeer::socketFailure(int, void *, int code)
+void SctpPeer::socketFailure(SctpSocket *socket, int, void *, int code)
 {
     // subclasses may override this function, and add code try to reconnect after a delay.
     EV_WARN << "connection broken\n";
@@ -540,7 +540,7 @@ void SctpPeer::socketFailure(int, void *, int code)
     scheduleAt(simTime() + par("reconnectInterval"), timeMsg);
 }
 
-void SctpPeer::socketStatusArrived(int assocId, void *yourPtr, SctpStatusReq *status)
+void SctpPeer::socketStatusArrived(SctpSocket *socket, int assocId, void *yourPtr, SctpStatusReq *status)
 {
     struct PathStatus ps;
     auto i = sctpPathStatus.find(status->getPathId());
@@ -656,7 +656,7 @@ void SctpPeer::sendQueueRequest()
     clientSocket.sendRequest(cmsg);
 }
 
-void SctpPeer::sendRequestArrived()
+void SctpPeer::sendRequestArrived(SctpSocket *socket)
 {
     int count = 0;
 
@@ -672,7 +672,7 @@ void SctpPeer::sendRequestArrived()
     }
 }
 
-void SctpPeer::socketDataArrived(int, void *, Packet *msg, bool)
+void SctpPeer::socketDataArrived(SctpSocket *socket, int, void *, Packet *msg, bool)
 {
     // *redefine* to perform or schedule next sending
     packetsRcvd++;
@@ -710,7 +710,7 @@ void SctpPeer::socketDataArrived(int, void *, Packet *msg, bool)
     }
 }
 
-void SctpPeer::shutdownReceivedArrived(int connId)
+void SctpPeer::shutdownReceivedArrived(SctpSocket *socket, int connId)
 {
     if (numRequestsToSend == 0) {
         Message *cmsg = new Message("SCTP_C_NO_OUTSTANDING");
@@ -722,12 +722,12 @@ void SctpPeer::shutdownReceivedArrived(int connId)
     }
 }
 
-void SctpPeer::msgAbandonedArrived(int assocId)
+void SctpPeer::msgAbandonedArrived(SctpSocket *socket, int assocId)
 {
     chunksAbandoned++;
 }
 
-void SctpPeer::sendqueueFullArrived(int assocId)
+void SctpPeer::sendqueueFullArrived(SctpSocket *socket, int assocId)
 {
     sendAllowed = false;
 }

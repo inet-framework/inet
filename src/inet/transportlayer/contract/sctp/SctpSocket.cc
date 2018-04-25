@@ -94,7 +94,7 @@ SctpSocket::~SctpSocket()
     delete sOptions;
     delete appOptions;
     if (cb) {
-        cb->socketDeleted(assocId, yourPtr);
+        cb->socketDeleted(this, assocId, yourPtr);
     }
 }
 
@@ -446,15 +446,6 @@ bool SctpSocket::belongsToSocket(cMessage *msg) const
     return ret;
 }
 
-bool SctpSocket::belongsToAnySctpSocket(cMessage *msg)
-{
-    auto& tags = getTags(msg);
-    if (tags.getNumTags() > 0)
-        return true;
-    else
-       return false;
-}
-
 void SctpSocket::setCallbackObject(ICallback *callback, void *yourPointer)
 {
     cb = callback;
@@ -467,7 +458,7 @@ void SctpSocket::processMessage(cMessage *msg)
         case SCTP_I_DATA:
             EV_INFO << "SCTP_I_DATA\n";
             if (cb) {
-                cb->socketDataArrived(assocId, yourPtr, check_and_cast<Packet *>(msg), false);
+                cb->socketDataArrived(this, assocId, yourPtr, check_and_cast<Packet *>(msg), false);
                 msg = nullptr;
             }
             break;
@@ -475,13 +466,13 @@ void SctpSocket::processMessage(cMessage *msg)
         case SCTP_I_DATA_NOTIFICATION:
             EV_INFO << "SCTP_I_NOTIFICATION\n";
             if (cb) {
-                cb->socketDataNotificationArrived(assocId, yourPtr, check_and_cast<Message *>(msg));
+                cb->socketDataNotificationArrived(this, assocId, yourPtr, check_and_cast<Message *>(msg));
             }
             break;
 
         case SCTP_I_SEND_MSG:
             if (cb) {
-                cb->sendRequestArrived();
+                cb->sendRequestArrived(this);
             }
             break;
 
@@ -502,7 +493,7 @@ void SctpSocket::processMessage(cMessage *msg)
             assocId = tags.getTag<SocketInd>()->getSocketId();
 
             if (cb) {
-                cb->socketEstablished(assocId, yourPtr, connectInfo->getNumMsgs());
+                cb->socketEstablished(this, assocId, yourPtr, connectInfo->getNumMsgs());
             }
             delete message;
             break;
@@ -514,7 +505,7 @@ void SctpSocket::processMessage(cMessage *msg)
                 sockstate = (sockstate == CONNECTED) ? PEER_CLOSED : CLOSED;
 
             if (cb) {
-                cb->socketPeerClosed(assocId, yourPtr);
+                cb->socketPeerClosed(this, assocId, yourPtr);
             }
             delete msg;
             break;
@@ -525,7 +516,7 @@ void SctpSocket::processMessage(cMessage *msg)
             EV_INFO << "SCTP_I_CLOSED called\n";
             sockstate = CLOSED;
             if (cb) {
-                cb->socketClosed(assocId, yourPtr);
+                cb->socketClosed(this, assocId, yourPtr);
             }
             delete msg;
             break;
@@ -535,7 +526,7 @@ void SctpSocket::processMessage(cMessage *msg)
         case SCTP_I_TIMED_OUT:
             sockstate = SOCKERROR;
             if (cb) {
-                cb->socketFailure(assocId, yourPtr, msg->getKind());
+                cb->socketFailure(this, assocId, yourPtr, msg->getKind());
             }
             break;
 
@@ -544,14 +535,14 @@ void SctpSocket::processMessage(cMessage *msg)
             auto& tags = getTags(message);
             SctpStatusReq *status = tags.findTag<SctpStatusReq>();
             if (cb) {
-                cb->socketStatusArrived(assocId, yourPtr, status);
+                cb->socketStatusArrived(this, assocId, yourPtr, status);
             }
             }
             break;
 
         case SCTP_I_ABANDONED:
             if (cb) {
-                cb->msgAbandonedArrived(assocId);
+                cb->msgAbandonedArrived(this, assocId);
             }
             delete msg;
             break;
@@ -559,13 +550,13 @@ void SctpSocket::processMessage(cMessage *msg)
         case SCTP_I_SHUTDOWN_RECEIVED:
             EV_INFO << "SCTP_I_SHUTDOWN_RECEIVED\n";
             if (cb) {
-                cb->shutdownReceivedArrived(assocId);
+                cb->shutdownReceivedArrived(this, assocId);
             }
             break;
 
         case SCTP_I_SENDQUEUE_FULL:
             if (cb) {
-                cb->sendqueueFullArrived(assocId);
+                cb->sendqueueFullArrived(this, assocId);
             }
             break;
 
@@ -573,7 +564,7 @@ void SctpSocket::processMessage(cMessage *msg)
             auto& tags = getTags(msg);
             SctpCommandReq *cmd = tags.getTag<SctpCommandReq>();
             if (cb) {
-                cb->sendqueueAbatedArrived(assocId, cmd->getNumMsgs());
+                cb->sendqueueAbatedArrived(this, assocId, cmd->getNumMsgs());
             }
             delete cmd;
             }
@@ -591,7 +582,7 @@ void SctpSocket::processMessage(cMessage *msg)
             auto& tags = getTags(msg);
             SctpCommandReq *cmd = tags.getTag<SctpCommandReq>();
             if (cb) {
-                cb->addressAddedArrived(assocId, cmd->getLocalAddr(), remoteAddr);
+                cb->addressAddedArrived(this, assocId, cmd->getLocalAddr(), remoteAddr);
             }
            // delete cmd;
             break;

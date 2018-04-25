@@ -553,7 +553,7 @@ void SctpNatPeer::handleTimer(cMessage *msg)
     }
 }
 
-void SctpNatPeer::socketDataNotificationArrived(int32 connId, void *ptr, Message *msg)
+void SctpNatPeer::socketDataNotificationArrived(SctpSocket *socket, int32 connId, void *ptr, Message *msg)
 {
     Message *message = check_and_cast<Message *>(msg);
     auto& intags = getTags(message);
@@ -568,7 +568,7 @@ void SctpNatPeer::socketDataNotificationArrived(int32 connId, void *ptr, Message
     clientSocket.sendNotification(cmesg);
 }
 
-void SctpNatPeer::socketPeerClosed(int32, void *)
+void SctpNatPeer::socketPeerClosed(SctpSocket *socket, int32, void *)
 {
     // close the connection (if not already closed)
     if (clientSocket.getState() == SctpSocket::PEER_CLOSED) {
@@ -600,7 +600,7 @@ void SctpNatPeer::socketPeerClosed(int32, void *)
     }
 }
 
-void SctpNatPeer::socketClosed(int32, void *)
+void SctpNatPeer::socketClosed(SctpSocket *socket, int32, void *)
 {
     // *redefine* to start another session etc.
 
@@ -631,7 +631,7 @@ void SctpNatPeer::socketClosed(int32, void *)
     }
 }
 
-void SctpNatPeer::socketFailure(int32, void *, int32 code)
+void SctpNatPeer::socketFailure(SctpSocket *socket, int32, void *, int32 code)
 {
     // subclasses may override this function, and add code try to reconnect after a delay.
     EV << "connection broken\n";
@@ -644,7 +644,7 @@ void SctpNatPeer::socketFailure(int32, void *, int32 code)
     scheduleAt(simTime() + par("reconnectInterval"), timeMsg);
 }
 
-void SctpNatPeer::socketStatusArrived(int assocId, void *yourPtr, SctpStatusReq *status)
+void SctpNatPeer::socketStatusArrived(SctpSocket *socket, int assocId, void *yourPtr, SctpStatusReq *status)
 {
     struct pathStatus ps;
     auto i = sctpPathStatus.find(status->getPathId());
@@ -694,7 +694,7 @@ void SctpNatPeer::sendRequest(bool last)
     bytesSent += numBytes;
 }
 
-void SctpNatPeer::socketEstablished(int32, void *, unsigned long int buffer)
+void SctpNatPeer::socketEstablished(SctpSocket *socket, int32, void *, unsigned long int buffer)
 {
     int32 count = 0;
     // *redefine* to perform or schedule first sending
@@ -802,7 +802,7 @@ void SctpNatPeer::sendQueueRequest()
     clientSocket.sendRequest(cmsg);
 }
 
-void SctpNatPeer::sendRequestArrived()
+void SctpNatPeer::sendRequestArrived(SctpSocket *socket)
 {
     int32 count = 0;
 
@@ -821,7 +821,7 @@ void SctpNatPeer::sendRequestArrived()
     }
 }
 
-void SctpNatPeer::socketDataArrived(int32, void *, Packet *msg, bool)
+void SctpNatPeer::socketDataArrived(SctpSocket *socket, int32, void *, Packet *msg, bool)
 {
     // *redefine* to perform or schedule next sending
     packetsRcvd++;
@@ -857,7 +857,7 @@ void SctpNatPeer::socketDataArrived(int32, void *, Packet *msg, bool)
     }
 }
 
-void SctpNatPeer::shutdownReceivedArrived(int32 connId)
+void SctpNatPeer::shutdownReceivedArrived(SctpSocket *socket, int32 connId)
 {
     if (numRequestsToSend == 0 || rendezvous) {
         Message *cmsg = new Message("SCTP_C_NO_OUTSTANDING");
@@ -869,17 +869,17 @@ void SctpNatPeer::shutdownReceivedArrived(int32 connId)
     }
 }
 
-void SctpNatPeer::msgAbandonedArrived(int32 assocId)
+void SctpNatPeer::msgAbandonedArrived(SctpSocket *socket, int32 assocId)
 {
     chunksAbandoned++;
 }
 
-void SctpNatPeer::sendqueueFullArrived(int32 assocId)
+void SctpNatPeer::sendqueueFullArrived(SctpSocket *socket, int32 assocId)
 {
     sendAllowed = false;
 }
 
-void SctpNatPeer::addressAddedArrived(int32 assocId, L3Address localAddr, L3Address remoteAddr)
+void SctpNatPeer::addressAddedArrived(SctpSocket *socket, int32 assocId, L3Address localAddr, L3Address remoteAddr)
 {
     EV << getFullPath() << ": addressAddedArrived for remoteAddr " << remoteAddr << "\n";
     localAddressList.push_back(localAddr);

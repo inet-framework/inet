@@ -70,20 +70,20 @@ class INET_API SctpSocket : public ISocket
     {
       public:
         virtual ~ICallback() {}
-        virtual void socketDataArrived(int assocId, void *yourPtr, Packet *msg, bool urgent) = 0;
-        virtual void socketDataNotificationArrived(int assocId, void *yourPtr, Message *msg) = 0;
-        virtual void socketEstablished(int assocId, void *yourPtr, unsigned long int buffer) {}
-        virtual void socketPeerClosed(int assocId, void *yourPtr) {}
-        virtual void socketClosed(int assocId, void *yourPtr) {}
-        virtual void socketFailure(int assocId, void *yourPtr, int code) {}
-        virtual void socketStatusArrived(int assocId, void *yourPtr, SctpStatusReq *status) { delete status; }
-        virtual void socketDeleted(int assocId, void *yourPtr) {}
-        virtual void sendRequestArrived() {}
-        virtual void msgAbandonedArrived(int assocId) {}
-        virtual void shutdownReceivedArrived(int connId) {}
-        virtual void sendqueueFullArrived(int connId) {}
-        virtual void sendqueueAbatedArrived(int connId, unsigned long int buffer) {}
-        virtual void addressAddedArrived(int assocId, L3Address localAddr, L3Address remoteAddr) {}
+        virtual void socketDataArrived(SctpSocket *socket, int assocId, void *yourPtr, Packet *msg, bool urgent) = 0;
+        virtual void socketDataNotificationArrived(SctpSocket *socket, int assocId, void *yourPtr, Message *msg) = 0;
+        virtual void socketEstablished(SctpSocket *socket, int assocId, void *yourPtr, unsigned long int buffer) {}
+        virtual void socketPeerClosed(SctpSocket *socket, int assocId, void *yourPtr) {}
+        virtual void socketClosed(SctpSocket *socket, int assocId, void *yourPtr) {}
+        virtual void socketFailure(SctpSocket *socket, int assocId, void *yourPtr, int code) {}
+        virtual void socketStatusArrived(SctpSocket *socket, int assocId, void *yourPtr, SctpStatusReq *status) { delete status; }
+        virtual void socketDeleted(SctpSocket *socket, int assocId, void *yourPtr) {}
+        virtual void sendRequestArrived(SctpSocket *socket) {}
+        virtual void msgAbandonedArrived(SctpSocket *socket, int assocId) {}
+        virtual void shutdownReceivedArrived(SctpSocket *socket, int connId) {}
+        virtual void sendqueueFullArrived(SctpSocket *socket, int connId) {}
+        virtual void sendqueueAbatedArrived(SctpSocket *socket, int connId, unsigned long int buffer) {}
+        virtual void addressAddedArrived(SctpSocket *socket, int assocId, L3Address localAddr, L3Address remoteAddr) {}
     };
 
     enum State { NOT_BOUND, CLOSED, LISTENING, CONNECTING, CONNECTED, PEER_CLOSED, LOCALLY_CLOSED, SOCKERROR };
@@ -315,13 +315,6 @@ class INET_API SctpSocket : public ISocket
      * that of the socket.)
      */
     virtual bool belongsToSocket(cMessage *msg) const override;
-
-    /**
-     * Returns true if the message belongs to any SctpSocket instance.
-     * (This basically checks if the message has a SctpCommand attached to
-     * it as controlInfo().)
-     */
-    static bool belongsToAnySctpSocket(cMessage *msg);
 
     /**
      * Sets a callback object, to be used with processMessage().
