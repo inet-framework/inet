@@ -55,6 +55,7 @@ class INET_API Gpsr : public cSimpleModule, public ILifecycle, public cListener,
     simtime_t beaconInterval;
     simtime_t maxJitter;
     simtime_t neighborValidityInterval;
+    bool displayBubbles;
 
     // context
     cModule *host = nullptr;
