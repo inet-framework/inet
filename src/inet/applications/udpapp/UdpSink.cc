@@ -65,17 +65,22 @@ void UdpSink::handleMessageWhenUp(cMessage *msg)
                 throw cRuntimeError("Invalid kind %d in self message", (int)selfMsg->getKind());
         }
     }
-    else if (msg->getKind() == UDP_I_DATA) {
-        // process incoming packet
-        processPacket(check_and_cast<Packet *>(msg));
-    }
-    else if (msg->getKind() == UDP_I_ERROR) {
-        EV_WARN << "Ignoring UDP error report " << msg->getName() << endl;
-        delete msg;
-    }
-    else {
-        throw cRuntimeError("Unrecognized message (%s)%s", msg->getClassName(), msg->getName());
-    }
+    else if (msg->arrivedOn("socketIn"))
+        socket.processMessage(msg);
+    else
+        throw cRuntimeError("Unknown incoming gate: '%s'", msg->getArrivalGate()->getFullName());
+}
+
+void UdpSink::socketDataArrived(UdpSocket* socket, Packet *msg)
+{
+    // process incoming packet
+    processPacket(msg);
+}
+
+void UdpSink::socketErrorArrived(UdpSocket* socket, cMessage *msg)
+{
+    EV_WARN << "Ignoring UDP error report " << msg->getName() << endl;
+    delete msg;
 }
 
 void UdpSink::refreshDisplay() const
@@ -108,6 +113,7 @@ void UdpSink::setSocketOptions()
             throw cRuntimeError("Wrong multicastGroup setting: not a multicast address: %s", groupAddr);
         socket.joinMulticastGroup(multicastGroup);
     }
+    socket.setCallbackObject(this);
 }
 
 void UdpSink::processStart()

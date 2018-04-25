@@ -29,7 +29,7 @@ namespace inet {
 /**
  * Consumes and prints packets received from the Udp module. See NED for more info.
  */
-class INET_API UdpSink : public ApplicationBase
+class INET_API UdpSink : public ApplicationBase, public UdpSocket::ICallback
 {
   protected:
     enum SelfMsgKinds { START = 1, STOP };
@@ -57,6 +57,9 @@ class INET_API UdpSink : public ApplicationBase
     virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void finish() override;
     virtual void refreshDisplay() const override;
+
+    void socketDataArrived(UdpSocket* socket, Packet *msg) override;
+    void socketErrorArrived(UdpSocket* socket, cMessage *msg) override;
 
     virtual void processStart();
     virtual void processStop();
