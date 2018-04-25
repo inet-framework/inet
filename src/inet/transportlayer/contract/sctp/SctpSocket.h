@@ -70,20 +70,20 @@ class INET_API SctpSocket : public ISocket
     {
       public:
         virtual ~ICallback() {}
-        virtual void socketDataArrived(SctpSocket *socket, int assocId, void *yourPtr, Packet *msg, bool urgent) = 0;
-        virtual void socketDataNotificationArrived(SctpSocket *socket, int assocId, void *yourPtr, Message *msg) = 0;
-        virtual void socketEstablished(SctpSocket *socket, int assocId, void *yourPtr, unsigned long int buffer) {}
-        virtual void socketPeerClosed(SctpSocket *socket, int assocId, void *yourPtr) {}
-        virtual void socketClosed(SctpSocket *socket, int assocId, void *yourPtr) {}
-        virtual void socketFailure(SctpSocket *socket, int assocId, void *yourPtr, int code) {}
-        virtual void socketStatusArrived(SctpSocket *socket, int assocId, void *yourPtr, SctpStatusReq *status) { delete status; }
-        virtual void socketDeleted(SctpSocket *socket, int assocId, void *yourPtr) {}
+        virtual void socketDataArrived(SctpSocket *socket, Packet *msg, bool urgent) = 0;
+        virtual void socketDataNotificationArrived(SctpSocket *socket, Message *msg) = 0;
+        virtual void socketEstablished(SctpSocket *socket, unsigned long int buffer) {}
+        virtual void socketPeerClosed(SctpSocket *socket) {}
+        virtual void socketClosed(SctpSocket *socket) {}
+        virtual void socketFailure(SctpSocket *socket, int code) {}
+        virtual void socketStatusArrived(SctpSocket *socket, SctpStatusReq *status) { delete status; }
+        virtual void socketDeleted(SctpSocket *socket) {}
         virtual void sendRequestArrived(SctpSocket *socket) {}
-        virtual void msgAbandonedArrived(SctpSocket *socket, int assocId) {}
-        virtual void shutdownReceivedArrived(SctpSocket *socket, int connId) {}
-        virtual void sendqueueFullArrived(SctpSocket *socket, int connId) {}
-        virtual void sendqueueAbatedArrived(SctpSocket *socket, int connId, unsigned long int buffer) {}
-        virtual void addressAddedArrived(SctpSocket *socket, int assocId, L3Address localAddr, L3Address remoteAddr) {}
+        virtual void msgAbandonedArrived(SctpSocket *socket) {}
+        virtual void shutdownReceivedArrived(SctpSocket *socket) {}
+        virtual void sendqueueFullArrived(SctpSocket *socket) {}
+        virtual void sendqueueAbatedArrived(SctpSocket *socket, unsigned long int buffer) {}
+        virtual void addressAddedArrived(SctpSocket *socket, L3Address localAddr, L3Address remoteAddr) {}
     };
 
     enum State { NOT_BOUND, CLOSED, LISTENING, CONNECTING, CONNECTED, PEER_CLOSED, LOCALLY_CLOSED, SOCKERROR };

@@ -498,7 +498,7 @@ void SctpPeer::handleTimer(cMessage *msg)
     }
 }
 
-void SctpPeer::socketDataNotificationArrived(SctpSocket *socket, int connId, void *ptr, Message *msg)
+void SctpPeer::socketDataNotificationArrived(SctpSocket *socket, Message *msg)
 {
     Message *message = check_and_cast<Message *>(msg);
     auto& intags = getTags(message);
@@ -513,7 +513,7 @@ void SctpPeer::socketDataNotificationArrived(SctpSocket *socket, int connId, voi
     clientSocket.sendNotification(cmesg);
 }
 
-void SctpPeer::socketPeerClosed(SctpSocket *socket, int, void *)
+void SctpPeer::socketPeerClosed(SctpSocket *socket)
 {
     // close the connection (if not already closed)
     if (clientSocket.getState() == SctpSocket::PEER_CLOSED) {
@@ -523,14 +523,14 @@ void SctpPeer::socketPeerClosed(SctpSocket *socket, int, void *)
     }
 }
 
-void SctpPeer::socketClosed(SctpSocket *socket, int, void *)
+void SctpPeer::socketClosed(SctpSocket *socket)
 {
     // *redefine* to start another session etc.
     EV_INFO << "connection closed\n";
     setStatusString("closed");
 }
 
-void SctpPeer::socketFailure(SctpSocket *socket, int, void *, int code)
+void SctpPeer::socketFailure(SctpSocket *socket, int code)
 {
     // subclasses may override this function, and add code try to reconnect after a delay.
     EV_WARN << "connection broken\n";
@@ -540,7 +540,7 @@ void SctpPeer::socketFailure(SctpSocket *socket, int, void *, int code)
     scheduleAt(simTime() + par("reconnectInterval"), timeMsg);
 }
 
-void SctpPeer::socketStatusArrived(SctpSocket *socket, int assocId, void *yourPtr, SctpStatusReq *status)
+void SctpPeer::socketStatusArrived(SctpSocket *socket, SctpStatusReq *status)
 {
     struct PathStatus ps;
     auto i = sctpPathStatus.find(status->getPathId());
@@ -591,8 +591,9 @@ void SctpPeer::sendRequest(bool last)
     bytesSent += numBytes;
 }
 
-void SctpPeer::socketEstablished(int, void *)
+void SctpPeer::socketEstablished(SctpSocket *socket, unsigned long int buffer)
 {
+    ASSERT(socket == &clientSocket);
     int count = 0;
     // *redefine* to perform or schedule first sending
     EV_INFO << "SctpClient: connected\n";
@@ -658,6 +659,7 @@ void SctpPeer::sendQueueRequest()
 
 void SctpPeer::sendRequestArrived(SctpSocket *socket)
 {
+    ASSERT(socket == &clientSocket);
     int count = 0;
 
     EV_INFO << "sendRequestArrived numRequestsToSend=" << numRequestsToSend << "\n";
@@ -672,7 +674,7 @@ void SctpPeer::sendRequestArrived(SctpSocket *socket)
     }
 }
 
-void SctpPeer::socketDataArrived(SctpSocket *socket, int, void *, Packet *msg, bool)
+void SctpPeer::socketDataArrived(SctpSocket *socket, Packet *msg, bool)
 {
     // *redefine* to perform or schedule next sending
     packetsRcvd++;
@@ -710,24 +712,24 @@ void SctpPeer::socketDataArrived(SctpSocket *socket, int, void *, Packet *msg, b
     }
 }
 
-void SctpPeer::shutdownReceivedArrived(SctpSocket *socket, int connId)
+void SctpPeer::shutdownReceivedArrived(SctpSocket *socket)
 {
     if (numRequestsToSend == 0) {
         Message *cmsg = new Message("SCTP_C_NO_OUTSTANDING");
         auto& tags = getTags(cmsg);
         SctpCommandReq *qinfo = tags.addTagIfAbsent<SctpCommandReq>();
         cmsg->setKind(SCTP_C_NO_OUTSTANDING);
-        qinfo->setSocketId(connId);
+        qinfo->setSocketId(socket->getConnectionId());
         clientSocket.sendNotification(cmsg);
     }
 }
 
-void SctpPeer::msgAbandonedArrived(SctpSocket *socket, int assocId)
+void SctpPeer::msgAbandonedArrived(SctpSocket *socket)
 {
     chunksAbandoned++;
 }
 
-void SctpPeer::sendqueueFullArrived(SctpSocket *socket, int assocId)
+void SctpPeer::sendqueueFullArrived(SctpSocket *socket)
 {
     sendAllowed = false;
 }

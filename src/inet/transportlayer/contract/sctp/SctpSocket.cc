@@ -94,7 +94,7 @@ SctpSocket::~SctpSocket()
     delete sOptions;
     delete appOptions;
     if (cb) {
-        cb->socketDeleted(this, assocId, yourPtr);
+        cb->socketDeleted(this);
     }
 }
 
@@ -458,7 +458,7 @@ void SctpSocket::processMessage(cMessage *msg)
         case SCTP_I_DATA:
             EV_INFO << "SCTP_I_DATA\n";
             if (cb) {
-                cb->socketDataArrived(this, assocId, yourPtr, check_and_cast<Packet *>(msg), false);
+                cb->socketDataArrived(this, check_and_cast<Packet *>(msg), false);
                 msg = nullptr;
             }
             break;
@@ -466,7 +466,7 @@ void SctpSocket::processMessage(cMessage *msg)
         case SCTP_I_DATA_NOTIFICATION:
             EV_INFO << "SCTP_I_NOTIFICATION\n";
             if (cb) {
-                cb->socketDataNotificationArrived(this, assocId, yourPtr, check_and_cast<Message *>(msg));
+                cb->socketDataNotificationArrived(this, check_and_cast<Message *>(msg));
             }
             break;
 
@@ -493,7 +493,7 @@ void SctpSocket::processMessage(cMessage *msg)
             assocId = tags.getTag<SocketInd>()->getSocketId();
 
             if (cb) {
-                cb->socketEstablished(this, assocId, yourPtr, connectInfo->getNumMsgs());
+                cb->socketEstablished(this, connectInfo->getNumMsgs());
             }
             delete message;
             break;
@@ -505,7 +505,7 @@ void SctpSocket::processMessage(cMessage *msg)
                 sockstate = (sockstate == CONNECTED) ? PEER_CLOSED : CLOSED;
 
             if (cb) {
-                cb->socketPeerClosed(this, assocId, yourPtr);
+                cb->socketPeerClosed(this);
             }
             delete msg;
             break;
@@ -516,7 +516,7 @@ void SctpSocket::processMessage(cMessage *msg)
             EV_INFO << "SCTP_I_CLOSED called\n";
             sockstate = CLOSED;
             if (cb) {
-                cb->socketClosed(this, assocId, yourPtr);
+                cb->socketClosed(this);
             }
             delete msg;
             break;
@@ -526,7 +526,7 @@ void SctpSocket::processMessage(cMessage *msg)
         case SCTP_I_TIMED_OUT:
             sockstate = SOCKERROR;
             if (cb) {
-                cb->socketFailure(this, assocId, yourPtr, msg->getKind());
+                cb->socketFailure(this, msg->getKind());
             }
             break;
 
@@ -535,14 +535,14 @@ void SctpSocket::processMessage(cMessage *msg)
             auto& tags = getTags(message);
             SctpStatusReq *status = tags.findTag<SctpStatusReq>();
             if (cb) {
-                cb->socketStatusArrived(this, assocId, yourPtr, status);
+                cb->socketStatusArrived(this, status);
             }
             }
             break;
 
         case SCTP_I_ABANDONED:
             if (cb) {
-                cb->msgAbandonedArrived(this, assocId);
+                cb->msgAbandonedArrived(this);
             }
             delete msg;
             break;
@@ -550,13 +550,13 @@ void SctpSocket::processMessage(cMessage *msg)
         case SCTP_I_SHUTDOWN_RECEIVED:
             EV_INFO << "SCTP_I_SHUTDOWN_RECEIVED\n";
             if (cb) {
-                cb->shutdownReceivedArrived(this, assocId);
+                cb->shutdownReceivedArrived(this);
             }
             break;
 
         case SCTP_I_SENDQUEUE_FULL:
             if (cb) {
-                cb->sendqueueFullArrived(this, assocId);
+                cb->sendqueueFullArrived(this);
             }
             break;
 
@@ -564,7 +564,7 @@ void SctpSocket::processMessage(cMessage *msg)
             auto& tags = getTags(msg);
             SctpCommandReq *cmd = tags.getTag<SctpCommandReq>();
             if (cb) {
-                cb->sendqueueAbatedArrived(this, assocId, cmd->getNumMsgs());
+                cb->sendqueueAbatedArrived(this, cmd->getNumMsgs());
             }
             delete cmd;
             }
@@ -582,7 +582,7 @@ void SctpSocket::processMessage(cMessage *msg)
             auto& tags = getTags(msg);
             SctpCommandReq *cmd = tags.getTag<SctpCommandReq>();
             if (cb) {
-                cb->addressAddedArrived(this, assocId, cmd->getLocalAddr(), remoteAddr);
+                cb->addressAddedArrived(this, cmd->getLocalAddr(), remoteAddr);
             }
            // delete cmd;
             break;

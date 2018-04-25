@@ -118,37 +118,37 @@ class INET_API SctpNatPeer : public cSimpleModule, public SctpSocket::ICallback,
     void connectx(AddressVector connectAddressList, int32 connectPort);
 
     /** Does nothing but update statistics/status. Redefine to perform or schedule first sending. */
-    void socketEstablished(SctpSocket *socket, int32, void *, unsigned long int buffer) override;
+    void socketEstablished(SctpSocket *socket, unsigned long int buffer) override;
 
     /**
      * Does nothing but update statistics/status. Redefine to perform or schedule next sending.
      * Beware: this funcion deletes the incoming message, which might not be what you want.
      */
-    void socketDataArrived(SctpSocket *socket, int32 connId, void *yourPtr, Packet *msg, bool urgent) override;
+    void socketDataArrived(SctpSocket *socket, Packet *msg, bool urgent) override;
 
-    void socketDataNotificationArrived(SctpSocket *socket, int connId, void *yourPtr, Message *msg) override;
+    void socketDataNotificationArrived(SctpSocket *socket, Message *msg) override;
     /** Since remote SCTP closed, invokes close(). Redefine if you want to do something else. */
-    void socketPeerClosed(SctpSocket *socket, int32 connId, void *yourPtr) override;
+    void socketPeerClosed(SctpSocket *socket) override;
 
     /** Does nothing but update statistics/status. Redefine if you want to do something else, such as opening a new connection. */
-    void socketClosed(SctpSocket *socket, int32 connId, void *yourPtr) override;
+    void socketClosed(SctpSocket *socket) override;
 
     /** Does nothing but update statistics/status. Redefine if you want to try reconnecting after a delay. */
-    void socketFailure(SctpSocket *socket, int32 connId, void *yourPtr, int32 code) override;
+    void socketFailure(SctpSocket *socket, int32 code) override;
 
     /** Redefine to handle incoming SctpStatusInfo. */
-    void socketStatusArrived(SctpSocket *socket, int connId, void *yourPtr, SctpStatusReq *status) override;
+    void socketStatusArrived(SctpSocket *socket, SctpStatusReq *status) override;
     //@}
-    void msgAbandonedArrived(SctpSocket *socket, int32 assocId) override;
+    void msgAbandonedArrived(SctpSocket *socket) override;
     //void setAssociation(SctpAssociation *_assoc) {assoc = _assoc;};
 
     void setPrimaryPath();
     void sendStreamResetNotification();
     void sendRequestArrived(SctpSocket *socket) override;
     void sendQueueRequest();
-    void shutdownReceivedArrived(SctpSocket *socket, int32 connId) override;
-    void sendqueueFullArrived(SctpSocket *socket, int32 connId) override;
-    void addressAddedArrived(SctpSocket *socket, int32 assocId, L3Address localAddr, L3Address remoteAddr) override;
+    void shutdownReceivedArrived(SctpSocket *socket) override;
+    void sendqueueFullArrived(SctpSocket *socket) override;
+    void addressAddedArrived(SctpSocket *socket, L3Address localAddr, L3Address remoteAddr) override;
     void setStatusString(const char *s);
 
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override
