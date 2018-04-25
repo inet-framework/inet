@@ -16,6 +16,9 @@
 
 package inet.networklayer.ldp;
 
+import inet.networklayer.mpls.IIngressClassifier;
+
+
 //
 // Handles and processes LDP messages.
 //
@@ -34,7 +37,7 @@ package inet.networklayer.ldp;
 //
 // @author Andras Varga, Vojta Janota
 //
-simple Ldp      //FIXME like IApp
+simple Ldp like IIngressClassifier     //FIXME like IApp
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

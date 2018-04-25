@@ -1,5 +1,5 @@
 //
-// (C) 2005 Vojtech Janota
+// (C) 2018 Andras Varga
 //
 // This library is free software, you can redistribute it
 // and/or modify
@@ -13,20 +13,13 @@
 //
 
 
-package inet.networklayer.rsvpte;
-
-import inet.networklayer.mpls.IIngressClassifier;
-
+package inet.networklayer.mpls;
 
 //
-// Table-base ingress classifier.
+// Prototype for ingress packet classifiers for MPLS.
 //
-simple RsvpClassifier like IIngressClassifier
+moduleinterface IIngressClassifier
 {
     parameters:
-        string routingTableModule;
-        string libTableModule;
-        string rsvpModule;
-        xml config = default(xml("<fectable/>"));
         @display("i=block/classifier");
 }
