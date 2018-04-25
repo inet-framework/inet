@@ -23,9 +23,10 @@
 
 #include "inet/common/INETDefs.h"
 
+#include "inet/common/packet/Message.h"
+#include "inet/common/socket/ISocket.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
-#include "inet/common/packet/Message.h"
 
 namespace inet {
 
@@ -54,7 +55,7 @@ typedef struct {
     bool streamReset;
 } AppSocketOptions;
 
-class INET_API SctpSocket
+class INET_API SctpSocket : public ISocket
 {
   public:
     /**
@@ -140,7 +141,7 @@ class INET_API SctpSocket
      * to identify the connection when it receives a command from the application
      * (or SctpSocket).
      */
-    int getConnectionId() const { return assocId; }
+    int getConnectionId() const override { return assocId; }
 
     /**
      * Generates a new integer, to be used as assocId. (assocId is part of the key
@@ -313,7 +314,7 @@ class INET_API SctpSocket
      * has a SctpCommand as controlInfo(), and the assocId in it matches
      * that of the socket.)
      */
-    bool belongsToSocket(cMessage *msg);
+    virtual bool belongsToSocket(cMessage *msg) const override;
 
     /**
      * Returns true if the message belongs to any SctpSocket instance.
@@ -361,7 +362,7 @@ class INET_API SctpSocket
      * the message belongs to this socket, i.e. belongsToSocket(msg) would
      * return true!
      */
-    void processMessage(cMessage *msg);
+    void processMessage(cMessage *msg) override;
     //@}
 
     void setState(int state) { sockstate = state; };

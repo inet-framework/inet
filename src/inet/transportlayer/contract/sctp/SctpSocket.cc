@@ -440,7 +440,7 @@ void SctpSocket::requestStatus()
     sendToSctp(msg);
 }
 
-bool SctpSocket::belongsToSocket(cMessage *msg)
+bool SctpSocket::belongsToSocket(cMessage *msg) const
 {
     bool ret = (check_and_cast<Indication *>(msg)->getTag<SocketInd>()->getSocketId() == assocId);
     return ret;
