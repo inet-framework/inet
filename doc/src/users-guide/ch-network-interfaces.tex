@@ -278,18 +278,18 @@ transmission range. When a radio transmits a frame, all other radios
 within transmission range are able to receive the frame correctly, 
 and radios that are out of range will not be affected at all. 
 Interference modeling (collisions) is optional, and it is recommended
-to turn off with \nedtype{AckingMac}.
+to turn it off with \nedtype{AckingMac}.
 
 \nedtype{AckingMac} implements a trivial MAC protocol that has packet
-encapsulation and decapsulation, but no real medium access protocol. 
+encapsulation and decapsulation, but no real medium access procedure. 
 Frames are simply transmitted on the wireless channel as soon as the
-transmitter becomes idle. (There is no carrier sense, collision avoidance, 
-or collison detection.) \nedtype{AckingMac} also provides an optional 
+transmitter becomes idle. There is no carrier sense, collision avoidance, 
+or collison detection. \nedtype{AckingMac} also provides an optional 
 out-of-band acknowledgement mechanism (using C++ function calls, 
 not actual wirelessly sent frames), which is turned on by default.
-There is no retransmission: if an acknowledgement does not arrive
-after the first transmission of the packet, the MAC discards the
-packet and counts it as ``given up''. 
+There is no retransmission: if the acknowledgement does not arrive
+after the first transmission, the MAC gives up and counts the packet 
+as failed transmission. 
 
 \subsection{Shortcut}
 
