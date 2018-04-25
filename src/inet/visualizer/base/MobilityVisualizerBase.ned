@@ -34,7 +34,7 @@ simple MobilityVisualizerBase extends VisualizerBase
         bool displayMobility = default(true); // display mobility, enabled by default
         double animationSpeed = default(0); // animation speed while objects are moving around, value must be in the range (0, +inf)
         
-        string moduleFilter = default("**"); // which mobilities are considered, matches all mobilities by default
+        string moduleFilter = default("**.mobility"); // which mobilities are considered, matches all mobilities by default
 
         bool displayOrientations = default(false); // display an pie indicating the current orientation, disabled by default
         bool displayPositions = default(false); // display a circle indicating the current position, disabled by default
