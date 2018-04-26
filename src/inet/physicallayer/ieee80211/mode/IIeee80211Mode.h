@@ -46,6 +46,7 @@ class INET_API IIeee80211HeaderMode : public cObject, public IPrintableObject
 class INET_API IIeee80211DataMode : public cObject, public IPrintableObject
 {
   public:
+    virtual Hz getBandwidth() const = 0;
     virtual bps getNetBitrate() const = 0;
     virtual bps getGrossBitrate() const = 0;
     virtual b getPaddingLength(b dataLength) const = 0;

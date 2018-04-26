@@ -65,7 +65,7 @@ class INET_API Ieee80211OfdmModeBase : public Ieee80211OfdmTimingRelatedParamete
 
     virtual bps getGrossBitrate() const;
     virtual bps getNetBitrate() const;
-    Hz getBandwidth() const { return bandwidth; }
+    virtual Hz getBandwidth() const { return bandwidth; }
 };
 
 class INET_API Ieee80211OfdmPreambleMode : public IIeee80211PreambleMode, public Ieee80211OfdmTimingRelatedParametersBase
@@ -126,6 +126,7 @@ class INET_API Ieee80211OfdmDataMode : public IIeee80211DataMode, public Ieee802
     b getServiceFieldLength() const { return b(16); }
     b getTailFieldLength() const { return b(6); }
 
+    virtual Hz getBandwidth() const override { return bandwidth; }
     virtual b getPaddingLength(b dataLength) const override;
     virtual b getCompleteLength(b dataLength) const override;
     virtual const simtime_t getDuration(b dataLength) const override;
