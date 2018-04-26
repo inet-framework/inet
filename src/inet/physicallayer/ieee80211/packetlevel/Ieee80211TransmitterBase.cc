@@ -42,9 +42,9 @@ void Ieee80211TransmitterBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         const char *opMode = par("opMode");
         setModeSet(*opMode ? Ieee80211ModeSet::getModeSet(opMode) : nullptr);
-        setMode(modeSet != nullptr ? (bitrate != bps(-1) ? modeSet->getMode(bitrate) : nullptr) : nullptr);
         const char *bandName = par("bandName");
         setBand(*bandName != '\0' ? Ieee80211CompliantBands::getBand(bandName) : nullptr);
+        setMode(modeSet != nullptr ? (bitrate != bps(-1) ? modeSet->getMode(bitrate, band->getSpacing()) : nullptr) : nullptr);
         int channelNumber = par("channelNumber");
         if (channelNumber != -1)
             setChannelNumber(channelNumber);
@@ -104,7 +104,7 @@ void Ieee80211TransmitterBase::setModeSet(const Ieee80211ModeSet *modeSet)
 void Ieee80211TransmitterBase::setMode(const IIeee80211Mode *mode)
 {
     if (this->mode != mode) {
-        if (modeSet->findMode(mode->getDataMode()->getNetBitrate()) == nullptr)
+        if (modeSet->findMode(mode->getDataMode()->getNetBitrate(), mode->getDataMode()->getBandwidth()) == nullptr)
             throw cRuntimeError("Invalid mode");
         this->mode = mode;
     }
