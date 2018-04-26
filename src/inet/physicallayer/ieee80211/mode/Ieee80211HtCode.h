@@ -30,14 +30,14 @@ namespace physicallayer {
 class INET_API Ieee80211HtCode : public ICode
 {
     protected:
-        const IForwardErrorCorrection *forwardErrorCorrection;
+        const Ieee80211ConvolutionalCode *forwardErrorCorrection;
         const Ieee80211HtInterleaving *interleaving;
         const AdditiveScrambling *scrambling;
 
     public:
-        Ieee80211HtCode(const IForwardErrorCorrection *forwardErrorCorrection, const Ieee80211HtInterleaving *interleaving, const AdditiveScrambling *scrambling);
+        Ieee80211HtCode(const Ieee80211ConvolutionalCode *forwardErrorCorrection, const Ieee80211HtInterleaving *interleaving, const AdditiveScrambling *scrambling);
 
-        const IForwardErrorCorrection *getForwardErrorCorrection() const { return forwardErrorCorrection; }
+        const Ieee80211ConvolutionalCode *getForwardErrorCorrection() const { return forwardErrorCorrection; }
         const AdditiveScrambling *getScrambling() const { return scrambling; }
         const Ieee80211HtInterleaving *getInterleaving() const { return interleaving; }
 

@@ -22,7 +22,7 @@ namespace inet {
 namespace physicallayer {
 
 Ieee80211HtCode::Ieee80211HtCode(
-        const IForwardErrorCorrection* forwardErrorCorrection,
+        const Ieee80211ConvolutionalCode* forwardErrorCorrection,
         const Ieee80211HtInterleaving* interleaving,
         const AdditiveScrambling* scrambling) :
                 forwardErrorCorrection(forwardErrorCorrection),
