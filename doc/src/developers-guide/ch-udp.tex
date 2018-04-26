@@ -122,62 +122,6 @@ The \nedtype{Udp} module emits the following signals:
   \item \fsignal{droppedPkBadChecksum} when an erronous UDP packet received, the packet
 \end{itemize}
 
-\section{UDP sockets}
-
-UDPSocket is a convenience class, to make it easier to send and receive
-UDP packets from your application models. You'd have one (or more)
-UDPSocket object(s) in your application simple module class, and call
-its member functions (bind(), connect(), sendTo(), etc.) to create and
-configure a socket, and to send datagrams.
-
-UDPSocket chooses and remembers the sockId for you, assembles and sends command
-packets such as UDP\_C\_BIND to UDP, and can also help you deal with packets and
-notification messages arriving from UDP.
-
-Here is a code fragment that creates an UDP socket and sends a 1K packet
-over it (the code can be placed in your handleMessage() or activity()):
-
-\begin{cpp}
-UDPSocket socket;
-socket.setOutputGate(gate("udpOut"));
-socket.connect(L3AddressResolver().resolve("10.0.0.2"), 2000);
-
-cPacket *pk = new cPacket("dgram");
-pk->setByteLength(1024);
-socket.send(pk);
-
-socket.close();
-\end{cpp}
-
-% when the localAddr is unspecified by the socket (~ INADDR_ANY), then the kernel sets the
-% source address field of the outgoing packet according to the outgoing interface
-
-Processing messages sent up by the UDP module is relatively straightforward.
-You only need to distinguish between data packets and error notifications,
-by checking the message kind (should be either UDP\_I\_DATA or UDP\_I\_ERROR),
-and casting the control info to UDPDataIndication or UDPErrorIndication.
-USPSocket provides some help for this with the \ffunc{belongsToSocket()} and
-\ffunc{belongsToAnyUDPSocket()} methods.
-
-\begin{cpp}
-void MyApp::handleMessage(cMessage *msg)
-{
-    if (msg->getKind() == UDP_I_DATA)
-    {
-        if (socket.belongsToSocket())
-            processUDPPacket(PK(msg));
-    }
-    else if (msg->getKind() == UDP_I_ERROR)
-    {
-        processUDPError(msg);
-    }
-    else
-    {
-        error("Unrecognized message (%s)", msg->getClassName());
-    }
-}
-\end{cpp}
-
 \fi
 
 
