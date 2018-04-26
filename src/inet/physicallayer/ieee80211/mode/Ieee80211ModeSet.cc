@@ -505,10 +505,16 @@ bool Ieee80211ModeSet::getIsMandatory(const IIeee80211Mode *mode) const
 
 const IIeee80211Mode *Ieee80211ModeSet::findMode(bps bitrate, Hz bandwidth) const
 {
+    return findMode(bitrate, bitrate, bandwidth);
+}
+
+const IIeee80211Mode *Ieee80211ModeSet::findMode(bps minBitrate, bps maxBitrate, Hz bandwidth) const
+{
     for (size_t index = 0; index < entries.size(); index++) {
         auto mode = entries[index].mode;
         auto dataMode = mode->getDataMode();
-        if (dataMode->getNetBitrate() == bitrate && (std::isnan(bandwidth.get()) || dataMode->getBandwidth() == bandwidth))
+        auto bitrate = dataMode->getNetBitrate();
+        if (minBitrate <= bitrate && bitrate <= maxBitrate && (std::isnan(bandwidth.get()) || dataMode->getBandwidth() == bandwidth))
             return entries[index].mode;
     }
     return nullptr;
@@ -516,9 +522,18 @@ const IIeee80211Mode *Ieee80211ModeSet::findMode(bps bitrate, Hz bandwidth) cons
 
 const IIeee80211Mode *Ieee80211ModeSet::getMode(bps bitrate, Hz bandwidth) const
 {
-    const IIeee80211Mode *mode = findMode(bitrate, bandwidth);
+    const IIeee80211Mode *mode = getMode(bitrate, bitrate, bandwidth);
     if (mode == nullptr)
         throw cRuntimeError("Unknown bitrate: %g in operation mode: '%s'", bitrate.get(), getName());
+    else
+        return mode;
+}
+
+const IIeee80211Mode *Ieee80211ModeSet::getMode(bps minBitrate, bps maxBitrate, Hz bandwidth) const
+{
+    const IIeee80211Mode *mode = findMode(minBitrate, maxBitrate, bandwidth);
+    if (mode == nullptr)
+        throw cRuntimeError("Unknown bitrate: (%g - %g) in operation mode: '%s'", minBitrate.get(), maxBitrate.get(), getName());
     else
         return mode;
 }
