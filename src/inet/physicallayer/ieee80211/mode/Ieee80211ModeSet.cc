@@ -505,7 +505,7 @@ bool Ieee80211ModeSet::getIsMandatory(const IIeee80211Mode *mode) const
 
 const IIeee80211Mode *Ieee80211ModeSet::findMode(bps bitrate, Hz bandwidth) const
 {
-    return findMode(bitrate, bitrate, bandwidth);
+    return findMode(bitrate - Mbps(0.05), bitrate + Mbps(0.05), bandwidth);
 }
 
 const IIeee80211Mode *Ieee80211ModeSet::findMode(bps minBitrate, bps maxBitrate, Hz bandwidth) const
@@ -522,7 +522,7 @@ const IIeee80211Mode *Ieee80211ModeSet::findMode(bps minBitrate, bps maxBitrate,
 
 const IIeee80211Mode *Ieee80211ModeSet::getMode(bps bitrate, Hz bandwidth) const
 {
-    const IIeee80211Mode *mode = getMode(bitrate, bitrate, bandwidth);
+    const IIeee80211Mode *mode = getMode(bitrate - Mbps(0.05), bitrate + Mbps(0.05), bandwidth);
     if (mode == nullptr)
         throw cRuntimeError("Unknown bitrate: %g in operation mode: '%s'", bitrate.get(), getName());
     else
