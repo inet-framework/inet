@@ -25,6 +25,7 @@
 #include "inet/physicallayer/ieee80211/mode/Ieee80211VhtMode.h"
 #include <algorithm>
 
+
 namespace inet {
 
 namespace physicallayer {
@@ -502,19 +503,20 @@ bool Ieee80211ModeSet::getIsMandatory(const IIeee80211Mode *mode) const
     return entries[getModeIndex(mode)].isMandatory;
 }
 
-const IIeee80211Mode *Ieee80211ModeSet::findMode(bps bitrate) const
+const IIeee80211Mode *Ieee80211ModeSet::findMode(bps bitrate, Hz bandwidth) const
 {
     for (size_t index = 0; index < entries.size(); index++) {
-        const IIeee80211Mode *mode = entries[index].mode;
-        if (mode->getDataMode()->getNetBitrate() == bitrate)
+        auto mode = entries[index].mode;
+        auto dataMode = mode->getDataMode();
+        if (dataMode->getNetBitrate() == bitrate && (std::isnan(bandwidth.get()) || dataMode->getBandwidth() == bandwidth))
             return entries[index].mode;
     }
     return nullptr;
 }
 
-const IIeee80211Mode *Ieee80211ModeSet::getMode(bps bitrate) const
+const IIeee80211Mode *Ieee80211ModeSet::getMode(bps bitrate, Hz bandwidth) const
 {
-    const IIeee80211Mode *mode = findMode(bitrate);
+    const IIeee80211Mode *mode = findMode(bitrate, bandwidth);
     if (mode == nullptr)
         throw cRuntimeError("Unknown bitrate: %g in operation mode: '%s'", bitrate.get(), getName());
     else
