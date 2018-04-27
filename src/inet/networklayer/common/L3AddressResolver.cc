@@ -38,7 +38,7 @@
 
 #ifdef WITH_GENERIC
 #include "../generic/NextHopInterfaceData.h"
-#include "inet/networklayer/generic/GenericRoutingTable.h"
+#include "../generic/NextHopRoutingTable.h"
 #endif // ifdef WITH_GENERIC
 
 namespace inet {
@@ -473,10 +473,10 @@ Ipv6RoutingTable *L3AddressResolver::findIpv6RoutingTableOf(cModule *host)
 #endif // ifdef WITH_IPv6
 }
 
-GenericRoutingTable *L3AddressResolver::findGenericRoutingTableOf(cModule *host)
+NextHopRoutingTable *L3AddressResolver::findGenericRoutingTableOf(cModule *host)
 {
 #ifdef WITH_GENERIC
-    return dynamic_cast<GenericRoutingTable *>(host->getModuleByPath(".generic.routingTable"));
+    return dynamic_cast<NextHopRoutingTable *>(host->getModuleByPath(".generic.routingTable"));
 #else // ifdef WITH_GENERIC
     return nullptr;
 #endif // ifdef WITH_GENERIC

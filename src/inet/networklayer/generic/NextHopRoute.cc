@@ -15,15 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/networklayer/generic/GenericRoute.h"
-#include "inet/networklayer/generic/GenericRoutingTable.h"
-#include "NextHopInterfaceData.h"
+#include "inet/networklayer/generic/NextHopInterfaceData.h"
+#include "inet/networklayer/generic/NextHopRoute.h"
+#include "inet/networklayer/generic/NextHopRoutingTable.h"
 
 namespace inet {
 
-Register_Class(GenericRoute);
+Register_Class(NextHopRoute);
 
-std::string GenericRoute::str() const
+std::string NextHopRoute::str() const
 {
     std::stringstream out;
 
@@ -54,23 +54,23 @@ std::string GenericRoute::str() const
     return out.str();
 }
 
-std::string GenericRoute::detailedInfo() const
+std::string NextHopRoute::detailedInfo() const
 {
     return "";    //TODO
 }
 
-bool GenericRoute::equals(const IRoute& route) const
+bool NextHopRoute::equals(const IRoute& route) const
 {
     return false;    //TODO
 }
 
-void GenericRoute::changed(int fieldCode)
+void NextHopRoute::changed(int fieldCode)
 {
     if (owner)
         owner->routeChanged(this, fieldCode);
 }
 
-IRoutingTable *GenericRoute::getRoutingTableAsGeneric() const
+IRoutingTable *NextHopRoute::getRoutingTableAsGeneric() const
 {
     return owner;
 }

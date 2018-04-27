@@ -19,7 +19,7 @@
 //
 
 #include "inet/networklayer/configurator/generic/GenericNetworkConfigurator.h"
-#include "inet/networklayer/generic/GenericRoutingTable.h"
+#include "../../generic/NextHopRoutingTable.h"
 #include "../../generic/NextHopInterfaceData.h"
 
 namespace inet {
@@ -62,7 +62,7 @@ void GenericNetworkConfigurator::addStaticRoutes(Topology& topology)
         Node *sourceNode = (Node *)topology.getNode(i);
         if (isBridgeNode(sourceNode))
             continue;
-        GenericRoutingTable *sourceRoutingTable = dynamic_cast<GenericRoutingTable *>(sourceNode->routingTable);
+        NextHopRoutingTable *sourceRoutingTable = dynamic_cast<NextHopRoutingTable *>(sourceNode->routingTable);
 
         // calculate shortest paths from everywhere to sourceNode
         // we are going to use the paths in reverse direction (assuming all links are bidirectional)
@@ -105,7 +105,7 @@ void GenericNetworkConfigurator::addStaticRoutes(Topology& topology)
                         continue;
                     L3Address destinationAddress = destinationInterfaceEntry->getGenericNetworkProtocolData()->getAddress();
                     if (!destinationInterfaceEntry->isLoopback() && !destinationAddress.isUnspecified() && nextHopInterfaceEntry->getGenericNetworkProtocolData()) {
-                        GenericRoute *route = new GenericRoute();
+                        NextHopRoute *route = new NextHopRoute();
                         route->setSourceType(IRoute::MANUAL);
                         route->setDestination(destinationAddress);
                         route->setInterface(sourceInterfaceEntry);

@@ -26,15 +26,15 @@ namespace inet {
 
 class InterfaceEntry;
 class IRoutingTable;
-class GenericRoutingTable;
+class NextHopRoutingTable;
 
 /**
  * A generic route that uses generic addresses as destination and next hop.
  */
-class INET_API GenericRoute : public cObject, public IRoute
+class INET_API NextHopRoute : public cObject, public IRoute
 {
   private:
-    GenericRoutingTable *owner;
+    NextHopRoutingTable *owner;
     int prefixLength;
     L3Address destination;
     L3Address nextHop;
@@ -48,16 +48,16 @@ class INET_API GenericRoute : public cObject, public IRoute
     void changed(int fieldCode);
 
   public:
-    GenericRoute() : owner(nullptr), prefixLength(0), interface(nullptr), sourceType(IRoute::MANUAL),
+    NextHopRoute() : owner(nullptr), prefixLength(0), interface(nullptr), sourceType(IRoute::MANUAL),
         source(nullptr), protocolData(nullptr), metric(0) {}
-    virtual ~GenericRoute() { delete protocolData; }
+    virtual ~NextHopRoute() { delete protocolData; }
 
     virtual std::string str() const override;
     virtual std::string detailedInfo() const override;
 
     bool equals(const IRoute& route) const;
 
-    virtual void setRoutingTable(GenericRoutingTable *owner) { this->owner = owner; }
+    virtual void setRoutingTable(NextHopRoutingTable *owner) { this->owner = owner; }
     virtual void setDestination(const L3Address& dest) override { if (destination != dest) { this->destination = dest; changed(F_DESTINATION); } }
     virtual void setPrefixLength(int l) override { if (prefixLength != l) { this->prefixLength = l; changed(F_PREFIX_LENGTH); } }
     virtual void setNextHop(const L3Address& nextHop) override { if (this->nextHop != nextHop) { this->nextHop = nextHop; changed(F_NEXTHOP); } }

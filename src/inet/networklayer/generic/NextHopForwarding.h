@@ -31,7 +31,7 @@
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/INetworkProtocol.h"
 #include "inet/networklayer/generic/GenericDatagram_m.h"
-#include "inet/networklayer/generic/GenericRoutingTable.h"
+#include "inet/networklayer/generic/NextHopRoutingTable.h"
 
 namespace inet {
 
@@ -71,7 +71,7 @@ class INET_API NextHopForwarding : public QueueBase, public NetfilterBase, publi
     };
 
     IInterfaceTable *interfaceTable;
-    GenericRoutingTable *routingTable;
+    NextHopRoutingTable *routingTable;
     IArp *arp;
 
     // config

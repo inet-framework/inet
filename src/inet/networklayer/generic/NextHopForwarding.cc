@@ -17,8 +17,6 @@
 //
 
 #include "inet/applications/common/SocketTag_m.h"
-#include "inet/networklayer/generic/NextHopForwarding.h"
-
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -29,9 +27,10 @@
 #include "inet/networklayer/common/NextHopAddressTag_m.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
 #include "inet/networklayer/generic/GenericDatagram_m.h"
-#include "NextHopInterfaceData.h"
-#include "inet/networklayer/generic/GenericRoute.h"
-#include "inet/networklayer/generic/GenericRoutingTable.h"
+#include "inet/networklayer/generic/NextHopForwarding.h"
+#include "inet/networklayer/generic/NextHopInterfaceData.h"
+#include "inet/networklayer/generic/NextHopRoute.h"
+#include "inet/networklayer/generic/NextHopRoutingTable.h"
 
 namespace inet {
 
@@ -65,7 +64,7 @@ void NextHopForwarding::initialize(int stage)
         QueueBase::initialize();
 
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        routingTable = getModuleFromPar<GenericRoutingTable>(par("routingTableModule"), this);
+        routingTable = getModuleFromPar<NextHopRoutingTable>(par("routingTableModule"), this);
         arp = getModuleFromPar<IArp>(par("arpModule"), this);
 
         defaultHopLimit = par("hopLimit");
@@ -286,7 +285,7 @@ void NextHopForwarding::routePacket(Packet *datagram, const InterfaceEntry *dest
     }
     else {
         // use NextHopForwarding routing (lookup in routing table)
-        const GenericRoute *re = routingTable->findBestMatchingRoute(destAddr);
+        const NextHopRoute *re = routingTable->findBestMatchingRoute(destAddr);
 
         // error handling: destination address does not exist in routing table:
         // throw packet away and continue
