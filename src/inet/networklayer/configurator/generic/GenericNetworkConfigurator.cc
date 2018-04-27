@@ -19,8 +19,8 @@
 //
 
 #include "inet/networklayer/configurator/generic/GenericNetworkConfigurator.h"
-#include "../../nexthop/NextHopRoutingTable.h"
-#include "../../nexthop/NextHopInterfaceData.h"
+#include "inet/networklayer/nexthop/NextHopInterfaceData.h"
+#include "inet/networklayer/nexthop/NextHopRoutingTable.h"
 
 namespace inet {
 

@@ -24,7 +24,7 @@
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 #endif
 #ifdef WITH_GENERIC
-#include "inet/networklayer/generic/GenericDatagram_m.h"
+#include "inet/networklayer/nexthop/GenericDatagram_m.h"
 #endif
 
 namespace inet {

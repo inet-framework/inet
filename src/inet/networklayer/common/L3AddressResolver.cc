@@ -37,8 +37,8 @@
 #endif // ifdef WITH_IPv6
 
 #ifdef WITH_GENERIC
-#include "../nexthop/NextHopInterfaceData.h"
-#include "../nexthop/NextHopRoutingTable.h"
+#include "inet/networklayer/nexthop/NextHopInterfaceData.h"
+#include "inet/networklayer/nexthop/NextHopRoutingTable.h"
 #endif // ifdef WITH_GENERIC
 
 namespace inet {

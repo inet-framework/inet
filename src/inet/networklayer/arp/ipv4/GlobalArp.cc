@@ -20,9 +20,9 @@
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/networklayer/arp/ipv4/GlobalArp.h"
-#include "../../nexthop/NextHopInterfaceData.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
+#include "inet/networklayer/nexthop/NextHopInterfaceData.h"
 
 namespace inet {
 

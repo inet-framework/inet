@@ -29,7 +29,7 @@
 #include "inet/common/lifecycle/NodeOperations.h"
 
 #ifdef WITH_GENERIC
-#include "../nexthop/NextHopInterfaceData.h"
+#include "inet/networklayer/nexthop/NextHopInterfaceData.h"
 #endif // ifdef WITH_GENERIC
 
 #ifdef WITH_IPv4

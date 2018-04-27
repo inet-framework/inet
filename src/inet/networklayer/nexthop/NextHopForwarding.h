@@ -30,8 +30,8 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/INetworkProtocol.h"
-#include "inet/networklayer/generic/GenericDatagram_m.h"
-#include "../nexthop/NextHopRoutingTable.h"
+#include "inet/networklayer/nexthop/GenericDatagram_m.h"
+#include "inet/networklayer/nexthop/NextHopRoutingTable.h"
 
 namespace inet {
 

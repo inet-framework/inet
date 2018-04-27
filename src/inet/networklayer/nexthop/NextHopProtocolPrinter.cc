@@ -19,8 +19,8 @@
 
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
-#include "inet/networklayer/generic/GenericDatagram_m.h"
-#include "../nexthop/NextHopProtocolPrinter.h"
+#include "inet/networklayer/nexthop/GenericDatagram_m.h"
+#include "inet/networklayer/nexthop/NextHopProtocolPrinter.h"
 
 namespace inet {
 

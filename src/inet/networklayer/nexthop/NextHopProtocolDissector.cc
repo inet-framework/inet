@@ -18,8 +18,8 @@
 //
 
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
-#include "inet/networklayer/generic/GenericDatagram_m.h"
-#include "../nexthop/NextHopProtocolDissector.h"
+#include "inet/networklayer/nexthop/GenericDatagram_m.h"
+#include "inet/networklayer/nexthop/NextHopProtocolDissector.h"
 
 namespace inet {
 
