@@ -37,7 +37,7 @@ class SimpleVoipPacket;
 /**
  * Implements a simple VoIP source. See the NED file for more information.
  */
-class INET_API SimpleVoipReceiver : public cSimpleModule, public ILifecycle
+class INET_API SimpleVoipReceiver : public cSimpleModule, public ILifecycle, public UdpSocket::ICallback
 {
   private:
     class VoipPacketInfo
@@ -108,6 +108,10 @@ class INET_API SimpleVoipReceiver : public cSimpleModule, public ILifecycle
 
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override
     { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
+
+    //UdpSocket::ICallback methods
+    virtual void socketDataArrived(UdpSocket* socket, Packet *msg) override;
+    virtual void socketErrorArrived(UdpSocket* socket, cMessage *msg) override;
 
   public:
     SimpleVoipReceiver();

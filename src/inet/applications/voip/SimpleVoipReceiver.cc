@@ -98,6 +98,7 @@ void SimpleVoipReceiver::initialize(int stage)
             socket.setOutputGate(gate("socketOut"));
             socket.bind(port);
         }
+        socket.setCallbackObject(this);
 
         selfTalkspurtFinished = new cMessage("selfTalkspurtFinished");
     }
@@ -116,16 +117,17 @@ void SimpleVoipReceiver::handleMessage(cMessage *msg)
     if (msg->isSelfMessage()) {
         // selfTalkspurtFinished
         evaluateTalkspurt(false);
-        return;
     }
+    else if (msg->arrivedOn("socketIn")) {
+        socket.processMessage(msg);
+    }
+    else
+        throw cRuntimeError("Unknown incoming gate: '%s'", msg->getArrivalGate()->getFullName());
+}
 
-    Packet *packet = dynamic_cast<Packet *>(msg);
-    if (packet == nullptr) {
-        // TODO: throw exception instead?
-        EV_ERROR << "VoIPReceiver: Unknown incoming message: " << msg->getClassName() << endl;
-        delete msg;
-        return;
-    }
+void SimpleVoipReceiver::socketDataArrived(UdpSocket* socket, Packet *packet)
+{
+    // process incoming packet
     const auto& voice = packet->peekAtFront<SimpleVoipPacket>();
 
     if (currentTalkspurt.status == TalkspurtInfo::EMPTY) {
@@ -149,7 +151,7 @@ void SimpleVoipReceiver::handleMessage(cMessage *msg)
     else {
         // packet from older talkspurt, ignore
         EV_DEBUG << "PACKET ARRIVED TOO LATE: TALKSPURT " << voice->getTalkspurtID() << " PACKET " << voice->getPacketID() << ", IGNORED\n\n";
-        delete msg;
+        delete packet;
         return;
     }
 
@@ -158,6 +160,12 @@ void SimpleVoipReceiver::handleMessage(cMessage *msg)
     simtime_t delay = packet->getArrivalTime() - voice->getVoipTimestamp();
     emit(voipPacketDelaySignal, delay);
 
+    delete packet;
+}
+
+void SimpleVoipReceiver::socketErrorArrived(UdpSocket* socket, cMessage *msg)
+{
+    EV_WARN << "Unknown message '" << msg->getName() << "', kind = " << msg->getKind() << ", discarding it." << endl;
     delete msg;
 }
 
