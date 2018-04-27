@@ -18,18 +18,18 @@
 #include <algorithm>
 #include <sstream>
 
-#include "inet/networklayer/generic/GenericNetworkProtocolInterfaceData.h"
+#include "NextHopInterfaceData.h"
 
 namespace inet {
 
-std::string GenericNetworkProtocolInterfaceData::str() const
+std::string NextHopInterfaceData::str() const
 {
     std::stringstream out;
     out << "generic addr:" << getAddress();
     return out.str();
 }
 
-std::string GenericNetworkProtocolInterfaceData::detailedInfo() const
+std::string NextHopInterfaceData::detailedInfo() const
 {
     std::stringstream out;
     out << "generic addr:" << getAddress() << "\n"

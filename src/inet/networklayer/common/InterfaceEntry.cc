@@ -40,7 +40,7 @@
 #endif // ifdef WITH_IPv6
 
 #ifdef WITH_GENERIC
-#include "inet/networklayer/generic/GenericNetworkProtocolInterfaceData.h"
+#include "../generic/NextHopInterfaceData.h"
 #endif // ifdef WITH_GENERIC
 
 namespace inet {
@@ -218,7 +218,7 @@ void InterfaceEntry::resetInterface()
     ieee8021ddata = nullptr;
 }
 
-void InterfaceEntry::setGenericNetworkProtocolData(GenericNetworkProtocolInterfaceData *p)
+void InterfaceEntry::setGenericNetworkProtocolData(NextHopInterfaceData *p)
 {
 #ifdef WITH_GENERIC
     if (genericNetworkProtocolData && genericNetworkProtocolData->ownerp == this)

@@ -20,7 +20,7 @@
 
 #include "inet/networklayer/configurator/generic/GenericNetworkConfigurator.h"
 #include "inet/networklayer/generic/GenericRoutingTable.h"
-#include "inet/networklayer/generic/GenericNetworkProtocolInterfaceData.h"
+#include "../../generic/NextHopInterfaceData.h"
 
 namespace inet {
 

@@ -17,7 +17,7 @@
 
 #include "inet/networklayer/generic/GenericRoute.h"
 #include "inet/networklayer/generic/GenericRoutingTable.h"
-#include "inet/networklayer/generic/GenericNetworkProtocolInterfaceData.h"
+#include "NextHopInterfaceData.h"
 
 namespace inet {
 

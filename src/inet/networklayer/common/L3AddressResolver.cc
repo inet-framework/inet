@@ -37,7 +37,7 @@
 #endif // ifdef WITH_IPv6
 
 #ifdef WITH_GENERIC
-#include "inet/networklayer/generic/GenericNetworkProtocolInterfaceData.h"
+#include "../generic/NextHopInterfaceData.h"
 #include "inet/networklayer/generic/GenericRoutingTable.h"
 #endif // ifdef WITH_GENERIC
 

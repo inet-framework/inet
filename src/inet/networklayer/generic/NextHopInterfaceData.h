@@ -32,7 +32,7 @@ namespace inet {
  *
  * @see InterfaceEntry
  */
-class INET_API GenericNetworkProtocolInterfaceData : public InterfaceProtocolData
+class INET_API NextHopInterfaceData : public InterfaceProtocolData
 {
   protected:
     L3Address inetAddr;    ///< address of interface
@@ -47,11 +47,11 @@ class INET_API GenericNetworkProtocolInterfaceData : public InterfaceProtocolDat
 
   private:
     // copying not supported: following are private and also left undefined
-    GenericNetworkProtocolInterfaceData(const GenericNetworkProtocolInterfaceData& obj);
-    GenericNetworkProtocolInterfaceData& operator=(const GenericNetworkProtocolInterfaceData& obj);
+    NextHopInterfaceData(const NextHopInterfaceData& obj);
+    NextHopInterfaceData& operator=(const NextHopInterfaceData& obj);
 
   public:
-    GenericNetworkProtocolInterfaceData() { metric = 0; }
+    NextHopInterfaceData() { metric = 0; }
     virtual std::string str() const override;
     virtual std::string detailedInfo() const override;
 

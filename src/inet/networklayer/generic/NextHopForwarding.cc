@@ -29,7 +29,7 @@
 #include "inet/networklayer/common/NextHopAddressTag_m.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
 #include "inet/networklayer/generic/GenericDatagram_m.h"
-#include "inet/networklayer/generic/GenericNetworkProtocolInterfaceData.h"
+#include "NextHopInterfaceData.h"
 #include "inet/networklayer/generic/GenericRoute.h"
 #include "inet/networklayer/generic/GenericRoutingTable.h"
 

@@ -22,7 +22,7 @@
 
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/generic/GenericRoute.h"
-#include "inet/networklayer/generic/GenericNetworkProtocolInterfaceData.h"
+#include "NextHopInterfaceData.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/ModuleAccess.h"
 
@@ -173,7 +173,7 @@ void GenericRoutingTable::configureInterface(InterfaceEntry *ie)
     int metric = (int)(ceil(2e9 / ie->getDatarate()));    // use OSPF cost as default
     int interfaceModuleId = ie ? ie->getId() : -1;
     // mac
-    GenericNetworkProtocolInterfaceData *d = new GenericNetworkProtocolInterfaceData();
+    NextHopInterfaceData *d = new NextHopInterfaceData();
     d->setMetric(metric);
     if (addressType == L3Address::MAC)
         d->setAddress(ie->getMacAddress());
