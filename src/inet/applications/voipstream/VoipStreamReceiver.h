@@ -45,7 +45,7 @@ extern "C" {
 
 namespace inet {
 
-class INET_API VoipStreamReceiver : public cSimpleModule, public ILifecycle
+class INET_API VoipStreamReceiver : public cSimpleModule, public ILifecycle, public UdpSocket::ICallback
 {
   public:
     VoipStreamReceiver() {}
@@ -63,6 +63,10 @@ class INET_API VoipStreamReceiver : public cSimpleModule, public ILifecycle
     virtual void checkSourceAndParameters(Packet *vp);
     virtual void closeConnection();
     virtual void decodePacket(Packet *vp);
+
+    //UdpSocket::ICallback methods
+    virtual void socketDataArrived(UdpSocket* socket, Packet *msg) override;
+    virtual void socketErrorArrived(UdpSocket* socket, cMessage *msg) override;
 
     class Connection
     {

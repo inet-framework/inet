@@ -67,17 +67,23 @@ void VoipStreamReceiver::initialize(int stage)
 
         socket.setOutputGate(gate("socketOut"));
         socket.bind(localPort);
+        socket.setCallbackObject(this);
     }
 }
 
 void VoipStreamReceiver::handleMessage(cMessage *msg)
 {
-    if (msg->getKind() == UDP_I_ERROR) {
-        delete msg;
-        return;
+    if (msg->arrivedOn("socketIn")) {
+        socket.processMessage(msg);
     }
+    else
+        throw cRuntimeError("Unknown incoming gate: '%s'", msg->getArrivalGate()->getFullName());
+}
 
-    Packet *pk = check_and_cast<Packet *>(msg);
+void VoipStreamReceiver::socketDataArrived(UdpSocket* socket, Packet *pk)
+{
+    // process incoming packet
+
     const auto& vp = pk->peekAtFront<VoipStreamPacket>();
     bool ok = true;
     if (curConn.offline)
@@ -94,9 +100,15 @@ void VoipStreamReceiver::handleMessage(cMessage *msg)
     else {
         PacketDropDetails details;
         details.setReason(CONGESTION);
-        emit(packetDroppedSignal, msg, &details);
+        emit(packetDroppedSignal, pk, &details);
     }
 
+    delete pk;
+}
+
+void VoipStreamReceiver::socketErrorArrived(UdpSocket* socket, cMessage *msg)
+{
+    EV_WARN << "Unknown message '" << msg->getName() << "', kind = " << msg->getKind() << ", discarding it." << endl;
     delete msg;
 }
 
