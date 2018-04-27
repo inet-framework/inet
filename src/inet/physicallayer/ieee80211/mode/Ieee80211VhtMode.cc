@@ -713,8 +713,7 @@ const Ieee80211VhtMode* Ieee80211VhtCompliantModes::getCompliantMode(const Ieee8
         else if (preambleFormat == Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED)
         {
             legacySignal = &Ieee80211OfdmCompliantModes::ofdmHeaderMode6MbpsRate13;
-            //htSignal = new Ieee80211VhtSignalMode(mcsMode->getMcsIndex(), &Ieee80211OfdmCompliantModulations::qbpskModulation, Ieee80211VhtCompliantCodes::getCompliantCode(&Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, &Ieee80211OfdmCompliantModulations::qbpskModulation, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, mcsMode->getBandwidth(), false), mcsMode->getBandwidth(), guardIntervalType);
-            htSignal = new Ieee80211VhtSignalMode(mcsMode->getMcsIndex(), &Ieee80211OfdmCompliantModulations::bpskModulation, Ieee80211VhtCompliantCodes::getCompliantCode(&Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, &Ieee80211OfdmCompliantModulations::bpskModulation, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, mcsMode->getBandwidth(), false), mcsMode->getBandwidth(), guardIntervalType);
+            htSignal = new Ieee80211VhtSignalMode(mcsMode->getMcsIndex(), &Ieee80211OfdmCompliantModulations::qbpskModulation, Ieee80211VhtCompliantCodes::getCompliantCode(&Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2, &Ieee80211OfdmCompliantModulations::qbpskModulation, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, mcsMode->getBandwidth(), false), mcsMode->getBandwidth(), guardIntervalType);
         }
         else
             throw cRuntimeError("Unknown preamble format");
