@@ -421,7 +421,7 @@ void Ieee802154Mac::updateStatusCCA(t_mac_event event, cMessage *msg)
                     txAttempts = 0;
                     nbDroppedFrames++;
                     PacketDropDetails details;
-                    details.setReason(RETRY_LIMIT_REACHED);
+                    details.setReason(CONGESTION);
                     details.setLimit(macMaxCSMABackoffs);
                     emit(packetDroppedSignal, mac, &details);
                     delete mac;
