@@ -19,9 +19,9 @@ package inet.networklayer.nexthop;
 import inet.networklayer.contract.IRoutingTable;
 
 //
-// This module stores generic routes used by the generic network protocol.
+// This module stores next hop routes used by the next hop forwarding protocol.
 //
-simple GenericRoutingTable like IRoutingTable
+simple NextHopRoutingTable like IRoutingTable
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
@@ -32,7 +32,7 @@ simple GenericRoutingTable like IRoutingTable
                           // interface address; should be left empty ("") for hosts
         bool forwarding = default(true);  // turns IP forwarding on/off
         bool multicastForwarding = default(false); // turns multicast forwarding on/off
-        @signal[routeAdded](type=GenericRoute);
-        @signal[routeDeleted](type=GenericRoute);
-        @signal[routeChanged](type=GenericRoute);
+        @signal[routeAdded](type=NextHopRoute);
+        @signal[routeDeleted](type=NextHopRoute);
+        @signal[routeChanged](type=NextHopRoute);
 }

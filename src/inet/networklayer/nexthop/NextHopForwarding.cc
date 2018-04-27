@@ -26,7 +26,7 @@
 #include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/common/NextHopAddressTag_m.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
-#include "inet/networklayer/nexthop/GenericDatagram_m.h"
+#include "inet/networklayer/nexthop/NextHopDatagram_m.h"
 #include "inet/networklayer/nexthop/NextHopForwarding.h"
 #include "inet/networklayer/nexthop/NextHopInterfaceData.h"
 #include "inet/networklayer/nexthop/NextHopRoute.h"
@@ -264,7 +264,7 @@ void NextHopForwarding::routePacket(Packet *datagram, const InterfaceEntry *dest
         return;
     }
 
-    // if datagram arrived from input gate and Generic_FORWARD is off, delete datagram
+    // if datagram arrived from input gate and forwarding is off, delete datagram
     if (!fromHL && !routingTable->isForwardingEnabled()) {
         EV_INFO << "forwarding off, dropping packet\n";
         numDropped++;
@@ -316,7 +316,7 @@ void NextHopForwarding::routePacket(Packet *datagram, const InterfaceEntry *dest
     if (header->getSourceAddress().isUnspecified()) {
         datagram->trimFront();
         const auto& newHeader = removeNetworkProtocolHeader<NextHopDatagramHeader>(datagram);
-        newHeader->setSourceAddress(destIE->getGenericNetworkProtocolData()->getAddress());
+        newHeader->setSourceAddress(destIE->getNextHopProtocolData()->getAddress());
         insertNetworkProtocolHeader(datagram, Protocol::gnp, newHeader);
         header = newHeader;
     }
@@ -341,7 +341,7 @@ void NextHopForwarding::routeMulticastPacket(Packet *datagram, const InterfaceEn
             sendDatagramToHL(datagram);
 //
 //        // don't forward if NextHopForwarding forwarding is off
-//        if (!rt->isGenericForwardingEnabled())
+//        if (!rt->isForwardingEnabled())
 //        {
 //            delete datagram;
 //            return;
@@ -387,7 +387,7 @@ void NextHopForwarding::routeMulticastPacket(Packet *datagram, const InterfaceEn
 //        // check for local delivery
 //        if (rt->isLocalMulticastAddress(destAddr))
 //        {
-//            GenericDatagram *datagramCopy = datagram->dup();
+//            NextHopDatagram *datagramCopy = datagram->dup();
 //
 //            // FIXME code from the MPLS model: set packet dest address to routerId (???)
 //            datagramCopy->setDestinationAddress(rt->getRouterId());
@@ -396,7 +396,7 @@ void NextHopForwarding::routeMulticastPacket(Packet *datagram, const InterfaceEn
 //        }
 //
 //        // don't forward if NextHopForwarding forwarding is off
-//        if (!rt->isGenericForwardingEnabled())
+//        if (!rt->isForwardingEnabled())
 //        {
 //            delete datagram;
 //            return;
@@ -411,7 +411,7 @@ void NextHopForwarding::routeMulticastPacket(Packet *datagram, const InterfaceEn
 //
 //    }
 //
-//    // routed explicitly via Generic_MULTICAST_IF
+//    // routed explicitly via multicast interface
 //    if (destIE!=nullptr)
 //    {
 //        ASSERT(datagram->getDestinationAddress().isMulticast());
@@ -445,7 +445,7 @@ void NextHopForwarding::routeMulticastPacket(Packet *datagram, const InterfaceEn
 //            // don't forward to input port
 //            if (destIE && destIE!=fromIE)
 //            {
-//                GenericDatagram *datagramCopy = datagram->dup();
+//                NextHopDatagram *datagramCopy = datagram->dup();
 //
 //                // set datagram source address if not yet set
 //                if (datagramCopy->getSourceAddress().isUnspecified())
@@ -508,7 +508,7 @@ void NextHopForwarding::encapsulate(Packet *transportPacket, const InterfaceEntr
     // set source and destination address
     header->setDestinationAddress(dest);
 
-    // Generic_MULTICAST_IF option, but allow interface selection for unicast packets as well
+    // multicast interface option, but allow interface selection for unicast packets as well
     auto ifTag = transportPacket->findTag<InterfaceReq>();
     destIE = ifTag ? interfaceTable->getInterfaceById(ifTag->getInterfaceId()) : nullptr;
 

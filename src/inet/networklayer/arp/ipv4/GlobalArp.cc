@@ -98,7 +98,7 @@ void GlobalArp::initialize(int stage)
                     if (!ipv6Address.isUnspecified())
                         ensureCacheEntry(ipv6Address, interfaceEntry);
                 }
-                if (auto genericData = interfaceEntry->getGenericNetworkProtocolData()) {
+                if (auto genericData = interfaceEntry->getNextHopProtocolData()) {
                     L3Address address = genericData->getAddress();
                     if (!address.isUnspecified())
                         ensureCacheEntry(address, interfaceEntry);

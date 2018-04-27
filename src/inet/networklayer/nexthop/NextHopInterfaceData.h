@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_GENERICNETWORKPROTOCOLINTERFACEDATA_H
-#define __INET_GENERICNETWORKPROTOCOLINTERFACEDATA_H
+#ifndef __INET_NEXTHOPINTERFACEDATA_H
+#define __INET_NEXTHOPINTERFACEDATA_H
 
 #include <vector>
 #include "inet/common/INETDefs.h"
@@ -26,7 +26,7 @@
 namespace inet {
 
 /**
- * Generic network protocol specific data for an InterfaceEntry, stores generic network address.
+ * Next hop forwarding protocol specific data for an InterfaceEntry, stores generic network address.
  *
  * @see InterfaceEntry
  */
@@ -70,5 +70,5 @@ class INET_API NextHopInterfaceData : public InterfaceProtocolData
 
 } // namespace inet
 
-#endif // ifndef __INET_GENERICNETWORKPROTOCOLINTERFACEDATA_H
+#endif // ifndef __INET_NEXTHOPINTERFACEDATA_H
 

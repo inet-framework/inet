@@ -19,7 +19,7 @@ package inet.networklayer.nexthop;
 
 //
 // This module is a simplified next hop forwarding that routes
-// generic datagrams using different kind of network addresses.
+// datagrams using different kind of network addresses.
 //
 // @author Andras Varga
 //
@@ -37,6 +37,6 @@ simple NextHopForwarding
     gates:
         input transportIn @labels(TcpHeader,UdpHeader);
         output transportOut @labels(TcpHeader,UdpHeader);
-        input queueIn @labels(GenericDatagram);
-        output queueOut @labels(GenericDatagram);
+        input queueIn @labels(NextHopDatagram);
+        output queueOut @labels(NextHopDatagram);
 }

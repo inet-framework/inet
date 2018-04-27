@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_GENERICROUTINGTABLE_H
-#define __INET_GENERICROUTINGTABLE_H
+#ifndef __INET_NEXTHOPROUTINGTABLE_H
+#define __INET_NEXTHOPROUTINGTABLE_H
 
 #include <vector>
 #include "inet/common/INETDefs.h"
@@ -43,7 +43,7 @@ class INET_API NextHopRoutingTable : public cSimpleModule, public IRoutingTable,
     typedef std::vector<NextHopRoute *> RouteVector;
     RouteVector routes;    // unicast route table, sorted by prefix match order
 
-    typedef std::vector<GenericMulticastRoute *> MulticastRouteVector;
+    typedef std::vector<NextHopMulticastRoute *> MulticastRouteVector;
     MulticastRouteVector multicastRoutes;    // multicast route table, sorted by prefix match order
 
   protected:
@@ -234,5 +234,5 @@ class INET_API NextHopRoutingTable : public cSimpleModule, public IRoutingTable,
 
 } // namespace inet
 
-#endif // ifndef __INET_GENERICROUTINGTABLE_H
+#endif // ifndef __INET_NEXTHOPROUTINGTABLE_H
 

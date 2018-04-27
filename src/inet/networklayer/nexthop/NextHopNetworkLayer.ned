@@ -44,7 +44,7 @@ module NextHopNetworkLayer like INetworkLayer
         output transportOut @labels(Ipv4ControlInfo/up);
 
     submodules:
-        routingTable: GenericRoutingTable {
+        routingTable: NextHopRoutingTable {
             parameters:
                 @display("p=100,100;is=s");
         }

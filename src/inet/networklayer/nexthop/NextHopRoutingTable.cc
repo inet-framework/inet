@@ -34,7 +34,7 @@ std::ostream& operator<<(std::ostream& os, const NextHopRoute& e)
     return os;
 };
 
-std::ostream& operator<<(std::ostream& os, const GenericMulticastRoute& e)
+std::ostream& operator<<(std::ostream& os, const NextHopMulticastRoute& e)
 {
     os << e.str();
     return os;
@@ -147,7 +147,7 @@ void NextHopRoutingTable::configureRouterId()
             for (int i = 0; i < ift->getNumInterfaces(); ++i) {
                 InterfaceEntry *ie = ift->getInterface(i);
                 if (!ie->isLoopback()) {
-                    L3Address interfaceAddr = ie->getGenericNetworkProtocolData()->getAddress();
+                    L3Address interfaceAddr = ie->getNextHopProtocolData()->getAddress();
                     if (routerId.isUnspecified() || routerId < interfaceAddr)
                         routerId = interfaceAddr;
                 }
@@ -161,7 +161,7 @@ void NextHopRoutingTable::configureRouterId()
 //        if (getInterfaceByAddress(routerId)==nullptr)
 //        {
 //            InterfaceEntry *lo0 = ift->getFirstLoopbackInterface();
-//            lo0->getGenericNetworkProtocolData()->setAddress(routerId);
+//            lo0->getNextHopProtocolData()->setAddress(routerId);
 //        }
 //    }
 }
@@ -179,7 +179,7 @@ void NextHopRoutingTable::configureInterface(InterfaceEntry *ie)
         d->setAddress(ModulePathAddress(interfaceModuleId));
     else if (ie && addressType == L3Address::MODULEID)
         d->setAddress(ModuleIdAddress(interfaceModuleId));
-    ie->setGenericNetworkProtocolData(d);
+    ie->setNextHopProtocolData(d);
 }
 
 void NextHopRoutingTable::configureLoopback()
@@ -241,7 +241,7 @@ bool NextHopRoutingTable::isLocalAddress(const L3Address& dest) const
 
     // collect interface addresses if not yet done
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
-        L3Address interfaceAddr = ift->getInterface(i)->getGenericNetworkProtocolData()->getAddress();
+        L3Address interfaceAddr = ift->getInterface(i)->getNextHopProtocolData()->getAddress();
         if (interfaceAddr == dest)
             return true;
     }
@@ -253,7 +253,7 @@ InterfaceEntry *NextHopRoutingTable::getInterfaceByAddress(const L3Address& addr
     // collect interface addresses if not yet done
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
         InterfaceEntry *ie = ift->getInterface(i);
-        L3Address interfaceAddr = ie->getGenericNetworkProtocolData()->getAddress();
+        L3Address interfaceAddr = ie->getNextHopProtocolData()->getAddress();
         if (interfaceAddr == address)
             return ie;
     }

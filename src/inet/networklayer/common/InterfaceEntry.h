@@ -121,7 +121,7 @@ class INET_API InterfaceEntry : public cModule
 
     Ipv4InterfaceData *ipv4data = nullptr;    ///< Ipv4-specific interface info (Ipv4 address, etc)
     Ipv6InterfaceData *ipv6data = nullptr;    ///< Ipv6-specific interface info (Ipv6 addresses, etc)
-    NextHopInterfaceData *genericNetworkProtocolData = nullptr;    ///< NextHopForwarding-specific interface info (Address, etc)
+    NextHopInterfaceData *nextHopProtocolData = nullptr;    ///< NextHopForwarding-specific interface info (Address, etc)
     IsisInterfaceData *isisdata = nullptr;    ///< ISIS-specific interface info
     TrillInterfaceData *trilldata = nullptr;    ///< TRILL-specific interface info
     Ieee8021dInterfaceData *ieee8021ddata = nullptr;
@@ -225,7 +225,7 @@ class INET_API InterfaceEntry : public cModule
     Ipv4InterfaceData *ipv4Data() const { return ipv4data; }
     Ipv4Address getIpv4Address() const;
     Ipv6InterfaceData *ipv6Data() const { return ipv6data; }
-    NextHopInterfaceData *getGenericNetworkProtocolData() const { return genericNetworkProtocolData; }
+    NextHopInterfaceData *getNextHopProtocolData() const { return nextHopProtocolData; }
     TrillInterfaceData *trillData() const { return trilldata; }
     IsisInterfaceData *isisData() const { return isisdata; }
     Ieee8021dInterfaceData *ieee8021dData() const { return ieee8021ddata; }
@@ -240,7 +240,7 @@ class INET_API InterfaceEntry : public cModule
     //@{
     virtual void setIpv4Data(Ipv4InterfaceData *p);
     virtual void setIpv6Data(Ipv6InterfaceData *p);
-    virtual void setGenericNetworkProtocolData(NextHopInterfaceData *p);
+    virtual void setNextHopProtocolData(NextHopInterfaceData *p);
     virtual void setTrillInterfaceData(TrillInterfaceData *p);
     virtual void setIsisInterfaceData(IsisInterfaceData *p);
     virtual void setIeee8021dInterfaceData(Ieee8021dInterfaceData *p);

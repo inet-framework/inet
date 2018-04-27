@@ -30,14 +30,14 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/INetworkProtocol.h"
-#include "inet/networklayer/nexthop/GenericDatagram_m.h"
+#include "inet/networklayer/nexthop/NextHopDatagram_m.h"
 #include "inet/networklayer/nexthop/NextHopRoutingTable.h"
 
 namespace inet {
 
 /**
- * Implements a generic network protocol that routes generic datagrams through the network.
- * Routing decisions are based on a generic routing table, but it also supports the netfilter
+ * Implements a next hop forwarding protocol that routes datagrams through the network.
+ * Routing decisions are based on a next hop routing table, but it also supports the netfilter
  * interface to allow routing protocols to kick in. It doesn't provide datagram fragmentation
  * and reassembling.
  */
@@ -45,7 +45,7 @@ class INET_API NextHopForwarding : public QueueBase, public NetfilterBase, publi
 {
   protected:
     /**
-     * Represents an GenericDatagram, queued by a Hook
+     * Represents an NextHopDatagram, queued by a Hook
      */
     struct QueuedDatagramForHook
     {
@@ -100,7 +100,7 @@ class INET_API NextHopForwarding : public QueueBase, public NetfilterBase, publi
     virtual void refreshDisplay() const override;
 
     /**
-     * Handle GenericDatagram messages arriving from lower layer.
+     * Handle NextHopDatagram messages arriving from lower layer.
      * Decrements TTL, then invokes routePacket().
      */
     virtual void handlePacketFromNetwork(Packet *datagram);
@@ -125,7 +125,7 @@ class INET_API NextHopForwarding : public QueueBase, public NetfilterBase, publi
     virtual void routeMulticastPacket(Packet *datagram, const InterfaceEntry *destIE, const InterfaceEntry *fromIE);
 
     /**
-     * Encapsulate packet coming from higher layers into GenericDatagram, using
+     * Encapsulate packet coming from higher layers into NextHopDatagram, using
      * the control info attached to the packet.
      */
     virtual void encapsulate(Packet *transportPacket, const InterfaceEntry *& destIE);
@@ -178,8 +178,7 @@ class INET_API NextHopForwarding : public QueueBase, public NetfilterBase, publi
     void handleCommand(Request *msg);
 
     /**
-     * Processing of generic datagrams. Called when a datagram reaches the front
-     * of the queue.
+     * Processing of datagrams. Called when a datagram reaches the front of the queue.
      */
     virtual void endService(cPacket *packet) override;
 };

@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_GENERICROUTE_H
-#define __INET_GENERICROUTE_H
+#ifndef __INET_NEXTHOPROUTE_H
+#define __INET_NEXTHOPROUTE_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/common/L3Address.h"
@@ -29,7 +29,7 @@ class IRoutingTable;
 class NextHopRoutingTable;
 
 /**
- * A generic route that uses generic addresses as destination and next hop.
+ * A next hop route that uses generic addresses as destination and next hop.
  */
 class INET_API NextHopRoute : public cObject, public IRoute
 {
@@ -94,7 +94,7 @@ class INET_API NextHopRoute : public cObject, public IRoute
     virtual cObject *getProtocolData() const override { return protocolData; }
 };
 
-class INET_API GenericMulticastRoute : public cObject
+class INET_API NextHopMulticastRoute : public cObject
 {
 };
 
@@ -102,7 +102,7 @@ class INET_API GenericMulticastRoute : public cObject
 /**
  * TODO
  */
-class INET_API GenericMulticastRoute : public cObject, public IGenericMulticastRoute
+class INET_API NextHopMulticastRoute : public cObject, public INextHopMulticastRoute
 {
   private:
     struct Child { InterfaceEntry *ie; bool isLeaf; };
@@ -120,8 +120,8 @@ class INET_API GenericMulticastRoute : public cObject, public IGenericMulticastR
     int metric;
 
   public:
-    GenericMulticastRoute() {}    //TODO
-    virtual ~GenericMulticastRoute() {}
+    NextHopMulticastRoute() {}    //TODO
+    virtual ~NextHopMulticastRoute() {}
 
     virtual std::string str() const;
     virtual std::string detailedInfo() const;
@@ -176,5 +176,5 @@ class INET_API GenericMulticastRoute : public cObject, public IGenericMulticastR
 
 } // namespace inet
 
-#endif // ifndef __INET_GENERICROUTE_H
+#endif // ifndef __INET_NEXTHOPROUTE_H
 

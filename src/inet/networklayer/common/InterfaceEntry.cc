@@ -156,8 +156,8 @@ std::string InterfaceEntry::detailedInfo() const
         out << " " << ipv6data->detailedInfo() << "\n";
 #endif // ifdef WITH_IPv6
 #ifdef WITH_GENERIC
-    if (genericNetworkProtocolData)
-        out << " " << genericNetworkProtocolData->detailedInfo() << "\n";
+    if (nextHopProtocolData)
+        out << " " << nextHopProtocolData->detailedInfo() << "\n";
 #endif // ifdef WITH_GENERIC
     if (isisdata)
         out << " " << ((InterfaceProtocolData *)isisdata)->str() << "\n"; // Khmm...
@@ -200,11 +200,11 @@ void InterfaceEntry::resetInterface()
         throw cRuntimeError(this, "Model error: ipv6data filled, but INET was compiled without IPv6 support");
 #endif // ifdef WITH_IPv6
 #ifdef WITH_GENERIC
-    if (genericNetworkProtocolData && genericNetworkProtocolData->ownerp == this)
-        delete genericNetworkProtocolData;
-    genericNetworkProtocolData = nullptr;
+    if (nextHopProtocolData && nextHopProtocolData->ownerp == this)
+        delete nextHopProtocolData;
+    nextHopProtocolData = nullptr;
 #else // ifdef WITH_GENERIC
-    if (genericNetworkProtocolData)
+    if (nextHopProtocolData)
         throw cRuntimeError(this, "Model error: genericNetworkProtocolData filled, but INET was compiled without Generic Network Layer support");
 #endif // ifdef WITH_GENERIC
     if (isisdata && ((InterfaceProtocolData *)isisdata)->ownerp == this)
@@ -218,12 +218,12 @@ void InterfaceEntry::resetInterface()
     ieee8021ddata = nullptr;
 }
 
-void InterfaceEntry::setGenericNetworkProtocolData(NextHopInterfaceData *p)
+void InterfaceEntry::setNextHopProtocolData(NextHopInterfaceData *p)
 {
 #ifdef WITH_GENERIC
-    if (genericNetworkProtocolData && genericNetworkProtocolData->ownerp == this)
-        delete genericNetworkProtocolData;
-    genericNetworkProtocolData = p;
+    if (nextHopProtocolData && nextHopProtocolData->ownerp == this)
+        delete nextHopProtocolData;
+    nextHopProtocolData = p;
     p->ownerp = this;
     configChanged(F_GENERIC_DATA);
 #else // ifdef WITH_GENERIC
@@ -242,8 +242,8 @@ const L3Address InterfaceEntry::getNetworkAddress() const
         return ipv6data->getPreferredAddress();
 #endif // ifdef WITH_IPv6
 #ifdef WITH_GENERIC
-    if (genericNetworkProtocolData)
-        return genericNetworkProtocolData->getAddress();
+    if (nextHopProtocolData)
+        return nextHopProtocolData->getAddress();
 #endif // ifdef WITH_GENERIC
     return getModulePathAddress();
 }
@@ -341,7 +341,7 @@ void InterfaceEntry::joinMulticastGroup(const L3Address& address) const
         case L3Address::MAC:
         case L3Address::MODULEID:
         case L3Address::MODULEPATH:
-            getGenericNetworkProtocolData()->joinMulticastGroup(address);
+            getNextHopProtocolData()->joinMulticastGroup(address);
             break;
 
 #endif // ifdef WITH_GENERIC
