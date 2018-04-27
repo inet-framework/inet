@@ -25,9 +25,11 @@ import inet.mobility.contract.IMobility;
 // Format directives:
 //  - %p position
 //  - %v velocity
+//  - %s speed
 //  - %a acceleration
 //  - %P angular position
 //  - %V angular velocity
+//  - %S angular speed
 //  - %A angular acceleration
 //
 // @author Andras Varga

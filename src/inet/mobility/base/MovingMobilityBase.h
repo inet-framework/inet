@@ -51,6 +51,9 @@ class INET_API MovingMobilityBase : public MobilityBase
     /** @brief The last velocity that was reported at lastUpdate. */
     Coord lastVelocity;
 
+    /** @brief The last angular velocity that was reported at lastUpdate. */
+    EulerAngles lastAngularVelocity;
+
     /** @brief The simulation time when the mobility state was last updated. */
     simtime_t lastUpdate;
 
@@ -93,7 +96,7 @@ class INET_API MovingMobilityBase : public MobilityBase
     virtual Coord getCurrentAcceleration() override { throw cRuntimeError("Invalid operation"); }
 
     virtual EulerAngles getCurrentAngularPosition() override;
-    virtual EulerAngles getCurrentAngularVelocity() override { throw cRuntimeError("Invalid operation"); }
+    virtual EulerAngles getCurrentAngularVelocity() override;
     virtual EulerAngles getCurrentAngularAcceleration() override { throw cRuntimeError("Invalid operation"); }
 };
 
