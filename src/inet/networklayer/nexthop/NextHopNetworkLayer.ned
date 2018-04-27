@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.networklayer.generic;
+package inet.networklayer.nexthop;
 
 import inet.common.MessageDispatcher;
 import inet.networklayer.arp.ipv4.GlobalArp;

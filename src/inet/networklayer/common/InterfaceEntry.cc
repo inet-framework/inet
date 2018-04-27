@@ -40,7 +40,7 @@
 #endif // ifdef WITH_IPv6
 
 #ifdef WITH_GENERIC
-#include "../generic/NextHopInterfaceData.h"
+#include "../nexthop/NextHopInterfaceData.h"
 #endif // ifdef WITH_GENERIC
 
 namespace inet {

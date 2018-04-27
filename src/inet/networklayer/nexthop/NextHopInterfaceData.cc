@@ -17,7 +17,7 @@
 
 #include <algorithm>
 #include <sstream>
-#include "inet/networklayer/generic/NextHopInterfaceData.h"
+#include "../nexthop/NextHopInterfaceData.h"
 
 namespace inet {
 

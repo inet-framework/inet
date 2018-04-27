@@ -27,10 +27,10 @@
 #include "inet/networklayer/common/NextHopAddressTag_m.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
 #include "inet/networklayer/generic/GenericDatagram_m.h"
-#include "inet/networklayer/generic/NextHopForwarding.h"
-#include "inet/networklayer/generic/NextHopInterfaceData.h"
-#include "inet/networklayer/generic/NextHopRoute.h"
-#include "inet/networklayer/generic/NextHopRoutingTable.h"
+#include "../nexthop/NextHopForwarding.h"
+#include "../nexthop/NextHopInterfaceData.h"
+#include "../nexthop/NextHopRoute.h"
+#include "../nexthop/NextHopRoutingTable.h"
 
 namespace inet {
 

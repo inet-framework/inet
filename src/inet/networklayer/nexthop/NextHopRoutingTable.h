@@ -21,7 +21,7 @@
 #include <vector>
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
-#include "inet/networklayer/generic/NextHopRoute.h"
+#include "../nexthop/NextHopRoute.h"
 
 namespace inet {
 

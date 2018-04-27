@@ -20,9 +20,9 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/generic/NextHopInterfaceData.h"
-#include "inet/networklayer/generic/NextHopRoute.h"
-#include "inet/networklayer/generic/NextHopRoutingTable.h"
+#include "../nexthop/NextHopInterfaceData.h"
+#include "../nexthop/NextHopRoute.h"
+#include "../nexthop/NextHopRoutingTable.h"
 
 namespace inet {
 

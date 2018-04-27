@@ -19,7 +19,7 @@
 
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/networklayer/generic/GenericDatagram_m.h"
-#include "inet/networklayer/generic/NextHopProtocolDissector.h"
+#include "../nexthop/NextHopProtocolDissector.h"
 
 namespace inet {
 

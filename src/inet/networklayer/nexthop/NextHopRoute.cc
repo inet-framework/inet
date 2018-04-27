@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/networklayer/generic/NextHopInterfaceData.h"
-#include "inet/networklayer/generic/NextHopRoute.h"
-#include "inet/networklayer/generic/NextHopRoutingTable.h"
+#include "../nexthop/NextHopInterfaceData.h"
+#include "../nexthop/NextHopRoute.h"
+#include "../nexthop/NextHopRoutingTable.h"
 
 namespace inet {
 

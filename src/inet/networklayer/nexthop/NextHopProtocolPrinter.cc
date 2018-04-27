@@ -20,7 +20,7 @@
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
 #include "inet/networklayer/generic/GenericDatagram_m.h"
-#include "inet/networklayer/generic/NextHopProtocolPrinter.h"
+#include "../nexthop/NextHopProtocolPrinter.h"
 
 namespace inet {
 
