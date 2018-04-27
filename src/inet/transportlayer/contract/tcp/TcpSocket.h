@@ -141,7 +141,7 @@ class INET_API TcpSocket : public ISocket
       public:
         virtual ~ICallback() {}
         virtual void socketDataArrived(TcpSocket* socket, Packet *msg, bool urgent) = 0;
-        virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) {}
+        virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) { socket->accept(availableInfo->getNewSocketId()); }
         virtual void socketEstablished(TcpSocket *socket) {}
         virtual void socketPeerClosed(TcpSocket *socket) {}
         virtual void socketClosed(TcpSocket *socket) {}
@@ -185,6 +185,11 @@ class INET_API TcpSocket : public ISocket
      * arrived from TCP and contain TCPCommmand control info.
      */
     TcpSocket(cMessage *msg);
+
+    /**
+     * Constructor, to be used with forked sockets (see listen()).
+     */
+    TcpSocket(TcpAvailableInfo *availableInfo);
 
     /**
      * Destructor

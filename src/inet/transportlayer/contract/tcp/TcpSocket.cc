@@ -45,6 +45,7 @@ TcpSocket::TcpSocket(cMessage *msg)
 
     if (msg->getKind() == TCP_I_AVAILABLE) {
         TcpAvailableInfo *availableInfo = check_and_cast<TcpAvailableInfo *>(msg->getControlInfo());
+        connId = availableInfo->getNewSocketId();
         localAddr = availableInfo->getLocalAddr();
         remoteAddr = availableInfo->getRemoteAddr();
         localPrt = availableInfo->getLocalPort();
@@ -62,6 +63,16 @@ TcpSocket::TcpSocket(cMessage *msg)
         localPrt = connectInfo->getLocalPort();
         remotePrt = connectInfo->getRemotePort();
     }
+}
+
+TcpSocket::TcpSocket(TcpAvailableInfo *availableInfo)
+{
+    connId = availableInfo->getNewSocketId();
+    sockstate = CONNECTED;
+    localAddr = availableInfo->getLocalAddr();
+    remoteAddr = availableInfo->getRemoteAddr();
+    localPrt = availableInfo->getLocalPort();
+    remotePrt = availableInfo->getRemotePort();
 }
 
 TcpSocket::~TcpSocket()
@@ -259,7 +270,6 @@ void TcpSocket::processMessage(cMessage *msg)
                 cb->socketDataArrived(this, check_and_cast<Packet*>(msg), false);
             else
                 delete msg;
-
             break;
 
         case TCP_I_URGENT_DATA:
@@ -267,18 +277,17 @@ void TcpSocket::processMessage(cMessage *msg)
                 cb->socketDataArrived(this, check_and_cast<Packet*>(msg), true);
             else
                 delete msg;
-
             break;
 
         case TCP_I_AVAILABLE:
             availableInfo = check_and_cast<TcpAvailableInfo *>(msg->getControlInfo());
-            // TODO: implement non-auto accept support, by accepting using the callback interface
-            accept(availableInfo->getNewSocketId());
 
             if (cb)
                 cb->socketAvailable(this, availableInfo);
-            delete msg;
+            else
+                accept(availableInfo->getNewSocketId());
 
+            delete msg;
             break;
 
         case TCP_I_ESTABLISHED:
@@ -293,11 +302,10 @@ void TcpSocket::processMessage(cMessage *msg)
             remoteAddr = connectInfo->getRemoteAddr();
             localPrt = connectInfo->getLocalPort();
             remotePrt = connectInfo->getRemotePort();
-            delete msg;
 
             if (cb)
                 cb->socketEstablished(this);
-
+            delete msg;
             break;
 
         case TCP_I_PEER_CLOSED:

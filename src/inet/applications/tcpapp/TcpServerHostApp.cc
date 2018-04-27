@@ -85,29 +85,37 @@ void TcpServerHostApp::handleMessage(cMessage *msg)
     }
     else {
         TcpSocket *socket = check_and_cast_nullable<TcpSocket*>(socketMap.findSocketFor(msg));
-
-        if (!socket) {
-            // new connection -- create new socket object and server process
-            socket = new TcpSocket(msg);
-            socket->setOutputGate(gate("socketOut"));
+        if (socket) {
+            socket->processMessage(msg);
+        }
+        else if (serverSocket.belongsToSocket(msg) && (msg->getKind() == TCP_I_AVAILABLE)) {
+            // new TCP connection -- create new socket object and server process
+            TcpSocket *newSocket = new TcpSocket(msg);
+            newSocket->setOutputGate(gate("socketOut"));
 
             const char *serverThreadModuleType = par("serverThreadModuleType");
             cModuleType *moduleType = cModuleType::get(serverThreadModuleType);
             char name[80];
-            sprintf(name, "thread_%i", socket->getSocketId());
+            sprintf(name, "thread_%i", newSocket->getSocketId());
             TcpServerThreadBase *proc = check_and_cast<TcpServerThreadBase *>(moduleType->create(name, this));
             proc->finalizeParameters();
 
             proc->callInitialize();
 
-            socket->setCallbackObject(proc);
-            proc->init(this, socket);
+            newSocket->setCallbackObject(proc);
+            proc->init(this, newSocket);
 
-            socketMap.addSocket(socket);
+            socketMap.addSocket(newSocket);
             threadSet.insert(proc);
-        }
 
-        socket->processMessage(msg);
+            serverSocket.processMessage(msg);
+            return;
+        }
+        else {
+            // throw cRuntimeError("Unknown incoming message: '%s'", msg->getName());
+            EV_ERROR << "message " << msg->getFullName() << "(" << msg->getClassName() << ") arrived for unknown socket \n";
+            delete msg;
+        }
     }
 }
 
