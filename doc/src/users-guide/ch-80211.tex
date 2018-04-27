@@ -1,6 +1,7 @@
 \chapter{The 802.11 Model}
 \label{cha:80211}
 
+% https://summit.omnetpp.org/archive/2016/assets/pdf/OMNET-2016-Session_9-02-Presentation.pdf
 
 \section{Overview}
 
@@ -27,6 +28,56 @@ NICs consist of four layers, which are the following (in top-down order):
   \item physical layer (radio)
 \end{enumerate}
 
+The following sections examine the above components.
+
+\section{MAC}
+
+The \nedtype{Ieee80211Mac} module type represents the IEEE 802.11 MAC.
+The implementation is entirely based on the standard IEEE 802.11™-2012 Part 11:
+Wireless LAN Medium Access Control (MAC) and Physical Layer (PHY)
+Specifications.
+
+\nedtype{Ieee80211Mac} performs transmission of frames according
+to the CSMA/CA protocol. It receives data and management frames from
+the upper layers, and transmits them.
+
+The \nedtype{Ieee80211Mac} was designed to be modular to facilitate experimenting
+with new policies, features and algorithms within the MAC layer. Users can
+easily replace individual components with their own implementations. Policies,
+which most likely to be experimented with, are extracted into their own modules.
+
+The model has the following replaceable built-in policies:
+
+\begin{itemize}
+  \item ACK policy
+  \item RTS/CTS policy
+  \item Originator and recipient block ACK agreement policies
+  \item MSDU aggregation policy
+  \item Fragmentation policy
+\end{itemize}
+
+The new model also separates the following components:
+
+\begin{itemize}
+  \item Coordination functions
+  \item Channel access methods
+  \item MAC data services
+  \item Aggregation and deaggregation
+  \item Fragmentation and defragmentation
+  \item Block ACK agreements and reordering
+  \item Frame exchange sequences
+  \item Duplicate removal
+  \item Rate selection
+  \item Rate control
+  \item Protection mechanisms
+  \item Recovery procedure
+  \item Contention
+  \item Frame queues
+  \item TX/RX
+\end{itemize}
+
+\section{Physical Layer}
+
 \textit{The physical layer} modules (\nedtype{Ieee80211Radio}) deal with modelling
 transmission and reception of frames. They model the characteristics of
 the radio channel, and determine if a frame was received correctly
@@ -35,9 +86,7 @@ interference in the radio channel). Frames received correctly are passed
 up to the MAC. The implementation of these modules is based on the
 Mobility Framework.
 
-\textit{The MAC layer} (\nedtype{Ieee80211Mac}) performs transmission of frames according
-to the CSMA/CA protocol. It receives data and management frames from
-the upper layers, and transmits them.
+\section{Management}
 
 \textit{The management layer} performs encapsulation and decapsulation of data packets
 for the MAC, and exchanges management frames via the MAC with its peer
@@ -55,7 +104,9 @@ The management layer has several implementations which differ in their role
 in that they do not model the scan-authenticate-associate process,
 so they cannot be used in experiments involving handover.
 
-\textit{The agent} is what instructs the management layer to perform
+\section{Agent}
+
+The agent is what instructs the management layer to perform
 scanning, authentication and association. The management layer itself
 just carries out these commands by performing the scanning, authentication
 and association procedures, and reports back the results to the agent.
@@ -66,18 +117,6 @@ variants do not have as much freedom as to need an agent to control them.
 
 By modifying or replacing the agent, one can alter the dynamic behaviour
 of STAs in the network, for example implement different handover strategies.
-
-\subsection{Limitations}
-
-See the documentation of \nedtype{Ieee80211Mac} for features unsupported by this
-model.
-
-\ifdraft TODO
- further details about the implementation: what is modelled and what is
- not (beacons, auth, ...), communication between modules, frame formats,
- ...
-\fi
-
 
 
 %%% Local Variables:
