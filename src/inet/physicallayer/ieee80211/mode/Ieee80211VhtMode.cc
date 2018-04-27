@@ -267,16 +267,9 @@ unsigned int Ieee80211VhtPreambleMode::computeNumberOfHTLongTrainings(unsigned i
 
 const simtime_t Ieee80211VhtPreambleMode::getDuration() const
 {
-    // 20.3.7 Mathematical description of signals
-    simtime_t sumOfHTLTFs = getFirstHTLongTrainingFieldDuration() + getSecondAndSubsequentHTLongTrainingFielDuration() * (numberOfHTLongTrainings - 1);
-    if (preambleFormat == HT_PREAMBLE_MIXED)
-        // L-STF -> L-LTF -> L-SIG -> HT-SIG -> HT-STF -> HT-LTF1 -> HT-LTF2 -> ... -> HT_LTFn
-        return getNonHTShortTrainingSequenceDuration() + getNonHTLongTrainingFieldDuration() + legacySignalMode->getDuration() + highThroughputSignalMode->getDuration() + getHTShortTrainingFieldDuration() + sumOfHTLTFs;
-    else if (preambleFormat == HT_PREAMBLE_GREENFIELD)
-        // HT-GF-STF -> HT-LTF1 -> HT-SIG -> HT-LTF2 -> ... -> HT-LTFn
-        return getHTGreenfieldShortTrainingFieldDuration() + highThroughputSignalMode->getDuration() + sumOfHTLTFs;
-    else
-        throw cRuntimeError("Unknown preamble format");
+    // 21.3.4 Mathematical description of signals
+    simtime_t sumOfHTLTFs = getSecondAndSubsequentHTLongTrainingFielDuration() * (numberOfHTLongTrainings);
+    return getNonHTShortTrainingSequenceDuration() + getNonHTLongTrainingFieldDuration() + getLSIGDuration() + getVHTSignalFieldA() + getVHTShortTrainingFieldDuration() + sumOfHTLTFs + getVHTSignalFieldB();
 }
 
 bps Ieee80211VhtSignalMode::computeGrossBitrate() const

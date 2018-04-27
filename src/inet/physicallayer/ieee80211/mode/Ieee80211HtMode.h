@@ -217,7 +217,7 @@ class INET_API Ieee80211HtDataMode : public IIeee80211DataMode, public Ieee80211
         b getServiceFieldLength() const { return b(16); }
         b getTailFieldLength() const { return b(6) * numberOfBccEncoders; }
 
-        virtual Hz getBandwidth() const { return bandwidth; }
+        virtual Hz getBandwidth() const override { return bandwidth; }
         virtual int getNumberOfSpatialStreams() const override { return Ieee80211HtModeBase::getNumberOfSpatialStreams(); }
         virtual b getPaddingLength(b dataLength) const override { return b(0); }
         virtual b getCompleteLength(b dataLength) const override;

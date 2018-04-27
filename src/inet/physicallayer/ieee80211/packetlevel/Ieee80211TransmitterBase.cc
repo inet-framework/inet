@@ -18,7 +18,6 @@
 #include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211TransmitterBase.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211VhtMode.h"
 
 namespace inet {
 
