@@ -4,9 +4,9 @@
 \section{Overview}
 
 INET Framework has models for several internet routing protocols, including
-RIP, OSPF and BGP. 
+RIP, OSPF and BGP.
 
-The easiest way to add routing to a network is to use the \nedtype{Router} 
+The easiest way to add routing to a network is to use the \nedtype{Router}
 NED type for routers. \nedtype{Router} contains a conditional instance
 for each of the above protocols. These submodules can be enabled by
 setting the \ttt{hasRIP}, \ttt{hasOSPF} and/or \ttt{hasBGP} parameters to
@@ -14,9 +14,9 @@ setting the \ttt{hasRIP}, \ttt{hasOSPF} and/or \ttt{hasBGP} parameters to
 
 Example:
 
-\begin{verbatim}
+\begin{inifile}
 **.hasRIP = true
-\end{verbatim}
+\end{inifile}
 
 There are also NED types called \nedtype{RipRouter}, \nedtype{OspfRouter},
 \nedtype{BgpRouter}, which are all \nedtype{Router}s with appropriate
@@ -27,7 +27,7 @@ routing protocol enabled.
 
 RIP (Routing Information Protocol) is a distance-vector routing protocol
 which employs the hop count as a routing metric. RIP prevents routing loops
-by implementing a limit on the number of hops allowed in a path from source 
+by implementing a limit on the number of hops allowed in a path from source
 to destination.
 
 The \nedtype{Rip} module implements distance vector routing as
@@ -40,9 +40,9 @@ configuration can be specified in an XML file.
 \section{OSPF}
 \label{sec:ospf}
 
-OSPF (Open Shortest Path First) is a routing protocol for IP networks. 
-It uses a link state routing (LSR) algorithm and falls into the group 
-of interior gateway protocols (IGPs), operating within a single 
+OSPF (Open Shortest Path First) is a routing protocol for IP networks.
+It uses a link state routing (LSR) algorithm and falls into the group
+of interior gateway protocols (IGPs), operating within a single
 autonomous system (AS).
 
 The \nedtype{Ospf} module implements the OSPF Version 2. Areas and routers
@@ -55,10 +55,10 @@ can be configured using an XML file.
 \label{sec:bgp}
 
 BGP (Border Gateway Protocol) is a standardized exterior gateway protocol
-designed to exchange routing and reachability information among 
+designed to exchange routing and reachability information among
 autonomous systems (AS) on the Internet.
 
-The \nedtype{Bgp} module implements BGP Version 4. The model implements 
+The \nedtype{Bgp} module implements BGP Version 4. The model implements
 RFC 4271, with some limitations. Autonomous Systems and rules can be
 configured in an XML file.
 

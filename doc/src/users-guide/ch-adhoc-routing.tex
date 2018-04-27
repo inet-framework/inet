@@ -3,23 +3,23 @@
 
 \section{Overview}
 
-In ad hoc networks, nodes are not familiar with the topology of 
-their networks. Instead, they have to discover it: typically, 
-a new node announces its presence and listens for announcements 
-broadcast by its neighbors. Each node learns about others nearby 
+In ad hoc networks, nodes are not familiar with the topology of
+their networks. Instead, they have to discover it: typically,
+a new node announces its presence and listens for announcements
+broadcast by its neighbors. Each node learns about others nearby
 and how to reach them, and may announce that it too can reach them.
 The difficulty of routing may be compounded by the fact that
 nodes may be mobile, which results in a changing topology.
 
 Ad hoc routing protocols fall in two broad categories: proactive
-and reactive. \textit{Proactive} or \textit{table-driven} protocols 
+and reactive. \textit{Proactive} or \textit{table-driven} protocols
 maintain fresh lists of destinations and their routes by periodically
-distributing routing tables throughout the network.  
+distributing routing tables throughout the network.
 \textit{Reactive} or \textit{on-demand} protocols find a route on demand
 by flooding the network with Route Request packets.
 
 The INET Framework contains the implementation of several ad hoc routing
-protocols including AODV, DSDV, DYMO and GPSR. 
+protocols including AODV, DSDV, DYMO and GPSR.
 
 The easiest way to add routing to an ad hoc network is to use the
 \nedtype{ManetRouter} NED type for nodes. \nedtype{ManetRouter}
@@ -29,72 +29,72 @@ router of any other supported routing protocol. For example, you
 can configure \nedtype{ManetRouter} nodes in the network to use
 AODV with the following ini file line:
 
-\begin{verbatim}
+\begin{inifile}
 **.routingProtocolType = "Aodv"
-\end{verbatim}
+\end{inifile}
 
 There are also NED types called \nedtype{AodvRouter}, \nedtype{DymoRouter},
-\nedtype{DsvRouter}, \nedtype{GpsrRouter}, which are all 
-\nedtype{ManetRouter}s with the routing protocol submodule type 
+\nedtype{DsvRouter}, \nedtype{GpsrRouter}, which are all
+\nedtype{ManetRouter}s with the routing protocol submodule type
 set appropriately.
 
 
 \section{AODV}
 \label{sec:aodv}
 
-AODV (Ad hoc On-Demand Distance Vector Routing) is a routing protocol 
+AODV (Ad hoc On-Demand Distance Vector Routing) is a routing protocol
 for mobile ad hoc networks and other wireless ad hoc networks.
 It offers quick adaptation to dynamic link conditions, low processing and
 memory overhead, low network utilization, and determines unicast
 routes to destinations within the ad hoc network.
 
-The \nedtype{Aodv} module type implements AODV, based on RFC 3561. 
+The \nedtype{Aodv} module type implements AODV, based on RFC 3561.
 
 \nedtype{AodvRouter} is a \nedtype{ManetRouter} with the routing module type
-set to \nedtype{Aodv}. 
+set to \nedtype{Aodv}.
 
 
 \section{DSDV}
 \label{sec:dsdv}
 
-DSDV (Destination-Sequenced Distance-Vector Routing) is a table-driven 
+DSDV (Destination-Sequenced Distance-Vector Routing) is a table-driven
 routing scheme for ad hoc mobile networks based on the Bellman-Ford algorithm.
 
 The \nedtype{Dsdv} module type implements DSDV. It is currently a partial
 implementation.
 
 \nedtype{DsdvRouter} is a \nedtype{ManetRouter} with the routing module type
-set to \nedtype{Dsdv}. 
+set to \nedtype{Dsdv}.
 
 
 \section{DYMO}
 \label{sec:dymo}
 
-The DYMO (Dynamic MANET On-demand) routing protocol is successor to the 
-AODV routing protocol. DYMO can work as both a pro-active and as a reactive 
+The DYMO (Dynamic MANET On-demand) routing protocol is successor to the
+AODV routing protocol. DYMO can work as both a pro-active and as a reactive
 routing protocol, i.e. routes can be discovered just when they are needed.
 
 The \nedtype{Dymo} module type implements DYMO, based on the IETF draft
 \textit{draft-ietf-manet-dymo-24}.
 
 \nedtype{DymoRouter} is a \nedtype{ManetRouter} with the routing module type
-set to \nedtype{Dymo}. 
+set to \nedtype{Dymo}.
 
 
 \section{GPSR}
 \label{sec:gpsr}
 
-GPSR (Greedy Perimeter Stateless Routing) is a routing protocol for 
-mobile wireless networks that uses the geographic positions of nodes 
-to make packet forwarding decisions. 
+GPSR (Greedy Perimeter Stateless Routing) is a routing protocol for
+mobile wireless networks that uses the geographic positions of nodes
+to make packet forwarding decisions.
 
-The \nedtype{Gpsr} module type implements GPSR, based 
+The \nedtype{Gpsr} module type implements GPSR, based
 on the paper ``GPSR: Greedy Perimeter Stateless Routing for Wireless
-Networks'' by Brad Karp and H. T. Kung, 2000. The implementation 
+Networks'' by Brad Karp and H. T. Kung, 2000. The implementation
 supports both GG and RNG planarization algorithms.
 
 \nedtype{GpsrRouter} is a \nedtype{ManetRouter} with the routing module type
-set to \nedtype{Gpsr}. 
+set to \nedtype{Gpsr}.
 
 
 %%% Local Variables:

@@ -309,9 +309,11 @@ based on their weight.
 
 For example if the module has three input gates, and the weights
 are 3, 2, and 1, then packets are transmitted in this order:
+
 \begin{verbatim}
 A, A, A, B, B, C, A, A, A, B, B, C, ...
 \end{verbatim}
+
 where A packets arrived on \fgate{in[0]}, B packets on \fgate{in[1]},
 and C packets on \fgate{in[2]}. If there are no packets in the current
 one when a packet is requested, then the next one is chosen that has
@@ -386,13 +388,13 @@ The following example configuration specifies
   \item to transmit other packets on \fgate{defaultGate}.
 \end{compactitem}
 
-\begin{verbatim}
+\begin{XML}
 <filters>
   <filter srcAddress="192.168.1.0" srcPrefixLength="24" gate="0"/>
   <filter protocol="udp" destPort="5060" gate="1"/>
   <filter tos="0b00111000" tosMask="0x3f" gate="2"/>
 </filters>
-\end{verbatim}
+\end{XML}
 
 \subsubsection*{Behavior Aggregate Classifier}
 
