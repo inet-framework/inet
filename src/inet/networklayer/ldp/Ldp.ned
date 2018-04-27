@@ -16,7 +16,7 @@
 
 package inet.networklayer.ldp;
 
-import inet.networklayer.mpls.IIngressClassifier;
+import inet.applications.contract.IApp;
 
 
 //
@@ -37,7 +37,7 @@ import inet.networklayer.mpls.IIngressClassifier;
 //
 // @author Andras Varga, Vojta Janota
 //
-simple Ldp like IIngressClassifier     //FIXME like IApp
+simple Ldp like IApp
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
@@ -48,9 +48,6 @@ simple Ldp like IIngressClassifier     //FIXME like IApp
         double helloInterval @unit(s) = default(5s);
         @display("i=block/control");
     gates:
-        //FIXME use socketIn/socketOut gates instead of tcpIn/Out, udpIn/Out
-        input tcpIn @labels(TcpCommand/up);
-        input udpIn @labels(UdpControlInfo/up);
-        output tcpOut @labels(TcpCommand/down);
-        output udpOut @labels(UdpControlInfo/down);
+        input socketIn @labels(TcpCommand/up,UdpControlInfo/up);
+        output socketOut @labels(TcpCommand/down,UdpControlInfo/down);
 }

@@ -134,13 +134,13 @@ void Ldp::initialize(int stage)
             scheduleAt(simTime() + exponential(0.1), sendHelloMsg);
 
         // bind UDP socket
-        udpSocket.setOutputGate(gate("udpOut"));
+        udpSocket.setOutputGate(gate("socketOut"));
         udpSocket.bind(LDP_PORT);
         for (int i = 0; i < ift->getNumInterfaces(); ++i) {
             InterfaceEntry *ie = ift->getInterface(i);
             if (ie->isMulticast()) {
                 udpSockets.push_back(UdpSocket());
-                udpSockets.back().setOutputGate(gate("udpOut"));
+                udpSockets.back().setOutputGate(gate("socketOut"));
                 udpSockets.back().setMulticastLoop(false);
                 udpSockets.back().setMulticastOutputInterface(ie->getInterfaceId());
             }
@@ -148,7 +148,7 @@ void Ldp::initialize(int stage)
 
         // start listening for incoming TCP conns
         EV_INFO << "Starting to listen on port " << LDP_PORT << " for incoming LDP sessions\n";
-        serverSocket.setOutputGate(gate("tcpOut"));
+        serverSocket.setOutputGate(gate("socketOut"));
         serverSocket.bind(LDP_PORT);
         serverSocket.listen();
 
@@ -597,7 +597,7 @@ void Ldp::processLDPHello(Packet *msg)
 void Ldp::openTCPConnectionToPeer(int peerIndex)
 {
     TcpSocket *socket = new TcpSocket();
-    socket->setOutputGate(gate("tcpOut"));
+    socket->setOutputGate(gate("socketOut"));
     socket->setCallbackObject(this, (void *)((intptr_t)peerIndex));
     socket->bind(rt->getRouterId(), 0);
     socketMap.addSocket(socket);
@@ -623,7 +623,7 @@ void Ldp::socketAvailable(TcpSocket *socketocket, TcpAvailableInfo *availableInf
     // not yet in socketMap, must be new incoming connection.
     // find which peer it is and register connection
     TcpSocket *newSocket = new TcpSocket(availableInfo);
-    newSocket->setOutputGate(gate("tcpOut"));
+    newSocket->setOutputGate(gate("socketOut"));
 
     // FIXME there seems to be some confusion here. Is it sure that
     // routerIds we use as peerAddrs are the same as IP addresses
