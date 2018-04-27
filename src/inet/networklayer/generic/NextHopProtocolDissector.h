@@ -15,21 +15,21 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_GNPPROTOCOLPRINTER_H
-#define __INET_GNPPROTOCOLPRINTER_H
+#ifndef __INET_NEXTHOPPROTOCOLDISSECTOR_H
+#define __INET_NEXTHOPPROTOCOLDISSECTOR_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/packet/printer/ProtocolPrinter.h"
+#include "inet/common/packet/dissector/ProtocolDissector.h"
 
 namespace inet {
 
-class INET_API GnpProtocolPrinter : public ProtocolPrinter
+class INET_API NextHopProtocolDissector : public ProtocolDissector
 {
   public:
-    virtual void print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, Context& context) const override;
+    virtual void dissect(Packet *packet, ICallback& callback) const override;
 };
 
 } // namespace inet
 
-#endif // __INET_GNPPROTOCOLPRINTER_H
+#endif // __INET_NEXTHOPPROTOCOLDISSECTOR_H
 

@@ -17,19 +17,17 @@
 // @author: Zoltan Bojthe
 //
 
-#include "inet/networklayer/generic/GnpProtocolDissector.h"
-
-#include "inet/networklayer/generic/GenericDatagram_m.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
-
+#include "inet/networklayer/generic/GenericDatagram_m.h"
+#include "inet/networklayer/generic/NextHopProtocolDissector.h"
 
 namespace inet {
 
-Register_Protocol_Dissector(&Protocol::gnp, GnpProtocolDissector);
+Register_Protocol_Dissector(&Protocol::gnp, NextHopProtocolDissector);
 
-void GnpProtocolDissector::dissect(Packet *packet, ICallback& callback) const
+void NextHopProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    auto header = packet->popAtFront<GenericDatagramHeader>();
+    auto header = packet->popAtFront<NextHopDatagramHeader>();
     auto trailerPopOffset = packet->getBackOffset();
     auto gnpEndOffset = packet->getFrontOffset() + header->getPayloadLengthField();
     callback.startProtocolDataUnit(&Protocol::gnp);
