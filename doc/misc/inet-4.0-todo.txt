@@ -32,6 +32,7 @@ SHOULD:
  - rename GenericNetworkProtocol -> NextHopForwarding, GenericNetworkLayer -> NextHopNetworkLayer, GenericRoutingTable -> NextHopRoutingTable, GenericNetworkConfigurator -> NextHopNetworkConfigurator   
 
 NEED NOT:
+ - solve dynamic node creation and address resolution in applications
  - don't subclass APSK medium and such with other specific radios, think of APSK radio as yet another specific conceptual radio
  - generalize shutdown, startup, crash operations to applications, protocols, interfaces, etc. (NodeShutdownOperation -> ShutdownOperation, NodeStatus -> OperationalStatus?)
  - rename CallbackInterface to ICallback in TcpSocket and SctpSocket
