@@ -53,7 +53,7 @@ class Ted;
 /**
  * LDP (rfc 3036) protocol implementation.
  */
-class INET_API Ldp : public cSimpleModule, public TcpSocket::ICallback, public IIngressClassifier, public cListener, public ILifecycle
+class INET_API Ldp : public cSimpleModule, public TcpSocket::ICallback, public UdpSocket::ICallback, public IIngressClassifier, public cListener, public ILifecycle
 {
   public:
 
@@ -196,7 +196,6 @@ class INET_API Ldp : public cSimpleModule, public TcpSocket::ICallback, public I
 
     virtual void processLDPHello(Packet *msg);
     virtual void processHelloTimeout(cMessage *msg);
-    virtual void processMessageFromTCP(cMessage *msg);
     virtual void processLDPPacketFromTCP(Packet *packet);
 
     virtual void processLABEL_MAPPING(Packet *packet);
@@ -208,11 +207,18 @@ class INET_API Ldp : public cSimpleModule, public TcpSocket::ICallback, public I
     /** @name TcpSocket::ICallback callback methods */
     //@{
     virtual void socketEstablished(TcpSocket *socket) override;
+    virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override;
     virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override;
     virtual void socketPeerClosed(TcpSocket *socket) override;
     virtual void socketClosed(TcpSocket *socket) override;
     virtual void socketFailure(TcpSocket *socket, int code) override;
     virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override { delete status; }
+    //@}
+
+    /** @name UdpSocket::ICallback methods */
+    //@{
+    virtual void socketDataArrived(UdpSocket* socket, Packet *msg) override;
+    virtual void socketErrorArrived(UdpSocket* socket, cMessage *msg) override;
     //@}
 
     // IIngressClassifier
