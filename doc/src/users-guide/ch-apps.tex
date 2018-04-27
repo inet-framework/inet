@@ -5,21 +5,19 @@
 \section{Overview}
 
 This chapter describes application models and traffic generators.
+All applications implement the \nedtype{IApp} module interface
+to ease configuring the \nedtype{StandardHost} module.
 
 \section{TCP applications}
 
 This sections describes the applications using the TCP protocol.
-Each application must implement the \nedtype{ITCPApp} module interface
-to ease configuring the \nedtype{StandardHost} module.
-
-The applications described here are all contained by the
-\nedtype{inet.applications.tcpapp} package. These applications use
-\msgtype{GenericAppMsg} objects to represent the data sent between the client
-and server. The client message contains the expected reply length, the
-processing delay, and a flag indicating that the connection should be closed
-after sending the reply. This way intelligence (behaviour specific to the
-modelled application, e.g. HTTP, SMB, database protocol) needs only to be
-present in the client, and the server model can be kept simple and dumb.
+These applications use \msgtype{GenericAppMsg} objects to represent the data
+sent between the client and server. The client message contains the expected
+reply length, the processing delay, and a flag indicating that the connection
+should be closed after sending the reply. This way intelligence (behaviour
+specific to the modelled application, e.g. HTTP, SMB, database protocol) needs
+only to be present in the client, and the server model can be kept simple and
+dumb.
 
 
 \subsection{TcpBasicClientApp}
@@ -67,79 +65,64 @@ sending the response, while in this model it is the client.
 Accepts any number of incoming TCP connections, and discards whatever
 arrives on them.
 
-The module parameter \fpar{dataTransferMode} should be set the transfer mode in TCP layer.
-Its possible values (``bytecount'', ``object'', ``bytestream'') are described in ...
-
 \subsection{TcpGenericServerApp}
 
 Generic server application for modelling TCP-based request-reply style
 protocols or applications.
-
-Requires message object preserving sendQueue/receiveQueue classes
-to be used with \nedtype{Tcp} (that is, TCPMsgBasedSendQueue and TCPMsgBasedRcvQueue;
-TCPVirtualBytesSendQueue/RcvQueue are not good).
 
 The module accepts any number of incoming TCP connections, and expects
 to receive messages of class \msgtype{GenericAppMsg} on them. A message should
 contain how large the reply should be (number of bytes). \nedtype{TcpGenericServerApp}
 will just change the length of the received message accordingly, and send
 back the same message object. The reply can be delayed by a constant time
-(replyDelay parameter).
+(\fpar{replyDelay} parameter).
 
 \subsection{TcpEchoApp}
 
 The \nedtype{TcpEchoApp} application accepts any number of incoming TCP
-connections, and sends back the messages that arrive on them, The lengths of the
-messages are multiplied by \fpar{echoFactor} before sending them back (echoFactor=1
-will result in sending back the same message unmodified.) The reply can also be
-delayed by a constant time (\fpar{echoDelay} parameter).
-
-When \nedtype{TcpEchoApp} receives data packets from TCP (and such, when they can be
-echoed) depends on the dataTransferMode setting.
-With "bytecount" and "bytestream", TCP passes up data to us
-as soon as a segment arrives, so it can be echoed immediately.
-With "object" mode, our local TCP reproduces the same
-messages that the sender app passed down to its TCP -- so if the sender
-app sent a single 100 MB message, it will be echoed only when all
-100 megabytes have arrived.
+connections, and sends back the data that arrives on them, The byte counts are
+multiplied by \fpar{echoFactor} before echoing. The reply can also be delayed by
+a constant time (\fpar{echoDelay} parameter).
 
 \subsection{TcpSessionApp}
 
-Single-connection TCP application: it opens a connection, sends
-the given number of bytes, and closes. Sending may be one-off,
-or may be controlled by a "script" which is a series of
-(time, number of bytes) pairs. May act either as client or as server,
-and works with TCPVirtualBytesSendQueue/RcvQueue as sendQueue/receiveQueue
-setting for ~TCP.
-Compatible with both IPv4 (~IPv4) and ~IPv6.
+Single-connection TCP application: it opens a connection, sends the given number
+of bytes, and closes. Sending may be one-off, or may be controlled by a
+``script'' which is a series of (time, number of bytes) pairs. May act either as
+client or as server. Compatible with both IPv4 and IPv6.
 
 \subsubsection*{Opening the connection}
 
-Regarding the type of opening the connection, the application may
-be either a client or a server. When active=false, the application
-will listen on the given local localPort, and wait for an incoming connection.
-When active=true, the application will bind to given local localAddress:localPort,
-and connect to the connectAddress:connectPort. To use an ephemeral port
-as local port, set the localPort parameter to -1.
+Depending on the type of opening the connection (active/passive), the
+application may be either a client or a server. In passive mode,
+the application will listen on the given local local port, and wait for an
+incoming connection. In active mode, the application will bind
+to given local local address and local port, and connect to the
+given address and port. It is possible to use an ephemeral port as
+local port.
 
-Even when in server mode (active=false), the application will only
+Even when in server mode (passive open), the application will only
 serve one incoming connection. Further connect attempts will be
 refused by TCP (it will send RST) for lack of LISTENing connections.
 
-The time of opening the connection is in the tOpen parameter.
+The time of opening the connection is in the \fpar{tOpen} parameter.
 
 \subsubsection*{Sending data}
 
 Regardless of the type of OPEN, the application can be made to send
-data. One way of specifying sending is via the tSend, sendBytes
-parameters, the other way is sendScript. With the former, sendBytes
-bytes will be sent at tSend. With sendScript, the format is
-"<time> <numBytes>;<time> <numBytes>;..."
+data. One way of specifying sending is via the \fpar{tSend}, \fpar{sendBytes}
+parameters, the other way is \fpar{sendScript}. With the former,
+\fpar{sendBytes} bytes will be sent at \fpar{tSend}. When using 
+\fpar{sendScript}, the format of the script is:
+
+\begin{verbatim}
+<time> <numBytes>; <time> <numBytes>;...
+\end{verbatim}
 
 \subsubsection*{Closing the connection}
 
-The application will issue a TCP CLOSE at time tClose. If tClose=-1, no
-CLOSE will be issued.
+The application will issue a TCP CLOSE at time \fpar{tClose}. If
+\fpar{tClose=-1}, no CLOSE will be issued.
 
 
 
@@ -152,24 +135,20 @@ In this model the client repeats the following activity
 between \fpar{startTime} and \fpar{stopTime}:
 
 \begin{enumerate}
-\item opens a telnet connection
-\item sends \fpar{numCommands} commands. The command is \fpar{commandLength} bytes
-      long. The command is transmitted as entered by the user character by character,
+\item Opens a telnet connection
+\item Sends \fpar{numCommands} commands. The command is \fpar{commandLength} bytes long.
+      The command is transmitted as entered by the user character by character, 
       there is \fpar{keyPressDelay} time between the characters. The server echoes
       each character. When the last character of the command is sent (new line),
       the server responds with a \fpar{commandOutputLength} bytes long message.
       The user waits \fpar{thinkTime} interval between the commands.
-\item closes the connection and waits \fpar{idleInterval} seconds
-\item if the connection is broken it is noticed after \fpar{reconnectInterval}
+\item Closes the connection and waits \fpar{idleInterval} seconds
+\item If the connection is broken, it is noticed after \fpar{reconnectInterval}
       and the connection is reopened
 \end{enumerate}
 
 Each parameter in the above description is ``volatile'', so you can
 use distributions to emulate random behaviour.
-
-Additional parameters:
-addresses,ports
-dataTransferMode
 
 \begin{note}
 This module emulates a very specific user behaviour, and as such,
@@ -182,39 +161,22 @@ write your model accordingly.
 \subsection{TcpServerHostApp}
 
 This module hosts TCP-based server applications. It dynamically creates
-and launches a new "thread" object for each incoming connection.
+and launches a new ``thread'' object for each incoming connection.
 
-Server threads should be subclassed from the \cppclass{TcpServerThreadBase}
-C++ class, registered in the C++ code using the Register\_Class() macro,
-and the class name should be specified in the serverThreadClass
-parameter of \nedtype{TcpServerHostApp}. The thread object will receive events
-via a callback interface (methods like established(), dataArrived(),
-peerClosed(), timerExpired()), and can send packets via TCPSocket's send()
-method.
-
-Example server thread class: \cppclass{TcpGenericServerThread}.
-
-\begin{important}
-Before you try to use this module, make sure you actually need it!
-In most cases, \nedtype{TcpGenericServerApp} and \msgtype{GenericAppMsg} will be completely
-enough, and they are a lot easier to handle. You'll want to subclass your
-client from \cppclass{TCPGenericCliAppBase} then; check \nedtype{TelnetApp} and
-\nedtype{TcpBasicClientApp} for examples.
-\end{important}
+Server threads can be implemented in C++. An example server thread class is
+\cppclass{TcpGenericServerThread}.
 
 
 \section{UDP applications}
 
-All UDP applications should be derived from the \nedtype{IUDPApp} module interface,
-so that the application of \nedtype{StandardHost} could be configured without changing its NED file.
+The following UDP-based applications are implemented in INET:
 
-The following applications are implemented in INET:
 \begin{itemize}
 \item \nedtype{UdpBasicApp} sends UDP packets to a given IP address at a given interval
 \item \nedtype{UdpBasicBurst} sends UDP packets to the given IP address(es) in bursts, or acts as a packet sink.
-\item \nedtype{UdpEchoApp} similar to \nedtype{UdpBasicApp}, but it sends back the packet after reception
+\item \nedtype{UdpEchoApp} is similar to \nedtype{UdpBasicApp}, but it sends back the packet after reception
 \item \nedtype{UdpSink} consumes and prints packets received from the \nedtype{Udp} module
-\item \nedtype{UdpVideoStreamClient},\nedtype{UdpVideoStreamServer} simulates UDP streaming
+\item \nedtype{UdpVideoStreamClient},\nedtype{UdpVideoStreamServer} simulates video streaming over UDP
 \end{itemize}
 
 The next sections describe these applications in details.
@@ -229,11 +191,6 @@ sent, it is emitted in the \fsignal{sentPk} signal.
 
 The application simply prints the received UDP datagrams. The \fsignal{rcvdPk}
 signal can be used to detect the received packets.
-
-The number of sent and received messages are saved as scalars at the end of the
-simulation.
-
-% could be a simple packet generator without the ability to receive packets?
 
 \subsection{UdpSink}
 
@@ -267,7 +224,7 @@ using the \fpar{videoSize} parameter, and starts streaming to the client.
 During streaming, it will send UDP packets of size \fpar{packetLen} at every
 \fpar{sendInterval}, until \fpar{videoSize} is reached. The parameters \fpar{packetLen}
 and \fpar{sendInterval} can be set to constant values to create CBR traffic,
-or to random values (e.g. sendInterval=uniform(1e-6, 1.01e-6)) to
+or to random values (e.g. \ttt{sendInterval=uniform(1e-6, 1.01e-6)}) to
 accomodate jitter.
 
 The server can serve several clients, and several streams per client.
@@ -296,20 +253,25 @@ name. (The \cppclass{L3AddressResolver} class is used to resolve the address.)
 You can use the "Broadcast" string as address for sending broadcast messages.
 
 INET also defines several NED functions that can be useful:
+
 \begin{itemize}
-\item[-] moduleListByPath("pattern",...): \\
+\item \ttt{moduleListByPath("pattern",...)}: \\
          Returns a space-separated list of the modulenames.
-         All modules whole getFullPath() matches one of the pattern parameters will get included.
+         All modules whose full path matches one of the pattern parameters will be included.
          The patterns may contain wilcards in the same syntax as in ini files.
-         See cTopology::extractByModulePath() function
-         example: destaddresses = moduleListByPath("**.host[*]", "**.fixhost[*]")
-\item[-] moduleListByNedType("fully.qualified.ned.type",...): \\
+         Example: 
+\item \ttt{moduleListByNedType("fully.qualified.ned.type",...)}: \\
          Returns a space-separated list of the modulenames with the given NED type(s).
-         All modules whose getNedTypeName() is listed in the given parameters will get included.
-         The NED type name is fully qualified.
-         See cTopology::extractByNedTypeName() function
-         example: destaddresses = moduleListByNedType("inet.nodes.inet.StandardHost")
+         All modules whose NED type name occurs in the parameter list will be included.
+         The NED type name is fully qualified. Example: 
 \end{itemize}
+
+Examples:
+
+\begin{inifile}
+**.app[0].destAddresses = moduleListByPath("**.host[*]", "**.fixhost[*]")
+**.app[1].destAddresses = moduleListByNedType("inet.nodes.inet.StandardHost")
+\end{inifile}
 
 The peer can be UDPSink or another UDPBasicBurst.
 
@@ -317,47 +279,17 @@ The peer can be UDPSink or another UDPBasicBurst.
 
 The first burst starts at \fpar{startTime}. Bursts start by immediately sending
 a packet; subsequent packets are sent at \fpar{sendInterval} intervals. The
-sendInterval parameter can be a random value, e.g. exponential(10ms).
-A constant interval with jitter can be specified as 1s+uniform(-0.01s,0.01s)
-or uniform(0.99s,1.01s). The length of the burst is controlled by the
+\fpar{sendInterval} parameter can be a random value, e.g. \ttt{exponential(10ms)}.
+A constant interval with jitter can be specified as \ttt{1s+uniform(-0.01s,0.01s)}
+or \ttt{uniform(0.99s,1.01s)}. The length of the burst is controlled by the
 \fpar{burstDuration} parameter. (Note that if \fpar{sendInterval} is greater than
 \fpar{burstDuration}, the burst will consist of one packet only.) The time between
 burst is the \fpar{sleepDuration} parameter; this can be zero (zero is not
 allowed for \fpar{sendInterval}.) The zero \fpar{burstDuration} is interpreted as infinity.
 
-\subsubsection*{Packets}
-
-Packet length is controlled by the \fpar{messageLength} parameter.
-
-The module adds two parameters to packets before sending:
-\begin{itemize}
-\item[-] sourceID: source module ID
-\item[-] msgId: incremented by 1 after send any packet.
-\end{itemize}
-When received packet has this parameters, the module checks the order of received packets.
-
 \subsubsection*{Operation as sink}
 
 When \fpar{destAddresses} parameter is empty, the module receives packets and makes statistics only.
-
-\subsubsection*{Statistics}
-
-Statistics are collected on outgoing packets:
-\begin{itemize}
-\item[-] sentPk: packet object
-\end{itemize}
-
-Statistics are collected on incoming packets:
-\begin{itemize}
-\item[-] outOfOrderPk: statistics of out of order packets.
-       The packet is out of order, when has msgId and sourceId parameters and module
-       received bigger msgId from same sourceID.
-\item[-] dropPk: statistics of dropped packets.
-       The packet is dropped when not out-of-order packet and delay time is larger than
-       delayLimit parameter. The delayLimit=0 is infinity.
-\item[-] rcvdPk: statistics of not dropped, not out-of-order packets.
-\item[-] endToEndDelay: end to end delay statistics of not dropped, not out-of-order packets.
-\end{itemize}
 
 
 \section{IPv4/IPv6 traffic generators}
@@ -368,12 +300,12 @@ They can be used with both IPv4 and IPv6.
 
 \nedtype{IIPvXTraffixGenerator} (prototype) sends IP or IPv6 datagrams to the
 given address at the given \fpar{sendInterval}.
-The \fpar{sendInterval} parameter can be a constant or a random value (e.g. exponential(1)).
-If the \fpar{destAddresses} parameter contains more than one address, one
-of them is randomly for each packet. An address may be given in the
-dotted decimal notation (or, for IPv6, in the usual notation with colons),
-or with the module name. (The \cppclass{L3AddressResolver} class is used to resolve
-the address.) To disable the model, set destAddresses to "".
+The \fpar{sendInterval} parameter can be a constant or a random value (e.g.
+\ttt{exponential(1)}). If the \fpar{destAddresses} parameter contains more than
+one address, one of them is randomly for each packet. An address may be given in
+the dotted decimal notation (or, for IPv6, in the usual notation with colons),
+or with the module name. (The \cppclass{L3AddressResolver} class is used to
+resolve the address.) To disable the model, set \fpar{destAddresses} to "".
 
 The \nedtype{IpvxTrafGen} sends messages with length \fpar{packetLength}.
 The sent packet is emitted in the \fsignal{sentPk} signal.
@@ -410,32 +342,6 @@ decremented. (It is assumed that the packet arrived was counted earlier as a los
 which is true if there are no duplicate packets.)
 
 Uses \msgtype{PingPayload} as payload for the ICMP(v6) Echo Request/Reply packets.
-
-\subsection*{Parameters}
-
-\begin{itemize}
-  \item \fpar{destAddr}: destination address
-  \item \fpar{srcAddr}: source address (useful with multi-homing)
-  \item \fpar{packetSize}: of ping payload, in bytes (default is 56)
-  \item \fpar{sendInterval}: time to wait between pings (can be random, default is 1s)
-  \item \fpar{hopLimit}: TTL or hopLimit for IP packets (default is 32)
-  \item \fpar{count}: stop after \fpar{count} ping request, 0 means continuously
-  \item \fpar{startTime}: send first ping request at \fpar{startTime}
-  \item \fpar{stopTime}: time of finish sending, 0 means forever
-  \item \fpar{printPing}: dump on stdout (default is \fkeyword{false})
-\end{itemize}
-
-\subsection*{Signals and Statistics}
-
-\begin{itemize}
-  \item \fsignal{rtt} value of the round trip time
-  \item \fsignal{numLost} number of lost packets
-  \item \fsignal{outOfOrderArrivals} number of packets arrived out-of-order
-  \item \fsignal{pingTxSeq} sequence number of the sent ping request
-  \item \fsignal{pingRxSeq} sequence number of the received ping response
-\end{itemize}
-
-% FIXME seqNo should be part of ICMPMessage
 
 
 \section{Ethernet applications}
