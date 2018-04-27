@@ -175,7 +175,7 @@ void NextHopForwarding::handlePacketFromNetwork(Packet *packet)
         return;
     }
 
-    const auto& header = packet->peekAtFront<GenericDatagramHeader>();
+    const auto& header = packet->peekAtFront<NextHopDatagramHeader>();
     packet->addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
     packet->addTagIfAbsent<NetworkProtocolInd>()->setNetworkProtocolHeader(header);
     B totalLength = header->getChunkLength() + header->getPayloadLengthField();
@@ -241,7 +241,7 @@ void NextHopForwarding::routePacket(Packet *datagram, const InterfaceEntry *dest
 {
     // TBD add option handling code here
 
-    auto header = datagram->peekAtFront<GenericDatagramHeader>();
+    auto header = datagram->peekAtFront<NextHopDatagramHeader>();
     L3Address destAddr = header->getDestinationAddress();
 
     EV_INFO << "Routing datagram `" << datagram->getName() << "' with dest=" << destAddr << ": ";
@@ -251,7 +251,7 @@ void NextHopForwarding::routePacket(Packet *datagram, const InterfaceEntry *dest
         EV_INFO << "local delivery\n";
         if (fromHL && header->getSourceAddress().isUnspecified()) {
             datagram->trimFront();
-            const auto& newHeader = removeNetworkProtocolHeader<GenericDatagramHeader>(datagram);
+            const auto& newHeader = removeNetworkProtocolHeader<NextHopDatagramHeader>(datagram);
             newHeader->setSourceAddress(destAddr); // allows two apps on the same host to communicate
             insertNetworkProtocolHeader(datagram, Protocol::gnp, newHeader);
             header = newHeader;
@@ -307,7 +307,7 @@ void NextHopForwarding::routePacket(Packet *datagram, const InterfaceEntry *dest
 
     if (!fromHL) {
         datagram->trimFront();
-        const auto& newHeader = removeNetworkProtocolHeader<GenericDatagramHeader>(datagram);
+        const auto& newHeader = removeNetworkProtocolHeader<NextHopDatagramHeader>(datagram);
         newHeader->setHopLimit(header->getHopLimit() - 1);
         insertNetworkProtocolHeader(datagram, Protocol::gnp, newHeader);
         header = newHeader;
@@ -316,7 +316,7 @@ void NextHopForwarding::routePacket(Packet *datagram, const InterfaceEntry *dest
     // set datagram source address if not yet set
     if (header->getSourceAddress().isUnspecified()) {
         datagram->trimFront();
-        const auto& newHeader = removeNetworkProtocolHeader<GenericDatagramHeader>(datagram);
+        const auto& newHeader = removeNetworkProtocolHeader<NextHopDatagramHeader>(datagram);
         newHeader->setSourceAddress(destIE->getGenericNetworkProtocolData()->getAddress());
         insertNetworkProtocolHeader(datagram, Protocol::gnp, newHeader);
         header = newHeader;
@@ -331,7 +331,7 @@ void NextHopForwarding::routePacket(Packet *datagram, const InterfaceEntry *dest
 
 void NextHopForwarding::routeMulticastPacket(Packet *datagram, const InterfaceEntry *destIE, const InterfaceEntry *fromIE)
 {
-    const auto& header = datagram->peekAtFront<GenericDatagramHeader>();
+    const auto& header = datagram->peekAtFront<NextHopDatagramHeader>();
     L3Address destAddr = header->getDestinationAddress();
     // if received from the network...
     if (fromIE != nullptr) {
@@ -467,7 +467,7 @@ void NextHopForwarding::decapsulate(Packet *packet)
 {
     // decapsulate transport packet
     const InterfaceEntry *fromIE = getSourceInterfaceFrom(packet);
-    const auto& header = packet->popAtFront<GenericDatagramHeader>();
+    const auto& header = packet->popAtFront<NextHopDatagramHeader>();
 
     // create and fill in control info
     if (fromIE) {
@@ -493,7 +493,7 @@ void NextHopForwarding::decapsulate(Packet *packet)
 
 void NextHopForwarding::encapsulate(Packet *transportPacket, const InterfaceEntry *& destIE)
 {
-    auto header = makeShared<GenericDatagramHeader>();
+    auto header = makeShared<NextHopDatagramHeader>();
     header->setChunkLength(B(par("headerLength")));
     auto l3AddressReq = transportPacket->removeTag<L3AddressReq>();
     L3Address src = l3AddressReq->getSrcAddress();
@@ -545,7 +545,7 @@ void NextHopForwarding::encapsulate(Packet *transportPacket, const InterfaceEntr
 
 void NextHopForwarding::sendDatagramToHL(Packet *packet)
 {
-    const auto& header = packet->peekAtFront<GenericDatagramHeader>();
+    const auto& header = packet->peekAtFront<NextHopDatagramHeader>();
     const Protocol *protocol = header->getProtocol();
     decapsulate(packet);
     // deliver to sockets
@@ -578,7 +578,7 @@ void NextHopForwarding::sendDatagramToOutput(Packet *datagram, const InterfaceEn
     if (datagram->getByteLength() > ie->getMtu())
         throw cRuntimeError("datagram too large"); //TODO refine
 
-    const auto& header = datagram->peekAtFront<GenericDatagramHeader>();
+    const auto& header = datagram->peekAtFront<NextHopDatagramHeader>();
     // hop counter check
     if (header->getHopLimit() <= 0) {
         EV_INFO << "datagram hopLimit reached zero, discarding\n";
@@ -623,7 +623,7 @@ void NextHopForwarding::sendDatagramToOutput(Packet *datagram, const InterfaceEn
 
 void NextHopForwarding::datagramPreRouting(Packet *datagram, const InterfaceEntry *inIE, const InterfaceEntry *destIE, const L3Address& nextHop)
 {
-    const auto& header = datagram->peekAtFront<GenericDatagramHeader>();
+    const auto& header = datagram->peekAtFront<NextHopDatagramHeader>();
     // route packet
     if (!header->getDestinationAddress().isMulticast())
         routePacket(datagram, destIE, nextHop, false);
@@ -638,7 +638,7 @@ void NextHopForwarding::datagramLocalIn(Packet *packet, const InterfaceEntry *in
 
 void NextHopForwarding::datagramLocalOut(Packet *datagram, const InterfaceEntry *destIE, const L3Address& nextHop)
 {
-    const auto& header = datagram->peekAtFront<GenericDatagramHeader>();
+    const auto& header = datagram->peekAtFront<NextHopDatagramHeader>();
     // route packet
     if (!header->getDestinationAddress().isMulticast())
         routePacket(datagram, destIE, nextHop, true);

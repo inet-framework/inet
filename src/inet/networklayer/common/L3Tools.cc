@@ -71,7 +71,7 @@ const Ptr<const NetworkHeaderBase> peekNetworkProtocolHeader(Packet *packet, con
 #endif
 #ifdef WITH_GENERIC
     if (protocol == Protocol::gnp)
-        return packet->peekAtFront<GenericDatagramHeader>();
+        return packet->peekAtFront<NextHopDatagramHeader>();
 #endif
     // TODO: add other L3 protocols
     throw cRuntimeError("Unknown protocol: %s", protocol.getName());
@@ -97,7 +97,7 @@ const Ptr<NetworkHeaderBase> removeNetworkProtocolHeader(Packet *packet, const P
 #endif
 #ifdef WITH_GENERIC
     if (protocol == Protocol::gnp)
-        return removeNetworkProtocolHeader<GenericDatagramHeader>(packet);
+        return removeNetworkProtocolHeader<NextHopDatagramHeader>(packet);
 #endif
     // TODO: add other L3 protocols
     throw cRuntimeError("Unknown protocol: %s", protocol.getName());

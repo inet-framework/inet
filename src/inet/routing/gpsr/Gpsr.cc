@@ -668,8 +668,8 @@ void Gpsr::setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const Networ
     else
 #endif
 #ifdef WITH_GENERIC
-    if (dynamicPtrCast<const GenericDatagramHeader>(nwHeader)) {
-        auto gnpHeader = removeNetworkProtocolHeader<GenericDatagramHeader>(packet);
+    if (dynamicPtrCast<const NextHopDatagramHeader>(nwHeader)) {
+        auto gnpHeader = removeNetworkProtocolHeader<NextHopDatagramHeader>(packet);
         gpsrOption->setType(GENERIC_TLVOPTION_TLV_GPSR);
         int oldHlen = gnpHeader->getTlvOptions().getLength();
         gnpHeader->getTlvOptionsForUpdate().insertTlvOption(gpsrOption);
@@ -705,7 +705,7 @@ const GpsrOption *Gpsr::findGpsrOptionInNetworkDatagram(const Ptr<const NetworkH
     else
 #endif
 #ifdef WITH_GENERIC
-    if (auto gnpHeader = dynamicPtrCast<const GenericDatagramHeader>(networkHeader)) {
+    if (auto gnpHeader = dynamicPtrCast<const NextHopDatagramHeader>(networkHeader)) {
         int i = (gnpHeader->getTlvOptions().findByType(GENERIC_TLVOPTION_TLV_GPSR));
         if (i >= 0)
             gpsrOption = check_and_cast<const GpsrOption *>(gnpHeader->getTlvOptions().getTlvOption(i));
@@ -739,7 +739,7 @@ GpsrOption *Gpsr::findGpsrOptionInNetworkDatagramForUpdate(const Ptr<NetworkHead
     else
 #endif
 #ifdef WITH_GENERIC
-    if (auto gnpHeader = dynamicPtrCast<GenericDatagramHeader>(networkHeader)) {
+    if (auto gnpHeader = dynamicPtrCast<NextHopDatagramHeader>(networkHeader)) {
         int i = (gnpHeader->getTlvOptions().findByType(GENERIC_TLVOPTION_TLV_GPSR));
         if (i >= 0)
             gpsrOption = check_and_cast<GpsrOption *>(gnpHeader->getTlvOptionsForUpdate().getTlvOptionForUpdate(i));

@@ -42,7 +42,7 @@ enum GenericTlvOptionTypes
 //
 // Represents a generic network datagram with generic network addresses. 
 //
-class GenericDatagramHeader extends NetworkHeaderBase
+class NextHopDatagramHeader extends NetworkHeaderBase
 {
     L3Address srcAddr;
     L3Address destAddr;
@@ -52,7 +52,7 @@ class GenericDatagramHeader extends NetworkHeaderBase
     TlvOptions tlvOptions;
 }
 
-cplusplus(GenericDatagramHeader) {{
+cplusplus(NextHopHeader) {{
   public:
     virtual L3Address getSourceAddress() const override { return getSrcAddr(); }
     virtual void setSourceAddress(const L3Address& addr) override { setSrcAddr(addr); }
