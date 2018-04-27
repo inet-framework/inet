@@ -139,7 +139,7 @@ simple Ospf like IOspf
         int interfaceOutputCost = default(1);  // cost of link on the interface (1-1000)
         int interfaceTransmissionDelay @unit(s) = default(1s);  // The number of seconds required to transmit a link state update packet. Valid values are 1 to 65535.
         int routerPriority = default(1);  // Priority in DR/BDR election process. Specify 0 to exclude the router from the election.
-        string authenticationType = default("NullType");  // SimplePasswordType|CrytographicType|NullType
+        string authenticationType @enum("SimplePasswordType","CrytographicType","NullType") = default("NullType");
         string authenticationKey = default("0x00");  // 0xnn..nn
         int linkCost = default(1);  // cost of link (1-1000)
         bool RFC1583Compatible = default(false);
