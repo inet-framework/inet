@@ -48,7 +48,7 @@ namespace inet {
 // KLUDGE: implement position registry protocol instead of using a global variable
 class INET_API Gpsr : public cSimpleModule, public ILifecycle, public cListener, public NetfilterBase::HookBase
 {
-  private:
+  protected:
     // GPSR parameters
     GpsrPlanarizationMode planarizationMode = static_cast<GpsrPlanarizationMode>(-1);
     const char *interfaces = nullptr;
@@ -86,7 +86,7 @@ class INET_API Gpsr : public cSimpleModule, public ILifecycle, public cListener,
     void initialize(int stage) override;
     void handleMessage(cMessage *message) override;
 
-  private:
+  protected:
     // handling messages
     void processSelfMessage(cMessage *message);
     void processMessage(cMessage *message);
@@ -109,7 +109,7 @@ class INET_API Gpsr : public cSimpleModule, public ILifecycle, public cListener,
     void processBeacon(Packet *packet);
 
     // handling packets
-    GpsrOption *createGpsrOption(L3Address destination);
+    virtual GpsrOption *createGpsrOption(L3Address destination);
     int computeOptionLength(GpsrOption *gpsrOption);
     void setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const NetworkHeaderBase>& networkHeader);
 
@@ -149,8 +149,8 @@ class INET_API Gpsr : public cSimpleModule, public ILifecycle, public cListener,
 
     // next hop
     L3Address findNextHop(const Ptr<const NetworkHeaderBase>& networkHeader, const L3Address& destination);
-    L3Address findGreedyRoutingNextHop(const Ptr<const NetworkHeaderBase>& networkHeader, const L3Address& destination);
-    L3Address findPerimeterRoutingNextHop(const Ptr<const NetworkHeaderBase>& networkHeader, const L3Address& destination);
+    virtual L3Address findGreedyRoutingNextHop(const Ptr<const NetworkHeaderBase>& networkHeader, const L3Address& destination);
+    virtual L3Address findPerimeterRoutingNextHop(const Ptr<const NetworkHeaderBase>& networkHeader, const L3Address& destination);
 
     // routing
     Result routeDatagram(Packet *datagram);
