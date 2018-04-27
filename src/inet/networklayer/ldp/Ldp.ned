@@ -33,7 +33,7 @@ import inet.networklayer.mpls.IIngressClassifier;
 // ~LdpHello, ~LdpNotify, ~LdpLabelRequest, ~LdpIni and ~LdpAddress.
 //
 // Message processing in the ~Ldp module is explained in
-// <a href="ldp-processing.html">~LDP Message Processing</a>
+// <a href="ldp-processing.html">LDP Message Processing</a>
 //
 // @author Andras Varga, Vojta Janota
 //
@@ -46,7 +46,6 @@ simple Ldp like IIngressClassifier     //FIXME like IApp
         string tedModule;
         double holdTime @unit(s) = default(15s);
         double helloInterval @unit(s) = default(5s);
-        string dataTransferMode @enum("bytecount", "object", "bytestream") = default("bytecount");
         @display("i=block/control");
     gates:
         //FIXME use socketIn/socketOut gates instead of tcpIn/Out, udpIn/Out

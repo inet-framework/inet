@@ -34,10 +34,7 @@ void TcpGenericServerThread::dataArrived(Packet *msg, bool)
     const auto& appmsg = msg->peekDataAt<GenericAppMsg>(B(0), B(msg->getByteLength()));
 
     if (!appmsg)
-        throw cRuntimeError("Message (%s)%s is not a GenericAppMsg -- "
-                            "probably wrong client app, or wrong setting of TCP's "
-                            "dataTransferMode parameters "
-                            "(try \"object\")",
+        throw cRuntimeError("Message (%s)%s is not a GenericAppMsg -- probably wrong client app",
                 msg->getClassName(), msg->getName());
 
     if (appmsg->getReplyDelay() > 0)
