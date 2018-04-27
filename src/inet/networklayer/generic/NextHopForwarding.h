@@ -16,23 +16,22 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __INET_GENERICNETWORKPROTOCOL_H
-#define __INET_GENERICNETWORKPROTOCOL_H
+#ifndef __INET_NEXTHOPFORWARDING_H
+#define __INET_NEXTHOPFORWARDING_H
 
 #include <list>
 #include <map>
-
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/networklayer/contract/IArp.h"
-#include "inet/networklayer/contract/INetworkProtocol.h"
+#include "inet/common/ProtocolMap.h"
 #include "inet/common/queue/QueueBase.h"
+#include "inet/networklayer/contract/IArp.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/INetfilter.h"
-#include "inet/networklayer/generic/GenericRoutingTable.h"
+#include "inet/networklayer/contract/INetworkProtocol.h"
 #include "inet/networklayer/generic/GenericDatagram_m.h"
-#include "inet/common/ProtocolMap.h"
+#include "inet/networklayer/generic/GenericRoutingTable.h"
 
 namespace inet {
 
@@ -42,9 +41,7 @@ namespace inet {
  * interface to allow routing protocols to kick in. It doesn't provide datagram fragmentation
  * and reassembling.
  */
-// TODO: rename this and its friends to something that is more specific
-// TODO: that expresses to some extent how this network protocol works
-class INET_API GenericNetworkProtocol : public QueueBase, public NetfilterBase, public INetworkProtocol, public IProtocolRegistrationListener
+class INET_API NextHopForwarding : public QueueBase, public NetfilterBase, public INetworkProtocol, public IProtocolRegistrationListener
 {
   protected:
     /**
@@ -159,8 +156,8 @@ class INET_API GenericNetworkProtocol : public QueueBase, public NetfilterBase, 
     virtual IHook::Result datagramLocalOutHook(Packet *datagram);
 
   public:
-    GenericNetworkProtocol();
-    ~GenericNetworkProtocol();
+    NextHopForwarding();
+    ~NextHopForwarding();
 
     virtual void handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive) override;
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive) override;
@@ -189,5 +186,5 @@ class INET_API GenericNetworkProtocol : public QueueBase, public NetfilterBase, 
 
 } // namespace inet
 
-#endif // ifndef __INET_GENERICNETWORKPROTOCOL_H
+#endif // ifndef __INET_NEXTHOPFORWARDING_H
 

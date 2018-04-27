@@ -60,7 +60,7 @@ module GenericNetworkLayer like INetworkLayer
             parameters:
                 @display("p=300,300;q=pendingQueue");
         }
-        gnp: GenericNetworkProtocol {
+        gnp: NextHopForwarding {
             parameters:
                 @display("p=450,300;q=queue");
         }

@@ -121,7 +121,7 @@ class INET_API InterfaceEntry : public cModule
 
     Ipv4InterfaceData *ipv4data = nullptr;    ///< Ipv4-specific interface info (Ipv4 address, etc)
     Ipv6InterfaceData *ipv6data = nullptr;    ///< Ipv6-specific interface info (Ipv6 addresses, etc)
-    GenericNetworkProtocolInterfaceData *genericNetworkProtocolData = nullptr;    ///< GenericNetworkProtocol-specific interface info (Address, etc)
+    GenericNetworkProtocolInterfaceData *genericNetworkProtocolData = nullptr;    ///< NextHopForwarding-specific interface info (Address, etc)
     IsisInterfaceData *isisdata = nullptr;    ///< ISIS-specific interface info
     TrillInterfaceData *trilldata = nullptr;    ///< TRILL-specific interface info
     Ieee8021dInterfaceData *ieee8021ddata = nullptr;

@@ -18,12 +18,12 @@
 package inet.networklayer.generic;
 
 //
-// This module is a simplified generic network protocol that routes
-// generic datagrams using different kind of network addresses. 
+// This module is a simplified next hop forwarding that routes
+// generic datagrams using different kind of network addresses.
 //
 // @author Andras Varga
 //
-simple GenericNetworkProtocol
+simple NextHopForwarding
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
