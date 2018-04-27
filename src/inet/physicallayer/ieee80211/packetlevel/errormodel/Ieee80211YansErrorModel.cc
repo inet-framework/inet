@@ -29,6 +29,7 @@
 #include "inet/physicallayer/modulation/Qam16Modulation.h"
 #include "inet/physicallayer/modulation/Qam256Modulation.h"
 #include "inet/physicallayer/modulation/Qam64Modulation.h"
+#include "inet/physicallayer/modulation/QbpskModulation.h"
 #include "inet/physicallayer/modulation/QpskModulation.h"
 
 namespace inet {
@@ -145,7 +146,7 @@ double Ieee80211YansErrorModel::getFecQamBer(double snr, uint32_t nbits, Hz sign
 
 double Ieee80211YansErrorModel::getOFDMAndERPOFDMChunkSuccessRate(const ApskModulationBase* subcarrierModulation, const ConvolutionalCode* convolutionalCode, unsigned int bitLength, bps grossBitrate, Hz bandwidth, double snr) const
 {
-    if (subcarrierModulation == &BpskModulation::singleton) {
+    if (subcarrierModulation == &BpskModulation::singleton || subcarrierModulation == &QbpskModulation::singleton) {
         if (convolutionalCode->getCodeRatePuncturingK() == 1 && convolutionalCode->getCodeRatePuncturingN() == 2)
             return getFecBpskBer(snr, bitLength, bandwidth, grossBitrate, 10, 11);
         else

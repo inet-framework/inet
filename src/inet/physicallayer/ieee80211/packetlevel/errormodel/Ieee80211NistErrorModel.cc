@@ -18,17 +18,18 @@
 // Author: Gary Pei <guangyu.pei@boeing.com>
 //
 
-#include "inet/physicallayer/ieee80211/mode//Ieee80211VhtMode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211DsssMode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211HrDsssMode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211HtMode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmMode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211VhtMode.h"
 #include "inet/physicallayer/ieee80211/packetlevel/errormodel/Ieee80211NistErrorModel.h"
 #include "inet/physicallayer/modulation/BpskModulation.h"
 #include "inet/physicallayer/modulation/Qam1024Modulation.h"
 #include "inet/physicallayer/modulation/Qam16Modulation.h"
 #include "inet/physicallayer/modulation/Qam256Modulation.h"
 #include "inet/physicallayer/modulation/Qam64Modulation.h"
+#include "inet/physicallayer/modulation/QbpskModulation.h"
 #include "inet/physicallayer/modulation/QpskModulation.h"
 
 namespace inet {
@@ -199,7 +200,7 @@ double Ieee80211NistErrorModel::getFec1024QamBer(double snr, uint64_t nbits, uin
 
 double Ieee80211NistErrorModel::getOFDMAndERPOFDMChunkSuccessRate(const ApskModulationBase *subcarrierModulation, const ConvolutionalCode *convolutionalCode, unsigned int bitLength, double snr) const
 {
-    if (subcarrierModulation == &BpskModulation::singleton) {
+    if (subcarrierModulation == &BpskModulation::singleton || subcarrierModulation == &QbpskModulation::singleton) {
         if (convolutionalCode->getCodeRatePuncturingK() == 1 && convolutionalCode->getCodeRatePuncturingN() == 2)
             return getFecBpskBer(snr, bitLength, 1);
         return getFecBpskBer(snr, bitLength, 3);
