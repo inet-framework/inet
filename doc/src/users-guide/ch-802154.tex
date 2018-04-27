@@ -1,13 +1,80 @@
-\ifdraft
-
 \chapter{The 802.15.4 Model}
 \label{cha:802154}
 
 \section{Overview}
 
-TODO
+IEEE 802.15.4 is a technical standard which defines the operation of low-rate
+wireless personal area networks (LR-WPANs). IEEE 802.15.4 was designed for data
+rates of 250 kbit/s or lower, in order to achieve long battery life (months or
+even years) and very low complexity. The standard specifies the physical layer
+and media access control.
 
-\fi
+IEEE 802.15.4 is the basis for the ZigBee, ISA100.11a, WirelessHART, MiWi, SNAP,
+and the Thread specifications, each of which further extends the standard by
+developing the upper layers which are not defined in IEEE 802.15.4.
+Alternatively, it can be used with 6LoWPAN, the technology used to deliver IPv6
+over WPANs, to define the upper layers. (Thread is also 6LoWPAN-based.)
+
+The INET Framework contains a basic implementation of IEEE 802.15.4 protocol.
+
+
+\section{Network Interfaces}
+
+There are two network interfaces that differ in the type of radio:
+
+\begin{itemize}
+  \item \nedtype{Ieee802154NarrowbandInterface} is for use with narrowband radios
+  \item \nedtype{Ieee802154UwbIrInterface} is for use with the UWB-IR radio
+\end{itemize}
+
+
+To create a wireless node with a 802.15.4 interface, use a node type 
+that has a wireless interface, and set the interface type to the 
+appropriate type. For example, \nedtype{WirelessHost} is a node type 
+which is preconfigured to have one wireless interface, \ttt{wlan[0]}.
+\ttt{wlan[0]} is of parametric type, so if you build the network from
+\nedtype{WirelessHost} nodes, you can configure all of them to use
+802.15.4 with the following line in the ini file:
+
+\begin{inifile}
+**.wlan[0].typename = "Ieee802154NarrowbandInterface"
+\end{inifile}
+
+\section{Physical Layer}
+
+The IEEE 802.15.4 standard defines several alternative PHYs. There are
+several narrowband radios at various frequency bands using various modulation
+schemes (DSSS, O-QPSK, MPSK, GFSK BPSK, etc.), a Direct Sequence ultra-wideband
+(UWB), and one using chirp spread spectrum (CSS).
+
+INET provides the following radios: 
+
+\begin{itemize}
+  \item \nedtype{Ieee802154NarrowbandScalarRadio} is currently a partially 
+    parameterized version of the APSK radio. Before using this radio, 
+    one must check its parameters and make sure that they correspond to the 
+    specification of the 802.15.4 narrowband PHY to be simulated. 
+  \item \nedtype{Ieee802154UwbIrRadio} models the 802.14.5 UWB radio. 
+\end{itemize}
+
+One must choose a matching medium model, for example
+\nedtype{Ieee802154UwbIrRadioMedium} for \nedtype{Ieee802154UwbIrRadio},
+and \nedtype{Ieee802154NarrowbandScalarRadioMedium} for
+\nedtype{Ieee802154\-NarrowbandScalarRadio}.
+
+
+\section{MAC Protocol}
+
+The 802.15.4 MAC is based on collision avoidance via CSMA/CA. Important other
+features include real-time suitability by reservation of guaranteed time slots,
+and integrated support for secure communications. Devices also include power
+management functions such as link quality and energy detection.
+
+The \nedtype{Ieee802154Mac} type in INET is currently a parameterized
+version of a generic CSMA/CA protocol model with ACK support.
+
+There is also a \nedtype{Ieee802154NarrowbandMac}.
+
 
 %%% Local Variables:
 %%% mode: latex

@@ -68,8 +68,8 @@ void ScenarioManager::processCommand(cXMLElement *node)
         processAtCommand(node);
     else if (!strcmp(tag, "set-param"))
         processSetParamCommand(node);
-    else if (!strcmp(tag, "set-channel-attr"))
-        processSetChannelAttrCommand(node);
+    else if (!strcmp(tag, "set-channel-param"))
+        processSetChannelParamCommand(node);
     else if (!strcmp(tag, "create-module"))
         processCreateModuleCommand(node);
     else if (!strcmp(tag, "delete-module"))
@@ -169,16 +169,16 @@ void ScenarioManager::processSetParamCommand(cXMLElement *node)
     param.parse(valueAttr);
 }
 
-void ScenarioManager::processSetChannelAttrCommand(cXMLElement *node)
+void ScenarioManager::processSetChannelParamCommand(cXMLElement *node)
 {
-    // process <set-channel-attr> command
+    // process <set-channel-param> command
     cGate *g = getRequiredGate(node, "src-module", "src-gate");
-    const char *attrAttr = getRequiredAttribute(node, "attr");
+    const char *parAttr = getRequiredAttribute(node, "par");
     const char *valueAttr = getRequiredAttribute(node, "value");
 
-    EV << "Setting channel attribute: " << attrAttr << " = " << valueAttr
+    EV << "Setting channel parameter: " << parAttr << " = " << valueAttr
        << " of gate " << g->getFullPath() << "\n";
-    bubble((std::string("setting channel attr: ") + attrAttr + " = " + valueAttr).c_str());
+    bubble((std::string("setting channel parameter: ") + parAttr + " = " + valueAttr).c_str());
 
     // make sure gate is connected at all
     if (!g->getNextGate())
@@ -187,10 +187,10 @@ void ScenarioManager::processSetChannelAttrCommand(cXMLElement *node)
     // find channel (or add one?)
     cChannel *chan = g->getChannel();
     if (!chan)
-        throw cRuntimeError("connection starting at gate '%s' has no attributes at %s", g->getFullPath().c_str(), node->getSourceLocation());
+        throw cRuntimeError("connection starting at gate '%s' has no channel object at %s", g->getFullPath().c_str(), node->getSourceLocation());
 
     // set the parameter to the given value
-    cPar& param = chan->par(attrAttr);
+    cPar& param = chan->par(parAttr);
     param.parse(valueAttr);
 }
 

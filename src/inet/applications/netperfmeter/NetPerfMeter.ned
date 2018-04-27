@@ -69,8 +69,6 @@ simple NetPerfMeter like INetPerfMeterApp
         string          protocol                 = default("SCTP");    // Transport protocol to use
         string          primaryPath              = default("");        // primary path (may be symbolic; SCTP only)
 
-        string          dataTransferMode         = default("object");  // Data transfer mode for TCP socket (TCP only)
-
         volatile double frameRate      @unit(Hz) = default(1 Hz);      // Outgoing frame rate
         volatile int    frameSize      @unit(B)  = default(1452 B);    // Outgoing frame size
         string          frameRateString          = default("");        // Outgoing frame rate per stream, separated by ";"

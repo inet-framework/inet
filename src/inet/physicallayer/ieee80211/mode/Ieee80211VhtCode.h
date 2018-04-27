@@ -18,10 +18,10 @@
 #ifndef __INET_IEEE80211VHTSIGNALCODE_H
 #define __INET_IEEE80211VHTSIGNALCODE_H
 
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211VhtInterleaving.h"
+#include "inet/physicallayer/common/bitlevel/AdditiveScrambling.h"
 #include "inet/physicallayer/contract/bitlevel/ICode.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211ConvolutionalCode.h"
-#include "inet/physicallayer/common/bitlevel/AdditiveScrambling.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211VhtInterleaving.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmModulation.h"
 
 namespace inet {

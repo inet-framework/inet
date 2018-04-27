@@ -18,9 +18,9 @@
 package inet.networklayer.common;
 
 import inet.common.MessageDispatcher;
+import inet.networklayer.contract.IArp;
 import inet.networklayer.contract.INetworkLayer;
 import inet.networklayer.contract.INetworkProtocol;
-
 
 //
 // This module provides a simple network layer.
@@ -30,6 +30,7 @@ module SimpleNetworkLayer like INetworkLayer
     parameters:
         string interfaceTableModule;
         string networkProtocolType;
+        string arpType = default("");
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         @display("i=block/fork");
 
@@ -40,29 +41,43 @@ module SimpleNetworkLayer like INetworkLayer
         output transportOut @labels(ITransportPacket/up);
 
     submodules:
-        np: <networkProtocolType> like INetworkProtocol {
-            parameters:
-                @display("p=200,300;q=queue");
-        }
         echo: EchoProtocol {
             parameters:
-                @display("p=300,100");
+                @display("p=450,100");
         }
-        dp: MessageDispatcher {
+        up: MessageDispatcher {
             parameters:
-                @display("p=200,200;b=280,5");
+                @display("p=300,200;b=480,5");
+        }
+        arp: <arpType> like IArp if arpType != "" {
+            parameters:
+                @display("p=150,300;q=pendingQueue");
+        }
+        np: <networkProtocolType> like INetworkProtocol {
+            parameters:
+                @display("p=300,300;q=queue");
+        }
+        lp: MessageDispatcher {
+            parameters:
+                @display("p=300,400;b=480,5");
         }
 
     connections allowunconnected:
-        dp.out++ --> { @display("m=n"); } --> transportOut;
-        dp.in++ <-- { @display("m=n"); } <-- transportIn;
+        up.out++ --> { @display("m=n"); } --> transportOut;
+        up.in++ <-- { @display("m=n"); } <-- transportIn;
 
-        np.transportOut --> dp.in++;
-        np.transportIn <-- dp.out++;
+        np.transportOut --> up.in++;
+        np.transportIn <-- up.out++;
 
-        dp.out++ --> echo.ipIn;
-        dp.in++ <-- echo.ipOut;
+        up.out++ --> echo.ipIn;
+        up.in++ <-- echo.ipOut;
 
-        ifIn --> { @display("m=s"); } --> np.queueIn;
-        np.queueOut --> { @display("m=s"); } --> ifOut;
+        lp.out++ --> arp.ifIn if arpType != "";
+        lp.in++ <-- arp.ifOut if arpType != "";
+
+        lp.out++ --> np.queueIn;
+        lp.in++ <-- np.queueOut;
+
+        lp.in++ <-- { @display("m=s"); } <-- ifIn;
+        lp.out++ --> { @display("m=s"); } --> ifOut;
 }

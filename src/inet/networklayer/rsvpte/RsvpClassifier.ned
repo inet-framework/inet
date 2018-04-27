@@ -15,10 +15,19 @@
 
 package inet.networklayer.rsvpte;
 
+import inet.networklayer.mpls.IIngressClassifier;
+
+
 //
-// TODO documentation
+// Table-base ingress classifier.
 //
-simple RsvpClassifier
+// The XML config file has the following format. <fectable>
+// is the root element. <fectable> may contain any number of
+// <fecentry> elements. <fecentry> may contain the following
+// child elements that effectively serve as attributes:
+// <id>, <destination>, <source>, <label>, <tunnel_id>, <lspid>.
+//
+simple RsvpClassifier like IIngressClassifier
 {
     parameters:
         string routingTableModule;

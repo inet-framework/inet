@@ -20,16 +20,16 @@
 
 #include "inet/physicallayer/ieee80211/mode/Ieee80211DsssMode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211HrDsssMode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmMode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211HtMode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmMode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211VhtMode.h"
 #include "inet/physicallayer/ieee80211/packetlevel/errormodel/Ieee80211NistErrorModel.h"
-
-#include "../../mode/Ieee80211VhtMode.h"
 #include "inet/physicallayer/modulation/BpskModulation.h"
-#include "inet/physicallayer/modulation/Qam16Modulation.h"
-#include "inet/physicallayer/modulation/Qam64Modulation.h"
-#include "inet/physicallayer/modulation/Qam256Modulation.h"
 #include "inet/physicallayer/modulation/Qam1024Modulation.h"
+#include "inet/physicallayer/modulation/Qam16Modulation.h"
+#include "inet/physicallayer/modulation/Qam256Modulation.h"
+#include "inet/physicallayer/modulation/Qam64Modulation.h"
+#include "inet/physicallayer/modulation/QbpskModulation.h"
 #include "inet/physicallayer/modulation/QpskModulation.h"
 
 namespace inet {
@@ -70,7 +70,7 @@ double Ieee80211NistErrorModel::get64QamBer(double snr) const
     return ber;
 }
 
-double Ieee80211NistErrorModel::get256QamBer (double snr) const
+double Ieee80211NistErrorModel::get256QamBer(double snr) const
 {
   double z = std::sqrt (snr / (85.0 * 2.0));
   double ber = 15.0 / 32.0 * 0.5 * erfc (z);
@@ -78,7 +78,7 @@ double Ieee80211NistErrorModel::get256QamBer (double snr) const
   return ber;
 }
 
-double Ieee80211NistErrorModel::get1024QamBer (double snr) const
+double Ieee80211NistErrorModel::get1024QamBer(double snr) const
 {
   double z = std::sqrt (snr / (341.0 * 2.0));
   double ber = 31.0 / 160.0 * 0.5 * erfc (z);
@@ -173,9 +173,9 @@ double Ieee80211NistErrorModel::getFec64QamBer(double snr, uint32_t nbits, uint3
     return pms;
 }
 
-double Ieee80211NistErrorModel::getFec256QamBer (double snr, uint64_t nbits, uint32_t bValue) const
+double Ieee80211NistErrorModel::getFec256QamBer(double snr, uint64_t nbits, uint32_t bValue) const
 {
-  double ber = get256QamBer (snr);
+  double ber = get256QamBer(snr);
   if (ber == 0.0) {
       return 1.0;
   }
@@ -185,9 +185,9 @@ double Ieee80211NistErrorModel::getFec256QamBer (double snr, uint64_t nbits, uin
   return pms;
 }
 
-double Ieee80211NistErrorModel::getFec1024QamBer (double snr, uint64_t nbits, uint32_t bValue) const
+double Ieee80211NistErrorModel::getFec1024QamBer(double snr, uint64_t nbits, uint32_t bValue) const
 {
-  double ber = get1024QamBer (snr);
+  double ber = get1024QamBer(snr);
   if (ber == 0.0) {
       return 1.0;
   }
@@ -200,7 +200,7 @@ double Ieee80211NistErrorModel::getFec1024QamBer (double snr, uint64_t nbits, ui
 
 double Ieee80211NistErrorModel::getOFDMAndERPOFDMChunkSuccessRate(const ApskModulationBase *subcarrierModulation, const ConvolutionalCode *convolutionalCode, unsigned int bitLength, double snr) const
 {
-    if (subcarrierModulation == &BpskModulation::singleton) {
+    if (subcarrierModulation == &BpskModulation::singleton || subcarrierModulation == &QbpskModulation::singleton) {
         if (convolutionalCode->getCodeRatePuncturingK() == 1 && convolutionalCode->getCodeRatePuncturingN() == 2)
             return getFecBpskBer(snr, bitLength, 1);
         return getFecBpskBer(snr, bitLength, 3);

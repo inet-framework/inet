@@ -43,6 +43,16 @@ NetworkNodeCanvasVisualization::NetworkNodeCanvasVisualization(cModule *networkN
     submoduleBounds = getEnvir()->getSubmoduleBounds(networkNode);
     submoduleBounds.x = -submoduleBounds.width / 2;
     submoduleBounds.y = -submoduleBounds.height / 2;
+    if (networkNode->hasPar("canvasImage") && strlen(networkNode->par("canvasImage")) != 0) {
+        auto imageFigure = new cImageFigure("node");
+        imageFigure->setTooltip("This image represents a network node");
+        imageFigure->setTooltip("");
+        imageFigure->setAssociatedObject(networkNode);
+        imageFigure->setImageName(networkNode->par("canvasImage"));
+        if (networkNode->hasPar("canvasImageColor") && strlen(networkNode->par("canvasImageColor")) != 0)
+            imageFigure->setTintColor(cFigure::parseColor(networkNode->par("canvasImageColor")));
+        addFigure(imageFigure);
+    }
 }
 
 void NetworkNodeCanvasVisualization::refreshDisplay()

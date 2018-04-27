@@ -15,10 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/modulation/QbpskModulation.h"
 #include <tuple>
-#include "Ieee80211VhtMode.h"
-#include "Ieee80211VhtCode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211VhtCode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211VhtMode.h"
+#include "inet/physicallayer/modulation/QbpskModulation.h"
 
 namespace inet {
 namespace physicallayer {

@@ -16,7 +16,7 @@
 //
 
 #ifndef __INET_FLOODINGPROTOCOLPRINTER_H
-#define __INET_FLOODIMGPROTOCOLPRINTER_H
+#define __INET_FLOODINGPROTOCOLPRINTER_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/printer/ProtocolPrinter.h"

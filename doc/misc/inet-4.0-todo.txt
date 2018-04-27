@@ -29,10 +29,13 @@ SHOULD:
  - validate positioning and orientation IMobility, PhysicalEnvironment, ObstacleLoss
  - replace ObjectLocatorNode with GeoTransform (PositionAttitudeTransform) to work with osgEarth 2.9
  - cSocketRTScheduler refactoring for multiple sockets bound to interfaces
- - rename GenericNetworkProtocol to NextHopForwarding
- - rename Flood to Flooding? (questionable)
+ - rename GenericNetworkProtocol -> NextHopForwarding, GenericNetworkLayer -> NextHopNetworkLayer, GenericRoutingTable -> NextHopRoutingTable, GenericNetworkConfigurator -> NextHopNetworkConfigurator
+ - fix MAC address filtering TODO in RadioMedium
 
 NEED NOT:
+ - solve dynamic node creation and address resolution in applications
+ - don't subclass APSK medium and such with other specific radios, think of APSK radio as yet another specific conceptual radio
+ - generalize shutdown, startup, crash operations to applications, protocols, interfaces, etc. (NodeShutdownOperation -> ShutdownOperation, NodeStatus -> OperationalStatus?)
  - rename CallbackInterface to ICallback in TcpSocket and SctpSocket
  - add ICallback and processMessage to UdpSocket
  - refactor all applications to use belongsToSocket and processMessage

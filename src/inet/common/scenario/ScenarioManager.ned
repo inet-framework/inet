@@ -61,22 +61,22 @@ package inet.common.scenario;
 // </scenario>
 // </pre>
 //
-// Built-in commands: <set-param>, <set-channel-attr>, <at>.
+// Built-in commands: <at>, <set-param>, <set-channel-param>,
+// <create-module>, <delete-module>, <connect>, <disconnect>,
+// <initiate>, <startup>, <shutdown>, <crash>
 //
 // All commands have a t attribute which carries the simulation time
 // at which the command has to be carried out. You can group several commands
 // to be carried out at the same simulation time using <at>, and
 // then only the <at> command is needed to have a t attribute.
 //
-// connect/disconnect working between nodes, with have same parent
-//
 // Supported attributes:
 //    - <set-param>: module, par, value.
-//    - <set-channel-attr>: src-module, src-gate, attr, value.
+//    - <set-channel-param>: src-module, src-gate, par, value.
 //    - <connect>: src-module, src-gate, dest-module, dest-gate, channel-type
 //        - <param>: name, value
 //    - <disconnect>: src-module, src-gate
-//          FIXME - TRANSLATE: a src-gate lehet inout gate is, akkor mindket iranyra disconnect
+//          note: if src-gate names an inout gate, both directions will be disconnected.
 //
 simple ScenarioManager
 {

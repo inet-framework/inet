@@ -16,7 +16,7 @@
 //
 
 #include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmCode.h"
-#include "Ieee80211VhtCode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211VhtCode.h"
 
 namespace inet {
 namespace physicallayer {

@@ -37,8 +37,6 @@ simple GenericNetworkProtocol
     gates:
         input transportIn @labels(TcpHeader,UdpHeader);
         output transportOut @labels(TcpHeader,UdpHeader);
-        input arpIn;
-        output arpOut;
         input queueIn @labels(GenericDatagram);
         output queueOut @labels(GenericDatagram);
 }

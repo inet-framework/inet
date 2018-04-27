@@ -40,11 +40,18 @@ class INET_API MobilityVisualizerBase : public VisualizerBase, public cListener
   protected:
     /** @name Parameters */
     //@{
-    bool displayMovements = false;
+    bool displayMobility = false;
     double animationSpeed = NaN;
     ModuleFilter moduleFilter;
+    // position
+    bool displayPositions = false;
+    double positionCircleRadius = NaN;
+    double positionCircleLineWidth = NaN;
+    ColorSet positionCircleLineColorSet;
+    ColorSet positionCircleFillColorSet;
     // orientation
     bool displayOrientations = false;
+    double orientationPieRadius = NaN;
     double orientationPieSize = NaN;
     double orientationPieOpacity = NaN;
     cFigure::Color orientationLineColor;

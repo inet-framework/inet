@@ -60,6 +60,33 @@ MobilityBase::MobilityBase() :
 {
 }
 
+const char *MobilityBase::DirectiveResolver::resolveDirective(char directive)
+{
+    switch (directive) {
+        case 'p':
+            result = mobility->getCurrentPosition().str();
+            break;
+        case 'v':
+            result = mobility->getCurrentVelocity().str();
+            break;
+        case 'a':
+            result = mobility->getCurrentAcceleration().str();
+            break;
+        case 'P':
+            result = mobility->getCurrentAngularPosition().str();
+            break;
+        case 'V':
+            result = mobility->getCurrentAngularVelocity().str();
+            break;
+        case 'A':
+            result = mobility->getCurrentAngularAcceleration().str();
+            break;
+        default:
+            throw cRuntimeError("Unknown directive: %c", directive);
+    }
+    return result.c_str();
+}
+
 void MobilityBase::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
@@ -71,6 +98,7 @@ void MobilityBase::initialize(int stage)
         constraintAreaMax.x = par("constraintAreaMaxX");
         constraintAreaMax.y = par("constraintAreaMaxY");
         constraintAreaMax.z = par("constraintAreaMaxZ");
+        format.parseFormat(par("displayStringTextFormat"));
         bool visualizeMobility = par("visualizeMobility");
         if (visualizeMobility) {
             visualRepresentation = findVisualRepresentation();
@@ -95,7 +123,6 @@ void MobilityBase::initializePosition()
     setInitialPosition();
     checkPosition();
     emitMobilityStateChangedSignal();
-    updateVisualRepresentation();
 }
 
 void MobilityBase::setInitialPosition()
@@ -153,31 +180,40 @@ void MobilityBase::initializeOrientation()
     }
 }
 
+void MobilityBase::refreshDisplay() const
+{
+    DirectiveResolver directiveResolver(const_cast<MobilityBase *>(this));
+    auto text = format.formatString(&directiveResolver);
+    cDisplayString& displayString = this->getDisplayString();
+    displayString.setTagArg("t", 0, text);
+    if (visualRepresentation != nullptr) {
+        auto position = const_cast<MobilityBase *>(this)->getCurrentPosition();
+        EV_DEBUG << "current position = " << position << endl;
+        auto visualRepresentationPosition = canvasProjection->computeCanvasPoint(position);
+        char buf[32];
+        snprintf(buf, sizeof(buf), "%lf", visualRepresentationPosition.x);
+        buf[sizeof(buf) - 1] = 0;
+        visualRepresentation->getDisplayString().setTagArg("p", 0, buf);
+        snprintf(buf, sizeof(buf), "%lf", visualRepresentationPosition.y);
+        buf[sizeof(buf) - 1] = 0;
+        visualRepresentation->getDisplayString().setTagArg("p", 1, buf);
+    }
+}
+
+void MobilityBase::handleParameterChange(const char *name)
+{
+    if (name != nullptr) {
+        if (!strcmp(name, "displayStringTextFormat"))
+            format.parseFormat(par("displayStringTextFormat"));
+    }
+}
+
 void MobilityBase::handleMessage(cMessage *message)
 {
     if (message->isSelfMessage())
         handleSelfMessage(message);
     else
         throw cRuntimeError("Mobility modules can only receive self messages");
-}
-
-void MobilityBase::updateVisualRepresentation()
-{
-    EV_DEBUG << "current position = " << lastPosition << endl;
-#ifdef WITH_VISUALIZERS
-    if (hasGUI() && visualRepresentation != nullptr) {
-        inet::visualizer::MobilityCanvasVisualizer::setPosition(visualRepresentation, canvasProjection->computeCanvasPoint(lastPosition));
-    }
-#else
-    auto position = canvasProjection->computeCanvasPoint(lastPosition);
-    char buf[32];
-    snprintf(buf, sizeof(buf), "%lf", position.x);
-    buf[sizeof(buf) - 1] = 0;
-    visualRepresentation->getDisplayString().setTagArg("p", 0, buf);
-    snprintf(buf, sizeof(buf), "%lf", position.y);
-    buf[sizeof(buf) - 1] = 0;
-    visualRepresentation->getDisplayString().setTagArg("p", 1, buf);
-#endif
 }
 
 void MobilityBase::emitMobilityStateChangedSignal()

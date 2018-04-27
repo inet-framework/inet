@@ -22,7 +22,7 @@ import inet.networklayer.contract.IArp;
 
 
 //
-// TODO
+// This module provides global address resolution without exchanging packets.
 //
 simple GlobalArp like IArp
 {
@@ -30,12 +30,7 @@ simple GlobalArp like IArp
         string interfaceTableModule;   // path to the InterfaceTable module
         string addressType @enum("ipv4", "ipv6", "mac", "moduleid", "modulepath") = default("ipv4");
         @display("i=block/layer");
-        @signal[arpResolutionInitiated](type=IArp::Notification);
-        @signal[arpResolutionCompleted](type=IArp::Notification);
-        @signal[arpResolutionFailed](type=IArp::Notification);
     gates:
-        input netwIn @labels(ArpPacket+Ieee802Ctrl); // incoming ARP requests and replies
-        output netwOut @labels(ArpPacket+Ieee802Ctrl);  // outgoing ARP requests/replies
         input ifIn @labels(ArpPacket,Ieee802Ctrl);
         output ifOut @labels(ArpPacket,Ieee802Ctrl);
 }

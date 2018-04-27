@@ -17,10 +17,10 @@ import inet.linklayer.contract.ILoopbackInterface;
 import inet.linklayer.contract.IPppInterface;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.Ipv4NetworkLayer;
+import inet.networklayer.mpls.IIngressClassifier;
 import inet.networklayer.mpls.LibTable;
 import inet.networklayer.mpls.Mpls;
 import inet.networklayer.rsvpte.RsvpTe;
-import inet.networklayer.rsvpte.RsvpClassifier;
 import inet.networklayer.ted.LinkStateRouting;
 import inet.networklayer.ted.Ted;
 
@@ -42,6 +42,7 @@ module RsvpMplsRouter
         int numLoInterfaces = default(1);
         string peers;
         string routerId = default("auto");
+        string classifierType = default("RsvpClassifier");
         *.forwarding = true;
         *.routingTable.routerId = routerId;
         *.interfaceTableModule = default(absPath(".interfaceTable"));
@@ -74,7 +75,7 @@ module RsvpMplsRouter
                 classifierModule = "^.classifier";
                 @display("p=458,106");
         }
-        classifier: RsvpClassifier {
+        classifier: <classifierType> like IIngressClassifier {
             parameters:
                 @display("p=58,362;is=s");
         }

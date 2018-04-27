@@ -67,6 +67,7 @@ class INET_API Ieee80211FhssDataMode : public IIeee80211DataMode
   public:
     Ieee80211FhssDataMode(const GfskModulationBase *modulation);
 
+    virtual Hz getBandwidth() const override { return Hz(NaN); }
     virtual inline bps getNetBitrate() const override { return Mbps(1) * modulation->getConstellationSize() / 2; }
     virtual inline bps getGrossBitrate() const override { return getNetBitrate(); }
     virtual b getPaddingLength(b dataLength) const override { return b(0); }

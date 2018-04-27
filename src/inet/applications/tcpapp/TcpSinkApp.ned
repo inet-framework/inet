@@ -23,40 +23,13 @@ import inet.applications.contract.IApp;
 
 //
 // Accepts any number of incoming TCP connections, and discards whatever
-// arrives on them.
-// Compatible with both ~Ipv4 and ~Ipv6.
-//
-// <b>Configuring App</b>
-//
-// Currently you have three dataTransferMode choices:
-//
-//   -# set them to "bytecount".
-//      This mode manages "virtual bytes", that is, only byte counts are
-//      transmitted over the TCP connection and no actual data. cMessage
-//      contents, and even message boundaries are not preserved with these
-//      classes: for example, if the client sends a single cMessage with
-//      length = 1 megabyte over TCP, the receiver-side client will see a
-//      sequence of MSS-sized messages.
-//
-//   -# use "object", which transmits
-//      cMessage objects (and subclasses) over a TCP connection. The same
-//      message object sequence that was sent by the client to the
-//      sender-side TCP entity will be reproduced on the receiver side.
-//      If a client sends a cMessage with length = 1 megabyte, the
-//      receiver-side client will receive the same message object (or a clone)
-//      after the TCP entities have completed simulating the transmission
-//      of 1 megabyte over the connection. This is a different behaviour
-//      from TCPVirtualDataSendQueue/RcvQueue.
-//      This mode is not implemented in ~TcpNsc yet.
-//
-//   -# use "bytestream", which transmits real bytes of messages.
+// arrives on them. Compatible with both ~Ipv4 and ~Ipv6.
 //
 simple TcpSinkApp like IApp
 {
     parameters:
         string localAddress = default(""); // may be left empty ("")
         int localPort = default(1000); // port number to listen on
-        string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
         @display("i=block/sink");
         @signal[packetReceived](type=Packet);
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

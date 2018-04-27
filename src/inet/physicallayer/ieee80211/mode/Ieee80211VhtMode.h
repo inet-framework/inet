@@ -20,12 +20,11 @@
 
 #define DI DelayedInitializer
 
-#include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmMode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211HtCode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211VhtCode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211HtMode.h"
-#include "inet/common/DelayedInitializer.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmMode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211VhtCode.h"
+#include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
 
 namespace inet {
 namespace physicallayer {
@@ -236,6 +235,7 @@ class INET_API Ieee80211VhtDataMode : public IIeee80211DataMode, public Ieee8021
         inline b getTailFieldLength() const { return b(6) * numberOfBccEncoders; }
 
         virtual int getNumberOfSpatialStreams() const override { return Ieee80211VhtModeBase::getNumberOfSpatialStreams(); }
+        virtual Hz getBandwidth() const { return bandwidth; }
         virtual b getPaddingLength(b dataLength) const override { return b(0); }
         virtual b getCompleteLength(b dataLength) const override;
         virtual const simtime_t getDuration(b dataLength) const override;

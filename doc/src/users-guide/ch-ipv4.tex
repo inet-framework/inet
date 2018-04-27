@@ -32,10 +32,9 @@ transmitted independently. The destination host must collect all fragments,
 and assemble the datagram, before sending up the data to the transport
 layer.
 
-\subsection{INET modules}
+The INET framework contains several modules to build the IPv4 network layer of
+hosts and routers:
 
-The INET framework contains several modules to build the
-IPv4 network layer of hosts and routers:
 \begin{itemize}
   \item \nedtype{Ipv4} is the main module that implements RFC791. This
         module performs IP encapsulation/decapsulation, fragmentation
@@ -52,220 +51,66 @@ IPv4 network layer of hosts and routers:
         membership reports.
 \end{itemize}
 
-These modules are assembled into a complete network layer module
-called \nedtype{Ipv4NetworkLayer}. This module has
-dedicated gates for TCP, UDP, SCTP, RSVP, OSPF, Manet, and Ping
-higher layer protocols. It can be connected to several network
-interface cards: Ethernet, PPP, Wlan, or external interfaces.
-The \nedtype{Ipv4NetworkLayer} module is used to build IPv4 hosts
-(\nedtype{StandardHost}) and routers (\nedtype{Router}).
-
-The implementation of these modules are based on the following RFCs:
-\begin{itemize}
-  \item RFC791: Internet Protocol
-  \item RFC792: Internet Control Message Protocol
-  \item RFC826: Address Resolution Protocol
-  \item RFC1122: Requirements for Internet Hosts - Communication Layers
-  \item RFC2236: Internet Group Management Protocol, Version 2
-\end{itemize}
+These modules are assembled into a complete network layer module called
+\nedtype{Ipv4NetworkLayer}. The \nedtype{Ipv4NetworkLayer} module is present
+e.g. in \nedtype{StandardHost} and \nedtype{Router}.
 
 The subsequent sections describe the IPv4 modules in detail.
 
-\section{The IPv4 Module}
+\section{Ipv4}
 
 The \nedtype{Ipv4} module implements the IPv4 protocol.
 
-For connecting the upper layer protocols the \nedtype{Ipv4} module
-has \emph{transportIn[]} and \emph{transportOut[]} gate vectors.
+Its parameters include:
 
-The IP packets are sent to the \nedtype{Arp} module through the
-\emph{queueOut} gate. The incoming IP packets are received
-directly from the network interface cards through the
-\emph{queueIn[]} gates. Each interface card knows its own
-network layer gate index.
-
-
-\subsection{IP packets}
-
-IP datagrams start with a variable length IP header.
-The minimum length of the header is 20 bytes, and
-it can contain at most 40 bytes for options, so
-the maximum length of the IP header is 60 bytes.
-
-\begin{center}
-\begin{bytefield}{32}
-\bitheader{0,3,4,7,8,15,16,18,19,23,24,31} \\
-\bitbox{4}{Version} &
-\bitbox{4}{IHL} &
-\bitbox{8}{\small Type of Service} &
-\bitbox{16}{Total Length} \\
-\bitbox{16}{Identification} &
-\bitbox{3}{Flags} &
-\bitbox{13}{Fragment Offset} \\
-\bitbox{8}{Time to Live} &
-\bitbox{8}{Protocol} &
-\bitbox{16}{Header Checksum} \\
-\bitbox{32}{Source Address} \\
-\bitbox{32}{Destination Address} \\
-\bitbox{24}{Options} &
-\bitbox{8}{Padding} \\
-\end{bytefield}
-\end{center}
-
-The \ttt{Version} field is 4 for IPv4. The 4-bit \ttt{IHL} field is the
-number of 32-bit words in the header. It is needed because the header
-may contain optional fields, so its length may vary. The minimum IP header
-length is 20, the maximum length is 60. The header is always padded to
-multiple of 4 bytes. The \ttt{Type of Service} field designed to store
-priority and preference values of the IP packet, so applications can
-request low delay, high throughput, and maximium reliability from the
-routing algorithms. In reality these fields are rarely set by applications,
-and the routers mostly ignore them. The \ttt{Total Length} field is the
-length of the whole datagram in bytes. The \ttt{Identification} field
-is used for identifying the datagram sent by a host. It is usually generated
-by incrementing a counter for each outgoing datagram. When the datagram
-gets fragmented by a router, its \ttt{Identification} field is kept unchanged
-to the other end can collect them. In datagram fragments the \ttt{Fragment Offset}
-is the address of the fragment in the payload of the original datagram. It is
-measured in 8-byte units, so fragment lengths must be a multiple of 8.
-Each fragment except the last one, has its \ttt{MF} (more fragments) bit set
-in the \ttt{Flags} field. The other used flag in \ttt{Flags} is the \ttt{DF}
-(don't fragment) bit which forbids the fragmentation of the datagram.
-The \ttt{Time to Live} field is decremented by each router in the path,
-and the datagram is dropped if it reached 0. Its purpose is to prevent
-endless cycles if the routing tables are not properly configured, but
-can be used for limiting hop count range of the datagram (e.g. for local
-broadcasts, but the \fprog{traceroute} program uses this field too).
-The \ttt{Protocol} field is for demultiplexing the payload of the IP
-datagram to higher level protocols. Each transport protocol has a registered
-protocol identifier. The \ttt{Header Checksum} field is the 16-bit one's
-complement sum of the header fields considered as a sequence of 16-bit numbers.
-The \ttt{Source Address} and \ttt{Destination Address} are the IPv4 addresses
-of the source and destination respectively.
-
-The \ttt{Options} field contains 0 or more IP options. It is always padded
-with zeros to a 32-bit boundary. An option is either a single-byte option
-code or an option code + option length followed by the actual values for
-the option. Thus IP implementations can skip unknown options.
-
-An IP datagram is represented by the \msgtype{IPv4Datagram} message class.
-It contains variables corresponding the fields of the IP header, except:
 \begin{itemize}
-  \item \fvar{Header Checksum} omitted, modeled by error bit of packets
-  \item \fvar{Options} only the following options are permitted and the
-                       datagram can contain at most one option:
-        \begin{itemize}
-          \item Loose Source Routing
-          \item Strict Source Routing
-          \item Timestamp
-          \item Record Route
-        \end{itemize}
-\end{itemize}
-
-The \fvar{Type of Service} field is called \ttt{diffServCodePoint} in
-\nedtype{IPv4Datagram}.
-
-Before sending the \msgtype{IPv4Datagram} through the network, the \nedtype{Ipv4}
-module attaches a \cppclass{IPv4RoutingDecision} control info.
-The control info contains the IP address of the next hop, and the
-identifier of the interface it should be sent. The ARP module translate
-the IP address to the hardware address on the local net of the specified
-interface and forwards the datagram to the interface card.
-
-
-\subsection{Parameters}
-
-The \nedtype{Ipv4} module has the following parameters:
-\begin{itemize}
+  \item \fpar{crcMode} TODO: @enum("declared", "computed") = default("declared");
   \item \fpar{procDelay} processing time of each incoming datagram.
   \item \fpar{timeToLive} default TTL of unicast datagrams.
   \item \fpar{multicastTimeToLive} default TTL of multicast datagrams.
-  \item \fpar{protocolMapping} string value containing the \ttt{protocol id}
-        $\rightarrow$ \ttt{gate index} mapping, e.g. \ttt{``6:0,17:1,1:2,2:3,46:4''}.
   \item \fpar{fragmentTimeout} the maximum duration until fragments are kept
           in the fragment buffer.
   \item \fpar{forceBroadcast} if \fkeyword{true}, then link-local broadcast
           datagrams are sent out through each interface, if the higher
           layer did not specify the outgoing interface.
+  \item \fpar{useProxyARP} TODO: default(true);
 \end{itemize}
 
-% compile time options: WITH\_MANET, NEWFRAGMENT
+\section{Ipv4RoutingTable}
 
-\subsection{Statistics}
-
-The \nedtype{Ipv4} module does not write any statistics into files,
-but it has some statistical information that can be watched during
-the simulation in the gui environment.
-\begin{itemize}
-  \item \ttt{numForwarded}: number of forwarded datagrams, i.e. sent to one of the
-        interfaces (not broadcast), counted before fragmentation.
-  \item \ttt{numLocalDeliver}: number of datagrams locally delivered.
-        (Each fragment counted separately.)
-  \item \ttt{numMulticast}: number of routed multicast datagrams.
-  \item \ttt{numDropped} number of dropped packets.
-        Either because there is no any interface, the interface is not specified and
-        no \fpar{forceBroadcast}, or received from the network but IP forwarding disabled.
-  \item \ttt{numUnroutable}: number of unroutable datagrams, i.e. there is no
-        route to the destination. (But if outgoing interface is specified it is routed!)
-\end{itemize}
-
-In the graphical interface the bubble of the \nedtype{Ipv4} module
-also displays these counters.
-
-
-\section{The IPv4RoutingTable module}
-
-The \nedtype{Ipv4RoutingTable} module represents the routing table.
-IP hosts and routers contain one instance of this class. It has
-methods to manage the routing table and the interface table,
-so one can achieve functionality similar to the \fprog{route} and
-\fprog{ifconfig} commands.
-
-This is a simple module without gates, it requires function calls to it
-(message handling does nothing). Methods are provided for reading and
-updating the interface table and the route table, as well as for unicast
-and multicast routing.
-
-\subsection*{Parameters}
+The \nedtype{Ipv4RoutingTable} module represents the IPv4 route table.
+Hosts and routers normally contain one instance of this module.
+The \nedtype{Ipv4RoutingTable} module does not send or receive messages.
+Instead, C++ methods are for querying and updating the table, as well as for
+unicast and multicast routing.
 
 The \nedtype{Ipv4RoutingTable} module has the following parameters:
 
 \begin{itemize}
   \item \fpar{routerId}: for routers, the router id using IPv4 address dotted notation;
-        specify ``auto'' to select the highest interface address; should be left empty ``''
-        for hosts
-  \item \fpar{IPForward}: turns IP forwarding on/off (It is always \fkeyword{true}
-                          in a \nedtype{Router} and is \fkeyword{false} by default
-                          in a \nedtype{StandardHost}.)
-  \item \fpar{forwardMulticast}: turns multicast IP forwarding on/off. Default is \fkeyword{false},
-  should be set to \fkeyword{true} in multicast routers.
-  \item \fpar{routingFile}: name of routing file that configures IP addresses and routes of the node
-  containing this routing table. Its format is described in section \ref{subsec:routing_files}.
+      specify ``auto'' to select the highest interface address; should be left empty ``''
+      for hosts.
+  \item \fpar{forwarding}: turns IP forwarding on/off. It is always \ttt{true}
+      in a \nedtype{Router} and is \ttt{false} by default in a \nedtype{StandardHost}.
+  \item \fpar{multicastForwarding}: turns multicast IP forwarding on/off. 
+    Default is \fkeyword{false}, should be set to \fkeyword{true} in multicast routers.
 \end{itemize}
 
-\begin{warning}
-The \fpar{routingFile} parameter is obsolete. The prefered method for network configuration
-is to use \nedtype{Ipv4NetworkConfigurator}. The old config files should be replaced
-with the XML configuration of \nedtype{Ipv4NetworkConfigurator}. Section \ref{subsec:ipv4configurator}
+The preferred method for static initialization of routing tables is to use
+\nedtype{Ipv4NetworkConfigurator}. While \nedtype{Ipv4RoutingTable}
+can read the routes from a \textit{routing file}, that is considered obsolete.
+Old routing files should be replaced with the XML configuration of
+\nedtype{Ipv4NetworkConfigurator}. Section \ref{subsec:ipv4configurator}
 describes the format of the new configuration files.
-\end{warning}
 
-% FIXME (#467) IPv4RoutingTable::invalidateCache() should clear localBroadcastAddresses.
-% IPv4RoutingTable::findBestMatchingRoute() should search in this order:
-%          1. host routes (exact match)
-%          2. network routes (longest match)
-%          3. default routes (round robin)
-%   It is ok, if host routes has 255.255.255.255 netmask, and default has 0.0.0.0 netmask.
-% FIXME IPv4RoutingTable::findBestMatchingRoute() if(...MANET...) branch always set bestRoute to NULL,
-%       because if there were exact match, it would have been choosen in the previous loop.
 
-\section{The ICMP module}
+\section{Icmp}
 
-The Internet Control Message Protocol (ICMP) is the error reporting and
-diagnostic mechanism of the Internet.
-It uses the services of IP, so it is a transport layer protocol, but unlike
-TCP or UDP it is not used to transfer user data. It can not be separated
-from the IP, because the routing errors are reported by ICMP.
+The \nedtype{Icmp} module implements the Internet Control Message Protocol
+(ICMP). ICMP is the error reporting and diagnostic mechanism of the Internet.
+It uses the services of IP, so it is a transport layer protocol, but unlike TCP
+or UDP it is not used to transfer user data. It cannot be separated from
+IP, because the routing errors are reported by ICMP.
 
 The \nedtype{Icmp} module can be used to send error messages and ping
 request. It can also respond to incoming ICMP messages.
@@ -273,140 +118,33 @@ request. It can also respond to incoming ICMP messages.
 Each ICMP message is encapsulated within an IP datagram, so its delivery
 is unreliable.
 
-\begin{center}
-\begin{bytefield}{32}
-\bitheader{0,7,8,15,31} \\
-\bitbox{8}{Type} &
-\bitbox{8}{Code} &
-\bitbox{16}{Checksum} \\
-\bitbox{32}{Rest of header} \\
-\wordbox{2}{Internet Header + 8 bytes of Original Datagram}
-\end{bytefield}
-\end{center}
+\section{Arp}
 
-The corresponding message class (\msgtype{ICMPMessage}) contains only
-the Type and Code fields. The message encapsulates the IP packet that
-triggered the error, or the data of the ping request/reply.
+The \nedtype{Arp} module implements the Address Resolution Protocol (ARP).
+The ARP protocol is designed to translate a local protocol address to a hardware
+address. Although the ARP protocol can be used with several network protocol and
+hardware addressing schemes, in practice they are almost always IPv4 and 802.3
+addresses. The \nedtype{Arp} module only supports IPv4-to-MAC address
+translation, but not the opposite direction, Reverse ARP (RARP).
 
-% FIXME type=PARAMETER_PROBLEM, code=0: missing Pointer field from ICMPMessage
-%            REDIRECT: Gateway Internet Address
-%            ECHO_REQUEST, ECHO_REPLY: Identifier, Sequence Number
-%            TIMESTAMP_REQUEST, TIMESTAMP_REPLY: Identifier, Sequence Number, Originate Timestamp, Receive Timestamp, Transmit Timestamp
+The address to be resolved can be either an IPv4 broadcast/multicast or a
+unicast address. The corresponding MAC addresses can be computed for broadcast
+and multicast addresses (RFC 1122, 6.4); unicast addresses are resolved 
+using the ARP procotol.
 
-% FIXME wrong type codes for ICMP_DESTINATION_UNREACHABLE (3), ICMP_ECHO_REQUEST (8), ICMP_ECHO_REPLY (0), ICMP_TIMESTAMP_REQUEST (13), ICMP_TIMESTAMP_REPLY (14)
+If the MAC address is found in the ARP cache, then the packet is transmitted to
+the addressed interface immediately. Otherwise the packet is queued and an
+address resolution takes place.
 
-% FIXME ICMP header serializer handles only ICMP_ECHO_REQUEST, ICMP_ECHO_REPLY, ICMP_DESTINATION_UNREACHABLE, ICMP_TIME_EXCEEDED
-%       ICMP header deserializer handles only ICMP_ECHO_REQUEST, ICMP_ECHO_REPLY
+For address resolution, ARP broadcasts a request frame on the network. In the
+request it publishes its own IP and MAC addresses, so each node in the local
+subnet can update their mapping. The node whose MAC address was requested will
+respond with an ARP frame containing its own MAC address directly to the node
+that sent the request. When the original node receives the ARP response, it
+updates its ARP cache and sends the delayed IP packet using the learned MAC
+address.
 
-% FIXME ICMP error should not be send if the original datagram
-%         1. is an ICMP error
-%         2. was sent to a broadcast or multicast address
-%         3. datagram was sent with a link-layer broadcast
-%         4. a fragment other than the first
-%         5. a datagram whose source address is 0.0.0.0, 127.*.*.*, broadcast or multicast address
-%      currently only the 1. and half of 2. checked
-
-
-% \section{The IGMP module}
-
-\section{The ARP module}
-
-The \nedtype{Arp} module implements the Address Resolution Protocol (RFC826).
-The ARP protocol is designed to translate a local protocol address
-to a hardware address. Altough the ARP protocol can be used with
-several network protocol and hardware addressing schemes, in practice
-they are almost always IPv4 and 802.3 addresses. The INET implementation
-of the ARP protocol (the \nedtype{Arp} module) supports only
-IP address $\rightarrow$ MAC address translation.
-
-If a node wants to send an IP packet to a node whose MAC address is unknown,
-it broadcasts an ARP frame on the Ethernet network.
-In the request its publish its own IP and
-MAC addresses, so each node in the local subnet can update their mapping.
-The node whose MAC address was requested will respond with an ARP frame
-containing its own MAC address directly to the node that sent the
-request. When the original node receives the ARP response, it updates
-its ARP cache and sends the delayed IP packet using the learned MAC address.
-
-The frame format of the ARP request and reponse is shown in Figure \ref{fig:ARP_frame}.
-In our case the HTYPE (hardware type), PTYPE (protocol type), HLEN (hardware address length)
-and PLEN (protocol address length) are constants: HTYPE=Ethernet (1), PTYPE=IPv4 (2048), HLEN=6,
-PLEN=4. The OPER (operation) field is 1 for an ARP request and 2 for an ARP response.
-The SHA field contains the 48-bit hardware address of the sender, SPA field is
-the 32-bit IP address of the sender; THA and TPA are the addresses of the target.
-The message class corresponding to the ARP frame is \msgtype{ArpPacket}.
-In this class only the OPER, SHA, SPA, THA and TPA fields are stored.
-The length of an \msgtype{ArpPacket} is 28 bytes.
-
-\begin{figure}[h]
-\begin{center}
-\label{fig:ARP_frame}
-\begin{bytefield}{16}
-\bitheader{0,7,8,15} \\
-\bitbox{16}{HTYPE} \\
-\bitbox{16}{PTYPE} \\
-\bitbox{8}{HLEN} &
-\bitbox{8}{PLEN} \\
-\bitbox{16}{OPER} \\
-\wordbox{3}{SHA} \\
-\wordbox{2}{SPA} \\
-\wordbox{3}{THA} \\
-\wordbox{2}{TPA} \\
-\end{bytefield}
-\caption{ARP frame}
-\end{center}
-\end{figure}
-
-The \nedtype{Arp} module receives IP datagrams and ARP responses from \nedtype{Ipv4}
-on the \ttt{ipIn} gate and transmits IP datagrams and ARP requests on the \ttt{nicOut[]} gates
-towards the network interface cards. ARP broadcasts the requests on the local network,
-so the NIC's entry in the \nedtype{InterfaceTable} should have \ffunc{isBroadcast()} flag
-set in order to participate in the address resolution.
-
-The incoming IP packet should have an attached \cppclass{IPv4RoutingDecision} control
-info containing the IP address of the next hop. The next hop can be either an
-IPv4 broadcast/multicast or a unicast address. The corresponding MAC addresses
-can be computed for broadcast and multicast addresses (RFC 1122, 6.4); unicast
-addresses are mapped using the ARP procotol.
-
-If the hardware address is found
-in the ARP cache, then the packet is transmitted to the addressed interface immediately.
-Otherwise the packet is queued and an address resolution takes place.
-The \nedtype{Arp} module creates an \msgtype{ArpPacket} object, sets the sender
-MAC and IP address to its own address, sets the destination IP address
-to the address of the target of the IP datagram, leave the destination MAC address
-blank and broadcasts the packet on each network interface with broadcast capability.
-Before sending the ARP packet, it retransmission a timer. If the timer expires,
-it will retransmit the ARP request, until the maximum retry count is reached.
-If there is no response to the ARP request, then the address resolution fails,
-and the IP packet is dropped from the queue. Otherwise the MAC address of the
-destination is learned and the IP packet can be transmitted on the corresponding
-interface.
-
-When an ARP packet is received on the \ttt{ipIn} gate, and the sender's IP
-is already in the ARP cache, it is updated with the information in the ARP frame.
-Then it is checked that the destination IP of the packet matches with our
-address. In this case a new entry is created with the sender addresses in the
-ARP cache, and if the packet is a request a response is created and sent directly
-to the originator. If proxy ARP is enabled, the request can be responded
-with our MAC address if we can route IP packets to the destination.
-
-Usually each \nedtype{Arp} module maintains a local ARP cache.
-However it is possible to use a global cache. The global cache is filled
-in with entries of the IP and MAC addresses of the known interfaces
-when the ARP modules are initiated (at simulation time 0).
-\nedtype{Arp} modules that are using the global ARP cache
-never initiate an address resolution; if an IP address not
-found in the global cache, the simulation stops with an error.
-However they will respond to ARP request, so the simulation can
-be configured so that some \nedtype{Arp}s use local, while others
-the global cache.
-
-When an entry is inserted or updated in the local ARP cache,
-the simulation time saved in the entry. The mapping in the
-entry is not used after the configured \fpar{cacheTimeout}
-elapsed. This parameter does not affect the entries of
-the global cache however.
+ARP resolution is initiated with a C++ call.
 
 The module parameters of \nedtype{Arp} are:
 
@@ -418,22 +156,15 @@ The module parameters of \nedtype{Arp} are:
   \item \fpar{globalARP}: use global ARP cache (default is \fkeyword{false})
 \end{itemize}
 
-The \nedtype{Arp} module emits four signals:
 
-\begin{itemize}
-  \item \ttt{sentReq}: emits 1 each time an ARP request is sent
-  \item \ttt{sentReplies}: emits 1 each time an ARP response is sent
-  \item \ttt{initiatedResolution}: emits 1 each time an ARP resolution is initiated
-  \item \ttt{failedResolution}: emits 1 each time an ARP resolution is failed
-\end{itemize}
+\section{Igmp}
 
-These signals are recorded as vectors and their counts as scalars.
+The \nedtype{Igmp} module implements the Internet Group Management Protocol
+(IGMP). IGMP is a communications protocol used by hosts and adjacent routers on
+IPv4 networks to establish multicast group memberships. IGMP is an integral part
+of IP multicast.
 
-% TODO watches, animation effects
-
-\section{The IGMP module}
-
-The IGMP module is responsible for distributing the information of
+IGMP is responsible for distributing the information of
 multicast group memberships from hosts to routers. When an interface
 of a host joins to a multicast group, it will send an IGMP report
 on that interface to routers. It can also send reports when the
@@ -458,11 +189,11 @@ The \nedtype{Igmpv2} module implements version 2 of the IGMP protocol
 Note that multicast routers behaves as hosts too, i.e. they are sending
 reports to other routers when joining or leaving a multicast group.
 
-\subsection{Host behaviour}
+\subsection*{Host behaviour}
 
 When an interface joins to a multicast group, the host
 will send a Membership Report immediately to the group address.
-This report is repeated after \fpar{unsolicetedReportInterval} to
+This report is repeated after \fpar{unsolicitedReportInterval} to
 cover the possibility of the first report being lost.
 
 When a host's interface leaves a multicast group, and it was
@@ -480,7 +211,7 @@ When the host receives a General Query on an interface,
 a timer is initialized and a report is sent for each group
 membership of the interface.
 
-\subsection{Router behaviour}
+\subsection*{Router behaviour}
 
 Multicast routers maintains a list for each interface containing
 the multicast groups that have listeners on that interface.
@@ -519,22 +250,17 @@ assumes that the group has no local members.
 
 % FIXME IGMPv2 not compatible with IGMPv1 hosts and routers
 
-\subsection{Disabling IGMP}
+\subsection*{Parameters}
 
-The IPv4 \nedtype{Ipv4NetworkLayer} contains an instance of the IGMP
-module. IGMP can be turned off by setting the \fpar{enabled}
-parameter to false. When disabled, then no IGMP message
-is generated, and incoming IGMP messages are ignored.
-
-\subsection{Parameters}
-
-The following parameters has effects in both hosts and routers:
+The following parameters have effects in both hosts and routers:
 
 \begin{itemize}
-  \item \fpar{enabled} if \fkeyword{false} then the IGMP module is silent. Default is \fkeyword{true}.
+  \item \fpar{enabled} if \fkeyword{false} then the IGMP module
+     never sends any message and discards incoming messages.
+  Default is \fkeyword{true}.
 \end{itemize}
 
-These parameters are only used in hosts:
+The following parameters are only used in hosts:
 
 \begin{itemize}
   \item \fpar{unsolicitedReportInterval} the time between repetitions of a
@@ -569,45 +295,6 @@ Router timeouts are configured by these parameters:
    Default is \fpar{robustnessVariable}.
 \end{itemize}
 
-\section{The IPv4NetworkLayer module}
-
-The \nedtype{Ipv4NetworkLayer} module packs the \nedtype{IP}, \nedtype{Icmp},
-\nedtype{Arp}, and \nedtype{IGMP} modules into one compound module.
-The compound module defines gates for connecting UDP, TCP, SCTP, RSVP and
-OSPF transport protocols. The \ttt{pingIn} and \ttt{pingOut} gates of the
-\nedtype{Icmp} module are also available, while its \ttt{errorOut} gate
-is connected to an inner \nedtype{ErrorHandling} component that writes
-the ICMP errors to the log.
-
-The component can be used in hosts and routers to support IPv4.
-
-\section{The NetworkInfo module}
-
-The \nedtype{NetworkInfo} module can be used to dump detailed information
-about the network layer. This module does not send or received messages,
-it is invoked by the \nedtype{ScenarioManager} instead. For example
-the following \nedtype{ScenarioManager} script dump the routing table
-of the \ttt{LSR2} module at simulation time $t=2$ into \ffilename{LSR2\_002.txt}:
-\begin{filelisting}
-<scenario>
-  <at t="2">
-    <routing module="NetworkInfo" target="LSR2" file="LSR2_002.txt"/>
-  </at>
-</scenario>
-\end{filelisting}
-
-The module currently support only the \ttt{routing} command which dumps
-the routing table. The command has four parameters given as XML attributes:
-\begin{itemize}
-  \item \ttt{target} the name of the node that owns the routing table to be dumped
-  \item \ttt{filename} the name of the file the output is directed to
-  \item \ttt{mode} if set to ``a'', the output is appended to the file,
-                   otherwise the target is truncated if the file existed
-  \item \ttt{compat} if set to ``linux'', then the output is generated
-                     in the format of the \ttt{route -n} command of Linux.
-                     The output is sorted only if \ttt{compat} is
-                     \fkeyword{true}.
-\end{itemize}
 
 %%% Local Variables:
 %%% mode: latex

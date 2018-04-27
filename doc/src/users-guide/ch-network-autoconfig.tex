@@ -30,8 +30,8 @@ can also be used with partially specified manual configurations,
 the configurator fills in the gaps automatically.
 
 The next section describes the usage of \nedtype{Ipv4NetworkConfigurator}.
-\nedtype{Ipv4FlatNetworkConfigurator} and old routing files are described
-in the following sections.
+The legacy solutions \nedtype{Ipv4FlatNetworkConfigurator} and
+routing files are described in subsequent sections.
 
 \subsection{Ipv4NetworkConfigurator}
 \label{subsec:ipv4configurator}
@@ -147,11 +147,13 @@ parameter of the 802.11 management module. Wireless interfaces
 whose node does not contain a management module are supposed
 to be on the same wireless link. Wireless links can also be
 configured in the configuration file of \nedtype{Ipv4NetworkConfigurator}:
-\begin{verbatim}
+
+\begin{XML}
 <config>
   <wireless hosts="area1.*" interfaces="wlan*">
 </config>
-\end{verbatim}
+\end{XML}
+
 puts wlan interfaces of the specified hosts into the same wireless link.
 
 If a link contains only one router, it is marked as the gateway
@@ -174,18 +176,18 @@ subnet. (The maximum subnet mask is 255.255.255.252 allows 2 nodes in the subnet
 The following configuration generates network addresses below the 10.0.0.0
 address for each link, and assign unique IP addresses to each host:
 
-\begin{verbatim}
+\begin{XML}
 <config>
   <interface hosts="*" address="10.x.x.x" netmask="255.x.x.x"/>
 </config>
-\end{verbatim}
+\end{XML}
 
 The configurator tries to put nodes on the same link into the same subnet,
 so its enough to configure the address of only one node on each link.
 
 The following example configures a hierarchical network in a way that keeps
 routing tables small.
-\begin{verbatim}
+\begin{XML}
 <config>
   <interface hosts="area11.lan1.*" address="10.11.1.x" netmask="255.255.255.x"/>
   <interface hosts="area11.lan2.*" address="10.11.2.x" netmask="255.255.255.x"/>
@@ -194,7 +196,7 @@ routing tables small.
   <interface hosts="area*.router*" address="10.x.x.x" netmask="x.x.x.x"/>
   <interface hosts="*" address="10.x.x.x" netmask="255.x.x.0"/>
 </config>
-\end{verbatim}
+\end{XML}
 
 The XML configuration must contain exactly one \verb!<config>! element. Under the
 root element there can be multiple of the following elements:
@@ -287,11 +289,11 @@ elements to the configuration file. Interfaces belongs to a multicast
 group will join to the group automatically.
 
 For example
-\begin{verbatim}
+\begin{XML}
 <config>
   <multicast-group hosts="router*" interfaces="eth*" address="224.0.0.5"/>
 </config>
-\end{verbatim}
+\end{XML}
 adds all Ethernet interfaces of nodes whose name starts with ``router''
 to the 224.0.0.5 multicast group.
 
@@ -417,11 +419,11 @@ is in the 10.0.1.0 network and whose destinatation address is 225.0.0.1 to
 send on the \ttt{eth1} and \ttt{eth2} interfaces assuming it arrived on the
 \ttt{eth0} interface:
 
-\begin{verbatim}
+\begin{XML}
 <multicast-route hosts="router1" source="10.0.1.0" netmask="255.255.255.0"
                  groups="225.0.0.1" metric="10"
                  parent="eth0" children="eth1 eth2"/>
-\end{verbatim}
+\end{XML}
 
 \subsubsection*{Automatic route configuration}
 
@@ -713,6 +715,28 @@ interface.
 
 % TODO warn that multicast configuration has changed
 
+\section{Configuring Layer 2}
+
+The \nedtype{L2Configurator} module allows configuring network scenarios at layer 2.
+The STP/RTP-related parameters such as link cost, port priority
+and the ``is-edge'' flag can be configured with XML files.
+
+This module is similar to \nedtype{Ipv4NetworkConfigurator}. It supports
+the selector attributes \ttt{@hosts}, \ttt{@names}, \ttt{@towards}, \ttt{@among},
+and they behave similarly to its \nedtype{Ipv4NetworkConfigurator} equivalent.
+The \ttt{@ports} selector is also supported, for configuring per-port parameters.
+
+The following example configures port 5 (if it exists) on all switches,
+and sets cost=19 and priority=32768:
+
+\begin{XML}
+<config>
+  <interface hosts='**' ports='5' cost='19' priority='32768'/>
+</config>
+\end{XML}
+
+For more information about the usage of the selector attributes see
+\nedtype{Ipv4NetworkConfigurator}.
 
 
 

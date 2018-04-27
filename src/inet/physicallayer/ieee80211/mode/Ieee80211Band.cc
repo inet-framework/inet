@@ -74,13 +74,13 @@ const Ieee80211EnumeratedBand Ieee80211CompliantBands::band2_4GHz("2.4 GHz",
 
 const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5GHz("5 GHz", GHz(5), MHz(5), 200);
 
-const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5GHz20MHz("5 GHz&20 MHz", GHz(5), MHz(20), 25);
+const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5GHz20MHz("5 GHz (20 MHz)", GHz(5), MHz(20), 25);
 
-const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5GHz40MHz("5 GHz&40 MHz", GHz(5), MHz(40), 12);
+const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5GHz40MHz("5 GHz (40 MHz)", GHz(5), MHz(40), 12);
 
-const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5GHz80MHz("5 GHz&80 MHz", GHz(5), MHz(80), 5);
+const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5GHz80MHz("5 GHz (80 MHz)", GHz(5), MHz(80), 5);
 
-const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5GHz160MHz("5 GHz&160 MHz", GHz(5), MHz(160), 2);
+const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5GHz160MHz("5 GHz (160 MHz)", GHz(5), MHz(160), 2);
 
 const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5_9GHz("5.9 GHz", GHz(5.86), MHz(10), 7);
 

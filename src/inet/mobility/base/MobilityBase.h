@@ -27,6 +27,7 @@
 #include "inet/common/geometry/common/EulerAngles.h"
 #include "inet/common/geometry/common/CanvasProjection.h"
 #include "inet/mobility/contract/IMobility.h"
+#include "inet/visualizer/util/StringFormat.h"
 
 namespace inet {
 
@@ -52,6 +53,18 @@ namespace inet {
  */
 class INET_API MobilityBase : public cSimpleModule, public IMobility
 {
+  protected:
+    class DirectiveResolver : public inet::visualizer::StringFormat::IDirectiveResolver {
+      protected:
+        IMobility *mobility = nullptr;
+        std::string result;
+
+      public:
+        DirectiveResolver(IMobility *mobility) : mobility(mobility) { }
+
+        virtual const char *resolveDirective(char directive) override;
+    };
+
   public:
     /**
      * Selects how a mobility module should behave if it reaches the edge of the constraint area.
@@ -80,6 +93,8 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
     /** @brief The last orientation that was reported. */
     EulerAngles lastOrientation;
 
+    inet::visualizer::StringFormat format;
+
   protected:
     MobilityBase();
 
@@ -101,14 +116,17 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
     /** @brief Initializes the orientation from module parameters. */
     virtual void initializeOrientation();
 
+    /** @brief Moves the visual representation module's icon to the new position on the screen. */
+    virtual void refreshDisplay() const;
+
+    /** @brief Allows changing parameters from the GUI. */
+    virtual void handleParameterChange(const char *name);
+
     /** @brief This modules should only receive self-messages. */
     virtual void handleMessage(cMessage *msg) override;
 
     /** @brief Called upon arrival of a self messages, subclasses must override. */
     virtual void handleSelfMessage(cMessage *msg) = 0;
-
-    /** @brief Moves the visual representation module's icon to the new position on the screen. */
-    virtual void updateVisualRepresentation();
 
     /** @brief Emits a signal with the updated mobility state. */
     virtual void emitMobilityStateChangedSignal();

@@ -635,6 +635,7 @@ bool RadioMedium::isPotentialReceiver(const IRadio *radio, const ITransmission *
         return false;
     else if (listeningFilter && !radio->getReceiver()->computeIsReceptionPossible(getListening(radio, transmission), transmission))
         return false;
+    // TODO: where is the tag?
     else if (macAddressFilter && !isRadioMacAddress(radio, const_cast<Packet *>(transmission->getPacket())->getTag<MacAddressReq>()->getDestAddress()))
         return false;
     else if (rangeFilter == RANGE_FILTER_INTERFERENCE_RANGE) {

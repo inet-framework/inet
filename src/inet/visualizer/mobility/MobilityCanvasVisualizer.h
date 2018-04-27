@@ -21,8 +21,6 @@
 #include "inet/common/figures/TrailFigure.h"
 #include "inet/common/geometry/common/CanvasProjection.h"
 #include "inet/visualizer/base/MobilityVisualizerBase.h"
-#include "inet/visualizer/scene/NetworkNodeCanvasVisualization.h"
-#include "inet/visualizer/scene/NetworkNodeCanvasVisualizer.h"
 
 namespace inet {
 
@@ -33,28 +31,23 @@ class INET_API MobilityCanvasVisualizer : public MobilityVisualizerBase
   protected:
     class INET_API MobilityCanvasVisualization : public MobilityVisualization {
       public:
-        NetworkNodeCanvasVisualization *networkNodeVisualization = nullptr;
-        cModule *visualRepresentation = nullptr;
+        cOvalFigure *positionFigure = nullptr;
         cPieSliceFigure *orientationFigure = nullptr;
         cLineFigure *veloctiyFigure = nullptr;
         TrailFigure *trailFigure = nullptr;
 
       public:
-        MobilityCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, cModule *visualRepresentation, cPieSliceFigure *orientationFigure, cLineFigure *veloctiyFigure, TrailFigure *trailFigure, IMobility *mobility);
+        MobilityCanvasVisualization(cOvalFigure *positionFigure, cPieSliceFigure *orientationFigure, cLineFigure *veloctiyFigure, TrailFigure *trailFigure, IMobility *mobility);
     };
 
   protected:
     double zIndex = NaN;
     const CanvasProjection *canvasProjection = nullptr;
-    NetworkNodeCanvasVisualizer *networkNodeVisualizer = nullptr;
     std::map<const IMobility *, MobilityCanvasVisualization *> mobilityVisualizations;
 
   protected:
     virtual void initialize(int stage) override;
     virtual void refreshDisplay() const override;
-
-    virtual cModule *findVisualRepresentation(cModule *module) const;
-    virtual double getOrientationPieRadius(cModule *module) const;
 
     virtual MobilityCanvasVisualization *getMobilityVisualization(const IMobility *mobility) const;
     virtual void setMobilityVisualization(const IMobility *mobility, MobilityCanvasVisualization *entry);
@@ -66,8 +59,6 @@ class INET_API MobilityCanvasVisualizer : public MobilityVisualizerBase
     virtual ~MobilityCanvasVisualizer();
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
-
-    static void setPosition(cModule* visualRepresentation, cFigure::Point position);
 };
 
 } // namespace visualizer

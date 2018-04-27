@@ -1,0 +1,29 @@
+<!-- DTD for LibTable's config file -->
+
+<!-- root element -->
+<!ELEMENT libtable (libentry*)>
+
+<!-- one entry in the LIB table -->
+<!ELEMENT libentry (inLabel,inInterface,outInterface,outLabel,color?)>  <!-- in arbitrary order -->
+
+<!-- input label -->
+<!ELEMENT inLabel (#PCDATA)> <!-- integer -->
+
+<!-- input interface -->
+<!ELEMENT inInterface (#PCDATA)>  <!-- string, name of interface -->
+
+<!-- output interface -->
+<!ELEMENT outInterface (#PCDATA)>  <!-- string, name of interface -->
+
+<!-- output label operations -->
+<!ELEMENT outLabel (op*)>
+
+<!-- optional color -->
+<!ELEMENT color (#PCDATA)>  <!-- integer -->
+
+<!-- one label operation: PUSH, POP or SWAP -->
+<!ELEMENT op EMPTY>
+<!ATTLIST op
+  code   NMTOKEN  (push|pop|swap)
+  value  NMTOKEN  #IMPLIED>  <!-- when code="push" or "swap"
+

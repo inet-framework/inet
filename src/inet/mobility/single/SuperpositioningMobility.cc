@@ -95,10 +95,8 @@ EulerAngles SuperpositioningMobility::getCurrentAngularAcceleration()
 
 void SuperpositioningMobility::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
-    if (IMobility::mobilityStateChangedSignal == signal) {
+    if (IMobility::mobilityStateChangedSignal == signal)
         emitMobilityStateChangedSignal();
-        updateVisualRepresentation();
-    }
 }
 
 } // namespace inet

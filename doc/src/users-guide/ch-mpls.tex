@@ -1,147 +1,260 @@
-\ifdraft
-
 \chapter{The MPLS Models}
 \label{cha:mpls}
 
-
 \section{Overview}
 
-TODO
+Multi-Protocol Label Switching (MPLS) is a ``layer 2.5'' protocol for
+high-performance telecommunications networks. MPLS directs data from one network
+node to the next based on numeric labels instead of network addresses, avoiding
+complex lookups in a routing table and allowing traffic engineering.
+The labels identify virtual links (label-switched paths or LSPs, also
+called MPLS tunnels) between distant nodes rather than endpoints. The routers
+that make up a label-switched network are called label-switching routers (LSRs)
+inside the network (``transit nodes''), and label edge routers (LER) on the
+edges of the network (``ingress'' or ``egress'' nodes).
 
+A fundamental MPLS concept is that two LSRs must agree on the meaning of the
+labels used to forward traffic between and through them.
+This common understanding is achieved by using signaling protocols by which one
+LSR informs another of label bindings it has made. Such signaling protocols are
+also called label distribution protocols. The two main label distribution
+protocols used with MPLS are LDP and RSVP-TE.
 
-\section{MPLS/RSVP/LDP Model - Implemented Standards}
+INET provides basic support for building MPLS simulations. It provides models
+for the MPLS, LDP and RSVP-TE protocols and their associated data structures,
+and preassembled MPLS-capable router models. 
 
-The implementation follows those RFCs below:
+\section{Core Modules}
 
-\begin{itemize}
-  \item RFC 2702: Requirements for Traffic Engineering Over MPLS
-  \item RFC 2205: Resource ReSerVation Protocol
-  \item RFC 3031: Multiprotocol Label Switching Architecture
-  \item RFC 3036: LDP Specification
-  \item RFC 3209: RSVP-TE Extension to RSVP for LSP tunnels
-  \item RFC 2205: RSVP Version 1 - Functional Specification
-  \item RFC 2209: RSVP Message processing Version 1
-\end{itemize}
-
-\section{The MPLS Module}
-
-TODO
-
-\section{The LDP Module}
-
-TODO
-
-\section{LIB Table File Format}
-
-The format of a LIB table file is:
-
-The beginning of the file should begin with comments. Lines that begin with \# are treated
-as comments. An empty line is required after the comments. The "LIB TABLE"
-syntax must come next with an empty line. The column headers follow. This header
-must be strictly "In-lbl In-intf Out-lbl Out-intf". Column
-values are after that with space or tab for field separation.
-The following is a sample of lib table file.
-
-\begin{verbatim}
-#lib table for MPLS network simulation test
-#lib1.table for LSR1 - this is an edge router
-#no incoming label for traffic from in-intf 0 &1 - LSR1 is ingress router for those traffic
-#no outgoing label for traffic from in_intf 2 &3 - LSR 1 is egress router for those traffic
-
-LIB TABLE:
-
-In-lbl  In-intf         Out-lbl     Out-intf
-1       193.233.7.90    1           193.231.7.21
-2       193.243.2.1     0           193.243.2.3
-\end{verbatim}
-
-
-\section{The traffic.xml file}
-
-The traffic.xml file is read by the RSVP-TE module (RSVP).
-The file must be in the same folder as the executable
-network simulation file.
-
-The XML elements used in the "traffic.xml" file:
+The core modules are:
 
 \begin{itemize}
-  \item \ttt{<Traffic></Traffic>} is the root element. It may contain one or more \ttt{<Conn>} elements.
-  \item \ttt{<Conn></Conn>} specifies an RSVP session. It may contain the following elements:
-  \begin{itemize}
-    \item \ttt{<src></src>} specifies sender IP address
-    \item \ttt{<dest></dest>} specifies receiver IP address
-    \item \ttt{<setupPri></setupPri>} specifies LSP setup priority
-    \item \ttt{<holdingPri></holdingPri>} specifies LSP holding priority
-    \item \ttt{<bandwidth></bandwidth>} specifies the requested BW.
-    \item \ttt{<delay></delay>} specifies the requested delay.
-    \item \ttt{<route></route>} specifies the explicit route. This is a comma-separated
-      list of IP-address, hop-type pairs (also separated by comma).
-      A hop type has a value of 1 if the hop is a loose hop and 0 otherwise.
-  \end{itemize}
+  \item \nedtype{Mpls} implements the MPLS protocol 
+  \item \nedtype{LibTable} holds the LIB (Label Information Base)
+  \item \nedtype{Ldp} implements the LDP signaling protocol for MPLS 
+  \item \nedtype{RsvpTe} implements the RSVP-TE signaling protocol for MPLS 
+  \item \nedtype{Ted} contains the Traffic Engineering Database 
+  \item \nedtype{LinkStateRouting} is a simple link-state routing protocol
+  \item \nedtype{SimpleClassifier} is a configurable ingress classifier for MPLS
 \end{itemize}
 
-The following presents an example file:
+\subsection{Mpls}
 
-\begin{verbatim}
-<?xml version="1.0"?>
-<!-- Example of traffic control file -->
-<traffic>
-   <conn>
-       <src>10.0.0.1</src>
-       <dest>10.0.1.2</dest>
-       <setupPri>7</setupPri>
-       <holdingPri>7</holdingPri>
-       <bandwidth>400</bandwidth>
-       <delay>5</delay>
-   </conn>
-   <conn>
-       <src>11.0.0.1</src>
-       <dest>11.0.1.2</dest>
-       <setupPri>7</setupPri>
-       <holdingPri>7</holdingPri>
-       <bandwidth>100</bandwidth>
-       <delay>5</delay>
-   </conn>
-</traffic>
-\end{verbatim}
+The \nedtype{Mpls} module implements the MPLS protocol. MPLS is situated between
+layer 2 and 3, and its main function is to switch packets based on their labels.
+For that, it relies on the data structure called LIB (Label Information Base).
+LIB is fundamentally a table with the following columns: \textit{input-interface},
+\textit{input-label}, \textit{output-interface}, \textit{label-operation(s)}.
 
-An example of using RSVP-TE as signaling protocol can be found in
-ExplicitRouting folder distributed with the simulation. In this
-example, a network similar to the network in LDP-MPLS example is
-setup. Instead of using LDP, "signaling" parameter is set to 2 (value
-of RSVP-TE handler). The following xml file is used for traffic
-control. Note the explicit routes specified in the second connection.
-It indicates that the route is a strict one since the values of every
-hop types are 0. The route defined is 10.0.0.1 -> 1.0.0.1 ->
-10.0.0.3 -> 1.0.0.4 -> 10.0.0.5 -> 10.0.1.2.
+Upon receiving a labelled packet from another LSR, MPLS first extracts the
+incoming interface and incoming label pair, and then looks it up in local LIB. 
+If a matching entry is found, it applies the prescribed label operations, and 
+forwards the packet to the output interface. 
 
-\begin{verbatim}
-<?xml version="1.0"?>
-<!-- Example of traffic control file -->
-<traffic>
-    <conn>
-        <src>10.0.0.1</src>
-        <dest>10.0.1.2</dest>
-        <setupPri>7</setupPri>
-        <holdingPri>7</holdingPri>
-        <bandwidth>0</bandwidth>
-        <delay>0</delay>
-        <ER>false</ER>
-    </conn>
-    <conn>
-        <src>11.0.0.1</src>
-        <dest>11.0.1.2</dest>
-        <setupPri>7</setupPri>
-        <holdingPri>7</holdingPri>
-        <bandwidth>0</bandwidth>
-        <delay>0</delay>
-        <ER>true</ER>
-        <route>1.0.0.1,0,1.0.0.3,0,1.0.0.4,0,1.0.0.5,0,10.0.1.2,0</route>
-    </conn>
-</traffic>
-\end{verbatim}
+Label operations can be the following:
 
-\fi
+\begin{itemize}
+  \item \textit{Push} adds a new MPLS label to a packet. (A packet may 
+     contain multiple labels, acting as a stack.) When a normal IP packet
+     enters an LSP, the new label will be the first label on the packet.
+  \item \textit{Pop} removes the topmost MPLS label from a packet. 
+     This is typically done at either the penultimate or the egress router.
+  \item \textit{Swap}: Replaces the topmost label with a new label.
+\end{itemize}
+
+In INET, the local LIB is stored in a \nedtype{LibTable} module in the router.
+
+Upon receiving an unlabelled (e.g. plain IPv4) packet, MPLS first determines the
+forwarding equivalence class (FEC) for the packet using an ingress classifier, 
+and then inserts one or more labels in the packet's newly created MPLS header. 
+The packet is then passed on to the next hop router for the LSP.
+
+The ingress classifier is also a separate module; it is selected depending 
+on the choice of the signaling protocol.
+
+
+\subsection{LibTable}
+
+\nedtype{LibTable} stores the LIB (Label Information Base), as described
+in the previous section. \nedtype{LibTable} is expected to have one instance
+in the router. 
+
+LIB is normally filled and maintained by label distribution protocols (RSVP-TE,
+LDP), but in INET it is possible to preload it with initial contents.
+
+The \nedtype{LibTable} module accepts an XML config file whose structure
+follows the contents of the LIB table. An example configuration:
+
+\begin{XML}
+<libtable>
+    <libentry>
+        <inLabel>203</inLabel>
+        <inInterface>ppp1</inInterface>
+        <outInterface>ppp2</outInterface>
+        <outLabel>
+            <op code="pop"/>
+            <op code="swap" value="200"/>
+            <op code="push" value="300"/>
+        </outLabel>
+        <color>200</color>
+    </libentry>
+</libtable>
+\end{XML}
+
+There can be multiple \ttt{<libentry>} elements, each describing a row in the
+table. Colums are given as child elements: \ttt{<inLabel>}, \ttt{<inInterface>},
+etc. The \ttt{<color>} element is optional, and it only exists to be able to
+color LSPs on the GUI. It is not used by the protocols.
+
+\subsection{Ldp}
+
+The \nedtype{Ldp} module implements the Label Distribution Protocol (LDP).
+LDP is used to establish LSPs in an MPLS network when traffic engineering is not
+required. It establishes LSPs that follow the existing IP routing table, and is
+particularly well suited for establishing a full mesh of LSPs between all of the
+routers on the network.
+
+LDP relies on the underlying routing information provided by a routing protocol
+in order to forward label packets. The router's forwarding information base, or
+FIB, is responsible for determining the hop-by-hop path through the network.
+
+In INET, the \nedtype{Ldp} module takes routing information from \nedtype{Ted}
+module. The \nedtype{Ted} instance in the network is filled and maintained
+by a \nedtype{LinkStateRouting} module. Unfortunately, it is currently not
+possible to use other routing protocol implementations such as \nedtype{Ospf} 
+in conjunction with \nedtype{Ldp}. 
+
+When \nedtype{Ldp} is used as signaling protocol, it also serves as ingress
+classifier for \nedtype{Mpls}.
+
+\subsection{Ted}
+
+The \nedtype{Ted} module contains the Traffic Engineering Database (TED). 
+In INET, \nedtype{Ted} contains a link state database, including reservations
+for each link by RSVP-TE.
+
+\subsection{LinkStateRouting}
+
+The \nedtype{LinkStateRouting} module provides a simple link state routing
+protocol. It uses \nedtype{Ted} as its link state database. Unfortunately, the
+\nedtype{LinkStateRouting} module cannot operate independently, it can only be
+used inside an MPLS router.
+
+ \subsection{RsvpTe}
+
+The \nedtype{RsvpTe} module implements RSVP-TE (Resource Reservation Protocol --
+Traffic Engineering), as signaling protocol for MPLS. RSVP-TE handles bandwidth
+allocation and allows traffic engineering across an MPLS network. Like LDP, RSVP
+uses discovery messages and advertisements to exchange LSP path information
+between all hosts. However, whereas LDP is restricted to using the configured
+IGP's shortest path as the transit path through the network, RSVP can take
+taking into consideration network constraint parameters such as available
+bandwidth and explicit hops. RSVP uses a combination of the Constrained Shortest
+Path First (CSPF) algorithm and Explicit Route Objects (EROs) to determine how
+traffic is routed through the network.
+
+When \nedtype{RsvpTe} is used as signaling protocol, \nedtype{Mpls} needs a
+separate ingress classifier module, which is usually a \nedtype{SimpleClassifier}.
+
+The \nedtype{RsvpTe} module allows LSPs to be specified statically in an XML
+config file. An example \ttt{traffic.xml} file:
+
+\begin{XML}
+<sessions>
+    <session>
+        <endpoint>host3</endpoint>
+        <tunnel_id>1</tunnel_id>
+        <paths>
+            <path>
+                <lspid>100</lspid>
+                <bandwidth>100000</bandwidth>
+                <route>
+                    <node>10.1.1.1</node>
+                    <lnode>10.1.2.1</lnode>
+                    <node>10.1.4.1</node>
+                    <node>10.1.5.1</node>
+                </route>
+                <permanent>true</permanent>
+                <color>100</color>
+            </path>
+        </paths>
+    </session>
+</sessions>
+\end{XML}
+
+In the route, \ttt{<node>} stands for strict hop, and \ttt{<lnode>} for loose hop.
+
+Paths can also be set up and torn down dynamically with \nedtype{ScenarioManager} 
+commands (see chapter \ref{cha:scenario-scripting}). 
+\nedtype{RsvpTe} understands the \ttt{<add-session>} and \ttt{<del-session>}
+\nedtype{ScenarioManager} commands. The contents of the \ttt{<add-session>}
+element can be the same as the \ttt{<session>} element for the \ttt{traffic.xml}
+above. The \ttt{<del-command>} element syntax is also similar, but only
+\ttt{<endpoint>}, \ttt{<tunnel\_id>} and \ttt{<lspid>} need to be specified.
+
+The following is an example \ttt{scenario.xml} file:
+
+\begin{XML}
+<scenario>
+    <at t="2">
+        <add-session module="LSR1.rsvp">
+            <endpoint>10.2.1.1</endpoint>
+            <tunnel_id>1</tunnel_id>
+            <paths>
+                ...
+            </paths>
+        </add-session>
+    </at>
+    <at t="2.4">
+        <del-session module="LSR1.rsvp">
+            <endpoint>10.2.1.1</endpoint>
+            <tunnel_id>1</tunnel_id>
+            <paths>
+                <path>
+                    <lspid>100</lspid>
+                </path>
+            </paths>
+        </del-session>
+    </at>
+</scenario>
+\end{XML}
+
+\section{Classifier}
+
+The \nedtype{RsvpClassifier} module implements an ingress classifier for
+\nedtype{Mpls} when using \nedtype{RsvpTe} for signaling. The classifier can be
+configured with an XML config file.
+
+\begin{inifile}
+**.classifier.config = xmldoc("fectable.xml");
+\end{inifile}
+
+An example \ttt{fectable.xml} file:
+
+\begin{XML}
+<fectable>
+    <fecentry>
+        <id>1</id>
+        <destination>host5</destination>
+        <source>host1</source>
+        <tunnel_id>1</tunnel_id>
+        <lspid>100</lspid>
+    </fecentry>
+</fectable>
+\end{XML}
+\section{MPLS-Enabled Router Models}
+
+INET provides the following pre-assembled MPLS routers:
+
+\begin{itemize}
+  \item \nedtype{LdpMplsRouter} is an MPLS router with the LDP signaling protocol
+  \item \nedtype{RsvpMplsRouter} is an MPLS router with the RSVP-TE signaling protocol
+\end{itemize}
+
+% HINT: A good MPLS primer:
+% "MPLS for Dummies", Richard A Steenbergen <ras@nlayer.net>, nLayer Communications, Inc.
+% https:www.nanog.org/meetings/nanog49/presentations/Sunday/mpls-nanog49.pdf
+
 
 %%% Local Variables:
 %%% mode: latex

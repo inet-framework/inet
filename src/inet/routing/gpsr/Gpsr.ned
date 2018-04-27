@@ -48,6 +48,8 @@ simple Gpsr like IManetRouting
         double neighborValidityInterval @unit(s) = default(4.5 * beaconInterval);
         int positionByteLength @unit(B) = default(2 * 4B);
 
+        // visualization parameters
+        bool displayBubbles = default(false);	// display bubble messages about changes in routing state for packets
     gates:
         input ipIn;
         output ipOut;

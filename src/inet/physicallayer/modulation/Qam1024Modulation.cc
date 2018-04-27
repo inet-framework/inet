@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Qam1024Modulation.h"
+#include "inet/physicallayer/modulation/Qam1024Modulation.h"
 
 namespace inet {
 

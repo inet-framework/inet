@@ -34,7 +34,6 @@ simple PacketDrillApp like IApp
         int inboundStreams = default(20);
         int outboundStreams = default(20);
         int streamReset = default(0);
-        string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
         string crcMode @enum("declared", "computed") = default("declared");
         double latency @unit(s) = default(0s);
         @display("i=block/app");

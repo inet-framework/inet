@@ -83,6 +83,7 @@ class INET_API Ieee80211HrDsssDataMode : public IIeee80211DataMode
   public:
     Ieee80211HrDsssDataMode(bps bitrate);
 
+    virtual Hz getBandwidth() const override { return MHz(22); }
     virtual inline bps getNetBitrate() const override { return bitrate; }
     virtual inline bps getGrossBitrate() const override { return bitrate; }
     virtual b getPaddingLength(b dataLength) const override { return b(0); }

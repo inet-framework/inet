@@ -31,14 +31,21 @@ simple MobilityVisualizerBase extends VisualizerBase
         string networkNodeVisualizerModule = default("^.networkNodeVisualizer"); // the network node visualizer module, refers to a sibling submodule by default
         string subscriptionModule = default("<root>"); // module where the visualizer subscribes for mobility signals, root module by default
         
-        bool displayMovements = default(true); // display mobility movement, enabled by default
+        bool displayMobility = default(true); // display mobility, enabled by default
         double animationSpeed = default(0); // animation speed while objects are moving around, value must be in the range (0, +inf)
         
-        string moduleFilter = default("**"); // which mobilities are considered, matches all mobilities by default
+        string moduleFilter = default("**.mobility"); // which mobilities are considered, matches all mobilities by default
 
-        bool displayOrientations = default(false); // display an pie indicating the current orientation, disabled by default
+        bool displayPositions = default(false); // display a circle indicating the current position, disabled by default
+        double positionCircleRadius = default(4); // radius of the circle
+        double positionCircleLineWidth = default(1); // line width of the circle
+        string positionCircleLineColor @enum("light", "dark") = default("dark"); // position circle line color is a list of colors, a set of dark colors by default
+        string positionCircleFillColor @enum("light", "dark") = default("dark"); // position circle fill color is a list of colors, a set of dark colors by default
+
+        bool displayOrientations = default(false); // display a pie indicating the current orientation, disabled by default
+        double orientationPieRadius = default(32); // radius of the pie
         double orientationPieSize = default(0.2); // relative size of the pie compared to the full circle 
-        double orientationPieOpacity = default(0.25);
+        double orientationPieOpacity = default(0.25); // opacity of the pie
         string orientationLineColor = default("black"); // orientation line color, black by default
         string orientationLineStyle = default("solid"); // orientation line style (solid, dashed, dotted)
         double orientationLineWidth = default(1); // orientation line width
