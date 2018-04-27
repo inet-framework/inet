@@ -36,10 +36,10 @@
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 #endif // ifdef WITH_IPv6
 
-#ifdef WITH_GENERIC
+#ifdef WITH_NEXTHOP
 #include "inet/networklayer/nexthop/NextHopInterfaceData.h"
 #include "inet/networklayer/nexthop/NextHopRoutingTable.h"
-#endif // ifdef WITH_GENERIC
+#endif // ifdef WITH_NEXTHOP
 
 namespace inet {
 
@@ -475,11 +475,11 @@ Ipv6RoutingTable *L3AddressResolver::findIpv6RoutingTableOf(cModule *host)
 
 NextHopRoutingTable *L3AddressResolver::findGenericRoutingTableOf(cModule *host)
 {
-#ifdef WITH_GENERIC
+#ifdef WITH_NEXTHOP
     return dynamic_cast<NextHopRoutingTable *>(host->getModuleByPath(".generic.routingTable"));
-#else // ifdef WITH_GENERIC
+#else // ifdef WITH_NEXTHOP
     return nullptr;
-#endif // ifdef WITH_GENERIC
+#endif // ifdef WITH_NEXTHOP
 }
 
 cModule *L3AddressResolver::findHostWithAddress(const L3Address& add)

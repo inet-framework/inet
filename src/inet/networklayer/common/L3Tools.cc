@@ -23,7 +23,7 @@
 #ifdef WITH_IPv6
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 #endif
-#ifdef WITH_GENERIC
+#ifdef WITH_NEXTHOP
 #include "inet/networklayer/nexthop/NextHopDatagram_m.h"
 #endif
 
@@ -69,7 +69,7 @@ const Ptr<const NetworkHeaderBase> peekNetworkProtocolHeader(Packet *packet, con
     if (protocol == Protocol::ipv6)
         return packet->peekAtFront<Ipv6Header>();
 #endif
-#ifdef WITH_GENERIC
+#ifdef WITH_NEXTHOP
     if (protocol == Protocol::gnp)
         return packet->peekAtFront<NextHopDatagramHeader>();
 #endif
@@ -95,7 +95,7 @@ const Ptr<NetworkHeaderBase> removeNetworkProtocolHeader(Packet *packet, const P
     if (protocol == Protocol::ipv6)
         return removeNetworkProtocolHeader<Ipv6Header>(packet);
 #endif
-#ifdef WITH_GENERIC
+#ifdef WITH_NEXTHOP
     if (protocol == Protocol::gnp)
         return removeNetworkProtocolHeader<NextHopDatagramHeader>(packet);
 #endif

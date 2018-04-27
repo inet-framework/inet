@@ -269,7 +269,7 @@ void PingApp::handleMessage(cMessage *msg)
         }
         else
 #endif
-#ifdef WITH_GENERIC
+#ifdef WITH_NEXTHOP
         if (packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::echo) {
             const auto& icmpHeader = packet->popAtFront<EchoPacket>();
             if (icmpHeader->getType() == ECHO_PROTOCOL_REPLY) {
@@ -407,7 +407,7 @@ void PingApp::sendPingRequest()
         }
         case L3Address::MODULEID:
         case L3Address::MODULEPATH: {
-#ifdef WITH_GENERIC
+#ifdef WITH_NEXTHOP
             const auto& request = makeShared<EchoPacket>();
             request->setChunkLength(B(8));
             request->setType(ECHO_PROTOCOL_REQUEST);

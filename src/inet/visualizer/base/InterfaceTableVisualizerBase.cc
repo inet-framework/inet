@@ -19,9 +19,9 @@
 #include "inet/common/Simsignals.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
-#ifdef WITH_GENERIC
+#ifdef WITH_NEXTHOP
 #include "../../networklayer/nexthop/NextHopInterfaceData.h"
-#endif // WITH_GENERIC
+#endif // WITH_NEXTHOP
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #endif // WITH_IPv4
@@ -78,16 +78,16 @@ const char *InterfaceTableVisualizerBase::DirectiveResolver::resolveDirective(ch
             else if (interfaceEntry->ipv6Data() != nullptr)
                 result = interfaceEntry->ipv6Data()->getLinkLocalAddress().str();
 #endif // WITH_IPv6
-#ifdef WITH_GENERIC
+#ifdef WITH_NEXTHOP
             else if (interfaceEntry->getNextHopProtocolData() != nullptr)
                 result = interfaceEntry->getNextHopProtocolData()->getAddress().str();
-#endif // WITH_GENERIC
+#endif // WITH_NEXTHOP
             break;
         case 'g':
-#ifdef WITH_GENERIC
+#ifdef WITH_NEXTHOP
             if (interfaceEntry->getNextHopProtocolData() != nullptr)
                 result = interfaceEntry->getNextHopProtocolData()->getAddress().str();
-#endif // WITH_GENERIC
+#endif // WITH_NEXTHOP
             break;
         case 'n':
             result = interfaceEntry->getNetworkAddress().str();

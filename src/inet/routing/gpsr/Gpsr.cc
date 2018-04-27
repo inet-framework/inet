@@ -41,7 +41,7 @@
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #endif
 
-#ifdef WITH_GENERIC
+#ifdef WITH_NEXTHOP
 #include "inet/networklayer/nexthop/NextHopDatagram_m.h"
 #endif
 
@@ -667,7 +667,7 @@ void Gpsr::setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const Networ
     }
     else
 #endif
-#ifdef WITH_GENERIC
+#ifdef WITH_NEXTHOP
     if (dynamicPtrCast<const NextHopDatagramHeader>(nwHeader)) {
         auto gnpHeader = removeNetworkProtocolHeader<NextHopDatagramHeader>(packet);
         gpsrOption->setType(GENERIC_TLVOPTION_TLV_GPSR);
@@ -704,7 +704,7 @@ const GpsrOption *Gpsr::findGpsrOptionInNetworkDatagram(const Ptr<const NetworkH
     }
     else
 #endif
-#ifdef WITH_GENERIC
+#ifdef WITH_NEXTHOP
     if (auto gnpHeader = dynamicPtrCast<const NextHopDatagramHeader>(networkHeader)) {
         int i = (gnpHeader->getTlvOptions().findByType(GENERIC_TLVOPTION_TLV_GPSR));
         if (i >= 0)
@@ -738,7 +738,7 @@ GpsrOption *Gpsr::findGpsrOptionInNetworkDatagramForUpdate(const Ptr<NetworkHead
     }
     else
 #endif
-#ifdef WITH_GENERIC
+#ifdef WITH_NEXTHOP
     if (auto gnpHeader = dynamicPtrCast<NextHopDatagramHeader>(networkHeader)) {
         int i = (gnpHeader->getTlvOptions().findByType(GENERIC_TLVOPTION_TLV_GPSR));
         if (i >= 0)
