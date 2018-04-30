@@ -1,72 +1,59 @@
 \chapter{The Ethernet Model}
 \label{cha:ethernet}
 
-TODO EtherMacFullDuplex --> EtherMac
-TODO EtherMac --> EtherCsmaCdMac
-TODO there is no IWiredNic with EtherLLC
-TODO: model delay in hubs: class I device 140 bit time, class II device 92 bit time (for fast ethernet)
-
 \section{Overview}
 
-Ethernet is the most popular wired LAN technology nowadays, also used in
-metropolitan area and wide area networks.
+Ethernet is the most popular wired LAN technology nowadays, and its use is also
+growing in metropolitan area and wide area networks. Since its introduction in
+1980, Ethernet data transfer rates have increased from the original 10Mb/s to
+the latest 400Gb/s. Originally, The technology has changed from using coaxial
+cables and repeaters to using unshielded twisted-pair cables with hubs and
+switches. Today, switched Ethernet is prevalent, and most links operate in full
+duplex mode. The INET Framework contains support for all major Ethernet
+technologies and device types.
 
-Variations: 10Mb/s ethernet, fast ethernet, Gigabit Ethernet, Fast Gigabit Ethernet, full duplex
+In Ethernet networks containing multiple switches, broadcast storms are
+prevented by use of a spanning tree protocol (STP, RSTP) that disables selected
+links to eliminate cycles from the topology. Ethernet switch models in INET
+contain support for STP and RSTP.
 
-TODO: 802.1d (STP, RSTP), 802.2 (LLC), ...
+ \section{Nodes}
 
-
-\section{Nodes}
-
+There are several node models that can be used in an Ethernet network:
+ 
 \begin{itemize}
   \item Node models such as \nedtype{StandardHost} and \nedtype{Router} are Ethernet-capable
-  \item \nedtype{EtherSwitch} TODO switching hub
-  \item \nedtype{EtherHub} TODO repeating hub
-  \item \nedtype{EtherBus} TODO legacy coaxial cable
-  \item \nedtype{EtherHost} TODO is a sample node
+  \item \nedtype{EtherSwitch} models an Ethernet switch, i.e. a multiport bridging device
+  \item \nedtype{EtherHub} models an Ethernet hub or multiport repeater
+  \item \nedtype{EtherBus} models the coaxial cable (10BASE2 or 10BASE5 network segments) on legacy Ethernet networks 
+  \item \nedtype{EtherHost} is a sample node which can be used to generate ``raw'' Ethernet traffic
 \end{itemize}
 
-how to connect networks
-
-how to add stp/rstp
-
-TODO describe PAUSE handling here
 
 \subsection{EtherSwitch}
 
-Ethernet switches play an important role in modern Ethernet LANs. Unlike
-passive hubs and repeaters, that work in the physical layer, the switches
-operate in the data link layer and routes data frames between the connected
-subnets.
+\nedtype{EtherSwitch} models an Ethernet switch. Ethernet switches play an
+important role in modern Ethernet LANs. Unlike passive hubs and repeaters that
+work in the physical layer, the switches operate in the data link layer and
+route data frames between the connected subnets.
 
-While a hub repeats the data frames on each connected line, possibly causing
-collisions, switches help to segment the network to small collision domains.
-In modern Gigabit LANs each node is connected to the switch direclty
-by full-duplex lines, so no collisions are possible. In this case the
-CSMA/CD is not needed and the channel utilization can be high.
+In modern Ethernet LANs, each node is connected to the switch directly by full
+duplex lines, so no collisions are possible. In this case, the CSMA/CD is not
+needed and the channel utilization can be high.
 
-\nedtype{EtherSwitch} models an Ethernet switch.
-
-The duplexChannel attributes of the MACs must be set according to the
+The \fpar{duplexMode} parameters of the MACs must be set according to the
 medium connected to the port; if collisions are possible (it's a bus or hub)
 it must be set to false, otherwise it can be set to true.
-By default it uses half duples MAC with CSMA/CD.
-
-TODO STP, RSTP
+By default it uses half-duplex MAC with CSMA/CD.
 
 \subsection{EtherHub}
 
-Ethernet hubs are a simple broadcast devices. Messages arriving on a port
-are regenerated and broadcast to every other port.
+\nedtype{EtherHub} models an Ethernet hub. Ethernet hubs are a simple broadcast
+devices. Messages arriving on a port are regenerated and broadcast to every
+other port. 
 
 The connections connected to the hub must have the same data rate.
 Cable lengths should be reflected in the delays of the connections.
-
-Messages are not interpreted by the \nedtype{EtherType} hub model in any way,
-thus the hub model is not specific to Ethernet. Messages may
-represent anything, from the beginning of a frame transmission to
-end (or abortion) of transmission.
-
 
 
 \subsection{EtherBus}
@@ -85,17 +72,8 @@ a copy of the message to the other direction (except at the ends).
 The propagation delays are computed from the distances of the taps
 and the \fpar{propagationSpeed} parameter.
 
-Messages are not interpreted by the bus model in any way, thus the bus
-model is not specific to Ethernet. Messages may represent anything, 
-from the beginning of a frame transmission to end (or abortion) of transmission.
 
-% FIXME #356 NED comment is wrong: data rate must not be zero!
-% FIXME #354 default propagation speed is wrong (should be 2e8mps)
-%            btw there is a hard coded propagation speed in EtherMACBase.cc
-
-
-
-\section{Physical layer}
+\section{The Physical Layer}
 
 Stations on an Ethernet networks are connected by coaxial,
 twisted pair or fibre cables. (Coaxial only has historical importance,
@@ -110,13 +88,20 @@ The delay parameter can be used to model the distance between the
 nodes. The datarate parameter can have four values:
 
 \begin{itemize}
-  \item \ttt{10Mbps} classic Ethernet
-  \item \ttt{100Mbps} Fast Ethernet
-  \item \ttt{1Gbps} Gigabit Ethernet
-  \item \ttt{10Gbps} Fast Gigabit Ethernet
+  \item 10Mbps (classic Ethernet)
+  \item 100Mbps (Fast Ethernet)
+  \item 1Gbps (Gigabit Ethernet, GbE)
+  \item 10Gbps (10 Gigabit Ethernet, 10GbE)
+  \item 40Gbps (40 Gigabit Ethernet, 40GbE)
+  \item 100Gbps (100 Gigabit Ethernet, 100GbE)
 \end{itemize}
 
-\section{Ethernet Interfaces}
+There is currently no support for 200Gbps and 400Gbps Ethernet.
+
+\nedtype{Ether10M}, \nedtype{Ether100M}, \nedtype{Ether1G}, \nedtype{Eth10G},
+\nedtype{Eth40G}, \nedtype{Eth100G}
+
+\section{Ethernet Interface}
 
 The \nedtype{EthernetInterface} compound module implements the \nedtype{IWiredInterface}
 interface. Complements \nedtype{EtherMac} and \nedtype{EtherEncap} with an output queue
@@ -140,64 +125,6 @@ because it supports only full-duplex connections. The \nedtype{EtherMac}
 module implements the full MAC functionality including CSMA/CD, it
 can operate both half-duplex and full-duplex mode.
 
-\subsection*{Queueing}
-
-When the transmission line is busy, messages received from the upper layer
-needs to be queued.
-
-In routers, MAC relies on an external queue module (see \nedtype{OutputQueue}),
-and requests packets from this external queue one-by-one. The name of the
-external queue must be given as the \fpar{queueModule} parameer.
-There are implementations of \nedtype{OutputQueue} to model finite buffer,
-QoS and/or RED.
-
-In hosts, no such queue is used, so MAC contains an internal
-queue named \fvar{txQueue} to queue up packets waiting for transmission.
-Conceptually, \fvar{txQueue} is of infinite size, but for better diagnostics
-one can specify a hard limit in the \fpar{txQueueLimit} parameter -- if this is
-exceeded, the simulation stops with an error.
-
-\subsection*{PAUSE handling}
-\label{subsec:pause_handling}
-
-The 802.3x standard supports PAUSE frames as a means of flow
-control. The frame contains a timer value, expressed as a multiple
-of 512 bit-times, that specifies how long the transmitter should
-remain quiet. If the receiver becomes uncongested before the
-transmitter's pause timer expires, the receiver may elect to send
-another PAUSE frame to the transmitter with a timer value of zero,
-allowing the transmitter to resume immediately.
-
-\nedtype{EtherMac} will properly respond to PAUSE frames it receives
-(\msgtype{EtherPauseFrame} class),
-however it will never send a PAUSE frame by itself. (For one thing,
-it doesn't have an input buffer that can overflow.)
-
-\nedtype{EtherMac}, however, transmits PAUSE frames received by higher layers,
-and \nedtype{EtherLlc} can be instructed by a command to send a PAUSE frame to MAC.
-
-% FIXME PAUSE frames should only be sent on full-duplex ethernet.
-%       If a switch uses half-duplex mode to connect to hosts, it can ask sending hosts
-%       to slow down their sending rates:
-%       - force collisions with incoming frames
-%       - make it appear as if the channel is busy
-% FIXME PAUSE frames should have 0x8808 in the etherType field
-
-\subsection*{Error handling}
-
-If the MAC is not connected to the network ("cable unplugged"), it will
-start up in "disabled" mode. A disabled MAC simply discards any messages
-it receives. It is currently not supported to dynamically connect/disconnect
-a MAC.
-
-CRC checks are modeled by the \fvar{bitError} flag of the packets. Erronous
-packets are dropped by the MAC.
-
-
-%\subsection*{Auto-Negotiation}
-% Ethernet Auto-Negotiation not supported
-
-
 \section{Components}
 
 Thw following components:
@@ -208,6 +135,7 @@ Thw following components:
   \item \nedtype{EtherLlc}
   \item \nedtype{EtherEncap}
   \item \nedtype{MacRelayUnit}
+  \item \nedtype{MacAddressTable}
   \item \nedtype{Ieee802dRelay}
 \end{itemize}
 
@@ -218,67 +146,26 @@ From the two MAC implementation \nedtype{EtherMacFullDuplex} is the simpler one,
 it operates only in full-duplex mode (its \fpar{duplexEnabled} parameter fixed to
 \ttt{true} in its NED definition). This module does not need to implement
 CSMA/CD, so there is no collision detection, retransmission with exponential backoff,
-carrier extension and frame bursting. Flow control works as described in section
-\ref{subsec:pause_handling}.
-
-% FIXME remove frameBursting from NED def, or fix it to false
-%       currently setting it to 'true' has no effect
-
-In the \nedtype{EtherMacFullDuplex} module,
-packets arrived at the \ttt{phys\$i} gate are handled when their last bit received.
-
-Outgoing packets are transmitted according to the following state diagram:
-
-\begin{center}
-\includegraphics{figures/EtherMACFullDuplex_txstates}
-\end{center}
+carrier extension and frame bursting.
 
 \subsection{EtherMac}
 
 Ethernet MAC layer implementing CSMA/CD. It supports both half-duplex and full-duplex operations;
-in full-duplex mode it behaves as \nedtype{EtherMacFullDuplex}. In half-duplex  mode
+in full-duplex mode it behaves as \nedtype{EtherMacFullDuplex}. In half-duplex mode
 it detects collisions, sends jam messages and retransmit frames upon collisions using
 the exponential backoff algorithm. In Gigabit Ethernet networks it supports carrier
 extension and frame bursting. Carrier extension can be turned off by setting the
 \fpar{carrierExtension} parameter to \ttt{false}.
 
-Unlike \nedtype{EtherMacFullDuplex}, this MAC module processes the incoming packets when their
-first bit is received. The end of the reception is calculated by the MAC and
-detected by scheduling a self message.
-
-When frames collide the transmission is aborted -- in this case the transmitting
-station transmits a jam signal. Jam signals are represented
-by a \msgtype{EtherJam} message. The jam message contains the tree identifier
-of the frame whose transmission is aborted. When the \nedtype{EtherMac} receives a jam
-signal, it knows that the corresponding transmission ended in jamming and have
-been aborted. Thus when it receives as many jams as collided frames, it can
-be sure that the channel is free again. (Receiving a jam message marks the
-beginning of the jam signal, so actually has to wait for the duration of the jamming.)
-
-The operation of the MAC module can be schematized by the following state chart:
-
-\begin{center}
-\includegraphics{figures/EtherMAC_txstates}
-\end{center}
-
-
 \subsection{EtherEncap}
 
-The \nedtype{EtherEncap} module generates \msgtype{EthernetIIFrame} messages.
-
-EtherFrameII
+The \nedtype{EtherEncap} module performs Ethernet II or Ethernet with SNAP
+encapsulation/decapsulation.
 
 \subsection{EtherLlc}
 
-TODO what it does
-
-
-% document error conditions (causing error() calls in the code)
-
-% FIXME handleRestransmission() comment is not true: // no beginSendFrames(), because end of jam signal sending will trigger it automatically
-%       in case of inner queue, the queued msg is not transmitted
-% FIXME should not enter PAUSE state when !duplexMode
-
+The \nedtype{EtherLlc} module provides Ethernet 802.3
+encapsulation/decapsulation.
 
 \subsection{MacRelayUnit}
 
@@ -286,40 +173,16 @@ INET framework ethernet switches are built from \nedtype{IMacRelayUnit}
 components. Each relay unit has N input and output gates for sending/receiving
 Ethernet frames. They should be connected to \nedtype{IEtherMac} modules.
 
-Internally the relay unit holds a table for the destination address -> output
-port mapping. When it receives a data frame it updates the table with the
-source address->input port. The table can also be pre-loaded from a text file
-while initializing the relay unit. The file name given as the \fpar{addressTableFile}
-parameter. Each line of the file contains a hexadecimal MAC address and a decimal port
-number separated by tabs. Comment lines beginning with '\#' are also allowed:
+The relay unit holds a table for the destination address -> output port mapping
+in a \nedtype{MacAddressTable} module.  When the relay unit receives a data frame, it
+updates the table with the source address->input port. The table can also be
+pre-loaded from a text file while initializing the relay unit.
 
-\begin{verbatim}
-01 ff ff ff ff    0
-00-ff-ff-ee-d1    1
-0A:AA:BC:DE:FF    2
-\end{verbatim}
-
-% FIXME #352 addressTableSize is not checked in readAddressTable -> if overflown
-%            then later check updateTableWithAddress has no effect
-% FIXME format is wrong in the comment of readAddressTable()
-
-The size of the lookup table is restricted by the \fpar{addressTableSize} parameter.
-When the table is full, the oldest address is deleted. Entries are also deleted
-if their age exceeds the duration given as the \fpar{agingTime} parameter.
-
-If the destination address is not found in the table, the frame is broadcasted.
+If the destination address is not found in the table, the frame is broadcast.
 The frame is not sent to the same subnet it was received from, because the
 target already received the original frame. The only exception if the frame
 arrived through a radio channel, in this case the target can be out of range.
 The port range 0..\fpar{numWirelessPorts}-1 are reserved for wireless connections.
-
-The \nedtype{IMacRelayUnit} module is not a concrete implementation,
-it just defines gates and parameters an \nedtype{IMacRelayUnit} should have.
-Concrete inplementations add
-capacity and performance aspects to the model (number of frames processed
-per second, amount of memory available in the switch, etc.)
-
-There are two versions of \nedtype{IMacRelayUnit}: \nedtype{MacRelayUnit}]
 
 A simple scheme for sending PAUSE frames is built in (although
 users will probably change it). When the buffer level goes
@@ -327,9 +190,48 @@ above a high watermark, PAUSE frames are sent on all ports.
 The watermark and the pause time is configurable; use zero
 values to disable the PAUSE feature.
 
-\subsection{Ieee802dRelay}
+\subsection{MacAddressTable}
 
-\nedtype{Ieee802dRelay} ..............
+The \nedtype{MacAddressTable} module stores the mapping between ports and MAC addresses.
+Entries are deleted if their age exceeds a certain limit.
+
+If needed, address tables can be pre-loaded from text files at the beginning of
+the simulation; this controlled by the \fpar{addressTableFile} module parameter.
+In the file, each line contains a literal 0 (reserved for VLAN id), a hexadecimal
+MAC address and a decimal port number, separated by tabs. Comment lines
+beginning with '\#' are also allowed:
+
+\begin{verbatim}
+0    01 ff ff ff ff    0
+0    00-ff-ff-ee-d1    1
+0    0A:AA:BC:DE:FF    2
+\end{verbatim}
+
+Entries are deleted if their age exceeds the duration given as the \fpar{agingTime} parameter.
+
+
+\subsection{Ieee8021dRelay}
+
+\nedtype{Ieee8021dRelay} is a MAC relay unit that should be used instead
+of \nedtype{MacRelayUnit} that when STP or RSTP is needed.
+
+\subsection{Stp}
+
+The \nedtype{Stp} module type implements Spanning Tree Protocol (STP). STP
+is a network protocol that builds a loop-free logical topology for Ethernet
+networks. The basic function of STP is to prevent bridge loops and the broadcast
+radiation that results from them.
+
+STP creates a spanning tree within a network of connected layer-2 bridges, and
+disables those links that are not part of the spanning tree, leaving a single
+active path between any two network nodes.
+
+
+\subsection{Rstp}
+
+\nedtype{Rstp} implements Rapid Spanning Tree Protocol (RSTP), an improved
+version of STP. RSTP provides significantly faster recovery in response to
+network changes or failures.
 
 
 \section{Implemented Standards}
@@ -342,6 +244,7 @@ The Ethernet model operates according to the following standards:
   \item Full-Duplex Ethernet with Flow Control: IEEE 802.3x-1997
   \item Gigabit Ethernet: IEEE 802.3z-1998
 \end{compactitem}
+
 
 %%% Local Variables:
 %%% mode: latex
