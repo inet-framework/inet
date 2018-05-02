@@ -122,9 +122,6 @@ void SctpClient::initialize(int stage)
             socket.bindx(addresses, port);
         }
 
-
-       // socket.setOutputGate(gate("socketOut"));
-
         simtime_t stopTime = par("stopTime");
         if (stopTime >= SIMTIME_ZERO) {
             stopTimer = new cMessage("StopTimer");
