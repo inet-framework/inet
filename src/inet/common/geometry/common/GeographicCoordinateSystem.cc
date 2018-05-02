@@ -70,7 +70,9 @@ void OsgGeographicCoordinateSystem::initialize(int stage)
         auto playgroundBank = deg(par("playgroundBank"));
         playgroundPosition = GeoCoord(playgroundLatitude, playgroundLongitude, playgroundAltitude);
 
-        playgroundOrientation = EulerAngles(rad(playgroundHeading), rad(playgroundElevation), rad(playgroundBank));
+        // The parameter is conventional direction of heading and elevation (positive heading turns left,
+        // positive elevation lifts nose), but the EulerAngles class has different expectations.
+        playgroundOrientation = EulerAngles(-rad(playgroundHeading - deg(90)), -rad(playgroundElevation), rad(playgroundBank));
 
         osg::ref_ptr<osgEarth::GeoTransform> geoTransform = new osgEarth::GeoTransform();
         osg::ref_ptr<osg::PositionAttitudeTransform> localTransform = new osg::PositionAttitudeTransform();

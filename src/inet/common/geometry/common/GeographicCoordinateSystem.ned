@@ -50,7 +50,7 @@ simple OsgGeographicCoordinateSystem like IGeographicCoordinateSystem
         double playgroundLatitude @unit(deg); // latitude coordinate of the playground origin
         double playgroundLongitude @unit(deg); // longitude coordinate of the playground origin
         double playgroundAltitude @unit(m) = default(0m); // altitude coordinate of the playground origin
-        double playgroundHeading @unit(deg) = default(0deg); // heading of the playground
-        double playgroundElevation @unit(deg) = default(0deg); // elevation of the playground
+        double playgroundHeading @unit(deg) = default(90deg); // geographic heading of the playground (0deg means X axis points north, 90deg means X axis points east)
+        double playgroundElevation @unit(deg) = default(0deg); // geographic elevation of the playground (0deg means X axis is horizontal, positive rotates X axis towards the sky)
         double playgroundBank @unit(deg) = default(0deg); // bank of the playground
 }
