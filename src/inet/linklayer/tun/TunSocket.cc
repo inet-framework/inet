@@ -65,5 +65,28 @@ void TunSocket::close()
     this->interfaceId = -1;
 }
 
+bool TunSocket::belongsToSocket(cMessage *msg) const
+{
+    auto& tags = getTags(msg);
+    int msgSocketId = tags.getTag<SocketInd>()->getSocketId();
+    return socketId == msgSocketId;
+}
+
+void TunSocket::setCallbackObject(ICallback *callback, void *yourPointer)
+{
+    cb = callback;
+    yourPtr = yourPointer;
+}
+
+void TunSocket::processMessage(cMessage *msg)
+{
+    ASSERT(belongsToSocket(msg));
+
+    if (cb)
+        cb->socketDataArrived(this, check_and_cast<Packet*>(msg));
+    else
+        delete msg;
+}
+
 } // namespace inet
 
