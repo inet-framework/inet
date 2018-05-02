@@ -98,7 +98,9 @@ void MobilityBase::initialize(int stage)
         constraintAreaMax.x = par("constraintAreaMaxX");
         constraintAreaMax.y = par("constraintAreaMaxY");
         constraintAreaMax.z = par("constraintAreaMaxZ");
+#ifdef WITH_VISUALIZERS
         format.parseFormat(par("displayStringTextFormat"));
+#endif
         bool visualizeMobility = par("visualizeMobility");
         if (visualizeMobility) {
             visualRepresentation = findVisualRepresentation();
@@ -182,10 +184,12 @@ void MobilityBase::initializeOrientation()
 
 void MobilityBase::refreshDisplay() const
 {
+#ifdef WITH_VISUALIZERS
     DirectiveResolver directiveResolver(const_cast<MobilityBase *>(this));
     auto text = format.formatString(&directiveResolver);
     cDisplayString& displayString = this->getDisplayString();
     displayString.setTagArg("t", 0, text);
+#endif
     if (visualRepresentation != nullptr) {
         auto position = const_cast<MobilityBase *>(this)->getCurrentPosition();
         EV_DEBUG << "current position = " << position << endl;
@@ -202,10 +206,12 @@ void MobilityBase::refreshDisplay() const
 
 void MobilityBase::handleParameterChange(const char *name)
 {
+#ifdef WITH_VISUALIZERS
     if (name != nullptr) {
         if (!strcmp(name, "displayStringTextFormat"))
             format.parseFormat(par("displayStringTextFormat"));
     }
+#endif
 }
 
 void MobilityBase::handleMessage(cMessage *message)
