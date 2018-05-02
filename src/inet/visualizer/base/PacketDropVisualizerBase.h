@@ -20,13 +20,13 @@
 
 #include "inet/common/packet/PacketFilter.h"
 #include "inet/common/Simsignals.h"
+#include "inet/common/StringFormat.h"
 #include "inet/visualizer/base/VisualizerBase.h"
 #include "inet/visualizer/util/AnimationPosition.h"
 #include "inet/visualizer/util/ColorSet.h"
 #include "inet/visualizer/util/InterfaceFilter.h"
 #include "inet/visualizer/util/LineManager.h"
 #include "inet/visualizer/util/NetworkNodeFilter.h"
-#include "inet/visualizer/util/StringFormat.h"
 
 namespace inet {
 

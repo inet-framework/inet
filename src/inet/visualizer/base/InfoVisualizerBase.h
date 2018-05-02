@@ -18,10 +18,10 @@
 #ifndef __INET_INFOVISUALIZERBASE_H
 #define __INET_INFOVISUALIZERBASE_H
 
+#include "inet/common/StringFormat.h"
 #include "inet/visualizer/base/VisualizerBase.h"
-#include "inet/visualizer/util/Placement.h"
 #include "inet/visualizer/util/ModuleFilter.h"
-#include "inet/visualizer/util/StringFormat.h"
+#include "inet/visualizer/util/Placement.h"
 
 namespace inet {
 
