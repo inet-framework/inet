@@ -23,7 +23,7 @@ package inet.networklayer.configurator.nexthop;
 import inet.networklayer.configurator.base.NetworkConfiguratorBase;
 
 //
-// Adds routes to a GenericRoutingTable similarly how Ipv4NetworkConfigurator adds
+// Adds routes to a NextHopRoutingTable similarly how Ipv4NetworkConfigurator adds
 // static routes to Ipv4RoutingTable.
 //
 simple NextHopNetworkConfigurator extends NetworkConfiguratorBase

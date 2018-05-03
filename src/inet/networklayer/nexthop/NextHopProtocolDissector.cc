@@ -29,13 +29,13 @@ void NextHopProtocolDissector::dissect(Packet *packet, ICallback& callback) cons
 {
     auto header = packet->popAtFront<NextHopForwardingHeader>();
     auto trailerPopOffset = packet->getBackOffset();
-    auto gnpEndOffset = packet->getFrontOffset() + header->getPayloadLengthField();
+    auto endOffset = packet->getFrontOffset() + header->getPayloadLengthField();
     callback.startProtocolDataUnit(&Protocol::nextHopForwarding);
     callback.visitChunk(header, &Protocol::nextHopForwarding);
-    packet->setBackOffset(gnpEndOffset);
+    packet->setBackOffset(endOffset);
     callback.dissectPacket(packet, header->getProtocol());
     ASSERT(packet->getDataLength() == B(0));
-    packet->setFrontOffset(gnpEndOffset);
+    packet->setFrontOffset(endOffset);
     packet->setBackOffset(trailerPopOffset);
     callback.endProtocolDataUnit(&Protocol::nextHopForwarding);
 }

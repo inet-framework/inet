@@ -419,7 +419,7 @@ void PingApp::sendPingRequest()
             outPacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::echo);
             break;
 #else
-            throw cRuntimeError("INET compiled without Generic Network");
+            throw cRuntimeError("INET compiled without Next Hop Forwarding");
 #endif
         }
         default:

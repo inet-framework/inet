@@ -669,13 +669,13 @@ void Gpsr::setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const Networ
 #endif
 #ifdef WITH_NEXTHOP
     if (dynamicPtrCast<const NextHopForwardingHeader>(nwHeader)) {
-        auto gnpHeader = removeNetworkProtocolHeader<NextHopForwardingHeader>(packet);
+        auto nextHopHeader = removeNetworkProtocolHeader<NextHopForwardingHeader>(packet);
         gpsrOption->setType(NEXTHOP_TLVOPTION_TLV_GPSR);
-        int oldHlen = gnpHeader->getTlvOptions().getLength();
-        gnpHeader->getTlvOptionsForUpdate().insertTlvOption(gpsrOption);
-        int newHlen = gnpHeader->getTlvOptions().getLength();
-        gnpHeader->setChunkLength(gnpHeader->getChunkLength() + B(newHlen - oldHlen));
-        insertNetworkProtocolHeader(packet, Protocol::nextHopForwarding, gnpHeader);
+        int oldHlen = nextHopHeader->getTlvOptions().getLength();
+        nextHopHeader->getTlvOptionsForUpdate().insertTlvOption(gpsrOption);
+        int newHlen = nextHopHeader->getTlvOptions().getLength();
+        nextHopHeader->setChunkLength(nextHopHeader->getChunkLength() + B(newHlen - oldHlen));
+        insertNetworkProtocolHeader(packet, Protocol::nextHopForwarding, nextHopHeader);
     }
     else
 #endif
@@ -705,10 +705,10 @@ const GpsrOption *Gpsr::findGpsrOptionInNetworkDatagram(const Ptr<const NetworkH
     else
 #endif
 #ifdef WITH_NEXTHOP
-    if (auto gnpHeader = dynamicPtrCast<const NextHopForwardingHeader>(networkHeader)) {
-        int i = (gnpHeader->getTlvOptions().findByType(NEXTHOP_TLVOPTION_TLV_GPSR));
+    if (auto nextHopHeader = dynamicPtrCast<const NextHopForwardingHeader>(networkHeader)) {
+        int i = (nextHopHeader->getTlvOptions().findByType(NEXTHOP_TLVOPTION_TLV_GPSR));
         if (i >= 0)
-            gpsrOption = check_and_cast<const GpsrOption *>(gnpHeader->getTlvOptions().getTlvOption(i));
+            gpsrOption = check_and_cast<const GpsrOption *>(nextHopHeader->getTlvOptions().getTlvOption(i));
     }
     else
 #endif
@@ -739,10 +739,10 @@ GpsrOption *Gpsr::findGpsrOptionInNetworkDatagramForUpdate(const Ptr<NetworkHead
     else
 #endif
 #ifdef WITH_NEXTHOP
-    if (auto gnpHeader = dynamicPtrCast<NextHopForwardingHeader>(networkHeader)) {
-        int i = (gnpHeader->getTlvOptions().findByType(NEXTHOP_TLVOPTION_TLV_GPSR));
+    if (auto nextHopHeader = dynamicPtrCast<NextHopForwardingHeader>(networkHeader)) {
+        int i = (nextHopHeader->getTlvOptions().findByType(NEXTHOP_TLVOPTION_TLV_GPSR));
         if (i >= 0)
-            gpsrOption = check_and_cast<GpsrOption *>(gnpHeader->getTlvOptionsForUpdate().getTlvOptionForUpdate(i));
+            gpsrOption = check_and_cast<GpsrOption *>(nextHopHeader->getTlvOptionsForUpdate().getTlvOptionForUpdate(i));
     }
     else
 #endif

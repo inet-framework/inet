@@ -225,7 +225,7 @@ void InterfaceEntry::setNextHopData(NextHopInterfaceData *p)
         delete nextHopData;
     nextHopData = p;
     p->ownerp = this;
-    configChanged(F_GENERIC_DATA);
+    configChanged(F_NEXTHOP_DATA);
 #else // ifdef WITH_NEXTHOP
     throw cRuntimeError(this, "setNextHopProtocolData(): INET was compiled without Next Hop Forwarding support");
 #endif // ifdef WITH_NEXTHOP

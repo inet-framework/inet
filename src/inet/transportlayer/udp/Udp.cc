@@ -370,19 +370,13 @@ void Udp::processPacketFromApp(Packet *packet)
         packet->addTagIfAbsent<DscpReq>()->setDifferentiatedServicesCodePoint(sd->typeOfService);
 
     const Protocol *l3Protocol = nullptr;
-    // TODO: apps use ModuleIdAddress if the network interface doesn't have an IP address configured, and UDP uses GNP which results in a weird error in MessageDispatcher
-    if (destAddr.getType() == L3Address::IPv4) {
-        // send to Ipv4
+    // TODO: apps use ModuleIdAddress if the network interface doesn't have an IP address configured, and UDP uses NextHopForwarding which results in a weird error in MessageDispatcher
+    if (destAddr.getType() == L3Address::IPv4)
         l3Protocol = &Protocol::ipv4;
-    }
-    else if (destAddr.getType() == L3Address::IPv6) {
-        // send to Ipv6
+    else if (destAddr.getType() == L3Address::IPv6)
         l3Protocol = &Protocol::ipv6;
-    }
-    else {
-        // send to generic
+    else
         l3Protocol = &Protocol::nextHopForwarding;
-    }
 
     auto udpHeader = makeShared<UdpHeader>();
     // set source and destination port

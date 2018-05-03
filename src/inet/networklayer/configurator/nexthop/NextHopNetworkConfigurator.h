@@ -28,7 +28,7 @@ namespace inet {
 class PatternMatcher;
 
 /**
- * This module configures generic routing tables for a network.
+ * This module configures NextHopRoutingTable modules for a network.
  *
  * For more info please see the NED file.
  */
