@@ -966,35 +966,35 @@ IRoute *Aodv::createRoute(const L3Address& destAddr, const L3Address& nextHop,
         unsigned int hopCount, bool hasValidDestNum, unsigned int destSeqNum,
         bool isActive, simtime_t lifeTime)
 {
+    // create a new route
     IRoute *newRoute = routingTable->createRoute();
-    AodvRouteData *newProtocolData = new AodvRouteData();
 
-    newProtocolData->setHasValidDestNum(hasValidDestNum);
-
-    // active route
-    newProtocolData->setIsActive(isActive);
+    // adding generic fields
+    newRoute->setDestination(destAddr);
+    newRoute->setNextHop(nextHop);
+    newRoute->setPrefixLength(addressType->getMaxPrefixLength());    // TODO:
+    newRoute->setMetric(hopCount);
+    InterfaceEntry *ifEntry = interfaceTable->getInterfaceByName("wlan0");    // TODO: IMPLEMENT: multiple interfaces
+    if (ifEntry)
+        newRoute->setInterface(ifEntry);
+    newRoute->setSourceType(IRoute::AODV);
+    newRoute->setSource(this);
 
     // A route towards a destination that has a routing table entry
     // that is marked as valid.  Only active routes can be used to
     // forward data packets.
 
-    newProtocolData->setLifeTime(lifeTime);
+    // adding protocol-specific fields
+    AodvRouteData *newProtocolData = new AodvRouteData();
+    newProtocolData->setIsActive(isActive);
+    newProtocolData->setHasValidDestNum(hasValidDestNum);
     newProtocolData->setDestSeqNum(destSeqNum);
-
-    InterfaceEntry *ifEntry = interfaceTable->getInterfaceByName("wlan0");    // TODO: IMPLEMENT: multiple interfaces
-    if (ifEntry)
-        newRoute->setInterface(ifEntry);
-
-    newRoute->setDestination(destAddr);
-    newRoute->setSourceType(IRoute::AODV);
-    newRoute->setSource(this);
+    newProtocolData->setLifeTime(lifeTime);
     newRoute->setProtocolData(newProtocolData);
-    newRoute->setMetric(hopCount);
-    newRoute->setNextHop(nextHop);
-    newRoute->setPrefixLength(addressType->getMaxPrefixLength());    // TODO:
 
     EV_DETAIL << "Adding new route " << newRoute << endl;
     routingTable->addRoute(newRoute);
+
     scheduleExpungeRoutes();
     return newRoute;
 }
