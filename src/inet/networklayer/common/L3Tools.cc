@@ -70,7 +70,7 @@ const Ptr<const NetworkHeaderBase> peekNetworkProtocolHeader(Packet *packet, con
         return packet->peekAtFront<Ipv6Header>();
 #endif
 #ifdef WITH_NEXTHOP
-    if (protocol == Protocol::gnp)
+    if (protocol == Protocol::nextHopForwarding)
         return packet->peekAtFront<NextHopForwardingHeader>();
 #endif
     // TODO: add other L3 protocols
@@ -96,7 +96,7 @@ const Ptr<NetworkHeaderBase> removeNetworkProtocolHeader(Packet *packet, const P
         return removeNetworkProtocolHeader<Ipv6Header>(packet);
 #endif
 #ifdef WITH_NEXTHOP
-    if (protocol == Protocol::gnp)
+    if (protocol == Protocol::nextHopForwarding)
         return removeNetworkProtocolHeader<NextHopForwardingHeader>(packet);
 #endif
     // TODO: add other L3 protocols

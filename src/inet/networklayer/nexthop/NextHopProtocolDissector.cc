@@ -23,21 +23,21 @@
 
 namespace inet {
 
-Register_Protocol_Dissector(&Protocol::gnp, NextHopProtocolDissector);
+Register_Protocol_Dissector(&Protocol::nextHopForwarding, NextHopProtocolDissector);
 
 void NextHopProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
     auto header = packet->popAtFront<NextHopForwardingHeader>();
     auto trailerPopOffset = packet->getBackOffset();
     auto gnpEndOffset = packet->getFrontOffset() + header->getPayloadLengthField();
-    callback.startProtocolDataUnit(&Protocol::gnp);
-    callback.visitChunk(header, &Protocol::gnp);
+    callback.startProtocolDataUnit(&Protocol::nextHopForwarding);
+    callback.visitChunk(header, &Protocol::nextHopForwarding);
     packet->setBackOffset(gnpEndOffset);
     callback.dissectPacket(packet, header->getProtocol());
     ASSERT(packet->getDataLength() == B(0));
     packet->setFrontOffset(gnpEndOffset);
     packet->setBackOffset(trailerPopOffset);
-    callback.endProtocolDataUnit(&Protocol::gnp);
+    callback.endProtocolDataUnit(&Protocol::nextHopForwarding);
 }
 
 } // namespace inet

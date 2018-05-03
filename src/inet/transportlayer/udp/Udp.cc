@@ -381,7 +381,7 @@ void Udp::processPacketFromApp(Packet *packet)
     }
     else {
         // send to generic
-        l3Protocol = &Protocol::gnp;
+        l3Protocol = &Protocol::nextHopForwarding;
     }
 
     auto udpHeader = makeShared<UdpHeader>();
@@ -618,7 +618,7 @@ void Udp::processUndeliverablePacket(Packet *udpPacket)
         delete udpPacket;
 #endif // ifdef WITH_IPv6
     }
-    else if (protocol->getId() == Protocol::gnp.getId()) {
+    else if (protocol->getId() == Protocol::nextHopForwarding.getId()) {
         delete udpPacket;
     }
     else {

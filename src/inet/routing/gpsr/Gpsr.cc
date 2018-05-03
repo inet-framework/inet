@@ -675,7 +675,7 @@ void Gpsr::setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const Networ
         gnpHeader->getTlvOptionsForUpdate().insertTlvOption(gpsrOption);
         int newHlen = gnpHeader->getTlvOptions().getLength();
         gnpHeader->setChunkLength(gnpHeader->getChunkLength() + B(newHlen - oldHlen));
-        insertNetworkProtocolHeader(packet, Protocol::gnp, gnpHeader);
+        insertNetworkProtocolHeader(packet, Protocol::nextHopForwarding, gnpHeader);
     }
     else
 #endif

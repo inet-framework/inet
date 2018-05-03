@@ -76,8 +76,8 @@ void NextHopForwarding::initialize(int stage)
         WATCH(numForwarded);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
-        registerService(Protocol::gnp, gate("transportIn"), gate("queueIn"));
-        registerProtocol(Protocol::gnp, gate("queueOut"), gate("transportOut"));
+        registerService(Protocol::nextHopForwarding, gate("transportIn"), gate("queueIn"));
+        registerProtocol(Protocol::nextHopForwarding, gate("queueOut"), gate("transportOut"));
     }
 }
 
@@ -175,7 +175,7 @@ void NextHopForwarding::handlePacketFromNetwork(Packet *packet)
     }
 
     const auto& header = packet->peekAtFront<NextHopForwardingHeader>();
-    packet->addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
+    packet->addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&Protocol::nextHopForwarding);
     packet->addTagIfAbsent<NetworkProtocolInd>()->setNetworkProtocolHeader(header);
     B totalLength = header->getChunkLength() + header->getPayloadLengthField();
     if (totalLength > packet->getDataLength()) {
@@ -252,7 +252,7 @@ void NextHopForwarding::routePacket(Packet *datagram, const InterfaceEntry *dest
             datagram->trimFront();
             const auto& newHeader = removeNetworkProtocolHeader<NextHopForwardingHeader>(datagram);
             newHeader->setSourceAddress(destAddr); // allows two apps on the same host to communicate
-            insertNetworkProtocolHeader(datagram, Protocol::gnp, newHeader);
+            insertNetworkProtocolHeader(datagram, Protocol::nextHopForwarding, newHeader);
             header = newHeader;
         }
         numLocalDeliver++;
@@ -308,7 +308,7 @@ void NextHopForwarding::routePacket(Packet *datagram, const InterfaceEntry *dest
         datagram->trimFront();
         const auto& newHeader = removeNetworkProtocolHeader<NextHopForwardingHeader>(datagram);
         newHeader->setHopLimit(header->getHopLimit() - 1);
-        insertNetworkProtocolHeader(datagram, Protocol::gnp, newHeader);
+        insertNetworkProtocolHeader(datagram, Protocol::nextHopForwarding, newHeader);
         header = newHeader;
     }
 
@@ -317,7 +317,7 @@ void NextHopForwarding::routePacket(Packet *datagram, const InterfaceEntry *dest
         datagram->trimFront();
         const auto& newHeader = removeNetworkProtocolHeader<NextHopForwardingHeader>(datagram);
         newHeader->setSourceAddress(destIE->getNextHopProtocolData()->getAddress());
-        insertNetworkProtocolHeader(datagram, Protocol::gnp, newHeader);
+        insertNetworkProtocolHeader(datagram, Protocol::nextHopForwarding, newHeader);
         header = newHeader;
     }
 
@@ -482,7 +482,7 @@ void NextHopForwarding::decapsulate(Packet *packet)
     auto payloadProtocol = header->getProtocol();
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
-    packet->addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&Protocol::gnp);
+    packet->addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&Protocol::nextHopForwarding);
     packet->addTagIfAbsent<NetworkProtocolInd>()->setNetworkProtocolHeader(header);
     auto l3AddressInd = packet->addTagIfAbsent<L3AddressInd>();
     l3AddressInd->setSrcAddress(header->getSourceAddress());
@@ -539,7 +539,7 @@ void NextHopForwarding::encapsulate(Packet *transportPacket, const InterfaceEntr
     delete transportPacket->removeControlInfo();
     header->setPayloadLengthField(transportPacket->getDataLength());
 
-    insertNetworkProtocolHeader(transportPacket, Protocol::gnp, header);
+    insertNetworkProtocolHeader(transportPacket, Protocol::nextHopForwarding, header);
 }
 
 void NextHopForwarding::sendDatagramToHL(Packet *packet)
@@ -590,8 +590,8 @@ void NextHopForwarding::sendDatagramToOutput(Packet *datagram, const InterfaceEn
         //Peer to peer interface, no broadcast, no MACAddress. // packet->addTagIfAbsent<MACAddressReq>()->setDestinationAddress(macAddress);
         delete datagram->removeTagIfPresent<DispatchProtocolReq>();
         datagram->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
-        datagram->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::gnp);
-        datagram->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::gnp);
+        datagram->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::nextHopForwarding);
+        datagram->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::nextHopForwarding);
         send(datagram, "queueOut");
         return;
     }
@@ -612,8 +612,8 @@ void NextHopForwarding::sendDatagramToOutput(Packet *datagram, const InterfaceEn
         datagram->addTagIfAbsent<MacAddressReq>()->setDestAddress(nextHopMAC);
         delete datagram->removeTagIfPresent<DispatchProtocolReq>();
         datagram->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
-        datagram->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::gnp);
-        datagram->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::gnp);
+        datagram->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::nextHopForwarding);
+        datagram->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::nextHopForwarding);
 
         // send out
         send(datagram, "queueOut");

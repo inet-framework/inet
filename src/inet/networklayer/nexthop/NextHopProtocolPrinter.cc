@@ -24,7 +24,7 @@
 
 namespace inet {
 
-Register_Protocol_Printer(&Protocol::gnp, NextHopProtocolPrinter);
+Register_Protocol_Printer(&Protocol::nextHopForwarding, NextHopProtocolPrinter);
 
 void NextHopProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, Context& context) const
 {
