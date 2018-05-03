@@ -18,7 +18,7 @@
 //
 
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
-#include "inet/networklayer/nexthop/NextHopDatagram_m.h"
+#include "inet/networklayer/nexthop/NextHopForwardingHeader_m.h"
 #include "inet/networklayer/nexthop/NextHopProtocolDissector.h"
 
 namespace inet {
@@ -27,7 +27,7 @@ Register_Protocol_Dissector(&Protocol::gnp, NextHopProtocolDissector);
 
 void NextHopProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    auto header = packet->popAtFront<NextHopDatagramHeader>();
+    auto header = packet->popAtFront<NextHopForwardingHeader>();
     auto trailerPopOffset = packet->getBackOffset();
     auto gnpEndOffset = packet->getFrontOffset() + header->getPayloadLengthField();
     callback.startProtocolDataUnit(&Protocol::gnp);

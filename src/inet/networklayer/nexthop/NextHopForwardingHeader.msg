@@ -30,19 +30,19 @@ import inet.networklayer.common.IpProtocolId;
 namespace inet;
 
 //
-// Generic protocol TLV option types
+// Next hop forwarding TLV option types
 //
-enum GenericTlvOptionTypes
+enum NextHopTlvOptionTypes
 {
-    GENERIC_TLVOPTION_NOP1 = 0;
-    GENERIC_TLVOPTION_NOPN = 1;
-    GENERIC_TLVOPTION_TLV_GPSR = 47;
+    NEXTHOP_TLVOPTION_NOP1 = 0;
+    NEXTHOP_TLVOPTION_NOPN = 1;
+    NEXTHOP_TLVOPTION_TLV_GPSR = 47;
 };
 
 //
-// Represents a next hop forwarding datagram header with generic network addresses. 
+// Next hop forwarding datagram header using generic network addresses.
 //
-class NextHopDatagramHeader extends NetworkHeaderBase
+class NextHopForwardingHeader extends NetworkHeaderBase
 {
     L3Address srcAddr;
     L3Address destAddr;
@@ -52,7 +52,7 @@ class NextHopDatagramHeader extends NetworkHeaderBase
     TlvOptions tlvOptions;
 }
 
-cplusplus(NextHopDatagramHeader) {{
+cplusplus(NextHopForwardingHeader) {{
   public:
     virtual L3Address getSourceAddress() const override { return getSrcAddr(); }
     virtual void setSourceAddress(const L3Address& addr) override { setSrcAddr(addr); }

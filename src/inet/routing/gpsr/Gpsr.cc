@@ -42,7 +42,7 @@
 #endif
 
 #ifdef WITH_NEXTHOP
-#include "inet/networklayer/nexthop/NextHopDatagram_m.h"
+#include "inet/networklayer/nexthop/NextHopForwardingHeader_m.h"
 #endif
 
 namespace inet {
@@ -668,9 +668,9 @@ void Gpsr::setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const Networ
     else
 #endif
 #ifdef WITH_NEXTHOP
-    if (dynamicPtrCast<const NextHopDatagramHeader>(nwHeader)) {
-        auto gnpHeader = removeNetworkProtocolHeader<NextHopDatagramHeader>(packet);
-        gpsrOption->setType(GENERIC_TLVOPTION_TLV_GPSR);
+    if (dynamicPtrCast<const NextHopForwardingHeader>(nwHeader)) {
+        auto gnpHeader = removeNetworkProtocolHeader<NextHopForwardingHeader>(packet);
+        gpsrOption->setType(NEXTHOP_TLVOPTION_TLV_GPSR);
         int oldHlen = gnpHeader->getTlvOptions().getLength();
         gnpHeader->getTlvOptionsForUpdate().insertTlvOption(gpsrOption);
         int newHlen = gnpHeader->getTlvOptions().getLength();
@@ -705,8 +705,8 @@ const GpsrOption *Gpsr::findGpsrOptionInNetworkDatagram(const Ptr<const NetworkH
     else
 #endif
 #ifdef WITH_NEXTHOP
-    if (auto gnpHeader = dynamicPtrCast<const NextHopDatagramHeader>(networkHeader)) {
-        int i = (gnpHeader->getTlvOptions().findByType(GENERIC_TLVOPTION_TLV_GPSR));
+    if (auto gnpHeader = dynamicPtrCast<const NextHopForwardingHeader>(networkHeader)) {
+        int i = (gnpHeader->getTlvOptions().findByType(NEXTHOP_TLVOPTION_TLV_GPSR));
         if (i >= 0)
             gpsrOption = check_and_cast<const GpsrOption *>(gnpHeader->getTlvOptions().getTlvOption(i));
     }
@@ -739,8 +739,8 @@ GpsrOption *Gpsr::findGpsrOptionInNetworkDatagramForUpdate(const Ptr<NetworkHead
     else
 #endif
 #ifdef WITH_NEXTHOP
-    if (auto gnpHeader = dynamicPtrCast<NextHopDatagramHeader>(networkHeader)) {
-        int i = (gnpHeader->getTlvOptions().findByType(GENERIC_TLVOPTION_TLV_GPSR));
+    if (auto gnpHeader = dynamicPtrCast<NextHopForwardingHeader>(networkHeader)) {
+        int i = (gnpHeader->getTlvOptions().findByType(NEXTHOP_TLVOPTION_TLV_GPSR));
         if (i >= 0)
             gpsrOption = check_and_cast<GpsrOption *>(gnpHeader->getTlvOptionsForUpdate().getTlvOptionForUpdate(i));
     }

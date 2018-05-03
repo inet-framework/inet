@@ -19,7 +19,7 @@
 
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
-#include "inet/networklayer/nexthop/NextHopDatagram_m.h"
+#include "inet/networklayer/nexthop/NextHopForwardingHeader_m.h"
 #include "inet/networklayer/nexthop/NextHopProtocolPrinter.h"
 
 namespace inet {
@@ -28,7 +28,7 @@ Register_Protocol_Printer(&Protocol::gnp, NextHopProtocolPrinter);
 
 void NextHopProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, Context& context) const
 {
-    if (auto header = dynamicPtrCast<const NextHopDatagramHeader>(chunk)) {
+    if (auto header = dynamicPtrCast<const NextHopForwardingHeader>(chunk)) {
         context.sourceColumn << header->getSourceAddress();
         context.destinationColumn << header->getDestinationAddress();
         B payloadLength = header->getPayloadLengthField();

@@ -24,7 +24,7 @@
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 #endif
 #ifdef WITH_NEXTHOP
-#include "inet/networklayer/nexthop/NextHopDatagram_m.h"
+#include "inet/networklayer/nexthop/NextHopForwardingHeader_m.h"
 #endif
 
 namespace inet {
@@ -71,7 +71,7 @@ const Ptr<const NetworkHeaderBase> peekNetworkProtocolHeader(Packet *packet, con
 #endif
 #ifdef WITH_NEXTHOP
     if (protocol == Protocol::gnp)
-        return packet->peekAtFront<NextHopDatagramHeader>();
+        return packet->peekAtFront<NextHopForwardingHeader>();
 #endif
     // TODO: add other L3 protocols
     throw cRuntimeError("Unknown protocol: %s", protocol.getName());
@@ -97,7 +97,7 @@ const Ptr<NetworkHeaderBase> removeNetworkProtocolHeader(Packet *packet, const P
 #endif
 #ifdef WITH_NEXTHOP
     if (protocol == Protocol::gnp)
-        return removeNetworkProtocolHeader<NextHopDatagramHeader>(packet);
+        return removeNetworkProtocolHeader<NextHopForwardingHeader>(packet);
 #endif
     // TODO: add other L3 protocols
     throw cRuntimeError("Unknown protocol: %s", protocol.getName());
