@@ -27,9 +27,7 @@ SHOULD:
  - fix mobility non-determinism caused by interpolation from last position during animation
  - validate Rotation, Quaternion, EulerAngles against each other and documentation
  - validate positioning and orientation IMobility, PhysicalEnvironment, ObstacleLoss
- - replace ObjectLocatorNode with GeoTransform (PositionAttitudeTransform) to work with osgEarth 2.9
  - cSocketRTScheduler refactoring for multiple sockets bound to interfaces
- - rename GenericNetworkProtocol -> NextHopForwarding, GenericNetworkLayer -> NextHopNetworkLayer, GenericRoutingTable -> NextHopRoutingTable, GenericNetworkConfigurator -> NextHopNetworkConfigurator
  - fix MAC address filtering TODO in RadioMedium
 
 NEED NOT:
@@ -74,6 +72,8 @@ NEED NOT:
  - pretty print white spaces
 
 DONE:
+ + rename GenericNetworkProtocol -> NextHopForwarding, GenericNetworkLayer -> NextHopNetworkLayer, GenericRoutingTable -> NextHopRoutingTable, GenericNetworkConfigurator -> NextHopNetworkConfigurator
+ + replace ObjectLocatorNode with GeoTransform (PositionAttitudeTransform) to work with osgEarth 2.9
  + add missing interface NED files for all L2 protocols, BMacInterface
  + use degree instead of double in GeoCoord, use degree instead of double in EulerAngles
  + revise and rename signals to have a consistent naming scheme (e.g. NF_*)
