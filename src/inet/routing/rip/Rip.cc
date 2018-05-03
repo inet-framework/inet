@@ -1160,14 +1160,18 @@ void Rip::invalidateRoutes(const InterfaceEntry *ie)
 
 IRoute *Rip::addRoute(const L3Address& dest, int prefixLength, const InterfaceEntry *ie, const L3Address& nextHop, int metric)
 {
+    // create a new route
     IRoute *route = rt->createRoute();
+
+    // adding generic fields
+    route->setDestination(dest);
+    route->setNextHop(nextHop);
+    route->setPrefixLength(prefixLength);
+    route->setMetric(metric);
+    route->setInterface(const_cast<InterfaceEntry *>(ie));
     route->setSourceType(IRoute::RIP);
     route->setSource(this);
-    route->setDestination(dest);
-    route->setPrefixLength(prefixLength);
-    route->setInterface(const_cast<InterfaceEntry *>(ie));
-    route->setNextHop(nextHop);
-    route->setMetric(metric);
+
     rt->addRoute(route);
     return route;
 }
