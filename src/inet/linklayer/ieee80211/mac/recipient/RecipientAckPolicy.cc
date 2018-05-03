@@ -62,7 +62,10 @@ bool RecipientAckPolicy::isAckNeeded(Ieee80211DataOrMgmtFrame* frame) const
 simtime_t RecipientAckPolicy::computeAckDurationField(Ieee80211DataOrMgmtFrame* frame) const
 {
     if (frame->getMoreFragments()) {
-        simtime_t duration = ceil(frame->getDuration() - modeSet->getSifsTime() - computeAckDuration(frame));
+        auto duration = frame->getDuration() - modeSet->getSifsTime() - computeAckDuration(frame);
+        duration = ceil(duration, SimTime(1, SIMTIME_US));
+        if (duration < 0)
+            EV_WARN << "ACK duration field would be negative, returning 0 instead.\n";
         return duration < 0 ? 0 : duration;
     }
     return 0;

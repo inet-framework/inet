@@ -428,7 +428,7 @@
 /examples/wireless/synchronized/,    -f omnetpp.ini -c Synchronized -r 0,           2s,              e81b-e994/tplx
 /examples/wireless/synchronized/,    -f omnetpp.ini -c NonSynchronized -r 0,        2s,              31ee-321f/tplx
 
-/examples/wireless/testnewmac/,      -f omnetpp.ini -c Mac -r 0,                    100s,          73e1-2b7c/tplx
+/examples/wireless/testnewmac/,      -f omnetpp.ini -c Mac -r 0,                    100s,          a36b-ae16/tplx
 
 /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput1 -r 0,            20s,           959e-18f7/tplx
 # /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput2 -r 0,            100s,         0000-0000   # Throughput2 extended
