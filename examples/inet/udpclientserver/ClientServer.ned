@@ -20,7 +20,7 @@ package inet.examples.inet.udpclientserver;
 
 import inet.common.misc.NetAnimTrace;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.networklayer.configurator.generic.GenericNetworkConfigurator;
+import inet.networklayer.configurator.generic.NextHopNetworkConfigurator;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
 
@@ -58,7 +58,7 @@ network UdpClientServer
             parameters:
                 @display("p=53,134");
         }
-//        configurator: GenericNetworkConfigurator {
+//        configurator: NextHopNetworkConfigurator {
 //            parameters:
 //                @display("p=53,134");
 //        }

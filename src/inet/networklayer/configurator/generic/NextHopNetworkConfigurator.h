@@ -18,8 +18,8 @@
 // Authors: Levente Meszaros (primary author), Andras Varga, Tamas Borbely
 //
 
-#ifndef __INET_GENERICNETWORKCONFIGURATOR_H
-#define __INET_GENERICNETWORKCONFIGURATOR_H
+#ifndef __INET_NEXTHOPNETWORKCONFIGURATOR_H
+#define __INET_NEXTHOPNETWORKCONFIGURATOR_H
 
 #include "inet/networklayer/configurator/base/NetworkConfiguratorBase.h"
 
@@ -32,7 +32,7 @@ class PatternMatcher;
  *
  * For more info please see the NED file.
  */
-class INET_API GenericNetworkConfigurator : public NetworkConfiguratorBase
+class INET_API NextHopNetworkConfigurator : public NetworkConfiguratorBase
 {
   protected:
     // parameters
@@ -58,5 +58,5 @@ class INET_API GenericNetworkConfigurator : public NetworkConfiguratorBase
 
 } // namespace inet
 
-#endif // ifndef __INET_GENERICNETWORKCONFIGURATOR_H
+#endif // ifndef __INET_NEXTHOPNETWORKCONFIGURATOR_H
 

@@ -18,15 +18,15 @@
 // Authors: Levente Meszaros (primary author), Andras Varga, Tamas Borbely
 //
 
-#include "inet/networklayer/configurator/generic/GenericNetworkConfigurator.h"
+#include "inet/networklayer/configurator/generic/NextHopNetworkConfigurator.h"
 #include "inet/networklayer/nexthop/NextHopInterfaceData.h"
 #include "inet/networklayer/nexthop/NextHopRoutingTable.h"
 
 namespace inet {
 
-Define_Module(GenericNetworkConfigurator);
+Define_Module(NextHopNetworkConfigurator);
 
-void GenericNetworkConfigurator::initialize(int stage)
+void NextHopNetworkConfigurator::initialize(int stage)
 {
     NetworkConfiguratorBase::initialize(stage);
     if (stage == INITSTAGE_NETWORK_LAYER_3) {
@@ -49,12 +49,12 @@ void GenericNetworkConfigurator::initialize(int stage)
 
 #undef T
 
-IRoutingTable *GenericNetworkConfigurator::findRoutingTable(Node *node)
+IRoutingTable *NextHopNetworkConfigurator::findRoutingTable(Node *node)
 {
     return L3AddressResolver().findGenericRoutingTableOf(node->module);
 }
 
-void GenericNetworkConfigurator::addStaticRoutes(Topology& topology)
+void NextHopNetworkConfigurator::addStaticRoutes(Topology& topology)
 {
     // TODO: it should be configurable (via xml?) which nodes need static routes filled in automatically
     // add static routes for all routing tables
@@ -121,7 +121,7 @@ void GenericNetworkConfigurator::addStaticRoutes(Topology& topology)
     }
 }
 
-void GenericNetworkConfigurator::dumpRoutes(Topology& topology)
+void NextHopNetworkConfigurator::dumpRoutes(Topology& topology)
 {
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
