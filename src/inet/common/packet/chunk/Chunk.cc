@@ -40,19 +40,19 @@ void Chunk::handleChange()
     checkMutable();
 }
 
-int Chunk::getBitsArraySize()
+int Chunk::getBinDumpNumLines()
 {
     return (b(getChunkLength()).get() + 31) / 32;
 }
 
-int Chunk::getBytesArraySize()
+int Chunk::getHexDumpNumLines()
 {
     return ((b(getChunkLength()).get() + 7) / 8 + 15) / 16;
 }
 
 static std::string asStringValue;
 
-const char *Chunk::getBitsAsString(int index)
+const char *Chunk::getBinDumpLine(int index)
 {
     asStringValue = "";
     try {
@@ -74,7 +74,7 @@ const char *Chunk::getBitsAsString(int index)
     return asStringValue.c_str();
 }
 
-const char *Chunk::getBytesAsString(int index)
+const char *Chunk::getHexDumpLine(int index)
 {
     asStringValue = "";
     try {
