@@ -165,7 +165,7 @@
         labels = ""
         nedPackages = "
                        inet.networklayer.nexthop
-                       inet.networklayer.configurator.generic
+                       inet.networklayer.configurator.nexthop
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_NEXTHOP"
