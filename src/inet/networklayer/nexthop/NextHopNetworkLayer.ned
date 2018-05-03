@@ -60,7 +60,7 @@ module NextHopNetworkLayer like INetworkLayer
             parameters:
                 @display("p=300,300;q=pendingQueue");
         }
-        gnp: NextHopForwarding {
+        nextHop: NextHopForwarding {
             parameters:
                 @display("p=450,300;q=queue");
         }
@@ -73,8 +73,8 @@ module NextHopNetworkLayer like INetworkLayer
         up.out++ --> { @display("m=n"); } --> transportOut;
         up.in++ <-- { @display("m=n"); } <-- transportIn;
 
-        gnp.transportOut --> up.in++;
-        gnp.transportIn <-- up.out++;
+        nextHop.transportOut --> up.in++;
+        nextHop.transportIn <-- up.out++;
 
         up.out++ --> echo.ipIn;
         up.in++ <-- echo.ipOut;
@@ -82,8 +82,8 @@ module NextHopNetworkLayer like INetworkLayer
         lp.out++ --> arp.ifIn;
         lp.in++ <-- arp.ifOut;
 
-        lp.out++ --> gnp.queueIn;
-        lp.in++ <-- gnp.queueOut;
+        lp.out++ --> nextHop.queueIn;
+        lp.in++ <-- nextHop.queueOut;
 
         lp.in++ <-- { @display("m=s"); } <-- ifIn;
         lp.out++ --> { @display("m=s"); } --> ifOut;
