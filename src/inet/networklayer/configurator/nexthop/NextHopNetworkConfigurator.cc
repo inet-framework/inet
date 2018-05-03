@@ -18,7 +18,7 @@
 // Authors: Levente Meszaros (primary author), Andras Varga, Tamas Borbely
 //
 
-#include "inet/networklayer/configurator/generic/NextHopNetworkConfigurator.h"
+#include "inet/networklayer/configurator/nexthop/NextHopNetworkConfigurator.h"
 #include "inet/networklayer/nexthop/NextHopInterfaceData.h"
 #include "inet/networklayer/nexthop/NextHopRoutingTable.h"
 

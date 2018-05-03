@@ -20,10 +20,8 @@ package inet.examples.inet.udpclientserver;
 
 import inet.common.misc.NetAnimTrace;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.networklayer.configurator.generic.NextHopNetworkConfigurator;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
-
 
 network UdpClientServer
 {
