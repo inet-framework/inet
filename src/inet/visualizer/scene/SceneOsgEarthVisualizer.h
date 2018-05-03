@@ -24,7 +24,7 @@
 #ifdef WITH_OSG
 #include <osgEarth/MapNode>
 #include <osgEarthAnnotation/RectangleNode>
-#include <osgEarthUtil/ObjectLocator>
+#include <osgEarth/GeoTransform>
 #endif // ifdef WITH_OSG
 
 namespace inet {
@@ -43,7 +43,8 @@ class INET_API SceneOsgEarthVisualizer : public SceneOsgVisualizerBase
     double cameraDistanceFactor = NaN;
 
     osgEarth::MapNode *mapNode = nullptr;
-    osgEarth::Util::ObjectLocatorNode *locatorNode = nullptr;
+    osgEarth::GeoTransform *geoTransform = nullptr;
+    osg::PositionAttitudeTransform *localTransform = nullptr;
 
   protected:
     virtual void initialize(int stage) override;

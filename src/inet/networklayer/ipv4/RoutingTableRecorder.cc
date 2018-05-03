@@ -27,7 +27,7 @@
 #include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
-#include "inet/networklayer/generic/GenericRoutingTable.h"
+#include "inet/networklayer/generic/NextHopRoutingTable.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"    // TODO: remove?
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/ipv4/RoutingTableRecorder.h"
@@ -129,11 +129,11 @@ void RoutingTableRecorder::recordSnapshot()
             for (int i = 0; i < rt6->getNumRoutes(); i++)
                 recordRoute(host, rt6->getRoute(i), -1);
         }
-        GenericRoutingTable *generic = dynamic_cast<GenericRoutingTable *>(module);
-        if (generic) {
+        NextHopRoutingTable *nhrt = dynamic_cast<NextHopRoutingTable *>(module);
+        if (nhrt) {
             cModule *host = getContainingNode(module);
-            for (int i = 0; i < generic->getNumRoutes(); i++)
-                recordRoute(host, generic->getRoute(i), -1);
+            for (int i = 0; i < nhrt->getNumRoutes(); i++)
+                recordRoute(host, nhrt->getRoute(i), -1);
         }
     }
 }

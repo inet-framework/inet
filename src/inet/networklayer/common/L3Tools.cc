@@ -23,8 +23,8 @@
 #ifdef WITH_IPv6
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 #endif
-#ifdef WITH_GENERIC
-#include "inet/networklayer/generic/GenericDatagram_m.h"
+#ifdef WITH_NEXTHOP
+#include "inet/networklayer/nexthop/NextHopForwardingHeader_m.h"
 #endif
 
 namespace inet {
@@ -69,9 +69,9 @@ const Ptr<const NetworkHeaderBase> peekNetworkProtocolHeader(Packet *packet, con
     if (protocol == Protocol::ipv6)
         return packet->peekAtFront<Ipv6Header>();
 #endif
-#ifdef WITH_GENERIC
-    if (protocol == Protocol::gnp)
-        return packet->peekAtFront<GenericDatagramHeader>();
+#ifdef WITH_NEXTHOP
+    if (protocol == Protocol::nextHopForwarding)
+        return packet->peekAtFront<NextHopForwardingHeader>();
 #endif
     // TODO: add other L3 protocols
     throw cRuntimeError("Unknown protocol: %s", protocol.getName());
@@ -95,9 +95,9 @@ const Ptr<NetworkHeaderBase> removeNetworkProtocolHeader(Packet *packet, const P
     if (protocol == Protocol::ipv6)
         return removeNetworkProtocolHeader<Ipv6Header>(packet);
 #endif
-#ifdef WITH_GENERIC
-    if (protocol == Protocol::gnp)
-        return removeNetworkProtocolHeader<GenericDatagramHeader>(packet);
+#ifdef WITH_NEXTHOP
+    if (protocol == Protocol::nextHopForwarding)
+        return removeNetworkProtocolHeader<NextHopForwardingHeader>(packet);
 #endif
     // TODO: add other L3 protocols
     throw cRuntimeError("Unknown protocol: %s", protocol.getName());

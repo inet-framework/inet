@@ -28,9 +28,9 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 
-#ifdef WITH_GENERIC
-#include "inet/networklayer/generic/GenericNetworkProtocolInterfaceData.h"
-#endif // ifdef WITH_GENERIC
+#ifdef WITH_NEXTHOP
+#include "inet/networklayer/nexthop/NextHopInterfaceData.h"
+#endif // ifdef WITH_NEXTHOP
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
@@ -123,10 +123,10 @@ InterfaceEntry *InterfaceTable::findInterfaceByAddress(const L3Address& address)
         for (auto & elem : idToInterface) {
             InterfaceEntry *ie = elem;
             if (ie) {
-#ifdef WITH_GENERIC
-                if (ie->getGenericNetworkProtocolData() && ie->getGenericNetworkProtocolData()->getAddress() == address)
+#ifdef WITH_NEXTHOP
+                if (ie->getNextHopData() && ie->getNextHopData()->getAddress() == address)
                     return ie;
-#endif // ifdef WITH_GENERIC
+#endif // ifdef WITH_NEXTHOP
                 switch (addrType) {
 #ifdef WITH_IPv4
                     case L3Address::IPv4:

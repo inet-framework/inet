@@ -18,7 +18,8 @@
 #include "inet/common/geometry/common/GeographicCoordinateSystem.h"
 
 #if defined(WITH_OSGEARTH) && defined(WITH_VISUALIZERS)
-#include <osgEarthUtil/ObjectLocator>
+#include <osg/PositionAttitudeTransform>
+#include <osgEarth/GeoTransform>
 #endif
 
 namespace inet {
@@ -68,13 +69,31 @@ void OsgGeographicCoordinateSystem::initialize(int stage)
         auto playgroundElevation = deg(par("playgroundElevation"));
         auto playgroundBank = deg(par("playgroundBank"));
         playgroundPosition = GeoCoord(playgroundLatitude, playgroundLongitude, playgroundAltitude);
-        playgroundOrientation = EulerAngles(playgroundHeading, playgroundElevation, playgroundBank);
-        auto locatorNode = new osgEarth::Util::ObjectLocatorNode(mapNode->getMap());
-        locatorNode->getLocator()->setPosition(osg::Vec3d(deg(playgroundLongitude).get(), deg(playgroundLatitude).get(), m(playgroundAltitude).get()));
-        locatorNode->getLocator()->setOrientation(osg::Vec3d(rad(playgroundHeading).get(), rad(playgroundElevation).get(), rad(playgroundBank).get()));
-        locatorNode->getLocator()->getLocatorMatrix(locatorMatrix);
+
+        // The parameter is conventional direction of heading and elevation (positive heading turns left,
+        // positive elevation lifts nose), but the EulerAngles class has different expectations.
+        playgroundOrientation = EulerAngles(-rad(playgroundHeading - deg(90)), -rad(playgroundElevation), rad(playgroundBank));
+
+        osg::ref_ptr<osgEarth::GeoTransform> geoTransform = new osgEarth::GeoTransform();
+        osg::ref_ptr<osg::PositionAttitudeTransform> localTransform = new osg::PositionAttitudeTransform();
+
+        geoTransform->addChild(localTransform);
+        geoTransform->setPosition(osgEarth::GeoPoint(mapNode->getMapSRS()->getGeographicSRS(),
+            deg(playgroundPosition.longitude).get(), deg(playgroundPosition.latitude).get(), m(playgroundPosition.altitude).get()));
+
+        localTransform->setAttitude(
+            osg::Quat(rad(playgroundOrientation.gamma).get(), osg::Vec3d(1.0, 0.0, 0.0)) *
+            osg::Quat(rad(playgroundOrientation.beta).get(), osg::Vec3d(0.0, 1.0, 0.0)) *
+            osg::Quat(rad(playgroundOrientation.alpha).get(), osg::Vec3d(0.0, 0.0, 1.0)));
+
+        osg::ref_ptr<osg::Group> child = new osg::Group();
+        localTransform->addChild(child);
+
+        auto matrices = child->getWorldMatrices();
+        ASSERT(matrices.size() == 1);
+
+        locatorMatrix = matrices[0];
         inverseLocatorMatrix.invert(locatorMatrix);
-        delete locatorNode;
     }
 }
 

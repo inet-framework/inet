@@ -39,9 +39,9 @@
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #endif // ifdef WITH_IPv6
 
-#ifdef WITH_GENERIC
-#include "inet/networklayer/generic/GenericNetworkProtocolInterfaceData.h"
-#endif // ifdef WITH_GENERIC
+#ifdef WITH_NEXTHOP
+#include "inet/networklayer/nexthop/NextHopInterfaceData.h"
+#endif // ifdef WITH_NEXTHOP
 
 namespace inet {
 
@@ -155,10 +155,10 @@ std::string InterfaceEntry::detailedInfo() const
     if (ipv6data)
         out << " " << ipv6data->detailedInfo() << "\n";
 #endif // ifdef WITH_IPv6
-#ifdef WITH_GENERIC
-    if (genericNetworkProtocolData)
-        out << " " << genericNetworkProtocolData->detailedInfo() << "\n";
-#endif // ifdef WITH_GENERIC
+#ifdef WITH_NEXTHOP
+    if (nextHopData)
+        out << " " << nextHopData->detailedInfo() << "\n";
+#endif // ifdef WITH_NEXTHOP
     if (isisdata)
         out << " " << ((InterfaceProtocolData *)isisdata)->str() << "\n"; // Khmm...
     if (trilldata)
@@ -199,14 +199,14 @@ void InterfaceEntry::resetInterface()
     if (ipv6data)
         throw cRuntimeError(this, "Model error: ipv6data filled, but INET was compiled without IPv6 support");
 #endif // ifdef WITH_IPv6
-#ifdef WITH_GENERIC
-    if (genericNetworkProtocolData && genericNetworkProtocolData->ownerp == this)
-        delete genericNetworkProtocolData;
-    genericNetworkProtocolData = nullptr;
-#else // ifdef WITH_GENERIC
-    if (genericNetworkProtocolData)
-        throw cRuntimeError(this, "Model error: genericNetworkProtocolData filled, but INET was compiled without Generic Network Layer support");
-#endif // ifdef WITH_GENERIC
+#ifdef WITH_NEXTHOP
+    if (nextHopData && nextHopData->ownerp == this)
+        delete nextHopData;
+    nextHopData = nullptr;
+#else // ifdef WITH_NEXTHOP
+    if (nextHopData)
+        throw cRuntimeError(this, "Model error: nextHopProtocolData filled, but INET was compiled without Next Hop Forwarding support");
+#endif // ifdef WITH_NEXTHOP
     if (isisdata && ((InterfaceProtocolData *)isisdata)->ownerp == this)
         delete (InterfaceProtocolData *)isisdata;
     isisdata = nullptr;
@@ -218,17 +218,17 @@ void InterfaceEntry::resetInterface()
     ieee8021ddata = nullptr;
 }
 
-void InterfaceEntry::setGenericNetworkProtocolData(GenericNetworkProtocolInterfaceData *p)
+void InterfaceEntry::setNextHopData(NextHopInterfaceData *p)
 {
-#ifdef WITH_GENERIC
-    if (genericNetworkProtocolData && genericNetworkProtocolData->ownerp == this)
-        delete genericNetworkProtocolData;
-    genericNetworkProtocolData = p;
+#ifdef WITH_NEXTHOP
+    if (nextHopData && nextHopData->ownerp == this)
+        delete nextHopData;
+    nextHopData = p;
     p->ownerp = this;
-    configChanged(F_GENERIC_DATA);
-#else // ifdef WITH_GENERIC
-    throw cRuntimeError(this, "setGenericNetworkProtocolData(): INET was compiled without Generic Network Layer support");
-#endif // ifdef WITH_GENERIC
+    configChanged(F_NEXTHOP_DATA);
+#else // ifdef WITH_NEXTHOP
+    throw cRuntimeError(this, "setNextHopProtocolData(): INET was compiled without Next Hop Forwarding support");
+#endif // ifdef WITH_NEXTHOP
 }
 
 const L3Address InterfaceEntry::getNetworkAddress() const
@@ -241,10 +241,10 @@ const L3Address InterfaceEntry::getNetworkAddress() const
     if (ipv6data)
         return ipv6data->getPreferredAddress();
 #endif // ifdef WITH_IPv6
-#ifdef WITH_GENERIC
-    if (genericNetworkProtocolData)
-        return genericNetworkProtocolData->getAddress();
-#endif // ifdef WITH_GENERIC
+#ifdef WITH_NEXTHOP
+    if (nextHopData)
+        return nextHopData->getAddress();
+#endif // ifdef WITH_NEXTHOP
     return getModulePathAddress();
 }
 
@@ -337,14 +337,14 @@ void InterfaceEntry::joinMulticastGroup(const L3Address& address) const
             break;
 
 #endif // ifdef WITH_IPv6
-#ifdef WITH_GENERIC
+#ifdef WITH_NEXTHOP
         case L3Address::MAC:
         case L3Address::MODULEID:
         case L3Address::MODULEPATH:
-            getGenericNetworkProtocolData()->joinMulticastGroup(address);
+            getNextHopData()->joinMulticastGroup(address);
             break;
 
-#endif // ifdef WITH_GENERIC
+#endif // ifdef WITH_NEXTHOP
         default:
             throw cRuntimeError("Unknown address type");
     }

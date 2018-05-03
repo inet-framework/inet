@@ -15,15 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_GENERICROUTINGTABLE_H
-#define __INET_GENERICROUTINGTABLE_H
+#ifndef __INET_NEXTHOPROUTINGTABLE_H
+#define __INET_NEXTHOPROUTINGTABLE_H
 
 #include <vector>
-
 #include "inet/common/INETDefs.h"
-
-#include "inet/networklayer/generic/GenericRoute.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
+#include "inet/networklayer/nexthop/NextHopRoute.h"
 
 namespace inet {
 
@@ -32,7 +30,7 @@ class IInterfaceTable;
 /**
  * A C++ interface to abstract the functionality of a routing table, regardless of address type.
  */
-class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable, public cListener
+class INET_API NextHopRoutingTable : public cSimpleModule, public IRoutingTable, public cListener
 {
   private:
     IInterfaceTable *ift = nullptr;    // cached pointer
@@ -42,10 +40,10 @@ class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable,
     bool forwarding = false;
     bool multicastForwarding = false;
 
-    typedef std::vector<GenericRoute *> RouteVector;
+    typedef std::vector<NextHopRoute *> RouteVector;
     RouteVector routes;    // unicast route table, sorted by prefix match order
 
-    typedef std::vector<GenericMulticastRoute *> MulticastRouteVector;
+    typedef std::vector<NextHopMulticastRoute *> MulticastRouteVector;
     MulticastRouteVector multicastRoutes;    // multicast route table, sorted by prefix match order
 
   protected:
@@ -71,14 +69,14 @@ class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable,
 
     virtual void configureLoopback();
 
-    static bool routeLessThan(const GenericRoute *a, const GenericRoute *b);
+    static bool routeLessThan(const NextHopRoute *a, const NextHopRoute *b);
 
-    void internalAddRoute(GenericRoute *route);
-    GenericRoute *internalRemoveRoute(GenericRoute *route);
+    void internalAddRoute(NextHopRoute *route);
+    NextHopRoute *internalRemoveRoute(NextHopRoute *route);
 
   public:
-    GenericRoutingTable();
-    virtual ~GenericRoutingTable();
+    NextHopRoutingTable();
+    virtual ~NextHopRoutingTable();
 
     /** @name Miscellaneous functions */
     //@{
@@ -112,7 +110,7 @@ class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable,
      * maintaining internal data structures and firing "routing table changed"
      * notifications.
      */
-    virtual void routeChanged(GenericRoute *entry, int fieldCode);
+    virtual void routeChanged(NextHopRoute *entry, int fieldCode);
     //@}
 
     /** @name Routing functions (query the route table) */
@@ -122,7 +120,7 @@ class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable,
      * destination address, and returns the resulting route. Returns nullptr
      * if there is no matching route.
      */
-    virtual GenericRoute *findBestMatchingRoute(const L3Address& dest) const override;    //TODO make coveriant return types everywhere
+    virtual NextHopRoute *findBestMatchingRoute(const L3Address& dest) const override;    //TODO make coveriant return types everywhere
 
     /**
      * Convenience function based on findBestMatchingRoute().
@@ -236,5 +234,5 @@ class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable,
 
 } // namespace inet
 
-#endif // ifndef __INET_GENERICROUTINGTABLE_H
+#endif // ifndef __INET_NEXTHOPROUTINGTABLE_H
 

@@ -70,16 +70,20 @@ simple Rip like IApp
 
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
-        string mode @enum("RIPv2", "RIPng") = default("RIPv2");
         xml ripConfig = default(xml("<config><interface metric='1'/></config>"));
 
+        string mode @enum("RIPv2", "RIPng") = default("RIPv2");
         int udpPort = (mode == "RIPng" ? 521 : 520);
-        double updateInterval @unit(s) = default(30s);
-        volatile double startupTime @unit(s) = default(uniform(0s,5s));
+        volatile double startupTime @unit(s) = default(uniform(0s,5s)); // delay before starting RIP
+        double shutdownTime @unit(s) = default(1s); // delay before shutting down RIP
+        
+        // RIP timers
+        double updateInterval @unit(s) = default(30s);   // 30s timer or periodic timer (RFC 2453)
+        double routeExpiryTime @unit(s) = default(180s); // timeout timer (RFC 2453)
+        double routePurgeTime @unit(s) = default(120s);  // garbage collection timer (RFC 2453)
+        
         volatile double triggeredUpdateDelay @unit(s) = default(uniform(1s,5s));
-        double routeExpiryTime @unit(s) = default(180s);
-        double routePurgeTime @unit(s) = default(120s);
-        double shutdownTime @unit(s) = default(1s);
+        
         @signal[sentRequest](type=cPacket);
         @signal[sentUpdate](type=cPacket);
         @signal[rcvdResponse](type=cPacket);

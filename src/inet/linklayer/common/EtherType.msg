@@ -32,7 +32,7 @@ enum EtherType
     ETHERTYPE_RARP = 0x8035;
     ETHERTYPE_8021Q_TAG = 0x8100;
     ETHERTYPE_IPv6 = 0x86DD;
-    ETHERTYPE_INET_GENERIC = 0x86FF;    // not in standard, INET spceific value for @GenericNetworkProtocol
+    ETHERTYPE_NEXT_HOP_FORWARDING = 0x86FF;    // not in standard, INET spceific value for @NextHopForwarding
     ETHERTYPE_FLOW_CONTROL = 0x8808;
     ETHERTYPE_8021ad_S_TAG = 0x88A8;
     ETHERTYPE_MPLS_UNICAST = 0x8847;

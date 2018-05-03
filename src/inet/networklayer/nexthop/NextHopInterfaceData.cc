@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2018 OpenSim Ltd.
+// Copyright (C) 2012 Opensim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,21 +15,26 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_GNPPROTOCOLPRINTER_H
-#define __INET_GNPPROTOCOLPRINTER_H
-
-#include "inet/common/INETDefs.h"
-#include "inet/common/packet/printer/ProtocolPrinter.h"
+#include <algorithm>
+#include <sstream>
+#include "inet/networklayer/nexthop/NextHopInterfaceData.h"
 
 namespace inet {
 
-class INET_API GnpProtocolPrinter : public ProtocolPrinter
+std::string NextHopInterfaceData::str() const
 {
-  public:
-    virtual void print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, Context& context) const override;
-};
+    std::stringstream out;
+    out << "generic addr:" << getAddress();
+    return out.str();
+}
+
+std::string NextHopInterfaceData::detailedInfo() const
+{
+    std::stringstream out;
+    out << "generic addr:" << getAddress() << "\n"
+        << "Metric: " << getMetric() << "\n";
+    return out.str();
+}
 
 } // namespace inet
-
-#endif // __INET_GNPPROTOCOLPRINTER_H
 

@@ -17,29 +17,27 @@
 // @author: Zoltan Bojthe
 //
 
-#include "inet/networklayer/generic/GnpProtocolDissector.h"
-
-#include "inet/networklayer/generic/GenericDatagram_m.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
-
+#include "inet/networklayer/nexthop/NextHopForwardingHeader_m.h"
+#include "inet/networklayer/nexthop/NextHopProtocolDissector.h"
 
 namespace inet {
 
-Register_Protocol_Dissector(&Protocol::gnp, GnpProtocolDissector);
+Register_Protocol_Dissector(&Protocol::nextHopForwarding, NextHopProtocolDissector);
 
-void GnpProtocolDissector::dissect(Packet *packet, ICallback& callback) const
+void NextHopProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
-    auto header = packet->popAtFront<GenericDatagramHeader>();
+    auto header = packet->popAtFront<NextHopForwardingHeader>();
     auto trailerPopOffset = packet->getBackOffset();
-    auto gnpEndOffset = packet->getFrontOffset() + header->getPayloadLengthField();
-    callback.startProtocolDataUnit(&Protocol::gnp);
-    callback.visitChunk(header, &Protocol::gnp);
-    packet->setBackOffset(gnpEndOffset);
+    auto endOffset = packet->getFrontOffset() + header->getPayloadLengthField();
+    callback.startProtocolDataUnit(&Protocol::nextHopForwarding);
+    callback.visitChunk(header, &Protocol::nextHopForwarding);
+    packet->setBackOffset(endOffset);
     callback.dissectPacket(packet, header->getProtocol());
     ASSERT(packet->getDataLength() == B(0));
-    packet->setFrontOffset(gnpEndOffset);
+    packet->setFrontOffset(endOffset);
     packet->setBackOffset(trailerPopOffset);
-    callback.endProtocolDataUnit(&Protocol::gnp);
+    callback.endProtocolDataUnit(&Protocol::nextHopForwarding);
 }
 
 } // namespace inet

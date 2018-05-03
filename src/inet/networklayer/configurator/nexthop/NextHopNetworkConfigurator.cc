@@ -18,15 +18,15 @@
 // Authors: Levente Meszaros (primary author), Andras Varga, Tamas Borbely
 //
 
-#include "inet/networklayer/configurator/generic/GenericNetworkConfigurator.h"
-#include "inet/networklayer/generic/GenericRoutingTable.h"
-#include "inet/networklayer/generic/GenericNetworkProtocolInterfaceData.h"
+#include "inet/networklayer/configurator/nexthop/NextHopNetworkConfigurator.h"
+#include "inet/networklayer/nexthop/NextHopInterfaceData.h"
+#include "inet/networklayer/nexthop/NextHopRoutingTable.h"
 
 namespace inet {
 
-Define_Module(GenericNetworkConfigurator);
+Define_Module(NextHopNetworkConfigurator);
 
-void GenericNetworkConfigurator::initialize(int stage)
+void NextHopNetworkConfigurator::initialize(int stage)
 {
     NetworkConfiguratorBase::initialize(stage);
     if (stage == INITSTAGE_NETWORK_LAYER_3) {
@@ -49,12 +49,12 @@ void GenericNetworkConfigurator::initialize(int stage)
 
 #undef T
 
-IRoutingTable *GenericNetworkConfigurator::findRoutingTable(Node *node)
+IRoutingTable *NextHopNetworkConfigurator::findRoutingTable(Node *node)
 {
-    return L3AddressResolver().findGenericRoutingTableOf(node->module);
+    return L3AddressResolver().findNextHopRoutingTableOf(node->module);
 }
 
-void GenericNetworkConfigurator::addStaticRoutes(Topology& topology)
+void NextHopNetworkConfigurator::addStaticRoutes(Topology& topology)
 {
     // TODO: it should be configurable (via xml?) which nodes need static routes filled in automatically
     // add static routes for all routing tables
@@ -62,7 +62,7 @@ void GenericNetworkConfigurator::addStaticRoutes(Topology& topology)
         Node *sourceNode = (Node *)topology.getNode(i);
         if (isBridgeNode(sourceNode))
             continue;
-        GenericRoutingTable *sourceRoutingTable = dynamic_cast<GenericRoutingTable *>(sourceNode->routingTable);
+        NextHopRoutingTable *sourceRoutingTable = dynamic_cast<NextHopRoutingTable *>(sourceNode->routingTable);
 
         // calculate shortest paths from everywhere to sourceNode
         // we are going to use the paths in reverse direction (assuming all links are bidirectional)
@@ -89,7 +89,7 @@ void GenericNetworkConfigurator::addStaticRoutes(Topology& topology)
             InterfaceInfo *nextHopInterfaceInfo = nullptr;
             while (node != sourceNode) {
                 link = (Link *)node->getPath(0);
-                if (node != sourceNode && !isBridgeNode(node) && link->sourceInterfaceInfo && link->sourceInterfaceInfo->interfaceEntry->getGenericNetworkProtocolData())
+                if (node != sourceNode && !isBridgeNode(node) && link->sourceInterfaceInfo && link->sourceInterfaceInfo->interfaceEntry->getNextHopData())
                     nextHopInterfaceInfo = static_cast<InterfaceInfo *>(link->sourceInterfaceInfo);
                 node = (Node *)node->getPath(0)->getRemoteNode();
             }
@@ -101,15 +101,15 @@ void GenericNetworkConfigurator::addStaticRoutes(Topology& topology)
                 // add the same routes for all destination interfaces (IP packets are accepted from any interface at the destination)
                 for (int j = 0; j < destinationInterfaceTable->getNumInterfaces(); j++) {
                     InterfaceEntry *destinationInterfaceEntry = destinationInterfaceTable->getInterface(j);
-                    if (!destinationInterfaceEntry->getGenericNetworkProtocolData())
+                    if (!destinationInterfaceEntry->getNextHopData())
                         continue;
-                    L3Address destinationAddress = destinationInterfaceEntry->getGenericNetworkProtocolData()->getAddress();
-                    if (!destinationInterfaceEntry->isLoopback() && !destinationAddress.isUnspecified() && nextHopInterfaceEntry->getGenericNetworkProtocolData()) {
-                        GenericRoute *route = new GenericRoute();
+                    L3Address destinationAddress = destinationInterfaceEntry->getNextHopData()->getAddress();
+                    if (!destinationInterfaceEntry->isLoopback() && !destinationAddress.isUnspecified() && nextHopInterfaceEntry->getNextHopData()) {
+                        NextHopRoute *route = new NextHopRoute();
                         route->setSourceType(IRoute::MANUAL);
                         route->setDestination(destinationAddress);
                         route->setInterface(sourceInterfaceEntry);
-                        L3Address nextHopAddress = nextHopInterfaceEntry->getGenericNetworkProtocolData()->getAddress();
+                        L3Address nextHopAddress = nextHopInterfaceEntry->getNextHopData()->getAddress();
                         if (nextHopAddress != destinationAddress)
                             route->setNextHop(nextHopAddress);
                         EV_DEBUG << "Adding route " << sourceInterfaceEntry->getInterfaceFullPath() << " -> " << destinationInterfaceEntry->getInterfaceFullPath() << " as " << route->str() << endl;
@@ -121,7 +121,7 @@ void GenericNetworkConfigurator::addStaticRoutes(Topology& topology)
     }
 }
 
-void GenericNetworkConfigurator::dumpRoutes(Topology& topology)
+void NextHopNetworkConfigurator::dumpRoutes(Topology& topology)
 {
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);

@@ -153,7 +153,11 @@ class INET_API Ieee80211VhtPreambleMode : public IIeee80211PreambleMode, public 
         virtual const inline simtime_t getNonHTShortTrainingSequenceDuration() const { return 10 * getDFTPeriod() / 4;  } // L-STF
         virtual const inline simtime_t getHTGreenfieldShortTrainingFieldDuration() const { return 10 * getDFTPeriod() / 4; } // HT-GF-STF
         virtual const inline simtime_t getNonHTLongTrainingFieldDuration() const { return 2 * getDFTPeriod() + getDoubleGIDuration(); } // L-LTF
-        virtual const inline simtime_t getHTShortTrainingFieldDuration() const { return 4E-6; } // HT-STF
+        virtual const inline simtime_t getNonHTSignalField() const { return 4E-6; } // L-SIG
+        virtual const inline simtime_t getVHTSignalFieldA() const { return 8E-6; } // VHT-SIG-A
+        virtual const inline simtime_t getVHTShortTrainingFieldDuration() const { return 4E-6; } // VHT-STF
+        virtual const inline simtime_t getVHTSignalFieldB() const { return 4E-6; } // VHT-SIG-A
+
         virtual const simtime_t getFirstHTLongTrainingFieldDuration() const;
         virtual const inline simtime_t getSecondAndSubsequentHTLongTrainingFielDuration() const { return 4E-6; } // HT-LTFs, s = 2,3,..,n
         virtual const inline unsigned int getNumberOfHtLongTrainings() const { return numberOfHTLongTrainings; }
@@ -235,7 +239,7 @@ class INET_API Ieee80211VhtDataMode : public IIeee80211DataMode, public Ieee8021
         inline b getTailFieldLength() const { return b(6) * numberOfBccEncoders; }
 
         virtual int getNumberOfSpatialStreams() const override { return Ieee80211VhtModeBase::getNumberOfSpatialStreams(); }
-        virtual Hz getBandwidth() const { return bandwidth; }
+        virtual Hz getBandwidth() const override { return bandwidth; }
         virtual b getPaddingLength(b dataLength) const override { return b(0); }
         virtual b getCompleteLength(b dataLength) const override;
         virtual const simtime_t getDuration(b dataLength) const override;

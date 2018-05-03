@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2012 Opensim Ltd.
+// Copyright (C) 2018 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,27 +15,21 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <algorithm>
-#include <sstream>
+#ifndef __INET_NEXTHOPPROTOCOLDISSECTOR_H
+#define __INET_NEXTHOPPROTOCOLDISSECTOR_H
 
-#include "inet/networklayer/generic/GenericNetworkProtocolInterfaceData.h"
+#include "inet/common/INETDefs.h"
+#include "inet/common/packet/dissector/ProtocolDissector.h"
 
 namespace inet {
 
-std::string GenericNetworkProtocolInterfaceData::str() const
+class INET_API NextHopProtocolDissector : public ProtocolDissector
 {
-    std::stringstream out;
-    out << "generic addr:" << getAddress();
-    return out.str();
-}
-
-std::string GenericNetworkProtocolInterfaceData::detailedInfo() const
-{
-    std::stringstream out;
-    out << "generic addr:" << getAddress() << "\n"
-        << "Metric: " << getMetric() << "\n";
-    return out.str();
-}
+  public:
+    virtual void dissect(Packet *packet, ICallback& callback) const override;
+};
 
 } // namespace inet
+
+#endif // __INET_NEXTHOPPROTOCOLDISSECTOR_H
 

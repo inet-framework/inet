@@ -246,6 +246,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         // name
         const char *name = element->getAttribute("name");
         // orientation
+        // TODO: what about geographic orientation? what about taking GeographicCoordinateSystem into account?
         EulerAngles orientation;
         const char *orientationAttribute = element->getAttribute("orientation");
         if (orientationAttribute)

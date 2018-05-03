@@ -34,7 +34,7 @@ namespace inet {
 class InterfaceEntry;
 class IInterfaceTable;
 class InterfaceProtocolData;
-class GenericNetworkProtocolInterfaceData;
+class NextHopInterfaceData;
 class Ipv4InterfaceData;
 class Ipv6InterfaceData;
 class TrillInterfaceData;
@@ -121,7 +121,7 @@ class INET_API InterfaceEntry : public cModule
 
     Ipv4InterfaceData *ipv4data = nullptr;    ///< Ipv4-specific interface info (Ipv4 address, etc)
     Ipv6InterfaceData *ipv6data = nullptr;    ///< Ipv6-specific interface info (Ipv6 addresses, etc)
-    GenericNetworkProtocolInterfaceData *genericNetworkProtocolData = nullptr;    ///< GenericNetworkProtocol-specific interface info (Address, etc)
+    NextHopInterfaceData *nextHopData = nullptr;    ///< NextHopForwarding-specific interface info (Address, etc)
     IsisInterfaceData *isisdata = nullptr;    ///< ISIS-specific interface info
     TrillInterfaceData *trilldata = nullptr;    ///< TRILL-specific interface info
     Ieee8021dInterfaceData *ieee8021ddata = nullptr;
@@ -139,7 +139,7 @@ class INET_API InterfaceEntry : public cModule
         F_NAME, F_NODE_IN_GATEID, F_NODE_OUT_GATEID, F_NETW_GATEIDX,
         F_LOOPBACK, F_BROADCAST, F_MULTICAST, F_POINTTOPOINT,
         F_DATARATE, F_MTU, F_MACADDRESS, F_TOKEN,
-        F_IPV4_DATA, F_IPV6_DATA, F_GENERIC_DATA, F_ISIS_DATA, F_TRILL_DATA, F_IEEE8021D_DATA
+        F_IPV4_DATA, F_IPV6_DATA, F_NEXTHOP_DATA, F_ISIS_DATA, F_TRILL_DATA, F_IEEE8021D_DATA
     };
 
   protected:
@@ -225,7 +225,7 @@ class INET_API InterfaceEntry : public cModule
     Ipv4InterfaceData *ipv4Data() const { return ipv4data; }
     Ipv4Address getIpv4Address() const;
     Ipv6InterfaceData *ipv6Data() const { return ipv6data; }
-    GenericNetworkProtocolInterfaceData *getGenericNetworkProtocolData() const { return genericNetworkProtocolData; }
+    NextHopInterfaceData *getNextHopData() const { return nextHopData; }
     TrillInterfaceData *trillData() const { return trilldata; }
     IsisInterfaceData *isisData() const { return isisdata; }
     Ieee8021dInterfaceData *ieee8021dData() const { return ieee8021ddata; }
@@ -240,7 +240,7 @@ class INET_API InterfaceEntry : public cModule
     //@{
     virtual void setIpv4Data(Ipv4InterfaceData *p);
     virtual void setIpv6Data(Ipv6InterfaceData *p);
-    virtual void setGenericNetworkProtocolData(GenericNetworkProtocolInterfaceData *p);
+    virtual void setNextHopData(NextHopInterfaceData *p);
     virtual void setTrillInterfaceData(TrillInterfaceData *p);
     virtual void setIsisInterfaceData(IsisInterfaceData *p);
     virtual void setIeee8021dInterfaceData(Ieee8021dInterfaceData *p);

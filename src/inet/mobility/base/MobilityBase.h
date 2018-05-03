@@ -22,12 +22,12 @@
 #ifndef __INET_MOBILITYBASE_H
 #define __INET_MOBILITYBASE_H
 
-#include "inet/common/ModuleAccess.h"
+#include "inet/common/geometry/common/CanvasProjection.h"
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/geometry/common/EulerAngles.h"
-#include "inet/common/geometry/common/CanvasProjection.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/StringFormat.h"
 #include "inet/mobility/contract/IMobility.h"
-#include "inet/visualizer/util/StringFormat.h"
 
 namespace inet {
 

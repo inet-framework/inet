@@ -75,7 +75,7 @@ ProtocolGroup ProtocolGroup::ethertype("ethertype", {
     { 0x36FC, &Protocol::flooding },         // ETHERTYPE_INET_FLOODING, not in any standards
     { 0x86FD, &Protocol::probabilistic },         // ETHERTYPE_INET_PROBABILISTIC, not in any standards
     { 0x86FE, &Protocol::wiseRoute },         // ETHERTYPE_INET_WISE, not in any standards
-    { 0x86FF, &Protocol::gnp },         // ETHERTYPE_INET_GENERIC
+    { 0x86FF, &Protocol::nextHopForwarding },         // ETHERTYPE_INET_NEXTHOP
     { 0x8847, &Protocol::mpls },
 });
 
@@ -87,7 +87,7 @@ ProtocolGroup ProtocolGroup::pppprotocol("pppprotocol", {
     { 0x39FC, &Protocol::flooding },         // INET_FLOODING, not in any standards
     { 0x39FD, &Protocol::probabilistic },         // INET_PROBABILISTIC, not in any standards
     { 0x39FE, &Protocol::wiseRoute },         // INET_WISE, not in any standards
-    { 0x39FF, &Protocol::gnp },         // INET_GENERIC, not in any standards
+    { 0x39FF, &Protocol::nextHopForwarding },         // INET_NEXT_HOP_FORWARDING, not in any standards
 });
 
 // excerpt from http://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
@@ -114,7 +114,7 @@ ProtocolGroup ProtocolGroup::ipprotocol("ipprotocol", {
     { 250, &Protocol::flooding },    // INET specific: Probabilistic Network Protocol
     { 251, &Protocol::probabilistic },    // INET specific: Probabilistic Network Protocol
     { 252, &Protocol::wiseRoute },    // INET specific: Probabilistic Network Protocol
-    { 253, &Protocol::gnp },    // INET specific: Generic Network Protocol
+    { 253, &Protocol::nextHopForwarding },    // INET specific: Next Hop Forwarding
     { 254, &Protocol::echo },    // INET specific: Echo Protocol
 });
 

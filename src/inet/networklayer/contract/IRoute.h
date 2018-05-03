@@ -70,9 +70,9 @@ class INET_API IRoute
 //    virtual std::string info() const;
 //    virtual std::string detailedInfo() const;
 //
-//    bool operator==(const IGenericRoute& route) const { return equals(route); }
-//    bool operator!=(const IGenericRoute& route) const { return !equals(route); }
-//    bool equals(const IGenericRoute& route) const;
+//    bool operator==(const IRoute& route) const { return equals(route); }
+//    bool operator!=(const IRoute& route) const { return !equals(route); }
+//    bool equals(const IRoute& route) const;
 
     virtual ~IRoute() {}
 

@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/visualizer/util/StringFormat.h"
+#include "inet/common/StringFormat.h"
 
 namespace inet {
 

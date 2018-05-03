@@ -1109,7 +1109,7 @@ typedef compose<nautical_mile, pow<hour, -1> > knot;
 typedef scale<mps, 100, 34029> mach;
 
 // Angles
-constexpr static double rad2degScale() { return 180 / M_PI; }
+constexpr inline double rad2degScale() { return 180 / M_PI; }
 typedef fscale<rad, rad2degScale> deg;
 typedef scale<deg, 60> deg_min;
 typedef scale<deg_min, 60> deg_sec;

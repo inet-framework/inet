@@ -157,18 +157,18 @@
         linkerFlags = ""
         />
     <feature
-        id="Generic"
-        name="Generic network layer protocol"
-        description = "Basic Generic network layer support"
+        id="Nexthop"
+        name="Next hop forwarding protocol"
+        description = "Conceptual next hop forwarding protocol"
         initiallyEnabled = "true"
         requires = ""
         labels = ""
         nedPackages = "
-                       inet.networklayer.generic
-                       inet.networklayer.configurator.generic
+                       inet.networklayer.nexthop
+                       inet.networklayer.configurator.nexthop
                       "
         extraSourceFolders = ""
-        compileFlags = "-DWITH_GENERIC"
+        compileFlags = "-DWITH_NEXTHOP"
         linkerFlags = ""
         />
     <feature
@@ -176,7 +176,7 @@
         name="WiseRoute"
         description = "Wiseroute is a simple loop-free routing algorithm that builds a routing tree from a central network point, designed for sensor networks and convergecast traffic."
         initiallyEnabled = "true"
-        requires = "Generic"
+        requires = ""
         labels = ""
         nedPackages = "
                        inet.networklayer.wiseroute

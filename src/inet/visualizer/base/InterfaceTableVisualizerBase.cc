@@ -19,9 +19,9 @@
 #include "inet/common/Simsignals.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
-#ifdef WITH_GENERIC
-#include "inet/networklayer/generic/GenericNetworkProtocolInterfaceData.h"
-#endif // WITH_GENERIC
+#ifdef WITH_NEXTHOP
+#include "../../networklayer/nexthop/NextHopInterfaceData.h"
+#endif // WITH_NEXTHOP
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #endif // WITH_IPv4
@@ -78,16 +78,16 @@ const char *InterfaceTableVisualizerBase::DirectiveResolver::resolveDirective(ch
             else if (interfaceEntry->ipv6Data() != nullptr)
                 result = interfaceEntry->ipv6Data()->getLinkLocalAddress().str();
 #endif // WITH_IPv6
-#ifdef WITH_GENERIC
-            else if (interfaceEntry->getGenericNetworkProtocolData() != nullptr)
-                result = interfaceEntry->getGenericNetworkProtocolData()->getAddress().str();
-#endif // WITH_GENERIC
+#ifdef WITH_NEXTHOP
+            else if (interfaceEntry->getNextHopData() != nullptr)
+                result = interfaceEntry->getNextHopData()->getAddress().str();
+#endif // WITH_NEXTHOP
             break;
         case 'g':
-#ifdef WITH_GENERIC
-            if (interfaceEntry->getGenericNetworkProtocolData() != nullptr)
-                result = interfaceEntry->getGenericNetworkProtocolData()->getAddress().str();
-#endif // WITH_GENERIC
+#ifdef WITH_NEXTHOP
+            if (interfaceEntry->getNextHopData() != nullptr)
+                result = interfaceEntry->getNextHopData()->getAddress().str();
+#endif // WITH_NEXTHOP
             break;
         case 'n':
             result = interfaceEntry->getNetworkAddress().str();

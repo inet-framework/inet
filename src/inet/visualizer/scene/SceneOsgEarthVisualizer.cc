@@ -76,19 +76,24 @@ void SceneOsgEarthVisualizer::initializeScene()
     mapNode = MapNode::findMapNode(mapScene);
     if (mapNode == nullptr)
         throw cRuntimeError("Could not find map node in the scene");
-    locatorNode = new osgEarth::Util::ObjectLocatorNode(mapNode->getMap());
-    locatorNode->addChild(new inet::osg::SimulationScene());
-    topLevelScene->addChild(locatorNode);
+    geoTransform = new osgEarth::GeoTransform();
+    topLevelScene->addChild(geoTransform);
+    localTransform = new osg::PositionAttitudeTransform();
+    geoTransform->addChild(localTransform);
+    localTransform->addChild(new inet::osg::SimulationScene());
 }
 
 void SceneOsgEarthVisualizer::initializeLocator()
 {
     auto playgroundPosition = coordinateSystem->getPlaygroundPosition();
+    geoTransform->setPosition(osgEarth::GeoPoint(mapNode->getMapSRS()->getGeographicSRS(),
+            deg(playgroundPosition.longitude).get(), deg(playgroundPosition.latitude).get(), m(playgroundPosition.altitude).get()));
+
     auto playgroundOrientation = coordinateSystem->getPlaygroundOrientation();
-    locatorNode->getLocator()->setPosition(osg::Vec3d(deg(playgroundPosition.longitude).get(), deg(playgroundPosition.latitude).get(), m(playgroundPosition.altitude).get()));
-    locatorNode->getLocator()->setOrientation(osg::Vec3d(rad(playgroundOrientation.alpha).get(),
-                                                         rad(playgroundOrientation.beta).get(),
-                                                         rad(playgroundOrientation.gamma).get()));
+    localTransform->setAttitude(
+        osg::Quat(rad(playgroundOrientation.gamma).get(), osg::Vec3d(1.0, 0.0, 0.0)) *
+        osg::Quat(rad(playgroundOrientation.beta).get(), osg::Vec3d(0.0, 1.0, 0.0)) *
+        osg::Quat(rad(playgroundOrientation.alpha).get(), osg::Vec3d(0.0, 0.0, 1.0)));
 }
 
 void SceneOsgEarthVisualizer::initializeViewpoint()

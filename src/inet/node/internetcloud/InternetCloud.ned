@@ -68,7 +68,7 @@ module InternetCloud extends NetworkLayerNodeBase
         }
         gnDelayer: <default("MatrixCloudDelayer")> like ICloudDelayer if hasGn {
             parameters:
-                networkProtocolModule = "^.generic.gnp";
+                networkProtocolModule = "^.generic.nextHop";
                 @display("p=600,408");
         }
     connections allowunconnected:

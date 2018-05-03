@@ -15,24 +15,22 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_GENERICNETWORKPROTOCOLINTERFACEDATA_H
-#define __INET_GENERICNETWORKPROTOCOLINTERFACEDATA_H
+#ifndef __INET_NEXTHOPINTERFACEDATA_H
+#define __INET_NEXTHOPINTERFACEDATA_H
 
 #include <vector>
-
 #include "inet/common/INETDefs.h"
-
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/common/L3Address.h"
 
 namespace inet {
 
 /**
- * Generic network protocol specific data for an InterfaceEntry, stores generic network address.
+ * Next hop forwarding protocol specific data for an InterfaceEntry, stores generic network address.
  *
  * @see InterfaceEntry
  */
-class INET_API GenericNetworkProtocolInterfaceData : public InterfaceProtocolData
+class INET_API NextHopInterfaceData : public InterfaceProtocolData
 {
   protected:
     L3Address inetAddr;    ///< address of interface
@@ -47,11 +45,11 @@ class INET_API GenericNetworkProtocolInterfaceData : public InterfaceProtocolDat
 
   private:
     // copying not supported: following are private and also left undefined
-    GenericNetworkProtocolInterfaceData(const GenericNetworkProtocolInterfaceData& obj);
-    GenericNetworkProtocolInterfaceData& operator=(const GenericNetworkProtocolInterfaceData& obj);
+    NextHopInterfaceData(const NextHopInterfaceData& obj);
+    NextHopInterfaceData& operator=(const NextHopInterfaceData& obj);
 
   public:
-    GenericNetworkProtocolInterfaceData() { metric = 0; }
+    NextHopInterfaceData() { metric = 0; }
     virtual std::string str() const override;
     virtual std::string detailedInfo() const override;
 
@@ -72,5 +70,5 @@ class INET_API GenericNetworkProtocolInterfaceData : public InterfaceProtocolDat
 
 } // namespace inet
 
-#endif // ifndef __INET_GENERICNETWORKPROTOCOLINTERFACEDATA_H
+#endif // ifndef __INET_NEXTHOPINTERFACEDATA_H
 

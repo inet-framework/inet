@@ -58,7 +58,7 @@ enum IpProtocolId
     IP_PROT_FLOODING = 250;    // INET specific: Probabilistic Network Protocol
     IP_PROT_PROBABILISTIC = 251;    // INET specific: Probabilistic Network Protocol
     IP_PROT_WISE = 252;    // INET specific: Probabilistic Network Protocol
-    IP_PROT_GNP = 253; // INET specific: Generic Network Protocol
+    IP_PROT_NEXT_HOP_FORWARDING = 253; // INET specific: Next Hop Forwarding
     IP_PROT_ECHO = 254; // INET specific: Echo Protocol
 }
 

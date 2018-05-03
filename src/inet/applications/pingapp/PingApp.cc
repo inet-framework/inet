@@ -66,7 +66,7 @@ const std::map<const Protocol *, const Protocol *> PingApp::l3Echo( {
     { &Protocol::ipv4, &Protocol::icmpv4 },
     { &Protocol::ipv6, &Protocol::icmpv6 },
     { &Protocol::flooding, &Protocol::echo },
-    { &Protocol::gnp, &Protocol::echo },
+    { &Protocol::nextHopForwarding, &Protocol::echo },
     { &Protocol::probabilistic, &Protocol::echo },
     { &Protocol::wiseRoute, &Protocol::echo },
 });
@@ -202,7 +202,7 @@ void PingApp::handleMessage(cMessage *msg)
                     case L3Address::IPv4: l3Protocol = &Protocol::ipv4; break;
                     case L3Address::IPv6: l3Protocol = &Protocol::ipv6; break;
                     case L3Address::MODULEID:
-                    case L3Address::MODULEPATH: l3Protocol = &Protocol::gnp; break;
+                    case L3Address::MODULEPATH: l3Protocol = &Protocol::nextHopForwarding; break;
                         //TODO
                     default: throw cRuntimeError("unknown address type: %d(%s)", (int)destAddr.getType(), L3Address::getTypeName(destAddr.getType()));
                 }
@@ -269,7 +269,7 @@ void PingApp::handleMessage(cMessage *msg)
         }
         else
 #endif
-#ifdef WITH_GENERIC
+#ifdef WITH_NEXTHOP
         if (packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::echo) {
             const auto& icmpHeader = packet->popAtFront<EchoPacket>();
             if (icmpHeader->getType() == ECHO_PROTOCOL_REPLY) {
@@ -407,7 +407,7 @@ void PingApp::sendPingRequest()
         }
         case L3Address::MODULEID:
         case L3Address::MODULEPATH: {
-#ifdef WITH_GENERIC
+#ifdef WITH_NEXTHOP
             const auto& request = makeShared<EchoPacket>();
             request->setChunkLength(B(8));
             request->setType(ECHO_PROTOCOL_REQUEST);
@@ -419,7 +419,7 @@ void PingApp::sendPingRequest()
             outPacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::echo);
             break;
 #else
-            throw cRuntimeError("INET compiled without Generic Network");
+            throw cRuntimeError("INET compiled without Next Hop Forwarding");
 #endif
         }
         default:

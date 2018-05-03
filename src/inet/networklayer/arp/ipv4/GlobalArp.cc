@@ -20,9 +20,9 @@
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/networklayer/arp/ipv4/GlobalArp.h"
-#include "inet/networklayer/generic/GenericNetworkProtocolInterfaceData.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
+#include "inet/networklayer/nexthop/NextHopInterfaceData.h"
 
 namespace inet {
 
@@ -98,7 +98,7 @@ void GlobalArp::initialize(int stage)
                     if (!ipv6Address.isUnspecified())
                         ensureCacheEntry(ipv6Address, interfaceEntry);
                 }
-                if (auto genericData = interfaceEntry->getGenericNetworkProtocolData()) {
+                if (auto genericData = interfaceEntry->getNextHopData()) {
                     L3Address address = genericData->getAddress();
                     if (!address.isUnspecified())
                         ensureCacheEntry(address, interfaceEntry);

@@ -16,39 +16,36 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __INET_GENERICNETWORKPROTOCOL_H
-#define __INET_GENERICNETWORKPROTOCOL_H
+#ifndef __INET_NEXTHOPFORWARDING_H
+#define __INET_NEXTHOPFORWARDING_H
 
 #include <list>
 #include <map>
-
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/networklayer/contract/IArp.h"
-#include "inet/networklayer/contract/INetworkProtocol.h"
+#include "inet/common/ProtocolMap.h"
 #include "inet/common/queue/QueueBase.h"
+#include "inet/networklayer/contract/IArp.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/INetfilter.h"
-#include "inet/networklayer/generic/GenericRoutingTable.h"
-#include "inet/networklayer/generic/GenericDatagram_m.h"
-#include "inet/common/ProtocolMap.h"
+#include "inet/networklayer/contract/INetworkProtocol.h"
+#include "inet/networklayer/nexthop/NextHopForwardingHeader_m.h"
+#include "inet/networklayer/nexthop/NextHopRoutingTable.h"
 
 namespace inet {
 
 /**
- * Implements a generic network protocol that routes generic datagrams through the network.
- * Routing decisions are based on a generic routing table, but it also supports the netfilter
+ * Implements a next hop forwarding protocol that routes datagrams through the network.
+ * Routing decisions are based on a next hop routing table, but it also supports the netfilter
  * interface to allow routing protocols to kick in. It doesn't provide datagram fragmentation
  * and reassembling.
  */
-// TODO: rename this and its friends to something that is more specific
-// TODO: that expresses to some extent how this network protocol works
-class INET_API GenericNetworkProtocol : public QueueBase, public NetfilterBase, public INetworkProtocol, public IProtocolRegistrationListener
+class INET_API NextHopForwarding : public QueueBase, public NetfilterBase, public INetworkProtocol, public IProtocolRegistrationListener
 {
   protected:
     /**
-     * Represents an GenericDatagram, queued by a Hook
+     * Represents an NextHopDatagram, queued by a Hook
      */
     struct QueuedDatagramForHook
     {
@@ -74,7 +71,7 @@ class INET_API GenericNetworkProtocol : public QueueBase, public NetfilterBase, 
     };
 
     IInterfaceTable *interfaceTable;
-    GenericRoutingTable *routingTable;
+    NextHopRoutingTable *routingTable;
     IArp *arp;
 
     // config
@@ -103,7 +100,7 @@ class INET_API GenericNetworkProtocol : public QueueBase, public NetfilterBase, 
     virtual void refreshDisplay() const override;
 
     /**
-     * Handle GenericDatagram messages arriving from lower layer.
+     * Handle NextHopDatagram messages arriving from lower layer.
      * Decrements TTL, then invokes routePacket().
      */
     virtual void handlePacketFromNetwork(Packet *datagram);
@@ -128,7 +125,7 @@ class INET_API GenericNetworkProtocol : public QueueBase, public NetfilterBase, 
     virtual void routeMulticastPacket(Packet *datagram, const InterfaceEntry *destIE, const InterfaceEntry *fromIE);
 
     /**
-     * Encapsulate packet coming from higher layers into GenericDatagram, using
+     * Encapsulate packet coming from higher layers into NextHopDatagram, using
      * the control info attached to the packet.
      */
     virtual void encapsulate(Packet *transportPacket, const InterfaceEntry *& destIE);
@@ -159,8 +156,8 @@ class INET_API GenericNetworkProtocol : public QueueBase, public NetfilterBase, 
     virtual IHook::Result datagramLocalOutHook(Packet *datagram);
 
   public:
-    GenericNetworkProtocol();
-    ~GenericNetworkProtocol();
+    NextHopForwarding();
+    ~NextHopForwarding();
 
     virtual void handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive) override;
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive) override;
@@ -181,13 +178,12 @@ class INET_API GenericNetworkProtocol : public QueueBase, public NetfilterBase, 
     void handleCommand(Request *msg);
 
     /**
-     * Processing of generic datagrams. Called when a datagram reaches the front
-     * of the queue.
+     * Processing of datagrams. Called when a datagram reaches the front of the queue.
      */
     virtual void endService(cPacket *packet) override;
 };
 
 } // namespace inet
 
-#endif // ifndef __INET_GENERICNETWORKPROTOCOL_H
+#endif // ifndef __INET_NEXTHOPFORWARDING_H
 

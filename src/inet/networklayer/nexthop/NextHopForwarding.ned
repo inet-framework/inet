@@ -15,15 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.networklayer.generic;
+package inet.networklayer.nexthop;
 
 //
-// This module is a simplified generic network protocol that routes
-// generic datagrams using different kind of network addresses. 
+// This module is a simplified next hop forwarding that routes
+// datagrams using different kind of network addresses.
 //
 // @author Andras Varga
 //
-simple GenericNetworkProtocol
+simple NextHopForwarding
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
@@ -37,6 +37,6 @@ simple GenericNetworkProtocol
     gates:
         input transportIn @labels(TcpHeader,UdpHeader);
         output transportOut @labels(TcpHeader,UdpHeader);
-        input queueIn @labels(GenericDatagram);
-        output queueOut @labels(GenericDatagram);
+        input queueIn @labels(NextHopDatagram);
+        output queueOut @labels(NextHopDatagram);
 }

@@ -15,15 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/networklayer/generic/GenericRoute.h"
-#include "inet/networklayer/generic/GenericRoutingTable.h"
-#include "inet/networklayer/generic/GenericNetworkProtocolInterfaceData.h"
+#include "inet/networklayer/nexthop/NextHopInterfaceData.h"
+#include "inet/networklayer/nexthop/NextHopRoute.h"
+#include "inet/networklayer/nexthop/NextHopRoutingTable.h"
 
 namespace inet {
 
-Register_Class(GenericRoute);
+Register_Class(NextHopRoute);
 
-std::string GenericRoute::str() const
+std::string NextHopRoute::str() const
 {
     std::stringstream out;
 
@@ -43,8 +43,8 @@ std::string GenericRoute::str() const
         out << "*";
     else
         out << interface->getInterfaceName();
-    if (interface && interface->getGenericNetworkProtocolData())
-        out << "(" << interface->getGenericNetworkProtocolData()->getAddress() << ")";
+    if (interface && interface->getNextHopData())
+        out << "(" << interface->getNextHopData()->getAddress() << ")";
     out << "  ";
     out << (nextHop.isUnspecified() ? "DIRECT" : "REMOTE");
     out << " " << IRoute::sourceTypeName(sourceType);
@@ -54,23 +54,23 @@ std::string GenericRoute::str() const
     return out.str();
 }
 
-std::string GenericRoute::detailedInfo() const
+std::string NextHopRoute::detailedInfo() const
 {
     return "";    //TODO
 }
 
-bool GenericRoute::equals(const IRoute& route) const
+bool NextHopRoute::equals(const IRoute& route) const
 {
     return false;    //TODO
 }
 
-void GenericRoute::changed(int fieldCode)
+void NextHopRoute::changed(int fieldCode)
 {
     if (owner)
         owner->routeChanged(this, fieldCode);
 }
 
-IRoutingTable *GenericRoute::getRoutingTableAsGeneric() const
+IRoutingTable *NextHopRoute::getRoutingTableAsGeneric() const
 {
     return owner;
 }
@@ -79,17 +79,17 @@ IRoutingTable *GenericRoute::getRoutingTableAsGeneric() const
 
 #if 0    /*FIXME TODO!!!! */
 
-std::string GenericMulticastRoute::str() const
+std::string NextHopMulticastRoute::str() const
 {
     return "";    //TODO
 }
 
-std::string GenericMulticastRoute::detailedInfo() const
+std::string NextHopMulticastRoute::detailedInfo() const
 {
     return "";    //TODO
 }
 
-bool GenericMulticastRoute::addChild(InterfaceEntry *ie, bool isLeaf)
+bool NextHopMulticastRoute::addChild(InterfaceEntry *ie, bool isLeaf)
 {
     //TODO:
     children.push_back(Child());
@@ -98,7 +98,7 @@ bool GenericMulticastRoute::addChild(InterfaceEntry *ie, bool isLeaf)
     child.isLeaf = isLeaf;
 }
 
-bool GenericMulticastRoute::removeChild(InterfaceEntry *ie)
+bool NextHopMulticastRoute::removeChild(InterfaceEntry *ie)
 {
     //TODO:
 }

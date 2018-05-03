@@ -21,6 +21,7 @@
  **************************************************************************/
 
 #include "inet/common/geometry/common/GeographicCoordinateSystem.h"
+#include "inet/common/geometry/common/Quaternion.h"
 #include "inet/common/INETMath.h"
 #include "inet/mobility/base/MobilityBase.h"
 #ifdef WITH_VISUALIZERS
@@ -69,6 +70,9 @@ const char *MobilityBase::DirectiveResolver::resolveDirective(char directive)
         case 'v':
             result = mobility->getCurrentVelocity().str();
             break;
+        case 's':
+            result = std::to_string(mobility->getCurrentVelocity().length());
+            break;
         case 'a':
             result = mobility->getCurrentAcceleration().str();
             break;
@@ -78,6 +82,14 @@ const char *MobilityBase::DirectiveResolver::resolveDirective(char directive)
         case 'V':
             result = mobility->getCurrentAngularVelocity().str();
             break;
+        case 'S': {
+            Quaternion quaternion(mobility->getCurrentAngularVelocity());
+            Coord axis;
+            double angle;
+            quaternion.toAxisAngle(axis, angle);
+            result = std::to_string(angle);
+            break;
+        }
         case 'A':
             result = mobility->getCurrentAngularAcceleration().str();
             break;
