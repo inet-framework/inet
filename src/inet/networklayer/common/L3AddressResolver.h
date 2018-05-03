@@ -192,7 +192,7 @@ class INET_API L3AddressResolver
     /**
      * Like interfaceTableOf(), but doesn't throw error if not found.
      */
-    virtual NextHopRoutingTable *findGenericRoutingTableOf(cModule *host);
+    virtual NextHopRoutingTable *findNextHopRoutingTableOf(cModule *host);
 
     /**
      * Find the Host with the specified address.

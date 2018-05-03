@@ -51,7 +51,7 @@ void NextHopNetworkConfigurator::initialize(int stage)
 
 IRoutingTable *NextHopNetworkConfigurator::findRoutingTable(Node *node)
 {
-    return L3AddressResolver().findGenericRoutingTableOf(node->module);
+    return L3AddressResolver().findNextHopRoutingTableOf(node->module);
 }
 
 void NextHopNetworkConfigurator::addStaticRoutes(Topology& topology)

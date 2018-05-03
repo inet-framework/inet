@@ -473,7 +473,7 @@ Ipv6RoutingTable *L3AddressResolver::findIpv6RoutingTableOf(cModule *host)
 #endif // ifdef WITH_IPv6
 }
 
-NextHopRoutingTable *L3AddressResolver::findGenericRoutingTableOf(cModule *host)
+NextHopRoutingTable *L3AddressResolver::findNextHopRoutingTableOf(cModule *host)
 {
 #ifdef WITH_NEXTHOP
     return dynamic_cast<NextHopRoutingTable *>(host->getModuleByPath(".generic.routingTable"));
