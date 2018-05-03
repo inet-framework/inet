@@ -37,7 +37,7 @@ const ChunkSerializer *ChunkSerializerRegistry::getSerializer(const std::type_in
     if (it != serializers.end())
         return it->second;
     else
-        throw cRuntimeError("Cannot find serializer for %s", typeInfo.name());
+        throw cRuntimeError("Cannot find serializer for %s", opp_typename(typeInfo));
 }
 
 } // namespace
