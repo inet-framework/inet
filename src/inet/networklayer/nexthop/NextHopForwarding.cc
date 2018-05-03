@@ -316,7 +316,7 @@ void NextHopForwarding::routePacket(Packet *datagram, const InterfaceEntry *dest
     if (header->getSourceAddress().isUnspecified()) {
         datagram->trimFront();
         const auto& newHeader = removeNetworkProtocolHeader<NextHopForwardingHeader>(datagram);
-        newHeader->setSourceAddress(destIE->getNextHopProtocolData()->getAddress());
+        newHeader->setSourceAddress(destIE->getNextHopData()->getAddress());
         insertNetworkProtocolHeader(datagram, Protocol::nextHopForwarding, newHeader);
         header = newHeader;
     }

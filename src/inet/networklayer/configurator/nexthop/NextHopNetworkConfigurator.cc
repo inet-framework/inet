@@ -89,7 +89,7 @@ void NextHopNetworkConfigurator::addStaticRoutes(Topology& topology)
             InterfaceInfo *nextHopInterfaceInfo = nullptr;
             while (node != sourceNode) {
                 link = (Link *)node->getPath(0);
-                if (node != sourceNode && !isBridgeNode(node) && link->sourceInterfaceInfo && link->sourceInterfaceInfo->interfaceEntry->getNextHopProtocolData())
+                if (node != sourceNode && !isBridgeNode(node) && link->sourceInterfaceInfo && link->sourceInterfaceInfo->interfaceEntry->getNextHopData())
                     nextHopInterfaceInfo = static_cast<InterfaceInfo *>(link->sourceInterfaceInfo);
                 node = (Node *)node->getPath(0)->getRemoteNode();
             }
@@ -101,15 +101,15 @@ void NextHopNetworkConfigurator::addStaticRoutes(Topology& topology)
                 // add the same routes for all destination interfaces (IP packets are accepted from any interface at the destination)
                 for (int j = 0; j < destinationInterfaceTable->getNumInterfaces(); j++) {
                     InterfaceEntry *destinationInterfaceEntry = destinationInterfaceTable->getInterface(j);
-                    if (!destinationInterfaceEntry->getNextHopProtocolData())
+                    if (!destinationInterfaceEntry->getNextHopData())
                         continue;
-                    L3Address destinationAddress = destinationInterfaceEntry->getNextHopProtocolData()->getAddress();
-                    if (!destinationInterfaceEntry->isLoopback() && !destinationAddress.isUnspecified() && nextHopInterfaceEntry->getNextHopProtocolData()) {
+                    L3Address destinationAddress = destinationInterfaceEntry->getNextHopData()->getAddress();
+                    if (!destinationInterfaceEntry->isLoopback() && !destinationAddress.isUnspecified() && nextHopInterfaceEntry->getNextHopData()) {
                         NextHopRoute *route = new NextHopRoute();
                         route->setSourceType(IRoute::MANUAL);
                         route->setDestination(destinationAddress);
                         route->setInterface(sourceInterfaceEntry);
-                        L3Address nextHopAddress = nextHopInterfaceEntry->getNextHopProtocolData()->getAddress();
+                        L3Address nextHopAddress = nextHopInterfaceEntry->getNextHopData()->getAddress();
                         if (nextHopAddress != destinationAddress)
                             route->setNextHop(nextHopAddress);
                         EV_DEBUG << "Adding route " << sourceInterfaceEntry->getInterfaceFullPath() << " -> " << destinationInterfaceEntry->getInterfaceFullPath() << " as " << route->str() << endl;

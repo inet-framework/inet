@@ -156,8 +156,8 @@ std::string InterfaceEntry::detailedInfo() const
         out << " " << ipv6data->detailedInfo() << "\n";
 #endif // ifdef WITH_IPv6
 #ifdef WITH_NEXTHOP
-    if (nextHopProtocolData)
-        out << " " << nextHopProtocolData->detailedInfo() << "\n";
+    if (nextHopData)
+        out << " " << nextHopData->detailedInfo() << "\n";
 #endif // ifdef WITH_NEXTHOP
     if (isisdata)
         out << " " << ((InterfaceProtocolData *)isisdata)->str() << "\n"; // Khmm...
@@ -200,12 +200,12 @@ void InterfaceEntry::resetInterface()
         throw cRuntimeError(this, "Model error: ipv6data filled, but INET was compiled without IPv6 support");
 #endif // ifdef WITH_IPv6
 #ifdef WITH_NEXTHOP
-    if (nextHopProtocolData && nextHopProtocolData->ownerp == this)
-        delete nextHopProtocolData;
-    nextHopProtocolData = nullptr;
+    if (nextHopData && nextHopData->ownerp == this)
+        delete nextHopData;
+    nextHopData = nullptr;
 #else // ifdef WITH_NEXTHOP
-    if (nextHopProtocolData)
-        throw cRuntimeError(this, "Model error: genericNetworkProtocolData filled, but INET was compiled without Generic Network Layer support");
+    if (nextHopData)
+        throw cRuntimeError(this, "Model error: nextHopProtocolData filled, but INET was compiled without Next Hop Forwarding support");
 #endif // ifdef WITH_NEXTHOP
     if (isisdata && ((InterfaceProtocolData *)isisdata)->ownerp == this)
         delete (InterfaceProtocolData *)isisdata;
@@ -218,16 +218,16 @@ void InterfaceEntry::resetInterface()
     ieee8021ddata = nullptr;
 }
 
-void InterfaceEntry::setNextHopProtocolData(NextHopInterfaceData *p)
+void InterfaceEntry::setNextHopData(NextHopInterfaceData *p)
 {
 #ifdef WITH_NEXTHOP
-    if (nextHopProtocolData && nextHopProtocolData->ownerp == this)
-        delete nextHopProtocolData;
-    nextHopProtocolData = p;
+    if (nextHopData && nextHopData->ownerp == this)
+        delete nextHopData;
+    nextHopData = p;
     p->ownerp = this;
     configChanged(F_GENERIC_DATA);
 #else // ifdef WITH_NEXTHOP
-    throw cRuntimeError(this, "setGenericNetworkProtocolData(): INET was compiled without Generic Network Layer support");
+    throw cRuntimeError(this, "setNextHopProtocolData(): INET was compiled without Next Hop Forwarding support");
 #endif // ifdef WITH_NEXTHOP
 }
 
@@ -242,8 +242,8 @@ const L3Address InterfaceEntry::getNetworkAddress() const
         return ipv6data->getPreferredAddress();
 #endif // ifdef WITH_IPv6
 #ifdef WITH_NEXTHOP
-    if (nextHopProtocolData)
-        return nextHopProtocolData->getAddress();
+    if (nextHopData)
+        return nextHopData->getAddress();
 #endif // ifdef WITH_NEXTHOP
     return getModulePathAddress();
 }
@@ -341,7 +341,7 @@ void InterfaceEntry::joinMulticastGroup(const L3Address& address) const
         case L3Address::MAC:
         case L3Address::MODULEID:
         case L3Address::MODULEPATH:
-            getNextHopProtocolData()->joinMulticastGroup(address);
+            getNextHopData()->joinMulticastGroup(address);
             break;
 
 #endif // ifdef WITH_NEXTHOP

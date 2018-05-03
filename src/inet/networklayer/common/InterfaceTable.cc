@@ -124,7 +124,7 @@ InterfaceEntry *InterfaceTable::findInterfaceByAddress(const L3Address& address)
             InterfaceEntry *ie = elem;
             if (ie) {
 #ifdef WITH_NEXTHOP
-                if (ie->getNextHopProtocolData() && ie->getNextHopProtocolData()->getAddress() == address)
+                if (ie->getNextHopData() && ie->getNextHopData()->getAddress() == address)
                     return ie;
 #endif // ifdef WITH_NEXTHOP
                 switch (addrType) {

@@ -79,14 +79,14 @@ const char *InterfaceTableVisualizerBase::DirectiveResolver::resolveDirective(ch
                 result = interfaceEntry->ipv6Data()->getLinkLocalAddress().str();
 #endif // WITH_IPv6
 #ifdef WITH_NEXTHOP
-            else if (interfaceEntry->getNextHopProtocolData() != nullptr)
-                result = interfaceEntry->getNextHopProtocolData()->getAddress().str();
+            else if (interfaceEntry->getNextHopData() != nullptr)
+                result = interfaceEntry->getNextHopData()->getAddress().str();
 #endif // WITH_NEXTHOP
             break;
         case 'g':
 #ifdef WITH_NEXTHOP
-            if (interfaceEntry->getNextHopProtocolData() != nullptr)
-                result = interfaceEntry->getNextHopProtocolData()->getAddress().str();
+            if (interfaceEntry->getNextHopData() != nullptr)
+                result = interfaceEntry->getNextHopData()->getAddress().str();
 #endif // WITH_NEXTHOP
             break;
         case 'n':
