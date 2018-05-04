@@ -112,6 +112,14 @@ const IReceptionResult *FlatReceiverBase::computeReceptionResult(const IListenin
     return receptionResult;
 }
 
+Packet *FlatReceiverBase::computeReceivedPacket(const ISnir *snir, bool isReceptionSuccessful) const
+{
+    if (errorModel == nullptr || isReceptionSuccessful)
+        return ReceiverBase::computeReceivedPacket(snir, isReceptionSuccessful);
+    else
+        return errorModel->computeCorruptedPacket(snir);
+}
+
 } // namespace physicallayer
 
 } // namespace inet

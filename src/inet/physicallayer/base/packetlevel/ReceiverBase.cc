@@ -80,7 +80,10 @@ const IReceptionDecision *ReceiverBase::computeReceptionDecision(const IListenin
 
 const IReceptionResult *ReceiverBase::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
-    auto packet = reception->getTransmission()->getPacket()->dup();
+    bool isReceptionSuccessful = true;
+    for (auto decision : *decisions)
+        isReceptionSuccessful &= decision->isReceptionSuccessful();
+    auto packet = computeReceivedPacket(snir, isReceptionSuccessful);
     auto signalPower = computeSignalPower(listening, snir, interference);
     if (!std::isnan(signalPower.get())) {
         auto signalPowerInd = packet->addTagIfAbsent<SignalPowerInd>();
@@ -89,10 +92,6 @@ const IReceptionResult *ReceiverBase::computeReceptionResult(const IListening *l
     auto snirInd = packet->addTagIfAbsent<SnirInd>();
     snirInd->setMinimumSnir(snir->getMin());
     snirInd->setMaximumSnir(snir->getMax());
-    bool isReceptionSuccessful = true;
-    for (auto decision : *decisions)
-        isReceptionSuccessful &= decision->isReceptionSuccessful();
-    packet->setBitError(!isReceptionSuccessful);
     return new ReceptionResult(reception, decisions, packet);
 }
 
@@ -106,6 +105,18 @@ W ReceiverBase::computeSignalPower(const IListening *listening, const ISnir *sni
         auto signalPower = signalPlusNoise == nullptr ? W(NaN) : signalPlusNoise->computeMinPower(listening->getStartTime(), listening->getEndTime());
         delete signalPlusNoise;
         return signalPower;
+    }
+}
+
+Packet *ReceiverBase::computeReceivedPacket(const ISnir *snir, bool isReceptionSuccessful) const
+{
+    auto packet = snir->getReception()->getTransmission()->getPacket();
+    if (isReceptionSuccessful)
+        return packet->dup();
+    else {
+        auto corruptedPacket = packet->dup();
+        corruptedPacket->setBitError(true);
+        return corruptedPacket;
     }
 }
 
