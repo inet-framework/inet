@@ -207,12 +207,12 @@ class INET_API Ldp : public cSimpleModule, public TcpSocket::ICallback, public I
 
     /** @name TcpSocket::ICallback callback methods */
     //@{
-    virtual void socketEstablished(TcpSocket *socket, void *yourPtr) override;
-    virtual void socketDataArrived(TcpSocket *socket, void *yourPtr, Packet *msg, bool urgent) override;
-    virtual void socketPeerClosed(TcpSocket *socket, void *yourPtr) override;
-    virtual void socketClosed(TcpSocket *socket, void *yourPtr) override;
-    virtual void socketFailure(TcpSocket *socket, void *yourPtr, int code) override;
-    virtual void socketStatusArrived(TcpSocket *socket, void *yourPtr, TcpStatusInfo *status) override { delete status; }
+    virtual void socketEstablished(TcpSocket *socket) override;
+    virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override;
+    virtual void socketPeerClosed(TcpSocket *socket) override;
+    virtual void socketClosed(TcpSocket *socket) override;
+    virtual void socketFailure(TcpSocket *socket, int code) override;
+    virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override { delete status; }
     //@}
 
     // IIngressClassifier

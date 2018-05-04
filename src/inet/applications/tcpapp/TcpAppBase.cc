@@ -107,13 +107,13 @@ void TcpAppBase::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, TcpSocket::stateName(socket.getState()));
 }
 
-void TcpAppBase::socketEstablished(TcpSocket *, void *)
+void TcpAppBase::socketEstablished(TcpSocket *)
 {
     // *redefine* to perform or schedule first sending
     EV_INFO << "connected\n";
 }
 
-void TcpAppBase::socketDataArrived(TcpSocket *, void *, Packet *msg, bool)
+void TcpAppBase::socketDataArrived(TcpSocket *, Packet *msg, bool)
 {
     // *redefine* to perform or schedule next sending
     packetsRcvd++;
@@ -122,8 +122,9 @@ void TcpAppBase::socketDataArrived(TcpSocket *, void *, Packet *msg, bool)
     delete msg;
 }
 
-void TcpAppBase::socketPeerClosed(TcpSocket *, void *)
+void TcpAppBase::socketPeerClosed(TcpSocket *socket_)
 {
+    ASSERT(socket_ == &socket);
     // close the connection (if not already closed)
     if (socket.getState() == TcpSocket::PEER_CLOSED) {
         EV_INFO << "remote TCP closed, closing here as well\n";
@@ -131,13 +132,13 @@ void TcpAppBase::socketPeerClosed(TcpSocket *, void *)
     }
 }
 
-void TcpAppBase::socketClosed(TcpSocket *, void *)
+void TcpAppBase::socketClosed(TcpSocket *)
 {
     // *redefine* to start another session etc.
     EV_INFO << "connection closed\n";
 }
 
-void TcpAppBase::socketFailure(TcpSocket *, void *, int code)
+void TcpAppBase::socketFailure(TcpSocket *, int code)
 {
     // subclasses may override this function, and add code try to reconnect after a delay.
     EV_WARN << "connection broken\n";

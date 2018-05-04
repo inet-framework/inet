@@ -613,9 +613,9 @@ void Ldp::processMessageFromTCP(cMessage *msg)
     socket->processMessage(msg);
 }
 
-void Ldp::socketEstablished(TcpSocket *, void *yourPtr)
+void Ldp::socketEstablished(TcpSocket *socket)
 {
-    peer_info& peer = myPeers[(uintptr_t)yourPtr];
+    peer_info& peer = myPeers[(uintptr_t)socket->getYourPtr()];
     EV_INFO << "TCP connection established with peer " << peer.peerIP << "\n";
 
     // we must update all entries with nextHop == peerIP
@@ -624,18 +624,18 @@ void Ldp::socketEstablished(TcpSocket *, void *yourPtr)
     // FIXME start LDP session setup (if we're on the active side?)
 }
 
-void Ldp::socketDataArrived(TcpSocket *, void *yourPtr, Packet *msg, bool)
+void Ldp::socketDataArrived(TcpSocket *socket, Packet *msg, bool)
 {
-    peer_info& peer = myPeers[(uintptr_t)yourPtr];
+    peer_info& peer = myPeers[(uintptr_t)socket->getYourPtr()];
     EV_INFO << "Message arrived over TCP from peer " << peer.peerIP << "\n";
 
     delete msg->removeControlInfo();
     processLDPPacketFromTCP(msg);
 }
 
-void Ldp::socketPeerClosed(TcpSocket *, void *yourPtr)
+void Ldp::socketPeerClosed(TcpSocket *socket)
 {
-    peer_info& peer = myPeers[(uintptr_t)yourPtr];
+    peer_info& peer = myPeers[(uintptr_t)socket->getYourPtr()];
     EV_INFO << "Peer " << peer.peerIP << " closed TCP connection\n";
 
     ASSERT(false);
@@ -650,9 +650,9 @@ void Ldp::socketPeerClosed(TcpSocket *, void *yourPtr)
  */
 }
 
-void Ldp::socketClosed(TcpSocket *, void *yourPtr)
+void Ldp::socketClosed(TcpSocket *socket)
 {
-    peer_info& peer = myPeers[(uintptr_t)yourPtr];
+    peer_info& peer = myPeers[(uintptr_t)socket->getYourPtr()];
     EV_INFO << "TCP connection to peer " << peer.peerIP << " closed\n";
 
     ASSERT(false);
@@ -660,9 +660,9 @@ void Ldp::socketClosed(TcpSocket *, void *yourPtr)
     // FIXME what now? reconnect after a delay?
 }
 
-void Ldp::socketFailure(TcpSocket *, void *yourPtr, int code)
+void Ldp::socketFailure(TcpSocket *socket, int code)
 {
-    peer_info& peer = myPeers[(uintptr_t)yourPtr];
+    peer_info& peer = myPeers[(uintptr_t)socket->getYourPtr()];
     EV_INFO << "TCP connection to peer " << peer.peerIP << " broken\n";
 
     ASSERT(false);

@@ -67,10 +67,10 @@ class INET_API TcpSessionApp : public TcpAppBase
     virtual void sendData();
 
     virtual void handleTimer(cMessage *msg) override;
-    virtual void socketEstablished(TcpSocket *socket, void *yourPtr) override;
-    virtual void socketDataArrived(TcpSocket *socket, void *yourPtr, Packet *msg, bool urgent) override;
-    virtual void socketClosed(TcpSocket *socket, void *yourPtr) override;
-    virtual void socketFailure(TcpSocket *socket, void *yourPtr, int code) override;
+    virtual void socketEstablished(TcpSocket *socket) override;
+    virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override;
+    virtual void socketClosed(TcpSocket *socket) override;
+    virtual void socketFailure(TcpSocket *socket, int code) override;
 
   public:
     TcpSessionApp() {}

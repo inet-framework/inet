@@ -67,8 +67,8 @@ TcpSocket::TcpSocket(cMessage *msg)
 TcpSocket::~TcpSocket()
 {
     if (cb)
-        cb->socketDeleted(this, yourPtr);
-    setCallbackObject(nullptr, nullptr);
+        cb->socketDeleted(this);
+    setCallbackObject(nullptr);
 }
 
 const char *TcpSocket::stateName(TcpSocket::State state)
@@ -256,7 +256,7 @@ void TcpSocket::processMessage(cMessage *msg)
     switch (msg->getKind()) {
         case TCP_I_DATA:
             if (cb)
-                cb->socketDataArrived(this, yourPtr, check_and_cast<Packet*>(msg), false);
+                cb->socketDataArrived(this, check_and_cast<Packet*>(msg), false);
             else
                 delete msg;
 
@@ -264,7 +264,7 @@ void TcpSocket::processMessage(cMessage *msg)
 
         case TCP_I_URGENT_DATA:
             if (cb)
-                cb->socketDataArrived(this, yourPtr, check_and_cast<Packet*>(msg), true);
+                cb->socketDataArrived(this, check_and_cast<Packet*>(msg), true);
             else
                 delete msg;
 
@@ -276,7 +276,7 @@ void TcpSocket::processMessage(cMessage *msg)
             accept(availableInfo->getNewSocketId());
 
             if (cb)
-                cb->socketAvailable(this, yourPtr, availableInfo);
+                cb->socketAvailable(this, availableInfo);
             delete msg;
 
             break;
@@ -296,7 +296,7 @@ void TcpSocket::processMessage(cMessage *msg)
             delete msg;
 
             if (cb)
-                cb->socketEstablished(this, yourPtr);
+                cb->socketEstablished(this);
 
             break;
 
@@ -305,7 +305,7 @@ void TcpSocket::processMessage(cMessage *msg)
             delete msg;
 
             if (cb)
-                cb->socketPeerClosed(this, yourPtr);
+                cb->socketPeerClosed(this);
 
             break;
 
@@ -314,7 +314,7 @@ void TcpSocket::processMessage(cMessage *msg)
             delete msg;
 
             if (cb)
-                cb->socketClosed(this, yourPtr);
+                cb->socketClosed(this);
 
             break;
 
@@ -324,7 +324,7 @@ void TcpSocket::processMessage(cMessage *msg)
             sockstate = SOCKERROR;
 
             if (cb)
-                cb->socketFailure(this, yourPtr, msg->getKind());
+                cb->socketFailure(this, msg->getKind());
 
             delete msg;
             break;
@@ -334,7 +334,7 @@ void TcpSocket::processMessage(cMessage *msg)
             delete msg;
 
             if (cb)
-                cb->socketStatusArrived(this, yourPtr, status);
+                cb->socketStatusArrived(this, status);
 
             break;
 

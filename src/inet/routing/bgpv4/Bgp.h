@@ -50,11 +50,11 @@ class INET_API Bgp : public cSimpleModule, public ILifecycle, public TcpSocket::
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
     virtual void finish() override;
 
-    virtual void socketDataArrived(TcpSocket *socket, void *yourPtr, Packet *msg, bool urgent) override;
-    virtual void socketEstablished(TcpSocket *socket, void *yourPtr) override;
-    virtual void socketFailure(TcpSocket *socket, void *yourPtr, int code) override;
-    virtual void socketPeerClosed(TcpSocket *socket, void *yourPtr) override {}
-    virtual void socketClosed(TcpSocket *socket, void *yourPtr) override {}
+    virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override;
+    virtual void socketEstablished(TcpSocket *socket) override;
+    virtual void socketFailure(TcpSocket *socket, int code) override;
+    virtual void socketPeerClosed(TcpSocket *socket) override {}
+    virtual void socketClosed(TcpSocket *socket) override {}
 
     friend class BgpSession;
     //functions used by the BgpSession class

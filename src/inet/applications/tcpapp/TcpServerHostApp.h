@@ -75,12 +75,12 @@ class INET_API TcpServerThreadBase : public cSimpleModule, public TcpSocket::ICa
     TcpSocket *sock;    // ptr into socketMap managed by TcpServerHostApp
 
     // internal: TcpSocket::ICallback methods
-    virtual void socketDataArrived(TcpSocket *socket, void *, Packet *msg, bool urgent) override { dataArrived(msg, urgent); }
-    virtual void socketEstablished(TcpSocket *socket, void *) override { established(); }
-    virtual void socketPeerClosed(TcpSocket *socket, void *) override { peerClosed(); }
-    virtual void socketClosed(TcpSocket *socket, void *) override { closed(); }
-    virtual void socketFailure(TcpSocket *socket, void *, int code) override { failure(code); }
-    virtual void socketStatusArrived(TcpSocket *socket, void *, TcpStatusInfo *status) override { statusArrived(status); }
+    virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override { dataArrived(msg, urgent); }
+    virtual void socketEstablished(TcpSocket *socket) override { established(); }
+    virtual void socketPeerClosed(TcpSocket *socket) override { peerClosed(); }
+    virtual void socketClosed(TcpSocket *socket) override { closed(); }
+    virtual void socketFailure(TcpSocket *socket, int code) override { failure(code); }
+    virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override { statusArrived(status); }
 
     virtual void refreshDisplay() const override;
 

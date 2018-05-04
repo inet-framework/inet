@@ -102,7 +102,7 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TcpSocket::ICallback
      * open after the handler has completed. A counter for pending messages is incremented for each
      * request sent.
      */
-    virtual void socketEstablished(TcpSocket *socket, void *yourPtr) override;
+    virtual void socketEstablished(TcpSocket *socket) override;
 
     /*
      * Handler for socket data arrival.
@@ -110,34 +110,34 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TcpSocket::ICallback
      * virtual method of the parent class. The counter for pending replies is decremented for each one handled.
      * Close is called on the socket once the counter reaches zero.
      */
-    virtual void socketDataArrived(TcpSocket *socket, void *yourPtr, Packet *msg, bool urgent) override;
+    virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override;
 
     /*
      * Handler for the socket closed by peer event.
      * Called by the socket->processMessage(msg) handler call in handleMessage.
      */
-    virtual void socketPeerClosed(TcpSocket *socket, void *yourPtr) override;
+    virtual void socketPeerClosed(TcpSocket *socket) override;
 
     /*
      * Socket closed handler.
      * Called by the socket->processMessage(msg) handler call in handleMessage.
      */
-    virtual void socketClosed(TcpSocket *socket, void *yourPtr) override;
+    virtual void socketClosed(TcpSocket *socket) override;
 
     /*
      * Socket failure handler.
      * This method does nothing but reporting and statistics collection at this time.
      * @todo Implement reconnect if necessary. See the INET demos.
      */
-    virtual void socketFailure(TcpSocket *socket, void *yourPtr, int code) override;
+    virtual void socketFailure(TcpSocket *socket, int code) override;
 
     /*
      * Socket status arrived handler.
      * Called by the socket->processMessage(msg) handler call in handleMessage.
      */
-    virtual void socketStatusArrived(TcpSocket *socket, void *yourPtr, TcpStatusInfo *status) override;
+    virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override;
 
-    virtual void socketDeleted(TcpSocket *socket, void *yourPtr) override;
+    virtual void socketDeleted(TcpSocket *socket) override;
 
     // Socket establishment and data submission
     /*

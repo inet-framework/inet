@@ -39,10 +39,10 @@ class INET_API TelnetApp : public TcpAppBase, public ILifecycle
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleTimer(cMessage *msg) override;
-    virtual void socketEstablished(TcpSocket *socket, void *yourPtr) override;
-    virtual void socketDataArrived(TcpSocket *socket, void *yourPtr, Packet *msg, bool urgent) override;
-    virtual void socketClosed(TcpSocket *socket, void *yourPtr) override;
-    virtual void socketFailure(TcpSocket *socket, void *yourPtr, int code) override;
+    virtual void socketEstablished(TcpSocket *socket) override;
+    virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override;
+    virtual void socketClosed(TcpSocket *socket) override;
+    virtual void socketFailure(TcpSocket *socket, int code) override;
     virtual void checkedScheduleAt(simtime_t t, cMessage *msg);
     virtual void sendGenericAppMsg(int numBytes, int expectedReplyBytes);
 

@@ -71,13 +71,13 @@ class TcpStatusInfo;
  * class MyModule : public cSimpleModule, public TcpSocket::ICallback
  * {
  *     TcpSocket socket;
- *     virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
- *     virtual void socketFailure(int connId, void *yourPtr, int code);
+ *     virtual void socketDataArrived(TcpSocket *tcpSocket, cPacket *msg, bool urgent);
+ *     virtual void socketFailure(int connId, int code);
  *     ...
  * };
  *
  * void MyModule::initialize() {
- *     socket.setCallbackObject(this,nullptr);
+ *     socket.setCallbackObject(this, nullptr);
  * }
  *
  * void MyModule::handleMessage(cMessage *msg) {
@@ -87,12 +87,12 @@ class TcpStatusInfo;
  *         ...
  * }
  *
- * void MyModule::socketDataArrived(int, void *, cPacket *msg, bool) {
+ * void MyModule::socketDataArrived(TcpSocket *tcpSocket, cPacket *msg, bool) {
  *     EV << "Received TCP data, " << msg->getByteLength() << " bytes\\n";
  *     delete msg;
  * }
  *
- * void MyModule::socketFailure(int, void *, int code) {
+ * void MyModule::socketFailure(TcpSocket *tcpSocket, int code) {
  *     if (code==TCP_I_CONNECTION_RESET)
  *         EV << "Connection reset!\\n";
  *     else if (code==TCP_I_CONNECTION_REFUSED)
@@ -140,16 +140,14 @@ class INET_API TcpSocket : public ISocket
     {
       public:
         virtual ~ICallback() {}
-        virtual void socketDataArrived(TcpSocket* socket, void *yourPtr, Packet *msg, bool urgent) = 0;
-        virtual void socketAvailable(TcpSocket *socket, void *yourPtr, TcpAvailableInfo *availableInfo) {}
-        virtual void socketEstablished(TcpSocket *socket, void *yourPtr) {}
-        virtual void socketPeerClosed(TcpSocket *socket, void *yourPtr) {}
-        virtual void socketClosed(TcpSocket *socket, void *yourPtr) {}
-        virtual void socketFailure(TcpSocket *socket, void *yourPtr, int code) {}
-        virtual void socketStatusArrived(TcpSocket *socket, void *yourPtr, TcpStatusInfo *status) { delete status; }
-        virtual void socketDeleted(TcpSocket *socket, void *yourPtr) {}
-      protected:
-        virtual void socketDeleted(ISocket *socket, void *yourPtr) override {socketDeleted(check_and_cast<TcpSocket*>(socket), yourPtr); }
+        virtual void socketDataArrived(TcpSocket* socket, Packet *msg, bool urgent) = 0;
+        virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) {}
+        virtual void socketEstablished(TcpSocket *socket) {}
+        virtual void socketPeerClosed(TcpSocket *socket) {}
+        virtual void socketClosed(TcpSocket *socket) {}
+        virtual void socketFailure(TcpSocket *socket, int code) {}
+        virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) { delete status; }
+        virtual void socketDeleted(TcpSocket *socket) {}
     };
 
     enum State { NOT_BOUND, BOUND, LISTENING, CONNECTING, CONNECTED, PEER_CLOSED, LOCALLY_CLOSED, CLOSED, SOCKERROR };
@@ -199,6 +197,8 @@ class INET_API TcpSocket : public ISocket
      * (or TcpSocket).
      */
     int getConnectionId() const override { return connId; }
+
+    void *getYourPtr() const { return yourPtr; }
 
     /**
      * Returns the socket state, one of NOT_BOUND, CLOSED, LISTENING, CONNECTING,

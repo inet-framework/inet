@@ -151,20 +151,19 @@ void HttpBrowser::sendRequestsToServer(std::string www, HttpRequestQueue queue)
     submitToSocket(szModuleName, connectPort, queue);
 }
 
-void HttpBrowser::socketEstablished(TcpSocket *socket, void *yourPtr)
+void HttpBrowser::socketEstablished(TcpSocket *socket)
 {
     int connId = socket->getConnectionId();
     EV_DEBUG << "Socket with id " << connId << " established" << endl;
 
     socketsOpened++;
 
-    if (yourPtr == nullptr) {
+    // Get the socket and associated data structure.
+    SockData *sockdata = (SockData *)socket->getYourPtr();
+    if (sockdata == nullptr) {
         EV_ERROR << "SocketEstablished failure. Null pointer" << endl;
         return;
     }
-
-    // Get the socket and associated data structure.
-    SockData *sockdata = (SockData *)yourPtr;
     ASSERT(socket == sockdata->socket);
     if (sockdata->messageQueue.empty()) {
         EV_INFO << "No data to send on socket with connection id " << connId << ". Closing" << endl;
@@ -184,15 +183,15 @@ void HttpBrowser::socketEstablished(TcpSocket *socket, void *yourPtr)
     }
 }
 
-void HttpBrowser::socketDataArrived(TcpSocket *socket, void *yourPtr, Packet *msg, bool urgent)
+void HttpBrowser::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
 {
     EV_DEBUG << "Socket data arrived on connection " << socket->getConnectionId() << ": " << msg->getName() << endl;
-    if (yourPtr == nullptr) {
+    SockData *sockdata = (SockData *)socket->getYourPtr();
+    if (sockdata == nullptr) {
         EV_ERROR << "socketDataArrivedfailure. Null pointer" << endl;
         return;
     }
 
-    SockData *sockdata = (SockData *)yourPtr;
     ASSERT(socket == sockdata->socket);
 
     sockdata->queue.push(msg->peekDataAt(B(0), msg->getDataLength()));
@@ -209,22 +208,22 @@ void HttpBrowser::socketDataArrived(TcpSocket *socket, void *yourPtr, Packet *ms
     // Message deleted in handler - do not delete here!
 }
 
-void HttpBrowser::socketStatusArrived(TcpSocket *socket, void *yourPtr, TcpStatusInfo *status)
+void HttpBrowser::socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status)
 {
     // This is obviously not used at the present time.
     EV_INFO << "SOCKET STATUS ARRIVED. Socket: " << socket->getConnectionId() << endl;
 }
 
-void HttpBrowser::socketPeerClosed(TcpSocket *socket, void *yourPtr)
+void HttpBrowser::socketPeerClosed(TcpSocket *socket)
 {
     int connId = socket->getConnectionId();
     EV_DEBUG << "Socket " << connId << " closed by peer" << endl;
-    if (yourPtr == nullptr) {
+    SockData *sockdata = (SockData *)socket->getYourPtr();
+    if (sockdata == nullptr) {
         EV_ERROR << "socketPeerClosed failure. Null pointer" << endl;
         return;
     }
 
-    SockData *sockdata = (SockData *)yourPtr;
     ASSERT(socket == sockdata->socket);
 
     // close the connection (if not already closed)
@@ -234,29 +233,30 @@ void HttpBrowser::socketPeerClosed(TcpSocket *socket, void *yourPtr)
     }
 }
 
-void HttpBrowser::socketClosed(TcpSocket *socket, void *yourPtr)
+void HttpBrowser::socketClosed(TcpSocket *socket)
 {
     int connId = socket->getConnectionId();
     EV_INFO << "Socket " << connId << " closed" << endl;
 
-    if (yourPtr == nullptr) {
+    SockData *sockdata = (SockData *)socket->getYourPtr();
+    if (sockdata == nullptr) {
         EV_ERROR << "socketClosed failure. Null pointer" << endl;
         return;
     }
 
-    SockData *sockdata = (SockData *)yourPtr;
     ASSERT(socket == sockdata->socket);
     sockCollection.removeSocket(socket);
     delete socket;
 }
 
-void HttpBrowser::socketFailure(TcpSocket *socket, void *yourPtr, int code)
+void HttpBrowser::socketFailure(TcpSocket *socket, int code)
 {
     int connId = socket->getConnectionId();
     EV_WARN << "connection broken. Connection id " << connId << endl;
     numBroken++;
 
-    if (yourPtr == nullptr) {
+    SockData *sockdata = (SockData *)socket->getYourPtr();
+    if (sockdata == nullptr) {
         EV_ERROR << "socketFailure failure. Null pointer" << endl;
         return;
     }
@@ -266,19 +266,18 @@ void HttpBrowser::socketFailure(TcpSocket *socket, void *yourPtr, int code)
     else if (code == TCP_I_CONNECTION_REFUSED)
         EV_WARN << "Connection refused!\n";
 
-    SockData *sockdata = (SockData *)yourPtr;
     ASSERT(socket == sockdata->socket);
     sockCollection.removeSocket(socket);
     delete socket;
 }
 
-void HttpBrowser::socketDeleted(TcpSocket *socket, void *yourPtr)
+void HttpBrowser::socketDeleted(TcpSocket *socket)
 {
-    if (yourPtr == nullptr) {
+    SockData *sockdata = (SockData *)socket->getYourPtr();
+    if (sockdata == nullptr) {
         throw cRuntimeError("Model error: socketDelete failure. yourPtr is null pointer");
     }
 
-    SockData *sockdata = (SockData *)yourPtr;
     // TODO: socket is already deleted, no?
     ASSERT(socket == sockdata->socket);
     HttpRequestQueue& queue = sockdata->messageQueue;

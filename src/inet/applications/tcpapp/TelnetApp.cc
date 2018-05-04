@@ -150,9 +150,9 @@ void TelnetApp::sendGenericAppMsg(int numBytes, int expectedReplyBytes)
     sendPacket(packet);
 }
 
-void TelnetApp::socketEstablished(TcpSocket *socket, void *ptr)
+void TelnetApp::socketEstablished(TcpSocket *socket)
 {
-    TcpAppBase::socketEstablished(socket, ptr);
+    TcpAppBase::socketEstablished(socket);
 
     // schedule first sending
     numLinesToType = par("numCommands");
@@ -161,10 +161,10 @@ void TelnetApp::socketEstablished(TcpSocket *socket, void *ptr)
     checkedScheduleAt(simTime() + par("thinkTime"), timeoutMsg);
 }
 
-void TelnetApp::socketDataArrived(TcpSocket *socket, void *ptr, Packet *msg, bool urgent)
+void TelnetApp::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
 {
     int len = msg->getByteLength();
-    TcpAppBase::socketDataArrived(socket, ptr, msg, urgent);
+    TcpAppBase::socketDataArrived(socket, msg, urgent);
 
     if (len == 1) {
         // this is an echo, ignore
@@ -195,9 +195,9 @@ void TelnetApp::socketDataArrived(TcpSocket *socket, void *ptr, Packet *msg, boo
     }
 }
 
-void TelnetApp::socketClosed(TcpSocket *socket, void *ptr)
+void TelnetApp::socketClosed(TcpSocket *socket)
 {
-    TcpAppBase::socketClosed(socket, ptr);
+    TcpAppBase::socketClosed(socket);
 
     // start another session after a delay
     cancelEvent(timeoutMsg);
@@ -205,9 +205,9 @@ void TelnetApp::socketClosed(TcpSocket *socket, void *ptr)
     checkedScheduleAt(simTime() + par("idleInterval"), timeoutMsg);
 }
 
-void TelnetApp::socketFailure(TcpSocket *socket, void *ptr, int code)
+void TelnetApp::socketFailure(TcpSocket *socket, int code)
 {
-    TcpAppBase::socketFailure(socket, ptr, code);
+    TcpAppBase::socketFailure(socket, code);
 
     // reconnect after a delay
     cancelEvent(timeoutMsg);
