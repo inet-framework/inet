@@ -35,7 +35,7 @@ namespace inet {
  * its member functions (bind(), connect(), sendTo(), etc.) to create and
  * configure a socket, and to send datagrams.
  *
- * UdpSocket chooses and remembers the sockId for you, assembles and sends command
+ * UdpSocket chooses and remembers the socketId for you, assembles and sends command
  * packets such as UDP_C_BIND to UDP, and can also help you deal with packets and
  * notification messages arriving from UDP.
  *
@@ -71,7 +71,7 @@ class INET_API UdpSocket : public ISocket
         virtual void socketErrorArrived(UdpSocket *socket, cMessage *msg) { delete msg; }
     };
   protected:
-    int sockId;
+    int socketId;
     ICallback *cb = nullptr;
     void *userData = nullptr;
     cGate *gateToUdp;
@@ -97,7 +97,7 @@ class INET_API UdpSocket : public ISocket
     /**
      * Returns the internal socket Id.
      */
-    int getSocketId() const override { return sockId; }
+    int getSocketId() const override { return socketId; }
 
     /**
      * Generates a new socket id.
@@ -256,7 +256,7 @@ class INET_API UdpSocket : public ISocket
     //@{
     /**
      * Returns true if the message belongs to this socket instance (message
-     * has a UdpControlInfo as getControlInfo(), and the sockId in it matches
+     * has a UdpControlInfo as getControlInfo(), and the socketId in it matches
      * that of the socket.)
      */
     virtual bool belongsToSocket(cMessage *msg) const override;

@@ -34,9 +34,9 @@ namespace inet {
 
 UdpSocket::UdpSocket()
 {
-    // don't allow user-specified sockIds because they may conflict with
+    // don't allow user-specified socketIds because they may conflict with
     // automatically assigned ones.
-    sockId = generateSocketId();
+    socketId = generateSocketId();
     gateToUdp = nullptr;
 }
 
@@ -58,7 +58,7 @@ void UdpSocket::sendToUDP(cMessage *msg)
 
     auto& tags = getTags(msg);
     tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::udp);
-    tags.addTagIfAbsent<SocketReq>()->setSocketId(sockId);
+    tags.addTagIfAbsent<SocketReq>()->setSocketId(socketId);
     check_and_cast<cSimpleModule *>(gateToUdp->getOwnerModule())->send(msg, gateToUdp);
 }
 
@@ -300,7 +300,7 @@ bool UdpSocket::belongsToSocket(cMessage *msg) const
 {
     auto& tags = getTags(msg);
     int socketId = tags.getTag<SocketInd>()->getSocketId();
-    return socketId == sockId;
+    return socketId == this->socketId;
 }
 
 std::string UdpSocket::getReceivedPacketInfo(Packet *pk)
