@@ -90,16 +90,16 @@ void ApskRadio::encapsulate(Packet *packet) const
 
 void ApskRadio::decapsulate(Packet *packet) const
 {
-    const auto& phyHeader = packet->popAtFront<ApskPhyHeader>();
+    const auto& phyHeader = packet->popAtFront<ApskPhyHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT);
     b headerLength = phyHeader->getChunkLength();
     if (auto flatTransmitter = dynamic_cast<const FlatTransmitterBase *>(transmitter)) {
         headerLength = flatTransmitter->getHeaderLength();
         if (headerLength > phyHeader->getChunkLength())
-            packet->popAtFront(headerLength - phyHeader->getChunkLength());
+            packet->popAtFront(headerLength - phyHeader->getChunkLength(), Chunk::PF_ALLOW_INCORRECT);
     }
     auto paddingLength = computePaddingLength(headerLength + B(phyHeader->getLengthField()), nullptr, getModulation());
     if (paddingLength != b(0))
-        packet->popAtBack(paddingLength);
+        packet->popAtBack(paddingLength, Chunk::PF_ALLOW_INCORRECT);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(phyHeader->getPayloadProtocol());
 }
 
