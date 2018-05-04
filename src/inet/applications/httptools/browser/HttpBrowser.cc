@@ -159,7 +159,7 @@ void HttpBrowser::socketEstablished(TcpSocket *socket)
     socketsOpened++;
 
     // Get the socket and associated data structure.
-    SockData *sockdata = (SockData *)socket->getYourPtr();
+    SockData *sockdata = (SockData *)socket->getUserData();
     if (sockdata == nullptr) {
         EV_ERROR << "SocketEstablished failure. Null pointer" << endl;
         return;
@@ -186,7 +186,7 @@ void HttpBrowser::socketEstablished(TcpSocket *socket)
 void HttpBrowser::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
 {
     EV_DEBUG << "Socket data arrived on connection " << socket->getSocketId() << ": " << msg->getName() << endl;
-    SockData *sockdata = (SockData *)socket->getYourPtr();
+    SockData *sockdata = (SockData *)socket->getUserData();
     if (sockdata == nullptr) {
         EV_ERROR << "socketDataArrivedfailure. Null pointer" << endl;
         return;
@@ -218,7 +218,7 @@ void HttpBrowser::socketPeerClosed(TcpSocket *socket)
 {
     int connId = socket->getSocketId();
     EV_DEBUG << "Socket " << connId << " closed by peer" << endl;
-    SockData *sockdata = (SockData *)socket->getYourPtr();
+    SockData *sockdata = (SockData *)socket->getUserData();
     if (sockdata == nullptr) {
         EV_ERROR << "socketPeerClosed failure. Null pointer" << endl;
         return;
@@ -238,7 +238,7 @@ void HttpBrowser::socketClosed(TcpSocket *socket)
     int connId = socket->getSocketId();
     EV_INFO << "Socket " << connId << " closed" << endl;
 
-    SockData *sockdata = (SockData *)socket->getYourPtr();
+    SockData *sockdata = (SockData *)socket->getUserData();
     if (sockdata == nullptr) {
         EV_ERROR << "socketClosed failure. Null pointer" << endl;
         return;
@@ -255,7 +255,7 @@ void HttpBrowser::socketFailure(TcpSocket *socket, int code)
     EV_WARN << "connection broken. Connection id " << connId << endl;
     numBroken++;
 
-    SockData *sockdata = (SockData *)socket->getYourPtr();
+    SockData *sockdata = (SockData *)socket->getUserData();
     if (sockdata == nullptr) {
         EV_ERROR << "socketFailure failure. Null pointer" << endl;
         return;
@@ -273,7 +273,7 @@ void HttpBrowser::socketFailure(TcpSocket *socket, int code)
 
 void HttpBrowser::socketDeleted(TcpSocket *socket)
 {
-    SockData *sockdata = (SockData *)socket->getYourPtr();
+    SockData *sockdata = (SockData *)socket->getUserData();
     if (sockdata == nullptr) {
         throw cRuntimeError("Model error: socketDelete failure. yourPtr is null pointer");
     }

@@ -97,7 +97,7 @@ void HttpServer::socketEstablished(TcpSocket *socket)
 
 void HttpServer::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
 {
-    SockData *sockdata = (SockData *)socket->getYourPtr();
+    SockData *sockdata = (SockData *)socket->getUserData();
     if (sockdata == nullptr) {
         EV_ERROR << "Socket establish failure. Null pointer" << endl;
         return;
@@ -122,7 +122,7 @@ void HttpServer::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
 
 void HttpServer::socketPeerClosed(TcpSocket *socket)
 {
-    SockData *sockdata = (SockData *)socket->getYourPtr();
+    SockData *sockdata = (SockData *)socket->getUserData();
     if (sockdata == nullptr) {
         EV_ERROR << "Socket establish failure. Null pointer" << endl;
         return;
@@ -140,7 +140,7 @@ void HttpServer::socketClosed(TcpSocket *socket)
 {
     EV_INFO << "connection closed. Connection id " << socket->getSocketId() << endl;
 
-    SockData *sockdata = (SockData *)socket->getYourPtr();
+    SockData *sockdata = (SockData *)socket->getUserData();
     if (sockdata == nullptr) {
         EV_ERROR << "Socket establish failure. Null pointer" << endl;
         return;
@@ -159,7 +159,7 @@ void HttpServer::socketFailure(TcpSocket *socket, int code)
 
     EV_INFO << "connection closed. Connection id " << connId << endl;
 
-    SockData *sockdata = (SockData *)socket->getYourPtr();
+    SockData *sockdata = (SockData *)socket->getUserData();
     if (sockdata == nullptr) {
         EV_ERROR << "Socket establish failure. Null pointer" << endl;
         return;
@@ -178,7 +178,7 @@ void HttpServer::socketFailure(TcpSocket *socket, int code)
 
 void HttpServer::socketDeleted(TcpSocket *socket)
 {
-    SockData *sockdata = (SockData *)socket->getYourPtr();
+    SockData *sockdata = (SockData *)socket->getUserData();
     delete sockdata;
 }
 

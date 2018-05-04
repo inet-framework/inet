@@ -608,7 +608,7 @@ void Ldp::openTCPConnectionToPeer(int peerIndex)
 
 void Ldp::socketEstablished(TcpSocket *socket)
 {
-    peer_info& peer = myPeers[(uintptr_t)socket->getYourPtr()];
+    peer_info& peer = myPeers[(uintptr_t)socket->getUserData()];
     EV_INFO << "TCP connection established with peer " << peer.peerIP << "\n";
 
     // we must update all entries with nextHop == peerIP
@@ -645,7 +645,7 @@ void Ldp::socketAvailable(TcpSocket *socketocket, TcpAvailableInfo *availableInf
 
 void Ldp::socketDataArrived(TcpSocket *socket, Packet *msg, bool)
 {
-    peer_info& peer = myPeers[(uintptr_t)socket->getYourPtr()];
+    peer_info& peer = myPeers[(uintptr_t)socket->getUserData()];
     EV_INFO << "Message arrived over TCP from peer " << peer.peerIP << "\n";
 
     delete msg->removeControlInfo();
@@ -654,7 +654,7 @@ void Ldp::socketDataArrived(TcpSocket *socket, Packet *msg, bool)
 
 void Ldp::socketPeerClosed(TcpSocket *socket)
 {
-    peer_info& peer = myPeers[(uintptr_t)socket->getYourPtr()];
+    peer_info& peer = myPeers[(uintptr_t)socket->getUserData()];
     EV_INFO << "Peer " << peer.peerIP << " closed TCP connection\n";
 
     ASSERT(false);
@@ -671,7 +671,7 @@ void Ldp::socketPeerClosed(TcpSocket *socket)
 
 void Ldp::socketClosed(TcpSocket *socket)
 {
-    peer_info& peer = myPeers[(uintptr_t)socket->getYourPtr()];
+    peer_info& peer = myPeers[(uintptr_t)socket->getUserData()];
     EV_INFO << "TCP connection to peer " << peer.peerIP << " closed\n";
 
     ASSERT(false);
@@ -681,7 +681,7 @@ void Ldp::socketClosed(TcpSocket *socket)
 
 void Ldp::socketFailure(TcpSocket *socket, int code)
 {
-    peer_info& peer = myPeers[(uintptr_t)socket->getYourPtr()];
+    peer_info& peer = myPeers[(uintptr_t)socket->getUserData()];
     EV_INFO << "TCP connection to peer " << peer.peerIP << " broken\n";
 
     ASSERT(false);
