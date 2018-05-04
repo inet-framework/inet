@@ -41,6 +41,7 @@ void ErrorModelBase::initialize(int stage)
 
 bool ErrorModelBase::hasProbabilisticError(b length, double ber) const
 {
+    ASSERT(0.0 < ber && ber <= 1.0);
     return dblrand() < 1 - std::pow((1 - ber), length.get());
 }
 
@@ -131,7 +132,6 @@ Packet *ErrorModelBase::computeCorruptedPacket(const ISnir *snir) const
 {
     auto packet = snir->getReception()->getTransmission()->getPacket();
     auto ber = computeBitErrorRate(snir, IRadioSignal::SIGNAL_PART_WHOLE);
-    ASSERT(0.0 < ber && ber <= 1.0);
     return computeCorruptedPacket(packet, ber);
 }
 
