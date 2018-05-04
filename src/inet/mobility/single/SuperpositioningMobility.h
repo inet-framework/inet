@@ -42,7 +42,7 @@ class INET_API SuperpositioningMobility : public MobilityBase, public cListener
     virtual EulerAngles getCurrentAngularVelocity() override;
     virtual EulerAngles getCurrentAngularAcceleration() override;
 
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details);
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 };
 
 } // namespace inet
