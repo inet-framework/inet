@@ -27,42 +27,33 @@
 namespace inet {
 
 /**
- * Small utility class for managing a large number of TcpSocket objects.
+ * Small utility class for managing a large number of ISocket objects.
  */
-//TBD: need for lookup could be eliminated by adding a void *yourPtr into TcpConnection and TcpCommand
 class INET_API SocketMap
 {
   protected:
     std::map<int, ISocket *> socketMap;
 
   public:
-    /**
-     * Constructor.
-     */
     SocketMap() {}
 
     /**
-     * Destructor. Does NOT delete the TcpSocket objects.
+     * Destructor does NOT delete the socket objects.
      */
     ~SocketMap() {}
 
     /**
-     * Finds the socket (by connId) for the given message. The message
-     * must have arrived from TCP, and must contain a TcpCommand
-     * control info object. The method returns nullptr if the socket was
-     * not found, and throws an error if the message doesn't contain
-     * a TcpCommand.
+     * Finds the socket for the given message.
      */
     ISocket *findSocketFor(cMessage *msg);
 
     /**
-     * Registers the given socket. Should not be called multiple times
-     * for one socket object.
+     * Adds the given socket.
      */
     void addSocket(ISocket *socket);
 
     /**
-     * Removes the given socket from the data structure.
+     * Removes the given socket.
      */
     ISocket *removeSocket(ISocket *socket);
 
