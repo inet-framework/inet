@@ -237,7 +237,7 @@ TlvOptionBase *Ipv4HeaderSerializer::deserializeOption(MemoryInputStream& stream
                 case 3: flag = IP_TIMESTAMP_SENDER_INIT_ADDRESS; bytes = 8; break;
                 default: break;
             }
-            if (flag != -1 && length > 4 && bytes && ((length-4) % bytes) == 0 && pointer >= 5 && ((pointer-5) % bytes) == 0) {
+            if (flag != static_cast<TimestampFlag>(-1) && length > 4 && bytes && ((length-4) % bytes) == 0 && pointer >= 5 && ((pointer-5) % bytes) == 0) {
                 auto *option = new Ipv4OptionTimestamp();
                 option->setType(type);
                 option->setLength(length);
