@@ -65,6 +65,14 @@ double Ieee80211ErrorModelBase::computeSymbolErrorRate(const ISnir *snir, IRadio
     return NaN;
 }
 
+Packet *Ieee80211ErrorModelBase::computeCorruptedPacket(const Packet *packet, double ber) const
+{
+    if (corruptionMode == CorruptionMode::CM_PACKET)
+        return ErrorModelBase::computeCorruptedPacket(packet, ber);
+    else
+        throw cRuntimeError("Unimplemented corruption mode");
+}
+
 } // namespace physicallayer
 
 } // namespace inet
