@@ -337,8 +337,8 @@ sub savepage($$$)
       my $needtitlepage = shift @_;
 
       my $new_html = $template;
-      $new_html =~ s/__PRODUCT__/$product/;
-      $new_html =~ s/__VERSION__/$productversion/;
+      $new_html =~ s/__PRODUCT__/$product/sg;
+      $new_html =~ s/__VERSION__/$productversion/sg;
       $new_html =~ s/__TITLEPAGE_START__(.*)__TITLEPAGE_END__//s unless ($needtitlepage);
       $new_html =~ s/__TITLEPAGE_(START|END)__//sg;
       $new_html =~ s/__BODY__/$body/;
