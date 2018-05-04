@@ -204,6 +204,7 @@ class INET_API TcpSocket : public ISocket
     int getSocketId() const override { return connId; }
 
     void *getUserData() const { return userData; }
+    void setUserData(void *userData) { this->userData = userData; }
 
     /**
      * Returns the socket state, one of NOT_BOUND, CLOSED, LISTENING, CONNECTING,

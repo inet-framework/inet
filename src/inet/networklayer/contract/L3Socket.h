@@ -51,6 +51,9 @@ class INET_API L3Socket : public ISocket
     L3Socket(const Protocol *l3ProtocolId = nullptr, cGate *outputGate = nullptr);
     virtual ~L3Socket() {}
 
+    void *getUserData() const { return userData; }
+    void setUserData(void *userData) { this->userData = userData; }
+
     /**
      * Sets controlInfoProtocolId, for example setControlInfoProtocolId(Protocol::ipv4.getId())
      */

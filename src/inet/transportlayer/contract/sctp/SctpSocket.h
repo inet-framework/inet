@@ -136,6 +136,9 @@ class INET_API SctpSocket : public ISocket
      */
     ~SctpSocket();
 
+    void *getUserData() const { return userData; }
+    void setUserData(void *userData) { this->userData = userData; }
+
     /**
      * Returns the internal connection Id. SCTP uses the (gate index, assocId) pair
      * to identify the connection when it receives a command from the application

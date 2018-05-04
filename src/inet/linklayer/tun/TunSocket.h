@@ -46,6 +46,9 @@ class INET_API TunSocket : public ISocket
     TunSocket();
     ~TunSocket() {}
 
+    void *getUserData() const { return userData; }
+    void setUserData(void *userData) { this->userData = userData; }
+
     void setOutputGate(cGate *outputGate) { this->outputGate = outputGate; }
 
     void open(int interfaceId);

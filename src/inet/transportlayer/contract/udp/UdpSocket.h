@@ -91,6 +91,9 @@ class INET_API UdpSocket : public ISocket
      */
     ~UdpSocket() {}
 
+    void *getUserData() const { return userData; }
+    void setUserData(void *userData) { this->userData = userData; }
+
     /**
      * Returns the internal socket Id.
      */
