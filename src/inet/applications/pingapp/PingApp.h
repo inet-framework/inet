@@ -40,7 +40,7 @@ namespace inet {
  *
  * See NED file for detailed description of operation.
  */
-class INET_API PingApp : public cSimpleModule, public ILifecycle
+class INET_API PingApp : public cSimpleModule, public ILifecycle, public L3Socket::ICallback
 {
   protected:
     // parameters: for more details, see the corresponding NED parameters' documentation
@@ -104,7 +104,11 @@ class INET_API PingApp : public cSimpleModule, public ILifecycle
     virtual void processPingResponse(int identifier, int seqNumber, Packet *packet);
     virtual void countPingResponse(int bytes, long seqNo, simtime_t rtt, bool isDup);
 
+    //ILifecycle
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+
+    //L3Socket::ICallback:
+    virtual void socketDataArrived(L3Socket *socket, Packet *packet) override;
 
   public:
     PingApp();

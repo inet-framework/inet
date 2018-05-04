@@ -216,6 +216,7 @@ void PingApp::handleMessage(cMessage *msg)
                 }
                 l3Socket = new L3Socket(l3Protocol, gate("socketOut"));
                 l3Socket->bind(icmp);
+                l3Socket->setCallbackObject(this);
             }
             msg->setKind(PING_SEND);
         }
@@ -239,52 +240,57 @@ void PingApp::handleMessage(cMessage *msg)
         // then schedule next one if needed
         scheduleNextPingRequest(simTime(), msg->getKind() == PING_CHANGE_ADDR);
     }
-    else {
-        Packet *packet = check_and_cast<Packet *>(msg);
+    else if (l3Socket->belongsToSocket(msg))
+        l3Socket->processMessage(msg);
+    else
+        throw cRuntimeError("Unaccepted message: %s(%s)", msg->getName(), msg->getClassName());
+}
+
+void PingApp::socketDataArrived(L3Socket *socket, Packet *packet)
+{
 #ifdef WITH_IPv4
-        if (packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv4) {
-            const auto& icmpHeader = packet->popAtFront<IcmpHeader>();
-            if (icmpHeader->getType() == ICMP_ECHO_REPLY) {
-                const auto& echoReply = CHK(dynamicPtrCast<const IcmpEchoReply>(icmpHeader));
-                processPingResponse(echoReply->getIdentifier(), echoReply->getSeqNumber(), packet);
-            }
-            else {
-                // process other icmp messages, process icmp errors
-            }
-            delete packet;
+    if (packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv4) {
+        const auto& icmpHeader = packet->popAtFront<IcmpHeader>();
+        if (icmpHeader->getType() == ICMP_ECHO_REPLY) {
+            const auto& echoReply = CHK(dynamicPtrCast<const IcmpEchoReply>(icmpHeader));
+            processPingResponse(echoReply->getIdentifier(), echoReply->getSeqNumber(), packet);
         }
-        else
+        else {
+            // process other icmp messages, process icmp errors
+        }
+        delete packet;
+    }
+    else
 #endif
 #ifdef WITH_IPv6
-        if (packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv6) {
-            const auto& icmpHeader = packet->popAtFront<Icmpv6Header>();
-            if (icmpHeader->getType() == ICMPv6_ECHO_REPLY) {
-                const auto& echoReply = CHK(dynamicPtrCast<const Icmpv6EchoReplyMsg>(icmpHeader));
-                processPingResponse(echoReply->getIdentifier(), echoReply->getSeqNumber(), packet);
-            }
-            else {
-                // process other icmpv6 messages, process icmpv6 errors
-            }
-            delete packet;
+    if (packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv6) {
+        const auto& icmpHeader = packet->popAtFront<Icmpv6Header>();
+        if (icmpHeader->getType() == ICMPv6_ECHO_REPLY) {
+            const auto& echoReply = CHK(dynamicPtrCast<const Icmpv6EchoReplyMsg>(icmpHeader));
+            processPingResponse(echoReply->getIdentifier(), echoReply->getSeqNumber(), packet);
         }
-        else
+        else {
+            // process other icmpv6 messages, process icmpv6 errors
+        }
+        delete packet;
+    }
+    else
 #endif
 #ifdef WITH_NEXTHOP
-        if (packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::echo) {
-            const auto& icmpHeader = packet->popAtFront<EchoPacket>();
-            if (icmpHeader->getType() == ECHO_PROTOCOL_REPLY) {
-                processPingResponse(icmpHeader->getIdentifier(), icmpHeader->getSeqNumber(), packet);
-            }
-            else {
-                // process other icmp messages, process icmp errors
-            }
-            delete packet;
+    if (packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::echo) {
+        const auto& icmpHeader = packet->popAtFront<EchoPacket>();
+        if (icmpHeader->getType() == ECHO_PROTOCOL_REPLY) {
+            processPingResponse(icmpHeader->getIdentifier(), icmpHeader->getSeqNumber(), packet);
         }
-        else
+        else {
+            // process other icmp messages, process icmp errors
+        }
+        delete packet;
+    }
+    else
 #endif
-        {
-            throw cRuntimeError("Unaccepted packet: %s(%s)", packet->getName(), packet->getClassName());
-        }
+    {
+        throw cRuntimeError("Unaccepted packet: %s(%s)", packet->getName(), packet->getClassName());
     }
 }
 
