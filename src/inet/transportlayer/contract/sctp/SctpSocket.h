@@ -110,7 +110,7 @@ class INET_API SctpSocket : public ISocket
     AppSocketOptions *appOptions;
 
     ICallback *cb;
-    void *yourPtr;
+    void *userData;
 
   protected:
     void sendToSctp(cMessage *msg);
@@ -328,22 +328,14 @@ class INET_API SctpSocket : public ISocket
      *
      * SctpSocket doesn't delete the callback object in the destructor
      * or on any other occasion.
-     *
-     * YourPtr is an optional pointer. It may contain any value you wish --
-     * SctpSocket will not look at it or do anything with it except passing
-     * it back to you in the CallbackInterface calls. You may find it
-     * useful if you maintain additional per-connection information:
-     * in that case you don't have to look it up by assocId in the callbacks,
-     * you can have it passed to you as yourPtr.
      */
-    void setCallbackObject(ICallback *cb, void *yourPtr = nullptr);
+    void setCallbackObject(ICallback *cb, void *userData = nullptr);
 
     /**
      * Examines the message (which should have arrived from SctpMain),
      * updates socket state, and if there is a callback object installed
      * (see setCallbackObject(), class CallbackInterface), dispatches
-     * to the appropriate method of it with the same yourPtr that
-     * you gave in the setCallbackObject() call.
+     * to the appropriate method.
      *
      * The method deletes the message, unless (1) there is a callback object
      * installed AND (2) the message is payload (message kind SCTP_I_DATA or

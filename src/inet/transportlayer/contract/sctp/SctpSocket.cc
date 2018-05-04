@@ -34,7 +34,7 @@ SctpSocket::SctpSocket(bool type)
     localPrt = remotePrt = 0;
     fsmStatus = -1;
     cb = nullptr;
-    yourPtr = nullptr;
+    userData = nullptr;
     gateToSctp = nullptr;
     lastStream = -1;
     oneToOne = type;
@@ -67,7 +67,7 @@ SctpSocket::SctpSocket(cMessage *msg)
     appOptions->outboundStreams = -1;
     appLimited = false;
     cb = nullptr;
-    yourPtr = nullptr;
+    userData = nullptr;
     gateToSctp = nullptr;
     lastStream = -1;
     oneToOne = true;
@@ -446,10 +446,10 @@ bool SctpSocket::belongsToSocket(cMessage *msg) const
     return ret;
 }
 
-void SctpSocket::setCallbackObject(ICallback *callback, void *yourPointer)
+void SctpSocket::setCallbackObject(ICallback *callback, void *userData)
 {
     cb = callback;
-    yourPtr = yourPointer;
+    this->userData = userData;
 }
 
 void SctpSocket::processMessage(cMessage *msg)

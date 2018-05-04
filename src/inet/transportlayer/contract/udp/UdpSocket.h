@@ -73,7 +73,7 @@ class INET_API UdpSocket : public ISocket
   protected:
     int sockId;
     ICallback *cb = nullptr;
-    void *yourPtr = nullptr;
+    void *userData = nullptr;
     cGate *gateToUdp;
 
   protected:
@@ -271,15 +271,8 @@ class INET_API UdpSocket : public ISocket
      *
      * UdpSocket doesn't delete the callback object in the destructor
      * or on any other occasion.
-     *
-     * YourPtr is an optional pointer. It may contain any value you wish --
-     * UdpSocket will not look at it or do anything with it except passing
-     * it back to you in the ICallback calls. You may find it
-     * useful if you maintain additional per-connection information:
-     * in that case you don't have to look it up by connId in the callbacks,
-     * you can have it passed to you as yourPtr.
      */
-    void setCallbackObject(ICallback *cb, void *yourPtr = nullptr);
+    void setCallbackObject(ICallback *cb, void *userData = nullptr);
 
     virtual void processMessage(cMessage *msg) override;
 

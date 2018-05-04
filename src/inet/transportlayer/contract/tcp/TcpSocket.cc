@@ -31,7 +31,7 @@ TcpSocket::TcpSocket()
 
     localPrt = remotePrt = -1;
     cb = nullptr;
-    yourPtr = nullptr;
+    userData = nullptr;
 
     gateToTcp = nullptr;
 }
@@ -250,10 +250,10 @@ bool TcpSocket::belongsToSocket(cMessage *msg) const
     return tags.getTag<SocketInd>()->getSocketId() == connId;
 }
 
-void TcpSocket::setCallbackObject(ICallback *callback, void *yourPointer)
+void TcpSocket::setCallbackObject(ICallback *callback, void *userData)
 {
     cb = callback;
-    yourPtr = yourPointer;
+    this->userData = userData;
 }
 
 void TcpSocket::processMessage(cMessage *msg)

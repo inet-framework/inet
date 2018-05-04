@@ -162,7 +162,7 @@ class INET_API TcpSocket : public ISocket
     int remotePrt;
 
     ICallback *cb = nullptr;
-    void *yourPtr = nullptr;
+    void *userData = nullptr;
     cGate *gateToTcp = nullptr;
     std::string tcpAlgorithmClass;
 
@@ -203,7 +203,7 @@ class INET_API TcpSocket : public ISocket
      */
     int getSocketId() const override { return connId; }
 
-    void *getYourPtr() const { return yourPtr; }
+    void *getUserData() const { return userData; }
 
     /**
      * Returns the socket state, one of NOT_BOUND, CLOSED, LISTENING, CONNECTING,
@@ -364,22 +364,14 @@ class INET_API TcpSocket : public ISocket
      *
      * TcpSocket doesn't delete the callback object in the destructor
      * or on any other occasion.
-     *
-     * YourPtr is an optional pointer. It may contain any value you wish --
-     * TcpSocket will not look at it or do anything with it except passing
-     * it back to you in the ICallback calls. You may find it
-     * useful if you maintain additional per-connection information:
-     * in that case you don't have to look it up by connId in the callbacks,
-     * you can have it passed to you as yourPtr.
      */
-    void setCallbackObject(ICallback *cb, void *yourPtr = nullptr);
+    void setCallbackObject(ICallback *cb, void *userData = nullptr);
 
     /**
      * Examines the message (which should have arrived from TCP),
      * updates socket state, and if there is a callback object installed
      * (see setCallbackObject(), class ICallback), dispatches
-     * to the appropriate method of it with the same yourPtr that
-     * you gave in the setCallbackObject() call.
+     * to the appropriate method.
      *
      * The method deletes the message, unless (1) there is a callback object
      * installed AND (2) the message is payload (message kind TCP_I_DATA or
