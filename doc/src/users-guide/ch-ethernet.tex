@@ -1,50 +1,58 @@
-% last synchronized to 'dbc28949bf4332ac86d84b95705fbea9af4f84f7'
 \chapter{The Ethernet Model}
 \label{cha:ethernet}
 
-% TODO: comment numWirelessPorts in MacRelayUnitPP
-% TODO: comment origByteLength in EtherFrame
-% FIXME: wrong header length in EtherFrame.msg
+TODO EtherMacFullDuplex --> EtherMac
+TODO EtherMac --> EtherCsmaCdMac
+TODO there is no IWiredNic with EtherLLC
+TODO: model delay in hubs: class I device 140 bit time, class II device 92 bit time (for fast ethernet)
 
 \section{Overview}
 
+Ethernet is the most popular wired LAN technology nowadays, also used in
+metropolitan area and wide area networks.
+
 Variations: 10Mb/s ethernet, fast ethernet, Gigabit Ethernet, Fast Gigabit Ethernet, full duplex
 
-The Ethernet model contains a MAC model (\nedtype{EtherMac}), LLC model (\nedtype{EtherLlc}) as well
-as a bus (\nedtype{EtherBus}, for modelling coaxial cable) and a hub (\nedtype{EtherHub}) model.
-A switch model (\nedtype{EtherSwitch}) is also provided.
+TODO: 802.1d (STP, RSTP), 802.2 (LLC), ...
+
+
+\section{Nodes}
 
 \begin{itemize}
-  \item \nedtype{EtherHost} is a sample node with an Ethernet NIC;
-  \item \nedtype{EtherSwitch}, \nedtype{EtherBus}, \nedtype{EtherHub} model switching hub, repeating hub and
-        the old coxial cable;
-  \item basic components of the model: \nedtype{EtherMac}, \nedtype{EtherLlc}/\nedtype{EtherEncap} module types,
-        \nedtype{MacRelayUnit} (\nedtype{MACRelayUnitNP} and \nedtype{MACRelayUnitPP}), \nedtype{EtherFrame} message type,
-        \cppclass{MacAddress} class
+  \item Node models such as \nedtype{StandardHost} and \nedtype{Router} are Ethernet-capable
+  \item \nedtype{EtherSwitch} TODO switching hub
+  \item \nedtype{EtherHub} TODO repeating hub
+  \item \nedtype{EtherBus} TODO legacy coaxial cable
+  \item \nedtype{EtherHost} TODO is a sample node
 \end{itemize}
 
+how to connect networks
 
-\section{Physical layer}
+how to add stp/rstp
 
-Stations on an Ethernet networks are connected by coaxial,
-twisted pair or fibre cables. (Coaxial only has historical importance,
-but is supported by INET anyway.) There are several cable types specified
-in the standard.
+TODO describe PAUSE handling here
 
-In the INET framework, the cables are represented by connections.
-The connections used in Ethernet LANs must be derived from
-\nedtype{DatarateConnection} and should have their \fpar{delay} and
-\fpar{datarate} parameters set.
-The delay parameter can be used to model the distance between the
-nodes. The datarate parameter can have four values:
+\subsection{EtherSwitch}
 
-\begin{itemize}
-  \item \ttt{10Mbps} classic Ethernet
-  \item \ttt{100Mbps} Fast Ethernet
-  \item \ttt{1Gbps} Gigabit Ethernet
-  \item \ttt{10Gbps} Fast Gigabit Ethernet
-\end{itemize}
+Ethernet switches play an important role in modern Ethernet LANs. Unlike
+passive hubs and repeaters, that work in the physical layer, the switches
+operate in the data link layer and routes data frames between the connected
+subnets.
 
+While a hub repeats the data frames on each connected line, possibly causing
+collisions, switches help to segment the network to small collision domains.
+In modern Gigabit LANs each node is connected to the switch direclty
+by full-duplex lines, so no collisions are possible. In this case the
+CSMA/CD is not needed and the channel utilization can be high.
+
+\nedtype{EtherSwitch} models an Ethernet switch.
+
+The duplexChannel attributes of the MACs must be set according to the
+medium connected to the port; if collisions are possible (it's a bus or hub)
+it must be set to false, otherwise it can be set to true.
+By default it uses half duples MAC with CSMA/CD.
+
+TODO STP, RSTP
 
 \subsection{EtherHub}
 
@@ -59,7 +67,7 @@ thus the hub model is not specific to Ethernet. Messages may
 represent anything, from the beginning of a frame transmission to
 end (or abortion) of transmission.
 
-% TODO: model delay in hubs: class I device 140 bit time, class II device 92 bit time (for fast ethernet)
+
 
 \subsection{EtherBus}
 
@@ -86,19 +94,34 @@ from the beginning of a frame transmission to end (or abortion) of transmission.
 %            btw there is a hard coded propagation speed in EtherMACBase.cc
 
 
-\section{Ethernet Interfaces}
 
-\subsection{EthernetInterface}
+\section{Physical layer}
+
+Stations on an Ethernet networks are connected by coaxial,
+twisted pair or fibre cables. (Coaxial only has historical importance,
+but is supported by INET anyway.) There are several cable types specified
+in the standard.
+
+In the INET framework, the cables are represented by connections.
+The connections used in Ethernet LANs must be derived from
+\nedtype{DatarateConnection} and should have their \fpar{delay} and
+\fpar{datarate} parameters set.
+The delay parameter can be used to model the distance between the
+nodes. The datarate parameter can have four values:
+
+\begin{itemize}
+  \item \ttt{10Mbps} classic Ethernet
+  \item \ttt{100Mbps} Fast Ethernet
+  \item \ttt{1Gbps} Gigabit Ethernet
+  \item \ttt{10Gbps} Fast Gigabit Ethernet
+\end{itemize}
+
+\section{Ethernet Interfaces}
 
 The \nedtype{EthernetInterface} compound module implements the \nedtype{IWiredInterface}
 interface. Complements \nedtype{EtherMac} and \nedtype{EtherEncap} with an output queue
 for QoS and RED support. It also has configurable input/output filters as \nedtype{IHook}
 components similarly to the \nedtype{PppInterface} module.
-
-% TODO there is no IWiredNic with EtherLLC
-
-
-\subsection{Ethernet MAC Layer}
 
 The Ethernet MAC (Media Access Control) layer transmits the Ethernet frames on
 the physical media. This is a sublayer within the data link layer. Because
@@ -106,16 +129,6 @@ encapsulation/decapsulation is not always needed (e.g. switches does not do
 encapsulation/decapsulation), it is implemented in a separate modules
 (\nedtype{EtherEncap} and \nedtype{EtherLlc}) that are part of the LLC layer.
 
-\subsection{Implemented Standards}
-
-The Ethernet model operates according to the following standards:
-
-\begin{itemize}
-  \item Ethernet: IEEE 802.3-1998
-  \item Fast Ethernet: IEEE 802.3u-1995
-  \item Full-Duplex Ethernet with Flow Control: IEEE 802.3x-1997
-  \item Gigabit Ethernet: IEEE 802.3z-1998
-\end{itemize}
 
 Nowadays almost all Ethernet networks operate using full-duplex
 point-to-point connections between hosts and switches. This means
@@ -126,34 +139,6 @@ the \nedtype{EtherMacFullDuplex} is simpler to understand and easier to extend,
 because it supports only full-duplex connections. The \nedtype{EtherMac}
 module implements the full MAC functionality including CSMA/CD, it
 can operate both half-duplex and full-duplex mode.
-
-\subsection*{Packets and frames}
-
-The environment of the MAC modules is described by the \nedtype{IEtherMac}
-module interface. Each MAC modules has gates to connect to the physical
-layer (\ttt{phys\$i} and \ttt{phys\$o}) and to connect to the upper layer
-(LLC module is hosts, relay units in switches): \ttt{upperLayerIn} and
-\ttt{upperLayerOut}.
-
-When a frame is received from the higher layers, it must be an
-\msgtype{EtherFrame}, and with all protocol fields filled out
-(including the destination MAC address). The source address, if left empty,
-will be filled in with the configured \fpar{address} of the MAC.
-% TODO document auto MAC address
-
-
-Packets received from the network are \msgtype{EtherTraffic} objects.
-They are messages representing inter-frame gaps (\msgtype{EtherPadding}),
-jam signals (\msgtype{EtherJam}), control frames (\msgtype{EtherPauseFrame})
-or data frames (all derived from \msgtype{EtherFrame}). Data frames
-are passed up to the higher layers without modification.
-In \fpar{promiscuous} mode, the MAC passes up all received frames;
-otherwise, only the frames with matching MAC addresses and
-the broadcast frames are passed up.
-
-Also, the module properly responds to PAUSE frames, but never sends them
-by itself -- however, it transmits PAUSE frames received from upper layers.
-See section~\ref{subsec:pause_handling} for more info.
 
 \subsection*{Queueing}
 
@@ -213,6 +198,19 @@ packets are dropped by the MAC.
 % Ethernet Auto-Negotiation not supported
 
 
+\section{Components}
+
+Thw following components:
+
+\begin{itemize}
+  \item \nedtype{EtherMacFullDuplex}
+  \item \nedtype{EtherMac}
+  \item \nedtype{EtherLlc}
+  \item \nedtype{EtherEncap}
+  \item \nedtype{MacRelayUnit}
+  \item \nedtype{Ieee802dRelay}
+\end{itemize}
+
 
 \subsection{EtherMacFullDuplex}
 
@@ -234,15 +232,6 @@ Outgoing packets are transmitted according to the following state diagram:
 \begin{center}
 \includegraphics{figures/EtherMACFullDuplex_txstates}
 \end{center}
-
-The \nedtype{EtherMacFullDuplex} module records two scalars in addition to the
-ones mentioned earlier:
-\begin{itemize}
-\item \ttt{rx channel idle (\%)}: reception channel idle time
-        as a percentage of the total simulation time
-\item \ttt{rx channel utilization (\%)}: total reception
-        time as a percentage of the total simulation time
-\end{itemize}
 
 \subsection{EtherMac}
 
@@ -272,31 +261,16 @@ The operation of the MAC module can be schematized by the following state chart:
 \includegraphics{figures/EtherMAC_txstates}
 \end{center}
 
-The module generates these extra signals:
-\begin{itemize}
-\item \fsignal{collision} when collision starts (received a frame,
-         while transmitting or receiving another one; or start to transmit while receiving a frame),
-         the constant value 1
-\item \fsignal{backoff} when jamming period ended and before waiting according to the
-         exponential backoff algorith, the constant value 1
-\end{itemize}
-
-These scalar statistics are generated about the state of the line:
-\begin{itemize}
-  \item \ttt{rx channel idle (\%)} reception channel idle time (full duplex) or channel
-         idle time (half-duplex), as a percentage of the total simulation time
-  \item \ttt{rx channel utilization (\%)} total successful reception time (full-duplex) or total
-         successful reception/transmission time (half duplex), as a percentage
-         of the total simulation time
-  \item \ttt{rx channel collision (\%)} total unsuccessful reception time, as a percentage
-         of the total simulation time
-  \item \ttt{collisions} total number collisions (same as count of \fsignal{collisionSignal})
-  \item \ttt{backoffs} total number of backoffs (same as count of \fsignal{backoffSignal})
-\end{itemize}
 
 \subsection{EtherEncap}
 
 The \nedtype{EtherEncap} module generates \msgtype{EthernetIIFrame} messages.
+
+EtherFrameII
+
+\subsection{EtherLlc}
+
+TODO what it does
 
 
 % document error conditions (causing error() calls in the code)
@@ -306,20 +280,7 @@ The \nedtype{EtherEncap} module generates \msgtype{EthernetIIFrame} messages.
 % FIXME should not enter PAUSE state when !duplexMode
 
 
-\section{Switches}
-
-Ethernet switches play an important role in modern Ethernet LANs. Unlike
-passive hubs and repeaters, that work in the physical layer, the switches
-operate in the data link layer and routes data frames between the connected
-subnets.
-
-While a hub repeats the data frames on each connected line, possibly causing
-collisions, switches help to segment the network to small collision domains.
-In modern Gigabit LANs each node is connected to the switch direclty
-by full-duplex lines, so no collisions are possible. In this case the
-CSMA/CD is not needed and the channel utilization can be high.
-
-\subsection{MAC relay units}
+\subsection{MacRelayUnit}
 
 INET framework ethernet switches are built from \nedtype{IMacRelayUnit}
 components. Each relay unit has N input and output gates for sending/receiving
@@ -357,20 +318,8 @@ it just defines gates and parameters an \nedtype{IMacRelayUnit} should have.
 Concrete inplementations add
 capacity and performance aspects to the model (number of frames processed
 per second, amount of memory available in the switch, etc.)
-C++ implementations can subclass from the class \cppclass{MACRelayUnitBase}.
 
-There are two versions of \nedtype{IMacRelayUnit}:
-
-\begin{description}
-  \item[\nedtype{MACRelayUnitNP}] models one or more CPUs with shared memory,
-    working from a single shared queue.
-  \item[\nedtype{MACRelayUnitPP}] models one CPU assigned to each incoming port,
-    working with shared memory but separate queues.
-\end{description}
-
-In both models input messages are queued. CPUs poll messages from the queue
-and process them in \fpar{processingTime}. If the memory usage exceeds
-\fpar{bufferSize}, the frame will be dropped.
+There are two versions of \nedtype{IMacRelayUnit}: \nedtype{MacRelayUnit}]
 
 A simple scheme for sending PAUSE frames is built in (although
 users will probably change it). When the buffer level goes
@@ -378,31 +327,21 @@ above a high watermark, PAUSE frames are sent on all ports.
 The watermark and the pause time is configurable; use zero
 values to disable the PAUSE feature.
 
-% FIXME valid values for pauseTime: 0..0xFFFF
-% FIXME ETHER_PAUSE_COMMAND_BYTES should be 4 in Ethernet.h (2bytes opcode + 2bytes pauseTime)
-% FIXME PAUSE frame should not be sent on all ports probably
-% TODO add lowWatermark, send PauseFrame(pauseUnits=0) to resume sending
+\subsection{Ieee802dRelay}
 
-The relay units collects the following statistics:
-
-\begin{description}
-\item[usedBufferBytes] memory usage as function of time
-\item[processedBytes] count and length of processed frames
-\item[droppedBytes] count and length of frames dropped caused by out of memory
-\end{description}
-
-% FIXME MACRelayUnitNP: no signals are generated, how does @statistic work in the ned file?
-
-\subsection{EtherSwitch}
-
-Model of an Ethernet switch containing a relay unit and multiple MAC units.
-
-The duplexChannel attributes of the MACs must be set according to the
-medium connected to the port; if collisions are possible (it's a bus or hub)
-it must be set to false, otherwise it can be set to true.
-By default it uses half duples MAC with CSMA/CD.
+\nedtype{Ieee802dRelay} ..............
 
 
+\section{Implemented Standards}
+
+The Ethernet model operates according to the following standards:
+
+\begin{compactitem}
+  \item Ethernet: IEEE 802.3-1998
+  \item Fast Ethernet: IEEE 802.3u-1995
+  \item Full-Duplex Ethernet with Flow Control: IEEE 802.3x-1997
+  \item Gigabit Ethernet: IEEE 802.3z-1998
+\end{compactitem}
 
 %%% Local Variables:
 %%% mode: latex
