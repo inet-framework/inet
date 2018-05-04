@@ -54,13 +54,8 @@ class INET_API L3Socket : public ISocket
     void *getUserData() const { return userData; }
     void setUserData(void *userData) { this->userData = userData; }
 
-    /**
-     * Sets controlInfoProtocolId, for example setControlInfoProtocolId(Protocol::ipv4.getId())
-     */
     void setL3Protocol(const Protocol *l3Protocol);
-
     const Protocol *getL3Protocol() const { return l3Protocol; }
-
 
     /**
      * Returns the internal socket Id.
@@ -86,7 +81,6 @@ class INET_API L3Socket : public ISocket
     void setCallbackObject(ICallback *cb, void *userData = nullptr);
 
     virtual void processMessage(cMessage *msg) override;
-
 
     /**
      * Sets the gate on which to send raw packets. Must be invoked before socket

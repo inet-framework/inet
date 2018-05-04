@@ -24,17 +24,17 @@
 
 namespace inet {
 
-L3Socket::L3Socket(const Protocol *controlInfoProtocol, cGate *outputGate) :
-    l3Protocol(controlInfoProtocol),
+L3Socket::L3Socket(const Protocol *l3Protocol, cGate *outputGate) :
+    l3Protocol(l3Protocol),
     socketId(getEnvir()->getUniqueNumber()),
     outputGate(outputGate)
 {
 }
 
-void L3Socket::setL3Protocol(const Protocol *controlInfoProtocol)
+void L3Socket::setL3Protocol(const Protocol *l3Protocol)
 {
     ASSERT(!bound);
-    l3Protocol = controlInfoProtocol;
+    this->l3Protocol = l3Protocol;
 }
 
 void L3Socket::sendToOutput(cMessage *message)
