@@ -25,7 +25,7 @@ import inet.physicallayer.contract.packetlevel.IErrorModel;
 module ErrorModelBase like IErrorModel
 {
     parameters:
-        string corruptionMode @enum("packet", "chunk", "byte", "bit") = default("chunk");
+        string corruptionMode @enum("packet", "chunk", "byte", "bit") = default("packet");
         @display("i=block/broadcast");
         @class(ErrorModelBase);
 }
