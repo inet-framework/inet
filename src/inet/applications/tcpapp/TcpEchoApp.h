@@ -75,7 +75,7 @@ class INET_API TcpEchoAppThread : public TcpServerThreadBase
      */
     virtual void timerExpired(cMessage *timer) override;
 
-    virtual void init(TcpServerHostApp *hostmodule, TcpSocket *socket) override { hostmod = hostmodule; sock = socket; echoAppModule = check_and_cast<TcpEchoApp *>(hostmod); }
+    virtual void init(TcpServerHostApp *hostmodule, TcpSocket *socket) override { TcpServerThreadBase::init(hostmodule, socket); echoAppModule = check_and_cast<TcpEchoApp *>(hostmod); }
 };
 
 } // namespace inet
