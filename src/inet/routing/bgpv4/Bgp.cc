@@ -184,8 +184,9 @@ void Bgp::processMessageFromTCP(cMessage *msg)
     socket->processMessage(msg);
 }
 
-void Bgp::socketEstablished(int connId, void *yourPtr)
+void Bgp::socketEstablished(TcpSocket *socket, void *yourPtr)
 {
+    int connId = socket->getConnectionId();
     _currSessionId = findIdFromSocketConnId(_BGPSessions, connId);
     if (_currSessionId == static_cast<SessionId>(-1)) {
         throw cRuntimeError("socket id=%d is not established", connId);
@@ -210,9 +211,9 @@ void Bgp::socketEstablished(int connId, void *yourPtr)
     }
 }
 
-void Bgp::socketDataArrived(int connId, void *yourPtr, Packet *msg, bool urgent)
+void Bgp::socketDataArrived(TcpSocket *socket, void *yourPtr, Packet *msg, bool urgent)
 {
-    _currSessionId = findIdFromSocketConnId(_BGPSessions, connId);
+    _currSessionId = findIdFromSocketConnId(_BGPSessions, socket->getConnectionId());
     if (_currSessionId != static_cast<SessionId>(-1)) {
         //TODO: should queuing incoming payloads, and peek from the queue
         const auto& ptrHdr = msg->peekAtFront<BgpHeader>();
@@ -237,8 +238,9 @@ void Bgp::socketDataArrived(int connId, void *yourPtr, Packet *msg, bool urgent)
     delete msg;
 }
 
-void Bgp::socketFailure(int connId, void *yourPtr, int code)
+void Bgp::socketFailure(TcpSocket *socket, void *yourPtr, int code)
 {
+    int connId = socket->getConnectionId();
     _currSessionId = findIdFromSocketConnId(_BGPSessions, connId);
     if (_currSessionId != static_cast<SessionId>(-1)) {
         _BGPSessions[_currSessionId]->getFSM()->TcpConnectionFails();

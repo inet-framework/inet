@@ -140,14 +140,16 @@ class INET_API TcpSocket : public ISocket
     {
       public:
         virtual ~ICallback() {}
-        virtual void socketDataArrived(int connId, void *yourPtr, Packet *msg, bool urgent) = 0;
-        virtual void socketAvailable(int connId, void *yourPtr, TcpAvailableInfo *availableInfo) {}
-        virtual void socketEstablished(int connId, void *yourPtr) {}
-        virtual void socketPeerClosed(int connId, void *yourPtr) {}
-        virtual void socketClosed(int connId, void *yourPtr) {}
-        virtual void socketFailure(int connId, void *yourPtr, int code) {}
-        virtual void socketStatusArrived(int connId, void *yourPtr, TcpStatusInfo *status) { delete status; }
-        virtual void socketDeleted(int connId, void *yourPtr) {}
+        virtual void socketDataArrived(TcpSocket* socket, void *yourPtr, Packet *msg, bool urgent) = 0;
+        virtual void socketAvailable(TcpSocket *socket, void *yourPtr, TcpAvailableInfo *availableInfo) {}
+        virtual void socketEstablished(TcpSocket *socket, void *yourPtr) {}
+        virtual void socketPeerClosed(TcpSocket *socket, void *yourPtr) {}
+        virtual void socketClosed(TcpSocket *socket, void *yourPtr) {}
+        virtual void socketFailure(TcpSocket *socket, void *yourPtr, int code) {}
+        virtual void socketStatusArrived(TcpSocket *socket, void *yourPtr, TcpStatusInfo *status) { delete status; }
+        virtual void socketDeleted(TcpSocket *socket, void *yourPtr) {}
+      protected:
+        virtual void socketDeleted(ISocket *socket, void *yourPtr) override {socketDeleted(check_and_cast<TcpSocket*>(socket), yourPtr); }
     };
 
     enum State { NOT_BOUND, BOUND, LISTENING, CONNECTING, CONNECTED, PEER_CLOSED, LOCALLY_CLOSED, CLOSED, SOCKERROR };
@@ -383,7 +385,7 @@ class INET_API TcpSocket : public ISocket
      * the message belongs to this socket, i.e. belongsToSocket(msg) would
      * return true!
      */
-    void processMessage(cMessage *msg);
+    void processMessage(cMessage *msg) override;
     //@}
 };
 

@@ -141,9 +141,9 @@ void TcpBasicClientApp::handleTimer(cMessage *msg)
     }
 }
 
-void TcpBasicClientApp::socketEstablished(int connId, void *ptr)
+void TcpBasicClientApp::socketEstablished(TcpSocket *socket, void *ptr)
 {
-    TcpAppBase::socketEstablished(connId, ptr);
+    TcpAppBase::socketEstablished(socket, ptr);
 
     // determine number of requests in this session
     numRequestsToSend = par("numRequestsPerSession");
@@ -171,9 +171,9 @@ void TcpBasicClientApp::rescheduleOrDeleteTimer(simtime_t d, short int msgKind)
     }
 }
 
-void TcpBasicClientApp::socketDataArrived(int connId, void *ptr, Packet *msg, bool urgent)
+void TcpBasicClientApp::socketDataArrived(TcpSocket *socket, void *ptr, Packet *msg, bool urgent)
 {
-    TcpAppBase::socketDataArrived(connId, ptr, msg, urgent);
+    TcpAppBase::socketDataArrived(socket, ptr, msg, urgent);
 
     if (numRequestsToSend > 0) {
         EV_INFO << "reply arrived\n";
@@ -183,15 +183,15 @@ void TcpBasicClientApp::socketDataArrived(int connId, void *ptr, Packet *msg, bo
             rescheduleOrDeleteTimer(d, MSGKIND_SEND);
         }
     }
-    else if (socket.getState() != TcpSocket::LOCALLY_CLOSED) {
+    else if (socket->getState() != TcpSocket::LOCALLY_CLOSED) {
         EV_INFO << "reply to last request arrived, closing session\n";
         close();
     }
 }
 
-void TcpBasicClientApp::socketClosed(int connId, void *ptr)
+void TcpBasicClientApp::socketClosed(TcpSocket *socket, void *ptr)
 {
-    TcpAppBase::socketClosed(connId, ptr);
+    TcpAppBase::socketClosed(socket, ptr);
 
     // start another session after a delay
     if (timeoutMsg) {
@@ -200,9 +200,9 @@ void TcpBasicClientApp::socketClosed(int connId, void *ptr)
     }
 }
 
-void TcpBasicClientApp::socketFailure(int connId, void *ptr, int code)
+void TcpBasicClientApp::socketFailure(TcpSocket *socket, void *ptr, int code)
 {
-    TcpAppBase::socketFailure(connId, ptr, code);
+    TcpAppBase::socketFailure(socket, ptr, code);
 
     // reconnect after a delay
     if (timeoutMsg) {

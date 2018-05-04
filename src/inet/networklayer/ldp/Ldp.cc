@@ -613,7 +613,7 @@ void Ldp::processMessageFromTCP(cMessage *msg)
     socket->processMessage(msg);
 }
 
-void Ldp::socketEstablished(int, void *yourPtr)
+void Ldp::socketEstablished(TcpSocket *, void *yourPtr)
 {
     peer_info& peer = myPeers[(uintptr_t)yourPtr];
     EV_INFO << "TCP connection established with peer " << peer.peerIP << "\n";
@@ -624,7 +624,7 @@ void Ldp::socketEstablished(int, void *yourPtr)
     // FIXME start LDP session setup (if we're on the active side?)
 }
 
-void Ldp::socketDataArrived(int, void *yourPtr, Packet *msg, bool)
+void Ldp::socketDataArrived(TcpSocket *, void *yourPtr, Packet *msg, bool)
 {
     peer_info& peer = myPeers[(uintptr_t)yourPtr];
     EV_INFO << "Message arrived over TCP from peer " << peer.peerIP << "\n";
@@ -633,7 +633,7 @@ void Ldp::socketDataArrived(int, void *yourPtr, Packet *msg, bool)
     processLDPPacketFromTCP(msg);
 }
 
-void Ldp::socketPeerClosed(int, void *yourPtr)
+void Ldp::socketPeerClosed(TcpSocket *, void *yourPtr)
 {
     peer_info& peer = myPeers[(uintptr_t)yourPtr];
     EV_INFO << "Peer " << peer.peerIP << " closed TCP connection\n";
@@ -650,7 +650,7 @@ void Ldp::socketPeerClosed(int, void *yourPtr)
  */
 }
 
-void Ldp::socketClosed(int, void *yourPtr)
+void Ldp::socketClosed(TcpSocket *, void *yourPtr)
 {
     peer_info& peer = myPeers[(uintptr_t)yourPtr];
     EV_INFO << "TCP connection to peer " << peer.peerIP << " closed\n";
@@ -660,7 +660,7 @@ void Ldp::socketClosed(int, void *yourPtr)
     // FIXME what now? reconnect after a delay?
 }
 
-void Ldp::socketFailure(int, void *yourPtr, int code)
+void Ldp::socketFailure(TcpSocket *, void *yourPtr, int code)
 {
     peer_info& peer = myPeers[(uintptr_t)yourPtr];
     EV_INFO << "TCP connection to peer " << peer.peerIP << " broken\n";

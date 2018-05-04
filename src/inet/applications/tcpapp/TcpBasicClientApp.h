@@ -45,10 +45,10 @@ class INET_API TcpBasicClientApp : public TcpAppBase, public ILifecycle
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleTimer(cMessage *msg) override;
-    virtual void socketEstablished(int connId, void *yourPtr) override;
-    virtual void socketDataArrived(int connId, void *yourPtr, Packet *msg, bool urgent) override;
-    virtual void socketClosed(int connId, void *yourPtr) override;
-    virtual void socketFailure(int connId, void *yourPtr, int code) override;
+    virtual void socketEstablished(TcpSocket *socket, void *yourPtr) override;
+    virtual void socketDataArrived(TcpSocket *socket, void *yourPtr, Packet *msg, bool urgent) override;
+    virtual void socketClosed(TcpSocket *socket, void *yourPtr) override;
+    virtual void socketFailure(TcpSocket *socket, void *yourPtr, int code) override;
     virtual bool isNodeUp();
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 

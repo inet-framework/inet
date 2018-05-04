@@ -59,12 +59,12 @@ class INET_API TcpAppBase : public cSimpleModule, public TcpSocket::ICallback
 
     /* TcpSocket::ICallback callback methods */
     virtual void handleTimer(cMessage *msg) = 0;
-    virtual void socketEstablished(int connId, void *yourPtr) override;
-    virtual void socketDataArrived(int connId, void *yourPtr, Packet *msg, bool urgent) override;
-    virtual void socketPeerClosed(int connId, void *yourPtr) override;
-    virtual void socketClosed(int connId, void *yourPtr) override;
-    virtual void socketFailure(int connId, void *yourPtr, int code) override;
-    virtual void socketStatusArrived(int connId, void *yourPtr, TcpStatusInfo *status) override { delete status; }
+    virtual void socketEstablished(TcpSocket *socket, void *yourPtr) override;
+    virtual void socketDataArrived(TcpSocket *socket, void *yourPtr, Packet *msg, bool urgent) override;
+    virtual void socketPeerClosed(TcpSocket *socket, void *yourPtr) override;
+    virtual void socketClosed(TcpSocket *socket, void *yourPtr) override;
+    virtual void socketFailure(TcpSocket *socket, void *yourPtr, int code) override;
+    virtual void socketStatusArrived(TcpSocket *socket, void *yourPtr, TcpStatusInfo *status) override { delete status; }
 };
 
 } // namespace inet
