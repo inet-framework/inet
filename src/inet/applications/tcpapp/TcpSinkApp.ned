@@ -25,17 +25,22 @@ import inet.applications.contract.IApp;
 // Accepts any number of incoming TCP connections, and discards whatever
 // arrives on them. Compatible with both ~Ipv4 and ~Ipv6.
 //
-simple TcpSinkApp like IApp
+simple TcpSinkApp extends TcpServerHostApp
 {
     parameters:
-        string localAddress = default(""); // may be left empty ("")
-        int localPort = default(1000); // port number to listen on
+        @class(TcpSinkApp);
+        @display("i=block/sink");
+        serverThreadModuleType = "inet.applications.tcpapp.TcpSinkAppThread";
+        @signal[packetReceived](type=Packet);
+        @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[endToEndDelay](title="end-to-end delay"; source="dataAge(packetReceived)"; unit=s; record=histogram,vector; interpolationmode=none);
+}
+
+simple TcpSinkAppThread
+{
+    parameters:
         @display("i=block/sink");
         @signal[packetReceived](type=Packet);
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[endToEndDelay](title="end-to-end delay"; source="dataAge(packetReceived)"; unit=s; record=histogram,vector; interpolationmode=none);
-    gates:
-        input socketIn @labels(TcpCommand/up);
-        output socketOut @labels(TcpCommand/down);
 }
-
