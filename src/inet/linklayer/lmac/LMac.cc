@@ -503,7 +503,7 @@ void LMac::handleSelfMessage(cMessage *msg)
                     return;
                 }
                 Packet *data = new Packet("Data");
-                data->insertAtBack(macQueue.front()->peekAt(headerLength));
+                data->insertAtBack(macQueue.front()->peekAt(headerLength, macQueue.front()->getTotalLength() - headerLength));
                 const auto& lmacHeader = staticPtrCast<LMacHeader>(macQueue.front()->peekAtFront<LMacHeader>()->dupShared());
                 lmacHeader->setType(LMAC_DATA);
                 lmacHeader->setMySlot(mySlot);
