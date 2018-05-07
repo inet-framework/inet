@@ -324,10 +324,9 @@ std::string UdpSocket::getReceivedPacketInfo(Packet *pk)
     return os.str();
 }
 
-void UdpSocket::setCallbackObject(ICallback *callback, void *userData)
+void UdpSocket::setCallback(ICallback *callback)
 {
     cb = callback;
-    this->userData = userData;
 }
 
 void UdpSocket::processMessage(cMessage *msg)

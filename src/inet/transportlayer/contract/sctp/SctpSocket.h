@@ -59,7 +59,7 @@ class INET_API SctpSocket : public ISocket
 {
   public:
     /**
-     * Abstract base class for your callback objects. See setCallbackObject()
+     * Abstract base class for your callback objects. See setCallback()
      * and processMessage() for more info.
      *
      * Note: this class is not subclassed from cObject, because
@@ -332,12 +332,12 @@ class INET_API SctpSocket : public ISocket
      * SctpSocket doesn't delete the callback object in the destructor
      * or on any other occasion.
      */
-    void setCallbackObject(ICallback *cb, void *userData = nullptr);
+    void setCallback(ICallback *cb);
 
     /**
      * Examines the message (which should have arrived from SctpMain),
      * updates socket state, and if there is a callback object installed
-     * (see setCallbackObject(), class CallbackInterface), dispatches
+     * (see setCallback(), class CallbackInterface), dispatches
      * to the appropriate method.
      *
      * The method deletes the message, unless (1) there is a callback object

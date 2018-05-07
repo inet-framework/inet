@@ -74,7 +74,7 @@ class INET_API Ipv6Socket : public ISocket
      * Ipv6Socket doesn't delete the callback object in the destructor
      * or on any other occasion.
      */
-    void setCallbackObject(ICallback *cb, void *userData = nullptr);
+    virtual void setCallback(INetworkSocket::ICallback *cb) override;
 
     virtual void processMessage(cMessage *msg) override;
 

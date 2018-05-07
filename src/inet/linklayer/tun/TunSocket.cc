@@ -72,10 +72,9 @@ bool TunSocket::belongsToSocket(cMessage *msg) const
     return socketId == msgSocketId;
 }
 
-void TunSocket::setCallbackObject(ICallback *callback, void *userData)
+void TunSocket::setCallback(ICallback *callback)
 {
     cb = callback;
-    this->userData = userData;
 }
 
 void TunSocket::processMessage(cMessage *msg)

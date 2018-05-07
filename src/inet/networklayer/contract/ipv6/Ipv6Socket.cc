@@ -72,10 +72,9 @@ bool Ipv6Socket::belongsToSocket(cMessage *msg) const
     return socketId == msgSocketId;
 }
 
-void Ipv6Socket::setCallbackObject(ICallback *callback, void *userData)
+void Ipv6Socket::setCallback(INetworkSocket::ICallback *callback)
 {
     cb = callback;
-    this->userData = userData;
 }
 
 void Ipv6Socket::processMessage(cMessage *msg)

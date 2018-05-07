@@ -446,10 +446,9 @@ bool SctpSocket::belongsToSocket(cMessage *msg) const
     return ret;
 }
 
-void SctpSocket::setCallbackObject(ICallback *callback, void *userData)
+void SctpSocket::setCallback(ICallback *callback)
 {
     cb = callback;
-    this->userData = userData;
 }
 
 void SctpSocket::processMessage(cMessage *msg)

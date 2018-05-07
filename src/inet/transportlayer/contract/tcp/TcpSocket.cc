@@ -77,9 +77,10 @@ TcpSocket::TcpSocket(TcpAvailableInfo *availableInfo)
 
 TcpSocket::~TcpSocket()
 {
-    if (cb)
+    if (cb) {
         cb->socketDeleted(this);
-    setCallbackObject(nullptr);
+        cb = nullptr;
+    }
 }
 
 const char *TcpSocket::stateName(TcpSocket::State state)
@@ -250,10 +251,9 @@ bool TcpSocket::belongsToSocket(cMessage *msg) const
     return tags.getTag<SocketInd>()->getSocketId() == connId;
 }
 
-void TcpSocket::setCallbackObject(ICallback *callback, void *userData)
+void TcpSocket::setCallback(ICallback *callback)
 {
     cb = callback;
-    this->userData = userData;
 }
 
 void TcpSocket::processMessage(cMessage *msg)

@@ -81,10 +81,9 @@ bool L3Socket::belongsToSocket(cMessage *msg) const
     return socketId == msgSocketId;
 }
 
-void L3Socket::setCallbackObject(ICallback *callback, void *userData)
+void L3Socket::setCallback(INetworkSocket::ICallback *callback)
 {
     cb = callback;
-    this->userData = userData;
 }
 
 void L3Socket::processMessage(cMessage *msg)

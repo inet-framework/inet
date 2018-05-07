@@ -72,10 +72,9 @@ bool Ipv4Socket::belongsToSocket(cMessage *msg) const
     return socketId == msgSocketId;
 }
 
-void Ipv4Socket::setCallbackObject(ICallback *callback, void *userData)
+void Ipv4Socket::setCallback(INetworkSocket::ICallback *callback)
 {
     cb = callback;
-    this->userData = userData;
 }
 
 void Ipv4Socket::processMessage(cMessage *msg)

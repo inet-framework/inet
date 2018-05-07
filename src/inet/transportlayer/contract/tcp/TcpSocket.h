@@ -77,7 +77,7 @@ class TcpStatusInfo;
  * };
  *
  * void MyModule::initialize() {
- *     socket.setCallbackObject(this, nullptr);
+ *     socket.setCallback(this);
  * }
  *
  * void MyModule::handleMessage(cMessage *msg) {
@@ -114,7 +114,7 @@ class TcpStatusInfo;
  *     // not yet in socketMap, must be new incoming connection: add to socketMap
  *     socket = new TcpSocket(msg);
  *     socket->setOutputGate(gate("tcpOut"));
- *     socket->setCallbackObject(this, nullptr);
+ *     socket->setCallback(this);
  *     socketMap.addSocket(socket);
  * }
  * // dispatch to socketEstablished(), socketDataArrived(), socketPeerClosed()
@@ -128,7 +128,7 @@ class INET_API TcpSocket : public ISocket
 {
   public:
     /**
-     * Abstract base class for your callback objects. See setCallbackObject()
+     * Abstract base class for your callback objects. See setCallback()
      * and processMessage() for more info.
      *
      * Note: this class is not subclassed from cObject, because
@@ -366,12 +366,12 @@ class INET_API TcpSocket : public ISocket
      * TcpSocket doesn't delete the callback object in the destructor
      * or on any other occasion.
      */
-    void setCallbackObject(ICallback *cb, void *userData = nullptr);
+    void setCallback(ICallback *cb);
 
     /**
      * Examines the message (which should have arrived from TCP),
      * updates socket state, and if there is a callback object installed
-     * (see setCallbackObject(), class ICallback), dispatches
+     * (see setCallback(), class ICallback), dispatches
      * to the appropriate method.
      *
      * The method deletes the message, unless (1) there is a callback object

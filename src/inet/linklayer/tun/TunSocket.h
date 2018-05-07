@@ -74,7 +74,7 @@ class INET_API TunSocket : public ISocket
      * TunSocket doesn't delete the callback object in the destructor
      * or on any other occasion.
      */
-    void setCallbackObject(ICallback *cb, void *userData = nullptr);
+    void setCallback(ICallback *cb);
 
     virtual void processMessage(cMessage *msg) override;
 
