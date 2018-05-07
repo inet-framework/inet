@@ -56,8 +56,8 @@ class INET_API UdpVideoStreamClient : public ApplicationBase, public UdpSocket::
     virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
     virtual void handleNodeCrash() override;
 
-    virtual void socketDataArrived(UdpSocket* socket, Packet *msg) override;
-    virtual void socketErrorArrived(UdpSocket* socket, cMessage *msg) override;
+    virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
+    virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
 
   public:
     UdpVideoStreamClient() { }

@@ -110,8 +110,8 @@ class INET_API DhcpServer : public cSimpleModule, public cListener, public ILife
     virtual void sendToUDP(Packet *msg, int srcPort, const L3Address& destAddr, int destPort);
 
     //UdpSocket::ICallback methods
-    virtual void socketDataArrived(UdpSocket* socket, Packet *msg) override;
-    virtual void socketErrorArrived(UdpSocket* socket, cMessage *msg) override;
+    virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
+    virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
 
     /*
      * Signal handler for cObject, override cListener function.

@@ -217,8 +217,8 @@ class INET_API Ldp : public cSimpleModule, public TcpSocket::ICallback, public U
 
     /** @name UdpSocket::ICallback methods */
     //@{
-    virtual void socketDataArrived(UdpSocket* socket, Packet *msg) override;
-    virtual void socketErrorArrived(UdpSocket* socket, cMessage *msg) override;
+    virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
+    virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
     //@}
 
     // IIngressClassifier

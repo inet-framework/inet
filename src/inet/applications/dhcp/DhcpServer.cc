@@ -139,16 +139,16 @@ void DhcpServer::handleMessage(cMessage *msg)
         throw cRuntimeError("Unknown incoming gate: '%s'", msg->getArrivalGate()->getFullName());
 }
 
-void DhcpServer::socketDataArrived(UdpSocket* socket, Packet *msg)
+void DhcpServer::socketDataArrived(UdpSocket *socket, Packet *packet)
 {
     // process incoming packet
-    processDHCPMessage(msg);
+    processDHCPMessage(packet);
 }
 
-void DhcpServer::socketErrorArrived(UdpSocket* socket, cMessage *msg)
+void DhcpServer::socketErrorArrived(UdpSocket *socket, Indication *indication)
 {
-    EV_WARN << "Unknown message '" << msg->getName() << "', kind = " << msg->getKind() << ", discarding it." << endl;
-    delete msg;
+    EV_WARN << "Unknown message '" << indication->getName() << "', kind = " << indication->getKind() << ", discarding it." << endl;
+    delete indication;
 }
 
 void DhcpServer::handleSelfMessages(cMessage *msg)

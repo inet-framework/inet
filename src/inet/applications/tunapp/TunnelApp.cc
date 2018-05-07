@@ -107,9 +107,9 @@ void TunnelApp::socketDataArrived(UdpSocket *socket, Packet *packet)
         throw cRuntimeError("Unknown protocol: %s", packetProtocol->getName());;
 }
 
-void TunnelApp::socketErrorArrived(UdpSocket *socket, cMessage *msg)
+void TunnelApp::socketErrorArrived(UdpSocket *socket, Indication *indication)
 {
-    delete msg;
+    delete indication;
 }
 
 // L3Socket::ICallback

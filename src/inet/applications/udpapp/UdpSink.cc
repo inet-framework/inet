@@ -71,16 +71,16 @@ void UdpSink::handleMessageWhenUp(cMessage *msg)
         throw cRuntimeError("Unknown incoming gate: '%s'", msg->getArrivalGate()->getFullName());
 }
 
-void UdpSink::socketDataArrived(UdpSocket* socket, Packet *msg)
+void UdpSink::socketDataArrived(UdpSocket *socket, Packet *packet)
 {
     // process incoming packet
-    processPacket(msg);
+    processPacket(packet);
 }
 
-void UdpSink::socketErrorArrived(UdpSocket* socket, cMessage *msg)
+void UdpSink::socketErrorArrived(UdpSocket *socket, Indication *indication)
 {
-    EV_WARN << "Ignoring UDP error report " << msg->getName() << endl;
-    delete msg;
+    EV_WARN << "Ignoring UDP error report " << indication->getName() << endl;
+    delete indication;
 }
 
 void UdpSink::refreshDisplay() const

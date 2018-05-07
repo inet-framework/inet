@@ -80,7 +80,7 @@ void VoipStreamReceiver::handleMessage(cMessage *msg)
         throw cRuntimeError("Unknown incoming gate: '%s'", msg->getArrivalGate()->getFullName());
 }
 
-void VoipStreamReceiver::socketDataArrived(UdpSocket* socket, Packet *pk)
+void VoipStreamReceiver::socketDataArrived(UdpSocket *socket, Packet *pk)
 {
     // process incoming packet
 
@@ -106,10 +106,10 @@ void VoipStreamReceiver::socketDataArrived(UdpSocket* socket, Packet *pk)
     delete pk;
 }
 
-void VoipStreamReceiver::socketErrorArrived(UdpSocket* socket, cMessage *msg)
+void VoipStreamReceiver::socketErrorArrived(UdpSocket *socket, Indication *indication)
 {
-    EV_WARN << "Unknown message '" << msg->getName() << "', kind = " << msg->getKind() << ", discarding it." << endl;
-    delete msg;
+    EV_WARN << "Unknown message '" << indication->getName() << "', kind = " << indication->getKind() << ", discarding it." << endl;
+    delete indication;
 }
 
 void VoipStreamReceiver::Connection::openAudio(const char *fileName)

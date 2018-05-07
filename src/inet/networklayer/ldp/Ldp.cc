@@ -202,17 +202,17 @@ void Ldp::handleMessage(cMessage *msg)
     }
 }
 
-void Ldp::socketDataArrived(UdpSocket* socket, Packet *msg)
+void Ldp::socketDataArrived(UdpSocket *socket, Packet *packet)
 {
     // process incoming udp packet
     //FIXME add implementation
-    processLDPHello(check_and_cast<Packet *>(msg));
+    processLDPHello(check_and_cast<Packet *>(packet));
 }
 
-void Ldp::socketErrorArrived(UdpSocket* socket, cMessage *msg)
+void Ldp::socketErrorArrived(UdpSocket *socket, Indication *indication)
 {
-    EV_WARN << "Ignoring UDP error report " << msg->getName() << endl;
-    delete msg;
+    EV_WARN << "Ignoring UDP error report " << indication->getName() << endl;
+    delete indication;
 }
 
 bool Ldp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)

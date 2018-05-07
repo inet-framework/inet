@@ -50,16 +50,16 @@ void UdpVideoStreamClient::handleMessageWhenUp(cMessage *msg)
         socket.processMessage(msg);
 }
 
-void UdpVideoStreamClient::socketDataArrived(UdpSocket* socket, Packet *msg)
+void UdpVideoStreamClient::socketDataArrived(UdpSocket *socket, Packet *packet)
 {
     // process incoming packet
-    receiveStream(msg);
+    receiveStream(packet);
 }
 
-void UdpVideoStreamClient::socketErrorArrived(UdpSocket* socket, cMessage *msg)
+void UdpVideoStreamClient::socketErrorArrived(UdpSocket *socket, Indication *indication)
 {
-    EV_WARN << "Ignoring UDP error report " << msg->getName() << endl;
-    delete msg;
+    EV_WARN << "Ignoring UDP error report " << indication->getName() << endl;
+    delete indication;
 }
 
 void UdpVideoStreamClient::requestStream()

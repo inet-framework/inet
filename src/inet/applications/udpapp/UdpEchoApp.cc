@@ -42,7 +42,7 @@ void UdpEchoApp::handleMessageWhenUp(cMessage *msg)
     socket.processMessage(msg);
 }
 
-void UdpEchoApp::socketDataArrived(UdpSocket* socket, Packet *pk)
+void UdpEchoApp::socketDataArrived(UdpSocket *socket, Packet *pk)
 {
     // determine its source address/port
     L3Address remoteAddress = pk->getTag<L3AddressInd>()->getSrcAddress();
@@ -57,10 +57,10 @@ void UdpEchoApp::socketDataArrived(UdpSocket* socket, Packet *pk)
     socket->sendTo(pk, remoteAddress, srcPort);
 }
 
-void UdpEchoApp::socketErrorArrived(UdpSocket* socket, cMessage *msg)
+void UdpEchoApp::socketErrorArrived(UdpSocket *socket, Indication *indication)
 {
-    EV_WARN << "Ignoring UDP error report " << msg->getName() << endl;
-    delete msg;
+    EV_WARN << "Ignoring UDP error report " << indication->getName() << endl;
+    delete indication;
 }
 
 void UdpEchoApp::refreshDisplay() const

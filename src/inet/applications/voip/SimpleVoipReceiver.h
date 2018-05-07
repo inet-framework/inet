@@ -110,8 +110,8 @@ class INET_API SimpleVoipReceiver : public cSimpleModule, public ILifecycle, pub
     { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
     //UdpSocket::ICallback methods
-    virtual void socketDataArrived(UdpSocket* socket, Packet *msg) override;
-    virtual void socketErrorArrived(UdpSocket* socket, cMessage *msg) override;
+    virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
+    virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
 
   public:
     SimpleVoipReceiver();

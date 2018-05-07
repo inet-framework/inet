@@ -125,7 +125,7 @@ void SimpleVoipReceiver::handleMessage(cMessage *msg)
         throw cRuntimeError("Unknown incoming gate: '%s'", msg->getArrivalGate()->getFullName());
 }
 
-void SimpleVoipReceiver::socketDataArrived(UdpSocket* socket, Packet *packet)
+void SimpleVoipReceiver::socketDataArrived(UdpSocket *socket, Packet *packet)
 {
     // process incoming packet
     const auto& voice = packet->peekAtFront<SimpleVoipPacket>();
@@ -163,10 +163,10 @@ void SimpleVoipReceiver::socketDataArrived(UdpSocket* socket, Packet *packet)
     delete packet;
 }
 
-void SimpleVoipReceiver::socketErrorArrived(UdpSocket* socket, cMessage *msg)
+void SimpleVoipReceiver::socketErrorArrived(UdpSocket *socket, Indication *indication)
 {
-    EV_WARN << "Unknown message '" << msg->getName() << "', kind = " << msg->getKind() << ", discarding it." << endl;
-    delete msg;
+    EV_WARN << "Unknown message '" << indication->getName() << "', kind = " << indication->getKind() << ", discarding it." << endl;
+    delete indication;
 }
 
 void SimpleVoipReceiver::evaluateTalkspurt(bool finish)

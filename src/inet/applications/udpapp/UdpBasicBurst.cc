@@ -197,16 +197,16 @@ void UdpBasicBurst::handleMessageWhenUp(cMessage *msg)
         socket.processMessage(msg);
 }
 
-void UdpBasicBurst::socketDataArrived(UdpSocket* socket, Packet *msg)
+void UdpBasicBurst::socketDataArrived(UdpSocket *socket, Packet *packet)
 {
     // process incoming packet
-    processPacket(msg);
+    processPacket(packet);
 }
 
-void UdpBasicBurst::socketErrorArrived(UdpSocket* socket, cMessage *msg)
+void UdpBasicBurst::socketErrorArrived(UdpSocket *socket, Indication *indication)
 {
-    EV_WARN << "Ignoring UDP error report " << msg->getName() << endl;
-    delete msg;
+    EV_WARN << "Ignoring UDP error report " << indication->getName() << endl;
+    delete indication;
 }
 
 void UdpBasicBurst::refreshDisplay() const

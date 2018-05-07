@@ -65,8 +65,8 @@ class INET_API VoipStreamReceiver : public cSimpleModule, public ILifecycle, pub
     virtual void decodePacket(Packet *vp);
 
     //UdpSocket::ICallback methods
-    virtual void socketDataArrived(UdpSocket* socket, Packet *msg) override;
-    virtual void socketErrorArrived(UdpSocket* socket, cMessage *msg) override;
+    virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
+    virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
 
     class Connection
     {

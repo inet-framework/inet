@@ -208,17 +208,17 @@ void DhcpClient::handleMessage(cMessage *msg)
         throw cRuntimeError("Unknown incoming gate: '%s'", msg->getArrivalGate()->getFullName());
 }
 
-void DhcpClient::socketDataArrived(UdpSocket* socket, Packet *msg)
+void DhcpClient::socketDataArrived(UdpSocket *socket, Packet *packet)
 {
     // process incoming packet
-    handleDHCPMessage(msg);
-    delete msg;
+    handleDHCPMessage(packet);
+    delete packet;
 }
 
-void DhcpClient::socketErrorArrived(UdpSocket* socket, cMessage *msg)
+void DhcpClient::socketErrorArrived(UdpSocket *socket, Indication *indication)
 {
-    EV_WARN << "Ignoring UDP error report " << msg->getName() << endl;
-    delete msg;
+    EV_WARN << "Ignoring UDP error report " << indication->getName() << endl;
+    delete indication;
 }
 
 void DhcpClient::handleTimer(cMessage *msg)

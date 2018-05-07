@@ -176,8 +176,8 @@ class INET_API DhcpClient : public cSimpleModule, public cListener, public ILife
     virtual InterfaceEntry *chooseInterface();
 
     //UdpSocket::ICallback methods
-    virtual void socketDataArrived(UdpSocket* socket, Packet *msg) override;
-    virtual void socketErrorArrived(UdpSocket* socket, cMessage *msg) override;
+    virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
+    virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
 
     // Lifecycle methods
     virtual void startApp();
