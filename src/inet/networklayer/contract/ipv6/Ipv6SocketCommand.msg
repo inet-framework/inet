@@ -26,16 +26,16 @@ enum Ipv6CommandCode
     IPv6_C_CLOSE = 2;
 }
 
-class Ipv6SocketCommand extends cObject
+class Ipv6SocketCommandBase extends cObject
 {
 }
 
-class Ipv6SocketBindCommand extends Ipv6SocketCommand
+class Ipv6SocketBindCommand extends Ipv6SocketCommandBase
 {
     const Protocol *protocol;
 }
 
-class Ipv6SocketCloseCommand extends Ipv6SocketCommand
+class Ipv6SocketCloseCommand extends Ipv6SocketCommandBase
 {
 }
 

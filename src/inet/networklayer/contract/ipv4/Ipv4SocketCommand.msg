@@ -26,16 +26,16 @@ enum Ipv4CommandCode
     IPv4_C_CLOSE = 2;
 }
 
-class Ipv4SocketCommand extends cObject
+class Ipv4SocketCommandBase extends cObject
 {
 }
 
-class Ipv4SocketBindCommand extends Ipv4SocketCommand
+class Ipv4SocketBindCommand extends Ipv4SocketCommandBase
 {
     const Protocol *protocol;
 }
 
-class Ipv4SocketCloseCommand extends Ipv4SocketCommand
+class Ipv4SocketCloseCommand extends Ipv4SocketCommandBase
 {
 }
 
