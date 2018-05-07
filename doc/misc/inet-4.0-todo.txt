@@ -31,13 +31,10 @@ SHOULD:
  - fix MAC address filtering TODO in RadioMedium
 
 NEED NOT:
+ - add L2 sockets: EthernetSocket bound to EtherType, LlcSocket bound to SSAP, DSAP, add Ieee80211Socket bound unconditionally
  - solve dynamic node creation and address resolution in applications
  - don't subclass APSK medium and such with other specific radios, think of APSK radio as yet another specific conceptual radio
  - generalize shutdown, startup, crash operations to applications, protocols, interfaces, etc. (NodeShutdownOperation -> ShutdownOperation, NodeStatus -> OperationalStatus?)
- - rename CallbackInterface to ICallback in TcpSocket and SctpSocket
- - add ICallback and processMessage to UdpSocket
- - refactor all applications to use belongsToSocket and processMessage
- - solve dispatching to several UDP, TCP, SCTP sockets in a single application
  - add antenna directional selectivity visualizer
  - separate Euclidean and geographic mobilities
  - move extra functions that doesn't really belong to L3AddressResolver (e.g. findInterfaceTableOf, findIPv4RoutingTableOf)
@@ -72,6 +69,10 @@ NEED NOT:
  - pretty print white spaces
 
 DONE:
+ + rename CallbackInterface to ICallback in TcpSocket and SctpSocket
+ + add ICallback and processMessage to UdpSocket
+ + refactor all applications to use belongsToSocket and processMessage
+ + solve dispatching to several UDP, TCP, SCTP sockets in a single application
  + rename GenericNetworkProtocol -> NextHopForwarding, GenericNetworkLayer -> NextHopNetworkLayer, GenericRoutingTable -> NextHopRoutingTable, GenericNetworkConfigurator -> NextHopNetworkConfigurator
  + replace ObjectLocatorNode with GeoTransform (PositionAttitudeTransform) to work with osgEarth 2.9
  + add missing interface NED files for all L2 protocols, BMacInterface
