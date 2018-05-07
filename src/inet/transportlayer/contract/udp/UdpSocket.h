@@ -20,11 +20,12 @@
 
 #include <vector>
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/socket/ISocket.h"
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/transportlayer/contract/udp/UdpControlInfo.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/transportlayer/contract/udp/UdpControlInfo.h"
 
 namespace inet {
 
@@ -69,7 +70,7 @@ class INET_API UdpSocket : public ISocket
       public:
         virtual ~ICallback() {}
         virtual void socketDataArrived(UdpSocket *socket, Packet *packet) = 0;
-        virtual void socketErrorArrived(UdpSocket *socket, cMessage *msg) { delete msg; }
+        virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) { delete indication; }
     };
   protected:
     int socketId;

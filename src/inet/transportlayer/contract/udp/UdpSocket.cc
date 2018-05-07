@@ -336,13 +336,13 @@ void UdpSocket::processMessage(cMessage *msg)
     switch (msg->getKind()) {
         case UDP_I_DATA:
             if (cb)
-                cb->socketDataArrived(this, check_and_cast<Packet*>(msg));
+                cb->socketDataArrived(this, check_and_cast<Packet *>(msg));
             else
                 delete msg;
             break;
         case UDP_I_ERROR:
             if (cb)
-                cb->socketErrorArrived(this, msg);
+                cb->socketErrorArrived(this, check_and_cast<Indication *>(msg));
             else
                 delete msg;
             break;
