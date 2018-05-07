@@ -28,18 +28,22 @@ htmlfile_spec := $BASE.html
 :comm   :\opp:OMNeT++::
 
 
-:{}     :\textbf:<b>:</>:
+:{} :\textbf:<b>:</>:
 :{}	:\textsl:<i>:</>:
 :{}	:\textem:<i>:</>:
 :{}	:\textit:<i>:</>:
 :{}	:\texttt:<tt>:</>:
 :{}	:\textsf:<i>:</>:
+:{}	:\emph:<i>:</>:
 :{}	:\underline:<ul>:</>:
 :{}	:\chapter:<hr class='pgbr'><h1>:</h1>:
 :{}	:\appendixchapter:<hr class='pgbr'><h1>Appendix AAA&#58; :</h1>:
 :{}	:\section:<h2>:</h2>:
 :{}	:\subsection:<h3>:</h3>:
 :{}	:\subsubsection:<h4>:</h4>:
+:{}	:\section*:<b>:</b>:
+:{}	:\subsection*:<b>:</b>:
+:{}	:\subsubsection*:<b>:</b>:
 :{}	:\centerline:<p align=center>:</>:
 :{}	:\footnote:<br><ul><font size=-1>[:]</font></ul>:
 :{}	:\mbox:::
@@ -117,6 +121,7 @@ htmlfile_spec := $BASE.html
 :{2}    :\href#1#2:<a href="#1">#2</a>::
 :{1}    :\cite#1:[<a href="#bib-#1">#1</a>]::
 :{1}    :\url#1:<a href="#1">#1</a>::
+:{}     :\protocol:::
 @{}     @\caption@<center><div class="caption"><i>Figure: @</i></div></center>@
 :comm   :\textbar:|::
 :comm   :\textasciicircum:^::
@@ -141,14 +146,19 @@ htmlfile_spec := $BASE.html
 :comm   :\neq:!=::
 :comm   :\c{S}:S::
 :comm   :\u{g}:g::
+:comm   :\verb!(.*?)!:<tt>$1</tt>::
 :comm   :\textrm(\[.*?\])?{(.*?)}:<i>$2</i>::
 :comm   :\fpar(\[.*?\])?{(.*?)}:<tt>$2</tt>::
+:comm   :\fgate(\[.*?\])?{(.*?)}:<tt>$2</tt>::
+:comm   :\fsignal(\[.*?\])?{(.*?)}:<tt>$2</tt>::
 :comm   :\fdef(\[.*?\])?{(.*?)}:<tt>$2</tt>::
 :comm   :\fvar(\[.*?\])?{(.*?)}:<tt>$2</tt>::
 :comm   :\ffunc(\[.*?\])?{(.*?)}:<tt>$2</tt>::
 :comm   :\fprog(\[.*?\])?{(.*?)}:<tt>$2</tt>::
+:comm   :\program(\[.*?\])?{(.*?)}:<b>$2</b>::
 :comm   :\fopt(\[.*?\])?{(.*?)}:<tt>$2</tt>::
 :comm   :\nedtype(\[.*?\])?{(.*?)}:<tt>$2</tt>::
+:comm   :\msgtype(\[.*?\])?{(.*?)}:<tt>$2</tt>::
 :comm   :\cclass(\[.*?\])?{(.*?)}:<tt>$2</tt>::
 :comm   :\cppclass(\[.*?\])?{(.*?)}:<tt>$2</tt>::
 :comm   :\fmac(\[.*?\])?{(.*?)}:<tt>$2</tt>::
@@ -184,6 +194,7 @@ htmlfile_spec := $BASE.html
 :b/e	:\begin{msg}(\[.*?\])?:<pre class="msg">:</pre>:
 :b/e	:\begin{cpp}(\[.*?\])?:<pre class="cpp">:</pre>:
 :b/e	:\begin{inifile}(\[.*?\])?:<pre class="inifile">:</pre>:
+:b/e	:\begin{XML}(\[.*?\])?:<pre class="xml">:</pre>:
 :b/e	:\begin{filelisting}(\[.*?\])?:<pre class="filelisting">:</pre>:
 :b/e	:\begin{commandline}(\[.*?\])?:<pre class="commandline">:</pre>:
 :b/e	:\begin{Verbatim}(\[.*?\])?:<pre class="verbatim">:</pre>:
