@@ -30,14 +30,26 @@ Ipv6Socket::Ipv6Socket(cGate *outputGate) :
 {
 }
 
-void Ipv6Socket::sendToOutput(cMessage *message)
+void Ipv6Socket::setCallback(INetworkSocket::ICallback *callback)
 {
-    if (!outputGate)
-        throw cRuntimeError("Ipv6Socket: setOutputGate() must be invoked before the socket can be used");
-    auto& tags = getTags(message);
-    tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
-    tags.addTagIfAbsent<SocketReq>()->setSocketId(socketId);
-    check_and_cast<cSimpleModule *>(outputGate->getOwnerModule())->send(message, outputGate);
+    this->callback = callback;
+}
+
+bool Ipv6Socket::belongsToSocket(cMessage *msg) const
+{
+    auto& tags = getTags(msg);
+    int msgSocketId = tags.getTag<SocketInd>()->getSocketId();
+    return socketId == msgSocketId;
+}
+
+void Ipv6Socket::processMessage(cMessage *msg)
+{
+    ASSERT(belongsToSocket(msg));
+
+    if (callback)
+        callback->socketDataArrived(this, check_and_cast<Packet*>(msg));
+    else
+        delete msg;
 }
 
 void Ipv6Socket::bind(const Protocol *protocol)
@@ -65,26 +77,14 @@ void Ipv6Socket::close()
     sendToOutput(request);
 }
 
-bool Ipv6Socket::belongsToSocket(cMessage *msg) const
+void Ipv6Socket::sendToOutput(cMessage *message)
 {
-    auto& tags = getTags(msg);
-    int msgSocketId = tags.getTag<SocketInd>()->getSocketId();
-    return socketId == msgSocketId;
-}
-
-void Ipv6Socket::setCallback(INetworkSocket::ICallback *callback)
-{
-    cb = callback;
-}
-
-void Ipv6Socket::processMessage(cMessage *msg)
-{
-    ASSERT(belongsToSocket(msg));
-
-    if (cb)
-        cb->socketDataArrived(this, check_and_cast<Packet*>(msg));
-    else
-        delete msg;
+    if (!outputGate)
+        throw cRuntimeError("Ipv6Socket: setOutputGate() must be invoked before the socket can be used");
+    auto& tags = getTags(message);
+    tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
+    tags.addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    check_and_cast<cSimpleModule *>(outputGate->getOwnerModule())->send(message, outputGate);
 }
 
 } // namespace inet

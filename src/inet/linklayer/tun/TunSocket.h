@@ -36,7 +36,7 @@ class INET_API TunSocket : public ISocket
   protected:
     int socketId = -1;
     int interfaceId = -1;
-    ICallback *cb = nullptr;
+    ICallback *callback = nullptr;
     void *userData = nullptr;
     cGate *outputGate = nullptr;
 
@@ -47,19 +47,11 @@ class INET_API TunSocket : public ISocket
     TunSocket();
     ~TunSocket() {}
 
-    void *getUserData() const { return userData; }
-    void setUserData(void *userData) { this->userData = userData; }
-
-    void setOutputGate(cGate *outputGate) { this->outputGate = outputGate; }
-
-    void open(int interfaceId);
-    void send(Packet *packet);
-    void close();
-
     /**
-     * Returns true if the message belongs to this socket instance.
+     * Sets the gate on which to send raw packets. Must be invoked before socket
+     * can be used. Example: <tt>socket.setOutputGate(gate("ipOut"));</tt>
      */
-    virtual bool belongsToSocket(cMessage *msg) const override;
+    void setOutputGate(cGate *outputGate) { this->outputGate = outputGate; }
 
     /**
      * Sets a callback object, to be used with processMessage().
@@ -77,12 +69,20 @@ class INET_API TunSocket : public ISocket
      */
     void setCallback(ICallback *cb);
 
-    virtual void processMessage(cMessage *msg) override;
+    void *getUserData() const { return userData; }
+    void setUserData(void *userData) { this->userData = userData; }
 
     /**
      * Returns the internal socket Id.
      */
-    int getSocketId() const override { return socketId; }
+    virtual int getSocketId() const override { return socketId; }
+
+    void open(int interfaceId);
+    void send(Packet *packet);
+    void close();
+
+    virtual bool belongsToSocket(cMessage *msg) const override;
+    virtual void processMessage(cMessage *msg) override;
 };
 
 } // namespace inet

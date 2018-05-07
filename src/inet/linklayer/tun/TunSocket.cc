@@ -28,14 +28,26 @@ TunSocket::TunSocket()
     socketId = getEnvir()->getUniqueNumber();
 }
 
-void TunSocket::sendToTun(cMessage *msg)
+void TunSocket::setCallback(ICallback *callback)
 {
-    if (!outputGate)
-        throw cRuntimeError("TunSocket: setOutputGate() must be invoked before socket can be used");
+    this->callback = callback;
+}
+
+bool TunSocket::belongsToSocket(cMessage *msg) const
+{
     auto& tags = getTags(msg);
-    tags.addTagIfAbsent<SocketReq>()->setSocketId(socketId);
-    tags.addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
-    check_and_cast<cSimpleModule *>(outputGate->getOwnerModule())->send(msg, outputGate);
+    int msgSocketId = tags.getTag<SocketInd>()->getSocketId();
+    return socketId == msgSocketId;
+}
+
+void TunSocket::processMessage(cMessage *msg)
+{
+    ASSERT(belongsToSocket(msg));
+
+    if (callback)
+        callback->socketDataArrived(this, check_and_cast<Packet*>(msg));
+    else
+        delete msg;
 }
 
 void TunSocket::open(int interfaceId)
@@ -65,26 +77,14 @@ void TunSocket::close()
     this->interfaceId = -1;
 }
 
-bool TunSocket::belongsToSocket(cMessage *msg) const
+void TunSocket::sendToTun(cMessage *msg)
 {
+    if (!outputGate)
+        throw cRuntimeError("TunSocket: setOutputGate() must be invoked before socket can be used");
     auto& tags = getTags(msg);
-    int msgSocketId = tags.getTag<SocketInd>()->getSocketId();
-    return socketId == msgSocketId;
-}
-
-void TunSocket::setCallback(ICallback *callback)
-{
-    cb = callback;
-}
-
-void TunSocket::processMessage(cMessage *msg)
-{
-    ASSERT(belongsToSocket(msg));
-
-    if (cb)
-        cb->socketDataArrived(this, check_and_cast<Packet*>(msg));
-    else
-        delete msg;
+    tags.addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    tags.addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
+    check_and_cast<cSimpleModule *>(outputGate->getOwnerModule())->send(msg, outputGate);
 }
 
 } // namespace inet

@@ -31,14 +31,26 @@ L3Socket::L3Socket(const Protocol *l3Protocol, cGate *outputGate) :
 {
 }
 
-void L3Socket::sendToOutput(cMessage *message)
+void L3Socket::setCallback(INetworkSocket::ICallback *callback)
 {
-    if (!outputGate)
-        throw cRuntimeError("L3Socket: setOutputGate() must be invoked before the socket can be used");
-    auto& tags = getTags(message);
-    tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(l3Protocol);
-    tags.addTagIfAbsent<SocketReq>()->setSocketId(socketId);
-    check_and_cast<cSimpleModule *>(outputGate->getOwnerModule())->send(message, outputGate);
+    this->callback = callback;
+}
+
+bool L3Socket::belongsToSocket(cMessage *msg) const
+{
+    auto& tags = getTags(msg);
+    int msgSocketId = tags.getTag<SocketInd>()->getSocketId();
+    return socketId == msgSocketId;
+}
+
+void L3Socket::processMessage(cMessage *msg)
+{
+    ASSERT(belongsToSocket(msg));
+
+    if (callback)
+        callback->socketDataArrived(this, check_and_cast<Packet*>(msg));
+    else
+        delete msg;
 }
 
 void L3Socket::bind(const Protocol *protocol)
@@ -68,26 +80,14 @@ void L3Socket::close()
     sendToOutput(request);
 }
 
-bool L3Socket::belongsToSocket(cMessage *msg) const
+void L3Socket::sendToOutput(cMessage *message)
 {
-    auto& tags = getTags(msg);
-    int msgSocketId = tags.getTag<SocketInd>()->getSocketId();
-    return socketId == msgSocketId;
-}
-
-void L3Socket::setCallback(INetworkSocket::ICallback *callback)
-{
-    cb = callback;
-}
-
-void L3Socket::processMessage(cMessage *msg)
-{
-    ASSERT(belongsToSocket(msg));
-
-    if (cb)
-        cb->socketDataArrived(this, check_and_cast<Packet*>(msg));
-    else
-        delete msg;
+    if (!outputGate)
+        throw cRuntimeError("L3Socket: setOutputGate() must be invoked before the socket can be used");
+    auto& tags = getTags(message);
+    tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(l3Protocol);
+    tags.addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    check_and_cast<cSimpleModule *>(outputGate->getOwnerModule())->send(message, outputGate);
 }
 
 } // namespace inet
