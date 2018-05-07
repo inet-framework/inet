@@ -39,8 +39,6 @@ namespace inet {
 
 #define FES(sim) (sim->getFES())
 
-std::vector<EmulationScheduler::ExtConn> EmulationScheduler::conn;
-
 int64_t EmulationScheduler::baseTime;
 
 Register_Class(EmulationScheduler);
@@ -53,6 +51,23 @@ EmulationScheduler::~EmulationScheduler()
 {
 }
 
+void EmulationScheduler::addCallback(int fd, ICallback *callback)
+{
+    if (!callback)
+        throw cRuntimeError("EmulationScheduler::addCallback(): callback must be non-nullptr");
+    callbackEntries.push_back(Entry(fd, callback));
+}
+
+void EmulationScheduler::removeCallback(int fd, ICallback *callback)
+{
+    for (auto it = callbackEntries.begin(); it != callbackEntries.end(); ) {
+        if (fd == it->fd && callback == it->callback)
+            it = callbackEntries.erase(it);
+        else
+            ++it;
+    }
+}
+
 void EmulationScheduler::startRun()
 {
     baseTime = opp_get_monotonic_clock_usecs();
@@ -60,37 +75,13 @@ void EmulationScheduler::startRun()
 
 void EmulationScheduler::endRun()
 {
-    conn.clear();
+    callbackEntries.clear();
 }
 
 void EmulationScheduler::executionResumed()
 {
     baseTime = opp_get_monotonic_clock_usecs();
     baseTime = baseTime - sim->getSimTime().inUnit(SIMTIME_US);
-}
-
-void EmulationScheduler::setInterfaceModule(cModule *mod, int recv_socket)
-{
-    if (!mod)
-        throw cRuntimeError("EmulationScheduler::setInterfaceModule(): arguments must be non-nullptr");
-
-    ExtConn newConn;
-    newConn.module = mod;
-    newConn.callback = check_and_cast<EmulationScheduler::ICallback *>(mod);
-    newConn.recv_socket = recv_socket;
-    conn.push_back(newConn);
-
-    EV << "Opened pcap device.\n";
-}
-
-void EmulationScheduler::dropInterfaceModule(cModule *mod)
-{
-    for (auto it = conn.begin(); it != conn.end(); ) {
-        if (mod == it->module)
-            it = conn.erase(it);
-        else
-            ++it;
-    }
 }
 
 bool EmulationScheduler::receiveWithTimeout(long usec)
@@ -105,8 +96,8 @@ bool EmulationScheduler::receiveWithTimeout(long usec)
     fd_set rdfds;
     FD_ZERO(&rdfds);
     maxfd = -1;
-    for (uint16 i = 0; i < conn.size(); i++) {
-        fdVec[i] = conn.at(i).recv_socket;
+    for (uint16 i = 0; i < callbackEntries.size(); i++) {
+        fdVec[i] = callbackEntries.at(i).fd;
         if (fdVec[i] > maxfd)
             maxfd = fdVec[i];
         FD_SET(fdVec[i], &rdfds);
@@ -114,10 +105,10 @@ bool EmulationScheduler::receiveWithTimeout(long usec)
     if (select(maxfd + 1, &rdfds, nullptr, nullptr, &timeout) < 0) {
         return found;
     }
-    for (uint16 i = 0; i < conn.size(); i++) {
+    for (uint16 i = 0; i < callbackEntries.size(); i++) {
         if (!(FD_ISSET(fdVec[i], &rdfds)))
             continue;
-        if (conn.at(i).callback->dispatch(fdVec[i]))
+        if (callbackEntries.at(i).callback->notify(fdVec[i]))
             found = true;
     }
     return found;
@@ -127,8 +118,8 @@ bool EmulationScheduler::receiveWithTimeout(long usec)
     timeout.tv_sec = 0;
     timeout.tv_usec = usec;
 
-    for (uint16 i = 0; i < conn.size(); i++) {
-        if (conn.at(i).callback->dispatch(fdVec[i]))
+    for (uint16 i = 0; i < callbackEntries.size(); i++) {
+        if (callbackEntries.at(i).callback->notify(fdVec[i]))
             found = true;
     }
     if (!found)
@@ -207,6 +198,15 @@ cEvent *EmulationScheduler::takeNextEvent()
 void EmulationScheduler::putBackEvent(cEvent *event)
 {
     FES(sim)->putBackFirst(event);
+}
+
+void EmulationScheduler::scheduleMessage(cModule *module, cMessage *msg)
+{
+    int64_t curTime = opp_get_monotonic_clock_usecs();
+    simtime_t t(curTime - EmulationScheduler::baseTime, SIMTIME_US);
+    // TBD assert that it's somehow not smaller than previous event's time
+    msg->setArrival(module->getId(), -1, t);
+    getSimulation()->getFES()->insert(msg);
 }
 
 } // namespace inet

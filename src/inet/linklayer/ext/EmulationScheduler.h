@@ -23,8 +23,6 @@
 
 #include "inet/common/INETDefs.h"
 
-#include <omnetpp/platdep/sockets.h>
-
 namespace inet {
 
 class INET_API EmulationScheduler : public cScheduler
@@ -34,35 +32,36 @@ class INET_API EmulationScheduler : public cScheduler
     {
       public:
         virtual ~ICallback() {}
-        virtual bool dispatch(int socket) = 0;
-    };
-  protected:
-    class ExtConn {
-      public:
-        cModule *module = nullptr;      // Ext module
-        ICallback *callback = nullptr;      // callback module
-        int recv_socket = -1;           // pcap socket
-        int datalink;
-        int headerLength;               // link layer header length
+        virtual bool notify(int fd) = 0;
     };
 
+    class Entry {
+      public:
+        int fd = -1;
+        ICallback *callback = nullptr;
+      public:
+        Entry(int fd, ICallback *callback) : fd(fd), callback(callback) {}
+    };
+
+    static int64_t baseTime; // in microseconds, as returned by opp_get_monotonic_clock_usecs()
+
+  protected:
+    std::vector<Entry> callbackEntries;
+
+  protected:
     virtual bool receiveWithTimeout(long usec);
     virtual int receiveUntil(int64_t targetTime); // in microseconds, as returned by opp_get_monotonic_clock_usecs()
 
   public:
-    /**
-     * Constructor.
-     */
     EmulationScheduler();
-
-    /**
-     * Destructor.
-     */
     virtual ~EmulationScheduler();
 
-    static std::vector<ExtConn> conn;
-
-    static int64_t baseTime; // in microseconds, as returned by opp_get_monotonic_clock_usecs()
+    /**
+     * To be called from the module which wishes to receive data from the
+     * fd. The method must be called from the module's initialize() function.
+     */
+    void addCallback(int fd, ICallback *callback);
+    void removeCallback(int fd, ICallback *callback);
 
     /**
      * Called at the beginning of a simulation run.
@@ -80,15 +79,6 @@ class INET_API EmulationScheduler : public cScheduler
     virtual void executionResumed() override;
 
     /**
-     * To be called from the module which wishes to receive data from the
-     * socket. The method must be called from the module's initialize()
-     * function.
-     */
-    void setInterfaceModule(cModule *mod, int recv_socket);
-
-    void dropInterfaceModule(cModule *mod);
-
-    /**
      * Returns the first event in the Future Event Set.
      */
     virtual cEvent *guessNextEvent() override;
@@ -102,6 +92,11 @@ class INET_API EmulationScheduler : public cScheduler
      * Scheduler function -- it comes from the cScheduler interface.
      */
     virtual void putBackEvent(cEvent *event) override;
+
+    /**
+     * Schedule a message for module at the current real time.
+     */
+    virtual void scheduleMessage(cModule *module, cMessage *msg);
 };
 
 } // namespace inet

@@ -50,19 +50,19 @@ class InterfaceEntry;
 class INET_API Ext : public MacBase, public EmulationScheduler::ICallback
 {
   protected:
-    bool connected;
+    EmulationScheduler *rtScheduler = nullptr;
+    bool connected = false;
     uint8 buffer[1 << 16];
-    const char *device;
+    const char *device = nullptr;
 
     // statistics
-    int numSent;
-    int numRcvd;
-    int numDropped;
+    int numSent = 0;
+    int numRcvd = 0;
+    int numDropped = 0;
 
     // access to real network interface via Scheduler class:
-    EmulationScheduler *rtScheduler;
     int fd = INVALID_SOCKET;        // RAW socket ID
-  public: //FIXME KLUDGE
+
     pcap_t *pd = nullptr;           // pcap socket
     int pcap_socket = -1;
     int datalink = -1;
@@ -80,11 +80,13 @@ class INET_API Ext : public MacBase, public EmulationScheduler::ICallback
     virtual bool isUpperMsg(cMessage *msg) override { return msg->arrivedOn("upperLayerIn"); }
 
     // EmulationScheduler::ICallback:
-    virtual bool dispatch(int socket) override;
+    virtual bool notify(int fd) override;
 
     // utility functions
     void sendBytes(unsigned char *buf, size_t numBytes, struct sockaddr *from, socklen_t addrlen);
     void openPcap(const char *device, const char *filter);
+
+    static void ext_packet_handler(u_char *usermod, const struct pcap_pkthdr *hdr, const u_char *bytes);
 
   public:
     virtual ~Ext();

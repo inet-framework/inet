@@ -52,8 +52,9 @@ namespace inet {
 
 Define_Module(Ext);
 
-static void ext_packet_handler(u_char *usermod, const struct pcap_pkthdr *hdr, const u_char *bytes)
+void Ext::ext_packet_handler(u_char *usermod, const struct pcap_pkthdr *hdr, const u_char *bytes)
 {
+    EV_STATICCONTEXT;
     Ext *module = (Ext*)usermod;
 
     //FIXME Why? Could we use the pcap for filtering incoming IPv4 packet?
@@ -72,21 +73,18 @@ static void ext_packet_handler(u_char *usermod, const struct pcap_pkthdr *hdr, c
 
     // put the IP packet from wire into Packet
     uint32_t pklen = hdr->caplen - module->headerLength;
-    Packet *notificationMsg = new Packet("rtEvent");
+    Packet *packet = new Packet("rtEvent");
     const auto& bytesChunk = makeShared<BytesChunk>(bytes + module->headerLength, pklen);
-    notificationMsg->insertAtBack(bytesChunk);
+    packet->insertAtBack(bytesChunk);
 
     // signalize new incoming packet to the interface via cMessage
     EV << "Captured " << pklen << " bytes for an IP packet.\n";
-    int64_t curTime = opp_get_monotonic_clock_usecs();
-    simtime_t t(curTime - EmulationScheduler::baseTime, SIMTIME_US);
-    // TBD assert that it's somehow not smaller than previous event's time
-    notificationMsg->setArrival(module->getId(), -1, t);
-    getSimulation()->getFES()->insert(notificationMsg);
+    module->rtScheduler->scheduleMessage(module, packet);
 }
 
-bool Ext::dispatch(int socket)
+bool Ext::notify(int fd)
 {
+    ASSERT(fd == pcap_socket);
     bool found = false;
     int32 n = pcap_dispatch(pd, 1, ext_packet_handler, (u_char *)this);
     if (n < 0)
@@ -102,7 +100,7 @@ Ext::~Ext()
     close(fd);
     if (pd)
         pcap_close(pd);
-    rtScheduler->dropInterfaceModule(this);
+    rtScheduler->removeCallback(pcap_socket, this);
 }
 
 void Ext::initialize(int stage)
@@ -118,7 +116,7 @@ void Ext::initialize(int stage)
             device = par("device");
             const char *filter = par("filterString");
             openPcap(device, filter);
-            rtScheduler->setInterfaceModule(this, pcap_socket);
+            rtScheduler->addCallback(pcap_socket, this);
             connected = true;
 
             // Enabling sending makes no sense when we can't receive...
@@ -343,7 +341,7 @@ void Ext::refreshDisplay() const
 
 void Ext::finish()
 {
-    rtScheduler->dropInterfaceModule(this);
+    rtScheduler->removeCallback(pcap_socket, this);
     std::cout << getFullPath() << ": " << numSent << " packets sent, "
               << numRcvd << " packets received, " << numDropped << " packets dropped.\n";
     //close raw socket:
