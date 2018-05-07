@@ -24,17 +24,10 @@
 #include "inet/linklayer/ext/EmulationScheduler.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/common/serializer/headers/ethernethdr.h"
-#include "inet/linklayer/common/Ieee802Ctrl_m.h"
-#include "inet/linklayer/common/EtherType_m.h"
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__CYGWIN__) || defined(_WIN64)
 #include <ws2tcpip.h>
 #endif // if defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__CYGWIN__) || defined(_WIN64)
-
-#include <net/if.h>
-
-#define PCAP_SNAPLEN    65536 /* capture all data packets with up to pcap_snaplen bytes */
 
 #ifdef __linux__
 #define UI_REFRESH_TIME 100000 /* refresh time of the UI in us */
@@ -67,17 +60,6 @@ void EmulationScheduler::startRun()
 
 void EmulationScheduler::endRun()
 {
-
-    for (auto& curConn : conn) {
-        // close pcap:
-        pcap_stat ps;
-        if (pcap_stats(curConn.pd, &ps) < 0)
-            throw cRuntimeError("EmulationScheduler::endRun(): Cannot query pcap statistics: %s", pcap_geterr(curConn.pd));
-        else
-            EV << curConn.module->getFullPath() << ": Received Packets: " << ps.ps_recv << " Dropped Packets: " << ps.ps_drop << ".\n";
-        pcap_close(curConn.pd);
-    }
-
     conn.clear();
 }
 
@@ -87,130 +69,44 @@ void EmulationScheduler::executionResumed()
     baseTime = baseTime - sim->getSimTime().inUnit(SIMTIME_US);
 }
 
-void EmulationScheduler::setInterfaceModule(cModule *mod, const char *dev, const char *filter)
+void EmulationScheduler::setInterfaceModule(cModule *mod, int recv_socket)
 {
-    char errbuf[PCAP_ERRBUF_SIZE];
-    struct bpf_program fcode;
-    pcap_t *pd;
-    int32 datalink;
-    int32 headerLength;
-
-    if (!mod || !dev || !filter)
+    if (!mod)
         throw cRuntimeError("EmulationScheduler::setInterfaceModule(): arguments must be non-nullptr");
-
-    /* get pcap handle */
-    memset(&errbuf, 0, sizeof(errbuf));
-    if ((pd = pcap_create(dev, errbuf)) == nullptr)
-        throw cRuntimeError("EmulationScheduler::setInterfaceModule(): Cannot create pcap device, error = %s", errbuf);
-    else if (strlen(errbuf) > 0)
-        EV << "EmulationScheduler::setInterfaceModule(): pcap_open_live returned warning: " << errbuf << "\n";
-
-    /* apply the immediate mode to pcap */
-    if (pcap_set_immediate_mode(pd, 1) != 0)
-            throw cRuntimeError("EmulationScheduler::setInterfaceModule(): Cannot set immediate mode to pcap device");
-
-    if (pcap_activate(pd) != 0)
-        throw cRuntimeError("EmulationScheduler::setInterfaceModule(): Cannot activate pcap device");
-
-    /* compile this command into a filter program */
-    if (pcap_compile(pd, &fcode, (char *)filter, 0, 0) < 0)
-        throw cRuntimeError("EmulationScheduler::setInterfaceModule(): Cannot compile pcap filter: %s", pcap_geterr(pd));
-
-    /* apply the compiled filter to the packet capture device */
-    if (pcap_setfilter(pd, &fcode) < 0)
-        throw cRuntimeError("EmulationScheduler::setInterfaceModule(): Cannot apply compiled pcap filter: %s", pcap_geterr(pd));
-
-    if ((datalink = pcap_datalink(pd)) < 0)
-        throw cRuntimeError("EmulationScheduler::setInterfaceModule(): Cannot query pcap link-layer header type: %s", pcap_geterr(pd));
-
-#ifndef __linux__
-    if (pcap_setnonblock(pd, 1, errbuf) < 0)
-        throw cRuntimeError("EmulationScheduler::setInterfaceModule(): Cannot put pcap device into non-blocking mode, error: %s", errbuf);
-#endif
-
-    switch (datalink) {
-        case DLT_NULL:
-            headerLength = 4;
-            break;
-
-        case DLT_EN10MB:
-            headerLength = 14;
-            break;
-
-        case DLT_SLIP:
-            headerLength = 24;
-            break;
-
-        case DLT_PPP:
-            headerLength = 24;
-            break;
-
-        default:
-            throw cRuntimeError("EmulationScheduler::setInterfaceModule(): Unsupported datalink: %d", datalink);
-    }
 
     ExtConn newConn;
     newConn.module = mod;
-    newConn.pd = pd;
-    newConn.datalink = datalink;
-    newConn.headerLength = headerLength;
+    newConn.callback = check_and_cast<EmulationScheduler::ICallback *>(mod);
+    newConn.recv_socket = recv_socket;
     conn.push_back(newConn);
 
-    EV << "Opened pcap device " << dev << " with filter " << filter << " and datalink " << datalink << ".\n";
+    EV << "Opened pcap device.\n";
 }
 
-static void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_char *bytes)
+void EmulationScheduler::dropInterfaceModule(cModule *mod)
 {
-    unsigned int i = *(uint16 *)user;
-    int32_t datalink = EmulationScheduler::conn.at(i).datalink;
-    int32_t headerLength = EmulationScheduler::conn.at(i).headerLength;
-    cModule *module = EmulationScheduler::conn.at(i).module;
-
-    //FIXME Why? Could we use the pcap for filtering incoming IPv4 packet?
-    //FIXME Why filtering IPv4 only on eth interface? why not filtering on PPP or other interfaces?
-    // skip ethernet frames not encapsulating an IP packet.
-    // TODO: how about ipv6 and other protocols?
-    if (datalink == DLT_EN10MB && hdr->caplen > ETHER_HDR_LEN) {
-        //TODO for decapsulate, using code from EtherEncap
-        uint16_t etherType = (uint16_t)(bytes[ETHER_ADDR_LEN * 2]) << 8 | bytes[ETHER_ADDR_LEN * 2 + 1];
-        //TODO get ethertype from snap header when packet has snap header
-        if (etherType != ETHERTYPE_IPv4) // ipv4
-            return;
+    for (auto it = conn.begin(); it != conn.end(); ) {
+        if (mod == it->module)
+            it = conn.erase(it);
+        else
+            ++it;
     }
-    //TODO for other DLT_ : decapsulate
-    //TODO or move decapsulation to Ext interface
-
-    // put the IP packet from wire into Packet
-    uint32_t pklen = hdr->caplen - headerLength;
-    Packet *notificationMsg = new Packet("rtEvent");
-    const auto& bytesChunk = makeShared<BytesChunk>(bytes + headerLength, pklen);
-    notificationMsg->insertAtBack(bytesChunk);
-
-    // signalize new incoming packet to the interface via cMessage
-    EV << "Captured " << pklen << " bytes for an IP packet.\n";
-    int64_t curTime = opp_get_monotonic_clock_usecs();
-    simtime_t t(curTime - EmulationScheduler::baseTime, SIMTIME_US);
-    // TBD assert that it's somehow not smaller than previous event's time
-    notificationMsg->setArrival(module->getId(), -1, t);
-    FES(getSimulation())->insert(notificationMsg);
 }
 
 bool EmulationScheduler::receiveWithTimeout(long usec)
 {
 #ifdef __linux__
-    int32 fdVec[FD_SETSIZE], maxfd;
-    fd_set rdfds;
-#endif
-
     bool found = false;
     timeval timeout;
     timeout.tv_sec = 0;
     timeout.tv_usec = usec;
-#ifdef __linux__
+
+    int32 fdVec[FD_SETSIZE], maxfd;
+    fd_set rdfds;
     FD_ZERO(&rdfds);
     maxfd = -1;
     for (uint16 i = 0; i < conn.size(); i++) {
-        fdVec[i] = pcap_get_selectable_fd(conn.at(i).pd);
+        fdVec[i] = conn.at(i).recv_socket;
         if (fdVec[i] > maxfd)
             maxfd = fdVec[i];
         FD_SET(fdVec[i], &rdfds);
@@ -218,23 +114,27 @@ bool EmulationScheduler::receiveWithTimeout(long usec)
     if (select(maxfd + 1, &rdfds, nullptr, nullptr, &timeout) < 0) {
         return found;
     }
-#endif
     for (uint16 i = 0; i < conn.size(); i++) {
-#ifdef __linux__
         if (!(FD_ISSET(fdVec[i], &rdfds)))
             continue;
-#endif // ifdef __linux__
-        int32 n = pcap_dispatch(conn.at(i).pd, 1, packet_handler, (uint8 *)&i);
-        if (n < 0)
-            throw cRuntimeError("EmulationScheduler::pcap_dispatch(): An error occured: %s", pcap_geterr(conn.at(i).pd));
-        if (n > 0)
+        if (conn.at(i).callback->dispatch(fdVec[i]))
             found = true;
     }
-#ifndef __linux__
+    return found;
+#else
+    bool found = false;
+    timeval timeout;
+    timeout.tv_sec = 0;
+    timeout.tv_usec = usec;
+
+    for (uint16 i = 0; i < conn.size(); i++) {
+        if (conn.at(i).callback->dispatch(fdVec[i]))
+            found = true;
+    }
     if (!found)
         select(0, nullptr, nullptr, nullptr, &timeout);
-#endif
     return found;
+#endif
 }
 
 int EmulationScheduler::receiveUntil(int64_t targetTime)

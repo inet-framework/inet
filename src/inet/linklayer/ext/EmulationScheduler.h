@@ -25,25 +25,23 @@
 
 #include <omnetpp/platdep/sockets.h>
 
-// prevent pcap.h to redefine int8_t,... types on Windows
-#include "inet/common/serializer/headers/bsdint.h"
-#define HAVE_U_INT8_T
-#define HAVE_U_INT16_T
-#define HAVE_U_INT32_T
-#define HAVE_U_INT64_T
-
-#include <pcap.h>
-#include "inet/linklayer/ext/ExtFrame_m.h"
-
 namespace inet {
 
 class INET_API EmulationScheduler : public cScheduler
 {
+  public:
+    class INET_API ICallback
+    {
+      public:
+        virtual ~ICallback() {}
+        virtual bool dispatch(int socket) = 0;
+    };
   protected:
     class ExtConn {
       public:
         cModule *module = nullptr;      // Ext module
-        pcap_t *pd = nullptr;           // pcap socket
+        ICallback *callback = nullptr;      // callback module
+        int recv_socket = -1;           // pcap socket
         int datalink;
         int headerLength;               // link layer header length
     };
@@ -86,7 +84,9 @@ class INET_API EmulationScheduler : public cScheduler
      * socket. The method must be called from the module's initialize()
      * function.
      */
-    void setInterfaceModule(cModule *mod, const char *dev, const char *filter);
+    void setInterfaceModule(cModule *mod, int recv_socket);
+
+    void dropInterfaceModule(cModule *mod);
 
     /**
      * Returns the first event in the Future Event Set.

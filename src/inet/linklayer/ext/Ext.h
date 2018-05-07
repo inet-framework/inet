@@ -25,6 +25,8 @@
 #define MAX_MTU_SIZE    4000
 #endif // ifndef MAX_MTU_SIZE
 
+#include <pcap.h>
+
 #include "inet/common/INETDefs.h"
 
 #include "inet/linklayer/base/MacBase.h"
@@ -45,7 +47,7 @@ class InterfaceEntry;
  *
  * See NED file for more details.
  */
-class INET_API Ext : public MacBase
+class INET_API Ext : public MacBase, public EmulationScheduler::ICallback
 {
   protected:
     bool connected;
@@ -59,8 +61,12 @@ class INET_API Ext : public MacBase
 
     // access to real network interface via Scheduler class:
     EmulationScheduler *rtScheduler;
-
     int fd = INVALID_SOCKET;        // RAW socket ID
+  public: //FIXME KLUDGE
+    pcap_t *pd = nullptr;           // pcap socket
+    int pcap_socket = -1;
+    int datalink = -1;
+    int headerLength = -1;               // link layer header length
 
   protected:
     void displayBusy();
@@ -73,8 +79,12 @@ class INET_API Ext : public MacBase
     virtual void clearQueue() override;
     virtual bool isUpperMsg(cMessage *msg) override { return msg->arrivedOn("upperLayerIn"); }
 
+    // EmulationScheduler::ICallback:
+    virtual bool dispatch(int socket) override;
+
     // utility functions
     void sendBytes(unsigned char *buf, size_t numBytes, struct sockaddr *from, socklen_t addrlen);
+    void openPcap(const char *device, const char *filter);
 
   public:
     virtual ~Ext();
