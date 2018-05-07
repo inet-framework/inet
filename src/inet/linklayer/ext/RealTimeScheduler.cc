@@ -21,7 +21,7 @@
 // This file is based on the cSocketRTScheduler.cc of OMNeT++ written by
 // Andras Varga.
 
-#include "inet/linklayer/ext/EmulationScheduler.h"
+#include "RealTimeScheduler.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/Packet.h"
 
@@ -39,26 +39,26 @@ namespace inet {
 
 #define FES(sim) (sim->getFES())
 
-int64_t EmulationScheduler::baseTime;
+int64_t RealTimeScheduler::baseTime;
 
-Register_Class(EmulationScheduler);
+Register_Class(RealTimeScheduler);
 
-EmulationScheduler::EmulationScheduler() : cScheduler()
+RealTimeScheduler::RealTimeScheduler() : cScheduler()
 {
 }
 
-EmulationScheduler::~EmulationScheduler()
+RealTimeScheduler::~RealTimeScheduler()
 {
 }
 
-void EmulationScheduler::addCallback(int fd, ICallback *callback)
+void RealTimeScheduler::addCallback(int fd, ICallback *callback)
 {
     if (!callback)
-        throw cRuntimeError("EmulationScheduler::addCallback(): callback must be non-nullptr");
+        throw cRuntimeError("RealTimeScheduler::addCallback(): callback must be non-nullptr");
     callbackEntries.push_back(Entry(fd, callback));
 }
 
-void EmulationScheduler::removeCallback(int fd, ICallback *callback)
+void RealTimeScheduler::removeCallback(int fd, ICallback *callback)
 {
     for (auto it = callbackEntries.begin(); it != callbackEntries.end(); ) {
         if (fd == it->fd && callback == it->callback)
@@ -68,23 +68,23 @@ void EmulationScheduler::removeCallback(int fd, ICallback *callback)
     }
 }
 
-void EmulationScheduler::startRun()
+void RealTimeScheduler::startRun()
 {
     baseTime = opp_get_monotonic_clock_usecs();
 }
 
-void EmulationScheduler::endRun()
+void RealTimeScheduler::endRun()
 {
     callbackEntries.clear();
 }
 
-void EmulationScheduler::executionResumed()
+void RealTimeScheduler::executionResumed()
 {
     baseTime = opp_get_monotonic_clock_usecs();
     baseTime = baseTime - sim->getSimTime().inUnit(SIMTIME_US);
 }
 
-bool EmulationScheduler::receiveWithTimeout(long usec)
+bool RealTimeScheduler::receiveWithTimeout(long usec)
 {
 #ifdef __linux__
     bool found = false;
@@ -128,7 +128,7 @@ bool EmulationScheduler::receiveWithTimeout(long usec)
 #endif
 }
 
-int EmulationScheduler::receiveUntil(int64_t targetTime)
+int RealTimeScheduler::receiveUntil(int64_t targetTime)
 {
     // if there's more than 2*UI_REFRESH_TIME to wait, wait in UI_REFRESH_TIME chunks
     // in order to keep UI responsiveness by invoking getEnvir()->idle()
@@ -151,12 +151,12 @@ int EmulationScheduler::receiveUntil(int64_t targetTime)
     return 0;
 }
 
-cEvent *EmulationScheduler::guessNextEvent()
+cEvent *RealTimeScheduler::guessNextEvent()
 {
     return FES(sim)->peekFirst();
 }
 
-cEvent *EmulationScheduler::takeNextEvent()
+cEvent *RealTimeScheduler::takeNextEvent()
 {
     int64_t targetTime;
 
@@ -195,15 +195,15 @@ cEvent *EmulationScheduler::takeNextEvent()
     return event;
 }
 
-void EmulationScheduler::putBackEvent(cEvent *event)
+void RealTimeScheduler::putBackEvent(cEvent *event)
 {
     FES(sim)->putBackFirst(event);
 }
 
-void EmulationScheduler::scheduleMessage(cModule *module, cMessage *msg)
+void RealTimeScheduler::scheduleMessage(cModule *module, cMessage *msg)
 {
     int64_t curTime = opp_get_monotonic_clock_usecs();
-    simtime_t t(curTime - EmulationScheduler::baseTime, SIMTIME_US);
+    simtime_t t(curTime - RealTimeScheduler::baseTime, SIMTIME_US);
     // TBD assert that it's somehow not smaller than previous event's time
     msg->setArrival(module->getId(), -1, t);
     getSimulation()->getFES()->insert(msg);

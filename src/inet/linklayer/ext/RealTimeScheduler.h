@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_EMULATIONSCHEDULER_H
-#define __INET_EMULATIONSCHEDULER_H
+#ifndef __INET_REALTIMESCHEDULER_H
+#define __INET_REALTIMESCHEDULER_H
 
 #define WANT_WINSOCK2
 
@@ -25,7 +25,7 @@
 
 namespace inet {
 
-class INET_API EmulationScheduler : public cScheduler
+class INET_API RealTimeScheduler : public cScheduler
 {
   public:
     class INET_API ICallback
@@ -53,8 +53,8 @@ class INET_API EmulationScheduler : public cScheduler
     virtual int receiveUntil(int64_t targetTime); // in microseconds, as returned by opp_get_monotonic_clock_usecs()
 
   public:
-    EmulationScheduler();
-    virtual ~EmulationScheduler();
+    RealTimeScheduler();
+    virtual ~RealTimeScheduler();
 
     /**
      * To be called from the module which wishes to receive data from the
@@ -101,5 +101,5 @@ class INET_API EmulationScheduler : public cScheduler
 
 } // namespace inet
 
-#endif // ifndef __INET_EMULATIONSCHEDULER_H
+#endif // ifndef __INET_REALTIMESCHEDULER_H
 

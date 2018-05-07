@@ -111,7 +111,7 @@ void Ext::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         numSent = numRcvd = numDropped = 0;
 
-        if (auto scheduler = dynamic_cast<EmulationScheduler *>(getSimulation()->getScheduler())) {
+        if (auto scheduler = dynamic_cast<RealTimeScheduler *>(getSimulation()->getScheduler())) {
             rtScheduler = scheduler;
             device = par("device");
             const char *filter = par("filterString");
@@ -132,7 +132,7 @@ void Ext::initialize(int stage)
             memset(&ifr, 0, sizeof(ifr));
             snprintf(ifr.ifr_name, sizeof(ifr.ifr_name), "%s", device);
             if (setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, (void *)&ifr, sizeof(ifr)) < 0) {
-                throw cRuntimeError("EmulationScheduler: couldn't bind raw socket to '%s' interface", device);
+                throw cRuntimeError("RealTimeScheduler: couldn't bind raw socket to '%s' interface", device);
             }
         }
         else {
@@ -158,36 +158,36 @@ void Ext::openPcap(const char *device, const char *filter)
     int32 headerLength;
 
     if (!device || !filter)
-        throw cRuntimeError("EmulationScheduler::setInterfaceModule(): arguments must be non-nullptr");
+        throw cRuntimeError("RealTimeScheduler::setInterfaceModule(): arguments must be non-nullptr");
 
     /* get pcap handle */
     memset(&errbuf, 0, sizeof(errbuf));
     if ((pd = pcap_create(device, errbuf)) == nullptr)
-        throw cRuntimeError("EmulationScheduler::setInterfaceModule(): Cannot create pcap device, error = %s", errbuf);
+        throw cRuntimeError("RealTimeScheduler::setInterfaceModule(): Cannot create pcap device, error = %s", errbuf);
     else if (strlen(errbuf) > 0)
-        EV << "EmulationScheduler::setInterfaceModule(): pcap_open_live returned warning: " << errbuf << "\n";
+        EV << "RealTimeScheduler::setInterfaceModule(): pcap_open_live returned warning: " << errbuf << "\n";
 
     /* apply the immediate mode to pcap */
     if (pcap_set_immediate_mode(pd, 1) != 0)
-            throw cRuntimeError("EmulationScheduler::setInterfaceModule(): Cannot set immediate mode to pcap device");
+            throw cRuntimeError("RealTimeScheduler::setInterfaceModule(): Cannot set immediate mode to pcap device");
 
     if (pcap_activate(pd) != 0)
-        throw cRuntimeError("EmulationScheduler::setInterfaceModule(): Cannot activate pcap device");
+        throw cRuntimeError("RealTimeScheduler::setInterfaceModule(): Cannot activate pcap device");
 
     /* compile this command into a filter program */
     if (pcap_compile(pd, &fcode, filter, 0, 0) < 0)
-        throw cRuntimeError("EmulationScheduler::setInterfaceModule(): Cannot compile pcap filter: %s", pcap_geterr(pd));
+        throw cRuntimeError("RealTimeScheduler::setInterfaceModule(): Cannot compile pcap filter: %s", pcap_geterr(pd));
 
     /* apply the compiled filter to the packet capture device */
     if (pcap_setfilter(pd, &fcode) < 0)
-        throw cRuntimeError("EmulationScheduler::setInterfaceModule(): Cannot apply compiled pcap filter: %s", pcap_geterr(pd));
+        throw cRuntimeError("RealTimeScheduler::setInterfaceModule(): Cannot apply compiled pcap filter: %s", pcap_geterr(pd));
 
     if ((datalink = pcap_datalink(pd)) < 0)
-        throw cRuntimeError("EmulationScheduler::setInterfaceModule(): Cannot query pcap link-layer header type: %s", pcap_geterr(pd));
+        throw cRuntimeError("RealTimeScheduler::setInterfaceModule(): Cannot query pcap link-layer header type: %s", pcap_geterr(pd));
 
 #ifndef __linux__
     if (pcap_setnonblock(pd, 1, errbuf) < 0)
-        throw cRuntimeError("EmulationScheduler::setInterfaceModule(): Cannot put pcap device into non-blocking mode, error: %s", errbuf);
+        throw cRuntimeError("RealTimeScheduler::setInterfaceModule(): Cannot put pcap device into non-blocking mode, error: %s", errbuf);
 #endif
 
     switch (datalink) {
@@ -208,7 +208,7 @@ void Ext::openPcap(const char *device, const char *filter)
             break;
 
         default:
-            throw cRuntimeError("EmulationScheduler::setInterfaceModule(): Unsupported datalink: %d", datalink);
+            throw cRuntimeError("RealTimeScheduler::setInterfaceModule(): Unsupported datalink: %d", datalink);
     }
 
     this->pd = pd;
@@ -299,7 +299,7 @@ void Ext::sendBytes(uint8 *buf, size_t numBytes, struct sockaddr *to, socklen_t 
 {
     //TODO check: is this an IPv4 packet --OR-- is this packet acceptable by fd socket?
     if (fd == INVALID_SOCKET)
-        throw cRuntimeError("EmulationScheduler::sendBytes(): no raw socket.");
+        throw cRuntimeError("RealTimeScheduler::sendBytes(): no raw socket.");
 
     int sent = sendto(fd, buf, numBytes, 0, to, addrlen);    //note: no ssize_t on MSVC
 
@@ -351,7 +351,7 @@ void Ext::finish()
     // close pcap:
     pcap_stat ps;
     if (pcap_stats(pd, &ps) < 0)
-        throw cRuntimeError("EmulationScheduler::endRun(): Cannot query pcap statistics: %s", pcap_geterr(pd));
+        throw cRuntimeError("RealTimeScheduler::endRun(): Cannot query pcap statistics: %s", pcap_geterr(pd));
     EV << "Received Packets: " << ps.ps_recv << " Dropped Packets: " << ps.ps_drop << ".\n";
     recordScalar("Received Packets", ps.ps_recv);
     recordScalar("Dropped Packets", ps.ps_drop);

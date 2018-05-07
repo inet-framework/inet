@@ -31,7 +31,7 @@
 
 #include "inet/linklayer/base/MacBase.h"
 #include "inet/linklayer/ext/ExtFrame_m.h"
-#include "inet/linklayer/ext/EmulationScheduler.h"
+#include "RealTimeScheduler.h"
 
 namespace inet {
 
@@ -43,14 +43,14 @@ class InterfaceEntry;
  * on the host running the simulation. Suitable for hardware-in-the-loop
  * simulations.
  *
- * Requires EmulationScheduler to be configured as scheduler in omnetpp.ini.
+ * Requires RealTimeScheduler to be configured as scheduler in omnetpp.ini.
  *
  * See NED file for more details.
  */
-class INET_API Ext : public MacBase, public EmulationScheduler::ICallback
+class INET_API Ext : public MacBase, public RealTimeScheduler::ICallback
 {
   protected:
-    EmulationScheduler *rtScheduler = nullptr;
+    RealTimeScheduler *rtScheduler = nullptr;
     bool connected = false;
     uint8 buffer[1 << 16];
     const char *device = nullptr;
@@ -79,7 +79,7 @@ class INET_API Ext : public MacBase, public EmulationScheduler::ICallback
     virtual void clearQueue() override;
     virtual bool isUpperMsg(cMessage *msg) override { return msg->arrivedOn("upperLayerIn"); }
 
-    // EmulationScheduler::ICallback:
+    // RealTimeScheduler::ICallback:
     virtual bool notify(int fd) override;
 
     // utility functions
