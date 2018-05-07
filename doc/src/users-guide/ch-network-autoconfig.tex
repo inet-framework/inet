@@ -479,38 +479,30 @@ the same way by the optimized routing table.
 
 This list summarize the parameters of the \nedtype{IPv4NetorkConfigurator}:
 
-\begin{params}
-  \param{config}
-   {XML configuration parameters for IP address assignment and adding manual routes.}
-  \param{assignAddresses}
-   {assign IP addresses to all interfaces in the network}
-  \param{assignDisjunctSubnetAddresses}
-   {avoid using the same address prefix and
-    netmask on different links when assigning IP addresses to interfaces}
-  \param{addStaticRoutes}
-   {add static routes to the routing tables of all nodes
+\begin{itemize}
+  \item \fpar{config}: XML configuration parameters for IP address assignment
+    and adding manual routes.
+  \item \fpar{assignAddresses}: assign IP addresses to all interfaces in the network
+  \item \fpar{assignDisjunctSubnetAddresses}: avoid using the same address prefix and
+    netmask on different links when assigning IP addresses to interfaces
+  \item \fpar{addStaticRoutes}: add static routes to the routing tables of all nodes
     to route to all destination interfaces (only where applicable; turn off when
-    config file contains manual routes)}
-  \param{addDefaultRoutes}
-    {add default routes if all routes from a source node go
-     through the same gateway (used only if addStaticRoutes is true)}
-  \param{addSubnetRoutes}
-   {add subnet routes instead of destination interface routes
-    (only where applicable; used only if addStaticRoutes is true)}
-  \param{optimizeRoutes}
-   {optimize routing tables by merging routes, the resulting routing table might
-    route more packets than the original (used only if addStaticRoutes is true)}
-  \param{dumpTopology}
-   {if true, then the module prints extracted network topology}
-  \param{dumpAddresses}
-   {if true, then the module prints assigned IP addresses for all interfaces}
-  \param{dumpRoutes}
-   {if true, then the module prints configured and optimized routing tables for all nodes to
-    the module output}
-  \param{dumpConfig}
-   {name of the file, write configuration into the given config file that can be fed back
-    to speed up subsequent runs (network configurations)}
-\end{params}
+    config file contains manual routes)
+  \item \fpar{addDefaultRoutes}: add default routes if all routes from a source node
+     go through the same gateway (used only if addStaticRoutes is true)
+  \item \fpar{addSubnetRoutes}: add subnet routes instead of destination interface routes
+    (only where applicable; used only if addStaticRoutes is true)
+  \item \fpar{optimizeRoutes}: optimize routing tables by merging routes, the
+    resulting routing table might route more packets than the original
+    (used only if addStaticRoutes is true)
+  \item \fpar{dumpTopology}: if true, then the module prints extracted network topology
+  \item \fpar{dumpAddresses}: if true, then the module prints assigned IP addresses
+    for all interfaces
+  \item \fpar{dumpRoutes}: if true, then the module prints configured and optimized
+    routing tables for all nodes to the module output
+  \item \fpar{dumpConfig}: name of the file, write configuration into the given
+    config file that can be fed back to speed up subsequent runs (network configurations)
+\end{itemize}
 
 \subsection{Ipv4FlatNetworkConfigurator (Legacy)}
 \label{sec:autoconfig:ipv4flatnetworkconfigurator}

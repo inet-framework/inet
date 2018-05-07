@@ -51,7 +51,7 @@ built-in network nodes.
 
 \begin{itemize}
   \item \nedtype{StandardHost} contains the most common Internet protocols:
-     \protocol{UCP}, \protocol{TDP}, \protocol{IPv4}, \protocol{IPv6},
+     \protocol{UDP}, \protocol{TCP}, \protocol{IPv4}, \protocol{IPv6},
      \protocol{Ethernet}, \protocol{IEEE 802.11}. It also supports an
      optional mobility model, optional energy models, and any number of
      applications which are entirely configurable from INI files.
@@ -226,14 +226,14 @@ addresses given with any of the following syntax variations:
 \label{sec:networks:enabling-dual-ip-stack}
 
 All built-in network nodes support dual Internet protocol stacks, that is
-both \protocol{Ipv4} and \protocol{Ipv6} are available. They are also
+both \protocol{IPv4} and \protocol{IPv6} are available. They are also
 supported by transport layer protocols, link layer protocols, and most
-applications. Only \protocol{Ipv4} is enabled by default, so in order to
-use \protocol{Ipv6}, it must be enabled first, and an application
-supporting \protocol{Ipv6} (e.g., \nedtype{PingApp} must be used). The
+applications. Only \protocol{IPv4} is enabled by default, so in order to
+use \protocol{IPv6}, it must be enabled first, and an application
+supporting \protocol{IPv6} (e.g., \nedtype{PingApp} must be used). The
 following example shows how to configure two ping applications in a single
-node where one is using an \protocol{Ipv4} and the other is using an
-\protocol{Ipv6} destination address.
+node where one is using an \protocol{IPv4} and the other is using an
+\protocol{IPv6} destination address.
 
 \inisnippet{DualStackExample}{Dual stack example}
 

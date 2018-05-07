@@ -135,9 +135,9 @@ and other ways.
 \subsection{More Information on Some Mobility Models}
 \label{sec:mobility:more-information-on-some-mobility-models}
 
-\begin{description}
+\subsubsection*{TractorMobility}
 
-\item[TractorMobility] Moves a tractor through a field with a certain
+Moves a tractor through a field with a certain
 amount of rows. The following figure illustrates the movement of the
 tractor when the \fpar{rowCount} parameter is 2. The trajectory follows
 the segments in $1,2,3,4,5,6,7,8,1,2,3\ldots$ order. The area is configured
@@ -145,6 +145,7 @@ by the \fpar{x1}, \fpar{y1}, \fpar{x2}, \fpar{y2} parameters.
 
 % TODO use constraint area instead of new x1,y1,x2,y2 parameters as in RectangleMobility
 
+\begin{pdfonly}
 \begin{center}
 \setlength{\unitlength}{0.5mm}
 \begin{picture}(80,80)
@@ -159,8 +160,13 @@ by the \fpar{x1}, \fpar{y1}, \fpar{x2}, \fpar{y2} parameters.
 \put(0,72){$(x_1,y_1)$} \put(65,2){$(x_2,y_2)$}
 \end{picture}
 \end{center}
+\end{pdfonly}
 
-\item[RandomWaypointMobility]
+\begin{htmlonly}
+[TODO reproduce drawing in SVG]
+\end{htmlonly}
+
+\subsubsection*{RandomWaypointMobility}
 
 In the Random Waypoint mobility model the nodes move in line segments. For each
 line segment, a random destination position (distributed uniformly over the
@@ -170,16 +176,16 @@ specify it as \ttt{uniform(minSpeed, maxSpeed)}. When the node reaches the
 target position, it waits for the time \fpar{waitTime} which can also be defined as a
 variate. After this time the the algorithm calculates a new random position, etc.
 
-\item[GaussMarkovMobility] The Gauss-Markov model contains a tuning
-parameter, that control the randomness in the movement of the node.
-Let the magnitude and direction of speed of the node at the $n$th time step be
-$s_n$ and $d_n$. The next speed and direction is computed as
+\subsubsection*{GaussMarkovMobility}
 
-$$ s_{n+1} = \alpha s_n + (1 - \alpha) \bar{s} +
-             \sqrt{(1-\alpha^2)} s_{x_n} $$
+The Gauss-Markov model contains a tuning parameter that control the randomness
+in the movement of the node. Let the magnitude and direction of speed of the
+node at the $n$th time step be $s_n$ and $d_n$. The next speed and direction are
+computed as
 
-$$ d_{n+1} = \alpha s_n + (1 - \alpha) \bar{d} +
-             \sqrt{(1-\alpha^2)} d_{x_n} $$
+$$ s_{n+1} = \alpha s_n + (1 - \alpha) \bar{s} + \sqrt{(1-\alpha^2)} s_{x_n} $$
+
+$$ d_{n+1} = \alpha s_n + (1 - \alpha) \bar{d} + \sqrt{(1-\alpha^2)} d_{x_n} $$
 
 where $\bar{s}$ and $\bar{d}$ are constants representing the mean value
 of speed and direction as $n \to \infty$; and $s_{x_n}$ and $d_{x_n}$
@@ -196,7 +202,7 @@ area it is set to 180 degrees, so the new direction is away from the edge.
 % FIXME the GaussMarkovMobility module has only one variance parameter.
 %       it should have separate speed and direction parameters
 
-\item[MassMobility]
+\subsubsection*{MassMobility}
 
 This is a random mobility model for a mobile host with
 a mass. It is the one used in \cite{Perkins99optimizedsmooth}.
@@ -228,9 +234,9 @@ The parameters described above correspond to the following settings:
 \item speed = normal(avgSpeed, 0.01)
 \end{itemize}
 
-\item[ChiangMobility] Chiang's random walk movement model
-(\cite{Chiang98wirelessnetwork}).
+\subsubsection*{ChiangMobility}
 
+Implements Chiang's random walk movement model (\cite{Chiang98wirelessnetwork}).
 In this model, the state of the mobile node in each direction (x and y) can be:
 
 \begin{itemize}
@@ -242,6 +248,7 @@ In this model, the state of the mobile node in each direction (x and y) can be:
 The $(i,j)$ element of the state transition matrix determines the
 probability that the state changes from $i$ to $j$:
 
+\begin{pdfonly}
 $$ \left(
 \begin{array}{ccc}
   0 & 0.5 & 0.5 \\
@@ -249,16 +256,26 @@ $$ \left(
   0.3 & 0 & 0.7
 \end{array}
 \right) $$
+\end{pdfonly}
 
-\end{description}
+\begin{htmlonly}
+<center>
+<div>
+<table class="matrix">
+  <tr> <td>0</td>   <td>0.5</td> <td>0.5</td> </tr>
+  <tr> <td>0.3</td> <td>0.7</td> <td>0</td>   </tr>
+  <tr> <td>0.3</td> <td>0</td>   <td>0.7</td> </tr>
+</table>
+</div>
+</center>
+\end{htmlonly}
 
 \subsection{Replaying trace files}
 \label{sec:mobility:replaying-trace-files}
 
-\begin{description}
+\subsubsection*{BonnMotionMobility}
 
-\item[BonnMotionMobility] Uses the native file format of
-\href{http://bonnmotion.net}{BonnMotion}.
+Uses the native file format of \href{http://bonnmotion.net}{BonnMotion}.
 
 The file is a plain text file, where every line describes the motion
 of one host. A line consists of one or more (t, x, y) triplets of real
@@ -271,8 +288,10 @@ t1 x1 y1 t2 x2 y2 t3 x3 y3 t4 x4 y4 ...
 The meaning is that the given node gets to $(xk,yk)$ at $tk$. There's no
 separate notation for wait, so x and y coordinates will be repeated there.
 
-\item[Ns2MotionMobility] Nodes are moving according to the trace files used
-in NS2. The trace file has this format:
+\subsubsection*{Ns2MotionMobility}
+
+Nodes are moving according to the trace files used in NS2.
+The trace file has this format:
 
 \begin{verbatim}
 # '#' starts a comment, ends at the end of line
@@ -296,8 +315,9 @@ The \nedtype{Ns2MotionMobility} module has the following parameters:
 % TODO cleaning the code (e.g. duplicated bounds check in setTargetPosition())
 % TODO implement cached file access as in BonnMotionMobility
 
-\item[ANSimMobility] reads trace files of the \href{http://www.ansim.info}{ANSim} Tool.
+\subsubsection*{ANSimMobility}
 
+It reads trace files of the \href{http://www.ansim.info}{ANSim} Tool.
 The nodes are moving along linear segments described by an XML trace file
 conforming to this DTD:
 
@@ -321,14 +341,10 @@ Parameters of the module:
 \end{itemize}
 
 \begin{note}
-The \nedtype{AnsimMobility} module process only the \ttt{position\_{}change}
-elements and it ignores the \ttt{start\_{}time} attribute. It starts the move
+The \nedtype{AnsimMobility} module processes only the \ttt{position\_change}
+elements and it ignores the \ttt{start\_time} attribute. It starts the move
 on the next segment immediately.
 \end{note}
-
-
-\end{description}
-
 
 \subsection{TurtleMobility}
 \label{sec:mobility:turtlemobility}

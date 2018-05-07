@@ -17,12 +17,15 @@
 \usepackage[11pt]{moresize}
 \usepackage{setspace}
 \usepackage{ifpdf}
+\usepackage{verbatim}   % for the comment environment
 \usepackage{makeidx}
 \usepackage{longtable}  %% page wrapping table environment
 \usepackage{colortbl}   %% colors for tables
 \usepackage{fancyvrb}   %% the "Verbatim" environment
 \usepackage{fancyhdr}   %% custom headers and footers
 \usepackage{multicol}
+%% \usepackage{enumitem}   %% compact bullet lists with \begin{itemize}[noitemsep]
+\usepackage{csquotes}   %% for the "displayquote" environment
 \usepackage{listings}   %% source code listings with syntax highlight (lstxxx commands)
 \usepackage[tight]{shorttoc}   %% for generating a second table of contents, only containing chapter titles
 \usepackage{bytefield}  %% for drawing protocol frames
@@ -41,6 +44,9 @@
 \renewcommand{\bottomfraction}{0.9}
 \renewcommand{\topfraction}{0.9}
 \renewcommand{\floatpagefraction}{0.9}
+
+\newenvironment{htmlonly}{\expandafter\comment}{\expandafter\endcomment}
+\newcommand{\pdfonly}{}
 
 %% try to cure overfull hboxes
 %% \tolerance=500
@@ -166,6 +172,7 @@
 
 
 \newenvironment{note}{\begin{graybox}\textbf{NOTE: }}{\end{graybox}}
+\newenvironment{hint}{\begin{graybox}\textbf{HINT: }}{\end{graybox}}
 \newenvironment{warning}{\begin{graybox}\textbf{WARNING: }}{\end{graybox}}
 \newenvironment{caution}{\begin{graybox}\textbf{CAUTION: }}{\end{graybox}}
 \newenvironment{rationale}{\begin{graybox}\textbf{Rationale: }}{\end{graybox}}
@@ -293,14 +300,11 @@
 
 \newcommand{\program}{\textbf}
 
+\newcommand{\includepng}{\includegraphics}
+\newcommand{\includesvg}{\includegraphics}
+
 %% Colordefinition for table header rows (requires package colortbl)
 \newcommand{\tabheadcol}{\rowcolor[gray]{0.8}}
-
-%%
-%% Module parameters list
-%%
-\newenvironment{params}{\begin{itemize}}{\end{itemize}}
-\newcommand{\param}[2]{\item \fpar{#1}: #2}
 
 %%
 %% Function/Class/Macro/Variable/Program/Parameter/Define names
