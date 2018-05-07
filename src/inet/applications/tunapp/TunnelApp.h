@@ -21,12 +21,12 @@
 #include "inet/applications/base/ApplicationBase.h"
 #include "inet/common/socket/SocketMap.h"
 #include "inet/linklayer/tun/TunSocket.h"
-#include "inet/networklayer/contract/L3Socket.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Socket.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {
 
-class INET_API TunnelApp : public ApplicationBase, public UdpSocket::ICallback, public L3Socket::ICallback, public TunSocket::ICallback
+class INET_API TunnelApp : public ApplicationBase, public UdpSocket::ICallback, public Ipv4Socket::ICallback, public TunSocket::ICallback
 {
 protected:
     const Protocol *protocol = nullptr;
@@ -35,7 +35,7 @@ protected:
     int destinationPort = -1;
     int localPort = -1;
 
-    L3Socket l3Socket;
+    Ipv4Socket ipv4Socket;
     UdpSocket serverSocket;
     UdpSocket clientSocket;
     TunSocket tunSocket;
@@ -54,8 +54,8 @@ protected:
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
     virtual void socketErrorArrived(UdpSocket *socket, cMessage *msg) override;
 
-    // L3Socket::ICallback
-    virtual void socketDataArrived(L3Socket *socket, Packet *packet) override;
+    // Ipv4Socket::ICallback
+    virtual void socketDataArrived(Ipv4Socket *socket, Packet *packet) override;
 
     // TunSocket::ICallback
     virtual void socketDataArrived(TunSocket *socket, Packet *packet) override;

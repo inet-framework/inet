@@ -53,11 +53,10 @@ void TunnelApp::initialize(int stage)
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         if (protocol == &Protocol::ipv4) {
-            l3Socket.setOutputGate(gate("socketOut"));
-            l3Socket.setL3Protocol(&Protocol::ipv4);
-            l3Socket.bind(&Protocol::ipv4);
-            l3Socket.setCallbackObject(this);
-            socketMap.addSocket(&l3Socket);
+            ipv4Socket.setOutputGate(gate("socketOut"));
+            ipv4Socket.bind(&Protocol::ipv4);
+            ipv4Socket.setCallback(this);
+            socketMap.addSocket(&ipv4Socket);
         }
         if (protocol == &Protocol::udp) {
             serverSocket.setOutputGate(gate("socketOut"));
@@ -66,8 +65,8 @@ void TunnelApp::initialize(int stage)
             clientSocket.setOutputGate(gate("socketOut"));
             if (destinationPort != -1)
                 clientSocket.connect(L3AddressResolver().resolve(destinationAddress), destinationPort);
-            clientSocket.setCallbackObject(this);
-            serverSocket.setCallbackObject(this);
+            clientSocket.setCallback(this);
+            serverSocket.setCallback(this);
             socketMap.addSocket(&clientSocket);
             socketMap.addSocket(&serverSocket);
         }
@@ -77,7 +76,7 @@ void TunnelApp::initialize(int stage)
             throw cRuntimeError("TUN interface not found: %s", interface);
         tunSocket.setOutputGate(gate("socketOut"));
         tunSocket.open(interfaceEntry->getInterfaceId());
-        tunSocket.setCallbackObject(this);
+        tunSocket.setCallback(this);
         socketMap.addSocket(&tunSocket);
     }
 }
@@ -114,7 +113,7 @@ void TunnelApp::socketErrorArrived(UdpSocket *socket, cMessage *msg)
 }
 
 // L3Socket::ICallback
-void TunnelApp::socketDataArrived(L3Socket *socket, Packet *packet)
+void TunnelApp::socketDataArrived(Ipv4Socket *socket, Packet *packet)
 {
     auto packetProtocol = packet->getTag<NetworkProtocolInd>()->getProtocol();
     if (protocol == packetProtocol) {
@@ -133,7 +132,7 @@ void TunnelApp::socketDataArrived(TunSocket *socket, Packet *packet)
         packet->clearTags();
         packet->addTag<L3AddressReq>()->setDestAddress(L3AddressResolver().resolve(destinationAddress));
         packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
-        l3Socket.send(packet);
+        ipv4Socket.send(packet);
     }
     else if (protocol == &Protocol::udp) {
         packet->clearTags();
