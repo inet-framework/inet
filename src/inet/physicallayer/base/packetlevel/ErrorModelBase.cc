@@ -49,7 +49,7 @@ Packet *ErrorModelBase::corruptBits(const Packet *packet, double ber, bool& isCo
 {
     std::vector<bool> corruptedBits;
     const auto& all = packet->peekAllAsBits();
-    for (auto bit : all->getBits()) {
+    for (bool bit : all->getBits()) {
         if (hasProbabilisticError(b(1), ber)) {
             isCorrupted = true;
             bit = !bit;
@@ -65,7 +65,7 @@ Packet *ErrorModelBase::corruptBytes(const Packet *packet, double ber, bool& isC
 {
     std::vector<uint8_t> corruptedBytes;
     const auto& all = packet->peekAllAsBytes();
-    for (auto byte : all->getBytes()) {
+    for (uint8_t byte : all->getBytes()) {
         if (hasProbabilisticError(B(1), ber)) {
             isCorrupted = true;
             byte = ~byte;
