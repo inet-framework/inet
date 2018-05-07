@@ -598,7 +598,8 @@ void Ldp::openTCPConnectionToPeer(int peerIndex)
 {
     TcpSocket *socket = new TcpSocket();
     socket->setOutputGate(gate("socketOut"));
-    socket->setCallbackObject(this, (void *)((intptr_t)peerIndex));
+    socket->setCallback(this);
+    socket->setUserData((void *)((intptr_t)peerIndex));
     socket->bind(rt->getRouterId(), 0);
     socketMap.addSocket(socket);
     myPeers[peerIndex].socket = socket;
@@ -638,7 +639,8 @@ void Ldp::socketAvailable(TcpSocket *socketocket, TcpAvailableInfo *availableInf
         return;
     }
     myPeers[i].socket = newSocket;
-    newSocket->setCallbackObject(this, (void *)((intptr_t)i));
+    newSocket->setCallback(this);
+    newSocket->setUserData((void *)((intptr_t)i));
     socketMap.addSocket(newSocket);
     socketocket->accept(availableInfo->getNewSocketId());
 }

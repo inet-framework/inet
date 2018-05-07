@@ -121,7 +121,7 @@ void UdpBasicBurst::processStart()
 {
     socket.setOutputGate(gate("socketOut"));
     socket.bind(localPort);
-    socket.setCallbackObject(this);
+    socket.setCallback(this);
 
     const char *destAddrs = par("destAddresses");
     cStringTokenizer tokenizer(destAddrs);
@@ -170,7 +170,7 @@ void UdpBasicBurst::processSend()
 void UdpBasicBurst::processStop()
 {
     socket.close();
-    socket.setCallbackObject(nullptr);
+    socket.setCallback(nullptr);
 }
 
 void UdpBasicBurst::handleMessageWhenUp(cMessage *msg)

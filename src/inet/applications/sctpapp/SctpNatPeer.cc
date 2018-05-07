@@ -100,7 +100,7 @@ void SctpNatPeer::initialize(int stage)
         inboundStreams = par("inboundStreams");
         ordered = par("ordered");
         clientSocket.setOutputGate(gate("socketOut"));
-        clientSocket.setCallbackObject(this);
+        clientSocket.setCallback(this);
         if (addresses.size() == 0) {
             clientSocket.bind(port);
         }

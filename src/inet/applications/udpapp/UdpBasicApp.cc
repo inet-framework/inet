@@ -91,7 +91,7 @@ void UdpBasicApp::setSocketOptions()
         MulticastGroupList mgl = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this)->collectMulticastGroups();
         socket.joinLocalMulticastGroups(mgl);
     }
-    socket.setCallbackObject(this);
+    socket.setCallback(this);
 }
 
 L3Address UdpBasicApp::chooseDestAddr()

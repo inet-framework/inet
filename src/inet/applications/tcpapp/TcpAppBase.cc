@@ -44,7 +44,7 @@ void TcpAppBase::initialize(int stage)
         int localPort = par("localPort");
         socket.bind(*localAddress ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
 
-        socket.setCallbackObject(this);
+        socket.setCallback(this);
         socket.setOutputGate(gate("socketOut"));
     }
 }

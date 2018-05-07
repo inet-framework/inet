@@ -113,7 +113,7 @@ void UdpSink::setSocketOptions()
             throw cRuntimeError("Wrong multicastGroup setting: not a multicast address: %s", groupAddr);
         socket.joinMulticastGroup(multicastGroup);
     }
-    socket.setCallbackObject(this);
+    socket.setCallback(this);
 }
 
 void UdpSink::processStart()

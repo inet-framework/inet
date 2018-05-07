@@ -80,7 +80,7 @@ void DhcpServer::openSocket()
     socket.setOutputGate(gate("socketOut"));
     socket.bind(serverPort);
     socket.setBroadcast(true);
-    socket.setCallbackObject(this);
+    socket.setCallback(this);
     EV_INFO << "DHCP server bound to port " << serverPort << endl;
 }
 

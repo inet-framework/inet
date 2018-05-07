@@ -67,7 +67,7 @@ void VoipStreamReceiver::initialize(int stage)
 
         socket.setOutputGate(gate("socketOut"));
         socket.bind(localPort);
-        socket.setCallbackObject(this);
+        socket.setCallback(this);
     }
 }
 

@@ -98,7 +98,7 @@ void SimpleVoipReceiver::initialize(int stage)
             socket.setOutputGate(gate("socketOut"));
             socket.bind(port);
         }
-        socket.setCallbackObject(this);
+        socket.setCallback(this);
 
         selfTalkspurtFinished = new cMessage("selfTalkspurtFinished");
     }

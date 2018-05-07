@@ -41,7 +41,7 @@ void HttpServer::initialize(int stage)
 
         listensocket.setOutputGate(gate("socketOut"));
         listensocket.bind(port);
-        listensocket.setCallbackObject(this);
+        listensocket.setCallback(this);
         listensocket.listen();
     }
 }
@@ -83,7 +83,8 @@ void HttpServer::handleMessage(cMessage *msg)
             SockData *sockdata = new SockData;
             sockdata->socket = socket;
 
-            socket->setCallbackObject(this, sockdata);
+            socket->setCallback(this);
+            socket->setUserData(sockdata);
             listensocket.processMessage(msg);
         }
     }

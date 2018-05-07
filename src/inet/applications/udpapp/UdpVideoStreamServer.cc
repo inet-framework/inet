@@ -153,7 +153,7 @@ bool UdpVideoStreamServer::handleNodeStart(IDoneCallback *doneCallback)
 {
     socket.setOutputGate(gate("socketOut"));
     socket.bind(localPort);
-    socket.setCallbackObject(this);
+    socket.setCallback(this);
 
     return true;
 }
@@ -162,14 +162,14 @@ bool UdpVideoStreamServer::handleNodeShutdown(IDoneCallback *doneCallback)
 {
     clearStreams();
     //TODO if(socket.isOpened()) socket.close();
-    socket.setCallbackObject(nullptr);
+    socket.setCallback(nullptr);
     return true;
 }
 
 void UdpVideoStreamServer::handleNodeCrash()
 {
     clearStreams();
-    socket.setCallbackObject(nullptr);
+    socket.setCallback(nullptr);
 }
 
 } // namespace inet

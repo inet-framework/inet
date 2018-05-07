@@ -102,7 +102,7 @@ void TcpServerHostApp::handleMessage(cMessage *msg)
 
             proc->callInitialize();
 
-            newSocket->setCallbackObject(proc);
+            newSocket->setCallback(proc);
             proc->init(this, newSocket);
 
             socketMap.addSocket(newSocket);

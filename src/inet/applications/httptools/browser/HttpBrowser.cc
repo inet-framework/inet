@@ -318,7 +318,8 @@ void HttpBrowser::submitToSocket(const char *moduleName, int connectPort, HttpRe
     sockdata->messageQueue = HttpRequestQueue(queue);
     sockdata->socket = socket;
     sockdata->pending = 0;
-    socket->setCallbackObject(this, sockdata);
+    socket->setCallback(this);
+    socket->setUserData(sockdata);
 
     // Issue a connect to the socket for the specified module and port.
     socket->connect(L3AddressResolver().resolve(moduleName), connectPort);

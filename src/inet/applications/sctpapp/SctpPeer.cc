@@ -128,7 +128,7 @@ void SctpPeer::initialize(int stage)
         }
         listeningSocket.listen(true, par("streamReset"), par("numPacketsToSendPerClient"));
         EV_DEBUG << "SctpPeer::initialized listen port=" << port << "\n";
-        clientSocket.setCallbackObject(this);
+        clientSocket.setCallback(this);
         clientSocket.setOutputGate(gate("socketOut"));
 
         if (simtime_t(par("startTime")) > SIMTIME_ZERO) {    //FIXME is invalid the startTime == 0 ????

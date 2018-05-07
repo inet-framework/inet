@@ -78,7 +78,7 @@ void UdpVideoStreamClient::requestStream()
 
     socket.setOutputGate(gate("socketOut"));
     socket.bind(localPort);
-    socket.setCallbackObject(this);
+    socket.setCallback(this);
 
     Packet *pk = new Packet("VideoStrmReq");
     const auto& payload = makeShared<ByteCountChunk>(B(1));    //FIXME set packet length

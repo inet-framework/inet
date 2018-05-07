@@ -112,7 +112,7 @@ void SctpClient::initialize(int stage)
         AddressVector addresses = L3AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
         int port = par("localPort");
         socket.setOutputGate(gate("socketOut"));
-        socket.setCallbackObject(this);
+        socket.setCallback(this);
 
         if (addresses.size() == 0) {
         EV_INFO << "Call socket bind\n";

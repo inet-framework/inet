@@ -82,14 +82,14 @@ bool UdpEchoApp::handleNodeStart(IDoneCallback *doneCallback)
     socket.bind(localPort);
     MulticastGroupList mgl = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this)->collectMulticastGroups();
     socket.joinLocalMulticastGroups(mgl);
-    socket.setCallbackObject(this);
+    socket.setCallback(this);
     return true;
 }
 
 bool UdpEchoApp::handleNodeShutdown(IDoneCallback *doneCallback)
 {
     //TODO if(socket.isOpened()) socket.close();
-    socket.setCallbackObject(nullptr);
+    socket.setCallback(nullptr);
     return true;
 }
 
