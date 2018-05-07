@@ -64,7 +64,8 @@ namespace inet {
 class INET_API UdpSocket : public ISocket
 {
   public:
-    class ICallback {
+    class INET_API ICallback
+    {
       public:
         virtual ~ICallback() {}
         virtual void socketDataArrived(UdpSocket *socket, Packet *packet) = 0;

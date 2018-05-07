@@ -136,7 +136,7 @@ class INET_API TcpSocket : public ISocket
      * and cSimpleModule is already a cObject.
      */
     // TODO: add socket parameter to all methods?
-    class ICallback
+    class INET_API ICallback
     {
       public:
         virtual ~ICallback() {}

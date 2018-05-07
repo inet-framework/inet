@@ -66,7 +66,7 @@ class INET_API SctpSocket : public ISocket
      * classes may have both this class and cSimpleModule as base class,
      * and cSimpleModule is already a cObject.
      */
-    class ICallback
+    class INET_API ICallback
     {
       public:
         virtual ~ICallback() {}

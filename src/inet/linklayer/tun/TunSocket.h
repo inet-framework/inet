@@ -27,7 +27,8 @@ namespace inet {
 class INET_API TunSocket : public ISocket
 {
   public:
-    class ICallback {
+    class INET_API ICallback
+    {
       public:
         virtual ~ICallback() {}
         virtual void socketDataArrived(TunSocket *socket, Packet *packet) = 0;
