@@ -34,7 +34,7 @@ namespace physicallayer {
 class INET_API IErrorModel : public IPrintableObject
 {
   public:
-    // TODO: virtual bool computePacketErroneous() const = 0;
+    virtual Packet *computeCorruptedPacket(const ISnir *snir) const = 0;
 
     /**
      * Returns the packet error rate based on SNIR, modulation, FEC encoding

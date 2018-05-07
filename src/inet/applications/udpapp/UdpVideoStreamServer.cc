@@ -70,17 +70,20 @@ void UdpVideoStreamServer::handleMessageWhenUp(cMessage *msg)
         // timer for a particular video stream expired, send packet
         sendStreamData(msg);
     }
-    else if (msg->getKind() == UDP_I_DATA) {
-        // start streaming
-        processStreamRequest(check_and_cast<Packet *>(msg));
-    }
-    else if (msg->getKind() == UDP_I_ERROR) {
-        EV_WARN << "Ignoring UDP error report\n";
-        delete msg;
-    }
-    else {
-        throw cRuntimeError("Unrecognized message (%s)%s", msg->getClassName(), msg->getName());
-    }
+    else
+        socket.processMessage(msg);
+}
+
+void UdpVideoStreamServer::socketDataArrived(UdpSocket *socket, Packet *packet)
+{
+    // process incoming packet
+    processStreamRequest(packet);
+}
+
+void UdpVideoStreamServer::socketErrorArrived(UdpSocket *socket, Indication *indication)
+{
+    EV_WARN << "Ignoring UDP error report " << indication->getName() << endl;
+    delete indication;
 }
 
 void UdpVideoStreamServer::processStreamRequest(Packet *msg)
@@ -150,6 +153,7 @@ bool UdpVideoStreamServer::handleNodeStart(IDoneCallback *doneCallback)
 {
     socket.setOutputGate(gate("socketOut"));
     socket.bind(localPort);
+    socket.setCallback(this);
 
     return true;
 }
@@ -158,12 +162,14 @@ bool UdpVideoStreamServer::handleNodeShutdown(IDoneCallback *doneCallback)
 {
     clearStreams();
     //TODO if(socket.isOpened()) socket.close();
+    socket.setCallback(nullptr);
     return true;
 }
 
 void UdpVideoStreamServer::handleNodeCrash()
 {
     clearStreams();
+    socket.setCallback(nullptr);
 }
 
 } // namespace inet

@@ -23,9 +23,10 @@
 
 #include "inet/common/INETDefs.h"
 
+#include "inet/common/packet/Message.h"
+#include "inet/common/socket/ISocket.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
-#include "inet/common/packet/Message.h"
 
 namespace inet {
 
@@ -54,35 +55,35 @@ typedef struct {
     bool streamReset;
 } AppSocketOptions;
 
-class INET_API SctpSocket
+class INET_API SctpSocket : public ISocket
 {
   public:
     /**
-     * Abstract base class for your callback objects. See setCallbackObject()
+     * Abstract base class for your callback objects. See setCallback()
      * and processMessage() for more info.
      *
      * Note: this class is not subclassed from cObject, because
      * classes may have both this class and cSimpleModule as base class,
      * and cSimpleModule is already a cObject.
      */
-    class CallbackInterface
+    class INET_API ICallback
     {
       public:
-        virtual ~CallbackInterface() {}
-        virtual void socketDataArrived(int assocId, void *yourPtr, Packet *msg, bool urgent) = 0;
-        virtual void socketDataNotificationArrived(int assocId, void *yourPtr, Message *msg) = 0;
-        virtual void socketEstablished(int assocId, void *yourPtr, unsigned long int buffer) {}
-        virtual void socketPeerClosed(int assocId, void *yourPtr) {}
-        virtual void socketClosed(int assocId, void *yourPtr) {}
-        virtual void socketFailure(int assocId, void *yourPtr, int code) {}
-        virtual void socketStatusArrived(int assocId, void *yourPtr, SctpStatusReq *status) { delete status; }
-        virtual void socketDeleted(int assocId, void *yourPtr) {}
-        virtual void sendRequestArrived() {}
-        virtual void msgAbandonedArrived(int assocId) {}
-        virtual void shutdownReceivedArrived(int connId) {}
-        virtual void sendqueueFullArrived(int connId) {}
-        virtual void sendqueueAbatedArrived(int connId, unsigned long int buffer) {}
-        virtual void addressAddedArrived(int assocId, L3Address localAddr, L3Address remoteAddr) {}
+        virtual ~ICallback() {}
+        virtual void socketDataArrived(SctpSocket *socket, Packet *packet, bool urgent) = 0;
+        virtual void socketDataNotificationArrived(SctpSocket *socket, Message *msg) = 0;
+        virtual void socketEstablished(SctpSocket *socket, unsigned long int buffer) {}
+        virtual void socketPeerClosed(SctpSocket *socket) {}
+        virtual void socketClosed(SctpSocket *socket) {}
+        virtual void socketFailure(SctpSocket *socket, int code) {}
+        virtual void socketStatusArrived(SctpSocket *socket, SctpStatusReq *status) { delete status; }
+        virtual void socketDeleted(SctpSocket *socket) {}
+        virtual void sendRequestArrived(SctpSocket *socket) {}
+        virtual void msgAbandonedArrived(SctpSocket *socket) {}
+        virtual void shutdownReceivedArrived(SctpSocket *socket) {}
+        virtual void sendqueueFullArrived(SctpSocket *socket) {}
+        virtual void sendqueueAbatedArrived(SctpSocket *socket, unsigned long int buffer) {}
+        virtual void addressAddedArrived(SctpSocket *socket, L3Address localAddr, L3Address remoteAddr) {}
     };
 
     enum State { NOT_BOUND, CLOSED, LISTENING, CONNECTING, CONNECTED, PEER_CLOSED, LOCALLY_CLOSED, SOCKERROR };
@@ -108,8 +109,8 @@ class INET_API SctpSocket
     SocketOptions *sOptions;
     AppSocketOptions *appOptions;
 
-    CallbackInterface *cb;
-    void *yourPtr;
+    ICallback *cb;
+    void *userData;
 
   protected:
     void sendToSctp(cMessage *msg);
@@ -135,19 +136,21 @@ class INET_API SctpSocket
      */
     ~SctpSocket();
 
+    void *getUserData() const { return userData; }
+    void setUserData(void *userData) { this->userData = userData; }
+
     /**
      * Returns the internal connection Id. SCTP uses the (gate index, assocId) pair
      * to identify the connection when it receives a command from the application
      * (or SctpSocket).
      */
-    int getConnectionId() const { return assocId; }
+    int getSocketId() const override { return assocId; }
 
     /**
      * Generates a new integer, to be used as assocId. (assocId is part of the key
      * which associates connections with their apps).
      */
-   // static int32 getNewAssocId() { return ++nextAssocId; }
-     static int32 getNewAssocId() { return getEnvir()->getUniqueNumber(); }
+    static int32 getNewAssocId() { return getEnvir()->getUniqueNumber(); }
 
     /**
      * Returns the socket state, one of NOT_BOUND, CLOSED, LISTENING, CONNECTING,
@@ -313,14 +316,7 @@ class INET_API SctpSocket
      * has a SctpCommand as controlInfo(), and the assocId in it matches
      * that of the socket.)
      */
-    bool belongsToSocket(cMessage *msg);
-
-    /**
-     * Returns true if the message belongs to any SctpSocket instance.
-     * (This basically checks if the message has a SctpCommand attached to
-     * it as controlInfo().)
-     */
-    static bool belongsToAnySctpSocket(cMessage *msg);
+    virtual bool belongsToSocket(cMessage *msg) const override;
 
     /**
      * Sets a callback object, to be used with processMessage().
@@ -335,22 +331,14 @@ class INET_API SctpSocket
      *
      * SctpSocket doesn't delete the callback object in the destructor
      * or on any other occasion.
-     *
-     * YourPtr is an optional pointer. It may contain any value you wish --
-     * SctpSocket will not look at it or do anything with it except passing
-     * it back to you in the CallbackInterface calls. You may find it
-     * useful if you maintain additional per-connection information:
-     * in that case you don't have to look it up by assocId in the callbacks,
-     * you can have it passed to you as yourPtr.
      */
-    void setCallbackObject(CallbackInterface *cb, void *yourPtr = nullptr);
+    void setCallback(ICallback *cb);
 
     /**
      * Examines the message (which should have arrived from SctpMain),
      * updates socket state, and if there is a callback object installed
-     * (see setCallbackObject(), class CallbackInterface), dispatches
-     * to the appropriate method of it with the same yourPtr that
-     * you gave in the setCallbackObject() call.
+     * (see setCallback(), class CallbackInterface), dispatches
+     * to the appropriate method.
      *
      * The method deletes the message, unless (1) there is a callback object
      * installed AND (2) the message is payload (message kind SCTP_I_DATA or
@@ -361,7 +349,7 @@ class INET_API SctpSocket
      * the message belongs to this socket, i.e. belongsToSocket(msg) would
      * return true!
      */
-    void processMessage(cMessage *msg);
+    void processMessage(cMessage *msg) override;
     //@}
 
     void setState(int state) { sockstate = state; };

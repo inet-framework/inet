@@ -151,11 +151,11 @@ void Ieee80211Radio::encapsulate(Packet *packet) const
 void Ieee80211Radio::decapsulate(Packet *packet) const
 {
     auto mode = packet->getTag<Ieee80211ModeInd>()->getMode();
-    const auto& phyHeader = packet->popAtFront<Ieee80211PhyHeader>();
+    const auto& phyHeader = packet->popAtFront<Ieee80211PhyHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT);
     auto tailLength = dynamic_cast<const Ieee80211OfdmMode *>(mode) ? b(6) : b(0);
     auto paddingLength = mode->getDataMode()->getPaddingLength(B(phyHeader->getLengthField()));
     if (tailLength + paddingLength != b(0))
-        packet->popAtBack(tailLength + paddingLength);
+        packet->popAtBack(tailLength + paddingLength, Chunk::PF_ALLOW_INCORRECT);
     packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
 }
 

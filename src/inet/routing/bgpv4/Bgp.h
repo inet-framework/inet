@@ -21,7 +21,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
-#include "inet/transportlayer/contract/tcp/TcpSocketMap.h"
+#include "inet/common/socket/SocketMap.h"
 #include "inet/routing/bgpv4/BgpRoutingTableEntry.h"
 #include "inet/routing/bgpv4/BgpCommon.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
@@ -36,7 +36,7 @@ namespace bgp {
 
 class BgpSession;
 
-class INET_API Bgp : public cSimpleModule, public ILifecycle, public TcpSocket::CallbackInterface
+class INET_API Bgp : public cSimpleModule, public ILifecycle, public TcpSocket::ICallback
 {
   public:
     Bgp() {}
@@ -50,11 +50,11 @@ class INET_API Bgp : public cSimpleModule, public ILifecycle, public TcpSocket::
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
     virtual void finish() override;
 
-    virtual void socketDataArrived(int connId, void *yourPtr, Packet *msg, bool urgent) override;
-    virtual void socketEstablished(int connId, void *yourPtr) override;
-    virtual void socketFailure(int connId, void *yourPtr, int code) override;
-    virtual void socketPeerClosed(int connId, void *yourPtr) override {}
-    virtual void socketClosed(int connId, void *yourPtr) override {}
+    virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override;
+    virtual void socketEstablished(TcpSocket *socket) override;
+    virtual void socketFailure(TcpSocket *socket, int code) override;
+    virtual void socketPeerClosed(TcpSocket *socket) override {}
+    virtual void socketClosed(TcpSocket *socket) override {}
 
     friend class BgpSession;
     //functions used by the BgpSession class
@@ -128,7 +128,7 @@ class INET_API Bgp : public cSimpleModule, public ILifecycle, public TcpSocket::
     SessionId findIdFromSocketConnId(std::map<SessionId, BgpSession *> sessions, int connId);
     unsigned int calculateStartDelay(int rtListSize, unsigned char rtPosition, unsigned char rtPeerPosition);
 
-    TcpSocketMap _socketMap;
+    SocketMap _socketMap;
     AsId _myAS = 0;
     SessionId _currSessionId = 0;
 

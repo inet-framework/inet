@@ -22,10 +22,10 @@
 
 #include "inet/common/INETDefs.h"
 
+#include "inet/common/socket/SocketMap.h"
 #include "inet/networklayer/ldp/LdpPacket_m.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
-#include "inet/transportlayer/contract/tcp/TcpSocketMap.h"
 #include "inet/networklayer/mpls/IIngressClassifier.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"
@@ -53,7 +53,7 @@ class Ted;
 /**
  * LDP (rfc 3036) protocol implementation.
  */
-class INET_API Ldp : public cSimpleModule, public TcpSocket::CallbackInterface, public IIngressClassifier, public cListener, public ILifecycle
+class INET_API Ldp : public cSimpleModule, public TcpSocket::ICallback, public UdpSocket::ICallback, public IIngressClassifier, public cListener, public ILifecycle
 {
   public:
 
@@ -128,7 +128,7 @@ class INET_API Ldp : public cSimpleModule, public TcpSocket::CallbackInterface, 
     UdpSocket udpSocket;    // for receiving Hello
     std::vector<UdpSocket> udpSockets;    // for sending Hello, one socket for each multicast interface
     TcpSocket serverSocket;    // for listening on LDP_PORT
-    TcpSocketMap socketMap;    // holds TCP connections with peers
+    SocketMap socketMap;    // holds TCP connections with peers
 
     // hello timeout message
     cMessage *sendHelloMsg = nullptr;
@@ -196,7 +196,6 @@ class INET_API Ldp : public cSimpleModule, public TcpSocket::CallbackInterface, 
 
     virtual void processLDPHello(Packet *msg);
     virtual void processHelloTimeout(cMessage *msg);
-    virtual void processMessageFromTCP(cMessage *msg);
     virtual void processLDPPacketFromTCP(Packet *packet);
 
     virtual void processLABEL_MAPPING(Packet *packet);
@@ -205,14 +204,21 @@ class INET_API Ldp : public cSimpleModule, public TcpSocket::CallbackInterface, 
     virtual void processLABEL_WITHDRAW(Packet *packet);
     virtual void processNOTIFICATION(Packet *packet);
 
-    /** @name TcpSocket::CallbackInterface callback methods */
+    /** @name TcpSocket::ICallback callback methods */
     //@{
-    virtual void socketEstablished(int connId, void *yourPtr) override;
-    virtual void socketDataArrived(int connId, void *yourPtr, Packet *msg, bool urgent) override;
-    virtual void socketPeerClosed(int connId, void *yourPtr) override;
-    virtual void socketClosed(int connId, void *yourPtr) override;
-    virtual void socketFailure(int connId, void *yourPtr, int code) override;
-    virtual void socketStatusArrived(int connId, void *yourPtr, TcpStatusInfo *status) override { delete status; }
+    virtual void socketEstablished(TcpSocket *socket) override;
+    virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override;
+    virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override;
+    virtual void socketPeerClosed(TcpSocket *socket) override;
+    virtual void socketClosed(TcpSocket *socket) override;
+    virtual void socketFailure(TcpSocket *socket, int code) override;
+    virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override { delete status; }
+    //@}
+
+    /** @name UdpSocket::ICallback methods */
+    //@{
+    virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
+    virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
     //@}
 
     // IIngressClassifier

@@ -121,6 +121,7 @@ void UdpBasicBurst::processStart()
 {
     socket.setOutputGate(gate("socketOut"));
     socket.bind(localPort);
+    socket.setCallback(this);
 
     const char *destAddrs = par("destAddresses");
     cStringTokenizer tokenizer(destAddrs);
@@ -169,6 +170,7 @@ void UdpBasicBurst::processSend()
 void UdpBasicBurst::processStop()
 {
     socket.close();
+    socket.setCallback(nullptr);
 }
 
 void UdpBasicBurst::handleMessageWhenUp(cMessage *msg)
@@ -191,17 +193,20 @@ void UdpBasicBurst::handleMessageWhenUp(cMessage *msg)
                 throw cRuntimeError("Invalid kind %d in self message", (int)msg->getKind());
         }
     }
-    else if (msg->getKind() == UDP_I_DATA) {
-        // process incoming packet
-        processPacket(check_and_cast<Packet *>(msg));
-    }
-    else if (msg->getKind() == UDP_I_ERROR) {
-        EV_WARN << "Ignoring UDP error report\n";
-        delete msg;
-    }
-    else {
-        throw cRuntimeError("Unrecognized message (%s)%s", msg->getClassName(), msg->getName());
-    }
+    else
+        socket.processMessage(msg);
+}
+
+void UdpBasicBurst::socketDataArrived(UdpSocket *socket, Packet *packet)
+{
+    // process incoming packet
+    processPacket(packet);
+}
+
+void UdpBasicBurst::socketErrorArrived(UdpSocket *socket, Indication *indication)
+{
+    EV_WARN << "Ignoring UDP error report " << indication->getName() << endl;
+    delete indication;
 }
 
 void UdpBasicBurst::refreshDisplay() const

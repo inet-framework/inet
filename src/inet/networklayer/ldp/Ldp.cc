@@ -21,6 +21,7 @@
 
 #include "inet/networklayer/ldp/Ldp.h"
 
+#include "inet/applications/common/SocketTag_m.h"
 //#include "inet/networklayer/mpls/ConstType.h"
 #include "inet/networklayer/mpls/LibTable.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
@@ -133,13 +134,13 @@ void Ldp::initialize(int stage)
             scheduleAt(simTime() + exponential(0.1), sendHelloMsg);
 
         // bind UDP socket
-        udpSocket.setOutputGate(gate("udpOut"));
+        udpSocket.setOutputGate(gate("socketOut"));
         udpSocket.bind(LDP_PORT);
         for (int i = 0; i < ift->getNumInterfaces(); ++i) {
             InterfaceEntry *ie = ift->getInterface(i);
             if (ie->isMulticast()) {
                 udpSockets.push_back(UdpSocket());
-                udpSockets.back().setOutputGate(gate("udpOut"));
+                udpSockets.back().setOutputGate(gate("socketOut"));
                 udpSockets.back().setMulticastLoop(false);
                 udpSockets.back().setMulticastOutputInterface(ie->getInterfaceId());
             }
@@ -147,7 +148,7 @@ void Ldp::initialize(int stage)
 
         // start listening for incoming TCP conns
         EV_INFO << "Starting to listen on port " << LDP_PORT << " for incoming LDP sessions\n";
-        serverSocket.setOutputGate(gate("tcpOut"));
+        serverSocket.setOutputGate(gate("socketOut"));
         serverSocket.bind(LDP_PORT);
         serverSocket.listen();
 
@@ -167,6 +168,7 @@ void Ldp::handleMessage(cMessage *msg)
         throw cRuntimeError("LDP is not running");
     EV_INFO << "Received: (" << msg->getClassName() << ")" << msg->getName() << "\n";
     if (msg == sendHelloMsg) {
+        ASSERT(msg->isSelfMessage());
         // every LDP capable router periodically sends HELLO messages to the
         // "all routers in the sub-network" multicast address
         EV_INFO << "Multicasting LDP Hello to neighboring routers\n";
@@ -184,13 +186,33 @@ void Ldp::handleMessage(cMessage *msg)
             processNOTIFICATION(check_and_cast<Packet *>(msg));
         }
     }
-    else if (!strcmp(msg->getArrivalGate()->getName(), "udpIn")) {
-        // we can only receive LDP Hello from UDP (everything else goes over TCP)
-        processLDPHello(check_and_cast<Packet *>(msg));
+    else {
+        ISocket *socket = socketMap.findSocketFor(msg);
+        if (socket) {
+            socket->processMessage(msg);
+        }
+        else if (serverSocket.belongsToSocket(msg)) {
+            serverSocket.processMessage(msg);
+        }
+        else if (udpSocket.belongsToSocket(msg)) {
+            udpSocket.processMessage(msg);
+        }
+        else
+            throw cRuntimeError("model error: no socket found for msg '%s'", msg->getName());
     }
-    else if (!strcmp(msg->getArrivalGate()->getName(), "tcpIn")) {
-        processMessageFromTCP(msg);
-    }
+}
+
+void Ldp::socketDataArrived(UdpSocket *socket, Packet *packet)
+{
+    // process incoming udp packet
+    //FIXME add implementation
+    processLDPHello(check_and_cast<Packet *>(packet));
+}
+
+void Ldp::socketErrorArrived(UdpSocket *socket, Indication *indication)
+{
+    EV_WARN << "Ignoring UDP error report " << indication->getName() << endl;
+    delete indication;
 }
 
 bool Ldp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
@@ -515,6 +537,9 @@ void Ldp::processHelloTimeout(cMessage *msg)
 
 void Ldp::processLDPHello(Packet *msg)
 {
+    int socketId = msg->getTag<SocketInd>()->getSocketId();
+    ASSERT(socketId == udpSocket.getSocketId());
+
     const auto& ldpHello = msg->peekAtFront<LdpHello>();
     //Ipv4Address peerAddr = controlInfo->getSrcAddr().toIPv4();
     Ipv4Address peerAddr = ldpHello->getSenderAddress();
@@ -572,8 +597,9 @@ void Ldp::processLDPHello(Packet *msg)
 void Ldp::openTCPConnectionToPeer(int peerIndex)
 {
     TcpSocket *socket = new TcpSocket();
-    socket->setOutputGate(gate("tcpOut"));
-    socket->setCallbackObject(this, (void *)((intptr_t)peerIndex));
+    socket->setOutputGate(gate("socketOut"));
+    socket->setCallback(this);
+    socket->setUserData((void *)((intptr_t)peerIndex));
     socket->bind(rt->getRouterId(), 0);
     socketMap.addSocket(socket);
     myPeers[peerIndex].socket = socket;
@@ -581,41 +607,9 @@ void Ldp::openTCPConnectionToPeer(int peerIndex)
     socket->connect(myPeers[peerIndex].peerIP, LDP_PORT);
 }
 
-void Ldp::processMessageFromTCP(cMessage *msg)
+void Ldp::socketEstablished(TcpSocket *socket)
 {
-    TcpSocket *socket = socketMap.findSocketFor(msg);
-    if (!socket) {
-        // not yet in socketMap, must be new incoming connection.
-        // find which peer it is and register connection
-        socket = new TcpSocket(msg);
-        socket->setOutputGate(gate("tcpOut"));
-
-        // FIXME there seems to be some confusion here. Is it sure that
-        // routerIds we use as peerAddrs are the same as IP addresses
-        // the routing is based on? --Andras
-        Ipv4Address peerAddr = socket->getRemoteAddress().toIpv4();
-
-        int i = findPeer(peerAddr);
-        if (i == -1 || myPeers[i].socket) {
-            // nothing known about this guy, or already connected: refuse
-            socket->close();    // reset()?
-            delete socket;
-            delete msg;
-            return;
-        }
-        myPeers[i].socket = socket;
-        socket->setCallbackObject(this, (void *)((intptr_t)i));
-        socketMap.addSocket(socket);
-    }
-
-    // dispatch to socketEstablished(), socketDataArrived(), socketPeerClosed()
-    // or socketFailure()
-    socket->processMessage(msg);
-}
-
-void Ldp::socketEstablished(int, void *yourPtr)
-{
-    peer_info& peer = myPeers[(uintptr_t)yourPtr];
+    peer_info& peer = myPeers[(uintptr_t)socket->getUserData()];
     EV_INFO << "TCP connection established with peer " << peer.peerIP << "\n";
 
     // we must update all entries with nextHop == peerIP
@@ -624,18 +618,45 @@ void Ldp::socketEstablished(int, void *yourPtr)
     // FIXME start LDP session setup (if we're on the active side?)
 }
 
-void Ldp::socketDataArrived(int, void *yourPtr, Packet *msg, bool)
+void Ldp::socketAvailable(TcpSocket *socketocket, TcpAvailableInfo *availableInfo)
 {
-    peer_info& peer = myPeers[(uintptr_t)yourPtr];
+    //TODO
+    // not yet in socketMap, must be new incoming connection.
+    // find which peer it is and register connection
+    TcpSocket *newSocket = new TcpSocket(availableInfo);
+    newSocket->setOutputGate(gate("socketOut"));
+
+    // FIXME there seems to be some confusion here. Is it sure that
+    // routerIds we use as peerAddrs are the same as IP addresses
+    // the routing is based on? --Andras
+    Ipv4Address peerAddr = newSocket->getRemoteAddress().toIpv4();
+
+    int i = findPeer(peerAddr);
+    if (i == -1 || myPeers[i].socket) {
+        // nothing known about this guy, or already connected: refuse
+        newSocket->close();    // reset()?
+        delete newSocket;
+        return;
+    }
+    myPeers[i].socket = newSocket;
+    newSocket->setCallback(this);
+    newSocket->setUserData((void *)((intptr_t)i));
+    socketMap.addSocket(newSocket);
+    socketocket->accept(availableInfo->getNewSocketId());
+}
+
+void Ldp::socketDataArrived(TcpSocket *socket, Packet *msg, bool)
+{
+    peer_info& peer = myPeers[(uintptr_t)socket->getUserData()];
     EV_INFO << "Message arrived over TCP from peer " << peer.peerIP << "\n";
 
     delete msg->removeControlInfo();
     processLDPPacketFromTCP(msg);
 }
 
-void Ldp::socketPeerClosed(int, void *yourPtr)
+void Ldp::socketPeerClosed(TcpSocket *socket)
 {
-    peer_info& peer = myPeers[(uintptr_t)yourPtr];
+    peer_info& peer = myPeers[(uintptr_t)socket->getUserData()];
     EV_INFO << "Peer " << peer.peerIP << " closed TCP connection\n";
 
     ASSERT(false);
@@ -650,9 +671,9 @@ void Ldp::socketPeerClosed(int, void *yourPtr)
  */
 }
 
-void Ldp::socketClosed(int, void *yourPtr)
+void Ldp::socketClosed(TcpSocket *socket)
 {
-    peer_info& peer = myPeers[(uintptr_t)yourPtr];
+    peer_info& peer = myPeers[(uintptr_t)socket->getUserData()];
     EV_INFO << "TCP connection to peer " << peer.peerIP << " closed\n";
 
     ASSERT(false);
@@ -660,9 +681,9 @@ void Ldp::socketClosed(int, void *yourPtr)
     // FIXME what now? reconnect after a delay?
 }
 
-void Ldp::socketFailure(int, void *yourPtr, int code)
+void Ldp::socketFailure(TcpSocket *socket, int code)
 {
-    peer_info& peer = myPeers[(uintptr_t)yourPtr];
+    peer_info& peer = myPeers[(uintptr_t)socket->getUserData()];
     EV_INFO << "TCP connection to peer " << peer.peerIP << " broken\n";
 
     ASSERT(false);

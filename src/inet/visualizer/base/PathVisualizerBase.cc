@@ -236,7 +236,7 @@ void PathVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, c
             auto packet = check_and_cast<Packet *>(object);
             if (nodeFilter.matches(networkNode) && packetFilter.matches(packet)) {
                 auto module = getContainingNode(check_and_cast<cModule *>(source));
-                mapChunkIds(packet->peekAt(b(0)), [&] (int id) {
+                mapChunkIds(packet->peekAt(b(0), packet->getTotalLength()), [&] (int id) {
                     auto path = getIncompletePath(id);
                     if (path != nullptr)
                         removeIncompletePath(id);
@@ -250,7 +250,7 @@ void PathVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, c
             auto packet = check_and_cast<Packet *>(object);
             if (packetFilter.matches(packet)) {
                 auto module = getContainingNode(check_and_cast<cModule *>(source));
-                mapChunkIds(packet->peekAt(b(0)), [&] (int id) {
+                mapChunkIds(packet->peekAt(b(0), packet->getTotalLength()), [&] (int id) {
                     auto path = getIncompletePath(id);
                     if (path != nullptr)
                         addToIncompletePath(id, module);
@@ -264,7 +264,7 @@ void PathVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, c
             auto networkNode = getContainingNode(module);
             auto packet = check_and_cast<Packet *>(object);
             if (nodeFilter.matches(networkNode) && packetFilter.matches(packet)) {
-                mapChunkIds(packet->peekAt(b(0)), [&] (int id) {
+                mapChunkIds(packet->peekAt(b(0), packet->getTotalLength()), [&] (int id) {
                     auto path = getIncompletePath(id);
                     if (path != nullptr) {
                         if (path->size() > 1)

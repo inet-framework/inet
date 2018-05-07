@@ -23,8 +23,8 @@
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/socket/SocketMap.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
-#include "inet/transportlayer/contract/tcp/TcpSocketMap.h"
 
 namespace inet {
 
@@ -40,7 +40,7 @@ class INET_API TcpServerHostApp : public cSimpleModule, public ILifecycle
 {
   protected:
     TcpSocket serverSocket;
-    TcpSocketMap socketMap;
+    SocketMap socketMap;
     typedef std::set<TcpServerThreadBase *> ThreadSet;
     ThreadSet threadSet;
     NodeStatus *nodeStatus = nullptr;
@@ -68,19 +68,19 @@ class INET_API TcpServerHostApp : public cSimpleModule, public ILifecycle
  *
  * @see TcpServerHostApp
  */
-class INET_API TcpServerThreadBase : public cSimpleModule, public TcpSocket::CallbackInterface
+class INET_API TcpServerThreadBase : public cSimpleModule, public TcpSocket::ICallback
 {
   protected:
     TcpServerHostApp *hostmod;
     TcpSocket *sock;    // ptr into socketMap managed by TcpServerHostApp
 
-    // internal: TcpSocket::CallbackInterface methods
-    virtual void socketDataArrived(int, void *, Packet *msg, bool urgent) override { dataArrived(msg, urgent); }
-    virtual void socketEstablished(int, void *) override { established(); }
-    virtual void socketPeerClosed(int, void *) override { peerClosed(); }
-    virtual void socketClosed(int, void *) override { closed(); }
-    virtual void socketFailure(int, void *, int code) override { failure(code); }
-    virtual void socketStatusArrived(int, void *, TcpStatusInfo *status) override { statusArrived(status); }
+    // internal: TcpSocket::ICallback methods
+    virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override { dataArrived(msg, urgent); }
+    virtual void socketEstablished(TcpSocket *socket) override { established(); }
+    virtual void socketPeerClosed(TcpSocket *socket) override { peerClosed(); }
+    virtual void socketClosed(TcpSocket *socket) override { closed(); }
+    virtual void socketFailure(TcpSocket *socket, int code) override { failure(code); }
+    virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override { statusArrived(status); }
 
     virtual void refreshDisplay() const override;
 

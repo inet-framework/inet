@@ -22,6 +22,7 @@
 
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/socket/ISocket.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 
@@ -60,23 +61,23 @@ class TcpStatusInfo;
  * messages yourself, or let TcpSocket do part of the job. For the latter,
  * you give TcpSocket a callback object on which it'll invoke the appropriate
  * member functions: socketEstablished(), socketDataArrived(), socketFailure(),
- * socketPeerClosed(), etc (these are methods of TcpSocket::CallbackInterface).,
+ * socketPeerClosed(), etc (these are methods of TcpSocket::ICallback).,
  * The callback object can be your simple module class too.
  *
  * This code skeleton example shows how to set up a TcpSocket to use the module
  * itself as callback object:
  *
  * <pre>
- * class MyModule : public cSimpleModule, public TcpSocket::CallbackInterface
+ * class MyModule : public cSimpleModule, public TcpSocket::ICallback
  * {
  *     TcpSocket socket;
- *     virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
- *     virtual void socketFailure(int connId, void *yourPtr, int code);
+ *     virtual void socketDataArrived(TcpSocket *tcpSocket, cPacket *msg, bool urgent);
+ *     virtual void socketFailure(int connId, int code);
  *     ...
  * };
  *
  * void MyModule::initialize() {
- *     socket.setCallbackObject(this,nullptr);
+ *     socket.setCallback(this);
  * }
  *
  * void MyModule::handleMessage(cMessage *msg) {
@@ -86,12 +87,12 @@ class TcpStatusInfo;
  *         ...
  * }
  *
- * void MyModule::socketDataArrived(int, void *, cPacket *msg, bool) {
+ * void MyModule::socketDataArrived(TcpSocket *tcpSocket, cPacket *msg, bool) {
  *     EV << "Received TCP data, " << msg->getByteLength() << " bytes\\n";
  *     delete msg;
  * }
  *
- * void MyModule::socketFailure(int, void *, int code) {
+ * void MyModule::socketFailure(TcpSocket *tcpSocket, int code) {
  *     if (code==TCP_I_CONNECTION_RESET)
  *         EV << "Connection reset!\\n";
  *     else if (code==TCP_I_CONNECTION_REFUSED)
@@ -102,18 +103,18 @@ class TcpStatusInfo;
  * </pre>
  *
  * If you need to manage a large number of sockets (e.g. in a server
- * application which handles multiple incoming connections), the TcpSocketMap
+ * application which handles multiple incoming connections), the SocketMap
  * class may be useful. The following code fragment to handle incoming
  * connections is from the Ldp module:
  *
  * <pre>
- * TcpSocket *socket = socketMap.findSocketFor(msg);
+ * TcpSocket *socket = check_and_cast_nullable<TcpSocket*>socketMap.findSocketFor(msg);
  * if (!socket)
  * {
  *     // not yet in socketMap, must be new incoming connection: add to socketMap
  *     socket = new TcpSocket(msg);
  *     socket->setOutputGate(gate("tcpOut"));
- *     socket->setCallbackObject(this, nullptr);
+ *     socket->setCallback(this);
  *     socketMap.addSocket(socket);
  * }
  * // dispatch to socketEstablished(), socketDataArrived(), socketPeerClosed()
@@ -123,11 +124,11 @@ class TcpStatusInfo;
  *
  * @see TcpSocketMap
  */
-class INET_API TcpSocket
+class INET_API TcpSocket : public ISocket
 {
   public:
     /**
-     * Abstract base class for your callback objects. See setCallbackObject()
+     * Abstract base class for your callback objects. See setCallback()
      * and processMessage() for more info.
      *
      * Note: this class is not subclassed from cObject, because
@@ -135,40 +136,38 @@ class INET_API TcpSocket
      * and cSimpleModule is already a cObject.
      */
     // TODO: add socket parameter to all methods?
-    class CallbackInterface
+    class INET_API ICallback
     {
       public:
-        virtual ~CallbackInterface() {}
-        virtual void socketDataArrived(int connId, void *yourPtr, Packet *msg, bool urgent) = 0;
-        virtual void socketAvailable(int connId, void *yourPtr, TcpAvailableInfo *availableInfo) {}
-        virtual void socketEstablished(int connId, void *yourPtr) {}
-        virtual void socketPeerClosed(int connId, void *yourPtr) {}
-        virtual void socketClosed(int connId, void *yourPtr) {}
-        virtual void socketFailure(int connId, void *yourPtr, int code) {}
-        virtual void socketStatusArrived(int connId, void *yourPtr, TcpStatusInfo *status) { delete status; }
-        virtual void socketDeleted(int connId, void *yourPtr) {}
+        virtual ~ICallback() {}
+        virtual void socketDataArrived(TcpSocket* socket, Packet *packet, bool urgent) = 0;
+        virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) { socket->accept(availableInfo->getNewSocketId()); }
+        virtual void socketEstablished(TcpSocket *socket) {}
+        virtual void socketPeerClosed(TcpSocket *socket) {}
+        virtual void socketClosed(TcpSocket *socket) {}
+        virtual void socketFailure(TcpSocket *socket, int code) {}
+        virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) { delete status; }
+        virtual void socketDeleted(TcpSocket *socket) {}
     };
 
     enum State { NOT_BOUND, BOUND, LISTENING, CONNECTING, CONNECTED, PEER_CLOSED, LOCALLY_CLOSED, CLOSED, SOCKERROR };
 
   protected:
-    int connId;
-    int sockstate;
+    int connId = -1;
+    State sockstate;
 
     L3Address localAddr;
     int localPrt;
     L3Address remoteAddr;
     int remotePrt;
 
-    CallbackInterface *cb;
-    void *yourPtr;
-
-    cGate *gateToTcp;
-
+    ICallback *cb = nullptr;
+    void *userData = nullptr;
+    cGate *gateToTcp = nullptr;
     std::string tcpAlgorithmClass;
 
   protected:
-    void sendToTCP(cMessage *msg, int c = -1);
+    void sendToTcp(cMessage *msg, int c = -1);
 
     // internal: implementation behind listen() and listenOnce()
     void listen(bool fork);
@@ -188,6 +187,11 @@ class INET_API TcpSocket
     TcpSocket(cMessage *msg);
 
     /**
+     * Constructor, to be used with forked sockets (see listen()).
+     */
+    TcpSocket(TcpAvailableInfo *availableInfo);
+
+    /**
      * Destructor
      */
     ~TcpSocket();
@@ -197,21 +201,24 @@ class INET_API TcpSocket
      * to identify the connection when it receives a command from the application
      * (or TcpSocket).
      */
-    int getConnectionId() const { return connId; }
+    int getSocketId() const override { return connId; }
+
+    void *getUserData() const { return userData; }
+    void setUserData(void *userData) { this->userData = userData; }
 
     /**
      * Returns the socket state, one of NOT_BOUND, CLOSED, LISTENING, CONNECTING,
      * CONNECTED, etc. Messages received from TCP must be routed through
      * processMessage() in order to keep socket state up-to-date.
      */
-    int getState() const { return sockstate; }
+    TcpSocket::State getState() const { return sockstate; }
 
     /**
      * Returns name of socket state code returned by getState().
      */
-    static const char *stateName(int state);
+    static const char *stateName(TcpSocket::State state);
 
-    void setState(enum State state) { sockstate = state; };
+    void setState(TcpSocket::State state) { sockstate = state; };
 
     /** @name Getter functions */
     //@{
@@ -343,37 +350,29 @@ class INET_API TcpSocket
      * has a TcpCommand as getControlInfo(), and the connId in it matches
      * that of the socket.)
      */
-    bool belongsToSocket(cMessage *msg);
+    virtual bool belongsToSocket(cMessage *msg) const override;
 
     /**
      * Sets a callback object, to be used with processMessage().
      * This callback object may be your simple module itself (if it
-     * multiply inherits from CallbackInterface too, that is you
+     * multiply inherits from ICallback too, that is you
      * declared it as
      * <pre>
-     * class MyAppModule : public cSimpleModule, public TcpSocket::CallbackInterface
+     * class MyAppModule : public cSimpleModule, public TcpSocket::ICallback
      * </pre>
      * and redefined the necessary virtual functions; or you may use
      * dedicated class (and objects) for this purpose.
      *
      * TcpSocket doesn't delete the callback object in the destructor
      * or on any other occasion.
-     *
-     * YourPtr is an optional pointer. It may contain any value you wish --
-     * TcpSocket will not look at it or do anything with it except passing
-     * it back to you in the CallbackInterface calls. You may find it
-     * useful if you maintain additional per-connection information:
-     * in that case you don't have to look it up by connId in the callbacks,
-     * you can have it passed to you as yourPtr.
      */
-    void setCallbackObject(CallbackInterface *cb, void *yourPtr = nullptr);
+    void setCallback(ICallback *cb);
 
     /**
      * Examines the message (which should have arrived from TCP),
      * updates socket state, and if there is a callback object installed
-     * (see setCallbackObject(), class CallbackInterface), dispatches
-     * to the appropriate method of it with the same yourPtr that
-     * you gave in the setCallbackObject() call.
+     * (see setCallback(), class ICallback), dispatches
+     * to the appropriate method.
      *
      * The method deletes the message, unless (1) there is a callback object
      * installed AND (2) the message is payload (message kind TCP_I_DATA or
@@ -384,7 +383,7 @@ class INET_API TcpSocket
      * the message belongs to this socket, i.e. belongsToSocket(msg) would
      * return true!
      */
-    void processMessage(cMessage *msg);
+    void processMessage(cMessage *msg) override;
     //@}
 };
 

@@ -100,7 +100,7 @@ void SctpNatPeer::initialize(int stage)
         inboundStreams = par("inboundStreams");
         ordered = par("ordered");
         clientSocket.setOutputGate(gate("socketOut"));
-        clientSocket.setCallbackObject(this);
+        clientSocket.setCallback(this);
         if (addresses.size() == 0) {
             clientSocket.bind(port);
         }
@@ -165,7 +165,7 @@ void SctpNatPeer::connectx(AddressVector connectAddressList, int32 connectPort)
     clientSocket.setInboundStreams(inStreams);
 
     EV << "issuing OPEN command\n";
-    EV << "Assoc " << clientSocket.getConnectionId() << "::connect to  port " << connectPort << "\n";
+    EV << "Assoc " << clientSocket.getSocketId() << "::connect to  port " << connectPort << "\n";
     bool streamReset = par("streamReset");
     clientSocket.connectx(connectAddressList, connectPort, streamReset, static_cast<uint32>(par("prMethod")), static_cast<uint32>(par("numRequestsPerSession")));
     numSessions++;
@@ -194,7 +194,7 @@ void SctpNatPeer::connect(L3Address connectAddress, int32 connectPort)
     clientSocket.setInboundStreams(inboundStreams);
 
     EV << "issuing OPEN command\n";
-    EV << "Assoc " << clientSocket.getConnectionId() << "::connect to address " << connectAddress << ", port " << connectPort << "\n";
+    EV << "Assoc " << clientSocket.getSocketId() << "::connect to address " << connectAddress << ", port " << connectPort << "\n";
     bool streamReset = par("streamReset");
     clientSocket.connect(connectAddress, connectPort, streamReset, static_cast<int32>(par("prMethod")), static_cast<uint32>(par("numRequestsPerSession")));
     numSessions++;
@@ -553,7 +553,7 @@ void SctpNatPeer::handleTimer(cMessage *msg)
     }
 }
 
-void SctpNatPeer::socketDataNotificationArrived(int32 connId, void *ptr, Message *msg)
+void SctpNatPeer::socketDataNotificationArrived(SctpSocket *socket, Message *msg)
 {
     Message *message = check_and_cast<Message *>(msg);
     auto& intags = getTags(message);
@@ -568,7 +568,7 @@ void SctpNatPeer::socketDataNotificationArrived(int32 connId, void *ptr, Message
     clientSocket.sendNotification(cmesg);
 }
 
-void SctpNatPeer::socketPeerClosed(int32, void *)
+void SctpNatPeer::socketPeerClosed(SctpSocket *socket)
 {
     // close the connection (if not already closed)
     if (clientSocket.getState() == SctpSocket::PEER_CLOSED) {
@@ -600,7 +600,7 @@ void SctpNatPeer::socketPeerClosed(int32, void *)
     }
 }
 
-void SctpNatPeer::socketClosed(int32, void *)
+void SctpNatPeer::socketClosed(SctpSocket *socket)
 {
     // *redefine* to start another session etc.
 
@@ -631,7 +631,7 @@ void SctpNatPeer::socketClosed(int32, void *)
     }
 }
 
-void SctpNatPeer::socketFailure(int32, void *, int32 code)
+void SctpNatPeer::socketFailure(SctpSocket *socket, int32 code)
 {
     // subclasses may override this function, and add code try to reconnect after a delay.
     EV << "connection broken\n";
@@ -644,7 +644,7 @@ void SctpNatPeer::socketFailure(int32, void *, int32 code)
     scheduleAt(simTime() + par("reconnectInterval"), timeMsg);
 }
 
-void SctpNatPeer::socketStatusArrived(int assocId, void *yourPtr, SctpStatusReq *status)
+void SctpNatPeer::socketStatusArrived(SctpSocket *socket, SctpStatusReq *status)
 {
     struct pathStatus ps;
     auto i = sctpPathStatus.find(status->getPathId());
@@ -694,7 +694,7 @@ void SctpNatPeer::sendRequest(bool last)
     bytesSent += numBytes;
 }
 
-void SctpNatPeer::socketEstablished(int32, void *, unsigned long int buffer)
+void SctpNatPeer::socketEstablished(SctpSocket *socket, unsigned long int buffer)
 {
     int32 count = 0;
     // *redefine* to perform or schedule first sending
@@ -738,7 +738,7 @@ void SctpNatPeer::socketEstablished(int32, void *, unsigned long int buffer)
             Request *cmesg = new Request("SCTP_C_SEND_ASCONF");
             auto& tags = getTags(cmesg);
             SctpCommandReq *cmd = tags.addTagIfAbsent<SctpCommandReq>();
-            cmd->setSocketId(clientSocket.getConnectionId());
+            cmd->setSocketId(clientSocket.getSocketId());
             cmesg->setKind(SCTP_C_SEND_ASCONF);
             clientSocket.sendNotification(cmesg);
         }
@@ -798,11 +798,11 @@ void SctpNatPeer::sendQueueRequest()
     SctpInfoReq *qinfo = tags.addTagIfAbsent<SctpInfoReq>();
     qinfo->setText(queueSize);
     cmsg->setKind(SCTP_C_QUEUE_MSGS_LIMIT);
-    qinfo->setSocketId(clientSocket.getConnectionId());
+    qinfo->setSocketId(clientSocket.getSocketId());
     clientSocket.sendRequest(cmsg);
 }
 
-void SctpNatPeer::sendRequestArrived()
+void SctpNatPeer::sendRequestArrived(SctpSocket *socket)
 {
     int32 count = 0;
 
@@ -821,7 +821,7 @@ void SctpNatPeer::sendRequestArrived()
     }
 }
 
-void SctpNatPeer::socketDataArrived(int32, void *, Packet *msg, bool)
+void SctpNatPeer::socketDataArrived(SctpSocket *socket, Packet *msg, bool)
 {
     // *redefine* to perform or schedule next sending
     packetsRcvd++;
@@ -857,29 +857,29 @@ void SctpNatPeer::socketDataArrived(int32, void *, Packet *msg, bool)
     }
 }
 
-void SctpNatPeer::shutdownReceivedArrived(int32 connId)
+void SctpNatPeer::shutdownReceivedArrived(SctpSocket *socket)
 {
     if (numRequestsToSend == 0 || rendezvous) {
         Message *cmsg = new Message("SCTP_C_NO_OUTSTANDING");
         auto& tags = getTags(cmsg);
         SctpCommandReq *qinfo = tags.addTagIfAbsent<SctpCommandReq>();
         cmsg->setKind(SCTP_C_NO_OUTSTANDING);
-        qinfo->setSocketId(connId);
+        qinfo->setSocketId(socket->getSocketId());
         clientSocket.sendNotification(cmsg);
     }
 }
 
-void SctpNatPeer::msgAbandonedArrived(int32 assocId)
+void SctpNatPeer::msgAbandonedArrived(SctpSocket *socket)
 {
     chunksAbandoned++;
 }
 
-void SctpNatPeer::sendqueueFullArrived(int32 assocId)
+void SctpNatPeer::sendqueueFullArrived(SctpSocket *socket)
 {
     sendAllowed = false;
 }
 
-void SctpNatPeer::addressAddedArrived(int32 assocId, L3Address localAddr, L3Address remoteAddr)
+void SctpNatPeer::addressAddedArrived(SctpSocket *socket, L3Address localAddr, L3Address remoteAddr)
 {
     EV << getFullPath() << ": addressAddedArrived for remoteAddr " << remoteAddr << "\n";
     localAddressList.push_back(localAddr);

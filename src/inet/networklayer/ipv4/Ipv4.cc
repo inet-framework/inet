@@ -18,19 +18,18 @@
 
 #include <stdlib.h>
 #include <string.h>
-
-#include "inet/networklayer/ipv4/Ipv4.h"
-
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/LayeredProtocolBase.h"
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Message.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/serializer/TcpIpChecksum.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/arp/ipv4/ArpPacket_m.h"
 #include "inet/networklayer/common/DscpTag_m.h"
 #include "inet/networklayer/common/EcnTag_m.h"
@@ -42,13 +41,12 @@
 #include "inet/networklayer/common/NextHopAddressTag_m.h"
 #include "inet/networklayer/contract/IArp.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/contract/L3SocketCommand_m.h"
+#include "inet/networklayer/contract/ipv4/Ipv4SocketCommand_m.h"
 #include "inet/networklayer/ipv4/IcmpHeader_m.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/networklayer/ipv4/Ipv4.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-#include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/linklayer/common/MacAddressTag_m.h"
 
 namespace inet {
 
@@ -157,14 +155,14 @@ void Ipv4::refreshDisplay() const
 void Ipv4::handleMessage(cMessage *msg)
 {
     auto request = dynamic_cast<Request *>(msg);
-    if (L3SocketBindCommand *command = dynamic_cast<L3SocketBindCommand *>(msg->getControlInfo())) {
+    if (Ipv4SocketBindCommand *command = dynamic_cast<Ipv4SocketBindCommand *>(msg->getControlInfo())) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
         SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocol()->getId());
         socketIdToSocketDescriptor[socketId] = descriptor;
         protocolIdToSocketDescriptors.insert(std::pair<int, SocketDescriptor *>(command->getProtocol()->getId(), descriptor));
         delete msg;
     }
-    else if (dynamic_cast<L3SocketCloseCommand *>(msg->getControlInfo()) != nullptr) {
+    else if (dynamic_cast<Ipv4SocketCloseCommand *>(msg->getControlInfo()) != nullptr) {
         int socketId = 0; request->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketDescriptor.find(socketId);
         if (it != socketIdToSocketDescriptor.end()) {

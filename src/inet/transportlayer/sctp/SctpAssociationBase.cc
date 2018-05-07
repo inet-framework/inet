@@ -368,8 +368,6 @@ SctpStateVariables::SctpStateVariables()
     initChunk = nullptr;
     cookieChunk = nullptr;
     resetInfo = nullptr;
-   // sctpmsg = nullptr;
-    sctpMsg = nullptr;
     incomingRequest = nullptr;
     peerRequestType = 0;
     localRequestType = 0;

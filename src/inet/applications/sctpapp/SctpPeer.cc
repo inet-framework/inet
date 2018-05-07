@@ -128,7 +128,7 @@ void SctpPeer::initialize(int stage)
         }
         listeningSocket.listen(true, par("streamReset"), par("numPacketsToSendPerClient"));
         EV_DEBUG << "SctpPeer::initialized listen port=" << port << "\n";
-        clientSocket.setCallbackObject(this);
+        clientSocket.setCallback(this);
         clientSocket.setOutputGate(gate("socketOut"));
 
         if (simtime_t(par("startTime")) > SIMTIME_ZERO) {    //FIXME is invalid the startTime == 0 ????
@@ -191,7 +191,7 @@ void SctpPeer::connect()
     clientSocket.setOutboundStreams(outStreams);
 
     EV_INFO << "issuing OPEN command\n";
-    EV_INFO << "Assoc " << clientSocket.getConnectionId() << "::connect to address " << connectAddress << ", port " << connectPort << "\n";
+    EV_INFO << "Assoc " << clientSocket.getSocketId() << "::connect to address " << connectAddress << ", port " << connectPort << "\n";
     numSessions++;
     bool streamReset = par("streamReset");
     L3Address destination;
@@ -498,7 +498,7 @@ void SctpPeer::handleTimer(cMessage *msg)
     }
 }
 
-void SctpPeer::socketDataNotificationArrived(int connId, void *ptr, Message *msg)
+void SctpPeer::socketDataNotificationArrived(SctpSocket *socket, Message *msg)
 {
     Message *message = check_and_cast<Message *>(msg);
     auto& intags = getTags(message);
@@ -513,7 +513,7 @@ void SctpPeer::socketDataNotificationArrived(int connId, void *ptr, Message *msg
     clientSocket.sendNotification(cmesg);
 }
 
-void SctpPeer::socketPeerClosed(int, void *)
+void SctpPeer::socketPeerClosed(SctpSocket *socket)
 {
     // close the connection (if not already closed)
     if (clientSocket.getState() == SctpSocket::PEER_CLOSED) {
@@ -523,14 +523,14 @@ void SctpPeer::socketPeerClosed(int, void *)
     }
 }
 
-void SctpPeer::socketClosed(int, void *)
+void SctpPeer::socketClosed(SctpSocket *socket)
 {
     // *redefine* to start another session etc.
     EV_INFO << "connection closed\n";
     setStatusString("closed");
 }
 
-void SctpPeer::socketFailure(int, void *, int code)
+void SctpPeer::socketFailure(SctpSocket *socket, int code)
 {
     // subclasses may override this function, and add code try to reconnect after a delay.
     EV_WARN << "connection broken\n";
@@ -540,7 +540,7 @@ void SctpPeer::socketFailure(int, void *, int code)
     scheduleAt(simTime() + par("reconnectInterval"), timeMsg);
 }
 
-void SctpPeer::socketStatusArrived(int assocId, void *yourPtr, SctpStatusReq *status)
+void SctpPeer::socketStatusArrived(SctpSocket *socket, SctpStatusReq *status)
 {
     struct PathStatus ps;
     auto i = sctpPathStatus.find(status->getPathId());
@@ -591,8 +591,9 @@ void SctpPeer::sendRequest(bool last)
     bytesSent += numBytes;
 }
 
-void SctpPeer::socketEstablished(int, void *)
+void SctpPeer::socketEstablished(SctpSocket *socket, unsigned long int buffer)
 {
+    ASSERT(socket == &clientSocket);
     int count = 0;
     // *redefine* to perform or schedule first sending
     EV_INFO << "SctpClient: connected\n";
@@ -652,12 +653,13 @@ void SctpPeer::sendQueueRequest()
     SctpInfoReq *qinfo = tags.addTagIfAbsent<SctpInfoReq>();
     qinfo->setText(queueSize);
     cmsg->setKind(SCTP_C_QUEUE_MSGS_LIMIT);
-    qinfo->setSocketId(clientSocket.getConnectionId());
+    qinfo->setSocketId(clientSocket.getSocketId());
     clientSocket.sendRequest(cmsg);
 }
 
-void SctpPeer::sendRequestArrived()
+void SctpPeer::sendRequestArrived(SctpSocket *socket)
 {
+    ASSERT(socket == &clientSocket);
     int count = 0;
 
     EV_INFO << "sendRequestArrived numRequestsToSend=" << numRequestsToSend << "\n";
@@ -672,7 +674,7 @@ void SctpPeer::sendRequestArrived()
     }
 }
 
-void SctpPeer::socketDataArrived(int, void *, Packet *msg, bool)
+void SctpPeer::socketDataArrived(SctpSocket *socket, Packet *msg, bool)
 {
     // *redefine* to perform or schedule next sending
     packetsRcvd++;
@@ -710,24 +712,24 @@ void SctpPeer::socketDataArrived(int, void *, Packet *msg, bool)
     }
 }
 
-void SctpPeer::shutdownReceivedArrived(int connId)
+void SctpPeer::shutdownReceivedArrived(SctpSocket *socket)
 {
     if (numRequestsToSend == 0) {
         Message *cmsg = new Message("SCTP_C_NO_OUTSTANDING");
         auto& tags = getTags(cmsg);
         SctpCommandReq *qinfo = tags.addTagIfAbsent<SctpCommandReq>();
         cmsg->setKind(SCTP_C_NO_OUTSTANDING);
-        qinfo->setSocketId(connId);
+        qinfo->setSocketId(socket->getSocketId());
         clientSocket.sendNotification(cmsg);
     }
 }
 
-void SctpPeer::msgAbandonedArrived(int assocId)
+void SctpPeer::msgAbandonedArrived(SctpSocket *socket)
 {
     chunksAbandoned++;
 }
 
-void SctpPeer::sendqueueFullArrived(int assocId)
+void SctpPeer::sendqueueFullArrived(SctpSocket *socket)
 {
     sendAllowed = false;
 }

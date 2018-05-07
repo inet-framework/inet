@@ -35,7 +35,7 @@ class SctpAssociation;
 /**
  * Implements the SctpClient simple module. See the NED file for more info.
  */
-class INET_API SctpClient : public cSimpleModule, public SctpSocket::CallbackInterface, public ILifecycle
+class INET_API SctpClient : public cSimpleModule, public SctpSocket::ICallback, public ILifecycle
 {
   protected:
     struct PathStatus
@@ -92,21 +92,21 @@ class INET_API SctpClient : public cSimpleModule, public SctpSocket::CallbackInt
     void close();
     void handleTimer(cMessage *msg);
 
-    /* SctpSocket::CallbackInterface callback methods */
-    void socketEstablished(int connId, void *yourPtr, unsigned long int buffer) override;    // TODO: needs a better name
-    void socketDataArrived(int connId, void *yourPtr, Packet *msg, bool urgent) override;    // TODO: needs a better name
-    void socketDataNotificationArrived(int connId, void *yourPtr, Message *msg) override;
-    void socketPeerClosed(int connId, void *yourPtr) override;
-    void socketClosed(int connId, void *yourPtr) override;
-    void socketFailure(int connId, void *yourPtr, int code) override;
-    void socketStatusArrived(int connId, void *yourPtr, SctpStatusReq *status) override;
+    /* SctpSocket::ICallback callback methods */
+    void socketEstablished(SctpSocket *socket, unsigned long int buffer) override;    // TODO: needs a better name
+    void socketDataArrived(SctpSocket *socket, Packet *msg, bool urgent) override;    // TODO: needs a better name
+    void socketDataNotificationArrived(SctpSocket *socket, Message *msg) override;
+    void socketPeerClosed(SctpSocket *socket) override;
+    void socketClosed(SctpSocket *socket) override;
+    void socketFailure(SctpSocket *socket, int code) override;
+    void socketStatusArrived(SctpSocket *socket, SctpStatusReq *status) override;
 
     void setPrimaryPath(const char *addr);
-    void sendRequestArrived() override;
+    void sendRequestArrived(SctpSocket *socket) override;
     void sendQueueRequest();
-    void shutdownReceivedArrived(int connId) override;
-    void sendqueueAbatedArrived(int connId, unsigned long int buffer) override;
-    void msgAbandonedArrived(int assocId) override;
+    void shutdownReceivedArrived(SctpSocket *socket) override;
+    void sendqueueAbatedArrived(SctpSocket *socket, unsigned long int buffer) override;
+    void msgAbandonedArrived(SctpSocket *socket) override;
     void sendStreamResetNotification();
     void sendRequest(bool last = true);
 

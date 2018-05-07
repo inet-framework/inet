@@ -66,6 +66,10 @@ module LdpMplsRouter
                 helloInterval = helloInterval;
                 @display("p=222,67");
         }
+        at: MessageDispatcher {
+            parameters:
+                @display("p=219,107;b=153,5,,,,1");
+        }
         ted: Ted {
             parameters:
                 @display("p=73,114;is=s");
@@ -121,11 +125,14 @@ module LdpMplsRouter
         linkStateRouting.ipOut --> tn.in++;
         tn.out++ --> linkStateRouting.ipIn;
 
-        ldp.tcpIn <-- tcp.appOut;
-        ldp.tcpOut --> tcp.appIn;
+        ldp.socketIn <-- at.out++;
+        ldp.socketOut --> at.in++;
 
-        ldp.udpOut --> udp.appIn;
-        ldp.udpIn <-- udp.appOut;
+        at.out++ --> udp.appIn;
+        at.in++ <-- udp.appOut;
+
+        at.out++ --> tcp.appIn;
+        at.in++ <-- tcp.appOut;
 
         udp.ipOut --> tn.in++;
         tn.out++ --> udp.ipIn;

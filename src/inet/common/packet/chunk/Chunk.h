@@ -370,10 +370,10 @@ class INET_API Chunk : public cObject,
 
     virtual void handleChange();
 
-    virtual int getBitsArraySize(); // only for class descriptor
-    virtual int getBytesArraySize(); // only for class descriptor
-    virtual const char *getBitsAsString(int index); // only for class descriptor
-    virtual const char *getBytesAsString(int index); // only for class descriptor
+    virtual int getBinDumpNumLines(); // only for class descriptor
+    virtual int getHexDumpNumLines(); // only for class descriptor
+    virtual const char *getBinDumpLine(int index); // only for class descriptor
+    virtual const char *getHexDumpLine(int index); // only for class descriptor
 
     virtual int getTagsArraySize(); // only for class descriptor
     virtual const RegionTagSet::RegionTag<cObject>& getTags(int index); // only for class descriptor

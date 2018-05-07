@@ -122,7 +122,7 @@ class INET_API NetPerfMeter : public cSimpleModule
    SctpSocket*             IncomingSocketSCTP = nullptr;
    TcpSocket*              SocketTCP = nullptr;
    TcpSocket*              IncomingSocketTCP = nullptr;
-   UdpSocket*              SocketUDP = nullptr;
+   UdpSocket *             SocketUDP = nullptr;
    int                     ConnectionID = 0;
    L3Address               PrimaryPath;
 

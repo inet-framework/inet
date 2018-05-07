@@ -46,17 +46,20 @@ void UdpVideoStreamClient::handleMessageWhenUp(cMessage *msg)
     if (msg->isSelfMessage()) {
         requestStream();
     }
-    else if (msg->getKind() == UDP_I_DATA) {
-        // process incoming packet
-        receiveStream(check_and_cast<Packet *>(msg));
-    }
-    else if (msg->getKind() == UDP_I_ERROR) {
-        EV_WARN << "Ignoring UDP error report\n";
-        delete msg;
-    }
-    else {
-        throw cRuntimeError("Unrecognized message (%s)%s", msg->getClassName(), msg->getName());
-    }
+    else
+        socket.processMessage(msg);
+}
+
+void UdpVideoStreamClient::socketDataArrived(UdpSocket *socket, Packet *packet)
+{
+    // process incoming packet
+    receiveStream(packet);
+}
+
+void UdpVideoStreamClient::socketErrorArrived(UdpSocket *socket, Indication *indication)
+{
+    EV_WARN << "Ignoring UDP error report " << indication->getName() << endl;
+    delete indication;
 }
 
 void UdpVideoStreamClient::requestStream()
@@ -75,6 +78,7 @@ void UdpVideoStreamClient::requestStream()
 
     socket.setOutputGate(gate("socketOut"));
     socket.bind(localPort);
+    socket.setCallback(this);
 
     Packet *pk = new Packet("VideoStrmReq");
     const auto& payload = makeShared<ByteCountChunk>(B(1));    //FIXME set packet length

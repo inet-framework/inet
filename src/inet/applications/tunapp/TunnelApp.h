@@ -18,14 +18,15 @@
 #ifndef __INET_TUNNELAPP_H
 #define __INET_TUNNELAPP_H
 
-#include "inet/linklayer/tun/TunSocket.h"
-#include "inet/networklayer/contract/L3Socket.h"
-#include "inet/transportlayer/contract/udp/UdpSocket.h"
 #include "inet/applications/base/ApplicationBase.h"
+#include "inet/common/socket/SocketMap.h"
+#include "inet/linklayer/tun/TunSocket.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Socket.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {
 
-class INET_API TunnelApp : public ApplicationBase
+class INET_API TunnelApp : public ApplicationBase, public UdpSocket::ICallback, public Ipv4Socket::ICallback, public TunSocket::ICallback
 {
 protected:
     const Protocol *protocol = nullptr;
@@ -34,10 +35,11 @@ protected:
     int destinationPort = -1;
     int localPort = -1;
 
-    L3Socket l3Socket;
+    Ipv4Socket ipv4Socket;
     UdpSocket serverSocket;
     UdpSocket clientSocket;
     TunSocket tunSocket;
+    SocketMap socketMap;
 
 public:
     TunnelApp();
@@ -47,6 +49,16 @@ protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessageWhenUp(cMessage *msg) override;
+
+    // UdpSocket::ICallback
+    virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
+    virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
+
+    // Ipv4Socket::ICallback
+    virtual void socketDataArrived(Ipv4Socket *socket, Packet *packet) override;
+
+    // TunSocket::ICallback
+    virtual void socketDataArrived(TunSocket *socket, Packet *packet) override;
 };
 
 } // namespace inet

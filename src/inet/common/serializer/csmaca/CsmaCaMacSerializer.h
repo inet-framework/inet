@@ -26,7 +26,7 @@ namespace inet {
 namespace serializer {
 
 /**
- * Converts between CsmaCaMacHeader and binary network byte order IEEE 802.11 mac header.
+ * Converts between CsmaCaMacHeader and binary network byte order mac header.
  */
 class INET_API CsmaCaMacHeaderSerializer : public FieldsChunkSerializer
 {

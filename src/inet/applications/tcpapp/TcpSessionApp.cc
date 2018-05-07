@@ -174,9 +174,9 @@ Packet *TcpSessionApp::createDataPacket(long sendBytes)
     return packet;
 }
 
-void TcpSessionApp::socketEstablished(int connId, void *ptr)
+void TcpSessionApp::socketEstablished(TcpSocket *socket)
 {
-    TcpAppBase::socketEstablished(connId, ptr);
+    TcpAppBase::socketEstablished(socket);
 
     ASSERT(commandIndex == 0);
     timeoutMsg->setKind(MSGKIND_SEND);
@@ -184,20 +184,20 @@ void TcpSessionApp::socketEstablished(int connId, void *ptr)
     scheduleAt(std::max(tSend, simTime()), timeoutMsg);
 }
 
-void TcpSessionApp::socketDataArrived(int connId, void *ptr, Packet *msg, bool urgent)
+void TcpSessionApp::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
 {
-    TcpAppBase::socketDataArrived(connId, ptr, msg, urgent);
+    TcpAppBase::socketDataArrived(socket, msg, urgent);
 }
 
-void TcpSessionApp::socketClosed(int connId, void *ptr)
+void TcpSessionApp::socketClosed(TcpSocket *socket)
 {
-    TcpAppBase::socketClosed(connId, ptr);
+    TcpAppBase::socketClosed(socket);
     cancelEvent(timeoutMsg);
 }
 
-void TcpSessionApp::socketFailure(int connId, void *ptr, int code)
+void TcpSessionApp::socketFailure(TcpSocket *socket, int code)
 {
-    TcpAppBase::socketFailure(connId, ptr, code);
+    TcpAppBase::socketFailure(socket, code);
     cancelEvent(timeoutMsg);
 }
 

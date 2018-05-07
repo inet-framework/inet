@@ -89,6 +89,8 @@ void SimpleVoipSender::handleMessage(cMessage *msg)
         else
             selectTalkOrSilenceInterval();
     }
+    else
+        throw cRuntimeError("Unknown incoming message: '%s' on gate '%s'", msg->getClassName(), msg->getArrivalGate()->getFullName());
 }
 
 void SimpleVoipSender::talkspurt(simtime_t dur)

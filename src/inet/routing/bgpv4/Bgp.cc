@@ -152,7 +152,8 @@ void Bgp::openTCPConnectionToPeer(SessionId sessionID)
         socket->abort();
         socket->renewSocket();
     }
-    socket->setCallbackObject(this, (void *)(uintptr_t)sessionID);
+    socket->setCallback(this);
+    socket->setUserData((void *)(uintptr_t)sessionID);
     socket->setOutputGate(gate("socketOut"));
     socket->bind(intfEntry->ipv4Data()->getIPAddress(), 0);
     _socketMap.addSocket(socket);
@@ -162,7 +163,7 @@ void Bgp::openTCPConnectionToPeer(SessionId sessionID)
 
 void Bgp::processMessageFromTCP(cMessage *msg)
 {
-    TcpSocket *socket = _socketMap.findSocketFor(msg);
+    TcpSocket *socket = check_and_cast_nullable<TcpSocket*>(_socketMap.findSocketFor(msg));
     if (!socket) {
         socket = new TcpSocket(msg);
         socket->setOutputGate(gate("socketOut"));
@@ -174,7 +175,8 @@ void Bgp::processMessageFromTCP(cMessage *msg)
             delete msg;
             return;
         }
-        socket->setCallbackObject(this, (void *)(uintptr_t)i);
+        socket->setCallback(this);
+        socket->setUserData((void *)(uintptr_t)i);
 
         _socketMap.addSocket(socket);
         _BGPSessions[i]->getSocket()->abort();
@@ -184,8 +186,9 @@ void Bgp::processMessageFromTCP(cMessage *msg)
     socket->processMessage(msg);
 }
 
-void Bgp::socketEstablished(int connId, void *yourPtr)
+void Bgp::socketEstablished(TcpSocket *socket)
 {
+    int connId = socket->getSocketId();
     _currSessionId = findIdFromSocketConnId(_BGPSessions, connId);
     if (_currSessionId == static_cast<SessionId>(-1)) {
         throw cRuntimeError("socket id=%d is not established", connId);
@@ -202,7 +205,7 @@ void Bgp::socketEstablished(int connId, void *yourPtr)
         _BGPSessions[_currSessionId]->getSocketListen()->abort();
     }
 
-    if (_BGPSessions[_currSessionId]->getSocketListen()->getConnectionId() != connId &&
+    if (_BGPSessions[_currSessionId]->getSocketListen()->getSocketId() != connId &&
         _BGPSessions[_currSessionId]->getType() == EGP &&
         this->findNextSession(EGP) != static_cast<SessionId>(-1))
     {
@@ -210,9 +213,9 @@ void Bgp::socketEstablished(int connId, void *yourPtr)
     }
 }
 
-void Bgp::socketDataArrived(int connId, void *yourPtr, Packet *msg, bool urgent)
+void Bgp::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
 {
-    _currSessionId = findIdFromSocketConnId(_BGPSessions, connId);
+    _currSessionId = findIdFromSocketConnId(_BGPSessions, socket->getSocketId());
     if (_currSessionId != static_cast<SessionId>(-1)) {
         //TODO: should queuing incoming payloads, and peek from the queue
         const auto& ptrHdr = msg->peekAtFront<BgpHeader>();
@@ -237,8 +240,9 @@ void Bgp::socketDataArrived(int connId, void *yourPtr, Packet *msg, bool urgent)
     delete msg;
 }
 
-void Bgp::socketFailure(int connId, void *yourPtr, int code)
+void Bgp::socketFailure(TcpSocket *socket, int code)
 {
+    int connId = socket->getSocketId();
     _currSessionId = findIdFromSocketConnId(_BGPSessions, connId);
     if (_currSessionId != static_cast<SessionId>(-1)) {
         _BGPSessions[_currSessionId]->getFSM()->TcpConnectionFails();
@@ -741,7 +745,7 @@ SessionId Bgp::findIdFromSocketConnId(std::map<SessionId, BgpSession *> sessions
     for (auto & session : sessions)
     {
         TcpSocket *socket = (session).second->getSocket();
-        if (socket->getConnectionId() == connId) {
+        if (socket->getSocketId() == connId) {
             return (session).first;
         }
     }

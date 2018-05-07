@@ -121,16 +121,14 @@ const Ptr<const Chunk> Packet::peekDataAt(b offset, b length, int flags) const
     CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getDataLength(), "offset is out of range");
     CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= getDataLength(), "length is invalid");
     b peekOffset = frontIterator.getPosition() + offset;
-    b peekLength = length == b(-1) ? getDataLength() - offset : length;
-    return content->peek(Chunk::Iterator(true, peekOffset, -1), peekLength, flags);
+    return content->peek(Chunk::Iterator(true, peekOffset, -1), length, flags);
 }
 
 const Ptr<const Chunk> Packet::peekAt(b offset, b length, int flags) const
 {
     CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getTotalLength(), "offset is out of range");
     CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= getTotalLength(), "length is invalid");
-    b peekLength = length == b(-1) ? getTotalLength() - offset : length;
-    return content->peek(Chunk::Iterator(true, offset, -1), peekLength, flags);
+    return content->peek(Chunk::Iterator(true, offset, -1), length, flags);
 }
 
 void Packet::insertAtBack(const Ptr<const Chunk>& chunk)

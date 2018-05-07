@@ -26,16 +26,16 @@ enum L3CommandCode
     L3_C_CLOSE = 2;
 }
 
-class L3SocketCommand extends cObject
+class L3SocketCommandBase extends cObject
 {
 }
 
-class L3SocketBindCommand extends L3SocketCommand
+class L3SocketBindCommand extends L3SocketCommandBase
 {
     const Protocol *protocol;
 }
 
-class L3SocketCloseCommand extends L3SocketCommand
+class L3SocketCloseCommand extends L3SocketCommandBase
 {
 }
 

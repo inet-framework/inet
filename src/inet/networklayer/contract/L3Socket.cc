@@ -24,27 +24,33 @@
 
 namespace inet {
 
-L3Socket::L3Socket(const Protocol *controlInfoProtocol, cGate *outputGate) :
-    l3Protocol(controlInfoProtocol),
+L3Socket::L3Socket(const Protocol *l3Protocol, cGate *outputGate) :
+    l3Protocol(l3Protocol),
     socketId(getEnvir()->getUniqueNumber()),
     outputGate(outputGate)
 {
 }
 
-void L3Socket::setL3Protocol(const Protocol *controlInfoProtocol)
+void L3Socket::setCallback(INetworkSocket::ICallback *callback)
 {
-    ASSERT(!bound);
-    l3Protocol = controlInfoProtocol;
+    this->callback = callback;
 }
 
-void L3Socket::sendToOutput(cMessage *message)
+bool L3Socket::belongsToSocket(cMessage *msg) const
 {
-    if (!outputGate)
-        throw cRuntimeError("L3Socket: setOutputGate() must be invoked before the socket can be used");
-    auto& tags = getTags(message);
-    tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(l3Protocol);
-    tags.addTagIfAbsent<SocketReq>()->setSocketId(socketId);
-    check_and_cast<cSimpleModule *>(outputGate->getOwnerModule())->send(message, outputGate);
+    auto& tags = getTags(msg);
+    int msgSocketId = tags.getTag<SocketInd>()->getSocketId();
+    return socketId == msgSocketId;
+}
+
+void L3Socket::processMessage(cMessage *msg)
+{
+    ASSERT(belongsToSocket(msg));
+
+    if (callback)
+        callback->socketDataArrived(this, check_and_cast<Packet*>(msg));
+    else
+        delete msg;
 }
 
 void L3Socket::bind(const Protocol *protocol)
@@ -59,9 +65,9 @@ void L3Socket::bind(const Protocol *protocol)
     bound = true;
 }
 
-void L3Socket::send(cPacket *msg)
+void L3Socket::send(Packet *packet)
 {
-    sendToOutput(msg);
+    sendToOutput(packet);
 }
 
 void L3Socket::close()
@@ -72,6 +78,16 @@ void L3Socket::close()
     auto request = new Request("close", L3_C_CLOSE);
     request->setControlInfo(command);
     sendToOutput(request);
+}
+
+void L3Socket::sendToOutput(cMessage *message)
+{
+    if (!outputGate)
+        throw cRuntimeError("L3Socket: setOutputGate() must be invoked before the socket can be used");
+    auto& tags = getTags(message);
+    tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(l3Protocol);
+    tags.addTagIfAbsent<SocketReq>()->setSocketId(socketId);
+    check_and_cast<cSimpleModule *>(outputGate->getOwnerModule())->send(message, outputGate);
 }
 
 } // namespace inet

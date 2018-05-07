@@ -34,7 +34,7 @@ namespace inet {
 /**
  * UDP application. See NED for more info.
  */
-class INET_API UdpBasicBurst : public ApplicationBase
+class INET_API UdpBasicBurst : public ApplicationBase, public UdpSocket::ICallback
 {
   public:
     enum ChooseDestAddrMode {
@@ -102,6 +102,9 @@ class INET_API UdpBasicBurst : public ApplicationBase
     virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
     virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
     virtual void handleNodeCrash() override;
+
+    virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
+    virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
 
   public:
     UdpBasicBurst() {}

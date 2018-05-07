@@ -25,21 +25,21 @@
 #include "inet/common/packet/Message.h"
 
 #include "inet/applications/common/SocketTag_m.h"
-#include "inet/networklayer/common/EcnTag_m.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/common/DscpTag_m.h"
+#include "inet/networklayer/common/EcnTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/L3Tools.h"
-#include "inet/networklayer/contract/L3SocketCommand_m.h"
-#include "inet/networklayer/ipv6/Ipv6ExtHeaderTag_m.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/contract/ipv6/Ipv6SocketCommand_m.h"
+#include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 #include "inet/networklayer/icmpv6/Ipv6NdMessage_m.h"
 #include "inet/networklayer/ipv6/Ipv6.h"
 #include "inet/networklayer/ipv6/Ipv6ExtensionHeaders_m.h"
+#include "inet/networklayer/ipv6/Ipv6ExtHeaderTag_m.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
-#include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/linklayer/common/MacAddressTag_m.h"
-#include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 
 #ifdef WITH_xMIPv6
 #include "inet/networklayer/xmipv6/MobilityHeader_m.h"
@@ -133,14 +133,14 @@ void Ipv6::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePr
 void Ipv6::handleMessage(cMessage *msg)
 {
     auto request = dynamic_cast<Request *>(msg);
-    if (L3SocketBindCommand *command = dynamic_cast<L3SocketBindCommand *>(msg->getControlInfo())) {
+    if (Ipv6SocketBindCommand *command = dynamic_cast<Ipv6SocketBindCommand *>(msg->getControlInfo())) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
         SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocol()->getId());
         socketIdToSocketDescriptor[socketId] = descriptor;
         protocolIdToSocketDescriptors.insert(std::pair<int, SocketDescriptor *>(command->getProtocol()->getId(), descriptor));
         delete msg;
     }
-    else if (dynamic_cast<L3SocketCloseCommand *>(msg->getControlInfo()) != nullptr) {
+    else if (dynamic_cast<Ipv6SocketCloseCommand *>(msg->getControlInfo()) != nullptr) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketDescriptor.find(socketId);
         if (it != socketIdToSocketDescriptor.end()) {

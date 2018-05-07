@@ -80,6 +80,7 @@ void DhcpServer::openSocket()
     socket.setOutputGate(gate("socketOut"));
     socket.bind(serverPort);
     socket.setBroadcast(true);
+    socket.setCallback(this);
     EV_INFO << "DHCP server bound to port " << serverPort << endl;
 }
 
@@ -131,16 +132,23 @@ void DhcpServer::handleMessage(cMessage *msg)
     if (msg->isSelfMessage()) {
         handleSelfMessages(msg);
     }
-    else {
-        auto packet = check_and_cast<Packet *>(msg);
-        if (packet->getKind() == UDP_I_DATA)
-            processDHCPMessage(packet);
-        else {
-            // note: unknown packets are likely Icmp errors in response to DHCP messages we sent out; just ignore them
-            EV_WARN << "Unknown packet '" << msg->getName() << "', kind = " << packet->getKind() << ", discarding it." << endl;
-            delete msg;
-        }
+    else if (msg->arrivedOn("socketIn")) {
+        socket.processMessage(msg);
     }
+    else
+        throw cRuntimeError("Unknown incoming gate: '%s'", msg->getArrivalGate()->getFullName());
+}
+
+void DhcpServer::socketDataArrived(UdpSocket *socket, Packet *packet)
+{
+    // process incoming packet
+    processDHCPMessage(packet);
+}
+
+void DhcpServer::socketErrorArrived(UdpSocket *socket, Indication *indication)
+{
+    EV_WARN << "Unknown message '" << indication->getName() << "', kind = " << indication->getKind() << ", discarding it." << endl;
+    delete indication;
 }
 
 void DhcpServer::handleSelfMessages(cMessage *msg)

@@ -656,7 +656,6 @@ class INET_API SctpStateVariables : public cObject
     /** pointer to the resetChunk (for retransmission) */
     SctpShutdownChunk *shutdownChunk;
     SctpShutdownAckChunk *shutdownAckChunk;
-   // SctpHeader *sctpmsg;
     uint64 sendQueueLimit;
     uint64 sendBuffer;
     bool appSendAllowed;
@@ -666,7 +665,7 @@ class INET_API SctpStateVariables : public cObject
     bool lastMsgWasFragment;
     bool enableHeartbeats;
     bool sendHeartbeatsOnActivePaths;
-    SctpHeader *sctpMsg;
+    Ptr<SctpHeader> sctpMsg;
     uint16 chunksAdded;
     uint16 dataChunksAdded;
     uint32 packetBytes;
@@ -1438,7 +1437,7 @@ class INET_API SctpAssociation : public cObject
             const uint16 dataChunksAdded,
             const bool authAdded);
     void loadPacket(SctpPathVariables *pathVar,
-            SctpHeader **sctpMsg,
+            Ptr<SctpHeader> *sctpMsg,
             uint16 *chunksAdded,
             uint16 *dataChunksAdded,
             bool *authAdded);
@@ -1489,7 +1488,7 @@ class INET_API SctpAssociation : public cObject
      */
     uint32 updateOLIA(uint32 w, const uint32 s, const uint32 totalW, double a, const uint32 mtu, const uint32 ackedBytes, SctpPathVariables* path);
 
-    inline bool addAuthChunkIfNecessary(SctpHeader *sctpMsg,
+    inline bool addAuthChunkIfNecessary(Ptr<SctpHeader> sctpMsg,
             const uint16 chunkType,
             const bool authAdded)
     {

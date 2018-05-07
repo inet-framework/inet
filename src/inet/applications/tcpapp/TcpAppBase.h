@@ -29,7 +29,7 @@ namespace inet {
  *
  * It needs the following NED parameters: localAddress, localPort, connectAddress, connectPort.
  */
-class INET_API TcpAppBase : public cSimpleModule, public TcpSocket::CallbackInterface
+class INET_API TcpAppBase : public cSimpleModule, public TcpSocket::ICallback
 {
   protected:
     TcpSocket socket;
@@ -57,14 +57,14 @@ class INET_API TcpAppBase : public cSimpleModule, public TcpSocket::CallbackInte
     virtual void close();
     virtual void sendPacket(Packet *pkt);
 
-    /* TcpSocket::CallbackInterface callback methods */
+    /* TcpSocket::ICallback callback methods */
     virtual void handleTimer(cMessage *msg) = 0;
-    virtual void socketEstablished(int connId, void *yourPtr) override;
-    virtual void socketDataArrived(int connId, void *yourPtr, Packet *msg, bool urgent) override;
-    virtual void socketPeerClosed(int connId, void *yourPtr) override;
-    virtual void socketClosed(int connId, void *yourPtr) override;
-    virtual void socketFailure(int connId, void *yourPtr, int code) override;
-    virtual void socketStatusArrived(int connId, void *yourPtr, TcpStatusInfo *status) override { delete status; }
+    virtual void socketEstablished(TcpSocket *socket) override;
+    virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override;
+    virtual void socketPeerClosed(TcpSocket *socket) override;
+    virtual void socketClosed(TcpSocket *socket) override;
+    virtual void socketFailure(TcpSocket *socket, int code) override;
+    virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override { delete status; }
 };
 
 } // namespace inet

@@ -34,9 +34,9 @@ namespace inet {
 
 UdpSocket::UdpSocket()
 {
-    // don't allow user-specified sockIds because they may conflict with
+    // don't allow user-specified socketIds because they may conflict with
     // automatically assigned ones.
-    sockId = generateSocketId();
+    socketId = generateSocketId();
     gateToUdp = nullptr;
 }
 
@@ -58,7 +58,7 @@ void UdpSocket::sendToUDP(cMessage *msg)
 
     auto& tags = getTags(msg);
     tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::udp);
-    tags.addTagIfAbsent<SocketReq>()->setSocketId(sockId);
+    tags.addTagIfAbsent<SocketReq>()->setSocketId(socketId);
     check_and_cast<cSimpleModule *>(gateToUdp->getOwnerModule())->send(msg, gateToUdp);
 }
 
@@ -296,11 +296,11 @@ void UdpSocket::setMulticastSourceFilter(int interfaceId, const L3Address& multi
     sendToUDP(request);
 }
 
-bool UdpSocket::belongsToSocket(cMessage *msg)
+bool UdpSocket::belongsToSocket(cMessage *msg) const
 {
     auto& tags = getTags(msg);
-    int socketId = tags.getTag<SocketReq>()->getSocketId();
-    return socketId == sockId;
+    int socketId = tags.getTag<SocketInd>()->getSocketId();
+    return socketId == this->socketId;
 }
 
 std::string UdpSocket::getReceivedPacketInfo(Packet *pk)
@@ -322,6 +322,34 @@ std::string UdpSocket::getReceivedPacketInfo(Packet *pk)
         os << " DSCP=" << dscpTag->getDifferentiatedServicesCodePoint();
     os << " on ifID=" << interfaceID;
     return os.str();
+}
+
+void UdpSocket::setCallback(ICallback *callback)
+{
+    cb = callback;
+}
+
+void UdpSocket::processMessage(cMessage *msg)
+{
+    ASSERT(belongsToSocket(msg));
+
+    switch (msg->getKind()) {
+        case UDP_I_DATA:
+            if (cb)
+                cb->socketDataArrived(this, check_and_cast<Packet *>(msg));
+            else
+                delete msg;
+            break;
+        case UDP_I_ERROR:
+            if (cb)
+                cb->socketErrorArrived(this, check_and_cast<Indication *>(msg));
+            else
+                delete msg;
+            break;
+        default:
+            throw cRuntimeError("UdpSocket: invalid msg kind %d, one of the UDP_I_xxx constants expected", msg->getKind());
+            break;
+    }
 }
 
 } // namespace inet

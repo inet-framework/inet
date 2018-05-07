@@ -1,6 +1,5 @@
 //
-// Copyright (C) 2015 Thomas Dreibholz (dreibh@simula.no)
-// Based on TCPSocketMap.cc, Copyright (C) 2004 Andras Varga
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -17,41 +16,37 @@
 //
 
 #include "inet/common/INETDefs.h"
-
-#include "inet/transportlayer/contract/sctp/SctpSocketMap.h"
+#include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/packet/Message.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/socket/SocketMap.h"
 
 namespace inet {
 
-SctpSocket *SctpSocketMap::findSocketFor(cMessage *msg)
+ISocket *SocketMap::findSocketFor(cMessage *msg)
 {
     auto& tags = getTags(msg);
-    SctpCommandReq *ind = tags.findTag<SctpCommandReq>();
-    if (!ind)
-        throw cRuntimeError("SctpSocketMap: findSocketFor(): no SctpCommand control info in message (not from SCTP?)");
-
-    for (auto & elem : socketMap) {
-        if (elem.second->belongsToSocket(msg)) {
-            return elem.second;
-        }
-    }
-    return nullptr;
+    int connId = tags.getTag<SocketInd>()->getSocketId();
+    auto i = socketMap.find(connId);
+    ASSERT(i == socketMap.end() || i->first == i->second->getSocketId());
+    return (i == socketMap.end()) ? nullptr : i->second;
 }
 
-void SctpSocketMap::addSocket(SctpSocket *socket)
+void SocketMap::addSocket(ISocket *socket)
 {
-    ASSERT(socketMap.find(socket->getConnectionId()) == socketMap.end());
-    socketMap[socket->getConnectionId()] = socket;
+    ASSERT(socketMap.find(socket->getSocketId()) == socketMap.end());
+    socketMap[socket->getSocketId()] = socket;
 }
 
-SctpSocket *SctpSocketMap::removeSocket(SctpSocket *socket)
+ISocket *SocketMap::removeSocket(ISocket *socket)
 {
-    auto i = socketMap.find(socket->getConnectionId());
+    auto i = socketMap.find(socket->getSocketId());
     if (i != socketMap.end())
         socketMap.erase(i);
     return socket;
 }
 
-void SctpSocketMap::deleteSockets()
+void SocketMap::deleteSockets()
 {
     for (auto & elem : socketMap)
         delete elem.second;
@@ -59,3 +54,4 @@ void SctpSocketMap::deleteSockets()
 }
 
 } // namespace inet
+

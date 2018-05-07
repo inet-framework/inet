@@ -35,7 +35,7 @@ control structure to the LLC by the network layer.
 EtherJam, EtherPadding (interframe gap), EtherPauseFrame?
 
 
-\subsection{EtherLlc}
+\section{EtherLlc}
 
 EtherFrameWithLLC
 
@@ -120,6 +120,97 @@ have to connect to different ports of \nedtype{EtherLlc}.
 
 The ETHERCTRL\_REGISTER\_DSAP/IEEE802CTRL\_DEREGISTER\_DSAP commands use only the
 dsap field in the \cppclass{Ieee802Ctrl} structure.
+
+\section{EtherMac}
+
+The operation of the MAC module can be schematized by the following state chart:
+
+\begin{center}
+\includegraphics{figures/EtherMAC_txstates}
+\end{center}
+
+Unlike \nedtype{EtherMacFullDuplex}, this MAC module processes the incoming packets when their
+first bit is received. The end of the reception is calculated by the MAC and
+detected by scheduling a self message.
+
+When frames collide the transmission is aborted -- in this case the transmitting
+station transmits a jam signal. Jam signals are represented
+by a \msgtype{EtherJam} message. The jam message contains the tree identifier
+of the frame whose transmission is aborted. When the \nedtype{EtherMac} receives a jam
+signal, it knows that the corresponding transmission ended in jamming and have
+been aborted. Thus when it receives as many jams as collided frames, it can
+be sure that the channel is free again. (Receiving a jam message marks the
+beginning of the jam signal, so actually has to wait for the duration of the jamming.)
+
+\section{EtherMacFullDuplex}
+
+Outgoing packets are transmitted according to the following state diagram:
+
+\begin{center}
+\includegraphics{figures/EtherMACFullDuplex_txstates}
+\end{center}
+
+\section{EthernetInterface}
+
+\subsection*{Queueing}
+
+When the transmission line is busy, messages received from the upper layer
+needs to be queued.
+
+In routers, MAC relies on an external queue module (see \nedtype{OutputQueue}),
+and requests packets from this external queue one-by-one. The name of the
+external queue must be given as the \fpar{queueModule} parameer.
+There are implementations of \nedtype{OutputQueue} to model finite buffer,
+QoS and/or RED.
+
+In hosts, no such queue is used, so MAC contains an internal
+queue named \fvar{txQueue} to queue up packets waiting for transmission.
+Conceptually, \fvar{txQueue} is of infinite size, but for better diagnostics
+one can specify a hard limit in the \fpar{txQueueLimit} parameter -- if this is
+exceeded, the simulation stops with an error.
+
+\subsection*{PAUSE handling}
+\label{subsec:pause_handling}
+
+The 802.3x standard supports PAUSE frames as a means of flow
+control. The frame contains a timer value, expressed as a multiple
+of 512 bit-times, that specifies how long the transmitter should
+remain quiet. If the receiver becomes uncongested before the
+transmitter's pause timer expires, the receiver may elect to send
+another PAUSE frame to the transmitter with a timer value of zero,
+allowing the transmitter to resume immediately.
+
+\nedtype{EtherMac} will properly respond to PAUSE frames it receives
+(\msgtype{EtherPauseFrame} class),
+however it will never send a PAUSE frame by itself. (For one thing,
+it doesn't have an input buffer that can overflow.)
+
+\nedtype{EtherMac}, however, transmits PAUSE frames received by higher layers,
+and \nedtype{EtherLlc} can be instructed by a command to send a PAUSE frame to MAC.
+
+% FIXME PAUSE frames should only be sent on full-duplex ethernet.
+%       If a switch uses half-duplex mode to connect to hosts, it can ask sending hosts
+%       to slow down their sending rates:
+%       - force collisions with incoming frames
+%       - make it appear as if the channel is busy
+% FIXME PAUSE frames should have 0x8808 in the etherType field
+
+\subsection*{Error handling}
+
+If the MAC is not connected to the network ("cable unplugged"), it will
+start up in "disabled" mode. A disabled MAC simply discards any messages
+it receives. It is currently not supported to dynamically connect/disconnect
+a MAC.
+
+CRC checks are modeled by the \fvar{bitError} flag of the packets. Erronous
+packets are dropped by the MAC.
+
+
+%\subsection*{Auto-Negotiation}
+% Ethernet Auto-Negotiation not supported
+
+
+
 
 \fi
 

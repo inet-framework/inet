@@ -108,7 +108,7 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
         Packet *packet = check_and_cast<Packet *>(msg);
         int connId = packet->getTag<SocketInd>()->getSocketId();
         ChunkQueue &queue = socketQueue[connId];
-        auto chunk = packet->peekDataAt(B(0));
+        auto chunk = packet->peekDataAt(B(0), packet->getTotalLength());
         queue.push(chunk);
         emit(packetReceivedSignal, packet);
 

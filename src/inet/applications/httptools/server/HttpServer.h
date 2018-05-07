@@ -18,9 +18,10 @@
 #ifndef __INET_HTTPSERVER_H
 #define __INET_HTTPSERVER_H
 
+#include "inet/common/INETDefs.h"
 #include "inet/common/packet/ChunkQueue.h"
+#include "inet/common/socket/SocketMap.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
-#include "inet/transportlayer/contract/tcp/TcpSocketMap.h"
 #include "inet/applications/httptools/server/HttpServerBase.h"
 
 namespace inet {
@@ -37,7 +38,7 @@ namespace httptools {
  *
  * @author  Kristjan V. Jonsson
  */
-class INET_API HttpServer : public HttpServerBase, public TcpSocket::CallbackInterface
+class INET_API HttpServer : public HttpServerBase, public TcpSocket::ICallback
 {
   protected:
     struct SockData
@@ -47,7 +48,7 @@ class INET_API HttpServer : public HttpServerBase, public TcpSocket::CallbackInt
     };
 
     TcpSocket listensocket;
-    TcpSocketMap sockCollection;
+    SocketMap sockCollection;
     unsigned long numBroken = 0;
     unsigned long socketsOpened = 0;
 
@@ -57,12 +58,12 @@ class INET_API HttpServer : public HttpServerBase, public TcpSocket::CallbackInt
     virtual void finish() override;
     virtual void handleMessage(cMessage *msg) override;
 
-    virtual void socketEstablished(int connId, void *yourPtr) override;
-    virtual void socketDataArrived(int connId, void *yourPtr, Packet *msg, bool urgent) override;
-    virtual void socketPeerClosed(int connId, void *yourPtr) override;
-    virtual void socketClosed(int connId, void *yourPtr) override;
-    virtual void socketFailure(int connId, void *yourPtr, int code) override;
-    virtual void socketDeleted(int connId, void *yourPtr) override;
+    virtual void socketEstablished(TcpSocket *socket) override;
+    virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override;
+    virtual void socketPeerClosed(TcpSocket *socket) override;
+    virtual void socketClosed(TcpSocket *socket) override;
+    virtual void socketFailure(TcpSocket *socket, int code) override;
+    virtual void socketDeleted(TcpSocket *socket) override;
 };
 
 } // namespace httptools

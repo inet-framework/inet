@@ -49,8 +49,8 @@ class Chunk extends cObject
     bool correct @packetData(false) @getter("isCorrect");
     bool properlyRepresented @packetData(false) @getter("isProperlyRepresented");
     b chunkLength @packetData(false);
-    string bits[] @getter("getBitsAsString");
-    string bytes[] @getter("getBytesAsString");
+    string rawBin[] @label("raw bin ") @getter("getBinDumpLine") @sizeGetter("getBinDumpNumLines");
+    string rawHex[] @label("raw hex ") @getter("getHexDumpLine") @sizeGetter("getHexDumpNumLines");
     RegionTagSet::cObjectRegionTag tags[] @packetData(false);
 }
 

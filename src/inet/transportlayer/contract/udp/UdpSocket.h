@@ -20,10 +20,12 @@
 
 #include <vector>
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/socket/ISocket.h"
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/transportlayer/contract/udp/UdpControlInfo.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/transportlayer/contract/udp/UdpControlInfo.h"
 
 namespace inet {
 
@@ -34,7 +36,7 @@ namespace inet {
  * its member functions (bind(), connect(), sendTo(), etc.) to create and
  * configure a socket, and to send datagrams.
  *
- * UdpSocket chooses and remembers the sockId for you, assembles and sends command
+ * UdpSocket chooses and remembers the socketId for you, assembles and sends command
  * packets such as UDP_C_BIND to UDP, and can also help you deal with packets and
  * notification messages arriving from UDP.
  *
@@ -60,10 +62,20 @@ namespace inet {
  * USPSocket provides some help for this with the belongsToSocket() and
  * belongsToAnyUDPSocket() methods.
  */
-class INET_API UdpSocket
+class INET_API UdpSocket : public ISocket
 {
+  public:
+    class INET_API ICallback
+    {
+      public:
+        virtual ~ICallback() {}
+        virtual void socketDataArrived(UdpSocket *socket, Packet *packet) = 0;
+        virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) { delete indication; }
+    };
   protected:
-    int sockId;
+    int socketId;
+    ICallback *cb = nullptr;
+    void *userData = nullptr;
     cGate *gateToUdp;
 
   protected:
@@ -81,10 +93,13 @@ class INET_API UdpSocket
      */
     ~UdpSocket() {}
 
+    void *getUserData() const { return userData; }
+    void setUserData(void *userData) { this->userData = userData; }
+
     /**
      * Returns the internal socket Id.
      */
-    int getSocketId() const { return sockId; }
+    int getSocketId() const override { return socketId; }
 
     /**
      * Generates a new socket id.
@@ -243,10 +258,28 @@ class INET_API UdpSocket
     //@{
     /**
      * Returns true if the message belongs to this socket instance (message
-     * has a UdpControlInfo as getControlInfo(), and the sockId in it matches
+     * has a UdpControlInfo as getControlInfo(), and the socketId in it matches
      * that of the socket.)
      */
-    bool belongsToSocket(cMessage *msg);
+    virtual bool belongsToSocket(cMessage *msg) const override;
+
+    /**
+     * Sets a callback object, to be used with processMessage().
+     * This callback object may be your simple module itself (if it
+     * multiply inherits from ICallback too, that is you
+     * declared it as
+     * <pre>
+     * class MyAppModule : public cSimpleModule, public UdpSocket::ICallback
+     * </pre>
+     * and redefined the necessary virtual functions; or you may use
+     * dedicated class (and objects) for this purpose.
+     *
+     * UdpSocket doesn't delete the callback object in the destructor
+     * or on any other occasion.
+     */
+    void setCallback(ICallback *cb);
+
+    virtual void processMessage(cMessage *msg) override;
 
     /**
      * Utility function: returns a line of information about a packet received via UDP.

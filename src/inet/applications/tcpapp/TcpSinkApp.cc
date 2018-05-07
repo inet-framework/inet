@@ -27,65 +27,69 @@
 namespace inet {
 
 Define_Module(TcpSinkApp);
+Define_Module(TcpSinkAppThread);
+
+TcpSinkApp::TcpSinkApp()
+{
+}
+
+TcpSinkApp::~TcpSinkApp()
+{
+}
 
 void TcpSinkApp::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    TcpServerHostApp::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         bytesRcvd = 0;
         WATCH(bytesRcvd);
     }
-    else if (stage == INITSTAGE_APPLICATION_LAYER) {
-        bool isOperational;
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-        if (!isOperational)
-            throw cRuntimeError("This module doesn't support starting in node DOWN state");
-
-        const char *localAddress = par("localAddress");
-        int localPort = par("localPort");
-        socket.setOutputGate(gate("socketOut"));
-        socket.bind(localAddress[0] ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
-        socket.listen();
-    }
-}
-
-void TcpSinkApp::handleMessage(cMessage *msg)
-{
-    if (msg->getKind() == TCP_I_PEER_CLOSED) {
-        // we close too
-        auto indication = check_and_cast<Indication *>(msg);
-        int socketId = indication->getTag<SocketInd>()->getSocketId();
-        auto request = new Request("close", TCP_C_CLOSE);
-        request->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::tcp);
-        request->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
-        send(request, "socketOut");
-        delete msg;
-    }
-    else if (msg->getKind() == TCP_I_DATA || msg->getKind() == TCP_I_URGENT_DATA) {
-        Packet *pk = check_and_cast<Packet *>(msg);
-        long packetLength = pk->getByteLength();
-        bytesRcvd += packetLength;
-        emit(packetReceivedSignal, pk);
-        delete msg;
-    }
-    else if (msg->getKind() == TCP_I_AVAILABLE)
-        socket.processMessage(msg);
-    else {
-        // must be data or some kind of indication -- can be dropped
-        delete msg;
-    }
-}
-
-void TcpSinkApp::finish()
-{
 }
 
 void TcpSinkApp::refreshDisplay() const
 {
+    char buf[160];
+    sprintf(buf, "threads: %d\nrcvd: %ld bytes", socketMap.size(), bytesRcvd);
+    getDisplayString().setTagArg("t", 0, buf);
+}
+
+
+void TcpSinkApp::finish()
+{
+    recordScalar("bytesRcvd", bytesRcvd);
+}
+
+
+void TcpSinkAppThread::initialize(int stage)
+{
+    TcpServerThreadBase::initialize(stage);
+
+    if (stage == INITSTAGE_LOCAL) {
+        bytesRcvd = 0;
+        WATCH(bytesRcvd);
+    }
+}
+
+void TcpSinkAppThread::established()
+{
+    bytesRcvd = 0;
+}
+
+void TcpSinkAppThread::dataArrived(Packet *pk, bool urgent)
+{
+    long packetLength = pk->getByteLength();
+    bytesRcvd += packetLength;
+    sinkAppModule->bytesRcvd += packetLength;
+
+    emit(packetReceivedSignal, pk);
+    delete pk;
+}
+
+void TcpSinkAppThread::refreshDisplay() const
+{
     std::ostringstream os;
-    os << TcpSocket::stateName(socket.getState()) << "\nrcvd: " << bytesRcvd << " bytes";
+    os << (sock ? TcpSocket::stateName(sock->getState()) : "NULL_SOCKET") << "\nrcvd: " << bytesRcvd << " bytes";
     getDisplayString().setTagArg("t", 0, os.str().c_str());
 }
 

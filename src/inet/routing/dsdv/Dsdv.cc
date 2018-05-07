@@ -19,7 +19,6 @@
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/networklayer/contract/L3Socket.h"
 #include "inet/routing/dsdv/Dsdv.h"
 
 namespace inet {
@@ -65,7 +64,6 @@ void Dsdv::initialize(int stage)
     {
         registerService(Protocol::manet, nullptr, gate("ipIn"));
         registerProtocol(Protocol::manet, gate("ipOut"), nullptr);
-        L3Socket socket(&Protocol::manet, gate("ipOut"));
         forwardList = new std::list<ForwardEntry *>();
         event = new cMessage("event");
         if (isNodeUp())
