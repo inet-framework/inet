@@ -2,6 +2,7 @@
 \label{cha:mobility}
 
 \section{Overview}
+\label{sec:mobility:overview}
 
 In order to simulate ad-hoc wireless networks, it is important to model the
 motion of mobile network nodes. Received signal strength, signal
@@ -12,7 +13,7 @@ simulation (e.g. via packet loss rates).
 A mobility model describes position and orientation over time in a 3D
 Euclidean coordinate system. Its main purpose is to provide position,
 velocity and acceleration, and also angular position, angular velocity,
-and angular acceleration data as three-dimensional quantities at the 
+and angular acceleration data as three-dimensional quantities at the
 current simulation time.
 
 In INET, a mobility model is most often an OMNeT++ simple module
@@ -22,11 +23,11 @@ their own set of parameters. Some models support geographic positioning to
 ease the configuration of map based scenarios.
 
 Mobility models be \textit{single} or \textit{group} mobility models.
-Single mobility models describe the motion of entities independent of each other. 
+Single mobility models describe the motion of entities independent of each other.
 Group mobility models provide such a motion where group members are dependent
 on each other.
 
-Mobility models can also be categorized as \textit{trace-based}, 
+Mobility models can also be categorized as \textit{trace-based},
 \textit{deterministic}, \textit{stochastic}, and \textit{combining} models.
 
 \subsection*{Using Mobility Models}
@@ -35,14 +36,14 @@ In order for a mobility model to actually have an effect on the motion of a netw
 the mobility model needs to be included as a submodule in the compound module of the
 network node. By default, a transceiver antenna within a network node uses
 the same mobility model as the node itself, but that is completely optional.
-For example, it is possible to model a vehicle facing forward while moving 
-on a road that contains multiple transceiver antennas at different relative 
+For example, it is possible to model a vehicle facing forward while moving
+on a road that contains multiple transceiver antennas at different relative
 locations with different orientations.
 
 \subsection*{The Playground}
 
-Many mobility models allow the user to define a cubic volume that the node 
-can not leave. The volume is configured by setting the \fpar{constraintAreaX}, 
+Many mobility models allow the user to define a cubic volume that the node
+can not leave. The volume is configured by setting the \fpar{constraintAreaX},
 \fpar{constraintAreaY}, \fpar{constraintAreaZ},
 \fpar{constraintAreaWidth}, \fpar{constraintAreaHeight} and
 \fpar{constraintAreaDepth} parameters.
@@ -53,7 +54,7 @@ the display string. Otherwise, the position can be given in the \fpar{initialX},
 are given, a random initial position is choosen within the contraint area.
 
 When the node reaches the boundary of the constraint area, the mobility
-component has to prevent the node to exit. Many mobility models offer the 
+component has to prevent the node to exit. Many mobility models offer the
 following policies:
 
 \begin{itemize}
@@ -65,11 +66,13 @@ following policies:
 
 
 \section{Built-In Mobility Models}
+\label{sec:mobility:built-in-mobility-models}
 
 \subsection{List of Mobility Models}
+\label{sec:mobility:list-of-mobility-models}
 
 The following, potentially list contains the mobility models available in INET.
-Nearly all of these models als single mobility models; group mobility can be 
+Nearly all of these models als single mobility models; group mobility can be
 implemented e.g. with combining other mobility models.
 
 \subsubsection*{Stationary}
@@ -121,8 +124,8 @@ Stochastic or random mobility models use mathematical models involving random nu
 \subsubsection*{Combining}
 
 Combining mobility models are not mobility models per se, but instead, they
-allow more complex motions to be formed from simpler ones via superposition 
-and other ways. 
+allow more complex motions to be formed from simpler ones via superposition
+and other ways.
 
 \begin{itemize}
         \item \nedtype{SuperpositioningMobility} model combines several other mobility models by summing them up. It allows creating group mobility by sharing a mobility model in each group member, separating initial positioning from positioning during the simulation, and separating positioning from orientation.
@@ -130,6 +133,7 @@ and other ways.
 \end{itemize}
 
 \subsection{More Information on Some Mobility Models}
+\label{sec:mobility:more-information-on-some-mobility-models}
 
 \begin{description}
 
@@ -249,6 +253,7 @@ $$ \left(
 \end{description}
 
 \subsection{Replaying trace files}
+\label{sec:mobility:replaying-trace-files}
 
 \begin{description}
 
@@ -326,9 +331,10 @@ on the next segment immediately.
 
 
 \subsection{TurtleMobility}
+\label{sec:mobility:turtlemobility}
 
 The \nedtype{TurtleMobility} module can be parametrized by a script file
-containing LOGO-style movement commands in XML format. The content of 
+containing LOGO-style movement commands in XML format. The content of
 the XML file should conform to the DTD in the \ffilename{TurtleMobility.dtd}
 file in the source tree.
 
@@ -345,11 +351,11 @@ The \ttt{movement} elements may contain the the following commands as
 elements (names in parens are recognized attribute names):
 
 \begin{itemize}
-\item \ttt{repeat(n)} repeats its content n times, or indefinitely if 
+\item \ttt{repeat(n)} repeats its content n times, or indefinitely if
        the \ttt{n} attribute is omitted.
 \item \ttt{set(x,y,speed,angle,borderPolicy)} modifies the state of the node.
-      \ttt{borderPolicy} can be \ttt{reflect}, \ttt{wrap}, \ttt{placerandomly} 
-      or \ttt{error}. 
+      \ttt{borderPolicy} can be \ttt{reflect}, \ttt{wrap}, \ttt{placerandomly}
+      or \ttt{error}.
 \item \ttt{forward(d,t)} moves the node for $t$ time or to the $d$ distance
       with the current speed. If both $d$ and $t$ is given, then the current
       speed is ignored.

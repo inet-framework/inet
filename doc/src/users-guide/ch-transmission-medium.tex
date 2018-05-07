@@ -2,6 +2,7 @@
 \label{cha:transmission-medium}
 
 \section{Overview}
+\label{sec:medium:overview}
 
 For wireless communication, an additional module is required to model the
 shared physical medium where the communication takes place. This module
@@ -9,7 +10,7 @@ keeps track of transceivers, noise sources, ongoing transmissions,
 background noise, and other ongoing noises.
 
 It relies on several models:
- 
+
 \begin{enumerate}
   \item signal propagation model
   \item path loss model
@@ -18,37 +19,38 @@ It relies on several models:
   \item signal analog model
 \end{enumerate}
 
-With the help of the above models, the medium module computes 
-when, where, and how signals arrive at receivers, including 
-the set of interfering signals and noises. In addition, 
-the medium module also contains various mechanisms and ways 
+With the help of the above models, the medium module computes
+when, where, and how signals arrive at receivers, including
+the set of interfering signals and noises. In addition,
+the medium module also contains various mechanisms and ways
 to improve the scalability of wireless network simulations.
 
 \section{RadioMedium}
+\label{sec:medium:radiomedium}
 
-The standard transmission medium model in INET is \nedtype{RadioMedium}. 
+The standard transmission medium model in INET is \nedtype{RadioMedium}.
 \nedtype{RadioMedium} is as an OMNeT++ compound module with
-several replaceable submodules. It contains submodules for 
-each of the above models (signal propagation, path loss, etc.), 
-and various caches for efficiency. 
+several replaceable submodules. It contains submodules for
+each of the above models (signal propagation, path loss, etc.),
+and various caches for efficiency.
 
-Note that \nedtype{RadioMedium} is an active compound module, that is, 
+Note that \nedtype{RadioMedium} is an active compound module, that is,
 it has an associated C++ class that encapsulates the computations.
 
-\nedtype{RadioMedium} contains its components as submodules 
+\nedtype{RadioMedium} contains its components as submodules
 with parametric types:
 
 \begin{ned}
 propagation: <propagationType> like IPropagation;
 analogModel: <analogModelType> like IAnalogModel;
-backgroundNoise: <backgroundNoiseType> like IRadioBackgroundNoise 
+backgroundNoise: <backgroundNoiseType> like IRadioBackgroundNoise
     if backgroundNoiseType != "";
 pathLoss: <pathLossType> like IPathLoss;
-obstacleLoss: <obstacleLossType> like IObstacleLoss 
+obstacleLoss: <obstacleLossType> like IObstacleLoss
     if obstacleLossType != "";
 mediumLimitCache: <mediumLimitCacheType> like IMediumLimitCache;
 communicationCache: <communicationCacheType> like ICommunicationCache;
-neighborCache: <neighborCacheType> like INeighborCache 
+neighborCache: <neighborCacheType> like INeighborCache
     if neighborCacheType != "";
 \end{ned}
 
@@ -66,6 +68,7 @@ There are many preconfigured versions of \nedtype{RadioMedium}:
 The following sections describe the parts of the medium model.
 
 \section{Propagation Models}
+\label{sec:medium:propagation-models}
 
 When a transmitter starts to transmit a signal, the beginning of the signal
 propagates through the transmission medium. When the transmitter ends the
@@ -89,6 +92,7 @@ communication, because the propagation speed of the signal is much more
 comparable to the speed of the transceivers.
 
 \section{Path Loss Models}
+\label{sec:medium:path-loss-models}
 
 As a signal propagates through space its power density decreases. This is
 called path loss and it is the combination of many effects such as
@@ -120,6 +124,7 @@ log normal shadowing:
 \inisnippet{PathLossConfigurationExample}{Path loss configuration example}
 
 \section{Obstacle Loss Models}
+\label{sec:medium:obstacle-loss-models}
 
 When the signal propagates through space it also passes through physical
 objects present in that space. As the signal penetrates physical objects,
@@ -146,6 +151,7 @@ configuring one is very simple:
 Statistical obstacle loss models are also possible but currently not provided.
 
 \section{Background Noise Models}
+\label{sec:medium:background-noise-models}
 
 Thermal noise, cosmic background noise, and other random fluctuations of
 the electromagnetic field affect the quality of the communication channel.
@@ -165,6 +171,7 @@ The simplest background noise model can be configured as follows:
 \inisnippet{BackgroundNoiseModelConfigurationExample}{Background noise model configuration example}
 
 \section{Analog Models}
+\label{sec:medium:analog-models}
 
 The analog signal is a complex physical phenomenon which can be modeled in
 many different ways. Choosing the right analog domain signal representation
@@ -185,6 +192,7 @@ follows:
 \inisnippet{AnalogModelConfigurationExample}{Analog model configuration example}
 
 \section{Neighbor Cache}
+\label{sec:medium:neighbor-cache}
 
 Transceivers are considered neighbors if successful communication is
 possible between them. For wired communication it is easy to determine
@@ -203,7 +211,7 @@ periodically:
   \item \nedtype{NeighborListNeighborCache} takes a range as parameter,
     and for each transceiver it maintains the list of receivers within
     range (\textit{neighbor list}).
-  \item \nedtype{GridNeighborCache} organizes transceivers in a 3D grid with 
+  \item \nedtype{GridNeighborCache} organizes transceivers in a 3D grid with
     constant cell size.
   \item \nedtype{QuadTreeNeighborCache} organizes transceivers in a 2D quad tree
     (ignoring the Z axis) with constant node size.
@@ -213,22 +221,23 @@ The following example sets \nedtype{QuadTreeNeighborCache} as neighbor cache:
 
 \inisnippet{NeighborCacheModelConfigurationExample}{Neighbor cache model configuration example}
 
-How should one decide which neighbor cache to choose for a given simulation? 
-As the sole purpose of the neighbor cache is to speed up the simulation, 
+How should one decide which neighbor cache to choose for a given simulation?
+As the sole purpose of the neighbor cache is to speed up the simulation,
 one should choose the one that leads to the best performance for that particular
 network. Which one performs best is best determined by experimentation, as it
 depends on many factors: number of nodes, their spatial distribution, their
-speed and movement pattern, their communication pattern, and so on. 
+speed and movement pattern, their communication pattern, and so on.
 Note that not only the choice of neighbor cache but also its parameterization
 can affect performance.
 
 
 \section{Medium Limit Cache}
+\label{sec:medium:medium-limit-cache}
 
 The medium limit cache (and its default implementation \nedtype{MediumLimitCache})
-keeps track of certain thresholds and minimum/maximum values of quantities 
-related to layer 1 modeling. Some of these limits can be gathered from other 
-modules in the network, but still, all of them can be explicitly specified by the user. 
+keeps track of certain thresholds and minimum/maximum values of quantities
+related to layer 1 modeling. Some of these limits can be gathered from other
+modules in the network, but still, all of them can be explicitly specified by the user.
 The quantities include:
 
 \begin{itemize}
@@ -238,7 +247,7 @@ The quantities include:
     \item maximum antenna gain (can be computed from antenna models)
     \item minimum time interval to consider two overlapping signals interfering
     \item maximum duration of a transmission
-    \item maximum communication range and interference range 
+    \item maximum communication range and interference range
       (can be computed from transmitter and receiver models)
 \end{itemize}
 
@@ -249,6 +258,7 @@ of a signal being receivable.
 
 
 \section{Communication Cache}
+\label{sec:medium:communication-cache}
 
 The communication cache is used to cache various intermediate computation
 results related to the communication on the medium. The main motivation to have
@@ -267,18 +277,19 @@ Implementations include:
 
 
 \section{Improving Scalability}
+\label{sec:medium:improving-scalability}
 
 The simulation of wireless networks is inherently less scalable than
-that of wired networks. In wired networks, a transmission only affects 
+that of wired networks. In wired networks, a transmission only affects
 the host's neighbors on the link, which is usually 1 in modern networks
-that are dominated by point-to-point links. The wireless medium, however, 
-is a broadcast medium. Any transmission is ``heard'' by all nodes 
+that are dominated by point-to-point links. The wireless medium, however,
+is a broadcast medium. Any transmission is ``heard'' by all nodes
 within interference range, not only the intended recipients.
-The signal may be receivable by them (and must be indeeded received 
-before the destination address field in it can be examined), 
+The signal may be receivable by them (and must be indeeded received
+before the destination address field in it can be examined),
 or may interfere with the reception of other transmissions.
 Whichever the case, the transmission must be evaluated or processed
-by a much larger number of nodes than in the wired case. 
+by a much larger number of nodes than in the wired case.
 This makes the computational complexity at least $O(n^2)$ ($n$ being
 the number of nodes.) Other effects may further increase the exponent.
 
@@ -291,22 +302,22 @@ There are several filters that can be enabled/disabled individually:
 
 \begin{itemize}
   \item \textit{Range filter}. When this filter is active, the medium module
-    does not send signals to a radio if it is outside interference range 
+    does not send signals to a radio if it is outside interference range
     (or communication range, this option can also be selected.)
-  \item \textit{Radio mode filter}. When this filter is active, 
-    the medium module does not send signals to a radio if it is neither 
+  \item \textit{Radio mode filter}. When this filter is active,
+    the medium module does not send signals to a radio if it is neither
     in \textit{receiver} nor in \textit{transceiver} mode.
-  \item \textit{Listening filter}. When this filter is active, the medium module 
-    does not send signals to a radio if it listens on the channel in 
-    incompatible mode (e.g. different carrier frequency and bandwidth, 
+  \item \textit{Listening filter}. When this filter is active, the medium module
+    does not send signals to a radio if it listens on the channel in
+    incompatible mode (e.g. different carrier frequency and bandwidth,
     or different modulation)
-  \item \textit{MAC address filter}. When this filter is active, the radio medium 
+  \item \textit{MAC address filter}. When this filter is active, the radio medium
     does not send signals to a radio if it the destination MAC address
     does not match
 \end{itemize}
 
 The corresponding module parameters are called \ttt{rangeFilter},
-\ttt{radioModeFilter}, \ttt{listeningFilter} and \ttt{macAddressFilter}. 
+\ttt{radioModeFilter}, \ttt{listeningFilter} and \ttt{macAddressFilter}.
 By default, all filters are turned off.
 
 %%% Local Variables:

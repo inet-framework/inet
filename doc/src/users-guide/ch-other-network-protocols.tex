@@ -4,6 +4,7 @@
 \label{cha:other-network-protocols}
 
 \section{Overview}
+\label{sec:networkprotocols:overview}
 
 Network layer protocols in INET are not restricted to IPv4 and IPv6. INET nodes such as
 \nedtype{Router} and \nedtype{StandardHost} can be configured to use an alternative
@@ -34,13 +35,13 @@ The list of alternative network layers includes:
 \begin{itemize}
   \item \nedtype{SimpleNetworkLayer} is a generic network layer where the
     concrete protocol type is a parameter
-  \item \nedtype{NextHopNetworkLayer} is a network layer specialized 
-    for the ``Next-Hop Forwarding Protocol'', an abstract implementation of the 
+  \item \nedtype{NextHopNetworkLayer} is a network layer specialized
+    for the ``Next-Hop Forwarding Protocol'', an abstract implementation of the
     next-hop routing concept
   \item \nedtype{WiseRouteNetworkLayer} is specialized for the Wise Route protocol
 \end{itemize}
 
-The list of network layer protocols that can be plugged into 
+The list of network layer protocols that can be plugged into
 \nedtype{SimpleNetworkLayer} includes:
 
 \begin{itemize}
@@ -58,7 +59,7 @@ implements a simple \textit{ping}-like protocol.
 All the above network protocols can work with IPv4 addresses, IPv6 addresses,
 use MAC address as network address (this is sometimes useful in WSNs),
 or use sythetic addresses that only make sense within the simulation.
-\footnote{This is possible because the implementation of these modules 
+\footnote{This is possible because the implementation of these modules
 simply use the \ttt{L3Address} C++ class, which is a variant type capable of
 holding several types of L3 addresses.}
 
@@ -71,16 +72,19 @@ For example:
 
 
 \section{Protocols}
+\label{sec:networkprotocols:protocols}
 
 \subsection{Flooding}
+\label{sec:networkprotocols:flooding}
 
 \nedtype{Flooding} is a simple flooding protocol for network-level broadcast.
-It remembers already broadcast messages, and does not rebroadcast 
+It remembers already broadcast messages, and does not rebroadcast
 them if it gets another copy of that message.
 
 \subsection{ProbabilisticBroadcast}
+\label{sec:networkprotocols:probabilisticbroadcast}
 
-\nedtype{ProbabilisticBroadcast} is a multi-hop ad-hoc data dissemination 
+\nedtype{ProbabilisticBroadcast} is a multi-hop ad-hoc data dissemination
 protocol based on probabilistic broadcast.
 
 This method reduces the number of packets sent on the channel (reducing the
@@ -92,12 +96,14 @@ attempts, the maximum number of broadcast transmissions of a packet, and
 some other settings are parameters.
 
 \subsection{AdaptiveProbabilisticBroadcast}
+\label{sec:networkprotocols:adaptiveprobabilisticbroadcast}
 
 \nedtype{AdaptiveProbabilisticBroadcast} is a variant of
 \nedtype{ProbabilisticBroadcast} that automatically adjusts transmission
 probabilities depending on the estimated number of neighbours.
 
 \subsection{WiseRoute}
+\label{sec:networkprotocols:wiseroute}
 
 \nedtype{WiseRoute} implements Wise Route, a simple loop-free routing algorithm
 that builds a routing tree from a central network point, designed for sensor
@@ -117,9 +123,10 @@ the tree building procedure. Set it to a large value if you do not want the tree
 to be rebuilt.
 
 \subsection{NextHopForwarding}
+\label{sec:networkprotocols:nexthopforwarding}
 
 The \nedtype{NextHopForwarding} module is an implementation of the next-hop
-forwarding concept. (It can be thought of as an abstracted version of IP.) 
+forwarding concept. (It can be thought of as an abstracted version of IP.)
 
 The protocol needs an additional module, a \nedtype{NextHopRoutingTable} for its
 operation. The routing table module is included in the
@@ -127,6 +134,7 @@ operation. The routing table module is included in the
 
 
 \section{Address Types}
+\label{sec:networkprotocols:address-types}
 
 The following address types are available:
 
@@ -142,11 +150,12 @@ Protocols described in this chapter work with ``generic'' L3 addresses,
 they can use any address type.
 
 When choosing IPv4 addresses, an \nedtype{IPv4NetworkConfigurator} global
-instance can be used to assign addresses to network interfaces. (Note that 
+instance can be used to assign addresses to network interfaces. (Note that
 \nedtype{IPv4NetworkConfigurator} also needs a per-node instance
 of \nedtype{Ipv4NodeConfigurator} for it to work.)
 
 \section{Address Resolution}
+\label{sec:networkprotocols:address-resolution}
 
 Address resolution is done by \nedtype{GlobalArp}.
 If the address type is IPv4, \nedtype{Arp} can be used instead of

@@ -2,19 +2,21 @@
 \label{cha:network-nodes}
 
 \section{Overview}
+\label{sec:nodes:overview}
 
 Hosts, routers, switches, access points, mobile phones, and other network
-nodes are represented in INET with compound modules. The previous chapter 
-has introduced a few node types like \nedtype{StandardHost}, \nedtype{Router}, 
+nodes are represented in INET with compound modules. The previous chapter
+has introduced a few node types like \nedtype{StandardHost}, \nedtype{Router},
 and showed how to put together networks from them. In this chapter,
 we look at the internals of such node models, in order to provide a deeper
 understanding of their customization possibilities and to give some guidance
 on how custom nodes models can be assembled.
 
 \section{Ingredients}
+\label{sec:nodes:ingredients}
 
-Node models are assembled from other modules which represent applications, 
-communication protocols, network interfaces, routing tables, mobility models, 
+Node models are assembled from other modules which represent applications,
+communication protocols, network interfaces, routing tables, mobility models,
 energy models, and other functionality. These modules fall into the following
 broad categories:
 
@@ -77,17 +79,18 @@ broad categories:
 \end{itemize}
 
 \section{Node Architecture}
+\label{sec:nodes:node-architecture}
 
-Within network nodes, OMNeT++ connections are used to represent 
-communication opportunities between protocols. Packets and 
+Within network nodes, OMNeT++ connections are used to represent
+communication opportunities between protocols. Packets and
 messages sent on these connections represent software or hardware activity.
 
-Although protocols may also be connected to each other directly, 
+Although protocols may also be connected to each other directly,
 in most cases they are connected via \emph{dispatcher modules}.
-Dispatchers (\nedtype{MessageDispatcher}) are small, low-overhead modules 
-that allow protocol components to be connected in one-to-many and many-to-many 
+Dispatchers (\nedtype{MessageDispatcher}) are small, low-overhead modules
+that allow protocol components to be connected in one-to-many and many-to-many
 fashion, and ensure that messages and packets sent from one component end up
-being delivered to the correct component. Dispatchers need no manual 
+being delivered to the correct component. Dispatchers need no manual
 configuration, as they use discovery and peek into packets.
 
 In there pre-assembled node models, dispatchers allow arbitrary
@@ -95,17 +98,18 @@ protocol components to talk directly to each other, i.e. not only
 to ones in neighboring layers.
 
 \section{Customizing Nodes}
+\label{sec:nodes:customizing-nodes}
 
 The built-in network nodes are written to be as versatile and customizable
 as possible. This is achieved in several ways:
 
 \subsection*{Submodule and Gate Vectors}
 
-One way is the use of gate vectors and submodule vectors. The sizes 
+One way is the use of gate vectors and submodule vectors. The sizes
 of vectors may come from parameters or derived by the number of
 external connections to the network node. For example, a host may
 have an arbitrary number of wireless interfaces, and it will automatically
-have as many \protocol{Ethernet} interfaces as the number of \protocol{Ethernet} 
+have as many \protocol{Ethernet} interfaces as the number of \protocol{Ethernet}
 devices connected to it.
 
 For example, wireless interfaces for hosts are defined like this:
@@ -114,10 +118,10 @@ For example, wireless interfaces for hosts are defined like this:
 wlan[numWlanInterfaces]: <snip> // wlan interfaces in StandardHost etc al.
 \end{ned}
 
-Where \ttt{numWlanInterfaces} is a module parameter that defaults to 
+Where \ttt{numWlanInterfaces} is a module parameter that defaults to
 either 0 or 1 (this is different for e.g. \nedtype{StandardHost} and
-\nedtype{WirelessHost}.) To configure a host to have two interfaces, 
-add the following line to the ini file: 
+\nedtype{WirelessHost}.) To configure a host to have two interfaces,
+add the following line to the ini file:
 
 \begin{inifile}
 **.hostA.numWlanInterfaces = 2
@@ -147,14 +151,14 @@ tcp: <tcpType> like ITcp if hasTcp;
 
 The \ttt{tcpType} parameter defaults to the default implementation, \nedtype{Tcp}.
 To use another implementation instead, add the following line to the ini file:
- 
+
 \begin{inifile}
 **.host*.tcpType = "TcpLwip"  # use lwIP's TCP implementation
 \end{inifile}
 
 Submodule vectors with parametric types are defined without the use of a
 module parameter to allow elements have different types. An example
-is how applications are defined in hosts: 
+is how applications are defined in hosts:
 
 \begin{ned}
 app[numApps]: <> like IApp;  // applications in StandardHost et al.
@@ -178,7 +182,7 @@ For example, \nedtype{WirelessHost} is derived from \nedtype{StandardHost}
 in the following way:
 
 \begin{ned}
-module WirelessHost extends StandardHost 
+module WirelessHost extends StandardHost
 {
     @display("i=device/wifilaptop");
     numWlanInterfaces = default(1);
@@ -186,6 +190,7 @@ module WirelessHost extends StandardHost
 \end{ned}
 
 \section{Custom Network Nodes}
+\label{sec:nodes:custom-network-nodes}
 
 Despite the many pre-assembled network nodes and the several available
 customization options, sometimes it is just easier to build a network node

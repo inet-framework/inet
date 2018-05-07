@@ -2,10 +2,12 @@
 \label{cha:network-autoconfiguration}
 
 \section{Overview}
+\label{sec:autoconfig:overview}
 
 This chapter describes static autoconfiguration of networks.
 
 \section{Configuring IPv4 Networks}
+\label{sec:autoconfig:configuring-ipv4-networks}
 
 An IPv4 network is composed of several nodes like hosts, routers,
 switches, hubs, Ethernet buses, or wireless access points.
@@ -34,7 +36,7 @@ The legacy solutions \nedtype{Ipv4FlatNetworkConfigurator} and
 routing files are described in subsequent sections.
 
 \subsection{Ipv4NetworkConfigurator}
-\label{subsec:ipv4configurator}
+\label{sec:autoconfig:ipv4networkconfigurator}
 
 The \nedtype{Ipv4NetworkConfigurator} assigns IP addresses and sets up
 static routing for an IPv4 network.
@@ -283,6 +285,7 @@ element with a different id defines a separate subnet.
 
 
 \subsubsection{Multicast groups}
+\label{sec:autoconfig:multicast-groups}
 
 Multicast groups can be configured by adding \verb!<multicast-group>!
 elements to the configuration file. Interfaces belongs to a multicast
@@ -510,6 +513,7 @@ This list summarize the parameters of the \nedtype{IPv4NetorkConfigurator}:
 \end{params}
 
 \subsection{Ipv4FlatNetworkConfigurator (Legacy)}
+\label{sec:autoconfig:ipv4flatnetworkconfigurator}
 
 The \nedtype{Ipv4FlatNetworkConfigurator} module configures
 IP addresses and routes of IP nodes of a network.
@@ -583,7 +587,7 @@ best matching route will be proportional to $n$.
 %       Broadcast capable interfaces should have a real netmast (not 255.255.255.255) to support subnet directed IP broadcasts.
 
 \subsection{Routing Files (Legacy)}
-\label{subsec:routing_files}
+\label{sec:autoconfig:routing-files}
 
 Routing files are files with \ttt{.irt} or \ttt{.mrt} extension,
 and their names are passed in the \fpar{routingFile} parameter
@@ -716,6 +720,7 @@ interface.
 % TODO warn that multicast configuration has changed
 
 \section{Configuring Layer 2}
+\label{sec:autoconfig:configuring-layer-2}
 
 The \nedtype{L2Configurator} module allows configuring network scenarios at layer 2.
 The STP/RTP-related parameters such as link cost, port priority

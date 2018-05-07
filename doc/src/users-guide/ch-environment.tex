@@ -2,6 +2,7 @@
 \label{cha:environment}
 
 \section{Overview}
+\label{sec:environment:overview}
 
 Wireless networks are heavily affected by the physical environment, and the
 requirements for today's ubiquitous wireless communication devices are
@@ -30,6 +31,7 @@ The following sections provide a brief overview of the physical environment
 model.
 
 \section{PhysicalEnvironment}
+\label{sec:environment:physicalenvironment}
 
 In INET, the physical environment is modeled by the
 \nedtype{PhysicalEnvironment} compound module. This module normally has one
@@ -43,7 +45,7 @@ simulation can query at runtime. It contains the following information:
 \end{itemize}
 
 \nedtype{PhysicalEnvironment} is an active compound module, that is, it has an
-associated C++ class that contains the data structures and implements an API 
+associated C++ class that contains the data structures and implements an API
 that allows other modules to query the data.
 
 Part of \nedtype{PhysicalEnvironment}'s functionality is implemented in
@@ -56,11 +58,12 @@ objectCache: <objectCacheType> like IObjectCache if objectCacheType != "";
 \end{ned}
 
 \section{Physical Objects}
+\label{sec:environment:physical-objects}
 
 The most important aspect of the physical environment is the objects which are
 present in it. For example, simulating an indoor Wifi scenario may need to model
 walls, floors, ceilings, doors, windows, furniture, and similar objects, because
-they all affect signal propagation (obstacle modeling). 
+they all affect signal propagation (obstacle modeling).
 
 Objects are located in space, and have shapes and materials. The physical
 environment model supports basic shapes and homogeneous materials, which is a
@@ -108,6 +111,7 @@ used:
 \inisnippet{PhysicalObjectsConfigurationExample}{Physical objects configuration example}
 
 \section{Ground Models}
+\label{sec:environment:ground-models}
 
 % Why ground models are needed?
 In inter-vehicle simulations the terrain has profound effects on signal
@@ -128,6 +132,7 @@ OMNeT++ simple modules:
 \end{itemize}
 
 \section{Geographic Coordinate System Models}
+\label{sec:environment:geographic-coordinate-system-models}
 
 % Why geographic coordinate systems are needed?
 In order to run high fidelity simulations, it is often required to embed
@@ -168,6 +173,7 @@ location and orientation.
 \inisnippet{GeographicCoordinateSystemConfigurationExample}{Geographic coordinate system configuration example}
 
 \section{Object Cache}
+\label{sec:environment:object-cache}
 
 If a simulation contains a large number of physical objects, then signal
 propagation may become computationally very expensive. The reason is that

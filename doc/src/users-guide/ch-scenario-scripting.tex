@@ -2,13 +2,14 @@
 \label{cha:scenario-scripting}
 
 \section{Overview}
+\label{sec:scenario:overview}
 
-The INET Framework contains scripting support to help the user express 
+The INET Framework contains scripting support to help the user express
 scenarios that cannot be adequately described using static configuration.
 You can schedule actions to be carried out at specified simulation times,
 for example changing a parameter value, changing the bit error rate of
-a connection, removing or adding connections, removing or adding 
-routes in a routing table, shutting down or crashing routers, etc. 
+a connection, removing or adding connections, removing or adding
+routes in a routing table, shutting down or crashing routers, etc.
 The aim is usually to observe transient behaviour caused by the changes.
 
 INET supports the following built-in actions:
@@ -17,11 +18,12 @@ INET supports the following built-in actions:
   \item Create or delete module
   \item Create or delete connection
   \item Set module or channel parameter
-  \item Initiate lifecycle operation (startup, shutdown, crash) 
+  \item Initiate lifecycle operation (startup, shutdown, crash)
     on a network node or part of it
 \end{itemize}
 
 \section{ScenarioManager}
+\label{sec:scenario:scenariomanager}
 
 The \nedtype{ScenarioManager} module type is for setting up and controlling
 simulation experiments. In typical usage, it has only one instance in the
@@ -36,7 +38,7 @@ network Test {
 \end{ned}
 
 \nedtype{ScenarioManager} executes a script specified in XML. It has a few
-built-in commands, while other commands are dispatched (in C++) to be 
+built-in commands, while other commands are dispatched (in C++) to be
 carried out by other simple modules.
 
 An example script:
@@ -64,10 +66,10 @@ An example script:
 
 The above script probably does not need much explanation.
 
-The built-in commands of \nedtype{ScenarioManager} are: 
+The built-in commands of \nedtype{ScenarioManager} are:
 \ttt{<connect>}, \ttt{<disconnect>},
-\ttt{<create-module>}, \ttt{<delete-module>},   
-\ttt{<initiate>}, \ttt{<shutdown>},\ttt{<startup>},\ttt{<crash>}, 
+\ttt{<create-module>}, \ttt{<delete-module>},
+\ttt{<initiate>}, \ttt{<shutdown>},\ttt{<startup>},\ttt{<crash>},
 \ttt{<set-param>}, \ttt{<set-channel-attr>}, \ttt{<at>}.
 
 All commands have a \ttt{t} attribute which carries the simulation time
@@ -77,7 +79,7 @@ then only the \ttt{<at>} command needs to have a \ttt{t} attribute.
 
 More information can be found in the \nedtype{ScenarioManager} documentation.
 
-The script is usually placed in a separate file, and specified like this: 
+The script is usually placed in a separate file, and specified like this:
 
 \begin{inifile}
 *.scenarioManager.script = xmldoc("scenario.xml")
@@ -90,7 +92,7 @@ Short scripts can also be written inline:
 \end{inifile}
 
 
- 
+
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "usman"

@@ -2,47 +2,50 @@
 \label{cha:usage}
 
 \section{Installation}
+\label{sec:usage:installation}
 
 There are several ways to install the INET Framework:
 
 \begin{itemize}
-  \item Let the OMNeT++ IDE download and install it for you. 
+  \item Let the OMNeT++ IDE download and install it for you.
       This is the easiest way. Just accept the offer to install INET
       in the dialog that comes up when you first start the IDE, or
       choose \textit{Help > Install Simulation Models} any time later.
-  \item From INET Framework web site, \textit{http://inet.omnetpp.org}. 
+  \item From INET Framework web site, \textit{http://inet.omnetpp.org}.
       The IDE always installs the last stable version compatible with
       your version of OMNeT++. If you need some other version, they
       are available for download from the web site. Installation
-      instructions are also provided there.  
-  \item From GitHub. If you have experience with \textit{git}, 
-      clone the INET Framework project (\ttt{inet\--frame\-work/inet}), 
-      check out the revision of your choice, and follow the INSTALL 
+      instructions are also provided there.
+  \item From GitHub. If you have experience with \textit{git},
+      clone the INET Framework project (\ttt{inet\--frame\-work/inet}),
+      check out the revision of your choice, and follow the INSTALL
       file in the project root.
 \end{itemize}
- 
- 
+
+
 \section{Installing INET Extensions}
+\label{sec:usage:installing-inet-extensions}
 
 If you plan to make use of INET extensions (e.g. Veins or SimuLTE),
-follow the installation instructions provided with them. 
+follow the installation instructions provided with them.
 
-In the absence of specific instructions, the following procedure usually works: 
+In the absence of specific instructions, the following procedure usually works:
 
 \begin{itemize}
  \item First, check if the project root contains a file named \ttt{.project}.
  \item If it does, then the project can be imported into the IDE (use \textit{File > Import >
     General > Existing Project} into workspace). make sure that the project is recognized
     as an OMNeT++ project (the \textit{Project Properties} dialog contains a page
-    titled \textit{OMNeT++}), and it lists the INET project as dependency 
+    titled \textit{OMNeT++}), and it lists the INET project as dependency
     (check the \textit{Project References} page in the \textit{Project Properties} dialog).
  \item If there is no \ttt{.project} file, you can create an empty OMNeT++
-    project using the \textit{New OMNeT++ Project} wizard in \textit{File > New}, 
-    add the INET project as dependency using the \textit{Project References} page 
+    project using the \textit{New OMNeT++ Project} wizard in \textit{File > New},
+    add the INET project as dependency using the \textit{Project References} page
     in the \textit{Project Properties} dialog, and copy the source files into the project.
 \end{itemize}
 
 \section{Getting Familiar with INET}
+\label{sec:usage:getting-familiar-with-inet}
 
 The INET Framework builds upon OMNeT++, and uses the same concept: modules
 that communicate by message passing. Hosts, routers, switches and other
@@ -51,7 +54,7 @@ modules are assembled from simple modules that represent protocols,
 applications, and other functional units. A network is again an OMNeT++
 compound module that contains host, router and other modules.
 
-Modules are organized into a directory structure that roughly follows 
+Modules are organized into a directory structure that roughly follows
 OSI layers:
 
 \begin{itemize}
@@ -69,23 +72,24 @@ OSI layers:
   \item \ttt{src/inet/common/} -- miscellaneous utility components
 \end{itemize}
 
-The OMNeT++ NED language uses hierarchical packages names. Packages correspond 
+The OMNeT++ NED language uses hierarchical packages names. Packages correspond
 to directories under \ttt{src/}, so e.g. the \ttt{src/inet/transportlayer/tcp}
 directory corresponds to the \ttt{inet.transportlayer.tcp} NED package.
 
 For modularity, the INET Framework has about 80 \textit{project features}
 (parts of the codebase that can be disabled as a unit) defined. Not all project
 features are enabled in the default setup after installation. You can review
-the list of available project features in the \emph{Project | Project Features...} 
+the list of available project features in the \emph{Project | Project Features...}
 dialog in the IDE. If you want to know more about project features, refer to the
 \emph{OMNeT++ User Guide}.
 
 \section{Getting Help}
+\label{sec:usage:getting-help}
 
 Examples and practical guidance:
 
- \ttt{examples}, 
- showcases, 
+ \ttt{examples},
+ showcases,
  tutorials.
 
 
