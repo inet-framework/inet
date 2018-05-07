@@ -88,7 +88,7 @@ bool Ext::notify(int fd)
     bool found = false;
     int32 n = pcap_dispatch(pd, 1, ext_packet_handler, (u_char *)this);
     if (n < 0)
-        throw cRuntimeError("EmulationScheduler::pcap_dispatch(): An error occured: %s", pcap_geterr(pd));
+        throw cRuntimeError("Ext::notify(): An error occured: %s", pcap_geterr(pd));
     if (n > 0)
         found = true;
     return found;
@@ -125,14 +125,14 @@ void Ext::initialize(int stage)
                 throw cRuntimeError("Ext interface: Root privileges needed");
             const int32 on = 1;
             if (setsockopt(fd, IPPROTO_IP, IP_HDRINCL, (char *)&on, sizeof(on)) < 0)
-                throw cRuntimeError("EmulationScheduler: couldn't set sockopt for raw socket");
+                throw cRuntimeError("Ext: couldn't set sockopt for raw socket");
 
             // bind to interface:
             struct ifreq ifr;
             memset(&ifr, 0, sizeof(ifr));
             snprintf(ifr.ifr_name, sizeof(ifr.ifr_name), "%s", device);
             if (setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, (void *)&ifr, sizeof(ifr)) < 0) {
-                throw cRuntimeError("RealTimeScheduler: couldn't bind raw socket to '%s' interface", device);
+                throw cRuntimeError("Ext: couldn't bind raw socket to '%s' interface", device);
             }
         }
         else {
@@ -158,36 +158,36 @@ void Ext::openPcap(const char *device, const char *filter)
     int32 headerLength;
 
     if (!device || !filter)
-        throw cRuntimeError("RealTimeScheduler::setInterfaceModule(): arguments must be non-nullptr");
+        throw cRuntimeError("arguments must be non-nullptr");
 
     /* get pcap handle */
     memset(&errbuf, 0, sizeof(errbuf));
     if ((pd = pcap_create(device, errbuf)) == nullptr)
-        throw cRuntimeError("RealTimeScheduler::setInterfaceModule(): Cannot create pcap device, error = %s", errbuf);
+        throw cRuntimeError("Cannot create pcap device, error = %s", errbuf);
     else if (strlen(errbuf) > 0)
-        EV << "RealTimeScheduler::setInterfaceModule(): pcap_open_live returned warning: " << errbuf << "\n";
+        EV << "pcap_open_live returned warning: " << errbuf << "\n";
 
     /* apply the immediate mode to pcap */
     if (pcap_set_immediate_mode(pd, 1) != 0)
-            throw cRuntimeError("RealTimeScheduler::setInterfaceModule(): Cannot set immediate mode to pcap device");
+            throw cRuntimeError("Cannot set immediate mode to pcap device");
 
     if (pcap_activate(pd) != 0)
-        throw cRuntimeError("RealTimeScheduler::setInterfaceModule(): Cannot activate pcap device");
+        throw cRuntimeError("Cannot activate pcap device");
 
     /* compile this command into a filter program */
     if (pcap_compile(pd, &fcode, filter, 0, 0) < 0)
-        throw cRuntimeError("RealTimeScheduler::setInterfaceModule(): Cannot compile pcap filter: %s", pcap_geterr(pd));
+        throw cRuntimeError("Cannot compile pcap filter: %s", pcap_geterr(pd));
 
     /* apply the compiled filter to the packet capture device */
     if (pcap_setfilter(pd, &fcode) < 0)
-        throw cRuntimeError("RealTimeScheduler::setInterfaceModule(): Cannot apply compiled pcap filter: %s", pcap_geterr(pd));
+        throw cRuntimeError("Cannot apply compiled pcap filter: %s", pcap_geterr(pd));
 
     if ((datalink = pcap_datalink(pd)) < 0)
-        throw cRuntimeError("RealTimeScheduler::setInterfaceModule(): Cannot query pcap link-layer header type: %s", pcap_geterr(pd));
+        throw cRuntimeError("Cannot query pcap link-layer header type: %s", pcap_geterr(pd));
 
 #ifndef __linux__
     if (pcap_setnonblock(pd, 1, errbuf) < 0)
-        throw cRuntimeError("RealTimeScheduler::setInterfaceModule(): Cannot put pcap device into non-blocking mode, error: %s", errbuf);
+        throw cRuntimeError("Cannot put pcap device into non-blocking mode, error: %s", errbuf);
 #endif
 
     switch (datalink) {
