@@ -122,12 +122,13 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
 
   protected:
     // parameters
-    bool assignAddressesParameter;
-    bool assignDisjunctSubnetAddressesParameter;
-    bool addStaticRoutesParameter;
-    bool addSubnetRoutesParameter;
-    bool addDefaultRoutesParameter;
-    bool optimizeRoutesParameter;
+    bool assignAddressesParameter = false;
+    bool assignDisjunctSubnetAddressesParameter = false;
+    bool addStaticRoutesParameter = false;
+    bool addSubnetRoutesParameter = false;
+    bool addDefaultRoutesParameter = false;
+    bool addDirectRoutesParameter = false;
+    bool optimizeRoutesParameter = false;
 
     // internal state
     Topology topology;
