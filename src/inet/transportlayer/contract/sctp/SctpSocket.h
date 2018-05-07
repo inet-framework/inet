@@ -70,7 +70,7 @@ class INET_API SctpSocket : public ISocket
     {
       public:
         virtual ~ICallback() {}
-        virtual void socketDataArrived(SctpSocket *socket, Packet *msg, bool urgent) = 0;
+        virtual void socketDataArrived(SctpSocket *socket, Packet *packet, bool urgent) = 0;
         virtual void socketDataNotificationArrived(SctpSocket *socket, Message *msg) = 0;
         virtual void socketEstablished(SctpSocket *socket, unsigned long int buffer) {}
         virtual void socketPeerClosed(SctpSocket *socket) {}

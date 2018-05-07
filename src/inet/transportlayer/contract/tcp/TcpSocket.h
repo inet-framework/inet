@@ -140,7 +140,7 @@ class INET_API TcpSocket : public ISocket
     {
       public:
         virtual ~ICallback() {}
-        virtual void socketDataArrived(TcpSocket* socket, Packet *msg, bool urgent) = 0;
+        virtual void socketDataArrived(TcpSocket* socket, Packet *packet, bool urgent) = 0;
         virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) { socket->accept(availableInfo->getNewSocketId()); }
         virtual void socketEstablished(TcpSocket *socket) {}
         virtual void socketPeerClosed(TcpSocket *socket) {}
