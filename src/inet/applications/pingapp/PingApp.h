@@ -26,7 +26,7 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/networklayer/contract/L3Socket.h"
+#include "inet/networklayer/contract/INetworkSocket.h"
 #include "inet/transportlayer/common/CRC_m.h"
 
 namespace inet {
@@ -40,7 +40,7 @@ namespace inet {
  *
  * See NED file for detailed description of operation.
  */
-class INET_API PingApp : public cSimpleModule, public ILifecycle, public L3Socket::ICallback
+class INET_API PingApp : public cSimpleModule, public ILifecycle, public INetworkSocket::ICallback
 {
   protected:
     // parameters: for more details, see the corresponding NED parameters' documentation
@@ -60,7 +60,7 @@ class INET_API PingApp : public cSimpleModule, public ILifecycle, public L3Socke
     bool continuous = false;
 
     // state
-    L3Socket *l3Socket = nullptr;
+    INetworkSocket *l3Socket = nullptr;
     int pid = 0;    // to determine which hosts are associated with the responses
     cMessage *timer = nullptr;    // to schedule the next Ping request
     NodeStatus *nodeStatus = nullptr;    // lifecycle
@@ -107,8 +107,8 @@ class INET_API PingApp : public cSimpleModule, public ILifecycle, public L3Socke
     //ILifecycle
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
-    //L3Socket::ICallback:
-    virtual void socketDataArrived(L3Socket *socket, Packet *packet) override;
+    //INetworkSocket::ICallback:
+    virtual void socketDataArrived(INetworkSocket *socket, Packet *packet) override;
 
   public:
     PingApp();

@@ -36,6 +36,9 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Socket.h"
+#include "inet/networklayer/contract/ipv6/Ipv6Socket.h"
+#include "inet/networklayer/contract/L3Socket.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/Icmp.h"
@@ -192,31 +195,34 @@ void PingApp::handleMessage(cMessage *msg)
             destAddr = destAddresses[destAddrIdx];
             EV_INFO << "Starting up: dest=" << destAddr << "  src=" << srcAddr << "seqNo=" << sendSeqNo << endl;
             ASSERT(!destAddr.isUnspecified());
-            const Protocol *l3Protocol = nullptr;
-            const char *networkProtocol = par("networkProtocol");
-            if (*networkProtocol) {
-                l3Protocol = Protocol::getProtocol(networkProtocol);
-            }
+            const Protocol *networkProtocol = nullptr;
+            const char *networkProtocolAsString = par("networkProtocol");
+            if (*networkProtocolAsString)
+                networkProtocol = Protocol::getProtocol(networkProtocolAsString);
             else {
                 switch (destAddr.getType()) {
-                    case L3Address::IPv4: l3Protocol = &Protocol::ipv4; break;
-                    case L3Address::IPv6: l3Protocol = &Protocol::ipv6; break;
+                    case L3Address::IPv4: networkProtocol = &Protocol::ipv4; break;
+                    case L3Address::IPv6: networkProtocol = &Protocol::ipv6; break;
                     case L3Address::MODULEID:
-                    case L3Address::MODULEPATH: l3Protocol = &Protocol::nextHopForwarding; break;
-                        //TODO
+                    case L3Address::MODULEPATH: networkProtocol = &Protocol::nextHopForwarding; break;
                     default: throw cRuntimeError("unknown address type: %d(%s)", (int)destAddr.getType(), L3Address::getTypeName(destAddr.getType()));
                 }
             }
-            const Protocol *icmp = l3Echo.at(l3Protocol);
+            const Protocol *icmp = l3Echo.at(networkProtocol);
 
-            if (!l3Socket || l3Socket->getL3Protocol()->getId() != l3Protocol->getId()) {
+            if (!l3Socket || l3Socket->getNetworkProtocol() != networkProtocol) {
                 if (l3Socket) {
                     l3Socket->close();
                     delete l3Socket;
                 }
-                l3Socket = new L3Socket(l3Protocol, gate("socketOut"));
+                if (networkProtocol == &Protocol::ipv4)
+                    l3Socket = new Ipv4Socket(gate("socketOut"));
+                else if (networkProtocol == &Protocol::ipv6)
+                    l3Socket = new Ipv6Socket(gate("socketOut"));
+                else
+                    l3Socket = new L3Socket(networkProtocol, gate("socketOut"));
                 l3Socket->bind(icmp);
-                l3Socket->setCallbackObject(this);
+                l3Socket->setCallback(this);
             }
             msg->setKind(PING_SEND);
         }
@@ -246,7 +252,7 @@ void PingApp::handleMessage(cMessage *msg)
         throw cRuntimeError("Unaccepted message: %s(%s)", msg->getName(), msg->getClassName());
 }
 
-void PingApp::socketDataArrived(L3Socket *socket, Packet *packet)
+void PingApp::socketDataArrived(INetworkSocket *socket, Packet *packet)
 {
 #ifdef WITH_IPv4
     if (packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv4) {
