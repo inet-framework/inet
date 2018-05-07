@@ -42,7 +42,6 @@ class INET_API EmulationScheduler : public cScheduler
   protected:
     class ExtConn {
       public:
-        int fd = INVALID_SOCKET;        // RAW socket ID
         cModule *module = nullptr;      // Ext module
         pcap_t *pd = nullptr;           // pcap socket
         int datalink;
@@ -103,11 +102,6 @@ class INET_API EmulationScheduler : public cScheduler
      * Scheduler function -- it comes from the cScheduler interface.
      */
     virtual void putBackEvent(cEvent *event) override;
-
-    /**
-     * Send on the currently open connection
-     */
-    void sendBytes(cModule *mod, unsigned char *buf, size_t numBytes, struct sockaddr *from, socklen_t addrlen);
 };
 
 } // namespace inet

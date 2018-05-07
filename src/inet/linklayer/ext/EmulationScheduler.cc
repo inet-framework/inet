@@ -69,10 +69,6 @@ void EmulationScheduler::endRun()
 {
 
     for (auto& curConn : conn) {
-        //close raw socket:
-        close(curConn.fd);
-        curConn.fd = INVALID_SOCKET;
-
         // close pcap:
         pcap_stat ps;
         if (pcap_stats(curConn.pd, &ps) < 0)
@@ -153,29 +149,11 @@ void EmulationScheduler::setInterfaceModule(cModule *mod, const char *dev, const
             throw cRuntimeError("EmulationScheduler::setInterfaceModule(): Unsupported datalink: %d", datalink);
     }
 
-    // Enabling sending makes no sense when we can't receive...
-    int fd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
-    if (fd == INVALID_SOCKET)
-        throw cRuntimeError("EmulationScheduler: Root privileges needed");
-    const int32 on = 1;
-    if (setsockopt(fd, IPPROTO_IP, IP_HDRINCL, (char *)&on, sizeof(on)) < 0)
-        throw cRuntimeError("EmulationScheduler: couldn't set sockopt for raw socket");
-
-    // bind to interface:
-     struct ifreq ifr;
-
-    memset(&ifr, 0, sizeof(ifr));
-    snprintf(ifr.ifr_name, sizeof(ifr.ifr_name), "%s", dev);
-    if (setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, (void *)&ifr, sizeof(ifr)) < 0) {
-        throw cRuntimeError("EmulationScheduler: couldn't bind raw socket to '%s' interface", dev);
-    }
-
     ExtConn newConn;
     newConn.module = mod;
     newConn.pd = pd;
     newConn.datalink = datalink;
     newConn.headerLength = headerLength;
-    newConn.fd = fd;
     conn.push_back(newConn);
 
     EV << "Opened pcap device " << dev << " with filter " << filter << " and datalink " << datalink << ".\n";
@@ -329,26 +307,6 @@ cEvent *EmulationScheduler::takeNextEvent()
 void EmulationScheduler::putBackEvent(cEvent *event)
 {
     FES(sim)->putBackFirst(event);
-}
-
-void EmulationScheduler::sendBytes(cModule *mod, uint8 *buf, size_t numBytes, struct sockaddr *to, socklen_t addrlen)
-{
-    //TODO check: is this an IPv4 packet --OR-- is this packet acceptable by fd socket?
-    for (auto& curConn : conn) {
-        if (curConn.module == mod) {
-            if (curConn.fd == INVALID_SOCKET)
-                throw cRuntimeError("EmulationScheduler::sendBytes(): no raw socket.");
-
-            int sent = sendto(curConn.fd, buf, numBytes, 0, to, addrlen);    //note: no ssize_t on MSVC
-
-            if ((size_t)sent == numBytes)
-                EV << "Sent an IP packet with length of " << sent << " bytes.\n";
-            else
-                EV << "Sending of an IP packet FAILED! (sendto returned " << sent << " (" << strerror(errno) << ") instead of " << numBytes << ").\n";
-            return;
-        }
-    }
-    throw cRuntimeError("EmulationScheduler::sendBytes(): no raw socket.");
 }
 
 } // namespace inet

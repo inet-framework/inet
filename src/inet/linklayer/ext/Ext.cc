@@ -23,9 +23,12 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <platdep/sockets.h>
-
 #include "inet/common/INETDefs.h"
+
+#include <omnetpp/platdep/sockets.h>
+
+#include <net/if.h>
+
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -46,6 +49,13 @@ namespace inet {
 
 Define_Module(Ext);
 
+Ext::~Ext()
+{
+    //close raw socket:
+    close(fd);
+    fd = INVALID_SOCKET;
+}
+
 void Ext::initialize(int stage)
 {
     MacBase::initialize(stage);
@@ -64,6 +74,23 @@ void Ext::initialize(int stage)
             connected = false;
         }
         numSent = numRcvd = numDropped = 0;
+
+        // Enabling sending makes no sense when we can't receive...
+        fd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
+        if (fd == INVALID_SOCKET)
+            throw cRuntimeError("Ext interface: Root privileges needed");
+        const int32 on = 1;
+        if (setsockopt(fd, IPPROTO_IP, IP_HDRINCL, (char *)&on, sizeof(on)) < 0)
+            throw cRuntimeError("EmulationScheduler: couldn't set sockopt for raw socket");
+
+        // bind to interface:
+        struct ifreq ifr;
+        memset(&ifr, 0, sizeof(ifr));
+        snprintf(ifr.ifr_name, sizeof(ifr.ifr_name), "%s", device);
+        if (setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, (void *)&ifr, sizeof(ifr)) < 0) {
+            throw cRuntimeError("EmulationScheduler: couldn't bind raw socket to '%s' interface", device);
+        }
+
         WATCH(numSent);
         WATCH(numRcvd);
         WATCH(numDropped);
@@ -136,7 +163,7 @@ void Ext::handleMessage(cMessage *msg)
                << " and length of "
                << packet->getByteLength()
                << " bytes to link layer.\n";
-            rtScheduler->sendBytes(this, buffer, packetLength, (struct sockaddr *)&addr, sizeof(struct sockaddr_in));
+            sendBytes(buffer, packetLength, (struct sockaddr *)&addr, sizeof(struct sockaddr_in));
             numSent++;
             delete packet;
         }
@@ -146,6 +173,22 @@ void Ext::handleMessage(cMessage *msg)
         }
     }
 }
+
+void Ext::sendBytes(uint8 *buf, size_t numBytes, struct sockaddr *to, socklen_t addrlen)
+{
+    //TODO check: is this an IPv4 packet --OR-- is this packet acceptable by fd socket?
+    if (fd == INVALID_SOCKET)
+        throw cRuntimeError("EmulationScheduler::sendBytes(): no raw socket.");
+
+    int sent = sendto(fd, buf, numBytes, 0, to, addrlen);    //note: no ssize_t on MSVC
+
+    if ((size_t)sent == numBytes)
+        EV << "Sent an IP packet with length of " << sent << " bytes.\n";
+    else
+        EV << "Sending of an IP packet FAILED! (sendto returned " << sent << " (" << strerror(errno) << ") instead of " << numBytes << ").\n";
+    return;
+}
+
 
 void Ext::displayBusy()
 {
@@ -179,6 +222,9 @@ void Ext::finish()
 {
     std::cout << getFullPath() << ": " << numSent << " packets sent, "
               << numRcvd << " packets received, " << numDropped << " packets dropped.\n";
+    //close raw socket:
+    close(fd);
+    fd = INVALID_SOCKET;
 }
 
 void Ext::flushQueue()

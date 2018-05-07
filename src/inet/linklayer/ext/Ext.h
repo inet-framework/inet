@@ -60,6 +60,8 @@ class INET_API Ext : public MacBase
     // access to real network interface via Scheduler class:
     EmulationScheduler *rtScheduler;
 
+    int fd = INVALID_SOCKET;        // RAW socket ID
+
   protected:
     void displayBusy();
     void displayIdle();
@@ -71,7 +73,11 @@ class INET_API Ext : public MacBase
     virtual void clearQueue() override;
     virtual bool isUpperMsg(cMessage *msg) override { return msg->arrivedOn("upperLayerIn"); }
 
+    // utility functions
+    void sendBytes(unsigned char *buf, size_t numBytes, struct sockaddr *from, socklen_t addrlen);
+
   public:
+    virtual ~Ext();
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
