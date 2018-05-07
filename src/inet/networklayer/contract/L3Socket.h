@@ -19,28 +19,29 @@
 #define __INET_L3SOCKET_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/Protocol.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/common/socket/ISocket.h"
+#include "inet/common/Protocol.h"
+#include "inet/networklayer/contract/INetworkSocket.h"
 
 namespace inet {
 
 /**
  * Thie class implements a raw L3 socket.
  */
-class INET_API L3Socket : public ISocket
+class INET_API L3Socket : public INetworkSocket
 {
   public:
-    class ICallback {
-        public:
-          virtual ~ICallback() {}
-          virtual void socketDataArrived(L3Socket *socket, Packet *packet) = 0;
-      };
+    class INET_API ICallback : public INetworkSocket::ICallback
+    {
+      public:
+        virtual void socketDataArrived(INetworkSocket *socket, Packet *packet) override { socketDataArrived(check_and_cast<L3Socket *>(socket), packet); }
+        virtual void socketDataArrived(L3Socket *socket, Packet *packet) = 0;
+    };
   protected:
     bool bound = false;
     const Protocol *l3Protocol = nullptr;
     int socketId = -1;
-    ICallback *cb = nullptr;
+    INetworkSocket::ICallback *cb = nullptr;
     void *userData = nullptr;
     cGate *outputGate = nullptr;
 
@@ -48,14 +49,13 @@ class INET_API L3Socket : public ISocket
     void sendToOutput(cMessage *message);
 
   public:
-    L3Socket(const Protocol *l3ProtocolId = nullptr, cGate *outputGate = nullptr);
+    L3Socket(const Protocol *l3Protocol, cGate *outputGate = nullptr);
     virtual ~L3Socket() {}
+
+    virtual const Protocol *getNetworkProtocol() const override { return l3Protocol; }
 
     void *getUserData() const { return userData; }
     void setUserData(void *userData) { this->userData = userData; }
-
-    void setL3Protocol(const Protocol *l3Protocol);
-    const Protocol *getL3Protocol() const { return l3Protocol; }
 
     /**
      * Returns the internal socket Id.
@@ -91,18 +91,18 @@ class INET_API L3Socket : public ISocket
     /**
      * Bind the socket to a protocol.
      */
-    void bind(const Protocol *protocol);
+    void bind(const Protocol *protocol) override;
 
     /**
      * Sends a data packet.
      */
-    void send(cPacket *msg);
+    void send(Packet *packet) override;
 
     /**
      * Unbinds the socket. Once closed, a closed socket may be bound to another
      * (or the same) protocol, and reused.
      */
-    void close();
+    void close() override;
 };
 
 } // namespace inet

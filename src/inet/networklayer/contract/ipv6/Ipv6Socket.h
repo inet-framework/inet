@@ -21,25 +21,26 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/Protocol.h"
-#include "inet/common/socket/ISocket.h"
+#include "inet/networklayer/contract/INetworkSocket.h"
 
 namespace inet {
 
 /**
  * Thie class implements a raw IPv6 socket.
  */
-class INET_API Ipv6Socket : public ISocket
+class INET_API Ipv6Socket : public INetworkSocket
 {
   public:
-    class ICallback {
-        public:
-          virtual ~ICallback() {}
-          virtual void socketDataArrived(Ipv6Socket *socket, Packet *packet) = 0;
-      };
+    class INET_API ICallback : public INetworkSocket::ICallback
+    {
+      public:
+        virtual void socketDataArrived(INetworkSocket *socket, Packet *packet) override { socketDataArrived(check_and_cast<Ipv6Socket *>(socket), packet); }
+        virtual void socketDataArrived(Ipv6Socket *socket, Packet *packet) = 0;
+    };
   protected:
     bool bound = false;
     int socketId = -1;
-    ICallback *cb = nullptr;
+    INetworkSocket::ICallback *cb = nullptr;
     void *userData = nullptr;
     cGate *outputGate = nullptr;
 
@@ -52,6 +53,8 @@ class INET_API Ipv6Socket : public ISocket
 
     void *getUserData() const { return userData; }
     void setUserData(void *userData) { this->userData = userData; }
+
+    virtual const Protocol *getNetworkProtocol() const override { return &Protocol::ipv6; }
 
     /**
      * Returns the internal socket Id.
@@ -87,18 +90,18 @@ class INET_API Ipv6Socket : public ISocket
     /**
      * Bind the socket to a protocol.
      */
-    void bind(const Protocol *protocol);
+    void bind(const Protocol *protocol) override;
 
     /**
      * Sends a data packet.
      */
-    void send(cPacket *msg);
+    void send(Packet *packet) override;
 
     /**
      * Unbinds the socket. Once closed, a closed socket may be bound to another
      * (or the same) protocol, and reused.
      */
-    void close();
+    void close() override;
 };
 
 } // namespace inet

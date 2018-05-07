@@ -51,9 +51,9 @@ void Ipv6Socket::bind(const Protocol *protocol)
     bound = true;
 }
 
-void Ipv6Socket::send(cPacket *msg)
+void Ipv6Socket::send(Packet *packet)
 {
-    sendToOutput(msg);
+    sendToOutput(packet);
 }
 
 void Ipv6Socket::close()

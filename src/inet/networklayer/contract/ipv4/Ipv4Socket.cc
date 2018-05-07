@@ -51,9 +51,9 @@ void Ipv4Socket::bind(const Protocol *protocol)
     bound = true;
 }
 
-void Ipv4Socket::send(cPacket *msg)
+void Ipv4Socket::send(Packet *packet)
 {
-    sendToOutput(msg);
+    sendToOutput(packet);
 }
 
 void Ipv4Socket::close()

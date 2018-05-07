@@ -31,12 +31,6 @@ L3Socket::L3Socket(const Protocol *l3Protocol, cGate *outputGate) :
 {
 }
 
-void L3Socket::setL3Protocol(const Protocol *l3Protocol)
-{
-    ASSERT(!bound);
-    this->l3Protocol = l3Protocol;
-}
-
 void L3Socket::sendToOutput(cMessage *message)
 {
     if (!outputGate)
@@ -59,9 +53,9 @@ void L3Socket::bind(const Protocol *protocol)
     bound = true;
 }
 
-void L3Socket::send(cPacket *msg)
+void L3Socket::send(Packet *packet)
 {
-    sendToOutput(msg);
+    sendToOutput(packet);
 }
 
 void L3Socket::close()
