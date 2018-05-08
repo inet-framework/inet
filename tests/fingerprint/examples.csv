@@ -80,7 +80,6 @@
 /examples/ethernet/lans/,            -f hub.ini -c Hub1 -r 0,                       100s,            3682-ecd7/tplx, PASS,
 /examples/ethernet/lans/,            -f hub.ini -c Hub2 -r 0,                       10s,             71a3-6014/tplx, PASS,
 /examples/ethernet/lans/,            -f hub.ini -c Hub3 -r 0,                       100s,            3682-ecd7/tplx, PASS,
-/examples/ethernet/lans/,            -f hub.ini -c Hub4 -r 0,                       100s,            3682-ecd7/tplx, PASS,
 /examples/ethernet/lans/,            -f largeNet.ini -c LargeNet -r 0,              5s,              1039-318e/tplx, PASS,
 /examples/ethernet/lans/,            -f mixed.ini -c MixedLAN -r 0,                 100s,            ab7d-1a9c/tplx, PASS,
 /examples/ethernet/lans/,            -f omnetpp.ini -c MixedLAN1 -r 0,              500s,            80b6-e1d7/tplx, PASS,
