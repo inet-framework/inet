@@ -626,6 +626,7 @@ sub do_comment_verbatim {
         }
 
         # attempt math formatting. --Andras Varga
+        $line =~ s!\$\$([^\n]+?)\$\$!"<center>" . formatmath($1) . "</center>"!gse;
         $line =~ s/\$([^\n]+?)\$/formatmath($1)/gse;
 
         if ($skip == $true) {
@@ -1196,7 +1197,12 @@ sub do_complicated_latex_defs {
 #
 sub formatmath ()
 {
+      # TODO use MathJax, https://www.mathjax.org/ instead!!!
+      
       my $txt = shift @_;
+      $txt =~ s/^\s+|\s+$//g; # trim
+
+      warning(8, "formatmath($txt)");
 
       # ugly heuristics: last character should be letter, number, ], ) or }, otherwise
       # this is probably not a math formula...
@@ -1205,28 +1211,35 @@ sub formatmath ()
       my $origtxt = $txt;
 
       # convert greek letters
-      $txt =~ s!\\(Alpha|Beta|Gamma|Delta|Epsilon|Zeta|Eta|Theta|Iota|Kappa|Lambda|Mu|Nu|Xi|Omicron|Pi|Rho|Sigma|Tau|Upsilon|Phi|Chi|Psi|Omega|alpha|beta|gamma|delta|epsilon|zeta|eta|theta|iota|kappa|lambda|mu|nu|xi|omicron|pi|rho|sigmaf|sigma|tau|upsilon|phi|chi|psi|omega)!&$1;!g;
+      $txt =~ s!\\(Alpha|Beta|Gamma|Delta|Epsilon|Zeta|Eta|Theta|Iota|Kappa|Lambda|Mu|Nu|Xi|Omicron|Pi|Rho|Sigma|Tau|Upsilon|Phi|Chi|Psi|Omega|alpha|beta|gamma|delta|epsilon|zeta|eta|theta|iota|kappa|lambda|mu|nu|xi|omicron|pi|rho|sigmaf|sigma|tau|upsilon|phi|chi|psi|omega)\b!&$1;!g;
 
       # convert \tilde{n}, N, a, A (other letters don't have tilde versions in HTML)
       $txt =~ s!\\tilde\{(n|N|a|A)}!&$1tilde;!g;
 
+      # convert \bar{n}
+      $txt =~ s!\\bar\{(.+?)}!$1&#772!g;
+
       # convert \in
-      $txt =~ s!\\in! is in !g;
+      $txt =~ s!\\in\b! is in !g;
+      $txt =~ s!\\infty\b!&#8734;!g;
+      $txt =~ s!\\to\b!&#8594;!g;
+
+      $txt =~ s!\\sqrt\{(.*?)}!sqrt($1)!g;
 
       # convert some arrows
-      $txt =~ s!\\leftarrow!<--!g;
-      $txt =~ s!\\Leftarrow!<==!g;
-      $txt =~ s!\\rightarrow!-->!g;
-      $txt =~ s!\\Rightarrow!==>!g;
-      $txt =~ s!\\leftrightarrow!<-->!g;
-      $txt =~ s!\\Leftrightarrow!<==>!g;
+      $txt =~ s!\\leftarrow\b!<--!g;
+      $txt =~ s!\\Leftarrow\b!<==!g;
+      $txt =~ s!\\rightarrow\b!-->!g;
+      $txt =~ s!\\Rightarrow\b!==>!g;
+      $txt =~ s!\\leftrightarrow\b!<-->!g;
+      $txt =~ s!\\Leftrightarrow\b!<==>!g;
 
-      $txt =~ s!\\longleftarrow!<---!g;
-      $txt =~ s!\\Longleftarrow!<===!g;
-      $txt =~ s!\\longrightarrow!--->!g;
-      $txt =~ s!\\Longrightarrow!===>!g;
-      $txt =~ s!\\longleftrightarrow!<--->!g;
-      $txt =~ s!\\Longleftrightarrow!<===>!g;
+      $txt =~ s!\\longleftarrow\b!<---!g;
+      $txt =~ s!\\Longleftarrow\b!<===!g;
+      $txt =~ s!\\longrightarrow\b!--->!g;
+      $txt =~ s!\\Longrightarrow\b!===>!g;
+      $txt =~ s!\\longleftrightarrow\b!<--->!g;
+      $txt =~ s!\\Longleftrightarrow\b!<===>!g;
 
       # convert ^ and _ without braces
       $txt =~ s!\^([a-zA-Z0-9]+)!<sup>$1</sup>!g;
