@@ -466,8 +466,8 @@ sub handle_specification {
         if ($from =~ s/(\\begin\{[^\}]+\})(.+)/$1/ ) {
             fyi(7, "Stripped begin\{...\} args: $arr[2] --> $from");
         }
-    } elsif ($from =~ /(\\[A-Za-z_]+)([^A-Za-z_].*)/ ) {
-        $from =~ s/(\\[A-Za-z_]+)([^A-Za-z_].*)/$1/;
+    } elsif ($from =~ /(\\[A-Za-z_]+\*?)([^A-Za-z_*].*)/ ) {  # note: allow '*' at the end of the command name, as in \section*{}
+        $from =~ s/(\\[A-Za-z_]+\*?)([^A-Za-z_*].*)/$1/;
         fyi(7, "Stripped args: $arr[2] --> $from");
     }
 
@@ -1018,7 +1018,7 @@ sub mark_delims {
                 $dsp ++;
                 $dcount ++;
 
-                if ( $frag =~ /(\\[\w]+)\{$/) {
+                if ( $frag =~ /(\\[\w]+\*?)\{$/) {
                     warning(8, "mark:  id2comm{$id} = $1");
                     $id2comm{$id} = $1;
                 } else {
@@ -1060,7 +1060,7 @@ sub do_simple_latex_defs {
         }
         warning(8, "do_simple_brace_comms($line)");
 
-        if ($line =~ /\[:([0-9]+):/) {
+        if ($line =~ /\[:([0-9]+):/) { # opening brace, escaped
             $id = $1;
             $comm = $id2comm{$id};
             warning(8, "    id2comm{$id} is $id2comm{$id}");
@@ -1084,7 +1084,7 @@ sub do_simple_latex_defs {
                 }
             }
         }
-        if ($line =~ /:([0-9]+):\]/) {
+        if ($line =~ /:([0-9]+):\]/) { # closing brace, escaped
             $id = $1;
             $comm = $id2comm{$id};
             if ($comm ne "_:NULL_COMMAND:_") {
