@@ -347,7 +347,7 @@ void Ext::finish()
     // close pcap:
     pcap_stat ps;
     if (pcap_stats(pd, &ps) < 0)
-        throw cRuntimeError("RealTimeScheduler::endRun(): Cannot query pcap statistics: %s", pcap_geterr(pd));
+        throw cRuntimeError("Cannot query pcap statistics: %s", pcap_geterr(pd));
     EV << "Received Packets: " << ps.ps_recv << " Dropped Packets: " << ps.ps_drop << ".\n";
     recordScalar("Received Packets", ps.ps_recv);
     recordScalar("Dropped Packets", ps.ps_drop);
