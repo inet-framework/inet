@@ -626,8 +626,8 @@ sub do_comment_verbatim {
         }
 
         # attempt math formatting. --Andras Varga
-        $line =~ s!\$\$([^\n]+?)\$\$!"<center>" . formatmath($1) . "</center>"!gse;
-        $line =~ s/\$([^\n]+?)\$/formatmath($1)/gse;
+        $line =~ s!\$\$([^\n]+?)\$\$!"<center>" . formatmath($1,0) . "</center>"!gse;
+        $line =~ s/\$([^\n]+?)\$/formatmath($1,1)/gse;
 
         if ($skip == $true) {
             $line = "";
@@ -1200,13 +1200,15 @@ sub formatmath ()
       # TODO use MathJax, https://www.mathjax.org/ instead!!!
       
       my $txt = shift @_;
-      $txt =~ s/^\s+|\s+$//g; # trim
-
+      my $isinline = shift @_;
+      
       warning(8, "formatmath($txt)");
 
-      # ugly heuristics: last character should be letter, number, ], ) or }, otherwise
+      # ugly heuristics: last character should be letter, number, ], ), | or }, otherwise
       # this is probably not a math formula...
-      return "\$$txt\$" unless ($txt =~ /[]a-zA-Z0-9\)}]$/);
+      if ($isinline) {
+          return "\$$txt\$" unless ($txt =~ /[]a-zA-Z0-9\)|}]$/);
+      }
 
       my $origtxt = $txt;
 
