@@ -225,9 +225,9 @@ InterfaceEntry *Ext::createInterfaceEntry()
 {
     InterfaceEntry *e = getContainingNicModule(this);
 
-    e->setMtu(par("mtu"));
-    e->setMulticast(true);
-    e->setPointToPoint(true);
+    e->setMtu(par("mtu"));      //TODO get mtu from real interface / or set mtu in real interface
+    e->setMulticast(true);      //TODO
+    e->setPointToPoint(true);   //TODO
 
     return e;
 }
