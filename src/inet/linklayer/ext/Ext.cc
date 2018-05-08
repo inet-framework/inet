@@ -314,15 +314,11 @@ void Ext::sendBytes(uint8 *buf, size_t numBytes, struct sockaddr *to, socklen_t 
 void Ext::displayBusy()
 {
     getDisplayString().setTagArg("i", 1, "yellow");
-    gate("physOut")->getDisplayString().setTagArg("ls", 0, "yellow");
-    gate("physOut")->getDisplayString().setTagArg("ls", 1, "3");
 }
 
 void Ext::displayIdle()
 {
     getDisplayString().setTagArg("i", 1, "");
-    gate("physOut")->getDisplayString().setTagArg("ls", 0, "black");
-    gate("physOut")->getDisplayString().setTagArg("ls", 1, "1");
 }
 
 void Ext::refreshDisplay() const
