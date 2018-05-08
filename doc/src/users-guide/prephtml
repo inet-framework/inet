@@ -15,6 +15,7 @@ $fname = "";
 $outfnamebase = "";
 $quiet = 0;
 $singlePage = 1;
+$isdraft = 0;
 $ext = "html";
 $apidir = "../api";
 $tagfile = ""; # ../../api/opptags.xml";
@@ -24,6 +25,9 @@ while (@ARGV)
     $arg = shift @ARGV;
     if ($arg eq "--split" || $arg eq "-s") {
         $singlePage = 0;
+    }
+    elsif ($arg eq "--draft") {
+        $isdraft = 1;
     }
     elsif ($arg eq "--outfilenamebase") {
         $outfnamebase = shift @ARGV;
@@ -80,6 +84,13 @@ $html = join("", <HTMLFILE>);
 # kill unwanted formatting
 #
 print "removing unnecessary formatting and parts\n" unless $quiet;
+
+if ($isdraft) {
+   $html =~ s/\@ifdraft\@//sg;
+   $html =~ s/\@fi\@//sg;
+} else {
+   $html =~ s/\@ifdraft\@.*?\@fi\@//sg;
+}
 
 if ($product ne "OMNEST") {
    $html =~ s/\@ifcommercial\@.*?\@fi\@//sg;

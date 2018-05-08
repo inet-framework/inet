@@ -169,7 +169,7 @@ htmlfile_spec := $BASE.html
 :comm   :\ftest(\[.*?\])?{(.*?)}:<tt>$2</tt>::
 :comm   :\includepng(\[.*?\])?{figures/(.*?)}:<img src="$2.png">::
 :comm   :\includesvg(\[.*?\])?{figures/(.*?)}:<img src="$2.svg">::
-:comm   :\ifcommercial:@ifcommercial@::
+:comm   :\ifdraft:@ifdraft@::
 :comm   :\fi:@fi@::
 
 # WRONG --  :comm   :\chapter\*{(.*?)}:<br><br><br><b>$2</b>::
