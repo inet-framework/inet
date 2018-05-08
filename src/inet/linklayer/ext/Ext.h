@@ -30,7 +30,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/linklayer/base/MacBase.h"
-#include "RealTimeScheduler.h"
+#include "inet/linklayer/ext/RealTimeScheduler.h"
 
 namespace inet {
 
