@@ -82,6 +82,7 @@ simple Rip like IApp
         double routeExpiryTime @unit(s) = default(180s); // timeout timer (RFC 2453)
         double routePurgeTime @unit(s) = default(120s);  // garbage collection timer (RFC 2453)
         
+        bool triggeredUpdate = default(true);  // controlling if triggered update is active or not
         volatile double triggeredUpdateDelay @unit(s) = default(uniform(1s,5s));
         
         @signal[sentRequest](type=cPacket);
