@@ -4,17 +4,23 @@
 \section{Overview}
 \label{sec:transport:overview}
 
-INET contains support for the following transport layer protocols: TCP, UDP,
-SCTP, RTP.
+In the OSI reference model, the protocols of the transport layer provide
+host-to-host communication services for applications. They provide services such
+as connection-oriented communication, reliability, flow control, and
+multiplexing.
 
-INET node models contain transport protocols as optional and replaceable
-components, like this:
+INET currently provides support for the TCP, UDP, SCTP and RTP transport layer
+protocols. INET nodes like \nedtype{StandardHost} contain optional and
+replaceable instances of these protocols, like this:
 
 \begin{ned}
 tcp: <tcpType> like ITcp if hasTcp;
 udp: <udpType> like IUdp if hasUdp;
 sctp: <sctpType> like ISctp if hasSctp;
 \end{ned}
+
+As RTP is more specialized that the other ones (multimedia streaming), INET
+provides a separate node type, \nedtype{RtpHost}, for modeling RTP traffic.
 
 \section{TCP}
 \label{sec:transport:tcp}
