@@ -935,7 +935,7 @@ int PacketDrillApp::syscallWrite(struct syscall_spec *syscall, cQueue *args, cha
             sendCommand->setSendUnordered(false);
             sendCommand->setSid(0);
 
-            sctpSocket.sendMsg(cmsg);
+            sctpSocket.send(cmsg);
             break;
         }
         default:
@@ -1332,7 +1332,7 @@ int PacketDrillApp::syscallSctpSendmsg(struct syscall_spec *syscall, cQueue *arg
         sendCommand->setSendUnordered(true);
     }
 
-    sctpSocket.sendMsg(cmsg);
+    sctpSocket.send(cmsg);
     return STATUS_OK;
 }
 
@@ -1384,7 +1384,7 @@ int PacketDrillApp::syscallSctpSend(struct syscall_spec *syscall, cQueue *args, 
     sendCommand->setSsn(ssn);
     sendCommand->setSendUnordered(false);
 
-    sctpSocket.sendMsg(cmsg);
+    sctpSocket.send(cmsg);
     return STATUS_OK;
 }
 

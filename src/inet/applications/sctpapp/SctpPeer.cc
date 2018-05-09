@@ -587,7 +587,7 @@ void SctpPeer::sendRequest(bool last)
     auto sendCommand = cmsg->addTagIfAbsent<SctpSendReq>();
     sendCommand->setLast(true);
     // send SctpMessage with SctpSimpleMessage enclosed
-    clientSocket.sendMsg(cmsg);
+    clientSocket.send(cmsg);
     bytesSent += numBytes;
 }
 
@@ -700,7 +700,7 @@ void SctpPeer::socketDataArrived(SctpSocket *socket, Packet *msg, bool)
         cmd->setSid(ind->getSid());
         cmsg->setKind(ind->getSendUnordered() ? SCTP_C_SEND_UNORDERED : SCTP_C_SEND_ORDERED);
         packetsSent++;
-        clientSocket.sendMsg(cmsg);
+        clientSocket.send(cmsg);
     }
 
     if (par("numPacketsToReceive").intValue() > 0) {
