@@ -168,35 +168,30 @@ The module has the following parameters:
 
 \begin{itemize}
   \item \fpar{stackName}: the name of the TCP implementation to be used.
-  Possible values are: \ttt{liblinux2.6.10.so}, \ttt{liblinux2.6.18.so},
-  \ttt{liblinux2.6.26.so}, \ttt{libopenbsd3.5.so}, \ttt{libfreebsd5.3.so} and
-  \ttt{liblwip.so}. (On the 64 bit systems, the \ttt{liblinux2.6.26.so} and
-  \ttt{liblinux2.6.16.so} are available only).
-
+    Possible values are: \ttt{liblinux2.6.10.so}, \ttt{liblinux2.6.18.so},
+    \ttt{liblinux2.6.26.so}, \ttt{libopenbsd3.5.so}, \ttt{libfreebsd5.3.so} and
+    \ttt{liblwip.so}. (On the 64 bit systems, the \ttt{liblinux2.6.26.so} and
+    \ttt{liblinux2.6.16.so} are available only).
   \item \fpar{stackBufferSize}: the size of the receive and send buffer of
-  one connection for selected TCP implementation.
-  The NSC sets the \fvar{wmem\_max}, \fvar{rmem\_max}, \fvar{tcp\_rmem}, \fvar{tcp\_wmem}
-  parameters to this value on linux TCP implementations. For details, you can see
-  the NSC documentation.
+    one connection for selected TCP implementation.
+    The NSC sets the \fvar{wmem\_max}, \fvar{rmem\_max}, \fvar{tcp\_rmem}, \fvar{tcp\_wmem}
+    parameters to this value on linux TCP implementations. For details, you can see
+    the NSC documentation.
 \end{itemize}
 
 \subsubsection*{Limitations}
 
 \begin{itemize}
-\item Because the kernel code is not reentrant, NSC creates a record containing
-the global variables of the stack implementation. By default there is room
-for 50 instance in this table, so you can not create more then 50 instance
-of \nedtype{TcpNsc}. You can increase the \fvar{NUM\_STACKS} constant
-in \ffilename{num\_stacks.h} and recompile NSC to overcome this limitation.
-
-\item The \nedtype{TcpNsc} module does not supprt TCP\_TRANSFER\_OBJECT
-data transfer mode.
-
-\item The MTU of the network stack fixed to 1500, therefore MSS is 1460.
-
-\item TCP\_C\_STATUS command reports only local/remote addresses/ports and
-      current window of the connection.
-
+  \item Because the kernel code is not reentrant, NSC creates a record containing
+    the global variables of the stack implementation. By default there is room
+    for 50 instance in this table, so you can not create more then 50 instance
+    of \nedtype{TcpNsc}. You can increase the \fvar{NUM\_STACKS} constant
+    in \ffilename{num\_stacks.h} and recompile NSC to overcome this limitation.
+  \item The \nedtype{TcpNsc} module does not supprt TCP\_TRANSFER\_OBJECT
+    data transfer mode.
+  \item The MTU of the network stack fixed to 1500, therefore MSS is 1460.
+  \item TCP\_C\_STATUS command reports only local/remote addresses/ports and
+    current window of the connection.
 \end{itemize}
 
 \section{UDP}

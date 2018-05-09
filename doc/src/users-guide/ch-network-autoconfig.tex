@@ -71,7 +71,6 @@ The configurator goes through the following steps:
      the configurator also builds a table of all "links" (the link data
      structure consists of the set of network interfaces that are
      on the same point-to-point link or LAN)
-
   \item  Assigns IP addresses to all interfaces of all nodes. The
      assignment process takes into consideration the addresses and netmasks
      already present on the interfaces (possibly set in earlier initialize
@@ -90,9 +89,7 @@ The configurator goes through the following steps:
      The configurator might fail to assign netmasks and addresses according
      to the given configuration parameters; if that happens, the assignment
      process stops and an error is signalled.
-
   \item  Adds the manual routes that are specified in the configuration.
-
   \item  Adds static routes to all routing tables in the network. The
      configurator uses Dijkstra's weighted shortest path algorithm to find
      the desired routes between all possible node pairs. The resulting
@@ -105,7 +102,6 @@ The configurator goes through the following steps:
      different links. CAVEAT: Using manual routes and static route generation
      together may have unwanted side effects, because route generation ignores
      manual routes.
-
   \item  Then it optimizes the routing tables for size. This optimization allows
      configuring larger networks with smaller memory footprint and makes the
      routing table lookup faster. The resulting routing table might be
@@ -113,7 +109,6 @@ The configurator goes through the following steps:
      did not. Nevertheless the following invariant holds: any packet routed
      by the original routing table (has matching route) will still be routed
      the same way by the optimized routing table.
-
   \item  Finally it dumps the requested results of the configuration. It can
      dump network topology, assigned IP addresses, routing tables and its
      own configuration format.
@@ -216,13 +211,11 @@ The \verb!<interface>! element may contain the following attributes:
       the hierarchy, and other patterns similar to ini file keys. The default
       value is "*" that matches all hosts.
       e.g. "subnet.client*" or "host* router[0..3]" or "area*.*.host[0]"
-
     \item \ttt{@names}
       Optional selector attribute that specifies a list of interface name
       patterns. Only interfaces with the specified names are affected. The
       default value is "*" that matches all interfaces.
       e.g. "eth* ppp0" or "*"
-
     \item \ttt{@towards}
       Optional selector attribute that specifies a list of host name patterns.
       Only interfaces connected towards the specified hosts are affected. The
@@ -232,13 +225,11 @@ The \verb!<interface>! element may contain the following attributes:
       For wired networks it might be easier to specify this parameter instead
       of specifying the interface names. The default value is "*".
       e.g. "ap" or "server" or "client*"
-
     \item \ttt{@among}
       Optional selector attribute that specifies a list of host name patterns.
       Only interfaces in the specified hosts connected towards the specified
       hosts are affected.
       The 'among="X Y Z"' is same as 'hosts="X Y Z" towards="X Y Z"'.
-
     \item \ttt{@address}
       Optional parameter attribute that limits the range of assignable
       addresses. Wildcards are allowed with using 'x' as part of the address
@@ -247,7 +238,6 @@ The \verb!<interface>! element may contain the following attributes:
       be configured. Unconfigured interfaces still have allocated addresses
       in their subnets allowing them to become configured later very easily.
       e.g. "192.168.1.1" or "10.0.x.x"
-
     \item \ttt{@netmask}
       Optional parameter attribute that limits the range of assignable
       netmasks. Wildcards are allowed with using 'x' as part of the netmask
@@ -255,11 +245,9 @@ The \verb!<interface>! element may contain the following attributes:
       the configurator. The default value "" means that any netmask can be
       configured.
       e.g. "255.255.255.0" or "255.255.x.x" or "255.255.x.0"
-
     \item \ttt{@mtu}                number
       Optional parameter attribute to set the MTU parameter in the interface.
       When unspecified the interface parameter is left unchanged.
-
     \item \ttt{@metric}                number
       Optional parameter attribute to set the Metric parameter in the interface.
       When unspecified the interface parameter is left unchanged.
@@ -268,15 +256,14 @@ The \verb!<interface>! element may contain the following attributes:
 Wireless interfaces can similarly be configured by adding
 \verb!<wireless>! elements to the configuration. Each \verb!<wireless>!
 element with a different id defines a separate subnet.
+
 \begin{compactitem}
     \item \ttt{@id} (optional)
       identifies wireless network, unique value used if missed
-
     \item \ttt{@hosts}
       Optional selector attribute that specifies a list of host name patterns.
       Only interfaces in the specified hosts are affected. The default value
       is "*" that matches all hosts.
-
     \item \ttt{@interfaces}
       Optional selector attribute that specifies a list of interface name
       patterns. Only interfaces with the specified names are affected. The
@@ -291,12 +278,14 @@ Multicast groups can be configured by adding \verb!<multicast-group>!
 elements to the configuration file. Interfaces belongs to a multicast
 group will join to the group automatically.
 
-For example
+For example,
+
 \begin{XML}
 <config>
   <multicast-group hosts="router*" interfaces="eth*" address="224.0.0.5"/>
 </config>
 \end{XML}
+
 adds all Ethernet interfaces of nodes whose name starts with ``router''
 to the 224.0.0.5 multicast group.
 
@@ -306,23 +295,19 @@ The \verb!<multicast-group>! element has the following attributes:
       Optional selector attribute that specifies a list of host name patterns.
       Only interfaces in the specified hosts are affected. The default value
       is "*" that matches all hosts.
-
     \item \ttt{@interfaces}
       Optional selector attribute that specifies a list of interface name
       patterns. Only interfaces with the specified names are affected. The
       default value is "*" that matches all interfaces.
-
     \item \ttt{@towards}
       Optional selector attribute that specifies a list of host name patterns.
       Only interfaces connected towards the specified hosts are affected.
       The default value is "*".
-
     \item \ttt{@among}
       Optional selector attribute that specifies a list of host name patterns.
       Only interfaces in the specified hosts connected towards the specified
       hosts are affected.
       The 'among="X Y Z"' is same as 'hosts="X Y Z" towards="X Y Z"'.
-
     \item \ttt{@address}
       Mandatory parameter attribute that specifies a list of multicast group
       addresses to be assigned. Values must be selected from the valid range
@@ -345,29 +330,24 @@ routing tables of selected nodes. The element has the following attributes:
       Only routing tables in the specified hosts are affected. The default
       value "" means all hosts will be affected.
       e.g. "host* router[0..3]"
-
     \item \ttt{@destination}
       Optional parameter attribute that specifies the destination address in
       the route (L3AddressResolver syntax). The default value is "*".
       e.g. "192.168.1.1" or "subnet.client[3]" or "subnet.server(ipv4)" or "*"
-
     \item \ttt{@netmask}
       Optional parameter attribute that specifies the netmask in the route.
       The default value is "*".
       e.g. "255.255.255.0" or "/29" or "*"
-
     \item \ttt{@gateway}
       Optional parameter attribute that specifies the gateway (next-hop)
       address in the route (L3AddressResolver syntax). When unspecified
       the interface parameter must be specified. The default value is "*".
       e.g. "192.168.1.254" or "subnet.router" or "*"
-
     \item \ttt{@interface}
       Optional parameter attribute that specifies the output interface name
       in the route. When unspecified the gateway parameter must be specified.
       This parameter has no default value.
       e.g. "eth0"
-
     \item \ttt{@metric}
       Optional parameter attribute that specifies the metric in the route.
       The default value is 0.
@@ -380,30 +360,24 @@ Multicast routing tables can similarly be configured by adding
       Optional selector attribute that specifies a list of host name patterns.
       Only routing tables in the specified hosts are affected.
       e.g. "host* router[0..3]"
-
     \item \ttt{@source}
       Optional parameter attribute that specifies the address of the source
       network. The default value is "*" that matches all sources.
-
     \item \ttt{@netmask}
       Optional parameter attribute that specifies the netmask of the source
       network. The default value is "*" that matches all sources.
-
     \item \ttt{@groups}
       Optional List of IPv4 multicast addresses specifying the groups this entry
       applies to. The default value is "*" that matches all multicast groups.
       e.g. "225.0.0.1 225.0.1.2".
-
     \item \ttt{@metric}
       Optional parameter attribute that specifies the metric in the route.
-
     \item \ttt{@parent}
       Optional parameter attribute that specifies the name of the interface
       the multicast datagrams are expected to arrive. When a datagram arrives
       on the parent interface, it will be forwarded towards the child interfaces;
       otherwise it will be dropped. The default value is the interface on the
       shortest path towards the source of the datagram.
-
     \item \ttt{@children}
       Mandatory parameter attribute that specifies a list of interface name
       patterns:
