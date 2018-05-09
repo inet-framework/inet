@@ -67,8 +67,12 @@ class INET_API Ipv4Socket : public INetworkSocket
     virtual bool belongsToSocket(cMessage *msg) const override;
     virtual void processMessage(cMessage *msg) override;
 
-    virtual void bind(const Protocol *protocol) override;
+    virtual void bind(const Protocol *protocol, L3Address localAddress) override { bind(protocol, localAddress.toIpv4()); }
+    virtual void bind(const Protocol *protocol, Ipv4Address localAddress);
+    virtual void connect(L3Address remoteAddress) override { connect(remoteAddress.toIpv4()); }
+    virtual void connect(Ipv4Address remoteAddress);
     virtual void send(Packet *packet) override;
+    virtual void sendTo(Packet *packet, L3Address destAddress) override;
     virtual void close() override;
 };
 

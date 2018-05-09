@@ -68,8 +68,10 @@ class INET_API L3Socket : public INetworkSocket
     virtual bool belongsToSocket(cMessage *msg) const override;
     virtual void processMessage(cMessage *msg) override;
 
-    virtual void bind(const Protocol *protocol) override;
+    virtual void bind(const Protocol *protocol, L3Address localAddress) override;
+    virtual void connect(L3Address remoteAddress) override;
     virtual void send(Packet *packet) override;
+    virtual void sendTo(Packet *packet, L3Address destAddress) override;
     virtual void close() override;
 };
 

@@ -19,6 +19,7 @@
 #define __INET_INETWORKSOCKET_H
 
 #include "inet/common/socket/ISocket.h"
+#include "inet/networklayer/common/L3Address.h"
 
 namespace inet {
 
@@ -50,18 +51,35 @@ class INET_API INetworkSocket : public ISocket
      * other occasion.
      */
     virtual void setCallback(ICallback *callback) = 0;
+
+    /**
+     * Returns the associated network protocol used to deliver datagrams by this socket.
+     */
     virtual const Protocol *getNetworkProtocol() const = 0;
 
     /**
-     * Binds this socket to the given protocol. All incoming packets will be
-     * delivered via the callback interface.
+     * Binds this socket to the given protocol and local address. All incoming
+     * packets matching the given parameters will be delivered via the callback
+     * interface.
      */
-    virtual void bind(const Protocol *protocol) = 0;
+    virtual void bind(const Protocol *protocol, L3Address localAddress) = 0;
+
+    /**
+     * Connects to a remote socket. The socket will only receive packets from
+     * the specified address, and you can use send() as opposed to sendTo() to
+     * send packets.
+     */
+    virtual void connect(L3Address remoteAddress) = 0;
 
     /**
      * Sends a packet using the associated network protocol.
      */
     virtual void send(Packet *packet) = 0;
+
+    /**
+     * Sends a packet to the given remote address using the associated network protocol.
+     */
+    virtual void sendTo(Packet *packet, L3Address remoteAddress) = 0;
 
     /**
      * Closes this socket releasing all resources. Once closed, a closed socket
