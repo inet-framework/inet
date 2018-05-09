@@ -68,6 +68,11 @@ void L3Socket::bind(const Protocol *protocol, L3Address localAddress)
 
 void L3Socket::connect(L3Address remoteAddress)
 {
+    auto *command = new L3SocketConnectCommand();
+    command->setRemoteAddress(remoteAddress);
+    auto request = new Request("connect", L3_C_CONNECT);
+    request->setControlInfo(command);
+    sendToOutput(request);
 }
 
 void L3Socket::send(Packet *packet)

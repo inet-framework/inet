@@ -157,24 +157,21 @@ void Ipv4::handleMessage(cMessage *msg)
     auto request = dynamic_cast<Request *>(msg);
     if (Ipv4SocketBindCommand *command = dynamic_cast<Ipv4SocketBindCommand *>(msg->getControlInfo())) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
-        SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocol()->getId());
+        SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocol()->getId(), command->getLocalAddress());
         socketIdToSocketDescriptor[socketId] = descriptor;
-        protocolIdToSocketDescriptors.insert(std::pair<int, SocketDescriptor *>(command->getProtocol()->getId(), descriptor));
+        delete msg;
+    }
+    else if (Ipv4SocketConnectCommand *command = dynamic_cast<Ipv4SocketConnectCommand *>(msg->getControlInfo())) {
+        int socketId = request->getTag<SocketReq>()->getSocketId();
+        if (socketIdToSocketDescriptor.find(socketId) == socketIdToSocketDescriptor.end())
+            throw cRuntimeError("Ipv4Socket: should use bind() before connect()");
+        socketIdToSocketDescriptor[socketId]->remoteAddress = command->getRemoteAddress();
         delete msg;
     }
     else if (dynamic_cast<Ipv4SocketCloseCommand *>(msg->getControlInfo()) != nullptr) {
         int socketId = 0; request->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketDescriptor.find(socketId);
         if (it != socketIdToSocketDescriptor.end()) {
-            int protocol = it->second->protocolId;
-            auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol);
-            auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol);
-            for (auto jt = lowerBound; jt != upperBound; jt++) {
-                if (it->second == jt->second) {
-                    protocolIdToSocketDescriptors.erase(jt);
-                    break;
-                }
-            }
             delete it->second;
             socketIdToSocketDescriptor.erase(it);
         }
@@ -732,15 +729,20 @@ void Ipv4::reassembleAndDeliverFinish(Packet *packet)
     auto ipv4HeaderPosition = packet->getFrontOffset();
     const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
     const Protocol *protocol = ipv4Header->getProtocol();
+    auto remoteAddress(ipv4Header->getSrcAddress());
+    auto localAddress(ipv4Header->getDestAddress());
     decapsulate(packet);
-    auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol->getId());
-    auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol->getId());
-    bool hasSocket = lowerBound != upperBound;
-    for (auto it = lowerBound; it != upperBound; it++) {
-        auto *packetCopy = packet->dup();
-        packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(it->second->socketId);
-        emit(packetSentToUpperSignal, packetCopy);
-        send(packetCopy, "transportOut");
+    bool hasSocket = false;
+    for (const auto &it: socketIdToSocketDescriptor) {
+        if (it.second->protocolId == protocol->getId()
+                && (it.second->localAddress.isUnspecified() || it.second->localAddress == localAddress)
+                && (it.second->remoteAddress.isUnspecified() || it.second->remoteAddress == remoteAddress)) {
+            auto *packetCopy = packet->dup();
+            packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(it.second->socketId);
+            emit(packetSentToUpperSignal, packetCopy);
+            send(packetCopy, "transportOut");
+            hasSocket = true;
+        }
     }
     if (mapping.findOutputGateForProtocol(protocol->getId()) >= 0) {
         emit(packetSentToUpperSignal, packet);
@@ -885,12 +887,8 @@ void Ipv4::fragmentAndSend(Packet *packet)
             curFragName += "-last";
         Packet *fragment = new Packet(curFragName.c_str());     //TODO add offset or index to fragment name
 
-        //copy Tags from packet to fragment     //FIXME optimizing needed
-        {
-            Packet *tmp = packet->dup();
-            fragment->copyTags(*tmp);
-            delete tmp;
-        }
+        //copy Tags from packet to fragment
+        fragment->copyTags(*packet);
 
         ASSERT(fragment->getByteLength() == 0);
         auto fraghdr = staticPtrCast<Ipv4Header>(ipv4Header->dupShared());

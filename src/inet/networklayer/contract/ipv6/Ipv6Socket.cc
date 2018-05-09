@@ -53,19 +53,25 @@ void Ipv6Socket::processMessage(cMessage *msg)
         delete msg;
 }
 
-void Ipv6Socket::bind(const Protocol *protocol, L3Address localAddress)
+void Ipv6Socket::bind(const Protocol *protocol, Ipv6Address localAddress)
 {
     ASSERT(!bound);
-    Ipv6SocketBindCommand *command = new Ipv6SocketBindCommand();
+    auto *command = new Ipv6SocketBindCommand();
     command->setProtocol(protocol);
+    command->setLocalAddress(localAddress);
     auto request = new Request("bind", IPv6_C_BIND);
     request->setControlInfo(command);
     sendToOutput(request);
     bound = true;
 }
 
-void Ipv6Socket::connect(L3Address remoteAddress)
+void Ipv6Socket::connect(Ipv6Address remoteAddress)
 {
+    auto *command = new Ipv6SocketConnectCommand();
+    command->setRemoteAddress(remoteAddress);
+    auto request = new Request("connect", IPv6_C_CONNECT);
+    request->setControlInfo(command);
+    sendToOutput(request);
 }
 
 void Ipv6Socket::send(Packet *packet)
@@ -73,10 +79,10 @@ void Ipv6Socket::send(Packet *packet)
     sendToOutput(packet);
 }
 
-void Ipv6Socket::sendTo(Packet *packet, L3Address destAddress)
+void Ipv6Socket::sendTo(Packet *packet, Ipv6Address destAddress)
 {
     auto addressReq = packet->addTagIfAbsent<L3AddressReq>();
-    addressReq->setDestAddress(destAddress.toIpv6());
+    addressReq->setDestAddress(destAddress);
     send(packet);
 }
 

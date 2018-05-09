@@ -66,8 +66,11 @@ class INET_API Ipv6 : public QueueBase, public NetfilterBase, public ILifecycle,
     {
         int socketId = -1;
         int protocolId = -1;
+        Ipv6Address localAddress;
+        Ipv6Address remoteAddress;
 
-        SocketDescriptor(int socketId, int protocolId) : socketId(socketId), protocolId(protocolId) { }
+        SocketDescriptor(int socketId, int protocolId, Ipv6Address localAddress)
+                : socketId(socketId), protocolId(protocolId), localAddress(localAddress) { }
     };
 
     IInterfaceTable *ift = nullptr;
@@ -83,7 +86,6 @@ class INET_API Ipv6 : public QueueBase, public NetfilterBase, public ILifecycle,
     simtime_t lastCheckTime;    // when fragbuf was last checked for state fragments
     ProtocolMapping mapping;    // where to send packets after decapsulation
     std::map<int, SocketDescriptor *> socketIdToSocketDescriptor;
-    std::multimap<int, SocketDescriptor *> protocolIdToSocketDescriptors;
 
     // statistics
     int numMulticast = 0;

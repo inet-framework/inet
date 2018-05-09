@@ -69,7 +69,7 @@ void Ipv4Socket::connect(Ipv4Address remoteAddress)
 {
     Ipv4SocketConnectCommand *command = new Ipv4SocketConnectCommand();
     command->setRemoteAddress(remoteAddress);
-    auto request = new Request("bind", IPv4_C_CONNECT);
+    auto request = new Request("connect", IPv4_C_CONNECT);
     request->setControlInfo(command);
     sendToOutput(request);
 }
@@ -79,10 +79,10 @@ void Ipv4Socket::send(Packet *packet)
     sendToOutput(packet);
 }
 
-void Ipv4Socket::sendTo(Packet *packet, L3Address destAddress)
+void Ipv4Socket::sendTo(Packet *packet, Ipv4Address destAddress)
 {
     auto addressReq = packet->addTagIfAbsent<L3AddressReq>();
-    addressReq->setDestAddress(destAddress.toIpv4());
+    addressReq->setDestAddress(destAddress);
     send(packet);
 }
 

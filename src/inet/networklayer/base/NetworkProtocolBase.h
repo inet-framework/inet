@@ -33,8 +33,11 @@ class INET_API NetworkProtocolBase : public LayeredProtocolBase, public IProtoco
     {
         int socketId = -1;
         int protocolId = -1;
+        L3Address localAddress;
+        L3Address remoteAddress;
 
-        SocketDescriptor(int socketId, int protocolId) : socketId(socketId), protocolId(protocolId) { }
+        SocketDescriptor(int socketId, int protocolId, L3Address localAddress)
+                : socketId(socketId), protocolId(protocolId), localAddress(localAddress) { }
     };
 
     ProtocolMapping protocolMapping;    // where to send packets after decapsulation
@@ -42,7 +45,6 @@ class INET_API NetworkProtocolBase : public LayeredProtocolBase, public IProtoco
     // working vars
     ProtocolMapping mapping;
     std::map<int, SocketDescriptor *> socketIdToSocketDescriptor;
-    std::multimap<int, SocketDescriptor *> protocolIdToSocketDescriptors;
 
   protected:
     NetworkProtocolBase();

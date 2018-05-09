@@ -133,26 +133,23 @@ void Ipv6::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePr
 void Ipv6::handleMessage(cMessage *msg)
 {
     auto request = dynamic_cast<Request *>(msg);
-    if (Ipv6SocketBindCommand *command = dynamic_cast<Ipv6SocketBindCommand *>(msg->getControlInfo())) {
+    if (auto *command = dynamic_cast<Ipv6SocketBindCommand *>(msg->getControlInfo())) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
-        SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocol()->getId());
+        SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocol()->getId(), command->getLocalAddress());
         socketIdToSocketDescriptor[socketId] = descriptor;
-        protocolIdToSocketDescriptors.insert(std::pair<int, SocketDescriptor *>(command->getProtocol()->getId(), descriptor));
+        delete msg;
+    }
+    else if (auto *command = dynamic_cast<Ipv6SocketConnectCommand *>(msg->getControlInfo())) {
+        int socketId = request->getTag<SocketReq>()->getSocketId();
+        if (socketIdToSocketDescriptor.find(socketId) == socketIdToSocketDescriptor.end())
+            throw cRuntimeError("Ipv6Socket: should use bind() before connect()");
+        socketIdToSocketDescriptor[socketId]->remoteAddress = command->getRemoteAddress();
         delete msg;
     }
     else if (dynamic_cast<Ipv6SocketCloseCommand *>(msg->getControlInfo()) != nullptr) {
-        int socketId = request->getTag<SocketReq>()->getSocketId();
+        int socketId = 0; request->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketDescriptor.find(socketId);
         if (it != socketIdToSocketDescriptor.end()) {
-            int protocol = it->second->protocolId;
-            auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol);
-            auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol);
-            for (auto jt = lowerBound; jt != upperBound; jt++) {
-                if (it->second == jt->second) {
-                    protocolIdToSocketDescriptors.erase(jt);
-                    break;
-                }
-            }
             delete it->second;
             socketIdToSocketDescriptor.erase(it);
         }
@@ -670,14 +667,20 @@ void Ipv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
 
     auto origPacket = packet->dup();
     int protocol = ipv6Header->getProtocol()->getId();
+    auto remoteAddress(ipv6Header->getSrcAddress());
+    auto localAddress(ipv6Header->getDestAddress());
     decapsulate(packet);
-    auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol);
-    auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol);
-    bool hasSocket = lowerBound != upperBound;
-    for (auto it = lowerBound; it != upperBound; it++) {
-        Packet *packetCopy = packet->dup();
-        packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(it->second->socketId);
-        send(packetCopy, "transportOut");
+    bool hasSocket = false;
+    for (const auto &it: socketIdToSocketDescriptor) {
+        if (it.second->protocolId == protocol
+                && (it.second->localAddress.isUnspecified() || it.second->localAddress == localAddress)
+                && (it.second->remoteAddress.isUnspecified() || it.second->remoteAddress == remoteAddress)) {
+            auto *packetCopy = packet->dup();
+            packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(it.second->socketId);
+            emit(packetSentToUpperSignal, packetCopy);
+            send(packetCopy, "transportOut");
+            hasSocket = true;
+        }
     }
 
     if (protocol == Protocol::icmpv6.getId()) {
