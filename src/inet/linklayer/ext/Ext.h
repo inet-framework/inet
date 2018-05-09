@@ -26,11 +26,9 @@
 #endif // ifndef MAX_MTU_SIZE
 
 #include <pcap.h>
-
 #include "inet/common/INETDefs.h"
-
+#include "inet/common/scheduler/RealTimeScheduler.h"
 #include "inet/linklayer/base/MacBase.h"
-#include "inet/linklayer/ext/RealTimeScheduler.h"
 
 namespace inet {
 
