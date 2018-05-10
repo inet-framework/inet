@@ -17,6 +17,7 @@ $quiet = 0;
 $singlePage = 1;
 $isdraft = 0;
 $ext = "html";
+$linkext = "html";
 $apidir = "../api";
 $tagfile = ""; # ../../api/opptags.xml";
 
@@ -43,6 +44,9 @@ while (@ARGV)
     }
     elsif ($arg eq "--title") {
         $doctitle = shift @ARGV;
+    }
+    elsif ($arg eq "--ext") {
+        $ext = shift @ARGV;
     }
     elsif ($arg eq "--product") {
         $product = shift @ARGV;
@@ -210,7 +214,7 @@ while ($scrap =~ s/\<a name="([^"]+)"//si)
           if (!$singlePage) {
               my $i = $aname2index{$aname};
               my $c = $chapnum[$i];
-              $afilename = "chap$c.$ext";
+              $afilename = "chap$c.$linkext";
           }
       }
       if ($aname =~ /^fig/) {
@@ -240,14 +244,14 @@ print "creating Topics and TOC tables\n" unless $quiet;
 if ($singlePage) {
       $chapters = "<h1>Chapters</h1>\n<p>\n";
 } else {
-      $navbar="<p><b><hr><a href=\"toc.$ext\">[Table of Contents]</a><hr></b></p>";
+      $navbar="<p><b><hr><a href=\"toc.$linkext\">[Table of Contents]</a><hr></b></p>";
       $chapters = $navbar . "<h1>" . $doctitle . " -- Chapters</h1>\n<p>\n";
 }
 for ($i=0; $i<$nheadings; $i++)
 {
       if ($level[$i]==1)
       {
-           $link = $singlePage ? "#toc_$number[$i]" : "chap$chapnum[$i].$ext";
+           $link = $singlePage ? "#toc_$number[$i]" : "chap$chapnum[$i].$linkext";
            $entry = "<b><a href=\"$link\" class=\"toc\">$number[$i] $title[$i]</a></b><br>";
            $chapters .= "$entry\n";
       }
@@ -260,13 +264,13 @@ $chapters .= "</p>";
 if ($singlePage) {
       $toc = "<h1>Table of Contents</h1>\n<p>\n";
 } else {
-      $navbar="<p><b><hr><a href=\"$outfnamebase.$ext\">[Chapters]</a><hr></b>\n</p>";
+      $navbar="<p><b><hr><a href=\"$outfnamebase.$linkext\">[Chapters]</a><hr></b>\n</p>";
       $toc = $navbar . "<h1>Table of Contents</h1><p>\n";
 }
 for ($i=0; $i<$nheadings; $i++)
 {
       if ($level[$i]==4) { next; }
-      $link = $singlePage ? "#$label[$i]" : "chap$chapnum[$i].$ext#$label[$i]";
+      $link = $singlePage ? "#$label[$i]" : "chap$chapnum[$i].$linkext#$label[$i]";
       $entry = "<a name=\"toc_$number[$i]\"/><a href=\"$link\" class=\"toc\">$number[$i] $title[$i]</A>";
       for ($j=0; $j<$level[$i]; $j++) {$entry = "&nbsp;&nbsp;$entry";}
       if ($level[$i]==1)    {$entry = "<br><font size=+1><b>$entry</b></font>";}
@@ -291,7 +295,7 @@ $tocxml = '<?xml version="1.0" encoding="utf-8" standalone="no"?>
 $level[$nheadings] = 1; #sentry
 for (my $i=0; $i<$nheadings; $i++)
 {
-      my $link = $singlePage ? "$outfnamebase.$ext#$label[$i]" : "chap$chapnum[$i].$ext#$label[$i]";
+      my $link = $singlePage ? "$outfnamebase.$linkext#$label[$i]" : "chap$chapnum[$i].$linkext#$label[$i]";
       my $title = $title[$i];
       $title =~ s|"|&quot;|g;
       $title =~ s|</?[a-z0-9]+>||gi;  # remove <b></b>, <tt></tt>
@@ -385,10 +389,10 @@ else
       for ($i=1; $i<=$nchapters; $i++)
       {
             $navbar[$i] = "<p><hr><b>";
-            if ($i>1) {$t=$i-1; $navbar[$i] .= "<a href=\"chap$t.$ext\">[Prev]</A>";}
-            if ($i<$nchapters) {$t=$i+1; $navbar[$i] .= "&nbsp;<a href=\"chap$t.$ext\">[Next]</A>";}
-            $navbar[$i] .= "&nbsp;<a href=\"toc.$ext#toc_$i.\">[TOC]</a>";
-            $navbar[$i] .= "&nbsp;<a href=\"$outfnamebase.$ext\">[Chapters]</a>";
+            if ($i>1) {$t=$i-1; $navbar[$i] .= "<a href=\"chap$t.$linkext\">[Prev]</A>";}
+            if ($i<$nchapters) {$t=$i+1; $navbar[$i] .= "&nbsp;<a href=\"chap$t.$linkext\">[Next]</A>";}
+            $navbar[$i] .= "&nbsp;<a href=\"toc.$linkext#toc_$i.\">[TOC]</a>";
+            $navbar[$i] .= "&nbsp;<a href=\"$outfnamebase.$linkext\">[Chapters]</a>";
             $navbar[$i] .= "</b><hr></p>";
       }
 
