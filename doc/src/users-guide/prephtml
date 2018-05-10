@@ -6,10 +6,10 @@
 
 
 # *** check settings below -- also ltoh.specs for \opp definition! ***
-$product = "OMNeT++"; # or "OMNEST";
-$productversion = "5.x";
-$templatefile = "omnetpp.thtml"; # or "omnest.thtml";
-$doctitle = "OMNeT++ Simulation Manual";
+$product = "INET Framework"; # or "OMNEST";
+$productversion = "4.x";
+$templatefile = "";
+$doctitle = "INET Framework Users Guide";
 
 $fname = "";
 $outfnamebase = "";
@@ -240,19 +240,18 @@ $html =~ s|\<A HREF=\"#([^\"]+)\"\>\[click\]\</A\>|\<a href=\"$xref{$1}\"\>$xref
 #
 # create 'chapters' table
 #
-print "creating Topics and TOC tables\n" unless $quiet;
+print "creating Topics and ToC tables\n" unless $quiet;
 if ($singlePage) {
       $chapters = "<h1>Chapters</h1>\n<p>\n";
 } else {
-      $navbar="<p><b><hr><a href=\"toc.$linkext\">[Table of Contents]</a><hr></b></p>";
-      $chapters = $navbar . "<h1>" . $doctitle . " -- Chapters</h1>\n<p>\n";
+      $chapters = "<h1>Chapters</h1>\n<p>\n";
 }
 for ($i=0; $i<$nheadings; $i++)
 {
       if ($level[$i]==1)
       {
            $link = $singlePage ? "#toc_$number[$i]" : "chap$chapnum[$i].$linkext";
-           $entry = "<b><a href=\"$link\" class=\"toc\">$number[$i] $title[$i]</a></b><br>";
+           $entry = "<a href=\"$link\" class=\"toc\">$number[$i] $title[$i]</a><br>";
            $chapters .= "$entry\n";
       }
 }
@@ -262,19 +261,18 @@ $chapters .= "</p>";
 # create table of contents
 #
 if ($singlePage) {
-      $toc = "<h1>Table of Contents</h1>\n<p>\n";
+      $toc = "<h1>Table of Contents</h1>\n";
 } else {
-      $navbar="<p><b><hr><a href=\"$outfnamebase.$linkext\">[Chapters]</a><hr></b>\n</p>";
-      $toc = $navbar . "<h1>Table of Contents</h1><p>\n";
+      $toc = "<h1>Table of Contents</h1>\n";
 }
 for ($i=0; $i<$nheadings; $i++)
 {
       if ($level[$i]==4) { next; }
       $link = $singlePage ? "#$label[$i]" : "chap$chapnum[$i].$linkext#$label[$i]";
-      $entry = "<a name=\"toc_$number[$i]\"/><a href=\"$link\" class=\"toc\">$number[$i] $title[$i]</A>";
+      $entry = "<a name=\"toc_$number[$i]\"/><a href=\"$link\" class=\"toc\">$number[$i] $title[$i]</a>";
       for ($j=0; $j<$level[$i]; $j++) {$entry = "&nbsp;&nbsp;$entry";}
-      if ($level[$i]==1)    {$entry = "<br><font size=+1><b>$entry</b></font>";}
-      elsif ($level[$i]==2) {$entry = "<b>$entry</b>";}
+      if ($level[$i]==1)    {$entry = "<br>$entry";}
+      elsif ($level[$i]==2) {$entry = "$entry";}
       $toc .= "$entry<br>\n";
 }
 $toc .= "</p>";
@@ -406,12 +404,13 @@ else
       #
       for ($i=1; $i<=$nchapters; $i++)
       {
-            $navbar[$i] = "<p><hr><b>";
-            if ($i>1) {$t=$i-1; $navbar[$i] .= "<a href=\"chap$t.$linkext\">[Prev]</A>";}
-            if ($i<$nchapters) {$t=$i+1; $navbar[$i] .= "&nbsp;<a href=\"chap$t.$linkext\">[Next]</A>";}
-            $navbar[$i] .= "&nbsp;<a href=\"toc.$linkext#toc_$i.\">[TOC]</a>";
-            $navbar[$i] .= "&nbsp;<a href=\"$outfnamebase.$linkext\">[Chapters]</a>";
-            $navbar[$i] .= "</b><hr></p>";
+            $navbar[$i] = "<div class='oppnavbar'>";
+            my $sep = " &#8226; "; # bullet
+            if ($i>1) {$t=$i-1; $navbar[$i] .= "<a href=\"chap$t.$linkext\">Prev</a>" . $sep;}
+            if ($i<$nchapters) {$t=$i+1; $navbar[$i] .= "<a href=\"chap$t.$linkext\">Next</a>" . $sep;}
+            $navbar[$i] .= "<a href=\"toc.$linkext#toc_$i\">ToC</a>" . $sep;
+            $navbar[$i] .= "<a href=\"$outfnamebase.$linkext\">Chapters</a>";
+            $navbar[$i] .= "</div>";
       }
 
       #
@@ -420,7 +419,7 @@ else
       print "writing chapter files\n" unless $quiet;
       for ($i=1; $i<=$nchapters; $i++)
       {
-            savepage("chap$i.$ext", $navbar[$i] . $chapter[$i] . $navbar[$i], 0);
+            savepage("chap$i.$ext", "<div>$doctitle<hr width='100%'></div>\n" . $navbar[$i] . $chapter[$i] . $navbar[$i], 0);
       }
 
       #
@@ -433,7 +432,7 @@ else
       # write toc file (toc.html)
       #
       print "writing toc file\n" unless $quiet;
-      savepage("toc.$ext", $toc, 0);
+      savepage("toc.$ext", $toc, 1);
 }
 
 #
