@@ -35,7 +35,7 @@ htmlfile_spec := $BASE.html
 :{}	:\texttt:<tt>:</>:
 :{}	:\textsf:<i>:</>:
 :{}	:\emph:<i>:</>:
-:{}	:\underline:<ul>:</>:
+:{}	:\underline:<u>:</>:
 :{}	:\chapter:<hr class='pgbr'><h1>:</h1>:
 :{}	:\appendixchapter:<hr class='pgbr'><h1>Appendix AAA&#58; :</h1>:
 :{}	:\section:<h2>:</h2>:
@@ -189,12 +189,18 @@ htmlfile_spec := $BASE.html
 :b/e	:\begin{important}:<ul class="important"><b>IMPORTANT</b><br>:</ul>:
 :b/e	:\begin{pseudocode}(\[.*?\])?:<pre class="text">:</pre>:
 
+:{2}	:\nedsnippet#1#2:<pre class="snippet" src="Snippets.ned" after="//!#1" until="//!End"></pre><small>#2</small>::
+:{2}	:\msgsnippet#1#2:<pre class="snippet" src="Snippets.msg" after="//!#1" until="//!End"></pre><small>#2</small>::
+:{2}	:\cppsnippet#1#2:<pre class="snippet" src="Snippets.cc" after="//!#1" until="//!End"></pre><small>#2</small>::
+:{2}	:\inisnippet#1#2:<pre class="snippet" src="Snippets.ini" after="#!#1" until="#!End"></pre><small>#2</small>::
+:{2}	:\xmlsnippet#1#2:<pre class="snippet" src="Snippets.xml" after="<!--!#1-->" until="<!--End-->"></pre><small>#2</small>::
+
 #XXX Warning: the following names are now hardcoded into ltoh.pl! We need a "vb/e" category in ltoh, for "verbatim-like begin/end" where \,{,} needs to be left alone
-:b/e	:\begin{ned}(\[.*?\])?:<pre class="ned">:</pre>:
-:b/e	:\begin{msg}(\[.*?\])?:<pre class="msg">:</pre>:
-:b/e	:\begin{cpp}(\[.*?\])?:<pre class="cpp">:</pre>:
-:b/e	:\begin{inifile}(\[.*?\])?:<pre class="inifile">:</pre>:
-:b/e	:\begin{XML}(\[.*?\])?:<pre class="xml">:</pre>:
+:b/e	:\begin{ned}(\[.*?\])?:<pre><code data-language="ned">:</code></pre>:
+:b/e	:\begin{msg}(\[.*?\])?:<pre><code data-language="msg">:</code></pre>:
+:b/e	:\begin{cpp}(\[.*?\])?:<pre><code data-language="cpp">:</code></pre>:
+:b/e	:\begin{inifile}(\[.*?\])?:<pre><code data-language="ini">:</code></pre>:
+:b/e	:\begin{XML}(\[.*?\])?:<pre><code data-language="xml">:</code></pre>:
 :b/e	:\begin{filelisting}(\[.*?\])?:<pre class="filelisting">:</pre>:
 :b/e	:\begin{commandline}(\[.*?\])?:<pre class="commandline">:</pre>:
 :b/e	:\begin{Verbatim}(\[.*?\])?:<pre class="verbatim">:</pre>:

@@ -14,7 +14,8 @@
   tt,code,pre { font-size: 11pt; }
 
   div.top {
-    background-color: white; max-width: 750px; margin: 0 auto; padding-left: 100px; padding-right: 100px;
+    background-color: white; max-width: 750px; margin: 0 auto;
+    padding-left: 100px; padding-right: 100px; padding-top: 25px; padding-bottom: 25px;
     box-shadow: 0 0 2px 2px #dddddd;
   }
 
@@ -57,7 +58,7 @@ __TITLEPAGE_START__
   <img src='inet-logo.png' border='0'>
   <p style="color: #196F93; font-weight: bold; font-size: 32px; margin-top: 15px; margin-bottom: 5px">User's Guide</p>
   <p style="color: #196F93; font-weight: bold; font-size: 18px; margin-top: 5px; margin-bottom: 10px">INET Framework __VERSION__</p>
-  <p style="color: #196F93; font-weight: bold; font-size: 12px; margin-top: 5px; margin-bottom: 40px"><a href="http://inet.omnetpp.org">http://inet.omnetpp.org</a></p>
+  <p style="color: #196F93; font-weight: bold; font-size: 12px; margin-top: 5px; margin-bottom: 10px"><a href="http://inet.omnetpp.org">http://inet.omnetpp.org</a></p>
   <hr>
 __TITLEPAGE_END__
 

@@ -4,17 +4,19 @@ DOT=dot
 
 DOCNAME=inet-users-guide
 TEXMAIN=$(DOCNAME).tex
-TEMPLATE=inet-users-guide.thtml
+HTMLTEMPLATE=inet-users-guide.thtml
+MDTEMPLATE=inet-users-guide.tmd
 VERSION=4.x
 HTMLDIR=../../users-guide
 PDFDIR=../..
+MDDIR=~/inet-framework.github.io/users-guide
 
 ALLTEX = $(wildcard *.tex)
 DOTPICS = $(wildcard figures/*.dot)
 SVGPICS = $(wildcard figures/*.svg) $(DOTPICS:.dot=.svg)
 PDFPICS = $(SVGPICS:.svg=.pdf) $(DOTPICS:.dot=.pdf)
 
-.PHONY : pdf html
+.PHONY : pdf html md
 
 default: pdf html
 
@@ -22,6 +24,8 @@ pdf: $(ALLTEX) $(PDFPICS) figures/*.png
 	pdflatex $(TEXMAIN)
 	pdflatex $(TEXMAIN)
 	pdflatex $(TEXMAIN)
+	mkdir -p $(PDFDIR)
+	cp $(DOCNAME).pdf $(PDFDIR)
 
 %.pdf: %.svg
 	$(INKSCAPE) $< -A $@
@@ -37,25 +41,37 @@ pdf: $(ALLTEX) $(PDFPICS) figures/*.png
 %.png: %.dot
 	$(DOT) -Tpng $< >$@
 
-html : $(ALLTEX) $(SVGPICS) $(TEMPLATE) prephtml ltoh ltoh.specs
+html : $(ALLTEX) $(SVGPICS) $(HTMLTEMPLATE) prephtml ltoh ltoh.specs
 	CHAPTERS=$$(grep '\include{' $(TEXMAIN) | sed 's/\\include{//;s/}/.tex/' | sed '/^title\.tex/d') && cat $$CHAPTERS > _allinone_.tex
 	$(PERL) ltoh _allinone_.tex
-	$(PERL) prephtml --template $(TEMPLATE) --productversion $(VERSION) --outfilenamebase $(DOCNAME) _allinone_.html
+	$(PERL) prephtml --template $(HTMLTEMPLATE) --productversion $(VERSION) --outfilenamebase $(DOCNAME) _allinone_.html
 	rm _allinone_.tex _allinone_.html
-	rm -rf $(HTMLDIR)
-	mkdir $(HTMLDIR)
+	mkdir -p $(HTMLDIR)
 	cp $(DOCNAME).html $(HTMLDIR)/index.html
+	cp Snippets.* $(HTMLDIR)
 	cp *.png $(HTMLDIR)
 	cp figures/*.svg $(HTMLDIR)
 	cp figures/*.png $(HTMLDIR)
 	@if grep 'Unknown LaTeX command' $(DOCNAME).html; then echo 'Error: LaTeX commands missing from ltoh.specs! (see lines above)'; exit 1; fi
 
+md : $(ALLTEX) $(SVGPICS) $(MDTEMPLATE) prephtml ltoh ltoh.specs
+	CHAPTERS=$$(grep '\include{' $(TEXMAIN) | sed 's/\\include{//;s/}/.tex/' | sed '/^title\.tex/d') && cat $$CHAPTERS > _allinone_.tex
+	$(PERL) ltoh _allinone_.tex
+	$(PERL) prephtml --ext md --split --template $(MDTEMPLATE) --productversion $(VERSION) --outfilenamebase $(DOCNAME) _allinone_.html
+	rm _allinone_.tex _allinone_.html
+	mkdir -p $(MDDIR)
+	cp *.md Snippets.* $(MDDIR)
+	cp *.png $(MDDIR)
+	cp figures/*.svg $(MDDIR)
+	cp figures/*.png $(MDDIR)
+	@if grep 'Unknown LaTeX command' $(DOCNAME).md; then echo 'Error: LaTeX commands missing from ltoh.specs! (see lines above)'; exit 1; fi
+
 clean:
-	rm -f $(DOCNAME).dvi $(DOCNAME).pdf $(DOCNAME).html *.aux *.idx *.ilg *.ind *.log *.out *.toc *.bbl *.blg
+	rm -f $(DOCNAME).dvi $(DOCNAME).pdf $(DOCNAME).html $(DOCNAME).md *.md *.aux *.idx *.ilg *.ind *.log *.out *.toc *.bbl *.blg
 	rm -rf $(HTMLDIR)
+	rm -rf $(MDDIR)
 	rm -rf $(PDFDIR)/$(DOCNAME).pdf
 	rm -rf eclipse
 	rm -f figures/*.pdf
 	rm -f `ls figures/*.svg | sed 's/svg$$/png/'`
 	rm -f `ls figures/*.dot | sed 's/dot$$/svg/'`
-
