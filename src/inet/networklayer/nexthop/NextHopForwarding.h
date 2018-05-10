@@ -24,7 +24,6 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/common/ProtocolMap.h"
 #include "inet/common/queue/QueueBase.h"
 #include "inet/networklayer/contract/IArp.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -32,6 +31,9 @@
 #include "inet/networklayer/contract/INetworkProtocol.h"
 #include "inet/networklayer/nexthop/NextHopForwardingHeader_m.h"
 #include "inet/networklayer/nexthop/NextHopRoutingTable.h"
+
+#include <map>
+#include <set>
 
 namespace inet {
 
@@ -66,8 +68,11 @@ class INET_API NextHopForwarding : public QueueBase, public NetfilterBase, publi
     {
         int socketId = -1;
         int protocolId = -1;
+        L3Address localAddress;
+        L3Address remoteAddress;
 
-        SocketDescriptor(int socketId, int protocolId) : socketId(socketId), protocolId(protocolId) { }
+        SocketDescriptor(int socketId, int protocolId, L3Address localAddress)
+                : socketId(socketId), protocolId(protocolId), localAddress(localAddress) { }
     };
 
     IInterfaceTable *interfaceTable;
@@ -78,9 +83,8 @@ class INET_API NextHopForwarding : public QueueBase, public NetfilterBase, publi
     int defaultHopLimit;
 
     // working vars
-    ProtocolMapping mapping;    // where to send packets after decapsulation
+    std::set<const Protocol *> upperProtocols;    // where to send packets after decapsulation
     std::map<int, SocketDescriptor *> socketIdToSocketDescriptor;
-    std::multimap<int, SocketDescriptor *> protocolIdToSocketDescriptors;
 
     // hooks
     typedef std::list<QueuedDatagramForHook> DatagramQueueForHooks;

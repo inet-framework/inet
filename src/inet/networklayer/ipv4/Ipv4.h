@@ -29,8 +29,10 @@
 #include "inet/networklayer/contract/INetworkProtocol.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4FragBuf.h"
-#include "inet/common/ProtocolMap.h"
 #include "inet/common/queue/QueueBase.h"
+#include <list>
+#include <map>
+#include <set>
 
 namespace inet {
 
@@ -91,8 +93,7 @@ class INET_API Ipv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     long curFragmentId = -1;    // counter, used to assign unique fragmentIds to datagrams
     Ipv4FragBuf fragbuf;    // fragmentation reassembly buffer
     simtime_t lastCheckTime;    // when fragbuf was last checked for state fragments
-    ProtocolMapping mapping;    // where to send packets after decapsulation
-    // std::set<const Protocol *> protocols;    // where to send packets after decapsulation
+    std::set<const Protocol *> upperProtocols;    // where to send packets after decapsulation
     std::map<int, SocketDescriptor *> socketIdToSocketDescriptor;
 
     // ARP related

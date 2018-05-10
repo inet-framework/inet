@@ -89,9 +89,8 @@ void NextHopForwarding::handleRegisterService(const Protocol& protocol, cGate *o
 void NextHopForwarding::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
-    if (!strcmp("transportIn", in->getBaseName())) {
-        mapping.addProtocolMapping(protocol.getId(), in->getIndex());
-    }
+    if (!strcmp("transportIn", in->getBaseName()))
+        upperProtocols.insert(&protocol);
 }
 
 void NextHopForwarding::refreshDisplay() const
@@ -118,26 +117,23 @@ void NextHopForwarding::handleMessage(cMessage *msg)
 
 void NextHopForwarding::handleCommand(Request *request)
 {
-    if (L3SocketBindCommand *command = dynamic_cast<L3SocketBindCommand *>(request->getControlInfo())) {
+    if (auto *command = dynamic_cast<L3SocketBindCommand *>(request->getControlInfo())) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
-        SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocol()->getId());
+        SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocol()->getId(), command->getLocalAddress());
         socketIdToSocketDescriptor[socketId] = descriptor;
-        protocolIdToSocketDescriptors.insert(std::pair<int, SocketDescriptor *>(command->getProtocol()->getId(), descriptor));
+        delete request;
+    }
+    else if (auto *command = dynamic_cast<L3SocketConnectCommand *>(request->getControlInfo())) {
+        int socketId = request->getTag<SocketReq>()->getSocketId();
+        if (socketIdToSocketDescriptor.find(socketId) == socketIdToSocketDescriptor.end())
+            throw cRuntimeError("L3Socket: should use bind() before connect()");
+        socketIdToSocketDescriptor[socketId]->remoteAddress = command->getRemoteAddress();
         delete request;
     }
     else if (dynamic_cast<L3SocketCloseCommand *>(request->getControlInfo()) != nullptr) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketDescriptor.find(socketId);
         if (it != socketIdToSocketDescriptor.end()) {
-            int protocol = it->second->protocolId;
-            auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol);
-            auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol);
-            for (auto jt = lowerBound; jt != upperBound; jt++) {
-                if (it->second == jt->second) {
-                    protocolIdToSocketDescriptors.erase(jt);
-                    break;
-                }
-            }
             delete it->second;
             socketIdToSocketDescriptor.erase(it);
         }
@@ -548,15 +544,24 @@ void NextHopForwarding::sendDatagramToHL(Packet *packet)
     const Protocol *protocol = header->getProtocol();
     decapsulate(packet);
     // deliver to sockets
-    auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol->getId());
-    auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol->getId());
-    bool hasSocket = lowerBound != upperBound;
-    for (auto it = lowerBound; it != upperBound; it++) {
-        auto *packetCopy = packet->dup();
-        packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(it->second->socketId);
-        send(packetCopy, "transportOut");
+    auto localAddress(header->getDestAddr());
+    auto remoteAddress(header->getSrcAddr());
+    bool hasSocket = false;
+    for (const auto &elem: socketIdToSocketDescriptor) {
+        if (elem.second->protocolId == protocol->getId()
+                && (elem.second->localAddress.isUnspecified() || elem.second->localAddress == localAddress)
+                && (elem.second->remoteAddress.isUnspecified() || elem.second->remoteAddress == remoteAddress)) {
+            auto *packetCopy = packet->dup();
+            packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
+            EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
+            emit(packetSentToUpperSignal, packetCopy);
+            send(packetCopy, "transportOut");
+            hasSocket = true;
+        }
     }
-    if (mapping.findOutputGateForProtocol(protocol->getId()) >= 0) {
+    if (upperProtocols.find(protocol) != upperProtocols.end()) {
+        EV_INFO << "Passing up to protocol " << protocol << "\n";
+        emit(packetSentToUpperSignal, packet);
         send(packet, "transportOut");
         numLocalDeliver++;
     }

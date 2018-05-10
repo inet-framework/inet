@@ -52,7 +52,8 @@ void NetworkProtocolBase::handleRegisterService(const Protocol& protocol, cGate 
 void NetworkProtocolBase::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
-    protocolMapping.addProtocolMapping(protocol.getId(), in->getIndex());
+    if (in->isName("transportIn"))
+        upperProtocols.insert(&protocol);
 }
 
 void NetworkProtocolBase::sendUp(cMessage *message)
@@ -69,12 +70,14 @@ void NetworkProtocolBase::sendUp(cMessage *message)
                     && (elem.second->remoteAddress.isUnspecified() || elem.second->remoteAddress == remoteAddress)) {
                 auto *packetCopy = packet->dup();
                 packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
+                EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
                 emit(packetSentToUpperSignal, packetCopy);
                 send(packetCopy, "transportOut");
                 hasSocket = true;
             }
         }
-        if (protocolMapping.findOutputGateForProtocol(protocol->getId()) >= 0) {
+        if (upperProtocols.find(protocol) != upperProtocols.end()) {
+            EV_INFO << "Passing up to protocol " << protocol << "\n";
             emit(packetSentToUpperSignal, packet);
             send(packet, "transportOut");
         }
@@ -146,7 +149,6 @@ void NetworkProtocolBase::handleUpperCommand(cMessage *msg)
         int socketId = request->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketDescriptor.find(socketId);
         if (it != socketIdToSocketDescriptor.end()) {
-            int protocol = it->second->protocolId;
             delete it->second;
             socketIdToSocketDescriptor.erase(it);
         }
