@@ -600,14 +600,14 @@ void EtherMac::handleEndTxPeriod()
     numBytesSent += curTxFrame->getByteLength();
     emit(packetSentToLowerSignal, curTxFrame);    //consider: emit with start time of frame
 
-    bool isPauseFrame = false;
     const auto& header = curTxFrame->peekAtFront<EthernetMacHeader>();
     if (header->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL) {
         const auto& controlFrame = curTxFrame->peekDataAt<EthernetControlFrame>(header->getChunkLength(), b(-1));
-        isPauseFrame = controlFrame->getOpCode() == ETHERNET_CONTROL_PAUSE;
-        const auto& pauseFrame = dynamicPtrCast<const EthernetPauseFrame>(controlFrame);
-        numPauseFramesSent++;
-        emit(txPausePkUnitsSignal, pauseFrame->getPauseTime());
+        if (controlFrame->getOpCode() == ETHERNET_CONTROL_PAUSE) {
+            const auto& pauseFrame = dynamicPtrCast<const EthernetPauseFrame>(controlFrame);
+            numPauseFramesSent++;
+            emit(txPausePkUnitsSignal, pauseFrame->getPauseTime());
+        }
     }
 
     EV_INFO << "Transmission of " << curTxFrame << " successfully completed.\n";

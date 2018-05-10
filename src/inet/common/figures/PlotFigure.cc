@@ -299,8 +299,8 @@ void PlotFigure::redrawValueTicks()
     }
 
     // Allocate ticks and numbers if needed
-    if (numTicks > valueTicks.size())
-        while (numTicks > valueTicks.size()) {
+    if ((size_t)numTicks > valueTicks.size())
+        while ((size_t)numTicks > valueTicks.size()) {
             cLineFigure *tick = new cLineFigure("valueTick");
             cLineFigure *dashLine = new cLineFigure("valueDashLine");
             cTextFigure *number = new cTextFigure("valueNumber");
@@ -323,7 +323,7 @@ void PlotFigure::redrawValueTicks()
             valueTicks.pop_back();
         }
 
-    for (uint32 i = 0; i < valueTicks.size(); ++i) {
+    for (size_t i = 0; i < valueTicks.size(); ++i) {
         double x = bounds.x + bounds.width;
         double y = bounds.y + bounds.height - bounds.height * (i * valueTickSize) / std::abs(max - min);
         if (y > bounds.y && y < bounds.y + bounds.height) {
@@ -366,8 +366,8 @@ void PlotFigure::redrawTimeTicks()
     int numTimeTicks = (timeWindow - shifting) / timeTickSize + 1;
 
     // Allocate ticks and numbers if needed
-    if (numTimeTicks > timeTicks.size())
-        while (numTimeTicks > timeTicks.size()) {
+    if ((size_t)numTimeTicks > timeTicks.size())
+        while ((size_t)numTimeTicks > timeTicks.size()) {
             cLineFigure *tick = new cLineFigure("timeTick");
             cLineFigure *dashLine = new cLineFigure("timeDashLine");
             cTextFigure *number = new cTextFigure("timeNumber");

@@ -52,7 +52,7 @@ void Prism::genereateFaces()
 {
     faces.clear();
     faces.push_back(base);
-    Coord baseNormalUnitVector = base.getNormalUnitVector();
+    Coord baseNormalUnitVector = base.getNormalUnitVector();    //FIXME variable ‘baseNormalUnitVector’ set but not used
     const std::vector<Coord>& basePoints = base.getPoints();
     std::vector<Coord> translatedCopyPoints;
     for (auto & basePoint : basePoints)

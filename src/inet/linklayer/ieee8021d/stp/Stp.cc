@@ -530,7 +530,7 @@ void Stp::selectRootPort()
         }
     }
 
-    int xRootInterfaceId = ifTable->getInterface(xRootIdx)->getInterfaceId();
+    unsigned int xRootInterfaceId = ifTable->getInterface(xRootIdx)->getInterfaceId();
     if (rootInterfaceId != xRootInterfaceId) {
         EV_DETAIL << "Port=" << xRootInterfaceId << " selected as root port." << endl;
         topologyChangeNotification = true;

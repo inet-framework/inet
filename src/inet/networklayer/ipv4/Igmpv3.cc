@@ -441,14 +441,14 @@ void Igmpv3::initialize(int stage)
         registerProtocol(Protocol::igmp, gate("ipOut"), nullptr);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_2) {    // ipv4Data() created in INITSTAGE_NETWORK_LAYER
-        for (size_t i = 0; i < ift->getNumInterfaces(); ++i) {
+        for (int i = 0; i < ift->getNumInterfaces(); ++i) {
             InterfaceEntry *ie = ift->getInterface(i);
             if (ie->isMulticast())
                 configureInterface(ie);
         }
         // in multicast routers: join to ALL_IGMPv3_ROUTERS_MCAST address on all interfaces
         if (enabled && rt->isMulticastForwardingEnabled()) {
-            for (size_t i = 0; i < ift->getNumInterfaces(); ++i) {
+            for (int i = 0; i < ift->getNumInterfaces(); ++i) {
                 InterfaceEntry *ie = ift->getInterface(i);
                 if (ie->isMulticast())
                     ie->ipv4Data()->joinMulticastGroup(Ipv4Address::ALL_IGMPV3_ROUTERS_MCAST);

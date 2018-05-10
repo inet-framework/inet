@@ -372,7 +372,7 @@ bool Rstp::processBetterSource(const Ptr<const Bpdu>& frame, unsigned int arriva
                         if (arrivalPort->getState() != Ieee8021dInterfaceData::FORWARDING)
                             iPort->setTCWhile(simTime() + tcWhileTime);
                         macTable->flush(interfaceId);
-                        if (interfaceId != arrivalInterfaceId) {
+                        if ((unsigned int)interfaceId != arrivalInterfaceId) {
                             iPort->setRole(Ieee8021dInterfaceData::NOTASSIGNED);
                             iPort->setState(Ieee8021dInterfaceData::DISCARDING);
                             iPort->setNextUpgrade(simTime() + migrateTime);
@@ -865,7 +865,7 @@ void Rstp::flushOtherPorts(unsigned int portId)
         int interfaceId = ifTable->getInterface(i)->getInterfaceId();
         Ieee8021dInterfaceData *iPort = getPortInterfaceData(interfaceId);
         iPort->setTCWhile(simTime() + tcWhileTime);
-        if (interfaceId != portId)
+        if ((unsigned int)interfaceId != portId)
             macTable->flush(interfaceId);
     }
 }

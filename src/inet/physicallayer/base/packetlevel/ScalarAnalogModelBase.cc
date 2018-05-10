@@ -39,7 +39,7 @@ W ScalarAnalogModelBase::computeReceptionPower(const IRadio *receiverRadio, cons
     const INarrowbandSignal *narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(transmission->getAnalogModel());
     const IScalarSignal *scalarSignalAnalogModel = check_and_cast<const IScalarSignal *>(transmission->getAnalogModel());
     const Coord receptionStartPosition = arrival->getStartPosition();
-    const Coord receptionEndPosition = arrival->getEndPosition();
+    const Coord receptionEndPosition = arrival->getEndPosition();       //FIXME variable ‘receptionEndPosition’ set but not used
     const EulerAngles transmissionDirection = computeTransmissionDirection(transmission, arrival);
     const EulerAngles transmissionAntennaDirection = transmission->getStartOrientation() - transmissionDirection;
     const EulerAngles receptionAntennaDirection = transmissionDirection - arrival->getStartOrientation();
