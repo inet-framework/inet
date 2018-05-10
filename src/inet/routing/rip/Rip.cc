@@ -467,13 +467,13 @@ void Rip::processUpdate(bool triggered)
     else
         EV_INFO << "sending regular updates on all interfaces\n";
 
-    for (auto & elem : ripInterfaces)
-        if (elem.mode != NO_RIP && elem.ie->isUp())
-            sendRoutes(addressType->getLinkLocalRIPRoutersMulticastAddress(), ripUdpPort, elem, triggered);
+    for (auto &ripInterface : ripInterfaces)
+        if (ripInterface.mode != NO_RIP && ripInterface.ie->isUp())
+            sendRoutes(addressType->getLinkLocalRIPRoutersMulticastAddress(), ripUdpPort, ripInterface, triggered);
 
     // clear changed flags
-    for (auto & elem : ripRoutes)
-        (elem)->setChanged(false);
+    for (auto &ripRoute : ripRoutes)
+        ripRoute->setChanged(false);
 }
 
 /**
@@ -553,12 +553,6 @@ void Rip::processRequest(Packet *packet)
  */
 void Rip::sendRoutes(const L3Address& address, int port, const RipInterfaceEntry& ripInterface, bool changedOnly)
 {
-    // todo: remove later
-    if(std::string(host->getName()) == "router2" && omnetpp::simTime().dbl() >= 330.59285)
-    {
-        int yu = 0;
-    }
-
     EV_DEBUG << "Sending " << (changedOnly ? "changed" : "all") << " routes on " << ripInterface.ie->getFullName() << std::endl;
 
     int maxEntries = mode == RIPv2 ? 25 : (ripInterface.ie->getMtu() - 40    /*IPv6_HEADER_BYTES*/ - 8    /*UDP_HEADER_BYTES*/ - RIP_HEADER_SIZE) / RIP_RTE_SIZE;
@@ -569,9 +563,13 @@ void Rip::sendRoutes(const L3Address& address, int port, const RipInterfaceEntry
     packet->setEntryArraySize(maxEntries);
     int k = 0;    // index into RIP entries
 
-    for (auto & elem : ripRoutes) {
-        RipRoute *ripRoute = checkRouteIsExpired(elem);
-        if (!ripRoute)
+    checkExpiredRoutes();
+
+    for (auto &ripRoute : ripRoutes) {
+        // do not include a rip route with infinity metric if trigger update is active
+        if (ripRoute->getType() == RipRoute::RIP_ROUTE_RTE
+                && ripRoute->getMetric() == RIP_INFINITE_METRIC
+                && triggeredUpdate)
             continue;
 
         if (changedOnly && !ripRoute->isChanged())
@@ -859,6 +857,7 @@ void Rip::updateRoute(RipRoute *ripRoute, const InterfaceEntry *ie, const L3Addr
 
         ripRoute->setRoute(route);
     }
+
     if (oldMetric != RIP_INFINITE_METRIC) {
         IRoute *route = ripRoute->getRoute();
         ASSERT(route);
@@ -898,33 +897,35 @@ void Rip::triggerUpdate()
         // Triggered updates may be suppressed if a regular
         // update is due by the time the triggered update would be sent.
         if (!updateTimer->isScheduled() || updateTimer->getArrivalTime() > updateTime)
+        {
+            EV_DETAIL << "scheduling triggered update \n";
             scheduleAt(updateTime, triggeredUpdateTimer);
+        }
     }
 }
 
 /**
  * Should be called regularly to handle expiry and purge of routes.
- * If the route is valid, then returns it, otherwise returns nullptr.
  */
-RipRoute *Rip::checkRouteIsExpired(RipRoute *route)
+void Rip::checkExpiredRoutes()
 {
-    if (route->getType() == RipRoute::RIP_ROUTE_RTE) {
-        simtime_t now = simTime();
-        if (now >= route->getLastUpdateTime() + routeExpiryTime + routePurgeTime) {
-            purgeRoute(route);
-            return nullptr;
+    // iterate over each rip route and check if it has expired
+    // note that the iterator becomes invalid after calling purgeRoute
+    for (RouteVector::iterator iter = ripRoutes.begin(); iter != ripRoutes.end();) {
+        RipRoute *ripRoute = (*iter);
+        if (ripRoute->getType() == RipRoute::RIP_ROUTE_RTE) {
+            simtime_t now = simTime();
+            if (now >= ripRoute->getLastUpdateTime() + routeExpiryTime + routePurgeTime)
+            {
+                iter = purgeRoute(ripRoute);
+                continue;
+            }
+            else if (now >= ripRoute->getLastUpdateTime() + routeExpiryTime)
+                invalidateRoute(ripRoute);
         }
-        if (now >= route->getLastUpdateTime() + routeExpiryTime) {
-            invalidateRoute(route);
 
-            // return the ripRoute in order to be included in the rip response
-            if(!triggeredUpdate)
-                return route;
-            else
-                return nullptr;
-        }
+        iter++;
     }
-    return route;
 }
 
 /*
@@ -940,8 +941,7 @@ RipRoute *Rip::checkRouteIsExpired(RipRoute *route)
  */
 void Rip::invalidateRoute(RipRoute *ripRoute)
 {
-    if(ripRoute->getMetric() != RIP_INFINITE_METRIC)
-        EV_INFO << "invalidating route dest:" << ripRoute->getDestination() << "\n";
+    EV_INFO << "invalidating route dest:" << ripRoute->getDestination() << "\n";
 
     IRoute *route = ripRoute->getRoute();
     if (route) {
@@ -962,9 +962,6 @@ Rip::RouteVector::iterator Rip::purgeRoute(RipRoute *ripRoute)
 
     EV_INFO << "purging route dest:" << ripRoute->getDestination() << "\n";
 
-    // todo: remove later
-    std::string strr = ripRoute->getDestination().str();
-
     IRoute *route = ripRoute->getRoute();
     if (route) {
         ripRoute->setRoute(nullptr);
@@ -972,7 +969,7 @@ Rip::RouteVector::iterator Rip::purgeRoute(RipRoute *ripRoute)
     }
 
     // erase the ripRoute from the vector
-    RouteVector::iterator itt = ripRoutes.erase(std::remove(ripRoutes.begin(), ripRoutes.end(), ripRoute), ripRoutes.end());
+    auto itt = ripRoutes.erase(std::find(ripRoutes.begin(), ripRoutes.end(), ripRoute));
 
     delete ripRoute;
     ripRoute = nullptr;
