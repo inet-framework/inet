@@ -344,6 +344,24 @@ if ($tagfile) {
 $names = join('|',@components);
 $html =~ s!\b($names)\b!'<a href="'.$apidir.'/'.$htmlfile{$1}.'">'.$1.'</a>'!gse unless($names eq '');
 
+#
+# add </li>, because ltoh does not do it, and missing </li> causes problem with Jekyll
+#
+$html =~ s!(\s*<li>)!</li>\1!gs;
+$html =~ s!(<ul>\s*)</li>!\1!gs;
+$html =~ s!(<ol>\s*)</li>!\1!gs;
+$html =~ s!(\s*</ul>)!</li>\1!gs;
+$html =~ s!(\s*</ol>)!</li>\1!gs;
+
+#
+# remove LF just after <pre> and before </pre>, to eliminate extra blank lines; same for <code>
+#
+$html =~ s!(<code\b.*?>)\n!\1!gs;
+$html =~ s!\n(</code>)!\1!gs;
+
+$html =~ s!(<pre\b.*?>)\n!\1!gs;
+$html =~ s!\n(</pre>)!\1!gs;
+
 
 sub savepage($$$)
 {
