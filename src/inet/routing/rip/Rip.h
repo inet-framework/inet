@@ -148,7 +148,7 @@ protected:
     virtual void updateRoute(RipRoute *route, const InterfaceEntry *ie, const L3Address& nextHop, int metric, uint16 routeTag, const L3Address& from);
     virtual void addRoute(const L3Address& dest, int prefixLength, const InterfaceEntry *ie, const L3Address& nextHop, int metric, uint16 routeTag, const L3Address& from);
 
-    virtual RipRoute *checkRouteIsExpired(RipRoute *route);
+    virtual void checkExpiredRoutes();
     virtual void invalidateRoute(RipRoute *route);
     virtual RouteVector::iterator purgeRoute(RipRoute *route);
 
