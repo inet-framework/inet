@@ -685,7 +685,7 @@ bool CsmaCaMac::isFcsOk(Packet *frame)
                 auto bufferLength = B(fcsBytes->getChunkLength()).get();
                 auto buffer = new uint8_t[bufferLength];
                 fcsBytes->copyToBuffer(buffer, bufferLength);
-                auto computedFcs = inet::serializer::ethernetCRC(buffer, bufferLength);
+                auto computedFcs = ethernetCRC(buffer, bufferLength);
                 delete [] buffer;
                 return computedFcs == trailer->getFcs();
             }
@@ -700,7 +700,7 @@ uint32_t CsmaCaMac::computeFcs(const Ptr<const BytesChunk>& bytes)
     auto bufferLength = B(bytes->getChunkLength()).get();
     auto buffer = new uint8_t[bufferLength];
     bytes->copyToBuffer(buffer, bufferLength);
-    auto computedFcs = inet::serializer::ethernetCRC(buffer, bufferLength);
+    auto computedFcs = ethernetCRC(buffer, bufferLength);
     delete [] buffer;
     return computedFcs;
 }

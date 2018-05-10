@@ -72,7 +72,7 @@ void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& head
         auto bufferLength = B(fcsBytes->getChunkLength()).get();
         auto buffer = new uint8_t[bufferLength];
         fcsBytes->copyToBuffer(buffer, bufferLength);
-        auto fcs = inet::serializer::ethernetCRC(buffer, bufferLength);
+        auto fcs = ethernetCRC(buffer, bufferLength);
         updatedTrailer->setFcs(fcs);
         delete [] buffer;
     }

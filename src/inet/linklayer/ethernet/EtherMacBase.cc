@@ -419,7 +419,7 @@ bool EtherMacBase::verifyCrcAndLength(Packet *packet)
             // 1. fill in the data
             ethBytes->copyToBuffer(buffer, bufferLength);
             // 2. compute the FCS
-            auto computedFcs = inet::serializer::ethernetCRC(buffer, bufferLength);
+            auto computedFcs = ethernetCRC(buffer, bufferLength);
             delete [] buffer;
             isFcsBad = (computedFcs != ethTrailer->getFcs());      //FIXME how to check fcs?
             if (isFcsBad)

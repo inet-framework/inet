@@ -39,8 +39,6 @@
 
 namespace inet {
 
-namespace serializer {
-
 #ifdef s_addr
 #undef s_addr
 #endif // ifdef s_addr
@@ -64,8 +62,6 @@ struct in_addr
 };
 
 /*...*/
-
-} // namespace serializer
 
 } // namespace inet
 

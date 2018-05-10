@@ -19,13 +19,11 @@
 #include "inet/common/INETDefs.h"
 
 namespace inet {
-namespace serializer {
 
 extern const uint32_t crc32_tab[];
 
 uint32_t ethernetCRC(const unsigned char *buf, unsigned int bufsize);
 
-} // namespace serializer
 } // namespace inet
 
 #endif /* ETHERNETCRC_H_ */

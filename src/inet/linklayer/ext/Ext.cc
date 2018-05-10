@@ -234,7 +234,6 @@ InterfaceEntry *Ext::createInterfaceEntry()
 
 void Ext::handleMessage(cMessage *msg)
 {
-    using namespace serializer;
     if (!isOperational) {
         handleMessageWhenDown(msg);
         return;

@@ -11,8 +11,6 @@
 
 namespace inet {
 
-namespace serializer {
-
 #ifdef _MSC_VER
 #define __PACKED__
 #else
@@ -84,8 +82,6 @@ extern const uint8_t etherbroadcastaddr[ETHER_ADDR_LEN];
 
 #define ETHERMTU                 (ETHER_MAX_LEN - ETHER_HDR_LEN - ETHER_CRC_LEN)
 #define ETHERMIN                 (ETHER_MIN_LEN - ETHER_HDR_LEN - ETHER_CRC_LEN)
-
-} // namespace serializer
 
 } // namespace inet
 

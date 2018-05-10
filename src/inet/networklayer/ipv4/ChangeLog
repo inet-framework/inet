@@ -99,10 +99,12 @@
 	    ICMPDestinationUnreachableCodes -> IcmpDestinationUnreachableCodes
 	    ICMPEchoReply -> IcmpEchoReply
 	    ICMPEchoRequest -> IcmpEchoRequest
+	    ICMPHeaderSerializer -> IcmpHeaderSerializer
 	    ICMPParameterProblemSubcodes -> IcmpParameterProblemSubcodes
 	    ICMPRedirectSubcodes -> IcmpRedirectSubcodes
 	    ICMPTimeExceededSubcodes -> IcmpTimeExceededSubcodes
 	    ICMPType -> IcmpType
+	    IGMPHeaderSerializer -> IgmpHeaderSerializer
 	    IGMPHostTimerContext -> IgmpHostTimerContext
 	    IGMPMessage -> IgmpMessage
 	    IGMPQuery -> IgmpQuery
@@ -129,6 +131,7 @@
 	    IPv4AddressVector -> Ipv4AddressVector
 	    IPv4ControlInfo -> Ipv4ControlInfo
 	    IPv4FragBuf -> Ipv4FragBuf
+	    IPv4HeaderSerializer -> Ipv4HeaderSerializer
 	    IPv4InterfaceData -> Ipv4InterfaceData
 	    IPv4MulticastGroupInfo -> Ipv4MulticastGroupInfo
 	    IPv4MulticastGroupSourceInfo -> Ipv4MulticastGroupSourceInfo
@@ -153,6 +156,7 @@
 	    TCPSegment -> TcpHeader
 	    TLVOption -> TlvOptions
 	    TLVOptionBase -> TlvOptionBase
+	    TLVOptionRaw -> TlvOptionRaw
 	    TLVOptions -> TlvOptions
 
 2017-12-15  Andras Varga
@@ -169,6 +173,7 @@
 
 2017-12-14  Levente Mészáros
 
+	Fixed a few compiler warnings.
 	Removed unnecessary markImmutable() calls.
 
 2017-12-11  Zoltan Bojthe
@@ -216,7 +221,7 @@
 
 2017-09-27  Zoltan Bojthe
 
-	Added crc mode.
+	Added CRC mode handling.
 
 2017-09-20  Zoltan Bojthe
 
@@ -309,6 +314,10 @@
 	ICMP messages are only sent about errors in handling fragment zero of
 	fragmented datagrams.
 
+2017-04-12  Levente Mészáros
+
+	Removed discouraged setChunkLength calls from deserializers.
+
 2017-04-11  Levente Mészáros
 
 	Fixed chunkLength, it must be independent of the header field's value to
@@ -351,9 +360,22 @@
 
 	Removed declaredIncorrect from crcMode.
 
+2017-03-01  Levente Mészáros
+
+	Ported IGMPHeaderSerializer to new API.
+
+2017-02-22  Levente Mészáros
+
+	Extracted PingPayloadSerializer.
+	Ported serialization of IPv4 options.
+
 2017-02-22  Levente Mészáros
 
 	Added crcMode parameter.
+
+2017-02-21  Levente Mészáros
+
+	Ported IPv4HeaderSerializer and ICMPHeaderSerializer to new API.
 
 2017-02-21  Levente Mészáros
 

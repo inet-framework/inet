@@ -83,7 +83,7 @@ Ptr<Ipv4Header> PacketDrill::makeIpv4Header(IpProtocolId protocol, enum directio
     if (pdapp->getCrcMode() == CRC_COMPUTED) {
         MemoryOutputStream ipv4HeaderStream;
         Chunk::serialize(ipv4HeaderStream, ipv4Header);
-        uint16_t crc = serializer::TcpIpChecksum::checksum(ipv4HeaderStream.getData());
+        uint16_t crc = TcpIpChecksum::checksum(ipv4HeaderStream.getData());
         ipv4Header->setCrc(crc);
     }
 

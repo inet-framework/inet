@@ -137,12 +137,24 @@
 
 2017-09-13  Levente Mészáros
 
+	Correctly implemented EthernetPhyHeaderSerializer.
+
+2017-09-13  Levente Mészáros
+
+	Fixed deserializing non-representable control frames.
+
+2017-09-13  Levente Mészáros
+
 	Added clearTags() and removePoppedChunks() calls when reusing packets in relay units.
 	Replaced EtherPhyFrame with EthernetPhyHeader in MACs.
 	Replaced EtherPhyFrame with EthernetPhyHeader.
 	Renamed EtherTraffic to EthernetSignal and extracted jam processing.
 	Merged remaining enums from EtherTypeTag.msg into EtherFrame.msg.
 	Renamed protocol to ieee8022 and protocol group to ieee8022protocol.
+
+2017-09-12  Zoltan Bojthe
+
+	Switched to using new ethernet header structures.
 
 2017-09-12  Zoltan Bojthe
 
@@ -170,6 +182,10 @@
 
 	Replaced remaining packet drop signals with the generic one.
 
+2017-04-12  Levente Mészáros
+
+	Removed discouraged setChunkLength calls from deserializers.
+
 2017-04-11  Levente Mészáros
 
 	Removed all chunkLength = -1 or chunkLength = 0 fields, they are useless.
@@ -190,6 +206,10 @@
 
 	Removed obsolete RawPacket.
 	Added static EtherEncap::decapsulate() function.
+
+2017-02-21  Levente Mészáros
+
+	Moved headerserializers one level up.
 
 2017-02-21  Levente Mészáros
 

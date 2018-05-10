@@ -93,7 +93,7 @@ uint16_t TcpCrcInsertion::computeCrc(const Protocol *networkProtocol, const L3Ad
     Chunk::serialize(stream, pseudoHeader);
     Chunk::serialize(stream, tcpHeader);
     Chunk::serialize(stream, tcpData);
-    uint16_t crc = inet::serializer::TcpIpChecksum::checksum(stream.getData());
+    uint16_t crc = TcpIpChecksum::checksum(stream.getData());
     return crc;
 }
 

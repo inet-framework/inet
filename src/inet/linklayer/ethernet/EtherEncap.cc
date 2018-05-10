@@ -160,7 +160,7 @@ void EtherEncap::addFcs(Packet *packet, EthernetFcsMode fcsMode)
         // 1. fill in the data
         ethBytes->copyToBuffer(buffer, bufferLength);
         // 2. compute the FCS
-        auto computedFcs = inet::serializer::ethernetCRC(buffer, bufferLength);
+        auto computedFcs = ethernetCRC(buffer, bufferLength);
         delete [] buffer;
         ethFcs->setFcs(computedFcs);
     }

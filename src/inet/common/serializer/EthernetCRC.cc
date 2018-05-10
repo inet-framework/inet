@@ -16,7 +16,6 @@
 #include "inet/common/serializer/EthernetCRC.h"
 
 namespace inet {
-namespace serializer {
 
 const uint32_t crc32_tab[] = {
     0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f,
@@ -76,6 +75,5 @@ uint32_t ethernetCRC(const unsigned char *buf, unsigned int bufsize)
     return (crc >> 24) | ((crc >>  8) & 0x0000FF00) | ((crc <<  8) & 0x00FF0000) | (crc << 24);
 }
 
-} // namespace serializer
 } // namespace inet
 

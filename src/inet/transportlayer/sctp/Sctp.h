@@ -196,6 +196,8 @@ class INET_API Sctp : public cSimpleModule
 
     uint16 nextEphemeralPort;
 
+    bool sendRawBytes = false;
+
     SctpAssociation *findAssocForMessage(L3Address srcAddr, L3Address destAddr, uint32 srcPort, uint32 destPort, bool findListen);
     SctpAssociation *findAssocForApp(int32 appGateIndex, int32 assocId);
     int32 findAssocForFd(int32 fd);

@@ -22,7 +22,6 @@
 #include "inet/common/INETDefs.h"
 
 namespace inet {
-namespace serializer {
 
 /**
  * Calculates checksum.
@@ -53,7 +52,6 @@ class INET_API TcpIpChecksum
 
 };
 
-} // namespace serializer
 } // namespace inet
 
 #endif // ifndef __INET_TCPIPCHECKSUM_H

@@ -156,7 +156,7 @@ bool Tcp::checkCrc(const Ptr<const TcpHeader>& tcpHeader, Packet *packet)
             MemoryOutputStream stream;
             Chunk::serialize(stream, pseudoHeader);
             Chunk::serialize(stream, packet->peekData());
-            uint16_t crc = inet::serializer::TcpIpChecksum::checksum(stream.getData());
+            uint16_t crc = TcpIpChecksum::checksum(stream.getData());
             return (crc == 0);
         }
         case CRC_DECLARED_CORRECT:

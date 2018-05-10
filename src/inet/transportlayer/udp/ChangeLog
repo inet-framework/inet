@@ -143,6 +143,10 @@
 
 	Added crcMode parameter.
 
+2017-02-16  Levente Mészáros
+
+	Ported UdpHeaderSerializer to new API.
+
 2017-02-06  Levente Mészáros
 
 	Change to use the new Packet API.

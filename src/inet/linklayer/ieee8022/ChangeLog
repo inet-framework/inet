@@ -38,7 +38,15 @@
 
 2017-09-12  Zoltan Bojthe
 
+	Added support for 4 bytes LLC header.
+
+2017-09-12  Zoltan Bojthe
+
 	Renamed ethernet, llc and snap headers.
+
+2017-05-09  Levente Mészáros
+
+	Added Ieee8022LlcHeaderSerializer.
 
 2017-05-09  Levente Mészáros
 

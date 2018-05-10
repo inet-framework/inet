@@ -19,7 +19,6 @@
 #include "inet/common/serializer/TcpIpChecksum.h"
 
 namespace inet {
-namespace serializer {
 
 uint16_t TcpIpChecksum::_checksum(const void *_addr, unsigned int count)
 {
@@ -58,6 +57,5 @@ uint16_t TcpIpChecksum::_checksum(const std::vector<uint8_t>& vec)
     return (uint16_t)sum;
 }
 
-} // namespace serializer
 } // namespace inet
 

@@ -215,7 +215,7 @@ bool Ipv4::verifyCrc(const Ptr<const Ipv4Header>& ipv4Header)
                 // compute the CRC, the check passes if the result is 0xFFFF (includes the received CRC) and the chunks are correct
                 MemoryOutputStream ipv4HeaderStream;
                 Chunk::serialize(ipv4HeaderStream, ipv4Header);
-                uint16_t computedCrc = inet::serializer::TcpIpChecksum::checksum(ipv4HeaderStream.getData());
+                uint16_t computedCrc = TcpIpChecksum::checksum(ipv4HeaderStream.getData());
                 return computedCrc == 0;
             }
             else {
@@ -798,7 +798,7 @@ void Ipv4::setComputedCrc(Ptr<Ipv4Header>& ipv4Header)
     MemoryOutputStream ipv4HeaderStream;
     Chunk::serialize(ipv4HeaderStream, ipv4Header);
     // compute the CRC
-    uint16_t crc = inet::serializer::TcpIpChecksum::checksum(ipv4HeaderStream.getData());
+    uint16_t crc = TcpIpChecksum::checksum(ipv4HeaderStream.getData());
     ipv4Header->setCrc(crc);
 }
 
