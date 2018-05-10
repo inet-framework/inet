@@ -130,8 +130,7 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
         if (authenticationNecessary) {
             if (type == AUTH) {
                 EV_INFO << "AUTH received" << endl;
-                SctpAuthenticationChunk *authChunk;
-                authChunk = check_and_cast<SctpAuthenticationChunk *>(header);
+                auto authChunk = check_and_cast<SctpAuthenticationChunk *>(header);
                 if (authChunk->getHMacIdentifier() != 1) {
                     sendHMacError(authChunk->getHMacIdentifier());
                     auto it = sctpMain->assocStatMap.find(assocId);
@@ -159,10 +158,9 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
         }
 
         switch (type) {
-            case INIT:
+            case INIT: {
                 EV_INFO<< "INIT received" << endl;
-                SctpInitChunk *initChunk;
-                initChunk = check_and_cast<SctpInitChunk *>(header);
+                auto initChunk = check_and_cast<SctpInitChunk *>(header);
                 if ((initChunk->getNoInStreams() != 0) &&
                     (initChunk->getNoOutStreams() != 0) &&
                     (initChunk->getInitTag() != 0))
@@ -172,12 +170,12 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
                 i = numberOfChunks - 1;
                 //delete initChunk;
                 break;
+            }
 
             case INIT_ACK:
                 EV_INFO << "INIT_ACK received" << endl;
                 if (fsm->getState() == SCTP_S_COOKIE_WAIT) {
-                    SctpInitAckChunk *initAckChunk;
-                    initAckChunk = check_and_cast<SctpInitAckChunk *>(header);
+                    auto initAckChunk = check_and_cast<SctpInitAckChunk *>(header);
                     if ((initAckChunk->getNoInStreams() != 0) &&
                         (initAckChunk->getNoOutStreams() != 0) &&
                         (initAckChunk->getInitTag() != 0))
@@ -197,19 +195,18 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
                 }
                 break;
 
-            case COOKIE_ECHO:
+            case COOKIE_ECHO: {
                 EV_INFO << "COOKIE_ECHO received" << endl;
-                SctpCookieEchoChunk *cookieEchoChunk;
-                cookieEchoChunk = check_and_cast<SctpCookieEchoChunk *>(header);
+                auto cookieEchoChunk = check_and_cast<SctpCookieEchoChunk *>(header);
                 trans = processCookieEchoArrived(cookieEchoChunk, src);
                 //delete cookieEchoChunk;
                 break;
+            }
 
             case COOKIE_ACK:
                 EV_INFO << "COOKIE_ACK received" << endl;
                 if (fsm->getState() == SCTP_S_COOKIE_ECHOED) {
-                    SctpCookieAckChunk *cookieAckChunk;
-                    cookieAckChunk = check_and_cast<SctpCookieAckChunk *>(header);
+                    auto cookieAckChunk = check_and_cast<SctpCookieAckChunk *>(header);  //FIXME warning: variable ‘cookieAckChunk’ set but not used
                     trans = processCookieAckArrived();
                    // delete cookieAckChunk;
                 }
@@ -241,8 +238,7 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
                     return true;
                 }
                 if (!(fsm->getState() == SCTP_S_SHUTDOWN_RECEIVED || fsm->getState() == SCTP_S_SHUTDOWN_ACK_SENT)) {
-                    SctpDataChunk *dataChunk;
-                    dataChunk = check_and_cast<SctpDataChunk *>(header);
+                    auto dataChunk = check_and_cast<SctpDataChunk *>(header);
                     if ((dataChunk->getByteLength() - SCTP_DATA_CHUNK_LENGTH) > 0) {
                         dacPacketsRcvd++;
                         const SctpEventCode event = processDataArrived(dataChunk);
@@ -287,8 +283,7 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
             case SACK:
             case NR_SACK: {
                 EV_INFO << "SACK chunk received" << endl;
-                SctpSackChunk *sackChunk;
-                sackChunk = check_and_cast<SctpSackChunk *>(header);
+                auto sackChunk = check_and_cast<SctpSackChunk *>(header);
                 processSackArrived(sackChunk);
                 trans = true;
                 sendAllowed = true;
@@ -309,9 +304,8 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
                 break;
             }
 
-            case ABORT:
-                SctpAbortChunk *abortChunk;
-                abortChunk = check_and_cast<SctpAbortChunk *>(header);
+            case ABORT: {
+                auto abortChunk = check_and_cast<SctpAbortChunk *>(header);
                 EV_INFO << "ABORT with T-Bit "
                         << abortChunk->getT_Bit() << " received" << endl;
                 if (sctpmsg->getVTag() == localVTag || sctpmsg->getVTag() == peerVTag) {
@@ -320,11 +314,11 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
                 }
               //  delete abortChunk;
                 break;
+            }
 
-            case HEARTBEAT:
+            case HEARTBEAT: {
                 EV_INFO << "HEARTBEAT received" << endl;
-                SctpHeartbeatChunk *heartbeatChunk;
-                heartbeatChunk = check_and_cast<SctpHeartbeatChunk *>(header);
+                auto heartbeatChunk = check_and_cast<SctpHeartbeatChunk *>(header);
                 if (!(fsm->getState() == SCTP_S_CLOSED)) {
                     sendHeartbeatAck(heartbeatChunk, dest, src);
                 }
@@ -335,25 +329,25 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
                     path->vectorPathRcvdHb->record(path->numberOfHeartbeatsRcvd);
                 }
                 break;
+            }
 
-            case HEARTBEAT_ACK:
+            case HEARTBEAT_ACK: {
                 EV_INFO << "HEARTBEAT_ACK received" << endl;
                 if (fsm->getState() == SCTP_S_COOKIE_ECHOED) {
                     trans = performStateTransition(SCTP_E_RCV_COOKIE_ACK);
                 }
-                SctpHeartbeatAckChunk *heartbeatAckChunk;
-                heartbeatAckChunk = check_and_cast<SctpHeartbeatAckChunk *>(header);
+                auto heartbeatAckChunk = check_and_cast<SctpHeartbeatAckChunk *>(header);
                 if (path) {
                     processHeartbeatAckArrived(heartbeatAckChunk, path);
                 }
                 trans = true;
                // delete heartbeatAckChunk;
                 break;
+            }
 
-            case SHUTDOWN:
+            case SHUTDOWN: {
                 EV_INFO << "SHUTDOWN received" << endl;
-                SctpShutdownChunk *shutdownChunk;
-                shutdownChunk = check_and_cast<SctpShutdownChunk *>(header);
+                auto shutdownChunk = check_and_cast<SctpShutdownChunk *>(header);
                 if (shutdownChunk->getCumTsnAck() > state->lastTsnAck) {
                     simtime_t rttEstimation = SIMTIME_MAX;
                     dequeueAckedChunks(shutdownChunk->getCumTsnAck(),
@@ -368,12 +362,12 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
                     delete state->resetChunk;
                 }*/
                 break;
+            }
 
             case SHUTDOWN_ACK:
                 EV_INFO << "SHUTDOWN_ACK received" << endl;
                 if (fsm->getState() != SCTP_S_ESTABLISHED) {
-                    SctpShutdownAckChunk *shutdownAckChunk;
-                    shutdownAckChunk = check_and_cast<SctpShutdownAckChunk *>(header);
+                    auto shutdownAckChunk = check_and_cast<SctpShutdownAckChunk *>(header);    //FIXME warning: variable ‘shutdownAckChunk’ set but not used
                     sendShutdownComplete();
                     stopTimers();
                     stopTimer(T2_ShutdownTimer);
@@ -396,10 +390,9 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
                 }
                 break;
 
-            case SHUTDOWN_COMPLETE:
+            case SHUTDOWN_COMPLETE: {
                 EV_INFO << "Shutdown Complete arrived" << endl;
-                SctpShutdownCompleteChunk *shutdownCompleteChunk;
-                shutdownCompleteChunk = check_and_cast<SctpShutdownCompleteChunk *>(header);
+                auto shutdownCompleteChunk = check_and_cast<SctpShutdownCompleteChunk *>(header); //FIXME variable ‘shutdownCompleteChunk’ set but not used
                 trans = performStateTransition(SCTP_E_RCV_SHUTDOWN_COMPLETE);
                 sendIndicationToApp(SCTP_I_PEER_CLOSED);    // necessary for NAT-Rendezvous
                 if (trans == true) {
@@ -410,31 +403,32 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
                 delete state->shutdownAckChunk;
                // delete shutdownCompleteChunk;
                 break;
+            }
 
-            case FORWARD_TSN:
+            case FORWARD_TSN: {
                 EV_INFO << "FORWARD_TSN received" << endl;
-                SctpForwardTsnChunk *forwChunk;
-                forwChunk = check_and_cast<SctpForwardTsnChunk *>(header);
+                auto forwChunk = check_and_cast<SctpForwardTsnChunk *>(header);
                 processForwardTsnArrived(forwChunk);
                 trans = true;
                 sendAllowed = true;
                 dataChunkReceived = true;
                // delete forwChunk;
                 break;
+            }
 
-            case RE_CONFIG:
+            case RE_CONFIG: {
                 EV_INFO << "StreamReset received" << endl;
                 if (fsm->getState() != SCTP_S_ESTABLISHED && fsm->getState() != SCTP_S_SHUTDOWN_PENDING) {
                    // delete header;
                     break;
                 }
-                SctpStreamResetChunk *strResChunk;
-                strResChunk = check_and_cast<SctpStreamResetChunk *>(header);
+                auto strResChunk = check_and_cast<SctpStreamResetChunk *>(header);
                 processStreamResetArrived(strResChunk);
                 trans = true;
                 sendAllowed = true;
                // delete strResChunk;
                 break;
+            }
 
             case ASCONF:
                 EV_INFO << "ASCONF received" << endl;
@@ -448,21 +442,20 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
                // delete asconfChunk;
                 break;
 
-            case ASCONF_ACK:
+            case ASCONF_ACK: {
                 EV_INFO << "ASCONF_ACK received" << endl;
-                SctpAsconfAckChunk *asconfAckChunk;
-                asconfAckChunk = check_and_cast<SctpAsconfAckChunk *>(header);
+                auto asconfAckChunk = check_and_cast<SctpAsconfAckChunk *>(header);
                 processAsconfAckArrived(asconfAckChunk);
                 trans = true;
                 delete state->asconfChunk;
                // delete asconfAckChunk;
                 break;
+            }
 
             case PKTDROP:
                 EV_INFO << "PKTDROP received" << endl;
                 if (sctpMain->pktdrop) {
-                    SctpPacketDropChunk *packetDropChunk;
-                    packetDropChunk = check_and_cast<SctpPacketDropChunk *>(header);
+                    auto packetDropChunk = check_and_cast<SctpPacketDropChunk *>(header);
                     if (packetDropChunk->getBFlag() && !packetDropChunk->getMFlag())
                         processPacketDropArrived(packetDropChunk);
 
@@ -472,14 +465,14 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
                 }
                 break;
 
-            case ERRORTYPE:
+            case ERRORTYPE: {
                 EV_INFO << "ERROR received" << endl;
-                SctpErrorChunk *errorChunk;
-                errorChunk = check_and_cast<SctpErrorChunk *>(header);
+                auto errorChunk = check_and_cast<SctpErrorChunk *>(header);
                 processErrorArrived(errorChunk);
                 trans = true;
                // delete errorChunk;
                 break;
+            }
 
             default:
                 EV_ERROR << "different type" << endl;    // TODO
@@ -2798,7 +2791,6 @@ SctpEventCode SctpAssociation::processStreamResetArrived(SctpStreamResetChunk *r
 {
     EV_INFO << "processStreamResetArrived\n";
     SctpParameter *parameter, *nextParam;
-    bool requestReceived = false;
     std::map<uint32, SctpStateVariables::RequestData>::reverse_iterator rit;
     uint32 numberOfParameters = resetChunk->getParametersArraySize();
     if (numberOfParameters == 0)
@@ -2839,8 +2831,8 @@ SctpEventCode SctpAssociation::processStreamResetArrived(SctpStreamResetChunk *r
                 state->peerRequests[outRequestParam->getSrReqSn()].sn = outRequestParam->getSrReqSn();
                 state->peerRequests[outRequestParam->getSrReqSn()].result = 100;
                 state->peerRequests[outRequestParam->getSrReqSn()].type = outRequestParam->getParameterType();
-                if (numberOfParameters > i + 1) {
-                    nextParam = (SctpParameter *)(resetChunk->getParameters(i + 1));
+                if (numberOfParameters > i + 1u) {
+                    nextParam = (SctpParameter *)(resetChunk->getParameters(i + 1));    //FIXME const_cast
                     if (nextParam->getParameterType() != INCOMING_RESET_REQUEST_PARAMETER &&
                         nextParam->getParameterType() != STREAM_RESET_RESPONSE_PARAMETER) {
                         processOutgoingResetRequestArrived(outRequestParam);
@@ -2869,7 +2861,6 @@ SctpEventCode SctpAssociation::processStreamResetArrived(SctpStreamResetChunk *r
                 } else {
                     processOutgoingResetRequestArrived(outRequestParam);
                 }
-                requestReceived = true;
                 break;
             }
 
@@ -2914,7 +2905,7 @@ SctpEventCode SctpAssociation::processStreamResetArrived(SctpStreamResetChunk *r
                 state->peerRequests[inRequestParam->getSrReqSn()].sn = inRequestParam->getSrReqSn();
                 state->peerRequests[inRequestParam->getSrReqSn()].result = 100;
                 state->peerRequests[inRequestParam->getSrReqSn()].type = inRequestParam->getParameterType();
-                if (numberOfParameters > i + 1) {
+                if (numberOfParameters > i + 1u) {
                     nextParam = (SctpParameter *)(resetChunk->getParameters(i + 1));
                     if (nextParam->getParameterType() != OUTGOING_RESET_REQUEST_PARAMETER) {
                         processIncomingResetRequestArrived(inRequestParam);
@@ -2933,7 +2924,6 @@ SctpEventCode SctpAssociation::processStreamResetArrived(SctpStreamResetChunk *r
                 } else {
                     processIncomingResetRequestArrived(inRequestParam);
                 }
-                requestReceived = true;
                 break;
             }
 
@@ -2964,7 +2954,6 @@ SctpEventCode SctpAssociation::processStreamResetArrived(SctpStreamResetChunk *r
                 state->peerRequests[ssnRequestParam->getSrReqSn()].result = 100;
                 state->peerRequests[ssnRequestParam->getSrReqSn()].type = ssnRequestParam->getParameterType();
                 processSsnTsnResetRequestArrived(ssnRequestParam);
-                requestReceived = true;
                 break;
 
             case ADD_INCOMING_STREAMS_REQUEST_PARAMETER: {
@@ -2990,7 +2979,7 @@ SctpEventCode SctpAssociation::processStreamResetArrived(SctpStreamResetChunk *r
                 state->peerRequests[addStreamsParam->getSrReqSn()].sn = addStreamsParam->getSrReqSn();
                 state->peerRequests[addStreamsParam->getSrReqSn()].result = 100;
                 state->peerRequests[addStreamsParam->getSrReqSn()].type = addStreamsParam->getParameterType();
-                if (numberOfParameters > i + 1) {
+                if (numberOfParameters > i + 1u) {
                     nextParam = (SctpParameter *)(resetChunk->getParameters(i + 1));
                     if (nextParam->getParameterType() == ADD_OUTGOING_STREAMS_REQUEST_PARAMETER) {
                         SctpAddStreamsRequestParameter *addOutStreamsParam;
@@ -3058,7 +3047,7 @@ SctpEventCode SctpAssociation::processStreamResetArrived(SctpStreamResetChunk *r
                         state->numAddedInStreams = 0;
                     (this->*ssFunctions.ssAddInStreams)(addOutStreamsParam->getNumberOfStreams());
                 }
-                if (numberOfParameters > i + 1) {
+                if (numberOfParameters > i + 1u) {
                     nextParam = (SctpParameter *)(resetChunk->getParameters(i + 1));
                     if (nextParam->getParameterType() == ADD_INCOMING_STREAMS_REQUEST_PARAMETER) {
                         SctpAddStreamsRequestParameter *addInStreamsParam;
@@ -3086,7 +3075,6 @@ SctpEventCode SctpAssociation::processStreamResetArrived(SctpStreamResetChunk *r
                     state->firstPeerRequest = false;
                     state->resetRequested = true;
                 }
-                requestReceived = true;
                 break;
             }
 
@@ -3098,7 +3086,7 @@ SctpEventCode SctpAssociation::processStreamResetArrived(SctpStreamResetChunk *r
                     state->resetChunk = nullptr;
                     break;
                 }
-                if (numberOfParameters > i + 1) {
+                if (numberOfParameters > i + 1u) {
                     nextParam = (SctpParameter *)(resetChunk->getParameters(i + 1));
                     if (nextParam->getParameterType() != OUTGOING_RESET_REQUEST_PARAMETER) {
                         if (responseParam->getResult() != DEFERRED)
@@ -3120,7 +3108,6 @@ SctpEventCode SctpAssociation::processStreamResetArrived(SctpStreamResetChunk *r
                                 state->peerRequests[outRequestParam->getSrReqSn()].type = outRequestParam->getParameterType();
                                 state->numResetRequests -= 2;
                                 processOutAndResponseArrived(outRequestParam, responseParam);
-                                requestReceived = true;
                                 i++;
                                 break;
                             }
