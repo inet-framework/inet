@@ -405,7 +405,7 @@ void Rip::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
                 ripRoute->setNextHop(route->getNextHopAsGeneric());
                 ripRoute->setInterface(route->getInterface());
                 if (changed) {
-                    ripRoute->setChanged(changed);
+                    ripRoute->setChanged(true);
                     triggerUpdate();
                 }
             }
@@ -566,14 +566,15 @@ void Rip::sendRoutes(const L3Address& address, int port, const RipInterfaceEntry
     checkExpiredRoutes();
 
     for (auto &ripRoute : ripRoutes) {
-        // do not include a rip route with infinity metric if trigger update is active
-        if (ripRoute->getType() == RipRoute::RIP_ROUTE_RTE
-                && ripRoute->getMetric() == RIP_INFINITE_METRIC
-                && triggeredUpdate)
-            continue;
+        // this is a triggered update
+        if (changedOnly) {
 
-        if (changedOnly && !ripRoute->isChanged())
-            continue;
+            // make sure triggered update is active
+            ASSERT(triggeredUpdate);
+
+            if (!ripRoute->isChanged())
+                continue;
+        }
 
         // Split Horizon check:
         //   Omit routes learned from one neighbor in updates sent to that neighbor.
