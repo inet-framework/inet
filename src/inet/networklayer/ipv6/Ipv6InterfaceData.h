@@ -23,8 +23,12 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
+#ifndef WITH_IPv6
+#error "IPv6 feature disabled"
+#endif
+
 #include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 
 namespace inet {
 

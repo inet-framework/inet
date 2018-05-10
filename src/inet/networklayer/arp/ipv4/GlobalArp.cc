@@ -21,8 +21,12 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/networklayer/arp/ipv4/GlobalArp.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#ifdef WITH_IPv6
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
+#endif
+#ifdef WITH_NEXTHOP
 #include "inet/networklayer/nexthop/NextHopInterfaceData.h"
+#endif
 
 namespace inet {
 
@@ -88,21 +92,27 @@ void GlobalArp::initialize(int stage)
         for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
             InterfaceEntry *interfaceEntry = interfaceTable->getInterface(i);
             if (!interfaceEntry->isLoopback()) {
+#ifdef WITH_IPv4
                 if (auto ipv4Data = interfaceEntry->ipv4Data()) {
                     Ipv4Address ipv4Address = ipv4Data->getIPAddress();
                     if (!ipv4Address.isUnspecified())
                         ensureCacheEntry(ipv4Address, interfaceEntry);
                 }
+#endif
+#ifdef WITH_IPv6
                 if (auto ipv6Data = interfaceEntry->ipv6Data()) {
                     Ipv6Address ipv6Address = ipv6Data->getLinkLocalAddress();
                     if (!ipv6Address.isUnspecified())
                         ensureCacheEntry(ipv6Address, interfaceEntry);
                 }
+#endif
+#ifdef WITH_NEXTHOP
                 if (auto genericData = interfaceEntry->getNextHopData()) {
                     L3Address address = genericData->getAddress();
                     if (!address.isUnspecified())
                         ensureCacheEntry(address, interfaceEntry);
                 }
+#endif
             }
         }
         cModule *node = findContainingNode(this);
@@ -193,6 +203,7 @@ MacAddress GlobalArp::resolveL3Address(const L3Address& address, const Interface
 MacAddress GlobalArp::mapUnicastAddress(L3Address address)
 {
     switch (address.getType()) {
+#ifdef WITH_IPv4
         case L3Address::IPv4: {
             Ipv4Address ipv4Address = address.toIpv4();
             ArpCache::const_iterator it = globalArpCache.find(ipv4Address);
@@ -201,6 +212,8 @@ MacAddress GlobalArp::mapUnicastAddress(L3Address address)
             throw cRuntimeError("GlobalArp does not support dynamic address resolution");
             return MacAddress::UNSPECIFIED_ADDRESS;
         }
+#endif
+#ifdef WITH_IPv6
         case L3Address::IPv6: {
             Ipv6Address ipv6Address = address.toIpv6();
             ArpCache::const_iterator it = globalArpCache.find(ipv6Address);
@@ -209,6 +222,7 @@ MacAddress GlobalArp::mapUnicastAddress(L3Address address)
             throw cRuntimeError("GlobalArp does not support dynamic address resolution");
             return MacAddress::UNSPECIFIED_ADDRESS;
         }
+#endif
         case L3Address::MAC:
             return address.toMac();
         case L3Address::MODULEID: {
@@ -243,6 +257,7 @@ L3Address GlobalArp::getL3AddressFor(const MacAddress& macAddress) const
 {
     Enter_Method_Silent();
     switch (addressType) {
+#ifdef WITH_IPv4
         case L3Address::IPv4: {
             if (macAddress.isUnspecified())
                 return Ipv4Address::UNSPECIFIED_ADDRESS;
@@ -251,6 +266,8 @@ L3Address GlobalArp::getL3AddressFor(const MacAddress& macAddress) const
                     return it->first;
             return Ipv4Address::UNSPECIFIED_ADDRESS;
         }
+#endif
+#ifdef WITH_IPv6
         case L3Address::IPv6: {
             if (macAddress.isUnspecified())
                 return Ipv6Address::UNSPECIFIED_ADDRESS;
@@ -259,6 +276,7 @@ L3Address GlobalArp::getL3AddressFor(const MacAddress& macAddress) const
                     return it->first;
             return Ipv4Address::UNSPECIFIED_ADDRESS;
         }
+#endif
         case L3Address::MAC:
             return L3Address(macAddress);
         case L3Address::MODULEID: {
@@ -293,6 +311,7 @@ void GlobalArp::receiveSignal(cComponent *source, simsignal_t signalID, cObject 
             return;
         auto it = globalArpCache.begin();
         ArpCacheEntry *entry = nullptr;
+#ifdef WITH_IPv4
         if (signalID == interfaceIpv4ConfigChangedSignal) {
             for ( ; it != globalArpCache.end(); ++it) {
                 if (it->second->interfaceEntry == interfaceEntry && it->first.getType() == L3Address::IPv4)
@@ -319,7 +338,10 @@ void GlobalArp::receiveSignal(cComponent *source, simsignal_t signalID, cObject 
             auto where = globalArpCache.insert(globalArpCache.begin(), std::make_pair(ipv4Address, entry));
             ASSERT(where->second == entry);
         }
-        else if (signalID == interfaceIpv6ConfigChangedSignal) {
+        else
+#endif
+#ifdef WITH_IPv6
+        if (signalID == interfaceIpv6ConfigChangedSignal) {
             for ( ; it != globalArpCache.end(); ++it) {
                 if (it->second->interfaceEntry == interfaceEntry && it->first.getType() == L3Address::IPv6)
                     break;
@@ -345,6 +367,9 @@ void GlobalArp::receiveSignal(cComponent *source, simsignal_t signalID, cObject 
             auto where = globalArpCache.insert(globalArpCache.begin(), std::make_pair(ipv6Address, entry));
             ASSERT(where->second == entry);
         }
+        else
+#endif
+        {}
     }
     else
         throw cRuntimeError("Unknown signal");
