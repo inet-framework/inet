@@ -29,7 +29,6 @@ Test serializing frames
 
 using namespace inet;
 
-using namespace inet::serializer;
 
 #define PCAP_MAGIC      0xa1b2c3d4
 
