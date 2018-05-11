@@ -8,6 +8,10 @@
 
 	Added Ieee80211MacProtocolDissector.
 
+2018-02-19  Zoltan Bojthe
+
+	Renamed functions to use camel case.
+
 2018-02-14  Levente Mészáros
 
 	Fixed packet protocol tag for packets sent up.
@@ -45,6 +49,14 @@
 	Changed ackPolicy to NORMAL_ACK in Ieee80211DataHeader constructor.
 
 2017-11-16  ------ inet-3.99.1 released ------
+
+2017-10-24  Levente Mészáros
+
+	Revived MAC FCS computation and verification.
+
+2017-07-27  Levente Mészáros
+
+	Added Ieee80211MpduSubframeHeader and its serialization.
 
 2017-07-14  Levente Mészáros
 
@@ -105,6 +117,10 @@
 
 2017-05-09  Levente Mészáros
 
+	Extracted Ieee80211MgmtFrameSerializer from Ieee80211MacHeaderSerializer.
+
+2017-05-09  Levente Mészáros
+
 	Renamed to Ieee80211MsduSubframeHeader.
 
 2017-05-09  Levente Mészáros
@@ -145,13 +161,29 @@
 
 2017-04-27  Levente Mészáros
 
+	Added missing chunk types to Ieee80211MacHeaderSerializer.
+	Fixed Ieee80211MacHeader deserialization wrt. sequence control and QoS control.
+
+2017-04-27  Levente Mészáros
+
 	Moved dup in Tx.
+
+2017-04-26  Levente Mészáros
+
+	Added separate IEEE 802 LLC and SNAP headers and serializers.
+	Added TID to QoS control field in serializer.
+	Implemented Ieee80211FcsTrailerSerializer.
+	Renamed to Ieee80211MacTrailer and Ieee80211MacTrailerSerializer.
 
 2017-04-26  Levente Mészáros
 
 	Revived Ieee80211MacHeader::deserialize().
 	Renamed to Ieee80211MacTrailer.
 	Removed Ieee80211DataFrameWithSNAP and add separate Ieee802SnapHeader.
+
+2017-04-25  Levente Mészáros
+
+	Ported Ieee80211MacHeaderSerializer to new API.
 
 2017-04-25  Levente Mészáros
 
