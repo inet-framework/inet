@@ -1,6 +1,8 @@
 PERL=perl
 INKSCAPE=inkscape
 DOT=dot
+LTOH=$(PERL) ../tools/ltoh
+PREPHTML=$(PERL) ../tools/prephtml
 
 DOCNAME=inet-users-guide
 TEXMAIN=$(DOCNAME).tex
@@ -43,8 +45,8 @@ pdf: $(ALLTEX) $(PDFPICS) figures/*.png
 
 html : $(ALLTEX) $(SVGPICS) $(HTMLTEMPLATE) prephtml ltoh ltoh.specs
 	CHAPTERS=$$(grep '\include{' $(TEXMAIN) | sed 's/\\include{//;s/}/.tex/' | sed '/^title\.tex/d') && cat $$CHAPTERS > _allinone_.tex
-	$(PERL) ltoh _allinone_.tex
-	$(PERL) prephtml --template $(HTMLTEMPLATE) --productversion $(VERSION) --outfilenamebase $(DOCNAME) _allinone_.html
+	$(LTOH) _allinone_.tex
+	$(PREPHTML) --template $(HTMLTEMPLATE) --productversion $(VERSION) --outfilenamebase $(DOCNAME) _allinone_.html
 	rm _allinone_.tex _allinone_.html
 	mkdir -p $(HTMLDIR)
 	cp $(DOCNAME).html $(HTMLDIR)/index.html
@@ -56,15 +58,15 @@ html : $(ALLTEX) $(SVGPICS) $(HTMLTEMPLATE) prephtml ltoh ltoh.specs
 
 md : $(ALLTEX) $(SVGPICS) $(MDTEMPLATE) prephtml ltoh ltoh.specs
 	CHAPTERS=$$(grep '\include{' $(TEXMAIN) | sed 's/\\include{//;s/}/.tex/' | sed '/^title\.tex/d') && cat $$CHAPTERS > _allinone_.tex
-	$(PERL) ltoh _allinone_.tex
-	$(PERL) prephtml --ext md --split --template $(MDTEMPLATE) --productversion $(VERSION) --outfilenamebase $(DOCNAME) _allinone_.html
+	$(LTOH) _allinone_.tex
+	$(PREPHTML) --ext md --split --template $(MDTEMPLATE) --productversion $(VERSION) --outfilenamebase $(DOCNAME) _allinone_.html
 	rm _allinone_.tex _allinone_.html
 	mkdir -p $(MDDIR)
 	cp *.md Snippets.* $(MDDIR)
 	cp *.png $(MDDIR)
 	cp figures/*.svg $(MDDIR)
 	cp figures/*.png $(MDDIR)
-	@if grep 'Unknown LaTeX command' $(DOCNAME).md; then echo 'Error: LaTeX commands missing from ltoh.specs! (see lines above)'; exit 1; fi
+	@if grep 'Unknown LaTeX command' *.md; then echo 'Error: LaTeX commands missing from ltoh.specs! (see lines above)'; exit 1; fi
 
 clean:
 	rm -f $(DOCNAME).dvi $(DOCNAME).pdf $(DOCNAME).html $(DOCNAME).md *.md *.aux *.idx *.ilg *.ind *.log *.out *.toc *.bbl *.blg
