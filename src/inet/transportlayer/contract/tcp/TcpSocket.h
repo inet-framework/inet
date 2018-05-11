@@ -135,7 +135,6 @@ class INET_API TcpSocket : public ISocket
      * classes may have both this class and cSimpleModule as base class,
      * and cSimpleModule is already a cObject.
      */
-    // TODO: add socket parameter to all methods?
     class INET_API ICallback
     {
       public:
