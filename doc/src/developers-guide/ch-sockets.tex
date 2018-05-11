@@ -2,6 +2,7 @@
 \label{cha:sockets}
 
 \section{Overview}
+\label{sec:sockets:overview}
 
 The INET Socket API provides special C++ abstractions on top of the standard
 OMNeT++ message passing interface for several communication protocols.
@@ -140,6 +141,7 @@ to and removed from it using the \ffunc{addSocket()} and \ffunc{removeSocket()}
 methods respectively.
 
 \section{UDP Socket}
+\label{sec:sockets:udp-socket}
 
 The \cppclass{UdpSocket} class provides an easy to use C++ interface to send and
 receive \protocol{UDP} datagrams.
@@ -202,6 +204,7 @@ follows:
 \cppsnippet{UdpSocketReceiveExample}{UDP socket receive example}
 
 \section{TCP Socket}
+\label{sec:sockets:tcp-socket}
 
 The \cppclass{TcpSocket} class provides an easy to use C++ interface to manage
 \protocol{TCP} connections, and to send and receive data.
@@ -224,6 +227,7 @@ example}
 \cppsnippet{TcpSocketReceiveExample}{TCP socket receive example}
 
 \section{SCTP Socket}
+\label{sec:sockets:sctp-socket}
 
 \subsection*{Configuring Sockets}
 
@@ -240,6 +244,7 @@ example}
 \cppsnippet{SctpSocketReceiveExample}{SCTP socket receive example}
 
 \section{IPv4 Socket}
+\label{sec:sockets:ipv4-socket}
 
 The \cppclass{Ipv4Socket} class provides an easy to use C++ interface to send
 and receive \protocol{IPv4} datagrams.
@@ -296,6 +301,7 @@ follows:
 \cppsnippet{Ipv4SocketReceiveExample}{IPv4 socket receive example}
 
 \section{IPv6 Socket}
+\label{sec:sockets:ipv6-socket}
 
 The \cppclass{Ipv6Socket} class provides an easy to use C++ interface to send
 and receive \protocol{IPv6} datagrams.
@@ -352,6 +358,7 @@ follows:
 \cppsnippet{Ipv6SocketReceiveExample}{IPv6 socket receive example}
 
 \section{L3 Socket}
+\label{sec:sockets:l3-socket}
 
 The \cppclass{L3Socket} class provides an easy to use C++ interface to send and
 receive datagrams using the conceptual network protocols:
@@ -416,6 +423,7 @@ For example, the application may directly implement the
 \cppsnippet{L3SocketReceiveExample}{L3 socket receive example}
 
 \section{TUN Socket}
+\label{sec:sockets:tun-socket}
 
 The \cppclass{TunSocket} class provides an easy to use C++ interface to send and
 receive datagrams using a \protocol{TUN} interface.

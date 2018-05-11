@@ -90,7 +90,7 @@ $html = join("", <HTMLFILE>);
 print "removing unnecessary formatting and parts\n" unless $quiet;
 
 if ($product ne "OMNEST") {
-   while ($html =~ s/(.*)\@ifcommercial(.*?)\@fi\@//sg) {}
+   while ($html =~ s/(.*)\@ifcommercial\@(.*?)\@fi\@/$1/sg) {}
 } else {
    $html =~ s/\@ifcommercial\@//sg;
    $html =~ s/\@fi\@//sg;
@@ -100,7 +100,9 @@ if ($isdraft) {
    $html =~ s/\@ifdraft\@//sg;
    $html =~ s/\@fi\@//sg;
 } else {
-   while ($html =~ s/(.*)\@ifdraft(.*?)\@fi\@//sg) {}
+   while ($html =~ s/(.*)\@ifdraft\@(.*?)\@fi\@/$1/sg) {}
+   die "unmatched \\fi" if ($html =~ /\@fi\@/);
+   die "unmatched \\ifdraft" if ($html =~ /\@ifdraft\@/);
 }
 
 

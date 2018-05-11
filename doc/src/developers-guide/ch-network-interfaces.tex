@@ -14,7 +14,7 @@ the INET Framework: information about the network interfaces in the host.
 The interface table module does not send or receive messages; other modules
 access it using standard C++ member function calls.
 
-\ifdraft TODO
+ TODO
 \subsection{Accessing the Interface Table}
 
 If a module wants to work with the interface table, first it needs to obtain a
@@ -43,7 +43,7 @@ class interface that \cppclass{InterfaceTable} implements. Using the abstract
 class interface allows one to transparently replace the interface table with
 another implementation, without the need for any change or even
 recompilation of the INET Framework.
-\fi
+
 
 \subsection{Interface Entries}
 
@@ -161,7 +161,7 @@ InterfaceEntry *PPP::registerInterface(double datarate)
 }
 \end{cpp}
 
-\ifdraft TODO
+ TODO
 \subsection{Interface Change Notifications}
 
 \nedtype{InterfaceTable} has a change notification mechanism built in, with
@@ -187,7 +187,6 @@ categories in the host's \nedtype{NotificationBoard}:
 In all those notifications, the data field is a pointer to the
 corresponding \cppclass{InterfaceEntry} object. This is even true for
 \ttt{NF\_INTERFACE\_DELETED} (which is actually a pre-delete notification).
-\fi
 
 \fi
 
