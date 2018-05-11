@@ -139,33 +139,6 @@ struct ip
 #define IPOPT_OFFSET                  2               /* offset within option */
 #define IPOPT_MINOFF                  4               /* min value of above */
 
-/*
- * Time stamp option structure.
- */
-struct  ip_timestamp
-{
-    u_char ipt_code;    /* IPOPT_TS */
-    u_char ipt_len;    /* size of structure (variable) */
-    u_char ipt_ptr;    /* index of current entry */
-#if BYTE_ORDER == LITTLE_ENDIAN
-    u_char    /*A*/ ipt_flg : 4,    /* flags, see below */
-                    ipt_oflw : 4;    /* overflow counter */
-#endif // if BYTE_ORDER == LITTLE_ENDIAN
-#if BYTE_ORDER == BIG_ENDIAN
-    u_char    /*A*/ ipt_oflw : 4,    /* overflow counter */
-                    ipt_flg : 4;    /* flags, see below */
-#endif // if BYTE_ORDER == BIG_ENDIAN
-    union ipt_timestamp
-    {
-        n_long ipt_time[1];
-        struct  ipt_ta
-        {
-            struct in_addr ipt_addr;
-            n_long ipt_time;
-        } ipt_ta[1];
-    } ipt_timestamp;
-};
-
 /* flag bits for ipt_flg */
 #define IPOPT_TS_TSONLY          0               /* timestamps only */
 #define IPOPT_TS_TSANDADDR       1               /* timestamps and addresses */

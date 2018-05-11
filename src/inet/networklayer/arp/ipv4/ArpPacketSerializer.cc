@@ -14,7 +14,7 @@
 //
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/common/serializer/headers/ethernethdr.h"
+#include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/common/EtherType_m.h"
 #include "inet/networklayer/arp/ipv4/ArpPacket_m.h"
 #include "inet/networklayer/arp/ipv4/ArpPacketSerializer.h"
@@ -44,7 +44,7 @@ void ArpPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     const auto& arpPacket = staticPtrCast<const ArpPacket>(chunk);
     stream.writeUint16Be(1); //ethernet
     stream.writeUint16Be(ETHERTYPE_IPv4);
-    stream.writeByte(ETHER_ADDR_LEN);
+    stream.writeByte(MAC_ADDRESS_SIZE);
     stream.writeByte(4);  // size of IPv4 address
     stream.writeUint16Be(arpPacket->getOpcode());
     stream.writeMacAddress(arpPacket->getSrcMacAddress());

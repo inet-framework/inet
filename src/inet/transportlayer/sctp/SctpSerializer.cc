@@ -18,12 +18,9 @@
 
 //#include "inet/common/serializer/SerializerUtil.h"
 
-#include "inet/common/serializer/headers/defs.h"
+#include "inet/common/Endian.h"
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/common/serializer/headers/bsdint.h"
-#include "inet/common/serializer/headers/in_systm.h"
-#include "inet/common/serializer/headers/in.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/ipv4/headers/ip.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"

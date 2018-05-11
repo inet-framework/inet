@@ -26,5 +26,11 @@ uint32_t ethernetCRC(const unsigned char *buf, unsigned int bufsize);
 
 } // namespace inet
 
+/*
+ * Ethernet CRC32 polynomials (big- and little-endian verions).
+ */
+#define ETHER_CRC_POLY_LE    0xedb88320
+#define ETHER_CRC_POLY_BE    0x04c11db6
+
 #endif /* ETHERNETCRC_H_ */
 

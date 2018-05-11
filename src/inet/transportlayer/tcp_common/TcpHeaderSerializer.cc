@@ -13,11 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
+#include "inet/common/Endian.h"
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/common/serializer/headers/bsdint.h"
-#include "inet/common/serializer/headers/defs.h"
-#include "inet/common/serializer/headers/in_systm.h"
-#include "inet/common/serializer/headers/in.h"
 #include "inet/transportlayer/tcp_common/TcpHeaderSerializer.h"
 #include "inet/transportlayer/tcp_common/headers/tcphdr.h"
 

@@ -34,11 +34,11 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
-#include "inet/common/serializer/headers/ethernethdr.h"
 
 #include "inet/linklayer/common/EtherType_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/ethernet/Ethernet.h"
 #include "inet/linklayer/ext/Ext.h"
 
 #include "inet/networklayer/common/InterfaceEntry.h"
@@ -61,7 +61,7 @@ void Ext::ext_packet_handler(u_char *usermod, const struct pcap_pkthdr *hdr, con
     //FIXME Why filtering IPv4 only on eth interface? why not filtering on PPP or other interfaces?
     // skip ethernet frames not encapsulating an IP packet.
     // TODO: how about ipv6 and other protocols?
-    if (module->datalink == DLT_EN10MB && hdr->caplen > ETHER_HDR_LEN) {
+    if (module->datalink == DLT_EN10MB && hdr->caplen > ETHER_MAC_HEADER_BYTES) {
         //TODO for decapsulate, using code from EtherEncap
         uint16_t etherType = (uint16_t)(bytes[ETHER_ADDR_LEN * 2]) << 8 | bytes[ETHER_ADDR_LEN * 2 + 1];
         //TODO get ethertype from snap header when packet has snap header
