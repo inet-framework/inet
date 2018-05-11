@@ -45,7 +45,7 @@ htmlfile_spec := $BASE.html
 :{}	:\subsection*:<b>:</b>:
 :{}	:\subsubsection*:<b>:</b>:
 :{}	:\centerline:<p align=center>:</>:
-:{}	:\footnote:<br><ul><font size=-1>[:]</font></ul>:
+:{}	:\footnote:<br><ul><font size='-1'>[:]</font></ul>:
 :{}	:\mbox:::
 :{}	:\ensuremath:<it>:</>:
 :{} :\textsuperscript:<sup>:</sup>:

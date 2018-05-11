@@ -3,6 +3,8 @@ DOT=dot
 LTOH=../tools/ltoh
 PREPHTML=../tools/prephtml
 
+PRODUCT="INET Framework"
+TITLE="INET User's Guide"
 DOCNAME=inet-users-guide
 TEXMAIN=$(DOCNAME).tex
 HTMLTEMPLATE=inet-users-guide.thtml
@@ -10,7 +12,7 @@ MDTEMPLATE=inet-users-guide.tmd
 VERSION=4.x
 HTMLDIR=../../users-guide
 PDFDIR=../..
-MDDIR=~/inet-framework.github.io/users-guide
+MDDIR=~/www/inet.omnetpp.org/users-guide
 
 ALLTEX = $(wildcard *.tex)
 DOTPICS = $(wildcard figures/*.dot)
@@ -45,7 +47,7 @@ pdf: $(ALLTEX) $(PDFPICS) figures/*.png
 html : $(ALLTEX) $(SVGPICS) $(HTMLTEMPLATE) $(PREPHTML) $(LTOH) ltoh.specs
 	CHAPTERS=$$(grep '\include{' $(TEXMAIN) | sed 's/\\include{//;s/}/.tex/' | sed '/^title\.tex/d') && cat $$CHAPTERS > _allinone_.tex
 	$(LTOH) _allinone_.tex
-	$(PREPHTML) --template $(HTMLTEMPLATE) --productversion $(VERSION) --outfilenamebase $(DOCNAME) _allinone_.html
+	$(PREPHTML) --template $(HTMLTEMPLATE) --productversion $(VERSION) --product $(PRODUCT) --title $(TITLE) --outfilenamebase $(DOCNAME) _allinone_.html
 	rm _allinone_.tex _allinone_.html
 	mkdir -p $(HTMLDIR)
 	cp $(DOCNAME).html $(HTMLDIR)/index.html
@@ -58,7 +60,7 @@ html : $(ALLTEX) $(SVGPICS) $(HTMLTEMPLATE) $(PREPHTML) $(LTOH) ltoh.specs
 md : $(ALLTEX) $(SVGPICS) $(MDTEMPLATE) $(PREPHTML) $(LTOH) ltoh.specs
 	CHAPTERS=$$(grep '\include{' $(TEXMAIN) | sed 's/\\include{//;s/}/.tex/' | sed '/^title\.tex/d') && cat $$CHAPTERS > _allinone_.tex
 	$(LTOH) _allinone_.tex
-	$(PREPHTML) --ext md --split --template $(MDTEMPLATE) --productversion $(VERSION) --outfilenamebase index _allinone_.html
+	$(PREPHTML) --ext md --split --template $(MDTEMPLATE) --productversion $(VERSION) --product $(PRODUCT) --title $(TITLE) --outfilenamebase index _allinone_.html
 	rm _allinone_.tex _allinone_.html
 	mkdir -p $(MDDIR)
 	cp *.md Snippets.* $(MDDIR)
