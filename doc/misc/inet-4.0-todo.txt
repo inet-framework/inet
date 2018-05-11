@@ -23,9 +23,7 @@ should be included in INET 4.0.
 SHOULD:
  - add test and check for std::dynamic_pointer_cast<Subclass1>(chunk->peek<Subclass1>()) != nullptr always holds when peek uses a variant type deserializer
 
- - eliminate ProtocolMapping and other unused code
  - remove KLUDGEs, TODOs, etc.
- - move serializers into their own protocol folders
  - update/remove obsolete NED documentation
  - make sure all tests PASS, check for leaks, etc.
 
@@ -36,6 +34,9 @@ SHOULD:
  - fix MAC address filtering TODO in RadioMedium
 
 NEED NOT:
+ - 802.11 preamble, header, data separation in HT and VHT mode doesn't really make sense the way it's right now implemented
+   there's no separate header in these modes, the preamble is much more complicated than in the other modes
+   there's also a bug related to this in the Ieee80211ScalarTransmitter when it computes the data duration
  - add L2 sockets: EthernetSocket bound to EtherType, LlcSocket bound to SSAP, DSAP, add Ieee80211Socket bound unconditionally
  - solve dynamic node creation and address resolution in applications
  - don't subclass APSK medium and such with other specific radios, think of APSK radio as yet another specific conceptual radio
@@ -74,6 +75,8 @@ NEED NOT:
  - pretty print white spaces
 
 DONE:
+ + move serializers into their own protocol folders
+ + eliminate ProtocolMapping and other unused code
  + cSocketRTScheduler refactoring for multiple sockets bound to interfaces
  + rename CallbackInterface to ICallback in TcpSocket and SctpSocket
  + add ICallback and processMessage to UdpSocket
