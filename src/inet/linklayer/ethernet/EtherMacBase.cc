@@ -113,6 +113,28 @@ const EtherMacBase::EtherDescr EtherMacBase::etherDescrs[NUM_OF_ETHERDESCRS] = {
         0,
         0.0,
         0.0
+    },
+    {
+        TWOHUNDRED_GIGABIT_ETHERNET_TXRATE,
+        0.5 / TWOHUNDRED_GIGABIT_ETHERNET_TXRATE,
+        MIN_ETHERNET_FRAME_BYTES,
+        0,
+        0,
+        -1,    // half-duplex is not supported
+        0,
+        0.0,
+        0.0
+    },
+    {
+        FOURHUNDRED_GIGABIT_ETHERNET_TXRATE,
+        0.5 / FOURHUNDRED_GIGABIT_ETHERNET_TXRATE,
+        MIN_ETHERNET_FRAME_BYTES,
+        0,
+        0,
+        -1,    // half-duplex is not supported
+        0,
+        0.0,
+        0.0
     }
 };
 

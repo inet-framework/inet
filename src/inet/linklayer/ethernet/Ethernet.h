@@ -42,6 +42,8 @@ namespace inet {
 #define FAST_GIGABIT_ETHERNET_TXRATE        10000000000.0   /* 10 Gbit/sec (in bit/s) */
 #define FOURTY_GIGABIT_ETHERNET_TXRATE      40000000000.0   /* 40 Gbit/sec (in bit/s) */
 #define HUNDRED_GIGABIT_ETHERNET_TXRATE     100000000000.0   /* 100 Gbit/sec (in bit/s) */
+#define TWOHUNDRED_GIGABIT_ETHERNET_TXRATE  200000000000.0   /* 200 Gbit/sec (in bit/s) */
+#define FOURHUNDRED_GIGABIT_ETHERNET_TXRATE 400000000000.0   /* 400 Gbit/sec (in bit/s) */
 
 #define MAX_ATTEMPTS                        16
 #define BACKOFF_RANGE_LIMIT                 10
