@@ -38,7 +38,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/common/serializer/TcpIpChecksum.h"
+#include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/common/L3Address.h"

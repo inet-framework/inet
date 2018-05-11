@@ -21,7 +21,7 @@
 #include "inet/common/ProtocolTag_m.h"
 //#include "inet/common/ProtocolGroup.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
-#include "inet/common/serializer/EthernetCRC.h"
+#include "inet/common/checksum/EthernetCRC.h"
 #include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/Ethernet.h"

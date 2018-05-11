@@ -21,7 +21,7 @@
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Message.h"
-#include "inet/common/serializer/TcpIpChecksum.h"
+#include "inet/common/checksum/TcpIpChecksum.h"
 #include "lwip/lwip_tcp.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/tcp_lwip/TcpLwip.h"

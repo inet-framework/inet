@@ -23,7 +23,7 @@
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/common/serializer/TcpIpChecksum.h"
+#include "inet/common/checksum/TcpIpChecksum.h"
 
 #include "inet/linklayer/common/InterfaceTag_m.h"
 

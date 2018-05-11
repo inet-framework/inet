@@ -28,7 +28,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/dissector/ProtocolDissector.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
-#include "inet/common/serializer/TcpIpChecksum.h"
+#include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"

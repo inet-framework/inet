@@ -22,7 +22,7 @@
 #include <sim_interface.h>    // NSC header
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/serializer/TcpIpChecksum.h"
+#include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/tcp_common/headers/tcphdr.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"

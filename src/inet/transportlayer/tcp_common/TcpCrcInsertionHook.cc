@@ -16,7 +16,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/EmptyChunk.h"
-#include "inet/common/serializer/TcpIpChecksum.h"
+#include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/contract/INetfilter.h"

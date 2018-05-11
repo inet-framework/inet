@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/serializer/EthernetCRC.h"
+#include "inet/common/checksum/EthernetCRC.h"
 #include "inet/linklayer/ieee80211/mac/contract/IContention.h"
 #include "inet/linklayer/ieee80211/mac/contract/IStatistics.h"
 #include "inet/linklayer/ieee80211/mac/contract/ITx.h"

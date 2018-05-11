@@ -17,7 +17,7 @@
 
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/serializer/EthernetCRC.h"
+#include "inet/common/checksum/EthernetCRC.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRx.h"
 #include "inet/linklayer/ieee80211/mac/contract/IStatistics.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
