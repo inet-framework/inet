@@ -43,6 +43,7 @@ void TcpServerHostApp::start()
     int localPort = par("localPort");
 
     serverSocket.setOutputGate(gate("socketOut"));
+    serverSocket.setCallback(this);
     serverSocket.bind(localAddress[0] ? L3Address(localAddress) : L3Address(), localPort);
     serverSocket.listen();
 }
@@ -85,32 +86,10 @@ void TcpServerHostApp::handleMessage(cMessage *msg)
     }
     else {
         TcpSocket *socket = check_and_cast_nullable<TcpSocket*>(socketMap.findSocketFor(msg));
-        if (socket) {
+        if (socket)
             socket->processMessage(msg);
-        }
-        else if (serverSocket.belongsToSocket(msg) && (msg->getKind() == TCP_I_AVAILABLE)) {
-            // new TCP connection -- create new socket object and server process
-            TcpSocket *newSocket = new TcpSocket(msg);
-            newSocket->setOutputGate(gate("socketOut"));
-
-            const char *serverThreadModuleType = par("serverThreadModuleType");
-            cModuleType *moduleType = cModuleType::get(serverThreadModuleType);
-            char name[80];
-            sprintf(name, "thread_%i", newSocket->getSocketId());
-            TcpServerThreadBase *proc = check_and_cast<TcpServerThreadBase *>(moduleType->create(name, this));
-            proc->finalizeParameters();
-
-            proc->callInitialize();
-
-            newSocket->setCallback(proc);
-            proc->init(this, newSocket);
-
-            socketMap.addSocket(newSocket);
-            threadSet.insert(proc);
-
+        else if (serverSocket.belongsToSocket(msg))
             serverSocket.processMessage(msg);
-            return;
-        }
         else {
             // throw cRuntimeError("Unknown incoming message: '%s'", msg->getName());
             EV_ERROR << "message " << msg->getFullName() << "(" << msg->getClassName() << ") arrived for unknown socket \n";
@@ -122,6 +101,29 @@ void TcpServerHostApp::handleMessage(cMessage *msg)
 void TcpServerHostApp::finish()
 {
     stop();
+}
+
+void TcpServerHostApp::socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo)
+{
+    // new TCP connection -- create new socket object and server process
+    TcpSocket *newSocket = new TcpSocket(availableInfo);
+    newSocket->setOutputGate(gate("socketOut"));
+
+    const char *serverThreadModuleType = par("serverThreadModuleType");
+    cModuleType *moduleType = cModuleType::get(serverThreadModuleType);
+    char name[80];
+    sprintf(name, "thread_%i", newSocket->getSocketId());
+    TcpServerThreadBase *proc = check_and_cast<TcpServerThreadBase *>(moduleType->create(name, this));
+    proc->finalizeParameters();
+    proc->callInitialize();
+
+    newSocket->setCallback(proc);
+    proc->init(this, newSocket);
+
+    socketMap.addSocket(newSocket);
+    threadSet.insert(proc);
+
+    socket->accept(availableInfo->getNewSocketId());
 }
 
 void TcpServerHostApp::removeThread(TcpServerThreadBase *thread)
