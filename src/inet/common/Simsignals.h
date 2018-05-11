@@ -62,9 +62,9 @@ extern INET_API simsignal_t    // admin
     mrouteChangedSignal,
 
 // layer 3 - Ipv4
+    ipv4MulticastChangeSignal,
     ipv4MulticastGroupJoinedSignal,
     ipv4MulticastGroupLeftSignal,
-    ipv4McastChangeSignal,
     ipv4MulticastGroupRegisteredSignal,
     ipv4MulticastGroupUnregisteredSignal,
 

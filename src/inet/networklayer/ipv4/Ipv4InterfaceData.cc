@@ -268,7 +268,7 @@ void Ipv4InterfaceData::changeMulticastGroupMembership(Ipv4Address multicastAddr
         cModule *m = ownerp ? dynamic_cast<cModule *>(ownerp->getInterfaceTable()) : nullptr;
         if (m) {
             Ipv4MulticastGroupSourceInfo info(ownerp, multicastAddress, entry->sourceList);
-            m->emit(ipv4McastChangeSignal, &info);
+            m->emit(ipv4MulticastChangeSignal, &info);
         }
 
         // Legacy notifications

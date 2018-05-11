@@ -389,7 +389,7 @@ void Igmpv3::initialize(int stage)
 
         cModule *host = getContainingNode(this);
         host->subscribe(interfaceDeletedSignal, this);
-        host->subscribe(ipv4McastChangeSignal, this);
+        host->subscribe(ipv4MulticastChangeSignal, this);
 
         enabled = par("enabled");
         robustness = par("robustnessVariable");
@@ -485,7 +485,7 @@ void Igmpv3::receiveSignal(cComponent *source, simsignal_t signalID, cObject *ob
             deleteRouterInterfaceData(interfaceId);
         }
     }
-    else if (signalID == ipv4McastChangeSignal) {
+    else if (signalID == ipv4MulticastChangeSignal) {
         info = check_and_cast<const Ipv4MulticastGroupSourceInfo *>(obj);
         multicastSourceListChanged(info->ie, info->groupAddress, info->sourceList);
     }
