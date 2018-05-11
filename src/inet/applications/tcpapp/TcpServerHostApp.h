@@ -53,6 +53,12 @@ class INET_API TcpServerHostApp : public cSimpleModule, public ILifecycle, publi
 
     virtual void socketDataArrived(TcpSocket* socket, Packet *packet, bool urgent) override { throw cRuntimeError("Unexpected data"); }
     virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override;
+    virtual void socketEstablished(TcpSocket *socket) override {}
+    virtual void socketPeerClosed(TcpSocket *socket) override {}
+    virtual void socketClosed(TcpSocket *socket) override {}
+    virtual void socketFailure(TcpSocket *socket, int code) override {}
+    virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override { delete status; }
+    virtual void socketDeleted(TcpSocket *socket) override {}
 
     bool isNodeUp() { return !nodeStatus || nodeStatus->getState() == NodeStatus::UP; }
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
@@ -79,11 +85,13 @@ class INET_API TcpServerThreadBase : public cSimpleModule, public TcpSocket::ICa
 
     // internal: TcpSocket::ICallback methods
     virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override { dataArrived(msg, urgent); }
+    virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override { socket->accept(availableInfo->getNewSocketId()); }
     virtual void socketEstablished(TcpSocket *socket) override { established(); }
     virtual void socketPeerClosed(TcpSocket *socket) override { peerClosed(); }
     virtual void socketClosed(TcpSocket *socket) override { closed(); }
     virtual void socketFailure(TcpSocket *socket, int code) override { failure(code); }
     virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override { statusArrived(status); }
+    virtual void socketDeleted(TcpSocket *socket) override {}
 
     virtual void refreshDisplay() const override;
 
