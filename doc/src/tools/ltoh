@@ -1219,7 +1219,7 @@ sub formatmath ()
       $txt =~ s!\\tilde\{(n|N|a|A)}!&$1tilde;!g;
 
       # convert \bar{n}
-      $txt =~ s!\\bar\{(.+?)}!$1&#772!g;
+      $txt =~ s!\\bar\{(.+?)}!$1&#772;!g;
 
       # convert \in
       $txt =~ s!\\in\b! is in !g;
