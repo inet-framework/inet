@@ -45,7 +45,7 @@ htmlfile_spec := $BASE.html
 :{}	:\subsection*:<b>:</b>:
 :{}	:\subsubsection*:<b>:</b>:
 :{}	:\centerline:<p align=center>:</>:
-:{}	:\footnote:<br><ul><font size=-1>[:]</font></ul>:
+:{}	:\footnote:<br><ul><font size='-1'>[:]</font></ul>:
 :{}	:\mbox:::
 :{}	:\ensuremath:<it>:</>:
 :{} :\textsuperscript:<sup>:</sup>:
@@ -189,11 +189,11 @@ htmlfile_spec := $BASE.html
 :b/e	:\begin{important}:<ul class="important"><b>IMPORTANT</b><br>:</ul>:
 :b/e	:\begin{pseudocode}(\[.*?\])?:<pre class="text">:</pre>:
 
-:{2}	:\nedsnippet#1#2:<pre class="snippet" src="Snippets.ned" after="//!#1" until="//!End"></pre><small>#2</small>::
-:{2}	:\msgsnippet#1#2:<pre class="snippet" src="Snippets.msg" after="//!#1" until="//!End"></pre><small>#2</small>::
-:{2}	:\cppsnippet#1#2:<pre class="snippet" src="Snippets.cc" after="//!#1" until="//!End"></pre><small>#2</small>::
-:{2}	:\inisnippet#1#2:<pre class="snippet" src="Snippets.ini" after="#!#1" until="#!End"></pre><small>#2</small>::
-:{2}	:\xmlsnippet#1#2:<pre class="snippet" src="Snippets.xml" after="<!--!#1-->" until="<!--End-->"></pre><small>#2</small>::
+:{2}	:\nedsnippet#1#2:<pre class="snippet" src="Snippets.ned" after="//!#1" until="//!End"></pre>::
+:{2}	:\msgsnippet#1#2:<pre class="snippet" src="Snippets.msg" after="//!#1" until="//!End"></pre>::
+:{2}	:\cppsnippet#1#2:<pre class="snippet" src="Snippets.cc" after="//!#1" until="//!End"></pre>::
+:{2}	:\inisnippet#1#2:<pre class="snippet" src="Snippets.ini" after="#!#1" until="#!End"></pre>::
+:{2}	:\xmlsnippet#1#2:<pre class="snippet" src="Snippets.xml" after="<!--!#1-->" until="<!--End-->"></pre>::
 
 #XXX Warning: the following names are now hardcoded into ltoh.pl! We need a "vb/e" category in ltoh, for "verbatim-like begin/end" where \,{,} needs to be left alone
 :b/e	:\begin{ned}(\[.*?\])?:<pre><code data-language="ned">:</code></pre>:
