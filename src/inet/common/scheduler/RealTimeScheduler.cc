@@ -119,7 +119,7 @@ bool RealTimeScheduler::receiveWithTimeout(long usec)
     timeout.tv_usec = usec;
 
     for (uint16 i = 0; i < callbackEntries.size(); i++) {
-        if (callbackEntries.at(i).callback->notify(fdVec[i]))
+        if (callbackEntries.at(i).callback->notify(callbackEntries.at(i).fd))
             found = true;
     }
     if (!found)
