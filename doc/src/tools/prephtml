@@ -89,19 +89,20 @@ $html = join("", <HTMLFILE>);
 #
 print "removing unnecessary formatting and parts\n" unless $quiet;
 
-if ($isdraft) {
-   $html =~ s/\@ifdraft\@//sg;
-   $html =~ s/\@fi\@//sg;
-} else {
-   $html =~ s/\@ifdraft\@.*?\@fi\@//sg;
-}
-
 if ($product ne "OMNEST") {
-   $html =~ s/\@ifcommercial\@.*?\@fi\@//sg;
+   while ($html =~ s/(.*)\@ifcommercial(.*?)\@fi\@//sg) {}
 } else {
    $html =~ s/\@ifcommercial\@//sg;
    $html =~ s/\@fi\@//sg;
 }
+
+if ($isdraft) {
+   $html =~ s/\@ifdraft\@//sg;
+   $html =~ s/\@fi\@//sg;
+} else {
+   while ($html =~ s/(.*)\@ifdraft(.*?)\@fi\@//sg) {}
+}
+
 
 # replace product name in verbatim and listing sections (not affected by ltoh)
 $html =~ s|`\\opp`|$product|seg;

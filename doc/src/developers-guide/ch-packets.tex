@@ -2,6 +2,7 @@
 \label{cha:packet-api}
 
 \section{Overview}
+\label{sec:packets:overviews}
 
 The INET Packet API is designed to ease the implementation of communication
 protocols and applications by providing many useful C++ components. In the
@@ -39,6 +40,7 @@ buffer received data for reassembly (e.g., \protocol{IP}) or for reordering
 structures on top of the lower layer mentioned above.
 
 \section{Representing Data}
+\label{sec:packets:representing-data}
 
 The \cppclass{Packet} data structure is a compound data structure that builds on
 top of another set of data structures called chunks. The \cppclass{Chunk} data
@@ -103,6 +105,7 @@ It's important to distinguish the two length related fields in the
 (\fvar{lengthField}).
 
 \section{Representing Packets}
+\label{sec:packets:representing-packets}
 
 The \cppclass{Packet} data structure uses a single chunk data structure to
 represent its contents. The contents may be as simple as raw bytes
@@ -127,6 +130,7 @@ part, but it doesn't affect the data stored in the packet.
 \cppsnippet{PacketProcessingExample}{Packet processing example}
 
 \section{Representing Signals}
+\label{sec:packets:representing-signals}
 
 Protocols and applications use the \cppclass{Packet} data structure to represent
 digital data during the processing within the network node. In contrast, the
@@ -140,6 +144,7 @@ domain representation. The most important physical properties of a signal are
 the signal duration and the signal power.
 
 \section{Representing Transmission Errors}
+\label{sec:packets:representing-transmission-errors}
 
 An essential part of communication network simulation is the understanding of
 protocol behavior in the presence of errors. The Packet API provides several
@@ -180,6 +185,7 @@ errors by chechking the error bit on packets and chunks, and by standard CRC
 mechanisms.
 
 \section{Packet Tagging}
+\label{sec:packets:packet-tagging}
 
 Communication between protocols inside network nodes often require passing
 around meta information along with packets. To this end, packets are also
@@ -208,6 +214,7 @@ Tags come in three flavors:
 \msgsnippet{TagDefinitionExeample}{Tag definition example}
 
 \section{Region Tagging}
+\label{sec:packets:region-tagging}
 
 In order to collect some statistics, it is required to attach meta information
 to arbitrary regions of packets. For example, computing the end-to-end delay in
@@ -230,6 +237,7 @@ times depending on how the data is provided at the sender and how the underlying
 network works.
 
 \section{Dissecting Packets}
+\label{sec:packets:dissecting-packets}
 
 Understanding what's inside a packet is a very important and often used
 functionality. Simply using the representation may be insufficient, because the
@@ -260,6 +268,7 @@ interface will be notified for each part of the packet as the
 \cppsnippet{PacketDissectionExample}{Packet dissection example}
 
 \section{Filtering Packets}
+\label{sec:packets:filtering-packets}
 
 Filtering packets based on the actual data they contain is another widely used
 and very important feature. With the help of the packet dissector, it is very
@@ -280,6 +289,7 @@ with a '10.0.0' source address prefix.
 \cppsnippet{PacketFilteringExample}{Packet filtering example}
 
 \section{Printing Packets}
+\label{sec:packets:printing-packets}
 
 During model development, packets often need to be displayed in a human readable
 form. The Packet API provides a \cppclass{PacketPrinter} class which is capable
@@ -300,6 +310,7 @@ The \cppclass{PacketPrinter} provides a few other functions which have
 additional options to control the details of the resulting human readable form.
 
 \section{Recording PCAP}
+\label{sec:packets:recording-pcap}
 
 Exporting the packets from a simulation into a PCAP file allows further
 processing with 3rd party tools. The Packet API provides a \cppclass{PcapDump}
@@ -309,6 +320,7 @@ size and increase performance.
 \cppsnippet{PCAPRecoringExample}{PCAP recording example}
 
 \section{Encapsulating Packets}
+\label{sec:packets:encapsulating-packets}
 
 Many communication protocols work with simple packet encapsulation. They
 encapsulate packets with their own protocol specific headers and trailers at the
@@ -336,6 +348,7 @@ packet data. That is when the packet reaches high level protocol, it still
 contains all the received data.
 
 \section{Fragmenting Packets}
+\label{sec:packets:fragmenting-packets}
 
 Communication protocols often provide fragmentation to overcome various physical
 limits (e.g. length limit, error rate). They split packets into smaller pieces
@@ -356,6 +369,7 @@ fragments:
 \cppsnippet{PacketDefragmentationExample}{Packet defragmentation example}
 
 \section{Aggregating Packets}
+\label{sec:packets:aggregating-packets}
 
 Communication protocols often provide aggregation to better utilize the
 communication channel by reducing protocol overhead. They wait for several
@@ -375,6 +389,7 @@ packet:
 \cppsnippet{PacketDisaggregationExample}{Packet disaggregation example}
 
 \section{Serializing Packets}
+\label{sec:packets:serializing-packets}
 
 In real communication systems packets are usually stored as a sequence of bytes
 directly in network byte order. In contrast, INET usually stores packets in
@@ -397,6 +412,7 @@ deserialized from a sequence of bytes:
 \cppsnippet{PacketDeserializationExample}{Packet deserialization example}
 
 \section{Emulation Support}
+\label{sec:packets:emulation-support}
 
 In order to be able to communicate with real hardware, packets must be converted
 to and from a sequence of bytes. The reason is that the programming interface of
@@ -427,6 +443,7 @@ either because it's already available in the packet, or because it gets
 automatically deserialized.
 
 \section{Queueing Packets}
+\label{sec:packets:queueing-packets}
 
 Some protocols store packet data temporarily at the sender node before actual
 processing can occur. For example, the TCP protocol must store the outgoing data
@@ -443,6 +460,7 @@ works with chunks. Similarly to the \cppclass{Packet} it also automatically
 merge consecutive data and selects the most appropriate representation.
 
 \section{Buffering Packets}
+\label{sec:packets:buffering-packets}
 
 Protocols at the receiver node often need to buffer incoming packet data until
 the actual processing can occur. For example, packets may arrive out of order,
@@ -467,6 +485,7 @@ representation provided by INET, and any combination thereof. For example,
 \cppclass{SliceChunk} can be freely mixed in the same buffer.
 
 \section{Reassembling Packets}
+\label{sec:packets:reassembling-packets}
 
 Some protocols may use an unreliable service to transfer a large piece of data
 over the network. The unreliable service requires the receiver node to be
@@ -487,6 +506,7 @@ offset, and it also provides the complete reassembled data with the expected
 length if available.
 
 \section{Reordering Packets}
+\label{sec:packets:reordering-packets}
 
 Some protocols may use an unreliable service to transfer a long data stream over
 the network. The unreliable service requires the sender node to resend
@@ -508,6 +528,7 @@ The \cppclass{ReorderBuffer} supports replacing the stored data at a given
 offset, and it provides the available data from the expected offset if any.
 
 \section{Dispatching Packets}
+\label{sec:packets:dispatching-packets}
 
 Protocols also communicate with each other inside the network node by sending
 packets, requests, and confirmations. INET is very flexible in terms of how
