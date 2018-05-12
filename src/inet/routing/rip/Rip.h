@@ -111,6 +111,7 @@ class INET_API Rip : public cSimpleModule, protected cListener, public ILifecycl
     simtime_t updateInterval;    // time between regular updates
     simtime_t routeExpiryTime;    // learned routes becomes invalid if no update received in this period of time
     simtime_t routePurgeTime;    // invalid routes are deleted after this period of time is elapsed
+    simtime_t holdDownTime;
     simtime_t shutdownTime;    // time of shutdown processing
     bool triggeredUpdate = false;
     bool isOperational = false;

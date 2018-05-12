@@ -52,6 +52,7 @@ protected:
     simtime_t lastUpdateTime = 0;   // time of the last change (only for RTE routes)
     bool changed = false;           // true if the route has changed since the update
     uint16 tag = 0;                 // route tag (only for REDISTRIBUTE routes)
+    simtime_t lastInvalid = 0;      // time of the last invalidation
 
 public:
     RipRoute(IRoute *route, RouteType type, int metric, uint16 routeTag)
@@ -68,6 +69,7 @@ public:
         this->lastUpdateTime = 0;
         this->changed = false;
         this->tag = routeTag;
+        this->lastInvalid = 0;
     }
 
     virtual std::string str() const override;
@@ -83,6 +85,7 @@ public:
     simtime_t getLastUpdateTime() const { return lastUpdateTime; }
     bool isChanged() const { return changed; }
     uint16 getRouteTag() const { return tag; }
+    simtime_t getLastInvalidationTime() const { return lastInvalid; }
 
     void setRoute(IRoute *route) { this->route = route; }
     void setType(RouteType type) { this->type = type; }
@@ -95,6 +98,7 @@ public:
     void setLastUpdateTime(simtime_t time) { lastUpdateTime = time; }
     void setChanged(bool changed) { this->changed = changed; }
     void setRouteTag(uint16 routeTag) { this->tag = routeTag; }
+    void setLastInvalidationTime(simtime_t time) { this->lastInvalid = time; }
 };
 
 } // namespace inet

@@ -50,6 +50,7 @@ std::string RipRoute::str() const
     out << "lastUpdate:" << lastUpdateTime << "s  ";
     out << "changed:" << changed << " ";
     out << "tag:" << tag << " ";
+    out << "lastInvalid:" << lastInvalid << "s  ";
 
     switch (type) {
         case RIP_ROUTE_INTERFACE:
