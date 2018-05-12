@@ -20,41 +20,6 @@
 namespace inet {
 
 
-std::string RipRouteData::str() const
-{
-    std::stringstream out;
-
-    out << "from:" << from << " ";
-    out << "lastUpdate:" << lastUpdateTime << "s  ";
-    out << "changed:" << changed << " ";
-    out << "tag:" << tag << " ";
-
-    switch (type) {
-        case RIP_ROUTE_INTERFACE:
-            out << "INTERFACE";
-            break;
-
-        case RIP_ROUTE_STATIC:
-            out << "STATIC";
-            break;
-
-        case RIP_ROUTE_DEFAULT:
-            out << "DEFAULT";
-            break;
-
-        case RIP_ROUTE_RTE:
-            out << "RTE";
-            break;
-
-        case RIP_ROUTE_REDISTRIBUTE:
-            out << "REDISTRIBUTE";
-            break;
-    }
-
-    return out.str();
-}
-
-
 std::string RipRoute::str() const
 {
     std::stringstream out;
