@@ -808,10 +808,6 @@ void Rip::addRoute(const L3Address& dest, int prefixLength, const InterfaceEntry
     ripRoute->setChanged(true);
     ripRoutes.push_back(ripRoute);
 
-   // route->setProtocolData(dynamic_cast<RipRouteData *>(ripRoute));
-    EV_DETAIL << "Adding new route " << route << endl;
-    rt->addRoute(route);
-
     emit(numRoutesSignal, (unsigned long)ripRoutes.size());
     triggerUpdate();
 }
@@ -852,9 +848,6 @@ void Rip::updateRoute(RipRoute *ripRoute, const InterfaceEntry *ie, const L3Addr
         ripRoute->setNextHop(nextHop);
 
         IRoute *route = createRoute(ripRoute->getDestination(), ripRoute->getPrefixLength(), ie, nextHop, metric);
-       // route->setProtocolData(dynamic_cast<RipRouteData *>(ripRoute));
-        EV_DETAIL << "Adding new route " << route << endl;
-        rt->addRoute(route);
 
         ripRoute->setRoute(route);
     }
@@ -862,16 +855,13 @@ void Rip::updateRoute(RipRoute *ripRoute, const InterfaceEntry *ie, const L3Addr
     if (oldMetric != RIP_INFINITE_METRIC) {
         IRoute *route = ripRoute->getRoute();
         ASSERT(route);
-
-        ripRoute->setRoute(nullptr);
         rt->deleteRoute(route);
 
+        ripRoute->setRoute(nullptr);
         ripRoute->setNextHop(nextHop);
+
         if (metric < RIP_INFINITE_METRIC) {
             route = createRoute(ripRoute->getDestination(), ripRoute->getPrefixLength(), ie, nextHop, metric);
-           // route->setProtocolData(dynamic_cast<RipRouteData *>(ripRoute));
-            EV_DETAIL << "Adding new route " << route << endl;
-            rt->addRoute(route);
 
             ripRoute->setRoute(route);
         }
@@ -1121,6 +1111,9 @@ IRoute *Rip::createRoute(const L3Address& dest, int prefixLength, const Interfac
     route->setInterface(const_cast<InterfaceEntry *>(ie));
     route->setSourceType(IRoute::RIP);
     route->setSource(this);
+
+    EV_DETAIL << "Adding new route " << route << endl;
+    rt->addRoute(route);
 
     return route;
 }
