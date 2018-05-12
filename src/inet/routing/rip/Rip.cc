@@ -119,6 +119,7 @@ void Rip::initialize(int stage)
         updateInterval = par("updateInterval");
         routeExpiryTime = par("routeExpiryTime");
         routePurgeTime = par("routePurgeTime");
+        holdDownTime = par("holdDownTime");
         shutdownTime = par("shutdownTime");
         triggeredUpdate = par("triggeredUpdate");
 
@@ -694,12 +695,16 @@ void Rip::processResponse(Packet *packet)
         if (ripRoute) {
             RipRoute::RouteType routeType = ripRoute->getType();
             int routeMetric = ripRoute->getMetric();
+
             if ((routeType == RipRoute::RIP_ROUTE_STATIC || routeType == RipRoute::RIP_ROUTE_DEFAULT) && routeMetric != RIP_INFINITE_METRIC)
                 continue;
+
             if (ripRoute->getFrom() == srcAddr)
                 ripRoute->setLastUpdateTime(simTime());
+
             if ((ripRoute->getFrom() == srcAddr && ripRoute->getMetric() != metric) || metric < ripRoute->getMetric())
                 updateRoute(ripRoute, incomingIe->ie, nextHop, metric, entry.routeTag, srcAddr);
+
             // TODO RIPng: if the metric is the same as the old one, and the old route is about to expire (i.e. at least halfway to the expiration point)
             //             then update the old route with the new RTE
         }
@@ -830,8 +835,15 @@ void Rip::addRoute(const L3Address& dest, int prefixLength, const InterfaceEntry
  */
 void Rip::updateRoute(RipRoute *ripRoute, const InterfaceEntry *ie, const L3Address& nextHop, int metric, uint16 routeTag, const L3Address& from)
 {
-    //ASSERT(ripRoute && ripRoute->getType() == RipRoute::RIP_ROUTE_RTE);
-    //ASSERT(!ripRoute->getRoute() || ripRoute->getRoute()->getSource() == this);
+    // we receive a route update that shows the unreachable route is now reachable
+    if(ripRoute->getMetric() == RIP_INFINITE_METRIC && metric < RIP_INFINITE_METRIC) {
+        simtime_t now = simTime();
+        // hold-down timer is active
+        if(holdDownTime > 0 && now < ripRoute->getLastInvalidationTime() + holdDownTime) {
+            EV_DEBUG << "hold-down timer prevents update to route " << ripRoute->getDestination() << std::endl;
+            return;
+        }
+    }
 
     EV_DEBUG << "Updating route to " << ripRoute->getDestination() << "/" << ripRoute->getPrefixLength() << ": "
              << "nextHop=" << nextHop << " metric=" << metric << std::endl;
@@ -941,6 +953,7 @@ void Rip::invalidateRoute(RipRoute *ripRoute)
     }
     ripRoute->setMetric(RIP_INFINITE_METRIC);
     ripRoute->setChanged(true);
+    ripRoute->setLastInvalidationTime(simTime());
     triggerUpdate();
 }
 
