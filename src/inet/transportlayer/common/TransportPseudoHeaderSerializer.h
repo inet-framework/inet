@@ -20,8 +20,6 @@
 
 namespace inet {
 
-namespace serializer {
-
 /**
  * Converts between TransportPseudoHeader and binary (network byte order) transport pseudo header.
  */
@@ -34,8 +32,6 @@ class INET_API TransportPseudoHeaderSerializer : public FieldsChunkSerializer
   public:
     TransportPseudoHeaderSerializer() : FieldsChunkSerializer() {}
 };
-
-} // namespace serializer
 
 } // namespace inet
 

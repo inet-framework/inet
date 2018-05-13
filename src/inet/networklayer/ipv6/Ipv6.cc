@@ -125,34 +125,30 @@ void Ipv6::handleRegisterService(const Protocol& protocol, cGate *out, ServicePr
 void Ipv6::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
-    if (!strcmp("transportIn", in->getBaseName())) {
-        mapping.addProtocolMapping(protocol.getId(), in->getIndex());
-    }
+    if (in->isName("transportIn"))
+        upperProtocols.insert(&protocol);
 }
 
 void Ipv6::handleMessage(cMessage *msg)
 {
     auto request = dynamic_cast<Request *>(msg);
-    if (Ipv6SocketBindCommand *command = dynamic_cast<Ipv6SocketBindCommand *>(msg->getControlInfo())) {
+    if (auto *command = dynamic_cast<Ipv6SocketBindCommand *>(msg->getControlInfo())) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
-        SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocol()->getId());
+        SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocol()->getId(), command->getLocalAddress());
         socketIdToSocketDescriptor[socketId] = descriptor;
-        protocolIdToSocketDescriptors.insert(std::pair<int, SocketDescriptor *>(command->getProtocol()->getId(), descriptor));
+        delete msg;
+    }
+    else if (auto *command = dynamic_cast<Ipv6SocketConnectCommand *>(msg->getControlInfo())) {
+        int socketId = request->getTag<SocketReq>()->getSocketId();
+        if (socketIdToSocketDescriptor.find(socketId) == socketIdToSocketDescriptor.end())
+            throw cRuntimeError("Ipv6Socket: should use bind() before connect()");
+        socketIdToSocketDescriptor[socketId]->remoteAddress = command->getRemoteAddress();
         delete msg;
     }
     else if (dynamic_cast<Ipv6SocketCloseCommand *>(msg->getControlInfo()) != nullptr) {
-        int socketId = request->getTag<SocketReq>()->getSocketId();
+        int socketId = 0; request->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketDescriptor.find(socketId);
         if (it != socketIdToSocketDescriptor.end()) {
-            int protocol = it->second->protocolId;
-            auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol);
-            auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol);
-            for (auto jt = lowerBound; jt != upperBound; jt++) {
-                if (it->second == jt->second) {
-                    protocolIdToSocketDescriptors.erase(jt);
-                    break;
-                }
-            }
             delete it->second;
             socketIdToSocketDescriptor.erase(it);
         }
@@ -669,22 +665,29 @@ void Ipv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
 #endif /* WITH_xMIPv6 */
 
     auto origPacket = packet->dup();
-    int protocol = ipv6Header->getProtocol()->getId();
+    const Protocol *protocol = ipv6Header->getProtocol();
+    auto remoteAddress(ipv6Header->getSrcAddress());
+    auto localAddress(ipv6Header->getDestAddress());
     decapsulate(packet);
-    auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol);
-    auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol);
-    bool hasSocket = lowerBound != upperBound;
-    for (auto it = lowerBound; it != upperBound; it++) {
-        Packet *packetCopy = packet->dup();
-        packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(it->second->socketId);
-        send(packetCopy, "transportOut");
+    bool hasSocket = false;
+    for (const auto &elem: socketIdToSocketDescriptor) {
+        if (elem.second->protocolId == protocol->getId()
+                && (elem.second->localAddress.isUnspecified() || elem.second->localAddress == localAddress)
+                && (elem.second->remoteAddress.isUnspecified() || elem.second->remoteAddress == remoteAddress)) {
+            auto *packetCopy = packet->dup();
+            packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
+            EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
+            emit(packetSentToUpperSignal, packetCopy);
+            send(packetCopy, "transportOut");
+            hasSocket = true;
+        }
     }
 
-    if (protocol == Protocol::icmpv6.getId()) {
+    if (protocol == &Protocol::icmpv6) {
         handleReceivedIcmp(packet);
     }    //Added by WEI to forward ICMPv6 msgs to ICMPv6 module.
 #ifdef WITH_xMIPv6
-    else if (protocol == Protocol::mobileipv6.getId()) {       //FIXME this dynamic_cast always returns nullptr. MobilityHeader should become to FieldChunk
+    else if (protocol == &Protocol::mobileipv6) {
         // added check for MIPv6 support to prevent nodes w/o the
         // xMIP module from processing related messages, 4.9.07 - CB
         if (rt->hasMipv6Support()) {
@@ -701,12 +704,12 @@ void Ipv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
         }
     }
 #endif /* WITH_xMIPv6 */
-    else if (protocol == Protocol::ipv4.getId() || protocol == Protocol::ipv6.getId()) {
+    else if (protocol == &Protocol::ipv4 || protocol == &Protocol::ipv6) {
         EV_INFO << "Tunnelled IP datagram\n";
         send(packet, "upperTunnelingOut");
     }
-    else if (mapping.findOutputGateForProtocol(protocol) >= 0) {
-        EV_INFO << "Protocol " << protocol << ", passing up\n";
+    else if (upperProtocols.find(protocol) != upperProtocols.end()) {
+        EV_INFO << "Passing up to protocol " << protocol << "\n";
         send(packet, "transportOut");
     }
     else if (!hasSocket) {

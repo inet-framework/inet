@@ -3,6 +3,7 @@
 
 
 \section{Overview}
+\label{sec:authorsguide:overview}
 
 This chapter is intended for authors and contributors of this 
 \textit{INET Developer's Guide}, and covers the guidelines for deciding
@@ -35,8 +36,10 @@ Why is duplication to be avoided? Multiple reasons:
 
 
 \section{Guidelines}
+\label{sec:authorsguide:guidelines}
 
 \subsection{Do Not Repeat the Standard}
+\label{sec:authorsguide:do-not-repeat-standard}
 
 When describing a module that implements protocol X, do not go
 into lengths explaining what protocol X does and how it works,
@@ -49,6 +52,7 @@ It surely looks nice and takes up a lot of space, but the same information
 can probably be found in a myriad places all over the internet.
 
 \subsection{Do Not Repeat NED Documentation}
+\label{sec:authorsguide:do-not-repeat-neddoc}
 
 Things like module parameters, gate names, emitted signals and collected 
 statistics are appropriately and formally part of the NED definitions,
@@ -59,12 +63,14 @@ list of \textit{implemented standards} should be covered in the module's
 NED documentation, not in this \textit{Guide}.
 
 \subsection{Do Not Repeat C++ Documentation}
+\label{sec:authorsguide:do-not-repeat-cpp}
 
 Describing every minute detail of C++ classes, methods, arguments are
 expected to be appropriately present in their \textit{doxygen}
 documentation.
 
 \subsection{What then?}
+\label{sec:authorsguide:what-then}
 
 Concentrate on giving a ``big picture'' of the implementation: what it is
 generally capable of, how the parts fit together, how to use the provided APIs,

@@ -481,7 +481,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *packet, const Ptr<c
 
         if (payloadLength > 0) {
             // check for full sized segment
-            if (payloadLength == state->snd_mss || payloadLength + tcpseg->getHeaderLength() - TCP_HEADER_OCTETS == state->snd_mss)
+            if ((uint32_t)payloadLength == state->snd_mss || (uint32_t)payloadLength + tcpseg->getHeaderLength() - (unsigned int)TCP_HEADER_OCTETS == state->snd_mss)
                 state->full_sized_segment_counter++;
 
             // check for persist probe

@@ -16,7 +16,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/EmptyChunk.h"
-#include "inet/common/serializer/TcpIpChecksum.h"
+#include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/contract/INetfilter.h"
@@ -93,7 +93,7 @@ uint16_t TcpCrcInsertion::computeCrc(const Protocol *networkProtocol, const L3Ad
     Chunk::serialize(stream, pseudoHeader);
     Chunk::serialize(stream, tcpHeader);
     Chunk::serialize(stream, tcpData);
-    uint16_t crc = inet::serializer::TcpIpChecksum::checksum(stream.getData());
+    uint16_t crc = TcpIpChecksum::checksum(stream.getData());
     return crc;
 }
 

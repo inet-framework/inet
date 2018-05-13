@@ -2,6 +2,7 @@
 \label{cha:power}
 
 \section{Overview}
+\label{sec:power:overview}
 
 Modeling power consumption becomes more and more important with the increasing
 number of embedded devices and the upcoming Internet of Things. Mobile personal
@@ -23,7 +24,7 @@ model consists of the following components:
 \end{itemize}
 
 The power model elements fall into two categories, abbreviated with \ttt{Ep}
-and \ttt{Cc} as part of their names: 
+and \ttt{Cc} as part of their names:
 
 \begin{itemize}
   \item \ttt{Ep} models are simpler, and deal with energy and power quantities.
@@ -33,8 +34,9 @@ and \ttt{Cc} as part of their names:
 The following sections provide a brief overview of the power model.
 
 \section{Energy Consumer Models}
+\label{sec:power:energy-consumer-models}
 
-Energy consumer models describe the energy consumption of devices over time. 
+Energy consumer models describe the energy consumption of devices over time.
 For example, a transceiver consumes energy when it transmits or
 receives signals, a CPU consumes energy when the network protocol routes
 packets, and a display consumes energy when it's turned on.
@@ -62,12 +64,13 @@ a transceiver energy consumer model:
 
 
 \section{Energy Generator Models}
+\label{sec:power:energy-generator-models}
 
-Energy generator models describe the energy generation of devices over time. 
-A solar panel, for example, produces energy based on time, the panel's 
-position on the globe, its orientation towards the sun and the actual weather 
-conditions. Energy generators connect to an energy storage that absorbs the 
-generated energy. 
+Energy generator models describe the energy generation of devices over time.
+A solar panel, for example, produces energy based on time, the panel's
+position on the globe, its orientation towards the sun and the actual weather
+conditions. Energy generators connect to an energy storage that absorbs the
+generated energy.
 
 In INET, an energy generator model is an OMNeT++ simple module implementing
 the energy generation of a hardware device using a physical phenomena over
@@ -82,8 +85,9 @@ example shows how to configure its power generation parameters:
 \inisnippet{EnergyGeneratorConfigurationExample}{Energy generator configuration example}
 
 \section{Energy Storage Models}
+\label{sec:power:energy-storage-models}
 
-Electronic devices which are not connected to external power source must contain 
+Electronic devices which are not connected to external power source must contain
 some component to store energy. For example, an electrochemical battery in a
 mobile phone provides energy for its display, its CPU, and its communication
 devices. It might also absorb energy produced by a solar installed on its
@@ -109,6 +113,7 @@ The following example shows how to configure a simple energy storage model:
 \inisnippet{EnergyStorageConfigurationExample}{Energy storage configuration example}
 
 \section{Energy Management Models}
+\label{sec:power:energy-management-models}
 
 % Why energy management models are needed?
 % The energy management models monitors an energy storage, estimates its state, and controls the consumers and generators to protect the energy storage from operating outside its safe operating area.

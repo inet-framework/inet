@@ -2,6 +2,7 @@
 \label{cha:visualization}
 
 \section{Overview}
+\label{sec:visualization:overview}
 
 The INET Framework is able to visualize a wide range of events and conditions
 in the network: packet drops, data link connectivity, wireless signal path loss,
@@ -10,8 +11,10 @@ implemented as a collection of configurable INET modules that can be added
 to simulations at will.
 
 \section{Visualizing Network Communication}
+\label{sec:visualization:network-communication}
 
 \subsection{Visualizing Packet Drops}
+\label{sec:visualization:packet-drops}
 
 Several network problems manifest themselves as excessive packet drops, for
 example poor connectivity, congestion, or misconfiguration. Visualizing packet
@@ -47,6 +50,7 @@ Packets are dropped for the following reasons:
 
 
 \subsection{Visualizing Transport Path Activity}
+\label{sec:visualization:transport-path-activity}
 
 With INET simulations, it is often useful to be able to visualize network
 traffic. INET provides several visualizers for this task, operating at various
@@ -76,6 +80,7 @@ selection can be narrowed with the visualizer's packetFilter and nodeFilter
 parameters.
 
 \subsection{Visualizing Network Path Activity}
+\label{sec:visualization:network-path-activity}
 
 With INET simulations, it is often useful to be able to visualize network
 traffic. INET offers several visualizers for this task, operating at various
@@ -107,6 +112,7 @@ parameters.
 
 
 \subsection{Visualizing Data Link Activity}
+\label{sec:visualization:data-link-activity}
 
 With INET simulations, it is often useful to be able to visualize network
 traffic. INET offers several visualizers for this task, operating at various
@@ -139,6 +145,7 @@ with the visualizer's \fpar{packetFilter}, \fpar{interfaceFilter}, and
 
 
 \subsection{Visualizing Physical Link Activity}
+\label{sec:visualization:physical-link-activity}
 
 With INET simulations, it is often useful to be able to visualize network
 traffic. For this task, there are several visualizers in INET, operating at
@@ -167,6 +174,7 @@ visualization. This selection can be narrowed with the visualizer's
 
 
 \subsection{Visualizing Routing Tables}
+\label{sec:visualization:routing-tables}
 
 In a complex network topology, it is difficult to see how a packet would be
 routed because the relevant data is scattered among network nodes and hidden in
@@ -212,6 +220,7 @@ visualizer automatically updates the visualizations according to the specified
 filters. This is very useful e.g. for the simulation of mobile ad-hoc networks.
 
 \subsection{Displaying IP Addresses and Other Interface Information}
+\label{sec:visualization:displaying-ip-addresses-and-other-interface-information}
 
 In the simulation of complex networks, it is often useful to be able to display
 node IP addresses, interface names, etc. above the node icons or on the links.
@@ -263,6 +272,7 @@ There are also several parameters for styling, such as color and font selection.
 
 
 \subsection{Visualizing IEEE 802.11 Network Membership}
+\label{sec:visualization:ieee-80211-network-membership}
 
 When simulating wifi networks that overlap in space, it is difficult to see
 which node is a member of which network. The membership may even change over
@@ -286,6 +296,7 @@ considered.
 
 
 \subsection{Visualizing Transport Connections}
+\label{sec:visualization:transport-connections}
 
 In a large network with a complex topology, there might be many transport layer
 applications and many nodes communicating. In such a case, it might be difficult
@@ -320,8 +331,10 @@ visualizer's parameters.
 
 
 \section{Visualizing The Infrastructure}
+\label{sec:visualization:the-infrastructure}
 
 \subsection{Visualizing the Physical Environment}
+\label{sec:visualization:the-physical-environment}
 
 The physical environment has a profound effect on the communication of wireless
 devices. For example, physical objects like walls inside buildings constraint
@@ -349,6 +362,7 @@ The visualizer also supports OpenGL-based 3D rendering using the OpenSceneGraph
 support, you can switch to 3D view using the Qtenv toolbar.
 
 \subsection{Visualizing Node Mobility}
+\label{sec:visualization:node-mobility}
 
 In INET simulations, the movement of mobile nodes is often as important as the
 communication among them. However, as mobile nodes roam, it is often difficult

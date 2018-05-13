@@ -207,7 +207,7 @@ bool AlternativesFs::completeStep(FrameSequenceContext *context)
 std::string AlternativesFs::getHistory() const
 {
     ASSERT(step != -1);
-    ASSERT(0 <= elementIndex && elementIndex < elements.size());
+    ASSERT(0 <= elementIndex && (size_t)elementIndex < elements.size());
     return elements[elementIndex]->getHistory();
 }
 

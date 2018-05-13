@@ -2,6 +2,7 @@
 \label{cha:mobility}
 
 \section{Overview}
+\label{sec:mobility:overview}
 
 In order to simulate ad-hoc wireless networks, it is important to model the
 motion of mobile network nodes. Received signal strength, signal
@@ -12,7 +13,7 @@ simulation (e.g. via packet loss rates).
 A mobility model describes position and orientation over time in a 3D
 Euclidean coordinate system. Its main purpose is to provide position,
 velocity and acceleration, and also angular position, angular velocity,
-and angular acceleration data as three-dimensional quantities at the 
+and angular acceleration data as three-dimensional quantities at the
 current simulation time.
 
 In INET, a mobility model is most often an OMNeT++ simple module
@@ -22,11 +23,11 @@ their own set of parameters. Some models support geographic positioning to
 ease the configuration of map based scenarios.
 
 Mobility models be \textit{single} or \textit{group} mobility models.
-Single mobility models describe the motion of entities independent of each other. 
+Single mobility models describe the motion of entities independent of each other.
 Group mobility models provide such a motion where group members are dependent
 on each other.
 
-Mobility models can also be categorized as \textit{trace-based}, 
+Mobility models can also be categorized as \textit{trace-based},
 \textit{deterministic}, \textit{stochastic}, and \textit{combining} models.
 
 \subsection*{Using Mobility Models}
@@ -35,14 +36,14 @@ In order for a mobility model to actually have an effect on the motion of a netw
 the mobility model needs to be included as a submodule in the compound module of the
 network node. By default, a transceiver antenna within a network node uses
 the same mobility model as the node itself, but that is completely optional.
-For example, it is possible to model a vehicle facing forward while moving 
-on a road that contains multiple transceiver antennas at different relative 
+For example, it is possible to model a vehicle facing forward while moving
+on a road that contains multiple transceiver antennas at different relative
 locations with different orientations.
 
 \subsection*{The Playground}
 
-Many mobility models allow the user to define a cubic volume that the node 
-can not leave. The volume is configured by setting the \fpar{constraintAreaX}, 
+Many mobility models allow the user to define a cubic volume that the node
+can not leave. The volume is configured by setting the \fpar{constraintAreaX},
 \fpar{constraintAreaY}, \fpar{constraintAreaZ},
 \fpar{constraintAreaWidth}, \fpar{constraintAreaHeight} and
 \fpar{constraintAreaDepth} parameters.
@@ -53,7 +54,7 @@ the display string. Otherwise, the position can be given in the \fpar{initialX},
 are given, a random initial position is choosen within the contraint area.
 
 When the node reaches the boundary of the constraint area, the mobility
-component has to prevent the node to exit. Many mobility models offer the 
+component has to prevent the node to exit. Many mobility models offer the
 following policies:
 
 \begin{itemize}
@@ -65,11 +66,13 @@ following policies:
 
 
 \section{Built-In Mobility Models}
+\label{sec:mobility:built-in-mobility-models}
 
 \subsection{List of Mobility Models}
+\label{sec:mobility:list-of-mobility-models}
 
 The following, potentially list contains the mobility models available in INET.
-Nearly all of these models als single mobility models; group mobility can be 
+Nearly all of these models als single mobility models; group mobility can be
 implemented e.g. with combining other mobility models.
 
 \subsubsection*{Stationary}
@@ -121,8 +124,8 @@ Stochastic or random mobility models use mathematical models involving random nu
 \subsubsection*{Combining}
 
 Combining mobility models are not mobility models per se, but instead, they
-allow more complex motions to be formed from simpler ones via superposition 
-and other ways. 
+allow more complex motions to be formed from simpler ones via superposition
+and other ways.
 
 \begin{itemize}
         \item \nedtype{SuperpositioningMobility} model combines several other mobility models by summing them up. It allows creating group mobility by sharing a mobility model in each group member, separating initial positioning from positioning during the simulation, and separating positioning from orientation.
@@ -130,10 +133,11 @@ and other ways.
 \end{itemize}
 
 \subsection{More Information on Some Mobility Models}
+\label{sec:mobility:more-information-on-some-mobility-models}
 
-\begin{description}
+\subsubsection*{TractorMobility}
 
-\item[TractorMobility] Moves a tractor through a field with a certain
+Moves a tractor through a field with a certain
 amount of rows. The following figure illustrates the movement of the
 tractor when the \fpar{rowCount} parameter is 2. The trajectory follows
 the segments in $1,2,3,4,5,6,7,8,1,2,3\ldots$ order. The area is configured
@@ -141,6 +145,7 @@ by the \fpar{x1}, \fpar{y1}, \fpar{x2}, \fpar{y2} parameters.
 
 % TODO use constraint area instead of new x1,y1,x2,y2 parameters as in RectangleMobility
 
+\begin{pdfonly}
 \begin{center}
 \setlength{\unitlength}{0.5mm}
 \begin{picture}(80,80)
@@ -155,8 +160,13 @@ by the \fpar{x1}, \fpar{y1}, \fpar{x2}, \fpar{y2} parameters.
 \put(0,72){$(x_1,y_1)$} \put(65,2){$(x_2,y_2)$}
 \end{picture}
 \end{center}
+\end{pdfonly}
 
-\item[RandomWaypointMobility]
+\begin{htmlonly}
+<center><img src="tractormobility.png" border="0" width="240"></center> <!-- screenshot from the PDF version -->
+\end{htmlonly}
+
+\subsubsection*{RandomWaypointMobility}
 
 In the Random Waypoint mobility model the nodes move in line segments. For each
 line segment, a random destination position (distributed uniformly over the
@@ -166,16 +176,16 @@ specify it as \ttt{uniform(minSpeed, maxSpeed)}. When the node reaches the
 target position, it waits for the time \fpar{waitTime} which can also be defined as a
 variate. After this time the the algorithm calculates a new random position, etc.
 
-\item[GaussMarkovMobility] The Gauss-Markov model contains a tuning
-parameter, that control the randomness in the movement of the node.
-Let the magnitude and direction of speed of the node at the $n$th time step be
-$s_n$ and $d_n$. The next speed and direction is computed as
+\subsubsection*{GaussMarkovMobility}
 
-$$ s_{n+1} = \alpha s_n + (1 - \alpha) \bar{s} +
-             \sqrt{(1-\alpha^2)} s_{x_n} $$
+The Gauss-Markov model contains a tuning parameter that control the randomness
+in the movement of the node. Let the magnitude and direction of speed of the
+node at the $n$th time step be $s_n$ and $d_n$. The next speed and direction are
+computed as
 
-$$ d_{n+1} = \alpha s_n + (1 - \alpha) \bar{d} +
-             \sqrt{(1-\alpha^2)} d_{x_n} $$
+$$ s_{n+1} = \alpha s_n + (1 - \alpha) \bar{s} + \sqrt{(1-\alpha^2)} s_{x_n} $$
+
+$$ d_{n+1} = \alpha s_n + (1 - \alpha) \bar{d} + \sqrt{(1-\alpha^2)} d_{x_n} $$
 
 where $\bar{s}$ and $\bar{d}$ are constants representing the mean value
 of speed and direction as $n \to \infty$; and $s_{x_n}$ and $d_{x_n}$
@@ -189,10 +199,7 @@ area for a long time, the mean value of the direction ($\bar{d}$) modified
 as the node enters the margin area. For example at the right edge of the
 area it is set to 180 degrees, so the new direction is away from the edge.
 
-% FIXME the GaussMarkovMobility module has only one variance parameter.
-%       it should have separate speed and direction parameters
-
-\item[MassMobility]
+\subsubsection*{MassMobility}
 
 This is a random mobility model for a mobile host with
 a mass. It is the one used in \cite{Perkins99optimizedsmooth}.
@@ -224,9 +231,9 @@ The parameters described above correspond to the following settings:
 \item speed = normal(avgSpeed, 0.01)
 \end{itemize}
 
-\item[ChiangMobility] Chiang's random walk movement model
-(\cite{Chiang98wirelessnetwork}).
+\subsubsection*{ChiangMobility}
 
+Implements Chiang's random walk movement model (\cite{Chiang98wirelessnetwork}).
 In this model, the state of the mobile node in each direction (x and y) can be:
 
 \begin{itemize}
@@ -238,6 +245,7 @@ In this model, the state of the mobile node in each direction (x and y) can be:
 The $(i,j)$ element of the state transition matrix determines the
 probability that the state changes from $i$ to $j$:
 
+\begin{pdfonly}
 $$ \left(
 \begin{array}{ccc}
   0 & 0.5 & 0.5 \\
@@ -245,15 +253,26 @@ $$ \left(
   0.3 & 0 & 0.7
 \end{array}
 \right) $$
+\end{pdfonly}
 
-\end{description}
+\begin{htmlonly}
+<center>
+<div>
+<table class="matrix">
+  <tr> <td>0</td>   <td>0.5</td> <td>0.5</td> </tr>
+  <tr> <td>0.3</td> <td>0.7</td> <td>0</td>   </tr>
+  <tr> <td>0.3</td> <td>0</td>   <td>0.7</td> </tr>
+</table>
+</div>
+</center>
+\end{htmlonly}
 
 \subsection{Replaying trace files}
+\label{sec:mobility:replaying-trace-files}
 
-\begin{description}
+\subsubsection*{BonnMotionMobility}
 
-\item[BonnMotionMobility] Uses the native file format of
-\href{http://bonnmotion.net}{BonnMotion}.
+Uses the native file format of \href{http://bonnmotion.net}{BonnMotion}.
 
 The file is a plain text file, where every line describes the motion
 of one host. A line consists of one or more (t, x, y) triplets of real
@@ -266,8 +285,10 @@ t1 x1 y1 t2 x2 y2 t3 x3 y3 t4 x4 y4 ...
 The meaning is that the given node gets to $(xk,yk)$ at $tk$. There's no
 separate notation for wait, so x and y coordinates will be repeated there.
 
-\item[Ns2MotionMobility] Nodes are moving according to the trace files used
-in NS2. The trace file has this format:
+\subsubsection*{Ns2MotionMobility}
+
+Nodes are moving according to the trace files used in NS2.
+The trace file has this format:
 
 \begin{verbatim}
 # '#' starts a comment, ends at the end of line
@@ -291,8 +312,9 @@ The \nedtype{Ns2MotionMobility} module has the following parameters:
 % TODO cleaning the code (e.g. duplicated bounds check in setTargetPosition())
 % TODO implement cached file access as in BonnMotionMobility
 
-\item[ANSimMobility] reads trace files of the \href{http://www.ansim.info}{ANSim} Tool.
+\subsubsection*{ANSimMobility}
 
+It reads trace files of the \href{http://www.ansim.info}{ANSim} Tool.
 The nodes are moving along linear segments described by an XML trace file
 conforming to this DTD:
 
@@ -316,19 +338,16 @@ Parameters of the module:
 \end{itemize}
 
 \begin{note}
-The \nedtype{AnsimMobility} module process only the \ttt{position\_{}change}
-elements and it ignores the \ttt{start\_{}time} attribute. It starts the move
+The \nedtype{AnsimMobility} module processes only the \ttt{position\_change}
+elements and it ignores the \ttt{start\_time} attribute. It starts the move
 on the next segment immediately.
 \end{note}
 
-
-\end{description}
-
-
 \subsection{TurtleMobility}
+\label{sec:mobility:turtlemobility}
 
 The \nedtype{TurtleMobility} module can be parametrized by a script file
-containing LOGO-style movement commands in XML format. The content of 
+containing LOGO-style movement commands in XML format. The content of
 the XML file should conform to the DTD in the \ffilename{TurtleMobility.dtd}
 file in the source tree.
 
@@ -345,11 +364,11 @@ The \ttt{movement} elements may contain the the following commands as
 elements (names in parens are recognized attribute names):
 
 \begin{itemize}
-\item \ttt{repeat(n)} repeats its content n times, or indefinitely if 
+\item \ttt{repeat(n)} repeats its content n times, or indefinitely if
        the \ttt{n} attribute is omitted.
 \item \ttt{set(x,y,speed,angle,borderPolicy)} modifies the state of the node.
-      \ttt{borderPolicy} can be \ttt{reflect}, \ttt{wrap}, \ttt{placerandomly} 
-      or \ttt{error}. 
+      \ttt{borderPolicy} can be \ttt{reflect}, \ttt{wrap}, \ttt{placerandomly}
+      or \ttt{error}.
 \item \ttt{forward(d,t)} moves the node for $t$ time or to the $d$ distance
       with the current speed. If both $d$ and $t$ is given, then the current
       speed is ignored.

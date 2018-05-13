@@ -298,7 +298,7 @@ void SctpNatServer::handleMessage(cMessage *msg)
                 int bufferlen = B(smsg->getChunkLength()).get();
                 uint8_t buffer[bufferlen];
                 std::vector<uint8_t> vec = smsg->getBytes();
-                for (unsigned int i = 0; i < bufferlen; i++) {
+                for (int i = 0; i < bufferlen; i++) {
                     buffer[i] = vec[i];
                 }
                 struct nat_message *nat = (struct nat_message *) buffer;

@@ -20,7 +20,7 @@
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/serializer/EthernetCRC.h"
+#include "inet/common/checksum/EthernetCRC.h"
 #include "inet/linklayer/common/EthernetFcsMode_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
@@ -160,7 +160,7 @@ void EtherEncap::addFcs(Packet *packet, EthernetFcsMode fcsMode)
         // 1. fill in the data
         ethBytes->copyToBuffer(buffer, bufferLength);
         // 2. compute the FCS
-        auto computedFcs = inet::serializer::ethernetCRC(buffer, bufferLength);
+        auto computedFcs = ethernetCRC(buffer, bufferLength);
         delete [] buffer;
         ethFcs->setFcs(computedFcs);
     }

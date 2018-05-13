@@ -21,14 +21,13 @@
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Message.h"
-//#include "inet/common/serializer/headers/defs.h"    // for endian macros
-#include "inet/common/serializer/tcp/headers/tcphdr.h"
+#include "inet/common/checksum/TcpIpChecksum.h"
 #include "lwip/lwip_tcp.h"
-#include "inet/transportlayer/tcp_lwip/TcpLwip.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
-#include "inet/common/serializer/TcpIpChecksum.h"
+#include "inet/transportlayer/tcp_lwip/TcpLwip.h"
 #include "inet/transportlayer/tcp_lwip/queues/TcpLwipQueues.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
+#include "inet/transportlayer/tcp_common/headers/tcphdr.h"
 #include "inet/common/INETUtils.h"
 
 namespace inet {

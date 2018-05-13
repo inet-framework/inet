@@ -25,7 +25,7 @@
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Message.h"
-#include "inet/common/serializer/TcpIpChecksum.h"
+#include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/transportlayer/common/TransportPseudoHeader_m.h"
@@ -156,7 +156,7 @@ bool Tcp::checkCrc(const Ptr<const TcpHeader>& tcpHeader, Packet *packet)
             MemoryOutputStream stream;
             Chunk::serialize(stream, pseudoHeader);
             Chunk::serialize(stream, packet->peekData());
-            uint16_t crc = inet::serializer::TcpIpChecksum::checksum(stream.getData());
+            uint16_t crc = TcpIpChecksum::checksum(stream.getData());
             return (crc == 0);
         }
         case CRC_DECLARED_CORRECT:

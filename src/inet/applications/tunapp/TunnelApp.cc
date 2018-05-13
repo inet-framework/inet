@@ -54,7 +54,7 @@ void TunnelApp::initialize(int stage)
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         if (protocol == &Protocol::ipv4) {
             ipv4Socket.setOutputGate(gate("socketOut"));
-            ipv4Socket.bind(&Protocol::ipv4);
+            ipv4Socket.bind(&Protocol::ipv4, Ipv4Address::UNSPECIFIED_ADDRESS);
             ipv4Socket.setCallback(this);
             socketMap.addSocket(&ipv4Socket);
         }

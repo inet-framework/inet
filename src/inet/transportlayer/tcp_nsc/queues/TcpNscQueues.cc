@@ -56,7 +56,7 @@ int TcpNscSendQueue::getBytesForTcpLayer(void *bufferP, int bufferLengthP) const
 {
     ASSERT(bufferP);
 
-    unsigned int length = B(dataBuffer.getLength()).get();
+    int length = B(dataBuffer.getLength()).get();
     if (bufferLengthP < length)
         length = bufferLengthP;
     if (length == 0)

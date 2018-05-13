@@ -29,7 +29,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/common/serializer/TcpIpChecksum.h"
+#include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
@@ -1347,7 +1347,7 @@ uint16_t Udp::computeCrc(const Protocol *networkProtocol, const L3Address& srcAd
     Chunk::serialize(stream, pseudoHeader);
     Chunk::serialize(stream, udpHeader);
     Chunk::serialize(stream, udpData);
-    uint16_t crc = inet::serializer::TcpIpChecksum::checksum(stream.getData());
+    uint16_t crc = TcpIpChecksum::checksum(stream.getData());
 
     // Excerpt from RFC 768:
     // If the computed  checksum  is zero,  it is transmitted  as all ones (the

@@ -221,7 +221,7 @@ void PingApp::handleMessage(cMessage *msg)
                     l3Socket = new Ipv6Socket(gate("socketOut"));
                 else
                     l3Socket = new L3Socket(networkProtocol, gate("socketOut"));
-                l3Socket->bind(icmp);
+                l3Socket->bind(icmp, L3Address());
                 l3Socket->setCallback(this);
             }
             msg->setKind(PING_SEND);

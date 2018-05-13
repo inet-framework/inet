@@ -13,7 +13,7 @@ Test serializing frames
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
-#include "inet/common/serializer/EthernetCRC.h"
+#include "inet/common/checksum/EthernetCRC.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
 #include "inet/linklayer/ieee8022/Ieee8022Llc.h"
@@ -29,7 +29,6 @@ Test serializing frames
 
 using namespace inet;
 
-using namespace inet::serializer;
 
 #define PCAP_MAGIC      0xa1b2c3d4
 

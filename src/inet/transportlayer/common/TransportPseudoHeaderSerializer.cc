@@ -20,8 +20,6 @@
 
 namespace inet {
 
-namespace serializer {
-
 Register_Serializer(TransportPseudoHeader, TransportPseudoHeaderSerializer);
 
 void TransportPseudoHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
@@ -56,8 +54,6 @@ const Ptr<Chunk> TransportPseudoHeaderSerializer::deserialize(MemoryInputStream&
 {
     throw cRuntimeError("TransportPseudoHeader is not a valid deserializable data");
 }
-
-} // namespace serializer
 
 } // namespace inet
 

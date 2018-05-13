@@ -26,6 +26,10 @@
 
 	Adapted SCTP to the new Packet API.
 
+2018-01-22  Irene Ruengeler
+
+	Adapted SCTP serializer to the new Packet API.
+
 2018-01-18  Levente Mészáros
 
 	Replaced packet tags API calls to use the new API.

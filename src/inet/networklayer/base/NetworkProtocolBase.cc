@@ -23,6 +23,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Message.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
 
 namespace inet {
@@ -51,23 +52,32 @@ void NetworkProtocolBase::handleRegisterService(const Protocol& protocol, cGate 
 void NetworkProtocolBase::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
-    protocolMapping.addProtocolMapping(protocol.getId(), in->getIndex());
+    if (in->isName("transportIn"))
+        upperProtocols.insert(&protocol);
 }
 
 void NetworkProtocolBase::sendUp(cMessage *message)
 {
     if (Packet *packet = dynamic_cast<Packet *>(message)) {
         const Protocol *protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-        auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol->getId());
-        auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol->getId());
-        bool hasSocket = lowerBound != upperBound;
-        for (auto it = lowerBound; it != upperBound; it++) {
-            Packet *packetCopy = packet->dup();
-            packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(it->second->socketId);
-            emit(packetSentToUpperSignal, packetCopy);
-            send(packetCopy, "transportOut");
+        const auto *addr = packet->getTag<L3AddressInd>();
+        auto remoteAddress(addr->getSrcAddress());
+        auto localAddress(addr->getDestAddress());
+        bool hasSocket = false;
+        for (const auto &elem: socketIdToSocketDescriptor) {
+            if (elem.second->protocolId == protocol->getId()
+                    && (elem.second->localAddress.isUnspecified() || elem.second->localAddress == localAddress)
+                    && (elem.second->remoteAddress.isUnspecified() || elem.second->remoteAddress == remoteAddress)) {
+                auto *packetCopy = packet->dup();
+                packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
+                EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
+                emit(packetSentToUpperSignal, packetCopy);
+                send(packetCopy, "transportOut");
+                hasSocket = true;
+            }
         }
-        if (protocolMapping.findOutputGateForProtocol(protocol->getId()) >= 0) {
+        if (upperProtocols.find(protocol) != upperProtocols.end()) {
+            EV_INFO << "Passing up to protocol " << protocol << "\n";
             emit(packetSentToUpperSignal, packet);
             send(packet, "transportOut");
         }
@@ -122,26 +132,23 @@ bool NetworkProtocolBase::isLowerMessage(cMessage *message)
 void NetworkProtocolBase::handleUpperCommand(cMessage *msg)
 {
     auto request = dynamic_cast<Request *>(msg);
-    if (L3SocketBindCommand *command = dynamic_cast<L3SocketBindCommand *>(msg->getControlInfo())) {
+    if (auto *command = dynamic_cast<L3SocketBindCommand *>(msg->getControlInfo())) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
-        SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocol()->getId());
+        SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocol()->getId(), command->getLocalAddress());
         socketIdToSocketDescriptor[socketId] = descriptor;
-        protocolIdToSocketDescriptors.insert(std::pair<int, SocketDescriptor *>(command->getProtocol()->getId(), descriptor));
+        delete msg;
+    }
+    else if (auto *command = dynamic_cast<L3SocketConnectCommand *>(msg->getControlInfo())) {
+        int socketId = request->getTag<SocketReq>()->getSocketId();
+        if (socketIdToSocketDescriptor.find(socketId) == socketIdToSocketDescriptor.end())
+            throw cRuntimeError("Ipv4Socket: should use bind() before connect()");
+        socketIdToSocketDescriptor[socketId]->remoteAddress = command->getRemoteAddress();
         delete msg;
     }
     else if (dynamic_cast<L3SocketCloseCommand *>(msg->getControlInfo()) != nullptr) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketDescriptor.find(socketId);
         if (it != socketIdToSocketDescriptor.end()) {
-            int protocol = it->second->protocolId;
-            auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol);
-            auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol);
-            for (auto jt = lowerBound; jt != upperBound; jt++) {
-                if (it->second == jt->second) {
-                    protocolIdToSocketDescriptors.erase(jt);
-                    break;
-                }
-            }
             delete it->second;
             socketIdToSocketDescriptor.erase(it);
         }
@@ -150,8 +157,6 @@ void NetworkProtocolBase::handleUpperCommand(cMessage *msg)
     else
         LayeredProtocolBase::handleUpperCommand(msg);
 }
-
-
 
 } // namespace inet
 

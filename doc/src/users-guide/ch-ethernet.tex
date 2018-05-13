@@ -2,6 +2,7 @@
 \label{cha:ethernet}
 
 \section{Overview}
+\label{sec:ethernet:overview}
 
 Ethernet is the most popular wired LAN technology nowadays, and its use is also
 growing in metropolitan area and wide area networks. Since its introduction in
@@ -17,20 +18,22 @@ prevented by use of a spanning tree protocol (STP, RSTP) that disables selected
 links to eliminate cycles from the topology. Ethernet switch models in INET
 contain support for STP and RSTP.
 
- \section{Nodes}
+\section{Nodes}
+\label{sec:ethernet:nodes}
 
 There are several node models that can be used in an Ethernet network:
- 
+
 \begin{itemize}
   \item Node models such as \nedtype{StandardHost} and \nedtype{Router} are Ethernet-capable
   \item \nedtype{EtherSwitch} models an Ethernet switch, i.e. a multiport bridging device
   \item \nedtype{EtherHub} models an Ethernet hub or multiport repeater
-  \item \nedtype{EtherBus} models the coaxial cable (10BASE2 or 10BASE5 network segments) on legacy Ethernet networks 
+  \item \nedtype{EtherBus} models the coaxial cable (10BASE2 or 10BASE5 network segments) on legacy Ethernet networks
   \item \nedtype{EtherHost} is a sample node which can be used to generate ``raw'' Ethernet traffic
 \end{itemize}
 
 
 \subsection{EtherSwitch}
+\label{sec:ethernet:etherswitch}
 
 \nedtype{EtherSwitch} models an Ethernet switch. Ethernet switches play an
 important role in modern Ethernet LANs. Unlike passive hubs and repeaters that
@@ -47,16 +50,18 @@ it must be set to false, otherwise it can be set to true.
 By default it uses half-duplex MAC with CSMA/CD.
 
 \subsection{EtherHub}
+\label{sec:ethernet:etherhub}
 
 \nedtype{EtherHub} models an Ethernet hub. Ethernet hubs are a simple broadcast
 devices. Messages arriving on a port are regenerated and broadcast to every
-other port. 
+other port.
 
 The connections connected to the hub must have the same data rate.
 Cable lengths should be reflected in the delays of the connections.
 
 
 \subsection{EtherBus}
+\label{sec:ethernet:etherbus}
 
 The \nedtype{EtherBus} component can model a common coaxial cable
 found in early Ethernet LANs. The nodes are attached via taps at specific
@@ -74,6 +79,7 @@ and the \fpar{propagationSpeed} parameter.
 
 
 \section{The Physical Layer}
+\label{sec:ethernet:the-physical-layer}
 
 Stations on an Ethernet networks are connected by coaxial,
 twisted pair or fibre cables. (Coaxial only has historical importance,
@@ -102,6 +108,7 @@ There is currently no support for 200Gbps and 400Gbps Ethernet.
 \nedtype{Eth40G}, \nedtype{Eth100G}
 
 \section{Ethernet Interface}
+\label{sec:ethernet:ethernet-interface}
 
 The \nedtype{EthernetInterface} compound module implements the \nedtype{IWiredInterface}
 interface. Complements \nedtype{EtherMac} and \nedtype{EtherEncap} with an output queue
@@ -126,6 +133,7 @@ module implements the full MAC functionality including CSMA/CD, it
 can operate both half-duplex and full-duplex mode.
 
 \section{Components}
+\label{sec:ethernet:components}
 
 Thw following components:
 
@@ -141,6 +149,7 @@ Thw following components:
 
 
 \subsection{EtherMacFullDuplex}
+\label{sec:ethernet:ethermacfullduplex}
 
 From the two MAC implementation \nedtype{EtherMacFullDuplex} is the simpler one,
 it operates only in full-duplex mode (its \fpar{duplexEnabled} parameter fixed to
@@ -149,6 +158,7 @@ CSMA/CD, so there is no collision detection, retransmission with exponential bac
 carrier extension and frame bursting.
 
 \subsection{EtherMac}
+\label{sec:ethernet:ethermac}
 
 Ethernet MAC layer implementing CSMA/CD. It supports both half-duplex and full-duplex operations;
 in full-duplex mode it behaves as \nedtype{EtherMacFullDuplex}. In half-duplex mode
@@ -158,16 +168,19 @@ extension and frame bursting. Carrier extension can be turned off by setting the
 \fpar{carrierExtension} parameter to \ttt{false}.
 
 \subsection{EtherEncap}
+\label{sec:ethernet:etherencap}
 
 The \nedtype{EtherEncap} module performs Ethernet II or Ethernet with SNAP
 encapsulation/decapsulation.
 
 \subsection{EtherLlc}
+\label{sec:ethernet:etherllc}
 
 The \nedtype{EtherLlc} module provides Ethernet 802.3
 encapsulation/decapsulation.
 
 \subsection{MacRelayUnit}
+\label{sec:ethernet:macrelayunit}
 
 INET framework ethernet switches are built from \nedtype{IMacRelayUnit}
 components. Each relay unit has N input and output gates for sending/receiving
@@ -191,6 +204,7 @@ The watermark and the pause time is configurable; use zero
 values to disable the PAUSE feature.
 
 \subsection{MacAddressTable}
+\label{sec:ethernet:macaddresstable}
 
 The \nedtype{MacAddressTable} module stores the mapping between ports and MAC addresses.
 Entries are deleted if their age exceeds a certain limit.
@@ -211,11 +225,13 @@ Entries are deleted if their age exceeds the duration given as the \fpar{agingTi
 
 
 \subsection{Ieee8021dRelay}
+\label{sec:ethernet:ieee8021drelay}
 
 \nedtype{Ieee8021dRelay} is a MAC relay unit that should be used instead
 of \nedtype{MacRelayUnit} that when STP or RSTP is needed.
 
 \subsection{Stp}
+\label{sec:ethernet:stp}
 
 The \nedtype{Stp} module type implements Spanning Tree Protocol (STP). STP
 is a network protocol that builds a loop-free logical topology for Ethernet
@@ -228,6 +244,7 @@ active path between any two network nodes.
 
 
 \subsection{Rstp}
+\label{sec:ethernet:rstp}
 
 \nedtype{Rstp} implements Rapid Spanning Tree Protocol (RSTP), an improved
 version of STP. RSTP provides significantly faster recovery in response to
@@ -235,6 +252,7 @@ network changes or failures.
 
 
 \section{Implemented Standards}
+\label{sec:ethernet:implemented-standards}
 
 The Ethernet model operates according to the following standards:
 

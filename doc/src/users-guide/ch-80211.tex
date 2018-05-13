@@ -4,6 +4,7 @@
 % https://summit.omnetpp.org/archive/2016/assets/pdf/OMNET-2016-Session_9-02-Presentation.pdf
 
 \section{Overview}
+\label{sec:80211:overview}
 
 This chapter provides an overview of the IEEE 802.11 model for the INET Framework.
 
@@ -31,6 +32,7 @@ NICs consist of four layers, which are the following (in top-down order):
 The following sections examine the above components.
 
 \section{MAC}
+\label{sec:80211:mac}
 
 The \nedtype{Ieee80211Mac} module type represents the IEEE 802.11 MAC.
 The implementation is entirely based on the standard IEEE 802.11™-2012 Part 11:
@@ -77,6 +79,7 @@ The new model also separates the following components:
 \end{itemize}
 
 \section{Physical Layer}
+\label{sec:80211:physical-layer}
 
 \textit{The physical layer} modules (\nedtype{Ieee80211Radio}) deal with modelling
 transmission and reception of frames. They model the characteristics of
@@ -87,6 +90,7 @@ up to the MAC. The implementation of these modules is based on the
 Mobility Framework.
 
 \section{Management}
+\label{sec:80211:management}
 
 \textit{The management layer} performs encapsulation and decapsulation of data packets
 for the MAC, and exchanges management frames via the MAC with its peer
@@ -105,6 +109,7 @@ in that they do not model the scan-authenticate-associate process,
 so they cannot be used in experiments involving handover.
 
 \section{Agent}
+\label{sec:80211:agent}
 
 The agent is what instructs the management layer to perform
 scanning, authentication and association. The management layer itself

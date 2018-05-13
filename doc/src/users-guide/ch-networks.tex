@@ -2,23 +2,24 @@
 \label{cha:networks}
 
 %
-% This chapter provides practical guidance on how to put together various 
+% This chapter provides practical guidance on how to put together various
 % networks from the built-in node models and how to configure them,
 % WITHOUT LOOKING AT THE INTERNALS OF THOSE NODES.
 %
 
 \section{Overview}
+\label{sec:networks:overview}
 
 %TODO: wired, wireless, mixed wired/wireless, various topologies + generated, hierarchical, parametric
 %TODO: ethernet networks, mpls networks, vpn, tunneling, PPP networks, sensor networks
 
-INET heavily builds upon the modular architecture of OMNeT++. It provides 
+INET heavily builds upon the modular architecture of OMNeT++. It provides
 numerous domain specific and highly parameterizable components which can be
-combined in many ways. The primary means of building large custom network 
+combined in many ways. The primary means of building large custom network
 simulations in INET is the composition of existing models with custom models,
 starting from small components and gradually forming ever larger ones up until
-the composition of the network. Users are not required to have programming 
-experience to create simulations unless they also want to implement 
+the composition of the network. Users are not required to have programming
+experience to create simulations unless they also want to implement
 their own protocols, for example.
 
 Assembling an INET simulation starts with defining a module representing
@@ -34,11 +35,12 @@ one, and because of the vast possibilities. However, the OMNeT++ IDE provides
 several topology generator wizards for advanced scenarios.
 
 As INET is an OMNeT++-based framework, users mainly use NED to describe the
-model topology, and ini files to provide configuration.\footnote{Some 
+model topology, and ini files to provide configuration.\footnote{Some
 components require additional configuration to be provided as separate
-files, e.g. in XML.} 
+files, e.g. in XML.}
 
 \section{Built-in Network Nodes and Other Top-Level Modules}
+\label{sec:networks:built-in-network-nodes-and-other-top-level-modules}
 
 INET provides several pre-assembled network nodes with carefully selected
 components. They support customization via parameters and parametric
@@ -49,7 +51,7 @@ built-in network nodes.
 
 \begin{itemize}
   \item \nedtype{StandardHost} contains the most common Internet protocols:
-     \protocol{UCP}, \protocol{TDP}, \protocol{IPv4}, \protocol{IPv6},
+     \protocol{UDP}, \protocol{TCP}, \protocol{IPv4}, \protocol{IPv6},
      \protocol{Ethernet}, \protocol{IEEE 802.11}. It also supports an
      optional mobility model, optional energy models, and any number of
      applications which are entirely configurable from INI files.
@@ -69,50 +71,52 @@ built-in network nodes.
      an additional \protocol{AODV} protocol.
 \end{itemize}
 
-Network nodes communicate at the network level by exchanging OMNeT++ messages 
-which are the abstract representations of physical signals on the 
-transmission medium.  Signals are either sent through OMNeT++ connections 
-in the wired case, or sent directly to the gate of the receiving network node 
-in the wireless case. Signals encapsulate INET-specific packets that represent 
+Network nodes communicate at the network level by exchanging OMNeT++ messages
+which are the abstract representations of physical signals on the
+transmission medium.  Signals are either sent through OMNeT++ connections
+in the wired case, or sent directly to the gate of the receiving network node
+in the wireless case. Signals encapsulate INET-specific packets that represent
 the transmitted digital data. Packets are further divided into chunks that
-provide alternative representations for smaller pieces of data (e.g. 
+provide alternative representations for smaller pieces of data (e.g.
 protocol headers, application data).
 
 Additionally, there are components that occur on network level, but they
-are not models of physical network nodes. They are necessary 
+are not models of physical network nodes. They are necessary
 to model other aspects. Some of them are:
 
 \begin{itemize}
   \item A \textit{radio medium} module such as \nedtype{Ieee80211RadioMedium},
-     \nedtype{ApskScalarRadioMedium} and \nedtype{UnitDiskRadioMedium} 
-     (there are a few of them) are a required component of wireless networks. 
-  \item \nedtype{PhysicalEnvironment} models the effect of the physical 
+     \nedtype{ApskScalarRadioMedium} and \nedtype{UnitDiskRadioMedium}
+     (there are a few of them) are a required component of wireless networks.
+  \item \nedtype{PhysicalEnvironment} models the effect of the physical
      environment (i.e. obstacles) on radio signal propagation. It is an
      optional component.
   \item \textit{Configurators} such as \nedtype{Ipv4NetworkConfigurator},
      \nedtype{L2NetworkConfigurator} and \nedtype{GenericNetworkConfigurator}
-     configure various aspects of the network. For example,  
-     \nedtype{Ipv4\-Network\-Configurator} assigns IP addresses 
-     to hosts and routers, and sets up static routing. It is used 
-     when modeling dynamic IP address assignment (e.g. via DHCP) or 
-     dynamic routing is not of importance. \nedtype{L2NetworkConfigurator} 
-     allows one to configure 802.1 LANs and provide STP/RSTP-related 
+     configure various aspects of the network. For example,
+     \nedtype{Ipv4\-Network\-Configurator} assigns IP addresses
+     to hosts and routers, and sets up static routing. It is used
+     when modeling dynamic IP address assignment (e.g. via DHCP) or
+     dynamic routing is not of importance. \nedtype{L2NetworkConfigurator}
+     allows one to configure 802.1 LANs and provide STP/RSTP-related
      parameters such as link cost, port priority and the ``is-edge'' flag.
   \item \nedtype{ScenarioManager} allows scripted scenarios, such
      as timed failure and recovery of network nodes.
-  \item \textit{Group coordinators} are needed for the operation of some 
-     group mobility mdels. For example, \nedtype{MoBanCoordinator} is 
+  \item \textit{Group coordinators} are needed for the operation of some
+     group mobility mdels. For example, \nedtype{MoBanCoordinator} is
      the coordinator module for the MoBAN mobility model.
   \item \textit{Visualizers} like \nedtype{PacketDropOsgVisualizer} provide
      graphical rendering of some aspect of the simulation either in
-     2D (canvas) or 3D (using OSG or osgEarth). The usual choice is 
-     \nedtype{IntegratedVisualizer} which bundles together an instance 
+     2D (canvas) or 3D (using OSG or osgEarth). The usual choice is
+     \nedtype{IntegratedVisualizer} which bundles together an instance
      of each specific visualizer type in a compound module.
 \end{itemize}
 
 \section{Typical Networks}
+\label{sec:networks:typical-networks}
 
 \subsection{Wired Networks}
+\label{sec:networks:wired-networks}
 
 Wired network connections, for example \protocol{Ethernet} cables, are
 represented with standard OMNeT++ connections using the
@@ -145,6 +149,7 @@ concludes. The default statistics are written to the \texttt{results}
 folder of the simulation for later analysis.
 
 \subsection{Wireless Networks}
+\label{sec:networks:wireless-networks}
 
 Wireless network connections are not modeled with OMNeT++ connections due the
 dynamically changing nature of connectivity. For wireless networks, an
@@ -157,7 +162,7 @@ In the above network, positions in the display strings provide
 positions for the transmission medium during the computation of 
 signal propagation and path loss. 
 
-In addition, \ttt{host1} is configured to periodically send 
+In addition, \ttt{host1} is configured to periodically send
 \protocol{UDP} packets to \ttt{host2} over the AP.
 
 \inisnippet{WirelessNetworkConfigurationExample}{Wireless network configuration example}
@@ -165,6 +170,7 @@ In addition, \ttt{host1} is configured to periodically send
 
 
 \subsection{Mobile Ad hoc Networks}
+\label{sec:networks:mobile-ad-hoc-networks}
 
 \nedsnippet{MobileAdhocNetworkExample}{Mobile ad hoc network example}
 
@@ -172,10 +178,12 @@ In addition, \ttt{host1} is configured to periodically send
 
 
 \section{Frequent Tasks (How To...)}
+\label{sec:networks:frequent-tasks}
 
 Quick and somewhat superficial advice to many practical tasks.
 
 \subsection{Automatic Wired Interfaces}
+\label{sec:networks:automatic-wired-interfaces}
 
 In many wired network simulations, the number of wired interfaces need not
 be manually configured, because it can be automatically inferred from the
@@ -185,6 +193,7 @@ actual number of connections between network nodes.
 example}
 
 \subsection{Multiple Wireless Interfaces}
+\label{sec:networks:multiple-wireless-interfaces}
 
 All built-in wireless network nodes support multiple wireless interfaces,
 but only one is enabled by default.
@@ -193,6 +202,7 @@ but only one is enabled by default.
 example}
 
 \subsection{Specifying Addresses}
+\label{sec:networks:specifying-addresses}
 
 Nearly all application layer modules, but several other components as well,
 have parameters that specify network addresses. They typically accept
@@ -210,22 +220,25 @@ addresses given with any of the following syntax variations:
 \end{itemize}
 
 \subsection{Node Failure and Recovery}
+\label{sec:networks:node-failure-and-recovery}
 
 \subsection{Enabling Dual IP Stack}
+\label{sec:networks:enabling-dual-ip-stack}
 
 All built-in network nodes support dual Internet protocol stacks, that is
-both \protocol{Ipv4} and \protocol{Ipv6} are available. They are also
+both \protocol{IPv4} and \protocol{IPv6} are available. They are also
 supported by transport layer protocols, link layer protocols, and most
-applications. Only \protocol{Ipv4} is enabled by default, so in order to
-use \protocol{Ipv6}, it must be enabled first, and an application
-supporting \protocol{Ipv6} (e.g., \nedtype{PingApp} must be used). The
+applications. Only \protocol{IPv4} is enabled by default, so in order to
+use \protocol{IPv6}, it must be enabled first, and an application
+supporting \protocol{IPv6} (e.g., \nedtype{PingApp} must be used). The
 following example shows how to configure two ping applications in a single
-node where one is using an \protocol{Ipv4} and the other is using an
-\protocol{Ipv6} destination address.
+node where one is using an \protocol{IPv4} and the other is using an
+\protocol{IPv6} destination address.
 
 \inisnippet{DualStackExample}{Dual stack example}
 
 \subsection{Enabling Packet Forwarding}
+\label{sec:networks:enabling-packet-forwarding}
 
 In general, network nodes don't forward packets by default, only
 \nedtype{Router} and the like do. Nevertheless, it's possible to enable

@@ -1,0 +1,208 @@
+# Standard specifications for ltoh.
+# 	R. Quong 1996, 1997
+#	quong@best.com
+
+# Comments begin with optional whitespace followed by a '#', ';', or a '!'
+# We recommend you begin all comments with a '#'.
+# Each line contains:
+#
+
+author  := Russell W. Quong
+login   := quong
+email   := quong@best.com
+url     := http://www.best.com/~quong
+htmlfile_spec := $BASE.html
+=***= warnlevel := 6
+
+# The general structure of a specification is
+# :type   :latex-macro:html-begin-spec-start:html-end-spec:reserved/not-used
+#
+# type is one of the following:
+#      {} = brace delimited command, \textbf{...}
+#     {N} = command, with brace delimited N arguments, \swap{xxx}{yyy}
+#    comm = command without any parameters
+#     b/e = begin/end delimited command \begin{xxx} ... \end{xxx}
+#
+
+#:comm   :\opp:OMNEST::
+:comm   :\opp:OMNeT++::
+
+
+:{} :\textbf:<b>:</>:
+:{}	:\textsl:<i>:</>:
+:{}	:\textem:<i>:</>:
+:{}	:\textit:<i>:</>:
+:{}	:\texttt:<tt>:</>:
+:{}	:\textsf:<i>:</>:
+:{}	:\emph:<i>:</>:
+:{}	:\underline:<u>:</>:
+:{}	:\chapter:<hr class='pgbr'><h1>:</h1>:
+:{}	:\appendixchapter:<hr class='pgbr'><h1>Appendix AAA&#58; :</h1>:
+:{}	:\section:<h2>:</h2>:
+:{}	:\subsection:<h3>:</h3>:
+:{}	:\subsubsection:<h4>:</h4>:
+:{}	:\section*:<b>:</b>:
+:{}	:\subsection*:<b>:</b>:
+:{}	:\subsubsection*:<b>:</b>:
+:{}	:\centerline:<p align=center>:</>:
+:{}	:\footnote:<br><ul><font size='-1'>[:]</font></ul>:
+:{}	:\mbox:::
+:{}	:\ensuremath:<it>:</>:
+:{} :\textsuperscript:<sup>:</sup>:
+:{} :\textsubscript:<sub>:</sub>:
+:{2}	:\renewcommand#1#2:::
+:{1}	:\makebox[^{]*#1:#1::
+:b/e	:\begin{center}:<div align=center>:</>:
+:b/e	:\begin{itemize}(\[noitemsep\])?:<ul>:</>:
+:b/e	:\begin{enumerate}:<ol>:</>:
+:b/e	:\begin{description}:<ul class="dl">:</>:
+:b/e	:\begin{multques}(\{[^\}]*\})*:<ol>:</>:
+:b/e	:\begin{document}:::
+:b/e	:\begin{quote}:<blockquote>:</>:
+:b/e	:\begin{verse}:<blockquote>:</>:
+:b/e	:\begin{displayquote}:<blockquote>:</>:
+:b/e	:\begin{multicols}:::
+:b/e	:\begin{flushleft}:::
+:comm	:\ldots:...::
+:comm	:\par:<p>::
+:comm	:\LaTeX[^ \t\n]*:LaTeX::
+:comm	:\qquad:::
+@comm	@\longrightarrow@ ===&gt; @@
+:comm	:\TeX[^ \t\n]*:TeX::
+:comm	:\backslash:@BS@::
+:comm	:\hfill:::
+:comm	:\hrule:<hr>::
+:comm	:\vneg:::
+# :comm	:\item([^]]+\])?:<li><strong>$1</strong>::
+:comm	:\item([^]]+\])?:<li>$1::
+:comm	:\def[^\n]+:::
+:comm	:\small:::
+:comm	:\normalsize:::
+:comm	:\footnotesize:::
+:comm	:\large:::
+:comm	:\Large:::
+:comm	:\parindent[^\n]+:::
+:comm	:\noindent[^\n]+:::
+:comm	:\setcounter[^ \t\n]*:::
+:comm	:\addtocounter[^ \t\n]*:::
+:comm	:\raggedright:::
+:comm	:\raggedleft:::
+:comm	:\vspace[*]?\{[^\}]+\}:::
+:comm	:\hspace[*]?\{[^\}]+\}:::
+:comm	:\usepackage\{[^\}]+\}:::
+:comm	:\documentclass[^ \t\n]+:::
+:comm	:\thispagestyle{.*}:::
+:comm	:\pagestyle{.*}:::
+:comm	:\newpage:::
+:comm	:\vfill:::
+:comm	:\bigskip:<br><br>::
+:comm	:\textquotedbl:"::
+:comm	:\allowbreak:::
+#TODO \bfseries
+#TODO \ttfamily
+#TODO \itshape
+
+
+#
+# End specifications for standard Latex command
+#
+
+:comm   :\omnetpp:OMNeT++::
+:comm   :\omnest:OMNEST::
+:comm   :\new:<sup><b>[New!]</b></sup>::
+:comm   :\changed:[Changed!]::
+:{}     :\ttt:<tt>:</tt>:
+:{}     :\tbf:<b>:</b>:
+:{}     :\mathit:<i>:</i>:
+:{}     :\tilde:&:tilde;:
+:{}     :\label:<a name=":"></a>:
+:{}     :\ref:<a href="#:">[click]</a>:
+:{}     :\index:<!--:-->:
+:{2}    :\href#1#2:<a href="#1">#2</a>::
+:{1}    :\cite#1:[<a href="#bib-#1">#1</a>]::
+:{1}    :\url#1:<a href="#1">#1</a>::
+:{}     :\protocol:::
+@{}     @\caption@<center><div class="caption"><i>Figure: @</i></div></center>@
+:comm   :\textbar:|::
+:comm   :\textasciicircum:^::
+:comm   :\textasciitilde:~::
+:comm   :\textbackslash:\::
+:comm   :\sim:~::
+:comm   :\times:x::
+:comm   :\dots:...::
+:comm   :\cdots:..::
+:comm   :\nobreakspace:&nbsp;::
+:comm   :\hline:::
+:comm   :\tabheadcol:::
+:comm   :\linebreak:<br>::
+:comm   :\newline:<br>::
+:comm   :\centering:<br>::
+:comm   :\tab: ::
+:comm   :\sloppy:::
+:comm   :\bibitem(\[(.*?)\])?{(.*?)}:<a name="bib-$3"></a>[$2]&nbsp;&nbsp;::
+:comm   :\newblock:::
+:comm   :\em:::
+:comm   :\pm:+/-::
+:comm   :\neq:!=::
+:comm   :\c{S}:S::
+:comm   :\u{g}:g::
+:comm   :\verb!(.*?)!:<tt>$1</tt>::
+:comm   :\textrm(\[.*?\])?{(.*?)}:<i>$2</i>::
+:comm   :\fpar(\[.*?\])?{(.*?)}:<tt>$2</tt>::
+:comm   :\fgate(\[.*?\])?{(.*?)}:<tt>$2</tt>::
+:comm   :\fsignal(\[.*?\])?{(.*?)}:<tt>$2</tt>::
+:comm   :\fdef(\[.*?\])?{(.*?)}:<tt>$2</tt>::
+:comm   :\fvar(\[.*?\])?{(.*?)}:<tt>$2</tt>::
+:comm   :\ffunc(\[.*?\])?{(.*?)}:<tt>$2</tt>::
+:comm   :\fprog(\[.*?\])?{(.*?)}:<tt>$2</tt>::
+:comm   :\program(\[.*?\])?{(.*?)}:<b>$2</b>::
+:comm   :\fopt(\[.*?\])?{(.*?)}:<tt>$2</tt>::
+:comm   :\nedtype(\[.*?\])?{(.*?)}:<tt>$2</tt>::
+:comm   :\msgtype(\[.*?\])?{(.*?)}:<tt>$2</tt>::
+:comm   :\cclass(\[.*?\])?{(.*?)}:<tt>$2</tt>::
+:comm   :\cppclass(\[.*?\])?{(.*?)}:<tt>$2</tt>::
+:comm   :\fmac(\[.*?\])?{(.*?)}:<tt>$2</tt>::
+:comm   :\fkeyword(\[.*?\])?{(.*?)}:<b><tt>$2</tt></b>::
+:comm   :\fprop(\[.*?\])?{(.*?)}:<b><tt>$2</tt></b>::
+:comm   :\fconfig(\[.*?\])?{(.*?)}:<b><tt>$2</tt></b>::
+:comm   :\ffilename(\[.*?\])?{(.*?)}:<tt>$2</tt>::
+:comm   :\ftest(\[.*?\])?{(.*?)}:<tt>$2</tt>::
+:comm   :\includepng(\[.*?\])?{figures/(.*?)}:<img src="$2.png">::
+:comm   :\includesvg(\[.*?\])?{figures/(.*?)}:<img src="$2.svg">::
+:comm   :\ifdraft:@ifdraft@::
+:comm   :\fi:@fi@::
+
+# WRONG --  :comm   :\chapter\*{(.*?)}:<br><br><br><b>$2</b>::
+# WRONG --  :comm   :$\^(.*)\$:<sup>$1</sup>::
+# WRONG --  :comm   :\'(.):&\1acute;:
+# WRONG --  :comm   :\"(.):&\1tilde;:
+:b/e	:\begin{figure}(\[.*?\])?:::
+:b/e	:\begin{equation}:<blockquote>:</blockquote>:
+:b/e	:\begin{sloppypar}:<p>:</p>:
+:b/e	:\begin{compactitem}:<ul>:</ul>:
+:b/e	:\begin{thebibliography}(\{.*?\})?:<H1>References</H1>::
+:b/e	:\begin{note}:<ul class="note"><b>NOTE</b><br>:</ul>:
+:b/e	:\begin{hint}:<ul class="hint"><b>HINT</b><br>:</ul>:
+:b/e	:\begin{warning}:<ul class="warning"><b>WARNING</b><br>:</ul>:
+:b/e	:\begin{caution}:<ul class="caution"><b>CAUTION</b><br>:</ul>:
+:b/e	:\begin{rationale}:<ul class="rationale"><b>Rationale</b><br>:</ul>:
+:b/e	:\begin{important}:<ul class="important"><b>IMPORTANT</b><br>:</ul>:
+:b/e	:\begin{pseudocode}(\[.*?\])?:<pre class="text">:</pre>:
+
+:{2}	:\nedsnippet#1#2:<pre class="snippet" src="Snippets.ned" after="//!#1" until="//!End"></pre>::
+:{2}	:\msgsnippet#1#2:<pre class="snippet" src="Snippets.msg" after="//!#1" until="//!End"></pre>::
+:{2}	:\cppsnippet#1#2:<pre class="snippet" src="Snippets.cc" after="//!#1" until="//!End"></pre>::
+:{2}	:\inisnippet#1#2:<pre class="snippet" src="Snippets.ini" after="#!#1" until="#!End"></pre>::
+:{2}	:\xmlsnippet#1#2:<pre class="snippet" src="Snippets.xml" after="<!--!#1-->" until="<!--End-->"></pre>::
+
+#XXX Warning: the following names are now hardcoded into ltoh.pl! We need a "vb/e" category in ltoh, for "verbatim-like begin/end" where \,{,} needs to be left alone
+:b/e	:\begin{ned}(\[.*?\])?:<pre><code data-language="ned">:</code></pre>:
+:b/e	:\begin{msg}(\[.*?\])?:<pre><code data-language="msg">:</code></pre>:
+:b/e	:\begin{cpp}(\[.*?\])?:<pre><code data-language="cpp">:</code></pre>:
+:b/e	:\begin{inifile}(\[.*?\])?:<pre><code data-language="ini">:</code></pre>:
+:b/e	:\begin{XML}(\[.*?\])?:<pre><code data-language="xml">:</code></pre>:
+:b/e	:\begin{filelisting}(\[.*?\])?:<pre class="filelisting">:</pre>:
+:b/e	:\begin{commandline}(\[.*?\])?:<pre class="commandline">:</pre>:
+:b/e	:\begin{Verbatim}(\[.*?\])?:<pre class="verbatim">:</pre>:
+:b/e	:\begin{center}:<center>:</center>:
+

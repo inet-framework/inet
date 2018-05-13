@@ -86,6 +86,11 @@
 	Added all 802.11 phy and preamble chunks.
 	Added descriptors for Signal and some 802.11 transmissions.
 
+2017-07-26  Levente Mészáros
+
+	Rewritten 802.11 OFDM phy header serialization to avoid using a structure.
+	Dropped unused 802.11 PLCP header file.
+
 2017-05-11  Levente Mészáros
 
 	Revived layered OFDM transmitter and receiver.

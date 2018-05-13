@@ -27,7 +27,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/serializer/TcpIpChecksum.h"
+#include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/arp/ipv4/ArpPacket_m.h"
@@ -131,9 +131,8 @@ void Ipv4::handleRegisterService(const Protocol& protocol, cGate *out, ServicePr
 void Ipv4::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
-    if (!strcmp("transportIn", in->getBaseName())) {
-        mapping.addProtocolMapping(protocol.getId(), in->getIndex());
-    }
+    if (in->isName("transportIn"))
+            upperProtocols.insert(&protocol);
 }
 
 void Ipv4::refreshDisplay() const
@@ -157,24 +156,21 @@ void Ipv4::handleMessage(cMessage *msg)
     auto request = dynamic_cast<Request *>(msg);
     if (Ipv4SocketBindCommand *command = dynamic_cast<Ipv4SocketBindCommand *>(msg->getControlInfo())) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
-        SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocol()->getId());
+        SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocol()->getId(), command->getLocalAddress());
         socketIdToSocketDescriptor[socketId] = descriptor;
-        protocolIdToSocketDescriptors.insert(std::pair<int, SocketDescriptor *>(command->getProtocol()->getId(), descriptor));
+        delete msg;
+    }
+    else if (Ipv4SocketConnectCommand *command = dynamic_cast<Ipv4SocketConnectCommand *>(msg->getControlInfo())) {
+        int socketId = request->getTag<SocketReq>()->getSocketId();
+        if (socketIdToSocketDescriptor.find(socketId) == socketIdToSocketDescriptor.end())
+            throw cRuntimeError("Ipv4Socket: should use bind() before connect()");
+        socketIdToSocketDescriptor[socketId]->remoteAddress = command->getRemoteAddress();
         delete msg;
     }
     else if (dynamic_cast<Ipv4SocketCloseCommand *>(msg->getControlInfo()) != nullptr) {
         int socketId = 0; request->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketDescriptor.find(socketId);
         if (it != socketIdToSocketDescriptor.end()) {
-            int protocol = it->second->protocolId;
-            auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol);
-            auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol);
-            for (auto jt = lowerBound; jt != upperBound; jt++) {
-                if (it->second == jt->second) {
-                    protocolIdToSocketDescriptors.erase(jt);
-                    break;
-                }
-            }
             delete it->second;
             socketIdToSocketDescriptor.erase(it);
         }
@@ -215,7 +211,7 @@ bool Ipv4::verifyCrc(const Ptr<const Ipv4Header>& ipv4Header)
                 // compute the CRC, the check passes if the result is 0xFFFF (includes the received CRC) and the chunks are correct
                 MemoryOutputStream ipv4HeaderStream;
                 Chunk::serialize(ipv4HeaderStream, ipv4Header);
-                uint16_t computedCrc = inet::serializer::TcpIpChecksum::checksum(ipv4HeaderStream.getData());
+                uint16_t computedCrc = TcpIpChecksum::checksum(ipv4HeaderStream.getData());
                 return computedCrc == 0;
             }
             else {
@@ -732,17 +728,24 @@ void Ipv4::reassembleAndDeliverFinish(Packet *packet)
     auto ipv4HeaderPosition = packet->getFrontOffset();
     const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
     const Protocol *protocol = ipv4Header->getProtocol();
+    auto remoteAddress(ipv4Header->getSrcAddress());
+    auto localAddress(ipv4Header->getDestAddress());
     decapsulate(packet);
-    auto lowerBound = protocolIdToSocketDescriptors.lower_bound(protocol->getId());
-    auto upperBound = protocolIdToSocketDescriptors.upper_bound(protocol->getId());
-    bool hasSocket = lowerBound != upperBound;
-    for (auto it = lowerBound; it != upperBound; it++) {
-        auto *packetCopy = packet->dup();
-        packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(it->second->socketId);
-        emit(packetSentToUpperSignal, packetCopy);
-        send(packetCopy, "transportOut");
+    bool hasSocket = false;
+    for (const auto &elem: socketIdToSocketDescriptor) {
+        if (elem.second->protocolId == protocol->getId()
+                && (elem.second->localAddress.isUnspecified() || elem.second->localAddress == localAddress)
+                && (elem.second->remoteAddress.isUnspecified() || elem.second->remoteAddress == remoteAddress)) {
+            auto *packetCopy = packet->dup();
+            packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
+            EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
+            emit(packetSentToUpperSignal, packetCopy);
+            send(packetCopy, "transportOut");
+            hasSocket = true;
+        }
     }
-    if (mapping.findOutputGateForProtocol(protocol->getId()) >= 0) {
+    if (upperProtocols.find(protocol) != upperProtocols.end()) {
+        EV_INFO << "Passing up to protocol " << protocol << "\n";
         emit(packetSentToUpperSignal, packet);
         send(packet, "transportOut");
         numLocalDeliver++;
@@ -798,7 +801,7 @@ void Ipv4::setComputedCrc(Ptr<Ipv4Header>& ipv4Header)
     MemoryOutputStream ipv4HeaderStream;
     Chunk::serialize(ipv4HeaderStream, ipv4Header);
     // compute the CRC
-    uint16_t crc = inet::serializer::TcpIpChecksum::checksum(ipv4HeaderStream.getData());
+    uint16_t crc = TcpIpChecksum::checksum(ipv4HeaderStream.getData());
     ipv4Header->setCrc(crc);
 }
 
@@ -885,12 +888,8 @@ void Ipv4::fragmentAndSend(Packet *packet)
             curFragName += "-last";
         Packet *fragment = new Packet(curFragName.c_str());     //TODO add offset or index to fragment name
 
-        //copy Tags from packet to fragment     //FIXME optimizing needed
-        {
-            Packet *tmp = packet->dup();
-            fragment->copyTags(*tmp);
-            delete tmp;
-        }
+        //copy Tags from packet to fragment
+        fragment->copyTags(*packet);
 
         ASSERT(fragment->getByteLength() == 0);
         auto fraghdr = staticPtrCast<Ipv4Header>(ipv4Header->dupShared());

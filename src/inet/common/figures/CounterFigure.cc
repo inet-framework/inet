@@ -72,8 +72,8 @@ int CounterFigure::getDecimalPlaces() const
 void CounterFigure::setDecimalPlaces(int number)
 {
     ASSERT(number > 0);
-    if (digits.size() != number) {
-        if (digits.size() > number)
+    if (digits.size() != (unsigned int)number) {
+        if (digits.size() > (unsigned int)number)
             // Remove unnecessary figures from canvas
             for (int i = digits.size() - 1; i > number - 1; --i) {
                 delete removeFigure(digits[i].bounds);
@@ -82,7 +82,7 @@ void CounterFigure::setDecimalPlaces(int number)
             }
         else
             // Add figure to canvas if it's necessary
-            while (digits.size() < number) {
+            while (digits.size() < (unsigned int)number) {
                 Digit digit(new cRectangleFigure(), new cTextFigure());
                 digit.bounds->setFilled(true);
                 digit.bounds->setFillColor(getDigitBackgroundColor());

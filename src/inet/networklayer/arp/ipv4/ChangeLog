@@ -53,6 +53,7 @@
 	    ARPCacheEntry -> ArpCacheEntry
 	    ARPOpcode -> ArpOpcode
 	    ARPPacket -> ArpPacket
+	    ARPPacketSerializer -> ArpPacketSerializer
 	    GlobalARP -> GlobalArp
 	    IARP -> IArp
 	    IIPv4RoutingTable -> IIpv4RoutingTable
@@ -83,6 +84,14 @@
 	Added required import statements to MSG files according to new syntax.
 
 2017-11-16  ------ inet-3.99.1 released ------
+
+2017-04-12  Levente Mészáros
+
+	Removed discouraged setChunkLength calls from deserializers.
+
+2017-02-21  Levente Mészáros
+
+	Moved headerserializers one level up.
 
 2017-01-11  Zoltan Bojthe
 

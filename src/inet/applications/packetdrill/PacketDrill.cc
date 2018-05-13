@@ -31,7 +31,7 @@
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/common/serializer/TcpIpChecksum.h"
+#include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/networklayer/common/L3Tools.h"
 #include "inet/transportlayer/common/L4Tools.h"
 
@@ -83,7 +83,7 @@ Ptr<Ipv4Header> PacketDrill::makeIpv4Header(IpProtocolId protocol, enum directio
     if (pdapp->getCrcMode() == CRC_COMPUTED) {
         MemoryOutputStream ipv4HeaderStream;
         Chunk::serialize(ipv4HeaderStream, ipv4Header);
-        uint16_t crc = serializer::TcpIpChecksum::checksum(ipv4HeaderStream.getData());
+        uint16_t crc = TcpIpChecksum::checksum(ipv4HeaderStream.getData());
         ipv4Header->setCrc(crc);
     }
 

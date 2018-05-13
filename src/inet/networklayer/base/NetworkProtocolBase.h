@@ -20,9 +20,10 @@
 
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/lifecycle/NodeOperations.h"
-#include "inet/common/ProtocolMap.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include <map>
+#include <set>
 
 namespace inet {
 
@@ -33,16 +34,17 @@ class INET_API NetworkProtocolBase : public LayeredProtocolBase, public IProtoco
     {
         int socketId = -1;
         int protocolId = -1;
+        L3Address localAddress;
+        L3Address remoteAddress;
 
-        SocketDescriptor(int socketId, int protocolId) : socketId(socketId), protocolId(protocolId) { }
+        SocketDescriptor(int socketId, int protocolId, L3Address localAddress)
+                : socketId(socketId), protocolId(protocolId), localAddress(localAddress) { }
     };
 
-    ProtocolMapping protocolMapping;    // where to send packets after decapsulation
     IInterfaceTable *interfaceTable;
     // working vars
-    ProtocolMapping mapping;
+    std::set<const Protocol *> upperProtocols;
     std::map<int, SocketDescriptor *> socketIdToSocketDescriptor;
-    std::multimap<int, SocketDescriptor *> protocolIdToSocketDescriptors;
 
   protected:
     NetworkProtocolBase();

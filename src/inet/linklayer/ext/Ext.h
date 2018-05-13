@@ -25,11 +25,10 @@
 #define MAX_MTU_SIZE    4000
 #endif // ifndef MAX_MTU_SIZE
 
+#include <pcap.h>
 #include "inet/common/INETDefs.h"
-
+#include "inet/common/scheduler/RealTimeScheduler.h"
 #include "inet/linklayer/base/MacBase.h"
-#include "inet/linklayer/ext/ExtFrame_m.h"
-#include "inet/linklayer/ext/cSocketRTScheduler.h"
 
 namespace inet {
 
@@ -41,24 +40,30 @@ class InterfaceEntry;
  * on the host running the simulation. Suitable for hardware-in-the-loop
  * simulations.
  *
- * Requires cSocketRTScheduler to be configured as scheduler in omnetpp.ini.
+ * Requires RealTimeScheduler to be configured as scheduler in omnetpp.ini.
  *
  * See NED file for more details.
  */
-class INET_API Ext : public MacBase
+class INET_API Ext : public MacBase, public RealTimeScheduler::ICallback
 {
   protected:
-    bool connected;
+    RealTimeScheduler *rtScheduler = nullptr;
+    bool connected = false;
     uint8 buffer[1 << 16];
-    const char *device;
+    const char *device = nullptr;
 
     // statistics
-    int numSent;
-    int numRcvd;
-    int numDropped;
+    int numSent = 0;
+    int numRcvd = 0;
+    int numDropped = 0;
 
     // access to real network interface via Scheduler class:
-    cSocketRTScheduler *rtScheduler;
+    int fd = INVALID_SOCKET;        // RAW socket ID
+
+    pcap_t *pd = nullptr;           // pcap socket
+    int pcap_socket = -1;
+    int datalink = -1;
+    int headerLength = -1;               // link layer header length
 
   protected:
     void displayBusy();
@@ -71,7 +76,17 @@ class INET_API Ext : public MacBase
     virtual void clearQueue() override;
     virtual bool isUpperMsg(cMessage *msg) override { return msg->arrivedOn("upperLayerIn"); }
 
+    // RealTimeScheduler::ICallback:
+    virtual bool notify(int fd) override;
+
+    // utility functions
+    void sendBytes(unsigned char *buf, size_t numBytes, struct sockaddr *from, socklen_t addrlen);
+    void openPcap(const char *device, const char *filter);
+
+    static void ext_packet_handler(u_char *usermod, const struct pcap_pkthdr *hdr, const u_char *bytes);
+
   public:
+    virtual ~Ext();
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;

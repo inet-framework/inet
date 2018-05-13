@@ -29,6 +29,7 @@
 	    ITCP -> ITcp
 	    TCPCommand -> TcpCommand
 	    TCPIPchecksum -> TcpIpChecksum
+	    TCP -> Tcp
 	    TCPOption -> TcpOption
 	    TCPOptionEnd -> TcpOptionEnd
 	    TCPOptionMaxSegmentSize -> TcpOptionMaxSegmentSize
@@ -81,6 +82,10 @@
 
 	Replaced "int foo @enum(FooEnum)" to FooEnum foo.
 
+2017-11-13  Zoltan Bojthe
+
+	Converted TCPOptionNumbers to enum, default CRC case was missed.
+
 2017-06-28  Zoltan Bojthe
 
 	Switched to using pointer array in MSG files for TCPOption.
@@ -111,6 +116,13 @@
 
 	Removed unused parts from TcpHeader.
 
+2017-02-22  Levente Mészáros
+
+	Ported serialization of TCP options.
+
+2017-02-21  Levente Mészáros
+
+	Ported TcpHeaderSerializer to new API.
 2017-01-25  Zoltan Bojthe
 
 	Renamed TCPSegment to TcpHeader.

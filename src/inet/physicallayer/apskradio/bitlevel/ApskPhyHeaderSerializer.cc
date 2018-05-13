@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/common/serializer/EthernetCRC.h"
+#include "inet/common/checksum/EthernetCRC.h"
 #include "inet/physicallayer/apskradio/bitlevel/ApskPhyHeaderSerializer.h"
 
 namespace inet {

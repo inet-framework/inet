@@ -112,6 +112,10 @@
 
 2017-05-09  Levente Mészáros
 
+	Extracted Ieee80211MgmtFrameSerializer from Ieee80211MacHeaderSerializer.
+
+2017-05-09  Levente Mészáros
+
 	Renamed to Ieee80211MgmtFrame.msg.
 
 2017-05-09  Levente Mészáros

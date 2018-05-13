@@ -20,15 +20,12 @@
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/transportlayer/sctp/SctpHeader.h"
 #include "inet/transportlayer/sctp/SctpCrcInsertionHook.h"
-#include "inet/common/serializer/SctpChecksum.h"
+#include "inet/transportlayer/sctp/SctpChecksum.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 
 
-
 namespace inet {
-
 namespace sctp {
-
 
 INetfilter::IHook::Result SctpCrcInsertion::datagramPostRoutingHook(Packet *packet)
 {
@@ -45,7 +42,6 @@ INetfilter::IHook::Result SctpCrcInsertion::datagramPostRoutingHook(Packet *pack
     }
     return ACCEPT;
 }
-
 
 void SctpCrcInsertion::insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<SctpHeader>& sctpHeader, Packet *packet)
 {
@@ -71,7 +67,7 @@ void SctpCrcInsertion::insertCrc(const Protocol *networkProtocol, const L3Addres
             auto headerLength = sctpHeaderBytes.size();
             auto buffer = new uint8_t[headerLength];
             std::copy(sctpHeaderBytes.begin(), sctpHeaderBytes.end(), (uint8_t *)buffer);
-            auto crc = inet::serializer::SctpChecksum::checksum(buffer, headerLength);
+            auto crc = SctpChecksum::checksum(buffer, headerLength);
             sctpHeader->setCrc(crc);
             break;
         }
@@ -81,7 +77,5 @@ void SctpCrcInsertion::insertCrc(const Protocol *networkProtocol, const L3Addres
 }
 
 } // namespace sctp
-
 } // namespace inet
-
 

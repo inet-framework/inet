@@ -23,7 +23,7 @@
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/common/serializer/TcpIpChecksum.h"
+#include "inet/common/checksum/TcpIpChecksum.h"
 
 #include "inet/linklayer/common/InterfaceTag_m.h"
 
@@ -380,7 +380,7 @@ void Icmpv6::insertCrc(CrcMode crcMode, const Ptr<Icmpv6Header>& icmpHeader, Pac
                 auto icmpDataBytes = packet->peekDataAsBytes();
                 Chunk::serialize(icmpStream, icmpDataBytes);
             }
-            uint16_t crc = inet::serializer::TcpIpChecksum::checksum(icmpStream.getData());
+            uint16_t crc = TcpIpChecksum::checksum(icmpStream.getData());
             icmpHeader->setChksum(crc);
             break;
         }
@@ -402,7 +402,7 @@ bool Icmpv6::verifyCrc(const Packet *packet)
         case CRC_COMPUTED: {
             // otherwise compute the CRC, the check passes if the result is 0xFFFF (includes the received CRC)
             auto dataBytes = packet->peekDataAsBytes(Chunk::PF_ALLOW_INCORRECT);
-            uint16_t crc = inet::serializer::TcpIpChecksum::checksum(dataBytes->getBytes());
+            uint16_t crc = TcpIpChecksum::checksum(dataBytes->getBytes());
             // TODO: delete these isCorrect calls, rely on CRC only
             return crc == 0 && icmpHeader->isCorrect();
         }

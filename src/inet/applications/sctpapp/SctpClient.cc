@@ -343,7 +343,7 @@ void SctpClient::socketDataArrived(SctpSocket *socket, Packet *msg, bool)
         cmd->setSid(ind->getSid());
         cmsg->setKind(ind->getSendUnordered() ? SCTP_C_SEND_UNORDERED : SCTP_C_SEND_ORDERED);
         packetsSent++;
-        socket->sendMsg(cmsg);
+        socket->send(cmsg);
     }
 
     if (par("numPacketsToReceive").intValue() > 0) {
@@ -400,7 +400,7 @@ void SctpClient::sendRequest(bool last)
     creationTimeTag->setCreationTime(simTime());
     applicationPacket->setKind(ordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);
     emit(packetSentSignal, applicationPacket);
-    socket.sendMsg(applicationPacket);
+    socket.send(applicationPacket);
 
     bytesSent += sendBytes;
 }

@@ -154,7 +154,7 @@ void SctpNatPeer::generateAndSend()
     tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::sctp);
     bytesSent += numBytes;
     packetsSent++;
-    clientSocket.sendMsg(applicationPacket);
+    clientSocket.send(applicationPacket);
 }
 
 void SctpNatPeer::connectx(AddressVector connectAddressList, int32 connectPort)
@@ -690,7 +690,7 @@ void SctpNatPeer::sendRequest(bool last)
     auto sendCommand = cmsg->addTagIfAbsent<SctpSendReq>();
     sendCommand->setLast(true);
     // send SctpMessage with SctpSimpleMessage enclosed
-    clientSocket.sendMsg(cmsg);
+    clientSocket.send(cmsg);
     bytesSent += numBytes;
 }
 
@@ -732,7 +732,7 @@ void SctpNatPeer::socketEstablished(SctpSocket *socket, unsigned long int buffer
         auto creationTimeTag = applicationPacket->addTagIfAbsent<CreationTimeTag>();
         creationTimeTag->setCreationTime(simTime());
         applicationPacket->setKind(SCTP_C_SEND_ORDERED);
-        clientSocket.sendMsg(applicationPacket);
+        clientSocket.send(applicationPacket);
 
         if (par("multi").boolValue()) {
             Request *cmesg = new Request("SCTP_C_SEND_ASCONF");
@@ -846,7 +846,7 @@ void SctpNatPeer::socketDataArrived(SctpSocket *socket, Packet *msg, bool)
         cmd->setSid(ind->getSid());
         cmsg->setKind(ind->getSendUnordered() ? SCTP_C_SEND_UNORDERED : SCTP_C_SEND_ORDERED);
         packetsSent++;
-        clientSocket.sendMsg(cmsg);
+        clientSocket.send(cmsg);
     }
     if (par("numPacketsToReceive").intValue() > 0) {
         numPacketsToReceive--;
@@ -917,7 +917,7 @@ void SctpNatPeer::addressAddedArrived(SctpSocket *socket, L3Address localAddr, L
         auto creationTimeTag = applicationPacket->addTagIfAbsent<CreationTimeTag>();
         creationTimeTag->setCreationTime(simTime());
         applicationPacket->setKind(SCTP_C_SEND_ORDERED);
-        clientSocket.sendMsg(applicationPacket);
+        clientSocket.send(applicationPacket);
     }
 }
 

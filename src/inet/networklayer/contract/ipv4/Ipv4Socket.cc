@@ -19,6 +19,7 @@
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Socket.h"
 #include "inet/networklayer/contract/ipv4/Ipv4SocketCommand_m.h"
 
@@ -52,20 +53,37 @@ void Ipv4Socket::processMessage(cMessage *msg)
         delete msg;
 }
 
-void Ipv4Socket::bind(const Protocol *protocol)
+void Ipv4Socket::bind(const Protocol *protocol, Ipv4Address localAddress)
 {
     ASSERT(!bound);
     Ipv4SocketBindCommand *command = new Ipv4SocketBindCommand();
     command->setProtocol(protocol);
+    command->setLocalAddress(localAddress);
     auto request = new Request("bind", IPv4_C_BIND);
     request->setControlInfo(command);
     sendToOutput(request);
     bound = true;
 }
 
+void Ipv4Socket::connect(Ipv4Address remoteAddress)
+{
+    Ipv4SocketConnectCommand *command = new Ipv4SocketConnectCommand();
+    command->setRemoteAddress(remoteAddress);
+    auto request = new Request("connect", IPv4_C_CONNECT);
+    request->setControlInfo(command);
+    sendToOutput(request);
+}
+
 void Ipv4Socket::send(Packet *packet)
 {
     sendToOutput(packet);
+}
+
+void Ipv4Socket::sendTo(Packet *packet, Ipv4Address destAddress)
+{
+    auto addressReq = packet->addTagIfAbsent<L3AddressReq>();
+    addressReq->setDestAddress(destAddress);
+    send(packet);
 }
 
 void Ipv4Socket::close()

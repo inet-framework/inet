@@ -10,7 +10,7 @@ To run this example, some parameters have to be adjusted in the omnetpp.ini.
 
 - Make sure that you have libpcap-dev (v1.5.3 or later) installed on your machine. 
 - Turn on the "Network Emulation" feature (In IDE / INET Project Properties / Project Features.
-  (if you forget this you will receive a 'Class "inet::cSocketRTScheduler" not found' error)
+  (if you forget this you will receive a 'Class "inet::EmulationScheduler" not found' error)
 - Rebuild INET
 - Set **.ext[0].device to the device name of the interface of the computer
   running the simulation in the omnetpp.ini file.

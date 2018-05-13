@@ -9,8 +9,6 @@
         nedPackages = "
                        inet.transportlayer.tcp_common
                        inet.applications.tcpapp
-                       inet.common.serializer.tcp
-                       inet.common.serializer.application.tcpapp
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_TCP_COMMON"
@@ -73,8 +71,6 @@
                        inet.networklayer.ipv4
                        inet.networklayer.configurator.ipv4
                        inet.networklayer.arp.ipv4
-                       inet.common.serializer.ipv4
-                       inet.common.serializer.arp
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_IPv4"
@@ -107,7 +103,6 @@
                        inet.networklayer.icmpv6
                        inet.networklayer.ipv6tunneling
                        inet.node.ipv6
-                       inet.common.serializer.ipv6
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_IPv6"
@@ -210,7 +205,6 @@
         nedPackages = "
                        inet.transportlayer.udp
                        inet.applications.udpapp
-                       inet.common.serializer.udp
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_UDP"
@@ -257,7 +251,6 @@
                        inet.applications.sctpapp
                        inet.applications.sctpapp
                        inet.transportlayer.sctp
-                       inet.common.serializer.sctp
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_SCTP"
@@ -319,7 +312,6 @@
                        inet.applications.ethernet
                        inet.linklayer.ethernet
                        inet.node.ethernet
-                       inet.common.serializer.ethernet
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_ETHERNET"
@@ -347,7 +339,6 @@
         labels = "protocols"
         nedPackages = "
                        inet.linklayer.ppp
-                       inet.common.serializer.ppp
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_PPP"
@@ -728,7 +719,6 @@
         nedPackages = "
                        inet.linklayer.ieee80211
                        inet.physicallayer.ieee80211
-                       inet.common.serializer.ieee80211
                        inet.node.wireless
                       "
         extraSourceFolders = ""
@@ -1107,7 +1097,6 @@
         requires = ""
         labels = ""
         nedPackages = "
-                       inet.common.serializer.csmaca
                        inet.linklayer.csmaca
                       "
         extraSourceFolders = ""

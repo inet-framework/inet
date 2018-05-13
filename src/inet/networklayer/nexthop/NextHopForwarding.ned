@@ -34,6 +34,7 @@ simple NextHopForwarding
         int headerLength @unit(B) = default(10B);
         @display("i=block/routing");
         @signal[packetDropped](type=Packet);
+        @signal[packetSentToUpper](type=Packet);
     gates:
         input transportIn @labels(TcpHeader,UdpHeader);
         output transportOut @labels(TcpHeader,UdpHeader);

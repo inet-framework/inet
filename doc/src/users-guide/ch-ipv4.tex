@@ -3,6 +3,7 @@
 
 
 \section{Overview}
+\label{sec:ipv4:overview}
 
 The IP protocol is the workhorse protocol of the TCP/IP protocol suite.
 All UDP, TCP, ICMP packets are encapsulated into IP datagrams and
@@ -58,6 +59,7 @@ e.g. in \nedtype{StandardHost} and \nedtype{Router}.
 The subsequent sections describe the IPv4 modules in detail.
 
 \section{Ipv4}
+\label{sec:ipv4:ipv4}
 
 The \nedtype{Ipv4} module implements the IPv4 protocol.
 
@@ -77,6 +79,7 @@ Its parameters include:
 \end{itemize}
 
 \section{Ipv4RoutingTable}
+\label{sec:ipv4:ipv4routingtable}
 
 The \nedtype{Ipv4RoutingTable} module represents the IPv4 route table.
 Hosts and routers normally contain one instance of this module.
@@ -92,7 +95,7 @@ The \nedtype{Ipv4RoutingTable} module has the following parameters:
       for hosts.
   \item \fpar{forwarding}: turns IP forwarding on/off. It is always \ttt{true}
       in a \nedtype{Router} and is \ttt{false} by default in a \nedtype{StandardHost}.
-  \item \fpar{multicastForwarding}: turns multicast IP forwarding on/off. 
+  \item \fpar{multicastForwarding}: turns multicast IP forwarding on/off.
     Default is \fkeyword{false}, should be set to \fkeyword{true} in multicast routers.
 \end{itemize}
 
@@ -105,6 +108,7 @@ describes the format of the new configuration files.
 
 
 \section{Icmp}
+\label{sec:ipv4:icmp}
 
 The \nedtype{Icmp} module implements the Internet Control Message Protocol
 (ICMP). ICMP is the error reporting and diagnostic mechanism of the Internet.
@@ -119,6 +123,7 @@ Each ICMP message is encapsulated within an IP datagram, so its delivery
 is unreliable.
 
 \section{Arp}
+\label{sec:ipv4:arp}
 
 The \nedtype{Arp} module implements the Address Resolution Protocol (ARP).
 The ARP protocol is designed to translate a local protocol address to a hardware
@@ -129,7 +134,7 @@ translation, but not the opposite direction, Reverse ARP (RARP).
 
 The address to be resolved can be either an IPv4 broadcast/multicast or a
 unicast address. The corresponding MAC addresses can be computed for broadcast
-and multicast addresses (RFC 1122, 6.4); unicast addresses are resolved 
+and multicast addresses (RFC 1122, 6.4); unicast addresses are resolved
 using the ARP procotol.
 
 If the MAC address is found in the ARP cache, then the packet is transmitted to
@@ -158,6 +163,7 @@ The module parameters of \nedtype{Arp} are:
 
 
 \section{Igmp}
+\label{sec:ipv4:igmp}
 
 The \nedtype{Igmp} module implements the Internet Group Management Protocol
 (IGMP). IGMP is a communications protocol used by hosts and adjacent routers on

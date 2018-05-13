@@ -212,6 +212,7 @@ void HttpBrowser::socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status)
 {
     // This is obviously not used at the present time.
     EV_INFO << "SOCKET STATUS ARRIVED. Socket: " << socket->getSocketId() << endl;
+    delete status;
 }
 
 void HttpBrowser::socketPeerClosed(TcpSocket *socket)

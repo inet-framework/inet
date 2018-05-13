@@ -3,6 +3,7 @@
 
 
 \section{Overview}
+\label{sec:diffserv:overview}
 
 In the early days of the Internet, only best effort service was defined.
 The Internet delivers individually each packet, and delivery time is not
@@ -43,7 +44,7 @@ first.
 In the Differentiated Service architecture, the network is partitioned into
 DiffServ domains. Within each domain the resources of the domain are allocated
 to forwarding classes, taking into account the available resources and the
-traffic flows. There are \emph{service level agggreements} (SLA) between the users
+traffic flows. There are \emph{service level agreements} (SLA) between the users
 and service providers, and between the domains that describe the mapping of
 packets to forwarding classes and the allowed traffic profile for each class.
 The routers at the edge of the network are responsible for marking the packets
@@ -52,6 +53,7 @@ may be dropped, delayed, or marked with a different forwarding class.
 
 
 \subsection{Implemented Standards}
+\label{sec:diffserv:implemented-standards}
 
 The implementation follows these RFCs below:
 
@@ -66,6 +68,7 @@ The implementation follows these RFCs below:
 \end{itemize}
 
 \section{Architecture of NICs}
+\label{sec:diffserv:architecture-of-nics}
 
 Network Interface Card (NIC) modules, such as \nedtype{PppInterface} and
 \nedtype{EthernetInterface}, may contain traffic conditioners in
@@ -81,6 +84,7 @@ module interface. If it is not specified, then \nedtype{Ppp} and \nedtype{EtherM
 use an internal drop tail queue to buffer the packets until the line is busy.
 
 \subsection{Traffic Conditioners}
+\label{sec:diffserv:traffic-conditioners}
 
 Traffic conditioners have one input
 and one output gate as defined in the \nedtype{ITrafficConditioner}
@@ -101,6 +105,7 @@ INET provides classifier, meter, and marker modules, that can be
 composed to build a traffic conditioner as a compound module.
 
 \subsection{Output Queues}
+\label{sec:diffserv:output-queues}
 
 The queue component also has one input and one output gate. These components
 must implement a passive queue behaviour: they only deliver a packet,
@@ -112,6 +117,7 @@ asks a packet by calling the \ffunc{requestPacket()} method of this interface.
 
 
 \section{Simple modules}
+\label{sec:diffserv:simple-modules}
 
 This section describes the primitive elements from which traffic
 conditioners and output queues can be built. The next sections
@@ -138,6 +144,7 @@ The type of the components are:
 \end{itemize}
 
 \subsection{Queues}
+\label{sec:diffserv:queues}
 
 When packets arrive at higher rate, than the interface can trasmit,
 they are getting queued.
@@ -156,6 +163,7 @@ They should be able to notify the module connected to its output
 about the arrival of new packets.
 
 \subsubsection{FIFO Queue}
+\label{sec:diffserv:fifo-queue}
 
 The \nedtype{FifoQueue} module implements a passive
 FIFO queue with unlimited buffer space. It can be combined
@@ -166,6 +174,7 @@ The C++ class implements the \cppclass{IQueueAccess} and
 \cppclass{IPassiveQueue} interfaces.
 
 \subsubsection{DropTailQueue}
+\label{sec:diffserv:droptailqueue}
 
 The other primitive queue module is \nedtype{DropTailQueue}.
 Its capacity can be specified by the \fpar{frameCapacity}
@@ -179,6 +188,7 @@ This module implements the \nedtype{IOutputQueue} interface,
 so it can be used as the queue component of interface card per se.
 
 \subsection{Droppers}
+\label{sec:diffserv:droppers}
 
 Algorithmic droppers selectively drop received packets based on some condition.
 The condition can be either deterministic (e.g. to bound the queue length),
@@ -200,6 +210,7 @@ Note, that it is also possible to connect each output to the same
 queue module.
 
 \subsubsection{Threshold Dropper}
+\label{sec:diffserv:threshold-dropper}
 
 The \nedtype{ThresholdDropper} module selectively drops packets,
 based on the available buffer space of the queues attached to its output.
@@ -234,6 +245,7 @@ maximum threshold, it will be dropped by a given probability.
 This probability determined by a linear function which is
 0 at the minth and maxp at maxth.
 
+\begin{pdfonly}
 \begin{center}
 \setlength{\unitlength}{1cm}
 \begin{picture}(7,4)(-1,-1)
@@ -255,6 +267,11 @@ This probability determined by a linear function which is
 \put(3.9,-0.3){$th_{max}$}
 \end{picture}
 \end{center}
+\end{pdfonly}
+
+\begin{htmlonly}
+<center><img src="red-dropper.png" border="0" width="340"></center> <!-- screenshot from the PDF version -->
+\end{htmlonly}
 
 The queue length can be smoothed by specifying the \fpar{wq}
 parameter. The average queue length used in the tests
@@ -267,6 +284,7 @@ can be specified separately for each input gate, so this module
 can be used to implement different packet drop priorities.
 
 \subsection{Schedulers}
+\label{sec:diffserv:schedulers}
 
 Scheduler modules decide which queue can send a packet, when the
 interface is ready to transmit one. They have several input gates
@@ -284,6 +302,7 @@ rate-based). INET contains implementation
 of priority and weighted round-robin schedulers.
 
 \subsubsection{Priority Scheduler}
+\label{sec:diffserv:priority-scheduler}
 
 The \nedtype{PriorityScheduler} module implements a strict priority
 scheduler. Packets that arrived on \fgate{in[0]} has the highest priority,
@@ -330,6 +349,7 @@ bandwidth, then the rest is allocated to the other flows.
 \nedtype{WrrScheduler} can be used to implement the \ttt{AFxy} PHBs.
 
 \subsection{Classifiers}
+\label{sec:diffserv:classifiers}
 
 Classifier modules have one input and many output gates.
 They examine the received packets, and forward them to the
@@ -412,6 +432,7 @@ value not enumerated in the \fpar{dscps} parameter, it will
 be forwarded to the \nedtype{defaultOut} gate.
 
 \subsection{Meters}
+\label{sec:diffserv:meters}
 
 Meters classify the packets based on the temporal characteristics
 of their arrival. The arrival rate of packets is compared to an
@@ -483,6 +504,7 @@ is under $pir*(t_1-t_0)+8*pbs$ and $cir*(t_1-t_0)+8*cbs$, the yellow traffic
 is under $pir*(t_1-t_0)+8*pbs$ in every $[t_0,t_1]$ interval.
 
 \subsection{Markers}
+\label{sec:diffserv:markers}
 
 DSCP markers sets the codepoint of the crossing packets.
 The codepoint determines the further processing of the packet
@@ -509,8 +531,10 @@ For example the following lines are equivalent:
 \end{inifile}
 
 \section{Compound modules}
+\label{sec:diffserv:compound-modules}
 
 \subsection{AFxyQueue}
+\label{sec:diffserv:afxyqueue}
 
 The \nedtype{AFxyQueue} module is an example queue, that implements
 one class of the Assured Forwarding PHB group (RFC 2597).
@@ -527,14 +551,19 @@ ensure that packets with lower drop priorities are dropped with lower
 or equal probability than packets with higher drop priorities.
 
 \subsection{DiffservQeueue}
+\label{sec:diffserv:diffservqeueue}
 
 The \nedtype{DiffservQueue} is an example queue, that can be used in
 interfaces of DS core and edge nodes to support
 the AFxy (RFC 2597) and EF (RFC 3246) PHBs.
 
-\begin{center}
-\includegraphics[scale=0.7]{figures/DiffservQueue.png}
-\end{center}
+\begin{figure}[htbp]
+  \begin{center}
+    \includepng[scale=0.7]{figures/DiffservQueue}
+    \caption{DiffservQueue}
+    \label{fig:DiffservQueue}
+  \end{center}
+\end{figure}
 
 The incoming packets are first classified according to
 their DSCP field. DSCPs other than AFxy and EF are handled

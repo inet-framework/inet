@@ -17,13 +17,15 @@
 
 import inet.common.INETDefs;
 import inet.common.Protocol;
+import inet.networklayer.contract.ipv4.Ipv4Address;
 
 namespace inet;
 
 enum Ipv4CommandCode
 {
-    IPv4_C_BIND  = 1;
-    IPv4_C_CLOSE = 2;
+    IPv4_C_BIND    = 1;
+    IPv4_C_CONNECT = 2;
+    IPv4_C_CLOSE   = 3;
 }
 
 class Ipv4SocketCommandBase extends cObject
@@ -33,6 +35,12 @@ class Ipv4SocketCommandBase extends cObject
 class Ipv4SocketBindCommand extends Ipv4SocketCommandBase
 {
     const Protocol *protocol;
+    Ipv4Address localAddress;
+}
+
+class Ipv4SocketConnectCommand extends Ipv4SocketCommandBase
+{
+    Ipv4Address remoteAddress;
 }
 
 class Ipv4SocketCloseCommand extends Ipv4SocketCommandBase

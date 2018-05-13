@@ -46,6 +46,7 @@
 	    PPP -> Ppp
 	    PPPFrame -> PppFrame
 	    PPPInterface -> PppInterface
+	    PPPHeaderSerializer -> PppHeaderSerializer
 
 2017-12-15  Zoltan Bojthe
 
@@ -89,6 +90,10 @@
 	Added missing PacketProtocolTag.
 	Changed append/prepend to the more intentional push variants.
 
+
+2017-02-21  Levente Mészáros
+
+	Moved headerserializers one level up.
 2017-02-21  Levente Mészáros
 
 	Make sure the packet has the correct PacketProtocolTag before emitting.

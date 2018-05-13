@@ -2,6 +2,7 @@
 \label{cha:mpls}
 
 \section{Overview}
+\label{sec:mpls:overview}
 
 Multi-Protocol Label Switching (MPLS) is a ``layer 2.5'' protocol for
 high-performance telecommunications networks. MPLS directs data from one network
@@ -22,23 +23,25 @@ protocols used with MPLS are LDP and RSVP-TE.
 
 INET provides basic support for building MPLS simulations. It provides models
 for the MPLS, LDP and RSVP-TE protocols and their associated data structures,
-and preassembled MPLS-capable router models. 
+and preassembled MPLS-capable router models.
 
 \section{Core Modules}
+\label{sec:mpls:core-modules}
 
 The core modules are:
 
 \begin{itemize}
-  \item \nedtype{Mpls} implements the MPLS protocol 
+  \item \nedtype{Mpls} implements the MPLS protocol
   \item \nedtype{LibTable} holds the LIB (Label Information Base)
-  \item \nedtype{Ldp} implements the LDP signaling protocol for MPLS 
-  \item \nedtype{RsvpTe} implements the RSVP-TE signaling protocol for MPLS 
-  \item \nedtype{Ted} contains the Traffic Engineering Database 
+  \item \nedtype{Ldp} implements the LDP signaling protocol for MPLS
+  \item \nedtype{RsvpTe} implements the RSVP-TE signaling protocol for MPLS
+  \item \nedtype{Ted} contains the Traffic Engineering Database
   \item \nedtype{LinkStateRouting} is a simple link-state routing protocol
   \item \nedtype{SimpleClassifier} is a configurable ingress classifier for MPLS
 \end{itemize}
 
 \subsection{Mpls}
+\label{sec:mpls:mpls}
 
 The \nedtype{Mpls} module implements the MPLS protocol. MPLS is situated between
 layer 2 and 3, and its main function is to switch packets based on their labels.
@@ -47,17 +50,17 @@ LIB is fundamentally a table with the following columns: \textit{input-interface
 \textit{input-label}, \textit{output-interface}, \textit{label-operation(s)}.
 
 Upon receiving a labelled packet from another LSR, MPLS first extracts the
-incoming interface and incoming label pair, and then looks it up in local LIB. 
-If a matching entry is found, it applies the prescribed label operations, and 
-forwards the packet to the output interface. 
+incoming interface and incoming label pair, and then looks it up in local LIB.
+If a matching entry is found, it applies the prescribed label operations, and
+forwards the packet to the output interface.
 
 Label operations can be the following:
 
 \begin{itemize}
-  \item \textit{Push} adds a new MPLS label to a packet. (A packet may 
+  \item \textit{Push} adds a new MPLS label to a packet. (A packet may
      contain multiple labels, acting as a stack.) When a normal IP packet
      enters an LSP, the new label will be the first label on the packet.
-  \item \textit{Pop} removes the topmost MPLS label from a packet. 
+  \item \textit{Pop} removes the topmost MPLS label from a packet.
      This is typically done at either the penultimate or the egress router.
   \item \textit{Swap}: Replaces the topmost label with a new label.
 \end{itemize}
@@ -65,19 +68,20 @@ Label operations can be the following:
 In INET, the local LIB is stored in a \nedtype{LibTable} module in the router.
 
 Upon receiving an unlabelled (e.g. plain IPv4) packet, MPLS first determines the
-forwarding equivalence class (FEC) for the packet using an ingress classifier, 
-and then inserts one or more labels in the packet's newly created MPLS header. 
+forwarding equivalence class (FEC) for the packet using an ingress classifier,
+and then inserts one or more labels in the packet's newly created MPLS header.
 The packet is then passed on to the next hop router for the LSP.
 
-The ingress classifier is also a separate module; it is selected depending 
+The ingress classifier is also a separate module; it is selected depending
 on the choice of the signaling protocol.
 
 
 \subsection{LibTable}
+\label{sec:mpls:libtable}
 
 \nedtype{LibTable} stores the LIB (Label Information Base), as described
 in the previous section. \nedtype{LibTable} is expected to have one instance
-in the router. 
+in the router.
 
 LIB is normally filled and maintained by label distribution protocols (RSVP-TE,
 LDP), but in INET it is possible to preload it with initial contents.
@@ -107,6 +111,7 @@ etc. The \ttt{<color>} element is optional, and it only exists to be able to
 color LSPs on the GUI. It is not used by the protocols.
 
 \subsection{Ldp}
+\label{sec:mpls:ldp}
 
 The \nedtype{Ldp} module implements the Label Distribution Protocol (LDP).
 LDP is used to establish LSPs in an MPLS network when traffic engineering is not
@@ -121,19 +126,21 @@ FIB, is responsible for determining the hop-by-hop path through the network.
 In INET, the \nedtype{Ldp} module takes routing information from \nedtype{Ted}
 module. The \nedtype{Ted} instance in the network is filled and maintained
 by a \nedtype{LinkStateRouting} module. Unfortunately, it is currently not
-possible to use other routing protocol implementations such as \nedtype{Ospf} 
-in conjunction with \nedtype{Ldp}. 
+possible to use other routing protocol implementations such as \nedtype{Ospf}
+in conjunction with \nedtype{Ldp}.
 
 When \nedtype{Ldp} is used as signaling protocol, it also serves as ingress
 classifier for \nedtype{Mpls}.
 
 \subsection{Ted}
+\label{sec:mpls:ted}
 
-The \nedtype{Ted} module contains the Traffic Engineering Database (TED). 
+The \nedtype{Ted} module contains the Traffic Engineering Database (TED).
 In INET, \nedtype{Ted} contains a link state database, including reservations
 for each link by RSVP-TE.
 
 \subsection{LinkStateRouting}
+\label{sec:mpls:linkstaterouting}
 
 The \nedtype{LinkStateRouting} module provides a simple link state routing
 protocol. It uses \nedtype{Ted} as its link state database. Unfortunately, the
@@ -141,6 +148,7 @@ protocol. It uses \nedtype{Ted} as its link state database. Unfortunately, the
 used inside an MPLS router.
 
  \subsection{RsvpTe}
+\label{sec:mpls:rsvpte}
 
 The \nedtype{RsvpTe} module implements RSVP-TE (Resource Reservation Protocol --
 Traffic Engineering), as signaling protocol for MPLS. RSVP-TE handles bandwidth
@@ -184,8 +192,8 @@ config file. An example \ttt{traffic.xml} file:
 
 In the route, \ttt{<node>} stands for strict hop, and \ttt{<lnode>} for loose hop.
 
-Paths can also be set up and torn down dynamically with \nedtype{ScenarioManager} 
-commands (see chapter \ref{cha:scenario-scripting}). 
+Paths can also be set up and torn down dynamically with \nedtype{ScenarioManager}
+commands (see chapter \ref{cha:scenario-scripting}).
 \nedtype{RsvpTe} understands the \ttt{<add-session>} and \ttt{<del-session>}
 \nedtype{ScenarioManager} commands. The contents of the \ttt{<add-session>}
 element can be the same as the \ttt{<session>} element for the \ttt{traffic.xml}
@@ -220,6 +228,7 @@ The following is an example \ttt{scenario.xml} file:
 \end{XML}
 
 \section{Classifier}
+\label{sec:mpls:classifier}
 
 The \nedtype{RsvpClassifier} module implements an ingress classifier for
 \nedtype{Mpls} when using \nedtype{RsvpTe} for signaling. The classifier can be
@@ -243,6 +252,7 @@ An example \ttt{fectable.xml} file:
 </fectable>
 \end{XML}
 \section{MPLS-Enabled Router Models}
+\label{sec:mpls:mpls-enabled-router-models}
 
 INET provides the following pre-assembled MPLS routers:
 

@@ -8,6 +8,10 @@
 
 	Added Ipv6ProtocolDissector.
 
+2018-02-19  Zoltan Bojthe
+
+	Renamed functions to use camel case.
+
 2018-02-12  Zoltan Bojthe
 
 	Renamed functions to use camel case.
@@ -86,8 +90,11 @@
 	    FlatNetworkConfigurator -> Ipv4FlatNetworkConfigurator
 	    FlatNetworkConfigurator6 -> Ipv6FlatNetworkConfigurator
 	    ICMPv6 -> Icmpv6
+	    ICMPv6DEST_UN -> Icmpv6DestUnav
 	    ICMPv6Header -> Icmpv6Header
+	    ICMPv6HeaderSerializer -> Icmpv6HeaderSerializer
 	    ICMPv6Type -> Icmpv6Type
+	    ICMPv6_TIME_EX -> Icmpv6TimeEx
 	    IIPv6Tunneling -> IIpv6Tunneling
 	    IPProtocolId -> IpProtocolId
 	    IPv4 -> Ipv4
@@ -100,14 +107,18 @@
 	    IPv6ExtensionHeaders -> Ipv6ExtensionHeaders
 	    IPv6FragBuf -> Ipv6FragBuf
 	    IPv6Header -> Ipv6Header
+	    IPv6HeaderSerializer -> Ipv6HeaderSerializer
 	    IPv6InterfaceData -> Ipv6InterfaceData
 	    IPv6MulticastGroupInfo -> Ipv6MulticastGroupInfo
 	    IPv6NDControlInfo -> Ipv6NdControlInfo
 	    IPv6NDMessage -> Ipv6NdMessage
 	    IPv6NDPrefixInformation -> Ipv6NdPrefixInformation
+	    IPv6NeighbourAdvertisement -> Ipv6NeighbourAdvertisement
 	    IPv6NeighbourDiscovery -> Ipv6NeighbourDiscovery
 	    IPv6NetworkLayer -> Ipv6NetworkLayer
 	    IPv6Route -> Ipv6Route
+	    IPv6RouterAdvertisement -> Ipv6RouterAdvertisement
+	    IPv6RouterSolicitation -> Ipv6RouterSolicitation
 	    IPv6RoutingTable -> Ipv6RoutingTable
 	    IPv6TLVOptionTypes -> Ipv6TlvOptionTypes
 	    IPv6Tunneling -> Ipv6Tunneling
@@ -158,7 +169,19 @@
 
 	Added required import statements to MSG files according to new syntax.
 
+2017-11-15  Zoltan Bojthe
+
+	Removed incorrect serialization of TLVs in router solicitation.
+
+2017-11-15  Zoltan Bojthe
+
+	Fixed IPv6RouterSolicitation optional fields.
+
 2017-11-16  ------ inet-3.99.1 released ------
+
+2017-11-13  Levente Mészáros
+
+	Added missing ICMP v6 headers to serializer, still incomplete.
 
 2017-09-20  Zoltan Bojthe
 
@@ -176,6 +199,10 @@
 2017-08-02  Zoltan Bojthe
 
 	Renamed IPv6*Header to Ipv6*Header.
+
+2017-07-31  Zoltan Bojthe
+
+	Fixed ICMPv6HeaderSerializer: removed 2 bytes extra read.
 
 2017-07-26  Zoltan Bojthe
 
@@ -215,6 +242,10 @@
 
 	Fragmentation fixes.
 
+2017-06-12  TÖRÖK Attila
+
+	Typedef BSD-style integer types on all platforms.
+
 2017-06-12  Zoltan Bojthe
 
 	Eliminated cast after dup().
@@ -222,6 +253,10 @@
 2017-04-10  Zoltan Bojthe
 
 	Optimized dynamic_cast usage.
+
+2017-04-12  Levente Mészáros
+
+	Removed discouraged setChunkLength calls from deserializers.
 
 2017-04-12  Levente Mészáros
 
@@ -245,9 +280,17 @@
 	Set payload length field, verify payload length, truncate packet to
 	payloadlength in decapsulate.
 
+2017-03-29  Zoltan Bojthe
+
+	Optimized and fixed memory leaks.
+
 2017-03-20  Zoltan Bojthe
 
 	Revived fragmentation.
+
+2017-03-01  Levente Mészáros
+
+	Ported ICMPv6HeaderSerializer and IPv6HeaderSerializer to new API.
 
 2017-03-01  Levente Mészáros
 

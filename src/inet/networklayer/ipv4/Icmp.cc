@@ -28,7 +28,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/dissector/ProtocolDissector.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
-#include "inet/common/serializer/TcpIpChecksum.h"
+#include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -320,7 +320,7 @@ void Icmp::insertCrc(CrcMode crcMode, const Ptr<IcmpHeader>& icmpHeader, Packet 
             MemoryOutputStream icmpStream;
             Chunk::serialize(icmpStream, icmpHeader);
             Chunk::serialize(icmpStream, packet->peekDataAsBytes());
-            uint16_t crc = inet::serializer::TcpIpChecksum::checksum(icmpStream.getData());
+            uint16_t crc = TcpIpChecksum::checksum(icmpStream.getData());
             icmpHeader->setChksum(crc);
             break;
         }
@@ -342,7 +342,7 @@ bool Icmp::verifyCrc(const Packet *packet)
         case CRC_COMPUTED: {
             // otherwise compute the CRC, the check passes if the result is 0xFFFF (includes the received CRC)
             auto dataBytes = packet->peekDataAsBytes(Chunk::PF_ALLOW_INCORRECT);
-            uint16_t crc = inet::serializer::TcpIpChecksum::checksum(dataBytes->getBytes());
+            uint16_t crc = TcpIpChecksum::checksum(dataBytes->getBytes());
             // TODO: delete these isCorrect calls, rely on CRC only
             return crc == 0 && icmpHeader->isCorrect();
         }

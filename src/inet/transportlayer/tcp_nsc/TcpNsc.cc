@@ -28,34 +28,29 @@
 #endif // ifdef WITH_IPv6
 
 #include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/INETUtils.h"
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
-
-#include "inet/common/serializer/TcpIpChecksum.h"
-#include "inet/common/serializer/tcp/headers/tcphdr.h"
-#include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/common/L4Tools.h"
+#include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
+#include "inet/transportlayer/tcp_common/headers/tcphdr.h"
 #include "inet/transportlayer/tcp_nsc/queues/TcpNscQueues.h"
 
 #include <assert.h>
 #include <dlfcn.h>
 #include <netinet/in.h>
 
-#include "inet/transportlayer/tcp_nsc/queues/TcpNscQueues.h"
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/common/INETUtils.h"
-
 #include <sim_errno.h>
 
 namespace inet {
-
-using namespace serializer;
 
 namespace tcp {
 

@@ -19,6 +19,7 @@
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Socket.h"
 #include "inet/networklayer/contract/ipv6/Ipv6SocketCommand_m.h"
 
@@ -52,20 +53,37 @@ void Ipv6Socket::processMessage(cMessage *msg)
         delete msg;
 }
 
-void Ipv6Socket::bind(const Protocol *protocol)
+void Ipv6Socket::bind(const Protocol *protocol, Ipv6Address localAddress)
 {
     ASSERT(!bound);
-    Ipv6SocketBindCommand *command = new Ipv6SocketBindCommand();
+    auto *command = new Ipv6SocketBindCommand();
     command->setProtocol(protocol);
+    command->setLocalAddress(localAddress);
     auto request = new Request("bind", IPv6_C_BIND);
     request->setControlInfo(command);
     sendToOutput(request);
     bound = true;
 }
 
+void Ipv6Socket::connect(Ipv6Address remoteAddress)
+{
+    auto *command = new Ipv6SocketConnectCommand();
+    command->setRemoteAddress(remoteAddress);
+    auto request = new Request("connect", IPv6_C_CONNECT);
+    request->setControlInfo(command);
+    sendToOutput(request);
+}
+
 void Ipv6Socket::send(Packet *packet)
 {
     sendToOutput(packet);
+}
+
+void Ipv6Socket::sendTo(Packet *packet, Ipv6Address destAddress)
+{
+    auto addressReq = packet->addTagIfAbsent<L3AddressReq>();
+    addressReq->setDestAddress(destAddress);
+    send(packet);
 }
 
 void Ipv6Socket::close()

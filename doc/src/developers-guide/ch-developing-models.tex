@@ -19,7 +19,7 @@ simultaneously. In order to spare the applications from using the default
 OMNeT++ message passing style between modules, INET provides an easy to use
 C++ socket API.
 
-\ifdraft TODO
+ TODO
 \section{NED Conventions}
 
 %TODO conventions for NED module definitions
@@ -80,9 +80,9 @@ Gates can also be labelled with \ttt{@labels()}; the purpose is to make it easie
 to connect modules in the editor. If you connect two modules in the editor,
 the gate selection menu will list gate pairs that have a label in common.
 
-\ifdraft TODO
+ TODO
 screenshot
-\fi
+
 
 For example, when connecting hosts and routers, the editor will offer connecting
 Ethernet gates with Ethernet gates, and PPP gates with PPP gates. This is the
@@ -133,7 +133,7 @@ simple PPP
         inout phys @labels(PPPFrame);
 }
 \end{ned}
-\fi
+
 
 \section{Module Initialization}
 
@@ -172,7 +172,7 @@ method) that usually corresponds to the all-zeros address.
     to access the value.
 \end{itemize}
 
-\ifdraft TODO
+ TODO
 \subsection{Resolving Addresses}
 
 explain what kind of addresses INET provides for protocols to use: network
@@ -183,17 +183,13 @@ address lookup by name
 node lookup by MAC address
 
 node lookup by L3 address
-\fi
 
-\ifdraft TODO
+
+ TODO
 \section{Starting and Stopping Nodes}
 
 %TODO explain how INET supports network node lifecycle management: startup, shutdown, crash, etc.
 
 \cppsnippet{LifecycleOperationExample}{Lifecycle operation example}
-\fi
 
 \fi
-
-
-%

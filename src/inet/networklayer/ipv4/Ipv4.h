@@ -29,8 +29,10 @@
 #include "inet/networklayer/contract/INetworkProtocol.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4FragBuf.h"
-#include "inet/common/ProtocolMap.h"
 #include "inet/common/queue/QueueBase.h"
+#include <list>
+#include <map>
+#include <set>
 
 namespace inet {
 
@@ -64,8 +66,11 @@ class INET_API Ipv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     {
         int socketId = -1;
         int protocolId = -1;
+        Ipv4Address localAddress;
+        Ipv4Address remoteAddress;
 
-        SocketDescriptor(int socketId, int protocolId) : socketId(socketId), protocolId(protocolId) { }
+        SocketDescriptor(int socketId, int protocolId, Ipv4Address localAddress)
+                : socketId(socketId), protocolId(protocolId), localAddress(localAddress) { }
     };
 
   protected:
@@ -88,9 +93,8 @@ class INET_API Ipv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     long curFragmentId = -1;    // counter, used to assign unique fragmentIds to datagrams
     Ipv4FragBuf fragbuf;    // fragmentation reassembly buffer
     simtime_t lastCheckTime;    // when fragbuf was last checked for state fragments
-    ProtocolMapping mapping;    // where to send packets after decapsulation
+    std::set<const Protocol *> upperProtocols;    // where to send packets after decapsulation
     std::map<int, SocketDescriptor *> socketIdToSocketDescriptor;
-    std::multimap<int, SocketDescriptor *> protocolIdToSocketDescriptors;
 
     // ARP related
     PendingPackets pendingPackets;    // map indexed with IPv4Address for outbound packets waiting for ARP resolution

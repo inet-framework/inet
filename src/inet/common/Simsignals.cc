@@ -53,7 +53,7 @@ simsignal_t mrouteChangedSignal = cComponent::registerSignal("mrouteChanged");
 // layer 3 - Ipv4
 simsignal_t ipv4MulticastGroupJoinedSignal = cComponent::registerSignal("ipv4MulticastGroupJoined");
 simsignal_t ipv4MulticastGroupLeftSignal = cComponent::registerSignal("ipv4MulticastGroupLeft");
-simsignal_t ipv4McastChangeSignal = cComponent::registerSignal("ipv4McastChange");
+simsignal_t ipv4MulticastChangeSignal = cComponent::registerSignal("ipv4McastChange");
 simsignal_t ipv4MulticastGroupRegisteredSignal = cComponent::registerSignal("ipv4MulticastGroupRegistered");
 simsignal_t ipv4MulticastGroupUnregisteredSignal = cComponent::registerSignal("ipv4MulticastGroupUnregistered");
 

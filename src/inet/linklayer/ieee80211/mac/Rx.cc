@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/serializer/EthernetCRC.h"
+#include "inet/common/checksum/EthernetCRC.h"
 #include "inet/linklayer/ieee80211/mac/contract/IContention.h"
 #include "inet/linklayer/ieee80211/mac/contract/IStatistics.h"
 #include "inet/linklayer/ieee80211/mac/contract/ITx.h"
@@ -120,7 +120,7 @@ bool Rx::isFcsOk(Packet *packet) const
                 auto bufferLength = B(fcsBytes->getChunkLength()).get();
                 auto buffer = new uint8_t[bufferLength];
                 fcsBytes->copyToBuffer(buffer, bufferLength);
-                auto computedFcs = inet::serializer::ethernetCRC(buffer, bufferLength);
+                auto computedFcs = ethernetCRC(buffer, bufferLength);
                 delete [] buffer;
                 return computedFcs == trailer->getFcs();
             }

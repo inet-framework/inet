@@ -351,9 +351,9 @@ void SctpSocket::connectx(AddressVector remoteAddressList, int32 remotePort, boo
 }
 
 
-void SctpSocket::sendMsg(cMessage *cmsg)
+void SctpSocket::send(Packet *packet)
 {
-    auto& tags = getTags(cmsg);
+    auto& tags = getTags(packet);
     auto sendReq = tags.findTag<SctpSendReq>();
     if (sendReq) {
         if (sendReq->getSid() == -1) {
@@ -369,8 +369,8 @@ void SctpSocket::sendMsg(cMessage *cmsg)
         lastStream = (lastStream + 1) % appOptions->outboundStreams;
         sctpReq->setSid(lastStream);
     }
-    cmsg->setKind(SCTP_C_SEND);
-    sendToSctp(cmsg);
+    packet->setKind(SCTP_C_SEND);
+    sendToSctp(packet);
 }
 
 void SctpSocket::sendNotification(cMessage *msg)

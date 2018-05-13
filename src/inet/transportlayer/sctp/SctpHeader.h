@@ -25,7 +25,6 @@
 #include "inet/transportlayer/sctp/SctpHeader_m.h"
 
 namespace inet {
-
 namespace sctp {
 
 /**
@@ -262,7 +261,6 @@ class INET_API SctpAsconfAckChunk : public SctpAsconfAckChunk_Base
 };
 
 } // namespace sctp
-
 } // namespace inet
 
 #endif // ifndef __INET_SCTPHEADER_H

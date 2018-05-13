@@ -3,10 +3,11 @@
 
 
 \section{Overview}
+\label{sec:ppp:overview}
 
 For simulating wired point-to-point links, the INET Framework contains
 a minimal implementation of the PPP protocol and a corresponding network
-interface module. 
+interface module.
 
 \begin{itemize}
   \item \nedtype{Ppp} is a simple module that performs encapsulation
@@ -17,24 +18,25 @@ interface module.
     the transmitted and dropped packages.
   \item \nedtype{PppInterface} is a compound module that complements
     the \nedtype{Ppp} module with an output queue. It implements
-    the \nedtype{IWiredInterface} interface. Input and output hooks 
+    the \nedtype{IWiredInterface} interface. Input and output hooks
     can be configured for further processing of the network messages.
 \end{itemize}
 
-PPP (RFC 1661) is a complex protocol which, in addition to providing 
-a method for encapsulating multi-protocol datagrams, also contains 
-control protocols for establishing, configuring, and testing the data-link 
-connection (LCP) and for configuring different network-layer protocols (NCP). 
+PPP (RFC 1661) is a complex protocol which, in addition to providing
+a method for encapsulating multi-protocol datagrams, also contains
+control protocols for establishing, configuring, and testing the data-link
+connection (LCP) and for configuring different network-layer protocols (NCP).
 
-The INET implementation only covers encapsulation and decapsulation of 
+The INET implementation only covers encapsulation and decapsulation of
 data into PPP frames. Control protocols, which do not have a significant
 effect on the links' capacity and latency during normal link operation,
 are not simulated. In addition, header field compressions (PFC and ACFC)
 are also bot supported, so a simulated PPP frame always contains 1-byte
-Address and Control fields and a 2-byte Protocol field. 
+Address and Control fields and a 2-byte Protocol field.
 
 
 \section{The PPP module}
+\label{sec:ppp:the-ppp-module}
 
 The PPP module receives packets from the upper layer in the \fvar{netwIn}
 gate, encapsulates them into \msgtype{PppFrame}s, and send it to the
@@ -66,9 +68,10 @@ The \fvar{mtu} of the entry can be specified by the
 and updates the entry in the interface table.
 
 \section{PppInterface}
+\label{sec:ppp:pppinterface}
 
-\nedtype{PppInterface} is a compound module that implements the 
-\nedtype{IWiredInterface} interface. It contains a \nedtype{Ppp} 
+\nedtype{PppInterface} is a compound module that implements the
+\nedtype{IWiredInterface} interface. It contains a \nedtype{Ppp}
 module and a passive queue for the messages received from the network layer.
 
 The queue type is specified by the \fpar{queueType} parameter.

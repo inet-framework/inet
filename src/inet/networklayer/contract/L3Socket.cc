@@ -16,9 +16,10 @@
 //
 
 #include "inet/applications/common/SocketTag_m.h"
-#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/L3Socket.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
 
@@ -53,7 +54,7 @@ void L3Socket::processMessage(cMessage *msg)
         delete msg;
 }
 
-void L3Socket::bind(const Protocol *protocol)
+void L3Socket::bind(const Protocol *protocol, L3Address localAddress)
 {
     ASSERT(!bound);
     ASSERT(l3Protocol != nullptr);
@@ -65,9 +66,25 @@ void L3Socket::bind(const Protocol *protocol)
     bound = true;
 }
 
+void L3Socket::connect(L3Address remoteAddress)
+{
+    auto *command = new L3SocketConnectCommand();
+    command->setRemoteAddress(remoteAddress);
+    auto request = new Request("connect", L3_C_CONNECT);
+    request->setControlInfo(command);
+    sendToOutput(request);
+}
+
 void L3Socket::send(Packet *packet)
 {
     sendToOutput(packet);
+}
+
+void L3Socket::sendTo(Packet *packet, L3Address destAddress)
+{
+    auto addressReq = packet->addTagIfAbsent<L3AddressReq>();
+    addressReq->setDestAddress(destAddress);
+    send(packet);
 }
 
 void L3Socket::close()

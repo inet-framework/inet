@@ -31,6 +31,10 @@ namespace inet {
 #define MIN_ETHERNET_FRAME_BYTES            64  /* excludes preamble and SFD */
 #define GIGABIT_MIN_FRAME_BYTES_WITH_EXT    512  /* excludes preamble and SFD, but includes 448 byte extension */
 #define INTERFRAME_GAP_BITS                 96
+/*
+ * The maximum packet length.   //FIXME 3 MAX length exist now: 1500, 1518, 1526 bytes
+ */
+#define ETHER_MAX_LEN     1518
 
 #define ETHERNET_TXRATE                     10000000.0   /* 10 Mbit/sec (in bit/s) */
 #define FAST_ETHERNET_TXRATE                100000000.0   /* 100 Mbit/sec (in bit/s) */
@@ -38,6 +42,8 @@ namespace inet {
 #define FAST_GIGABIT_ETHERNET_TXRATE        10000000000.0   /* 10 Gbit/sec (in bit/s) */
 #define FOURTY_GIGABIT_ETHERNET_TXRATE      40000000000.0   /* 40 Gbit/sec (in bit/s) */
 #define HUNDRED_GIGABIT_ETHERNET_TXRATE     100000000000.0   /* 100 Gbit/sec (in bit/s) */
+#define TWOHUNDRED_GIGABIT_ETHERNET_TXRATE  200000000000.0   /* 200 Gbit/sec (in bit/s) */
+#define FOURHUNDRED_GIGABIT_ETHERNET_TXRATE 400000000000.0   /* 400 Gbit/sec (in bit/s) */
 
 #define MAX_ATTEMPTS                        16
 #define BACKOFF_RANGE_LIMIT                 10
@@ -46,13 +52,34 @@ namespace inet {
 #define SFD_BYTES                           1
 #define PAUSE_UNIT_BITS                     512 /* one pause unit is 512 bit times */
 
+/*
+ * The number of bytes in an ethernet (MAC) address.
+ */
+#define ETHER_ADDR_LEN    6
+
+/*
+ * The number of bytes in the type field.
+ */
+#define ETHER_TYPE_LEN    2
+
+/*
+ * The number of bytes in the trailing CRC field.
+ */
+#define ETHER_FCS_BYTES     4
+
 #define ETHER_FCS_BYTES                     4
-#define ETHER_MAC_HEADER_BYTES              (6 + 6 + 2) /* src(6)+dest(6)+length/type(2) */
+#define ETHER_MAC_HEADER_BYTES              (2 * ETHER_ADDR_LEN + ETHER_TYPE_LEN) /* src(6)+dest(6)+length/type(2) */
 #define ETHER_MAC_FRAME_BYTES               (ETHER_MAC_HEADER_BYTES + ETHER_FCS_BYTES) /* src(6)+dest(6)+length/type(2)+FCS(4) */
 #define ETHER_LLC_HEADER_LENGTH             (3) /* ssap(1)+dsap(1)+control(1) */
 #define ETHER_SNAP_HEADER_LENGTH            (5) /* org(3)+local(2) */
 #define ETHER_PAUSE_COMMAND_BYTES           (2 + 2) /* opcode(2)+parameters(2) */
 #define ETHER_PAUSE_COMMAND_PADDED_BYTES    std::max(MIN_ETHERNET_FRAME_BYTES, ETHER_MAC_FRAME_BYTES + ETHER_PAUSE_COMMAND_BYTES)
+
+/*
+ * A macro to validate a length with
+ */
+#define ETHER_IS_VALID_LEN(foo)  ((foo) >= MIN_ETHERNET_FRAME_BYTES && (foo) <= ETHER_MAX_LEN)
+
 
 } // namespace inet
 

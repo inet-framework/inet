@@ -36,7 +36,7 @@ class TcpServerThreadBase;
  * is a sSimpleModule). Creates one instance (using dynamic module creation)
  * for each incoming connection. More info in the corresponding NED file.
  */
-class INET_API TcpServerHostApp : public cSimpleModule, public ILifecycle
+class INET_API TcpServerHostApp : public cSimpleModule, public ILifecycle, public TcpSocket::ICallback
 {
   protected:
     TcpSocket serverSocket;
@@ -50,6 +50,9 @@ class INET_API TcpServerHostApp : public cSimpleModule, public ILifecycle
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
     virtual void refreshDisplay() const override;
+
+    virtual void socketDataArrived(TcpSocket* socket, Packet *packet, bool urgent) override { throw cRuntimeError("Unexpected data"); }
+    virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override;
 
     bool isNodeUp() { return !nodeStatus || nodeStatus->getState() == NodeStatus::UP; }
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;

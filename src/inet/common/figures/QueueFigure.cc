@@ -70,8 +70,8 @@ void QueueFigure::setElementCount(int elementCount)
             boxes[0]->setBounds(cFigure::Rectangle(spacing, bounds.height - spacing - height, width, height));
         }
         else
-            for (uint32 i = 0; i < boxes.size(); i++)
-                boxes[i]->setVisible((boxes.size() - i) <= elementCount);
+            for (size_t i = 0; i < boxes.size(); i++)
+                boxes[i]->setVisible((boxes.size() - i) <= (size_t)elementCount);
     }
 }
 

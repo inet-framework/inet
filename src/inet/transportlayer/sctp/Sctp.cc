@@ -16,27 +16,27 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/transportlayer/sctp/Sctp.h"
-#include "inet/transportlayer/sctp/SctpAssociation.h"
-#include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
-#include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/serializer/sctp/SctpSerializer.h"
-#include "inet/applications/common/SocketTag_m.h"
-#include "inet/transportlayer/common/L4Tools.h"
 #include "inet/common/packet/chunk/Chunk.h"
 #include "inet/common/packet/Message.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/contract/IL3AddressType.h"
+#include "inet/transportlayer/common/L4Tools.h"
+#include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
+#include "inet/transportlayer/contract/sctp/SctpSocket.h"
+#include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
+#include "inet/transportlayer/sctp/Sctp.h"
+#include "inet/transportlayer/sctp/SctpAssociation.h"
+#include "inet/transportlayer/sctp/SctpSerializer.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #endif // ifdef WITH_IPv4
 
-#include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
-#include "inet/transportlayer/contract/udp/UdpSocket.h"
-#include "inet/transportlayer/contract/sctp/SctpSocket.h"
 
 namespace inet {
 
@@ -105,6 +105,7 @@ void Sctp::initialize(int stage)
         numPacketsDropped = 0;
         sizeAssocMap = 0;
         nextEphemeralPort = (uint16)(intrand(10000) + 30000);
+        sendRawBytes = par("sendRawBytes");
 
         cModule *netw = getSimulation()->getSystemModule();
         if (netw->hasPar("testTimeout")) {
@@ -442,14 +443,12 @@ void Sctp::sendShutdownCompleteFromMain(Ptr<SctpHeader>& sctpmsg, L3Address from
 
 void Sctp::send_to_ip(Packet *msg)
 {
-// enable this and run all SCTP tests tp see if SCTP serializer correctly handles all SCTP packets
-#if 0
-    char buff[4096];
-    serializer::Buffer b(buff, 4096);
-    serializer::Context ctx;
-    serializer::SctpSerializer().serializePacket(msg, b, ctx);
-    ASSERT(b.getPos() == msg->getByteLength());
-#endif
+    if (sendRawBytes) {
+        auto rawFrame = new Packet(msg->getName(), msg->peekAllAsBytes());
+        rawFrame->copyTags(*msg);
+        delete msg;
+        msg = rawFrame;
+    }
     EV_INFO << "send packet " << msg << " to IP\n";
     send(msg, "ipOut");
 }

@@ -1069,11 +1069,11 @@ class INET_API SctpAssociation : public cObject
      * Compare TSNs
      */
     /* Defines see RFC1982 for details */
-    inline static bool SCTP_UINT16_GT(uint16 a, uint16 b) { return (((a < b) && ((b - a) > (1U<<15))) || \
-                                  ((a > b) && ((a - b) < (1U<<15)))); }
+    inline static bool SCTP_UINT16_GT(uint16 a, uint16 b) { return (((a < b) && ((uint16)(b - a) > (1U<<15))) || \
+                                  ((a > b) && ((uint16)(a - b) < (1U<<15)))); }
     inline static bool SCTP_UINT16_GE(uint16 a, uint16 b) { return (a == b ) || SCTP_UINT16_GT(a, b); }
-    inline static bool SCTP_UINT32_GT(uint32 a, uint32 b) { return ((a < b) && ((b - a) > (1UL<<31))) ||
-                                  ((a > b) && ((a - b) < (1UL<<31))); }
+    inline static bool SCTP_UINT32_GT(uint32 a, uint32 b) { return ((a < b) && ((uint32)(b - a) > (1UL<<31))) ||
+                                  ((a > b) && ((uint32)(a - b) < (1UL<<31))); }
     inline static bool SCTP_UINT32_GE(uint32 a, uint32 b) { return SCTP_UINT32_GT(a, b) || (a == b); }
     #define SCTP_TSN_GT(a, b) SCTP_UINT32_GT(a, b)
     #define SCTP_TSN_GE(a, b) SCTP_UINT32_GE(a, b)

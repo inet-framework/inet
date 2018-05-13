@@ -70,6 +70,7 @@ void Ipv4NetworkConfigurator::initialize(int stage)
         addStaticRoutesParameter = par("addStaticRoutes");
         addSubnetRoutesParameter = par("addSubnetRoutes");
         addDefaultRoutesParameter = par("addDefaultRoutes");
+        addDirectRoutesParameter = par("addDirectRoutes");
         optimizeRoutesParameter = par("optimizeRoutes");
     }
     else if (stage == INITSTAGE_NETWORK_LAYER)
@@ -1296,17 +1297,19 @@ void Ipv4NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
             InterfaceInfo *gatewayInterfaceInfo = static_cast<InterfaceInfo *>(sourceInterfaceInfo->linkInfo->gatewayInterfaceInfo);
             //InterfaceEntry *gatewayInterfaceEntry = gatewayInterfaceInfo->interfaceEntry;
 
-            // add a network route for the local network using ARP
-            Ipv4Route *route = new Ipv4Route();
-            route->setDestination(sourceInterfaceInfo->getAddress().doAnd(sourceInterfaceInfo->getNetmask()));
-            route->setGateway(Ipv4Address::UNSPECIFIED_ADDRESS);
-            route->setNetmask(sourceInterfaceInfo->getNetmask());
-            route->setInterface(sourceInterfaceEntry);
-            route->setSourceType(Ipv4Route::MANUAL);
-            sourceNode->staticRoutes.push_back(route);
+            if (addDirectRoutesParameter) {
+                // add a network route for the local network using ARP
+                Ipv4Route *route = new Ipv4Route();
+                route->setDestination(sourceInterfaceInfo->getAddress().doAnd(sourceInterfaceInfo->getNetmask()));
+                route->setGateway(Ipv4Address::UNSPECIFIED_ADDRESS);
+                route->setNetmask(sourceInterfaceInfo->getNetmask());
+                route->setInterface(sourceInterfaceEntry);
+                route->setSourceType(Ipv4Route::MANUAL);
+                sourceNode->staticRoutes.push_back(route);
+            }
 
             // add a default route towards the only one gateway
-            route = new Ipv4Route();
+            Ipv4Route *route = new Ipv4Route();
             Ipv4Address gateway = gatewayInterfaceInfo->getAddress();
             route->setDestination(Ipv4Address::UNSPECIFIED_ADDRESS);
             route->setNetmask(Ipv4Address::UNSPECIFIED_ADDRESS);
@@ -1375,6 +1378,8 @@ void Ipv4NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
                                 route->setGateway(gatewayAddress);
                             route->setSourceType(Ipv4Route::MANUAL);
                             if (containsRoute(sourceNode->staticRoutes, route))
+                                delete route;
+                            else if (!addDirectRoutesParameter && route->getGateway().isUnspecified())
                                 delete route;
                             else {
                                 sourceNode->staticRoutes.push_back(route);
