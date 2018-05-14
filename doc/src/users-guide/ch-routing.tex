@@ -26,24 +26,18 @@ routing protocol enabled.
 \section{RIP}
 \label{sec:routing:rip}
 
-RIP (Routing Information Protocol) is a distance-vector routing protocol
-which employs the hop count as a routing metric. RIP prevents routing loops
-by implementing a limit on the number of hops allowed in a path from source
-to destination.
+RIP (Routing Information Protocol) is a distance-vector routing protocol which
+employs the hop count as a routing metric. RIP prevents routing loops by
+implementing a limit on the number of hops allowed in a path from source to
+destination.  RIP uses the \textit{split horizon with poison reverse} technique
+to work around the ``count-to-infinity'' problem.
 
-The \nedtype{Rip} module implements distance vector routing as
-specified in RFC 2453 (RIPv2) and RFC 2080 (RIPng). Configuration
-can be specified in an XML file that can be specified in the
-\ttt{ripConfig} parameter.
-
-The \nedtype{Rip} module has the following parameters:
-
-\begin{itemize}
-  \item \ttt{mode}: either "RIPv2" (RFC 2453) or "RIPng" (RFC 2080)
-  \item \ttt{routingTableModule}: path to the routing table module
-        e.g. \ttt{'\^{}.ipv4.routingTable'}
-  \item \ttt{ripConfig}: an XML configuration file containing per-interface parameters
-\end{itemize}
+The \nedtype{Rip} module implements distance vector routing as specified in RFC
+2453 (RIPv2) and RFC 2080 (RIPng). The behavior can be selected by setting the
+\fpar{mode} parameter to either \ttt{"RIPv2"} or \ttt{"RIPng"}. Protocol
+configuration such as link metrics and per-interface operation mode (such as 
+whether RIP is enabled on the interface, and whether to use split horizon)
+can be specified in XML using the \ttt{ripConfig} parameter.
 
 The following example configures a \nedtype{Router} module to use RIPv2:
 
