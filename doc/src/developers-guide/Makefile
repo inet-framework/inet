@@ -4,12 +4,12 @@ LTOH=../tools/ltoh
 PREPHTML=../tools/prephtml
 
 PRODUCT="INET Framework"
-TITLE="INET Developer's Guide"
+TITLE="INET __VERSION__ Developer's Guide"
 DOCNAME=inet-developers-guide
 TEXMAIN=$(DOCNAME).tex
 HTMLTEMPLATE=inet-developers-guide.thtml
 MDTEMPLATE=inet-developers-guide.tmd
-VERSION=4.x
+VERSION=4.0
 HTMLDIR=../../developers-guide
 PDFDIR=../..
 MDDIR=~/www/inet.omnetpp.org/developers-guide
