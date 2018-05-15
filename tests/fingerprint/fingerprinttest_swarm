@@ -1,0 +1,364 @@
+#!/usr/bin/env python3
+
+import argparse
+import os
+import sys
+import subprocess
+
+import re
+import io
+import zipfile
+
+import time
+import random
+import pprint
+
+import redis
+import rq
+import requests
+
+import csv
+
+
+#INET_OMNETPP_OPTIONS="-n $INET_ROOT/src:$INET_ROOT/examples:$INET_ROOT/showcases:$INET_ROOT/tutorials:$INET_ROOT/tests/networks"
+
+LOCAL_INET_ROOT = re.sub(R"(/showcases|/tutorials)$", "",
+                         subprocess.check_output(["git", "rev-parse", "--show-toplevel"]).decode("utf-8").strip())
+
+def guess_project_name():
+    origin_url = subprocess.check_output(
+        ["git", "-C", LOCAL_INET_ROOT, "config", "--get", "remote.origin.url"]
+    ).decode("utf-8").strip()
+
+    match = re.match(r"^(git@|https://)github\.com[:/]([-a-zA-Z0-9]+/[-a-zA-Z0-9]+)\.git$", origin_url)
+
+    return match.group(2)
+
+
+def get_remote_inet_root(project_name):
+    return "/opt/projects/" + project_name
+
+
+def get_remote_ned_path(project_name):
+    remote_inet_root = get_remote_inet_root(project_name)
+
+    subdirectories = ["src", "examples",
+                      "showcases", "tutorials", "tests/networks"]
+
+    directories = [remote_inet_root + "/" +
+                   directory for directory in subdirectories]
+
+    return ";".join(directories)
+
+
+def get_remote_inet_lib(project_name):
+    return get_remote_inet_root(project_name) + "/src/INET"
+
+
+githash = subprocess.check_output(
+            ["git", "-C", LOCAL_INET_ROOT, "rev-parse", "HEAD"]).decode("utf-8").strip()
+
+def local_inet_path_to_remote(project_name, local_path):
+    return get_remote_inet_root(project_name) + "/" + os.path.relpath(os.path.abspath(local_path), LOCAL_INET_ROOT)
+
+
+DESCRIPTION = """\
+Execute a number of OMNeT++ simulation runs on an INET Swarm application.
+In the simplest case, you would invoke it like this:
+
+% inet_runall_swarm -c Foo
+
+where "Foo" is an omnetpp.ini configuration, containing iteration variables
+and/or specifying multiple repetitions.
+
+The first positional (non-option) argument and all following arguments are
+treated as the simulation command (simulation program and its arguments).
+Options intended for opp_runall should come before the the simulation command.
+
+To limit the set of simulation runs to be performed, add a -r <runfilter>
+argument to the simulation command.
+
+Command-line options:
+"""
+
+EPILOG = """\
+Operation: inet_runall_swarm invokes "./simprog -c Foo" with the "-q runnumbers"
+extra command-line arguments to figure out how many (and which) simulation
+runs it needs to perform, then ... magic happens. TODO
+"""
+
+
+def unzip_stream(zip_stream):
+    with zipfile.ZipFile(zip_stream, "r") as zipf:
+        zipf.extractall(".")
+
+
+def get_job_results(key):
+    req = requests.get('http://giga:3001/blob/' + key, stream=True)
+    unzip_stream(io.BytesIO(req.raw.read()))
+
+
+class OppRunallJobGenerator(object):
+
+    def resolveRunNumbers(self, opts):
+        # XXX handle _dbg as well as not _dbg ?
+        tmp_args = ["opp_run_dbg"] + opts.sim_prog_args + ["-s", "-q", "runnumbers"]
+        if opts.r is not None:
+            tmp_args += ["-r", opts.r]
+
+        tmp_args_str = " ".join(tmp_args)
+
+        print("running: " + tmp_args_str)
+
+        try:
+            output = subprocess.check_output(tmp_args)
+        except subprocess.CalledProcessError as exc:
+            print("'" + tmp_args_str + "' returned nonzero exit status")
+            exit(1)
+        except IOError as exc:
+            print("Cannot execute '" +tmp_args_str + "'" + str(exc))
+            exit(1)
+
+        try:
+            output = output.decode("utf-8")
+            run_numbers = [int(num) for num in output.split()]
+            print("run numbers: " + str(run_numbers))
+            return run_numbers
+        except:
+            print("Error parsing output of '" + tmp_args_str + "'")
+            exit(1)
+
+    def generateCommands(self):
+        """
+            returns a list of commands, each being a list of args to be put AFTER
+            opp_run_release -s -n '<nedpath>' -l <libINET> -u Cmdenv <ARGS GO HERE>
+        """
+
+
+        opts = self.parseArgs()
+
+        origwd = os.getcwd()
+        if opts.directory != None:
+            self.changeDir(opts.directory)
+
+
+        wd = "/" + \
+            os.path.relpath(os.path.abspath(os.getcwd()), LOCAL_INET_ROOT)
+        run_numbers = self.resolveRunNumbers(opts)
+
+        return [(wd, opts.sim_prog_args + ["-r", str(rn)])
+                for rn in run_numbers]
+
+    def parseArgs(self):
+        currentGitRef = subprocess.check_output(
+            ["git", "-C", LOCAL_INET_ROOT, "rev-parse", "HEAD"]).decode("utf-8").strip()
+
+        parser = argparse.ArgumentParser(
+            description=DESCRIPTION, epilog=EPILOG, formatter_class=argparse.RawDescriptionHelpFormatter)
+        parser.add_argument(
+            '--commit', default=currentGitRef, metavar='commit')
+        parser.add_argument('-r', default=None, metavar='runfilter')
+        parser.add_argument('-C', '--directory', metavar='DIR',
+                            help='Change to the given directory before doing anything.')
+
+        try:
+            opts, argv = parser.parse_known_args()
+            opts.sim_prog_args = argv
+        except IOError as e:
+            print(e)
+            exit(1)
+
+        global githash
+        githash = subprocess.check_output(
+            ["git", "-C", LOCAL_INET_ROOT, "rev-parse", opts.commit.strip()]).decode("utf-8").strip()
+
+        print("running with commit " + githash)
+
+        return opts
+
+    def changeDir(self, directory):
+        print("changing into directory: " + directory)
+        try:
+            os.chdir(directory)
+        except IOError as exc:
+            print("Cannot change directory: " + str(exc))
+            exit(1)
+
+
+class FingerprintTestJobGenerator(object):
+
+    def commentRemover(self, csvData):
+        p = re.compile(' *#.*$')
+        for line in csvData:
+            yield p.sub('',line.decode('utf-8'))
+
+    # parse the CSV into a list of dicts
+    def parseSimulationsTable(self, csvFile):
+        simulations = []
+        f = open(csvFile, 'rb')
+        csvReader = csv.reader(self.commentRemover(f), delimiter=',', quotechar='"', skipinitialspace=True)
+        for fields in csvReader:
+            if len(fields) == 0:
+                pass        # empty line
+            elif len(fields) == 6:
+                if fields[4] in ['PASS', 'FAIL', 'ERROR']:
+                    simulations.append({'file': csvFile, 'line' : csvReader.line_num,
+                            'wd': fields[0], 'args': fields[1], 'simtimelimit': fields[2], 'fingerprint': fields[3], 'expectedResult': fields[4]})
+                else:
+                    raise Exception(csvFile + " Line " + str(csvReader.line_num) + ": the 5th item must contain one of 'PASS', 'FAIL', 'ERROR'" + ": " + '"' + '", "'.join(fields) + '"')
+            else:
+                raise Exception(csvFile + " Line " + str(csvReader.line_num) + " must contain 6 items, but contains " + str(len(fields)) + ": " + '"' + '", "'.join(fields) + '"')
+        f.close()
+        return simulations
+
+    def generateFromDictList(self, simulations, filterRegexList, excludeFilterRegexList, repeat):
+        class StoreFingerprintCallback:
+            def __init__(self, simulation):
+                self.simulation = simulation
+            def __call__(self, fingerprint):
+                self.simulation['computedFingerprint'] = fingerprint
+
+        class StoreExitcodeCallback:
+            def __init__(self, simulation):
+                self.simulation = simulation
+            def __call__(self, exitcode):
+                self.simulation['exitcode'] = exitcode
+
+        testcases = []
+        for simulation in simulations:
+            title = simulation['wd'] + " " + simulation['args']
+            if not filterRegexList or ['x' for regex in filterRegexList if re.search(regex, title)]: # if any regex matches title
+                if not excludeFilterRegexList or not ['x' for regex in excludeFilterRegexList if re.search(regex, title)]: # if NO exclude-regex matches title
+                    testcases.append(
+                        (os.path.relpath(os.path.abspath(os.getcwd()), LOCAL_INET_ROOT),
+                        simulation['args'].split(" ") + ["--**.vector-recording=false", "--**.scalar-recording=false", "--fingerprint="+simulation['fingerprint']]))
+
+                        ## TODO:   simulation['simtimelimit'], simulation['expectedResult'], repeat))
+        return testcases
+
+
+    def generateCommands(self):
+
+        simulations = self.parseSimulationsTable("ethernet-switch.csv") \
+            + self.parseSimulationsTable("ethernet-hub.csv") \
+            + self.parseSimulationsTable("ethernet-hub-reconnect.csv") \
+            + self.parseSimulationsTable("ethernet-bus-reconnect.csv") \
+            + self.parseSimulationsTable("ethernet-twohosts.csv")
+
+        cases = self.generateFromDictList(simulations, None, None, 1)
+
+        return cases
+
+
+class FingerprintTestResultHandler(object):
+    def handleResult(self, result):
+        print(result["command"].split("-u Cmdenv")[1].split("--fingerprint")[0] + " ... "
+            + ("OK" if result["isFingerprintOK"] else "FAIL"))
+
+class Runall:
+
+    def __init__(self, run_job_generator, job_result_handler):
+        print("connecting to the job queue")
+        conn = redis.Redis(host="giga")
+        self.build_q = rq.Queue("build", connection=conn,
+                                default_timeout=10 * 60 * 60)
+        self.run_q = rq.Queue("run", connection=conn,
+                              default_timeout=10 * 60 * 60)
+
+        self.run_job_generator = run_job_generator
+        self.job_result_handler = job_result_handler
+
+    def run(self):
+
+        project_name = guess_project_name()
+        print("guessed project name: " + project_name)
+
+        global githash
+
+        start_time = time.perf_counter()
+        print("queueing build job")
+
+        build_job = self.build_q.enqueue(
+            "inet_worker.build_project", project_name, githash)
+
+        print("waiting for build job to end")
+        while not build_job.is_finished:
+            if build_job.is_failed:
+                build_job.refresh()
+                print("ERROR: build job failed " + str(build_job.exc_info))
+                exit(1)
+            try:
+                time.sleep(0.1)
+            except KeyboardInterrupt:
+                print("interrupted, not running tests (the build will still finish)")
+                exit(1)
+
+        end_time = time.perf_counter()
+
+        print("build finished, took " + str(end_time -
+                                            start_time) + "s, result:" + str(build_job.result))
+
+
+        remote_inet_root = get_remote_inet_root(project_name)
+
+        rng = random.SystemRandom()
+
+        # rng.shuffle(run_numbers)
+
+        job_commands = self.run_job_generator.generateCommands()
+
+        run_jobs = []
+        for workdir, job_args in job_commands:
+
+            # run the simulation
+            workingdir = remote_inet_root + "/" + workdir
+
+            command = "opp_run_release -s -n '" + get_remote_ned_path(project_name) + "' -l " + get_remote_inet_lib(project_name) + " -u Cmdenv " + \
+                " ".join(job_args)
+
+            runJob = self.run_q.enqueue(
+                "inet_worker.run_simulation", project_name, githash, command, workingdir, depends_on=build_job)
+
+            run_jobs.append(runJob)
+
+        print("queued " + str(len(run_jobs)) + " jobs")
+
+        stop = False
+        while run_jobs and not stop:
+            try:
+                for j in run_jobs[:]:
+
+                    if j.status is None:
+                        print("Run " + "" + " was removed from the queue")
+                        run_jobs.remove(j)
+                    elif j.status == rq.job.JobStatus.FAILED:
+                        j.refresh()
+                        print("Run " + "" + " failed: " + str(j.exc_info))
+                        run_jobs.remove(j)
+                    else:
+                        if j.result is not None:
+                            self.job_result_handler.handleResult(j.result)
+                            get_job_results(j.id.replace('-', ''))
+                            run_jobs.remove(j)
+
+                time.sleep(1)
+            except KeyboardInterrupt:
+                stop = True
+
+        if run_jobs:
+            print("Cancelling " + str(len([j for j in run_jobs if j.status ==
+                                           'queued' or j.status == 'deferred'])) + " pending jobs...")
+            for j in run_jobs[:]:
+                j.cancel()
+
+        print("done")
+
+        sys.exit(0)
+
+#run_job_generator = OppRunallJobGenerator()
+
+run_job_generator = FingerprintTestJobGenerator()
+result_handler = FingerprintTestResultHandler()
+
+tool = Runall(run_job_generator, result_handler)
+tool.run()
