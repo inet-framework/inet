@@ -351,7 +351,7 @@ static void testCorrect()
 static void testIncorrect()
 {
     // 1. chunk is incorrect after marking it incorrect
-    auto applicationHeader1 = makeImmutableApplicationHeader(42);
+    auto applicationHeader1 = makeShared<ApplicationHeader>();
     applicationHeader1->markIncorrect();
     ASSERT(applicationHeader1->isIncorrect());
 }
