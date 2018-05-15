@@ -26,6 +26,7 @@ SHOULD:
  - remove KLUDGEs, TODOs, etc.
  - update/remove obsolete NED documentation
  - make sure all tests PASS, check for leaks, etc.
+ - remove obsolete HostAutoConfigurator, Ipv4FlatNetworkConfigurator modules?
 
  - revise and rename statistics to have a consistent naming scheme
  - fix mobility non-determinism caused by interpolation from last position during animation
