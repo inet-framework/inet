@@ -42,6 +42,8 @@ void QosRecoveryProcedure::initialize(int stage)
         rtsThreshold = rtsPolicy->getRtsThreshold();
         shortRetryLimit = par("shortRetryLimit");
         longRetryLimit = par("longRetryLimit");
+        ASSERT(shortRetryLimit > 0);
+        ASSERT(longRetryLimit > 0);
     }
 }
 
