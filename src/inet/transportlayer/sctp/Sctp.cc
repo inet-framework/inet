@@ -105,7 +105,6 @@ void Sctp::initialize(int stage)
         numPacketsDropped = 0;
         sizeAssocMap = 0;
         nextEphemeralPort = (uint16)(intrand(10000) + 30000);
-        sendRawBytes = par("sendRawBytes");
 
         cModule *netw = getSimulation()->getSystemModule();
         if (netw->hasPar("testTimeout")) {
@@ -443,12 +442,6 @@ void Sctp::sendShutdownCompleteFromMain(Ptr<SctpHeader>& sctpmsg, L3Address from
 
 void Sctp::send_to_ip(Packet *msg)
 {
-    if (sendRawBytes) {
-        auto rawFrame = new Packet(msg->getName(), msg->peekAllAsBytes());
-        rawFrame->copyTags(*msg);
-        delete msg;
-        msg = rawFrame;
-    }
     EV_INFO << "send packet " << msg << " to IP\n";
     send(msg, "ipOut");
 }
