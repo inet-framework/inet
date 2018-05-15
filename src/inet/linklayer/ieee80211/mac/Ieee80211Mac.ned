@@ -122,7 +122,9 @@ module Ieee80211Mac extends MacProtocolBase like IIeee80211Mac
 }
 
 //
-// Delegate some upperMac parameters to Ieee80211Mac, to be more compatible with the old MAC.
+// Ieee80211Mac parameterized in a way to make it more similar to the old,
+// monolithic 802.11 MAC module of INET 3.x.
+//
 // NOTE: NOT ALL PARAMETERS OF THE OLD MAC CAN BE MAPPED.
 //
 module Ieee80211CompatibleMac extends Ieee80211Mac
@@ -138,7 +140,7 @@ module Ieee80211CompatibleMac extends Ieee80211Mac
         double controlBitrate @unit(bps) = default(-1bps);
         double initialRateControlRate @unit(bps) = default(-1bps);
         int rtsThresholdBytes @unit(B) = default(2346B);
-        int retryLimit = default(-1);
+        int retryLimit = default(7);
         bool EDCA = default(false);
         int maxQueueSize = default(14);
 
@@ -146,44 +148,51 @@ module Ieee80211CompatibleMac extends Ieee80211Mac
         int AIFSN1 = default(3); // AIFSN for best effort
         int AIFSN2 = default(2); // AIFSN for video
         int AIFSN3 = default(2); // AIFSN for voice
+        int AIFSN = default(-1); // if there is only one AC (EDCA = false); -1 means default
         double TXOP0 @unit(s) = default(0s);
         double TXOP1 @unit(s) = default(0s);
         double TXOP2 @unit(s) = default(3.008ms);
         double TXOP3 @unit(s) = default(1.504ms);
-        int AIFSN = default(2); // if there is only one AC (EDCA = false)
         bool prioritizeMulticast = default(false); // if true, prioritize multicast frames (9.3.2.1 Fundamental access)
-        double slotTime @unit(s) = default(-1s); // slot time, -1 means default (mode dependent)
-        int cwMinData = default(-1); // contention window for normal data frames, -1 means default
-        int cwMaxData = default(-1); // contention window for normal data frames, -1 means default
+        int cwMinData = default(-1); // contention window for normal data frames (DCF) and best effort (EDCA), -1 means default
+        int cwMaxData = default(-1); // contention window for normal data frames (DCF) and best effort (EDCA), -1 means default
 
-        //upperMac.typename = EDCA ? "EdcaUpperMac" : "DcfUpperMac";
-
-        modeSet = opMode; // BasicRateSelection
-        *.maxQueueSize = maxQueueSize;
-        *.rateControlType = rateControlType;
-        *.rateSelection.multicastFrameBitrate = multicastBitrate; // BasicRateSelection
-        *.rateSelection.dataFrameBitrate = dataBitrate; // BasicRateSelection
-        *.rateSelection.mgmtFrameBitrate = mgmtBitrate;
-        *.rateSelection.controlFrameBitrate = controlBitrate;
-        *.rateSelection.responseAckFrameBitrate = controlBitrate;
-        *.rateControl.initialRate = initialRateControlRate;
+        modeSet = opMode;
+        qosStation = EDCA;
+        dcf.maxQueueSize = maxQueueSize;
+        hcf.maxQueueSize = maxQueueSize;
+        dcf.rateControlType = rateControlType;
+        hcf.rateControlType = rateControlType;
+        dcf.rateSelection.multicastFrameBitrate = multicastBitrate;
+        hcf.rateSelection.multicastFrameBitrate = multicastBitrate;
+        dcf.rateSelection.dataFrameBitrate = dataBitrate;
+        hcf.rateSelection.dataFrameBitrate = dataBitrate;
+        dcf.rateSelection.mgmtFrameBitrate = mgmtBitrate;
+        hcf.rateSelection.mgmtFrameBitrate = mgmtBitrate;
+        dcf.rateSelection.controlFrameBitrate = controlBitrate;
+        hcf.rateSelection.controlFrameBitrate = controlBitrate;
+        dcf.rateSelection.responseAckFrameBitrate = controlBitrate;
+        hcf.rateSelection.responseAckFrameBitrate = controlBitrate;
+        dcf.rateControl.initialRate = initialRateControlRate; // applies to OnoeRateControl, AArfRateControl
+        hcf.rateControl.initialRate = initialRateControlRate; // applies to OnoeRateControl, AArfRateControl
         dcf.rtsPolicy.rtsThreshold = rtsThresholdBytes;
-        upperMac.rtsThreshold = rtsThresholdBytes; // DcfUpperMac, EdcaUpperMac
-        upperMac.shortRetryLimit = retryLimit; // DcfUpperMac, EdcaUpperMac
-        upperMac.maxQueueSize = maxQueueSize; // DcfUpperMac, EdcaUpperMac
+        hcf.rtsPolicy.rtsThreshold = rtsThresholdBytes;
+        dcf.recoveryProcedure.shortRetryLimit = retryLimit;
+        hcf.edcaDataRecoveryProcedures[*].shortRetryLimit = retryLimit;
 
-        upperMac.aifsn0 = AIFSN0; // EdcaUpperMac
-        upperMac.aifsn1 = AIFSN1; // EdcaUpperMac
-        upperMac.aifsn2 = AIFSN2; // EdcaUpperMac
-        upperMac.aifsn3 = AIFSN3; // EdcaUpperMac
-        upperMac.txopLimit0 = TXOP0; // EdcaUpperMac
-        upperMac.txopLimit1 = TXOP1; // EdcaUpperMac
-        upperMac.txopLimit2 = TXOP2; // EdcaUpperMac
-        upperMac.txopLimit3 = TXOP3; // EdcaUpperMac
-        //TODO upperMac.difsn =  AIFSN;
-        upperMac.prioritizeMulticast = prioritizeMulticast; // DcfUpperMac, EdcaUpperMac
-        upperMac.slotTime = slotTime; // DcfUpperMac, EdcaUpperMac
-        dcf.channelAccess.cwMin = cwMinData; // DcfUpperMac
-        dcf.channelAccess.cwMax = cwMaxData; // DcfUpperMac
-        upperMac.cwMinMulticast = cwMulticast; // DcfUpperMac, EdcaUpperMac
+        hcf.edca.edcaf[0].aifsn = AIFSN0;
+        hcf.edca.edcaf[1].aifsn = AIFSN1;
+        hcf.edca.edcaf[2].aifsn = AIFSN2;
+        hcf.edca.edcaf[3].aifsn = AIFSN3;
+        dcf.channelAccess.difsn = AIFSN;
+        hcf.edcaTxopProcedures[0].txopLimit = TXOP0;
+        hcf.edcaTxopProcedures[1].txopLimit = TXOP1;
+        hcf.edcaTxopProcedures[2].txopLimit = TXOP2;
+        hcf.edcaTxopProcedures[3].txopLimit = TXOP3;
+        dcf.prioritizeMulticast = prioritizeMulticast;
+        hcf.prioritizeMulticast = prioritizeMulticast;
+        dcf.channelAccess.cwMin = cwMinData;
+        dcf.channelAccess.cwMax = cwMaxData;
+        hcf.edca.edcaf[1].cwMin = cwMinData;
+        hcf.edca.edcaf[1].cwMax = cwMaxData;
 }
