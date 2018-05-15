@@ -24,7 +24,7 @@ import inet.physicallayer.contract.packetlevel.INeighborCache;
 import inet.physicallayer.contract.packetlevel.IObstacleLoss;
 import inet.physicallayer.contract.packetlevel.IPathLoss;
 import inet.physicallayer.contract.packetlevel.IPropagation;
-import inet.physicallayer.contract.packetlevel.IRadioBackgroundNoise;
+import inet.physicallayer.contract.packetlevel.IBackgroundNoise;
 import inet.physicallayer.contract.packetlevel.IRadioMedium;
 
 //
@@ -79,7 +79,7 @@ module RadioMedium like IRadioMedium
             parameters:
                 @display("p=100,150");
         }
-        backgroundNoise: <backgroundNoiseType> like IRadioBackgroundNoise if backgroundNoiseType != "" {
+        backgroundNoise: <backgroundNoiseType> like IBackgroundNoise if backgroundNoiseType != "" {
             parameters:
                 @display("p=100,250");
         }
