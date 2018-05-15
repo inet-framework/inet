@@ -1,4 +1,4 @@
-\chapter{Working with Sockets}
+\chapter{Using Sockets}
 \label{cha:sockets}
 
 \section{Overview}
@@ -242,6 +242,9 @@ algorithms, which can also be configured using the \cppclass{TcpSocket}:
 
 \cppsnippet{TcpSocketConfigureExample}{TCP socket configure example}
 
+Upon setting the individual parameters, the socket immediately sends sevice
+requests to the underlying \nedtype{Tcp} protocol module.
+
 \subsection*{Setting up Connections}
 
 Since \protocol{TCP} is a connection oriented protocol, a connection must be
@@ -311,9 +314,12 @@ to notify the application about the received data or service indication:
 \subsection*{Configuring Connections}
 
 The \cppclass{SctpSocket} class supports setting several \protocol{SCTP}
-connection parameters:
+specific connection parameters directly:
 
 \cppsnippet{SctpSocketConfigureExample}{SCTP socket configure example}
+
+Upon setting the individual parameters, the socket immediately sends sevice
+requests to the underlying \nedtype{Sctp} protocol module.
 
 \subsection*{Setting up Connections}
 

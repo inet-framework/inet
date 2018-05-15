@@ -857,7 +857,10 @@ void App::sctpSocketExample()
 {
 SctpSocket socket;
 //!SctpSocketConfigureExample
-// TODO:
+socket.setOutboundStreams(2);
+socket.setStreamPriority(1);
+socket.setEnableHeartbeats(true);
+// ...
 //!End
 //!SctpSocketListenExample
 socket.bind(Ipv4Address("10.0.0.42"), 42); // local address/port
