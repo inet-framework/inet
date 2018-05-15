@@ -149,10 +149,10 @@ module Ieee80211CompatibleMac extends Ieee80211Mac
         int AIFSN2 = default(2); // AIFSN for video
         int AIFSN3 = default(2); // AIFSN for voice
         int AIFSN = default(-1); // if there is only one AC (EDCA = false); -1 means default
-        double TXOP0 @unit(s) = default(0s);
-        double TXOP1 @unit(s) = default(0s);
-        double TXOP2 @unit(s) = default(3.008ms);
-        double TXOP3 @unit(s) = default(1.504ms);
+        double TXOP0 @unit(s) = default(-1s); // TXOP for background, -1 means default
+        double TXOP1 @unit(s) = default(-1s); // TXOP for best effort, -1 means default
+        double TXOP2 @unit(s) = default(-1s); // TXOP for video, -1 means default
+        double TXOP3 @unit(s) = default(-1s); // TXOP for voice, -1 means default
         bool prioritizeMulticast = default(false); // if true, prioritize multicast frames (9.3.2.1 Fundamental access)
         int cwMinData = default(-1); // contention window for normal data frames (DCF) and best effort (EDCA), -1 means default
         int cwMaxData = default(-1); // contention window for normal data frames (DCF) and best effort (EDCA), -1 means default
