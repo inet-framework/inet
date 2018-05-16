@@ -1,0 +1,78 @@
+#! /usr/bin/env python
+# This script replaces header guards in all header files in current directory and
+# subdirectories with the format: __INET_[FILENAME]_H.
+#
+
+import re
+import string
+import fnmatch
+import os
+
+# grep -RE 'string +[a-zA-Z]+Type\b'
+# grep -RE  '<[a-zA-Z]+Type>'
+
+# configuration parameters
+rootPath = '.'
+
+def fooType_to_hasFoo(s):
+    return "has" + s[0].capitalize() + s[1:-4]
+    
+#TODO: no need for "hasFoo" if there is no "if"
+for root, dirs, files in os.walk(rootPath):
+    for filename in fnmatch.filter(files, "*.ned"):
+        fullpath = os.path.join(root, filename)
+        f = open(fullpath, 'r')
+        content = f.read()
+        origContent = content
+        for m in re.finditer(r"<([a-zA-Z]+Type)>", content):
+            typeParam = m.group(1)
+            mm = re.search(r" string +" + typeParam + " += +default\( *(.*?) *\)", content)
+            if mm:
+                defaultType = mm.group(1)
+                if defaultType.startswith("firstAvailable"):
+                    defaultType = defaultType + ")"
+                defaultTypeIsEmpty = defaultType=="\"\""
+                hasFooType = fooType_to_hasFoo(typeParam)
+                hasFooValue = "false" if defaultTypeIsEmpty else "true"
+
+                containsIf = re.search(r"(?s)if +" + typeParam + r" *!=", content)
+                if not containsIf and defaultTypeIsEmpty:
+                    print "WARNING: ", filename, ": ", typeParam, " default value is empty but corresponding submodule is not conditional (or does not exist)"
+
+                # replace fooType parameter with hasFoo if submodule is conditional, otherwise simply remove it
+                replacement = (r"\1bool " + hasFooType + " = default(" + hasFooValue + ");\n") if containsIf else "";
+                content = re.sub(r"(?s)( *)string +" + typeParam + r" += .*?\n", replacement, content)
+
+                # replace <fooType> with <default("BasicFoo")>, or with <> if there is no default type
+                replacement = "<>" if defaultTypeIsEmpty else "<default(" + defaultType + ")>"
+                content = re.sub(r"(?s)< *" + typeParam + r" *>", replacement, content)
+
+                # replace 'if fooType!=""' with 'if hasFoo'
+                content = re.sub(r"(?s)if +" + typeParam + r" *!= *" + r"\"\"", "if " + hasFooType, content)
+
+                print filename, ": ", typeParam, " declaration: ", mm.group(0), ", default is ", defaultType
+
+        if content != origContent:
+            print content
+            # f2 = open(fullpath, 'w')
+            # f2.write(content)
+            # f2.close()
+            pass
+
+
+for root, dirs, files in os.walk(rootPath):
+    for filename in fnmatch.filter(files, "*.ini"):
+        fullpath = os.path.join(root, filename)
+        f = open(fullpath, 'r')
+        content = f.read()
+        origContent = content
+        for m in re.finditer(r"\.([a-zA-Z]+Type) *= *(.*?) *#.*", content):
+            print m.group(1), " ---> ", m.group(2)
+        content = re.sub(r"(?m)^(.*)\.([a-zA-Z]+)Type *= *\"\"", r"#TODO maybe: \1.has^\2 = false", content)  #TODO use fooType_to_hasFoo()
+        content = re.sub(r"(?m)\.([a-zA-Z]+)Type( *=.*?)$", r".\1.typename\2 #TODO autoconverted; TODO maybe also needs .has^\1 = true?", content)
+        if content != origContent:
+            print content
+            # f2 = open(fullpath, 'w')
+            # f2.write(content)
+            # f2.close()
+
