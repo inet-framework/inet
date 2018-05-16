@@ -1,0 +1,76 @@
+#! /usr/bin/env python
+# This script replaces header guards in all header files in current directory and
+# subdirectories with the format: __INET_[FILENAME]_H.
+#
+
+import re
+import string
+import fnmatch
+import os
+
+# grep -RE 'string +[a-zA-Z]+Type\b'
+# grep -RE  '<[a-zA-Z]+Type>'
+
+# configuration parameters
+rootPath = '.'
+
+for root, dirs, files in os.walk(rootPath):
+    for filename in fnmatch.filter(files, "*.ned"):
+        fullpath = os.path.join(root, filename)
+        f = open(fullpath, 'r')
+        content = f.read()
+        origContent = content
+        for m in re.finditer(r"<(\w+Type)>", content):
+            typeParam = m.group(1)
+            mm = re.search(r" string +" + typeParam + "( *= *(.*?))? *;", content)
+            if mm:
+                typeParamValue = mm.group(2)
+                if not typeParamValue:
+                    typeParamValue = ""
+
+                containsIf = re.search(r"(?s)if +" + typeParam + r" *!=", content)
+                if not containsIf and typeParamValue=='default("")':
+                    print "WARNING: ", filename, ": ", typeParam, " default value is empty but corresponding submodule is not conditional (or does not exist)"
+
+                # remove fooType parameter
+                content = re.sub(r"(?s)( *)string +" + typeParam + r"\b.*?\n", "", content)
+
+                # replace <fooType> with <default("BasicFoo")>, or with <> if there is no default type
+                content = re.sub(r"(?s)< *" + typeParam + r" *>", "<" + typeParamValue + ">", content)
+
+                # replace 'if fooType!=""' with 'if typename!=""'
+                content = re.sub(r"(?s)( like +\w+ +)if +" + typeParam + r' *!= *""', r'\1if typename!=""', content)
+
+                print filename, ": ", typeParam, " declaration: ", mm.group(0), ", default is >>", typeParamValue, "<<"
+
+        # replace assignments on inherited type parameters
+        content = re.sub(r"(?m)^( +\w+)Type( *=)", r"\1.typename\2", content)
+
+        # replace "if" conditions in connections
+        content = re.sub(r'(?m)(--[^;]+ if [^;]*)(\b\w+)Type *!= *""', r"\1exists(\2)", content)
+        content = re.sub(r'(?m)(--[^;]+ if [^;]*)(\b\w+)Type *== *""', r"\1!exists(\2)", content)
+
+        if content != origContent:
+            #print content
+            f2 = open(fullpath, 'w')
+            f2.write(content)
+            f2.close()
+            #pass
+
+
+for root, dirs, files in os.walk(rootPath):
+    for filename in fnmatch.filter(files, "*.ini"):
+        fullpath = os.path.join(root, filename)
+        f = open(fullpath, 'r')
+        content = f.read()
+        origContent = content
+        for m in re.finditer(r"\.([a-zA-Z]+Type) *= *(.*?) *#.*", content):
+            print m.group(1), " ---> ", m.group(2)
+        content = re.sub(r"(?m)\.([a-zA-Z]+)Type( *=.*?)$", r".\1.typename\2 #TODO autoconverted", content)
+        if content != origContent:
+            #print content
+            f2 = open(fullpath, 'w')
+            f2.write(content)
+            f2.close()
+            #pass
+
