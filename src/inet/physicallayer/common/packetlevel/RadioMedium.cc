@@ -518,11 +518,6 @@ ISignal *RadioMedium::createTransmitterSignal(const IRadio *radio, Packet *packe
     Enter_Method_Silent();
     take(packet);
     auto transmission = radio->getTransmitter()->createTransmission(radio, packet, simTime());
-    auto oldPacketProtocolTag = packet->removeTag<PacketProtocolTag>();
-    packet->clearTags();
-    auto newPacketProtocolTag = packet->addTag<PacketProtocolTag>();
-    *newPacketProtocolTag = *oldPacketProtocolTag;
-    delete oldPacketProtocolTag;
     auto signal = new Signal(transmission);
     signal->setName(packet->getName());
     signal->setDuration(transmission->getDuration());
@@ -533,10 +528,12 @@ ISignal *RadioMedium::createTransmitterSignal(const IRadio *radio, Packet *packe
 ISignal *RadioMedium::createReceiverSignal(const ITransmission *transmission)
 {
     auto signal = new Signal(transmission);
-    auto packet = transmission->getPacket();
-    signal->setName(packet->getName());
+    auto transmitterPacket = transmission->getPacket();
+    auto receiverPacket = new Packet(transmitterPacket->getName(), transmitterPacket->peekAll());
+    receiverPacket->addTag<PacketProtocolTag>()->setProtocol(transmitterPacket->getTag<PacketProtocolTag>()->getProtocol());
+    signal->setName(receiverPacket->getName());
     signal->setDuration(transmission->getDuration());
-    signal->encapsulate(packet->dup());
+    signal->encapsulate(receiverPacket);
     return signal;
 }
 
