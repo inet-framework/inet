@@ -9,22 +9,24 @@
 
 package inet.examples.wireless.video.videoStreaming.simulations;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.node.inet.INetworkNode;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import inet.node.internetcloud.InternetCloud;
 import inet.node.wireless.AccessPoint;
-import inet.physicallayer.idealradio.IdealRadioMedium;
+//import inet.physicallayer.idealradio.IdealRadioMedium;
 import inet.visualizer.contract.IIntegratedVisualizer;
-import inet.node.aodv.AODVRouter;
+import inet.node.aodv.AodvRouter;
 import inet.common.lifecycle.LifecycleController;
 import inet.common.scenario.ScenarioManager;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+//import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
-import inet.node.aodv.AODVRouter;
-import inet.physicallayer.idealradio.IdealRadioMedium;
+//import inet.node.aodv.AODVRouter;
+//import inet.physicallayer.idealradio.IdealRadioMedium;
+//import inet.physicallayer.apskradio.packetlevel.ApskRadio;
+import inet.physicallayer.unitdisk.UnitDiskRadioMedium;
 
 network Net
 {
@@ -39,21 +41,21 @@ network Net
             parameters:
                 @display("p=61.1,14.3");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 @display("p=61.1,127.4");
         }
-        radioMedium: IdealRadioMedium {
+        radioMedium: UnitDiskRadioMedium {
             parameters:
                 @display("p=59.8,67.6");
         }
-        hostA: AODVRouter {
+        hostA: AodvRouter {
             @display("i=device/pocketpc_s;p=782.86206,544.9101");
         }
-        hostB: AODVRouter {
+        hostB: AodvRouter {
             @display("i=device/pocketpc_s;p=145.15071,242.71104");
         }
-        hostR[numHosts]: AODVRouter {
+        hostR[numHosts]: AodvRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;");
         }
