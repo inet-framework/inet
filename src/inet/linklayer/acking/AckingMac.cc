@@ -273,6 +273,9 @@ void AckingMac::encapsulate(Packet *packet)
         macHeader->setSrcModuleId(getId());
     macHeader->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(packet->getTag<PacketProtocolTag>()->getProtocol()));
     packet->insertAtFront(macHeader);
+    auto macAddressInd = packet->addTagIfAbsent<MacAddressInd>();
+    macAddressInd->setSrcAddress(macHeader->getSrc());
+    macAddressInd->setDestAddress(macHeader->getDest());
     packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ackingMac);
 }
 
