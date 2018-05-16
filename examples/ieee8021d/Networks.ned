@@ -23,7 +23,7 @@ import inet.node.ethernet.EtherHost;
 import inet.node.ethernet.EtherSwitch;
 
 
-network SwitchNetwork
+network Ieee8021dSwitchNetworkExample
 {
     submodules:
         stpTester: StpTester {
@@ -89,7 +89,7 @@ network SwitchNetwork
         switch5.ethg++ <--> Eth1G <--> switch7.ethg++;
 }
 
-network LargeNet extends SwitchNetwork
+network Ieee8021dLargeNetExample extends Ieee8021dSwitchNetworkExample
 {
     submodules:
         host1: EtherHost {

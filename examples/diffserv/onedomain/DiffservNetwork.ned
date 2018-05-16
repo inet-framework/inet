@@ -21,11 +21,12 @@ package inet.examples.diffserv.onedomain;
 
 import inet.common.misc.ThruputMeteringChannel;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.AdhocHost;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 
 
-network DiffservNetwork
+network DiffservNetworkExample
 {
     parameters:
         double edgeDatarate @unit(bps);

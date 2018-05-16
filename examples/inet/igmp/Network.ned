@@ -27,7 +27,7 @@ import inet.node.inet.StandardHost;
 //
 // TODO documentation
 //
-network Network
+network IgmpExample
 {
     submodules:
         Alice: StandardHost {

@@ -4,7 +4,7 @@ import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.rtp.RtpHost;
 
 
-network RTPUnicast2
+network RtpUnicast2Example
 {
     types:
         channel ethernet extends ned.DatarateChannel

@@ -22,7 +22,7 @@ import inet.node.inet.AdhocHost;
 import inet.physicallayer.apskradio.bitlevel.ApskLayeredScalarRadioMedium;
 import inet.visualizer.contract.IIntegratedVisualizer;
 
-network LayeredApsk
+network LayeredApskExample
 {
     parameters:
         int numHosts;

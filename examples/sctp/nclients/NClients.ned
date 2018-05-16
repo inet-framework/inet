@@ -27,7 +27,7 @@ import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 
 
-network NClients
+network SctpNClientsExample
 {
     parameters:
         int n;

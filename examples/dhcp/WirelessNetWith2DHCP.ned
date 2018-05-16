@@ -26,7 +26,7 @@ import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.contract.IIntegratedVisualizer;
 
 
-network WirelessNetWith2DHCP
+network WirelessNetWith2DhcpExample
 {
     int numHosts;
     submodules:

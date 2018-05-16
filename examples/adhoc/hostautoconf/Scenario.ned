@@ -21,7 +21,7 @@ package inet.examples.adhoc.hostautoconf;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.contract.IIntegratedVisualizer;
 
-network Scenario
+network HostAutoConfExample
 {
     parameters:
         int hosts;

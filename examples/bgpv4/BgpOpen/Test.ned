@@ -4,7 +4,7 @@ package inet.examples.bgpv4.BgpOpen;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 
 
-network Net
+network BgpOpenMessageExample
 {
     types:
         channel LINK_100 extends ned.DatarateChannel

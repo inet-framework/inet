@@ -33,7 +33,7 @@ module MyRouter extends Router
 //
 // TODO Auto-generated network
 //
-network Ipv4hook
+network Ipv4HookExample
 {
     types:
         channel C extends DatarateChannel

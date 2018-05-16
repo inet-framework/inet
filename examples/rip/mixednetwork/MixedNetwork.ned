@@ -14,7 +14,7 @@ import ned.DatarateChannel;
 //
 // TODO Auto-generated network
 //
-network MixedNetwork
+network RipMixedNetworkExample
 {
     parameters:
         int numCHosts;

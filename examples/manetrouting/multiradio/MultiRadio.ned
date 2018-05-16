@@ -25,7 +25,7 @@ import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 // Models a network with several hosts. Each host may contain one or
 // more radios. Nodes are using adhoc routing to pass information.
 //
-network MultiRadio
+network MultiRadioExample
 {
     parameters:
         int numHosts;

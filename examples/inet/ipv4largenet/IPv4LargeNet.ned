@@ -150,7 +150,7 @@ module IPv4LargeLAN
 //
 // A large Ethernet LAN -- see model description
 //
-network IPv4LargeNet
+network IPv4HierarchicalStaticRoutingLargeNetExample
 {
     parameters:
         int n;   // length of the "backbone" (n>5!)

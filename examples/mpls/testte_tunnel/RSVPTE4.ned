@@ -24,7 +24,7 @@ import inet.node.mpls.RsvpMplsRouter;
 //
 // See the README file in the model directory for scenario description.
 //
-network RSVPTE4
+network RsvpteTunnelExample
 {
     parameters:
         **.ipv4.configurator.networkConfiguratorModule = "";

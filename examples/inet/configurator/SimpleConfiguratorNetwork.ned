@@ -22,7 +22,7 @@ import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth1G;
 import inet.node.inet.StandardHost;
 
-network SimpleConfiguratorNetwork
+network ConfiguratorFeaturesSimple
 {
     @display("bgb=450,300");
     submodules:

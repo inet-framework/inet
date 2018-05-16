@@ -22,7 +22,7 @@ import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
 
 
-network ARPTest
+network ArpTest2Example
 {
     types:
         channel ethline extends DatarateChannel

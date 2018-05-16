@@ -29,7 +29,7 @@ import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 
 
-network NClients
+network ShutdownRestartExample
 {
     parameters:
         int n;

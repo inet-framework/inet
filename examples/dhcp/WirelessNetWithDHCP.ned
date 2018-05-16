@@ -26,7 +26,7 @@ import inet.node.wireless.AccessPoint;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 
-network WirelessNetWithDHCP
+network WirelessNetWithDhcpExample
 {
     int numHosts;
     **.mgmt.numChannels = 5;

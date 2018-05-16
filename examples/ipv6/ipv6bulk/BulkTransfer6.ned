@@ -28,7 +28,7 @@ import inet.node.ipv6.StandardHost6;
 import ned.DatarateChannel;
 
 
-network BulkTransfer6
+network Ipv6BulkTransferExample
 {
     types:
         channel C extends DatarateChannel

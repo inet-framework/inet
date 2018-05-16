@@ -23,7 +23,7 @@ import inet.node.ethernet.Eth10M;
 import inet.node.inet.StandardHost;
 
 
-network DHCPShutdownReboot
+network RebootingDhcpExample
 {
     submodules:
         scenarioManager: ScenarioManager {

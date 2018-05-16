@@ -9,7 +9,7 @@ import inet.node.inet.StandardHost;
 import inet.node.ospfv2.OspfRouter;
 
 
-network SimpleTest
+network OspfSimpleExample
 {
     parameters:
         @display("p=10,10;b=712,152");

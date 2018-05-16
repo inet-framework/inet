@@ -5,7 +5,7 @@ import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
 
 
-network BGPTest
+network BgpUpdateMessageExample
 {
     types:
         channel LINK_100 extends ThruputMeteringChannel

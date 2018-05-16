@@ -12,7 +12,7 @@ import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.contract.IIntegratedVisualizer;
 import ned.DatarateChannel;
 
-network MultiRadio
+network MultipleRadioInterfacesExample
 {
     parameters:
         bool useEthernetSwitching = default(true);

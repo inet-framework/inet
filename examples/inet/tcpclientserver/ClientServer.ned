@@ -24,7 +24,7 @@ import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
 
 
-network ClientServer
+network TcpImplementationsExample
 {
     parameters:
         double per = default(0);

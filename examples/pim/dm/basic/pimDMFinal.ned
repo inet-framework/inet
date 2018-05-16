@@ -26,7 +26,7 @@ import inet.node.inet.MulticastRouter;
 import inet.node.inet.StandardHost;
 
 
-network pimDMFinal
+network PimDmFinalTestExample
 {
     submodules:
         R1: MulticastRouter {

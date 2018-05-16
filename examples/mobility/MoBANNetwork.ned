@@ -50,7 +50,7 @@ import inet.mobility.group.MoBanCoordinator;
 // Some nodes of type BaseNode use MoBanLocal module as their mobility module. Then those nodes will be considered as WBAN nodes.
 // Those node have a parameter named "coordinatorIndex" that determines to which WBAN (coordinator) the node belongs.
 //
-network MoBANNetwork
+network MoBanExample
 {
     parameters:
         int numNodes; // total number of nodes in the network, either ordinary nodes or WBAN nodes

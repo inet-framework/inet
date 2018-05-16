@@ -27,7 +27,7 @@ import inet.node.ipv6.StandardHost6;
 import ned.DatarateChannel;
 
 
-network NClientsPPP
+network Ipv6NClientsPPPExample
 {
     parameters:
         int n;

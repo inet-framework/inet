@@ -28,7 +28,7 @@ import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
 
 
-network FlatNet
+network FlatNetConfiguratorExample
 {
     types:
         channel fiberline extends DatarateChannel

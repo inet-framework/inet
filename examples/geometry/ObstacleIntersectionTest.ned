@@ -22,7 +22,7 @@ import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
-network ObstacleIntersectionTest
+network ObstacleIntersectionTestExample
 {
     parameters:
         int numHosts;

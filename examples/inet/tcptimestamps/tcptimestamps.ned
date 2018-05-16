@@ -9,7 +9,7 @@ import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
 
 
-network tcptimestamps
+network TcpTimestampsExample
 {
     parameters:
     submodules:

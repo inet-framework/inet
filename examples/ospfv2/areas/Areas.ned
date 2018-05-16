@@ -6,7 +6,7 @@ import inet.common.misc.ThruputMeteringChannel;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 
 
-network OSPF_AreaTest
+network OspfAreaTestExample
 {
     submodules:
         Area1: TwoNetsArea {

@@ -10,7 +10,7 @@ import inet.node.inet.Router;
 import ned.DatarateChannel;
 
 
-network RIPInfinityCountTest
+network RipInfinityCountExample
 {
     parameters:
         int numRipRouters;

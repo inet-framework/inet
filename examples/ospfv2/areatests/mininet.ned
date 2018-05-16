@@ -9,7 +9,7 @@ import inet.node.inet.StandardHost;
 import inet.node.ospfv2.OspfRouter;
 
 
-network OSPF_mininet
+network OspfMininetExample
 {
     parameters:
         int numBBr = 2;

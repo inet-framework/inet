@@ -8,7 +8,7 @@ import inet.node.inet.StandardHost;
 import inet.node.ospfv2.OspfRouter;
 
 
-network Backbone
+network OspfBackboneTest2Example
 {
     parameters:
         @display("p=10,10;b=736,568");

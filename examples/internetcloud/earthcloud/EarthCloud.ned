@@ -51,7 +51,7 @@ network SimpleContinentCloud
         }
 }
 
-network EarthCloud
+network EarthCloudExample
 {
     @display("bgi=maps/world;bgb=875,414");
     submodules:

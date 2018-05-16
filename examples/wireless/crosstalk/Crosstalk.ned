@@ -23,7 +23,7 @@ import inet.node.inet.AdhocHost;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium;
 import inet.visualizer.contract.IIntegratedVisualizer;
 
-network Crosstalk
+network CrosstalkExample
 {
     parameters:
     submodules:

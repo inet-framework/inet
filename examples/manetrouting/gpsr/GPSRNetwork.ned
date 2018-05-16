@@ -14,7 +14,7 @@ import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 //
 // TODO
 //
-network GPSRNetworkRandom
+network GpsRoutingRandomExample
 {
     parameters:
         int numHosts;
@@ -44,7 +44,7 @@ network GPSRNetworkRandom
     connections allowunconnected:
 }
 
-network GPSRNetworkManual
+network GpsRoutingManualExample
 {
     submodules:
         radioMedium: Ieee80211ScalarRadioMedium {

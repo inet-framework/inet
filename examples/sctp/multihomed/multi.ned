@@ -23,7 +23,7 @@ import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
 
 
-network multi
+network SctpMultihomingExample
 {
     parameters:
         double testTimeout @unit(s) = default(0s);

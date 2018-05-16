@@ -9,7 +9,7 @@ import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
 
 
-network tcpwindowscale
+network TcpWindowScaleExample
 {
     parameters:
     submodules:

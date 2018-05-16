@@ -23,7 +23,7 @@ import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.Router;
 
 
-network RouterPerfNetwork
+network RouterPerfTestExample
 {
     parameters:
         int nodeNo;

@@ -23,7 +23,7 @@ import inet.node.inet.WirelessHost;
 import inet.physicallayer.contract.packetlevel.IRadioMedium;
 import inet.visualizer.contract.IIntegratedVisualizer;
 
-network TestRadioScaling
+network TestRadioScalingExample
 {
     parameters:
         int numHosts;

@@ -27,7 +27,7 @@ import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 
 
-network Hierarchical
+network HierarchicalStaticRoutingExample
 {
     parameters:
         int columns = default(3);

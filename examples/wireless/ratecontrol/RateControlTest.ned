@@ -94,7 +94,7 @@ module Client
         cli.out --> wlan.upperLayerIn;
 }
 
-network RateControlTest
+network Ieee80211RateControlExample
 {
     parameters:
         int numCli;

@@ -8,7 +8,7 @@ import inet.node.rtp.RtpHost;
 import ned.DatarateChannel;
 
 
-network RTPMulticast1
+network RtpMulticast1Example
 {
     types:
         channel ethernet extends DatarateChannel

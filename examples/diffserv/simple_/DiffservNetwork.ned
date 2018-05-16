@@ -34,7 +34,7 @@ import ned.DatarateChannel;
 // to the server. Without QoS, high traffic can cause random packet drops
 // at the router Ppp interface.
 //
-network DiffservNetwork
+network DiffservNetworkQosExample
 {
     parameters:
         int numClients = default(1);

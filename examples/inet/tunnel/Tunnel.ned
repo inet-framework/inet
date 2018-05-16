@@ -6,7 +6,7 @@ import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 
 
-network Tunnel
+network TunnelExample
 {
     submodules:
         configurator: Ipv4NetworkConfigurator {

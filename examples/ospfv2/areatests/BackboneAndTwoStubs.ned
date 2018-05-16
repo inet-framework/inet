@@ -8,7 +8,7 @@ import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ospfv2.OspfRouter;
 
 
-network OSPF_BackboneAndTwoStubsTest
+network OspfBackboneAndTwoStubsTestExample
 {
     parameters:
         int numBBRouters = default(3);

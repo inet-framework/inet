@@ -24,7 +24,7 @@ import inet.node.wireless.AccessPoint;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.contract.IIntegratedVisualizer;
 
-network Lan80211
+network Lan80211Example
 {
     parameters:
         int numHosts;

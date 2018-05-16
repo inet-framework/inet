@@ -23,7 +23,7 @@ import inet.node.inet.AdhocHost;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.contract.IIntegratedVisualizer;
 
-network Net80211
+network Ieee80211AdhocModeExample
 {
     parameters:
         int numHosts;

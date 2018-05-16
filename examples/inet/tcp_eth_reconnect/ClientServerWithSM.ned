@@ -25,7 +25,7 @@ import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
 
 
-network ClientServerWithSM
+network TcpEthReconnectExample
 {
     types:
         channel C extends DatarateChannel

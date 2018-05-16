@@ -26,7 +26,7 @@ import inet.node.inet.StandardHost;
 //
 // A generated network with grid topology.
 //
-network Network
+network PimIptvExample
 {
     submodules:
         R00: MulticastRouter {

@@ -10,7 +10,7 @@ import inet.node.inet.StandardHost;
 import inet.node.ospfv2.OspfRouter;
 
 
-network DynamicTest
+network OspfDynamicExample
 {
     parameters:
         @display("p=10,10;b=712,152");

@@ -22,7 +22,7 @@ import inet.node.inet.AdhocHost;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 
-network ObjectCacheTest
+network ObjectCacheTestExample
 {
     parameters:
         int numHosts;

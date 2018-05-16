@@ -7,7 +7,7 @@ import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
 
 
-network UDPBroadcastNetwork
+network UdpBroadcastExample
 {
     parameters:
         int numTargets;

@@ -24,7 +24,7 @@ import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
 
 
-network NClients2
+network TrafficSimulationNClients2Example
 {
     parameters:
         int numRouters;

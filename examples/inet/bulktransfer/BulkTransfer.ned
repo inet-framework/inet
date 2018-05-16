@@ -27,7 +27,7 @@ import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
 
 
-network BulkTransfer
+network BulkTransferExample
 {
     types:
         channel C extends DatarateChannel

@@ -8,7 +8,7 @@ import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
 
 
-network ber
+network BerExample
 {
     parameters:
         double n;

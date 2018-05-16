@@ -10,7 +10,7 @@ import inet.node.inet.StandardHost;
 import inet.node.rip.RipRouter;
 
 
-network SimpleTest
+network RipSimpleTestExample
 {
     parameters:
         @display("p=10,10;b=712,152");

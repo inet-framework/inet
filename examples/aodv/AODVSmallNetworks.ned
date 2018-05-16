@@ -24,7 +24,7 @@ import inet.node.aodv.AodvRouter;
 import inet.physicallayer.unitdisk.UnitDiskRadioMedium;
 
 
-network SimpleRREQ
+network AodvSimpleRreqExample
 {
     parameters:
     submodules:
@@ -64,7 +64,7 @@ network SimpleRREQ
     connections allowunconnected:
 }
 
-network SimpleRREQ2
+network AodvSimpleRreq2Example
 {
     parameters:
     submodules:
@@ -108,7 +108,7 @@ network SimpleRREQ2
     connections allowunconnected:
 }
 
-network ShortestPath
+network AodvShortestPathExample
 {
     parameters:
         @display("bgb=650,550");

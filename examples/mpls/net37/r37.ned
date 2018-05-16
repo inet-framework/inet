@@ -18,7 +18,7 @@ import inet.node.inet.StandardHost;
 import inet.node.mpls.RsvpMplsRouter;
 
 
-network R37
+network R37Example
 {
     types:
         channel line extends ThruputMeteringChannel

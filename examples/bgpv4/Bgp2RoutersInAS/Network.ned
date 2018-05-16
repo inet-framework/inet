@@ -8,7 +8,7 @@ import inet.node.inet.StandardHost;
 import inet.node.ospfv2.OspfRouter;
 
 
-network BGPTest
+network Bgp2RoutersInAsExample
 {
     types:
         channel LINK_100 extends ThruputMeteringChannel

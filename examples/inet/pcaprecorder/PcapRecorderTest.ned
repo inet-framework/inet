@@ -24,7 +24,7 @@ import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
 
 
-network PcapRecorderTest
+network PcapRecorderTestExample
 {
     types:
         channel C extends DatarateChannel

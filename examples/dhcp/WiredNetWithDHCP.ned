@@ -24,7 +24,7 @@ import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.StandardHost;
 
 
-network WiredNetWithDHCP
+network WiredNetWithDhcpExample
 {
     parameters:
         int numHosts;

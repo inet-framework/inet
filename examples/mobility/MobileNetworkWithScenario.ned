@@ -21,7 +21,7 @@ package inet.examples.mobility;
 import inet.common.scenario.ScenarioManager;
 
 
-network MobileNetworkWithScenario
+network MobileHostsWithScenarioExample
 {
     parameters:
         int numHosts;

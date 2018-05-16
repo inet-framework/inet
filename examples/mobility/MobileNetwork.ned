@@ -20,7 +20,7 @@ package inet.examples.mobility;
 
 import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 
-network MobileNetwork
+network MobileHostsExample
 {
     parameters:
         int numHosts;

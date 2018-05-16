@@ -14,7 +14,7 @@ import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 //
 // TODO
 //
-network DsdvNetwork
+network DsdvRoutingExample
 {
     parameters:
         int numHosts;

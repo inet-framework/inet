@@ -35,7 +35,7 @@ module DynamicHost extends AdhocHost
         }
 }
 
-network DynamicRadioNetwork
+network DynamicRadioExample
 {
     @display("bgb=600,520");
     submodules:

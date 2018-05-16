@@ -25,7 +25,7 @@ import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
 
 
-network MulticastNetwork
+network MulticastRoutingExample
 {
     types:
         channel ethernet extends DatarateChannel

@@ -97,7 +97,7 @@ module ThroughputServer
         sink.in++ <-- wlan.upperLayerOut;
 }
 
-network Throughput
+network NewMacThroughputTestExample
 {
     parameters:
         int numCli;

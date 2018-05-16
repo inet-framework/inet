@@ -20,7 +20,7 @@ import inet.node.mpls.LdpMplsRouter;
 import ned.DatarateChannel;
 
 
-network LDPTEST
+network LdpTestExample
 {
     parameters:
         **.ipv4.configurator.networkConfiguratorModule = "";

@@ -6,7 +6,7 @@ import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
 
 
-network UDPBurst
+network UDPBurstExample
 {
     parameters:
         int numhosts;

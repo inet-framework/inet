@@ -21,7 +21,7 @@ import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
 
 
-network ARPTest
+network ArpTestExample
 {
     types:
         channel fiberline extends DatarateChannel

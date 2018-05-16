@@ -7,7 +7,7 @@ import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 
 
-network OSPF_BackboneAndOneStubTest
+network OspfBackboneAndOneStubTestExample
 {
     types:
         channel C extends ThruputMeteringChannel

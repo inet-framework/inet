@@ -23,7 +23,7 @@ import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
 
-network UdpClientServer
+network UdpClientServerExample
 {
     parameters:
         double per = default(0);
@@ -55,10 +55,10 @@ network UdpClientServer
             parameters:
                 @display("p=100,100;is=s");
         }
-//        configurator: NextHopNetworkConfigurator {
-//            parameters:
-//                @display("p=53,134");
-//        }
+        //        configurator: NextHopNetworkConfigurator {
+        //            parameters:
+        //                @display("p=53,134");
+        //        }
         netAnimTrace: NetAnimTrace {
             @display("p=100,200;is=s");
         }

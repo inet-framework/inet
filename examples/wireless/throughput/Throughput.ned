@@ -60,7 +60,7 @@ module ThroughputClient
         cli.out --> wlan.upperLayerIn;
 }
 
-network Throughput
+network WirelessThroughputExample
 {
     parameters:
         int numCli;

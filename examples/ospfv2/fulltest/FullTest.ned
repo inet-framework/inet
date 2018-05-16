@@ -177,7 +177,7 @@ module OSPF_Area3
         ethg[0] <--> { @display("m=e"); } <--> N9.ethg++;
 }
 
-network OSPF_RFC2328_Fig6
+network OspfRfc2328Fig6Example
 {
     parameters:
         @display("p=10,10;b=704,560");

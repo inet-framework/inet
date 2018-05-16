@@ -9,7 +9,7 @@ import inet.node.aodv.AodvRouter;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 
-network FilteringExampleNetwork
+network FilteringExample
 {
     parameters:
         int numHosts;

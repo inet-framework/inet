@@ -24,7 +24,7 @@ import inet.physicallayer.unitdisk.UnitDiskRadioMedium;
 import inet.visualizer.contract.IIntegratedVisualizer;
 
 
-network Net
+network IdealWirelessNicExample
 {
     parameters:
         int numHosts;

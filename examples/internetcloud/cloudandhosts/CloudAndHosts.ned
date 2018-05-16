@@ -24,7 +24,7 @@ import inet.node.internetcloud.InternetCloud;
 import ned.DatarateChannel;
 
 
-network CloudAndHosts
+network CloudAndHostsExample
 {
     parameters:
         int numSenders;

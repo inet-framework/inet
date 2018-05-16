@@ -25,7 +25,7 @@ import inet.node.ipv6.StandardHost6;
 import ned.DatarateChannel;
 
 
-network NClientsEth
+network Ipv6NClientsEthExample
 {
     parameters:
         int n;

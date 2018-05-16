@@ -24,7 +24,7 @@ import inet.node.aodv.AodvRouter;
 import inet.physicallayer.unitdisk.UnitDiskRadioMedium;
 
 
-network NeighborCacheTest
+network NeighborCacheTestExample
 {
     parameters:
         int numHosts;

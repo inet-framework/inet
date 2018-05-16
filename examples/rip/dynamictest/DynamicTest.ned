@@ -9,7 +9,7 @@ import inet.node.inet.StandardHost;
 import inet.node.rip.RipRouter;
 
 
-network DynamicTest
+network RipDynamicTestExample
 {
     parameters:
         @display("p=10,10;b=712,152");

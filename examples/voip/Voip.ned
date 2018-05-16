@@ -15,7 +15,7 @@ import ned.DatarateChannel;
 //
 // A generated network with star topology.
 //
-network Voip
+network VoipExample
 {
     types:
         channel C extends DatarateChannel

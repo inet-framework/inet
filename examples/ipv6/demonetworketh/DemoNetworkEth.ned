@@ -25,7 +25,7 @@ import inet.node.ipv6.StandardHost6;
 import ned.DatarateChannel;
 
 
-network DemoNetworkEth
+network Ipv6DemoNetworkEthExample
 {
     parameters:
         int n;
