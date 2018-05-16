@@ -278,7 +278,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
 
     /** @name Reception */
     //@{
-    virtual bool isRadioMacAddress(const IRadio *radio, const MacAddress address) const;
+    virtual bool matchesMacAddressFilter(const IRadio *radio, const Packet *packet) const;
 
     /**
      * Returns true if the radio can potentially receive the transmission

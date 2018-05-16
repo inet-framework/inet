@@ -178,8 +178,12 @@ void RadioMedium::handleMessage(cMessage *message)
         throw cRuntimeError("Unknown message");
 }
 
-bool RadioMedium::isRadioMacAddress(const IRadio *radio, const MacAddress address) const
+bool RadioMedium::matchesMacAddressFilter(const IRadio *radio, const Packet *packet) const
 {
+    auto macAddressReq = const_cast<Packet *>(packet)->findTag<MacAddressInd>();
+    if (macAddressReq == nullptr)
+        return true;
+    const MacAddress address = macAddressReq->getDestAddress();
     if (address.isBroadcast() || address.isMulticast())
         return true;
     cModule *host = getContainingNode(check_and_cast<const cModule *>(radio));
@@ -633,7 +637,7 @@ bool RadioMedium::isPotentialReceiver(const IRadio *radio, const ITransmission *
     else if (listeningFilter && !radio->getReceiver()->computeIsReceptionPossible(getListening(radio, transmission), transmission))
         return false;
     // TODO: where is the tag?
-    else if (macAddressFilter && !isRadioMacAddress(radio, const_cast<Packet *>(transmission->getPacket())->getTag<MacAddressReq>()->getDestAddress()))
+    else if (macAddressFilter && !matchesMacAddressFilter(radio, transmission->getPacket()))
         return false;
     else if (rangeFilter == RANGE_FILTER_INTERFERENCE_RANGE) {
         const IArrival *arrival = getArrival(radio, transmission);
