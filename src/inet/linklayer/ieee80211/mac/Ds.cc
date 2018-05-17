@@ -85,6 +85,13 @@ void Ds::processDataFrame(Packet *frame, const Ptr<const Ieee80211DataHeader>& h
                 emit(packetDroppedSignal, frame, &details);
                 delete frame;
             }
+            else if (mib->bssData.bssid != header->getTransmitterAddress()) {
+                EV << "Rejecting data frame received from another AP" << endl;
+                PacketDropDetails details;
+                details.setReason(OTHER_PACKET_DROP);
+                emit(packetDroppedSignal, frame, &details);
+                delete frame;
+            }
             else
                 mac->sendUp(frame);
         }
