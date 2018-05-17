@@ -239,6 +239,7 @@ void Ieee80211Mac::encapsulate(Packet *packet)
     auto macAddressReq = packet->getTag<MacAddressReq>();
     auto destAddress = macAddressReq->getDestAddress();
     const auto& header = makeShared<Ieee80211DataHeader>();
+    header->setTransmitterAddress(mib->address);
     if (mib->mode == Ieee80211Mib::INDEPENDENT)
         header->setReceiverAddress(destAddress);
     else if (mib->mode == Ieee80211Mib::INFRASTRUCTURE) {
