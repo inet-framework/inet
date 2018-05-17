@@ -31,11 +31,11 @@ module NetworkNodeVisualizer like INetworkNodeVisualizer
         string canvasVisualizerType = default("NetworkNodeCanvasVisualizer");
         string osgVisualizerType = default("NetworkNodeOsgVisualizer");
     submodules:
-        canvasVisualizer: <> like INetworkNodeVisualizer if canvasVisualizerType != "" {
+        canvasVisualizer: <canvasVisualizerType> like INetworkNodeVisualizer if canvasVisualizerType != "" {
             parameters:
                 @display("p=100,50");
         }
-        osgVisualizer: <> like INetworkNodeVisualizer if osgVisualizerType != "" {
+        osgVisualizer: <osgVisualizerType> like INetworkNodeVisualizer if osgVisualizerType != "" {
             parameters:
                 @display("p=100,150");
         }
