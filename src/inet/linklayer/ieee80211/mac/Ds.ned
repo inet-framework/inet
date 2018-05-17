@@ -27,4 +27,5 @@ simple Ds like IDs
     parameters:
         string mibModule;
         @display("i=block/routing");
+        @signal[packetDropped];
 }
