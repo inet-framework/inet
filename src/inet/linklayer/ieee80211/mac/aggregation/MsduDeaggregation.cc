@@ -50,6 +50,8 @@ void MsduDeaggregation::setExplodedFrameAddress(const Ptr<Ieee80211DataHeader>& 
         header->setAddress3(subframeHeader->getDa());
         header->setAddress4(subframeHeader->getSa());
     }
+    ASSERT(!header->getReceiverAddress().isUnspecified());
+    ASSERT(!header->getTransmitterAddress().isUnspecified());
 }
 
 std::vector<Packet *> *MsduDeaggregation::deaggregateFrame(Packet *aggregatedFrame)

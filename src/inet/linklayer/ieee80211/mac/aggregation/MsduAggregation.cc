@@ -50,6 +50,8 @@ void MsduAggregation::setSubframeAddress(const Ptr<Ieee80211MsduSubframeHeader>&
         da = header->getAddress3();
         sa = header->getAddress4();
     }
+    ASSERT(!da.isUnspecified());
+    ASSERT(!sa.isUnspecified());
     subframeHeader->setDa(da);
     subframeHeader->setSa(sa);
 }
