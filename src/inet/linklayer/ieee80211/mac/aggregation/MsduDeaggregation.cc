@@ -33,7 +33,7 @@ void MsduDeaggregation::setExplodedFrameAddress(const Ptr<Ieee80211DataHeader>& 
     }
     else if (fromDS == 1 && toDS == 0) // AP to STA
     {
-        header->setTransmitterAddress(header->getTransmitterAddress());
+        header->setTransmitterAddress(aMsduHeader->getTransmitterAddress());
         header->setReceiverAddress(subframeHeader->getDa());
         header->setAddress3(subframeHeader->getSa());
     }
