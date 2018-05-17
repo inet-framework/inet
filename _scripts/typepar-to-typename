@@ -52,8 +52,13 @@ for root, dirs, files in os.walk(rootPath):
 
                 print filename, ": ", typeParam, " declaration: ", mm.group(0), ", default is ", defaultType
 
+            else:
+                print filename, ": skipping ", typeParam, "(no default value?) "
+                mm = re.search(r"string +" + typeParam + r"\b.*", content)
+                print "   skipped line:", mm.group(0)
+
         if content != origContent:
-            print content
+            #print content
             # f2 = open(fullpath, 'w')
             # f2.write(content)
             # f2.close()
@@ -71,8 +76,9 @@ for root, dirs, files in os.walk(rootPath):
         content = re.sub(r"(?m)^(.*)\.([a-zA-Z]+)Type *= *\"\"", r"#TODO maybe: \1.has^\2 = false", content)  #TODO use fooType_to_hasFoo()
         content = re.sub(r"(?m)\.([a-zA-Z]+)Type( *=.*?)$", r".\1.typename\2 #TODO autoconverted; TODO maybe also needs .has^\1 = true?", content)
         if content != origContent:
-            print content
+            #print content
             # f2 = open(fullpath, 'w')
             # f2.write(content)
             # f2.close()
+            pass
 
