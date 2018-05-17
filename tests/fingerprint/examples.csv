@@ -452,6 +452,11 @@
 
 /examples/wireless/errorrate/,       -f omnetpp.ini -c General -r 0,                100s,         4d4f-c416/tplx, PASS, wireless
 
+/examples/wireless/filtering/,       -f omnetpp.ini -c CommunicationRangeFilter -r 0, 100s,         dd84-2036/tplx, PASS,
+/examples/wireless/filtering/,       -f omnetpp.ini -c RadioModeFilter -r 0,          100s,         49d7-1692/tplx, PASS,
+/examples/wireless/filtering/,       -f omnetpp.ini -c ListeningFilter -r 0,          100s,         e9ff-969a/tplx, PASS,
+/examples/wireless/filtering/,       -f omnetpp.ini -c MacAddressFilter -r 0,         100s,         839a-edaf/tplx, PASS,
+
 /examples/wireless/handover/,        -f omnetpp.ini -c General -r 0,                1500s,        fc92-21ef/tplx, PASS, wireless
 
 /examples/wireless/hiddennode/,      -f omnetpp.ini -c General -r 0,                5s,         a24a-dd6e/tplx, PASS, wireless
