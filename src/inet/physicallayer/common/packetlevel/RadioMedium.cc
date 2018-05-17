@@ -533,7 +533,8 @@ ISignal *RadioMedium::createReceiverSignal(const ITransmission *transmission)
 {
     auto signal = new Signal(transmission);
     auto transmitterPacket = transmission->getPacket();
-    auto receiverPacket = new Packet(transmitterPacket->getName(), transmitterPacket->peekAll());
+    auto receiverPacket = transmitterPacket->dup();
+    receiverPacket->clearTags();
     receiverPacket->addTag<PacketProtocolTag>()->setProtocol(transmitterPacket->getTag<PacketProtocolTag>()->getProtocol());
     signal->setName(receiverPacket->getName());
     signal->setDuration(transmission->getDuration());

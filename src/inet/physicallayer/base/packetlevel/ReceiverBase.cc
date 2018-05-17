@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/physicallayer/base/packetlevel/NarrowbandNoiseBase.h"
 #include "inet/physicallayer/base/packetlevel/ReceiverBase.h"
 #include "inet/physicallayer/common/packetlevel/Interference.h"
@@ -110,14 +111,13 @@ W ReceiverBase::computeSignalPower(const IListening *listening, const ISnir *sni
 
 Packet *ReceiverBase::computeReceivedPacket(const ISnir *snir, bool isReceptionSuccessful) const
 {
-    auto packet = snir->getReception()->getTransmission()->getPacket();
-    if (isReceptionSuccessful)
-        return packet->dup();
-    else {
-        auto corruptedPacket = packet->dup();
-        corruptedPacket->setBitError(true);
-        return corruptedPacket;
-    }
+    auto transmittedPacket = snir->getReception()->getTransmission()->getPacket();
+    auto receivedPacket = transmittedPacket->dup();
+    receivedPacket->clearTags();
+    receivedPacket->addTag<PacketProtocolTag>()->setProtocol(transmittedPacket->getTag<PacketProtocolTag>()->getProtocol());
+    if (!isReceptionSuccessful)
+        receivedPacket->setBitError(true);
+    return receivedPacket;
 }
 
 } // namespace physicallayer
