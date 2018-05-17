@@ -274,6 +274,11 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
      * Sends a copy of the provided signal to all receivers on the radio medium.
      */
     virtual void sendToAllRadios(IRadio *transmitter, const ISignal *signal);
+
+    /**
+     * Sends a copy of all ongoing signals to the receiver on the radio medium.
+     */
+    virtual void pickUpSignals(IRadio *receiver);
     //@}
 
     /** @name Reception */
@@ -356,6 +361,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual const IReceptionResult *getReceptionResult(const IRadio *receiver, const IListening *listening, const ITransmission *transmission) const override;
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, long value, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *value, cObject *details) override;
 };
 
 } // namespace physicallayer

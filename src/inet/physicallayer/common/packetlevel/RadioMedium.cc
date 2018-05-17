@@ -692,46 +692,68 @@ void RadioMedium::sendToAllRadios(IRadio *transmitter, const ISignal *signal)
             sendToRadio(transmitter, radio, signal);
 }
 
-void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, long value, cObject *details)
+void RadioMedium::pickUpSignals(IRadio *receiverRadio)
 {
-    if (signal == IRadio::radioModeChangedSignal || signal == IRadio::listeningChangedSignal || signal == interfaceConfigChangedSignal) {
-        const Radio *receiverRadio = check_and_cast<const Radio *>(source);
-        for (const auto transmission : transmissions) {
-            if (signal == IRadio::listeningChangedSignal) {
-                const IArrival *arrival = getArrival(receiverRadio, transmission);
-                const IListening *listening = receiverRadio->getReceiver()->createListening(receiverRadio, arrival->getStartTime(), arrival->getEndTime(), arrival->getStartPosition(), arrival->getEndPosition());
-                delete communicationCache->getCachedListening(receiverRadio, transmission);
-                communicationCache->setCachedListening(receiverRadio, transmission, listening);
-            }
-
-            auto transmitterRadio = dynamic_cast<const Radio*>(getRadio(transmission->getTransmitterId()));
-            if (!transmitterRadio)
-                continue;
-
-            if (communicationCache->getCachedSignal(receiverRadio, transmission) == nullptr &&
-                receiverRadio != transmitterRadio && isPotentialReceiver(receiverRadio, transmission))
-            {
-                const IArrival *arrival = getArrival(receiverRadio, transmission);
-                if (arrival->getEndTime() >= simTime()) {
-                    cMethodCallContextSwitcher contextSwitcher(transmitterRadio);
-                    contextSwitcher.methodCallSilent();
-                    const Packet *packet = transmission->getPacket();
-                    EV_DEBUG << "Picking up " << packet << " originally sent "
-                             << " from " << (IRadio *)transmitterRadio << " at " << transmission->getStartPosition()
-                             << " to " << (IRadio *)receiverRadio << " at " << arrival->getStartPosition()
-                             << " in " << arrival->getStartPropagationTime() * 1E+6 << " us propagation time." << endl;
-                    auto signal = static_cast<Signal *>(createReceiverSignal(transmission));
-                    simtime_t delay = arrival->getStartTime() - simTime();
-                    simtime_t duration = delay > 0 ? signal->getDuration() : signal->getDuration() + delay;
-                    cGate *gate = receiverRadio->getRadioGate()->getPathStartGate();
-                    ASSERT(dynamic_cast<IRadio *>(getSimulation()->getContextModule()) != nullptr);
-                    const_cast<Radio *>(transmitterRadio)->sendDirect(signal, delay > 0 ? delay : 0, duration, gate);
-                    communicationCache->setCachedSignal(receiverRadio, transmission, signal);
-                    signalSendCount++;
-                }
+    for (const auto transmission : transmissions) {
+        auto transmitterRadio = dynamic_cast<const Radio*>(getRadio(transmission->getTransmitterId()));
+        if (!transmitterRadio)
+            continue;
+        if (communicationCache->getCachedSignal(receiverRadio, transmission) == nullptr &&
+            receiverRadio != transmitterRadio && isPotentialReceiver(receiverRadio, transmission))
+        {
+            const IArrival *arrival = getArrival(receiverRadio, transmission);
+            if (arrival->getEndTime() >= simTime()) {
+                cMethodCallContextSwitcher contextSwitcher(transmitterRadio);
+                contextSwitcher.methodCallSilent();
+                const Packet *packet = transmission->getPacket();
+                EV_DEBUG << "Picking up " << packet << " originally sent "
+                         << " from " << (IRadio *)transmitterRadio << " at " << transmission->getStartPosition()
+                         << " to " << (IRadio *)receiverRadio << " at " << arrival->getStartPosition()
+                         << " in " << arrival->getStartPropagationTime() * 1E+6 << " us propagation time." << endl;
+                auto signal = static_cast<Signal *>(createReceiverSignal(transmission));
+                simtime_t delay = arrival->getStartTime() - simTime();
+                simtime_t duration = delay > 0 ? signal->getDuration() : signal->getDuration() + delay;
+                cGate *gate = receiverRadio->getRadioGate()->getPathStartGate();
+                ASSERT(dynamic_cast<IRadio *>(getSimulation()->getContextModule()) != nullptr);
+                const_cast<Radio *>(transmitterRadio)->sendDirect(signal, delay > 0 ? delay : 0, duration, gate);
+                communicationCache->setCachedSignal(receiverRadio, transmission, signal);
+                signalSendCount++;
             }
         }
     }
+}
+
+void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, long value, cObject *details)
+{
+    if (signal == IRadio::radioModeChangedSignal) {
+        auto radio = check_and_cast<Radio *>(source);
+        pickUpSignals(radio);
+    }
+    else if (signal == IRadio::listeningChangedSignal) {
+        auto radio = check_and_cast<Radio *>(source);
+        for (const auto transmission : transmissions) {
+            const IArrival *arrival = getArrival(radio, transmission);
+            const IListening *listening = radio->getReceiver()->createListening(radio, arrival->getStartTime(), arrival->getEndTime(), arrival->getStartPosition(), arrival->getEndPosition());
+            delete communicationCache->getCachedListening(radio, transmission);
+            communicationCache->setCachedListening(radio, transmission, listening);
+        }
+        pickUpSignals(radio);
+    }
+    else
+        throw cRuntimeError("Unknown signal");
+}
+
+void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, cObject *value, cObject *details)
+{
+    if (signal == interfaceConfigChangedSignal) {
+        auto interfaceChange = check_and_cast<InterfaceEntryChangeDetails *>(value);
+        if (interfaceChange->getFieldId() == InterfaceEntry::F_MACADDRESS) {
+            auto radio = check_and_cast<Radio *>(interfaceChange->getInterfaceEntry()->getSubmodule("radio"));
+            pickUpSignals(radio);
+        }
+    }
+    else
+        throw cRuntimeError("Unknown signal");
 }
 
 } // namespace physicallayer
