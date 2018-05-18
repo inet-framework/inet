@@ -38,12 +38,6 @@ namespace inet {
 simsignal_t Arp::arpRequestSentSignal = registerSignal("arpRequestSent");
 simsignal_t Arp::arpReplySentSignal = registerSignal("arpReplySent");
 
-static std::ostream& operator<<(std::ostream& out, cMessage *msg)
-{
-    out << "(" << msg->getClassName() << ")" << msg->getFullName();
-    return out;
-}
-
 static std::ostream& operator<<(std::ostream& out, const Arp::ArpCacheEntry& e)
 {
     if (e.pending)
