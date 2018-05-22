@@ -1319,6 +1319,59 @@ std::ostream& operator<<(std::ostream& os, const value<Value, units::b>& value)
     return os;
 }
 
+// TODO: extract these SI prefix printing fallback mechanisms
+template<typename Value>
+std::ostream& operator<<(std::ostream& os, const value<Value, units::W>& value)
+{
+    if (values::pW(value) < values::pW(1000.0))
+        os << values::pW(value);
+    else if (values::nW(value) < values::nW(1000.0))
+        os << values::nW(value);
+    else if (values::uW(value) < values::uW(1000.0))
+        os << values::uW(value);
+    else if (values::mW(value) < values::mW(1000.0))
+        os << values::mW(value);
+    else {
+        os << value.get() << ' ';
+        output_unit<units::W>::fn(os);
+    }
+    return os;
+}
+
+// TODO: extract these SI prefix printing fallback mechanisms
+template<typename Value>
+std::ostream& operator<<(std::ostream& os, const value<Value, units::Hz>& value)
+{
+    if (values::GHz(value) >= values::GHz(1.0))
+        os << values::GHz(value);
+    else if (values::MHz(value) >= values::MHz(1.0))
+        os << values::MHz(value);
+    else if (values::kHz(value) >= values::kHz(1.0))
+        os << values::kHz(value);
+    else {
+        os << value.get() << ' ';
+        output_unit<units::Hz>::fn(os);
+    }
+    return os;
+}
+
+// TODO: extract these SI prefix printing fallback mechanisms
+template<typename Value>
+std::ostream& operator<<(std::ostream& os, const value<Value, units::bps>& value)
+{
+    if (values::Gbps(value) >= values::Gbps(1.0))
+        os << values::Gbps(value);
+    else if (values::Mbps(value) >= values::Mbps(1.0))
+        os << values::Mbps(value);
+    else if (values::kbps(value) >= values::kbps(1.0))
+        os << values::kbps(value);
+    else {
+        os << value.get() << ' ';
+        output_unit<units::bps>::fn(os);
+    }
+    return os;
+}
+
 namespace constants {
 
 // Physical constants:
