@@ -197,7 +197,7 @@ class INET_API Ipv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     virtual void reassembleAndDeliverFinish(Packet *packet);
 
     /**
-     * Decapsulate and return encapsulated packet after attaching Ipv4ControlInfo.
+     * Decapsulate packet.
      */
     virtual void decapsulate(Packet *packet);
 

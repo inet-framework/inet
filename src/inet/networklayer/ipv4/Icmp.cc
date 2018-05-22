@@ -280,7 +280,6 @@ void Icmp::sendToIP(Packet *msg, const Ipv4Address& dest)
 
 void Icmp::sendToIP(Packet *msg)
 {
-    // assumes Ipv4ControlInfo is already attached
     EV_INFO << "Sending " << msg << " to lower layer.\n";
     msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::icmpv4);

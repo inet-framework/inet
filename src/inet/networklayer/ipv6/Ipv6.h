@@ -179,7 +179,7 @@ class INET_API Ipv6 : public QueueBase, public NetfilterBase, public ILifecycle,
     virtual void localDeliver(Packet *packet, const InterfaceEntry *fromIE);
 
     /**
-     * Decapsulate and return encapsulated packet after attaching Ipv6ControlInfo.
+     * Decapsulate packet.
      */
     virtual void decapsulate(Packet *packet);
 
