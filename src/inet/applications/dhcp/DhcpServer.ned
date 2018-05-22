@@ -31,7 +31,7 @@ import inet.applications.contract.IApp;
 simple DhcpServer like IApp
 {
     parameters:
-        string interfaceTableModule;   // The path to the InterfaceTable module
+        string interfaceTableModule; // the path to the InterfaceTable module
         string interface = default(""); // interface to listen on; can be left empty if there is only one non-loopback interface
         int numReservedAddresses; // number of addresses to skip at the start of the network's address range
         int maxNumClients; // maximum number of clients (IPs) allowed to be leased
@@ -43,6 +43,3 @@ simple DhcpServer like IApp
         input socketIn @labels(UdpControlInfo/up);
         output socketOut @labels(UdpControlInfo/down);
 }
-
-
-

@@ -18,10 +18,9 @@
 package inet.applications.ethernet;
 
 //
-// A simple traffic generator for the Ethernet model and the 802.11 model,
-// and generally for any L2 model that accepts Ieee80211Ctrl control info
-// on the packets. It should be connected directly to ~EtherEncap or
-// an Ieee802NicXXX module.
+// A simple traffic generator for the Ethernet model and the 802.11 model, and
+// generally for any L2 model that accepts Ieee802SapReq tag on packets. It
+// should be connected directly to ~EtherEncap module.
 //
 simple EtherTrafGen
 {
@@ -44,4 +43,3 @@ simple EtherTrafGen
         input in @labels(Ieee802Ctrl/up);
         output out @labels(Ieee802Ctrl/down);
 }
-
