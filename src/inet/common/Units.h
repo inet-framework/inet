@@ -1305,6 +1305,13 @@ typedef value<double, units::rpm> rpm;
 typedef value<double, units::dozen> dozen;
 typedef value<double, units::bakers_dozen> bakers_dozen;
 
+template<typename Value, typename Unit>
+std::string unit2string(const value<Value, Unit>& value) {
+    std::stringstream ss;
+    ss << value;
+    return ss.str();
+}
+
 } // namespace values
 
 template<typename Value>
