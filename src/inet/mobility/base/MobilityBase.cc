@@ -200,7 +200,7 @@ void MobilityBase::refreshDisplay() const
     displayString.setTagArg("t", 0, text);
     if (visualRepresentation != nullptr) {
         auto position = const_cast<MobilityBase *>(this)->getCurrentPosition();
-        EV_DEBUG << "current position = " << position << endl;
+        EV_TRACE << "current position = " << position << endl;
         auto visualRepresentationPosition = canvasProjection->computeCanvasPoint(position);
         char buf[32];
         snprintf(buf, sizeof(buf), "%lf", visualRepresentationPosition.x);
