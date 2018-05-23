@@ -41,9 +41,8 @@ package inet.transportlayer.contract;
 //
 // <b>Communication with the IPv4 (IPv4/IPv6) layer</b>
 //
-// The ~Udp model relies on sending and receiving ~Ipv4ControlInfo/~Ipv6ControlInfo
-// objects attached to ~UdpHeader objects as control info
-// (see cMessage::setControlInfo()).
+// The ~Udp model relies on sending and receiving ~L3AddressReq/~L3AddressInd
+// objects attached to packets.
 //
 // @see ~Udp, ~UdpHeader, ~UdpControlInfo, ~UdpCommandCode
 //

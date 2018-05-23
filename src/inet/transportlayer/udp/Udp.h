@@ -35,8 +35,6 @@
 namespace inet {
 
 class IInterfaceTable;
-class Ipv4ControlInfo;
-class Ipv6ControlInfo;
 class Icmp;
 class Icmpv6;
 class UdpHeader;

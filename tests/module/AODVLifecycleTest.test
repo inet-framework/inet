@@ -81,7 +81,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 *.intermediateNodeA.aodv.jitter = 3ms
 *.intermediateNodeB.aodv.jitter = 4ms
 # mobility
-**.mobilityType = "StationaryMobility"
+*.*.mobilityType = "StationaryMobility"
 **.mobility.constraintAreaMinZ = 0m
 **.mobility.constraintAreaMaxZ = 0m
 **.mobility.constraintAreaMinX = 0m

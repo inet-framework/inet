@@ -75,7 +75,7 @@ sim-time-limit = 100s
 *.radioMedium.mediumLimitCache.maxTransmissionPower = 2.0mW
 
 # mobility
-**.mobilityType = "StationaryMobility"
+*.*.mobilityType = "StationaryMobility"
 **.mobility.constraintAreaMinZ = 0m
 **.mobility.constraintAreaMaxZ = 0m
 **.mobility.constraintAreaMinX = 0m

@@ -16,7 +16,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 package inet.applications.generic;
 
 //
@@ -38,7 +37,7 @@ simple IpvxTrafGen like IIpvxTrafficGenerator
         double stopTime @unit(s) = default(-1s);  // time of finishing sending, negative values mean forever
         volatile double sendInterval @unit(s) = default(10ms); // may be a random value, e.g. exponential(1)
         int numPackets = default(-1); // max number of packets to generate, -1 means forever
-        int protocol; // value for ~Ipv4ControlInfo / ~Ipv6ControlInfo protocol field, accepts only between 143 and 254
+        int protocol; // value for IPv4, IPv6 protocol field, accepts only between 143 and 254
         volatile int packetLength @unit(B); // packet length in bytes
         string destAddresses = default(""); // list of destination addresses, separated by spaces
         @display("i=block/source");
@@ -51,4 +50,3 @@ simple IpvxTrafGen like IIpvxTrafficGenerator
         input ipIn @labels(Ipv4ControlInfo/up,Ipv6ControlInfo/up);
         output ipOut @labels(Ipv4ControlInfo/down,Ipv6ControlInfo/down);
 }
-

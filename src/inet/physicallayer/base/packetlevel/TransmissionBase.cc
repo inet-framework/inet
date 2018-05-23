@@ -50,8 +50,8 @@ std::ostream& TransmissionBase::printToStream(std::ostream& stream, int level) c
                << ", endTime = " << endTime
                << ", startPosition = " << startPosition
                << ", preambleDuration = " << preambleDuration
-               << ", headerPosition = " << headerDuration
-               << ", dataPosition = " << dataDuration
+               << ", headerDuration = " << headerDuration
+               << ", dataDuration = " << dataDuration
                << ", endPosition = " << endPosition
                << ", startOrientation = " << startOrientation
                << ", endOrientation = " << endOrientation;

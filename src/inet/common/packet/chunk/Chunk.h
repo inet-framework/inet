@@ -452,7 +452,7 @@ class INET_API Chunk : public cObject,
     // NOTE: there is no markComplete() intentionally
     virtual bool isComplete() const { return !(flags & CF_INCOMPLETE); }
     virtual bool isIncomplete() const { return flags & CF_INCOMPLETE; }
-    virtual void markIncomplete() { flags |= CF_INCOMPLETE; }
+    virtual void markIncomplete() { checkMutable(); flags |= CF_INCOMPLETE; }
     //@}
 
     /** @name Correctness related functions */
@@ -460,7 +460,7 @@ class INET_API Chunk : public cObject,
     // NOTE: there is no markCorrect() intentionally
     virtual bool isCorrect() const { return !(flags & CF_INCORRECT); }
     virtual bool isIncorrect() const { return flags & CF_INCORRECT; }
-    virtual void markIncorrect() { flags |= CF_INCORRECT; }
+    virtual void markIncorrect() { checkMutable(); flags |= CF_INCORRECT; }
     //@}
 
     /** @name Proper representation related functions */
@@ -468,7 +468,7 @@ class INET_API Chunk : public cObject,
     // NOTE: there is no markProperlyRepresented() intentionally
     virtual bool isProperlyRepresented() const { return !(flags & CF_IMPROPERLY_REPRESENTED); }
     virtual bool isImproperlyRepresented() const { return flags & CF_IMPROPERLY_REPRESENTED; }
-    virtual void markImproperlyRepresented() { flags |= CF_IMPROPERLY_REPRESENTED; }
+    virtual void markImproperlyRepresented() { checkMutable(); flags |= CF_IMPROPERLY_REPRESENTED; }
     //@}
 
     /** @name Iteration related functions */

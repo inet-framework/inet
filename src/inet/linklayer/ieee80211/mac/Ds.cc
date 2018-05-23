@@ -70,6 +70,9 @@ void Ds::processDataFrame(Packet *frame, const Ptr<const Ieee80211DataHeader>& h
                 }
                 else {
                     EV << "Frame's destination STA is not in associated state -- dropping frame\n";
+                    PacketDropDetails details;
+                    details.setReason(OTHER_PACKET_DROP);
+                    emit(packetDroppedSignal, frame, &details);
                     delete frame;
                 }
             }
@@ -77,6 +80,16 @@ void Ds::processDataFrame(Packet *frame, const Ptr<const Ieee80211DataHeader>& h
         else if (mib->bssStationData.stationType == Ieee80211Mib::STATION) {
             if (!mib->bssStationData.isAssociated) {
                 EV << "Rejecting data frame as STA is not associated with an AP" << endl;
+                PacketDropDetails details;
+                details.setReason(OTHER_PACKET_DROP);
+                emit(packetDroppedSignal, frame, &details);
+                delete frame;
+            }
+            else if (mib->bssData.bssid != header->getTransmitterAddress()) {
+                EV << "Rejecting data frame received from another AP" << endl;
+                PacketDropDetails details;
+                details.setReason(OTHER_PACKET_DROP);
+                emit(packetDroppedSignal, frame, &details);
                 delete frame;
             }
             else

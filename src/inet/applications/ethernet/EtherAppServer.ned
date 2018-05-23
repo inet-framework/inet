@@ -15,13 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 package inet.applications.ethernet;
 
 //
-// Server side of the EtherCli model -- generates ~EtherAppResp packets
-// with the number of bytes requested by the client in ~EtherAppReq.
-// It should be connected directly to ~EtherLlc or a Ieee802NicXXX module.
+// Server side of the EtherAppCliend model -- generates packets containing
+// ~EtherAppResp chunks with the number of bytes requested by the client in
+// corresponding ~EtherAppReq. It should be connected directly to ~EtherLlc
+// module.
 //
 simple EtherAppServer
 {

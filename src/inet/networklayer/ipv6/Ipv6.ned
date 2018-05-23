@@ -28,12 +28,12 @@ package inet.networklayer.ipv6;
 // <b>Interfacing with higher layer protocols</b>
 //
 // To send a packet over Ipv6 from a higher layer protocol, the module should
-// fill in an ~Ipv6ControlInfo object, attach it to the packet with cMessage's
-// setControlInfo() method, the send it to the ~Ipv6 module.
+// fill in an ~L3AddressReq object, attach it to the packet with Packet's
+// addTag() method, then send the packet to the ~Ipv6 module.
 //
 // When ~Ipv6 sends up a packet to a higher layer protocol, it will also attach
-// an ~Ipv6ControlInfo to the packet, with the source and destination Ipv6 address,
-// etc. of the Ipv6 datagram in which the packet arrived.
+// an ~L3AddressInd to the packet, with the source and destination Ipv6 addresses
+// of the Ipv6 datagram in which the packet arrived.
 //
 // ~Ipv6 can serve several higher-layer protocols. The higher layer protocols
 // should call registerProtocol with their gate towards the Ipv6 module,
@@ -59,7 +59,7 @@ package inet.networklayer.ipv6;
 // datagrams are processed in order. The processing time is determined by the
 // procDelay module parameter.
 //
-// @see ~Ipv6RoutingTable, ~Ipv6ControlInfo, ~Ipv6NeighbourDiscovery, ~Icmpv6
+// @see ~Ipv6RoutingTable, ~Ipv6NeighbourDiscovery, ~Icmpv6
 //
 // @author Andras Varga
 //

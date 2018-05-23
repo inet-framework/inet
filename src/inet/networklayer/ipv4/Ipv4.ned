@@ -25,12 +25,12 @@ package inet.networklayer.ipv4;
 // <b>Interfacing with higher layer protocols</b>
 //
 // To send a packet over IPv4 from a higher layer protocol, the module should
-// fill in an ~Ipv4ControlInfo object, attach it to the packet with cMessage's
-// setControlInfo() method, the send it to the ~Ipv4 module.
+// fill in an ~L3AddressReq object, attach it to the packet with the Packets's
+// addTag() method, then send the packet to the ~Ipv4 module.
 //
 // When ~Ipv4 sends up a packet to a higher layer protocol, it will also attach
-// an ~Ipv4ControlInfo to the packet, with the source and destination IPv4 address,
-// etc. of the IPv4 datagram in which the packet arrived.
+// an ~L3AddressInd to the packet, with the source and destination IPv4 addresses
+// of the IPv4 datagram in which the packet arrived.
 //
 // ~Ipv4 can serve several higher-layer protocols. The higher layer protocols
 // should call registerProtocol with their gate towards the ~Ipv4 module,
@@ -45,8 +45,7 @@ package inet.networklayer.ipv4;
 // calling C++ methods (such as findBestMatchingRoute(destAddress)) of ~Ipv4RoutingTable.
 // No message exchange with ~Ipv4RoutingTable takes place.
 //
-// A routed datagram will be sent to the queueOut gate, with an
-// ~Ipv4ControlInfo  object attached. queueOut is expected to be
+// A routed datagram will be sent to the queueOut, which is expected to be
 // connected to ~INetworkInterface modules.
 //
 // Routing protocol implementations (e.g. OSPF and ISIS) can also query
@@ -77,7 +76,7 @@ package inet.networklayer.ipv4;
 // method which determines processing time for a packet, or (2) use a
 // different base class.
 //
-// @see ~Ipv4RoutingTable, ~Ipv4ControlInfo, ~Arp
+// @see ~Ipv4RoutingTable, ~Arp
 //
 // @author Andras Varga
 //

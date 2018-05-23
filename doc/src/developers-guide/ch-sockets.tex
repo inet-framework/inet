@@ -1,4 +1,4 @@
-\chapter{Working with Sockets}
+\chapter{Using Sockets}
 \label{cha:sockets}
 
 \section{Overview}
@@ -60,6 +60,10 @@ be configured:
 In contrast, incoming messages such as service indications from the underlying
 communication protocol can be received on any application gate.
 
+To ease application development, all sockets support storing a user specified
+data object pointer. The pointer is accessible with the \ffunc{setUserData()},
+\ffunc{getUserData()} member functions.
+
 Another mandatory configuration for all sockets is setting the socket callback
 interface. The callback interface is covered in more detail in the following
 section.
@@ -82,15 +86,19 @@ packets:
 
 \subsection*{Processing Messages}
 
-In general, sockets can process all incoming messages and update their state
-accordingly if necessary. They can automatically dispatch the received packets
-and service indications to the appropriate functions in the \cppclass{ICallback}
-interface of the socket.
+In general, sockets can process all incoming messages which were sent by the
+underlying protocol. The received messages must be processed by the socket where
+they belong to.
 
-For example, an applications can simply go through each knonwn socket in any
+For example, an application can simply go through each knonwn socket in any
 order, and decide which one should process the received message as follows:
 
 \cppsnippet{SocketProcessExample}{Socket process example}
+
+Sockets usually deconstruct the received messages and update their state
+accordingly if necessary. They also automatically dispatch received packets and
+service indications for further processing to the appropriate functions in the
+corresponding \cppclass{ICallback} interface.
 
 \subsection*{Sending Data}
 
@@ -144,7 +152,20 @@ methods respectively.
 \label{sec:sockets:udp-socket}
 
 The \cppclass{UdpSocket} class provides an easy to use C++ interface to send and
-receive \protocol{UDP} datagrams.
+receive \protocol{UDP} datagrams. The underlying \protocol{UDP} protocol is
+implemented in the \nedtype{Udp} module.
+
+\subsection*{Callback Interface}
+
+Processing packets and indications which are received from the \nedtype{Udp}
+module is pretty simple. The incoming message must be processed by the socket
+where it belongs as shown in the general section.
+
+The \cppclass{UdpSocket} deconstructs the message and uses the
+\cppclass{UdpSocket::ICallback} interface to notify the application about
+received data and error indications:
+
+\cppsnippet{UdpSocketCallbackInterface}{UDP socket callback interface}
 
 \subsection*{Configuring Sockets}
 
@@ -155,14 +176,21 @@ received. If the port is -1, then an unused port is selected automatically by
 the \nedtype{Udp} module. The address and port pair must be unique within the
 same network node.
 
-Here is how to bind to a specific local address and local port to receive
+Here is how to bind to a specific local address and port to receive
 \protocol{UDP} datagrams:
 
 \cppsnippet{UdpSocketBindExample}{UDP socket bind example}
 
+For only receiving \protocol{UDP} datagrams from a specific remote address/port,
+the socket can be connected to the desired remote address/port:
+
+\cppsnippet{UdpSocketConnectExample}{UDP socket connect example}
+
 There are several other socket options (e.g. receiving broadcasts, managing
 multicast groups, setting type of service) which can also be configured using
-the \cppclass{UdpSocket} class.
+the \cppclass{UdpSocket} class:
+
+\cppsnippet{UdpSocketConfigureExample}{UDP socket configuration example}
 
 \subsection*{Sending Data}
 
@@ -184,19 +212,6 @@ The application can call connect several times on the same socket.
 
 \subsection*{Receiving Data}
 
-Processing packets and indications which are received from the \nedtype{Udp}
-module is pretty simple. The incoming message must be processed by the socket
-where it belongs as shown in the general section.
-
-The \cppclass{UdpSocket} deconstructs the message and uses the
-\cppclass{UdpSocket::ICallback} interface to notify the application about
-received data and error indications. The \cppclass{UdpSocket::ICallback}
-interface contains only a few functions which are to be implemented by the
-application.
-
-\cppsnippet{UdpSocketCallbackInterfaceExample}{UDP socket callback interface
-example}
-
 For example, the application may directly implement the
 \cppclass{UdpSocket::ICallback} interface and print the received data as
 follows:
@@ -207,39 +222,149 @@ follows:
 \label{sec:sockets:tcp-socket}
 
 The \cppclass{TcpSocket} class provides an easy to use C++ interface to manage
-\protocol{TCP} connections, and to send and receive data.
+\protocol{TCP} connections, and to send and receive data. The underlying
+\protocol{TCP} protocol is implemented in the \nedtype{Tcp}, \nedtype{TcpLwip},
+and \nedtype{TcpNsc} modules.
 
-\subsection*{Configuring Sockets}
+\subsection*{Callback Interface}
+
+Messages received from the various \nedtype{Tcp} modules can be processed by the
+\cppclass{TcpSocket} where they belong to. The \cppclass{TcpSocket} deconstructs
+the message and uses the \cppclass{TcpSocket::ICallback} interface to notify the
+application about the received data or service indication:
+
+\cppsnippet{TcpSocketCallbackInterface}{TCP socket callback interface}
+
+\subsection*{Configuring Connections}
+
+The \nedtype{Tcp} module supports several \protocol{TCP} different congestion
+algorithms, which can also be configured using the \cppclass{TcpSocket}:
+
+\cppsnippet{TcpSocketConfigureExample}{TCP socket configure example}
+
+Upon setting the individual parameters, the socket immediately sends sevice
+requests to the underlying \nedtype{Tcp} protocol module.
+
+\subsection*{Setting up Connections}
+
+Since \protocol{TCP} is a connection oriented protocol, a connection must be
+established before applications can exchange data. On the one side, the
+application listens at a local address and port for incoming \protocol{TCP}
+connections:
 
 \cppsnippet{TcpSocketListenExample}{TCP socket listen example}
 
+On the other side, the application connects to a remote address and port to
+establish a new connection:
+
 \cppsnippet{TcpSocketConnectExample}{TCP socket connect example}
+
+\subsection*{Accepting Connections}
+
+The \nedtype{Tcp} module automatically notifies the \cppclass{TcpSocket} about
+incoming connections. The socket in turn notifies the application using the
+\ffunc{ICallback::socketAvailable} method of the callback interface. Finally,
+incoming \protocol{TCP} connections must be accepted by the application before
+they can be used:
+
+\cppsnippet{TcpSocketAcceptExample}{TCP socket accept example}
+
+After the connection is accepted, the \nedtype{Tcp} module notifies the
+application about the socket being established and ready to be used.
 
 \subsection*{Sending Data}
 
+After the connection has been established, applications can send data to the
+remote application via a simple function call:
+
 \cppsnippet{TcpSocketSendExample}{TCP socket send example}
+
+Packet data is enqueued by the local \nedtype{Tcp} module and transmitted
+over time according to the protocol logic.
 
 \subsection*{Receiving Data}
 
-\cppsnippet{TcpSocketCallbackInterfaceExample}{TCP socket callback interface
-example}
+Receiving data is as simple as implementing the corresponding method of the
+\cppclass{TcpSocket::ICallback} interface. One caveat is that packet data may
+arrive in different chunk sizes (but the same order) than they were sent due to
+the nature of \protocol{TCP} protocol.
+
+For example, the application may directly implement the
+\cppclass{TcpSocket::ICallback} interface and print the received data as
+follows:
 
 \cppsnippet{TcpSocketReceiveExample}{TCP socket receive example}
 
 \section{SCTP Socket}
 \label{sec:sockets:sctp-socket}
 
-\subsection*{Configuring Sockets}
+The \cppclass{SctpSocket} class provides an easy to use C++ interface to manage
+\protocol{SCTP} connections, and to send and receive data. The underlying
+\protocol{SCTP} protocol is implemented in the \nedtype{Sctp} module.
+
+\subsection*{Callback Interface}
+
+Messages received from the \nedtype{Sctp} module can be processed by the
+\cppclass{SctpSocket} where they belong to. The \cppclass{SctpSocket}
+deconstructs the message and uses the \cppclass{SctpSocket::ICallback} interface
+to notify the application about the received data or service indication:
+
+\cppsnippet{SctpSocketCallbackInterface}{SCTP socket callback interface}
+
+\subsection*{Configuring Connections}
+
+The \cppclass{SctpSocket} class supports setting several \protocol{SCTP}
+specific connection parameters directly:
+
+\cppsnippet{SctpSocketConfigureExample}{SCTP socket configure example}
+
+Upon setting the individual parameters, the socket immediately sends sevice
+requests to the underlying \nedtype{Sctp} protocol module.
+
+\subsection*{Setting up Connections}
+
+Since \protocol{SCTP} is a connection oriented protocol, a connection must be
+established before applications can exchange data. On the one side, the
+application listens at a local address and port for incoming \protocol{SCTP}
+connections:
 
 \cppsnippet{SctpSocketListenExample}{SCTP socket listen example}
 
+On the other side, the application connects to a remote address and port to
+establish a new connection:
+
 \cppsnippet{SctpSocketConnectExample}{SCTP socket connect example}
+
+\subsection*{Accepting Connections}
+
+The \nedtype{Sctp} module automatically notifies the \cppclass{SctpSocket} about
+incoming connections. The socket in turn notifies the application using the
+\ffunc{ICallback::socketAvailable} method of the callback interface. Finally,
+incoming \protocol{SCTP} connections must be accepted by the application before
+they can be used:
+
+\cppsnippet{SctpSocketAcceptExample}{SCTP socket accept example}
 
 \subsection*{Sending Data}
 
+After the connection has been established, applications can send data to the
+remote applica- tion via a simple function call:
+
 \cppsnippet{SctpSocketSendExample}{SCTP socket send example}
 
+Packet data is enqueued by the local \nedtype{Sctp} module and transmitted over
+time according to the protocol logic.
+
 \subsection*{Receiving Data}
+
+Receiving data is as simple as implementing the corresponding method of the
+\cppclass{SctpSocket::ICallback} interface. One caveat is that packet data may
+arrive in different chunk sizes (but the same order) than they were sent due to
+the nature of \protocol{SCTP} protocol.
+
+For example, the application may directly implement the
+\cppclass{SctpSocket::ICallback} interface and print the received data as
+follows:
 
 \cppsnippet{SctpSocketReceiveExample}{SCTP socket receive example}
 
@@ -247,7 +372,17 @@ example}
 \label{sec:sockets:ipv4-socket}
 
 The \cppclass{Ipv4Socket} class provides an easy to use C++ interface to send
-and receive \protocol{IPv4} datagrams.
+and receive \protocol{IPv4} datagrams. The underlying \protocol{IPv4} protocol
+is implemented in the \nedtype{Ipv4} module.
+
+\subsection*{Callback Interface}
+
+Messages received from the \nedtype{Ipv4} module must be processed by the socket
+where they belong as shown in the general section. The \cppclass{Ipv4Socket}
+deconstructs the message and uses the \cppclass{Ipv4Socket::ICallback} interface
+to notify the application about the received data:
+
+\cppsnippet{Ipv4SocketCallbackInterface}{IPv4 socket callback interface}
 
 \subsection*{Configuring Sockets}
 
@@ -286,14 +421,6 @@ The application can call \ffunc{connect()} several times on the same socket.
 
 \subsection*{Receiving Data}
 
-Messages received from the \nedtype{Ipv4} module must be processed by the socket
-where they belong as shown in the general section. The \cppclass{Ipv4Socket}
-deconstructs the message and uses the \cppclass{Ipv4Socket::ICallback} interface
-to notify the application about the received data:
-
-\cppsnippet{Ipv4SocketCallbackInterfaceExample}{IPv4 socket callback interface
-example}
-
 For example, the application may directly implement the
 \cppclass{Ipv4Socket::ICallback} interface and print the received data as
 follows:
@@ -304,7 +431,17 @@ follows:
 \label{sec:sockets:ipv6-socket}
 
 The \cppclass{Ipv6Socket} class provides an easy to use C++ interface to send
-and receive \protocol{IPv6} datagrams.
+and receive \protocol{IPv6} datagrams. The underlying \protocol{IPv6} protocol
+is implemented in the \nedtype{Ipv6} module.
+
+\subsection*{Callback Interface}
+
+Messages received from the \nedtype{Ipv6} module must be processed by the socket
+where they belong as shown in the general section. The \cppclass{Ipv6Socket}
+deconstructs the message and uses the \cppclass{Ipv6Socket::ICallback} interface
+to notify the application about the received data:
+
+\cppsnippet{Ipv6SocketCallbackInterface}{IPv6 socket callback interface}
 
 \subsection*{Configuring Sockets}
 
@@ -343,14 +480,6 @@ The application can call \ffunc{connect()} several times on the same socket.
 
 \subsection*{Receiving Data}
 
-Messages received from the \nedtype{Ipv6} module must be processed by the socket
-where they belong as shown in the general section. The \cppclass{Ipv6Socket}
-deconstructs the message and uses the \cppclass{Ipv6Socket::ICallback} interface
-to notify the application about received data:
-
-\cppsnippet{Ipv6SocketCallbackInterfaceExample}{IPv6 socket callback interface
-example}
-
 For example, the application may directly implement the
 \cppclass{Ipv6Socket::ICallback} interface and print the received data as
 follows:
@@ -361,9 +490,19 @@ follows:
 \label{sec:sockets:l3-socket}
 
 The \cppclass{L3Socket} class provides an easy to use C++ interface to send and
-receive datagrams using the conceptual network protocols:
-\nedtype{NextHopForwarding}, \nedtype{Flooding},
-\nedtype{ProbabilisticBroadcast}, and \nedtype{AdaptiveProbabilisticBroadcast}.
+receive datagrams using the conceptual network protocols. The underlying network
+protocols are implemented in the \nedtype{NextHopForwarding},
+\nedtype{Flooding}, \nedtype{ProbabilisticBroadcast}, and
+\nedtype{AdaptiveProbabilisticBroadcast} modules.
+
+\subsection*{Callback Interface}
+
+Messages received from the network protocol module must be processed by the
+associated socket where as shown in the general section. The \cppclass{L3Socket}
+deconstructs the message and uses the \cppclass{L3Socket::ICallback} interface
+to notify the application about the received data:
+
+\cppsnippet{L3SocketCallbackInterface}{L3 socket callback interface}
 
 \subsection*{Configuring Sockets}
 
@@ -409,14 +548,6 @@ The application can call \ffunc{connect()} several times on the same socket.
 
 \subsection*{Receiving Data}
 
-Messages received from the network protocol module must be processed by the
-associated socket where as shown in the general section. The \cppclass{L3Socket}
-deconstructs the message and uses the \cppclass{L3Socket::ICallback} interface
-to notify the application about the received data:
-
-\cppsnippet{L3SocketCallbackInterfaceExample}{L3 socket callback interface
-example}
-
 For example, the application may directly implement the
 \cppclass{L3Socket::ICallback} interface and print the received data as follows:
 
@@ -426,24 +557,35 @@ For example, the application may directly implement the
 \label{sec:sockets:tun-socket}
 
 The \cppclass{TunSocket} class provides an easy to use C++ interface to send and
-receive datagrams using a \protocol{TUN} interface.
+receive datagrams using a \protocol{TUN} interface. The underlying
+\protocol{TUN} interface is implemented in the \nedtype{Tun} module.
 
 A \protocol{TUN} interface is basically a virtual network interface which is
 usually connected to an application (from the outside) instead of other network
 devices. It can be used for many networking tasks such as tunneling, or virtual
 private networking.
 
+\subsection*{Callback Interface}
+
+Messages received from the \nedtype{Tunq} module must be processed by the socket
+where they belong as shown in the general section. The \cppclass{TunSocket}
+deconstructs the message and uses the \cppclass{TunSocket::ICallback} interface
+to notify the application about the received data:
+
+\cppsnippet{TunSocketCallbackInterface}{TUN socket callback interface}
+
 \subsection*{Configuring Sockets}
 
-A \cppclass{TunSocket} must be associated to a \protocol{TUN} interface before
+A \cppclass{TunSocket} must be associated with a \protocol{TUN} interface before
 it can be used:
 
 \cppsnippet{TunSocketOpenExample}{TUN socket open example}
 
 \subsection*{Sending Packets}
 
-As soon as the \cppclass{TunSocket} is associated to a \protocol{TUN} interface,
-applications can immediately start sending datagrams via a simple function call:
+As soon as the \cppclass{TunSocket} is associated with a \protocol{TUN}
+interface, applications can immediately start sending datagrams via a simple
+function call:
 
 \cppsnippet{TunSocketSendExample}{TUN socket send example}
 

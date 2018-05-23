@@ -31,7 +31,7 @@ AntennaBase::AntennaBase() :
 void AntennaBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        mobility = getModuleFromPar<IMobility>(par("mobilityModule"), getContainingNode(this));
+        mobility = getModuleFromPar<IMobility>(par("mobilityModule"), this);
         numAntennas = par("numAntennas");
     }
 }

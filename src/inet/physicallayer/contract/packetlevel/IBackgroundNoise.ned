@@ -22,7 +22,7 @@ package inet.physicallayer.contract.packetlevel;
 // noise, and other random fluctuations of the electromagnetic field that affect
 // the quality of the communication channel.
 //
-moduleinterface IRadioBackgroundNoise
+moduleinterface IBackgroundNoise
 {
     parameters:
         @display("i=block/mac");

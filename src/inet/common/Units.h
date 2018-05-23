@@ -1038,6 +1038,9 @@ typedef kilo<m>::type km;
 typedef milli<kg>::type g;
 typedef milli<g>::type mg;
 typedef milli<s>::type ms;
+typedef pico<W>::type pW;
+typedef nano<W>::type nW;
+typedef micro<W>::type uW;
 typedef milli<W>::type mW;
 typedef milli<Ah>::type mAh;
 typedef kilo<Hz>::type kHz;
@@ -1052,6 +1055,9 @@ UNIT_DISPLAY_NAME(units::km, "km");
 UNIT_DISPLAY_NAME(units::g, "g");
 UNIT_DISPLAY_NAME(units::mg, "mg");
 UNIT_DISPLAY_NAME(units::ms, "ms");
+UNIT_DISPLAY_NAME(units::pW, "pW");
+UNIT_DISPLAY_NAME(units::nW, "nW");
+UNIT_DISPLAY_NAME(units::uW, "uW");
 UNIT_DISPLAY_NAME(units::mW, "mW");
 UNIT_DISPLAY_NAME(units::kHz, "kHz");
 UNIT_DISPLAY_NAME(units::MHz, "MHz");
@@ -1122,8 +1128,9 @@ typedef scale<kPa, 10> millibar;
 // Informatics
 typedef intscale<b, 1, 8> B;
 typedef compose<b, pow<s, -1> > bps;
-typedef scale<bps, 1, 1000> kbps;
-typedef scale<bps, 1, 1000000> Mbps;
+typedef kilo<bps>::type kbps;
+typedef mega<bps>::type Mbps;
+typedef giga<bps>::type Gbps;
 
 // Other
 typedef scale<Hz, 60> rpm;
@@ -1173,6 +1180,7 @@ UNIT_DISPLAY_NAME(units::B, "B");
 UNIT_DISPLAY_NAME(units::bps, "bps");
 UNIT_DISPLAY_NAME(units::kbps, "kbps");
 UNIT_DISPLAY_NAME(units::Mbps, "Mbps");
+UNIT_DISPLAY_NAME(units::Gbps, "Gbps");
 UNIT_DISPLAY_NAME(units::percent, "%");
 UNIT_DISPLAY_NAME(units::rpm, "rpm");
 UNIT_DISPLAY_NAME(units::dozen, "dozen");
@@ -1227,6 +1235,9 @@ typedef value<double, units::km> km;
 typedef value<double, units::g> g;
 typedef value<double, units::mg> mg;
 typedef value<double, units::ms> ms;
+typedef value<double, units::pW> pW;
+typedef value<double, units::nW> nW;
+typedef value<double, units::uW> uW;
 typedef value<double, units::mW> mW;
 typedef value<double, units::mAh> mAh;
 typedef value<double, units::kHz> kHz;
@@ -1287,11 +1298,19 @@ typedef value<double, units::millibar> millibar;
 typedef value<double, units::bps> bps;
 typedef value<double, units::kbps> kbps;
 typedef value<double, units::Mbps> Mbps;
+typedef value<double, units::Gbps> Gbps;
 
 typedef value<double, units::percent> percent;
 typedef value<double, units::rpm> rpm;
 typedef value<double, units::dozen> dozen;
 typedef value<double, units::bakers_dozen> bakers_dozen;
+
+template<typename Value, typename Unit>
+std::string unit2string(const value<Value, Unit>& value) {
+    std::stringstream ss;
+    ss << value;
+    return ss.str();
+}
 
 } // namespace values
 
@@ -1303,6 +1322,59 @@ std::ostream& operator<<(std::ostream& os, const value<Value, units::b>& value)
     else {
         os << value.get() << ' ';
         output_unit<units::b>::fn(os);
+    }
+    return os;
+}
+
+// TODO: extract these SI prefix printing fallback mechanisms
+template<typename Value>
+std::ostream& operator<<(std::ostream& os, const value<Value, units::W>& value)
+{
+    if (values::pW(value) < values::pW(1000.0))
+        os << values::pW(value);
+    else if (values::nW(value) < values::nW(1000.0))
+        os << values::nW(value);
+    else if (values::uW(value) < values::uW(1000.0))
+        os << values::uW(value);
+    else if (values::mW(value) < values::mW(1000.0))
+        os << values::mW(value);
+    else {
+        os << value.get() << ' ';
+        output_unit<units::W>::fn(os);
+    }
+    return os;
+}
+
+// TODO: extract these SI prefix printing fallback mechanisms
+template<typename Value>
+std::ostream& operator<<(std::ostream& os, const value<Value, units::Hz>& value)
+{
+    if (values::GHz(value) >= values::GHz(1.0))
+        os << values::GHz(value);
+    else if (values::MHz(value) >= values::MHz(1.0))
+        os << values::MHz(value);
+    else if (values::kHz(value) >= values::kHz(1.0))
+        os << values::kHz(value);
+    else {
+        os << value.get() << ' ';
+        output_unit<units::Hz>::fn(os);
+    }
+    return os;
+}
+
+// TODO: extract these SI prefix printing fallback mechanisms
+template<typename Value>
+std::ostream& operator<<(std::ostream& os, const value<Value, units::bps>& value)
+{
+    if (values::Gbps(value) >= values::Gbps(1.0))
+        os << values::Gbps(value);
+    else if (values::Mbps(value) >= values::Mbps(1.0))
+        os << values::Mbps(value);
+    else if (values::kbps(value) >= values::kbps(1.0))
+        os << values::kbps(value);
+    else {
+        os << value.get() << ' ';
+        output_unit<units::bps>::fn(os);
     }
     return os;
 }

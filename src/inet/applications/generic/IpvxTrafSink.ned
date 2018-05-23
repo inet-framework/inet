@@ -26,7 +26,7 @@ package inet.applications.generic;
 simple IpvxTrafSink like IIpvxTrafficGenerator
 {
     parameters:
-        int protocol; // value for ~Ipv4ControlInfo / ~Ipv6ControlInfo protocol field, accepts only between 143 and 254
+        int protocol; // value for IPv4, IPv6 protocol field, accepts only between 143 and 254
         @display("i=block/sink");
         @signal[packetReceived](type=Packet);
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

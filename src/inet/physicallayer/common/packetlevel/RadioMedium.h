@@ -274,11 +274,16 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
      * Sends a copy of the provided signal to all receivers on the radio medium.
      */
     virtual void sendToAllRadios(IRadio *transmitter, const ISignal *signal);
+
+    /**
+     * Sends a copy of all ongoing signals to the receiver on the radio medium.
+     */
+    virtual void pickUpSignals(IRadio *receiver);
     //@}
 
     /** @name Reception */
     //@{
-    virtual bool isRadioMacAddress(const IRadio *radio, const MacAddress address) const;
+    virtual bool matchesMacAddressFilter(const IRadio *radio, const Packet *packet) const;
 
     /**
      * Returns true if the radio can potentially receive the transmission
@@ -356,6 +361,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual const IReceptionResult *getReceptionResult(const IRadio *receiver, const IListening *listening, const ITransmission *transmission) const override;
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, long value, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *value, cObject *details) override;
 };
 
 } // namespace physicallayer

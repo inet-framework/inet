@@ -23,7 +23,7 @@ import inet.linklayer.ieee80211.mac.contention.Contention;
 module Dcaf
 {
     parameters:
-        double difsTime @unit(s) = default(-1s);
+        int difsn = default(-1);
         int cwMin = default(-1);
         int cwMax = default(-1);
 

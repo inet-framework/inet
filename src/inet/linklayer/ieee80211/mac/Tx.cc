@@ -18,6 +18,7 @@
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/checksum/EthernetCRC.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRx.h"
 #include "inet/linklayer/ieee80211/mac/contract/IStatistics.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
@@ -61,9 +62,15 @@ void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& head
     this->txCallback = txCallback;
     Enter_Method("transmitFrame(\"%s\")", packet->getName());
     take(packet);
+    auto macAddressInd = packet->addTagIfAbsent<MacAddressInd>();
     const auto& updatedHeader = packet->removeAtFront<Ieee80211MacHeader>();
-    if (auto twoAddressHeader = dynamicPtrCast<Ieee80211TwoAddressHeader>(updatedHeader))
+    if (auto oneAddressHeader = dynamicPtrCast<Ieee80211OneAddressHeader>(updatedHeader)) {
+        macAddressInd->setDestAddress(oneAddressHeader->getReceiverAddress());
+    }
+    if (auto twoAddressHeader = dynamicPtrCast<Ieee80211TwoAddressHeader>(updatedHeader)) {
         twoAddressHeader->setTransmitterAddress(mac->getAddress());
+        macAddressInd->setSrcAddress(twoAddressHeader->getTransmitterAddress());
+    }
     packet->insertAtFront(updatedHeader);
     const auto& updatedTrailer = packet->removeAtBack<Ieee80211MacTrailer>();
     updatedTrailer->setFcsMode(mac->getFcsMode());

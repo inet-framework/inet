@@ -1,0 +1,6 @@
+#!/bin/sh
+#
+# collect NED files which are NOT named after the NED types they contain
+#
+echo "collecting inconsistently named NED files in $(pwd):"
+grep -RE '^(simple|module|moduleinterface|channel) ' | grep -Ev '([A-Za-z0-9]+)\.ned:[a-z]+ \1\b' | grep -E --color=always  '[^/]+\.ned'

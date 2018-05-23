@@ -26,17 +26,63 @@ routing protocol enabled.
 \section{RIP}
 \label{sec:routing:rip}
 
-RIP (Routing Information Protocol) is a distance-vector routing protocol
-which employs the hop count as a routing metric. RIP prevents routing loops
-by implementing a limit on the number of hops allowed in a path from source
-to destination.
+RIP (Routing Information Protocol) is a distance-vector routing protocol which
+employs the hop count as a routing metric. RIP prevents routing loops by
+implementing a limit on the number of hops allowed in a path from source to
+destination.  RIP uses the \textit{split horizon with poison reverse} technique
+to work around the ``count-to-infinity'' problem.
 
-The \nedtype{Rip} module implements distance vector routing as
-specified in RFC 2453 (RIPv2) and RFC 2080 (RIPng). Per-interface
-configuration can be specified in an XML file.
+The \nedtype{Rip} module implements distance vector routing as specified in RFC
+2453 (RIPv2) and RFC 2080 (RIPng). The behavior can be selected by setting the
+\fpar{mode} parameter to either \ttt{"RIPv2"} or \ttt{"RIPng"}. Protocol
+configuration such as link metrics and per-interface operation mode (such as 
+whether RIP is enabled on the interface, and whether to use split horizon)
+can be specified in XML using the \ttt{ripConfig} parameter.
 
-\nedtype{RipRouter} is a \nedtype{Router} with the RIP protocol enabled.
+The following example configures a \nedtype{Router} module to use RIPv2:
 
+\begin{inifile}
+**.hasRIP = true
+**.mode = "RIPv2"
+**.ripConfig = xmldoc("RIPConfig.xml")
+\end{inifile}
+
+The configuration file specifies the per interface parameters.
+Each \ttt{<interface>} element configures one or more interfaces;
+the \ttt{hosts}, \ttt{names}, \ttt{towards}, \ttt{among} attributes
+select the configured interfaces (in a similar way as with
+\nedtype{Ipv4NetworkConfigurator} \ref{cha:network-autoconfiguration}).
+
+Additional attributes:
+
+\begin{itemize}
+  \item \ttt{metric}: metric assigned to the link, default value is 1.
+        This value is added to the metric of a learned route,
+        received on this interface. It must be an integer in
+        the [1,15] interval.
+  \item \ttt{mode}: mode of the interface.
+\end{itemize}
+
+The mode attribute can be one of the following:
+
+\begin{itemize}
+  \item \ttt{'NoRIP'}: no RIP messages are sent or received on this interface.
+  \item \ttt{'NoSplitHorizon'}: no split horizon filtering; send all routes to
+        neighbors.
+  \item \ttt{'SplitHorizon'}: do not sent routes whose next hop is the neighbor.
+  \item \ttt{'SplitHorizonPoisenedReverse'} (default): if the next hop is the neighbor, then
+  set the metric of the route to infinity.
+\end{itemize}
+
+The following example sets the link metric between router
+\ttt{R1} and \ttt{RB} to 2, while all other links will have a metric of 1.
+
+\begin{XML}
+<RIPConfig>
+  <interface among="R1 RB" metric="2"/>
+  <interface among="R? R?" metric="1"/>
+</RIPConfig>
+\end{XML}
 
 \section{OSPF}
 \label{sec:routing:ospf}
@@ -46,11 +92,47 @@ It uses a link state routing (LSR) algorithm and falls into the group
 of interior gateway protocols (IGPs), operating within a single
 autonomous system (AS).
 
-The \nedtype{Ospf} module implements the OSPF Version 2. Areas and routers
-can be configured using an XML file.
-
 \nedtype{OspfRouter} is a \nedtype{Router} with the OSPF protocol enabled.
 
+The \nedtype{Ospf} module implements OSPF protocol version 2. Areas and routers
+can be configured using an XML file specified by the \ttt{ospfConfig} parameter.
+Various parameters for the network interfaces can be specified also in the XML
+file or as a parameter of the \nedtype{Ospf} module.
+
+\begin{inifile}
+**.ospf.ospfConfig = xmldoc("ASConfig.xml")
+**.ospf.helloInterval = 12s
+**.ospf.retransmissionInterval = 6s
+\end{inifile}
+
+The \ttt{<OSPFASConfig>} root element may contain \ttt{<Area>} and \ttt{<Router>}
+elements with various attributes specifying the parameters for the network
+interfaces. Most importantly \ttt{<Area>} contains \ttt{<AddressRange>} elements
+enumerating the network addresses that should be advertized by the protocol.
+Also \ttt{<Router>} elements may contain data for configuring various pont-to-point
+or broadcast interfaces.
+
+\begin{XML}
+<?xml version="1.0"?>
+<OSPFASConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="OSPF.xsd">
+  <!-- Areas -->
+  <Area id="0.0.0.0">
+    <AddressRange address="H1" mask="H1" status="Advertise" />
+    <AddressRange address="H2" mask="H2" status="Advertise" />
+    <AddressRange address="R1>R2" mask="R1>R2" status="Advertise" />
+    <AddressRange address="R2>R1" mask="R2>R1" status="Advertise" />
+  </Area>
+  <!-- Routers -->
+  <Router name="R1" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="1" routerPriority="1" />
+    <PointToPointInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="2" />
+  </Router>
+  <Router name="R2" RFC1583Compatible="true">
+    <PointToPointInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="2" />
+    <BroadcastInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="1" routerPriority="2" />
+  </Router>
+</OSPFASConfig>
+\end{XML}
 
 \section{BGP}
 \label{sec:routing:bgp}
@@ -59,11 +141,90 @@ BGP (Border Gateway Protocol) is a standardized exterior gateway protocol
 designed to exchange routing and reachability information among
 autonomous systems (AS) on the Internet.
 
+\nedtype{BgpRouter} is a \nedtype{Router} with the BGP protocol enabled.
+
 The \nedtype{Bgp} module implements BGP Version 4. The model implements
 RFC 4271, with some limitations. Autonomous Systems and rules can be
-configured in an XML file.
+configured in an XML file that can be specified in the \ttt{bgpConfig}
+parameter.
 
-\nedtype{BgpRouter} is a \nedtype{Router} with the BGP protocol enabled.
+\begin{inifile}
+**.bgpConfig = xmldoc("BGPConfig.xml")
+\end{inifile}
+
+The configuration file may contain \ttt{<TimerParams>}, \ttt{<AS>} and
+\ttt{Session} elements at the top level.
+
+\begin{itemize}
+  \item \ttt{<TimerParams>}: allows specifying various timing parameters
+  for the routers.
+  \item \ttt{<AS>}: defines Autonomous Systems, routers and rules to be applied.
+  \item \ttt{<Session>}: specifies open sessions between edge routers. It must
+  contain exactly two \ttt{<Router exterAddr="x.x.x.x"/>} elements.
+\end{itemize}
+
+\begin{XML}
+<BGPConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="BGP.xsd">
+
+  <TimerParams>
+    <connectRetryTime> 120 </connectRetryTime>
+    <holdTime> 180 </holdTime>
+    <keepAliveTime> 60 </keepAliveTime>
+    <startDelay> 15 </startDelay>
+  </TimerParams>
+
+  <AS id="60111">
+    <Router interAddr="172.1.10.255"/> <!--Router A1-->
+    <Router interAddr="172.1.20.255"/> <!--Router A2-->
+  </AS>
+
+  <AS id="60222">
+    <Router interAddr="172.10.4.255"/> <!--Router B-->
+  </AS>
+
+  <AS id="60333">
+    <Router interAddr="172.13.1.255"/> <!--Router C1-->
+    <Router interAddr="172.13.2.255"/> <!--Router C2-->
+    <Router interAddr="172.13.3.255"/> <!--Router C3-->
+    <Router interAddr="172.13.4.255"/> <!--Router C4-->
+    <DenyRouteOUT Address="172.10.8.0" Netmask="255.255.255.0"/>
+    <DenyASOUT> 60111 </DenyASOUT>
+  </AS>
+
+  <Session id="1">
+    <Router exterAddr="10.10.10.1" > </Router> <!--Router A1-->
+    <Router exterAddr="10.10.10.2" > </Router> <!--Router C1-->
+  </Session>
+
+  <Session id="2">
+    <Router exterAddr="10.10.20.1" > </Router> <!--Router A2-->
+    <Router exterAddr="10.10.20.2" > </Router> <!--Router B-->
+  </Session>
+
+  <Session id="3">
+    <Router exterAddr="10.10.30.1" > </Router> <!--Router B-->
+    <Router exterAddr="10.10.30.2" > </Router> <!--Router C2-->
+  </Session>
+</BGPConfig>
+\end{XML}
+
+Inside \ttt{<AS>} elements various rules can be sepecified:
+
+\begin{itemize}
+  \item DenyRoute: deny route in IN and OUT traffic (\ttt{Address} and
+        \ttt{Netmask} attributes must be specified.)
+  \item DenyRouteIN : deny route in IN traffic (\ttt{Address} and
+        \ttt{Netmask} attributes must be specified.)
+  \item DenyRouteOUT: deny route in OUT traffic (\ttt{Address} and
+        \ttt{Netmask} attributes must be specified.)
+  \item DenyAS: deny routes learned by AS in IN  and OUT traffic (AS id must be
+        specified as the body of the element.)
+  \item DenyASIN : deny routes learned by AS in IN traffic (AS id must be
+        specified as the body of the element.)
+  \item DenyASOUT: deny routes learned by AS in OUT traffic (AS id must be
+        specified as the body of the element.)
+\end{itemize}
 
 %%% Local Variables:
 %%% mode: latex

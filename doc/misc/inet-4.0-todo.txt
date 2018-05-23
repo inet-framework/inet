@@ -26,14 +26,18 @@ SHOULD:
  - remove KLUDGEs, TODOs, etc.
  - update/remove obsolete NED documentation
  - make sure all tests PASS, check for leaks, etc.
+ - remove obsolete HostAutoConfigurator, Ipv4FlatNetworkConfigurator modules?
+ - check if IEEE 802.11 MAC filters for SSID (e.g. 2 APs, 2 STAs, 2 SSIDs, 2 UDP broadcasting applications don't mix up)
 
  - revise and rename statistics to have a consistent naming scheme
  - fix mobility non-determinism caused by interpolation from last position during animation
  - validate Rotation, Quaternion, EulerAngles against each other and documentation
  - validate positioning and orientation IMobility, PhysicalEnvironment, ObstacleLoss
- - fix MAC address filtering TODO in RadioMedium
 
 NEED NOT:
+ - replace all fooType string parameters used for submodule types with <default("Foo")> and add hasFoo parameters
+   omnet must support foo: <default("Foo")> if typename != "" && hasFoo
+   omnet must support foo.typename = default("") parameter assignment for inherited submodules
  - 802.11 preamble, header, data separation in HT and VHT mode doesn't really make sense the way it's right now implemented
    there's no separate header in these modes, the preamble is much more complicated than in the other modes
    there's also a bug related to this in the Ieee80211ScalarTransmitter when it computes the data duration
@@ -75,6 +79,7 @@ NEED NOT:
  - pretty print white spaces
 
 DONE:
+ + fix MAC address filtering TODO in RadioMedium
  + move serializers into their own protocol folders
  + eliminate ProtocolMapping and other unused code
  + cSocketRTScheduler refactoring for multiple sockets bound to interfaces

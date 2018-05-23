@@ -371,11 +371,17 @@ sub savepage($$$)
       my $needtitlepage = shift @_;
 
       my $new_html = $template;
-      $new_html =~ s/__PRODUCT__/$product/sg;
-      $new_html =~ s/__VERSION__/$productversion/sg;
       $new_html =~ s/__TITLEPAGE_START__(.*)__TITLEPAGE_END__//s unless ($needtitlepage);
       $new_html =~ s/__TITLEPAGE_(START|END)__//sg;
       $new_html =~ s/__BODY__/$body/;
+      
+      my $prev_html = "";
+      while ($prev_html ne $new_html) {
+          $prev_html = $new_html;
+          $new_html =~ s/__TITLE__/$doctitle/sg;
+          $new_html =~ s/__PRODUCT__/$product/sg;
+          $new_html =~ s/__VERSION__/$productversion/sg;
+      }
 
       open(FILE,">$filename");
       print FILE $new_html;

@@ -85,9 +85,8 @@ import inet.transportlayer.contract.ITcp;
 //
 // <b>Communication with the IP layer</b>
 //
-// The Tcp model relies on sending and receiving ~Ipv4ControlInfo objects
-// attached to Tcp segment objects as control info
-// (see cMessage::setControlInfo()).
+// The TCP model relies on sending and receiving ~L3AddressReq/~L3AddressInd tags
+// attached to TCP segment packets.
 //
 // <b>Configuring Tcp</b>
 //

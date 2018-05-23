@@ -56,12 +56,9 @@ This is achieved with two components in INET:
     Packets sent to an \nedtype{ExtInterface} will be sent out on the
     host OS interface, and packets received by the host OS interface
     (or rather, the appropriate subset of them) will appear in the
-    simulation as if received on an \nedtype{ExtInterface}.
- \item \cppclass{cSocketRTScheduler}, a real-time scheduler class.
-    The scheduler does the actual work: not only the real-time
-    synchronization as the name implies, but also the relaying of packets
-    from/to the host OS interface. The code uses the pcap library for
-    capturing packets, and raw sockets for sending.
+    simulation as if received on an \nedtype{ExtInterface}. The code
+    uses the pcap library for capturing packets, and raw sockets for sending.
+ \item \cppclass{RealTimeScheduler}, a socket-aware real-time scheduler class.
 \end{itemize}
 
 \begin{note}
@@ -115,7 +112,7 @@ Also, the simulation must be configured to run under control the of the
 appropriate real-time scheduler class:
 
 \begin{inifile}
-scheduler-class = "inet::cSocketRTScheduler"
+scheduler-class = "inet::RealTimeScheduler"
 \end{inifile}
 
 \nedtype{ExtInterface} has two important parameters which need to be

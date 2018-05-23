@@ -56,7 +56,7 @@
 //  - message classes: ~Ipv4Header, ~TcpHeader, ~UdpHeader, ~EthernetIIFrame,
 //    ~ArpPacket, ~PppFrame, ~GenericAppMsg, ~EtherAppReq, etc.
 //  - control info classes (used in communication between protocol layers):
-//    ~Ipv4ControlInfo, ~TcpCommand, ~UdpControlInfo, ~Ieee802Ctrl, etc.
+//    ~TcpCommand, ~UdpControlInfo, ~Ieee802Ctrl, etc.
 //  - application models: ~UdpVideoStreamServer, ~UdpVideoStreamClient, ~UdpBasicApp, ~UdpEchoApp,
 //    ~TcpSessionApp, ~TcpBasicClientApp, ~TcpGenericServerApp, ~TcpSinkApp,
 //    ~TcpServerHostApp, ~EtherAppClient, ~EtherAppServer, ~PingApp, ~SimpleVoipSender,

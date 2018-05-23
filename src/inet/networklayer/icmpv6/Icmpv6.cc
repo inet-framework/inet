@@ -264,7 +264,6 @@ void Icmpv6::sendToIP(Packet *msg, const Ipv6Address& dest)
 
 void Icmpv6::sendToIP(Packet *msg)
 {
-    // assumes Ipv6ControlInfo is already attached
     msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv6);
     msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::icmpv6);
     send(msg, "ipv6Out");

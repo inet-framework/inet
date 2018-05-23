@@ -31,15 +31,12 @@ import inet.applications.contract.IApp;
 simple DhcpClient like IApp
 {
     parameters:
-        string interfaceTableModule;   // The path to the InterfaceTable module
-        string routingTableModule;
-        string interface = default("");  // which NIC should be configured (i.e. wlan0, eth1 etc.)
+        string interfaceTableModule; // path to the InterfaceTable module
+        string routingTableModule; // path to the Ipv4RoutingTable module
+        string interface = default(""); // which NIC should be configured (i.e. wlan0, eth1 etc.)
         double startTime @unit(s) = default(0s); // starting time of DHCP initialization
         @display("i=block/app2");
     gates:
         input socketIn @labels(UdpControlInfo/up);
         output socketOut @labels(UdpControlInfo/down);
 }
-
-
-

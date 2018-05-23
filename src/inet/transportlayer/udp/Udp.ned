@@ -44,8 +44,8 @@ import inet.transportlayer.contract.IUdp;
 //
 // <b>Communication with the IP (IPv4/IPv6) layer</b>
 //
-// The ~Udp model relies on sending and receiving ~Ipv4ControlInfo/~Ipv6ControlInfo
-// objects attached to ~UdpHeader objects as control info.
+// The ~Udp model relies on sending and receiving ~L3AddressReq/~L3AddressInd
+// tags attached to UDP packets.
 //
 // CRC operation modes for outgoing Udp packets (crcMode parameter in Udp module):
 //  - "disabled" means the outgoing packet will have its CRC set to 0 (serializable)

@@ -33,7 +33,7 @@ void MsduDeaggregation::setExplodedFrameAddress(const Ptr<Ieee80211DataHeader>& 
     }
     else if (fromDS == 1 && toDS == 0) // AP to STA
     {
-        header->setTransmitterAddress(header->getTransmitterAddress());
+        header->setTransmitterAddress(aMsduHeader->getTransmitterAddress());
         header->setReceiverAddress(subframeHeader->getDa());
         header->setAddress3(subframeHeader->getSa());
     }
@@ -50,6 +50,8 @@ void MsduDeaggregation::setExplodedFrameAddress(const Ptr<Ieee80211DataHeader>& 
         header->setAddress3(subframeHeader->getDa());
         header->setAddress4(subframeHeader->getSa());
     }
+    ASSERT(!header->getReceiverAddress().isUnspecified());
+    ASSERT(!header->getTransmitterAddress().isUnspecified());
 }
 
 std::vector<Packet *> *MsduDeaggregation::deaggregateFrame(Packet *aggregatedFrame)

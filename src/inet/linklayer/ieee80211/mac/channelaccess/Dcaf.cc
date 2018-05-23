@@ -57,11 +57,11 @@ void Dcaf::calculateTimingParameters()
 {
     slotTime = modeSet->getSlotTime();
     sifs = modeSet->getSifsTime();
-    simtime_t difs = par("difsTime");
+    int difsNumber = par("difsn");
     // The PIFS and DIFS are derived by the Equation (9-2) and Equation (9-3), as illustrated in Figure 9-14.
     // PIFS = aSIFSTime + aSlotTime (9-2)
     // DIFS = aSIFSTime + 2 × aSlotTime (9-3)
-    ifs = difs == -1 ? sifs + 2 * slotTime : difs;
+    ifs = difsNumber == -1 ? sifs + 2 * slotTime : difsNumber * slotTime;
     // The EIFS is derived from the SIFS and the DIFS and the length of time it takes to transmit an ACK frame at the
     // lowest PHY mandatory rate by Equation (9-4).
     // EIFS = aSIFSTime + DIFS + ACKTxTime

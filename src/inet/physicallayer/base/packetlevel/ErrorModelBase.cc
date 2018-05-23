@@ -56,9 +56,7 @@ Packet *ErrorModelBase::corruptBits(const Packet *packet, double ber, bool& isCo
         }
         corruptedBits.push_back(bit);
     }
-    auto corruptedPacket = new Packet(packet->getName(), makeShared<BitsChunk>(corruptedBits));
-    corruptedPacket->addTag<PacketProtocolTag>()->setProtocol(packet->getTag<PacketProtocolTag>()->getProtocol());
-    return corruptedPacket;
+    return new Packet(packet->getName(), makeShared<BitsChunk>(corruptedBits));
 }
 
 Packet *ErrorModelBase::corruptBytes(const Packet *packet, double ber, bool& isCorrupted) const
@@ -72,16 +70,13 @@ Packet *ErrorModelBase::corruptBytes(const Packet *packet, double ber, bool& isC
         }
         corruptedBytes.push_back(byte);
     }
-    auto corruptedPacket = new Packet(packet->getName(), makeShared<BytesChunk>(corruptedBytes));
-    corruptedPacket->addTag<PacketProtocolTag>()->setProtocol(packet->getTag<PacketProtocolTag>()->getProtocol());
-    return corruptedPacket;
+    return new Packet(packet->getName(), makeShared<BytesChunk>(corruptedBytes));
 }
 
 Packet *ErrorModelBase::corruptChunks(const Packet *packet, double ber, bool& isCorrupted) const
 {
     b offset = b(0);
     auto corruptedPacket = new Packet(packet->getName());
-    corruptedPacket->addTag<PacketProtocolTag>()->setProtocol(packet->getTag<PacketProtocolTag>()->getProtocol());
     while (auto chunk = packet->peekAt(offset, b(-1), Chunk::PF_ALLOW_NULLPTR)) {
         if (hasProbabilisticError(chunk->getChunkLength(), ber)) {
             isCorrupted = true;
@@ -130,9 +125,12 @@ Packet *ErrorModelBase::computeCorruptedPacket(const Packet *packet, double ber)
 
 Packet *ErrorModelBase::computeCorruptedPacket(const ISnir *snir) const
 {
-    auto packet = snir->getReception()->getTransmission()->getPacket();
+    auto transmittedPacket = snir->getReception()->getTransmission()->getPacket();
     auto ber = computeBitErrorRate(snir, IRadioSignal::SIGNAL_PART_WHOLE);
-    return computeCorruptedPacket(packet, ber);
+    auto receivedPacket = computeCorruptedPacket(transmittedPacket, ber);
+    receivedPacket->clearTags();
+    receivedPacket->addTag<PacketProtocolTag>()->setProtocol(transmittedPacket->getTag<PacketProtocolTag>()->getProtocol());
+    return receivedPacket;
 }
 
 } // namespace physicallayer
