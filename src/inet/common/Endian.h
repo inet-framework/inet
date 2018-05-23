@@ -37,6 +37,7 @@
 # define BYTE_ORDER       __BYTE_ORDER
 #elif defined(__APPLE__)
 #include <machine/endian.h>
+#include <netinet/in.h>
 #else /* fallback, including cases __FreeBSD__, __NetBSD__ and __OpenBSD__ */
 //XXX this causes problems in FreeBSD, and probably not needed anyway: #define __BSD_VISIBLE
 #include <machine/endian.h>
