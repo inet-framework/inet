@@ -76,7 +76,7 @@ class INET_API SctpSocket : public ISocket
         virtual void socketPeerClosed(SctpSocket *socket) {}
         virtual void socketClosed(SctpSocket *socket) {}
         virtual void socketFailure(SctpSocket *socket, int code) {}
-        virtual void socketStatusArrived(SctpSocket *socket, SctpStatusReq *status) { delete status; }
+        virtual void socketStatusArrived(SctpSocket *socket, SctpStatusReq *status) { }
         virtual void socketDeleted(SctpSocket *socket) {}
         virtual void sendRequestArrived(SctpSocket *socket) {}
         virtual void msgAbandonedArrived(SctpSocket *socket) {}

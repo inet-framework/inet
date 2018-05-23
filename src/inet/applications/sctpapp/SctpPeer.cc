@@ -554,7 +554,6 @@ void SctpPeer::socketStatusArrived(SctpSocket *socket, SctpStatusReq *status)
         ps.primaryPath = false;
         sctpPathStatus[ps.pid] = ps;
     }
-    delete status;
 }
 
 void SctpPeer::setStatusString(const char *s)

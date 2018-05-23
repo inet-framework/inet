@@ -57,7 +57,7 @@ class INET_API TcpServerHostApp : public cSimpleModule, public ILifecycle, publi
     virtual void socketPeerClosed(TcpSocket *socket) override {}
     virtual void socketClosed(TcpSocket *socket) override {}
     virtual void socketFailure(TcpSocket *socket, int code) override {}
-    virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override { delete status; }
+    virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override { }
     virtual void socketDeleted(TcpSocket *socket) override {}
 
     bool isNodeUp() { return !nodeStatus || nodeStatus->getState() == NodeStatus::UP; }
@@ -151,7 +151,7 @@ class INET_API TcpServerThreadBase : public cSimpleModule, public TcpSocket::ICa
      * By default it deletes the status object, redefine it to add code
      * to examine the status.
      */
-    virtual void statusArrived(TcpStatusInfo *status) { delete status; }
+    virtual void statusArrived(TcpStatusInfo *status) { }
 };
 
 } // namespace inet

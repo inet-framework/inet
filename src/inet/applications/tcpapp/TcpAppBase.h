@@ -66,7 +66,7 @@ class INET_API TcpAppBase : public cSimpleModule, public TcpSocket::ICallback
     virtual void socketPeerClosed(TcpSocket *socket) override;
     virtual void socketClosed(TcpSocket *socket) override;
     virtual void socketFailure(TcpSocket *socket, int code) override;
-    virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override { delete status; }
+    virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override { }
     virtual void socketDeleted(TcpSocket *socket) override {}
 };
 

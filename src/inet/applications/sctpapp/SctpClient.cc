@@ -551,7 +551,6 @@ void SctpClient::socketStatusArrived(SctpSocket *socket, SctpStatusReq *status)
         ps.primaryPath = false;
         sctpPathStatus[ps.pid] = ps;
     }
-    delete status;
 }
 
 void SctpClient::setPrimaryPath(const char *str)

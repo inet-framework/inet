@@ -338,12 +338,12 @@ void TcpSocket::processMessage(cMessage *msg)
             break;
 
         case TCP_I_STATUS:
-            status = check_and_cast<TcpStatusInfo *>(msg->removeControlInfo());
-            delete msg;
+            status = check_and_cast<TcpStatusInfo *>(msg->getControlInfo());
 
             if (cb)
                 cb->socketStatusArrived(this, status);
 
+            delete msg;
             break;
 
         default:
