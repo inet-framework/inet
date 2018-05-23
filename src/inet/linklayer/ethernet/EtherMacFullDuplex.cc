@@ -250,12 +250,20 @@ void EtherMacFullDuplex::processMsgFromNetwork(EthernetSignal *signal)
     if (dropFrameNotForUs(packet, frame))
         return;
 
-    if (auto pauseFrame = dynamic_cast<const EthernetPauseFrame *>(frame.get())) {      //FIXME KLUDGE
-        int pauseUnits = pauseFrame->getPauseTime();
-        delete packet;
-        numPauseFramesRcvd++;
-        emit(rxPausePkUnitsSignal, pauseUnits);
-        processPauseCommand(pauseUnits);
+    if (frame->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL) {
+        const auto& controlFrame = curTxFrame->peekDataAt<EthernetControlFrame>(frame->getChunkLength(), b(-1));
+        if (controlFrame->getOpCode() == ETHERNET_CONTROL_PAUSE) {
+            auto pauseFrame = check_and_cast<const EthernetPauseFrame *>(controlFrame.get());
+            int pauseUnits = pauseFrame->getPauseTime();
+            delete packet;
+            numPauseFramesRcvd++;
+            emit(rxPausePkUnitsSignal, pauseUnits);
+            processPauseCommand(pauseUnits);
+        }
+        else {
+            EV_INFO << "Received unknown ethernet flow control frame" << frame << " dropped." << endl;
+            delete packet;
+        }
     }
     else {
         EV_INFO << "Reception of " << frame << " successfully completed." << endl;
