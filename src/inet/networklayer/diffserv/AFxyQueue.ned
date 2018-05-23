@@ -65,7 +65,7 @@ module AFxyQueue
         output out;
     submodules:
         fifoQueue: FifoQueue {
-            @display("p=251,102");
+            @display("p=250,100");
         }
         redDropper: RedDropper {
             numGates = 3;
@@ -73,7 +73,7 @@ module AFxyQueue
             minths = string(afx1Minth) + " " + string(afx2Minth) + " " + string(afx3Minth);
             maxths = string(afx1Maxth) + " " + string(afx2Maxth) + " " + string(afx3Maxth);
             maxps = string(afx1Maxp) + " " + string(afx2Maxp) + " " + string(afx3Maxp);
-            @display("p=105,102");
+            @display("p=100,100");
         }
     connections:
         afx1In --> { @display("m=w"); } --> redDropper.in[0];

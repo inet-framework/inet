@@ -100,18 +100,18 @@ module Radio extends PhysicalLayerBase like IRadio
     submodules:
         antenna: <antennaType> like IAntenna {
             parameters:
-                @display("p=100,50");
+                @display("p=100,100");
         }
         transmitter: <transmitterType> like ITransmitter {
             parameters:
-                @display("p=100,150");
+                @display("p=100,200");
         }
         receiver: <receiverType> like IReceiver {
             parameters:
-                @display("p=100,250");
+                @display("p=100,300");
         }
         energyConsumer: <energyConsumerType> like IEnergyConsumer if energyConsumerType != "" {
             parameters:
-                @display("p=100,350");
+                @display("p=100,400");
         }
 }

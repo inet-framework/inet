@@ -109,15 +109,15 @@ module Ieee80211Mac extends MacProtocolBase like IIeee80211Mac
         }
         rx: <default("Rx")> like IRx {
             parameters:
-                @display("p=100,250");
+                @display("p=100,200");
         }
         tx: <default("Tx")> like ITx {
             parameters:
-                @display("p=250,250");
+                @display("p=250,200");
         }
         statistics: <default("BasicStatistics")> like IStatistics {
             parameters:
-                @display("p=400,250");
+                @display("p=400,200");
         }
 }
 

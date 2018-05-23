@@ -93,21 +93,21 @@ module Ieee80211LayeredOfdmTransmitter like ITransmitter
         @display("i=block/tx");
     submodules:
         signalEncoder: <signalEncoderType> like IEncoder if signalEncoderType != "" {
-            @display("p=100,50");
+            @display("p=100,100");
         }
         dataEncoder: <dataEncoderType> like IEncoder if dataEncoderType != "" {
-            @display("p=226,50");
+            @display("p=300,100");
         }
         dataModulator: <dataModulatorType> like IModulator if dataModulatorType != "" {
-            @display("p=100,150");
+            @display("p=100,200");
         }
         signalModulator: <signalModulatorType> like IModulator if signalModulatorType != "" {
-            @display("p=226,150");
+            @display("p=300,200");
         }
         pulseShaper: <pulseShaperType> like IPulseShaper if pulseShaperType != "" {
-            @display("p=100,250");
+            @display("p=100,300");
         }
         digitalAnalogConverter: <digitalAnalogConverterType> like IDigitalAnalogConverter if digitalAnalogConverterType != "" {
-            @display("p=100,350");
+            @display("p=100,400");
         }
 }

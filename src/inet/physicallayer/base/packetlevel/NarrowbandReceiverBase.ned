@@ -36,5 +36,7 @@ module NarrowbandReceiverBase like IReceiver
         @display("i=block/wrx");
 
     submodules:
-        errorModel: <errorModelType> like IErrorModel if errorModelType != "";
+        errorModel: <errorModelType> like IErrorModel if errorModelType != "" {
+            @display("p=100,100");
+        }
 }

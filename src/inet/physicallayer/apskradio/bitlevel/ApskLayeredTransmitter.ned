@@ -65,15 +65,15 @@ module ApskLayeredTransmitter like ITransmitter
 
     submodules:
         encoder: <encoderType> like IEncoder if encoderType != "" {
-            @display("p=100,50");
+            @display("p=100,100");
         }
         modulator: <modulatorType> like IModulator {
-            @display("p=100,150");
+            @display("p=100,200");
         }
         pulseShaper: <pulseShaperType> like IPulseShaper if pulseShaperType != "" {
-            @display("p=100,250");
+            @display("p=100,300");
         }
         digitalAnalogConverter: <digitalAnalogConverterType> like IDigitalAnalogConverter if digitalAnalogConverterType != "" {
-            @display("p=100,350");
+            @display("p=100,400");
         }
 }
