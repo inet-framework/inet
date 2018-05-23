@@ -69,8 +69,16 @@ class INET_API UdpSocket : public ISocket
     {
       public:
         virtual ~ICallback() {}
+
+        /**
+         * Notifies about data arrival, packet ownership is transferred to the callee.
+         */
         virtual void socketDataArrived(UdpSocket *socket, Packet *packet) = 0;
-        virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) { delete indication; }
+
+        /**
+         * Notifies about error indication arrival, indication ownership is transferred to the callee.
+         */
+        virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) = 0;
     };
   protected:
     int socketId;
