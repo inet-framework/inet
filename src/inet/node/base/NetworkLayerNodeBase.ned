@@ -25,7 +25,7 @@ module NetworkLayerNodeBase extends LinkLayerNodeBase
     parameters:
         bool hasIpv4 = default(true);
         bool hasIpv6 = default(false);
-        bool hasGn = default(false); 
+        bool hasGn = default(false);
         string networkLayerType = default("");
         string ipv4NetworkLayerType = default("Ipv4NetworkLayer");
         string ipv6NetworkLayerType = default("Ipv6NetworkLayer");
@@ -55,13 +55,13 @@ module NetworkLayerNodeBase extends LinkLayerNodeBase
         }
 
     connections allowunconnected:
-        ipv4.ifIn <-- nl.out++if hasIpv4;
+        ipv4.ifIn <-- nl.out++ if hasIpv4;
         ipv4.ifOut --> nl.in++ if hasIpv4;
 
-        ipv6.ifIn <-- nl.out++if hasIpv6;
+        ipv6.ifIn <-- nl.out++ if hasIpv6;
         ipv6.ifOut --> nl.in++ if hasIpv6;
 
-        generic.ifIn <-- nl.out++if networkLayerType != "";
+        generic.ifIn <-- nl.out++ if networkLayerType != "";
         generic.ifOut --> nl.in++ if networkLayerType != "";
 
         for i=0..numLoInterfaces-1 {
