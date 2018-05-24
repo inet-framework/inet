@@ -44,8 +44,8 @@ module EtherSwitch
         @labels(node,ethernet-node);
         @display("i=device/switch;bgb=663,297");
         bool hasStatus = default(false);
-        bool csmacdSupport = default(true);  // by default use CSMA/CD
-        string macType = default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex"); // ~EtherMac or ~EtherMacFullDuplex
+        bool csmacdSupport = default(true);  // by default use CSMA/CD --FIXME remove
+        string macType = default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex"); // ~EtherMac or ~EtherMacFullDuplex --FIXME remove
         string spanningTreeProtocol = default("");
         eth[*].encap.typename = "EtherEncapDummy";
         eth[*].csmacdSupport = csmacdSupport;
