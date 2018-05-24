@@ -301,7 +301,7 @@ class INET_API Coord
 
 inline std::ostream& operator<<(std::ostream& os, const Coord& coord)
 {
-    return os << "(" << coord.x << ", " << coord.y << ", " << coord.z << ")";
+    return os << "(" << coord.x << ", " << coord.y << ", " << coord.z << ") m";
 }
 
 inline std::string Coord::str() const

@@ -71,7 +71,7 @@ class INET_API EulerAngles
 
 inline std::ostream& operator<<(std::ostream& os, const EulerAngles& a)
 {
-    return os << "(" << a.alpha << ", " << a.beta << ", " << a.gamma << ")";
+    return os << "(" << a.alpha.get() << ", " << a.beta.get() << ", " << a.gamma.get() << ") rad";
 }
 
 inline std::string EulerAngles::str() const
