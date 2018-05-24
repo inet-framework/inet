@@ -26,7 +26,7 @@ import inet.node.inet.Router;
 module BgpRouter extends Router
 {
     parameters:
-        hasBGP = true;
-        hasOSPF = true;
+        hasBgp = true;
+        hasOspf = true;
 }
 

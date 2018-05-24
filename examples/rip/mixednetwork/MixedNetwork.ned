@@ -36,7 +36,7 @@ network MixedNetwork
             @display("p=450,100");
         }
         rRouter[numRipRouters]: Router {
-            hasRIP = true;
+            hasRip = true;
             @display("p=580,200,ri,180,180");
         }
         rHost: StandardHost {

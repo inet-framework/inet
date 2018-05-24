@@ -22,15 +22,15 @@ network RIPInfinityCountTest
         }
     submodules:
         cRouter: Router {
-            hasRIP = true;
+            hasRip = true;
             @display("p=237,192");
         }
         bRouter: Router {
-            hasRIP = true;
+            hasRip = true;
             @display("p=337,192");
         }
         rRouter[numRipRouters]: Router {
-            hasRIP = true;
+            hasRip = true;
             @display("p=487,192,ri,100,100");
         }
         configurator: Ipv4NetworkConfigurator {
