@@ -33,7 +33,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 **.arpType = "GlobalArp"
 
-**.host*.mobilityType = "StationaryMobility"
+**.host*.mobility.typename = "StationaryMobility"
 **.mobility.constraintAreaMinZ = 0m
 **.mobility.constraintAreaMinX = 0m
 **.mobility.constraintAreaMinY = 0m

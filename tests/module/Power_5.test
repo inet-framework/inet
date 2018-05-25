@@ -56,7 +56,7 @@ cmdenv-express-mode = false
 **.mobility.initFromDisplayString = false
 **.mobility.initialY = 50m
 **.mobility.initialZ = 0m
-*.host*.mobilityType = "StationaryMobility"
+*.host*.mobility.typename = "StationaryMobility"
 *.hostSource.mobility.initialX = 20m
 *.hostDestination.mobility.initialX = 80m
 

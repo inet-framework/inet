@@ -24,7 +24,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 *.host.ipv4.configurator.networkConfiguratorModule = ""
 
-*.host.mobilityType = "StationaryMobility"
+*.host.mobility.typename = "StationaryMobility"
 **.mobility.constraintAreaMinX = 0m
 **.mobility.constraintAreaMinY = 0m
 **.mobility.constraintAreaMinZ = 0m

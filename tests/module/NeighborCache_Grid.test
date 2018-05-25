@@ -91,10 +91,10 @@ ned-path = .;../../../../src;../../lib
 *.numHosts = 20
 
 # mobility
-**.host[0..1].mobilityType = "StationaryMobility"
+**.host[0..1].mobility.typename = "StationaryMobility"
 **.host[1].mobility.initialX = 600m
 **.host[1].mobility.initialY = 600m
-**.host[2..20].mobilityType = "LinearMobility"
+**.host[2..20].mobility.typename = "LinearMobility"
 **.host[2..20].mobility.speed = 8mps
 **.mobility.constraintAreaMinZ = 0m
 **.mobility.constraintAreaMaxZ = 0m
