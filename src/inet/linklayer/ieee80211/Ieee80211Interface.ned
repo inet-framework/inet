@@ -46,7 +46,7 @@ module Ieee80211Interface like IWirelessInterface
         string llcType = default("Ieee8022Llc");
         string mgmtType = default("Ieee80211MgmtSta"); // name of the management module type (implements IIeee80211Mgmt)
         string radioType = default("Ieee80211ScalarRadio");
-        string macType = default("Ieee80211CompatibleMac");   // choose from Ieee80211Mac and Ieee80211CompatibleMac, @see IIeee80211Mac
+        string macType = default("Ieee80211Mac");   // choose from Ieee80211Mac and Ieee80211CompatibleMac, @see IIeee80211Mac
         string opMode @enum("a", "b", "g(erp)", "g(mixed)", "n(mixed-2.4Ghz)", "p", "ac") = default("g(mixed)");
         double bitrate @unit(bps) = default(-1bps);
         bool _agentNeeded = (mgmtType == "Ieee80211MgmtSta");   // internal par. do not use, shows if optional agent module is needed
