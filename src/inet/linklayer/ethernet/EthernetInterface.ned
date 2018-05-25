@@ -16,15 +16,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
-
 package inet.linklayer.ethernet;
 
 import inet.common.IHook;
+import inet.common.queue.IOutputQueue;
 import inet.linklayer.contract.IEtherMac;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.contract.ITrafficConditioner;
-
 
 //
 // Ethernet network interface. Complements ~EtherMac and ~EtherEncap
@@ -36,7 +34,6 @@ module EthernetInterface like IEthernetInterface
         @class(InterfaceEntry);
         string interfaceTableModule;
         bool csmacdSupport = default(false);  // by default CSMA/CD is turned off, so only point-to-point duplex links are supported.
-        string queueType = default(""); // ~DropTailQueue, or a Diffserv queue; set to "" for use of an internal queue
         string fcsMode @enum("declaredCorrect","declaredIncorrect","computed") = default("declaredCorrect");
         int numOutputHooks = default(0);
         int numInputHooks = default(0);
@@ -60,15 +57,14 @@ module EthernetInterface like IEthernetInterface
         egressTC: <default("")> like ITrafficConditioner if typename!="" {
             @display("p=53,158");
         }
-        queue: EtherQosQueue if queueType != "" {
+        queue: <default("")> like IOutputQueue if typename!="" {
             parameters:
-                dataQueueType = queueType;
                 @display("p=107,263;q=l2queue");
         }
         mac: <default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex")> like IEtherMac {
             parameters:
-                queueModule = (queueType == "" ? "" : "^.queue");
-                txQueueLimit = (queueType == "" ? 10000 : 1); // queue sends one packet at a time
+                queueModule = (exists(queue) ? "^.queue" : "");
+                txQueueLimit = (exists(queue) ? 1 : 10000); // queue sends one packet at a time
                 @display("p=182,321");
         }
         encap: <default("EtherEncap")> like IEtherEncap {
@@ -79,12 +75,12 @@ module EthernetInterface like IEthernetInterface
         mac.upperLayerOut --> encap.lowerLayerIn;
         mac.phys <--> { @display("m=s"); } <--> phys;
 
-        if queueType != "" {
+        if exists(queue) {
             encap.lowerLayerOut --> queue.in;
             queue.out --> mac.upperLayerIn;
         }
 
-        encap.lowerLayerOut --> mac.upperLayerIn if queueType == "";
+        encap.lowerLayerOut --> mac.upperLayerIn if !exists(queue);
 
         // no input hooks, no ingressTC
         encap.upperLayerOut --> { @display("m=n"); } --> upperLayerOut if numInputHooks == 0 && !exists(ingressTC);

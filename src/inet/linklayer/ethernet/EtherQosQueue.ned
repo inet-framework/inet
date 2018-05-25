@@ -31,7 +31,6 @@ import inet.common.queue.PriorityScheduler;
 module EtherQosQueue like IOutputQueue
 {
     parameters:
-        string dataQueueType = default("DropTailQueue");  // class that inherits from IOutputQueue (~DropTailQueue, ~EtherQosQueue, ~DiffservQueue etc.)
         @display("i=block/queue");
     gates:
         input in;
@@ -44,7 +43,7 @@ module EtherQosQueue like IOutputQueue
             queueName = "pauseQueue";
             @display("p=250,100");
         }
-        dataQueue: <dataQueueType> like IOutputQueue {
+        dataQueue: <default("DropTailQueue")> like IOutputQueue {
             parameters:
                 @display("p=250,300;q=l2queue");
         }

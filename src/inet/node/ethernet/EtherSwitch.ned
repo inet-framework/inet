@@ -45,11 +45,10 @@ module EtherSwitch
         @display("i=device/switch;bgb=663,297");
         bool hasStatus = default(false);
         bool csmacdSupport = default(true);  // by default use CSMA/CD --FIXME remove
-        string macType = default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex"); // ~EtherMac or ~EtherMacFullDuplex --FIXME remove
         string spanningTreeProtocol = default("");
         eth[*].encap.typename = "EtherEncapDummy";
         eth[*].csmacdSupport = csmacdSupport;
-        eth[*].mac.typename = macType;
+        eth[*].mac.typename = default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex");
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.macTableModule = default(absPath(".macTable"));
     gates:
