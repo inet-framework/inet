@@ -33,7 +33,7 @@ import inet.networklayer.common.InterfaceTable;
 // By default, the access point is stationary (~StationaryMobility),
 // but that can also be configured by a parameter.
 //
-// The wlan[*].mgmtType can be configured for different management types
+// The wlan[*].mgmt.typename can be configured for different management types
 // currently it can be: ~Ieee80211MgmtApSimplified and ~Ieee80211MgmtAp.
 // By default it is ~Ieee80211MgmtAp. The Simplified version does not
 // support channel scanning, authentication and association .
@@ -48,7 +48,7 @@ module AccessPoint
         @display("i=device/accesspoint");
         int numWlanInterfaces = default(1);               // the number of radios in the access point
         bool hasStatus = default(false);
-        wlan[*].mgmtType = default("Ieee80211MgmtAp");
+        wlan[*].mgmt.typename = default("Ieee80211MgmtAp");
         wlan[*].llc.typename = default("Ieee80211Portal");
         wlan[*].radio.antenna.mobilityModule = default("^.^.^.mobility");
         eth[*].encap.typename = "EtherEncapDummy";

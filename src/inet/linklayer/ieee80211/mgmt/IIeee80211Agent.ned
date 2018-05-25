@@ -8,25 +8,20 @@
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.node.inet;
+package inet.linklayer.ieee80211.mgmt;
 
-//
-// Models a host with (default) one wireless (802.11) card in infrastructure mode.
-// This module is basically a ~StandardHost with an ~Ieee80211Interface with
-// mgmt.typename = ~Ieee80211MgmtSta added.
-// It should be used in conjunction with ~AccessPoint, or any other AP model
-// which contains ~Ieee80211Interface with mgmt.typename = ~Ieee80211MgmtAp.
-//
-module WirelessHost extends StandardHost
+moduleinterface IIeee80211Agent
 {
     parameters:
-        numWlanInterfaces = default(1);
-        @display("i=device/wifilaptop");
+        @display("i=block/cogwheel");
+    gates:
+        input mgmtIn;
+        output mgmtOut;
 }
