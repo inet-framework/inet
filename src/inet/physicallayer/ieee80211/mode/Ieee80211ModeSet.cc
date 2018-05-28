@@ -503,35 +503,39 @@ bool Ieee80211ModeSet::getIsMandatory(const IIeee80211Mode *mode) const
     return entries[getModeIndex(mode)].isMandatory;
 }
 
-const IIeee80211Mode *Ieee80211ModeSet::findMode(bps bitrate, Hz bandwidth) const
+const IIeee80211Mode *Ieee80211ModeSet::findMode(bps bitrate, Hz bandwidth, int numSpatialStreams) const
 {
-    return findMode(bitrate - Mbps(0.05), bitrate + Mbps(0.05), bandwidth);
+    return findMode(bitrate - Mbps(0.05), bitrate + Mbps(0.05), bandwidth, numSpatialStreams);
 }
 
-const IIeee80211Mode *Ieee80211ModeSet::findMode(bps minBitrate, bps maxBitrate, Hz bandwidth) const
+const IIeee80211Mode *Ieee80211ModeSet::findMode(bps minBitrate, bps maxBitrate, Hz bandwidth, int numSpatialStreams) const
 {
     for (size_t index = 0; index < entries.size(); index++) {
         auto mode = entries[index].mode;
         auto dataMode = mode->getDataMode();
         auto bitrate = dataMode->getNetBitrate();
-        if (minBitrate <= bitrate && bitrate <= maxBitrate && (std::isnan(bandwidth.get()) || dataMode->getBandwidth() == bandwidth))
+        if (minBitrate <= bitrate && bitrate <= maxBitrate &&
+            (std::isnan(bandwidth.get()) || dataMode->getBandwidth() == bandwidth) &&
+            (numSpatialStreams == -1 || dataMode->getNumberOfSpatialStreams() == numSpatialStreams))
+        {
             return entries[index].mode;
+        }
     }
     return nullptr;
 }
 
-const IIeee80211Mode *Ieee80211ModeSet::getMode(bps bitrate, Hz bandwidth) const
+const IIeee80211Mode *Ieee80211ModeSet::getMode(bps bitrate, Hz bandwidth, int numSpatialStreams) const
 {
-    const IIeee80211Mode *mode = getMode(bitrate - Mbps(0.05), bitrate + Mbps(0.05), bandwidth);
+    const IIeee80211Mode *mode = getMode(bitrate - Mbps(0.05), bitrate + Mbps(0.05), bandwidth, numSpatialStreams);
     if (mode == nullptr)
         throw cRuntimeError("Unknown bitrate: %g in operation mode: '%s'", bitrate.get(), getName());
     else
         return mode;
 }
 
-const IIeee80211Mode *Ieee80211ModeSet::getMode(bps minBitrate, bps maxBitrate, Hz bandwidth) const
+const IIeee80211Mode *Ieee80211ModeSet::getMode(bps minBitrate, bps maxBitrate, Hz bandwidth, int numSpatialStreams) const
 {
-    const IIeee80211Mode *mode = findMode(minBitrate, maxBitrate, bandwidth);
+    const IIeee80211Mode *mode = findMode(minBitrate, maxBitrate, bandwidth, numSpatialStreams);
     if (mode == nullptr)
         throw cRuntimeError("Unknown bitrate: (%g - %g) in operation mode: '%s'", minBitrate.get(), maxBitrate.get(), getName());
     else
