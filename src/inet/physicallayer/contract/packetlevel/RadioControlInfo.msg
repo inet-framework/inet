@@ -17,14 +17,9 @@
 
 import inet.common.INETDefs;
 import inet.common.Units;
-
-cplusplus {{
-#include "inet/physicallayer/contract/packetlevel/IModulation.h"
-}}
+import inet.physicallayer.contract.packetlevel.IModulation;
 
 namespace inet::physicallayer;
-
-class IModulation { @existingClass; }
 
 //
 // Message kinds for sending commands to the radio.
