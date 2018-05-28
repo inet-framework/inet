@@ -570,7 +570,7 @@ void Rip::processUpdate(bool triggered)
         EV_INFO << "sending regular updates on all interfaces\n";
 
     for (auto & elem : ripInterfaces)
-        if (elem.mode != NO_RIP)
+        if (elem.mode != NO_RIP && elem.ie->isUp())
             sendRoutes(addressType->getLinkLocalRIPRoutersMulticastAddress(), ripUdpPort, elem, triggered);
 
 
