@@ -44,7 +44,7 @@ module PacketDrillHost extends StandardHost
         tunApp[numTunInterfaces]: PacketDrillApp {
             parameters:
                 interface = "tun"+string(index);
-                @display("p=800,100");
+                @display("p=825,76,row,150");
         }
 
     connections allowunconnected:

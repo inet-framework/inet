@@ -31,10 +31,10 @@ module DataLinkVisualizer like IDataLinkVisualizer
     submodules:
         canvasVisualizer: <default("DataLinkCanvasVisualizer")> like IDataLinkVisualizer if typename != "" {
             parameters:
-                @display("p=100,50");
+                @display("p=100,100");
         }
         osgVisualizer: <default("DataLinkOsgVisualizer")> like IDataLinkVisualizer if typename != "" {
             parameters:
-                @display("p=100,150");
+                @display("p=100,200");
         }
 }

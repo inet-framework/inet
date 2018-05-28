@@ -59,17 +59,17 @@ module InternetCloud extends NetworkLayerNodeBase
         ipv4Delayer: <default("MatrixCloudDelayer")> like ICloudDelayer if hasIpv4 {
             parameters:
                 networkProtocolModule = "^.ipv4.ip";
-                @display("p=400,408");
+                @display("p=825,376");
         }
         ipv6Delayer: <default("MatrixCloudDelayer")> like ICloudDelayer if hasIpv6 {
             parameters:
                 networkProtocolModule = "^.ipv6.ipv6";
-                @display("p=500,408");
+                @display("p=975,376");
         }
         gnDelayer: <default("MatrixCloudDelayer")> like ICloudDelayer if hasGn {
             parameters:
                 networkProtocolModule = "^.generic.nextHop";
-                @display("p=600,408");
+                @display("p=1125,376");
         }
     connections allowunconnected:
 }

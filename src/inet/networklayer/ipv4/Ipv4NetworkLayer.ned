@@ -61,32 +61,32 @@ module Ipv4NetworkLayer like INetworkLayer
         }
         up: MessageDispatcher {
             parameters:
-                @display("p=450,100;b=480,5");
+                @display("p=550,100;b=600,5");
         }
         igmp: <default("Igmpv2")> like IIgmp {
             parameters:
-                @display("p=300,200");
+                @display("p=400,200");
         }
         icmp: Icmp {
             parameters:
-                @display("p=600,200");
+                @display("p=700,200");
         }
         mp: MessageDispatcher {
             parameters:
-                @display("p=450,300;b=480,5");
+                @display("p=550,300;b=600,5");
         }
         ip: Ipv4 {
             parameters:
                 useProxyARP = true; // as routes with unspecified next-hop addr are quite common
-                @display("p=450,400;q=queue");
+                @display("p=700,400;q=queue");
         }
         arp: <default("Arp")> like IArp {
             parameters:
-                @display("p=300,400;q=pendingQueue");
+                @display("p=400,400;q=pendingQueue");
         }
         lp: MessageDispatcher {
             parameters:
-                @display("p=450,500;b=480,5");
+                @display("p=550,500;b=600,5");
         }
 
     connections allowunconnected:

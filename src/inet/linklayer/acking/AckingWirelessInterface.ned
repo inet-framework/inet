@@ -41,7 +41,7 @@ module AckingWirelessInterface like IWirelessInterface
 {
     parameters:
         @class(InterfaceEntry);
-        @display("i=block/ifcard;bgb=214,335;bgl=53");
+        @display("i=block/ifcard");
         string interfaceTableModule;
         string energySourceModule = default("");
         double bitrate @unit(bps);
@@ -55,15 +55,15 @@ module AckingWirelessInterface like IWirelessInterface
     submodules:
         queue: <default("DropTailQueue")> like IOutputQueue {
             parameters:
-                @display("p=23,125;q=l2queue");
+                @display("p=100,100;q=l2queue");
         }
         mac: AckingMac {
             parameters:
-                @display("p=98,207");
+                @display("p=250,200");
         }
         radio: <default("UnitDiskRadio")> like IRadio {
             parameters:
-                @display("p=98,278");
+                @display("p=250,350");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> queue.in;

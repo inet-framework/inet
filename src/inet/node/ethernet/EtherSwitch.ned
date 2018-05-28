@@ -42,7 +42,7 @@ module EtherSwitch
     parameters:
         @networkNode();
         @labels(node,ethernet-node);
-        @display("i=device/switch;bgb=663,297");
+        @display("i=device/switch");
         bool hasStatus = default(false);
         bool csmacdSupport = default(true);  // by default use CSMA/CD --FIXME remove
         string spanningTreeProtocol = default("");
@@ -55,31 +55,31 @@ module EtherSwitch
         inout ethg[] @labels(EtherFrame-conn);
     submodules:
         status: NodeStatus if hasStatus {
-            @display("p=73,177;is=s");
+            @display("p=100,400;is=s");
         }
         l2NodeConfigurator: L2NodeConfigurator if spanningTreeProtocol != "" {
-            @display("p=73,252;is=s");
+            @display("p=100,300;is=s");
         }
         interfaceTable: InterfaceTable {
-            @display("p=73,115;is=s");
+            @display("p=100,200;is=s");
         }
         macTable: <default("MacAddressTable")> like IMacAddressTable {
-            @display("p=73,42;is=s");
+            @display("p=100,100;is=s");
         }
         relayUnit: <default(firstAvailable("Ieee8021dRelay","MacRelayUnit"))> like IMacRelayUnit {
-            @display("p=264,89;is=m");
+            @display("p=400,100;is=m");
         }
         stp: <spanningTreeProtocol> like ISpanningTree if spanningTreeProtocol != "" {
-            @display("p=169,89");
+            @display("p=250,100");
         }
         nl: MessageDispatcher {
             parameters:
-                @display("p=427,167;b=395,5");
+                @display("p=800,200;b=1200,5");
         }
         eth[sizeof(ethg)]: <default("EthernetInterface")> like IEthernetInterface {
             parameters:
                 mac.promiscuous = true;
-                @display("p=264,247,row;q=txQueue");
+                @display("p=250,300,row,150;q=txQueue");
         }
     connections:
         relayUnit.ifOut --> nl.in++;

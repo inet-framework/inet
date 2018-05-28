@@ -31,10 +31,10 @@ module PhysicalLinkVisualizer like IPhysicalLinkVisualizer
     submodules:
         canvasVisualizer: <default("PhysicalLinkCanvasVisualizer")> like IPhysicalLinkVisualizer if typename != "" {
             parameters:
-                @display("p=100,50");
+                @display("p=100,100");
         }
         osgVisualizer: <default("PhysicalLinkOsgVisualizer")> like IPhysicalLinkVisualizer if typename != "" {
             parameters:
-                @display("p=100,150");
+                @display("p=100,200");
         }
 }

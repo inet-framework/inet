@@ -47,7 +47,7 @@ module NetPerfMeterHost extends TransportLayerNodeBase
     submodules:
         netPerfMeterApp[numNetPerfMeterApps]: <default("NetPerfMeter")> like INetPerfMeterApp {  // T.D. 17.11.09
             parameters:
-                @display("p=262,36");
+                @display("p=375,76,row,150");
         }
 
     connections allowunconnected:

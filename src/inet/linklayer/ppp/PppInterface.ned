@@ -33,7 +33,7 @@ module PppInterface like IPppInterface
 {
     parameters:
         @class(InterfaceEntry);
-        @display("i=block/ifcard;bgb=214,249;bgl=53");
+        @display("i=block/ifcard;bgl=53");
         string interfaceTableModule;
         int numOutputHooks = default(0);
         int numInputHooks = default(0);
@@ -44,26 +44,26 @@ module PppInterface like IPppInterface
         inout phys @labels(PppFrame);
     submodules:
         outputHook[numOutputHooks]: <default("Nop")> like IHook if numOutputHooks>0 {
-            @display("p=42,33");
+            @display("p=100,100,row,50");
         }
         inputHook[numInputHooks]: <default("Nop")> like IHook if numInputHooks>0 {
-            @display("p=177,33");
+            @display("p=500,100,row,50");
         }
         ingressTC: <default("")> like ITrafficConditioner if typename != "" {
-            @display("p=177,100");
+            @display("p=500,200");
         }
         egressTC: <default("")> like ITrafficConditioner if typename != "" {
-            @display("p=42,100");
+            @display("p=100,200");
         }
         queue: <default("DropTailQueue")> like IOutputQueue if typename != "" {
             parameters:
-                @display("p=42,161;q=l2queue");
+                @display("p=200,300;q=l2queue");
         }
         ppp: Ppp {
             parameters:
                 queueModule = (!exists(queue) ? "" : "^.queue");
                 txQueueLimit = (!exists(queue) ? 10000 : 1); // queue sends one packet at a time
-                @display("p=98,207");
+                @display("p=300,400");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> outputHook[0].in if numOutputHooks > 0;

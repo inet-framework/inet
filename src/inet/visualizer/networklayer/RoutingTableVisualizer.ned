@@ -31,10 +31,10 @@ module RoutingTableVisualizer like IRoutingTableVisualizer
     submodules:
         canvasVisualizer: <default("RoutingTableCanvasVisualizer")> like IRoutingTableVisualizer if typename != "" {
             parameters:
-                @display("p=100,50");
+                @display("p=100,100");
         }
         osgVisualizer: <default("RoutingTableOsgVisualizer")> like IRoutingTableVisualizer if typename != "" {
             parameters:
-                @display("p=100,150");
+                @display("p=100,200");
         }
 }

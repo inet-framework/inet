@@ -31,10 +31,10 @@ module InfoVisualizer like IInfoVisualizer
     submodules:
         canvasVisualizer: <default("InfoCanvasVisualizer")> like IInfoVisualizer if typename != "" {
             parameters:
-                @display("p=100,50");
+                @display("p=100,100");
         }
         osgVisualizer: <default("InfoOsgVisualizer")> like IInfoVisualizer if typename != "" {
             parameters:
-                @display("p=100,150");
+                @display("p=100,200");
         }
 }

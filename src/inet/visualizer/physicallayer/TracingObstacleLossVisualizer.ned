@@ -31,10 +31,10 @@ module TracingObstacleLossVisualizer like ITracingObstacleLossVisualizer
     submodules:
         canvasVisualizer: <default("TracingObstacleLossCanvasVisualizer")> like ITracingObstacleLossVisualizer if typename != "" {
             parameters:
-                @display("p=100,50");
+                @display("p=100,100");
         }
         osgVisualizer: <default("TracingObstacleLossOsgVisualizer")> like ITracingObstacleLossVisualizer if typename != "" {
             parameters:
-                @display("p=100,150");
+                @display("p=100,200");
         }
 }

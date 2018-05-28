@@ -35,6 +35,6 @@ module Dcaf
     submodules:
         contention: Contention {
             parameters:
-	            @display("p=100,100");
+                @display("p=100,100");
         }
 }

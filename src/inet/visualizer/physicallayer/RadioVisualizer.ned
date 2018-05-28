@@ -31,10 +31,10 @@ module RadioVisualizer like IRadioVisualizer
     submodules:
         canvasVisualizer: <default("RadioCanvasVisualizer")> like IRadioVisualizer if typename != "" {
             parameters:
-                @display("p=100,50");
+                @display("p=100,100");
         }
         osgVisualizer: <default("RadioOsgVisualizer")> like IRadioVisualizer if typename != "" {
             parameters:
-                @display("p=100,150");
+                @display("p=100,200");
         }
 }

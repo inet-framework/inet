@@ -31,10 +31,10 @@ module NetworkConnectionVisualizer like INetworkConnectionVisualizer
     submodules:
         canvasVisualizer: <default("NetworkConnectionCanvasVisualizer")> like INetworkConnectionVisualizer if typename != "" {
             parameters:
-                @display("p=100,50");
+                @display("p=100,100");
         }
         osgVisualizer: <default("NetworkConnectionOsgVisualizer")> like INetworkConnectionVisualizer if typename != "" {
             parameters:
-                @display("p=100,150");
+                @display("p=100,200");
         }
 }

@@ -37,15 +37,15 @@ module Ieee802154UwbIrInterface like IWirelessInterface
     submodules:
         queue: <default("DropTailQueue")> like IOutputQueue {
             parameters:
-                @display("p=100,50;q=l2queue");
+                @display("p=100,100;q=l2queue");
         }
         mac: AckingMac {
             parameters:
-                @display("p=100,150");
+                @display("p=250,200");
         }
         radio: <default("Ieee802154UwbIrRadio")> like IRadio {
             parameters:
-                @display("p=100,250");
+                @display("p=250,350");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> queue.in;

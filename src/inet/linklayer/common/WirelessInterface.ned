@@ -29,20 +29,20 @@ module WirelessInterface like IWirelessInterface
         string energySourceModule;
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         *.energySourceModule = default(absPath(energySourceModule));
-        @display("i=block/ifcard;bgb=250,300");
+        @display("i=block/ifcard");
     gates:
         input upperLayerIn;
         output upperLayerOut;
         input radioIn @labels(ISignal);
     submodules:
         classifier: <default("")> like IIeee8021dQosClassifier if typename != "" {
-                @display("p=80,70");
+                @display("p=250,100");
         }
         mac: <> like IMacProtocol {
-                @display("p=150,100");
+                @display("p=100,200");
         }
         radio: <> like IRadio if typename != "" {
-                @display("p=150,200");
+                @display("p=100,350");
         }
     connections allowunconnected:
         radioIn --> { @display("m=s"); } --> radio.radioIn if exists(radio);

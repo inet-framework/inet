@@ -31,10 +31,10 @@ module MediumVisualizer like IMediumVisualizer
     submodules:
         canvasVisualizer: <default("MediumCanvasVisualizer")> like IMediumVisualizer if typename != "" {
             parameters:
-                @display("p=100,50");
+                @display("p=100,100");
         }
         osgVisualizer: <default("MediumOsgVisualizer")> like IMediumVisualizer if typename != "" {
             parameters:
-                @display("p=100,150");
+                @display("p=100,200");
         }
 }

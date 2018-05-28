@@ -31,10 +31,10 @@ module Ieee80211Visualizer like IIeee80211Visualizer
     submodules:
         canvasVisualizer: <default("Ieee80211CanvasVisualizer")> like IIeee80211Visualizer if typename != "" {
             parameters:
-                @display("p=100,50");
+                @display("p=100,100");
         }
         osgVisualizer: <default("Ieee80211OsgVisualizer")> like IIeee80211Visualizer if typename != "" {
             parameters:
-                @display("p=100,150");
+                @display("p=100,200");
         }
 }

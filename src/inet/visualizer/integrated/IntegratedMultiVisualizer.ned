@@ -29,10 +29,10 @@ module IntegratedMultiVisualizer like IIntegratedVisualizer
     submodules:
         canvasVisualizer: <default("IntegratedMultiCanvasVisualizer")> like IIntegratedVisualizer if typename != "" {
             parameters:
-                @display("p=100,50");
+                @display("p=100,100");
         }
         osgVisualizer: <default("")> like IIntegratedVisualizer if typename != "" {
             parameters:
-                @display("p=100,150");
+                @display("p=100,200");
         }
 }

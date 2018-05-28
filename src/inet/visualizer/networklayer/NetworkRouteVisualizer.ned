@@ -31,10 +31,10 @@ module NetworkRouteVisualizer like INetworkRouteVisualizer
     submodules:
         canvasVisualizer: <default("NetworkRouteCanvasVisualizer")> like INetworkRouteVisualizer if typename != "" {
             parameters:
-                @display("p=100,50");
+                @display("p=100,100");
         }
         osgVisualizer: <default("NetworkRouteOsgVisualizer")> like INetworkRouteVisualizer if typename != "" {
             parameters:
-                @display("p=100,150");
+                @display("p=100,200");
         }
 }
