@@ -33,6 +33,7 @@ module ThroughputClient
         @display("i=device/wifilaptop");
         @networkNode();
         *.interfaceTableModule = default(absPath(".interfaceTable"));
+        wlan.radio.antenna.mobilityModule = default("^.^.^.mobility");
     gates:
         input radioIn @directIn;
 
@@ -67,6 +68,7 @@ module ThroughputServer
         @display("i=device/wifilaptop");
         @networkNode();
         *.interfaceTableModule = default(absPath(".interfaceTable"));
+        wlan.radio.antenna.mobilityModule = default("^.^.^.mobility");
     gates:
         input radioIn @directIn;
 

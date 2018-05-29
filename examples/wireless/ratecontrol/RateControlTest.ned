@@ -34,6 +34,7 @@ module SinkClient
         @labels(node);
         @display("i=device/cellphone");
         *.interfaceTableModule = default(absPath(".interfaceTable"));
+        wlan.radio.antenna.mobilityModule = default("^.^.^.mobility");
     gates:
         input radioIn @directIn;
     submodules:
@@ -62,6 +63,7 @@ module Client
         @display("i=device/wifilaptop");
         @networkNode();
         *.interfaceTableModule = default(absPath(".interfaceTable"));
+        wlan.radio.antenna.mobilityModule = default("^.^.^.mobility");
     gates:
         input radioIn @directIn;
 
