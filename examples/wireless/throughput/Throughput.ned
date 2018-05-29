@@ -25,13 +25,13 @@ import inet.networklayer.common.InterfaceTable;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.contract.IIntegratedVisualizer;
 
-
 module ThroughputClient
 {
     parameters:
         @display("i=device/wifilaptop");
         @networkNode();
         *.interfaceTableModule = "^.interfaceTable";
+        wlan.radio.antenna.mobilityModule = default("^.^.^.mobility");
     gates:
         input radioIn @directIn;
 
