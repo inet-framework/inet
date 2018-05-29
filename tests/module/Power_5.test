@@ -37,8 +37,8 @@ cmdenv-express-mode = false
 **.hasStatus = true
 
 # power
-**.energyStorageType = "SimpleCcBattery"
-**.energyConsumerType = "StateBasedCcEnergyConsumer"
+**.energyStorage.typename = "SimpleCcBattery"
+**.energyConsumer.typename = "StateBasedCcEnergyConsumer"
 **.energyStorage.nominalCapacity = 1C
 **.energyStorage.nominalVoltage = 1.5V
 **.energyStorage.cutoffVoltage = 1.0V

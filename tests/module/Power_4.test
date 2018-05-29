@@ -45,9 +45,9 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 *.hostDestination.status.initialStatus = "up"
 
 # power
-**.energyStorageType = "SimpleEpEnergyStorage"
+**.energyStorage.typename = "SimpleEpEnergyStorage"
 **.energyManagementType = "SimpleEpEnergyManagement"
-**.energyConsumerType = "StateBasedEpEnergyConsumer"
+**.energyConsumer.typename = "StateBasedEpEnergyConsumer"
 **.energyStorage.nominalCapacity = 1J
 **.energyManagement.nodeShutdownCapacity = 0J
 **.energyManagement.nodeStartCapacity = 0.2J
