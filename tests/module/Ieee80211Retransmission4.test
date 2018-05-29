@@ -74,11 +74,11 @@ ned-path = .;../../../../src;../../lib
 **.receiver.numApps = 1
 **.receiver.app[0].typename = "UdpSink"
 **.receiver.app[0].localPort = 21
-**.sender.wlan[*].macType = "Ieee80211Mac"
+**.sender.wlan[*].mac.typename = "Ieee80211Mac"
 **.sender.wlan[*].mac.dcf.rtsPolicy.rtsThreshold = 1500B
 **.sender.wlan[*].mac.dcf.channelAccess.cwMin = 15
 **.sender.wlan[*].mac.dcf.channelAccess.cwMin = 1023
-**.receiver.wlan[*].macType = "Ieee80211TesterMac"
+**.receiver.wlan[*].mac.typename = "Ieee80211TesterMac"
 **.wlan[*].mgmtType = "Ieee80211MgmtAdhoc"
 
 **.sender.app[0].packets = "SSS"
