@@ -48,10 +48,10 @@ module AccessPoint
         @display("i=device/accesspoint");
         int numWlanInterfaces = default(1);               // the number of radios in the access point
         bool hasStatus = default(false);
-        wlan[*].llc.type = default("Ieee80211Portal");
         wlan[*].mgmtType = default("Ieee80211MgmtAp");
-        eth[*].encap.type = "EtherEncapDummy";
+        wlan[*].llc.typename = default("Ieee80211Portal");
         wlan[*].radio.antenna.mobilityModule = default("^.^.^.mobility");
+        eth[*].encap.typename = "EtherEncapDummy";
         *.interfaceTableModule = default(absPath(".interfaceTable"));
     gates:
         input radioIn[numWlanInterfaces] @directIn;
