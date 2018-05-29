@@ -28,7 +28,7 @@ network Synchronized
     parameters:
         int nodeCount;
         **.bitrate = 11Mbps;
-        **.arpType = "GlobalArp";
+        **.arp.typename = "GlobalArp";
         @display("bgl=3");
     submodules:
         visualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if hasVisualizer() {

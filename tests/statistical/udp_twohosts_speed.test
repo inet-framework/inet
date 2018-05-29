@@ -81,7 +81,7 @@ sim-time-limit = 20s
 **.host*.eth[*].queue.frameCapacity = 1
 
 # Arp
-**.arpType = "GlobalArp"
+**.arp.typename = "GlobalArp"
 
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: Rscript check.r

@@ -59,7 +59,7 @@ ned-path = .;../../../../src;../../lib
 **.radio.receiver.snirThreshold = 4dB
 
 # Arp
-**.arpType = "GlobalArp"
+**.arp.typename = "GlobalArp"
 
 # Sender
 **.sender.numApps = 1
