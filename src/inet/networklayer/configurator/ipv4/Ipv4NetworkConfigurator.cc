@@ -19,14 +19,15 @@
 //
 
 #include <set>
+#include "inet/common/INETUtils.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/stlutils.h"
-#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
-#include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/common/XMLUtils.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/configurator/ipv4/Ipv4NetworkConfigurator.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/XMLUtils.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 
 namespace inet {
 
@@ -728,7 +729,9 @@ void Ipv4NetworkConfigurator::dumpRoutes(Topology& topology)
 void Ipv4NetworkConfigurator::dumpConfig(Topology& topology)
 {
     FILE *f;
-    f = fopen(par("dumpConfig"), "w");
+    const char *filename = par("dumpConfig");
+    inet::utils::makePathForFile(filename);
+    f = fopen(filename, "w");
     if (!f)
         throw cRuntimeError("Cannot write configurator output file");
     fprintf(f, "<config>\n");

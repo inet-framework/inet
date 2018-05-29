@@ -20,6 +20,7 @@
 //
 
 #include <errno.h>
+#include "inet/common/INETUtils.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/recorder/PcapDump.h"
 
@@ -62,6 +63,7 @@ void PcapDump::openPcap(const char *filename, unsigned int snaplen_par, uint32 n
     if (!filename || !filename[0])
         throw cRuntimeError("Cannot open pcap file: file name is empty");
 
+    inet::utils::makePathForFile(filename);
     dumpfile = fopen(filename, "wb");
 
     if (!dumpfile)
