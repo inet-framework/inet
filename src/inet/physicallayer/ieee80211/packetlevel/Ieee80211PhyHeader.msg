@@ -28,7 +28,7 @@ class Ieee80211PhyPreamble extends FieldsChunk
 class Ieee80211PhyHeader extends FieldsChunk
 {
     // TODO: remove this, because not all subtypes have lengthField
-    uint16_t lengthField;
+    B lengthField;
 }
 
 //
@@ -57,7 +57,7 @@ class Ieee80211IrPhyPreamble extends Ieee80211PhyPreamble
 
 class Ieee80211IrPhyHeader extends Ieee80211PhyHeader
 {
-    // TODO: uint16_t lengthField;
+    // TODO: B lengthField;
     uint16_t crc;
     CrcMode crcMode;
 }
@@ -74,7 +74,7 @@ class Ieee80211DsssPhyHeader extends Ieee80211PhyHeader
 {
     uint8_t signal;
     uint8_t service;
-    // TODO: uint16_t lengthField;
+    // TODO: B lengthField;
     uint16_t crc;
     CrcMode crcMode;
 }
@@ -119,7 +119,7 @@ class Ieee80211OfdmPhyHeader extends Ieee80211PhyHeader
     // Tail (6) and SERVICE (16) fields.
     chunkLength = B(5);
     uint8_t rate;
-    // TODO: uint16_t lengthField;
+    // TODO: B lengthField;
     uint16_t service;
 }
 
