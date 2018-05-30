@@ -15,9 +15,9 @@
 
 package ieee80211retransmissiontest;
 
-import inet.linklayer.ieee80211.mac.Ieee80211CompatibleMac;
+import inet.linklayer.ieee80211.mac.Ieee80211Mac;
 
-module Ieee80211TesterMac extends Ieee80211CompatibleMac
+module Ieee80211TesterMac extends Ieee80211Mac
 {
     parameters:
         // A means accept
