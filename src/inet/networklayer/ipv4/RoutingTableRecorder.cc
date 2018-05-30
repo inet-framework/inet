@@ -258,9 +258,6 @@ void RoutingTableRecorder::hookListeners()
 void RoutingTableRecorder::ensureRoutingLogFileOpen()
 {
     if (routingLogFile == nullptr) {
-        // hack to ensure that results/ folder is created
-        getSimulation()->getSystemModule()->recordScalar("hackForCreateResultsFolder", 0);
-
         std::string fname = getEnvir()->getConfig()->getAsFilename(CFGID_ROUTINGLOG_FILE);
         inet::utils::makePathForFile(fname.c_str());
         routingLogFile = fopen(fname.c_str(), "w");
