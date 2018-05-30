@@ -45,16 +45,12 @@ module IPv4SmallLAN
 {
     parameters:
         int h; // number of hosts on the router
-        @display("i=old/cloud_s");
+        @display("i=old/cloud");
     gates:
         inout ethg;
     submodules:
-        router: Router {
-            @display("is=s");
-        }
-        host[h]: StandardHost {
-            @display("is=s");
-        }
+        router: Router;
+        host[h]: StandardHost;
     connections:
         for i=0..h-1 {
             router.ethg++ <--> cable <--> host[i].ethg++;
@@ -71,25 +67,15 @@ module IPv4MediumLAN
     parameters:
         int n; // number of hosts on the switch
         int h; // number of hosts on the hub
-        @display("i=old/cloud_s");
+        @display("i=old/cloud");
     gates:
         inout ethg;
     submodules:
-        router: Router {
-            @display("is=s");
-        }
-        switch: EtherSwitch {
-            @display("is=s");
-        }
-        host[n]: StandardHost {
-            @display("is=s");
-        }
-        hub: EtherHub {
-            @display("is=s");
-        }
-        hhost[h]: StandardHost {
-            @display("is=s");
-        }
+        router: Router;
+        switch: EtherSwitch;
+        host[n]: StandardHost;
+        hub: EtherHub;
+        hhost[h]: StandardHost;
     connections:
         for i=0..n-1 {
             switch.ethg++ <--> cable <--> host[i].ethg++;
@@ -128,31 +114,18 @@ module IPv4LargeLAN
                 datarate = 10Mbps;
         }
     submodules:
-        router: Router {
-            @display("is=s");
-        }
-        switch: EtherSwitch {
-            @display("is=s");
-        }
-        host[n]: StandardHost {
-            @display("is=s");
-        }
-        hub: EtherHub {
-            @display("is=s");
-        }
-        hhost[h]: StandardHost {
-            @display("is=s");
-        }
+        router: Router;
+        switch: EtherSwitch;
+        host[n]: StandardHost;
+        hub: EtherHub;
+        hhost[h]: StandardHost;
         bus: EtherBus {
             parameters:
                 positions = "5 10 15"; // every 5 meters
                 propagationSpeed = 2e8 mps;  // 1us = 200m
                 @display("b=424,6;o=#408060");
         }
-        bhost[b]: StandardHost {
-            parameters:
-                @display("is=s;p=,r");
-        }
+        bhost[b]: StandardHost;
     connections:
         for i=0..n-1 {
             switch.ethg++ <--> cable <--> host[i].ethg++;
@@ -208,28 +181,68 @@ network IPv4LargeNet
         slanBB[n*bbs]: IPv4SmallLAN;
         mlanBB[n*bbm]: IPv4MediumLAN;
         llanBB[n*bbl]: IPv4LargeLAN;
-        routerA: Router;
-        serverA: StandardHost;
-        slanA[as]: IPv4SmallLAN;
-        mlanA[am]: IPv4MediumLAN;
-        llanA[al]: IPv4LargeLAN;
-        routerB: Router;
-        serverB: StandardHost;
-        slanB[bs]: IPv4SmallLAN;
-        mlanB[bm]: IPv4MediumLAN;
-        llanB[bl]: IPv4LargeLAN;
-        routerC: Router;
-        serverC: StandardHost;
-        slanC[cs]: IPv4SmallLAN;
-        mlanC[cm]: IPv4MediumLAN;
-        llanC[cl]: IPv4LargeLAN;
-        routerD: Router;
-        serverD: StandardHost;
-        slanD[ds]: IPv4SmallLAN;
-        mlanD[dm]: IPv4MediumLAN;
-        llanD[dl]: IPv4LargeLAN;
+        routerA: Router {
+            @display("p=1300,550");
+        }
+        serverA: StandardHost {
+            @display("p=1450,570");
+        }
+        slanA[as]: IPv4SmallLAN {
+            @display("p=1200,650");
+        }
+        mlanA[am]: IPv4MediumLAN {
+            @display("p=1350,650");
+        }
+        llanA[al]: IPv4LargeLAN {
+            @display("p=1450,470");
+        }
+        routerB: Router {
+            @display("p=350,550");
+        }
+        serverB: StandardHost {
+            @display("p=200,570");
+        }
+        slanB[bs]: IPv4SmallLAN {
+            @display("p=450,650");
+        }
+        mlanB[bm]: IPv4MediumLAN {
+            @display("p=300,650");
+        }
+        llanB[bl]: IPv4LargeLAN {
+            @display("p=200,470");
+        }
+        routerC: Router {
+            @display("p=350,170");
+        }
+        serverC: StandardHost {
+            @display("p=200,150");
+        }
+        slanC[cs]: IPv4SmallLAN {
+            @display("p=450,70");
+        }
+        mlanC[cm]: IPv4MediumLAN {
+            @display("p=300,70");
+        }
+        llanC[cl]: IPv4LargeLAN {
+            @display("p=200,250");
+        }
+        routerD: Router {
+            @display("p=1300,170");
+        }
+        serverD: StandardHost {
+            @display("p=1450,150");
+        }
+        slanD[ds]: IPv4SmallLAN {
+            @display("p=1200,70");
+        }
+        mlanD[dm]: IPv4MediumLAN {
+            @display("p=1350,70");
+        }
+        llanD[dl]: IPv4LargeLAN {
+            @display("p=1450,250");
+        }
         configurator: Ipv4NetworkConfigurator {
-            @display("p=121,37");
+            @display("p=100,100;is=s");
         }
     connections:
         // "backbone" switches

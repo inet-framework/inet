@@ -27,22 +27,22 @@ network TestNic
 {
     parameters:
         int numHosts;
+        @display("bgb=450,450");
     submodules:
         visualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
             parameters:
-                @display("p=100,50");
+                @display("p=100,300;is=s");
         }
         configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=100,150");
+                @display("p=100,100;is=s");
         }
         radioMedium: <> like IRadioMedium {
             parameters:
-                @display("p=100,250");
+                @display("p=100,200;is=s");
         }
         host[numHosts]: WirelessHost {
             parameters:
-                @display("r=,,#707070;p=250,58");
+                @display("r=,,#707070;p=250,200");
         }
 }
-

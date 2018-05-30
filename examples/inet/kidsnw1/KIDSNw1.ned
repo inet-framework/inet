@@ -43,42 +43,42 @@ network KIDSNw1
     submodules:
         host1: StandardHost {
             parameters:
-                @display("p=101,307,row;i=device/pc2");
+                @display("p=100,400;i=device/pc2");
         }
         host2: StandardHost {
             parameters:
-                @display("p=202,307,row;i=device/pc2");
+                @display("p=300,400;i=device/pc2");
         }
         host3: StandardHost {
             parameters:
-                @display("p=368,307,row;i=device/pc2");
+                @display("p=500,400;i=device/pc2");
         }
         // First Hop Router
         fhrouter1: Router {
             parameters:
-                @display("p=154,222,row,130");
+                @display("p=200,300");
         }
         fhrouter2: Router {
             parameters:
-                @display("p=358,222,row,130");
+                @display("p=500,300");
         }
         // InteriorRouter
         irouter: Router {
             parameters:
-                @display("p=167,142");
+                @display("p=200,200");
         }
         // Border Gateway Router
         bgrouter3: Router {
             parameters:
-                @display("p=193,70,row");
+                @display("p=350,100");
         }
         bgrouter4: Router {
             parameters:
-                @display("p=329,101,row");
+                @display("p=500,200");
         }
         configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=93,22");
+                @display("p=100,100;is=s");
         }
     connections:
         // host connections

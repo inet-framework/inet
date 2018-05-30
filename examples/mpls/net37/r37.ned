@@ -30,164 +30,126 @@ network R37
     submodules:
         configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=100,100");
+                @display("p=100,100;is=s");
         }
         LSR0: RsvpMplsRouter {
             parameters:
-                @display("p=391,225");
         }
         LSR1: RsvpMplsRouter {
             parameters:
-                @display("p=799,589");
         }
         LSR2: RsvpMplsRouter {
             parameters:
-                @display("p=289,472");
         }
         LSR3: RsvpMplsRouter {
             parameters:
-                @display("p=712,418");
         }
         LSR4: RsvpMplsRouter {
             parameters:
-                @display("p=541,228");
         }
         LSR5: RsvpMplsRouter {
             parameters:
-                @display("p=288,169");
         }
         LSR6: RsvpMplsRouter {
             parameters:
-                @display("p=256,394");
         }
         LSR7: RsvpMplsRouter {
             parameters:
-                @display("p=380,263");
         }
         LSR8: RsvpMplsRouter {
             parameters:
-                @display("p=682,348");
         }
         LSR9: RsvpMplsRouter {
             parameters:
-                @display("p=536,142");
         }
         LSR10: RsvpMplsRouter {
             parameters:
-                @display("p=177,170");
         }
         LSR11: RsvpMplsRouter {
             parameters:
-                @display("p=424,262");
         }
         LSR12: RsvpMplsRouter {
             parameters:
-                @display("p=470,279");
         }
         LSR13: RsvpMplsRouter {
             parameters:
-                @display("p=278,91");
         }
         LSR14: RsvpMplsRouter {
             parameters:
-                @display("p=467,214");
         }
         LSR15: RsvpMplsRouter {
             parameters:
-                @display("p=724,19");
         }
         LSR16: RsvpMplsRouter {
             parameters:
-                @display("p=685,287");
         }
         LSR17: RsvpMplsRouter {
             parameters:
-                @display("p=20,519");
         }
         LSR18: RsvpMplsRouter {
             parameters:
-                @display("p=298,236");
         }
         LSR19: RsvpMplsRouter {
             parameters:
-                @display("p=390,390");
         }
         LSR20: RsvpMplsRouter {
             parameters:
-                @display("p=148,502");
         }
         LSR21: RsvpMplsRouter {
             parameters:
-                @display("p=362,448");
         }
         LSR22: RsvpMplsRouter {
             parameters:
-                @display("p=476,397");
         }
         LSR23: RsvpMplsRouter {
             parameters:
-                @display("p=517,325");
         }
         LSR24: RsvpMplsRouter {
             parameters:
-                @display("p=514,34");
         }
         LSR25: RsvpMplsRouter {
             parameters:
-                @display("p=548,599");
         }
         LSR26: RsvpMplsRouter {
             parameters:
-                @display("p=330,301");
         }
         LSR27: RsvpMplsRouter {
             parameters:
-                @display("p=612,310");
         }
         LSR28: RsvpMplsRouter {
             parameters:
-                @display("p=556,502");
         }
         LSR29: RsvpMplsRouter {
             parameters:
-                @display("p=83,570");
         }
         LSR30: RsvpMplsRouter {
             parameters:
-                @display("p=796,466");
         }
         LSR31: RsvpMplsRouter {
             parameters:
-                @display("p=610,65");
         }
         LSR32: RsvpMplsRouter {
             parameters:
-                @display("p=435,321");
         }
         LSR33: RsvpMplsRouter {
             parameters:
-                @display("p=605,337");
         }
         LSR34: RsvpMplsRouter {
             parameters:
-                @display("p=707,227");
         }
         LSR35: RsvpMplsRouter {
             parameters:
-                @display("p=613,405");
         }
         LSR36: RsvpMplsRouter {
             parameters:
-                @display("p=435,361");
-
         }
         host1: StandardHost {
             parameters:
-                @display("p=299,522;i=device/laptop_s");
+                @display("i=device/laptop");
         }
         host2: StandardHost {
             parameters:
-                @display("p=757,227;i=device/laptop_s");
+                @display("i=device/laptop");
 
         }
     connections:

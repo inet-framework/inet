@@ -20,30 +20,30 @@ network UDPBroadcastNetwork
     submodules:
         target[numTargets]: StandardHost {
             parameters:
-                @display("i=device/pc3;p=514,115");
+                @display("i=device/pc3;p=850,100,col,100");
         }
         client: StandardHost {
             parameters:
-                @display("p=62,115;i=device/pc2");
+                @display("p=250,200;i=device/pc2");
         }
         R1: Router {
             parameters:
-                @display("p=180,115");
+                @display("p=400,200");
         }
         R2: Router {
 
-            @display("p=279,115");
+            @display("p=550,200");
         }
         configurator: Ipv4NetworkConfigurator {
             parameters:
                 config = xmldoc("config.xml");
-                @display("p=62,31");
+                @display("p=100,100;is=s");
         }
         switch: EtherSwitch {
-            @display("p=389,114");
+            @display("p=700,199");
         }
         nonTarget: StandardHost {
-            @display("p=389,31");
+            @display("p=550,100");
         }
     connections:
         client.pppg++ <--> C <--> R1.pppg++;

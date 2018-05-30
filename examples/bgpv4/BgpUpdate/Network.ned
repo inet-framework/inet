@@ -18,32 +18,32 @@ network BGPTest
     submodules:
         A: BGPRouterEx {
             parameters:
-                @display("p=160,92");
+                @display("p=400,100");
             gates:
                 pppg[1];
                 ethg[1];
         }
         B: BGPRouterEx {
             parameters:
-                @display("p=256,92");
+                @display("p=550,100");
             gates:
                 pppg[1];
                 ethg[1];
         }
         H1: StandardHost {
             parameters:
-                @display("p=56,92;i=device/laptop");
+                @display("p=250,100;i=device/laptop");
             gates:
                 ethg[1];
         }
         H2: StandardHost {
             parameters:
-                @display("p=364,92;i=device/laptop");
+                @display("p=700,100;i=device/laptop");
             gates:
                 ethg[1];
         }
         configurator: Ipv4NetworkConfigurator {
-            @display("p=208,23");
+            @display("p=100,100;is=s");
             config = xmldoc("IPv4Config.xml");
             //assignAddresses = false;
             //assignDisjunctSubnetAddresses = false;

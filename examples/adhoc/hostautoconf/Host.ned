@@ -32,7 +32,7 @@ module Host extends AdhocHost
 
     submodules:
         ac_wlan: HostAutoConfigurator {
-            @display("p=171,335");
+            @display("p=225,80;is=s");
         }
 
 }

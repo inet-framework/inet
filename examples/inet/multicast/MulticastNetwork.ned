@@ -47,7 +47,7 @@ network MulticastNetwork
         host1: StandardHost {
             parameters:
                 forwarding = false;
-                @display("p=125,52;i=device/pc2");
+                @display("p=250,100;i=device/pc2");
             gates:
                 pppg[1];
         }
@@ -55,7 +55,7 @@ network MulticastNetwork
             parameters:
                 forwarding = true;
                 multicastForwarding = true;
-                @display("p=60,244;i=device/pc2");
+                @display("p=150,300;i=device/pc2");
             gates:
                 pppg[2];
         }
@@ -63,61 +63,61 @@ network MulticastNetwork
             parameters:
                 forwarding = true;
                 multicastForwarding = true;
-                @display("p=196,244;i=device/pc2");
+                @display("p=350,300;i=device/pc2");
             gates:
                 pppg[2];
         }
         host4: StandardHost {
             parameters:
                 forwarding = false;
-                @display("p=406,305;i=device/pc2");
+                @display("p=600,350;i=device/pc2");
             gates:
                 pppg[1];
         }
         host5: StandardHost {
             parameters:
                 forwarding = false;
-                @display("p=492,59;i=device/pc2");
+                @display("p=750,150;i=device/pc2");
             gates:
                 pppg[1];
         }
         host6: StandardHost {
             parameters:
                 forwarding = false;
-                @display("p=492,204;i=device/pc2");
+                @display("p=750,250;i=device/pc2");
             gates:
                 pppg[1];
         }
         router1: Router {
             parameters:
                 multicastForwarding = true;
-                @display("p=124,135");
+                @display("p=250,200");
             gates:
                 pppg[4];
         }
         router2: Router {
             parameters:
                 multicastForwarding = true;
-                @display("p=292,135");
+                @display("p=500,200");
             gates:
                 pppg[3];
         }
         router3: Router {
             parameters:
                 multicastForwarding = true;
-                @display("p=292,238");
+                @display("p=500,300");
             gates:
                 pppg[2];
         }
         router4: Router {
             parameters:
                 multicastForwarding = true;
-                @display("p=408,135");
+                @display("p=650,200");
             gates:
                 pppg[3];
         }
         configurator: Ipv4NetworkConfigurator {
-            @display("p=275,26");
+            @display("p=100,100;is=s");
         }
     connections:
         // * Domain 1 * (172.0.0.x)

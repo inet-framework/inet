@@ -29,7 +29,6 @@ network NClientsEth
 {
     parameters:
         int n;
-        @display("bgb=569,296");
     types:
         channel fiberline extends DatarateChannel
         {
@@ -43,22 +42,22 @@ network NClientsEth
         }
     submodules:
         configurator: Ipv6FlatNetworkConfigurator {
-            @display("p=73,70");
+            @display("p=100,100;is=s");
         }
         r1: Router6 {
-            @display("p=245,173");
+            @display("p=400,100");
         }
         r2: Router6 {
-            @display("p=338,121");
+            @display("p=550,100");
         }
         r3: Router6 {
-            @display("p=430,75");
+            @display("p=700,100");
         }
         cli[n]: StandardHost6 {
-            @display("p=56,236");
+            @display("p=250,100,col,100");
         }
         srv: StandardHost6 {
-            @display("p=524,33");
+            @display("p=850,100");
         }
     connections:
         for i=0..n-1 {

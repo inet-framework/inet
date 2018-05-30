@@ -12,7 +12,7 @@ network OSPF_BackboneTest
         Backbone: TestArea {
             parameters:
                 numHosts = 10;
-                @display("p=138,156;b=136,136");
+                @display("p=300,150;b=100,100");
         }
         configurator: Ipv4NetworkConfigurator {
             parameters:
@@ -27,10 +27,10 @@ network OSPF_BackboneTest
                             "</config>");
                 addStaticRoutes = false;
                 addDefaultRoutes = false;
-                @display("p=75,43");
+                @display("p=100,100;is=s");
         }
         scenarioManager: ScenarioManager {
-            @display("p=187,43");
+            @display("p=100,200;is=s");
         }
 }
 

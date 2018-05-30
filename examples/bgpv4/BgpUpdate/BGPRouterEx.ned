@@ -49,50 +49,50 @@ module BGPRouterEx
     submodules:
         interfaceTable: InterfaceTable {
             parameters:
-                @display("p=52,108;i=block/table_s");
+                @display("p=100,100;i=block/table_s");
         }
         ospf: Ospf {
             parameters:
-                @display("p=235,284,row;i=block/network2");
+                @display("p=400,400,row;i=block/network2");
         }
         bgp: Bgp {
             parameters:
                 ospfRoutingModule = "^.ospf";
-                @display("p=160,50;i=block/network");
+                @display("p=325,80;i=block/network");
         }
         snifferIn: MessageChecker {
             parameters:
-                @display("i=block/uparrow_s;p=132,124");
+                @display("i=block/uparrow_s;p=250,160");
         }
         snifferOut: MessageChecker {
             parameters:
-                @display("i=block/downarrow_s;p=196,124");
+                @display("i=block/downarrow_s;p=400,160");
         }
         tcp: <default(firstAvailable("Tcp","TcpLwip","TcpNsc"))> like ITcp {
             parameters:
-                @display("p=160,202;i=block/transport");
+                @display("p=325,240;i=block/transport");
         }
         tn: MessageDispatcher {
             parameters:
-                @display("b=580,5,,,,1;p=305,243");
+                @display("b=400,5,,,,1;p=325,320");
         }
         ipv4: Ipv4NetworkLayer {
             parameters:
                 proxyARP = true;
                 routingTable.routerId = "auto";
-                @display("p=120,284;i=block/layer;q=queue");
+                @display("p=250,400;i=block/layer;q=queue");
         }
         nl: MessageDispatcher {
             parameters:
-                @display("b=580,5,,,,1;p=305,326");
+                @display("b=400,5,,,,1;p=325,480");
         }
         ppp[sizeof(pppg)]: <default("PppInterface")> like IPppInterface {
             parameters:
-                @display("p=74,369,row,110;q=l2queue;i=block/ifcard");
+                @display("p=250,560,row,110;q=l2queue;i=block/ifcard");
         }
         eth[sizeof(ethg)]: <default("EthernetInterface")> like IEthernetInterface {
             parameters:
-                @display("p=196,369,row,110;q=l2queue;i=block/ifcard");
+                @display("p=400,560,row,110;q=l2queue;i=block/ifcard");
         }
     connections allowunconnected:
         bgp.socketOut --> { @display("m=s"); } --> snifferOut.in;

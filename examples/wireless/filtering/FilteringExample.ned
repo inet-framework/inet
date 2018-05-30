@@ -16,15 +16,15 @@ network FilteringExampleNetwork
     submodules:
         visualizer: IntegratedCanvasVisualizer {
             parameters:
-                @display("p=50,50");
+                @display("p=100,300;is=s");
         }
         radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
-                @display("p=50,100");
+                @display("p=100,200;is=s");
         }
         configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=50,150");
+                @display("p=100,100;is=s");
         }
         host[numHosts]: AodvRouter {
             parameters:

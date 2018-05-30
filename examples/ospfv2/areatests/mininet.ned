@@ -23,13 +23,27 @@ network OSPF_mininet
             thruputDisplayFormat = "#N";
         }
     submodules:
-        BBR[numBBr]: OspfRouter;
-        BBRtoS1: OspfRouter;
-        S1R[numSBr]: OspfRouter;
-        S1H[numHst]: StandardHost;
-        BBRtoS2: OspfRouter;
-        S2R[numSBr]: OspfRouter;
-        S2H[numHst]: StandardHost;
+        BBR[numBBr]: OspfRouter {
+            @display("p=700,150,col,100");
+        }
+        BBRtoS1: OspfRouter {
+            @display("p=850,150");
+        }
+        S1R[numSBr]: OspfRouter {
+            @display("p=1000,150,col,100");
+        }
+        S1H[numHst]: StandardHost {
+            @display("p=1150,150,col,100");
+        }
+        BBRtoS2: OspfRouter {
+            @display("p=550,150");
+        }
+        S2R[numSBr]: OspfRouter {
+            @display("p=400,150,col,100");
+        }
+        S2H[numHst]: StandardHost {
+            @display("p=250,150,col,100");
+        }
         configurator: Ipv4NetworkConfigurator {
             parameters:
                 config = xml("<config>"+
@@ -46,10 +60,10 @@ network OSPF_mininet
                             "</config>");
                 addStaticRoutes = false;
                 addDefaultRoutes = false;
-                @display("p=75,43");
+                @display("p=100,100;is=s");
         }
         scenarioManager: ScenarioManager {
-            @display("p=187,43");
+            @display("p=100,200;is=s");
         }
     connections:
         BBRtoS1.ethg++ <--> C <--> BBR[0].ethg++;

@@ -33,7 +33,6 @@ network NClients
 {
     parameters:
         int n;
-        @display("bgb=593,356");
     types:
         channel fiberline extends ThruputMeteringChannel
         {
@@ -49,28 +48,28 @@ network NClients
         }
     submodules:
         r1: Router {
-            @display("p=232,281");
+            @display("p=500,150");
         }
         r2: Router {
-            @display("p=324,219");
+            @display("p=650,150");
         }
         r3: Router {
-            @display("p=433,250");
+            @display("p=800,150");
         }
         s: EtherSwitch {
-            @display("p=153,221");
+            @display("p=350,150");
         }
         cli[n]: StandardHost {
-            @display("i=device/laptop;p=51,269,r");
+            @display("i=device/laptop;p=250,100,col,100");
         }
         srv: StandardHost {
-            @display("p=544,194;i=device/server_l");
+            @display("p=950,150;i=device/server");
         }
         configurator: Ipv4NetworkConfigurator {
-            @display("p=75,47");
+            @display("p=100,100;is=s");
         }
         scenarioManager: ScenarioManager {
-            @display("p=75,101");
+            @display("p=100,200;is=s");
             script = xml("<script>\n" +
                 "<at t='3s'><shutdown module='r2'/></at>\n" +
                 "<at t='6s'><startup module='r2'/></at>\n" +

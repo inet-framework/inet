@@ -24,7 +24,7 @@ network RTPUnicast1
                 destinationAddress = "host4";
                 portNumber = 5004;
                 bandwidth = 8000;
-                @display("p=150,50");
+                @display("p=400,100");
         }
         host2: RtpHost {
             parameters:
@@ -33,7 +33,7 @@ network RTPUnicast1
                 destinationAddress = "host4";
                 portNumber = 5004;
                 bandwidth = 8000;
-                @display("p=250,150");
+                @display("p=550,230");
         }
         host3: RtpHost {
             parameters:
@@ -42,7 +42,7 @@ network RTPUnicast1
                 destinationAddress = "host4";
                 portNumber = 5004;
                 bandwidth = 8000;
-                @display("p=150,250");
+                @display("p=400,360");
         }
         host4: RtpHost {
             parameters:
@@ -51,17 +51,17 @@ network RTPUnicast1
                 destinationAddress = "host1";
                 portNumber = 5004;
                 bandwidth = 8000;
-                @display("p=50,150");
+                @display("p=250,230");
         }
         router1: Router {
             parameters:
-                @display("p=150,150");
+                @display("p=400,230");
             gates:
                 pppg[];
 
         }
         configurator: Ipv4NetworkConfigurator {
-            @display("p=58,32");
+            @display("p=100,100;is=s");
         }
     connections:
         host1.pppg++ <--> ethernet <--> router1.pppg++;

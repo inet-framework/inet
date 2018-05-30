@@ -38,27 +38,27 @@ network BulkTransfer
     submodules:
         client1: StandardHost {
             parameters:
-                @display("p=131,67;i=device/pc3");
+                @display("p=250,100;i=device/pc3");
         }
         client2: StandardHost {
             parameters:
-                @display("p=337,67;i=device/pc3");
+                @display("p=550,100;i=device/pc3");
         }
         client3: StandardHost {
             parameters:
-                @display("p=337,247;i=device/pc3");
+                @display("p=550,300;i=device/pc3");
         }
         server: StandardHost {
             parameters:
-                @display("p=131,247;i=device/pc2");
+                @display("p=250,300;i=device/pc2");
         }
         router: Router {
             parameters:
-                @display("p=239,156");
+                @display("p=400,200");
         }
         configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=62,119");
+                @display("p=100,100;is=s");
         }
     connections:
         client1.pppg++ <--> C <--> router.pppg++;

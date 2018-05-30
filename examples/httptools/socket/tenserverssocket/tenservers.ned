@@ -54,69 +54,68 @@ network Http10Servers
 {
     parameters:
         int numclients @prompt("Number of clients") = default(10);
-        @display("bgb=939,624");
     submodules:
         configurator: Ipv4NetworkConfigurator {
             parameters:
                 //                moduleTypes = "Router StandardHost";
                 //                nonIPModuleTypes = "";
-                @display("p=58,79;i=block/cogwheel");
+                @display("is=s;p=100,100;i=block/cogwheel");
         }
         httpController: HttpController {
             parameters:
-                @display("p=62,156;i=block/cogwheel");
+                @display("is=s;p=100,200;i=block/cogwheel");
         }
         router_c: Router {
             parameters:
-                @display("p=492,424;i=abstract/router_l");
+                @display("p=850,250;i=abstract/router");
         }
         router_s: Router {
             parameters:
-                @display("p=492,320;i=abstract/router_l");
+                @display("p=400,250;i=abstract/router");
         }
         client[numclients]: StandardHost {
             parameters:
-                @display("i=device/laptop_l");
+                @display("i=device/laptop;p=700,80,ri,150,170");
         }
         server1: StandardHost {
             parameters:
-                @display("p=191,316;i=device/server_l");
+                @display("p=300,120;i=device/server");
         }
         server2: StandardHost {
             parameters:
-                @display("p=231,220;i=device/server_l");
+                @display("p=230,200;i=device/server");
         }
         server3: StandardHost {
             parameters:
-                @display("p=278,140;i=device/server_l");
+                @display("p=230,300;i=device/server");
         }
         server4: StandardHost {
             parameters:
-                @display("p=355,92;i=device/server_l");
+                @display("p=300,370;i=device/server");
         }
         server5: StandardHost {
             parameters:
-                @display("p=452,60;i=device/server_l");
+                @display("p=400,420;i=device/server");
         }
         server6: StandardHost {
             parameters:
-                @display("p=549,60;i=device/server_l");
+                @display("p=500,370;i=device/server");
         }
         server7: StandardHost {
             parameters:
-                @display("p=660,84;i=device/server_l");
+                @display("p=570,300;i=device/server");
         }
         server8: StandardHost {
             parameters:
-                @display("p=734,148;i=device/server_l");
+                @display("p=570,200;i=device/server");
         }
         server9: StandardHost {
             parameters:
-                @display("p=772,228;i=device/server_l");
+                @display("p=500,120;i=device/server");
         }
         server10: StandardHost {
             parameters:
-                @display("p=797,324;i=device/server_l");
+                @display("p=400,80;i=device/server");
         }
     connections allowunconnected:
         server1.ethg++ <--> ethernetline <--> router_s.ethg++;

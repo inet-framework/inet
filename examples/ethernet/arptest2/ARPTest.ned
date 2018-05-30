@@ -32,47 +32,47 @@ network ARPTest
         }
     submodules:
         server: StandardHost {
-            @display("p=480,198;i=device/server_l");
+            @display("p=925,200;i=device/server");
         }
         router8: Router {
-            @display("p=478,100");
+            @display("p=775,200");
         }
         router7: Router {
-            @display("p=329,100");
+            @display("p=625,200");
         }
         router6: Router {
-            @display("p=254,100");
+            @display("p=325,200");
         }
         bus2: EtherBus {
             positions = "";
             propagationSpeed = 2e8 mps;
-            @display("p=260,40;b=260,10");
+            @display("p=475,100;b=350,5");
         }
         router5: Router {
-            @display("p=187,98");
+            @display("p=475,200");
         }
         bus1: EtherBus {
             positions = "";
             propagationSpeed = 2e8 mps;
-            @display("p=280,170;b=260,10");
+            @display("p=475,300;b=500,5");
         }
         router4: Router {
-            @display("p=386,240");
+            @display("p=700,400");
         }
         router3: Router {
-            @display("p=320,240");
+            @display("p=550,400");
         }
         router2: Router {
-            @display("p=247,240");
+            @display("p=400,400");
         }
         router1: Router {
-            @display("p=182,283");
+            @display("p=250,400");
         }
         client: StandardHost {
-            @display("p=54,274;i=device/laptop_l");
+            @display("p=100,400;i=device/laptop");
         }
         configurator: Ipv4NetworkConfigurator {
-            @display("p=46,111");
+            @display("p=100,100;is=s");
         }
     connections:
         server.ethg++ <--> ethline <--> router8.ethg++;

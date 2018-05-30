@@ -41,16 +41,16 @@ module TC2 like ITrafficConditioner
     submodules:
         classifier: MultiFieldClassifier {
             filters = xml("<filters><filter gate=\"0\"/></filters>");
-            @display("p=62,117");
+            @display("p=100,200");
         }
         meter: TokenBucketMeter {
-            @display("p=157,62");
+            @display("p=250,100");
         }
         marker: DscpMarker {
-            @display("p=252,62");
+            @display("p=400,100");
         }
         join: Join {
-            @display("p=348,117");
+            @display("p=550,200");
         }
     connections:
         in --> classifier.in;

@@ -27,23 +27,23 @@ network MixedNetwork
         }
     submodules:
         cHost[numCHosts]: StandardHost {
-            @display("p=40,120,ri,180,180");
+            @display("p=250,100,ri,150,150");
         }
         cRouter: Router {
-            @display("p=220,300");
+            @display("p=400,250");
         }
         bRouter: Router {
-            @display("p=450,100");
+            @display("p=700,100");
         }
         rRouter[numRipRouters]: Router {
             hasRip = true;
-            @display("p=580,200,ri,180,180");
+            @display("p=850,100,ri,150,150");
         }
         rHost: StandardHost {
-            @display("p=580,641");
+            @display("p=1000,500");
         }
         configurator: Ipv4NetworkConfigurator {
-            @display("p=59,31");
+            @display("p=100,100;is=s");
             config = xml(
                  "<config>"
                 +"<interface among='cHost[*] cRouter' address='10.1.x.x' netmask='255.255.x.x'/>"
@@ -56,7 +56,7 @@ network MixedNetwork
                 +"</config>");
         }
         scenarioManager: ScenarioManager {
-            @display("p=59,100");
+            @display("p=100,200;is=s");
         }
     connections:
         cRouter.ethg++ <--> C <--> bRouter.ethg++;

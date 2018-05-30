@@ -55,7 +55,7 @@ network MoBANNetwork
     parameters:
         int numNodes; // total number of nodes in the network, either ordinary nodes or WBAN nodes
         int numMoBAN; // total number of MoBAN coordinators (WBAN instances)
-        @display("bgb=1000,1000,white;bgp=0,0");
+        @display("bgb=1000,1000");
     submodules:
         node[numNodes]: MobileHost {
             parameters:
@@ -63,6 +63,6 @@ network MoBANNetwork
         }
         coordinator[numMoBAN]: MoBanCoordinator {
             parameters:
-                @display("i=block/wheelbarrow");
+                @display("i=block/wheelbarrow;p=100,100;is=s");
         }
 }

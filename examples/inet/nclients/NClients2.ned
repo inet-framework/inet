@@ -41,15 +41,17 @@ network NClients2
             datarate = 1Gbps;
         }
     submodules:
-        configurator: Ipv4NetworkConfigurator;
+        configurator: Ipv4NetworkConfigurator {
+            @display("p=100,100;is=s");
+        }
         r[numRouters]: Router;
         cli[numRouters*hostsPerRouter]: StandardHost {
             parameters:
-                @display("i=device/laptop_vs");
+                @display("i=device/laptop");
         }
         srv: StandardHost {
             parameters:
-                @display("i=device/server_l");
+                @display("i=device/server;p=250,100");
         }
     connections:
         for i=0..numRouters-1, for j=0..hostsPerRouter-1 {

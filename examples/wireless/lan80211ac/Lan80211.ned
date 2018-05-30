@@ -32,16 +32,16 @@ network Lan80211ac
     submodules:
         visualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
             parameters:
-                @display("p=100,50");
+                @display("p=100,300;is=s");
         }
         configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=100,150");
+                @display("p=100,100;is=s");
                 config = xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.0.0'/></config>");
         }
         radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
-                @display("p=100,250");
+                @display("p=100,200;is=s");
         }
         host[numHosts]: WirelessHost {
             @display("r=,,#707070");
@@ -49,7 +49,7 @@ network Lan80211ac
             wlan[*].agent.typename = "";
         }
         ap: AccessPoint {
-            @display("p=213,174;r=,,#707070");
+            @display("p=250,200;r=,,#707070");
             wlan[*].mgmt.typename = "Ieee80211MgmtApSimplified";
         }
 }

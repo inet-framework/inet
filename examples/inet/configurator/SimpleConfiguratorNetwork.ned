@@ -28,19 +28,19 @@ network SimpleConfiguratorNetwork
     submodules:
         configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=50,50");
+                @display("p=100,100;is=s");
         }
         host11: StandardHost {
             parameters:
-                @display("p=200,50");
+                @display("p=250,100");
         }
         host21: StandardHost {
             parameters:
-                @display("p=400,50");
+                @display("p=400,100");
         }
         host12: StandardHost {
             parameters:
-                @display("p=200,250");
+                @display("p=250,250");
         }
         host22: StandardHost {
             parameters:

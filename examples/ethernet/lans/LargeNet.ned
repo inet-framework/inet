@@ -44,15 +44,15 @@ module SmallLAN
 {
     parameters:
         int h; // number of hosts on the hub
-        @display("i=old/cloud_s");
+        @display("i=old/cloud");
     gates:
         inout ethg;
     submodules:
         hub: EtherHub {
-            @display("is=s");
+            @display("p=400,100");
         }
         host[h]: EtherHost {
-            @display("is=s");
+            @display("p=100,200,row,150");
         }
     connections:
         for i=0..h-1 {
@@ -70,21 +70,21 @@ module MediumLAN
     parameters:
         int n; // number of hosts on the switch
         int h; // number of hosts on the hub
-        @display("i=old/cloud_s");
+        @display("i=old/cloud");
     gates:
         inout ethg;
     submodules:
         switch: EtherSwitch {
-            @display("is=s");
+            @display("p=625,100");
         }
         host[n]: EtherHost {
-            @display("is=s");
+            @display("p=100,200,row,150");
         }
         hub: EtherHub {
-            @display("is=s");
+            @display("p=625,300");
         }
         hhost[h]: EtherHost {
-            @display("is=s");
+            @display("p=325,400,row,150");
         }
     connections:
         for i=0..n-1 {
@@ -124,26 +124,26 @@ module LargeLAN
         }
     submodules:
         switch: EtherSwitch {
-            @display("is=s");
+            @display("p=450,100");
         }
         host[n]: EtherHost {
-            @display("is=s");
+            @display("p=100,200,row,100");
         }
         hub: EtherHub {
-            @display("is=s");
+            @display("p=900,100");
         }
         hhost[h]: EtherHost {
-            @display("is=s");
+            @display("p=1050,100,col,100");
         }
         bus: EtherBus {
             parameters:
                 positions = "5 10 15"; // every 5 meters
                 propagationSpeed = 2e8 mps;  // 1us = 200m
-                @display("b=424,6;o=#408060");
+                @display("b=800,5;o=#408060;p=450,300");
         }
         bhost[b]: EtherHost {
             parameters:
-                @display("is=s;p=,r");
+                @display("p=100,400,row,100");
         }
     connections:
         for i=0..n-1 {
@@ -197,31 +197,77 @@ network LargeNet
         }
     submodules:
         switchBB[n]: EtherSwitch {
-            @display("is=s");
+            @display("p=200,180,row,200");
         }
-        slanBB[n*bbs]: SmallLAN;
-        mlanBB[n*bbm]: MediumLAN;
-        llanBB[n*bbl]: LargeLAN;
-        switchA: EtherSwitch;
-        serverA: EtherHost;
-        slanA[as]: SmallLAN;
-        mlanA[am]: MediumLAN;
-        llanA[al]: LargeLAN;
-        switchB: EtherSwitch;
-        serverB: EtherHost;
-        slanB[bs]: SmallLAN;
-        mlanB[bm]: MediumLAN;
-        llanB[bl]: LargeLAN;
-        switchC: EtherSwitch;
-        serverC: EtherHost;
-        slanC[cs]: SmallLAN;
-        mlanC[cm]: MediumLAN;
-        llanC[cl]: LargeLAN;
-        switchD: EtherSwitch;
-        serverD: EtherHost;
-        slanD[ds]: SmallLAN;
-        mlanD[dm]: MediumLAN;
-        llanD[dl]: LargeLAN;
+        slanBB[n*bbs]: SmallLAN {
+            @display("p=100,130,row,200");
+        }
+        mlanBB[n*bbm]: MediumLAN {
+            @display("p=200,80,row,200");
+        }
+        llanBB[n*bbl]: LargeLAN {
+            @display("p=200,280,row,200");
+        }
+        switchA: EtherSwitch {
+            @display("p=400,580");
+        }
+        serverA: EtherHost {
+            @display("p=550,580");
+        }
+        slanA[as]: SmallLAN {
+            @display("p=250,580");
+        }
+        mlanA[am]: MediumLAN {
+            @display("p=325,680");
+        }
+        llanA[al]: LargeLAN {
+            @display("p=475,680");
+        }
+        switchB: EtherSwitch {
+            @display("p=700,380");
+        }
+        serverB: EtherHost {
+            @display("p=850,380");
+        }
+        slanB[bs]: SmallLAN {
+            @display("p=550,380");
+        }
+        mlanB[bm]: MediumLAN {
+            @display("p=625,480");
+        }
+        llanB[bl]: LargeLAN {
+            @display("p=775,480");
+        }
+        switchC: EtherSwitch {
+            @display("p=1000,580");
+        }
+        serverC: EtherHost {
+            @display("p=1150,580");
+        }
+        slanC[cs]: SmallLAN {
+            @display("p=850,580");
+        }
+        mlanC[cm]: MediumLAN {
+            @display("p=925,680");
+        }
+        llanC[cl]: LargeLAN {
+            @display("p=1075,680");
+        }
+        switchD: EtherSwitch {
+            @display("p=1300,380");
+        }
+        serverD: EtherHost {
+            @display("p=1450,380");
+        }
+        slanD[ds]: SmallLAN {
+            @display("p=1150,380");
+        }
+        mlanD[dm]: MediumLAN {
+            @display("p=1225,480");
+        }
+        llanD[dl]: LargeLAN {
+            @display("p=1375,480");
+        }
     connections:
         // "backbone" switches
         for k=0..n-1, for i=0..bbs-1 {

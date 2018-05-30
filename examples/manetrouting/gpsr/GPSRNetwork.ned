@@ -21,21 +21,21 @@ network GPSRNetworkRandom
     submodules:
         radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
-                @display("p=50,50");
+                @display("p=100,200;is=s");
         }
         configurator: Ipv4NetworkConfigurator {
             parameters:
                 config = xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.0.0'/></config>");
-                @display("p=50,100");
+                @display("p=100,100;is=s");
         }
         routingTableRecorder: RoutingTableRecorder {
             parameters:
-                @display("p=50,150");
+                @display("p=100,300;is=s");
         }
         scenarioManager: ScenarioManager {
             parameters:
                 script = default(xml("<scenario/>"));
-                @display("p=50,250");
+                @display("p=100,400;is=s");
         }
         host[numHosts]: GpsrRouter {
             parameters:
@@ -49,16 +49,16 @@ network GPSRNetworkManual
     submodules:
         radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
-                @display("p=50,50");
+                @display("p=100,200;is=s");
         }
         configurator: Ipv4NetworkConfigurator {
             parameters:
                 config = xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.0.0'/></config>");
-                @display("p=50,100");
+                @display("p=100,100;is=s");
         }
         routingTableRecorder: RoutingTableRecorder {
             parameters:
-                @display("p=50,150");
+                @display("p=100,300;is=s");
         }
         host0: GpsrRouter {
             parameters:

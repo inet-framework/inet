@@ -47,7 +47,6 @@ network HttpNnodes
 {
     parameters:
         int numclients @prompt("Number of clients") = default(10);
-        @display("bgb=474,374");
     types:
         channel ethernetline extends ned.DatarateChannel
         {
@@ -66,35 +65,35 @@ network HttpNnodes
                 //                moduleTypes = "Router StandardHost";
                 //                nonIPModuleTypes = "";
                 config = xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.x.x'/></config>");
-                @display("p=50,64;i=block/cogwheel");
+                @display("is=s;p=100,100;i=block/cogwheel");
         }
         httpController: HttpController {
             parameters:
-                @display("p=46,140;i=block/cogwheel");
+                @display("is=s;p=100,200;i=block/cogwheel");
         }
         router_c: Router {
             parameters:
-                @display("p=100,200;i=abstract/router_l");
+                @display("p=400,200;i=abstract/router");
         }
         router_s: Router {
             parameters:
-                @display("p=300,200;i=abstract/router_l");
+                @display("p=750,200;i=abstract/router");
         }
         client[numclients]: StandardHost {
             parameters:
-                @display("i=device/laptop_l");
+                @display("i=device/laptop;p=250,100,ri,150,100");
         }
         thegood: StandardHost {
             parameters:
-                @display("i=device/server_l");
+                @display("i=device/server;p=850,100");
         }
         thebad: StandardHost {
             parameters:
-                @display("i=device/server_l");
+                @display("i=device/server;p=850,300");
         }
         theugly: StandardHost {
             parameters:
-                @display("i=device/server_l");
+                @display("i=device/server;p=900,200");
         }
     connections allowunconnected:
         thegood.ethg++ <--> ethernetline <--> router_s.ethg++;

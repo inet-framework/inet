@@ -17,14 +17,14 @@ network Net
     submodules:
         A: BGPRouterSimple {
             parameters:
-                @display("p=80,60");
+                @display("p=250,100");
         }
         B: BGPRouterSimple {
             parameters:
-                @display("p=200,60");
+                @display("p=400,100");
         }
         configurator: Ipv4NetworkConfigurator {
-            @display("p=62,127");
+            @display("p=100,100;is=s");
             config = xmldoc("IPv4Config.xml");
             //assignAddresses = false;
             //assignDisjunctSubnetAddresses = false;

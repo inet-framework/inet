@@ -11,11 +11,11 @@ network Tunnel
     submodules:
         configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=100,50");
+                @display("p=100,100;is=s");
         }
         client: StandardHost {
             parameters:
-                @display("p=200,100");
+                @display("p=250,100");
         }
         inlet: Router {
             parameters:
@@ -23,20 +23,20 @@ network Tunnel
         }
         router: Router {
             parameters:
-                @display("p=600,100");
+                @display("p=550,100");
         }
         outlet: Router {
             parameters:
-                @display("p=800,100");
+                @display("p=700,100");
         }
         server: StandardHost {
             parameters:
-                @display("p=1000,100");
+                @display("p=850,100");
         }
     connections:
         client.ethg++ <--> Eth1G <--> inlet.ethg++;
-        inlet.pppg++ <--> { delay = 1us; datarate = 1Gbps; } <--> router.pppg++;
-        router.pppg++ <--> { delay = 1us; datarate = 1Gbps; } <--> outlet.pppg++;
+        inlet.pppg++ <--> {  delay = 1us; datarate = 1Gbps; } <--> router.pppg++;
+        router.pppg++ <--> {  delay = 1us; datarate = 1Gbps; } <--> outlet.pppg++;
         outlet.ethg++ <--> Eth1G <--> server.ethg++;
 }
 

@@ -44,51 +44,51 @@ module TrafficConditioner like ITrafficConditioner
     submodules:
         mfClassifier: MultiFieldClassifier {
             filters = xmldoc("filters.xml");
-            @display("p=52,296");
+            @display("p=100,250");
         }
         efMeter: TokenBucketMeter {
-            @display("p=339,113");
+            @display("p=400,100");
         }
         defaultMeter: SingleRateThreeColorMeter {
-            @display("p=339,356");
+            @display("p=400,300");
         }
         efMarker: DscpMarker {
             dscps = "EF";
-            @display("p=204,113");
+            @display("p=250,100");
         }
         af11Marker: DscpMarker {
             dscps = "AF11";
-            @display("p=204,236");
+            @display("p=250,200");
         }
         af21Marker: DscpMarker {
             dscps = "AF21";
-            @display("p=204,356");
+            @display("p=250,300");
         }
         af13Marker: DscpMarker {
             dscps = "AF13";
-            @display("p=556,405");
+            @display("p=700,350");
         }
         af23Marker: DscpMarker {
             dscps = "AF23";
-            @display("p=556,512");
+            @display("p=700,450");
         }
         join: Join {
-            @display("p=665,296");
+            @display("p=850,250");
         }
         beMarker: DscpMarker {
             dscps = "BE";
-            @display("p=204,479");
+            @display("p=250,400");
         }
         baClassifier: BehaviorAggregateClassifier {
             dscps = "AF11 AF21";
-            @display("p=450,405");
+            @display("p=550,350");
         }
         af11Marker2: DscpMarker {
             dscps = "AF11";
-            @display("p=517,114");
+            @display("p=550,100");
         }
         dropper: Sink {
-            @display("p=450,512");
+            @display("p=550,450");
         }
     connections:
         in --> mfClassifier.in;
