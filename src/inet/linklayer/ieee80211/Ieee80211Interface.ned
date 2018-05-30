@@ -52,6 +52,8 @@ module Ieee80211Interface like IWirelessInterface
         bool _agentNeeded = (mgmtType == "Ieee80211MgmtSta");   // internal par. do not use, shows if optional agent module is needed
         **.opMode = opMode;
         **.bitrate = bitrate;
+        mac.modeSet = default(opMode);
+        mac.*.rateSelection.dataFrameBitrate = default(bitrate);
         *.macModule = default(absPath(".mac"));
         *.mibModule = default(absPath(".mib"));
         *.interfaceTableModule = default(absPath(interfaceTableModule));
