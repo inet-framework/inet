@@ -46,14 +46,14 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 # power
 **.energyStorage.typename = "SimpleEpEnergyStorage"
-**.energyManagementType = "SimpleEpEnergyManagement"
+**.energyManagement.typename = "SimpleEpEnergyManagement"
 **.energyConsumer.typename = "StateBasedEpEnergyConsumer"
 **.energyStorage.nominalCapacity = 1J
 **.energyManagement.nodeShutdownCapacity = 0J
 **.energyManagement.nodeStartCapacity = 0.2J
 *.hostSource.energyStorage.initialCapacity = 0J
 *.hostDestination.energyStorage.initialCapacity = 0.1J
-*.hostSource.energyGeneratorType = "AlternatingEpEnergyGenerator"
+*.hostSource.energyGenerator.typename = "AlternatingEpEnergyGenerator"
 *.hostSource.energyGenerator.energySinkModule = "hostSource.energyStorage"
 *.hostSource.energyGenerator.powerGeneration = 10mW
 *.hostSource.energyGenerator.sleepInterval = 0s

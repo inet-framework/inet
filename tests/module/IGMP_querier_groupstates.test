@@ -66,7 +66,7 @@ output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 network=IGMPTestNetwork
-**.igmpType = "TestIGMP"
+**.igmp.typename = "TestIGMP"
 
 **.scenarioManager.script = xmldoc("scenario.xml")
 **.router.*.igmp.outputFile = "router-output.txt"

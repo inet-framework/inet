@@ -82,7 +82,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 *.radioMedium.backgroundNoise.power = -110dBm
 
 # antenna
-**.antennaType = "InterpolatingAntenna"
+**.antenna.typename = "InterpolatingAntenna"
 **.headingGains = "0 0 180 10 360 0"
 
 %#--------------------------------------------------------------------------------------------------------------
