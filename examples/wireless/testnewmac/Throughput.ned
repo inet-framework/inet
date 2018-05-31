@@ -86,7 +86,7 @@ module ThroughputServer
             parameters:
                 @display("p=120,158;q=queue");
                 mgmt.typename = "Ieee80211MgmtAdhoc";
-                agent.typename = "Ieee80211MgmtAdhoc";
+                agent.typename = "";
         }
         mobility: StationaryMobility {
             parameters:

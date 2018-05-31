@@ -19,13 +19,12 @@
 package inet.examples.adhoc.hostautoconf;
 
 import inet.networklayer.configurator.ipv4.HostAutoConfigurator;
-import inet.node.inet.WirelessHost;
-
+import inet.node.inet.AdhocHost;
 
 //
 // Wireless-enabled Host
 //
-module Host extends WirelessHost
+module Host extends AdhocHost
 {
     parameters:
         @display("i=device/cellphone");

@@ -19,9 +19,8 @@
 package inet.examples.wireless.mactest;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.node.inet.WirelessHost;
+import inet.node.inet.AdhocHost;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-
 
 network MacTest
 {
@@ -31,11 +30,11 @@ network MacTest
         configurator: Ipv4NetworkConfigurator {
             @display("p=61,164");
         }
-        srvHost: WirelessHost {
+        srvHost: AdhocHost {
             parameters:
                 @display("r=,,#707070;p=589,111");
         }
-        cliHost: WirelessHost {
+        cliHost: AdhocHost {
             parameters:
                 @display("r=,,#707070;p=349,111");
         }
