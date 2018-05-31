@@ -49,7 +49,10 @@ const Ptr<Chunk> RipPacketSerializer::deserialize(MemoryInputStream& stream) con
 
     ripPacket->setCommand((inet::RipCommand)stream.readUint8());
     int ripVer = stream.readUint8();
-    ASSERT(ripVer == 2);
+    if (ripVer != 2) {
+        //TODO add RIP v1 support
+        ripPacket->markIncorrect();
+    }
 
     int numEntries = stream.readUint16Be();
     ripPacket->setEntryArraySize(numEntries);
@@ -59,6 +62,8 @@ const Ptr<Chunk> RipPacketSerializer::deserialize(MemoryInputStream& stream) con
         RipEntry entry = {};
 
         entry.addressFamilyId = (inet::RipAf)stream.readUint16Be();
+        //TODO Valid addressFamilyId values: 0, 2, 0xFFFF
+        // 0 and 2 means IPv4, 0xFFFF means Authentication packet
         entry.routeTag = stream.readUint16Be();
         entry.address = stream.readIpv4Address();
         Ipv4Address netmask = stream.readIpv4Address();
