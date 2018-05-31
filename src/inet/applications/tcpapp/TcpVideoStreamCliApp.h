@@ -1,19 +1,18 @@
 /*
  *  TcpVideoStreamCliApp.cc
  *
- *  It's an adaptation of the code of Navarro Joaquim (https://github.com/navarrojoaquin/adaptive-video-tcp-omnet).
- *  Created on 8 de dez de 2017 by Anderson Andrei da Silva & Patrick Menani Abrahão at University of São Paulo
+ *  It's an adaptation of the code of Navarro Joaquim (https://github.com/navarrojoaquin/adaptive-video-Tcp-omnet).
+ *  Created on 8 de dez de 2017 by Anderson Andrei da Silva & Patrick Menani Abrahao at University of Sao Paulo
  *
  */
 
-#ifndef TcpVideoSTREAMCLIAPP_H_
-#define TcpVideoSTREAMCLIAPP_H_
+#ifndef TCPVIDEOSTREAMCLIAPP_H_
+#define TCPVIDEOSTREAMCLIAPP_H_
 
 #include <omnetpp.h>
 #include <algorithm>
 #include "inet/common/INETDefs.h"
 #include "inet/applications/tcpapp/TcpBasicClientApp.h"
-#include "inet/common/packet/Packet.h"
 
 namespace inet {
 
@@ -41,8 +40,8 @@ protected:
     double video_startTime;
 
     // statistics:
-    static simsignal_t rcvdPkSignal;
-    static simsignal_t sentPkSignal;
+    static simsignal_t packetReceived;
+    static simsignal_t packetSent;
 
     long msgsRcvd;
     long msgsSent;

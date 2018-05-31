@@ -1,15 +1,13 @@
 /*
  *  TcpVideoStreamCliApp.cc
  *
- *  It's an adaptation of the code of Navarro Joaquim (https://github.com/navarrojoaquin/adaptive-video-tcp-omnet).
- *  Created on 8 de dez de 2017 by Anderson Andrei da Silva & Patrick Menani Abrahão at University of São Paulo
+ *  It's an adaptation of the code of Navarro Joaquim (https://github.com/navarrojoaquin/adaptive-video-Tcp-omnet).
+ *  Created on 8 de dez de 2017 by Anderson Andrei da Silva & Patrick Menani Abrahao at University of Sao Paulo.
  *
  */
 
-#include "inet/applications/tcpapp/TcpVideoStreamCliApp.h"
-
+#include "TcpVideoStreamCliApp.h"
 #include "inet/applications/tcpapp/GenericAppMsg_m.h"
-#include "inet/common/packet/Packet.h"
 
 namespace inet {
 
@@ -20,8 +18,8 @@ namespace inet {
 //Register_Class(TcpVideoStreamCliApp);
 Define_Module(TcpVideoStreamCliApp);
 
-simsignal_t TcpVideoStreamCliApp::rcvdPkSignal = registerSignal("rcvdPk");
-simsignal_t TcpVideoStreamCliApp::sentPkSignal = registerSignal("sentPk");
+simsignal_t TcpVideoStreamCliApp::packetReceived = registerSignal("packetReceived");
+simsignal_t TcpVideoStreamCliApp::packetSent = registerSignal("packetSent");
 
 TcpVideoStreamCliApp::~TcpVideoStreamCliApp() {
     cancelAndDelete(timeoutMsg);
@@ -30,7 +28,6 @@ TcpVideoStreamCliApp::~TcpVideoStreamCliApp() {
 TcpVideoStreamCliApp::TcpVideoStreamCliApp() {
     timeoutMsg = NULL;
 }
-
 
 void TcpVideoStreamCliApp::initialize(int stage) {
     TcpBasicClientApp::initialize(stage);
@@ -90,8 +87,10 @@ void TcpVideoStreamCliApp::sendRequest() {
     // Request length
     long requestLength = par("requestLength");
     if (requestLength < 1) requestLength = 1;
+
     // Reply length
     long replyLength = -1;
+
     if (manifestAlreadySent) {
         replyLength = video_packet_size_per_second[video_current_quality_index] / 8 * 1000;  // kbits -> bytes
         // Log requested quality
@@ -107,24 +106,14 @@ void TcpVideoStreamCliApp::sendRequest() {
     msgsSent++;
     bytesSent += requestLength;
 
-//    GenericAppMsg *msg = new GenericAppMsg();
-//    msg->setExpectedReplyLength(requestLength);
-//    msg->setExpectedReplyLength(replyLength);
-//    msg->setServerClose(false);
-
     const auto& payload = makeShared<GenericAppMsg>();
-    Packet *msg = new Packet("data");
+    Packet *packet = new Packet("data");
     payload->setChunkLength(B(requestLength));
     payload->setExpectedReplyLength(replyLength);
     payload->setServerClose(false);
-    msg->insertAtBack(payload);
+    packet->insertAtBack(payload);
+    sendPacket(packet);
 
-//  Packet *msg = new GenericAppMsg();
-    //msg->setExpectedReplyLength(requestLength);
-    //msg->setExpectedReplyLength(replyLength);
-    //msg->setServerClose(false);
-
-    sendPacket(msg);
 }
 
 void TcpVideoStreamCliApp::handleTimer(cMessage *msg) {
@@ -198,7 +187,7 @@ void TcpVideoStreamCliApp::rescheduleOrDeleteTimer(simtime_t d,
 
 void TcpVideoStreamCliApp::socketDataArrived(int connId, void *ptr, Packet *msg,
         bool urgent) {
-    TcpBasicClientApp::socketDataArrived(connId, ptr, msg, urgent);
+    TcpAppBase::socketDataArrived(connId, ptr, msg, urgent);
 
     if (!manifestAlreadySent) {
         manifestAlreadySent = true;
