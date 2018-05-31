@@ -37,7 +37,7 @@ void RipPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
         stream.writeUint16Be(entry.addressFamilyId);
         stream.writeUint16Be(entry.routeTag);
         stream.writeIpv4Address(entry.address.toIpv4());
-        stream.writeUint32Be(entry.prefixLength);
+        stream.writeIpv4Address(Ipv4Address::makeNetmask(entry.prefixLength));
         stream.writeIpv4Address(entry.nextHop.toIpv4());
         stream.writeUint32Be(entry.metric);
     }
@@ -61,7 +61,10 @@ const Ptr<Chunk> RipPacketSerializer::deserialize(MemoryInputStream& stream) con
         entry.addressFamilyId = (inet::RipAf)stream.readUint16Be();
         entry.routeTag = stream.readUint16Be();
         entry.address = stream.readIpv4Address();
-        entry.prefixLength = stream.readUint32Be();
+        Ipv4Address netmask = stream.readIpv4Address();
+        entry.prefixLength = netmask.getNetmaskLength();
+        if (netmask != Ipv4Address::makeNetmask(entry.prefixLength))
+            ripPacket->markIncorrect();         // netmask can not be converted into prefixLength       //TODO should replace prefixLength to netmask
         entry.nextHop = stream.readIpv4Address();
         entry.metric = stream.readUint32Be();
 
