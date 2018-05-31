@@ -19,6 +19,11 @@
 
 namespace inet {
 
+//TODO
+// The inet::Rip uses RipPacket and RipEntry for IPv4 (RIPv2, see RFC 1058)
+// and for IPv6 (RIPng, see RFC 2080).
+// The serializer accepts only RFC1058 packets with IPv4 addresses.
+
 Register_Serializer(RipPacket, RipPacketSerializer);
 
 void RipPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
