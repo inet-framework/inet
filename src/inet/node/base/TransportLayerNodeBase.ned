@@ -31,25 +31,24 @@ module TransportLayerNodeBase extends NetworkLayerNodeBase
         string tcpType = default(firstAvailableOrEmpty("Tcp", "TcpLwip", "TcpNsc"));  // tcp implementation (e.g. ~Tcp, ~TcpLwip, ~TcpNsc) or ~TcpSpoof
         string udpType = default(firstAvailableOrEmpty("Udp"));
         string sctpType = default(firstAvailableOrEmpty("Sctp"));
-        @figure[transportLayer](type=rectangle; pos=250,210; size=670,180; fillColor=#ff0000; lineColor=#808080; cornerRadius=5; fillOpacity=0.1);
-        @figure[transportLayer.title](type=text; pos=910,220; anchor=ne; text="transport layer");
-
+        @figure[transportLayer](type=rectangle; pos=250,156; size=1000,130; fillColor=#ff0000; lineColor=#808080; cornerRadius=5; fillOpacity=0.1);
+        @figure[transportLayer.title](type=text; pos=1245,161; anchor=ne; text="transport layer");
     submodules:
         udp: <udpType> like IUdp if hasUdp {
             parameters:
-                @display("p=400,300");
+                @display("p=375,226");
         }
         tcp: <tcpType> like ITcp if hasTcp {
             parameters:
-                @display("p=500,300");
+                @display("p=525,226");
         }
         sctp: <sctpType> like ISctp if hasSctp {
             parameters:
-                @display("p=600,300");
+                @display("p=675,226");
         }
         tn: MessageDispatcher {
             parameters:
-                @display("p=585,400;b=670,5,,,,1");
+                @display("p=750,296;b=1000,5,,,,1");
         }
 
     connections allowunconnected:

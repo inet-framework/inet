@@ -105,7 +105,6 @@ class INET_API SctpNatPeer : public cSimpleModule, public SctpSocket::ICallback,
     };
     typedef std::map<L3Address, pathStatus> SctpPathStatus;
     SctpPathStatus sctpPathStatus;
-    //virtual void socketStatusArrived(int32 assocId, void *yourPtr, SctpStatusInfo *status);
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     void initialize(int stage) override;
     void handleMessage(cMessage *msg) override;

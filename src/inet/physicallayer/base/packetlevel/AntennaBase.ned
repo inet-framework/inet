@@ -27,7 +27,7 @@ module AntennaBase like IAntenna
 {
     parameters:
         // TODO: referencing the module environment is generally a bad idea, this parameter should be set from the parent modules 
-        string mobilityModule = default(mobilityType == "" ? "^.^.^.mobility" : "mobility"); // the path to the mobility module relative to this module
+        string mobilityModule = default(mobilityType == "" ? "^.^.^.mobility" : ".mobility"); // the path to the mobility module relative to this module
         string mobilityType = default("");
         int numAntennas = default(1); // the number of antennas in the antenna array
         @display("i=device/antennatower");

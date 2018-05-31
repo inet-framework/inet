@@ -250,12 +250,20 @@ void EtherMacFullDuplex::processMsgFromNetwork(EthernetSignal *signal)
     if (dropFrameNotForUs(packet, frame))
         return;
 
-    if (auto pauseFrame = dynamic_cast<const EthernetPauseFrame *>(frame.get())) {      //FIXME KLUDGE
-        int pauseUnits = pauseFrame->getPauseTime();
-        delete packet;
-        numPauseFramesRcvd++;
-        emit(rxPausePkUnitsSignal, pauseUnits);
-        processPauseCommand(pauseUnits);
+    if (frame->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL) {
+        const auto& controlFrame = curTxFrame->peekDataAt<EthernetControlFrame>(frame->getChunkLength(), b(-1));
+        if (controlFrame->getOpCode() == ETHERNET_CONTROL_PAUSE) {
+            auto pauseFrame = check_and_cast<const EthernetPauseFrame *>(controlFrame.get());
+            int pauseUnits = pauseFrame->getPauseTime();
+            delete packet;
+            numPauseFramesRcvd++;
+            emit(rxPausePkUnitsSignal, pauseUnits);
+            processPauseCommand(pauseUnits);
+        }
+        else {
+            EV_INFO << "Received unknown ethernet flow control frame" << frame << " dropped." << endl;
+            delete packet;
+        }
     }
     else {
         EV_INFO << "Reception of " << frame << " successfully completed." << endl;
@@ -289,14 +297,14 @@ void EtherMacFullDuplex::handleEndTxPeriod()
     numBytesSent += curTxFrame->getByteLength();
     emit(packetSentToLowerSignal, curTxFrame);    //consider: emit with start time of frame
 
-    bool isPauseFrame = false;
     const auto& header = curTxFrame->peekAtFront<EthernetMacHeader>();
     if (header->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL) {
         const auto& controlFrame = curTxFrame->peekDataAt<EthernetControlFrame>(header->getChunkLength(), b(-1));
-        isPauseFrame = controlFrame->getOpCode() == ETHERNET_CONTROL_PAUSE;
-        const auto& pauseFrame = dynamicPtrCast<const EthernetPauseFrame>(controlFrame);
-        numPauseFramesSent++;
-        emit(txPausePkUnitsSignal, pauseFrame->getPauseTime());
+        if (controlFrame->getOpCode() == ETHERNET_CONTROL_PAUSE) {
+            const auto& pauseFrame = CHK(dynamicPtrCast<const EthernetPauseFrame>(controlFrame));
+            numPauseFramesSent++;
+            emit(txPausePkUnitsSignal, pauseFrame->getPauseTime());
+        }
     }
 
     EV_INFO << "Transmission of " << curTxFrame << " successfully completed.\n";

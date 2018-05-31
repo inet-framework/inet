@@ -30,7 +30,7 @@ simple Delayer like IHook
 {
     parameters:
         volatile double delay @unit(s) = default(0s);    // delay [seconds] e.g. uniform(20ms,40ms)
-        @display("i=status/lightning");
+        @display("i=block/timer");
         @signal[packetReceived](type=cMessage);
         @signal[packetSent](type=cMessage);
         @signal[delay](type=simtime_t);     // delay in seconds, emitted at packet receiving

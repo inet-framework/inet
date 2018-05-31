@@ -235,7 +235,7 @@ class TcpHeader extends TransportHeaderBase
 
     // Header options (optional)
     // Currently only EOL, NOP, MSS, WS, SACK_PERMITTED, SACK and TS are implemented
-    TcpOption *headerOption[] @owned @clone(->dup());
+    TcpOption *headerOption[] @owned;
 }
 
 cplusplus(TcpHeader) {{

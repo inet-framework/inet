@@ -124,4 +124,9 @@
 # /showcases/wireless/scaling/,        -f omnetpp.ini -c ApskRadioUdp -r 0,                                       500s,            0000-0000/tplx, PASS,
 # /showcases/wireless/scaling/,        -f omnetpp.ini -c IdealRadioPing -r 0,                                     500s,            0000-0000/tplx, PASS,
 # /showcases/wireless/scaling/,        -f omnetpp.ini -c IdealRadioUdp -r 0,                                      500s,            0000-0000/tplx, PASS,
-/showcases/wireless/throughput/,     -f omnetpp.ini -c General -r 0,                                            1s,            ed65-fd19/tplx, PASS,
+/showcases/wireless/throughput/,     -f omnetpp.ini -c g -r 0,                                                  1s,            ed65-fd19/tplx, PASS,
+# /showcases/wireless/throughput/,     -f omnetpp.ini -c Ac -r 0,                                                 1s,            ed65-fd19/tplx, PASS,  # The simulation wanted to ask a question, set cmdenv-interactive=true to allow it: "Enter parameter 'Throughput.sourceHost.app[0].sendInterval'
+/showcases/wireless/throughput/,     -f omnetpp.ini -c Ac2 -r 0,                                                1s,            ba2a-c507/tplx, PASS,
+/showcases/wireless/throughput/,     -f omnetpp.ini -c Ac3-1MiBUdp -r 0,                                        1s,            9981-c1b4/tplx, PASS,
+/showcases/wireless/throughput/,     -f omnetpp.ini -c Ac4 -r 0,                                                1s,            9fd6-a532/tplx, PASS,
+/showcases/wireless/throughput/,     -f omnetpp.ini -c Ac5 -r 0,                                                1s,            dc27-2ac6/tplx, PASS,

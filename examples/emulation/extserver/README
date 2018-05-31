@@ -1,5 +1,3 @@
-The external interface makes it possible to connect the simulation with real
-networks.
 In this example the network consists of one client, one router, one internal
 server and one external (real) server.
 
@@ -8,10 +6,6 @@ For downlink traffic the external server may send data to the internal server.
 
 To run this example, some parameters have to be adjusted in the omnetpp.ini.
 
-- Make sure that you have libpcap-dev (v1.5.3 or later) installed on your machine. 
-- Turn on the "Network Emulation" feature (In IDE / INET Project Properties / Project Features.
-  (if you forget this you will receive a 'Class "inet::EmulationScheduler" not found' error)
-- Rebuild INET
 - Set **.ext[0].device to the device name of the interface of the computer
   running the simulation in the omnetpp.ini file.
 - Set IP address of the external server to: 192.168.0.111/24 and add a route
@@ -22,7 +16,5 @@ To run this example, some parameters have to be adjusted in the omnetpp.ini.
   listen on port 10021.
 - For downlink traffic use e.g. Iperf with following command line:
   iperf -c 172.0.1.111 -P 1 -i 1 -m -p 10021 -M 1452.0B -l 100.0M -f m -t 0
-
-Start the simulation with root privileges.
 
 IP addresses and routing tables are set up by using mrt files.

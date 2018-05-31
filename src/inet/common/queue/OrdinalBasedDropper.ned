@@ -30,7 +30,7 @@ simple OrdinalBasedDropper like IHook
     parameters:
         string dropsVector = default(""); // the dropsVector format is "<packetNumber>;<packetNumber>;...;"
                                           // packet numbers in ascending order e.g. "5;6;12;13;"
-        @display("i=status/lightning");
+        @display("i=block/downarrow");
         @signal[packetReceived](type=cMessage);
         @signal[packetSent](type=cMessage);
         @signal[packetDropped](type=cMessage);

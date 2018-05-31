@@ -57,14 +57,17 @@ class INET_API TcpAppBase : public cSimpleModule, public TcpSocket::ICallback
     virtual void close();
     virtual void sendPacket(Packet *pkt);
 
-    /* TcpSocket::ICallback callback methods */
     virtual void handleTimer(cMessage *msg) = 0;
-    virtual void socketEstablished(TcpSocket *socket) override;
+
+    /* TcpSocket::ICallback callback methods */
     virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override;
+    virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override { socket->accept(availableInfo->getNewSocketId()); }
+    virtual void socketEstablished(TcpSocket *socket) override;
     virtual void socketPeerClosed(TcpSocket *socket) override;
     virtual void socketClosed(TcpSocket *socket) override;
     virtual void socketFailure(TcpSocket *socket, int code) override;
-    virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override { delete status; }
+    virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override { }
+    virtual void socketDeleted(TcpSocket *socket) override {}
 };
 
 } // namespace inet

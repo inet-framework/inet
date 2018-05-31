@@ -180,10 +180,10 @@ module PhysicalEnvironment like IPhysicalEnvironment
     submodules:
         objectCache: <objectCacheType> like IObjectCache if objectCacheType != "" {
             parameters:
-                @display("p=100,50");
+                @display("p=100,100");
         }
         ground: <groundType> like IGround if groundType != "" {
             parameters:
-                @display("p=100,150");
+                @display("p=100,200");
         }
 }

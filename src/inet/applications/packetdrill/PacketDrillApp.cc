@@ -1735,10 +1735,10 @@ bool PacketDrillApp::compareTcpHeader(const Ptr<const TcpHeader>& storedTcp, con
             return true;
         }
         if (storedTcp->getHeaderOptionArraySize() != liveTcp->getHeaderOptionArraySize()) {
-            const TcpOption *liveOption;
-            for (unsigned int i = 0; i < liveTcp->getHeaderOptionArraySize(); i++) {
-                liveOption = liveTcp->getHeaderOption(i);
-            }
+//            const TcpOption *liveOption;
+//            for (unsigned int i = 0; i < liveTcp->getHeaderOptionArraySize(); i++) {
+//                liveOption = liveTcp->getHeaderOption(i);
+//            }
             return false;
         } else {
             const TcpOption *storedOption, *liveOption;

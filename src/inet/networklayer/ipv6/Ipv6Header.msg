@@ -71,7 +71,7 @@ class Ipv6Header extends NetworkHeaderBase
     short hopLimit = 0;
     IpProtocolId protocolId = IP_PROT_NONE;
 
-    Ipv6ExtensionHeader *extensionHeader[] @owned @clone(->dup()); // array of extension headers, subclassed from ~Ipv6ExtensionHeader
+    Ipv6ExtensionHeader *extensionHeader[] @owned; // array of extension headers, subclassed from ~Ipv6ExtensionHeader
 }
 
 cplusplus(Ipv6Header) {{

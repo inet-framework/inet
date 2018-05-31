@@ -61,7 +61,7 @@ import inet.applications.contract.IApp;
 //     - 'NoSplitHorizon': no split horizon filtering; send all routes to
 //                         neighbors.
 //     - 'SplitHorizon':   do not sent routes whose next hop is the neighbor
-//     - 'SplitHorizonPoisenedReverse': if the next hop is the neighbor, then
+//     - 'SplitHorizonPoisonedReverse': if the next hop is the neighbor, then
 //                         set the metric of the route to infinity.
 simple Rip like IApp
 {
@@ -70,18 +70,21 @@ simple Rip like IApp
 
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
+        
         xml ripConfig = default(xml("<config><interface metric='1'/></config>"));
-
         string mode @enum("RIPv2", "RIPng") = default("RIPv2");
         int udpPort = (mode == "RIPng" ? 521 : 520);
+        
         volatile double startupTime @unit(s) = default(uniform(0s,5s)); // delay before starting RIP
         double shutdownTime @unit(s) = default(1s); // delay before shutting down RIP
         
         // RIP timers
-        double updateInterval @unit(s) = default(30s);   // 30s timer or periodic timer (RFC 2453)
-        double routeExpiryTime @unit(s) = default(180s); // timeout timer (RFC 2453)
-        double routePurgeTime @unit(s) = default(120s);  // garbage collection timer (RFC 2453)
+        double updateInterval @unit(s) = default(30s);   // 30s timer or update timer
+        double routeExpiryTime @unit(s) = default(180s); // invalid timer
+        double routePurgeTime @unit(s) = default(120s);  // garbage collection timer or flush timer
+        double holdDownTime @unit(s) = default(0s);      // hold-down timer (not defined in RFC). 0s means not active
         
+        bool triggeredUpdate = default(true);  // sending triggered updates on route changes
         volatile double triggeredUpdateDelay @unit(s) = default(uniform(1s,5s));
         
         @signal[sentRequest](type=cPacket);

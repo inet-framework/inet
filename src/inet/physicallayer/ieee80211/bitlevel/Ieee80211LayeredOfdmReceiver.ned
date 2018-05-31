@@ -56,24 +56,24 @@ module Ieee80211LayeredOfdmReceiver like IReceiver
         @display("i=block/rx");
     submodules:
         errorModel: <errorModelType> like ILayeredErrorModel if errorModelType != "" {
-            @display("p=240,350");
+            @display("p=300,400");
         }
         dataDecoder: <dataDecoderType> like IDecoder if dataDecoderType != "" {
-            @display("p=100,50");
+            @display("p=100,100");
         }
         signalDecoder: <signalDecoderType> like IDecoder if signalDecoderType != "" {
-            @display("p=240,50");
+            @display("p=300,100");
         }
         signalDemodulator: <signalDemodulatorType> like IDemodulator if signalDemodulatorType != "" {
-            @display("p=240,150");
+            @display("p=300,200");
         }
         dataDemodulator: <dataDemodulatorType> like IDemodulator if dataDemodulatorType != "" {
-            @display("p=100,150");
+            @display("p=100,200");
         }
         pulseFilter: <pulseFilterType> like IPulseFilter if pulseFilterType != "" {
-            @display("p=100,250");
+            @display("p=100,300");
         }
         analogDigitalConverter: <analogDigitalConverterType> like IAnalogDigitalConverter if analogDigitalConverterType != "" {
-            @display("p=100,350");
+            @display("p=100,400");
         }
 }

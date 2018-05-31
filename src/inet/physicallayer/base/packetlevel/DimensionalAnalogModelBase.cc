@@ -61,7 +61,7 @@ const ConstMapping *DimensionalAnalogModelBase::computeReceptionPower(const IRad
     const simtime_t receptionStartTime = arrival->getStartTime();
     const simtime_t receptionEndTime = arrival->getEndTime();
     const Coord receptionStartPosition = arrival->getStartPosition();
-    const Coord receptionEndPosition = arrival->getEndPosition();       //FIXME variable ‘receptionEndPosition’ set but not used
+    // TODO: could be used for doppler shift? const Coord receptionEndPosition = arrival->getEndPosition();
     const EulerAngles transmissionDirection = computeTransmissionDirection(transmission, arrival);
     const EulerAngles transmissionAntennaDirection = transmission->getStartOrientation() - transmissionDirection;
     const EulerAngles receptionAntennaDirection = transmissionDirection - arrival->getStartOrientation();

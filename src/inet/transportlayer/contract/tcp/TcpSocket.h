@@ -128,8 +128,7 @@ class INET_API TcpSocket : public ISocket
 {
   public:
     /**
-     * Abstract base class for your callback objects. See setCallback()
-     * and processMessage() for more info.
+     * Callback interface for TCP sockets, see setCallback() and processMessage() for more info.
      *
      * Note: this class is not subclassed from cObject, because
      * classes may have both this class and cSimpleModule as base class,
@@ -139,14 +138,17 @@ class INET_API TcpSocket : public ISocket
     {
       public:
         virtual ~ICallback() {}
+        /**
+         * Notifies about data arrival, packet ownership is transferred to the callee.
+         */
         virtual void socketDataArrived(TcpSocket* socket, Packet *packet, bool urgent) = 0;
-        virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) { socket->accept(availableInfo->getNewSocketId()); }
-        virtual void socketEstablished(TcpSocket *socket) {}
-        virtual void socketPeerClosed(TcpSocket *socket) {}
-        virtual void socketClosed(TcpSocket *socket) {}
-        virtual void socketFailure(TcpSocket *socket, int code) {}
-        virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) { delete status; }
-        virtual void socketDeleted(TcpSocket *socket) {}
+        virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) = 0;
+        virtual void socketEstablished(TcpSocket *socket) = 0;
+        virtual void socketPeerClosed(TcpSocket *socket) = 0;
+        virtual void socketClosed(TcpSocket *socket) = 0;
+        virtual void socketFailure(TcpSocket *socket, int code) = 0;
+        virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) = 0;
+        virtual void socketDeleted(TcpSocket *socket) = 0;
     };
 
     enum State { NOT_BOUND, BOUND, LISTENING, CONNECTING, CONNECTED, PEER_CLOSED, LOCALLY_CLOSED, CLOSED, SOCKERROR };

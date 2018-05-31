@@ -35,7 +35,6 @@ module NodeBase like INetworkNode
     parameters:
         @networkNode;
         @labels(node,ethernet-node,wireless-node);
-        @display("bgb=930,800");
         bool hasStatus = default(false);
         string osgModel = default(""); // 3D model for OSG visualization, no 3D model by default
         string osgModelColor = default(""); // tint color, no colorization by default
@@ -48,27 +47,27 @@ module NodeBase like INetworkNode
         *.mobilityModule = default(mobilityType != "" ? absPath(".mobility") : "");
         *.energySourceModule = default(energyStorageType != "" ? absPath(".energyStorage") : "");
         *.energyGeneratorModule = default(energyGeneratorType != "" ? absPath(".energyGenerator") : "");
-
+        @display("bgb=1256,672");
     submodules:
         status: NodeStatus if hasStatus {
             parameters:
-                @display("p=100,100;is=s");
+                @display("p=125,80;is=s");
         }
         energyStorage: <energyStorageType> like IEnergyStorage if energyStorageType != "" {
             parameters:
-                @display("p=100,300;is=s");
+                @display("p=125,320;is=s");
         }
         energyManagement: <energyManagementType> like IEnergyManagement if energyManagementType != "" {
             parameters:
-                @display("p=100,400;i=block/plug;is=s");
+                @display("p=125,400;i=block/plug;is=s");
         }
         energyGenerator: <energyGeneratorType> like IEnergyGenerator if energyGeneratorType != "" {
             parameters:
-                @display("p=100,500;is=s");
+                @display("p=125,480;is=s");
         }
         // TODO: move mobility right after status to have it in the same order as in their positions, changes fingerprints 
         mobility: <mobilityType> like IMobility if mobilityType != "" {
             parameters:
-                @display("p=100,200;is=s");
+                @display("p=125,160;is=s");
         }
 }

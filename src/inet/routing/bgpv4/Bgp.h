@@ -50,11 +50,17 @@ class INET_API Bgp : public cSimpleModule, public ILifecycle, public TcpSocket::
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
     virtual void finish() override;
 
+    /** @name TcpSocket::ICallback callback methods */
+    //@{
     virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override;
+    virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override { socket->accept(availableInfo->getNewSocketId()); }      //TODO
     virtual void socketEstablished(TcpSocket *socket) override;
-    virtual void socketFailure(TcpSocket *socket, int code) override;
     virtual void socketPeerClosed(TcpSocket *socket) override {}
     virtual void socketClosed(TcpSocket *socket) override {}
+    virtual void socketFailure(TcpSocket *socket, int code) override;
+    virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override { }
+    virtual void socketDeleted(TcpSocket *socket) override {}
+    //@}
 
     friend class BgpSession;
     //functions used by the BgpSession class

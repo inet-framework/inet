@@ -41,6 +41,8 @@ NEED NOT:
  - 802.11 preamble, header, data separation in HT and VHT mode doesn't really make sense the way it's right now implemented
    there's no separate header in these modes, the preamble is much more complicated than in the other modes
    there's also a bug related to this in the Ieee80211ScalarTransmitter when it computes the data duration
+ - replace long2string and double2string in Units.msg with something more clever (e.g. 160000000 Hz -> 160 MHz)
+ - use SimTime::format instead of simtime2string in descriptors (e.g. 0.000072 -> 72 us)
  - add L2 sockets: EthernetSocket bound to EtherType, LlcSocket bound to SSAP, DSAP, add Ieee80211Socket bound unconditionally
  - solve dynamic node creation and address resolution in applications
  - don't subclass APSK medium and such with other specific radios, think of APSK radio as yet another specific conceptual radio

@@ -59,7 +59,7 @@ module RadioMedium like IRadioMedium
         bool recordCommunicationLog = default(false); // when enabled the medium writes a communication log file that contains one line per transmission and per reception
 
         @class(RadioMedium);
-        @display("i=misc/sun_s");
+        @display("i=misc/sun");
 
         @signal[radioAdded];
         @signal[radioRemoved];
@@ -73,34 +73,34 @@ module RadioMedium like IRadioMedium
     submodules:
         propagation: <propagationType> like IPropagation {
             parameters:
-                @display("p=100,50");
+                @display("p=100,100");
         }
         analogModel: <analogModelType> like IAnalogModel {
             parameters:
-                @display("p=100,150");
+                @display("p=100,200");
         }
         backgroundNoise: <backgroundNoiseType> like IBackgroundNoise if backgroundNoiseType != "" {
             parameters:
-                @display("p=100,250");
+                @display("p=100,300");
         }
         pathLoss: <pathLossType> like IPathLoss {
             parameters:
-                @display("p=300,50");
+                @display("p=300,100");
         }
         obstacleLoss: <obstacleLossType> like IObstacleLoss if obstacleLossType != "" {
             parameters:
-                @display("p=300,150");
+                @display("p=300,200");
         }
         mediumLimitCache: <mediumLimitCacheType> like IMediumLimitCache {
             parameters:
-                @display("p=500,50");
+                @display("p=500,100");
         }
         communicationCache: <communicationCacheType> like ICommunicationCache {
             parameters:
-                @display("p=500,250");
+                @display("p=500,300");
         }
         neighborCache: <neighborCacheType> like INeighborCache if neighborCacheType != "" {
             parameters:
-                @display("p=500,150");
+                @display("p=500,200");
         }
 }

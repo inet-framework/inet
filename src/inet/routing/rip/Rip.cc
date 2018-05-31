@@ -45,99 +45,6 @@ std::ostream& operator<<(std::ostream& os, const RipRoute& e)
     return os;
 }
 
-RipRoute::RipRoute(IRoute *route, RouteType type, int metric, uint16 routeTag)
-    : type(type), route(route), metric(metric), changed(false), lastUpdateTime(0)
-{
-    dest = route->getDestinationAsGeneric();
-    prefixLength = route->getPrefixLength();
-    nextHop = route->getNextHopAsGeneric();
-    ie = route->getInterface();
-    tag = routeTag;
-}
-
-std::string RipRoute::str() const
-{
-    std::stringstream out;
-
-    out << "dest:";
-    if (dest.isUnspecified())
-        out << "*  ";
-    else
-        out << dest << "  ";
-    out << "prefix:" << prefixLength << "  ";
-    out << "gw:";
-    if (nextHop.isUnspecified())
-        out << "*  ";
-    else
-        out << nextHop << "  ";
-    out << "metric:" << metric << " ";
-    out << "if:";
-    if (!ie)
-        out << "*  ";
-    else
-        out << ie->getInterfaceName() << "  ";
-    out << "tag:" << tag << " ";
-    out << "upd:" << lastUpdateTime << "s  ";
-    switch (type) {
-        case RIP_ROUTE_INTERFACE:
-            out << "INTERFACE";
-            break;
-
-        case RIP_ROUTE_STATIC:
-            out << "STATIC";
-            break;
-
-        case RIP_ROUTE_DEFAULT:
-            out << "DEFAULT";
-            break;
-
-        case RIP_ROUTE_RTE:
-            out << "RTE";
-            break;
-
-        case RIP_ROUTE_REDISTRIBUTE:
-            out << "REDISTRIBUTE";
-            break;
-    }
-
-    return out.str();
-}
-
-RipInterfaceEntry::RipInterfaceEntry(const InterfaceEntry *ie)
-    : ie(ie), metric(1), mode(NO_RIP)
-{
-    ASSERT(!ie->isLoopback());
-    ASSERT(ie->isMulticast());
-}
-
-/**
- * Fills in the parameters of the interface from the matching <interface>
- * element of the configuration.
- */
-void RipInterfaceEntry::configure(cXMLElement *config)
-{
-    const char *metricAttr = config->getAttribute("metric");
-
-    if (metricAttr) {
-        int metric = atoi(metricAttr);
-        if (metric < 1 || metric >= RIP_INFINITE_METRIC)
-            throw cRuntimeError("RIP: invalid metric in <interface> element at %s: %s", config->getSourceLocation(), metricAttr);
-        this->metric = metric;
-    }
-
-    const char *ripModeAttr = config->getAttribute("mode");
-    RipMode mode = !ripModeAttr ? SPLIT_HORIZON_POISONED_REVERSE :
-        strcmp(ripModeAttr, "NoRIP") == 0 ? NO_RIP :
-        strcmp(ripModeAttr, "NoSplitHorizon") == 0 ? NO_SPLIT_HORIZON :
-        strcmp(ripModeAttr, "SplitHorizon") == 0 ? SPLIT_HORIZON :
-        strcmp(ripModeAttr, "SplitHorizonPoisonedReverse") == 0 ? SPLIT_HORIZON_POISONED_REVERSE :
-                static_cast<RipMode>(-1);
-    if (mode == static_cast<RipMode>(-1))
-        throw cRuntimeError("RIP: invalid split-horizon-mode attribute in <interface> element at %s: %s",
-                config->getSourceLocation(), ripModeAttr);
-    this->mode = mode;
-}
-
 std::ostream& operator<<(std::ostream& os, const RipInterfaceEntry& e)
 {
     os << "if:" << e.ie->getInterfaceName() << "  ";
@@ -212,7 +119,9 @@ void Rip::initialize(int stage)
         updateInterval = par("updateInterval");
         routeExpiryTime = par("routeExpiryTime");
         routePurgeTime = par("routePurgeTime");
+        holdDownTime = par("holdDownTime");
         shutdownTime = par("shutdownTime");
+        triggeredUpdate = par("triggeredUpdate");
 
         updateTimer = new cMessage("RIP-timer");
         triggeredUpdateTimer = new cMessage("RIP-trigger");
@@ -230,28 +139,68 @@ void Rip::initialize(int stage)
     }
 }
 
-/**
- * Creates a RipInterfaceEntry for each interface found in the interface table.
- */
-void Rip::configureInterfaces(cXMLElement *config)
+
+void Rip::handleMessage(cMessage *msg)
 {
-    cXMLElementList interfaceElements = config->getChildrenByTagName("interface");
+    if (!isOperational) {
+        if (msg->isSelfMessage())
+            throw cRuntimeError("Model error: self msg '%s' received when isOperational is false", msg->getName());
+        EV_ERROR << "Application is turned off, dropping '" << msg->getName() << "' message\n";
+        delete msg;
+        return;
+    }
+
+    if (msg->isSelfMessage()) {
+        if (msg == updateTimer) {
+            processUpdate(false);
+            scheduleAt(simTime() + updateInterval, msg);
+        }
+        else if (msg == triggeredUpdateTimer) {
+            processUpdate(true);
+        }
+        else if (msg == startupTimer) {
+            startRIPRouting();
+        }
+        else if (msg == shutdownTimer) {
+            isOperational = false;
+            IDoneCallback *doneCallback = (IDoneCallback *)msg->getContextPointer();
+            msg->setContextPointer(nullptr);
+            doneCallback->invoke();
+        }
+    }
+    else if (msg->getKind() == UDP_I_DATA) {
+        Packet *pk = check_and_cast<Packet *>(msg);
+        unsigned char command = pk->peekAtFront<RipPacket>()->getCommand();
+        if (command == RIP_REQUEST)
+            processRequest(pk);
+        else if (command == RIP_RESPONSE)
+            processResponse(pk);
+        else
+            throw cRuntimeError("RIP: unknown command (%d)", (int)command);
+    }
+    else if (msg->getKind() == UDP_I_ERROR) {
+        EV_DETAIL << "Ignoring UDP error report\n";
+        delete msg;
+    }
+}
+
+void Rip::startRIPRouting()
+{
+    addressType = rt->getRouterIdAsGeneric().getAddressType();
+
+    cXMLElementList interfaceElements = par("ripConfig").xmlValue()->getChildrenByTagName("interface");
     InterfaceMatcher matcher(interfaceElements);
 
+    // Creates a RipInterfaceEntry for each interface found in the 'interface table'.
     for (int k = 0; k < ift->getNumInterfaces(); ++k) {
         InterfaceEntry *ie = ift->getInterface(k);
         if (ie->isMulticast() && !ie->isLoopback()) {
             int i = matcher.findMatchingSelector(ie);
-            addInterface(ie, i >= 0 ? interfaceElements[i] : nullptr);
+            addRipInterface(ie, i >= 0 ? interfaceElements[i] : nullptr);
         }
     }
-}
 
-/**
- * Import interface/static/default routes from the routing table.
- */
-void Rip::configureInitialRoutes()
-{
+    // Import interface/static/default routes from the 'routing table'.
     for (int i = 0; i < rt->getNumRoutes(); ++i) {
         IRoute *route = rt->getRoute(i);
         if (isLoopbackInterfaceRoute(route)) {
@@ -270,6 +219,58 @@ void Rip::configureInitialRoutes()
                 importRoute(route, RipRoute::RIP_ROUTE_STATIC);
         }
     }
+
+    // subscribe to interface created/deleted/changed notifications
+    host->subscribe(interfaceCreatedSignal, this);
+    host->subscribe(interfaceDeletedSignal, this);
+    host->subscribe(interfaceStateChangedSignal, this);
+
+    // subscribe to route added/deleted/changed notifications
+    host->subscribe(routeAddedSignal, this);
+    host->subscribe(routeDeletedSignal, this);
+    host->subscribe(routeChangedSignal, this);
+
+    // configure socket
+    socket.setMulticastLoop(false);
+    socket.bind(ripUdpPort);
+
+    for (auto & elem : ripInterfaces)
+        if (elem.mode != NO_RIP)
+            socket.joinMulticastGroup(addressType->getLinkLocalRIPRoutersMulticastAddress(), elem.ie->getInterfaceId());
+
+    for (auto & elem : ripInterfaces)
+        if (elem.mode != NO_RIP)
+            sendRIPRequest(elem);
+
+    // set update timer
+    scheduleAt(simTime() + updateInterval, updateTimer);
+}
+
+void Rip::stopRIPRouting()
+{
+    if (startupTimer->isScheduled())
+        cancelEvent(startupTimer);
+    else {
+        socket.close();
+
+        // unsubscribe to notifications
+        host->unsubscribe(interfaceCreatedSignal, this);
+        host->unsubscribe(interfaceDeletedSignal, this);
+        host->unsubscribe(interfaceStateChangedSignal, this);
+        host->unsubscribe(routeDeletedSignal, this);
+        host->unsubscribe(routeAddedSignal, this);
+        host->unsubscribe(routeChangedSignal, this);
+    }
+
+    // cancel timers
+    cancelEvent(updateTimer);
+    cancelEvent(triggeredUpdateTimer);
+
+    // clear data
+    for (auto& elem : ripRoutes)
+        delete elem;
+    ripRoutes.clear();
+    ripInterfaces.clear();
 }
 
 /**
@@ -296,7 +297,6 @@ RipRoute *Rip::importRoute(IRoute *route, RipRoute::RouteType type, int metric, 
  */
 void Rip::sendRIPRequest(const RipInterfaceEntry& ripInterface)
 {
-    Packet *pk = new Packet("RIP request");
     const  auto& packet = makeShared<RipPacket>();
     packet->setCommand(RIP_REQUEST);
     packet->setEntryArraySize(1);
@@ -304,6 +304,10 @@ void Rip::sendRIPRequest(const RipInterfaceEntry& ripInterface)
     entry.addressFamilyId = RIP_AF_NONE;
     entry.metric = RIP_INFINITE_METRIC;
     packet->setChunkLength(B(RIP_HEADER_SIZE + RIP_RTE_SIZE * packet->getEntryArraySize()));
+
+    EV_INFO << "sending RIP request from " << ripInterface.ie->getInterfaceName() << "\n";
+
+    Packet *pk = new Packet("RIP request");
     pk->insertAtBack(packet);
     emit(sentRequestSignal, pk);
     sendPacket(pk, addressType->getLinkLocalRIPRoutersMulticastAddress(), ripUdpPort, ripInterface.ie);
@@ -326,23 +330,25 @@ void Rip::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
             cXMLElementList config = par("ripConfig").xmlValue()->getChildrenByTagName("interface");
             int i = InterfaceMatcher(config).findMatchingSelector(ie);
             if (i >= 0)
-                addInterface(ie, config[i]);
+                addRipInterface(ie, config[i]);
         }
     }
     else if (signalID == interfaceDeletedSignal) {
         // delete interfaces and routes referencing the deleted interface
         ie = check_and_cast<const InterfaceEntry *>(obj);
-        deleteInterface(ie);
+        deleteRipInterface(ie);
     }
     else if (signalID == interfaceStateChangedSignal) {
         change = check_and_cast<const InterfaceEntryChangeDetails *>(obj);
         if (change->getFieldId() == InterfaceEntry::F_CARRIER || change->getFieldId() == InterfaceEntry::F_STATE) {
             ie = change->getInterfaceEntry();
             if (!ie->isUp()) {
-                invalidateRoutes(ie);
+                for (auto & elem : ripRoutes)
+                    if ((elem)->getInterface() == ie)
+                        invalidateRoute(elem);
             }
             else {
-                RipInterfaceEntry *ripInterfacePtr = findInterfaceById(ie->getInterfaceId());
+                RipInterfaceEntry *ripInterfacePtr = findRipInterfaceById(ie->getInterfaceId());
                 if (ripInterfacePtr && ripInterfacePtr->mode != NO_RIP)
                     sendRIPRequest(*ripInterfacePtr);
             }
@@ -369,9 +375,9 @@ void Rip::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
             }
             else if (isLocalInterfaceRoute(route)) {
                 InterfaceEntry *ie = check_and_cast<InterfaceEntry *>(route->getSource());
-                RipRoute *ripRoute = findRoute(ie, RipRoute::RIP_ROUTE_INTERFACE);
+                RipRoute *ripRoute = findRipRoute(ie, RipRoute::RIP_ROUTE_INTERFACE);
                 if (ripRoute) {    // readded
-                    RipInterfaceEntry *ripIe = findInterfaceById(ie->getInterfaceId());
+                    RipInterfaceEntry *ripIe = findRipInterfaceById(ie->getInterfaceId());
                     ripRoute->setRoute(route);
                     ripRoute->setMetric(ripIe ? ripIe->metric : 1);
                     ripRoute->setChanged(true);
@@ -388,7 +394,7 @@ void Rip::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
     else if (signalID == routeChangedSignal) {
         const IRoute *route = check_and_cast<const IRoute *>(obj);
         if (route->getSource() != this) {
-            RipRoute *ripRoute = findRoute(route);
+            RipRoute *ripRoute = findRipRoute(route);
             if (ripRoute) {
                 // TODO check and update tag
                 bool changed = route->getDestinationAsGeneric() != ripRoute->getDestination() ||
@@ -400,7 +406,7 @@ void Rip::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
                 ripRoute->setNextHop(route->getNextHopAsGeneric());
                 ripRoute->setInterface(route->getInterface());
                 if (changed) {
-                    ripRoute->setChanged(changed);
+                    ripRoute->setChanged(true);
                     triggerUpdate();
                 }
             }
@@ -451,113 +457,6 @@ bool Rip::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCa
     return true;
 }
 
-void Rip::startRIPRouting()
-{
-    addressType = rt->getRouterIdAsGeneric().getAddressType();
-
-    // configure interfaces
-    configureInterfaces(par("ripConfig"));
-
-    // import interface routes
-    configureInitialRoutes();
-
-    // subscribe to notifications
-    host->subscribe(interfaceCreatedSignal, this);
-    host->subscribe(interfaceDeletedSignal, this);
-    host->subscribe(interfaceStateChangedSignal, this);
-    host->subscribe(routeDeletedSignal, this);
-    host->subscribe(routeAddedSignal, this);
-    host->subscribe(routeChangedSignal, this);
-
-    // configure socket
-    socket.setMulticastLoop(false);
-    socket.bind(ripUdpPort);
-
-    for (auto & elem : ripInterfaces)
-        if (elem.mode != NO_RIP)
-            socket.joinMulticastGroup(addressType->getLinkLocalRIPRoutersMulticastAddress(), elem.ie->getInterfaceId());
-
-
-    for (auto & elem : ripInterfaces)
-        if (elem.mode != NO_RIP)
-            sendRIPRequest(elem);
-
-
-    // set update timer
-    scheduleAt(simTime() + updateInterval, updateTimer);
-}
-
-void Rip::stopRIPRouting()
-{
-    if (startupTimer->isScheduled())
-        cancelEvent(startupTimer);
-    else {
-        socket.close();
-
-        // unsubscribe to notifications
-        host->unsubscribe(interfaceCreatedSignal, this);
-        host->unsubscribe(interfaceDeletedSignal, this);
-        host->unsubscribe(interfaceStateChangedSignal, this);
-        host->unsubscribe(routeDeletedSignal, this);
-        host->unsubscribe(routeAddedSignal, this);
-        host->unsubscribe(routeChangedSignal, this);
-    }
-
-    // cancel timers
-    cancelEvent(updateTimer);
-    cancelEvent(triggeredUpdateTimer);
-
-    // clear data
-    for (auto& elem : ripRoutes)
-        delete elem;
-    ripRoutes.clear();
-    ripInterfaces.clear();
-}
-
-void Rip::handleMessage(cMessage *msg)
-{
-    if (!isOperational) {
-        if (msg->isSelfMessage())
-            throw cRuntimeError("Model error: self msg '%s' received when isOperational is false", msg->getName());
-        EV_ERROR << "Application is turned off, dropping '" << msg->getName() << "' message\n";
-        delete msg;
-        return;
-    }
-
-    if (msg->isSelfMessage()) {
-        if (msg == updateTimer) {
-            processUpdate(false);
-            scheduleAt(simTime() + updateInterval, msg);
-        }
-        else if (msg == triggeredUpdateTimer) {
-            processUpdate(true);
-        }
-        else if (msg == startupTimer) {
-            startRIPRouting();
-        }
-        else if (msg == shutdownTimer) {
-            isOperational = false;
-            IDoneCallback *doneCallback = (IDoneCallback *)msg->getContextPointer();
-            msg->setContextPointer(nullptr);
-            doneCallback->invoke();
-        }
-    }
-    else if (msg->getKind() == UDP_I_DATA) {
-        Packet *pk = check_and_cast<Packet *>(msg);
-        unsigned char command = pk->peekAtFront<RipPacket>()->getCommand();
-        if (command == RIP_REQUEST)
-            processRequest(pk);
-        else if (command == RIP_RESPONSE)
-            processResponse(pk);
-        else
-            throw cRuntimeError("RIP: unknown command (%d)", (int)command);
-    }
-    else if (msg->getKind() == UDP_I_ERROR) {
-        EV_DETAIL << "Ignoring UDP error report\n";
-        delete msg;
-    }
-}
-
 /**
  * This method called when a triggered or regular update timer expired.
  * It either sends the changed/all routes to neighbors.
@@ -569,14 +468,13 @@ void Rip::processUpdate(bool triggered)
     else
         EV_INFO << "sending regular updates on all interfaces\n";
 
-    for (auto & elem : ripInterfaces)
-        if (elem.mode != NO_RIP)
-            sendRoutes(addressType->getLinkLocalRIPRoutersMulticastAddress(), ripUdpPort, elem, triggered);
-
+    for (auto &ripInterface : ripInterfaces)
+        if (ripInterface.mode != NO_RIP && ripInterface.ie->isUp())
+            sendRoutes(addressType->getLinkLocalRIPRoutersMulticastAddress(), ripUdpPort, ripInterface, triggered);
 
     // clear changed flags
-    for (auto & elem : ripRoutes)
-        (elem)->setChanged(false);
+    for (auto &ripRoute : ripRoutes)
+        ripRoute->setChanged(false);
 }
 
 /**
@@ -590,7 +488,7 @@ void Rip::processUpdate(bool triggered)
  *     if it sets the metric field of the entry to the metric of the
  *     found route, or to infinity (16) if not found. Once all entries
  *     are have been filled in, change the command from Request to Response,
- *     and sent the packet back to the requestor. If there are no
+ *     and sent the packet back to the requester. If there are no
  *     entries in the request, then no response is sent; the request is
  *     silently discarded.
  * - the whole routing table is requested
@@ -620,7 +518,7 @@ void Rip::processRequest(Packet *packet)
         switch (entry.addressFamilyId) {
             case RIP_AF_NONE:
                 if (numEntries == 1 && entry.metric == RIP_INFINITE_METRIC) {
-                    RipInterfaceEntry *ripInterface = findInterfaceById(interfaceId);
+                    RipInterfaceEntry *ripInterface = findRipInterfaceById(interfaceId);
                     if (ripInterface)
                         sendRoutes(srcAddr, srcPort, *ripInterface, false);
                     delete packet;
@@ -632,7 +530,7 @@ void Rip::processRequest(Packet *packet)
                 break;
 
             case RIP_AF_INET: {
-                RipRoute *ripRoute = findRoute(entry.address, entry.prefixLength);
+                RipRoute *ripRoute = findRipRoute(entry.address, entry.prefixLength);
                 entry.metric = ripRoute ? ripRoute->getMetric() : RIP_INFINITE_METRIC;
                 // entry.nextHop, entry.routeTag?
                 break;
@@ -666,13 +564,18 @@ void Rip::sendRoutes(const L3Address& address, int port, const RipInterfaceEntry
     packet->setEntryArraySize(maxEntries);
     int k = 0;    // index into RIP entries
 
-    for (auto & elem : ripRoutes) {
-        RipRoute *ripRoute = checkRouteIsExpired(elem);
-        if (!ripRoute)
-            continue;
+    checkExpiredRoutes();
 
-        if (changedOnly && !ripRoute->isChanged())
-            continue;
+    for (auto &ripRoute : ripRoutes) {
+        // this is a triggered update
+        if (changedOnly) {
+
+            // make sure triggered update is active
+            ASSERT(triggeredUpdate);
+
+            if (!ripRoute->isChanged())
+                continue;
+        }
 
         // Split Horizon check:
         //   Omit routes learned from one neighbor in updates sent to that neighbor.
@@ -771,7 +674,7 @@ void Rip::processResponse(Packet *packet)
     int interfaceId = packet->getTag<InterfaceInd>()->getInterfaceId();
     packet->clearTags();
 
-    RipInterfaceEntry *incomingIe = findInterfaceById(interfaceId);
+    RipInterfaceEntry *incomingIe = findRipInterfaceById(interfaceId);
     if (!incomingIe) {
         EV_INFO << "dropping unexpected RIP response.\n";
         emit(badResponseSignal, packet);
@@ -788,17 +691,21 @@ void Rip::processResponse(Packet *packet)
         int metric = std::min((int)entry.metric + incomingIe->metric, RIP_INFINITE_METRIC);
         L3Address nextHop = entry.nextHop.isUnspecified() ? srcAddr : entry.nextHop;
 
-        RipRoute *ripRoute = findRoute(entry.address, entry.prefixLength);
+        RipRoute *ripRoute = findRipRoute(entry.address, entry.prefixLength);
         if (ripRoute) {
             RipRoute::RouteType routeType = ripRoute->getType();
             int routeMetric = ripRoute->getMetric();
+
             if ((routeType == RipRoute::RIP_ROUTE_STATIC || routeType == RipRoute::RIP_ROUTE_DEFAULT) && routeMetric != RIP_INFINITE_METRIC)
                 continue;
+
             if (ripRoute->getFrom() == srcAddr)
                 ripRoute->setLastUpdateTime(simTime());
+
             if ((ripRoute->getFrom() == srcAddr && ripRoute->getMetric() != metric) || metric < ripRoute->getMetric())
                 updateRoute(ripRoute, incomingIe->ie, nextHop, metric, entry.routeTag, srcAddr);
-            // TODO RIPng: if the metric is the same as the old one, and the old route is aboute to expire (i.e. at least halfway to the expiration point)
+
+            // TODO RIPng: if the metric is the same as the old one, and the old route is about to expire (i.e. at least halfway to the expiration point)
             //             then update the old route with the new RTE
         }
         else {
@@ -898,13 +805,14 @@ void Rip::addRoute(const L3Address& dest, int prefixLength, const InterfaceEntry
     EV_DEBUG << "Add route to " << dest << "/" << prefixLength << ": "
              << "nextHop=" << nextHop << " metric=" << metric << std::endl;
 
-    IRoute *route = addRoute(dest, prefixLength, ie, nextHop, metric);
+    IRoute *route = createRoute(dest, prefixLength, ie, nextHop, metric);
 
     RipRoute *ripRoute = new RipRoute(route, RipRoute::RIP_ROUTE_RTE, metric, routeTag);
     ripRoute->setFrom(from);
     ripRoute->setLastUpdateTime(simTime());
     ripRoute->setChanged(true);
     ripRoutes.push_back(ripRoute);
+
     emit(numRoutesSignal, (unsigned long)ripRoutes.size());
     triggerUpdate();
 }
@@ -927,8 +835,15 @@ void Rip::addRoute(const L3Address& dest, int prefixLength, const InterfaceEntry
  */
 void Rip::updateRoute(RipRoute *ripRoute, const InterfaceEntry *ie, const L3Address& nextHop, int metric, uint16 routeTag, const L3Address& from)
 {
-    //ASSERT(ripRoute && ripRoute->getType() == RipRoute::RIP_ROUTE_RTE);
-    //ASSERT(!ripRoute->getRoute() || ripRoute->getRoute()->getSource() == this);
+    // we receive a route update that shows the unreachable route is now reachable
+    if(ripRoute->getMetric() == RIP_INFINITE_METRIC && metric < RIP_INFINITE_METRIC) {
+        simtime_t now = simTime();
+        // hold-down timer is active
+        if(holdDownTime > 0 && now < ripRoute->getLastInvalidationTime() + holdDownTime) {
+            EV_DEBUG << "hold-down timer prevents update to route " << ripRoute->getDestination() << std::endl;
+            return;
+        }
+    }
 
     EV_DEBUG << "Updating route to " << ripRoute->getDestination() << "/" << ripRoute->getPrefixLength() << ": "
              << "nextHop=" << nextHop << " metric=" << metric << std::endl;
@@ -944,19 +859,22 @@ void Rip::updateRoute(RipRoute *ripRoute, const InterfaceEntry *ie, const L3Addr
         ripRoute->setType(RipRoute::RIP_ROUTE_RTE);
         ripRoute->setNextHop(nextHop);
 
-        IRoute *route = addRoute(ripRoute->getDestination(), ripRoute->getPrefixLength(), ie, nextHop, metric);
+        IRoute *route = createRoute(ripRoute->getDestination(), ripRoute->getPrefixLength(), ie, nextHop, metric);
+
         ripRoute->setRoute(route);
     }
+
     if (oldMetric != RIP_INFINITE_METRIC) {
         IRoute *route = ripRoute->getRoute();
         ASSERT(route);
+        rt->deleteRoute(route);
 
         ripRoute->setRoute(nullptr);
-        deleteRoute(route);
-
         ripRoute->setNextHop(nextHop);
+
         if (metric < RIP_INFINITE_METRIC) {
-            route = addRoute(ripRoute->getDestination(), ripRoute->getPrefixLength(), ie, nextHop, metric);
+            route = createRoute(ripRoute->getDestination(), ripRoute->getPrefixLength(), ie, nextHop, metric);
+
             ripRoute->setRoute(route);
         }
     }
@@ -976,34 +894,41 @@ void Rip::updateRoute(RipRoute *ripRoute, const InterfaceEntry *ie, const L3Addr
  */
 void Rip::triggerUpdate()
 {
-    if (!triggeredUpdateTimer->isScheduled()) {
+    if (triggeredUpdate && !triggeredUpdateTimer->isScheduled()) {
         double delay = par("triggeredUpdateDelay");
         simtime_t updateTime = simTime() + delay;
         // Triggered updates may be suppressed if a regular
         // update is due by the time the triggered update would be sent.
         if (!updateTimer->isScheduled() || updateTimer->getArrivalTime() > updateTime)
+        {
+            EV_DETAIL << "scheduling triggered update \n";
             scheduleAt(updateTime, triggeredUpdateTimer);
+        }
     }
 }
 
 /**
  * Should be called regularly to handle expiry and purge of routes.
- * If the route is valid, then returns it, otherwise returns nullptr.
  */
-RipRoute *Rip::checkRouteIsExpired(RipRoute *route)
+void Rip::checkExpiredRoutes()
 {
-    if (route->getType() == RipRoute::RIP_ROUTE_RTE) {
-        simtime_t now = simTime();
-        if (now >= route->getLastUpdateTime() + routeExpiryTime + routePurgeTime) {
-            purgeRoute(route);
-            return nullptr;
+    // iterate over each rip route and check if it has expired
+    // note that the iterator becomes invalid after calling purgeRoute
+    for (RouteVector::iterator iter = ripRoutes.begin(); iter != ripRoutes.end();) {
+        RipRoute *ripRoute = (*iter);
+        if (ripRoute->getType() == RipRoute::RIP_ROUTE_RTE) {
+            simtime_t now = simTime();
+            if (now >= ripRoute->getLastUpdateTime() + routeExpiryTime + routePurgeTime)
+            {
+                iter = purgeRoute(ripRoute);
+                continue;
+            }
+            else if (now >= ripRoute->getLastUpdateTime() + routeExpiryTime)
+                invalidateRoute(ripRoute);
         }
-        if (now >= route->getLastUpdateTime() + routeExpiryTime) {
-            invalidateRoute(route);
-            return nullptr;
-        }
+
+        iter++;
     }
-    return route;
 }
 
 /*
@@ -1019,33 +944,44 @@ RipRoute *Rip::checkRouteIsExpired(RipRoute *route)
  */
 void Rip::invalidateRoute(RipRoute *ripRoute)
 {
+    EV_INFO << "invalidating route dest:" << ripRoute->getDestination() << "\n";
+
     IRoute *route = ripRoute->getRoute();
     if (route) {
         ripRoute->setRoute(nullptr);
-        deleteRoute(route);
+        rt->deleteRoute(route);
     }
     ripRoute->setMetric(RIP_INFINITE_METRIC);
     ripRoute->setChanged(true);
+    ripRoute->setLastInvalidationTime(simTime());
     triggerUpdate();
 }
 
 /**
  * Removes the route from the routing table.
  */
-void Rip::purgeRoute(RipRoute *ripRoute)
+Rip::RouteVector::iterator Rip::purgeRoute(RipRoute *ripRoute)
 {
     ASSERT(ripRoute->getType() == RipRoute::RIP_ROUTE_RTE);
+
+    EV_INFO << "purging route dest:" << ripRoute->getDestination() << "\n";
 
     IRoute *route = ripRoute->getRoute();
     if (route) {
         ripRoute->setRoute(nullptr);
-        deleteRoute(route);
+        rt->deleteRoute(route);
     }
 
-    remove(ripRoutes, ripRoute);
+    // erase the ripRoute from the vector
+    auto itt = ripRoutes.erase(std::find(ripRoutes.begin(), ripRoutes.end(), ripRoute));
+
     delete ripRoute;
+    ripRoute = nullptr;
 
     emit(numRoutesSignal, (unsigned long)ripRoutes.size());
+
+    // return the iterator that points to the next element after the deleted one
+    return itt;
 }
 
 /**
@@ -1068,7 +1004,7 @@ void Rip::sendPacket(Packet *packet, const L3Address& destAddr, int destPort, co
  *      private methods
  *----------------------------------------*/
 
-RipInterfaceEntry *Rip::findInterfaceById(int interfaceId)
+RipInterfaceEntry *Rip::findRipInterfaceById(int interfaceId)
 {
     for (auto & elem : ripInterfaces)
         if (elem.ie->getInterfaceId() == interfaceId)
@@ -1077,7 +1013,7 @@ RipInterfaceEntry *Rip::findInterfaceById(int interfaceId)
     return nullptr;
 }
 
-RipRoute *Rip::findRoute(const L3Address& destination, int prefixLength)
+RipRoute *Rip::findRipRoute(const L3Address& destination, int prefixLength)
 {
     for (auto & elem : ripRoutes)
         if ((elem)->getDestination() == destination && (elem)->getPrefixLength() == prefixLength)
@@ -1086,7 +1022,7 @@ RipRoute *Rip::findRoute(const L3Address& destination, int prefixLength)
     return nullptr;
 }
 
-RipRoute *Rip::findRoute(const L3Address& destination, int prefixLength, RipRoute::RouteType type)
+RipRoute *Rip::findRipRoute(const L3Address& destination, int prefixLength, RipRoute::RouteType type)
 {
     for (auto & elem : ripRoutes)
         if ((elem)->getType() == type && (elem)->getDestination() == destination && (elem)->getPrefixLength() == prefixLength)
@@ -1095,7 +1031,7 @@ RipRoute *Rip::findRoute(const L3Address& destination, int prefixLength, RipRout
     return nullptr;
 }
 
-RipRoute *Rip::findRoute(const IRoute *route)
+RipRoute *Rip::findRipRoute(const IRoute *route)
 {
     for (auto & elem : ripRoutes)
         if ((elem)->getRoute() == route)
@@ -1104,7 +1040,7 @@ RipRoute *Rip::findRoute(const IRoute *route)
     return nullptr;
 }
 
-RipRoute *Rip::findRoute(const InterfaceEntry *ie, RipRoute::RouteType type)
+RipRoute *Rip::findRipRoute(const InterfaceEntry *ie, RipRoute::RouteType type)
 {
     for (auto & elem : ripRoutes)
         if ((elem)->getType() == type && (elem)->getInterface() == ie)
@@ -1113,15 +1049,40 @@ RipRoute *Rip::findRoute(const InterfaceEntry *ie, RipRoute::RouteType type)
     return nullptr;
 }
 
-void Rip::addInterface(const InterfaceEntry *ie, cXMLElement *config)
+void Rip::addRipInterface(const InterfaceEntry *ie, cXMLElement *config)
 {
     RipInterfaceEntry ripInterface(ie);
+
+    // Fills in the parameters of the interface from the matching <interface>
+    // element of the configuration.
     if (config)
-        ripInterface.configure(config);
+    {
+        const char *metricAttr = config->getAttribute("metric");
+
+        if (metricAttr) {
+            int metric = atoi(metricAttr);
+            if (metric < 1 || metric >= RIP_INFINITE_METRIC)
+                throw cRuntimeError("RIP: invalid metric in <interface> element at %s: %s", config->getSourceLocation(), metricAttr);
+            ripInterface.metric = metric;
+        }
+
+        const char *ripModeAttr = config->getAttribute("mode");
+        RipMode mode = !ripModeAttr ? SPLIT_HORIZON_POISONED_REVERSE :
+            strcmp(ripModeAttr, "NoRIP") == 0 ? NO_RIP :
+            strcmp(ripModeAttr, "NoSplitHorizon") == 0 ? NO_SPLIT_HORIZON :
+            strcmp(ripModeAttr, "SplitHorizon") == 0 ? SPLIT_HORIZON :
+            strcmp(ripModeAttr, "SplitHorizonPoisonedReverse") == 0 ? SPLIT_HORIZON_POISONED_REVERSE :
+                    static_cast<RipMode>(-1);
+        if (mode == static_cast<RipMode>(-1))
+            throw cRuntimeError("RIP: invalid split-horizon-mode attribute in <interface> element at %s: %s",
+                    config->getSourceLocation(), ripModeAttr);
+        ripInterface.mode = mode;
+    }
+
     ripInterfaces.push_back(ripInterface);
 }
 
-void Rip::deleteInterface(const InterfaceEntry *ie)
+void Rip::deleteRipInterface(const InterfaceEntry *ie)
 {
     // delete interfaces and routes referencing ie
     for (auto it = ripInterfaces.begin(); it != ripInterfaces.end(); ) {
@@ -1146,19 +1107,11 @@ void Rip::deleteInterface(const InterfaceEntry *ie)
 
 int Rip::getInterfaceMetric(InterfaceEntry *ie)
 {
-    RipInterfaceEntry *ripIe = findInterfaceById(ie->getInterfaceId());
+    RipInterfaceEntry *ripIe = findRipInterfaceById(ie->getInterfaceId());
     return ripIe ? ripIe->metric : 1;
 }
 
-void Rip::invalidateRoutes(const InterfaceEntry *ie)
-{
-    for (auto & elem : ripRoutes)
-        if ((elem)->getInterface() == ie)
-            invalidateRoute(elem);
-
-}
-
-IRoute *Rip::addRoute(const L3Address& dest, int prefixLength, const InterfaceEntry *ie, const L3Address& nextHop, int metric)
+IRoute *Rip::createRoute(const L3Address& dest, int prefixLength, const InterfaceEntry *ie, const L3Address& nextHop, int metric)
 {
     // create a new route
     IRoute *route = rt->createRoute();
@@ -1172,26 +1125,10 @@ IRoute *Rip::addRoute(const L3Address& dest, int prefixLength, const InterfaceEn
     route->setSourceType(IRoute::RIP);
     route->setSource(this);
 
+    EV_DETAIL << "Adding new route " << route << endl;
     rt->addRoute(route);
+
     return route;
 }
 
-void Rip::deleteRoute(IRoute *route)
-{
-    rt->deleteRoute(route);
-}
-
-bool Rip::isLoopbackInterfaceRoute(const IRoute *route)
-{
-    InterfaceEntry *ie = dynamic_cast<InterfaceEntry *>(route->getSource());
-    return ie && ie->isLoopback();
-}
-
-bool Rip::isLocalInterfaceRoute(const IRoute *route)
-{
-    InterfaceEntry *ie = dynamic_cast<InterfaceEntry *>(route->getSource());
-    return ie && !ie->isLoopback();
-}
-
 } // namespace inet
-

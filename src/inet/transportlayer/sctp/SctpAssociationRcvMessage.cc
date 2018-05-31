@@ -206,7 +206,7 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
             case COOKIE_ACK:
                 EV_INFO << "COOKIE_ACK received" << endl;
                 if (fsm->getState() == SCTP_S_COOKIE_ECHOED) {
-                    auto cookieAckChunk = check_and_cast<SctpCookieAckChunk *>(header);  //FIXME warning: variable ‘cookieAckChunk’ set but not used
+                    check_and_cast<SctpCookieAckChunk *>(header);
                     trans = processCookieAckArrived();
                    // delete cookieAckChunk;
                 }
@@ -367,7 +367,7 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
             case SHUTDOWN_ACK:
                 EV_INFO << "SHUTDOWN_ACK received" << endl;
                 if (fsm->getState() != SCTP_S_ESTABLISHED) {
-                    auto shutdownAckChunk = check_and_cast<SctpShutdownAckChunk *>(header);    //FIXME warning: variable ‘shutdownAckChunk’ set but not used
+                    check_and_cast<SctpShutdownAckChunk *>(header);
                     sendShutdownComplete();
                     stopTimers();
                     stopTimer(T2_ShutdownTimer);
@@ -392,7 +392,7 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
 
             case SHUTDOWN_COMPLETE: {
                 EV_INFO << "Shutdown Complete arrived" << endl;
-                auto shutdownCompleteChunk = check_and_cast<SctpShutdownCompleteChunk *>(header); //FIXME variable ‘shutdownCompleteChunk’ set but not used
+                check_and_cast<SctpShutdownCompleteChunk *>(header);
                 trans = performStateTransition(SCTP_E_RCV_SHUTDOWN_COMPLETE);
                 sendIndicationToApp(SCTP_I_PEER_CLOSED);    // necessary for NAT-Rendezvous
                 if (trans == true) {

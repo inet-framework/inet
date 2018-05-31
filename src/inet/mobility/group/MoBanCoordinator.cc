@@ -42,8 +42,8 @@
 #include <string>
 #include <stdio.h>
 #include <assert.h>
-
 #include "inet/common/INETMath.h"
+#include "inet/common/INETUtils.h"
 #include "inet/mobility/group/MoBanCoordinator.h"
 #include "inet/mobility/group/MoBanLocal.h"
 
@@ -87,6 +87,7 @@ void MoBanCoordinator::initialize(int stage)
         // preparing output mobility pattern log file
         char log_file_name[70];
         sprintf(log_file_name, "MoBAN_Pattern_out%d.txt", getIndex());
+        inet::utils::makePathForFile(log_file_name);
         logfile = fopen(log_file_name, "w");
 
         if (!readPostureSpecificationFile())

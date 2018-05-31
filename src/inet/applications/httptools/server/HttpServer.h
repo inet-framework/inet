@@ -58,11 +58,13 @@ class INET_API HttpServer : public HttpServerBase, public TcpSocket::ICallback
     virtual void finish() override;
     virtual void handleMessage(cMessage *msg) override;
 
-    virtual void socketEstablished(TcpSocket *socket) override;
     virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override;
+    virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override { socket->accept(availableInfo->getNewSocketId()); }
+    virtual void socketEstablished(TcpSocket *socket) override;
     virtual void socketPeerClosed(TcpSocket *socket) override;
     virtual void socketClosed(TcpSocket *socket) override;
     virtual void socketFailure(TcpSocket *socket, int code) override;
+    virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override { }
     virtual void socketDeleted(TcpSocket *socket) override;
 };
 

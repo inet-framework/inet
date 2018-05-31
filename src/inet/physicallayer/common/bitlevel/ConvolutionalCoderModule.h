@@ -27,7 +27,7 @@ namespace physicallayer {
 class INET_API ConvolutionalCoderModule : public cSimpleModule, public IFecCoder
 {
   protected:
-    ConvolutionalCoder *convolutionalCoder;
+    ConvolutionalCoder *convolutionalCoder = nullptr;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

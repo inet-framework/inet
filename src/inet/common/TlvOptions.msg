@@ -35,8 +35,7 @@ class TlvOptionRaw extends TlvOptionBase
 
 class TlvOptions extends cObject
 {
-    TlvOptionBase *tlvOption[] @owned @clone(->dup());
-    //KLUDGE/HACK @clone(->dup()): msgc bug: currently, owned cObject elements cloned with copy constructor of defined class
+    TlvOptionBase *tlvOption[] @owned;
 }
 
 cplusplus(TlvOptions) {{

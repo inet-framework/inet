@@ -67,18 +67,18 @@ module ApskLayeredReceiver like IReceiver
 
     submodules:
         decoder: <decoderType> like IDecoder if decoderType != "" {
-            @display("p=100,50");
+            @display("p=100,100");
         }
         demodulator: <demodulatorType> like IDemodulator {
-            @display("p=100,150");
+            @display("p=100,200");
         }
         pulseFilter: <pulseFilterType> like IPulseFilter if pulseFilterType != "" {
-            @display("p=100,250");
+            @display("p=100,300");
         }
         analogDigitalConverter: <analogDigitalConverterType> like IAnalogDigitalConverter if analogDigitalConverterType != "" {
-            @display("p=100,350");
+            @display("p=100,400");
         }
         errorModel: <errorModelType> like ILayeredErrorModel if errorModelType != "" {
-            @display("p=100,450");
+            @display("p=100,500");
         }
 }

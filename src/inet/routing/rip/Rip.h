@@ -26,61 +26,11 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
+#include "inet/routing/rip/RipRouteData.h"
 
 namespace inet {
 
 #define RIP_INFINITE_METRIC    16
-
-struct RipRoute : public cObject
-{
-    enum RouteType {
-        RIP_ROUTE_RTE,    // route learned from a RipEntry
-        RIP_ROUTE_STATIC,    // static route
-        RIP_ROUTE_DEFAULT,    // default route
-        RIP_ROUTE_REDISTRIBUTE,    // route imported from another routing protocol
-        RIP_ROUTE_INTERFACE    // route belongs to a local interface
-    };
-
-  private:
-    RouteType type = static_cast<RouteType>(-1);    // the type of the route
-    IRoute *route = nullptr;    // the route in the host routing table that is associated with this route, may be nullptr if deleted
-    L3Address dest;    // destination of the route
-    int prefixLength = 0;    // prefix length of the destination
-    L3Address nextHop;    // next hop of the route
-    InterfaceEntry *ie = nullptr;    // outgoing interface of the route
-    L3Address from;    // only for RTE routes
-    int metric = 0;    // the metric of this route, or infinite (16) if invalid
-    uint16 tag = 0;    // route tag, only for REDISTRIBUTE routes
-    bool changed = false;    // true if the route has changed since the update
-    simtime_t lastUpdateTime;    // time of the last change, only for RTE routes
-
-  public:
-    RipRoute(IRoute *route, RouteType type, int metric, uint16 tag);
-    virtual std::string str() const override;
-
-    RouteType getType() const { return type; }
-    IRoute *getRoute() const { return route; }
-    L3Address getDestination() const { return dest; }
-    int getPrefixLength() const { return prefixLength; }
-    L3Address getNextHop() const { return nextHop; }
-    InterfaceEntry *getInterface() const { return ie; }
-    L3Address getFrom() const { return from; }
-    int getMetric() const { return metric; }
-    uint16 getRouteTag() const { return tag; }
-    bool isChanged() const { return changed; }
-    simtime_t getLastUpdateTime() const { return lastUpdateTime; }
-    void setType(RouteType type) { this->type = type; }
-    void setRoute(IRoute *route) { this->route = route; }
-    void setDestination(const L3Address& dest) { this->dest = dest; }
-    void setPrefixLength(int prefixLength) { this->prefixLength = prefixLength; }
-    void setNextHop(const L3Address& nextHop) { this->nextHop = nextHop; if (route && type == RIP_ROUTE_RTE) route->setNextHop(nextHop); }
-    void setInterface(InterfaceEntry *ie) { this->ie = ie; if (route && type == RIP_ROUTE_RTE) route->setInterface(ie); }
-    void setMetric(int metric) { this->metric = metric; if (route && type == RIP_ROUTE_RTE) route->setMetric(metric); }
-    void setRouteTag(uint16 routeTag) { this->tag = routeTag; }
-    void setFrom(const L3Address& from) { this->from = from; }
-    void setChanged(bool changed) { this->changed = changed; }
-    void setLastUpdateTime(simtime_t time) { lastUpdateTime = time; }
-};
 
 /**
  * Enumerated parameter to control how the Rip module
@@ -106,8 +56,12 @@ struct RipInterfaceEntry
     int metric = 0;    // metric of this interface
     RipMode mode = NO_RIP;    // RIP mode of this interface
 
-    RipInterfaceEntry(const InterfaceEntry *ie);
-    void configure(cXMLElement *config);
+    RipInterfaceEntry(const InterfaceEntry *ie)
+    : ie(ie), metric(1), mode(NO_RIP)
+    {
+        ASSERT(!ie->isLoopback());
+        ASSERT(ie->isMulticast());
+    }
 };
 
 /**
@@ -157,7 +111,9 @@ class INET_API Rip : public cSimpleModule, protected cListener, public ILifecycl
     simtime_t updateInterval;    // time between regular updates
     simtime_t routeExpiryTime;    // learned routes becomes invalid if no update received in this period of time
     simtime_t routePurgeTime;    // invalid routes are deleted after this period of time is elapsed
+    simtime_t holdDownTime;
     simtime_t shutdownTime;    // time of shutdown processing
+    bool triggeredUpdate = false;
     bool isOperational = false;
 
     // signals
@@ -167,28 +123,11 @@ class INET_API Rip : public cSimpleModule, protected cListener, public ILifecycl
     static simsignal_t badResponseSignal;
     static simsignal_t numRoutesSignal;
 
-  public:
+public:
     Rip();
     ~Rip();
 
-  private:
-    RipInterfaceEntry *findInterfaceById(int interfaceId);
-    RipRoute *findRoute(const L3Address& destAddress, int prefixLength);
-    RipRoute *findRoute(const L3Address& destination, int prefixLength, RipRoute::RouteType type);
-    RipRoute *findRoute(const IRoute *route);
-    RipRoute *findRoute(const InterfaceEntry *ie, RipRoute::RouteType type);
-    void addInterface(const InterfaceEntry *ie, cXMLElement *config);
-    void deleteInterface(const InterfaceEntry *ie);
-    void invalidateRoutes(const InterfaceEntry *ie);
-    IRoute *addRoute(const L3Address& dest, int prefixLength, const InterfaceEntry *ie, const L3Address& nextHop, int metric);
-    void deleteRoute(IRoute *route);
-    bool isLoopbackInterfaceRoute(const IRoute *route);
-    bool isLocalInterfaceRoute(const IRoute *route);
-    bool isDefaultRoute(const IRoute *route) { return route->getPrefixLength() == 0; }
-    std::string getHostName() { return host->getFullName(); }
-    int getInterfaceMetric(InterfaceEntry *ie);
-
-  protected:
+protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
@@ -198,8 +137,6 @@ class INET_API Rip : public cSimpleModule, protected cListener, public ILifecycl
     virtual void startRIPRouting();
     virtual void stopRIPRouting();
 
-    virtual void configureInterfaces(cXMLElement *config);
-    virtual void configureInitialRoutes();
     virtual RipRoute *importRoute(IRoute *route, RipRoute::RouteType type, int metric = 1, uint16 routeTag = 0);
     virtual void sendRIPRequest(const RipInterfaceEntry& ripInterface);
 
@@ -209,15 +146,40 @@ class INET_API Rip : public cSimpleModule, protected cListener, public ILifecycl
 
     virtual void processResponse(Packet *pk);
     virtual bool isValidResponse(Packet *packet);
-    virtual void addRoute(const L3Address& dest, int prefixLength, const InterfaceEntry *ie, const L3Address& nextHop, int metric, uint16 routeTag, const L3Address& from);
     virtual void updateRoute(RipRoute *route, const InterfaceEntry *ie, const L3Address& nextHop, int metric, uint16 routeTag, const L3Address& from);
+    virtual void addRoute(const L3Address& dest, int prefixLength, const InterfaceEntry *ie, const L3Address& nextHop, int metric, uint16 routeTag, const L3Address& from);
+
+    virtual void checkExpiredRoutes();
+    virtual void invalidateRoute(RipRoute *route);
+    virtual RouteVector::iterator purgeRoute(RipRoute *route);
 
     virtual void triggerUpdate();
-    virtual RipRoute *checkRouteIsExpired(RipRoute *route);
-    virtual void invalidateRoute(RipRoute *route);
-    virtual void purgeRoute(RipRoute *route);
 
     virtual void sendPacket(Packet *packet, const L3Address& destAddr, int destPort, const InterfaceEntry *destInterface);
+
+private:
+    RipInterfaceEntry *findRipInterfaceById(int interfaceId);
+
+    RipRoute *findRipRoute(const L3Address& destAddress, int prefixLength);
+    RipRoute *findRipRoute(const L3Address& destination, int prefixLength, RipRoute::RouteType type);
+    RipRoute *findRipRoute(const IRoute *route);
+    RipRoute *findRipRoute(const InterfaceEntry *ie, RipRoute::RouteType type);
+
+    void addRipInterface(const InterfaceEntry *ie, cXMLElement *config);
+    void deleteRipInterface(const InterfaceEntry *ie);
+    int getInterfaceMetric(InterfaceEntry *ie);
+
+    IRoute *createRoute(const L3Address& dest, int prefixLength, const InterfaceEntry *ie, const L3Address& nextHop, int metric);
+
+    bool isLoopbackInterfaceRoute(const IRoute *route) {
+        InterfaceEntry *ie = dynamic_cast<InterfaceEntry *>(route->getSource());
+        return ie && ie->isLoopback();
+    }
+    bool isLocalInterfaceRoute(const IRoute *route) {
+        InterfaceEntry *ie = dynamic_cast<InterfaceEntry *>(route->getSource());
+        return ie && !ie->isLoopback();
+    }
+    bool isDefaultRoute(const IRoute *route) { return route->getPrefixLength() == 0; }
 };
 
 } // namespace inet

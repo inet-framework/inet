@@ -38,18 +38,18 @@ module EtherQosQueue like IOutputQueue
         output out;
     submodules:
         classifier: EtherFrameClassifier {
-            @display("p=46,145");
+            @display("p=100,200");
         }
         pauseQueue: DropTailQueue {
             queueName = "pauseQueue";
-            @display("p=187,91");
+            @display("p=250,100");
         }
         dataQueue: <dataQueueType> like IOutputQueue {
             parameters:
-                @display("p=187,192;q=l2queue");
+                @display("p=250,300;q=l2queue");
         }
         scheduler: PriorityScheduler {
-            @display("p=318,145");
+            @display("p=400,200");
         }
     connections:
         in --> classifier.in;

@@ -658,7 +658,6 @@ void SctpNatPeer::socketStatusArrived(SctpSocket *socket, SctpStatusReq *status)
         ps.primaryPath = false;
         sctpPathStatus[ps.pid] = ps;
     }
-    delete status;
 }
 
 void SctpNatPeer::setStatusString(const char *s)
