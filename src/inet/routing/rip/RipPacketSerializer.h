@@ -13,27 +13,27 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_RIPDATASERIALIZER_H
-#define __INET_RIPDATASERIALIZER_H
+#ifndef __INET_RIPPACKETSERIALIZER_H
+#define __INET_RIPPACKETSERIALIZER_H
 
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
 
 namespace inet {
 
 /**
- * Converts between RipPacket and binary (network byte order) Rip data.
+ * Converts between RipPacket and binary (network byte order) RIP data.
  */
-class INET_API RipDataSerializer : public FieldsChunkSerializer
+class INET_API RipPacketSerializer : public FieldsChunkSerializer
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
     virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
   public:
-    RipDataSerializer() : FieldsChunkSerializer() {}
+    RipPacketSerializer() : FieldsChunkSerializer() {}
 };
 
 } // namespace inet
 
-#endif // ifndef __INET_RIPDATASERIALIZER_H
+#endif // ifndef __INET_RIPPACKETSERIALIZER_H
 

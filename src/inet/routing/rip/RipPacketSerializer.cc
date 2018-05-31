@@ -15,13 +15,13 @@
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/routing/rip/RipPacket_m.h"
-#include "inet/routing/rip/RipDataSerializer.h"
+#include "inet/routing/rip/RipPacketSerializer.h"
 
 namespace inet {
 
-Register_Serializer(RipPacket, RipDataSerializer);
+Register_Serializer(RipPacket, RipPacketSerializer);
 
-void RipDataSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void RipPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     const auto& ripPacket = staticPtrCast<const RipPacket>(chunk);
 
@@ -43,7 +43,7 @@ void RipDataSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Ch
     }
 }
 
-const Ptr<Chunk> RipDataSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> RipPacketSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto ripPacket = makeShared<RipPacket>();
 
