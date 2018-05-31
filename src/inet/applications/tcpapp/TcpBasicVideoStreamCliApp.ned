@@ -1,20 +1,21 @@
+//
+//  TcpBasicVideoStreamCliApp
+//
+//  It's an adaptation of the code of Navarro Joaquim (https://github.com/navarrojoaquin/adaptive-video-Tcp-omnet).
+//  Created on 8 de dez de 2017 by Anderson Andrei da Silva & Patrick Menani Abrahao at University of Sao Paulo
+//
+//
+//  Client for video streaming over Tcp.
+//
+
 package inet.applications.tcpapp;
 import inet.applications.contract.IApp;
 
-//
-//  TCPVideoStreamCliApp
-//
-//  It's an adaptation of the code of Navarro Joaquim (https://github.com/navarrojoaquin/adaptive-video-tcp-omnet).
-//  Created on 8 de dez de 2017 by Anderson Andrei da Silva & Patrick Menani Abrahão at University of São Paulo
-//
-//
-// Client for video streaming over TCP.
-//
-
-simple TCPBasicVideoStreamCliApp like IApp {
+simple TcpBasicVideoStreamCliApp like IApp 
+{
     
     parameters:
-        @class(TCPBasicVideoStreamCliApp);
+        @class(TcpBasicVideoStreamCliApp);
         // General parameters
         string 			localAddress = default(""); // may be left empty ("")
         int 			localPort = default(-1); // port number to listen on
@@ -39,17 +40,17 @@ simple TCPBasicVideoStreamCliApp like IApp {
         
         // General statistics
         @display("i=block/app");
-        @signal[sentPk](type=cPacket);
-        @signal[rcvdPk](type=cPacket);
+        @signal[packetSent](type=Packet);
+        @signal[packetReceived](type=Packet);
         @signal[connect](type=long);  // 1 for open, -1 for close
-        @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[endToEndDelay](title="end-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
+        @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[endToEndDelay](title="end-to-end delay"; source="messageAge(packetReceived)"; unit=s; record=histogram,vector; interpolationmode=none);
         @statistic[numActiveSessions](title="number of active sessions"; source="sum(connect)"; record=max,timeavg,vector; interpolationmode=sample-hold);
         @statistic[numSessions](title="total number of sessions"; source="sum(connect+1)/2"; record=last);
 
         
     gates:
-        input tcpIn @labels(TCPCommand/up);
-        output tcpOut @labels(TCPCommand/down);
+        input socketIn @labels(TcpCommand/up);
+        output socketOut @labels(TcpCommand/down);
 }

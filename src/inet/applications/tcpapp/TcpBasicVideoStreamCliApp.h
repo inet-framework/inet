@@ -1,13 +1,13 @@
 /*
- *  TCPVideoStreamCliApp.cc
+ *  TcpVideoStreamCliApp.cc
  *
- *  It's an adaptation of the code of Navarro Joaquim (https://github.com/navarrojoaquin/adaptive-video-tcp-omnet).
- *  Created on 8 de dez de 2017 by Anderson Andrei da Silva & Patrick Menani Abrahão at University of São Paulo
+ *  It's an adaptation of the code of Navarro Joaquim (https://github.com/navarrojoaquin/adaptive-video-Tcp-omnet).
+ *  Created on 8 de dez de 2017 by Anderson Andrei da Silva & Patrick Menani Abrahao at University of Sao Paulo
  *
  */
 
-#ifndef INET_APPLICATIONS_TCPAPP_TcpBasicVIDEOSTREAMCLIAPP_H_
-#define INET_APPLICATIONS_TCPAPP_TcpBasicVIDEOSTREAMCLIAPP_H_
+#ifndef INET_APPLICATIONS_TCPAPP_TcpBASICVIDEOSTREAMCLIAPP_H_
+#define INET_APPLICATIONS_TCPAPP_TcpBASICVIDEOSTREAMCLIAPP_H_
 
 #include <omnetpp.h>
 #include <algorithm>
@@ -16,7 +16,8 @@
 
 namespace inet {
 
-class TcpBasicVideoStreamCliApp: public TcpBasicClientApp {
+class TcpBasicVideoStreamCliApp: public TcpBasicClientApp
+{
 
 protected:
 
@@ -36,8 +37,8 @@ protected:
     bool manifestAlreadySent = false;
 
     // statistics:
-    static simsignal_t rcvdPkSignal;
-    static simsignal_t sentPkSignal;
+    static simsignal_t packetReceived;
+    static simsignal_t packetSent;
 
     long msgsRcvd;
     long msgsSent;
@@ -56,7 +57,7 @@ protected:
     virtual void rescheduleOrDeleteTimer(simtime_t d, short int msgKind);
 
 public:
-    TcpBasicVideoStreamCliApp();
+    TcpBasicVideoStreamCliApp() {}
     virtual ~TcpBasicVideoStreamCliApp();
 
 protected:
