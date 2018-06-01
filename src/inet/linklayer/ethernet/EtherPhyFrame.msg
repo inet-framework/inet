@@ -50,7 +50,7 @@ packet EthernetJamSignal extends EthernetSignal
 //
 packet EthernetFilledIfgSignal extends EthernetSignal
 {
-    bitLength = INTERFRAME_GAP_BITS;
+    bitLength = b(INTERFRAME_GAP_BITS).get();
 }
 
 //
@@ -63,6 +63,6 @@ packet EthernetFilledIfgSignal extends EthernetSignal
 //
 class EthernetPhyHeader extends FieldsChunk
 {
-    chunkLength = B(PREAMBLE_BYTES + SFD_BYTES);
+    chunkLength = PREAMBLE_BYTES + SFD_BYTES;
     bool srcMacFullDuplex;  // meta-info, for detecting model misconfiguration 
 }

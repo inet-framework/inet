@@ -19,17 +19,18 @@
 
 
 import inet.common.INETDefs;
+import inet.common.Units;
 import inet.common.packet.chunk.Chunk;
 import inet.networklayer.contract.ipv4.Ipv4Address;
 
 namespace inet;
 
-enum PimContstants {
-    PIM_HEADER_LENGTH = 4;
-    ENCODED_UNICODE_ADDRESS_LENGTH = 6; // Ipv4 only
-    ENCODED_GROUP_ADDRESS_LENGTH = 8; // Ipv4 only
-    ENCODED_SOURCE_ADDRESS_LENGTH = 8; // Ipv4 only
-};
+cplusplus {{
+const B PIM_HEADER_LENGTH = B(4);
+const B ENCODED_UNICODE_ADDRESS_LENGTH = B(6); // Ipv4 only
+const B ENCODED_GROUP_ADDRESS_LENGTH = B(8); // Ipv4 only
+const B ENCODED_SOURCE_ADDRESS_LENGTH = B(8); // Ipv4 only
+}}
 
 enum PimPacketType
 {

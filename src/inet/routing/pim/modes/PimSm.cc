@@ -1406,12 +1406,12 @@ void PimSm::sendPIMJoin(Ipv4Address group, Ipv4Address source, Ipv4Address upstr
     encodedAddr.W = (routeType == G);
     encodedAddr.R = (routeType == G);
 
-    msg->setChunkLength(B(PIM_HEADER_LENGTH
+    msg->setChunkLength(PIM_HEADER_LENGTH
             + ENCODED_UNICODE_ADDRESS_LENGTH
-            + 4
+            + B(4)
             + ENCODED_GROUP_ADDRESS_LENGTH
-            + 4
-            + ENCODED_SOURCE_ADDRESS_LENGTH));
+            + B(4)
+            + ENCODED_SOURCE_ADDRESS_LENGTH);
 
     pk->insertAtFront(msg);
 
@@ -1441,12 +1441,12 @@ void PimSm::sendPIMPrune(Ipv4Address group, Ipv4Address source, Ipv4Address upst
     encodedAddr.W = (routeType == G);
     encodedAddr.R = (routeType == G);
 
-    msg->setChunkLength(B(PIM_HEADER_LENGTH
+    msg->setChunkLength(PIM_HEADER_LENGTH
             + ENCODED_UNICODE_ADDRESS_LENGTH
-            + 4
+            + B(4)
             + ENCODED_GROUP_ADDRESS_LENGTH
-            + 4
-            + ENCODED_SOURCE_ADDRESS_LENGTH));
+            + B(4)
+            + ENCODED_SOURCE_ADDRESS_LENGTH);
 
     pk->insertAtFront(msg);
 
@@ -1468,7 +1468,7 @@ void PimSm::sendPIMRegisterNull(Ipv4Address multOrigin, Ipv4Address multGroup)
         msg->setType(Register);
         msg->setN(true);
         msg->setB(false);
-        msg->setChunkLength(B(PIM_HEADER_LENGTH + 4));
+        msg->setChunkLength(PIM_HEADER_LENGTH + B(4));
         pk->insertAtFront(msg);
 
         // set encapsulated packet (Ipv4 header only)
@@ -1476,8 +1476,8 @@ void PimSm::sendPIMRegisterNull(Ipv4Address multOrigin, Ipv4Address multGroup)
         ipv4Header->setDestAddress(multGroup);
         ipv4Header->setSrcAddress(multOrigin);
         ipv4Header->setProtocolId(IP_PROT_PIM);
-        ipv4Header->setHeaderLength(IP_HEADER_BYTES);
-        ipv4Header->setTotalLengthField(IP_HEADER_BYTES);
+        ipv4Header->setHeaderLength(IPv4_MIN_HEADER_LENGTH);
+        ipv4Header->setTotalLengthField(IPv4_MIN_HEADER_LENGTH);
         pk->insertAtBack(ipv4Header);
 
         emit(sentRegisterPkSignal, pk);
@@ -1499,7 +1499,7 @@ void PimSm::sendPIMRegister(Packet *ipv4Packet, Ipv4Address dest, int outInterfa
     msg->setN(false);
     msg->setB(false);
 
-    msg->setChunkLength(B(PIM_HEADER_LENGTH + 4));
+    msg->setChunkLength(PIM_HEADER_LENGTH + B(4));
 
     pk->insertAtBack(ipv4Packet->peekDataAt(b(0), ipv4Packet->getDataLength()));
     pk->insertAtFront(msg);
@@ -1544,10 +1544,10 @@ void PimSm::sendPIMAssert(Ipv4Address source, Ipv4Address group, AssertMetric me
     pkt->setMetricPreference(metric.preference);
     pkt->setMetric(metric.metric);
 
-    pkt->setChunkLength(B(PIM_HEADER_LENGTH
+    pkt->setChunkLength(PIM_HEADER_LENGTH
             + ENCODED_GROUP_ADDRESS_LENGTH
             + ENCODED_UNICODE_ADDRESS_LENGTH
-            + 8));
+            + B(8));
     pk->insertAtFront(pkt);
 
     emit(sentAssertPkSignal, pk);

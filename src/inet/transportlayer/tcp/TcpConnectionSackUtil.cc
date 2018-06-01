@@ -238,7 +238,7 @@ bool TcpConnection::nextSeg(uint32& seqNum)
     seqNum = 0;
 
     if (state->ts_enabled)
-        shift -= TCP_OPTION_TS_SIZE;
+        shift -= B(TCP_OPTION_TS_SIZE).get();
 
     // RFC 3517, page 5: "(1) If there exists a smallest unSACKed sequence number 'S2' that
     // meets the following three criteria for determining loss, the
@@ -440,8 +440,8 @@ void TcpConnection::sendSegmentDuringLossRecoveryPhase(uint32 seqNum)
 
 TcpHeader TcpConnection::addSacks(const Ptr<TcpHeader>& tcpseg)
 {
-    uint options_len = 0;
-    uint used_options_len = tcpseg->getHeaderOptionArrayLength();
+    B options_len = B(0);
+    B used_options_len = tcpseg->getHeaderOptionArrayLength();
     bool dsack_inserted = false;    // set if dsack is subsets of a bigger sack block recently reported
 
     uint32 start = state->start_seqno;
@@ -558,7 +558,7 @@ TcpHeader TcpConnection::addSacks(const Ptr<TcpHeader>& tcpseg)
 
     uint n = state->sacks_array.size();
 
-    uint maxnode = ((TCP_OPTIONS_MAX_SIZE - used_options_len) - 2) / 8;    // 2: option header, 8: size of one sack entry
+    uint maxnode = ((B(TCP_OPTIONS_MAX_SIZE - used_options_len).get()) - 2) / 8;    // 2: option header, 8: size of one sack entry
 
     if (n > maxnode)
         n = maxnode;
@@ -580,7 +580,7 @@ TcpHeader TcpConnection::addSacks(const Ptr<TcpHeader>& tcpseg)
 
     uint optArrSizeAligned = optArrSize;
 
-    while (used_options_len % 4 != 2) {
+    while (B(used_options_len).get() % 4 != 2) {
         used_options_len++;
         optArrSizeAligned++;
     }
@@ -590,7 +590,7 @@ TcpHeader TcpConnection::addSacks(const Ptr<TcpHeader>& tcpseg)
         optArrSize++;
     }
 
-    ASSERT(used_options_len % 4 == 2);
+    ASSERT(B(used_options_len).get() % 4 == 2);
 
     TcpOptionSack *option = new TcpOptionSack();
     option->setLength(8 * n + 2);
@@ -605,13 +605,13 @@ TcpHeader TcpConnection::addSacks(const Ptr<TcpHeader>& tcpseg)
     }
 
     // independent of "n" we always need 2 padding bytes (NOP) to make: (used_options_len % 4 == 0)
-    options_len = used_options_len + 8 * n + 2;    // 8 bytes for each SACK (n) + 2 bytes for kind&length
+    options_len = used_options_len + TCP_OPTION_SACK_ENTRY_SIZE * n + TCP_OPTION_HEAD_SIZE;    // 8 bytes for each SACK (n) + 2 bytes for kind&length
 
     ASSERT(options_len <= TCP_OPTIONS_MAX_SIZE);    // Options length allowed? - maximum: 40 Bytes
 
     tcpseg->insertHeaderOption(option);
-    tcpseg->setHeaderLength(TCP_HEADER_OCTETS + tcpseg->getHeaderOptionArrayLength());
-    tcpseg->setChunkLength(B(tcpseg->getHeaderLength()));
+    tcpseg->setHeaderLength(TCP_MIN_HEADER_LENGTH + tcpseg->getHeaderOptionArrayLength());
+    tcpseg->setChunkLength(tcpseg->getHeaderLength());
     // update number of sent sacks
     state->snd_sacks += n;
 

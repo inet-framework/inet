@@ -27,10 +27,10 @@ void Ipv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     auto startPosition = stream.getLength();
     struct ip iphdr;
     const auto& ipv4Header = staticPtrCast<const Ipv4Header>(chunk);
-    int headerLength = ipv4Header->getHeaderLength();
-    ASSERT((headerLength & 3) == 0 && headerLength >= IP_HEADER_BYTES && headerLength <= IP_MAX_HEADER_BYTES);
+    B headerLength = ipv4Header->getHeaderLength();
+    ASSERT((headerLength.get() & 3) == 0 && headerLength >= IPv4_MIN_HEADER_LENGTH && headerLength <= IPv4_MAX_HEADER_LENGTH);
     ASSERT(headerLength <= ipv4Header->getTotalLengthField());
-    iphdr.ip_hl = headerLength >> 2;
+    iphdr.ip_hl = B(headerLength).get() >> 2;
     iphdr.ip_v = ipv4Header->getVersion();
     iphdr.ip_tos = ipv4Header->getTypeOfService();
     iphdr.ip_id = htons(ipv4Header->getIdentification());
@@ -45,27 +45,27 @@ void Ipv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     iphdr.ip_p = ipv4Header->getProtocolId();
     iphdr.ip_src.s_addr = htonl(ipv4Header->getSrcAddress().getInt());
     iphdr.ip_dst.s_addr = htonl(ipv4Header->getDestAddress().getInt());
-    iphdr.ip_len = htons(ipv4Header->getTotalLengthField());
+    iphdr.ip_len = htons(B(ipv4Header->getTotalLengthField()).get());
     if (ipv4Header->getCrcMode() != CRC_COMPUTED)
         throw cRuntimeError("Cannot serialize Ipv4 header without a properly computed CRC");
     iphdr.ip_sum = htons(ipv4Header->getCrc());
-    stream.writeBytes((uint8_t *)&iphdr, B(IP_HEADER_BYTES));
+    stream.writeBytes((uint8_t *)&iphdr, IPv4_MIN_HEADER_LENGTH);
 
-    if (headerLength > IP_HEADER_BYTES) {
+    if (headerLength > IPv4_MIN_HEADER_LENGTH) {
         unsigned short numOptions = ipv4Header->getOptionArraySize();
-        unsigned int optionsLength = 0;
+        B optionsLength = B(0);
         if (numOptions > 0) {    // options present?
             for (unsigned short i = 0; i < numOptions; i++) {
                 const TlvOptionBase *option = &ipv4Header->getOption(i);
                 serializeOption(stream, option);
-                optionsLength += option->getLength();
+                optionsLength += B(option->getLength());
             }
         }    // if options present
-        if (ipv4Header->getHeaderLength() < (int)(IP_HEADER_BYTES + optionsLength))
+        if (ipv4Header->getHeaderLength() < IPv4_MIN_HEADER_LENGTH + optionsLength)
             throw cRuntimeError("Serializing an Ipv4 packet with wrong headerLength value: not enough for store options.\n");
-        auto writtenLength = B(stream.getLength() - startPosition).get();
+        auto writtenLength = B(stream.getLength() - startPosition);
         if (writtenLength < headerLength)
-            stream.writeByteRepeatedly(IPOPTION_END_OF_OPTIONS, headerLength - writtenLength);
+            stream.writeByteRepeatedly(IPOPTION_END_OF_OPTIONS, B(headerLength - writtenLength).get());
     }
 }
 
@@ -146,14 +146,14 @@ const Ptr<Chunk> Ipv4HeaderSerializer::deserialize(MemoryInputStream& stream) co
 {
     auto position = stream.getPosition();
     B bufsize = stream.getRemainingLength();
-    uint8_t buffer[IP_HEADER_BYTES];
-    stream.readBytes(buffer, B(IP_HEADER_BYTES));
+    uint8_t buffer[B(IPv4_MIN_HEADER_LENGTH).get()];
+    stream.readBytes(buffer, IPv4_MIN_HEADER_LENGTH);
     auto ipv4Header = makeShared<Ipv4Header>();
     const struct ip& iphdr = *static_cast<const struct ip *>((void *)&buffer);
-    unsigned int totalLength, headerLength;
+    B totalLength, headerLength;
 
     ipv4Header->setVersion(iphdr.ip_v);
-    ipv4Header->setHeaderLength(IP_HEADER_BYTES);
+    ipv4Header->setHeaderLength(IPv4_MIN_HEADER_LENGTH);
     ipv4Header->setSrcAddress(Ipv4Address(ntohl(iphdr.ip_src.s_addr)));
     ipv4Header->setDestAddress(Ipv4Address(ntohl(iphdr.ip_dst.s_addr)));
     ipv4Header->setProtocolId((IpProtocolId)iphdr.ip_p);
@@ -164,28 +164,28 @@ const Ptr<Chunk> Ipv4HeaderSerializer::deserialize(MemoryInputStream& stream) co
     ipv4Header->setDontFragment((ip_off & IP_DF) != 0);
     ipv4Header->setFragmentOffset((ntohs(iphdr.ip_off) & IP_OFFMASK) * 8);
     ipv4Header->setTypeOfService(iphdr.ip_tos);
-    totalLength = ntohs(iphdr.ip_len);
+    totalLength = B(ntohs(iphdr.ip_len));
     ipv4Header->setTotalLengthField(totalLength);
-    headerLength = iphdr.ip_hl << 2;
+    headerLength = B(iphdr.ip_hl << 2);
 
     if (iphdr.ip_v != 4)
         ipv4Header->markIncorrect();
-    if (headerLength < IP_HEADER_BYTES) {
+    if (headerLength < IPv4_MIN_HEADER_LENGTH) {
         ipv4Header->markIncorrect();
-        headerLength = IP_HEADER_BYTES;
+        headerLength = IPv4_MIN_HEADER_LENGTH;
     }
     if (totalLength < headerLength)
         ipv4Header->markIncorrect();
 
     ipv4Header->setHeaderLength(headerLength);
 
-    if (headerLength > IP_HEADER_BYTES) {    // options present?
-        while (stream.getRemainingLength() > B(0) && stream.getPosition() - position < B(headerLength)) {
+    if (headerLength > IPv4_MIN_HEADER_LENGTH) {    // options present?
+        while (stream.getRemainingLength() > B(0) && stream.getPosition() - position < headerLength) {
             TlvOptionBase *option = deserializeOption(stream);
             ipv4Header->addOption(option);
         }
     }
-    if (B(headerLength) > bufsize) {
+    if (headerLength > bufsize) {
         ipv4Header->markIncomplete();
     }
 

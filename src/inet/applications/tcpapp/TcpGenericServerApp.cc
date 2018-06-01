@@ -116,18 +116,18 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
         while (const auto& appmsg = queue.pop<GenericAppMsg>(b(-1), Chunk::PF_ALLOW_NULLPTR)) {
             msgsRcvd++;
             bytesRcvd += B(appmsg->getChunkLength()).get();
-            long requestedBytes = appmsg->getExpectedReplyLength();
+            B requestedBytes = appmsg->getExpectedReplyLength();
             simtime_t msgDelay = appmsg->getReplyDelay();
             if (msgDelay > maxMsgDelay)
                 maxMsgDelay = msgDelay;
 
-            if (requestedBytes > 0) {
+            if (requestedBytes > B(0)) {
                 Packet *outPacket = new Packet(msg->getName());
                 outPacket->addTagIfAbsent<SocketReq>()->setSocketId(connId);
                 outPacket->setKind(TCP_C_SEND);
                 const auto& payload = makeShared<GenericAppMsg>();
-                payload->setChunkLength(B(requestedBytes));
-                payload->setExpectedReplyLength(0);
+                payload->setChunkLength(requestedBytes);
+                payload->setExpectedReplyLength(B(0));
                 payload->setReplyDelay(0);
                 outPacket->insertAtBack(payload);
                 sendOrSchedule(outPacket, delay + msgDelay);

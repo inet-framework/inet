@@ -740,12 +740,12 @@ void Ipv6::decapsulate(Packet *packet)
     // decapsulate transport packet
     auto ipv6Header = packet->popAtFront<Ipv6Header>();
 
-    int64_t payloadLength = ipv6Header->getPayloadLength();
-    if (payloadLength != 0) {      // payloadLength == 0 occured with Jumbo payload
-        ASSERT(payloadLength <= packet->getByteLength());
+    B payloadLength = ipv6Header->getPayloadLength();
+    if (payloadLength != B(0)) {      // payloadLength == 0 occured with Jumbo payload
+        ASSERT(payloadLength <= packet->getDataLength());
         // drop padding behind the payload:
-        if (payloadLength < packet->getByteLength())
-            packet->setBackOffset(packet->getFrontOffset() + B(payloadLength));
+        if (payloadLength < packet->getDataLength())
+            packet->setBackOffset(packet->getFrontOffset() + payloadLength);
     }
 
     // create and fill in control info
@@ -776,7 +776,7 @@ void Ipv6::encapsulate(Packet *transportPacket)
     short ttl = (hopLimitReq != nullptr) ? hopLimitReq->getHopLimit() : -1;
     delete hopLimitReq;
 
-    ipv6Header->setPayloadLength(transportPacket->getByteLength());
+    ipv6Header->setPayloadLength(transportPacket->getDataLength());
 
     // set source and destination address
     ipv6Header->setDestAddress(dest);
@@ -894,12 +894,12 @@ void Ipv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MacAd
 
     // create and send fragments
     ipv6Header = packet->popAtFront<Ipv6Header>();
-    int headerLength = ipv6Header->calculateUnfragmentableHeaderByteLength();
-    int payloadLength = packet->getByteLength();
-    int fragmentLength = ((mtu - headerLength - IPv6_FRAGMENT_HEADER_LENGTH) / 8) * 8;
-    ASSERT(fragmentLength > 0);
+    B headerLength = ipv6Header->calculateUnfragmentableHeaderByteLength();
+    B payloadLength = packet->getDataLength();
+    B fragmentLength = ((B(mtu) - headerLength - IPv6_FRAGMENT_HEADER_LENGTH) / 8) * 8;
+    ASSERT(fragmentLength > B(0));
 
-    int noOfFragments = (payloadLength + fragmentLength - 1) / fragmentLength;
+    int noOfFragments = B(payloadLength + fragmentLength - B(1)).get() / B(fragmentLength).get();
     EV_INFO << "Breaking datagram into " << noOfFragments << " fragments\n";
     std::string fragMsgName = packet->getName();
     fragMsgName += "-frag-";
@@ -907,25 +907,25 @@ void Ipv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MacAd
     //FIXME is need to remove unfragmentable header extensions? see calculateUnfragmentableHeaderByteLength()
 
     unsigned int identification = curFragmentId++;
-    for (int offset = 0; offset < payloadLength; offset += fragmentLength) {
+    for (B offset = B(0); offset < payloadLength; offset += fragmentLength) {
         bool lastFragment = (offset + fragmentLength >= payloadLength);
-        int thisFragmentLength = lastFragment ? payloadLength - offset : fragmentLength;
+        B thisFragmentLength = lastFragment ? payloadLength - offset : fragmentLength;
 
-        std::string curFragName = fragMsgName + std::to_string(offset);
+        std::string curFragName = fragMsgName + std::to_string(offset.get());
         if (lastFragment)
             curFragName += "-last";
         Packet *fragPk = new Packet(curFragName.c_str());
         const auto& fragHdr = staticPtrCast<Ipv6Header>(ipv6Header->dupShared());
         auto *fh = new Ipv6FragmentHeader();
         fh->setIdentification(identification);
-        fh->setFragmentOffset(offset);
+        fh->setFragmentOffset(offset.get());
         fh->setMoreFragments(!lastFragment);
         fragHdr->addExtensionHeader(fh);
-        fragHdr->setChunkLength(B(headerLength + fh->getByteLength()));      //FIXME KLUDGE
+        fragHdr->setChunkLength(headerLength + fh->getByteLength());      //FIXME KLUDGE
         fragPk->insertAtFront(fragHdr);
-        fragPk->insertAtBack(packet->peekDataAt(B(offset), B(thisFragmentLength)));
+        fragPk->insertAtBack(packet->peekDataAt(offset, thisFragmentLength));
 
-        ASSERT(fragPk->getByteLength() == headerLength + fh->getByteLength() + thisFragmentLength);
+        ASSERT(fragPk->getDataLength() == headerLength + fh->getByteLength() + thisFragmentLength);
 
         sendDatagramToOutput(fragPk, ie, nextHopAddr);
     }

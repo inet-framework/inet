@@ -55,7 +55,7 @@ void TcpSpoof::sendSpoofPacket()
     // one can customize the following according to concrete needs
     tcpseg->setSrcPort(srcPort);
     tcpseg->setDestPort(destPort);
-    tcpseg->setChunkLength(B(TCP_HEADER_OCTETS));
+    tcpseg->setChunkLength(TCP_MIN_HEADER_LENGTH);
     tcpseg->setSequenceNo(seq);
     //tcpseg->setAckNo(...);
     tcpseg->setSynBit(isSYN);

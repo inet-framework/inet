@@ -81,7 +81,7 @@ void EtherMac::initializeStatistics()
     EtherMacBase::initializeStatistics();
 
     framesSentInBurst = 0;
-    bytesSentInBurst = 0;
+    bytesSentInBurst = B(0);
 
     WATCH(framesSentInBurst);
     WATCH(bytesSentInBurst);
@@ -112,7 +112,7 @@ void EtherMac::processConnectDisconnect()
         cancelEvent(endRxMsg);
         cancelEvent(endBackoffMsg);
         cancelEvent(endJammingMsg);
-        bytesSentInBurst = 0;
+        bytesSentInBurst = B(0);
         framesSentInBurst = 0;
     }
 
@@ -122,7 +122,7 @@ void EtherMac::processConnectDisconnect()
         if (!duplexMode) {
             // start RX_RECONNECT_STATE
             changeReceptionState(RX_RECONNECT_STATE);
-            simtime_t reconnectEndTime = simTime() + 8 * (MAX_ETHERNET_FRAME_BYTES + JAM_SIGNAL_BYTES) / curEtherDescr->txrate;
+            simtime_t reconnectEndTime = simTime() + b(MAX_ETHERNET_FRAME_BYTES + JAM_SIGNAL_BYTES).get() / curEtherDescr->txrate;
             endRxTimeList.clear();
             addReceptionInReconnectState(-1, reconnectEndTime);
         }
@@ -134,7 +134,7 @@ void EtherMac::readChannelParameters(bool errorWhenAsymmetric)
     EtherMacBase::readChannelParameters(errorWhenAsymmetric);
 
     if (connected && !duplexMode) {
-        if (curEtherDescr->halfDuplexFrameMinBytes < 0.0)
+        if (curEtherDescr->halfDuplexFrameMinBytes < B(0))
             throw cRuntimeError("%g bps Ethernet only supports full-duplex links", curEtherDescr->txrate);
     }
 }
@@ -208,7 +208,7 @@ void EtherMac::handleMessage(cMessage *msg)
 
 void EtherMac::processFrameFromUpperLayer(Packet *packet)
 {
-    ASSERT(packet->getByteLength() >= MIN_ETHERNET_FRAME_BYTES);
+    ASSERT(packet->getDataLength() >= MIN_ETHERNET_FRAME_BYTES);
 
     EV_INFO << "Received " << packet << " from upper layer." << endl;
 
@@ -221,7 +221,7 @@ void EtherMac::processFrameFromUpperLayer(Packet *packet)
                 packet->getFullName(), frame->getDest().str().c_str());
     }
 
-    if (packet->getByteLength() > MAX_ETHERNET_FRAME_BYTES) {
+    if (packet->getDataLength() > MAX_ETHERNET_FRAME_BYTES) {
         throw cRuntimeError("Packet from higher layer (%d bytes) exceeds maximum Ethernet frame size (%d)",
                 (int)(packet->getByteLength()), MAX_ETHERNET_FRAME_BYTES);
     }
@@ -499,7 +499,7 @@ void EtherMac::handleEndIFGPeriod()
     EV_DETAIL << "IFG elapsed\n";
 
     if (frameBursting && (transmitState != SEND_IFG_STATE)) {
-        bytesSentInBurst = 0;
+        bytesSentInBurst = B(0);
         framesSentInBurst = 0;
     }
 
@@ -522,9 +522,9 @@ void EtherMac::startFrameTransmission()
     ASSERT(!hdr->getSrc().isUnspecified());
 
     bool inBurst = frameBursting && framesSentInBurst;
-    int64 minFrameLength = duplexMode ? curEtherDescr->frameMinBytes : (inBurst ? curEtherDescr->frameInBurstMinBytes : curEtherDescr->halfDuplexFrameMinBytes);
+    B minFrameLength = duplexMode ? curEtherDescr->frameMinBytes : (inBurst ? curEtherDescr->frameInBurstMinBytes : curEtherDescr->halfDuplexFrameMinBytes);
 
-    if (frame->getByteLength() < minFrameLength) {
+    if (frame->getDataLength() < minFrameLength) {
         auto oldFcs = frame->removeAtBack<EthernetFcs>();
         EtherEncap::addPaddingAndFcs(frame, oldFcs->getFcsMode(), minFrameLength);
     }
@@ -532,7 +532,7 @@ void EtherMac::startFrameTransmission()
     // add preamble and SFD (Starting Frame Delimiter), then send out
     encapsulate(frame);
 
-    int64_t sentFrameByteLength = frame->getByteLength();
+    B sentFrameByteLength = B(frame->getByteLength());
     auto oldPacketProtocolTag = frame->removeTag<PacketProtocolTag>();
     frame->clearTags();
     auto newPacketProtocolTag = frame->addTag<PacketProtocolTag>();
@@ -704,7 +704,7 @@ void EtherMac::sendJamSignal()
         throw cRuntimeError("Model error: sending JAM while not transmitting");
 
     EthernetJamSignal *jam = new EthernetJamSignal("JAM_SIGNAL");
-    jam->setByteLength(JAM_SIGNAL_BYTES);
+    jam->setByteLength(B(JAM_SIGNAL_BYTES).get());
     jam->setAbortedPkTreeID(currentSendPkTreeID);
 
     transmissionChannel->forceTransmissionFinishTime(SIMTIME_ZERO);
@@ -904,7 +904,7 @@ void EtherMac::processReceivedControlFrame(Packet *packet)
 void EtherMac::scheduleEndIFGPeriod()
 {
     changeTransmissionState(WAIT_IFG_STATE);
-    simtime_t endIFGTime = simTime() + (INTERFRAME_GAP_BITS / curEtherDescr->txrate);
+    simtime_t endIFGTime = simTime() + (b(INTERFRAME_GAP_BITS).get() / curEtherDescr->txrate);
     scheduleAt(endIFGTime, endIFGMsg);
 }
 
@@ -922,12 +922,12 @@ void EtherMac::fillIFGIfInBurst()
         && (simTime() == endIFGMsg->getSendingTime())
         && (framesSentInBurst > 0)
         && (framesSentInBurst < curEtherDescr->maxFramesInBurst)
-        && (bytesSentInBurst + (INTERFRAME_GAP_BITS / 8) + PREAMBLE_BYTES + SFD_BYTES + curTxFrame->getByteLength()
+        && (bytesSentInBurst + INTERFRAME_GAP_BITS + PREAMBLE_BYTES + SFD_BYTES + curTxFrame->getDataLength()
             <= curEtherDescr->maxBytesInBurst)
         )
     {
         EthernetFilledIfgSignal *gap = new EthernetFilledIfgSignal("FilledIFG");
-        bytesSentInBurst += gap->getByteLength();
+        bytesSentInBurst += B(gap->getByteLength());
         currentSendPkTreeID = gap->getTreeId();
         send(gap, physOutGate);
         changeTransmissionState(SEND_IFG_STATE);
@@ -935,12 +935,12 @@ void EtherMac::fillIFGIfInBurst()
         scheduleAt(transmissionChannel->getTransmissionFinishTime(), endIFGMsg);
     }
     else {
-        bytesSentInBurst = 0;
+        bytesSentInBurst = B(0);
         framesSentInBurst = 0;
     }
 }
 
-void EtherMac::scheduleEndTxPeriod(int64_t sentFrameByteLength)
+void EtherMac::scheduleEndTxPeriod(B sentFrameByteLength)
 {
     // update burst variables
     if (frameBursting) {

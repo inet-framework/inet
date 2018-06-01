@@ -48,12 +48,12 @@ void Ipv4Header::addOption(TlvOptionBase *opt, int atPos)
     options.insertTlvOption(atPos, opt);
 }
 
-int Ipv4Header::calculateHeaderByteLength() const
+B Ipv4Header::calculateHeaderByteLength() const
 {
     int length = utils::roundUp(20 + options.getLength(), 4);
     ASSERT(length >= 20 && length <= 60 && (length % 4 == 0));
 
-    return length;
+    return B(length);
 }
 
 short Ipv4Header::getTypeOfService() const

@@ -426,7 +426,7 @@ void Ipv6Tunneling::encapsulateDatagram(Packet *packet)
             t2RH->setRoutingType(2);
             t2RH->setSegmentsLeft(1);
             t2RH->setAddressArraySize(1);
-            t2RH->setByteLength(8 + 1 * 16);
+            t2RH->setByteLength(B(8 + 1 * 16));
             // old src becomes address of T2RH
             t2RH->setAddress(0, rh2);
 

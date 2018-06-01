@@ -23,9 +23,10 @@ import inet.transportlayer.contract.TransportHeaderBase;
 
 namespace inet;
 
-enum UdpConstants {
-    UDP_HEADER_BYTES = 8;
-};
+
+cplusplus {{
+const B UDP_HEADER_LENGTH = B(8);
+}}
 
 //
 // Represents an Udp header, to be used with the ~Udp module.
@@ -34,8 +35,8 @@ class UdpHeader extends TransportHeaderBase
 {
     unsigned short srcPort;
     unsigned short destPort;
-    chunkLength = B(UDP_HEADER_BYTES);
-    int totalLengthField = -1;   // UDP header + payload in bytes //TODO fill it in code
+    chunkLength = UDP_HEADER_LENGTH;
+    B totalLengthField = B(-1);   // UDP header + payload in bytes
     uint16_t crc = 0;
     CrcMode crcMode;
 }

@@ -204,10 +204,10 @@ void Neighbor::sendDatabaseDescriptionPacket(bool init)
 
     ddPacket->setDdSequenceNumber(ddSequenceNumber);
 
-    long maxPacketSize = (((IP_MAX_HEADER_BYTES + OSPF_HEADER_LENGTH + OSPF_DD_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH) > parentInterface->getMtu()) ?
+    B maxPacketSize = (((IPv4_MAX_HEADER_LENGTH + OSPF_HEADER_LENGTH + OSPF_DD_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH) > B(parentInterface->getMtu())) ?
                           IPV4_DATAGRAM_LENGTH :
-                          parentInterface->getMtu()) - IP_MAX_HEADER_BYTES;
-    long packetSize = OSPF_HEADER_LENGTH + OSPF_DD_HEADER_LENGTH;
+                          B(parentInterface->getMtu())) - IPv4_MAX_HEADER_LENGTH;
+    B packetSize = OSPF_HEADER_LENGTH + OSPF_DD_HEADER_LENGTH;
 
     if (init || databaseSummaryList.empty()) {
         ddPacket->setLsaHeadersArraySize(0);
@@ -240,7 +240,7 @@ void Neighbor::sendDatabaseDescriptionPacket(bool init)
     }
     ddPacket->setDdOptions(ddOptions);
 
-    ddPacket->setChunkLength(B(packetSize));
+    ddPacket->setChunkLength(packetSize);
     Packet *pk = new Packet();
     pk->insertAtBack(ddPacket);
 
@@ -342,10 +342,10 @@ void Neighbor::sendLinkStateRequestPacket()
         requestPacket->setAuthentication(i, authKey.bytes[i]);
     }
 
-    long maxPacketSize = (((IP_MAX_HEADER_BYTES + OSPF_HEADER_LENGTH + OSPF_REQUEST_LENGTH) > parentInterface->getMtu()) ?
+    B maxPacketSize = ((IPv4_MAX_HEADER_LENGTH + OSPF_HEADER_LENGTH + OSPF_REQUEST_LENGTH) > B(parentInterface->getMtu())) ?
                           IPV4_DATAGRAM_LENGTH :
-                          parentInterface->getMtu()) - IP_MAX_HEADER_BYTES;
-    long packetSize = OSPF_HEADER_LENGTH;
+                          B(parentInterface->getMtu()) - IPv4_MAX_HEADER_LENGTH;
+    B packetSize = OSPF_HEADER_LENGTH;
 
     if (linkStateRequestList.empty()) {
         requestPacket->setRequestsArraySize(0);
@@ -370,7 +370,7 @@ void Neighbor::sendLinkStateRequestPacket()
         }
     }
 
-    requestPacket->setChunkLength(B(packetSize));
+    requestPacket->setChunkLength(packetSize);
     Packet *pk = new Packet();
     pk->insertAtBack(requestPacket);
 
@@ -626,7 +626,7 @@ void Neighbor::retransmitUpdatePacket()
 
     bool packetFull = false;
     unsigned short lsaCount = 0;
-    unsigned long packetLength = IP_MAX_HEADER_BYTES + OSPF_LSA_HEADER_LENGTH;
+    B packetLength = IPv4_MAX_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH;
     auto it = linkStateRetransmissionList.begin();
 
     while (!packetFull && (it != linkStateRetransmissionList.end())) {
@@ -636,7 +636,7 @@ void Neighbor::retransmitUpdatePacket()
         OspfSummaryLsa *summaryLSA = ((lsaType == SUMMARYLSA_NETWORKS_TYPE) ||
                                       (lsaType == SUMMARYLSA_ASBOUNDARYROUTERS_TYPE)) ? dynamic_cast<OspfSummaryLsa *>(*it) : nullptr;
         OspfAsExternalLsa *asExternalLSA = (lsaType == AS_EXTERNAL_LSA_TYPE) ? dynamic_cast<OspfAsExternalLsa *>(*it) : nullptr;
-        long lsaSize = 0;
+        B lsaSize = B(0);
         bool includeLSA = false;
 
         switch (lsaType) {
@@ -669,7 +669,7 @@ void Neighbor::retransmitUpdatePacket()
                 break;
         }
 
-        if (packetLength + lsaSize < parentInterface->getMtu()) {
+        if (packetLength + lsaSize < B(parentInterface->getMtu())) {
             includeLSA = true;
             lsaCount++;
         }
@@ -761,7 +761,7 @@ void Neighbor::retransmitUpdatePacket()
         it++;
     }
 
-    updatePacket->setChunkLength(B(packetLength - IP_MAX_HEADER_BYTES));
+    updatePacket->setChunkLength(packetLength - IPv4_MAX_HEADER_LENGTH);
     Packet *pk = new Packet();
     pk->insertAtBack(updatePacket);
 

@@ -94,7 +94,7 @@ void EtherEncap::refreshDisplay() const
 
 void EtherEncap::processPacketFromHigherLayer(Packet *packet)
 {
-    if (packet->getByteLength() > MAX_ETHERNET_DATA_BYTES)
+    if (packet->getDataLength() > MAX_ETHERNET_DATA_BYTES)
         throw cRuntimeError("packet from higher layer (%d bytes) exceeds maximum Ethernet payload length (%d)", (int)packet->getByteLength(), MAX_ETHERNET_DATA_BYTES);
 
     totalFromHigherLayer++;
@@ -136,12 +136,12 @@ void EtherEncap::processPacketFromHigherLayer(Packet *packet)
     send(packet, "lowerLayerOut");
 }
 
-void EtherEncap::addPaddingAndFcs(Packet *packet, EthernetFcsMode fcsMode, int64_t requiredMinBytes)
+void EtherEncap::addPaddingAndFcs(Packet *packet, EthernetFcsMode fcsMode, B requiredMinBytes)
 {
-    int64_t paddingLength = requiredMinBytes - ETHER_FCS_BYTES - packet->getByteLength();
-    if (paddingLength > 0) {
+    B paddingLength = requiredMinBytes - ETHER_FCS_BYTES - B(packet->getByteLength());
+    if (paddingLength > B(0)) {
         const auto& ethPadding = makeShared<EthernetPadding>();
-        ethPadding->setChunkLength(B(paddingLength));
+        ethPadding->setChunkLength(paddingLength);
         packet->insertAtBack(ethPadding);
     }
     addFcs(packet, fcsMode);
@@ -171,7 +171,7 @@ void EtherEncap::addFcs(Packet *packet, EthernetFcsMode fcsMode)
 const Ptr<const EthernetMacHeader> EtherEncap::decapsulateMacHeader(Packet *packet)
 {
     auto ethHeader = packet->popAtFront<EthernetMacHeader>();
-    packet->popAtBack<EthernetFcs>(B(ETHER_FCS_BYTES));
+    packet->popAtBack<EthernetFcs>(ETHER_FCS_BYTES);
 
     // add Ieee802Ctrl to packet
     auto macAddressInd = packet->addTagIfAbsent<MacAddressInd>();

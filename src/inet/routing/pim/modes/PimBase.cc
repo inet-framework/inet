@@ -160,7 +160,7 @@ void PimBase::sendHelloPacket(PimInterface *pimInterface)
     Packet *pk = new Packet("PimHello");
     const auto& msg = makeShared<PimHello>();
 
-    int byteLength = PIM_HEADER_LENGTH + 6 + 8;    // HoldTime + GenerationID option
+    B byteLength = PIM_HEADER_LENGTH + B(6) + B(8);    // HoldTime + GenerationID option
 
     msg->setOptionsArraySize(designatedRouterPriority < 0 ? 2 : 3);
     HoldtimeOption *holdtimeOption = new HoldtimeOption();
@@ -175,10 +175,10 @@ void PimBase::sendHelloPacket(PimInterface *pimInterface)
         DrPriorityOption *drPriorityOption = new DrPriorityOption();
         drPriorityOption->setPriority(designatedRouterPriority);
         msg->setOptions(2, drPriorityOption);
-        byteLength += 8;
+        byteLength += B(8);
     }
 
-    msg->setChunkLength(B(byteLength));
+    msg->setChunkLength(byteLength);
     pk->insertAtFront(msg);
     pk->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::pim);
     pk->addTagIfAbsent<InterfaceReq>()->setInterfaceId(pimInterface->getInterfaceId());

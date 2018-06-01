@@ -56,7 +56,7 @@ Ptr<Ipv4Header> PacketDrill::makeIpv4Header(IpProtocolId protocol, enum directio
 {
     auto ipv4Header = makeShared<Ipv4Header>();
     ipv4Header->setVersion(4);
-    ipv4Header->setHeaderLength(20);
+    ipv4Header->setHeaderLength(IPv4_MIN_HEADER_LENGTH);
 
     if (direction == DIRECTION_INBOUND) {
         ipv4Header->setSrcAddress(remoteAddr.toIpv4());
@@ -76,8 +76,8 @@ Ptr<Ipv4Header> PacketDrill::makeIpv4Header(IpProtocolId protocol, enum directio
     ipv4Header->setDontFragment(0);
     ipv4Header->setFragmentOffset(0);
     ipv4Header->setTypeOfService(0);
-    ipv4Header->setChunkLength(B(20));
-    ipv4Header->setTotalLengthField(20);
+    ipv4Header->setChunkLength(IPv4_MIN_HEADER_LENGTH);
+    ipv4Header->setTotalLengthField(IPv4_MIN_HEADER_LENGTH);
     ipv4Header->setCrcMode(pdapp->getCrcMode());
     ipv4Header->setCrc(0);
     if (pdapp->getCrcMode() == CRC_COMPUTED) {
@@ -111,10 +111,10 @@ Packet* PacketDrill::buildUDPPacket(int address_family, enum direction_t directi
         packet->setName("UDPOutbound");
     } else
         throw cRuntimeError("Unknown direction");
-    udpHeader->setTotalLengthField(UDP_HEADER_BYTES + udpPayloadBytes);
+    udpHeader->setTotalLengthField(UDP_HEADER_LENGTH + B(udpPayloadBytes));
     packet->insertAtFront(udpHeader);
     auto ipHeader = PacketDrill::makeIpv4Header(IP_PROT_UDP, direction, app->getLocalAddress(), app->getRemoteAddress());
-    ipHeader->setTotalLengthField(ipHeader->getTotalLengthField() + packet->getByteLength());
+    ipHeader->setTotalLengthField(ipHeader->getTotalLengthField() + packet->getDataLength());
     packet->insertAtFront(ipHeader);
     return packet;
 }
@@ -215,7 +215,7 @@ Packet* PacketDrill::buildTCPPacket(int address_family, enum direction_t directi
     tcpHeader->setSequenceNo(startSequence);
     tcpHeader->setAckNo(ackSequence);
 
-    tcpHeader->setHeaderLength(TCP_HEADER_OCTETS);
+    tcpHeader->setHeaderLength(TCP_MIN_HEADER_LENGTH);
 
     // set flags
     tcpHeader->setFinBit(strchr(flags, 'F'));
@@ -249,13 +249,13 @@ Packet* PacketDrill::buildTCPPacket(int address_family, enum direction_t directi
             tcpHeader->insertHeaderOption(option);
         } // for
     } // if options present
-    tcpHeader->setHeaderLength(TCP_HEADER_OCTETS + tcpHeader->getHeaderOptionArrayLength());
-    tcpHeader->setChunkLength(B(TCP_HEADER_OCTETS + tcpHeader->getHeaderOptionArrayLength()));
+    tcpHeader->setHeaderLength(TCP_MIN_HEADER_LENGTH + B(tcpHeader->getHeaderOptionArrayLength()));
+    tcpHeader->setChunkLength(TCP_MIN_HEADER_LENGTH + B(tcpHeader->getHeaderOptionArrayLength()));
     packet->insertAtFront(tcpHeader);
 
     auto ipHeader = PacketDrill::makeIpv4Header(IP_PROT_TCP, direction, app->getLocalAddress(),
             app->getRemoteAddress());
-    ipHeader->setTotalLengthField(ipHeader->getTotalLengthField() + packet->getByteLength());
+    ipHeader->setTotalLengthField(ipHeader->getTotalLengthField() + packet->getDataLength());
     packet->insertAtFront(ipHeader);
     delete tcpOptions;
     return packet;
@@ -470,7 +470,7 @@ Packet* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direct
     insertTransportProtocolHeader(packet, Protocol::sctp, sctpmsg);
     auto ipHeader = PacketDrill::makeIpv4Header(IP_PROT_SCTP, direction, app->getLocalAddress(),
             app->getRemoteAddress());
-    ipHeader->setTotalLengthField(ipHeader->getTotalLengthField() + packet->getByteLength());
+    ipHeader->setTotalLengthField(ipHeader->getTotalLengthField() + packet->getDataLength());
     insertNetworkProtocolHeader(packet, Protocol::ipv4, ipHeader);
     EV_INFO << "SCTP packet " << packet << endl;
     delete chunks;

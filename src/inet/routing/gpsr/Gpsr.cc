@@ -637,10 +637,10 @@ void Gpsr::setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const Networ
     if (dynamicPtrCast<const Ipv4Header>(nwHeader)) {
         auto ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
         gpsrOption->setType(IPOPTION_TLV_GPSR);
-        int oldHlen = ipv4Header->calculateHeaderByteLength();
+        B oldHlen = ipv4Header->calculateHeaderByteLength();
         ASSERT(ipv4Header->getHeaderLength() == oldHlen);
         ipv4Header->addOption(gpsrOption);
-        int newHlen = ipv4Header->calculateHeaderByteLength();
+        B newHlen = ipv4Header->calculateHeaderByteLength();
         ipv4Header->setHeaderLength(newHlen);
         ipv4Header->setChunkLength(ipv4Header->getChunkLength() + B(newHlen - oldHlen));  // it was ipv4Header->addByteLength(newHlen - oldHlen);
         ipv4Header->setTotalLengthField(ipv4Header->getTotalLengthField() + newHlen - oldHlen);
@@ -652,17 +652,17 @@ void Gpsr::setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const Networ
     if (dynamicPtrCast<const Ipv6Header>(nwHeader)) {
         auto ipv6Header = removeNetworkProtocolHeader<Ipv6Header>(packet);
         gpsrOption->setType(IPv6TLVOPTION_TLV_GPSR);
-        int oldHlen = ipv6Header->calculateHeaderByteLength();
+        B oldHlen = ipv6Header->calculateHeaderByteLength();
         Ipv6HopByHopOptionsHeader *hdr = check_and_cast_nullable<Ipv6HopByHopOptionsHeader *>(ipv6Header->findExtensionHeaderByTypeForUpdate(IP_PROT_IPv6EXT_HOP));
         if (hdr == nullptr) {
             hdr = new Ipv6HopByHopOptionsHeader();
-            hdr->setByteLength(8);
+            hdr->setByteLength(B(8));
             ipv6Header->addExtensionHeader(hdr);
         }
         hdr->getTlvOptionsForUpdate().insertTlvOption(gpsrOption);
-        hdr->setByteLength(utils::roundUp(2 + hdr->getTlvOptions().getLength(), 8));
-        int newHlen = ipv6Header->calculateHeaderByteLength();
-        ipv6Header->setChunkLength(ipv6Header->getChunkLength() + B(newHlen - oldHlen));
+        hdr->setByteLength(B(utils::roundUp(2 + B(hdr->getTlvOptions().getLength()).get(), 8)));
+        B newHlen = ipv6Header->calculateHeaderByteLength();
+        ipv6Header->setChunkLength(ipv6Header->getChunkLength() + (newHlen - oldHlen));
         insertNetworkProtocolHeader(packet, Protocol::ipv6, ipv6Header);
     }
     else

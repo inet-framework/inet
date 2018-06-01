@@ -17,6 +17,7 @@
 
 
 import inet.common.INETDefs;
+import inet.common.Units;
 import inet.common.packet.chunk.Chunk;
 
 namespace inet;
@@ -34,7 +35,7 @@ namespace inet;
 //
 class GenericAppMsg extends FieldsChunk
 {
-    int expectedReplyLength; // in bytes
+    B expectedReplyLength;   // in bytes
     double replyDelay;       // reply after this many seconds
     bool serverClose;        // with TCP: if true, server should close the
                              // connection after sending the reply

@@ -81,12 +81,12 @@ class INET_API EtherMacBase : public MacBase
     {
         double txrate;
         double halfBitTime;    // transmission time of a half bit
-        int64 frameMinBytes;    // minimal frame length
+        B frameMinBytes;    // minimal frame length
         // for half-duplex operation:
-        unsigned int maxFramesInBurst;
-        int64 maxBytesInBurst;    // including IFG and preamble, etc.
-        int64 halfDuplexFrameMinBytes;    // minimal frame length in half-duplex mode; -1 means half duplex is not supported
-        int64 frameInBurstMinBytes;    // minimal frame length in burst mode, after first frame
+        short int maxFramesInBurst;
+        B maxBytesInBurst;    // including IFG and preamble, etc.
+        B halfDuplexFrameMinBytes;    // minimal frame length in half-duplex mode; -1 means half duplex is not supported
+        B frameInBurstMinBytes;    // minimal frame length in burst mode, after first frame
         double slotTime;    // slot time
         double maxPropagationDelay;    // used for detecting longer cables than allowed
     };

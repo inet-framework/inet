@@ -60,11 +60,11 @@ void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     tcp.th_flags = (TH_FLAGS & flags);
     tcp.th_win = htons(tcpHeader->getWindow());
     tcp.th_urp = htons(tcpHeader->getUrgentPointer());
-    if (tcpHeader->getHeaderLength() % 4 != 0)
+    if (B(tcpHeader->getHeaderLength()).get() % 4 != 0)
         throw cRuntimeError("invalid Tcp header length=%u: must be dividable by 4", tcpHeader->getHeaderLength());
-    tcp.th_offs = tcpHeader->getHeaderLength() / 4;
+    tcp.th_offs = B(tcpHeader->getHeaderLength()).get() / 4;
 
-    stream.writeBytes((uint8_t *)&tcp, B(TCP_HEADER_OCTETS));
+    stream.writeBytes((uint8_t *)&tcp, TCP_MIN_HEADER_LENGTH);
 
     unsigned short numOptions = tcpHeader->getHeaderOptionArraySize();
     unsigned int optionsLength = 0;
@@ -77,7 +77,7 @@ void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
         if (optionsLength % 4 != 0)
             stream.writeByteRepeatedly(0, 4 - optionsLength % 4);
     }
-    ASSERT(tcpHeader->getHeaderLength() == TCP_HEADER_OCTETS + optionsLength);
+    ASSERT(tcpHeader->getHeaderLength() == TCP_MIN_HEADER_LENGTH + B(optionsLength));
 }
 
 void TcpHeaderSerializer::serializeOption(MemoryOutputStream& stream, const TcpOption *option) const
@@ -158,18 +158,18 @@ void TcpHeaderSerializer::serializeOption(MemoryOutputStream& stream, const TcpO
 const Ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto position = stream.getPosition();
-    uint8_t buffer[TCP_HEADER_OCTETS];
-    stream.readBytes(buffer, B(TCP_HEADER_OCTETS));
+    uint8_t buffer[B(TCP_MIN_HEADER_LENGTH).get()];
+    stream.readBytes(buffer, TCP_MIN_HEADER_LENGTH);
     auto tcpHeader = makeShared<TcpHeader>();
     const struct tcphdr& tcp = *static_cast<const struct tcphdr *>((void *)&buffer);
-    ASSERT(sizeof(tcp) == TCP_HEADER_OCTETS);
+    ASSERT(B(sizeof(tcp)) == TCP_MIN_HEADER_LENGTH);
 
     // fill Tcp header structure
     tcpHeader->setSrcPort(ntohs(tcp.th_sport));
     tcpHeader->setDestPort(ntohs(tcp.th_dport));
     tcpHeader->setSequenceNo(ntohl(tcp.th_seq));
     tcpHeader->setAckNo(ntohl(tcp.th_ack));
-    unsigned short headerLength = tcp.th_offs * 4;
+    B headerLength = B(tcp.th_offs * 4);
 
     // set flags
     unsigned char flags = tcp.th_flags;
@@ -184,8 +184,8 @@ const Ptr<Chunk> TcpHeaderSerializer::deserialize(MemoryInputStream& stream) con
 
     tcpHeader->setUrgentPointer(ntohs(tcp.th_urp));
 
-    if (headerLength > TCP_HEADER_OCTETS) {
-        while (stream.getPosition() - position < B(headerLength)) {
+    if (headerLength > TCP_MIN_HEADER_LENGTH) {
+        while (stream.getPosition() - position < headerLength) {
             TcpOption *option = deserializeOption(stream);
             tcpHeader->insertHeaderOption(option);
         }

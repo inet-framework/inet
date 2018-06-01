@@ -61,9 +61,9 @@ void Ext::ext_packet_handler(u_char *usermod, const struct pcap_pkthdr *hdr, con
     //FIXME Why filtering IPv4 only on eth interface? why not filtering on PPP or other interfaces?
     // skip ethernet frames not encapsulating an IP packet.
     // TODO: how about ipv6 and other protocols?
-    if (module->datalink == DLT_EN10MB && hdr->caplen > ETHER_MAC_HEADER_BYTES) {
+    if (module->datalink == DLT_EN10MB && B(hdr->caplen) > ETHER_MAC_HEADER_BYTES) {
         //TODO for decapsulate, using code from EtherEncap
-        uint16_t etherType = (uint16_t)(bytes[ETHER_ADDR_LEN * 2]) << 8 | bytes[ETHER_ADDR_LEN * 2 + 1];
+        uint16_t etherType = (uint16_t)(bytes[B(ETHER_ADDR_LEN).get() * 2]) << 8 | bytes[B(ETHER_ADDR_LEN).get() * 2 + 1];
         //TODO get ethertype from snap header when packet has snap header
         if (etherType != ETHERTYPE_IPv4) // ipv4
             return;

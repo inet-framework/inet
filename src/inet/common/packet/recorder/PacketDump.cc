@@ -434,7 +434,7 @@ void PacketDump::udpDump(bool l2r, const char *label, const Ptr<const UdpHeader>
     }
 
     //out << endl;
-    out << "UDP: Payload length=" << udpHeader->getTotalLengthField() - UDP_HEADER_BYTES << endl;
+    out << "UDP: Payload length=" << udpHeader->getTotalLengthField() - UDP_HEADER_LENGTH << endl;
 
     // comment
     if (comment)
@@ -530,7 +530,7 @@ void PacketDump::tcpDump(bool l2r, const char *label, const Ptr<const tcp::TcpHe
         out << srcAddr << "." << tcpHeader->getSrcPort() << ": ";
     }
 
-    int payloadLength = tcpLength - tcpHeader->getHeaderLength();
+    int payloadLength = tcpLength - B(tcpHeader->getHeaderLength()).get();
 
     // flags
     bool flags = false;
@@ -580,7 +580,7 @@ void PacketDump::tcpDump(bool l2r, const char *label, const Ptr<const tcp::TcpHe
         out << "urg " << tcpHeader->getUrgentPointer() << " ";
 
     // options present?
-    if (tcpHeader->getHeaderLength() > 20) {
+    if (tcpHeader->getHeaderLength() > TCP_MIN_HEADER_LENGTH) {
         const char *direction = l2r ? "sent" : "received";
 
         if (verbose) {

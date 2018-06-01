@@ -66,10 +66,10 @@ Packet *Ipv4FragBuf::addFragment(Packet *packet, simtime_t now)
 
     // add fragment into reassembly buffer
     ASSERT(ipv4Header->getTotalLengthField() > ipv4Header->getHeaderLength());
-    int bytes = ipv4Header->getTotalLengthField() - ipv4Header->getHeaderLength();
-    curBuf->buf.replace(B(ipv4Header->getFragmentOffset()), packet->peekDataAt(B(ipv4Header->getHeaderLength()), B(bytes)));
+    B bytes = ipv4Header->getTotalLengthField() - ipv4Header->getHeaderLength();
+    curBuf->buf.replace(B(ipv4Header->getFragmentOffset()), packet->peekDataAt(B(ipv4Header->getHeaderLength()), bytes));
     if (!ipv4Header->getMoreFragments()) {
-        curBuf->buf.setExpectedLength(B(ipv4Header->getFragmentOffset() + bytes));
+        curBuf->buf.setExpectedLength(B(ipv4Header->getFragmentOffset()) + bytes);
     }
     if (ipv4Header->getFragmentOffset() == 0 || curBuf->packet == nullptr) {
         delete curBuf->packet;
@@ -91,7 +91,7 @@ Packet *Ipv4FragBuf::addFragment(Packet *packet, simtime_t now)
         pk->setName(pkName.c_str());
         pk->removeAll();
         const auto& payload = curBuf->buf.getReassembledData();
-        hdr->setTotalLengthField(hdr->getHeaderLength() + B(payload->getChunkLength()).get());
+        hdr->setTotalLengthField(hdr->getHeaderLength() + payload->getChunkLength());
         hdr->setFragmentOffset(0);
         hdr->setMoreFragments(false);
         pk->insertAtFront(hdr);

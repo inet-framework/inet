@@ -52,21 +52,21 @@ std::string Sack::str() const
     return out.str();
 }
 
-unsigned short TcpHeader::getHeaderOptionArrayLength()
+B TcpHeader::getHeaderOptionArrayLength()
 {
     unsigned short usedLength = 0;
 
     for (uint i = 0; i < getHeaderOptionArraySize(); i++)
         usedLength += getHeaderOption(i)->getLength();
 
-    return usedLength;
+    return B(usedLength);
 }
 
 void TcpHeader::dropHeaderOptions()
 {
     setHeaderOptionArraySize(0);
-    setHeaderLength(TCP_HEADER_OCTETS);
-    setChunkLength(B(TCP_HEADER_OCTETS));
+    setHeaderLength(TCP_MIN_HEADER_LENGTH);
+    setChunkLength(TCP_MIN_HEADER_LENGTH);
 }
 
 std::string TcpHeader::str() const

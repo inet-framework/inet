@@ -48,7 +48,7 @@ std::string TcpSendQueue::str() const
 void TcpSendQueue::enqueueAppData(Packet *msg)
 {
     //tcpEV << "sendQ: " << str() << " enqueueAppData(bytes=" << msg->getByteLength() << ")\n";
-    dataBuffer.push(msg->peekDataAt(B(0), B(msg->getByteLength())));
+    dataBuffer.push(msg->peekDataAt(B(0), msg->getDataLength()));
     end += msg->getByteLength();
     if (seqLess(end, begin))
         throw cRuntimeError("Send queue is full");

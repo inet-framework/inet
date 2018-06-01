@@ -117,7 +117,7 @@ INetfilter::IHook::Result SctpNatHook::datagramForwardHook(Packet *datagram)
                 networkHeader->setDestAddress(dgram->getSrcAddress());
                 if (!tmpaddr.isUnspecified())
                     networkHeader->setSrcAddress(tmpaddr);
-                networkHeader->setTotalLengthField(B(sctp->getChunkLength()).get() + 20);
+                networkHeader->setTotalLengthField(sctp->getChunkLength() + B(20));
                 insertTransportProtocolHeader(datagram, Protocol::sctp, sctp);
                 insertNetworkProtocolHeader(datagram, Protocol::ipv4, (const Ptr<NetworkHeaderBase>&) networkHeader);
                 datagram->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(networkHeader->getDestAddress());

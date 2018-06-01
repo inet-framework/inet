@@ -95,7 +95,7 @@ class EthernetPadding extends FieldsChunk
 
 class EthernetFcs extends FieldsChunk
 {
-    chunkLength = B(ETHER_FCS_BYTES);
+    chunkLength = ETHER_FCS_BYTES;
     uint32_t fcs;
     EthernetFcsMode fcsMode = FCS_DECLARED_CORRECT;
 }

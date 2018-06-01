@@ -77,7 +77,7 @@ void TcpConnection::segmentArrivalWhileClosed(Packet *packet, const Ptr<const Tc
 
     if (!tcpseg->getAckBit()) {
         EV_DETAIL << "ACK bit not set: sending RST+ACK\n";
-        uint32 ackNo = tcpseg->getSequenceNo() + packet->getByteLength() - tcpseg->getHeaderLength() + tcpseg->getSynFinLen();
+        uint32 ackNo = tcpseg->getSequenceNo() + packet->getByteLength() - B(tcpseg->getHeaderLength()).get() + tcpseg->getSynFinLen();
         sendRstAck(0, ackNo, destAddr, srcAddr, tcpseg->getDestPort(), tcpseg->getSrcPort());
     }
     else {
@@ -124,7 +124,7 @@ bool TcpConnection::hasEnoughSpaceForSegmentInReceiveQueue(Packet *packet, const
     //TODO must rewrite it
     //return (state->freeRcvBuffer >= tcpseg->getPayloadLength()); // enough freeRcvBuffer in rcvQueue for new segment?
 
-    long int payloadLength = packet->getByteLength() - tcpseg->getHeaderLength();
+    long int payloadLength = packet->getByteLength() - B(tcpseg->getHeaderLength()).get();
     uint32_t payloadSeq = tcpseg->getSequenceNo();
     uint32 firstSeq = receiveQueue->getFirstSeqNo();
     if (seqLess(payloadSeq, firstSeq)) {
@@ -143,7 +143,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *packet, const Ptr<c
 
     bool acceptable = true;
 
-    if (tcpseg->getHeaderLength() > TCP_HEADER_OCTETS) {    // Header options present? TCP_HEADER_OCTETS = 20
+    if (tcpseg->getHeaderLength() > TCP_MIN_HEADER_LENGTH) {    // Header options present? TCP_HEADER_OCTETS = 20
         // PAWS
         if (state->ts_enabled) {
             uint32 tsval = getTSval(tcpseg);
@@ -162,7 +162,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *packet, const Ptr<c
     if (acceptable)
         acceptable = isSegmentAcceptable(packet, tcpseg);
 
-    int payloadLength = packet->getByteLength() - tcpseg->getHeaderLength();
+    int payloadLength = packet->getByteLength() - B(tcpseg->getHeaderLength()).get();
 
     if (!acceptable) {
         //"
@@ -481,7 +481,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *packet, const Ptr<c
 
         if (payloadLength > 0) {
             // check for full sized segment
-            if ((uint32_t)payloadLength == state->snd_mss || (uint32_t)payloadLength + tcpseg->getHeaderLength() - (unsigned int)TCP_HEADER_OCTETS == state->snd_mss)
+            if ((uint32_t)payloadLength == state->snd_mss || (uint32_t)payloadLength + B(tcpseg->getHeaderLength() - TCP_MIN_HEADER_LENGTH).get() == state->snd_mss)
                 state->full_sized_segment_counter++;
 
             // check for persist probe
@@ -814,7 +814,7 @@ TcpEventCode TcpConnection::processSegmentInListen(Packet *packet, const Ptr<con
         // initial snd_wnd from the segment here.
         updateWndInfo(tcpseg, true);
 
-        if (tcpseg->getHeaderLength() > TCP_HEADER_OCTETS) // Header options present? TCP_HEADER_OCTETS = 20
+        if (tcpseg->getHeaderLength() > TCP_MIN_HEADER_LENGTH) // Header options present?
             readHeaderOptions(tcpseg);
 
         state->ack_now = true;
@@ -833,7 +833,7 @@ TcpEventCode TcpConnection::processSegmentInListen(Packet *packet, const Ptr<con
         // there isn't much left to do: RST, SYN, ACK, FIN got processed already,
         // so there's only URG and PSH left to handle.
         //
-        if (packet->getByteLength() > tcpseg->getHeaderLength()) {
+        if (B(packet->getByteLength()) > tcpseg->getHeaderLength()) {
             updateRcvQueueVars();
 
             if (hasEnoughSpaceForSegmentInReceiveQueue(packet, tcpseg)) {    // enough freeRcvBuffer in rcvQueue for new segment?
@@ -986,7 +986,7 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *packet, const Ptr<co
             if (tcpseg->getFinBit())
                 EV_DETAIL << "SYN+ACK+FIN received: ignoring FIN\n";
 
-            if (packet->getByteLength() > tcpseg->getHeaderLength()) {
+            if (B(packet->getByteLength()) > tcpseg->getHeaderLength()) {
                 updateRcvQueueVars();
 
                 if (hasEnoughSpaceForSegmentInReceiveQueue(packet, tcpseg)) {    // enough freeRcvBuffer in rcvQueue for new segment?
@@ -1006,7 +1006,7 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *packet, const Ptr<co
             if (tcpseg->getUrgBit() || tcpseg->getPshBit())
                 EV_DETAIL << "Ignoring URG and PSH bits in SYN+ACK\n"; // TBD
 
-            if (tcpseg->getHeaderLength() > TCP_HEADER_OCTETS) // Header options present? TCP_HEADER_OCTETS = 20
+            if (tcpseg->getHeaderLength() > TCP_MIN_HEADER_LENGTH) // Header options present?
                 readHeaderOptions(tcpseg);
 
             // notify tcpAlgorithm (it has to send ACK of SYN) and app layer
@@ -1043,7 +1043,7 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *packet, const Ptr<co
         // We don't send text in SYN or SYN+ACK, but accept it. Otherwise
         // there isn't much left to do: RST, SYN, ACK, FIN got processed already,
         // so there's only URG and PSH left to handle.
-        if (packet->getByteLength() > tcpseg->getHeaderLength()) {
+        if (B(packet->getByteLength()) > tcpseg->getHeaderLength()) {
             updateRcvQueueVars();
 
             if (hasEnoughSpaceForSegmentInReceiveQueue(packet, tcpseg)) {    // enough freeRcvBuffer in rcvQueue for new segment?
@@ -1108,7 +1108,7 @@ bool TcpConnection::processAckInEstabEtc(Packet *packet, const Ptr<const TcpHead
 {
     EV_DETAIL << "Processing ACK in a data transfer state\n";
 
-    int payloadLength = packet->getByteLength() - tcpseg->getHeaderLength();
+    int payloadLength = packet->getByteLength() - B(tcpseg->getHeaderLength()).get();
 
     //
     //"

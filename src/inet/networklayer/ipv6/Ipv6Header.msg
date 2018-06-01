@@ -26,6 +26,7 @@ import inet.networklayer.contract.ipv6.Ipv6Address;
 cplusplus {{
 #include <iostream>
 #include "inet/common/ProtocolGroup.h"
+#include "inet/networklayer/contract/ipv6/Ipv6Consts.h"
 }}
 
 
@@ -34,8 +35,6 @@ namespace inet;
 cplusplus {{
 class Ipv6ExtensionHeader;
 std::ostream& operator<<(std::ostream& os, Ipv6ExtensionHeader eh);
-
-const int IPv6_HEADER_BYTES = 40;
 }}
 
 //
@@ -44,7 +43,7 @@ const int IPv6_HEADER_BYTES = 40;
 class Ipv6ExtensionHeader extends cObject
 {
     short extensionType;
-    short byteLength = 0;   // byteLength = n * 8;
+    B byteLength = B(0);   // byteLength = n * 8;
 }
 
 cplusplus(Ipv6ExtensionHeader) {{
@@ -61,10 +60,10 @@ cplusplus(Ipv6ExtensionHeader) {{
 //
 class Ipv6Header extends NetworkHeaderBase
 {
-    chunkLength = B(IPv6_HEADER_BYTES);
+    chunkLength = IPv6_HEADER_BYTES;
     Ipv6Address srcAddress;
     Ipv6Address destAddress;
-    int payloadLength = -1;    // The size of the payload in octets, including any extension headers. The length is set to zero when a Hop-by-Hop extension header carries a Jumbo Payload option.
+    B payloadLength = B(-1);    // The size of the payload in octets, including any extension headers. The length is set to zero when a Hop-by-Hop extension header carries a Jumbo Payload option.
     short diffServCodePoint;  // bits 0-5 of trafficClass
     short explicitCongestionNotification;  // bits 6-7 of trafficClass
     unsigned int flowLabel;
@@ -98,19 +97,19 @@ cplusplus(Ipv6Header) {{
      * Calculates the length of the Ipv6 header plus the extension
      * headers.
      */
-    virtual int calculateHeaderByteLength() const;
+    virtual B calculateHeaderByteLength() const;
 
     /**
      * Calculates the length of the unfragmentable part of Ipv6 header
      * plus the extension headers.
      */
-    virtual int calculateUnfragmentableHeaderByteLength() const;
+    virtual B calculateUnfragmentableHeaderByteLength() const;
 
     /**
      * Calculates the length of the payload and extension headers
      * after the Fragment Header.
      */
-    virtual int calculateFragmentLength() const;
+    virtual B calculateFragmentLength() const;
 
     /**
      * Removes and returns the first extension header of this datagram

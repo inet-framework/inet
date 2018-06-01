@@ -45,7 +45,7 @@ const Ipv6ExtensionHeader *Ipv6Header::findExtensionHeaderByType(IpProtocolId ex
 
 void Ipv6Header::addExtensionHeader(Ipv6ExtensionHeader *eh)
 {
-    ASSERT((eh->getByteLength() >= 1) && (eh->getByteLength() % 8 == 0));
+    ASSERT((eh->getByteLength() >= B(1)) && (eh->getByteLength().get() % 8 == 0));
     int thisOrder = eh->getOrder();
     size_t i;
     for (i = 0; i < extensionHeader_arraysize; i++) {
@@ -101,9 +101,9 @@ int Ipv6ExtensionHeader::getOrder() const
     }
 }
 
-int Ipv6Header::calculateHeaderByteLength() const
+B Ipv6Header::calculateHeaderByteLength() const
 {
-    int len = 40;
+    B len = B(40);
     for (size_t i = 0; i < extensionHeader_arraysize; i++)
         len += extensionHeader[i]->getByteLength();
     return len;
@@ -112,7 +112,7 @@ int Ipv6Header::calculateHeaderByteLength() const
 /**
  * Note: it is assumed that headers are ordered as described in RFC 2460 4.1
  */
-int Ipv6Header::calculateUnfragmentableHeaderByteLength() const
+B Ipv6Header::calculateUnfragmentableHeaderByteLength() const
 {
     size_t firstFragmentableExtensionIndex = 0;
     for (size_t i = extensionHeader_arraysize; i > 0; i--) {
@@ -123,7 +123,7 @@ int Ipv6Header::calculateUnfragmentableHeaderByteLength() const
         }
     }
 
-    int len = 40;
+    B len = B(40);
     for (size_t i = 0; i < firstFragmentableExtensionIndex; i++)
         len += extensionHeader[i]->getByteLength();
     return len;
@@ -132,9 +132,9 @@ int Ipv6Header::calculateUnfragmentableHeaderByteLength() const
 /**
  * Note: it is assumed that headers are ordered as described in RFC 2460 4.1
  */
-int Ipv6Header::calculateFragmentLength() const
+B Ipv6Header::calculateFragmentLength() const
 {
-    int len = B(getChunkLength()).get() - IPv6_HEADER_BYTES;
+    B len = getChunkLength() - IPv6_HEADER_BYTES;
     size_t i;
     for (i = 0; i < extensionHeader_arraysize; i++) {
         len -= extensionHeader[i]->getByteLength();

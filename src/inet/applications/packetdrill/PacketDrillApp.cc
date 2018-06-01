@@ -428,7 +428,7 @@ void PacketDrillApp::runEvent(PacketDrillEvent* event)
     if (event->getType() == PACKET_EVENT) {
         Packet *pk = event->getPacket()->getInetPacket();
         if (event->getPacket()->getDirection() == DIRECTION_INBOUND) { // < injected packet, will go through the stack bottom up.
-            auto packetByteLength = pk->getByteLength();
+            auto packetByteLength = pk->getDataLength();
             auto ipHeader = pk->removeAtFront<Ipv4Header>();
             // remove lower layer paddings:
             ASSERT(B(ipHeader->getTotalLengthField()) >= ipHeader->getChunkLength());
@@ -535,7 +535,7 @@ void PacketDrillApp::runEvent(PacketDrillEvent* event)
             else {
                 // other protocol
             }
-            ipHeader->setTotalLengthField(B(ipHeader->getChunkLength()).get() + pk->getByteLength());
+            ipHeader->setTotalLengthField(ipHeader->getChunkLength() + pk->getDataLength());
             pk->insertAtFront(ipHeader);
             tunSocket.send(pk);
         } else if (event->getPacket()->getDirection() == DIRECTION_OUTBOUND) { // >
@@ -658,7 +658,7 @@ void PacketDrillApp::closeAllSockets()
     ipv4Header->setDestAddress(localAddress.toIpv4());
     ipv4Header->setIdentification(0);
     ipv4Header->setVersion(4);
-    ipv4Header->setHeaderLength(20);
+    ipv4Header->setHeaderLength(IPv4_MIN_HEADER_LENGTH);
     ipv4Header->setProtocolId(IP_PROT_SCTP);
     ipv4Header->setTimeToLive(32);
     ipv4Header->setMoreFragments(0);
@@ -667,7 +667,7 @@ void PacketDrillApp::closeAllSockets()
     ipv4Header->setTypeOfService(0);
     ipv4Header->setCrcMode(crcMode);
     ipv4Header->setCrc(0);
-    ipv4Header->setTotalLengthField(B(ipv4Header->getChunkLength()).get() + pk->getByteLength());
+    ipv4Header->setTotalLengthField(ipv4Header->getChunkLength() + pk->getDataLength());
     pk->insertAtFront(ipv4Header);
     EV_DETAIL << "Send Abort to cleanup association." << endl;
 

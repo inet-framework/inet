@@ -26,7 +26,7 @@ void GenericAppMsgSerializer::serialize(MemoryOutputStream& stream, const Ptr<co
     auto startPosition = stream.getLength();
     const auto& msg = staticPtrCast<const GenericAppMsg>(chunk);
     stream.writeUint32Be(B(msg->getChunkLength()).get());
-    stream.writeUint32Be(msg->getExpectedReplyLength());
+    stream.writeUint32Be(B(msg->getExpectedReplyLength()).get());
     stream.writeUint64Be(SimTime(msg->getReplyDelay()).raw());
     stream.writeByte(msg->getServerClose());
     int64_t remainders = B(msg->getChunkLength() - (stream.getLength() - startPosition)).get();
@@ -40,13 +40,13 @@ const Ptr<Chunk> GenericAppMsgSerializer::deserialize(MemoryInputStream& stream)
     auto startPosition = stream.getPosition();
     auto msg = makeShared<GenericAppMsg>();
     B dataLength = B(stream.readUint32Be());
-    msg->setExpectedReplyLength(stream.readUint32Be());
+    msg->setExpectedReplyLength(B(stream.readUint32Be()));
     int64_t delayraw = stream.readUint64Be();
     msg->setReplyDelay(SimTime(delayraw).dbl());
     msg->setServerClose(stream.readByte() ? true : false);
     B remainders = dataLength - (stream.getPosition() - startPosition);
     ASSERT(remainders >= B(0));
-    stream.readByteRepeatedly('?', B(remainders).get());
+    stream.readByteRepeatedly('?', remainders.get());
     return msg;
 }
 

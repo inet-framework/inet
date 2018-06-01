@@ -33,10 +33,10 @@ namespace inet;
 
 cplusplus {{
 // default Ipv4 header length: 20 bytes
-const int IP_HEADER_BYTES = 20;
+const B IPv4_MIN_HEADER_LENGTH = B(20);
 
 // maximum Ipv4 header length (base+options): 60 = 4 * 15 bytes
-const int IP_MAX_HEADER_BYTES = 60;
+const B IPv4_MAX_HEADER_LENGTH = B(60);
 
 // option type fields
 const unsigned char IPOPTION_COPY_MASK   = 0x80;
@@ -172,10 +172,10 @@ class Ipv4OptionUnknown extends Ipv4Option
 // TODO: cleanup order of fields
 class Ipv4Header extends NetworkHeaderBase
 {
-    chunkLength = B(IP_HEADER_BYTES);
+    chunkLength = IPv4_MIN_HEADER_LENGTH;
 
     short version = 4;
-    short headerLength = IP_HEADER_BYTES;         // bytes, must be multiple of 4
+    B headerLength = IPv4_MIN_HEADER_LENGTH;         // bytes, must be multiple of 4
 
     Ipv4Address srcAddress;
     Ipv4Address destAddress;
@@ -189,7 +189,7 @@ class Ipv4Header extends NetworkHeaderBase
     bool moreFragments;
     bool dontFragment;
     int fragmentOffset;         // bytes, must be multiple of 8
-    int totalLengthField;
+    B totalLengthField;
     short diffServCodePoint;  // maps to bits 0-5 of ToS
     short explicitCongestionNotification;  // maps to bits 6-7 of ToS
 
@@ -230,7 +230,7 @@ cplusplus(Ipv4Header) {{
      * Calculates the length of the Ipv6 header plus the extension
      * headers.
      */
-    virtual int calculateHeaderByteLength() const;
+    virtual B calculateHeaderByteLength() const;
 
     // implements NetworkHeaderBase:
     virtual L3Address getSourceAddress() const override { return L3Address(getSrcAddress()); }
