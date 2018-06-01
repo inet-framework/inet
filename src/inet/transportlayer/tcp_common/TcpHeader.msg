@@ -22,18 +22,6 @@ import inet.common.packet.chunk.Chunk;
 import inet.transportlayer.common.CRC;
 import inet.transportlayer.contract.TransportHeaderBase;
 
-cplusplus {{
-#include <iostream>
-
-namespace inet {
-namespace tcp {
-class Sack;
-class TcpOption;
-}
-}
-
-}}
-
 namespace inet::tcp;
 
 enum TcpConstants {
