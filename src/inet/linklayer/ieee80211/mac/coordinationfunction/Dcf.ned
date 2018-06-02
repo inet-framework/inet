@@ -18,6 +18,7 @@
 package inet.linklayer.ieee80211.mac.coordinationfunction;
 
 import inet.linklayer.ieee80211.mac.channelaccess.Dcaf;
+import inet.linklayer.ieee80211.mac.contract.IDcf;
 import inet.linklayer.ieee80211.mac.contract.IRateControl;
 import inet.linklayer.ieee80211.mac.originator.NonQosRecoveryProcedure;
 import inet.linklayer.ieee80211.mac.originator.OriginatorAckPolicy;
@@ -32,7 +33,7 @@ import inet.linklayer.ieee80211.mac.recipient.RecipientMacDataService;
 //
 // IEEE 802.11 Distributed Coordination Function
 //
-module Dcf
+module Dcf like IDcf
 {
     parameters:
         int maxQueueSize = default(100); // -1 means unlimited
