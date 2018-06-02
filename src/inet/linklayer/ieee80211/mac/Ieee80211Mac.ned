@@ -19,9 +19,12 @@ package inet.linklayer.ieee80211.mac;
 
 import inet.linklayer.base.MacProtocolBase;
 import inet.linklayer.ieee80211.IIeee80211Mac;
+import inet.linklayer.ieee80211.mac.contract.IDcf;
+import inet.linklayer.ieee80211.mac.contract.IHcf;
+import inet.linklayer.ieee80211.mac.contract.IDs;
 import inet.linklayer.ieee80211.mac.contract.IRx;
-import inet.linklayer.ieee80211.mac.contract.IStatistics;
 import inet.linklayer.ieee80211.mac.contract.ITx;
+import inet.linklayer.ieee80211.mac.contract.IStatistics;
 import inet.linklayer.ieee80211.mac.coordinationfunction.Dcf;
 import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
 
@@ -71,6 +74,10 @@ module Ieee80211Mac extends MacProtocolBase like IIeee80211Mac
         int mtu @unit(B) = default(2304B);
         bool qosStation = default(false);
 
+		string dcfType = default("Dcf");
+		string hcfType = default("Hcf");
+		string dsType = default("Ds");
+
         *.mibModule = default(absPath(mibModule));
         *.rxModule = "^.rx";
         *.txModule = "^.tx";
@@ -95,15 +102,15 @@ module Ieee80211Mac extends MacProtocolBase like IIeee80211Mac
         input mgmtIn;
         output mgmtOut;
     submodules:
-        dcf: Dcf {
+        dcf: <dcfType> like IDcf {
             parameters:
                 @display("p=100,100");
         }
-        hcf: Hcf {
+        hcf: <hcfType> like IHcf {
             parameters:
                 @display("p=250,100");
         }
-        ds: Ds {
+        ds: <dsType> like IDs {
             parameters:
                 @display("p=400,100");
         }
