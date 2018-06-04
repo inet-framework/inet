@@ -57,7 +57,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.sctp.sctpAlgorithmClass = "SctpAlg"
 
 # NIC configuration
-#**.ppp[*].queueType = "DropTailQueue" # in routers
+#**.ppp[*].queue.typename = "DropTailQueue" # in routers
 #**.ppp[*].queue.frameCapacity = 100  # in routers
 #**.ppp[*].ppp.mtu = 1500 B
 

@@ -56,7 +56,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 #4=FAIR_BANDWITH 5=FAIR_BANDWITH_PACKET 6=PRIORITY 7=FCFS 8=PATH_MANUAL 9=PATH_MAP_TO_PATH       = 9
 
 # NIC configuration
-#**.ppp[*].queueType = "DropTailQueue" # in routers
+#**.ppp[*].queue.typename = "DropTailQueue" # in routers
 #**.ppp[*].queue.frameCapacity = 100  # in routers
 #**.ppp[*].ppp.mtu = 1500 B
 
