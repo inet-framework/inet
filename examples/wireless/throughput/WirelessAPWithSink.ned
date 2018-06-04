@@ -48,8 +48,8 @@ module WirelessAPWithSink
         wlan: Ieee80211Interface {
             parameters:
                 @display("p=169,231;q=queue");
-                llc.typename = default("Ieee80211Portal");
-                mgmt.typename = default("Ieee80211MgmtApSimplified");
+                llc.typename = "Ieee80211Portal";
+                mgmt.typename = "Ieee80211MgmtApSimplified";
                 agent.typename = "";
         }
         mobility: StationaryMobility {

@@ -46,7 +46,7 @@ module SinkClient
         wlan: Ieee80211Interface {
             parameters:
                 @display("p=89,225;q=queue");
-                mgmt.typename = default("Ieee80211MgmtAdhoc");
+                mgmt.typename = "Ieee80211MgmtAdhoc";
                 agent.typename = "";
         }
         mobility: RectangleMobility {
@@ -78,7 +78,7 @@ module Client
         wlan: Ieee80211Interface {
             parameters:
                 @display("p=112,134;q=queue");
-                mgmt.typename = default("Ieee80211MgmtAdhoc");
+                mgmt.typename = "Ieee80211MgmtAdhoc";
                 agent.typename = "";
         }
         mobility: RectangleMobility {
