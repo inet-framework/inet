@@ -4,7 +4,7 @@ https://warpproject.org/trac/wiki/802.11/MAC/Lower/Retransmissions (Example S.4)
 %file: test.ned
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.node.inet.WirelessHost;
+import inet.node.inet.AdhocHost;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
@@ -17,11 +17,11 @@ network RetransmissionTest
         configurator: Ipv4NetworkConfigurator {
             @display("p=61,164");
         }
-        receiver: WirelessHost {
+        receiver: AdhocHost {
             parameters:
                 @display("r=,,#707070");
         }
-        sender: WirelessHost {
+        sender: AdhocHost {
             parameters:
                 @display("r=,,#707070");
         }
@@ -79,7 +79,6 @@ ned-path = .;../../../../src;../../lib
 **.sender.wlan[*].mac.dcf.channelAccess.cwMin = 15
 **.sender.wlan[*].mac.dcf.channelAccess.cwMin = 1023
 **.receiver.wlan[*].mac.typename = "Ieee80211TesterMac"
-**.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
 
 **.sender.app[0].packets = "SSS"
 **.receiver.wlan[*].mac.actions = "BBBBBBBBBBBBBBBA"
