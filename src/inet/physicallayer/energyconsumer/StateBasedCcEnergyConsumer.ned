@@ -29,7 +29,7 @@ simple StateBasedCcEnergyConsumer extends CcEnergyConsumerBase
     parameters:
         string energySourceModule;
         double minSupplyVoltage @unit(V) = default(0V);
-        double maxSupplyVoltage @unit(V) = default(1V/0);
+        double maxSupplyVoltage @unit(V) = default(inf V);
         double offCurrentConsumption @unit(A) = default(0mA);
         double sleepCurrentConsumption @unit(A) = default(1mA);
         double switchingCurrentConsumption @unit(A) = default(1mA);

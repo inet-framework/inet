@@ -43,10 +43,10 @@ simple MobilityBase like IMobility
         bool visualizeMobility = default(true); // false means this mobility module does no visualization
         string visualRepresentation = default("^"); // determines the module that is moved by this mobility
         string displayStringTextFormat = default("p: %p\nv: %v");
-        double constraintAreaMinX @unit(m) = default(-1m/0); // min x position of the constraint area, unconstrained by default (negative infinity)
-        double constraintAreaMinY @unit(m) = default(-1m/0); // min y position of the constraint area, unconstrained by default (negative infinity)
-        double constraintAreaMinZ @unit(m) = default(-1m/0); // min z position of the constraint area, unconstrained by default (negative infinity)
-        double constraintAreaMaxX @unit(m) = default(1m/0); // max x position of the constraint area, unconstrained by default (positive infinity)
-        double constraintAreaMaxY @unit(m) = default(1m/0); // max y position of the constraint area, unconstrained by default (positive infinity)
-        double constraintAreaMaxZ @unit(m) = default(1m/0); // max z position of the constraint area, unconstrained by default (positive infinity)
+        double constraintAreaMinX @unit(m) = default(-inf m); // min x position of the constraint area, unconstrained by default (negative infinity)
+        double constraintAreaMinY @unit(m) = default(-inf m); // min y position of the constraint area, unconstrained by default (negative infinity)
+        double constraintAreaMinZ @unit(m) = default(-inf m); // min z position of the constraint area, unconstrained by default (negative infinity)
+        double constraintAreaMaxX @unit(m) = default(inf m); // max x position of the constraint area, unconstrained by default (positive infinity)
+        double constraintAreaMaxY @unit(m) = default(inf m); // max y position of the constraint area, unconstrained by default (positive infinity)
+        double constraintAreaMaxZ @unit(m) = default(inf m); // max z position of the constraint area, unconstrained by default (positive infinity)
 }
