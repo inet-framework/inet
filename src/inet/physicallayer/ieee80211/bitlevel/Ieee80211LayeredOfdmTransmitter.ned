@@ -78,7 +78,7 @@ module Ieee80211LayeredOfdmTransmitter like ITransmitter
     parameters:
         bool isCompliant = default(true);
         string levelOfDetail @enum("packet","bit","symbol","sample") = default("symbol");
-        double channelSpacing @unit(Hz) = default(0Hz/0);
+        double channelSpacing @unit(Hz) = default(nan Hz);
         double power @unit(W);
         double carrierFrequency @unit(Hz);
         double bandwidth @unit(Hz);

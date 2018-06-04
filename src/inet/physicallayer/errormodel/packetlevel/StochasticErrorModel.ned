@@ -27,8 +27,8 @@ import inet.physicallayer.base.packetlevel.ErrorModelBase;
 module StochasticErrorModel extends ErrorModelBase
 {
     parameters:
-        double packetErrorRate = default(0/0); // a probability in the range [0, 1] or NaN if not set
-        double bitErrorRate = default(0/0);    // a probability in the range [0, 1] or NaN if not set
-        double symbolErrorRate = default(0/0); // a probability in the range [0, 1] or NaN if not set
+        double packetErrorRate = default(nan); // a probability in the range [0, 1] or NaN if not set
+        double bitErrorRate = default(nan);    // a probability in the range [0, 1] or NaN if not set
+        double symbolErrorRate = default(nan); // a probability in the range [0, 1] or NaN if not set
         @class(StochasticErrorModel);
 }

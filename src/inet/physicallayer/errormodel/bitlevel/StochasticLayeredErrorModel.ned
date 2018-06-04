@@ -22,8 +22,8 @@ import inet.physicallayer.base.bitlevel.LayeredErrorModelBase;
 module StochasticLayeredErrorModel extends LayeredErrorModelBase
 {
     parameters:
-        double packetErrorRate = default(0/0);
-        double bitErrorRate = default(0/0);
-        double symbolErrorRate = default(0/0);
+        double packetErrorRate = default(nan);
+        double bitErrorRate = default(nan);
+        double symbolErrorRate = default(nan);
         @class(StochasticLayeredErrorModel);
 }
