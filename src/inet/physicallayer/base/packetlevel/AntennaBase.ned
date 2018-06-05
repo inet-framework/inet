@@ -26,13 +26,11 @@ import inet.physicallayer.contract.packetlevel.IAntenna;
 module AntennaBase like IAntenna
 {
     parameters:
-        // TODO: referencing the module environment is generally a bad idea, this parameter should be set from the parent modules 
-        string mobilityModule = default(mobilityType == "" ? "^.^.^.mobility" : ".mobility"); // the path to the mobility module relative to this module
-        string mobilityType = default("");
+        string mobilityModule; // = default(""); // the path to the mobility module relative to this module, only used if no mobility submodule is present
         int numAntennas = default(1); // the number of antennas in the antenna array
         @display("i=device/antennatower");
     submodules:
-        mobility: <mobilityType> like IMobility if mobilityType != "" {
+        mobility: <default("")> like IMobility if typename != "" {
             parameters:
                 @display("p=100,100;is=s");
         }
