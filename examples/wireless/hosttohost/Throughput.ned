@@ -46,7 +46,7 @@ module ThroughputClient
         wlan: Ieee80211Interface {
             parameters:
                 @display("p=112,134;q=queue");
-                mgmtType = "Ieee80211MgmtStaSimplified";
+                mgmt.typename = "Ieee80211MgmtStaSimplified";
         }
         interfaceTable: InterfaceTable {
             parameters:
@@ -79,7 +79,7 @@ module ThroughputServer
         wlan: Ieee80211Interface {
             parameters:
                 @display("p=120,158;q=queue");
-                mgmtType = "Ieee80211MgmtStaSimplified";
+                mgmt.typename = "Ieee80211MgmtStaSimplified";
         }
         interfaceTable: InterfaceTable {
             parameters:
@@ -119,6 +119,6 @@ network Throughput
         ap: AccessPoint {
             parameters:
                 @display("p=200,200;r=,,#707070");
-                wlan[*].mgmtType = "Ieee80211MgmtApSimplified";
+                wlan[*].mgmt.typename = "Ieee80211MgmtApSimplified";
         }
 }

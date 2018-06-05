@@ -49,7 +49,7 @@ module WirelessAPWithSink
             parameters:
                 @display("p=169,231;q=queue");
                 llc.typename = default("Ieee80211Portal");
-                mgmtType = default("Ieee80211MgmtApSimplified");
+                mgmt.typename = default("Ieee80211MgmtApSimplified");
         }
         mobility: StationaryMobility {
             parameters:

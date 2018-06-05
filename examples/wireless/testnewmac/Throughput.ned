@@ -50,7 +50,7 @@ module ThroughputClient
         wlan: Ieee80211Interface {
             parameters:
                 @display("p=112,134;q=queue");
-                mgmtType = "Ieee80211MgmtAdhoc";
+                mgmt.typename = "Ieee80211MgmtAdhoc";
                 mac.typename = "Ieee80211Mac";
         }
         mobility: CircleMobility {
@@ -84,7 +84,7 @@ module ThroughputServer
         wlan: Ieee80211Interface {
             parameters:
                 @display("p=120,158;q=queue");
-                mgmtType = "Ieee80211MgmtAdhoc";
+                mgmt.typename = "Ieee80211MgmtAdhoc";
         }
         mobility: StationaryMobility {
             parameters:

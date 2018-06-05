@@ -44,7 +44,7 @@ module ThroughputClient
         wlan: Ieee80211Interface {
             parameters:
                 @display("p=112,134;q=queue");
-                mgmtType = default("Ieee80211MgmtStaSimplified");
+                mgmt.typename = default("Ieee80211MgmtStaSimplified");
         }
         interfaceTable: InterfaceTable {
             parameters:

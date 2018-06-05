@@ -80,7 +80,7 @@ ned-path = .;../../../../src;../../lib
 **.sender.wlan[*].mac.dcf.channelAccess.cwMin = 1023
 **.sender.wlan[*].mac.dcf.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = 2000B
 **.receiver.wlan[*].mac.typename = "Ieee80211TesterMac"
-**.wlan[*].mgmtType = "Ieee80211MgmtAdhoc"
+**.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
 
 **.sender.app[0].packets = "LL"
 **.receiver.wlan[*].mac.actions = "ABAAAA"

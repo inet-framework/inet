@@ -45,10 +45,10 @@ network Lan80211
         }
         host[numHosts]: WirelessHost {
             @display("r=,,#707070");
-            wlan[*].mgmtType = "Ieee80211MgmtStaSimplified";
+            wlan[*].mgmt.typename = "Ieee80211MgmtStaSimplified";
         }
         ap: AccessPoint {
             @display("p=213,174;r=,,#707070");
-            wlan[*].mgmtType = "Ieee80211MgmtApSimplified";
+            wlan[*].mgmt.typename = "Ieee80211MgmtApSimplified";
         }
 }
