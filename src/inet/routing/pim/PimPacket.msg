@@ -93,7 +93,7 @@ class GenerationIdOption extends HelloOption
 struct EncodedAddress
 {
     Ipv4Address IPaddress;
-    bool         S;
+    bool        S;
     bool        W;                //WC bit
     bool        R;                //RPT bit
 }
@@ -103,8 +103,8 @@ struct EncodedAddress
 class JoinPruneGroup extends cObject
 {
     Ipv4Address     groupAddress;
-    EncodedAddress     joinedSourceAddress[];
-    EncodedAddress     prunedSourceAddress[];
+    EncodedAddress  joinedSourceAddress[];
+    EncodedAddress  prunedSourceAddress[];
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -141,7 +141,7 @@ class PimAssert extends PimPacket
     type = Assert;
     Ipv4Address        groupAddress;
     Ipv4Address        sourceAddress;
-    bool            R;
+    bool               R;
     int                metric;
     int                metricPreference;
 }
@@ -168,9 +168,9 @@ class PimStateRefresh extends PimPacket
     Ipv4Address        originatorAddress;
     int                metric;
     int                metricPreference;
-    short            maskLen;
-    short            ttl;
-    bool            P;
+    short              maskLen;
+    short              ttl;
+    bool               P;
     int                interval;
 }
 // Register message
