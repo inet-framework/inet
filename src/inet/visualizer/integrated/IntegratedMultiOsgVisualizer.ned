@@ -75,91 +75,91 @@ module IntegratedMultiOsgVisualizer like IIntegratedVisualizer
         int numTransportConnectionVisualizers = default(1);
    		*.networkNodeVisualizerModule = default(absPath(".networkNodeVisualizer[0]"));
     submodules:
-        sceneVisualizer[numSceneVisualizers]: <default("SceneOsgVisualizer")> like ISceneVisualizer if typename!="" {
+        sceneVisualizer[numSceneVisualizers]: <default("SceneOsgVisualizer")> like ISceneVisualizer if typename != "" {
             parameters:
                 @display("p=150,50,row,25");
         }
-        physicalEnvironmentVisualizer[numPhysicalEnvironmentVisualizers]: <default("PhysicalEnvironmentOsgVisualizer")> like IPhysicalEnvironmentVisualizer if typename!="" {
+        physicalEnvironmentVisualizer[numPhysicalEnvironmentVisualizers]: <default("PhysicalEnvironmentOsgVisualizer")> like IPhysicalEnvironmentVisualizer if typename != "" {
             parameters:
                 @display("p=150,150,row,25");
         }
-        networkNodeVisualizer[numNetworkNodeVisualizers]: <default("NetworkNodeOsgVisualizer")> like INetworkNodeVisualizer if typename!="" {
+        networkNodeVisualizer[numNetworkNodeVisualizers]: <default("NetworkNodeOsgVisualizer")> like INetworkNodeVisualizer if typename != "" {
             parameters:
                 @display("p=150,250,row,25");
         }
-        networkConnectionVisualizer[numNetworkConnectionVisualizers]: <default("NetworkConnectionOsgVisualizer")> like INetworkConnectionVisualizer if typename!="" {
+        networkConnectionVisualizer[numNetworkConnectionVisualizers]: <default("NetworkConnectionOsgVisualizer")> like INetworkConnectionVisualizer if typename != "" {
             parameters:
                 @display("p=150,350,row,25");
         }
-        mobilityVisualizer[numMobilityVisualizers]: <default("MobilityOsgVisualizer")> like IMobilityVisualizer if typename!="" {
+        mobilityVisualizer[numMobilityVisualizers]: <default("MobilityOsgVisualizer")> like IMobilityVisualizer if typename != "" {
             parameters:
                 @display("p=150,450,row,25");
         }
-        statisticVisualizer[numStatisticVisualizers]: <default("StatisticOsgVisualizer")> like IStatisticVisualizer if typename!="" {
+        statisticVisualizer[numStatisticVisualizers]: <default("StatisticOsgVisualizer")> like IStatisticVisualizer if typename != "" {
             parameters:
                 @display("p=150,550,row,25");
         }
-        infoVisualizer[numInfoVisualizers]: <default("InfoOsgVisualizer")> like IInfoVisualizer if typename!="" {
+        infoVisualizer[numInfoVisualizers]: <default("InfoOsgVisualizer")> like IInfoVisualizer if typename != "" {
             parameters:
                 @display("p=150,650,row,25");
         }
-        energyStorageVisualizer[numEnergyStorageVisualizers]: <default("EnergyStorageOsgVisualizer")> like IEnergyStorageVisualizer if typename!="" {
+        energyStorageVisualizer[numEnergyStorageVisualizers]: <default("EnergyStorageOsgVisualizer")> like IEnergyStorageVisualizer if typename != "" {
             parameters:
                 @display("p=150,750,row,25");
         }
-        mediumVisualizer[numMediumVisualizers]: <default("MediumOsgVisualizer")> like IMediumVisualizer if typename!="" {
+        mediumVisualizer[numMediumVisualizers]: <default("MediumOsgVisualizer")> like IMediumVisualizer if typename != "" {
             parameters:
                 @display("p=150,850,row,25");
         }
-        obstacleLossVisualizer[numObstacleLossVisualizers]: <default("TracingObstacleLossOsgVisualizer")> like ITracingObstacleLossVisualizer if typename!="" {
+        obstacleLossVisualizer[numObstacleLossVisualizers]: <default("TracingObstacleLossOsgVisualizer")> like ITracingObstacleLossVisualizer if typename != "" {
             parameters:
                 @display("p=150,950,row,25");
         }
-        packetDropVisualizer[numPacketDropVisualizers]: <default("PacketDropOsgVisualizer")> like IPacketDropVisualizer if typename!="" {
+        packetDropVisualizer[numPacketDropVisualizers]: <default("PacketDropOsgVisualizer")> like IPacketDropVisualizer if typename != "" {
             parameters:
                 @display("p=150,1050,row,25");
         }
-        queueVisualizer[numQueueVisualizers]: <default("QueueOsgVisualizer")> like IQueueVisualizer if typename!="" {
+        queueVisualizer[numQueueVisualizers]: <default("QueueOsgVisualizer")> like IQueueVisualizer if typename != "" {
             parameters:
                 @display("p=450,50,row,25");
         }
-        radioVisualizer[numRadioVisualizers]: <default("RadioOsgVisualizer")> like IRadioVisualizer if typename!="" {
+        radioVisualizer[numRadioVisualizers]: <default("RadioOsgVisualizer")> like IRadioVisualizer if typename != "" {
             parameters:
                 @display("p=450,150,row,25");
         }
-        physicalLinkVisualizer[numPhysicalLinkVisualizers]: <default("PhysicalLinkOsgVisualizer")> like IPhysicalLinkVisualizer if typename!="" {
+        physicalLinkVisualizer[numPhysicalLinkVisualizers]: <default("PhysicalLinkOsgVisualizer")> like IPhysicalLinkVisualizer if typename != "" {
             parameters:
                 @display("p=450,250,row,25");
         }
-        interfaceTableVisualizer[numInterfaceTableVisualizers]: <default("InterfaceTableOsgVisualizer")> like IInterfaceTableVisualizer if typename!="" {
+        interfaceTableVisualizer[numInterfaceTableVisualizers]: <default("InterfaceTableOsgVisualizer")> like IInterfaceTableVisualizer if typename != "" {
             parameters:
                 @display("p=450,350,row,25");
         }
-        dataLinkVisualizer[numDataLinkVisualizers]: <default("DataLinkOsgVisualizer")> like IDataLinkVisualizer if typename!="" {
+        dataLinkVisualizer[numDataLinkVisualizers]: <default("DataLinkOsgVisualizer")> like IDataLinkVisualizer if typename != "" {
             parameters:
                 @display("p=450,450,row,25");
         }
-        linkBreakVisualizer[numLinkBreakVisualizers]: <default("LinkBreakOsgVisualizer")> like ILinkBreakVisualizer if typename!="" {
+        linkBreakVisualizer[numLinkBreakVisualizers]: <default("LinkBreakOsgVisualizer")> like ILinkBreakVisualizer if typename != "" {
             parameters:
                 @display("p=450,550,row,25");
         }
-        ieee80211Visualizer[numIeee80211Visualizers]: <default("Ieee80211OsgVisualizer")> like IIeee80211Visualizer if typename!="" {
+        ieee80211Visualizer[numIeee80211Visualizers]: <default("Ieee80211OsgVisualizer")> like IIeee80211Visualizer if typename != "" {
             parameters:
                 @display("p=450,650,row,25");
         }
-        networkRouteVisualizer[numNetworkRouteVisualizers]: <default("NetworkRouteOsgVisualizer")> like INetworkRouteVisualizer if typename!="" {
+        networkRouteVisualizer[numNetworkRouteVisualizers]: <default("NetworkRouteOsgVisualizer")> like INetworkRouteVisualizer if typename != "" {
             parameters:
                 @display("p=450,750,row,25");
         }
-        routingTableVisualizer[numRoutingTableVisualizers]: <default("RoutingTableOsgVisualizer")> like IRoutingTableVisualizer if typename!="" {
+        routingTableVisualizer[numRoutingTableVisualizers]: <default("RoutingTableOsgVisualizer")> like IRoutingTableVisualizer if typename != "" {
             parameters:
                 @display("p=450,850,row,25");
         }
-        transportRouteVisualizer[numTransportRouteVisualizers]: <default("TransportRouteOsgVisualizer")> like ITransportRouteVisualizer if typename!="" {
+        transportRouteVisualizer[numTransportRouteVisualizers]: <default("TransportRouteOsgVisualizer")> like ITransportRouteVisualizer if typename != "" {
             parameters:
                 @display("p=450,950,row,25");
         }
-        transportConnectionVisualizer[numTransportConnectionVisualizers]: <default("TransportConnectionOsgVisualizer")> like ITransportConnectionVisualizer if typename!="" {
+        transportConnectionVisualizer[numTransportConnectionVisualizers]: <default("TransportConnectionOsgVisualizer")> like ITransportConnectionVisualizer if typename != "" {
             parameters:
                 @display("p=450,1050,row,25");
         }

@@ -65,11 +65,11 @@ module Ieee80211Interface like IWirelessInterface
             parameters:
                 @display("p=250,131");
         }
-        classifier: <default("")> like IIeee8021dQosClassifier if typename!="" {
+        classifier: <default("")> like IIeee8021dQosClassifier if typename != "" {
             parameters:
                 @display("p=400,82");
         }
-        agent: <default("Ieee80211AgentSta")> like IIeee80211Agent if typename!="" {
+        agent: <default("Ieee80211AgentSta")> like IIeee80211Agent if typename != "" {
             parameters:
                 @display("p=550,250");
         }

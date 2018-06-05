@@ -29,11 +29,11 @@ module StatisticVisualizer like IStatisticVisualizer
     parameters:
         @display("i=block/app_s");
     submodules:
-        canvasVisualizer: <default("StatisticCanvasVisualizer")> like IStatisticVisualizer if typename!="" {
+        canvasVisualizer: <default("StatisticCanvasVisualizer")> like IStatisticVisualizer if typename != "" {
             parameters:
                 @display("p=100,50");
         }
-        osgVisualizer: <default("StatisticOsgVisualizer")> like IStatisticVisualizer if typename!="" {
+        osgVisualizer: <default("StatisticOsgVisualizer")> like IStatisticVisualizer if typename != "" {
             parameters:
                 @display("p=100,150");
         }

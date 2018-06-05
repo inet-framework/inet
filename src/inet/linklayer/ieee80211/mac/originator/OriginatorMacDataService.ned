@@ -26,7 +26,7 @@ module OriginatorMacDataService
         @class("OriginatorMacDataService");
         @display("i=block/fork");
     submodules:
-        fragmentationPolicy: <"BasicFragmentationPolicy"> like IFragmentationPolicy if typename!="" {
+        fragmentationPolicy: <"BasicFragmentationPolicy"> like IFragmentationPolicy if typename != "" {
             parameters:
                 @display("p=100,100");
         }

@@ -106,7 +106,7 @@ module Radio extends PhysicalLayerBase like IRadio
             parameters:
                 @display("p=100,300");
         }
-        energyConsumer: <default("")> like IEnergyConsumer if typename!="" {
+        energyConsumer: <default("")> like IEnergyConsumer if typename != "" {
             parameters:
                 @display("p=100,400");
         }

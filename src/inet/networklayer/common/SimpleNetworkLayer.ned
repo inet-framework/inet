@@ -47,7 +47,7 @@ module SimpleNetworkLayer like INetworkLayer
             parameters:
                 @display("p=300,200;b=480,5");
         }
-        arp: <default("")> like IArp if typename!="" {
+        arp: <default("")> like IArp if typename != "" {
             parameters:
                 @display("p=150,300;q=pendingQueue");
         }

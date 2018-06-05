@@ -64,7 +64,7 @@ module BGPRouterSimple
             parameters:
                 @display("i=block/downarrow_s;p=196,124");
         }
-        tcp: <default(firstAvailable("Tcp","TcpLwip","TcpNsc"))> like ITcp if typename!="" {
+        tcp: <default(firstAvailable("Tcp","TcpLwip","TcpNsc"))> like ITcp if typename != "" {
             parameters:
                 @display("p=160,202;i=block/transport");
         }

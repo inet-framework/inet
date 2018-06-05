@@ -29,11 +29,11 @@ module PacketDropVisualizer like IPacketDropVisualizer
     parameters:
         @display("i=block/app_s");
     submodules:
-        canvasVisualizer: <default("PacketDropCanvasVisualizer")> like IPacketDropVisualizer if typename!="" {
+        canvasVisualizer: <default("PacketDropCanvasVisualizer")> like IPacketDropVisualizer if typename != "" {
             parameters:
                 @display("p=100,50");
         }
-        osgVisualizer: <default("PacketDropOsgVisualizer")> like IPacketDropVisualizer if typename!="" {
+        osgVisualizer: <default("PacketDropOsgVisualizer")> like IPacketDropVisualizer if typename != "" {
             parameters:
                 @display("p=100,150");
         }

@@ -49,10 +49,10 @@ module PppInterface like IPppInterface
         inputHook[numInputHooks]: <default("Nop")> like IHook if numInputHooks>0 {
             @display("p=177,33");
         }
-        ingressTC: <default("")> like ITrafficConditioner if typename!="" {
+        ingressTC: <default("")> like ITrafficConditioner if typename != "" {
             @display("p=177,100");
         }
-        egressTC: <default("")> like ITrafficConditioner if typename!="" {
+        egressTC: <default("")> like ITrafficConditioner if typename != "" {
             @display("p=42,100");
         }
         queue: <default("DropTailQueue")> like IOutputQueue if typename != "" {

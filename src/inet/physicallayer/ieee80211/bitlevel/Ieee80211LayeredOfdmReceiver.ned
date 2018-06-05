@@ -48,25 +48,25 @@ module Ieee80211LayeredOfdmReceiver like IReceiver
 
         @display("i=block/rx");
     submodules:
-        errorModel: <default("")> like ILayeredErrorModel if typename!="" {
+        errorModel: <default("")> like ILayeredErrorModel if typename != "" {
             @display("p=300,400");
         }
-        dataDecoder: <default("")> like IDecoder if typename!="" {
+        dataDecoder: <default("")> like IDecoder if typename != "" {
             @display("p=100,100");
         }
-        signalDecoder: <default("")> like IDecoder if typename!="" {
+        signalDecoder: <default("")> like IDecoder if typename != "" {
             @display("p=300,100");
         }
-        signalDemodulator: <default("")> like IDemodulator if typename!="" {
+        signalDemodulator: <default("")> like IDemodulator if typename != "" {
             @display("p=300,200");
         }
-        dataDemodulator: <default("")> like IDemodulator if typename!="" {
+        dataDemodulator: <default("")> like IDemodulator if typename != "" {
             @display("p=100,200");
         }
-        pulseFilter: <default("")> like IPulseFilter if typename!="" {
+        pulseFilter: <default("")> like IPulseFilter if typename != "" {
             @display("p=100,300");
         }
-        analogDigitalConverter: <default("")> like IAnalogDigitalConverter if typename!="" {
+        analogDigitalConverter: <default("")> like IAnalogDigitalConverter if typename != "" {
             @display("p=100,400");
         }
 }

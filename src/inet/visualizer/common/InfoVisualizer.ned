@@ -29,11 +29,11 @@ module InfoVisualizer like IInfoVisualizer
     parameters:
         @display("i=block/app_s");
     submodules:
-        canvasVisualizer: <default("InfoCanvasVisualizer")> like IInfoVisualizer if typename!="" {
+        canvasVisualizer: <default("InfoCanvasVisualizer")> like IInfoVisualizer if typename != "" {
             parameters:
                 @display("p=100,50");
         }
-        osgVisualizer: <default("InfoOsgVisualizer")> like IInfoVisualizer if typename!="" {
+        osgVisualizer: <default("InfoOsgVisualizer")> like IInfoVisualizer if typename != "" {
             parameters:
                 @display("p=100,150");
         }

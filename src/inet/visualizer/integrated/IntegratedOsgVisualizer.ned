@@ -52,91 +52,91 @@ module IntegratedOsgVisualizer like IIntegratedVisualizer
     parameters:
         @display("i=block/app_s");
     submodules:
-        sceneVisualizer: <default("SceneOsgVisualizer")> like ISceneVisualizer if typename!="" {
+        sceneVisualizer: <default("SceneOsgVisualizer")> like ISceneVisualizer if typename != "" {
             parameters:
                 @display("p=150,50");
         }
-        physicalEnvironmentVisualizer: <default("PhysicalEnvironmentOsgVisualizer")> like IPhysicalEnvironmentVisualizer if typename!="" {
+        physicalEnvironmentVisualizer: <default("PhysicalEnvironmentOsgVisualizer")> like IPhysicalEnvironmentVisualizer if typename != "" {
             parameters:
                 @display("p=150,150");
         }
-        networkNodeVisualizer: <default("NetworkNodeOsgVisualizer")> like INetworkNodeVisualizer if typename!="" {
+        networkNodeVisualizer: <default("NetworkNodeOsgVisualizer")> like INetworkNodeVisualizer if typename != "" {
             parameters:
                 @display("p=150,250");
         }
-        networkConnectionVisualizer: <default("NetworkConnectionOsgVisualizer")> like INetworkConnectionVisualizer if typename!="" {
+        networkConnectionVisualizer: <default("NetworkConnectionOsgVisualizer")> like INetworkConnectionVisualizer if typename != "" {
             parameters:
                 @display("p=150,350");
         }
-        mobilityVisualizer: <default("MobilityOsgVisualizer")> like IMobilityVisualizer if typename!="" {
+        mobilityVisualizer: <default("MobilityOsgVisualizer")> like IMobilityVisualizer if typename != "" {
             parameters:
                 @display("p=150,450");
         }
-        statisticVisualizer: <default("StatisticOsgVisualizer")> like IStatisticVisualizer if typename!="" {
+        statisticVisualizer: <default("StatisticOsgVisualizer")> like IStatisticVisualizer if typename != "" {
             parameters:
                 @display("p=150,550");
         }
-        infoVisualizer: <default("InfoOsgVisualizer")> like IInfoVisualizer if typename!="" {
+        infoVisualizer: <default("InfoOsgVisualizer")> like IInfoVisualizer if typename != "" {
             parameters:
                 @display("p=150,650");
         }
-        energyStorageVisualizer: <default("EnergyStorageOsgVisualizer")> like IEnergyStorageVisualizer if typename!="" {
+        energyStorageVisualizer: <default("EnergyStorageOsgVisualizer")> like IEnergyStorageVisualizer if typename != "" {
             parameters:
                 @display("p=150,750");
         }
-        mediumVisualizer: <default("MediumOsgVisualizer")> like IMediumVisualizer if typename!="" {
+        mediumVisualizer: <default("MediumOsgVisualizer")> like IMediumVisualizer if typename != "" {
             parameters:
                 @display("p=150,850");
         }
-        obstacleLossVisualizer: <default("TracingObstacleLossOsgVisualizer")> like ITracingObstacleLossVisualizer if typename!="" {
+        obstacleLossVisualizer: <default("TracingObstacleLossOsgVisualizer")> like ITracingObstacleLossVisualizer if typename != "" {
             parameters:
                 @display("p=150,950");
         }
-        packetDropVisualizer: <default("PacketDropOsgVisualizer")> like IPacketDropVisualizer if typename!="" {
+        packetDropVisualizer: <default("PacketDropOsgVisualizer")> like IPacketDropVisualizer if typename != "" {
             parameters:
                 @display("p=150,1050");
         }
-        queueVisualizer: <default("QueueOsgVisualizer")> like IQueueVisualizer if typename!="" {
+        queueVisualizer: <default("QueueOsgVisualizer")> like IQueueVisualizer if typename != "" {
             parameters:
                 @display("p=450,50");
         }
-        radioVisualizer: <default("RadioOsgVisualizer")> like IRadioVisualizer if typename!="" {
+        radioVisualizer: <default("RadioOsgVisualizer")> like IRadioVisualizer if typename != "" {
             parameters:
                 @display("p=450,150");
         }
-        physicalLinkVisualizer: <default("PhysicalLinkOsgVisualizer")> like IPhysicalLinkVisualizer if typename!="" {
+        physicalLinkVisualizer: <default("PhysicalLinkOsgVisualizer")> like IPhysicalLinkVisualizer if typename != "" {
             parameters:
                 @display("p=450,250");
         }
-        interfaceTableVisualizer: <default("InterfaceTableOsgVisualizer")> like IInterfaceTableVisualizer if typename!="" {
+        interfaceTableVisualizer: <default("InterfaceTableOsgVisualizer")> like IInterfaceTableVisualizer if typename != "" {
             parameters:
                 @display("p=450,350");
         }
-        dataLinkVisualizer: <default("DataLinkOsgVisualizer")> like IDataLinkVisualizer if typename!="" {
+        dataLinkVisualizer: <default("DataLinkOsgVisualizer")> like IDataLinkVisualizer if typename != "" {
             parameters:
                 @display("p=450,450");
         }
-        linkBreakVisualizer: <default("LinkBreakOsgVisualizer")> like ILinkBreakVisualizer if typename!="" {
+        linkBreakVisualizer: <default("LinkBreakOsgVisualizer")> like ILinkBreakVisualizer if typename != "" {
             parameters:
                 @display("p=450,550");
         }
-        ieee80211Visualizer: <default("Ieee80211OsgVisualizer")> like IIeee80211Visualizer if typename!="" {
+        ieee80211Visualizer: <default("Ieee80211OsgVisualizer")> like IIeee80211Visualizer if typename != "" {
             parameters:
                 @display("p=450,650");
         }
-        networkRouteVisualizer: <default("NetworkRouteOsgVisualizer")> like INetworkRouteVisualizer if typename!="" {
+        networkRouteVisualizer: <default("NetworkRouteOsgVisualizer")> like INetworkRouteVisualizer if typename != "" {
             parameters:
                 @display("p=450,750");
         }
-        routingTableVisualizer: <default("RoutingTableOsgVisualizer")> like IRoutingTableVisualizer if typename!="" {
+        routingTableVisualizer: <default("RoutingTableOsgVisualizer")> like IRoutingTableVisualizer if typename != "" {
             parameters:
                 @display("p=450,850");
         }
-        transportRouteVisualizer: <default("TransportRouteOsgVisualizer")> like ITransportRouteVisualizer if typename!="" {
+        transportRouteVisualizer: <default("TransportRouteOsgVisualizer")> like ITransportRouteVisualizer if typename != "" {
             parameters:
                 @display("p=450,950");
         }
-        transportConnectionVisualizer: <default("TransportConnectionOsgVisualizer")> like ITransportConnectionVisualizer if typename!="" {
+        transportConnectionVisualizer: <default("TransportConnectionOsgVisualizer")> like ITransportConnectionVisualizer if typename != "" {
             parameters:
                 @display("p=450,1050");
         }

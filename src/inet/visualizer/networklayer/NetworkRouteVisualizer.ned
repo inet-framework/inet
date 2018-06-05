@@ -29,11 +29,11 @@ module NetworkRouteVisualizer like INetworkRouteVisualizer
     parameters:
         @display("i=block/app_s");
     submodules:
-        canvasVisualizer: <default("NetworkRouteCanvasVisualizer")> like INetworkRouteVisualizer if typename!="" {
+        canvasVisualizer: <default("NetworkRouteCanvasVisualizer")> like INetworkRouteVisualizer if typename != "" {
             parameters:
                 @display("p=100,50");
         }
-        osgVisualizer: <default("NetworkRouteOsgVisualizer")> like INetworkRouteVisualizer if typename!="" {
+        osgVisualizer: <default("NetworkRouteOsgVisualizer")> like INetworkRouteVisualizer if typename != "" {
             parameters:
                 @display("p=100,150");
         }

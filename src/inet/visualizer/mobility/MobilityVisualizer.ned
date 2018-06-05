@@ -29,11 +29,11 @@ module MobilityVisualizer like IMobilityVisualizer
     parameters:
         @display("i=block/app_s");
     submodules:
-        canvasVisualizer: <default("MobilityCanvasVisualizer")> like IMobilityVisualizer if typename!="" {
+        canvasVisualizer: <default("MobilityCanvasVisualizer")> like IMobilityVisualizer if typename != "" {
             parameters:
                 @display("p=100,50");
         }
-        osgVisualizer: <default("MobilityOsgVisualizer")> like IMobilityVisualizer if typename!="" {
+        osgVisualizer: <default("MobilityOsgVisualizer")> like IMobilityVisualizer if typename != "" {
             parameters:
                 @display("p=100,150");
         }

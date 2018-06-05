@@ -29,11 +29,11 @@ module QueueVisualizer like IQueueVisualizer
     parameters:
         @display("i=block/app_s");
     submodules:
-        canvasVisualizer: <default("QueueCanvasVisualizer")> like IQueueVisualizer if typename!="" {
+        canvasVisualizer: <default("QueueCanvasVisualizer")> like IQueueVisualizer if typename != "" {
             parameters:
                 @display("p=100,50");
         }
-        osgVisualizer: <default("QueueOsgVisualizer")> like IQueueVisualizer if typename!="" {
+        osgVisualizer: <default("QueueOsgVisualizer")> like IQueueVisualizer if typename != "" {
             parameters:
                 @display("p=100,150");
         }

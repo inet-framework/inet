@@ -27,11 +27,11 @@ module IntegratedVisualizer like IIntegratedVisualizer
     parameters:
         @display("i=block/app_s");
     submodules:
-        canvasVisualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if typename!="" {
+        canvasVisualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if typename != "" {
             parameters:
                 @display("p=100,50");
         }
-        osgVisualizer: <default("")> like IIntegratedVisualizer if typename!="" {
+        osgVisualizer: <default("")> like IIntegratedVisualizer if typename != "" {
             parameters:
                 @display("p=100,150");
         }

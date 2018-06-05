@@ -51,13 +51,13 @@ module EthernetInterface like IEthernetInterface
         inputHook[numInputHooks]: <default("Nop")> like IHook if numInputHooks>0 {
             @display("p=265,83");
         }
-        ingressTC: <default("")> like ITrafficConditioner if typename!="" {
+        ingressTC: <default("")> like ITrafficConditioner if typename != "" {
             @display("p=292,158");
         }
-        egressTC: <default("")> like ITrafficConditioner if typename!="" {
+        egressTC: <default("")> like ITrafficConditioner if typename != "" {
             @display("p=53,158");
         }
-        queue: <default("")> like IOutputQueue if typename!="" {
+        queue: <default("")> like IOutputQueue if typename != "" {
             parameters:
                 @display("p=107,263;q=l2queue");
         }

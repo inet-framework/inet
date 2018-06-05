@@ -29,11 +29,11 @@ module RoutingTableVisualizer like IRoutingTableVisualizer
     parameters:
         @display("i=block/app_s");
     submodules:
-        canvasVisualizer: <default("RoutingTableCanvasVisualizer")> like IRoutingTableVisualizer if typename!="" {
+        canvasVisualizer: <default("RoutingTableCanvasVisualizer")> like IRoutingTableVisualizer if typename != "" {
             parameters:
                 @display("p=100,50");
         }
-        osgVisualizer: <default("RoutingTableOsgVisualizer")> like IRoutingTableVisualizer if typename!="" {
+        osgVisualizer: <default("RoutingTableOsgVisualizer")> like IRoutingTableVisualizer if typename != "" {
             parameters:
                 @display("p=100,150");
         }

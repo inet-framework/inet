@@ -60,16 +60,16 @@ module ApskLayeredTransmitter like ITransmitter
         @class(ApskLayeredTransmitter);
 
     submodules:
-        encoder: <default("ApskEncoder")> like IEncoder if typename!="" {
+        encoder: <default("ApskEncoder")> like IEncoder if typename != "" {
             @display("p=100,100");
         }
         modulator: <default("ApskModulator")> like IModulator {
             @display("p=100,200");
         }
-        pulseShaper: <default("")> like IPulseShaper if typename!="" {
+        pulseShaper: <default("")> like IPulseShaper if typename != "" {
             @display("p=100,300");
         }
-        digitalAnalogConverter: <default("")> like IDigitalAnalogConverter if typename!="" {
+        digitalAnalogConverter: <default("")> like IDigitalAnalogConverter if typename != "" {
             @display("p=100,400");
         }
 }

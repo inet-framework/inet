@@ -29,11 +29,11 @@ module SceneVisualizer like ISceneVisualizer
     parameters:
         @display("i=block/app_s");
     submodules:
-        canvasVisualizer: <default("SceneCanvasVisualizer")> like ISceneVisualizer if typename!="" {
+        canvasVisualizer: <default("SceneCanvasVisualizer")> like ISceneVisualizer if typename != "" {
             parameters:
                 @display("p=100,50");
         }
-        osgVisualizer: <default("SceneOsgVisualizer")> like ISceneVisualizer if typename!="" {
+        osgVisualizer: <default("SceneOsgVisualizer")> like ISceneVisualizer if typename != "" {
             parameters:
                 @display("p=100,150");
         }

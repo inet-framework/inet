@@ -29,11 +29,11 @@ module Ieee80211Visualizer like IIeee80211Visualizer
     parameters:
         @display("i=block/app_s");
     submodules:
-        canvasVisualizer: <default("Ieee80211CanvasVisualizer")> like IIeee80211Visualizer if typename!="" {
+        canvasVisualizer: <default("Ieee80211CanvasVisualizer")> like IIeee80211Visualizer if typename != "" {
             parameters:
                 @display("p=100,50");
         }
-        osgVisualizer: <default("Ieee80211OsgVisualizer")> like IIeee80211Visualizer if typename!="" {
+        osgVisualizer: <default("Ieee80211OsgVisualizer")> like IIeee80211Visualizer if typename != "" {
             parameters:
                 @display("p=100,150");
         }

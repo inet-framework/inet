@@ -40,13 +40,13 @@ module Ieee80211OfdmEncoder like IEncoder
         @class(Ieee80211OfdmEncoderModule);
 
     submodules:
-        fecEncoder: <default("")> like IFecCoder if typename!="" {
+        fecEncoder: <default("")> like IFecCoder if typename != "" {
             @display("p=100,200");
         }
-        scrambler: <default("")> like IScrambler if typename!="" {
+        scrambler: <default("")> like IScrambler if typename != "" {
             @display("p=100,100");
         }
-        interleaver: <default("")> like IInterleaver if typename!="" {
+        interleaver: <default("")> like IInterleaver if typename != "" {
             @display("p=100,300");
         }
 }

@@ -176,11 +176,11 @@ module PhysicalEnvironment like IPhysicalEnvironment
         @class(PhysicalEnvironment);
 
     submodules:
-        objectCache: <default("")> like IObjectCache if typename!="" {
+        objectCache: <default("")> like IObjectCache if typename != "" {
             parameters:
                 @display("p=100,100");
         }
-        ground: <default("")> like IGround if typename!="" {
+        ground: <default("")> like IGround if typename != "" {
             parameters:
                 @display("p=100,200");
         }

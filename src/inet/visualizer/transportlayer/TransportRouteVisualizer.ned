@@ -29,11 +29,11 @@ module TransportRouteVisualizer like ITransportRouteVisualizer
     parameters:
         @display("i=block/app_s");
     submodules:
-        canvasVisualizer: <default("TransportRouteCanvasVisualizer")> like ITransportRouteVisualizer if typename!="" {
+        canvasVisualizer: <default("TransportRouteCanvasVisualizer")> like ITransportRouteVisualizer if typename != "" {
             parameters:
                 @display("p=100,50");
         }
-        osgVisualizer: <default("TransportRouteOsgVisualizer")> like ITransportRouteVisualizer if typename!="" {
+        osgVisualizer: <default("TransportRouteOsgVisualizer")> like ITransportRouteVisualizer if typename != "" {
             parameters:
                 @display("p=100,150");
         }

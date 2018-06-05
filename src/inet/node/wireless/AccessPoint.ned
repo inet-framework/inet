@@ -75,7 +75,7 @@ module AccessPoint
             parameters:
                 @display("p=100,400;is=s");
         }
-        relayUnit: <default(firstAvailable("Ieee8021dRelay","MacRelayUnit"))> like IMacRelayUnit if sizeof(ethg)+numWlanInterfaces > 1 && typename!="" {
+        relayUnit: <default(firstAvailable("Ieee8021dRelay","MacRelayUnit"))> like IMacRelayUnit if sizeof(ethg)+numWlanInterfaces > 1 && typename != "" {
             parameters:
                 @display("p=400,200");
         }

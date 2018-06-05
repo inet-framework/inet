@@ -29,11 +29,11 @@ module NetworkNodeVisualizer like INetworkNodeVisualizer
     parameters:
         @display("i=block/app_s");
     submodules:
-        canvasVisualizer: <default("NetworkNodeCanvasVisualizer")> like INetworkNodeVisualizer if typename!="" {
+        canvasVisualizer: <default("NetworkNodeCanvasVisualizer")> like INetworkNodeVisualizer if typename != "" {
             parameters:
                 @display("p=100,50");
         }
-        osgVisualizer: <default("NetworkNodeOsgVisualizer")> like INetworkNodeVisualizer if typename!="" {
+        osgVisualizer: <default("NetworkNodeOsgVisualizer")> like INetworkNodeVisualizer if typename != "" {
             parameters:
                 @display("p=100,150");
         }

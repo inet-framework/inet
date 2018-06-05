@@ -80,7 +80,7 @@ module Hcf
                 rateControlModule = "^.rateControl";
                 @display("p=350,100");
         }
-        rateControl: <default("")> like IRateControl if typename!="" {
+        rateControl: <default("")> like IRateControl if typename != "" {
             parameters:
                 @display("p=350,200");
         }

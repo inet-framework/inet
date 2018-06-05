@@ -36,13 +36,13 @@ module ApskEncoder like IEncoder
         @class(ApskEncoder);
 
     submodules:
-        scrambler: <default("")> like IScrambler if typename!="" {
+        scrambler: <default("")> like IScrambler if typename != "" {
             @display("p=100,100");
         }
-        fecEncoder: <default("")> like IFecCoder if typename!="" {
+        fecEncoder: <default("")> like IFecCoder if typename != "" {
             @display("p=100,200");
         }
-        interleaver: <default("")> like IInterleaver if typename!="" {
+        interleaver: <default("")> like IInterleaver if typename != "" {
             @display("p=100,300");
         }
 }

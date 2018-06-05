@@ -71,7 +71,7 @@ module RadioMedium like IRadioMedium
             parameters:
                 @display("p=100,200");
         }
-        backgroundNoise: <default("")> like IBackgroundNoise if typename!="" {
+        backgroundNoise: <default("")> like IBackgroundNoise if typename != "" {
             parameters:
                 @display("p=100,300");
         }
@@ -79,7 +79,7 @@ module RadioMedium like IRadioMedium
             parameters:
                 @display("p=300,100");
         }
-        obstacleLoss: <default("")> like IObstacleLoss if typename!="" {
+        obstacleLoss: <default("")> like IObstacleLoss if typename != "" {
             parameters:
                 @display("p=300,200");
         }
@@ -91,7 +91,7 @@ module RadioMedium like IRadioMedium
             parameters:
                 @display("p=500,300");
         }
-        neighborCache: <default("")> like INeighborCache if typename!="" {
+        neighborCache: <default("")> like INeighborCache if typename != "" {
             parameters:
                 @display("p=500,200");
         }

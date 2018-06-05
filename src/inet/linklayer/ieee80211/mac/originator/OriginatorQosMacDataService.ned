@@ -27,15 +27,15 @@ module OriginatorQosMacDataService
         @class("OriginatorQosMacDataService");
         @display("i=block/fork");
     submodules:
-        msduAggregationPolicy: <default("BasicMsduAggregationPolicy")> like IMsduAggregationPolicy if typename!="" {
+        msduAggregationPolicy: <default("BasicMsduAggregationPolicy")> like IMsduAggregationPolicy if typename != "" {
             parameters:
                 @display("p=100,100");
         }
-        mpduAggregationPolicy: <default("BasicMpduAggregationPolicy")> like IMpduAggregationPolicy if typename!="" {
+        mpduAggregationPolicy: <default("BasicMpduAggregationPolicy")> like IMpduAggregationPolicy if typename != "" {
             parameters:
                 @display("p=100,300");
         }
-        fragmentationPolicy: <default("BasicFragmentationPolicy")> like IFragmentationPolicy if typename!="" {
+        fragmentationPolicy: <default("BasicFragmentationPolicy")> like IFragmentationPolicy if typename != "" {
             parameters:
                 @display("p=100,200");
         }

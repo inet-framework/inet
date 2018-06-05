@@ -29,11 +29,11 @@ module TransportConnectionVisualizer like ITransportConnectionVisualizer
     parameters:
         @display("i=block/app_s");
     submodules:
-        canvasVisualizer: <default("TransportConnectionCanvasVisualizer")> like ITransportConnectionVisualizer if typename!="" {
+        canvasVisualizer: <default("TransportConnectionCanvasVisualizer")> like ITransportConnectionVisualizer if typename != "" {
             parameters:
                 @display("p=100,50");
         }
-        osgVisualizer: <default("TransportConnectionOsgVisualizer")> like ITransportConnectionVisualizer if typename!="" {
+        osgVisualizer: <default("TransportConnectionOsgVisualizer")> like ITransportConnectionVisualizer if typename != "" {
             parameters:
                 @display("p=100,150");
         }

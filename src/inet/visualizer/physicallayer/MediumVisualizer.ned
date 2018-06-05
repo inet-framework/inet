@@ -29,11 +29,11 @@ module MediumVisualizer like IMediumVisualizer
     parameters:
         @display("i=block/app_s");
     submodules:
-        canvasVisualizer: <default("MediumCanvasVisualizer")> like IMediumVisualizer if typename!="" {
+        canvasVisualizer: <default("MediumCanvasVisualizer")> like IMediumVisualizer if typename != "" {
             parameters:
                 @display("p=100,50");
         }
-        osgVisualizer: <default("MediumOsgVisualizer")> like IMediumVisualizer if typename!="" {
+        osgVisualizer: <default("MediumOsgVisualizer")> like IMediumVisualizer if typename != "" {
             parameters:
                 @display("p=100,150");
         }

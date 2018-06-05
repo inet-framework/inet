@@ -61,19 +61,19 @@ module ApskLayeredReceiver like IReceiver
         @class(ApskLayeredReceiver);
 
     submodules:
-        decoder: <default("ApskDecoder")> like IDecoder if typename!="" {
+        decoder: <default("ApskDecoder")> like IDecoder if typename != "" {
             @display("p=100,100");
         }
         demodulator: <default("ApskDemodulator")> like IDemodulator {
             @display("p=100,200");
         }
-        pulseFilter: <default("")> like IPulseFilter if typename!="" {
+        pulseFilter: <default("")> like IPulseFilter if typename != "" {
             @display("p=100,300");
         }
-        analogDigitalConverter: <default("")> like IAnalogDigitalConverter if typename!="" {
+        analogDigitalConverter: <default("")> like IAnalogDigitalConverter if typename != "" {
             @display("p=100,400");
         }
-        errorModel: <default("ApskLayeredErrorModel")> like ILayeredErrorModel if typename!="" {
+        errorModel: <default("ApskLayeredErrorModel")> like ILayeredErrorModel if typename != "" {
             @display("p=100,500");
         }
 }
