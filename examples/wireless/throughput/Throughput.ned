@@ -45,6 +45,7 @@ module ThroughputClient
             parameters:
                 @display("p=112,134;q=queue");
                 mgmt.typename = default("Ieee80211MgmtStaSimplified");
+                agent.typename = "";
         }
         interfaceTable: InterfaceTable {
             parameters:

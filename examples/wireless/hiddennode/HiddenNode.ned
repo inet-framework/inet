@@ -47,6 +47,7 @@ module Node
             parameters:
                 @display("p=112,134;q=queue");
                 mgmt.typename = "Ieee80211MgmtAdhoc";
+                agent.typename = "";
                 mac.typename = "Ieee80211Mac";
         }
         mobility: StationaryMobility {
@@ -78,6 +79,7 @@ module SinkNode
             parameters:
                 @display("p=120,158;q=queue");
                 mgmt.typename = "Ieee80211MgmtAdhoc";
+                agent.typename = "";
                 mac.typename = "Ieee80211Mac";
         }
         mobility: StationaryMobility {

@@ -47,6 +47,7 @@ module SinkClient
             parameters:
                 @display("p=89,225;q=queue");
                 mgmt.typename = default("Ieee80211MgmtAdhoc");
+                agent.typename = "";
         }
         mobility: RectangleMobility {
             parameters:
@@ -78,6 +79,7 @@ module Client
             parameters:
                 @display("p=112,134;q=queue");
                 mgmt.typename = default("Ieee80211MgmtAdhoc");
+                agent.typename = "";
         }
         mobility: RectangleMobility {
             parameters:

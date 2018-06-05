@@ -20,6 +20,7 @@ module Ieee80211NicAdhoc extends Ieee80211Interface
 {
     parameters:
         mgmt.typename = "Ieee80211MgmtAdhoc";
+        agent.typename = "";
 }
 
 module ThroughputClient

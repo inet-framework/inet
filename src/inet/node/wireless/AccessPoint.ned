@@ -50,6 +50,7 @@ module AccessPoint
         bool hasStatus = default(false);
         wlan[*].mgmt.typename = default("Ieee80211MgmtAp");
         wlan[*].llc.typename = default("Ieee80211Portal");
+        wlan[*].agent.typename = default("");
         wlan[*].radio.antenna.mobilityModule = default("^.^.^.mobility");
         eth[*].encap.typename = "EtherEncapDummy";
         *.interfaceTableModule = default(absPath(".interfaceTable"));

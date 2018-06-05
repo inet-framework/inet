@@ -46,6 +46,7 @@ network Lan80211ac
         host[numHosts]: WirelessHost {
             @display("r=,,#707070");
             wlan[*].mgmt.typename = "Ieee80211MgmtStaSimplified";
+            wlan[*].agent.typename = "";
         }
         ap: AccessPoint {
             @display("p=213,174;r=,,#707070");

@@ -20,12 +20,14 @@ module Ieee80211NicSTASimplified extends Ieee80211Interface
 {
     parameters:
         mgmt.typename = "Ieee80211MgmtStaSimplified";
+        agent.typename = "";
 }
 
 module WirelessAPSimplified extends AccessPoint
 {
     parameters:
         wlan[*].mgmt.typename = "Ieee80211MgmtApSimplified";
+        wlan[*].agent.typename = "";
 }
 
 module ThroughputClient

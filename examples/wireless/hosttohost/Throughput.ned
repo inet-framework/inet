@@ -47,6 +47,7 @@ module ThroughputClient
             parameters:
                 @display("p=112,134;q=queue");
                 mgmt.typename = "Ieee80211MgmtStaSimplified";
+                agent.typename = "";
         }
         interfaceTable: InterfaceTable {
             parameters:
@@ -80,6 +81,7 @@ module ThroughputServer
             parameters:
                 @display("p=120,158;q=queue");
                 mgmt.typename = "Ieee80211MgmtStaSimplified";
+                agent.typename = "";
         }
         interfaceTable: InterfaceTable {
             parameters:
@@ -120,5 +122,6 @@ network Throughput
             parameters:
                 @display("p=200,200;r=,,#707070");
                 wlan[*].mgmt.typename = "Ieee80211MgmtApSimplified";
+                wlan[*].agent.typename = "";
         }
 }
