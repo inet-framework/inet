@@ -13,6 +13,7 @@ ifconfigend.
 
 route:
 #Destination     Gateway          Genmask          Flags  Metric  Iface
+10.1.1.3         *                255.255.255.255  G      0       eth0
 0.0.0.0          *                0.0.0.0          G      0       ext0
 
 routeend.
