@@ -28,14 +28,12 @@ module StatisticVisualizer like IStatisticVisualizer
 {
     parameters:
         @display("i=block/app_s");
-        string canvasVisualizerType = default("StatisticCanvasVisualizer");
-        string osgVisualizerType = default("StatisticOsgVisualizer");
     submodules:
-        canvasVisualizer: <canvasVisualizerType> like IStatisticVisualizer if canvasVisualizerType != "" {
+        canvasVisualizer: <default("StatisticCanvasVisualizer")> like IStatisticVisualizer if typename != "" {
             parameters:
                 @display("p=100,50");
         }
-        osgVisualizer: <osgVisualizerType> like IStatisticVisualizer if osgVisualizerType != "" {
+        osgVisualizer: <default("StatisticOsgVisualizer")> like IStatisticVisualizer if typename != "" {
             parameters:
                 @display("p=100,150");
         }

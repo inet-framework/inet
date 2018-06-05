@@ -33,7 +33,7 @@ import inet.node.base.ApplicationLayerNodeBase;
 // - Also external interfaces can be configured for HW in the loop simulation
 //   using the numExtInterfaces parameter and setting the type using
 //   **.ext[*].typename in the INI file. see: ~ExtInterface and ~IExternalInterface
-// - If wireless card is present, node mobility can be set using *.*.mobilityType
+// - If wireless card is present, node mobility can be set using *.*.mobility.typename
 //   see: inet.mobility and ~IMobility
 //
 module StandardHost extends ApplicationLayerNodeBase

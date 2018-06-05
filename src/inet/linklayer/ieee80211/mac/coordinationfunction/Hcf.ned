@@ -43,7 +43,6 @@ module Hcf
     parameters:
         int numEdcafs = default(4);
         int maxQueueSize = default(100); // -1 means unlimited
-        string rateControlType = default("");
         bool isBlockAckSupported = default(false);
         bool prioritizeMulticast = default(false); // if true, prioritize multicast frames (9.3.2.1 Fundamental access)
 
@@ -81,7 +80,7 @@ module Hcf
                 rateControlModule = "^.rateControl";
                 @display("p=350,100");
         }
-        rateControl: <rateControlType> like IRateControl if rateControlType != "" {
+        rateControl: <default("")> like IRateControl if typename != "" {
             parameters:
                 @display("p=350,200");
         }

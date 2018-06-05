@@ -33,7 +33,7 @@ import inet.networklayer.common.InterfaceTable;
 // By default, the access point is stationary (~StationaryMobility),
 // but that can also be configured by a parameter.
 //
-// The wlan[*].mgmtType can be configured for different management types
+// The wlan[*].mgmt.typename can be configured for different management types
 // currently it can be: ~Ieee80211MgmtApSimplified and ~Ieee80211MgmtAp.
 // By default it is ~Ieee80211MgmtAp. The Simplified version does not
 // support channel scanning, authentication and association .
@@ -46,14 +46,13 @@ module AccessPoint
         @networkNode();
         @labels(node,ethernet-node,wireless-node);
         @display("i=device/accesspoint");
-        string mobilityType = default("StationaryMobility"); // how the node moves around. see: inet.mobility
-        string relayUnitType = default(firstAvailable("Ieee8021dRelay","MacRelayUnit")); // type of the IMacRelayUnit (MacRelayUnit, Ieee8021dRelay, etc)
-        string macTableType = default("MacAddressTable"); // type of the ~IMacAddressTable
         int numWlanInterfaces = default(1);               // the number of radios in the access point
         bool hasStatus = default(false);
-        wlan[*].llcType = default("Ieee80211Portal");
-        wlan[*].mgmtType = default("Ieee80211MgmtAp");
-        eth[*].encapType = "EtherEncapDummy";
+        wlan[*].mgmt.typename = default("Ieee80211MgmtAp");
+        wlan[*].llc.typename = default("Ieee80211Portal");
+        wlan[*].agent.typename = default("");
+        wlan[*].radio.antenna.mobilityModule = default("^.^.^.mobility");
+        eth[*].encap.typename = "EtherEncapDummy";
         *.interfaceTableModule = default(absPath(".interfaceTable"));
     gates:
         input radioIn[numWlanInterfaces] @directIn;
@@ -68,19 +67,19 @@ module AccessPoint
             parameters:
                 @display("p=100,200;is=s");
         }
-        mobility: <mobilityType> like IMobility {
+        mobility: <default("StationaryMobility")> like IMobility {
             parameters:
                 @display("p=100,300;is=s");
         }
-        macTable: <macTableType> like IMacAddressTable {
+        macTable: <default("MacAddressTable")> like IMacAddressTable {
             parameters:
                 @display("p=100,400;is=s");
         }
-        relayUnit: <relayUnitType> like IMacRelayUnit if sizeof(ethg)+numWlanInterfaces > 1 && relayUnitType != "" {
+        relayUnit: <default(firstAvailable("Ieee8021dRelay","MacRelayUnit"))> like IMacRelayUnit if sizeof(ethg)+numWlanInterfaces > 1 && typename != "" {
             parameters:
                 @display("p=400,200");
         }
-        nl: MessageDispatcher if sizeof(ethg)+numWlanInterfaces > 1 && relayUnitType != "" {
+        nl: MessageDispatcher if sizeof(ethg)+numWlanInterfaces > 1 && exists(relayUnit) {
             parameters:
                 @display("p=356,299;b=300,5,,,,1");
         }
@@ -94,15 +93,15 @@ module AccessPoint
                 @display("p=400,400,row;q=txQueue");
         }
     connections allowunconnected:
-        nl.out++--> relayUnit.ifIn if sizeof(ethg)+numWlanInterfaces > 1 && relayUnitType != "";
-        nl.in++ <-- relayUnit.ifOut if sizeof(ethg)+numWlanInterfaces > 1 && relayUnitType != "";
+        nl.out++--> relayUnit.ifIn if sizeof(ethg)+numWlanInterfaces > 1 && exists(relayUnit);
+        nl.in++ <-- relayUnit.ifOut if sizeof(ethg)+numWlanInterfaces > 1 && exists(relayUnit);
         // connections to network outside
         // wireless interfaces MUST be connected first (i.e. ports 0..numWlanInterfaces-1)
         // because broadcasts must be handled differently for wireless IFs by the relayUnit
         for i=0..numWlanInterfaces-1 {
             radioIn[i] --> { @display("m=s"); } --> wlan[i].radioIn;
-            wlan[i].upperLayerOut --> nl.in++ if sizeof(ethg)+numWlanInterfaces > 1 && relayUnitType != "";
-            wlan[i].upperLayerIn <-- nl.out++ if sizeof(ethg)+numWlanInterfaces > 1 && relayUnitType != "";
+            wlan[i].upperLayerOut --> nl.in++ if sizeof(ethg)+numWlanInterfaces > 1 && exists(relayUnit);
+            wlan[i].upperLayerIn <-- nl.out++ if sizeof(ethg)+numWlanInterfaces > 1 && exists(relayUnit);
         }
         // ethernet must be connected only AFTER wireless ports
         for i=0..sizeof(ethg)-1 {

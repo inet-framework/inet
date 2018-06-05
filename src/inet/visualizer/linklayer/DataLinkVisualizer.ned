@@ -28,14 +28,12 @@ module DataLinkVisualizer like IDataLinkVisualizer
 {
     parameters:
         @display("i=block/app_s");
-        string canvasVisualizerType = default("DataLinkCanvasVisualizer");
-        string osgVisualizerType = default("DataLinkOsgVisualizer");
     submodules:
-        canvasVisualizer: <canvasVisualizerType> like IDataLinkVisualizer if canvasVisualizerType != "" {
+        canvasVisualizer: <default("DataLinkCanvasVisualizer")> like IDataLinkVisualizer if typename != "" {
             parameters:
                 @display("p=100,50");
         }
-        osgVisualizer: <osgVisualizerType> like IDataLinkVisualizer if osgVisualizerType != "" {
+        osgVisualizer: <default("DataLinkOsgVisualizer")> like IDataLinkVisualizer if typename != "" {
             parameters:
                 @display("p=100,150");
         }

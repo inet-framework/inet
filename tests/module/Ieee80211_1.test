@@ -31,9 +31,9 @@ output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
 output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
-**.arpType = "GlobalArp"
+**.arp.typename = "GlobalArp"
 
-**.host*.mobilityType = "StationaryMobility"
+**.host*.mobility.typename = "StationaryMobility"
 **.mobility.constraintAreaMinZ = 0m
 **.mobility.constraintAreaMinX = 0m
 **.mobility.constraintAreaMinY = 0m

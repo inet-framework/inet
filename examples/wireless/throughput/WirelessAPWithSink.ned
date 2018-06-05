@@ -23,7 +23,6 @@ import inet.linklayer.ieee80211.Ieee80211Interface;
 import inet.mobility.static.StationaryMobility;
 import inet.networklayer.common.InterfaceTable;
 
-
 //
 // Well, this models a 802.11 Access Point with a Sink.
 //
@@ -34,6 +33,7 @@ module WirelessAPWithSink
         @labels(node);
         @display("i=device/accesspoint");
         *.interfaceTableModule = "^.interfaceTable";
+        wlan.radio.antenna.mobilityModule = default("^.^.^.mobility");
     gates:
         input radioIn @directIn;
     submodules:
@@ -48,8 +48,9 @@ module WirelessAPWithSink
         wlan: Ieee80211Interface {
             parameters:
                 @display("p=169,231;q=queue");
-                llcType = default("Ieee80211Portal");
-                mgmtType = default("Ieee80211MgmtApSimplified");
+                llc.typename = "Ieee80211Portal";
+                mgmt.typename = "Ieee80211MgmtApSimplified";
+                agent.typename = "";
         }
         mobility: StationaryMobility {
             parameters:

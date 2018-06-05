@@ -28,14 +28,12 @@ module PhysicalEnvironmentVisualizer like IPhysicalEnvironmentVisualizer
 {
     parameters:
         @display("i=block/app_s");
-        string canvasVisualizerType = default("PhysicalEnvironmentCanvasVisualizer");
-        string osgVisualizerType = default("PhysicalEnvironmentOsgVisualizer");
     submodules:
-        canvasVisualizer: <canvasVisualizerType> like IPhysicalEnvironmentVisualizer if canvasVisualizerType != "" {
+        canvasVisualizer: <default("PhysicalEnvironmentCanvasVisualizer")> like IPhysicalEnvironmentVisualizer if typename != "" {
             parameters:
                 @display("p=100,50");
         }
-        osgVisualizer: <osgVisualizerType> like IPhysicalEnvironmentVisualizer if osgVisualizerType != "" {
+        osgVisualizer: <default("PhysicalEnvironmentOsgVisualizer")> like IPhysicalEnvironmentVisualizer if typename != "" {
             parameters:
                 @display("p=100,150");
         }

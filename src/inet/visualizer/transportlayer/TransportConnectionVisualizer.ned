@@ -28,14 +28,12 @@ module TransportConnectionVisualizer like ITransportConnectionVisualizer
 {
     parameters:
         @display("i=block/app_s");
-        string canvasVisualizerType = default("TransportConnectionCanvasVisualizer");
-        string osgVisualizerType = default("TransportConnectionOsgVisualizer");
     submodules:
-        canvasVisualizer: <canvasVisualizerType> like ITransportConnectionVisualizer if canvasVisualizerType != "" {
+        canvasVisualizer: <default("TransportConnectionCanvasVisualizer")> like ITransportConnectionVisualizer if typename != "" {
             parameters:
                 @display("p=100,50");
         }
-        osgVisualizer: <osgVisualizerType> like ITransportConnectionVisualizer if osgVisualizerType != "" {
+        osgVisualizer: <default("TransportConnectionOsgVisualizer")> like ITransportConnectionVisualizer if typename != "" {
             parameters:
                 @display("p=100,150");
         }

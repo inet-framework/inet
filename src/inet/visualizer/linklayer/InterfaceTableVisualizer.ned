@@ -23,14 +23,12 @@ module InterfaceTableVisualizer like IInterfaceTableVisualizer
 {
     parameters:
         @display("i=block/app_s");
-        string canvasVisualizerType = default("InterfaceTableCanvasVisualizer");
-        string osgVisualizerType = default("InterfaceTableOsgVisualizer");
     submodules:
-        canvasVisualizer: <canvasVisualizerType> like IInterfaceTableVisualizer if canvasVisualizerType != "" {
+        canvasVisualizer: <default("InterfaceTableCanvasVisualizer")> like IInterfaceTableVisualizer if typename != "" {
             parameters:
                 @display("p=100,50");
         }
-        osgVisualizer: <osgVisualizerType> like IInterfaceTableVisualizer if osgVisualizerType != "" {
+        osgVisualizer: <default("InterfaceTableOsgVisualizer")> like IInterfaceTableVisualizer if typename != "" {
             parameters:
                 @display("p=100,150");
         }

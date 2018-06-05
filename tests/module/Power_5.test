@@ -37,8 +37,8 @@ cmdenv-express-mode = false
 **.hasStatus = true
 
 # power
-**.energyStorageType = "SimpleCcBattery"
-**.energyConsumerType = "StateBasedCcEnergyConsumer"
+**.energyStorage.typename = "SimpleCcBattery"
+**.energyConsumer.typename = "StateBasedCcEnergyConsumer"
 **.energyStorage.nominalCapacity = 1C
 **.energyStorage.nominalVoltage = 1.5V
 **.energyStorage.cutoffVoltage = 1.0V
@@ -56,7 +56,7 @@ cmdenv-express-mode = false
 **.mobility.initFromDisplayString = false
 **.mobility.initialY = 50m
 **.mobility.initialZ = 0m
-*.host*.mobilityType = "StationaryMobility"
+*.host*.mobility.typename = "StationaryMobility"
 *.hostSource.mobility.initialX = 20m
 *.hostDestination.mobility.initialX = 80m
 

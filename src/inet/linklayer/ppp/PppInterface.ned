@@ -35,9 +35,6 @@ module PppInterface like IPppInterface
         @class(InterfaceEntry);
         @display("i=block/ifcard;bgb=214,249;bgl=53");
         string interfaceTableModule;
-        string queueType = default("DropTailQueue"); // DropTailQueue, a Diffserv queue, or empty for use internal queue
-        string ingressTCType = default(""); // a module type implementing ~ITrafficConditioner for optional traffic conditioning of incoming traffic
-        string egressTCType = default(""); // a module type implementing ~ITrafficConditioner for optional traffic conditioning of outgoing traffic
         int numOutputHooks = default(0);
         int numInputHooks = default(0);
         *.interfaceTableModule = default(absPath(interfaceTableModule));
@@ -52,49 +49,49 @@ module PppInterface like IPppInterface
         inputHook[numInputHooks]: <default("Nop")> like IHook if numInputHooks>0 {
             @display("p=177,33");
         }
-        ingressTC: <ingressTCType> like ITrafficConditioner if ingressTCType != "" {
+        ingressTC: <default("")> like ITrafficConditioner if typename != "" {
             @display("p=177,100");
         }
-        egressTC: <egressTCType> like ITrafficConditioner if egressTCType != "" {
+        egressTC: <default("")> like ITrafficConditioner if typename != "" {
             @display("p=42,100");
         }
-        queue: <queueType> like IOutputQueue if queueType != "" {
+        queue: <default("DropTailQueue")> like IOutputQueue if typename != "" {
             parameters:
                 @display("p=42,161;q=l2queue");
         }
         ppp: Ppp {
             parameters:
-                queueModule = (queueType == "" ? "" : "^.queue");
-                txQueueLimit = (queueType == "" ? 10000 : 1); // queue sends one packet at a time
+                queueModule = (!exists(queue) ? "" : "^.queue");
+                txQueueLimit = (!exists(queue) ? 10000 : 1); // queue sends one packet at a time
                 @display("p=98,207");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> outputHook[0].in if numOutputHooks > 0;
-        upperLayerIn --> { @display("m=n"); } --> egressTC.in if numOutputHooks == 0 && egressTCType != "";
-        upperLayerIn --> { @display("m=n"); } --> queue.in if numOutputHooks == 0 && egressTCType == "" && queueType != "";
-        upperLayerIn --> { @display("m=n"); } --> ppp.upperLayerIn if numOutputHooks == 0 && egressTCType == "" && queueType == "";
+        upperLayerIn --> { @display("m=n"); } --> egressTC.in if numOutputHooks == 0 && exists(egressTC);
+        upperLayerIn --> { @display("m=n"); } --> queue.in if numOutputHooks == 0 && !exists(egressTC) && exists(queue);
+        upperLayerIn --> { @display("m=n"); } --> ppp.upperLayerIn if numOutputHooks == 0 && !exists(egressTC) && !exists(queue);
 
-        egressTC.out --> queue.in if egressTCType != "" && queueType != "";
-        egressTC.out --> ppp.upperLayerIn if egressTCType != "" && queueType == "";
+        egressTC.out --> queue.in if exists(egressTC) && exists(queue);
+        egressTC.out --> ppp.upperLayerIn if exists(egressTC) && !exists(queue);
 
         for i=0..numOutputHooks-2 {
             outputHook[i].out --> outputHook[i+1].in;
         }
-        outputHook[numOutputHooks-1].out --> egressTC.in if numOutputHooks > 0 && egressTCType != "";
-        outputHook[numOutputHooks-1].out --> queue.in if numOutputHooks > 0 && egressTCType == "" && queueType != "";
-        outputHook[numOutputHooks-1].out --> ppp.upperLayerIn if numOutputHooks > 0 && egressTCType == "" && queueType == "";
+        outputHook[numOutputHooks-1].out --> egressTC.in if numOutputHooks > 0 && exists(egressTC);
+        outputHook[numOutputHooks-1].out --> queue.in if numOutputHooks > 0 && !exists(egressTC) && exists(queue);
+        outputHook[numOutputHooks-1].out --> ppp.upperLayerIn if numOutputHooks > 0 && !exists(egressTC) && !exists(queue);
 
-        queue.out --> ppp.upperLayerIn if queueType != "";
+        queue.out --> ppp.upperLayerIn if exists(queue);
 
         phys <--> { @display("m=s"); } <--> ppp.phys;
 
-        ppp.upperLayerOut --> { @display("m=n"); } --> upperLayerOut if numInputHooks == 0 && ingressTCType == "";
+        ppp.upperLayerOut --> { @display("m=n"); } --> upperLayerOut if numInputHooks == 0 && !exists(ingressTC);
 
-        ppp.upperLayerOut --> ingressTC.in if ingressTCType != "";
-        ingressTC.out --> { @display("m=n"); } --> upperLayerOut if ingressTCType != "" && numInputHooks == 0;
+        ppp.upperLayerOut --> ingressTC.in if exists(ingressTC);
+        ingressTC.out --> { @display("m=n"); } --> upperLayerOut if exists(ingressTC) && numInputHooks == 0;
 
-        ppp.upperLayerOut --> inputHook[0].in if numInputHooks > 0 && ingressTCType == "";
-        ingressTC.out --> inputHook[0].in if numInputHooks > 0 && ingressTCType != "";
+        ppp.upperLayerOut --> inputHook[0].in if numInputHooks > 0 && !exists(ingressTC);
+        ingressTC.out --> inputHook[0].in if numInputHooks > 0 && exists(ingressTC);
 
         for i=0..numInputHooks-2 {
             inputHook[i].out --> inputHook[i+1].in;

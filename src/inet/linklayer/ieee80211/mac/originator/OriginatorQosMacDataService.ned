@@ -24,21 +24,18 @@ import inet.linklayer.ieee80211.mac.contract.IMpduAggregationPolicy;
 module OriginatorQosMacDataService
 {
     parameters:
-        string aMsduAggregationPolicyType = default("BasicMsduAggregationPolicy");
-        string aMpduAggregationPolicyType = default("BasicMpduAggregationPolicy");
-        string fragmentationPolicyType = default("BasicFragmentationPolicy");
         @class("OriginatorQosMacDataService");
         @display("i=block/fork");
     submodules:
-        msduAggregationPolicy: <aMsduAggregationPolicyType> like IMsduAggregationPolicy if aMsduAggregationPolicyType != "" {
+        msduAggregationPolicy: <default("BasicMsduAggregationPolicy")> like IMsduAggregationPolicy if typename != "" {
             parameters:
                 @display("p=100,100");
         }
-        mpduAggregationPolicy: <aMpduAggregationPolicyType> like IMpduAggregationPolicy if aMpduAggregationPolicyType != "" {
+        mpduAggregationPolicy: <default("BasicMpduAggregationPolicy")> like IMpduAggregationPolicy if typename != "" {
             parameters:
                 @display("p=100,300");
         }
-        fragmentationPolicy: <fragmentationPolicyType> like IFragmentationPolicy if fragmentationPolicyType != "" {
+        fragmentationPolicy: <default("BasicFragmentationPolicy")> like IFragmentationPolicy if typename != "" {
             parameters:
                 @display("p=100,200");
         }

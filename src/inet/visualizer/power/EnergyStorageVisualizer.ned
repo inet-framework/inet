@@ -28,14 +28,12 @@ module EnergyStorageVisualizer like IEnergyStorageVisualizer
 {
     parameters:
         @display("i=block/app_s");
-        string canvasVisualizerType = default("EnergyStorageCanvasVisualizer");
-        string osgVisualizerType = default("EnergyStorageOsgVisualizer");
     submodules:
-        canvasVisualizer: <canvasVisualizerType> like IEnergyStorageVisualizer if canvasVisualizerType != "" {
+        canvasVisualizer: <default("EnergyStorageCanvasVisualizer")> like IEnergyStorageVisualizer if typename != "" {
             parameters:
                 @display("p=100,50");
         }
-        osgVisualizer: <osgVisualizerType> like IEnergyStorageVisualizer if osgVisualizerType != "" {
+        osgVisualizer: <default("EnergyStorageOsgVisualizer")> like IEnergyStorageVisualizer if typename != "" {
             parameters:
                 @display("p=100,150");
         }

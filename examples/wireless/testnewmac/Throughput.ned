@@ -33,6 +33,7 @@ module ThroughputClient
         @display("i=device/wifilaptop");
         @networkNode();
         *.interfaceTableModule = default(absPath(".interfaceTable"));
+        wlan.radio.antenna.mobilityModule = default("^.^.^.mobility");
     gates:
         input radioIn @directIn;
 
@@ -49,8 +50,9 @@ module ThroughputClient
         wlan: Ieee80211Interface {
             parameters:
                 @display("p=112,134;q=queue");
-                mgmtType = "Ieee80211MgmtAdhoc";
-                macType = "Ieee80211CompatibleMac";
+                mgmt.typename = "Ieee80211MgmtAdhoc";
+                agent.typename = "";
+                mac.typename = "Ieee80211Mac";
         }
         mobility: CircleMobility {
             parameters:
@@ -67,6 +69,7 @@ module ThroughputServer
         @display("i=device/wifilaptop");
         @networkNode();
         *.interfaceTableModule = default(absPath(".interfaceTable"));
+        wlan.radio.antenna.mobilityModule = default("^.^.^.mobility");
     gates:
         input radioIn @directIn;
 
@@ -82,7 +85,8 @@ module ThroughputServer
         wlan: Ieee80211Interface {
             parameters:
                 @display("p=120,158;q=queue");
-                mgmtType = "Ieee80211MgmtAdhoc";
+                mgmt.typename = "Ieee80211MgmtAdhoc";
+                agent.typename = "";
         }
         mobility: StationaryMobility {
             parameters:

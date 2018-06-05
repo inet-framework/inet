@@ -18,10 +18,9 @@
 package inet.node.ethernet;
 
 import inet.applications.ethernet.EtherTrafGen;
+import inet.common.queue.IOutputQueue;
 import inet.linklayer.contract.IEtherMac;
-import inet.linklayer.ethernet.EtherQosQueue;
 import inet.linklayer.ethernet.IEtherEncap;
-
 
 //
 // An example host with one Ethernet interface and an Ethernet traffic
@@ -33,9 +32,7 @@ module EtherHost2
 {
     parameters:
         bool csmacdSupport = default(true);  // by default use CSMA/CD
-        string macType = default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex"); // ~EtherMac or ~EtherMacFullDuplex
-        string queueType = default(""); // DropTailQueue, DiffServQueue, or "" to use the internal queue
-        string fcsMode @enum("declaredCorrect", "declaredIncorrect", "computed") = default("declaredCorrect");
+        string fcsMode @enum("declaredCorrect","declaredIncorrect","computed") = default("declaredCorrect");
         *.interfaceTableModule = default("");
         *.fcsMode = fcsMode;
         @networkNode();
@@ -50,22 +47,21 @@ module EtherHost2
         encap: <default("EtherEncap")> like IEtherEncap {
             @display("p=155,146");
         }
-        queue: EtherQosQueue if queueType != "" {
+        queue: <default("")> like IOutputQueue if typename != "" {
             parameters:
-                dataQueueType = queueType;
                 @display("p=87,207;q=l2queue");
         }
-        mac: <macType> like IEtherMac {
-            queueModule = (queueType == "" ? "" : "^.queue");
+        mac: <default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex")> like IEtherMac {
+            queueModule = (!exists(queue) ? "" : "^.queue");
             @display("p=155,272;q=txQueue");
         }
     connections:
         app.out --> encap.upperLayerIn;
         app.in <-- encap.upperLayerOut;
 
-        encap.lowerLayerOut --> queue.in if queueType != "";
-        queue.out --> mac.upperLayerIn if queueType != "";
-        encap.lowerLayerOut --> mac.upperLayerIn if queueType == "";
+        encap.lowerLayerOut --> queue.in if exists(queue);
+        queue.out --> mac.upperLayerIn if exists(queue);
+        encap.lowerLayerOut --> mac.upperLayerIn if !exists(queue);
         mac.upperLayerOut --> encap.lowerLayerIn;
 
         mac.phys <--> ethg;

@@ -30,7 +30,7 @@ module SensorNode extends ApplicationLayerNodeBase
         @display("i=misc/sensor2");
         @figure[submodules];
         numWlanInterfaces = default(1);
-        energyStorageType = default("IdealEpEnergyStorage");
+        energyStorage.typename = default("IdealEpEnergyStorage");
 		wlan[*].typename = default("Ieee802154NarrowbandInterface");
-        wlan[*].radio.energyConsumerType = default("SensorStateBasedEpEnergyConsumer");
+        wlan[*].radio.energyConsumer.typename = default("SensorStateBasedEpEnergyConsumer"); //FIXME does this consumer exist???
 }

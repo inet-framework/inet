@@ -40,33 +40,29 @@ module NodeBase like INetworkNode
         string osgModelColor = default(""); // tint color, no colorization by default
         string canvasImage = default(""); // image for canvas visualization, no image by default
         string canvasImageColor = default(""); // tint color, no colorization by default
-        string mobilityType = default("");
-        string energyStorageType = default("");
-        string energyManagementType = default("");
-        string energyGeneratorType = default("");
-        *.mobilityModule = default(mobilityType != "" ? absPath(".mobility") : "");
-        *.energySourceModule = default(energyStorageType != "" ? absPath(".energyStorage") : "");
-        *.energyGeneratorModule = default(energyGeneratorType != "" ? absPath(".energyGenerator") : "");
+        *.mobilityModule = default(exists(mobility) ? absPath(".mobility") : "");
+        *.energySourceModule = default(exists(energyStorage) ? absPath(".energyStorage") : "");
+        *.energyGeneratorModule = default(exists(energyGenerator) ? absPath(".energyGenerator") : "");
         @display("bgb=1256,672");
     submodules:
         status: NodeStatus if hasStatus {
             parameters:
                 @display("p=125,80;is=s");
         }
-        energyStorage: <energyStorageType> like IEnergyStorage if energyStorageType != "" {
+        energyStorage: <default("")> like IEnergyStorage if typename != "" {
             parameters:
                 @display("p=125,320;is=s");
         }
-        energyManagement: <energyManagementType> like IEnergyManagement if energyManagementType != "" {
+        energyManagement: <default("")> like IEnergyManagement if typename != "" {
             parameters:
                 @display("p=125,400;i=block/plug;is=s");
         }
-        energyGenerator: <energyGeneratorType> like IEnergyGenerator if energyGeneratorType != "" {
+        energyGenerator: <default("")> like IEnergyGenerator if typename != "" {
             parameters:
                 @display("p=125,480;is=s");
         }
         // TODO: move mobility right after status to have it in the same order as in their positions, changes fingerprints 
-        mobility: <mobilityType> like IMobility if mobilityType != "" {
+        mobility: <default("")> like IMobility if typename != "" {
             parameters:
                 @display("p=125,160;is=s");
         }

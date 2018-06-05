@@ -32,6 +32,6 @@ module ApskScalarReceiver extends NarrowbandReceiverBase
 {
     parameters:
         modulation = default("BPSK");
-        errorModelType = default("ApskErrorModel");
+        errorModel.typename = default("ApskErrorModel");
         @class(ApskScalarReceiver);
 }

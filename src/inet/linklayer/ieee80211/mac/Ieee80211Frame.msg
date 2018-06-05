@@ -414,7 +414,7 @@ class Ieee80211BlockAck extends Ieee80211TwoAddressHeader
 //
 class Ieee80211BasicBlockAck extends Ieee80211BlockAck
 {
-    // chunkLength TODO
+    chunkLength = LENGTH_BASIC_BLOCKACK - B(4);
     multiTid = 0;
     compressedBitmap = 0;
 

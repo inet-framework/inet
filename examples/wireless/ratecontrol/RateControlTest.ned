@@ -34,6 +34,7 @@ module SinkClient
         @labels(node);
         @display("i=device/cellphone");
         *.interfaceTableModule = default(absPath(".interfaceTable"));
+        wlan.radio.antenna.mobilityModule = default("^.^.^.mobility");
     gates:
         input radioIn @directIn;
     submodules:
@@ -45,7 +46,8 @@ module SinkClient
         wlan: Ieee80211Interface {
             parameters:
                 @display("p=89,225;q=queue");
-                mgmtType = default("Ieee80211MgmtAdhoc");
+                mgmt.typename = "Ieee80211MgmtAdhoc";
+                agent.typename = "";
         }
         mobility: RectangleMobility {
             parameters:
@@ -62,6 +64,7 @@ module Client
         @display("i=device/wifilaptop");
         @networkNode();
         *.interfaceTableModule = default(absPath(".interfaceTable"));
+        wlan.radio.antenna.mobilityModule = default("^.^.^.mobility");
     gates:
         input radioIn @directIn;
 
@@ -75,7 +78,8 @@ module Client
         wlan: Ieee80211Interface {
             parameters:
                 @display("p=112,134;q=queue");
-                mgmtType = default("Ieee80211MgmtAdhoc");
+                mgmt.typename = "Ieee80211MgmtAdhoc";
+                agent.typename = "";
         }
         mobility: RectangleMobility {
             parameters:

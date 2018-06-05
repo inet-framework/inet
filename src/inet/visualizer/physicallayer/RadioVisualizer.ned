@@ -28,14 +28,12 @@ module RadioVisualizer like IRadioVisualizer
 {
     parameters:
         @display("i=block/app_s");
-        string canvasVisualizerType = default("RadioCanvasVisualizer");
-        string osgVisualizerType = default("RadioOsgVisualizer");
     submodules:
-        canvasVisualizer: <canvasVisualizerType> like IRadioVisualizer if canvasVisualizerType != "" {
+        canvasVisualizer: <default("RadioCanvasVisualizer")> like IRadioVisualizer if typename != "" {
             parameters:
                 @display("p=100,50");
         }
-        osgVisualizer: <osgVisualizerType> like IRadioVisualizer if osgVisualizerType != "" {
+        osgVisualizer: <default("RadioOsgVisualizer")> like IRadioVisualizer if typename != "" {
             parameters:
                 @display("p=100,150");
         }

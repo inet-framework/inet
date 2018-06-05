@@ -29,6 +29,6 @@ package inet.physicallayer.apskradio.packetlevel;
 module ApskScalarRadio extends ApskRadio
 {
     parameters:
-        transmitterType = default("ApskScalarTransmitter");
-        receiverType = default("ApskScalarReceiver");
+        transmitter.typename = default("ApskScalarTransmitter");
+        receiver.typename = default("ApskScalarReceiver");
 }

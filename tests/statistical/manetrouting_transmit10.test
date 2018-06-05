@@ -87,8 +87,8 @@ description = "Aodv Simple test"
 # mobility
 **.mobility.initFromDisplayString = false
 
-**.host*.mobilityType = "StationaryMobility"
-**.*host.mobilityType = "StationaryMobility"
+**.host*.mobility.typename = "StationaryMobility"
+**.*host.mobility.typename = "StationaryMobility"
 
 # udp apps (on)
 **.senderhost.numApps = 1

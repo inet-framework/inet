@@ -94,7 +94,7 @@ void Icmpv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<con
         }
 
         case ICMPv6_NEIGHBOUR_AD: {
-            auto frame = check_and_cast<const Ipv6NeighbourSolicitation *>(pkt.get());
+            auto frame = check_and_cast<const Ipv6NeighbourAdvertisement *>(pkt.get());
             stream.writeByte(pkt->getType());
             stream.writeByte(frame->getCode());
             stream.writeUint16Be(frame->getChksum());

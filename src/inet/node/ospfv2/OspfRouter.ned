@@ -27,6 +27,6 @@ import inet.node.inet.Router;
 module OspfRouter extends Router
 {
     parameters:
-        hasOSPF = true;
+        hasOspf = true;
 }
 

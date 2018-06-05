@@ -44,14 +44,11 @@ module EtherSwitch
         @labels(node,ethernet-node);
         @display("i=device/switch;bgb=663,297");
         bool hasStatus = default(false);
-        bool csmacdSupport = default(true);  // by default use CSMA/CD
-        string macType = default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex"); // ~EtherMac or ~EtherMacFullDuplex
+        bool csmacdSupport = default(true);  // by default use CSMA/CD --FIXME remove
         string spanningTreeProtocol = default("");
-        string relayUnitType = default(firstAvailable("Ieee8021dRelay","MacRelayUnit")); // type of the ~IMacRelayUnit;
-        string macTableType = default("MacAddressTable"); // type of the ~IMacAddressTable
-        eth[*].encapType = "EtherEncapDummy";
+        eth[*].encap.typename = "EtherEncapDummy";
         eth[*].csmacdSupport = csmacdSupport;
-        eth[*].macType = macType;
+        eth[*].mac.typename = default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex");
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.macTableModule = default(absPath(".macTable"));
     gates:
@@ -66,10 +63,10 @@ module EtherSwitch
         interfaceTable: InterfaceTable {
             @display("p=73,115;is=s");
         }
-        macTable: <macTableType> like IMacAddressTable {
+        macTable: <default("MacAddressTable")> like IMacAddressTable {
             @display("p=73,42;is=s");
         }
-        relayUnit: <relayUnitType> like IMacRelayUnit {
+        relayUnit: <default(firstAvailable("Ieee8021dRelay","MacRelayUnit"))> like IMacRelayUnit {
             @display("p=264,89;is=m");
         }
         stp: <spanningTreeProtocol> like ISpanningTree if spanningTreeProtocol != "" {

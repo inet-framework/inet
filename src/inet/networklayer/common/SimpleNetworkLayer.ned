@@ -29,8 +29,6 @@ module SimpleNetworkLayer like INetworkLayer
 {
     parameters:
         string interfaceTableModule;
-        string networkProtocolType;
-        string arpType = default("");
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         @display("i=block/fork");
 
@@ -49,11 +47,11 @@ module SimpleNetworkLayer like INetworkLayer
             parameters:
                 @display("p=300,200;b=480,5");
         }
-        arp: <arpType> like IArp if arpType != "" {
+        arp: <default("")> like IArp if typename != "" {
             parameters:
                 @display("p=150,300;q=pendingQueue");
         }
-        np: <networkProtocolType> like INetworkProtocol {
+        np: <> like INetworkProtocol {
             parameters:
                 @display("p=300,300;q=queue");
         }
@@ -72,8 +70,8 @@ module SimpleNetworkLayer like INetworkLayer
         up.out++ --> echo.ipIn;
         up.in++ <-- echo.ipOut;
 
-        lp.out++ --> arp.ifIn if arpType != "";
-        lp.in++ <-- arp.ifOut if arpType != "";
+        lp.out++ --> arp.ifIn if exists(arp);
+        lp.in++ <-- arp.ifOut if exists(arp);
 
         lp.out++ --> np.queueIn;
         lp.in++ <-- np.queueOut;

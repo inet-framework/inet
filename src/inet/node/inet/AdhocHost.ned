@@ -35,6 +35,7 @@ module AdhocHost extends WirelessHost
 {
     parameters:
         @display("i=device/cellphone");
-        wlan[*].mgmtType = default("Ieee80211MgmtAdhoc");  // use adhoc management
+        wlan[*].mgmt.typename = default("Ieee80211MgmtAdhoc");
+        wlan[*].agent.typename = default("");
         forwarding = default(true);
 }

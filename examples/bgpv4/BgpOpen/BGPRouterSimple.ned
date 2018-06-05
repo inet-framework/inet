@@ -36,7 +36,6 @@ module BGPRouterSimple
         @networkNode();
         @labels(node,ethernet-node);
         @display("i=abstract/router");
-        string tcpType = default(firstAvailable("Tcp","TcpLwip","TcpNsc"));  // tcp implementation (e.g. ~Tcp, ~TcpLwip, ~TcpNsc) or ~TcpSpoof
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.routingTableModule = default(absPath(".routingTable"));
     gates:
@@ -65,7 +64,7 @@ module BGPRouterSimple
             parameters:
                 @display("i=block/downarrow_s;p=196,124");
         }
-        tcp: <tcpType> like ITcp if tcpType != "" {
+        tcp: <default(firstAvailable("Tcp","TcpLwip","TcpNsc"))> like ITcp if typename != "" {
             parameters:
                 @display("p=160,202;i=block/transport");
         }

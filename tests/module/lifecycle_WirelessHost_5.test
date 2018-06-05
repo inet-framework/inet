@@ -28,7 +28,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 *.hostsender.numApps = 1
 *.hostsender.app[0].typename = "DhcpClient"
 
-*.host*.mobilityType = "StationaryMobility"
+*.host*.mobility.typename = "StationaryMobility"
 **.mobility.constraintAreaMinX = 0m
 **.mobility.constraintAreaMinY = 0m
 **.mobility.constraintAreaMinZ = 0m

@@ -19,16 +19,15 @@ package inet.linklayer.ieee80211;
 
 import inet.linklayer.common.IIeee8021dQosClassifier;
 import inet.linklayer.contract.IWirelessInterface;
+import inet.linklayer.ieee80211.mgmt.IIeee80211Agent;
 import inet.linklayer.ieee80211.mgmt.IIeee80211Mgmt;
-import inet.linklayer.ieee80211.mgmt.Ieee80211AgentSta;
 import inet.linklayer.ieee80211.mib.Ieee80211Mib;
 import inet.linklayer.ieee8022.IIeee8022Llc;
 import inet.physicallayer.contract.packetlevel.IRadio;
 
-
 //
 // This NIC implements an 802.11 network interface card.
-// It can be configured via the mgmtType parameter to act
+// It can be configured via the mgmt.typename parameter to act
 // as an AP or a STA, or for ad-hoc mode.
 //
 // Potential mgmType values: Ieee80211MgmtStaSimplified, Ieee80211MgmtSta
@@ -42,16 +41,12 @@ module Ieee80211Interface like IWirelessInterface
         @class(::inet::InterfaceEntry);
         string interfaceTableModule;
         string energySourceModule = default("");
-        string classifierType = default(""); // needed for EDCA, as the classifier assigns User Priority (UP) to packets; UP determines Access Category via TID
-        string llcType = default("Ieee8022Llc");
-        string mgmtType = default("Ieee80211MgmtSta"); // name of the management module type (implements IIeee80211Mgmt)
-        string radioType = default("Ieee80211ScalarRadio");
-        string macType = default("Ieee80211CompatibleMac");   // choose from Ieee80211Mac and Ieee80211CompatibleMac, @see IIeee80211Mac
         string opMode @enum("a", "b", "g(erp)", "g(mixed)", "n(mixed-2.4Ghz)", "p", "ac") = default("g(mixed)");
         double bitrate @unit(bps) = default(-1bps);
-        bool _agentNeeded = (mgmtType == "Ieee80211MgmtSta");   // internal par. do not use, shows if optional agent module is needed
         **.opMode = opMode;
         **.bitrate = bitrate;
+        mac.modeSet = default(opMode);
+        mac.*.rateSelection.dataFrameBitrate = default(bitrate);
         *.macModule = default(absPath(".mac"));
         *.mibModule = default(absPath(".mib"));
         *.interfaceTableModule = default(absPath(interfaceTableModule));
@@ -66,27 +61,27 @@ module Ieee80211Interface like IWirelessInterface
             parameters:
                 @display("p=100,100;is=s");
         }
-        llc: <llcType> like IIeee8022Llc {
+        llc: <default("Ieee8022Llc")> like IIeee8022Llc {
             parameters:
                 @display("p=250,131");
         }
-        classifier: <classifierType> like IIeee8021dQosClassifier if classifierType != "" {
+        classifier: <default("")> like IIeee8021dQosClassifier if typename != "" {
             parameters:
                 @display("p=400,82");
         }
-        agent: Ieee80211AgentSta if _agentNeeded {
+        agent: <default("Ieee80211AgentSta")> like IIeee80211Agent if typename != "" {
             parameters:
                 @display("p=550,250");
         }
-        mgmt: <mgmtType> like IIeee80211Mgmt {
+        mgmt: <default("Ieee80211MgmtSta")> like IIeee80211Mgmt {
             parameters:
                 @display("p=400,250");
         }
-        mac: <macType> like IIeee80211Mac {
+        mac: <default("Ieee80211Mac")> like IIeee80211Mac {
             parameters:
                 @display("p=250,250");
         }
-        radio: <radioType> like IRadio {
+        radio: <default("Ieee80211ScalarRadio")> like IRadio {
             parameters:
                 @display("p=250,400");
         }
@@ -98,16 +93,16 @@ module Ieee80211Interface like IWirelessInterface
         mac.mgmtOut --> mgmt.macIn;
         mac.mgmtIn <-- mgmt.macOut;
 
-        mgmt.agentOut --> agent.mgmtIn if _agentNeeded;
-        mgmt.agentIn <-- agent.mgmtOut if _agentNeeded;
+        mgmt.agentOut --> agent.mgmtIn if exists(agent);
+        mgmt.agentIn <-- agent.mgmtOut if exists(agent);
 
         llc.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
-        llc.upperLayerIn <-- { @display("m=n"); } <-- upperLayerIn if classifierType == "";
-        llc.upperLayerIn <-- { @display("m=n"); } <-- classifier.out if classifierType != "";
+        llc.upperLayerIn <-- { @display("m=n"); } <-- upperLayerIn if !exists(classifier);
+        llc.upperLayerIn <-- { @display("m=n"); } <-- classifier.out if exists(classifier);
 
         llc.lowerLayerOut --> mac.upperLayerIn;
         llc.lowerLayerIn <-- mac.upperLayerOut;
 
-        classifier.in <-- { @display("m=n"); } <-- upperLayerIn if classifierType != "";
+        classifier.in <-- { @display("m=n"); } <-- upperLayerIn if exists(classifier);
 }
 

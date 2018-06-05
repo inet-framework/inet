@@ -28,8 +28,6 @@ module Ieee802154UwbIrInterface like IWirelessInterface
     parameters:
         @class(InterfaceEntry);
         string interfaceTableModule;
-        string queueType = default("DropTailQueue");    // DropTailQueue, a Diffserv queue, etc.
-        string radioType = default("Ieee802154UwbIrRadio");
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         @display("i=block/ifcard");
     gates:
@@ -37,7 +35,7 @@ module Ieee802154UwbIrInterface like IWirelessInterface
         output upperLayerOut;
         input radioIn @labels(ISignal);
     submodules:
-        queue: <queueType> like IOutputQueue {
+        queue: <default("DropTailQueue")> like IOutputQueue {
             parameters:
                 @display("p=100,50;q=l2queue");
         }
@@ -45,7 +43,7 @@ module Ieee802154UwbIrInterface like IWirelessInterface
             parameters:
                 @display("p=100,150");
         }
-        radio: <radioType> like IRadio {
+        radio: <default("Ieee802154UwbIrRadio")> like IRadio {
             parameters:
                 @display("p=100,250");
         }

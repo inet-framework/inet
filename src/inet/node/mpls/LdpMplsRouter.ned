@@ -43,7 +43,6 @@ module LdpMplsRouter
         int numLoInterfaces = default(1);
         string peers;
         string routerId = default("auto");
-        string tcpType = default(firstAvailable("Tcp","TcpLwip","TcpNsc"));  // tcp implementation (e.g. ~Tcp, ~TcpLwip, ~TcpNsc) or ~TcpSpoof
         *.forwarding = true;
         *.routingTable.routerId = routerId;
         *.interfaceTableModule = default(absPath(".interfaceTable"));
@@ -79,7 +78,7 @@ module LdpMplsRouter
                 peers = peers;
                 @display("p=544,106");
         }
-        tcp: <tcpType> like ITcp {
+        tcp: <default(firstAvailable("Tcp","TcpLwip","TcpNsc"))> like ITcp {
             parameters:
                 @display("p=177,145");
         }

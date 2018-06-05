@@ -22,7 +22,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.scenarioManager.script = xmldoc("scenario.xml")
 *.host.numWlanInterfaces=2
 
-*.host.mobilityType = "StationaryMobility"
+*.host.mobility.typename = "StationaryMobility"
 **.mobility.constraintAreaMinX = 0m
 **.mobility.constraintAreaMinY = 0m
 **.mobility.constraintAreaMinZ = 0m
@@ -39,7 +39,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 *.host.wlan[*].bitrate = 54Mbps
 *.host*.wlan[*].mac.headerLength = 10B
 *.host*.wlan[*].mac.fullDuplex = false
-*.host*.wlan[*].radioType = "UnitDiskRadio"
+*.host*.wlan[*].radio.typename = "UnitDiskRadio"
 *.host*.wlan[*].radio.transmitter.bitrate = 2Mbps
 *.host*.wlan[*].radio.transmitter.communicationRange = 1km
 *.host*.wlan[*].radio.transmitter.interferenceRange = 5km

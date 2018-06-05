@@ -7,15 +7,14 @@ network TcpTestNet1
 {
     parameters:
         bool testing;
-        string tcpType = default(firstAvailable("Tcp", "TcpLwip", "TcpNsc"));  // tcp implementation (e.g. ~Tcp, ~TcpLwip, ~TcpNsc) or ~TcpSpoof
     submodules:
         cli_app: TcpTestClient {
             @display("p=95,95");
         }
-        cli_tcp: <tcpType> like ITcp {
+        cli_tcp: <default(firstAvailable("Tcp", "TcpLwip", "TcpNsc"))> like ITcp {
             @display("p=95,178");
         }
-        srv_tcp: <tcpType> like ITcp {
+        srv_tcp: <default(firstAvailable("Tcp", "TcpLwip", "TcpNsc"))> like ITcp {
             @display("p=302,178");
         }
         srv_app: TcpTestClient {
@@ -41,15 +40,14 @@ network TcpTestNet2
 {
     parameters:
         bool testing;
-        string tcpType = default(firstAvailable("Tcp", "TcpLwip", "TcpNsc"));  // tcp implementation (e.g. ~Tcp, ~TcpLwip, ~TcpNsc) or ~TcpSpoof
     submodules:
         cli_app: TcpTestClient {
             @display("p=95,95");
         }
-        cli_tcp: <tcpType> like ITcp {
+        cli_tcp: <default(firstAvailable("Tcp", "TcpLwip", "TcpNsc"))> like ITcp {
             @display("p=95,178");
         }
-        srv_tcp: <tcpType> like ITcp {
+        srv_tcp: <default(firstAvailable("Tcp", "TcpLwip", "TcpNsc"))> like ITcp {
             @display("p=302,178");
         }
         srv_app: TcpTestClient {

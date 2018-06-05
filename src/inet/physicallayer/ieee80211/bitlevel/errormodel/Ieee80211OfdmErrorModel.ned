@@ -42,10 +42,10 @@ import inet.physicallayer.ieee80211.packetlevel.errormodel.Ieee80211NistErrorMod
 module Ieee80211OfdmErrorModel extends Ieee80211NistErrorModel like ILayeredErrorModel
 {
     parameters:
-        double dataSymbolErrorRate = default(0/0);
-        double dataBitErrorRate = default(0/0);
-        double signalSymbolErrorRate = default(0/0);
-        double signalBitErrorRate = default(0/0);
+        double dataSymbolErrorRate = default(nan);
+        double dataBitErrorRate = default(nan);
+        double signalSymbolErrorRate = default(nan);
+        double signalBitErrorRate = default(nan);
         @class(Ieee80211OfdmErrorModel);
         @display("i=block/broadcast");
 }

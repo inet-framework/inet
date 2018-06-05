@@ -19,7 +19,8 @@ import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 module Ieee80211NicAdhoc extends Ieee80211Interface
 {
     parameters:
-        mgmtType = "Ieee80211MgmtAdhoc";
+        mgmt.typename = "Ieee80211MgmtAdhoc";
+        agent.typename = "";
 }
 
 module ThroughputClient

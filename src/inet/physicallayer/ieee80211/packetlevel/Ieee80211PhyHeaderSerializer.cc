@@ -32,9 +32,9 @@ void Ieee80211PhyHeaderSerializer::serialize(MemoryOutputStream& stream, const P
     if (auto ofdmPhyHeader = dynamicPtrCast<const Ieee80211OfdmPhyHeader>(chunk)) {
         stream.writeUint4(ofdmPhyHeader->getRate());
         stream.writeBit(false);
-        stream.writeUint4((uint8_t)(ofdmPhyHeader->getLengthField() >> 8));
-        stream.writeUint4((uint8_t)(ofdmPhyHeader->getLengthField() >> 4));
-        stream.writeUint4((uint8_t)(ofdmPhyHeader->getLengthField() >> 0));
+        stream.writeUint4((uint8_t)(ofdmPhyHeader->getLengthField().get() >> 8));
+        stream.writeUint4((uint8_t)(ofdmPhyHeader->getLengthField().get() >> 4));
+        stream.writeUint4((uint8_t)(ofdmPhyHeader->getLengthField().get() >> 0));
         stream.writeBit(false);
         stream.writeBitRepeatedly(false, 6);
         stream.writeUint16Be(0);
@@ -55,7 +55,7 @@ const Ptr<Chunk> Ieee80211PhyHeaderSerializer::deserialize(MemoryInputStream& st
         lengthField |= ((uint16_t)stream.readUint4()) << 8;
         lengthField |= ((uint16_t)stream.readUint4()) << 4;
         lengthField |= ((uint16_t)stream.readUint4()) << 0;
-        ofdmPhyHeader->setLengthField(lengthField);
+        ofdmPhyHeader->setLengthField(B(lengthField));
         stream.readBit();
         stream.readBitRepeatedly(false, 6);
         stream.readUint16Be();

@@ -28,14 +28,12 @@ module LinkBreakVisualizer like ILinkBreakVisualizer
 {
     parameters:
         @display("i=block/app_s");
-        string canvasVisualizerType = default("LinkBreakCanvasVisualizer");
-        string osgVisualizerType = default("LinkBreakOsgVisualizer");
     submodules:
-        canvasVisualizer: <canvasVisualizerType> like ILinkBreakVisualizer if canvasVisualizerType != "" {
+        canvasVisualizer: <default("LinkBreakCanvasVisualizer")> like ILinkBreakVisualizer if typename != "" {
             parameters:
                 @display("p=100,50");
         }
-        osgVisualizer: <osgVisualizerType> like ILinkBreakVisualizer if osgVisualizerType != "" {
+        osgVisualizer: <default("LinkBreakOsgVisualizer")> like ILinkBreakVisualizer if typename != "" {
             parameters:
                 @display("p=100,150");
         }

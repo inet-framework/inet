@@ -16,15 +16,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
-
 package inet.linklayer.ethernet;
 
 import inet.common.IHook;
+import inet.common.queue.IOutputQueue;
 import inet.linklayer.contract.IEtherMac;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.contract.ITrafficConditioner;
-
 
 //
 // Ethernet network interface. Complements ~EtherMac and ~EtherEncap
@@ -36,11 +34,6 @@ module EthernetInterface like IEthernetInterface
         @class(InterfaceEntry);
         string interfaceTableModule;
         bool csmacdSupport = default(false);  // by default CSMA/CD is turned off, so only point-to-point duplex links are supported.
-        string macType = default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex"); // ~EtherMac or ~EtherMacFullDuplex
-        string queueType = default(""); // ~DropTailQueue, or a Diffserv queue; set to "" for use of an internal queue
-        string ingressTCType = default(""); // a module type implementing ~ITrafficConditioner for optional traffic conditioning of incoming traffic
-        string egressTCType = default(""); // a module type implementing ~ITrafficConditioner for optional traffic conditioning of outgoing traffic
-        string encapType = default("EtherEncap");   // module for encapsulation/decapsulation; use ~EtherEncapDummy for no encapsulation/decapsulation
         string fcsMode @enum("declaredCorrect","declaredIncorrect","computed") = default("declaredCorrect");
         int numOutputHooks = default(0);
         int numInputHooks = default(0);
@@ -58,24 +51,23 @@ module EthernetInterface like IEthernetInterface
         inputHook[numInputHooks]: <default("Nop")> like IHook if numInputHooks>0 {
             @display("p=265,83");
         }
-        ingressTC: <ingressTCType> like ITrafficConditioner if ingressTCType != "" {
+        ingressTC: <default("")> like ITrafficConditioner if typename != "" {
             @display("p=292,158");
         }
-        egressTC: <egressTCType> like ITrafficConditioner if egressTCType != "" {
+        egressTC: <default("")> like ITrafficConditioner if typename != "" {
             @display("p=53,158");
         }
-        queue: EtherQosQueue if queueType != "" {
+        queue: <default("")> like IOutputQueue if typename != "" {
             parameters:
-                dataQueueType = queueType;
                 @display("p=107,263;q=l2queue");
         }
-        mac: <macType> like IEtherMac {
+        mac: <default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex")> like IEtherMac {
             parameters:
-                queueModule = (queueType == "" ? "" : "^.queue");
-                txQueueLimit = (queueType == "" ? 10000 : 1); // queue sends one packet at a time
+                queueModule = (exists(queue) ? "^.queue" : "");
+                txQueueLimit = (exists(queue) ? 1 : 10000); // queue sends one packet at a time
                 @display("p=182,321");
         }
-        encap: <encapType> like IEtherEncap {
+        encap: <default("EtherEncap")> like IEtherEncap {
             parameters:
                 @display("p=182,205");
         }
@@ -83,18 +75,18 @@ module EthernetInterface like IEthernetInterface
         mac.upperLayerOut --> encap.lowerLayerIn;
         mac.phys <--> { @display("m=s"); } <--> phys;
 
-        if queueType != "" {
+        if exists(queue) {
             encap.lowerLayerOut --> queue.in;
             queue.out --> mac.upperLayerIn;
         }
 
-        encap.lowerLayerOut --> mac.upperLayerIn if queueType == "";
+        encap.lowerLayerOut --> mac.upperLayerIn if !exists(queue);
 
         // no input hooks, no ingressTC
-        encap.upperLayerOut --> { @display("m=n"); } --> upperLayerOut if numInputHooks == 0 && ingressTCType == "";
+        encap.upperLayerOut --> { @display("m=n"); } --> upperLayerOut if numInputHooks == 0 && !exists(ingressTC);
 
         // no input hooks, there is ingressTC
-        if numInputHooks == 0 && ingressTCType != "" {
+        if numInputHooks == 0 && exists(ingressTC) {
             encap.upperLayerOut --> ingressTC.in;
             ingressTC.out --> { @display("m=n"); } --> upperLayerOut;
         }
@@ -108,12 +100,12 @@ module EthernetInterface like IEthernetInterface
         }
 
         // there are input hooks, no ingressTC
-        if numInputHooks > 0 && ingressTCType == "" {
+        if numInputHooks > 0 && exists(ingressTC) {
             encap.upperLayerOut --> inputHook[0].in;
         }
 
         // there are input hooks, there is ingressTC
-        if numInputHooks > 0 && ingressTCType != "" {
+        if numInputHooks > 0 && exists(ingressTC) {
             encap.upperLayerOut --> ingressTC.in;
             ingressTC.out --> inputHook[0].in;
         }
@@ -124,7 +116,7 @@ module EthernetInterface like IEthernetInterface
         }
 
         // no output hooks, no egressTC
-        upperLayerIn --> { @display("m=n"); } --> encap.upperLayerIn if numOutputHooks == 0 && egressTCType == "";
+        upperLayerIn --> { @display("m=n"); } --> encap.upperLayerIn if numOutputHooks == 0 && !exists(egressTC);
 
         // there are output hooks
         if numOutputHooks > 0 {
@@ -132,22 +124,22 @@ module EthernetInterface like IEthernetInterface
         }
 
         // no output hooks, there is egressTC
-        if numOutputHooks == 0 && egressTCType != "" {
+        if numOutputHooks == 0 && exists(egressTC) {
             upperLayerIn --> { @display("m=n"); } --> egressTC.in;
         }
 
         // there is egressTC
-        if egressTCType != "" {
+        if exists(egressTC) {
             egressTC.out --> encap.upperLayerIn;
         }
 
         // there are output hooks, no egressTC
-        if numOutputHooks > 0 && egressTCType == "" {
+        if numOutputHooks > 0 && exists(egressTC) {
             outputHook[numOutputHooks-1].out --> encap.upperLayerIn;
         }
 
         // there are output hooks, there is egressTC
-        if numOutputHooks > 0 && egressTCType != "" {
+        if numOutputHooks > 0 && exists(egressTC) {
             outputHook[numOutputHooks-1].out --> egressTC.in;
         }
 }

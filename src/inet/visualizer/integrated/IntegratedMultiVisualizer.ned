@@ -26,14 +26,12 @@ module IntegratedMultiVisualizer like IIntegratedVisualizer
 {
     parameters:
         @display("i=block/app_s");
-        string canvasVisualizerType = default("IntegratedMultiCanvasVisualizer");
-        string osgVisualizerType = default(""); // TODO:  revive "IntegratedOsgVisualizer" when OSG visualizers are at least as good as Canvas based
     submodules:
-        canvasVisualizer: <canvasVisualizerType> like IIntegratedVisualizer if canvasVisualizerType != "" {
+        canvasVisualizer: <default("IntegratedMultiCanvasVisualizer")> like IIntegratedVisualizer if typename != "" {
             parameters:
                 @display("p=100,50");
         }
-        osgVisualizer: <osgVisualizerType> like IIntegratedVisualizer if osgVisualizerType != "" {
+        osgVisualizer: <default("")> like IIntegratedVisualizer if typename != "" {
             parameters:
                 @display("p=100,150");
         }

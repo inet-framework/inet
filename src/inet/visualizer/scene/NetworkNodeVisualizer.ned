@@ -28,14 +28,12 @@ module NetworkNodeVisualizer like INetworkNodeVisualizer
 {
     parameters:
         @display("i=block/app_s");
-        string canvasVisualizerType = default("NetworkNodeCanvasVisualizer");
-        string osgVisualizerType = default("NetworkNodeOsgVisualizer");
     submodules:
-        canvasVisualizer: <> like INetworkNodeVisualizer if canvasVisualizerType != "" {
+        canvasVisualizer: <default("NetworkNodeCanvasVisualizer")> like INetworkNodeVisualizer if typename != "" {
             parameters:
                 @display("p=100,50");
         }
-        osgVisualizer: <> like INetworkNodeVisualizer if osgVisualizerType != "" {
+        osgVisualizer: <default("NetworkNodeOsgVisualizer")> like INetworkNodeVisualizer if typename != "" {
             parameters:
                 @display("p=100,150");
         }

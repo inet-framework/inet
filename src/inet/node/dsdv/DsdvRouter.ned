@@ -18,26 +18,19 @@
 
 package inet.node.dsdv;
 
-import inet.node.inet.WirelessHost;
+import inet.node.inet.AdhocHost;
 import inet.routing.dsdv.Dsdv;
 
 //
 // A Dsdv router.
 //
-module DsdvRouter extends WirelessHost
+module DsdvRouter extends AdhocHost
 {
-    parameters:
-        @display("i=device/cellphone");
-        forwarding = true;
-        wlan[*].mgmtType = default("Ieee80211MgmtAdhoc");
-
     submodules:
         dsdv: Dsdv {
             @display("p=700,300");
         }
-
     connections:
         dsdv.ipOut --> tn.in++;
         dsdv.ipIn <-- tn.out++;
 }
-

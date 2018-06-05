@@ -25,9 +25,6 @@ module WirelessInterface like IWirelessInterface
 {
     parameters:
         @class(InterfaceEntry);
-        string classifierType = default("");
-        string macType;
-        string radioType;
         string interfaceTableModule;
         string energySourceModule;
         *.interfaceTableModule = default(absPath(interfaceTableModule));
@@ -38,22 +35,22 @@ module WirelessInterface like IWirelessInterface
         output upperLayerOut;
         input radioIn @labels(ISignal);
     submodules:
-        classifier: <classifierType> like IIeee8021dQosClassifier if classifierType != "" {
+        classifier: <default("")> like IIeee8021dQosClassifier if typename != "" {
                 @display("p=80,70");
         }
-        mac: <macType> like IMacProtocol {
+        mac: <> like IMacProtocol {
                 @display("p=150,100");
         }
-        radio: <radioType> like IRadio if radioType != "" {
+        radio: <> like IRadio if typename != "" {
                 @display("p=150,200");
         }
     connections allowunconnected:
-        radioIn --> { @display("m=s"); } --> radio.radioIn if radioType != "";
-        radio.upperLayerIn <-- mac.lowerLayerOut if radioType != "";
-        radio.upperLayerOut --> mac.lowerLayerIn if radioType != "";
+        radioIn --> { @display("m=s"); } --> radio.radioIn if exists(radio);
+        radio.upperLayerIn <-- mac.lowerLayerOut if exists(radio);
+        radio.upperLayerOut --> mac.lowerLayerIn if exists(radio);
 
         mac.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
-        mac.upperLayerIn <-- { @display("m=n"); } <-- upperLayerIn if classifierType == "";
-        mac.upperLayerIn <-- { @display("m=n"); } <-- classifier.out if classifierType != "";
-        classifier.in <-- { @display("m=n"); } <-- upperLayerIn if classifierType != "";
+        mac.upperLayerIn <-- { @display("m=n"); } <-- upperLayerIn if !exists(classifier);
+        mac.upperLayerIn <-- { @display("m=n"); } <-- classifier.out if exists(classifier);
+        classifier.in <-- { @display("m=n"); } <-- upperLayerIn if exists(classifier);
 }

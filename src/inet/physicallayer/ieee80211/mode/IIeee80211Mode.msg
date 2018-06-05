@@ -17,10 +17,12 @@
 
 import inet.common.INETDefs;
 import inet.common.Units;
+import inet.physicallayer.contract.packetlevel.IModulation;
 
 cplusplus {{
 #include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmModulation.h"
 }}
 
 namespace inet::physicallayer;
@@ -40,7 +42,7 @@ class IIeee80211HeaderMode
     bps grossBitrate;
     b Length;
     simtime_t duration;
-//    IModulation *modulation;
+    IModulation *modulation;
 };
 
 class IIeee80211DataMode
@@ -49,7 +51,7 @@ class IIeee80211DataMode
     @descriptor(readonly);
     bps netBitrate;
     bps grossBitrate;
-//    IModulation *modulation;
+    IModulation *modulation;
     int numberOfSpatialStreams;
 };
 
@@ -89,3 +91,9 @@ class Ieee80211ModeSet extends cObject
     int cwMax;
 }
 
+class Ieee80211OfdmModulation extends IModulation
+{
+    @existingClass;
+    @descriptor(readonly);
+    IModulation *subcarrierModulation;
+};

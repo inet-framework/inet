@@ -22,8 +22,8 @@ import inet.physicallayer.common.packetlevel.Radio;
 module Ieee802154UwbIrRadio extends Radio
 {
     parameters:
-        antennaType = default("IsotropicAntenna");
-        transmitterType = default("Ieee802154UwbIrTransmitter");
-        receiverType = default("Ieee802154UwbIrReceiver");
+        antenna.typename = default("IsotropicAntenna");
+        transmitter.typename = default("Ieee802154UwbIrTransmitter");
+        receiver.typename = default("Ieee802154UwbIrReceiver");
         @class(Radio);
 }

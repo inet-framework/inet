@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 package inet.linklayer.ieee80211.mgmt;
 
 //
@@ -25,7 +24,7 @@ package inet.linklayer.ieee80211.mgmt;
 //
 // @author Andras Varga
 //
-simple Ieee80211AgentSta
+simple Ieee80211AgentSta like IIeee80211Agent
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module

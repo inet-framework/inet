@@ -32,10 +32,9 @@ module BurstHost extends TransportLayerNodeBase
         @display("i=device/pc3");
         hasUdp = false;
         hasTcp = false;
-        string trafGenType;
         *.routingTableModule = default("^.ipv4.routingTable");
     submodules:
-        trafGen: <trafGenType> like IIpvxTrafficGenerator {
+        trafGen: <> like IIpvxTrafficGenerator {
             parameters:
                 @display("p=329,81");
         }

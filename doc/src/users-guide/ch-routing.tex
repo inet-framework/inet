@@ -10,13 +10,13 @@ RIP, OSPF and BGP.
 The easiest way to add routing to a network is to use the \nedtype{Router}
 NED type for routers. \nedtype{Router} contains a conditional instance
 for each of the above protocols. These submodules can be enabled by
-setting the \ttt{hasRIP}, \ttt{hasOSPF} and/or \ttt{hasBGP} parameters to
+setting the \ttt{hasRip}, \ttt{hasOspf} and/or \ttt{hasBgp} parameters to
 \ttt{true}.
 
 Example:
 
 \begin{inifile}
-**.hasRIP = true
+**.hasRip = true
 \end{inifile}
 
 There are also NED types called \nedtype{RipRouter}, \nedtype{OspfRouter},
@@ -42,7 +42,7 @@ can be specified in XML using the \ttt{ripConfig} parameter.
 The following example configures a \nedtype{Router} module to use RIPv2:
 
 \begin{inifile}
-**.hasRIP = true
+**.hasRip = true
 **.mode = "RIPv2"
 **.ripConfig = xmldoc("RIPConfig.xml")
 \end{inifile}

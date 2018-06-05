@@ -27,6 +27,6 @@ import inet.node.inet.Router;
 module RipRouter extends Router
 {
     parameters:
-        hasRIP = true;
+        hasRip = true;
 }
 

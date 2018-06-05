@@ -124,7 +124,7 @@ sim-time-limit = 2s+60s+12s
 ## tcp apps
 
 # NIC configuration
-**.ppp[*].queueType = "DropTailQueue" # in routers
+**.ppp[*].queue.typename = "DropTailQueue" # in routers
 #**.ppp[*].queue.frameCapacity = 10
 **.ppp[*].queue.frameCapacity = 100  # good:(13,15,16,18,19,21-25, 7) bad:(17,20)
 

@@ -51,7 +51,7 @@ network Ns3Test
                 mobility.initialX = 15m;
                 mobility.initialY = serverYPos;
                 mobility.initialZ = 0m;
-                wlan[*].classifierType =  withQos ? "ExampleQosClassifier" : "";
+                wlan[*].classifier.typename =  withQos ? "ExampleQosClassifier" : "";
                 wlan[*].mac.EDCA = withQos;
                 @display("r=,,#707070");
         }
@@ -62,7 +62,7 @@ network Ns3Test
                 mobility.initialX = 10m + 10m * index();
                 mobility.initialY = 10m;
                 mobility.initialZ = 0m;
-                wlan[*].classifierType =  withQos ? "ExampleQosClassifier" : "";
+                wlan[*].classifier.typename =  withQos ? "ExampleQosClassifier" : "";
                 wlan[*].mac.EDCA = withQos;
                 udpApp[*].startTime = appStartTime + appStartDelta * index();
                 @display("r=,,#707070");

@@ -27,7 +27,6 @@ network TestRadioScaling
 {
     parameters:
         int numHosts;
-        string radioMediumType;
     submodules:
         visualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
             parameters:
@@ -37,7 +36,7 @@ network TestRadioScaling
             parameters:
                 @display("p=100,150");
         }
-        radioMedium: <radioMediumType> like IRadioMedium {
+        radioMedium: <> like IRadioMedium {
             parameters:
                 @display("p=100,250");
         }

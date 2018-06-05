@@ -30,7 +30,7 @@ import inet.physicallayer.common.packetlevel.RadioMedium;
 module UnitDiskRadioMedium extends RadioMedium
 {
     parameters:
-        propagationType = default("ConstantSpeedPropagation");
-        pathLossType = default("FreeSpacePathLoss");
-        analogModelType = default("UnitDiskAnalogModel");
+        propagation.typename = default("ConstantSpeedPropagation");
+        pathLoss.typename = default("FreeSpacePathLoss");
+        analogModel.typename = default("UnitDiskAnalogModel");
 }

@@ -37,7 +37,6 @@ module BGPRouterEx
         @networkNode();
         @labels(node,ethernet-node);
         @display("i=abstract/router");
-        string tcpType = default(firstAvailable("Tcp","TcpLwip","TcpNsc"));  // tcp implementation (e.g. ~Tcp, ~TcpLwip, ~TcpNsc) or ~TcpSpoof
         bool forwarding = true;
         bool multicastForwarding = default(false);
         *.forwarding = forwarding;
@@ -69,7 +68,7 @@ module BGPRouterEx
             parameters:
                 @display("i=block/downarrow_s;p=196,124");
         }
-        tcp: <tcpType> like ITcp {
+        tcp: <default(firstAvailable("Tcp","TcpLwip","TcpNsc"))> like ITcp {
             parameters:
                 @display("p=160,202;i=block/transport");
         }
@@ -80,7 +79,6 @@ module BGPRouterEx
         ipv4: Ipv4NetworkLayer {
             parameters:
                 proxyARP = true;
-                routingTable.forwarding = true;
                 routingTable.routerId = "auto";
                 @display("p=120,284;i=block/layer;q=queue");
         }

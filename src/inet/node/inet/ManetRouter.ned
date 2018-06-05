@@ -2,15 +2,10 @@ package inet.node.inet;
 
 import inet.routing.contract.IManetRouting;
 
-module ManetRouter extends WirelessHost
+module ManetRouter extends AdhocHost
 {
-    parameters:
-        @display("i=device/cellphone");
-        string routingProtocolType;
-        forwarding = true;
-        wlan[*].mgmtType = default("Ieee80211MgmtAdhoc");
     submodules:
-        routing: <routingProtocolType> like IManetRouting {
+        routing: <> like IManetRouting {
             @display("p=700,300");
         }
     connections:

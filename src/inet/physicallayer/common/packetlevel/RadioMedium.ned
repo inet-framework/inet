@@ -40,14 +40,6 @@ module RadioMedium like IRadioMedium
         string physicalEnvironmentModule = default("physicalEnvironment"); // module path of the physical environment model
 
         // submodule type parameters
-        string propagationType;                   // NED type of the propagation model
-        string pathLossType;                      // NED type of the path loss model
-        string obstacleLossType = default("");    // NED type of the obstacle loss model
-        string analogModelType;                   // NED type of the analog model
-        string backgroundNoiseType = default(""); // NED type of the background noise model
-        string mediumLimitCacheType = default("MediumLimitCache"); // NED type of the medium limit cache model
-        string neighborCacheType = default("");   // NED type of the neighbor cache model
-        string communicationCacheType = default("VectorCommunicationCache"); // NED type of the communication cache model
 
         // filter parameters that control when signals are sent to receiver radios
         string rangeFilter = default("");       // when either set to 'interferenceRange' or 'communicationRange' the radio medium doesn't send signals to a radio if it's outside the provided range
@@ -71,35 +63,35 @@ module RadioMedium like IRadioMedium
         @signal[signalArrivalEnded];
 
     submodules:
-        propagation: <propagationType> like IPropagation {
+        propagation: <> like IPropagation {
             parameters:
                 @display("p=100,100");
         }
-        analogModel: <analogModelType> like IAnalogModel {
+        analogModel: <> like IAnalogModel {
             parameters:
                 @display("p=100,200");
         }
-        backgroundNoise: <backgroundNoiseType> like IBackgroundNoise if backgroundNoiseType != "" {
+        backgroundNoise: <default("")> like IBackgroundNoise if typename != "" {
             parameters:
                 @display("p=100,300");
         }
-        pathLoss: <pathLossType> like IPathLoss {
+        pathLoss: <> like IPathLoss {
             parameters:
                 @display("p=300,100");
         }
-        obstacleLoss: <obstacleLossType> like IObstacleLoss if obstacleLossType != "" {
+        obstacleLoss: <default("")> like IObstacleLoss if typename != "" {
             parameters:
                 @display("p=300,200");
         }
-        mediumLimitCache: <mediumLimitCacheType> like IMediumLimitCache {
+        mediumLimitCache: <default("MediumLimitCache")> like IMediumLimitCache {
             parameters:
                 @display("p=500,100");
         }
-        communicationCache: <communicationCacheType> like ICommunicationCache {
+        communicationCache: <default("VectorCommunicationCache")> like ICommunicationCache {
             parameters:
                 @display("p=500,300");
         }
-        neighborCache: <neighborCacheType> like INeighborCache if neighborCacheType != "" {
+        neighborCache: <default("")> like INeighborCache if typename != "" {
             parameters:
                 @display("p=500,200");
         }

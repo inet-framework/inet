@@ -23,11 +23,10 @@ import inet.linklayer.ieee80211.mac.contract.IFragmentationPolicy;
 module OriginatorMacDataService
 {
     parameters:
-        string fragmentationPolicyModuleType = "BasicFragmentationPolicy";
         @class("OriginatorMacDataService");
         @display("i=block/fork");
     submodules:
-        fragmentationPolicy: <fragmentationPolicyModuleType> like IFragmentationPolicy if fragmentationPolicyModuleType != "" {
+        fragmentationPolicy: <"BasicFragmentationPolicy"> like IFragmentationPolicy if typename != "" {
             parameters:
                 @display("p=100,100");
         }

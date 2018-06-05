@@ -28,14 +28,12 @@ module Ieee80211Visualizer like IIeee80211Visualizer
 {
     parameters:
         @display("i=block/app_s");
-        string canvasVisualizerType = default("Ieee80211CanvasVisualizer");
-        string osgVisualizerType = default("Ieee80211OsgVisualizer");
     submodules:
-        canvasVisualizer: <canvasVisualizerType> like IIeee80211Visualizer if canvasVisualizerType != "" {
+        canvasVisualizer: <default("Ieee80211CanvasVisualizer")> like IIeee80211Visualizer if typename != "" {
             parameters:
                 @display("p=100,50");
         }
-        osgVisualizer: <osgVisualizerType> like IIeee80211Visualizer if osgVisualizerType != "" {
+        osgVisualizer: <default("Ieee80211OsgVisualizer")> like IIeee80211Visualizer if typename != "" {
             parameters:
                 @display("p=100,150");
         }

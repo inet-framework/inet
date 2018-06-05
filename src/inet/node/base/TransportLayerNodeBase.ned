@@ -28,21 +28,18 @@ module TransportLayerNodeBase extends NetworkLayerNodeBase
         bool hasUdp = default(true);
         bool hasTcp = default(true);
         bool hasSctp = default(false);
-        string tcpType = default(firstAvailableOrEmpty("Tcp", "TcpLwip", "TcpNsc"));  // tcp implementation (e.g. ~Tcp, ~TcpLwip, ~TcpNsc) or ~TcpSpoof
-        string udpType = default(firstAvailableOrEmpty("Udp"));
-        string sctpType = default(firstAvailableOrEmpty("Sctp"));
         @figure[transportLayer](type=rectangle; pos=250,156; size=1000,130; fillColor=#ff0000; lineColor=#808080; cornerRadius=5; fillOpacity=0.1);
         @figure[transportLayer.title](type=text; pos=1245,161; anchor=ne; text="transport layer");
     submodules:
-        udp: <udpType> like IUdp if hasUdp {
+        udp: <default(firstAvailableOrEmpty("Udp"))> like IUdp if hasUdp {
             parameters:
                 @display("p=375,226");
         }
-        tcp: <tcpType> like ITcp if hasTcp {
+        tcp: <default(firstAvailableOrEmpty("Tcp", "TcpLwip", "TcpNsc"))> like ITcp if hasTcp {
             parameters:
                 @display("p=525,226");
         }
-        sctp: <sctpType> like ISctp if hasSctp {
+        sctp: <default(firstAvailableOrEmpty("Sctp"))> like ISctp if hasSctp {
             parameters:
                 @display("p=675,226");
         }

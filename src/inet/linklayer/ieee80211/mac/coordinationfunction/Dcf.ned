@@ -39,7 +39,6 @@ module Dcf
 
         string rxModule;
         string txModule;
-        string rateControlType = default("");
         bool prioritizeMulticast = default(false); // if true, prioritize multicast frames (9.3.2.1 Fundamental access)
 
         *.rateSelectionModule = "^.rateSelection";
@@ -68,7 +67,7 @@ module Dcf
                 rateControlModule = "^.rateControl";
                 @display("p=350,100");
         }
-        rateControl: <rateControlType> like IRateControl if rateControlType != "" {
+        rateControl: <default("")> like IRateControl if typename != "" {
             parameters:
                 @display("p=350,200");
         }
