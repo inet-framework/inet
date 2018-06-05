@@ -38,9 +38,9 @@ import inet.physicallayer.common.packetlevel.Radio;
 module UnitDiskRadio extends Radio
 {
     parameters:
-        antennaType = default("IsotropicAntenna");
-        transmitterType = default("UnitDiskTransmitter");
-        receiverType = default("UnitDiskReceiver");
+        antenna.typename = default("IsotropicAntenna");
+        transmitter.typename = default("UnitDiskTransmitter");
+        receiver.typename = default("UnitDiskReceiver");
         separateTransmissionParts = default(false);
         separateReceptionParts = default(false);
         @class(UnitDiskRadio);

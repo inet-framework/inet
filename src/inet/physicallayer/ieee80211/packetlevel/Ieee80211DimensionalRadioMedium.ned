@@ -28,6 +28,6 @@ package inet.physicallayer.ieee80211.packetlevel;
 module Ieee80211DimensionalRadioMedium extends Ieee80211RadioMedium
 {
     parameters:
-        analogModelType = default("DimensionalAnalogModel");
-        backgroundNoiseType = default("IsotropicDimensionalBackgroundNoise");
+        analogModel.typename = default("DimensionalAnalogModel");
+        backgroundNoise.typename = default("IsotropicDimensionalBackgroundNoise");
 }

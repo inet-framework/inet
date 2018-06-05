@@ -36,11 +36,7 @@ module EthernetInterface like IEthernetInterface
         @class(InterfaceEntry);
         string interfaceTableModule;
         bool csmacdSupport = default(false);  // by default CSMA/CD is turned off, so only point-to-point duplex links are supported.
-        string macType = default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex"); // ~EtherMac or ~EtherMacFullDuplex
         string queueType = default(""); // ~DropTailQueue, or a Diffserv queue; set to "" for use of an internal queue
-        string ingressTCType = default(""); // a module type implementing ~ITrafficConditioner for optional traffic conditioning of incoming traffic
-        string egressTCType = default(""); // a module type implementing ~ITrafficConditioner for optional traffic conditioning of outgoing traffic
-        string encapType = default("EtherEncap");   // module for encapsulation/decapsulation; use ~EtherEncapDummy for no encapsulation/decapsulation
         string fcsMode @enum("declaredCorrect","declaredIncorrect","computed") = default("declaredCorrect");
         int numOutputHooks = default(0);
         int numInputHooks = default(0);
@@ -58,10 +54,10 @@ module EthernetInterface like IEthernetInterface
         inputHook[numInputHooks]: <default("Nop")> like IHook if numInputHooks>0 {
             @display("p=265,83");
         }
-        ingressTC: <ingressTCType> like ITrafficConditioner if ingressTCType != "" {
+        ingressTC: <default("")> like ITrafficConditioner if typename!="" {
             @display("p=292,158");
         }
-        egressTC: <egressTCType> like ITrafficConditioner if egressTCType != "" {
+        egressTC: <default("")> like ITrafficConditioner if typename!="" {
             @display("p=53,158");
         }
         queue: EtherQosQueue if queueType != "" {
@@ -69,13 +65,13 @@ module EthernetInterface like IEthernetInterface
                 dataQueueType = queueType;
                 @display("p=107,263;q=l2queue");
         }
-        mac: <macType> like IEtherMac {
+        mac: <default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex")> like IEtherMac {
             parameters:
                 queueModule = (queueType == "" ? "" : "^.queue");
                 txQueueLimit = (queueType == "" ? 10000 : 1); // queue sends one packet at a time
                 @display("p=182,321");
         }
-        encap: <encapType> like IEtherEncap {
+        encap: <default("EtherEncap")> like IEtherEncap {
             parameters:
                 @display("p=182,205");
         }

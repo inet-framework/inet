@@ -78,12 +78,6 @@ module Ieee80211LayeredOfdmTransmitter like ITransmitter
     parameters:
         bool isCompliant = default(true);
         string levelOfDetail @enum("packet","bit","symbol","sample") = default("symbol");
-        string signalEncoderType = default("");
-        string dataEncoderType = default("");
-        string signalModulatorType = default("");
-        string dataModulatorType = default("");
-        string pulseShaperType = default("");
-        string digitalAnalogConverterType = default("");
         double channelSpacing @unit(Hz) = default(0Hz/0);
         double power @unit(W);
         double carrierFrequency @unit(Hz);
@@ -92,22 +86,22 @@ module Ieee80211LayeredOfdmTransmitter like ITransmitter
 
         @display("i=block/tx");
     submodules:
-        signalEncoder: <signalEncoderType> like IEncoder if signalEncoderType != "" {
+        signalEncoder: <default("")> like IEncoder if typename!="" {
             @display("p=100,100");
         }
-        dataEncoder: <dataEncoderType> like IEncoder if dataEncoderType != "" {
+        dataEncoder: <default("")> like IEncoder if typename!="" {
             @display("p=300,100");
         }
-        dataModulator: <dataModulatorType> like IModulator if dataModulatorType != "" {
+        dataModulator: <default("")> like IModulator if typename!="" {
             @display("p=100,200");
         }
-        signalModulator: <signalModulatorType> like IModulator if signalModulatorType != "" {
+        signalModulator: <default("")> like IModulator if typename!="" {
             @display("p=300,200");
         }
-        pulseShaper: <pulseShaperType> like IPulseShaper if pulseShaperType != "" {
+        pulseShaper: <default("")> like IPulseShaper if typename!="" {
             @display("p=100,300");
         }
-        digitalAnalogConverter: <digitalAnalogConverterType> like IDigitalAnalogConverter if digitalAnalogConverterType != "" {
+        digitalAnalogConverter: <default("")> like IDigitalAnalogConverter if typename!="" {
             @display("p=100,400");
         }
 }

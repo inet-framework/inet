@@ -46,7 +46,7 @@ module Node
             parameters:
                 @display("p=112,134;q=queue");
                 mgmtType = "Ieee80211MgmtAdhoc";
-                macType = "Ieee80211Mac";
+                mac.typename = "Ieee80211Mac";
         }
         mobility: StationaryMobility {
             parameters:
@@ -76,7 +76,7 @@ module SinkNode
             parameters:
                 @display("p=120,158;q=queue");
                 mgmtType = "Ieee80211MgmtAdhoc";
-                macType = "Ieee80211Mac";
+                mac.typename = "Ieee80211Mac";
         }
         mobility: StationaryMobility {
             parameters:

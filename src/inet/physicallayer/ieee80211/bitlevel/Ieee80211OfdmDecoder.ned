@@ -36,20 +36,17 @@ import inet.physicallayer.contract.bitlevel.IScrambler;
 module Ieee80211OfdmDecoder like IDecoder
 {
     parameters:
-        string fecType = default("");
-        string deinterleaverType = default("");
-        string descramblerType = default("");
         @display("i=block/blackboard");
         @class(Ieee80211OfdmDecoderModule);
 
     submodules:
-        descrambler: <descramblerType> like IScrambler if descramblerType != "" {
+        descrambler: <default("")> like IScrambler if typename!="" {
             @display("p=100,300");
         }
-        fecDecoder: <fecType> like IFecCoder if fecType != "" {
+        fecDecoder: <default("")> like IFecCoder if typename!="" {
             @display("p=100,200");
         }
-        deinterleaver: <deinterleaverType> like IInterleaver if deinterleaverType != "" {
+        deinterleaver: <default("")> like IInterleaver if typename!="" {
             @display("p=100,100");
         }
 }

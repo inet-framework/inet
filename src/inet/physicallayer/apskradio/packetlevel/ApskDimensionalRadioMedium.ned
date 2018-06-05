@@ -31,8 +31,8 @@ import inet.physicallayer.common.packetlevel.RadioMedium;
 module ApskDimensionalRadioMedium extends RadioMedium
 {
     parameters:
-        propagationType = default("ConstantSpeedPropagation");
-        pathLossType = default("FreeSpacePathLoss");
-        analogModelType = default("DimensionalAnalogModel");
-        backgroundNoiseType = default("IsotropicDimensionalBackgroundNoise");
+        propagation.typename = default("ConstantSpeedPropagation");
+        pathLoss.typename = default("FreeSpacePathLoss");
+        analogModel.typename = default("DimensionalAnalogModel");
+        backgroundNoise.typename = default("IsotropicDimensionalBackgroundNoise");
 }

@@ -53,10 +53,6 @@ import inet.power.contract.IEnergyConsumer;
 module Radio extends PhysicalLayerBase like IRadio
 {
     parameters:
-        string antennaType;                      // NED type of the antenna model
-        string transmitterType;                  // NED type of the transmitter model
-        string receiverType;                     // NED type of the receiver model
-        string energyConsumerType = default(""); // NED type of the energy consumer model
 
         string radioMediumModule = default("radioMedium"); // module path of the medium module where this radio communicates
         string energySourceModule = default("");           // module path of the energy source module which provides energy to the radio
@@ -98,19 +94,19 @@ module Radio extends PhysicalLayerBase like IRadio
         @statistic[symbolErrorRate](title="Symbol error rate"; source=symbolErrorRate(packetSentToUpper); record=histogram);
 
     submodules:
-        antenna: <antennaType> like IAntenna {
+        antenna: <> like IAntenna {
             parameters:
                 @display("p=100,100");
         }
-        transmitter: <transmitterType> like ITransmitter {
+        transmitter: <> like ITransmitter {
             parameters:
                 @display("p=100,200");
         }
-        receiver: <receiverType> like IReceiver {
+        receiver: <> like IReceiver {
             parameters:
                 @display("p=100,300");
         }
-        energyConsumer: <energyConsumerType> like IEnergyConsumer if energyConsumerType != "" {
+        energyConsumer: <default("")> like IEnergyConsumer if typename!="" {
             parameters:
                 @display("p=100,400");
         }

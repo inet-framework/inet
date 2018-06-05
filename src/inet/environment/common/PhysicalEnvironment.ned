@@ -164,8 +164,6 @@ module PhysicalEnvironment like IPhysicalEnvironment
 {
     parameters:
         string coordinateSystemModule = default(""); // module path of the geographic coordinate system module
-        string objectCacheType = default("");  // NED type of object cache
-        string groundType = default("");
         double temperature @unit(K) = default(293K);
         double spaceMinX @unit(m) = default(0m/0); // lower bound of x coordinates in space, NaN means determined by physical objects, NaN by default
         double spaceMinY @unit(m) = default(0m/0); // lower bound of y coordinates in space, NaN means determined by physical objects, NaN by default
@@ -178,11 +176,11 @@ module PhysicalEnvironment like IPhysicalEnvironment
         @class(PhysicalEnvironment);
 
     submodules:
-        objectCache: <objectCacheType> like IObjectCache if objectCacheType != "" {
+        objectCache: <default("")> like IObjectCache if typename!="" {
             parameters:
                 @display("p=100,100");
         }
-        ground: <groundType> like IGround if groundType != "" {
+        ground: <default("")> like IGround if typename!="" {
             parameters:
                 @display("p=100,200");
         }

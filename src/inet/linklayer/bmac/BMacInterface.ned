@@ -23,7 +23,7 @@ import inet.linklayer.common.WirelessInterface;
 module BMacInterface extends WirelessInterface
 {
     parameters:
-        radioType = default("ApskScalarRadio");
-        macType = "BMac";
+        radio.typename = default("ApskScalarRadio");
+        mac.typename = "BMac";
 }
 

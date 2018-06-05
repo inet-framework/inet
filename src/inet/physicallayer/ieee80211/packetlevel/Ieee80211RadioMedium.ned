@@ -32,8 +32,8 @@ import inet.physicallayer.common.packetlevel.RadioMedium;
 module Ieee80211RadioMedium extends RadioMedium
 {
     parameters:
-        propagationType = default("ConstantSpeedPropagation");
-        pathLossType = default("FreeSpacePathLoss");
+        propagation.typename = default("ConstantSpeedPropagation");
+        pathLoss.typename = default("FreeSpacePathLoss");
         backgroundNoise.power = default(-110dBm);
         mediumLimitCache.carrierFrequency = default(2.4GHz);
         mediumLimitCache.minReceptionPower = default(-85dBm);

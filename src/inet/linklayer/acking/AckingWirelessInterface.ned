@@ -46,7 +46,6 @@ module AckingWirelessInterface like IWirelessInterface
         string energySourceModule = default("");
         double bitrate @unit(bps);
         string queueType = default("DropTailQueue");    // DropTailQueue, a Diffserv queue, etc.
-        string radioType = default("UnitDiskRadio");
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         *.energySourceModule = default(absPath(energySourceModule));
         **.bitrate = bitrate;
@@ -63,7 +62,7 @@ module AckingWirelessInterface like IWirelessInterface
             parameters:
                 @display("p=98,207");
         }
-        radio: <radioType> like IRadio {
+        radio: <default("UnitDiskRadio")> like IRadio {
             parameters:
                 @display("p=98,278");
         }

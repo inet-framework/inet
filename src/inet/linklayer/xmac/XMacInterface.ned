@@ -22,7 +22,7 @@ import inet.linklayer.common.WirelessInterface;
 module XMacInterface extends WirelessInterface
 {
     parameters:
-        radioType = default("ApskScalarRadio");
-        macType = "XMac";
+        radio.typename = default("ApskScalarRadio");
+        mac.typename = "XMac";
 }
 

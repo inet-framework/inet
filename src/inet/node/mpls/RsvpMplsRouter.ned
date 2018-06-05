@@ -42,7 +42,6 @@ module RsvpMplsRouter
         int numLoInterfaces = default(1);
         string peers;
         string routerId = default("auto");
-        string classifierType = default("RsvpClassifier");
         *.forwarding = true;
         *.routingTable.routerId = routerId;
         *.interfaceTableModule = default(absPath(".interfaceTable"));
@@ -75,7 +74,7 @@ module RsvpMplsRouter
                 classifierModule = "^.classifier";
                 @display("p=458,106");
         }
-        classifier: <classifierType> like IIngressClassifier {
+        classifier: <default("RsvpClassifier")> like IIngressClassifier {
             parameters:
                 @display("p=58,362;is=s");
         }

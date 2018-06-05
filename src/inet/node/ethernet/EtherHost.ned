@@ -37,7 +37,6 @@ module EtherHost
     parameters:
         bool hasStatus = default(false);
         bool csmacdSupport = default(true);  // by default use CSMA/CD
-        string macType = default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex"); // ~EtherMac or ~EtherMacFullDuplex
         string queueType = default(""); // DropTailQueue, DiffServQueue, or empty to use the internal queue
         string fcsMode @enum("declaredCorrect", "declaredIncorrect", "computed") = default("declaredCorrect");
         @networkNode();
@@ -73,7 +72,7 @@ module EtherHost
                 dataQueueType = queueType;
                 @display("p=159,199;q=l2queue");
         }
-        mac: <macType> like IEtherMac {
+        mac: <default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex")> like IEtherMac {
             parameters:
                 queueModule = (queueType == "" ? "" : "^.queue");
                 @display("p=215,270;q=txQueue");

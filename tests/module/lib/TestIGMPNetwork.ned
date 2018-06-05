@@ -32,7 +32,6 @@ network TestIGMPNetwork
         {
             parameters:
                 @networkNode;
-                string igmpType = default("Igmpv3");
                 *.interfaceTableModule = absPath(".interfaceTable");
                 *.routingTableModule = absPath(".routingTable");
             submodules:
@@ -45,7 +44,7 @@ network TestIGMPNetwork
                 tester: IgmpTesterNic {
                     @display("p=70,153");
                 }
-                igmp: <igmpType> like IIgmp {
+                igmp: <default("Igmpv3")> like IIgmp {
                     @display("p=176,153");
                 }
                 nodeConfigurator: Ipv4NodeConfigurator {

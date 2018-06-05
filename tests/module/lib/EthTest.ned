@@ -18,7 +18,6 @@ module EthTestHost
 {
     parameters:
         bool csmacdSupport = default(true);  // by default use CSMA/CD
-        string macType = default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex"); // ~EtherMac or ~EtherMacFullDuplex
         string queueType = default(""); // DropTailQueue, DiffServQueue, or empty to use the internal queue
         *.interfaceTableModule = "";
         @networkNode();
@@ -33,7 +32,7 @@ module EthTestHost
                 dataQueueType = queueType;
                 @display("p=65,171;q=l2queue");
         }
-        mac: <macType> like IEtherMac {
+        mac: <default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex")> like IEtherMac {
             parameters:
                 queueModule = (queueType == "" ? "" : "^.queue");
                 @display("p=155,272;q=txQueue");

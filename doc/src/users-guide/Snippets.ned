@@ -79,12 +79,11 @@ network MobileAdhocNetworkExample
 module NetworkNodeExample
 {
     parameters:
-        string appType; // application type is configurable from INI file
     gates:
         inout ethg; // ethernet interface connector
         input radioIn; // incoming radio frames from physical medium
     submodules:
-        app: <appType> like IApp; // configurable application
+        app: <> like IApp; // configurable application
         tcp: Tcp; // standard TCP protocol
         ip: Ipv4; // standard IP protocol
         md: MessageDispatcher; // connects multiple interfaces to IP

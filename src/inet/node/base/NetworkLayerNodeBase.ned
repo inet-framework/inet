@@ -25,10 +25,7 @@ module NetworkLayerNodeBase extends LinkLayerNodeBase
     parameters:
         bool hasIpv4 = default(true);
         bool hasIpv6 = default(false);
-        bool hasGn = default(false);
-        string networkLayerType = default("");
-        string ipv4NetworkLayerType = default("Ipv4NetworkLayer");
-        string ipv6NetworkLayerType = default("Ipv6NetworkLayer");
+        bool hasGn = default(false); 
         bool forwarding = default(false);
         bool multicastForwarding = default(false);
         *.forwarding = forwarding;
@@ -37,15 +34,15 @@ module NetworkLayerNodeBase extends LinkLayerNodeBase
         @figure[networkLayer.title](type=text; pos=1245,311; anchor=ne; text="network layer");
 
     submodules:
-        ipv4: <ipv4NetworkLayerType> like INetworkLayer if hasIpv4 {
+        ipv4: <default("Ipv4NetworkLayer")> like INetworkLayer if hasIpv4 {
             parameters:
                 @display("p=375,376;q=queue");
         }
-        ipv6: <ipv6NetworkLayerType> like INetworkLayer if hasIpv6 {
+        ipv6: <default("Ipv6NetworkLayer")> like INetworkLayer if hasIpv6 {
             parameters:
                 @display("p=525,376;q=queue");
         }
-        generic: <networkLayerType> like INetworkLayer if hasGn {
+        generic: <default("")> like INetworkLayer if hasGn {
             parameters:
                 @display("p=675,376;q=queue");
         }
@@ -62,7 +59,7 @@ module NetworkLayerNodeBase extends LinkLayerNodeBase
         ipv6.ifOut --> nl.in++ if hasIpv6;
 
         generic.ifIn <-- nl.out++ if networkLayerType != "";
-        generic.ifOut --> nl.in++ if networkLayerType != "";
+        generic.ifOut --> nl.in++ if exists(networkLayer);
 
         for i=0..numLoInterfaces-1 {
             nl.out++ --> lo[i].upperLayerIn;

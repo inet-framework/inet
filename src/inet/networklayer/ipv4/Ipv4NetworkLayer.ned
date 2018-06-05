@@ -34,8 +34,6 @@ module Ipv4NetworkLayer like INetworkLayer
         bool proxyARP = default(true);
         bool forwarding = default(false);
         bool multicastForwarding = default(false);
-        string igmpType = default("Igmpv2");
-        string arpType = default("Arp");
         string interfaceTableModule;
         *.forwarding = forwarding;
         *.multicastForwarding = multicastForwarding;
@@ -65,7 +63,7 @@ module Ipv4NetworkLayer like INetworkLayer
             parameters:
                 @display("p=450,100;b=480,5");
         }
-        igmp: <igmpType> like IIgmp {
+        igmp: <default("Igmpv2")> like IIgmp {
             parameters:
                 @display("p=300,200");
         }
@@ -82,7 +80,7 @@ module Ipv4NetworkLayer like INetworkLayer
                 useProxyARP = true; // as routes with unspecified next-hop addr are quite common
                 @display("p=450,400;q=queue");
         }
-        arp: <arpType> like IArp {
+        arp: <default("Arp")> like IArp {
             parameters:
                 @display("p=300,400;q=pendingQueue");
         }

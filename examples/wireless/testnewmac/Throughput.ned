@@ -50,7 +50,7 @@ module ThroughputClient
             parameters:
                 @display("p=112,134;q=queue");
                 mgmtType = "Ieee80211MgmtAdhoc";
-                macType = "Ieee80211Mac";
+                mac.typename = "Ieee80211Mac";
         }
         mobility: CircleMobility {
             parameters:

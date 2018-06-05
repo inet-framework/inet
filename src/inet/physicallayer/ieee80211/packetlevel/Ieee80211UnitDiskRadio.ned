@@ -27,7 +27,7 @@ package inet.physicallayer.ieee80211.packetlevel;
 module Ieee80211UnitDiskRadio extends Ieee80211Radio
 {
     parameters:
-        transmitterType = default("Ieee80211UnitDiskTransmitter");
-        receiverType = default("Ieee80211UnitDiskReceiver");
+        transmitter.typename = default("Ieee80211UnitDiskTransmitter");
+        receiver.typename = default("Ieee80211UnitDiskReceiver");
         @class(Radio);
 }

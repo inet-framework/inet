@@ -34,7 +34,6 @@ import inet.node.inet.StandardHost;
 network Hierarchical99
 {
     parameters:
-        string networkConfiguratorType;
         @display("bgb=708,518;bgl=22");
     types:
         module LAN
@@ -108,7 +107,7 @@ network Hierarchical99
         recorder: RoutingTableRecorder {
             @display("p=37,81");
         }
-        networkConfigurator: <networkConfiguratorType> like INetworkConfigurator {
+        networkConfigurator: <> like INetworkConfigurator {
             @display("p=37,31");
         }
         area11: Area {
