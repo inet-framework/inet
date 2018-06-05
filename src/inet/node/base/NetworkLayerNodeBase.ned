@@ -58,8 +58,8 @@ module NetworkLayerNodeBase extends LinkLayerNodeBase
         ipv6.ifIn <-- nl.out++ if hasIpv6;
         ipv6.ifOut --> nl.in++ if hasIpv6;
 
-        generic.ifIn <-- nl.out++ if networkLayerType != "";
-        generic.ifOut --> nl.in++ if exists(networkLayer);
+        generic.ifIn <-- nl.out++ if exists(generic);
+        generic.ifOut --> nl.in++ if exists(generic);
 
         for i=0..numLoInterfaces-1 {
             nl.out++ --> lo[i].upperLayerIn;

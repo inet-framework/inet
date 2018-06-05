@@ -72,7 +72,7 @@ module PppInterface like IPppInterface
         upperLayerIn --> { @display("m=n"); } --> queue.in if numOutputHooks == 0 && !exists(egressTC) && queueType != "";
         upperLayerIn --> { @display("m=n"); } --> ppp.upperLayerIn if numOutputHooks == 0 && !exists(egressTC) && queueType == "";
 
-        egressTC.out --> queue.in if egressTCType != "" && queueType != "";
+        egressTC.out --> queue.in if exists(egressTC) && queueType != "";
         egressTC.out --> ppp.upperLayerIn if exists(egressTC) && queueType == "";
 
         for i=0..numOutputHooks-2 {

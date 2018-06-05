@@ -87,10 +87,10 @@ module EthernetInterface like IEthernetInterface
         encap.lowerLayerOut --> mac.upperLayerIn if queueType == "";
 
         // no input hooks, no ingressTC
-        encap.upperLayerOut --> { @display("m=n"); } --> upperLayerOut if numInputHooks == 0 && ingressTCType == "";
+        encap.upperLayerOut --> { @display("m=n"); } --> upperLayerOut if numInputHooks == 0 && !exists(ingressTC);
 
         // no input hooks, there is ingressTC
-        if numInputHooks == 0 && ingressTCType != "" {
+        if numInputHooks == 0 && exists(ingressTC) {
             encap.upperLayerOut --> ingressTC.in;
             ingressTC.out --> { @display("m=n"); } --> upperLayerOut;
         }
@@ -104,12 +104,12 @@ module EthernetInterface like IEthernetInterface
         }
 
         // there are input hooks, no ingressTC
-        if numInputHooks > 0 && ingressTCType == "" {
+        if numInputHooks > 0 && exists(ingressTC) {
             encap.upperLayerOut --> inputHook[0].in;
         }
 
         // there are input hooks, there is ingressTC
-        if numInputHooks > 0 && ingressTCType != "" {
+        if numInputHooks > 0 && exists(ingressTC) {
             encap.upperLayerOut --> ingressTC.in;
             ingressTC.out --> inputHook[0].in;
         }
@@ -120,7 +120,7 @@ module EthernetInterface like IEthernetInterface
         }
 
         // no output hooks, no egressTC
-        upperLayerIn --> { @display("m=n"); } --> encap.upperLayerIn if numOutputHooks == 0 && egressTCType == "";
+        upperLayerIn --> { @display("m=n"); } --> encap.upperLayerIn if numOutputHooks == 0 && !exists(egressTC);
 
         // there are output hooks
         if numOutputHooks > 0 {
@@ -128,22 +128,22 @@ module EthernetInterface like IEthernetInterface
         }
 
         // no output hooks, there is egressTC
-        if numOutputHooks == 0 && egressTCType != "" {
+        if numOutputHooks == 0 && exists(egressTC) {
             upperLayerIn --> { @display("m=n"); } --> egressTC.in;
         }
 
         // there is egressTC
-        if egressTCType != "" {
+        if exists(egressTC) {
             egressTC.out --> encap.upperLayerIn;
         }
 
         // there are output hooks, no egressTC
-        if numOutputHooks > 0 && egressTCType == "" {
+        if numOutputHooks > 0 && exists(egressTC) {
             outputHook[numOutputHooks-1].out --> encap.upperLayerIn;
         }
 
         // there are output hooks, there is egressTC
-        if numOutputHooks > 0 && egressTCType != "" {
+        if numOutputHooks > 0 && exists(egressTC) {
             outputHook[numOutputHooks-1].out --> egressTC.in;
         }
 }

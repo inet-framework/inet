@@ -40,9 +40,9 @@ module NodeBase like INetworkNode
         string osgModelColor = default(""); // tint color, no colorization by default
         string canvasImage = default(""); // image for canvas visualization, no image by default
         string canvasImageColor = default(""); // tint color, no colorization by default
-        *.mobilityModule = default(mobilityType != "" ? absPath(".mobility") : "");
-        *.energySourceModule = default(energyStorageType != "" ? absPath(".energyStorage") : "");
-        *.energyGeneratorModule = default(energyGeneratorType != "" ? absPath(".energyGenerator") : "");
+        *.mobilityModule = default(exists(mobility) ? absPath(".mobility") : "");
+        *.energySourceModule = default(exists(energyStorage) ? absPath(".energyStorage") : "");
+        *.energyGeneratorModule = default(exists(energyGenerator) ? absPath(".energyGenerator") : "");
         @display("bgb=1256,672");
     submodules:
         status: NodeStatus if hasStatus {

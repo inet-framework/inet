@@ -50,7 +50,7 @@ module WirelessInterface like IWirelessInterface
         radio.upperLayerOut --> mac.lowerLayerIn if exists(radio);
 
         mac.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
-        mac.upperLayerIn <-- { @display("m=n"); } <-- upperLayerIn if classifierType == "";
+        mac.upperLayerIn <-- { @display("m=n"); } <-- upperLayerIn if !exists(classifier);
         mac.upperLayerIn <-- { @display("m=n"); } <-- classifier.out if exists(classifier);
         classifier.in <-- { @display("m=n"); } <-- upperLayerIn if exists(classifier);
 }

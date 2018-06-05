@@ -47,9 +47,9 @@ module EtherSwitch
         bool csmacdSupport = default(true);  // by default use CSMA/CD
         string macType = default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex"); // ~EtherMac or ~EtherMacFullDuplex
         string spanningTreeProtocol = default("");
-        eth[*].encapType = "EtherEncapDummy";
+        eth[*].encap.typename = "EtherEncapDummy";
         eth[*].csmacdSupport = csmacdSupport;
-        eth[*].macType = macType;
+        eth[*].mac.typename = macType;
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.macTableModule = default(absPath(".macTable"));
     gates:

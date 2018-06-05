@@ -48,9 +48,9 @@ module AccessPoint
         @display("i=device/accesspoint");
         int numWlanInterfaces = default(1);               // the number of radios in the access point
         bool hasStatus = default(false);
-        wlan[*].llcType = default("Ieee80211Portal");
+        wlan[*].llc.type = default("Ieee80211Portal");
         wlan[*].mgmtType = default("Ieee80211MgmtAp");
-        eth[*].encapType = "EtherEncapDummy";
+        eth[*].encap.type = "EtherEncapDummy";
         *.interfaceTableModule = default(absPath(".interfaceTable"));
     gates:
         input radioIn[numWlanInterfaces] @directIn;
@@ -73,11 +73,11 @@ module AccessPoint
             parameters:
                 @display("p=100,400;is=s");
         }
-        relayUnit: <default(firstAvailable("Ieee8021dRelay","MacRelayUnit"))> like IMacRelayUnit if sizeof(ethg)+numWlanInterfaces > 1 && relayUnitType != "" {
+        relayUnit: <default(firstAvailable("Ieee8021dRelay","MacRelayUnit"))> like IMacRelayUnit if sizeof(ethg)+numWlanInterfaces > 1 && typename!="" {
             parameters:
                 @display("p=400,200");
         }
-        nl: MessageDispatcher if sizeof(ethg)+numWlanInterfaces > 1 && relayUnitType != "" {
+        nl: MessageDispatcher if sizeof(ethg)+numWlanInterfaces > 1 && exists(relayUnit) {
             parameters:
                 @display("p=356,299;b=300,5,,,,1");
         }

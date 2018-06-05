@@ -100,7 +100,7 @@ module Ieee80211Interface like IWirelessInterface
         mgmt.agentIn <-- agent.mgmtOut if _agentNeeded;
 
         llc.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
-        llc.upperLayerIn <-- { @display("m=n"); } <-- upperLayerIn if classifierType == "";
+        llc.upperLayerIn <-- { @display("m=n"); } <-- upperLayerIn if !exists(classifier);
         llc.upperLayerIn <-- { @display("m=n"); } <-- classifier.out if exists(classifier);
 
         llc.lowerLayerOut --> mac.upperLayerIn;
