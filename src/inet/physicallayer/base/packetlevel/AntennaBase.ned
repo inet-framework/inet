@@ -26,7 +26,7 @@ import inet.physicallayer.contract.packetlevel.IAntenna;
 module AntennaBase like IAntenna
 {
     parameters:
-        string mobilityModule; // = default(""); // the path to the mobility module relative to this module, only used if no mobility submodule is present
+        string mobilityModule; // the path to the mobility module relative to this module, only used if no mobility submodule is present
         int numAntennas = default(1); // the number of antennas in the antenna array
         @display("i=device/antennatower");
     submodules:
