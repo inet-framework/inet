@@ -51,6 +51,7 @@ module AccessPoint
         wlan[*].llc.type = default("Ieee80211Portal");
         wlan[*].mgmtType = default("Ieee80211MgmtAp");
         eth[*].encap.type = "EtherEncapDummy";
+        wlan[*].radio.antenna.mobilityModule = default("^.^.^.mobility");
         *.interfaceTableModule = default(absPath(".interfaceTable"));
     gates:
         input radioIn[numWlanInterfaces] @directIn;

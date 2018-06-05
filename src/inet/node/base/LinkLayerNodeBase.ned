@@ -39,6 +39,7 @@ module LinkLayerNodeBase extends NodeBase
         int numTunInterfaces = default(0);
         mobility.typename = default(numWlanInterfaces > 0 ? "StationaryMobility" : "");
         *.interfaceTableModule = default(absPath(".interfaceTable"));
+        wlan[*].radio.antenna.mobilityModule = default("^.^.^.mobility");
         @figure[linkLayer](type=rectangle; pos=250,456; size=1000,210; fillColor=#0000ff; lineColor=#808080; cornerRadius=5; fillOpacity=0.1);
         @figure[linkLayer.title](type=text; pos=1245,461; anchor=ne; text="link layer");
 
