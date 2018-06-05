@@ -71,7 +71,7 @@ module Ieee80211Mac extends MacProtocolBase like IIeee80211Mac
         string modeSet @enum("a", "b", "g(erp)", "g(mixed)", "n(mixed-2.4Ghz)", "p", "ac") = default("g(mixed)");
         string fcsMode @enum("declared","computed") = default("declared");
 
-		string initialRadioState @enum("off", "sleep", "receiver") = default("receiver");
+		string initialRadioMode @enum("off", "sleep", "receiver") = default("receiver");
 		
         int mtu @unit(B) = default(2304B);
         bool qosStation = default(false);

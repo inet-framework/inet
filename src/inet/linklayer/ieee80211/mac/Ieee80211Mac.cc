@@ -91,12 +91,12 @@ void Ieee80211Mac::initialize(int stage)
         emit(modesetChangedSignal, modeSet);
         if (isOperational)
         {
-            const char *initialRadioState = par("initialRadioState");
-            if(!strcmp(initialRadioState, "off"))
+            const char *initialRadioMode = par("initialRadioMode");
+            if(!strcmp(initialRadioMode, "off"))
                 radio->setRadioMode(IRadio::RADIO_MODE_OFF);
-            else if(!strcmp(initialRadioState, "sleep"))
+            else if(!strcmp(initialRadioMode, "sleep"))
                 radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
-            else if(!strcmp(initialRadioState, "receiver"))
+            else if(!strcmp(initialRadioMode, "receiver"))
                 radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
             else
                 throw cRuntimeError("Unknown initialRadio state");
