@@ -18,6 +18,9 @@
 
 package inet.examples.emulation.extclient;
 
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth1G;
+import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.StandardHost;
 
 
@@ -26,6 +29,7 @@ network ExtClient
     parameters:
         double testTimeout @unit(s) = default(0s);
         bool testing = default(false);
+        @display("bgb=310,255");
     submodules:
         peer: StandardHost {
             parameters:
@@ -34,7 +38,22 @@ network ExtClient
                 numExtInterfaces = 1;
                 @display("p=29,90;i=old/laptop3");
         }
+        etherSwitch: EtherSwitch {
+            @display("p=155,123");
+        }
+        peer2: StandardHost {
+            parameters:
+                forwarding = false;
+                ipv4.routingTable.routingFile = "cli1d.mrt";
+                numExtInterfaces = 1;
+                @display("p=249,70;i=old/laptop3");
+        }
+        configurator: Ipv4NetworkConfigurator {
+            @display("p=75,188");
+        }
     connections allowunconnected:
+        peer.ethg++ <--> Eth1G <--> etherSwitch.ethg++;
+        etherSwitch.ethg++ <--> Eth1G { per = 0.0; }<--> peer2.ethg++;
 }
 
 
