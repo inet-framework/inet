@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2018-03-14  Zoltan Bojthe
+
+	Refactored PacketPrinter::isEnabledInfo().
+
+2018-03-09  Zoltan Bojthe
+
+	Change PacketPrinter to use Protocol layer info.
+
 2018-03-07  Levente Mészáros
 
 	Adapted PacketPrinter to the new ProtocolPrinter interface.

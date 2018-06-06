@@ -1,5 +1,20 @@
 ====== inet-4.x ======
 
+2018-05-04  Levente Mészáros
+
+	Removed implicit peek till end behavior from peekAt and peekDataAt.
+
+	No other variants support this, and the old behavior prevents peeking
+	into the current representation.
+
+2018-05-03  Andras Varga
+
+	Added proper printing of class name in error messages.
+
+2018-04-13  Levente Mészáros
+
+	Enhanced Packet API documentation.
+
 2018-03-21  Levente Mészáros
 
 	Common: Refactored Packet API for clarity and consistency.

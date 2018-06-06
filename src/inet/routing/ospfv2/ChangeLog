@@ -1,5 +1,10 @@
 ====== inet-4.x ======
 
+2018-05-04  Rudolf Hornig
+
+	Changed an integer parameter unit to second.
+	Added NED documentation for OSPFv2
+
 2018-02-26  Zoltan Bojthe
 
 	Added OspfProtocolDissector.

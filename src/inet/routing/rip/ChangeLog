@@ -1,5 +1,35 @@
 ====== inet-4.x ======
 
+2018-05-30  Mani Amoozadeh
+
+	Added RipPacketSerializer.
+
+2018-05-28  Mani Amoozadeh
+
+	Prevent sending updates on interface which is down.
+
+2018-05-12  Mani Amoozadeh
+
+	Added hold-down timer parameter.
+
+2018-05-10  Mani Amoozadeh
+
+	The 30s-timer should include all routes in the RIP response.
+
+2018-05-09  Mani Amoozadeh
+
+	Fixed iterating over ripRoutes while deleting some entries.
+	Added triggeredUpdate parameter.
+
+2018-05-08  Mani Amoozadeh
+
+	Extracted the RipRouteData and refactored protocol to use it.
+
+2018-04-09  Zoltan Bojthe
+
+	Added RipProtocolDissector.
+	Added RipProtocolPrinter.
+
 2018-01-18  Levente Mészáros
 
 	Replaced packet tags API calls to use the new API.

@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2018-05-07  Levente Mészáros
+
+	Changed PingApp to work with Ipv4Socket, Ipv6Socket and L3Socket.
+
+2018-05-04  Zoltan Bojthe
+
+	Refactored to use L3Socket with ICallback.
+
+2018-04-09  Levente Mészáros
+
+	Common: Changed protocol variable names to use camel case.
+
 2018-03-02  Zoltan Bojthe
 
 	Added networkProtocol parameter to PingApp.

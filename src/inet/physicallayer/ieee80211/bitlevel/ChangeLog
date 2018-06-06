@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2018-06-04  Levente Mészáros
+
+	Replaced 0/0 NED parameter values with nan.
+
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-05-30  Levente Mészáros
+
+	Fixed length field wrap around for large packets.
+
 2018-01-18  Levente Mészáros
 
 	Replaced packet tags API calls to use the new API.

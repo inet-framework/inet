@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2018-05-03  Levente Mészáros
+
+	Fixed AttachedMobility velocity computation when there's no rotation at all.
+
+2018-04-25  Levente Mészáros
+
+	Moved code from updateVisualRepresentation into the standard refreshDisplay module function.
+
+2018-04-18  Levente Mészáros
+
+	Fixed GaussMarkov reflection with respect to velocity and orientation.
+
 2018-03-22  Levente Mészáros
 
 	Replaced type of angle member variables with rad and added degree around parameters.

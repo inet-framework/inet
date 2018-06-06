@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
 2017-12-22  ------ inet-3.99.2 released ------
 
 2017-12-20  Zoltan Bojthe

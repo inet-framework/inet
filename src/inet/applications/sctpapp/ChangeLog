@@ -1,5 +1,18 @@
 ====== inet-4.x ======
 
+2018-04-25  Zoltan Bojthe
+
+	Refactored to use the new SctpSocket interface.
+
+2018-03-28  Zoltan Bojthe
+
+	Fixed packet type in @signal.
+
+2018-03-28  Zoltan Bojthe
+
+	Added missing units for zero values.
+	Added missing units for parameters.
+
 2018-02-09  Zoltan Bojthe
 
 	Replaced deprecated cDoubleHistogram with cHistogram.

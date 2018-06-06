@@ -1,5 +1,33 @@
 ====== inet-4.x ======
 
+2018-05-23  Zoltan Bojthe
+
+	TcpStatusInfo is automatically deleted when socketStatusArrived() returns.
+
+2018-05-07  Levente Mészáros
+
+	Separated setCallback from setUserData in all sockets.
+
+2018-05-04  Levente Mészáros
+
+	Added get/setUserData to all sockets.
+	Renamed yourPtr to userData in all sockets.
+
+2018-05-04  Zoltan Bojthe
+
+	Removed yourPtr from parameters of TcpSocket::ICallback functions.
+	Replaced connId with TcpSocket* in TcpSocket::ICallback functions.
+
+2018-04-23  Zoltan Bojthe
+
+	Replaced TcpSocketMap with SocketMap.
+	Refactored TcpSocket to implement ISocket.
+	Rename TcpSocket::CallbackInterface to ICallback.
+
+2018-04-19  Zoltan Bojthe
+
+	Removed obsolete TcpSocket::belongsToAnyTCPSocket().
+
 2018-01-12  Levente Mészáros
 
 	Renamed Request variables.

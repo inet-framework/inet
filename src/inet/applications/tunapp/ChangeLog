@@ -1,5 +1,14 @@
 ====== inet-4.x ======
 
+2018-05-07  Levente Mészáros
+
+	Refactored to use the new TunSocket interface.
+	Replaced L3Socket with Ipv4Socket in TunnelApp.
+
+2018-05-02  Zoltan Bojthe
+
+	Refactored TunnelApp to use ISocket, SocketMap.
+
 2018-02-19  Zoltan Bojthe
 
 	Switched to using addTag() because all tags absent after clearTags().

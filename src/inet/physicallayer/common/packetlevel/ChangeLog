@@ -1,5 +1,32 @@
 ====== inet-4.x ======
 
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-06-04  Levente Mészáros
+
+	Replaced 0/0 NED parameter values with nan.
+
+2018-05-17  Levente Mészáros
+
+	Added clearTags() and copied PacketProtocolTag to all received packet computations.
+	Extracted a separate pickUpSignals from cListener::receiveSignal implementation.
+
+2018-05-16  Levente Mészáros
+
+	Fixed MAC address filtering.
+	Moved copying packet tags from createTransmitterSignal into createReceiverSignal.
+
+2018-04-19  Levente Mészáros
+
+	Added broadcast/multicast MAC address support to MAC address filter.
+
+2018-04-06  Gyorgy Szaszko
+
+	Switched to bold font for important parts of log messages.
+	Affected parts: possible/impossible, attempting/ignoring, successful/unsuccessful, and various states.
+
 2018-02-21  Levente Mészáros
 
 	Fixed missing PacketProtocolTag for raw packets.

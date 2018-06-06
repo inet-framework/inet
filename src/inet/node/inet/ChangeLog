@@ -1,5 +1,30 @@
 ====== inet-4.x ======
 
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-06-04  Levente Mészáros
+
+	Replaced PPP, 802.15.4 and acking wireless queueType parameters with queue.typename parameters.
+	Replaced WirelessHost with AdhocHost in MANET routers.
+
+2018-05-29  Levente Mészáros
+
+	Replaced various fooType parameter assignments with foo.typename assignments.
+
+2018-05-25  Levente Mészáros
+
+	Added IIeee80211Agent and replaced mgmtType with mgmt.typename parameter.
+
+2018-05-24  Andras Varga
+
+	Renamed hasRIP, hasOSPF and similar parameters changed to camel case.
+
+2018-04-06  Gyorgy Szaszko
+
+	Added SensorNode module type.
+
 2018-01-23  Levente Mészáros
 
 	Replaced MessageDispatcher lower/upper vector gates with a single one.

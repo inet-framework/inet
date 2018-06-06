@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2018-03-14  Zoltan Bojthe
+
+	Added ProbabilisticProtocolPrinter.
+
 2018-03-02  Zoltan Bojthe
 
 	Added payloadLength field to header.

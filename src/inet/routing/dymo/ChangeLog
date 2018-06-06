@@ -1,5 +1,10 @@
 ====== inet-4.x ======
 
+2018-04-09  Zoltan Bojthe
+
+	Added DymoRouteData::str().
+	Removed "inet::" from packet name.
+
 2018-02-01  Zoltan Bojthe
 
 	Renamed message classes: Rreq, Rrep, Rerr.

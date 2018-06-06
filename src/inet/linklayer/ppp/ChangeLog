@@ -1,5 +1,21 @@
 ====== inet-4.x ======
 
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-05-10  Zoltan Bojthe
+
+	Moved header serializers to the corresponding protocol folders.
+
+2018-03-14  Zoltan Bojthe
+
+	Added PppProtocolPrinter.
+
+2018-03-28  Zoltan Bojthe
+
+	Moved PppProtocolDissector to separated file.
+
 2018-02-21  Zoltan Bojthe
 
 	Changed clearing tags when sending a packet to leave the PacketProtocolTag intact.

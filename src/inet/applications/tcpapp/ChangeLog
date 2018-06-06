@@ -1,5 +1,29 @@
 ====== inet-4.x ======
 
+2018-05-11  Levente Mészáros
+
+	Refactored TcpServerHostApp to properly use TcpSocket when accepting connections.
+
+2018-05-04  Zoltan Bojthe
+
+	Changed TcpSinkApp to use TcpServerHostApp/TcpServerThreadBase.
+
+2018-04-25  Zoltan Bojthe
+
+	Refactored to use the new TcpSocket interface.
+
+2018-04-27  Andras Varga
+
+	Removed obsolete "dataTransferMode" parameter.
+
+2018-04-23  Zoltan Bojthe
+
+	Replaced TcpSocketMap with SocketMap.
+
+2018-04-10  Zoltan Bojthe
+
+	Fixed issue #238: TcpAppBase ignored localPort when connecting.
+
 2018-02-02  Zoltan Bojthe
 
 	Fixed memory leak.

@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2018-03-28  Zoltan Bojthe
+
+	Fixed refreshDisplay() for power-off state.
+
 2018-01-05  Zoltan Bojthe
 
 	Renamed NF_* signals to use camel case.

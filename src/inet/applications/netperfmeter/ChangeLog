@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2018-04-27  Andras Varga
+
+	Removed obsolete "dataTransferMode" parameters.
+
 2018-02-09  Zoltan Bojthe
 
 	Replaced deprecated cDoubleHistogram with cHistogram.

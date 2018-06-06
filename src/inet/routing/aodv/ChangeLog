@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2018-04-09  Zoltan Bojthe
+
+	Added AodvRouteData::str().
+
+2018-04-07  Mani Amoozadeh
+
+	Fixed protocol to respond properly to the D (destination only flag) flag.
+
+2018-04-06  Mani Amoozadeh
+
+	Fixed bug #293.
+
 2018-02-01  Zoltan Bojthe
 
 	Moved to aodv namespace.

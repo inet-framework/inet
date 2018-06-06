@@ -1,5 +1,27 @@
 ====== inet-4.x ======
 
+2018-04-24  Andras Varga
+
+	Renamed <set-channel-attr> to <set-channel-param>.
+
+2018-04-16  Andras Varga
+
+	Scripting integrated into ScenarioManager.
+
+	It accepts the following new commands in ScenarioManager scripts:
+
+	  <initiate module="..." operation="..."/>, where operation is shutdown,
+	    start/startup, crash, or an operation class name like
+	NodeCrashOperation
+	 <shutdown module="..."/>
+	 <startup module="..."/> or <start module="..."/>
+	 <crash module="..."/>
+
+	E.g. this line:
+	 <tell module="lifecycleController" target="client"
+	operation="NodeShutdownOperation"/> will become
+	 <shutdown module="client"/>
+
 2017-12-22  ------ inet-3.99.2 released ------
 
 2017-11-16  ------ inet-3.99.1 released ------

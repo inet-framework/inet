@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2018-04-25  Zoltan Bojthe
+
+	Refactored to use the new UdpSocket interface.
+
+2018-03-21  Zoltan Bojthe
+
+	Added missing units for zero values.
+
 2018-02-05  Zoltan Bojthe
 
 	Renamed signals:

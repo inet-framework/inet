@@ -1,5 +1,22 @@
 ====== inet-4.x ======
 
+2018-05-07  Levente Mészáros
+
+	Separated setCallback from setUserData in all sockets.
+
+2018-05-04  Levente Mészáros
+
+	Added get/setUserData to all sockets.
+	Renamed yourPtr to userData in all sockets.
+
+2018-05-02  Zoltan Bojthe
+
+	Implmented ISocket with TunSocket.
+
+2018-04-09  Zoltan Bojthe
+
+	Change initialize to call registerInterface() in INITSTAGE_LINK_LAYER.
+
 2018-01-18  Levente Mészáros
 
 	Replaced packet tags API calls to use the new API.

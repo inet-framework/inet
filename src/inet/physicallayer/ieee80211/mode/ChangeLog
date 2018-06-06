@@ -1,5 +1,32 @@
 ====== inet-4.x ======
 
+2018-05-28  Levente Mészáros
+
+	Added numSpatialStreams parameter for mode lookup in Ieee80211ModeSet.
+
+2018-04-26  Levente Mészáros
+
+	Moved default bitrate rante (0.1 Mbps) into mode lookup in Ieee80211ModeSet.
+	Extended finding a mode in a modeset with new variants taking a bitrate range.
+	Added getSpacing function to bands.
+	Added optional bandwidth parameter to finding mode in modeset.
+	Added getBandwidth function to data modes.
+
+2018-04-26  Alfonso Ariza
+
+	Added new 5GHz bands for 20, 40, 80, and 160 Mhz bandwidth.
+	Added 802.11/ac modes using VHT PHY.
+	Replaced interfaces with 802.11 specific classes in HT code and HT mode.
+	Added new OFDM codes and modulations.
+
+2018-04-24  Alfonso Ariza
+
+	Added Ieee80211VhtMode mode and related preamble, header and data modes.
+
+2018-04-16  Levente Mészáros
+
+	Fixed center frequency calculation in Ieee80211ArithmeticalBand.
+
 2018-01-04  Levente Mészáros
 
 	Replaced @editable(false) with the simpler @descriptor(readonly).

@@ -1,5 +1,25 @@
 ====== inet-4.x ======
 
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-05-23  Zoltan Bojthe
+
+	Fixed for received control/pause frames.
+
+2018-05-17  Zoltan Bojthe
+
+	Fixed pause frame transmit statistical and emitting code.
+
+2018-05-11  Zoltan Bojthe
+
+	Added 200Gbit and 400Gbit ethernet.
+
+2018-05-10  Zoltan Bojthe
+
+	Moved header serializers to the corresponding protocol folders.
+
 2018-03-08  Zoltan Bojthe
 
 	Added EthernetProtocolPrinter.

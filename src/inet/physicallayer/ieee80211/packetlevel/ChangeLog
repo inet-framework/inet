@@ -1,5 +1,44 @@
 ====== inet-4.x ======
 
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-06-04  Levente Mészáros
+
+	Replaced 0/0 NED parameter values with nan.
+
+2018-05-30  Levente Mészáros
+
+	Fixed length field wrap around for large packets.
+
+2018-05-10  Zoltan Bojthe
+
+	Moved header serializers to the corresponding protocol folders.
+
+2018-05-04  Levente Mészáros
+
+	Extended error models with corruption mode parameter.
+
+	Available corruption modes: packet, chunk, byte, or bit level. 802.11
+	error models support packet corruption mode only but could be extended
+	with the others to do real MPDU aggregation.
+
+2018-05-04  Levente Mészáros
+
+	Changed chunk processing to allow for incorrect chunks.
+
+	Physical layers generally don't check whether the data is erroneous or
+	not. This change allows chunk level packet corruption.
+
+2018-04-27  Levente Mészáros
+
+	Added QBPSK to subcarrier modulations for HT mode.
+
+2018-04-26  Alfonso Ariza
+
+	Fixed opMode parameter @enum for n(mixed-2.4Ghz) modeset.
+
 2018-03-08  Zoltan Bojthe
 
 	Added Ieee80211PhyProtocolPrinter.

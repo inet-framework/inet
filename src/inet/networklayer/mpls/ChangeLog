@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2018-04-25  Andras Varga
+
+	Maed RsvpMplsRouter ingress classifier configurable.
+
+2018-04-21  Andras Varga
+
+	Converted integer constants to enum in LibTable.
+
+2018-04-19  Andras Varga
+
+	Documented config file format of LibTable.
+
 2018-03-01  Zoltan Bojthe
 
 	Added MplsProtocolDissector

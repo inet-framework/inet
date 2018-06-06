@@ -1,5 +1,26 @@
 ====== inet-4.x ======
 
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-05-16  Levente Mészáros
+
+	Added MacAddressInd to outgoing packets.
+
+2018-05-10  Zoltan Bojthe
+
+	Moved header serializers to the corresponding protocol folders.
+
+2018-04-09  Zoltan Bojthe
+
+	Fixed mac module initialize to call registerInterface() in INITSTAGE_LINK_LAYER.
+	Added CsmaCaInterface.
+
+2018-03-14  Zoltan Bojthe
+
+	Added CsmaCaProtocolPrinter.
+
 2018-02-27  Zoltan Bojthe
 
 	Added CsmaCaProtocolDissector.

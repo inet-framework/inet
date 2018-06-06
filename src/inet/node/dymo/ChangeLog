@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2018-06-04  Levente Mészáros
+
+	Replaced WirelessHost with AdhocHost in MANET routers.
+
 2018-01-23  Levente Mészáros
 
 	Replaced MessageDispatcher lower/upper vector gates with a single one.

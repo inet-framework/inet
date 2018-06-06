@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-04-13  Levente Mészáros
+
+	Added missing ApskLayeredScalarRadio and ApskLayeredDimensionalRadio modules.
+
 2018-02-23  Zoltan Bojthe
 
 	Added apskPhy protocol, added payloadProtocol field to ApskPhyHeader.

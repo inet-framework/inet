@@ -1,5 +1,22 @@
 ====== inet-4.x ======
 
+2018-05-09  Zoltan Bojthe
+
+	Implemented bind() and connect().
+
+2018-05-09  Levente Mészáros
+
+	Extended INetworkSockets and implementations with local/remote address filter.
+
+2018-05-07  Levente Mészáros
+
+	Changed all network sockets to implement the new INetworkSocket interface.
+	Separated setCallback from setUserData in all sockets.
+
+2018-05-04  Levente Mészáros
+
+	Added Ipv6Socket.
+
 2018-02-12  Zoltan Bojthe
 
 	Added toString for some address descriptor.

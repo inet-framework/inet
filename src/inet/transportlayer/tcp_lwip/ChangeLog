@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2018-05-10  Zoltan Bojthe
+
+	Moved header serializers to the corresponding protocol folders.
+
 2018-01-24  Levente Mészáros
 
 	Adapted registerProtocol calls to the new API based on OSI service primitives.

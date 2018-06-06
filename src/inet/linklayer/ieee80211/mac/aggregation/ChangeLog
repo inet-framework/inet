@@ -1,5 +1,10 @@
 ====== inet-4.x ======
 
+2018-05-17  Levente Mészáros
+
+	Added ASSERTs to check that the addresses are always correct in MSDU aggregation.
+	Fixed exploded frame transmitter address in MsduDeagregation.
+
 2018-02-12  Zoltan Bojthe
 
 	Switched to using type b (bit) for length constants in Ieee80211Frame subtypes.

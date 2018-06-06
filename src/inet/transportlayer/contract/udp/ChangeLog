@@ -1,5 +1,19 @@
 ====== inet-4.x ======
 
+2018-05-07  Levente Mészáros
+
+	Changed to UdpSocket::ICallback parameter type to Indication.
+	Separated setCallback from setUserData in all sockets.
+
+2018-05-04  Levente Mészáros
+
+	Added get/setUserData to all sockets.
+	Renamed yourPtr to userData in all sockets.
+
+2018-04-25  Zoltan Bojthe
+
+	Refactored UdpSocket to implement ISocket.
+
 2018-01-18  Levente Mészáros
 
 	Replaced packet tags API calls to use the new API.

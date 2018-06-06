@@ -1,5 +1,29 @@
 ====== inet-4.x ======
 
+2018-06-04  Levente Mészáros
+
+	Replaced +-1/0 NED parameter value with +-inf.
+
+2018-05-22  Levente Mészáros
+
+	Changed annoying mobility position log statement to TRACE.
+
+2018-05-02  Levente Mészáros
+
+	Moved StringFormat class under common to remove Mobility feature dependency
+	on the visualizer feature.
+
+2018-04-25  Levente Mészáros
+
+	Allowed changing displayStringTextFormat parameter from the GUI.
+	Added formatted display string text to refreshDisplay.
+	Moved code from updateVisualRepresentation into the standard refreshDisplay module function.
+
+2018-04-06  Gyorgy Szaszko
+
+	Added position and velocity to display string of mobility modules by default.
+	Added displayStringTextFormat parameter to control display string format.
+
 2018-03-22  Levente Mészáros
 
 	Replaced type of angle member variables with rad and added degree around parameters.

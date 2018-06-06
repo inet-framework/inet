@@ -1,5 +1,26 @@
 ====== inet-4.x ======
 
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-04-27  Florian Kauer
+
+	Use CONGESTION instead of RETRY_LIMIT_REACHED for backoff limit reached
+
+2018-04-09  Zoltan Bojthe
+
+	Fixed mac module initialize to call registerInterface() in INITSTAGE_LINK_LAYER.
+
+2018-03-21  Gyorgy Szaszko
+
+	Added missing protocol tag.
+	Fixed ACK detection bug.
+
+2018-03-05  Gyorgy Szaszko
+
+	Set energySourceModule path.
+
 2018-02-26  Zoltan Bojthe
 
 	Added Ieee802154ProtocolDissector.

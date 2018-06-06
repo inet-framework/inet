@@ -1,5 +1,21 @@
 ====== inet-4.x ======
 
+2018-05-28  Levente Mészáros
+
+	Added more complete IModulation descriptors to allow inspecting 802.11 signal's modulation.
+
+2018-05-15  Andras Varga
+
+	Renamed IRadioBackgroundNoise to IBackgroundNoise, for consistency with usages.
+
+2018-05-04  Levente Mészáros
+
+	Extended error models with corruption mode parameter.
+
+	Available corruption modes: packet, chunk, byte, or bit level. 802.11
+	error models support packet corruption mode only but could be extended
+	with the others to do real MPDU aggregation.
+
 2018-02-07  Zoltan Bojthe
 
 	Added type info for signals.

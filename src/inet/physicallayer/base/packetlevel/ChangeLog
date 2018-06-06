@@ -1,5 +1,31 @@
 ====== inet-4.x ======
 
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-05-17  Levente Mészáros
+
+	Added clearTags() and copied PacketProtocolTag to all received packet computations.
+
+2018-05-15  Levente Mészáros
+
+	Added conditional mobility submodule to AntennaBase.
+
+2018-05-04  Levente Mészáros
+
+	Extended error models with corruption mode parameter.
+
+	Available corruption modes: packet, chunk, byte, or bit level. 802.11
+	error models support packet corruption mode only but could be extended
+	with the others to do real MPDU aggregation.
+
+2018-05-04  Levente Mészáros
+
+	Extended receiver model with computeReceivedPacket.
+
+	This change allows using different packet corruption modes.
+
 2018-01-26  Levente Mészáros
 
 	Replaced headerBitLength with headerLength where the unit is already present.

@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2018-05-11  Gyorgy Szaszko
+
+	Fixed memory leak in HttpBrowser.
+
+2018-04-25  Zoltan Bojthe
+
+	Refactored to use the new TcpSocket interface.
+
+2018-04-23  Zoltan Bojthe
+
+	Replaced TcpSocketMap with SocketMap.
+
 2018-01-18  Levente Mészáros
 
 	Replaced packet tags API calls to use the new API.

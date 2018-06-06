@@ -1,5 +1,57 @@
 ====== inet-4.x ======
 
+2018-05-29  Levente Mészáros
+
+	Added makePathForFile call before opening any output file to make sure the directory exists.
+	Took over some file utils from omnet.
+
+2018-05-22  Levente Mészáros
+
+	Added unit2string for displaying values with units in the GUI.
+	Added reasonable fallback mechanism for printing values with W, Hz, and bps units.
+	Extended units with some new SI prefixed units.
+
+2018-05-11  Zoltan Bojthe
+
+	Renamed to ipv4MulticastChangeSignal.
+	Fixed RealTimeScheduler platform specific code (non-linux).
+
+2018-05-11  Levente Mészáros
+
+	Moved EthernetCRC and TcpIpChecksum under common/checksum folder.
+
+2018-05-10  Zoltan Bojthe
+
+	Remove obsolete ProtocolMap.
+	Moved header serializers to the corresponding protocol folders.
+
+2018-05-09  Levente Mészáros
+
+	Moved RealTimeScheduler under common/scheduler.
+
+2018-05-02  Levente Mészáros
+
+	Moved StringFormat class under common to remove Mobility feature dependency
+	on the visualizer feature.
+
+2018-04-23  Zoltan Bojthe
+
+	Added generic SocketMap to support using several different sockets simulataneously.
+	Added generic ISocket interface implemented by all sockets.
+
+2018-04-09  Levente Mészáros
+
+	Changed protocol variable names to use camel case.
+
+2018-04-06  Levente Mészáros
+
+	Removed unnecessary spaces from descriptive names of protocol identifiers.
+	Renamed protocol identifier rsvp to rsvpte.
+
+2018-03-08  Zoltan Bojthe
+
+	Changed TcpIpChecksum to work on std::vector<uint8_t> too.
+
 2018-03-22  Levente Mészáros
 
 	Replaced scale with fsacle in deg unit for more precision.

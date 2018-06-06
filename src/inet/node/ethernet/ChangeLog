@@ -1,5 +1,14 @@
 ====== inet-4.x ======
 
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-05-25  Levente Mészáros
+
+	Replaced queueType parameter with queue.typename parameter.
+	EtherQosQueue already uses a dataQueue.typename parameter.
+
 2018-01-23  Levente Mészáros
 
 	Replaced MessageDispatcher lower/upper vector gates with a single one.

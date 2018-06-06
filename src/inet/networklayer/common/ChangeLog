@@ -1,5 +1,25 @@
 ====== inet-4.x ======
 
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-05-03  Levente Mészáros
+
+	Renamed findGenericRoutingTableOf to findNextHopRoutingTableOf.
+
+2018-04-24  Levente Mészáros
+
+	Refactored SimpleNetworkLayer to optionally include an Arp module.
+
+2018-04-16  Zoltan Bojthe
+
+	Rename AddressTypes to IPv4, IPv6.
+
+2018-03-14  Zoltan Bojthe
+
+	Added some ProtocolPrinters.
+
 2018-02-28  Zoltan Bojthe
 
 	networklayer: EchoProtocol: using incoming network protocol for sending reply.

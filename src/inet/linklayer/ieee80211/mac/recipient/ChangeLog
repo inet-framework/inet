@@ -1,5 +1,12 @@
 ====== inet-4.x ======
 
+2018-05-03  Levente Mészáros
+
+	Fixed ACK frame duration bug reported by Raphael Elsner.
+
+	The duration was incorrectly rounded up in seconds instead of
+	microseconds for data fragment ACKs.
+
 2018-01-12  Levente Mészáros
 
 	Renamed ACK packets to TcpAck and WlanAck to avoid confusion.

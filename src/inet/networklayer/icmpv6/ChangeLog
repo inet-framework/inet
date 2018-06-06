@@ -1,5 +1,21 @@
 ====== inet-4.x ======
 
+2018-06-01  Zoltan Bojthe
+
+	Fixed serializer copy-paste bug: wrong type in check_and_cast.
+
+2018-05-22  Levente Mészáros
+
+	Removed obsolete references to IPv4ControlInfo and IPv6ControlInfo from documentation and comments.
+
+2018-05-10  Zoltan Bojthe
+
+	Moved header serializers to the corresponding protocol folders.
+
+2018-03-09  Zoltan Bojthe
+
+	Optimized CRC calculation.
+
 2018-02-28  Zoltan Bojthe
 
 	Fixed Ipv6NeighbourDiscovery bug: type field was not filled sometimes.

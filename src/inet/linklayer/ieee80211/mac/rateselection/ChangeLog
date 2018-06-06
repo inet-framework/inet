@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2018-05-28  Levente Mészáros
+
+	Added dataFrameBandwidth and dataFrameNumSpatialStreams parameters to rate selections.
+
+2018-05-15  Andras Varga
+
+	Renamed NED file to agree with module and C++ type name.
+
 2018-01-18  Levente Mészáros
 
 	Replaced packet tags API calls to use the new API.

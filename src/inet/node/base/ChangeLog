@@ -1,5 +1,18 @@
 ====== inet-4.x ======
 
+2018-06-05  Levente Mészáros
+
+	Added deep parameter assignments for antenna.mobilityModule.
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-04-25  Gyorgy Szaszko
+
+	Added canvasImage and canvasImageColor parameters to NodeBase.
+
+2018-04-06  Andras Varga
+
+	Added reference to hasGn parameter in NetworkLayerNodeBase submodule condition.
+
 2018-03-07  Zoltan Bojthe
 
 	Added numPppInterfaces and numEthInterfaces to allow configuring the number

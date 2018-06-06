@@ -1,5 +1,29 @@
 ====== inet-4.x ======
 
+2018-05-10  Zoltan Bojthe
+
+	Moved header serializers to the corresponding protocol folders.
+
+2018-05-09  Levente Mészáros
+
+	Moved RealTimeScheduler under common/scheduler folder.
+
+2018-05-08  Zoltan Bojthe
+
+	Remove obsolete ExtFrame.
+
+2018-05-07  Levente Mészáros
+
+	Refactored interface between Ext and RealTimeScheduler.
+	Moved pcap handling to Ext module.
+	Moved raw socket handling to Ext module.
+
+2018-04-20  Zoltan Bojthe
+
+	Renamed cSocketRTScheduler to EmulationScheduler.
+	Bind raw socket to interface.
+	Added dedicated raw socket for each ext interface.
+
 2018-03-09  Irene Ruengeler
 
 	Ported to the new Packet API.

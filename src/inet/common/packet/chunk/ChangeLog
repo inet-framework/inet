@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2018-05-15  Levente Mészáros
+
+	Added missing checkImmutable calls into Chunk::mark* methods.
+
+2018-05-03  Andras Varga
+
+	Chunk.msg: bits[] and bytes[] were confusing, renamed them.
+
+	When Qtenv displayed something like bits[8] and bytes[2], one would think
+	that [8] and [2] indicate the number of bits and bytes, but no: they
+	indicate the number of *lines* in a binary and hex *dump* of the data.
+
 2018-03-21  Levente Mészáros
 
 	Common: Refactored Packet API for clarity and consistency.

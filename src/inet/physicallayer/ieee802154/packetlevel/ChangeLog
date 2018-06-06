@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
 2018-01-26  Levente Mészáros
 
 	Replaced headerBitLength with headerLength where the unit is already present.

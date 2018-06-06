@@ -1,5 +1,18 @@
 ====== inet-4.x ======
 
+2018-04-25  Andras Varga
+
+	Made RsvpMplsRouter ingress classifier configurable.
+
+2018-04-21  Andras Varga
+
+	Documented fectable.xml format for RsvpClassifier
+
+2018-04-06  Levente Mészáros
+
+	Renamed protocol identifier rsvp to rsvpte.
+	Renamed rsvp_te folder to rsvpte according to INET naming scheme.
+
 2018-03-01  Zoltan Bojthe
 
 	Added RsvpProtocolDissector.

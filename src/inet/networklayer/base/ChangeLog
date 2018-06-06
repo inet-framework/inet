@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2018-05-09  Zoltan Bojthe
+
+	Implemented bind() and connect().
+
 2018-03-05  Zoltan Bojthe
 
 	Replaced IP_PROTOCOL_ID with Protocol pointers.

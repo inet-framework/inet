@@ -1,5 +1,19 @@
 ====== inet-4.x ======
 
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-04-25  Andras Varga
+
+	Changed RsvpMplsRouter ingress classifier configurable.
+
+2018-04-06  Levente Mészáros
+
+	Renamed rsvp_te folder to rsvpte according to INET naming scheme.
+	Renamed Rsvp module to RsvpTe.
+	Renamed modules RsvpRouter to RsvpMplsRouter, and LdpRouter to LdpMplsRouter.
+
 2018-01-23  Levente Mészáros
 
 	Replaced MessageDispatcher lower/upper vector gates with a single one.

@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2018-04-27  Zoltan Bojthe
+
+	Refactored to use the new UdpSocket interface.
+
 2018-01-19  Zoltan Bojthe
 
 	Removed customization from ByteArray.

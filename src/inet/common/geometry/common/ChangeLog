@@ -1,5 +1,21 @@
 ====== inet-4.x ======
 
+2018-05-24  Levente Mészáros
+
+	Changed Coord and EulerAngles str methods to print the unit only once.
+
+2018-05-02  Levente Mészáros
+
+	Changed geographic heading and elevation to use the conventional definition.
+
+	Heading: 0deg means X axis points north, 90deg means X axis points east
+	Elevation: 0deg means X axis is horizontal, positive rotates X axis
+	towards the sky
+
+2018-03-23  TÖRÖK Attila
+
+	Replaced osgEarth::ObjectLocatorNode with GeoTransform and osg::PositionAttitudeTransform.
+
 2018-03-22  Levente Mészáros
 
 	Replaced type of altitude fields with m type.

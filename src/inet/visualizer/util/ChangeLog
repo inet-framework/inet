@@ -1,5 +1,14 @@
 ====== inet-4.x ======
 
+2018-05-02  Levente Mészáros
+
+	Moved StringFormat class under common to remove Mobility feature dependency
+	on the visualizer feature.
+
+2018-04-23  Levente Mészáros
+
+	Fixed LineManager bug introduced when replaced c-style casts.
+
 2018-02-20  Levente Mészáros
 
 	Replaced old PacketFilter with the new one which is based on PacketDissector.

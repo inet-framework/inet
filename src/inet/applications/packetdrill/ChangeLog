@@ -1,5 +1,29 @@
 ====== inet-4.x ======
 
+2018-05-18  Zoltan Bojthe
+
+	Ineffective code moved to comment.
+
+2018-04-27  Andras Varga
+
+	Removed obsolete "dataTransferMode" parameters.
+
+2018-04-25  Zoltan Bojthe
+
+	Refactored to use the new TcpSocket interface.
+
+2018-04-10  Zoltan Bojthe
+
+	Removed "using namespace sctp" from headers.
+
+2018-03-29  Irene Ruengeler
+
+	Set the DupTsn relative to the localDiffTSN
+
+2018-03-09  Zoltan Bojthe
+
+	Optimized CRC calculation.
+
 2018-02-19  Zoltan Bojthe
 
 	Renamed functions to use camel case.

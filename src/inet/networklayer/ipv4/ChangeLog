@@ -1,5 +1,45 @@
 ====== inet-4.x ======
 
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-05-22  Levente Mészáros
+
+	Removed obsolete references to IPv4ControlInfo from documentation and comments.
+
+2018-05-10  Zoltan Bojthe
+
+	Moved header serializers to the corresponding protocol folders.
+
+2018-05-09  Zoltan Bojthe
+
+	Implemented bind() and connect().
+
+2018-05-07  Levente Mészáros
+
+	Changed Ipv4 to use the socket specific BIND and CLOSE commands.
+
+2018-04-17  Andras Varga
+
+	Cleared fragbuf on shutdown and crash.
+
+2018-04-09  Zoltan Bojthe
+
+	Fixed RoutingTable printout format #299.
+
+2018-04-06  Levente Mészáros
+
+	Fixed bug #270 in RoutingTableRecorder.
+
+2018-03-21  Zoltan Bojthe
+
+	Added IgmpProtocolPrinter
+
+2018-03-09  Zoltan Bojthe
+
+	Optimized CRC calculation.
+
 2018-03-09  Zoltan Bojthe
 
 	Fixed double free in Ipv4FragBuf destructor.

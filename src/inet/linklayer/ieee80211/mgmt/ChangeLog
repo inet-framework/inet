@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2018-05-25  Levente Mészáros
+
+	Added IIeee80211Agent and replaced mgmtType with mgmt.typename parameter.
+
+2018-05-10  Zoltan Bojthe
+
+	Moved header serializers to the corresponding protocol folders.
+
 2018-03-08  Zoltan Bojthe
 
 	Added Ieee80211MgmtProtocolPrinter.

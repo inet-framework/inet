@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2018-05-29  Levente Mészáros
+
+	Added makePathForFile call before opening any output file to make sure the directory exists.
+
+2018-04-17  Levente Mészáros
+
+	Renamed writeFrame to writePacket in PcapDump.
+
 2018-03-05  Zoltan Bojthe
 
 	Fixed protocol names (ethernetmac, ieee80211mac).

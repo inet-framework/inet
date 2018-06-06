@@ -1,5 +1,16 @@
 ====== inet-4.x ======
 
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-05-04  Levente Mészáros
+
+	Changed chunk processing to allow for incorrect chunks.
+
+	Physical layers generally don't check whether the data is erroneous or
+	not. This change allows chunk level packet corruption.
+
 2018-02-27  Zoltan Bojthe
 
 	Added ApskProtocolDissector, with kludges for header padding and trailer.

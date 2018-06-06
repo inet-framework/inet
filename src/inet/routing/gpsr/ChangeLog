@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2018-04-25  Gyorgy Szaszko
+
+	Added boolean parameter for displaying packet routing state changes with bubbles.
+
 2018-02-05  Levente Mészáros
 
 	Replaced neighbor search loop in perimeter routing with a more predictable solution.

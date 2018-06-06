@@ -1,5 +1,34 @@
 ====== inet-4.x ======
 
+2018-05-25  Zoltan Bojthe
+
+	Removed @clone(->dup()) KLUDGEs from MSG files for owned pointers.
+
+2018-05-22  Levente Mészáros
+
+	Removed obsolete references to IPv6ControlInfo from documentation and comments.
+
+2018-05-10  Zoltan Bojthe
+
+	Moved header serializers to the corresponding protocol folders.
+
+2018-05-09  Zoltan Bojthe
+
+	Implemented bind() and connect().
+
+2018-05-07  Levente Mészáros
+
+	Changed Ipv6 to use the socket specific BIND and CLOSE commands.
+
+2018-04-10  Zoltan Bojthe
+
+	Fixed missing packetDropped signal in NED.
+
+2018-03-14  Zoltan Bojthe
+
+	Added Ipv6ProtocolPrinter.
+	Implemented fragment handling in Ipv6ProtocolDissector.
+
 2018-03-09  Zoltan Bojthe
 
 	Added missig postRouting hook.

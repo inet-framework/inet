@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2018-02-19  Gyorgy Szaszko
+
+	Added missing EnergyStorage::initialize function.
+
 2017-03-08  Maximilian Köstler
 
 	Add getter for energy balance in IdealEpEnergyStorage.

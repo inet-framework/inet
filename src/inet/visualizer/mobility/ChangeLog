@@ -1,5 +1,15 @@
 ====== inet-4.x ======
 
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-04-25  Levente Mészáros
+
+	Changed MobilityCanvasVisualizer to visualize only the state of mobility modules.
+	The visualizer doesn't move submodules and network node visualizations any more.
+	Replaced submodule based orientation figure size with parameter.
+
 2018-03-19  Levente Mészáros
 
 	Replaced cArcFigure with cPieSliceFigure in MobilityCanvasVisualizer.

@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
 2018-02-26  TÖRÖK Attila
 
 	Take zoom level into account in PacketDropCanvasVisualizer.

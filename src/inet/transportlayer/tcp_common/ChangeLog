@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2018-05-25  Zoltan Bojthe
+
+	Removed @clone(->dup()) KLUDGEs from MSG files for owned pointers.
+
+2018-05-10  Zoltan Bojthe
+
+	Moved header serializers to the corresponding protocol folders.
+
+2018-03-09  Zoltan Bojthe
+
+	Optimized CRC calculation.
+
 2018-03-07  Zoltan Bojthe
 
 	Added TcpProtocolPrinter.
@@ -151,20 +163,20 @@
 
 2017-02-17  Rudolf Hornig
 
-    build: removed OMNeT 5.0 compatibility code
+	build: removed OMNeT 5.0 compatibility code
 
 2016-12-23  Rudolf Hornig
 
-    build: removed deprecation warings
+	build: removed deprecation warings
 
 2016-10-20  Rudolf Hornig
 
-    refactoring: removed compatibility macros required for OMNeT++ 4.x builds
-    + warning fixes
+	refactoring: removed compatibility macros required for OMNeT++ 4.x builds
+	+ warning fixes
 
 2016-08-03  Zoltan Bojthe
 
-    MSG: @fieldNameSuffix("_var") removed when @omitGetVerb(true) not used
+	MSG: @fieldNameSuffix("_var") removed when @omitGetVerb(true) not used
 
 2016-06-15  ------ inet-3.4.0 released ------
 
