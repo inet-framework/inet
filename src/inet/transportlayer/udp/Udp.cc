@@ -413,7 +413,7 @@ void Udp::processUDPPacket(Packet *udpPacket)
     auto srcAddr = l3AddressInd->getSrcAddress();
     auto destAddr = l3AddressInd->getDestAddress();
     auto totalLength = B(udpHeader->getTotalLengthField());
-    auto hasIncorrectLength = totalLength > udpHeader->getChunkLength() + udpPacket->getDataLength();
+    auto hasIncorrectLength = totalLength < udpHeader->getChunkLength() || totalLength > udpHeader->getChunkLength() + udpPacket->getDataLength();
     auto networkProtocol = udpPacket->getTag<NetworkProtocolInd>()->getProtocol();
 
     if (hasIncorrectLength || !verifyCrc(networkProtocol, udpHeader, udpPacket)) {
@@ -424,6 +424,11 @@ void Udp::processUDPPacket(Packet *udpPacket)
         numDroppedBadChecksum++;
         delete udpPacket;
         return;
+    }
+
+    // remove lower layer paddings:
+    if (totalLength < udpPacket->getDataLength()) {
+        udpPacket->setBackOffset(udpHeaderPopPosition + totalLength);
     }
 
     bool isMulticast = destAddr.isMulticast();
