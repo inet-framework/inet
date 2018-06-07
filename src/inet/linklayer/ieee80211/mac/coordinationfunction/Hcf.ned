@@ -22,6 +22,7 @@ import inet.linklayer.ieee80211.mac.blockack.RecipientBlockAckAgreementPolicy;
 import inet.linklayer.ieee80211.mac.channelaccess.Edca;
 import inet.linklayer.ieee80211.mac.channelaccess.Hcca;
 import inet.linklayer.ieee80211.mac.contract.IRateControl;
+import inet.linklayer.ieee80211.mac.contract.IHcf;
 import inet.linklayer.ieee80211.mac.originator.NonQosRecoveryProcedure;
 import inet.linklayer.ieee80211.mac.originator.OriginatorQosAckPolicy;
 import inet.linklayer.ieee80211.mac.originator.OriginatorQosMacDataService;
@@ -38,7 +39,7 @@ import inet.linklayer.ieee80211.mac.recipient.RecipientQosMacDataService;
 //
 // HCF -- Hybrid Coordination Function
 //
-module Hcf
+module Hcf like IHcf
 {
     parameters:
         int numEdcafs = default(4);

@@ -421,6 +421,7 @@ simple Ipv4NetworkConfigurator extends NetworkConfiguratorBase
         bool addSubnetRoutes = default(true);  // add subnet routes instead of destination interface routes (only where applicable; used only if addStaticRoutes is true)
         bool addDirectRoutes = default(true);  // add direct routes (i.e. directly connected interfaces) to the routing table (used only if addStaticRoutes is true)
         bool optimizeRoutes = default(true); // optimize routing tables by merging routes, the resulting routing table might route more packets than the original (used only if addStaticRoutes is true)
+        
         bool dumpTopology = default(false);  // print extracted network topology to the module output
         bool dumpLinks = default(false);     // print recognized network links to the module output
         bool dumpAddresses = default(false); // print assigned IP addresses for all interfaces to the module output

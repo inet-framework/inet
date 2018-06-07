@@ -90,7 +90,17 @@ void Ieee80211Mac::initialize(int stage)
         registerInterface();
         emit(modesetChangedSignal, modeSet);
         if (isOperational)
-            radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
+        {
+            const char *initialRadioMode = par("initialRadioMode");
+            if(!strcmp(initialRadioMode, "off"))
+                radio->setRadioMode(IRadio::RADIO_MODE_OFF);
+            else if(!strcmp(initialRadioMode, "sleep"))
+                radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
+            else if(!strcmp(initialRadioMode, "receiver"))
+                radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
+            else
+                throw cRuntimeError("Unknown initialRadio state");
+        }
         if (isInterfaceRegistered().isUnspecified())// TODO: do we need multi-MAC feature? if so, should they share interfaceEntry??  --Andras
             registerInterface();
     }
