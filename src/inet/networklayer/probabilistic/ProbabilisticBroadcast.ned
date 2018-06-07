@@ -36,7 +36,7 @@ simple ProbabilisticBroadcast extends NetworkProtocolBase like INetworkProtocol
 {
     parameters:
         @class(ProbabilisticBroadcast);
-        int headerLength @unit(bit) = default(100b); // length of the network packet header (in bits)
+        int headerLength @unit(b) = default(100b); // length of the network packet header (in bits)
         // period between two probabilistic broadcast attempts
         double bcperiod @unit(s) = default(2 s);
         // probability of broadcast for each attempt

@@ -39,7 +39,7 @@ simple Ieee802154Mac extends MacProtocolBase like IMacProtocol
                                           // a generated MAC address in init stage 0.
 
         // length of MAC header
-        int headerLength @unit(bit) = default(72 bit);
+        int headerLength @unit(b) = default(72 bit);
         int mtu @unit(B) = default(0B);
         // size of the MAC queue (maximum number of packets in Tx buffer)
         int queueLength = default(100);
@@ -70,7 +70,7 @@ simple Ieee802154Mac extends MacProtocolBase like IMacProtocol
         // Complete MAC ack message length (in bits)
         // (! headerLength is not added to this),
         // only used when usage of MAC acks is enabled.
-        int ackLength @unit(bit) = default(40 bit);
+        int ackLength @unit(b) = default(40 bit);
         // Simple interframe space (12 symbols). Time to wait between receiving a frame and acknowledging it.
         // Should be bigger than the maximum time for switching between Tx and Rx at the receiver.
         // Only used when usage of MAC acks is enabled.
