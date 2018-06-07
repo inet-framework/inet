@@ -14,7 +14,7 @@ set -e # make the script exit with error if any executed command exits with erro
 
 ccache -cCz # we don't use ccache across builds, only across stages within each build
 
-export PATH="/root/omnetpp-5.3-$TARGET_PLATFORM/bin:/usr/lib/ccache:$PATH"
+export PATH="/root/omnetpp-5.4-$TARGET_PLATFORM/bin:/usr/lib/ccache:$PATH"
 
 # this is where the cloned INET repo is mounted into the container (as prescribed in /.travis.yml)
 cd /$TRAVIS_REPO_SLUG
