@@ -13,3 +13,15 @@
          int err;
  
          newval = size;
+--- a/nsc-0.5.3/globaliser/SConscript
++++ b/nsc-0.5.3/globaliser/SConscript
+@@ -19,7 +19,8 @@
+ env.Bison([ 'parser.tab.cc', 'parser.tab.hh' ], 'parser.yc')
+ env.Program("globaliser", source_files,
+     LIBS = ['fl' ],
+-    CCFLAGS = '-Wall -g -O'
++    CCFLAGS = '-Wall -g -O -std=c++03',
++    LINKFLAGS = '-static'
+     )
+
+ SConscript("test/SConscript")
