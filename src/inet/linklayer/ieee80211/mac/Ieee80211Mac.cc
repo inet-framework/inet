@@ -336,7 +336,7 @@ void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, long 
         if (transmissionFinished) {
             tx->radioTransmissionFinished();
             EV_DEBUG << "changing radio to receiver mode\n";
-            configureRadioMode(IRadio::RADIO_MODE_RECEIVER); // FIXME: this is in a very wrong place!!! should be done explicitly from UpperMac!
+            configureRadioMode(IRadio::RADIO_MODE_RECEIVER); // FIXME: this is in a very wrong place!!! should be done explicitly from coordination function!
         }
         rx->transmissionStateChanged(transmissionState);
     }
