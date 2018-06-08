@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2018-04-13  ------ inet-3.99.3 released ------
+
 2018-02-23  Zoltan Bojthe
 
 	Protocol parameter must be between 143 and 254 for IpvxTrafGen and IpvxTrafSink.

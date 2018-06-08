@@ -4,6 +4,8 @@
 
 	Moved header serializers to the corresponding protocol folders.
 
+2018-04-13  ------ inet-3.99.3 released ------
+
 2018-01-24  Levente Mészáros
 
 	Adapted registerProtocol calls to the new API based on OSI service primitives.

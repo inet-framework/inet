@@ -24,6 +24,8 @@
 
 	Fixed issue #238: TcpAppBase ignored localPort when connecting.
 
+2018-04-13  ------ inet-3.99.3 released ------
+
 2018-02-02  Zoltan Bojthe
 
 	Fixed memory leak.

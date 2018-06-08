@@ -17,6 +17,8 @@
 
 	Change initialize to call registerInterface() in INITSTAGE_LINK_LAYER.
 
+2018-04-13  ------ inet-3.99.3 released ------
+
 2018-01-18  Levente Mészáros
 
 	Replaced packet tags API calls to use the new API.

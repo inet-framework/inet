@@ -8,6 +8,8 @@
 
 	Replaced TcpSocketMap with SocketMap.
 
+2018-04-13  ------ inet-3.99.3 released ------
+
 2018-01-02  Levente Mészáros
 
 	Replaced cPacket with Packet.

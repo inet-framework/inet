@@ -27,6 +27,8 @@
 
 	Fixed center frequency calculation in Ieee80211ArithmeticalBand.
 
+2018-04-13  ------ inet-3.99.3 released ------
+
 2018-01-04  Levente Mészáros
 
 	Replaced @editable(false) with the simpler @descriptor(readonly).

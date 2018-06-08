@@ -4,6 +4,8 @@
 
 	Added boolean parameter for displaying packet routing state changes with bubbles.
 
+2018-04-13  ------ inet-3.99.3 released ------
+
 2018-02-05  Levente Mészáros
 
 	Replaced neighbor search loop in perimeter routing with a more predictable solution.

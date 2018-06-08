@@ -27,6 +27,8 @@
 	Switched to bold font for important parts of log messages.
 	Affected parts: possible/impossible, attempting/ignoring, successful/unsuccessful, and various states.
 
+2018-04-13  ------ inet-3.99.3 released ------
+
 2018-02-21  Levente Mészáros
 
 	Fixed missing PacketProtocolTag for raw packets.

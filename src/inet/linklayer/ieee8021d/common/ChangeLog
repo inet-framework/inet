@@ -4,6 +4,8 @@
 
 	Fixed refreshDisplay() for power-off state.
 
+2018-04-13  ------ inet-3.99.3 released ------
+
 2018-01-05  Zoltan Bojthe
 
 	Renamed NF_* signals to use camel case.

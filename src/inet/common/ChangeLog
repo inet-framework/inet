@@ -52,6 +52,8 @@
 
 	Changed TcpIpChecksum to work on std::vector<uint8_t> too.
 
+2018-04-13  ------ inet-3.99.3 released ------
+
 2018-03-22  Levente Mészáros
 
 	Replaced scale with fsacle in deg unit for more precision.

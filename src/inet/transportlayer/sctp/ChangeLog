@@ -33,6 +33,8 @@
 
 	Added SctpProtocolDissector.
 
+2018-04-13  ------ inet-3.99.3 released ------
+
 2018-02-27  Irene Ruengeler
 
 	Changed PacketDrill and improve data handling.

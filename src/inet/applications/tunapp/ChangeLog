@@ -9,6 +9,8 @@
 
 	Refactored TunnelApp to use ISocket, SocketMap.
 
+2018-04-13  ------ inet-3.99.3 released ------
+
 2018-02-19  Zoltan Bojthe
 
 	Switched to using addTag() because all tags absent after clearTags().

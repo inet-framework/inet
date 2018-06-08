@@ -5,6 +5,8 @@
 	Changed an integer parameter unit to second.
 	Added NED documentation for OSPFv2
 
+2018-04-13  ------ inet-3.99.3 released ------
+
 2018-02-26  Zoltan Bojthe
 
 	Added OspfProtocolDissector.

@@ -8,6 +8,8 @@
 
 	Moved code from updateVisualRepresentation into the standard refreshDisplay module function.
 
+2018-04-13  ------ inet-3.99.3 released ------
+
 2018-03-20  Levente Mészáros
 
 	Renamed speed to velocity where appropriate. Speed is a scalar, velocity is a vector quantity.

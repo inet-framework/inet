@@ -12,6 +12,8 @@
 	that [8] and [2] indicate the number of bits and bytes, but no: they
 	indicate the number of *lines* in a binary and hex *dump* of the data.
 
+2018-04-13  ------ inet-3.99.3 released ------
+
 2018-03-21  Levente Mészáros
 
 	Common: Refactored Packet API for clarity and consistency.

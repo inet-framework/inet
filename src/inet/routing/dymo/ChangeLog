@@ -5,6 +5,8 @@
 	Added DymoRouteData::str().
 	Removed "inet::" from packet name.
 
+2018-04-13  ------ inet-3.99.3 released ------
+
 2018-02-01  Zoltan Bojthe
 
 	Renamed message classes: Rreq, Rrep, Rerr.

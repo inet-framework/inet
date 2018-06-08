@@ -4,6 +4,8 @@
 
 	Replaced fooType NED parameters with foo.typename parameters.
 
+2018-04-13  ------ inet-3.99.3 released ------
+
 2018-02-08  Levente Mészáros
 
 	Separated Canvas and OSG line managers.

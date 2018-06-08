@@ -16,6 +16,8 @@
 
 	Renamed ack frames to BMacAck/XMacAck to differentiate from other acks.
 
+2018-04-13  ------ inet-3.99.3 released ------
+
 2018-03-06  Gyorgy Szaszko
 
 	Added missing packet name.

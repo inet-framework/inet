@@ -20,6 +20,8 @@
 
 	Added some ProtocolPrinters.
 
+2018-04-13  ------ inet-3.99.3 released ------
+
 2018-02-28  Zoltan Bojthe
 
 	networklayer: EchoProtocol: using incoming network protocol for sending reply.

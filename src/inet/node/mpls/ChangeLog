@@ -14,6 +14,8 @@
 	Renamed Rsvp module to RsvpTe.
 	Renamed modules RsvpRouter to RsvpMplsRouter, and LdpRouter to LdpMplsRouter.
 
+2018-04-13  ------ inet-3.99.3 released ------
+
 2018-01-23  Levente Mészáros
 
 	Replaced MessageDispatcher lower/upper vector gates with a single one.

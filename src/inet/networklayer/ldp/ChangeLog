@@ -5,6 +5,8 @@
 	Changed Ldp module to implement IApp.
 	Adapted ldp to use ISocket.
 
+2018-04-13  ------ inet-3.99.3 released ------
+
 2018-02-19  Zoltan Bojthe
 
 	Renamed functions to use camel case.

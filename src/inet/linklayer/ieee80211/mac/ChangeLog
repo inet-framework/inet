@@ -39,6 +39,8 @@
 	The duration was incorrectly rounded up in seconds instead of
 	microseconds for data fragment ACKs.
 
+2018-04-13  ------ inet-3.99.3 released ------
+
 2018-03-08  Zoltan Bojthe
 
 	Added Ieee80211MacProtocolPrinter.

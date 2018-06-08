@@ -4,6 +4,8 @@
 
 	Replaced fooType NED parameters with foo.typename parameters.
 
+2018-04-13  ------ inet-3.99.3 released ------
+
 2018-02-12  TÖRÖK Attila
 
 	Put the signal spheres and rings in the transparent render bin.

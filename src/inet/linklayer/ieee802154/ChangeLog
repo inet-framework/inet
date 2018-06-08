@@ -21,6 +21,8 @@
 
 	Set energySourceModule path.
 
+2018-04-13  ------ inet-3.99.3 released ------
+
 2018-02-26  Zoltan Bojthe
 
 	Added Ieee802154ProtocolDissector.
