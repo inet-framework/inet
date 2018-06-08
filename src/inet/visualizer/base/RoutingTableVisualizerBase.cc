@@ -44,6 +44,9 @@ const char *RoutingTableVisualizerBase::DirectiveResolver::resolveDirective(char
         case 'd':
             result = route->getDestination().isUnspecified() ? "*" : route->getDestination().str();
             break;
+        case 'e':
+            result = std::to_string(route->getMetric());
+            break;
         case 'n':
             result = route->getInterface()->getInterfaceName();
             break;

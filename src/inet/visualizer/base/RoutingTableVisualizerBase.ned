@@ -31,6 +31,7 @@ package inet.visualizer.base;
 //  - %m mask
 //  - %g gateway
 //  - %d destination
+//  - %e metric
 //  - %n interface name
 //  - %i IRoute::info()
 //  - %s IRoute::str()
