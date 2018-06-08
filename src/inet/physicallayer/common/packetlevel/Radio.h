@@ -179,6 +179,7 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
 
   protected:
     virtual void initialize(int stage) override;
+    virtual void initializeRadioMode();
 
     virtual void handleMessageWhenDown(cMessage *message) override;
     virtual void handleSelfMessage(cMessage *message) override;

@@ -65,6 +65,7 @@ void Radio::initialize(int stage)
         sendRawBytes = par("sendRawBytes");
         separateTransmissionParts = par("separateTransmissionParts");
         separateReceptionParts = par("separateReceptionParts");
+        initializeRadioMode();
         WATCH(radioMode);
         WATCH(receptionState);
         WATCH(transmissionState);
@@ -78,6 +79,22 @@ void Radio::initialize(int stage)
     else if (stage == INITSTAGE_LAST) {
         EV_INFO << "Initialized " << getCompleteStringRepresentation() << endl;
     }
+}
+
+void Radio::initializeRadioMode() {
+    const char *initialRadioMode = par("initialRadioMode");
+    if(!strcmp(initialRadioMode, "off"))
+        completeRadioModeSwitch(IRadio::RADIO_MODE_OFF);
+    else if(!strcmp(initialRadioMode, "sleep"))
+        completeRadioModeSwitch(IRadio::RADIO_MODE_SLEEP);
+    else if(!strcmp(initialRadioMode, "receiver"))
+        completeRadioModeSwitch(IRadio::RADIO_MODE_RECEIVER);
+    else if(!strcmp(initialRadioMode, "transmitter"))
+        completeRadioModeSwitch(IRadio::RADIO_MODE_TRANSMITTER);
+    else if(!strcmp(initialRadioMode, "transceiver"))
+        completeRadioModeSwitch(IRadio::RADIO_MODE_TRANSCEIVER);
+    else
+        throw cRuntimeError("Unknown initialRadioMode");
 }
 
 std::ostream& Radio::printToStream(std::ostream& stream, int level) const
@@ -287,7 +304,7 @@ void Radio::handleSignal(Signal *signal)
 bool Radio::handleNodeStart(IDoneCallback *doneCallback)
 {
     // NOTE: we ignore radio mode switching during start
-    completeRadioModeSwitch(RADIO_MODE_OFF);
+    initializeRadioMode();
     return PhysicalLayerBase::handleNodeStart(doneCallback);
 }
 

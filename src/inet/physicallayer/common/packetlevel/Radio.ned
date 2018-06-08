@@ -53,10 +53,10 @@ import inet.power.contract.IEnergyConsumer;
 module Radio extends PhysicalLayerBase like IRadio
 {
     parameters:
-
         string radioMediumModule = default("radioMedium"); // module path of the medium module where this radio communicates
         string energySourceModule = default("");           // module path of the energy source module which provides energy to the radio
 
+        string initialRadioMode @enum("off", "sleep", "receiver", "transmitter", "transceiver") = default("off");
         string switchingTimes = default("ms 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"); // time parameters to switch between radio modes
 
         bool sendRawBytes = default(false); // when true packets are serialized into a sequence of bytes before sending out
