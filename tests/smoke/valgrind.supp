@@ -1,9 +1,9 @@
 {
-   nedparser
+   nedparser_overlap
    Memcheck:Overlap
    fun:memcpy@@GLIBC_2.14
    ...
-   fun:_Z11ned2yyparsev
+   fun:_Z11ned2yyparsePN7omnetpp6nedxml12ParseContextE
    ...
 }
 
@@ -15,3 +15,13 @@
    fun:_dl_init
    ...
 }
+
+{
+   stringpool_get_leak
+   Memcheck:Leak
+   match-leak-kinds: definite
+   ...
+   fun:_ZN7omnetpp11cStringPool3getEPKc
+   ...
+}
+
