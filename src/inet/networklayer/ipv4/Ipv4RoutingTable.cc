@@ -192,17 +192,15 @@ cModule *Ipv4RoutingTable::getHostModule()
 
 void Ipv4RoutingTable::deleteInterfaceRoutes(const InterfaceEntry *entry)
 {
-    bool changed = false;
-
     // delete unicast routes using this interface
     for (auto it = routes.begin(); it != routes.end(); ) {
         Ipv4Route *route = *it;
         if (route->getInterface() == entry) {
             it = routes.erase(it);
+            invalidateCache();
             ASSERT(route->getRoutingTable() == this);    // still filled in, for the listeners' benefit
             emit(routeDeletedSignal, route);
             delete route;
-            changed = true;
         }
         else
             ++it;
@@ -215,23 +213,18 @@ void Ipv4RoutingTable::deleteInterfaceRoutes(const InterfaceEntry *entry)
         Ipv4MulticastRoute *route = *it;
         if (route->getInInterface() && route->getInInterface()->getInterface() == entry) {
             it = multicastRoutes.erase(it);
+            invalidateCache();
             ASSERT(route->getRoutingTable() == this);    // still filled in, for the listeners' benefit
             emit(mrouteDeletedSignal, route);
             delete route;
-            changed = true;
         }
         else {
-            bool removed = route->removeOutInterface(entry);
-            if (removed) {
+            if (route->removeOutInterface(entry)) {
+                invalidateCache();
                 emit(mrouteChangedSignal, route);
-                changed = true;
             }
             ++it;
         }
-    }
-
-    if (changed) {
-        invalidateCache();
     }
 }
 
@@ -411,8 +404,6 @@ bool Ipv4RoutingTable::isLocalMulticastAddress(const Ipv4Address& dest) const
 
 void Ipv4RoutingTable::purge()
 {
-    bool deleted = false;
-
     // purge unicast routes
     for (auto it = routes.begin(); it != routes.end(); ) {
         Ipv4Route *route = *it;
@@ -420,10 +411,10 @@ void Ipv4RoutingTable::purge()
             ++it;
         else {
             it = routes.erase(it);
+            invalidateCache();
             ASSERT(route->getRoutingTable() == this);    // still filled in, for the listeners' benefit
             emit(routeDeletedSignal, route);
             delete route;
-            deleted = true;
         }
     }
 
@@ -434,15 +425,11 @@ void Ipv4RoutingTable::purge()
             ++it;
         else {
             it = multicastRoutes.erase(it);
+            invalidateCache();
             ASSERT(route->getRoutingTable() == this);    // still filled in, for the listeners' benefit
             emit(mrouteDeletedSignal, route);
             delete route;
-            deleted = true;
         }
-    }
-
-    if (deleted) {
-        invalidateCache();
     }
 }
 
@@ -781,6 +768,7 @@ void Ipv4RoutingTable::updateNetmaskRoutes()
             auto it = routes.begin() + (k--);    // '--' is necessary because indices shift down
             Ipv4Route *route = *it;
             routes.erase(it);
+            invalidateCache();
             ASSERT(route->getRoutingTable() == this);    // still filled in, for the listeners' benefit
             emit(routeDeletedSignal, route);
             delete route;
@@ -807,11 +795,10 @@ void Ipv4RoutingTable::updateNetmaskRoutes()
             route->setRoutingTable(this);
             auto pos = upper_bound(routes.begin(), routes.end(), route, RouteLessThan(*this));
             routes.insert(pos, route);
+            invalidateCache();
             emit(routeAddedSignal, route);
         }
     }
-
-    invalidateCache();
 }
 
 bool Ipv4RoutingTable::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
