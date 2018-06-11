@@ -170,7 +170,11 @@ void TCPNewReno::receivedDataAck(uint32 firstSeqAcked)
             conn->retransmitOneSegment(false);
 
             // deflate cwnd by amount of new data acknowledged by cumulative acknowledgement field
-            state->snd_cwnd -= state->snd_una - firstSeqAcked;
+            if (state->snd_cwnd >= state->snd_una - firstSeqAcked) {
+                state->snd_cwnd -= state->snd_una - firstSeqAcked;
+            } else {
+                state->snd_cwnd = 0;
+            }
 
             if (cwndVector)
                 cwndVector->record(state->snd_cwnd);
