@@ -45,7 +45,7 @@ simple SimpleVoIPReceiver like IUDPApp
         int emodelA = default(5);         // Advantage factor
         double emodelRo = default(93.2);  // Basic signal-to-noise ratio
 
-        double playoutDelay @unit(s) = default(0);      // initial delay for beginning playout after receiving the first packet
+        double playoutDelay @unit(s) = default(0s);      // initial delay for beginning playout after receiving the first packet
         bool adaptivePlayoutDelay = default(false);      // if true, adjust playoutDelay after each talkspurt
         int bufferSpace = default(20);      // buffer size in packets
         double mosSpareTime @unit(s) = default(1s); // spare time before calculating MOS (after calculated playout time of last packet)

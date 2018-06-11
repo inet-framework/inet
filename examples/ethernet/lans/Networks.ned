@@ -229,7 +229,7 @@ network BusLAN
     types:
         channel C extends DatarateChannel
         {
-            delay = 0;
+            delay = 0s;
             datarate = 10Mbps;
         }
     submodules:

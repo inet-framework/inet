@@ -37,7 +37,7 @@ simple SCTPClient like ISCTPApp
         int requestLength = default(1452); // length of a request (bytes)
         double thinkTime @unit(s) = default(0s); // time gap between requests
         double waitToClose @unit(s) = default(0s); //time to wait between last message sent and abort
-        double reconnectInterval @unit(s) = default(0);  // if connection breaks, waits this much before trying to reconnect
+        double reconnectInterval @unit(s) = default(0s);  // if connection breaks, waits this much before trying to reconnect
         int inboundStreams = default(17);
         int outboundStreams = default(1);
         bool echo = default(false);  // echoes received packages when true

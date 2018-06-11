@@ -10,7 +10,7 @@ network Net
         channel LINK_100 extends ned.DatarateChannel
         {
             parameters:
-                delay = 0;
+                delay = 0s;
                 datarate = 100Mbps;
         }
 
