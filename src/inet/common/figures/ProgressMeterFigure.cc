@@ -130,7 +130,7 @@ void ProgressMeterFigure::setLabel(const char *text)
     labelFigure->setText(text);
 }
 
-const int ProgressMeterFigure::getLabelOffset() const
+int ProgressMeterFigure::getLabelOffset() const
 {
     return labelOffset;
 }

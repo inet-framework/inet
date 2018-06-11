@@ -165,7 +165,7 @@ void PlotFigure::setLabel(const char *text)
     labelFigure->setText(text);
 }
 
-const int PlotFigure::getLabelOffset() const
+int PlotFigure::getLabelOffset() const
 {
     return labelOffset;
 }

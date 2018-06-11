@@ -91,7 +91,7 @@ void ThermometerFigure::setLabel(const char *text)
     labelFigure->setText(text);
 }
 
-const int ThermometerFigure::getLabelOffset() const
+int ThermometerFigure::getLabelOffset() const
 {
     return labelOffset;
 }

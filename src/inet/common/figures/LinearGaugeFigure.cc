@@ -107,7 +107,7 @@ void LinearGaugeFigure::setLabel(const char *text)
     labelFigure->setText(text);
 }
 
-const int LinearGaugeFigure::getLabelOffset() const
+int LinearGaugeFigure::getLabelOffset() const
 {
     return labelOffset;
 }

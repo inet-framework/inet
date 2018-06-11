@@ -112,7 +112,7 @@ void GaugeFigure::setLabel(const char *text)
     labelFigure->setText(text);
 }
 
-const int GaugeFigure::getLabelOffset() const
+int GaugeFigure::getLabelOffset() const
 {
     return labelOffset;
 }
