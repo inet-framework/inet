@@ -54,12 +54,14 @@ class INET_API RegionTagSet : public cObject
 
         RegionTag& operator=(const RegionTag& other) {
             if (this != &other) {
+                delete tag;
                 offset = other.offset; length = other.length; tag = other.tag->dup();
             }
             return *this;
         }
         RegionTag& operator=(RegionTag&& other) {
             if (this != &other) {
+                delete tag;
                 offset = other.offset; length = other.length; tag = other.tag; other.tag = nullptr;
             }
             return *this;
