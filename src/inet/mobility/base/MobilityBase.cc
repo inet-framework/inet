@@ -146,8 +146,10 @@ void MobilityBase::setInitialPosition()
                                 " (3rd argument of 'p' tag) from '@display' attribute.", subjectModule->getFullPath().c_str());
         filled = parseIntTo(subjectModule->getDisplayString().getTagArg("p", 0), lastPosition.x) &&
                  parseIntTo(subjectModule->getDisplayString().getTagArg("p", 1), lastPosition.y);
-        if (filled)
+        if (filled) {
             lastPosition.z = hasPar("initialZ") ? par("initialZ") : 0.0;
+            lastPosition = canvasProjection->computeCanvasPointInverse(cFigure::Point(lastPosition.x, lastPosition.y), lastPosition.z);
+        }
     }
     // not all mobility models have "initialX", "initialY" and "initialZ" parameters
     else if (coordinateSystem == nullptr && hasPar("initialX") && hasPar("initialY") && hasPar("initialZ")) {
