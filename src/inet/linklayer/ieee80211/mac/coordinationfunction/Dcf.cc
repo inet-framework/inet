@@ -57,6 +57,8 @@ void Dcf::initialize(int stage)
         stationRetryCounters = new StationRetryCounters();
         inProgressFrames = new InProgressFrames(pendingQueue, originatorDataService, ackHandler);
         originatorProtectionMechanism = check_and_cast<OriginatorProtectionMechanism*>(getSubmodule("originatorProtectionMechanism"));
+        pendingQueueSizeSignal = registerSignal("pendingQueueSize");
+        pendingQueueDroppedSignal = registerSignal("pendingQueueDropped");
     }
 }
 
@@ -97,6 +99,7 @@ void Dcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtH
     EV_INFO << "Processing upper frame: " << packet->getName() << endl;
     if (pendingQueue->insert(packet)) {
         EV_INFO << "Frame " << packet->getName() << " has been inserted into the PendingQueue." << endl;
+        emit(pendingQueueSizeSignal, pendingQueue->getLength());
         EV_DETAIL << "Requesting channel" << endl;
         dcfChannelAccess->requestChannel(this);
     }
@@ -106,6 +109,8 @@ void Dcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtH
         details.setReason(QUEUE_OVERFLOW);
         details.setLimit(pendingQueue->getMaxQueueSize());
         emit(packetDroppedSignal, packet, &details);
+        int i = 1;
+        emit(pendingQueueDroppedSignal, i);
         delete packet;
     }
 }
@@ -186,6 +191,7 @@ void Dcf::transmitFrame(Packet *packet, simtime_t ifs)
     updatedHeader->setDuration(duration);
     packet->insertAtFront(updatedHeader);
     tx->transmitFrame(packet, packet->peekAtFront<Ieee80211MacHeader>(), ifs, this);
+    emit(pendingQueueSizeSignal, pendingQueue->getLength());
 }
 
 /*

@@ -51,6 +51,8 @@ class Ieee80211Mac;
 class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler::ICallback, public IChannelAccess::ICallback, public ITx::ICallback, public IProcedureCallback, public ModeSetListener
 {
     protected:
+        simsignal_t pendingQueueSizeSignal;
+        simsignal_t pendingQueueDroppedSignal;
         Ieee80211Mac *mac = nullptr;
         IRateControl *dataAndMgmtRateControl = nullptr;
 
