@@ -40,6 +40,7 @@ module NodeBase like INetworkNode
         string osgModelColor = default(""); // tint color, no colorization by default
         string canvasImage = default(""); // image for canvas visualization, no image by default
         string canvasImageColor = default(""); // tint color, no colorization by default
+        mobility.subjectModule = default("^");
         *.mobilityModule = default(exists(mobility) ? absPath(".mobility") : "");
         *.energySourceModule = default(exists(energyStorage) ? absPath(".energyStorage") : "");
         *.energyGeneratorModule = default(exists(energyGenerator) ? absPath(".energyGenerator") : "");

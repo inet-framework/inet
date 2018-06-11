@@ -39,9 +39,8 @@ simple MobilityBase like IMobility
     parameters:
         @signal[mobilityStateChanged](type=MobilityBase);
         @display("i=block/cogwheel");
+        string subjectModule = default("^"); // module path which determines the subject module, the motion of which this mobility model describes, the default value is the parent module
         string coordinateSystemModule = default(""); // module path of the geographic coordinate system module
-        bool visualizeMobility = default(true); // false means this mobility module does no visualization
-        string visualRepresentation = default("^"); // determines the module that is moved by this mobility
         string displayStringTextFormat = default("p: %p\nv: %v");
         double constraintAreaMinX @unit(m) = default(-inf m); // min x position of the constraint area, unconstrained by default (negative infinity)
         double constraintAreaMinY @unit(m) = default(-inf m); // min y position of the constraint area, unconstrained by default (negative infinity)

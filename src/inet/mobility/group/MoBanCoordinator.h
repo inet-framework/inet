@@ -173,7 +173,7 @@ class INET_API MoBanCoordinator : public LineSegmentsMobilityBase
     virtual void setTargetPosition() override;
 
     /** @brief Returns the module that represents the object moved by this mobility module. */
-    virtual cModule *findVisualRepresentation() override { return this; }
+    virtual cModule *findSubjectModule() override { return this; }
 
     /** @brief To be called at the end of simulation run. */
     virtual void finish() override;

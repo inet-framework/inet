@@ -79,7 +79,7 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
 
   protected:
     /** @brief Pointer to visual representation module, to speed up repeated access. */
-    cModule *visualRepresentation;
+    cModule *subjectModule;
 
     /** @brief The 2D projection used on the canvas. */
     const CanvasProjection *canvasProjection;
@@ -135,7 +135,7 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
     virtual Coord getRandomPosition();
 
     /** @brief Returns the module that represents the object moved by this mobility module. */
-    virtual cModule *findVisualRepresentation() { return findModuleFromPar<cModule>(par("visualRepresentation"), this); }
+    virtual cModule *findSubjectModule() { return findModuleFromPar<cModule>(par("subjectModule"), this); }
 
     /** @brief Returns true if the mobility is outside of the constraint area. */
     virtual bool isOutside();
