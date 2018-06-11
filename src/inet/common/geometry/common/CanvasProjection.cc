@@ -35,6 +35,12 @@ cFigure::Point CanvasProjection::computeCanvasPoint(const Coord& point) const
     return cFigure::Point(rotatedPoint.x * scale.x + translation.x, rotatedPoint.y * scale.y + translation.y);
 }
 
+Coord CanvasProjection::computeCanvasPointInverse(const cFigure::Point& point, double offset) const
+{
+    Coord p((point.x - translation.x) / scale.x, (point.y - translation.y) / scale.y, offset);
+    return rotation.rotateVectorInverse(p);
+}
+
 const CanvasProjection *CanvasProjection::getCanvasProjection(const cCanvas *canvas)
 {
     auto it = canvasProjections.find(canvas);
