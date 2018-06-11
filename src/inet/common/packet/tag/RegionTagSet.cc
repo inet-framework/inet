@@ -36,22 +36,26 @@ RegionTagSet::RegionTagSet(RegionTagSet&& other) :
 
 RegionTagSet& RegionTagSet::operator=(const RegionTagSet& other)
 {
-    clearAllTags();
-    if (other.regionTags == nullptr)
-        regionTags = nullptr;
-    else {
-        ensureAllocated();
-        for (auto& regionTag : *other.regionTags)
-            addTag(regionTag.getOffset(), regionTag.getLength(), regionTag.getTag()->dup());
+    if (this != &other) {
+        clearAllTags();
+        if (other.regionTags == nullptr)
+            regionTags = nullptr;
+        else {
+            ensureAllocated();
+            for (auto& regionTag : *other.regionTags)
+                addTag(regionTag.getOffset(), regionTag.getLength(), regionTag.getTag()->dup());
+        }
     }
     return *this;
 }
 
 RegionTagSet& RegionTagSet::operator=(RegionTagSet&& other)
 {
-    clearAllTags();
-    regionTags = other.regionTags;
-    other.regionTags = nullptr;
+    if (this != &other) {
+        clearAllTags();
+        regionTags = other.regionTags;
+        other.regionTags = nullptr;
+    }
     return *this;
 }
 
