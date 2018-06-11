@@ -34,9 +34,9 @@ class INET_API Protocol
 
   protected:
     const int id;
-    const char *name;
-    const char *descriptiveName;
-    Layer layer;
+    const std::string name;
+    const std::string descriptiveName;
+    const Layer layer;
 
   public:
     Protocol(const char *name, const char *descriptiveName, Layer layer = UnspecifiedLayer);
@@ -45,9 +45,9 @@ class INET_API Protocol
     bool operator!=(const Protocol& other) const { return id != other.id; }
 
     int getId() const { return id; }
-    const char *getName() const { return name; }
-    const char *getDescriptiveName() const { return descriptiveName; }
-    Layer getLayer() const { return layer; }
+    const char *getName() const { return name.c_str(); }
+    const char *getDescriptiveName() const { return descriptiveName.c_str(); }
+    const Layer getLayer() const { return layer; }
 
     std::string str() const;
 
