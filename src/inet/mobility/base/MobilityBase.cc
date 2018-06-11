@@ -195,7 +195,7 @@ void MobilityBase::refreshDisplay() const
     auto text = format.formatString(&directiveResolver);
     cDisplayString& displayString = this->getDisplayString();
     displayString.setTagArg("t", 0, text);
-    if (subjectModule != nullptr) {
+    if (subjectModule != nullptr && par("updateDisplayString")) {
         auto position = const_cast<MobilityBase *>(this)->getCurrentPosition();
         EV_TRACE << "current position = " << position << endl;
         auto subjectModulePosition = canvasProjection->computeCanvasPoint(position);
