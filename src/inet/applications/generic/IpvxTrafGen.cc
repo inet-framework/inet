@@ -34,6 +34,8 @@ namespace inet {
 Define_Module(IpvxTrafGen);
 
 
+std::vector<const Protocol *> IpvxTrafGen::allocatedProtocols;
+
 IpvxTrafGen::IpvxTrafGen()
 {
 }
@@ -55,9 +57,9 @@ void IpvxTrafGen::initialize(int stage)
             throw cRuntimeError("invalid protocol id %d, accepts only between 143 and 254", protocolId);
         protocol = ProtocolGroup::ipprotocol.findProtocol(protocolId);
         if (!protocol) {
-            char *buff = new char[40];
-            sprintf(buff, "prot_%d", protocolId);
-            protocol = new Protocol(buff, buff);
+            std::string name = "prot_" + std::to_string(protocolId);
+            protocol = new Protocol(name.c_str(), name.c_str());
+            allocatedProtocols.push_back(protocol);
             ProtocolGroup::ipprotocol.addProtocol(protocolId, protocol);
         }
         numPackets = par("numPackets");
@@ -238,6 +240,15 @@ void IpvxTrafGen::processPacket(Packet *msg)
     delete msg;
     numReceived++;
 }
+
+void ipvxTrafGenClearProtocols()
+{
+    for (auto *p: IpvxTrafGen::allocatedProtocols)
+        delete p;
+    IpvxTrafGen::allocatedProtocols.clear();
+}
+
+EXECUTE_ON_SHUTDOWN(ipvxTrafGenClearProtocols());
 
 } // namespace inet
 
