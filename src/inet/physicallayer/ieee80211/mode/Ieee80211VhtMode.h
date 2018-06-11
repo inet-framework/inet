@@ -146,7 +146,6 @@ class INET_API Ieee80211VhtPreambleMode : public IIeee80211PreambleMode, public 
         virtual const Ieee80211VhtSignalMode *getSignalMode() const { return highThroughputSignalMode; }
         virtual const Ieee80211OfdmSignalMode *getLegacySignalMode() const { return legacySignalMode; }
         virtual const Ieee80211VhtSignalMode* getHighThroughputSignalMode() const { return highThroughputSignalMode; }
-        virtual inline unsigned int getNumberOfHTLongTrainings() const { return numberOfHTLongTrainings; }
 
         virtual const inline simtime_t getDoubleGIDuration() const { return 2 * getGIDuration(); } // GI2
         virtual const inline simtime_t getLSIGDuration() const { return getSymbolInterval(); } // L-SIG
