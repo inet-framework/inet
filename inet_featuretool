@@ -484,7 +484,8 @@ root directory where the following files are present:
         ok = True
         for fid, feature in self.sortedFeatures:
             if not self.checkFeatureNedFolders(feature):
-                ok = False
+                if 'showcases' not in fid and 'tutorial' not in fid:
+                    ok = False
         if not ok:
             fail("Check whether all NED folders are set properly (in the {} file) and all directories corresponding to the NED packages defined in the {} file do exist.".format(NEDFOLDERSFILE, FEATURESFILE))
 
@@ -526,7 +527,7 @@ root directory where the following files are present:
             if not self.featurestate[req].enabled:
                 if not req in requirements and not req in featureOnList:
                     self.updateRequirementsOf(req, featureOnList, requirements)
-                requirements.add(req)
+                    requirements.add(req)
     ############################
     def updateRequirements(self, featureOnList, requirements):
         for featureid in featureOnList:
