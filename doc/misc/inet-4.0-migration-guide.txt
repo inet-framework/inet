@@ -1,5 +1,5 @@
-INET 4.0 Migration Guide
-========================
+INET 3.x to 4.0 Migration Guide
+===============================
 
 1 Network Node Architecture
 ---------------------------
