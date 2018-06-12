@@ -252,7 +252,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                 struct init_ack_chunk *iac = (struct init_ack_chunk *)(buffer + writtenbytes);    // append data to buffer
                 // fill buffer with data from Sctp init ack chunk structure
                 iac->type = initAckChunk->getSctpChunkType();
-//                  iac->flags = initAckChunk->getFlags(); // no flags available in this type of SctpChunk
+                iac->flags = 0;    // no flags available in this type of SctpChunk
                 iac->initiate_tag = htonl(initAckChunk->getInitTag());
                 iac->a_rwnd = htonl(initAckChunk->getA_rwnd());
                 iac->mos = htons(initAckChunk->getNoOutStreams());
@@ -620,6 +620,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                 struct cookie_echo_chunk *cec = (struct cookie_echo_chunk *)(buffer + writtenbytes);
 
                 cec->type = cookieChunk->getSctpChunkType();
+                cec->flags = 0;    // no flags available in this type of SctpChunk
                 cec->length = htons(cookieChunk->getByteLength());
                 int32 cookielen = cookieChunk->getCookieArraySize();
                 if (cookielen > 0) {
@@ -637,7 +638,10 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                         cookie->peerTieTag[i] = stateCookie->getPeerTieTag(i);
                     }
                 }
-                writtenbytes += (ADD_PADDING(cookieChunk->getByteLength()));
+                uint32_t paddingEndPos = writtenbytes + ADD_PADDING(cookieChunk->getByteLength());
+                writtenbytes += cookieChunk->getByteLength();
+                while (writtenbytes < paddingEndPos)
+                    buffer[writtenbytes++] = 0;
                 uint32 uLen = cookieChunk->getUnrecognizedParametersArraySize();
                 if (uLen > 0) {
                     struct error_chunk *error = (struct error_chunk *)(buffer + writtenbytes);
