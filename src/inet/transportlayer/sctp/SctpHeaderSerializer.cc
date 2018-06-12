@@ -28,7 +28,7 @@
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
 #include "inet/transportlayer/sctp/SctpAssociation.h"
 #include "inet/transportlayer/sctp/SctpChecksum.h"
-#include "inet/transportlayer/sctp/SctpSerializer.h"
+#include "inet/transportlayer/sctp/SctpHeaderSerializer.h"
 #include "inet/transportlayer/sctp/headers/sctphdr.h"
 
 
@@ -45,15 +45,15 @@ namespace inet {
 
 namespace sctp {
 
-Register_Serializer(SctpHeader, SctpSerializer);
+Register_Serializer(SctpHeader, SctpHeaderSerializer);
 
-unsigned char SctpSerializer::keyVector[512];
-unsigned int SctpSerializer::sizeKeyVector = 0;
-unsigned char SctpSerializer::peerKeyVector[512];
-unsigned int SctpSerializer::sizePeerKeyVector = 0;
-unsigned char SctpSerializer::sharedKey[512];
+unsigned char SctpHeaderSerializer::keyVector[512];
+unsigned int SctpHeaderSerializer::sizeKeyVector = 0;
+unsigned char SctpHeaderSerializer::peerKeyVector[512];
+unsigned int SctpHeaderSerializer::sizePeerKeyVector = 0;
+unsigned char SctpHeaderSerializer::sharedKey[512];
 
-void SctpSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     uint8_t buffer[MAXBUFLEN];
     // int32 size_chunk = sizeof(struct chunk);
@@ -1111,7 +1111,7 @@ void SctpSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk
     stream.writeBytes((uint8_t *)&buffer, B(writtenbytes));
 }
 
-void SctpSerializer::hmacSha1(const uint8 *buf, uint32 buflen, const uint8 *key, uint32 keylen, uint8 *digest)
+void SctpHeaderSerializer::hmacSha1(const uint8 *buf, uint32 buflen, const uint8 *key, uint32 keylen, uint8 *digest)
 {
     /* XXX needs to be implemented */
     for (uint16 i = 0; i < SHA_LENGTH; i++) {
@@ -1120,7 +1120,7 @@ void SctpSerializer::hmacSha1(const uint8 *buf, uint32 buflen, const uint8 *key,
 }
 
 
-const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
+const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     uint16 paramType;
     int32 parptr, chunklen, cLen, woPadding;
@@ -2162,7 +2162,7 @@ const Ptr<Chunk> SctpSerializer::deserialize(MemoryInputStream& stream) const
      return dest;
 }
 
-bool SctpSerializer::compareRandom()
+bool SctpHeaderSerializer::compareRandom()
 {
     unsigned int i, size;
     if (sizeKeyVector != sizePeerKeyVector) {
@@ -2184,7 +2184,7 @@ bool SctpSerializer::compareRandom()
     return true;
 }
 
-void SctpSerializer::calculateSharedKey()
+void SctpHeaderSerializer::calculateSharedKey()
 {
     unsigned int i;
     bool peerFirst = false;

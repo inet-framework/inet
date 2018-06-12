@@ -31,7 +31,7 @@
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 #include "inet/transportlayer/sctp/Sctp.h"
 #include "inet/transportlayer/sctp/SctpAssociation.h"
-#include "inet/transportlayer/sctp/SctpSerializer.h"
+#include "inet/transportlayer/sctp/SctpHeaderSerializer.h"
 
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
