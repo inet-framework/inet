@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2018-06-11  Zoltan Bojthe
+
+	Replaced protocol name and descriptiveName fields with std::string.
+
+2018-06-08  Zoltan Bojthe
+
+	Remove obsolete omnetpp version related code from NedFunctions: #if OMNETPP_VERSION < 0x504
+
+2018-06-06  Zoltan Bojthe
+
+	Updated the required omnetpp version to 5.4
+
 2018-05-29  Levente Mészáros
 
 	Added makePathForFile call before opening any output file to make sure the directory exists.

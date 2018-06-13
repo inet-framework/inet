@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2018-06-12  Zoltan Bojthe
+
+	Fixed SctpHeaderSerializer to fill all unfilled bytes.
+
+2018-06-12  Zoltan Bojthe
+
+	Renamed SctpSerializer to SctpHeaderSerializer.
+
+2018-06-01  Zoltan Bojthe
+
+	Added B/b units to length constants and length fields of chunks.
+
 2018-05-18  Zoltan Bojthe
 
 	Moved CRC calculation code to SctpChecksum.cc.

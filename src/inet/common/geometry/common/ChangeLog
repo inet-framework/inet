@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2018-06-11  Levente Mészáros
+
+	Added CanvasProjection::computeCanvasPointInverse.
+
 2018-05-24  Levente Mészáros
 
 	Changed Coord and EulerAngles str methods to print the unit only once.

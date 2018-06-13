@@ -2,6 +2,10 @@
 
 2018-06-01  Zoltan Bojthe
 
+	Added B/b units to length constants and length fields of chunks.
+
+2018-06-01  Zoltan Bojthe
+
 	Fixed serializer copy-paste bug: wrong type in check_and_cast.
 
 2018-05-22  Levente Mészáros

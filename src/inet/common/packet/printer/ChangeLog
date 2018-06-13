@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2018-06-13  Levente Mészáros
+
+	Removed obsolete packet printers.
+
 2018-03-14  Zoltan Bojthe
 
 	Refactored PacketPrinter::isEnabledInfo().
