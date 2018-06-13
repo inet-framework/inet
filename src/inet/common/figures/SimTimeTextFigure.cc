@@ -25,6 +25,7 @@ static const char *PKEY_PREFIX = "prefix";
 
 void SimTimeTextFigure::refreshDisplay() {
     setText((prefix + simTime().format(SimTime::getScaleExp(), ".", "'", true, "", " ")).c_str());
+    getSimulation()->getSystemModule()->getCanvas()->setAnimationSpeed(10, this);
 }
 
 void SimTimeTextFigure::parse(cProperty *property)
