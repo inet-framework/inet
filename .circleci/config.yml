@@ -2,7 +2,7 @@ version: 2
 jobs:
   build: # the name is misleading, but has to be "build", so it is used outside of workflows
     docker:
-      - image: omnetpp/travis-inet:5.4pre1-180607
+      - image: omnetpp/travis-inet:5.4-180613
     parallelism: 4 # make use of all our free containers
     steps:
       - checkout
