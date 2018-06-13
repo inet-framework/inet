@@ -24,13 +24,6 @@ import inet.common.packet.Message;
 
 namespace inet::sctp;
 
-cplusplus {{
-typedef cPacket *cPacketPtr;
-}}
-
-
-//sstruct cPacketPtr;
-
 class SctpHeader extends TransportHeaderBase
 {
     @customize;
