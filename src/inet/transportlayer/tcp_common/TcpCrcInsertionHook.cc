@@ -81,7 +81,7 @@ uint16_t TcpCrcInsertion::computeCrc(const Protocol *networkProtocol, const L3Ad
     pseudoHeader->setDestAddress(destAddress);
     pseudoHeader->setNetworkProtocolId(networkProtocol->getId());
     pseudoHeader->setProtocolId(IP_PROT_TCP);
-    pseudoHeader->setPacketLength(B(tcpHeader->getChunkLength() + tcpData->getChunkLength()).get());
+    pseudoHeader->setPacketLength(tcpHeader->getChunkLength() + tcpData->getChunkLength());
     // pseudoHeader length: ipv4: 12 bytes, ipv6: 40 bytes, generic: ???
     if (networkProtocol == &Protocol::ipv4)
         pseudoHeader->setChunkLength(B(12));

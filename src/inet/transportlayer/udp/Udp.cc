@@ -1339,7 +1339,7 @@ uint16_t Udp::computeCrc(const Protocol *networkProtocol, const L3Address& srcAd
     pseudoHeader->setDestAddress(destAddress);
     pseudoHeader->setNetworkProtocolId(networkProtocol->getId());
     pseudoHeader->setProtocolId(IP_PROT_UDP);
-    pseudoHeader->setPacketLength(B(udpHeader->getChunkLength() + udpData->getChunkLength()).get());
+    pseudoHeader->setPacketLength(udpHeader->getChunkLength() + udpData->getChunkLength());
     // pseudoHeader length: ipv4: 12 bytes, ipv6: 40 bytes, other: ???
     if (networkProtocol == &Protocol::ipv4)
         pseudoHeader->setChunkLength(B(12));

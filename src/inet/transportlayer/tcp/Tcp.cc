@@ -145,7 +145,7 @@ bool Tcp::checkCrc(const Ptr<const TcpHeader>& tcpHeader, Packet *packet)
             ASSERT(networkProtocol);
             pseudoHeader->setNetworkProtocolId(networkProtocol->getId());
             pseudoHeader->setProtocolId(IP_PROT_TCP);
-            pseudoHeader->setPacketLength(tcpBytes.size());
+            pseudoHeader->setPacketLength(B(tcpBytes.size()));
             // pseudoHeader length: ipv4: 12 bytes, ipv6: 40 bytes, generic: ???
             if (networkProtocol == &Protocol::ipv4)
                 pseudoHeader->setChunkLength(B(12));
