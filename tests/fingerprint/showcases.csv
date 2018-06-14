@@ -105,7 +105,6 @@
 
 /showcases/visualizer/transportconnection/, -f omnetpp.ini -c EnablingVisualization -r 0,                       2s,            4cdd-db33/tplx, PASS,
 /showcases/visualizer/transportconnection/, -f omnetpp.ini -c MultipleConnections -r 0,                         2s,            7a53-b375/tplx, PASS,
-/showcases/visualizer/transportconnection/, -f omnetpp.ini -c LotsOfConnections -r 0, 100s,       0000-0000/tplx, PASS,
 
 /showcases/visualizer/transportpathactivity/, -f omnetpp.ini -c EnablingPathVisualizationWired -r 0,            500s,            09af-5b21/tplx, PASS,
 /showcases/visualizer/transportpathactivity/, -f omnetpp.ini -c EnablingPathVisualizationWireless -r 0,         500s,            e56a-1601/tplx, PASS,
@@ -225,9 +224,9 @@
 /showcases/wireless/sensornetwork/,  -f omnetpp.ini -c XMac -r 0,                   100s,         469c-01fe/tplx, PASS,
 /showcases/wireless/sensornetwork/,  -f omnetpp.ini -c LMac -r 0,                   100s,         97e1-c0f0/tplx, PASS,
 # /showcases/wireless/sensornetwork/,  -f omnetpp.ini -c StatisticBase -r 0,          100s,         0000-0000/tplx, PASS,   # StatisticBase extended
-/showcases/wireless/sensornetwork/,  -f omnetpp.ini -c StatisticBMac -r 0,          100s,         b69f-1382/tplx, PASS,
-/showcases/wireless/sensornetwork/,  -f omnetpp.ini -c StatisticXMac -r 0,          100s,         785a-4dbb/tplx, PASS,
-/showcases/wireless/sensornetwork/,  -f omnetpp.ini -c StatisticLMac -r 0,          100s,         0000-0000/tplx, PASS,
+/showcases/wireless/sensornetwork/,  -f omnetpp.ini -c StatisticBMac -r 100,          100s,         0727-1b4d/tplx, PASS,
+/showcases/wireless/sensornetwork/,  -f omnetpp.ini -c StatisticXMac -r 100,          100s,         07da-c1bc/tplx, PASS,
+/showcases/wireless/sensornetwork/,  -f omnetpp.ini -c StatisticLMac -r 100,          100s,         93a3-9cdf/tplx, PASS,
 
 /showcases/wireless/throughput/,     -f omnetpp.ini -c General -r 0,                1s,         ed65-fd19/tplx, PASS,
 
