@@ -60,7 +60,7 @@ InterfaceEntry *OspfConfigReader::getInterfaceByXMLAttributesOf(const cXMLElemen
         return ie;
     }
 
-    const char *toward = getRequiredAttribute(ifConfig, "toward");
+    const char *toward = getMandatoryFilledAttribute(ifConfig, "toward");
     cModule *destnode = getSimulation()->getSystemModule()->getModuleByPath(toward);
     if (!destnode)
         throw cRuntimeError("toward module `%s' not found at %s", toward, ifConfig.getSourceLocation());
@@ -123,17 +123,17 @@ void OspfConfigReader::loadAreaFromXML(const cXMLElement& asConfig, AreaId areaI
         std::string nodeName = (areaDetail)->getTagName();
         if (nodeName == "AddressRange") {
             Ipv4AddressRange addressRange;
-            addressRange.address = ipv4AddressFromAddressString(getRequiredAttribute(*areaDetail, "address"));
-            addressRange.mask = ipv4NetmaskFromAddressString(getRequiredAttribute(*areaDetail, "mask"));
+            addressRange.address = ipv4AddressFromAddressString(getMandatoryFilledAttribute(*areaDetail, "address"));
+            addressRange.mask = ipv4NetmaskFromAddressString(getMandatoryFilledAttribute(*areaDetail, "mask"));
             addressRange.address = addressRange.address & addressRange.mask;
-            std::string status = getRequiredAttribute(*areaDetail, "status");
+            std::string status = getMandatoryFilledAttribute(*areaDetail, "status");
             area->addAddressRange(addressRange, status == "Advertise");
         }
         else if (nodeName == "Stub") {
             if (areaID == BACKBONE_AREAID)
                 throw cRuntimeError("The backbone cannot be configured as a stub at %s", (areaDetail)->getSourceLocation());
             area->setExternalRoutingCapability(false);
-            area->setStubDefaultCost(atoi(getRequiredAttribute(*areaDetail, "defaultCost")));
+            area->setStubDefaultCost(atoi(getMandatoryFilledAttribute(*areaDetail, "defaultCost")));
         }
         else
             throw cRuntimeError("Invalid node '%s' at %s", nodeName.c_str(), (areaDetail)->getSourceLocation());
@@ -275,8 +275,8 @@ void OspfConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig)
                 std::string neighborNodeName = (elem)->getTagName();
                 if (neighborNodeName == "NBMANeighbor") {
                     Neighbor *neighbor = new Neighbor;
-                    neighbor->setAddress(ipv4AddressFromAddressString(getRequiredAttribute(*elem, "networkInterfaceAddress")));
-                    neighbor->setPriority(atoi(getRequiredAttribute(*elem, "neighborPriority")));
+                    neighbor->setAddress(ipv4AddressFromAddressString(getMandatoryFilledAttribute(*elem, "networkInterfaceAddress")));
+                    neighbor->setPriority(atoi(getMandatoryFilledAttribute(*elem, "neighborPriority")));
                     intf->addNeighbor(neighbor);
                 }
             }
@@ -318,8 +318,8 @@ void OspfConfigReader::loadExternalRoute(const cXMLElement& externalRouteConfig)
 
     joinMulticastGroups(ifIndex);
 
-    networkAddress.address = ipv4AddressFromAddressString(getRequiredAttribute(externalRouteConfig, "advertisedExternalNetworkAddress"));
-    networkAddress.mask = ipv4NetmaskFromAddressString(getRequiredAttribute(externalRouteConfig, "advertisedExternalNetworkMask"));
+    networkAddress.address = ipv4AddressFromAddressString(getMandatoryFilledAttribute(externalRouteConfig, "advertisedExternalNetworkAddress"));
+    networkAddress.mask = ipv4NetmaskFromAddressString(getMandatoryFilledAttribute(externalRouteConfig, "advertisedExternalNetworkMask"));
     networkAddress.address = networkAddress.address & networkAddress.mask;
     asExternalRoute.setNetworkMask(networkAddress.mask);
 
@@ -341,7 +341,7 @@ void OspfConfigReader::loadExternalRoute(const cXMLElement& externalRouteConfig)
         throw cRuntimeError("Invalid 'externalInterfaceOutputType' at interface '%s' at ", ie->getInterfaceName(), externalRouteConfig.getSourceLocation());
     }
 
-    asExternalRoute.setForwardingAddress(ipv4AddressFromAddressString(getRequiredAttribute(externalRouteConfig, "forwardingAddress")));
+    asExternalRoute.setForwardingAddress(ipv4AddressFromAddressString(getMandatoryFilledAttribute(externalRouteConfig, "forwardingAddress")));
 
     long externalRouteTagVal = 0;    // default value
     const char *externalRouteTag = externalRouteConfig.getAttribute("externalRouteTag");
@@ -372,7 +372,7 @@ void OspfConfigReader::loadHostRoute(const cXMLElement& hostRouteConfig)
     joinMulticastGroups(hostParameters.ifIndex);
 
     hostArea = ipv4AddressFromAddressString(getStrAttrOrPar(hostRouteConfig, "areaID"));
-    hostParameters.address = ipv4AddressFromAddressString(getRequiredAttribute(hostRouteConfig, "attachedHost"));
+    hostParameters.address = ipv4AddressFromAddressString(getMandatoryFilledAttribute(hostRouteConfig, "attachedHost"));
     hostParameters.linkCost = getIntAttrOrPar(hostRouteConfig, "linkCost");
 
     // add the host route to the OSPF data structure.
@@ -388,7 +388,7 @@ void OspfConfigReader::loadHostRoute(const cXMLElement& hostRouteConfig)
 void OspfConfigReader::loadVirtualLink(const cXMLElement& virtualLinkConfig)
 {
     Interface *intf = new Interface;
-    std::string endPoint = getRequiredAttribute(virtualLinkConfig, "endPointRouterID");
+    std::string endPoint = getMandatoryFilledAttribute(virtualLinkConfig, "endPointRouterID");
     Neighbor *neighbor = new Neighbor;
 
     EV_DEBUG << "        loading VirtualLink to " << endPoint << "\n";
@@ -397,7 +397,7 @@ void OspfConfigReader::loadVirtualLink(const cXMLElement& virtualLinkConfig)
     neighbor->setNeighborID(ipv4AddressFromAddressString(endPoint.c_str()));
     intf->addNeighbor(neighbor);
 
-    intf->setTransitAreaId(ipv4AddressFromAddressString(getRequiredAttribute(virtualLinkConfig, "transitAreaID")));
+    intf->setTransitAreaId(ipv4AddressFromAddressString(getMandatoryFilledAttribute(virtualLinkConfig, "transitAreaID")));
 
     intf->setRetransmissionInterval(getIntAttrOrPar(virtualLinkConfig, "retransmissionInterval"));
 
@@ -439,7 +439,7 @@ bool OspfConfigReader::loadConfigFromXML(cXMLElement *asConfig, Router *ospfRout
     cXMLElementList routers = asConfig->getElementsByTagName("Router");
     cXMLElement *routerNode = nullptr;
     for (auto & router : routers) {
-        const char *nodeName = getRequiredAttribute(*(router), "name");
+        const char *nodeName = getMandatoryFilledAttribute(*(router), "name");
         inet::PatternMatcher pattern(nodeName, true, true, true);
         if (pattern.matches(nodeFullPath.c_str()) || pattern.matches(nodeShortenedFullPath.c_str())) {    // match Router@name and fullpath of my node
             routerNode = router;
