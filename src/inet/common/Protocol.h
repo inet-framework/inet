@@ -47,7 +47,7 @@ class INET_API Protocol
     int getId() const { return id; }
     const char *getName() const { return name.c_str(); }
     const char *getDescriptiveName() const { return descriptiveName.c_str(); }
-    const Layer getLayer() const { return layer; }
+    Layer getLayer() const { return layer; }
 
     std::string str() const;
 
