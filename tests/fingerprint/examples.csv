@@ -129,7 +129,7 @@
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2a -r 0,           50s,             d887-b503/tplx, PASS,
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2b -r 0,           50s,             23c7-14ae/tplx, PASS,
 
-/examples/inet/configurator/,        -f complex.ini -c General -r 0,                100s,            b98b-79e7/tplx, PASS, wireless
+/examples/inet/configurator/,        -f complex.ini -c General -r 0,                100s,            c078-fd71/tplx, PASS, wireless
 /examples/inet/configurator/,        -f simple.ini -c Default -r 0,                 10s,             c1c9-5c80/tplx, PASS,
 /examples/inet/configurator/,        -f simple.ini -c DisableNode -r 0,             10s,             4b41-5e80/tplx, PASS,
 /examples/inet/configurator/,        -f simple.ini -c DisableLink -r 0,             10s,             00db-ee4f/tplx, PASS,
