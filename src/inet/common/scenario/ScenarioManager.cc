@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/scenario/ScenarioManager.h"
+#include "inet/common/XMLUtils.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/INETUtils.h"
@@ -206,8 +207,16 @@ void ScenarioManager::processCreateModuleCommand(cXMLElement *node)
     if (parentModule == nullptr)
         throw cRuntimeError("parent module '%s' is not found", parentModulePath);
     cModule *submodule = parentModule->getSubmodule(submoduleName, 0);
-    int submoduleIndex = submodule == nullptr ? 0 : submodule->getVectorSize();
-    cModule *module = moduleType->create(submoduleName, parentModule, submoduleIndex + 1, submoduleIndex);
+    bool vector = xmlutils::getAttributeBoolValue(node, "vector", submodule != nullptr);
+    cModule *module = nullptr;
+    if (vector) {
+        cModule *submodule = parentModule->getSubmodule(submoduleName, 0);
+        int submoduleIndex = submodule == nullptr ? 0 : submodule->getVectorSize();
+        module = moduleType->create(submoduleName, parentModule, submoduleIndex + 1, submoduleIndex);
+    }
+    else {
+        module = moduleType->create(submoduleName, parentModule);
+    }
     module->finalizeParameters();
     module->buildInside();
     module->callInitialize();
