@@ -111,7 +111,7 @@ class INET_API Gpsr : public cSimpleModule, public ILifecycle, public cListener,
     // handling packets
     GpsrOption *createGpsrOption(L3Address destination);
     int computeOptionLength(GpsrOption *gpsrOption);
-    void setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const NetworkHeaderBase>& networkHeader);
+    void setGpsrOptionOnNetworkDatagram(Packet *packet, const Ptr<const NetworkHeaderBase>& networkHeader, GpsrOption *gpsrOption);
 
     // returns nullptr if not found
     GpsrOption *findGpsrOptionInNetworkDatagramForUpdate(const Ptr<NetworkHeaderBase>& networkHeader);
@@ -148,12 +148,12 @@ class INET_API Gpsr : public cSimpleModule, public ILifecycle, public cListener,
     std::vector<L3Address> getPlanarNeighborsCounterClockwise(double startAngle) const;
 
     // next hop
-    L3Address findNextHop(const Ptr<const NetworkHeaderBase>& networkHeader, const L3Address& destination);
-    L3Address findGreedyRoutingNextHop(const Ptr<const NetworkHeaderBase>& networkHeader, const L3Address& destination);
-    L3Address findPerimeterRoutingNextHop(const Ptr<const NetworkHeaderBase>& networkHeader, const L3Address& destination);
+    L3Address findNextHop(const L3Address& destination, GpsrOption *gpsrOption);
+    L3Address findGreedyRoutingNextHop(const L3Address& destination, GpsrOption *gpsrOption);
+    L3Address findPerimeterRoutingNextHop(const L3Address& destination, GpsrOption *gpsrOption);
 
     // routing
-    Result routeDatagram(Packet *datagram);
+    Result routeDatagram(Packet *datagram, GpsrOption *gpsrOption);
 
     // netfilter
     virtual Result datagramPreRoutingHook(Packet *datagram) override;
