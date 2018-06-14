@@ -192,6 +192,10 @@ void MobilityCanvasVisualizer::receiveSignal(cComponent *source, simsignal_t sig
         if (moduleFilter.matches(check_and_cast<cModule *>(source)))
             ensureMobilityVisualization(dynamic_cast<IMobility *>(source));
     }
+    else if (signal == PRE_MODEL_CHANGE) {
+        if (auto mobility = dynamic_cast<IMobility *>(source))
+            removeMobilityVisualization(mobility);
+    }
     else
         throw cRuntimeError("Unknown signal");
 }
