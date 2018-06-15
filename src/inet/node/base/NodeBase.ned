@@ -56,7 +56,7 @@ module NodeBase like INetworkNode
         }
         energyManagement: <default("")> like IEnergyManagement if typename != "" {
             parameters:
-                @display("p=125,400;i=block/plug;is=s");
+                @display("p=125,400;is=s");
         }
         energyGenerator: <default("")> like IEnergyGenerator if typename != "" {
             parameters:
