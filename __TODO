@@ -1,20 +1,10 @@
-SHOULD:
  - add test and check for std::dynamic_pointer_cast<Subclass1>(chunk->peek<Subclass1>()) != nullptr always holds when peek uses a variant type deserializer
-
- - remove KLUDGEs, TODOs, etc.
- - update/remove obsolete NED documentation
- - make sure all tests PASS, check for leaks, etc.
  - remove obsolete HostAutoConfigurator, Ipv4FlatNetworkConfigurator modules?
- - check if IEEE 802.11 MAC filters for SSID (e.g. 2 APs, 2 STAs, 2 SSIDs, 2 UDP broadcasting applications don't mix up)
-
  - revise and rename statistics to have a consistent naming scheme
  - fix mobility non-determinism caused by interpolation from last position during animation
  - validate Rotation, Quaternion, EulerAngles against each other and documentation
  - validate positioning and orientation IMobility, PhysicalEnvironment, ObstacleLoss
-
-NEED NOT:
  - replace all internal queues with external queue modules and make them configurable
- - fix mobility visualization for dynamic nodes, don't reference mobility modules directly
  - 802.11 preamble, header, data separation in HT and VHT mode doesn't really make sense the way it's right now implemented
    there's no separate header in these modes, the preamble is much more complicated than in the other modes
    there's also a bug related to this in the Ieee80211ScalarTransmitter when it computes the data duration
@@ -29,13 +19,10 @@ NEED NOT:
  - revise protocol base class hierarchy (e.g. LayeredProtocolBase vs IPv4 base class, etc.)
  - revise protocol header class hierarchy (e.g. avoid unnecessary interfaces)
  - revise NED network node module hierarchy (e.g. MPLS nodes)
- - compare performance with INET 3.x branch and optimize if a lot of worse
  - use m instead of double in Coord?
  - add meaningful display strings to at least the top level submodules of network nodes
  - replace functionality of GenericAppMsg with chunk tags, or better yet get rid of it altogether!
  - use shared pointers for transmissions/receptions, etc. because the gui copies packets in the packet log and inspects them later
- - eliminate all KLUDGES introduced by the 3 main infrastructure changes
- - revise physical layer error models wrt. how errors are represented
  - factor out physical layer analog domain representation into a separate parameter of transmissions
  - ethernet socket vs. ssap/dsap both in StandardHost and EtherHost
  - review all examples and check if they still do what is intended
@@ -49,7 +36,7 @@ NEED NOT:
  - add separate classes/functions for iterating over the network nodes in a network or
    finding a network node based on its mac address/ip address or finding the position of a network node, etc.
  - add missing node NED files for existing protocols (e.g. sensor nodes, IoT devices) 
- - update all NED and C++ documentation
+ - update all NED and C++ documentation, remove obsolete documentation
  - nicely position submodules in compound modules, prepare for 2 info lines
  - extend main protocol modules (and all submodules) with 2 info lines above the submodule icon
  - avoid specifying module icon sizes by default, override icon size in submodules
