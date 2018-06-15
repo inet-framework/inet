@@ -54,6 +54,7 @@ module InternetCloud extends NetworkLayerNodeBase
         numTunInterfaces = 0;
         forwarding = true;
         @display("i=misc/cloud");
+        @figure[submodules];
         *.interfaceTableModule = default(absPath(".interfaceTable"));
     submodules:
         ipv4Delayer: <default("MatrixCloudDelayer")> like ICloudDelayer if hasIpv4 {

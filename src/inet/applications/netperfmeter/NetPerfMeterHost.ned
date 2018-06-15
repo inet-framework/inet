@@ -39,6 +39,7 @@ import inet.transportlayer.contract.IUdp;
 module NetPerfMeterHost extends TransportLayerNodeBase
 {
     parameters:
+        @figure[submodules];
         @display("i=device/pc2");
         int numNetPerfMeterApps = default(0);   // T.D. 17.11.09
         forwarding = default(false);  // disable routing by default
