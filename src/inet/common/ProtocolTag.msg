@@ -7,16 +7,10 @@ import inet.common.Protocol;
 import inet.common.TagBase;
 import inet.common.packet.chunk.Chunk;
 
-cplusplus{{
-#include "inet/common/Units.h"      //FIXME Why? Units unused in this file.
-}}
-
 namespace inet;
 
 cplusplus{{
 typedef Ptr<const Chunk> ChunkPtr;
-
-using namespace units::values;      //FIXME Why? Units unused in this file.
 }}
 
 class ChunkPtr
