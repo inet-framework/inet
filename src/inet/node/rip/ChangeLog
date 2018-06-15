@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2018-06-15  ------ inet-4.0.0 released ------
+
 2018-05-24  Andras Varga
 
 	Renamed hasRIP, hasOSPF and similar parameters changed to camel case.

@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2018-06-15  ------ inet-4.0.0 released ------
+
 2018-05-28  Levente Mészáros
 
 	Added more complete IModulation descriptors to allow inspecting 802.11 signal's modulation.
