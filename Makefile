@@ -48,8 +48,6 @@ submodule-init:
 $(FEATURES_H): $(wildcard .oppfeaturestate) .oppfeatures
 	@./inet_featuretool defines >$(FEATURES_H)
 
-
 doc:
-	cd doc/src/tcp && $(MAKE)
-	cd doc/src/manual && $(MAKE)
+	cd doc/src && $(MAKE)
 	doxygen doxy.cfg
