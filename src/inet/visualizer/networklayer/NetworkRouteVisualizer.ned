@@ -27,7 +27,7 @@ import inet.visualizer.contract.INetworkRouteVisualizer;
 module NetworkRouteVisualizer like INetworkRouteVisualizer
 {
     parameters:
-        @display("i=block/app_s");
+        @display("i=block/app");
     submodules:
         canvasVisualizer: <default("NetworkRouteCanvasVisualizer")> like INetworkRouteVisualizer if typename != "" {
             parameters:

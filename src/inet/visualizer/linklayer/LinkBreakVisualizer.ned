@@ -27,7 +27,7 @@ import inet.visualizer.contract.ILinkBreakVisualizer;
 module LinkBreakVisualizer like ILinkBreakVisualizer
 {
     parameters:
-        @display("i=block/app_s");
+        @display("i=block/app");
     submodules:
         canvasVisualizer: <default("LinkBreakCanvasVisualizer")> like ILinkBreakVisualizer if typename != "" {
             parameters:

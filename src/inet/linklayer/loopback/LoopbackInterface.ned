@@ -41,10 +41,10 @@ module LoopbackInterface like ILoopbackInterface
         output upperLayerOut;
     submodules:
         outputHook[numOutputHooks]: <default("Nop")> like IHook if numOutputHooks>0 {
-            @display("p=100,100,row,50");
+            @display("p=100,100,row,50;is=s");
         }
         inputHook[numInputHooks]: <default("Nop")> like IHook if numInputHooks>0 {
-            @display("p=400,100,row,50");
+            @display("p=400,100,row,50;is=s");
         }
         lo: Loopback {
             parameters:

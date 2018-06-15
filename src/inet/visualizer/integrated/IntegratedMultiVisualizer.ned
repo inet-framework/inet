@@ -25,7 +25,7 @@ import inet.visualizer.contract.IIntegratedVisualizer;
 module IntegratedMultiVisualizer like IIntegratedVisualizer
 {
     parameters:
-        @display("i=block/app_s");
+        @display("i=block/app");
     submodules:
         canvasVisualizer: <default("IntegratedMultiCanvasVisualizer")> like IIntegratedVisualizer if typename != "" {
             parameters:

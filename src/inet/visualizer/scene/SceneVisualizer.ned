@@ -27,7 +27,7 @@ import inet.visualizer.contract.ISceneVisualizer;
 module SceneVisualizer like ISceneVisualizer
 {
     parameters:
-        @display("i=block/app_s");
+        @display("i=block/app");
     submodules:
         canvasVisualizer: <default("SceneCanvasVisualizer")> like ISceneVisualizer if typename != "" {
             parameters:

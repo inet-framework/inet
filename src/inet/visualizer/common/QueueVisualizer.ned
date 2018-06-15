@@ -27,7 +27,7 @@ import inet.visualizer.contract.IQueueVisualizer;
 module QueueVisualizer like IQueueVisualizer
 {
     parameters:
-        @display("i=block/app_s");
+        @display("i=block/app");
     submodules:
         canvasVisualizer: <default("QueueCanvasVisualizer")> like IQueueVisualizer if typename != "" {
             parameters:

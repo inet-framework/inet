@@ -50,7 +50,7 @@ import inet.visualizer.contract.ITransportRouteVisualizer;
 module IntegratedOsgVisualizer like IIntegratedVisualizer
 {
     parameters:
-        @display("i=block/app_s");
+        @display("i=block/app");
     submodules:
         sceneVisualizer: <default("SceneOsgVisualizer")> like ISceneVisualizer if typename != "" {
             parameters:

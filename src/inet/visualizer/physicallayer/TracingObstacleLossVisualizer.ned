@@ -27,7 +27,7 @@ import inet.visualizer.contract.ITracingObstacleLossVisualizer;
 module TracingObstacleLossVisualizer like ITracingObstacleLossVisualizer
 {
     parameters:
-        @display("i=block/app_s");
+        @display("i=block/app");
     submodules:
         canvasVisualizer: <default("TracingObstacleLossCanvasVisualizer")> like ITracingObstacleLossVisualizer if typename != "" {
             parameters:

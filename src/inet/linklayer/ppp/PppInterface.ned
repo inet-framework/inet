@@ -44,10 +44,10 @@ module PppInterface like IPppInterface
         inout phys @labels(PppFrame);
     submodules:
         outputHook[numOutputHooks]: <default("Nop")> like IHook if numOutputHooks>0 {
-            @display("p=100,100,row,50");
+            @display("p=100,100,row,50;is=s");
         }
         inputHook[numInputHooks]: <default("Nop")> like IHook if numInputHooks>0 {
-            @display("p=500,100,row,50");
+            @display("p=500,100,row,50;is=s");
         }
         ingressTC: <default("")> like ITrafficConditioner if typename != "" {
             @display("p=500,200");

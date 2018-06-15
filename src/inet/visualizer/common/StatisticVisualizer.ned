@@ -27,7 +27,7 @@ import inet.visualizer.contract.IStatisticVisualizer;
 module StatisticVisualizer like IStatisticVisualizer
 {
     parameters:
-        @display("i=block/app_s");
+        @display("i=block/app");
     submodules:
         canvasVisualizer: <default("StatisticCanvasVisualizer")> like IStatisticVisualizer if typename != "" {
             parameters:

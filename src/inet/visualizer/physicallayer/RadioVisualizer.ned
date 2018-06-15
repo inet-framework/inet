@@ -27,7 +27,7 @@ import inet.visualizer.contract.IRadioVisualizer;
 module RadioVisualizer like IRadioVisualizer
 {
     parameters:
-        @display("i=block/app_s");
+        @display("i=block/app");
     submodules:
         canvasVisualizer: <default("RadioCanvasVisualizer")> like IRadioVisualizer if typename != "" {
             parameters:

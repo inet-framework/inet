@@ -51,7 +51,7 @@ import inet.visualizer.contract.ITransportRouteVisualizer;
 module IntegratedCanvasVisualizer like IIntegratedVisualizer
 {
     parameters:
-        @display("i=block/app_s");
+        @display("i=block/app");
     submodules:
         sceneVisualizer: <default("SceneCanvasVisualizer")> like ISceneVisualizer if typename != "" {
             parameters:

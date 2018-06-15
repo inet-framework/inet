@@ -23,7 +23,7 @@ package inet.common.geometry.common;
 moduleinterface IGeographicCoordinateSystem
 {
     parameters:
-        @display("i=block/table2_s");
+        @display("i=block/table2");
 }
 
 //
@@ -33,7 +33,7 @@ moduleinterface IGeographicCoordinateSystem
 simple SimpleGeographicCoordinateSystem like IGeographicCoordinateSystem
 {
     parameters:
-        @display("i=block/table2_s");
+        @display("i=block/table2");
         double playgroundLatitude @unit(deg); // latitude coordinate of the playground origin
         double playgroundLongitude @unit(deg); // longitude coordinate of the playground origin
         double playgroundAltitude @unit(m) = default(0m); // altitude coordinate of the playground origin
@@ -46,7 +46,7 @@ simple SimpleGeographicCoordinateSystem like IGeographicCoordinateSystem
 simple OsgGeographicCoordinateSystem like IGeographicCoordinateSystem
 {
     parameters:
-        @display("i=block/table2_s");
+        @display("i=block/table2");
         double playgroundLatitude @unit(deg); // latitude coordinate of the playground origin
         double playgroundLongitude @unit(deg); // longitude coordinate of the playground origin
         double playgroundAltitude @unit(m) = default(0m); // altitude coordinate of the playground origin

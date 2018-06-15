@@ -27,7 +27,7 @@ import inet.visualizer.contract.ITransportConnectionVisualizer;
 module TransportConnectionVisualizer like ITransportConnectionVisualizer
 {
     parameters:
-        @display("i=block/app_s");
+        @display("i=block/app");
     submodules:
         canvasVisualizer: <default("TransportConnectionCanvasVisualizer")> like ITransportConnectionVisualizer if typename != "" {
             parameters:

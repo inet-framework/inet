@@ -27,7 +27,7 @@ import inet.visualizer.contract.IRoutingTableVisualizer;
 module RoutingTableVisualizer like IRoutingTableVisualizer
 {
     parameters:
-        @display("i=block/app_s");
+        @display("i=block/app");
     submodules:
         canvasVisualizer: <default("RoutingTableCanvasVisualizer")> like IRoutingTableVisualizer if typename != "" {
             parameters:

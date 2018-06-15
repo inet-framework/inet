@@ -22,7 +22,7 @@ import inet.visualizer.contract.IInterfaceTableVisualizer;
 module InterfaceTableVisualizer like IInterfaceTableVisualizer
 {
     parameters:
-        @display("i=block/app_s_s");
+        @display("i=block/app");
     submodules:
         canvasVisualizer: <default("InterfaceTableCanvasVisualizer")> like IInterfaceTableVisualizer if typename != "" {
             parameters:

@@ -46,10 +46,10 @@ module EthernetInterface like IEthernetInterface
         inout phys @labels(EtherFrame);
     submodules:
         outputHook[numOutputHooks]: <default("Nop")> like IHook if numOutputHooks>0 {
-            @display("p=100,100");
+            @display("p=100,100;is=s");
         }
         inputHook[numInputHooks]: <default("Nop")> like IHook if numInputHooks>0 {
-            @display("p=400,100");
+            @display("p=400,100;is=s");
         }
         ingressTC: <default("")> like ITrafficConditioner if typename != "" {
             @display("p=400,200");

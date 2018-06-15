@@ -50,7 +50,7 @@ import inet.visualizer.contract.ITransportRouteVisualizer;
 module IntegratedMultiOsgVisualizer like IIntegratedVisualizer
 {
     parameters:
-        @display("i=block/app_s");
+        @display("i=block/app");
         int numSceneVisualizers = default(1);
         int numPhysicalEnvironmentVisualizers = default(1);
         int numNetworkNodeVisualizers = default(1);

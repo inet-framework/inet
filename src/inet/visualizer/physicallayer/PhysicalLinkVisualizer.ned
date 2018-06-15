@@ -27,7 +27,7 @@ import inet.visualizer.contract.IPhysicalLinkVisualizer;
 module PhysicalLinkVisualizer like IPhysicalLinkVisualizer
 {
     parameters:
-        @display("i=block/app_s");
+        @display("i=block/app");
     submodules:
         canvasVisualizer: <default("PhysicalLinkCanvasVisualizer")> like IPhysicalLinkVisualizer if typename != "" {
             parameters:

@@ -27,7 +27,7 @@ import inet.visualizer.contract.IDataLinkVisualizer;
 module DataLinkVisualizer like IDataLinkVisualizer
 {
     parameters:
-        @display("i=block/app_s");
+        @display("i=block/app");
     submodules:
         canvasVisualizer: <default("DataLinkCanvasVisualizer")> like IDataLinkVisualizer if typename != "" {
             parameters:

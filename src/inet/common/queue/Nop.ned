@@ -27,7 +27,7 @@ import inet.common.IHook;
 //
 module Nop like IHook
 {
-    @display("i=block/socket;is=vs");
+    @display("i=block/socket");
     gates:
         input in;
         output out;

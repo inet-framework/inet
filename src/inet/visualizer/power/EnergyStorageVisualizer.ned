@@ -27,7 +27,7 @@ import inet.visualizer.contract.IEnergyStorageVisualizer;
 module EnergyStorageVisualizer like IEnergyStorageVisualizer
 {
     parameters:
-        @display("i=block/app_s");
+        @display("i=block/app");
     submodules:
         canvasVisualizer: <default("EnergyStorageCanvasVisualizer")> like IEnergyStorageVisualizer if typename != "" {
             parameters:

@@ -27,7 +27,7 @@ import inet.visualizer.contract.IMobilityVisualizer;
 module MobilityVisualizer like IMobilityVisualizer
 {
     parameters:
-        @display("i=block/app_s");
+        @display("i=block/app");
     submodules:
         canvasVisualizer: <default("MobilityCanvasVisualizer")> like IMobilityVisualizer if typename != "" {
             parameters:
