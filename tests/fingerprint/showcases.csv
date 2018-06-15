@@ -71,7 +71,7 @@
 /showcases/visualizer/obstacleloss/, -f omnetpp.ini -c EnablingVisualization -r 0,                              250s,            2410-572d/tplx, PASS,
 /showcases/visualizer/obstacleloss/, -f omnetpp.ini -c MultipleObstacles -r 0,                                  500s,            89ca-0f0a/tplx, PASS,
 
-/showcases/visualizer/osgdemo/,      -f omnetpp.ini -c General -r 0,                100s,         0000-0000/tplx, PASS,
+/showcases/visualizer/osgdemo/,      -f omnetpp.ini -c General -r 0,                100s,         0000-0000/tplx, ERROR,
 
 /showcases/visualizer/packetdrop/,   -f omnetpp.ini -c QueueOverflow -r 0,                                      2002ms,            6c7f-53d6/tplx, PASS,
 /showcases/visualizer/packetdrop/,   -f omnetpp.ini -c ArpResolutionFailed -r 0,                                500s,            9f65-bc35/tplx, PASS,
@@ -110,17 +110,17 @@
 /showcases/visualizer/transportpathactivity/, -f omnetpp.ini -c EnablingPathVisualizationWireless -r 0,         500s,            e56a-1601/tplx, PASS,
 /showcases/visualizer/transportpathactivity/, -f omnetpp.ini -c Filtering -r 0,     100s,         b79c-e86d/tplx, PASS,
 
-/showcases/wireless/coexistence/,    -f omnetpp.ini -c CompletelyOverlappingFrequencyAndBandwidth -r 0, 100s, 0000-0000/tplx, ERROR,
-/showcases/wireless/coexistence/,    -f omnetpp.ini -c IndependentFrequencyBands -r 0, 100s,      0000-0000/tplx, ERROR,
-/showcases/wireless/coexistence/,    -f omnetpp.ini -c IndependentFrequencyBands2 -r 0, 100s,     0000-0000/tplx, ERROR,
-/showcases/wireless/coexistence/,    -f omnetpp.ini -c PartiallyOverlappingFrequencyBands -r 0, 100s, 0000-0000/tplx, ERROR,   # PartiallyOverlappingFrequencyBands extended
-/showcases/wireless/coexistence/,    -f omnetpp.ini -c PartiallyOverlappingFrequencyBandsNonInterfereningChannels -r 0, 100s, 0000-0000/tplx, ERROR,
-/showcases/wireless/coexistence/,    -f omnetpp.ini -c PartiallyOverlappingFrequencyBandsClose -r 0, 100s, 0000-0000/tplx, ERROR,
-/showcases/wireless/coexistence/,    -f omnetpp.ini -c PartiallyOverlappingFrequencyBandsScalarRadio -r 0, 100s, 0000-0000/tplx, ERROR,
-/showcases/wireless/coexistence/,    -f omnetpp.ini -c PartiallyOverlappingFrequencyBandsDifferingFrequencyAndBandwidth -r 0, 100s, 0000-0000/tplx, ERROR,
-/showcases/wireless/coexistence/,    -f omnetpp.ini -c PartiallyOverlappingFrequencyBandsUWBIR802154DimensionalThing -r 0, 100s, 0000-0000/tplx, ERROR,
-/showcases/wireless/coexistence/,    -f omnetpp.ini -c PartiallyOverlappingDimensional -r 0, 100s, 0000-0000/tplx, ERROR,
-/showcases/wireless/coexistence/,    -f omnetpp.ini -c Dimensional -r 0,            100s,         0000-0000/tplx, ERROR,
+/showcases/wireless/coexistence/,    -f omnetpp.ini -c CompletelyOverlappingFrequencyAndBandwidth -r 0, 2s, 0000-0000/tplx, ERROR,
+/showcases/wireless/coexistence/,    -f omnetpp.ini -c IndependentFrequencyBands -r 0, 2s,      1668-9152/tplx, PASS,
+/showcases/wireless/coexistence/,    -f omnetpp.ini -c IndependentFrequencyBands2 -r 0, 2s,     1668-9152/tplx, PASS,
+/showcases/wireless/coexistence/,    -f omnetpp.ini -c PartiallyOverlappingFrequencyBands -r 0, 1s, e3ef-19ba/tplx, PASS,   # PartiallyOverlappingFrequencyBands extended
+/showcases/wireless/coexistence/,    -f omnetpp.ini -c PartiallyOverlappingFrequencyBandsNonInterfereningChannels -r 0, 1s, e3ef-19ba/tplx, PASS,
+/showcases/wireless/coexistence/,    -f omnetpp.ini -c PartiallyOverlappingFrequencyBandsClose -r 0, 1s, 5efd-db9c/tplx, PASS,
+/showcases/wireless/coexistence/,    -f omnetpp.ini -c PartiallyOverlappingFrequencyBandsScalarRadio -r 0, 2s, 95d5-4e15/tplx, PASS,
+/showcases/wireless/coexistence/,    -f omnetpp.ini -c PartiallyOverlappingFrequencyBandsDifferingFrequencyAndBandwidth -r 0, 2s, 0000-0000/tplx, ERROR,
+/showcases/wireless/coexistence/,    -f omnetpp.ini -c PartiallyOverlappingFrequencyBandsUWBIR802154DimensionalThing -r 0, 2s, 0000-0000/tplx, ERROR,
+/showcases/wireless/coexistence/,    -f omnetpp.ini -c PartiallyOverlappingDimensional -r 0, 2s, 0000-0000/tplx, ERROR,
+/showcases/wireless/coexistence/,    -f omnetpp.ini -c Dimensional -r 0,            2s,         0000-0000/tplx, ERROR,
 
 /showcases/wireless/crosstalk/,      -f omnetpp.ini -c CompletelyOverlappingFrequencyBands -r 0, 100s, 1f4f-f700/tplx, PASS,
 /showcases/wireless/crosstalk/,      -f omnetpp.ini -c IndependentFrequencyBandsOneScalarRadioMediumModule -r 0, 100s, a44c-fa81/tplx, PASS,
