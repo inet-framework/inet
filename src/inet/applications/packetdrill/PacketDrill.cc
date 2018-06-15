@@ -78,6 +78,12 @@ Ptr<Ipv4Header> PacketDrill::makeIpv4Header(IpProtocolId protocol, enum directio
     ipv4Header->setTypeOfService(0);
     ipv4Header->setChunkLength(IPv4_MIN_HEADER_LENGTH);
     ipv4Header->setTotalLengthField(IPv4_MIN_HEADER_LENGTH);
+
+    return ipv4Header;
+}
+
+void PacketDrill::setIpv4HeaderCrc(Ptr<Ipv4Header> &ipv4Header)
+{
     ipv4Header->setCrcMode(pdapp->getCrcMode());
     ipv4Header->setCrc(0);
     if (pdapp->getCrcMode() == CRC_COMPUTED) {
@@ -86,8 +92,6 @@ Ptr<Ipv4Header> PacketDrill::makeIpv4Header(IpProtocolId protocol, enum directio
         uint16_t crc = TcpIpChecksum::checksum(ipv4HeaderStream.getData());
         ipv4Header->setCrc(crc);
     }
-
-    return ipv4Header;
 }
 
 
@@ -115,6 +119,7 @@ Packet* PacketDrill::buildUDPPacket(int address_family, enum direction_t directi
     packet->insertAtFront(udpHeader);
     auto ipHeader = PacketDrill::makeIpv4Header(IP_PROT_UDP, direction, app->getLocalAddress(), app->getRemoteAddress());
     ipHeader->setTotalLengthField(ipHeader->getTotalLengthField() + packet->getDataLength());
+    PacketDrill::setIpv4HeaderCrc(ipHeader);
     packet->insertAtFront(ipHeader);
     return packet;
 }
@@ -256,6 +261,7 @@ Packet* PacketDrill::buildTCPPacket(int address_family, enum direction_t directi
     auto ipHeader = PacketDrill::makeIpv4Header(IP_PROT_TCP, direction, app->getLocalAddress(),
             app->getRemoteAddress());
     ipHeader->setTotalLengthField(ipHeader->getTotalLengthField() + packet->getDataLength());
+    PacketDrill::setIpv4HeaderCrc(ipHeader);
     packet->insertAtFront(ipHeader);
     delete tcpOptions;
     return packet;
@@ -471,6 +477,7 @@ Packet* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direct
     auto ipHeader = PacketDrill::makeIpv4Header(IP_PROT_SCTP, direction, app->getLocalAddress(),
             app->getRemoteAddress());
     ipHeader->setTotalLengthField(ipHeader->getTotalLengthField() + packet->getDataLength());
+    PacketDrill::setIpv4HeaderCrc(ipHeader);
     insertNetworkProtocolHeader(packet, Protocol::ipv4, ipHeader);
     EV_INFO << "SCTP packet " << packet << endl;
     delete chunks;
