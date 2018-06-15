@@ -291,7 +291,7 @@ void Dcf::originatorProcessTransmittedFrame(Packet *packet)
         }
     }
     else if (auto rtsFrame = dynamicPtrCast<const Ieee80211RtsFrame>(transmittedHeader)) {
-        auto protectedFrame = inProgressFrames->getFrameToTransmit(); // TODO: kludge
+        auto protectedFrame = inProgressFrames->getFrameToTransmit(); // KLUDGE:
         auto protectedHeader = protectedFrame->peekAtFront<Ieee80211DataOrMgmtHeader>();
         EV_INFO << "For the current frame exchange, we have CW = " << dcfChannelAccess->getCw() << " SRC = " << recoveryProcedure->getShortRetryCount(protectedFrame, protectedHeader) << " LRC = " << recoveryProcedure->getLongRetryCount(protectedFrame, protectedHeader) << " SSRC = " << stationRetryCounters->getStationShortRetryCount() << " and SLRC = " << stationRetryCounters->getStationLongRetryCount() << std::endl;
         rtsProcedure->processTransmittedRts(rtsFrame);
