@@ -1188,9 +1188,7 @@ void NetPerfMeter::sendDataOfTraceFile(const unsigned long long bytesAvailableIn
 // ###### Receive data ######################################################
 void NetPerfMeter::receiveMessage(cMessage* msg)
 {
-   const Packet* dataMessage =
-      dynamic_cast<const Packet*>(msg);
-   if(dataMessage != nullptr) {
+   if (const Packet* dataMessage = dynamic_cast<const Packet*>(msg)) {
       unsigned int    streamID = 0;
       const auto& smsg = staticPtrCast<const BytesChunk>(dataMessage->peekData());
       auto creationTimeTag = smsg->findTag<CreationTimeTag>();
