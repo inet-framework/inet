@@ -200,66 +200,66 @@ void Sctp::handleMessage(cMessage *msg)
             int chunkLength = B(sctpmsg->getChunkLength()).get();
             numPacketsReceived++;
 
-			if (!pktdrop && (packet->hasBitError())) {
-				EV_WARN << "Packet has bit-error. delete it\n";
+            if (!pktdrop && (packet->hasBitError())) {
+                EV_WARN << "Packet has bit-error. delete it\n";
 
-				numPacketsDropped++;
-				delete msg;
-				return;
-			}
+                numPacketsDropped++;
+                delete msg;
+                return;
+            }
 
             if (pktdrop && packet->hasBitError()) {
                 EV_WARN << "Packet has bit-error. Call Pktdrop\n";
             }
 
-			srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress();
-			destAddr = packet->getTag<L3AddressInd>()->getDestAddress();
-			EV_INFO << "srcAddr=" << srcAddr << "   destAddr=" << destAddr << "\n";
-			if (chunkLength > SCTP_COMMON_HEADER) {
-				if (((sctpmsg->getSctpChunks(0)))->getSctpChunkType() == INIT || ((sctpmsg->getSctpChunks(0)))->getSctpChunkType() == INIT_ACK)
-					findListen = true;
+            srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress();
+            destAddr = packet->getTag<L3AddressInd>()->getDestAddress();
+            EV_INFO << "srcAddr=" << srcAddr << "   destAddr=" << destAddr << "\n";
+            if (chunkLength > SCTP_COMMON_HEADER) {
+                if (((sctpmsg->getSctpChunks(0)))->getSctpChunkType() == INIT || ((sctpmsg->getSctpChunks(0)))->getSctpChunkType() == INIT_ACK)
+                    findListen = true;
 
-				SctpAssociation *assoc = findAssocForMessage(srcAddr, destAddr, sctpmsg->getSrcPort(), sctpmsg->getDestPort(), findListen);
-				if (!assoc && sctpAssocMap.size() > 0 && (((sctpmsg->getSctpChunks(0)))->getSctpChunkType() == INIT_ACK)) {
-					SctpInitAckChunk* initack = check_and_cast<SctpInitAckChunk *>((SctpChunk *)(sctpmsg->getSctpChunks(0)));
-					assoc = findAssocForInitAck(initack, srcAddr, destAddr, sctpmsg->getSrcPort(), sctpmsg->getDestPort(), findListen);
-				}
-				if (!assoc && sctpAssocMap.size() > 0 && (((sctpmsg->getSctpChunks(0)))->getSctpChunkType() == ERRORTYPE
-														  || (sctpmsg->getSctpChunksArraySize() > 1 &&
-															  (((sctpmsg->getSctpChunks(1)))->getSctpChunkType() == ASCONF || ((sctpmsg->getSctpChunks(1)))->getSctpChunkType() == ASCONF_ACK))))
-				{
-					assoc = findAssocWithVTag(sctpmsg->getVTag(), sctpmsg->getSrcPort(), sctpmsg->getDestPort());
-				}
-				if (!assoc) {
-					EV_INFO << "no assoc found msg=" << sctpmsg->getName() << "\n";
+                SctpAssociation *assoc = findAssocForMessage(srcAddr, destAddr, sctpmsg->getSrcPort(), sctpmsg->getDestPort(), findListen);
+                if (!assoc && sctpAssocMap.size() > 0 && (((sctpmsg->getSctpChunks(0)))->getSctpChunkType() == INIT_ACK)) {
+                    SctpInitAckChunk* initack = check_and_cast<SctpInitAckChunk *>((SctpChunk *)(sctpmsg->getSctpChunks(0)));
+                    assoc = findAssocForInitAck(initack, srcAddr, destAddr, sctpmsg->getSrcPort(), sctpmsg->getDestPort(), findListen);
+                }
+                if (!assoc && sctpAssocMap.size() > 0 && (((sctpmsg->getSctpChunks(0)))->getSctpChunkType() == ERRORTYPE
+                                                          || (sctpmsg->getSctpChunksArraySize() > 1 &&
+                                                              (((sctpmsg->getSctpChunks(1)))->getSctpChunkType() == ASCONF || ((sctpmsg->getSctpChunks(1)))->getSctpChunkType() == ASCONF_ACK))))
+                {
+                    assoc = findAssocWithVTag(sctpmsg->getVTag(), sctpmsg->getSrcPort(), sctpmsg->getDestPort());
+                }
+                if (!assoc) {
+                    EV_INFO << "no assoc found msg=" << sctpmsg->getName() << "\n";
 
-					if (!pktdrop && packet->hasBitError()) {
-						//delete sctpmsg;
-						return;
-					}
+                    if (!pktdrop && packet->hasBitError()) {
+                        //delete sctpmsg;
+                        return;
+                    }
 
-					Ptr<SctpHeader> sctpmsgptr(sctpmsg);
-					if (((sctpmsg->getSctpChunks(0)))->getSctpChunkType() == SHUTDOWN_ACK)
-						sendShutdownCompleteFromMain(sctpmsgptr, destAddr, srcAddr);
-					else if (((sctpmsg->getSctpChunks(0)))->getSctpChunkType() != ABORT &&
-							 ((sctpmsg->getSctpChunks(0)))->getSctpChunkType() != SHUTDOWN_COMPLETE) {
-						sendAbortFromMain(sctpmsgptr, destAddr, srcAddr);
-					}
-					delete packet;
-				}
-				else {
-					EV_INFO << "assoc " << assoc->assocId << " found\n";
-					bool ret = assoc->processSctpMessage(sctpmsg, srcAddr, destAddr);
-					if (!ret) {
-						EV_DEBUG << "SctpMain:: removeAssociation \n";
-						removeAssociation(assoc);
-						delete packet;
-					}
-					else {
-						delete packet;
-					}
-				}
-			}
+                    Ptr<SctpHeader> sctpmsgptr(sctpmsg);
+                    if (((sctpmsg->getSctpChunks(0)))->getSctpChunkType() == SHUTDOWN_ACK)
+                        sendShutdownCompleteFromMain(sctpmsgptr, destAddr, srcAddr);
+                    else if (((sctpmsg->getSctpChunks(0)))->getSctpChunkType() != ABORT &&
+                             ((sctpmsg->getSctpChunks(0)))->getSctpChunkType() != SHUTDOWN_COMPLETE) {
+                        sendAbortFromMain(sctpmsgptr, destAddr, srcAddr);
+                    }
+                    delete packet;
+                }
+                else {
+                    EV_INFO << "assoc " << assoc->assocId << " found\n";
+                    bool ret = assoc->processSctpMessage(sctpmsg, srcAddr, destAddr);
+                    if (!ret) {
+                        EV_DEBUG << "SctpMain:: removeAssociation \n";
+                        removeAssociation(assoc);
+                        delete packet;
+                    }
+                    else {
+                        delete packet;
+                    }
+                }
+            }
         }
         else {
             delete packet;
