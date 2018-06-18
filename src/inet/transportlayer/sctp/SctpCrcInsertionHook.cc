@@ -15,6 +15,7 @@
 
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/contract/INetfilter.h"
@@ -29,6 +30,8 @@ namespace sctp {
 
 INetfilter::IHook::Result SctpCrcInsertion::datagramPostRoutingHook(Packet *packet)
 {
+    if (packet->findTag<InterfaceInd>())
+        return ACCEPT;  // FORWARD
     auto networkProtocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     const auto& networkHeader = getNetworkProtocolHeader(packet);
     if (networkHeader->getProtocol() == &Protocol::sctp) {

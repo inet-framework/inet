@@ -1257,6 +1257,8 @@ void Udp::SockDesc::deleteMulticastMembership(MulticastMembership *membership)
 
 INetfilter::IHook::Result Udp::CrcInsertion::datagramPostRoutingHook(Packet *packet)
 {
+    if (packet->findTag<InterfaceInd>())
+        return ACCEPT;  // FORWARD
     auto networkProtocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     const auto& networkHeader = getNetworkProtocolHeader(packet);
     if (networkHeader->getProtocol() == &Protocol::udp) {
