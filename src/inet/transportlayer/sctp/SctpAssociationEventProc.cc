@@ -155,8 +155,8 @@ void SctpAssociation::process_SEND(SctpEventCode& event, SctpCommandReq *sctpCom
 
     Packet *applicationPacket = check_and_cast<Packet *>(msg);
     const auto& applicationData = staticPtrCast<const BytesChunk>(applicationPacket->peekData());
-    int sendBytes = applicationData->getChunkLength().get() / 8;
-    EV_INFO << "got msg of length " << applicationData->getChunkLength().get() << "sendBytes=" << sendBytes << endl;
+    int sendBytes = B(applicationData->getChunkLength()).get();
+    EV_INFO << "got msg of length " << applicationData->getChunkLength() << " sendBytes=" << sendBytes << endl;
 
     auto iter = sctpMain->assocStatMap.find(assocId);
     iter->second.sentBytes += sendBytes;
