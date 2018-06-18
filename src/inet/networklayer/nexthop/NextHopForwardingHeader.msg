@@ -60,5 +60,6 @@ cplusplus(NextHopForwardingHeader) {{
     virtual void setDestinationAddress(const L3Address& addr) override { setDestAddr(addr); }
     virtual const Protocol *getProtocol() const override { return ProtocolGroup::ipprotocol.findProtocol(getProtocolId()); }
     virtual void setProtocol(const Protocol *protocol) override { setProtocolId(static_cast<IpProtocolId>(ProtocolGroup::ipprotocol.getProtocolNumber(protocol))); }
+    virtual bool fragmented() const override { return false; }
 }}
 

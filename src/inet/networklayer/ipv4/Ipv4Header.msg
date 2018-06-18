@@ -239,5 +239,6 @@ cplusplus(Ipv4Header) {{
     virtual void setDestinationAddress(const L3Address& address) override { setDestAddress(address.toIpv4()); }
     virtual const Protocol *getProtocol() const override { return ProtocolGroup::ipprotocol.findProtocol(getProtocolId()); }
     virtual void setProtocol(const Protocol *protocol) override { setProtocolId(static_cast<IpProtocolId>(ProtocolGroup::ipprotocol.getProtocolNumber(protocol))); }
+    virtual bool fragmented() const override { return getMoreFragments() || (getFragmentOffset() != 0); }
 }}
 
