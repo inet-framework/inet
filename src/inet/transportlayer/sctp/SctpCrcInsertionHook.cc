@@ -34,7 +34,7 @@ INetfilter::IHook::Result SctpCrcInsertion::datagramPostRoutingHook(Packet *pack
         return ACCEPT;  // FORWARD
     auto networkProtocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     const auto& networkHeader = getNetworkProtocolHeader(packet);
-    if (networkHeader->getProtocol() == &Protocol::sctp) {
+    if (networkHeader->getProtocol() == &Protocol::sctp && !networkHeader->fragmented()) {
         packet->eraseAtFront(networkHeader->getChunkLength());
         auto sctpHeader = packet->removeAtFront<SctpHeader>();
         const L3Address& srcAddress = networkHeader->getSourceAddress();
