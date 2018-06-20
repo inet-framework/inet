@@ -388,7 +388,6 @@ void SctpServer::handleMessage(cMessage *msg)
                         j->second.rcvdPackets--;
 
                         auto m = endToEndDelay.find(id);
-                       // const auto& smsg = staticPtrCast<const BytesChunk>(message->peekData());
                         auto creationTimeTag = message->findTag<CreationTimeTag>();
                         m->second->record(simTime() - creationTimeTag->getCreationTime());
                         EV_INFO << "server: Data received. Left packets to receive=" << j->second.rcvdPackets << "\n";
@@ -416,7 +415,7 @@ void SctpServer::handleMessage(cMessage *msg)
                 }
                 else {
                     auto m = endToEndDelay.find(id);
-                    const auto& smsg = staticPtrCast<const BytesChunk>(message->peekData());
+                    const auto& smsg = message->peekData();
                     auto creationTimeTag = message->findTag<CreationTimeTag>();
                     m->second->record(simTime() - creationTimeTag->getCreationTime());
                     creationTimeTag->setCreationTime(simTime());

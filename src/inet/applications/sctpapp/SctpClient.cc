@@ -331,7 +331,7 @@ void SctpClient::socketDataArrived(SctpSocket *socket, Packet *msg, bool)
     bytesRcvd += msg->getByteLength();
 
     if (echo) {
-        const auto& smsg = staticPtrCast<const BytesChunk>(msg->peekData());
+        const auto& smsg = msg->peekData();
         auto creationTimeTag = msg->findTag<CreationTimeTag>();
         creationTimeTag->setCreationTime(simTime());
         auto cmsg = new Packet("ApplicationPacket");

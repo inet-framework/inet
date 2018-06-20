@@ -1190,7 +1190,7 @@ void NetPerfMeter::receiveMessage(cMessage* msg)
 {
    if (const Packet* dataMessage = dynamic_cast<const Packet*>(msg)) {
       unsigned int    streamID = 0;
-      const auto& smsg = staticPtrCast<const BytesChunk>(dataMessage->peekData());
+      const auto& smsg = dataMessage->peekData();
       auto creationTimeTag = smsg->findTag<CreationTimeTag>();
       const simtime_t delay = simTime() - creationTimeTag->getCreationTime();
      // const simtime_t delay    = simTime() - dataMessage->getCreationTime();

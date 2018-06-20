@@ -374,7 +374,7 @@ void SctpNatPeer::handleMessage(cMessage *msg)
                 SctpRcvReq *ind = tags.findTag<SctpRcvReq>();
                 id = ind->getSocketId();
                 if (rendezvous) {
-                    const auto& smsg = staticPtrCast<const BytesChunk>(message->peekData());
+                    const auto& smsg = message->peekDataAsBytes();
                     int bufferlen = B(smsg->getChunkLength()).get();
                     uint8_t buffer[bufferlen];
                     std::vector<uint8_t> vec = smsg->getBytes();
@@ -833,8 +833,8 @@ void SctpNatPeer::socketDataArrived(SctpSocket *socket, Packet *msg, bool)
     bytesRcvd += msg->getByteLength();
 
     if (echo) {
-        const auto& smsg = staticPtrCast<const BytesChunk>(msg->peekData());
-        auto creationTimeTag = msg->findTag<CreationTimeTag>();
+        const auto& smsg = msg->peekData();
+        auto creationTimeTag = msg->addTagIfAbsent<CreationTimeTag>();
         creationTimeTag->setCreationTime(simTime());
         auto cmsg = new Packet("ApplicationPacket");
         cmsg->insertAtBack(smsg);
