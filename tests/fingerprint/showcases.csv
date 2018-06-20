@@ -15,7 +15,7 @@
 /showcases/general/mobility/,        -f omnetpp.ini -c Superpositioning2 -r 0,      100s,         2502-1188/tplx, PASS,
 /showcases/general/mobility/,        -f omnetpp.ini -c InitialVsOvertimePositioning -r 0, 100s,   0000-0000/tplx, PASS,
 
-/showcases/general/pcaprecording/,   -f omnetpp.ini -c PcapRecording -r 0,          100s,         d812-59bc/tplx, PASS,
+/showcases/general/pcaprecording/,   -f omnetpp.ini -c PcapRecording -r 0,          10s,         cdaa-f06e/tplx, PASS,
 
 # /showcases/routing/manet/,           -f omnetpp.ini -c MobileNodesBase -r 0,        100s,         0000-0000/tplx, PASS,   # MobileNodesBase extended
 /showcases/routing/manet/,           -f omnetpp.ini -c Aodv -r 0,                   100s,         4b33-b7f2/tplx, PASS,
