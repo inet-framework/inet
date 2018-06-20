@@ -2895,7 +2895,7 @@ bool SctpAssociation::allPathsInactive() const
 
 void SctpAssociation::removeFirstChunk(SctpHeader *sctpmsg)
 {
-    SctpChunk *chunk = sctpmsg->removeChunk();
+    SctpChunk *chunk = sctpmsg->removeFirstChunk();
     delete chunk;
 }
 
@@ -2905,7 +2905,7 @@ void SctpAssociation::disposeOf(SctpHeader *sctpmsg)
     uint32 numberOfChunks = sctpmsg->getSctpChunksArraySize();
     if (numberOfChunks > 0)
         for (uint32 i = 0; i < numberOfChunks; i++) {
-            chunk = sctpmsg->removeChunk();
+            chunk = sctpmsg->removeFirstChunk();
          /*   if (chunk->getSctpChunkType() == DATA) {
                 delete chunk->Chunk::peek<SctpSimpleMessage>(Chunk::BackwardIterator(B(0)));
             }*/

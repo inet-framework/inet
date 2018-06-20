@@ -113,7 +113,7 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
     bool sackWasReceived = false;
     for (uint32 i = 0; i < numberOfChunks; i++) {
        // SctpChunk *header = (SctpChunk *)(sctpmsg->getSctpChunks(0));
-        SctpChunk *header = sctpmsg->getFirstChunk();
+        SctpChunk *header = sctpmsg->removeFirstChunk();
         const uint8 type = header->getSctpChunkType();
         EV_DEBUG << "Header length: " << header->getByteLength() << endl;
 

@@ -308,7 +308,7 @@ INetfilter::IHook::Result SctpNatHook::datagramPreRoutingHook(Packet *datagram)
 void SctpNatHook::sendBackError(SctpHeader* sctp)
 {
   //  SctpHeader *sctpmsg = new SctpHeader();
-    sctp->removeFirstChunk();
+    delete sctp->removeFirstChunk();
     sctp->setChunkLength(B(SCTP_COMMON_HEADER));
     SctpErrorChunk *errorChunk = new SctpErrorChunk("NatError");
     errorChunk->setSctpChunkType(ERRORTYPE);
