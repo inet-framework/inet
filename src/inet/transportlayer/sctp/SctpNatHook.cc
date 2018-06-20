@@ -62,6 +62,11 @@ INetfilter::IHook::Result SctpNatHook::datagramForwardHook(Packet *datagram)
         insertNetworkProtocolHeader(datagram, Protocol::ipv4, (const Ptr<NetworkHeaderBase>&) dgram);
         return INetfilter::IHook::ACCEPT;
     }
+    if (dgram->fragmented()) {
+        //TODO process fragmented packets
+        insertNetworkProtocolHeader(datagram, Protocol::ipv4, dgram);
+        return INetfilter::IHook::ACCEPT;
+    }
     if (SctpAssociation::getAddressLevel(dgram->getSrcAddress()) != 3) {
         insertNetworkProtocolHeader(datagram, Protocol::ipv4, (const Ptr<NetworkHeaderBase>&) dgram);
         return INetfilter::IHook::ACCEPT;
@@ -157,6 +162,13 @@ INetfilter::IHook::Result SctpNatHook::datagramPreRoutingHook(Packet *datagram)
         insertNetworkProtocolHeader(datagram, Protocol::ipv4, (const Ptr<NetworkHeaderBase>&) dgram);
         return INetfilter::IHook::ACCEPT;
     }
+
+    if (dgram->fragmented()) {
+        //TODO process fragmented packets
+        insertNetworkProtocolHeader(datagram, Protocol::ipv4, dgram);
+        return INetfilter::IHook::ACCEPT;
+    }
+
     natTable->printNatTable();
     bool local = ((rt->isLocalAddress(dgram->getDestinationAddress())) && (SctpAssociation::getAddressLevel(dgram->getSourceAddress()) == 3));
     auto& sctpMsg = datagram->removeAtFront<SctpHeader>();
