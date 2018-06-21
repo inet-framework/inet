@@ -53,7 +53,7 @@ network ExtClient
         }
     connections allowunconnected:
         peer.ethg++ <--> Eth1G <--> etherSwitch.ethg++;
-        etherSwitch.ethg++ <--> Eth1G { per = 0.0; }<--> peer2.ethg++;
+        etherSwitch.ethg++ <--> Eth1G { per = 0.1; }<--> peer2.ethg++;
 }
 
 
