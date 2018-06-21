@@ -456,7 +456,7 @@ void PacketDrillApp::runEvent(PacketDrillEvent* event)
                 sctpHeader->setVTag(peerVTag);
                 int32 noChunks = sctpHeader->getSctpChunksArraySize();
                 for (int32 cc = 0; cc < noChunks; cc++) {
-                    SctpChunk *chunk = const_cast<SctpChunk *>(check_and_cast<const SctpChunk *>(sctpHeader->getSctpChunks(cc)));
+                    SctpChunk *chunk = const_cast<SctpChunk *>(sctpHeader->getSctpChunks(cc));
                     unsigned char chunkType = chunk->getSctpChunkType();
                     switch (chunkType) {
                         case INIT: {
