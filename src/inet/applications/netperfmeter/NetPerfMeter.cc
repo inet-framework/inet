@@ -396,19 +396,21 @@ void NetPerfMeter::handleMessage(cMessage* msg)
          // ------ Data Arrival Indication ----------------------------------
          case SCTP_I_DATA_NOTIFICATION: {
             // Data has arrived -> request it from the SCTP module.
-            const SctpCommandReq* dataIndication =
-               check_and_cast<const SctpCommandReq*>(msg->getControlInfo());
+            auto& tags = getTags(msg);
+            const SctpCommandReq* dataIndication = tags.getTag<SctpCommandReq>();
            // SctpInfoReq* command = new SctpInfoReq("SendCommand");
             SctpInfoReq* command = new SctpInfoReq();
             command->setSocketId(dataIndication->getSocketId());
             command->setSid(dataIndication->getSid());
             command->setNumMsgs(dataIndication->getNumMsgs());
-            Packet* cmsg = new Packet("ReceiveRequest");
-            cmsg->setKind(SCTP_C_RECEIVE);
-            cmsg->setControlInfo(command);
+            Packet* cmsg = new Packet("ReceiveRequest", SCTP_C_RECEIVE);
+            SctpSendReq *cmd = cmsg->addTag<SctpSendReq>();
+            cmd->setSocketId(dataIndication->getSocketId());
+            cmd->setSid(dataIndication->getSid());
+            cmsg->addTag<SocketReq>()->setSocketId(dataIndication->getSocketId());
             send(cmsg, "sctpOut");
-           }
-          break;
+         }
+         break;
          // ------ Connection established -----------------------------------
          case SCTP_I_ESTABLISHED: {
              Message *message = check_and_cast<Message *>(msg);
@@ -429,8 +431,9 @@ void NetPerfMeter::handleMessage(cMessage* msg)
           break;
          // ------ Queue indication -----------------------------------------
          case SCTP_I_SENDQUEUE_ABATED: {
-            const SctpSendQueueAbatedReq* sendQueueAbatedIndication =
-               check_and_cast<SctpSendQueueAbatedReq*>(msg->getControlInfo());
+            Message *message = check_and_cast<Message *>(msg);
+            auto& tags = getTags(message);
+            const SctpSendQueueAbatedReq* sendQueueAbatedIndication = tags.getTag<SctpSendQueueAbatedReq>();
             assert(sendQueueAbatedIndication != nullptr);
             // Queue is underfull again -> give it more data.
             SendingAllowed = true;
@@ -951,6 +954,7 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
             dataMessage->setDataLen(msgSize);
             SctpSendInfo* command = new SctpSendInfo("SendRequest");*/
 
+            cmsg->addTagIfAbsent<SocketReq>()->setSocketId(ConnectionID);
             auto command = cmsg->addTagIfAbsent<SctpSendReq>();
             command->setSocketId(ConnectionID);
             command->setSid(streamID);
@@ -1192,8 +1196,8 @@ void NetPerfMeter::receiveMessage(cMessage* msg)
       unsigned int    streamID = 0;
       const auto& smsg = dataMessage->peekData();
       auto creationTimeTag = smsg->findTag<CreationTimeTag>();
-      const simtime_t delay = simTime() - creationTimeTag->getCreationTime();
-     // const simtime_t delay    = simTime() - dataMessage->getCreationTime();
+      auto creationTime = creationTimeTag ? creationTimeTag->getCreationTime() : dataMessage->getCreationTime();
+      const simtime_t delay = simTime() - creationTime;
 
       if(TransportProtocol == SCTP) {
          auto& tags = getTags(msg);

@@ -2255,6 +2255,12 @@ SctpEventCode SctpAssociation::processDataArrived(SctpDataChunk *dataChunk)
                 putInDeliveryQ(dataChunk->getSid());
                 if (simTime() > state->lastThroughputTime + 1) {
                     for (uint16 i = 0; i < inboundStreams; i++) {
+                        if (streamThroughputVectors.find(i) == streamThroughputVectors.end()) {
+                            char vectorName[128];
+                            snprintf(vectorName, sizeof(vectorName), "Stream %d Throughput", i);
+                            streamThroughputVectors[i] = new cOutVector(vectorName);
+                        }
+
                         streamThroughputVectors[i]->record(state->streamThroughput[i]
                                 / (simTime() - state->lastThroughputTime) / 1024);
                         state->streamThroughput[i] = 0;
