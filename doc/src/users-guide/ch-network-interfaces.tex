@@ -47,21 +47,21 @@ and can be added via configuration.
 Typical ingredients are:
 
 \begin{itemize}
-    \item \emph{Layer 2 protocol implementation}. For some interfaces such as
+    \item \textit{Layer 2 protocol implementation}. For some interfaces such as
       \nedtype{PppInterface} this is a single module; for others like Ethernet
       and Wifi it consists of separate modules for MAC, LLC, and possibly
       other subcomponents.
-    \item \emph{PHY model}. Some interfaces also contain separate
+    \item \textit{PHY model}. Some interfaces also contain separate
       module(s) that implement the physical layer. For example,
       \nedtype{Ieee80211Interface} contains a radio module.
-    \item \emph{Output queue}. This module is optional and absent by default,
+    \item \textit{Output queue}. This module is optional and absent by default,
       because most MAC protocol implementations already contain an internal queue
       which is more efficient to work with. The possibility to plug in an
       external queue module allows one to experiment with different queueing policies
       and implement QoS, RED, etc.
-    \item \emph{Traffic conditioners} allow traffic shaping and policing elements
+    \item \textit{Traffic conditioners} allow traffic shaping and policing elements
       to be added to the interface, for example to implement a Diffserv router.
-    \item \emph{Hooks} allow extra modules to be inserted in the incoming
+    \item \textit{Hooks} allow extra modules to be inserted in the incoming
       and outgoing paths of packets.
 \end{itemize}
 

@@ -20,7 +20,7 @@ Example:
 \end{inifile}
 
 There are also NED types called \nedtype{RipRouter}, \nedtype{OspfRouter},
-\nedtype{BgpRouter}, which are all \nedtype{Router}s with appropriate
+\nedtype{BgpRouter}, which are all \nedtype{Router}'s with appropriate
 routing protocol enabled.
 
 \section{RIP}
@@ -35,7 +35,7 @@ to work around the ``count-to-infinity'' problem.
 The \nedtype{Rip} module implements distance vector routing as specified in RFC
 2453 (RIPv2) and RFC 2080 (RIPng). The behavior can be selected by setting the
 \fpar{mode} parameter to either \ttt{"RIPv2"} or \ttt{"RIPng"}. Protocol
-configuration such as link metrics and per-interface operation mode (such as 
+configuration such as link metrics and per-interface operation mode (such as
 whether RIP is enabled on the interface, and whether to use split horizon)
 can be specified in XML using the \ttt{ripConfig} parameter.
 

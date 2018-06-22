@@ -1,0 +1,56 @@
+/* fixes for sphinx_materialdesign_theme */
+
+body { font-family: "Helvetica","Arial",sans-serif }
+
+.globaltoc .nav-toggle { height:24px }
+.globaltoc .toctree-l1 ul.current { background-color: #0000000a }
+.globaltoc ul li.toctree-l2 .link-wrapper>a {
+    font-size: 0.9rem;
+    line-height: 1rem;
+    padding-top: 0.3rem;
+    padding-bottom: 0.3rem;
+}
+.globaltoc ul li .link-wrapper>a { padding:0px }
+.globaltoc ul li {min-height:24px }
+
+.page-content pre { white-space: pre; }
+.page-content p { font-size: 1.1rem; }
+.page-content h2 { padding-top: 1rem; margin-bottom: 0.5rem }
+.page-content h3, .page-content h4 { padding-top: 0.5rem; margin-bottom: 0.5rem }
+
+.globaltoc ul li.toctree-l2 { font-size: 0.8rem }
+
+.toctree-wrapper { border-left: 0px none; }
+.toctree-wrapper ul {
+    padding-left: 14px;
+    line-height: 1.5rem;
+}
+.toctree-wrapper a {
+    font-size: 1.1rem!important;
+}
+
+/* missing styles */
+.align-left { text-align: left; }
+.align-center { text-align: center; display: block; margin-left: auto; margin-right: auto; }
+.align-right { text-align: right; display: block; margin-left: auto; }
+
+/* 'literal' roles */
+.protocol { font-style: italic; }
+.literal-cpp { color: darkblue; }
+.literal-ini { color: darkorange; }
+.literal-ned { color: darkgreen; }
+.literal-msg { color: purple; }
+
+/* higlighter backgrounds */
+.highlight-cpp .highlight { background-color: #e6f3ff }
+.highlight-ini .highlight { background-color: #fef5d6 }
+.highlight-ned .highlight { background-color: #eeffe4 }
+.highlight-msg .highlight { background-color: #fcf5ff }
+
+.page-content code.literal {
+    font-size: 0.95rem;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding-left: 2px;
+    padding-right: 2px;
+}

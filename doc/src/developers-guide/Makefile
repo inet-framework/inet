@@ -8,13 +8,14 @@ TITLE="INET __VERSION__ Developer's Guide"
 DOCNAME=inet-developers-guide
 TEXMAIN=$(DOCNAME).tex
 HTMLTEMPLATE=inet-developers-guide.thtml
-MDTEMPLATE=inet-developers-guide.tmd
+RSTTEMPLATE=inet-developers-guide.rst
 VERSION=4.0
 HTMLDIR=../../developers-guide
 PDFDIR=../..
 MDDIR=~/www/inet.omnetpp.org/developers-guide
 
 ALLTEX = $(wildcard *.tex)
+ALLRST = $(ALLTEX:.tex=.rst)
 DOTPICS = $(wildcard figures/*.dot)
 SVGPICS = $(wildcard figures/*.svg) $(DOTPICS:.dot=.svg)
 PDFPICS = $(SVGPICS:.svg=.pdf) $(DOTPICS:.dot=.pdf)
@@ -35,6 +36,9 @@ pdf: $(ALLTEX) $(PDFPICS) figures/*.png
 
 %.svg: %.dot
 	$(DOT) -Tsvg $< >$@
+
+%.rst: %.tex
+	@../tools/tex2rst $<
 
 .SUFFIXES : .svg .dot
 
@@ -57,17 +61,7 @@ html : $(ALLTEX) $(SVGPICS) $(HTMLTEMPLATE) $(PREPHTML) $(LTOH) ltoh.specs
 	cp figures/*.png $(HTMLDIR)
 	@if grep 'Unknown LaTeX command' $(DOCNAME).html; then echo 'Error: LaTeX commands missing from ltoh.specs! (see lines above)'; exit 1; fi
 
-md : $(ALLTEX) $(SVGPICS) $(MDTEMPLATE) $(PREPHTML) $(LTOH) ltoh.specs
-	CHAPTERS=$$(grep '\include{' $(TEXMAIN) | sed 's/\\include{//;s/}/.tex/' | sed '/^title\.tex/d') && cat $$CHAPTERS > _allinone_.tex
-	$(LTOH) _allinone_.tex
-	$(PREPHTML) --ext md --split --template $(MDTEMPLATE) --productversion $(VERSION) --product $(PRODUCT) --title $(TITLE) --outfilenamebase index _allinone_.html
-	rm _allinone_.tex _allinone_.html
-	mkdir -p $(MDDIR)
-	cp *.md lib/* $(MDDIR)
-	cp *.png $(MDDIR)
-	cp figures/*.svg $(MDDIR)
-	cp figures/*.png $(MDDIR)
-	@if grep 'Unknown LaTeX command' *.md; then echo 'Error: LaTeX commands missing from ltoh.specs! (see lines above)'; exit 1; fi
+rst : $(ALLRST) $(SVGPICS)
 
 clean:
 	rm -f $(DOCNAME).dvi $(DOCNAME).pdf $(DOCNAME).html $(DOCNAME).md *.md *.aux *.idx *.ilg *.ind *.log *.out *.toc *.bbl *.blg

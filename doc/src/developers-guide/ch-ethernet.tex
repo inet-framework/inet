@@ -1,5 +1,3 @@
-\ifdraft TODO
-
 \chapter{The Ethernet Model}
 \label{cha:ethernet}
 
@@ -18,7 +16,7 @@ The models supports Ethernet II, 803.2 with LLC header, and 803.3 with LLC and S
 The corresponding classes are:
 \msgtype{EthernetIIFrame}, \msgtype{EtherFrameWithLlc} and \msgtype{EtherFrameWithSNAP}. They all class
 from \msgtype{EtherFrame} which only represents the basic MAC frame with source and
-destination addresses. \nedtype{EtherMac} only deals with \msgtype{EtherFrame}s, and does not
+destination addresses. \nedtype{EtherMac} only deals with \msgtype{EtherFrame}'s, and does not
 care about the specific subclass.
 
 Ethernet frames carry data packets as encapsulated cMessage objects.
@@ -208,10 +206,5 @@ packets are dropped by the MAC.
 
 %\subsection*{Auto-Negotiation}
 % Ethernet Auto-Negotiation not supported
-
-
-
-
-\fi
 
 

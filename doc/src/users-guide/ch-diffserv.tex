@@ -33,7 +33,7 @@ during the data transmission too.
 Differentiated Services is a more scalable approach to offer a better than
 best-effort service. Differentiated Services do not require resource reservation
 setup. Instead of making per-flow reservations, Differentiated
-Services divides the traffic into a small number of \emph{forwarding classes}.
+Services divides the traffic into a small number of \textit{forwarding classes}.
 The forwarding class is directly encoded into the packet header. After packets are
 marked with their forwarding classes at the edge of the network, the interior nodes
 of the network can use this information to differentiate the treatment of packets.
@@ -44,7 +44,7 @@ first.
 In the Differentiated Service architecture, the network is partitioned into
 DiffServ domains. Within each domain the resources of the domain are allocated
 to forwarding classes, taking into account the available resources and the
-traffic flows. There are \emph{service level agreements} (SLA) between the users
+traffic flows. There are \textit{service level agreements} (SLA) between the users
 and service providers, and between the domains that describe the mapping of
 packets to forwarding classes and the allowed traffic profile for each class.
 The routers at the edge of the network are responsible for marking the packets
@@ -287,7 +287,7 @@ Modules that are connected to the inputs of a scheduler must
 implement the \cppclass{IPassiveQueue} C++ interface.
 Schedulers also implement \cppclass{IPassiveQueue}, so
 they can be cascaded to other schedulers, and can be used
-as the output module of \nedtype{IOutputQueue}s.
+as the output module of \nedtype{IOutputQueue}'s.
 
 There are several possible scheduling discipline (first come/first served,
 priority, weighted fair, weighted round-robin, deadline-based,
@@ -348,7 +348,7 @@ Classifier modules have one input and many output gates.
 They examine the received packets, and forward them to the
 appropriate output gate based on the content of some portion
 of the packet header. You can read more about classifiers
-in RFC 2475 2.3.1 and RFC 3290 4.
+in RFC 2475 and RFC 3290.
 
 The \nedtype{inet.networklayer.diffserv} package contains two
 classifiers: \nedtype{MultiFieldClassifier} to classify
@@ -377,7 +377,7 @@ The document element must contain a list of \ttt{<filter>} elements.
 The filter element has a mandatory \ttt{@gate} attribute that gives
 the index of the gate for packets matching the filter. Other attributes
 are optional and specify the condition of matching:
-\begin{compactitem}
+\begin{itemize}
   \item \ttt{@srcAddress}, \ttt{@srcPrefixLength}: to match the source
     address of the IP
   \item \ttt{@destAddress}, \ttt{@destPrefixLength}:
@@ -391,15 +391,15 @@ are optional and specify the condition of matching:
   \item \ttt{@destPort}: matches the destination port of the TCP or UDP packet.
   \item \ttt{@destPortMin}, \ttt{@destPortMax}: matches a range of
      destination ports.
-\end{compactitem}
+\end{itemize}
 
 The following example configuration specifies
-\begin{compactitem}
+\begin{itemize}
   \item to transmit packets received from the 192.168.1.x subnet on gate 0,
   \item to transmit packets addressed to port 5060 on gate 1,
   \item to transmit packets having CS7 in their DSCP field on gate 2,
   \item to transmit other packets on \fgate{defaultGate}.
-\end{compactitem}
+\end{itemize}
 
 \begin{XML}
 <filters>
@@ -422,7 +422,7 @@ DSCP values are enumerated in the \fpar{dscps} parameter.
 The first value is for gate \fgate{out[0]}, the second for
 \fgate{out[1]}, so on. If the received packet has a DSCP
 value not enumerated in the \fpar{dscps} parameter, it will
-be forwarded to the \nedtype{defaultOut} gate.
+be forwarded to the \fgate{defaultOut} gate.
 
 \subsection{Meters}
 \label{sec:diffserv:meters}
@@ -548,7 +548,7 @@ or equal probability than packets with higher drop priorities.
 
 The \nedtype{DiffservQueue} is an example queue, that can be used in
 interfaces of DS core and edge nodes to support
-the AFxy (RFC 2597) and EF (RFC 3246) PHBs.
+the AFxy (RFC 2597) and EF (RFC 3246) PHB's.
 
 \begin{figure}[htbp]
   \begin{center}
@@ -559,7 +559,7 @@ the AFxy (RFC 2597) and EF (RFC 3246) PHBs.
 \end{figure}
 
 The incoming packets are first classified according to
-their DSCP field. DSCPs other than AFxy and EF are handled
+their DSCP field. DSCP's other than AFxy and EF are handled
 as BE (best effort).
 
 EF packets are stored in a dedicated queue, and served first

@@ -64,7 +64,7 @@ This is achieved with two components in INET:
 \begin{note}
 It is probably needless to say, but the simulation must be fast enough
 to be able to keep up with real time. That is, its relative speed compared
-to real time (the simsec/sec value) must be $>>1$.  (Under Qtenv, this
+to real time (the simsec/sec value) must be >>1.  (Under Qtenv, this
 can usually only be achieved in Express mode.)
 \end{note}
 
@@ -78,7 +78,7 @@ run simulations in network emulation mode.
 
 First, network emulation is a separate \textit{project feature} that needs to
 be enabled before it can be used. (Project features can be reviewed and changed
-in the \emph{Project | Project Features...} dialog in the IDE.)
+in the \textit{Project | Project Features...} dialog in the IDE.)
 
 The network emulation code makes use of the pcap library, and therefore
 it must be available on your system. On Ubuntu, for example, pcap can be
@@ -97,7 +97,7 @@ is only allowed for processes that have root (administrator) privileges.
 \label{sec:emulation:configuring}
 
 INET nodes such as \nedtype{StandardHost} and \nedtype{Router}
-can be configured to have \nedtype{ExtInterface}s.
+can be configured to have \nedtype{ExtInterface}'s.
 The simulation may contain several nodes with external interfaces,
 and one node may also have several external interfaces.
 

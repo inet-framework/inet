@@ -1,5 +1,3 @@
-\ifdraft TODO
-
 \chapter{Ipv4}
 \label{cha:ipv4}
 
@@ -55,10 +53,10 @@ Optionally the following fields can be set too:
       Otherwise the TTL field is determined by the \fpar{defaultTimeToLive} or
       \fpar{defaultMCTimeToLive} module parameters depending whether the destination
       address is a multicast address or not.
-\item \fvar{dontFragment}: the \ttt{Don't Fragment} flag of the outgoing datagram (default is \fkeyword{false})
+\item \fvar{dontFragment}: the \ttt{Don't Fragment} flag of the outgoing datagram (default is \ttt{false})
 \item \fvar{diffServCodePoint}: the \ttt{Type of Service} field of the outgoing datagram.
       (ToS is called \ttt{diffServCodePoint} in \msgtype{IPv4Datagram} too.)
-\item \fvar{multicastLoop}: if \fkeyword{true}, then a copy of the multicast datagrams
+\item \fvar{multicastLoop}: if \ttt{true}, then a copy of the multicast datagrams
       are sent to the loopback interface, so applications on the same host can receive it.
 \item \fvar{interfaceId}: id of outgoing interface (can be used to limit broadcast or restrict routing).
 \item \fvar{nextHopAddr}: explicit routing info, used by Manet DSR routing. If specified, then
@@ -195,9 +193,9 @@ in these steps:
   interface. If the higher layer specified am outgoing interface
   (\fvar{interfaceId} in the control info), then it will be broadcasted
   on that interface only. Otherwise if the \fpar{forceBroadcast} module
-  parameter is \fkeyword{true}, then it will broadcasted on all interfaces
+  parameter is \ttt{true}, then it will broadcasted on all interfaces
   including the loopback interface. The default value of the
-  \fpar{forceBroadcast} is \fkeyword{false}.
+  \fpar{forceBroadcast} is \ttt{false}.
   \item If the higher layer provided the routing decision (Manet routing),
   then the datagram will be sent through the specified interface to the
   specified next hop.
@@ -230,7 +228,7 @@ routed in the following steps:
 Outgoing multicast datagrams are handled as follows:
 \begin{enumerate}
   \item If the higher layer set the \fvar{multicastLoop} variable
-  to \fkeyword{true}, the IP will send up a copy of the datagram
+  to \ttt{true}, the IP will send up a copy of the datagram
   through the loopback interface.
   \item Determine the outgoing interface for the multicast datagram,
   and send out the datagram through that interface. The outgoing
@@ -405,7 +403,5 @@ The \cppclass{Ipv4ControlInfo} also copied from the \msgtype{ICMPMessage}
 to the application message.
 
 % FIXME ICMP TIMESTAMP requests are processed as ECHO requests
-
-\fi
 
 

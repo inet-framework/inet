@@ -1,4 +1,4 @@
-<!--DefiningPhysicalObjectsExample-->
+<!--!DefiningPhysicalObjectsExample-->
 <environment>
   <!-- shapes and materials -->
   <shape id="1" type="sphere" radius="10"/>
@@ -12,4 +12,4 @@
   <object position="min 10 20 0" orientation="45 -30 0" shape="cuboid 20 30 40"
              material="concrete" line-color="0 0 0" fill-color="112 128 144"/>
 </environment>
-<!--End-->
+<!--!End-->

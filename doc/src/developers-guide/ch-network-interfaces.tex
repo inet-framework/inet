@@ -1,5 +1,3 @@
-\ifdraft TODO
-
 \chapter{Network Interafces}
 \label{cha:network-interfaces}
 
@@ -74,7 +72,7 @@ Data stored by an interface entry include:
   \item \textit{host gate IDs}: the IDs of the input and output gate of the host the NIC is connected to
 \end{itemize}
 
-\tbf{Extensibility}. You have probably noticed that the above list does not
+Extensibility: You have probably noticed that the above list does not
 contain data such as the IPv4 or IPv6 address of the interface. Such
 information is not part of \cppclass{InterfaceEntry} because we do not want
 \nedtype{InterfaceTable} to depend on either the IPv4 or the IPv6 protocol
@@ -88,7 +86,7 @@ layer (i.e. the NIC), and extension by the network layer protocol:
 
 \begin{itemize}
 
-\item \tbf{NICs} can extend interface entries via C++ class inheritance, that is, by
+\item NICs can extend interface entries via C++ class inheritance, that is, by
 simply subclassing \cppclass{InterfaceEntry} and adding extra data and
 functions. This is possible because NICs create and register entries in
 \nedtype{InterfaceTable}, so in their code one can just write
@@ -172,15 +170,15 @@ Clients that wish to be notified when something changes in
 categories in the host's \nedtype{NotificationBoard}:
 
 \begin{itemize}
-  \item \tbf{\ttt{NF\_INTERFACE\_CREATED}}: an interface entry has been
+  \item \ttt{NF\_INTERFACE\_CREATED}: an interface entry has been
     created and added to the interface table
-  \item \tbf{\ttt{NF\_INTERFACE\_DELETED}}: an interface entry is going
+  \item \ttt{NF\_INTERFACE\_DELETED}: an interface entry is going
     to be removed from the interface table. This is a pre-delete
     notification so that clients have access to interface data that are
     possibly needed to react to the change
-  \item \tbf{\ttt{NF\_INTERFACE\_CONFIG\_CHANGED}}: a configuration setting
+  \item \ttt{NF\_INTERFACE\_CONFIG\_CHANGED}: a configuration setting
     in an interface entry has changed (e.g. MTU or IP address)
-  \item \tbf{\ttt{NF\_INTERFACE\_STATE\_CHANGED}}: a state variable in an
+  \item \ttt{NF\_INTERFACE\_STATE\_CHANGED}: a state variable in an
     interface entry has changed (e.g. the up/down flag)
 \end{itemize}
 
@@ -188,6 +186,5 @@ In all those notifications, the data field is a pointer to the
 corresponding \cppclass{InterfaceEntry} object. This is even true for
 \ttt{NF\_INTERFACE\_DELETED} (which is actually a pre-delete notification).
 
-\fi
 
 

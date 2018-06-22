@@ -60,7 +60,7 @@ in the INET framework.
 
 \nedtype{Tcp} implements the following:
 
-\begin{compactitem}
+\begin{itemize}
   \item TCP state machine
   \item initial sequence number selection according to the system clock.
   \item window-based flow control
@@ -79,7 +79,7 @@ in the INET framework.
   \item Loss Recovery Using Limited Transmit
   \item Selective Acknowledgments (SACK)
   \item SACK based loss recovery
-\end{compactitem}
+\end{itemize}
 
 Several protocol features can be turned on/off with parameters like
 \fpar{delayedAcksEnabled}, \fpar{nagleEnabled}, \fpar{limitedTransmitEnabled},
@@ -116,7 +116,7 @@ the lwIP sources.
 
 Features:
 
-\begin{compactitem}
+\begin{itemize}
 \item delayed ACK
 \item Nagle's algorithm
 \item round trip time estimation
@@ -127,7 +127,7 @@ Features:
 \item fast recovery
 \item persist timer
 \item keep-alive timer
-\end{compactitem}
+\end{itemize}
 
 \subsubsection*{Limitations}
 
@@ -135,7 +135,7 @@ Features:
   \item only MSS and TS TCP options are supported. The TS option is turned off
         by default, but can be enabled by defining LWIP\_TCP\_TIMESTAMPS to 1
         in \ffilename{lwipopts.h}.
-  \item \fvar{fork} must be \fkeyword{true} in the passive open command
+  \item \fvar{fork} must be \ttt{true} in the passive open command
   \item The status request command (TCP\_C\_STATUS) only reports the
           local and remote addresses/ports of the connection and
           the MSS, SND.NXT, SND.WND, SND.WL1, SND.WL2, RCV.NXT, RCV.WND variables.
@@ -155,11 +155,11 @@ To use the \nedtype{TcpNsc} module you should download the
 in the \ffilename{<inet\_root>/3rdparty/README} file to build it.
 
 \begin{warning}
-Before generating the INET module, check that the \emph{opp\_makemake} call
+Before generating the INET module, check that the \textit{opp\_makemake} call
 in the make file (\ffilename{<inet\_root>/Makefile}) includes the
-\emph{-DWITH\_TCP\_NSC} argument. Without this option the \nedtype{TcpNsc}
+\textit{-DWITH\_TCP\_NSC} argument. Without this option the \nedtype{TcpNsc}
 module is not built. If you build the INET library from the IDE, it is enough
-to enable the \emph{TCP (NSC)} project feature.
+to enable the \textit{TCP (NSC)} project feature.
 \end{warning}
 
 \subsubsection*{Parameters}

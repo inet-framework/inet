@@ -1,5 +1,3 @@
-\ifdraft TODO
-
 \chapter{The TCP Models}
 \label{cha:tcp}
 
@@ -21,20 +19,20 @@ the corresponding object.
 
 The INET framework models the TCP header with the \msgtype{TcpHeader} message class.
 This contains the fields of a TCP frame, except:
-\begin{compactitem}
-  \item \emph{Data Offset}: represented by \ffunc{cMessage::length()}
-  \item \emph{Reserved}
-  \item \emph{Checksum}: modelled by \ffunc{cMessage::hasBitError()}
-  \item \emph{Options}: only EOL, NOP, MSS, WS, SACK\_PERMITTED, SACK and TS are possible
-  \item \emph{Padding}
-\end{compactitem}
+\begin{itemize}
+  \item \textit{Data Offset}: represented by \ffunc{cMessage::length()}
+  \item \textit{Reserved}
+  \item \textit{Checksum}: modelled by \ffunc{cMessage::hasBitError()}
+  \item \textit{Options}: only EOL, NOP, MSS, WS, SACK\_PERMITTED, SACK and TS are possible
+  \item \textit{Padding}
+\end{itemize}
 
 The Data field can either be represented by (see \cppclass{TcpDataTransferMode}):
-\begin{compactitem}
+\begin{itemize}
   \item encapsulated C++ packet objects,
   \item raw bytes as a \cppclass{ByteArray} instance,
   \item its byte count only,
-\end{compactitem}
+\end{itemize}
 corresponding to transfer modes OBJECT, BYTESTREAM, BYTECOUNT resp.
 
 
@@ -138,7 +136,7 @@ The TCP modules in the INET framework support 3 data transfer modes:
 
 \begin{itemize}
   \item \ttt{TCP\_TRANSFER\_BYTECOUNT}: only byte counts are
-        represented, no actual payload in \msgtype{TcpHeader}s.
+        represented, no actual payload in \msgtype{TcpHeader}'s.
         The TCP sends as many TCP segments as needed
   \item \ttt{TCP\_TRANSFER\_BYTESTREAM}: the application can pass
         byte arrays to the TCP. The sending TCP breaks down the bytes
@@ -213,7 +211,7 @@ The application can write data into the connection
 by sending a message with TCP\_C\_SEND kind to the TCP.
 The attached control info must be of type \cppclass{TCPSendCommand}.
 
-The TCP will add the message to the \emph{send queue}.
+The TCP will add the message to the \textit{send queue}.
 There are three type of send queues corresponding to the
 three data transfer mode. If the payload is transmitted as a message
 object, then \cppclass{TCPMsgBasedSendQueue};
@@ -238,7 +236,7 @@ There is no way to set the PUSH and URGENT flags, when sending data.
 \subsection{Receiving Data}
 
 The TCP connection stores the incoming segments in the
-\emph{receive queue}. The receive queue also has three flavours:
+\textit{receive queue}. The receive queue also has three flavours:
 \cppclass{TCPMsgBasedRcvQueue}, \cppclass{TCPDataStreamRcvQueue}
 and \cppclass{TCPVirtualDataRcvQueue}. The queue is created
 when the connection is opened according to the \fvar{dataTransferMode}
@@ -248,9 +246,9 @@ Finite receive buffer size is modeled by the \fpar{advertisedWindow}
 parameter. If receive buffer is exhausted (by out-of-order
 segments) and the payload length of a new received segment
 is higher than the free receiver buffer, the new segment will be dropped.
-Such drops are recorded in \emph{tcpRcvQueueDrops} vector.
+Such drops are recorded in \textit{tcpRcvQueueDrops} vector.
 
-If the \emph{Sequence Number} of the received segment is the next
+If the \textit{Sequence Number} of the received segment is the next
 expected one, then the data is passed
 to the application immediately. The \ffunc{recv()} call of
 Unix is not modeled.
@@ -274,10 +272,10 @@ data is urgent or pushed.
 When an error occures at the TCP level, an RST segment is sent to
 the communication partner and the connection is aborted.
 Such error can be:
-\begin{compactitem}
+\begin{itemize}
   \item arrival of a segment in CLOSED state
   \item an incoming segment acknowledges something not yet sent.
-\end{compactitem}
+\end{itemize}
 
 The receiver of the RST it will abort the connection.
 If the connection is not yet established, then the passive
@@ -327,11 +325,11 @@ the initial sequence numbers, windows of the receiver and sender, etc.
 
 % \section{TCP queues}
 %
-% Three queues belong to each TCP connection. The \emph{send queue} holds
+% Three queues belong to each TCP connection. The \textit{send queue} holds
 % the segments not yet transmitted or not yet acknowledged.
-% The \emph{receive queue} holds the segments received by the TCP,
+% The \textit{receive queue} holds the segments received by the TCP,
 % but not yet passed to the application. (This happens only when the segment
-% is received out-of-order.). The \emph{retransmit queue} holds additional
+% is received out-of-order.). The \textit{retransmit queue} holds additional
 % information about the segments in the send queue.
 %
 % As mentioned in section \ref{subsec:tcp_packets}, there are three methods
@@ -403,7 +401,7 @@ data. See also \ref{subsec:trans_policies}.
 
 \subsubsection*{Persistence Timer}
 
-The algorithm implements \emph{Persistence Timer} (see \ref{subsec:flow_control}).
+The algorithm implements \textit{Persistence Timer} (see \ref{subsec:flow_control}).
 When a zero-sized window is received it starts the timer with 5s timeout.
 If the timer expires before the window is increased, a 1-byte probe is
 sent. Further probes are sent after 5, 6, 12, 24, 48, 60, 60, 60, ...
@@ -448,9 +446,9 @@ Can be used to demonstrate effect of lack of congestion control.
 \subsection{TcpTahoe}
 
 The \cppclass{TcpTahoe} algorithm class extends \cppclass{TcpBaseAlg}
-with \emph{Slow Start}, \emph{Congestion Avoidance} and
-\emph{Fast Retransmit} congestion control algorithms.
-This algorithm initiates a \emph{Slow Start} when a packet
+with \textit{Slow Start}, \textit{Congestion Avoidance} and
+\textit{Fast Retransmit} congestion control algorithms.
+This algorithm initiates a \textit{Slow Start} when a packet
 loss is detected.
 
 \subsubsection*{Slow Start}
@@ -480,7 +478,7 @@ $ssthresh$ will be $cwnd/2$, $cwnd$ will be 1 SMSS.
 \subsection{TcpReno}
 
 The \cppclass{TcpReno} algorithm extends the behaviour \cppclass{TcpTahoe}
-with \emph{Fast Recovery}. This algorithm can also use the information
+with \textit{Fast Recovery}. This algorithm can also use the information
 transmitted in SACK options, which enables a much more accurate
 congestion control.
 
@@ -502,7 +500,7 @@ slow start by setting $cwnd$ to 1 SMSS.
 
 This algorithm can be used with the SACK extension.
 Set the \fpar{sackSupport} parameter to \fkeyword{true} to
-enable sending and receiving \emph{SACK} options.
+enable sending and receiving \textit{SACK} options.
 
 \subsection{TcpNewReno}
 
@@ -513,7 +511,4 @@ than Reno does.
 It does not exit fast-recovery phase until all data which was out-standing
 at the time it entered fast-recovery is acknowledged. Thus avoids
 reducing the $cwnd$ multiple times.
-
-\fi
-
 

@@ -59,7 +59,7 @@ The configurator goes through the following steps:
 
 \begin{enumerate}
   \item  Builds a graph representing the network topology. The graph
-     will have a vertex for every module that has a @node property (this
+     will have a vertex for every module that has a \ttt{@node} property (this
      includes hosts, routers, and L2 devices like switches, access points,
      Ethernet hubs, etc.) It also assigns weights to vertices and edges that
      will be used by the shortest path algorithm when setting up routes.
@@ -122,14 +122,14 @@ the config file of subsequent runs.
 \subsubsection*{Network topology graph}
 
 The network topology graph is constructed from the nodes
-of the network. The node is a module having a @node property
+of the network. The node is a module having a \ttt{@node} property
 (this includes hosts, routers, and L2 devices like switches,
  access points, Ethernet hubs, etc.). An IP node is a node
 that contains an \nedtype{InterfaceTable} and a \nedtype{Ipv4RoutingTable}.
 A router is an IP node that has multiple network interfaces,
 and IP forwarding is enabled in its routing table module.
 In multicast routers the \fpar{forwardMulticast} parameter
-is also set to \fkeyword{true}.
+is also set to \ttt{true}.
 
 A link is a set of interfaces that can send datagrams to each other
 without intervening routers. Each interface belongs to exactly
@@ -203,7 +203,7 @@ interfaces in the network. The selector attributes limit the scope where
 the interface element has effects. The parameter attributes limit the
 range of assignable addresses and netmasks.
 The \verb!<interface>! element may contain the following attributes:
-\begin{compactitem}
+\begin{itemize}
     \item \ttt{@hosts}
       Optional selector attribute that specifies a list of host name patterns.
       Only interfaces in the specified hosts are affected. The pattern might
@@ -251,13 +251,13 @@ The \verb!<interface>! element may contain the following attributes:
     \item \ttt{@metric}                number
       Optional parameter attribute to set the Metric parameter in the interface.
       When unspecified the interface parameter is left unchanged.
-\end{compactitem}
+\end{itemize}
 
 Wireless interfaces can similarly be configured by adding
 \verb!<wireless>! elements to the configuration. Each \verb!<wireless>!
 element with a different id defines a separate subnet.
 
-\begin{compactitem}
+\begin{itemize}
     \item \ttt{@id} (optional)
       identifies wireless network, unique value used if missed
     \item \ttt{@hosts}
@@ -268,7 +268,7 @@ element with a different id defines a separate subnet.
       Optional selector attribute that specifies a list of interface name
       patterns. Only interfaces with the specified names are affected. The
       default value is "*" that matches all interfaces.
-\end{compactitem}
+\end{itemize}
 
 
 \subsubsection{Multicast groups}
@@ -290,7 +290,7 @@ adds all Ethernet interfaces of nodes whose name starts with ``router''
 to the 224.0.0.5 multicast group.
 
 The \verb!<multicast-group>! element has the following attributes:
-\begin{compactitem}
+\begin{itemize}
     \item \ttt{@hosts}
       Optional selector attribute that specifies a list of host name patterns.
       Only interfaces in the specified hosts are affected. The default value
@@ -313,7 +313,7 @@ The \verb!<multicast-group>! element has the following attributes:
       addresses to be assigned. Values must be selected from the valid range
       of multicast addresses.
       e.g. "224.0.0.1 224.0.1.33"
-\end{compactitem}
+\end{itemize}
 
 
 \subsubsection*{Manual route configuration}
@@ -324,7 +324,7 @@ of the simulation.
 
 The \verb!<route>! elements of the configuration add a route to the
 routing tables of selected nodes. The element has the following attributes:
-\begin{compactitem}
+\begin{itemize}
     \item \ttt{@hosts}
       Optional selector attribute that specifies a list of host name patterns.
       Only routing tables in the specified hosts are affected. The default
@@ -351,11 +351,11 @@ routing tables of selected nodes. The element has the following attributes:
     \item \ttt{@metric}
       Optional parameter attribute that specifies the metric in the route.
       The default value is 0.
-\end{compactitem}
+\end{itemize}
 
 Multicast routing tables can similarly be configured by adding
 \verb!<multicast-route>! elements to the configuration.
-\begin{compactitem}
+\begin{itemize}
     \item \ttt{@hosts}
       Optional selector attribute that specifies a list of host name patterns.
       Only routing tables in the specified hosts are affected.
@@ -381,14 +381,14 @@ Multicast routing tables can similarly be configured by adding
     \item \ttt{@children}
       Mandatory parameter attribute that specifies a list of interface name
       patterns:
-      \begin{compactitem}
+      \begin{itemize}
         \item a name pattern (e.g. "ppp*") matches the name of the interface
         \item a 'towards' pattern (starting with ">", e.g. ">router*") matches the interface
          by naming one of the neighbour nodes on its link.
-      \end{compactitem}
+      \end{itemize}
       Incoming multicast datagrams are forwarded to each child interface except the
       one they arrived in.
-\end{compactitem}
+\end{itemize}
 
 The following example adds an entry to the multicast routing table of \ttt{router1},
 that intsructs the routing algorithm to forward multicast datagrams whose source
@@ -431,12 +431,12 @@ Using manual routes and static route generation
 together may have unwanted side effects, because route generation ignores
 manual routes. Therefore if the configuration file contains
 manual routes, then the \fpar{addStaticRoutes} parameter should be set
-to \fkeyword{false}.
+to \ttt{false}.
 \end{caution}
 
 \subsubsection*{Route optimization}
 
-If the \fpar{optimizeRoutes} parameter is \fkeyword{true} then the
+If the \fpar{optimizeRoutes} parameter is \ttt{true} then the
 configurator tries to optimize the routing table for size.
 This optimization allows configuring larger networks with smaller
 memory footprint and makes the routing table lookup faster.
@@ -494,7 +494,7 @@ merging similar routes into a single, more general route.)
 
 \begin{warning}
 \nedtype{Ipv4FlatNetworkConfigurator} is considered
-legacy, use do not use it for new projects.
+legacy, do not use it for new projects.
 \end{warning}
 
 The \nedtype{Ipv4FlatNetworkConfigurator} module configures
@@ -627,7 +627,7 @@ Accepted interface fields are:
   \item flags: \ttt{BROADCAST}, \ttt{MULTICAST}, \ttt{POINTTOPOINT}
 \end{itemize}
 
-The following fields are parsed but ignored: \ttt{Bcast},\ttt{encap},
+The following fields are parsed but ignored: \ttt{Bcast}, \ttt{encap},
 \ttt{HWaddr}.
 
 Interface modules set a good default for MTU, Metric (as $2*10^9$/bitrate) and

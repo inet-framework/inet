@@ -39,8 +39,8 @@ Address and Control fields and a 2-byte Protocol field.
 \label{sec:ppp:the-ppp-module}
 
 The PPP module receives packets from the upper layer in the \fvar{netwIn}
-gate, encapsulates them into \msgtype{PppFrame}s, and send it to the
-physical layer through the \fvar{phys} gate. The \msgtype{PppFrame}s
+gate, encapsulates them into \msgtype{PppFrame}'s, and send it to the
+physical layer through the \fvar{phys} gate. The \msgtype{PppFrame}'s
 received from the \fvar{phys} gate are decapsulated and sent to the upper
 layer immediately through the \fvar{netwOut} gate.
 

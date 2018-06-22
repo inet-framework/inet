@@ -72,7 +72,7 @@ Its parameters include:
   \item \fpar{multicastTimeToLive} default TTL of multicast datagrams.
   \item \fpar{fragmentTimeout} the maximum duration until fragments are kept
           in the fragment buffer.
-  \item \fpar{forceBroadcast} if \fkeyword{true}, then link-local broadcast
+  \item \fpar{forceBroadcast} if \ttt{true}, then link-local broadcast
           datagrams are sent out through each interface, if the higher
           layer did not specify the outgoing interface.
   \item \fpar{useProxyARP} TODO: default(true);
@@ -96,7 +96,7 @@ The \nedtype{Ipv4RoutingTable} module has the following parameters:
   \item \fpar{forwarding}: turns IP forwarding on/off. It is always \ttt{true}
       in a \nedtype{Router} and is \ttt{false} by default in a \nedtype{StandardHost}.
   \item \fpar{multicastForwarding}: turns multicast IP forwarding on/off.
-    Default is \fkeyword{false}, should be set to \fkeyword{true} in multicast routers.
+    Default is \ttt{false}, should be set to \ttt{true} in multicast routers.
 \end{itemize}
 
 The preferred method for static initialization of routing tables is to use
@@ -157,8 +157,8 @@ The module parameters of \nedtype{Arp} are:
   \item \fpar{retryTimeout}: number of seconds ARP waits between retries to resolve an IPv4 address (default is 1s)
   \item \fpar{retryCount}: number of times ARP will attempt to resolve an IPv4 address (default is 3)
   \item \fpar{cacheTimeout}: number of seconds unused entries in the cache will time out (default is 120s)
-  \item \fpar{proxyARP}: enables proxy ARP mode (default is \fkeyword{true})
-  \item \fpar{globalARP}: use global ARP cache (default is \fkeyword{false})
+  \item \fpar{proxyARP}: enables proxy ARP mode (default is \ttt{true})
+  \item \fpar{globalARP}: use global ARP cache (default is \ttt{false})
 \end{itemize}
 
 
@@ -261,9 +261,9 @@ assumes that the group has no local members.
 The following parameters have effects in both hosts and routers:
 
 \begin{itemize}
-  \item \fpar{enabled} if \fkeyword{false} then the IGMP module
+  \item \fpar{enabled} if \ttt{false} then the IGMP module
      never sends any message and discards incoming messages.
-  Default is \fkeyword{true}.
+  Default is \ttt{true}.
 \end{itemize}
 
 The following parameters are only used in hosts:

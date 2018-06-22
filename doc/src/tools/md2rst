@@ -1,0 +1,30 @@
+#!/bin/sh
+RR="perl -pe"
+cat $1 | \
+$RR 's!^---$!!g' | \
+$RR 's!layout:(.*)!!g' | \
+$RR 's!tutorial:(.*)!!g' | \
+$RR 's!hidden:(.*)!!g' | \
+$RR 's!title: (.*)!# $1!g' | \
+$RR 's/<img.*?src="(.*?)".*?>/![]($1)/g' | \
+$RR 's!<a.*href="(.*?)".*?>(.*)</a>![$2]($1)!g' | \
+$RR 's!<a.*?srcfile="(.*?/.*?/)(.*?)".*?/>!:download:[$2](../$2)!g' | \
+$RR 's!<a.*?srcFile="(.*?/.*?/)(.*?)".*?/>!:download:[$2](../$2)!g' | \
+pandoc --from markdown_mmd --to rst | \
+$RR 's!:download:`(.*?)`__!:download:`$1`!g' | \
+$RR 's!:alt:!:width: 100%!g' | \
+$RR 's!\.\. raw:: html!!g' | \
+$RR 's!<p><video.*?src="(.*?)"\s+?width="(.*?)"\s+?height="(.*?)"\s*?></video></p>!.. video:: $1\n   :width: $2\n   :height: $3!g' | \
+$RR 's!<video.*?src="(.*?)"\s+?width="(.*?)"\s+?height="(.*?)"\s*?></video>!.. video:: $1\n   :width: $2\n   :height: $3!g' | \
+$RR 's!<p><video.*?src="(.*?)".*?></video></p>!.. video:: $1!g' | \
+$RR 's!<video.*?src="(.*?)".*?></video>!.. video:: $1!g' | \
+$RR 's!"\\\[!"[!g' | \
+$RR 's!\\]"!]"!g' | \
+$RR 's!\s*<pre class="snippet".*?src="(.*/)(.*?)"\s+?from="(.*?)"\s+?until="(.*?)".*?></pre>!.. literalinclude:: ../$2\n   :start-at: $3\n   :end-before: $4!g' | \
+$RR 's!\s*<pre class="snippet".*?src="(.*/)(.*?)"(.*?)></pre>!.. literalinclude:: ../$2\n   $3!g' | \
+cat >$(echo $1 | sed 's/\..*$//').rst
+
+
+
+
+

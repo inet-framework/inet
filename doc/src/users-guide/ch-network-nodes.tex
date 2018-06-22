@@ -21,60 +21,60 @@ energy models, and other functionality. These modules fall into the following
 broad categories:
 
 \begin{itemize}
-  \item \emph{Applications} often model the user behavior as well as the
+  \item \textit{Applications} often model the user behavior as well as the
      application program (e.g., browser), and the application layer protocol
      (e.g., \protocol{HTTP}). Applications typically use transport layer
      protocols (e.g., \protocol{TCP} and/or \protocol{UDP}), but they may
      also directly use lower layer protocols (e.g., \protocol{IP} or
      \protocol{Ethernet}) via sockets.
-  \item \emph{Routing protocols} are provided as separate modules:
+  \item \textit{Routing protocols} are provided as separate modules:
      \protocol{OSPF}, \protocol{BGP}, or \protocol{AODV} for MANET routing.
      These modules use \protocol{TCP}, \protocol{UDP}, and \protocol{IPv4},
      and manipulate routes in the \nedtype{Ipv4\-RoutingTable} module.
-  \item \emph{Transport layer protocols} are connected to applications and
+  \item \textit{Transport layer protocols} are connected to applications and
      network layer protocols. They are most often represented by simple
      modules, currently \protocol{TCP}, \protocol{UDP}, and \protocol{SCTP}
      are supported. \protocol{TCP} has several implementations: \nedtype{Tcp}
      is the OMNeT++ native implementation; \nedtype{TcpLwip} module wraps the
      lwIP \protocol{TCP} stack; and \nedtype{TcpNsc} module wraps the
      Network Simulation Cradle library.
-  \item \emph{Network layer protocols} are connected to transport layer
+  \item \textit{Network layer protocols} are connected to transport layer
      protocols and network interfaces. They are usually modeled as compound
      modules: \nedtype{Ipv4NetworkLayer} for \protocol{IPv4}, and
      \nedtype{Ipv6NetworkLayer} for \protocol{IPv6}. The \nedtype{Ipv4NetworkLayer}
      module contains several protocol modules: \nedtype{Ipv4}, \nedtype{Arp},
      and \nedtype{Icmpv4}.
-  \item \emph{Network interfaces} are represented by compound modules
+  \item \textit{Network interfaces} are represented by compound modules
      which are connected to the network layer protocols and other network
      interfaces in the wired case. They are often modeled as compound modules
      containing separate modules for queues, classifiers, MAC, and PHY protocols.
-  \item \emph{Link layer protocols} are usually simple modules sitting
+  \item \textit{Link layer protocols} are usually simple modules sitting
      in network interface modules. Some protocols, for example
      \protocol{IEEE 802.11 MAC}, are modeled as a compound module themselves
      due to the complexity of the protocol.
-  \item \emph{Physical layer protocols} are compound modules also being part
+  \item \textit{Physical layer protocols} are compound modules also being part
      of network interface modules.
-  \item \emph{Interface table} maintains the set of network interfaces
+  \item \textit{Interface table} maintains the set of network interfaces
      (e.g. \texttt{eth0}, \texttt{wlan0}) in the network node. Interfaces
      are registered dynamically during initialization of network interfaces.
-  \item \emph{Routing tables} maintain the list of routes for the corresponding
+  \item \textit{Routing tables} maintain the list of routes for the corresponding
      network protocol (e.g., \nedtype{Ipv4RoutingTable} for \nedtype{Ipv4}).
      Routes are added by automatic network configurators or routing protocols.
      Network protocols use the routing tables to find out the best matching
      route for datagrams.
-  \item \emph{Mobility modules} are responsible for moving around the network
+  \item \textit{Mobility modules} are responsible for moving around the network
      node in the simulated playground. The mobility model is mandatory for
      wireless simulations even if the network node is stationary. The mobility
      module stores the location of the network node which is needed to compute
      wireless propagation and path loss. Different mobility models are provided
      as different modules. Network nodes define their mobility submodule with
      a parametric type, so the mobility model can be changed in the configuration.
-  \item \emph{Energy modules} model energy storage mechanisms, energy
+  \item \textit{Energy modules} model energy storage mechanisms, energy
      consumption of devices and software processes, energy generation of devices,
      and energy management processes which shutdown and startup network nodes.
-  \item \emph{Status} (\nedtype{NodeStatus}) keeps track of the status of the
+  \item \textit{Status} (\nedtype{NodeStatus}) keeps track of the status of the
      network node (up, down, etc.)
-  \item \emph{Other modules} with particular functionality such as
+  \item \textit{Other modules} with particular functionality such as
      \nedtype{PcapRecorder} are also available.
 \end{itemize}
 
@@ -86,7 +86,7 @@ communication opportunities between protocols. Packets and
 messages sent on these connections represent software or hardware activity.
 
 Although protocols may also be connected to each other directly,
-in most cases they are connected via \emph{dispatcher modules}.
+in most cases they are connected via \textit{dispatcher modules}.
 Dispatchers (\nedtype{MessageDispatcher}) are small, low-overhead modules
 that allow protocol components to be connected in one-to-many and many-to-many
 fashion, and ensure that messages and packets sent from one component end up
