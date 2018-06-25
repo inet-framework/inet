@@ -34,14 +34,14 @@ INetfilter::IHook::Result SctpCrcInsertion::datagramPostRoutingHook(Packet *pack
         return ACCEPT;  // FORWARD
     auto networkProtocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     const auto& networkHeader = getNetworkProtocolHeader(packet);
-    if (networkHeader->getProtocol() == &Protocol::sctp && !networkHeader->isFragment()) {
+    if (networkHeader->getProtocol() == &Protocol::sctp) {
+        ASSERT(!networkHeader->isFragment());
         packet->eraseAtFront(networkHeader->getChunkLength());
         auto sctpHeader = packet->removeAtFront<SctpHeader>();
-        if (sctpHeader->getCrcMode() == CRC_COMPUTED) {
-            const L3Address& srcAddress = networkHeader->getSourceAddress();
-            const L3Address& destAddress = networkHeader->getDestinationAddress();
-            insertCrc(networkProtocol, srcAddress, destAddress, sctpHeader, packet);
-        }
+        ASSERT(sctpHeader->getCrcMode() == CRC_COMPUTED);
+        const L3Address& srcAddress = networkHeader->getSourceAddress();
+        const L3Address& destAddress = networkHeader->getDestinationAddress();
+        insertCrc(networkProtocol, srcAddress, destAddress, sctpHeader, packet);
         packet->insertAtFront(sctpHeader);
         packet->insertAtFront(networkHeader);
     }
