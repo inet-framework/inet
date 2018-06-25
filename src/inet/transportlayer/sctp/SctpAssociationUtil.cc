@@ -2052,6 +2052,7 @@ void SctpAssociation::pushUlp()
                 vec[i] = smsg->getData(i);
             auto applicationData = makeShared<BytesChunk>();
             applicationData->setBytes(vec);
+            applicationData->addTag<CreationTimeTag>()->setCreationTime(smsg->getCreationTime());
             auto& tags = getTags(applicationPacket);
             SctpRcvReq *cmd = tags.addTagIfAbsent<SctpRcvReq>();
             applicationPacket->setKind(SCTP_I_DATA);
@@ -2065,8 +2066,6 @@ void SctpAssociation::pushUlp()
             cmd->setPpid(chunk->ppid);
             cmd->setTsn(chunk->tsn);
             cmd->setCumTsn(state->lastTsnAck);
-            auto creationTimeTag = applicationPacket->addTagIfAbsent<CreationTimeTag>();
-            creationTimeTag->setCreationTime(smsg->getCreationTime());
             applicationPacket->insertAtBack(applicationData);
             state->numMsgsReq[count]--;
             EndToEndDelay->record(simTime() - chunk->firstSendTime);

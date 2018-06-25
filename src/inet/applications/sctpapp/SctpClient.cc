@@ -332,8 +332,6 @@ void SctpClient::socketDataArrived(SctpSocket *socket, Packet *msg, bool)
 
     if (echo) {
         const auto& smsg = msg->peekData();
-        auto creationTimeTag = msg->findTag<CreationTimeTag>();
-        creationTimeTag->setCreationTime(simTime());
         auto cmsg = new Packet("ApplicationPacket");
         cmsg->insertAtBack(smsg);
         auto cmd = cmsg->addTagIfAbsent<SctpSendReq>();
@@ -390,14 +388,13 @@ void SctpClient::sendRequest(bool last)
     for (uint32 i = 0; i < sendBytes; i++)
         vec[i] = (bytesSent + i) & 0xFF;
     applicationData->setBytes(vec);
+    applicationData->addTag<CreationTimeTag>()->setCreationTime(simTime());
     applicationPacket->insertAtBack(applicationData);
     auto sctpSendReq = applicationPacket->addTagIfAbsent<SctpSendReq>();
     sctpSendReq->setLast(last);
     sctpSendReq->setPrMethod(par("prMethod"));
     sctpSendReq->setPrValue(par("prValue"));
     sctpSendReq->setSid(nextStream);
-    auto creationTimeTag = applicationPacket->addTagIfAbsent<CreationTimeTag>();
-    creationTimeTag->setCreationTime(simTime());
     applicationPacket->setKind(ordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);
     emit(packetSentSignal, applicationPacket);
     socket.send(applicationPacket);

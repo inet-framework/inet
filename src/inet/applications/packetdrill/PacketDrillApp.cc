@@ -924,9 +924,8 @@ int PacketDrillApp::syscallWrite(struct syscall_spec *syscall, cQueue *args, cha
             for (uint32 i = 0; i < sendBytes; i++)
                 vec[i] = (bytesSent + i) & 0xFF;
             applicationData->setBytes(vec);
+            applicationData->addTag<CreationTimeTag>()->setCreationTime(simTime());
 
-            auto creationTimeTag = applicationData->addTag<CreationTimeTag>();
-            creationTimeTag->setCreationTime(simTime());
             cmsg->setKind(SCTP_C_SEND_ORDERED);
             cmsg->insertAtBack(applicationData);
             auto sendCommand = cmsg->addTagIfAbsent<SctpSendReq>();
@@ -1319,8 +1318,7 @@ int PacketDrillApp::syscallSctpSendmsg(struct syscall_spec *syscall, cQueue *arg
     for (uint32 i = 0; i < sendBytes; i++)
         vec[i] = (bytesSent + i) & 0xFF;
     applicationData->setBytes(vec);
-    auto creationTimeTag = applicationData->addTag<CreationTimeTag>();
-    creationTimeTag->setCreationTime(simTime());
+    applicationData->addTag<CreationTimeTag>()->setCreationTime(simTime());
     cmsg->insertAtBack(applicationData);
 
     auto sendCommand = cmsg->addTagIfAbsent<SctpSendReq>();
@@ -1372,8 +1370,7 @@ int PacketDrillApp::syscallSctpSend(struct syscall_spec *syscall, cQueue *args, 
     for (uint32 i = 0; i < sendBytes; i++)
         vec[i] = (bytesSent + i) & 0xFF;
     applicationData->setBytes(vec);
-    auto creationTimeTag = applicationData->addTag<CreationTimeTag>();
-    creationTimeTag->setCreationTime(simTime());
+    applicationData->addTag<CreationTimeTag>()->setCreationTime(simTime());
     cmsg->insertAtBack(applicationData);
 
     auto sendCommand = cmsg->addTagIfAbsent<SctpSendReq>();

@@ -938,21 +938,8 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
             for (uint32 i = 0; i < msgSize; i++)
                 vec[i] = ((i & 1) ? 'D' : 'T');
             dataMessage->setBytes(vec);
-            auto creationTimeTag = dataMessage->addTag<CreationTimeTag>();
-            creationTimeTag->setCreationTime(simTime());
+            dataMessage->addTag<CreationTimeTag>()->setCreationTime(simTime());
             cmsg->insertAtBack(dataMessage);
-
-          /*  NetPerfMeterDataMessage* dataMessage = new NetPerfMeterDataMessage;
-            dataMessage->setCreationTime(simTime());
-            dataMessage->setByteLength(msgSize);
-
-            dataMessage->setDataArraySize(msgSize);
-            for(unsigned long i = 0; i < msgSize; i++)  {
-               dataMessage->setData(i, (i & 1) ? 'D' : 'T');
-            }
-
-            dataMessage->setDataLen(msgSize);
-            SctpSendInfo* command = new SctpSendInfo("SendRequest");*/
 
             cmsg->addTagIfAbsent<SocketReq>()->setSocketId(ConnectionID);
             auto command = cmsg->addTagIfAbsent<SctpSendReq>();
@@ -1195,9 +1182,6 @@ void NetPerfMeter::receiveMessage(cMessage* msg)
    if (const Packet* dataMessage = dynamic_cast<const Packet*>(msg)) {
       unsigned int    streamID = 0;
       const auto& smsg = dataMessage->peekData();
-      auto creationTimeTag = smsg->findTag<CreationTimeTag>();
-      auto creationTime = creationTimeTag ? creationTimeTag->getCreationTime() : dataMessage->getCreationTime();
-      const simtime_t delay = simTime() - creationTime;
 
       if(TransportProtocol == SCTP) {
          auto& tags = getTags(msg);
@@ -1210,7 +1194,8 @@ void NetPerfMeter::receiveMessage(cMessage* msg)
       ReceiverStatistics* receiverStatistics = getReceiverStatistics(streamID);
       receiverStatistics->ReceivedMessages++;
       receiverStatistics->ReceivedBytes += B(smsg->getChunkLength()).get();
-      receiverStatistics->ReceivedDelayHistogram.collect(delay);
+      for (auto& region : smsg->getAllTags<CreationTimeTag>())
+          receiverStatistics->ReceivedDelayHistogram.collect(simTime() - region.getTag()->getCreationTime());
    }
 }
 

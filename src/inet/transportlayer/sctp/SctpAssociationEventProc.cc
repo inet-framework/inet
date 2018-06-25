@@ -183,8 +183,6 @@ void SctpAssociation::process_SEND(SctpEventCode& event, SctpCommandReq *sctpCom
     smsg->setDataLen(sendBytes);
     smsg->setEncaps(false);
     smsg->setByteLength(sendBytes);
-    auto creationTimeTag = applicationPacket->findTag<CreationTimeTag>();
-    smsg->setCreationTime(creationTimeTag ? creationTimeTag->getCreationTime() : applicationPacket->getCreationTime()); // TODO : get CreationTime from Tag
     datMsg->encapsulate(smsg);
     datMsg->setSid(streamId);
     datMsg->setPpid(ppid);

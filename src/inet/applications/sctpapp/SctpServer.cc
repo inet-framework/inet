@@ -141,6 +141,7 @@ void SctpServer::generateAndSend()
     for (int i = 0; i < numBytes; i++)
         vec[i] = (bytesSent + i) & 0xFF;
     applicationData->setBytes(vec);
+    applicationData->addTag<CreationTimeTag>()->setCreationTime(simTime());
     applicationPacket->insertAtBack(applicationData);
     auto sctpSendReq = applicationPacket->addTagIfAbsent<SctpSendReq>();
     if (queueSize > 0 && numRequestsToSend > 0 && count < queueSize * 2)
@@ -152,8 +153,6 @@ void SctpServer::generateAndSend()
     lastStream = (lastStream + 1) % outboundStreams;
     sctpSendReq->setSid(lastStream);
     sctpSendReq->setSocketId(assocId);
-    auto creationTimeTag = applicationPacket->addTagIfAbsent<CreationTimeTag>();
-    creationTimeTag->setCreationTime(simTime());
     applicationPacket->setKind(ordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);
     auto& tags = getTags(applicationPacket);
     tags.addTagIfAbsent<SocketReq>()->setSocketId(assocId);
@@ -388,8 +387,9 @@ void SctpServer::handleMessage(cMessage *msg)
                         j->second.rcvdPackets--;
 
                         auto m = endToEndDelay.find(id);
-                        auto creationTimeTag = message->findTag<CreationTimeTag>();
-                        m->second->record(simTime() - creationTimeTag->getCreationTime());
+                        for (auto& region : message->peekData()->getAllTags<CreationTimeTag>())
+                            m->second->record(simTime() - region.getTag()->getCreationTime());
+
                         EV_INFO << "server: Data received. Left packets to receive=" << j->second.rcvdPackets << "\n";
 
                         if (j->second.rcvdPackets == 0) {
@@ -416,9 +416,10 @@ void SctpServer::handleMessage(cMessage *msg)
                 else {
                     auto m = endToEndDelay.find(id);
                     const auto& smsg = message->peekData();
-                    auto creationTimeTag = message->findTag<CreationTimeTag>();
-                    m->second->record(simTime() - creationTimeTag->getCreationTime());
-                    creationTimeTag->setCreationTime(simTime());
+
+                    for (auto& region : smsg->getAllTags<CreationTimeTag>())
+                        m->second->record(simTime() - region.getTag()->getCreationTime());
+
                     auto cmsg = new Packet("ApplicationPacket");
                     cmsg->insertAtBack(smsg);
                     auto cmd = cmsg->addTagIfAbsent<SctpSendReq>();
