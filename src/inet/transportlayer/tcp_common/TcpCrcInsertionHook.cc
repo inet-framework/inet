@@ -38,9 +38,11 @@ INetfilter::IHook::Result TcpCrcInsertion::datagramPostRoutingHook(Packet *packe
     if (networkHeader->getProtocol() == &Protocol::tcp && !networkHeader->fragmented()) {
         packet->eraseAtFront(networkHeader->getChunkLength());
         auto tcpHeader = packet->removeAtFront<TcpHeader>();
-        const L3Address& srcAddress = networkHeader->getSourceAddress();
-        const L3Address& destAddress = networkHeader->getDestinationAddress();
-        insertCrc(networkProtocol, srcAddress, destAddress, tcpHeader, packet);
+        if (tcpHeader->getCrcMode() == CRC_COMPUTED) {
+            const L3Address& srcAddress = networkHeader->getSourceAddress();
+            const L3Address& destAddress = networkHeader->getDestinationAddress();
+            insertCrc(networkProtocol, srcAddress, destAddress, tcpHeader, packet);
+        }
         packet->insertAtFront(tcpHeader);
         packet->insertAtFront(networkHeader);
     }

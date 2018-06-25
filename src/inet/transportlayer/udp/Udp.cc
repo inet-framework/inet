@@ -1264,9 +1264,11 @@ INetfilter::IHook::Result Udp::CrcInsertion::datagramPostRoutingHook(Packet *pac
     if (networkHeader->getProtocol() == &Protocol::udp && !networkHeader->fragmented()) {
         packet->eraseAtFront(networkHeader->getChunkLength());
         auto udpHeader = packet->removeAtFront<UdpHeader>();
-        const L3Address& srcAddress = networkHeader->getSourceAddress();
-        const L3Address& destAddress = networkHeader->getDestinationAddress();
-        udp->insertCrc(networkProtocol, srcAddress, destAddress, udpHeader, packet);
+        if (udpHeader->getCrcMode() == CRC_COMPUTED) {
+            const L3Address& srcAddress = networkHeader->getSourceAddress();
+            const L3Address& destAddress = networkHeader->getDestinationAddress();
+            udp->insertCrc(networkProtocol, srcAddress, destAddress, udpHeader, packet);
+        }
         packet->insertAtFront(udpHeader);
         packet->insertAtFront(networkHeader);
     }
