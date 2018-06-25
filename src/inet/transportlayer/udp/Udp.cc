@@ -1261,7 +1261,7 @@ INetfilter::IHook::Result Udp::CrcInsertion::datagramPostRoutingHook(Packet *pac
         return ACCEPT;  // FORWARD
     auto networkProtocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     const auto& networkHeader = getNetworkProtocolHeader(packet);
-    if (networkHeader->getProtocol() == &Protocol::udp && !networkHeader->fragmented()) {
+    if (networkHeader->getProtocol() == &Protocol::udp && !networkHeader->isFragment()) {
         packet->eraseAtFront(networkHeader->getChunkLength());
         auto udpHeader = packet->removeAtFront<UdpHeader>();
         if (udpHeader->getCrcMode() == CRC_COMPUTED) {

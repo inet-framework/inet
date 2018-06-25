@@ -35,7 +35,7 @@ INetfilter::IHook::Result TcpCrcInsertion::datagramPostRoutingHook(Packet *packe
         return ACCEPT;  // FORWARD
     auto networkProtocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     const auto& networkHeader = getNetworkProtocolHeader(packet);
-    if (networkHeader->getProtocol() == &Protocol::tcp && !networkHeader->fragmented()) {
+    if (networkHeader->getProtocol() == &Protocol::tcp && !networkHeader->isFragment()) {
         packet->eraseAtFront(networkHeader->getChunkLength());
         auto tcpHeader = packet->removeAtFront<TcpHeader>();
         if (tcpHeader->getCrcMode() == CRC_COMPUTED) {

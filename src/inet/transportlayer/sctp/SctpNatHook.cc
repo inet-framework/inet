@@ -62,7 +62,7 @@ INetfilter::IHook::Result SctpNatHook::datagramForwardHook(Packet *datagram)
         insertNetworkProtocolHeader(datagram, Protocol::ipv4, dgram);
         return INetfilter::IHook::ACCEPT;
     }
-    if (dgram->fragmented()) {
+    if (dgram->isFragment()) {
         //TODO process fragmented packets
         insertNetworkProtocolHeader(datagram, Protocol::ipv4, dgram);
         return INetfilter::IHook::ACCEPT;
@@ -163,7 +163,7 @@ INetfilter::IHook::Result SctpNatHook::datagramPreRoutingHook(Packet *datagram)
         return INetfilter::IHook::ACCEPT;
     }
 
-    if (dgram->fragmented()) {
+    if (dgram->isFragment()) {
         //TODO process fragmented packets
         insertNetworkProtocolHeader(datagram, Protocol::ipv4, dgram);
         return INetfilter::IHook::ACCEPT;
