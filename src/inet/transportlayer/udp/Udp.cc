@@ -383,7 +383,12 @@ void Udp::processPacketFromApp(Packet *packet)
     udpHeader->setSourcePort(srcPort);
     udpHeader->setDestinationPort(destPort);
     udpHeader->setTotalLengthField(udpHeader->getChunkLength() + packet->getTotalLength());
-    insertCrc(l3Protocol, srcAddr, destAddr, udpHeader, packet);    // crcMode == CRC_COMPUTED is done in an INetfilter hook
+    if (crcMode == CRC_COMPUTED) {
+        udpHeader->setCrcMode(CRC_COMPUTED);
+        udpHeader->setCrc(0x0000);    // crcMode == CRC_COMPUTED is done in an INetfilter hook
+    }
+    else
+        insertCrc(l3Protocol, srcAddr, destAddr, udpHeader, packet);
     insertTransportProtocolHeader(packet, Protocol::udp, udpHeader);
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(l3Protocol);
 
