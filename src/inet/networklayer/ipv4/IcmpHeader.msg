@@ -19,7 +19,7 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
-import inet.transportlayer.common.CRC;
+import inet.transportlayer.common.CrcMode;
 
 namespace inet;
 
@@ -125,7 +125,7 @@ class IcmpHeader extends FieldsChunk
     IcmpType type;   // 1 byte
     int code = -1;                   // 1 byte
     int chksum = 0;                 // 2 bytes, RFC 1071
-    CrcMode crcMode;
+    CrcMode crcMode = CRC_MODE_UNDEFINED;
 }
 
 class IcmpEchoRequest extends IcmpHeader

@@ -42,7 +42,7 @@ simple EtherEncap like IEtherEncap
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
         bool useSNAP = default(false);  // create EtherFrameWithSNAP frames instead of EthernetIIFrame
-        string fcsMode @enum("declaredCorrect", "declaredIncorrect", "computed");
+        string fcsMode @enum("declared", "computed");
         @display("i=block/square");
         @signal[encapPk](type=cPacket);
         @signal[decapPk](type=cPacket);

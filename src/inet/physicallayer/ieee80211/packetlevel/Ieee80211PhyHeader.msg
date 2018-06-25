@@ -17,7 +17,7 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
-import inet.transportlayer.common.CRC;
+import inet.transportlayer.common.CrcMode;
 
 namespace inet::physicallayer;
 
@@ -45,7 +45,7 @@ class Ieee80211FhssPhyHeader extends Ieee80211PhyHeader
     uint16_t plw;
     uint8_t psf;
     uint16_t crc;
-    CrcMode crcMode;
+    CrcMode crcMode = CRC_MODE_UNDEFINED;
 }
 
 //
@@ -59,7 +59,7 @@ class Ieee80211IrPhyHeader extends Ieee80211PhyHeader
 {
     // TODO: B lengthField;
     uint16_t crc;
-    CrcMode crcMode;
+    CrcMode crcMode = CRC_MODE_UNDEFINED;
 }
 
 //
@@ -76,7 +76,7 @@ class Ieee80211DsssPhyHeader extends Ieee80211PhyHeader
     uint8_t service;
     // TODO: B lengthField;
     uint16_t crc;
-    CrcMode crcMode;
+    CrcMode crcMode = CRC_MODE_UNDEFINED;
 }
 
 //

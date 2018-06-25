@@ -18,7 +18,7 @@
 import inet.common.INETDefs;
 import inet.common.Protocol;
 import inet.common.packet.chunk.Chunk;
-import inet.transportlayer.common.CRC;
+import inet.transportlayer.common.CrcMode;
 
 namespace inet;
 
@@ -27,6 +27,6 @@ class ApskPhyHeader extends FieldsChunk
     chunkLength = B(6);
     uint16_t lengthField;
     uint16_t crc = 0;
-    CrcMode crcMode;
+    CrcMode crcMode = CRC_MODE_UNDEFINED;
     const Protocol *payloadProtocol @toString("->str()") = nullptr; // specifies a protocol (internal class with an artificial identifier)
 }

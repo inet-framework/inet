@@ -28,7 +28,7 @@
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/transportlayer/common/CRC_m.h"
+#include "inet/transportlayer/common/CrcMode_m.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/tcp_common/TcpCrcInsertionHook.h"
 #include "lwip/lwip_tcp.h"
@@ -165,7 +165,7 @@ class INET_API TcpLwip : public cSimpleModule, public LwipTcpStackIf, public ILi
     bool isAliveM;
     Packet *pCurTcpSegM;
     TcpCrcInsertion crcInsertion;
-    CrcMode crcMode = static_cast<CrcMode>(-1);
+    CrcMode crcMode = CRC_MODE_UNDEFINED;
 };
 
 } // namespace tcp

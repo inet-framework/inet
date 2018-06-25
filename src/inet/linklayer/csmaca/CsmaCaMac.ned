@@ -62,7 +62,7 @@ simple CsmaCaMac extends MacProtocolBase like IMacProtocol
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
                                           // "auto". "auto" values will be replaced by
                                           // a generated MAC address in init stage 0.
-        string fcsMode @enum("declared","computed") = default("declared");
+        string fcsMode @enum("declared", "computed") = default("declared");
         string queueModule = default(""); // name of optional external queue module
         int maxQueueSize = default(-1); // maximum queue length in frames; only used if queueModule==""
         bool prioritizeByUP = default(false); // use priority queueing, based on IEEE 802.1d User Priority (UP)

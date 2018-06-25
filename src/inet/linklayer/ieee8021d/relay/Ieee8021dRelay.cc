@@ -42,7 +42,7 @@ void Ieee8021dRelay::initialize(int stage)
         // statistics
         numDispatchedBDPUFrames = numDispatchedNonBPDUFrames = numDeliveredBDPUsToSTP = 0;
         numReceivedBPDUsFromSTP = numReceivedNetworkFrames = numDroppedFrames = 0;
-        fcsMode = parseEthernetFcsMode(par("fcsMode"));
+        fcsMode = parseFcsMode(par("fcsMode"));
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         registerService(Protocol::ethernetMac, gate("stpIn"), gate("ifIn"));

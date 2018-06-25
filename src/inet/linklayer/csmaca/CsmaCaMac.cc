@@ -64,14 +64,7 @@ void CsmaCaMac::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         EV << "Initializing stage 0\n";
-
-        const char *fcsModeString = par("fcsMode");
-        if (!strcmp(fcsModeString, "declared"))
-            fcsMode = FCS_DECLARED;
-        else if (!strcmp(fcsModeString, "computed"))
-            fcsMode = FCS_COMPUTED;
-        else
-            throw cRuntimeError("Unknown fcs mode");
+        fcsMode = parseFcsMode(par("fcsMode"));
         maxQueueSize = par("maxQueueSize");
         useAck = par("useAck");
         bitrate = par("bitrate");
@@ -684,7 +677,9 @@ bool CsmaCaMac::isFcsOk(Packet *frame)
     else {
         const auto& trailer = frame->peekAtBack<CsmaCaMacTrailer>(B(4));
         switch (trailer->getFcsMode()) {
-            case FCS_DECLARED:
+            case FCS_DECLARED_INCORRECT:
+                return false;
+            case FCS_DECLARED_CORRECT:
                 return true;
             case FCS_COMPUTED: {
                 const auto& fcsBytes = frame->peekDataAt<BytesChunk>(B(0), frame->getDataLength() - trailer->getChunkLength());

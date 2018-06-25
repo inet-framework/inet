@@ -21,7 +21,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/checksum/EthernetCRC.h"
-#include "inet/linklayer/common/EthernetFcsMode_m.h"
+#include "inet/linklayer/common/FcsMode_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -43,7 +43,7 @@ simsignal_t EtherEncap::pauseSentSignal = registerSignal("pauseSent");
 void EtherEncap::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        fcsMode = parseEthernetFcsMode(par("fcsMode"));
+        fcsMode = parseFcsMode(par("fcsMode"));
         seqNum = 0;
         WATCH(seqNum);
         totalFromHigherLayer = totalFromMAC = totalPauseSent = 0;
@@ -136,7 +136,7 @@ void EtherEncap::processPacketFromHigherLayer(Packet *packet)
     send(packet, "lowerLayerOut");
 }
 
-void EtherEncap::addPaddingAndFcs(Packet *packet, EthernetFcsMode fcsMode, B requiredMinBytes)
+void EtherEncap::addPaddingAndFcs(Packet *packet, FcsMode fcsMode, B requiredMinBytes)
 {
     B paddingLength = requiredMinBytes - ETHER_FCS_BYTES - B(packet->getByteLength());
     if (paddingLength > B(0)) {
@@ -147,7 +147,7 @@ void EtherEncap::addPaddingAndFcs(Packet *packet, EthernetFcsMode fcsMode, B req
     addFcs(packet, fcsMode);
 }
 
-void EtherEncap::addFcs(Packet *packet, EthernetFcsMode fcsMode)
+void EtherEncap::addFcs(Packet *packet, FcsMode fcsMode)
 {
     const auto& ethFcs = makeShared<EthernetFcs>();
     ethFcs->setFcsMode(fcsMode);

@@ -17,7 +17,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/linklayer/common/EthernetFcsMode_m.h"
+#include "inet/linklayer/common/FcsMode_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/portal/Ieee80211Portal.h"
@@ -39,7 +39,7 @@ void Ieee80211Portal::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         upperLayerOutConnected = gate("upperLayerOut")->getPathEndGate()->isConnected();
 #ifdef WITH_ETHERNET
-        fcsMode = parseEthernetFcsMode(par("fcsMode"));
+        fcsMode = parseFcsMode(par("fcsMode"));
 #endif // ifdef WITH_ETHERNET
     }
 }

@@ -26,7 +26,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/ipv4/IcmpHeader.h"
-#include "inet/transportlayer/common/CRC_m.h"
+#include "inet/transportlayer/common/CrcMode_m.h"
 
 namespace inet {
 
@@ -39,7 +39,7 @@ class INET_API Icmp : public cSimpleModule, public IProtocolRegistrationListener
 {
   protected:
     std::set<int> transportProtocols;    // where to send up packets
-    CrcMode crcMode = static_cast<CrcMode>(-1);
+    CrcMode crcMode = CRC_MODE_UNDEFINED;
   protected:
     virtual void processICMPMessage(Packet *);
     virtual void errorOut(Packet *);

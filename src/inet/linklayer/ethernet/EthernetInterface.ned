@@ -34,7 +34,7 @@ module EthernetInterface like IEthernetInterface
         @class(InterfaceEntry);
         string interfaceTableModule;
         bool csmacdSupport = default(false);  // by default CSMA/CD is turned off, so only point-to-point duplex links are supported.
-        string fcsMode @enum("declaredCorrect","declaredIncorrect","computed") = default("declaredCorrect");
+        string fcsMode @enum("declared", "computed") = default("declared");
         int numOutputHooks = default(0);
         int numInputHooks = default(0);
         @display("i=block/ifcard;bgl=2");

@@ -18,7 +18,7 @@
 
 
 import inet.common.INETDefs;
-import inet.transportlayer.common.CRC;
+import inet.transportlayer.common.CrcMode;
 import inet.transportlayer.contract.TransportHeaderBase;
 
 namespace inet;
@@ -38,7 +38,7 @@ class UdpHeader extends TransportHeaderBase
     chunkLength = UDP_HEADER_LENGTH;
     B totalLengthField = B(-1);   // UDP header + payload in bytes
     uint16_t crc = 0;
-    CrcMode crcMode;
+    CrcMode crcMode = CRC_MODE_UNDEFINED;
 }
 
 cplusplus(UdpHeader) {{

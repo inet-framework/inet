@@ -43,7 +43,7 @@ void EtherLlc::initialize(int stage)
     cSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        fcsMode = parseEthernetFcsMode(par("fcsMode"));
+        fcsMode = parseFcsMode(par("fcsMode"));
         seqNum = 0;
         WATCH(seqNum);
 

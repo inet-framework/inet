@@ -28,7 +28,7 @@
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/INetfilter.h"
-#include "inet/transportlayer/common/CRC_m.h"
+#include "inet/transportlayer/common/CrcMode_m.h"
 #include "inet/transportlayer/common/TransportPseudoHeader_m.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo.h"
 
@@ -111,7 +111,7 @@ class INET_API Udp : public cSimpleModule, public ILifecycle
     typedef std::map<int, SockDescList> SocketsByPortMap;
 
   protected:
-    CrcMode crcMode = static_cast<CrcMode>(-1);
+    CrcMode crcMode = CRC_MODE_UNDEFINED;
     CrcInsertion crcInsertion;
 
     // sockets

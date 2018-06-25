@@ -23,7 +23,7 @@ import inet.common.packet.chunk.Chunk;
 import inet.networklayer.common.IpProtocolId;
 import inet.networklayer.contract.NetworkHeaderBase;
 import inet.networklayer.contract.ipv4.Ipv4Address;
-import inet.transportlayer.common.CRC;
+import inet.transportlayer.common.CrcMode;
 
 cplusplus {{
 #include "inet/common/ProtocolGroup.h"
@@ -181,7 +181,7 @@ class Ipv4Header extends NetworkHeaderBase
     Ipv4Address destAddress;
 
     uint16_t crc = 0;
-    CrcMode crcMode;
+    CrcMode crcMode = CRC_MODE_UNDEFINED;
 
     IpProtocolId protocolId = IP_PROT_NONE;
     short timeToLive;

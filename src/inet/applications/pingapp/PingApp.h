@@ -27,7 +27,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/contract/INetworkSocket.h"
-#include "inet/transportlayer/common/CRC_m.h"
+#include "inet/transportlayer/common/CrcMode_m.h"
 
 namespace inet {
 
@@ -55,7 +55,7 @@ class INET_API PingApp : public cSimpleModule, public ILifecycle, public INetwor
     int destAddrIdx = -1;
     simtime_t startTime;
     simtime_t stopTime;
-    CrcMode crcMode = static_cast<CrcMode>(-1);
+    CrcMode crcMode = CRC_MODE_UNDEFINED;
     bool printPing = false;
     bool continuous = false;
 

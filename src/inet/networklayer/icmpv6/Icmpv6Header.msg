@@ -20,7 +20,7 @@
 import inet.common.INETDefs;
 import inet.common.Units;
 import inet.common.packet.chunk.Chunk;
-import inet.transportlayer.common.CRC;
+import inet.transportlayer.common.CrcMode;
 
 namespace inet;
 
@@ -106,7 +106,7 @@ class Icmpv6Header extends FieldsChunk
     Icmpv6Type type;     // 1 byte
     //int code; // 1 byte //TODO: this should be specific to different ICMP types.
     int chksum = 0;     // 2 bytes
-    CrcMode crcMode;
+    CrcMode crcMode = CRC_MODE_UNDEFINED;
     // 4 bytes 'type' specific values
 }
 

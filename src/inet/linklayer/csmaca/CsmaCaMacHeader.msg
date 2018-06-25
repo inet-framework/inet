@@ -17,6 +17,7 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
+import inet.linklayer.common.FcsMode;
 import inet.linklayer.common.MacAddress;
 
 namespace inet;
@@ -39,14 +40,9 @@ class CsmaCaMacDataHeader extends CsmaCaMacHeader
     int priority = -1;  // 802.1d UP (User Priority)
 }
 
-enum FcsMode {
-    FCS_DECLARED = 1;
-    FCS_COMPUTED = 2;
-}
-
 class CsmaCaMacTrailer extends FieldsChunk
 {
     chunkLength = B(4);
     uint32_t fcs = 0;
-    FcsMode fcsMode;
+    FcsMode fcsMode = FCS_MODE_UNDEFINED;
 }

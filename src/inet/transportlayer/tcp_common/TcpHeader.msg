@@ -19,7 +19,7 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
-import inet.transportlayer.common.CRC;
+import inet.transportlayer.common.CrcMode;
 import inet.transportlayer.contract.TransportHeaderBase;
 
 namespace inet::tcp;
@@ -227,7 +227,7 @@ class TcpHeader extends TransportHeaderBase
     unsigned short urgentPointer;
 
     uint16_t crc = 0;
-    CrcMode crcMode;
+    CrcMode crcMode = CRC_MODE_UNDEFINED;
 
     // Header options (optional)
     // Currently only EOL, NOP, MSS, WS, SACK_PERMITTED, SACK and TS are implemented

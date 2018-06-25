@@ -19,7 +19,7 @@
 #define __INET_IEEE80211PORTAL_H
 
 #include "inet/common/packet/Packet.h"
-#include "inet/linklayer/common/EthernetFcsMode_m.h"
+#include "inet/linklayer/common/FcsMode_m.h"
 
 namespace inet {
 
@@ -28,7 +28,7 @@ namespace ieee80211 {
 class INET_API Ieee80211Portal : public cSimpleModule
 {
   protected:
-    EthernetFcsMode fcsMode = static_cast<EthernetFcsMode>(-1);
+    FcsMode fcsMode = FCS_MODE_UNDEFINED;
     bool upperLayerOutConnected = false;
 
   protected:

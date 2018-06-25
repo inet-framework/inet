@@ -22,7 +22,7 @@ import inet.linklayer.ieee8022.IIeee8022Llc;
 simple Ieee80211Portal like IIeee8022Llc
 {
     parameters:
-        string fcsMode @enum("declaredCorrect", "declaredIncorrect", "computed") = default("declaredCorrect");
+        string fcsMode @enum("declared", "computed") = default("declared");
         @display("i=block/layer");
     gates:
         input upperLayerIn;

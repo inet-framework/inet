@@ -18,7 +18,7 @@
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
 import inet.linklayer.common.EtherType;
-import inet.linklayer.common.EthernetFcsMode;
+import inet.linklayer.common.FcsMode;
 import inet.linklayer.common.Ieee802Ctrl;
 import inet.linklayer.common.MacAddress;
 
@@ -97,6 +97,6 @@ class EthernetFcs extends FieldsChunk
 {
     chunkLength = ETHER_FCS_BYTES;
     uint32_t fcs;
-    EthernetFcsMode fcsMode = FCS_DECLARED_CORRECT;
+    FcsMode fcsMode = FCS_MODE_UNDEFINED;
 }
 
