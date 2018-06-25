@@ -385,6 +385,8 @@ void Sctp::sendAbortFromMain(Ptr<SctpHeader>& sctpmsg, L3Address fromAddr, L3Add
     msg->setSrcPort(sctpmsg->getDestPort());
     msg->setDestPort(sctpmsg->getSrcPort());
     msg->setChunkLength(B(SCTP_COMMON_HEADER));
+    msg->setCrc(0);
+    msg->setCrcMode(crcMode);
     msg->setChecksumOk(true);
 
     SctpAbortChunk *abortChunk = new SctpAbortChunk();
@@ -420,6 +422,8 @@ void Sctp::sendShutdownCompleteFromMain(Ptr<SctpHeader>& sctpmsg, L3Address from
     msg->setSrcPort(sctpmsg->getDestPort());
     msg->setDestPort(sctpmsg->getSrcPort());
     msg->setChunkLength(b(SCTP_COMMON_HEADER));
+    msg->setCrc(0);
+    msg->setCrcMode(crcMode);
     msg->setChecksumOk(true);
 
     SctpShutdownCompleteChunk *scChunk = new SctpShutdownCompleteChunk();
