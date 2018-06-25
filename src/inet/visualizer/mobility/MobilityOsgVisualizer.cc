@@ -134,8 +134,10 @@ void MobilityOsgVisualizer::receiveSignal(cComponent *source, simsignal_t signal
             extendMovementTrail(mobilityVisualization->trail, position);
     }
     else if (signal == PRE_MODEL_CHANGE) {
-        if (auto mobility = dynamic_cast<IMobility *>(source))
-            removeMobilityVisualization(mobility);
+        if (dynamic_cast<cPreModuleDeleteNotification *>(object)) {
+            if (auto mobility = dynamic_cast<IMobility *>(source))
+                removeMobilityVisualization(mobility);
+        }
     }
     else
         throw cRuntimeError("Unknown signal");
