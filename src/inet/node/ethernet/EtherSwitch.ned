@@ -22,6 +22,7 @@ import inet.common.MessageDispatcher;
 import inet.common.lifecycle.NodeStatus;
 import inet.linklayer.configurator.L2NodeConfigurator;
 import inet.linklayer.contract.IEthernetInterface;
+import inet.linklayer.contract.IExternalInterface;
 import inet.linklayer.contract.IMacAddressTable;
 import inet.linklayer.contract.IMacRelayUnit;
 import inet.linklayer.contract.ISpanningTree;
@@ -46,6 +47,7 @@ module EtherSwitch
         bool hasStatus = default(false);
         bool csmacdSupport = default(true);  // by default use CSMA/CD --FIXME remove
         string spanningTreeProtocol = default("");
+        int numExtInterfaces = default(0);
         eth[*].encap.typename = "EtherEncapDummy";
         eth[*].csmacdSupport = csmacdSupport;
         eth[*].mac.typename = default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex");
@@ -81,6 +83,10 @@ module EtherSwitch
                 mac.promiscuous = true;
                 @display("p=250,300,row,150;q=txQueue");
         }
+        ext[numExtInterfaces]: <default("ExtInterface")> like IExternalInterface {
+            parameters:
+                @display("p=1125,616,row,150;q=txQueue");
+        }
     connections:
         relayUnit.ifOut --> nl.in++;
         relayUnit.ifIn <-- nl.out++;
@@ -93,5 +99,9 @@ module EtherSwitch
         if spanningTreeProtocol != "" {
             stp.relayIn <-- relayUnit.stpOut;
             stp.relayOut --> relayUnit.stpIn;
+        }
+        for i=0..numExtInterfaces-1 {
+            ext[i].upperLayerOut --> nl.in++;
+            ext[i].upperLayerIn <-- nl.out++;
         }
 }
