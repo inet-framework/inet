@@ -29,7 +29,7 @@ namespace visualizer {
 
 class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
 {
-  protected:
+  public:
     class INET_API LastValueRecorder : public cNumericResultRecorder
     {
       protected:
@@ -76,7 +76,7 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
     const char *signalName = nullptr;
     const char *statisticName = nullptr;
     const char *statisticUnit = nullptr;
-    const char *recordingMode = nullptr;
+    const char *statisticExpression = nullptr;
     StringFormat format;
     std::vector<std::string> units;
     cFigure::Font font;
@@ -96,8 +96,9 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
     virtual void subscribe();
     virtual void unsubscribe();
 
-    virtual cResultFilter *findResultFilter(cComponent *source, simsignal_t signal);
-    virtual cResultFilter *findResultFilter(cResultFilter *parentResultFilter, cResultListener *resultListener);
+    virtual void addResultRecorder(cComponent *source, simsignal_t signal);
+    virtual LastValueRecorder *findResultRecorder(cComponent *source, simsignal_t signal);
+    virtual LastValueRecorder *findResultRecorder(cResultListener *resultListener);
     virtual std::string getText(const StatisticVisualization *statisticVisualization);
     virtual const char *getUnit(cComponent *source);
 

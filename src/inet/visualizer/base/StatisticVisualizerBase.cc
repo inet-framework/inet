@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "omnetpp/cstatisticbuilder.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/visualizer/base/StatisticVisualizerBase.h"
 
@@ -22,12 +23,13 @@ namespace inet {
 
 namespace visualizer {
 
+Register_ResultRecorder("statisticVisualizer", StatisticVisualizerBase::LastValueRecorder);
+
 StatisticVisualizerBase::StatisticVisualization::StatisticVisualization(int moduleId, simsignal_t signal, const char *unit) :
     moduleId(moduleId),
     signal(signal),
     unit(unit)
 {
-    recorder = new LastValueRecorder();
 }
 
 StatisticVisualizerBase::~StatisticVisualizerBase()
@@ -44,9 +46,6 @@ const char *StatisticVisualizerBase::DirectiveResolver::resolveDirective(char di
             break;
         case 'n':
             result = visualizer->statisticName;
-            break;
-        case 'r':
-            result = visualizer->recordingMode;
             break;
         case 'v':
             if (std::isnan(visualization->printValue))
@@ -75,9 +74,9 @@ void StatisticVisualizerBase::initialize(int stage)
         sourceFilter.setPattern(par("sourceFilter"));
         signalName = par("signalName");
         statisticName = par("statisticName");
-        format.parseFormat(par("format"));
         statisticUnit = par("statisticUnit");
-        recordingMode = par("recordingMode");
+        statisticExpression = par("statisticExpression");
+        format.parseFormat(par("format"));
         cStringTokenizer tokenizer(par("unit"));
         while (tokenizer.hasMoreTokens())
             units.push_back(tokenizer.nextToken());
@@ -120,12 +119,26 @@ void StatisticVisualizerBase::unsubscribe()
     }
 }
 
-cResultFilter *StatisticVisualizerBase::findResultFilter(cComponent *source, simsignal_t signal)
+void StatisticVisualizerBase::addResultRecorder(cComponent *source, simsignal_t signal)
+{
+    cStatisticBuilder statisticBuilder(getEnvir()->getConfig());
+    cProperty statisticTemplateProperty;
+    std::string record;
+    if (*statisticExpression == '\0')
+        record = "statisticVisualizer";
+    else
+        record = std::string("statisticVisualizer(") + statisticExpression + std::string(")");
+    statisticTemplateProperty.addKey("record");
+    statisticTemplateProperty.setValue("record", 0, record.c_str());
+    statisticBuilder.addResultRecorders(source, signal, statisticName, &statisticTemplateProperty);
+}
+
+StatisticVisualizerBase::LastValueRecorder *StatisticVisualizerBase::findResultRecorder(cComponent *source, simsignal_t signal)
 {
     auto listeners = source->getLocalSignalListeners(signal);
     for (auto listener : listeners) {
         if (auto resultListener = dynamic_cast<cResultListener *>(listener)) {
-            auto foundResultFilter = findResultFilter(nullptr, resultListener);
+            auto foundResultFilter = findResultRecorder(resultListener);
             if (foundResultFilter != nullptr)
                 return foundResultFilter;
         }
@@ -133,19 +146,14 @@ cResultFilter *StatisticVisualizerBase::findResultFilter(cComponent *source, sim
     return nullptr;
 }
 
-cResultFilter *StatisticVisualizerBase::findResultFilter(cResultFilter *parentResultFilter, cResultListener *resultListener)
+StatisticVisualizerBase::LastValueRecorder *StatisticVisualizerBase::findResultRecorder(cResultListener *resultListener)
 {
-    if (auto resultRecorder = dynamic_cast<cResultRecorder *>(resultListener)) {
-        // TODO: why do we allow nullptr here?
-        bool statisticNameMatches = resultRecorder->getStatisticName() == nullptr || !strcmp(statisticName, resultRecorder->getStatisticName());
-        bool recordingModeMatches = *recordingMode == '\0' || (resultRecorder->getRecordingMode() != nullptr && !strcmp(recordingMode, resultRecorder->getRecordingMode()));
-        if (statisticNameMatches && recordingModeMatches)
-            return parentResultFilter;
-    }
+    if (auto resultRecorder = dynamic_cast<StatisticVisualizerBase::LastValueRecorder *>(resultListener))
+        return resultRecorder;
     else if (auto resultFilter = dynamic_cast<cResultFilter *>(resultListener)) {
         auto delegates = resultFilter->getDelegates();
         for (auto delegate : delegates) {
-            auto foundResultFilter = findResultFilter(resultFilter, delegate);
+            auto foundResultFilter = findResultRecorder(delegate);
             if (foundResultFilter != nullptr)
                 return foundResultFilter;
         }
@@ -164,8 +172,11 @@ const char *StatisticVisualizerBase::getUnit(cComponent *source)
     auto properties = source->getProperties();
     for (int i = 0; i < properties->getNumProperties(); i++) {
         auto property = properties->get(i);
-        if (!strcmp(property->getName(), "statistic") && !strcmp(property->getIndex(), statisticName))
-            return property->getValue("unit", 0);
+        if (!strcmp(property->getName(), "statistic") && !strcmp(property->getIndex(), statisticName)) {
+            auto unit = property->getValue("unit", 0);
+            if (unit != nullptr)
+                return unit;
+        }
     }
     return statisticUnit;
 }
@@ -210,15 +221,14 @@ void StatisticVisualizerBase::processSignal(cComponent *source, simsignal_t sign
         refreshStatisticVisualization(statisticVisualization);
     else {
         if (sourceFilter.matches(check_and_cast<cModule *>(source))) {
-            statisticVisualization = createStatisticVisualization(source, signal);
-            auto resultFilter = findResultFilter(source, signal);
+            auto statisticVisualization = createStatisticVisualization(source, signal);
+            // TODO: when we are adding a delegate to a count(packet) filter chain, then the incoming value will be NaN (due to the signal being about a packet)
+            // TODO: but the count is already 1 at this point and we have no way of getting it, and we will be notified only with the next emit when it becomes 2, never receiving 1 here
+            addResultRecorder(source, signal);
+            statisticVisualization->recorder = findResultRecorder(source, signal);
+            if (statisticVisualization->recorder == nullptr)
+                throw cRuntimeError("Statistic '%s' not found for signal '%s'", statisticName, signalName);
             statisticVisualization->recorder->setLastValue(value);
-            if (resultFilter == nullptr)
-                source->subscribe(registerSignal(signalName), statisticVisualization->recorder);
-            else
-                // TODO: when we are adding a delegate to a count(packet) filter chain, the the incoming value will be NaN (due to the signal being about a packet)
-                // TODO: but the count is already 1 at this point and we have no way of getting it, and we will be notified only with the next emit when it becomes 2, never receiving 1 here
-                resultFilter->addDelegate(statisticVisualization->recorder);
             addStatisticVisualization(statisticVisualization);
             refreshStatisticVisualization(statisticVisualization);
         }
