@@ -55,6 +55,17 @@ class INET_API RadioVisualizerBase : public VisualizerBase, public cListener
     double height;
     Placement placementHint;
     double placementPriority;
+    // antennaLobe
+    bool displayAntennaLobes = false;
+    bool antennaLobePlaneGlobal = false;
+    const char *antennaLobePlane = nullptr;
+    double antennaLobeRadius = NaN;
+    deg antennaLobeStep = deg(NaN);
+    double antennaLobeOpacity = NaN;
+    cFigure::Color antennaLobeLineColor;
+    cFigure::LineStyle antennaLobeLineStyle;
+    double antennaLobeLineWidth = NaN;
+    cFigure::Color antennaLobeFillColor;
     //@}
 
     std::map<int, const RadioVisualization *> radioVisualizations;
