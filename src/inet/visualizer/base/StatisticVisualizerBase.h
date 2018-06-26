@@ -18,6 +18,7 @@
 #ifndef __INET_STATISTICVISUALIZERBASE_H
 #define __INET_STATISTICVISUALIZERBASE_H
 
+#include <functional>
 #include "inet/common/StringFormat.h"
 #include "inet/visualizer/base/VisualizerBase.h"
 #include "inet/visualizer/util/ModuleFilter.h"
@@ -97,7 +98,7 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
     virtual void unsubscribe();
 
     virtual void addResultRecorder(cComponent *source, simsignal_t signal);
-    virtual LastValueRecorder *findResultRecorder(cComponent *source, simsignal_t signal);
+    virtual LastValueRecorder *getResultRecorder(cComponent *source, simsignal_t signal);
     virtual LastValueRecorder *findResultRecorder(cResultListener *resultListener);
     virtual std::string getText(const StatisticVisualization *statisticVisualization);
     virtual const char *getUnit(cComponent *source);
@@ -109,18 +110,19 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
     virtual void removeAllStatisticVisualizations();
 
     virtual void refreshStatisticVisualization(const StatisticVisualization *statisticVisualization);
-    virtual void processSignal(cComponent *source, simsignal_t signal, double value);
+    virtual void processSignal(cComponent *source, simsignal_t signal, std::function<void (cIListener *)> receiveSignal);
 
   public:
     virtual ~StatisticVisualizerBase();
 
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, bool b, cObject *details) override { processSignal(source, signal, NaN); }
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, long l, cObject *details) override { processSignal(source, signal, l); }
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, unsigned long l, cObject *details) override { processSignal(source, signal, l); }
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, double d, cObject *details) override { processSignal(source, signal, d); }
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, const SimTime& t, cObject *details) override { processSignal(source, signal, t.dbl()); }
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, const char *s, cObject *details) override { processSignal(source, signal, NaN); }
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details) override { processSignal(source, signal, NaN); }
+#define PROCESS_SIGNAL(value) { processSignal(source, signal, [=] (cIListener *listener) { listener->receiveSignal(source, signal, value, details); }); }
+    virtual void receiveSignal(cComponent* source, simsignal_t signal, bool b, cObject* details) override { PROCESS_SIGNAL(b); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, long l, cObject *details) override { PROCESS_SIGNAL(l); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, unsigned long l, cObject *details) override { PROCESS_SIGNAL(l); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, double d, cObject *details) override { PROCESS_SIGNAL(d); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, const SimTime& t, cObject *details) override { PROCESS_SIGNAL(t); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, const char *s, cObject *details) override { PROCESS_SIGNAL(s); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details) override { PROCESS_SIGNAL(obj); }
 };
 
 } // namespace visualizer

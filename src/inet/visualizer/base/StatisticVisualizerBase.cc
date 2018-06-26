@@ -133,7 +133,7 @@ void StatisticVisualizerBase::addResultRecorder(cComponent *source, simsignal_t 
     statisticBuilder.addResultRecorders(source, signal, statisticName, &statisticTemplateProperty);
 }
 
-StatisticVisualizerBase::LastValueRecorder *StatisticVisualizerBase::findResultRecorder(cComponent *source, simsignal_t signal)
+StatisticVisualizerBase::LastValueRecorder *StatisticVisualizerBase::getResultRecorder(cComponent *source, simsignal_t signal)
 {
     auto listeners = source->getLocalSignalListeners(signal);
     for (auto listener : listeners) {
@@ -143,7 +143,7 @@ StatisticVisualizerBase::LastValueRecorder *StatisticVisualizerBase::findResultR
                 return foundResultFilter;
         }
     }
-    return nullptr;
+    throw cRuntimeError("Recorder not found for signal '%s'", signalName);
 }
 
 StatisticVisualizerBase::LastValueRecorder *StatisticVisualizerBase::findResultRecorder(cResultListener *resultListener)
@@ -214,7 +214,7 @@ void StatisticVisualizerBase::removeAllStatisticVisualizations()
     }
 }
 
-void StatisticVisualizerBase::processSignal(cComponent *source, simsignal_t signal, double value)
+void StatisticVisualizerBase::processSignal(cComponent *source, simsignal_t signal, std::function<void (cIListener *)> receiveSignal)
 {
     auto statisticVisualization = getStatisticVisualization(source, signal);
     if (statisticVisualization != nullptr)
@@ -222,13 +222,10 @@ void StatisticVisualizerBase::processSignal(cComponent *source, simsignal_t sign
     else {
         if (sourceFilter.matches(check_and_cast<cModule *>(source))) {
             auto statisticVisualization = createStatisticVisualization(source, signal);
-            // TODO: when we are adding a delegate to a count(packet) filter chain, then the incoming value will be NaN (due to the signal being about a packet)
-            // TODO: but the count is already 1 at this point and we have no way of getting it, and we will be notified only with the next emit when it becomes 2, never receiving 1 here
             addResultRecorder(source, signal);
-            statisticVisualization->recorder = findResultRecorder(source, signal);
-            if (statisticVisualization->recorder == nullptr)
-                throw cRuntimeError("Statistic '%s' not found for signal '%s'", statisticName, signalName);
-            statisticVisualization->recorder->setLastValue(value);
+            statisticVisualization->recorder = getResultRecorder(source, signal);
+            auto listeners = source->getLocalSignalListeners(signal);
+            receiveSignal(listeners[listeners.size() - 1]);
             addStatisticVisualization(statisticVisualization);
             refreshStatisticVisualization(statisticVisualization);
         }
