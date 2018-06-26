@@ -2,6 +2,10 @@
 
 2018-06-15  ------ inet-4.0.0 released ------
 
+2018-06-14  Levente Mészáros
+
+	Merged all const_cast<GpsrOption *> KLUDGEs into one place.
+
 2018-06-01  Zoltan Bojthe
 
 	Added B/b units to length constants and length fields of chunks.

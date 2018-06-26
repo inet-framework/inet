@@ -2,6 +2,10 @@
 
 2018-06-15  ------ inet-4.0.0 released ------
 
+2018-06-26  Levente Mészáros
+
+	Changed signal source to TcpSinkApp instead of TcpSinkAppThread.
+
 2018-06-01  Zoltan Bojthe
 
 	Added B/b units to length constants and length fields of chunks.

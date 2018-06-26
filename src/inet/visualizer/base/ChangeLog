@@ -2,6 +2,16 @@
 
 2018-06-15  ------ inet-4.0.0 released ------
 
+2018-06-26  Levente Mészáros
+
+	Refactored StatisticVisualizerBase to use cStatisticBuilder.
+
+	Removed recordingMode parameter. Added statisticExpression parameter.
+
+2018-06-14  Levente Mészáros
+
+	Fixed crash caused by dynamically deleted mobility modules.
+
 2018-06-08  Gyorgy Szaszko
 
 	Added metric to RoutingTableVisualizerBase labelFormat directives.

@@ -2,6 +2,10 @@
 
 2018-06-15  ------ inet-4.0.0 released ------
 
+2018-06-25  Levente Mészáros
+
+	Changed region tag getter functions to return const tags, because chunks can be shared.
+
 2018-05-15  Levente Mészáros
 
 	Added missing checkImmutable calls into Chunk::mark* methods.

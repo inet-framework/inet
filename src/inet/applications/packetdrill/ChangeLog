@@ -2,6 +2,14 @@
 
 2018-06-15  ------ inet-4.0.0 released ------
 
+2018-06-25  Zoltan Bojthe
+
+	Fixed CreationTimeTag.
+
+2018-06-15  Zoltan Bojthe
+
+	Fixed IPv4 header CRC.
+
 2018-06-01  Zoltan Bojthe
 
 	Added B/b units to length constants and length fields of chunks.

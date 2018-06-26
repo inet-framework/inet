@@ -2,6 +2,14 @@
 
 2018-06-15  ------ inet-4.0.0 released ------
 
+2018-06-25  Levente Mészáros
+
+	Fixed PRE_MODEL_CHANGE guard in mobility visualizers.
+
+2018-06-14  Levente Mészáros
+
+	Fixed crash caused by dynamically deleted mobility modules.
+
 2018-06-05  Levente Mészáros
 
 	Replaced fooType NED parameters with foo.typename parameters.

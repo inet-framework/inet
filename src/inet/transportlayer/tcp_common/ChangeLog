@@ -2,6 +2,14 @@
 
 2018-06-15  ------ inet-4.0.0 released ------
 
+2018-06-25  Zoltan Bojthe
+
+	CRC insertion calculates CRC only when crcMode is CRC_COMPUTED.
+
+2018-06-18  Zoltan Bojthe
+
+	CrcInsertion doesn't calculate CRC for fragmented packets and forwarded packets.
+
 2018-06-01  Zoltan Bojthe
 
 	Added B/b units to length constants and length fields of chunks.

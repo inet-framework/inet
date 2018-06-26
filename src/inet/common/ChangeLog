@@ -2,6 +2,10 @@
 
 2018-06-15  ------ inet-4.0.0 released ------
 
+2018-06-14  Zoltan Bojthe
+
+	Split getRequiredAttribute() into getMandatoryAttribute() and getMandatoryFilledAttribute()
+
 2018-06-11  Zoltan Bojthe
 
 	Replaced protocol name and descriptiveName fields with std::string.

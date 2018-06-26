@@ -2,6 +2,10 @@
 
 2018-06-15  ------ inet-4.0.0 released ------
 
+2018-06-14  Zoltan Bojthe
+
+	Added bool vector attribute to ScenarioManager for create module command.
+
 2018-04-24  Andras Varga
 
 	Renamed <set-channel-attr> to <set-channel-param>.

@@ -2,6 +2,15 @@
 
 2018-06-15  ------ inet-4.0.0 released ------
 
+2018-06-25  Zoltan Bojthe
+
+	CRC insertion calculates CRC only when crcMode is CRC_COMPUTED.
+	Calculate crc only once (CRC_COMPUTED calculated in Udp::CrcInsertion hook)
+
+2018-06-18  Zoltan Bojthe
+
+	CrcInsertion doesn't calculate crc for fragmented packets and forwarded packets.
+
 2018-06-06  Zoltan Bojthe
 
 	Fixed checks for too short totalLength, truncate padding (out of totalLength).

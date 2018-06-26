@@ -2,6 +2,14 @@
 
 2018-06-15  ------ inet-4.0.0 released ------
 
+2018-06-14  Levente Mészáros
+
+	Changed radio default mode to fastest mode in mode set if bitrate is not specified.
+
+	This allows configuring static routing based on error rate without
+	specifying a bitrate for the radio. Of course, the 802.11 mac still
+	overrides this mode for each packet.
+
 2018-06-05  Levente Mészáros
 
 	Replaced fooType NED parameters with foo.typename parameters.
