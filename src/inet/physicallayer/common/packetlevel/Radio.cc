@@ -32,11 +32,6 @@ namespace physicallayer {
 
 Define_Module(Radio);
 
-simsignal_t Radio::minSnirSignal = cComponent::registerSignal("minSnir");
-simsignal_t Radio::packetErrorRateSignal = cComponent::registerSignal("packetErrorRate");
-simsignal_t Radio::bitErrorRateSignal = cComponent::registerSignal("bitErrorRate");
-simsignal_t Radio::symbolErrorRateSignal = cComponent::registerSignal("symbolErrorRate");
-
 Radio::~Radio()
 {
     // NOTE: can't use the medium module here, because it may have been already deleted
