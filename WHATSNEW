@@ -123,7 +123,7 @@ The highlights of this release since the last development release are:
 
    Fixed bug when a packet was received from another Ap and sent up incorrectly.
    Fixed ACK frame duration bug reported by Raphael Elsner.
-   Fixed exploded frame transmitter address in MsduDeagregation.
+   Fixed exploded frame transmitter address in MsduDeaggregation.
    Fixed length field wrap around for large packets.
    Fixed center frequency calculation in Ieee80211ArithmeticalBand.
 
@@ -131,7 +131,7 @@ The highlights of this release since the last development release are:
 
    The whole emulation support, including the ExternalInterface compound module,
    the Ext simple module, and the corresponding cSocketRtScheduler have been
-   redesigned and heavily refactored. The new C++ scheduler class is called the
+   redesigned and heavily refactored. The new C++ scheduler class is called
    RealTimeScheduler and it is completely independent of the external interfaces.
 
    The new scheduler still provides real time simulation execution, but it also
@@ -140,11 +140,11 @@ The highlights of this release since the last development release are:
    raw packets via PCAP. Futhermore, the new external interface implementation
    uses dedicated raw sockets to send packets.
 
-8. Licycle and scenario management
+8. Lifecycle and scenario management
 
-   The LifecycleController module has been removed becaose the module did not
+   The LifecycleController module has been removed because the module did not
    have and is not expected to have any parameters in the future. Therefore the
-   LifecycleController module is no longer needed in the network for the lifcycle
+   LifecycleController module is no longer needed in the network for the lifecycle
    operations to work. The corresponding LifecycleController C++ class with the
    actual functionality remains there.
 
@@ -165,10 +165,10 @@ The highlights of this release since the last development release are:
 
 10. Other notable changes
 
-    The ethernet model has been extended with 200 Gbit and 400 Gbit.
+    The Ethernet model has been extended with 200 Gbit and 400 Gbit modes.
 
     The antenna directional selectivity computation in wireless medium analog
-    models have been fixed.
+    models has been fixed.
 
     Several missing protocol dissectors and protocol printers have been added.
 
@@ -273,7 +273,7 @@ The highlights of this release are:
 
 7. SCTP
 
-   With this new release, SCTP, the last remaining protocol, has also been 
+   With this new release, SCTP, the last remaining protocol, has also been
    ported to the new packet API.
 
    Many thanks to Irene Rüngeler for her valuable contribution.
@@ -423,7 +423,7 @@ The highlights of this release are:
       all. This is primarily useful for sitations where the MAC protocol is not
       to be simulated in detail. It doesn't provide carrier sense mechanism,
       collision avoidance, or collision detection. The only MAC feature it provides
-      is optional out of bound acknowledgement, hence the name. 
+      is optional out-of-band acknowledgement, hence the name.
 
     - IdealRadio -> UnitDiskRadio
       This rename is simply admitting the fact that this radio implements the
