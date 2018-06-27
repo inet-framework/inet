@@ -175,7 +175,7 @@
 /examples/inet/nclients/,            -f video.ini -c General -r 0,                  50s,             5c63-f5a1/tplx, PASS,
 
 /examples/inet/netperfmeter/,        -f omnetpp.ini -c TraceFile -r 0,              100s,            cf20-1a83/tplx, PASS,
-/examples/inet/netperfmeter/,        -f omnetpp.ini -c SCTP-with-OLIA -r 0,         100s,            73dd-81b3/tplx, PASS,
+/examples/inet/netperfmeter/,        -f omnetpp.ini -c SCTP-with-OLIA -r 0,         30s,             1999-5439/tplx, PASS,
 
 /examples/inet/pcaprecorder/,        -f omnetpp.ini -c General -r 0,                5000s,           f707-85a9/tplx, PASS,
 
