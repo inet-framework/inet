@@ -18,6 +18,7 @@
 #ifndef __INET_ANALOGMODELBASE_H
 #define __INET_ANALOGMODELBASE_H
 
+#include "inet/common/geometry/common/Quaternion.h"
 #include "inet/physicallayer/contract/packetlevel/IAnalogModel.h"
 #include "inet/physicallayer/contract/packetlevel/IArrival.h"
 #include "inet/physicallayer/contract/packetlevel/ITransmission.h"
@@ -29,7 +30,8 @@ namespace physicallayer {
 class INET_API AnalogModelBase : public cModule, public virtual IAnalogModel
 {
   protected:
-    virtual EulerAngles computeTransmissionDirection(const ITransmission *transmission, const IArrival *arrival) const;
+    virtual Quaternion computeTransmissionDirection(const ITransmission *transmission, const IArrival *arrival) const;
+    virtual Quaternion computeReceptionDirection(const ITransmission *transmission, const IArrival *arrival) const;
 };
 
 } // namespace physicallayer

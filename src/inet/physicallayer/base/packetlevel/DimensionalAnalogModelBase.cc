@@ -62,11 +62,12 @@ const ConstMapping *DimensionalAnalogModelBase::computeReceptionPower(const IRad
     const simtime_t receptionEndTime = arrival->getEndTime();
     const Coord receptionStartPosition = arrival->getStartPosition();
     // TODO: could be used for doppler shift? const Coord receptionEndPosition = arrival->getEndPosition();
-    const EulerAngles transmissionDirection = computeTransmissionDirection(transmission, arrival);
-    const EulerAngles transmissionAntennaDirection = transmission->getStartOrientation() - transmissionDirection;
-    const EulerAngles receptionAntennaDirection = transmissionDirection - arrival->getStartOrientation();
-    double transmitterAntennaGain = transmitterAntenna->computeGain(transmissionAntennaDirection);
-    double receiverAntennaGain = receiverAntenna->getGain()->computeGain(receptionAntennaDirection);
+    auto transmissionDirection = computeTransmissionDirection(transmission, arrival);
+    auto antennaLocalTransmissionDirection = Quaternion(transmission->getStartOrientation()).inverse() * transmissionDirection;
+    double transmitterAntennaGain = transmitterAntenna->computeGain(antennaLocalTransmissionDirection.toEulerAngles());
+    auto receptionDirection = computeReceptionDirection(transmission, arrival);
+    auto antennaLocalReceptionDirection = Quaternion(arrival->getStartOrientation()).inverse() * receptionDirection;
+    double receiverAntennaGain = receiverAntenna->getGain()->computeGain(antennaLocalReceptionDirection.toEulerAngles());
     m distance = m(receptionStartPosition.distance(transmission->getStartPosition()));
     mps propagationSpeed = radioMedium->getPropagation()->getPropagationSpeed();
     const ConstMapping *transmissionPower = dimensionalSignalAnalogModel->getPower();

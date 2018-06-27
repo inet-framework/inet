@@ -21,16 +21,14 @@ namespace inet {
 
 namespace physicallayer {
 
-EulerAngles AnalogModelBase::computeTransmissionDirection(const ITransmission *transmission, const IArrival *arrival) const
+Quaternion AnalogModelBase::computeTransmissionDirection(const ITransmission *transmission, const IArrival *arrival) const
 {
-    const Coord transmissionStartPosition = transmission->getStartPosition();
-    const Coord arrivalStartPosition = arrival->getStartPosition();
-    Coord transmissionStartDirection = arrivalStartPosition - transmissionStartPosition;
-    double z = transmissionStartDirection.z;
-    transmissionStartDirection.z = 0;
-    auto heading = rad(atan2(transmissionStartDirection.y, transmissionStartDirection.x));
-    auto elevation = rad(atan2(z, transmissionStartDirection.length()));
-    return EulerAngles(heading, elevation, rad(0));
+    return Quaternion::rotationFromTo(Coord::X_AXIS, arrival->getStartPosition() - transmission->getStartPosition());
+}
+
+Quaternion AnalogModelBase::computeReceptionDirection(const ITransmission *transmission, const IArrival *arrival) const
+{
+    return Quaternion::rotationFromTo(Coord::X_AXIS, transmission->getStartPosition() - arrival->getStartPosition());
 }
 
 } // namespace physicallayer
