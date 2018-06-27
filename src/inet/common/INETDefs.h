@@ -41,8 +41,8 @@ namespace inet {
 using namespace omnetpp;
 }
 
-#if OMNETPP_VERSION < 0x0504
-#  error At least OMNeT++/OMNEST version 5.4 required
+#if OMNETPP_VERSION < 0x0504 || OMNETPP_BUILDNUM < 1020
+#  error At least OMNeT++/OMNEST version 5.4.1 required
 #endif // if OMNETPP_VERSION < 0x0504
 
 #define INET_VERSION  0x0400
