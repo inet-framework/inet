@@ -166,13 +166,12 @@
 # /showcases/wireless/scaling/,        -f omnetpp.ini -c IdealRadioMediumBase -r 0,   100s,         0000-0000/tplx, PASS,   # IdealRadioMediumBase extended
 # /showcases/wireless/scaling/,        -f omnetpp.ini -c ScalarRadioMediumBase -r 0,  100s,         0000-0000/tplx, PASS,   # ScalarRadioMediumBase extended
 # /showcases/wireless/scaling/,        -f omnetpp.ini -c Ieee80211Base -r 0,          100s,         0000-0000/tplx, PASS,   # Ieee80211Base extended
-/showcases/wireless/scaling/,        -f omnetpp.ini -c Ieee80211Ping -r 0,          100s,         39f4-12ab/tplx, PASS,
 /showcases/wireless/scaling/,        -f omnetpp.ini -c Ieee80211Ping -r 0,                                      500s,            44e9-728f/tplx, PASS,
 /showcases/wireless/scaling/,        -f omnetpp.ini -c Ieee80211Udp -r 0,                                       500s,            03b6-5da3/tplx, PASS,
-/showcases/wireless/scaling/,        -f omnetpp.ini -c ApskRadioPing -r 0,                                      500s,            0000-0000/tplx, ERROR,
-/showcases/wireless/scaling/,        -f omnetpp.ini -c ApskRadioUdp -r 0,                                       500s,            0000-0000/tplx, ERROR,
-/showcases/wireless/scaling/,        -f omnetpp.ini -c IdealRadioPing -r 0,                                     500s,            0000-0000/tplx, ERROR,
-/showcases/wireless/scaling/,        -f omnetpp.ini -c IdealRadioUdp -r 0,                                      500s,            0000-0000/tplx, ERROR,
+/showcases/wireless/scaling/,        -f omnetpp.ini -c ApskRadioPing -r 0,                                      500s,            25cc-4933/tplx, PASS,
+/showcases/wireless/scaling/,        -f omnetpp.ini -c ApskRadioUdp -r 0,                                       500s,            418a-1ded/tplx, PASS,
+/showcases/wireless/scaling/,        -f omnetpp.ini -c IdealRadioPing -r 0,                                     500s,            37e4-12cc/tplx, PASS,
+/showcases/wireless/scaling/,        -f omnetpp.ini -c IdealRadioUdp -r 0,                                      500s,            b428-a77d/tplx, PASS,
 
 /showcases/wireless/sensornetwork/,  -f omnetpp.ini -c BMac -r 0,                   100s,         2171-bb23/tplx, PASS,
 /showcases/wireless/sensornetwork/,  -f omnetpp.ini -c XMac -r 0,                   100s,         469c-01fe/tplx, PASS,
