@@ -167,6 +167,9 @@ The highlights of this release since the last development release are:
 
     The ethernet model has been extended with 200 Gbit and 400 Gbit.
 
+    The antenna directional selectivity computation in wireless medium analog
+    models have been fixed.
+
     Several missing protocol dissectors and protocol printers have been added.
 
     All protocol specific header serializers have been moved to the folder of their
