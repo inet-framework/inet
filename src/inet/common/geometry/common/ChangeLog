@@ -2,6 +2,10 @@
 
 2018-06-27  ------ inet-4.0.0 released ------
 
+2018-06-27  Levente Mészáros
+
+	Fixed Quaternion to EulerAngles conversion.
+
 2018-06-11  Levente Mészáros
 
 	Added CanvasProjection::computeCanvasPointInverse.

@@ -2,6 +2,10 @@
 
 2018-06-27  ------ inet-4.0.0 released ------
 
+2018-06-27  Levente Mészáros
+
+	Fixed antenna directional selectivity computation in radio medium analog models.
+
 2018-06-05  Levente Mészáros
 
 	Replaced fooType NED parameters with foo.typename parameters.

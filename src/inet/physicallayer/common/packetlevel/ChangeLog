@@ -2,6 +2,10 @@
 
 2018-06-27  ------ inet-4.0.0 released ------
 
+2018-06-26  Levente Mészáros
+
+	Dropped unused signals.
+
 2018-06-08  Levente Mészáros
 
 	Added initialRadioMode parameter.

@@ -2,6 +2,10 @@
 
 2018-06-27  ------ inet-4.0.0 released ------
 
+2018-06-27  Levente Mészáros
+
+	Reverted back the emit signal to TcpSinkAppThread and disabled signal checks locally.
+
 2018-06-26  Levente Mészáros
 
 	Changed signal source to TcpSinkApp instead of TcpSinkAppThread.
