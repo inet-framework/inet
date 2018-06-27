@@ -25,15 +25,14 @@ import inet.applications.contract.IApp;
 // Accepts any number of incoming TCP connections, and discards whatever
 // arrives on them. Compatible with both ~Ipv4 and ~Ipv6.
 //
-simple TcpSinkApp extends TcpServerHostApp
+module TcpSinkApp extends TcpServerHostApp
 {
     parameters:
+        serverThreadModuleType = default("inet.applications.tcpapp.TcpSinkAppThread");
         @class(TcpSinkApp);
         @display("i=block/sink");
-        serverThreadModuleType = "inet.applications.tcpapp.TcpSinkAppThread";
-        @signal[packetReceived](type=Packet);
-        @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[endToEndDelay](title="end-to-end delay"; source="dataAge(packetReceived)"; unit=s; record=histogram,vector; interpolationmode=none);
+        @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none; checkSignals=false);
+        @statistic[endToEndDelay](title="end-to-end delay"; source="dataAge(packetReceived)"; unit=s; record=histogram,vector; interpolationmode=none; checkSignals=false);
 }
 
 simple TcpSinkAppThread

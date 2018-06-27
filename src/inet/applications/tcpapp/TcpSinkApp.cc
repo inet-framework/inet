@@ -82,7 +82,7 @@ void TcpSinkAppThread::dataArrived(Packet *pk, bool urgent)
     bytesRcvd += packetLength;
     sinkAppModule->bytesRcvd += packetLength;
 
-    getParentModule()->emit(packetReceivedSignal, pk);
+    emit(packetReceivedSignal, pk);
     delete pk;
 }
 
