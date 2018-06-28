@@ -59,6 +59,10 @@ module Ipv4NetworkLayer like INetworkLayer
             parameters:
                 @display("p=100,200;is=s");
         }
+        natTable: Ipv4NatTable {
+            parameters:
+                @display("p=100,300;is=s");
+        }
         up: MessageDispatcher {
             parameters:
                 @display("p=550,100;b=600,5");
