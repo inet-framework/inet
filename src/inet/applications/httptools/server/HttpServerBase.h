@@ -44,7 +44,7 @@ namespace httptools {
  *
  * @see HttpServer
  * @see HttpServerDirect
- * @see DirectHost.
+ * @see HttpDirectHost.
  *
  * @author  Kristjan V. Jonsson
  */

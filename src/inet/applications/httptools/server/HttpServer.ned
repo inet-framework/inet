@@ -98,7 +98,7 @@ import inet.applications.contract.IApp;
 // can be satisfied (a 200:OK reply). Otherwise, a 404:Not found reply is issued.
 //
 // @see HttpServerDirect
-// @see DirectHost
+// @see HttpDirectHost
 //
 // @author  Kristjan V. Jonsson
 //

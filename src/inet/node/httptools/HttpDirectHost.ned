@@ -21,19 +21,16 @@ import inet.applications.httptools.common.IHttpDirectApp;
 
 
 //
-// Simple host for the HttpTools project. The module is derived from the INET
-// StandardHost module. All network infrastructure modules were removed;
-// the node is a simple container for tcpApps. Suitable apps are the HttpBrowserDirect
-// and HttpServerDirect modules from HttpTools.
-// See the INET documentation for StandardHost and the provided examples on how
-// to assign tcpApps to the module.
+// Simple host for the HttpTools project. The node is a simple container for tcpApps.
+// Suitable apps are the HttpBrowserDirect and HttpServerDirect modules from HttpTools.
 //
+// @see IHttpDirectApp
 // @see HttpServerDirect
 // @see HttpBrowserDirect
 //
 // @author Kristjan V. Jonsson (kristjanvj@gmail.com)
 //
-module DirectHost
+module HttpDirectHost
 {
     parameters:
         @networkNode;
@@ -44,5 +41,4 @@ module DirectHost
                 @display("p=100,100,row,150;i=block/app");
         }
 }
-
 

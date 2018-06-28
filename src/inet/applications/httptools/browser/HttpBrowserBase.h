@@ -39,7 +39,7 @@ namespace httptools {
  *
  * The component is designed to plug into the existing INET StandardHost module as a
  * tcpApp. See the INET documentation and examples for details. It can also be used
- * with the simplified DirectHost, which only supports direct message passing.
+ * with the simplified HttpDirectHost, which only supports direct message passing.
  *
  * The browser can operate in two modes:
  * - Random request mode: The browser uses the parameters supplied and statistical distributions

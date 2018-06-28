@@ -31,7 +31,7 @@
 package inet.examples.httptools.direct.pairdirect;
 
 import inet.applications.httptools.configurator.HttpController;
-import inet.node.httptools.DirectHost;
+import inet.node.httptools.HttpDirectHost;
 
 
 //
@@ -45,11 +45,11 @@ network HttpDirectPair
             parameters:
                 @display("is=s;p=100,100;i=block/cogwheel");
         }
-        srv: DirectHost {
+        srv: HttpDirectHost {
             parameters:
                 @display("p=250,100;i=device/server");
         }
-        cli: DirectHost {
+        cli: HttpDirectHost {
             parameters:
                 @display("p=400,100;i=device/laptop");
         }
