@@ -8,7 +8,7 @@ case "$-" in
     fi
 esac
 
-if [ ! -f inet_featuretool ]; then
+if [ ! -f bin/inet ]; then
     echo "Error: current working directory does not look like an INET root directory"
     # no exit -- it would close the shell
 else
