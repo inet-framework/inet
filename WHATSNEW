@@ -5,7 +5,7 @@ INET-4.0 (June 2018) - Stable
 -----------------------------
 
 This is the first stable release of the new INET 4.x branch. All originally
-planned tasks have been completed. This version requires OMNeT++ 5.4 or later.
+planned tasks have been completed. This version requires OMNeT++ 5.4.1 or later.
 
 With the new INET 4.0 release, the development of the old INET 3.x branch is
 stopped. Users are strongly encouraged to use the new INET 4.0 version for new
