@@ -59,7 +59,7 @@ fi
 
 # clean up the showcase and tutorial dir and remove the website text and videos to reduce package size
 (cd showcases && rm -rf _config.yml _docs */*/doc __TODO)
-(cd tutorials && rm -rf _config.yml _docs */*/doc __TODO _wireless-packetcounts)
+(cd tutorials && rm -rf _config.yml _docs */doc __TODO _wireless-packetcounts)
 
 # pack and create tar.gz archives
 echo Creating $FILENAME.
