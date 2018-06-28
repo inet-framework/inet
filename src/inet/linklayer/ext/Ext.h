@@ -63,7 +63,6 @@ class INET_API Ext : public MacBase, public RealTimeScheduler::ICallback
     pcap_t *pd = nullptr;           // pcap socket
     int pcap_socket = -1;
     int datalink = -1;
-    int headerLength = -1;               // link layer header length
 
   protected:
     virtual void refreshDisplay() const override;
