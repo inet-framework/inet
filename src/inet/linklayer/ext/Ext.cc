@@ -155,7 +155,6 @@ void Ext::openPcap(const char *device, const char *filter)
     struct bpf_program fcode;
     pcap_t *pd;
     int32 datalink;
-    int32 headerLength;
 
     if (!device || !filter)
         throw cRuntimeError("arguments must be non-nullptr");
@@ -190,30 +189,8 @@ void Ext::openPcap(const char *device, const char *filter)
         throw cRuntimeError("Cannot put pcap device into non-blocking mode, error: %s", errbuf);
 #endif
 
-    switch (datalink) {
-        case DLT_NULL:
-            headerLength = 4;
-            break;
-
-        case DLT_EN10MB:
-            headerLength = 14;
-            break;
-
-        case DLT_SLIP:
-            headerLength = 24;
-            break;
-
-        case DLT_PPP:
-            headerLength = 24;
-            break;
-
-        default:
-            throw cRuntimeError("RealTimeScheduler::setInterfaceModule(): Unsupported datalink: %d", datalink);
-    }
-
     this->pd = pd;
     this->datalink = datalink;
-    this->headerLength = headerLength;
 #ifdef __linux__
     this->pcap_socket = pcap_get_selectable_fd(pd);
 #endif
