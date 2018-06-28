@@ -66,8 +66,6 @@ class INET_API Ext : public MacBase, public RealTimeScheduler::ICallback
     int headerLength = -1;               // link layer header length
 
   protected:
-    void displayBusy();
-    void displayIdle();
     virtual void refreshDisplay() const override;
 
     // MacBase functions

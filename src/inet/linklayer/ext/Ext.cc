@@ -309,17 +309,6 @@ void Ext::sendBytes(uint8 *buf, size_t numBytes, struct sockaddr *to, socklen_t 
     return;
 }
 
-
-void Ext::displayBusy()
-{
-    getDisplayString().setTagArg("i", 1, "yellow");
-}
-
-void Ext::displayIdle()
-{
-    getDisplayString().setTagArg("i", 1, "");
-}
-
 void Ext::refreshDisplay() const
 {
     if (connected) {
