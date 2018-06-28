@@ -18,18 +18,17 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "inet/applications/common/SocketTag_m.h"
 #include "inet/applications/sctpapp/SctpNatServer.h"
 #include "inet/applications/sctpapp/SctpNatPeer.h"
-
-#include "inet/transportlayer/sctp/SctpAssociation.h"
-#include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
-#include "inet/transportlayer/contract/sctp/SctpSocket.h"
-#include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/transportlayer/sctp/SctpNatTable.h"
-#include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/TimeTag_m.h"
 #include "inet/common/packet/Message.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
+#include "inet/transportlayer/contract/sctp/SctpSocket.h"
+#include "inet/transportlayer/sctp/SctpAssociation.h"
+#include "inet/transportlayer/sctp/SctpNatTable.h"
 
 namespace inet {
 

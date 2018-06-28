@@ -18,15 +18,15 @@
 
 #include "inet/applications/sctpapp/SctpClient.h"
 
-#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/TimeTag_m.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/packet/Message.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/sctp/SctpAssociation.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
-#include "inet/common/packet/chunk/ByteCountChunk.h"
-#include "inet/common/TimeTag_m.h"
-#include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/common/packet/Message.h"
 
 namespace inet {
 
