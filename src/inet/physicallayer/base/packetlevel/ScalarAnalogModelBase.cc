@@ -35,18 +35,12 @@ bool ScalarAnalogModelBase::areOverlappingBands(Hz carrierFrequency1, Hz bandwid
 W ScalarAnalogModelBase::computeReceptionPower(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
 {
     const IRadioMedium *radioMedium = receiverRadio->getMedium();
-    const IAntenna *receiverAntenna = receiverRadio->getAntenna();
-    const IAntennaGain *transmitterAntenna = transmission->getTransmitterAntennaGain();
     const INarrowbandSignal *narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(transmission->getAnalogModel());
     const IScalarSignal *scalarSignalAnalogModel = check_and_cast<const IScalarSignal *>(transmission->getAnalogModel());
     const Coord receptionStartPosition = arrival->getStartPosition();
     // TODO: could be used for doppler shift? const Coord receptionEndPosition = arrival->getEndPosition();
-    auto transmissionDirection = computeTransmissionDirection(transmission, arrival);
-    auto antennaLocalTransmissionDirection = Quaternion(transmission->getStartOrientation()).inverse() * transmissionDirection;
-    double transmitterAntennaGain = transmitterAntenna->computeGain(antennaLocalTransmissionDirection.toEulerAngles());
-    auto receptionDirection = computeReceptionDirection(transmission, arrival);
-    auto antennaLocalReceptionDirection = Quaternion(arrival->getStartOrientation()).inverse() * receptionDirection;
-    double receiverAntennaGain = receiverAntenna->getGain()->computeGain(antennaLocalReceptionDirection.toEulerAngles());
+    double transmitterAntennaGain = computeAntennaGain(transmission->getTransmitterAntennaGain(), transmission->getStartPosition(), arrival->getStartPosition(), transmission->getStartOrientation());
+    double receiverAntennaGain = computeAntennaGain(receiverRadio->getAntenna()->getGain().get(), arrival->getStartPosition(), transmission->getStartPosition(), arrival->getStartOrientation());
     double pathLoss = radioMedium->getPathLoss()->computePathLoss(transmission, arrival);
     double obstacleLoss = radioMedium->getObstacleLoss() ? radioMedium->getObstacleLoss()->computeObstacleLoss(narrowbandSignalAnalogModel->getCarrierFrequency(), transmission->getStartPosition(), receptionStartPosition) : 1;
     W transmissionPower = scalarSignalAnalogModel->getPower();

@@ -15,20 +15,22 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/geometry/common/Quaternion.h"
 #include "inet/physicallayer/base/packetlevel/AnalogModelBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-Quaternion AnalogModelBase::computeTransmissionDirection(const ITransmission *transmission, const IArrival *arrival) const
+double AnalogModelBase::computeAntennaGain(const IAntennaGain* antennaGain, const Coord& startPosition, const Coord& endPosition, const EulerAngles& startOrientation) const
 {
-    return Quaternion::rotationFromTo(Coord::X_AXIS, arrival->getStartPosition() - transmission->getStartPosition());
-}
-
-Quaternion AnalogModelBase::computeReceptionDirection(const ITransmission *transmission, const IArrival *arrival) const
-{
-    return Quaternion::rotationFromTo(Coord::X_AXIS, transmission->getStartPosition() - arrival->getStartPosition());
+    if (antennaGain->getMinGain() == antennaGain->getMaxGain())
+        return antennaGain->getMinGain();
+    else {
+        auto direction = Quaternion::rotationFromTo(Coord::X_AXIS, endPosition - startPosition);
+        auto antennaLocalDirection = Quaternion(startOrientation).inverse() * direction;
+        return antennaGain->computeGain(antennaLocalDirection.toEulerAngles());
+    }
 }
 
 } // namespace physicallayer
