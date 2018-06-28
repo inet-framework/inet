@@ -887,7 +887,7 @@ void SctpNatPeer::addressAddedArrived(SctpSocket *socket, L3Address localAddr, L
         nat->portPeer1 = par("localPort");
         nat->portPeer2 = 0;
         nat->numAddrPeer1 = 2;
-        nat->numAddrPeer1 = 2;
+        nat->numAddrPeer2 = 2;
         bool mul = par("multi");
         if (mul == true) {
             nat->multi = 1;

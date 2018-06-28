@@ -88,7 +88,7 @@ void SctpNatServer::sendInfo(NatInfo *info)
     nat->portPeer1 = info->peer1Port;
     nat->portPeer2 = info->peer2Port;
     nat->numAddrPeer1 = 2;
-    nat->numAddrPeer1 = 2;
+    nat->numAddrPeer2 = 2;
     nat->multi = info->multi;
     buflen = ADD_PADDING(buflen + 4 * (nat->numAddrPeer1 + nat->numAddrPeer2));
     nat->peer1Addresses[0] = info->peer1Address1.toIpv4().getInt();
@@ -135,7 +135,7 @@ void SctpNatServer::sendInfo(NatInfo *info)
     nat2->portPeer1 = info->peer2Port;
     nat2->portPeer2 = info->peer1Port;
     nat2->numAddrPeer1 = 2;
-    nat2->numAddrPeer1 = 2;
+    nat2->numAddrPeer2 = 2;
     nat2->multi = info->multi;
     buflen = ADD_PADDING(buflen + 4 * (nat2->numAddrPeer1 + nat2->numAddrPeer2));
     nat2->peer1Addresses[0] = info->peer2Address1.toIpv4().getInt();
