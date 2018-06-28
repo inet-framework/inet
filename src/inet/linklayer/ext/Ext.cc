@@ -56,29 +56,8 @@ void Ext::ext_packet_handler(u_char *usermod, const struct pcap_pkthdr *hdr, con
 {
     EV_STATICCONTEXT;
     Ext *module = (Ext*)usermod;
-
-    //FIXME Why? Could we use the pcap for filtering incoming IPv4 packet?
-    //FIXME Why filtering IPv4 only on eth interface? why not filtering on PPP or other interfaces?
-    // skip ethernet frames not encapsulating an IP packet.
-    // TODO: how about ipv6 and other protocols?
-    if (module->datalink == DLT_EN10MB && B(hdr->caplen) > ETHER_MAC_HEADER_BYTES) {
-        //TODO for decapsulate, using code from EtherEncap
-        uint16_t etherType = (uint16_t)(bytes[B(ETHER_ADDR_LEN).get() * 2]) << 8 | bytes[B(ETHER_ADDR_LEN).get() * 2 + 1];
-        //TODO get ethertype from snap header when packet has snap header
-        if (etherType != ETHERTYPE_IPv4) // ipv4
-            return;
-    }
-    //TODO for other DLT_ : decapsulate
-    //TODO or move decapsulation to Ext interface
-
-    // put the IP packet from wire into Packet
-    uint32_t pklen = hdr->caplen - module->headerLength;
-    Packet *packet = new Packet("rtEvent");
-    const auto& bytesChunk = makeShared<BytesChunk>(bytes + module->headerLength, pklen);
-    packet->insertAtBack(bytesChunk);
-
-    // signalize new incoming packet to the interface via cMessage
-    EV << "Captured " << pklen << " bytes for an IP packet.\n";
+    Packet *packet = new Packet("CapturedPacket", makeShared<BytesChunk>(bytes, hdr->caplen));
+    EV << "Captured " << packet->getTotalLength() << " packet" << endl;
     module->rtScheduler->scheduleMessage(module, packet);
 }
 
