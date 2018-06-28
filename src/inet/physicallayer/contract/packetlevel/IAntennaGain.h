@@ -36,6 +36,11 @@ class INET_API IAntennaGain : public IPrintableObject
 {
   public:
     /**
+     * Returns the minimum possible antenna gain independent of any direction.
+     */
+    virtual double getMinGain() const = 0;
+
+    /**
      * Returns the maximum possible antenna gain independent of any direction.
      */
     virtual double getMaxGain() const = 0;

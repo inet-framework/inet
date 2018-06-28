@@ -35,6 +35,7 @@ class INET_API DipoleAntenna : public AntennaBase
       public:
         AntennaGain(m length);
         virtual m getLength() const { return length; }
+        virtual double getMinGain() const override { return 0; }
         virtual double getMaxGain() const override { return 1.5; }
         virtual double computeGain(const EulerAngles direction) const override;
 
