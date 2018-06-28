@@ -23,9 +23,7 @@ import inet.applications.contract.IApp;
 // Single-connection TCP application: it opens a connection, sends
 // the given number of bytes, and closes. Sending may be one-off,
 // or may be controlled by a "script" which is a series of
-// (time, number of bytes) pairs. May act either as client or as server,
-// and works with TCPVirtualBytesSendQueue/RcvQueue as sendQueue/receiveQueue
-// setting for ~Tcp.
+// (time, number of bytes) pairs. May act either as client or as server.
 // Compatible with both Ipv4 (~Ipv4) and IPv6 (~Ipv6).
 //
 // <b>Opening the connection</b>

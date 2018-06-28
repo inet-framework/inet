@@ -26,15 +26,6 @@ import inet.applications.contract.IApp;
 // result in sending back the same message unmodified.) The reply can also be
 // delayed by a constant time (echoDelay parameter).
 //
-// When TcpEchoApp receives data packets from TCP (and such, when they can be
-// echoed) depends on the sendQueue/receiveQueue setting of TCPMain.
-// With TCPVirtualBytesSendQueue/RcvQueue, TCP passes up data to us
-// as soon as a segment arrives, so it can be echoed immediately.
-// With TCPMsgBasedSendQueue/RcvQueue, our local TCP reproduces the same
-// messages that the sender app passed down to its TCP -- so if the sender
-// app sent a single 100 MB message, it will be echoed only when all
-// 100 megabytes have arrived.
-//
 simple SctpNatPeer like IApp
 {
     parameters:

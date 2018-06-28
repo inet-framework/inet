@@ -15,6 +15,9 @@
 
 package inet.linklayer.contract;
 
+//
+// Prototype module for wireless network interfaces.
+//
 moduleinterface IWirelessInterface extends INetworkInterface
 {
     parameters:
