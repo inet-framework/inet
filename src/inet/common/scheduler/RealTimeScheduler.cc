@@ -69,6 +69,8 @@ void RealTimeScheduler::removeCallback(int fd, ICallback *callback)
 void RealTimeScheduler::startRun()
 {
     baseTime = opp_get_monotonic_clock_usecs();
+    // this event prevents Qtenv fast forwarding to the first event
+    sim->getFES()->insert(new BeginSimulationEvent("BeginSimulation"));
 }
 
 void RealTimeScheduler::endRun()

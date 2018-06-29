@@ -46,6 +46,16 @@ class INET_API RealTimeScheduler : public cScheduler
     static int64_t baseTime; // in microseconds, as returned by opp_get_monotonic_clock_usecs()
 
   protected:
+    class BeginSimulationEvent : public cEvent
+    {
+      public:
+        BeginSimulationEvent(const char* name) : cEvent(name) {}
+        virtual cEvent *dup() const override { return new BeginSimulationEvent(getName()); }
+        virtual cObject *getTargetObject() const override { return nullptr; }
+        virtual void execute() override {}
+    };
+
+  protected:
     std::vector<Entry> callbackEntries;
 
   protected:
