@@ -37,8 +37,6 @@
 
 namespace inet {
 
-#define FES(sim) (sim->getFES())
-
 int64_t RealTimeScheduler::baseTime;
 
 Register_Class(RealTimeScheduler);
@@ -153,7 +151,7 @@ int RealTimeScheduler::receiveUntil(int64_t targetTime)
 
 cEvent *RealTimeScheduler::guessNextEvent()
 {
-    return FES(sim)->peekFirst();
+    return sim->getFES()->peekFirst();
 }
 
 cEvent *RealTimeScheduler::takeNextEvent()
@@ -161,7 +159,7 @@ cEvent *RealTimeScheduler::takeNextEvent()
     int64_t targetTime;
 
     // calculate target time
-    cEvent *event = FES(sim)->peekFirst();
+    cEvent *event = sim->getFES()->peekFirst();
     if (!event) {
         // This way targetTime will always be "as far in the future as possible", considering
         // how integer overflows work in conjunction with comparisons in C++ (in practice...)
@@ -182,7 +180,7 @@ cEvent *RealTimeScheduler::takeNextEvent()
         if (status == -1)
             return nullptr; // interrupted by user
         if (status == 1)
-            event = FES(sim)->peekFirst(); // received something
+            event = sim->getFES()->peekFirst(); // received something
     }
     else {
         // we're behind -- customized versions of this class may
@@ -190,14 +188,14 @@ cEvent *RealTimeScheduler::takeNextEvent()
         int64_t diffTime = curTime - targetTime;
         EV << "We are behind: " << diffTime * 1e-6 << " seconds\n";
     }
-    cEvent *tmp = FES(sim)->removeFirst();
+    cEvent *tmp = sim->getFES()->removeFirst();
     ASSERT(tmp == event);
     return event;
 }
 
 void RealTimeScheduler::putBackEvent(cEvent *event)
 {
-    FES(sim)->putBackFirst(event);
+    sim->getFES()->putBackFirst(event);
 }
 
 void RealTimeScheduler::scheduleMessage(cModule *module, cMessage *msg)
