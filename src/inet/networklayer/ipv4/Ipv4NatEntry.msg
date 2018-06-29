@@ -21,4 +21,5 @@ namespace inet;
 class Ipv4NatEntry extends cObject
 {
     Ipv4Address destAddress;
+    int destPort = -1;
 }

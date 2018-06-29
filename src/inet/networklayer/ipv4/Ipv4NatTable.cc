@@ -14,9 +14,13 @@
 //
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4NatTable.h"
+#include "inet/transportlayer/common/L4Tools.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
+#include "inet/transportlayer/udp/Udp.h"
 
 namespace inet {
 
@@ -87,7 +91,18 @@ INetfilter::IHook::Result Ipv4NatTable::processPacket(Packet *packet, INetfilter
         // TODO: this might be slow for too many filters
         if (packetFilter->matches(packet)) {
             auto& ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
-            ipv4Header->setDestAddress(natEntry.getDestAddress());
+            if (!natEntry.getDestAddress().isUnspecified())
+                ipv4Header->setDestAddress(natEntry.getDestAddress());
+            // TODO: other transport protocols
+            auto& udpHeader = removeTransportProtocolHeader<UdpHeader>(packet);
+            // TODO: if (!Udp::verifyCrc(Protocol::ipv4, udpHeader, packet))
+            udpHeader->setCrc(0x0000);
+            auto udpData = packet->peekData();
+            auto crc = Udp::computeCrc(&Protocol::ipv4, ipv4Header->getSrcAddress(), ipv4Header->getDestAddress(), udpHeader, udpData);
+            udpHeader->setCrc(crc);
+            if (natEntry.getDestPort() != -1)
+                udpHeader->setDestPort(natEntry.getDestPort());
+            insertTransportProtocolHeader(packet, Protocol::udp, udpHeader);
             insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
             break;
         }
