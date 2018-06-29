@@ -46,6 +46,10 @@ module ExtInterface like IExternalInterface
         inputHook[numInputHooks]: <default("Nop")> like IHook if numInputHooks>0 {
             @display("p=177,33");
         }
+        encapDecap: HackEncapDecap {
+            parameters:
+                @display("p=150,100");
+        }
         rawSocket: RawSocket {
             parameters:
                 @display("p=100,200");
@@ -56,20 +60,23 @@ module ExtInterface like IExternalInterface
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> outputHook[0].in if numOutputHooks > 0;
-        upperLayerIn --> { @display("m=n"); } --> rawSocket.upperLayerIn if numOutputHooks == 0;
+        upperLayerIn --> { @display("m=n"); } --> encapDecap.upperLayerIn if numOutputHooks == 0;
 
         for i=0..numOutputHooks-2 {
             outputHook[i].out --> outputHook[i+1].in;
         }
-        outputHook[numOutputHooks-1].out --> rawSocket.upperLayerIn if numOutputHooks > 0;
+        outputHook[numOutputHooks-1].out --> encapDecap.upperLayerIn if numOutputHooks > 0;
 
-        pcapCapture.upperLayerOut --> { @display("m=n"); } --> upperLayerOut if numInputHooks == 0;
+        encapDecap.upperLayerOut --> { @display("m=n"); } --> upperLayerOut if numInputHooks == 0;
 
-        pcapCapture.upperLayerOut --> inputHook[0].in if numInputHooks > 0;
+        encapDecap.upperLayerOut --> inputHook[0].in if numInputHooks > 0;
 
         for i=0..numInputHooks-2 {
             inputHook[i].out --> inputHook[i+1].in;
         }
         inputHook[numInputHooks-1].out --> { @display("m=n"); } --> upperLayerOut if numInputHooks > 0;
+        
+        encapDecap.lowerLayerOut --> rawSocket.upperLayerIn;
+        encapDecap.lowerLayerIn <-- pcapCapture.upperLayerOut;
 }
 
