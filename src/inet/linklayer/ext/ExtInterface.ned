@@ -31,7 +31,7 @@ module ExtInterface like IExternalInterface
 {
     parameters:
         @class(InterfaceEntry);
-        @display("i=block/ifcard;bgb=214,249;bgl=53");
+        @display("i=block/ifcard;bgl=53");
         string interfaceTableModule;   // The path to the InterfaceTable module
         int numOutputHooks = default(0);
         int numInputHooks = default(0);
@@ -46,22 +46,26 @@ module ExtInterface like IExternalInterface
         inputHook[numInputHooks]: <default("Nop")> like IHook if numInputHooks>0 {
             @display("p=177,33");
         }
-        ext: Ext {
+        rawSocket: RawSocket {
             parameters:
-                @display("p=98,207");
+                @display("p=100,200");
+        }
+        pcapCapture: PcapCapture {
+            parameters:
+                @display("p=200,200");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> outputHook[0].in if numOutputHooks > 0;
-        upperLayerIn --> { @display("m=n"); } --> ext.upperLayerIn if numOutputHooks == 0;
+        upperLayerIn --> { @display("m=n"); } --> rawSocket.upperLayerIn if numOutputHooks == 0;
 
         for i=0..numOutputHooks-2 {
             outputHook[i].out --> outputHook[i+1].in;
         }
-        outputHook[numOutputHooks-1].out --> ext.upperLayerIn if numOutputHooks > 0;
+        outputHook[numOutputHooks-1].out --> rawSocket.upperLayerIn if numOutputHooks > 0;
 
-        ext.upperLayerOut --> { @display("m=n"); } --> upperLayerOut if numInputHooks == 0;
+        pcapCapture.upperLayerOut --> { @display("m=n"); } --> upperLayerOut if numInputHooks == 0;
 
-        ext.upperLayerOut --> inputHook[0].in if numInputHooks > 0;
+        pcapCapture.upperLayerOut --> inputHook[0].in if numInputHooks > 0;
 
         for i=0..numInputHooks-2 {
             inputHook[i].out --> inputHook[i+1].in;
