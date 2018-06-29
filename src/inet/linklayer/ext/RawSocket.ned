@@ -27,5 +27,4 @@ simple RawSocket
         @statistic[packetReceivedFromUpper](title="packets received from higher layer"; source=packetReceivedFromUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
     gates:
         input upperLayerIn;
-        output upperLayerOut;
 }
