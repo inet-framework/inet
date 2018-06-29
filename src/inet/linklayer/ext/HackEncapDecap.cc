@@ -15,7 +15,10 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "HackEncapDecap.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/ext/HackEncapDecap.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
 
@@ -24,12 +27,27 @@ Define_Module(HackEncapDecap);
 void HackEncapDecap::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
-    }
+    if (stage == INITSTAGE_LOCAL)
+        // TODO: parameter
+        headerLength = B(14);
 }
 
 void HackEncapDecap::handleMessage(cMessage *msg)
 {
+    auto gateName = msg->getArrivalGate()->getName();
+    if (!strcmp(gateName, "upperLayerIn")) {
+        send(msg, "lowerLayerOut");
+    }
+    else if (!strcmp(gateName, "lowerLayerIn")) {
+        auto packet = check_and_cast<Packet *>(msg);
+        packet->popAtFront(headerLength);
+        // TODO: protocol parameter
+        packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        send(msg, "upperLayerOut");
+    }
+    else
+        throw cRuntimeError("Unknown message");
 }
 
 } // namespace inet

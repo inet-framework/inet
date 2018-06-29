@@ -17,7 +17,18 @@
 
 package inet.linklayer.ext;
 
-simple HackEncapDecap
+moduleinterface IEncapDecap
+{
+    parameters:
+        @display("i=block/square");
+    gates:
+        input lowerLayerIn;
+        output lowerLayerOut;
+        input upperLayerIn;
+        output upperLayerOut;
+}
+
+simple HackEncapDecap like IEncapDecap
 {
     parameters:
         @display("i=block/square");

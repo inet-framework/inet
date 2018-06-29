@@ -18,7 +18,8 @@
 #ifndef __INET_HACKENCAPDECAP_H
 #define __INET_HACKENCAPDECAP_H
 
-#include "inet/common/INETDefs.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/base/MacBase.h"
 
 namespace inet {
 
@@ -27,15 +28,21 @@ namespace inet {
  *
  * See NED file for more details.
  */
-class INET_API HackEncapDecap : public cSimpleModule
+class INET_API HackEncapDecap : public MacBase
 {
+  protected:
+    B headerLength = B(-1);
+
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
 
-  public:
-    virtual ~HackEncapDecap();
+    // MacBase functions
+    InterfaceEntry *createInterfaceEntry() override {}
+    virtual void flushQueue() override {}
+    virtual void clearQueue() override {}
+    virtual bool isUpperMsg(cMessage *msg) override { return msg->arrivedOn("upperLayerIn"); }
 };
 
 } // namespace inet
