@@ -24,7 +24,7 @@ if [ "$BUILDID" = "" ]; then
 fi
 
 FILENAME=$INET_ROOT/inet-$BUILDID-src.tgz
-DIRNAME=inet
+DIRNAME=inet4
 
 rm -rf $INET_ROOT/out/$DIRNAME
 mkdir -p $INET_ROOT/out/$DIRNAME
