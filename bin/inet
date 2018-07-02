@@ -36,8 +36,8 @@ if [ "$1" = "--printcmd" ] || [ "$1" = "-p" ]; then
    shift;
 fi
 
-OPP_RUN_DBG=`which opp_run_dbg || echo opp_run_dbg`
-OPP_RUN_RELEASE=`which opp_run_release || echo opp_run_release`
+OPP_RUN_DBG=`which opp_run_dbg 2> /dev/null || echo opp_run_dbg`
+OPP_RUN_RELEASE=`which opp_run_release 2> /dev/null || echo opp_run_release`
 
 if [ "$MODE" = "" ]; then
   if [ -f $OUT/INET ]; then
