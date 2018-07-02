@@ -23,12 +23,12 @@
 #include "inet/visualizer/scene/NetworkNodeOsgVisualizer.h"
 #include "inet/visualizer/scene/SceneOsgEarthVisualizer.h"
 
-#ifdef WITH_OSG
+#ifdef WITH_OSGEARTH
 #include <osg/Group>
 #include <osgDB/ReadFile>
 #include <osgEarth/Capabilities>
 #include <osgEarth/Viewpoint>
-#endif // ifdef WITH_OSG
+#endif // ifdef WITH_OSGEARTH
 
 namespace inet {
 
@@ -36,7 +36,7 @@ namespace visualizer {
 
 Define_Module(SceneOsgEarthVisualizer);
 
-#ifdef WITH_OSG
+#ifdef WITH_OSGEARTH
 
 using namespace osgEarth;
 using namespace osgEarth::Annotation;
@@ -110,7 +110,7 @@ void SceneOsgEarthVisualizer::initializeViewpoint()
 #endif
 }
 
-#endif // ifdef WITH_OSG
+#endif // ifdef WITH_OSGEARTH
 
 } // namespace visualizer
 
