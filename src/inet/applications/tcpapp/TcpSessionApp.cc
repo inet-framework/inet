@@ -233,7 +233,7 @@ void TcpSessionApp::parseScript(const char *script)
             s++;
 
         // add command
-        EV_DEBUG << " add command (" << tSend << "s, " << "B)\n";
+        EV_DEBUG << " add command (" << tSend << "s, " << numBytes << "B)\n";
         commands.push_back(Command(tSend, numBytes));
 
         // skip delimiter
