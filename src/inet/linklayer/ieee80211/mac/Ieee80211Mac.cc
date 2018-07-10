@@ -23,6 +23,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
+#include "inet/linklayer/ieee80211/llc/Ieee80211Llc.h"
 #include "inet/linklayer/ieee80211/mac/contract/IContention.h"
 #include "inet/linklayer/ieee80211/mac/contract/IFrameSequence.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRx.h"
@@ -65,6 +66,8 @@ void Ieee80211Mac::initialize(int stage)
     else if (stage == INITSTAGE_LINK_LAYER) {
         mib = getModuleFromPar<Ieee80211Mib>(par("mibModule"), this);
         mib->qos = par("qosStation");
+        cModule *llcModule = gate("upperLayerOut")->getNextGate()->getOwnerModule();
+        llc = check_and_cast<Ieee80211Llc *>(llcModule);
         cModule *radioModule = gate("lowerLayerOut")->getNextGate()->getOwnerModule();
         radioModule->subscribe(IRadio::radioModeChangedSignal, this);
         radioModule->subscribe(IRadio::receptionStateChangedSignal, this);
@@ -279,7 +282,7 @@ void Ieee80211Mac::decapsulate(Packet *packet)
     const auto& header = packet->popAtFront<Ieee80211DataOrMgmtHeader>();
     auto packetProtocolTag = packet->addTagIfAbsent<PacketProtocolTag>();
     if (dynamicPtrCast<const Ieee80211DataHeader>(header))
-        packetProtocolTag->setProtocol(&Protocol::ieee8022);
+        packetProtocolTag->setProtocol(llc->getProtocol());
     else if (dynamicPtrCast<const Ieee80211MgmtHeader>(header))
         packetProtocolTag->setProtocol(&Protocol::ieee80211Mgmt);
     auto macAddressInd = packet->addTagIfAbsent<MacAddressInd>();
