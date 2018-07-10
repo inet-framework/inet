@@ -22,7 +22,9 @@
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/ieee80211/llc/LlcProtocolTag_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
 namespace inet {
 
@@ -30,6 +32,15 @@ Register_Protocol_Dissector(&Protocol::ieee80211Mac, Ieee80211MacProtocolDissect
 
 void Ieee80211MacProtocolDissector::dissect(Packet *packet, ICallback& callback) const
 {
+    const Protocol *llcProtocol = &Protocol::ieee8022; // default for most IEEE 802.11 deployments
+    if (const auto llcTag = packet->findTag<ieee80211::LlcProtocolTag>()) {
+        llcProtocol = llcTag->getProtocol();
+    } else if (const auto channelTag = packet->findTag<physicallayer::Ieee80211ChannelInd>()) {
+        // EtherType protocol discrimination is mandatory for deployments in the 5.9 GHz band
+        if (channelTag->getChannel()->getBand() == &physicallayer::Ieee80211CompliantBands::band5_9GHz)
+            llcProtocol = &Protocol::ieee80211EtherType;
+    }
+
     const auto& header = packet->popAtFront<inet::ieee80211::Ieee80211MacHeader>();
     const auto& trailer = packet->popAtBack<inet::ieee80211::Ieee80211MacTrailer>(B(4));
     callback.startProtocolDataUnit(&Protocol::ieee80211Mac);
@@ -46,14 +57,14 @@ void Ieee80211MacProtocolDissector::dissect(Packet *packet, ICallback& callback)
                 const auto& msduSubframeHeader = packet->popAtFront<ieee80211::Ieee80211MsduSubframeHeader>();
                 auto msduEndOffset = packet->getFrontOffset() + B(msduSubframeHeader->getLength());
                 packet->setBackOffset(msduEndOffset);
-                callback.dissectPacket(packet, &Protocol::ieee8022);
+                callback.dissectPacket(packet, llcProtocol);
                 paddingLength = 4 - B(msduSubframeHeader->getChunkLength() + B(msduSubframeHeader->getLength())).get() % 4;
                 packet->setBackOffset(originalTrailerPopOffset);
                 packet->setFrontOffset(msduEndOffset);
             }
         }
         else
-            callback.dissectPacket(packet, &Protocol::ieee8022);
+            callback.dissectPacket(packet, llcProtocol);
     }
     else if (dynamicPtrCast<const inet::ieee80211::Ieee80211ActionFrame>(header))
         ASSERT(packet->getDataLength() == b(0));
