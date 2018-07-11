@@ -18,14 +18,16 @@
 #ifndef __INET_IEEE80211PORTAL_H
 #define __INET_IEEE80211PORTAL_H
 
+#include "inet/common/Protocol.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/FcsMode_m.h"
+#include "inet/linklayer/ieee80211/llc/Ieee80211Llc.h"
 
 namespace inet {
 
 namespace ieee80211 {
 
-class INET_API Ieee80211Portal : public cSimpleModule
+class INET_API Ieee80211Portal : public cSimpleModule, public Ieee80211Llc
 {
   protected:
     FcsMode fcsMode = FCS_MODE_UNDEFINED;
@@ -38,6 +40,9 @@ class INET_API Ieee80211Portal : public cSimpleModule
 
     virtual void encapsulate(Packet *packet);
     virtual void decapsulate(Packet *packet);
+
+  public:
+    const Protocol *getProtocol() const override { return &Protocol::ieee8022; }
 };
 
 } // namespace ieee80211
