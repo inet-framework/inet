@@ -16,7 +16,6 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckProcedure.h"
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
