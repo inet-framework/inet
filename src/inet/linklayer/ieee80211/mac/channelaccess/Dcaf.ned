@@ -17,7 +17,7 @@
 
 package inet.linklayer.ieee80211.mac.channelaccess;
 
-import inet.linklayer.ieee80211.mac.contention.Contention;
+import inet.linklayer.ieee80211.mac.contract.IContention;
 
 
 module Dcaf
@@ -33,7 +33,7 @@ module Dcaf
         @class("Dcaf");
         @display("i=block/star");
     submodules:
-        contention: Contention {
+        contention: <default("Contention")> like IContention {
             parameters:
                 @display("p=100,100");
         }
