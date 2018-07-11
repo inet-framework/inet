@@ -16,7 +16,6 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Dcf.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/DcfFs.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
