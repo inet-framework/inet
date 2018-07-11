@@ -61,6 +61,10 @@ module Ieee80211Interface like IWirelessInterface
             parameters:
                 @display("p=100,100;is=s");
         }
+        llc: <default(opMode == "p" ? "Ieee80211LlcEpd" : "Ieee80211LlcLpd")> like Ieee80211Llc {
+            parameters:
+                @display("p=250,200");
+        }
         classifier: <default("")> like IIeee8021dQosClassifier if typename != "" {
             parameters:
                 @display("p=400,100");
@@ -80,10 +84,6 @@ module Ieee80211Interface like IWirelessInterface
         radio: <default("Ieee80211ScalarRadio")> like IRadio {
             parameters:
                 @display("p=250,500");
-        }
-        llc: <default(radio.bandName == "5.9 GHz" ? "Ieee80211LlcEpd" : "Ieee80211LlcLpd")> like Ieee80211Llc {
-            parameters:
-                @display("p=250,200");
         }
     connections:
         radioIn --> { @display("m=s"); } --> radio.radioIn;
