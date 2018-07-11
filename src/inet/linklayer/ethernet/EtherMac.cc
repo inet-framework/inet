@@ -215,6 +215,8 @@ void EtherMac::processFrameFromUpperLayer(Packet *packet)
     numFramesFromHL++;
     emit(packetReceivedFromUpperSignal, packet);
 
+    MacAddress address = getMacAddress();
+
     auto frame = packet->peekAtFront<EthernetMacHeader>();
     if (frame->getDest().equals(address)) {
         throw cRuntimeError("Logic error: frame %s from higher layer has local MAC address as dest (%s)",

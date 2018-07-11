@@ -195,8 +195,7 @@ void EtherMacBase::initialize(int stage)
         subscribe(POST_MODEL_CHANGE, this);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
-        initializeMacAddress();
-        registerInterface();    // needs MAC address    //FIXME why not called in MacBase::initialize()?
+        registerInterface();
         initializeQueueModule();
         readChannelParameters(true);
     }
@@ -222,22 +221,6 @@ void EtherMacBase::initializeQueueModule()
     }
     else {
         txQueue.setInternalQueue("txQueue", par("txQueueLimit"));
-    }
-}
-
-void EtherMacBase::initializeMacAddress()
-{
-    const char *addrstr = par("address");
-
-    if (!strcmp(addrstr, "auto")) {
-        // assign automatic address
-        address = MacAddress::generateAutoAddress();
-
-        // change module parameter from "auto" to concrete address
-        par("address").setStringValue(address.str().c_str());
-    }
-    else {
-        address.setAddress(addrstr);
     }
 }
 
@@ -294,8 +277,19 @@ InterfaceEntry *EtherMacBase::createInterfaceEntry()
 {
     InterfaceEntry *interfaceEntry = getContainingNicModule(this);
 
-    // generate a link-layer address to be used as interface token for IPv6
+    const char *addrstr = par("address");
+    MacAddress address;
+
+    if (!strcmp(addrstr, "auto")) {
+        // assign automatic address
+        address = MacAddress::generateAutoAddress();
+    }
+    else {
+        address.setAddress(addrstr);
+    }
     interfaceEntry->setMacAddress(address);
+
+    // generate a link-layer address to be used as interface token for IPv6
     interfaceEntry->setInterfaceToken(address.formInterfaceIdentifier());
     //InterfaceToken token(0, getSimulation()->getUniqueNumber(), 64);
     //interfaceEntry->setInterfaceToken(token);
@@ -317,7 +311,6 @@ bool EtherMacBase::handleOperationStage(LifecycleOperation *operation, int stage
     if (dynamic_cast<NodeStartOperation *>(operation)) {
         if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_LINK_LAYER) {
             initializeFlags();
-            initializeMacAddress();
             initializeQueueModule();
         }
     }
@@ -518,7 +511,7 @@ bool EtherMacBase::dropFrameNotForUs(Packet *packet, const Ptr<const EthernetMac
     // All NON-PAUSE frames must be passed to the upper layer if the interface is
     // in promiscuous mode.
 
-    if (frame->getDest().equals(address))
+    if (frame->getDest().equals(getMacAddress()))
         return false;
 
     if (frame->getDest().isBroadcast())
@@ -612,7 +605,7 @@ void EtherMacBase::readChannelParameters(bool errorWhenAsymmetric)
 void EtherMacBase::printParameters()
 {
     // Dump parameters
-    EV_DETAIL << "MAC address: " << address << (promiscuous ? ", promiscuous mode" : "") << endl
+    EV_DETAIL << "MAC address: " << getMacAddress() << (promiscuous ? ", promiscuous mode" : "") << endl
               << "txrate: " << curEtherDescr->txrate << " bps, "
               << (duplexMode ? "full-duplex" : "half-duplex") << endl
               << "bitTime: " << 1e9 / curEtherDescr->txrate << " ns" << endl
