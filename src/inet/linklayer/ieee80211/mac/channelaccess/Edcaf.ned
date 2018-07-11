@@ -18,7 +18,7 @@
 
 package inet.linklayer.ieee80211.mac.channelaccess;
 
-import inet.linklayer.ieee80211.mac.contention.Contention;
+import inet.linklayer.ieee80211.mac.contract.IContention;
 
 //
 // IEEE 802.11 Enhanced Distributed Channel Access Function
@@ -39,7 +39,7 @@ module Edcaf
         @display("i=block/queue");
 
     submodules:
-        contention: Contention {
+        contention: <default("Contention")> like IContention {
             parameters:
                 @display("p=100,100");
         }
