@@ -17,9 +17,10 @@
 
 package inet.linklayer.ieee80211.portal;
 
+import inet.linklayer.ieee80211.llc.Ieee80211Llc;
 import inet.linklayer.ieee8022.IIeee8022Llc;
 
-simple Ieee80211Portal like IIeee8022Llc
+simple Ieee80211Portal like IIeee8022Llc, Ieee80211Llc
 {
     parameters:
         string fcsMode @enum("declared", "computed") = default("declared");
