@@ -22,4 +22,6 @@ class Ipv4NatEntry extends cObject
 {
     Ipv4Address destAddress;
     int destPort = -1;
+    Ipv4Address srcAddress;
+    int srcPort = -1;
 }

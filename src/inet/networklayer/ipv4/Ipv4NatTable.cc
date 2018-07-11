@@ -77,6 +77,15 @@ void Ipv4NatTable::parseConfig()
         const char *destAddressAttr = xmlEntry->getAttribute("destAddress");
         if (destAddressAttr != nullptr && *destAddressAttr != '\0')
             natEntry.setDestAddress(Ipv4Address(destAddressAttr));
+        const char *destPortAttr = xmlEntry->getAttribute("destPort");
+        if (destPortAttr != nullptr && *destPortAttr != '\0')
+            natEntry.setDestPort(atoi(destPortAttr));
+        const char *srcAddressAttr = xmlEntry->getAttribute("srcAddress");
+        if (srcAddressAttr != nullptr && *srcAddressAttr != '\0')
+            natEntry.setSrcAddress(Ipv4Address(srcAddressAttr));
+        const char *srcPortAttr = xmlEntry->getAttribute("srcPort");
+        if (srcPortAttr != nullptr && *srcPortAttr != '\0')
+            natEntry.setSrcPort(atoi(srcPortAttr));
         natEntries.insert({type, {packetFilter, natEntry}});
     }
 }
@@ -93,6 +102,8 @@ INetfilter::IHook::Result Ipv4NatTable::processPacket(Packet *packet, INetfilter
             auto& ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
             if (!natEntry.getDestAddress().isUnspecified())
                 ipv4Header->setDestAddress(natEntry.getDestAddress());
+            if (!natEntry.getSrcAddress().isUnspecified())
+                ipv4Header->setSrcAddress(natEntry.getSrcAddress());
             // TODO: other transport protocols
             auto& udpHeader = removeTransportProtocolHeader<UdpHeader>(packet);
             // TODO: if (!Udp::verifyCrc(Protocol::ipv4, udpHeader, packet))
@@ -102,6 +113,8 @@ INetfilter::IHook::Result Ipv4NatTable::processPacket(Packet *packet, INetfilter
             udpHeader->setCrc(crc);
             if (natEntry.getDestPort() != -1)
                 udpHeader->setDestPort(natEntry.getDestPort());
+            if (natEntry.getSrcPort() != -1)
+                udpHeader->setSrcPort(natEntry.getSrcPort());
             insertTransportProtocolHeader(packet, Protocol::udp, udpHeader);
             insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
             break;
