@@ -18,46 +18,8 @@
 package inet.node.ethernet;
 
 import inet.applications.ethernet.EtherTrafGen;
-import inet.common.queue.IOutputQueue;
-import inet.linklayer.contract.IEtherMac;
-import inet.linklayer.ethernet.IEtherEncap;
+import inet.linklayer.contract.IEthernetInterface;
 
-module Eth2
-{
-    parameters:
-        bool csmacdSupport = default(true);  // by default use CSMA/CD
-        string interfaceTableModule;
-        string fcsMode @enum("declared", "computed") = default("declared");
-        mac.csmacdSupport = csmacdSupport;
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
-        *.fcsMode = fcsMode;
-    gates:
-        input upperLayerIn;
-        output upperLayerOut;
-        inout phys @labels(EtherFrame);
-    submodules:
-        encap: <default("EtherEncap")> like IEtherEncap {
-            @display("p=200,200");
-        }
-        queue: <default("")> like IOutputQueue if typename != "" {
-            parameters:
-                @display("p=100,300;q=l2queue");
-        }
-        mac: <default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex")> like IEtherMac {
-            queueModule = (!exists(queue) ? "" : "^.queue");
-            @display("p=200,400;q=txQueue");
-        }
-    connections:
-        upperLayerIn --> encap.upperLayerIn;
-        upperLayerOut <-- encap.upperLayerOut;
-
-        encap.lowerLayerOut --> queue.in if exists(queue);
-        queue.out --> mac.upperLayerIn if exists(queue);
-        encap.lowerLayerOut --> mac.upperLayerIn if !exists(queue);
-        mac.upperLayerOut --> encap.lowerLayerIn;
-
-        mac.phys <--> { @display("m=s"); } <--> phys;
-}
 
 //
 // An example host with one Ethernet interface and an Ethernet traffic
@@ -72,6 +34,7 @@ module EtherHost2
         string fcsMode @enum("declared", "computed") = default("declared");
         *.interfaceTableModule = default("");
         *.fcsMode = fcsMode;
+        eth.csmacdSupport = csmacdSupport;
         @networkNode();
         @labels(node,ethernet-node);
         @display("i=device/pc2");
@@ -81,12 +44,12 @@ module EtherHost2
         app: EtherTrafGen {
             @display("p=200,100");
         }
-        eth: Eth2 {
-            @display("p=200,200");
+        eth: <default("EthernetInterface")> like IEthernetInterface {
+            parameters:
+                @display("p=200,239,row,150;q=txQueue");
         }
     connections:
         app.out --> eth.upperLayerIn;
         app.in <-- eth.upperLayerOut;
-
         eth.phys <--> { @display("m=s"); } <--> ethg;
 }

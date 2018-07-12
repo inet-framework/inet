@@ -21,41 +21,9 @@ package inet.node.ethernet;
 import inet.applications.ethernet.EtherAppClient;
 import inet.applications.ethernet.EtherAppServer;
 import inet.common.lifecycle.NodeStatus;
-import inet.common.queue.IOutputQueue;
-import inet.linklayer.contract.IEtherMac;
+import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.ethernet.EtherLlc;
 
-module Eth
-{
-    parameters:
-        bool csmacdSupport = default(true);  // by default use CSMA/CD
-        string interfaceTableModule;
-        string fcsMode @enum("declared", "computed") = default("declared");
-        mac.csmacdSupport = csmacdSupport;
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
-        *.fcsMode = fcsMode;
-    gates:
-        input upperLayerIn;
-        output upperLayerOut;
-        inout phys @labels(EtherFrame);
-    submodules:
-        queue: <default("")> like IOutputQueue if typename != "" {
-            parameters:
-                @display("p=250,300;q=l2queue");
-        }
-        mac: <default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex")> like IEtherMac {
-            parameters:
-                queueModule = (!exists(queue) ? "" : "^.queue");
-                @display("p=350,400;q=txQueue");
-        }
-    connections:
-        upperLayerIn --> queue.in if exists(queue);
-        queue.out --> mac.upperLayerIn if exists(queue);
-        upperLayerIn --> mac.upperLayerIn if !exists(queue);
-        mac.upperLayerOut --> upperLayerOut;
-
-        mac.phys <--> { @display("m=s"); } <--> phys;
-}
 
 //
 // An example host with one Ethernet port and a traffic generator that
@@ -75,6 +43,7 @@ module EtherHost
         eth.csmacdSupport = csmacdSupport;
         *.interfaceTableModule = default("");
         *.fcsMode = fcsMode;
+        eth.encap.typename = "EtherEncapDummy";
     gates:
         inout ethg @labels(EtherFrame-conn);
     submodules:
@@ -98,9 +67,9 @@ module EtherHost
                 upperLayerIn[2];
                 upperLayerOut[2];
         }
-        eth: Eth {
+        eth: <default("EthernetInterface")> like IEthernetInterface {
             parameters:
-                @display("p=350,400;q=txQueue");
+                @display("p=350,297,row,150;q=txQueue");
         }
     connections:
 
