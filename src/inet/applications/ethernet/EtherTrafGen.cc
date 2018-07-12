@@ -161,9 +161,12 @@ MacAddress EtherTrafGen::resolveDestMACAddress()
             if (!destStation)
                 throw cRuntimeError("cannot resolve MAC address '%s': not a 12-hex-digit MAC address or a valid module path name", destAddress);
 
-            cModule *destMAC = destStation->getSubmodule("mac");
+            cModule *destMAC = destStation->getSubmodule("eth");
             if (!destMAC)
-                throw cRuntimeError("module '%s' has no 'mac' submodule", destAddress);
+                throw cRuntimeError("module '%s' has no 'eth' submodule", destAddress);
+            destMAC = destMAC->getSubmodule("mac");
+            if (!destMAC)
+                throw cRuntimeError("module '%s' has no 'eth/mac' submodule", destAddress);
 
             destMACAddress.setAddress(destMAC->par("address"));
         }

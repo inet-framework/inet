@@ -25,6 +25,38 @@ import inet.common.queue.IOutputQueue;
 import inet.linklayer.contract.IEtherMac;
 import inet.linklayer.ethernet.EtherLlc;
 
+module Eth
+{
+    parameters:
+        bool csmacdSupport = default(true);  // by default use CSMA/CD
+        string interfaceTableModule;
+        string fcsMode @enum("declared", "computed") = default("declared");
+        mac.csmacdSupport = csmacdSupport;
+        *.interfaceTableModule = default(absPath(interfaceTableModule));
+        *.fcsMode = fcsMode;
+    gates:
+        input upperLayerIn;
+        output upperLayerOut;
+        inout phys @labels(EtherFrame);
+    submodules:
+        queue: <default("")> like IOutputQueue if typename != "" {
+            parameters:
+                @display("p=250,300;q=l2queue");
+        }
+        mac: <default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex")> like IEtherMac {
+            parameters:
+                queueModule = (!exists(queue) ? "" : "^.queue");
+                @display("p=350,400;q=txQueue");
+        }
+    connections:
+        upperLayerIn --> queue.in if exists(queue);
+        queue.out --> mac.upperLayerIn if exists(queue);
+        upperLayerIn --> mac.upperLayerIn if !exists(queue);
+        mac.upperLayerOut --> upperLayerOut;
+
+        mac.phys <--> { @display("m=s"); } <--> phys;
+}
+
 //
 // An example host with one Ethernet port and a traffic generator that
 // generates request-reply traffic directly over Ethernet. This host model
@@ -40,6 +72,7 @@ module EtherHost
         @networkNode();
         @labels(node,ethernet-node);
         @display("i=device/pc2");
+        eth.csmacdSupport = csmacdSupport;
         *.interfaceTableModule = default("");
         *.fcsMode = fcsMode;
     gates:
@@ -65,13 +98,8 @@ module EtherHost
                 upperLayerIn[2];
                 upperLayerOut[2];
         }
-        queue: <default("")> like IOutputQueue if typename != "" {
+        eth: Eth {
             parameters:
-                @display("p=250,300;q=l2queue");
-        }
-        mac: <default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex")> like IEtherMac {
-            parameters:
-                queueModule = (!exists(queue) ? "" : "^.queue");
                 @display("p=350,400;q=txQueue");
         }
     connections:
@@ -81,10 +109,9 @@ module EtherHost
         srv.out --> llc.upperLayerIn[1];
         srv.in <-- llc.upperLayerOut[1];
 
-        llc.lowerLayerOut --> queue.in if exists(queue);
-        queue.out --> mac.upperLayerIn if exists(queue);
-        llc.lowerLayerOut --> mac.upperLayerIn if !exists(queue);
-        mac.upperLayerOut --> llc.lowerLayerIn;
+        llc.lowerLayerOut --> eth.upperLayerIn;
+        eth.upperLayerOut --> llc.lowerLayerIn;
 
-        mac.phys <--> ethg;
+        eth.phys <--> { @display("m=s"); } <--> ethg;
 }
+
