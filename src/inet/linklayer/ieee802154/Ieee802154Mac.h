@@ -208,9 +208,6 @@ class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol
     t_mac_states macState;
     t_mac_status status;
 
-    /** @brief The MAC address of the interface. */
-    MacAddress address;
-
     /** @brief The radio. */
     physicallayer::IRadio *radio;
     physicallayer::IRadio::TransmissionState transmissionState;
@@ -289,7 +286,6 @@ class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol
 
   protected:
     /** @brief Generate new interface address*/
-    virtual void initializeMacAddress();
     virtual InterfaceEntry *createInterfaceEntry() override;
     virtual void handleCommand(cMessage *msg) {}
 

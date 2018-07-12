@@ -129,16 +129,6 @@ void CsmaCaMac::initialize(int stage)
         WATCH(numReceivedBroadcast);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
-        const char *addressString = par("address");
-        if (!strcmp(addressString, "auto")) {
-            // assign automatic address
-            address = MacAddress::generateAutoAddress();
-            // change module parameter from "auto" to concrete address
-            par("address").setStringValue(address.str().c_str());
-        }
-        else
-            address.setAddress(addressString);
-
         registerInterface();
 
         // subscribe for the information of the carrier sense
@@ -180,6 +170,7 @@ void CsmaCaMac::finish()
 InterfaceEntry *CsmaCaMac::createInterfaceEntry()
 {
     InterfaceEntry *e = getContainingNicModule(this);
+    MacAddress address = parseMacAddressPar(par("address"));
 
     // data rate
     e->setDatarate(bitrate);
@@ -434,7 +425,7 @@ void CsmaCaMac::encapsulate(Packet *frame)
     auto transportProtocol = frame->getTag<PacketProtocolTag>()->getProtocol();
     auto networkProtocol = ProtocolGroup::ethertype.getProtocolNumber(transportProtocol);
     macHeader->setNetworkProtocol(networkProtocol);
-    macHeader->setTransmitterAddress(address);
+    macHeader->setTransmitterAddress(interfaceEntry->getMacAddress());
     macHeader->setReceiverAddress(frame->getTag<MacAddressReq>()->getDestAddress());
     auto userPriorityReq = frame->findTag<UserPriorityReq>();
     int userPriority = userPriorityReq == nullptr ? UP_BE : userPriorityReq->getUserPriority();
@@ -667,7 +658,7 @@ bool CsmaCaMac::isBroadcast(Packet *frame)
 bool CsmaCaMac::isForUs(Packet *frame)
 {
     const auto& macHeader = frame->peekAtFront<CsmaCaMacHeader>();
-    return macHeader->getReceiverAddress() == address;
+    return macHeader->getReceiverAddress() == interfaceEntry->getMacAddress();
 }
 
 bool CsmaCaMac::isFcsOk(Packet *frame)

@@ -276,17 +276,8 @@ void EtherMacBase::initializeStatistics()
 InterfaceEntry *EtherMacBase::createInterfaceEntry()
 {
     InterfaceEntry *interfaceEntry = getContainingNicModule(this);
+    MacAddress address = parseMacAddressPar(par("address"));
 
-    const char *addrstr = par("address");
-    MacAddress address;
-
-    if (!strcmp(addrstr, "auto")) {
-        // assign automatic address
-        address = MacAddress::generateAutoAddress();
-    }
-    else {
-        address.setAddress(addrstr);
-    }
     interfaceEntry->setMacAddress(address);
 
     // generate a link-layer address to be used as interface token for IPv6

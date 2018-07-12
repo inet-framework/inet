@@ -46,7 +46,6 @@ void LMac::initialize(int stage)
 
         auto node = getContainingNode(this);
         myId = node->isVector() ? node->getIndex() : getId() % numSlots;
-        EV_DETAIL << "My Mac address is" << address << " and my Id is " << myId << endl;
 
         macState = INIT;
 
@@ -57,7 +56,6 @@ void LMac::initialize(int stage)
         EV << "Control packets take : " << controlDuration << " seconds to transmit\n";
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
-        initializeMacAddress();
         registerInterface();
 
         cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
@@ -95,6 +93,7 @@ void LMac::initialize(int stage)
         send_control->setKind(LMAC_SEND_CONTROL);
 
         scheduleAt(0.0, start_lmac);
+        EV_DETAIL << "My Mac address is" << interfaceEntry->getMacAddress() << " and my Id is " << myId << endl;
     }
 }
 
@@ -115,25 +114,10 @@ LMac::~LMac()
     macQueue.clear();
 }
 
-void LMac::initializeMacAddress()
-{
-    const char *addrstr = par("address");
-
-    if (!strcmp(addrstr, "auto")) {
-        // assign automatic address
-        address = MacAddress::generateAutoAddress();
-
-        // change module parameter from "auto" to concrete address
-        par("address").setStringValue(address.str().c_str());
-    }
-    else {
-        address.setAddress(addrstr);
-    }
-}
-
 InterfaceEntry *LMac::createInterfaceEntry()
 {
     InterfaceEntry *e = getContainingNicModule(this);
+    MacAddress address = parseMacAddressPar(par("address"));
 
     // data rate
     e->setDatarate(bitrate);
@@ -189,6 +173,8 @@ void LMac::handleUpperPacket(Packet *packet)
  */
 void LMac::handleSelfMessage(cMessage *msg)
 {
+    MacAddress address = interfaceEntry->getMacAddress();
+
     switch (macState) {
         case INIT:
             if (msg->getKind() == LMAC_START_LMAC) {
@@ -694,7 +680,7 @@ void LMac::encapsulate(Packet *netwPkt)
     delete netwPkt->removeControlInfo();
 
     //set the src address to own mac address (nic module getId())
-    pkt->setSrcAddr(address);
+    pkt->setSrcAddr(interfaceEntry->getMacAddress());
 
     //encapsulate the network packet
     netwPkt->insertAtFront(pkt);

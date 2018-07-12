@@ -29,6 +29,20 @@ MacProtocolBase::MacProtocolBase() :
 {
 }
 
+MacAddress MacProtocolBase::parseMacAddressPar(cPar& par)
+{
+    const char *addrstr = par;
+    MacAddress address;
+
+    if (!strcmp(addrstr, "auto"))
+        // assign automatic address
+        address = MacAddress::generateAutoAddress();
+    else
+        address.setAddress(addrstr);
+
+    return address;
+}
+
 void MacProtocolBase::initialize(int stage)
 {
     LayeredProtocolBase::initialize(stage);

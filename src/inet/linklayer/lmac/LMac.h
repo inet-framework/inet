@@ -119,7 +119,6 @@ class INET_API LMac : public MacProtocolBase, public IMacProtocol
 
   protected:
     /** @brief Generate new interface address*/
-    virtual void initializeMacAddress();
     virtual InterfaceEntry *createInterfaceEntry() override;
     virtual void handleCommand(cMessage *msg) {}
 
@@ -174,9 +173,6 @@ class INET_API LMac : public MacProtocolBase, public IMacProtocol
     MacAddress occSlotsAway[64];
     /** @brief The first couple of slots are reserved for nodes with special needs to avoid changing slots for them (mobile nodes) */
     int reservedMobileSlots;
-
-    /** @brief The MAC address of the interface. */
-    MacAddress address;
 
     /** @brief A queue to store packets from upper layer in case another
        packet is still waiting for transmission..*/

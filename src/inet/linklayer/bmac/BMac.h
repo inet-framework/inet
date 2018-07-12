@@ -89,9 +89,6 @@ class INET_API BMac : public MacProtocolBase, public IMacProtocol
   protected:
     typedef std::list<Packet *> MacQueue;
 
-    /** @brief The MAC address of the interface. */
-    MacAddress address;
-
     /** @brief A queue to store packets from upper layer in case another
        packet is still waiting for transmission.*/
     MacQueue macQueue;
@@ -194,7 +191,6 @@ class INET_API BMac : public MacProtocolBase, public IMacProtocol
     bool stats = false;
 
     /** @brief Generate new interface address*/
-    virtual void initializeMacAddress();
     virtual InterfaceEntry *createInterfaceEntry() override;
     virtual void handleCommand(cMessage *msg) {}
 

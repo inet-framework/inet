@@ -110,7 +110,6 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
     virtual void clearQueue();
     virtual InterfaceEntry *createInterfaceEntry() override;
     //@}
-    virtual void initializeMacAddress();
 
     /** @brief A queue to store packets from upper layer in case another
     packet is still waiting for transmission.*/
@@ -186,7 +185,6 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
     MacAddress lastDataPktDestAddr;
     MacAddress lastPreamblePktSrcAddr;
     int headerLength = 0;    // XMacFrame header length in bytes
-    MacAddress address;    // MAC address
 
     /** @brief The radio. */
     physicallayer::IRadio *radio;
