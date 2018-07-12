@@ -162,11 +162,8 @@ MacAddress EtherAppClient::resolveDestMACAddress()
             cModule *destMAC = destStation->getSubmodule("eth");
             if (!destMAC)
                 throw cRuntimeError("module '%s' has no 'eth' submodule", destAddress);
-            destMAC = destMAC->getSubmodule("mac");
-            if (!destMAC)
-                throw cRuntimeError("module '%s' has no 'eth/mac' submodule", destAddress);
 
-            destMACAddress.setAddress(destMAC->par("address"));
+            destMACAddress = check_and_cast<InterfaceEntry *>(destMAC)->getMacAddress();
         }
     }
     return destMACAddress;
