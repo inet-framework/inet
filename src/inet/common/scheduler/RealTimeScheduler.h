@@ -52,7 +52,7 @@ class INET_API RealTimeScheduler : public cScheduler
         BeginSimulationEvent(const char* name) : cEvent(name) {}
         virtual cEvent *dup() const override { return new BeginSimulationEvent(getName()); }
         virtual cObject *getTargetObject() const override { return nullptr; }
-        virtual void execute() override {}
+        virtual void execute() override { delete this; }
     };
 
   protected:
