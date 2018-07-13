@@ -43,13 +43,13 @@ void MacProtocolBase::initialize(int stage)
 void MacProtocolBase::registerInterface()
 {
     ASSERT(interfaceEntry == nullptr);
+    interfaceEntry = createInterfaceEntry();
     IInterfaceTable *interfaceTable = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     if (interfaceTable) {
-        interfaceEntry = createInterfaceEntry();
         interfaceTable->addInterface(interfaceEntry);
-        auto module = getContainingNicModule(this);
-        inet::registerInterface(*interfaceEntry, module->gate("upperLayerIn"), module->gate("upperLayerOut"));
     }
+    auto module = getContainingNicModule(this);
+    inet::registerInterface(*interfaceEntry, module->gate("upperLayerIn"), module->gate("upperLayerOut"));
 }
 
 void MacProtocolBase::sendUp(cMessage *message)
