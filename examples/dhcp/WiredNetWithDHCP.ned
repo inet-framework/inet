@@ -30,19 +30,19 @@ network WiredNetWithDHCP
         int numHosts;
     submodules:
         server: StandardHost {
-            @display("p=42,494");
+            @display("p=400,225");
         }
         switch: EtherSwitch {
             parameters:
-                @display("p=521,428");
+                @display("p=450,350");
         }
         client[numHosts]: StandardHost {
-            @display("p=193,122,ri,350,350,200");
+            @display("p=150,100,ri,300,250");
         }
         configurator: Ipv4NetworkConfigurator {
             parameters:
                 config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0' /></config>");
-                @display("p=109,71");
+                @display("p=100,100;is=s");
         }
     connections:
         server.ethg++ <--> Eth10M <--> switch.ethg++;

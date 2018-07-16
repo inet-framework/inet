@@ -54,7 +54,7 @@ module WiseRouteNetworkLayer like INetworkLayer
         }
         dp: MessageDispatcher {
             parameters:
-                @display("p=250,200;b=380,5");
+                @display("p=250,200;b=400,5");
         }
 
     connections allowunconnected:

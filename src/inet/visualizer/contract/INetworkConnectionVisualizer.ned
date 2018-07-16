@@ -27,5 +27,5 @@ package inet.visualizer.contract;
 moduleinterface INetworkConnectionVisualizer
 {
     parameters:
-        @display("i=block/app_s");
+        @display("i=block/app");
 }

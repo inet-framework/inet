@@ -366,7 +366,7 @@ class INET_API Chunk : public cObject,
     RegionTagSet tags;
 
   protected:
-    void checkMutable() { CHUNK_CHECK_USAGE(isMutable(), "chunk is immutable"); }
+    void checkMutable() const { CHUNK_CHECK_USAGE(isMutable(), "chunk is immutable"); }
 
     virtual void handleChange();
 
@@ -628,7 +628,7 @@ class INET_API Chunk : public cObject,
     /**
      * Returns the chunk tag at the given index.
      */
-    cObject *getTag(int index) const {
+    const cObject *getTag(int index) const {
         return tags.getTag(index);
     }
 
@@ -651,22 +651,22 @@ class INET_API Chunk : public cObject,
     /**
      * Returns the chunk tag for the provided type and range, or returns nullptr if no such chunk tag is found.
      */
-    template<typename T> T *findTag(b offset = b(0), b length = b(-1)) const {
+    template<typename T> const T *findTag(b offset = b(0), b length = b(-1)) const {
         return tags.findTag<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
     }
 
     /**
      * Returns the chunk tag for the provided type and range, or throws an exception if no such chunk tag is found.
      */
-    template<typename T> T *getTag(b offset = b(0), b length = b(-1)) const {
+    template<typename T> const T *getTag(b offset = b(0), b length = b(-1)) const {
         return tags.getTag<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
     }
 
     /**
-     * Returns all chunk tags for the provided type and range.
+     * Returns all chunk tags for the provided type and range in a detached vector of region tags.
      */
-    template<typename T> std::vector<RegionTagSet::RegionTag<T>> getAllTags(b offset = b(0), b length = b(-1)) const {
-        return tags.getAllTags<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
+    template<typename T> std::vector<RegionTagSet::RegionTag<const T>> getAllTags(b offset = b(0), b length = b(-1)) const {
+        return tags.getAllTags<const T>(offset, length == b(-1) ? getChunkLength() - offset : length);
     }
 
     /**

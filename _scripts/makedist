@@ -24,7 +24,7 @@ if [ "$BUILDID" = "" ]; then
 fi
 
 FILENAME=$INET_ROOT/inet-$BUILDID-src.tgz
-DIRNAME=inet
+DIRNAME=inet4
 
 rm -rf $INET_ROOT/out/$DIRNAME
 mkdir -p $INET_ROOT/out/$DIRNAME
@@ -58,8 +58,8 @@ if [ "$todofiles" != "" ]; then
 fi
 
 # clean up the showcase and tutorial dir and remove the website text and videos to reduce package size
-(cd showcases && rm -rf _config.yml _docs __TODO)
-(cd tutorials && rm -rf _config.yml _docs __TODO _wireless-packetcounts)
+(cd showcases && rm -rf _config.yml _docs */*/doc __TODO)
+(cd tutorials && rm -rf _config.yml _docs */doc __TODO _wireless-packetcounts)
 
 # pack and create tar.gz archives
 echo Creating $FILENAME.

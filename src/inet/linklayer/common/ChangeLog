@@ -1,5 +1,20 @@
 ====== inet-4.x ======
 
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-25  Levente Mészáros
+
+	Added new generic FcsMode enumeration.
+	Replaced EthernetFcsMode with FcsMode.
+	Replaced parseEthernetFcsMode with parseFcsMode.
+	Added FCS_MODE_UNDEFINED enum members.
+
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
 2018-02-05  Zoltan Bojthe
 
 	Removed unused TxNotifDetails.

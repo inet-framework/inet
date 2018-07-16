@@ -26,22 +26,21 @@ import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 network QosThroughput
 {
     parameters:
-        @display("b=297,203");
     submodules:
         configurator: Ipv4NetworkConfigurator {
-            @display("p=61,164");
+            @display("p=100,100;is=s");
         }
         srvHost: AdhocHost {
             parameters:
-                @display("r=,,#707070");
+                @display("r=,,#707070;p=500,150");
         }
         cliHost: AdhocHost {
             parameters:
-                @display("r=,,#707070");
+                @display("r=,,#707070;p=300,150");
         }
         radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
-                @display("p=61,46");
+                @display("p=100,200;is=s");
         }
 }
 

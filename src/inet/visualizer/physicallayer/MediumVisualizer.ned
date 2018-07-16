@@ -27,14 +27,14 @@ import inet.visualizer.contract.IMediumVisualizer;
 module MediumVisualizer like IMediumVisualizer
 {
     parameters:
-        @display("i=block/app_s");
+        @display("i=block/app");
     submodules:
         canvasVisualizer: <default("MediumCanvasVisualizer")> like IMediumVisualizer if typename != "" {
             parameters:
-                @display("p=100,50");
+                @display("p=100,100");
         }
         osgVisualizer: <default("MediumOsgVisualizer")> like IMediumVisualizer if typename != "" {
             parameters:
-                @display("p=100,150");
+                @display("p=100,200");
         }
 }

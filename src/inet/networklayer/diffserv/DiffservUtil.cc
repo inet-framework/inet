@@ -40,14 +40,6 @@ using namespace utils;
 cEnum *dscpEnum = nullptr;
 cEnum *protocolEnum = nullptr;
 
-const char *getRequiredAttribute(cXMLElement *element, const char *attrName)
-{
-    const char *attrValue = element->getAttribute(attrName);
-    if (!attrValue)
-        throw cRuntimeError("missing attribute '%s' from <%s> element", attrName, element->getTagName());
-    return attrValue;
-}
-
 double parseInformationRate(const char *attrValue, const char *attrName, IInterfaceTable *ift, cSimpleModule& owner, int defaultValue)
 {
     if (isEmpty(attrValue))

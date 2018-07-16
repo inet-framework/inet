@@ -129,7 +129,7 @@ void Icmp::sendErrorMessage(Packet *packet, int inputInterfaceId, IcmpType type,
     icmpHeader->setCode(code);
     // ICMP message length: the internet header plus the first 8 bytes of
     // the original datagram's data is returned to the sender.
-    errorPacket->insertAtBack(packet->peekDataAt(B(0), B(ipv4Header->getHeaderLength() + 8)));
+    errorPacket->insertAtBack(packet->peekDataAt(B(0), ipv4Header->getHeaderLength() + B(8)));
     insertCrc(icmpHeader,errorPacket);
     errorPacket->insertAtFront(icmpHeader);
 

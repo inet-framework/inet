@@ -47,7 +47,7 @@ import inet.networklayer.contract.INetworkProtocol;
 simple WiseRoute extends NetworkProtocolBase like INetworkProtocol
 {
     parameters:
-        int headerLength @unit(bit) = default(100b); // length of the network packet header (in bits)
+        int headerLength @unit(b) = default(100b); // length of the network packet header (in bits)
 
         // debug switch
         bool debug = default(false);

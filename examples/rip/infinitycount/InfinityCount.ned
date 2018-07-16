@@ -23,18 +23,18 @@ network RIPInfinityCountTest
     submodules:
         cRouter: Router {
             hasRip = true;
-            @display("p=237,192");
+            @display("p=250,150");
         }
         bRouter: Router {
             hasRip = true;
-            @display("p=337,192");
+            @display("p=400,150");
         }
         rRouter[numRipRouters]: Router {
             hasRip = true;
             @display("p=487,192,ri,100,100");
         }
         configurator: Ipv4NetworkConfigurator {
-            @display("p=59,31");
+            @display("p=100,100;is=s");
             config = xml("<config>"
                             +"<interface among='cRouter bRouter' address='10.0.0.x' netmask='255.255.255.x' add-static-route='off'/>"
                             +"<interface among='bRouter rRouter[0]' address='10.1.0.x' netmask='255.255.255.x' add-static-route='off'/>"
@@ -42,7 +42,7 @@ network RIPInfinityCountTest
                         +"</config>");
         }
         scenarioManager: ScenarioManager {
-            @display("p=59,86");
+            @display("p=100,200;is=s");
             script = xml("<scenario>"
                             +"<at t='60'>"
                                 +"<disconnect src-module='rRouter[0]' src-gate='ethg[0]' />"

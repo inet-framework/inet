@@ -34,6 +34,7 @@ class INET_API CosineAntenna : public AntennaBase
     {
       public:
         AntennaGain(double maxGain, deg beamWidth);
+        virtual double getMinGain() const override { return 0; }
         virtual double getMaxGain() const override { return maxGain; }
         virtual deg getBeamWidth() const { return beamWidth; }
         virtual double computeGain(const EulerAngles direction) const override;

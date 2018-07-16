@@ -1,6 +1,184 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-4.0 (June 2018) - Stable
+-----------------------------
+
+This is the first stable release of the new INET 4.x branch. All originally
+planned tasks have been completed. This version requires OMNeT++ 5.4.1 or later.
+
+With the new INET 4.0 release, the development of the old INET 3.x branch is
+stopped. Users are strongly encouraged to use the new INET 4.0 version for new
+projects and also for migrating existing projects. Admittably, migration is not
+trivial, but there's an 'INET 4.0 Migration Guide' to help with the task under
+the 'doc/misc' folder.
+
+The main changes of the new INET 4.0 major stable release are:
+
+1. Packet API
+
+   The INET Packet API has been completely redesigned to supports efficient
+   construction, sharing, duplication, encapsulation, aggregation, fragmentation,
+   and serialization of packets.
+
+   The new Packet API also adds many other useful features such as a detailed
+   packet printer, a packet dissector, a packet filter based on packet data,
+   packet tags for cross-layer communication, region tags for attaching metadata
+   to packet data, and queueing and buffering packet data.
+
+   The new Packet API also makes implementing communication protocols easier. The
+   resulting code looks more similar to the real world implementation. Supporting
+   emulation is pretty much trivial when implementing communication protocols.
+
+   For more details on how to use the new Packet API, see the 'INET Developer's Guide'.
+
+2. Network node architecture
+
+   The internal structure of network nodes has been changed considerably. With
+   the new architecture, applications can directly talk to any protocol down to
+   the link layer, and protocols don't have to deal with dispatching packets and
+   commands to other protocols. Cross-layer communication is directly supported
+   in both downward and upward directions.
+
+   For more details on how to use the new architecture, see the 'INET User's Guide'.
+
+3. Documentation
+
+   The somewhat outdated 'INET Framework for OMNeT++ Manual' has been reworked
+   and split into the 'INET User's Guide' and 'INET Developer's Guide'. Several
+   new detailed showcases have been added and many have been updated, they are
+   available on the INET website.
+
+The highlights of this release since the last development release are:
+
+1. Socket API
+
+   The Socket API has been redesigned and uniformized. All sockets can be used
+   with similar callback interfaces. All callback functions receive the socket
+   object as a parameter to allow handling multiple sockets concurrently.
+
+   New raw Ipv4Socket and Ipv6Socket classes have been added to directly access
+   the IPv4 and IPv6 protocols from applications.
+
+2. Module type parameters
+
+   All string NED module parameters, which were used to specify submodule types,
+   have been replaced with the standard OMNeT++ typename parameter. This reduces
+   the confusion caused by having two different configuration options for the
+   same task. The typename parameter is also simpler and more generic in the
+   sense that it allows configuring the module type for submodule vector elements.
+
+   The replacement of the EthernetInterface queueType and the Ieee80211Interface
+   agentType parameters requires the applications which use them to be updated.
+   The queueType parameter had effect on the dataQueueType of the EtherQosQueue,
+   which is no longer true. The agentType parameter depended on the mgmtType
+   parameter, which is also no longer true. These parameters must be set separately.
+
+3. NED units
+
+   With the new OMNeT++ 5.4 release, INET supports the automatic conversion of
+   non-linear units such as dBm, dBW to W, dB to ratio, etc. All 0/0 and +-1/0
+   parameter value assignments have been replaced with nan and +-inf respectively.
+
+4. Various renames
+
+   Renamed several modules, submodules, classes, interfaces, etc. to be consistent
+   with the INET naming conventions:
+
+    - GenericNetworkProtocol module -> NextHopForwarding
+    - generic folder -> nexthop
+    - gnp submodule -> nextHop
+    - InterfaceEntry get/setNextHopProtocolData functions -> get/setNextHopData
+    - Protocol::gnp global variable -> Protocol::nextHopForwarding
+    - NextHopDatagram class -> NextHopForwardingHeader
+
+    - RsvpRouter module -> RsvpMplsRouter
+    - LdpRouter module -> LdpMplsRouter
+    - Rsvp module -> RsvpTe.
+    - rsvp_te folder -> rsvpte
+    - Protoco::rsvp global variable -> rsvpte.
+
+5. Packet error representation
+
+   The physical layer error models have been extended with a corruption mode
+   parameter. The available corruption modes are: packet, chunk, byte, or bit
+   level. The parameter determines on what level the error model introduces
+   errors into a packet.
+
+   In many protocols, various corruption modes don't lead to different outcome.
+   Nevertheless, this change allows implementing IEEE 802.11 A-MPDU aggregation
+   with support to only dropping the individual subframes which are received
+   incorrectly.
+
+6. IEEE 802.11
+
+   Thanks to Alfonso Ariza Quintana, the 802.11/ac (VHT PHY) modes have been
+   added to physical layer. Futhermore, the necessary 5GHz bands with 20, 40,
+   80, and 160 Mhz bandwidth have also been added.
+
+   The 802.11 mode lookup mechanism has been extended with bandwidth and number
+   of spatial streams parameters, and the mechanism has also been relaxed to
+   allow specifying more already supported bitrates (e.g. 86.7 Mbps with 0.1 Mbps
+   precision).
+
+   Fixed bug when a packet was received from another Ap and sent up incorrectly.
+   Fixed ACK frame duration bug reported by Raphael Elsner.
+   Fixed exploded frame transmitter address in MsduDeaggregation.
+   Fixed length field wrap around for large packets.
+   Fixed center frequency calculation in Ieee80211ArithmeticalBand.
+
+7. Emulation
+
+   The whole emulation support, including the ExternalInterface compound module,
+   the Ext simple module, and the corresponding cSocketRtScheduler have been
+   redesigned and heavily refactored. The new C++ scheduler class is called
+   RealTimeScheduler and it is completely independent of the external interfaces.
+
+   The new scheduler still provides real time simulation execution, but it also
+   allows for using the POSIX select mechanism to support I/O operations with
+   file descriptors. The external interface hooks into this mechanism to read
+   raw packets via PCAP. Futhermore, the new external interface implementation
+   uses dedicated raw sockets to send packets.
+
+8. Lifecycle and scenario management
+
+   The LifecycleController module has been removed because the module did not
+   have and is not expected to have any parameters in the future. Therefore the
+   LifecycleController module is no longer needed in the network for the lifecycle
+   operations to work. The corresponding LifecycleController C++ class with the
+   actual functionality remains there.
+
+   The ScenarioManager scripting has been extended with the following shortcuts
+   for the lifecycle operations:
+    - <shutdown module="hostA"/>
+    - <startup module="hostA"/>
+    - <crash module="hostA"/>
+
+9. RIP
+
+   Thanks to the contributions of Mani Amoozadeh the RIP protocol has been
+   refactored to store the protocol specific route data in the routing table
+   instead of an internal data structure. The protocol has also been extended
+   with new hold-down timer and triggered update parameters.
+
+   Fixed sending updates on interface which is down.
+
+10. Other notable changes
+
+    The Ethernet model has been extended with 200 Gbit and 400 Gbit modes.
+
+    The antenna directional selectivity computation in wireless medium analog
+    models has been fixed.
+
+    Several missing protocol dissectors and protocol printers have been added.
+
+    All protocol specific header serializers have been moved to the folder of their
+    respective communication protocol.
+
+    In order to suppor more recent OSG Earth versions, the osgEarth::ObjectLocatorNode
+    has been replaced with GeoTransform and osg::PositionAttitudeTransform.
+
+
 INET-3.99.3 (April 2018) - Development
 --------------------------------------
 
@@ -95,7 +273,7 @@ The highlights of this release are:
 
 7. SCTP
 
-   With this new release, SCTP, the last remaining protocol, has also been 
+   With this new release, SCTP, the last remaining protocol, has also been
    ported to the new packet API.
 
    Many thanks to Irene Rüngeler for her valuable contribution.
@@ -245,7 +423,7 @@ The highlights of this release are:
       all. This is primarily useful for sitations where the MAC protocol is not
       to be simulated in detail. It doesn't provide carrier sense mechanism,
       collision avoidance, or collision detection. The only MAC feature it provides
-      is optional out of bound acknowledgement, hence the name. 
+      is optional out-of-band acknowledgement, hence the name.
 
     - IdealRadio -> UnitDiskRadio
       This rename is simply admitting the fact that this radio implements the

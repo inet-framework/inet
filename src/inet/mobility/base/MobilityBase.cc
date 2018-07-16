@@ -52,7 +52,7 @@ static bool isFiniteNumber(double value)
 }
 
 MobilityBase::MobilityBase() :
-    visualRepresentation(nullptr),
+    subjectModule(nullptr),
     canvasProjection(nullptr),
     constraintAreaMin(Coord::ZERO),
     constraintAreaMax(Coord::ZERO),
@@ -111,13 +111,10 @@ void MobilityBase::initialize(int stage)
         constraintAreaMax.y = par("constraintAreaMaxY");
         constraintAreaMax.z = par("constraintAreaMaxZ");
         format.parseFormat(par("displayStringTextFormat"));
-        bool visualizeMobility = par("visualizeMobility");
-        if (visualizeMobility) {
-            visualRepresentation = findVisualRepresentation();
-            if (visualRepresentation != nullptr) {
-                auto visualizationTarget = visualRepresentation->getParentModule();
-                canvasProjection = CanvasProjection::getCanvasProjection(visualizationTarget->getCanvas());
-            }
+        subjectModule = findSubjectModule();
+        if (subjectModule != nullptr) {
+            auto visualizationTarget = subjectModule->getParentModule();
+            canvasProjection = CanvasProjection::getCanvasProjection(visualizationTarget->getCanvas());
         }
         WATCH(constraintAreaMin);
         WATCH(constraintAreaMax);
@@ -142,15 +139,17 @@ void MobilityBase::setInitialPosition()
     // reading the coordinates from omnetpp.ini makes predefined scenarios a lot easier
     bool filled = false;
     auto coordinateSystem = getModuleFromPar<IGeographicCoordinateSystem>(par("coordinateSystemModule"), this, false);
-    if (hasPar("initFromDisplayString") && par("initFromDisplayString") && visualRepresentation) {
-        const char *s = visualRepresentation->getDisplayString().getTagArg("p", 2);
+    if (subjectModule != nullptr && hasPar("initFromDisplayString") && par("initFromDisplayString")) {
+        const char *s = subjectModule->getDisplayString().getTagArg("p", 2);
         if (s && *s)
             throw cRuntimeError("The coordinates of '%s' are invalid. Please remove automatic arrangement"
-                                " (3rd argument of 'p' tag) from '@display' attribute.", visualRepresentation->getFullPath().c_str());
-        filled = parseIntTo(visualRepresentation->getDisplayString().getTagArg("p", 0), lastPosition.x) &&
-                 parseIntTo(visualRepresentation->getDisplayString().getTagArg("p", 1), lastPosition.y);
-        if (filled)
+                                " (3rd argument of 'p' tag) from '@display' attribute.", subjectModule->getFullPath().c_str());
+        filled = parseIntTo(subjectModule->getDisplayString().getTagArg("p", 0), lastPosition.x) &&
+                 parseIntTo(subjectModule->getDisplayString().getTagArg("p", 1), lastPosition.y);
+        if (filled) {
             lastPosition.z = hasPar("initialZ") ? par("initialZ") : 0.0;
+            lastPosition = canvasProjection->computeCanvasPointInverse(cFigure::Point(lastPosition.x, lastPosition.y), lastPosition.z);
+        }
     }
     // not all mobility models have "initialX", "initialY" and "initialZ" parameters
     else if (coordinateSystem == nullptr && hasPar("initialX") && hasPar("initialY") && hasPar("initialZ")) {
@@ -198,17 +197,17 @@ void MobilityBase::refreshDisplay() const
     auto text = format.formatString(&directiveResolver);
     cDisplayString& displayString = this->getDisplayString();
     displayString.setTagArg("t", 0, text);
-    if (visualRepresentation != nullptr) {
+    if (subjectModule != nullptr && par("updateDisplayString")) {
         auto position = const_cast<MobilityBase *>(this)->getCurrentPosition();
         EV_TRACE << "current position = " << position << endl;
-        auto visualRepresentationPosition = canvasProjection->computeCanvasPoint(position);
+        auto subjectModulePosition = canvasProjection->computeCanvasPoint(position);
         char buf[32];
-        snprintf(buf, sizeof(buf), "%lf", visualRepresentationPosition.x);
+        snprintf(buf, sizeof(buf), "%lf", subjectModulePosition.x);
         buf[sizeof(buf) - 1] = 0;
-        visualRepresentation->getDisplayString().setTagArg("p", 0, buf);
-        snprintf(buf, sizeof(buf), "%lf", visualRepresentationPosition.y);
+        subjectModule->getDisplayString().setTagArg("p", 0, buf);
+        snprintf(buf, sizeof(buf), "%lf", subjectModulePosition.y);
         buf[sizeof(buf) - 1] = 0;
-        visualRepresentation->getDisplayString().setTagArg("p", 1, buf);
+        subjectModule->getDisplayString().setTagArg("p", 1, buf);
     }
 }
 

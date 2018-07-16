@@ -31,25 +31,25 @@ network Network
 {
     submodules:
         Alice: StandardHost {
-            @display("p=76,62");
+            @display("p=250,100");
         }
         FITgate1: Router {
-            @display("p=314,58");
+            @display("p=550,100");
         }
         FITgate2: Router {
-            @display("p=314,168");
+            @display("p=550,200");
         }
         Bob: StandardHost {
-            @display("p=76,172");
+            @display("p=250,200");
         }
         Carlos: StandardHost {
-            @display("p=314,257");
+            @display("p=550,300");
         }
         etherSwitch: EtherSwitch {
-            @display("p=203,124");
+            @display("p=400,150");
         }
         configurator: Ipv4NetworkConfigurator {
-            @display("p=195,25");
+            @display("p=100,100;is=s");
             config = xmldoc("config.xml");
         }
     connections allowunconnected:

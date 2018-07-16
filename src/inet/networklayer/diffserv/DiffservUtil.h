@@ -35,12 +35,6 @@ enum Color { GREEN, YELLOW, RED };
 inline bool isEmpty(const char *str) { return !str || !(*str); }
 
 /**
- * Returns the value of the named attribute of the XML element,
- * or throws an exception if not found.
- */
-const char *getRequiredAttribute(cXMLElement *element, const char *attrName);
-
-/**
  * Parses the information rate parameter (bits/sec).
  * Supported formats:
  *  - absolute (e.g. 10Mbps)

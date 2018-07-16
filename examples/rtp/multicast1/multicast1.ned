@@ -24,7 +24,7 @@ network RTPMulticast1
                 destinationAddress = "225.0.0.1";
                 portNumber = 5004;
                 bandwidth = 8000;
-                @display("p=150,50");
+                @display("p=400,100");
         }
         host2: RtpHost {
             parameters:
@@ -33,7 +33,7 @@ network RTPMulticast1
                 destinationAddress = "225.0.0.1";
                 portNumber = 5004;
                 bandwidth = 8000;
-                @display("p=250,150");
+                @display("p=550,230");
         }
         host3: RtpHost {
             parameters:
@@ -42,7 +42,7 @@ network RTPMulticast1
                 destinationAddress = "225.0.0.1";
                 portNumber = 5004;
                 bandwidth = 8000;
-                @display("p=150,250");
+                @display("p=400,360");
         }
         host4: RtpHost {
             parameters:
@@ -51,12 +51,12 @@ network RTPMulticast1
                 destinationAddress = "225.0.0.1";
                 portNumber = 5004;
                 bandwidth = 8000;
-                @display("p=50,150");
+                @display("p=250,230");
         }
         router1: Router {
             parameters:
                 multicastForwarding = true;
-                @display("p=150,150");
+                @display("p=400,230");
             gates:
                 pppg[];
 
@@ -67,6 +67,7 @@ network RTPMulticast1
                 +"<multicast-group hosts='**' address='225.0.0.1'/>"
                 +"<multicast-route hosts='router1' groups='225.0.0.1' children='ppp*'/>"
                 +"</config>");
+            @display("p=100,100;is=s");
         }
     connections:
         host1.pppg++ <--> ethernet <--> router1.pppg++;

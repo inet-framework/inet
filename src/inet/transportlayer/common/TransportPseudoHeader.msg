@@ -18,6 +18,7 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.Units;
 import inet.common.packet.chunk.Chunk;
 import inet.networklayer.common.L3Address;
 
@@ -32,6 +33,6 @@ class TransportPseudoHeader extends FieldsChunk
     L3Address destAddress;
     int networkProtocolId;  // inet specific value, Protocol::getId()
     int protocolId = -1;    // TCP: 6, UDP: 17
-    int64_t packetLength = -1;
+    B packetLength = B(-1);
 }
 

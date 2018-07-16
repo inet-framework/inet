@@ -16,7 +16,7 @@ module MyHost extends StandardHost
     submodules:
         iPv4HookInfo: NetfilterInfoHook {
             networkProtocolModule = "^.ipv4.ip";
-            @display("p=626,265");
+            @display("p=225,80");
         }
 }
 
@@ -43,16 +43,16 @@ network Ipv4hook
         }
     submodules:
         host1: MyHost {
-            @display("p=43,70");
+            @display("p=250,70");
         }
         host2: MyHost {
-            @display("p=271,70");
+            @display("p=450,70");
         }
         router: MyRouter {
-            @display("p=157,197");
+            @display("p=350,170");
         }
         configurator: Ipv4NetworkConfigurator {
-            @display("p=112,278");
+            @display("p=100,70;is=s");
         }
     connections:
         host1.ethg++ <--> C <--> router.ethg++;

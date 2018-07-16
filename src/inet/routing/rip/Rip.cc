@@ -19,21 +19,22 @@
 #include <algorithm>
 #include <functional>
 
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/Simsignals.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/stlutils.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
+#include "inet/networklayer/contract/ipv6/Ipv6Consts.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/InterfaceMatcher.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/common/stlutils.h"
-#include "inet/common/lifecycle/NodeOperations.h"
-#include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/common/Simsignals.h"
-#include "inet/transportlayer/udp/Udp.h"
-#include "inet/common/ModuleAccess.h"
-#include "inet/linklayer/common/InterfaceTag_m.h"
-
 #include "inet/routing/rip/RipPacket_m.h"
 #include "inet/routing/rip/Rip.h"
 #include "inet/transportlayer/common/L4PortTag_m.h"
+#include "inet/transportlayer/udp/Udp.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
 
 namespace inet {
 
@@ -303,7 +304,7 @@ void Rip::sendRIPRequest(const RipInterfaceEntry& ripInterface)
     RipEntry& entry = packet->getEntryForUpdate(0);
     entry.addressFamilyId = RIP_AF_NONE;
     entry.metric = RIP_INFINITE_METRIC;
-    packet->setChunkLength(B(RIP_HEADER_SIZE + RIP_RTE_SIZE * packet->getEntryArraySize()));
+    packet->setChunkLength(RIP_HEADER_SIZE + RIP_RTE_SIZE * packet->getEntryArraySize());
 
     EV_INFO << "sending RIP request from " << ripInterface.ie->getInterfaceName() << "\n";
 
@@ -556,7 +557,7 @@ void Rip::sendRoutes(const L3Address& address, int port, const RipInterfaceEntry
 {
     EV_DEBUG << "Sending " << (changedOnly ? "changed" : "all") << " routes on " << ripInterface.ie->getFullName() << std::endl;
 
-    int maxEntries = mode == RIPv2 ? 25 : (ripInterface.ie->getMtu() - 40    /*IPv6_HEADER_BYTES*/ - 8    /*UDP_HEADER_BYTES*/ - RIP_HEADER_SIZE) / RIP_RTE_SIZE;
+    int maxEntries = mode == RIPv2 ? 25 : B(B(ripInterface.ie->getMtu()) - IPv6_HEADER_BYTES - UDP_HEADER_LENGTH - RIP_HEADER_SIZE).get() / RIP_RTE_SIZE.get();
 
     Packet *pk = new Packet("RIP response");
     auto packet = makeShared<RipPacket>();
@@ -605,7 +606,7 @@ void Rip::sendRoutes(const L3Address& address, int port, const RipInterfaceEntry
 
         // if packet is full, then send it and allocate a new one
         if (k >= maxEntries) {
-            packet->setChunkLength(B(RIP_HEADER_SIZE + RIP_RTE_SIZE * packet->getEntryArraySize()));
+            packet->setChunkLength(RIP_HEADER_SIZE + RIP_RTE_SIZE * packet->getEntryArraySize());
             pk->insertAtBack(packet);
 
             emit(sentUpdateSignal, pk);
@@ -621,7 +622,7 @@ void Rip::sendRoutes(const L3Address& address, int port, const RipInterfaceEntry
     // send last packet if it has entries
     if (k > 0) {
         packet->setEntryArraySize(k);
-        packet->setChunkLength(B(RIP_HEADER_SIZE + RIP_RTE_SIZE * packet->getEntryArraySize()));
+        packet->setChunkLength(RIP_HEADER_SIZE + RIP_RTE_SIZE * packet->getEntryArraySize());
         pk->insertAtBack(packet);
 
         emit(sentUpdateSignal, pk);

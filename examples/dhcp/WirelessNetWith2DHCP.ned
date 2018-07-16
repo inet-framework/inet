@@ -28,14 +28,13 @@ import inet.visualizer.contract.IIntegratedVisualizer;
 
 network WirelessNetWith2DHCP
 {
-    @display("bgb=590,407;bgl=2");
     int numHosts;
     submodules:
         visualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
-            @display("p=305,35");
+            @display("p=100,300;is=s");
         }
         radioMedium: Ieee80211ScalarRadioMedium {
-            @display("p=64,34");
+            @display("p=100,200;is=s");
         }
         client: WirelessHost {
             @display("p=64,124");
@@ -53,7 +52,7 @@ network WirelessNetWith2DHCP
             @display("p=511,307");
         }
         configurator: Ipv4NetworkConfigurator {
-            @display("p=180,35");
+            @display("p=100,100;is=s");
         }
         server: StandardHost {
             @display("p=283,363");

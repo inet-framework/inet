@@ -31,17 +31,17 @@ network MultiRadio
         int numHosts;
     submodules:
         radioMedium: Ieee80211ScalarRadioMedium {
-            @display("p=83,15");
+            @display("p=100,200;is=s");
         }
         configurator: Ipv4NetworkConfigurator {
-            config=xml("<config><interface hosts='*' address='10.0.0.x' netmask='255.255.255.0'/></config>");
+            config = xml("<config><interface hosts='*' address='10.0.0.x' netmask='255.255.255.0'/></config>");
             addStaticRoutes = false;
             addDefaultRoutes = false;
             addSubnetRoutes = false;
-            @display("p=253,15");
+            @display("p=100,100;is=s");
         }
         mobileHost[numHosts]: DymoRouter {
-            @display("p=100,100;r=,,#000040");
+            @display("p=250,150;r=,,#000040");
         }
     connections allowunconnected:
 }

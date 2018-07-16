@@ -27,14 +27,14 @@ import inet.visualizer.contract.ITransportConnectionVisualizer;
 module TransportConnectionVisualizer like ITransportConnectionVisualizer
 {
     parameters:
-        @display("i=block/app_s");
+        @display("i=block/app");
     submodules:
         canvasVisualizer: <default("TransportConnectionCanvasVisualizer")> like ITransportConnectionVisualizer if typename != "" {
             parameters:
-                @display("p=100,50");
+                @display("p=100,100");
         }
         osgVisualizer: <default("TransportConnectionOsgVisualizer")> like ITransportConnectionVisualizer if typename != "" {
             parameters:
-                @display("p=100,150");
+                @display("p=100,200");
         }
 }

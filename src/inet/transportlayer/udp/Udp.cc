@@ -382,8 +382,13 @@ void Udp::processPacketFromApp(Packet *packet)
     // set source and destination port
     udpHeader->setSourcePort(srcPort);
     udpHeader->setDestinationPort(destPort);
-    udpHeader->setTotalLengthField(B(udpHeader->getChunkLength() + packet->getTotalLength()).get());
-    insertCrc(l3Protocol, srcAddr, destAddr, udpHeader, packet);    // crcMode == CRC_COMPUTED is done in an INetfilter hook
+    udpHeader->setTotalLengthField(udpHeader->getChunkLength() + packet->getTotalLength());
+    if (crcMode == CRC_COMPUTED) {
+        udpHeader->setCrcMode(CRC_COMPUTED);
+        udpHeader->setCrc(0x0000);    // crcMode == CRC_COMPUTED is done in an INetfilter hook
+    }
+    else
+        insertCrc(l3Protocol, srcAddr, destAddr, udpHeader, packet);
     insertTransportProtocolHeader(packet, Protocol::udp, udpHeader);
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(l3Protocol);
 
@@ -413,7 +418,7 @@ void Udp::processUDPPacket(Packet *udpPacket)
     auto srcAddr = l3AddressInd->getSrcAddress();
     auto destAddr = l3AddressInd->getDestAddress();
     auto totalLength = B(udpHeader->getTotalLengthField());
-    auto hasIncorrectLength = totalLength > udpHeader->getChunkLength() + udpPacket->getDataLength();
+    auto hasIncorrectLength = totalLength < udpHeader->getChunkLength() || totalLength > udpHeader->getChunkLength() + udpPacket->getDataLength();
     auto networkProtocol = udpPacket->getTag<NetworkProtocolInd>()->getProtocol();
 
     if (hasIncorrectLength || !verifyCrc(networkProtocol, udpHeader, udpPacket)) {
@@ -424,6 +429,11 @@ void Udp::processUDPPacket(Packet *udpPacket)
         numDroppedBadChecksum++;
         delete udpPacket;
         return;
+    }
+
+    // remove lower layer paddings:
+    if (totalLength < udpPacket->getDataLength()) {
+        udpPacket->setBackOffset(udpHeaderPopPosition + totalLength);
     }
 
     bool isMulticast = destAddr.isMulticast();
@@ -1247,11 +1257,15 @@ void Udp::SockDesc::deleteMulticastMembership(MulticastMembership *membership)
 
 INetfilter::IHook::Result Udp::CrcInsertion::datagramPostRoutingHook(Packet *packet)
 {
+    if (packet->findTag<InterfaceInd>())
+        return ACCEPT;  // FORWARD
     auto networkProtocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     const auto& networkHeader = getNetworkProtocolHeader(packet);
     if (networkHeader->getProtocol() == &Protocol::udp) {
+        ASSERT(!networkHeader->isFragment());
         packet->eraseAtFront(networkHeader->getChunkLength());
         auto udpHeader = packet->removeAtFront<UdpHeader>();
+        ASSERT(udpHeader->getCrcMode() == CRC_COMPUTED);
         const L3Address& srcAddress = networkHeader->getSourceAddress();
         const L3Address& destAddress = networkHeader->getDestinationAddress();
         udp->insertCrc(networkProtocol, srcAddress, destAddress, udpHeader, packet);
@@ -1300,7 +1314,7 @@ bool Udp::verifyCrc(const Protocol *networkProtocol, const Ptr<const UdpHeader>&
         case CRC_DECLARED_CORRECT: {
             // if the CRC mode is declared to be correct, then the check passes if and only if the chunks are correct
             auto totalLength = udpHeader->getTotalLengthField();
-            auto udpDataBytes = packet->peekDataAt(B(0), B(totalLength) - udpHeader->getChunkLength(), Chunk::PF_ALLOW_INCORRECT);
+            auto udpDataBytes = packet->peekDataAt(B(0), totalLength - udpHeader->getChunkLength(), Chunk::PF_ALLOW_INCORRECT);
             return udpHeader->isCorrect() && udpDataBytes->isCorrect();
         }
         case CRC_DECLARED_INCORRECT:
@@ -1316,7 +1330,7 @@ bool Udp::verifyCrc(const Protocol *networkProtocol, const Ptr<const UdpHeader>&
                 auto srcAddress = l3AddressInd->getSrcAddress();
                 auto destAddress = l3AddressInd->getDestAddress();
                 auto totalLength = udpHeader->getTotalLengthField();
-                auto udpData = packet->peekDataAt<BytesChunk>(B(0), B(totalLength) - udpHeader->getChunkLength(), Chunk::PF_ALLOW_INCORRECT);
+                auto udpData = packet->peekDataAt<BytesChunk>(B(0), totalLength - udpHeader->getChunkLength(), Chunk::PF_ALLOW_INCORRECT);
                 auto computedCrc = computeCrc(networkProtocol, srcAddress, destAddress, udpHeader, udpData);
                 // TODO: delete these isCorrect calls, rely on CRC only
                 return computedCrc == 0xFFFF && udpHeader->isCorrect() && udpData->isCorrect();
@@ -1334,7 +1348,7 @@ uint16_t Udp::computeCrc(const Protocol *networkProtocol, const L3Address& srcAd
     pseudoHeader->setDestAddress(destAddress);
     pseudoHeader->setNetworkProtocolId(networkProtocol->getId());
     pseudoHeader->setProtocolId(IP_PROT_UDP);
-    pseudoHeader->setPacketLength(B(udpHeader->getChunkLength() + udpData->getChunkLength()).get());
+    pseudoHeader->setPacketLength(udpHeader->getChunkLength() + udpData->getChunkLength());
     // pseudoHeader length: ipv4: 12 bytes, ipv6: 40 bytes, other: ???
     if (networkProtocol == &Protocol::ipv4)
         pseudoHeader->setChunkLength(B(12));

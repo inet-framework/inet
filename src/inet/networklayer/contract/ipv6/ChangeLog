@@ -1,5 +1,30 @@
 ====== inet-4.x ======
 
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-01  Zoltan Bojthe
+
+	Added B/b units to length constants and length fields of chunks.
+
+2018-05-09  Zoltan Bojthe
+
+	Implemented bind() and connect().
+
+2018-05-09  Levente Mészáros
+
+	Extended INetworkSockets and implementations with local/remote address filter.
+
+2018-05-07  Levente Mészáros
+
+	Changed all network sockets to implement the new INetworkSocket interface.
+	Separated setCallback from setUserData in all sockets.
+
+2018-05-04  Levente Mészáros
+
+	Added Ipv6Socket.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
 2018-02-12  Zoltan Bojthe
 
 	Added toString for some address descriptor.

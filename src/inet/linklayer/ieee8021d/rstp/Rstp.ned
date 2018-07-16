@@ -55,7 +55,7 @@ simple Rstp like ISpanningTree
 
         // The migrate time is the time after which a non-assigned port becomes designated. This time is equal to 6 sec by default,
         // but you can tune the time to be between 4 and 30 sec.
-        double migrateTime @unit ("s")= default(3s);
+        double migrateTime @unit(s)= default(3s);
 
         // The topology change while time is the time while a port will send TC=true (Topology Change Notification)
         double tcWhileTime @unit(s) = default(6s);

@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-01  Zoltan Bojthe
+
+	Added B/b units to length constants and length fields of chunks.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
 2018-02-14  Zoltan Bojthe
 
 	Renamed functions to use camel case.

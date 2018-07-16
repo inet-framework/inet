@@ -1,0 +1,109 @@
+%description:
+
+Tests the effect of dipole antenna orientation and directional selectivity on wireless communication.
+
+The relationship between the position and orientation of the two wireless nodes:
+ - X equals
+ - Y differs
+ - Z equals
+ - heading   differs
+ - elevation equals
+ - bank      equals
+
+Communication should be possible.
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.apskradio.packetlevel.ApskScalarRadioMedium;
+
+network Test
+{
+    submodules:
+        radioMedium: ApskScalarRadioMedium;
+        configurator: Ipv4NetworkConfigurator;
+        host1: WirelessHost;
+        host2: WirelessHost;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+sim-time-limit = 80us
+record-eventlog = true
+ned-path = .;../../../../src
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+**.arp.typename = "GlobalArp"
+
+*.host*.mobility.constraintAreaMinZ = 0m
+*.host*.mobility.constraintAreaMinX = 0m
+*.host*.mobility.constraintAreaMinY = 0m
+*.host*.mobility.constraintAreaMaxX = 1000m
+*.host*.mobility.constraintAreaMaxY = 1000m
+*.host*.mobility.constraintAreaMaxZ = 1000m
+*.host*.mobility.initFromDisplayString = false
+*.host*.mobility.typename = "StationaryMobility"
+
+*.host1.mobility.initialX = 500m
+*.host1.mobility.initialY = 200m
+*.host1.mobility.initialZ = 0m
+*.host1.mobility.initialHeading = 0deg
+*.host1.mobility.initialElevation = 0deg
+*.host1.mobility.initialBank = 0deg
+
+*.host2.mobility.initialX = 500m
+*.host2.mobility.initialY = 800m
+*.host2.mobility.initialZ = 0m
+*.host2.mobility.initialHeading = 90deg
+*.host2.mobility.initialElevation = 0deg
+*.host2.mobility.initialBank = 0deg
+
+# radio medium
+*.radioMedium.backgroundNoise.power = -110dBm
+
+# nic
+*.host*.wlan[*].typename = "AckingWirelessInterface"
+*.host*.wlan[*].bitrate = 2Mbps
+*.host*.wlan[*].mac.headerLength = 10B
+*.host*.wlan[*].mac.fullDuplex = false
+*.host*.wlan[*].radio.typename = "ApskScalarRadio"
+*.host*.wlan[*].radio.carrierFrequency = 2.4GHz
+*.host*.wlan[*].radio.bandwidth = 2MHz
+*.host*.wlan[*].radio.antenna.typename = "DipoleAntenna"
+*.host*.wlan[*].radio.antenna.length = 20cm
+*.host*.wlan[*].radio.transmitter.bitrate = 2Mbps
+*.host*.wlan[*].radio.transmitter.preambleDuration = 0s
+*.host*.wlan[*].radio.transmitter.headerLength = 100b
+*.host*.wlan[*].radio.transmitter.power = 100mW
+*.host*.wlan[*].radio.receiver.energyDetection = -90dBm
+*.host*.wlan[*].radio.receiver.sensitivity = -80dBm
+*.host*.wlan[*].radio.receiver.snirThreshold = 10dB
+
+# ping app
+*.host1.numApps = 1
+*.host1.app[0].typename = "PingApp"
+*.host1.app[0].count = 1
+*.host1.app[0].printPing = true
+*.host1.app[0].destAddr = "host2"
+*.host1.app[0].startTime = 0s
+
+%#--------------------------------------------------------------------------------------------------------------
+%# remove colorizing
+%subst: /\x1B\[[0-9;]*m//
+%#--------------------------------------------------------------------------------------------------------------
+%contains: results/General-0.elog
+Changing radio reception state from IDLE to RECEIVING.
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

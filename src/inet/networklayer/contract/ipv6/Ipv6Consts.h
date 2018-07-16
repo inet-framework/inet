@@ -1,5 +1,5 @@
 //
-// Copyright (C) OpenSim Ltd.
+// Copyright (C) 2018 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,15 +15,17 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-import inet.common.INETDefs;
+#ifndef __INET_IPV6CONSTS_H
+#define __INET_IPV6CONSTS_H
 
-namespace inet;
+#include "inet/common/INETDefs.h"
+#include "inet/common/Units_m.h"
 
-enum CrcMode
-{
-    CRC_DISABLED = 0; // CRC is not set, serializable
-    CRC_DECLARED_CORRECT = 1; // CRC is correctly set without the actual value, not serializable
-    CRC_DECLARED_INCORRECT = 2; // the CRC is incorrectly set without the actual value, not serializable
-    CRC_COMPUTED = 3; // CRC is set to a value that is potentially incorrect, serializable
-}
+namespace inet {
+
+const B IPv6_HEADER_BYTES = B(40);
+
+} // namespace inet
+
+#endif // ifndef __INET_IPV6CONSTS_H
 

@@ -95,7 +95,7 @@ void TcpEchoAppThread::dataArrived(Packet *rcvdPkt, bool urgent)
         int socketId = rcvdPkt->getTag<SocketInd>()->getSocketId();
         outPkt->addTagIfAbsent<SocketReq>()->setSocketId(socketId);
 
-        long outByteLen = rcvdPkt->getByteLength() * echoAppModule->echoFactor;
+        long outByteLen = rcvdBytes * echoAppModule->echoFactor;
 
         if (outByteLen < 1)
             outByteLen = 1;

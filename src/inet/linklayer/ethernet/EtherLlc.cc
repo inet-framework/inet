@@ -43,7 +43,7 @@ void EtherLlc::initialize(int stage)
     cSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        fcsMode = parseEthernetFcsMode(par("fcsMode"));
+        fcsMode = parseFcsMode(par("fcsMode"));
         seqNum = 0;
         WATCH(seqNum);
 
@@ -119,7 +119,7 @@ void EtherLlc::refreshDisplay() const
 
 void EtherLlc::processPacketFromHigherLayer(Packet *packet)
 {
-    if (packet->getByteLength() > (MAX_ETHERNET_DATA_BYTES - ETHER_LLC_HEADER_LENGTH))
+    if (packet->getDataLength() > (MAX_ETHERNET_DATA_BYTES - ETHER_LLC_HEADER_LENGTH))
         throw cRuntimeError("packet from higher layer (%d bytes) plus LLC header exceeds maximum Ethernet payload length (%d)", (int)(packet->getByteLength()), MAX_ETHERNET_DATA_BYTES);
 
     totalFromHigherLayer++;

@@ -44,13 +44,13 @@ void TcpGenericServerThread::dataArrived(Packet *msg, bool)
 
     // process message: send back requested number of bytes, then close
     // connection if that was requested too
-    long requestedBytes = appmsg->getExpectedReplyLength();
+    B requestedBytes = appmsg->getExpectedReplyLength();
     bool doClose = appmsg->getServerClose();
     delete msg;
 
-    if (requestedBytes > 0) {
+    if (requestedBytes > B(0)) {
         Packet *outPacket = new Packet(msg->getName());
-        const auto& payload = makeShared<ByteCountChunk>(B(requestedBytes));
+        const auto& payload = makeShared<ByteCountChunk>(requestedBytes);
         outPacket->insertAtBack(payload);
         getSocket()->send(outPacket);
     }

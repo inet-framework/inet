@@ -299,7 +299,7 @@ osg::Node *MediumOsgVisualizer::createSphereSignalNode(const ITransmission *tran
 void MediumOsgVisualizer::refreshRingTransmissionNode(const ITransmission *transmission, osg::Node *node) const
 {
     auto propagation = radioMedium->getPropagation();
-    auto transmissionStart = transmission->getStartPosition();
+    // TODO: auto transmissionStart = transmission->getStartPosition();
     double startRadius = propagation->getPropagationSpeed().get() * (simTime() - transmission->getStartTime()).dbl();
     double endRadius = std::max(0.0, propagation->getPropagationSpeed().get() * (simTime() - transmission->getEndTime()).dbl());
     auto positionAttitudeTransform = static_cast<osg::PositionAttitudeTransform *>(node);
@@ -321,7 +321,7 @@ void MediumOsgVisualizer::refreshRingTransmissionNode(const ITransmission *trans
 void MediumOsgVisualizer::refreshSphereTransmissionNode(const ITransmission *transmission, osg::Node *node) const
 {
     auto propagation = radioMedium->getPropagation();
-    auto transmissionStart = transmission->getStartPosition();
+    // TODO: auto transmissionStart = transmission->getStartPosition();
     double startRadius = propagation->getPropagationSpeed().get() * (simTime() - transmission->getStartTime()).dbl();
     double endRadius = std::max(0.0, propagation->getPropagationSpeed().get() * (simTime() - transmission->getEndTime()).dbl());
     auto group = static_cast<osg::Group *>(node);

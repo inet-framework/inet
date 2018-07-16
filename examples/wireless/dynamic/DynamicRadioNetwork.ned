@@ -31,36 +31,37 @@ module DynamicHost extends AdhocHost
         ipv4.configurator.networkConfiguratorModule = "";
     submodules:
         autoConfigurator: HostAutoConfigurator {
-            @display("p=171,335");
+            @display("p=125,640;is=s");
         }
 }
 
 network DynamicRadioNetwork
 {
+    @display("bgb=600,520");
     submodules:
         visualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
             parameters:
-                @display("p=100,50");
+                @display("p=100,400;is=s");
         }
         configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=100,150");
+                @display("p=100,100;is=s");
         }
         radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
-                @display("p=100,250");
+                @display("p=100,200;is=s");
         }
         destinationNode: DynamicHost {
             parameters:
-                @display("p=250,50");
+                @display("p=400,250");
         }
         sourceNode[0]: DynamicHost {
             parameters:
                 @dynamic(true);
-                @display("p=250,150");
+                @display("p=250,250");
         }
         scenarioManager: ScenarioManager {
             parameters:
-                @display("p=100,250");
+                @display("p=100,300;is=s");
         }
 }

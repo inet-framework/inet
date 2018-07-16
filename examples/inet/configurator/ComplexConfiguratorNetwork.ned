@@ -29,23 +29,22 @@ import inet.visualizer.contract.IIntegratedVisualizer;
 network ComplexConfiguratorNetwork
 {
     parameters:
-        @display("bgb=1138,534");
     submodules:
         visualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
             parameters:
-                @display("p=200,50");
+                @display("p=100,400;is=s");
         }
         configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=50,50");
+                @display("p=100,100;is=s");
         }
         radioMediumA: Ieee80211ScalarRadioMedium {
             parameters:
-                @display("p=50,150");
+                @display("p=100,200;is=s");
         }
         radioMediumB: Ieee80211ScalarRadioMedium {
             parameters:
-                @display("p=50,250");
+                @display("p=100,300;is=s");
         }
         source: AdhocHost {
             @display("p=50,271;i=device/laptop");

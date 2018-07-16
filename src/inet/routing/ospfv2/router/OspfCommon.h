@@ -22,6 +22,8 @@
 #include <functional>
 #include <stdio.h>
 
+#include "inet/common/INETDefs.h"
+#include "inet/common/Units_m.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 
@@ -43,21 +45,22 @@ namespace ospf {
 #define MAX_SEQUENCE_NUMBER                    2147483647
 
 #define VIRTUAL_LINK_TTL                       32
-//#define IPV4_HEADER_LENGTH                  60    // use IP_MAX_HEADER_BYTES from Ipv4Header_m.h
-#define IPV4_DATAGRAM_LENGTH                   65536
-#define OSPF_HEADER_LENGTH                     24
-#define OSPF_LSA_HEADER_LENGTH                 20
-#define OSPF_HELLO_HEADER_LENGTH               20
-#define OSPF_DD_HEADER_LENGTH                  8
-#define OSPF_REQUEST_LENGTH                    12
-#define OSPF_ROUTERLSA_HEADER_LENGTH           4
-#define OSPF_LINK_HEADER_LENGTH                12
-#define OSPF_TOS_LENGTH                        4
-#define OSPF_NETWORKLSA_MASK_LENGTH            4
-#define OSPF_NETWORKLSA_ADDRESS_LENGTH         4
-#define OSPF_SUMMARYLSA_HEADER_LENGTH          8
-#define OSPF_ASEXTERNALLSA_HEADER_LENGTH       16
-#define OSPF_ASEXTERNALLSA_TOS_INFO_LENGTH     12
+
+const B IPV4_DATAGRAM_LENGTH                   = B(65536);
+const B OSPF_HEADER_LENGTH                     = B(24);
+const B OSPF_LSA_HEADER_LENGTH                 = B(20);
+const B OSPF_HELLO_HEADER_LENGTH               = B(20);
+const B OSPF_DD_HEADER_LENGTH                  = B(8);
+const B OSPF_REQUEST_LENGTH                    = B(12);
+const B OSPF_ROUTERLSA_HEADER_LENGTH           = B(4);
+const B OSPF_LINK_HEADER_LENGTH                = B(12);
+const B OSPF_TOS_LENGTH                        = B(4);
+const B OSPF_NETWORKLSA_MASK_LENGTH            = B(4);
+const B OSPF_NETWORKLSA_ADDRESS_LENGTH         = B(4);
+const B OSPF_SUMMARYLSA_HEADER_LENGTH          = B(8);
+const B OSPF_ASEXTERNALLSA_HEADER_LENGTH       = B(16);
+const B OSPF_ASEXTERNALLSA_TOS_INFO_LENGTH     = B(12);
+
 #define OSPF_EXTERNAL_ROUTES_LEARNED_BY_BGP    179
 #define OSPF_BGP_DEFAULT_COST                  1
 

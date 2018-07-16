@@ -218,7 +218,7 @@ class INET_API Sctp : public cSimpleModule
     bool sackNow;
     uint64 numPktDropReports;
     int interfaceId = -1;
-    CrcMode crcMode = static_cast<CrcMode>(-1);
+    CrcMode crcMode = CRC_MODE_UNDEFINED;
 
   public:
     virtual ~Sctp();

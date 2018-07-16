@@ -79,7 +79,7 @@ void insertSegment(TcpReceiveQueue *rq, Packet *tcpseg)
 {
     const auto& tcphdr = tcpseg->peekAtFront<TcpHeader>();
     uint32_t beg = tcphdr->getSequenceNo();
-    uint32_t end = beg + tcpseg->getByteLength() - tcphdr->getHeaderLength();
+    uint32_t end = beg + tcpseg->getByteLength() - B(tcphdr->getHeaderLength()).get();
     EV << "RQ:" << "insertSeg [" << beg << ".." << end << ")";
     uint32 rcv_nxt = rq->insertBytesFromSegment(tcpseg, tcphdr);
     delete tcpseg;
@@ -90,7 +90,7 @@ void tryinsertSegment(TcpReceiveQueue *rq, Packet *tcpseg)
 {
     const auto& tcphdr = tcpseg->peekAtFront<TcpHeader>();
     uint32_t beg = tcphdr->getSequenceNo();
-    uint32_t end = beg + tcpseg->getByteLength() - tcphdr->getHeaderLength();
+    uint32_t end = beg + tcpseg->getByteLength() - B(tcphdr->getHeaderLength()).get();
     EV << "RQ:" << "insertSeg [" << beg << ".." << end << ")";
     try {
         uint32 rcv_nxt = rq->insertBytesFromSegment(tcpseg,tcphdr);

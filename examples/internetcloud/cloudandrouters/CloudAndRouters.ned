@@ -39,14 +39,24 @@ network CloudAndRouters
     submodules:
         configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=61,163");
+                @display("p=100,70;is=s");
         }
 
-        srouter[numSenders]: Router;
-        sender[numSenders]: StandardHost;
-        rrouter: Router;
-        recip: StandardHost;
-        internet: InternetCloud;
+        srouter[numSenders]: Router {
+            @display("p=250,200,row,100");
+        }
+        sender[numSenders]: StandardHost {
+            @display("p=250,100,row,100");
+        }
+        rrouter: Router {
+            @display("p=250,600");
+        }
+        recip: StandardHost {
+            @display("p=250,700");
+        }
+        internet: InternetCloud {
+            @display("p=250,400;is=vl");
+        }
     connections:
         rrouter.pppg++ <--> C <--> internet.pppg++;
         recip.ethg++ <--> Eth100M <--> rrouter.ethg++;

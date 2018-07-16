@@ -43,39 +43,39 @@ network multi
         cli1: StandardHost {
             parameters:
                 forwarding = false;
-                @display("p=61,142;i=device/laptop");
+                @display("p=250,200;i=device/laptop");
             gates:
                 pppg[1];
         }
         srv1: StandardHost {
             parameters:
                 forwarding = false;
-                @display("p=426,135;i=device/server2");
+                @display("p=600,200;i=device/server2");
             gates:
                 pppg[1];
 
         }
         router1: Router {
             parameters:
-                @display("p=188,77;i=abstract/router");
+                @display("p=350,100;i=abstract/router");
             gates:
                 pppg[2];
         }
         router2: Router {
             parameters:
-                @display("p=323,75;i=abstract/router");
+                @display("p=500,100;i=abstract/router");
             gates:
                 pppg[2];
         }
         router3: Router {
             parameters:
-                @display("p=188,192;i=abstract/router");
+                @display("p=350,300;i=abstract/router");
             gates:
                 pppg[2];
         }
         router4: Router {
             parameters:
-                @display("p=328,188;i=abstract/router");
+                @display("p=500,300;i=abstract/router");
             gates:
                 pppg[2];
         }
@@ -107,6 +107,7 @@ network multi
                     "<route hosts='router4' destination='10.2.3.1' netmask='/32' gateway='10.2.3.1' />"+
                     "<route hosts='router4' destination='*' gateway='10.2.2.254' />"+
                     "</config>");
+            @display("p=100,100;is=s");
         }
     connections:
         cli1.pppg++ <--> ppp2line <--> router1.pppg++;

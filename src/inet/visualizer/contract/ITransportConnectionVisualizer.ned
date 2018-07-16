@@ -27,5 +27,5 @@ package inet.visualizer.contract;
 moduleinterface ITransportConnectionVisualizer
 {
     parameters:
-        @display("i=block/app_s");
+        @display("i=block/app");
 }

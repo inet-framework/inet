@@ -143,7 +143,7 @@ void TelnetApp::sendGenericAppMsg(int numBytes, int expectedReplyBytes)
     const auto& payload = makeShared<GenericAppMsg>();
     Packet *packet = new Packet("data");
     payload->setChunkLength(B(numBytes));
-    payload->setExpectedReplyLength(expectedReplyBytes);
+    payload->setExpectedReplyLength(B(expectedReplyBytes));
     payload->setServerClose(false);
     packet->insertAtBack(payload);
 

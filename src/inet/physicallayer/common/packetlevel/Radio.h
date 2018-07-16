@@ -41,9 +41,9 @@ namespace physicallayer {
  * its transmitter state back to idle, and emits a transmitter state changed
  * signal.
  *
- * The reception process starts when the radio module receives a signal.
- * The radio must be in receiver or transceiver mode before the message arrives,
- * otherwise it just ignores the message. The radio changes its receiver state
+ * The reception process starts when the radio module receives a packet.
+ * The radio must be in receiver or transceiver mode before the packet arrives,
+ * otherwise it just ignores the packet. The radio changes its receiver state
  * to the appropriate value, and emits a receiver state changed signal. Finally,
  * it schedules a timer to the end of the reception.
  *
@@ -57,12 +57,6 @@ namespace physicallayer {
 // TODO: support capturing a stronger transmission
 class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
 {
-  public:
-    static simsignal_t minSnirSignal;
-    static simsignal_t packetErrorRateSignal;
-    static simsignal_t bitErrorRateSignal;
-    static simsignal_t symbolErrorRateSignal;
-
   protected:
     /**
      * An identifier which is globally unique for the whole lifetime of the
@@ -179,6 +173,7 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
 
   protected:
     virtual void initialize(int stage) override;
+    virtual void initializeRadioMode();
 
     virtual void handleMessageWhenDown(cMessage *message) override;
     virtual void handleSelfMessage(cMessage *message) override;
@@ -244,7 +239,6 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
     virtual IRadioSignal::SignalPart getTransmittedSignalPart() const override;
     virtual IRadioSignal::SignalPart getReceivedSignalPart() const override;
 
-    // TODO: cleanup
     virtual void encapsulate(Packet *packet) const { }
     virtual void decapsulate(Packet *packet) const { }
 };

@@ -71,7 +71,7 @@ class INET_API LinearGaugeFigure : public cGroupFigure, public inet::IIndicatorF
     const char *getLabel() const;
     void setLabel(const char *text);
 
-    const int getLabelOffset() const;
+    int getLabelOffset() const;
     void setLabelOffset(int offset);
 
     const Font& getLabelFont() const;

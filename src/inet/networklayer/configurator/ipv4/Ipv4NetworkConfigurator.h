@@ -224,7 +224,6 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
     virtual InterfaceInfo *createInterfaceInfo(NetworkConfiguratorBase::Topology& topology, NetworkConfiguratorBase::Node *node, LinkInfo *linkInfo, InterfaceEntry *interfaceEntry) override;
     virtual void parseAddressAndSpecifiedBits(const char *addressAttr, uint32_t& outAddress, uint32_t& outAddressSpecifiedBits);
     virtual bool linkContainsMatchingHostExcept(LinkInfo *linkInfo, Matcher *hostMatcher, cModule *exceptModule);
-    virtual const char *getMandatoryAttribute(cXMLElement *element, const char *attr);
     virtual void resolveInterfaceAndGateway(Node *node, const char *interfaceAttr, const char *gatewayAttr, InterfaceEntry *& outIE, Ipv4Address& outGateway, Topology& topology);
     virtual InterfaceInfo *findInterfaceOnLinkByNode(LinkInfo *linkInfo, cModule *node);
     virtual InterfaceInfo *findInterfaceOnLinkByNodeAddress(LinkInfo *linkInfo, Ipv4Address address);

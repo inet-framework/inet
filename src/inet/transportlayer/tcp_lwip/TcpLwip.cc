@@ -255,7 +255,7 @@ void TcpLwip::notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, u
     }
     else {
         const auto& tcpHdr = pCurTcpSegM->peekAtFront<TcpHeader>();
-        if (pCurTcpSegM->getByteLength() > tcpHdr->getHeaderLength())
+        if (B(pCurTcpSegM->getByteLength()) > tcpHdr->getHeaderLength())
             throw cRuntimeError("conn is null, and received packet has data");
 
         EV_WARN << "notifyAboutIncomingSegmentProcessing: conn is null\n";
@@ -647,7 +647,7 @@ void TcpLwip::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP, L3Add
         EV_INFO << " PSH";
     if (tcpHdr->getUrgBit())
         EV_INFO << " URG";
-    EV_INFO << " len=" << packet->getByteLength() - tcpHdr->getHeaderLength() << "\n";
+    EV_INFO << " len=" << B(packet->getDataLength()) - tcpHdr->getHeaderLength() << "\n";
 
     send(packet, "ipOut");
 }

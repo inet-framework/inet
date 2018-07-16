@@ -106,7 +106,7 @@ void TcpBasicClientApp::sendRequest()
     const auto& payload = makeShared<GenericAppMsg>();
     Packet *packet = new Packet("data");
     payload->setChunkLength(B(requestLength));
-    payload->setExpectedReplyLength(replyLength);
+    payload->setExpectedReplyLength(B(replyLength));
     payload->setServerClose(false);
     packet->insertAtBack(payload);
 

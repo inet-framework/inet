@@ -25,16 +25,12 @@ namespace inet {
 // Constants from the 802.3 spec
 #define MAX_PACKETBURST                     13
 
-#define GIGABIT_MAX_BURST_BYTES             8192  /* don't start new frame after 8192 or more bytes already transmitted */
-#define MAX_ETHERNET_DATA_BYTES             1500  /* including LLC, SNAP etc headers */
-#define MAX_ETHERNET_FRAME_BYTES            1526  /* excludes preamble and SFD */
-#define MIN_ETHERNET_FRAME_BYTES            64  /* excludes preamble and SFD */
-#define GIGABIT_MIN_FRAME_BYTES_WITH_EXT    512  /* excludes preamble and SFD, but includes 448 byte extension */
-#define INTERFRAME_GAP_BITS                 96
-/*
- * The maximum packet length.   //FIXME 3 MAX length exist now: 1500, 1518, 1526 bytes
- */
-#define ETHER_MAX_LEN     1518
+const B GIGABIT_MAX_BURST_BYTES           = B(8192);  /* don't start new frame after 8192 or more bytes already transmitted */
+const B MAX_ETHERNET_DATA_BYTES           = B(1500);  /* including LLC, SNAP etc headers */
+const B MAX_ETHERNET_FRAME_BYTES          = B(1526);  /* excludes preamble and SFD */
+const B MIN_ETHERNET_FRAME_BYTES          = B(64);  /* excludes preamble and SFD */
+const B GIGABIT_MIN_FRAME_BYTES_WITH_EXT  = B(512);  /* excludes preamble and SFD, but includes 448 byte extension */
+const b INTERFRAME_GAP_BITS               = b(96);
 
 #define ETHERNET_TXRATE                     10000000.0   /* 10 Mbit/sec (in bit/s) */
 #define FAST_ETHERNET_TXRATE                100000000.0   /* 100 Mbit/sec (in bit/s) */
@@ -47,33 +43,32 @@ namespace inet {
 
 #define MAX_ATTEMPTS                        16
 #define BACKOFF_RANGE_LIMIT                 10
-#define JAM_SIGNAL_BYTES                    4
-#define PREAMBLE_BYTES                      7
-#define SFD_BYTES                           1
+const B JAM_SIGNAL_BYTES                    = B(4);
+const B PREAMBLE_BYTES                      = B(7);
+const B SFD_BYTES                           = B(1);
+
 #define PAUSE_UNIT_BITS                     512 /* one pause unit is 512 bit times */
 
 /*
  * The number of bytes in an ethernet (MAC) address.
  */
-#define ETHER_ADDR_LEN    6
+const B ETHER_ADDR_LEN  = B(6);
 
 /*
  * The number of bytes in the type field.
  */
-#define ETHER_TYPE_LEN    2
+const B ETHER_TYPE_LEN  = B(2);
 
 /*
  * The number of bytes in the trailing CRC field.
  */
-#define ETHER_FCS_BYTES     4
-
-#define ETHER_FCS_BYTES                     4
-#define ETHER_MAC_HEADER_BYTES              (2 * ETHER_ADDR_LEN + ETHER_TYPE_LEN) /* src(6)+dest(6)+length/type(2) */
-#define ETHER_MAC_FRAME_BYTES               (ETHER_MAC_HEADER_BYTES + ETHER_FCS_BYTES) /* src(6)+dest(6)+length/type(2)+FCS(4) */
-#define ETHER_LLC_HEADER_LENGTH             (3) /* ssap(1)+dsap(1)+control(1) */
-#define ETHER_SNAP_HEADER_LENGTH            (5) /* org(3)+local(2) */
-#define ETHER_PAUSE_COMMAND_BYTES           (2 + 2) /* opcode(2)+parameters(2) */
-#define ETHER_PAUSE_COMMAND_PADDED_BYTES    std::max(MIN_ETHERNET_FRAME_BYTES, ETHER_MAC_FRAME_BYTES + ETHER_PAUSE_COMMAND_BYTES)
+const B ETHER_FCS_BYTES                  = B(4);
+const B ETHER_MAC_HEADER_BYTES           = ETHER_ADDR_LEN + ETHER_ADDR_LEN + ETHER_TYPE_LEN; /* src(6)+dest(6)+length/type(2) */
+const B ETHER_MAC_FRAME_BYTES            = ETHER_MAC_HEADER_BYTES + ETHER_FCS_BYTES; /* src(6)+dest(6)+length/type(2)+FCS(4) */
+const B ETHER_LLC_HEADER_LENGTH          = B(3); /* ssap(1)+dsap(1)+control(1) */
+const B ETHER_SNAP_HEADER_LENGTH         = B(5); /* org(3)+local(2) */
+const B ETHER_PAUSE_COMMAND_BYTES        = B(2 + 2); /* opcode(2)+parameters(2) */
+const B ETHER_PAUSE_COMMAND_PADDED_BYTES = std::max(MIN_ETHERNET_FRAME_BYTES, ETHER_MAC_FRAME_BYTES + ETHER_PAUSE_COMMAND_BYTES);
 
 /*
  * A macro to validate a length with

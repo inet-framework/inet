@@ -26,7 +26,6 @@ import ned.DatarateChannel;
 
 network PcapRecorderTest
 {
-    @display("bgb=306,193");
     types:
         channel C extends DatarateChannel
         {
@@ -36,22 +35,22 @@ network PcapRecorderTest
     submodules:
         client0: StandardHost {
             parameters:
-                @display("p=164,36;i=device/pc3");
+                @display("p=250,100;i=device/pc3");
         }
         client1: StandardHost {
             parameters:
-                @display("p=164,136;i=device/pc3");
+                @display("p=250,200;i=device/pc3");
         }
         server: StandardHost {
             parameters:
-                @display("p=260,87;i=device/pc2");
+                @display("p=350,150;i=device/pc2");
         }
         configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=46,28");
+                @display("p=100,100;is=s");
         }
         netAnimTrace: NetAnimTrace {
-            @display("p=46,105");
+            @display("p=100,200;is=s");
         }
     connections:
         client0.pppg++ <--> C <--> server.pppg++;

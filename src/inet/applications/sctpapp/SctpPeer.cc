@@ -15,18 +15,16 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/applications/sctpapp/SctpPeer.h"
-
-#include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/transportlayer/sctp/SctpAssociation.h"
-#include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
-//#include "inet/transportlayer/sctp/SctpMessage_m.h"
-#include "inet/transportlayer/contract/sctp/SctpSocket.h"
-
 #include <stdlib.h>
 #include <stdio.h>
+
+#include "inet/applications/sctpapp/SctpPeer.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
+#include "inet/transportlayer/contract/sctp/SctpSocket.h"
+#include "inet/transportlayer/sctp/SctpAssociation.h"
 
 namespace inet {
 
@@ -164,6 +162,7 @@ void SctpPeer::generateAndSend()
     for (int i = 0; i < numBytes; i++)
         vec[i] = (bytesSent + i) & 0xFF;
     applicationData->setBytes(vec);
+    applicationData->addTag<CreationTimeTag>()->setCreationTime(simTime());
     applicationPacket->insertAtBack(applicationData);
     auto sctpSendReq = applicationPacket->addTagIfAbsent<SctpSendReq>();
     sctpSendReq->setLast(true);
@@ -172,8 +171,6 @@ void SctpPeer::generateAndSend()
     lastStream = (lastStream + 1) % outboundStreams;
     sctpSendReq->setSid(lastStream);
     sctpSendReq->setSocketId(serverAssocId);
-    auto creationTimeTag = applicationPacket->addTagIfAbsent<CreationTimeTag>();
-    creationTimeTag->setCreationTime(simTime());
     applicationPacket->setKind(ordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);
     auto& tags = getTags(applicationPacket);
     tags.addTagIfAbsent<SocketReq>()->setSocketId(serverAssocId);
@@ -391,12 +388,14 @@ void SctpPeer::handleMessage(cMessage *msg)
                 }
                 else {
                     auto m = endToEndDelay.find(id);
-                    const auto& smsg = staticPtrCast<const BytesChunk>(message->peekData());
-                    auto creationTimeTag = message->findTag<CreationTimeTag>();
-                    m->second->record(simTime() - creationTimeTag->getCreationTime());
                     auto k = histEndToEndDelay.find(id);
-                    k->second->collect(simTime() - creationTimeTag->getCreationTime());
-                    creationTimeTag->setCreationTime(simTime());
+                    const auto& smsg = message->peekData();
+
+                    for (auto& region : smsg->getAllTags<CreationTimeTag>()) {
+                        m->second->record(simTime() - region.getTag()->getCreationTime());
+                        k->second->collect(simTime() - region.getTag()->getCreationTime());
+                    }
+
                     auto cmsg = new Packet("ApplicationPacket");
                     cmsg->insertAtBack(smsg);
                     auto cmd = cmsg->addTagIfAbsent<SctpSendReq>();
@@ -579,9 +578,8 @@ void SctpPeer::sendRequest(bool last)
     for (int i = 0; i < numBytes; i++)
         vec[i] = (bytesSent + i) & 0xFF;
     msg->setBytes(vec);
+    msg->addTag<CreationTimeTag>()->setCreationTime(simTime());
     cmsg->insertAtBack(msg);
-    auto creationTimeTag = cmsg->addTagIfAbsent<CreationTimeTag>();
-    creationTimeTag->setCreationTime(simTime());
     cmsg->setKind(ordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);
     auto sendCommand = cmsg->addTagIfAbsent<SctpSendReq>();
     sendCommand->setLast(true);
@@ -687,9 +685,7 @@ void SctpPeer::socketDataArrived(SctpSocket *socket, Packet *msg, bool)
     bytesRcvd += msg->getByteLength();
 
     if (echo) {
-        const auto& smsg = staticPtrCast<const BytesChunk>(msg->peekData());
-        auto creationTimeTag = msg->findTag<CreationTimeTag>();
-        creationTimeTag->setCreationTime(simTime());
+        const auto& smsg = msg->peekData();
         auto cmsg = new Packet("ApplicationPacket");
         cmsg->insertAtBack(smsg);
         auto cmd = cmsg->addTagIfAbsent<SctpSendReq>();

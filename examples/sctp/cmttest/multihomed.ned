@@ -33,7 +33,7 @@ network multihomed
             parameters:
                 forwarding = false;
                 ipv4.configurator.networkConfiguratorModule = "";
-                @display("p=61,142;i=device/laptop");
+                @display("p=100,200;i=device/laptop");
             gates:
                 pppg[2];
         }
@@ -41,7 +41,7 @@ network multihomed
             parameters:
                 forwarding = false;
                 ipv4.configurator.networkConfiguratorModule = "";
-                @display("p=426,135;i=device/server2");
+                @display("p=450,200;i=device/server2");
             gates:
                 pppg[2];
 
@@ -49,14 +49,14 @@ network multihomed
         router1: Router {
             parameters:
                 ipv4.configurator.networkConfiguratorModule = "";
-                @display("p=188,77;i=abstract/router");
+                @display("p=200,100;i=abstract/router");
             gates:
                 pppg[4];
         }
         router2: Router {
             parameters:
                 ipv4.configurator.networkConfiguratorModule = "";
-                @display("p=323,75;i=abstract/router");
+                @display("p=350,100;i=abstract/router");
             gates:
                 pppg[4];
         }

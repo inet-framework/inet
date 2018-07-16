@@ -11,7 +11,7 @@ module DymoRouter extends AdhocHost
 {
     submodules:
         dymo: Dymo {
-            @display("p=700,300");
+            @display("p=825,226");
         }
     connections:
         dymo.ipOut --> tn.in++;

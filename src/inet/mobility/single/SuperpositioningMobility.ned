@@ -35,11 +35,11 @@ module SuperpositioningMobility extends MobilityBase
 {
     parameters:
         int numElements; // number of combined mobility modules
-        element[*].visualRepresentation = default(""); // disable visual representation of superposition elements by default 
+        element[*].subjectModule = default(""); // disable visual subject module of superposition elements by default 
         @class(SuperpositioningMobility);
     submodules:
         element[numElements]: <> like IMobility {
             parameters:
-	            @display("p=150,150,row,200");
+                @display("p=100,100,row,150");
         }
 }

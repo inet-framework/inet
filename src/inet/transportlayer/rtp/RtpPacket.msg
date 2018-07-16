@@ -22,10 +22,9 @@ import inet.common.packet.chunk.Chunk;
 
 namespace inet::rtp;
 
-enum RtpHeaderEnums
-{
-    RTPPACKET_FIX_HEADERLENGTH = 12;
-}
+cplusplus {{
+    const B RTPPACKET_FIX_HEADERLENGTH = B(12);
+}}
 
 //
 // This class represents an RTP data packet. Real data can either
@@ -37,7 +36,7 @@ enum RtpHeaderEnums
 //
 class RtpHeader extends FieldsChunk
 {
-    chunkLength = B(RTPPACKET_FIX_HEADERLENGTH);  // 12-byte fixed header
+    chunkLength = RTPPACKET_FIX_HEADERLENGTH;  // 12-byte fixed header
 
     // The rtp version of this ~RtpPacket.
     uint8 version = 2;      // 2 bits

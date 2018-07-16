@@ -29,7 +29,7 @@ simple FacingMobility extends MobilityBase
         double initialX @unit(m) = default(uniform(this.constraintAreaMinX, this.constraintAreaMaxX));
         double initialY @unit(m) = default(uniform(this.constraintAreaMinY, this.constraintAreaMaxY));
         double initialZ @unit(m) = default(nanToZero(uniform(this.constraintAreaMinZ, this.constraintAreaMaxZ)));
-        bool initFromDisplayString = default(true);
+        bool initFromDisplayString = default(true); // enables one time initialization from the subject module's display string
         string sourceMobility = default("."); // the default source mobility is this
         string targetMobility;
         @class(FacingMobility);

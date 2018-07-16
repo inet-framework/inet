@@ -50,10 +50,10 @@ class INET_API PacketDrillApp : public TcpSessionApp, public ILifecycle
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override
     { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
-    const int getLocalPort() { return localPort;};
-    const int getRemotePort() { return remotePort;};
-    const uint32 getIdInbound() { return idInbound;};
-    const uint32 getIdOutbound() { return idOutbound;};
+    int getLocalPort() const { return localPort;};
+    int getRemotePort() const { return remotePort;};
+    uint32 getIdInbound() const { return idInbound;};
+    uint32 getIdOutbound() const { return idOutbound;};
     uint32 getPeerTS() { return peerTS; };
     void increaseIdInbound() { idInbound++;};
     void increaseIdOutbound() { idOutbound++;};
@@ -129,7 +129,7 @@ class INET_API PacketDrillApp : public TcpSessionApp, public ILifecycle
         std::map<uint32, uint32> seqNumMap;
         simtime_t peerHeartbeatTime;
         cMessage *eventTimer;
-        CrcMode crcMode = static_cast<CrcMode>(-1);
+        CrcMode crcMode = CRC_MODE_UNDEFINED;
 
 
         void scheduleEvent();

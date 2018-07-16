@@ -60,13 +60,7 @@ void Ieee80211Mac::initialize(int stage)
     MacProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         modeSet = Ieee80211ModeSet::getModeSet(par("modeSet"));
-        const char *fcsModeString = par("fcsMode");
-        if (!strcmp(fcsModeString, "declared"))
-            fcsMode = FCS_DECLARED;
-        else if (!strcmp(fcsModeString, "computed"))
-            fcsMode = FCS_COMPUTED;
-        else
-            throw cRuntimeError("Unknown fcs mode");
+        fcsMode = parseFcsMode(par("fcsMode"));
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         mib = getModuleFromPar<Ieee80211Mib>(par("mibModule"), this);
@@ -90,7 +84,7 @@ void Ieee80211Mac::initialize(int stage)
         registerInterface();
         emit(modesetChangedSignal, modeSet);
         if (isOperational)
-            radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
+            initializeRadioMode();
         if (isInterfaceRegistered().isUnspecified())// TODO: do we need multi-MAC feature? if so, should they share interfaceEntry??  --Andras
             registerInterface();
     }
@@ -100,6 +94,22 @@ void Ieee80211Mac::initialize(int stage)
         dcf = check_and_cast<Dcf *>(getSubmodule("dcf"));
         hcf = check_and_cast<Hcf *>(getSubmodule("hcf"));
     }
+}
+
+void Ieee80211Mac::initializeRadioMode() {
+    const char *initialRadioMode = par("initialRadioMode");
+    if(!strcmp(initialRadioMode, "off"))
+        radio->setRadioMode(IRadio::RADIO_MODE_OFF);
+    else if(!strcmp(initialRadioMode, "sleep"))
+        radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
+    else if(!strcmp(initialRadioMode, "receiver"))
+        radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
+    else if(!strcmp(initialRadioMode, "transmitter"))
+        radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
+    else if(!strcmp(initialRadioMode, "transceiver"))
+        radio->setRadioMode(IRadio::RADIO_MODE_TRANSCEIVER);
+    else
+        throw cRuntimeError("Unknown initialRadioMode");
 }
 
 const MacAddress& Ieee80211Mac::isInterfaceRegistered()
@@ -320,7 +330,7 @@ void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, long 
         if (transmissionFinished) {
             tx->radioTransmissionFinished();
             EV_DEBUG << "changing radio to receiver mode\n";
-            configureRadioMode(IRadio::RADIO_MODE_RECEIVER); // FIXME: this is in a very wrong place!!! should be done explicitly from UpperMac!
+            configureRadioMode(IRadio::RADIO_MODE_RECEIVER); // FIXME: this is in a very wrong place!!! should be done explicitly from coordination function!
         }
         rx->transmissionStateChanged(transmissionState);
     }
@@ -404,7 +414,7 @@ bool Ieee80211Mac::handleNodeStart(IDoneCallback *doneCallback)
         return true;    // do nothing when called from initialize()
 
     bool ret = MacProtocolBase::handleNodeStart(doneCallback);
-    radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
+    initializeRadioMode();
     return ret;
 }
 

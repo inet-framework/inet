@@ -77,7 +77,7 @@ void NetworkProtocolBase::sendUp(cMessage *message)
             }
         }
         if (upperProtocols.find(protocol) != upperProtocols.end()) {
-            EV_INFO << "Passing up to protocol " << protocol << "\n";
+            EV_INFO << "Passing up to protocol " << protocol->getName() << "\n";
             emit(packetSentToUpperSignal, packet);
             send(packet, "transportOut");
         }

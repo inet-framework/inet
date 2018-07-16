@@ -27,14 +27,14 @@ import inet.visualizer.contract.IIeee80211Visualizer;
 module Ieee80211Visualizer like IIeee80211Visualizer
 {
     parameters:
-        @display("i=block/app_s");
+        @display("i=block/app");
     submodules:
         canvasVisualizer: <default("Ieee80211CanvasVisualizer")> like IIeee80211Visualizer if typename != "" {
             parameters:
-                @display("p=100,50");
+                @display("p=100,100");
         }
         osgVisualizer: <default("Ieee80211OsgVisualizer")> like IIeee80211Visualizer if typename != "" {
             parameters:
-                @display("p=100,150");
+                @display("p=100,200");
         }
 }

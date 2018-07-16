@@ -111,10 +111,9 @@ void EtherMacFullDuplex::startFrameTransmission()
     ASSERT(hdr);
     ASSERT(!hdr->getSrc().isUnspecified());
 
-    int64 minFrameLength = curEtherDescr->frameMinBytes;
-    if (frame->getByteLength() < minFrameLength) {
+    if (frame->getDataLength() < curEtherDescr->frameMinBytes) {
         auto oldFcs = frame->removeAtBack<EthernetFcs>();
-        EtherEncap::addPaddingAndFcs(frame, oldFcs->getFcsMode(), minFrameLength);
+        EtherEncap::addPaddingAndFcs(frame, oldFcs->getFcsMode(), curEtherDescr->frameMinBytes);
     }
 
     // add preamble and SFD (Starting Frame Delimiter), then send out
@@ -142,7 +141,7 @@ void EtherMacFullDuplex::startFrameTransmission()
 
 void EtherMacFullDuplex::processFrameFromUpperLayer(Packet *packet)
 {
-    ASSERT(packet->getByteLength() >= MIN_ETHERNET_FRAME_BYTES);
+    ASSERT(packet->getDataLength() >= MIN_ETHERNET_FRAME_BYTES);
 
     EV_INFO << "Received " << packet << " from upper layer." << endl;
 
@@ -155,9 +154,9 @@ void EtherMacFullDuplex::processFrameFromUpperLayer(Packet *packet)
                 packet->getFullName(), frame->getDest().str().c_str());
     }
 
-    if (packet->getByteLength() > MAX_ETHERNET_FRAME_BYTES) {    //FIXME two MAX FRAME BYTES in specif...
+    if (packet->getDataLength() > MAX_ETHERNET_FRAME_BYTES) {    //FIXME two MAX FRAME BYTES in specif...
         throw cRuntimeError("packet from higher layer (%d bytes) exceeds maximum Ethernet frame size (%d)",
-                (int)(packet->getByteLength()), MAX_ETHERNET_FRAME_BYTES);
+                (int)(packet->getByteLength()), B(MAX_ETHERNET_FRAME_BYTES).get());
     }
 
     if (!connected || disabled) {
@@ -394,7 +393,7 @@ void EtherMacFullDuplex::scheduleEndIFGPeriod()
 {
     ASSERT(nullptr == curTxFrame);
     changeTransmissionState(WAIT_IFG_STATE);
-    simtime_t endIFGTime = simTime() + (INTERFRAME_GAP_BITS / curEtherDescr->txrate);
+    simtime_t endIFGTime = simTime() + (b(INTERFRAME_GAP_BITS).get() / curEtherDescr->txrate);
     scheduleAt(endIFGTime, endIFGMsg);
 }
 

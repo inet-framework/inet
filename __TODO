@@ -1,3 +1,74 @@
+ - add test and check for std::dynamic_pointer_cast<Subclass1>(chunk->peek<Subclass1>()) != nullptr always holds when peek uses a variant type deserializer
+ - remove obsolete HostAutoConfigurator, Ipv4FlatNetworkConfigurator modules?
+ - revise and rename statistics to have a consistent naming scheme
+ - fix mobility non-determinism caused by interpolation from last position during animation
+ - validate Rotation, Quaternion, EulerAngles against each other and documentation
+ - validate positioning and orientation IMobility, PhysicalEnvironment, ObstacleLoss
+ - replace all internal queues with external queue modules and make them configurable
+ - 802.11 preamble, header, data separation in HT and VHT mode doesn't really make sense the way it's right now implemented
+   there's no separate header in these modes, the preamble is much more complicated than in the other modes
+   there's also a bug related to this in the Ieee80211ScalarTransmitter when it computes the data duration
+ - replace long2string and double2string in Units.msg with something more clever (e.g. 160000000 Hz -> 160 MHz)
+ - add L2 sockets: EthernetSocket bound to EtherType, LlcSocket bound to SSAP, DSAP, add Ieee80211Socket bound unconditionally
+ - solve dynamic node creation and address resolution in applications
+ - don't subclass APSK medium and such with other specific radios, think of APSK radio as yet another specific conceptual radio
+ - generalize shutdown, startup, crash operations to applications, protocols, interfaces, etc. (NodeShutdownOperation -> ShutdownOperation, NodeStatus -> OperationalStatus?)
+ - add antenna directional selectivity visualizer
+ - separate Euclidean and geographic mobilities
+ - move extra functions that doesn't really belong to L3AddressResolver (e.g. findInterfaceTableOf, findIPv4RoutingTableOf)
+ - revise protocol base class hierarchy (e.g. LayeredProtocolBase vs IPv4 base class, etc.)
+ - revise protocol header class hierarchy (e.g. avoid unnecessary interfaces)
+ - revise NED network node module hierarchy (e.g. MPLS nodes)
+ - use m instead of double in Coord?
+ - add meaningful display strings to at least the top level submodules of network nodes
+ - replace functionality of GenericAppMsg with chunk tags, or better yet get rid of it altogether!
+ - use shared pointers for transmissions/receptions, etc. because the gui copies packets in the packet log and inspects them later
+ - factor out physical layer analog domain representation into a separate parameter of transmissions
+ - ethernet socket vs. ssap/dsap both in StandardHost and EtherHost
+ - review all examples and check if they still do what is intended
+ - add ChunkStack (lifo) similarly to how ChunkQueue (fifo) is implemented
+ - add separate reusable application packet generators
+ - rewrite serializers that use structure bit fields, this is undefined C++ behavior
+ - revise all network node module base class hierarchy (e.g. mpls nodes)
+ - replace cCompoundModule class in hosts/nodes with a specific classes such as StandardHost
+   providing getInterfaceTable, getMobility, getIPv4NetworkLayer, etc. to avoid random code fragments with getSubmodule(".ipv4.routingTable")???
+   but we should avoid having these classes for a random collections of utility functions!
+ - add separate classes/functions for iterating over the network nodes in a network or
+   finding a network node based on its mac address/ip address or finding the position of a network node, etc.
+ - add missing node NED files for existing protocols (e.g. sensor nodes, IoT devices) 
+ - update all NED and C++ documentation, remove obsolete documentation
+ - nicely position submodules in compound modules, prepare for 2 info lines
+ - extend main protocol modules (and all submodules) with 2 info lines above the submodule icon
+ - avoid specifying module icon sizes by default, override icon size in submodules
+ - sort includes alphabetically
+ - pretty print white spaces
+
+
+TODO: cleanup MSG files
+ remove if possible:
+  - import inet.common.INETDefs-ek
+  - INETDefs.msg
+  - cplusplus-ok
+  - #include-ok
+  - const-ansok
+  - typedef-ek
+  - @opaque
+  - @primitive-ek -> primitive foo;
+
+ @descriptor(false) vs @descriptor(readonly); why do we have descriptor anything at all? why don't we have descriptors for all types all the time?
+ @editable(false) vs @descriptor(readonly)??? and in general editable is a GUI concept
+
+ Chunk.msg:
+ _getChunk -> getChunk
+ _packet -> packet
+
+ DYMOSequenceNumber: class DYMOSequenceNumber??? why class? primitive class???
+ PacketDrop: packet_ -> packet
+ IntServ.msg: *_t is reserved for C++ standard
+ InterfaceEntry: eliminate @getter if possible
+ EtherType.msg: replace with Protocol.h?
+ IPProtocolId.msg: replace with Protocol.h?
+
 TODO: review and refactor all applications which have lifecycle, startTime, endTime parameters, move code from initialize to separate reusable functions (e.g. for lifecycle restart)
 
 TODO: DHCP Client should work multiple interfaces, but works with only one.

@@ -19,17 +19,18 @@
 
 
 import inet.common.INETDefs;
+import inet.common.Units;
 import inet.common.packet.chunk.Chunk;
 import inet.networklayer.contract.ipv4.Ipv4Address;
 
 namespace inet;
 
-enum PimContstants {
-    PIM_HEADER_LENGTH = 4;
-    ENCODED_UNICODE_ADDRESS_LENGTH = 6; // Ipv4 only
-    ENCODED_GROUP_ADDRESS_LENGTH = 8; // Ipv4 only
-    ENCODED_SOURCE_ADDRESS_LENGTH = 8; // Ipv4 only
-};
+cplusplus {{
+const B PIM_HEADER_LENGTH = B(4);
+const B ENCODED_UNICODE_ADDRESS_LENGTH = B(6); // Ipv4 only
+const B ENCODED_GROUP_ADDRESS_LENGTH = B(8); // Ipv4 only
+const B ENCODED_SOURCE_ADDRESS_LENGTH = B(8); // Ipv4 only
+}}
 
 enum PimPacketType
 {
@@ -93,7 +94,7 @@ class GenerationIdOption extends HelloOption
 struct EncodedAddress
 {
     Ipv4Address IPaddress;
-    bool         S;
+    bool        S;
     bool        W;                //WC bit
     bool        R;                //RPT bit
 }
@@ -103,8 +104,8 @@ struct EncodedAddress
 class JoinPruneGroup extends cObject
 {
     Ipv4Address     groupAddress;
-    EncodedAddress     joinedSourceAddress[];
-    EncodedAddress     prunedSourceAddress[];
+    EncodedAddress  joinedSourceAddress[];
+    EncodedAddress  prunedSourceAddress[];
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -141,7 +142,7 @@ class PimAssert extends PimPacket
     type = Assert;
     Ipv4Address        groupAddress;
     Ipv4Address        sourceAddress;
-    bool            R;
+    bool               R;
     int                metric;
     int                metricPreference;
 }
@@ -168,9 +169,9 @@ class PimStateRefresh extends PimPacket
     Ipv4Address        originatorAddress;
     int                metric;
     int                metricPreference;
-    short            maskLen;
-    short            ttl;
-    bool            P;
+    short              maskLen;
+    short              ttl;
+    bool               P;
     int                interval;
 }
 // Register message

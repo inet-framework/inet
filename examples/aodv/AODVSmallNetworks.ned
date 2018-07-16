@@ -27,11 +27,10 @@ import inet.physicallayer.unitdisk.UnitDiskRadioMedium;
 network SimpleRREQ
 {
     parameters:
-        @display("bgb=525,437");
     submodules:
         radioMedium: UnitDiskRadioMedium {
             parameters:
-                @display("p=50,50");
+                @display("p=100,200;is=s");
         }
         configurator: Ipv4NetworkConfigurator {
             parameters:
@@ -39,16 +38,16 @@ network SimpleRREQ
                 addStaticRoutes = false;
                 addSubnetRoutes = false;
                 config = xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.0.0'/></config>");
-                @display("p=50,100");
+                @display("p=100,100;is=s");
         }
         routingTableRecorder: RoutingTableRecorder {
             parameters:
-                @display("p=50,150");
+                @display("p=100,300;is=s");
         }
         scenarioManager: ScenarioManager {
             parameters:
                 script = default(xml("<scenario/>"));
-                @display("p=50,250");
+                @display("p=100,400;is=s");
         }
         sender: AodvRouter {
             parameters:
@@ -68,11 +67,10 @@ network SimpleRREQ
 network SimpleRREQ2
 {
     parameters:
-        @display("bgb=961,662");
     submodules:
         radioMedium: UnitDiskRadioMedium {
             parameters:
-                @display("p=50,50");
+                @display("p=100,200;is=s");
         }
         configurator: Ipv4NetworkConfigurator {
             parameters:
@@ -80,16 +78,16 @@ network SimpleRREQ2
                 addStaticRoutes = false;
                 addSubnetRoutes = false;
                 config = xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.0.0'/></config>");
-                @display("p=50,100");
+                @display("p=100,100;is=s");
         }
         routingTableRecorder: RoutingTableRecorder {
             parameters:
-                @display("p=50,150");
+                @display("p=100,300;is=s");
         }
         scenarioManager: ScenarioManager {
             parameters:
                 script = default(xml("<scenario/>"));
-                @display("p=50,250");
+                @display("p=100,400;is=s");
         }
         sender: AodvRouter {
             parameters:
@@ -113,11 +111,11 @@ network SimpleRREQ2
 network ShortestPath
 {
     parameters:
-        @display("bgb=961,662");
+        @display("bgb=650,550");
     submodules:
         radioMedium: UnitDiskRadioMedium {
             parameters:
-                @display("p=50,50");
+                @display("p=100,200;is=s");
         }
         configurator: Ipv4NetworkConfigurator {
             parameters:
@@ -125,16 +123,16 @@ network ShortestPath
                 addStaticRoutes = false;
                 addSubnetRoutes = false;
                 config = xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.0.0'/></config>");
-                @display("p=50,100");
+                @display("p=100,100;is=s");
         }
         routingTableRecorder: RoutingTableRecorder {
             parameters:
-                @display("p=50,150");
+                @display("p=100,300;is=s");
         }
         scenarioManager: ScenarioManager {
             parameters:
                 script = default(xml("<scenario/>"));
-                @display("p=50,250");
+                @display("p=100,400;is=s");
         }
         sender: AodvRouter {
             parameters:

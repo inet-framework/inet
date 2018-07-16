@@ -44,63 +44,63 @@ network MixedLAN
             parameters:
                 positions = "10 20 24 35 40 48";
                 propagationSpeed = 2e8 mps; // 1us = 200m
-                @display("p=277,182;b=424,6;o=#408060");
+                @display("p=450,300;b=800,5;o=#408060");
             gates:
                 ethg[6];
         }
         busHostA: EtherHost {
             parameters:
-                @display("p=122,118");
+                @display("p=100,200");
         }
         busHostB: EtherHost {
             parameters:
-                @display("p=210,118");
+                @display("p=250,200");
         }
         busHostC: EtherHost {
             parameters:
-                @display("p=338,238");
+                @display("p=650,400");
         }
         busHostD: EtherHost {
             parameters:
-                @display("p=426,238");
+                @display("p=800,400");
         }
         switchHostA: EtherHost {
             parameters:
-                @display("p=82,300");
+                @display("p=100,500");
         }
         switchHostB: EtherHost {
             parameters:
-                @display("p=162,300");
+                @display("p=250,500");
         }
         switchHostC: EtherHost {
             parameters:
-                @display("p=234,300");
+                @display("p=400,500");
         }
         switchHostD: EtherHost {
             parameters:
-                @display("p=306,300");
+                @display("p=550,500");
         }
         switch: EtherSwitch {
             parameters:
-                @display("p=194,236");
+                @display("p=325,400");
             gates:
                 ethg[5];
         }
         hubHostA: EtherHost {
             parameters:
-                @display("p=297,55");
+                @display("p=500,100");
         }
         hubHostB: EtherHost {
             parameters:
-                @display("p=365,55");
+                @display("p=650,100");
         }
         hubHostC: EtherHost {
             parameters:
-                @display("p=430,55");
+                @display("p=800,100");
         }
         hub: EtherHub {
             parameters:
-                @display("p=362,132");
+                @display("p=650,200");
             gates:
                 ethg[4];
         }
@@ -132,11 +132,11 @@ network TwoHosts
     submodules:
         hostA: EtherHost {
             parameters:
-                @display("p=60,160");
+                @display("p=100,100");
         }
         hostB: EtherHost {
             parameters:
-                @display("p=200,140");
+                @display("p=300,100");
         }
     connections:
         hostA.ethg <--> {  delay = 0.5us; datarate = 100Mbps; } <--> hostB.ethg;
@@ -157,23 +157,23 @@ network SwitchedLAN
     submodules:
         hostA: EtherHost {
             parameters:
-                @display("p=161,55");
+                @display("p=250,100");
         }
         hostB: EtherHost {
             parameters:
-                @display("p=253,125");
+                @display("p=400,200");
         }
         hostC: EtherHost {
             parameters:
-                @display("p=158,199");
+                @display("p=250,300");
         }
         hostD: EtherHost {
             parameters:
-                @display("p=59,127");
+                @display("p=100,200");
         }
         switch: EtherSwitch {
             parameters:
-                @display("p=162,124");
+                @display("p=250,200");
             gates:
                 ethg[4];
         }
@@ -193,23 +193,23 @@ network HubLAN
     submodules:
         hostA: EtherHost {
             parameters:
-                @display("p=161,55");
+                @display("p=250,100");
         }
         hostB: EtherHost {
             parameters:
-                @display("p=253,125");
+                @display("p=400,200");
         }
         hostC: EtherHost {
             parameters:
-                @display("p=158,199");
+                @display("p=250,300");
         }
         hostD: EtherHost {
             parameters:
-                @display("p=59,127");
+                @display("p=100,200");
         }
         hub: EtherHub {
             parameters:
-                @display("p=162,124");
+                @display("p=250,200");
             gates:
                 ethg[4];
         }
@@ -235,25 +235,25 @@ network BusLAN
     submodules:
         hostA: EtherHost {
             parameters:
-                @display("p=100,150");
+                @display("p=100,200");
         }
         hostB: EtherHost {
             parameters:
-                @display("p=200,150");
+                @display("p=250,200");
         }
         hostC: EtherHost {
             parameters:
-                @display("p=300,150");
+                @display("p=400,200");
         }
         hostD: EtherHost {
             parameters:
-                @display("p=400,150");
+                @display("p=550,200");
         }
         bus: EtherBus {
             parameters:
                 positions = "0 10 20 30";
                 propagationSpeed = 2e8 mps;
-                @display("p=250,100;b=400,6;o=#408060");
+                @display("p=325,100;b=500,6;o=#408060");
             gates:
                 ethg[4];
         }
@@ -288,23 +288,23 @@ network SwitchedDuplexLAN
     submodules:
         hostA: EtherHostFullDuplex {
             parameters:
-                @display("p=161,55");
+                @display("p=250,100");
         }
         hostB: EtherHostFullDuplex {
             parameters:
-                @display("p=253,125");
+                @display("p=400,200");
         }
         hostC: EtherHostFullDuplex {
             parameters:
-                @display("p=158,199");
+                @display("p=250,300");
         }
         hostD: EtherHostFullDuplex {
             parameters:
-                @display("p=59,127");
+                @display("p=100,200");
         }
         switch: EtherSwitchFullDuplex {
             parameters:
-                @display("p=162,124");
+                @display("p=250,200");
             gates:
                 ethg[4];
         }

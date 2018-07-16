@@ -39,11 +39,11 @@ namespace inet {
 #define LDP_USER_TRAFFIC     100     // label switched user traffic
 
 // base header: version, length, LSR ID, Label space
-#define LDP_BASEHEADER_BYTES  10
+const B LDP_BASEHEADER_BYTES = B(10);
 
 // FIXME: the length below is just a guess. TBD find lengths for individual TLVs
 // making up different LDP packet types, and determine length for each packet type
-#define LDP_HEADER_BYTES  (LDP_BASEHEADER_BYTES+20)
+const B LDP_HEADER_BYTES = LDP_BASEHEADER_BYTES + B(20);
 
 class IInterfaceTable;
 class IIpv4RoutingTable;

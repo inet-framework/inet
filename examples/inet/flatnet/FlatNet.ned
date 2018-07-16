@@ -45,18 +45,16 @@ network FlatNet
         configurator: Ipv4NetworkConfigurator {
             parameters:
                 config = xml("<config><interface hosts='*' address='192.168.x.x' netmask='255.255.x.x'/></config>");
+                @display("p=100,100;is=s");
         }
-        rte[57]: Router {
-            parameters:
-                @display("is=vs");
-        }
+        rte[57]: Router;
         cli[2]: StandardHost {
             parameters:
-                @display("i=device/laptop_s");
+                @display("i=device/laptop");
         }
         srv: StandardHost {
             parameters:
-                @display("i=device/server_s");
+                @display("i=device/server");
         }
     connections:
         cli[0].pppg++ <--> ethernetline <--> rte[50].pppg++;

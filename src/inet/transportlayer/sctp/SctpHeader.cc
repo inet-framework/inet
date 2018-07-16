@@ -79,9 +79,18 @@ void SctpHeader::setSctpChunksArraySize(size_t size)
     throw new cException(this, "setSctpChunkArraySize() not supported, use insertSctpChunks()");
 }
 
-void SctpHeader::setSctpChunks(size_t k, SctpChunk * sctpChunks)
+void SctpHeader::setSctpChunks(size_t k, SctpChunk *chunk)
 {
-    sctpChunkList.at(k) = sctpChunks;
+    handleChange();
+    SctpChunk *tmp = sctpChunkList.at(k);
+    if (tmp == chunk)
+        return;
+    headerLength -= ADD_PADDING(tmp->getByteLength());
+    dropAndDelete(tmp);
+    sctpChunkList[k] = chunk;
+    take(chunk);
+    headerLength += ADD_PADDING(chunk->getByteLength());
+    setChunkLength(B(headerLength));
 }
 
 size_t SctpHeader::getSctpChunksArraySize() const
@@ -90,45 +99,33 @@ size_t SctpHeader::getSctpChunksArraySize() const
 }
 
 
-/*void SctpHeader::replaceChunk(SctpChunk *msg, uint32 k) const
+void SctpHeader::replaceSctpChunk(SctpChunk *chunk, uint32 k)
 {
-   // sctpChunkList[k] = msg;
-    setSctpChunks(k, msg);
-}*/
-
-/*void SctpHeader::addChunk(SctpChunk *chunk)
-{
-    take(chunk);
-    if (this->sctpChunkList.size() < 9) {
-        snprintf(str, sizeof(str), "%s %s", this->getName(), chunk->getName());
-        this->setName(str);
-    }
-    this->setChunkLength(B(B(this->getChunkLength()).get() + ADD_PADDING(chunk->getByteLength())));
-    sctpChunkList.push_back(chunk);
-}*/
+    setSctpChunks(k, chunk);
+}
 
 void SctpHeader::insertSctpChunks(SctpChunk * chunk)
 {
     handleChange();
     sctpChunkList.push_back(chunk);
-    headerLength += chunk->getByteLength();
+    take(chunk);
+    headerLength += ADD_PADDING(chunk->getByteLength());
     setChunkLength(B(headerLength));
 }
 
 void SctpHeader::insertSctpChunks(size_t k, SctpChunk * chunk)
 {
     handleChange();
-    SctpChunk *tmp = sctpChunkList.at(k);
-    headerLength -= ADD_PADDING(tmp->getByteLength());
+    sctpChunkList.insert(sctpChunkList.begin()+k, chunk);
+    take(chunk);
     headerLength += ADD_PADDING(chunk->getByteLength());
-    sctpChunkList[k] = chunk;
     setChunkLength(B(headerLength));
 }
 
 //void SctpHeader::eraseSctpChunks(size_t k)
-SctpChunk *SctpHeader::removeChunk()
+SctpChunk *SctpHeader::removeFirstChunk()
 {
-   // handleChange();
+    handleChange();
     if (sctpChunkList.empty())
         return nullptr;
 
@@ -136,31 +133,6 @@ SctpChunk *SctpHeader::removeChunk()
     headerLength -= ADD_PADDING(msg->getByteLength());
     sctpChunkList.erase(sctpChunkList.begin());
     drop(msg);
-    setChunkLength(B(headerLength));
-    return msg;
-}
-
-void SctpHeader::removeFirstChunk()
-{
-   // handleChange();
-    if (sctpChunkList.empty())
-        return;
-
-    SctpChunk *msg = sctpChunkList.front();
-    headerLength -= ADD_PADDING(msg->getByteLength());
-    sctpChunkList.erase(sctpChunkList.begin());
-    setChunkLength(B(headerLength));
-}
-
-SctpChunk *SctpHeader::getFirstChunk()
-{
-   // handleChange();
-    if (sctpChunkList.empty())
-        return nullptr;
-
-    SctpChunk *msg = sctpChunkList.front();
-    headerLength -= ADD_PADDING(msg->getByteLength());
-    sctpChunkList.erase(sctpChunkList.begin());
     setChunkLength(B(headerLength));
     return msg;
 }

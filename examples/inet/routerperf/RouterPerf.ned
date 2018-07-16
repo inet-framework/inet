@@ -35,19 +35,19 @@ network RouterPerfNetwork
     submodules:
         configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=61,163");
+                @display("p=100,100;is=s");
         }
         sender[nodeNo]: BurstHost {
             parameters:
-                @display("p=100,300,row,100");
+                @display("p=250,300,row,150");
         }
         recip[nodeNo]: BurstHost {
             parameters:
-                @display("p=100,80,row,100");
+                @display("p=250,100,row,150");
         }
         router: Router {
             parameters:
-                @display("p=210,190");
+                @display("p=400,200");
         }
     connections:
         for i=0..nodeNo-1 {

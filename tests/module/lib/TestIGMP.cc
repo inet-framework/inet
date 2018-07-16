@@ -194,6 +194,7 @@ void TestIGMP::sendToIP(Packet *msg, InterfaceEntry *ie, const Ipv4Address& dest
                 out << "send query"; break;
             case IGMPV1_MEMBERSHIP_REPORT:
             case IGMPV2_MEMBERSHIP_REPORT:
+            case IGMPV3_MEMBERSHIP_REPORT:
                 out << "send report"; break;
             case IGMPV2_LEAVE_GROUP:
                 out << "send leave"; break;

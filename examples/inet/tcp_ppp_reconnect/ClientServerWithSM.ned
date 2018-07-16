@@ -27,7 +27,6 @@ import ned.DatarateChannel;
 
 network ClientServerWithSM
 {
-    @display("bgb=232,193");
     types:
         channel C extends DatarateChannel
         {
@@ -37,21 +36,21 @@ network ClientServerWithSM
     submodules:
         client1: StandardHost {
             parameters:
-                @display("p=53,67;i=device/pc3");
+                @display("p=250,200;i=device/pc3");
         }
         server: StandardHost {
             parameters:
-                @display("p=181,67;i=device/pc2");
+                @display("p=400,200;i=device/pc2");
         }
         configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=53,134");
+                @display("p=100,100;is=s");
         }
         netAnimTrace: NetAnimTrace {
-            @display("p=184,142");
+            @display("p=100,200;is=s");
         }
         scenarioManager: ScenarioManager {
-            @display("p=184,180");
+            @display("p=100,300;is=s");
         }
     connections:
         client1.pppg++ <--> C <--> server.pppg++;

@@ -16,17 +16,18 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.Units;
 import inet.common.packet.chunk.Chunk;
 import inet.networklayer.contract.ipv4.Ipv4Address;
 import inet.routing.bgpv4.BgpCommon;
 
 namespace inet::bgp;
 
-enum BgpConstants {
-    BGP_HEADER_OCTETS = 19;
-    BGP_OPEN_OCTETS = 10;
-    BGP_EMPTY_UPDATE_OCTETS = 4; // UnfeasibleRoutesLength (2) + TotalPathAttributeLength (2)
-};
+cplusplus {{
+const B BGP_HEADER_OCTETS = B(19);
+const B BGP_OPEN_OCTETS = B(10);
+const B BGP_EMPTY_UPDATE_OCTETS = B(4); // UnfeasibleRoutesLength (2) + TotalPathAttributeLength (2)
+}}
 
 //
 // Represents a BGPv4 AS_PATH path attribute (RFC 4271 Section 4.3)
@@ -60,7 +61,7 @@ enum BgpType
 //
 class BgpHeader extends FieldsChunk
 {
-    chunkLength = B(BGP_HEADER_OCTETS);
+    chunkLength = BGP_HEADER_OCTETS;
     BgpType type;
 }
 
@@ -108,7 +109,7 @@ struct BgpOptionalParameters
 class BgpOpenMessage extends BgpHeader
 {
     type = BGP_OPEN;
-    chunkLength = B(BGP_HEADER_OCTETS + BGP_OPEN_OCTETS);
+    chunkLength = BGP_HEADER_OCTETS + BGP_OPEN_OCTETS;
 
     char version = 4;
     unsigned short myAS;
@@ -226,7 +227,7 @@ class BgpUpdateMessage extends BgpHeader
 {
     @customize;     // update chunkLength when changed   //FIXME setNLRI() always increment length with 5 bytes
     type = BGP_UPDATE;
-    chunkLength = B(BGP_HEADER_OCTETS + BGP_EMPTY_UPDATE_OCTETS);
+    chunkLength = BGP_HEADER_OCTETS + BGP_EMPTY_UPDATE_OCTETS;
 
     BgpUpdateWithdrawnRoutes withdrawnRoutes[];
     BgpUpdatePathAttributeList pathAttributeList[]; // optional field (size is either 0 or 1)

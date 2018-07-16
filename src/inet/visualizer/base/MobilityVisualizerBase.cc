@@ -86,14 +86,17 @@ void MobilityVisualizerBase::subscribe()
 {
     auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
     subscriptionModule->subscribe(IMobility::mobilityStateChangedSignal, this);
+    subscriptionModule->subscribe(PRE_MODEL_CHANGE, this);
 }
 
 void MobilityVisualizerBase::unsubscribe()
 {
     // NOTE: lookup the module again because it may have been deleted first
     auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this, false);
-    if (subscriptionModule != nullptr)
+    if (subscriptionModule != nullptr) {
         subscriptionModule->unsubscribe(IMobility::mobilityStateChangedSignal, this);
+        subscriptionModule->unsubscribe(PRE_MODEL_CHANGE, this);
+    }
 }
 
 } // namespace visualizer

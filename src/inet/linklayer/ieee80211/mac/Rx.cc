@@ -113,7 +113,9 @@ bool Rx::isFcsOk(Packet *packet) const
     else {
         const auto& trailer = packet->peekAtBack<Ieee80211MacTrailer>(B(4));
         switch (trailer->getFcsMode()) {
-            case FCS_DECLARED:
+            case FCS_DECLARED_INCORRECT:
+                return false;
+            case FCS_DECLARED_CORRECT:
                 return true;
             case FCS_COMPUTED: {
                 const auto& fcsBytes = packet->peekDataAt<BytesChunk>(B(0), packet->getDataLength() - trailer->getChunkLength());

@@ -52,8 +52,6 @@ std::ostream& DimensionalAnalogModelBase::printToStream(std::ostream& stream, in
 const ConstMapping *DimensionalAnalogModelBase::computeReceptionPower(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
 {
     const IRadioMedium *radioMedium = receiverRadio->getMedium();
-    const IAntenna *receiverAntenna = receiverRadio->getAntenna();
-    const IAntennaGain *transmitterAntenna = transmission->getTransmitterAntennaGain();
     const INarrowbandSignal *narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(transmission->getAnalogModel());
     const IDimensionalSignal *dimensionalSignalAnalogModel = check_and_cast<const IDimensionalSignal *>(transmission->getAnalogModel());
     const simtime_t transmissionStartTime = transmission->getStartTime();
@@ -62,11 +60,8 @@ const ConstMapping *DimensionalAnalogModelBase::computeReceptionPower(const IRad
     const simtime_t receptionEndTime = arrival->getEndTime();
     const Coord receptionStartPosition = arrival->getStartPosition();
     // TODO: could be used for doppler shift? const Coord receptionEndPosition = arrival->getEndPosition();
-    const EulerAngles transmissionDirection = computeTransmissionDirection(transmission, arrival);
-    const EulerAngles transmissionAntennaDirection = transmission->getStartOrientation() - transmissionDirection;
-    const EulerAngles receptionAntennaDirection = transmissionDirection - arrival->getStartOrientation();
-    double transmitterAntennaGain = transmitterAntenna->computeGain(transmissionAntennaDirection);
-    double receiverAntennaGain = receiverAntenna->getGain()->computeGain(receptionAntennaDirection);
+    double transmitterAntennaGain = computeAntennaGain(transmission->getTransmitterAntennaGain(), transmission->getStartPosition(), arrival->getStartPosition(), transmission->getStartOrientation());
+    double receiverAntennaGain = computeAntennaGain(receiverRadio->getAntenna()->getGain().get(), arrival->getStartPosition(), transmission->getStartPosition(), arrival->getStartOrientation());
     m distance = m(receptionStartPosition.distance(transmission->getStartPosition()));
     mps propagationSpeed = radioMedium->getPropagation()->getPropagationSpeed();
     const ConstMapping *transmissionPower = dimensionalSignalAnalogModel->getPower();

@@ -177,7 +177,7 @@ void TcpConnection::printSegmentBrief(Packet *packet, const Ptr<const TcpHeader>
     if (tcpseg->getPshBit())
         EV_INFO << "PSH ";
 
-    auto payloadLength = packet->getByteLength() - tcpseg->getHeaderLength();
+    auto payloadLength = packet->getByteLength() - B(tcpseg->getHeaderLength()).get();
     if (payloadLength > 0 || tcpseg->getSynBit()) {
         EV_INFO << "[" << tcpseg->getSequenceNo() << ".." << (tcpseg->getSequenceNo() + payloadLength) << ") ";
         EV_INFO << "(l=" << payloadLength << ") ";
@@ -191,7 +191,7 @@ void TcpConnection::printSegmentBrief(Packet *packet, const Ptr<const TcpHeader>
     if (tcpseg->getUrgBit())
         EV_INFO << "urg " << tcpseg->getUrgentPointer() << " ";
 
-    if (tcpseg->getHeaderLength() > TCP_HEADER_OCTETS) {    // Header options present? TCP_HEADER_OCTETS = 20
+    if (tcpseg->getHeaderLength() > TCP_MIN_HEADER_LENGTH) {    // Header options present?
         EV_INFO << "options ";
 
         for (uint i = 0; i < tcpseg->getHeaderOptionArraySize(); i++) {
@@ -250,9 +250,9 @@ void TcpConnection::sendToIP(Packet *packet, const Ptr<TcpHeader>& tcpseg)
     // final touches on the segment before sending
     tcpseg->setSrcPort(localPort);
     tcpseg->setDestPort(remotePort);
-    ASSERT(tcpseg->getHeaderLength() >= TCP_HEADER_OCTETS);    // TCP_HEADER_OCTETS = 20 (without options)
-    ASSERT(tcpseg->getHeaderLength() <= TCP_MAX_HEADER_OCTETS);    // TCP_MAX_HEADER_OCTETS = 60
-    ASSERT(B(tcpseg->getChunkLength()).get() == tcpseg->getHeaderLength());
+    ASSERT(tcpseg->getHeaderLength() >= TCP_MIN_HEADER_LENGTH);
+    ASSERT(tcpseg->getHeaderLength() <= TCP_MAX_HEADER_LENGTH);
+    ASSERT(tcpseg->getChunkLength() == tcpseg->getHeaderLength());
     state->sentBytes = packet->getByteLength();    // resetting sentBytes to 0 if sending a segment without data (e.g. ACK)
 
     EV_INFO << "Sending: ";
@@ -278,7 +278,7 @@ void TcpConnection::sendToIP(Packet *pkt, const Ptr<TcpHeader>& tcpseg, L3Addres
     printSegmentBrief(pkt, tcpseg);
 
     IL3AddressType *addressType = dest.getAddressType();
-    ASSERT(B(tcpseg->getChunkLength()).get() == tcpseg->getHeaderLength());
+    ASSERT(tcpseg->getChunkLength() == tcpseg->getHeaderLength());
     pkt->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     auto addresses = pkt->addTagIfAbsent<L3AddressReq>();
     addresses->setSrcAddress(src);
@@ -447,7 +447,7 @@ bool TcpConnection::isSegmentAcceptable(Packet *packet, const Ptr<const TcpHeade
     //      >0       0     not acceptable
     //      >0      >0     RCV.NXT =< SEG.SEQ < RCV.NXT+RCV.WND
     //                  or RCV.NXT =< SEG.SEQ+SEG.LEN-1 < RCV.NXT+RCV.WND"
-    uint32 len = packet->getByteLength() - tcpseg->getHeaderLength();
+    uint32 len = packet->getByteLength() - B(tcpseg->getHeaderLength()).get();
     uint32 seqNo = tcpseg->getSequenceNo();
     uint32 ackNo = tcpseg->getAckNo();
     uint32 rcvWndEnd = state->rcv_nxt + state->rcv_wnd;
@@ -648,7 +648,7 @@ void TcpConnection::sendSegment(uint32 bytes)
     const auto& tcpseg_temp = makeShared<TcpHeader>();
     tcpseg_temp->setAckBit(true);    // needed for TS option, otherwise TSecr will be set to 0
     writeHeaderOptions(tcpseg_temp);
-    uint options_len = tcpseg_temp->getHeaderLength() - TCP_HEADER_OCTETS;    // TCP_HEADER_OCTETS = 20
+    uint options_len = B(tcpseg_temp->getHeaderLength() - TCP_MIN_HEADER_LENGTH).get();
 
     ASSERT(options_len < state->snd_mss);
 
@@ -690,7 +690,7 @@ void TcpConnection::sendSegment(uint32 bytes)
     // add header options and update header length (from tcpseg_temp)
     for (uint i = 0; i < tcpseg_temp->getHeaderOptionArraySize(); i++)
         tcpseg->insertHeaderOption(tcpseg_temp->getHeaderOption(i)->dup());
-    tcpseg->setHeaderLength(TCP_HEADER_OCTETS + tcpseg->getHeaderOptionArrayLength());
+    tcpseg->setHeaderLength(TCP_MIN_HEADER_LENGTH + tcpseg->getHeaderOptionArrayLength());
     tcpseg->setChunkLength(B(tcpseg->getHeaderLength()));
 
     ASSERT(tcpseg->getHeaderLength() == tcpseg_temp->getHeaderLength());
@@ -745,7 +745,7 @@ bool TcpConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
     uint32 effectiveMaxBytesSend = state->snd_mss;
 
     if (state->ts_enabled)
-        effectiveMaxBytesSend -= TCP_OPTION_TS_SIZE;
+        effectiveMaxBytesSend -= B(TCP_OPTION_TS_SIZE).get();
 
     // last segment could be less than state->snd_mss (or less than snd_mss - TCP_OPTION_TS_SIZE if using TS option)
     if (fullSegmentsOnly && (bytesToSend < (effectiveMaxBytesSend))) {
@@ -1257,16 +1257,16 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpseg)
     }
 
     if (tcpseg->getHeaderOptionArraySize() != 0) {
-        uint options_len = tcpseg->getHeaderOptionArrayLength();
+        B options_len = tcpseg->getHeaderOptionArrayLength();
 
         if (options_len <= TCP_OPTIONS_MAX_SIZE) { // Options length allowed? - maximum: 40 Bytes
-            tcpseg->setHeaderLength(TCP_HEADER_OCTETS + options_len); // TCP_HEADER_OCTETS = 20
-            tcpseg->setChunkLength(B(TCP_HEADER_OCTETS + options_len));
+            tcpseg->setHeaderLength(TCP_MIN_HEADER_LENGTH + options_len);
+            tcpseg->setChunkLength(B(TCP_MIN_HEADER_LENGTH + options_len));
         }
         else {
             tcpseg->dropHeaderOptions();    // drop all options
-            tcpseg->setHeaderLength(TCP_HEADER_OCTETS);    // TCP_HEADER_OCTETS = 20
-            tcpseg->setChunkLength(B(TCP_HEADER_OCTETS));
+            tcpseg->setHeaderLength(TCP_MIN_HEADER_LENGTH);
+            tcpseg->setChunkLength(TCP_MIN_HEADER_LENGTH);
             EV_ERROR << "ERROR: Options length exceeded! Segment will be sent without options" << "\n";
         }
     }

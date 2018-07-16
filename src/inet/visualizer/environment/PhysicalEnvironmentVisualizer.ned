@@ -27,7 +27,7 @@ import inet.visualizer.contract.IPhysicalEnvironmentVisualizer;
 module PhysicalEnvironmentVisualizer like IPhysicalEnvironmentVisualizer
 {
     parameters:
-        @display("i=block/app_s");
+        @display("i=block/app");
     submodules:
         canvasVisualizer: <default("PhysicalEnvironmentCanvasVisualizer")> like IPhysicalEnvironmentVisualizer if typename != "" {
             parameters:

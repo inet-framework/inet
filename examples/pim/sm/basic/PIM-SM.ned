@@ -28,65 +28,63 @@ import inet.node.inet.StandardHost;
 
 network PIM_SM_Network
 {
-    @display("bgb=567,467");
-
     submodules:
         DR_R1: MulticastRouter {
             parameters:
-                @display("p=70,420");
+                @display("p=400,190");
             gates:
                 ethg[3];
         }
         DR_R2: MulticastRouter {
             parameters:
-                @display("p=70,302");
+                @display("p=500,280");
             gates:
                 ethg[4];
         }
         RP: MulticastRouter {
             parameters:
-                @display("p=394,302");
+                @display("p=600,100");
             gates:
                 ethg[3];
         }
         DR_S2: MulticastRouter {
             parameters:
-                @display("p=230,197");
+                @display("p=700,280");
             gates:
                 ethg[4];
         }
         DR_S1: MulticastRouter {
             parameters:
-                @display("p=420,143");
+                @display("p=800,190");
             gates:
                 ethg[3];
         }
         Source2: StandardHost {
             parameters:
-                @display("i=device/server;p=230,36");
+                @display("i=device/server;p=800,370");
             gates:
                 ethg[1];
         }
         Source1: StandardHost {
             parameters:
-                @display("i=device/server;p=536,29");
+                @display("i=device/server;p=950,190");
             gates:
                 ethg[1];
         }
         Receiver1: StandardHost {
             parameters:
-                @display("p=394,420");
+                @display("p=250,190");
             gates:
                 ethg[1];
         }
         Receiver2: StandardHost {
             parameters:
-                @display("p=70,85");
+                @display("p=400,370");
             gates:
                 ethg[1];
         }
         configurator: Ipv4NetworkConfigurator {
-            @display("p=510,420");
+            @display("p=100,100;is=s");
         }
     connections allowunconnected:
         DR_R2.ethg[2] <--> Eth100M <--> RP.ethg[1];

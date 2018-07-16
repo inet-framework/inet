@@ -29,10 +29,10 @@ network MobileNetwork
     submodules:
         visualizer: IntegratedCanvasVisualizer if hasVisualizer {
             parameters:
-                @display("p=50,50");
+                @display("p=100,100");
         }
         host[numHosts]: MobileHost {
             parameters:
-                @display("p=300,300;r=,,#707070");
+                @display("p=300,200;r=,,#707070");
         }
 }

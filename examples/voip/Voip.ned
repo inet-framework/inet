@@ -17,7 +17,6 @@ import ned.DatarateChannel;
 //
 network Voip
 {
-    @display("bgb=327,282");
     types:
         channel C extends DatarateChannel
         {
@@ -27,17 +26,17 @@ network Voip
     submodules:
         senderHost: StandardHost {
             parameters:
-                @display("p=63,94");
+                @display("p=250,100");
         }
         receiverHost: StandardHost {
             parameters:
-                @display("p=260,94");
+                @display("p=650,100");
         }
         configurator: Ipv4NetworkConfigurator {
-            @display("p=126,20");
+            @display("p=100,100;is=s");
         }
         internetCloud: InternetCloud {
-            @display("p=157,218");
+            @display("p=450,100;is=vl");
         }
     connections:
         senderHost.pppg++ <--> C <--> internetCloud.pppg++;

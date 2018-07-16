@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scave:Analysis xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:scave="http://www.omnetpp.org/omnetpp/scave">
+  <inputs>
+    <inputs name="/inet/examples/wireless/antenna/results/*.vec"/>
+    <inputs name="/inet/examples/wireless/antenna/results/*.sca"/>
+  </inputs>
+  <datasets>
+    <datasets name="Default">
+      <items xsi:type="scave:Add" filterPattern="name(receptionPower:vector) " type="VECTOR"/>
+      <items xsi:type="scave:LineChart" name="Reception power" lineNameFormat=""/>
+    </datasets>
+  </datasets>
+  <chartSheets>
+    <chartSheets name="default" charts="//@datasets/@datasets.0/@items.1"/>
+  </chartSheets>
+</scave:Analysis>

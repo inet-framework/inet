@@ -20,20 +20,22 @@
 #include <string.h>
 
 #include "inet/common/INETDefs.h"
-#include "inet/linklayer/common/EthernetFcsMode_m.h"
+#include "inet/linklayer/common/FcsMode_m.h"
 
 namespace inet {
 
-EthernetFcsMode parseEthernetFcsMode(const char *fcsModeString)
+FcsMode parseFcsMode(const char *fcsModeString)
 {
-    if (!strcmp(fcsModeString, "declaredCorrect"))
+    if (!strcmp(fcsModeString, "declared"))
+        return FCS_DECLARED_CORRECT;
+    else if (!strcmp(fcsModeString, "declaredCorrect"))
         return FCS_DECLARED_CORRECT;
     else if (!strcmp(fcsModeString, "declaredIncorrect"))
         return FCS_DECLARED_INCORRECT;
     else if (!strcmp(fcsModeString, "computed"))
         return FCS_COMPUTED;
     else
-        throw cRuntimeError("Unknown fcs mode: '%s'", fcsModeString);
+        throw cRuntimeError("Unknown FCS mode: '%s'", fcsModeString);
 }
 
 } // namespace inet

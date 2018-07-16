@@ -12,18 +12,18 @@ network PowerNetwork
     submodules:
         visualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
             parameters:
-                @display("p=100,50");
+                @display("p=100,300;is=s");
         }
         configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=100,150");
+                @display("p=100,100;is=s");
         }
         radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
-                @display("p=100,250");
+                @display("p=100,200;is=s");
         }
         host[numHost]: AdhocHost {
             parameters:
-            @display("p=150,300");
+                @display("p=250,200");
         }
 }

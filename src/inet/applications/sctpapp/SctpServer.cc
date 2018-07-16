@@ -21,18 +21,17 @@
 
 #include "inet/applications/sctpapp/SctpServer.h"
 
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/transportlayer/sctp/SctpAssociation.h"
-#include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
-//#include "inet/transportlayer/sctp/SctpMessage_m.h"
-#include "inet/transportlayer/contract/sctp/SctpSocket.h"
-#include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/TimeTag_m.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Message.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
+#include "inet/transportlayer/contract/sctp/SctpSocket.h"
+#include "inet/transportlayer/sctp/SctpAssociation.h"
 
 namespace inet {
 
@@ -141,6 +140,7 @@ void SctpServer::generateAndSend()
     for (int i = 0; i < numBytes; i++)
         vec[i] = (bytesSent + i) & 0xFF;
     applicationData->setBytes(vec);
+    applicationData->addTag<CreationTimeTag>()->setCreationTime(simTime());
     applicationPacket->insertAtBack(applicationData);
     auto sctpSendReq = applicationPacket->addTagIfAbsent<SctpSendReq>();
     if (queueSize > 0 && numRequestsToSend > 0 && count < queueSize * 2)
@@ -152,8 +152,6 @@ void SctpServer::generateAndSend()
     lastStream = (lastStream + 1) % outboundStreams;
     sctpSendReq->setSid(lastStream);
     sctpSendReq->setSocketId(assocId);
-    auto creationTimeTag = applicationPacket->addTagIfAbsent<CreationTimeTag>();
-    creationTimeTag->setCreationTime(simTime());
     applicationPacket->setKind(ordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);
     auto& tags = getTags(applicationPacket);
     tags.addTagIfAbsent<SocketReq>()->setSocketId(assocId);
@@ -388,9 +386,9 @@ void SctpServer::handleMessage(cMessage *msg)
                         j->second.rcvdPackets--;
 
                         auto m = endToEndDelay.find(id);
-                       // const auto& smsg = staticPtrCast<const BytesChunk>(message->peekData());
-                        auto creationTimeTag = message->findTag<CreationTimeTag>();
-                        m->second->record(simTime() - creationTimeTag->getCreationTime());
+                        for (auto& region : message->peekData()->getAllTags<CreationTimeTag>())
+                            m->second->record(simTime() - region.getTag()->getCreationTime());
+
                         EV_INFO << "server: Data received. Left packets to receive=" << j->second.rcvdPackets << "\n";
 
                         if (j->second.rcvdPackets == 0) {
@@ -416,10 +414,11 @@ void SctpServer::handleMessage(cMessage *msg)
                 }
                 else {
                     auto m = endToEndDelay.find(id);
-                    const auto& smsg = staticPtrCast<const BytesChunk>(message->peekData());
-                    auto creationTimeTag = message->findTag<CreationTimeTag>();
-                    m->second->record(simTime() - creationTimeTag->getCreationTime());
-                    creationTimeTag->setCreationTime(simTime());
+                    const auto& smsg = message->peekData();
+
+                    for (auto& region : smsg->getAllTags<CreationTimeTag>())
+                        m->second->record(simTime() - region.getTag()->getCreationTime());
+
                     auto cmsg = new Packet("ApplicationPacket");
                     cmsg->insertAtBack(smsg);
                     auto cmd = cmsg->addTagIfAbsent<SctpSendReq>();

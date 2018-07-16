@@ -41,7 +41,7 @@ void Contention::initialize(int stage)
         mac = check_and_cast<Ieee80211Mac *>(getContainingNicModule(this)->getSubmodule("mac"));
         startTxEvent = new cMessage("startTx");
         startTxEvent->setSchedulingPriority(1000); // low priority, i.e. processed later than most events for the same time
-        // FIXME: kludge
+        // KLUDGE:
         // The callback->channelAccessGranted() call should be the last
         // event at a simulation time in order to handle internal collisions
         // properly.

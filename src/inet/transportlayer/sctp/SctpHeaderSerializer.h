@@ -27,7 +27,7 @@ namespace sctp {
 /**
  * Converts between SCTPMessage and binary (network byte order) SCTP header.
  */
-class INET_API SctpSerializer : public FieldsChunkSerializer
+class INET_API SctpHeaderSerializer : public FieldsChunkSerializer
 {
   protected:
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
@@ -36,7 +36,7 @@ class INET_API SctpSerializer : public FieldsChunkSerializer
    // virtual cPacket* deserialize(const Buffer &b, Context& context) override;
 
   public:
-    SctpSerializer(const char *name = nullptr) : FieldsChunkSerializer() {}
+    SctpHeaderSerializer(const char *name = nullptr) : FieldsChunkSerializer() {}
 
     /**
      * Serializes an SCTPMessage for transmission on the wire.
@@ -51,7 +51,7 @@ class INET_API SctpSerializer : public FieldsChunkSerializer
      */
   //  void parse(const uint8 *buf, uint32 bufsize, SctpHeader *dest);
 
-    static uint32 checksum(const uint8 *buf, register uint32 len);
+    static uint32 checksum(const uint8 *buf, uint32 len);
     static void hmacSha1(const uint8 *buf, uint32 buflen, const uint8 *key, uint32 keylen, uint8 *digest);
     void calculateSharedKey();
     bool compareRandom();

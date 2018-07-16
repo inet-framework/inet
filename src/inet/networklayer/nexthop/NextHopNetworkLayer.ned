@@ -62,7 +62,7 @@ module NextHopNetworkLayer like INetworkLayer
         }
         nextHop: NextHopForwarding {
             parameters:
-                @display("p=450,300;q=queue");
+                @display("p=600,300;q=queue");
         }
         lp: MessageDispatcher {
             parameters:

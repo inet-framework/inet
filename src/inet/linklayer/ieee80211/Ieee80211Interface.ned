@@ -63,27 +63,27 @@ module Ieee80211Interface like IWirelessInterface
         }
         llc: <default("Ieee8022Llc")> like IIeee8022Llc {
             parameters:
-                @display("p=250,131");
+                @display("p=250,200");
         }
         classifier: <default("")> like IIeee8021dQosClassifier if typename != "" {
             parameters:
-                @display("p=400,82");
+                @display("p=400,100");
         }
         agent: <default("Ieee80211AgentSta")> like IIeee80211Agent if typename != "" {
             parameters:
-                @display("p=550,250");
+                @display("p=550,350");
         }
         mgmt: <default("Ieee80211MgmtSta")> like IIeee80211Mgmt {
             parameters:
-                @display("p=400,250");
+                @display("p=400,350");
         }
         mac: <default("Ieee80211Mac")> like IIeee80211Mac {
             parameters:
-                @display("p=250,250");
+                @display("p=250,350");
         }
         radio: <default("Ieee80211ScalarRadio")> like IRadio {
             parameters:
-                @display("p=250,400");
+                @display("p=250,500");
         }
     connections:
         radioIn --> { @display("m=s"); } --> radio.radioIn;

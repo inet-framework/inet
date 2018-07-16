@@ -1,5 +1,67 @@
 ====== inet-4.x ======
 
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-25  Zoltan Bojthe
+
+	CRC insertion calculates CRC only when crcMode is CRC_COMPUTED.
+
+2018-06-20  Zoltan Bojthe
+
+	Fixed CreationTimeTag.
+	Added fragmentation check to SctpNatHook.
+
+2018-06-18  Zoltan Bojthe
+
+	CrcInsertion doesn't calculate CRC for fragmented packets and forwarded packets.
+
+2018-06-12  Zoltan Bojthe
+
+	Fixed SctpHeaderSerializer to fill all unfilled bytes.
+
+2018-06-12  Zoltan Bojthe
+
+	Renamed SctpSerializer to SctpHeaderSerializer.
+
+2018-06-01  Zoltan Bojthe
+
+	Added B/b units to length constants and length fields of chunks.
+
+2018-05-18  Zoltan Bojthe
+
+	Moved CRC calculation code to SctpChecksum.cc.
+
+2018-05-15  Levente Mészáros
+
+	Removed sendRawBytes parameter, this parameter is supposed to be part of the physical layer.
+
+2018-05-11  Zoltan Bojthe
+
+	Remove unneeded headers, rename defs.h to Endian.h and moved to common.
+
+2018-05-10  Zoltan Bojthe
+
+	Moved header serializers to the corresponding protocol folders.
+
+2018-04-18  Zoltan Bojthe
+
+	Fixed bug where SctpHeader* was cast to Ptr<SctpHeader>.
+
+2018-04-11  Zoltan Bojthe
+
+	Fixed bug where cPacket is needed for encapsulation, but 'rt' was a cMessage.
+	Fixed bug related to it++, it doesn't work correctly after list::erase(it).
+
+2018-03-14  Zoltan Bojthe
+
+	Added SctpProtocolPrinter.
+
+2018-03-09  Zoltan Bojthe
+
+	Added SctpProtocolDissector.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
 2018-02-27  Irene Ruengeler
 
 	Changed PacketDrill and improve data handling.

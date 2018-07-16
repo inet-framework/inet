@@ -24,7 +24,7 @@
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
-#include "inet/transportlayer/common/CRC_m.h"
+#include "inet/transportlayer/common/CrcMode_m.h"
 
 namespace inet {
 
@@ -107,7 +107,7 @@ class INET_API Icmpv6 : public cSimpleModule, public ILifecycle, public IProtoco
     void insertCrc(const Ptr<Icmpv6Header>& icmpHeader, Packet *packet) { insertCrc(crcMode, icmpHeader, packet); }
 
   protected:
-    CrcMode crcMode = static_cast<CrcMode>(-1);
+    CrcMode crcMode = CRC_MODE_UNDEFINED;
     typedef std::map<long, int> PingMap;
     PingMap pingMap;
     std::set<int> transportProtocols;    // where to send up packets

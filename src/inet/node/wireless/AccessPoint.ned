@@ -69,28 +69,28 @@ module AccessPoint
         }
         mobility: <default("StationaryMobility")> like IMobility {
             parameters:
-                @display("p=100,300;is=s");
+                @display("p=100,400;is=s");
         }
         macTable: <default("MacAddressTable")> like IMacAddressTable {
             parameters:
-                @display("p=100,400;is=s");
+                @display("p=100,300;is=s");
         }
         relayUnit: <default(firstAvailable("Ieee8021dRelay","MacRelayUnit"))> like IMacRelayUnit if sizeof(ethg)+numWlanInterfaces > 1 && typename != "" {
             parameters:
-                @display("p=400,200");
+                @display("p=400,100");
         }
         nl: MessageDispatcher if sizeof(ethg)+numWlanInterfaces > 1 && exists(relayUnit) {
             parameters:
-                @display("p=356,299;b=300,5,,,,1");
+                @display("p=800,200;b=1200,5,,,,1");
         }
         wlan[numWlanInterfaces]: <default("Ieee80211Interface")> like IWirelessInterface {
             parameters:
-                @display("p=216,400,row;q=queue");
+                @display("p=250,300,row,150;q=queue");
         }
         eth[sizeof(ethg)]: <default("EthernetInterface")> like IEthernetInterface {
             parameters:
                 mac.promiscuous = true;
-                @display("p=400,400,row;q=txQueue");
+                @display("p=850,300,row;q=txQueue");
         }
     connections allowunconnected:
         nl.out++--> relayUnit.ifIn if sizeof(ethg)+numWlanInterfaces > 1 && exists(relayUnit);

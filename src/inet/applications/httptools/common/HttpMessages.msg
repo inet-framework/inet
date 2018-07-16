@@ -65,7 +65,7 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
-import inet.transportlayer.common.CRC;
+import inet.transportlayer.common.CrcMode;
 
 namespace inet::httptools;
 

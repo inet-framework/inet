@@ -58,11 +58,11 @@ network mIPv6Network
     submodules:
         configurator: Ipv6FlatNetworkConfigurator {
             parameters:
-                @display("p=763,53");
+                @display("p=100,100;is=s");
         }
         radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
-                @display("p=753,123");
+                @display("p=100,200;is=s");
         }
         Home_Agent: HomeAgent6 {
             parameters:

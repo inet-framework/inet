@@ -27,5 +27,5 @@ simple VisualizerBase
         string visualizerTargetModule = default("<root>"); // module path relative to the visualizer where the visualization should appear in the user interface, root module by default
         string tags = default(""); // tag added to each visualization for disambiguation in the runtime environment
         @class(VisualizerBase);
-        @display("i=block/app_s");
+        @display("i=block/app");
 }

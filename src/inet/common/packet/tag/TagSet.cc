@@ -41,22 +41,26 @@ TagSet::~TagSet()
 
 TagSet& TagSet::operator=(const TagSet& other)
 {
-    clearTags();
-    if (other.tags == nullptr)
-        tags = nullptr;
-    else {
-        ensureAllocated();
-        for (auto tag : *other.tags)
-            addTag(tag->dup());
+    if (this != &other) {
+        clearTags();
+        if (other.tags == nullptr)
+            tags = nullptr;
+        else {
+            ensureAllocated();
+            for (auto tag : *other.tags)
+                addTag(tag->dup());
+        }
     }
     return *this;
 }
 
 TagSet& TagSet::operator=(TagSet&& other)
 {
-    clearTags();
-    tags = other.tags;
-    other.tags = nullptr;
+    if (this != &other) {
+        clearTags();
+        tags = other.tags;
+        other.tags = nullptr;
+    }
     return *this;
 }
 

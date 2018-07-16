@@ -158,7 +158,7 @@ void CounterFigure::setLabel(const char *text)
     labelFigure->setText(text);
 }
 
-const int CounterFigure::getLabelOffset() const
+int CounterFigure::getLabelOffset() const
 {
     return labelOffset;
 }

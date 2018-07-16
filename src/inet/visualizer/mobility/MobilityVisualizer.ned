@@ -27,14 +27,14 @@ import inet.visualizer.contract.IMobilityVisualizer;
 module MobilityVisualizer like IMobilityVisualizer
 {
     parameters:
-        @display("i=block/app_s");
+        @display("i=block/app");
     submodules:
         canvasVisualizer: <default("MobilityCanvasVisualizer")> like IMobilityVisualizer if typename != "" {
             parameters:
-                @display("p=100,50");
+                @display("p=100,100");
         }
         osgVisualizer: <default("MobilityOsgVisualizer")> like IMobilityVisualizer if typename != "" {
             parameters:
-                @display("p=100,150");
+                @display("p=100,200");
         }
 }

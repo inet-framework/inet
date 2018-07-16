@@ -147,11 +147,20 @@ double getParameterDoubleValue(const cXMLElement *ptr, const char *name)
     return strtod(xvalue->getNodeValue(), nullptr);
 }
 
-const char *getRequiredAttribute(const cXMLElement& node, const char *attr)
+const char *getMandatoryAttribute(const cXMLElement& node, const char *attr)
 {
     const char *s = node.getAttribute(attr);
-    if (!(s && *s))
+    if (s == nullptr)
         throw cRuntimeError("required attribute %s of <%s> missing at %s",
+                attr, node.getTagName(), node.getSourceLocation());
+    return s;
+}
+
+const char *getMandatoryFilledAttribute(const cXMLElement& node, const char *attr)
+{
+    const char *s = getMandatoryAttribute(node, attr);
+    if (*s == '\0')
+        throw cRuntimeError("required attribute %s of <%s> is empty at %s",
                 attr, node.getTagName(), node.getSourceLocation());
     return s;
 }
@@ -166,7 +175,7 @@ bool getAttributeBoolValue(const cXMLElement *node, const char *attrName, bool d
 
 bool getAttributeBoolValue(const cXMLElement *node, const char *attrName)
 {
-    const char *attrStr = getRequiredAttribute(*node, attrName);
+    const char *attrStr = getMandatoryFilledAttribute(*node, attrName);
     return parseBool(attrStr);
 }
 

@@ -15,11 +15,11 @@
 #define __INET_SCTPNATSERVER_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/transportlayer/sctp/SctpAssociation.h"
-#include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
-#include "inet/transportlayer/contract/sctp/SctpSocket.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
+#include "inet/transportlayer/contract/sctp/SctpSocket.h"
+#include "inet/transportlayer/sctp/SctpAssociation.h"
 
 namespace inet {
 

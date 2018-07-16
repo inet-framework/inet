@@ -39,7 +39,7 @@ bool insertFragment(Ipv6FragBuf& fragbuf, Frag& f)
     frag->addExtensionHeader(fh);
 //    frag->setHeaderLength(40 + 8);
     frag->setChunkLength(B(40 + 8));
-    frag->setPayloadLength(8 + f.bytes);
+    frag->setPayloadLength(B(8 + f.bytes));
     const auto& payload = makeShared<ByteCountChunk>(B(f.bytes));
     pk->insertAtFront(payload);
     pk->insertAtFront(frag);

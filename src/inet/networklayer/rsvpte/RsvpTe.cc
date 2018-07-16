@@ -1849,8 +1849,8 @@ void RsvpTe::sendPathTearMessage(Ipv4Address peerIP, const SessionObj& session, 
     hop.Next_Hop_Address = NHOP;
     msg->setHop(hop);
     msg->setForce(force);
-    int length = 44;
-    msg->setChunkLength(B(length));
+    B length = B(44);
+    msg->setChunkLength(length);
     pk->insertAtBack(msg);
 
     sendToIP(pk, peerIP);

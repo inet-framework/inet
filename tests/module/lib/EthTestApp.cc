@@ -66,6 +66,7 @@ void EthTestApp::createCommand(simtime_t t, int bytes)
     const auto& payload = makeShared<ByteCountChunk>(B(bytes-14-4));
     packet->insertAtBack(payload);
     const auto& fcs = makeShared<EthernetFcs>();
+    fcs->setFcsMode(FCS_DECLARED_CORRECT);
     packet->insertAtBack(fcs);
     ASSERT(packet->getByteLength() == bytes);
     //TODO set packet->destAddr

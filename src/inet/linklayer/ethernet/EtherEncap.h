@@ -19,7 +19,7 @@
 #define __INET_ETHERENCAP_H
 
 #include "inet/common/packet/Packet.h"
-#include "inet/linklayer/common/EthernetFcsMode_m.h"
+#include "inet/linklayer/common/FcsMode_m.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
 #include "inet/linklayer/ieee8022/Ieee8022Llc.h"
@@ -32,7 +32,7 @@ namespace inet {
 class INET_API EtherEncap : public Ieee8022Llc
 {
   protected:
-    EthernetFcsMode fcsMode = static_cast<EthernetFcsMode>(-1);
+    FcsMode fcsMode = FCS_MODE_UNDEFINED;
     int seqNum;
 
     // statistics
@@ -59,8 +59,8 @@ class INET_API EtherEncap : public Ieee8022Llc
     virtual const Ptr<const EthernetMacHeader> decapsulateMacLlcSnap(Packet *packet);
 
   public:
-    static void addPaddingAndFcs(Packet *packet, EthernetFcsMode fcsMode, int64_t requiredMinByteLength = MIN_ETHERNET_FRAME_BYTES);
-    static void addFcs(Packet *packet, EthernetFcsMode fcsMode);
+    static void addPaddingAndFcs(Packet *packet, FcsMode fcsMode, B requiredMinByteLength = MIN_ETHERNET_FRAME_BYTES);
+    static void addFcs(Packet *packet, FcsMode fcsMode);
 
     static const Ptr<const EthernetMacHeader> decapsulateMacHeader(Packet *packet);
 };

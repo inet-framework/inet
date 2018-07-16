@@ -45,7 +45,7 @@ void StaticLinearMobility::initialize(int stage)
 
 void StaticLinearMobility::setInitialPosition()
 {
-    int index = visualRepresentation->getIndex();
+    int index = subjectModule->getIndex();
     Coord initialPos;
     initialPos.x = initialX;
     initialPos.y = initialY;

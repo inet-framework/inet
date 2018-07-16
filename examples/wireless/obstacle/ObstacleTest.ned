@@ -32,22 +32,22 @@ network ObstacleTest
     submodules:
         visualizer: <default("IntegratedVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
             parameters:
-                @display("p=100,50");
+                @display("p=100,400;is=s");
         }
         physicalEnvironment: PhysicalEnvironment {
             parameters:
-                @display("p=100,150");
+                @display("p=100,200;is=s");
         }
         configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=100,250");
+                @display("p=100,100;is=s");
         }
         radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
-                @display("p=100,350");
+                @display("p=100,300;is=s");
         }
         host[numHosts]: AdhocHost {
             parameters:
-                @display("r=,,#707070;p=250,50");
+                @display("r=,,#707070;p=250,250");
         }
 }

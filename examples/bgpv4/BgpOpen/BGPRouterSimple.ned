@@ -43,47 +43,47 @@ module BGPRouterSimple
     submodules:
         interfaceTable: InterfaceTable {
             parameters:
-                @display("p=52,108;i=block/table_s");
+                @display("p=100,100;is=s");
         }
         routingTable: Ipv4RoutingTable {
             parameters:
                 forwarding = true;
                 routerId = "auto";
-                @display("p=52,172;i=block/table2_s");
+                @display("p=100,200;is=s");
         }
         bgp: Bgp {
             parameters:
                 ospfRoutingModule = "";
-                @display("p=160,50;i=block/network");
+                @display("p=325,80;i=block/network");
         }
         snifferIn: MessageChecker {
             parameters:
-                @display("i=block/uparrow_s;p=132,124");
+                @display("i=block/uparrow_s;p=250,160");
         }
         snifferOut: MessageChecker {
             parameters:
-                @display("i=block/downarrow_s;p=196,124");
+                @display("i=block/downarrow_s;p=400,160");
         }
         tcp: <default(firstAvailable("Tcp","TcpLwip","TcpNsc"))> like ITcp if typename != "" {
             parameters:
-                @display("p=160,202;i=block/transport");
+                @display("p=325,240;i=block/transport");
         }
         tn: MessageDispatcher {
             parameters:
-                @display("b=580,5,,,,1;p=461,274");
+                @display("b=300,5,,,,1;p=325,320");
         }
         ipv4: Ipv4NetworkLayer {
             parameters:
                 proxyARP = true;
-                @display("p=401,320;i=block/layer;q=queue");
+                @display("p=325,400;i=block/layer;q=queue");
         }
         nl: MessageDispatcher {
             parameters:
-                @display("b=580,5,,,,1;p=461,368");
+                @display("b=300,5,,,,1;p=325,480");
         }
         ppp[sizeof(pppg)]: <default("PppInterface")> like IPppInterface {
             parameters:
-                @display("p=401,429,row,110;q=l2queue;i=block/ifcard");
+                @display("p=325,560,row,110;q=l2queue;i=block/ifcard");
         }
 
     connections allowunconnected:

@@ -928,20 +928,12 @@ void Ipv4NetworkConfigurator::readMulticastGroupConfiguration(Topology& topology
     }
 }
 
-const char *Ipv4NetworkConfigurator::getMandatoryAttribute(cXMLElement *element, const char *attr)
-{
-    const char *value = element->getAttribute(attr);
-    if (isEmpty(value))
-        throw cRuntimeError("<%s> element is missing mandatory attribute \"%s\" at %s", element->getTagName(), attr, element->getSourceLocation());
-    return value;
-}
-
 void Ipv4NetworkConfigurator::readManualRouteConfiguration(Topology& topology)
 {
     cXMLElementList routeElements = configuration->getChildrenByTagName("route");
     for (auto & routeElement : routeElements) {
-        const char *hostAttr = getMandatoryAttribute(routeElement, "hosts");
-        const char *destinationAttr = getMandatoryAttribute(routeElement, "destination");    // destination address  (L3AddressResolver syntax)
+        const char *hostAttr = xmlutils::getMandatoryFilledAttribute(*routeElement, "hosts");
+        const char *destinationAttr = xmlutils::getMandatoryAttribute(*routeElement, "destination");    // destination address  (L3AddressResolver syntax)
         const char *netmaskAttr = routeElement->getAttribute("netmask");    // default: 255.255.255.255; alternative notation: "/23"
         const char *gatewayAttr = routeElement->getAttribute("gateway");    // next hop address (L3AddressResolver syntax)
         const char *interfaceAttr = routeElement->getAttribute("interface");    // output interface name

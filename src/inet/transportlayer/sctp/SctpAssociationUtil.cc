@@ -400,7 +400,7 @@ void SctpAssociation::sendToIP(Packet *pkt, const Ptr<SctpHeader>& sctpmsg,
         auto udpHeader = makeShared<UdpHeader>();
         udpHeader->setSourcePort(SCTP_UDP_PORT);
         udpHeader->setDestinationPort(SCTP_UDP_PORT);
-        udpHeader->setTotalLengthField(B(udpHeader->getChunkLength() + pkt->getTotalLength()).get());
+        udpHeader->setTotalLengthField(udpHeader->getChunkLength() + pkt->getTotalLength());
         EV_INFO << "Packet: " << pkt << endl;
         udpHeader->setCrcMode(sctpMain->crcMode);
         insertTransportProtocolHeader(pkt, Protocol::udp, udpHeader);
@@ -2052,6 +2052,7 @@ void SctpAssociation::pushUlp()
                 vec[i] = smsg->getData(i);
             auto applicationData = makeShared<BytesChunk>();
             applicationData->setBytes(vec);
+            applicationData->addTag<CreationTimeTag>()->setCreationTime(smsg->getCreationTime());
             auto& tags = getTags(applicationPacket);
             SctpRcvReq *cmd = tags.addTagIfAbsent<SctpRcvReq>();
             applicationPacket->setKind(SCTP_I_DATA);
@@ -2065,8 +2066,6 @@ void SctpAssociation::pushUlp()
             cmd->setPpid(chunk->ppid);
             cmd->setTsn(chunk->tsn);
             cmd->setCumTsn(state->lastTsnAck);
-            auto creationTimeTag = applicationPacket->addTagIfAbsent<CreationTimeTag>();
-            creationTimeTag->setCreationTime(smsg->getCreationTime());
             applicationPacket->insertAtBack(applicationData);
             state->numMsgsReq[count]--;
             EndToEndDelay->record(simTime() - chunk->firstSendTime);
@@ -2895,7 +2894,7 @@ bool SctpAssociation::allPathsInactive() const
 
 void SctpAssociation::removeFirstChunk(SctpHeader *sctpmsg)
 {
-    SctpChunk *chunk = sctpmsg->removeChunk();
+    SctpChunk *chunk = sctpmsg->removeFirstChunk();
     delete chunk;
 }
 
@@ -2905,7 +2904,7 @@ void SctpAssociation::disposeOf(SctpHeader *sctpmsg)
     uint32 numberOfChunks = sctpmsg->getSctpChunksArraySize();
     if (numberOfChunks > 0)
         for (uint32 i = 0; i < numberOfChunks; i++) {
-            chunk = sctpmsg->removeChunk();
+            chunk = sctpmsg->removeFirstChunk();
          /*   if (chunk->getSctpChunkType() == DATA) {
                 delete chunk->Chunk::peek<SctpSimpleMessage>(Chunk::BackwardIterator(B(0)));
             }*/

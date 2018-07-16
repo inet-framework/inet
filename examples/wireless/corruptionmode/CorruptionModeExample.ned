@@ -27,18 +27,18 @@ network CorruptionModeExample
     submodules:
         configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=100,150");
+                @display("p=100,100;is=s");
         }
         radioMedium: ApskScalarRadioMedium {
             parameters:
-                @display("p=100,250");
+                @display("p=100,200;is=s");
         }
         sourceHost: AdhocHost {
             parameters:
-                @display("p=200,100");
+                @display("p=250,150");
         }
         destinationHost: AdhocHost {
             parameters:
-                @display("p=400,100");
+                @display("p=400,150");
         }
 }

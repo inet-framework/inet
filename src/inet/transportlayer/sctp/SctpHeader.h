@@ -69,6 +69,7 @@ class INET_API SctpHeader : public SctpHeader_Base
     virtual void insertSctpChunks(SctpChunk * sctpChunks) override;
     virtual void insertSctpChunks(size_t k, SctpChunk * sctpChunks) override;
     virtual void eraseSctpChunks(size_t k) override {};
+    virtual void replaceSctpChunk(SctpChunk *msg, uint32 k);
 
 
    // virtual void addChunk(SctpChunk * chunk);
@@ -76,13 +77,10 @@ class INET_API SctpHeader : public SctpHeader_Base
     /**
      * Removes and returns the first message object in this SCTP packet.
      */
-    virtual SctpChunk *removeChunk();
-    SctpChunk *getFirstChunk();
-    virtual void removeFirstChunk();
+    virtual SctpChunk *removeFirstChunk();
     virtual SctpChunk *removeLastChunk();
     virtual SctpChunk *peekFirstChunk() const;
     virtual SctpChunk *peekLastChunk() const;
-   // virtual void replaceChunk(SctpChunk *msg, uint32 k) const;
 
     virtual unsigned int getSourcePort() const override { return SctpHeader_Base::getSrcPort(); }
     virtual void setSourcePort(unsigned int port) override { SctpHeader_Base::setSrcPort(port); }

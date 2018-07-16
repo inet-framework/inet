@@ -43,7 +43,7 @@ class INET_API InterpolatingAntenna : public AntennaBase
 
       public:
         AntennaGain(const char *elevation, const char *heading, const char *bank);
-        virtual double getMinGain() const { return minGain; }
+        virtual double getMinGain() const override { return minGain; }
         virtual double getMaxGain() const override { return maxGain; }
         virtual double computeGain(const EulerAngles direction) const override;
     };

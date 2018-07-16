@@ -36,7 +36,7 @@ module EtherHost
     parameters:
         bool hasStatus = default(false);
         bool csmacdSupport = default(true);  // by default use CSMA/CD
-        string fcsMode @enum("declaredCorrect","declaredIncorrect","computed") = default("declaredCorrect");
+        string fcsMode @enum("declared", "computed") = default("declared");
         @networkNode();
         @labels(node,ethernet-node);
         @display("i=device/pc2");
@@ -46,33 +46,33 @@ module EtherHost
         inout ethg @labels(EtherFrame-conn);
     submodules:
         status: NodeStatus if hasStatus {
-            @display("p=50,50;is=s");
+            @display("p=100,100;is=s");
         }
         cli: EtherAppClient {
             parameters:
                 registerSAP = true;
-                @display("p=120,58,col");
+                @display("p=250,100");
         }
         srv: EtherAppServer {
             parameters:
                 registerSAP = true;
-                @display("p=310,58,col");
+                @display("p=450,100");
         }
         llc: EtherLlc {
             parameters:
-                @display("p=215,118");
+                @display("p=350,200");
             gates:
                 upperLayerIn[2];
                 upperLayerOut[2];
         }
         queue: <default("")> like IOutputQueue if typename != "" {
             parameters:
-                @display("p=159,199;q=l2queue");
+                @display("p=250,300;q=l2queue");
         }
         mac: <default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex")> like IEtherMac {
             parameters:
                 queueModule = (!exists(queue) ? "" : "^.queue");
-                @display("p=215,270;q=txQueue");
+                @display("p=350,400;q=txQueue");
         }
     connections:
 

@@ -22,174 +22,174 @@ network BGPTest
     submodules:
         A: BgpRouter {
             parameters:
-                @display("p=266,141");
+                @display("p=700,230");
             gates:
                 pppg[4];
         }
         B: BgpRouter {
             parameters:
-                @display("p=338,141");
+                @display("p=850,230");
             gates:
                 pppg[4];
         }
         C: BgpRouter {
             parameters:
-                @display("p=298,197");
+                @display("p=775,330");
             gates:
                 pppg[4];
         }
         RA1: OspfRouter {
             parameters:
-                @display("p=198,113;i=device/router");
+                @display("p=550,130;i=device/router");
             gates:
                 pppg[2];
                 ethg[1];
         }
         RA2: OspfRouter {
             parameters:
-                @display("p=198,187;i=device/router");
+                @display("p=550,330;i=device/router");
             gates:
                 pppg[2];
                 ethg[1];
         }
         RB1: OspfRouter {
             parameters:
-                @display("p=406,105;i=device/router");
+                @display("p=1000,130;i=device/router");
             gates:
                 pppg[2];
                 ethg[1];
         }
         RB2: OspfRouter {
             parameters:
-                @display("p=406,187;i=device/router");
+                @display("p=1000,330;i=device/router");
             gates:
                 pppg[2];
                 ethg[1];
         }
         RC1: OspfRouter {
             parameters:
-                @display("p=262,273;i=device/router");
+                @display("p=625,430;i=device/router");
             gates:
                 pppg[2];
                 ethg[1];
         }
         RC2: OspfRouter {
             parameters:
-                @display("p=342,275;i=device/router");
+                @display("p=925,430;i=device/router");
             gates:
                 pppg[2];
                 ethg[1];
         }
         PA1: EtherSwitch {
             parameters:
-                @display("p=124,70;i=device/switch");
+                @display("p=400,130;i=device/switch");
             gates:
                 ethg[3];
         }
         PA2: EtherSwitch {
             parameters:
-                @display("p=114,190;i=device/switch");
+                @display("p=400,330;i=device/switch");
             gates:
                 ethg[3];
         }
         PB1: EtherSwitch {
             parameters:
-                @display("p=484,78;i=device/switch");
+                @display("p=1150,130;i=device/switch");
             gates:
                 ethg[3];
         }
         PB2: EtherSwitch {
             parameters:
-                @display("p=492,190;i=device/switch");
+                @display("p=1150,330;i=device/switch");
             gates:
                 ethg[3];
         }
         PC1: EtherSwitch {
             parameters:
-                @display("p=244,350;i=device/switch");
+                @display("p=625,530;i=device/switch");
             gates:
                 ethg[3];
         }
         PC2: EtherSwitch {
             parameters:
-                @display("p=364,350;i=device/switch");
+                @display("p=925,530;i=device/switch");
             gates:
                 ethg[3];
         }
         HA11: StandardHost {
             parameters:
-                @display("p=42,34;i=device/pc");
+                @display("p=250,80;i=device/pc");
             gates:
                 ethg[1];
         }
         HA12: StandardHost {
             parameters:
-                @display("p=34,90;i=device/pc");
+                @display("p=250,180;i=device/pc");
             gates:
                 ethg[1];
         }
         HA21: StandardHost {
             parameters:
-                @display("p=34,156;i=device/pc");
+                @display("p=250,280;i=device/pc");
             gates:
                 ethg[1];
         }
         HA22: StandardHost {
             parameters:
-                @display("p=34,218;i=device/pc");
+                @display("p=250,380;i=device/pc");
             gates:
                 ethg[1];
         }
         HB11: StandardHost {
             parameters:
-                @display("p=558,34;i=device/pc");
+                @display("p=1300,80;i=device/pc");
             gates:
                 ethg[1];
         }
         HB12: StandardHost {
             parameters:
-                @display("p=558,90;i=device/pc");
+                @display("p=1300,180;i=device/pc");
             gates:
                 ethg[1];
         }
         HB21: StandardHost {
             parameters:
-                @display("p=558,156;i=device/pc");
+                @display("p=1300,280;i=device/pc");
             gates:
                 ethg[1];
         }
         HB22: StandardHost {
             parameters:
-                @display("p=558,220;i=device/pc");
+                @display("p=1300,380;i=device/pc");
             gates:
                 ethg[1];
         }
         HC11: StandardHost {
             parameters:
-                @display("p=206,426;i=device/pc");
+                @display("p=550,630;i=device/pc");
             gates:
                 ethg[1];
         }
         HC12: StandardHost {
             parameters:
-                @display("p=262,426;i=device/pc");
+                @display("p=700,630;i=device/pc");
             gates:
                 ethg[1];
         }
         HC21: StandardHost {
             parameters:
-                @display("p=334,428;i=device/pc");
+                @display("p=850,630;i=device/pc");
             gates:
                 ethg[1];
         }
         HC22: StandardHost {
             parameters:
-                @display("p=398,428;i=device/pc");
+                @display("p=1000,630;i=device/pc");
             gates:
                 ethg[1];
         }
         configurator: Ipv4NetworkConfigurator {
-            @display("p=71,374");
+            @display("p=100,100;is=s");
             config = xmldoc("IPv4Config.xml");
             //assignAddresses = false;
             //assignDisjunctSubnetAddresses = false;

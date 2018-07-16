@@ -146,7 +146,7 @@ simtime_t SingleProtectionMechanism::computeDataOrMgmtFrameDurationField(Packet 
                 simtime_t pendingFrameDuration = pendingFrameMode->getDuration(pendingPacket->getDataLength());
                 duration += pendingFrameDuration + modeSet->getSifsTime();
                 if (ackPolicy->isAckNeeded(pendingHeader)) {
-                    RateSelection::setFrameMode(pendingPacket, pendingHeader, pendingFrameMode); // FIXME: Kludge
+                    RateSelection::setFrameMode(pendingPacket, pendingHeader, pendingFrameMode); // KLUDGE:
                     simtime_t ackToPendingFrameDuration = rateSelection->computeResponseAckFrameMode(pendingPacket, pendingHeader)->getDuration(LENGTH_ACK);
                     duration += ackToPendingFrameDuration + modeSet->getSifsTime();
                 }
@@ -164,7 +164,7 @@ simtime_t SingleProtectionMechanism::computeDataOrMgmtFrameDurationField(Packet 
                 simtime_t pendingFrameDuration = pendingFrameMode->getDuration(pendingPacket->getDataLength());
                 duration = pendingFrameDuration + modeSet->getSifsTime();
                 if (ackPolicy->isAckNeeded(pendingHeader)) {
-                    RateSelection::setFrameMode(pendingPacket, pendingHeader, pendingFrameMode); // FIXME: Kludge
+                    RateSelection::setFrameMode(pendingPacket, pendingHeader, pendingFrameMode); // KLUDGE:
                     simtime_t ackToPendingFrameDuration = rateSelection->computeResponseAckFrameMode(pendingPacket, pendingHeader)->getDuration(LENGTH_ACK);
                     duration += ackToPendingFrameDuration + modeSet->getSifsTime();
                 }

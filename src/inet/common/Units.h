@@ -404,7 +404,8 @@ struct convert2<intscale<T, Num, Den>, U>
     static V fn(const V& v)
     {
         auto t = v * Den;
-        assert(t % Num == 0);
+        if (t % Num != 0)
+            throw cRuntimeError("Cannot convert between integer units");
         return convert<T, U>::fn(t / Num);
     }
 };
@@ -417,7 +418,8 @@ struct convert3<T, intscale<U, Num, Den> >
     static V fn(const V& v)
     {
         auto t = convert<T, U>::fn(v) * Num;
-        assert(t % Den == 0);
+        if (t % Den != 0)
+            throw cRuntimeError("Cannot convert between integer units");
         return t / Den;
     }
 };
@@ -704,7 +706,8 @@ struct scaling_factor<intscale<U, N, D> >
     static T fn()
     {
         auto t = scaling_factor<U>::template fn<T>() * static_cast<T>(N);
-        assert(t % static_cast<T>(D) == 0);
+        if (t % static_cast<T>(D) != 0)
+            throw cRuntimeError("Cannot convert between integer units");
         return t / static_cast<T>(D);
     }
 };

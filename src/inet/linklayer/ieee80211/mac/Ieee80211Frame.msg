@@ -17,6 +17,7 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
+import inet.linklayer.common.FcsMode;
 import inet.linklayer.common.MacAddress;
 
 cplusplus {{
@@ -96,16 +97,11 @@ enum AckPolicy
     BLOCK_ACK = 3;
 }
 
-enum FcsMode {
-    FCS_DECLARED = 1;
-    FCS_COMPUTED = 2;
-}
-
 class Ieee80211MacTrailer extends FieldsChunk
 {
     chunkLength = B(4);
     uint32_t fcs = 0;
-    FcsMode fcsMode;
+    FcsMode fcsMode = FCS_MODE_UNDEFINED;
 }
 
 //

@@ -126,9 +126,6 @@ enum TcpEventCode {
 #define TCP_MAX_WIN                   65535  // 65535 bytes, largest value (16 bit) for (unscaled) window size
 #define DUPTHRESH                     3  // used for TcpTahoe, TcpReno and SACK (RFC 3517)
 #define MAX_SACK_BLOCKS               60  // will only be used with SACK
-#define TCP_OPTIONS_MAX_SIZE          40  // 40 bytes, 15 * 4 bytes (15 is the largest number in 4 bits length data offset field), TCP_MAX_HEADER_OCTETS - TCP_HEADER_OCTETS = 40
-#define TCP_OPTION_SACK_MIN_SIZE      10  // 10 bytes, option length = 8 * n + 2 bytes (NOP)
-#define TCP_OPTION_TS_SIZE            12  // 12 bytes, option length = 10 bytes + 2 bytes (NOP)
 #define PAWS_IDLE_TIME_THRESH         (24 * 24 * 3600)  // 24 days in seconds (RFC 1323)
 
 typedef std::list<Sack> SackList;

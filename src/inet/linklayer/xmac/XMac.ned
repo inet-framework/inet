@@ -54,8 +54,8 @@ simple XMac extends MacProtocolBase like IMacProtocol
         // bit rate 
         double bitrate @unit(bps) = default(19200 bps);
 
-        //tx power [mW]
-        double txPower @unit(mW) = default(50 mW);
+        //tx power
+        double txPower @unit(W) = default(50 mW);
 
         //should mac send and expect acknowledgments?
         bool useMACAcks = default(false);

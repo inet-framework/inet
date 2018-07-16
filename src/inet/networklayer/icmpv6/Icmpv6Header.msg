@@ -18,14 +18,15 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.Units;
 import inet.common.packet.chunk.Chunk;
-import inet.transportlayer.common.CRC;
+import inet.transportlayer.common.CrcMode;
 
 namespace inet;
 
-enum Icmpv6Constants {
-	ICMPv6_HEADER_BYTES = 8;
-}
+cplusplus {{
+const B ICMPv6_HEADER_BYTES = B(8);
+}}
 
 //
 //# TODO consolidate this file's contents with ICMPMessage.msg
@@ -101,11 +102,11 @@ enum Icmpv6ParameterProblem
 //
 class Icmpv6Header extends FieldsChunk
 {
-    chunkLength = B(ICMPv6_HEADER_BYTES);
+    chunkLength = ICMPv6_HEADER_BYTES;
     Icmpv6Type type;     // 1 byte
     //int code; // 1 byte //TODO: this should be specific to different ICMP types.
     int chksum = 0;     // 2 bytes
-    CrcMode crcMode;
+    CrcMode crcMode = CRC_MODE_UNDEFINED;
     // 4 bytes 'type' specific values
 }
 

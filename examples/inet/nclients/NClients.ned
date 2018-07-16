@@ -47,27 +47,24 @@ network NClients
     submodules:
         configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=185,50");
+                @display("p=100,100;is=s");
         }
         r1: Router {
-            parameters:
-                @display("p=186,250");
+            @display("p=400,250");
         }
         r2: Router {
-            parameters:
-                @display("p=304,220");
+            @display("p=550,250");
         }
         r3: Router {
-            parameters:
-                @display("p=433,250");
+            @display("p=700,250");
         }
         cli[n]: StandardHost {
             parameters:
-                @display("i=device/laptop");
+                @display("i=device/laptop;p=250,100,col,100");
         }
         srv: StandardHost {
             parameters:
-                @display("p=544,194;i=device/server_l");
+                @display("i=device/server;p=850,250");
         }
     connections:
         for i=0..n-1 {

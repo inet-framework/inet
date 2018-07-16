@@ -32,7 +32,7 @@ void StaticConcentricMobility::setInitialPosition()
     unsigned int numHosts = par("numHosts");
     double distance = par("distance");
 
-    unsigned int index = visualRepresentation->getIndex();
+    unsigned int index = subjectModule->getIndex();
 
     unsigned int totalCircles = 0;
     unsigned int totalNodesOnInnerCircles = 0;

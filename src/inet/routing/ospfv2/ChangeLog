@@ -1,5 +1,18 @@
 ====== inet-4.x ======
 
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-01  Zoltan Bojthe
+
+	Added B/b units to length constants and length fields of chunks.
+
+2018-05-04  Rudolf Hornig
+
+	Changed an integer parameter unit to second.
+	Added NED documentation for OSPFv2
+
+2018-04-13  ------ inet-3.99.3 released ------
+
 2018-02-26  Zoltan Bojthe
 
 	Added OspfProtocolDissector.

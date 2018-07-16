@@ -106,14 +106,14 @@ const Ptr<Chunk> EthernetFcsSerializer::deserialize(MemoryInputStream& stream) c
 
 void EthernetPhyHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
-    stream.writeByteRepeatedly(0x55, PREAMBLE_BYTES); // preamble
+    stream.writeByteRepeatedly(0x55, B(PREAMBLE_BYTES).get()); // preamble
     stream.writeByte(0xD5); // SFD
 }
 
 const Ptr<Chunk> EthernetPhyHeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
     auto ethernetPhyHeader = makeShared<EthernetPhyHeader>();
-    bool preambleReadSuccessfully = stream.readByteRepeatedly(0x55, PREAMBLE_BYTES); // preamble
+    bool preambleReadSuccessfully = stream.readByteRepeatedly(0x55, B(PREAMBLE_BYTES).get()); // preamble
     uint8_t sfd = stream.readByte();
     if (!preambleReadSuccessfully || sfd != 0xD5)
         ethernetPhyHeader->markIncorrect();

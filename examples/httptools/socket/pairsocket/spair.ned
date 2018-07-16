@@ -14,7 +14,6 @@ import inet.node.inet.StandardHost;
 network HttpSockPair
 {
     parameters:
-        @display("bgb=474,374");
     types:
         channel gigabitline extends ned.DatarateChannel
         {
@@ -28,19 +27,19 @@ network HttpSockPair
                 //                moduleTypes = "StandardHost";
                 //                nonIPModuleTypes = "";
                 config = xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.0.0'/></config>");
-                @display("i=block/cogwheel");
+                @display("is=s;p=100,100");
         }
         httpController: HttpController {
             parameters:
-                @display("p=62,60;i=block/cogwheel");
+                @display("is=s;p=100,200;i=block/cogwheel");
         }
         srv: StandardHost {
             parameters:
-                @display("p=170,188;i=device/server_l");
+                @display("p=250,150;i=device/server");
         }
         cli: StandardHost {
             parameters:
-                @display("p=316,188;i=device/laptop_l");
+                @display("p=400,150;i=device/laptop");
         }
     connections:
         cli.ethg++ <--> gigabitline <--> srv.ethg++;

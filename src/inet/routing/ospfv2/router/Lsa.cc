@@ -74,35 +74,35 @@ bool operator==(const OspfOptions& leftOptions, const OspfOptions& rightOptions)
            (leftOptions.DC_DemandCircuits == rightOptions.DC_DemandCircuits);
 }
 
-unsigned int calculateLSASize(const OspfRouterLsa *routerLSA)
+B calculateLSASize(const OspfRouterLsa *routerLSA)
 {
-    unsigned int lsaLength = OSPF_LSA_HEADER_LENGTH + OSPF_ROUTERLSA_HEADER_LENGTH;
+    B lsaLength = OSPF_LSA_HEADER_LENGTH + OSPF_ROUTERLSA_HEADER_LENGTH;
     unsigned short linkCount = routerLSA->getLinksArraySize();
 
     for (unsigned short i = 0; i < linkCount; i++) {
         const Link& link = routerLSA->getLinks(i);
-        lsaLength += OSPF_LINK_HEADER_LENGTH + (link.getTosDataArraySize() * OSPF_TOS_LENGTH);
+        lsaLength += OSPF_LINK_HEADER_LENGTH + (OSPF_TOS_LENGTH * link.getTosDataArraySize());
     }
 
     return lsaLength;
 }
 
-unsigned int calculateLSASize(const OspfNetworkLsa *networkLSA)
+B calculateLSASize(const OspfNetworkLsa *networkLSA)
 {
     return OSPF_LSA_HEADER_LENGTH + OSPF_NETWORKLSA_MASK_LENGTH
-           + (networkLSA->getAttachedRoutersArraySize() * OSPF_NETWORKLSA_ADDRESS_LENGTH);
+           + (OSPF_NETWORKLSA_ADDRESS_LENGTH * networkLSA->getAttachedRoutersArraySize());
 }
 
-unsigned int calculateLSASize(const OspfSummaryLsa *summaryLSA)
+B calculateLSASize(const OspfSummaryLsa *summaryLSA)
 {
     return OSPF_LSA_HEADER_LENGTH + OSPF_SUMMARYLSA_HEADER_LENGTH
-           + (summaryLSA->getTosDataArraySize() * OSPF_TOS_LENGTH);
+           + (OSPF_TOS_LENGTH * summaryLSA->getTosDataArraySize());
 }
 
-unsigned int calculateLSASize(const OspfAsExternalLsa *asExternalLSA)
+B calculateLSASize(const OspfAsExternalLsa *asExternalLSA)
 {
     return OSPF_LSA_HEADER_LENGTH + OSPF_ASEXTERNALLSA_HEADER_LENGTH
-           + (asExternalLSA->getContents().getExternalTOSInfoArraySize() * OSPF_ASEXTERNALLSA_TOS_INFO_LENGTH);
+           + (OSPF_ASEXTERNALLSA_TOS_INFO_LENGTH * asExternalLSA->getContents().getExternalTOSInfoArraySize());
 }
 
 std::ostream& operator<<(std::ostream& ostr, const OspfLsaHeader& lsaHeader)

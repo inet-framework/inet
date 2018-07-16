@@ -1521,7 +1521,7 @@ void PimDm::sendPrunePacket(Ipv4Address nextHop, Ipv4Address src, Ipv4Address gr
     EncodedAddress& address = group.getPrunedSourceAddressForUpdate(0);
     address.IPaddress = src;
 
-    msg->setChunkLength(B(PIM_HEADER_LENGTH + 8 + ENCODED_GROUP_ADDRESS_LENGTH + 4 + ENCODED_SOURCE_ADDRESS_LENGTH));
+    msg->setChunkLength(PIM_HEADER_LENGTH + B(8) + ENCODED_GROUP_ADDRESS_LENGTH + B(4) + ENCODED_SOURCE_ADDRESS_LENGTH);
     packet->insertAtFront(msg);
 
     emit(sentJoinPrunePkSignal, packet);
@@ -1549,7 +1549,7 @@ void PimDm::sendJoinPacket(Ipv4Address nextHop, Ipv4Address src, Ipv4Address grp
     EncodedAddress& address = group.getJoinedSourceAddressForUpdate(0);
     address.IPaddress = src;
 
-    msg->setChunkLength(B(PIM_HEADER_LENGTH + 8 + ENCODED_GROUP_ADDRESS_LENGTH + 4 + ENCODED_SOURCE_ADDRESS_LENGTH));
+    msg->setChunkLength(PIM_HEADER_LENGTH + B(8) + ENCODED_GROUP_ADDRESS_LENGTH + B(4) + ENCODED_SOURCE_ADDRESS_LENGTH);
     packet->insertAtFront(msg);
 
     emit(sentJoinPrunePkSignal, packet);
@@ -1579,7 +1579,7 @@ void PimDm::sendGraftPacket(Ipv4Address nextHop, Ipv4Address src, Ipv4Address gr
     EncodedAddress& address = group.getJoinedSourceAddressForUpdate(0);
     address.IPaddress = src;
 
-    msg->setChunkLength(B(PIM_HEADER_LENGTH + 8 + ENCODED_GROUP_ADDRESS_LENGTH + 4 + ENCODED_SOURCE_ADDRESS_LENGTH));
+    msg->setChunkLength(PIM_HEADER_LENGTH + B(8) + ENCODED_GROUP_ADDRESS_LENGTH + B(4) + ENCODED_SOURCE_ADDRESS_LENGTH);
     packet->insertAtFront(msg);
 
     emit(sentGraftPkSignal, packet);
@@ -1628,11 +1628,11 @@ void PimDm::sendStateRefreshPacket(Ipv4Address originator, Route *route, Downstr
     msg->setP(downstream->pruneState == DownstreamInterface::PRUNED);
     // TODO set metric
 
-    msg->setChunkLength(B(PIM_HEADER_LENGTH
+    msg->setChunkLength(PIM_HEADER_LENGTH
             + ENCODED_GROUP_ADDRESS_LENGTH
             + ENCODED_UNICODE_ADDRESS_LENGTH
             + ENCODED_UNICODE_ADDRESS_LENGTH
-            + 12));
+            + B(12));
     packet->insertAtFront(msg);
 
     emit(sentStateRefreshPkSignal, packet);
@@ -1652,10 +1652,10 @@ void PimDm::sendAssertPacket(Ipv4Address source, Ipv4Address group, AssertMetric
     pkt->setMetricPreference(metric.preference);
     pkt->setMetric(metric.metric);
 
-    pkt->setChunkLength(B(PIM_HEADER_LENGTH
+    pkt->setChunkLength(PIM_HEADER_LENGTH
             + ENCODED_GROUP_ADDRESS_LENGTH
             + ENCODED_UNICODE_ADDRESS_LENGTH
-            + 8));
+            + B(8));
     packet->insertAtFront(pkt);
 
     emit(sentAssertPkSignal, packet);

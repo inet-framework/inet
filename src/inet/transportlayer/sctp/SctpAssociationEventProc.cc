@@ -154,9 +154,9 @@ void SctpAssociation::process_SEND(SctpEventCode& event, SctpCommandReq *sctpCom
              << " streamId=" << sendCommand->getSid() << endl;
 
     Packet *applicationPacket = check_and_cast<Packet *>(msg);
-    const auto& applicationData = staticPtrCast<const BytesChunk>(applicationPacket->peekData());
-    int sendBytes = applicationData->getChunkLength().get() / 8;
-    EV_INFO << "got msg of length " << applicationData->getChunkLength().get() << "sendBytes=" << sendBytes << endl;
+    const auto& applicationData = applicationPacket->peekDataAsBytes();
+    int sendBytes = B(applicationData->getChunkLength()).get();
+    EV_INFO << "got msg of length " << applicationData->getChunkLength() << " sendBytes=" << sendBytes << endl;
 
     auto iter = sctpMain->assocStatMap.find(assocId);
     iter->second.sentBytes += sendBytes;
@@ -183,9 +183,7 @@ void SctpAssociation::process_SEND(SctpEventCode& event, SctpCommandReq *sctpCom
     smsg->setDataLen(sendBytes);
     smsg->setEncaps(false);
     smsg->setByteLength(sendBytes);
-    auto creationTimeTag = applicationPacket->findTag<CreationTimeTag>();
-    smsg->setCreationTime(creationTimeTag->getCreationTime()); // TODO : get CreationTime from Tag
-    datMsg->encapsulate((cPacket *)smsg);
+    datMsg->encapsulate(smsg);
     datMsg->setSid(streamId);
     datMsg->setPpid(ppid);
     datMsg->setEnqueuingTime(simTime());

@@ -53,62 +53,62 @@ module RsvpMplsRouter
         inout pppg[] @labels(PppFrame-conn);
     submodules:
         status: NodeStatus if hasStatus {
-            @display("p=58,50;is=s");
+            @display("p=100,400;is=s");
         }
         interfaceTable: InterfaceTable {
             parameters:
-                @display("p=58,272;is=s");
+                @display("p=100,200;is=s");
         }
         ted: Ted {
             parameters:
-                @display("p=58,115;is=s");
+                @display("p=100,500;is=s");
         }
         linkStateRouting: LinkStateRouting {
             parameters:
                 peers = peers;
-                @display("p=545,106");
+                @display("p=600,80");
         }
         rsvp: RsvpTe {
             parameters:
                 peers = peers;
                 classifierModule = "^.classifier";
-                @display("p=458,106");
+                @display("p=300,80");
         }
         classifier: <default("RsvpClassifier")> like IIngressClassifier {
             parameters:
-                @display("p=58,362;is=s");
+                @display("p=100,100;is=s");
         }
         tn: MessageDispatcher {
             parameters:
-                @display("p=409,185;b=580,5,,,,1");
+                @display("p=450,160;b=500,5,,,,1");
         }
         ipv4: Ipv4NetworkLayer {
             parameters:
-                @display("p=409,223");
+                @display("p=450,240");
         }
         nm: MessageDispatcher {
             parameters:
-                @display("p=409,271;b=580,5,,,,1");
+                @display("p=450,320;b=500,5,,,,1");
         }
         lo[numLoInterfaces]: <default("LoopbackInterface")> like ILoopbackInterface {
-            @display("p=139,394");
+            @display("p=250,560");
         }
         ppp[sizeof(pppg)]: <default("PppInterface")> like IPppInterface {
             parameters:
-                @display("p=271,394,row,90;q=l2queue");
+                @display("p=400,560,row,150;q=l2queue");
         }
         mpls: Mpls {
             parameters:
                 classifierModule = "^.classifier";
-                @display("p=448,311");
+                @display("p=450,400");
         }
         libTable: LibTable {
             parameters:
-                @display("p=58,186;is=s");
+                @display("p=100,300;is=s");
         }
         ml: MessageDispatcher {
             parameters:
-                @display("p=409,350;b=580,5,,,,1");
+                @display("p=450,480;b=500,5,,,,1");
         }
     connections allowunconnected:
         linkStateRouting.ipOut --> tn.in++;

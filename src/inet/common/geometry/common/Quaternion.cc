@@ -148,12 +148,12 @@ EulerAngles Quaternion::toEulerAngles(bool homogenous) const
     EulerAngles euler;
     if (homogenous) {
         euler.gamma = rad(std::atan2(2.0 * (v.x*v.y + v.z*s), sqx - sqy - sqz + sqw));
-        euler.beta = rad(std::asin(-2.0 * (v.x*v.z - v.y*s)));
+        euler.beta = rad(std::asin(std::min(1.0, std::max(-1.0, -2.0 * (v.x*v.z - v.y*s)))));
         euler.alpha = rad(std::atan2(2.0 * (v.y*v.z + v.x*s), -sqx - sqy + sqz + sqw));
     }
     else {
         euler.gamma = rad(std::atan2(2.0 * (v.z*v.y + v.x*s), 1 - 2*(sqx + sqy)));
-        euler.beta = rad(std::asin(-2.0 * (v.x*v.z - v.y*s)));
+        euler.beta = rad(std::asin(std::min(1.0, std::max(-1.0, -2.0 * (v.x*v.z - v.y*s)))));
         euler.alpha = rad(std::atan2(2.0 * (v.x*v.y + v.z*s), 1 - 2*(sqy + sqz)));
     }
     return euler;

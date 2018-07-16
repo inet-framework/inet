@@ -33,10 +33,10 @@ module SctpNatRouter extends StandardHost
         submodules:
         natHook: SctpNatHook {
             parameters:
-                @display( "p=160,132;i=block/table");
+                @display("p=175,640;i=block/table;is=s");
         }
         natTable: SctpNatTable {
             parameters:
-                @display( "p=60,132;i=block/table");
+                @display("p=75,640;i=block/table;is=s");
         }
 }

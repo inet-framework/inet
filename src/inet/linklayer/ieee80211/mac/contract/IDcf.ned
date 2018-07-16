@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2017 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -12,22 +12,13 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
-//
-// author: Zoltan Bojthe
+// along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-import inet.common.INETDefs;
+package inet.linklayer.ieee80211.mac.contract;
 
-namespace inet;
-
-enum EthernetFcsMode {
-    FCS_DECLARED_CORRECT = 1;
-    FCS_DECLARED_INCORRECT = 2;
-    FCS_COMPUTED = 3;
+moduleinterface IDcf
+{
+    parameters:
+        @display("i=block/rx");
 }
-
-cplusplus {{
-INET_API EthernetFcsMode parseEthernetFcsMode(const char *fcsModeString);
-}}
-

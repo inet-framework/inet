@@ -41,12 +41,12 @@ namespace inet {
 using namespace omnetpp;
 }
 
-#if OMNETPP_VERSION < 0x0503
-#  error At least OMNeT++/OMNEST version 5.3 required
-#endif // if OMNETPP_VERSION < 0x0503
+#if OMNETPP_VERSION < 0x0504 || OMNETPP_BUILDNUM < 1020
+#  error At least OMNeT++/OMNEST version 5.4.1 required
+#endif // if OMNETPP_VERSION < 0x0504
 
-#define INET_VERSION  0x0363
-#define INET_PATCH_LEVEL 0x03
+#define INET_VERSION  0x0400
+#define INET_PATCH_LEVEL 0x00
 
 #if defined(INET_EXPORT)
 #  define INET_API    OPP_DLLEXPORT

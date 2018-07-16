@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-04-13  ------ inet-3.99.3 released ------
+
 2018-02-21  Zoltan Bojthe
 
 	Changed clearing tags when sending a packet to leave the PacketProtocolTag intact.

@@ -28,7 +28,7 @@ module DsdvRouter extends AdhocHost
 {
     submodules:
         dsdv: Dsdv {
-            @display("p=700,300");
+            @display("p=825,226");
         }
     connections:
         dsdv.ipOut --> tn.in++;

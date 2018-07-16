@@ -397,9 +397,11 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const char
             Packet *transmittedFrame = new Packet();
             auto byteCountChunk = makeShared<ByteCountChunk>(B(transmitterInterfaceInfo->interfaceEntry->getMtu()));
             transmittedFrame->insertAtBack(byteCountChunk);
-            transmittedFrame->addTag<PacketProtocolTag>()->setProtocol(nullptr);      //FIXME kludge
-            // TODO: KLUDGE: review
+
+            // KLUDGE:
+            transmittedFrame->addTag<PacketProtocolTag>()->setProtocol(nullptr);
             check_and_cast<const Radio *>(transmitterRadio)->encapsulate(transmittedFrame);
+
             const ITransmission *transmission = transmitterRadio->getTransmitter()->createTransmission(transmitterRadio, transmittedFrame, simTime());
             const IArrival *arrival = medium->getPropagation()->computeArrival(transmission, receiverRadio->getAntenna()->getMobility());
             const IListening *listening = receiverRadio->getReceiver()->createListening(receiverRadio, arrival->getStartTime(), arrival->getEndTime(), arrival->getStartPosition(), arrival->getEndPosition());

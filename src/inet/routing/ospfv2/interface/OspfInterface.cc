@@ -168,7 +168,7 @@ void Interface::sendHelloPacket(Ipv4Address destination, short ttl)
         helloPacket->setNeighbor(k, neighbors[k]);
     }
 
-    helloPacket->setChunkLength(B(OSPF_HEADER_LENGTH + OSPF_HELLO_HEADER_LENGTH + initedNeighborCount * 4));
+    helloPacket->setChunkLength(OSPF_HEADER_LENGTH + OSPF_HELLO_HEADER_LENGTH + B(initedNeighborCount * 4));
     Packet *pk = new Packet();
     pk->insertAtBack(helloPacket);
 
@@ -191,7 +191,7 @@ void Interface::sendLsAcknowledgement(const OspfLsaHeader *lsaHeader, Ipv4Addres
     lsAckPacket->setLsaHeadersArraySize(1);
     lsAckPacket->setLsaHeaders(0, *lsaHeader);
 
-    lsAckPacket->setChunkLength(B(OSPF_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH));
+    lsAckPacket->setChunkLength(OSPF_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH);
     Packet *pk = new Packet();
     pk->insertAtBack(lsAckPacket);
 
@@ -449,7 +449,7 @@ Packet *Interface::createUpdatePacket(const OspfLsa *lsa)
         ((lsaType == AS_EXTERNAL_LSA_TYPE) && (asExternalLSA != nullptr)))
     {
         const auto& updatePacket = makeShared<OspfLinkStateUpdatePacket>();
-        long packetLength = OSPF_HEADER_LENGTH + sizeof(uint32_t);    // OSPF header + place for number of advertisements
+        B packetLength = OSPF_HEADER_LENGTH + B(sizeof(uint32_t));    // OSPF header + place for number of advertisements
 
         updatePacket->setType(LINKSTATE_UPDATE_PACKET);
         updatePacket->setRouterID(Ipv4Address(parentArea->getRouter()->getRouterID()));
@@ -523,7 +523,7 @@ Packet *Interface::createUpdatePacket(const OspfLsa *lsa)
                 throw cRuntimeError("Invalid LSA type: %d", lsaType);
         }
 
-        updatePacket->setChunkLength(B(packetLength));
+        updatePacket->setChunkLength(packetLength);
         Packet *pk = new Packet();
         pk->insertAtBack(updatePacket);
 
@@ -558,7 +558,7 @@ void Interface::addDelayedAcknowledgement(const OspfLsaHeader& lsaHeader)
 void Interface::sendDelayedAcknowledgements()
 {
     MessageHandler *messageHandler = parentArea->getRouter()->getMessageHandler();
-    long maxPacketSize = ((IP_MAX_HEADER_BYTES + OSPF_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH) > mtu) ? IPV4_DATAGRAM_LENGTH : mtu;
+    B maxPacketSize = ((IPv4_MAX_HEADER_LENGTH + OSPF_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH) > B(mtu)) ? IPV4_DATAGRAM_LENGTH : B(mtu);
 
     for (auto & elem : delayedAcknowledgements)
     {
@@ -566,7 +566,7 @@ void Interface::sendDelayedAcknowledgements()
         if (ackCount > 0) {
             while (!(elem.second.empty())) {
                 const auto& ackPacket = makeShared<OspfLinkStateAcknowledgementPacket>();
-                long packetSize = IP_MAX_HEADER_BYTES + OSPF_HEADER_LENGTH;
+                B packetSize = IPv4_MAX_HEADER_LENGTH + OSPF_HEADER_LENGTH;
 
                 ackPacket->setType(LINKSTATE_ACKNOWLEDGEMENT_PACKET);
                 ackPacket->setRouterID(Ipv4Address(parentArea->getRouter()->getRouterID()));
@@ -584,7 +584,7 @@ void Interface::sendDelayedAcknowledgements()
                     packetSize += OSPF_LSA_HEADER_LENGTH;
                 }
 
-                ackPacket->setChunkLength(B(packetSize - IP_MAX_HEADER_BYTES));
+                ackPacket->setChunkLength(packetSize - IPv4_MAX_HEADER_LENGTH);
                 Packet *pk = new Packet();
                 pk->insertAtBack(ackPacket);
 

@@ -28,7 +28,7 @@
 #include "inet/networklayer/icmpv6/Ipv6NdMessage_m.h"
 #include "inet/networklayer/icmpv6/Ipv6NeighbourCache.h"
 #include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/transportlayer/common/CRC_m.h"
+#include "inet/transportlayer/common/CrcMode_m.h"
 
 namespace inet {
 
@@ -99,7 +99,7 @@ class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
     IInterfaceTable *ift = nullptr;
     Ipv6RoutingTable *rt6 = nullptr;
     Icmpv6 *icmpv6 = nullptr;
-    CrcMode crcMode = static_cast<CrcMode>(-1);
+    CrcMode crcMode = CRC_MODE_UNDEFINED;
 
 #ifdef WITH_xMIPv6
     xMIPv6 *mipv6 = nullptr;    // in case the node has MIP support

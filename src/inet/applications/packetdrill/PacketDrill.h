@@ -83,6 +83,7 @@ class INET_API PacketDrill
         static PacketDrillSctpChunk* buildErrorChunk(int64 flgs, cQueue *causes);
 
         static Ptr<Ipv4Header> makeIpv4Header(IpProtocolId protocol, enum direction_t direction, L3Address localAddr, L3Address remoteAddr);
+        static void setIpv4HeaderCrc(Ptr<Ipv4Header> &ipv4Header);
 
         int evaluateExpressionList(cQueue *in_list, cQueue *out_list, char **error);
 

@@ -25,14 +25,14 @@ import inet.visualizer.contract.IIntegratedVisualizer;
 module IntegratedVisualizer like IIntegratedVisualizer
 {
     parameters:
-        @display("i=block/app_s");
+        @display("i=block/app");
     submodules:
         canvasVisualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if typename != "" {
             parameters:
-                @display("p=100,50");
+                @display("p=100,100");
         }
         osgVisualizer: <default("")> like IIntegratedVisualizer if typename != "" {
             parameters:
-                @display("p=100,150");
+                @display("p=100,200");
         }
 }

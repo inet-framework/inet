@@ -1,5 +1,34 @@
 ====== inet-4.x ======
 
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-25  Zoltan Bojthe
+
+	CRC insertion calculates CRC only when crcMode is CRC_COMPUTED.
+	Calculate crc only once (CRC_COMPUTED calculated in Udp::CrcInsertion hook)
+
+2018-06-18  Zoltan Bojthe
+
+	CrcInsertion doesn't calculate crc for fragmented packets and forwarded packets.
+
+2018-06-06  Zoltan Bojthe
+
+	Fixed checks for too short totalLength, truncate padding (out of totalLength).
+
+2018-06-01  Zoltan Bojthe
+
+	Added B/b units to length constants and length fields of chunks.
+
+2018-05-10  Zoltan Bojthe
+
+	Moved header serializers to the corresponding protocol folders.
+
+2018-03-09  Zoltan Bojthe
+
+	Optimized CRC calculation.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
 2018-03-07  Zoltan Bojthe
 
 	Added UdpProtocolPrinter.

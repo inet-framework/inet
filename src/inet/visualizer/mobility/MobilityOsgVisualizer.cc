@@ -106,7 +106,7 @@ void MobilityOsgVisualizer::extendMovementTrail(osg::Geode *trail, const Coord& 
         // TODO: 1?
         if (dx * dx + dy * dy + dz * dz > 1) {
             vertices->push_back(osg::Vec3d(position.x, position.y, position.z));
-            if (vertices->size() > trailLength)
+            if ((int)vertices->size() > trailLength)
                 vertices->erase(vertices->begin(), vertices->begin() + 1);
             auto drawArrays = static_cast<osg::DrawArrays *>(drawable->getPrimitiveSet(0));
             drawArrays->setFirst(0);
@@ -132,6 +132,12 @@ void MobilityOsgVisualizer::receiveSignal(cComponent *source, simsignal_t signal
                                  osg::Quat(rad(orientation.alpha).get(), osg::Vec3d(0.0, 0.0, 1.0)));
         if (displayMovementTrails)
             extendMovementTrail(mobilityVisualization->trail, position);
+    }
+    else if (signal == PRE_MODEL_CHANGE) {
+        if (dynamic_cast<cPreModuleDeleteNotification *>(object)) {
+            if (auto mobility = dynamic_cast<IMobility *>(source))
+                removeMobilityVisualization(mobility);
+        }
     }
     else
         throw cRuntimeError("Unknown signal");

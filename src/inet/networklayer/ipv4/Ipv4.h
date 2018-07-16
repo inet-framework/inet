@@ -81,7 +81,7 @@ class INET_API Ipv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     int transportInGateBaseId = -1;
 
     // config
-    CrcMode crcMode = static_cast<CrcMode>(-1);
+    CrcMode crcMode = CRC_MODE_UNDEFINED;
     int defaultTimeToLive = -1;
     int defaultMCTimeToLive = -1;
     simtime_t fragmentTimeoutTime;

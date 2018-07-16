@@ -41,7 +41,7 @@ void OriginatorProtectionMechanism::initialize(int stage)
 simtime_t OriginatorProtectionMechanism::computeRtsDurationField(Packet *rtsPacket, const Ptr<const Ieee80211RtsFrame>& rtsFrame, Packet *pendingPacket, const Ptr<const Ieee80211DataOrMgmtHeader>& pendingHeader)
 {
     auto pendingFrameMode = rateSelection->computeMode(pendingPacket, pendingHeader);
-    RateSelection::setFrameMode(pendingPacket, pendingHeader, pendingFrameMode); // FIXME: Kludge
+    RateSelection::setFrameMode(pendingPacket, pendingHeader, pendingFrameMode); // KLUDGE:
     simtime_t pendingFrameDuration = pendingFrameMode->getDuration(pendingPacket->getDataLength());
     simtime_t ctsFrameDuration = rateSelection->computeResponseCtsFrameMode(rtsPacket, rtsFrame)->getDuration(LENGTH_CTS);
     simtime_t ackFrameDuration = rateSelection->computeResponseAckFrameMode(pendingPacket, pendingHeader)->getDuration(LENGTH_ACK);

@@ -44,7 +44,7 @@ void Ipv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
 
     EV << "Serialize Ipv6 packet\n";
 
-    unsigned int nextHdrCodePos = B(stream.getLength()).get() + 6;
+    B nextHdrCodePos = stream.getLength() + B(6);
     struct ip6_hdr ip6h;
 
     flowinfo = 0x06;
@@ -64,25 +64,25 @@ void Ipv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
         ip6h.ip6_dst.__u6_addr.__u6_addr32[i] = htonl(ipv6Header->getDestAddress().words()[i]);
     }
 
-    ip6h.ip6_plen = htons(ipv6Header->getPayloadLength());
+    ip6h.ip6_plen = htons(B(ipv6Header->getPayloadLength()).get());
 
-    stream.writeBytes((uint8_t *)&ip6h, B(IPv6_HEADER_BYTES));
+    stream.writeBytes((uint8_t *)&ip6h, IPv6_HEADER_BYTES);
 
     //FIXME serialize extension headers
     for (i = 0; i < ipv6Header->getExtensionHeaderArraySize(); i++) {
         const Ipv6ExtensionHeader *extHdr = ipv6Header->getExtensionHeader(i);
         stream.writeByte(i + 1 < ipv6Header->getExtensionHeaderArraySize() ? ipv6Header->getExtensionHeader(i + 1)->getExtensionType() : ipv6Header->getProtocolId());
-        ASSERT((extHdr->getByteLength() & 7) == 0);
-        stream.writeByte((extHdr->getByteLength() - 8) / 8);
+        ASSERT((B(extHdr->getByteLength()).get() & 7) == 0);
+        stream.writeByte(B(extHdr->getByteLength() - B(8)).get() / 8);
         switch (extHdr->getExtensionType()) {
             case IP_PROT_IPv6EXT_HOP: {
                 const Ipv6HopByHopOptionsHeader *hdr = check_and_cast<const Ipv6HopByHopOptionsHeader *>(extHdr);
-                stream.writeByteRepeatedly(0, hdr->getByteLength() - 2);    //TODO
+                stream.writeByteRepeatedly(0, B(hdr->getByteLength()).get() - 2);    //TODO
                 break;
             }
             case IP_PROT_IPv6EXT_DEST: {
                 const Ipv6DestinationOptionsHeader *hdr = check_and_cast<const Ipv6DestinationOptionsHeader *>(extHdr);
-                stream.writeByteRepeatedly(0, hdr->getByteLength() - 2);    //TODO
+                stream.writeByteRepeatedly(0, B(hdr->getByteLength()).get() - 2);    //TODO
                 break;
             }
             case IP_PROT_IPv6EXT_ROUTING: {
@@ -104,12 +104,12 @@ void Ipv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
             }
             case IP_PROT_IPv6EXT_AUTH: {
                 const Ipv6AuthenticationHeader *hdr = check_and_cast<const Ipv6AuthenticationHeader *>(extHdr);
-                stream.writeByteRepeatedly(0, hdr->getByteLength() - 2);    //TODO
+                stream.writeByteRepeatedly(0, B(hdr->getByteLength()).get() - 2);    //TODO
                 break;
             }
             case IP_PROT_IPv6EXT_ESP: {
                 const Ipv6EncapsulatingSecurityPayloadHeader *hdr = check_and_cast<const Ipv6EncapsulatingSecurityPayloadHeader *>(extHdr);
-                stream.writeByteRepeatedly(0, hdr->getByteLength() - 2);    //TODO
+                stream.writeByteRepeatedly(0, B(hdr->getByteLength()).get() - 2);    //TODO
                 break;
             }
             default: {
@@ -117,14 +117,14 @@ void Ipv6HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                 break;
             }
         }
-        ASSERT(nextHdrCodePos + extHdr->getByteLength() == B(stream.getLength()).get());
+        ASSERT(nextHdrCodePos + extHdr->getByteLength() == stream.getLength());
     }
 }
 
 const Ptr<Chunk> Ipv6HeaderSerializer::deserialize(MemoryInputStream& stream) const
 {
-    uint8_t buffer[IPv6_HEADER_BYTES];
-    stream.readBytes(buffer, B(IPv6_HEADER_BYTES));
+    uint8_t buffer[B(IPv6_HEADER_BYTES).get()];
+    stream.readBytes(buffer, IPv6_HEADER_BYTES);
     auto dest = makeShared<Ipv6Header>();
     const struct ip6_hdr& ip6h = *static_cast<const struct ip6_hdr *>((void *)&buffer);
     uint32_t flowinfo = ntohl(ip6h.ip6_flow);
@@ -147,7 +147,7 @@ const Ptr<Chunk> Ipv6HeaderSerializer::deserialize(MemoryInputStream& stream) co
              ntohl(ip6h.ip6_dst.__u6_addr.__u6_addr32[2]),
              ntohl(ip6h.ip6_dst.__u6_addr.__u6_addr32[3]));
     dest->setDestAddress(temp);
-    dest->setPayloadLength(ip6h.ip6_plen);
+    dest->setPayloadLength(B(ip6h.ip6_plen));
 
     return dest;
 }

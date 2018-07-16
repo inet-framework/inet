@@ -17,6 +17,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/EmptyChunk.h"
 #include "inet/common/checksum/TcpIpChecksum.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/contract/INetfilter.h"
@@ -30,11 +31,15 @@ namespace tcp {
 
 INetfilter::IHook::Result TcpCrcInsertion::datagramPostRoutingHook(Packet *packet)
 {
+    if (packet->findTag<InterfaceInd>())
+        return ACCEPT;  // FORWARD
     auto networkProtocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     const auto& networkHeader = getNetworkProtocolHeader(packet);
     if (networkHeader->getProtocol() == &Protocol::tcp) {
+        ASSERT(!networkHeader->isFragment());
         packet->eraseAtFront(networkHeader->getChunkLength());
         auto tcpHeader = packet->removeAtFront<TcpHeader>();
+        ASSERT(tcpHeader->getCrcMode() == CRC_COMPUTED);
         const L3Address& srcAddress = networkHeader->getSourceAddress();
         const L3Address& destAddress = networkHeader->getDestinationAddress();
         insertCrc(networkProtocol, srcAddress, destAddress, tcpHeader, packet);
@@ -81,7 +86,7 @@ uint16_t TcpCrcInsertion::computeCrc(const Protocol *networkProtocol, const L3Ad
     pseudoHeader->setDestAddress(destAddress);
     pseudoHeader->setNetworkProtocolId(networkProtocol->getId());
     pseudoHeader->setProtocolId(IP_PROT_TCP);
-    pseudoHeader->setPacketLength(B(tcpHeader->getChunkLength() + tcpData->getChunkLength()).get());
+    pseudoHeader->setPacketLength(tcpHeader->getChunkLength() + tcpData->getChunkLength());
     // pseudoHeader length: ipv4: 12 bytes, ipv6: 40 bytes, generic: ???
     if (networkProtocol == &Protocol::ipv4)
         pseudoHeader->setChunkLength(B(12));

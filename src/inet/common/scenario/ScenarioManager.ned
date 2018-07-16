@@ -77,12 +77,20 @@ package inet.common.scenario;
 //        - <param>: name, value
 //    - <disconnect>: src-module, src-gate
 //          note: if src-gate names an inout gate, both directions will be disconnected.
+//    - <create-module>: parent, submodule, type, vector
+//          parent: parent path
+//          submodule: name of created module
+//          type: type of created module
+//          vector: boolean, if true, the module created as vector element with next index,
+//                  if false, the module created as a single module,
+//                  if missing, detects existing vector by submodule name
+//    - <delete-module>: module
 //
 simple ScenarioManager
 {
     parameters:
         xml script = default(xml("<script></script>"));
-        @display("i=block/control_s");
+        @display("i=block/control");
         @labels(node,mpls-node);
 }
 

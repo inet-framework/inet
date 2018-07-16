@@ -51,94 +51,94 @@ import inet.visualizer.contract.ITransportRouteVisualizer;
 module IntegratedCanvasVisualizer like IIntegratedVisualizer
 {
     parameters:
-        @display("i=block/app_s");
+        @display("i=block/app");
     submodules:
         sceneVisualizer: <default("SceneCanvasVisualizer")> like ISceneVisualizer if typename != "" {
             parameters:
-                @display("p=150,50");
+                @display("p=150,100");
         }
         physicalEnvironmentVisualizer: <default("PhysicalEnvironmentCanvasVisualizer")> like IPhysicalEnvironmentVisualizer if typename != "" {
             parameters:
-                @display("p=150,150");
+                @display("p=150,200");
         }
         networkNodeVisualizer: <default("NetworkNodeCanvasVisualizer")> like INetworkNodeVisualizer if typename != "" {
             parameters:
-                @display("p=150,250");
+                @display("p=150,300");
         }
         networkConnectionVisualizer: <default("NetworkConnectionCanvasVisualizer")> like INetworkConnectionVisualizer if typename != "" {
             parameters:
-                @display("p=150,350");
+                @display("p=150,400");
         }
         mobilityVisualizer: <default("MobilityCanvasVisualizer")> like IMobilityVisualizer if typename != "" {
             parameters:
-                @display("p=150,450");
+                @display("p=150,500");
         }
         statisticVisualizer: <default("StatisticCanvasVisualizer")> like IStatisticVisualizer if typename != "" {
             parameters:
-                @display("p=150,550");
+                @display("p=150,600");
         }
         infoVisualizer: <default("InfoCanvasVisualizer")> like IInfoVisualizer if typename != "" {
             parameters:
-                @display("p=150,650");
+                @display("p=150,700");
         }
         energyStorageVisualizer: <default("EnergyStorageCanvasVisualizer")> like IEnergyStorageVisualizer if typename != "" {
             parameters:
-                @display("p=150,750");
+                @display("p=150,800");
         }
         mediumVisualizer: <default("MediumCanvasVisualizer")> like IMediumVisualizer if typename != "" {
             parameters:
-                @display("p=150,850");
+                @display("p=150,900");
         }
         obstacleLossVisualizer: <default("TracingObstacleLossCanvasVisualizer")> like ITracingObstacleLossVisualizer if typename != "" {
             parameters:
-                @display("p=150,950");
+                @display("p=150,1000");
         }
         packetDropVisualizer: <default("PacketDropCanvasVisualizer")> like IPacketDropVisualizer if typename != "" {
             parameters:
-                @display("p=150,1050");
+                @display("p=150,1100");
         }
         queueVisualizer: <default("QueueCanvasVisualizer")> like IQueueVisualizer if typename != "" {
             parameters:
-                @display("p=450,50");
+                @display("p=450,100");
         }
         radioVisualizer: <default("RadioCanvasVisualizer")> like IRadioVisualizer if typename != "" {
             parameters:
-                @display("p=450,150");
+                @display("p=450,200");
         }
         physicalLinkVisualizer: <default("PhysicalLinkCanvasVisualizer")> like IPhysicalLinkVisualizer if typename != "" {
             parameters:
-                @display("p=450,250");
+                @display("p=450,300");
         }
         interfaceTableVisualizer: <default("InterfaceTableCanvasVisualizer")> like IInterfaceTableVisualizer if typename != "" {
             parameters:
-                @display("p=450,350");
+                @display("p=450,400");
         }
         dataLinkVisualizer: <default("DataLinkCanvasVisualizer")> like IDataLinkVisualizer if typename != "" {
             parameters:
-                @display("p=450,450");
+                @display("p=450,500");
         }
         linkBreakVisualizer: <default("LinkBreakCanvasVisualizer")> like ILinkBreakVisualizer if typename != "" {
             parameters:
-                @display("p=450,550");
+                @display("p=450,600");
         }
         ieee80211Visualizer: <default("Ieee80211CanvasVisualizer")> like IIeee80211Visualizer if typename != "" {
             parameters:
-                @display("p=450,650");
+                @display("p=450,700");
         }
         networkRouteVisualizer: <default("NetworkRouteCanvasVisualizer")> like INetworkRouteVisualizer if typename != "" {
             parameters:
-                @display("p=450,750");
+                @display("p=450,800");
         }
         routingTableVisualizer: <default("RoutingTableCanvasVisualizer")> like IRoutingTableVisualizer if typename != "" {
             parameters:
-                @display("p=450,850");
+                @display("p=450,900");
         }
         transportRouteVisualizer: <default("TransportRouteCanvasVisualizer")> like ITransportRouteVisualizer if typename != "" {
             parameters:
-                @display("p=450,950");
+                @display("p=450,1000");
         }
         transportConnectionVisualizer: <default("TransportConnectionCanvasVisualizer")> like ITransportConnectionVisualizer if typename != "" {
             parameters:
-                @display("p=450,1050");
+                @display("p=450,1100");
         }
 }

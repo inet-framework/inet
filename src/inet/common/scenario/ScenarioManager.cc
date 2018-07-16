@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/scenario/ScenarioManager.h"
+#include "inet/common/XMLUtils.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/INETUtils.h"
@@ -101,18 +102,9 @@ static bool parseIndexedName(const char *s, std::string& name, int& index)
     }
 }
 
-const char *ScenarioManager::getRequiredAttribute(cXMLElement *node, const char *attr)
-{
-    const char *s = node->getAttribute(attr);
-    if (!s)
-        throw cRuntimeError("required attribute %s of <%s> missing at %s",
-                attr, node->getTagName(), node->getSourceLocation());
-    return s;
-}
-
 cModule *ScenarioManager::getRequiredModule(cXMLElement *node, const char *attr)
 {
-    const char *moduleAttr = getRequiredAttribute(node, attr);
+    const char *moduleAttr = xmlutils::getMandatoryFilledAttribute(*node, attr);
     cModule *mod = getModuleByPath(moduleAttr);
     if (!mod)
         throw cRuntimeError("module '%s' not found at %s", moduleAttr, node->getSourceLocation());
@@ -122,7 +114,7 @@ cModule *ScenarioManager::getRequiredModule(cXMLElement *node, const char *attr)
 cGate *ScenarioManager::getRequiredGate(cXMLElement *node, const char *modAttr, const char *gateAttr)
 {
     cModule *mod = getRequiredModule(node, modAttr);
-    const char *gateStr = getRequiredAttribute(node, gateAttr);
+    const char *gateStr = xmlutils::getMandatoryFilledAttribute(*node, gateAttr);
     std::string gname;
     int gindex;
     parseIndexedName(gateStr, gname, gindex);
@@ -158,8 +150,8 @@ void ScenarioManager::processSetParamCommand(cXMLElement *node)
 {
     // process <set-param> command
     cModule *mod = getRequiredModule(node, "module");
-    const char *parAttr = getRequiredAttribute(node, "par");
-    const char *valueAttr = getRequiredAttribute(node, "value");
+    const char *parAttr = xmlutils::getMandatoryFilledAttribute(*node, "par");
+    const char *valueAttr = xmlutils::getMandatoryAttribute(*node, "value");
 
     EV << "Setting " << mod->getFullPath() << "." << parAttr << " = " << valueAttr << "\n";
     bubble((std::string("setting: ") + mod->getFullPath() + "." + parAttr + " = " + valueAttr).c_str());
@@ -173,8 +165,8 @@ void ScenarioManager::processSetChannelParamCommand(cXMLElement *node)
 {
     // process <set-channel-param> command
     cGate *g = getRequiredGate(node, "src-module", "src-gate");
-    const char *parAttr = getRequiredAttribute(node, "par");
-    const char *valueAttr = getRequiredAttribute(node, "value");
+    const char *parAttr = xmlutils::getMandatoryFilledAttribute(*node, "par");
+    const char *valueAttr = xmlutils::getMandatoryAttribute(*node, "value");
 
     EV << "Setting channel parameter: " << parAttr << " = " << valueAttr
        << " of gate " << g->getFullPath() << "\n";
@@ -196,9 +188,9 @@ void ScenarioManager::processSetChannelParamCommand(cXMLElement *node)
 
 void ScenarioManager::processCreateModuleCommand(cXMLElement *node)
 {
-    const char *moduleTypeName = getRequiredAttribute(node, "type");
-    const char *submoduleName = getRequiredAttribute(node, "submodule");
-    const char *parentModulePath = getRequiredAttribute(node, "parent");
+    const char *moduleTypeName = xmlutils::getMandatoryFilledAttribute(*node, "type");
+    const char *submoduleName = xmlutils::getMandatoryFilledAttribute(*node, "submodule");
+    const char *parentModulePath = xmlutils::getMandatoryFilledAttribute(*node, "parent");
     cModuleType *moduleType = cModuleType::get(moduleTypeName);
     if (moduleType == nullptr)
         throw cRuntimeError("module type '%s' is not found", moduleType);
@@ -206,8 +198,16 @@ void ScenarioManager::processCreateModuleCommand(cXMLElement *node)
     if (parentModule == nullptr)
         throw cRuntimeError("parent module '%s' is not found", parentModulePath);
     cModule *submodule = parentModule->getSubmodule(submoduleName, 0);
-    int submoduleIndex = submodule == nullptr ? 0 : submodule->getVectorSize();
-    cModule *module = moduleType->create(submoduleName, parentModule, submoduleIndex + 1, submoduleIndex);
+    bool vector = xmlutils::getAttributeBoolValue(node, "vector", submodule != nullptr);
+    cModule *module = nullptr;
+    if (vector) {
+        cModule *submodule = parentModule->getSubmodule(submoduleName, 0);
+        int submoduleIndex = submodule == nullptr ? 0 : submodule->getVectorSize();
+        module = moduleType->create(submoduleName, parentModule, submoduleIndex + 1, submoduleIndex);
+    }
+    else {
+        module = moduleType->create(submoduleName, parentModule);
+    }
     module->finalizeParameters();
     module->buildInside();
     module->callInitialize();
@@ -215,7 +215,7 @@ void ScenarioManager::processCreateModuleCommand(cXMLElement *node)
 
 void ScenarioManager::processDeleteModuleCommand(cXMLElement *node)
 {
-    const char *modulePath = getRequiredAttribute(node, "module");
+    const char *modulePath = xmlutils::getMandatoryFilledAttribute(*node, "module");
     cModule *module = getSimulation()->getSystemModule()->getModuleByPath(modulePath);
     if (module == nullptr)
         throw cRuntimeError("module '%s' is not found", modulePath);
@@ -233,8 +233,8 @@ void ScenarioManager::createConnection(cXMLElementList& paramList, cChannelType 
         // set parameters:
         for (auto child : paramList) {
 
-            const char *name = getRequiredAttribute(child, "name");
-            const char *value = getRequiredAttribute(child, "value");
+            const char *name = xmlutils::getMandatoryFilledAttribute(*child, "name");
+            const char *value = xmlutils::getMandatoryAttribute(*child, "value");
             channel->par(name).parse(value);
         }
 
@@ -247,7 +247,7 @@ void ScenarioManager::processConnectCommand(cXMLElement *node)
 {
     cGate *srcGate;
     cModule *srcMod = getRequiredModule(node, "src-module");
-    const char *srcGateStr = getRequiredAttribute(node, "src-gate");
+    const char *srcGateStr = xmlutils::getMandatoryFilledAttribute(*node, "src-gate");
     std::string srcGateName;
     int srcGateIndex;
     parseIndexedName(srcGateStr, srcGateName, srcGateIndex);
@@ -255,7 +255,7 @@ void ScenarioManager::processConnectCommand(cXMLElement *node)
 
     cGate *destGate;
     cModule *destMod = getRequiredModule(node, "dest-module");
-    const char *destGateStr = getRequiredAttribute(node, "dest-gate");
+    const char *destGateStr = xmlutils::getMandatoryFilledAttribute(*node, "dest-gate");
     std::string destGateName;
     int destGateIndex;
     parseIndexedName(destGateStr, destGateName, destGateIndex);
@@ -295,7 +295,7 @@ void ScenarioManager::processDisconnectCommand(cXMLElement *node)
     // process <disconnect> command
     cModule *srcMod = getRequiredModule(node, "src-module");
     cModule *parentMod = srcMod->getParentModule();
-    const char *srcGateStr = getRequiredAttribute(node, "src-gate");
+    const char *srcGateStr = xmlutils::getMandatoryFilledAttribute(*node, "src-gate");
     std::string srcGateName;
     int srcGateIndex;
     parseIndexedName(srcGateStr, srcGateName, srcGateIndex);

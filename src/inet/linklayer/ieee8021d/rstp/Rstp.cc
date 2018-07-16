@@ -593,8 +593,8 @@ void Rstp::sendTCNtoRoot()
                 frame->setHelloTime(helloTime);
                 frame->setForwardDelay(forwardDelay);
 
-                if (frame->getChunkLength() < B(MIN_ETHERNET_FRAME_BYTES))   //FIXME KLUDGE, unnecessary padding
-                    frame->setChunkLength(B(MIN_ETHERNET_FRAME_BYTES));
+                if (frame->getChunkLength() < MIN_ETHERNET_FRAME_BYTES)   //FIXME KLUDGE, unnecessary padding
+                    frame->setChunkLength(MIN_ETHERNET_FRAME_BYTES);
 
                 packet->insertAtBack(frame);
 
@@ -659,8 +659,8 @@ void Rstp::sendBPDU(int interfaceId)
         frame->setHelloTime(helloTime);
         frame->setForwardDelay(forwardDelay);
 
-        if (frame->getChunkLength() < B(MIN_ETHERNET_FRAME_BYTES))   //FIXME KLUDGE, unnecessary padding
-            frame->setChunkLength(B(MIN_ETHERNET_FRAME_BYTES));
+        if (frame->getChunkLength() < MIN_ETHERNET_FRAME_BYTES)   //FIXME KLUDGE, unnecessary padding
+            frame->setChunkLength(MIN_ETHERNET_FRAME_BYTES);
 
         packet->insertAtBack(frame);
 

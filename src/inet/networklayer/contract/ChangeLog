@@ -1,5 +1,34 @@
 ====== inet-4.x ======
 
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-18  Zoltan Bojthe
+
+	Added bool isFragment() function to NetworkHeaderBase.
+
+2018-06-01  Zoltan Bojthe
+
+	Added B/b units to length constants and length fields of chunks.
+
+2018-05-09  Zoltan Bojthe
+
+	Implemented bind() and connect() with L3Socket.
+
+2018-05-09  Levente Mészáros
+
+	Extended INetworkSockets and implementations with local/remote address filter.
+
+2018-05-07  Levente Mészáros
+
+	Changed L3Socket to implement the new INetworkSocket interface.
+	Added a new INetworkSocket interface.
+
+2018-04-25  Zoltan Bojthe
+
+	Implemented ISocket with L3Socket.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
 2017-12-22  ------ inet-3.99.2 released ------
 
 2017-12-20  Zoltan Bojthe

@@ -1,5 +1,21 @@
 ====== inet-4.x ======
 
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-13  Levente Mészáros
+
+	Removed obsolete packet printers.
+
+2018-03-14  Zoltan Bojthe
+
+	Refactored PacketPrinter::isEnabledInfo().
+
+2018-03-09  Zoltan Bojthe
+
+	Change PacketPrinter to use Protocol layer info.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
 2018-03-07  Levente Mészáros
 
 	Adapted PacketPrinter to the new ProtocolPrinter interface.

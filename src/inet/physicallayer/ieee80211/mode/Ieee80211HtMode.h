@@ -153,7 +153,6 @@ class INET_API Ieee80211HtPreambleMode : public IIeee80211PreambleMode, public I
         virtual const Ieee80211HtSignalMode *getSignalMode() const { return highThroughputSignalMode; }
         virtual const Ieee80211OfdmSignalMode *getLegacySignalMode() const { return legacySignalMode; }
         virtual const Ieee80211HtSignalMode* getHighThroughputSignalMode() const { return highThroughputSignalMode; }
-        virtual inline unsigned int getNumberOfHTLongTrainings() const { return numberOfHTLongTrainings; }
 
         virtual const inline simtime_t getDoubleGIDuration() const { return 2 * getGIDuration(); } // GI2
         virtual const inline simtime_t getLSIGDuration() const { return getSymbolInterval(); } // L-SIG
@@ -163,7 +162,7 @@ class INET_API Ieee80211HtPreambleMode : public IIeee80211PreambleMode, public I
         virtual const inline simtime_t getHTShortTrainingFieldDuration() const { return 4E-6; } // HT-STF
         virtual const simtime_t getFirstHTLongTrainingFieldDuration() const;
         virtual const inline simtime_t getSecondAndSubsequentHTLongTrainingFielDuration() const { return 4E-6; } // HT-LTFs, s = 2,3,..,n
-        virtual const inline unsigned int getNumberOfHtLongTrainings() const { return numberOfHTLongTrainings; }
+        virtual inline unsigned int getNumberOfHtLongTrainings() const { return numberOfHTLongTrainings; }
 
         virtual const simtime_t getDuration() const override;
 

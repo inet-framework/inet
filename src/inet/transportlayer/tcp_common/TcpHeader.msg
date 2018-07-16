@@ -19,28 +19,24 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
-import inet.transportlayer.common.CRC;
+import inet.transportlayer.common.CrcMode;
 import inet.transportlayer.contract.TransportHeaderBase;
-
-cplusplus {{
-#include <iostream>
-
-namespace inet {
-namespace tcp {
-class Sack;
-class TcpOption;
-}
-}
-
-}}
 
 namespace inet::tcp;
 
+cplusplus {{
+const B TCP_MIN_HEADER_LENGTH = B(20);  // default TCP header length: 20 bytes without options
+const B TCP_MAX_HEADER_LENGTH = B(60);  // maximum TCP header length (base + options): 60 = 15 * 4 bytes
+
+const B TCP_OPTIONS_MAX_SIZE     = B(40);  // 40 bytes, 15 * 4 bytes (15 is the largest number in 4 bits length data offset field), TCP_MAX_HEADER_OCTETS - TCP_HEADER_OCTETS = 40
+const B TCP_OPTION_HEAD_SIZE = B(2);       // 2 bytes, type and length
+const B TCP_OPTION_SACK_MIN_SIZE = B(10);  // 10 bytes, option length = 8 * n + 2 bytes (NOP)
+const B TCP_OPTION_SACK_ENTRY_SIZE = B(8); // sack entry size
+const B TCP_OPTION_TS_SIZE       = B(12);  // 12 bytes, option length = 10 bytes + 2 bytes (NOP)
+
+}}
+
 enum TcpConstants {
-    // default TCP header length: 20 bytes without options
-    TCP_HEADER_OCTETS = 20;
-    // maximum TCP header length (base + options): 60 = 4 * 15 bytes
-    TCP_MAX_HEADER_OCTETS = 60;
     // maximum allowed sack entry number, if no other options are used
     TCP_MAX_SACK_ENTRIES = 4;
 }
@@ -188,7 +184,7 @@ class TcpOptionUnknown extends TcpOption
 //
 class TcpHeader extends TransportHeaderBase
 {
-    chunkLength = B(TCP_HEADER_OCTETS);
+    chunkLength = TCP_MIN_HEADER_LENGTH;
 
     // Source Port
     unsigned short srcPort;
@@ -209,7 +205,7 @@ class TcpHeader extends TransportHeaderBase
 
     // TCP Header Length - default: 20 bytes
     // if header options are used the headerLength is greater than 20 bytes (default)
-    unsigned short headerLength = TCP_HEADER_OCTETS; // TCP_HEADER_OCTETS = 20
+    B headerLength = TCP_MIN_HEADER_LENGTH; // TCP_MIN_HEADER_LENGTH = 20 bytes
 
     bool urgBit; // URG: urgent pointer field significant if set
     bool ackBit; // ACK: ackNo significant if set
@@ -231,7 +227,7 @@ class TcpHeader extends TransportHeaderBase
     unsigned short urgentPointer;
 
     uint16_t crc = 0;
-    CrcMode crcMode;
+    CrcMode crcMode = CRC_MODE_UNDEFINED;
 
     // Header options (optional)
     // Currently only EOL, NOP, MSS, WS, SACK_PERMITTED, SACK and TS are implemented
@@ -249,7 +245,7 @@ cplusplus(TcpHeader) {{
     uint32_t getSynFinLen() const { return (finBit ? 1 : 0) + (synBit ? 1 : 0); }
 
     /** Calculate Length of TCP Options Array in bytes */
-    virtual unsigned short getHeaderOptionArrayLength();
+    virtual B getHeaderOptionArrayLength();
 
     /** Drops all TCP options of the TCP segment */
     virtual void dropHeaderOptions();

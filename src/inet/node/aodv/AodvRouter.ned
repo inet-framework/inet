@@ -41,7 +41,7 @@ module AodvRouter extends AdhocHost
 {
     submodules:
         aodv: Aodv {
-            @display("p=700,300");
+            @display("p=825,226");
         }
     connections:
         aodv.ipOut --> tn.in++;

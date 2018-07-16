@@ -17,7 +17,7 @@ endif
 #
 # TCP implementaion using the Network Simulation Cradle (TCP_NSC feature)
 #
-WITH_TCP_NSC := $(shell (cd .. && ./inet_featuretool -q isenabled TCP_NSC && echo enabled) )
+WITH_TCP_NSC := $(shell (cd .. && ./bin/inet_featuretool -q isenabled TCP_NSC && echo enabled) )
 ifeq ($(WITH_TCP_NSC), enabled)
   NSC_VERSION= $(shell ls -d ../3rdparty/nsc* 2>/dev/null | sed 's/^.*-//')
   ifneq ($(NSC_VERSION),)
@@ -31,7 +31,7 @@ endif
 #
 # TCP implementation using the lwIP stack
 #
-WITH_TCP_LWIP := $(shell (cd .. && ./inet_featuretool -q isenabled TCP_lwIP && echo enabled) )
+WITH_TCP_LWIP := $(shell (cd .. && ./bin/inet_featuretool -q isenabled TCP_lwIP && echo enabled) )
 ifeq ($(WITH_TCP_LWIP), enabled)
   INCLUDE_PATH += -Iinet/transportlayer/tcp_lwip/lwip/include -Iinet/transportlayer/tcp_lwip/lwip/include/ipv4 -Iinet/transportlayer/tcp_lwip/lwip/include/ipv6
 endif
@@ -50,7 +50,7 @@ endif
 #
 # VoipStream feature:
 #
-WITH_VOIPSTREAM := $(shell (cd .. && ./inet_featuretool -q isenabled VoIPStream && echo enabled) )
+WITH_VOIPSTREAM := $(shell (cd .. && ./bin/inet_featuretool -q isenabled VoIPStream && echo enabled) )
 ifeq ($(WITH_VOIPSTREAM), enabled)
   ifeq ($(HAVE_PKGCFG), yes)
     HAVE_FFMPEG := $(shell $(PKGCFG) --exists libavcodec libavformat libavutil && echo yes || echo no)
@@ -69,7 +69,7 @@ endif
 #
 # visualization feature requires (optionally) some extra osg and osgEarth libraries
 #
-WITH_VISUALIZERS := $(shell (cd .. && ./inet_featuretool -q isenabled visualization && echo enabled) )
+WITH_VISUALIZERS := $(shell (cd .. && ./bin/inet_featuretool -q isenabled visualization && echo enabled) )
 ifeq ($(WITH_VISUALIZERS), enabled)
   ifeq ($(WITH_OSGEARTH), yes)
       OMNETPP_LIBS += -lOpenThreads -losg -losgText -losgDB -losgEarth -losgEarthUtil

@@ -18,7 +18,7 @@
 
 #include "inet/common/Protocol.h"
 #include "inet/networklayer/contract/INetfilter.h"
-#include "inet/transportlayer/common/CRC_m.h"
+#include "inet/transportlayer/common/CrcMode_m.h"
 #include "inet/transportlayer/tcp_common/TcpCrcInsertionHook.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 
@@ -28,7 +28,7 @@ namespace inet {
 namespace tcp {
 
 class TcpCrcInsertion : public NetfilterBase::HookBase {
-    CrcMode crcMode = static_cast<CrcMode>(-1);
+    CrcMode crcMode = CRC_MODE_UNDEFINED;
   public:
     TcpCrcInsertion() {}
     void setCrcMode(CrcMode crcModeP) { crcMode = crcModeP; }

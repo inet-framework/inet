@@ -38,11 +38,11 @@ const double EtherMacBase::SPEED_OF_LIGHT_IN_CABLE = 200000000.0;
 const EtherMacBase::EtherDescr EtherMacBase::nullEtherDescr = {
     0.0,
     0.0,
+    B(0),
     0,
-    0,
-    0,
-    0,
-    0,
+    B(0),
+    B(0),
+    B(0),
     0.0,
     0.0
 };
@@ -53,7 +53,7 @@ const EtherMacBase::EtherDescr EtherMacBase::etherDescrs[NUM_OF_ETHERDESCRS] = {
         0.5 / ETHERNET_TXRATE,
         MIN_ETHERNET_FRAME_BYTES,
         0,
-        0,
+        B(0),
         MIN_ETHERNET_FRAME_BYTES,
         MIN_ETHERNET_FRAME_BYTES,
         512 / ETHERNET_TXRATE,
@@ -64,7 +64,7 @@ const EtherMacBase::EtherDescr EtherMacBase::etherDescrs[NUM_OF_ETHERDESCRS] = {
         0.5 / FAST_ETHERNET_TXRATE,
         MIN_ETHERNET_FRAME_BYTES,
         0,
-        0,
+        B(0),
         MIN_ETHERNET_FRAME_BYTES,
         MIN_ETHERNET_FRAME_BYTES,
         512 / FAST_ETHERNET_TXRATE,
@@ -86,9 +86,9 @@ const EtherMacBase::EtherDescr EtherMacBase::etherDescrs[NUM_OF_ETHERDESCRS] = {
         0.5 / FAST_GIGABIT_ETHERNET_TXRATE,
         MIN_ETHERNET_FRAME_BYTES,
         0,
-        0,
-        -1,    // half-duplex is not supported
-        0,
+        B(0),
+        B(-1),    // half-duplex is not supported
+        B(0),
         0.0,
         0.0
     },
@@ -97,9 +97,9 @@ const EtherMacBase::EtherDescr EtherMacBase::etherDescrs[NUM_OF_ETHERDESCRS] = {
         0.5 / FOURTY_GIGABIT_ETHERNET_TXRATE,
         MIN_ETHERNET_FRAME_BYTES,
         0,
-        0,
-        -1,    // half-duplex is not supported
-        0,
+        B(0),
+        B(-1),    // half-duplex is not supported
+        B(0),
         0.0,
         0.0
     },
@@ -108,9 +108,9 @@ const EtherMacBase::EtherDescr EtherMacBase::etherDescrs[NUM_OF_ETHERDESCRS] = {
         0.5 / HUNDRED_GIGABIT_ETHERNET_TXRATE,
         MIN_ETHERNET_FRAME_BYTES,
         0,
-        0,
-        -1,    // half-duplex is not supported
-        0,
+        B(0),
+        B(-1),    // half-duplex is not supported
+        B(0),
         0.0,
         0.0
     },
@@ -119,9 +119,9 @@ const EtherMacBase::EtherDescr EtherMacBase::etherDescrs[NUM_OF_ETHERDESCRS] = {
         0.5 / TWOHUNDRED_GIGABIT_ETHERNET_TXRATE,
         MIN_ETHERNET_FRAME_BYTES,
         0,
-        0,
-        -1,    // half-duplex is not supported
-        0,
+        B(0),
+        B(-1),    // half-duplex is not supported
+        B(0),
         0.0,
         0.0
     },
@@ -130,9 +130,9 @@ const EtherMacBase::EtherDescr EtherMacBase::etherDescrs[NUM_OF_ETHERDESCRS] = {
         0.5 / FOURHUNDRED_GIGABIT_ETHERNET_TXRATE,
         MIN_ETHERNET_FRAME_BYTES,
         0,
-        0,
-        -1,    // half-duplex is not supported
-        0,
+        B(0),
+        B(-1),    // half-duplex is not supported
+        B(0),
         0.0,
         0.0
     }

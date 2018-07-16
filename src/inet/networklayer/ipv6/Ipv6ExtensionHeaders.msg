@@ -18,6 +18,7 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.Units;
 import inet.common.TlvOptions;
 import inet.networklayer.common.IpProtocolId;
 import inet.networklayer.ipv6.Ipv6Header;
@@ -29,9 +30,9 @@ cplusplus {{
 
 namespace inet;
 
-enum Ipv6ExtensionConstants {
-	IPv6_FRAGMENT_HEADER_LENGTH = 8;
-}
+cplusplus {{
+const B IPv6_FRAGMENT_HEADER_LENGTH = B(8);
+}}
 
 //
 // Ipv6 TLV option types
@@ -64,7 +65,7 @@ class Ipv6HopByHopOptionsHeader extends Ipv6ExtensionHeader
 class Ipv6RoutingHeader extends Ipv6ExtensionHeader
 {
     extensionType = IP_PROT_IPv6EXT_ROUTING;
-    byteLength = 8;
+    byteLength = B(8);
     //byteLength = 8+16*getAddressArraySize() when routingType == 0
     uint8 routingType;
     uint8 segmentsLeft;
@@ -93,7 +94,7 @@ class Ipv6FragmentHeader extends Ipv6ExtensionHeader
 class Ipv6DestinationOptionsHeader extends Ipv6ExtensionHeader
 {
     extensionType = IP_PROT_IPv6EXT_DEST;
-    byteLength = 8;    // utils::roundUp(2 + tlvOptions.getLength(), 8);
+    byteLength = B(8);    // utils::roundUp(2 + tlvOptions.getLength(), 8);
     TlvOptions tlvOptions;
 }
 
@@ -105,7 +106,7 @@ class Ipv6DestinationOptionsHeader extends Ipv6ExtensionHeader
 class Ipv6AuthenticationHeader extends Ipv6ExtensionHeader
 {
     extensionType = IP_PROT_IPv6EXT_AUTH;
-    byteLength = 8; // FIXME verify
+    byteLength = B(8); // FIXME verify
 }
 
 //
@@ -116,5 +117,5 @@ class Ipv6AuthenticationHeader extends Ipv6ExtensionHeader
 class Ipv6EncapsulatingSecurityPayloadHeader extends Ipv6ExtensionHeader
 {
     extensionType = IP_PROT_IPv6EXT_ESP;
-    byteLength = 8; // FIXME verify
+    byteLength = B(8); // FIXME verify
 }

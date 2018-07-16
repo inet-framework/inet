@@ -113,7 +113,7 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
     bool sackWasReceived = false;
     for (uint32 i = 0; i < numberOfChunks; i++) {
        // SctpChunk *header = (SctpChunk *)(sctpmsg->getSctpChunks(0));
-        SctpChunk *header = sctpmsg->getFirstChunk();
+        SctpChunk *header = sctpmsg->removeFirstChunk();
         const uint8 type = header->getSctpChunkType();
         EV_DEBUG << "Header length: " << header->getByteLength() << endl;
 
@@ -2255,6 +2255,12 @@ SctpEventCode SctpAssociation::processDataArrived(SctpDataChunk *dataChunk)
                 putInDeliveryQ(dataChunk->getSid());
                 if (simTime() > state->lastThroughputTime + 1) {
                     for (uint16 i = 0; i < inboundStreams; i++) {
+                        if (streamThroughputVectors.find(i) == streamThroughputVectors.end()) {
+                            char vectorName[128];
+                            snprintf(vectorName, sizeof(vectorName), "Stream %d Throughput", i);
+                            streamThroughputVectors[i] = new cOutVector(vectorName);
+                        }
+
                         streamThroughputVectors[i]->record(state->streamThroughput[i]
                                 / (simTime() - state->lastThroughputTime) / 1024);
                         state->streamThroughput[i] = 0;

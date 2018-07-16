@@ -37,6 +37,7 @@ class INET_API NetworkHeaderBase : public FieldsChunk
     virtual void setDestinationAddress(const L3Address& address) = 0;
     virtual const Protocol *getProtocol() const = 0;
     virtual void setProtocol(const Protocol *protocol) = 0;
+    virtual bool isFragment() const = 0;
 };
 
 } // namespace inet

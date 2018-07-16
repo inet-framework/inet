@@ -46,6 +46,7 @@ class INET_API CanvasProjection
     void setTranslation(const cFigure::Point& translation) { this->translation = translation; }
 
     cFigure::Point computeCanvasPoint(const Coord& point) const;
+    Coord computeCanvasPointInverse(const cFigure::Point& point, double offset) const;
 
     static const CanvasProjection *getCanvasProjection(const cCanvas *canvas);
     static void setCanvasProjection(const cCanvas *canvas, const CanvasProjection *canvasProjection);

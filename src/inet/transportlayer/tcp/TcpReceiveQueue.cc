@@ -54,8 +54,8 @@ std::string TcpReceiveQueue::str() const
 
 uint32_t TcpReceiveQueue::insertBytesFromSegment(Packet *packet, const Ptr<const TcpHeader>& tcpseg)
 {
-    int64_t tcpHeaderLength = tcpseg->getHeaderLength();
-    int64_t tcpPayloadLength = packet->getByteLength() - tcpHeaderLength;
+    B tcpHeaderLength = tcpseg->getHeaderLength();
+    B tcpPayloadLength = packet->getDataLength() - tcpHeaderLength;
     uint32_t seq = tcpseg->getSequenceNo();
     uint32_t offs = 0;
     uint32_t buffSeq = offsetToSeq(reorderBuffer.getExpectedOffset());
@@ -65,7 +65,7 @@ uint32_t TcpReceiveQueue::insertBytesFromSegment(Packet *packet, const Ptr<const
         uint32_t ob = offsetToSeq(reorderBuffer.getRegionStartOffset(0));
         uint32_t oe = offsetToSeq(reorderBuffer.getRegionEndOffset(reorderBuffer.getNumRegions()-1));
         uint32_t nb = seq;
-        uint32_t ne = seq + tcpPayloadLength;
+        uint32_t ne = seq + tcpPayloadLength.get();
         uint32_t minb = seqMin(ob, nb);
         uint32_t maxe = seqMax(oe, ne);
         if (seqGE(minb, oe) || seqGE(minb, ne) || seqGE(ob, maxe) || seqGE(nb, maxe))
@@ -77,9 +77,9 @@ uint32_t TcpReceiveQueue::insertBytesFromSegment(Packet *packet, const Ptr<const
     if (seqLess(seq, buffSeq)) {
         offs = buffSeq - seq;
         seq = buffSeq;
-        tcpPayloadLength -= offs;
+        tcpPayloadLength -= B(offs);
     }
-    const auto& payload = packet->peekDataAt(B(tcpHeaderLength + offs), B(tcpPayloadLength));
+    const auto& payload = packet->peekDataAt(tcpHeaderLength + B(offs), tcpPayloadLength);
     reorderBuffer.replace(seqToOffset(seq), payload);
 
     if (seqGE(rcv_nxt, offsetToSeq(reorderBuffer.getRegionStartOffset(0))))

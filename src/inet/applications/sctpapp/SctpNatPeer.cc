@@ -15,19 +15,19 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/applications/sctpapp/SctpNatPeer.h"
-#include "inet/transportlayer/contract/sctp/SctpSocket.h"
-#include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
-//#include "inet/transportlayer/sctp/SctpMessage_m.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include "inet/transportlayer/sctp/SctpAssociation.h"
-#include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/common/lifecycle/NodeStatus.h"
+
 #include "inet/applications/common/SocketTag_m.h"
+#include "inet/applications/sctpapp/SctpNatPeer.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/TimeTag_m.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Message.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
+#include "inet/transportlayer/contract/sctp/SctpSocket.h"
+#include "inet/transportlayer/sctp/SctpAssociation.h"
 
 namespace inet {
 
@@ -138,6 +138,7 @@ void SctpNatPeer::generateAndSend()
     for (int i = 0; i < numBytes; i++)
         vec[i] = (bytesSent + i) & 0xFF;
     applicationData->setBytes(vec);
+    applicationData->addTag<CreationTimeTag>()->setCreationTime(simTime());
     applicationPacket->insertAtBack(applicationData);
     auto sctpSendReq = applicationPacket->addTagIfAbsent<SctpSendReq>();
     sctpSendReq->setLast(true);
@@ -146,8 +147,6 @@ void SctpNatPeer::generateAndSend()
     lastStream = (lastStream + 1) % outboundStreams;
     sctpSendReq->setSid(lastStream);
     sctpSendReq->setSocketId(serverAssocId);
-    auto creationTimeTag = applicationPacket->addTagIfAbsent<CreationTimeTag>();
-    creationTimeTag->setCreationTime(simTime());
     applicationPacket->setKind(ordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);
     auto& tags = getTags(applicationPacket);
     tags.addTagIfAbsent<SocketReq>()->setSocketId(serverAssocId);
@@ -374,7 +373,7 @@ void SctpNatPeer::handleMessage(cMessage *msg)
                 SctpRcvReq *ind = tags.findTag<SctpRcvReq>();
                 id = ind->getSocketId();
                 if (rendezvous) {
-                    const auto& smsg = staticPtrCast<const BytesChunk>(message->peekData());
+                    const auto& smsg = message->peekDataAsBytes();
                     int bufferlen = B(smsg->getChunkLength()).get();
                     uint8_t buffer[bufferlen];
                     std::vector<uint8_t> vec = smsg->getBytes();
@@ -682,9 +681,8 @@ void SctpNatPeer::sendRequest(bool last)
     for (int i = 0; i < numBytes; i++)
         vec[i] = (bytesSent + i) & 0xFF;
     msg->setBytes(vec);
+    msg->addTag<CreationTimeTag>()->setCreationTime(simTime());
     cmsg->insertAtBack(msg);
-    auto creationTimeTag = cmsg->addTagIfAbsent<CreationTimeTag>();
-    creationTimeTag->setCreationTime(simTime());
     cmsg->setKind(ordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);
     auto sendCommand = cmsg->addTagIfAbsent<SctpSendReq>();
     sendCommand->setLast(true);
@@ -721,6 +719,7 @@ void SctpNatPeer::socketEstablished(SctpSocket *socket, unsigned long int buffer
         }
 
         auto applicationData = makeShared<BytesChunk>(buffer, buflen);
+        applicationData->addTag<CreationTimeTag>()->setCreationTime(simTime());
         auto applicationPacket = new Packet("ApplicationPacket");
         applicationPacket->insertAtBack(applicationData);
         auto sctpSendReq = applicationPacket->addTagIfAbsent<SctpSendReq>();
@@ -728,8 +727,6 @@ void SctpNatPeer::socketEstablished(SctpSocket *socket, unsigned long int buffer
         sctpSendReq->setPrMethod(0);
         sctpSendReq->setPrValue(0);
         sctpSendReq->setSid(0);
-        auto creationTimeTag = applicationPacket->addTagIfAbsent<CreationTimeTag>();
-        creationTimeTag->setCreationTime(simTime());
         applicationPacket->setKind(SCTP_C_SEND_ORDERED);
         clientSocket.send(applicationPacket);
 
@@ -833,12 +830,10 @@ void SctpNatPeer::socketDataArrived(SctpSocket *socket, Packet *msg, bool)
     bytesRcvd += msg->getByteLength();
 
     if (echo) {
-        const auto& smsg = staticPtrCast<const BytesChunk>(msg->peekData());
-        auto creationTimeTag = msg->findTag<CreationTimeTag>();
-        creationTimeTag->setCreationTime(simTime());
+        const auto& smsg = msg->peekData();
         auto cmsg = new Packet("ApplicationPacket");
         cmsg->insertAtBack(smsg);
-        auto cmd = cmsg->addTagIfAbsent<SctpSendReq>();
+        auto cmd = cmsg->addTag<SctpSendReq>();
         cmd->setLast(true);
         cmd->setSocketId(ind->getSocketId());
         cmd->setPrValue(0);
@@ -892,7 +887,7 @@ void SctpNatPeer::addressAddedArrived(SctpSocket *socket, L3Address localAddr, L
         nat->portPeer1 = par("localPort");
         nat->portPeer2 = 0;
         nat->numAddrPeer1 = 2;
-        nat->numAddrPeer1 = 2;
+        nat->numAddrPeer2 = 2;
         bool mul = par("multi");
         if (mul == true) {
             nat->multi = 1;
@@ -906,6 +901,7 @@ void SctpNatPeer::addressAddedArrived(SctpSocket *socket, L3Address localAddr, L
         buflen = ADD_PADDING(buflen + 4 * (nat->numAddrPeer1 + nat->numAddrPeer2));
 
         auto applicationData = makeShared<BytesChunk>(buffer, buflen);
+        applicationData->addTag<CreationTimeTag>()->setCreationTime(simTime());
         auto applicationPacket = new Packet("ApplicationPacket");
         applicationPacket->insertAtBack(applicationData);
         auto sctpSendReq = applicationPacket->addTagIfAbsent<SctpSendReq>();
@@ -913,8 +909,6 @@ void SctpNatPeer::addressAddedArrived(SctpSocket *socket, L3Address localAddr, L
         sctpSendReq->setPrMethod(0);
         sctpSendReq->setPrValue(0);
         sctpSendReq->setSid(0);
-        auto creationTimeTag = applicationPacket->addTagIfAbsent<CreationTimeTag>();
-        creationTimeTag->setCreationTime(simTime());
         applicationPacket->setKind(SCTP_C_SEND_ORDERED);
         clientSocket.send(applicationPacket);
     }

@@ -23,15 +23,15 @@ network UDPBurst
         }
         sink: StandardHost {
             parameters:
-                @display("p=178,247;i=device/pc2");
+                @display("p=250,300;i=device/pc2");
         }
         router: Router {
             parameters:
-                @display("p=178,153");
+                @display("p=250,200");
         }
         configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=62,119");
+                @display("p=100,100;is=s");
         }
     connections:
         for i=0..numhosts-1 {

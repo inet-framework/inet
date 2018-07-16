@@ -18,6 +18,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/XMLUtils.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
@@ -224,7 +225,7 @@ void MultiFieldClassifier::configureFilters(cXMLElement *config)
     for (auto & filterElements_i : filterElements) {
         cXMLElement *filterElement = filterElements_i;
         try {
-            const char *gateAttr = getRequiredAttribute(filterElement, "gate");
+            const char *gateAttr = xmlutils::getMandatoryAttribute(*filterElement, "gate");
             const char *srcAddrAttr = filterElement->getAttribute("srcAddress");
             const char *srcPrefixLengthAttr = filterElement->getAttribute("srcPrefixLength");
             const char *destAddrAttr = filterElement->getAttribute("destAddress");

@@ -19,7 +19,7 @@
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
 import inet.networklayer.contract.ipv4.Ipv4Address;
-import inet.transportlayer.common.CRC;
+import inet.transportlayer.common.CrcMode;
 
 namespace inet;
 
@@ -36,7 +36,7 @@ class IgmpMessage extends FieldsChunk
 {
     IgmpType type;         // 1 byte
     uint16_t crc = 0;                   // 2 bytes
-    CrcMode crcMode;  // 0 bytes, inet only
+    CrcMode crcMode = CRC_MODE_UNDEFINED;  // 0 bytes, inet only
 }
 
 class IgmpQuery extends IgmpMessage

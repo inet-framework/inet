@@ -12,7 +12,7 @@ module GpsrRouter extends AdhocHost
     submodules:
         gpsr: Gpsr {
             parameters:
-                @display("p=700,300");
+                @display("p=825,226");
         }
     connections:
         gpsr.ipOut --> tn.in++;
