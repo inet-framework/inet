@@ -37,7 +37,8 @@ namespace inet {
  * advertises the routes to its neighbors.
  */
 enum RipMode {
-    NO_RIP,    // no RIP messages sent
+    NO_RIP,    // no updates are sent, and the attached network is not advertised
+    PASSIVE,   // no updates are sent, but the attached network is advertised
     NO_SPLIT_HORIZON,    // every route is sent to the neighbor
     SPLIT_HORIZON,    // do not send routes to the neighbor it was learnt from
     SPLIT_HORIZON_POISONED_REVERSE    // send the route to the neighbor it was learnt from with infinite metric (16)
