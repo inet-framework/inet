@@ -56,6 +56,10 @@ std::ostream& operator<<(std::ostream& os, const RipInterfaceEntry& e)
             os << "NoRIP";
             break;
 
+        case PASSIVE:
+            os << "PASSIVE";
+            break;
+
         case NO_SPLIT_HORIZON:
             os << "NoSplitHorizon";
             break;
@@ -236,11 +240,11 @@ void Rip::startRIPRouting()
     socket.bind(ripUdpPort);
 
     for (auto & elem : ripInterfaces)
-        if (elem.mode != NO_RIP)
+        if (elem.mode != NO_RIP && elem.mode != PASSIVE)
             socket.joinMulticastGroup(addressType->getLinkLocalRIPRoutersMulticastAddress(), elem.ie->getInterfaceId());
 
     for (auto & elem : ripInterfaces)
-        if (elem.mode != NO_RIP)
+        if (elem.mode != NO_RIP && elem.mode != PASSIVE)
             sendRIPRequest(elem);
 
     // set update timer
@@ -350,7 +354,7 @@ void Rip::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
             }
             else {
                 RipInterfaceEntry *ripInterfacePtr = findRipInterfaceById(ie->getInterfaceId());
-                if (ripInterfacePtr && ripInterfacePtr->mode != NO_RIP)
+                if (ripInterfacePtr && ripInterfacePtr->mode != NO_RIP && ripInterfacePtr->mode != PASSIVE)
                     sendRIPRequest(*ripInterfacePtr);
             }
         }
@@ -555,6 +559,13 @@ void Rip::processRequest(Packet *packet)
  */
 void Rip::sendRoutes(const L3Address& address, int port, const RipInterfaceEntry& ripInterface, bool changedOnly)
 {
+    if(ripInterface.mode == PASSIVE)
+    {
+        EV_DEBUG << "No update is sent from passive interface " << ripInterface.ie->getFullName() << std::endl;
+        checkExpiredRoutes();
+        return;
+    }
+
     EV_DEBUG << "Sending " << (changedOnly ? "changed" : "all") << " routes on " << ripInterface.ie->getFullName() << std::endl;
 
     int maxEntries = mode == RIPv2 ? 25 : B(B(ripInterface.ie->getMtu()) - IPv6_HEADER_BYTES - UDP_HEADER_LENGTH - RIP_HEADER_SIZE).get() / RIP_RTE_SIZE.get();
@@ -1070,12 +1081,14 @@ void Rip::addRipInterface(const InterfaceEntry *ie, cXMLElement *config)
         const char *ripModeAttr = config->getAttribute("mode");
         RipMode mode = !ripModeAttr ? SPLIT_HORIZON_POISONED_REVERSE :
             strcmp(ripModeAttr, "NoRIP") == 0 ? NO_RIP :
+            strcmp(ripModeAttr, "PASSIVE") == 0 ? PASSIVE :
             strcmp(ripModeAttr, "NoSplitHorizon") == 0 ? NO_SPLIT_HORIZON :
             strcmp(ripModeAttr, "SplitHorizon") == 0 ? SPLIT_HORIZON :
             strcmp(ripModeAttr, "SplitHorizonPoisonedReverse") == 0 ? SPLIT_HORIZON_POISONED_REVERSE :
                     static_cast<RipMode>(-1);
+
         if (mode == static_cast<RipMode>(-1))
-            throw cRuntimeError("RIP: invalid split-horizon-mode attribute in <interface> element at %s: %s",
+            throw cRuntimeError("RIP: invalid mode attribute in <interface> element at %s: %s",
                     config->getSourceLocation(), ripModeAttr);
         ripInterface.mode = mode;
     }
