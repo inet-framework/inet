@@ -43,7 +43,7 @@ class INET_API RealTimeScheduler : public cScheduler
         Entry(int fd, ICallback *callback) : fd(fd), callback(callback) {}
     };
 
-    static int64_t baseTime; // in microseconds, as returned by opp_get_monotonic_clock_usecs()
+    int64_t baseTime; // in microseconds, as returned by opp_get_monotonic_clock_usecs()
 
   protected:
     class BeginSimulationEvent : public cEvent
@@ -59,6 +59,7 @@ class INET_API RealTimeScheduler : public cScheduler
     std::vector<Entry> callbackEntries;
 
   protected:
+    virtual void advanceSimTime();
     virtual bool receiveWithTimeout(long usec);
     virtual int receiveUntil(int64_t targetTime); // in microseconds, as returned by opp_get_monotonic_clock_usecs()
 
@@ -102,11 +103,6 @@ class INET_API RealTimeScheduler : public cScheduler
      * Scheduler function -- it comes from the cScheduler interface.
      */
     virtual void putBackEvent(cEvent *event) override;
-
-    /**
-     * Schedule a message for module at the current real time.
-     */
-    virtual void scheduleMessage(cModule *module, cMessage *msg);
 };
 
 } // namespace inet
