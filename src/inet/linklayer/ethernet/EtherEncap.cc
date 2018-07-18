@@ -212,21 +212,32 @@ const Ptr<const EthernetMacHeader> EtherEncap::decapsulateMacLlcSnap(Packet *pac
 void EtherEncap::processFrameFromMAC(Packet *packet)
 {
     // decapsulate and attach control info
+    totalFromMAC++;
     decapsulateMacLlcSnap(packet);
 
-    auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-    if (protocol)
-        packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
+    auto protocol = packet->findTag<PacketProtocolTag>()->getProtocol();
+    if (upperProtocols.find(protocol) != upperProtocols.end() || (protocol !=nullptr && upperProtocols.find(nullptr) != upperProtocols.end())) {
+        if (protocol)
+            packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
+        else
+            delete packet->removeTagIfPresent<DispatchProtocolReq>();
 
-    EV_DETAIL << "Decapsulating frame `" << packet->getName() << "', passing up contained packet `"
-              << packet->getName() << "' to higher layer\n";
+        EV_DETAIL << "Decapsulating frame `" << packet->getName() << "', passing up contained packet `"
+                  << packet->getName() << "' to higher layer\n";
 
-    totalFromMAC++;
-    emit(decapPkSignal, packet);
+        emit(decapPkSignal, packet);
 
-    // pass up to higher layers.
-    EV_INFO << "Sending " << packet << " to upper layer.\n";
-    send(packet, "upperLayerOut");
+        // pass up to higher layers.
+        EV_INFO << "Sending " << packet << " to upper layer.\n";
+        send(packet, "upperLayerOut");
+    }
+    else {
+        EV_ERROR << "The protocol '" << (protocol ? protocol->getName() : "<NULL>") << "' not connected, discarding packet\n";
+        PacketDropDetails details;
+        details.setReason(NO_PROTOCOL_FOUND);
+        emit(packetDroppedSignal, packet, &details);
+        delete packet;
+    }
 }
 
 void EtherEncap::handleSendPause(cMessage *msg)
@@ -261,6 +272,18 @@ void EtherEncap::handleSendPause(cMessage *msg)
 
     emit(pauseSentSignal, pauseUnits);
     totalPauseSent++;
+}
+
+void EtherEncap::handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)
+{
+    Enter_Method("handleRegisterService");
+}
+
+void EtherEncap::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
+{
+    Enter_Method("handleRegisterProtocol");
+    if (!strcmp("upperLayerIn", in->getBaseName()))
+        upperProtocols.insert(&protocol);
 }
 
 } // namespace inet

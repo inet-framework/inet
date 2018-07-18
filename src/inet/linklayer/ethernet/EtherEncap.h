@@ -18,6 +18,7 @@
 #ifndef __INET_ETHERENCAP_H
 #define __INET_ETHERENCAP_H
 
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/FcsMode_m.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
@@ -29,7 +30,7 @@ namespace inet {
 /**
  * Performs Ethernet II encapsulation/decapsulation. More info in the NED file.
  */
-class INET_API EtherEncap : public Ieee8022Llc
+class INET_API EtherEncap : public Ieee8022Llc, public IProtocolRegistrationListener
 {
   protected:
     FcsMode fcsMode = FCS_MODE_UNDEFINED;
@@ -43,6 +44,7 @@ class INET_API EtherEncap : public Ieee8022Llc
     static simsignal_t decapPkSignal;
     static simsignal_t pauseSentSignal;
     bool useSNAP;    // true: generate EtherFrameWithSNAP, false: generate EthernetIIFrame
+    std::set<const Protocol *> upperProtocols;    // where to send packets after decapsulation
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -57,6 +59,9 @@ class INET_API EtherEncap : public Ieee8022Llc
     virtual void refreshDisplay() const override;
 
     virtual const Ptr<const EthernetMacHeader> decapsulateMacLlcSnap(Packet *packet);
+
+    virtual void handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive) override;
+    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive) override;
 
   public:
     static void addPaddingAndFcs(Packet *packet, FcsMode fcsMode, B requiredMinByteLength = MIN_ETHERNET_FRAME_BYTES);
