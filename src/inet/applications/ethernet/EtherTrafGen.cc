@@ -21,6 +21,7 @@
 
 #include "inet/applications/ethernet/EtherTrafGen.h"
 
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/NodeOperations.h"
@@ -76,6 +77,9 @@ void EtherTrafGen::initialize(int stage)
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         if (isGenerator())
             timerMsg = new cMessage("generateNextPacket");
+
+        Protocol *protocol = nullptr;
+        registerProtocol(*protocol, gate("out"), (cGate*)nullptr);
 
         nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         if (isNodeUp() && isGenerator())
