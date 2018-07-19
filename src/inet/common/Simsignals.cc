@@ -95,12 +95,24 @@ simsignal_t packetReceivedFromPeerSignal = cComponent::registerSignal("packetRec
 simsignal_t packetSentSignal = cComponent::registerSignal("packetSent");
 simsignal_t packetReceivedSignal = cComponent::registerSignal("packetReceived");
 
-void printSignalBanner(simsignal_t signalID, const cObject *obj)
+void printSignalBanner(simsignal_t signalID, const cObject *obj, const cObject *details)
 {
     EV << "** Signal at T=" << simTime()
        << " to " << getSimulation()->getContextModule()->getFullPath() << ": "
        << cComponent::getSignalName(signalID) << " "
-       << (obj ? obj->str() : "") << "\n";
+       << (obj ? obj->str() : "") << " "
+       << (details ? details->str() : "")
+       << "\n";
+}
+
+void printSignalBanner(simsignal_t signalID, long value, const cObject *details)
+{
+    EV << "** Signal at T=" << simTime()
+       << " to " << getSimulation()->getContextModule()->getFullPath() << ": "
+       << cComponent::getSignalName(signalID) << " "
+       << value << " "
+       << (details ? details->str() : "")
+       << "\n";
 }
 
 } // namespace inet
