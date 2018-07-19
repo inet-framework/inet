@@ -95,6 +95,7 @@ class INET_API InterfaceTableVisualizerBase : public VisualizerBase, public cLis
     virtual ~InterfaceTableVisualizerBase();
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, long value, cObject *details) override;
 };
 
 } // namespace visualizer

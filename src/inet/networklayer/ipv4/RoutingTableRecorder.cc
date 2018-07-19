@@ -102,7 +102,7 @@ void RoutingTableRecorder::receiveChangeNotification(cComponent *source, simsign
     else if (signalID == interfaceCreatedSignal || signalID == interfaceDeletedSignal)
         recordInterface(host, check_and_cast<const InterfaceEntry *>(obj), signalID);
     else if (signalID == interfaceConfigChangedSignal || signalID == interfaceIpv4ConfigChangedSignal)
-        recordInterface(host, check_and_cast<const InterfaceEntryChangeDetails *>(obj)->getInterfaceEntry(), signalID);
+        recordInterface(host, check_and_cast<InterfaceEntryChangeDetails *>(obj)->getInterfaceEntry(), signalID);
 }
 
 void RoutingTableRecorder::recordSnapshot()
@@ -266,7 +266,7 @@ void RoutingTableRecorder::ensureRoutingLogFileOpen()
     }
 }
 
-void RoutingTableRecorder::receiveChangeNotification(cComponent *nsource, simsignal_t signalID, cObject *obj)
+void RoutingTableRecorder::receiveChangeNotification(cComponent *nsource, simsignal_t signalID, cObject *obj, cObject *details)
 {
     cModule *m = dynamic_cast<cModule *>(nsource);
     if (!m)
@@ -276,8 +276,16 @@ void RoutingTableRecorder::receiveChangeNotification(cComponent *nsource, simsig
         recordRouteChange(host, check_and_cast<const IRoute *>(obj), signalID);
     else if (signalID == interfaceCreatedSignal || signalID == interfaceDeletedSignal)
         recordInterfaceChange(host, check_and_cast<const InterfaceEntry *>(obj), signalID);
-    else if (signalID == interfaceConfigChangedSignal || signalID == interfaceIpv4ConfigChangedSignal)
-        recordInterfaceChange(host, check_and_cast<const InterfaceEntryChangeDetails *>(obj)->getInterfaceEntry(), signalID);
+}
+
+void RoutingTableRecorder::receiveChangeNotification(cComponent *nsource, simsignal_t signalID, long id, cObject *details)
+{
+    cModule *m = dynamic_cast<cModule *>(nsource);
+    if (!m)
+        m = nsource->getParentModule();
+    cModule *host = getContainingNode(m);
+    if (signalID == interfaceConfigChangedSignal || signalID == interfaceIpv4ConfigChangedSignal)
+        recordInterfaceChange(host, check_and_cast<InterfaceEntry *>(details), signalID);
 }
 
 void RoutingTableRecorder::recordInterfaceChange(cModule *host, const InterfaceEntry *ie, simsignal_t signalID)

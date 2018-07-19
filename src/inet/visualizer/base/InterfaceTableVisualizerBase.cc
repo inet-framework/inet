@@ -255,12 +255,18 @@ void InterfaceTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t
             }
         }
     }
-    else if (signal == interfaceConfigChangedSignal || signal == interfaceIpv4ConfigChangedSignal) {
+    else
+        throw cRuntimeError("Unknown signal");
+}
+
+void InterfaceTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, long value, cObject *details)
+{
+    Enter_Method_Silent();
+    if (signal == interfaceConfigChangedSignal || signal == interfaceIpv4ConfigChangedSignal) {
         auto networkNode = getContainingNode(static_cast<cModule *>(source));
-        if (object != nullptr && nodeFilter.matches(networkNode)) {
-            auto interfaceEntryDetails = static_cast<InterfaceEntryChangeDetails *>(object);
-            auto interfaceEntry = interfaceEntryDetails->getInterfaceEntry();
-            auto fieldId = interfaceEntryDetails->getFieldId();
+        if (details != nullptr && nodeFilter.matches(networkNode)) {
+            auto interfaceEntry = check_and_cast<InterfaceEntry *>(details);
+            auto fieldId = value;
             if (fieldId == InterfaceEntry::F_IPV4_DATA
 #ifdef WITH_IPv4
                     || fieldId == Ipv4InterfaceData::F_IP_ADDRESS || fieldId == Ipv4InterfaceData::F_NETMASK

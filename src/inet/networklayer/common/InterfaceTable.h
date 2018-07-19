@@ -91,7 +91,7 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
     virtual void discoverConnectingGates(InterfaceEntry *entry);
 
     // called from InterfaceEntry
-    virtual void interfaceChanged(simsignal_t signalID, const InterfaceEntryChangeDetails *details) override;
+    virtual void interfaceChanged(simsignal_t signalID, int fieldId, InterfaceEntry *ie) override;
 
     // internal
     virtual void invalidateTmpInterfaceList();

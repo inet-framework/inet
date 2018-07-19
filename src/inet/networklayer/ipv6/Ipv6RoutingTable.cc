@@ -189,8 +189,18 @@ void Ipv6RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, c
         const InterfaceEntry *entry = check_and_cast<const InterfaceEntry *>(obj);
         deleteInterfaceRoutes(entry);
     }
-    else if (signalID == interfaceStateChangedSignal) {
-        const InterfaceEntry *interfaceEntry = check_and_cast<const InterfaceEntryChangeDetails*>(obj)->getInterfaceEntry();
+}
+
+void Ipv6RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
+{
+    if (getSimulation()->getContextType() == CTX_INITIALIZE)
+        return; // ignore notifications during initialize
+
+    Enter_Method_Silent();
+    printSignalBanner(signalID, value, details);
+
+    if (signalID == interfaceStateChangedSignal) {
+        const InterfaceEntry *interfaceEntry = check_and_cast<InterfaceEntry*>(details);
         int interfaceEntryId = interfaceEntry->getInterfaceId();
 
         // an interface went down

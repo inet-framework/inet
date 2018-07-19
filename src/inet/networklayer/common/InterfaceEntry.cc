@@ -45,7 +45,6 @@
 
 namespace inet {
 
-Register_Abstract_Class(InterfaceEntryChangeDetails);
 Define_Module(InterfaceEntry);
 
 void InterfaceProtocolData::changed(simsignal_t signalID, int fieldId)
@@ -53,18 +52,6 @@ void InterfaceProtocolData::changed(simsignal_t signalID, int fieldId)
     // notify the containing InterfaceEntry that something changed
     if (ownerp)
         ownerp->changed(signalID, fieldId);
-}
-
-std::string InterfaceEntryChangeDetails::str() const
-{
-    return ie->str();
-}
-
-std::string InterfaceEntryChangeDetails::detailedInfo() const
-{
-    std::stringstream out;
-    out << ie->detailedInfo() << " changed field: " << field << "\n";
-    return out.str();
 }
 
 InterfaceEntry::InterfaceEntry()
@@ -176,9 +163,9 @@ std::string InterfaceEntry::getInterfaceFullPath() const
 void InterfaceEntry::changed(simsignal_t signalID, int fieldId)
 {
     if (ownerp) {
-        InterfaceEntryChangeDetails details(this, fieldId);
-        ownerp->interfaceChanged(signalID, &details);
+        ownerp->interfaceChanged(signalID, fieldId, this);
     }
+    //emit(signalID, fieldId, this);
 }
 
 void InterfaceEntry::resetInterface()

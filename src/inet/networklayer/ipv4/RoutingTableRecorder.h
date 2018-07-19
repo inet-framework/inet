@@ -95,7 +95,8 @@ class INET_API RoutingTableRecorder : public cSimpleModule, public cListener
     RoutingTableRecorder();
     virtual ~RoutingTableRecorder();
 
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override { receiveChangeNotification(source, signalID, obj); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override { receiveChangeNotification(source, signalID, obj, details); }
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override { receiveChangeNotification(source, signalID, value, details); }
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -104,7 +105,8 @@ class INET_API RoutingTableRecorder : public cSimpleModule, public cListener
     virtual void finish() override;
     virtual void hookListeners();
     virtual void ensureRoutingLogFileOpen();
-    virtual void receiveChangeNotification(cComponent *source, simsignal_t signalID, cObject *details);
+    virtual void receiveChangeNotification(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details);
+    virtual void receiveChangeNotification(cComponent *source, simsignal_t signalID, long i, cObject *details);
     virtual void recordInterfaceChange(cModule *host, const InterfaceEntry *ie, simsignal_t signalID);
     virtual void recordRouteChange(cModule *host, const IRoute *route, simsignal_t signalID);
 };

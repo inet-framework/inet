@@ -177,7 +177,17 @@ void Ipv4RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, c
     else if (signalID == interfaceStateChangedSignal) {
         invalidateCache();
     }
-    else if (signalID == interfaceConfigChangedSignal) {
+}
+
+void Ipv4RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
+{
+    if (getSimulation()->getContextType() == CTX_INITIALIZE)
+        return; // ignore notifications during initialize
+
+    Enter_Method_Silent();
+    printSignalBanner(signalID, value, details);
+
+    if (signalID == interfaceConfigChangedSignal) {
         invalidateCache();
     }
     else if (signalID == interfaceIpv4ConfigChangedSignal) {

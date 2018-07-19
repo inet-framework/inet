@@ -328,7 +328,6 @@ void Rip::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
     Enter_Method_Silent("Rip::receiveChangeNotification(%s)", cComponent::getSignalName(signalID));
 
     const InterfaceEntry *ie;
-    const InterfaceEntryChangeDetails *change;
 
     if (signalID == interfaceCreatedSignal) {
         // configure interface for RIP
@@ -344,22 +343,6 @@ void Rip::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
         // delete interfaces and routes referencing the deleted interface
         ie = check_and_cast<const InterfaceEntry *>(obj);
         deleteRipInterface(ie);
-    }
-    else if (signalID == interfaceStateChangedSignal) {
-        change = check_and_cast<const InterfaceEntryChangeDetails *>(obj);
-        if (change->getFieldId() == InterfaceEntry::F_CARRIER || change->getFieldId() == InterfaceEntry::F_STATE) {
-            ie = change->getInterfaceEntry();
-            if (!ie->isUp()) {
-                for (auto & elem : ripRoutes)
-                    if ((elem)->getInterface() == ie)
-                        invalidateRoute(elem);
-            }
-            else {
-                RipInterfaceEntry *ripInterfacePtr = findRipInterfaceById(ie->getInterfaceId());
-                if (ripInterfacePtr && ripInterfacePtr->mode != NO_RIP && ripInterfacePtr->mode != PASSIVE)
-                    sendRIPRequest(*ripInterfacePtr);
-            }
-        }
     }
     else if (signalID == routeDeletedSignal) {
         // remove references to the deleted route and invalidate the RIP route
@@ -420,6 +403,31 @@ void Rip::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
                     ripRoute->setChanged(true);
                     triggerUpdate();
                 }
+            }
+        }
+    }
+    else
+        throw cRuntimeError("Unexpected signal: %s", getSignalName(signalID));
+}
+
+void Rip::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
+{
+    Enter_Method_Silent("Rip::receiveChangeNotification(%s)", cComponent::getSignalName(signalID));
+
+    const InterfaceEntry *ie;
+
+    if (signalID == interfaceStateChangedSignal) {
+        ie = check_and_cast<InterfaceEntry *>(details);
+        if (value == InterfaceEntry::F_CARRIER || value == InterfaceEntry::F_STATE) {
+            if (!ie->isUp()) {
+                for (auto & elem : ripRoutes)
+                    if ((elem)->getInterface() == ie)
+                        invalidateRoute(elem);
+            }
+            else {
+                RipInterfaceEntry *ripInterfacePtr = findRipInterfaceById(ie->getInterfaceId());
+                if (ripInterfacePtr && ripInterfacePtr->mode != NO_RIP && ripInterfacePtr->mode != PASSIVE)
+                    sendRIPRequest(*ripInterfacePtr);
             }
         }
     }

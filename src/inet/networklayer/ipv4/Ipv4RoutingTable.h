@@ -168,6 +168,7 @@ class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable
      * occurs to which this client has subscribed.
      */
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
 
   public:
     /**

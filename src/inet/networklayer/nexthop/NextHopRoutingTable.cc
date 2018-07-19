@@ -126,6 +126,11 @@ void NextHopRoutingTable::receiveSignal(cComponent *source, simsignal_t signalID
     // TODO:
 }
 
+void NextHopRoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
+{
+    // TODO:
+}
+
 void NextHopRoutingTable::routeChanged(NextHopRoute *entry, int fieldCode)
 {
     if (fieldCode == IRoute::F_DESTINATION || fieldCode == IRoute::F_PREFIX_LENGTH || fieldCode == IRoute::F_METRIC) {    // our data structures depend on these fields

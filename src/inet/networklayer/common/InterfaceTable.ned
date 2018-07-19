@@ -40,11 +40,11 @@ simple InterfaceTable
         @display("i=block/table");
         @signal[interfaceCreated](type=InterfaceEntry);
         @signal[interfaceDeleted](type=InterfaceEntry);
-        @signal[interfaceStateChanged](type=InterfaceEntryChangeDetails);
-        @signal[interfaceConfigChanged](type=InterfaceEntryChangeDetails);
-        @signal[interfaceIpv4ConfigChanged](type=InterfaceEntryChangeDetails);
-        @signal[interfaceIpv6ConfigChanged](type=InterfaceEntryChangeDetails);
-        @signal[interfaceGnpConfigChanged](type=InterfaceEntryChangeDetails);
+        @signal[interfaceStateChanged](type=long);    //(type=long, details=InterfaceEntry)   //TODO
+        @signal[interfaceConfigChanged](type=long);    //(type=long, details=InterfaceEntry)   //TODO
+        @signal[interfaceIpv4ConfigChanged](type=long);    //(type=long, details=InterfaceEntry)   //TODO
+        @signal[interfaceIpv6ConfigChanged](type=long);    //(type=long, details=InterfaceEntry)   //TODO
+        @signal[interfaceGnpConfigChanged](type=long);    //(type=long, details=InterfaceEntry)   //TODO
         @signal[ipv4MulticastGroupJoined](type=Ipv4MulticastGroupInfo);
         @signal[ipv4MulticastGroupLeft](type=Ipv4MulticastGroupInfo);
         @signal[ipv4McastChange](type=Ipv4MulticastGroupSourceInfo);

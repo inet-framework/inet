@@ -870,13 +870,12 @@ void Rstp::flushOtherPorts(unsigned int portId)
     }
 }
 
-//void Rstp::receiveChangeNotification(int signalID, const cObject *obj)
-void Rstp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+void Rstp::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)
 {
     Enter_Method_Silent();
 
     if (signalID == interfaceStateChangedSignal) {
-        InterfaceEntry *changedIE = check_and_cast<const InterfaceEntryChangeDetails *>(obj)->getInterfaceEntry();
+        InterfaceEntry *changedIE = check_and_cast<InterfaceEntry *>(details);
         for (unsigned int i = 0; i < numPorts; i++) {
             int interfaceId = ifTable->getInterface(i)->getInterfaceId();
             InterfaceEntry *gateIfEntry = getPortInterfaceEntry(interfaceId);

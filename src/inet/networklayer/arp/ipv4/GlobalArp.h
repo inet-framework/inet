@@ -70,7 +70,7 @@ class INET_API GlobalArp : public cSimpleModule, public IArp, public ILifecycle,
     virtual MacAddress resolveL3Address(const L3Address& address, const InterfaceEntry *interfaceEntry) override;
     // @}
 
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details) override;
 
   protected:
     virtual void initialize(int stage) override;

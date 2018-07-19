@@ -77,19 +77,6 @@ class INET_API InterfaceProtocolData : public cObject
     InterfaceEntry *getInterfaceEntry() const { return ownerp; }
 };
 
-class INET_API InterfaceEntryChangeDetails : public cObject
-{
-    InterfaceEntry *ie;
-    int field;
-
-  public:
-    InterfaceEntryChangeDetails(InterfaceEntry *ie, int field) : ie(ie), field(field) { ASSERT(ie); }
-    InterfaceEntry *getInterfaceEntry() const { return ie; }
-    int getFieldId() const { return field; }
-    virtual std::string str() const override;
-    virtual std::string detailedInfo() const override;
-};
-
 /**
  * Interface entry for the interface table in IInterfaceTable.
  *

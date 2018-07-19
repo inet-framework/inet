@@ -300,13 +300,12 @@ L3Address GlobalArp::getL3AddressFor(const MacAddress& macAddress) const
     }
 }
 
-void GlobalArp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+void GlobalArp::receiveSignal(cComponent *source, simsignal_t signalID, long i, cObject *details)
 {
     Enter_Method_Silent();
     // host associated. Link is up. Change the state to init.
     if (signalID == interfaceIpv4ConfigChangedSignal || signalID == interfaceIpv6ConfigChangedSignal) {
-        const InterfaceEntryChangeDetails *iecd = check_and_cast<const InterfaceEntryChangeDetails *>(obj);
-        InterfaceEntry *interfaceEntry = iecd->getInterfaceEntry();
+        InterfaceEntry *interfaceEntry = check_and_cast<InterfaceEntry *>(details);
         if (interfaceEntry->isLoopback())
             return;
         auto it = globalArpCache.begin();

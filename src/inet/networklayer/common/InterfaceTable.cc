@@ -363,10 +363,10 @@ void InterfaceTable::invalidateTmpInterfaceList()
     tmpInterfaceList = nullptr;
 }
 
-void InterfaceTable::interfaceChanged(simsignal_t signalID, const InterfaceEntryChangeDetails *details)
+void InterfaceTable::interfaceChanged(simsignal_t signalID, int fieldId, InterfaceEntry *ie)
 {
     Enter_Method_Silent();
-    emit(signalID, const_cast<InterfaceEntryChangeDetails *>(details));
+    emit(signalID, fieldId, ie);
 }
 
 void InterfaceTable::updateLinkDisplayString(InterfaceEntry *entry) const

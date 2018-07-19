@@ -740,16 +740,10 @@ void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, long val
         }
         pickUpSignals(radio);
     }
-    else
-        throw cRuntimeError("Unknown signal");
-}
-
-void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, cObject *value, cObject *details)
-{
-    if (signal == interfaceConfigChangedSignal) {
-        auto interfaceChange = check_and_cast<InterfaceEntryChangeDetails *>(value);
-        if (interfaceChange->getFieldId() == InterfaceEntry::F_MACADDRESS) {
-            auto radio = check_and_cast<Radio *>(interfaceChange->getInterfaceEntry()->getSubmodule("radio"));
+    else if (signal == interfaceConfigChangedSignal) {
+        auto interface = check_and_cast<InterfaceEntry *>(details);
+        if (value == InterfaceEntry::F_MACADDRESS) {
+            auto radio = check_and_cast<Radio *>(interface->getSubmodule("radio"));
             pickUpSignals(radio);
         }
     }
