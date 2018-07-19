@@ -36,6 +36,7 @@ class INET_API SceneCanvasVisualizer : public SceneVisualizerBase
     virtual void initialize(int stage) override;
     virtual void initializeAxis(double axisLength);
     virtual void handleParameterChange(const char *name) override;
+    virtual void refreshAxis(double axisLength);
 
     virtual EulerAngles computeViewAngle(const char *viewAngle);
     virtual cFigure::Point parse2D(const char *text);

@@ -68,12 +68,6 @@ void SceneCanvasVisualizer::initializeAxis(double axisLength)
     xAxis->setZoomLineWidth(false);
     yAxis->setZoomLineWidth(false);
     zAxis->setZoomLineWidth(false);
-    xAxis->setStart(canvasProjection.computeCanvasPoint(Coord::ZERO));
-    yAxis->setStart(canvasProjection.computeCanvasPoint(Coord::ZERO));
-    zAxis->setStart(canvasProjection.computeCanvasPoint(Coord::ZERO));
-    xAxis->setEnd(canvasProjection.computeCanvasPoint(Coord(axisLength, 0, 0)));
-    yAxis->setEnd(canvasProjection.computeCanvasPoint(Coord(0, axisLength, 0)));
-    zAxis->setEnd(canvasProjection.computeCanvasPoint(Coord(0, 0, axisLength)));
     axisLayer->addFigure(xAxis);
     axisLayer->addFigure(yAxis);
     axisLayer->addFigure(zAxis);
@@ -87,12 +81,29 @@ void SceneCanvasVisualizer::initializeAxis(double axisLength)
     xLabel->setText("X");
     yLabel->setText("Y");
     zLabel->setText("Z");
-    xLabel->setPosition(canvasProjection.computeCanvasPoint(Coord(axisLength, 0, 0)));
-    yLabel->setPosition(canvasProjection.computeCanvasPoint(Coord(0, axisLength, 0)));
-    zLabel->setPosition(canvasProjection.computeCanvasPoint(Coord(0, 0, axisLength)));
     axisLayer->addFigure(xLabel);
     axisLayer->addFigure(yLabel);
     axisLayer->addFigure(zLabel);
+    refreshAxis(axisLength);
+}
+
+void SceneCanvasVisualizer::refreshAxis(double axisLength)
+{
+    auto xAxis = check_and_cast<cLineFigure *>(axisLayer->getFigure(0));
+    auto yAxis = check_and_cast<cLineFigure *>(axisLayer->getFigure(1));
+    auto zAxis = check_and_cast<cLineFigure *>(axisLayer->getFigure(2));
+    auto xLabel = check_and_cast<cLabelFigure *>(axisLayer->getFigure(3));
+    auto yLabel = check_and_cast<cLabelFigure *>(axisLayer->getFigure(4));
+    auto zLabel = check_and_cast<cLabelFigure *>(axisLayer->getFigure(5));
+    xAxis->setStart(canvasProjection.computeCanvasPoint(Coord::ZERO));
+    yAxis->setStart(canvasProjection.computeCanvasPoint(Coord::ZERO));
+    zAxis->setStart(canvasProjection.computeCanvasPoint(Coord::ZERO));
+    xAxis->setEnd(canvasProjection.computeCanvasPoint(Coord(axisLength, 0, 0)));
+    yAxis->setEnd(canvasProjection.computeCanvasPoint(Coord(0, axisLength, 0)));
+    zAxis->setEnd(canvasProjection.computeCanvasPoint(Coord(0, 0, axisLength)));
+    xLabel->setPosition(canvasProjection.computeCanvasPoint(Coord(axisLength, 0, 0)));
+    yLabel->setPosition(canvasProjection.computeCanvasPoint(Coord(0, axisLength, 0)));
+    zLabel->setPosition(canvasProjection.computeCanvasPoint(Coord(0, 0, axisLength)));
 }
 
 void SceneCanvasVisualizer::handleParameterChange(const char* name)
@@ -109,6 +120,9 @@ void SceneCanvasVisualizer::handleParameterChange(const char* name)
         canvasProjection.setTranslation(parse2D(par("viewTranslation")));
         // TODO: update all visualizers
     }
+    double axisLength = par("axisLength");
+    if (!std::isnan(axisLength))
+        refreshAxis(axisLength);
 }
 
 EulerAngles SceneCanvasVisualizer::computeViewAngle(const char* viewAngle)
