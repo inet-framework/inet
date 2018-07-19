@@ -140,6 +140,7 @@ Coord Quaternion::rotate(const Coord &v)
 
 EulerAngles Quaternion::toEulerAngles(bool homogenous) const
 {
+    // NOTE: this algorithm is prone to gimbal lock when beta is close to +-90
     double sqw = s*s;
     double sqx = v.x*v.x;
     double sqy = v.y*v.y;
