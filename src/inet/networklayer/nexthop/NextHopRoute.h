@@ -65,6 +65,7 @@ class INET_API NextHopRoute : public cObject, public IRoute
     virtual void setSourceType(SourceType sourceType) override { if (this->sourceType != sourceType) { this->sourceType = sourceType; changed(F_TYPE); } }
     virtual void setSource(cObject *source) override { if (this->source != source) { this->source = source; changed(F_SOURCE); } }
     virtual void setMetric(int metric) override { if (this->metric != metric) { this->metric = metric; changed(F_METRIC); } }
+    virtual void setAdminDist(unsigned int adminDist) override {   }
     virtual void setProtocolData(cObject *protocolData) override { this->protocolData = protocolData; }
 
     /** The routing table in which this route is inserted, or nullptr. */
