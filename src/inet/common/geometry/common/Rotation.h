@@ -36,7 +36,7 @@ class INET_API Rotation
 
     public:
         Rotation();
-        Rotation(const EulerAngles& eulerAngle);
+        Rotation(const EulerAngles& eulerAngles);
 
         Coord rotateVector(const Coord& vector) const;
         Coord rotateVectorInverse(const Coord& vector) const;

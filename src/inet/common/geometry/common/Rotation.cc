@@ -31,9 +31,9 @@ Rotation::Rotation()
     matrix[2][1] = matrix[2][0] = 0;
 }
 
-Rotation::Rotation(const EulerAngles& eulerAngle)
+Rotation::Rotation(const EulerAngles& eulerAngles)
 {
-    Quaternion q(eulerAngle);
+    Quaternion q(eulerAngles);
     computeRotationMatrix(q.s, q.v.x, q.v.y, q.v.z);
 }
 
