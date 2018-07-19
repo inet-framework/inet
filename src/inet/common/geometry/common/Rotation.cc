@@ -65,4 +65,52 @@ Coord Rotation::rotateVectorInverse(const Coord& vector) const
                  vector.x * matrix[0][2] + vector.y * matrix[1][2] + vector.z * matrix[2][2]);
 }
 
+EulerAngles Rotation::toEulerAngles() const
+{
+    // Ref: http://planning.cs.uiuc.edu/node103.html
+    // NOTE: this algorithm works only if matrix[0][0] != 0 and matrix[2][2] != 0
+    double tx = atan2(matrix[2][1], matrix[2][2]);
+    double ty = atan2(-matrix[2][0], sqrt(matrix[2][1] * matrix[2][1] + matrix[2][2] * matrix[2][2]));
+    double tz = atan2(matrix[1][0], matrix[0][0]);
+    return EulerAngles(rad(tz), rad(ty), rad(tx));
+}
+
+Quaternion Rotation::toQuaternion() const
+{
+    // Ref: http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
+    double w, x, y, z;
+    double trace = matrix[0][0] + matrix[1][1] + matrix[2][2];
+    if (trace > 0) {
+        double s = 0.5 / sqrt(trace + 1.0);
+        w = 0.25 / s;
+        x = (matrix[2][1] - matrix[1][2]) * s;
+        y = (matrix[0][2] - matrix[2][0]) * s;
+        z = (matrix[1][0] - matrix[0][1]) * s;
+    }
+    else {
+        if (matrix[0][0] > matrix[1][1] && matrix[0][0] > matrix[2][2]) {
+            double s = 2.0 * sqrt(1.0 + matrix[0][0] - matrix[1][1] - matrix[2][2]);
+            w = (matrix[2][1] - matrix[1][2]) / s;
+            x = 0.25 * s;
+            y = (matrix[0][1] + matrix[1][0]) / s;
+            z = (matrix[0][2] + matrix[2][0]) / s;
+        }
+        else if (matrix[1][1] > matrix[2][2]) {
+            double s = 2.0 * sqrt(1.0 + matrix[1][1] - matrix[0][0] - matrix[2][2]);
+            w = (matrix[0][2] - matrix[2][0]) / s;
+            x = (matrix[0][1] + matrix[1][0]) / s;
+            y = 0.25 * s;
+            z = (matrix[1][2] + matrix[2][1]) / s;
+        }
+        else {
+            double s = 2.0 * sqrt(1.0 + matrix[2][2] - matrix[0][0] - matrix[1][1]);
+            w = (matrix[1][0] - matrix[0][1]) / s;
+            x = (matrix[0][2] + matrix[2][0]) / s;
+            y = (matrix[1][2] + matrix[2][1]) / s;
+            z = 0.25 * s;
+        }
+    }
+    return Quaternion(w, x, y, z);
+}
+
 } /* namespace inet */

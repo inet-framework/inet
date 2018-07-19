@@ -20,6 +20,7 @@
 
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/geometry/common/EulerAngles.h"
+#include "inet/common/geometry/common/Quaternion.h"
 
 namespace inet {
 
@@ -40,6 +41,9 @@ class INET_API Rotation
 
         Coord rotateVector(const Coord& vector) const;
         Coord rotateVectorInverse(const Coord& vector) const;
+
+        EulerAngles toEulerAngles() const;
+        Quaternion toQuaternion() const;
 };
 
 } /* namespace inet */
