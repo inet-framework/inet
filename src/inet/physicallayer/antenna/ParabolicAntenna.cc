@@ -56,7 +56,11 @@ ParabolicAntenna::AntennaGain::AntennaGain(double maxGain, double minGain, deg b
 
 double ParabolicAntenna::AntennaGain::computeGain(const EulerAngles direction) const
 {
-    return std::max(minGain, maxGain * math::dB2fraction(-12 * pow(unit(direction.alpha / beamWidth).get(), 2)));
+    ASSERT(deg(0) <= direction.alpha && direction.alpha <= deg(360));
+    deg alpha = direction.alpha;
+    if (alpha > deg(180))
+        alpha = deg(360) - alpha;
+    return std::max(minGain, maxGain * math::dB2fraction(-12 * pow(unit(alpha / beamWidth).get(), 2)));
 }
 
 } // namespace physicallayer
