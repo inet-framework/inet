@@ -765,7 +765,9 @@ void Router::rebuildRoutingTable()
     for (i = 0; i < routeCount; i++) {
         if (routingTable[i]->getDestinationType() == RoutingTableEntry::NETWORK_DESTINATION) {
             if(!routingTable[i]->getNextHopAsGeneric().isUnspecified()) {
-                rt->addRoute(new RoutingTableEntry(*(routingTable[i])));
+                Ipv4Route *entry = new RoutingTableEntry(*(routingTable[i]));
+                entry->setAdminDist(Ipv4Route::dOSPF);
+                rt->addRoute(entry);
             }
         }
     }
