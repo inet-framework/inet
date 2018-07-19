@@ -62,6 +62,14 @@ class INET_API EulerAngles
         return std::isnan(alpha.get()) && std::isnan(beta.get()) && std::isnan(gamma.get());
     }
 
+    EulerAngles& normalize()
+    {
+        alpha = rad(math::modulo(alpha.get(), 2 * M_PI));
+        beta = rad(math::modulo(beta.get(), 2 * M_PI));
+        gamma = rad(math::modulo(gamma.get(), 2 * M_PI));
+        return *this;
+    }
+
     EulerAngles operator+(const EulerAngles a) const { return EulerAngles(alpha + a.alpha, beta + a.beta, gamma + a.gamma); }
 
     EulerAngles operator-(const EulerAngles a) const { return EulerAngles(alpha - a.alpha, beta - a.beta, gamma - a.gamma); }
