@@ -29,7 +29,7 @@ double AnalogModelBase::computeAntennaGain(const IAntennaGain* antennaGain, cons
     else {
         auto direction = Quaternion::rotationFromTo(Coord::X_AXIS, endPosition - startPosition);
         auto antennaLocalDirection = Quaternion(startOrientation).inverse() * direction;
-        return antennaGain->computeGain(antennaLocalDirection.toEulerAngles());
+        return antennaGain->computeGain(antennaLocalDirection.toEulerAngles().normalize());
     }
 }
 
