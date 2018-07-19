@@ -474,7 +474,7 @@ void Rip::processUpdate(bool triggered)
         EV_INFO << "sending regular updates on all interfaces\n";
 
     for (auto &ripInterface : ripInterfaces)
-        if (ripInterface.mode != NO_RIP && ripInterface.ie->isUp())
+        if (ripInterface.ie->isUp())
             sendRoutes(addressType->getLinkLocalRIPRoutersMulticastAddress(), ripUdpPort, ripInterface, triggered);
 
     // clear changed flags
@@ -559,6 +559,9 @@ void Rip::processRequest(Packet *packet)
  */
 void Rip::sendRoutes(const L3Address& address, int port, const RipInterfaceEntry& ripInterface, bool changedOnly)
 {
+    if(ripInterface.mode == NO_RIP)
+        return;
+
     if(ripInterface.mode == PASSIVE)
     {
         EV_DEBUG << "No update is sent from passive interface " << ripInterface.ie->getFullName() << std::endl;
