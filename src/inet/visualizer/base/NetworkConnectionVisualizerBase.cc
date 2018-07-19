@@ -49,6 +49,7 @@ void NetworkConnectionVisualizerBase::initialize(int stage)
 
 void NetworkConnectionVisualizerBase::handleParameterChange(const char *name)
 {
+    if (!hasGUI()) return;
     if (name != nullptr) {
         if (!strcmp(name, "nodeFilter"))
             nodeFilter.setPattern(par("nodeFilter"));

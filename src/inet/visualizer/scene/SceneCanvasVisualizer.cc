@@ -109,6 +109,7 @@ void SceneCanvasVisualizer::refreshAxis(double axisLength)
 
 void SceneCanvasVisualizer::handleParameterChange(const char* name)
 {
+    if (!hasGUI()) return;
     if (name && !strcmp(name, "viewAngle")) {
         bool invertY;
         canvasProjection.setRotation(parseViewAngle(par("viewAngle"), invertY));

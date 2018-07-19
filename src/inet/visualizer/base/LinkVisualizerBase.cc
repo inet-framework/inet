@@ -90,6 +90,7 @@ void LinkVisualizerBase::initialize(int stage)
 
 void LinkVisualizerBase::handleParameterChange(const char *name)
 {
+    if (!hasGUI()) return;
     if (name != nullptr) {
         if (!strcmp(name, "nodeFilter"))
             nodeFilter.setPattern(par("nodeFilter"));

@@ -95,6 +95,7 @@ void RoutingTableVisualizerBase::initialize(int stage)
 
 void RoutingTableVisualizerBase::handleParameterChange(const char *name)
 {
+    if (!hasGUI()) return;
     if (name != nullptr) {
         if (!strcmp(name, "destinationFilter"))
             destinationFilter.setPattern(par("destinationFilter"));

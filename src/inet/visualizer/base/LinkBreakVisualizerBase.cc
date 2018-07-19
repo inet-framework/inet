@@ -64,6 +64,7 @@ void LinkBreakVisualizerBase::initialize(int stage)
 
 void LinkBreakVisualizerBase::handleParameterChange(const char *name)
 {
+    if (!hasGUI()) return;
     if (name != nullptr) {
         if (!strcmp(name, "nodeFilter"))
             nodeFilter.setPattern(par("nodeFilter"));

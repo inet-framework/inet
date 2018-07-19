@@ -93,6 +93,7 @@ void StatisticVisualizerBase::initialize(int stage)
 
 void StatisticVisualizerBase::handleParameterChange(const char *name)
 {
+    if (!hasGUI()) return;
     if (name != nullptr) {
         if (!strcmp(name, "sourceFilter"))
             sourceFilter.setPattern(par("sourceFilter"));
