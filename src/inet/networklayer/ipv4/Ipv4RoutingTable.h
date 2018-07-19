@@ -196,6 +196,11 @@ class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable
     //@}
 
     /**
+     * AdminDist on/off
+     */
+    virtual bool isAdminDistEnabled() const override { return useAdminDist; }
+
+    /**
      * Ipv4 forwarding on/off
      */
     virtual bool isForwardingEnabled() const override { return forwarding; }

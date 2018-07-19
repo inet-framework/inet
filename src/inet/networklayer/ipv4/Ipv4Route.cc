@@ -55,7 +55,9 @@ std::string Ipv4Route::str() const
         out << "*  ";
     else
         out << netmask << "  ";
-    out << "metric:" << metric << " ";
+    if(rt && rt->isAdminDistEnabled())
+        out << "AD:" << adminDist << "  ";
+    out << "metric:" << metric << "  ";
     out << "if:";
     if (!interfacePtr)
         out << "*";
