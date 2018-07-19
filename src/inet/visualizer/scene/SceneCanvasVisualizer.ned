@@ -22,9 +22,9 @@ import inet.visualizer.contract.ISceneVisualizer;
 
 //
 // This module visualizes the scene on a 2D canvas. It provides the 3D coordinate
-// system's 2D projection for other visualizers. This is used to get a consistent
-// visualization accross all visualizers. It also displays the coordinate system
-// axes.
+// system's 2D orthographic projection for other visualizers. This is used to get
+// a consistent visualization accross all visualizers. It can also display the
+// coordinate system axes.
 //
 // @see ~SceneOsgVisualizer, ~SceneVisualizer, ~SceneVisualizerBase, ~ISceneVisualizer
 //
@@ -32,7 +32,10 @@ simple SceneCanvasVisualizer extends SceneVisualizerBase like ISceneVisualizer
 {
     parameters:
         double zIndex = default(0); // determines the drawing order of figures relative to other visualizers
-        string viewAngle = default("z"); // view angle is either x, y, z, isometric, isometricN (where 0 <= N < 48) or three rotation angles separated by spaces (it uses orthographic projection that is the projection is parallel to the normal of the viewing surface)
+        string viewAngle = default("x right y down z out"); // view angle is either ()
+                                                            //   - a valid combination of the words: x, y, z, left/right, up/down, in/out or
+                                                            //   - one of isometric, isometricN (where 0 <= N < 48)
+                                                            //   - 3 rotation angles and leftHanded/rightHanded 
         string viewScale = default("1 1"); // the 2D scale is applied after the view projection
         string viewTranslation = default("0 0"); // the 2D translation is applied after the view projection
         string descriptionFigure = default(""); // if not empty, it should be the name of a text figure; it will display the active configuration's description 

@@ -38,8 +38,8 @@ class INET_API SceneCanvasVisualizer : public SceneVisualizerBase
     virtual void handleParameterChange(const char *name) override;
     virtual void refreshAxis(double axisLength);
 
-    virtual EulerAngles computeViewAngle(const char *viewAngle);
-    virtual cFigure::Point parse2D(const char *text);
+    virtual Rotation parseViewAngle(const char *viewAngle, bool& invertY);
+    virtual cFigure::Point parse2D(const char *text, bool invertY = false);
     virtual void displayDescription(const char *descriptionFigurePath);
 
 };
