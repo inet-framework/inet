@@ -214,7 +214,9 @@ void Rip::startRIPRouting()
         }
         else if (isLocalInterfaceRoute(route)) {
             InterfaceEntry *ie = check_and_cast<InterfaceEntry *>(route->getSource());
-            importRoute(route, RipRoute::RIP_ROUTE_INTERFACE, getInterfaceMetric(ie));
+            RipInterfaceEntry *ripIe = findRipInterfaceById(ie->getInterfaceId());
+            if(!ripIe || ripIe->mode != NO_RIP)
+                importRoute(route, RipRoute::RIP_ROUTE_INTERFACE, getInterfaceMetric(ie));
         }
         else if (isDefaultRoute(route))
             importRoute(route, RipRoute::RIP_ROUTE_DEFAULT);
@@ -389,7 +391,11 @@ void Rip::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
                     triggerUpdate();
                 }
                 else
-                    importRoute(route, RipRoute::RIP_ROUTE_INTERFACE, getInterfaceMetric(ie));
+                {
+                    RipInterfaceEntry *ripIe = findRipInterfaceById(ie->getInterfaceId());
+                    if(!ripIe || ripIe->mode != NO_RIP)
+                        importRoute(route, RipRoute::RIP_ROUTE_INTERFACE, getInterfaceMetric(ie));
+                }
             }
             else {
                 // TODO import external routes from other routing daemons
