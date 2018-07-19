@@ -60,7 +60,6 @@ void Radio::initialize(int stage)
         sendRawBytes = par("sendRawBytes");
         separateTransmissionParts = par("separateTransmissionParts");
         separateReceptionParts = par("separateReceptionParts");
-        initializeRadioMode();
         WATCH(radioMode);
         WATCH(receptionState);
         WATCH(transmissionState);
@@ -69,6 +68,7 @@ void Radio::initialize(int stage)
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER) {
         medium->addRadio(this);
+        initializeRadioMode();
         parseRadioModeSwitchingTimes();
     }
     else if (stage == INITSTAGE_LAST) {
