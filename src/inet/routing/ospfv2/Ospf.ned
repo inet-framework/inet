@@ -130,7 +130,8 @@ simple Ospf like IOspf
         string interfaceTableModule;
         string routingTableModule;
         xml ospfConfig; // xml containing the full OSPF AS configuration
-
+        volatile double startupTime @unit(s) = default(0); // delay before starting OSPF
+        
         // default values for attributes of interface xml entries:
         int helloInterval @unit(s) = default(10s);  // specifies the time in seconds between hello packets that the other router sends on an interface
         int pollInterval @unit(s) = default(120s);  // specifies the length of time, in seconds, between OSPF packets that the router send before adjacency is established with a neighbor
