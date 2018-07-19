@@ -19,6 +19,7 @@
 #define __INET_RADIOCANVASVISUALIZER_H
 
 #include "inet/common/figures/IndexedImageFigure.h"
+#include "inet/physicallayer/contract/packetlevel/IAntenna.h"
 #include "inet/visualizer/base/RadioVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeCanvasVisualizer.h"
 
@@ -35,15 +36,17 @@ class INET_API RadioCanvasVisualizer : public RadioVisualizerBase
         IndexedImageFigure *radioModeFigure = nullptr;
         IndexedImageFigure *receptionStateFigure = nullptr;
         IndexedImageFigure *transmissionStateFigure = nullptr;
+        cPolygonFigure *antennaLobeFigure = nullptr;
 
       public:
-        RadioCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, IndexedImageFigure *radioModeFigure, IndexedImageFigure *receptionStateFigure, IndexedImageFigure *transmissionStateFigure, const int radioModuleId);
+        RadioCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, IndexedImageFigure *radioModeFigure, IndexedImageFigure *receptionStateFigure, IndexedImageFigure *transmissionStateFigure, cPolygonFigure *antennaLobeFigure, const int radioModuleId);
         virtual ~RadioCanvasVisualization();
     };
 
   protected:
     // parameters
     double zIndex = NaN;
+    const CanvasProjection *canvasProjection = nullptr;
     NetworkNodeCanvasVisualizer *networkNodeVisualizer = nullptr;
 
   protected:
@@ -53,6 +56,7 @@ class INET_API RadioCanvasVisualizer : public RadioVisualizerBase
     virtual void addRadioVisualization(const RadioVisualization *radioVisualization) override;
     virtual void removeRadioVisualization(const RadioVisualization *radioVisualization) override;
     virtual void refreshRadioVisualization(const RadioVisualization *radioVisualization) const override;
+    virtual void refreshAntennaLobe(const inet::physicallayer::IAntenna *antenna, cPolygonFigure *antennaLobeFigure) const;
 
     virtual void setImageIndex(IndexedImageFigure *indexedImageFigure, int index) const;
 };
