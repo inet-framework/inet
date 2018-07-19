@@ -161,7 +161,7 @@ void Ipv4RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, c
         return; // ignore notifications during initialize
 
     Enter_Method_Silent();
-    printSignalBanner(signalID, obj);
+    printSignalBanner(signalID, obj, details);
 
     if (signalID == interfaceCreatedSignal) {
         // add netmask route for the new interface

@@ -1050,7 +1050,7 @@ void PimDm::processAssertTimer(cMessage *timer)
 void PimDm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method_Silent();
-    printSignalBanner(signalID, obj);
+    printSignalBanner(signalID, obj, details);
     const Ipv4Header *ipv4Header;
     PimInterface *pimInterface;
 
