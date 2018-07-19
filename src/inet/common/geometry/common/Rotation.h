@@ -34,9 +34,11 @@ class INET_API Rotation
 
     protected:
         void computeRotationMatrix(const double& q0, const double& q1, const double& q2, const double& q3);
+        double computeDeterminant() const;
 
     public:
         Rotation();
+        Rotation(const double matrix[3][3]);
         Rotation(const EulerAngles& eulerAngles);
 
         Coord rotateVector(const Coord& vector) const;

@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/INETMath.h"
 #include "inet/common/geometry/common/Quaternion.h"
 #include "inet/common/geometry/common/Rotation.h"
 
@@ -29,6 +30,14 @@ Rotation::Rotation()
     matrix[1][0] = matrix[1][2] = 0;
     matrix[2][2] = 1;
     matrix[2][1] = matrix[2][0] = 0;
+}
+
+Rotation::Rotation(const double matrix[3][3])
+{
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            this->matrix[i][j] = matrix[i][j];
+    ASSERT(inet::math::close(computeDeterminant(), 1));
 }
 
 Rotation::Rotation(const EulerAngles& eulerAngles)
@@ -49,6 +58,11 @@ void Rotation::computeRotationMatrix(const double& q0, const double& q1, const d
     matrix[2][0] = 2*(q1*q3 - q0*q2);
     matrix[2][1] = 2*(q0*q1 + q2*q3);
     matrix[2][2] = 1 - 2*(q1*q1 + q2*q2);
+}
+
+double Rotation::computeDeterminant() const
+{
+    return matrix[0][0] * ((matrix[1][1] * matrix[2][2]) -(matrix[2][1] * matrix[1][2])) -matrix[0][1] * (matrix[1][0] * matrix[2][2] - matrix[2][0] * matrix[1][2]) + matrix[0][2] * (matrix[1][0] * matrix[2][1] - matrix[2][0] * matrix[1][1]);
 }
 
 Coord Rotation::rotateVector(const Coord& vector) const
