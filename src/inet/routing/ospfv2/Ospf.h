@@ -42,6 +42,7 @@ class Ospf : public cSimpleModule, public ILifecycle
     IInterfaceTable *ift = nullptr;
     bool isUp = false;
     Router *ospfRouter = nullptr;    // root object of the OSPF data structure
+    cMessage *startupTimer = nullptr;    // timer for delayed startup
 
   public:
     Ospf();
@@ -64,10 +65,8 @@ class Ospf : public cSimpleModule, public ILifecycle
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
-    virtual void handleMessageWhenDown(cMessage *msg);
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
     virtual void createOspfRouter();
-    virtual bool isNodeUp();
 };
 
 } // namespace ospf
