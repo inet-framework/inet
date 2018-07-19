@@ -764,7 +764,9 @@ void Router::rebuildRoutingTable()
     routeCount = routingTable.size();
     for (i = 0; i < routeCount; i++) {
         if (routingTable[i]->getDestinationType() == RoutingTableEntry::NETWORK_DESTINATION) {
-            rt->addRoute(new RoutingTableEntry(*(routingTable[i])));
+            if(!routingTable[i]->getNextHopAsGeneric().isUnspecified()) {
+                rt->addRoute(new RoutingTableEntry(*(routingTable[i])));
+            }
         }
     }
 
