@@ -74,15 +74,10 @@ void Ieee80211Mac::initialize(int stage)
         ds = check_and_cast<IDs *>(getSubmodule("ds"));
         rx = check_and_cast<IRx *>(getSubmodule("rx"));
         tx = check_and_cast<ITx *>(getSubmodule("tx"));
-        MacAddress address = parseMacAddressPar(par("address"));
-        //TODO the mib module should use the mac address from InterfaceEntry
-        mib->address = address;
         registerInterface();
         emit(modesetChangedSignal, modeSet);
         if (isOperational)
             initializeRadioMode();
-        if (isInterfaceRegistered().isUnspecified())// TODO: do we need multi-MAC feature? if so, should they share interfaceEntry??  --Andras
-            registerInterface();
     }
     else if (stage == INITSTAGE_LINK_LAYER_2) {
         rx = check_and_cast<IRx *>(getSubmodule("rx"));
@@ -127,11 +122,14 @@ const MacAddress& Ieee80211Mac::isInterfaceRegistered()
 
 InterfaceEntry *Ieee80211Mac::createInterfaceEntry()
 {
+    MacAddress address = parseMacAddressPar(par("address"));
+    //TODO the mib module should use the mac address from InterfaceEntry
+    mib->address = address;
     //TODO the mib module should use the mac address from InterfaceEntry
     InterfaceEntry *e = getContainingNicModule(this);
     // address
-    e->setMacAddress(mib->address);
-    e->setInterfaceToken(mib->address.formInterfaceIdentifier());
+    e->setMacAddress(address);
+    e->setInterfaceToken(address.formInterfaceIdentifier());
     e->setMtu(par("mtu"));
     // capabilities
     e->setBroadcast(true);
