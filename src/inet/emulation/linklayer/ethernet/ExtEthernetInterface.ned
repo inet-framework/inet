@@ -19,10 +19,11 @@
 package inet.emulation.linklayer.ethernet;
 
 import inet.common.IHook;
+import inet.emulation.common.HackEncapDecap;
 import inet.emulation.common.PcapCapturer;
 import inet.emulation.common.RawSocket;
-import inet.emulation.linklayer.ext.HackEncapDecap;
 import inet.linklayer.contract.IEthernetInterface;
+
 
 //
 // Implements an interface that corresponds to a real interface
