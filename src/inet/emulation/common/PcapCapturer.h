@@ -15,8 +15,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_PCAPCAPTURE_H
-#define __INET_PCAPCAPTURE_H
+#ifndef __INET_PCAPCAPTURER_H
+#define __INET_PCAPCAPTURER_H
 
 #include <pcap.h>
 #include "inet/common/scheduler/RealTimeScheduler.h"
@@ -31,7 +31,7 @@ namespace inet {
  *
  * See NED file for more details.
  */
-class INET_API PcapCapture : public cSimpleModule, public RealTimeScheduler::ICallback
+class INET_API PcapCapturer : public cSimpleModule, public RealTimeScheduler::ICallback
 {
   protected:
     const char *device = nullptr;
@@ -58,11 +58,11 @@ class INET_API PcapCapture : public cSimpleModule, public RealTimeScheduler::ICa
     static void ext_packet_handler(u_char *usermod, const struct pcap_pkthdr *hdr, const u_char *bytes);
 
   public:
-    virtual ~PcapCapture();
+    virtual ~PcapCapturer();
 
 };
 
 } // namespace inet
 
-#endif // ifndef __INET_PCAPCAPTURE_H
+#endif // ifndef __INET_PCAPCAPTURER_H
 

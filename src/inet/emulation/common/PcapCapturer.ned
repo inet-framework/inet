@@ -15,9 +15,9 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.emulation.linklayer.ext;
+package inet.emulation.common;
 
-simple PcapCapture
+simple PcapCapturer
 {
     parameters:
         string filterString;
