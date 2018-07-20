@@ -17,7 +17,7 @@ package inet.examples.voipstream.osudp;
 
 import inet.applications.voipstream.VoipStreamReceiver;
 import inet.applications.voipstream.VoipStreamSender;
-import inet.transportlayer.udp.OsUdp;
+import inet.emulation.transportlayer.udp.ExtUdp;
 
 network VoipStreamSenderApplication
 {
@@ -25,7 +25,7 @@ network VoipStreamSenderApplication
         @networkNode;
     submodules:
         app: VoipStreamSender;
-        udp: OsUdp;
+        udp: ExtUdp;
     connections:
         app.socketOut --> udp.appIn;
         app.socketIn <-- udp.appOut;
@@ -37,7 +37,7 @@ network VoipStreamReceiverApplication
         @networkNode;
     submodules:
         app: VoipStreamReceiver;
-        udp: OsUdp;
+        udp: ExtUdp;
     connections:
         app.socketOut --> udp.appIn;
         app.socketIn <-- udp.appOut;
