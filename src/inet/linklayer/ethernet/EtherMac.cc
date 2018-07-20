@@ -527,7 +527,7 @@ void EtherMac::startFrameTransmission()
     B minFrameLength = duplexMode ? curEtherDescr->frameMinBytes : (inBurst ? curEtherDescr->frameInBurstMinBytes : curEtherDescr->halfDuplexFrameMinBytes);
 
     if (frame->getDataLength() < minFrameLength) {
-        auto oldFcs = frame->removeAtBack<EthernetFcs>();
+        auto oldFcs = frame->removeAtBack<EthernetFcs>(B(4));
         EtherEncap::addPaddingAndFcs(frame, oldFcs->getFcsMode(), minFrameLength);
     }
 
