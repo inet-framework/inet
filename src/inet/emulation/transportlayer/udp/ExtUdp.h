@@ -13,15 +13,16 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_OSUDP_H
-#define __INET_OSUDP_H
+#ifndef __INET_EXTUDP_H
+#define __INET_EXTUDP_H
 
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/scheduler/RealTimeScheduler.h"
+#include "inet/networklayer/common/L3Address.h"
 
 namespace inet {
 
-class INET_API OsUdp : public cSimpleModule, public ILifecycle, public RealTimeScheduler::ICallback
+class INET_API ExtUdp : public cSimpleModule, public ILifecycle, public RealTimeScheduler::ICallback
 {
   protected:
     class Socket
@@ -53,10 +54,10 @@ class INET_API OsUdp : public cSimpleModule, public ILifecycle, public RealTimeS
     virtual void processPacketFromLower(int fd);
 
   public:
-    virtual ~OsUdp();
+    virtual ~ExtUdp();
 };
 
 } // namespace inet
 
-#endif // ifndef __INET_OSUDP_H
+#endif // ifndef __INET_EXTUDP_H
 
