@@ -34,8 +34,6 @@ class INET_API OrdinalBasedDuplicator : public cSimpleModule
     unsigned int numDuplicated;
     bool generateFurtherDuplicates;
 
-    static simsignal_t rcvdPkSignal;
-    static simsignal_t sentPkSignal;
     static simsignal_t duplPkSignal;
 
     std::vector<unsigned int> duplicatesVector;

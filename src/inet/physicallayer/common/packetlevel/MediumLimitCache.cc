@@ -184,7 +184,7 @@ double MediumLimitCache::computeMaxAntennaGain() const
     double maxAntennaGain = math::dB2fraction(par("maxAntennaGain"));
     for (const auto radio : radios) {
         if (radio != nullptr)
-            maxAntennaGain = maxIgnoreNaN(maxAntennaGain, radio->getAntenna()->getMaxGain());
+            maxAntennaGain = maxIgnoreNaN(maxAntennaGain, radio->getAntenna()->getGain()->getMaxGain());
     }
     return maxAntennaGain;
 }
@@ -209,12 +209,12 @@ m MediumLimitCache::computeMaxInterferenceRange() const
 
 const simtime_t MediumLimitCache::computeMinInterferenceTime() const
 {
-    return par("minInterferenceTime").doubleValue();
+    return simtime_t(par("minInterferenceTime"));
 }
 
 const simtime_t MediumLimitCache::computeMaxTransmissionDuration() const
 {
-    return par("maxTransmissionDuration").doubleValue();
+    return simtime_t(par("maxTransmissionDuration"));
 }
 
 Coord MediumLimitCache::computeMinConstraintArea() const

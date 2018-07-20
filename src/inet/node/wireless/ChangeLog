@@ -1,3 +1,51 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-05  Levente Mészáros
+
+	Added agent.typename deep parameter assignments.
+	Added deep parameter assignments for antenna.mobilityModule.
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-05-25  Levente Mészáros
+
+	Added IIeee80211Agent and replaced mgmtType with mgmt.typename parameter.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-01-23  Levente Mészáros
+
+	Replaced MessageDispatcher lower/upper vector gates with a single one.
+
+2018-01-11  Zoltan Bojthe
+
+	Renamed all *Nic modules to *Interface.
+	Added new moduleinterfaces (ILoopbackInterface, IEthernetInterface, IPppInterface).
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IMACAddressTable -> IMacAddressTable
+	    IMACRelayUnit -> IMacRelayUnit
+	    Ieee80211MgmtAP -> Ieee80211MgmtAp
+	    Ieee80211MgmtAPSimplified -> Ieee80211MgmtApSimplified
+	    MACAddressTable -> MacAddressTable
+	    MACRelayUnit -> MacRelayUnit
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2016-05-31  Levente Mészáros
+
+	Changed positions and icons in display string to at least have well-layouted
+	network nodes.
+
+2016-05-30  Levente Mészáros
+
+	Renamed numRadios to numWlanInterfaces to make it consistent with interface names.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

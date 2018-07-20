@@ -1,12 +1,22 @@
 %description:
 Testing the functionality of the TUN interface:
 %#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
 
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.StandardHost;
+
+network Test
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        testHost: StandardHost;
+}
 
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 
-network = TunTest
+network = Test
 debug-on-errors = true
 tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../src;../../lib
@@ -17,28 +27,33 @@ output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
 output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
-**.testHost.numUdpApps = 1
-**.testHost.numTcpApps = 0
-**.testHost.numTunApps = 1
+**.tunInterface = "tun0"
+
+**.testHost.numApps = 2
 **.testHost.numTunInterfaces = 1
-**.testHost.udpApp[0].typename = "UDPBasicApp"
-**.testHost.tunApp[0].typename = "TunLoopbackApp"
-**.testHost.udpApp[0].sendInterval = 0.05s
-**.testHost.udpApp[0].messageLength = 100B
-**.testHost.udpApp[0].startTime = 1s
-**.testHost.udpApp[0].stopTime = 2s
-**.testHost.udpApp[0].destAddresses = "192.168.0.2"
-**.testHost.udpApp[0].localAddress = "192.168.0.1"
-**.testHost.udpApp[0].destPort = 1000
-**.testHost.udpApp[0].localPort = 2000
+**.testHost.app[0].typename = "UdpBasicApp"
+**.testHost.app[0].sendInterval = 0.05s
+**.testHost.app[0].messageLength = 100B
+**.testHost.app[0].startTime = 1s
+**.testHost.app[0].stopTime = 2s
+**.testHost.app[0].localAddress = "10.0.0.1"
+**.testHost.app[0].destAddresses = "10.0.0.2"
+**.testHost.app[0].destPort = 1000
+**.testHost.app[0].localPort = 2000
+**.testHost.app[1].typename = "TunLoopbackApp"
 
-
-**.testHost.routingTable.routingFile = "../../lib/tun.mrt"
+**.configurator.config = xmldoc("config.xml")
 **.testHost.numPcapRecorders=1
 **.testHost.pcapRecorder[0].pcapFile="tun.pcap"
 **.testHost.pcapRecorder[0].moduleNamePatterns="tun[0]"
 **.testHost.pcapRecorder[0].sendingSignalNames="packetSentToUpper"
 **.testHost.pcapRecorder[0].receivingSignalNames="packetReceivedFromUpper"
+
+%file: config.xml
+<config>
+  <interface hosts="*" address="10.x.x.x" netmask="255.x.x.x"/>
+  <route hosts="testHost" destination="testHost" netmask="255.255.255.255" interface="tun0"/>
+</config>
 
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout

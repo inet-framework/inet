@@ -176,7 +176,7 @@ void L2NetworkConfigurator::readInterfaceConfiguration(Node *rootNode)
 
                         // Note: "hosts", "interfaces" and "towards" must ALL match on the interface for the rule to apply
                         if ((hostMatcher.matchesAny() || hostMatcher.matches(hostShortenedFullPath.c_str()) || hostMatcher.matches(hostFullPath.c_str()))
-                            && (interfaceMatcher.matchesAny() || interfaceMatcher.matches(ifEntry->getFullName()))
+                            && (interfaceMatcher.matchesAny() || interfaceMatcher.matches(ifEntry->getInterfaceName()))
                             && (towardsMatcher.matchesAny() || linkContainsMatchingHostExcept(currentNode->interfaceInfos[i], towardsMatcher, hostModule))
                             && (portsMatcher.matchesAny() || portsMatcher.matches(port.c_str())))
                         {
@@ -191,7 +191,7 @@ void L2NetworkConfigurator::readInterfaceConfiguration(Node *rootNode)
                             //edge
                             if (isNotEmpty(edge))
                                 currentNode->interfaceInfos[i]->portData.edge = strcmp(edge, "true") ? false : true;
-                            EV_DEBUG << hostModule->getFullPath() << ":" << ifEntry->getFullName() << endl;
+                            EV_DEBUG << hostModule->getFullPath() << ":" << ifEntry->getInterfaceName() << endl;
 
                             matchedBefore.insert(ifEntry);
                         }
@@ -261,7 +261,7 @@ bool L2NetworkConfigurator::linkContainsMatchingHostExcept(InterfaceInfo *curren
 void L2NetworkConfigurator::configureInterface(InterfaceEntry *interfaceEntry)
 {
     ensureConfigurationComputed(topology);
-    cModule *networkNodeModule = findContainingNode(interfaceEntry->getInterfaceModule());
+    cModule *networkNodeModule = findContainingNode(interfaceEntry);
     // TODO: avoid linear search
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);

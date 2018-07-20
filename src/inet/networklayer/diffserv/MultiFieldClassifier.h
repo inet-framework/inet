@@ -21,6 +21,8 @@
 
 #include "inet/common/INETDefs.h"
 
+#include "inet/common/packet/Packet.h"
+
 namespace inet {
 
 /**
@@ -47,10 +49,10 @@ class INET_API MultiFieldClassifier : public cSimpleModule
 
         Filter() {}
     #ifdef WITH_IPv4
-        bool matches(IPv4Datagram *datagram);
+        bool matches(Packet *packet, const Ipv4Header *ipv4Header);
     #endif // ifdef WITH_IPv4
     #ifdef WITH_IPv6
-        bool matches(IPv6Datagram *datagram);
+        bool matches(Packet *packet, const Ipv6Header *ipv6Header);
     #endif // ifdef WITH_IPv6
     };
 
@@ -75,7 +77,7 @@ class INET_API MultiFieldClassifier : public cSimpleModule
     virtual void handleMessage(cMessage *msg) override;
     virtual void refreshDisplay() const override;
 
-    virtual int classifyPacket(cPacket *packet);
+    virtual int classifyPacket(Packet *packet);
 };
 
 } // namespace inet

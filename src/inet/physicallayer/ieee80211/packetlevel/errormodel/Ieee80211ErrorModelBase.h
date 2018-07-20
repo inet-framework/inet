@@ -31,12 +31,14 @@ class INET_API Ieee80211ErrorModelBase : public ErrorModelBase
     virtual double getHeaderSuccessRate(const IIeee80211Mode *mode, unsigned int bitLength, double snr) const = 0;
     virtual double getDataSuccessRate(const IIeee80211Mode *mode, unsigned int bitLength, double snr) const = 0;
 
+    virtual Packet *computeCorruptedPacket(const Packet *packet, double ber) const override;
+
   public:
     Ieee80211ErrorModelBase();
 
-    virtual double computePacketErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const override;
-    virtual double computeBitErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const override;
-    virtual double computeSymbolErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const override;
+    virtual double computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const override;
+    virtual double computeBitErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const override;
+    virtual double computeSymbolErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const override;
 };
 
 } // namespace physicallayer

@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "omnetpp/cstatisticbuilder.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/visualizer/base/StatisticVisualizerBase.h"
 
@@ -22,12 +23,13 @@ namespace inet {
 
 namespace visualizer {
 
+Register_ResultRecorder("statisticVisualizer", StatisticVisualizerBase::LastValueRecorder);
+
 StatisticVisualizerBase::StatisticVisualization::StatisticVisualization(int moduleId, simsignal_t signal, const char *unit) :
     moduleId(moduleId),
     signal(signal),
     unit(unit)
 {
-    recorder = new LastValueRecorder();
 }
 
 StatisticVisualizerBase::~StatisticVisualizerBase()
@@ -72,8 +74,9 @@ void StatisticVisualizerBase::initialize(int stage)
         sourceFilter.setPattern(par("sourceFilter"));
         signalName = par("signalName");
         statisticName = par("statisticName");
-        format.parseFormat(par("format"));
         statisticUnit = par("statisticUnit");
+        statisticExpression = par("statisticExpression");
+        format.parseFormat(par("format"));
         cStringTokenizer tokenizer(par("unit"));
         while (tokenizer.hasMoreTokens())
             units.push_back(tokenizer.nextToken());
@@ -90,6 +93,7 @@ void StatisticVisualizerBase::initialize(int stage)
 
 void StatisticVisualizerBase::handleParameterChange(const char *name)
 {
+    if (!hasGUI()) return;
     if (name != nullptr) {
         if (!strcmp(name, "sourceFilter"))
             sourceFilter.setPattern(par("sourceFilter"));
@@ -116,29 +120,41 @@ void StatisticVisualizerBase::unsubscribe()
     }
 }
 
-cResultFilter *StatisticVisualizerBase::findResultFilter(cComponent *source, simsignal_t signal)
+void StatisticVisualizerBase::addResultRecorder(cComponent *source, simsignal_t signal)
+{
+    cStatisticBuilder statisticBuilder(getEnvir()->getConfig());
+    cProperty statisticTemplateProperty;
+    std::string record;
+    if (*statisticExpression == '\0')
+        record = "statisticVisualizer";
+    else
+        record = std::string("statisticVisualizer(") + statisticExpression + std::string(")");
+    statisticTemplateProperty.addKey("record");
+    statisticTemplateProperty.setValue("record", 0, record.c_str());
+    statisticBuilder.addResultRecorders(source, signal, statisticName, &statisticTemplateProperty);
+}
+
+StatisticVisualizerBase::LastValueRecorder *StatisticVisualizerBase::getResultRecorder(cComponent *source, simsignal_t signal)
 {
     auto listeners = source->getLocalSignalListeners(signal);
     for (auto listener : listeners) {
         if (auto resultListener = dynamic_cast<cResultListener *>(listener)) {
-            auto foundResultFilter = findResultFilter(nullptr, resultListener);
+            auto foundResultFilter = findResultRecorder(resultListener);
             if (foundResultFilter != nullptr)
                 return foundResultFilter;
         }
     }
-    return nullptr;
+    throw cRuntimeError("Recorder not found for signal '%s'", signalName);
 }
 
-cResultFilter *StatisticVisualizerBase::findResultFilter(cResultFilter *parentResultFilter, cResultListener *resultListener)
+StatisticVisualizerBase::LastValueRecorder *StatisticVisualizerBase::findResultRecorder(cResultListener *resultListener)
 {
-    if (auto resultRecorder = dynamic_cast<cResultRecorder *>(resultListener)) {
-        if (resultRecorder->getStatisticName() == nullptr || !strcmp(statisticName, resultRecorder->getStatisticName()))
-            return parentResultFilter;
-    }
+    if (auto resultRecorder = dynamic_cast<StatisticVisualizerBase::LastValueRecorder *>(resultListener))
+        return resultRecorder;
     else if (auto resultFilter = dynamic_cast<cResultFilter *>(resultListener)) {
         auto delegates = resultFilter->getDelegates();
         for (auto delegate : delegates) {
-            auto foundResultFilter = findResultFilter(resultFilter, delegate);
+            auto foundResultFilter = findResultRecorder(delegate);
             if (foundResultFilter != nullptr)
                 return foundResultFilter;
         }
@@ -157,8 +173,11 @@ const char *StatisticVisualizerBase::getUnit(cComponent *source)
     auto properties = source->getProperties();
     for (int i = 0; i < properties->getNumProperties(); i++) {
         auto property = properties->get(i);
-        if (!strcmp(property->getName(), "statistic") && !strcmp(property->getIndex(), statisticName))
-            return property->getValue("unit", 0);
+        if (!strcmp(property->getName(), "statistic") && !strcmp(property->getIndex(), statisticName)) {
+            auto unit = property->getValue("unit", 0);
+            if (unit != nullptr)
+                return unit;
+        }
     }
     return statisticUnit;
 }
@@ -196,20 +215,18 @@ void StatisticVisualizerBase::removeAllStatisticVisualizations()
     }
 }
 
-void StatisticVisualizerBase::processSignal(cComponent *source, simsignal_t signal, double value)
+void StatisticVisualizerBase::processSignal(cComponent *source, simsignal_t signal, std::function<void (cIListener *)> receiveSignal)
 {
     auto statisticVisualization = getStatisticVisualization(source, signal);
     if (statisticVisualization != nullptr)
         refreshStatisticVisualization(statisticVisualization);
     else {
         if (sourceFilter.matches(check_and_cast<cModule *>(source))) {
-            statisticVisualization = createStatisticVisualization(source, signal);
-            auto resultFilter = findResultFilter(source, signal);
-            statisticVisualization->recorder->setLastValue(value);
-            if (resultFilter == nullptr)
-                source->subscribe(registerSignal(signalName), statisticVisualization->recorder);
-            else
-                resultFilter->addDelegate(statisticVisualization->recorder);
+            auto statisticVisualization = createStatisticVisualization(source, signal);
+            addResultRecorder(source, signal);
+            statisticVisualization->recorder = getResultRecorder(source, signal);
+            auto listeners = source->getLocalSignalListeners(signal);
+            receiveSignal(listeners[listeners.size() - 1]);
             addStatisticVisualization(statisticVisualization);
             refreshStatisticVisualization(statisticVisualization);
         }

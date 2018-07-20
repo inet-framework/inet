@@ -1,3 +1,141 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-05-16  Levente Mészáros
+
+	Added MacAddressInd to outgoing packets.
+
+2018-05-10  Zoltan Bojthe
+
+	Moved header serializers to the corresponding protocol folders.
+
+2018-04-09  Zoltan Bojthe
+
+	Fixed mac module initialize to call registerInterface() in INITSTAGE_LINK_LAYER.
+	Added CsmaCaInterface.
+
+2018-03-14  Zoltan Bojthe
+
+	Added CsmaCaProtocolPrinter.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-02-27  Zoltan Bojthe
+
+	Added CsmaCaProtocolDissector.
+
+2018-02-21  Zoltan Bojthe
+
+	Added packet protocol tag at encapsulation and at ACK frame creation.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IMACProtocol -> IMacProtocol
+	    MACAddress -> MacAddress
+	    MACProtocolBase -> MacProtocolBase
+
+2017-12-15  Zoltan Bojthe
+
+	Remove unnecessary cPar::stringValue(), cPar::longValue() calls.
+
+	Motivation: rely on cast operators instead because they can detect
+	overflows (when the value is cast to a smaller integer type that can not
+	represent it). Removed unnecessary .longvalue() calls. Replaced to
+	.intValue() in comparisons.
+
+2017-11-14  Zoltan Bojthe
+
+	Replaced "int foo @enum(FooEnum)" to FooEnum foo.
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-10-27  TÖRÖK Attila
+
+	Fixed cross-compilation to macOS and Windows.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-11-09  Levente Mészáros
+
+	Removed call to resetStateVariables from receiving state machine transitions,
+	and renamed function to resetTransmissionVariables for clarity.
+	Changed FCS verification to always check for packet hasBitError() and chunk isCorrect().
+	Simplified deleting lower frames.
+
+2017-10-17  Levente Mészáros
+
+	Fixed error caused by receiving ACK with bit errors.
+
+2017-10-18  Levente Mészáros
+
+	Changed headerLength and ackLength to the minimum value.
+	Additional length is represented by a separate ByteCount chunk.
+	Added fcsMode parameter and FCS computation and verification.
+
+2017-07-14  Levente Mészáros
+
+	Removed remaining traces of cPacket.
+	Replaced cPacket with Packet in LayeredProtocolBase and subclasses.
+
+2017-07-13  Levente Mészáros
+
+	Extracted emitPacketDropSignal function.
+	Removed unnecessary popHeader no longer needed after L3 tools refactor.
+	Fixed invalid read detected by valgrind.
+
+2017-07-12  Levente Mészáros
+
+	Added linkBreak statistic.
+	Added missing packet drop related statistics.
+	Added missing packetDrop signal emitting code.
+	Added limit to packetDrop signals with queueOverflow reason.
+	Added limit to packetDrop signals with retryLimitReached reason.
+	Added some missing packet drop signal emitting.
+	Renamed NF_LINK_BREAK signal to linkBreak(Signal).
+	Renamed NF_PACKET_DROP to packetDrop(Signal).
+	Replaced packetFromLowerDropped and packetFromUpperDropped with NF_PACKET_DROP signal.
+
+2017-07-10  Levente Mészáros
+
+	Updated packet drop signals and statistics.
+	Added reason codes where packet drop signals are emitted.
+	Fixed @signal[NF_LINK_BREAK] emitted object types.
+
+2017-06-20  Levente Mészáros
+
+	Fixed packet content for link break signal.
+
+2017-03-07  Levente Mészáros
+
+	Changed to use new Packet.
+
+2017-02-02  Levente Mészáros
+
+	Added network protocol to CsmaCaMacHeader.
+	Fixed to work with the new Packet class and other protocols.
+
+2017-01-26  Levente Mészáros
+
+	Renamed to CsmaCaMacHeader.
+
+2017-01-30  Levente Mészáros
+
+	Added network protocol to packet.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

@@ -1,3 +1,41 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-07  Panagis Artoumas
+
+	Improve the performance of the computeIntersection function of the Prism shape.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-11-23  Levente Mészáros
+
+	Removed cObject base class from Coord and EulerAngles.
+
+	The reason why cObject was a base class was that we used to emit signals
+	with coordinates, but that's not the case anymore. There are no virtual
+	functions in those classes and cObject would introduce an unnecessary
+	vptr.
+
+2017-11-22  Levente Mészáros
+
+	Added fields to Coord and EulerAngles MSG files.
+
+2017-11-21  Levente Mészáros
+
+	Added missing properties to Coord and EulerAngles.
+	Renamed info() to str() in Coord.
+	Added str() to EulerAngles.
+	Removed @opaque from fields, and added @opaque to types where needed.
+
+2017-10-20  Zoltan Bojthe
+
+	Added Geometry.msg file.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

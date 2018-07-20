@@ -26,7 +26,7 @@
 #include "inet/physicallayer/contract/packetlevel/IReception.h"
 #include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
 #include "inet/physicallayer/contract/packetlevel/IReceptionResult.h"
-#include "inet/physicallayer/contract/packetlevel/ISNIR.h"
+#include "inet/physicallayer/contract/packetlevel/ISnir.h"
 #include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
 
 namespace inet {
@@ -120,7 +120,7 @@ class INET_API IReceiver : public IPrintableObject
      * receiver, thus it must be purely functional and support optimistic
      * parallel computation.
      */
-    virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISNIR *snir) const = 0;
+    virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const = 0;
 
     /**
      * Returns the reception decision for the transmission part that specifies
@@ -130,7 +130,7 @@ class INET_API IReceiver : public IPrintableObject
      * receiver, thus it must be purely functional and support optimistic
      * parallel computation.
      */
-    virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISNIR *snir) const = 0;
+    virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const = 0;
 
     /**
      * Returns the complete result of the reception process for the provided reception.
@@ -139,16 +139,7 @@ class INET_API IReceiver : public IPrintableObject
      * receiver, thus it must be purely functional and support optimistic
      * parallel computation.
      */
-    virtual const IReceptionResult *computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const = 0;
-
-    /**
-     * Returns the reception indication (control info) that is sent up to the MAC.
-     *
-     * This function may be called before the reception actually starts at the
-     * receiver, thus it must be purely functional and support optimistic
-     * parallel computation.
-     */
-    virtual const ReceptionIndication *computeReceptionIndication(const ISNIR *snir) const = 0;
+    virtual const IReceptionResult *computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const = 0;
 };
 
 } // namespace physicallayer

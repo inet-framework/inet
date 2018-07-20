@@ -1,0 +1,26 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-15  Zoltan Bojthe
+
+	Removed unnecessary cPar::boolValue() calls.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2016-10-26  Zoltan Bojthe
+
+	Removed compatibility macros required for OMNeT++ 4.x builds.
+
+2016-07-20  Zoltan Bojthe
+
+	Replaced deprecated cQueue functions: operator(), length(), empty().
+	Removed obsolete omnetpp 4.x code (#if OMNETPP_VERSION < 0x500).
+
+2016-06-16  Levente Mészáros
+
+	Removed icon size specification from module definitions.

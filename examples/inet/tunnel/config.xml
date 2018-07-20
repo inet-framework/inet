@@ -1,0 +1,9 @@
+<config>
+  <interface hosts="inlet outlet router" towards="router inlet outlet" address="132.224.x.x" netmask="255.x.x.x"/>
+  <interface hosts="**" address="10.x.x.x" netmask="255.x.x.x"/>
+  <route hosts="client" destination="10.0.0.0" netmask="255.0.0.0" interface="eth0" gateway="inlet"/>
+  <route hosts="server" destination="10.0.0.0" netmask="255.0.0.0" interface="eth0" gateway="outlet"/>
+  <route hosts="inlet" destination="10.0.0.0" netmask="255.0.0.0" interface="tun0"/>
+  <route hosts="outlet" destination="10.0.0.0" netmask="255.0.0.0" interface="tun0"/>
+  <autoroute sourceHosts="inlet router outlet" destinationInterfaces="*.ppp*"/>
+</config>

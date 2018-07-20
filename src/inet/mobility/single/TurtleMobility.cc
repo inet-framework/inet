@@ -26,7 +26,7 @@ TurtleMobility::TurtleMobility() :
     turtleScript(nullptr),
     nextStatement(nullptr),
     speed(0),
-    angle(0),
+    angle(deg(0)),
     borderPolicy(REFLECT),
     maxSpeed(0)
 {
@@ -53,7 +53,7 @@ void TurtleMobility::setInitialPosition()
     nextStatement = turtleScript->getFirstChild();
 
     speed = 1;
-    angle = 0;
+    angle = deg(0);
     borderPolicy = REFLECT;
 
     // a dirty trick to extract starting position out of the script
@@ -131,7 +131,7 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
             speed = getValue(speedAttr);
 
         if (angleAttr)
-            angle = getValue(angleAttr);
+            angle = deg(getValue(angleAttr));
 
         if (xAttr)
             targetPosition.x = lastPosition.x = getValue(xAttr);
@@ -189,8 +189,8 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
             throw cRuntimeError("<forward>: distance (attribute d) is negative at %s", stmt->getSourceLocation());
 
         // FIXME handle zeros properly...
-        targetPosition.x += d * cos(M_PI * angle / 180);
-        targetPosition.y += d * sin(M_PI * angle / 180);
+        targetPosition.x += d * cos(rad(angle).get());
+        targetPosition.y += d * sin(rad(angle).get());
         nextChange += t;
     }
     else if (!strcmp(tag, "turn")) {
@@ -199,7 +199,7 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
         if (!angleAttr)
             throw cRuntimeError("<turn>: required attribute 'angle' missing at %s", stmt->getSourceLocation());
 
-        angle += getValue(angleAttr);
+        angle += deg(getValue(angleAttr));
     }
     else if (!strcmp(tag, "wait")) {
         const char *tAttr = stmt->getAttribute("t");

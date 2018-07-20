@@ -42,7 +42,7 @@ class INET_API MassMobility : public LineSegmentsMobilityBase
     cPar *speedParameter;
 
     // current state
-    double angle;    ///< angle of linear motion
+    rad angle;    ///< angle of linear motion
 
     simtime_t previousChange;
     Coord sourcePosition;

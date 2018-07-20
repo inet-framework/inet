@@ -1,3 +1,64 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-02-05  Zoltan Bojthe
+
+	Removed unused TxNotifDetails.
+
+2018-01-25  Levente Mészáros
+
+	Added missing PacketProtocolTag.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-09  Zoltan Bojthe
+
+	Renamed @statistics to use camel case.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IPv4Address -> Ipv4Address
+	    MACBase -> MacBase
+
+2017-12-15  Zoltan Bojthe
+
+	Removed unnecessary cPar::longValue() calls.
+
+	Motivation: rely on cast operators instead because they can detect
+	overflows (when the value is cast to a smaller integer type that can not
+	represent it). Removed unnecessary .longvalue() calls. Replaced to
+	.intValue() in comparisons.
+
+2017-11-16  Levente Mészáros
+
+	Moved packetSentTo*Signal and packetReceivedFrom*Signal into Simsignals.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-07-10  Levente Mészáros
+
+	Updated packet drop signals and statistics.
+
+2017-07-12  Levente Mészáros
+
+	Replaced remaining packet drop signals with the generic one.
+
+2015-07-01  Zoltan Bojthe
+
+	Added @nic property to all network interfaces.
+
+2015-06-11  Levente Mészáros
+
+	Renamed gates from netwIn/netwOut to upperLayerIn/upperLayerOut be similar to other MACs.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

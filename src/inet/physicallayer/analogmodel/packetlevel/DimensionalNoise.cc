@@ -40,6 +40,24 @@ std::ostream& DimensionalNoise::printToStream(std::ostream& stream, int level) c
     return NarrowbandNoiseBase::printToStream(stream, level);
 }
 
+W DimensionalNoise::computeMinPower(simtime_t startTime, simtime_t endTime) const
+{
+    const DimensionSet& dimensions = power->getDimensionSet();
+    Argument start(dimensions);
+    Argument end(dimensions);
+    if (dimensions.hasDimension(Dimension::time)) {
+        start.setTime(startTime);
+        end.setTime(endTime);
+    }
+    if (dimensions.hasDimension(Dimension::frequency)) {
+        start.setArgValue(Dimension::frequency, carrierFrequency.get() - bandwidth.get() / 2);
+        end.setArgValue(Dimension::frequency, carrierFrequency.get() + bandwidth.get() / 2);
+    }
+    W minPower = W(MappingUtils::findMin(*power, start, end));
+    EV_DEBUG << "Computing minimum noise power: start = " << start << ", end = " << end << " -> " << minPower << endl;
+    return minPower;
+}
+
 W DimensionalNoise::computeMaxPower(simtime_t startTime, simtime_t endTime) const
 {
     const DimensionSet& dimensions = power->getDimensionSet();

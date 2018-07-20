@@ -1,6 +1,6 @@
 %description:
 Testing Ethernet communication between two hosts.
-All hosts use EtherMACFullDuplex implementation.
+All hosts use EtherMacFullDuplex implementation.
 Both hosts in pair have same ethernet configurations.
 Both hosts in pair are source and sink, too.
 
@@ -25,7 +25,7 @@ module EtherHostFullDuplexQ extends EtherHost
 {
     parameters:
         queueType = "DropTailQueue";
-        macType = "EtherMACFullDuplex";
+        macType = "EtherMacFullDuplex";
 }
 
 network SpeedTest

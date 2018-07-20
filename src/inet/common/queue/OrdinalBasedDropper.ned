@@ -30,13 +30,13 @@ simple OrdinalBasedDropper like IHook
     parameters:
         string dropsVector = default(""); // the dropsVector format is "<packetNumber>;<packetNumber>;...;"
                                           // packet numbers in ascending order e.g. "5;6;12;13;"
-        @display("i=status/lightning");
-        @signal[rcvdPk](type=cMessage);
-        @signal[sentPk](type=cMessage);
-        @signal[dropPk](type=cMessage);
-        @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[dropPk](title="packets dropped"; source=dropPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @display("i=block/downarrow");
+        @signal[packetReceived](type=cMessage);
+        @signal[packetSent](type=cMessage);
+        @signal[packetDropped](type=cMessage);
+        @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[dropPk](title="packets dropped"; source=packetDropped; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
     gates:
         input in;
         output out;

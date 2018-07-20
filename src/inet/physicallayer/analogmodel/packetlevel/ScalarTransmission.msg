@@ -13,18 +13,19 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
+import inet.common.INETDefs;
+import inet.common.Units;
+import inet.physicallayer.base.packetlevel.FlatTransmissionBase;
+
 cplusplus {{
 #include "inet/physicallayer/analogmodel/packetlevel/ScalarTransmission.h"
 }}
 
 namespace inet::physicallayer;
 
-class noncobject W;
-class FlatTransmissionBase extends cObject;
-
 class ScalarTransmission extends FlatTransmissionBase
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
-    W power @opaque;
+    W power;
 }

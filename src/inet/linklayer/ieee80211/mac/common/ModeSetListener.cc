@@ -16,7 +16,7 @@
 // 
 
 #include "ModeSetListener.h"
-#include "inet/common/NotifierConsts.h"
+#include "inet/common/Simsignals.h"
 #include "inet/common/ModuleAccess.h"
 
 namespace inet {
@@ -25,14 +25,14 @@ namespace ieee80211 {
 void ModeSetListener::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
-        getContainingNicModule(this)->subscribe(NF_MODESET_CHANGED, this);
+        getContainingNicModule(this)->subscribe(modesetChangedSignal, this);
 }
 
 void ModeSetListener::receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj, cObject* details)
 {
     Enter_Method("receiveModeSetChangeNotification");
-    if (signalID == NF_MODESET_CHANGED)
-        modeSet = check_and_cast<Ieee80211ModeSet*>(obj);
+    if (signalID == modesetChangedSignal)
+        modeSet = check_and_cast<physicallayer::Ieee80211ModeSet*>(obj);
 }
 
 } /* namespace ieee80211 */

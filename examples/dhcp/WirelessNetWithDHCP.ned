@@ -17,7 +17,7 @@
 
 package inet.examples.dhcp;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
@@ -28,12 +28,11 @@ import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 network WirelessNetWithDHCP
 {
-    @display("bgb=590,407;bgl=2");
     int numHosts;
     **.mgmt.numChannels = 5;
     submodules:
         radioMedium: Ieee80211ScalarRadioMedium {
-            @display("p=64,34");
+            @display("p=100,200;is=s");
         }
         gateway: Router {
             @display("p=365,35");
@@ -47,9 +46,9 @@ network WirelessNetWithDHCP
         dhcpServer: StandardHost {
             @display("p=64,307");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=180,35");
+                @display("p=100,100;is=s");
         }
         remote: StandardHost {
             @display("p=540,204");

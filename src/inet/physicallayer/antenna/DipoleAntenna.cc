@@ -24,8 +24,7 @@ namespace physicallayer {
 Define_Module(DipoleAntenna);
 
 DipoleAntenna::DipoleAntenna() :
-    AntennaBase(),
-    length(NaN)
+    AntennaBase()
 {
 }
 
@@ -33,21 +32,25 @@ void DipoleAntenna::initialize(int stage)
 {
     AntennaBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
-        length = m(par("length"));
-}
-
-double DipoleAntenna::computeGain(EulerAngles direction) const
-{
-    double q = sin(direction.beta - M_PI_2);
-    return 1.5 * q * q;
+        gain = makeShared<AntennaGain>(m(par("length")));
 }
 
 std::ostream& DipoleAntenna::printToStream(std::ostream& stream, int level) const
 {
     stream << "DipoleAntenna";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", length = " << length;
+        stream << ", length = " << gain->getLength();
     return AntennaBase::printToStream(stream, level);
+}
+
+DipoleAntenna::AntennaGain::AntennaGain(m length_) : length(length_)
+{
+}
+
+double DipoleAntenna::AntennaGain::computeGain(EulerAngles direction) const
+{
+    double q = sin(rad(direction.beta - rad(M_PI_2)).get());
+    return 1.5 * q * q;
 }
 
 } // namespace physicallayer

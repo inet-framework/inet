@@ -21,7 +21,7 @@
 namespace inet {
 namespace ieee80211 {
 
-RecipientBlockAckAgreement::RecipientBlockAckAgreement(MACAddress originatorAddress, Tid tid, SequenceNumber startingSequenceNumber, int bufferSize, simtime_t lastUsedTime) :
+RecipientBlockAckAgreement::RecipientBlockAckAgreement(MacAddress originatorAddress, Tid tid, SequenceNumber startingSequenceNumber, int bufferSize, simtime_t lastUsedTime) :
     startingSequenceNumber(startingSequenceNumber),
     bufferSize(bufferSize),
     blockAckTimeoutValue(lastUsedTime)
@@ -30,10 +30,10 @@ RecipientBlockAckAgreement::RecipientBlockAckAgreement(MACAddress originatorAddr
     blockAckRecord = new BlockAckRecord(originatorAddress, tid);
 }
 
-void RecipientBlockAckAgreement::blockAckPolicyFrameReceived(Ieee80211DataFrame* frame)
+void RecipientBlockAckAgreement::blockAckPolicyFrameReceived(const Ptr<const Ieee80211DataHeader>& header)
 {
-    ASSERT(frame->getAckPolicy() == BLOCK_ACK);
-    blockAckRecord->blockAckPolicyFrameReceived(frame);
+    ASSERT(header->getAckPolicy() == BLOCK_ACK);
+    blockAckRecord->blockAckPolicyFrameReceived(header);
 }
 
 std::ostream& operator<<(std::ostream& os, const RecipientBlockAckAgreement& agreement)

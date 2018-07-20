@@ -40,19 +40,18 @@ import inet.node.httptools.DirectHost;
 network HttpDirectPair
 {
     parameters:
-        @display("bgb=474,374");
     submodules:
-        controller: HttpController {
+        httpController: HttpController {
             parameters:
-                @display("p=62,60;i=block/cogwheel");
+                @display("is=s;p=100,100;i=block/cogwheel");
         }
         srv: DirectHost {
             parameters:
-                @display("p=170,188;i=device/server_l");
+                @display("p=250,100;i=device/server");
         }
         cli: DirectHost {
             parameters:
-                @display("p=316,188;i=device/laptop_l");
+                @display("p=400,100;i=device/laptop");
         }
     connections allowunconnected:
 }

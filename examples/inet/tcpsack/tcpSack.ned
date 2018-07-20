@@ -4,7 +4,7 @@
 
 package inet.examples.inet.tcpsack;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
@@ -13,27 +13,28 @@ import ned.DatarateChannel;
 network tcpsack
 {
     parameters:
-        @display("bgb=400,200");
     submodules:
         router: Router {
             parameters:
-                @display("p=200,100;i=abstract/router");
+                @display("p=400,100;i=abstract/router");
             gates:
                 pppg[2];
         }
         client: StandardHost {
             parameters:
-                @display("p=50,100");
+                @display("p=250,100");
             gates:
                 pppg[1];
         }
         server: StandardHost {
             parameters:
-                @display("p=350,100;i=device/server");
+                @display("p=550,100;i=device/server");
             gates:
                 pppg[1];
         }
-        configurator: IPv4NetworkConfigurator;
+        configurator: Ipv4NetworkConfigurator {
+            @display("p=100,100;is=s");
+        }
     connections:
         router.pppg[0] <--> NormalPath <--> client.pppg[0];
         router.pppg[1] <--> NormalPath <--> server.pppg[0];

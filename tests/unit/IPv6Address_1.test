@@ -1,9 +1,9 @@
 %description:
-Test parsing IPv6 addresses
+Test parsing Ipv6 addresses
 
 %includes:
 #include <stdio.h>
-#include "inet/networklayer/contract/ipv6/IPv6Address.h"
+#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 
 %global:
 
@@ -11,7 +11,7 @@ using namespace inet;
 
 static void parseAddr(const char *s)
 {
-    IPv6Address a(s);
+    Ipv6Address a(s);
     uint32 *d = a.words();
     char buff[100];
     sprintf(buff, "%x-%x-%x-%x", d[0],d[1],d[2],d[3]);

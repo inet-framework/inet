@@ -28,10 +28,10 @@
 package inet.examples.inet.netperfmeter;
 
 import inet.applications.netperfmeter.NetPerfMeterHost;
-import inet.common.queue.FIFOQueue;
+import inet.common.queue.FifoQueue;
 import inet.common.queue.IOutputQueue;
-import inet.common.queue.REDDropper;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.common.queue.RedDropper;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.Router;
 import ned.DatarateChannel;
 
@@ -43,7 +43,7 @@ module REDQueue like IOutputQueue
         output out;
 
     submodules:
-        red: REDDropper {
+        red: RedDropper {
             numGates = 1;
             wq = default(0.002);
             minths = default("30");
@@ -51,7 +51,7 @@ module REDQueue like IOutputQueue
             maxps = default("0.10");
             pkrates = default("8333.333");
         }
-        fifo: FIFOQueue;
+        fifo: FifoQueue;
     connections:
         in --> red.in[0];
         red.out[0] --> fifo.in++;
@@ -88,7 +88,7 @@ network testNetwork
     // ====== Network Components ============================================
     submodules:
         // ------ Routing Auto-Configuration --------------------------------
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 @display("p=850,75;i=abstract/penguin_l,gold");
         }

@@ -34,31 +34,29 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.arp.retryTimeout = 100ms
 
 # udp apps
-**.numUdpApps = 1
-**.client.udpApp[0].typename = "UDPBasicApp"
-**.client.udpApp[0].startTime = 0s
-**.client.udpApp[0].destAddresses = "10.0.0.2"
-**.client.udpApp[0].destPort = 1000
-**.client.udpApp[0].messageLength = 1000B 
-**.client.udpApp[0].sendInterval = 100ms
+**.numApps = 1
+**.client.app[0].typename = "UdpBasicApp"
+**.client.app[0].startTime = 0s
+**.client.app[0].destAddresses = "10.0.0.2"
+**.client.app[0].destPort = 1000
+**.client.app[0].messageLength = 1000B
+**.client.app[0].sendInterval = 100ms
 
-**.server.udpApp[0].typename = "UDPSink"
-**.server.udpApp[0].localPort = 1000
+**.server.app[0].typename = "UdpSink"
+**.server.app[0].localPort = 1000
 
 %file: test.ned
 
 import inet.node.ethernet.Eth10M;
 import inet.node.inet.StandardHost;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
-import inet.common.lifecycle.LifecycleController;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.common.scenario.ScenarioManager;
 
 network Test
 {
     submodules:
         scenarioManager: ScenarioManager;
-        lifecycleController: LifecycleController;
-        configurator: IPv4NetworkConfigurator;
+        configurator: Ipv4NetworkConfigurator;
         client: StandardHost;
         server: StandardHost;
     connections:
@@ -66,13 +64,13 @@ network Test
 }
 
 %file: scenario.xml
- 
+
 <scenario>
     <at t="1">
-        <tell module="lifecycleController" target="server" operation="NodeStartOperation"/>
+        <startup module="server"/>
     </at>
     <at t="2">
-        <tell module="lifecycleController" target="client" operation="NodeShutdownOperation"/>
+        <shutdown module="client"/>
     </at>
 </scenario>
 
@@ -87,7 +85,7 @@ Test.client shutting down
 .*
 Test.client shut down
 .*
-Test.server.udpApp\[0\]: received 10 packets
+Test.server.app\[0\]: received 10 packets
 .*
 
 %#--------------------------------------------------------------------------------------------------------------

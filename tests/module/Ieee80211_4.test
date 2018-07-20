@@ -4,7 +4,7 @@ Carrier sense test for Ieee80211 out of range concurrent and delayed mutual tran
 
 %file: test.ned
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
@@ -12,7 +12,7 @@ network Test
 {
     submodules:
         radioMedium: Ieee80211ScalarRadioMedium;
-        configurator: IPv4NetworkConfigurator;
+        configurator: Ipv4NetworkConfigurator;
         host1: AdhocHost;
         host2: AdhocHost;
 }
@@ -32,9 +32,9 @@ output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
 output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
-**.arpType = "GlobalARP"
+**.arp.typename = "GlobalArp"
 
-**.host*.mobilityType = "StationaryMobility"
+**.host*.mobility.typename = "StationaryMobility"
 **.mobility.constraintAreaMinZ = 0m
 **.mobility.constraintAreaMinX = 0m
 **.mobility.constraintAreaMinY = 0m
@@ -49,11 +49,12 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.radio.receiver.energyDetection = -100dBm
 
 # ping app
-*.host*.numPingApps = 1
-*.host*.pingApp[0].count = 1
-*.host*.pingApp[0].printPing = true
-*.host1.pingApp[0].destAddr = "host2"
-*.host2.pingApp[0].destAddr = "host1"
+*.host*.numApps = 1
+*.host*.app[0].typename = "PingApp"
+*.host*.app[0].count = 1
+*.host*.app[0].printPing = true
+*.host1.app[0].destAddr = "host2"
+*.host2.app[0].destAddr = "host1"
 
 **.mobility.initFromDisplayString = false
 **.mobility.initialY = 500m
@@ -61,9 +62,12 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 **.host1.mobility.initialX = 100m
 **.host2.mobility.initialX = 900m
-*.host1.pingApp[0].startTime = 0s
-*.host2.pingApp[0].startTime = 3us
+*.host1.app[0].startTime = 0s
+*.host2.app[0].startTime = 3us
 
+%#--------------------------------------------------------------------------------------------------------------
+%# remove colorizing
+%subst: /\x1B\[[0-9;]*m//
 %#--------------------------------------------------------------------------------------------------------------
 %contains: results/General-0.elog
 not attempting

@@ -1,3 +1,150 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-01  Zoltan Bojthe
+
+	Added B/b units to length constants and length fields of chunks.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-01-29  Zoltan Bojthe
+
+	Fixed padding RTCP packets to 32 bit words.
+	Added some missing handleChange() calls.
+	Removed @customize from RtcpPacket.
+	Added rtcpLength field, added documentations for packet fields, added
+	RtcpPacket::paddingAndSetLength() for padding RtcpPacket to 32-bit words
+	and for set rtcpLength field.
+
+2018-01-18  Zoltan Bojthe
+
+	Revise MSG customization.
+
+2018-01-12  Levente Mészáros
+
+	Replaced packet variable names where the name was wrong.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IIPv4RoutingTable -> IIpv4RoutingTable
+	    IPv4 -> Ipv4
+	    IPv4Address -> Ipv4Address
+	    IRTPPayloadSender -> IRtpPayloadSender
+	    RTCP -> Rtcp
+	    RTCPByePacket -> RtcpByePacket
+	    RTCPByePacket_Base -> RtcpByePacket_Base
+	    RTCPCompoundPacket -> RtcpCompoundPacket
+	    RTCPPacket -> RtcpPacket
+	    RTCPPacketType -> RtcpPacketType
+	    RTCPPacket_Base -> RtcpPacket_Base
+	    RTCPReceiverReportPacket -> RtcpReceiverReportPacket
+	    RTCPReceiverReportPacket_Base -> RtcpReceiverReportPacket_Base
+	    RTCPSDESPacket -> RtcpSdesPacket
+	    RTCPSDESPacket_Base -> RtcpSdesPacket_Base
+	    RTCPSenderReportPacket -> RtcpSenderReportPacket
+	    RTCPSenderReportPacket_Base -> RtcpSenderReportPacket_Base
+	    RTP -> Rtp
+	    RTPAVProfile -> RtpAvProfile
+	    RTPAVProfilePayload32Receiver -> RtpAvProfilePayload32Receiver
+	    RTPAVProfilePayload32Sender -> RtpAvProfilePayload32Sender
+	    RTPApplication -> RtpApplication
+	    RTPCICreateSenderModule -> RtpCiCreateSenderModule
+	    RTPCIDeleteSenderModule -> RtpCiDeleteSenderModule
+	    RTPCIEnterSession -> RtpCiEnterSession
+	    RTPCILeaveSession -> RtpCiLeaveSession
+	    RTPCISenderControl -> RtpCiSenderControl
+	    RTPCISenderModuleCreated -> RtpCiSenderModuleCreated
+	    RTPCISenderModuleDeleted -> RtpCiSenderModuleDeleted
+	    RTPCISenderStatus -> RtpCiSenderStatus
+	    RTPCISessionEntered -> RtpCiSessionEntered
+	    RTPCISessionLeft -> RtpCiSessionLeft
+	    RTPControlInfo -> RtpControlInfo
+	    RTPControlMsg -> RtpControlMsg
+	    RTPInnerPacket -> RtpInnerPacket
+	    RTPInnerPacket_Base -> RtpInnerPacket_Base
+	    RTPInterfacePacket -> RtpInterfacePacket
+	    RTPModule -> RtpModule
+	    RTPPacket -> RtpPacket
+	    RTPParticipantInfo -> RtpParticipantInfo
+	    RTPParticipantInfo_Base -> RtpParticipantInfo_Base
+	    RTPPayloadReceiver -> RtpPayloadReceiver
+	    RTPPayloadSender -> RtpPayloadSender
+	    RTPProfile -> RtpProfile
+	    RTPReceiverInfo -> RtpReceiverInfo
+	    RTPSenderControlMessage -> RtpSenderControlMessage
+	    RTPSenderControlMessageCommands -> RtpSenderControlMessageCommands
+	    RTPSenderInfo -> RtpSenderInfo
+	    RTPSenderStatus -> RtpSenderStatus
+	    RTPSenderStatusMessage -> RtpSenderStatusMessage
+	    RTPSessionControlInfo -> RtpSessionControlInfo
+	    RTP_IFP_TYPE -> RtpIfpType
+	    RTP_INP_TYPE -> RtpInpType
+	    SDESChunk -> SdesChunk
+	    SDESItem -> SdesItem
+	    SDES_ITEM_TYPE -> SdesItemType
+	    SSRCGate -> SsrcGate
+	    SSRCGateMap -> SsrcGateMap
+	    UDPControlInfo -> UdpControlInfo
+	    UDPSocket -> UdpSocket
+
+2017-12-15  Zoltan Bojthe
+
+	Renamed deprecated info() to str().
+
+2017-12-15  Zoltan Bojthe
+
+	Removed unnecessary cPar::boolValue() calls.
+
+2017-12-11  Zoltan Bojthe
+
+	Removed some unnecessary @customize from MSG files.
+
+2017-11-16  Levente Mészáros
+
+	Moved rcvdPkSignal and sentPkSignal into Simsignals.
+
+2017-11-14  Zoltan Bojthe
+
+	Replace "int foo @enum(FooEnum)" to FooEnum foo.
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-10-20  Zoltan Bojthe
+
+	Merged RTCPPacket1-3.msg and RTCPPacket1-3.h to the single RTCPPacket.msg file.
+
+2017-05-10  Zoltan Bojthe
+
+	Converted RTPMpegPacket to chunks: RTPMpegHeader | ByteCountChunk.
+
+2017-05-08  Zoltan Bojthe
+
+	Removed obsolete RTCPCompoundPacket.
+
+2017-05-10  Zoltan Bojthe
+
+	Fixed headerLength, it was not added to RTPMpegPacket::byteLength.
+
+2017-05-04  Zoltan Bojthe
+
+	Fixed _commonName pointing to a deallocated memory.
+
+2016-10-26  Zoltan Bojthe
+
+	Removed compatibility macros required for OMNeT++ 4.x builds
+
+2016-08-03  Zoltan Bojthe
+
+	Removed @fieldNameSuffix("_var") when @omitGetVerb(true) is not used.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

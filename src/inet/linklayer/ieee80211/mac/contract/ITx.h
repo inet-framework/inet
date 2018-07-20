@@ -18,13 +18,11 @@
 #ifndef __INET_ITX_H
 #define __INET_ITX_H
 
-#include "inet/common/INETDefs.h"
-#include "inet/linklayer/ieee80211/mac/contract/ITx.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 namespace inet {
 namespace ieee80211 {
-
-class Ieee80211Frame;
 
 /**
  * Abstract interface for unconditionally transmitting a frame immediately
@@ -36,20 +34,20 @@ class INET_API ITx
         class INET_API ICallback
         {
             public:
-                virtual ~ICallback() {}
-                virtual void transmissionComplete(Ieee80211Frame *frame) = 0;
+                virtual ~ICallback() { }
+
+                virtual void transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) = 0;
         };
 
     public:
-        virtual ~ITx() {}
+        virtual ~ITx() { }
 
-        virtual void transmitFrame(Ieee80211Frame *frame, ITx::ICallback *txCallback) = 0;
-        virtual void transmitFrame(Ieee80211Frame *frame, simtime_t ifs, ITx::ICallback *txCallback) = 0;
+        virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, ICallback *callback) = 0;
+        virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, ICallback *callback) = 0;
         virtual void radioTransmissionFinished() = 0;
 };
 
 } // namespace ieee80211
 } // namespace inet
 
-#endif
-
+#endif // #ifndef __INET_ITX_H

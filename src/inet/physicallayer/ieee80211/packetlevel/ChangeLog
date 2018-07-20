@@ -1,3 +1,175 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-14  Levente Mészáros
+
+	Changed radio default mode to fastest mode in mode set if bitrate is not specified.
+
+	This allows configuring static routing based on error rate without
+	specifying a bitrate for the radio. Of course, the 802.11 mac still
+	overrides this mode for each packet.
+
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-06-04  Levente Mészáros
+
+	Replaced 0/0 NED parameter values with nan.
+
+2018-05-30  Levente Mészáros
+
+	Fixed length field wrap around for large packets.
+
+2018-05-10  Zoltan Bojthe
+
+	Moved header serializers to the corresponding protocol folders.
+
+2018-05-04  Levente Mészáros
+
+	Extended error models with corruption mode parameter.
+
+	Available corruption modes: packet, chunk, byte, or bit level. 802.11
+	error models support packet corruption mode only but could be extended
+	with the others to do real MPDU aggregation.
+
+2018-05-04  Levente Mészáros
+
+	Changed chunk processing to allow for incorrect chunks.
+
+	Physical layers generally don't check whether the data is erroneous or
+	not. This change allows chunk level packet corruption.
+
+2018-04-27  Levente Mészáros
+
+	Added QBPSK to subcarrier modulations for HT mode.
+
+2018-04-26  Alfonso Ariza
+
+	Fixed opMode parameter @enum for n(mixed-2.4Ghz) modeset.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-03-08  Zoltan Bojthe
+
+	Added Ieee80211PhyProtocolPrinter.
+
+2018-03-06  Zoltan Bojthe
+
+	Added Ieee80211PhyProtocolDissector.
+
+2018-03-05  Zoltan Bojthe
+
+	Renamed Ieee80211Ideal* to Ieee80211UnitDisk*.
+
+2018-01-26  Levente Mészáros
+
+	Replaced headerBitLength with headerLength where the unit is already present.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2017-12-22  Levente Mészáros
+
+	Fixed memory leak during processing radio configuration commands.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    ISNIR -> ISnir
+	    IdealAnalogModel -> UnitDiskAnalogModel
+	    IdealNoise -> UnitDiskNoise
+	    IdealRadioMedium -> UnitDiskRadioMedium
+	    IdealReceiver -> UnitDiskReceiver
+	    IdealReception -> UnitDiskReception
+	    IdealTransmission -> UnitDiskTransmission
+	    Ieee80211OFDMMode -> Ieee80211OfdmMode
+
+2017-12-05  Zoltan Bojthe
+
+	Removed "typedef const Foo ConstFoo" statements, replaced with proper const support.
+
+2017-11-23  Levente Mészáros
+
+	Removed unnecessary @opaque and @tostring(... getCompleteStringRepresentation()) properties.
+
+2017-11-22  Levente Mészáros
+
+	Removed obsolete duplicate Ieee80211ControlInfoDescr.msg.
+	Renamed *Descr.msg to *.msg, now the msgc supports all required features.
+
+2017-11-21  Levente Mészáros
+
+	Removed @opaque from fields, and added @opaque to types where needed.
+
+2017-11-14  Zoltan Bojthe
+
+	Replaced "int foo @enum(FooEnum)" to FooEnum foo.
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-07  Zoltan Bojthe
+
+	Eliminated temporary manual descriptor hacks.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-11-10  Levente Mészáros
+
+	Updated dimensional transmitters/transmissions to be similar to scalar ones.
+
+2017-10-30  Levente Mészáros
+
+	Changed 802.11 OFDM error models wrt. to the service field.
+	The service field is part of the PHY header in terms of bits but it's
+	sent in the data part in terms of symbols (modulation).
+	Fixed PHY header length in Ieee80211Radio.
+	Enabled PHY padding bits in 802.11 packets.
+
+2017-10-27  Levente Mészáros
+
+	Added all 802.11 phy and preamble chunks.
+	Added descriptors for Signal and some 802.11 transmissions.
+
+2017-07-26  Levente Mészáros
+
+	Rewritten 802.11 OFDM phy header serialization to avoid using a structure.
+	Dropped unused 802.11 PLCP header file.
+
+2017-05-11  Levente Mészáros
+
+	Revived layered OFDM transmitter and receiver.
+
+2017-04-25  Levente Mészáros
+
+	Added PacketProtocolTag to 802.11 packets.
+
+2017-01-26  Levente Mészáros
+
+	Switched to bit type where appropriate.
+
+2017-01-25  Levente Mészáros
+
+	Added Ieee80211PhyHeader to non-layered 802.11 radio Packet.
+
+2017-01-25  Zoltan Bojthe
+
+	Renamed macFrame to packet where appropriate.
+
+2017-03-07  Levente Mészáros
+
+	Renamed getMacFrame to getPacket.
+
+2017-01-25  Zoltan Bojthe
+
+	Replaced cPacket* with Packet* where appropriate.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

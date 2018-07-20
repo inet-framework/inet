@@ -15,6 +15,8 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
+#include <algorithm>
+#include "inet/linklayer/ieee80211/mac/fragmentation/Defragmentation.h"
 #include "inet/linklayer/ieee80211/mac/fragmentation/BasicReassembly.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
@@ -26,54 +28,58 @@ Register_Class(BasicReassembly);
 /*
  * FIXME: this function needs a serious review
  */
-Ieee80211DataOrMgmtFrame *BasicReassembly::addFragment(Ieee80211DataOrMgmtFrame *frame)
+Packet *BasicReassembly::addFragment(Packet *packet)
 {
+    const auto& header = packet->peekAtFront<Ieee80211DataOrMgmtHeader>();
     // Frame is not fragmented
-    if (!frame->getMoreFragments() && frame->getFragmentNumber() == 0)
-        return frame;
+    if (!header->getMoreFragments() && header->getFragmentNumber() == 0)
+        return packet;
     // FIXME: temporary fix for mgmt frames
-    if (dynamic_cast<Ieee80211ManagementFrame*>(frame))
-        return frame;
+    if (dynamicPtrCast<const Ieee80211MgmtHeader>(header))
+        return packet;
     // find entry for this frame
     Key key;
-    key.macAddress = frame->getTransmitterAddress();
+    key.macAddress = header->getTransmitterAddress();
     key.tid = -1;
-    if (frame->getType() == ST_DATA_WITH_QOS)
-        if (Ieee80211DataFrame *qosDataFrame = dynamic_cast<Ieee80211DataFrame *>(frame))
-            key.tid = qosDataFrame->getTid();
-    key.seqNum = frame->getSequenceNumber();
-    short fragNum = frame->getFragmentNumber();
+    if (header->getType() == ST_DATA_WITH_QOS)
+        if (const Ptr<const Ieee80211DataHeader>& qosDataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header))
+            key.tid = qosDataHeader->getTid();
+    key.seqNum = header->getSequenceNumber();
+    short fragNum = header->getFragmentNumber();
     ASSERT(fragNum >= 0 && fragNum < MAX_NUM_FRAGMENTS);
     auto& value = fragmentsMap[key];
+    value.fragments.resize(16);
 
     // update entry
     uint16_t fragmentBit = 1 << fragNum;
     value.receivedFragments |= fragmentBit;
-    if (!frame->getMoreFragments())
+    if (!header->getMoreFragments())
         value.allFragments = (fragmentBit << 1) - 1;
-    if (!value.frame) {
-        frame->setByteLength(0);  // needed for decapsulation of larger packet
-        value.frame = check_and_cast_nullable<Ieee80211DataOrMgmtFrame *>(frame->decapsulate());
-    }
-    MACAddress txAddress = frame->getTransmitterAddress();
-    delete frame;
+    if (!value.fragments[fragNum])
+        value.fragments[fragNum] = packet;
+    else
+        delete packet;
+
+    //MacAddress txAddress = header->getTransmitterAddress();
 
     // if all fragments arrived, return assembled frame
     if (value.allFragments != 0 && value.allFragments == value.receivedFragments) {
-        Ieee80211DataOrMgmtFrame *result = value.frame;
+        Defragmentation defragmentation;
+        value.fragments.erase(std::remove(value.fragments.begin(), value.fragments.end(), nullptr), value.fragments.end());
+        auto defragmentedFrame = defragmentation.defragmentFrames(&value.fragments);
         // We need to restore some data from the carrying frame's header like TX address
         // TODO: Maybe we need to restore the fromDs, toDs fields as well when traveling through multiple APs
         // TODO: Are there any other fields that we need to restore?
-        // TODO: SET TX ADDR WHEN THE FRAME ARRIVES FROM UPPER LAYER
-        result->setTransmitterAddress(txAddress);
+        for (auto fragment : value.fragments)
+            delete fragment;
         fragmentsMap.erase(key);
-        return result;
+        return defragmentedFrame;
     }
     else
         return nullptr;
 }
 
-void BasicReassembly::purge(const MACAddress& address, int tid, int startSeqNumber, int endSeqNumber)
+void BasicReassembly::purge(const MacAddress& address, int tid, int startSeqNumber, int endSeqNumber)
 {
     Key key;
     key.macAddress = address;
@@ -85,13 +91,15 @@ void BasicReassembly::purge(const MACAddress& address, int tid, int startSeqNumb
 
     if (endSeqNumber < startSeqNumber) {
         for (auto it = itStart; it != fragmentsMap.end(); ) {
-            delete it->second.frame;
+            for (auto fragment : it->second.fragments)
+                delete fragment;
             it = fragmentsMap.erase(it);
         }
         itStart = fragmentsMap.begin();
     }
     for (auto it = itStart; it != itEnd; ) {
-        delete it->second.frame;
+        for (auto fragment : it->second.fragments)
+            delete fragment;
         it = fragmentsMap.erase(it);
     }
 }
@@ -99,7 +107,8 @@ void BasicReassembly::purge(const MACAddress& address, int tid, int startSeqNumb
 BasicReassembly::~BasicReassembly()
 {
     for (auto it = fragmentsMap.begin(); it != fragmentsMap.end(); ++it)
-        delete it->second.frame;
+        for (auto fragment : it->second.fragments)
+            delete fragment;
 }
 
 } // namespace ieee80211

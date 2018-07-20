@@ -1,17 +1,18 @@
 import inet.node.inet.StandardHost;
-import inet.transportlayer.sctp.SCTPNatRouter;
+import inet.transportlayer.sctp.SctpNatRouter;
 import inet.node.inet.Router;
 import ned.DatarateChannel;
 
 network multiRendezvous {
     parameters:
-        volatile double testTimeout;
+        volatile double testTimeout @unit(s);
         bool testing;
-        **.networkLayer.configurator.networkConfiguratorModule = "";
+        **.ipv4.configurator.networkConfiguratorModule = "";
     submodules:
         Peer_1: StandardHost {
             parameters:
                 forwarding = false;
+                ipv4.routingTable.routingFile = "../../lib/nat_peer1.mrt";
         @display("p=56,156;i=device/laptop");
             gates:
                 pppg[2];
@@ -19,6 +20,7 @@ network multiRendezvous {
         Peer_2: StandardHost {
             parameters:
                 forwarding = false;
+                ipv4.routingTable.routingFile = "../../lib/nat_peer2.mrt";
         @display("p=436,160;i=device/laptop");
             gates:
                 pppg[2];
@@ -26,42 +28,49 @@ network multiRendezvous {
         Server: StandardHost {
             parameters:
                 forwarding = false;
+                ipv4.routingTable.routingFile = "../../lib/nat_server.mrt";
         @display("p=252,140;i=device/server");
             gates:
                 pppg[2];
     }
-        Nat_1_1: SCTPNatRouter {
+        Nat_1_1: SctpNatRouter {
             parameters:
+            ipv4.routingTable.routingFile = "../../lib/nat1_1.mrt";
         @display("p=152,104;i=block/join");
             gates:
                 pppg[2];
     }
-        Nat_2_1: SCTPNatRouter {
+        Nat_2_1: SctpNatRouter {
             parameters:
+            ipv4.routingTable.routingFile = "../../lib/nat2_1.mrt";
         @display("p=340,104;i=block/join");
             gates:
                 pppg[2];
     }
         Router_1: Router {
             parameters:
+            ipv4.routingTable.routingFile = "../../lib/nat_router_1.mrt";
         @display("p=252,48;i=abstract/router");
             gates:
                 pppg[3];
     }
-        Nat_1_2: SCTPNatRouter {
+        Nat_1_2: SctpNatRouter {
         parameters:
+        ipv4.routingTable.routingFile = "../../lib/nat1_2.mrt";
         @display("p=152,200;i=block/join");
             gates:
                 pppg[2];
     }
-        Nat_2_2: SCTPNatRouter {
+        Nat_2_2: SctpNatRouter {
         parameters:
+        ipv4.routingTable.routingFile = "../../lib/nat2_2.mrt";
         @display("p=340,204;i=block/join");
             gates:
                 pppg[2];
     }
         Router_2: Router {
         parameters:
+        ipv4.routingTable.routingFile = "../../lib/nat_router_2.mrt";
         @display("p=252,232;i=abstract/router");
             gates:
                 pppg[3];

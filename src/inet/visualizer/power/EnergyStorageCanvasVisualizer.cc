@@ -22,6 +22,8 @@ namespace inet {
 
 namespace visualizer {
 
+using namespace inet::power;
+
 Define_Module(EnergyStorageCanvasVisualizer);
 
 EnergyStorageCanvasVisualizer::EnergyStorageCanvasVisualization::EnergyStorageCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, BarFigure *figure, const IEnergyStorage *energyStorage) :

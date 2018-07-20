@@ -17,6 +17,8 @@
 
 package inet.networklayer.common;
 
+import inet.common.MessageDispatcher;
+import inet.networklayer.contract.IArp;
 import inet.networklayer.contract.INetworkLayer;
 import inet.networklayer.contract.INetworkProtocol;
 
@@ -27,53 +29,53 @@ module SimpleNetworkLayer like INetworkLayer
 {
     parameters:
         string interfaceTableModule;
-        string networkProtocolType;
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         @display("i=block/fork");
 
     gates:
-        input ifIn[] @labels(INetworkDatagram);
-        output ifOut[] @labels(INetworkDatagram);
-        input transportIn[] @labels(ITransportPacket/down);
-        output transportOut[] @labels(ITransportPacket/up);
-        input pingIn[] @labels(PingPayload/down);
-        output pingOut[] @labels(PingPayload/up);
+        input ifIn @labels(INetworkHeader);
+        output ifOut @labels(INetworkHeader);
+        input transportIn @labels(ITransportPacket/down);
+        output transportOut @labels(ITransportPacket/up);
 
     submodules:
-        np: <networkProtocolType> like INetworkProtocol {
-            parameters:
-                @display("p=85,95;q=queue");
-            gates:
-                lowerLayerIn[sizeof(ifIn)];
-                lowerLayerOut[sizeof(ifOut)];
-        }
         echo: EchoProtocol {
             parameters:
-                @display("p=160,63");
+                @display("p=450,100");
+        }
+        up: MessageDispatcher {
+            parameters:
+                @display("p=300,200;b=480,5");
+        }
+        arp: <default("")> like IArp if typename != "" {
+            parameters:
+                @display("p=150,300;q=pendingQueue");
+        }
+        np: <> like INetworkProtocol {
+            parameters:
+                @display("p=300,300;q=queue");
+        }
+        lp: MessageDispatcher {
+            parameters:
+                @display("p=300,400;b=480,5");
         }
 
     connections allowunconnected:
-        for i=0..sizeof(transportIn)-1 {
-            transportIn[i] --> { @display("m=n"); } --> np.upperLayerIn++;
-        }
-        for i=0..sizeof(transportOut)-1 {
-            np.upperLayerOut++ --> { @display("m=n"); } --> transportOut[i];
-        }
+        up.out++ --> { @display("m=n"); } --> transportOut;
+        up.in++ <-- { @display("m=n"); } <-- transportIn;
 
-        np.upperLayerOut++ --> echo.localIn;
-        np.upperLayerIn++ <-- echo.sendOut;
+        np.transportOut --> up.in++;
+        np.transportIn <-- up.out++;
 
-        for i=0..sizeof(pingOut)-1 {
-            echo.pingOut++ --> { @display("m=n"); } --> pingOut[i];
-        }
-        for i=0..sizeof(pingIn)-1 {
-            echo.pingIn++ <-- { @display("m=n"); } <-- pingIn[i];
-        }
+        up.out++ --> echo.ipIn;
+        up.in++ <-- echo.ipOut;
 
-        for i=0..sizeof(ifIn)-1 {
-            ifIn[i] --> { @display("m=s"); } --> np.lowerLayerIn[i];
-        }
-        for i=0..sizeof(ifOut)-1 {
-            np.lowerLayerOut[i] --> { @display("m=s"); } --> ifOut[i];
-        }
+        lp.out++ --> arp.ifIn if exists(arp);
+        lp.in++ <-- arp.ifOut if exists(arp);
+
+        lp.out++ --> np.queueIn;
+        lp.in++ <-- np.queueOut;
+
+        lp.in++ <-- { @display("m=s"); } <-- ifIn;
+        lp.out++ --> { @display("m=s"); } --> ifOut;
 }

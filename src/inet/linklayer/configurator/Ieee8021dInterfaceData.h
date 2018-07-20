@@ -22,7 +22,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
-#include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/common/MacAddress.h"
 
 namespace inet {
 
@@ -52,10 +52,10 @@ class INET_API Ieee8021dInterfaceData : public InterfaceProtocolData
         PortRole role;
 
         unsigned int rootPriority;
-        MACAddress rootAddress;
+        MacAddress rootAddress;
         unsigned int rootPathCost;
         unsigned int bridgePriority;
-        MACAddress bridgeAddress;
+        MacAddress bridgeAddress;
         unsigned int portPriority;
         unsigned int portNum;    // The number of the switch port (i.e. EtherSwitch ethg[] gate index).
 
@@ -84,7 +84,7 @@ class INET_API Ieee8021dInterfaceData : public InterfaceProtocolData
   public:
     Ieee8021dInterfaceData();
 
-    virtual std::string info() const override;
+    virtual std::string str() const override;
     virtual std::string detailedInfo() const override;
 
     bool isLearning() const { return portData.state == LEARNING || portData.state == FORWARDING; }
@@ -95,9 +95,9 @@ class INET_API Ieee8021dInterfaceData : public InterfaceProtocolData
 
     void setAge(simtime_t age) { portData.age = age; }
 
-    const MACAddress& getBridgeAddress() const { return portData.bridgeAddress; }
+    const MacAddress& getBridgeAddress() const { return portData.bridgeAddress; }
 
-    void setBridgeAddress(const MACAddress& bridgeAddress) { portData.bridgeAddress = bridgeAddress; }
+    void setBridgeAddress(const MacAddress& bridgeAddress) { portData.bridgeAddress = bridgeAddress; }
 
     unsigned int getBridgePriority() const { return portData.bridgePriority; }
 
@@ -139,9 +139,9 @@ class INET_API Ieee8021dInterfaceData : public InterfaceProtocolData
 
     void setRole(PortRole role) { portData.role = role; }
 
-    const MACAddress& getRootAddress() const { return portData.rootAddress; }
+    const MacAddress& getRootAddress() const { return portData.rootAddress; }
 
-    void setRootAddress(const MACAddress& rootAddress) { portData.rootAddress = rootAddress; }
+    void setRootAddress(const MacAddress& rootAddress) { portData.rootAddress = rootAddress; }
 
     unsigned int getRootPathCost() const { return portData.rootPathCost; }
 

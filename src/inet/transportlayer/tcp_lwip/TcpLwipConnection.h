@@ -21,21 +21,22 @@
 
 #include "inet/common/INETDefs.h"
 
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "lwip/lwip_tcp.h"
-#include "inet/transportlayer/tcp_common/TCPSegment.h"
-#include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
+#include "inet/transportlayer/tcp_common/TcpHeader.h"
+#include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 
 namespace inet {
 
 // forward declarations:
-class TCPConnectInfo;
-class TCPStatusInfo;
+class TcpConnectInfo;
+class TcpStatusInfo;
 
 namespace tcp {
 
 // forward declarations:
-class TCP_lwIP;
+class TcpLwip;
 class TcpLwipReceiveQueue;
 class TcpLwipSendQueue;
 class INetStack;
@@ -52,8 +53,8 @@ class INET_API TcpLwipConnection
       public:
         Stats();
         ~Stats();
-        void recordSend(const TCPSegment& tcpsegP);
-        void recordReceive(const TCPSegment& tcpsegP);
+        void recordSend(const TcpHeader& tcpsegP);
+        void recordReceive(const TcpHeader& tcpsegP);
 
       protected:
         // statistics
@@ -70,13 +71,14 @@ class INET_API TcpLwipConnection
     TcpLwipConnection(const TcpLwipConnection&);
 
   public:
-    TcpLwipConnection(TCP_lwIP& tcpLwipP, int connIdP, int gateIndexP,
-            TCPDataTransferMode dataTransferModeP);
+    TcpLwipConnection(TcpLwip& tcpLwipP, int connIdP);
 
-    TcpLwipConnection(TcpLwipConnection& tcpLwipConnectionP, int connIdP,
-            LwipTcpLayer::tcp_pcb *pcbP);
+    TcpLwipConnection(TcpLwipConnection& tcpLwipConnectionP, int connIdP, LwipTcpLayer::tcp_pcb *pcbP);
 
     ~TcpLwipConnection();
+
+    /** Utility: sends TCP_I_AVAILABLE indication with TcpAvailableInfo to application */
+    void sendAvailableIndicationToApp(int listenConnId);
 
     void sendEstablishedMsg();
 
@@ -84,20 +86,21 @@ class INET_API TcpLwipConnection
 
     void sendIndicationToApp(int code);
 
-    void listen(L3Address& localAddr, unsigned short localPort);
+    void listen(const L3Address& localAddr, unsigned short localPort);
 
-    void connect(L3Address& localAddr, unsigned short localPort, L3Address& remoteAddr,
-            unsigned short remotePort);
+    void connect(const L3Address& localAddr, unsigned short localPort, const L3Address& remoteAddr, unsigned short remotePort);
 
     void close();
 
     void abort();
 
-    void send(cPacket *msgP);
+    void accept();
 
-    void fillStatusInfo(TCPStatusInfo& statusInfo);
+    void send(Packet *msgP);
 
-    void notifyAboutSending(const TCPSegment& tcpsegP);
+    void fillStatusInfo(TcpStatusInfo& statusInfo);
+
+    void notifyAboutSending(const TcpHeader& tcpsegP);
 
     int send_data(void *data, int len);
 
@@ -107,18 +110,22 @@ class INET_API TcpLwipConnection
 
     void initStats();
 
+    bool isSendUpEnabled() { return sendUpEnabled; }
+
+    void sendUpData();
+
   public:
     int connIdM;
-    int appGateIndexM;
     LwipTcpLayer::tcp_pcb *pcbM;
     TcpLwipSendQueue *sendQueueM;
     TcpLwipReceiveQueue *receiveQueueM;
-    TCP_lwIP& tcpLwipM;
+    TcpLwip& tcpLwipM;
 
   protected:
     long int totalSentM;
     bool isListenerM;
     bool onCloseM;
+    bool sendUpEnabled = false;
 
     Stats *statsM;
 };

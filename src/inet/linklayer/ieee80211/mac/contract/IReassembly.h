@@ -18,12 +18,12 @@
 #ifndef __INET_IREASSEMBLY_H
 #define __INET_IREASSEMBLY_H
 
-#include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/common/MacAddress.h"
 
 namespace inet {
 namespace ieee80211 {
 
-class Ieee80211DataOrMgmtFrame;
+class Ieee80211DataOrMgmtHeader;
 
 /**
  * Abstract interface for classes that encapsulate the functionality of
@@ -33,24 +33,24 @@ class Ieee80211DataOrMgmtFrame;
 class INET_API IReassembly
 {
     public:
-        virtual ~IReassembly() {}
+        virtual ~IReassembly() { }
 
         /**
          * Add a fragment to the reassembly buffer. If the new fragment completes a frame,
          * then the reassembled frame is returned (and fragments are removed from the buffer),
          * otherwise the function returns nullptr.
          */
-        virtual Ieee80211DataOrMgmtFrame *addFragment(Ieee80211DataOrMgmtFrame *frame) = 0;
+        virtual Packet *addFragment(Packet *frame) = 0;
 
         /**
          * Discard fragments from the reassembly buffer. Frames are identified by the transmitter
          * address, the TID, and the sequence number range [startSeqNumber, endSeqNumber[.
          * Set tid=-1 for non-QoS frames.
          */
-        virtual void purge(const MACAddress& address, int tid, int startSeqNumber, int endSeqNumber) = 0;
+        virtual void purge(const MacAddress& address, int tid, int startSeqNumber, int endSeqNumber) = 0;
 };
 
 } // namespace ieee80211
 } // namespace inet
 
-#endif
+#endif // #ifndef __INET_IREASSEMBLY_H

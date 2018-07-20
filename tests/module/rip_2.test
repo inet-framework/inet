@@ -20,9 +20,9 @@ It is checked that:
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
-import inet.node.rip.RIPRouter;
+import inet.node.rip.RipRouter;
 import inet.common.scenario.ScenarioManager;
 import ned.DatarateChannel;
 
@@ -36,12 +36,12 @@ network Test1
         }
     submodules:
         H1: StandardHost;
-        R1: RIPRouter { gates: ethg[3]; }
-        RA: RIPRouter { gates: ethg[2]; }
-        RB: RIPRouter { gates: ethg[2]; }
-        R2: RIPRouter { gates: ethg[3]; }
+        R1: RipRouter { gates: ethg[3]; }
+        RA: RipRouter { gates: ethg[2]; }
+        RB: RipRouter { gates: ethg[2]; }
+        R2: RipRouter { gates: ethg[3]; }
         H2: StandardHost;
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 config = xml("<config>"
                         + "<interface among='H1 R1' address='192.168.1.x' netmask='255.255.255.x' />"

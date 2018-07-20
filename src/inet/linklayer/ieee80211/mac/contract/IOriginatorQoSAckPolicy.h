@@ -29,19 +29,19 @@ namespace ieee80211 {
 class INET_API IOriginatorQoSAckPolicy
 {
     public:
-        virtual ~IOriginatorQoSAckPolicy() { };
+        virtual ~IOriginatorQoSAckPolicy() { }
 
-        virtual bool isAckNeeded(Ieee80211ManagementFrame *frame) const = 0;
-        virtual AckPolicy computeAckPolicy(Ieee80211DataFrame* frame, OriginatorBlockAckAgreement *agreement) const = 0;
+        virtual bool isAckNeeded(const Ptr<const Ieee80211MgmtHeader>& header) const = 0;
+        virtual AckPolicy computeAckPolicy(Packet *packet, const Ptr<const Ieee80211DataHeader>& header, OriginatorBlockAckAgreement *agreement) const = 0;
         virtual bool isBlockAckReqNeeded(InProgressFrames *inProgressFrames, TxopProcedure *txopProcedure) const = 0;
-        virtual bool isBlockAckPolicyEligibleFrame(Ieee80211DataFrame* frame) const = 0;
-        virtual std::tuple<MACAddress, SequenceNumber, Tid> computeBlockAckReqParameters(InProgressFrames *inProgressFrames, TxopProcedure* txopProcedure) const = 0;
+        virtual bool isBlockAckPolicyEligibleFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& header) const = 0;
+        virtual std::tuple<MacAddress, SequenceNumber, Tid> computeBlockAckReqParameters(InProgressFrames *inProgressFrames, TxopProcedure* txopProcedure) const = 0;
 
-        virtual simtime_t getAckTimeout(Ieee80211DataOrMgmtFrame *dataOrMgmtFrame) const = 0;
-        virtual simtime_t getBlockAckTimeout(Ieee80211BlockAckReq *blockAckReq) const = 0;
+        virtual simtime_t getAckTimeout(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) const = 0;
+        virtual simtime_t getBlockAckTimeout(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq) const = 0;
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif // ifndef __INET_IORIGINATORQOSACKPOLICY_H

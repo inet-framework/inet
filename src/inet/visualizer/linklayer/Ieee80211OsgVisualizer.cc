@@ -16,8 +16,8 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/OSGScene.h"
-#include "inet/common/OSGUtils.h"
+#include "inet/common/OsgScene.h"
+#include "inet/common/OsgUtils.h"
 #include "inet/visualizer/linklayer/Ieee80211OsgVisualizer.h"
 
 #ifdef WITH_OSG
@@ -48,9 +48,9 @@ void Ieee80211OsgVisualizer::initialize(int stage)
     }
 }
 
-Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211OsgVisualizer::createIeee80211Visualization(cModule *networkNode, InterfaceEntry *interfaceEntry, std::string ssid)
+Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211OsgVisualizer::createIeee80211Visualization(cModule *networkNode, InterfaceEntry *interfaceEntry, std::string ssid, W power)
 {
-    auto path = resolveResourcePath((std::string(icon) + ".png").c_str());
+    auto path = resolveResourcePath((getIcon(power) + ".png").c_str());
     auto image = inet::osg::createImage(path.c_str());
     auto texture = new osg::Texture2D();
     texture->setImage(image);

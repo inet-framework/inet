@@ -24,14 +24,14 @@ namespace physicallayer {
 simsignal_t IRadioMedium::radioAddedSignal = cComponent::registerSignal("radioAdded");
 simsignal_t IRadioMedium::radioRemovedSignal = cComponent::registerSignal("radioRemoved");
 
-simsignal_t IRadioMedium::transmissionAddedSignal = cComponent::registerSignal("transmissionAdded");
-simsignal_t IRadioMedium::transmissionRemovedSignal = cComponent::registerSignal("transmissionRemoved");
+simsignal_t IRadioMedium::signalAddedSignal = cComponent::registerSignal("signalAdded");
+simsignal_t IRadioMedium::signalRemovedSignal = cComponent::registerSignal("signalRemoved");
 
-simsignal_t IRadioMedium::transmissionStartedSignal = cComponent::registerSignal("transmissionStarted");
-simsignal_t IRadioMedium::transmissionEndedSignal = cComponent::registerSignal("transmissionEnded");
+simsignal_t IRadioMedium::signalDepartureStartedSignal = cComponent::registerSignal("signalDepartureStarted");
+simsignal_t IRadioMedium::signalDepartureEndedSignal = cComponent::registerSignal("signalDepartureEnded");
 
-simsignal_t IRadioMedium::receptionStartedSignal = cComponent::registerSignal("receptionStarted");
-simsignal_t IRadioMedium::receptionEndedSignal = cComponent::registerSignal("receptionEnded");
+simsignal_t IRadioMedium::signalArrivalStartedSignal = cComponent::registerSignal("signalArrivalStarted");
+simsignal_t IRadioMedium::signalArrivalEndedSignal = cComponent::registerSignal("signalArrivalEnded");
 
 } // namespace physicallayer
 

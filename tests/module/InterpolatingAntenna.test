@@ -27,11 +27,11 @@ void AntennaTest::initialize(int stage)
     if (stage == INITSTAGE_LAST)
     {
         IAntenna *antenna = check_and_cast<IAntenna *>(getSimulation()->getModuleByPath("host.wlan[0].radio.antenna"));
-        EV_INFO << antenna->computeGain(EulerAngles(0, 0, 0)) << " "
-                << antenna->computeGain(EulerAngles(M_PI / 2, 0, 0)) << " "
-                << antenna->computeGain(EulerAngles(M_PI, 0, 0)) << " "
-                << antenna->computeGain(EulerAngles(3 * M_PI / 2, 0, 0)) << " "
-                << antenna->computeGain(EulerAngles(2 * M_PI, 0, 0)) << "\n";
+        EV_INFO << antenna->getGain()->computeGain(EulerAngles::ZERO) << " "
+                << antenna->getGain()->computeGain(EulerAngles(rad(M_PI / 2), rad(0), rad(0))) << " "
+                << antenna->getGain()->computeGain(EulerAngles(rad(M_PI), rad(0), rad(0))) << " "
+                << antenna->getGain()->computeGain(EulerAngles(rad(3 * M_PI / 2), rad(0), rad(0))) << " "
+                << antenna->getGain()->computeGain(EulerAngles(rad(2 * M_PI), rad(0), rad(0))) << "\n";
     }
 }
 
@@ -39,7 +39,7 @@ void AntennaTest::initialize(int stage)
 
 %file: test.ned
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.WirelessHost;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
@@ -52,7 +52,7 @@ network Test
 {
     submodules:
         radioMedium: Ieee80211ScalarRadioMedium;
-        configurator: IPv4NetworkConfigurator;
+        configurator: Ipv4NetworkConfigurator;
         host: WirelessHost;
         test: AntennaTest;
 }
@@ -82,9 +82,13 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 *.radioMedium.backgroundNoise.power = -110dBm
 
 # antenna
-**.antennaType = "InterpolatingAntenna"
+**.antenna.typename = "InterpolatingAntenna"
 **.headingGains = "0 0 180 10 360 0"
 
+%#--------------------------------------------------------------------------------------------------------------
+%# remove colorizing
+%subst: /\x1B\[[0-9;]*m//
+%#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
 1 5.5 10 5.5 1
 %#--------------------------------------------------------------------------------------------------------------

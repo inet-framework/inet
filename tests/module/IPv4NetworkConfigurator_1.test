@@ -1,12 +1,12 @@
 %description:
 
-Tests IPv4NetworkConfigurator for a wired LAN.
+Tests Ipv4NetworkConfigurator for a wired LAN.
 Topology:
    server <--> router <--> switch <--> clients
 
 %file: test.ned
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth10M;
 import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.Router;
@@ -17,7 +17,7 @@ network Test
     parameters:
         int numHosts;
     submodules:
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 dumpAddresses = true;
         }
@@ -52,13 +52,13 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 %contains-regex: stdout
 Link 0
-    server / eth0 id=\d+  on:nwLayer.ifOut\[\d+\]  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-[0-9A-F]{2} IPv4:\{.*inet_addr:10.0.0.1/30.*}
-    router / eth0 id=\d+  on:nwLayer.ifOut\[\d+\]  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-[0-9A-F]{2} IPv4:\{.*inet_addr:10.0.0.2/30.*}
+    server / eth0  ID:\d+  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-[0-9A-F]{2} Ipv4:\{.*inet_addr:10.0.0.1/30.*}
+    router / eth0  ID:\d+  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-[0-9A-F]{2} Ipv4:\{.*inet_addr:10.0.0.2/30.*}
 Link 1
-    router / eth1 id=\d+  on:nwLayer.ifOut\[\d+\]  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-[0-9A-F]{2} IPv4:\{.*inet_addr:10.0.0.9/29.*}
-    client\[0\] / eth0 id=\d+  on:nwLayer.ifOut\[\d+\]  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-[0-9A-F]{2} IPv4:\{.*inet_addr:10.0.0.10/29.*}
-    client\[1\] / eth0 id=\d+  on:nwLayer.ifOut\[\d+\]  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-[0-9A-F]{2} IPv4:\{.*inet_addr:10.0.0.11/29.*}
-    client\[2\] / eth0 id=\d+  on:nwLayer.ifOut\[\d+\]  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-[0-9A-F]{2} IPv4:\{.*inet_addr:10.0.0.12/29.*}
+    router / eth1  ID:\d+  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-[0-9A-F]{2} Ipv4:\{.*inet_addr:10.0.0.9/29.*}
+    client\[0\] / eth0  ID:\d+  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-[0-9A-F]{2} Ipv4:\{.*inet_addr:10.0.0.10/29.*}
+    client\[1\] / eth0  ID:\d+  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-[0-9A-F]{2} Ipv4:\{.*inet_addr:10.0.0.11/29.*}
+    client\[2\] / eth0  ID:\d+  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-[0-9A-F]{2} Ipv4:\{.*inet_addr:10.0.0.12/29.*}
 
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout

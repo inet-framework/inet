@@ -18,43 +18,32 @@
 #ifndef __INET_ISTATISTICS_H
 #define __INET_ISTATISTICS_H
 
-#include "inet/common/INETDefs.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 namespace inet {
 namespace ieee80211 {
-
-class MacUtils;
-class IRateControl;
-class Ieee80211Frame;
-class Ieee80211DataOrMgmtFrame;
 
 /**
  * Abstract interface for statistics collection within the 802.11 MAC.
  * IStatistics is notified of various events that occur in the MAC,
  * and it is up to the concrete IStatistics implementation to decide
  * what statistics to collect from them.
- *
- * Note that dynamic rate control algorithms (IRateControl) also plug into
- * IStatistics, because due to the nature of its input.
  */
 class INET_API IStatistics
 {
     public:
-        ~IStatistics() {}
-
-        virtual void setMacUtils(MacUtils *utils) = 0;
-        virtual void setRateControl(IRateControl *rateControl) = 0;  // is interested in the statistics
+        ~IStatistics() { }
 
         // events to compute statistics from; TODO there should be many more, e.g. about the contention, queueing time, etc
-        virtual void frameTransmissionSuccessful(Ieee80211DataOrMgmtFrame *frame, int retryCount) = 0;
-        virtual void frameTransmissionUnsuccessful(Ieee80211DataOrMgmtFrame *frame, int retryCount) = 0;
-        virtual void frameTransmissionUnsuccessfulGivingUp(Ieee80211DataOrMgmtFrame *frame, int retryCount) = 0;
-        virtual void frameTransmissionGivenUp(Ieee80211DataOrMgmtFrame *frame) = 0;
-        virtual void frameReceived(Ieee80211Frame *frame) = 0;
+        virtual void frameTransmissionSuccessful(const Ptr<const Ieee80211DataOrMgmtHeader>& header, int retryCount) = 0;
+        virtual void frameTransmissionUnsuccessful(const Ptr<const Ieee80211DataOrMgmtHeader>& header, int retryCount) = 0;
+        virtual void frameTransmissionUnsuccessfulGivingUp(const Ptr<const Ieee80211DataOrMgmtHeader>& header, int retryCount) = 0;
+        virtual void frameTransmissionGivenUp(const Ptr<const Ieee80211DataOrMgmtHeader>& header) = 0;
+        virtual void frameReceived(const Ptr<const Ieee80211MacHeader>& header) = 0;
         virtual void erroneousFrameReceived() = 0;
 };
 
 }  // namespace ieee80211
 }  // namespace inet
 
-#endif
+#endif // #ifndef __INET_ISTATISTICS_H

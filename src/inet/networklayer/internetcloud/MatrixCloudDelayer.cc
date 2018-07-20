@@ -52,7 +52,7 @@ bool getBoolAttribute(const cXMLElement& element, const char *name, const bool *
 }
 } // namespace {
 
-//FIXME modified copy of 'Matcher' class from IPv4NetworkConfigurator
+//FIXME modified copy of 'Matcher' class from Ipv4NetworkConfigurator
 MatrixCloudDelayer::Matcher::Matcher(const char *pattern)
 {
     matchesany = isEmpty(pattern);
@@ -140,7 +140,7 @@ void MatrixCloudDelayer::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         host = getContainingNode(this);
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        cXMLElement *configEntity = par("config").xmlValue();
+        cXMLElement *configEntity = par("config");
         // parse XML config
         if (strcmp(configEntity->getTagName(), "internetCloud"))
             throw cRuntimeError("Cannot read internetCloud configuration, unaccepted '%s' entity at %s", configEntity->getTagName(),
@@ -181,7 +181,7 @@ void MatrixCloudDelayer::calculateDropAndDelay(const cMessage *msg, int srcID, i
 
 MatrixCloudDelayer::Descriptor *MatrixCloudDelayer::getOrCreateDescriptor(int srcID, int destID)
 {
-    IDPair idPair(srcID, destID);
+    IdPair idPair(srcID, destID);
     auto it = idPairToDescriptorMap.find(idPair);
     if (it != idPairToDescriptorMap.end())
         return &(it->second);
@@ -204,7 +204,7 @@ MatrixCloudDelayer::Descriptor *MatrixCloudDelayer::getOrCreateDescriptor(int sr
                     throw cRuntimeError("Inconsistent xml config between '%s' and '%s' nodes (at %s and %s)",
                             src.c_str(), dest.c_str(), matrixEntry->entity->getSourceLocation(),
                             reverseMatrixEntry->entity->getSourceLocation());
-                IDPair reverseIdPair(destID, srcID);
+                IdPair reverseIdPair(destID, srcID);
                 MatrixCloudDelayer::Descriptor& rdescriptor = idPairToDescriptorMap[reverseIdPair];
                 rdescriptor = descriptor;
             }

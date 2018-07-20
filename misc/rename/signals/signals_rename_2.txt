@@ -1,0 +1,16 @@
+interfaceGenericnetworkprotocolconfigChanged -> interfaceGnpConfigChanged
+l2AssociatedNewap -> l2AssociatedNewAp
+l2AssociatedOldap -> l2AssociatedOldAp
+voIpMos -> voipMos
+voIpPacketDelay -> voipPacketDelay
+voIpPacketLossRate -> voipPacketLossRate
+voIpPlayoutDelay -> voipPlayoutDelay
+voIpPlayoutLossRate -> voipPlayoutLossRate
+voIpTaildropLossRate -> voipTaildropLossRate
+interfaceGenericnetworkprotocolconfigChanged -> interfaceGnpConfigChanged
+l2AssociatedNewap -> l2AssociatedNewAp
+l2AssociatedOldap -> l2AssociatedOldAp
+
+completedArpResolution -> arpResolutionCompleted
+failedArpResolution -> arpResolutionFailed
+initiatedArpResolution -> arpResolutionInitiated

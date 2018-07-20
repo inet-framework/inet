@@ -45,7 +45,7 @@ void HttpBrowserDirect::handleMessage(cMessage *msg)
     if (msg->isSelfMessage())
         handleSelfMessages(msg);
     else
-        handleDataMessage(msg);
+        handleDataMessage(check_and_cast<Packet *>(msg));
 }
 
 void HttpBrowserDirect::sendRequestToServer(BrowseEvent be)
@@ -53,16 +53,17 @@ void HttpBrowserDirect::sendRequestToServer(BrowseEvent be)
     sendDirectToModule(be.serverModule, generatePageRequest(be.wwwhost, be.resourceName), 0.0, rdProcessingDelay);
 }
 
-void HttpBrowserDirect::sendRequestToServer(HttpRequestMessage *request)
+void HttpBrowserDirect::sendRequestToServer(Packet *pk)
 {
-    HttpServerBase *serverModule = dynamic_cast<HttpServerBase *>(controller->getServerModule(request->targetUrl()));
+    const auto& request = pk->peekAtFront<HttpRequestMessage>();
+    HttpServerBase *serverModule = dynamic_cast<HttpServerBase *>(controller->getServerModule(request->getTargetUrl()));
     if (serverModule == nullptr) {
-        EV_ERROR << "Failed to get server module for " << request->targetUrl() << endl;
-        delete request;
+        EV_ERROR << "Failed to get server module for " << request->getTargetUrl() << endl;
+        delete pk;
     }
     else {
         EV_DEBUG << "Sending request to " << serverModule->getHostName() << endl;
-        sendDirectToModule(serverModule, request, 0.0, rdProcessingDelay);
+        sendDirectToModule(serverModule, pk, 0.0, rdProcessingDelay);
     }
 }
 
@@ -84,14 +85,14 @@ void HttpBrowserDirect::sendRequestsToServer(std::string www, HttpRequestQueue q
     if (serverModule == nullptr) {
         EV_ERROR << "Failed to get server module " << www << endl;
         while (!queue.empty()) {
-            HttpRequestMessage *msg = queue.back();
+            Packet *msg = queue.back();
             queue.pop_back();
             delete msg;
         }
     }
     else {
         while (!queue.empty()) {
-            HttpRequestMessage *msg = queue.back();
+            Packet *msg = queue.back();
             queue.pop_back();
             sendDirectToModule(serverModule, msg, 0.0, rdProcessingDelay);
         }

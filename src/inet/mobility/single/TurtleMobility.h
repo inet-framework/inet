@@ -42,7 +42,7 @@ class INET_API TurtleMobility : public LineSegmentsMobilityBase
     // state
     cXMLElement *nextStatement;
     double speed;
-    double angle;
+    rad angle;
     BorderPolicy borderPolicy;
     std::stack<long> loopVars;    // for <repeat>
     double maxSpeed;

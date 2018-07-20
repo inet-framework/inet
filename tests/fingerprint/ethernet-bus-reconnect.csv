@@ -1,14 +1,14 @@
-# workingdir,                        args,                                          simtimelimit,    fingerprint
-.,                                   -f ethernet-bus-reconnect.ini -r 0,           ,                 a660-6982/tplx
-.,                                   -f ethernet-bus-reconnect.ini -r 1,           ,                 80e4-d5f3/tplx
-.,                                   -f ethernet-bus-reconnect.ini -r 2,           ,                 9d02-fc3a/tplx
-.,                                   -f ethernet-bus-reconnect.ini -r 3,           ,                 29c0-e9f4/tplx
-.,                                   -f ethernet-bus-reconnect.ini -r 4,           ,                 4246-3141/tplx
-.,                                   -f ethernet-bus-reconnect.ini -r 5,           ,                 0f46-df94/tplx
-.,                                   -f ethernet-bus-reconnect.ini -r 6,           ,                 90ad-043f/tplx
-.,                                   -f ethernet-bus-reconnect.ini -r 7,           ,                 888a-2d15/tplx
-.,                                   -f ethernet-bus-reconnect.ini -r 8,           ,                 2822-3267/tplx
-.,                                   -f ethernet-bus-reconnect.ini -r 9,           ,                 e499-7ac6/tplx
-.,                                   -f ethernet-bus-reconnect.ini -r 10,          ,                 12c2-dcd1/tplx
-.,                                   -f ethernet-bus-reconnect.ini -r 11,          ,                 3709-c28b/tplx
-#.,                                   -f ethernet-bus-reconnect.ini -r 12,          ,                 0000-0000/tplx
+# working directory, command line arguments, simulation time limit, fingerprint, expected result, tags
+.,                                   -f ethernet-bus-reconnect.ini -r 0,           ,                 a73f-55ec/tplx, PASS,
+.,                                   -f ethernet-bus-reconnect.ini -r 1,           ,                 631a-c7a0/tplx, PASS,
+.,                                   -f ethernet-bus-reconnect.ini -r 2,           ,                 d5c2-0310/tplx, PASS,
+.,                                   -f ethernet-bus-reconnect.ini -r 3,           ,                 261b-3d6f/tplx, PASS,
+.,                                   -f ethernet-bus-reconnect.ini -r 4,           ,                 c1b0-147f/tplx, PASS,
+.,                                   -f ethernet-bus-reconnect.ini -r 5,           ,                 73cc-9b1e/tplx, PASS,
+.,                                   -f ethernet-bus-reconnect.ini -r 6,           ,                 dcaa-315b/tplx, PASS,
+.,                                   -f ethernet-bus-reconnect.ini -r 7,           ,                 68e0-6727/tplx, PASS,
+.,                                   -f ethernet-bus-reconnect.ini -r 8,           ,                 4d93-da37/tplx, PASS,
+.,                                   -f ethernet-bus-reconnect.ini -r 9,           ,                 9aca-6b69/tplx, PASS,
+.,                                   -f ethernet-bus-reconnect.ini -r 10,          ,                 fc4c-eaf9/tplx, PASS,
+.,                                   -f ethernet-bus-reconnect.ini -r 11,          ,                 ee47-73bd/tplx, PASS,
+# .,                                   -f ethernet-bus-reconnect.ini -r 12,          ,                 0000-0000/tplx, PASS,

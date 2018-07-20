@@ -1,0 +1,101 @@
+%description:
+Tests TcpSendQueue, TcpReceiveQueue classes
+- segments with/without last byte of message
+- overlapped segments
+- segments out of order
+
+%includes:
+#include "TCPQueueTesterFunctions.h"
+
+%global:
+
+using namespace ::inet::tcp;
+
+%activity:
+TcpSendQueue sendQueue;
+TcpSendQueue *sq = &sendQueue;
+
+sq->init(1000);
+EV << sq->str() <<"\n";
+
+TcpReceiveQueue rcvQueue;
+TcpReceiveQueue *rq = &rcvQueue;
+
+rq->init(1000);
+EV << rq->str() <<"\n";
+
+enqueue(sq, "msg1", 100); // 1000..1100
+enqueue(sq, "msg2", 400); // 1100..1500
+enqueue(sq, "msg3", 600); // 1500..2100
+enqueue(sq, "msg4",  50); // 2100..2150
+enqueue(sq, "msg5", 150); // 2150..2300
+
+insertSegment(rq, createSegmentWithBytes(sq, 1000, 1099));
+insertSegment(rq, createSegmentWithBytes(sq, 1000, 1100));
+insertSegment(rq, createSegmentWithBytes(sq, 1000, 2099));
+insertSegment(rq, createSegmentWithBytes(sq, 1000, 2100));
+insertSegment(rq, createSegmentWithBytes(sq, 2000, 2099));
+insertSegment(rq, createSegmentWithBytes(sq, 2000, 2100));
+
+extractBytesUpTo(rq, 2099);
+extractBytesUpTo(rq, 2099);
+extractBytesUpTo(rq, 2099);
+extractBytesUpTo(rq, 2099);
+extractBytesUpTo(rq, 2099);
+discardUpTo(sq, 2099);
+
+extractBytesUpTo(rq, 2100);
+extractBytesUpTo(rq, 2100);
+discardUpTo(sq, 2100);
+
+insertSegment(rq, createSegmentWithBytes(sq, 2200, 2300));
+insertSegment(rq, createSegmentWithBytes(sq, 2100, 2200));
+extractBytesUpTo(rq, 2200);
+extractBytesUpTo(rq, 2300);
+discardUpTo(sq, 2300);
+
+EV << ".\n";
+
+%subst: /[\{\}]/ /
+
+%contains: stdout
+Running simulation...
+** Event #1  t=0   Test (Test, id=1)
+[1000..1000)EmptyChunk
+rcv_nxt=1000
+SQ:enqueue("msg1", 100): --> [1000..1100)ByteCountChunk, length = 100 B
+SQ:enqueue("msg2", 400): --> [1000..1500)ByteCountChunk, length = 500 B
+SQ:enqueue("msg3", 600): --> [1000..2100)ByteCountChunk, length = 1100 B
+SQ:enqueue("msg4", 50): --> [1000..2150)ByteCountChunk, length = 1150 B
+SQ:enqueue("msg5", 150): --> [1000..2300)ByteCountChunk, length = 1300 B
+SQ:createSegmentWithBytes(1000, 1099): inet::ByteCountChunk[1000..1099)
+RQ:insertSeg [1000..1099) --> rcv_nxt=1099 [1000..1099)
+SQ:createSegmentWithBytes(1000, 1100): inet::ByteCountChunk[1000..1100)
+RQ:insertSeg [1000..1100) --> rcv_nxt=1100 [1000..1100)
+SQ:createSegmentWithBytes(1000, 2099): inet::ByteCountChunk[1000..2099)
+RQ:insertSeg [1000..2099) --> rcv_nxt=2099 [1000..2099)
+SQ:createSegmentWithBytes(1000, 2100): inet::ByteCountChunk[1000..2100)
+RQ:insertSeg [1000..2100) --> rcv_nxt=2100 [1000..2100)
+SQ:createSegmentWithBytes(2000, 2099): inet::ByteCountChunk[2000..2099)
+RQ:insertSeg [2000..2099) --> rcv_nxt=2100 [1000..2100)
+SQ:createSegmentWithBytes(2000, 2100): inet::ByteCountChunk[2000..2100)
+RQ:insertSeg [2000..2100) --> rcv_nxt=2100 [1000..2100)
+RQ:extractUpTo(2099): < < data: 1099 bytes > > --> rcv_nxt=2100 [2099..2100)
+RQ:extractUpTo(2099): < > --> rcv_nxt=2100 [2099..2100)
+RQ:extractUpTo(2099): < > --> rcv_nxt=2100 [2099..2100)
+RQ:extractUpTo(2099): < > --> rcv_nxt=2100 [2099..2100)
+RQ:extractUpTo(2099): < > --> rcv_nxt=2100 [2099..2100)
+SQ:discardUpTo(2099): [2099..2300)ByteCountChunk, length = 201 B
+RQ:extractUpTo(2100): < < data: 1 bytes > > --> rcv_nxt=2100
+RQ:extractUpTo(2100): < > --> rcv_nxt=2100
+SQ:discardUpTo(2100): [2100..2300)ByteCountChunk, length = 200 B
+SQ:createSegmentWithBytes(2200, 2300): inet::ByteCountChunk[2200..2300)
+RQ:insertSeg [2200..2300) --> rcv_nxt=2100 [2200..2300)
+SQ:createSegmentWithBytes(2100, 2200): inet::ByteCountChunk[2100..2200)
+RQ:insertSeg [2100..2200) --> rcv_nxt=2300 [2100..2300)
+RQ:extractUpTo(2200): < < data: 100 bytes > > --> rcv_nxt=2300 [2200..2300)
+RQ:extractUpTo(2300): < < data: 100 bytes > > --> rcv_nxt=2300
+SQ:discardUpTo(2300): [2300..2300)EmptyChunk
+.
+
+<!> No more events, simulation completed -- at t=0s, event #1

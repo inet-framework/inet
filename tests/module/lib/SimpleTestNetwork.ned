@@ -1,6 +1,6 @@
 import ned.DatarateChannel;
 import inet.node.inet.StandardHost;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 
 network SimpleTestNetwork
 {
@@ -13,7 +13,7 @@ network SimpleTestNetwork
   submodules:
     client: StandardHost;
     server: StandardHost;
-    configurator: IPv4NetworkConfigurator;
+    configurator: Ipv4NetworkConfigurator;
   connections:
     client.pppg++ <--> pppline <--> server.pppg++;
 }

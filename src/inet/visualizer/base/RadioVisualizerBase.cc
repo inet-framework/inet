@@ -22,6 +22,8 @@ namespace inet {
 
 namespace visualizer {
 
+using namespace inet::physicallayer;
+
 RadioVisualizerBase::RadioVisualization::RadioVisualization(const int radioModuleId) :
     radioModuleId(radioModuleId)
 {
@@ -56,6 +58,17 @@ void RadioVisualizerBase::initialize(int stage)
         height = par("height");
         placementHint = parsePlacement(par("placementHint"));
         placementPriority = par("placementPriority");
+        // antenna lobe
+        displayAntennaLobes = par("displayAntennaLobes");
+        antennaLobePlaneGlobal = par("antennaLobePlaneGlobal");
+        antennaLobePlane = par("antennaLobePlane");
+        antennaLobeRadius = par("antennaLobeRadius");
+        antennaLobeStep = deg(par("antennaLobeStep"));
+        antennaLobeOpacity = par("antennaLobeOpacity");
+        antennaLobeLineColor = cFigure::parseColor(par("antennaLobeLineColor"));
+        antennaLobeLineStyle = cFigure::parseLineStyle(par("antennaLobeLineStyle"));
+        antennaLobeLineWidth = par("antennaLobeLineWidth");
+        antennaLobeFillColor = cFigure::parseColor(par("antennaLobeFillColor"));
         if (displayRadios)
             subscribe();
     }
@@ -63,6 +76,7 @@ void RadioVisualizerBase::initialize(int stage)
 
 void RadioVisualizerBase::handleParameterChange(const char *name)
 {
+    if (!hasGUI()) return;
     if (name != nullptr) {
         if (!strcmp(name, "radioFilter"))
             radioFilter.setPattern(par("radioFilter"));

@@ -1,0 +1,448 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-05-11  Zoltan Bojthe
+
+	Remove unneeded headers, rename defs.h to Endian.h and move to common.
+
+2018-05-11  Levente Mészáros
+
+	Moved EthernetCRC and TcpIpChecksum under common/checksum folder.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    TCPIPchecksum -> TcpIpChecksum
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-03-24  Zoltan Bojthe
+
+	Removed the special pseudoheader-related TCPIPchecksum::checksum() function.
+
+====== inet-3.x ======
+
+2018-03-21  ------ inet-3.6.4 released ------
+
+2017-12-22  ------ inet-3.6.3 released ------
+
+2017-09-26  Zoltan Bojthe
+
+	Fix TCP/IP Checksum calculation with odd length
+
+2017-10-02  ------ inet-3.6.2 released ------
+
+2017-07-06  ------ inet-3.6.1 released ------
+
+2017-06-09  ------ inet-3.6.0 released ------
+
+2017-06-01  Zoltan Bojthe
+
+	CID 179379 Unused value
+
+2017-02-20  Rudolf Hornig
+
+	Fixed build error on Windows.
+
+2017-02-20  ------ inet-3.5.0 released ------
+
+2016-11-24  Irene Ruengeler
+
+	Packetdrill: Add StreamReconfig support for SCTP
+
+2016-06-15  ------ inet-3.4.0 released ------
+
+2016-06-01  ------ inet-3.3.0 released ------
+
+2016-04-06  ------ inet-3.2.4 released ------
+
+2016-03-16  ------ inet-3.2.3 released ------
+
+2016-03-11  ------ inet-3.2.2 released ------
+
+2016-01-21  ------ inet-3.2.1 released ------
+
+2015-12-16  ------ inet-3.2.0 released ------
+
+2015-11-03  Till Steinbach
+
+	Added INET_API Macro to serializers
+
+2015-10-26  ------ inet-3.1.1 released ------
+
+2015-10-15  ------ inet-3.1.0 released ------
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-04-08  Zoltan Bojthe
+
+	Fixed fragmented packets in IPv4Serializer.
+
+2015-03-30  Zoltan Bojthe
+
+	Added support for EtherLLC, and EtherSNAP to EthernetSerializer.
+
+2015-04-01  Zoltan Bojthe
+
+	Refactored the serialization of TCP options in TCPSerializer.
+
+2015-04-01  Zoltan Bojthe
+
+	UDPSerializer: verify checksum only if pseudo header data is available
+
+2015-03-26  Zoltan Bojthe
+
+	Added IGMPv3_REPORT to IGMPSerializer.
+
+2015-03-30  Zoltan Bojthe
+
+	Deserialize only packet length bytes in IPv4Serializer. Fixed serialization
+	of header length.
+
+2015-04-02  Zoltan Bojthe
+
+	Added timestamps to Ieee80211Serializer.
+
+2015-03-23  Levente Meszaros
+
+	Replaced magic numbers with proper CRC calculations. CRC residue is not part
+	of the standard, it's a hardware implementation detail. We couldn't find a
+	reliable source how to use them, so we reverted back to simply recalculating
+	the CRC value.
+
+2015-03-12  Zoltan Bojthe
+
+	Renamed ByteArrayMessage to RawPacket.
+
+2015-03-11  Zoltan Bojthe
+
+	IPv4Serializer serializes only true IPv4Datagrams, it doesn't serialize
+	DSRPkt and DSRPktExt as IPv4Datagram.
+
+2015-03-06  Levente Meszaros
+
+	Added ByteArraySerializer, DefaultSerializer.
+
+2015-02-20  Zoltan Bojthe
+
+	Refactored packet serializer classes to use a safe buffer class to read and
+	write binary data. This allows parsing incorrect binary representations without
+	runtime errors required by bit precise physical layer models.
+
+	Refactored recursion in serializers to be extensible with new packet formats
+	without modifying existing code. Fixed a number of packet length bugs and
+	inconsistencies between serialized and non-serialized forms.
+
+	Refactored the following serializers:
+	TCPSerializer, SCTPSerializer, UDPSerializer,
+	IPv4Serializer, ICMPSerializer, ARPSerializer, IGMPSerializer,
+	IPv6Serializer, ICMPv6Serializer,
+	EthernetSerializer, Ieee80211Serializer
+
+2015-02-25  Benjamin Seregi
+
+	Added 802.11 OFDM PHY frame serializer.
+
+2015-01-28  Irene Ruengeler
+
+	Handle SACK and NR_SACK separately and use getByteLength instead of getBitLength.
+
+2015-01-21  Irene Ruengeler & Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-11-19  Zoltan Bojthe
+
+	Added implementation of IGMPv3.
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2014-09-18  Andras Varga
+
+	Moved all sources under the src/inet directory, so that all #include
+	statements begin with "inet/". The motivation is to rule out potential
+	filename clashes when multiple model frameworks are used together.
+
+	HINT: You can use the "opp_githist" command in inet/_scripts to find
+	all previous locations of the sources in this directory, and to view
+	the full history in gitk. Normal invocations of gitk can only show
+	file history back to the most recent move operation.
+
+2014-07-30  Andras Varga
+
+	Changes on the inet-3.x branch so far:
+
+	Code formatting (Zoltan Bojthe)
+	- using uncrustify, see _scripts/reformat/*
+	- common style for header guards
+
+	Namespace (Zoltan Bojthe, Zsolt Prontvai)
+	- code has been moved into the inet namespace
+
+	Init stages (Zoltan Bojthe, Andras Varga)
+	- init stages: reorganized by layers
+
+	Signals (Zoltan Bojthe)
+	- replace INotifiable and NotificationBoard by signals for
+	  publish/subscribe communication
+
+	Logging (Zoltan Bojthe, Benjamin Seregi)
+	- EV log statements revised and categorized: EV_ERROR, EV_WARN,
+	  EV_INFO, EV_DETAIL, EV_DEBUG, EV_TRACE
+
+====== inet-2.x ======
+
+2015-03-04  ------ inet-2.6 released ------
+
+2014-11-07  ------ inet-2.5.1 released ------
+
+2014-10-29  ------ inet-2.5.0 released ------
+
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2014-03-14  Rudolf Hornig
+
+	sctp: added SCTP NAT support (by Irene Rungeler)
+
+2013-12-02  Zoltan Bojthe
+
+	fixes for C++ 11
+
+2013-09-20  Andras Varga
+
+	ev->EV and related OMNeT++ 5.0 logging compatible fixes
+
+2013-09-10  Zoltan Bojthe
+
+	UDPSerializer: parser: parses UDP packet to ByteArrayMessage with payload
+
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-08-08  Irene Ruengeler
+
+	sctp: Fixes for supporting HMac
+
+2013-07-17  Rudolf Hornig
+
+	sctp: implemented SCTP Stream Reset (RFC 6525) (patch submitted by Irene
+	Ruengeler).
+
+2013-07-11  Rudolf Hornig
+
+	sctp: Authentication (RFC 4895) (patch submitted by Irene Ruengeler).
+
+2013-07-10  Rudolf Hornig
+
+	sctp: Implemented Add-IP feature for SCTP (RFC 5061) (patch submitted by
+	Irene Ruegeler).
+
+2013-07-03  Rudolf Hornig
+
+	sctp: implementation of Partial Reliability SCTP (RFC 3758) by Irene
+	Ruengeler
+
+2013-07-02  Rudolf Hornig
+
+	sctp: NR_SACK feature, implemented submitted by Irene Ruengeler
+
+2013-02-20  Andras Varga
+
+	const fixes (in OMNeT++ 5.0, check_and_cast<> no longer silently
+	discards const modifier)
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-10-25  Tamas Borbely
+
+	headerserializers: compile fix for Visual C++ 10.0 and later
+	they finally have <stdint.h>
+
+2012-08-07  ------ inet-2.0.0 released ------
+
+2012-06-25  ------ inet-1.99.5 released ------
+
+2012-06-15  Zoltan Bojthe
+
+	Fixed memory leaks in SCTPSerializer
+
+2012-03-20  ------ inet-1.99.4 released ------
+
+2012-02-24  ------ inet-1.99.3 released ------
+
+2011-12-14  Zoltan Bojthe
+
+	IPv4Serializer.cc: bugfixes related to the serialization of fragmented
+	packets (fragment offset, Don't Fragment bit, More Fragments bit)
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-26  Zoltan Bojthe
+
+	Renamed IP... classes to IPv4... or IPvX...
+
+2011-05-11  Rudolf Hornig
+
+	Undo last change: moved header serializers from various contract/
+	directories back into util/headerserializers, but into separate
+	subdirectories (ipv4/, tcp/, sctp/, etc.)
+
+2011-03-09  Zoltan Bojthe
+
+	Project Features support: moved header serializers to the contract/
+	directories of various protocols (src/udp/contract/, etc.)
+
+2011-03-11  Zoltan Bojthe
+
+	TCP header serializer: remove unwanted include
+
+2011-03-03  ------ INET-1.99.0 released ------
+
+2011-03-02  Zoltan Bojthe
+
+	IPSerializer: calculate encapLength, code styling.
+
+2011-03-02  Zoltan Bojthe
+
+	change opp_error to throw cRuntimeError
+
+2011-02-24  Zoltan Bojthe
+
+	TCP, TCP_NSC, TCP_lwip: implemented "bytestream" transfer modes
+
+	also refactoring of queues for "object" and "bytecount" transfer modes
+
+2011-02-24  Zoltan Bojthe
+
+	Eliminate compile warnings
+
+2011-02-02  Levente Meszaros
+
+	Follow omnetpp changes related to include files.
+
+	Include platdep/sockets.h only from those source files which really need
+	it.
+
+2011-01-13  Zoltan Bojthe
+
+	using getEncapsulatedPacket() instead deprecated getEncapsulatedMsg()
+
+2010-05-14  Zoltan Bojthe
+
+	TCPDump calculates IP header checksum
+
+2010-06-22  Zoltan Bojthe
+
+	minimal changes - from Thomas Reschka
+
+	commits, node positions, indentation, copyright, ...
+
+2010-06-21  Zoltan Bojthe
+
+	indent changes - from Thomas Reschka
+
+2010-05-25  Zoltan Bojthe
+
+	eliminate compiler warnings
+
+2010-03-12  Rudolf Hornig
+
+	Fixed compilation on windows. Unnecessary pthread references were
+	removed from TCP dump too.
+
+2010-03-11  Rudolf Hornig
+
+	Added SCTP patch from Irene Rungeler.
+
+2010-03-10  Zoltan Bojthe
+
+	Comment changes from Thomas Reschka
+
+2010-02-09  Zoltan Bojthe
+
+	bugfix: TCP checksum calculation
+
+2010-01-28  Zoltan Bojthe
+
+	correcting BYTE_ORDER check
+
+2009-12-15  Andras Varga
+
+	fix previous commit for mingw: use the endian macros defined in defs.h
+
+	thanks Ariza!
+
+2009-12-15  Zoltan Bojthe
+
+	Improved header serializers
+
+	- multiple copies of the same checksum functions factored out into
+	  TCPIPChecksum.h/cc
+	- TCP header serializer/parser rewritten for better option management.
+	- SCTPSerializer: checksum() renamed to crc32() because it's not the
+	  same algorithm as the convential TCP/IP checksum
+	- tcp.h: use fixed-size int types (uint16_t, etc) instead of
+	  int/short/char
+	- some whitespace change (tabs to spaces)
+
+2009-11-05  Rudolf Hornig
+
+	Changes related to the TCP-SACK implementation from Thomas Reschka.
+
+2009-08-26  Andras Varga
+
+	cosmetics (warnings, tab-to-space, reindent, typos, dead code removal)
+
+2009-03-25  ------ INET-20090325 released ------
+
+2009-03-19  Michael Tuexen
+
+	Fix handling of ICMP messages.
+
+2009-03-18  Michael Tuexen
+
+	Improve compilation on Windows as reported on the omnet mailing list.
+
+2008-01-01..2009-03-25  Andras Varga, Rudolf Hornig
+
+	Porting of INET to OMNeT++ 4.0, and some general face lift:
+	* better directory structure (names changed to lowercase; moved sources
+	  under src/; better names, e.g. networkinterfaces -> linklayer)
+	* build system to use a deep makefile
+	* updated the C++ code for the 4.0 API (follow name changes; use
+	  int64-based simtime_t; use cPacket; etc.)
+	* NED files converted to 4.0 syntax
+	* make use of new features in NED files (module interfaces, inout
+	  gates, @unit, etc.)
+
+2006-02-14  Andras Varga
+
+	Initial checkin of headerserializers, from Christian Dankbar, Irene
+	Ruengeler and Michael Tuexen.
+
+	If you are interested in the early history of the code,
+	change to the project root and type
+
+	$ gitk -- src/util/headerserializers INET/src/util/headerserializers \
+	    Util/HeaderSerializers

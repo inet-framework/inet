@@ -43,7 +43,7 @@ class INET_API HttpBrowserDirect : public HttpBrowserBase
     int numInitStages() const override { return NUM_INIT_STAGES; }
 
     virtual void sendRequestToServer(BrowseEvent be) override;
-    virtual void sendRequestToServer(HttpRequestMessage *request) override;
+    virtual void sendRequestToServer(Packet *request) override;
     virtual void sendRequestToRandomServer() override;
     virtual void sendRequestsToServer(std::string www, HttpRequestQueue queue) override;
 };

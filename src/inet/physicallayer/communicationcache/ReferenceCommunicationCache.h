@@ -64,7 +64,7 @@ class INET_API ReferenceCommunicationCache : public CommunicationCacheBase
     virtual const IReception *getCachedReception(const IRadio *radio, const ITransmission *transmission) override { return nullptr; }
     virtual const IInterference *getCachedInterference(const IRadio *receiver, const ITransmission *transmission) override { return nullptr; }
     virtual const INoise *getCachedNoise(const IRadio *receiver, const ITransmission *transmission) override { return nullptr; }
-    virtual const ISNIR *getCachedSNIR(const IRadio *receiver, const ITransmission *transmission) override { return nullptr; }
+    virtual const ISnir *getCachedSNIR(const IRadio *receiver, const ITransmission *transmission) override { return nullptr; }
     virtual const IReceptionDecision *getCachedReceptionDecision(const IRadio *radio, const ITransmission *transmission, IRadioSignal::SignalPart part) override { return nullptr; }
     //@}
 };

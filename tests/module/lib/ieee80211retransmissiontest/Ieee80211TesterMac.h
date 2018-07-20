@@ -33,7 +33,7 @@ class INET_API Ieee80211TesterMac : public Ieee80211Mac
         const char *actions = nullptr;
 
     protected:
-        virtual void handleLowerPacket(cPacket *msg) override;
+        virtual void handleLowerPacket(Packet *packet) override;
 };
 
 } // namespace inet

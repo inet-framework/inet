@@ -18,8 +18,7 @@
 #ifndef __INET_IEEE80211QUEUE_H
 #define __INET_IEEE80211QUEUE_H
 
-#include "inet/common/INETDefs.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/common/packet/Packet.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -33,17 +32,17 @@ class INET_API Ieee80211Queue : public cQueue
         virtual ~Ieee80211Queue() { }
         Ieee80211Queue(int maxQueueSize, const char *name);
 
-        virtual bool insert(Ieee80211DataOrMgmtFrame *frame);
-        virtual bool insertBefore(Ieee80211DataOrMgmtFrame *where, Ieee80211DataOrMgmtFrame *frame);
-        virtual bool insertAfter(Ieee80211DataOrMgmtFrame *where, Ieee80211DataOrMgmtFrame *frame);
+        virtual bool insert(Packet *frame);
+        virtual bool insertBefore(Packet *where, Packet *frame);
+        virtual bool insertAfter(Packet *where, Packet *frame);
 
-        virtual Ieee80211DataOrMgmtFrame *remove(Ieee80211DataOrMgmtFrame *frame);
-        virtual Ieee80211DataOrMgmtFrame *pop();
+        virtual Packet *remove(Packet *frame);
+        virtual Packet *pop() override;
 
-        virtual Ieee80211DataOrMgmtFrame *front() const;
-        virtual Ieee80211DataOrMgmtFrame *back() const;
+        virtual Packet *front() const override;
+        virtual Packet *back() const override;
 
-        virtual bool contains(Ieee80211DataOrMgmtFrame *frame) const;
+        virtual bool contains(Packet *frame) const;
 
         int getNumberOfFrames() { return getLength(); }
         int getMaxQueueSize() { return maxQueueSize; }
@@ -63,8 +62,8 @@ class PendingQueue : public Ieee80211Queue {
         PendingQueue(int maxQueueSize, const char *name, Priority priority);
 
     public:
-        static int cmpMgmtOverData(Ieee80211DataOrMgmtFrame *a, Ieee80211DataOrMgmtFrame *b);
-        static int cmpMgmtOverMulticastOverUnicast(Ieee80211DataOrMgmtFrame *a, Ieee80211DataOrMgmtFrame *b);
+        static int cmpMgmtOverData(Packet *a, Packet *b);
+        static int cmpMgmtOverMulticastOverUnicast(Packet *a, Packet *b);
 };
 
 } /* namespace ieee80211 */

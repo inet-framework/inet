@@ -4,12 +4,11 @@ package inet.examples.ospfv2.areatests;
 
 import inet.common.misc.ThruputMeteringChannel;
 import inet.common.scenario.ScenarioManager;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 
 
 network OSPF_BackboneAndOneStubTest
 {
-    @display("bgb=480,300");
     types:
         channel C extends ThruputMeteringChannel
         {
@@ -21,14 +20,14 @@ network OSPF_BackboneAndOneStubTest
         Backbone: TestArea {
             parameters:
                 extGates = 1;
-                @display("p=138,156;b=136,136");
+                @display("p=300,150;b=100,100");
         }
         Stub1: TestArea {
             parameters:
                 extGates = 1;
-                @display("p=325,156;b=136,136");
+                @display("p=500,150;b=100,100");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 config = xml("<config>"+
                             "<interface hosts='**.B[*]' names='eth0' address='192.168.3.x' netmask='255.255.255.x' />"+
@@ -42,10 +41,10 @@ network OSPF_BackboneAndOneStubTest
                             "</config>");
                 addStaticRoutes = false;
                 addDefaultRoutes = false;
-                @display("p=75,43");
+                @display("p=100,100;is=s");
         }
         scenarioManager: ScenarioManager {
-            @display("p=187,43");
+            @display("p=100,200;is=s");
         }
     connections:
         Backbone.ethg[0] <--> C <--> Stub1.ethg[0];

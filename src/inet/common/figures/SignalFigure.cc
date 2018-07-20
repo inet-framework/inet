@@ -58,7 +58,7 @@ void SignalFigure::refresh()
 {
     auto center = bounds.getCenter();
     auto size = bounds.getSize() / 2;
-    for (int i = 0; i < rings.size(); i++) {
+    for (size_t i = 0; i < rings.size(); i++) {
         auto ring = rings[i];
         bool isLast = i == rings.size() - 1;
         double minR = i * ringSize;
@@ -73,7 +73,7 @@ void SignalFigure::refresh()
         ring->setBounds(cFigure::Rectangle(center.x - outerRx, center.y - outerRy, 2 * outerRx, 2 * outerRy));
         ring->setVisible(innerRx < outerRx && innerRy < outerRy);
     }
-    for (int i = 0; i < waves.size(); i++) {
+    for (size_t i = 0; i < waves.size(); i++) {
         auto wave = waves[i];
         bool isLast = i == waves.size() - 1;
         double radius = waveOffset + i * waveLength;
@@ -83,9 +83,9 @@ void SignalFigure::refresh()
         wave->setBounds(cFigure::Rectangle(center.x - outerRx, center.y - outerRy, 2 * outerRx, 2 * outerRy));
         wave->setVisible(innerRx < radius && innerRy < radius && radius < size.x && radius < size.y);
     }
-    for (int i = 0; i < rings.size(); i++)
+    for (size_t i = 0; i < rings.size(); i++)
         rings[i]->setFillOpacity(opacity / pow(fadingFactor, i * ringSize / fadingDistance));
-    for (int i = 0; i < waves.size(); i++)
+    for (size_t i = 0; i < waves.size(); i++)
         waves[i]->setLineOpacity(waveOpacityFactor * opacity / pow(fadingFactor, i * waveLength / fadingDistance));
 }
 

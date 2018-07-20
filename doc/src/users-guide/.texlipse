@@ -1,0 +1,14 @@
+#TeXlipse project settings
+#Wed Apr 11 17:15:29 CEST 2018
+markTmpDer=false
+builderNum=2
+outputDir=
+makeIndSty=
+bibrefDir=
+outputFormat=pdf
+tempDir=
+mainTexFile=inet-users-guide.tex
+outputFile=inet-users-guide.pdf
+langSpell=en
+markDer=false
+srcDir=

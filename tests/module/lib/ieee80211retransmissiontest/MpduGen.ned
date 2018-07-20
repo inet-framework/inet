@@ -15,12 +15,12 @@
 
 package ieee80211retransmissiontest;
 
-import inet.applications.contract.IUDPApp;
+import inet.applications.contract.IApp;
 
 //
 // A very simple MPDU generator module
 //
-simple MpduGen like IUDPApp
+simple MpduGen like IApp
 {
     // List of packets genereted by this module.
     // S means short data packet (SendDataWithACKFrame)
@@ -38,12 +38,12 @@ simple MpduGen like IUDPApp
     string localAddress = default("");
     double startTime @unit(s) = default(0.05s);
     @display("i=block/app");
-    @signal[sentPk](type=cPacket);
-    @signal[rcvdPk](type=cPacket);
-    @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-    @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+    @signal[packetSent](type=cPacket);
+    @signal[packetReceived](type=cPacket);
+    @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+    @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
 
     gates:
-        input udpIn @labels(UDPControlInfo/up);
-        output udpOut @labels(UDPControlInfo/down);
+        input socketIn @labels(UdpControlInfo/up);
+        output socketOut @labels(UdpControlInfo/down);
 }

@@ -27,16 +27,14 @@ import inet.visualizer.contract.ITracingObstacleLossVisualizer;
 module TracingObstacleLossVisualizer like ITracingObstacleLossVisualizer
 {
     parameters:
-        @display("i=block/app_s");
-        string canvasVisualizerType = default("TracingObstacleLossCanvasVisualizer");
-        string osgVisualizerType = default("TracingObstacleLossOsgVisualizer");
+        @display("i=block/app");
     submodules:
-        canvasVisualizer: <canvasVisualizerType> like ITracingObstacleLossVisualizer if canvasVisualizerType != "" {
+        canvasVisualizer: <default("TracingObstacleLossCanvasVisualizer")> like ITracingObstacleLossVisualizer if typename != "" {
             parameters:
-                @display("p=100,50");
+                @display("p=100,100");
         }
-        osgVisualizer: <osgVisualizerType> like ITracingObstacleLossVisualizer if osgVisualizerType != "" {
+        osgVisualizer: <default("TracingObstacleLossOsgVisualizer")> like ITracingObstacleLossVisualizer if typename != "" {
             parameters:
-                @display("p=100,150");
+                @display("p=100,200");
         }
 }

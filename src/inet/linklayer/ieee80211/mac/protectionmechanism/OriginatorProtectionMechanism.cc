@@ -38,13 +38,13 @@ void OriginatorProtectionMechanism::initialize(int stage)
 // intervals. If the calculated duration includes a fractional microsecond, that value is rounded up to the next
 // higher integer. For RTS frames sent by QoS STAs, see 8.2.5.
 //
-simtime_t OriginatorProtectionMechanism::computeRtsDurationField(Ieee80211RTSFrame* rtsFrame, Ieee80211DataOrMgmtFrame* pendingFrame)
+simtime_t OriginatorProtectionMechanism::computeRtsDurationField(Packet *rtsPacket, const Ptr<const Ieee80211RtsFrame>& rtsFrame, Packet *pendingPacket, const Ptr<const Ieee80211DataOrMgmtHeader>& pendingHeader)
 {
-    auto pendingFrameMode = rateSelection->computeMode(pendingFrame);
-    RateSelection::setFrameMode(pendingFrame, pendingFrameMode); // FIXME: Kludge
-    simtime_t pendingFrameDuration = pendingFrameMode->getDuration(pendingFrame->getBitLength());
-    simtime_t ctsFrameDuration = rateSelection->computeResponseCtsFrameMode(rtsFrame)->getDuration(LENGTH_CTS);
-    simtime_t ackFrameDuration = rateSelection->computeResponseAckFrameMode(pendingFrame)->getDuration(LENGTH_ACK);
+    auto pendingFrameMode = rateSelection->computeMode(pendingPacket, pendingHeader);
+    RateSelection::setFrameMode(pendingPacket, pendingHeader, pendingFrameMode); // KLUDGE:
+    simtime_t pendingFrameDuration = pendingFrameMode->getDuration(pendingPacket->getDataLength());
+    simtime_t ctsFrameDuration = rateSelection->computeResponseCtsFrameMode(rtsPacket, rtsFrame)->getDuration(LENGTH_CTS);
+    simtime_t ackFrameDuration = rateSelection->computeResponseAckFrameMode(pendingPacket, pendingHeader)->getDuration(LENGTH_ACK);
     simtime_t durationId = ctsFrameDuration + pendingFrameDuration + ackFrameDuration;
     return durationId + 3 * modeSet->getSifsTime();
 }
@@ -59,17 +59,17 @@ simtime_t OriginatorProtectionMechanism::computeRtsDurationField(Ieee80211RTSFra
 //     an individual address, the duration value is set to the time, in microseconds, required to transmit the
 //     next fragment of this data frame, plus two ACK frames, plus three SIFS intervals.
 //
-simtime_t OriginatorProtectionMechanism::computeDataFrameDurationField(Ieee80211DataFrame* dataFrame, Ieee80211DataOrMgmtFrame* pendingFrame)
+simtime_t OriginatorProtectionMechanism::computeDataFrameDurationField(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, Packet *pendingPacket, const Ptr<const Ieee80211DataOrMgmtHeader>& pendingHeader)
 {
-    simtime_t ackToDataFrameDuration = rateSelection->computeResponseAckFrameMode(dataFrame)->getDuration(LENGTH_ACK);
-    if (dataFrame->getReceiverAddress().isMulticast())
+    simtime_t ackToDataFrameDuration = rateSelection->computeResponseAckFrameMode(dataPacket, dataHeader)->getDuration(LENGTH_ACK);
+    if (dataHeader->getReceiverAddress().isMulticast())
         return 0;
-    if (!dataFrame->getMoreFragments())
+    if (!dataHeader->getMoreFragments())
         return ackToDataFrameDuration + modeSet->getSifsTime();
     else {
-        simtime_t pendingFrameDuration = rateSelection->computeMode(pendingFrame)->getDuration(pendingFrame->getBitLength());
-        auto pendingFrameMode = rateSelection->computeMode(pendingFrame);
-        RateSelection::setFrameMode(pendingFrame, pendingFrameMode);
+        simtime_t pendingFrameDuration = rateSelection->computeMode(pendingPacket, pendingHeader)->getDuration(pendingPacket->getDataLength());
+        auto pendingFrameMode = rateSelection->computeMode(pendingPacket, pendingHeader);
+        RateSelection::setFrameMode(pendingPacket, pendingHeader, pendingFrameMode);
         simtime_t ackToPendingFrame = pendingFrameMode->getDuration(LENGTH_ACK);
         return pendingFrameDuration + ackToDataFrameDuration + ackToPendingFrame + 3 * modeSet->getSifsTime();
     }
@@ -85,28 +85,28 @@ simtime_t OriginatorProtectionMechanism::computeDataFrameDurationField(Ieee80211
 //     individual address, the duration value is set to the time, in microseconds, required to transmit the
 //     next fragment of this management frame, plus two ACK frames, plus three SIFS intervals.
 //
-simtime_t OriginatorProtectionMechanism::computeMgmtFrameDurationField(Ieee80211ManagementFrame* mgmtFrame, Ieee80211DataOrMgmtFrame* pendingFrame)
+simtime_t OriginatorProtectionMechanism::computeMgmtFrameDurationField(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader, Packet *pendingPacket, const Ptr<const Ieee80211DataOrMgmtHeader>& pendingHeader)
 {
-    simtime_t ackFrameDuration = rateSelection->computeResponseAckFrameMode(mgmtFrame)->getDuration(LENGTH_ACK);
-    if (mgmtFrame->getReceiverAddress().isMulticast())
+    simtime_t ackFrameDuration = rateSelection->computeResponseAckFrameMode(mgmtPacket, mgmtHeader)->getDuration(LENGTH_ACK);
+    if (mgmtHeader->getReceiverAddress().isMulticast())
         return 0;
-    if (!mgmtFrame->getMoreFragments()) {
+    if (!mgmtHeader->getMoreFragments()) {
         return ackFrameDuration + modeSet->getSifsTime();
     }
     else {
-        simtime_t pendingFrameDuration = rateSelection->computeMode(pendingFrame)->getDuration(pendingFrame->getBitLength());
+        simtime_t pendingFrameDuration = rateSelection->computeMode(pendingPacket, pendingHeader)->getDuration(pendingPacket->getDataLength());
         return pendingFrameDuration + 2 * ackFrameDuration + 3 * modeSet->getSifsTime();
     }
 }
 
-simtime_t OriginatorProtectionMechanism::computeDurationField(Ieee80211Frame* frame, Ieee80211DataOrMgmtFrame* pendingFrame)
+simtime_t OriginatorProtectionMechanism::computeDurationField(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, Packet *pendingPacket, const Ptr<const Ieee80211DataOrMgmtHeader>& pendingHeader)
 {
-    if (auto rtsFrame = dynamic_cast<Ieee80211RTSFrame *>(frame))
-        return computeRtsDurationField(rtsFrame, pendingFrame);
-    else if (auto dataFrame = dynamic_cast<Ieee80211DataFrame*>(frame))
-        return computeDataFrameDurationField(dataFrame, pendingFrame);
-    else if (auto mgmtFrame = dynamic_cast<Ieee80211ManagementFrame*>(frame))
-        return computeMgmtFrameDurationField(mgmtFrame, pendingFrame);
+    if (auto rtsFrame = dynamicPtrCast<const Ieee80211RtsFrame>(header))
+        return computeRtsDurationField(packet, rtsFrame, pendingPacket, pendingHeader);
+    else if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header))
+        return computeDataFrameDurationField(packet, dataHeader, pendingPacket, pendingHeader);
+    else if (auto mgmtHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(header))
+        return computeMgmtFrameDurationField(packet, mgmtHeader, pendingPacket, pendingHeader);
     else
         throw cRuntimeError("Unknown frame");
 }

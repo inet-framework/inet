@@ -3,7 +3,7 @@ Testing InternetCloud datarate
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
 import inet.node.internetcloud.InternetCloud;
 import ned.DatarateChannel;
@@ -21,7 +21,7 @@ network CloudAndHosts
             datarate = 5Mbps;
         }
     submodules:
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 @display("p=61,163");
         }
@@ -51,15 +51,16 @@ output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
 output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
-*.sender[*].numPingApps = 1
-*.sender[*].pingApp[0].destAddr = "recip"
-*.sender[*].pingApp[0].startTime = 10s
-*.sender[*].pingApp[0].stopTime = 10.5s
-*.sender[*].pingApp[0].sendInterval = 1s
-*.sender[*].pingApp[0].printPing = true
+*.sender[*].numApps = 1
+*.sender[*].app[0].typename = "PingApp"
+*.sender[*].app[0].destAddr = "recip"
+*.sender[*].app[0].startTime = 10s
+*.sender[*].app[0].stopTime = 10.5s
+*.sender[*].app[0].sendInterval = 1s
+*.sender[*].app[0].printPing = true
 
-**.internet.networkLayer.delayer.typename = "MatrixCloudDelayer"
-**.internet.networkLayer.delayer.config = xmldoc("internetCloud.xml")
+**.internet.ipv4Delayer.typename = "MatrixCloudDelayer"
+**.internet.ipv4Delayer.config = xmldoc("internetCloud.xml")
 
 **.numSenders = 10
 
@@ -88,16 +89,16 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
 [^C].*
-CloudAndHosts\.sender\[9\]\.pingApp\[0\]: reply of 60 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=\d+ time=.*
-CloudAndHosts\.sender\[8\]\.pingApp\[0\]: reply of 60 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=\d+ time=.*
-CloudAndHosts\.sender\[7\]\.pingApp\[0\]: reply of 60 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=\d+ time=.*
-CloudAndHosts\.sender\[6\]\.pingApp\[0\]: reply of 60 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=\d+ time=.*
-CloudAndHosts\.sender\[5\]\.pingApp\[0\]: reply of 60 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=\d+ time=.*
-CloudAndHosts\.sender\[4\]\.pingApp\[0\]: reply of 60 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=\d+ time=.*
-CloudAndHosts\.sender\[3\]\.pingApp\[0\]: reply of 60 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=\d+ time=.*
-CloudAndHosts\.sender\[2\]\.pingApp\[0\]: reply of 60 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=\d+ time=.*
-CloudAndHosts\.sender\[1\]\.pingApp\[0\]: reply of 60 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=\d+ time=.*
-CloudAndHosts\.sender\[0\]\.pingApp\[0\]: reply of 60 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=\d+ time=.*
+CloudAndHosts\.sender\[9\]\.app\[0\]: reply of 56 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=\d+ time=.*
+CloudAndHosts\.sender\[8\]\.app\[0\]: reply of 56 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=\d+ time=.*
+CloudAndHosts\.sender\[7\]\.app\[0\]: reply of 56 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=\d+ time=.*
+CloudAndHosts\.sender\[6\]\.app\[0\]: reply of 56 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=\d+ time=.*
+CloudAndHosts\.sender\[5\]\.app\[0\]: reply of 56 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=\d+ time=.*
+CloudAndHosts\.sender\[4\]\.app\[0\]: reply of 56 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=\d+ time=.*
+CloudAndHosts\.sender\[3\]\.app\[0\]: reply of 56 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=\d+ time=.*
+CloudAndHosts\.sender\[2\]\.app\[0\]: reply of 56 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=\d+ time=.*
+CloudAndHosts\.sender\[1\]\.app\[0\]: reply of 56 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=\d+ time=.*
+CloudAndHosts\.sender\[0\]\.app\[0\]: reply of 56 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=\d+ time=.*
 [^C].*
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout

@@ -52,31 +52,45 @@ package inet.common.scenario;
 //         <disconnect src-module="host[2]" src-gate="ppp[0]" />
 //         <disconnect src-module="host[1]" src-gate="ppp[0]" />
 //     </at>
+//     <at t="2s">
+//         <initiate module="Router2" operation="shutdown"/>
+//         <shutdown module="Router2"/>
+//         <start module="Router2"/>
+//         <crash module="Router2"/>
+//     </at>
 // </scenario>
 // </pre>
 //
-// Built-in commands: <set-param>, <set-channel-attr>, <at>.
+// Built-in commands: <at>, <set-param>, <set-channel-param>,
+// <create-module>, <delete-module>, <connect>, <disconnect>,
+// <initiate>, <startup>, <shutdown>, <crash>
 //
 // All commands have a t attribute which carries the simulation time
 // at which the command has to be carried out. You can group several commands
 // to be carried out at the same simulation time using <at>, and
 // then only the <at> command is needed to have a t attribute.
 //
-// connect/disconnect working between nodes, with have same parent
-//
 // Supported attributes:
 //    - <set-param>: module, par, value.
-//    - <set-channel-attr>: src-module, src-gate, attr, value.
+//    - <set-channel-param>: src-module, src-gate, par, value.
 //    - <connect>: src-module, src-gate, dest-module, dest-gate, channel-type
 //        - <param>: name, value
 //    - <disconnect>: src-module, src-gate
-//          FIXME - TRANSLATE: a src-gate lehet inout gate is, akkor mindket iranyra disconnect
+//          note: if src-gate names an inout gate, both directions will be disconnected.
+//    - <create-module>: parent, submodule, type, vector
+//          parent: parent path
+//          submodule: name of created module
+//          type: type of created module
+//          vector: boolean, if true, the module created as vector element with next index,
+//                  if false, the module created as a single module,
+//                  if missing, detects existing vector by submodule name
+//    - <delete-module>: module
 //
 simple ScenarioManager
 {
     parameters:
         xml script = default(xml("<script></script>"));
-        @display("i=block/control_s");
+        @display("i=block/control");
         @labels(node,mpls-node);
 }
 

@@ -19,29 +19,24 @@
 #define __INET_LAYEREDPROTOCOLBASE_H
 
 #include "inet/common/lifecycle/OperationalBase.h"
+#include "inet/common/packet/Packet.h"
 
 namespace inet {
 
 class INET_API LayeredProtocolBase : public OperationalBase
 {
-  public:
-    static simsignal_t packetSentToUpperSignal;
-    static simsignal_t packetReceivedFromUpperSignal;
-    static simsignal_t packetFromUpperDroppedSignal;
-
-    static simsignal_t packetSentToLowerSignal;
-    static simsignal_t packetReceivedFromLowerSignal;
-    static simsignal_t packetFromLowerDroppedSignal;
-
   protected:
     virtual void handleMessageWhenUp(cMessage *message) override;
     virtual void handleSelfMessage(cMessage *message);
 
+    virtual void handleUpperMessage(cMessage *message);
+    virtual void handleLowerMessage(cMessage *message);
+
     virtual void handleUpperCommand(cMessage *message);
     virtual void handleLowerCommand(cMessage *message);
 
-    virtual void handleUpperPacket(cPacket *packet) = 0;
-    virtual void handleLowerPacket(cPacket *packet) = 0;
+    virtual void handleUpperPacket(Packet *packet);
+    virtual void handleLowerPacket(Packet *packet);
 
     virtual bool isUpperMessage(cMessage *message) = 0;
     virtual bool isLowerMessage(cMessage *message) = 0;

@@ -1,3 +1,158 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-27  Levente Mészáros
+
+	Fixed antenna directional selectivity computation in radio medium analog models.
+
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-05-17  Levente Mészáros
+
+	Added clearTags() and copied PacketProtocolTag to all received packet computations.
+
+2018-05-15  Levente Mészáros
+
+	Added conditional mobility submodule to AntennaBase.
+
+2018-05-04  Levente Mészáros
+
+	Extended error models with corruption mode parameter.
+
+	Available corruption modes: packet, chunk, byte, or bit level. 802.11
+	error models support packet corruption mode only but could be extended
+	with the others to do real MPDU aggregation.
+
+2018-05-04  Levente Mészáros
+
+	Extended receiver model with computeReceivedPacket.
+
+	This change allows using different packet corruption modes.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-01-26  Levente Mészáros
+
+	Replaced headerBitLength with headerLength where the unit is already present.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-12  Zoltan Bojthe
+
+	Fixed double and int inconsistency: NED vs. INI and NED vs. C++
+
+2018-01-09  Levente Mészáros
+
+	Extended receiver to add SignalPowerInd tag to packets.
+	Extended analog models to be able to compute the sum of a signal and a noise.
+
+2018-01-04  Levente Mészáros
+
+	Added several missing class descriptors.
+
+2017-12-22  Levente Mészáros
+
+	Fixed memory leak during processing radio configuration commands.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    APSKModulationBase -> ApskModulationBase
+	    APSKSymbol -> ApskSymbol
+	    BPSKModulation -> BpskModulation
+	    DPSKModulationBase -> DpskModulationBase
+	    DSSSOQPSK16Modulation -> DsssOqpsk16Modulation
+	    DimensionalSNIR -> DimensionalSnir
+	    GFSKModulationBase -> GfskModulationBase
+	    IAPSKModulation -> IApskModulation
+	    ISNIR -> ISnir
+	    MPSKModulation -> MpskModulation
+	    MQAMModulation -> MqamModulation
+	    MQAMModulationBase -> MqamModulationBase
+	    PPMModulationBase -> PpmModulationBase
+	    QAM16Modulation -> Qam16Modulation
+	    QAM256Modulation -> Qam256Modulation
+	    QAM64Modulation -> Qam64Modulation
+	    QPSKModulation -> QpskModulation
+	    SNIRBase -> SnirBase
+	    SNIRReceiverBase -> SnirReceiverBase
+	    ScalarSNIR -> ScalarSnir
+
+2017-12-19  Levente Mészáros
+
+	Added handleSignal to PhysicalLayerBase.
+
+2017-12-18  Levente Mészáros
+
+	Moved gates from Radio to PhysicalLayerBase.
+
+2017-12-15  Andras Varga
+
+	Fixed int/double type mismatch between NED parameter and C++ usage.
+
+2017-12-15  Zoltan Bojthe
+
+	Removed unnecessary cPar::longValue() calls.
+
+	Motivation: rely on cast operators instead because they can detect
+	overflows (when the value is cast to a smaller integer type that can not
+	represent it). Removed unnecessary .longvalue() calls. Replaced to
+	.intValue() in comparisons.
+
+2017-11-23  Levente Mészáros
+
+	Changed return type for positions and orientations to reference.
+
+2017-11-21  Levente Mészáros
+
+	Removed @opaque from fields, and added @opaque to types where needed.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-10-09  Levente Mészáros
+
+	Fixed all problems with using the newly introduced intrusive shared pointer.
+
+2017-09-15  Raphael Riebl
+
+	Added getMedium() to ITransmission.
+	Extracted IAntennaGain from IAntenna interface.
+
+2017-08-08  Raphael Riebl
+
+	Changed transmitter lookup by id instead of internal pointer.
+
+2017-05-10  Levente Mészáros
+
+	Renamed IRadioFrame to ISignal, and RadioFrame to Signal.
+
+2017-01-26  Levente Mészáros
+
+	Switched to bit type where appropriate.
+
+2017-01-25  Zoltan Bojthe
+
+	Renamed macFrame to packet where appropriate.
+
+2017-03-07  Levente Mészáros
+
+	Renamed getMacFrame to getPacket.
+
+2017-01-16  Levente Mészáros
+
+	Merged getPhyFrame into getMacFrame.
+
+2017-01-25  Zoltan Bojthe
+
+	Replaced cPacket* with Packet* where appropriate.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

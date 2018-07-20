@@ -22,8 +22,7 @@
 #include "inet/common/INETMath.h"
 #include "IIndicatorFigure.h"
 
-// for the moment commented out as omnet cannot instatiate it from a namespace
-//namespace inet {
+namespace inet {
 
 class INET_API PlotFigure : public cGroupFigure, public inet::IIndicatorFigure
 {
@@ -98,7 +97,7 @@ class INET_API PlotFigure : public cGroupFigure, public inet::IIndicatorFigure
     const char *getLabel() const;
     void setLabel(const char *text);
 
-    const int getLabelOffset() const;
+    int getLabelOffset() const;
     void setLabelOffset(int offset);
 
     const Font& getLabelFont() const;
@@ -108,7 +107,7 @@ class INET_API PlotFigure : public cGroupFigure, public inet::IIndicatorFigure
     void setLabelColor(const Color& color);
 };
 
-// } // namespace inet
+} // namespace inet
 
 #endif // ifndef __INET_PLOTFIGURE_H
 

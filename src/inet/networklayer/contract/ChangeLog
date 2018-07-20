@@ -1,3 +1,154 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-18  Zoltan Bojthe
+
+	Added bool isFragment() function to NetworkHeaderBase.
+
+2018-06-01  Zoltan Bojthe
+
+	Added B/b units to length constants and length fields of chunks.
+
+2018-05-09  Zoltan Bojthe
+
+	Implemented bind() and connect() with L3Socket.
+
+2018-05-09  Levente Mészáros
+
+	Extended INetworkSockets and implementations with local/remote address filter.
+
+2018-05-07  Levente Mészáros
+
+	Changed L3Socket to implement the new INetworkSocket interface.
+	Added a new INetworkSocket interface.
+
+2018-04-25  Zoltan Bojthe
+
+	Implemented ISocket with L3Socket.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    ARPPacket -> ArpPacket
+	    IARP -> IArp
+	    ICMPv6 -> Icmpv6
+	    IIPv6Tunneling -> IIpv6Tunneling
+	    IPv4 -> Ipv4
+	    IPv4Address -> Ipv4Address
+	    IPv4MulticastRoute -> Ipv4MulticastRoute
+	    IPv4Route -> Ipv4Route
+	    IPv6 -> Ipv6
+	    IPv6NeighbourDiscovery -> Ipv6NeighbourDiscovery
+	    IPv6Route -> Ipv6Route
+	    MACAddress -> MacAddress
+
+2017-12-11  Zoltan Bojthe
+
+	Updated for new msgc function names: getFooForUpdate, insertFoo, eraseFoo, etc.
+
+2017-12-07  Zoltan Bojthe
+
+	Camelized property names in MSG files.
+
+2017-12-05  Zoltan Bojthe
+
+	Removed "typedef const Foo ConstFoo" statements from MSG files, replaced
+	with proper const support.
+
+2017-11-21  Levente Mészáros
+
+	Removed @opaque from fields, and added @opaque to types where needed.
+
+2017-11-13  Zoltan Bojthe
+
+	Replaced "int ipProtocolId @enum(IPProtocolId)" to "IPProtocolId ipProtocolId".
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-09-20  Zoltan Bojthe
+
+	Redesigned Netfilter hooks: functions have only the Packet
+	parameter, in/out interfaces and nextHop are TAGs on the packet.
+
+2017-04-12  Zoltan Bojthe
+
+	Merged INetworkHeader and NetworkHeaderBase.
+
+2017-04-12  Levente Mészáros
+
+	Removed getNetworkHeaderLength from INetworkHeader.
+
+2017-02-03  Levente Mészáros
+
+	Removed extra IPv4Header parameters from Netfilter.
+
+2017-02-03  Levente Mészáros
+
+	Renamed to INetworkHeader.
+
+2016-07-12  Levente Mészáros
+
+	Fixed double destructor after merge and cosmetics.
+
+2016-07-06  Florian Kauer
+
+	Fix regression bug in NetfilterBase
+
+	With the newly introduced NetfilterBase, sometimes a pure virtual method
+	call was issued during the destruction phase. Apparently, under some
+	conditions the NetfilterBase was destructed before the HookBase, leading
+	to this bug. The solution includes unregistering all registered hooks in
+	the destructor of NetfilterBase.
+
+	Signed-off-by: Florian Kauer <florian.kauer@koalo.de>
+
+2016-06-30  Zoltan Bojthe
+
+	Added destructor to NetfilterBase for unregister all registered hooks.
+
+2016-06-27  Zoltan Bojthe
+
+	NetFilter hook changes: auto unregister in destructor.
+
+2016-06-02  Levente Mészáros
+
+	Renamed gates in INetworkProtocol.
+
+2016-06-02  Levente Mészáros
+
+	Added a new raw socket called L3Socket.
+
+2016-05-31  Levente Mészáros
+
+	Merged unsused INetworkLayerUpper and INetworkLayerLower into INetworkLayer.
+
+2016-05-31  Levente Mészáros
+
+	Changed positions and icons in display string to at least have well-layouted
+	network nodes.
+
+2016-04-29  Levente Mészáros
+
+	Changed vector gates to scalar gates towards transport and link layer.
+
+2016-05-31  Levente Mészáros
+
+	Implemented IPacketControlInfo, IProtocolControlInfo, ISocketControlInfo
+	interfaces with network layer control infos.
+
+2015-06-11  Levente Mészáros
+
+	Dropped obsolete RegisterTransportProtocolCommand.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

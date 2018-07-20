@@ -1,3 +1,46 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-18  Zoltan Bojthe
+
+	Removed cPanelFigure copy (from omnetpp 5.2), switched to using omnetpp::cPanelFigure.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-07-12  Levente Mészáros
+
+	Dropped obsolete DelegateSignalConfigurator, functionality is present in omnetpp by default.
+
+2017-06-12  TÖRÖK Attila
+
+	Make inet::cPanelFigure use GroupFigureRenderer.
+
+	This way, the "panel" functionality will still work with Tkenv, and won't
+	crash in Qtenv. Sadly, it will act just like a "group" in Qtenv - not
+	cancelling transformations. Thankfully this is not needed for long... I
+	hope (just until OMNeT++ 5.2 comes out).
+
+2017-06-08  Levente Mészáros
+
+	Refactored BarFigure.
+
+2017-03-29  Levente Mészáros
+
+	Fixed some GCC warnings.
+
+2016-10-26  Zoltan Bojthe
+
+	Removed compatibility macros required for OMNeT++ 4.x builds.
+
+2016-07-20  Zoltan Bojthe
+
+	Removed obsolete omnetpp 4.x code (#if OMNETPP_VERSION < 0x500).
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

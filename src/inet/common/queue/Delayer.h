@@ -38,8 +38,6 @@ class INET_API Delayer : public cSimpleModule
 
     cPar *delayPar;
 
-    static simsignal_t rcvdPkSignal;
-    static simsignal_t sentPkSignal;
     static simsignal_t delaySignal;
 };
 

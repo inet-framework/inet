@@ -22,9 +22,7 @@
 #include "inet/common/INETMath.h"
 #include "IIndicatorFigure.h"
 
-// namespace inet {
-
-using namespace inet;
+namespace inet {
 
 class INET_API IndicatorLabelFigure : public cLabelFigure, public IIndicatorFigure
 {
@@ -44,7 +42,7 @@ class INET_API IndicatorLabelFigure : public cLabelFigure, public IIndicatorFigu
     virtual void setTextFormat(const char *textFormat) { this->textFormat = textFormat; refresh(); }
 };
 
-// } // namespace inet
+} // namespace inet
 
 #endif // ifndef __INET_INDICATORTEXTFIGURE_H
 

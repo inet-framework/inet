@@ -1,0 +1,82 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    MACAddress -> MacAddress
+
+2017-12-14  Levente Mészáros
+
+	Removed unnecessary markImmutable() calls.
+
+2017-11-27  Levente Mészáros
+
+	Defragmentation restores name of fragmented frames.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-05-11  Levente Mészáros
+
+	Renamed frame variables to header where applicable.
+
+2017-05-10  Levente Mészáros
+
+	Renamed some MAC headers and frames.
+
+	Ieee80211Frame -> Ieee80211MacHeader
+	Ieee80211OneAddressFrame -> Ieee80211OneAddressHeader
+	Ieee80211TwoAddressFrame -> Ieee80211TwoAddressHeader
+	Ieee80211ACKFrame -> Ieee80211AckFrame
+	Ieee80211RTSFrame -> Ieee80211RtsFrame
+	Ieee80211CTSFrame -> Ieee80211CtsFrame
+
+2017-05-09  Levente Mészáros
+
+	Renamed multiple header chunks.
+
+	Ieee80211DataFrame -> Ieee80211DataHeader
+	Ieee80211DataOrMgmtFrame -> Ieee80211DataOrMgmtHeader
+	Ieee80211ManagementHeader -> Ieee80211MgmtHeader
+	Ieee80211ManagementFrame -> Ieee80211MgmtFrame
+
+2017-05-02  Levente Mészáros
+
+	Renamed to Ieee80211ManagementHeader.
+
+2017-04-27  Levente Mészáros
+
+	Moved Ieee80211MacTrailer handling so that fingerprints are kept.
+
+2017-04-26  Levente Mészáros
+
+	Renamed to Ieee80211MacTrailer and Ieee80211MacTrailerSerializer.
+
+2017-04-26  Levente Mészáros
+
+	Renamed to Ieee80211FcsTrailer.
+
+2017-04-26  Levente Mészáros
+
+	Fixed defragmentation FCS trailer handling.
+
+2017-04-26  Levente Mészáros
+
+	Fixed sequence number for fragments.
+
+2017-04-20  Levente Mészáros
+
+	Removed obsolete kludgie solution from reassembly and switched to new chunk API.
+
+2017-04-20  Levente Mészáros
+
+	Refactored to use the new Packet API.
+
+2017-04-12  Levente Mészáros
+
+	Replace cPacket with Packet.

@@ -27,7 +27,7 @@
 //#------------------------------------------------------------------------
 // @page mpls-pseudocode.html, MPLS Operation
 //
-// The following algorithm is carried out by the ~MPLS module:
+// The following algorithm is carried out by the ~Mpls module:
 //
 // <pre>
 // Step 1: - Check which layer the packet is coming from

@@ -21,41 +21,28 @@ namespace inet {
 
 namespace physicallayer {
 
-ReceptionResult::ReceptionResult(const IReception *reception, const std::vector<const IReceptionDecision *> *decisions, const ReceptionIndication *indication) :
+ReceptionResult::ReceptionResult(const IReception *reception, const std::vector<const IReceptionDecision *> *decisions, const Packet *packet) :
     reception(reception),
     decisions(decisions),
-    indication(indication),
-    macFrame(nullptr)
+    packet(packet)
 {
-    macFrame = reception->getTransmission()->getMacFrame()->dup();
-    bool isReceptionSuccessful = true;
-    for (auto decision : *decisions)
-        isReceptionSuccessful &= decision->isReceptionSuccessful();
-    const_cast<cPacket *>(macFrame)->setBitError(!isReceptionSuccessful);
 }
 
 ReceptionResult::~ReceptionResult()
 {
-    delete macFrame;
+    delete packet;
     delete decisions;
 }
 
 std::ostream& ReceptionResult::printToStream(std::ostream& stream, int level) const
 {
     stream << "ReceptionResult";
-    if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", indication = " << indication;
     return stream;
 }
 
-const cPacket* inet::physicallayer::ReceptionResult::getPhyFrame() const
+const Packet* ReceptionResult::getPacket() const
 {
-    return nullptr;
-}
-
-const cPacket* inet::physicallayer::ReceptionResult::getMacFrame() const
-{
-    return macFrame;
+    return packet;
 }
 
 } // namespace physicallayer

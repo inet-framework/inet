@@ -65,9 +65,9 @@ enum InitStages {
 
     /**
      * Initialization of network-layer protocols, stage 1. Network configurators
-     * (e.g. IPv4NetworkConfigurator) run in this stage and compute IP addresses
-     * and static routes; protocol-specific data (e.g. IPv4InterfaceData)
-     * are added to InterfaceEntry; netf7ilter hooks are registered in IPv4; etc.
+     * (e.g. Ipv4NetworkConfigurator) run in this stage and compute IP addresses
+     * and static routes; protocol-specific data (e.g. Ipv4InterfaceData)
+     * are added to InterfaceEntry; netf7ilter hooks are registered in Ipv4; etc.
      */
     INITSTAGE_NETWORK_LAYER = 6,
 

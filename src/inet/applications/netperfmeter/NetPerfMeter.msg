@@ -25,14 +25,11 @@
 // *
 // *   Contact: dreibh@iem.uni-due.de
 
-cplusplus {{
-#include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
-}}
+import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
+import inet.transportlayer.contract.sctp.SctpCommand;
 
 namespace inet;
-
-class noncobject SCTPSimpleMessage;
-
 
 message NetPerfMeterTransmitTimer
 {
@@ -40,6 +37,6 @@ message NetPerfMeterTransmitTimer
 }
 
 
-message NetPerfMeterDataMessage extends SCTPSimpleMessage
+class NetPerfMeterDataMessage extends SctpSimpleMessage
 {
 }

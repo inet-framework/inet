@@ -30,7 +30,7 @@ class INET_API HelloHandler : public IMessageHandler
   public:
     HelloHandler(Router *containingRouter);
 
-    void processPacket(OSPFPacket *packet, Interface *intf, Neighbor *unused = nullptr) override;
+    void processPacket(Packet *packet, Interface *intf, Neighbor *unused = nullptr) override;
 };
 
 } // namespace ospf

@@ -77,6 +77,7 @@ void PathCanvasVisualizerBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         zIndex = par("zIndex");
         auto canvas = visualizerTargetModule->getCanvas();
+        lineManager = LineManager::getCanvasLineManager(canvas);
         canvasProjection = CanvasProjection::getCanvasProjection(canvas);
         pathGroup = new cGroupFigure("paths");
         pathGroup->setZIndex(zIndex);
@@ -93,7 +94,7 @@ void PathCanvasVisualizerBase::refreshDisplay() const
         auto pathCanvasVisualization = static_cast<const PathCanvasVisualization *>(pathVisualization);
         auto moduleIds = pathCanvasVisualization->moduleIds;
         std::vector<LineSegment> segments;
-        for (int index = 1; index < moduleIds.size(); index++) {
+        for (size_t index = 1; index < moduleIds.size(); index++) {
             auto fromModuleId = moduleIds[index - 1];
             auto toModuleId = moduleIds[index];
             auto fromModule = simulation->getModule(fromModuleId);
@@ -104,7 +105,7 @@ void PathCanvasVisualizerBase::refreshDisplay() const
             segments.push_back(LineSegment(fromPosition + shift, toPosition + shift));
         }
         std::vector<cFigure::Point> points;
-        for (int index = 0; index < segments.size(); index++) {
+        for (size_t index = 0; index < segments.size(); index++) {
             if (index == 0)
                 points.push_back(canvasProjection->computeCanvasPoint(segments[index].getPoint1()));
             if (index > 0) {

@@ -1,3 +1,116 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-04-13  Levente Mészáros
+
+	Added missing ApskLayeredScalarRadio and ApskLayeredDimensionalRadio modules.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-02-23  Zoltan Bojthe
+
+	Added apskPhy protocol, added payloadProtocol field to ApskPhyHeader.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-16  Levente Mészáros
+
+	Completed remaining APSK -> Apsk renames.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    APSKCode -> ApskCode
+	    APSKDecoder -> ApskDecoder
+	    APSKDemodulator -> ApskDemodulator
+	    APSKEncoder -> ApskEncoder
+	    APSKLayeredDimensionalRadioMedium -> ApskLayeredDimensionalRadioMedium
+	    APSKLayeredErrorModel -> ApskLayeredErrorModel
+	    APSKLayeredReceiver -> ApskLayeredReceiver
+	    APSKLayeredScalarRadioMedium -> ApskLayeredScalarRadioMedium
+	    APSKLayeredTransmitter -> ApskLayeredTransmitter
+	    APSKModulationBase -> ApskModulationBase
+	    APSKModulator -> ApskModulator
+	    APSKPhyHeader -> ApskPhyHeader
+	    APSKPhyHeaderSerializer -> ApskPhyHeaderSerializer
+	    APSKSymbol -> ApskSymbol
+	    BPSKModulation -> BpskModulation
+	    IFECCoder -> IFecCoder
+	    ISNIR -> ISnir
+	    QAM16Modulation -> Qam16Modulation
+	    QAM64Modulation -> Qam64Modulation
+	    QPSKModulation -> QpskModulation
+	    SNIRReceiverBase -> SnirReceiverBase
+	    UDP -> Udp
+
+2017-12-15  Zoltan Bojthe
+
+	Remove unnecessary cPar::stringValue() calls.
+
+2017-12-14  Levente Mészáros
+
+	Removed unnecessary markImmutable() calls.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-11-13  Levente Mészáros
+
+	Fixed memory leaks found by Valgrind.
+
+2017-10-24  Levente Mészáros
+
+	Fixed chunk mutability in APSKDecoder.
+
+2017-10-19  Levente Mészáros
+
+	Simplified the reception process in APSKLayeredReceiver.
+	Removed obsolete per and packetErrorless members from SignalPacketModel.
+
+2017-10-17  Levente Mészáros
+
+	Fixed decoding/encoding in APSKRadio when the number of bits is not divisible by 8.
+
+2017-07-27  Levente Mészáros
+
+	Resurrected APSKPhyHeaderSerialier to do the bare minimum.
+
+2017-07-27  Levente Mészáros
+
+	Removed superfluous APSKPhyHeaderSerializer dependency.
+
+2017-07-14  Levente Mészáros
+
+	Fixed invalid read bug found by valgrind.
+
+2017-01-26  Levente Mészáros
+
+	Switched to bit type where appropriate.
+
+2017-01-24  Levente Mészáros
+
+	Changed to use bit/byte where appropriate.
+
+2017-01-18  Levente Mészáros
+
+	Changed APSK bitlevel radio to use Packet/Chunk properly.
+
+2017-01-25  Zoltan Bojthe
+
+	Renamed macFrame to packet where appropriate.
+
+2017-01-25  Zoltan Bojthe
+
+	Replaced cPacket* with Packet* where appropriate.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

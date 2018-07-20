@@ -1,5 +1,5 @@
 %description:
-EtherMAC and EtherMACFullDuplex module: tests IFG in full duplex mode on gigabit ethernet
+EtherMac and EtherMacFullDuplex module: tests IFG in full duplex mode on gigabit ethernet
 
 
 %inifile: {}.ini
@@ -33,8 +33,8 @@ cmdenv-express-mode=false
 *.host2.app.script = ""
 *.host2.mac.address = "AA-00-00-00-00-02"
 
-*.host*.macType = ${"EtherMAC","EtherMACFullDuplex"}
-*.host*.queueType = ${"", "DropTailQueue"}
+*.host*.mac.typename = ${"EtherMac","EtherMacFullDuplex"}
+*.host*.queue.typename = ${"", "DropTailQueue"}
 *.host*.mac.duplexMode = true     # Full duplex
 
 #*.host1.ethg$o.channel.logfile="logfile-${runnumber}.txt"
@@ -44,28 +44,28 @@ cmdenv-express-mode=false
 # logfile-*.txt are same!!!
 
 %contains: logfile-0.txt
-#1:10000000000000: 'PK at 10: 92 Bytes' (inet::EtherPhyFrame) sent:10000000000000 (100 byte) discard:0, delay:0, duration:800000
-#2:10000000896000: 'PK at 10: 92 Bytes' (inet::EtherPhyFrame) sent:10000000896000 (100 byte) discard:0, delay:0, duration:800000
-#3:20000000000000: 'PK at 20: 92 Bytes' (inet::EtherPhyFrame) sent:20000000000000 (100 byte) discard:0, delay:0, duration:800000
-#4:20000000896000: 'PK at 20: 92 Bytes' (inet::EtherPhyFrame) sent:20000000896000 (100 byte) discard:0, delay:0, duration:800000
+#1:10000000000000: 'PK at 10: 92 Bytes' (inet::EthernetSignal) sent:10000000000000 (100 byte) discard:0, delay:0, duration:800000
+#2:10000000896000: 'PK at 10: 92 Bytes' (inet::EthernetSignal) sent:10000000896000 (100 byte) discard:0, delay:0, duration:800000
+#3:20000000000000: 'PK at 20: 92 Bytes' (inet::EthernetSignal) sent:20000000000000 (100 byte) discard:0, delay:0, duration:800000
+#4:20000000896000: 'PK at 20: 92 Bytes' (inet::EthernetSignal) sent:20000000896000 (100 byte) discard:0, delay:0, duration:800000
 
 %contains: logfile-1.txt
-#1:10000000000000: 'PK at 10: 92 Bytes' (inet::EtherPhyFrame) sent:10000000000000 (100 byte) discard:0, delay:0, duration:800000
-#2:10000000896000: 'PK at 10: 92 Bytes' (inet::EtherPhyFrame) sent:10000000896000 (100 byte) discard:0, delay:0, duration:800000
-#3:20000000000000: 'PK at 20: 92 Bytes' (inet::EtherPhyFrame) sent:20000000000000 (100 byte) discard:0, delay:0, duration:800000
-#4:20000000896000: 'PK at 20: 92 Bytes' (inet::EtherPhyFrame) sent:20000000896000 (100 byte) discard:0, delay:0, duration:800000
+#1:10000000000000: 'PK at 10: 92 Bytes' (inet::EthernetSignal) sent:10000000000000 (100 byte) discard:0, delay:0, duration:800000
+#2:10000000896000: 'PK at 10: 92 Bytes' (inet::EthernetSignal) sent:10000000896000 (100 byte) discard:0, delay:0, duration:800000
+#3:20000000000000: 'PK at 20: 92 Bytes' (inet::EthernetSignal) sent:20000000000000 (100 byte) discard:0, delay:0, duration:800000
+#4:20000000896000: 'PK at 20: 92 Bytes' (inet::EthernetSignal) sent:20000000896000 (100 byte) discard:0, delay:0, duration:800000
 
 %contains: logfile-2.txt
-#1:10000000000000: 'PK at 10: 92 Bytes' (inet::EtherPhyFrame) sent:10000000000000 (100 byte) discard:0, delay:0, duration:800000
-#2:10000000896000: 'PK at 10: 92 Bytes' (inet::EtherPhyFrame) sent:10000000896000 (100 byte) discard:0, delay:0, duration:800000
-#3:20000000000000: 'PK at 20: 92 Bytes' (inet::EtherPhyFrame) sent:20000000000000 (100 byte) discard:0, delay:0, duration:800000
-#4:20000000896000: 'PK at 20: 92 Bytes' (inet::EtherPhyFrame) sent:20000000896000 (100 byte) discard:0, delay:0, duration:800000
+#1:10000000000000: 'PK at 10: 92 Bytes' (inet::EthernetSignal) sent:10000000000000 (100 byte) discard:0, delay:0, duration:800000
+#2:10000000896000: 'PK at 10: 92 Bytes' (inet::EthernetSignal) sent:10000000896000 (100 byte) discard:0, delay:0, duration:800000
+#3:20000000000000: 'PK at 20: 92 Bytes' (inet::EthernetSignal) sent:20000000000000 (100 byte) discard:0, delay:0, duration:800000
+#4:20000000896000: 'PK at 20: 92 Bytes' (inet::EthernetSignal) sent:20000000896000 (100 byte) discard:0, delay:0, duration:800000
 
 %contains: logfile-3.txt
-#1:10000000000000: 'PK at 10: 92 Bytes' (inet::EtherPhyFrame) sent:10000000000000 (100 byte) discard:0, delay:0, duration:800000
-#2:10000000896000: 'PK at 10: 92 Bytes' (inet::EtherPhyFrame) sent:10000000896000 (100 byte) discard:0, delay:0, duration:800000
-#3:20000000000000: 'PK at 20: 92 Bytes' (inet::EtherPhyFrame) sent:20000000000000 (100 byte) discard:0, delay:0, duration:800000
-#4:20000000896000: 'PK at 20: 92 Bytes' (inet::EtherPhyFrame) sent:20000000896000 (100 byte) discard:0, delay:0, duration:800000
+#1:10000000000000: 'PK at 10: 92 Bytes' (inet::EthernetSignal) sent:10000000000000 (100 byte) discard:0, delay:0, duration:800000
+#2:10000000896000: 'PK at 10: 92 Bytes' (inet::EthernetSignal) sent:10000000896000 (100 byte) discard:0, delay:0, duration:800000
+#3:20000000000000: 'PK at 20: 92 Bytes' (inet::EthernetSignal) sent:20000000000000 (100 byte) discard:0, delay:0, duration:800000
+#4:20000000896000: 'PK at 20: 92 Bytes' (inet::EthernetSignal) sent:20000000896000 (100 byte) discard:0, delay:0, duration:800000
 
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout

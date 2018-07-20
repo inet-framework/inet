@@ -28,7 +28,7 @@ class OriginatorBlockAckAgreementHandler;
 class OriginatorBlockAckAgreement
 {
     protected:
-        MACAddress receiverAddr = MACAddress::UNSPECIFIED_ADDRESS;
+        MacAddress receiverAddr = MacAddress::UNSPECIFIED_ADDRESS;
         Tid tid = -1;
         int numSentBaPolicyFrames = 0;
         SequenceNumber startingSequenceNumber = -1;
@@ -41,7 +41,7 @@ class OriginatorBlockAckAgreement
         simtime_t expirationTime = -1;
 
     public:
-        OriginatorBlockAckAgreement(MACAddress receiverAddr, Tid tid, SequenceNumber startingSequenceNumber, int bufferSize, bool isAMsduSupported, bool isDelayedBlockAckPolicySupported) :
+        OriginatorBlockAckAgreement(MacAddress receiverAddr, Tid tid, SequenceNumber startingSequenceNumber, int bufferSize, bool isAMsduSupported, bool isDelayedBlockAckPolicySupported) :
             receiverAddr(receiverAddr),
             tid(tid),
             startingSequenceNumber(startingSequenceNumber),
@@ -59,7 +59,7 @@ class OriginatorBlockAckAgreement
         virtual bool getIsAddbaRequestSent() const { return isAddbaRequestSent; }
         virtual bool getIsAMsduSupported() const { return isAMsduSupported; }
         virtual bool getIsDelayedBlockAckPolicySupported() const { return isDelayedBlockAckPolicySupported; }
-        virtual MACAddress getReceiverAddr() const { return receiverAddr; }
+        virtual MacAddress getReceiverAddr() const { return receiverAddr; }
         virtual Tid getTid() const { return tid; }
         virtual const simtime_t getBlockAckTimeoutValue() const  { return blockAckTimeoutValue; }
         virtual int getNumSentBaPolicyFrames() const { return numSentBaPolicyFrames; }

@@ -1,3 +1,252 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-05-03  Levente Mészáros
+
+	Renamed findGenericRoutingTableOf to findNextHopRoutingTableOf.
+
+2018-04-24  Levente Mészáros
+
+	Refactored SimpleNetworkLayer to optionally include an Arp module.
+
+2018-04-16  Zoltan Bojthe
+
+	Rename AddressTypes to IPv4, IPv6.
+
+2018-03-14  Zoltan Bojthe
+
+	Added some ProtocolPrinters.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-02-28  Zoltan Bojthe
+
+	networklayer: EchoProtocol: using incoming network protocol for sending reply.
+
+2018-02-26  Zoltan Bojthe
+
+	Added EchoProtocolDissector.
+
+2018-02-12  Zoltan Bojthe
+
+	Renamed functions to use camel case. Renamed routingTableOf/routingTable6Of
+	to getIpv4RoutingTableOf/getIpv6RoutingTableOf in L3AddressResolver.
+
+2018-01-24  Levente Mészáros
+
+	Adapted registerProtocol calls to the new API based on OSI service primitives.
+
+2018-01-23  Levente Mészáros
+
+	Replaced MessageDispatcher lower/upper vector gates with a single one.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-05  Zoltan Bojthe
+
+	Renamed NF_* signals to use camel case.
+	Renamed signal variables to *Signal.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IIPv4RoutingTable -> IIpv4RoutingTable
+	    IPProtocolId -> IpProtocolId
+	    IPv4 -> Ipv4
+	    IPv4Address -> Ipv4Address
+	    IPv4AddressType -> Ipv4AddressType
+	    IPv4InterfaceData -> Ipv4InterfaceData
+	    IPv4MulticastGroupInfo -> Ipv4MulticastGroupInfo
+	    IPv4MulticastGroupSourceInfo -> Ipv4MulticastGroupSourceInfo
+	    IPv4NetworkConfigurator -> Ipv4NetworkConfigurator
+	    IPv4NetworkLayer -> Ipv4NetworkLayer
+	    IPv4RoutingTable -> Ipv4RoutingTable
+	    IPv6 -> Ipv6
+	    IPv6Address -> Ipv6Address
+	    IPv6AddressType -> Ipv6AddressType
+	    IPv6Header -> Ipv6Header
+	    IPv6InterfaceData -> Ipv6InterfaceData
+	    IPv6MulticastGroupInfo -> Ipv6MulticastGroupInfo
+	    IPv6RoutingTable -> Ipv6RoutingTable
+	    ISISInterfaceData -> IsisInterfaceData
+	    MACAddress -> MacAddress
+	    MACAddressType -> MacAddressType
+	    MPLS -> Mpls
+	    PPPInterface -> PppInterface
+	    TRILLInterfaceData -> TrillInterfaceData
+
+2017-12-15  Zoltan Bojthe
+
+	Renamed deprecated info() to str().
+
+2017-12-15  Zoltan Bojthe
+
+	Removed unnecessary cPar::boolValue() calls.
+
+2017-12-14  Levente Mészáros
+
+	Removed unnecessary markImmutable() calls.
+
+2017-12-11  Zoltan Bojthe
+
+	Removed some unnecessary @customize from MSG files.
+
+2017-12-07  Zoltan Bojthe
+
+	Camelized property names in MSG files.
+
+2017-11-21  Levente Mészáros
+
+	Removed @opaque from fields, and added @opaque to types where needed.
+
+2017-11-14  Zoltan Bojthe
+
+	Replaced "int foo @enum(FooEnum)" to FooEnum foo.
+
+2017-10-19  Zoltan Bojthe
+
+	Added L3Address.msg file.
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-11-13  Levente Mészáros
+
+	Fixed NetfilterInfoHook for non-mandatory tags.
+
+2017-09-21  Zoltan Bojthe
+
+	Merged InterfaceEntry and corresponding NIC module.
+	InterfaceEntry->getName() replaced to InterfaceEntry->getInterfaceName().
+
+2017-09-20  Zoltan Bojthe
+
+	Redesigned Netfilter hooks: functions have only the Packet
+	parameter, in/out interfaces and nextHop are TAGs on the packet.
+
+2017-07-05  Levente Mészáros
+
+	Refactored L3/L4 protocol tools.
+
+2017-06-12  Zoltan Bojthe
+
+	Fixed copy-paste bug in InterfaceEntry (delete pointer before override)
+
+2017-05-08  Levente Mészáros
+
+	Extended L3AddressResolver host lookup with MAC addresses.
+
+2017-04-24  Zoltan Bojthe
+
+	Added L3, L4 tools: peekNetworkHeader(), removeNetworkHeader(),
+	peekTransportHeader(), removeTransportHeader()
+
+2017-04-05  Zoltan Bojthe
+
+	Added copy constructor and operator= to L3Address.
+
+2017-03-31  Zoltan Bojthe
+
+	Removed obsolete OrigNetworkDatagramTag.
+
+2017-03-23  Levente Mészáros
+
+	Fixed disabled IPv4 feature.
+
+2017-02-03  Levente Mészáros
+
+	Removed extra IPv4Header parameters from Netfilter.
+
+2017-02-03  Levente Mészáros
+
+	Renamed to INetworkHeader.
+
+2017-02-01  Levente Mészáros
+
+	Fixed processEchoRequest in EchoProtocol.
+
+2016-06-30  Zoltan Bojthe
+
+	Changed info() format in InterfaceEntry.
+
+2016-06-27  Zoltan Bojthe
+
+	NetFilter hook changes: auto unregister in destructor.
+
+2016-06-17  Zoltan Bojthe
+
+	Fixed EchoProtocol for PingApp.
+
+2015-06-11  Levente Mészáros
+
+	Dropped obsolete IPRegisterProtocolCommand.
+
+2016-06-08  Zoltan Bojthe
+
+	Remove SimpleNetworkProtocolControlInfo, switched to GenericNetworkProtocolControlInfo.
+
+2016-05-31  Levente Mészáros
+
+	Changed positions and icons in display string to at least have well-layouted
+	network nodes.
+
+2016-05-31  Levente Mészáros
+
+	Added MessageDispatcher to all network layers.
+
+2016-05-30  Levente Mészáros
+
+	Filled missing fields in generic network control infos.
+
+2015-08-12  Zoltan Bojthe
+
+	Dropped obsolete getNetworkLayerGateIndex() and nwLayerGateIndex from InterfaceEntry.
+
+2015-08-12  Zoltan Bojthe
+
+	Dropped obsolete getInterfaceByNetworkLayerGateIndex() from InterfaceTable.
+
+2016-05-31  Levente Mészáros
+
+	Renamed networkLayer submodule to ipv4 and ipv6 submodules.
+
+2016-04-29  Levente Mészáros
+
+	Changed vector gates to scalar gates towards transport and link layer.
+
+2016-05-31  Levente Mészáros
+
+	Implemented IPacketControlInfo, IProtocolControlInfo, ISocketControlInfo
+	interfaces with network layer control infos.
+
+2016-05-02  Levente Mészáros
+
+	Added new registerProtocol() calls.
+
+2016-05-30  Levente Mészáros
+
+	Moved routing table modules under the corresponding network layer modules.
+
+2016-04-29  Levente Mészáros
+
+	Dropped obsolete IPSocket.registerProtocol() calls.
+
+2016-04-27  Levente Mészáros
+
+	Dropped obsolete IPSocket.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

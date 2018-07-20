@@ -55,7 +55,7 @@ class INET_API L2NetworkConfigurator : public cSimpleModule
 
       public:
         Node(cModule *module) : Topology::Node(module->getId()) { this->module = module; interfaceTable = nullptr; }
-        ~Node() { for (int i = 0; i < (int)interfaceInfos.size(); i++) delete interfaceInfos[i]; }
+        ~Node() { for (size_t i = 0; i < interfaceInfos.size(); i++) delete interfaceInfos[i]; }
     };
 
     /**
@@ -71,7 +71,7 @@ class INET_API L2NetworkConfigurator : public cSimpleModule
 
       public:
         InterfaceInfo(Node *node, Node *childNode, InterfaceEntry *interfaceEntry);
-        virtual std::string getFullPath() const override { return interfaceEntry->getFullPath(); }
+        virtual std::string getFullPath() const override { return interfaceEntry->getInterfaceFullPath(); }
     };
 
     class Matcher

@@ -19,12 +19,13 @@
 #define __INET_IEEE8021DRELAY_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/InterfaceTable.h"
-#include "inet/linklayer/ethernet/switch/IMACAddressTable.h"
+#include "inet/linklayer/ethernet/switch/IMacAddressTable.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/linklayer/ieee8021d/common/Ieee8021dBPDU_m.h"
+#include "inet/linklayer/ieee8021d/common/Ieee8021dBpdu_m.h"
 
 namespace inet {
 
@@ -38,13 +39,13 @@ class INET_API Ieee8021dRelay : public cSimpleModule, public ILifecycle
     Ieee8021dRelay();
 
   protected:
-    MACAddress bridgeAddress;
+    MacAddress bridgeAddress;
     IInterfaceTable *ifTable = nullptr;
-    IMACAddressTable *macTable = nullptr;
+    IMacAddressTable *macTable = nullptr;
     InterfaceEntry *ie = nullptr;
+    FcsMode fcsMode = FCS_MODE_UNDEFINED;
     bool isOperational = false;
     bool isStpAware = false;
-    unsigned int portCount = 0;    // number of ports in the switch
 
     // statistics: see finish() for details.
     int numReceivedNetworkFrames = 0;
@@ -67,22 +68,22 @@ class INET_API Ieee8021dRelay : public cSimpleModule, public ILifecycle
      * Includes calls to updateTableWithAddress() and getPortForAddress().
      *
      */
-    void handleAndDispatchFrame(EtherFrame *frame);
-    void dispatch(EtherFrame *frame, unsigned int portNum);
-    void learn(EtherFrame *frame);
-    void broadcast(EtherFrame *frame);
+    void handleAndDispatchFrame(Packet *packet);
+    void dispatch(Packet *packet, InterfaceEntry *ie);
+    void learn(MacAddress srcAddr, int arrivalInterfaceId);
+    void broadcast(Packet *packet);
 
     /**
      * Receives BPDU from the STP/RSTP module and dispatch it to network.
      * Sets EherFrame destination, source, etc. according to the BPDU's Ieee802Ctrl info.
      */
-    void dispatchBPDU(BPDU *bpdu);
+    void dispatchBPDU(Packet *packet);
 
     /**
      * Deliver BPDU to the STP/RSTP module.
      * Sets the BPDU's Ieee802Ctrl info according to the arriving EtherFrame.
      */
-    void deliverBPDU(EtherFrame *frame);
+    void deliverBPDU(Packet *packet);
 
     // For lifecycle
     virtual void start();
@@ -93,6 +94,8 @@ class INET_API Ieee8021dRelay : public cSimpleModule, public ILifecycle
      * Gets port data from the InterfaceTable
      */
     Ieee8021dInterfaceData *getPortInterfaceData(unsigned int portNum);
+
+    bool isForwardingInterface(InterfaceEntry *ie);
 
     /*
      * Returns the first non-loopback interface.

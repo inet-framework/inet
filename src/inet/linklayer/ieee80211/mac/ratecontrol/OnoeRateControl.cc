@@ -20,6 +20,8 @@
 namespace inet {
 namespace ieee80211 {
 
+using namespace inet::physicallayer;
+
 Define_Module(OnoeRateControl);
 
 void OnoeRateControl::initialize(int stage)
@@ -53,7 +55,7 @@ void OnoeRateControl::handleMessage(cMessage* msg)
     throw cRuntimeError("This module doesn't handle self messages");
 }
 
-void OnoeRateControl::frameTransmitted(const Ieee80211Frame* frame, int retryCount, bool isSuccessful, bool isGivenUp)
+void OnoeRateControl::frameTransmitted(Packet *frame, int retryCount, bool isSuccessful, bool isGivenUp)
 {
     computeModeIfTimerIsExpired();
     if (isSuccessful)
@@ -73,7 +75,7 @@ void OnoeRateControl::computeModeIfTimerIsExpired()
     }
 }
 
-void OnoeRateControl::frameReceived(const Ieee80211Frame* frame, const Ieee80211ReceptionIndication* receptionIndication)
+void OnoeRateControl::frameReceived(Packet *frame)
 {
 }
 

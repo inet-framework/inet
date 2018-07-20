@@ -16,12 +16,13 @@ output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
 output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
-*.host.numPingApps = 1
-*.host.pingApp[0].destAddr = "192.168.0.42"
-*.host.pingApp[0].startTime = 0s
-*.host.pingApp[0].stopTime = 6s
+*.host.numApps = 1
+*.host.app[0].typename = "PingApp"
+*.host.app[0].destAddr = "192.168.0.42"
+*.host.app[0].startTime = 0s
+*.host.app[0].stopTime = 6s
 
-*.host.networkLayer.configurator.networkConfiguratorModule = ""
+*.host.ipv4.configurator.networkConfiguratorModule = ""
 
 **.hasStatus = true
 **.scenarioManager.script = xmldoc("scenario.xml")
@@ -29,14 +30,12 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %file: test.ned
 
 import inet.node.inet.StandardHost;
-import inet.common.lifecycle.LifecycleController;
 import inet.common.scenario.ScenarioManager;
 
 network Test
 {
     submodules:
         scenarioManager: ScenarioManager;
-        lifecycleController: LifecycleController;
         host: StandardHost;
 }
 
@@ -45,22 +44,22 @@ network Test
 
 <scenario>
     <at t="3.0">
-        <tell module="lifecycleController" target="host" operation="NodeShutdownOperation"/>
+        <shutdown module="host"/>
     </at>
 </scenario>
 
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event #\d+  t=0   Test\.host\.pingApp\[0\] \(PingApp, id=\d+\)
+\*\* Event #\d+  t=0   Test\.host\.app\[0\] \(PingApp, id=\d+\)
 Starting up: dest=192\.168\.0\.42  src=<none>seqNo=0
 Sending ping request #0 to lower layer\.
 .*
-\*\* Event #\d+  t=2   Test\.host\.pingApp\[0\] \(PingApp, id=\d+\)
+\*\* Event #\d+  t=2   Test\.host\.app\[0\] \(PingApp, id=\d+\)
 Sending ping request #2 to lower layer\.
 .*
 \*\* Event #\d+  t=3   Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <at> command\.\.\.
-processing <tell> command\.\.\.
+processing <shutdown> command\.\.\.
 Doing stage 0/8 of operation inet::NodeShutdownOperation on Test\.host
 Test\.host shutting down
 .*

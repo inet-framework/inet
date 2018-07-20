@@ -33,7 +33,7 @@
 // Protocols are represented by simple modules. A simple module's external
 // interface (gates [connectors] and parameters) is described in a NED file,
 // and the implementation is contained in a C++ class with the same name.
-// Some examples: ~TCP, ~IPv4.
+// Some examples: ~Tcp, ~Ipv4.
 //
 // These modules can be freely combined to form hosts and other network devices
 // with the NED language (no C++ code and no recompilation required).
@@ -47,8 +47,8 @@
 // a MAC, and possibly other simple modules. See ~EthernetInterface as an example.
 //
 // Not all modules implement protocols though. There are modules which hold
-// data (for example ~IPv4RoutingTable), perform autoconfiguration of a network
-// (~FlatNetworkConfigurator), move a mobile node around (for example
+// data (for example ~Ipv4RoutingTable), perform autoconfiguration of a network
+// (~Ipv4FlatNetworkConfigurator), move a mobile node around (for example
 // ~ConstSpeedMobility), and perform housekeeping associated with radio channels
 // in wireless simulations (~IRadioMedium).
 //
@@ -80,23 +80,23 @@
 //   <code>interfaceTable</code> to be able to find it. (They obtain a <code>cModule *</code>
 //   pointer to it, then cast it to <code>InterfaceTable *</code> to be able to call its
 //   functions). Network interfaces get dynamically registered (added to the table)
-//   by simple modules implementing the network interface, for example ~EtherMAC.
+//   by simple modules implementing the network interface, for example ~EtherMac.
 //
-// - ~IPv4RoutingTable. This module contains the IP (v4) routing table, and heavily relies
+// - ~Ipv4RoutingTable. This module contains the IP (v4) routing table, and heavily relies
 //   on ~InterfaceTable for its operation. This module is also accessed from other
-//   modules (typically ~IPv4) by calling the public member functions of its C++ class.
+//   modules (typically ~Ipv4) by calling the public member functions of its C++ class.
 //   There are member functions for querying, adding, deleting routes, and
 //   finding the best matching route for a given destination IP address.
 //   The routing table submodule within the host (router) must be called
 //   <code>routingTable</code> for other modules to find it.
 //
-// - ~IPv6RoutingTable. This is like ~IPv4RoutingTable, but for IPv6.
+// - ~Ipv6RoutingTable. This is like ~Ipv4RoutingTable, but for Ipv6.
 //
 // <h3>Common modules at network level</h3>
 //
 // Some modules have only one instance, at global network level:
 //
-// - ~FlatNetworkConfigurator assigns IP addresses to hosts and routers,
+// - ~Ipv4FlatNetworkConfigurator assigns IP addresses to hosts and routers,
 //   and sets up static routing.
 //
 // - ~ScenarioManager makes simulations scriptable. Modules can be made to support
@@ -127,9 +127,9 @@
 // Control info only holds auxiliary information for the next protocol layer,
 // and is not supposed to be sent over the network to other hosts and routers.
 //
-// @page ipaddresses.html, Specifying IP (IPv6) addresses in module parameters
+// @page ipaddresses.html, Specifying IP (Ipv6) addresses in module parameters
 //
-// In INET, ~TCP, ~UDP and all application layer modules work with
+// In INET, ~Tcp, ~Udp and all application layer modules work with
 // both IPv4 and IPv6. Internally they use the Address C++ class, which
 // can represent both IPv4 and IPv6 addresses.
 //
@@ -150,7 +150,7 @@
 //
 // Routing files are files with <tt>.irt</tt> or <tt>.mrt</tt> extension,
 // and their names are passed in the routingFileName parameter
-// to ~IPv4RoutingTable modules. RoutingTables are present in all
+// to ~Ipv4RoutingTable modules. RoutingTables are present in all
 // IP nodes (hosts and routers).
 //
 // Routing files may contain network interface configuration and static
@@ -159,7 +159,7 @@
 //
 // Interfaces themselves are represented in the simulation by modules
 // (such as the ~PPP module). Modules automatically register themselves
-// with appropriate defaults in the ~IPv4RoutingTable, and entries in the
+// with appropriate defaults in the ~Ipv4RoutingTable, and entries in the
 // routing file refine (overwrite) these settings.
 // Interfaces are identified by names (e.g. ppp0, ppp1, eth0) which
 // are normally derived from the module's name: a module called
@@ -239,28 +239,26 @@
 //
 //
 //
-// @page ipv6overview.html, IPv6 model overview
+// @page ipv6overview.html, Ipv6 model overview
 //
-// IPv6 support is implemented by several cooperating modules. The ~IPv6 module
-// implements IPv6 datagram handling (sending, forwarding etc). It relies on
-// ~IPv6RoutingTable to get access to the routes. ~IPv6RoutingTable also contains the
+// Ipv6 support is implemented by several cooperating modules. The ~Ipv6 module
+// implements Ipv6 datagram handling (sending, forwarding etc). It relies on
+// ~Ipv6RoutingTable to get access to the routes. ~Ipv6RoutingTable also contains the
 // neighbour discovery data structures (destination cache, neighbour cache,
 // prefix list -- the latter effectively merged into the route table). Interface
 // configuration (address, state, timeouts etc) is held in the ~InterfaceTable,
-// in <tt>IPv6InterfaceData</tt> objects attached to <tt>InterfaceEntry</tt>
+// in <tt>Ipv6InterfaceData</tt> objects attached to <tt>InterfaceEntry</tt>
 // as its <tt>ipv6()</tt> member.
 //
-// The ~IPv6NeighbourDiscovery module implements all tasks associated with
+// The ~Ipv6NeighbourDiscovery module implements all tasks associated with
 // neighbour discovery and stateless address autoconfiguration. The data
 // structures themselves (destination cache, neighbour cache, prefix list)
-// are kept in ~IPv6RoutingTable, and are accessed via public C++ methods.
+// are kept in ~Ipv6RoutingTable, and are accessed via public C++ methods.
 // Neighbour discovery packets are only sent and processed by this module --
-// when ~IPv6 receives one, it forwards the packet to ~IPv6NeighbourDiscovery.
+// when ~Ipv6 receives one, it forwards the packet to ~Ipv6NeighbourDiscovery.
 //
 // The rest of ICMPv6 (ICMP errors, echo request/reply etc) is implemented in
-// the ~ICMPv6 module, just like with IPv4. ICMP errors are sent to
-// ~IPv6ErrorHandling, which the user can extend or replace to have errors
-// handled in the way she likes.
+// the ~Icmpv6 module, just like with IPv4.
 //
 
 package inet;

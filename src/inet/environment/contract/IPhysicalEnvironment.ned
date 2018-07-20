@@ -20,5 +20,5 @@ package inet.environment.contract;
 moduleinterface IPhysicalEnvironment
 {
     parameters:
-        @display("i=misc/town_s");
+        @display("i=misc/town");
 }

@@ -1,3 +1,106 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-04-09  Zoltan Bojthe
+
+	Fixed mac modules initialize to call registerInterface() in INITSTAGE_LINK_LAYER.
+
+2018-03-14  Zoltan Bojthe
+
+	Added some LMacProtocolPrinter.
+
+2018-02-13  Gyorgy Szaszko
+
+	Switched node index for initial slot randomization.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-03-06  Gyorgy Szaszko
+
+	Added missing packet name.
+
+2018-02-27  Zoltan Bojthe
+
+	Added type field for LMacHeader and use it to store type of lmac packet.
+
+2018-02-26  Zoltan Bojthe
+
+	Added LMacProtocolDissector.
+
+2018-02-22  Zoltan Bojthe
+
+	Added missing PacketProtocolTag.
+
+2018-02-19  Zoltan Bojthe
+
+	Renamed functions to use camel case.
+
+2018-01-29  Zoltan Bojthe
+
+	Changed headerLength field type to bit unit.
+
+2018-01-26  Levente Mészáros
+
+	Fixed headerLength unit, left interpretation unchanged.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-12  Zoltan Bojthe
+
+	Fixed double and int inconsistency: NED vs. INI and NED vs. C++
+
+2018-01-11  Zoltan Bojthe
+
+	Renamed all *Nic modules to *Interface.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    APSKScalarRadio -> ApskScalarRadio
+	    IMACProtocol -> IMacProtocol
+	    LMacLayer -> LMac
+	    LightweightNic -> LNic
+	    MACAddress -> MacAddress
+	    MACProtocolBase -> MacProtocolBase
+
+2017-12-18  Zoltan Bojthe
+
+	Added LNic.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-07-14  Levente Mészáros
+
+	Replaced cPacket with Packet in LayeredProtocolBase and subclasses.
+
+2017-07-12  Levente Mészáros
+
+	Added missing packet drop related statistics.
+	Added missing packetDrop signal emitting code.
+
+2017-01-19  Levente Mészáros
+
+	Renamed LMacFrame to LMacHeader.
+	Renamed MACFrameBase to MacHeaderBase.
+	Changed to use the new Packet class.
+
+2016-10-26  Zoltan Bojthe
+
+	Removed compatibility macros required for OMNeT++ 4.x builds.
+
+2015-06-23  Levente Mészáros
+
+	Added network protocol to BMac, LMac, CSMA frames.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

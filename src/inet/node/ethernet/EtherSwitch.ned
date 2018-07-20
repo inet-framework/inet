@@ -18,12 +18,13 @@
 
 package inet.node.ethernet;
 
+import inet.common.MessageDispatcher;
 import inet.common.lifecycle.NodeStatus;
-import inet.linklayer.contract.IMACAddressTable;
-import inet.linklayer.contract.IMACRelayUnit;
-import inet.linklayer.contract.ISpanningTree;
-import inet.linklayer.contract.IWiredNic;
 import inet.linklayer.configurator.L2NodeConfigurator;
+import inet.linklayer.contract.IEthernetInterface;
+import inet.linklayer.contract.IMacAddressTable;
+import inet.linklayer.contract.IMacRelayUnit;
+import inet.linklayer.contract.ISpanningTree;
 import inet.networklayer.common.InterfaceTable;
 
 
@@ -43,50 +44,50 @@ module EtherSwitch
         @labels(node,ethernet-node);
         @display("i=device/switch");
         bool hasStatus = default(false);
-        bool csmacdSupport = default(true);  // by default use CSMA/CD
-        string macType = default(csmacdSupport ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
+        bool csmacdSupport = default(true);  // by default use CSMA/CD --FIXME remove
         string spanningTreeProtocol = default("");
-        string relayUnitType = default(firstAvailable("Ieee8021dRelay","MACRelayUnit")); // type of the ~IMACRelayUnit;
-        string macTableType = default("MACAddressTable"); // type of the ~IMACAddressTable
-        eth[*].encapType = "EtherEncapDummy";
+        eth[*].encap.typename = "EtherEncapDummy";
         eth[*].csmacdSupport = csmacdSupport;
-        eth[*].macType = macType;
+        eth[*].mac.typename = default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex");
         *.interfaceTableModule = default(absPath(".interfaceTable"));
+        *.macTableModule = default(absPath(".macTable"));
     gates:
         inout ethg[] @labels(EtherFrame-conn);
     submodules:
         status: NodeStatus if hasStatus {
-            @display("p=73,111;is=s");
+            @display("p=100,400;is=s");
         }
         l2NodeConfigurator: L2NodeConfigurator if spanningTreeProtocol != "" {
-            @display("p=73,208");
+            @display("p=100,300;is=s");
         }
         interfaceTable: InterfaceTable {
-            @display("p=73,65;is=s");
+            @display("p=100,200;is=s");
         }
-        macTable: <macTableType> like IMACAddressTable {
-            @display("p=73,19;is=s");
+        macTable: <default("MacAddressTable")> like IMacAddressTable {
+            @display("p=100,100;is=s");
         }
-        relayUnit: <relayUnitType> like IMACRelayUnit {
-            parameters:
-                @display("p=263,50;is=m");
-            gates:
-                ifIn[sizeof(ethg)];
-                ifOut[sizeof(ethg)];
+        relayUnit: <default(firstAvailable("Ieee8021dRelay","MacRelayUnit"))> like IMacRelayUnit {
+            @display("p=400,100;is=m");
         }
         stp: <spanningTreeProtocol> like ISpanningTree if spanningTreeProtocol != "" {
-            @display("p=168,50");
+            @display("p=250,100");
         }
-        eth[sizeof(ethg)]: <default("EthernetInterface")> like IWiredNic {
+        nl: MessageDispatcher {
+            parameters:
+                @display("p=800,200;b=1200,5");
+        }
+        eth[sizeof(ethg)]: <default("EthernetInterface")> like IEthernetInterface {
             parameters:
                 mac.promiscuous = true;
-                @display("p=263,150,row;q=txQueue");
+                @display("p=250,300,row,150;q=txQueue");
         }
     connections:
+        relayUnit.ifOut --> nl.in++;
+        relayUnit.ifIn <-- nl.out++;
         for i=0..sizeof(ethg)-1 {
-            eth[i].upperLayerIn <-- relayUnit.ifOut++;
-            eth[i].upperLayerOut --> relayUnit.ifIn++;
-            eth[i].phys <--> ethg[i];
+            nl.out++ --> eth[i].upperLayerIn;
+            nl.in++ <-- eth[i].upperLayerOut;
+            eth[i].phys <--> { @display("m=s"); } <--> ethg[i];
         }
 
         if spanningTreeProtocol != "" {

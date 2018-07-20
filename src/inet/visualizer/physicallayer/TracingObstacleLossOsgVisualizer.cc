@@ -17,8 +17,8 @@
 
 #include "inet/common/geometry/common/Rotation.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/OSGScene.h"
-#include "inet/common/OSGUtils.h"
+#include "inet/common/OsgScene.h"
+#include "inet/common/OsgUtils.h"
 #include "inet/visualizer/physicallayer/TracingObstacleLossOsgVisualizer.h"
 
 #ifdef WITH_OSG
@@ -29,6 +29,8 @@
 namespace inet {
 
 namespace visualizer {
+
+using namespace inet::physicallayer;
 
 Define_Module(TracingObstacleLossOsgVisualizer);
 
@@ -59,11 +61,11 @@ const TracingObstacleLossVisualizerBase::ObstacleLossVisualization *TracingObsta
     auto intersection2 = obstaclePenetratedEvent->intersection2;
     auto normal1 = obstaclePenetratedEvent->normal1;
     auto normal2 = obstaclePenetratedEvent->normal2;
-    auto loss = obstaclePenetratedEvent->loss;
+    // TODO: display auto loss = obstaclePenetratedEvent->loss;
     const Rotation rotation(object->getOrientation());
     const Coord& position = object->getPosition();
-    const Coord rotatedIntersection1 = rotation.rotateVectorClockwise(intersection1);
-    const Coord rotatedIntersection2 = rotation.rotateVectorClockwise(intersection2);
+    const Coord rotatedIntersection1 = rotation.rotateVector(intersection1);
+    const Coord rotatedIntersection2 = rotation.rotateVector(intersection2);
     double intersectionDistance = intersection2.distance(intersection1);
     auto group = new osg::Group();
     if (displayIntersections) {
@@ -76,8 +78,8 @@ const TracingObstacleLossVisualizerBase::ObstacleLossVisualization *TracingObsta
     if (displayFaceNormalVectors) {
         Coord normalVisualization1 = normal1 / normal1.length() * intersectionDistance / 10;
         Coord normalVisualization2 = normal2 / normal2.length() * intersectionDistance / 10;
-        auto geometry1 = inet::osg::createLineGeometry(rotatedIntersection1 + position, rotatedIntersection1 + position + rotation.rotateVectorClockwise(normalVisualization1));
-        auto geometry2 = inet::osg::createLineGeometry(rotatedIntersection2 + position, rotatedIntersection2 + position + rotation.rotateVectorClockwise(normalVisualization2));
+        auto geometry1 = inet::osg::createLineGeometry(rotatedIntersection1 + position, rotatedIntersection1 + position + rotation.rotateVector(normalVisualization1));
+        auto geometry2 = inet::osg::createLineGeometry(rotatedIntersection2 + position, rotatedIntersection2 + position + rotation.rotateVector(normalVisualization2));
         auto geode = new osg::Geode();
         geode->addDrawable(geometry1);
         geode->addDrawable(geometry2);
@@ -107,7 +109,7 @@ void TracingObstacleLossOsgVisualizer::setAlpha(const ObstacleLossVisualization 
 {
     auto obstacleLossOsgVisualization = static_cast<const ObstacleLossOsgVisualization *>(obstacleLossVisualization);
     auto node = obstacleLossOsgVisualization->node;
-    for (int i = 0; i < node->getNumChildren(); i++) {
+    for (unsigned int i = 0; i < node->getNumChildren(); i++) {
         auto material = static_cast<osg::Material *>(node->getChild(i)->getOrCreateStateSet()->getAttribute(osg::StateAttribute::MATERIAL));
         material->setAlpha(osg::Material::FRONT_AND_BACK, alpha);
     }

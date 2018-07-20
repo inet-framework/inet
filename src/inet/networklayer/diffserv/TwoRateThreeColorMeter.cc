@@ -38,8 +38,8 @@ void TwoRateThreeColorMeter::initialize(int stage)
         WATCH(numYellow);
         WATCH(numRed);
 
-        PBS = 8 * (int)par("pbs");
-        CBS = 8 * (int)par("cbs");
+        PBS = 8 * par("pbs").intValue();
+        CBS = 8 * par("cbs").intValue();
         colorAwareMode = par("colorAwareMode");
         Tp = PBS;
         Tc = CBS;
@@ -54,9 +54,7 @@ void TwoRateThreeColorMeter::initialize(int stage)
 
 void TwoRateThreeColorMeter::handleMessage(cMessage *msg)
 {
-    cPacket *packet = findIPDatagramInPacket(check_and_cast<cPacket *>(msg));
-    if (!packet)
-        throw cRuntimeError("TwoRateThreeColorMeter received a packet that does not encapsulate an IP datagram.");
+    cPacket *packet = check_and_cast<cPacket *>(msg);
 
     numRcvd++;
     int color = meterPacket(packet);

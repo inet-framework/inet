@@ -1,25 +1,25 @@
-# workingdir,                        args,                                          simtimelimit,    fingerprint
-.,                                   -f ethernet-switch.ini -r 0,                  ,                 04fc-61f8/tplx
-.,                                   -f ethernet-switch.ini -r 1,                  ,                 1707-930b/tplx
-.,                                   -f ethernet-switch.ini -r 2,                  ,                 01a7-e5ca/tplx
-.,                                   -f ethernet-switch.ini -r 3,                  ,                 44bc-b454/tplx
-.,                                   -f ethernet-switch.ini -r 4,                  ,                 db69-a88a/tplx
-.,                                   -f ethernet-switch.ini -r 5,                  ,                 7a84-4678/tplx
-.,                                   -f ethernet-switch.ini -r 6,                  ,                 b666-188b/tplx
-.,                                   -f ethernet-switch.ini -r 7,                  ,                 9585-5669/tplx
-.,                                   -f ethernet-switch.ini -r 8,                  ,                 85f0-afe2/tplx
-.,                                   -f ethernet-switch.ini -r 9,                  ,                 4f37-601b/tplx
-.,                                   -f ethernet-switch.ini -r 10,                 ,                 d5a5-eb6a/tplx
-.,                                   -f ethernet-switch.ini -r 11,                 ,                 77fe-445d/tplx
-.,                                   -f ethernet-switch.ini -r 12,                 ,                 2bef-7068/tplx
-.,                                   -f ethernet-switch.ini -r 13,                 ,                 34e4-018c/tplx
-.,                                   -f ethernet-switch.ini -r 14,                 ,                 6b29-74df/tplx
-.,                                   -f ethernet-switch.ini -r 15,                 ,                 d6b2-9185/tplx
-.,                                   -f ethernet-switch.ini -r 16,                 ,                 c9b5-76d7/tplx
-.,                                   -f ethernet-switch.ini -r 17,                 ,                 1092-4768/tplx
-.,                                   -f ethernet-switch.ini -r 18,                 ,                 2735-95f6/tplx
-.,                                   -f ethernet-switch.ini -r 19,                 ,                 cd8d-90e8/tplx
-.,                                   -f ethernet-switch.ini -r 20,                 ,                 255f-0184/tplx
-.,                                   -f ethernet-switch.ini -r 21,                 ,                 1918-8126/tplx
-.,                                   -f ethernet-switch.ini -r 22,                 ,                 3c9d-df6b/tplx
-.,                                   -f ethernet-switch.ini -r 23,                 ,                 1498-9378/tplx
+# working directory, command line arguments, simulation time limit, fingerprint, expected result, tags
+.,                                   -f ethernet-switch.ini -r 0,                  ,                 99da-4211/tplx, PASS,
+.,                                   -f ethernet-switch.ini -r 1,                  ,                 2abb-3c80/tplx, PASS,
+.,                                   -f ethernet-switch.ini -r 2,                  ,                 5c27-46d5/tplx, PASS,
+.,                                   -f ethernet-switch.ini -r 3,                  ,                 b5fb-050d/tplx, PASS,
+.,                                   -f ethernet-switch.ini -r 4,                  ,                 0138-312e/tplx, PASS,
+.,                                   -f ethernet-switch.ini -r 5,                  ,                 dd9a-b6a9/tplx, PASS,
+.,                                   -f ethernet-switch.ini -r 6,                  ,                 5f0b-900f/tplx, PASS,
+.,                                   -f ethernet-switch.ini -r 7,                  ,                 0f06-df53/tplx, PASS,
+.,                                   -f ethernet-switch.ini -r 8,                  ,                 483b-035c/tplx, PASS,
+.,                                   -f ethernet-switch.ini -r 9,                  ,                 0af5-c8df/tplx, PASS,
+.,                                   -f ethernet-switch.ini -r 10,                 ,                 c302-e385/tplx, PASS,
+.,                                   -f ethernet-switch.ini -r 11,                 ,                 bf0c-b9c0/tplx, PASS,
+.,                                   -f ethernet-switch.ini -r 12,                 ,                 ba01-0ed4/tplx, PASS,
+.,                                   -f ethernet-switch.ini -r 13,                 ,                 ff9b-8dc6/tplx, PASS,
+.,                                   -f ethernet-switch.ini -r 14,                 ,                 0ade-5a6b/tplx, PASS,
+.,                                   -f ethernet-switch.ini -r 15,                 ,                 f94c-9152/tplx, PASS,
+.,                                   -f ethernet-switch.ini -r 16,                 ,                 7758-8055/tplx, PASS,
+.,                                   -f ethernet-switch.ini -r 17,                 ,                 fff8-4bde/tplx, PASS,
+.,                                   -f ethernet-switch.ini -r 18,                 ,                 b62a-6260/tplx, PASS,
+.,                                   -f ethernet-switch.ini -r 19,                 ,                 073f-c7b2/tplx, PASS,
+.,                                   -f ethernet-switch.ini -r 20,                 ,                 dab1-211f/tplx, PASS,
+.,                                   -f ethernet-switch.ini -r 21,                 ,                 2293-cf2d/tplx, PASS,
+.,                                   -f ethernet-switch.ini -r 22,                 ,                 ea23-c6a2/tplx, PASS,
+.,                                   -f ethernet-switch.ini -r 23,                 ,                 ac71-7efe/tplx, PASS,

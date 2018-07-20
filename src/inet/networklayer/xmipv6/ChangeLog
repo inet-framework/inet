@@ -1,3 +1,71 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-02-19  Zoltan Bojthe
+
+	Renamed functions to use camel case.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-17  Zoltan Bojthe
+
+	Added packetDropped signal.
+	Fixed illegal deletions, removed unnecessary parameters.
+
+2018-01-05  Zoltan Bojthe
+
+	Renamed NF_* signals to use camel case.
+	Renamed signal variables to *Signal.
+
+2018-01-03  Levente Mészáros
+
+	Switched from message pointer to packet pointer where available.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    BAStatus -> BaStatus
+	    BCExpiryIfEntry -> BcExpiryIfEntry
+	    BEStatus -> BeStatus
+	    BRTransmitIfEntry -> BrTransmitIfEntry
+	    BULExpiryIfEntry -> BulExpiryIfEntry
+	    BUTransmitIfEntry -> BuTransmitIfEntry
+	    CNList -> CnList
+	    IPv6 -> Ipv6
+	    IPv6Address -> Ipv6Address
+	    IPv6ControlInfo -> Ipv6ControlInfo
+	    IPv6ExtensionHeaders -> Ipv6ExtensionHeaders
+	    IPv6Header -> Ipv6Header
+	    IPv6InterfaceData -> Ipv6InterfaceData
+	    IPv6NeighbourDiscovery -> Ipv6NeighbourDiscovery
+	    IPv6RoutingTable -> Ipv6RoutingTable
+	    IPv6Tunneling -> Ipv6Tunneling
+
+2017-12-15  Zoltan Bojthe
+
+	Removed unnecessary cPar::boolValue() calls.
+
+2017-11-14  Zoltan Bojthe
+
+	Replace "int foo @enum(FooEnum)" to FooEnum foo.
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-02-07  Levente Mészáros
+
+	Changed to use the new Packet class.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

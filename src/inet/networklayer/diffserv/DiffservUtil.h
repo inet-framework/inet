@@ -35,12 +35,6 @@ enum Color { GREEN, YELLOW, RED };
 inline bool isEmpty(const char *str) { return !str || !(*str); }
 
 /**
- * Returns the value of the named attribute of the XML element,
- * or throws an exception if not found.
- */
-const char *getRequiredAttribute(cXMLElement *element, const char *attrName);
-
-/**
  * Parses the information rate parameter (bits/sec).
  * Supported formats:
  *  - absolute (e.g. 10Mbps)
@@ -56,14 +50,14 @@ int parseIntAttribute(const char *attrValue, const char *attrName, bool isOption
 
 /**
  * Parses an IP protocol number.
- * Recognizes the names defined in IPProtocolId.msg (e.g. "UDP", "udp", "Tcp"),
+ * Recognizes the names defined in IpProtocolId.msg (e.g. "Udp", "udp", "Tcp"),
  * and accepts decimal/octal/hex/binary numbers.
  */
 int parseProtocol(const char *attrValue, const char *attrName);
 
 /**
  * Parses a Diffserv code point.
- * Recognizes the names defined in DSCP.msg (e.g. "BE", "AF11"),
+ * Recognizes the names defined in Dscp.msg (e.g. "BE", "AF11"),
  * and accepts decimal/octal/hex/binary numbers.
  */
 int parseDSCP(const char *attrValue, const char *attrName);
@@ -96,7 +90,7 @@ double getInterfaceDatarate(IInterfaceTable *ift, cSimpleModule *interfaceModule
 
 /**
  * Returns the IP datagram encapsulated inside packet, or
- * the packet itself if it is an IPv4/IPv6 datagram.
+ * the packet itself if it is an Ipv4/Ipv6 datagram.
  * Returns nullptr, if there is no IP datagram in the packet.
  */
 cPacket *findIPDatagramInPacket(cPacket *packet);

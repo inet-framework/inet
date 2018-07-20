@@ -20,7 +20,7 @@
 
 package inet.examples.pim.dm.basic;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
 import inet.node.inet.MulticastRouter;
 import inet.node.inet.StandardHost;
@@ -28,37 +28,35 @@ import inet.node.inet.StandardHost;
 
 network pimDMFinal
 {
-    @display("bgb=448,352,white");
-
     submodules:
         R1: MulticastRouter {
-            @display("p=208,102");
+            @display("p=425,190");
         }
         R2: MulticastRouter {
-            @display("p=143,163");
+            @display("p=275,280");
         }
         R3: MulticastRouter {
-            @display("p=276,163");
+            @display("p=575,280");
         }
 
         Source1: StandardHost {
-            @display("p=208,33");
+            @display("p=425,100");
         }
         Host1: StandardHost {
-            @display("p=98,235;i=device/pc");
+            @display("p=200,370;i=device/pc");
         }
         Source2: StandardHost {
-            @display("p=242,235");
+            @display("p=500,370");
         }
 
         Host2: StandardHost {
-            @display("p=177,235;i=device/pc");
+            @display("p=350,370;i=device/pc");
         }
         Host3: StandardHost {
-            @display("p=317,235;i=device/pc");
+            @display("p=650,370;i=device/pc");
         }
-        configurator: IPv4NetworkConfigurator {
-            @display("p=44,41");
+        configurator: Ipv4NetworkConfigurator {
+            @display("p=100,100;is=s");
         }
     //        scenarioManager: ScenarioManager {
     //            @display("p=376,26");

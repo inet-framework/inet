@@ -26,15 +26,15 @@ namespace ieee80211 {
 class INET_API ITransmitLifetimeHandler
 {
     public:
-        virtual ~ITransmitLifetimeHandler() {}
+        virtual ~ITransmitLifetimeHandler() { }
 
-        virtual void frameGotInProgess(Ieee80211DataFrame *frame) = 0;
-        virtual void frameTransmitted(Ieee80211DataFrame *frame) = 0;
+        virtual void frameGotInProgess(const Ptr<const Ieee80211DataHeader>& header) = 0;
+        virtual void frameTransmitted(const Ptr<const Ieee80211DataHeader>& header) = 0;
 
-        virtual bool isLifetimeExpired(Ieee80211DataFrame *frame) = 0;
+        virtual bool isLifetimeExpired(const Ptr<const Ieee80211DataHeader>& header) = 0;
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif // ifndef ITRANSMITLIFETIMEHANDLER_H

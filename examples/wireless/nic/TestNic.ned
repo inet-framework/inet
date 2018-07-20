@@ -18,8 +18,7 @@
 
 package inet.examples.wireless.nic;
 
-import inet.common.lifecycle.LifecycleController;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.WirelessHost;
 import inet.physicallayer.contract.packetlevel.IRadioMedium;
 import inet.visualizer.contract.IIntegratedVisualizer;
@@ -28,26 +27,22 @@ network TestNic
 {
     parameters:
         int numHosts;
-        string radioMediumType;
+        @display("bgb=450,450");
     submodules:
         visualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
             parameters:
-                @display("p=100,50");
+                @display("p=100,300;is=s");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=100,150");
+                @display("p=100,100;is=s");
         }
-        radioMedium: <radioMediumType> like IRadioMedium {
+        radioMedium: <> like IRadioMedium {
             parameters:
-                @display("p=100,250");
-        }
-        lifecycleController: LifecycleController {
-            parameters:
-                @display("p=100,350");
+                @display("p=100,200;is=s");
         }
         host[numHosts]: WirelessHost {
             parameters:
-                @display("r=,,#707070;p=250,58");
+                @display("r=,,#707070;p=250,200");
         }
 }

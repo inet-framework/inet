@@ -24,10 +24,16 @@ namespace visualizer {
 
 Define_Module(PacketDropCanvasVisualizer);
 
-PacketDropCanvasVisualizer::PacketDropCanvasVisualization::PacketDropCanvasVisualization(LabeledIconFigure *figure, int moduleId, const cPacket *packet, const Coord& position) :
-    PacketDropVisualization(moduleId, packet, position),
+PacketDropCanvasVisualizer::PacketDropCanvasVisualization::PacketDropCanvasVisualization(LabeledIconFigure *figure, const PacketDrop *packetDrop) :
+    PacketDropVisualization(packetDrop),
     figure(figure)
 {
+}
+
+PacketDropCanvasVisualizer::PacketDropCanvasVisualization::~PacketDropCanvasVisualization()
+{
+    if (figure->getParentFigure() == nullptr)
+        delete figure;
 }
 
 void PacketDropCanvasVisualizer::initialize(int stage)
@@ -36,6 +42,8 @@ void PacketDropCanvasVisualizer::initialize(int stage)
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
         zIndex = par("zIndex");
+        dx = par("dx");
+        dy = par("dx");
         auto canvas = visualizerTargetModule->getCanvas();
         canvasProjection = CanvasProjection::getCanvasProjection(canvas);
         packetDropGroup = new cGroupFigure("packet drops");
@@ -50,50 +58,56 @@ void PacketDropCanvasVisualizer::refreshDisplay() const
     visualizerTargetModule->getCanvas()->setAnimationSpeed(packetDropVisualizations.empty() ? 0 : fadeOutAnimationSpeed, this);
 }
 
-const PacketDropVisualizerBase::PacketDropVisualization *PacketDropCanvasVisualizer::createPacketDropVisualization(cModule *module, cPacket *packet) const
+const PacketDropVisualizerBase::PacketDropVisualization *PacketDropCanvasVisualizer::createPacketDropVisualization(PacketDrop *packetDrop) const
 {
     std::string icon(this->icon);
-    auto position = getPosition(getContainingNode(module));
-    auto labeledIconFigure = new LabeledIconFigure("packetDrop");
+    auto labeledIconFigure = new LabeledIconFigure("packetDropped");
     labeledIconFigure->setTags((std::string("packet_drop ") + tags).c_str());
-    labeledIconFigure->setAssociatedObject(packet);
+    labeledIconFigure->setAssociatedObject(packetDrop);
     labeledIconFigure->setZIndex(zIndex);
-    labeledIconFigure->setPosition(canvasProjection->computeCanvasPoint(position));
+    labeledIconFigure->setPosition(canvasProjection->computeCanvasPoint(packetDrop->getPosition()));
     auto iconFigure = labeledIconFigure->getIconFigure();
     iconFigure->setTooltip("This icon represents a packet dropped in a network node");
     iconFigure->setImageName(icon.substr(0, icon.find_first_of(".")).c_str());
-    iconFigure->setTintColor(iconTintColor);
+    iconFigure->setTintColor(iconTintColorSet.getColor(packetDrop->getReason() % iconTintColorSet.getSize()));
     iconFigure->setTintAmount(iconTintAmount);
     auto labelFigure = labeledIconFigure->getLabelFigure();
     labelFigure->setTooltip("This label represents the name of a packet dropped in a network node");
     labelFigure->setFont(labelFont);
     labelFigure->setColor(labelColor);
-    labelFigure->setText(packet->getName());
-    return new PacketDropCanvasVisualization(labeledIconFigure, module->getId(), packet, position);
+    auto text = getPacketDropVisualizationText(packetDrop);
+    labelFigure->setText(text.c_str());
+    return new PacketDropCanvasVisualization(labeledIconFigure, packetDrop);
 }
 
-void PacketDropCanvasVisualizer::addPacketDropVisualization(const PacketDropVisualization *packetDrop)
+void PacketDropCanvasVisualizer::addPacketDropVisualization(const PacketDropVisualization *packetDropVisualization)
 {
-    PacketDropVisualizerBase::addPacketDropVisualization(packetDrop);
-    auto packetDropCanvasVisualization = static_cast<const PacketDropCanvasVisualization *>(packetDrop);
+    PacketDropVisualizerBase::addPacketDropVisualization(packetDropVisualization);
+    auto packetDropCanvasVisualization = static_cast<const PacketDropCanvasVisualization *>(packetDropVisualization);
     packetDropGroup->addFigure(packetDropCanvasVisualization->figure);
 }
 
-void PacketDropCanvasVisualizer::removePacketDropVisualization(const PacketDropVisualization *packetDrop)
+void PacketDropCanvasVisualizer::removePacketDropVisualization(const PacketDropVisualization *packetDropVisualization)
 {
-    PacketDropVisualizerBase::removePacketDropVisualization(packetDrop);
-    auto packetDropCanvasVisualization = static_cast<const PacketDropCanvasVisualization *>(packetDrop);
+    PacketDropVisualizerBase::removePacketDropVisualization(packetDropVisualization);
+    auto packetDropCanvasVisualization = static_cast<const PacketDropCanvasVisualization *>(packetDropVisualization);
     packetDropGroup->removeFigure(packetDropCanvasVisualization->figure);
 }
 
-void PacketDropCanvasVisualizer::setAlpha(const PacketDropVisualization *packetDrop, double alpha) const
+void PacketDropCanvasVisualizer::setAlpha(const PacketDropVisualization *packetDropVisualization, double alpha) const
 {
-    auto packetDropCanvasVisualization = static_cast<const PacketDropCanvasVisualization *>(packetDrop);
+    auto packetDropCanvasVisualization = static_cast<const PacketDropCanvasVisualization *>(packetDropVisualization);
     auto figure = packetDropCanvasVisualization->figure;
     figure->setOpacity(alpha);
-    double dx = 10 / alpha;
-    double dy = pow((dx / 4 - 9), 2) - 58;
-    figure->setPosition(canvasProjection->computeCanvasPoint(packetDrop->position) + cFigure::Point(dx, dy));
+    double a = dy / -(dx * dx);
+    double b = -2 * a * dx;
+    double px = 4 * dx * (1 - alpha);
+    double py = a * px * px + b * px;
+    auto& position = packetDropVisualization->packetDrop->getPosition();
+    double zoomLevel = getEnvir()->getZoomLevel(packetDropCanvasVisualization->packetDrop->getNetworkNode()->getParentModule());
+    if (std::isnan(zoomLevel))
+        zoomLevel = 1;
+    figure->setPosition(canvasProjection->computeCanvasPoint(position) + cFigure::Point(px, -py) / zoomLevel);
 }
 
 } // namespace visualizer

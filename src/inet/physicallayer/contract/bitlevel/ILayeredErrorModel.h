@@ -20,7 +20,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/physicallayer/common/bitlevel/LayeredTransmission.h"
-#include "inet/physicallayer/contract/packetlevel/ISNIR.h"
+#include "inet/physicallayer/contract/packetlevel/ISnir.h"
 
 namespace inet {
 
@@ -38,28 +38,28 @@ class INET_API ILayeredErrorModel : public IPrintableObject
      * model for the underlying domains. This result includes all potential
      * errors that were not corrected by the underlying domains.
      */
-    virtual const IReceptionPacketModel *computePacketModel(const LayeredTransmission *transmission, const ISNIR *snir) const = 0;
+    virtual const IReceptionPacketModel *computePacketModel(const LayeredTransmission *transmission, const ISnir *snir) const = 0;
 
     /**
      * Computes the bit domain representation at the receiver using a simplified
      * model for the underlying domains. This result includes all potential
      * errors that were not corrected by the underlying domains.
      */
-    virtual const IReceptionBitModel *computeBitModel(const LayeredTransmission *transmission, const ISNIR *snir) const = 0;
+    virtual const IReceptionBitModel *computeBitModel(const LayeredTransmission *transmission, const ISnir *snir) const = 0;
 
     /**
      * Computes the symbol domain representation at the receiver using a simplified
      * model for the underlying domains. This result includes all potential
      * errors that were not corrected by the underlying domains.
      */
-    virtual const IReceptionSymbolModel *computeSymbolModel(const LayeredTransmission *transmission, const ISNIR *snir) const = 0;
+    virtual const IReceptionSymbolModel *computeSymbolModel(const LayeredTransmission *transmission, const ISnir *snir) const = 0;
 
     /**
      * Computes the sample domain representation at the receiver using a simplified
      * model for the underlying domains. This result includes all potential
      * errors that were not corrected by the underlying domains.
      */
-    virtual const IReceptionSampleModel *computeSampleModel(const LayeredTransmission *transmission, const ISNIR *snir) const = 0;
+    virtual const IReceptionSampleModel *computeSampleModel(const LayeredTransmission *transmission, const ISnir *snir) const = 0;
 };
 
 } // namespace physicallayer

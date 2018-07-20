@@ -27,16 +27,14 @@ import inet.visualizer.contract.IPhysicalLinkVisualizer;
 module PhysicalLinkVisualizer like IPhysicalLinkVisualizer
 {
     parameters:
-        @display("i=block/app_s");
-        string canvasVisualizerType = default("PhysicalLinkCanvasVisualizer");
-        string osgVisualizerType = default("PhysicalLinkOsgVisualizer");
+        @display("i=block/app");
     submodules:
-        canvasVisualizer: <canvasVisualizerType> like IPhysicalLinkVisualizer if canvasVisualizerType != "" {
+        canvasVisualizer: <default("PhysicalLinkCanvasVisualizer")> like IPhysicalLinkVisualizer if typename != "" {
             parameters:
-                @display("p=100,50");
+                @display("p=100,100");
         }
-        osgVisualizer: <osgVisualizerType> like IPhysicalLinkVisualizer if osgVisualizerType != "" {
+        osgVisualizer: <default("PhysicalLinkOsgVisualizer")> like IPhysicalLinkVisualizer if typename != "" {
             parameters:
-                @display("p=100,150");
+                @display("p=100,200");
         }
 }

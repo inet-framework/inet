@@ -15,10 +15,9 @@
 
 package inet.examples.ieee8021d;
 
-import inet.common.lifecycle.LifecycleController;
 import inet.common.scenario.ScenarioManager;
 import inet.linklayer.configurator.L2NetworkConfigurator;
-import inet.linklayer.ieee8021d.tester.STPTester;
+import inet.linklayer.ieee8021d.tester.StpTester;
 import inet.node.ethernet.Eth1G;
 import inet.node.ethernet.EtherHost;
 import inet.node.ethernet.EtherSwitch;
@@ -26,70 +25,58 @@ import inet.node.ethernet.EtherSwitch;
 
 network SwitchNetwork
 {
-    @display("bgb=689,368");
     submodules:
-        stpTester: STPTester {
-            @display("p=75,277");
+        stpTester: StpTester {
+            @display("p=100,300;is=s");
         }
         scenarioManager: ScenarioManager {
-            @display("p=75,101");
+            @display("p=100,200;is=s");
         }
         l2NetworkConfigurator: L2NetworkConfigurator {
-            @display("p=75,217");
+            @display("p=100,100;is=s");
         }
-        lifecycleController: LifecycleController {
-            @display("p=75,155");
-        }
-
         switch1: EtherSwitch {
             parameters:
-                @display("p=333,78");
+                @display("p=400,100");
             gates:
                 ethg[];
         }
-
         switch2: EtherSwitch {
             parameters:
-                @display("p=301,217");
+                @display("p=475,300");
             gates:
                 ethg[];
         }
-
         switch3: EtherSwitch {
             parameters:
-                @display("p=443,78");
+                @display("p=550,100");
             gates:
                 ethg[];
         }
-
         switch4: EtherSwitch {
             parameters:
-                @display("p=322,153");
+                @display("p=400,200");
             gates:
                 ethg[];
         }
-
         switch5: EtherSwitch {
             parameters:
-                @display("p=529,217");
+                @display("p=625,300");
             gates:
                 ethg[];
         }
-
         switch6: EtherSwitch {
             parameters:
-                @display("p=200,154");
+                @display("p=325,300");
             gates:
                 ethg[];
         }
-
         switch7: EtherSwitch {
             parameters:
-                @display("p=443,153");
+                @display("p=550,200");
             gates:
                 ethg[];
         }
-
     connections:
         switch1.ethg++ <--> Eth1G <--> switch4.ethg++;
         switch1.ethg++ <--> Eth1G <--> switch3.ethg++;
@@ -104,39 +91,37 @@ network SwitchNetwork
 
 network LargeNet extends SwitchNetwork
 {
-    @display("bgb=952,472");
     submodules:
         host1: EtherHost {
-            @display("p=200,79");
+            @display("p=250,200");
         }
-
         host2: EtherHost {
-            @display("p=609,217");
+            @display("p=775,300");
         }
 
         host3: EtherHost {
-            @display("p=529,78");
+            @display("p=700,100");
         }
         host4: EtherHost {
-            @display("p=679,422");
+            @display("p=775,470");
         }
         host5: EtherHost {
-            @display("p=479,422");
+            @display("p=325,470");
         }
         host6: EtherHost {
-            @display("p=322,321");
+            @display("p=325,370");
         }
         switch8: EtherSwitch {
-            @display("p=443,282");
+            @display("p=475,370");
         }
         switch9: EtherSwitch {
-            @display("p=518,352");
+            @display("p=475,470");
         }
         switch10: EtherSwitch {
-            @display("p=648,352");
+            @display("p=625,470");
         }
         switch11: EtherSwitch {
-            @display("p=579,288");
+            @display("p=625,370");
         }
     connections:
         switch11.ethg++ <--> Eth1G <--> switch9.ethg++;

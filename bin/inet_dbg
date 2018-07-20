@@ -1,0 +1,13 @@
+#!/bin/sh
+#
+# This script is intended to run INET simulations in debug mode. It can be used
+# only after the 'setenv' script has been run from both the OMNeT++ and the INET
+# top level directory using the '. setenv' command. To run a simulation, simply
+# go into its directory and run 'inet_dbg' possibly passing additional command
+# line arguments. Please note that both OMNeT++ and INET must be compiled in debug
+# mode using 'make MODE=debug' before. Please also note that this script doesn't
+# start the debugger, there are other scripts for that purpose.
+#
+
+inet --debug $@
+

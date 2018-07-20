@@ -1,3 +1,47 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    APSKModulationBase -> ApskModulationBase
+	    APSKSymbol -> ApskSymbol
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-10-19  Levente Mészáros
+
+	Changed LayeredErrorModelBase to always copy the packet and call setBitError() if erroneous.
+
+2017-10-19  Levente Mészáros
+
+	Removed obsolete per and packetErrorless members from SignalPacketModel.
+
+2017-07-24  Levente Mészáros
+
+	Fixed accidentally inserted const keyword after new operator.
+
+2017-01-26  Levente Mészáros
+
+	Switched to bit type where appropriate.
+
+2017-01-18  Levente Mészáros
+
+	Adapted error model base class to new ISignalPacketModel.
+
+2017-01-25  Zoltan Bojthe
+
+	Replaced cPacket* with Packet* where appropriate.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

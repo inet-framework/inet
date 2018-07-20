@@ -1,4 +1,0 @@
-# workingdir,                        args,                                          simtimelimit,    fingerprint
-# repeat 4 times
-/examples/manetrouting/multiradio/,  -f omnetpp.ini -c MultiRadio -r 0,             25s,             4517-a614
-/examples/manetrouting/multiradio/,  -f omnetpp.ini -c SingleRadio -r 0,            10s,             24a7-f3cc

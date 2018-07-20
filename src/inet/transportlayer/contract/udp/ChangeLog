@@ -1,0 +1,85 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-05-07  Levente Mészáros
+
+	Changed to UdpSocket::ICallback parameter type to Indication.
+	Separated setCallback from setUserData in all sockets.
+
+2018-05-04  Levente Mészáros
+
+	Added get/setUserData to all sockets.
+	Renamed yourPtr to userData in all sockets.
+
+2018-04-25  Zoltan Bojthe
+
+	Refactored UdpSocket to implement ISocket.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-12  Levente Mészáros
+
+	Replaced cMessage commands with Request and Indication.
+
+2018-01-02  Levente Mészáros
+
+	Replaced cPacket with Packet.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    DSCP -> Dscp
+	    ICMP -> Icmp
+	    IPProtocolId -> IpProtocolId
+	    IPv4 -> Ipv4
+	    IPv4InterfaceData -> Ipv4InterfaceData
+	    IPv6 -> Ipv6
+	    UDP -> Udp
+	    UDPBindCommand -> UdpBindCommand
+	    UDPBlockMulticastSourcesCommand -> UdpBlockMulticastSourcesCommand
+	    UDPCloseCommand -> UdpCloseCommand
+	    UDPCommandCode -> UdpCommandCode
+	    UDPConnectCommand -> UdpConnectCommand
+	    UDPControlInfo -> UdpControlInfo
+	    UDPErrorIndication -> UdpErrorIndication
+	    UDPJoinMulticastGroupsCommand -> UdpJoinMulticastGroupsCommand
+	    UDPJoinMulticastSourcesCommand -> UdpJoinMulticastSourcesCommand
+	    UDPLeaveMulticastGroupsCommand -> UdpLeaveMulticastGroupsCommand
+	    UDPLeaveMulticastSourcesCommand -> UdpLeaveMulticastSourcesCommand
+	    UDPSetBroadcastCommand -> UdpSetBroadcastCommand
+	    UDPSetMulticastInterfaceCommand -> UdpSetMulticastInterfaceCommand
+	    UDPSetMulticastLoopCommand -> UdpSetMulticastLoopCommand
+	    UDPSetMulticastSourceFilterCommand -> UdpSetMulticastSourceFilterCommand
+	    UDPSetOptionCommand -> UdpSetOptionCommand
+	    UDPSetReuseAddressCommand -> UdpSetReuseAddressCommand
+	    UDPSetTimeToLiveCommand -> UdpSetTimeToLiveCommand
+	    UDPSetTypeOfServiceCommand -> UdpSetTypeOfServiceCommand
+	    UDPSocket -> UdpSocket
+	    UDPSourceFilterMode -> UdpSourceFilterMode
+	    UDPStatusInd -> UdpStatusInd
+	    UDPUnblockMulticastSourcesCommand -> UdpUnblockMulticastSourcesCommand
+
+2017-11-14  Zoltan Bojthe
+
+	Replaced "int foo @enum(FooEnum)" to FooEnum foo.
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-07-11  Zoltan Bojthe
+
+	Fixed getReceivedPacketInfo() output format.
+
+2015-06-11  Levente Mészáros
+
+	Renamed sockId to socketId to be able to implement generic interface.

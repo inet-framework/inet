@@ -90,6 +90,11 @@ T *dupPacketAndControlInfo(T *packet) {
     return copy;
 }
 
+INET_API bool fileExists(const char *pathname);
+INET_API void splitFileName(const char *pathname, std::string& dir, std::string& fnameonly);
+INET_API void makePath(const char *pathname);
+INET_API void makePathForFile(const char *filename);
+
 } // namespace utils
 
 } // namespace inet

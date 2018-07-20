@@ -1,0 +1,72 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-13  Levente Mészáros
+
+	Removed obsolete packet printers.
+
+2018-03-14  Zoltan Bojthe
+
+	Refactored PacketPrinter::isEnabledInfo().
+
+2018-03-09  Zoltan Bojthe
+
+	Change PacketPrinter to use Protocol layer info.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-03-07  Levente Mészáros
+
+	Adapted PacketPrinter to the new ProtocolPrinter interface.
+	Added ProtocolPrinter and ProtocolPrinterRegistry.
+
+2018-02-27  Levente Mészáros
+
+	Added new length column and some tags to PacketPrinter.
+
+2018-02-23  Levente Mészáros
+
+	Added colorization of incorrect packets to PacketPrinter.
+
+2018-02-21  Levente Mészáros
+
+	Added support for new OMNeT++ message printer API.
+
+2018-02-14  Levente Mészáros
+
+	Added inside-out and left-to-right printing algorithms to PacketPrinter.
+	Added startProtocol and endProtocol to allow building a tree.
+
+2018-02-13  Levente Mészáros
+
+	Added new PacketPrinter based on general purpose packet/protocol dissector.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    ARPPacket -> ArpPacket
+	    ICMPEchoReply -> IcmpEchoReply
+	    ICMPEchoRequest -> IcmpEchoRequest
+	    IPv4 -> Ipv4
+	    RIPEntry -> RipEntry
+	    RIPPacket -> RipPacket
+	    TCP -> Tcp
+	    TCPSegment -> TcpHeader
+	    UDP -> Udp
+
+2017-12-07  Levente Mészáros
+
+	Fixed includes for disabled features.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-04-05  Zoltan Bojthe
+
+	Adapted InetPacketPrinter to new API.
+
+2017-03-02  Levente Mészáros
+
+	Moved packet printers under common/packet/printer.

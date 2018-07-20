@@ -27,16 +27,14 @@ import inet.visualizer.contract.ILinkBreakVisualizer;
 module LinkBreakVisualizer like ILinkBreakVisualizer
 {
     parameters:
-        @display("i=block/app_s");
-        string canvasVisualizerType = default("LinkBreakCanvasVisualizer");
-        string osgVisualizerType = default("LinkBreakOsgVisualizer");
+        @display("i=block/app");
     submodules:
-        canvasVisualizer: <canvasVisualizerType> like ILinkBreakVisualizer if canvasVisualizerType != "" {
+        canvasVisualizer: <default("LinkBreakCanvasVisualizer")> like ILinkBreakVisualizer if typename != "" {
             parameters:
-                @display("p=100,50");
+                @display("p=100,100");
         }
-        osgVisualizer: <osgVisualizerType> like ILinkBreakVisualizer if osgVisualizerType != "" {
+        osgVisualizer: <default("LinkBreakOsgVisualizer")> like ILinkBreakVisualizer if typename != "" {
             parameters:
-                @display("p=100,150");
+                @display("p=100,200");
         }
 }

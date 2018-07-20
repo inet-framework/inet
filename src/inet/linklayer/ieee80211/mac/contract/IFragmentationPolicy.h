@@ -23,17 +23,17 @@
 namespace inet {
 namespace ieee80211 {
 
-class Ieee80211DataOrMgmtFrame;
+class Ieee80211DataOrMgmtHeader;
 
 class INET_API IFragmentationPolicy
 {
     public:
-        virtual ~IFragmentationPolicy() {}
+        virtual ~IFragmentationPolicy() { }
 
-        virtual std::vector<int> computeFragmentSizes(Ieee80211DataOrMgmtFrame *frame) = 0;
+        virtual std::vector<int> computeFragmentSizes(Packet *frame) = 0;
 };
 
 } // namespace ieee80211
 } // namespace inet
 
-#endif
+#endif // __INET_IFRAGMENTATIONPOLICY_H

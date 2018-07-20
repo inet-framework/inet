@@ -20,14 +20,14 @@
 namespace inet {
 namespace ieee80211 {
 
-Ieee80211RTSFrame *RtsProcedure::buildRtsFrame(Ieee80211DataOrMgmtFrame *dataOrMgmtFrame) const
+const Ptr<Ieee80211RtsFrame> RtsProcedure::buildRtsFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) const
 {
-    Ieee80211RTSFrame *rtsFrame = new Ieee80211RTSFrame("RTS");
-    rtsFrame->setReceiverAddress(dataOrMgmtFrame->getReceiverAddress());
+    auto rtsFrame = makeShared<Ieee80211RtsFrame>(); // TODO: "RTS");
+    rtsFrame->setReceiverAddress(dataOrMgmtHeader->getReceiverAddress());
     return rtsFrame;
 }
 
-void RtsProcedure::processTransmittedRts(Ieee80211RTSFrame* rtsFrame)
+void RtsProcedure::processTransmittedRts(const Ptr<const Ieee80211RtsFrame>& rtsFrame)
 {
     numSentRts++;
 }

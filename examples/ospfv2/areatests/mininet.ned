@@ -4,9 +4,9 @@ package inet.examples.ospfv2.areatests;
 
 import inet.common.misc.ThruputMeteringChannel;
 import inet.common.scenario.ScenarioManager;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
-import inet.node.ospfv2.OSPFRouter;
+import inet.node.ospfv2.OspfRouter;
 
 
 network OSPF_mininet
@@ -23,14 +23,28 @@ network OSPF_mininet
             thruputDisplayFormat = "#N";
         }
     submodules:
-        BBR[numBBr]: OSPFRouter;
-        BBRtoS1: OSPFRouter;
-        S1R[numSBr]: OSPFRouter;
-        S1H[numHst]: StandardHost;
-        BBRtoS2: OSPFRouter;
-        S2R[numSBr]: OSPFRouter;
-        S2H[numHst]: StandardHost;
-        configurator: IPv4NetworkConfigurator {
+        BBR[numBBr]: OspfRouter {
+            @display("p=700,150,col,100");
+        }
+        BBRtoS1: OspfRouter {
+            @display("p=850,150");
+        }
+        S1R[numSBr]: OspfRouter {
+            @display("p=1000,150,col,100");
+        }
+        S1H[numHst]: StandardHost {
+            @display("p=1150,150,col,100");
+        }
+        BBRtoS2: OspfRouter {
+            @display("p=550,150");
+        }
+        S2R[numSBr]: OspfRouter {
+            @display("p=400,150,col,100");
+        }
+        S2H[numHst]: StandardHost {
+            @display("p=250,150,col,100");
+        }
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 config = xml("<config>"+
                             "<interface hosts='BBR[*]' address='192.168.100.x' netmask='255.255.255.x' />"+
@@ -46,10 +60,10 @@ network OSPF_mininet
                             "</config>");
                 addStaticRoutes = false;
                 addDefaultRoutes = false;
-                @display("p=75,43");
+                @display("p=100,100;is=s");
         }
         scenarioManager: ScenarioManager {
-            @display("p=187,43");
+            @display("p=100,200;is=s");
         }
     connections:
         BBRtoS1.ethg++ <--> C <--> BBR[0].ethg++;

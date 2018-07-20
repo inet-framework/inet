@@ -32,7 +32,7 @@ void OriginatorBlockAckAgreementPolicy::initialize(int stage)
         delayedAckPolicySupported = par("delayedAckPolicySupported");
         aMsduSupported = par("aMsduSupported");
         maximumAllowedBufferSize = par("maximumAllowedBufferSize");
-        blockAckTimeoutValue = par("blockAckTimeoutValue").doubleValue();
+        blockAckTimeoutValue = par("blockAckTimeoutValue");
         // TODO: addbaFailureTimeout = par("addbaFailureTimeout");
     }
 }
@@ -43,18 +43,18 @@ simtime_t OriginatorBlockAckAgreementPolicy::computeAddbaFailureTimeout() const
     throw cRuntimeError("Unimplemented");
 }
 
-bool OriginatorBlockAckAgreementPolicy::isAddbaReqNeeded(Ieee80211DataFrame* frame)
+bool OriginatorBlockAckAgreementPolicy::isAddbaReqNeeded(Packet *packet, const Ptr<const Ieee80211DataHeader>& header)
 {
-    return ackPolicy->isBlockAckPolicyEligibleFrame(frame);
+    return ackPolicy->isBlockAckPolicyEligibleFrame(packet, header);
 }
 
-bool OriginatorBlockAckAgreementPolicy::isAddbaReqAccepted(Ieee80211AddbaResponse* addbaResp, OriginatorBlockAckAgreement* agreement)
+bool OriginatorBlockAckAgreementPolicy::isAddbaReqAccepted(const Ptr<const Ieee80211AddbaResponse>& addbaResp, OriginatorBlockAckAgreement* agreement)
 {
     ASSERT(agreement);
     return true;
 }
 
-bool OriginatorBlockAckAgreementPolicy::isDelbaAccepted(Ieee80211Delba* delba)
+bool OriginatorBlockAckAgreementPolicy::isDelbaAccepted(const Ptr<const Ieee80211Delba>& delba)
 {
     return true;
 }

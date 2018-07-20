@@ -54,10 +54,10 @@
 // request-response based protocol such as SMB/CIFS (the Windows file
 // sharing protocol), HTTP, or a database client-server protocol.
 //
-// Every computer runs a client application (~EtherAppCli) which connects
+// Every computer runs a client application (~EtherAppClient) which connects
 // to one of the servers. There's one server attached to switches A, B,
 // C and D each: serverA, serverB, serverC and serverD -- server selection
-// is configured in omnetpp.ini). The servers run ~EtherAppSrv.
+// is configured in omnetpp.ini). The servers run ~EtherAppServer.
 // Clients periodically send a request to the server, and the request
 // packet contains how many bytes the client wants the server to send back
 // (this can mean one or more Ethernet frames, depending on the byte count).

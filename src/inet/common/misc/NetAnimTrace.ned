@@ -35,6 +35,6 @@ simple NetAnimTrace
     parameters:
         bool enabled = default(true);
         string filename = default("netanim-trace.txt");
-        @display("i=block/control_s");
+        @display("i=block/control");
         @labels(node);
 }

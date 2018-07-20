@@ -32,21 +32,21 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 #ifdef WITH_IPv4
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-#include "inet/networklayer/ipv6/IPv6InterfaceData.h"
+#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #endif // ifdef WITH_IPv6
 
-#ifdef WITH_GENERIC
-#include "inet/networklayer/generic/GenericNetworkProtocolInterfaceData.h"
-#endif // ifdef WITH_GENERIC
+#ifdef WITH_NEXTHOP
+#include "inet/networklayer/nexthop/NextHopInterfaceData.h"
+#endif // ifdef WITH_NEXTHOP
 
 namespace inet {
 
 Register_Abstract_Class(InterfaceEntryChangeDetails);
-Register_Abstract_Class(InterfaceEntry);
+Define_Module(InterfaceEntry);
 
 void InterfaceProtocolData::changed(simsignal_t signalID, int fieldId)
 {
@@ -55,9 +55,9 @@ void InterfaceProtocolData::changed(simsignal_t signalID, int fieldId)
         ownerp->changed(signalID, fieldId);
 }
 
-std::string InterfaceEntryChangeDetails::info() const
+std::string InterfaceEntryChangeDetails::str() const
 {
-    return ie->info();
+    return ie->str();
 }
 
 std::string InterfaceEntryChangeDetails::detailedInfo() const
@@ -67,12 +67,8 @@ std::string InterfaceEntryChangeDetails::detailedInfo() const
     return out.str();
 }
 
-InterfaceEntry::InterfaceEntry(cModule *module)
+InterfaceEntry::InterfaceEntry()
 {
-    interfaceModule = findModuleUnderContainingNode(module);
-    if (!interfaceModule)
-        throw cRuntimeError("NIC module not found in the host");
-    setName(utils::stripnonalnum(interfaceModule->getFullName()).c_str());
     state = UP;
     carrier = true;
     datarate = 0;
@@ -83,16 +79,18 @@ InterfaceEntry::~InterfaceEntry()
     resetInterface();
 }
 
-std::string InterfaceEntry::info() const
+void InterfaceEntry::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL)
+        setInterfaceName(utils::stripnonalnum(getFullName()).c_str());
+}
+
+std::string InterfaceEntry::str() const
 {
     std::stringstream out;
-    out << (getName()[0] ? getName() : "*");
-    out << " id=" << getInterfaceId();
-    if (getNetworkLayerGateIndex() == -1)
-        out << "  on:-";
-    else
-        out << "  on:nwLayer.ifOut[" << getNetworkLayerGateIndex() << "]";
-    out << "  MTU:" << getMTU();
+    out << getInterfaceName();
+    out << "  ID:" << getInterfaceId();
+    out << "  MTU:" << getMtu();
     if (!isUp())
         out << " DOWN";
     if (isBroadcast())
@@ -111,11 +109,11 @@ std::string InterfaceEntry::info() const
 
 #ifdef WITH_IPv4
     if (ipv4data)
-        out << " " << ipv4data->info();
+        out << " " << ipv4data->str();
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
     if (ipv6data)
-        out << " " << ipv6data->info();
+        out << " " << ipv6data->str();
 #endif // ifdef WITH_IPv6
     if (isisdata)
         out << " " << ((InterfaceProtocolData *)isisdata)->str(); // Khmm...
@@ -129,12 +127,9 @@ std::string InterfaceEntry::info() const
 std::string InterfaceEntry::detailedInfo() const
 {
     std::stringstream out;
-    out << "name:" << (getName()[0] ? getName() : "*");
-    if (getNetworkLayerGateIndex() == -1)
-        out << "  on:-";
-    else
-        out << "  on:nwLayer.ifOut[" << getNetworkLayerGateIndex() << "]";
-    out << "MTU: " << getMTU() << " \t";
+    out << "name:" << getInterfaceName();
+    out << "  ID:" << getInterfaceId();
+    out << "  MTU: " << getMtu() << " \t";
     if (!isUp())
         out << "DOWN ";
     if (isBroadcast())
@@ -160,10 +155,10 @@ std::string InterfaceEntry::detailedInfo() const
     if (ipv6data)
         out << " " << ipv6data->detailedInfo() << "\n";
 #endif // ifdef WITH_IPv6
-#ifdef WITH_GENERIC
-    if (genericNetworkProtocolData)
-        out << " " << genericNetworkProtocolData->detailedInfo() << "\n";
-#endif // ifdef WITH_GENERIC
+#ifdef WITH_NEXTHOP
+    if (nextHopData)
+        out << " " << nextHopData->detailedInfo() << "\n";
+#endif // ifdef WITH_NEXTHOP
     if (isisdata)
         out << " " << ((InterfaceProtocolData *)isisdata)->str() << "\n"; // Khmm...
     if (trilldata)
@@ -173,9 +168,9 @@ std::string InterfaceEntry::detailedInfo() const
     return out.str();
 }
 
-std::string InterfaceEntry::getFullPath() const
+std::string InterfaceEntry::getInterfaceFullPath() const
 {
-    return ownerp == nullptr ? getFullName() : ownerp->getHostModule()->getFullPath() + "." + getFullName();
+    return ownerp == nullptr ? getInterfaceName() : ownerp->getHostModule()->getFullPath() + "." + getInterfaceName();
 }
 
 void InterfaceEntry::changed(simsignal_t signalID, int fieldId)
@@ -204,14 +199,14 @@ void InterfaceEntry::resetInterface()
     if (ipv6data)
         throw cRuntimeError(this, "Model error: ipv6data filled, but INET was compiled without IPv6 support");
 #endif // ifdef WITH_IPv6
-#ifdef WITH_GENERIC
-    if (genericNetworkProtocolData && genericNetworkProtocolData->ownerp == this)
-        delete genericNetworkProtocolData;
-    genericNetworkProtocolData = nullptr;
-#else // ifdef WITH_GENERIC
-    if (genericNetworkProtocolData)
-        throw cRuntimeError(this, "Model error: genericNetworkProtocolData filled, but INET was compiled without Generic Network Layer support");
-#endif // ifdef WITH_GENERIC
+#ifdef WITH_NEXTHOP
+    if (nextHopData && nextHopData->ownerp == this)
+        delete nextHopData;
+    nextHopData = nullptr;
+#else // ifdef WITH_NEXTHOP
+    if (nextHopData)
+        throw cRuntimeError(this, "Model error: nextHopProtocolData filled, but INET was compiled without Next Hop Forwarding support");
+#endif // ifdef WITH_NEXTHOP
     if (isisdata && ((InterfaceProtocolData *)isisdata)->ownerp == this)
         delete (InterfaceProtocolData *)isisdata;
     isisdata = nullptr;
@@ -223,17 +218,17 @@ void InterfaceEntry::resetInterface()
     ieee8021ddata = nullptr;
 }
 
-void InterfaceEntry::setGenericNetworkProtocolData(GenericNetworkProtocolInterfaceData *p)
+void InterfaceEntry::setNextHopData(NextHopInterfaceData *p)
 {
-#ifdef WITH_GENERIC
-    if (genericNetworkProtocolData && genericNetworkProtocolData->ownerp == this)
-        delete genericNetworkProtocolData;
-    genericNetworkProtocolData = p;
+#ifdef WITH_NEXTHOP
+    if (nextHopData && nextHopData->ownerp == this)
+        delete nextHopData;
+    nextHopData = p;
     p->ownerp = this;
-    configChanged(F_GENERIC_DATA);
-#else // ifdef WITH_GENERIC
-    throw cRuntimeError(this, "setGenericNetworkProtocolData(): INET was compiled without Generic Network Layer support");
-#endif // ifdef WITH_GENERIC
+    configChanged(F_NEXTHOP_DATA);
+#else // ifdef WITH_NEXTHOP
+    throw cRuntimeError(this, "setNextHopProtocolData(): INET was compiled without Next Hop Forwarding support");
+#endif // ifdef WITH_NEXTHOP
 }
 
 const L3Address InterfaceEntry::getNetworkAddress() const
@@ -246,14 +241,14 @@ const L3Address InterfaceEntry::getNetworkAddress() const
     if (ipv6data)
         return ipv6data->getPreferredAddress();
 #endif // ifdef WITH_IPv6
-#ifdef WITH_GENERIC
-    if (genericNetworkProtocolData)
-        return genericNetworkProtocolData->getAddress();
-#endif // ifdef WITH_GENERIC
+#ifdef WITH_NEXTHOP
+    if (nextHopData)
+        return nextHopData->getAddress();
+#endif // ifdef WITH_NEXTHOP
     return getModulePathAddress();
 }
 
-void InterfaceEntry::setIPv4Data(IPv4InterfaceData *p)
+void InterfaceEntry::setIpv4Data(Ipv4InterfaceData *p)
 {
 #ifdef WITH_IPv4
     if (ipv4data && ipv4data->ownerp == this)
@@ -266,7 +261,7 @@ void InterfaceEntry::setIPv4Data(IPv4InterfaceData *p)
 #endif // ifdef WITH_IPv4
 }
 
-void InterfaceEntry::setIPv6Data(IPv6InterfaceData *p)
+void InterfaceEntry::setIpv6Data(Ipv6InterfaceData *p)
 {
 #ifdef WITH_IPv6
     if (ipv6data && ipv6data->ownerp == this)
@@ -279,7 +274,7 @@ void InterfaceEntry::setIPv6Data(IPv6InterfaceData *p)
 #endif // ifdef WITH_IPv6
 }
 
-void InterfaceEntry::setTRILLInterfaceData(TRILLInterfaceData *p)
+void InterfaceEntry::setTrillInterfaceData(TrillInterfaceData *p)
 {
     if (trilldata && ((InterfaceProtocolData *)trilldata)->ownerp == this) // Khmm...
         delete (InterfaceProtocolData *)trilldata; // Khmm...
@@ -288,7 +283,7 @@ void InterfaceEntry::setTRILLInterfaceData(TRILLInterfaceData *p)
     configChanged(F_TRILL_DATA);
 }
 
-void InterfaceEntry::setISISInterfaceData(ISISInterfaceData *p)
+void InterfaceEntry::setIsisInterfaceData(IsisInterfaceData *p)
 {
     if (isisdata && ((InterfaceProtocolData *)isisdata)->ownerp == this) // Khmm...
         delete (InterfaceProtocolData *)isisdata; // Khmm...
@@ -332,34 +327,34 @@ void InterfaceEntry::joinMulticastGroup(const L3Address& address) const
     switch (address.getType()) {
 #ifdef WITH_IPv4
         case L3Address::IPv4:
-            ipv4Data()->joinMulticastGroup(address.toIPv4());
+            ipv4Data()->joinMulticastGroup(address.toIpv4());
             break;
 
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
         case L3Address::IPv6:
-            ipv6Data()->joinMulticastGroup(address.toIPv6());
+            ipv6Data()->joinMulticastGroup(address.toIpv6());
             break;
 
 #endif // ifdef WITH_IPv6
-#ifdef WITH_GENERIC
+#ifdef WITH_NEXTHOP
         case L3Address::MAC:
         case L3Address::MODULEID:
         case L3Address::MODULEPATH:
-            getGenericNetworkProtocolData()->joinMulticastGroup(address);
+            getNextHopData()->joinMulticastGroup(address);
             break;
 
-#endif // ifdef WITH_GENERIC
+#endif // ifdef WITH_NEXTHOP
         default:
             throw cRuntimeError("Unknown address type");
     }
 }
 
-static void toIPv4AddressVector(const std::vector<L3Address>& addresses, std::vector<IPv4Address>& result)
+static void toIpv4AddressVector(const std::vector<L3Address>& addresses, std::vector<Ipv4Address>& result)
 {
     result.reserve(addresses.size());
     for (auto & addresse : addresses)
-        result.push_back(addresse.toIPv4());
+        result.push_back(addresse.toIpv4());
 }
 
 void InterfaceEntry::changeMulticastGroupMembership(const L3Address& multicastAddress,
@@ -369,10 +364,10 @@ void InterfaceEntry::changeMulticastGroupMembership(const L3Address& multicastAd
     switch (multicastAddress.getType()) {
 #ifdef WITH_IPv4
         case L3Address::IPv4: {
-            std::vector<IPv4Address> oldIPv4SourceList, newIPv4SourceList;
-            toIPv4AddressVector(oldSourceList, oldIPv4SourceList);
-            toIPv4AddressVector(newSourceList, newIPv4SourceList);
-            ipv4Data()->changeMulticastGroupMembership(multicastAddress.toIPv4(),
+            std::vector<Ipv4Address> oldIPv4SourceList, newIPv4SourceList;
+            toIpv4AddressVector(oldSourceList, oldIPv4SourceList);
+            toIpv4AddressVector(newSourceList, newIPv4SourceList);
+            ipv4Data()->changeMulticastGroupMembership(multicastAddress.toIpv4(),
                     oldFilterMode, oldIPv4SourceList, newFilterMode, newIPv4SourceList);
             break;
         }
@@ -397,11 +392,11 @@ void InterfaceEntry::changeMulticastGroupMembership(const L3Address& multicastAd
     }
 }
 
-IPv4Address InterfaceEntry::getIPv4Address() const {
+Ipv4Address InterfaceEntry::getIpv4Address() const {
 #ifdef WITH_IPv4
-    return ipv4data == nullptr ? IPv4Address::UNSPECIFIED_ADDRESS : ipv4data->getIPAddress();
+    return ipv4data == nullptr ? Ipv4Address::UNSPECIFIED_ADDRESS : ipv4data->getIPAddress();
 #else
-    return IPv4Address::UNSPECIFIED_ADDRESS;
+    return Ipv4Address::UNSPECIFIED_ADDRESS;
 #endif // ifdef WITH_IPv4
 }
 

@@ -1,0 +1,10 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-02-15  Levente Mészáros
+
+	Added new dissector API in the form of PacketDissector, ProtocolDissector,
+	and ProtocolDissectorRegistry.

@@ -25,6 +25,8 @@ namespace inet {
 
 namespace physicallayer {
 
+using namespace inet::physicalenvironment;
+
 Define_Module(DielectricObstacleLoss);
 
 DielectricObstacleLoss::DielectricObstacleLoss() :
@@ -93,7 +95,7 @@ double DielectricObstacleLoss::computeObjectLoss(const IPhysicalObject *object, 
     const Coord& position = object->getPosition();
     const EulerAngles& orientation = object->getOrientation();
     Rotation rotation(orientation);
-    const LineSegment lineSegment(rotation.rotateVectorCounterClockwise(transmissionPosition - position), rotation.rotateVectorCounterClockwise(receptionPosition - position));
+    const LineSegment lineSegment(rotation.rotateVectorInverse(transmissionPosition - position), rotation.rotateVectorInverse(receptionPosition - position));
     Coord intersection1, intersection2, normal1, normal2;
     intersectionComputationCount++;
     bool hasIntersections = shape->computeIntersection(lineSegment, intersection1, intersection2, normal1, normal2);

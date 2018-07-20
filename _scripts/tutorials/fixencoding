@@ -1,0 +1,17 @@
+#!/bin/bash
+# 17.08.23
+
+# Re-encodes video using ffmpeg with the encoding used in tutorials and showcases
+
+if [[ $1 == -h || $# == 0 ]];
+then
+echo $'Re-encodes video using ffmpeg with the encoding used in tutorials and showcases'
+echo $'Arguments: input-file output-file'
+else 
+
+INPUT_FILE=$1
+OUTPUT_FILE=$2
+
+ffmpeg -i $INPUT_FILE -filter:v "crop=floor(iw/2)*2:floor(ih/2)*2" -vcodec libx264 -crf 23 -pix_fmt yuv420p -preset veryslow -profile:v baseline $OUTPUT_FILE
+
+fi

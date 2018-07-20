@@ -1,3 +1,141 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-06-04  Levente Mészáros
+
+	Replaced PPP, 802.15.4 and acking wireless queueType parameters with queue.typename parameters.
+	Replaced WirelessHost with AdhocHost in MANET routers.
+
+2018-05-29  Levente Mészáros
+
+	Replaced various fooType parameter assignments with foo.typename assignments.
+
+2018-05-25  Levente Mészáros
+
+	Added IIeee80211Agent and replaced mgmtType with mgmt.typename parameter.
+
+2018-05-24  Andras Varga
+
+	Renamed hasRIP, hasOSPF and similar parameters changed to camel case.
+
+2018-04-06  Gyorgy Szaszko
+
+	Added SensorNode module type.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-01-23  Levente Mészáros
+
+	Replaced MessageDispatcher lower/upper vector gates with a single one.
+
+2018-01-12  Zoltan Bojthe
+
+	Removed 'Routing' from name of all routing protocol classes/files.
+
+2018-01-11  Zoltan Bojthe
+
+	Renamed all *Nic modules to *Interface.
+
+2018-01-08  Gyorgy Szaszko
+
+	Added IManetRouting and a generic ManetRouter which supports configuring the routing protocol.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    BGPRouting -> BgpRouting
+	    DHCPServer -> DhcpServer
+	    IBGPRouting -> IBgpRouting
+	    IIPRouting -> IIpRouting
+	    IPIMRouting -> IPimRouting
+	    IPv4 -> Ipv4
+	    Ieee80211MgmtAP -> Ieee80211MgmtAp
+	    Ieee80211MgmtSTA -> Ieee80211MgmtSta
+	    OSPFRouting -> OspfRouting
+	    PIMRouting -> PimRouting
+	    PPPInterface -> PppInterface
+	    RIPRouting -> RipRouting
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-07-27  Levente Mészáros
+
+	Enabled UDP by default if DHCP is enabled.
+
+2016-06-16  Levente Mészáros
+
+	Changed @display strings for better positioning, icons, etc.
+
+2016-06-01  Levente Mészáros
+
+	Deleted required gates from INetworkNode, because it's not generic enough
+	and not needed anyway.
+
+2016-06-02  Levente Mészáros
+
+	Changed Router base module to ApplicationLayerNodeBase.
+
+2016-06-01  Levente Mészáros
+
+	Changed StandardHost base module to ApplicationLayerNodeBase.
+
+2016-05-31  Levente Mészáros
+
+	Changed positions and icons in display string to at least have well-layouted
+	network nodes.
+
+2016-05-31  Levente Mészáros
+
+	Connected OSPF and PIM to dispatcher instead of the network layer.
+
+2016-05-31  Levente Mészáros
+
+	Changed how ping apps are connected to network layers.
+
+2016-05-31  Levente Mészáros
+
+	Added routing table module path deep parameter assignments to network nodes.
+
+2016-05-30  Levente Mészáros
+
+	Moved NodeBase from inet to base directory.
+
+2016-05-05  Levente Mészáros
+
+	Moved submodules layer to the top.
+
+2016-05-30  Levente Mészáros
+
+	Renamed numRadios to numWlanInterfaces to make it consistent with interface names.
+
+2016-05-31  Levente Mészáros
+
+	Renamed networkLayer submodule to ipv4 and ipv6 submodules.
+
+2016-05-02  Levente Mészáros
+
+	Changed StandardHost and Router to have UDP and TCP protocols only when they
+	are actually used.
+
+2016-04-29  Levente Mészáros
+
+	Dropped various network node submodules inherited from base modules.
+
+2016-04-28  Levente Mészáros
+
+	Changed NodeBase to be the most basic base module of network nodes.
+
+2016-05-30  Levente Mészáros
+
+	Changed base module for all network nodes.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

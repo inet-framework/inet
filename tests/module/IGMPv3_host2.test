@@ -18,7 +18,7 @@ output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 network=TestIGMPNetwork
-**.igmpType = "IGMPv3"
+**.igmp.typename = "Igmpv3"
 **.IPForward = false
 **.multicastForwarding = false
 
@@ -29,13 +29,13 @@ network=TestIGMPNetwork
 %file: scenario.xml
 <scenario>
 
-<join t="2" module="node.tester" ifname="eth0" group="225.0.0.1" sources="10.0.0.1"/>
-<dump t="2" module="node.tester" ifname="eth0" what="groups"/>
-<send t="2" module="node.tester" ifname="eth0" type="IGMPv3Query" maxRespCode="10"/>
+<join t="2" module="node.tester.mac" ifname="eth0" group="225.0.0.1" sources="10.0.0.1"/>
+<dump t="2" module="node.tester.mac" ifname="eth0" what="groups"/>
+<send t="2" module="node.tester.mac" ifname="eth0" type="Igmpv3Query" maxRespCode="10"/>
 
-<set-filter t="3" module="node.tester" ifname="eth0" group="225.0.0.1" sources="E 10.0.0.2"/>
-<dump t="3" module="node.tester" ifname="eth0" what="groups"/>
-<send t="3" module="node.tester" ifname="eth0" type="IGMPv3Query" maxRespCode="10"/>
+<set-filter t="3" module="node.tester.mac" ifname="eth0" group="225.0.0.1" sources="E 10.0.0.2"/>
+<dump t="3" module="node.tester.mac" ifname="eth0" what="groups"/>
+<send t="3" module="node.tester.mac" ifname="eth0" type="Igmpv3Query" maxRespCode="10"/>
 
 </scenario>
 
@@ -54,9 +54,9 @@ IGMPTester: eth0: groups = 224.0.0.1 E, 224.0.0.2 E, 225.0.0.1 E 10.0.0.2.
 %#
 %postrun-command: grep "IGMPTester: .*Received" test.out > received.out || true
 %contains-regex: received.out
-IGMPTester: Received: inet::IGMPv3Report<225.0.0.1=IS_IN 10.0.0.1>.
+IGMPTester: Received: inet::Igmpv3Report<225.0.0.1=IS_IN 10.0.0.1>.
 .*
-IGMPTester: Received: inet::IGMPv3Report<225.0.0.1=IS_EX 10.0.0.2>.
+IGMPTester: Received: inet::Igmpv3Report<225.0.0.1=IS_EX 10.0.0.2>.
 
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout

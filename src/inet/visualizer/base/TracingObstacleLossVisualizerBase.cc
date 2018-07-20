@@ -23,6 +23,7 @@ namespace inet {
 
 namespace visualizer {
 
+using namespace inet::physicalenvironment;
 using namespace inet::physicallayer;
 
 TracingObstacleLossVisualizerBase::~TracingObstacleLossVisualizerBase()

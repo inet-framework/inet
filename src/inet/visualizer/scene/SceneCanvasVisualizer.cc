@@ -31,8 +31,9 @@ void SceneCanvasVisualizer::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         zIndex = par("zIndex");
         cCanvas *canvas = visualizerTargetModule->getCanvas();
-        canvasProjection.setRotation(Rotation(computeViewAngle(par("viewAngle"))));
-        canvasProjection.setScale(parse2D(par("viewScale")));
+        bool invertY;
+        canvasProjection.setRotation(parseViewAngle(par("viewAngle"), invertY));
+        canvasProjection.setScale(parse2D(par("viewScale"), invertY));
         canvasProjection.setTranslation(parse2D(par("viewTranslation")));
         CanvasProjection::setCanvasProjection(canvas, &canvasProjection);
         axisLayer = new cGroupFigure("axisLayer");
@@ -68,12 +69,6 @@ void SceneCanvasVisualizer::initializeAxis(double axisLength)
     xAxis->setZoomLineWidth(false);
     yAxis->setZoomLineWidth(false);
     zAxis->setZoomLineWidth(false);
-    xAxis->setStart(canvasProjection.computeCanvasPoint(Coord::ZERO));
-    yAxis->setStart(canvasProjection.computeCanvasPoint(Coord::ZERO));
-    zAxis->setStart(canvasProjection.computeCanvasPoint(Coord::ZERO));
-    xAxis->setEnd(canvasProjection.computeCanvasPoint(Coord(axisLength, 0, 0)));
-    yAxis->setEnd(canvasProjection.computeCanvasPoint(Coord(0, axisLength, 0)));
-    zAxis->setEnd(canvasProjection.computeCanvasPoint(Coord(0, 0, axisLength)));
     axisLayer->addFigure(xAxis);
     axisLayer->addFigure(yAxis);
     axisLayer->addFigure(zAxis);
@@ -87,18 +82,38 @@ void SceneCanvasVisualizer::initializeAxis(double axisLength)
     xLabel->setText("X");
     yLabel->setText("Y");
     zLabel->setText("Z");
-    xLabel->setPosition(canvasProjection.computeCanvasPoint(Coord(axisLength, 0, 0)));
-    yLabel->setPosition(canvasProjection.computeCanvasPoint(Coord(0, axisLength, 0)));
-    zLabel->setPosition(canvasProjection.computeCanvasPoint(Coord(0, 0, axisLength)));
     axisLayer->addFigure(xLabel);
     axisLayer->addFigure(yLabel);
     axisLayer->addFigure(zLabel);
+    refreshAxis(axisLength);
+}
+
+void SceneCanvasVisualizer::refreshAxis(double axisLength)
+{
+    auto xAxis = check_and_cast<cLineFigure *>(axisLayer->getFigure(0));
+    auto yAxis = check_and_cast<cLineFigure *>(axisLayer->getFigure(1));
+    auto zAxis = check_and_cast<cLineFigure *>(axisLayer->getFigure(2));
+    auto xLabel = check_and_cast<cLabelFigure *>(axisLayer->getFigure(3));
+    auto yLabel = check_and_cast<cLabelFigure *>(axisLayer->getFigure(4));
+    auto zLabel = check_and_cast<cLabelFigure *>(axisLayer->getFigure(5));
+    xAxis->setStart(canvasProjection.computeCanvasPoint(Coord::ZERO));
+    yAxis->setStart(canvasProjection.computeCanvasPoint(Coord::ZERO));
+    zAxis->setStart(canvasProjection.computeCanvasPoint(Coord::ZERO));
+    xAxis->setEnd(canvasProjection.computeCanvasPoint(Coord(axisLength, 0, 0)));
+    yAxis->setEnd(canvasProjection.computeCanvasPoint(Coord(0, axisLength, 0)));
+    zAxis->setEnd(canvasProjection.computeCanvasPoint(Coord(0, 0, axisLength)));
+    xLabel->setPosition(canvasProjection.computeCanvasPoint(Coord(axisLength, 0, 0)));
+    yLabel->setPosition(canvasProjection.computeCanvasPoint(Coord(0, axisLength, 0)));
+    zLabel->setPosition(canvasProjection.computeCanvasPoint(Coord(0, 0, axisLength)));
 }
 
 void SceneCanvasVisualizer::handleParameterChange(const char* name)
 {
+    if (!hasGUI()) return;
     if (name && !strcmp(name, "viewAngle")) {
-        canvasProjection.setRotation(Rotation(computeViewAngle(par("viewAngle"))));
+        bool invertY;
+        canvasProjection.setRotation(parseViewAngle(par("viewAngle"), invertY));
+        canvasProjection.setScale(parse2D(par("viewScale"), invertY));
         // TODO: update all visualizers
     }
     else if (name && !strcmp(name, "viewScale")) {
@@ -109,29 +124,67 @@ void SceneCanvasVisualizer::handleParameterChange(const char* name)
         canvasProjection.setTranslation(parse2D(par("viewTranslation")));
         // TODO: update all visualizers
     }
+    double axisLength = par("axisLength");
+    if (!std::isnan(axisLength))
+        refreshAxis(axisLength);
 }
 
-EulerAngles SceneCanvasVisualizer::computeViewAngle(const char* viewAngle)
+Rotation SceneCanvasVisualizer::parseViewAngle(const char* viewAngle, bool& invertY)
 {
-    double x, y, z;
-    if (!strcmp(viewAngle, "x"))
-    {
-        x = 0;
-        y = M_PI / 2;
-        z = M_PI / -2;
+    double a, b, c;
+    if (*viewAngle == 'x' || *viewAngle == 'y' || *viewAngle == 'z') {
+        double matrix[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+        cStringTokenizer tokenizer(viewAngle);
+        while (tokenizer.hasMoreTokens()) {
+            const char *axisToken = tokenizer.nextToken();
+            if (axisToken == nullptr)
+                throw cRuntimeError("Missing token in viewAngle parameter value");
+            int i;
+            if (!strcmp(axisToken, "x"))
+                i = 0;
+            else if (!strcmp(axisToken, "y"))
+                i = 1;
+            else if (!strcmp(axisToken, "z"))
+                i = 2;
+            else
+                throw cRuntimeError("Invalid token in viewAngle parameter value: '%s'", axisToken);
+            const char *directionToken = tokenizer.nextToken();
+            if (directionToken == nullptr)
+                throw cRuntimeError("Missing token in viewAngle parameter value");
+            Coord v;
+            if (!strcmp(directionToken, "right"))
+                v = Coord::X_AXIS;
+            else if (!strcmp(directionToken, "left"))
+                v = -Coord::X_AXIS;
+            else if (!strcmp(directionToken, "up"))
+                v = Coord::Y_AXIS;
+            else if (!strcmp(directionToken, "down"))
+                v = -Coord::Y_AXIS;
+            else if (!strcmp(directionToken, "out"))
+                v = Coord::Z_AXIS;
+            else if (!strcmp(directionToken, "in"))
+                v = -Coord::Z_AXIS;
+            else
+                throw cRuntimeError("Invalid token in viewAngle parameter value: '%s'", directionToken);
+            if (matrix[0][i] != 0 || matrix[1][i] != 0 || matrix[2][i] != 0)
+                throw cRuntimeError("Invalid viewAngle parameter vale: '%s'", viewAngle);
+            matrix[0][i] = v.x;
+            matrix[1][i] = v.y;
+            matrix[2][i] = v.z;
+        }
+        // NOTE: the rotation matrix cannot contain flipping, so the following code flips the resulting Y axis if needed, because the OMNeT++ 2D canvas also flips Y axis while drawing
+        double determinant = matrix[0][0] * ((matrix[1][1] * matrix[2][2]) -(matrix[2][1] * matrix[1][2])) -matrix[0][1] * (matrix[1][0] * matrix[2][2] - matrix[2][0] * matrix[1][2]) + matrix[0][2] * (matrix[1][0] * matrix[2][1] - matrix[2][0] * matrix[1][1]);
+        if (determinant == -1) {
+            matrix[1][0] *= -1;
+            matrix[1][1] *= -1;
+            matrix[1][2] *= -1;
+            invertY = false;
+        }
+        else
+            invertY = true;
+        return Rotation(matrix);
     }
-    else if (!strcmp(viewAngle, "y"))
-    {
-        x = M_PI / 2;
-        y = 0;
-        z = 0;
-    }
-    else if (!strcmp(viewAngle, "z"))
-    {
-        x = y = z = 0;
-    }
-    else if (!strncmp(viewAngle, "isometric", 9))
-    {
+    else if (!strncmp(viewAngle, "isometric", 9)) {
         int v;
         int l = strlen(viewAngle);
         switch (l) {
@@ -144,27 +197,26 @@ EulerAngles SceneCanvasVisualizer::computeViewAngle(const char* viewAngle)
         // 2nd axis can point on the 2d plane in 4 directions (the opposite direction is forbidden)
         // 3rd axis can point on the 2d plane in 2 directions
         // this results in 6 * 4 * 2 = 48 different configurations
-        x = math::deg2rad(45 + v % 4 * 90);
-        y = math::deg2rad(v / 24 % 2 ? 35.27 : -35.27);
-        z = math::deg2rad(30 + v / 4 % 6 * 60);
+        deg alpha = deg(45 + v % 4 * 90);
+        deg beta = deg(v / 24 % 2 ? 35.27 : -35.27);
+        deg gamma = deg(30 + v / 4 % 6 * 60);
+        invertY = false;
+        return Rotation(EulerAngles(alpha, beta, gamma));
     }
-    else if (sscanf(viewAngle, "%lf %lf %lf", &x, &y, &z) == 3)
-    {
-        x = math::deg2rad(x);
-        y = math::deg2rad(y);
-        z = math::deg2rad(z);
+    else if (sscanf(viewAngle, "%lf %lf %lf", &a, &b, &c) == 3) {
+        invertY = false;
+        return Rotation(EulerAngles(deg(a), deg(b), deg(c)));
     }
     else
-        throw cRuntimeError("The viewAngle parameter must be a predefined string or a triplet representing three degrees");
-    return EulerAngles(x, y, z);
+        throw cRuntimeError("Invalid viewAngle parameter value: '%s'", viewAngle);
 }
 
-cFigure::Point SceneCanvasVisualizer::parse2D(const char* text)
+cFigure::Point SceneCanvasVisualizer::parse2D(const char* text, bool invertY)
 {
     double x, y;
     if (sscanf(text, "%lf %lf", &x, &y) != 2)
         throw cRuntimeError("The parameter must be a pair of doubles: %s", text);
-    return cFigure::Point(x, y);
+    return cFigure::Point(x, invertY ? -y : y);
 }
 
 void SceneCanvasVisualizer::displayDescription(const char *descriptionFigurePath)

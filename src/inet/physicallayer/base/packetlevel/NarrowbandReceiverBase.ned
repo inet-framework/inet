@@ -31,10 +31,11 @@ module NarrowbandReceiverBase like IReceiver
         double snirThreshold @unit(dB);    // reception is not successful if the SNIR is below this threshold (unsuccessful reception)
         double carrierFrequency @unit(Hz); // center frequency of the band where this receiver listens on the medium
         double bandwidth @unit(Hz);        // bandwidth of the band where this receiver listens on the medium
-        string errorModelType;             // NED type of the error model
         string modulation;                 // one of "BPSK", "16-QAM", "256-QAM"
         @display("i=block/wrx");
 
     submodules:
-        errorModel: <errorModelType> like IErrorModel if errorModelType != "";
+        errorModel: <> like IErrorModel if typename != "" {
+            @display("p=100,100");
+        }
 }

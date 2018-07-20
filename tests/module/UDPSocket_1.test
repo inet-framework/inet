@@ -1,13 +1,13 @@
 %description:
-Tests UDPSocket method calls:
+Tests UdpSocket method calls:
 
 1. Socket options can be set before the bind() or connect() call.
 2. connect() can be called more than once.
 3. bind() can be called after connect().
 
 %file: TestApp.cc
-#include "inet/transportlayer/contract/udp/UDPSocket.h"
-#include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
+#include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 
 using namespace inet;
 namespace UDPSocket_1 {
@@ -24,8 +24,8 @@ Define_Module(TestApp);
 
 void TestApp::activity()
 {
-  UDPSocket s;
-  s.setOutputGate(gate("udpOut"));
+  UdpSocket s;
+  s.setOutputGate(gate("socketOut"));
   s.setMulticastLoop(false);
   s.connect(L3Address("10.0.0.1"), 1000);
   s.bind(100);
@@ -35,13 +35,13 @@ void TestApp::activity()
 }
 
 %file: TestApp.ned
-import inet.applications.contract.IUDPApp;
+import inet.applications.contract.IApp;
 
-simple TestApp like IUDPApp
+simple TestApp like IApp
 {
     gates:
-        input udpIn;
-        output udpOut;
+        input socketIn;
+        output socketOut;
 }
 
 %inifile: omnetpp.ini
@@ -57,23 +57,23 @@ output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
 output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
-**.client.numUdpApps = 1
-**.client.udpApp[0].typename = "TestApp"
+**.client.numApps = 1
+**.client.app[0].typename = "TestApp"
 
-**.client.udpApp[0].cmdenv-log-level=TRACE
+**.client.app[0].cmdenv-log-level=TRACE
 
 %contains: stdout
-C:(TestApp)SimpleTestNetwork.client.udpApp[0]: UDPSocket: Send (omnetpp::cMessage)SetMulticastLoop  control info: (inet::UDPSetMulticastLoopCommand)
-C:(TestApp)SimpleTestNetwork.client.udpApp[0]: UDPSocket: Send (omnetpp::cMessage)CONNECT  control info: (inet::UDPConnectCommand)
-C:(TestApp)SimpleTestNetwork.client.udpApp[0]: UDPSocket: Send (omnetpp::cMessage)BIND  control info: (inet::UDPBindCommand)
-C:(TestApp)SimpleTestNetwork.client.udpApp[0]: UDPSocket: Send (omnetpp::cMessage)CONNECT  control info: (inet::UDPConnectCommand)
+C:(TestApp)SimpleTestNetwork.client.app[0]: UdpSocket: Send (inet::Request)SetMulticastLoop  control info: (inet::UdpSetMulticastLoopCommand)
+C:(TestApp)SimpleTestNetwork.client.app[0]: UdpSocket: Send (inet::Request)CONNECT  control info: (inet::UdpConnectCommand)
+C:(TestApp)SimpleTestNetwork.client.app[0]: UdpSocket: Send (inet::Request)BIND  control info: (inet::UdpBindCommand)
+C:(TestApp)SimpleTestNetwork.client.app[0]: UdpSocket: Send (inet::Request)CONNECT  control info: (inet::UdpConnectCommand)
 
 %contains-regex: stdout
-C:\(UDP\)SimpleTestNetwork\.client\.udp: Socket created: sockId=2 appGateIndex=0 localPort=1025
+C:\(Udp\)SimpleTestNetwork\.client\.udp: Socket created: sockId=2 localPort=1025
 .*
-C:\(UDP\)SimpleTestNetwork\.client\.udp: Socket connected: sockId=2 appGateIndex=0 localPort=1025 remotePort=1000 remoteAddr=10\.0\.0\.1 multicastLoop=0
+C:\(Udp\)SimpleTestNetwork\.client\.udp: Socket connected: sockId=2 localPort=1025 remotePort=1000 remoteAddr=10\.0\.0\.1 multicastLoop=0
 .*
-C:\(UDP\)SimpleTestNetwork\.client\.udp: Socket connected: sockId=2 appGateIndex=0 localPort=100 remotePort=2000 remoteAddr=10\.0\.0\.2 multicastLoop=0
+C:\(Udp\)SimpleTestNetwork\.client\.udp: Socket connected: sockId=2 localPort=100 remotePort=2000 remoteAddr=10\.0\.0\.2 multicastLoop=0
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:

@@ -39,7 +39,7 @@ class INET_API LayeredTransmission : public TransmissionBase
     const ITransmissionAnalogModel *analogModel;
 
   public:
-    LayeredTransmission(const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *bitModel, const ITransmissionSymbolModel *symbolModel, const ITransmissionSampleModel *sampleModel, const ITransmissionAnalogModel *analogModel, const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation);
+    LayeredTransmission(const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *bitModel, const ITransmissionSymbolModel *symbolModel, const ITransmissionSampleModel *sampleModel, const ITransmissionAnalogModel *analogModel, const IRadio *transmitter, const Packet *packet, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation);
     virtual ~LayeredTransmission();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
@@ -50,8 +50,7 @@ class INET_API LayeredTransmission : public TransmissionBase
     virtual const ITransmissionSampleModel *getSampleModel() const { return sampleModel; }
     virtual const ITransmissionAnalogModel *getAnalogModel() const override { return analogModel; }
 
-    virtual const cPacket *getPhyFrame() const override { return packetModel->getPacket(); }
-    virtual const cPacket *getMacFrame() const override { return getPhyFrame()->getEncapsulatedPacket(); }
+    virtual const Packet *getPacket() const override { return packetModel->getPacket(); }
 };
 
 } // namespace physicallayer

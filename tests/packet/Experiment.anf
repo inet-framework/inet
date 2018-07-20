@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scave:Analysis xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:scave="http://www.omnetpp.org/omnetpp/scave">
+  <inputs>
+    <inputs name="results/Experiment*.sca"/>
+  </inputs>
+  <datasets>
+    <datasets name="default">
+      <items xsi:type="scave:Add" filterPattern=""/>
+      <items xsi:type="scave:ScatterChart" name="runtime vs. recipient count" xDataPattern="module(.) AND name(receiverCount)">
+        <isoDataPattern>test(*)</isoDataPattern>
+      </items>
+    </datasets>
+  </datasets>
+  <chartSheets>
+    <chartSheets name="default" charts="//@datasets/@datasets.0/@items.1"/>
+  </chartSheets>
+</scave:Analysis>

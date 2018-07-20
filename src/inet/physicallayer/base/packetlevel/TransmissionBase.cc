@@ -16,15 +16,18 @@
 //
 
 #include "inet/physicallayer/base/packetlevel/TransmissionBase.h"
+#include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-TransmissionBase::TransmissionBase(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation) :
+TransmissionBase::TransmissionBase(const IRadio *transmitter, const Packet *packet, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation) :
     id(nextId++),
-    transmitter(transmitter),
-    macFrame(macFrame),
+    radioMedium(transmitter->getMedium()),
+    transmitterId(transmitter->getId()),
+    transmitterGain(transmitter->getAntenna()->getGain()),
+    packet(packet),
     startTime(startTime),
     endTime(endTime),
     preambleDuration(preambleDuration),
@@ -42,19 +45,23 @@ std::ostream& TransmissionBase::printToStream(std::ostream& stream, int level) c
     if (level <= PRINT_LEVEL_DETAIL)
         stream << ", id = " << id;
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", transmitterId = " << transmitter->getId()
+        stream << ", transmitterId = " << transmitterId
                << ", startTime = " << startTime
                << ", endTime = " << endTime
                << ", startPosition = " << startPosition
                << ", preambleDuration = " << preambleDuration
-               << ", headerPosition = " << headerDuration
-               << ", dataPosition = " << dataDuration
+               << ", headerDuration = " << headerDuration
+               << ", dataDuration = " << dataDuration
                << ", endPosition = " << endPosition
                << ", startOrientation = " << startOrientation
                << ", endOrientation = " << endOrientation;
     return stream;
 }
 
+const IRadio *TransmissionBase::getTransmitter() const
+{
+    return radioMedium->getRadio(transmitterId);
+}
 
 const simtime_t TransmissionBase::getStartTime(IRadioSignal::SignalPart part) const
 {

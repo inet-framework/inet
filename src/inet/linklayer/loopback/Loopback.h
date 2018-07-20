@@ -22,8 +22,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/linklayer/base/MACBase.h"
-#include "inet/linklayer/common/TxNotifDetails.h"
+#include "inet/linklayer/base/MacBase.h"
 
 namespace inet {
 
@@ -33,15 +32,12 @@ class IPassiveQueue;
 /**
  * Loopback interface implementation.
  */
-class INET_API Loopback : public MACBase
+class INET_API Loopback : public MacBase
 {
   protected:
     // statistics
     long numSent = 0;
     long numRcvdOK = 0;
-
-    static simsignal_t packetSentToUpperSignal;
-    static simsignal_t packetReceivedFromUpperSignal;
 
   protected:
     virtual InterfaceEntry *createInterfaceEntry() override;

@@ -21,8 +21,8 @@ namespace inet {
 
 namespace physicallayer {
 
-LayeredReceptionResult::LayeredReceptionResult(const IReception *reception, const std::vector<const IReceptionDecision *> *decisions, const ReceptionIndication *indication, const IReceptionPacketModel *packetModel, const IReceptionBitModel *bitModel, const IReceptionSymbolModel *symbolModel, const IReceptionSampleModel *sampleModel, const IReceptionAnalogModel *analogModel) :
-    ReceptionResult(reception, decisions, indication),
+LayeredReceptionResult::LayeredReceptionResult(const IReception *reception, const std::vector<const IReceptionDecision *> *decisions, const IReceptionPacketModel *packetModel, const IReceptionBitModel *bitModel, const IReceptionSymbolModel *symbolModel, const IReceptionSampleModel *sampleModel, const IReceptionAnalogModel *analogModel) :
+    ReceptionResult(reception, decisions, nullptr),
     packetModel(packetModel),
     bitModel(bitModel),
     symbolModel(symbolModel),
@@ -53,14 +53,9 @@ std::ostream& LayeredReceptionResult::printToStream(std::ostream& stream, int le
     return stream;
 }
 
-const cPacket *LayeredReceptionResult::getPhyFrame() const
+const Packet *LayeredReceptionResult::getPacket() const
 {
     return packetModel->getPacket();
-}
-
-const cPacket *LayeredReceptionResult::getMacFrame() const
-{
-    return packetModel->getPacket()->getEncapsulatedPacket();
 }
 } /* namespace physicallayer */
 } /* namespace inet */

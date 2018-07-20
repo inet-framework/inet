@@ -29,7 +29,7 @@ namespace power {
 class INET_API EpEnergyStorageBase : public cSimpleModule, public EpEnergySourceBase, public EpEnergySinkBase, public virtual IEpEnergyStorage
 {
   protected:
-    void initialize(int stage) override;
+    virtual void initialize(int stage) override;
 
     virtual void updateTotalPowerConsumption() override;
     virtual void updateTotalPowerGeneration() override;

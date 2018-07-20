@@ -1,3 +1,207 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-26  Levente Mészáros
+
+	Dropped unused signals.
+
+2018-06-08  Levente Mészáros
+
+	Added initialRadioMode parameter.
+
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-06-04  Levente Mészáros
+
+	Replaced 0/0 NED parameter values with nan.
+
+2018-05-17  Levente Mészáros
+
+	Added clearTags() and copied PacketProtocolTag to all received packet computations.
+	Extracted a separate pickUpSignals from cListener::receiveSignal implementation.
+
+2018-05-16  Levente Mészáros
+
+	Fixed MAC address filtering.
+	Moved copying packet tags from createTransmitterSignal into createReceiverSignal.
+
+2018-04-19  Levente Mészáros
+
+	Added broadcast/multicast MAC address support to MAC address filter.
+
+2018-04-06  Gyorgy Szaszko
+
+	Switched to bold font for important parts of log messages.
+	Affected parts: possible/impossible, attempting/ignoring, successful/unsuccessful, and various states.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-02-21  Levente Mészáros
+
+	Fixed missing PacketProtocolTag for raw packets.
+	Changed clearing tags when sending a packet to leave the PacketProtocolTag intact.
+
+2018-02-01  Zoltan Bojthe
+
+	Removed minSnir, packetErrorRate, bitErrorRate, symbolErrorRate signals.
+	Added signal filters to compute the same statistics from the packet.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-12  Levente Mészáros
+
+	Removed clearTags calls on Signals because they don't support tags at all.
+
+2018-01-05  Zoltan Bojthe
+
+	Renamed NF_* signals to use camel case.
+	Renamed signal variables to *Signal.
+
+2018-01-04  Levente Mészáros
+
+	Fixed crash in Signal getters when accessing a duplicated signal.
+
+	This bug was triggered by the runtime user interface when inspecting old
+	packets in the packet log.
+
+2018-01-04  Levente Mészáros
+
+	Added getTransmission by id to RadioMedium.
+	Added several missing class descriptors.
+
+2017-12-22  Levente Mészáros
+
+	Fixed memory leak during processing radio configuration commands.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    ISNIR -> ISnir
+	    MACAddress -> MacAddress
+
+2017-12-19  Levente Mészáros
+
+	Replaced handleLowerPacket with handleSignal in Radio.
+
+2017-12-18  Levente Mészáros
+
+	Moved gates from Radio to PhysicalLayerBase.
+
+2017-12-15  Zoltan Bojthe
+
+	Removed unnecessary cPar::doubleValue() calls.
+
+2017-12-05  Zoltan Bojthe
+
+	Removed "typedef const Foo ConstFoo" statements from MSG files, replaced
+	with proper const support.
+
+2017-11-16  Levente Mészáros
+
+	Moved packetSentTo*Signal and packetReceivedFrom*Signal into Simsignals.
+
+2017-11-23  Levente Mészáros
+
+	Changed return type for positions and orientations to reference.
+
+2017-11-22  Levente Mészáros
+
+	Renamed *Descr.msg to *.msg, now the msgc supports all required features.
+
+2017-10-20  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-07  Zoltan Bojthe
+
+	Eliminated temporary manual descriptor hacks.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-10-27  Levente Mészáros
+
+	Added descriptors for Signal and some 802.11 transmissions.
+
+2017-10-10  Levente Mészáros
+
+	Separated simsignals for transmission/reception from radio signal departure/arrival.
+
+2017-09-15  Raphael Riebl
+
+	Added getMedium() to ITransmission.
+	Extracted IAntennaGain from IAntenna interface.
+	Add RadioMedium::getRadio() method for fetching radios by id.
+
+2017-08-08  Raphael Riebl
+
+	Changed transmitter lookup by id instead of internal pointer.
+
+2017-07-14  Levente Mészáros
+
+	Fixed invalid read bug found by valgrind.
+
+2017-05-10  Levente Mészáros
+
+	Renamed radioFrame variables to signal.
+
+2017-05-10  Levente Mészáros
+
+	Renamed IRadioFrame to ISignal, and RadioFrame to Signal.
+
+2017-05-09  Levente Mészáros
+
+	Removed obsolete KLUDGE and updated fingerprints.
+
+2017-05-09  Levente Mészáros
+
+	Renamed multiple header chunks.
+	Ieee80211DataFrame -> Ieee80211DataHeader Ieee80211DataOrMgmtFrame ->
+	Ieee80211DataOrMgmtHeader Ieee80211ManagementHeader ->
+	Ieee80211MgmtHeader Ieee80211ManagementFrame -> Ieee80211MgmtFrame
+
+2017-04-27  Levente Mészáros
+
+	Added sendRawBytes parameter.
+
+2017-04-12  Levente Mészáros
+
+	Dropped obsolete IMACFrame.
+
+2017-03-20  Levente Mészáros
+
+	Fixed network configuration for wireless links.
+
+2017-01-24  Levente Mészáros
+
+	Changed to use bit/byte where appropriate.
+
+2017-01-25  Zoltan Bojthe
+
+	Added encapsulate/decapsulate virtual methods to Radio.
+
+2017-01-25  Zoltan Bojthe
+
+	Renamed macFrame to packet where appropriate.
+
+2017-03-07  Levente Mészáros
+
+	Renamed getMacFrame to getPacket.
+
+2017-01-16  Levente Mészáros
+
+	Merged getPhyFrame into getMacFrame.
+
+2017-01-25  Zoltan Bojthe
+
+	Replaced cPacket* with Packet* where appropriate.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

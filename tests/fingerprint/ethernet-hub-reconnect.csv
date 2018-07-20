@@ -1,14 +1,14 @@
-# workingdir,                        args,                                          simtimelimit,    fingerprint
-.,                                   -f ethernet-hub-reconnect.ini -r 0,           ,                 39ed-b0b1/tplx
-.,                                   -f ethernet-hub-reconnect.ini -r 1,           ,                 11f3-3694/tplx
-.,                                   -f ethernet-hub-reconnect.ini -r 2,           ,                 3bf6-2997/tplx
-.,                                   -f ethernet-hub-reconnect.ini -r 3,           ,                 2529-fdf1/tplx
-.,                                   -f ethernet-hub-reconnect.ini -r 4,           ,                 a9e9-6ab5/tplx
-.,                                   -f ethernet-hub-reconnect.ini -r 5,           ,                 76e2-dbd9/tplx
-.,                                   -f ethernet-hub-reconnect.ini -r 6,           ,                 c111-0884/tplx
-.,                                   -f ethernet-hub-reconnect.ini -r 7,           ,                 96d2-162b/tplx
-.,                                   -f ethernet-hub-reconnect.ini -r 8,           ,                 eae6-7953/tplx
-.,                                   -f ethernet-hub-reconnect.ini -r 9,           ,                 2d3e-211a/tplx
-.,                                   -f ethernet-hub-reconnect.ini -r 10,          ,                 36f0-c094/tplx
-.,                                   -f ethernet-hub-reconnect.ini -r 11,          ,                 25ce-a1d1/tplx
-#.,                                   -f ethernet-hub-reconnect.ini -r 12,          ,                 0000-0000/tplx
+# working directory, command line arguments, simulation time limit, fingerprint, expected result, tags
+.,                                   -f ethernet-hub-reconnect.ini -r 0,           ,                 d03c-e025/tplx, PASS,
+.,                                   -f ethernet-hub-reconnect.ini -r 1,           ,                 0f8b-1e8e/tplx, PASS,
+.,                                   -f ethernet-hub-reconnect.ini -r 2,           ,                 e663-31b1/tplx, PASS,
+.,                                   -f ethernet-hub-reconnect.ini -r 3,           ,                 8e50-52c2/tplx, PASS,
+.,                                   -f ethernet-hub-reconnect.ini -r 4,           ,                 6b4a-e9c6/tplx, PASS,
+.,                                   -f ethernet-hub-reconnect.ini -r 5,           ,                 c776-922d/tplx, PASS,
+.,                                   -f ethernet-hub-reconnect.ini -r 6,           ,                 d2c4-9970/tplx, PASS,
+.,                                   -f ethernet-hub-reconnect.ini -r 7,           ,                 a703-dc9f/tplx, PASS,
+.,                                   -f ethernet-hub-reconnect.ini -r 8,           ,                 5de0-8c6a/tplx, PASS,
+.,                                   -f ethernet-hub-reconnect.ini -r 9,           ,                 9804-1f50/tplx, PASS,
+.,                                   -f ethernet-hub-reconnect.ini -r 10,          ,                 ae06-26c6/tplx, PASS,
+.,                                   -f ethernet-hub-reconnect.ini -r 11,          ,                 7db5-6e59/tplx, PASS,
+# .,                                   -f ethernet-hub-reconnect.ini -r 12,          ,                 0000-0000/tplx, PASS,

@@ -1,0 +1,58 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-25  Levente Mészáros
+
+	Renamed CRC to CrcMode.
+	Added parseCrcMode.
+	Added CRC_MODE_UNDEFINED enum members.
+
+2018-06-14  Zoltan Bojthe
+
+	Switched to using B type for TransportPseudoHeader packetLength field.
+
+2018-05-10  Zoltan Bojthe
+
+	Moved header serializers to the corresponding protocol folders.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-02-19  Zoltan Bojthe
+
+	Renamed functions to use camel case.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    TCPSegment -> TcpHeader
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-07-11  Zoltan Bojthe
+
+	Added isTransportProtocol() to L4Tools.
+	Added flags argument for peekTransportProtocolHeader().
+	Fixed memory leaks related to removing tags.
+
+2017-07-05  Levente Mészáros
+
+	Refactored L4 protocol tools.
+
+2017-04-24  Zoltan Bojthe
+
+	Added peekTransportHeader(), removeTransportHeader() to L4Tools.
+
+2017-04-11  Levente Mészáros
+
+	Removed all chunkLength = -1 or chunkLength = 0 fields.

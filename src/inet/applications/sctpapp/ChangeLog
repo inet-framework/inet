@@ -1,3 +1,70 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-25  Zoltan Bojthe
+
+	Fixed CreationTimeTag.
+
+2018-04-25  Zoltan Bojthe
+
+	Refactored to use the new SctpSocket interface.
+
+2018-03-28  Zoltan Bojthe
+
+	Fixed packet type in @signal.
+
+2018-03-28  Zoltan Bojthe
+
+	Added missing units for zero values.
+	Added missing units for parameters.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-02-09  Zoltan Bojthe
+
+	Replaced deprecated cDoubleHistogram with cHistogram.
+
+2018-01-22  Irene Ruengeler
+
+	Adapted to the new Packet API.
+
+2018-01-02  Levente Mészáros
+
+	Replaced cPacket with Packet.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IPv4Address -> Ipv4Address
+	    TCPEchoApp -> TcpEchoApp
+
+2017-12-15  Zoltan Bojthe
+
+	Remove unnecessary cPar::stringValue(), cPar::boolValue(), cPar::longValue() calls.
+
+	Motivation: rely on cast operators instead because they can detect
+	overflows (when the value is cast to a smaller integer type that can not
+	represent it). Removed unnecessary .longvalue() calls. Replaced to
+	.intValue() in comparisons.
+
+2017-11-16  Levente Mészáros
+
+	Moved rcvdPkSignal and sentPkSignal into Simsignals.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2016-06-14  Levente Mészáros
+
+	Renamed assocId to socketId in SCTPCommand.
+
+2016-06-02  Levente Mészáros
+
+	Changed applications to implement the new IApp interface.
+	Renamed gates to socketIn/socketOut.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

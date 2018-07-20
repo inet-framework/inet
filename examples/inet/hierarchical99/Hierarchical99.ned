@@ -34,26 +34,25 @@ import inet.node.inet.StandardHost;
 network Hierarchical99
 {
     parameters:
-        string networkConfiguratorType;
-        @display("bgb=708,518;bgl=22");
+        @display("bgl=22");
     types:
         module LAN
         {
-            @display("bgl=12;bgb=395,342;i=misc/cloud;is=vl");
+            @display("bgl=12;i=misc/cloud;is=vl");
             gates:
                 inout ethg[];
             submodules:
                 switch: EtherSwitch {
-                    @display("p=206,163");
+                    @display("p=250,100");
                 }
                 host1: StandardHost {
-                    @display("p=302,84;t=10.x.x.1");
+                    @display("p=100,200;t=10.x.x.1");
                 }
                 host2: StandardHost {
-                    @display("p=263,271;t=10.x.x.2");
+                    @display("p=250,200;t=10.x.x.2");
                 }
                 host3: StandardHost {
-                    @display("p=84,164;t=10.x.x.3");
+                    @display("p=400,200;t=10.x.x.3");
                 }
             connections:
                 host1.ethg++ <--> Eth100M <--> switch.ethg++;
@@ -70,28 +69,28 @@ network Hierarchical99
                 inout ethg[];
             submodules:
                 lan1: LAN {
-                    @display("p=391,86;t=10.x.1.x");
+                    @display("p=400,100;t=10.x.1.x");
                 }
                 lan2: LAN {
-                    @display("p=391,355;t=10.x.2.x");
+                    @display("p=400,300;t=10.x.2.x");
                 }
                 lan3: LAN {
-                    @display("p=106,355;t=10.x.3.x");
+                    @display("p=100,300;t=10.x.3.x");
                 }
                 lan4: LAN {
-                    @display("p=106,86;t=10.x.4.x");
+                    @display("p=100,100;t=10.x.4.x");
                 }
                 router1: Router {
-                    @display("p=250,87");
+                    @display("p=250,100");
                 }
                 router2: Router {
-                    @display("p=391,219");
+                    @display("p=400,200");
                 }
                 router3: Router {
-                    @display("p=250,356");
+                    @display("p=250,300");
                 }
                 router4: Router {
-                    @display("p=106,219");
+                    @display("p=100,200");
                 }
             connections:
                 lan1.ethg++ <--> Eth1G <--> router1.ethg++;
@@ -106,37 +105,37 @@ network Hierarchical99
         }
     submodules:
         recorder: RoutingTableRecorder {
-            @display("p=37,81");
+            @display("p=100,200;is=s");
         }
-        networkConfigurator: <networkConfiguratorType> like INetworkConfigurator {
-            @display("p=37,31");
+        networkConfigurator: <> like INetworkConfigurator {
+            @display("p=100,100;is=s");
         }
         area11: Area {
-            @display("p=261,80;t=10.11.x.x");
+            @display("p=400,100;t=10.11.x.x");
         }
         area12: Area {
-            @display("p=426,80;t=10.12.x.x");
+            @display("p=600,100;t=10.12.x.x");
         }
         area21: Area {
-            @display("p=581,299;t=10.21.x.x");
+            @display("p=750,300;t=10.21.x.x");
         }
         area22: Area {
-            @display("p=426,432;t=10.22.x.x");
+            @display("p=600,400;t=10.22.x.x");
         }
         area31: Area {
-            @display("p=104,299;t=10.31.x.x");
+            @display("p=250,300;t=10.31.x.x");
         }
         area32: Area {
-            @display("p=261,432;t=10.32.x.x");
+            @display("p=400,400;t=10.32.x.x");
         }
         router1: Router {
-            @display("p=337,196");
+            @display("p=500,200");
         }
         router2: Router {
-            @display("p=426,300");
+            @display("p=600,300");
         }
         router3: Router {
-            @display("p=261,300");
+            @display("p=400,300");
         }
     connections:
         router1.ethg++ <--> Eth10G <--> router2.ethg++;

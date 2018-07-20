@@ -15,10 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211TransmitterBase.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ReceiverBase.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/common/packet/chunk/BitCountChunk.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmMode.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ReceiverBase.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211TransmitterBase.h"
 
 namespace inet {
 
@@ -46,7 +51,6 @@ void Ieee80211Radio::initialize(int stage)
 void Ieee80211Radio::handleUpperCommand(cMessage *message)
 {
     if (message->getKind() == RADIO_C_CONFIGURE) {
-        FlatRadioBase::handleUpperCommand(message);
         Ieee80211ConfigureRadioCommand *configureCommand = dynamic_cast<Ieee80211ConfigureRadioCommand *>(message->getControlInfo());
         if (configureCommand != nullptr) {
             const char *opMode = configureCommand->getOpMode();
@@ -58,10 +62,10 @@ void Ieee80211Radio::handleUpperCommand(cMessage *message)
             const IIeee80211Mode *mode = configureCommand->getMode();
             if (mode != nullptr)
                 setMode(mode);
-            IIeee80211Band *band = configureCommand->getBand();
+            const IIeee80211Band *band = configureCommand->getBand();
             if (band != nullptr)
                 setBand(band);
-            Ieee80211Channel *channel = configureCommand->getChannel();
+            const Ieee80211Channel *channel = configureCommand->getChannel();
             if (channel != nullptr)
                 setChannel(channel);
             int newChannelNumber = configureCommand->getChannelNumber();
@@ -69,8 +73,7 @@ void Ieee80211Radio::handleUpperCommand(cMessage *message)
                 setChannelNumber(newChannelNumber);
         }
     }
-    else
-        FlatRadioBase::handleUpperCommand(message);
+    FlatRadioBase::handleUpperCommand(message);
 }
 
 void Ieee80211Radio::setModeSet(const Ieee80211ModeSet *modeSet)
@@ -126,6 +129,34 @@ void Ieee80211Radio::setChannelNumber(int newChannelNumber)
     receptionTimer = nullptr;
     emit(radioChannelChangedSignal, newChannelNumber);
     emit(listeningChangedSignal, 0);
+}
+
+void Ieee80211Radio::encapsulate(Packet *packet) const
+{
+    auto ieee80211Transmitter = check_and_cast<const Ieee80211TransmitterBase *>(transmitter);
+    auto mode = ieee80211Transmitter->computeTransmissionMode(packet);
+    auto phyHeader = mode->getHeaderMode()->createHeader();
+    phyHeader->setChunkLength(b(mode->getHeaderMode()->getLength()));
+    phyHeader->setLengthField(B(packet->getTotalLength()));
+    packet->insertAtFront(phyHeader);
+    auto tailLength = dynamic_cast<const Ieee80211OfdmMode *>(mode) ? b(6) : b(0);
+    auto paddingLength = mode->getDataMode()->getPaddingLength(B(phyHeader->getLengthField()));
+    if (tailLength + paddingLength != b(0)) {
+        const auto &phyTrailer = makeShared<BitCountChunk>(tailLength + paddingLength);
+        packet->insertAtBack(phyTrailer);
+    }
+    packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Phy);
+}
+
+void Ieee80211Radio::decapsulate(Packet *packet) const
+{
+    auto mode = packet->getTag<Ieee80211ModeInd>()->getMode();
+    const auto& phyHeader = packet->popAtFront<Ieee80211PhyHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT);
+    auto tailLength = dynamic_cast<const Ieee80211OfdmMode *>(mode) ? b(6) : b(0);
+    auto paddingLength = mode->getDataMode()->getPaddingLength(B(phyHeader->getLengthField()));
+    if (tailLength + paddingLength != b(0))
+        packet->popAtBack(tailLength + paddingLength, Chunk::PF_ALLOW_INCORRECT);
+    packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
 }
 
 } // namespace physicallayer

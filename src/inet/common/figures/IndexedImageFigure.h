@@ -22,8 +22,7 @@
 #include "inet/common/INETMath.h"
 #include "IIndicatorFigure.h"
 
-//TODO namespace inet { -- for the moment commented out, as OMNeT++ 5.0 cannot instantiate a figure from a namespace
-using namespace inet;
+namespace inet {
 
 class INET_API IndexedImageFigure : public cGroupFigure, public inet::IIndicatorFigure
 {
@@ -84,7 +83,7 @@ class INET_API IndexedImageFigure : public cGroupFigure, public inet::IIndicator
 
 };
 
-// } // namespace inet
+} // namespace inet
 
 #endif
 

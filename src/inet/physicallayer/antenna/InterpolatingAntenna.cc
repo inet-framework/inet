@@ -24,9 +24,7 @@ namespace physicallayer {
 Define_Module(InterpolatingAntenna);
 
 InterpolatingAntenna::InterpolatingAntenna() :
-    AntennaBase(),
-    minGain(NaN),
-    maxGain(NaN)
+    AntennaBase()
 {
 }
 
@@ -34,9 +32,7 @@ void InterpolatingAntenna::initialize(int stage)
 {
     AntennaBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        parseMap(elevationGainMap, par("elevationGains"));
-        parseMap(headingGainMap, par("headingGains"));
-        parseMap(bankGainMap, par("bankGains"));
+        gain = makeShared<AntennaGain>(par("elevationGains"), par("headingGains"), par("bankGains"));
     }
 }
 
@@ -44,11 +40,19 @@ std::ostream& InterpolatingAntenna::printToStream(std::ostream& stream, int leve
 {
     stream << "InterpolatingAntenna";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", maxGain = " << maxGain;
+        stream << ", maxGain = " << gain->getMaxGain();
     return AntennaBase::printToStream(stream, level);
 }
 
-void InterpolatingAntenna::parseMap(std::map<double, double>& gainMap, const char *text)
+InterpolatingAntenna::AntennaGain::AntennaGain(const char *elevation, const char *heading, const char *bank) :
+    minGain(NaN), maxGain(NaN)
+{
+    parseMap(elevationGainMap, elevation);
+    parseMap(headingGainMap, heading);
+    parseMap(bankGainMap, bank);
+}
+
+void InterpolatingAntenna::AntennaGain::parseMap(std::map<rad, double>& gainMap, const char *text)
 {
     cStringTokenizer tokenizer(text);
     const char *firstAngle = tokenizer.nextToken();
@@ -59,30 +63,30 @@ void InterpolatingAntenna::parseMap(std::map<double, double>& gainMap, const cha
     const char *firstGain = tokenizer.nextToken();
     if (!firstGain)
         throw cRuntimeError("Insufficient number of values");
-    gainMap.insert(std::pair<double, double>(0, math::dB2fraction(atof(firstGain))));
-    gainMap.insert(std::pair<double, double>(2 * M_PI, math::dB2fraction(atof(firstGain))));
+    gainMap.insert(std::pair<rad, double>(rad(0), math::dB2fraction(atof(firstGain))));
+    gainMap.insert(std::pair<rad, double>(rad(2 * M_PI), math::dB2fraction(atof(firstGain))));
     while (tokenizer.hasMoreTokens()) {
         const char *angleString = tokenizer.nextToken();
         const char *gainString = tokenizer.nextToken();
         if (!angleString || !gainString)
             throw cRuntimeError("Insufficient number of values");
-        double angle = atof(angleString) * M_PI / 180;
+        auto angle = deg(atof(angleString));
         double gain = math::dB2fraction(atof(gainString));
         if (std::isnan(minGain) || gain < minGain)
             minGain = gain;
         if (std::isnan(maxGain) || gain > maxGain)
             maxGain = gain;
-        gainMap.insert(std::pair<double, double>(angle, gain));
+        gainMap.insert(std::pair<rad, double>(angle, gain));
     }
 }
 
-double InterpolatingAntenna::computeGain(const std::map<double, double>& gainMap, double angle) const
+double InterpolatingAntenna::AntennaGain::computeGain(const std::map<rad, double>& gainMap, rad angle) const
 {
-    angle = fmod(angle, 2 * M_PI);
-    if (angle < 0.0) angle += 2 * M_PI;
+    angle = rad(fmod(rad(angle).get(), 2 * M_PI));
+    if (angle < rad(0.0)) angle += rad(2 * M_PI);
     // NOTE: 0 and 2 * M_PI are always in the map
-    std::map<double, double>::const_iterator lowerBound = gainMap.lower_bound(angle);
-    std::map<double, double>::const_iterator upperBound = gainMap.upper_bound(angle);
+    std::map<rad, double>::const_iterator lowerBound = gainMap.lower_bound(angle);
+    std::map<rad, double>::const_iterator upperBound = gainMap.upper_bound(angle);
     if (lowerBound->first != angle)
         lowerBound--;
     if (upperBound == gainMap.end())
@@ -90,16 +94,16 @@ double InterpolatingAntenna::computeGain(const std::map<double, double>& gainMap
     if (upperBound == lowerBound)
         return lowerBound->second;
     else {
-        double lowerAngle = lowerBound->first;
-        double upperAngle = upperBound->first;
+        auto lowerAngle = lowerBound->first;
+        auto upperAngle = upperBound->first;
         double lowerGain = lowerBound->second;
         double upperGain = upperBound->second;
-        double alpha = (angle - lowerAngle) / (upperAngle - lowerAngle);
+        double alpha = unit((angle - lowerAngle) / (upperAngle - lowerAngle)).get();
         return (1 - alpha) * lowerGain + alpha * upperGain;
     }
 }
 
-double InterpolatingAntenna::computeGain(EulerAngles direction) const
+double InterpolatingAntenna::AntennaGain::computeGain(EulerAngles direction) const
 {
     return computeGain(headingGainMap, direction.alpha) *
            computeGain(elevationGainMap, direction.beta) *

@@ -1,8 +1,8 @@
 %description:
-Test parsing IPv6 addresses with prefix
+Test parsing Ipv6 addresses with prefix
 
 %includes:
-#include "inet/networklayer/contract/ipv6/IPv6Address.h"
+#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 
 %global:
 
@@ -10,7 +10,7 @@ using namespace inet;
 
 static void parseAddr(const char *s)
 {
-    IPv6Address a;
+    Ipv6Address a;
     int prefixLen;
     if (!a.tryParseAddrWithPrefix(s,prefixLen))
         EV << "BAD ";

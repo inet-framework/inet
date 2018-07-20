@@ -31,16 +31,15 @@
 #include <assert.h>
 #include <fstream>
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/transportlayer/contract/udp/UDPSocket.h"
-#include "inet/transportlayer/contract/tcp/TCPSocket.h"
-#include "inet/transportlayer/contract/sctp/SCTPSocket.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
+#include "inet/transportlayer/contract/tcp/TcpSocket.h"
+#include "inet/transportlayer/contract/sctp/SctpSocket.h"
 #include "NetPerfMeter_m.h"
-#include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
-#include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
-#include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
+#include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
+#include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
+#include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 
 namespace inet {
-
 
 /**
  * Implementation of NetPerfMeter. See NED file for more details.
@@ -85,7 +84,7 @@ class INET_API NetPerfMeter : public cSimpleModule
       TIMER_ON       = 7
    };
 
-   Protocol                TransportProtocol  = (Protocol)-1;
+   Protocol                TransportProtocol = static_cast<Protocol>(-1);
    bool                    ActiveMode = false;
    bool                    SendingAllowed = false;
    bool                    HasFinished = false;
@@ -119,11 +118,11 @@ class INET_API NetPerfMeter : public cSimpleModule
                            FrameSizeExpressionVector;
 
    // ====== Sockets and Connection Information =============================
-   SCTPSocket*             SocketSCTP = nullptr;
-   SCTPSocket*             IncomingSocketSCTP = nullptr;
-   TCPSocket*              SocketTCP = nullptr;
-   TCPSocket*              IncomingSocketTCP = nullptr;
-   UDPSocket*              SocketUDP = nullptr;
+   SctpSocket*             SocketSCTP = nullptr;
+   SctpSocket*             IncomingSocketSCTP = nullptr;
+   TcpSocket*              SocketTCP = nullptr;
+   TcpSocket*              IncomingSocketTCP = nullptr;
+   UdpSocket *             SocketUDP = nullptr;
    int                     ConnectionID = 0;
    L3Address               PrimaryPath;
 
@@ -173,12 +172,12 @@ class INET_API NetPerfMeter : public cSimpleModule
       inline void reset() {
          ReceivedBytes    = 0;
          ReceivedMessages = 0;
-         ReceivedDelayHistogram.clearResult();
+         ReceivedDelayHistogram.clear();
       }
 
       unsigned long long ReceivedBytes = 0;
       unsigned long long ReceivedMessages = 0;
-      cDoubleHistogram   ReceivedDelayHistogram;
+      cHistogram ReceivedDelayHistogram;
    };
 
    std::map<unsigned int, SenderStatistics*>   SenderStatisticsMap;
@@ -200,7 +199,7 @@ class INET_API NetPerfMeter : public cSimpleModule
    void stopSending();
    void sendDataOfTraceFile(const unsigned long long bytesAvailableInQueue);
    void sendDataOfSaturatedStreams(const unsigned long long   bytesAvailableInQueue,
-                                   const SCTPSendQueueAbated* sendQueueAbatedIndication);
+                                   const SctpSendQueueAbatedReq* sendQueueAbatedIndication);
 
    void sendDataOfNonSaturatedStreams(const unsigned long long bytesAvailableInQueue,
                                       const unsigned int       streamID);
@@ -213,7 +212,6 @@ class INET_API NetPerfMeter : public cSimpleModule
    void createAndBindSocket();
    void handleTimer(cMessage* msg);
 };
-
 } // namespace inet
 
 #endif

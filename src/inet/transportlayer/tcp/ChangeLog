@@ -1,3 +1,229 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-01  Zoltan Bojthe
+
+	Added B/b units to length constants and length fields of chunks.
+
+2018-05-10  Zoltan Bojthe
+
+	Moved header serializers to the corresponding protocol folders.
+
+2018-03-09  Zoltan Bojthe
+
+	Optimized CRC calculation.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-01-24  Levente Mészáros
+
+	Adapted registerProtocol calls to the new API based on OSI service primitives.
+
+2018-01-18  Zoltan Bojthe
+
+	Revised MSG customization: Sack, TcpHeader.
+	Remove @customize properties where possible.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-12  Levente Mészáros
+
+	Moved Indication kind into constructor argument.
+	Renamed indication variables.
+	Replaced cMessage commands with Request and Indication.
+
+2018-01-12  Levente Mészáros
+
+	Renamed ACK packets to TcpAck and WlanAck to avoid confusion.
+
+	For example, a TcpAck can be followed by a WlanAck which used to be an ACK
+	followed by another ACK.
+
+2018-01-03  Levente Mészáros
+
+	Switched from message pointer to packet pointer where available.
+
+2018-01-02  Levente Mészáros
+
+	Replaced cPacket with Packet.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    DumbTCP -> DumbTcp
+	    IPv4 -> Ipv4
+	    IPv4ControlInfo -> Ipv4ControlInfo
+	    IPv6 -> Ipv6
+	    IPv6ControlInfo -> Ipv6ControlInfo
+	    ITCP -> ITcp
+	    LinuxTCP -> LinuxTcp
+	    TCP -> Tcp
+	    TCPAcceptCommand -> TcpAcceptCommand
+	    TCPAlgorithm -> TcpAlgorithm
+	    TCPAvailableInfo -> TcpAvailableInfo
+	    TCPBaseAlg -> TcpBaseAlg
+	    TCPCommand -> TcpCommand
+	    TCPConnectInfo -> TcpConnectInfo
+	    TCPConnection -> TcpConnection
+	    TCPEventCode -> TcpEventCode
+	    TCPIPchecksum -> TcpIpChecksum
+	    TCPNewReno -> TcpNewReno
+	    TCPNoCongestionControl -> TcpNoCongestionControl
+	    TCPOpenCommand -> TcpOpenCommand
+	    TCPOption -> TcpOption
+	    TCPOptionMaxSegmentSize -> TcpOptionMaxSegmentSize
+	    TCPOptionNop -> TcpOptionNop
+	    TCPOptionSack -> TcpOptionSack
+	    TCPOptionSackPermitted -> TcpOptionSackPermitted
+	    TCPOptionTimestamp -> TcpOptionTimestamp
+	    TCPOptionWindowScale -> TcpOptionWindowScale
+	    TCPReceiveQueue -> TcpReceiveQueue
+	    TCPReno -> TcpReno
+	    TCPSACKRexmitQueue -> TcpSackRexmitQueue
+	    TCPSegment -> TcpHeader
+	    TCPSendQueue -> TcpSendQueue
+	    TCPSocket -> TcpSocket
+	    TCPStateVariables -> TcpStateVariables
+	    TCPStatusInfo -> TcpStatusInfo
+	    TCPTahoe -> TcpTahoe
+	    TCPTahoeRenoFamily -> TcpTahoeRenoFamily
+	    TCPVegas -> TcpVegas
+	    TCPWestwood -> TcpWestwood
+
+2017-12-15  Zoltan Bojthe
+
+	Renamed deprecated info() to str().
+
+2017-12-15  Zoltan Bojthe
+
+	TcpSackRexmitQueue: info() renamed to detailedInfo() and it returns a string
+	instead of writing one to EV_DETAIL.
+
+2017-12-15  Zoltan Bojthe
+
+	Removed unnecessary cPar::longValue() calls.
+
+	Motivation: rely on cast operators instead because they can detect
+	overflows (when the value is cast to a smaller integer type that can not
+	represent it). Removed unnecessary .longvalue() calls. Replaced to
+	.intValue() in comparisons.
+
+2017-12-14  Levente Mészáros
+
+	Removed unnecessary markImmutable() calls.
+
+2017-12-11  Zoltan Bojthe
+
+	Updated for new msgc function names: getFooForUpdate, insertFoo, eraseFoo, etc.
+
+2017-12-07  Zoltan Bojthe
+
+	Moved buffer descriptors to a separate file, added ReassemblyBuffer
+	and ReorderBuffer descriptors.
+
+2017-11-29  Levente Mészáros
+
+	Dropped unused sendQueueClass and receiveQueueClass parameters.
+
+2017-11-29  Levente Mészáros
+
+	Added @enum to tcpAlgorithmClass parameter.
+
+2017-11-22  Levente Mészáros
+
+	Removed obsolete @readonly property from TCPConnection.
+
+2017-11-21  Levente Mészáros
+
+	Changed MSG files to use the canonical syntax.
+
+2017-11-13  Zoltan Bojthe
+
+	Converted TCPOptionNumbers enum, default CRC case was missed.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-11-13  Levente Mészáros
+
+	Fixed IPV6 module path in transport layers.
+
+2017-10-02  Zoltan Bojthe
+
+	Added verification for incoming CRC.
+
+2017-09-14  Levente Mészáros
+
+	Removed obsolete TCP socket parameter dataTransferMode from all implementations.
+
+2017-07-10  Levente Mészáros
+
+	Fixed incorrect connection pointer in rexmitQueue,
+	bug found and fix provided by Karsten Heimann.
+
+2017-07-28  Levente Mészáros
+
+	Renamed to ReorderBuffer::popAvailableData().
+
+2017-04-12  Levente Mészáros
+
+	Added descriptors for TcpReceiveQueue and TcpSendQueue.
+
+2017-03-16  Levente Mészáros
+
+	Removed declaredIncorrect from crcMode.
+
+2017-02-22  Levente Mészáros
+
+	Added crcMode parameter.
+
+2016-12-21  Zoltan Bojthe
+
+	Removed obsolete TCPDataTransferMode.
+	Fixes for compiler errors in TCPConnectionDescriptor.
+	Accepts and truncates packets with seqNo < rcvd_nxt (redesigned truncateSegment())
+
+2017-01-25  Zoltan Bojthe
+
+	Simplified receive and send queues, removed the queue interface.
+
+2017-01-25  Zoltan Bojthe
+
+	Renamed TCPSegment to TcpHeader.
+
+2016-07-20  Zoltan Bojthe
+
+	Removed obsolete omnetpp 4.x code (#if OMNETPP_VERSION < 0x500).
+
+2016-06-01  Levente Mészáros
+
+	Added registerProtocol calls to transport protocols.
+
+2016-06-03  Levente Mészáros
+
+	Renamed connId field to socketId.
+	Changed appIn/appOut gate vectors to simple gates.
+
+2016-06-03  Levente Mészáros
+
+	Added explicit accept mechanism to listening.
+
+2015-06-11  Levente Mészáros
+
+	Renamed connId to socketId to be able to implement the ISocketControlInfo interface.
+
+2016-05-02  Levente Mészáros
+
+	Added new registerProtocol() calls.
+
+2016-04-29  Levente Mészáros
+
+	Dropped obsolete IPSocket.registerProtocol() calls.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

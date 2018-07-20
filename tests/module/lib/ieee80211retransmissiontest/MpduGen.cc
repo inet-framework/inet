@@ -19,17 +19,16 @@
 
 #include "MpduGen.h"
 
+#include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
+#include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 
 namespace inet {
 
 Define_Module(MpduGen);
 
-simsignal_t MpduGen::sentPkSignal = registerSignal("sentPk");
-simsignal_t MpduGen::rcvdPkSignal = registerSignal("rcvdPk");
-
-void MpduGen::initialize(int stage) {
+void MpduGen::initialize(int stage)
+{
     ApplicationBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         localPort = par("localPort");
@@ -37,52 +36,57 @@ void MpduGen::initialize(int stage) {
     }
     else if (stage == INITSTAGE_LAST) {
         selfMsg = new cMessage("Self msg");
-        scheduleAt(simTime() + par("startTime").doubleValue(), selfMsg);
+        scheduleAt(simTime() + par("startTime"), selfMsg);
     }
 }
 
-void MpduGen::processPacket(cPacket *pk) {
-    emit(rcvdPkSignal, pk);
-    EV_INFO << "Received packet: " << UDPSocket::getReceivedPacketInfo(pk) << endl;
+void MpduGen::processPacket(Packet *pk)
+{
+    emit(packetReceivedSignal, pk);
+    EV_INFO << "Received packet: " << UdpSocket::getReceivedPacketInfo(pk) << endl;
     delete pk;
     numReceived++;
 }
 
-void MpduGen::sendPackets() {
-    socket.setOutputGate(gate("udpOut"));
+void MpduGen::sendPackets()
+{
+    socket.setOutputGate(gate("socketOut"));
     const char *localAddress = par("localAddress");
     socket.bind(*localAddress ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
     const char *destAddrStr = par("destAddress");
-    const char *packets = par("packets").stringValue();
+    const char *packets = par("packets");
     L3Address destAddr = L3AddressResolver().resolve(destAddrStr);
     int len = strlen(packets);
-    const char *packetName = par("packetName").stringValue();
+    const char *packetName = par("packetName");
     for (int i = 0; i < len; i++) {
         std::ostringstream str;
         str << packetName << "-" << i;
-        cPacket *payload = new cPacket(str.str().c_str());
+        Packet *packet = new Packet(str.str().c_str());
+        auto payload = makeShared<ByteCountChunk>();
         if (packets[i] == 'L') {
-            payload->setByteLength(par("longPacketSize").longValue());
+            payload->setLength(B(par("longPacketSize")));
         }
         else if (packets[i] == 'S') {
-            payload->setByteLength(par("shortPacketSize").longValue());
+            payload->setLength(B(par("shortPacketSize")));
         }
         else
             throw cRuntimeError("Unknown packet type = %c", packets[i]);
-        emit(sentPkSignal, payload);
-        socket.sendTo(payload, destAddr, destPort);
+        packet->insertAtBack(payload);
+        emit(packetSentSignal, packet);
+        socket.sendTo(packet, destAddr, destPort);
         numSent++;
     }
     socket.close();
 }
 
-void MpduGen::handleMessageWhenUp(cMessage *msg) {
+void MpduGen::handleMessageWhenUp(cMessage *msg)
+{
     if (msg->isSelfMessage()) {
         ASSERT(msg == selfMsg);
         sendPackets();
     }
     else if (msg->getKind() == UDP_I_DATA) {
-        processPacket(PK(msg));
+        processPacket(check_and_cast<Packet*>(msg));
     }
     else if (msg->getKind() == UDP_I_ERROR) {
         EV_WARN << "Ignoring UDP error report\n";

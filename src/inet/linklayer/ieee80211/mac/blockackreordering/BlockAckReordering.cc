@@ -24,19 +24,19 @@ namespace ieee80211 {
 //
 // The recipient flushes received MSDUs from its receive buffer as described in this subclause. [...]
 //
-BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Ieee80211DataFrame* dataFrame)
+BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader)
 {
     ReceiveBuffer *receiveBuffer = createReceiveBufferIfNecessary(agreement);
     // The reception of QoS data frames using Normal Ack policy shall not be used by the
     // recipient to reset the timer to detect Block Ack timeout (see 10.5.4).
     // This allows the recipient to delete the Block Ack if the originator does not switch
     // back to using Block Ack.
-    if (receiveBuffer->insertFrame(dataFrame)) {
-        if (dataFrame->getAckPolicy() == BLOCK_ACK)
-            agreement->blockAckPolicyFrameReceived(dataFrame);
+    if (receiveBuffer->insertFrame(dataPacket, dataHeader)) {
+        if (dataHeader->getAckPolicy() == BLOCK_ACK)
+            agreement->blockAckPolicyFrameReceived(dataHeader);
         auto earliestCompleteMsduOrAMsdu = getEarliestCompleteMsduOrAMsduIfExists(receiveBuffer);
         if (earliestCompleteMsduOrAMsdu.size() > 0) {
-            int earliestSequenceNumber = earliestCompleteMsduOrAMsdu.at(0)->getSequenceNumber();
+            int earliestSequenceNumber = earliestCompleteMsduOrAMsdu.at(0)->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber();
             // If, after an MPDU is received, the receive buffer is full, the complete MSDU or A-MSDU with the earliest
             // sequence number shall be passed up to the next MAC process.
             if (receiveBuffer->isFull()) {
@@ -53,31 +53,31 @@ BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedQoSFrame(Re
         }
     }
     else
-        delete dataFrame;
+        delete dataPacket;
     return ReorderBuffer({});
 }
 
 //
 // The recipient flushes received MSDUs from its receive buffer as described in this subclause. [...]
 //
-BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedBlockAckReq(Ieee80211BlockAckReq* frame)
+BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedBlockAckReq(const Ptr<const Ieee80211BlockAckReq>& blockAckReq)
 {
     // The originator shall use the Block Ack starting sequence control to signal the first MPDU in the block for
     // which an acknowledgment is expected.
     int startingSequenceNumber = -1;
     Tid tid = -1;
-    if (auto basicReq = dynamic_cast<Ieee80211BasicBlockAckReq*>(frame)) {
+    if (auto basicReq = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
         tid = basicReq->getTidInfo();
         startingSequenceNumber = basicReq->getStartingSequenceNumber();
     }
-    else if (auto compressedReq = dynamic_cast<Ieee80211CompressedBlockAck*>(frame)) {
+    else if (auto compressedReq = dynamicPtrCast<const Ieee80211CompressedBlockAck>(blockAckReq)) {
         tid = compressedReq->getTidInfo();
         startingSequenceNumber = compressedReq->getStartingSequenceNumber();
     }
     else {
         throw cRuntimeError("Multi-Tid BlockAckReq is currently an unimplemented feature");
     }
-    auto id = std::make_pair(tid, frame->getTransmitterAddress());
+    auto id = std::make_pair(tid, blockAckReq->getTransmitterAddress());
     auto it = receiveBuffers.find(id);
     if (it != receiveBuffers.end()) {
         ReceiveBuffer *receiveBuffer = it->second;
@@ -179,14 +179,15 @@ void BlockAckReordering::releaseReceiveBuffer(ReceiveBuffer *receiveBuffer, cons
 }
 
 
-bool BlockAckReordering::isComplete(const std::vector<Ieee80211DataFrame*>& fragments)
+bool BlockAckReordering::isComplete(const std::vector<Packet *>& fragments)
 {
     int largestFragmentNumber = -1;
     std::set<FragmentNumber> fragNums; // possible duplicate frames
     for (auto fragment : fragments) {
-        if (!fragment->getMoreFragments())
-            largestFragmentNumber = fragment->getFragmentNumber();
-        fragNums.insert(fragment->getFragmentNumber());
+        const auto& header = fragment->peekAtFront<Ieee80211DataHeader>();
+        if (!header->getMoreFragments())
+            largestFragmentNumber = header->getFragmentNumber();
+        fragNums.insert(header->getFragmentNumber());
     }
     return largestFragmentNumber != -1 && largestFragmentNumber + 1 == (int)fragNums.size();
 }
@@ -196,7 +197,7 @@ ReceiveBuffer* BlockAckReordering::createReceiveBufferIfNecessary(RecipientBlock
     SequenceNumber startingSequenceNumber = agreement->getStartingSequenceNumber();
     int bufferSize = agreement->getBufferSize();
     Tid tid = agreement->getBlockAckRecord()->getTid();
-    MACAddress originatorAddr = agreement->getBlockAckRecord()->getOriginatorAddress();
+    MacAddress originatorAddr = agreement->getBlockAckRecord()->getOriginatorAddress();
     auto id = std::make_pair(tid, originatorAddr);
     auto it = receiveBuffers.find(id);
     if (it == receiveBuffers.end()) {
@@ -208,10 +209,10 @@ ReceiveBuffer* BlockAckReordering::createReceiveBufferIfNecessary(RecipientBlock
         return it->second;
 }
 
-void BlockAckReordering::processReceivedDelba(Ieee80211Delba* delba)
+void BlockAckReordering::processReceivedDelba(const Ptr<const Ieee80211Delba>& delba)
 {
     Tid tid = delba->getTid();
-    MACAddress originatorAddr = delba->getTransmitterAddress();
+    MacAddress originatorAddr = delba->getTransmitterAddress();
     auto id = std::make_pair(tid, originatorAddr);
     auto it = receiveBuffers.find(id);
     if (it != receiveBuffers.end()) {
@@ -231,7 +232,7 @@ void BlockAckReordering::passedUp(ReceiveBuffer *receiveBuffer, int sequenceNumb
     receiveBuffer->remove(sequenceNumber);
 }
 
-std::vector<Ieee80211DataFrame*> BlockAckReordering::getEarliestCompleteMsduOrAMsduIfExists(ReceiveBuffer *receiveBuffer)
+std::vector<Packet *> BlockAckReordering::getEarliestCompleteMsduOrAMsduIfExists(ReceiveBuffer *receiveBuffer)
 {
     Fragments earliestFragments = Fragments();
     SequenceNumber earliestSeqNum = 0;
@@ -239,13 +240,13 @@ std::vector<Ieee80211DataFrame*> BlockAckReordering::getEarliestCompleteMsduOrAM
     for (auto it : buffer) {
         if (isComplete(it.second)) {
             earliestFragments = it.second;
-            earliestSeqNum = earliestFragments.at(0)->getSequenceNumber();
+            earliestSeqNum = earliestFragments.at(0)->peekAtFront<Ieee80211DataOrMgmtHeader>()->getSequenceNumber();
             break;
         }
     }
     if (earliestFragments.size() > 0) {
         for (auto it : buffer) {
-            SequenceNumber currentSeqNum = it.second.at(0)->getSequenceNumber();
+            SequenceNumber currentSeqNum = it.second.at(0)->peekAtFront<Ieee80211DataOrMgmtHeader>()->getSequenceNumber();
             if (isSequenceNumberLess(currentSeqNum, earliestSeqNum, receiveBuffer->getNextExpectedSequenceNumber(), receiveBuffer->getBufferSize())) {
                 if (isComplete(it.second)) {
                     earliestFragments = it.second;

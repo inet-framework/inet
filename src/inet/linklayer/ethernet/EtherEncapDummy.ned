@@ -22,8 +22,8 @@ package inet.linklayer.ethernet;
 // Dummy encapsulation/decapsulation module for ~EthernetInterface.
 //
 // Expected environment:
-// - lowerLayerIn, lowerLayerOut gates should be connected to an ~EtherMAC
-// - upperLayerIn, upperLayerOut gates should be connected to an ~IMACRelayUnit
+// - lowerLayerIn, lowerLayerOut gates should be connected to an ~EtherMac
+// - upperLayerIn, upperLayerOut gates should be connected to an ~IMacRelayUnit
 //
 // Functionality:
 // - packets coming from upper layers will be sent to MAC.

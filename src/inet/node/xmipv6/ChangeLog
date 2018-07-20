@@ -1,3 +1,28 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IPv6 -> Ipv6
+	    TCP -> Tcp
+	    UDP -> Udp
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2016-05-30  Levente Mészáros
+
+	Renamed numRadios to numWlanInterfaces to make it consistent with interface names.
+
+2016-05-31  Levente Mészáros
+
+	Renamed networkLayer submodule to ipv4 and ipv6 submodules.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------
@@ -90,4 +115,3 @@
 
 	merged commit is
 	https://github.com/zarrar/xMIPv6/commit/affe8fedb87705adaba09bfa30ba3320e3519d6f
-

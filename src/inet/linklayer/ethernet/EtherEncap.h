@@ -18,28 +18,27 @@
 #ifndef __INET_ETHERENCAP_H
 #define __INET_ETHERENCAP_H
 
-#include "inet/common/INETDefs.h"
-
+#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/common/FcsMode_m.h"
+#include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
+#include "inet/linklayer/ieee8022/Ieee8022Llc.h"
 
 namespace inet {
-
-// Forward declarations:
-class EtherFrame;
 
 /**
  * Performs Ethernet II encapsulation/decapsulation. More info in the NED file.
  */
-class INET_API EtherEncap : public cSimpleModule
+class INET_API EtherEncap : public Ieee8022Llc
 {
   protected:
+    FcsMode fcsMode = FCS_MODE_UNDEFINED;
     int seqNum;
 
     // statistics
     long totalFromHigherLayer;    // total number of packets received from higher layer
     long totalFromMAC;    // total number of frames received from MAC
     long totalPauseSent;    // total number of PAUSE frames sent
-    int interfaceId = -1;
     static simsignal_t encapPkSignal;
     static simsignal_t decapPkSignal;
     static simsignal_t pauseSentSignal;
@@ -50,11 +49,20 @@ class INET_API EtherEncap : public cSimpleModule
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
 
-    virtual void processPacketFromHigherLayer(cPacket *msg);
-    virtual void processFrameFromMAC(EtherFrame *msg);
+    virtual void processCommandFromHigherLayer(cMessage *msg);
+    virtual void processPacketFromHigherLayer(Packet *msg);
+    virtual void processFrameFromMAC(Packet *packet);
     virtual void handleSendPause(cMessage *msg);
 
     virtual void refreshDisplay() const override;
+
+    virtual const Ptr<const EthernetMacHeader> decapsulateMacLlcSnap(Packet *packet);
+
+  public:
+    static void addPaddingAndFcs(Packet *packet, FcsMode fcsMode, B requiredMinByteLength = MIN_ETHERNET_FRAME_BYTES);
+    static void addFcs(Packet *packet, FcsMode fcsMode);
+
+    static const Ptr<const EthernetMacHeader> decapsulateMacHeader(Packet *packet);
 };
 
 } // namespace inet

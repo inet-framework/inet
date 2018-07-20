@@ -30,7 +30,7 @@ class INET_API RateControlBase : public ModeSetListener, public IRateControl
         static simsignal_t datarateSignal;
 
     protected:
-        const IIeee80211Mode *currentMode = nullptr;
+        const physicallayer::IIeee80211Mode *currentMode = nullptr;
 
     protected:
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -39,8 +39,8 @@ class INET_API RateControlBase : public ModeSetListener, public IRateControl
 
         virtual void emitDatarateSignal();
 
-        const IIeee80211Mode *increaseRateIfPossible(const IIeee80211Mode *currentMode);
-        const IIeee80211Mode *decreaseRateIfPossible(const IIeee80211Mode *currentMode);
+        const physicallayer::IIeee80211Mode *increaseRateIfPossible(const physicallayer::IIeee80211Mode *currentMode);
+        const physicallayer::IIeee80211Mode *decreaseRateIfPossible(const physicallayer::IIeee80211Mode *currentMode);
 };
 
 } /* namespace ieee80211 */

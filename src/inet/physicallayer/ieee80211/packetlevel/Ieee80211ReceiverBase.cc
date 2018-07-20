@@ -15,9 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ReceiverBase.h"
-
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ReceiverBase.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211TransmissionBase.h"
 
 namespace inet {
@@ -89,30 +90,16 @@ void Ieee80211ReceiverBase::setChannelNumber(int channelNumber)
         setChannel(new Ieee80211Channel(band, channelNumber));
 }
 
-ReceptionIndication *Ieee80211ReceiverBase::createReceptionIndication() const
+const IReceptionResult *Ieee80211ReceiverBase::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
-    return new Ieee80211ReceptionIndication();
+    auto transmission = check_and_cast<const Ieee80211TransmissionBase *>(reception->getTransmission());
+    auto receptionResult = FlatReceiverBase::computeReceptionResult(listening, reception, interference, snir, decisions);
+    auto packet = const_cast<Packet *>(receptionResult->getPacket());
+    packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Phy);
+    packet->addTagIfAbsent<Ieee80211ModeInd>()->setMode(transmission->getMode());
+    packet->addTagIfAbsent<Ieee80211ChannelInd>()->setChannel(transmission->getChannel());
+    return receptionResult;
 }
-
-const ReceptionIndication *Ieee80211ReceiverBase::computeReceptionIndication(const ISNIR *snir) const
-{
-    Ieee80211ReceptionIndication *indication = check_and_cast<Ieee80211ReceptionIndication *>(const_cast<ReceptionIndication *>(FlatReceiverBase::computeReceptionIndication(snir)));
-
-    const Ieee80211TransmissionBase *transmission = check_and_cast<const Ieee80211TransmissionBase *>(snir->getReception()->getTransmission());
-    //FIXME fill indication
-    indication->setMode(transmission->getMode());
-    indication->setChannel(const_cast<Ieee80211Channel *>(transmission->getChannel()));
-    //indication->setSnr();
-    //indication->setLossRate();
-    //indication->setRecPow();
-    //indication->setAirtimeMetric();
-    //indication->setTestFrameDuration();
-    //indication->setTestFrameError());
-    //indication->setTestFrameSize();
-
-    return indication;
-}
-
 
 } // namespace physicallayer
 

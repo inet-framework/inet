@@ -18,7 +18,7 @@
 #ifndef __INET_QOSSEQUENCENUMBERASSIGNMENT_H
 #define __INET_QOSSEQUENCENUMBERASSIGNMENT_H
 
-#include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee80211/mac/common/SequenceControlField.h"
 #include "inet/linklayer/ieee80211/mac/contract/ISequenceNumberAssignment.h"
 #include <map>
@@ -35,18 +35,18 @@ class INET_API QoSSequenceNumberAssignment : public ISequenceNumberAssignment
             TIME_PRIORITY,
             DATA
         };
-        typedef std::pair<MACAddress, Tid> Key;
+        typedef std::pair<MacAddress, Tid> Key;
 
         std::map<Key, SequenceNumber> lastSentSeqNums; // last sent sequence numbers per RA
-        std::map<MACAddress, SequenceNumber> lastSentTimePrioritySeqNums; // last sent sequence numbers per RA
-        std::map<MACAddress, SequenceNumber> lastSentSharedSeqNums; // last sent sequence numbers per RA
+        std::map<MacAddress, SequenceNumber> lastSentTimePrioritySeqNums; // last sent sequence numbers per RA
+        std::map<MacAddress, SequenceNumber> lastSentSharedSeqNums; // last sent sequence numbers per RA
         SequenceNumber lastSentSharedCounterSeqNum = 0;
 
     protected:
-        virtual CacheType getCacheType(Ieee80211DataOrMgmtFrame *frame, bool incoming);
+        virtual CacheType getCacheType(const Ptr<const Ieee80211DataOrMgmtHeader>& header, bool incoming);
 
     public:
-        virtual void assignSequenceNumber(Ieee80211DataOrMgmtFrame *frame) override;
+        virtual void assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header) override;
 };
 
 } /* namespace ieee80211 */

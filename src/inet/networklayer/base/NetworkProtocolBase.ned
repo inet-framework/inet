@@ -28,8 +28,8 @@ simple NetworkProtocolBase extends LayeredProtocolBase
         string interfaceTableModule;
         @display("i=block/fork");
     gates:
-        input upperLayerIn[] @labels(ITransportPacket/down);
-        output upperLayerOut[] @labels(ITransportPacket/up);
-        input lowerLayerIn[] @labels(INetworkDatagram/up);
-        output lowerLayerOut[] @labels(INetworkDatagram/down);
+        input transportIn @labels(INetworkProtocolControlInfo/down);
+        output transportOut @labels(INetworkProtocolControlInfo/up);
+        input queueIn @labels(INetworkHeader);
+        output queueOut @labels(INetworkHeader);
 }

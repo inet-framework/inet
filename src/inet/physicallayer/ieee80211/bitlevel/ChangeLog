@@ -1,3 +1,145 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-04  Levente Mészáros
+
+	Replaced 0/0 NED parameter values with nan.
+
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-05-30  Levente Mészáros
+
+	Fixed length field wrap around for large packets.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-16  Levente Mészáros
+
+	Completed remaining APSK -> Apsk renames.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    APSKModulationBase -> ApskModulationBase
+	    APSKSymbol -> ApskSymbol
+	    BPSKModulation -> BpskModulation
+	    IAPSKModulation -> IApskModulation
+	    IFECCoder -> IFecCoder
+	    ISNIR -> ISnir
+	    Ieee80211HTInterleaving -> Ieee80211HtInterleaving
+	    Ieee80211LayeredOFDMReceiver -> Ieee80211LayeredOfdmReceiver
+	    Ieee80211LayeredOFDMTransmitter -> Ieee80211LayeredOfdmTransmitter
+	    Ieee80211OFDMCode -> Ieee80211OfdmCode
+	    Ieee80211OFDMCompliantCodes -> Ieee80211OfdmCompliantCodes
+	    Ieee80211OFDMCompliantModes -> Ieee80211OfdmCompliantModes
+	    Ieee80211OFDMDataMode -> Ieee80211OfdmDataMode
+	    Ieee80211OFDMDecoder -> Ieee80211OfdmDecoder
+	    Ieee80211OFDMDecoderModule -> Ieee80211OfdmDecoderModule
+	    Ieee80211OFDMDefs -> Ieee80211OfdmDefs
+	    Ieee80211OFDMDemodulator -> Ieee80211OfdmDemodulator
+	    Ieee80211OFDMDemodulatorModule -> Ieee80211OfdmDemodulatorModule
+	    Ieee80211OFDMEncoder -> Ieee80211OfdmEncoder
+	    Ieee80211OFDMEncoderModule -> Ieee80211OfdmEncoderModule
+	    Ieee80211OFDMInterleaver -> Ieee80211OfdmInterleaver
+	    Ieee80211OFDMInterleaverModule -> Ieee80211OfdmInterleaverModule
+	    Ieee80211OFDMInterleaving -> Ieee80211OfdmInterleaving
+	    Ieee80211OFDMMode -> Ieee80211OfdmMode
+	    Ieee80211OFDMModulation -> Ieee80211OfdmModulation
+	    Ieee80211OFDMModulator -> Ieee80211OfdmModulator
+	    Ieee80211OFDMModulatorModule -> Ieee80211OfdmModulatorModule
+	    Ieee80211OFDMPreambleMode -> Ieee80211OfdmPreambleMode
+	    Ieee80211OFDMRadio -> Ieee80211OfdmRadio
+	    Ieee80211OFDMReceptionSymbolModel -> Ieee80211OfdmReceptionSymbolModel
+	    Ieee80211OFDMSignalMode -> Ieee80211OfdmSignalMode
+	    Ieee80211OFDMSymbol -> Ieee80211OfdmSymbol
+	    Ieee80211OFDMSymbolModel -> Ieee80211OfdmSymbolModel
+	    Ieee80211OFDMTransmissionSymbolModel -> Ieee80211OfdmTransmissionSymbolModel
+	    QAM16Modulation -> Qam16Modulation
+	    QAM64Modulation -> Qam64Modulation
+	    QPSKModulation -> QpskModulation
+	    SNIRReceiverBase -> SnirReceiverBase
+
+2017-12-15  Zoltan Bojthe
+
+	Remove unnecessary cPar::stringValue(), cPar::boolValue() calls.
+
+2017-12-14  Levente Mészáros
+
+	Removed unnecessary markImmutable() calls.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-11-13  Levente Mészáros
+
+	Fixed memory leaks found by Valgrind.
+
+2017-10-30  Levente Mészáros
+
+	Renamed mode classes to have camel case names.
+	Added Ieee80211LayeredTransmission that carries the PHY mode and channel.
+
+2017-10-24  Levente Mészáros
+
+	Fixed padding in layered (bitlevel) OFDM radio.
+
+2017-09-28  Zoltan Bojthe
+
+	Added PacketProtocolTag in Ieee80211OFDMRadio::decapsulate().
+
+2017-07-26  Levente Mészáros
+
+	Simplified retrieving rate field in 802.11 layered receiver.
+
+2017-07-24  Levente Mészáros
+
+	Extracted chunk variables to fix bug caused by lifetime of temporaries within
+	a for loop header.
+
+2017-07-24  Levente Mészáros
+
+	Fixed accidentally inserted const keyword after new operator.
+
+2017-05-11  Levente Mészáros
+
+	Revived layered OFDM transmitter and receiver.
+
+2017-05-11  Levente Mészáros
+
+	Dropped obsolete layered code.
+
+2017-03-21  Levente Mészáros
+
+	Replaced APSKScalarRadio with Ieee80211OFDMRadio in layered example.
+
+2017-01-26  Levente Mészáros
+
+	Switched to bit type where appropriate.
+
+2017-01-24  Levente Mészáros
+
+	Changed to use bit/byte where appropriate.
+
+2017-01-18  Levente Mészáros
+
+	Changed 802.11 bitlevel radio to use Packet/Chunk properly.
+
+2017-01-25  Zoltan Bojthe
+
+	Renamed macFrame to packet where appropriate.
+
+2017-01-25  Zoltan Bojthe
+
+	Replaced cPacket* with Packet* where appropriate.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

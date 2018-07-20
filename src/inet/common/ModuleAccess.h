@@ -68,7 +68,7 @@ INET_API T *findModuleFromPar(cPar& par, const cModule *from, bool required = tr
 template<typename T>
 T *findModuleFromPar(cPar& par, const cModule *from, bool required)
 {
-    const char *path = par.stringValue();
+    const char *path = par;
     if (path && *path) {
         cModule *mod = from->getModuleByPath(path);
         if (!mod) {
@@ -97,7 +97,7 @@ INET_API T *getModuleFromPar(cPar& par, const cModule *from, bool required = tru
 template<typename T>
 T *getModuleFromPar(cPar& par, const cModule *from, bool required)
 {
-    const char *path = par.stringValue();
+    const char *path = par;
     cModule *mod = from->getModuleByPath(path);
     if (!mod) {
         if (required)
@@ -115,13 +115,13 @@ T *getModuleFromPar(cPar& par, const cModule *from, bool required)
  * Find the nic module (inside the networkNode) containing the given module.
  * Returns nullptr, if no containing nic module.
  */
-INET_API cModule *findContainingNicModule(cModule *from);
+INET_API InterfaceEntry *findContainingNicModule(const cModule *from);
 
 /**
  * Find the nic module (inside the networkNode) containing the given module.
  * throws error if no containing nic module.
  */
-INET_API cModule *getContainingNicModule(cModule *from);
+INET_API InterfaceEntry *getContainingNicModule(const cModule *from);
 
 } // namespace inet
 

@@ -1,0 +1,53 @@
+%description:
+Test TCPVirtualDataRcvQueue class
+- out of range in the queue
+
+%includes:
+#include "TCPQueueTesterFunctions.h"
+
+%global:
+
+using namespace ::inet::tcp;
+
+%activity:
+TcpReceiveQueue rcvQueue;
+TcpReceiveQueue *q = &rcvQueue;
+
+q->init(1000);
+EV << q->str() <<"\n";
+
+insertSegment(q,       1000, 1001);
+insertSegment(q, 2147484647, 2147484648);
+insertSegment(q,       1000, 1001);
+insertSegment(q, 2147484647, 2147484648);
+tryinsertSegment(q,        999, 1000);
+tryinsertSegment(q, 2147484648, 2147484649);
+insertSegment(q,       1010, 1020);
+
+q->init(1000);
+EV << q->str() <<"\n";
+
+insertSegment(q,       1000, 2000000000);
+tryinsertSegment(q, 2200000000, 3300000000);
+
+EV << ".\n";
+
+///////////////////////////////////////////////////////////////
+
+%contains: stdout
+Running simulation...
+** Event #1  t=0   Test (Test, id=1)
+rcv_nxt=1000
+RQ:insertSeg [1000..1001) --> rcv_nxt=1001 [1000..1001)
+RQ:insertSeg [2147484647..2147484648) --> rcv_nxt=1001 [1000..1001) [2147484647..2147484648)
+RQ:insertSeg [1000..1001) --> rcv_nxt=1001 [1000..1001) [2147484647..2147484648)
+RQ:insertSeg [2147484647..2147484648) --> rcv_nxt=1001 [1000..1001) [2147484647..2147484648)
+RQ:insertSeg [999..1000) --> Error: The new segment is [999, 1000) out of the acceptable range at the queue rcv_nxt=1001 [1000..1001) [2147484647..2147484648) --> rcv_nxt=1001 [1000..1001) [2147484647..2147484648)
+RQ:insertSeg [2147484648..2147484649) --> Error: The new segment is [2147484648, 2147484649) out of the acceptable range at the queue rcv_nxt=1001 [1000..1001) [2147484647..2147484648) --> rcv_nxt=1001 [1000..1001) [2147484647..2147484648)
+RQ:insertSeg [1010..1020) --> rcv_nxt=1001 [1000..1001) [1010..1020) [2147484647..2147484648)
+rcv_nxt=1000
+RQ:insertSeg [1000..2000000000) --> rcv_nxt=2000000000 [1000..2000000000)
+RQ:insertSeg [2200000000..3300000000) --> Error: The new segment is [2200000000, 3300000000) out of the acceptable range at the queue rcv_nxt=2000000000 [1000..2000000000) --> rcv_nxt=2000000000 [1000..2000000000)
+.
+
+<!> No more events, simulation completed -- at t=0s, event #1

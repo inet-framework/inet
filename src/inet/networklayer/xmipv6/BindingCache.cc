@@ -55,7 +55,7 @@ void BindingCache::handleMessage(cMessage *msg)
     throw cRuntimeError("This module doesn't process messages");
 }
 
-void BindingCache::addOrUpdateBC(const IPv6Address& hoa, const IPv6Address& coa,
+void BindingCache::addOrUpdateBC(const Ipv6Address& hoa, const Ipv6Address& coa,
         const uint lifetime, const uint seq, bool homeReg)
 {
     EV_INFO << "\n++++++++++++++++++++Binding Cache Being Updated in Routing Table6 ++++++++++++++\n";
@@ -65,10 +65,10 @@ void BindingCache::addOrUpdateBC(const IPv6Address& hoa, const IPv6Address& coa,
     bindingCache[hoa].isHomeRegisteration = homeReg;
 }
 
-uint BindingCache::readBCSequenceNumber(const IPv6Address& HoA) const
+uint BindingCache::readBCSequenceNumber(const Ipv6Address& HoA) const
 {
     //Reads the sequence number of the last received BU Message
-    /*IPv6Address HoA = bu->getHomeAddressMN();
+    /*Ipv6Address HoA = bu->getHomeAddressMN();
        uint seqNumber = bindingCache[HoA].sequenceNumber;
        return seqNumber;*/
 
@@ -83,7 +83,7 @@ uint BindingCache::readBCSequenceNumber(const IPv6Address& HoA) const
         return pos->second.sequenceNumber;
 }
 
-bool BindingCache::isInBindingCache(const IPv6Address& HoA, IPv6Address& CoA) const
+bool BindingCache::isInBindingCache(const Ipv6Address& HoA, const Ipv6Address& CoA) const
 {
     BindingCache6::const_iterator pos = bindingCache.find(HoA);
 
@@ -93,12 +93,12 @@ bool BindingCache::isInBindingCache(const IPv6Address& HoA, IPv6Address& CoA) co
     return pos->second.careOfAddress == CoA;    // if CoA corresponds to HoA, everything is fine
 }
 
-bool BindingCache::isInBindingCache(const IPv6Address& HoA) const
+bool BindingCache::isInBindingCache(const Ipv6Address& HoA) const
 {
     return bindingCache.find(HoA) != bindingCache.end();
 }
 
-void BindingCache::deleteEntry(IPv6Address& HoA)
+void BindingCache::deleteEntry(const Ipv6Address& HoA)
 {
     auto pos = bindingCache.find(HoA);
 
@@ -106,7 +106,7 @@ void BindingCache::deleteEntry(IPv6Address& HoA)
         bindingCache.erase(pos);
 }
 
-bool BindingCache::getHomeRegistration(const IPv6Address& HoA) const
+bool BindingCache::getHomeRegistration(const Ipv6Address& HoA) const
 {
     BindingCache6::const_iterator pos = bindingCache.find(HoA);
 
@@ -116,7 +116,7 @@ bool BindingCache::getHomeRegistration(const IPv6Address& HoA) const
         return pos->second.isHomeRegisteration;
 }
 
-uint BindingCache::getLifetime(const IPv6Address& HoA) const
+uint BindingCache::getLifetime(const Ipv6Address& HoA) const
 {
     BindingCache6::const_iterator pos = bindingCache.find(HoA);
 
@@ -126,17 +126,17 @@ uint BindingCache::getLifetime(const IPv6Address& HoA) const
         return pos->second.bindingLifetime;
 }
 
-int BindingCache::generateHomeToken(const IPv6Address& HoA, int nonce)
+int BindingCache::generateHomeToken(const Ipv6Address& HoA, int nonce)
 {
     return HO_TOKEN;
 }
 
-int BindingCache::generateCareOfToken(const IPv6Address& CoA, int nonce)
+int BindingCache::generateCareOfToken(const Ipv6Address& CoA, int nonce)
 {
     return CO_TOKEN;
 }
 
-int BindingCache::generateKey(int homeToken, int careOfToken, const IPv6Address& CoA)
+int BindingCache::generateKey(int homeToken, int careOfToken, const Ipv6Address& CoA)
 {
     // use a dummy value
     return homeToken + careOfToken;

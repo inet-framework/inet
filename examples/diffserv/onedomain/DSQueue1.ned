@@ -21,7 +21,7 @@ package inet.examples.diffserv.onedomain;
 import inet.common.queue.DropTailQueue;
 import inet.common.queue.IOutputQueue;
 import inet.common.queue.PriorityScheduler;
-import inet.common.queue.WRRScheduler;
+import inet.common.queue.WrrScheduler;
 import inet.networklayer.diffserv.BehaviorAggregateClassifier;
 
 
@@ -40,37 +40,37 @@ module DSQueue1 like IOutputQueue
     submodules:
         classifier: BehaviorAggregateClassifier {
             dscps = "EF AF11 AF21 AF31 AF41";
-            @display("p=41,284");
+            @display("p=100,350");
         }
         efQueue: DropTailQueue {
             frameCapacity = frameCapacity;
-            @display("p=195,95");
+            @display("p=250,100");
         }
         af1xQueue: DropTailQueue {
             frameCapacity = frameCapacity;
-            @display("p=195,224");
+            @display("p=250,200");
         }
         af2xQueue: DropTailQueue {
             frameCapacity = frameCapacity;
-            @display("p=195,329");
+            @display("p=250,300");
         }
         af3xQueue: DropTailQueue {
             frameCapacity = frameCapacity;
-            @display("p=195,421");
+            @display("p=250,400");
         }
         af4xQueue: DropTailQueue {
             frameCapacity = frameCapacity;
-            @display("p=195,537");
+            @display("p=250,500");
         }
         beQueue: DropTailQueue {
             frameCapacity = frameCapacity;
-            @display("p=195,628");
+            @display("p=250,600");
         }
-        wrr: WRRScheduler {
-            @display("p=384,368");
+        wrr: WrrScheduler {
+            @display("p=400,350");
         }
         priority: PriorityScheduler {
-            @display("p=556,263");
+            @display("p=550,350");
         }
 
     connections:

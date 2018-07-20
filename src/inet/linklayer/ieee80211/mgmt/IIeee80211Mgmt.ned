@@ -21,7 +21,7 @@ package inet.linklayer.ieee80211.mgmt;
 //
 // This is not a concrete module type, but a prototype for all IEEE 802.11
 // management module types. It exists to specify what gates a management
-// module should have in order to be usable within ~Ieee80211Nic.
+// module should have in order to be usable within ~Ieee80211Interface.
 //
 moduleinterface IIeee80211Mgmt
 {
@@ -29,10 +29,8 @@ moduleinterface IIeee80211Mgmt
         @display("i=block/cogwheel");
         string macModule;               // The path to the MAC module
     gates:
-        input upperLayerIn;
-        output upperLayerOut;
-        input macIn @labels(Ieee80211Frame);
-        output macOut @labels(Ieee80211Frame);
+        input macIn @labels(Ieee80211MacHeader);
+        output macOut @labels(Ieee80211MacHeader);
         input agentIn;   // optional gates used for the agent in stations
         output agentOut; // optional gates used for the agent in stations
 }

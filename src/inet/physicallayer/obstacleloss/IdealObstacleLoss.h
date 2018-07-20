@@ -54,13 +54,13 @@ class INET_API IdealObstacleLoss : public TracingObstacleLossBase
     /**
      * The physical environment that provides to obstacles.
      */
-    IPhysicalEnvironment *physicalEnvironment = nullptr;
+    physicalenvironment::IPhysicalEnvironment *physicalEnvironment = nullptr;
     //@}
 
   protected:
     virtual void initialize(int stage) override;
 
-    virtual bool isObstacle(const IPhysicalObject *object, const Coord& transmissionPosition, const Coord& receptionPosition) const;
+    virtual bool isObstacle(const physicalenvironment::IPhysicalObject *object, const Coord& transmissionPosition, const Coord& receptionPosition) const;
 
   public:
     IdealObstacleLoss();

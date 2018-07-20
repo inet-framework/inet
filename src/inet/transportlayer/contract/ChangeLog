@@ -1,3 +1,82 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-01-25  Levente Mészáros
+
+	Replaced cMessage with Request and Indication subclasses of Message.
+
+	The reason is that cMessage doesn't support the tags API used by INET.
+
+2018-01-22  Irene Ruengeler
+
+	Adapted SCTP to the new Packet API.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-12  Levente Mészáros
+
+	Replaced cMessage commands with Request and Indication.
+
+2018-01-03  Levente Mészáros
+
+	Replaced cMessage with Packet where applicable.
+
+2018-01-02  Levente Mészáros
+
+	Replaced cPacket with Packet.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IPv4 -> Ipv4
+	    IPv4ControlInfo -> Ipv4ControlInfo
+	    IPv6 -> Ipv6
+	    IPv6ControlInfo -> Ipv6ControlInfo
+	    ISCTP -> ISctp
+	    ITCP -> ITcp
+	    IUDP -> IUdp
+	    TCP -> Tcp
+	    TCPCommand -> TcpCommand
+	    TCPOpenCommand -> TcpOpenCommand
+	    TCPSegment -> TcpHeader
+	    TCPSocket -> TcpSocket
+	    TCP_NSC -> TcpNsc
+	    TCP_lwIP -> TcpLwip
+	    UDP -> Udp
+	    UDPCommandCode -> UdpCommandCode
+	    UDPControlInfo -> UdpControlInfo
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-04-24  Zoltan Bojthe
+
+	Replaced ITransportPacket with the TransportHeaderBase (based on FieldsChunk).
+
+2016-06-14  Levente Mészáros
+
+	Dropped SCTP vector gates from appIn/appOut and ipIn/ipOut.
+	This patch prepares for using SCTP with the MessageDispatcher node infrastructure.
+
+2016-06-14  Levente Mészáros
+
+	Renamed SCTP input/output gates according to other transport protocols.
+	Renamed from_appl/to_appl to appIn/appOut. Renamed from_ip/to_ip to ipIn/ipOut.
+
+2015-06-08  Levente Mészáros
+
+	Changed appIn/appOut gate vectors to simple gates in UDP/TCP.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

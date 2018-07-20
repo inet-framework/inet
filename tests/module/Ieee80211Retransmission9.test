@@ -3,8 +3,8 @@ https://warpproject.org/trac/wiki/802.11/MAC/Lower/Retransmissions (Example L.6)
 
 %file: test.ned
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
-import inet.node.inet.WirelessHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.AdhocHost;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
@@ -14,14 +14,14 @@ network RetransmissionTest
     parameters:
         @display("b=297,203");
     submodules:
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             @display("p=61,164");
         }
-        receiver: WirelessHost {
+        receiver: AdhocHost {
             parameters:
                 @display("r=,,#707070");
         }
-        sender: WirelessHost {
+        sender: AdhocHost {
             parameters:
                 @display("r=,,#707070");
         }
@@ -58,31 +58,30 @@ ned-path = .;../../../../src;../../lib
 **.radio.receiver.sensitivity = -85dBm
 **.radio.receiver.snirThreshold = 4dB
 
-# ARP
-**.arpType = "GlobalARP"
+# Arp
+**.arp.typename = "GlobalArp"
 
 # Sender
-**.sender.numUdpApps = 1
-**.sender.udpApp[0].typename = "MpduGen"
-**.sender.udpApp[0].destAddress = "receiver"
-**.sender.udpApp[0].destPort = 21
-**.sender.udpApp[0].longPacketSize = 1700B
-**.sender.udpApp[0].shortPacketSize = 500B
-**.sender.udpApp[0].startTime = 0.05s
+**.sender.numApps = 1
+**.sender.app[0].typename = "MpduGen"
+**.sender.app[0].destAddress = "receiver"
+**.sender.app[0].destPort = 21
+**.sender.app[0].longPacketSize = 1700B
+**.sender.app[0].shortPacketSize = 500B
+**.sender.app[0].startTime = 0.05s
 
 # Receiver
-**.receiver.numUdpApps = 1
-**.receiver.udpApp[0].typename = "UDPSink"
-**.receiver.udpApp[0].localPort = 21
-**.sender.wlan[*].macType = "Ieee80211Mac"
+**.receiver.numApps = 1
+**.receiver.app[0].typename = "UdpSink"
+**.receiver.app[0].localPort = 21
+**.sender.wlan[*].mac.typename = "Ieee80211Mac"
 **.sender.wlan[*].mac.dcf.rtsPolicy.rtsThreshold = 1500B
 **.sender.wlan[*].mac.dcf.channelAccess.cwMin = 15
 **.sender.wlan[*].mac.dcf.channelAccess.cwMin = 1023
 **.sender.wlan[*].mac.dcf.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = 2000B
-**.receiver.wlan[*].macType = "Ieee80211TesterMac"
-**.wlan[*].mgmtType = "Ieee80211MgmtAdhoc"
+**.receiver.wlan[*].mac.typename = "Ieee80211TesterMac"
 
-**.sender.udpApp[0].packets = "LL"
+**.sender.app[0].packets = "LL"
 **.receiver.wlan[*].mac.actions = "BBBBBBABABABABAA"
 
 %contains-regex: stdout

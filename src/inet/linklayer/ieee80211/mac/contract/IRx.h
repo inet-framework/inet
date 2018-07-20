@@ -18,19 +18,13 @@
 #ifndef __INET_IRX_H
 #define __INET_IRX_H
 
-#include "inet/common/INETDefs.h"
+#include "inet/linklayer/common/MacAddress.h"
+#include "inet/linklayer/ieee80211/mac/contract/IContention.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 
 namespace inet {
-
-class MACAddress;
-
 namespace ieee80211 {
-
-class Ieee80211Frame;
-class IContention;
-
-using namespace inet::physicallayer;  //TODO Khmm
 
 /**
  * Abstract interface for Rx processes. The Rx process checks received frames for
@@ -45,7 +39,7 @@ using namespace inet::physicallayer;  //TODO Khmm
 class INET_API IRx
 {
     public:
-        virtual ~IRx() {}
+        virtual ~IRx() { }
 
         virtual bool isReceptionInProgress() const = 0;
 
@@ -57,14 +51,13 @@ class INET_API IRx
         virtual void registerContention(IContention *contention) = 0;
 
         // events
-        virtual void receptionStateChanged(IRadio::ReceptionState state) = 0;
-        virtual void transmissionStateChanged(IRadio::TransmissionState state) = 0;
-        virtual void receivedSignalPartChanged(IRadioSignal::SignalPart part) = 0;
-        virtual bool lowerFrameReceived(Ieee80211Frame *frame) = 0;
+        virtual void receptionStateChanged(physicallayer::IRadio::ReceptionState state) = 0;
+        virtual void transmissionStateChanged(physicallayer::IRadio::TransmissionState state) = 0;
+        virtual void receivedSignalPartChanged(physicallayer::IRadioSignal::SignalPart part) = 0;
+        virtual bool lowerFrameReceived(Packet *packet) = 0;
 };
 
 } // namespace ieee80211
 } // namespace inet
 
-#endif
-
+#endif // #ifndef __INET_IRX_H

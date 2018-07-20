@@ -32,18 +32,18 @@ namespace ieee80211 {
 class INET_API BlockAckRecord
 {
     protected:
-        MACAddress originatorAddress = MACAddress::UNSPECIFIED_ADDRESS;
+        MacAddress originatorAddress = MacAddress::UNSPECIFIED_ADDRESS;
         Tid tid = -1;
         std::map<std::pair<SequenceNumber, FragmentNumber>, bool> acknowledgmentState;
 
     public:
-        BlockAckRecord(MACAddress originatorAddress, Tid tid);
+        BlockAckRecord(MacAddress originatorAddress, Tid tid);
         virtual ~BlockAckRecord() { }
 
-        void blockAckPolicyFrameReceived(Ieee80211DataFrame* frame);
+        void blockAckPolicyFrameReceived(const Ptr<const Ieee80211DataHeader>& header);
         bool getAckState(SequenceNumber sequenceNumber, FragmentNumber fragmentNumber);
 
-        MACAddress getOriginatorAddress() { return originatorAddress; }
+        MacAddress getOriginatorAddress() { return originatorAddress; }
         Tid getTid() { return tid; }
 };
 

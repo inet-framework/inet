@@ -30,7 +30,7 @@ class IRoutingTable;
  * C++ interface for accessing unicast routing table entries of various protocols (IPv4, IPv6, etc)
  * in a uniform way.
  *
- * @see IRoutingTable, IPv4Route, IPv6Route
+ * @see IRoutingTable, Ipv4Route, Ipv6Route
  */
 class INET_API IRoute
 {
@@ -70,9 +70,9 @@ class INET_API IRoute
 //    virtual std::string info() const;
 //    virtual std::string detailedInfo() const;
 //
-//    bool operator==(const IGenericRoute& route) const { return equals(route); }
-//    bool operator!=(const IGenericRoute& route) const { return !equals(route); }
-//    bool equals(const IGenericRoute& route) const;
+//    bool operator==(const IRoute& route) const { return equals(route); }
+//    bool operator!=(const IRoute& route) const { return !equals(route); }
+//    bool equals(const IRoute& route) const;
 
     virtual ~IRoute() {}
 
@@ -121,8 +121,8 @@ inline std::ostream& operator<<(std::ostream& out, const IRoute *route)
     out << ", prefixLength = " << route->getPrefixLength();
     out << ", nextHop = " << route->getNextHopAsGeneric();
     out << ", metric = " << route->getMetric();
-    if (route->getInterface())
-        out << ", interface = " << route->getInterface()->getName();
+    if (auto ie = route->getInterface())
+        out << ", interface = " << ie->getInterfaceName();
     return out;
 };
 
@@ -144,7 +144,7 @@ inline std::ostream& operator<<(std::ostream& out, const IRoute *route)
  * routing tree), then the datagram is forwarded only if there are listeners
  * of the multicast group on that link (TRPB routing).
  *
- * @see IRoutingTable, IPv4MulticastRoute, IPv6MulticastRoute
+ * @see IRoutingTable, Ipv4MulticastRoute, IPv6MulticastRoute
  */
 class INET_API IMulticastRoute
 {

@@ -27,16 +27,14 @@ import inet.visualizer.contract.IEnergyStorageVisualizer;
 module EnergyStorageVisualizer like IEnergyStorageVisualizer
 {
     parameters:
-        @display("i=block/app_s");
-        string canvasVisualizerType = default("EnergyStorageCanvasVisualizer");
-        string osgVisualizerType = default("EnergyStorageOsgVisualizer");
+        @display("i=block/app");
     submodules:
-        canvasVisualizer: <canvasVisualizerType> like IEnergyStorageVisualizer if canvasVisualizerType != "" {
+        canvasVisualizer: <default("EnergyStorageCanvasVisualizer")> like IEnergyStorageVisualizer if typename != "" {
             parameters:
-                @display("p=100,50");
+                @display("p=100,100");
         }
-        osgVisualizer: <osgVisualizerType> like IEnergyStorageVisualizer if osgVisualizerType != "" {
+        osgVisualizer: <default("EnergyStorageOsgVisualizer")> like IEnergyStorageVisualizer if typename != "" {
             parameters:
-                @display("p=100,150");
+                @display("p=100,200");
         }
 }

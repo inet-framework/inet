@@ -18,7 +18,7 @@
 #ifndef __INET_ISIGNALBITMODEL_H
 #define __INET_ISIGNALBITMODEL_H
 
-#include "inet/physicallayer/contract/bitlevel/IFECCoder.h"
+#include "inet/physicallayer/contract/bitlevel/IFecCoder.h"
 #include "inet/physicallayer/contract/bitlevel/IScrambler.h"
 #include "inet/physicallayer/contract/bitlevel/IInterleaver.h"
 #include "inet/physicallayer/contract/packetlevel/IModulation.h"
@@ -34,17 +34,17 @@ namespace physicallayer {
 class INET_API ISignalBitModel : public IPrintableObject
 {
   public:
-    virtual int getHeaderBitLength() const = 0;
+    virtual b getHeaderLength() const = 0;
     /**
      * Returns the gross (physical) bitrate of the PHY frame header.
      */
     virtual bps getHeaderBitRate() const = 0;
-    virtual int getPayloadBitLength() const = 0;
+    virtual b getDataLength() const = 0;
 
     /**
      * Returns the gross (physical) bitrate of the PHY frame data.
      */
-    virtual bps getPayloadBitRate() const = 0;
+    virtual bps getDataBitRate() const = 0;
     virtual const BitVector *getBits() const = 0;
 };
 

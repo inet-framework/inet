@@ -1,3 +1,44 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-02-14  Zoltan Bojthe
+
+	Renamed functions to use camel case.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    ISNIR -> ISnir
+	    WITH_IDEALWIRELESS -> WITH_ACKINGWIRELESS
+
+2017-12-18  Levente Mészáros
+
+	Changed NetworkConfiguratorBase to support ShortcutMac by allow
+	omitting the radio medium while computing the wireless id.
+
+2017-12-14  Levente Mészáros
+
+	Removed unnecessary markImmutable() calls.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-03-13  Zoltan Bojthe
+
+	Added fixme to NetworkConfiguratorBase.
+
+2017-02-02  Levente Mészáros
+
+	Added temporary kludge to make errorRate metric work again in NetworkConfiguratorBase.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

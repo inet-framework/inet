@@ -25,12 +25,18 @@
 #include <cinttypes>
 
 #include "PacketDrillUtils.h"
-#include "inet/transportlayer/udp/UDPPacket_m.h"
-#include "inet/transportlayer/tcp_common/TCPSegment_m.h"
-#include "inet/networklayer/ipv4/IPv4Datagram_m.h"
-#include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
+#include "inet/transportlayer/tcp_common/TcpHeader_m.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/common/checksum/TcpIpChecksum.h"
+#include "inet/networklayer/common/L3Tools.h"
+#include "inet/transportlayer/common/L4Tools.h"
 
-using namespace inet;
+namespace inet {
+
 using namespace tcp;
 using namespace sctp;
 
@@ -46,74 +52,90 @@ PacketDrill::~PacketDrill()
 
 }
 
-IPv4Datagram* PacketDrill::makeIPPacket(int protocol, enum direction_t direction, L3Address localAddr, L3Address remoteAddr)
+Ptr<Ipv4Header> PacketDrill::makeIpv4Header(IpProtocolId protocol, enum direction_t direction, L3Address localAddr, L3Address remoteAddr)
 {
-    IPv4Datagram *datagram = new IPv4Datagram("IPInject");
-    datagram->setVersion(4);
-    datagram->setHeaderLength(20);
+    auto ipv4Header = makeShared<Ipv4Header>();
+    ipv4Header->setVersion(4);
+    ipv4Header->setHeaderLength(IPv4_MIN_HEADER_LENGTH);
 
     if (direction == DIRECTION_INBOUND) {
-        datagram->setSrcAddress(remoteAddr.toIPv4());
-        datagram->setDestAddress(localAddr.toIPv4());
-        datagram->setIdentification(pdapp->getIdInbound());
+        ipv4Header->setSrcAddress(remoteAddr.toIpv4());
+        ipv4Header->setDestAddress(localAddr.toIpv4());
+        ipv4Header->setIdentification(pdapp->getIdInbound());
         pdapp->increaseIdInbound();
     } else if (direction == DIRECTION_OUTBOUND) {
-        datagram->setSrcAddress(localAddr.toIPv4());
-        datagram->setDestAddress(remoteAddr.toIPv4());
-        datagram->setIdentification(pdapp->getIdOutbound());
+        ipv4Header->setSrcAddress(localAddr.toIpv4());
+        ipv4Header->setDestAddress(remoteAddr.toIpv4());
+        ipv4Header->setIdentification(pdapp->getIdOutbound());
         pdapp->increaseIdOutbound();
     } else
         throw cRuntimeError("Unknown direction type %d", direction);
-    datagram->setTransportProtocol(protocol);
-    datagram->setTimeToLive(32);
-    datagram->setMoreFragments(0);
-    datagram->setDontFragment(0);
-    datagram->setFragmentOffset(0);
-    datagram->setTypeOfService(0);
-    datagram->setByteLength(20);
-    return datagram;
+    ipv4Header->setProtocolId(protocol);
+    ipv4Header->setTimeToLive(32);
+    ipv4Header->setMoreFragments(0);
+    ipv4Header->setDontFragment(0);
+    ipv4Header->setFragmentOffset(0);
+    ipv4Header->setTypeOfService(0);
+    ipv4Header->setChunkLength(IPv4_MIN_HEADER_LENGTH);
+    ipv4Header->setTotalLengthField(IPv4_MIN_HEADER_LENGTH);
+
+    return ipv4Header;
+}
+
+void PacketDrill::setIpv4HeaderCrc(Ptr<Ipv4Header> &ipv4Header)
+{
+    ipv4Header->setCrcMode(pdapp->getCrcMode());
+    ipv4Header->setCrc(0);
+    if (pdapp->getCrcMode() == CRC_COMPUTED) {
+        MemoryOutputStream ipv4HeaderStream;
+        Chunk::serialize(ipv4HeaderStream, ipv4Header);
+        uint16_t crc = TcpIpChecksum::checksum(ipv4HeaderStream.getData());
+        ipv4Header->setCrc(crc);
+    }
 }
 
 
-cPacket* PacketDrill::buildUDPPacket(int address_family, enum direction_t direction,
-                                     uint16 udp_payload_bytes, char **error)
+Packet* PacketDrill::buildUDPPacket(int address_family, enum direction_t direction,
+                                     uint16 udpPayloadBytes, char **error)
 {
     PacketDrillApp *app = PacketDrill::pdapp;
-    UDPPacket *udpPacket = new UDPPacket("UDPInject");
-    udpPacket->setByteLength(8);
-    cPacket *payload = new cPacket("payload");
-    payload->setByteLength(udp_payload_bytes);
-    udpPacket->encapsulate(payload);
-    IPv4Datagram *ipDatagram = PacketDrill::makeIPPacket(IP_PROT_UDP, direction, app->getLocalAddress(), app->getRemoteAddress());
+    Packet *packet = new Packet("UDPInject");
+    if (udpPayloadBytes) {
+        auto payload = makeShared<ByteCountChunk>(B(udpPayloadBytes));
+        packet->insertAtFront(payload);
+    }
+    auto udpHeader = makeShared<UdpHeader>();
     if (direction == DIRECTION_INBOUND) {
-        udpPacket->setSourcePort(app->getRemotePort());
-        udpPacket->setDestinationPort(app->getLocalPort());
-        udpPacket->setName("UDPInbound");
+        udpHeader->setSourcePort(app->getRemotePort());
+        udpHeader->setDestinationPort(app->getLocalPort());
+        packet->setName("UDPInbound");
     } else if (direction == DIRECTION_OUTBOUND) {
-        udpPacket->setSourcePort(app->getLocalPort());
-        udpPacket->setDestinationPort(app->getRemotePort());
-        udpPacket->setName("UDPOutbound");
+        udpHeader->setSourcePort(app->getLocalPort());
+        udpHeader->setDestinationPort(app->getRemotePort());
+        packet->setName("UDPOutbound");
     } else
         throw cRuntimeError("Unknown direction");
-
-    ipDatagram->encapsulate(udpPacket);
-    cPacket* pkt = ipDatagram->dup();
-    delete ipDatagram;
-    return pkt;
+    udpHeader->setTotalLengthField(UDP_HEADER_LENGTH + B(udpPayloadBytes));
+    packet->insertAtFront(udpHeader);
+    auto ipHeader = PacketDrill::makeIpv4Header(IP_PROT_UDP, direction, app->getLocalAddress(), app->getRemoteAddress());
+    ipHeader->setTotalLengthField(ipHeader->getTotalLengthField() + packet->getDataLength());
+    PacketDrill::setIpv4HeaderCrc(ipHeader);
+    packet->insertAtFront(ipHeader);
+    return packet;
 }
 
 
-TCPOption *setOptionValues(PacketDrillTcpOption* opt)
+TcpOption *setOptionValues(PacketDrillTcpOption* opt)
 {
     unsigned char length = opt->getLength();
     switch (opt->getKind()) {
         case TCPOPT_EOL: // EOL
-            return new TCPOptionEnd();
+            return new TcpOptionEnd();
         case TCPOPT_NOP: // NOP
-            return new TCPOptionNop();
+            return new TcpOptionNop();
         case TCPOPT_MAXSEG:
             if (length == 4) {
-                auto *option = new TCPOptionMaxSegmentSize();
+                auto *option = new TcpOptionMaxSegmentSize();
                 option->setLength(length);
                 option->setMaxSegmentSize(opt->getMss());
                 return option;
@@ -121,7 +143,7 @@ TCPOption *setOptionValues(PacketDrillTcpOption* opt)
             break;
         case TCPOPT_WINDOW:
             if (length == 3) {
-                auto *option = new TCPOptionWindowScale();
+                auto *option = new TcpOptionWindowScale();
                 option->setLength(length);
                 option->setWindowScale(opt->getWindowScale());
                 return option;
@@ -129,21 +151,22 @@ TCPOption *setOptionValues(PacketDrillTcpOption* opt)
             break;
         case TCPOPT_SACK_PERMITTED:
             if (length == 2) {
-                auto *option = new TCPOptionSackPermitted();
+                auto *option = new TcpOptionSackPermitted();
                 option->setLength(length);
                 return option;
             }
             break;
         case TCPOPT_SACK:
             if (length > 2 && (length % 8) == 2) {
-                auto *option = new TCPOptionSack();
+                auto *option = new TcpOptionSack();
                 option->setLength(length);
                 option->setSackItemArraySize(length / 8);
                 unsigned int count = 0;
                 for (int i = 0; i < 2 * opt->getBlockList()->getLength(); i += 2) {
                     SackItem si;
-                    si.setStart(((PacketDrillStruct *) opt->getBlockList()->get(i))->getValue1());
-                    si.setEnd(((PacketDrillStruct *) opt->getBlockList()->get(i))->getValue2());
+                    PacketDrillStruct *pds = check_and_cast<PacketDrillStruct *>(opt->getBlockList()->get(i));
+                    si.setStart(pds->getValue1());
+                    si.setEnd(pds->getValue2());
                     option->setSackItem(count++, si);
                 }
                 return option;
@@ -151,7 +174,7 @@ TCPOption *setOptionValues(PacketDrillTcpOption* opt)
             break;
         case TCPOPT_TIMESTAMP:
             if (length == 10) {
-                auto *option = new TCPOptionTimestamp();
+                auto *option = new TcpOptionTimestamp();
                 option->setLength(length);
                 option->setSenderTimestamp(opt->getVal());
                 option->setEchoedTimestamp(opt->getEcr());
@@ -162,8 +185,8 @@ TCPOption *setOptionValues(PacketDrillTcpOption* opt)
             EV_INFO << "TCP option is not supported (yet).";
             break;
     } // switch
-    auto *option = new TCPOptionUnknown();
-    option->setKind(opt->getKind());
+    auto *option = new TcpOptionUnknown();
+    option->setKind(static_cast<TcpOptionNumbers>(opt->getKind()));
     option->setLength(length);
     if (length > 2)
         option->setBytesArraySize(length - 2);
@@ -172,91 +195,95 @@ TCPOption *setOptionValues(PacketDrillTcpOption* opt)
     return option;
 }
 
-cPacket* PacketDrill::buildTCPPacket(int address_family, enum direction_t direction, const char *flags,
+Packet* PacketDrill::buildTCPPacket(int address_family, enum direction_t direction, const char *flags,
                                      uint32 startSequence, uint16 tcpPayloadBytes, uint32 ackSequence,
                                      int32 window, cQueue *tcpOptions, char **error)
 {
+    Packet *packet = new Packet("TCPInject");
     PacketDrillApp *app = PacketDrill::pdapp;
-    TCPSegment *tcpseg = new TCPSegment("TCPInject");
+    if (tcpPayloadBytes) {
+        auto payload = makeShared<ByteCountChunk>(B(tcpPayloadBytes));
+        packet->insertAtFront(payload);
+    }
+    auto tcpHeader = makeShared<TcpHeader>();
 
     // fill TCP header structure
     if (direction == DIRECTION_INBOUND) {
-        tcpseg->setSrcPort(app->getRemotePort());
-        tcpseg->setDestPort(app->getLocalPort());
-        tcpseg->setName("TCPInbound");
+        tcpHeader->setSrcPort(app->getRemotePort());
+        tcpHeader->setDestPort(app->getLocalPort());
+        packet->setName("TCPInbound");
     } else if (direction == DIRECTION_OUTBOUND) {
-        tcpseg->setSrcPort(app->getLocalPort());
-        tcpseg->setDestPort(app->getRemotePort());
-        tcpseg->setName("TCPOutbound");
+        tcpHeader->setSrcPort(app->getLocalPort());
+        tcpHeader->setDestPort(app->getRemotePort());
+        packet->setName("TCPOutbound");
     }
-    tcpseg->setSequenceNo(startSequence);
-    tcpseg->setAckNo(ackSequence);
+    tcpHeader->setSequenceNo(startSequence);
+    tcpHeader->setAckNo(ackSequence);
 
-    tcpseg->setHeaderLength(TCP_HEADER_OCTETS);
+    tcpHeader->setHeaderLength(TCP_MIN_HEADER_LENGTH);
 
     // set flags
-    tcpseg->setFinBit(strchr(flags, 'F'));
-    tcpseg->setSynBit(strchr(flags, 'S'));
-    tcpseg->setRstBit(strchr(flags, 'R'));
-    tcpseg->setPshBit(strchr(flags, 'P'));
-    tcpseg->setAckBit(strchr(flags, '.'));
-    tcpseg->setUrgBit(0);
-    if (tcpseg->getSynBit() && !tcpseg->getAckBit())
-        tcpseg->setName("Inject SYN");
-    else if (tcpseg->getSynBit() && tcpseg->getAckBit())
-        tcpseg->setName("Inject SYN ACK");
-    else if (!tcpseg->getSynBit() && tcpseg->getAckBit() && !tcpseg->getPshBit())
-        tcpseg->setName("Inject ACK");
-    else if (tcpseg->getPshBit())
-        tcpseg->setName("Inject PUSH");
-    else if (tcpseg->getFinBit())
-        tcpseg->setName("Inject FIN");
+    tcpHeader->setFinBit(strchr(flags, 'F'));
+    tcpHeader->setSynBit(strchr(flags, 'S'));
+    tcpHeader->setRstBit(strchr(flags, 'R'));
+    tcpHeader->setPshBit(strchr(flags, 'P'));
+    tcpHeader->setAckBit(strchr(flags, '.'));
+    tcpHeader->setUrgBit(0);
+    if (tcpHeader->getSynBit() && !tcpHeader->getAckBit())
+        packet->setName("Inject SYN");
+    else if (tcpHeader->getSynBit() && tcpHeader->getAckBit())
+        packet->setName("Inject SYN ACK");
+    else if (!tcpHeader->getSynBit() && tcpHeader->getAckBit() && !tcpHeader->getPshBit())
+        packet->setName("Inject ACK");
+    else if (tcpHeader->getPshBit())
+        packet->setName("Inject PUSH");
+    else if (tcpHeader->getFinBit())
+        packet->setName("Inject FIN");
 
-    tcpseg->setWindow(window);
-    tcpseg->setUrgentPointer(0);
+    tcpHeader->setWindow(window);
+    tcpHeader->setUrgentPointer(0);
     // Checksum (header checksum): modelled by cMessage::hasBitError()
 
-    uint16 tcpOptionsLength = 0;
-
     if (tcpOptions && tcpOptions->getLength() > 0) { // options present?
-        TCPOption *option;
-        uint16 optionsCounter = 0;
+        TcpOption *option;
 
         for (cQueue::Iterator iter(*tcpOptions); !iter.end(); iter++) {
-            PacketDrillTcpOption* opt = (PacketDrillTcpOption*)(*iter);
+            PacketDrillTcpOption* opt = check_and_cast<PacketDrillTcpOption*>(*iter);
             option = setOptionValues(opt);
-            tcpOptionsLength += opt->getLength();
             // write option to tcp header
-            tcpseg->addHeaderOption(option);
-            optionsCounter++;
+            tcpHeader->insertHeaderOption(option);
         } // for
     } // if options present
-    tcpseg->setHeaderLength(tcpseg->getHeaderLength() + tcpOptionsLength);
-    tcpseg->setByteLength(tcpseg->getHeaderLength() + tcpPayloadBytes);
-    tcpseg->setPayloadLength(tcpPayloadBytes);
+    tcpHeader->setHeaderLength(TCP_MIN_HEADER_LENGTH + B(tcpHeader->getHeaderOptionArrayLength()));
+    tcpHeader->setChunkLength(TCP_MIN_HEADER_LENGTH + B(tcpHeader->getHeaderOptionArrayLength()));
+    packet->insertAtFront(tcpHeader);
 
-    IPv4Datagram *ipDatagram = PacketDrill::makeIPPacket(IP_PROT_TCP, direction, app->getLocalAddress(),
+    auto ipHeader = PacketDrill::makeIpv4Header(IP_PROT_TCP, direction, app->getLocalAddress(),
             app->getRemoteAddress());
-    ipDatagram->encapsulate(tcpseg);
-    cPacket* pkt = ipDatagram->dup();
+    ipHeader->setTotalLengthField(ipHeader->getTotalLengthField() + packet->getDataLength());
+    PacketDrill::setIpv4HeaderCrc(ipHeader);
+    packet->insertAtFront(ipHeader);
     delete tcpOptions;
-    delete ipDatagram;
-    return pkt;
+    return packet;
 }
 
-cPacket* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direction, cQueue *chunks)
+Packet* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direction, cQueue *chunks)
 {
+    Packet *packet = new Packet("SCTPInject");
     PacketDrillApp *app = PacketDrill::pdapp;
-    SCTPMessage *sctpmsg = new SCTPMessage();
-    sctpmsg->setByteLength(SCTP_COMMON_HEADER);
+    auto sctpmsg = makeShared<SctpHeader>();
+    sctpmsg->setChunkLength(B(SCTP_COMMON_HEADER));
     if (direction == DIRECTION_INBOUND) {
         sctpmsg->setSrcPort(app->getRemotePort());
         sctpmsg->setDestPort(app->getLocalPort());
-        sctpmsg->setTag(app->getPeerVTag());
-        sctpmsg->setName("SCTPInbound");
+        auto addressReq = packet->addTagIfAbsent<L3AddressReq>();
+        addressReq->setSrcAddress(app->getRemoteAddress());
+        addressReq->setDestAddress(app->getLocalAddress());
+        sctpmsg->setVTag(app->getPeerVTag());
+        packet->setName("SCTPInbound");
         for (cQueue::Iterator iter(*chunks); !iter.end(); iter++) {
-            PacketDrillSctpChunk *chunk = (PacketDrillSctpChunk *) (*iter);
-            SCTPChunk *sctpchunk = (SCTPChunk *)chunk->getChunk();
+            PacketDrillSctpChunk *chunk = check_and_cast<PacketDrillSctpChunk *>(*iter);
+            SctpChunk *sctpchunk = chunk->getChunk();
             switch (chunk->getType()) {
                 case SCTP_DATA_CHUNK_TYPE:
                     if (sctpchunk->getFlags() & FLAG_CHUNK_FLAGS_NOCHECK) {
@@ -377,20 +404,23 @@ cPacket* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direc
     } else if (direction == DIRECTION_OUTBOUND) {
         sctpmsg->setSrcPort(app->getLocalPort());
         sctpmsg->setDestPort(app->getRemotePort());
-        sctpmsg->setTag(app->getLocalVTag());
-        sctpmsg->setName("SCTPOutbound");
+        auto addressReq = packet->addTagIfAbsent<L3AddressReq>();
+        addressReq->setSrcAddress(app->getLocalAddress());
+        addressReq->setDestAddress(app->getRemoteAddress());
+        sctpmsg->setVTag(app->getLocalVTag());
+        packet->setName("SCTPOutbound");
         for (cQueue::Iterator iter(*chunks); !iter.end(); iter++) {
-            PacketDrillSctpChunk *chunk = (PacketDrillSctpChunk *) (*iter);
-            SCTPChunk *sctpchunk = (SCTPChunk *)chunk->getChunk();
-            switch (sctpchunk->getChunkType()) {
+            PacketDrillSctpChunk *chunk = check_and_cast<PacketDrillSctpChunk *>(*iter);
+            SctpChunk *sctpchunk = chunk->getChunk();
+            switch (sctpchunk->getSctpChunkType()) {
                 case SCTP_RECONFIG_CHUNK_TYPE:
-                    SCTPStreamResetChunk* reconfig = check_and_cast<SCTPStreamResetChunk*>(sctpchunk);
+                    SctpStreamResetChunk* reconfig = check_and_cast<SctpStreamResetChunk*>(sctpchunk);
                     for (unsigned int i = 0; i < reconfig->getParametersArraySize(); i++) {
-                        SCTPParameter *parameter = check_and_cast<SCTPParameter *>(reconfig->getParameters(i));
+                        const SctpParameter *parameter = reconfig->getParameters(i);
                         switch (parameter->getParameterType()) {
                             case OUTGOING_RESET_REQUEST_PARAMETER: {
                                 printf("OUTGOING_RESET_REQUEST_PARAMETER\n");
-                                SCTPOutgoingSSNResetRequestParameter *outResetParam = check_and_cast<SCTPOutgoingSSNResetRequestParameter *>(parameter);
+                                auto outResetParam = check_and_cast<const SctpOutgoingSsnResetRequestParameter *>(parameter);
                                 if (!(pdapp->findSeqNumMap(outResetParam->getSrReqSn()))) {
                                     pdapp->setSeqNumMap(outResetParam->getSrReqSn(), 0);
                                 }
@@ -398,7 +428,7 @@ cPacket* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direc
                             }
                             case INCOMING_RESET_REQUEST_PARAMETER: {
                                 printf("INCOMING_RESET_REQUEST_PARAMETER\n");
-                                SCTPIncomingSSNResetRequestParameter *inResetParam = check_and_cast<SCTPIncomingSSNResetRequestParameter *>(parameter);
+                                auto inResetParam = check_and_cast<const SctpIncomingSsnResetRequestParameter *>(parameter);
                                 if (!(pdapp->findSeqNumMap(inResetParam->getSrReqSn()))) {
                                     pdapp->setSeqNumMap(inResetParam->getSrReqSn(), 0);
                                 }
@@ -406,7 +436,7 @@ cPacket* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direc
                             }
                             case SSN_TSN_RESET_REQUEST_PARAMETER: {
                                 printf("SSN_TSN_RESET_REQUEST_PARAMETER\n");
-                                SCTPSSNTSNResetRequestParameter *ssntsnResetParam = check_and_cast<SCTPSSNTSNResetRequestParameter *>(parameter);
+                                auto ssntsnResetParam = check_and_cast<const SctpSsnTsnResetRequestParameter *>(parameter);
                                 if (!(pdapp->findSeqNumMap(ssntsnResetParam->getSrReqSn()))) {
                                     pdapp->setSeqNumMap(ssntsnResetParam->getSrReqSn(), 0);
                                 }
@@ -414,7 +444,7 @@ cPacket* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direc
                             }
                             case ADD_OUTGOING_STREAMS_REQUEST_PARAMETER: {
                                 printf("ADD_OUTGOING_STREAMS_REQUEST_PARAMETER\n");
-                                SCTPAddStreamsRequestParameter *addOutResetParam = check_and_cast<SCTPAddStreamsRequestParameter *>(parameter);
+                                auto addOutResetParam = check_and_cast<const SctpAddStreamsRequestParameter *>(parameter);
                                 if (!(pdapp->findSeqNumMap(addOutResetParam->getSrReqSn()))) {
                                     pdapp->setSeqNumMap(addOutResetParam->getSrReqSn(), 0);
                                 }
@@ -422,7 +452,7 @@ cPacket* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direc
                             }
                             case ADD_INCOMING_STREAMS_REQUEST_PARAMETER: {
                                 printf("ADD_INCOMING_STREAMS_REQUEST_PARAMETER\n");
-                                SCTPAddStreamsRequestParameter *addInResetParam = check_and_cast<SCTPAddStreamsRequestParameter *>(parameter);
+                                auto addInResetParam = check_and_cast<const SctpAddStreamsRequestParameter *>(parameter);
                                 if (!(pdapp->findSeqNumMap(addInResetParam->getSrReqSn()))) {
                                     pdapp->setSeqNumMap(addInResetParam->getSrReqSn(), 0);
                                 }
@@ -435,26 +465,30 @@ cPacket* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direc
         }
     }
     sctpmsg->setChecksumOk(true);
+    sctpmsg->setCrcMode(pdapp->getCrcMode());
+    sctpmsg->setCrc(0);
 
     for (cQueue::Iterator iter(*chunks); !iter.end(); iter++) {
-        PacketDrillSctpChunk *chunk = (PacketDrillSctpChunk *)(*iter);
-        sctpmsg->addChunk(chunk->getChunk());
+        PacketDrillSctpChunk *chunk = check_and_cast<PacketDrillSctpChunk *>(*iter);
+        sctpmsg->insertSctpChunks(chunk->getChunk());
     }
 
-    IPv4Datagram *ipDatagram = PacketDrill::makeIPPacket(IP_PROT_SCTP, direction, app->getLocalAddress(),
+    insertTransportProtocolHeader(packet, Protocol::sctp, sctpmsg);
+    auto ipHeader = PacketDrill::makeIpv4Header(IP_PROT_SCTP, direction, app->getLocalAddress(),
             app->getRemoteAddress());
-    ipDatagram->encapsulate(sctpmsg);
-    cPacket* pkt = ipDatagram->dup();
-    delete ipDatagram;
+    ipHeader->setTotalLengthField(ipHeader->getTotalLengthField() + packet->getDataLength());
+    PacketDrill::setIpv4HeaderCrc(ipHeader);
+    insertNetworkProtocolHeader(packet, Protocol::ipv4, ipHeader);
+    EV_INFO << "SCTP packet " << packet << endl;
     delete chunks;
-    return pkt;
+    return packet;
 }
 
 PacketDrillSctpChunk* PacketDrill::buildDataChunk(int64 flgs, int64 len, int64 tsn, int64 sid, int64 ssn, int64 ppid)
 {
     uint32 flags = 0;
-    SCTPDataChunk *datachunk = new SCTPDataChunk();
-    datachunk->setChunkType(DATA);
+    SctpDataChunk *datachunk = new SctpDataChunk();
+    datachunk->setSctpChunkType(DATA);
     datachunk->setName("PacketDrillDATA");
 
     if (flgs != -1) {
@@ -501,7 +535,7 @@ PacketDrillSctpChunk* PacketDrill::buildDataChunk(int64 flgs, int64 len, int64 t
 // ToDo: Padding
     if (len != -1) {
         datachunk->setByteLength(SCTP_DATA_CHUNK_LENGTH);
-        SCTPSimpleMessage* msg = new SCTPSimpleMessage("payload");
+        SctpSimpleMessage* msg = new SctpSimpleMessage("payload");
         uint32 sendBytes = len - SCTP_DATA_CHUNK_LENGTH;
         msg->setDataArraySize(sendBytes);
         for (uint32 i = 0; i < sendBytes; i++)
@@ -516,7 +550,7 @@ PacketDrillSctpChunk* PacketDrill::buildDataChunk(int64 flgs, int64 len, int64 t
         datachunk->setByteLength(SCTP_DATA_CHUNK_LENGTH);
     }
     datachunk->setFlags(flags);
-    PacketDrillSctpChunk *sctpchunk = new PacketDrillSctpChunk(DATA, (SCTPChunk *)datachunk);
+    PacketDrillSctpChunk *sctpchunk = new PacketDrillSctpChunk(DATA, datachunk);
     return sctpchunk;
 }
 
@@ -524,8 +558,8 @@ PacketDrillSctpChunk* PacketDrill::buildInitChunk(int64 flgs, int64 tag, int64 a
 {
     uint32 flags = 0;
     uint16 length = 0;
-    SCTPInitChunk *initchunk = new SCTPInitChunk();
-    initchunk->setChunkType(INIT);
+    SctpInitChunk *initchunk = new SctpInitChunk();
+    initchunk->setSctpChunkType(INIT);
     initchunk->setName("INIT");
 
     if (tag == -1) {
@@ -557,20 +591,20 @@ PacketDrillSctpChunk* PacketDrill::buildInitChunk(int64 flgs, int64 tag, int64 a
     }
 
     if (tsn == -1) {
-        initchunk->setInitTSN(0);
+        initchunk->setInitTsn(0);
         flags |= FLAG_INIT_CHUNK_TSN_NOCHECK;
     } else {
-        initchunk->setInitTSN((uint32) tsn);
+        initchunk->setInitTsn(tsn);
     }
 
     if (parameters != nullptr) {
         PacketDrillSctpParameter *parameter;
         uint16 parLen = 0;
         for (cQueue::Iterator iter(*parameters); !iter.end(); iter++) {
-            parameter = (PacketDrillSctpParameter*) (*iter);
+            parameter = check_and_cast<PacketDrillSctpParameter*>(*iter);
             switch (parameter->getType()) {
                 case SUPPORTED_EXTENSIONS: {
-                    ByteArray *ba = (ByteArray *)(parameter->getByteList());
+                    ByteArray *ba = parameter->getByteList();
                     parLen = ba->getDataArraySize();
                     initchunk->setSepChunksArraySize(parLen);
                     for (int i = 0; i < parLen; i++) {
@@ -601,7 +635,7 @@ PacketDrillSctpChunk* PacketDrill::buildInitChunk(int64 flgs, int64 tag, int64 a
     initchunk->setUnrecognizedParametersArraySize(0);
     initchunk->setFlags(flags);
     initchunk->setByteLength(SCTP_INIT_CHUNK_LENGTH + length);
-    PacketDrillSctpChunk *sctpchunk = new PacketDrillSctpChunk(INIT, (SCTPChunk *)initchunk);
+    PacketDrillSctpChunk *sctpchunk = new PacketDrillSctpChunk(INIT, initchunk);
     delete parameters;
     return sctpchunk;
 }
@@ -610,8 +644,8 @@ PacketDrillSctpChunk* PacketDrill::buildInitAckChunk(int64 flgs, int64 tag, int6
 {
     uint32 flags = 0;
     uint16 length = 0;
-    SCTPInitAckChunk *initackchunk = new SCTPInitAckChunk();
-    initackchunk->setChunkType(INIT_ACK);
+    SctpInitAckChunk *initackchunk = new SctpInitAckChunk();
+    initackchunk->setSctpChunkType(INIT_ACK);
     initackchunk->setName("INIT_ACK");
 
     if (tag == -1) {
@@ -643,19 +677,19 @@ PacketDrillSctpChunk* PacketDrill::buildInitAckChunk(int64 flgs, int64 tag, int6
     }
 
     if (tsn == -1) {
-        initackchunk->setInitTSN(0);
+        initackchunk->setInitTsn(0);
         flags |= FLAG_INIT_ACK_CHUNK_TSN_NOCHECK;
     } else {
-        initackchunk->setInitTSN((uint32) tsn);
+        initackchunk->setInitTsn((uint32) tsn);
     }
     if (parameters != nullptr) {
         PacketDrillSctpParameter *parameter;
         uint16 parLen = 0;
         for (cQueue::Iterator iter(*parameters); !iter.end(); iter++) {
-            parameter = (PacketDrillSctpParameter*) (*iter);
+            parameter = check_and_cast<PacketDrillSctpParameter*>(*iter);
             switch (parameter->getType()) {
                 case SUPPORTED_EXTENSIONS: {
-                    ByteArray *ba = (ByteArray *)(parameter->getByteList());
+                    ByteArray *ba = parameter->getByteList();
                     parLen = ba->getDataArraySize();
                     initackchunk->setSepChunksArraySize(parLen);
                     for (int i = 0; i < parLen; i++) {
@@ -694,14 +728,14 @@ PacketDrillSctpChunk* PacketDrill::buildInitAckChunk(int64 flgs, int64 tag, int6
     initackchunk->setFlags(flags);
     initackchunk->setByteLength(SCTP_INIT_CHUNK_LENGTH + 36 + length);
     delete parameters;
-    PacketDrillSctpChunk *sctpchunk = new PacketDrillSctpChunk(INIT_ACK, (SCTPChunk *)initackchunk);
+    PacketDrillSctpChunk *sctpchunk = new PacketDrillSctpChunk(INIT_ACK, initackchunk);
     return sctpchunk;
 }
 
 PacketDrillSctpChunk* PacketDrill::buildSackChunk(int64 flgs, int64 cum_tsn, int64 a_rwnd, cQueue *gaps, cQueue *dups)
 {
-    SCTPSackChunk* sackchunk = new SCTPSackChunk();
-    sackchunk->setChunkType(SACK);
+    auto* sackchunk = new SctpSackChunk();
+    sackchunk->setSctpChunkType(SACK);
     sackchunk->setName("SACK");
     uint32 flags = 0;
 
@@ -731,7 +765,7 @@ PacketDrillSctpChunk* PacketDrill::buildSackChunk(int64 flgs, int64 cum_tsn, int
         sackchunk->setGapStartArraySize(gaps->getLength());
         sackchunk->setGapStopArraySize(gaps->getLength());
         for (cQueue::Iterator iter(*gaps); !iter.end(); iter++) {
-            gap = (PacketDrillStruct*)(*iter);
+            gap = check_and_cast<PacketDrillStruct*>(*iter);
             sackchunk->setGapStart(num, gap->getValue1());
             sackchunk->setGapStop(num, gap->getValue2());
             num++;
@@ -753,7 +787,7 @@ PacketDrillSctpChunk* PacketDrill::buildSackChunk(int64 flgs, int64 cum_tsn, int
         sackchunk->setDupTsnsArraySize(dups->getLength());
 
         for (cQueue::Iterator iter(*dups); !iter.end(); iter++) {
-            tsn = (PacketDrillStruct*)(*iter);
+            tsn = check_and_cast<PacketDrillStruct*>(*iter);
             sackchunk->setDupTsns(num, tsn->getValue1());
             num++;
         }
@@ -764,15 +798,15 @@ PacketDrillSctpChunk* PacketDrill::buildSackChunk(int64 flgs, int64 cum_tsn, int
     }
     sackchunk->setByteLength(SCTP_SACK_CHUNK_LENGTH + (sackchunk->getNumGaps() + sackchunk->getNumDupTsns()) * 4);
     sackchunk->setFlags(flags);
-    PacketDrillSctpChunk *sctpchunk = new PacketDrillSctpChunk(SACK, (SCTPChunk *)sackchunk);
+    PacketDrillSctpChunk *sctpchunk = new PacketDrillSctpChunk(SACK, sackchunk);
     return sctpchunk;
 
 }
 
 PacketDrillSctpChunk* PacketDrill::buildCookieEchoChunk(int64 flgs, int64 len, PacketDrillBytes *cookie)
 {
-    SCTPCookieEchoChunk *cookieechochunk = new SCTPCookieEchoChunk();
-    cookieechochunk->setChunkType(COOKIE_ECHO);
+    SctpCookieEchoChunk *cookieechochunk = new SctpCookieEchoChunk();
+    cookieechochunk->setSctpChunkType(COOKIE_ECHO);
     cookieechochunk->setName("COOKIE_ECHO");
     uint32 flags = 0;
 
@@ -787,23 +821,23 @@ PacketDrillSctpChunk* PacketDrill::buildCookieEchoChunk(int64 flgs, int64 len, P
     cookieechochunk->setUnrecognizedParametersArraySize(0);
     cookieechochunk->setByteLength(SCTP_COOKIE_ACK_LENGTH);
     cookieechochunk->setFlags(flags);
-    PacketDrillSctpChunk *sctpchunk = new PacketDrillSctpChunk(COOKIE_ECHO, (SCTPChunk *)cookieechochunk);
+    PacketDrillSctpChunk *sctpchunk = new PacketDrillSctpChunk(COOKIE_ECHO, cookieechochunk);
     return sctpchunk;
 }
 
 PacketDrillSctpChunk* PacketDrill::buildCookieAckChunk(int64 flgs)
 {
-    SCTPCookieAckChunk *cookieAckChunk = new SCTPCookieAckChunk("Cookie_Ack");
-    cookieAckChunk->setChunkType(COOKIE_ACK);
+    SctpCookieAckChunk *cookieAckChunk = new SctpCookieAckChunk("Cookie_Ack");
+    cookieAckChunk->setSctpChunkType(COOKIE_ACK);
     cookieAckChunk->setByteLength(SCTP_COOKIE_ACK_LENGTH);
-    PacketDrillSctpChunk *sctpchunk = new PacketDrillSctpChunk(COOKIE_ACK, (SCTPChunk *)cookieAckChunk);
+    PacketDrillSctpChunk *sctpchunk = new PacketDrillSctpChunk(COOKIE_ACK, cookieAckChunk);
     return sctpchunk;
 }
 
 PacketDrillSctpChunk* PacketDrill::buildShutdownChunk(int64 flgs, int64 cum_tsn)
 {
-    SCTPShutdownChunk *shutdownchunk = new SCTPShutdownChunk();
-    shutdownchunk->setChunkType(SHUTDOWN);
+    auto *shutdownchunk = new SctpShutdownChunk();
+    shutdownchunk->setSctpChunkType(SHUTDOWN);
     shutdownchunk->setName("SHUTDOWN");
     uint32 flags = 0;
 
@@ -811,27 +845,27 @@ PacketDrillSctpChunk* PacketDrill::buildShutdownChunk(int64 flgs, int64 cum_tsn)
         flags |= FLAG_SHUTDOWN_CHUNK_CUM_TSN_NOCHECK;
         shutdownchunk->setCumTsnAck(0);
     } else {
-        shutdownchunk->setCumTsnAck((uint32) cum_tsn);
+        shutdownchunk->setCumTsnAck(cum_tsn);
     }
     shutdownchunk->setFlags(flags);
     shutdownchunk->setByteLength(SCTP_SHUTDOWN_CHUNK_LENGTH);
-    PacketDrillSctpChunk *sctpchunk = new PacketDrillSctpChunk(SHUTDOWN, (SCTPChunk *)shutdownchunk);
+    PacketDrillSctpChunk *sctpchunk = new PacketDrillSctpChunk(SHUTDOWN, shutdownchunk);
     return sctpchunk;
 }
 
 PacketDrillSctpChunk* PacketDrill::buildShutdownAckChunk(int64 flgs)
 {
-    SCTPShutdownAckChunk *shutdownAckChunk = new SCTPShutdownAckChunk("Shutdown_Ack");
-    shutdownAckChunk->setChunkType(SHUTDOWN_ACK);
+    auto *shutdownAckChunk = new SctpShutdownAckChunk("Shutdown_Ack");
+    shutdownAckChunk->setSctpChunkType(SHUTDOWN_ACK);
     shutdownAckChunk->setByteLength(SCTP_COOKIE_ACK_LENGTH);
-    PacketDrillSctpChunk *sctpchunk = new PacketDrillSctpChunk(SHUTDOWN_ACK, (SCTPChunk *)shutdownAckChunk);
+    PacketDrillSctpChunk *sctpchunk = new PacketDrillSctpChunk(SHUTDOWN_ACK, shutdownAckChunk);
     return sctpchunk;
 }
 
 PacketDrillSctpChunk* PacketDrill::buildShutdownCompleteChunk(int64 flgs)
 {
-    SCTPShutdownCompleteChunk *shutdowncompletechunk = new SCTPShutdownCompleteChunk();
-    shutdowncompletechunk->setChunkType(SHUTDOWN_COMPLETE);
+    auto *shutdowncompletechunk = new SctpShutdownCompleteChunk();
+    shutdowncompletechunk->setSctpChunkType(SHUTDOWN_COMPLETE);
     shutdowncompletechunk->setName("SHUTDOWN_COMPLETE");
 
     if (flgs != -1) {
@@ -840,14 +874,14 @@ PacketDrillSctpChunk* PacketDrill::buildShutdownCompleteChunk(int64 flgs)
         flgs |= FLAG_CHUNK_FLAGS_NOCHECK;
     }
     shutdowncompletechunk->setByteLength(SCTP_SHUTDOWN_ACK_LENGTH);
-    PacketDrillSctpChunk *sctpchunk = new PacketDrillSctpChunk(SHUTDOWN_COMPLETE, (SCTPChunk *)shutdowncompletechunk);
+    PacketDrillSctpChunk *sctpchunk = new PacketDrillSctpChunk(SHUTDOWN_COMPLETE, shutdowncompletechunk);
     return sctpchunk;
 }
 
 PacketDrillSctpChunk* PacketDrill::buildAbortChunk(int64 flgs)
 {
-    SCTPAbortChunk *abortChunk = new SCTPAbortChunk("Abort");
-    abortChunk->setChunkType(ABORT);
+    auto *abortChunk = new SctpAbortChunk("Abort");
+    abortChunk->setSctpChunkType(ABORT);
 
     if (flgs != -1) {
         abortChunk->setT_Bit(flgs);
@@ -855,19 +889,19 @@ PacketDrillSctpChunk* PacketDrill::buildAbortChunk(int64 flgs)
         flgs |= FLAG_CHUNK_FLAGS_NOCHECK;
     }
     abortChunk->setByteLength(SCTP_ABORT_CHUNK_LENGTH);
-    PacketDrillSctpChunk *sctpchunk = new PacketDrillSctpChunk(ABORT, (SCTPChunk *)abortChunk);
+    PacketDrillSctpChunk *sctpchunk = new PacketDrillSctpChunk(ABORT, abortChunk);
     return sctpchunk;
 }
 
 PacketDrillSctpChunk* PacketDrill::buildErrorChunk(int64 flgs, cQueue *causes)
 {
     PacketDrillStruct *errorcause;
-    SCTPErrorChunk *errorChunk = new SCTPErrorChunk("Error");
-    errorChunk->setChunkType(ERRORTYPE);
+    auto *errorChunk = new SctpErrorChunk("Error");
+    errorChunk->setSctpChunkType(ERRORTYPE);
     errorChunk->setByteLength(SCTP_ERROR_CHUNK_LENGTH);
     for (cQueue::Iterator iter(*causes); !iter.end(); iter++) {
-        errorcause = (PacketDrillStruct*) (*iter);
-        SCTPSimpleErrorCauseParameter *cause = new SCTPSimpleErrorCauseParameter("Cause");
+        errorcause = check_and_cast<PacketDrillStruct*>(*iter);
+        auto *cause = new SctpSimpleErrorCauseParameter("Cause");
         cause->setParameterType(INVALID_STREAM_IDENTIFIER);
         cause->setByteLength(8);
         cause->setValue(errorcause->getValue2());
@@ -875,14 +909,14 @@ PacketDrillSctpChunk* PacketDrill::buildErrorChunk(int64 flgs, cQueue *causes)
         causes->remove((*iter));
     }
     delete causes;
-    PacketDrillSctpChunk *sctpchunk = new PacketDrillSctpChunk(ERRORTYPE, (SCTPChunk *)errorChunk);
+    PacketDrillSctpChunk *sctpchunk = new PacketDrillSctpChunk(ERRORTYPE, errorChunk);
     return sctpchunk;
 }
 
 PacketDrillSctpChunk* PacketDrill::buildHeartbeatChunk(int64 flgs, PacketDrillSctpParameter *info)
 {
-    SCTPHeartbeatChunk *heartbeatChunk = new SCTPHeartbeatChunk();
-    heartbeatChunk->setChunkType(HEARTBEAT);
+    auto *heartbeatChunk = new SctpHeartbeatChunk();
+    heartbeatChunk->setSctpChunkType(HEARTBEAT);
     assert(info == NULL ||
        info->getLength() + SCTP_HEARTBEAT_CHUNK_LENGTH <= MAX_SCTP_CHUNK_BYTES);
     if (info && info->getLength() > 0)
@@ -912,14 +946,14 @@ PacketDrillSctpChunk* PacketDrill::buildHeartbeatChunk(int64 flgs, PacketDrillSc
         heartbeatChunk->setTimeField(simTime());
         heartbeatChunk->setByteLength(SCTP_HEARTBEAT_CHUNK_LENGTH + 12);
     }
-    PacketDrillSctpChunk *sctpchunk = new PacketDrillSctpChunk(HEARTBEAT, (SCTPChunk *)heartbeatChunk);
+    PacketDrillSctpChunk *sctpchunk = new PacketDrillSctpChunk(HEARTBEAT, heartbeatChunk);
     return sctpchunk;
 }
 
 PacketDrillSctpChunk* PacketDrill::buildHeartbeatAckChunk(int64 flgs, PacketDrillSctpParameter *info)
 {
-    SCTPHeartbeatAckChunk *heartbeatAckChunk = new SCTPHeartbeatAckChunk();
-    heartbeatAckChunk->setChunkType(HEARTBEAT_ACK);
+    auto *heartbeatAckChunk = new SctpHeartbeatAckChunk();
+    heartbeatAckChunk->setSctpChunkType(HEARTBEAT_ACK);
     assert(info == NULL ||
        info->getLength() + SCTP_HEARTBEAT_CHUNK_LENGTH <= MAX_SCTP_CHUNK_BYTES);
     if (info && info->getLength() > 0)
@@ -930,7 +964,7 @@ PacketDrillSctpChunk* PacketDrill::buildHeartbeatAckChunk(int64 flgs, PacketDril
         heartbeatAckChunk->setTimeField(pdapp->getPeerHeartbeatTime());
         heartbeatAckChunk->setByteLength(SCTP_HEARTBEAT_CHUNK_LENGTH + 12);
     }
-    PacketDrillSctpChunk *sctpchunk = new PacketDrillSctpChunk(HEARTBEAT_ACK, (SCTPChunk *)heartbeatAckChunk);
+    PacketDrillSctpChunk *sctpchunk = new PacketDrillSctpChunk(HEARTBEAT_ACK, heartbeatAckChunk);
     return sctpchunk;
 }
 
@@ -938,17 +972,16 @@ PacketDrillSctpChunk* PacketDrill::buildReconfigChunk(int64 flgs, cQueue *parame
 {
     uint32 flags = 0;
     uint16 len = 0;
-    SCTPStreamResetChunk *resetChunk = new SCTPStreamResetChunk("RE_CONFIG");
-    resetChunk->setChunkType(RE_CONFIG);
+    auto *resetChunk = new SctpStreamResetChunk("RE_CONFIG");
+    resetChunk->setSctpChunkType(RE_CONFIG);
     resetChunk->setByteLength(SCTP_STREAM_RESET_CHUNK_LENGTH);
     if (parameters != nullptr) {
         PacketDrillSctpParameter *parameter;
         for (cQueue::Iterator iter(*parameters); !iter.end(); iter++) {
-            parameter = (PacketDrillSctpParameter*) (*iter);
+            parameter = check_and_cast<PacketDrillSctpParameter*>(*iter);
             switch (parameter->getType()) {
                 case OUTGOING_RESET_REQUEST_PARAMETER: {
-                    SCTPOutgoingSSNResetRequestParameter *outResetParam =
-                        new SCTPOutgoingSSNResetRequestParameter("Outgoing_Request_Param");
+                    auto *outResetParam = new SctpOutgoingSsnResetRequestParameter("Outgoing_Request_Param");
                     outResetParam->setParameterType(OUTGOING_RESET_REQUEST_PARAMETER);
                     PacketDrillStruct *content = (PacketDrillStruct *)parameter->getContent();
                     if (content->getValue1() == -1) {
@@ -973,8 +1006,8 @@ PacketDrillSctpChunk* PacketDrill::buildReconfigChunk(int64 flgs, cQueue *parame
                         outResetParam->setStreamNumbersArraySize(content->getStreams()->getLength());
                         unsigned int i = 0;
                         for (cQueue::Iterator it(*content->getStreams()); !it.end(); it++) {
-                            if (((PacketDrillExpression *)(*it))->getNum() != -1)
-                                outResetParam->setStreamNumbers(i++, ((PacketDrillExpression *)(*it))->getNum());
+                            if (check_and_cast<PacketDrillExpression *>(*it)->getNum() != -1)
+                                outResetParam->setStreamNumbers(i++, check_and_cast<PacketDrillExpression *>(*it)->getNum());
                             else
                                 outResetParam->setStreamNumbersArraySize(outResetParam->getStreamNumbersArraySize() - 1);
                         }
@@ -988,8 +1021,7 @@ PacketDrillSctpChunk* PacketDrill::buildReconfigChunk(int64 flgs, cQueue *parame
                     break;
                 }
                 case INCOMING_RESET_REQUEST_PARAMETER: {
-                    SCTPIncomingSSNResetRequestParameter *inResetParam =
-                        new SCTPIncomingSSNResetRequestParameter("Incoming_Request_Param");
+                    auto *inResetParam = new SctpIncomingSsnResetRequestParameter("Incoming_Request_Param");
                     PacketDrillStruct *content = (PacketDrillStruct *)parameter->getContent();
                     inResetParam->setParameterType(INCOMING_RESET_REQUEST_PARAMETER);
                     inResetParam->setSrReqSn(content->getValue1());
@@ -997,8 +1029,8 @@ PacketDrillSctpChunk* PacketDrill::buildReconfigChunk(int64 flgs, cQueue *parame
                         inResetParam->setStreamNumbersArraySize(content->getStreams()->getLength());
                         unsigned int i = 0;
                         for (cQueue::Iterator it(*content->getStreams()); !it.end(); it++) {
-                            if (((PacketDrillExpression *)(*it))->getNum() != -1)
-                                inResetParam->setStreamNumbers(i++, ((PacketDrillExpression *)(*it))->getNum());
+                            if (check_and_cast<PacketDrillExpression *>(*it)->getNum() != -1)
+                                inResetParam->setStreamNumbers(i++, check_and_cast<PacketDrillExpression *>(*it)->getNum());
                             else
                                 inResetParam->setStreamNumbersArraySize(inResetParam->getStreamNumbersArraySize() - 1);
                         }
@@ -1011,8 +1043,7 @@ PacketDrillSctpChunk* PacketDrill::buildReconfigChunk(int64 flgs, cQueue *parame
                     break;
                 }
                 case SSN_TSN_RESET_REQUEST_PARAMETER: {
-                    SCTPSSNTSNResetRequestParameter *resetParam =
-                        new SCTPSSNTSNResetRequestParameter("SSN_TSN_Request_Param");
+                    auto *resetParam = new SctpSsnTsnResetRequestParameter("SSN_TSN_Request_Param");
                     PacketDrillStruct *content = (PacketDrillStruct *)parameter->getContent();
                     resetParam->setParameterType(SSN_TSN_RESET_REQUEST_PARAMETER);
                     resetParam->setSrReqSn(content->getValue1());
@@ -1021,8 +1052,7 @@ PacketDrillSctpChunk* PacketDrill::buildReconfigChunk(int64 flgs, cQueue *parame
                     break;
                 }
                 case STREAM_RESET_RESPONSE_PARAMETER: {
-                    SCTPStreamResetResponseParameter *responseParam =
-                        new SCTPStreamResetResponseParameter("Response_Param");
+                    auto *responseParam = new SctpStreamResetResponseParameter("Response_Param");
                     PacketDrillStruct *content = (PacketDrillStruct *)parameter->getContent();
                     responseParam->setParameterType(STREAM_RESET_RESPONSE_PARAMETER);
                     responseParam->setSrResSn(content->getValue1());
@@ -1053,8 +1083,7 @@ PacketDrillSctpChunk* PacketDrill::buildReconfigChunk(int64 flgs, cQueue *parame
                     break;
                 }
                 case ADD_INCOMING_STREAMS_REQUEST_PARAMETER: {
-                    SCTPAddStreamsRequestParameter *addInParam =
-                        new SCTPAddStreamsRequestParameter("ADD_INCOMING_STREAMS_REQUEST_PARAMETER");
+                    auto *addInParam = new SctpAddStreamsRequestParameter("ADD_INCOMING_STREAMS_REQUEST_PARAMETER");
                     PacketDrillStruct *content = (PacketDrillStruct *)parameter->getContent();
                     addInParam->setParameterType(ADD_INCOMING_STREAMS_REQUEST_PARAMETER);
                     addInParam->setSrReqSn(content->getValue1());
@@ -1065,8 +1094,7 @@ PacketDrillSctpChunk* PacketDrill::buildReconfigChunk(int64 flgs, cQueue *parame
                     break;
                 }
                 case ADD_OUTGOING_STREAMS_REQUEST_PARAMETER: {
-                    SCTPAddStreamsRequestParameter *addOutParam =
-                        new SCTPAddStreamsRequestParameter("ADD_OUTGOING_STREAMS_REQUEST_PARAMETER");
+                    auto *addOutParam = new SctpAddStreamsRequestParameter("ADD_OUTGOING_STREAMS_REQUEST_PARAMETER");
                     PacketDrillStruct *content = (PacketDrillStruct *)parameter->getContent();
                     addOutParam->setParameterType(ADD_OUTGOING_STREAMS_REQUEST_PARAMETER);
                     addOutParam->setSrReqSn(content->getValue1());
@@ -1080,11 +1108,11 @@ PacketDrillSctpChunk* PacketDrill::buildReconfigChunk(int64 flgs, cQueue *parame
             }
         }
         for (cQueue::Iterator iter(*parameters); !iter.end(); iter++)
-            parameters->remove((PacketDrillEvent *) (*iter));
+            parameters->remove(*iter);
         delete parameters;
     }
     resetChunk->setFlags(flags);
-    PacketDrillSctpChunk *sctpchunk = new PacketDrillSctpChunk(RE_CONFIG, (SCTPChunk *)resetChunk);
+    PacketDrillSctpChunk *sctpchunk = new PacketDrillSctpChunk(RE_CONFIG, resetChunk);
     return sctpchunk;
 }
 
@@ -1497,7 +1525,6 @@ int PacketDrill::evaluate(PacketDrillExpression *in, PacketDrillExpression *out,
     case EXPR_SCTP_RESET_STREAMS: {
         assert(in->getType() == EXPR_SCTP_RESET_STREAMS);
         assert(out->getType() == EXPR_SCTP_RESET_STREAMS);
-        printf("evaluate EXPR_SCTP_RESET_STREAMS\n");
         struct sctp_reset_streams_expr *rs = (struct sctp_reset_streams_expr *) malloc(sizeof(struct sctp_reset_streams_expr));
         rs->srs_assoc_id = new PacketDrillExpression(in->getResetStreams()->srs_assoc_id->getType());
         if (evaluate(in->getResetStreams()->srs_assoc_id, rs->srs_assoc_id, error)) {
@@ -1520,11 +1547,10 @@ int PacketDrill::evaluate(PacketDrillExpression *in, PacketDrillExpression *out,
             free (rs);
             return STATUS_ERR;
         }
-        printf("srs_number_streams = %" PRId64 "\n", rs->srs_number_streams->getNum());
         if (rs->srs_number_streams->getNum() > 0) {
             rs->srs_stream_list = new PacketDrillExpression(in->getResetStreams()->srs_stream_list->getType());
             if (evaluate(in->getResetStreams()->srs_stream_list, rs->srs_stream_list, error)) {
-            printf("Fehler in evaluate\n");
+                EV_WARN << "Error in evaluate\n";
                 delete (rs->srs_assoc_id);
                 delete (rs->srs_flags);
                 delete (rs->srs_number_streams);
@@ -1662,18 +1688,17 @@ int PacketDrill::evaluate(PacketDrillExpression *in, PacketDrillExpression *out,
 
     case EXPR_BINARY:
         if (evaluate_binary_expression(in, out, error)) {
-            printf("Fehler in EXPR_BINARY\n");
+            printf("Error in EXPR_BINARY\n");
         }
         break;
 
     case EXPR_LIST:
         if (evaluateListExpression(in, out, error)) {
-            printf("Fehler in EXPR_LIST\n");
+            printf("Error in EXPR_LIST\n");
         }
         break;
 
     case EXPR_SOCKET_ADDRESS_IPV4:
-        printf("name=%s\n", out->getName());
         break;
     case EXPR_NONE:
         break;
@@ -1692,8 +1717,8 @@ int PacketDrill::evaluateExpressionList(cQueue *in_list, cQueue *out_list, char 
 {
     cQueue *node_ptr = out_list;
     for (cQueue::Iterator it(*in_list); !it.end(); it++) {
-        PacketDrillExpression *outExpr = new PacketDrillExpression(((PacketDrillExpression *)(*it))->getType());
-        if (evaluate((PacketDrillExpression *)(*it), outExpr, error)) {
+        PacketDrillExpression *outExpr = new PacketDrillExpression(check_and_cast<PacketDrillExpression *>(*it)->getType());
+        if (evaluate(check_and_cast<PacketDrillExpression *>(*it), outExpr, error)) {
             delete(outExpr);
             return STATUS_ERR;
         }
@@ -1742,3 +1767,6 @@ int PacketDrill::evaluateListExpression(PacketDrillExpression *in, PacketDrillEx
     out->setList(new cQueue("listExpression"));
     return evaluateExpressionList(in->getList(), out->getList(), error);
 }
+
+} // namespace inet
+

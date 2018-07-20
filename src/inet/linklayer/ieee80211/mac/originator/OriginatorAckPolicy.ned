@@ -19,6 +19,6 @@ simple OriginatorAckPolicy
 {
     parameters:
         string rateSelectionModule;
-        double ackTimeout @unit("s") = default(-1s);
+        double ackTimeout @unit(s) = default(-1s);
         @display("i=block/control");
 }

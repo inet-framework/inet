@@ -16,6 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/Simsignals.h"
 #include "inet/common/queue/AlgorithmicDropperBase.h"
 
 namespace inet {
@@ -48,6 +49,9 @@ void AlgorithmicDropperBase::handleMessage(cMessage *msg)
 void AlgorithmicDropperBase::dropPacket(cPacket *packet)
 {
     // TODO statistics
+    PacketDropDetails details;
+    details.setReason(CONGESTION);
+    emit(packetDroppedSignal, packet, &details);
     delete packet;
 }
 

@@ -1,0 +1,15 @@
+dequeuePk -> packetDequeued
+enqueuePk -> packetEnqueued
+ipv4McastJoin -> ipv4MulticastGroupJoined
+ipv4McastLeave -> ipv4MulticastGroupLeft
+ipv4McastRegistered -> ipv4MulticastGroupRegistered
+ipv4McastUnregistered -> ipv4MulticastGroupUnregistered
+ipv6McastJoin -> ipv6MulticastGroupJoined
+ipv6McastLeave -> ipv6MulticastGroupLeft
+ipv6McastRegistered -> ipv6MulticastGroupRegistered
+ipv6McastUnregistered -> ipv6MulticastGroupUnregistered
+linkBreak -> linkBroken
+markPk -> packetMarked
+packetDrop -> packetDropped
+rcvdPk -> packetReceived
+sentPk -> packetSent

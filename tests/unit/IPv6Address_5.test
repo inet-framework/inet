@@ -1,40 +1,40 @@
 %description:
-test IPv6Address scope and multicast scope
+test Ipv6Address scope and multicast scope
 
 %includes:
-#include "inet/networklayer/contract/ipv6/IPv6Address.h"
+#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 
 %global:
 
 using namespace inet;
 
 %activity:
-#define P(X)  EV << #X << "  " << IPv6Address::scopeName(X.getScope()) << " " << \
+#define P(X)  EV << #X << "  " << Ipv6Address::scopeName(X.getScope()) << " " << \
                     (X.isMulticast() ? X.getMulticastScope() : -1) << "\n";
 
-P(IPv6Address::UNSPECIFIED_ADDRESS);
-P(IPv6Address::LOOPBACK_ADDRESS);
-P(IPv6Address("ff03::1"));
-P(IPv6Address("ffff::1"));
-P(IPv6Address::ALL_NODES_1);
-P(IPv6Address::ALL_NODES_2);
-P(IPv6Address::ALL_ROUTERS_1);
-P(IPv6Address::ALL_ROUTERS_2);
-P(IPv6Address::ALL_ROUTERS_5);
-P(IPv6Address::SOLICITED_NODE_PREFIX);
-P(IPv6Address::LINKLOCAL_PREFIX);
+P(Ipv6Address::UNSPECIFIED_ADDRESS);
+P(Ipv6Address::LOOPBACK_ADDRESS);
+P(Ipv6Address("ff03::1"));
+P(Ipv6Address("ffff::1"));
+P(Ipv6Address::ALL_NODES_1);
+P(Ipv6Address::ALL_NODES_2);
+P(Ipv6Address::ALL_ROUTERS_1);
+P(Ipv6Address::ALL_ROUTERS_2);
+P(Ipv6Address::ALL_ROUTERS_5);
+P(Ipv6Address::SOLICITED_NODE_PREFIX);
+P(Ipv6Address::LINKLOCAL_PREFIX);
 EV << ".\n";
 
 %contains: stdout
-IPv6Address::UNSPECIFIED_ADDRESS  unspec -1
-IPv6Address::LOOPBACK_ADDRESS  loopback -1
-IPv6Address("ff03::1")  mcast 3
-IPv6Address("ffff::1")  mcast 15
-IPv6Address::ALL_NODES_1  mcast 1
-IPv6Address::ALL_NODES_2  mcast 2
-IPv6Address::ALL_ROUTERS_1  mcast 1
-IPv6Address::ALL_ROUTERS_2  mcast 2
-IPv6Address::ALL_ROUTERS_5  mcast 5
-IPv6Address::SOLICITED_NODE_PREFIX  mcast 2
-IPv6Address::LINKLOCAL_PREFIX  link -1
+Ipv6Address::UNSPECIFIED_ADDRESS  unspec -1
+Ipv6Address::LOOPBACK_ADDRESS  loopback -1
+Ipv6Address("ff03::1")  mcast 3
+Ipv6Address("ffff::1")  mcast 15
+Ipv6Address::ALL_NODES_1  mcast 1
+Ipv6Address::ALL_NODES_2  mcast 2
+Ipv6Address::ALL_ROUTERS_1  mcast 1
+Ipv6Address::ALL_ROUTERS_2  mcast 2
+Ipv6Address::ALL_ROUTERS_5  mcast 5
+Ipv6Address::SOLICITED_NODE_PREFIX  mcast 2
+Ipv6Address::LINKLOCAL_PREFIX  link -1
 .

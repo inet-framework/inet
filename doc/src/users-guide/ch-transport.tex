@@ -1,0 +1,244 @@
+\chapter{Transport Protocols}
+\label{cha:transport-protocols}
+
+\section{Overview}
+\label{sec:transport:overview}
+
+In the OSI reference model, the protocols of the transport layer provide
+host-to-host communication services for applications. They provide services such
+as connection-oriented communication, reliability, flow control, and
+multiplexing.
+
+INET currently provides support for the TCP, UDP, SCTP and RTP transport layer
+protocols. INET nodes like \nedtype{StandardHost} contain optional and
+replaceable instances of these protocols, like this:
+
+\begin{ned}
+tcp: <tcpType> like ITcp if hasTcp;
+udp: <udpType> like IUdp if hasUdp;
+sctp: <sctpType> like ISctp if hasSctp;
+\end{ned}
+
+As RTP is more specialized that the other ones (multimedia streaming), INET
+provides a separate node type, \nedtype{RtpHost}, for modeling RTP traffic.
+
+\section{TCP}
+\label{sec:transport:tcp}
+
+\subsection{Overview}
+\label{sec:transport:tcp-overview}
+
+TCP protocol is the most widely used protocol of the Internet. It provides
+reliable, ordered delivery of stream of bytes from one application on one
+computer to another application on another computer. The baseline TCP protocol
+is described in RFC793, but other tens of RFCs contains modifications and
+extensions to the TCP. As a result, TCP is a complex protocol and sometimes it
+is hard to see how the different requirements interact with each other.
+
+INET contains three implementations of the TCP protocol:
+
+\begin{itemize}
+  \item \nedtype{Tcp} is the primary implementation, designed for readability,
+    extensibility, and experimentation.
+  \item \nedtype{TcpLwip} is a wrapper around the lwIP (Lightweight IP) library,
+    a widely used open source TCP/IP stack designed for embedded systems.
+  \item \nedtype{TcpNsc} wraps Network Simulation Cradle (NSC), a library
+    that allows real world TCP/IP network stacks to be used inside a
+    network simulator.
+\end{itemize}
+
+All three module types implement the \nedtype{ITcp} interface and communicate
+with other layers through the same interface, so they can be interchanged and
+also mixed in the same network.
+
+
+\subsection{Tcp}
+\label{sec:transport:tcp}
+
+The \nedtype{Tcp} simple module is the main implementation of the TCP protocol
+in the INET framework.
+
+\nedtype{Tcp} implements the following:
+
+\begin{compactitem}
+  \item TCP state machine
+  \item initial sequence number selection according to the system clock.
+  \item window-based flow control
+  \item Window Scale option
+  \item Persistence timer
+  \item Keepalive timer
+  \item Transmission policies
+  \item RTT measurement for retransmission timeout (RTO) computation
+  \item Delayed ACK algorithm
+  \item Nagle's algorithm
+  \item Silly window avoidance
+  \item Timestamp option
+  \item Congestion control schemes: Tahoe, Reno, New Reno, Westwood, Vegas, etc.
+  \item Slow Start and Congestion Avoidance
+  \item Fast Retransmit and Fast Recovery
+  \item Loss Recovery Using Limited Transmit
+  \item Selective Acknowledgments (SACK)
+  \item SACK based loss recovery
+\end{compactitem}
+
+Several protocol features can be turned on/off with parameters like
+\fpar{delayedAcksEnabled}, \fpar{nagleEnabled}, \fpar{limitedTransmitEnabled},
+\fpar{increasedIWEnabled}, \fpar{sackSupport}, \fpar{windowScalingSupport}, or
+\fpar{timestampSupport}.
+
+The congestion control algorithm can be selected with the \fpar{tcpAlgorithmClass}
+parameter. For example, the following ini file fragment selects TCP Vegas:
+
+\begin{inifile}
+**.tcp.tcpAlgorithmClass = "TcpVegas"
+\end{inifile}
+
+Values like \ttt{"TcpVegas"} name C++ classes. Indeed, \nedtype{Tcp} can be
+extended with new congestion control schemes by implementing and registering
+them in C++.
+
+
+
+\subsection{TcpLwip}
+\label{sec:transport:tcplwip}
+
+\textit{lwIP} is a light-weight implementation of the TCP/IP protocol suite
+that was originally written by Adam Dunkels of the Swedish Institute of
+Computer Science. The current development homepage is
+\url{http://savannah.nongnu.org/projects/lwip/}.
+
+The implementation targets embedded devices: it has very limited resource usage
+(it works ``with tens of kilobytes of RAM and around 40 kilobytes of ROM''), and
+does not require an underlying OS.
+
+The \nedtype{TcpLwip} simple module is based on the 1.3.2 version of
+the lwIP sources.
+
+Features:
+
+\begin{compactitem}
+\item delayed ACK
+\item Nagle's algorithm
+\item round trip time estimation
+\item adaptive retransmission timeout
+\item SWS avoidance
+\item slow start threshold
+\item fast retransmit
+\item fast recovery
+\item persist timer
+\item keep-alive timer
+\end{compactitem}
+
+\subsubsection*{Limitations}
+
+\begin{itemize}
+  \item only MSS and TS TCP options are supported. The TS option is turned off
+        by default, but can be enabled by defining LWIP\_TCP\_TIMESTAMPS to 1
+        in \ffilename{lwipopts.h}.
+  \item \fvar{fork} must be \fkeyword{true} in the passive open command
+  \item The status request command (TCP\_C\_STATUS) only reports the
+          local and remote addresses/ports of the connection and
+          the MSS, SND.NXT, SND.WND, SND.WL1, SND.WL2, RCV.NXT, RCV.WND variables.
+\end{itemize}
+
+\subsection{TcpNsc}
+\label{sec:transport:tcpnsc}
+
+Network Simulation Cradle (NSC) is a tool that allow real-world TCP/IP network stacks
+to be used in simulated networks. The NSC project is created by Sam Jansen
+and available on \url{http://research.wand.net.nz/software/nsc.php}. NSC currently
+contains Linux, FreeBSD, OpenBSD and lwIP network stacks, although on 64-bit
+systems only Linux implementations can be built.
+
+To use the \nedtype{TcpNsc} module you should download the
+\ffilename{nsc-0.5.2.tar.bz2} package and follow the instructions
+in the \ffilename{<inet\_root>/3rdparty/README} file to build it.
+
+\begin{warning}
+Before generating the INET module, check that the \emph{opp\_makemake} call
+in the make file (\ffilename{<inet\_root>/Makefile}) includes the
+\emph{-DWITH\_TCP\_NSC} argument. Without this option the \nedtype{TcpNsc}
+module is not built. If you build the INET library from the IDE, it is enough
+to enable the \emph{TCP (NSC)} project feature.
+\end{warning}
+
+\subsubsection*{Parameters}
+
+The module has the following parameters:
+
+\begin{itemize}
+  \item \fpar{stackName}: the name of the TCP implementation to be used.
+    Possible values are: \ttt{liblinux2.6.10.so}, \ttt{liblinux2.6.18.so},
+    \ttt{liblinux2.6.26.so}, \ttt{libopenbsd3.5.so}, \ttt{libfreebsd5.3.so} and
+    \ttt{liblwip.so}. (On the 64 bit systems, the \ttt{liblinux2.6.26.so} and
+    \ttt{liblinux2.6.16.so} are available only).
+  \item \fpar{stackBufferSize}: the size of the receive and send buffer of
+    one connection for selected TCP implementation.
+    The NSC sets the \fvar{wmem\_max}, \fvar{rmem\_max}, \fvar{tcp\_rmem}, \fvar{tcp\_wmem}
+    parameters to this value on linux TCP implementations. For details, you can see
+    the NSC documentation.
+\end{itemize}
+
+\subsubsection*{Limitations}
+
+\begin{itemize}
+  \item Because the kernel code is not reentrant, NSC creates a record containing
+    the global variables of the stack implementation. By default there is room
+    for 50 instance in this table, so you can not create more then 50 instance
+    of \nedtype{TcpNsc}. You can increase the \fvar{NUM\_STACKS} constant
+    in \ffilename{num\_stacks.h} and recompile NSC to overcome this limitation.
+  \item The \nedtype{TcpNsc} module does not supprt TCP\_TRANSFER\_OBJECT
+    data transfer mode.
+  \item The MTU of the network stack fixed to 1500, therefore MSS is 1460.
+  \item TCP\_C\_STATUS command reports only local/remote addresses/ports and
+    current window of the connection.
+\end{itemize}
+
+\section{UDP}
+\label{sec:transport:udp}
+
+The UDP protocol is a very simple datagram transport protocol, which
+basically makes the services of the network layer available to the applications.
+It performs packet multiplexing and demultiplexing to ports and some basic
+error detection only.
+
+The \nedtype{Udp} simple module implements the UDP protocol.
+There is a module interface (\nedtype{IUdp}) that defines the gates of the
+\nedtype{Udp} component. In the \nedtype{StandardHost} node, the UDP component
+can be any module implementing that interface.
+
+
+\section{SCTP}
+\label{sec:transport:sctp}
+
+The \nedtype{Sctp} module implements the Stream Control Transmission Protocol
+(SCTP). Like TCP, SCTP provides reliable ordered data delivery over an ureliable
+network. The most prominent feature of SCTP is the capability of transmitting
+multiple streams of data at the same time between two end points that have
+established a connection.
+
+\section{RTP}
+\label{sec:transport:rtp}
+
+The Real-time Transport Protocol (RTP) is a transport layer protocol for
+delivering audio and video over IP networks. RTP is used extensively in
+communication and entertainment systems that involve streaming media, such as
+telephony, video teleconference applications including WebRTC, television
+services and web-based push-to-talk features.
+
+The RTP Control Protocol (RTCP) is a sister protocol of the Real-time Transport
+Protocol (RTP). RTCP provides out-of-band statistics and control information for
+an RTP session.
+
+INET provides the following modules:
+
+\begin{itemize}
+  \item \nedtype{Rtp} implements the RTP protocol
+  \item \nedtype{Rtcp} implements the RTCP protocol
+\end{itemize}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "usman"
+%%% End:
+

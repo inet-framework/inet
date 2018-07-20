@@ -18,10 +18,11 @@
 #ifndef __INET_ISIGNALPACKETMODEL_H
 #define __INET_ISIGNALPACKETMODEL_H
 
-#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
-#include "inet/physicallayer/contract/bitlevel/IFECCoder.h"
-#include "inet/physicallayer/contract/bitlevel/IScrambler.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/physicallayer/contract/bitlevel/IFecCoder.h"
 #include "inet/physicallayer/contract/bitlevel/IInterleaver.h"
+#include "inet/physicallayer/contract/bitlevel/IScrambler.h"
+#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
 
 namespace inet {
 
@@ -34,8 +35,7 @@ namespace physicallayer {
 class INET_API ISignalPacketModel : public IPrintableObject
 {
   public:
-    virtual const cPacket *getPacket() const = 0;
-    virtual const BitVector *getSerializedPacket() const = 0;
+    virtual const Packet *getPacket() const = 0;
     /**
      * Returns the net bitrate (datarate) of the packet.
      */
@@ -48,16 +48,6 @@ class INET_API ITransmissionPacketModel : public virtual ISignalPacketModel
 
 class INET_API IReceptionPacketModel : public virtual ISignalPacketModel
 {
-  public:
-    /**
-     * Returns the packet error rate (probability).
-     */
-    virtual double getPER() const = 0;
-
-    /**
-     * Returns true if the packet is actually free of errors.
-     */
-    virtual bool isPacketErrorless() const = 0;
 };
 
 } // namespace physicallayer

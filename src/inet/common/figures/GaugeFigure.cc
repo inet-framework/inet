@@ -19,8 +19,7 @@
 #include "GaugeFigure.h"
 #include "inet/common/INETUtils.h"
 
-//TODO namespace inet { -- for the moment commented out, as OMNeT++ 5.0 cannot instantiate a figure from a namespace
-using namespace inet;
+namespace inet {
 
 Register_Figure("gauge", GaugeFigure);
 
@@ -63,10 +62,10 @@ GaugeFigure::GaugeFigure(const char *name) : cGroupFigure(name)
 GaugeFigure::~GaugeFigure()
 {
     // delete figures which is not in canvas
-    for (int i = curvesOnCanvas; i < curveFigures.size(); ++i)
+    for (size_t i = curvesOnCanvas; i < curveFigures.size(); ++i)
         delete curveFigures[i];
 
-    for (int i = numTicks; i < tickFigures.size(); ++i) {
+    for (size_t i = numTicks; i < tickFigures.size(); ++i) {
         delete tickFigures[i];
         delete numberFigures[i];
     }
@@ -113,7 +112,7 @@ void GaugeFigure::setLabel(const char *text)
     labelFigure->setText(text);
 }
 
-const int GaugeFigure::getLabelOffset() const
+int GaugeFigure::getLabelOffset() const
 {
     return labelOffset;
 }
@@ -398,8 +397,8 @@ void GaugeFigure::redrawTicks()
     numTicks = std::max(0.0, std::abs(max - min - shifting) / tickSize + 1);
 
     // Allocate ticks and numbers if needed
-    if (numTicks > tickFigures.size())
-        while (numTicks > tickFigures.size()) {
+    if ((size_t)numTicks > tickFigures.size())
+        while ((size_t)numTicks > tickFigures.size()) {
             cLineFigure *tick = new cLineFigure();
             cTextFigure *number = new cTextFigure();
 
@@ -442,7 +441,7 @@ void GaugeFigure::redrawCurves()
     double lastStop = 0.0;
     double newStop = 0.0;
     Color color;
-    int index = 0;
+    size_t index = 0;
     const double deg270InRad = 6 * M_PI / 4;
     while (signalTokenizer.hasMoreTokens()) {
         const char *token = signalTokenizer.nextToken();
@@ -517,5 +516,5 @@ void GaugeFigure::refresh()
     }
 }
 
-// } // namespace inet
+} // namespace inet
 

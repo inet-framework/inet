@@ -21,8 +21,9 @@
 #define __INET_MPDUGEN_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/applications/base/ApplicationBase.h"
-#include "inet/transportlayer/contract/udp/UDPSocket.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {
 /*
@@ -32,10 +33,7 @@ class MpduGen : public ApplicationBase
 {
 protected:
     int localPort = -1, destPort = -1;
-    UDPSocket socket;
-
-    static simsignal_t sentPkSignal;
-    static simsignal_t rcvdPkSignal;
+    UdpSocket socket;
 
     cMessage *selfMsg = nullptr;
     int numSent = 0;
@@ -45,8 +43,8 @@ protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void sendPackets();
-    void processPacket(cPacket *pk);
-    virtual void handleMessageWhenUp(cMessage* msg);
+    void processPacket(Packet *pk);
+    virtual void handleMessageWhenUp(cMessage* msg) override;
 
   public:
     MpduGen() {}

@@ -26,7 +26,7 @@ Define_Module(LinearMobility);
 LinearMobility::LinearMobility()
 {
     speed = 0;
-    angle = 0;
+    angle = deg(0);
     acceleration = 0;
 }
 
@@ -37,7 +37,7 @@ void LinearMobility::initialize(int stage)
     EV_TRACE << "initializing LinearMobility stage " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {
         speed = par("speed");
-        angle = fmod((double)par("angle"), 360);
+        angle = deg(fmod(par("angle").doubleValue(), 360));
         acceleration = par("acceleration");
         stationary = (speed == 0) && (acceleration == 0.0);
     }
@@ -45,11 +45,10 @@ void LinearMobility::initialize(int stage)
 
 void LinearMobility::move()
 {
-    double rad = M_PI * angle / 180;
-    Coord direction(cos(rad), sin(rad));
-    lastSpeed = direction * speed;
+    Coord direction(cos(rad(angle).get()), sin(rad(angle).get()));
+    lastVelocity = direction * speed;
     double elapsedTime = (simTime() - lastUpdate).dbl();
-    lastPosition += lastSpeed * elapsedTime;
+    lastPosition += lastVelocity * elapsedTime;
 
     // do something if we reach the wall
     Coord dummy;

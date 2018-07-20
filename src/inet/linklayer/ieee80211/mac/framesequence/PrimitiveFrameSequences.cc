@@ -50,9 +50,12 @@ IFrameSequenceStep* RtsFs::prepareStep(FrameSequenceContext* context)
 {
     switch (step) {
         case 0: {
-            auto dataOrMgmtFrame = check_and_cast<Ieee80211DataOrMgmtFrame *>(context->getInProgressFrames()->getFrameToTransmit());
-            auto rtsFrame = context->getRtsProcedure()->buildRtsFrame(dataOrMgmtFrame);
-            return new RtsTransmitStep(dataOrMgmtFrame, rtsFrame, context->getIfs());
+            auto dataOrMgmtPacket = context->getInProgressFrames()->getFrameToTransmit();
+            auto rtsFrame = context->getRtsProcedure()->buildRtsFrame(dataOrMgmtPacket->peekAtFront<Ieee80211DataOrMgmtHeader>());
+            auto rtsPacket = new Packet("RTS");
+            rtsPacket->insertAtBack(rtsFrame);
+            rtsPacket->insertAtBack(makeShared<Ieee80211MacTrailer>());
+            return new RtsTransmitStep(dataOrMgmtPacket, rtsPacket, context->getIfs());
         }
         case 1:
             return nullptr;
@@ -83,8 +86,8 @@ IFrameSequenceStep* CtsFs::prepareStep(FrameSequenceContext* context)
     switch (step) {
         case 0: {
             auto txStep = check_and_cast<RtsTransmitStep *>(context->getLastStep());
-            auto rtsFrame = check_and_cast<Ieee80211RTSFrame*>(txStep->getFrameToTransmit());
-            return new ReceiveStep(context->getCtsTimeout(rtsFrame));
+            auto rtsPacket = txStep->getFrameToTransmit();
+            return new ReceiveStep(context->getCtsTimeout(rtsPacket, rtsPacket->peekAtFront<Ieee80211RtsFrame>()));
         }
         case 1:
             return nullptr;
@@ -99,8 +102,9 @@ bool CtsFs::completeStep(FrameSequenceContext* context)
         case 0: {
             auto receiveStep = check_and_cast<IReceiveStep *>(context->getStep(firstStep + step));
             step++;
-            auto receivedFrame = receiveStep->getReceivedFrame();
-            return context->isForUs(receivedFrame) && receivedFrame->getType() == ST_CTS;
+            auto receivedPacket = receiveStep->getReceivedFrame();
+            const auto& receivedHeader = receivedPacket->peekAtFront<Ieee80211MacHeader>();
+            return context->isForUs(receivedHeader) && receivedHeader->getType() == ST_CTS;
         }
         default:
             throw cRuntimeError("Unknown step");
@@ -117,8 +121,8 @@ IFrameSequenceStep *DataFs::prepareStep(FrameSequenceContext *context)
 {
     switch (step) {
         case 0: {
-            auto frame = check_and_cast<Ieee80211DataFrame *>(context->getInProgressFrames()->getFrameToTransmit());
-            return new TransmitStep(frame, context->getIfs());
+            auto packet = context->getInProgressFrames()->getFrameToTransmit();
+            return new TransmitStep(packet, context->getIfs());
         }
         case 1:
             return nullptr;
@@ -148,13 +152,14 @@ IFrameSequenceStep *ManagementAckFs::prepareStep(FrameSequenceContext *context)
 {
     switch (step) {
         case 0: {
-            auto mgmtFrame = check_and_cast<Ieee80211ManagementFrame *>(context->getInProgressFrames()->getFrameToTransmit());
-            return new TransmitStep(mgmtFrame, context->getIfs());
+            auto packet = context->getInProgressFrames()->getFrameToTransmit();
+            return new TransmitStep(packet, context->getIfs());
         }
         case 1: {
             auto txStep = check_and_cast<TransmitStep*>(context->getLastStep());
-            auto mgmtFrame = check_and_cast<Ieee80211ManagementFrame*>(txStep->getFrameToTransmit());
-            return new ReceiveStep(context->getAckTimeout(mgmtFrame));
+            auto packet = txStep->getFrameToTransmit();
+            auto mgmtHeader = packet->peekAtFront<Ieee80211MgmtHeader>();
+            return new ReceiveStep(context->getAckTimeout(packet, mgmtHeader));
         }
         case 2:
             return nullptr;
@@ -173,8 +178,9 @@ bool ManagementAckFs::completeStep(FrameSequenceContext *context)
         case 1: {
             auto receiveStep = check_and_cast<IReceiveStep*>(context->getStep(firstStep + step));
             step++;
-            auto receivedFrame = receiveStep->getReceivedFrame();
-            return context->isForUs(receivedFrame) && receivedFrame->getType() == ST_ACK;
+            auto receivedPacket = receiveStep->getReceivedFrame();
+            const auto& receivedHeader = receivedPacket->peekAtFront<Ieee80211MacHeader>();
+            return context->isForUs(receivedHeader) && receivedHeader->getType() == ST_ACK;
         }
         default:
             throw cRuntimeError("Unknown step");
@@ -191,8 +197,8 @@ IFrameSequenceStep *ManagementFs::prepareStep(FrameSequenceContext *context)
 {
     switch (step) {
         case 0: {
-            auto mgmtFrame = check_and_cast<Ieee80211ManagementFrame *>(context->getInProgressFrames()->getFrameToTransmit());
-            return new TransmitStep(mgmtFrame, context->getIfs());
+            auto packet = context->getInProgressFrames()->getFrameToTransmit();
+            return new TransmitStep(packet, context->getIfs());
         }
         case 1:
             return nullptr;
@@ -223,8 +229,9 @@ IFrameSequenceStep *AckFs::prepareStep(FrameSequenceContext *context)
     switch (step) {
         case 0: {
             auto txStep = check_and_cast<TransmitStep*>(context->getLastStep());
-            auto dataOrMgmtFrame = check_and_cast<Ieee80211DataOrMgmtFrame*>(txStep->getFrameToTransmit());
-            return new ReceiveStep(context->getAckTimeout(dataOrMgmtFrame));
+            auto packet = txStep->getFrameToTransmit();
+            auto dataOrMgmtHeader = packet->peekAtFront<Ieee80211DataOrMgmtHeader>();
+            return new ReceiveStep(context->getAckTimeout(packet, dataOrMgmtHeader));
         }
         case 1:
             return nullptr;
@@ -239,8 +246,9 @@ bool AckFs::completeStep(FrameSequenceContext *context)
         case 0: {
             auto receiveStep = check_and_cast<IReceiveStep*>(context->getStep(firstStep + step));
             step++;
-            auto receivedFrame = receiveStep->getReceivedFrame();
-            return context->isForUs(receivedFrame) && receivedFrame->getType() == ST_ACK;
+            auto receivedPacket = receiveStep->getReceivedFrame();
+            const auto& receivedHeader = receivedPacket->peekAtFront<Ieee80211MacHeader>();
+            return context->isForUs(receivedHeader) && receivedHeader->getType() == ST_ACK;
         }
         default:
             throw cRuntimeError("Unknown step");
@@ -257,14 +265,19 @@ IFrameSequenceStep *RtsCtsFs::prepareStep(FrameSequenceContext *context)
 {
     switch (step) {
         case 0: {
-            auto dataOrMgmtFrame = check_and_cast<Ieee80211DataOrMgmtFrame *>(context->getInProgressFrames()->getFrameToTransmit());
-            auto rtsFrame = context->getRtsProcedure()->buildRtsFrame(dataOrMgmtFrame);
-            return new RtsTransmitStep(dataOrMgmtFrame, rtsFrame, context->getIfs());
+            auto packet = context->getInProgressFrames()->getFrameToTransmit();
+            auto dataOrMgmtHeader = packet->peekAtFront<Ieee80211DataOrMgmtHeader>();
+            auto rtsFrame = context->getRtsProcedure()->buildRtsFrame(dataOrMgmtHeader);
+            auto rtsPacket = new Packet("RTS");
+            rtsPacket->insertAtBack(rtsFrame);
+            rtsPacket->insertAtBack(makeShared<Ieee80211MacTrailer>());
+            return new RtsTransmitStep(packet, rtsPacket, context->getIfs());
         }
         case 1: {
             auto txStep = check_and_cast<RtsTransmitStep *>(context->getLastStep());
-            auto rtsFrame = check_and_cast<Ieee80211RTSFrame*>(txStep->getFrameToTransmit());
-            return new ReceiveStep(context->getCtsTimeout(rtsFrame));
+            auto packet = txStep->getFrameToTransmit();
+            auto rtsFrame = packet->peekAtFront<Ieee80211RtsFrame>();
+            return new ReceiveStep(context->getCtsTimeout(packet, rtsFrame));
         }
         case 2:
             return nullptr;
@@ -282,8 +295,9 @@ bool RtsCtsFs::completeStep(FrameSequenceContext *context)
         case 1: {
             auto receiveStep = check_and_cast<IReceiveStep *>(context->getStep(firstStep + step));
             step++;
-            auto receivedFrame = receiveStep->getReceivedFrame();
-            return context->isForUs(receivedFrame) && receivedFrame->getType() == ST_CTS;
+            auto receivedPacket = receiveStep->getReceivedFrame();
+            const auto& receivedHeader = receivedPacket->peekAtFront<Ieee80211MacHeader>();
+            return context->isForUs(receivedHeader) && receivedHeader->getType() == ST_CTS;
         }
         default:
             throw cRuntimeError("Unknown step");
@@ -305,8 +319,9 @@ IFrameSequenceStep *FragFrameAckFs::prepareStep(FrameSequenceContext *context)
         }
         case 1: {
             auto txStep = check_and_cast<TransmitStep *>(context->getLastStep());
-            auto dataOrMgmtFrame = check_and_cast<Ieee80211DataOrMgmtFrame*>(txStep->getFrameToTransmit());
-            return new ReceiveStep(context->getAckTimeout(dataOrMgmtFrame));
+            auto packet = txStep->getFrameToTransmit();
+            auto dataOrMgmtHeader = packet->peekAtFront<Ieee80211DataOrMgmtHeader>();
+            return new ReceiveStep(context->getAckTimeout(packet, dataOrMgmtHeader));
         }
         case 2:
             return nullptr;
@@ -324,8 +339,9 @@ bool FragFrameAckFs::completeStep(FrameSequenceContext *context)
         case 1: {
             auto receiveStep = check_and_cast<IReceiveStep *>(context->getStep(firstStep + step));
             step++;
-            auto receivedFrame = receiveStep->getReceivedFrame();
-            return context->isForUs(receivedFrame) && receivedFrame->getType() == ST_ACK;
+            auto receivedPacket = receiveStep->getReceivedFrame();
+            const auto& receivedHeader = receivedPacket->peekAtFront<Ieee80211MacHeader>();
+            return context->isForUs(receivedHeader) && receivedHeader->getType() == ST_ACK;
         }
         default:
             throw cRuntimeError("Unknown step");
@@ -347,8 +363,9 @@ IFrameSequenceStep *LastFrameAckFs::prepareStep(FrameSequenceContext *context)
         }
         case 1: {
             auto txStep = check_and_cast<TransmitStep *>(context->getLastStep());
-            auto dataOrMgmtFrame = check_and_cast<Ieee80211DataOrMgmtFrame*>(txStep->getFrameToTransmit());
-            return new ReceiveStep(context->getAckTimeout(dataOrMgmtFrame));
+            auto packet = txStep->getFrameToTransmit();
+            auto dataOrMgmtHeader = packet->peekAtFront<Ieee80211DataOrMgmtHeader>();
+            return new ReceiveStep(context->getAckTimeout(packet, dataOrMgmtHeader));
         }
         case 2:
             return nullptr;
@@ -366,8 +383,9 @@ bool LastFrameAckFs::completeStep(FrameSequenceContext *context)
         case 1: {
             auto receiveStep = check_and_cast<IReceiveStep *>(context->getStep(firstStep + step));
             step++;
-            auto receivedFrame = receiveStep->getReceivedFrame();
-            return context->isForUs(receivedFrame) && receivedFrame->getType() == ST_ACK;
+            auto receivedPacket = receiveStep->getReceivedFrame();
+            const auto& receivedHeader = receivedPacket->peekAtFront<Ieee80211MacHeader>();
+            return context->isForUs(receivedHeader) && receivedHeader->getType() == ST_ACK;
         }
         default:
             throw cRuntimeError("Unknown step");
@@ -389,12 +407,15 @@ IFrameSequenceStep *BlockAckReqBlockAckFs::prepareStep(FrameSequenceContext *con
             auto startingSequenceNumber = std::get<1>(blockAckReqParams);
             auto tid = std::get<2>(blockAckReqParams);
             auto blockAckReq = context->getQoSContext()->blockAckProcedure->buildBasicBlockAckReqFrame(receiverAddr, tid, startingSequenceNumber);
-            return new TransmitStep(blockAckReq, context->getIfs());
+            auto blockAckPacket = new Packet("BasicBlockAckReq", blockAckReq);
+            blockAckPacket->insertAtBack(makeShared<Ieee80211MacTrailer>());
+            return new TransmitStep(blockAckPacket, context->getIfs());
         }
         case 1: {
             auto txStep = check_and_cast<ITransmitStep *>(context->getLastStep());
-            auto blockAckReq = check_and_cast<Ieee80211BlockAckReq*>(txStep->getFrameToTransmit());
-            return new ReceiveStep(context->getQoSContext()->ackPolicy->getBlockAckTimeout(blockAckReq));
+            auto packet = txStep->getFrameToTransmit();
+            auto blockAckReq = packet->peekAtFront<Ieee80211BlockAckReq>();
+            return new ReceiveStep(context->getQoSContext()->ackPolicy->getBlockAckTimeout(packet, blockAckReq));
         }
         case 2:
             return nullptr;
@@ -412,8 +433,9 @@ bool BlockAckReqBlockAckFs::completeStep(FrameSequenceContext *context)
         case 1: {
             auto receiveStep = check_and_cast<IReceiveStep*>(context->getStep(firstStep + step));
             step++;
-            auto receivedFrame = receiveStep->getReceivedFrame();
-            return context->isForUs(receivedFrame) && receivedFrame->getType() == ST_BLOCKACK;
+            auto receivedPacket = receiveStep->getReceivedFrame();
+            const auto& receivedHeader = receivedPacket->peekAtFront<Ieee80211MacHeader>();
+            return context->isForUs(receivedHeader) && receivedHeader->getType() == ST_BLOCKACK;
         }
         default:
             throw cRuntimeError("Unknown step");

@@ -17,8 +17,7 @@
 
 #include <algorithm>
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/NotifierConsts.h"
-#include "inet/linklayer/contract/IMACFrame.h"
+#include "inet/common/Simsignals.h"
 #ifdef WITH_IEEE80211
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #endif // WITH_IEEE80211
@@ -50,7 +49,7 @@ void LinkBreakVisualizerBase::initialize(int stage)
         displayLinkBreaks = par("displayLinkBreaks");
         nodeFilter.setPattern(par("nodeFilter"));
         interfaceFilter.setPattern(par("interfaceFilter"));
-        packetFilter.setPattern(par("packetFilter"));
+        packetFilter.setPattern(par("packetFilter"), par("packetDataFilter"));
         icon = par("icon");
         iconTintAmount = par("iconTintAmount");
         if (iconTintAmount != 0)
@@ -65,13 +64,14 @@ void LinkBreakVisualizerBase::initialize(int stage)
 
 void LinkBreakVisualizerBase::handleParameterChange(const char *name)
 {
+    if (!hasGUI()) return;
     if (name != nullptr) {
         if (!strcmp(name, "nodeFilter"))
             nodeFilter.setPattern(par("nodeFilter"));
         else if (!strcmp(name, "interfaceFilter"))
             interfaceFilter.setPattern(par("interfaceFilter"));
         else if (!strcmp(name, "packetFilter"))
-            packetFilter.setPattern(par("packetFilter"));
+            packetFilter.setPattern(par("packetFilter"), par("packetDataFilter"));
         removeAllLinkBreakVisualizations();
     }
 }
@@ -105,7 +105,7 @@ void LinkBreakVisualizerBase::refreshDisplay() const
 void LinkBreakVisualizerBase::subscribe()
 {
     auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
-    subscriptionModule->subscribe(NF_LINK_BREAK, this);
+    subscriptionModule->subscribe(linkBrokenSignal, this);
 }
 
 void LinkBreakVisualizerBase::unsubscribe()
@@ -113,21 +113,22 @@ void LinkBreakVisualizerBase::unsubscribe()
     // NOTE: lookup the module again because it may have been deleted first
     auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this, false);
     if (subscriptionModule != nullptr)
-        subscriptionModule->unsubscribe(NF_LINK_BREAK, this);
+        subscriptionModule->unsubscribe(linkBrokenSignal, this);
 }
 
 void LinkBreakVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     Enter_Method_Silent();
-    if (signal == NF_LINK_BREAK) {
-        MACAddress transmitterAddress;
-        MACAddress receiverAddress;
-        if (auto frame = dynamic_cast<IMACFrame *>(object)) {
-            transmitterAddress = frame->getTransmitterAddress();
-            receiverAddress = frame->getReceiverAddress();
-        }
+    if (signal == linkBrokenSignal) {
+        MacAddress transmitterAddress;
+        MacAddress receiverAddress;
+        // TODO: revive
+//        if (auto frame = dynamic_cast<IMACFrame *>(object)) {
+//            transmitterAddress = frame->getTransmitterAddress();
+//            receiverAddress = frame->getReceiverAddress();
+//        }
 #ifdef WITH_IEEE80211
-        if (auto frame = dynamic_cast<ieee80211::Ieee80211TwoAddressFrame *>(object)) {
+        if (auto frame = dynamic_cast<ieee80211::Ieee80211TwoAddressHeader *>(object)) {
             transmitterAddress = frame->getTransmitterAddress();
             receiverAddress = frame->getReceiverAddress();
         }
@@ -163,7 +164,7 @@ void LinkBreakVisualizerBase::removeLinkBreakVisualization(const LinkBreakVisual
 }
 
 // TODO: inefficient, create L2AddressResolver?
-cModule *LinkBreakVisualizerBase::findNode(MACAddress address)
+cModule *LinkBreakVisualizerBase::findNode(MacAddress address)
 {
     L3AddressResolver addressResolver;
     for (cModule::SubmoduleIterator it(getSystemModule()); !it.end(); it++) {

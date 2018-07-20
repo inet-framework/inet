@@ -38,10 +38,10 @@ class INET_API EdcaTransmitLifetimeHandler : public ITransmitLifetimeHandler
     public:
         EdcaTransmitLifetimeHandler(simtime_t bkLifetime, simtime_t beLifetime, simtime_t viLifetime, simtime_t voLifetime);
 
-        virtual void frameGotInProgess(Ieee80211DataFrame *frame);
-        virtual void frameTransmitted(Ieee80211DataFrame *frame);
+        virtual void frameGotInProgess(const Ptr<const Ieee80211DataHeader>& header);
+        virtual void frameTransmitted(const Ptr<const Ieee80211DataHeader>& header);
 
-        virtual bool isLifetimeExpired(Ieee80211DataFrame *frame);
+        virtual bool isLifetimeExpired(const Ptr<const Ieee80211DataHeader>& header);
 };
 
 } /* namespace ieee80211 */

@@ -13,27 +13,27 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
+import inet.common.INETDefs;
+import inet.linklayer.common.MacAddress;
+import inet.networklayer.contract.ipv4.Ipv4Address;
+
 cplusplus {{
-#include "inet/linklayer/common/MACAddress.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
 }}
 
 namespace inet;
 
-class noncobject MACAddress;
-class noncobject IPv4Address;
-
-class InterfaceEntry extends cNamedObject
+class InterfaceEntry extends cModule
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
     bool up @getter("isUp");
     bool broadcast @getter("isBroadcast");
     bool multicast @getter("isMulticast");
     bool pointToPoint @getter("isPointToPoint");
     bool loopback @getter("isLoopback");
-    int mtu @getter("getMTU");
-    MACAddress macAddress;
-    IPv4Address ipv4Address @opaque @getter("getIPv4Address");
+    int mtu;
+    MacAddress macAddress;
+    Ipv4Address ipv4Address @byValue;
 }
+

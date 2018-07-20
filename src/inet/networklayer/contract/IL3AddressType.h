@@ -19,8 +19,9 @@
 #define __INET_IL3ADDRESSTYPE_H
 
 #include "inet/common/INETDefs.h"
+
+#include "inet/common/Protocol.h"
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
@@ -41,7 +42,7 @@ class INET_API IL3AddressType
     virtual L3Address getBroadcastAddress() const = 0;
     virtual L3Address getLinkLocalManetRoutersMulticastAddress() const = 0;
     virtual L3Address getLinkLocalRIPRoutersMulticastAddress() const = 0;
-    virtual INetworkProtocolControlInfo *createNetworkProtocolControlInfo() const = 0;    // TODO: move, where?
+    virtual const Protocol *getNetworkProtocol() const = 0;    // TODO: move, where?
 
     /**
      * Returns the first valid link-local address of the interface, or UNSPECIFIED_ADDRESS if there's none.

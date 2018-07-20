@@ -20,17 +20,22 @@
 
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/contract/packetlevel/ITransmission.h"
+#include <memory>
 
 namespace inet {
 
 namespace physicallayer {
 
+class IRadioMedium;
+
 class INET_API TransmissionBase : public virtual ITransmission, public virtual ITransmissionAnalogModel, public cObject
 {
   protected:
     const int id;
-    const IRadio *transmitter;
-    const cPacket *macFrame;
+    const IRadioMedium *radioMedium;
+    const int transmitterId;
+    Ptr<const IAntennaGain> transmitterGain;
+    const Packet *packet;
     const simtime_t startTime;
     const simtime_t endTime;
     const simtime_t preambleDuration;
@@ -42,15 +47,17 @@ class INET_API TransmissionBase : public virtual ITransmission, public virtual I
     const EulerAngles endOrientation;
 
   public:
-    TransmissionBase(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation);
+    TransmissionBase(const IRadio *transmitter, const Packet *packet, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation);
 
     virtual int getId() const override { return id; }
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
-    virtual const IRadio *getTransmitter() const override { return transmitter; }
-    virtual const cPacket *getPhyFrame() const override { return nullptr; }
-    virtual const cPacket *getMacFrame() const override { return macFrame; }
+    virtual const IRadio *getTransmitter() const override;
+    virtual int getTransmitterId() const override { return transmitterId; }
+    virtual const IAntennaGain *getTransmitterAntennaGain() const override { return transmitterGain.get(); }
+    virtual const IRadioMedium *getMedium() const override { return radioMedium; }
+    virtual const Packet *getPacket() const override { return packet; }
 
     virtual const simtime_t getStartTime() const override { return startTime; }
     virtual const simtime_t getEndTime() const override { return endTime; }
@@ -71,11 +78,11 @@ class INET_API TransmissionBase : public virtual ITransmission, public virtual I
     virtual const simtime_t getHeaderDuration() const override { return headerDuration; }
     virtual const simtime_t getDataDuration() const override { return dataDuration; }
 
-    virtual const Coord getStartPosition() const override { return startPosition; }
-    virtual const Coord getEndPosition() const override { return endPosition; }
+    virtual const Coord& getStartPosition() const override { return startPosition; }
+    virtual const Coord& getEndPosition() const override { return endPosition; }
 
-    virtual const EulerAngles getStartOrientation() const override { return startOrientation; }
-    virtual const EulerAngles getEndOrientation() const override { return endOrientation; }
+    virtual const EulerAngles& getStartOrientation() const override { return startOrientation; }
+    virtual const EulerAngles& getEndOrientation() const override { return endOrientation; }
 
     virtual const ITransmissionAnalogModel *getAnalogModel() const override { return check_and_cast<const ITransmissionAnalogModel *>(this); }
 };

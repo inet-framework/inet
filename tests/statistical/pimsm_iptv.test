@@ -10,8 +10,8 @@ Testing the number of received multicast datagrams in examples/pim/iptv/ simulat
 ned-path = .;../../../../src;../../../../examples
 sim-time-limit = 35s
 output-scalar-file = test.sca
-**.udpApp[*].sentPk*.scalar-recording = true
-**.udpApp[*].rcvdPk*.scalar-recording = true
+**.app[*].packetSent*.scalar-recording = true
+**.app[*].packetReceived*.scalar-recording = true
 **.scalar-recording = false
 **.vector-recording = false
 
@@ -22,7 +22,7 @@ include ../../../../examples/pim/iptv/omnetpp.ini
 
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: test.sca
-scalar Network.server.udpApp\[0\]\s+sentPk:count\s+250
+scalar Network.server.app\[0\]\s+packetSent:count\s+250
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: test.sca
-scalar Network.client.udpApp\[0\]\s+rcvdPk:count\s+124
+scalar Network.client.app\[0\]\s+packetReceived:count\s+124

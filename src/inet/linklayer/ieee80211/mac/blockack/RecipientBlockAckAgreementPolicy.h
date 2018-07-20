@@ -37,8 +37,8 @@ class INET_API RecipientBlockAckAgreementPolicy : public cSimpleModule, public I
         virtual void initialize(int stage) override;
 
     public:
-        virtual bool isAddbaReqAccepted(Ieee80211AddbaRequest* addbaReq) override;
-        virtual bool isDelbaAccepted(Ieee80211Delba* delba) override;
+        virtual bool isAddbaReqAccepted(const Ptr<const Ieee80211AddbaRequest>& addbaReq) override;
+        virtual bool isDelbaAccepted(const Ptr<const Ieee80211Delba>& delba) override;
 
         virtual simtime_t getBlockAckTimeoutValue() const override { return blockAckTimeoutValue; }
         virtual bool aMsduSupported() const override { return isAMsduSupported; }

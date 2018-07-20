@@ -18,7 +18,7 @@
 #ifndef __INET_RADIOOSGVISUALIZER_H
 #define __INET_RADIOOSGVISUALIZER_H
 
-#include "inet/common/OSGUtils.h"
+#include "inet/common/OsgUtils.h"
 #include "inet/visualizer/base/RadioVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeOsgVisualizer.h"
 
@@ -47,7 +47,7 @@ class INET_API RadioOsgVisualizer : public RadioVisualizerBase
   protected:
     virtual void initialize(int stage) override;
 
-    virtual RadioVisualization *createRadioVisualization(const IRadio *radio) const override;
+    virtual RadioVisualization *createRadioVisualization(const physicallayer::IRadio *radio) const override;
     virtual void refreshRadioVisualization(const RadioVisualization *radioVisualization) const override;
 
 #else // ifdef WITH_OSG
@@ -55,7 +55,7 @@ class INET_API RadioOsgVisualizer : public RadioVisualizerBase
   protected:
     virtual void initialize(int stage) override {}
 
-    virtual RadioVisualization *createRadioVisualization(const IRadio *radio) const override { return nullptr; }
+    virtual RadioVisualization *createRadioVisualization(const physicallayer::IRadio *radio) const override { return nullptr; }
     virtual void refreshRadioVisualization(const RadioVisualization *radioVisualization) const override { }
 
 #endif // ifdef WITH_OSG

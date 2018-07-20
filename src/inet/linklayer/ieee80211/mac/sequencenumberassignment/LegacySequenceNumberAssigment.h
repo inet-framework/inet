@@ -30,7 +30,7 @@ class INET_API LegacySequenceNumberAssigment : public ISequenceNumberAssignment
         SequenceNumber lastSeqNum = 0;
 
     public:
-        virtual void assignSequenceNumber(Ieee80211DataOrMgmtFrame *frame) override;
+        virtual void assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header) override;
 
 };
 

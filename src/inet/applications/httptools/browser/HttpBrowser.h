@@ -18,10 +18,14 @@
 #ifndef __INET_HTTPBROWSER_H
 #define __INET_HTTPBROWSER_H
 
-#include "inet/transportlayer/contract/tcp/TCPSocket.h"
-#include "inet/transportlayer/contract/tcp/TCPSocketMap.h"
-#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/common/INETDefs.h"
+
 #include "inet/applications/httptools/browser/HttpBrowserBase.h"
+#include "inet/common/packet/ChunkQueue.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/socket/SocketMap.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
 namespace inet {
 
@@ -34,7 +38,7 @@ namespace httptools {
  * tcpApp. See the INET documentation and examples for details.
  *
  * This component uses the TCP/IP modeling of the INET framework for transport.
- * Specifically, the TCPSocket class is used to interface with the TCP component from the INET framework.
+ * Specifically, the TcpSocket class is used to interface with the TCP component from the INET framework.
  * A light-weight module which uses direct message passing is also available (HttpBrowserDirect).
  *
  * @author Kristjan V. Jonsson (kristjanvj@gmail.com)
@@ -42,24 +46,25 @@ namespace httptools {
  * @see HttpBrowserBase
  * @see HttpBrowserDirect
  */
-class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackInterface
+class INET_API HttpBrowser : public HttpBrowserBase, public TcpSocket::ICallback
 {
   protected:
     /*
      * Data structure used to keep state for each opened socket.
      *
      * An instance of this struct is created for each opened socket and assigned to
-     * it as a myPtr. See the TCPSocket::CallbackInterface methods of HttpBrowser for more
+     * it as a myPtr. See the TcpSocket::ICallback methods of HttpBrowser for more
      * details.
      */
     struct SockData
     {
         HttpRequestQueue messageQueue;    // Queue of pending messages.
-        TCPSocket *socket = nullptr;    // A reference to the socket object.
+        TcpSocket *socket = nullptr;    // A reference to the socket object.
         int pending = 0;    // A counter for the number of outstanding replies.
+        ChunkQueue queue;       // incoming queue for slices
     };
 
-    TCPSocketMap sockCollection;    // List of active sockets
+    SocketMap sockCollection;    // List of active sockets
     unsigned long numBroken = 0;    // Counter for the number of broken connections
     unsigned long socketsOpened = 0;    // Counter for opened sockets
 
@@ -77,7 +82,7 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackI
     /*
      * Send a request to server. Uses the recipient stamped in the request.
      */
-    virtual void sendRequestToServer(HttpRequestMessage *request) override;
+    virtual void sendRequestToServer(Packet *request) override;
 
     /*
      * Sends a generic request to a randomly chosen server
@@ -89,50 +94,15 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackI
      */
     virtual void sendRequestsToServer(std::string www, HttpRequestQueue queue) override;
 
-    // TCPSocket::CallbackInterface callback methods
-    /*
-     * Handler for socket established event.
-     * Called by the socket->processMessage(msg) handler call in handleMessage.
-     * The pending messages for the socket are transmitted in the order queued. The socket remains
-     * open after the handler has completed. A counter for pending messages is incremented for each
-     * request sent.
-     */
-    virtual void socketEstablished(int connId, void *yourPtr) override;
-
-    /*
-     * Handler for socket data arrival.
-     * Called by the socket->processMessage(msg) handler call in handleMessage.
-     * virtual method of the parent class. The counter for pending replies is decremented for each one handled.
-     * Close is called on the socket once the counter reaches zero.
-     */
-    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) override;
-
-    /*
-     * Handler for the socket closed by peer event.
-     * Called by the socket->processMessage(msg) handler call in handleMessage.
-     */
-    virtual void socketPeerClosed(int connId, void *yourPtr) override;
-
-    /*
-     * Socket closed handler.
-     * Called by the socket->processMessage(msg) handler call in handleMessage.
-     */
-    virtual void socketClosed(int connId, void *yourPtr) override;
-
-    /*
-     * Socket failure handler.
-     * This method does nothing but reporting and statistics collection at this time.
-     * @todo Implement reconnect if necessary. See the INET demos.
-     */
-    virtual void socketFailure(int connId, void *yourPtr, int code) override;
-
-    /*
-     * Socket status arrived handler.
-     * Called by the socket->processMessage(msg) handler call in handleMessage.
-     */
-    virtual void socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status) override;
-
-    virtual void socketDeleted(int connId, void *yourPtr) override;
+    // TcpSocket::ICallback callback methods
+    virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override;
+    virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override { socket->accept(availableInfo->getNewSocketId()); }
+    virtual void socketEstablished(TcpSocket *socket) override;
+    virtual void socketPeerClosed(TcpSocket *socket) override;
+    virtual void socketClosed(TcpSocket *socket) override;
+    virtual void socketFailure(TcpSocket *socket, int code) override;
+    virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override;
+    virtual void socketDeleted(TcpSocket *socket) override;
 
     // Socket establishment and data submission
     /*
@@ -141,7 +111,7 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackI
      * stored as a myPtr with the socket. The message is transmitted once the socket is established, signaled
      * by a call to socketEstablished.
      */
-    void submitToSocket(const char *moduleName, int connectPort, HttpRequestMessage *msg);
+    void submitToSocket(const char *moduleName, int connectPort, Packet *msg);
 
     /**
      * Establishes a socket and assigns a queue of messages to be transmitted.

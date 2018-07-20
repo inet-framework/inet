@@ -21,7 +21,7 @@
 #include <fstream>
 #include "inet/physicallayer/contract/packetlevel/ITransmission.h"
 #include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioFrame.h"
+#include "inet/physicallayer/contract/packetlevel/ISignal.h"
 
 namespace inet {
 
@@ -35,8 +35,8 @@ class INET_API CommunicationLog
   public:
     virtual void open();
     virtual void close();
-    virtual void writeTransmission(const IRadio *transmitter, const IRadioFrame *radioFrame);
-    virtual void writeReception(const IRadio *receiver, const IRadioFrame *radioFrame);
+    virtual void writeTransmission(const IRadio *transmitter, const ISignal *signal);
+    virtual void writeReception(const IRadio *receiver, const ISignal *signal);
 };
 
 } // namespace physicallayer

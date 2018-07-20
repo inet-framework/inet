@@ -52,10 +52,10 @@ output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 network=IGMPTestNetwork
-**.igmpType = "TestIGMP"
+**.igmp.typename = "TestIGMP"
 
 **.scenarioManager.script = xmldoc("scenario.xml")
-**.nqrouter.networkLayer.igmp.outputFile = "nqrouter-output.txt"
+**.nqrouter.ipv4.igmp.outputFile = "nqrouter-output.txt"
 
 **.igmp.queryResponseInterval = 6s
 **.igmp.startupQueryInterval = 1000s
@@ -65,12 +65,12 @@ network=IGMPTestNetwork
 %file: scenario.xml
 <scenario>
 
-<join t="100" module="host.networkLayer.igmp" ifname="eth0" group="225.0.0.1"/>
-<send t="120" module="router.networkLayer.igmp" ifname="eth0" what="query" group="225.0.0.1"/>
-<leave t="130" module="host.networkLayer.igmp" ifname="eth0" group="225.0.0.1"/>
+<join t="100" module="host.ipv4.igmp" ifname="eth0" group="225.0.0.1"/>
+<send t="120" module="router.ipv4.igmp" ifname="eth0" what="query" group="225.0.0.1"/>
+<leave t="130" module="host.ipv4.igmp" ifname="eth0" group="225.0.0.1"/>
 
-<disable t="199" module="router.networkLayer.igmp"/>
-<join t="200" module="host.networkLayer.igmp" ifname="eth0" group="225.0.0.2"/>
+<disable t="199" module="router.ipv4.igmp"/>
+<join t="200" module="host.ipv4.igmp" ifname="eth0" group="225.0.0.2"/>
 
 </scenario>
 

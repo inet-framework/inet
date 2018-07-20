@@ -1,3 +1,62 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-05-03  Levente Mészáros
+
+	Fixed AttachedMobility velocity computation when there's no rotation at all.
+
+2018-04-25  Levente Mészáros
+
+	Moved code from updateVisualRepresentation into the standard refreshDisplay module function.
+
+2018-04-18  Levente Mészáros
+
+	Fixed GaussMarkov reflection with respect to velocity and orientation.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-03-22  Levente Mészáros
+
+	Replaced type of angle member variables with rad and added degree around parameters.
+	Replace @unit(rad) with @unit(deg) in NED files because its more human readable.
+
+2018-03-20  Levente Mészáros
+
+	Moved static LinearNodeDistributionMobility into static folder.
+	Renamed speed to velocity where appropriate. Speed is a scalar, velocity is a vector quantity.
+
+2018-03-19  Levente Mészáros
+
+	Added current speed to AttachedMobility.
+	Added orientation offset parameters to AttachedMobility.
+	Added angular speed and acceleration to CircleMobility.
+
+2018-03-18  TÖRÖK Attila
+
+	Switched to Quaternion to convert from EulerAngles to a matrix in Rotation.
+
+2018-03-15  Levente Mészáros
+
+	Added AttachedMobility which provides trajectory attached with an offset to another mobility model.
+	Added FacingMobility which provides orientation towards another mobility model.
+
+2018-03-14  Levente Mészáros
+
+	Added SuperpositioningMobility which allows combining other mobility models.
+
+2018-02-13  TÖRÖK Attila
+
+	Factored out MovingMobilityBase::orient() to allow overriding.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-15  Zoltan Bojthe
+
+	Removed unnecessary cPar::doubleValue(), cPar::boolValue() calls.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

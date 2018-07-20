@@ -19,7 +19,7 @@
 package inet.examples.inet.tcpclientserver;
 
 import inet.common.misc.NetAnimTrace;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
 
@@ -28,7 +28,6 @@ network ClientServer
 {
     parameters:
         double per = default(0);
-        @display("bgb=232,193");
     types:
         channel C extends DatarateChannel
         {
@@ -39,18 +38,18 @@ network ClientServer
     submodules:
         client1: StandardHost {
             parameters:
-                @display("p=53,67;i=device/pc3");
+                @display("p=250,150;i=device/pc3");
         }
         server: StandardHost {
             parameters:
-                @display("p=181,67;i=device/pc2");
+                @display("p=400,150;i=device/pc2");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=53,134");
+                @display("p=100,100;is=s");
         }
         netAnimTrace: NetAnimTrace {
-            @display("p=184,142");
+            @display("p=100,200;is=s");
         }
     connections:
         client1.pppg++ <--> C <--> server.pppg++;

@@ -21,7 +21,7 @@
 
 package inet.examples.ipv6.ipv6nclients;
 
-import inet.networklayer.configurator.ipv6.FlatNetworkConfigurator6;
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
 import inet.node.ipv6.Router6;
 import inet.node.ipv6.StandardHost6;
 import ned.DatarateChannel;
@@ -31,7 +31,6 @@ network NClientsPPP
 {
     parameters:
         int n;
-        @display("bgb=628,413");
     types:
         channel fiberline extends DatarateChannel
         {
@@ -39,23 +38,23 @@ network NClientsPPP
             datarate = 512Mbps;
         }
     submodules:
-        configurator: FlatNetworkConfigurator6 {
-            @display("p=63,72");
+        configurator: Ipv6FlatNetworkConfigurator {
+            @display("p=100,100;is=s");
         }
         r1: Router6 {
-            @display("p=219,245");
+            @display("p=400,100");
         }
         r2: Router6 {
-            @display("p=336,178");
+            @display("p=550,100");
         }
         r3: Router6 {
-            @display("p=458,107");
+            @display("p=700,100");
         }
         cli[n]: StandardHost6 {
-            @display("p=63,334");
+            @display("p=250,100,col,100");
         }
         srv: StandardHost6 {
-            @display("p=576,46");
+            @display("p=850,100");
         }
     connections:
         for i=0..n-1 {

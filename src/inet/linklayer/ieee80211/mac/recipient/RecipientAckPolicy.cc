@@ -31,9 +31,9 @@ void RecipientAckPolicy::initialize(int stage)
     }
 }
 
-simtime_t RecipientAckPolicy::computeAckDuration(Ieee80211DataOrMgmtFrame* dataOrMgmtFrame) const
+simtime_t RecipientAckPolicy::computeAckDuration(Packet *dataOrMgmtPacket, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) const
 {
-    return rateSelection->computeResponseAckFrameMode(dataOrMgmtFrame)->getDuration(LENGTH_ACK);
+    return rateSelection->computeResponseAckFrameMode(dataOrMgmtPacket, dataOrMgmtHeader)->getDuration(LENGTH_ACK);
 }
 
 //
@@ -41,10 +41,10 @@ simtime_t RecipientAckPolicy::computeAckDuration(Ieee80211DataOrMgmtFrame* dataO
 // Annex G. On receipt of a management frame of subtype Action NoAck, a STA shall not send an ACK frame
 // in response.
 //
-bool RecipientAckPolicy::isAckNeeded(Ieee80211DataOrMgmtFrame* frame) const
+bool RecipientAckPolicy::isAckNeeded(const Ptr<const Ieee80211DataOrMgmtHeader>& header) const
 {
     // TODO: add mgmt NoAck check
-    return !frame->getReceiverAddress().isMulticast();
+    return !header->getReceiverAddress().isMulticast();
 }
 
 //
@@ -59,10 +59,13 @@ bool RecipientAckPolicy::isAckNeeded(Ieee80211DataOrMgmtFrame* frame) const
 //
 // NOTE: ** BlockAckReq, BlockAck to a NonQoS STA???
 //
-simtime_t RecipientAckPolicy::computeAckDurationField(Ieee80211DataOrMgmtFrame* frame) const
+simtime_t RecipientAckPolicy::computeAckDurationField(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) const
 {
-    if (frame->getMoreFragments()) {
-        simtime_t duration = ceil(frame->getDuration() - modeSet->getSifsTime() - computeAckDuration(frame));
+    if (header->getMoreFragments()) {
+        auto duration = header->getDuration() - modeSet->getSifsTime() - computeAckDuration(packet, header);
+        duration = ceil(duration, SimTime(1, SIMTIME_US));
+        if (duration < 0)
+            EV_WARN << "ACK duration field would be negative, returning 0 instead.\n";
         return duration < 0 ? 0 : duration;
     }
     return 0;

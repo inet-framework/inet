@@ -23,26 +23,26 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 *.n = 1
 
 # udp apps
-**.cli[*].numUdpApps = 1
-**.cli[*].udpApp[*].typename = "UDPBasicApp"
-**.cli[*].udpApp[0].destAddresses = "srv"
-**.cli[*].udpApp[0].destPort = 1000
-**.cli[*].udpApp[0].messageLength = 64B
-**.cli[*].udpApp[0].typeOfService = 53  # some abritrary value
+**.cli[*].numApps = 1
+**.cli[*].app[0].typename = "UdpBasicApp"
+**.cli[*].app[0].destAddresses = "srv"
+**.cli[*].app[0].destPort = 1000
+**.cli[*].app[0].messageLength = 64B
+**.cli[*].app[0].typeOfService = 53  # some abritrary value
 
-**.cli[*].udpApp[0].startTime = 10s
-**.cli[*].udpApp[0].stopTime = 11s
-**.cli[*].udpApp[0].sendInterval = 10s
+**.cli[*].app[0].startTime = 10s
+**.cli[*].app[0].stopTime = 11s
+**.cli[*].app[0].sendInterval = 10s
 
-**.srv.numUdpApps = 1
-**.srv.udpApp[*].typename = "UDPSink"
-**.srv.udpApp[0].localPort = 1000
+**.srv.numApps = 1
+**.srv.app[0].typename = "UdpSink"
+**.srv.app[0].localPort = 1000
 
 %#--------------------------------------------------------------------------------------------------------------
 %subst: /omnetpp:://
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-Received packet: \(inet::ApplicationPacket\)UDPBasicAppData-0 .* ToS=53
+Received packet: \(inet::Packet\)UdpBasicAppData-0 .* DSCP=53
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:

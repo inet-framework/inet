@@ -40,6 +40,7 @@ std::ostream& AdditiveScramblerModule::printToStream(std::ostream& stream, int l
 
 AdditiveScramblerModule::~AdditiveScramblerModule()
 {
+    delete scrambler->getScrambling();
     delete scrambler;
 }
 } /* namespace physicallayer */

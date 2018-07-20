@@ -19,7 +19,7 @@
 #define __INET_RADIO_H
 
 #include "inet/physicallayer/base/packetlevel/PhysicalLayerBase.h"
-#include "inet/physicallayer/common/packetlevel/RadioFrame.h"
+#include "inet/physicallayer/common/packetlevel/Signal.h"
 #include "inet/physicallayer/contract/packetlevel/IAntenna.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
@@ -32,40 +32,31 @@ namespace physicallayer {
  * This class is the default implementation of the IRadio interface.
  *
  * The transmission process starts when the radio module receives a packet
- * from the higher layer. The received packet can have a TransmissionRequest
- * attached as a control info object. The radio must be in transmitter or
- * transceiver mode before receiving a packet, otherwise it throws an exception.
- * The radio changes its transmitter state to transmitting, and emits a
- * transmitter state changed signal. Finally, it schedules a timer to the end of
- * the transmission.
+ * from the higher layer. The radio must be in transmitter or transceiver mode
+ * before receiving a packet, otherwise it throws an exception. The radio changes
+ * its transmitter state to transmitting, and emits a transmitter state changed
+ * signal. Finally, it schedules a timer to the end of the transmission.
  *
  * The transmission process ends when the above timer expires. The radio changes
  * its transmitter state back to idle, and emits a transmitter state changed
  * signal.
  *
- * The reception process starts when the radio module receives a radio frame.
- * The radio must be in receiver or transceiver mode before the message arrives,
- * otherwise it just ignores the message. The radio changes its receiver state
+ * The reception process starts when the radio module receives a packet.
+ * The radio must be in receiver or transceiver mode before the packet arrives,
+ * otherwise it just ignores the packet. The radio changes its receiver state
  * to the appropriate value, and emits a receiver state changed signal. Finally,
  * it schedules a timer to the end of the reception.
  *
  * The reception process ends when one of the above timer expires. If the timer
  * corresponds to an attempted reception, then the radio determines the
  * reception decision. Independently of whether the reception is successful or
- * not, the encapsulated packet is sent up to the higher layer. The radio also
- * attaches a ReceptionIndication as a control info object. Finally, the radio
+ * not, the encapsulated packet is sent up to the higher layer. Finally, the radio
  * changes its receiver state to the appropriate value, and emits a receiver
  * state changed signal.
  */
 // TODO: support capturing a stronger transmission
 class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
 {
-  public:
-    static simsignal_t minSNIRSignal;
-    static simsignal_t packetErrorRateSignal;
-    static simsignal_t bitErrorRateSignal;
-    static simsignal_t symbolErrorRateSignal;
-
   protected:
     /**
      * An identifier which is globally unique for the whole lifetime of the
@@ -99,6 +90,10 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
      * Simulation time required to switch from one radio mode to another.
      */
     simtime_t switchingTimes[RADIO_MODE_SWITCHING][RADIO_MODE_SWITCHING];
+    /**
+     * When true packets are serialized into a sequence of bytes before sending out.
+     */
+    bool sendRawBytes = false;
     /**
      * Determines whether the transmission of the preamble, header and data part
      * are simulated separately or not.
@@ -178,27 +173,27 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
 
   protected:
     virtual void initialize(int stage) override;
+    virtual void initializeRadioMode();
 
     virtual void handleMessageWhenDown(cMessage *message) override;
-    virtual void handleMessageWhenUp(cMessage *message) override;
-    virtual void handleSelfMessage(cMessage *message);
+    virtual void handleSelfMessage(cMessage *message) override;
     virtual void handleSwitchTimer(cMessage *message);
     virtual void handleTransmissionTimer(cMessage *message);
     virtual void handleReceptionTimer(cMessage *message);
-    virtual void handleUpperCommand(cMessage *command);
-    virtual void handleLowerCommand(cMessage *command);
-    virtual void handleUpperPacket(cPacket *packet);
-    virtual void handleLowerPacket(RadioFrame *packet);
+    virtual void handleUpperCommand(cMessage *command) override;
+    virtual void handleLowerCommand(cMessage *command) override;
+    virtual void handleUpperPacket(Packet *packet) override;
+    virtual void handleSignal(Signal *signal) override;
     virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
     virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
     virtual void handleNodeCrash() override;
 
-    virtual void startTransmission(cPacket *macFrame, IRadioSignal::SignalPart part);
+    virtual void startTransmission(Packet *macFrame, IRadioSignal::SignalPart part);
     virtual void continueTransmission();
     virtual void endTransmission();
     virtual void abortTransmission();
 
-    virtual RadioFrame *createRadioFrame(cPacket *packet) const;
+    virtual Signal *createSignal(Packet *packet) const;
 
     virtual void startReception(cMessage *timer, IRadioSignal::SignalPart part);
     virtual void continueReception(cMessage *timer);
@@ -206,8 +201,8 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
     virtual void abortReception(cMessage *timer);
     virtual void captureReception(cMessage *timer);
 
-    virtual void sendUp(cPacket *macFrame);
-    virtual cMessage *createReceptionTimer(RadioFrame *radioFrame) const;
+    virtual void sendUp(Packet *macFrame);
+    virtual cMessage *createReceptionTimer(Signal *signal) const;
     virtual bool isReceptionTimer(const cMessage *message) const;
 
     virtual bool isReceiverMode(IRadio::RadioMode radioMode) const;
@@ -243,6 +238,9 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
 
     virtual IRadioSignal::SignalPart getTransmittedSignalPart() const override;
     virtual IRadioSignal::SignalPart getReceivedSignalPart() const override;
+
+    virtual void encapsulate(Packet *packet) const { }
+    virtual void decapsulate(Packet *packet) const { }
 };
 
 } // namespace physicallayer

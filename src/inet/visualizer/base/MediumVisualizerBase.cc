@@ -23,6 +23,8 @@ namespace inet {
 
 namespace visualizer {
 
+using namespace inet::physicallayer;
+
 MediumVisualizerBase::~MediumVisualizerBase()
 {
     // NOTE: lookup the medium module again because it may have been deleted first
@@ -30,12 +32,12 @@ MediumVisualizerBase::~MediumVisualizerBase()
     if (radioMediumModule != nullptr) {
         radioMediumModule->unsubscribe(IRadioMedium::radioAddedSignal, this);
         radioMediumModule->unsubscribe(IRadioMedium::radioRemovedSignal, this);
-        radioMediumModule->unsubscribe(IRadioMedium::transmissionAddedSignal, this);
-        radioMediumModule->unsubscribe(IRadioMedium::transmissionRemovedSignal, this);
-        radioMediumModule->unsubscribe(IRadioMedium::transmissionStartedSignal, this);
-        radioMediumModule->unsubscribe(IRadioMedium::transmissionEndedSignal, this);
-        radioMediumModule->unsubscribe(IRadioMedium::receptionStartedSignal, this);
-        radioMediumModule->unsubscribe(IRadioMedium::receptionEndedSignal, this);
+        radioMediumModule->unsubscribe(IRadioMedium::signalAddedSignal, this);
+        radioMediumModule->unsubscribe(IRadioMedium::signalRemovedSignal, this);
+        radioMediumModule->unsubscribe(IRadioMedium::signalDepartureStartedSignal, this);
+        radioMediumModule->unsubscribe(IRadioMedium::signalDepartureEndedSignal, this);
+        radioMediumModule->unsubscribe(IRadioMedium::signalArrivalStartedSignal, this);
+        radioMediumModule->unsubscribe(IRadioMedium::signalArrivalEndedSignal, this);
     }
 }
 
@@ -46,7 +48,7 @@ void MediumVisualizerBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         networkNodeFilter.setPattern(par("nodeFilter"));
         interfaceFilter.setPattern(par("interfaceFilter"));
-        packetFilter.setPattern(par("packetFilter"));
+        packetFilter.setPattern(par("packetFilter"), par("packetDataFilter"));
         displaySignals = par("displaySignals");
         signalColorSet.parseColors(par("signalColor"));
         signalPropagationAnimationSpeed = par("signalPropagationAnimationSpeed");
@@ -55,12 +57,12 @@ void MediumVisualizerBase::initialize(int stage)
         signalTransmissionAnimationSpeed = par("signalTransmissionAnimationSpeed");
         signalTransmissionAnimationTime = par("signalTransmissionAnimationTime");
         signalAnimationSpeedChangeTime = par("signalAnimationSpeedChangeTime");
-        displayTransmissions = par("displayTransmissions");
-        displayReceptions = par("displayReceptions");
-        transmissionPlacementHint = parsePlacement(par("transmissionPlacementHint"));
-        receptionPlacementHint = parsePlacement(par("receptionPlacementHint"));
-        transmissionPlacementPriority = par("transmissionPlacementPriority");
-        receptionPlacementPriority = par("receptionPlacementPriority");
+        displaySignalDepartures = par("displaySignalDepartures");
+        displaySignalArrivals = par("displaySignalArrivals");
+        signalDeparturePlacementHint = parsePlacement(par("signalDeparturePlacementHint"));
+        signalArrivalPlacementHint = parsePlacement(par("signalArrivalPlacementHint"));
+        signalDeparturePlacementPriority = par("signalDeparturePlacementPriority");
+        signalArrivalPlacementPriority = par("signalArrivalPlacementPriority");
         displayInterferenceRanges = par("displayInterferenceRanges");
         interferenceRangeLineColor = cFigure::Color(par("interferenceRangeLineColor"));
         interferenceRangeLineStyle = cFigure::parseLineStyle(par("interferenceRangeLineStyle"));
@@ -76,12 +78,12 @@ void MediumVisualizerBase::initialize(int stage)
             cModule *radioMediumModule = check_and_cast<cModule *>(radioMedium);
             radioMediumModule->subscribe(IRadioMedium::radioAddedSignal, this);
             radioMediumModule->subscribe(IRadioMedium::radioRemovedSignal, this);
-            radioMediumModule->subscribe(IRadioMedium::transmissionAddedSignal, this);
-            radioMediumModule->subscribe(IRadioMedium::transmissionRemovedSignal, this);
-            radioMediumModule->subscribe(IRadioMedium::transmissionStartedSignal, this);
-            radioMediumModule->subscribe(IRadioMedium::transmissionEndedSignal, this);
-            radioMediumModule->subscribe(IRadioMedium::receptionStartedSignal, this);
-            radioMediumModule->subscribe(IRadioMedium::receptionEndedSignal, this);
+            radioMediumModule->subscribe(IRadioMedium::signalAddedSignal, this);
+            radioMediumModule->subscribe(IRadioMedium::signalRemovedSignal, this);
+            radioMediumModule->subscribe(IRadioMedium::signalDepartureStartedSignal, this);
+            radioMediumModule->subscribe(IRadioMedium::signalDepartureEndedSignal, this);
+            radioMediumModule->subscribe(IRadioMedium::signalArrivalStartedSignal, this);
+            radioMediumModule->subscribe(IRadioMedium::signalArrivalEndedSignal, this);
         }
     }
     else if (stage == INITSTAGE_LAST) {
@@ -94,13 +96,14 @@ void MediumVisualizerBase::initialize(int stage)
 
 void MediumVisualizerBase::handleParameterChange(const char *name)
 {
+    if (!hasGUI()) return;
     if (name != nullptr) {
         if (!strcmp(name, "networkNodeFilter"))
             networkNodeFilter.setPattern(par("nodeFilter"));
         else if (!strcmp(name, "interfaceFilter"))
             interfaceFilter.setPattern(par("interfaceFilter"));
         else if (!strcmp(name, "packetFilter"))
-            packetFilter.setPattern(par("packetFilter"));
+            packetFilter.setPattern(par("packetFilter"), par("packetDataFilter"));
         else if (!strcmp(name, "signalPropagationAnimationSpeed"))
             signalPropagationAnimationSpeed = par("signalPropagationAnimationSpeed");
         else if (!strcmp(name, "signalTransmissionAnimationSpeed"))
@@ -113,21 +116,21 @@ void MediumVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal,
 {
     Enter_Method_Silent();
     if (signal == IRadioMedium::radioAddedSignal)
-        radioAdded(check_and_cast<IRadio *>(object));
+        handleRadioAdded(check_and_cast<IRadio *>(object));
     else if (signal == IRadioMedium::radioRemovedSignal)
-        radioRemoved(check_and_cast<IRadio *>(object));
-    else if (signal == IRadioMedium::transmissionAddedSignal)
-        transmissionAdded(check_and_cast<ITransmission *>(object));
-    else if (signal == IRadioMedium::transmissionRemovedSignal)
-        transmissionRemoved(check_and_cast<ITransmission *>(object));
-    else if (signal == IRadioMedium::transmissionStartedSignal)
-        transmissionStarted(check_and_cast<ITransmission *>(object));
-    else if (signal == IRadioMedium::transmissionEndedSignal)
-        transmissionEnded(check_and_cast<ITransmission *>(object));
-    else if (signal == IRadioMedium::receptionStartedSignal)
-        receptionStarted(check_and_cast<IReception *>(object));
-    else if (signal == IRadioMedium::receptionEndedSignal)
-        receptionEnded(check_and_cast<IReception *>(object));
+        handleRadioRemoved(check_and_cast<IRadio *>(object));
+    else if (signal == IRadioMedium::signalAddedSignal)
+        handleSignalAdded(check_and_cast<ITransmission *>(object));
+    else if (signal == IRadioMedium::signalRemovedSignal)
+        handleSignalRemoved(check_and_cast<ITransmission *>(object));
+    else if (signal == IRadioMedium::signalDepartureStartedSignal)
+        handleSignalDepartureStarted(check_and_cast<ITransmission *>(object));
+    else if (signal == IRadioMedium::signalDepartureEndedSignal)
+        handleSignalDepartureEnded(check_and_cast<ITransmission *>(object));
+    else if (signal == IRadioMedium::signalArrivalStartedSignal)
+        handleSignalArrivalStarted(check_and_cast<IReception *>(object));
+    else if (signal == IRadioMedium::signalArrivalEndedSignal)
+        handleSignalArrivalEnded(check_and_cast<IReception *>(object));
     else
         throw cRuntimeError("Unknown signal");
 }
@@ -153,7 +156,9 @@ bool MediumVisualizerBase::isSignalTransmissionInProgress(const ITransmission *t
 
 bool MediumVisualizerBase::matchesTransmission(const ITransmission *transmission) const
 {
-    auto radio = check_and_cast<const cModule *>(transmission->getTransmitter());
+    auto radio = dynamic_cast<const cModule *>(transmission->getTransmitter());
+    if (!radio)
+        return false;
     auto networkNode = getContainingNode(radio);
     if (!networkNodeFilter.matches(networkNode))
         return false;
@@ -163,8 +168,7 @@ bool MediumVisualizerBase::matchesTransmission(const ITransmission *transmission
         if (!interfaceFilter.matches(interfaceEntry))
             return false;
     }
-    auto packet = transmission->getPhyFrame() != nullptr ? transmission->getPhyFrame() : transmission->getMacFrame();
-    return packetFilter.matches(packet);
+    return packetFilter.matches(transmission->getPacket());
 }
 
 } // namespace visualizer

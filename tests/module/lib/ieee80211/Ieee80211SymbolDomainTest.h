@@ -15,14 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#if 1
 #ifndef __INET_IEEE80211SYMBOLMODELTEST_H
 #define __INET_IEEE80211SYMBOLMODELTEST_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMEncoderModule.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMModulatorModule.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDemodulatorModule.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OFDMDecoderModule.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmEncoderModule.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmModulatorModule.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDemodulatorModule.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDecoderModule.h"
 
 using namespace inet::physicallayer;
 
@@ -31,14 +32,14 @@ namespace inet {
 class INET_API Ieee80211SymbolDomainTest : public cSimpleModule
 {
     protected:
-        Ieee80211OFDMEncoderModule *ieee80211OFDMSignalEncoder;
-        Ieee80211OFDMEncoderModule *ieee80211OFDMDataEncoder;
-        Ieee80211OFDMModulatorModule *ieee80211OFDMSignalModulator;
-        Ieee80211OFDMModulatorModule *ieee80211OFDMDataModulator;
-        Ieee80211OFDMDemodulatorModule *ieee80211OFDMSignalDemodulator;
-        Ieee80211OFDMDemodulatorModule *ieee80211OFDMDataDemodulator;
-        Ieee80211OFDMDecoderModule *ieee80211OFDMSignalDecoder;
-        Ieee80211OFDMDecoderModule *ieee80211OFDMDataDecoder;
+        Ieee80211OfdmEncoderModule *ieee80211OFDMSignalEncoder;
+        Ieee80211OfdmEncoderModule *ieee80211OFDMDataEncoder;
+        Ieee80211OfdmModulatorModule *ieee80211OFDMSignalModulator;
+        Ieee80211OfdmModulatorModule *ieee80211OFDMDataModulator;
+        Ieee80211OfdmDemodulatorModule *ieee80211OFDMSignalDemodulator;
+        Ieee80211OfdmDemodulatorModule *ieee80211OFDMDataDemodulator;
+        Ieee80211OfdmDecoderModule *ieee80211OFDMSignalDecoder;
+        Ieee80211OfdmDecoderModule *ieee80211OFDMDataDecoder;
         BitVector input;
 
     protected:
@@ -54,3 +55,5 @@ class INET_API Ieee80211SymbolDomainTest : public cSimpleModule
 } /* namespace inet */
 
 #endif /* __INET_IEEE80211SYMBOLMODELTEST_H */
+
+#endif

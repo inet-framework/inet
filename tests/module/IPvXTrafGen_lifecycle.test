@@ -1,6 +1,6 @@
 %description:
 
-Test shutdown and startup operations on IPvXTrafGen/IPvXTrafSink modules.
+Test shutdown and startup operations on IpvxTrafGen/IpvxTrafSink modules.
 
 sender[0] and recip start at down
 
@@ -25,70 +25,66 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.scenarioManager.script = xmldoc("scenario.xml")
 
 # app config
-**.sender[*].trafGenType = "IPvXTrafGen"
-**.recip.trafGenType = "IPvXTrafSink"
+**.sender[*].trafGenType = "IpvxTrafGen"
+**.recip.trafGenType = "IpvxTrafSink"
 
 **.sender[*].trafGen.startTime = 1s
 **.sender[*].trafGen.sendInterval = 0.4s
 **.sender[0].trafGen.numPackets = 15
 **.sender[1].trafGen.stopTime = 7s
-**.sender[*].trafGen.protocol = 17
+**.sender[*].trafGen.protocol = 150
 **.sender[*].trafGen.packetLength = 800B
 
 **.sender[*].trafGen.destAddresses = "recip"
 
-**.recip.trafGen.protocol = 17
+**.recip.trafGen.protocol = 150
 
 **.router.ppp[*].frameCapacity = 300
 **.router.ppp[*].bitCapacity = 0
 
 # NIC configuration
-**.ppp[*].queueType = "DropTailQueue" # in routers
+**.ppp[*].queue.typename = "DropTailQueue" # in routers
 **.ppp[*].queue.frameCapacity = 10  # in routers
 
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import inet.applications.generic.IIPvXTrafficGenerator;
-import inet.common.lifecycle.LifecycleController;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
-import inet.networklayer.configurator.ipv4.IPv4NodeConfigurator;
-import inet.node.inet.NodeBase;
+import inet.applications.generic.IIpvxTrafficGenerator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NodeConfigurator;
+import inet.node.base.NetworkLayerNodeBase;
 import inet.common.scenario.ScenarioManager;
 
 
-module TrafGenHost extends NodeBase
+module TrafGenHost extends NetworkLayerNodeBase
 {
     parameters:
         @networkNode();
         @display("i=device/pc3");
         string trafGenType;
     submodules:
-        trafGen: <trafGenType> like IIPvXTrafficGenerator {
+        trafGen: <trafGenType> like IIpvxTrafficGenerator {
             parameters:
-                protocol = 17;    // UDP
+                protocol = 150;
                 @display("p=329,81");
         }
     connections allowunconnected:
         // transport connections
-        networkLayer.transportOut++ --> trafGen.ipIn;
-        networkLayer.transportIn++ <-- trafGen.ipOut;
+        ipv4.transportOut --> trafGen.ipIn;
+        ipv4.transportIn <-- trafGen.ipOut;
 }
 
 network Test
 {
     submodules:
         scenarioManager: ScenarioManager;
-        lifecycleController: LifecycleController {
-            @display("p=76,50");
-        }
         sender[2]: TrafGenHost {
             @display("p=88,181,c,50");
         }
         recip: TrafGenHost {
             @display("p=359,181");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             @display("p=229,36");
         }
     connections:
@@ -99,129 +95,129 @@ network Test
 %file: scenario.xml
 
 <scenario>
-    <tell t="1.5" module="lifecycleController" target="recip" operation="NodeStartOperation"/>
-    <tell t="2.0" module="lifecycleController" target="sender[0]" operation="NodeStartOperation"/>
+    <startup t="1.5" module="recip"/>
+    <startup t="2.0" module="sender[0]"/>
 
-    <tell t="3.0" module="lifecycleController" target="recip" operation="NodeShutdownOperation"/>
-    <tell t="4.0" module="lifecycleController" target="recip" operation="NodeStartOperation"/>
+    <shutdown t="3.0" module="recip"/>
+    <startup t="4.0" module="recip"/>
 
-    <tell t="5.0" module="lifecycleController" target="sender[1]" operation="NodeShutdownOperation"/>
-    <tell t="6.0" module="lifecycleController" target="sender[1]" operation="NodeStartOperation"/>
+    <shutdown t="5.0" module="sender[1]"/>
+    <startup t="6.0" module="sender[1]"/>
 </scenario>
 %#--------------------------------------------------------------------------------------------------------------
 %subst: /omnetpp:://
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
 
-\*\* Event \#\d+  t=1   Test\.sender\[1\]\.trafGen \(IPvXTrafGen,.*
-Sending packet: \(cPacket\)appData-0
+\*\* Event \#\d+  t=1   Test\.sender\[1\]\.trafGen \(IpvxTrafGen,.*
+Sending packet: \(inet::Packet\)appData-0 .*
 .*
-\*\* Event \#\d+  t=1\.4   Test\.sender\[1\]\.trafGen \(IPvXTrafGen,.*
-Sending packet: \(cPacket\)appData-1
+\*\* Event \#\d+  t=1\.4   Test\.sender\[1\]\.trafGen \(IpvxTrafGen,.*
+Sending packet: \(inet::Packet\)appData-1 .*
 .*
 ?\*\* Event #\d+  t=1\.5   Test\.scenarioManager .*
 Test\.recip starting up
 .*
 Test\.recip started
 .*
-?\*\* Event \#\d+  t=1\.8   Test\.sender\[1\]\.trafGen \(IPvXTrafGen,.*
-Sending packet: \(cPacket\)appData-2
+?\*\* Event \#\d+  t=1\.8   Test\.sender\[1\]\.trafGen \(IpvxTrafGen,.*
+Sending packet: \(inet::Packet\)appData-2 .*
 .*
 ?\*\* Event #\d+  t=2   Test\.scenarioManager .*
 Test\.sender\[0\] starting up
 .*
 Test\.sender\[0\] started
 .*
-?\*\* Event \#\d+  t=2   Test\.sender\[0\]\.trafGen \(IPvXTrafGen,.*
-Sending packet: \(cPacket\)appData-0
+?\*\* Event \#\d+  t=2   Test\.sender\[0\]\.trafGen \(IpvxTrafGen,.*
+Sending packet: \(inet::Packet\)appData-0 .*
 .*
-?\*\* Event \#\d+  t=2\.2   Test\.sender\[1\]\.trafGen \(IPvXTrafGen,.*
-Sending packet: \(cPacket\)appData-3
+?\*\* Event \#\d+  t=2\.2   Test\.sender\[1\]\.trafGen \(IpvxTrafGen,.*
+Sending packet: \(inet::Packet\)appData-3 .*
 .*
-?\*\* Event \#\d+  t=2\.4   Test\.sender\[0\]\.trafGen \(IPvXTrafGen,.*
-Sending packet: \(cPacket\)appData-1
+?\*\* Event \#\d+  t=2\.4   Test\.sender\[0\]\.trafGen \(IpvxTrafGen,.*
+Sending packet: \(inet::Packet\)appData-1 .*
 .*
-?\*\* Event \#\d+  t=2\.6   Test\.sender\[1\]\.trafGen \(IPvXTrafGen,.*
-Sending packet: \(cPacket\)appData-4
+?\*\* Event \#\d+  t=2\.6   Test\.sender\[1\]\.trafGen \(IpvxTrafGen,.*
+Sending packet: \(inet::Packet\)appData-4 .*
 .*
-?\*\* Event \#\d+  t=2\.8   Test\.sender\[0\]\.trafGen \(IPvXTrafGen,.*
-Sending packet: \(cPacket\)appData-2
+?\*\* Event \#\d+  t=2\.8   Test\.sender\[0\]\.trafGen \(IpvxTrafGen,.*
+Sending packet: \(inet::Packet\)appData-2 .*
 .*
 ?\*\* Event #\d+  t=3   Test\.scenarioManager .*
 Test\.recip shutting down
 .*
 Test\.recip shut down
 .*
-?\*\* Event \#\d+  t=3   Test\.sender\[1\]\.trafGen \(IPvXTrafGen,.*
-Sending packet: \(cPacket\)appData-5
+?\*\* Event \#\d+  t=3   Test\.sender\[1\]\.trafGen \(IpvxTrafGen,.*
+Sending packet: \(inet::Packet\)appData-5 .*
 .*
-?\*\* Event \#\d+  t=3\.2   Test\.sender\[0\]\.trafGen \(IPvXTrafGen,.*
-Sending packet: \(cPacket\)appData-3
+?\*\* Event \#\d+  t=3\.2   Test\.sender\[0\]\.trafGen \(IpvxTrafGen,.*
+Sending packet: \(inet::Packet\)appData-3 .*
 .*
-?\*\* Event \#\d+  t=3\.4   Test\.sender\[1\]\.trafGen \(IPvXTrafGen,.*
-Sending packet: \(cPacket\)appData-6
+?\*\* Event \#\d+  t=3\.4   Test\.sender\[1\]\.trafGen \(IpvxTrafGen,.*
+Sending packet: \(inet::Packet\)appData-6 .*
 .*
-?\*\* Event \#\d+  t=3\.6   Test\.sender\[0\]\.trafGen \(IPvXTrafGen,.*
-Sending packet: \(cPacket\)appData-4
+?\*\* Event \#\d+  t=3\.6   Test\.sender\[0\]\.trafGen \(IpvxTrafGen,.*
+Sending packet: \(inet::Packet\)appData-4 .*
 .*
-?\*\* Event \#\d+  t=3\.8   Test\.sender\[1\]\.trafGen \(IPvXTrafGen,.*
-Sending packet: \(cPacket\)appData-7
+?\*\* Event \#\d+  t=3\.8   Test\.sender\[1\]\.trafGen \(IpvxTrafGen,.*
+Sending packet: \(inet::Packet\)appData-7 .*
 .*
 ?\*\* Event #\d+  t=4   Test\.scenarioManager .*
 Test\.recip starting up
 .*
 Test\.recip started
 .*
-?\*\* Event \#\d+  t=4   Test\.sender\[0\]\.trafGen \(IPvXTrafGen,.*
-Sending packet: \(cPacket\)appData-5
+?\*\* Event \#\d+  t=4   Test\.sender\[0\]\.trafGen \(IpvxTrafGen,.*
+Sending packet: \(inet::Packet\)appData-5 .*
 .*
-?\*\* Event \#\d+  t=4\.2   Test\.sender\[1\]\.trafGen \(IPvXTrafGen,.*
-Sending packet: \(cPacket\)appData-8
+?\*\* Event \#\d+  t=4\.2   Test\.sender\[1\]\.trafGen \(IpvxTrafGen,.*
+Sending packet: \(inet::Packet\)appData-8 .*
 .*
-?\*\* Event \#\d+  t=4\.4   Test\.sender\[0\]\.trafGen \(IPvXTrafGen,.*
-Sending packet: \(cPacket\)appData-6
+?\*\* Event \#\d+  t=4\.4   Test\.sender\[0\]\.trafGen \(IpvxTrafGen,.*
+Sending packet: \(inet::Packet\)appData-6 .*
 .*
-?\*\* Event \#\d+  t=4\.6   Test\.sender\[1\]\.trafGen \(IPvXTrafGen,.*
-Sending packet: \(cPacket\)appData-9
+?\*\* Event \#\d+  t=4\.6   Test\.sender\[1\]\.trafGen \(IpvxTrafGen,.*
+Sending packet: \(inet::Packet\)appData-9 .*
 .*
-?\*\* Event \#\d+  t=4\.8   Test\.sender\[0\]\.trafGen \(IPvXTrafGen,.*
-Sending packet: \(cPacket\)appData-7
+?\*\* Event \#\d+  t=4\.8   Test\.sender\[0\]\.trafGen \(IpvxTrafGen,.*
+Sending packet: \(inet::Packet\)appData-7 .*
 .*
 ?\*\* Event #\d+  t=5   Test\.scenarioManager .*
 Test\.sender\[1\] shutting down
 .*
 Test\.sender\[1\] shut down
 .*
-?\*\* Event \#\d+  t=5\.2   Test\.sender\[0\]\.trafGen \(IPvXTrafGen,.*
-Sending packet: \(cPacket\)appData-8
+?\*\* Event \#\d+  t=5\.2   Test\.sender\[0\]\.trafGen \(IpvxTrafGen,.*
+Sending packet: \(inet::Packet\)appData-8 .*
 .*
-?\*\* Event \#\d+  t=5\.6   Test\.sender\[0\]\.trafGen \(IPvXTrafGen,.*
-Sending packet: \(cPacket\)appData-9
+?\*\* Event \#\d+  t=5\.6   Test\.sender\[0\]\.trafGen \(IpvxTrafGen,.*
+Sending packet: \(inet::Packet\)appData-9 .*
 .*
 ?\*\* Event #\d+  t=6   Test\.scenarioManager .*
 Test\.sender\[1\] starting up
 .*
 Test\.sender\[1\] started
 .*
-?\*\* Event \#\d+  t=6   Test\.sender\[0\]\.trafGen \(IPvXTrafGen,.*
-Sending packet: \(cPacket\)appData-10
+?\*\* Event \#\d+  t=6   Test\.sender\[0\]\.trafGen \(IpvxTrafGen,.*
+Sending packet: \(inet::Packet\)appData-10 .*
 .*
-?\*\* Event \#\d+  t=6   Test\.sender\[1\]\.trafGen \(IPvXTrafGen,.*
-Sending packet: \(cPacket\)appData-10
+?\*\* Event \#\d+  t=6   Test\.sender\[1\]\.trafGen \(IpvxTrafGen,.*
+Sending packet: \(inet::Packet\)appData-10 .*
 
 %#--------------------------------------------------------------------------------------------------------------
 %contains: results/General-0.sca
-scalar Test.sender[0].trafGen sentPk:count 15
+scalar Test.sender[0].trafGen packetSent:count 15
 attr
 
 %#--------------------------------------------------------------------------------------------------------------
 %contains: results/General-0.sca
-scalar Test.sender[1].trafGen sentPk:count 13
+scalar Test.sender[1].trafGen packetSent:count 13
 attr
 
 %#--------------------------------------------------------------------------------------------------------------
 %contains: results/General-0.sca
-scalar Test.recip.trafGen rcvdPk:count 21
+scalar Test.recip.trafGen packetReceived:count 21
 attr
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout

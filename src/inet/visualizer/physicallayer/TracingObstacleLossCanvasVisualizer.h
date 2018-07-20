@@ -26,8 +26,6 @@ namespace inet {
 
 namespace visualizer {
 
-using namespace inet::physicallayer;
-
 class INET_API TracingObstacleLossCanvasVisualizer : public TracingObstacleLossVisualizerBase
 {
   protected:
@@ -64,7 +62,7 @@ class INET_API TracingObstacleLossCanvasVisualizer : public TracingObstacleLossV
     virtual void initialize(int stage) override;
     virtual void refreshDisplay() const override;
 
-    virtual const ObstacleLossVisualization *createObstacleLossVisualization(const ITracingObstacleLoss::ObstaclePenetratedEvent *obstaclePenetratedEvent) const override;
+    virtual const ObstacleLossVisualization *createObstacleLossVisualization(const physicallayer::ITracingObstacleLoss::ObstaclePenetratedEvent *obstaclePenetratedEvent) const override;
     virtual void addObstacleLossVisualization(const ObstacleLossVisualization* obstacleLossVisualization) override;
     virtual void removeObstacleLossVisualization(const ObstacleLossVisualization* obstacleLossVisualization) override;
     virtual void setAlpha(const ObstacleLossVisualization *obstacleLossVisualization, double alpha) const override;

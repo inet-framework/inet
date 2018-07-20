@@ -1,0 +1,159 @@
+====== inet-4.x ======
+
+2017-12-15  Andras Varga
+
+	Fixed int/double type mismatch between NED parameter and C++ usage.
+
+2017-12-15  Zoltan Bojthe
+
+	Removed unnecessary cPar::doubleValue() calls, cPar::boolValue() calls, cPar::longValue() calls.
+
+	Motivation: rely on cast operators instead because they can detect
+	overflows (when the value is cast to a smaller integer type that can not
+	represent it). Removed unnecessary .longvalue() calls. Replaced to
+	.intValue() in comparisons.
+
+2017-12-14  Levente Mészáros
+
+	Replaced pushHeader, pushTrailer with insertHeader, insertTrailer.
+	Removed unnecessary markImmutable() calls.
+
+2017-10-20  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-07-14  Levente Mészáros
+
+	Replaced cPacket with Packet in LayeredProtocolBase and subclasses.
+
+2017-07-12  Levente Mészáros
+
+	Added linkBreak statistic.
+	Added missing packet drop related statistics.
+	Added missing packetDrop signal emitting code.
+	Added limit to packetDrop signals with queueOverflow reason.
+	Added limit to packetDrop signals with retryLimitReached reason.
+	Renamed NF_PACKET_DROP to packetDrop(Signal).
+	Renamed NF_LINK_BREAK signal to linkBreak(Signal).
+	Replaced packetFromLowerDropped and packetFromUpperDropped with NF_PACKET_DROP signal.
+
+2017-07-10  Levente Mészáros
+
+	Added reason codes where packet drop signals are emitted.
+	Fixed @signal[NF_LINK_BREAK] emitted object types.
+
+2017-01-19  Levente Mészáros
+
+	Renamed MACFrameBase to MacHeaderBase.
+	Renamed CSMAFrame to CSMAHeader.
+
+2017-01-25  Zoltan Bojthe
+
+	Changed to use the new Packet class.
+
+2016-10-26  Zoltan Bojthe
+
+	Removed compatibility macros required for OMNeT++ 4.x builds.
+
+2016-06-30  Florian Kauer
+
+	Send multicasts as link-layer broadcasts for CSMA.
+
+	Previously multicasts were dropped in the CSMA layer. However, several
+	algorithms, especially GPSR use multicasts. Since association is not
+	implemented anyway for IEEE 802.15.4, there should be no difference in
+	the handling of broadcasts and multicasts on the link layer.
+
+2015-06-23  Levente Mészáros
+
+	Added network protocol to BMac, LMac, CSMA frames.
+
+====== inet-3.x ======
+
+2017-10-02  ------ inet-3.6.2 released ------
+
+2017-09-29  Levente Mészáros
+
+	CSMA: Added check for incorrect packet type.
+
+2017-07-06  ------ inet-3.6.1 released ------
+
+2017-06-09  ------ inet-3.6.0 released ------
+
+2017-02-20  ------ inet-3.5.0 released ------
+
+2016-10-20  Rudolf Hornig
+
+	Refactoring: removed compatibility macros required for OMNeT++ 4.x builds
+	+ warning fixes
+
+2016-06-15  ------ inet-3.4.0 released ------
+
+2016-05-11  Levente Meszaros
+
+	CSMA: Fixed handling of frames with bit errors.
+
+2016-05-19  Andras Varga
+
+	Added CSMA state machine image from
+	https://github.com/GRCDEV/mixim-sommer/find/VACaMobil
+
+2016-06-01  ------ inet-3.3.0 released ------
+
+2016-04-06  ------ inet-3.2.4 released ------
+
+2016-03-16  ------ inet-3.2.3 released ------
+
+2016-03-11  ------ inet-3.2.2 released ------
+
+2016-01-21  ------ inet-3.2.1 released ------
+
+2015-12-16  ------ inet-3.2.0 released ------
+
+2015-11-27  Zoltan Bojthe
+
+	Made the code compile with OMNeT++ 5.0b3
+
+2015-10-26  ------ inet-3.1.1 released ------
+
+2015-10-15  ------ inet-3.1.0 released ------
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-04-22  Rudolf Hornig
+
+	Added NF_LINK_BREAK notification. This enables ad-hoc routing protocols to
+	work correctly with this MAC.
+
+2015-04-22 Rudolf Hornig
+
+	Added support for sending NF_LINK_BREAK signal. This is required for certain
+	routing protocols (i.e. AODV) to function properly.
+
+2015-02-05  Zoltan Bojthe
+
+	Replaced getParentModule calls with module parameters.
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-11-28  Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-11-26  Levente Meszaros
+
+	Fixed memory management problems found by valgrind memcheck.
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2014-01-22  Levente Meszaros
+
+	Ported the MAC protocol from MiXiM and adapted to the MAC protocol contract.
+
+====== inet-2.x ======

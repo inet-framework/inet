@@ -60,11 +60,11 @@ class INET_API Arrival : public virtual IArrival
     virtual const simtime_t getDataStartTime() const override { return endTime - dataDuration; }
     virtual const simtime_t getDataEndTime() const override { return endTime; }
 
-    virtual const Coord getStartPosition() const override { return startPosition; }
-    virtual const Coord getEndPosition() const override { return endPosition; }
+    virtual const Coord& getStartPosition() const override { return startPosition; }
+    virtual const Coord& getEndPosition() const override { return endPosition; }
 
-    virtual const EulerAngles getStartOrientation() const override { return startOrientation; }
-    virtual const EulerAngles getEndOrientation() const override { return endOrientation; }
+    virtual const EulerAngles& getStartOrientation() const override { return startOrientation; }
+    virtual const EulerAngles& getEndOrientation() const override { return endOrientation; }
 };
 
 } // namespace physicallayer

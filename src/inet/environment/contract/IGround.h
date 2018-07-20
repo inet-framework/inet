@@ -28,9 +28,20 @@ class INET_API IGround
 {
   public:
     /**
-     * Returns the elevation above a fixed reference point.
+     * Returns a point on the ground "underneath" (or above) the given position.
+     * The projection might alter only the Z coordinate in simple cases, or it might
+     * alter all coordinates in case of a large playground on a globe model, or a playground
+     * placed at an angle above the ground (using a IGeographicCoordinateSystem).
      */
-    virtual double getElevation(const Coord &position) const = 0;
+    virtual Coord computeGroundProjection(const Coord &position) const = 0;
+
+    /**
+     * Returns a unit length vector that is locally perpendicular to the ground at "position",
+     * pointing up. If such vector cannot be determined, all components of the result are NaN.
+     * The point given by "position" does not have to be on the ground. If necessary, it is
+     * first projected to the ground internally by the implementation.
+     */
+    virtual Coord computeGroundNormal(const Coord &position) const = 0;
 };
 
 } // namespace physicalenvironment

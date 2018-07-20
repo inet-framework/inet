@@ -21,16 +21,17 @@
 package inet.linklayer.loopback;
 
 import inet.common.IHook;
-import inet.linklayer.contract.INic;
+import inet.linklayer.contract.ILoopbackInterface;
 
 
 //
 // Loopback interface. Complements the ~Loopback module.
 //
-module LoopbackInterface like INic
+module LoopbackInterface like ILoopbackInterface
 {
     parameters:
-        @display("i=block/ifcard;bgb=214,249;bgl=53");
+        @class(InterfaceEntry);
+        @display("i=block/ifcard;bgl=53");
         string interfaceTableModule;
         int numOutputHooks = default(0);
         int numInputHooks = default(0);
@@ -40,27 +41,27 @@ module LoopbackInterface like INic
         output upperLayerOut;
     submodules:
         outputHook[numOutputHooks]: <default("Nop")> like IHook if numOutputHooks>0 {
-            @display("p=42,33");
+            @display("p=100,100,row,50;is=s");
         }
         inputHook[numInputHooks]: <default("Nop")> like IHook if numInputHooks>0 {
-            @display("p=177,33");
+            @display("p=400,100,row,50;is=s");
         }
         lo: Loopback {
             parameters:
-                @display("p=98,207");
+                @display("p=250,200");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> outputHook[0].in if numOutputHooks > 0;
-        upperLayerIn --> { @display("m=n"); } --> lo.netwIn if numOutputHooks == 0;
+        upperLayerIn --> { @display("m=n"); } --> lo.upperLayerIn if numOutputHooks == 0;
 
         for i=0..numOutputHooks-2 {
             outputHook[i].out --> outputHook[i+1].in;
         }
-        outputHook[numOutputHooks-1].out --> lo.netwIn if numOutputHooks > 0;
+        outputHook[numOutputHooks-1].out --> lo.upperLayerIn if numOutputHooks > 0;
 
-        lo.netwOut --> { @display("m=n"); } --> upperLayerOut if numInputHooks == 0;
+        lo.upperLayerOut --> { @display("m=n"); } --> upperLayerOut if numInputHooks == 0;
 
-        lo.netwOut --> inputHook[0].in if numInputHooks > 0;
+        lo.upperLayerOut --> inputHook[0].in if numInputHooks > 0;
 
         for i=0..numInputHooks-2 {
             inputHook[i].out --> inputHook[i+1].in;

@@ -20,6 +20,9 @@
 #define __INET_TCPLWIPQUEUES_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/packet/ChunkQueue.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
 
 namespace inet {
 
@@ -27,12 +30,12 @@ namespace tcp {
 
 // forward declarations:
 class TcpLwipConnection;
-class TCPSegment;
+class TcpHeader;
 
 /**
- * Abstract base class for TCP_LWIP send queues. In fact a single object
+ * TCP_LWIP send queue. In fact a single object
  * represents both the send queue and the retransmission queue
- * (no need to separate them). The TCPConnection object knows
+ * (no need to separate them). The TcpConnection object knows
  * which data in the queue have already been transmitted ("retransmission
  * queue") and which not ("send queue"). This class is not interested
  * in where's the boundary.
@@ -47,7 +50,7 @@ class TCPSegment;
  * "IMPLEMENTATION" note).
  *
  * To simulate a TCP that retains segment boundaries in retransmissions,
- * the appropriate TCPAlgorithm class should remember where the segment
+ * the appropriate TcpAlgorithm class should remember where the segment
  * boundaries were at the original transmission, and it should form identical
  * segments when retransmitting. The createSegmentWithBytes() send queue
  * method makes this possible.
@@ -88,17 +91,17 @@ class INET_API TcpLwipSendQueue : public cObject
     /**
      * Ctor.
      */
-    TcpLwipSendQueue() : connM(nullptr) {}
+    TcpLwipSendQueue();
 
     /**
      * Virtual dtor.
      */
-    virtual ~TcpLwipSendQueue() {}
+    virtual ~TcpLwipSendQueue();
 
     /**
      * set connection queue, and initialise queue variables.
      */
-    virtual void setConnection(TcpLwipConnection *connP) { connM = connP; }
+    virtual void setConnection(TcpLwipConnection *connP);
 
     /**
      * Called on SEND app command, it inserts in the queue the data the user
@@ -108,7 +111,7 @@ class INET_API TcpLwipSendQueue : public cObject
      * The msg object should not be referenced after this point (sendQueue may
      * delete it.)
      */
-    virtual void enqueueAppData(cPacket *msgP) = 0;
+    virtual void enqueueAppData(Packet *msgP);
 
     /**
      * Copy data to the buffer for send to LWIP.
@@ -117,17 +120,17 @@ class INET_API TcpLwipSendQueue : public cObject
      *
      * called before called socket->send_data()
      */
-    virtual unsigned int getBytesForTcpLayer(void *bufferP, unsigned int bufferLengthP) const = 0;
+    virtual unsigned int getBytesForTcpLayer(void *bufferP, unsigned int bufferLengthP) const;
 
     /**
      * This function should remove msgLengthP bytes from TCP layer queue
      */
-    virtual void dequeueTcpLayerMsg(unsigned int msgLengthP) = 0;
+    virtual void dequeueTcpLayerMsg(unsigned int msgLengthP);
 
     /**
      * Utility function: returns how many bytes are available in the queue.
      */
-    virtual unsigned long getBytesAvailable() const = 0;
+    virtual unsigned long getBytesAvailable() const;
 
     /**
      * Called when the TCP wants to send or retransmit data, it constructs
@@ -139,10 +142,13 @@ class INET_API TcpLwipSendQueue : public cObject
      * called from inside of send_callback()
      * called before called the send() to IP layer
      */
-    virtual TCPSegment *createSegmentWithBytes(const void *tcpDataP, unsigned int tcpLengthP) = 0;
+    virtual Packet *createSegmentWithBytes(const void *tcpDataP, unsigned int tcpLengthP);
+
+    virtual void discardAckedBytes(unsigned long bytesP);
 
   protected:
-    TcpLwipConnection *connM;
+    TcpLwipConnection *connM = nullptr;
+    ChunkQueue dataBuffer;      // dataBuffer
 };
 
 class INET_API TcpLwipReceiveQueue : public cObject
@@ -151,17 +157,17 @@ class INET_API TcpLwipReceiveQueue : public cObject
     /**
      * Ctor.
      */
-    TcpLwipReceiveQueue() : connM(nullptr) {};
+    TcpLwipReceiveQueue();
 
     /**
      * Virtual dtor.
      */
-    virtual ~TcpLwipReceiveQueue() {}
+    virtual ~TcpLwipReceiveQueue();
 
     /**
      * Add a connection queue.
      */
-    virtual void setConnection(TcpLwipConnection *connP) { connM = connP; }
+    virtual void setConnection(TcpLwipConnection *connP);
 
     /**
      * Called when a TCP segment arrives, it should extract the payload
@@ -169,15 +175,17 @@ class INET_API TcpLwipReceiveQueue : public cObject
      * object should *not* be deleted.
      * //FIXME revise this comment
      */
-    virtual void notifyAboutIncomingSegmentProcessing(TCPSegment *tcpsegP, uint32 seqNo,
-            const void *bufferP, size_t bufferLengthP) = 0;
+    virtual void notifyAboutIncomingSegmentProcessing(Packet *packet, uint32 seqNo,
+            const void *bufferP, size_t bufferLengthP);
 
     /**
      * The method called when data received from LWIP
      * The method should set status of the data in queue to received
      * called after socket->read_data() successfull
      */
-    virtual void enqueueTcpLayerData(void *dataP, unsigned int dataLengthP) = 0;
+    virtual void enqueueTcpLayerData(void *dataP, unsigned int dataLengthP);
+
+    virtual unsigned long getExtractableBytesUpTo() const;
 
     /**
      * Should create a packet to be passed up to the app, up to (but NOT
@@ -187,22 +195,22 @@ class INET_API TcpLwipReceiveQueue : public cObject
      *
      * called after socket->read_data() successfull
      */
-    virtual cPacket *extractBytesUpTo() = 0;
+    virtual Packet *extractBytesUpTo();
 
     /**
      * Returns the number of bytes (out-of-order-segments) currently buffered in queue.
      */
-    virtual uint32 getAmountOfBufferedBytes() const = 0;
+    virtual uint32 getAmountOfBufferedBytes() const;
 
     /**
      * Returns the number of blocks currently buffered in queue.
      */
-    virtual uint32 getQueueLength() const = 0;
+    virtual uint32 getQueueLength() const;
 
     /**
      * Shows current queue status.
      */
-    virtual void getQueueStatus() const = 0;
+    virtual void getQueueStatus() const;
 
     /**
      * notify the queue about output messages
@@ -210,10 +218,12 @@ class INET_API TcpLwipReceiveQueue : public cObject
      * called when connM send out a packet.
      * for read AckNo, if have
      */
-    virtual void notifyAboutSending(const TCPSegment *tcpsegP) = 0;
+    virtual void notifyAboutSending(const TcpHeader *tcpsegP);
 
   protected:
-    TcpLwipConnection *connM;
+    TcpLwipConnection *connM = nullptr;
+    ChunkQueue dataBuffer;      // fifo dataBuffer
+    // ReorderBuffer reorderBuffer;     // ReorderBuffer not needed, because the original lwIP code manages the unordered buffer
 };
 
 } // namespace tcp

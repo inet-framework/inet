@@ -19,9 +19,8 @@
 
 #include "TCPTester.h"
 
-#include "inet/networklayer/contract/NetworkProtocolCommand_m.h"
-#include "inet/networklayer/common/IPSocket.h"
-#include "inet/networklayer/contract/ipv4/IPv4ControlInfo.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
 
 namespace inet {
 
@@ -38,21 +37,16 @@ void TCPTesterBase::initialize()
     tcpdump.setOutStream(EVSTREAM);
 }
 
-void TCPTesterBase::dump(TCPSegment *seg, bool fromA, const char *comment)
+void TCPTesterBase::dump(const Ptr<const inet::tcp::TcpHeader>& seg, int tcpLength, bool fromA, const char *comment)
 {
-#if OMNETPP_VERSION < 0x0500
-    if (getEnvir()->isDisabled())
-        return;
-#else
     if (getEnvir()->isExpressMode())
         return;
-#endif
 
     char lbl[32];
     sprintf(lbl," %c%03d", fromA ? 'A' : 'B', fromA ? fromASeq : fromBSeq);
     std::ostringstream out;
     tcpdump.setOutStream(out);
-    tcpdump.tcpDump(fromA, lbl, seg, std::string(fromA?"A":"B"),std::string(fromA?"B":"A"), comment);
+    tcpdump.tcpDump(fromA, lbl, seg, tcpLength, std::string(fromA ? "A":"B"),std::string(fromA ? "B":"A"), comment);
     EV_DEBUG_C("testing") << out.str();
     tcpdump.setOutStream(EVSTREAM);
 }
@@ -148,25 +142,15 @@ void TCPScriptableTester::parseScript(const char *script)
 
 void TCPScriptableTester::handleMessage(cMessage *msg)
 {
-    if (dynamic_cast<RegisterTransportProtocolCommand*>(msg))
-    {
-        delete msg;
-        return;
-    }
-
+    Packet *seg = check_and_cast<Packet *>(msg);
     if (msg->isSelfMessage())
     {
-        TCPSegment *seg = check_and_cast<TCPSegment *>(msg);
         dispatchSegment(seg);
     }
     else if (msg->isPacket())
     {
-        TCPSegment *seg = check_and_cast<TCPSegment *>(msg);
         bool fromA = msg->arrivedOn("in1");
         processIncomingSegment(seg, fromA);
-    }
-    else if (dynamic_cast<IPRegisterProtocolCommand *>(msg)) {
-        delete msg;
     }
     else
     {
@@ -174,18 +158,31 @@ void TCPScriptableTester::handleMessage(cMessage *msg)
     }
 }
 
-void TCPScriptableTester::dispatchSegment(TCPSegment *seg)
+void TCPScriptableTester::dispatchSegment(Packet *pk)
 {
-    Command *cmd = (Command *)seg->getContextPointer();
+    const auto& seg = pk->peekAtFront<TcpHeader>();
+    if (seg == nullptr)
+        throw cRuntimeError("Unknown message");
+    Command *cmd = (Command *)pk->getContextPointer();
     bool fromA = cmd->fromA;
     bubble("introducing copy");
-    dump(seg, fromA, "introducing copy");
-    send(seg, fromA ? "out2" : "out1");
+    dump(seg, pk->getByteLength(), fromA, "introducing copy");
+    send(pk, fromA ? "out2" : "out1");
 }
 
-void TCPScriptableTester::processIncomingSegment(TCPSegment *seg, bool fromA)
+void TCPScriptableTester::processIncomingSegment(Packet *pk, bool fromA)
 {
+    const auto& seg = pk->peekAtFront<TcpHeader>();
+    if (seg == nullptr)
+        throw cRuntimeError("Unknown message");
     int segno = fromA ? ++fromASeq : ++fromBSeq;
+//    const Protocol *protInd = pk->getTag<ProtocolInd>()->getProtocol();
+//    const Protocol *protReq = pk->getTag<ProtocolReq>()->getProtocol();
+//    pk->addTagIfAbsent<ProtocolReq>()->setProtocol(protInd);
+//    pk->addTagIfAbsent<ProtocolInd>()->setProtocol(protReq);
+    pk->addTagIfAbsent<L3AddressInd>()->setSrcAddress(pk->getTag<L3AddressReq>()->getSrcAddress());
+    pk->addTagIfAbsent<L3AddressInd>()->setDestAddress(pk->getTag<L3AddressReq>()->getDestAddress());
+    delete pk->removeTag<L3AddressReq>();
 
     // find entry in script
     Command *cmd = NULL;
@@ -196,28 +193,28 @@ void TCPScriptableTester::processIncomingSegment(TCPSegment *seg, bool fromA)
     if (!cmd)
     {
         // dump & forward
-        dump(seg, fromA);
-        send(seg, fromA ? "out2" : "out1");
+        dump(seg, pk->getByteLength(), fromA);
+        send(pk, fromA ? "out2" : "out1");
     }
     else if (cmd->command==CMD_DELETE)
     {
         bubble("deleting");
-        dump(seg, fromA, "deleting");
-        delete seg;
+        dump(seg, pk->getByteLength(), fromA, "deleting");
+        delete pk;
     }
     else if (cmd->command==CMD_COPY)
     {
         bubble("removing original");
-        dump(seg, fromA, "removing original");
+        dump(seg, pk->getByteLength(), fromA, "removing original");
         for (unsigned int i=0; i<cmd->delays.size(); i++)
         {
             simtime_t d = cmd->delays[i];
-            TCPSegment *segcopy = (TCPSegment *)seg->dup();
-            segcopy->setControlInfo(new IPv4ControlInfo(*check_and_cast<IPv4ControlInfo *>(seg->getControlInfo())));
+            Packet *segcopy = pk->dup();
+
             if (d==0)
             {
                 bubble("forwarding after 0 delay");
-                dump(segcopy, fromA, "introducing copy");
+                dump(seg, pk->getByteLength(), fromA, "introducing copy");
                 send(segcopy, fromA ? "out2" : "out1");
             }
             else
@@ -226,7 +223,7 @@ void TCPScriptableTester::processIncomingSegment(TCPSegment *seg, bool fromA)
                 scheduleAt(simTime()+d, segcopy);
             }
         }
-        delete seg;
+        delete pk;
     }
     else
     {
@@ -251,25 +248,15 @@ void TCPRandomTester::initialize()
 
 void TCPRandomTester::handleMessage(cMessage *msg)
 {
-    if (dynamic_cast<RegisterTransportProtocolCommand*>(msg))
-    {
-        delete msg;
-        return;
-    }
-
+    Packet *seg = check_and_cast<Packet *>(msg);
     if (msg->isSelfMessage())
     {
-        TCPSegment *seg = check_and_cast<TCPSegment *>(msg);
         dispatchSegment(seg);
     }
     else if (msg->isPacket())
     {
-        TCPSegment *seg = check_and_cast<TCPSegment *>(msg);
         bool fromA = msg->arrivedOn("in1");
         processIncomingSegment(seg, fromA);
-    }
-    else if (dynamic_cast<IPRegisterProtocolCommand *>(msg)) {
-        delete msg;
     }
     else
     {
@@ -277,54 +264,67 @@ void TCPRandomTester::handleMessage(cMessage *msg)
     }
 }
 
-void TCPRandomTester::dispatchSegment(TCPSegment *seg)
+void TCPRandomTester::dispatchSegment(Packet *pk)
 {
-    bool fromA = (bool)seg->getContextPointer();
+    const auto& seg = pk->peekAtFront<TcpHeader>();
+    if (seg == nullptr)
+        throw cRuntimeError("Unknown message");
+    bool fromA = (bool)pk->getContextPointer();
     bubble("introducing copy");
-    dump(seg, fromA, "introducing copy");
-    send(seg, fromA ? "out2" : "out1");
+    dump(seg, pk->getByteLength(), fromA, "introducing copy");
+    send(pk, fromA ? "out2" : "out1");
 }
 
-void TCPRandomTester::processIncomingSegment(TCPSegment *seg, bool fromA)
+void TCPRandomTester::processIncomingSegment(Packet *pk, bool fromA)
 {
+    const auto& seg = pk->peekAtFront<TcpHeader>();
+    if (seg == nullptr)
+        throw cRuntimeError("Unknown message");
     if (fromA) ++fromASeq; else ++fromBSeq;
+
+//    const Protocol *protInd = pk->getTag<ProtocolInd>()->getProtocol();
+//    const Protocol *protReq = pk->getTag<ProtocolReq>()->getProtocol();
+//    pk->addTagIfAbsent<ProtocolReq>()->setProtocol(protInd);
+//    pk->addTagIfAbsent<ProtocolInd>()->setProtocol(protReq);
+    pk->addTagIfAbsent<L3AddressInd>()->setSrcAddress(pk->getTag<L3AddressReq>()->getSrcAddress());
+    pk->addTagIfAbsent<L3AddressInd>()->setDestAddress(pk->getTag<L3AddressReq>()->getDestAddress());
+    delete pk->removeTag<L3AddressReq>();
 
     // decide what to do
     double x = dblrand();
     if (x<=pdelete)
     {
         bubble("deleting");
-        dump(seg, fromA, "deleting");
-        delete seg;
+        dump(seg, pk->getByteLength(), fromA, "deleting");
+        delete pk;
     }
     else if (x-=pdelete, x<=pdelay)
     {
         bubble("delay: removing original");
-        dump(seg, fromA, "delay: removing original");
-        double d = delay->doubleValue();
-        seg->setContextPointer((void*)fromA);
-        scheduleAt(simTime()+d, seg);
+        dump(seg, pk->getByteLength(), fromA, "delay: removing original");
+        double d = *delay;
+        pk->setContextPointer((void*)fromA);
+        scheduleAt(simTime()+d, pk);
     }
     else if (x-=pdelay, x<=pcopy)
     {
         bubble("copy: removing original");
-        dump(seg, fromA, "copy: removing original");
-        int n = numCopies->longValue();
+        dump(seg, pk->getByteLength(), fromA, "copy: removing original");
+        int n = *numCopies;
         for (int i=0; i<n; i++)
         {
-            double d = delay->doubleValue();
-            TCPSegment *segcopy = (TCPSegment *)seg->dup();
-            segcopy->setControlInfo(new IPv4ControlInfo(*check_and_cast<IPv4ControlInfo *>(seg->getControlInfo())));
+            double d = *delay;
+            Packet *segcopy = pk->dup();
             segcopy->setContextPointer((void *)fromA);
             scheduleAt(simTime()+d, segcopy);
         }
-        delete seg;
+        delete pk;
     }
     else
     {
         // dump & forward
-        dump(seg, fromA);
-        send(seg, fromA ? "out2" : "out1");
+        dump(seg, pk->getByteLength(), fromA);
+        send(pk, fromA ? "out2" : "out1");
     }
 }
 

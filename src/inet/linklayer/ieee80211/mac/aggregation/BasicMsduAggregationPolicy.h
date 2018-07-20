@@ -34,10 +34,10 @@ class INET_API BasicMsduAggregationPolicy : public IMsduAggregationPolicy, publi
     protected:
         virtual void initialize() override;
         virtual bool isAggregationPossible(int numOfFramesToAggragate, int aMsduLength);
-        virtual bool isEligible(Ieee80211DataFrame *frame, Ieee80211DataFrame *testFrame, int aMsduLength);
+        virtual bool isEligible(const Ptr<const Ieee80211DataHeader>& header, Packet *testPacket, const Ptr<const Ieee80211DataHeader>& testHeader, int aMsduLength);
 
     public:
-        virtual std::vector<Ieee80211DataFrame *> *computeAggregateFrames(cQueue *queue) override;
+        virtual std::vector<Packet *> *computeAggregateFrames(cQueue *queue) override;
 };
 
 } /* namespace ieee80211 */

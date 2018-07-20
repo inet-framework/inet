@@ -15,8 +15,11 @@ simple TestApp
 
 #include <fstream>
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/ipv4/IPv4Datagram.h"
-#include "inet/networklayer/ipv6/IPv6Datagram.h"
+#include "inet/common/Protocol.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/networklayer/ipv6/Ipv6Header.h"
 
 namespace diffserv_baclassifier_1
 {
@@ -41,22 +44,28 @@ void TestApp::initialize()
 
     char buf[30];
 
-    // send 64 IPv4 datagram
+    // send 64 Ipv4 datagram
     for (int i = 0; i < 64; i++)
     {
       sprintf(buf, "ipv4-%d", i);
-      IPv4Datagram *datagram = new IPv4Datagram(buf);
-      datagram->setDiffServCodePoint(i);
-      send(datagram, "out");
+      auto packet = new Packet(buf);
+      const auto& header = makeShared<Ipv4Header>();
+      header->setDiffServCodePoint(i);
+      packet->insertAtFront(header);
+      packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+      send(packet, "out");
     }
 
-    // send 64 IPv6 datagram
+    // send 64 Ipv6 datagram
     for (int i = 0; i < 64; i++)
     {
       sprintf(buf, "ipv6-%d", i);
-      IPv6Datagram *datagram = new IPv6Datagram(buf);
-      datagram->setDiffServCodePoint(i);
-      send(datagram, "out");
+      auto packet = new Packet(buf);
+      const auto& header = makeShared<Ipv6Header>();
+      header->setDiffServCodePoint(i);
+      packet->insertAtFront(header);
+      packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
+      send(packet, "out");
     }
 }
 

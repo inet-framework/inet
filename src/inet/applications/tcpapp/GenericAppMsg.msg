@@ -16,9 +16,9 @@
 //
 
 
-cplusplus {{
-#include "inet/common/INETDefs.h"
-}}
+import inet.common.INETDefs;
+import inet.common.Units;
+import inet.common.packet.chunk.Chunk;
 
 namespace inet;
 
@@ -31,11 +31,11 @@ namespace inet;
 // e.g. HTTP, SMB, database protocol) needs only to be present in
 // the client, and the server model can be kept simple and dumb.
 //
-// @see ~TCPGenericSrvApp, TCPGenericCliAppBase (C++ only)
+// @see ~TcpGenericServerApp, TCPGenericCliAppBase (C++ only)
 //
-packet GenericAppMsg
+class GenericAppMsg extends FieldsChunk
 {
-    int expectedReplyLength; // in bytes
+    B expectedReplyLength;   // in bytes
     double replyDelay;       // reply after this many seconds
     bool serverClose;        // with TCP: if true, server should close the
                              // connection after sending the reply

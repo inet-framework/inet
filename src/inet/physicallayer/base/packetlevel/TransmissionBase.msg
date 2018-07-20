@@ -13,26 +13,26 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
+import inet.common.INETDefs;
+import inet.common.geometry.Geometry;
+
 cplusplus {{
 #include "inet/physicallayer/base/packetlevel/TransmissionBase.h"
 }}
 
 namespace inet::physicallayer;
 
-class noncobject Coord;
-class noncobject EulerAngles;
-
 class TransmissionBase extends cObject
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
     int id;
     simtime_t startTime;
-    Coord startPosition @opaque;
-    EulerAngles startOrientation @opaque;
+    Coord startPosition;
+    EulerAngles startOrientation;
     simtime_t endTime;
-    Coord endPosition @opaque;
-    EulerAngles endOrientation @opaque;
+    Coord endPosition;
+    EulerAngles endOrientation;
     simtime_t duration;
     simtime_t preambleDuration;
     simtime_t headerDuration;

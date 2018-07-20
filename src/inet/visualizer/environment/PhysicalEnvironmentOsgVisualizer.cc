@@ -20,8 +20,8 @@
 #include "inet/common/geometry/shape/Prism.h"
 #include "inet/common/geometry/shape/Sphere.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/OSGScene.h"
-#include "inet/common/OSGUtils.h"
+#include "inet/common/OsgScene.h"
+#include "inet/common/OsgUtils.h"
 #include "inet/visualizer/environment/PhysicalEnvironmentOsgVisualizer.h"
 
 #ifdef WITH_OSG
@@ -35,6 +35,8 @@
 namespace inet {
 
 namespace visualizer {
+
+using namespace inet::physicalenvironment;
 
 Define_Module(PhysicalEnvironmentOsgVisualizer);
 

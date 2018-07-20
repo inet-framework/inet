@@ -34,14 +34,14 @@ class INET_API OriginatorProtectionMechanism : public ModeSetListener
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
         virtual void initialize(int stage) override;
 
-        virtual simtime_t computeRtsDurationField(Ieee80211RTSFrame *rtsFrame, Ieee80211DataOrMgmtFrame *pendingFrame);
-        virtual simtime_t computeDataFrameDurationField(Ieee80211DataFrame *dataFrame, Ieee80211DataOrMgmtFrame *pendingFrame);
-        virtual simtime_t computeMgmtFrameDurationField(Ieee80211ManagementFrame *mgmtFrame, Ieee80211DataOrMgmtFrame *pendingFrame);
+        virtual simtime_t computeRtsDurationField(Packet *rtsPacket, const Ptr<const Ieee80211RtsFrame>& rtsFrame, Packet *pendingPacket, const Ptr<const Ieee80211DataOrMgmtHeader>& pendingHeader);
+        virtual simtime_t computeDataFrameDurationField(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, Packet *pendingPacket, const Ptr<const Ieee80211DataOrMgmtHeader>& pendingHeader);
+        virtual simtime_t computeMgmtFrameDurationField(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader, Packet *pendingPacket, const Ptr<const Ieee80211DataOrMgmtHeader>& pendingHeader);
 
     public:
         virtual ~OriginatorProtectionMechanism() { }
 
-        virtual simtime_t computeDurationField(Ieee80211Frame *frame, Ieee80211DataOrMgmtFrame *pendingFrame);
+        virtual simtime_t computeDurationField(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, Packet *pendingPacket, const Ptr<const Ieee80211DataOrMgmtHeader>& pendingHeader);
 };
 
 } /* namespace ieee80211 */

@@ -17,14 +17,13 @@
 
 #include <algorithm>
 
+#include "inet/common/Simsignals.h"
 #include "inet/common/queue/PassiveQueueBase.h"
 
 namespace inet {
 
-simsignal_t PassiveQueueBase::rcvdPkSignal = registerSignal("rcvdPk");
-simsignal_t PassiveQueueBase::enqueuePkSignal = registerSignal("enqueuePk");
-simsignal_t PassiveQueueBase::dequeuePkSignal = registerSignal("dequeuePk");
-simsignal_t PassiveQueueBase::dropPkByQueueSignal = registerSignal("dropPkByQueue");
+simsignal_t PassiveQueueBase::packetEnqueuedSignal = registerSignal("packetEnqueued");
+simsignal_t PassiveQueueBase::packetDequeuedSignal = registerSignal("packetDequeued");
 simsignal_t PassiveQueueBase::queueingTimeSignal = registerSignal("queueingTime");
 
 void PassiveQueueBase::initialize()
@@ -44,12 +43,12 @@ void PassiveQueueBase::handleMessage(cMessage *msg)
 {
     numQueueReceived++;
 
-    emit(rcvdPkSignal, msg);
+    emit(packetReceivedSignal, msg);
 
     if (packetRequested > 0) {
         packetRequested--;
-        emit(enqueuePkSignal, msg);
-        emit(dequeuePkSignal, msg);
+        emit(packetEnqueuedSignal, msg);
+        emit(packetDequeuedSignal, msg);
         emit(queueingTimeSignal, SIMTIME_ZERO);
         sendOut(msg);
     }
@@ -57,11 +56,13 @@ void PassiveQueueBase::handleMessage(cMessage *msg)
         msg->setArrivalTime(simTime());
         cMessage *droppedMsg = enqueue(msg);
         if (msg != droppedMsg)
-            emit(enqueuePkSignal, msg);
+            emit(packetEnqueuedSignal, msg);
 
         if (droppedMsg) {
             numQueueDropped++;
-            emit(dropPkByQueueSignal, droppedMsg);
+            PacketDropDetails details;
+            details.setReason(QUEUE_OVERFLOW);
+            emit(packetDroppedSignal, droppedMsg, &details);
             delete droppedMsg;
         }
         else
@@ -85,7 +86,7 @@ void PassiveQueueBase::requestPacket()
         packetRequested++;
     }
     else {
-        emit(dequeuePkSignal, msg);
+        emit(packetDequeuedSignal, msg);
         emit(queueingTimeSignal, simTime() - msg->getArrivalTime());
         sendOut(msg);
     }

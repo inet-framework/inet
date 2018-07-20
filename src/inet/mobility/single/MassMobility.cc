@@ -29,7 +29,7 @@ MassMobility::MassMobility()
     changeIntervalParameter = nullptr;
     changeAngleByParameter = nullptr;
     speedParameter = nullptr;
-    angle = 0;
+    angle = deg(0);
 }
 
 void MassMobility::initialize(int stage)
@@ -38,7 +38,7 @@ void MassMobility::initialize(int stage)
 
     EV_TRACE << "initializing MassMobility stage " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {
-        angle = par("startAngle").doubleValue();
+        angle = deg(par("startAngle"));
         changeIntervalParameter = &par("changeInterval");
         changeAngleByParameter = &par("changeAngleBy");
         speedParameter = &par("speed");
@@ -47,14 +47,13 @@ void MassMobility::initialize(int stage)
 
 void MassMobility::setTargetPosition()
 {
-    angle += changeAngleByParameter->doubleValue();
+    angle += deg(changeAngleByParameter->doubleValue());
     EV_DEBUG << "angle: " << angle << endl;
-    double rad = M_PI * angle / 180.0;
-    Coord direction(cos(rad), sin(rad));
-    simtime_t nextChangeInterval = changeIntervalParameter->doubleValue();
+    Coord direction(cos(rad(angle).get()), sin(rad(angle).get()));
+    simtime_t nextChangeInterval = *changeIntervalParameter;
     EV_DEBUG << "interval: " << nextChangeInterval << endl;
     sourcePosition = lastPosition;
-    targetPosition = lastPosition + direction * speedParameter->doubleValue() * nextChangeInterval.dbl();
+    targetPosition = lastPosition + direction * (*speedParameter) * nextChangeInterval.dbl();
     previousChange = simTime();
     nextChange = previousChange + nextChangeInterval;
 }
@@ -64,18 +63,18 @@ void MassMobility::move()
     simtime_t now = simTime();
     if (now == nextChange) {
         lastPosition = targetPosition;
-        handleIfOutside(REFLECT, lastPosition, lastSpeed, angle);
+        handleIfOutside(REFLECT, lastPosition, lastVelocity, angle);
         EV_INFO << "reached current target position = " << lastPosition << endl;
         setTargetPosition();
         EV_INFO << "new target position = " << targetPosition << ", next change = " << nextChange << endl;
-        lastSpeed = (targetPosition - lastPosition) / (nextChange - simTime()).dbl();
+        lastVelocity = (targetPosition - lastPosition) / (nextChange - simTime()).dbl();
     }
     else if (now > lastUpdate) {
         ASSERT(nextChange == -1 || now < nextChange);
         double alpha = (now - previousChange) / (nextChange - previousChange);
         lastPosition = sourcePosition * (1 - alpha) + targetPosition * alpha;
-        double dummyAngle;
-        handleIfOutside(REFLECT, lastPosition, lastSpeed, dummyAngle);
+        rad dummyAngle;
+        handleIfOutside(REFLECT, lastPosition, lastVelocity, dummyAngle);
     }
 }
 

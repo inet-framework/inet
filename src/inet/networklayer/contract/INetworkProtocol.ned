@@ -26,8 +26,8 @@ moduleinterface INetworkProtocol
     parameters:
         @display("i=block/fork");
     gates:
-        input upperLayerIn[];
-        output upperLayerOut[];
-        input lowerLayerIn[];
-        output lowerLayerOut[];
+        input transportIn @labels(INetworkProtocolControlInfo/down);
+        output transportOut @labels(INetworkProtocolControlInfo/up);
+        input queueIn @labels(INetworkHeader);
+        output queueOut @labels(INetworkHeader);
 }

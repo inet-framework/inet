@@ -24,9 +24,9 @@ moduleinterface ISpanningTree
 {
     parameters:
         @display("i=block/network2");
-        double helloTime @unit("s");
-        double forwardDelay @unit("s");
-        double maxAge @unit("s");
+        double helloTime @unit(s);
+        double forwardDelay @unit(s);
+        double maxAge @unit(s);
         int bridgePriority;
         bool visualize;
     gates:

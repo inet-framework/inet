@@ -28,29 +28,30 @@ void BasicFragmentationPolicy::initialize()
     fragmentationThreshold = par("fragmentationThreshold");
 }
 
-std::vector<int> BasicFragmentationPolicy::computeFragmentSizes(Ieee80211DataOrMgmtFrame *frame)
+std::vector<int> BasicFragmentationPolicy::computeFragmentSizes(Packet *frame)
 {
     if (fragmentationThreshold < frame->getByteLength()) {
         std::vector<int> sizes;
         int payloadLength = 0;
         int headerLength = 0;
         // Mgmt frames don't have payload
-        if (dynamic_cast<Ieee80211DataFrame*>(frame)) {
-            cPacket *payload = frame->decapsulate();
-            payloadLength = payload->getByteLength();
-            headerLength = frame->getByteLength();
-            frame->encapsulate(payload); // restore original state
+        const auto& header = frame->peekAtFront<Ieee80211MacHeader>();
+        const auto& trailer = frame->peekAtBack<Ieee80211MacTrailer>();
+        int trailerLength = B(trailer->getChunkLength()).get();
+        if (dynamicPtrCast<const Ieee80211DataHeader>(header)) {
+            headerLength = B(header->getChunkLength()).get();
+            payloadLength = frame->getByteLength() - headerLength - trailerLength;
         }
         else
             headerLength = frame->getByteLength();
-        int maxFragmentPayload = fragmentationThreshold - headerLength;
+        int maxFragmentPayload = fragmentationThreshold - headerLength - trailerLength;
         if (payloadLength >= maxFragmentPayload * MAX_NUM_FRAGMENTS)
             throw cRuntimeError("Fragmentation: frame \"%s\" too large, won't fit into %d fragments", frame->getName(), MAX_NUM_FRAGMENTS);
-        for(int i = 0; headerLength + payloadLength > fragmentationThreshold; i++) {
-            sizes.push_back(fragmentationThreshold);
+        for(int i = 0; headerLength + trailerLength + payloadLength > fragmentationThreshold; i++) {
+            sizes.push_back(fragmentationThreshold - headerLength - trailerLength);
             payloadLength -= maxFragmentPayload;
         }
-        sizes.push_back(headerLength + payloadLength);
+        sizes.push_back(payloadLength);
         return sizes;
     }
     return std::vector<int>();

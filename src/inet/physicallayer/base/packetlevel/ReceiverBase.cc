@@ -15,9 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/physicallayer/base/packetlevel/NarrowbandNoiseBase.h"
 #include "inet/physicallayer/base/packetlevel/ReceiverBase.h"
+#include "inet/physicallayer/common/packetlevel/Interference.h"
 #include "inet/physicallayer/common/packetlevel/ReceptionDecision.h"
 #include "inet/physicallayer/common/packetlevel/ReceptionResult.h"
+#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 
@@ -67,17 +71,7 @@ bool ReceiverBase::computeIsReceptionAttempted(const IListening *listening, cons
     }
 }
 
-const ReceptionIndication *ReceiverBase::computeReceptionIndication(const ISNIR *snir) const
-{
-    return createReceptionIndication();
-}
-
-ReceptionIndication *ReceiverBase::createReceptionIndication() const
-{
-    return new ReceptionIndication();
-}
-
-const IReceptionDecision *ReceiverBase::computeReceptionDecision(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISNIR *snir) const
+const IReceptionDecision *ReceiverBase::computeReceptionDecision(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const
 {
     auto isReceptionPossible = computeIsReceptionPossible(listening, reception, part);
     auto isReceptionAttempted = isReceptionPossible && computeIsReceptionAttempted(listening, reception, part, interference);
@@ -85,16 +79,45 @@ const IReceptionDecision *ReceiverBase::computeReceptionDecision(const IListenin
     return new ReceptionDecision(reception, part, isReceptionPossible, isReceptionAttempted, isReceptionSuccessful);
 }
 
-const IReceptionResult *ReceiverBase::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const
+const IReceptionResult *ReceiverBase::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
-    auto radio = reception->getReceiver();
-    auto radioMedium = radio->getMedium();
-    auto transmission = reception->getTransmission();
-    auto indication = computeReceptionIndication(snir);
-    // TODO: add all cached decisions?
-    auto decisions = new std::vector<const IReceptionDecision *>();
-    decisions->push_back(radioMedium->getReceptionDecision(radio, listening, transmission, IRadioSignal::SIGNAL_PART_WHOLE));
-    return new ReceptionResult(reception, decisions, indication);
+    bool isReceptionSuccessful = true;
+    for (auto decision : *decisions)
+        isReceptionSuccessful &= decision->isReceptionSuccessful();
+    auto packet = computeReceivedPacket(snir, isReceptionSuccessful);
+    auto signalPower = computeSignalPower(listening, snir, interference);
+    if (!std::isnan(signalPower.get())) {
+        auto signalPowerInd = packet->addTagIfAbsent<SignalPowerInd>();
+        signalPowerInd->setPower(signalPower);
+    }
+    auto snirInd = packet->addTagIfAbsent<SnirInd>();
+    snirInd->setMinimumSnir(snir->getMin());
+    snirInd->setMaximumSnir(snir->getMax());
+    return new ReceptionResult(reception, decisions, packet);
+}
+
+W ReceiverBase::computeSignalPower(const IListening *listening, const ISnir *snir, const IInterference *interference) const
+{
+    if (!dynamic_cast<const NarrowbandNoiseBase *>(snir->getNoise()))
+        return W(0);
+    else {
+        auto analogModel = snir->getReception()->getTransmission()->getMedium()->getAnalogModel();
+        auto signalPlusNoise = check_and_cast<const NarrowbandNoiseBase *>(analogModel->computeNoise(snir->getReception(), snir->getNoise()));
+        auto signalPower = signalPlusNoise == nullptr ? W(NaN) : signalPlusNoise->computeMinPower(listening->getStartTime(), listening->getEndTime());
+        delete signalPlusNoise;
+        return signalPower;
+    }
+}
+
+Packet *ReceiverBase::computeReceivedPacket(const ISnir *snir, bool isReceptionSuccessful) const
+{
+    auto transmittedPacket = snir->getReception()->getTransmission()->getPacket();
+    auto receivedPacket = transmittedPacket->dup();
+    receivedPacket->clearTags();
+    receivedPacket->addTag<PacketProtocolTag>()->setProtocol(transmittedPacket->getTag<PacketProtocolTag>()->getProtocol());
+    if (!isReceptionSuccessful)
+        receivedPacket->setBitError(true);
+    return receivedPacket;
 }
 
 } // namespace physicallayer

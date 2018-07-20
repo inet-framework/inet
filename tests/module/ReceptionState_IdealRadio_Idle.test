@@ -5,15 +5,15 @@ The received signal is too weak to sense at all.
 
 %file: test.ned
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.WirelessHost;
-import inet.physicallayer.idealradio.IdealRadioMedium;
+import inet.physicallayer.unitdisk.UnitDiskRadioMedium;
 
 network Test
 {
     submodules:
-        radioMedium: IdealRadioMedium;
-        configurator: IPv4NetworkConfigurator;
+        radioMedium: UnitDiskRadioMedium;
+        configurator: Ipv4NetworkConfigurator;
         host1: WirelessHost;
         host2: WirelessHost;
 }
@@ -32,7 +32,7 @@ output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
 output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
-**.arpType = "GlobalARP"
+**.arp.typename = "GlobalArp"
 
 **.mobility.constraintAreaMinZ = 0m
 **.mobility.constraintAreaMinX = 0m
@@ -43,31 +43,36 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.mobility.initFromDisplayString = false
 **.mobility.initialY = 500m
 **.mobility.initialZ = 0m
-*.host*.mobilityType = "StationaryMobility"
+*.host*.mobility.typename = "StationaryMobility"
 *.host1.mobility.initialX = 100m
 *.host2.mobility.initialX = 900m
 
 # nic
-*.host*.wlan[*].typename = "IdealWirelessNic"
+*.host*.wlan[*].typename = "AckingWirelessInterface"
 *.host*.wlan[*].bitrate = 2Mbps
 *.host*.wlan[*].mac.headerLength = 10B
 *.host*.wlan[*].mac.fullDuplex = false
-*.host*.wlan[*].radioType = "IdealRadio"
+*.host*.wlan[*].radio.typename = "UnitDiskRadio"
 *.host*.wlan[*].radio.transmitter.bitrate = 2Mbps
 *.host*.wlan[*].radio.transmitter.preambleDuration = 0s
-*.host*.wlan[*].radio.transmitter.headerBitLength = 100b
+*.host*.wlan[*].radio.transmitter.headerLength = 100b
 *.host*.wlan[*].radio.transmitter.communicationRange = 200m
 *.host*.wlan[*].radio.transmitter.interferenceRange = 400m
 *.host*.wlan[*].radio.transmitter.detectionRange = 600m
 *.host*.wlan[*].radio.receiver.ignoreInterference = true
 
 # ping app
-*.host1.numPingApps = 1
-*.host1.pingApp[0].count = 1
-*.host1.pingApp[0].printPing = true
-*.host1.pingApp[0].destAddr = "host2"
-*.host1.pingApp[0].startTime = 0s
+*.host1.numApps = 1
+*.host1.app[0].typename = "PingApp"
+*.host1.app[0].count = 1
+*.host1.app[0].printPing = true
+*.host1.app[0].destAddr = "host2"
+*.host1.app[0].startTime = 0s
 
+%#--------------------------------------------------------------------------------------------------------------
+%# remove colorizing
+%subst: /\x1B\[[0-9;]*m//
+%#--------------------------------------------------------------------------------------------------------------
 %not-contains: results/General-0.elog
 Changing radio reception state from IDLE to BUSY.
 %not-contains: results/General-0.elog

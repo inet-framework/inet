@@ -26,6 +26,30 @@ namespace physicallayer {
 
 class INET_API ErrorModelBase : public cModule, public IErrorModel
 {
+  public:
+    enum class CorruptionMode {
+        CM_UNDEFINED = -1,
+        CM_PACKET,
+        CM_CHUNK,
+        CM_BYTE,
+        CM_BIT
+    };
+
+  protected:
+    CorruptionMode corruptionMode = CorruptionMode::CM_UNDEFINED;
+
+  protected:
+    virtual void initialize(int stage) override;
+
+    virtual bool hasProbabilisticError(b length, double ber) const;
+
+    virtual Packet *corruptBits(const Packet *packet, double ber, bool& isCorrupted) const;
+    virtual Packet *corruptBytes(const Packet *packet, double ber, bool& isCorrupted) const;
+    virtual Packet *corruptChunks(const Packet *packet, double ber, bool& isCorrupted) const;
+    virtual Packet *corruptPacket(const Packet *packet, bool& isCorrupted) const;
+
+    virtual Packet *computeCorruptedPacket(const Packet *packet, double ber) const;
+    virtual Packet *computeCorruptedPacket(const ISnir *snir) const override;
 };
 
 } // namespace physicallayer

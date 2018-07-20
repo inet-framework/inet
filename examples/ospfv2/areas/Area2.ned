@@ -3,7 +3,7 @@ package inet.examples.ospfv2.areas;
 
 import inet.linklayer.ethernet.EtherHub;
 import inet.node.inet.StandardHost;
-import inet.node.ospfv2.OSPFRouter;
+import inet.node.ospfv2.OspfRouter;
 import ned.DatarateChannel;
 
 
@@ -22,25 +22,25 @@ module OneNetArea
     submodules:
         H3: StandardHost {
             parameters:
-                @display("p=372,72;i=device/laptop");
+                @display("p=550,110;i=device/laptop");
             gates:
                 ethg[1];
         }
         N3: EtherHub {
             parameters:
-                @display("p=264,72");
+                @display("p=400,110");
             gates:
                 ethg[2];
         }
-        R5: OSPFRouter {
+        R5: OspfRouter {
             parameters:
-                @display("p=160,72");
+                @display("p=250,110");
             gates:
                 ethg[2];
         }
-        R4: OSPFRouter {
+        R4: OspfRouter {
             parameters:
-                @display("p=64,72");
+                @display("p=100,110");
             gates:
                 ethg[2];
         }

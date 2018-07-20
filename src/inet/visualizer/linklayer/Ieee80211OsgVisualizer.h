@@ -45,7 +45,7 @@ class INET_API Ieee80211OsgVisualizer : public Ieee80211VisualizerBase
   protected:
     virtual void initialize(int stage) override;
 
-    virtual Ieee80211Visualization *createIeee80211Visualization(cModule *networkNode, InterfaceEntry *interfaceEntry, std::string ssid) override;
+    virtual Ieee80211Visualization *createIeee80211Visualization(cModule *networkNode, InterfaceEntry *interfaceEntry, std::string ssid, W power) override;
     virtual void addIeee80211Visualization(const Ieee80211Visualization *ieee80211Visualization) override;
     virtual void removeIeee80211Visualization(const Ieee80211Visualization *ieee80211Visualization) override;
 
@@ -54,7 +54,7 @@ class INET_API Ieee80211OsgVisualizer : public Ieee80211VisualizerBase
   protected:
     virtual void initialize(int stage) override {}
 
-    virtual Ieee80211Visualization *createIeee80211Visualization(cModule *networkNode, InterfaceEntry *interfaceEntry, std::string ssid) override { return nullptr; }
+    virtual Ieee80211Visualization *createIeee80211Visualization(cModule *networkNode, InterfaceEntry *interfaceEntry, std::string ssid, W power) override { return nullptr; }
 
 #endif // ifdef WITH_OSG
 };

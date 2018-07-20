@@ -17,8 +17,8 @@
 
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/OSGScene.h"
-#include "inet/common/OSGUtils.h"
+#include "inet/common/OsgScene.h"
+#include "inet/common/OsgUtils.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/visualizer/base/PathOsgVisualizerBase.h"
 
@@ -41,6 +41,16 @@ PathOsgVisualizerBase::PathOsgVisualization::PathOsgVisualization(const std::vec
 PathOsgVisualizerBase::PathOsgVisualization::~PathOsgVisualization()
 {
     // TODO: delete node;
+}
+
+void PathOsgVisualizerBase::initialize(int stage)
+{
+    PathVisualizerBase::initialize(stage);
+    if (!hasGUI()) return;
+    if (stage == INITSTAGE_LOCAL) {
+        auto canvas = visualizerTargetModule->getCanvas();
+        lineManager = LineManager::getOsgLineManager(canvas);
+    }
 }
 
 void PathOsgVisualizerBase::refreshDisplay() const
@@ -67,6 +77,7 @@ void PathOsgVisualizerBase::addPathVisualization(const PathVisualization *pathVi
     PathVisualizerBase::addPathVisualization(pathVisualization);
     auto pathOsgVisualization = static_cast<const PathOsgVisualization *>(pathVisualization);
     auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
+    lineManager->addModulePath(pathVisualization);
     scene->addChild(pathOsgVisualization->node);
 }
 
@@ -75,6 +86,7 @@ void PathOsgVisualizerBase::removePathVisualization(const PathVisualization *pat
     PathVisualizerBase::removePathVisualization(pathVisualization);
     auto pathOsgVisualization = static_cast<const PathOsgVisualization *>(pathVisualization);
     auto node = pathOsgVisualization->node;
+    lineManager->removeModulePath(pathVisualization);
     node->getParent(0)->removeChild(node);
 }
 

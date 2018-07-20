@@ -1,0 +1,69 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-01  Zoltan Bojthe
+
+	Added B/b units to length constants and length fields of chunks.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-02-14  Zoltan Bojthe
+
+	Renamed functions to use camel case.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    DDPacketID -> DdPacketId
+	    DesignatedRouterID -> DesignatedRouterId
+	    IPv4Address -> Ipv4Address
+	    LSA -> Lsa
+	    LSAKeyType -> LsaKeyType
+	    LSARequest -> LsaRequest
+	    LSAType -> LsaType
+	    NetworkLSA -> NetworkLsa
+	    OSPFASExternalLSA -> OspfAsExternalLsa
+	    OSPFArea -> OspfArea
+	    OSPFDDOptions -> OspfDdOptions
+	    OSPFDatabaseDescriptionPacket -> OspfDatabaseDescriptionPacket
+	    OSPFInterface -> OspfInterface
+	    OSPFInterfaceType -> OspfInterfaceType
+	    OSPFLSA -> OspfLsa
+	    OSPFLSAHeader -> OspfLsaHeader
+	    OSPFLinkStateRequestPacket -> OspfLinkStateRequestPacket
+	    OSPFLinkStateUpdatePacket -> OspfLinkStateUpdatePacket
+	    OSPFNeighbor -> OspfNeighbor
+	    OSPFNeighborState -> OspfNeighborState
+	    OSPFNeighborStateAttempt -> OspfNeighborStateAttempt
+	    OSPFNeighborStateDown -> OspfNeighborStateDown
+	    OSPFNeighborStateExchange -> OspfNeighborStateExchange
+	    OSPFNeighborStateExchangeStart -> OspfNeighborStateExchangeStart
+	    OSPFNeighborStateFull -> OspfNeighborStateFull
+	    OSPFNeighborStateInit -> OspfNeighborStateInit
+	    OSPFNeighborStateLoading -> OspfNeighborStateLoading
+	    OSPFNeighborStateTwoWay -> OspfNeighborStateTwoWay
+	    OSPFNetworkLSA -> OspfNetworkLsa
+	    OSPFOptions -> OspfOptions
+	    OSPFRouter -> OspfRouter
+	    OSPFRouterLSA -> OspfRouterLsa
+	    OSPFSummaryLSA -> OspfSummaryLsa
+	    OSPFTimer -> OspfTimer
+	    OSPFcommon -> OspfCommon
+	    RouterID -> RouterId
+	    RouterLSA -> RouterLsa
+	    TransmittedLSA -> TransmittedLsa
+
+2017-12-14  Levente Mészáros
+
+	Replaced pushHeader with insertAtEnd because these chunks are not headers.
+	Removed unnecessary markImmutable() calls.
+
+2017-12-11  Zoltan Bojthe
+
+	Updated for new msgc function names: getFooForUpdate, insertFoo, eraseFoo, etc.
+
+2017-11-16  ------ inet-3.99.1 released ------
+

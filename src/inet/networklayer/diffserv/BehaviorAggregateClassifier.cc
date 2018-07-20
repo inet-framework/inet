@@ -17,23 +17,24 @@
 //
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 
 #ifdef WITH_IPv4
-#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-#include "inet/networklayer/ipv6/IPv6Datagram.h"
+#include "inet/networklayer/ipv6/Ipv6Header.h"
 #endif // ifdef WITH_IPv6
 
 #ifdef WITH_UDP
-#include "inet/transportlayer/udp/UDPPacket.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
 #endif // ifdef WITH_UDP
 
 #ifdef WITH_TCP_COMMON
-#include "inet/transportlayer/tcp_common/TCPSegment.h"
+#include "inet/transportlayer/tcp_common/TcpHeader.h"
 #endif // ifdef WITH_TCP_COMMON
 
 #include "inet/networklayer/diffserv/BehaviorAggregateClassifier.h"
@@ -65,7 +66,7 @@ void BehaviorAggregateClassifier::initialize()
 
 void BehaviorAggregateClassifier::handleMessage(cMessage *msg)
 {
-    cPacket *packet = check_and_cast<cPacket *>(msg);
+    Packet *packet = check_and_cast<Packet *>(msg);
     numRcvd++;
     int clazz = classifyPacket(packet);
     emit(pkClassSignal, clazz);
@@ -84,7 +85,7 @@ void BehaviorAggregateClassifier::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-int BehaviorAggregateClassifier::classifyPacket(cPacket *packet)
+int BehaviorAggregateClassifier::classifyPacket(Packet *packet)
 {
     int dscp = getDscpFromPacket(packet);
     if (dscp >= 0) {
@@ -95,20 +96,24 @@ int BehaviorAggregateClassifier::classifyPacket(cPacket *packet)
     return -1;
 }
 
-int BehaviorAggregateClassifier::getDscpFromPacket(cPacket *packet)
+int BehaviorAggregateClassifier::getDscpFromPacket(Packet *packet)
 {
-    for ( ; packet; packet = packet->getEncapsulatedPacket()) {
+    auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
+
+    //TODO processing link-layer headers when exists
+
 #ifdef WITH_IPv4
-        IPv4Datagram *ipv4Datagram = dynamic_cast<IPv4Datagram *>(packet);
-        if (ipv4Datagram)
-            return ipv4Datagram->getDiffServCodePoint();
+    if (protocol == &Protocol::ipv4) {
+        const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
+        return ipv4Header->getDiffServCodePoint();
+    }
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-        IPv6Datagram *ipv6Datagram = dynamic_cast<IPv6Datagram *>(packet);
-        if (ipv6Datagram)
-            return ipv6Datagram->getDiffServCodePoint();
-#endif // ifdef WITH_IPv6
+    if (protocol == &Protocol::ipv6) {
+        const auto& ipv6Header = packet->peekAtFront<Ipv6Header>();
+        return ipv6Header->getDiffServCodePoint();
     }
+#endif // ifdef WITH_IPv6
     return -1;
 }
 

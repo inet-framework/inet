@@ -1,3 +1,54 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    16PPMModulation -> 16PpmModulation
+	    2GFSKModulation -> 2GfskModulation
+	    4GFSKModulation -> 4GfskModulation
+	    4PPMModulation -> 4PpmModulation
+	    APSKModulationBase -> ApskModulationBase
+	    APSKSymbol -> ApskSymbol
+	    BPSKModulation -> BpskModulation
+	    DBPSKModulation -> DbpskModulation
+	    DPSKModulationBase -> DpskModulationBase
+	    DQPSKModulation -> DqpskModulation
+	    DSSSOQPSK16Modulation -> DsssOqpsk16Modulation
+	    GFSKModulationBase -> GfskModulationBase
+	    MASKModulation -> MaskModulation
+	    MFSKModulation -> MfskModulation
+	    MPSKModulation -> MpskModulation
+	    MQAMModulation -> MqamModulation
+	    MQAMModulationBase -> MqamModulationBase
+	    PPMModulationBase -> PpmModulationBase
+	    QAM16Modulation -> Qam16Modulation
+	    QAM256Modulation -> Qam256Modulation
+	    QAM64Modulation -> Qam64Modulation
+	    QBPSKModulation -> QbpskModulation
+	    QPSKModulation -> QpskModulation
+	    _16PPMModulation -> _16PpmModulation
+	    _2GFSKModulation -> _2GfskModulation
+	    _4GFSKModulation -> _4GfskModulation
+	    _4PPMModulation -> _4PpmModulation
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2016-06-30  Florian Kauer
+
+	Fixed DSSSOQPSK16Modulation.
+
+	The calculation does not make any sense if bitrate and bandwidth do not
+	match the conventional values. Furthermore, the base class requires an
+	existing symbol vector.
+
+	Signed-off-by: Florian Kauer <florian.kauer@koalo.de>
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

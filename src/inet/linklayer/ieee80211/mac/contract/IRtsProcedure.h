@@ -27,11 +27,12 @@ class INET_API IRtsProcedure
 {
     public:
         virtual ~IRtsProcedure() { }
-        virtual Ieee80211RTSFrame *buildRtsFrame(Ieee80211DataOrMgmtFrame *dataOrMgmtFrame) const = 0;
-        virtual void processTransmittedRts(Ieee80211RTSFrame *rtsFrame) = 0;
+
+        virtual const Ptr<Ieee80211RtsFrame> buildRtsFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) const = 0;
+        virtual void processTransmittedRts(const Ptr<const Ieee80211RtsFrame>& rtsFrame) = 0;
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif // ifndef __INET_IRTSPROCEDURE_H

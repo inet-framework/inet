@@ -21,15 +21,15 @@
 namespace inet {
 namespace ieee80211 {
 
-bool LegacyDuplicateRemoval::isDuplicate(Ieee80211DataOrMgmtFrame *frame)
+bool LegacyDuplicateRemoval::isDuplicate(const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
-    ASSERT(frame->getType() != ST_DATA_WITH_QOS);
-    const MACAddress& address = frame->getTransmitterAddress();
-    SequenceControlField seqVal(frame);
+    ASSERT(header->getType() != ST_DATA_WITH_QOS);
+    const MacAddress& address = header->getTransmitterAddress();
+    SequenceControlField seqVal(header);
     auto it = lastSeenSeqNumCache.find(address);
     if (it == lastSeenSeqNumCache.end())
-        lastSeenSeqNumCache.insert(std::pair<MACAddress, SequenceControlField>(address, seqVal));
-    else if (it->second.getSequenceNumber() == seqVal.getSequenceNumber() && it->second.getFragmentNumber() == seqVal.getFragmentNumber() && frame->getRetry())
+        lastSeenSeqNumCache.insert(std::pair<MacAddress, SequenceControlField>(address, seqVal));
+    else if (it->second.getSequenceNumber() == seqVal.getSequenceNumber() && it->second.getFragmentNumber() == seqVal.getFragmentNumber() && header->getRetry())
         return true;
     else
         it->second = seqVal;

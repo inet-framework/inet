@@ -1,0 +1,24 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    OSGUtils -> OsgUtils
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+====== inet-3.x ======
+
+2017-06-08  Levente Mészáros
+
+	Added new energy storage visualizers.

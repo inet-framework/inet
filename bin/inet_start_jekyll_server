@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if [[ $# < 1 ]]; then
+  echo "Missing arguments"
+  exit 1
+fi
+
+PORT_NUMBER=$1
+
+docker run --rm -it -p $PORT_NUMBER:$PORT_NUMBER -v $(pwd):/site madduci/docker-github-pages:172 exec jekyll serve --watch --host 0.0.0.0 --destination=/tmp/_site --port $PORT_NUMBER --incremental

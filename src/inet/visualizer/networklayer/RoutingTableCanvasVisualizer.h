@@ -34,7 +34,7 @@ class INET_API RoutingTableCanvasVisualizer : public RoutingTableVisualizerBase
         LabeledLineFigure *figure = nullptr;
 
       public:
-        RouteCanvasVisualization(LabeledLineFigure *figure, const IPv4Route *route, int nodeModuleId, int nextHopModuleId);
+        RouteCanvasVisualization(LabeledLineFigure *figure, const Ipv4Route *route, int nodeModuleId, int nextHopModuleId);
         virtual ~RouteCanvasVisualization();
     };
 
@@ -47,7 +47,7 @@ class INET_API RoutingTableCanvasVisualizer : public RoutingTableVisualizerBase
     virtual void initialize(int stage) override;
     virtual void refreshDisplay() const override;
 
-    virtual const RouteVisualization *createRouteVisualization(IPv4Route *route, cModule *node, cModule *nextHop) const override;
+    virtual const RouteVisualization *createRouteVisualization(Ipv4Route *route, cModule *node, cModule *nextHop) const override;
     virtual void addRouteVisualization(const RouteVisualization *routeVisualization) override;
     virtual void removeRouteVisualization(const RouteVisualization *routeVisualization) override;
     virtual void refreshRouteVisualization(const RouteVisualization *routeVisualization) const override;

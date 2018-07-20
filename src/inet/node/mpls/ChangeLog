@@ -1,3 +1,86 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-04-25  Andras Varga
+
+	Changed RsvpMplsRouter ingress classifier configurable.
+
+2018-04-06  Levente Mészáros
+
+	Renamed rsvp_te folder to rsvpte according to INET naming scheme.
+	Renamed Rsvp module to RsvpTe.
+	Renamed modules RsvpRouter to RsvpMplsRouter, and LdpRouter to LdpMplsRouter.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-01-23  Levente Mészáros
+
+	Replaced MessageDispatcher lower/upper vector gates with a single one.
+
+2018-01-11  Zoltan Bojthe
+
+	Added new moduleinterfaces (ILoopbackInterface, IEthernetInterface, IPppInterface).
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IPv4NetworkLayer -> Ipv4NetworkLayer
+	    IPv4RoutingTable -> Ipv4RoutingTable
+	    ITCP -> ITcp
+	    IUDP -> IUdp
+	    LDP -> Ldp
+	    LDP_LSR -> LdpRouter
+	    LIBTable -> LibTable
+	    MPLS -> Mpls
+	    PPPFrame -> PppFrame
+	    PPPInterface -> PppInterface
+	    RSVP -> Rsvp
+	    RSVP_LSR -> RsvpRouter
+	    TCP -> Tcp
+	    TCPSpoof -> TcpSpoof
+	    TCP_NSC -> TcpNsc
+	    TCP_lwIP -> TcpLwip
+	    TED -> Ted
+	    UDP -> Udp
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-08-25  Zoltan Bojthe
+
+	Changed module positions.
+
+2016-06-16  Levente Mészáros
+
+	Changed @display strings for better positioning, icons, etc.
+
+2016-06-16  Zoltan Bojthe
+
+	Changed lo0 loopback interface to a submodule vector.
+
+2016-06-02  Levente Mészáros
+
+	Changed appIn/appOut vector gates to simple gates.
+
+2016-05-31  Levente Mészáros
+
+	Changed positions and icons in display string to at least have well-layouted
+	network nodes.
+
+2016-05-31  Levente Mészáros
+
+	Added MessageDispatcher and removed RoutingTable according to new node architecture.
+
+2016-05-31  Levente Mészáros
+
+	Added routing table module path deep parameter assignments to network nodes.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

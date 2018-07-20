@@ -8,9 +8,9 @@ Testing OSPF routing
 %file: test.ned
 
 import inet.linklayer.ethernet.EtherHub;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
-import inet.node.ospfv2.OSPFRouter;
+import inet.node.ospfv2.OspfRouter;
 import inet.common.misc.ThruputMeteringChannel;
 import inet.common.scenario.ScenarioManager;
 
@@ -40,35 +40,35 @@ network Test1
             gates:
                 ethg[2];
         }
-        R1A: OSPFRouter {
+        R1A: OspfRouter {
             parameters:
                 @display("p=226,132");
             gates:
                 ethg[3];
         }
-        RA: OSPFRouter {
+        RA: OspfRouter {
             parameters:
                 @display("p=266,92");
             gates:
                 ethg[2];
         }
-        RB: OSPFRouter {
+        RB: OspfRouter {
             parameters:
                 @display("p=266,182");
             gates:
                 ethg[2];
         }
-        R1B: OSPFRouter {
+        R1B: OspfRouter {
             parameters:
                 @display("p=306,132");
             gates:
                 ethg[3];
         }
-        RI[numIRouters]: OSPFRouter {
+        RI[numIRouters]: OspfRouter {
             gates:
                 ethg[2];
         }
-        R2: OSPFRouter {
+        R2: OspfRouter {
             parameters:
                 @display("p=416,92");
             gates:
@@ -92,7 +92,7 @@ network Test1
                 script = xmldoc("scenario.xml");
 //                script = xml("<empty/>");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 config = xml("<config>"+
                             "<interface among='H1 R1A' address='192.168.1.x' netmask='255.255.255.0' />"+
@@ -136,17 +136,17 @@ num-rngs = 2
 
 **.ospf.ospfConfig = xmldoc("ASConfig.xml")
 
-**.numUdpApps = 2
-**.udpApp[0].typename = "UDPBasicApp"
-**.udpApp[0].destPort = 1234
-**.udpApp[0].messageLength = 32 bytes
-**.udpApp[0].sendInterval = 1s
-**.udpApp[0].startTime = 100s + uniform(-0.5s, 0.5s, 1)
-**.udpApp[0].stopTime = this.startTime + 999.9s
-**.H2.udpApp[0].destAddresses = "H1"
-**.H1.udpApp[0].destAddresses = "H2"
-**.udpApp[1].typename = "UDPEchoApp"
-**.udpApp[1].localPort = 1234
+**.numApps = 2
+**.app[0].typename = "UdpBasicApp"
+**.app[0].destPort = 1234
+**.app[0].messageLength = 32 bytes
+**.app[0].sendInterval = 1s
+**.app[0].startTime = 100s + uniform(-0.5s, 0.5s, 1)
+**.app[0].stopTime = this.startTime + 999.9s
+**.H2.app[0].destAddresses = "H1"
+**.H1.app[0].destAddresses = "H2"
+**.app[1].typename = "UdpEchoApp"
+**.app[1].localPort = 1234
 
 **.arp.cacheTimeout = 1s
 
@@ -229,55 +229,55 @@ library("omnetpp", warn.conflicts=FALSE)
 #TEST parameters
 runCount <- 7
 hostCount <- 2
-sentPk <- 1000
+packetSent <- 1000
 echoedPk <- 960
-rcvdPk <- 960
+packetReceived <- 960
 
 # begin TEST:
 
 cat("\nOMNETPP TEST RESULT:\n")
 
 x <- loadDataset('results/General-*.sca')
-ds <- x$scalars[grep("\\.H\\d\\.udpApp\\[\\d\\]$",x$scalars$module),]
+ds <- x$scalars[grep("\\.H\\d\\.app\\[\\d\\]$",x$scalars$module),]
 
 #merge runnumber column to ds:
 y <- subset(x$runattrs, attrname=='runnumber')
 names(y) <- c("runid","runnumber")
 ds <- merge(ds,y)
 
-sent <- ds[ds$name == "sentPk:count",]
-rcvd <- ds[ds$name == "rcvdPk:count",]
+sent <- ds[ds$name == "packetSent:count",]
+rcvd <- ds[ds$name == "packetReceived:count",]
 echoed <- ds[ds$name == "echoedPk:count",]
 
 cat("\nOSPF TEST RESULT:\n")
 
-sent$success = (sent$value == sentPk)
+sent$success = (sent$value == packetSent)
 if(length(sent$value) == runCount*hostCount & min(sent$success) == TRUE)
 {
     cat("SENT OK\n")
 } else {
     cat("SENT BAD:\n")
-    sent$rate = sent$value*100/sentPk
+    sent$rate = sent$value*100/packetSent
     print(sent)
 }
 
-echoed$success = (echoed$value >= echoedPk & echoed$value <= sentPk)
+echoed$success = (echoed$value >= echoedPk & echoed$value <= packetSent)
 if(length(echoed$value) == runCount*hostCount & min(echoed$success) == TRUE)
 {
     cat("ECHOED OK\n")
 } else {
     cat("ECHOED BAD:\n")
-    echoed$rate = echoed$value*100/sentPk
+    echoed$rate = echoed$value*100/packetSent
     print(echoed)
 }
 
-rcvd$success = ((rcvd$value >= rcvdPk) & (rcvd$value <= sentPk))
+rcvd$success = ((rcvd$value >= packetReceived) & (rcvd$value <= packetSent))
 if(length(rcvd$value) == runCount*hostCount & min(rcvd$success) == TRUE)
 {
     cat("RCVD OK\n")
 } else {
     cat("RCVD BAD:\n")
-    rcvd$rate = rcvd$value*100/sentPk
+    rcvd$rate = rcvd$value*100/packetSent
     print(rcvd)
 }
 

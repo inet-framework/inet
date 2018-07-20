@@ -27,16 +27,14 @@ import inet.visualizer.contract.IStatisticVisualizer;
 module StatisticVisualizer like IStatisticVisualizer
 {
     parameters:
-        @display("i=block/app_s");
-        string canvasVisualizerType = default("StatisticCanvasVisualizer");
-        string osgVisualizerType = default("StatisticOsgVisualizer");
+        @display("i=block/app");
     submodules:
-        canvasVisualizer: <canvasVisualizerType> like IStatisticVisualizer if canvasVisualizerType != "" {
+        canvasVisualizer: <default("StatisticCanvasVisualizer")> like IStatisticVisualizer if typename != "" {
             parameters:
-                @display("p=100,50");
+                @display("p=100,100");
         }
-        osgVisualizer: <osgVisualizerType> like IStatisticVisualizer if osgVisualizerType != "" {
+        osgVisualizer: <default("StatisticOsgVisualizer")> like IStatisticVisualizer if typename != "" {
             parameters:
-                @display("p=100,150");
+                @display("p=100,200");
         }
 }

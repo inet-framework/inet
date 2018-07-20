@@ -27,8 +27,6 @@ namespace inet {
 
 namespace visualizer {
 
-using namespace inet::physicallayer;
-
 class INET_API RadioVisualizerBase : public VisualizerBase, public cListener
 {
   protected:
@@ -57,6 +55,17 @@ class INET_API RadioVisualizerBase : public VisualizerBase, public cListener
     double height;
     Placement placementHint;
     double placementPriority;
+    // antennaLobe
+    bool displayAntennaLobes = false;
+    bool antennaLobePlaneGlobal = false;
+    const char *antennaLobePlane = nullptr;
+    double antennaLobeRadius = NaN;
+    deg antennaLobeStep = deg(NaN);
+    double antennaLobeOpacity = NaN;
+    cFigure::Color antennaLobeLineColor;
+    cFigure::LineStyle antennaLobeLineStyle;
+    double antennaLobeLineWidth = NaN;
+    cFigure::Color antennaLobeFillColor;
     //@}
 
     std::map<int, const RadioVisualization *> radioVisualizations;
@@ -69,7 +78,7 @@ class INET_API RadioVisualizerBase : public VisualizerBase, public cListener
     virtual void subscribe();
     virtual void unsubscribe();
 
-    virtual RadioVisualization *createRadioVisualization(const IRadio *radio) const = 0;
+    virtual RadioVisualization *createRadioVisualization(const physicallayer::IRadio *radio) const = 0;
     virtual const RadioVisualization *getRadioVisualization(int radioModuleId);
     virtual void addRadioVisualization(const RadioVisualization *radioVisualization);
     virtual void removeRadioVisualization(const RadioVisualization *radioVisualization);

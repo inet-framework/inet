@@ -8,15 +8,15 @@ The first signal is expected to be received correctly.
 
 %file: test.ned
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.WirelessHost;
-import inet.physicallayer.idealradio.IdealRadioMedium;
+import inet.physicallayer.unitdisk.UnitDiskRadioMedium;
 
 network Test
 {
     submodules:
-        radioMedium: IdealRadioMedium;
-        configurator: IPv4NetworkConfigurator;
+        radioMedium: UnitDiskRadioMedium;
+        configurator: Ipv4NetworkConfigurator;
         hostSender1: WirelessHost;
         hostSender2: WirelessHost;
         hostReceiver: WirelessHost;
@@ -36,7 +36,7 @@ output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
 output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
-**.arpType = "GlobalARP"
+**.arp.typename = "GlobalArp"
 
 **.mobility.constraintAreaMinZ = 0m
 **.mobility.constraintAreaMinX = 0m
@@ -47,20 +47,20 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.mobility.initFromDisplayString = false
 **.mobility.initialY = 500m
 **.mobility.initialZ = 0m
-*.host*.mobilityType = "StationaryMobility"
+*.host*.mobility.typename = "StationaryMobility"
 *.hostSender1.mobility.initialX = 200m
 *.hostSender2.mobility.initialX = 800m
 *.hostReceiver.mobility.initialX = 400m
 
 # nic
-*.host*.wlan[*].typename = "IdealWirelessNic"
+*.host*.wlan[*].typename = "AckingWirelessInterface"
 *.host*.wlan[*].bitrate = 2Mbps
 *.host*.wlan[*].mac.headerLength = 10B
 *.host*.wlan[*].mac.fullDuplex = false
-*.host*.wlan[*].radioType = "IdealRadio"
+*.host*.wlan[*].radio.typename = "UnitDiskRadio"
 *.host*.wlan[*].radio.transmitter.bitrate = 2Mbps
 *.host*.wlan[*].radio.transmitter.preambleDuration = 0s
-*.host*.wlan[*].radio.transmitter.headerBitLength = 100b
+*.host*.wlan[*].radio.transmitter.headerLength = 100b
 *.host*.wlan[*].radio.receiver.ignoreInterference = false
 *.hostSender1.wlan[*].radio.transmitter.communicationRange = 300m
 *.hostSender1.wlan[*].radio.transmitter.interferenceRange = 600m
@@ -73,18 +73,23 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 *.hostReceiver.wlan[*].radio.transmitter.detectionRange = 0m
 
 # ping app
-*.hostSender*.numPingApps = 1
-*.hostSender*.pingApp[0].count = 1
-*.hostSender*.pingApp[0].printPing = true
-*.hostSender*.pingApp[0].destAddr = "hostReceiver"
-*.hostSender*.pingApp[0].startTime = 0s
+*.hostSender*.numApps = 1
+*.hostSender*.app[0].typename = "PingApp"
+*.hostSender*.app[0].count = 1
+*.hostSender*.app[0].printPing = true
+*.hostSender*.app[0].destAddr = "hostReceiver"
+*.hostSender*.app[0].startTime = 0s
 
+%#--------------------------------------------------------------------------------------------------------------
+%# remove colorizing
+%subst: /\x1B\[[0-9;]*m//
+%#--------------------------------------------------------------------------------------------------------------
 %contains: results/General-0.elog
 Changing radio reception state from IDLE to RECEIVING.
 %contains: results/General-0.elog
-Passing up contained packet `ping0' to higher layer
+Passing up contained packet 'ping0' to higher layer
 %contains: results/General-0.elog
-Sending datagram (inet::IPv4Datagram)ping0-reply with destination = 10.0.0.1
+Sending datagram 'ping0-reply' with destination = 10.0.0.1
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:

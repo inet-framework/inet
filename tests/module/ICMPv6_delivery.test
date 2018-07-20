@@ -1,10 +1,10 @@
 %description:
-Test for bug #473: ICMPv6 error messages are delivered to the transport layer protocol
+Test for bug #473: Icmpv6 error messages are delivered to the transport layer protocol
 that initiated the packet causing the error.
 
 NClientsEth example network is used, with one client.
 The client sends an UDP datagram to an unopened port of the
-server. The server generates an Destination Unreachable ICMPv6
+server. The server generates an Destination Unreachable Icmpv6
 error that should be received by the client application in the
 form of an error indication.
 
@@ -25,22 +25,23 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 *.n = 1
 
 # udp apps
-**.cli[*].numUdpApps = 1
-**.cli[*].udpApp[*].typename = "UDPBasicApp"
-**.cli[*].udpApp[0].destAddresses = "aaaa:2:2::8aa:ff:fe00:8" # "srv" does not work
-**.cli[*].udpApp[0].destPort = 1000
-**.cli[*].udpApp[0].messageLength = 100B
+**.cli[*].numApps = 1
+**.cli[*].app[*].typename = "UdpBasicApp"
+**.cli[*].app[0].destAddresses = "aaaa:2:2::8aa:ff:fe00:8" # "srv" does not work
+**.cli[*].app[0].destPort = 1000
+**.cli[*].app[0].messageLength = 100B
 
-**.cli[*].udpApp[0].startTime = 10s
-**.cli[*].udpApp[0].stopTime = 11s
-**.cli[*].udpApp[0].sendInterval = 10s
+**.cli[*].app[0].startTime = 10s
+**.cli[*].app[0].stopTime = 11s
+**.cli[*].app[0].sendInterval = 10s
 
-**.srv.numUdpApps = 1
-**.srv.udpApp[*].typename = "UDPSink"
-**.srv.udpApp[0].localPort = 1001
+**.srv.numApps = 1
+**.srv.app[*].typename = "UdpSink"
+**.srv.app[0].localPort = 1001
 
 # Ethernet NIC configuration
-**.eth[*].queueType = "DropTailQueue" # in routers
+**.eth[*].queue.typename = "EtherQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue" # in routers
 **.eth[*].queue.dataQueue.frameCapacity = 10  # in routers
 **.eth[*].mac.duplexEnabled = true
 

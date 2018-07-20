@@ -27,15 +27,18 @@ Ieee80211ErrorModelBase::Ieee80211ErrorModelBase()
 {
 }
 
-double Ieee80211ErrorModelBase::computePacketErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const
+double Ieee80211ErrorModelBase::computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
     Enter_Method_Silent();
-    const ITransmission *transmission = snir->getReception()->getTransmission();
-    const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(transmission);
-    const Ieee80211TransmissionBase *ieee80211Transmission = check_and_cast<const Ieee80211TransmissionBase *>(transmission);
-    const IIeee80211Mode *mode = ieee80211Transmission->getMode();
-    double headerSuccessRate = getHeaderSuccessRate(mode, flatTransmission->getHeaderBitLength(), snir->getMin());
-    double dataSuccessRate = getDataSuccessRate(mode, flatTransmission->getDataBitLength(), snir->getMin());
+    auto transmission = snir->getReception()->getTransmission();
+    auto flatTransmission = dynamic_cast<const FlatTransmissionBase *>(transmission);
+    auto ieee80211Transmission = check_and_cast<const Ieee80211TransmissionBase *>(transmission);
+    auto mode = ieee80211Transmission->getMode();
+    auto headerLength = flatTransmission != nullptr ? flatTransmission->getHeaderLength() : mode->getHeaderMode()->getLength();
+    auto dataLength = flatTransmission != nullptr ? flatTransmission->getDataLength() : mode->getDataMode()->getCompleteLength(transmission->getPacket()->getTotalLength() - headerLength);
+    // TODO: check header length and data length for OFDM (signal) field
+    double headerSuccessRate = getHeaderSuccessRate(mode, b(headerLength).get(), snir->getMin());
+    double dataSuccessRate = getDataSuccessRate(mode, b(dataLength).get(), snir->getMin());
     switch (part) {
         case IRadioSignal::SIGNAL_PART_WHOLE:
             return 1.0 - headerSuccessRate * dataSuccessRate;
@@ -50,16 +53,24 @@ double Ieee80211ErrorModelBase::computePacketErrorRate(const ISNIR *snir, IRadio
     }
 }
 
-double Ieee80211ErrorModelBase::computeBitErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const
+double Ieee80211ErrorModelBase::computeBitErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
     Enter_Method_Silent();
     return NaN;
 }
 
-double Ieee80211ErrorModelBase::computeSymbolErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const
+double Ieee80211ErrorModelBase::computeSymbolErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
     Enter_Method_Silent();
     return NaN;
+}
+
+Packet *Ieee80211ErrorModelBase::computeCorruptedPacket(const Packet *packet, double ber) const
+{
+    if (corruptionMode == CorruptionMode::CM_PACKET)
+        return ErrorModelBase::computeCorruptedPacket(packet, ber);
+    else
+        throw cRuntimeError("Unimplemented corruption mode");
 }
 
 } // namespace physicallayer

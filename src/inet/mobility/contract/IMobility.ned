@@ -25,6 +25,6 @@ package inet.mobility.contract;
 moduleinterface IMobility
 {
     parameters:
-        @display("i=block/cogwheel_s");
+        @display("i=block/cogwheel");
         @signal[mobilityStateChanged];
 }

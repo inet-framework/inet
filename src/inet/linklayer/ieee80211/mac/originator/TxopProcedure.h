@@ -45,7 +45,7 @@ class INET_API TxopProcedure : public ModeSetListener
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
         virtual void initialize(int stage) override;
 
-        virtual s getTxopLimit(const IIeee80211Mode *mode, AccessCategory ac);
+        virtual s getTxopLimit(const physicallayer::IIeee80211Mode *mode, AccessCategory ac);
         virtual ProtectionMechanism selectProtectionMechanism(AccessCategory ac) const;
 
     public:
@@ -56,9 +56,9 @@ class INET_API TxopProcedure : public ModeSetListener
         virtual simtime_t getLimit() const;
         virtual simtime_t getRemaining() const;
 
-        virtual bool isFinalFragment(Ieee80211Frame *frame) const;
-        virtual bool isTxopInitiator(Ieee80211Frame *frame) const;
-        virtual bool isTxopTerminator(Ieee80211Frame *frame) const;
+        virtual bool isFinalFragment(const Ptr<const Ieee80211MacHeader>& header) const;
+        virtual bool isTxopInitiator(const Ptr<const Ieee80211MacHeader>& header) const;
+        virtual bool isTxopTerminator(const Ptr<const Ieee80211MacHeader>& header) const;
 
         virtual ProtectionMechanism getProtectionMechanism() const { return protectionMechanism; }
 };

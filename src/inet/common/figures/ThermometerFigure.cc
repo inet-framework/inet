@@ -19,8 +19,7 @@
 #include "ThermometerFigure.h"
 #include "inet/common/INETUtils.h"
 
-//TODO namespace inet { -- for the moment commented out, as OMNeT++ 5.0 cannot instantiate a figure from a namespace
-using namespace inet;
+namespace inet {
 
 Register_Figure("thermometer", ThermometerFigure);
 
@@ -55,7 +54,7 @@ ThermometerFigure::ThermometerFigure(const char *name) : cGroupFigure(name)
 ThermometerFigure::~ThermometerFigure()
 {
     // delete figures which is not in canvas
-    for (int i = numTicks; i < tickFigures.size(); ++i) {
+    for (size_t i = numTicks; i < tickFigures.size(); ++i) {
         delete tickFigures[i];
         delete numberFigures[i];
     }
@@ -92,7 +91,7 @@ void ThermometerFigure::setLabel(const char *text)
     labelFigure->setText(text);
 }
 
-const int ThermometerFigure::getLabelOffset() const
+int ThermometerFigure::getLabelOffset() const
 {
     return labelOffset;
 }
@@ -346,8 +345,8 @@ void ThermometerFigure::redrawTicks()
     numTicks = std::max(0.0, std::abs(max - min - shifting) / tickSize + 1);
 
     // Allocate ticks and numbers if needed
-    if (numTicks > tickFigures.size()) {
-        while (numTicks > tickFigures.size()) {
+    if ((size_t)numTicks > tickFigures.size()) {
+        while ((size_t)numTicks > tickFigures.size()) {
             cLineFigure *tick = new cLineFigure();
             cTextFigure *number = new cTextFigure();
 
@@ -399,5 +398,5 @@ void ThermometerFigure::refresh()
     setMercuryAndContainerGeometry();
 }
 
-// } // namespace inet
+} // namespace inet
 

@@ -13,6 +13,7 @@ Change:
  - remove updateInterval from MovingMobilityBase
 
 2D:
+ - Ieee80211Visualizer: ieee80211 showcase/handover config: undisposed object
 
 3D:
  - review and compare to 2D implementation

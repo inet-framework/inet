@@ -1,0 +1,7 @@
+ - add statistic collection, consider removing IStatistics and BasicStatistics and adding signals based statistics instead
+   reasoning: there are many components in 802.11 and it seems to be a bad idea to centralize all possible events into a single class
+   even if we do that, how can we be sure of whether we added all useful events to the API?
+ - remove frame arguments where appropriate
+ - add more logging and display strings
+ - generic cleanup, order of functions, formatting, whitespace, etc.
+ - mixed mode: access point receives proberq in dsss, responds in erpofdm. station cannot receive response.

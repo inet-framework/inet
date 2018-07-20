@@ -12,7 +12,7 @@ network LocalUDP
     submodules:
         host: StandardHost {
             parameters:
-                networkLayer.configurator.networkConfiguratorModule = "";
+                ipv4.configurator.networkConfiguratorModule = "";
                 @display("i=device/pc3");
         }
 }
@@ -37,64 +37,64 @@ network = LocalUDP
 total-stack = 7MiB
 
 # udp app configuration
-**.numUdpApps = 5
-**.udpApp[0].typename = "UDPEchoApp"
-**.udpApp[0].localPort = 100
+**.numApps = 5
+**.app[0].typename = "UdpEchoApp"
+**.app[0].localPort = 100
 
-**.udpApp[*].typename = "UDPBasicApp"
-**.udpApp[*].localPort = 200+index
-**.udpApp[*].destPort = 100
-**.udpApp[*].messageLength = 5000B
-**.udpApp[*].sendInterval = 5s
-**.udpApp[*].destAddresses = "127.0.0.1"
+**.app[*].typename = "UdpBasicApp"
+**.app[*].localPort = 200+index
+**.app[*].destPort = 100
+**.app[*].messageLength = 5000B
+**.app[*].sendInterval = 5s
+**.app[*].destAddresses = "127.0.0.1"
 
-**.udpApp[*].startTime = 60s+uniform(0s,5s)
-**.udpApp[*].stopTime = 1059.99s
+**.app[*].startTime = 60s+uniform(0s,5s)
+**.app[*].stopTime = 1059.99s
 
 %#--------------------------------------------------------------------------------------------------------------
 %#--------------------------------------------------------------------------------------------------------------
 %contains: results/General-0.sca
-scalar LocalUDP.host.lo0.lo passedUpPk:count 3200
+scalar LocalUDP.host.lo[0].lo passedUpPk:count 3200
 attr
 
 %contains: results/General-0.sca
-scalar LocalUDP.host.lo0.lo rcvdPkFromHL:count 3200
+scalar LocalUDP.host.lo[0].lo rcvdPkFromHl:count 3200
 attr
 
 %contains: results/General-0.sca
-scalar LocalUDP.host.udpApp[0] echoedPk:count 800
+scalar LocalUDP.host.app[0] echoedPk:count 800
 attr
 
 %contains: results/General-0.sca
-scalar LocalUDP.host.udpApp[1] sentPk:count 200
+scalar LocalUDP.host.app[1] packetSent:count 200
 attr
 
 %contains: results/General-0.sca
-scalar LocalUDP.host.udpApp[1] rcvdPk:count 200
+scalar LocalUDP.host.app[1] packetReceived:count 200
 attr
 
 %contains: results/General-0.sca
-scalar LocalUDP.host.udpApp[2] sentPk:count 200
+scalar LocalUDP.host.app[2] packetSent:count 200
 attr
 
 %contains: results/General-0.sca
-scalar LocalUDP.host.udpApp[2] rcvdPk:count 200
+scalar LocalUDP.host.app[2] packetReceived:count 200
 attr
 
 %contains: results/General-0.sca
-scalar LocalUDP.host.udpApp[3] sentPk:count 200
+scalar LocalUDP.host.app[3] packetSent:count 200
 attr
 
 %contains: results/General-0.sca
-scalar LocalUDP.host.udpApp[3] rcvdPk:count 200
+scalar LocalUDP.host.app[3] packetReceived:count 200
 attr
 
 %contains: results/General-0.sca
-scalar LocalUDP.host.udpApp[4] sentPk:count 200
+scalar LocalUDP.host.app[4] packetSent:count 200
 attr
 
 %contains: results/General-0.sca
-scalar LocalUDP.host.udpApp[4] rcvdPk:count 200
+scalar LocalUDP.host.app[4] packetReceived:count 200
 attr
 
 %contains: results/General-0.sca
@@ -102,11 +102,11 @@ scalar LocalUDP.host.udp passedUpPk:count 1600
 attr
 
 %contains: results/General-0.sca
-scalar LocalUDP.host.udp sentPk:count 1600
+scalar LocalUDP.host.udp packetSent:count 1600
 attr
 
 %contains: results/General-0.sca
-scalar LocalUDP.host.udp rcvdPk:count 1600
+scalar LocalUDP.host.udp packetReceived:count 1600
 attr
 
 %#--------------------------------------------------------------------------------------------------------------

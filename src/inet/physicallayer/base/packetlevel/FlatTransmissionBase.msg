@@ -13,20 +13,21 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
+import inet.common.INETDefs;
+import inet.common.Units;
+import inet.physicallayer.base.packetlevel.NarrowbandTransmissionBase;
+
 cplusplus {{
 #include "inet/physicallayer/base/packetlevel/FlatTransmissionBase.h"
 }}
 
 namespace inet::physicallayer;
 
-class noncobject bps;
-class NarrowbandTransmissionBase extends cObject;
-
 class FlatTransmissionBase extends NarrowbandTransmissionBase
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
-    int headerBitLength;
-    int dataBitLength;
-    bps bitrate @opaque;
+    b headerLength;
+    b dataLength;
+    bps bitrate;
 }

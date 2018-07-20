@@ -33,17 +33,17 @@
 #include "inet/linklayer/ieee80211/mac/contract/IRecipientBlockAckAgreementHandler.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRecipientBlockAckAgreementPolicy.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRecipientBlockAckProcedure.h"
-#include "inet/linklayer/ieee80211/mac/contract/IRecipientQoSAckPolicy.h"
-#include "inet/linklayer/ieee80211/mac/contract/IRecipientQoSMacDataService.h"
+#include "inet/linklayer/ieee80211/mac/contract/IRecipientQosAckPolicy.h"
+#include "inet/linklayer/ieee80211/mac/contract/IRecipientQosMacDataService.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRtsProcedure.h"
 #include "inet/linklayer/ieee80211/mac/contract/ITx.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceContext.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceHandler.h"
 #include "inet/linklayer/ieee80211/mac/lifetime/EdcaTransmitLifetimeHandler.h"
-#include "inet/linklayer/ieee80211/mac/originator/NonQoSRecoveryProcedure.h"
-#include "inet/linklayer/ieee80211/mac/originator/OriginatorQoSMacDataService.h"
-#include "inet/linklayer/ieee80211/mac/originator/QoSAckHandler.h"
-#include "inet/linklayer/ieee80211/mac/originator/QoSRecoveryProcedure.h"
+#include "inet/linklayer/ieee80211/mac/originator/NonQosRecoveryProcedure.h"
+#include "inet/linklayer/ieee80211/mac/originator/OriginatorQosMacDataService.h"
+#include "inet/linklayer/ieee80211/mac/originator/QosAckHandler.h"
+#include "inet/linklayer/ieee80211/mac/originator/QosRecoveryProcedure.h"
 #include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
 #include "inet/linklayer/ieee80211/mac/protectionmechanism/SingleProtectionMechanism.h"
 #include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
@@ -71,7 +71,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
         IRx *rx = nullptr;
         ITx *tx = nullptr;
 
-        IQoSRateSelection *rateSelection = nullptr;
+        IQosRateSelection *rateSelection = nullptr;
 
         // Channel Access Methods
         Edca *edca = nullptr;
@@ -79,12 +79,12 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
 
         // MAC Data Service
         IOriginatorMacDataService *originatorDataService = nullptr;
-        IRecipientQoSMacDataService *recipientDataService = nullptr;
+        IRecipientQosMacDataService *recipientDataService = nullptr;
 
         // MAC Procedures
         IRecipientAckProcedure *recipientAckProcedure = nullptr;
         IOriginatorQoSAckPolicy *originatorAckPolicy = nullptr;
-        IRecipientQoSAckPolicy *recipientAckPolicy = nullptr;
+        IRecipientQosAckPolicy *recipientAckPolicy = nullptr;
         IRtsProcedure *rtsProcedure = nullptr;
         IRtsPolicy *rtsPolicy = nullptr;
         ICtsProcedure *ctsProcedure = nullptr;
@@ -92,8 +92,8 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
         IOriginatorBlockAckProcedure *originatorBlockAckProcedure = nullptr;
         IRecipientBlockAckProcedure *recipientBlockAckProcedure = nullptr;
         EdcaTransmitLifetimeHandler *lifetimeHandler = nullptr;
-        std::vector<QoSRecoveryProcedure*> edcaDataRecoveryProcedures;
-        NonQoSRecoveryProcedure *edcaMgmtAndNonQoSRecoveryProcedure = nullptr;
+        std::vector<QosRecoveryProcedure*> edcaDataRecoveryProcedures;
+        NonQosRecoveryProcedure *edcaMgmtAndNonQoSRecoveryProcedure = nullptr;
 
         // Block Ack Agreement Handlers
         IOriginatorBlockAckAgreementHandler *originatorBlockAckAgreementHandler = nullptr;
@@ -102,7 +102,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
         IRecipientBlockAckAgreementPolicy *recipientBlockAckAgreementPolicy = nullptr;
 
         // Ack handler
-        std::vector<QoSAckHandler *> edcaAckHandlers;
+        std::vector<QosAckHandler *> edcaAckHandlers;
 
         // Tx Opportunity
         std::vector<TxopProcedure*> edcaTxops;
@@ -127,53 +127,54 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
         virtual void initialize(int stage) override;
         virtual void handleMessage(cMessage *msg) override;
+        virtual void updateDisplayString();
 
         void startFrameSequence(AccessCategory ac);
         void handleInternalCollision(std::vector<Edcaf*> internallyCollidedEdcafs);
 
-        void sendUp(const std::vector<Ieee80211Frame*>& completeFrames);
+        void sendUp(const std::vector<Packet *>& completeFrames);
         FrameSequenceContext* buildContext(AccessCategory ac);
         virtual bool hasFrameToTransmit();
         virtual bool hasFrameToTransmit(AccessCategory ac);
         virtual bool isReceptionInProgress();
 
         // Recipient
-        virtual void recipientProcessReceivedFrame(Ieee80211Frame *frame);
-        virtual void recipientProcessReceivedControlFrame(Ieee80211Frame *frame);
-        virtual void recipientProcessReceivedManagementFrame(Ieee80211ManagementFrame *frame);
-        virtual void recipientProcessTransmittedControlResponseFrame(Ieee80211Frame *frame);
+        virtual void recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
+        virtual void recipientProcessReceivedControlFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
+        virtual void recipientProcessReceivedManagementFrame(const Ptr<const Ieee80211MgmtHeader>& header);
+        virtual void recipientProcessTransmittedControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
 
         // Originator
-        virtual void originatorProcessTransmittedManagementFrame(Ieee80211ManagementFrame *mgmtFrame, AccessCategory ac);
-        virtual void originatorProcessTransmittedControlFrame(Ieee80211Frame *controlFrame, AccessCategory ac);
-        virtual void originatorProcessTransmittedDataFrame(Ieee80211DataFrame *dataFrame, AccessCategory ac);
-        virtual void originatorProcessReceivedManagementFrame(Ieee80211ManagementFrame *frame, Ieee80211Frame *lastTransmittedFrame, AccessCategory ac);
-        virtual void originatorProcessReceivedControlFrame(Ieee80211Frame *frame, Ieee80211Frame *lastTransmittedFrame, AccessCategory ac);
-        virtual void originatorProcessReceivedDataFrame(Ieee80211DataFrame* frame, Ieee80211Frame* lastTransmittedFrame, AccessCategory ac);
+        virtual void originatorProcessTransmittedManagementFrame(const Ptr<const Ieee80211MgmtHeader>& mgmtHeader, AccessCategory ac);
+        virtual void originatorProcessTransmittedControlFrame(const Ptr<const Ieee80211MacHeader>& controlHeader, AccessCategory ac);
+        virtual void originatorProcessTransmittedDataFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& dataHeader, AccessCategory ac);
+        virtual void originatorProcessReceivedManagementFrame(const Ptr<const Ieee80211MgmtHeader>& header, const Ptr<const Ieee80211MacHeader>& lastTransmittedHeader, AccessCategory ac);
+        virtual void originatorProcessReceivedControlFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, Packet *lastTransmittedPacket, const Ptr<const Ieee80211MacHeader>& lastTransmittedHeader, AccessCategory ac);
+        virtual void originatorProcessReceivedDataFrame(const Ptr<const Ieee80211DataHeader>& header, const Ptr<const Ieee80211MacHeader>& lastTransmittedHeader, AccessCategory ac);
 
-        virtual void setFrameMode(Ieee80211Frame *frame, const IIeee80211Mode *mode) const;
-        virtual bool isSentByUs(Ieee80211Frame *frame) const;
-        virtual bool isForUs(Ieee80211Frame *frame) const;
+        virtual void setFrameMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, const physicallayer::IIeee80211Mode *mode) const;
+        virtual bool isSentByUs(const Ptr<const Ieee80211MacHeader>& header) const;
+        virtual bool isForUs(const Ptr<const Ieee80211MacHeader>& header) const;
 
     protected:
         // IFrameSequenceHandler::ICallback
-        virtual void originatorProcessRtsProtectionFailed(Ieee80211DataOrMgmtFrame *protectedFrame) override;
-        virtual void originatorProcessTransmittedFrame(Ieee80211Frame* transmittedFrame) override;
-        virtual void originatorProcessReceivedFrame(Ieee80211Frame *frame, Ieee80211Frame *lastTransmittedFrame) override;
-        virtual void originatorProcessFailedFrame(Ieee80211DataOrMgmtFrame* failedFrame) override;
+        virtual void originatorProcessRtsProtectionFailed(Packet *packet) override;
+        virtual void originatorProcessTransmittedFrame(Packet *packet) override;
+        virtual void originatorProcessReceivedFrame(Packet *packet, Packet *lastTransmittedPacket) override;
+        virtual void originatorProcessFailedFrame(Packet *packet) override;
         virtual void frameSequenceFinished() override;
-        virtual void transmitFrame(Ieee80211Frame *frame, simtime_t ifs) override;
+        virtual void transmitFrame(Packet *packet, simtime_t ifs) override;
         virtual void scheduleStartRxTimer(simtime_t timeout) override;
 
         // IChannelAccess::ICallback
         virtual void channelGranted(IChannelAccess *channelAccess) override;
 
         // ITx::ICallback
-        virtual void transmissionComplete(Ieee80211Frame *frame) override;
+        virtual void transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override;
 
         // IProcedureCallback
-        virtual void transmitControlResponseFrame(Ieee80211Frame* responseFrame, Ieee80211Frame* receivedFrame) override;
-        virtual void processMgmtFrame(Ieee80211ManagementFrame *mgmtFrame) override;
+        virtual void transmitControlResponseFrame(Packet *responsePacket, const Ptr<const Ieee80211MacHeader>& responseHeader, Packet *receivedPacket, const Ptr<const Ieee80211MacHeader>& receivedHeader) override;
+        virtual void processMgmtFrame(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader) override;
 
         // IProcedureCallback
         virtual void scheduleInactivityTimer(simtime_t timeout) override;
@@ -182,8 +183,8 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
         virtual ~Hcf();
 
         // ICoordinationFunction
-        virtual void processUpperFrame(Ieee80211DataOrMgmtFrame *frame) override;
-        virtual void processLowerFrame(Ieee80211Frame *frame) override;
+        virtual void processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;
+        virtual void processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override;
         virtual void corruptedFrameReceived() override;
 
 };

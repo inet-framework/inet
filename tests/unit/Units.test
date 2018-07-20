@@ -1,0 +1,78 @@
+%description:
+Test physical units
+
+%includes:
+#include "inet/common/Units.h"
+
+%global:
+
+using namespace inet;
+using namespace units::values;
+
+#define P(X)  EV << #X << "  " << X << "\n";
+
+%activity:
+P(pW(1));
+P(W(0.000000000001));
+
+P(nW(1));
+P(W(0.000000001));
+
+P(uW(1));
+P(W(0.000001));
+
+P(mW(1));
+P(W(0.001));
+
+P(W(1));
+
+P(kHz(1));
+P(Hz(1000));
+
+P(MHz(1));
+P(Hz(1000000));
+
+P(GHz(1));
+P(Hz(1000000000));
+
+P(kbps(1));
+P(bps(1000));
+
+P(Mbps(1));
+P(bps(1000000));
+
+P(Gbps(1));
+P(bps(1000000000));
+
+P((b(7) < B(1)))
+P((b(8) == B(1)))
+P((b(9) > B(1)))
+
+EV << ".\n";
+
+%contains: stdout
+pW(1)  1 pW
+W(0.000000000001)  1 pW
+nW(1)  1 nW
+W(0.000000001)  1 nW
+uW(1)  1 uW
+W(0.000001)  1 uW
+mW(1)  1 mW
+W(0.001)  1 mW
+W(1)  1 W
+kHz(1)  1 kHz
+Hz(1000)  1 kHz
+MHz(1)  1 MHz
+Hz(1000000)  1 MHz
+GHz(1)  1 GHz
+Hz(1000000000)  1 GHz
+kbps(1)  1 kbps
+bps(1000)  1 kbps
+Mbps(1)  1 Mbps
+bps(1000000)  1 Mbps
+Gbps(1)  1 Gbps
+bps(1000000000)  1 Gbps
+(b(7) < B(1))  1
+(b(8) == B(1))  1
+(b(9) > B(1))  1
+.

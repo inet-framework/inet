@@ -25,14 +25,12 @@ namespace inet {
 
 namespace visualizer {
 
-using namespace inet::physicalenvironment;
-
 class INET_API PhysicalEnvironmentVisualizerBase : public VisualizerBase
 {
   protected:
     /** @name Parameters */
     //@{
-    const IPhysicalEnvironment *physicalEnvironment = nullptr;
+    const physicalenvironment::IPhysicalEnvironment *physicalEnvironment = nullptr;
     bool displayObjects = false;
     //@}
 

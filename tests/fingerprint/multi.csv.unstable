@@ -1,4 +1,0 @@
-# workingdir,                        args,                                          simtimelimit,    fingerprint
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c Generic -r 0,                10s,             0000-0000
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv4 -r 0,              10s,             0000-0000
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiGeneric -r 0,           10s,             0000-0000

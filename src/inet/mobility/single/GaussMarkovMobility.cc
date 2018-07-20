@@ -26,11 +26,11 @@ Define_Module(GaussMarkovMobility);
 GaussMarkovMobility::GaussMarkovMobility()
 {
     speed = 0;
-    angle = 0;
+    angle = deg(0);
     alpha = 0;
     margin = 0;
     speedMean = 0;
-    angleMean = 0;
+    angleMean = deg(0);
     variance = 0;
 }
 
@@ -41,11 +41,11 @@ void GaussMarkovMobility::initialize(int stage)
     EV_TRACE << "initializing GaussMarkovMobility stage " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {
         speedMean = par("speed");
-        angleMean = par("angle");
+        angleMean = deg(par("angle"));
         alpha = par("alpha");
         margin = par("margin");
         variance = par("variance");
-        angle = fmod(angle, 360);
+        angle = deg(fmod(deg(angle).get(), 360));
         //constrain alpha to [0.0;1.0]
         alpha = fmax(0.0, alpha);
         alpha = fmin(1.0, alpha);
@@ -63,24 +63,23 @@ void GaussMarkovMobility::preventBorderHugging()
     bool top = (lastPosition.y < constraintAreaMin.y + margin);
     bool bottom = (lastPosition.y >= constraintAreaMax.y - margin);
     if (top || bottom) {
-        angleMean = bottom ? 270.0 : 90.0;
+        angleMean = bottom ? deg(270.0) : deg(90.0);
         if (right)
-            angleMean -= 45.0;
+            angleMean -= deg(45.0);
         else if (left)
-            angleMean += 45.0;
+            angleMean += deg(45.0);
     }
     else if (left)
-        angleMean = 0.0;
+        angleMean = deg(0.0);
     else if (right)
-        angleMean = 180.0;
+        angleMean = deg(180.0);
 }
 
 void GaussMarkovMobility::move()
 {
     preventBorderHugging();
     LineSegmentsMobilityBase::move();
-    Coord dummy;
-    handleIfOutside(REFLECT, dummy, dummy, angle);
+    handleIfOutside(REFLECT, lastPosition, lastVelocity, angle);
 }
 
 void GaussMarkovMobility::setTargetPosition()
@@ -94,12 +93,9 @@ void GaussMarkovMobility::setTargetPosition()
 
     angle = alpha * angle
         + (1.0 - alpha) * angleMean
-        + sqrt(1.0 - alpha * alpha)
-        * normal(0.0, 1.0)
-        * variance;
+        + rad(sqrt(1.0 - alpha * alpha) * normal(0.0, 1.0) * variance);
 
-    double rad = M_PI * angle / 180.0;
-    Coord direction(cos(rad), sin(rad));
+    Coord direction(cos(rad(angle).get()), sin(rad(angle).get()));
     nextChange = simTime() + updateInterval;
     targetPosition = lastPosition + direction * speed * updateInterval.dbl();
 

@@ -1,3 +1,108 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-01  Zoltan Bojthe
+
+	Added B/b units to length constants and length fields of chunks.
+
+2018-05-10  Zoltan Bojthe
+
+	Moved header serializers to the corresponding protocol folders.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-01-24  Levente Mészáros
+
+	Adapted registerProtocol calls to the new API based on OSI service primitives.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-12  Levente Mészáros
+
+	Moved Indication kind into constructor argument.
+	Replaced cMessage commands with Request and Indication.
+
+2018-01-03  Levente Mészáros
+
+	Switched from message pointer to packet pointer where available.
+
+2018-01-02  Levente Mészáros
+
+	Replaced cPacket with Packet.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    ITCP -> ITcp
+	    TCPAcceptCommand -> TcpAcceptCommand
+	    TCPAvailableInfo -> TcpAvailableInfo
+	    TCPCommand -> TcpCommand
+	    TCPConnectInfo -> TcpConnectInfo
+	    TCPIPchecksum -> TcpIpChecksum
+	    TCPOpenCommand -> TcpOpenCommand
+	    TCPSegment -> TcpHeader
+	    TCPStatusInfo -> TcpStatusInfo
+	    TCP_lwIP -> TcpLwip
+
+2017-12-18  Levente Mészáros
+
+	Removed unnecessary markImmutable() calls from NSC and LwIP implementations.
+
+2017-12-14  Levente Mészáros
+
+	Replaced pushHeader, pushTrailer with insertHeader, insertTrailer.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-11-13  Levente Mészáros
+
+	Fixed IPV6 module path in transport layers.
+
+2017-09-14  Levente Mészáros
+
+	Removed obsolete TCP socket parameter dataTransferMode from all implementations.
+
+2017-01-25  Zoltan Bojthe
+
+	Renamed TCPSegment to TcpHeader.
+
+2016-07-20  Zoltan Bojthe
+
+	Removed obsolete omnetpp 4.x code (#if OMNETPP_VERSION < 0x500).
+
+2016-06-02  Levente Mészáros
+
+	Dropped gate index after switch to simple appIn/appOut gates.
+
+2016-06-01  Levente Mészáros
+
+	Added registerProtocol calls to transport protocols.
+
+2016-06-03  Levente Mészáros
+
+	Changed appIn/appOut gate vectors to simple gates.
+
+2016-05-30  Zoltan Bojthe
+
+	Added explicit accept mechanism to listening.
+
+2015-06-11  Levente Mészáros
+
+	Renamed connId to socketId to be able to implement the ISocketControlInfo interface.
+
+2016-05-02  Levente Mészáros
+
+	Added new registerProtocol() calls.
+
+2016-04-29  Levente Mészáros
+
+	Dropped obsolete IPSocket.registerProtocol() calls.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

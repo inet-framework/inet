@@ -32,16 +32,27 @@ simple RadioVisualizerBase extends VisualizerBase
         bool displayRadioMode = default(true);
         bool displayReceptionState = default(true);
         bool displayTransmissionState = default(true);
+        bool displayAntennaLobes = default(false);
 
         string radioFilter = default("**"); // which radios are considered, matches all radios by default
 
-		string radioModeImages = default("block/process_vs block/timer_vs block/wrx_vs block/wtx_vs block/wrxtx_vs block/cogwheel_vs");
-		string receptionStateImages = default("- - misc/reception misc/reception");
-		string transmissionStateImages = default("- - misc/transmission");
+        string radioModeImages = default("block/process_vs block/timer_vs block/wrx_vs block/wtx_vs block/wrxtx_vs block/cogwheel_vs");
+        string receptionStateImages = default("- - misc/receiving misc/receiving");
+		string transmissionStateImages = default("- - misc/transmitting");
         double width = default(16);
         double height = default(16);
         string placementHint = default("bottomRight"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
         double placementPriority = default(0); // determines the order of annotation positioning
+
+        bool antennaLobePlaneGlobal = default(true); // compute antenna lobe relative to the global or antenna local coordinate systems, global by default
+        string antennaLobePlane @enum("view", "xy", "xz", "yz") = default("view"); // compute antenna lobe in this plane, view by default
+        double antennaLobeRadius = default(100); // radius of the polyline for 1 gain
+        double antennaLobeStep @unit(deg) = default(10deg);
+        double antennaLobeOpacity = default(0.25); // opacity of the antenna lobe
+        string antennaLobeLineColor = default("black"); // antenna lobe line color, black by default
+        string antennaLobeLineStyle = default("solid"); // antenna lobe line style (solid, dashed, dotted)
+        double antennaLobeLineWidth = default(1); // antenna lobe line width
+        string antennaLobeFillColor = default("white"); // antenna lobe fill color, white by default
 
         @class(RadioVisualizerBase);
 }

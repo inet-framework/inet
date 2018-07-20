@@ -28,24 +28,24 @@ EdcaTransmitLifetimeHandler::EdcaTransmitLifetimeHandler(simtime_t bkLifetime, s
     msduLifetime[3] = voLifetime;
 }
 
-void EdcaTransmitLifetimeHandler::frameGotInProgess(Ieee80211DataFrame* frame)
+void EdcaTransmitLifetimeHandler::frameGotInProgess(const Ptr<const Ieee80211DataHeader>& header)
 {
-    if (frame->getFragmentNumber() == 0)
-        lifetimes[frame->getSequenceNumber()] = simTime();
+    if (header->getFragmentNumber() == 0)
+        lifetimes[header->getSequenceNumber()] = simTime();
 }
 
-void EdcaTransmitLifetimeHandler::frameTransmitted(Ieee80211DataFrame* frame)
+void EdcaTransmitLifetimeHandler::frameTransmitted(const Ptr<const Ieee80211DataHeader>& header)
 {
     // don't care
 }
 
-bool EdcaTransmitLifetimeHandler::isLifetimeExpired(Ieee80211DataFrame* frame)
+bool EdcaTransmitLifetimeHandler::isLifetimeExpired(const Ptr<const Ieee80211DataHeader>& header)
 {
-    ASSERT(frame->getType() == ST_DATA_WITH_QOS);
-    AccessCategory ac = mapTidToAc(frame->getTid());
-    auto it = lifetimes.find(frame->getSequenceNumber());
+    ASSERT(header->getType() == ST_DATA_WITH_QOS);
+    AccessCategory ac = mapTidToAc(header->getTid());
+    auto it = lifetimes.find(header->getSequenceNumber());
     if (it == lifetimes.end())
-        throw cRuntimeError("There is no lifetime entry for frame = %s", frame->getName());
+        throw cRuntimeError("There is no lifetime entry for frame = %s", header->getName());
     return (simTime() - it->second) >= msduLifetime[ac];
 }
 

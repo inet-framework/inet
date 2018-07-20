@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/OSGUtils.h"
+#include "inet/common/OsgUtils.h"
 #include "inet/visualizer/common/StatisticOsgVisualizer.h"
 
 namespace inet {

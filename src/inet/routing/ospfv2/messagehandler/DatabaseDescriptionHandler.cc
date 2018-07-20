@@ -17,10 +17,10 @@
 
 #include "inet/routing/ospfv2/messagehandler/DatabaseDescriptionHandler.h"
 
-#include "inet/routing/ospfv2/router/OSPFArea.h"
-#include "inet/routing/ospfv2/interface/OSPFInterface.h"
-#include "inet/routing/ospfv2/neighbor/OSPFNeighbor.h"
-#include "inet/routing/ospfv2/router/OSPFRouter.h"
+#include "inet/routing/ospfv2/router/OspfArea.h"
+#include "inet/routing/ospfv2/interface/OspfInterface.h"
+#include "inet/routing/ospfv2/neighbor/OspfNeighbor.h"
+#include "inet/routing/ospfv2/router/OspfRouter.h"
 
 namespace inet {
 
@@ -31,15 +31,15 @@ DatabaseDescriptionHandler::DatabaseDescriptionHandler(Router *containingRouter)
 {
 }
 
-void DatabaseDescriptionHandler::processPacket(OSPFPacket *packet, Interface *intf, Neighbor *neighbor)
+void DatabaseDescriptionHandler::processPacket(Packet *packet, Interface *intf, Neighbor *neighbor)
 {
     router->getMessageHandler()->printEvent("Database Description packet received", intf, neighbor);
 
-    OSPFDatabaseDescriptionPacket *ddPacket = check_and_cast<OSPFDatabaseDescriptionPacket *>(packet);
+    const auto& ddPacket = packet->peekAtFront<OspfDatabaseDescriptionPacket>();
 
     Neighbor::NeighborStateType neighborState = neighbor->getState();
 
-    if ((ddPacket->getInterfaceMTU() <= intf->getMTU()) &&
+    if ((ddPacket->getInterfaceMTU() <= intf->getMtu()) &&
         (neighborState > Neighbor::ATTEMPT_STATE))
     {
         switch (neighborState) {
@@ -51,13 +51,13 @@ void DatabaseDescriptionHandler::processPacket(OSPFPacket *packet, Interface *in
                 break;
 
             case Neighbor::EXCHANGE_START_STATE: {
-                OSPFDDOptions& ddOptions = ddPacket->getDdOptions();
+                const OspfDdOptions& ddOptions = ddPacket->getDdOptions();
 
                 if (ddOptions.I_Init && ddOptions.M_More && ddOptions.MS_MasterSlave &&
                     (ddPacket->getLsaHeadersArraySize() == 0))
                 {
                     if (neighbor->getNeighborID() > router->getRouterID()) {
-                        Neighbor::DDPacketID packetID;
+                        Neighbor::DdPacketId packetID;
                         packetID.ddOptions = ddOptions;
                         packetID.options = ddPacket->getOptions();
                         packetID.sequenceNumber = ddPacket->getDdSequenceNumber();
@@ -67,7 +67,7 @@ void DatabaseDescriptionHandler::processPacket(OSPFPacket *packet, Interface *in
                         neighbor->setDDSequenceNumber(packetID.sequenceNumber);
                         neighbor->setLastReceivedDDPacket(packetID);
 
-                        if (!processDDPacket(ddPacket, intf, neighbor, true)) {
+                        if (!processDDPacket(ddPacket.get(), intf, neighbor, true)) {
                             break;
                         }
 
@@ -88,7 +88,7 @@ void DatabaseDescriptionHandler::processPacket(OSPFPacket *packet, Interface *in
                     (ddPacket->getDdSequenceNumber() == neighbor->getDDSequenceNumber()) &&
                     (neighbor->getNeighborID() < router->getRouterID()))
                 {
-                    Neighbor::DDPacketID packetID;
+                    Neighbor::DdPacketId packetID;
                     packetID.ddOptions = ddOptions;
                     packetID.options = ddPacket->getOptions();
                     packetID.sequenceNumber = ddPacket->getDdSequenceNumber();
@@ -97,7 +97,7 @@ void DatabaseDescriptionHandler::processPacket(OSPFPacket *packet, Interface *in
                     neighbor->setDatabaseExchangeRelationship(Neighbor::MASTER);
                     neighbor->setLastReceivedDDPacket(packetID);
 
-                    if (!processDDPacket(ddPacket, intf, neighbor, true)) {
+                    if (!processDDPacket(ddPacket.get(), intf, neighbor, true)) {
                         break;
                     }
 
@@ -114,7 +114,7 @@ void DatabaseDescriptionHandler::processPacket(OSPFPacket *packet, Interface *in
             break;
 
             case Neighbor::EXCHANGE_STATE: {
-                Neighbor::DDPacketID packetID;
+                Neighbor::DdPacketId packetID;
                 packetID.ddOptions = ddPacket->getDdOptions();
                 packetID.options = ddPacket->getOptions();
                 packetID.sequenceNumber = ddPacket->getDdSequenceNumber();
@@ -136,7 +136,7 @@ void DatabaseDescriptionHandler::processPacket(OSPFPacket *packet, Interface *in
                              (packetID.sequenceNumber == (neighbor->getDDSequenceNumber() + 1))))
                         {
                             neighbor->setLastReceivedDDPacket(packetID);
-                            if (!processDDPacket(ddPacket, intf, neighbor, false)) {
+                            if (!processDDPacket(ddPacket.get(), intf, neighbor, false)) {
                                 break;
                             }
                             if (!neighbor->isLinkStateRequestListEmpty() &&
@@ -162,7 +162,7 @@ void DatabaseDescriptionHandler::processPacket(OSPFPacket *packet, Interface *in
 
             case Neighbor::LOADING_STATE:
             case Neighbor::FULL_STATE: {
-                Neighbor::DDPacketID packetID;
+                Neighbor::DdPacketId packetID;
                 packetID.ddOptions = ddPacket->getDdOptions();
                 packetID.options = ddPacket->getOptions();
                 packetID.sequenceNumber = ddPacket->getDdSequenceNumber();
@@ -188,7 +188,7 @@ void DatabaseDescriptionHandler::processPacket(OSPFPacket *packet, Interface *in
     }
 }
 
-bool DatabaseDescriptionHandler::processDDPacket(OSPFDatabaseDescriptionPacket *ddPacket, Interface *intf, Neighbor *neighbor, bool inExchangeStart)
+bool DatabaseDescriptionHandler::processDDPacket(const OspfDatabaseDescriptionPacket *ddPacket, Interface *intf, Neighbor *neighbor, bool inExchangeStart)
 {
     EV_INFO << "  Processing packet contents(ddOptions="
             << ((ddPacket->getDdOptions().I_Init) ? "I " : "_ ")
@@ -201,8 +201,8 @@ bool DatabaseDescriptionHandler::processDDPacket(OSPFDatabaseDescriptionPacket *
     unsigned int headerCount = ddPacket->getLsaHeadersArraySize();
 
     for (unsigned int i = 0; i < headerCount; i++) {
-        OSPFLSAHeader& currentHeader = ddPacket->getLsaHeaders(i);
-        LSAType lsaType = static_cast<LSAType>(currentHeader.getLsType());
+        const OspfLsaHeader& currentHeader = ddPacket->getLsaHeaders(i);
+        LsaType lsaType = static_cast<LsaType>(currentHeader.getLsType());
 
         EV_DETAIL << "    " << currentHeader;
 
@@ -214,12 +214,12 @@ bool DatabaseDescriptionHandler::processDDPacket(OSPFDatabaseDescriptionPacket *
             return false;
         }
         else {
-            LSAKeyType lsaKey;
+            LsaKeyType lsaKey;
 
             lsaKey.linkStateID = currentHeader.getLinkStateID();
             lsaKey.advertisingRouter = currentHeader.getAdvertisingRouter();
 
-            OSPFLSA *lsaInDatabase = router->findLSA(lsaType, lsaKey, intf->getArea()->getAreaID());
+            OspfLsa *lsaInDatabase = router->findLSA(lsaType, lsaKey, intf->getArea()->getAreaID());
 
             // operator< and operator== on OSPFLSAHeaders determines which one is newer(less means older)
             if ((lsaInDatabase == nullptr) || (lsaInDatabase->getHeader() < currentHeader)) {

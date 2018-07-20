@@ -15,19 +15,18 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
-#include <stdlib.h>
-#include <stdio.h>
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolGroup.h"
+#include "inet/networklayer/common/L3Tools.h"
+#include "inet/networklayer/contract/NetworkHeaderBase_m.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/applications/tunapp/TunLoopbackApp.h"
-#include "inet/networklayer/contract/INetworkDatagram.h"
-#include "inet/transportlayer/contract/ITransportPacket.h"
+#include "inet/transportlayer/contract/TransportHeaderBase_m.h"
+#include "inet/transportlayer/common/L4Tools.h"
 
 namespace inet {
 
 Define_Module(TunLoopbackApp);
-
-simsignal_t TunLoopbackApp::sentPkSignal = registerSignal("sentPk");
-simsignal_t TunLoopbackApp::rcvdPkSignal = registerSignal("rcvdPk");
 
 TunLoopbackApp::TunLoopbackApp() :
     packetsSent(0),
@@ -42,28 +41,52 @@ TunLoopbackApp::~TunLoopbackApp()
 void TunLoopbackApp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
+    if (stage == INITSTAGE_LINK_LAYER_2) {
+        tunInterface = par("tunInterface");
         packetsSent = 0;
         packetsReceived = 0;
+        IInterfaceTable *interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        InterfaceEntry *interfaceEntry = interfaceTable->getInterfaceByName(tunInterface);
+        if (interfaceEntry == nullptr)
+            throw cRuntimeError("TUN interface not found: %s", tunInterface);
+        tunSocket.setOutputGate(gate("socketOut"));
+        tunSocket.open(interfaceEntry->getInterfaceId());
     }
 }
 
 void TunLoopbackApp::handleMessage(cMessage *message)
 {
-    if (message->getArrivalGate()->isName("tunIn")) {
+    if (message->arrivedOn("socketIn")) {
         EV_INFO << "Message " << message->getName() << " arrived from tun. " << packetsReceived + 1 << " packets received so far\n";
         packetsReceived++;
-        INetworkDatagram *networkDatagram = check_and_cast<INetworkDatagram *>(message);
-        ITransportPacket *transportPacket = check_and_cast<ITransportPacket *>(check_and_cast<cPacket *>(message)->getEncapsulatedPacket());
-        transportPacket->setDestinationPort(transportPacket->getSourcePort());
-        transportPacket->setSourcePort(transportPacket->getDestinationPort());
-        networkDatagram->setSourceAddress(networkDatagram->getDestinationAddress());
-        networkDatagram->setDestinationAddress(networkDatagram->getSourceAddress());
-        send(message, "tunOut");
+
+        Packet *packet = check_and_cast<Packet *>(message);
+        auto packetProtocol = getPacketProtocol(packet);
+        auto networkProtocol = getNetworkProtocol(packet);
+        if (packetProtocol != networkProtocol)
+            throw cRuntimeError("Cannot handle packet");
+
+        const auto& networkHeader = removeNetworkProtocolHeader(packet, networkProtocol);
+        const auto& transportProtocol = *networkHeader->getProtocol();
+        const auto& transportHeader = removeTransportProtocolHeader(packet, transportProtocol);
+
+        unsigned int destPort = transportHeader->getDestinationPort();
+        transportHeader->setDestinationPort(transportHeader->getSourcePort());
+        transportHeader->setSourcePort(destPort);
+        L3Address destAddr = networkHeader->getDestinationAddress();
+        networkHeader->setDestinationAddress(networkHeader->getSourceAddress());
+        networkHeader->setSourceAddress(destAddr);
+
+        insertTransportProtocolHeader(packet, transportProtocol, transportHeader);
+        insertNetworkProtocolHeader(packet, networkProtocol, networkHeader);
+
+        delete message->removeControlInfo();
+        packet->clearTags();
+        tunSocket.send(packet);
         packetsSent++;
     }
     else
-        throw cRuntimeError("Unknown message");
+        throw cRuntimeError("Unknown message: %s", message->getName());
 }
 
 

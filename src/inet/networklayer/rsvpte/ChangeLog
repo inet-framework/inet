@@ -1,0 +1,372 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-01  Zoltan Bojthe
+
+	Added B/b units to length constants and length fields of chunks.
+
+2018-04-25  Andras Varga
+
+	Made RsvpMplsRouter ingress classifier configurable.
+
+2018-04-21  Andras Varga
+
+	Documented fectable.xml format for RsvpClassifier
+
+2018-04-06  Levente Mészáros
+
+	Renamed protocol identifier rsvp to rsvpte.
+	Renamed rsvp_te folder to rsvpte according to INET naming scheme.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-03-01  Zoltan Bojthe
+
+	Added RsvpProtocolDissector.
+
+2018-02-19  Zoltan Bojthe
+
+	Renamed functions to use camel case.
+
+2018-01-24  Levente Mészáros
+
+	Adapted registerProtocol calls to the new API based on OSI service primitives.
+
+2018-01-18  Zoltan Bojthe
+
+	Revise @customize in MSG files.
+	Replaced packet tags API calls to use the new API.
+
+2018-01-05  Zoltan Bojthe
+
+	Renamed NF_* signals to use camel case.
+	Renamed signal variables to *Signal.
+
+2018-01-03  Levente Mészáros
+
+	Replaced cMessage with Packet where applicable.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    EroObj_t -> EroObj
+	    FECEntry -> FecEntry
+	    FilterSpecObj_t -> FilterSpecObj
+	    FlowSpecObj_t -> FlowSpecObj
+	    HelloState_t -> HelloState
+	    IIPv4RoutingTable -> IIpv4RoutingTable
+	    IPAddressVector -> Ipv4AddressVector
+	    IPv4 -> Ipv4
+	    IPv4Address -> Ipv4Address
+	    IPv4AddressVector -> Ipv4AddressVector
+	    IPv4ControlInfo -> Ipv4ControlInfo
+	    IPv4InterfaceData -> Ipv4InterfaceData
+	    IRSVPClassifier -> IRsvpClassifier
+	    LIBTable -> LibTable
+	    LabelRequestObj_t -> LabelRequestObj
+	    MPLS -> Mpls
+	    PSBVector -> PsbVector
+	    PathStateBlock_t -> PathStateBlock
+	    RSBVector -> RsbVector
+	    RSVP -> Rsvp
+	    RSVPHelloMsg -> RsvpHelloMsg
+	    RSVPHelloMsg_Base -> RsvpHelloMsg_Base
+	    RSVPMessage -> RsvpMessage
+	    RSVPPacket -> RsvpPacket
+	    RSVPPacket_Base -> RsvpPacket_Base
+	    RSVPPathError -> RsvpPathError
+	    RSVPPathError_Base -> RsvpPathError_Base
+	    RSVPPathMsg -> RsvpPathMsg
+	    RSVPPathMsg_Base -> RsvpPathMsg_Base
+	    RSVPPathTear -> RsvpPathTear
+	    RSVPPathTear_Base -> RsvpPathTear_Base
+	    RSVPResvError -> RsvpResvError
+	    RSVPResvError_Base -> RsvpResvError_Base
+	    RSVPResvMsg -> RsvpResvMsg
+	    RSVPResvMsg_Base -> RsvpResvMsg_Base
+	    RSVPResvTear -> RsvpResvTear
+	    RSVPResvTear_Base -> RsvpResvTear_Base
+	    ResvStateBlock_t -> ResvStateBlock
+	    RsvpHopObj_t -> RsvpHopObj
+	    SenderTemplateObj_t -> SenderTemplateObj
+	    SenderTspecObj_t -> SenderTspecObj
+	    SessionObj_t -> SessionObj
+	    TED -> Ted
+	    TEDChangeInfo -> TedChangeInfo
+
+2017-12-15  Zoltan Bojthe
+
+	Removed unnecessary cPar::xmlValue(), cPar::doubleValue() calls.
+
+2017-12-14  Levente Mészáros
+
+	Removed unnecessary markImmutable() calls.
+
+2017-12-11  Zoltan Bojthe
+
+	Updated for new msgc function names: getFooForUpdate, insertFoo, eraseFoo, etc.
+
+2017-11-21  Levente Mészáros
+
+	Eliminated all #define statements from MSG files.
+
+2017-11-10  Zoltan Bojthe
+
+	Moved customized class declaration to MSG files.
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-08-09  Zoltan Bojthe
+
+	Removed const_cast kludge.
+
+2017-04-28  Zoltan Bojthe
+
+	Removed fixmes.
+
+2016-05-02  Levente Mészáros
+
+	Added new registerProtocol() calls.
+
+2016-04-29  Levente Mészáros
+
+	Dropped obsolete IPSocket.registerProtocol() calls.
+
+====== inet-3.x ======
+
+2018-03-21  ------ inet-3.6.4 released ------
+
+2017-12-22  ------ inet-3.6.3 released ------
+
+2017-10-02  ------ inet-3.6.2 released ------
+
+2017-07-06  ------ inet-3.6.1 released ------
+
+2017-06-09  ------ inet-3.6.0 released ------
+
+2017-05-18  Zoltan Bojthe
+
+	Fixed memory leaks
+
+2017-02-20  ------ inet-3.5.0 released ------
+
+2017-01-09  Rudolf Hornig
+
+	build: fixed various message files not to redefine a field on inheritance
+
+2016-08-03  Zoltan Bojthe
+
+	MSG: @fieldNameSuffix("_var") removed when @omitGetVerb(true) not used
+
+2016-06-15  ------ inet-3.4.0 released ------
+
+2016-06-01  ------ inet-3.3.0 released ------
+
+2016-04-06  ------ inet-3.2.4 released ------
+
+2016-03-16  ------ inet-3.2.3 released ------
+
+2016-03-11  ------ inet-3.2.2 released ------
+
+2016-01-21  ------ inet-3.2.1 released ------
+
+2015-12-16  ------ inet-3.2.0 released ------
+
+2015-10-26  ------ inet-3.1.1 released ------
+
+2015-10-15  ------ inet-3.1.0 released ------
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-01-05  Zoltan Bojthe
+
+	Replaced getParentModule calls with classifierModule parameter.
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-12-17  Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2014-09-18  Andras Varga
+
+	Moved all sources under the src/inet directory, so that all #include
+	statements begin with "inet/". The motivation is to rule out potential
+	filename clashes when multiple model frameworks are used together.
+
+	HINT: You can use the "opp_githist" command in inet/_scripts to find
+	all previous locations of the sources in this directory, and to view
+	the full history in gitk. Normal invocations of gitk can only show
+	file history back to the most recent move operation.
+
+2014-07-30  Andras Varga
+
+	Changes on the inet-3.x branch so far:
+
+	Code formatting (Zoltan Bojthe)
+	- using uncrustify, see _scripts/reformat/*
+	- common style for header guards
+
+	Namespace (Zoltan Bojthe, Zsolt Prontvai)
+	- code has been moved into the inet namespace
+
+	Init stages (Zoltan Bojthe, Andras Varga)
+	- init stages: reorganized by layers
+
+	Signals (Zoltan Bojthe)
+	- replace INotifiable and NotificationBoard by signals for
+	  publish/subscribe communication
+
+	Logging (Zoltan Bojthe, Benjamin Seregi)
+	- EV log statements revised and categorized: EV_ERROR, EV_WARN,
+	  EV_INFO, EV_DETAIL, EV_DEBUG, EV_TRACE
+
+====== inet-2.x ======
+
+2015-03-04  ------ inet-2.6 released ------
+
+2014-11-07  ------ inet-2.5.1 released ------
+
+2014-10-29  ------ inet-2.5.0 released ------
+
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2014-01-15  Zoltan Bojthe
+
+	backported registerProtocol
+
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-04-15  Levente Meszaros
+
+	RSVP: added support for lifecycle operations
+
+2013-02-22  Andras Varga
+
+	SimpleClassifier: xml parameter "conf" was renamed to "config", and
+	default value (empty XML document) was added
+
+	RSVP: added default value (empty XML document) to the "traffic" xml parameter
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-08-07  ------ inet-2.0.0 released ------
+
+2012-06-25  ------ inet-1.99.5 released ------
+
+2012-03-20  ------ inet-1.99.4 released ------
+
+2012-02-24  ------ inet-1.99.3 released ------
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-11-13  Levente Meszaros, Zoltan Bojthe
+
+	Refactored operator= and copy constructor in all INET classes.
+	See base/ChangeLog for details.
+
+2011-09-14  Zoltan Bojthe
+
+	bug #347: fixes some compiler warnings.
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-26  Zoltan Bojthe
+
+	Renamed IP... classes to IPv4... or IPvX...
+
+2011-03-04  Zoltan Bojthe
+
+	Features: Move RSVP / SCTP related functions from util/common.cc to
+	feature-specific directory
+
+2011-03-03  ------ INET-1.99.0 released ------
+
+2011-02-22  Andras Varga
+
+	Swiched NED documentation comments to explicit hyperlinking of NED
+	type names, using tilde. Example: "TCP" was changed to "~TCP"
+	wherever the module and not the protocol was meant.
+
+	The reason for the switch was that autolinking produced too many
+	false hits (e.g. "TCP connection" and "IP address" would link
+	to the TCP and IP modules.)
+
+2011-01-13  Zoltan Bojthe
+
+	using getEncapsulatedPacket() instead deprecated getEncapsulatedMsg()
+
+2009-07-17  Levente Meszaros
+
+	Added labels to gates to so that the graphical editor can match them
+	when the user creates a connection:
+
+	@labels(EtherFrame); labels(Ieee802Ctrl/up); labels(Ieee802Ctrl/down);
+	@labels(TCPCommand/up); @labels(TCPCommand/down);
+	@labels(UDPControlInfo/up); @labels(UDPControlInfo/down);
+	@labels(Ieee80211Frame);  @labels(IPControlInfo/down);
+	@labels(IPControlInfo/up);  @labels(IPDatagram);
+	@labels(IPv6ControlInfo/up); @labels(IPv6ControlInfo/down);
+	@labels(IPv6Datagram)
+
+2009-03-25  ------ INET-20090325 released ------
+
+2008-01-01..2009-03-25  Andras Varga, Rudolf Hornig
+
+	Porting of INET to OMNeT++ 4.0, and some general face lift:
+	* better directory structure (names changed to lowercase; moved sources
+	  under src/; better names, e.g. networkinterfaces -> linklayer)
+	* build system to use a deep makefile
+	* updated the C++ code for the 4.0 API (follow name changes; use
+	  int64-based simtime_t; use cPacket; etc.)
+	* NED files converted to 4.0 syntax
+	* make use of new features in NED files (module interfaces, inout
+	  gates, @unit, etc.)
+
+2005-10-03  Andras Varga
+
+	The RSVP_TE code has been replaced with Vojta Janota's new implementation.
+	The old code was moved into the Obsolete/RSVP_TE directory.
+
+2003-2004  Andras Varga
+
+	Extensive cleanup and refactoring of the original code. See
+	mpls/ChangeLog for details.
+
+2003-09-19  Andras Varga
+
+	Added MPLS/LDP/RESVP-TE models written by Xuan Thang Nguyen at
+	University of Technology, Sydney (UTS) as a Capstone project.
+	Original URL (now defunct):
+	    http://charlie.it.uts.edu.au/~tkaphan/xtn/capstone/
+
+	If you are interested in the early history of the RSVP-TE code,
+	change to the project root and type
+
+	$ gitk -- Network/RSVP_TE INET/src/networklayer/rsvp_te

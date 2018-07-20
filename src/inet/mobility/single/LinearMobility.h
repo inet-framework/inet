@@ -35,7 +35,7 @@ class INET_API LinearMobility : public MovingMobilityBase
 {
   protected:
     double speed;    ///< speed of the host
-    double angle;    ///< angle of linear motion
+    rad angle;    ///< angle of linear motion
     double acceleration;    ///< acceleration of linear motion
 
   protected:

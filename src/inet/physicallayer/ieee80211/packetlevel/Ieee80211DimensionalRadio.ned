@@ -28,6 +28,6 @@ package inet.physicallayer.ieee80211.packetlevel;
 module Ieee80211DimensionalRadio extends Ieee80211Radio
 {
     parameters:
-        transmitterType = default("Ieee80211DimensionalTransmitter");
-        receiverType = default("Ieee80211DimensionalReceiver");
+        transmitter.typename = default("Ieee80211DimensionalTransmitter");
+        receiver.typename = default("Ieee80211DimensionalReceiver");
 }

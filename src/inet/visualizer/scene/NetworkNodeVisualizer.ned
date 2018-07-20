@@ -27,16 +27,14 @@ import inet.visualizer.contract.INetworkNodeVisualizer;
 module NetworkNodeVisualizer like INetworkNodeVisualizer
 {
     parameters:
-        @display("i=block/app_s");
-        string canvasVisualizerType = default("NetworkNodeCanvasVisualizer");
-        string osgVisualizerType = default("NetworkNodeOsgVisualizer");
+        @display("i=block/app");
     submodules:
-        canvasVisualizer: <> like INetworkNodeVisualizer if canvasVisualizerType != "" {
+        canvasVisualizer: <default("NetworkNodeCanvasVisualizer")> like INetworkNodeVisualizer if typename != "" {
             parameters:
-                @display("p=100,50");
+                @display("p=100,100");
         }
-        osgVisualizer: <> like INetworkNodeVisualizer if osgVisualizerType != "" {
+        osgVisualizer: <default("NetworkNodeOsgVisualizer")> like INetworkNodeVisualizer if typename != "" {
             parameters:
-                @display("p=100,150");
+                @display("p=100,200");
         }
 }

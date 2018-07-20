@@ -30,6 +30,7 @@ import sys
 import threading
 import time
 import unittest
+from distutils import spawn
 from StringIO import StringIO
 
 
@@ -37,12 +38,18 @@ inetRoot = os.path.abspath("../..")
 sep = ";" if sys.platform == 'win32' else ':'
 nedPath = inetRoot + "/src" + sep + inetRoot + "/examples" + sep + inetRoot + "/showcases" + sep + inetRoot + "/tutorials"
 inetLib = inetRoot + "/src/INET"
-opp_run = "opp_run"
+executable = "opp_run"
 cpuTimeLimit = "6s"
 logFile = "test.out"
 memcheck = False
 memcheckFailedErrorCode = 66
 
+if spawn.find_executable("opp_run_dbg"):
+    executable = "opp_run_dbg"
+elif spawn.find_executable("opp_run"):
+    executable = "opp_run"
+elif spawn.find_executable("opp_run_release"):
+    executable = "opp_run_release"
 
 class SmokeTestCaseGenerator():
     fileToSimulationsMap = {}
@@ -185,9 +192,10 @@ class SmokeTestCase(SimulationTestCase):
         memcheckPrefix = ""
         if memcheck:
             memcheckPrefix = "valgrind --leak-check=full --track-origins=yes --error-exitcode=" + str(memcheckFailedErrorCode) + " --suppressions=" + inetRoot + "/tests/smoke/valgrind.supp "
-        command = memcheckPrefix + opp_run + " -n " + nedPath + " -l " + inetLib + " -u Cmdenv " + self.args + \
+        command = memcheckPrefix + executable + " -n " + nedPath + " -l " + inetLib + " -u Cmdenv " + self.args + \
             " --cpu-time-limit=" + cpuTimeLimit + \
             " --vector-recording=false --scalar-recording=false" \
+            " --cmdenv-express-mode=false" \
             " --result-dir=" + resultdir
 
         # print "COMMAND: " + command + '\n'
@@ -388,7 +396,7 @@ class SimulationTextTestResult(ThreadedTestResult):
     def addExpectedFailure(self, test, err):
         super(SimulationTextTestResult, self).addExpectedFailure(test, err)
         if self.showAll:
-            self.stream.write(": expected failure\n")
+            self.stream.write(":FAIL (expected)\n")
         elif self.dots:
             self.stream.write("x")
             self.stream.flush()
@@ -396,7 +404,7 @@ class SimulationTextTestResult(ThreadedTestResult):
     def addUnexpectedSuccess(self, test):
         super(SimulationTextTestResult, self).addUnexpectedSuccess(test)
         if self.showAll:
-            self.stream.write(": unexpected success\n")
+            self.stream.write(": PASS (unexpected)\n")
         elif self.dots:
             self.stream.write("u")
             self.stream.flush()
@@ -439,6 +447,7 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--cpu-time-limit', default='6s', dest='cpuTimeLimit', help='cpu time limit (default: 6s)')
     parser.add_argument('-t', '--threads', type=int, default=multiprocessing.cpu_count(), help='number of parallel threads (default: number of CPUs, currently '+str(multiprocessing.cpu_count())+')')
     parser.add_argument('-l', '--logfile', default='test.out', dest='logFile', help='name of logfile (default: test.out)')
+    parser.add_argument('-e', '--executable', help='Determines which binary to execute (e.g. opp_run_dbg, opp_run_release)')
     args = parser.parse_args()
     memcheck = args.memcheck
     cpuTimeLimit = args.cpuTimeLimit
@@ -450,6 +459,9 @@ if __name__ == "__main__":
 
     if not args.testspecfiles:
         args.testspecfiles = glob.glob('*.csv')
+
+    if args.executable:
+        executable = args.executable
 
     generator = SmokeTestCaseGenerator()
     testcases = generator.generateFromCSV(args.testspecfiles, args.match, args.exclude, 1)

@@ -1,0 +1,95 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-05-23  Zoltan Bojthe
+
+	TcpStatusInfo is automatically deleted when socketStatusArrived() returns.
+
+2018-05-07  Levente Mészáros
+
+	Separated setCallback from setUserData in all sockets.
+
+2018-05-04  Levente Mészáros
+
+	Added get/setUserData to all sockets.
+	Renamed yourPtr to userData in all sockets.
+
+2018-05-04  Zoltan Bojthe
+
+	Removed yourPtr from parameters of TcpSocket::ICallback functions.
+	Replaced connId with TcpSocket* in TcpSocket::ICallback functions.
+
+2018-04-23  Zoltan Bojthe
+
+	Replaced TcpSocketMap with SocketMap.
+	Refactored TcpSocket to implement ISocket.
+	Rename TcpSocket::CallbackInterface to ICallback.
+
+2018-04-19  Zoltan Bojthe
+
+	Removed obsolete TcpSocket::belongsToAnyTCPSocket().
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-01-12  Levente Mészáros
+
+	Renamed Request variables.
+	Replaced cMessage commands with Request and Indication.
+
+2018-01-03  Levente Mészáros
+
+	Replaced cMessage with Packet where applicable.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IPProtocolId -> IpProtocolId
+	    ITCP -> ITcp
+	    LDP -> Ldp
+	    TCPAcceptCommand -> TcpAcceptCommand
+	    TCPAlgorithm -> TcpAlgorithm
+	    TCPAvailableInfo -> TcpAvailableInfo
+	    TCPCommand -> TcpCommand
+	    TCPConnectInfo -> TcpConnectInfo
+	    TCPConnection -> TcpConnection
+	    TCPErrorCode -> TcpErrorCode
+	    TCPErrorInfo -> TcpErrorInfo
+	    TCPOpenCommand -> TcpOpenCommand
+	    TCPSocket -> TcpSocket
+	    TCPSocketMap -> TcpSocketMap
+	    TCPSrvHostApp -> TcpServerHostApp
+	    TCPStateVariables -> TcpStateVariables
+	    TCPStatusInfo -> TcpStatusInfo
+
+2017-11-14  Zoltan Bojthe
+
+	Replaced "int foo @enum(FooEnum)" to FooEnum foo in MSG files.
+
+2017-10-20  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-09-28  TÖRÖK Attila
+
+	Removed the requirement for a TCPCommand ControlInfo from TCPSocket ctor.
+
+2017-09-14  Levente Mészáros
+
+	Removed obsolete TCP socket parameter dataTransferMode from all implementations.
+
+2016-06-03  Levente Mészáros
+
+	Added explicit accept mechanism to listening.
+
+2015-06-11  Levente Mészáros
+
+	Renamed connId to socketId to be able to implement the ISocketControlInfo interface.

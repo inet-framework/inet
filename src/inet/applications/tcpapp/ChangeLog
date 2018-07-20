@@ -1,3 +1,156 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-27  Levente Mészáros
+
+	Reverted back the emit signal to TcpSinkAppThread and disabled signal checks locally.
+
+2018-06-26  Levente Mészáros
+
+	Changed signal source to TcpSinkApp instead of TcpSinkAppThread.
+
+2018-06-01  Zoltan Bojthe
+
+	Added B/b units to length constants and length fields of chunks.
+
+2018-05-11  Levente Mészáros
+
+	Refactored TcpServerHostApp to properly use TcpSocket when accepting connections.
+
+2018-05-04  Zoltan Bojthe
+
+	Changed TcpSinkApp to use TcpServerHostApp/TcpServerThreadBase.
+
+2018-04-25  Zoltan Bojthe
+
+	Refactored to use the new TcpSocket interface.
+
+2018-04-27  Andras Varga
+
+	Removed obsolete "dataTransferMode" parameter.
+
+2018-04-23  Zoltan Bojthe
+
+	Replaced TcpSocketMap with SocketMap.
+
+2018-04-10  Zoltan Bojthe
+
+	Fixed issue #238: TcpAppBase ignored localPort when connecting.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-02-02  Zoltan Bojthe
+
+	Fixed memory leak.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-12  Levente Mészáros
+
+	Renamed Request variables.
+	Replaced cMessage commands with Request and Indication.
+	Moved Request kind into constructor argument.
+
+2018-01-12  Zoltan Bojthe
+
+	Fixed double and int inconsistency: NED vs. INI and NED vs. C++
+
+2018-01-02  Levente Mészáros
+
+	Replaced cPacket with Packet.
+	Replaced cMessage with Packet where applicable.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IPv4 -> Ipv4
+	    IPv6 -> Ipv6
+	    TCP -> Tcp
+	    TCPAppBase -> TcpAppBase
+	    TCPBasicClientApp -> TcpBasicClientApp
+	    TCPCommand -> TcpCommand
+	    TCPEchoApp -> TcpEchoApp
+	    TCPEchoAppThread -> TcpEchoAppThread
+	    TCPGenericSrvApp -> TcpGenericServerApp
+	    TCPGenericSrvThread -> TcpGenericServerThread
+	    TCPServerThreadBase -> TcpServerThreadBase
+	    TCPSessionApp -> TcpSessionApp
+	    TCPSinkApp -> TcpSinkApp
+	    TCPSocket -> TcpSocket
+	    TCPSocketMap -> TcpSocketMap
+	    TCPSrvHostApp -> TcpServerHostApp
+	    TCPStatusInfo -> TcpStatusInfo
+	    TCP_NSC -> TcpNsc
+
+2017-12-15  Zoltan Bojthe
+
+	Removed unnecessary cPar::longValue() calls.
+
+	Motivation: rely on cast operators instead because they can detect
+	overflows (when the value is cast to a smaller integer type that can not
+	represent it). Removed unnecessary .longvalue() calls. Replaced to
+	.intValue() in comparisons.
+
+2017-12-14  Levente Mészáros
+
+	Removed unnecessary markImmutable() calls.
+
+2017-12-07  Levente Mészáros
+
+	Added CreationTimeTag support to UdpBasicApp and TcpSessionApp.
+
+2017-11-16  Levente Mészáros
+
+	Moved rcvdPkSignal and sentPkSignal into Simsignals.
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-11-13  Levente Mészáros
+
+	Fixed memory leak found by Valgrind.
+
+2017-03-20  Zoltan Bojthe
+
+	Send ApplicationPacket instead of cPacketChunk in object mode.
+
+2016-12-21  Levente Mészáros
+
+	Changed chunks to be immutable before appending/prepending to a Packet.
+
+2016-12-20  Levente Mészáros
+
+	Removed unnecessary chunk duplication.
+
+2016-07-22  Zoltan Bojthe
+
+	Added refreshDisplay() to TCPSrvHostApp.
+
+2016-06-30  Zoltan Bojthe
+
+	Added lifecycle support to TCPSrvHostApp.
+
+2016-06-02  Levente Mészáros
+
+	Changed applications to implement the new IApp interface.
+	Renamed gates to socketIn/socketOut.
+
+2015-06-11  Levente Mészáros
+
+	Added handling TCP_I_AVAILABLE to some TCP applications.
+
+2016-06-03  Levente Mészáros
+
+	Changed TCPEchoApp to be based on TCPSrvHostApp, sockets, threads.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

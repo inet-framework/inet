@@ -1,0 +1,166 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-04-24  Levente Mészáros
+
+	Renamed folders and files to flooding and Flooding*.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-03-01  Zoltan Bojthe
+
+	Added FloodProtocolDissector.
+	Added payloadLength field to FloodHeader.
+
+2018-02-06  Zoltan Bojthe
+
+	Optimized payload protocol decoding.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-12  Zoltan Bojthe
+
+	Fixed double and int inconsistency: NED vs. INI and NED vs. C++
+
+2018-01-03  Levente Mészáros
+
+	Replaced cMessage with Packet where applicable.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IPProtocolId -> IpProtocolId
+	    MACAddress -> MacAddress
+
+2017-12-15  Andras Varga
+
+	Fixed int/double type mismatch between NED parameter and C++ usage.
+
+2017-12-15  Zoltan Bojthe
+
+	Removed unnecessary cPar::doubleValue() calls.
+
+2017-12-14  Levente Mészáros
+
+	Replaced pushHeader, pushTrailer with insertHeader, insertTrailer.
+	Removed unnecessary markImmutable() calls.
+
+2017-12-11  Zoltan Bojthe
+
+	Removed some unnecessary @customize from MSG files.
+
+2017-12-05  Zoltan Bojthe
+
+	Removed "typedef const Foo ConstFoo" statements from MSG files, replaced
+	with proper const support.
+
+2017-11-23  Levente Mészáros
+
+	Removed protocolId @override from NetworkHeaderBase subclasses.
+
+2017-11-13  Zoltan Bojthe
+
+	Replaced "int ipProtocolId @enum(IPProtocolId)" to "IPProtocolId ipProtocolId".
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-11-13  Levente Mészáros
+
+	Fixed memory leak found by Valgrind.
+
+2017-07-14  Levente Mészáros
+
+	Renamed arguments in handleLowerPacket and handleUpperPacket to packet.
+
+2017-07-14  Levente Mészáros
+
+	Replaced cPacket with Packet in LayeredProtocolBase and subclasses.
+
+2017-06-16  Zoltan Bojthe
+
+	Fixed but caused by floodHeader being immutable.
+
+2017-02-01  Levente Mészáros
+
+	Renamed to FloodHeader.
+
+2017-02-01  Levente Mészáros
+
+	Changed to use new Packet class.
+
+2016-06-08  Zoltan Bojthe
+
+	Removed SimpleNetworkProtocolControlInfo, switched to GenericNetworkProtocolControlInfo.
+
+2016-05-30  Levente Mészáros
+
+	Added ether type to link layer control info.
+
+2016-05-30  Levente Mészáros
+
+	Dropped vector gate handling towards transport protocols and interfaces.
+
+====== inet-3.x ======
+
+2018-03-21  ------ inet-3.6.4 released ------
+
+2018-01-12  Zoltan Bojthe
+
+	Changed some module parameters from double to int.
+
+2017-12-22  ------ inet-3.6.3 released ------
+
+2017-10-02  ------ inet-3.6.2 released ------
+
+2017-07-06  ------ inet-3.6.1 released ------
+
+2017-06-09  ------ inet-3.6.0 released ------
+
+2017-02-20  ------ inet-3.5.0 released ------
+
+2016-06-15  ------ inet-3.4.0 released ------
+
+2016-06-01  ------ inet-3.3.0 released ------
+
+2016-04-06  ------ inet-3.2.4 released ------
+
+2016-03-16  ------ inet-3.2.3 released ------
+
+2016-03-11  ------ inet-3.2.2 released ------
+
+2016-01-21  ------ inet-3.2.1 released ------
+
+2015-12-16  ------ inet-3.2.0 released ------
+
+2015-10-26  ------ inet-3.1.1 released ------
+
+2015-10-15  ------ inet-3.1.0 released ------
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-12-19  Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2014-01-22  Levente Meszaros
+
+	Ported the network protocol from MiXiM and adapted to the network protocol contract.
+
+====== inet-2.x ======

@@ -16,7 +16,7 @@
 //
 
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
-#include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
+#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
 #include "inet/physicallayer/base/packetlevel/NarrowbandReceiverBase.h"
 #include "inet/physicallayer/base/packetlevel/NarrowbandTransmissionBase.h"
 #include "inet/physicallayer/base/packetlevel/NarrowbandReceptionBase.h"
@@ -30,7 +30,7 @@ namespace inet {
 namespace physicallayer {
 
 NarrowbandReceiverBase::NarrowbandReceiverBase() :
-    SNIRReceiverBase(),
+    SnirReceiverBase(),
     modulation(nullptr),
     carrierFrequency(Hz(NaN)),
     bandwidth(Hz(NaN))
@@ -39,9 +39,9 @@ NarrowbandReceiverBase::NarrowbandReceiverBase() :
 
 void NarrowbandReceiverBase::initialize(int stage)
 {
-    SNIRReceiverBase::initialize(stage);
+    SnirReceiverBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        modulation = APSKModulationBase::findModulation(par("modulation"));
+        modulation = ApskModulationBase::findModulation(par("modulation"));
         carrierFrequency = Hz(par("carrierFrequency"));
         bandwidth = Hz(par("bandwidth"));
     }
@@ -53,7 +53,7 @@ std::ostream& NarrowbandReceiverBase::printToStream(std::ostream& stream, int le
         stream << ", modulation = " << printObjectToString(modulation, level + 1)
                << ", carrierFrequency = " << carrierFrequency
                << ", bandwidth = " << bandwidth;
-    return SNIRReceiverBase::printToStream(stream, level);
+    return SnirReceiverBase::printToStream(stream, level);
 }
 
 const IListening *NarrowbandReceiverBase::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const
@@ -81,12 +81,12 @@ bool NarrowbandReceiverBase::computeIsReceptionPossible(const IListening *listen
         return true;
 }
 
-const IReceptionDecision *NarrowbandReceiverBase::computeReceptionDecision(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISNIR *snir) const
+const IReceptionDecision *NarrowbandReceiverBase::computeReceptionDecision(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const
 {
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
     const NarrowbandReceptionBase *narrowbandReception = check_and_cast<const NarrowbandReceptionBase *>(reception);
     if (bandListening->getCarrierFrequency() == narrowbandReception->getCarrierFrequency() && bandListening->getBandwidth() == narrowbandReception->getBandwidth())
-        return SNIRReceiverBase::computeReceptionDecision(listening, reception, part, interference, snir);
+        return SnirReceiverBase::computeReceptionDecision(listening, reception, part, interference, snir);
     else
         return new ReceptionDecision(reception, part, false, false, false);
 }

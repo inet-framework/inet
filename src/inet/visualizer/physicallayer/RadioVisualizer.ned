@@ -27,16 +27,14 @@ import inet.visualizer.contract.IRadioVisualizer;
 module RadioVisualizer like IRadioVisualizer
 {
     parameters:
-        @display("i=block/app_s");
-        string canvasVisualizerType = default("RadioCanvasVisualizer");
-        string osgVisualizerType = default("RadioOsgVisualizer");
+        @display("i=block/app");
     submodules:
-        canvasVisualizer: <canvasVisualizerType> like IRadioVisualizer if canvasVisualizerType != "" {
+        canvasVisualizer: <default("RadioCanvasVisualizer")> like IRadioVisualizer if typename != "" {
             parameters:
-                @display("p=100,50");
+                @display("p=100,100");
         }
-        osgVisualizer: <osgVisualizerType> like IRadioVisualizer if osgVisualizerType != "" {
+        osgVisualizer: <default("RadioOsgVisualizer")> like IRadioVisualizer if typename != "" {
             parameters:
-                @display("p=100,150");
+                @display("p=100,200");
         }
 }

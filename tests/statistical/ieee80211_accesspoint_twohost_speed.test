@@ -1,31 +1,33 @@
 %description:
 Testing TCP communication speed
     TCP
-    TCP_NSC
+    TcpNsc
 %#--------------------------------------------------------------------------------------------------------------
 %testprog: opp_run
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import inet.applications.ethernet.EtherAppCli;
+import inet.applications.ethernet.EtherAppClient;
 import inet.common.queue.Sink;
-import inet.linklayer.ieee80211.Ieee80211Nic;
+import inet.linklayer.ieee80211.Ieee80211Interface;
 import inet.mobility.single.CircleMobility;
 import inet.mobility.static.StationaryMobility;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 
-module Ieee80211NicSTASimplified extends Ieee80211Nic
+module Ieee80211NicSTASimplified extends Ieee80211Interface
 {
     parameters:
-        mgmtType = "Ieee80211MgmtSTASimplified";
+        mgmt.typename = "Ieee80211MgmtStaSimplified";
+        agent.typename = "";
 }
 
 module WirelessAPSimplified extends AccessPoint
 {
     parameters:
-        wlan[*].mgmtType = "Ieee80211MgmtAPSimplified";
+        wlan[*].mgmt.typename = "Ieee80211MgmtApSimplified";
+        wlan[*].agent.typename = "";
 }
 
 module ThroughputClient
@@ -41,7 +43,7 @@ module ThroughputClient
         input radioIn @directIn;
 
     submodules:
-        cli: EtherAppCli {
+        cli: EtherAppClient {
             parameters:
                 registerSAP = false;
                 destAddress = "20:00:00:00:00:0"+string(idx % maxSrv);
@@ -217,8 +219,8 @@ cat("\nOMNETPP TEST RESULT:\n")
 
 sink <- dataset$scalars[grep("\\.srvHost\\[\\d\\]\\.sink", dataset$scalars$module),]
 #print(sink)
-secs <- (sink$value[sink$name == "rcvdPk:count"] / sink$value[sink$name == "packetPerSec"])
-sinkRcvd <- sink[sink$name == "rcvdPk:sum(packetBytes)",]
+secs <- (sink$value[sink$name == "packetReceived:count"] / sink$value[sink$name == "packetPerSec"])
+sinkRcvd <- sink[sink$name == "packetReceived:sum(packetBytes)",]
 
 #print(sinkRcvd)
 cnt <- length(sinkRcvd$value)

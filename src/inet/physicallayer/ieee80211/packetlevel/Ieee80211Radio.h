@@ -44,6 +44,9 @@ class INET_API Ieee80211Radio : public FlatRadioBase
 
     virtual void handleUpperCommand(cMessage *message) override;
 
+    virtual void encapsulate(Packet *packet) const override;
+    virtual void decapsulate(Packet *packet) const override;
+
   public:
     Ieee80211Radio();
 

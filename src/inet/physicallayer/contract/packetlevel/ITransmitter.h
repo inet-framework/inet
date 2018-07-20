@@ -18,6 +18,7 @@
 #ifndef __INET_ITRANSMITTER_H
 #define __INET_ITRANSMITTER_H
 
+#include "inet/common/packet/Packet.h"
 #include "inet/physicallayer/contract/packetlevel/ITransmission.h"
 
 namespace inet {
@@ -39,7 +40,7 @@ class INET_API ITransmitter : public IPrintableObject
     virtual W getMaxPower() const = 0;
 
     /**
-     * Returns the maximum transmission range. Returns a value in the range
+     * Returns the maximum communication range. Returns a value in the range
      * [0, +infinity] or NaN if unspecified.
      */
     virtual m getMaxCommunicationRange() const = 0;
@@ -51,10 +52,10 @@ class INET_API ITransmitter : public IPrintableObject
     virtual m getMaxInterferenceRange() const = 0;
 
     /**
-     * Returns a transmission which describes the radio signal corresponding
-     * to the provided mac frame. This function never returns nullptr.
+     * Returns a transmission which describes the radio signal corresponding to
+     * the provided packet. This function never returns nullptr.
      */
-    virtual const ITransmission *createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const = 0;
+    virtual const ITransmission *createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const = 0;
 };
 
 } // namespace physicallayer

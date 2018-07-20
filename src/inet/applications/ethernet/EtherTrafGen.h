@@ -19,8 +19,8 @@
 #define __INET_ETHERTRAFGEN_H
 
 #include "inet/common/INETDefs.h"
-
-#include "inet/linklayer/common/MACAddress.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/common/MacAddress.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 
@@ -40,8 +40,9 @@ class INET_API EtherTrafGen : public cSimpleModule, public ILifecycle
     cPar *sendInterval = nullptr;
     cPar *numPacketsPerBurst = nullptr;
     cPar *packetLength = nullptr;
-    int etherType = 0;
-    MACAddress destMACAddress;
+    int ssap = -1;
+    int dsap = -1;
+    MacAddress destMACAddress;
     NodeStatus *nodeStatus = nullptr;
 
     // self messages
@@ -52,8 +53,6 @@ class INET_API EtherTrafGen : public cSimpleModule, public ILifecycle
     // receive statistics
     long packetsSent = 0;
     long packetsReceived = 0;
-    static simsignal_t sentPkSignal;
-    static simsignal_t rcvdPkSignal;
 
   protected:
     virtual void initialize(int stage) override;
@@ -66,10 +65,10 @@ class INET_API EtherTrafGen : public cSimpleModule, public ILifecycle
     virtual void scheduleNextPacket(simtime_t previous);
     virtual void cancelNextPacket();
 
-    virtual MACAddress resolveDestMACAddress();
+    virtual MacAddress resolveDestMACAddress();
 
     virtual void sendBurstPackets();
-    virtual void receivePacket(cPacket *msg);
+    virtual void receivePacket(Packet *msg);
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
   public:

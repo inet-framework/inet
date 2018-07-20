@@ -1,0 +1,104 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-05  Levente Mészáros
+
+	Added deep parameter assignments for antenna.mobilityModule.
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-04-25  Gyorgy Szaszko
+
+	Added canvasImage and canvasImageColor parameters to NodeBase.
+
+2018-04-06  Andras Varga
+
+	Added reference to hasGn parameter in NetworkLayerNodeBase submodule condition.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-03-07  Zoltan Bojthe
+
+	Added numPppInterfaces and numEthInterfaces to allow configuring the number
+	of interfaces from INI files.
+
+2018-01-23  Levente Mészáros
+
+	Replaced MessageDispatcher lower/upper vector gates with a single one.
+
+2018-01-11  Zoltan Bojthe
+
+	Renamed all *Nic modules to *Interface.
+	Added new moduleinterfaces (ILoopbackInterface, IEthernetInterface, IPppInterface).
+
+2018-01-15  Levente Mészáros
+
+	Fixed NED errors caused by optional IPv4 and IPv6 network layers.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IPv4NetworkLayer -> Ipv4NetworkLayer
+	    IPv6NetworkLayer -> Ipv6NetworkLayer
+	    ISCTP -> ISctp
+	    ITCP -> ITcp
+	    IUDP -> IUdp
+	    PPPFrame -> PppFrame
+	    PPPInterface -> PppInterface
+	    TCP -> Tcp
+	    TCPSpoof -> TcpSpoof
+	    TCP_NSC -> TcpNsc
+	    TCP_lwIP -> TcpLwip
+	    UDP -> Udp
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-09-15  Gyorgy Szaszko
+
+	Modified StandardHost graphical layer rectangles.
+
+2017-05-10  Levente Mészáros
+
+	Fine tuned NodeBase submodule positions and sizes.
+
+2017-01-30  TÖRÖK Attila
+
+	Make node background size match the layer figures in it.
+
+2016-06-16  Levente Mészáros
+
+	Changed @display strings for better positioning, icons, etc.
+
+2016-06-16  Zoltan Bojthe
+
+	Changed lo0 loopback interface to a submodule vector.
+
+2016-06-14  Levente Mészáros
+
+	Dropped vector gates from appIn/appOut and ipIn/ipOut.
+
+2016-06-14  Levente Mészáros
+
+	Renamed input/output gates according to other transport protocols.
+	Renamed from_appl/to_appl to appIn/appOut.
+	Renamed from_ip/to_ip to ipIn/ipOut.
+
+2016-06-02  Levente Mészáros
+
+	Added INetworkNode to implemented interfaces of NodeBase.
+
+2016-05-31  Levente Mészáros
+
+	Changed positions and icons in display string to at least have well-layouted
+	network nodes.
+
+2016-05-30  Levente Mészáros
+
+	Moved NodeBase from inet to base directory.
+
+2016-05-30  Levente Mészáros
+
+	Added new separate base modules for the OSI link, network, transport and
+	application layers.

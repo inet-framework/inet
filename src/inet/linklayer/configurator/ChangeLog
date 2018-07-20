@@ -1,3 +1,38 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-01-05  Zoltan Bojthe
+
+	Renamed NF_* signals to use camel case.
+	Renamed signal variables to *Signal.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IPv4NetworkConfigurator -> Ipv4NetworkConfigurator
+	    MACAddress -> MacAddress
+	    RSTP -> Rstp
+	    STP -> Stp
+
+2017-12-15  Zoltan Bojthe
+
+	Renamed deprecated info() to str().
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2016-10-26  Zoltan Bojthe
+
+	Removed compatibility macros required for OMNeT++ 4.x builds.
+
+2016-06-16  Levente Mészáros
+
+	Removed icon size specification from module definitions.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

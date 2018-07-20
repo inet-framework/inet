@@ -17,7 +17,7 @@
 
 package inet.examples.dhcp;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
 import inet.node.inet.StandardHost;
 import inet.node.inet.WirelessHost;
@@ -28,14 +28,13 @@ import inet.visualizer.contract.IIntegratedVisualizer;
 
 network WirelessNetWith2DHCP
 {
-    @display("bgb=590,407;bgl=2");
     int numHosts;
     submodules:
         visualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
-            @display("p=305,35");
+            @display("p=100,300;is=s");
         }
         radioMedium: Ieee80211ScalarRadioMedium {
-            @display("p=64,34");
+            @display("p=100,200;is=s");
         }
         client: WirelessHost {
             @display("p=64,124");
@@ -52,8 +51,8 @@ network WirelessNetWith2DHCP
         dhcpServer2: StandardHost {
             @display("p=511,307");
         }
-        configurator: IPv4NetworkConfigurator {
-            @display("p=180,35");
+        configurator: Ipv4NetworkConfigurator {
+            @display("p=100,100;is=s");
         }
         server: StandardHost {
             @display("p=283,363");

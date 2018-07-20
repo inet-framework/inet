@@ -24,22 +24,21 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 **.hasStatus = true
 **.scenarioManager.script = xmldoc("scenario.xml")
-**.numUdpApps = 1
-**.client.udpApp[0].typename = "DHCPClient"
-#**.client.udpApp[0].log-level = detail
+**.numApps = 1
+**.client.app[0].typename = "DhcpClient"
+#**.client.app[0].log-level = detail
 
-**.server.udpApp[0].typename = "DHCPServer"
-**.server.udpApp[0].numReservedAddresses = 100
-**.server.udpApp[0].maxNumClients = 100
-**.server.udpApp[0].dns = ""
-**.server.udpApp[0].leaseTime = 150s
+**.server.app[0].typename = "DhcpServer"
+**.server.app[0].numReservedAddresses = 100
+**.server.app[0].maxNumClients = 100
+**.server.app[0].dns = ""
+**.server.app[0].leaseTime = 150s
 
 %file: test.ned
 
 import inet.node.ethernet.Eth10M;
 import inet.node.inet.StandardHost;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
-import inet.common.lifecycle.LifecycleController;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.common.scenario.ScenarioManager;
 
 network LifecycleTest
@@ -48,10 +47,7 @@ network LifecycleTest
         scenarioManager: ScenarioManager {
             @display("p=73,59");
         }
-        lifecycleController: LifecycleController {
-            @display("p=73,185");
-        }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0'/></config>");
                 @display("p=73,116");
@@ -70,10 +66,10 @@ network LifecycleTest
 
 <scenario>
     <at t="0.0">
-        <tell module="lifecycleController" target="server" operation="NodeShutdownOperation"/>
+        <shutdown module="server"/>
     </at>
     <at t="190.0">
-        <tell module="lifecycleController" target="server" operation="NodeStartOperation"/>
+        <startup module="server"/>
     </at>
 </scenario>
 

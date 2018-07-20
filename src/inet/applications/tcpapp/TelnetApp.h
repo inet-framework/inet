@@ -18,16 +18,16 @@
 #ifndef __INET_TELNETAPP_H
 #define __INET_TELNETAPP_H
 
-#include "inet/applications/tcpapp/TCPAppBase.h"
+#include "inet/applications/tcpapp/TcpAppBase.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 
 namespace inet {
 
 /**
- * An example Telnet client application. The server app should be TCPGenericSrvApp.
+ * An example Telnet client application. The server app should be TcpGenericServerApp.
  */
-class INET_API TelnetApp : public TCPAppBase, public ILifecycle
+class INET_API TelnetApp : public TcpAppBase, public ILifecycle
 {
   protected:
     cMessage *timeoutMsg = nullptr;
@@ -39,10 +39,10 @@ class INET_API TelnetApp : public TCPAppBase, public ILifecycle
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleTimer(cMessage *msg) override;
-    virtual void socketEstablished(int connId, void *yourPtr) override;
-    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) override;
-    virtual void socketClosed(int connId, void *yourPtr) override;
-    virtual void socketFailure(int connId, void *yourPtr, int code) override;
+    virtual void socketEstablished(TcpSocket *socket) override;
+    virtual void socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent) override;
+    virtual void socketClosed(TcpSocket *socket) override;
+    virtual void socketFailure(TcpSocket *socket, int code) override;
     virtual void checkedScheduleAt(simtime_t t, cMessage *msg);
     virtual void sendGenericAppMsg(int numBytes, int expectedReplyBytes);
 

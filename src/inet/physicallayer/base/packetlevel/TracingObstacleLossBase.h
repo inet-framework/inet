@@ -25,8 +25,6 @@ namespace inet {
 
 namespace physicallayer {
 
-using namespace inet::physicalenvironment;
-
 class INET_API TracingObstacleLossBase : public cModule, public ITracingObstacleLoss
 {
 };

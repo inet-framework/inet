@@ -21,20 +21,13 @@
 //
 
 
-cplusplus {{
-#include "inet/common/INETDefs.h"
-#include "inet/networklayer/contract/ipv6/IPv6Address.h"
-#include "inet/networklayer/ipv6/IPv6Datagram.h" // added by CB
-#include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h" // 17.10.07 - CB
-}}
+import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
+import inet.networklayer.contract.ipv6.Ipv6Address;
+import inet.networklayer.ipv6.Ipv6Header;
+import inet.networklayer.ipv6.Ipv6ExtensionHeaders;
 
 namespace inet;
-
-class noncobject IPv6Address;
-
-class noncobject IPv6ExtensionHeader;
-
-class noncobject IPv6DestinationOptionsHeader;
 
 enum MobilityHeaderType
 {
@@ -49,13 +42,13 @@ enum MobilityHeaderType
     BINDING_ERROR = 7;
 }
 
-packet MobilityHeader // extends IPv6ExtensionHeader // TODO check how to define MobilityHeader as subclass of IPv6ExtensionHeader
+class MobilityHeader extends FieldsChunk  // extends Ipv6ExtensionHeader // TODO check how to define MobilityHeader as subclass of Ipv6ExtensionHeader
 {
-    int mobilityHeaderType @enum(MobilityHeaderType);
+    MobilityHeaderType mobilityHeaderType;
 }
 
 
-packet BindingUpdate extends MobilityHeader
+class BindingUpdate extends MobilityHeader
 {
     unsigned int lifetime;
     unsigned int sequence;
@@ -64,7 +57,7 @@ packet BindingUpdate extends MobilityHeader
     bool linkLocalAddressCompatibilityFlag;    //L-Flag (Link Local Address Compatibility Flag)
     bool keyManagementFlag = false;        //K-Flag (Key Management Flag)
     //Mobility Options not defined
-    IPv6Address homeAddressMN;        //As BU is supposed to be sent with Home Address Option, therefore i make this part of BU Msg.
+    Ipv6Address homeAddressMN;        //As BU is supposed to be sent with Home Address Option, therefore i make this part of BU Msg.
 
     // for CN communication; value different from 0 shows that it is used
     int bindingAuthorizationData = 0; // 28.08.07 - CB
@@ -73,7 +66,7 @@ packet BindingUpdate extends MobilityHeader
 
 //Defining the status fields for the Binding Acknowledgement Message
 
-enum BAStatus
+enum BaStatus
 {
 
     BINDING_UPDATE_ACCEPTED = 0;
@@ -94,9 +87,9 @@ enum BAStatus
 
 //==================Defining Binding Acknowledgement Message===================
 
-packet BindingAcknowledgement extends MobilityHeader
+class BindingAcknowledgement extends MobilityHeader
 {
-    int status @enum(BAStatus);
+    BaStatus status;
     unsigned int sequenceNumber;
     unsigned int lifetime;
     bool keyManagementFlag = false;//K-Flag (Key Management Flag)
@@ -108,7 +101,7 @@ packet BindingAcknowledgement extends MobilityHeader
 
 //==================Defining Binding Error Status====================
 
-enum BEStatus
+enum BeStatus
 {
 
     UNKNOWN_BINDING_FOR_HOME_ADDRESS_DEST_OPTION = 1;
@@ -117,24 +110,24 @@ enum BEStatus
 
 //==================Defining Binding Error Message===================
 
-packet BindingError extends MobilityHeader
+class BindingError extends MobilityHeader
 {
-    int status @enum(BEStatus);
-    IPv6Address homeAddress;
+    BeStatus status;
+    Ipv6Address homeAddress;
     //Mobility Options not defined
 
 }
 
 //=============Message definition of Home Test Init Message ==========
 
-packet HomeTestInit extends MobilityHeader
+class HomeTestInit extends MobilityHeader
 {
     unsigned int homeInitCookie;
 }
 
 //=============Message definition of Home Test Message ==========
 
-packet HomeTest extends MobilityHeader
+class HomeTest extends MobilityHeader
 {
     unsigned int homeInitCookie;
     unsigned int homeKeyGenToken;
@@ -143,14 +136,14 @@ packet HomeTest extends MobilityHeader
 
 //=============Message definition of Care-of Test Init Message ==========
 
-packet CareOfTestInit extends MobilityHeader
+class CareOfTestInit extends MobilityHeader
 {
     unsigned int careOfInitCookie;
 }
 
 //=============Message definition of Care-of Test Message ==========
 
-packet CareOfTest extends MobilityHeader
+class CareOfTest extends MobilityHeader
 {
     unsigned int careOfInitCookie;
     unsigned int careOfKeyGenToken;
@@ -161,7 +154,7 @@ packet CareOfTest extends MobilityHeader
 ///////////////////////////////////////////
 // 18.09.07 - CB
 ///////////////////////////////////////////
-packet BindingRefreshRequest extends MobilityHeader
+class BindingRefreshRequest extends MobilityHeader
 {
 }
 
@@ -169,8 +162,8 @@ packet BindingRefreshRequest extends MobilityHeader
 ///////////////////////////////////////////
 // 17.10.07 - CB
 ///////////////////////////////////////////
-packet HomeAddressOption extends IPv6DestinationOptionsHeader
+class HomeAddressOption extends Ipv6DestinationOptionsHeader
 {
-    @customize(true);
-    IPv6Address homeAddress;
+    Ipv6Address homeAddress;
 }
+

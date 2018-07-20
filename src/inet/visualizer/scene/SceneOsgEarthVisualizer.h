@@ -18,14 +18,14 @@
 #ifndef __INET_SCENEOSGEARTHVISUALIZER_H
 #define __INET_SCENEOSGEARTHVISUALIZER_H
 
-#include "inet/common/geometry/common/CoordinateSystem.h"
+#include "inet/common/geometry/common/GeographicCoordinateSystem.h"
 #include "inet/visualizer/base/SceneOsgVisualizerBase.h"
 
-#ifdef WITH_OSG
+#ifdef WITH_OSGEARTH
 #include <osgEarth/MapNode>
 #include <osgEarthAnnotation/RectangleNode>
-#include <osgEarthUtil/ObjectLocator>
-#endif // ifdef WITH_OSG
+#include <osgEarth/GeoTransform>
+#endif // ifdef WITH_OSGEARTH
 
 namespace inet {
 
@@ -33,14 +33,18 @@ namespace visualizer {
 
 class INET_API SceneOsgEarthVisualizer : public SceneOsgVisualizerBase
 {
-#ifdef WITH_OSG
+#ifdef WITH_OSGEARTH
+
+  public:
+    osgEarth::MapNode *getMapNode() { return mapNode; }
 
   protected:
     IGeographicCoordinateSystem *coordinateSystem = nullptr;
     double cameraDistanceFactor = NaN;
 
     osgEarth::MapNode *mapNode = nullptr;
-    osgEarth::Util::ObjectLocatorNode *locatorNode = nullptr;
+    osgEarth::GeoTransform *geoTransform = nullptr;
+    osg::PositionAttitudeTransform *localTransform = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
@@ -48,7 +52,7 @@ class INET_API SceneOsgEarthVisualizer : public SceneOsgVisualizerBase
     virtual void initializeLocator();
     virtual void initializeViewpoint();
 
-#endif // ifdef WITH_OSG
+#endif // ifdef WITH_OSGEARTH
 };
 
 } // namespace visualizer

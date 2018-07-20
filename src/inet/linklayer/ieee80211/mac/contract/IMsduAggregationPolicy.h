@@ -18,6 +18,7 @@
 #ifndef __INET_IMSDUAGGREGATIONPOLICY_H
 #define __INET_IMSDUAGGREGATIONPOLICY_H
 
+#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 namespace inet {
@@ -26,12 +27,12 @@ namespace ieee80211 {
 class INET_API IMsduAggregationPolicy
 {
     public:
-        virtual ~IMsduAggregationPolicy() {}
+        virtual ~IMsduAggregationPolicy() { }
 
-        virtual std::vector<Ieee80211DataFrame *> *computeAggregateFrames(cQueue *queue) = 0;
+        virtual std::vector<Packet *> *computeAggregateFrames(cQueue *queue) = 0;
 };
 
 } // namespace ieee80211
 } // namespace inet
 
-#endif
+#endif // __INET_IMSDUAGGREGATIONPOLICY_H

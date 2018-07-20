@@ -1,0 +1,66 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-01  Mani Amoozadeh
+
+	Added interfaces for Dcf, Hcf and Ds mac submodules.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IQoSRateSelection -> IQosRateSelection
+	    IRecipientQoSAckPolicy -> IRecipientQosAckPolicy
+	    IRecipientQoSMacDataService -> IRecipientQosMacDataService
+	    MACAddress -> MacAddress
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-10-24  Levente Mészáros
+
+	Revived MAC FCS computation and verification.
+
+2017-07-27  Levente Mészáros
+
+	Added MPDU aggregation interfaces.
+
+2017-05-10  Levente Mészáros
+
+	Renamed MAC header arguments to *Header.
+
+2017-05-10  Levente Mészáros
+
+	Renamed some MAC headers and frames.
+
+	Ieee80211Frame -> Ieee80211MacHeader
+	Ieee80211OneAddressFrame -> Ieee80211OneAddressHeader
+	Ieee80211TwoAddressFrame -> Ieee80211TwoAddressHeader
+	Ieee80211ACKFrame -> Ieee80211AckFrame
+	Ieee80211RTSFrame -> Ieee80211RtsFrame
+	Ieee80211CTSFrame -> Ieee80211CtsFrame
+
+2017-05-09  Levente Mészáros
+
+	Renamed multiple header chunks.
+
+	Ieee80211DataFrame -> Ieee80211DataHeader
+	Ieee80211DataOrMgmtFrame -> Ieee80211DataOrMgmtHeader
+	Ieee80211ManagementHeader -> Ieee80211MgmtHeader
+	Ieee80211ManagementFrame -> Ieee80211MgmtFrame
+
+2017-05-08  Levente Mészáros
+
+	Added a separate Ds (distribution service) module similarly how
+	the standard describes this service.
+
+2017-05-02  Levente Mészáros
+
+	Renamed to Ieee80211ManagementHeader.
+
+2017-04-20  Levente Mészáros
+
+	Refactored to use the new Packet API.

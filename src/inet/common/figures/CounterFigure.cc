@@ -19,8 +19,7 @@
 #include "CounterFigure.h"
 #include "inet/common/INETUtils.h"
 
-//TODO namespace inet { -- for the moment commented out, as OMNeT++ 5.0 cannot instantiate a figure from a namespace
-using namespace inet;
+namespace inet {
 
 Register_Figure("counter", CounterFigure);
 
@@ -73,8 +72,8 @@ int CounterFigure::getDecimalPlaces() const
 void CounterFigure::setDecimalPlaces(int number)
 {
     ASSERT(number > 0);
-    if (digits.size() != number) {
-        if (digits.size() > number)
+    if (digits.size() != (unsigned int)number) {
+        if (digits.size() > (unsigned int)number)
             // Remove unnecessary figures from canvas
             for (int i = digits.size() - 1; i > number - 1; --i) {
                 delete removeFigure(digits[i].bounds);
@@ -83,7 +82,7 @@ void CounterFigure::setDecimalPlaces(int number)
             }
         else
             // Add figure to canvas if it's necessary
-            while (digits.size() < number) {
+            while (digits.size() < (unsigned int)number) {
                 Digit digit(new cRectangleFigure(), new cTextFigure());
                 digit.bounds->setFilled(true);
                 digit.bounds->setFillColor(getDigitBackgroundColor());
@@ -159,7 +158,7 @@ void CounterFigure::setLabel(const char *text)
     labelFigure->setText(text);
 }
 
-const int CounterFigure::getLabelOffset() const
+int CounterFigure::getLabelOffset() const
 {
     return labelOffset;
 }
@@ -392,7 +391,7 @@ void CounterFigure::layout()
     // Add frame
     bounds.x += PADDING + DIGIT_PADDING / 2;
 
-    for (int i = 0; i < digits.size(); ++i) {
+    for (uint32 i = 0; i < digits.size(); ++i) {
         double rectWidth = getDigitFont().pointSize * DIGIT_WIDTH_PERCENT;
         double rectHeight = getDigitFont().pointSize * DIGIT_HEIGHT_PERCENT;
         double x = bounds.x + (rectWidth + DIGIT_PADDING) * i;
@@ -455,5 +454,5 @@ void CounterFigure::refresh()
     }
 }
 
-// } // namespace inet
+} // namespace inet
 

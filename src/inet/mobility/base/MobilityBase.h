@@ -22,10 +22,11 @@
 #ifndef __INET_MOBILITYBASE_H
 #define __INET_MOBILITYBASE_H
 
-#include "inet/common/ModuleAccess.h"
+#include "inet/common/geometry/common/CanvasProjection.h"
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/geometry/common/EulerAngles.h"
-#include "inet/common/geometry/common/CanvasProjection.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/StringFormat.h"
 #include "inet/mobility/contract/IMobility.h"
 
 namespace inet {
@@ -52,6 +53,18 @@ namespace inet {
  */
 class INET_API MobilityBase : public cSimpleModule, public IMobility
 {
+  protected:
+    class DirectiveResolver : public inet::visualizer::StringFormat::IDirectiveResolver {
+      protected:
+        IMobility *mobility = nullptr;
+        std::string result;
+
+      public:
+        DirectiveResolver(IMobility *mobility) : mobility(mobility) { }
+
+        virtual const char *resolveDirective(char directive) override;
+    };
+
   public:
     /**
      * Selects how a mobility module should behave if it reaches the edge of the constraint area.
@@ -66,7 +79,7 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
 
   protected:
     /** @brief Pointer to visual representation module, to speed up repeated access. */
-    cModule *visualRepresentation;
+    cModule *subjectModule;
 
     /** @brief The 2D projection used on the canvas. */
     const CanvasProjection *canvasProjection;
@@ -77,8 +90,10 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
     /** @brief The last position that was reported. */
     Coord lastPosition;
 
-    /** @brief The last position that was reported. */
+    /** @brief The last orientation that was reported. */
     EulerAngles lastOrientation;
+
+    inet::visualizer::StringFormat format;
 
   protected:
     MobilityBase();
@@ -101,14 +116,17 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
     /** @brief Initializes the orientation from module parameters. */
     virtual void initializeOrientation();
 
+    /** @brief Moves the visual representation module's icon to the new position on the screen. */
+    virtual void refreshDisplay() const override;
+
+    /** @brief Allows changing parameters from the GUI. */
+    virtual void handleParameterChange(const char *name) override;
+
     /** @brief This modules should only receive self-messages. */
     virtual void handleMessage(cMessage *msg) override;
 
     /** @brief Called upon arrival of a self messages, subclasses must override. */
     virtual void handleSelfMessage(cMessage *msg) = 0;
-
-    /** @brief Moves the visual representation module's icon to the new position on the screen. */
-    virtual void updateVisualRepresentation();
 
     /** @brief Emits a signal with the updated mobility state. */
     virtual void emitMobilityStateChangedSignal();
@@ -117,7 +135,7 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
     virtual Coord getRandomPosition();
 
     /** @brief Returns the module that represents the object moved by this mobility module. */
-    virtual cModule *findVisualRepresentation() { return getModuleFromPar<cModule>(par("visualRepresentation"), this); }
+    virtual cModule *findSubjectModule() { return findModuleFromPar<cModule>(par("subjectModule"), this); }
 
     /** @brief Returns true if the mobility is outside of the constraint area. */
     virtual bool isOutside();
@@ -128,7 +146,7 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
      * Decision is made on pos, but the variables passed as args will
      * also be updated. (Pass dummies you don't have some of them).
      */
-    virtual void reflectIfOutside(Coord& targetPosition, Coord& speed, double& angle);
+    virtual void reflectIfOutside(Coord& targetPosition, Coord& velocity, rad& angle);
 
     /** @brief Utility function to wrap the node to the opposite edge
      * (torus) if it goes outside the constraint area.
@@ -154,15 +172,10 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
     /** @brief Invokes one of reflectIfOutside(), wrapIfOutside() and
      * placeRandomlyIfOutside(), depending on the given border policy.
      */
-    virtual void handleIfOutside(BorderPolicy policy, Coord& targetPosition, Coord& speed, double& angle);
+    virtual void handleIfOutside(BorderPolicy policy, Coord& targetPosition, Coord& velocity, rad& angle);
 
   public:
     virtual double getMaxSpeed() const override { return NaN; }
-
-    virtual EulerAngles getCurrentAngularPosition() override { return EulerAngles::ZERO; }
-
-    /** @brief Returns the current angular speed at the current simulation time. */
-    virtual EulerAngles getCurrentAngularSpeed() override { return EulerAngles::ZERO; }
 
     virtual Coord getConstraintAreaMax() const override { return constraintAreaMax; }
     virtual Coord getConstraintAreaMin() const override { return constraintAreaMin; }

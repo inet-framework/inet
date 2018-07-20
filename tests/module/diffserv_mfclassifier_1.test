@@ -16,9 +16,12 @@ simple TestApp
 
 #include <fstream>
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/ipv4/IPv4Datagram.h"
-#include "inet/networklayer/ipv6/IPv6Datagram.h"
-#include "inet/transportlayer/udp/UDPPacket.h"
+#include "inet/common/Protocol.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/networklayer/ipv6/Ipv6Header.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
 
 using namespace inet;
 namespace diffserv_mfclassifier_1
@@ -41,92 +44,187 @@ void TestApp::initialize()
     if (out.fail())
       throw cRuntimeError("Can not open output file.");
 
-    IPv4Datagram *ipv4Datagram;
-    IPv6Datagram *ipv6Datagram;
-    UDPPacket *udpPacket;
+    {
+        Packet *packet = new Packet("ipv4-1");
+        const auto& ipv4Header = makeShared<Ipv4Header>();
+        ipv4Header->setSrcAddress(Ipv4Address("192.168.1.1"));
+        packet->insertAtFront(ipv4Header);
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        send(packet, "out");
+    }
 
-    ipv4Datagram = new IPv4Datagram("ipv4-1");
-    ipv4Datagram->setSrcAddress(IPv4Address("192.168.1.1"));    
-    send(ipv4Datagram, "out");
+    {
+        Packet *packet = new Packet("ipv6-2");
+        const auto& ipv6Header = makeShared<Ipv6Header>();
+        ipv6Header->setSrcAddress(Ipv6Address("fe80::1122:3344:5566"));
+        packet->insertAtFront(ipv6Header);
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
+        send(packet, "out");
+    }
 
-    ipv6Datagram = new IPv6Datagram("ipv6-2");
-    ipv6Datagram->setSrcAddress(IPv6Address("fe80::1122:3344:5566"));
-    send(ipv6Datagram, "out");
+    {
+        Packet *packet = new Packet("ipv4-3");
+        const auto& ipv4Header = makeShared<Ipv4Header>();
+        ipv4Header->setDestAddress(Ipv4Address("192.168.1.1"));
+        packet->insertAtFront(ipv4Header);
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        send(packet, "out");
+    }
 
-    ipv4Datagram = new IPv4Datagram("ipv4-3");
-    ipv4Datagram->setDestAddress(IPv4Address("192.168.1.1"));    
-    send(ipv4Datagram, "out");
+    {
+        Packet *packet = new Packet("ipv6-4");
+        const auto& ipv6Header = makeShared<Ipv6Header>();
+        ipv6Header->setDestAddress(Ipv6Address("fe80::1122:3344:5566"));
+        packet->insertAtFront(ipv6Header);
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
+        send(packet, "out");
+    }
 
-    ipv6Datagram = new IPv6Datagram("ipv6-4");
-    ipv6Datagram->setDestAddress(IPv6Address("fe80::1122:3344:5566"));
-    send(ipv6Datagram, "out");
+    {
+        Packet *packet = new Packet("ipv4-5");
+        const auto& ipv4Header = makeShared<Ipv4Header>();
+        const auto& udpPacket = makeShared<UdpHeader>();
+        udpPacket->setSourcePort(1000);
+        packet->insertAtFront(udpPacket);
+        ipv4Header->setProtocolId(IP_PROT_UDP);
+        packet->insertAtFront(ipv4Header);
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        send(packet, "out");
+    }
 
-    ipv4Datagram = new IPv4Datagram("ipv4-5");
-    udpPacket = new UDPPacket();
-    udpPacket->setSourcePort(1000);
-    ipv4Datagram->encapsulate(udpPacket);
-    send(ipv4Datagram, "out");
+    {
+        Packet *packet = new Packet("ipv4-6");
+        const auto& ipv4Header = makeShared<Ipv4Header>();
+        const auto& udpPacket = makeShared<UdpHeader>();
+        udpPacket->setDestinationPort(1000);
+        packet->insertAtFront(udpPacket);
+        ipv4Header->setProtocolId(IP_PROT_UDP);
+        packet->insertAtFront(ipv4Header);
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        send(packet, "out");
+    }
 
-    ipv4Datagram = new IPv4Datagram("ipv4-6");
-    udpPacket = new UDPPacket();
-    udpPacket->setDestinationPort(1000);
-    ipv4Datagram->encapsulate(udpPacket);
-    send(ipv4Datagram, "out");
+    {
+        Packet *packet = new Packet("ipv4-7");
+        const auto& ipv4Header = makeShared<Ipv4Header>();
+        const auto& udpPacket = makeShared<UdpHeader>();
+        udpPacket->setDestinationPort(999);
+        packet->insertAtFront(udpPacket);
+        ipv4Header->setProtocolId(IP_PROT_UDP);
+        packet->insertAtFront(ipv4Header);
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        send(packet, "out");
+    }
 
-    ipv4Datagram = new IPv4Datagram("ipv4-7");
-    ipv4Datagram->setTransportProtocol(17);
-    send(ipv4Datagram, "out");
+    {
+        Packet *packet = new Packet("ipv4-8");
+        const auto& ipv4Header = makeShared<Ipv4Header>();
+        ipv4Header->setTypeOfService(0x2e);
+        packet->insertAtFront(ipv4Header);
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        send(packet, "out");
+    }
 
-    ipv4Datagram = new IPv4Datagram("ipv4-8");
-    ipv4Datagram->setTypeOfService(0x2e);
-    send(ipv4Datagram, "out");
+    {
+        Packet *packet = new Packet("ipv6-9");
+        const auto& ipv6Header = makeShared<Ipv6Header>();
+        ipv6Header->setTrafficClass(0x2e);
+        packet->insertAtFront(ipv6Header);
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
+        send(packet, "out");
+    }
 
-    ipv6Datagram = new IPv6Datagram("ipv6-9");
-    ipv6Datagram->setTrafficClass(0x2e);
-    send(ipv6Datagram, "out");
+    {
+        Packet *packet = new Packet("ipv4-10");
+        const auto& ipv4Header = makeShared<Ipv4Header>();
+        ipv4Header->setSrcAddress(Ipv4Address("192.168.2.1"));    
+        packet->insertAtFront(ipv4Header);
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        send(packet, "out");
+    }
 
-    ipv4Datagram = new IPv4Datagram("ipv4-10");
-    ipv4Datagram->setSrcAddress(IPv4Address("192.168.2.1"));    
-    send(ipv4Datagram, "out");
+    {
+        Packet *packet = new Packet("ipv6-11");
+        const auto& ipv6Header = makeShared<Ipv6Header>();
+        ipv6Header->setSrcAddress(Ipv6Address("fe80::1"));
+        packet->insertAtFront(ipv6Header);
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
+        send(packet, "out");
+    }
 
-    ipv6Datagram = new IPv6Datagram("ipv6-11");
-    ipv6Datagram->setSrcAddress(IPv6Address("fe80::1"));
-    send(ipv6Datagram, "out");
+    {
+        Packet *packet = new Packet("ipv4-12");
+        const auto& ipv4Header = makeShared<Ipv4Header>();
+        ipv4Header->setDestAddress(Ipv4Address("192.168.2.1"));    
+        packet->insertAtFront(ipv4Header);
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        send(packet, "out");
+    }
 
-    ipv4Datagram = new IPv4Datagram("ipv4-12");
-    ipv4Datagram->setDestAddress(IPv4Address("192.168.2.1"));    
-    send(ipv4Datagram, "out");
+    {
+        Packet *packet = new Packet("ipv6-13");
+        const auto& ipv6Header = makeShared<Ipv6Header>();
+        ipv6Header->setDestAddress(Ipv6Address("fe80::1"));
+        packet->insertAtFront(ipv6Header);
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
+        send(packet, "out");
+    }
 
-    ipv6Datagram = new IPv6Datagram("ipv6-13");
-    ipv6Datagram->setDestAddress(IPv6Address("fe80::1"));
-    send(ipv6Datagram, "out");
+    {
+        Packet *packet = new Packet("ipv4-14");
+        const auto& ipv4Header = makeShared<Ipv4Header>();
+        const auto& udpPacket = makeShared<UdpHeader>();
+        udpPacket->setSourcePort(2100);
+        packet->insertAtFront(udpPacket);
+        ipv4Header->setProtocolId(IP_PROT_UDP);
+        packet->insertAtFront(ipv4Header);
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        send(packet, "out");
+    }
 
-    ipv4Datagram = new IPv4Datagram("ipv4-14");
-    udpPacket = new UDPPacket();
-    udpPacket->setSourcePort(2100);
-    ipv4Datagram->encapsulate(udpPacket);
-    send(ipv4Datagram, "out");
+    {
+        Packet *packet = new Packet("ipv6-15");
+        const auto& ipv6Header = makeShared<Ipv6Header>();
+        const auto& udpPacket = makeShared<UdpHeader>();
+        udpPacket->setSourcePort(2200);
+        packet->insertAtFront(udpPacket);
+        ipv6Header->setProtocolId(IP_PROT_UDP);
+        packet->insertAtFront(ipv6Header);
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
+        send(packet, "out");
+    }
 
-    ipv6Datagram = new IPv6Datagram("ipv6-15");
-    udpPacket = new UDPPacket();
-    udpPacket->setSourcePort(2200);
-    ipv6Datagram->encapsulate(udpPacket);
-    send(ipv6Datagram, "out");
+    {
+        Packet *packet = new Packet("ipv4-16");
+        const auto& ipv4Header = makeShared<Ipv4Header>();
+        const auto& udpPacket = makeShared<UdpHeader>();
+        udpPacket->setDestinationPort(2300);
+        packet->insertAtFront(udpPacket);
+        ipv4Header->setProtocolId(IP_PROT_UDP);
+        packet->insertAtFront(ipv4Header);
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        send(packet, "out");
+    }
 
-    ipv4Datagram = new IPv4Datagram("ipv4-16");
-    udpPacket = new UDPPacket();
-    udpPacket->setDestinationPort(2300);
-    ipv4Datagram->encapsulate(udpPacket);
-    send(ipv4Datagram, "out");
+    {
+        Packet *packet = new Packet("ipv6-17");
+        const auto& ipv6Header = makeShared<Ipv6Header>();
+        const auto& udpPacket = makeShared<UdpHeader>();
+        udpPacket->setDestinationPort(2400);
+        packet->insertAtFront(udpPacket);
+        ipv6Header->setProtocolId(IP_PROT_UDP);
+        packet->insertAtFront(ipv6Header);
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
+        send(packet, "out");
+    }
 
-    ipv6Datagram = new IPv6Datagram("ipv6-17");
-    udpPacket = new UDPPacket();
-    udpPacket->setDestinationPort(2400);
-    ipv6Datagram->encapsulate(udpPacket);
-    send(ipv6Datagram, "out");
-
-    ipv4Datagram = new IPv4Datagram("ipv4-18");
-    send(ipv4Datagram, "out");
+    {
+        Packet *packet = new Packet("ipv4-18");
+        const auto& ipv4Header = makeShared<Ipv4Header>();
+        packet->insertAtFront(ipv4Header);
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        send(packet, "out");
+    }
 }
 
 void TestApp::finalize()
@@ -171,15 +269,16 @@ network TestNetwork
   <filter gate="3" destAddress="fe80::1122:3344:5566"/>
   <filter gate="4" srcPort="1000"/>
   <filter gate="5" destPort="1000"/>
-  <filter gate="6" protocol="17"/>
-  <filter gate="7" tos="0x2e" tosMask="0x3f"/>
+  <filter gate="6" tos="0x2e" tosMask="0x3f"/>
 
-  <filter gate="8" srcAddress="192.168.0.0" srcPrefixLength="16"/>
-  <filter gate="9" srcAddress="fe80::" srcPrefixLength="10"/>
-  <filter gate="10" destAddress="192.168.0.0" destPrefixLength="16"/>
-  <filter gate="11" destAddress="fe80::" destPrefixLength="10"/>
-  <filter gate="12" srcPortMin="2000" srcPortMax="2999"/>
-  <filter gate="13" destPortMin="2000" destPortMax="2999"/>
+  <filter gate="7" srcAddress="192.168.0.0" srcPrefixLength="16"/>
+  <filter gate="8" srcAddress="fe80::" srcPrefixLength="10"/>
+  <filter gate="9" destAddress="192.168.0.0" destPrefixLength="16"/>
+  <filter gate="10" destAddress="fe80::" destPrefixLength="10"/>
+  <filter gate="11" srcPortMin="2000" srcPortMax="2999"/>
+  <filter gate="12" destPortMin="2000" destPortMax="2999"/>
+
+  <filter gate="13" protocol="17"/>
 </filters>
 
 
@@ -204,17 +303,17 @@ ipv4-3: in[2]
 ipv6-4: in[3]
 ipv4-5: in[4]
 ipv4-6: in[5]
-ipv4-7: in[6]
-ipv4-8: in[7]
-ipv6-9: in[7]
-ipv4-10: in[8]
-ipv6-11: in[9]
-ipv4-12: in[10]
-ipv6-13: in[11]
-ipv4-14: in[12]
-ipv6-15: in[12]
-ipv4-16: in[13]
-ipv6-17: in[13]
+ipv4-7: in[13]
+ipv4-8: in[6]
+ipv6-9: in[6]
+ipv4-10: in[7]
+ipv6-11: in[8]
+ipv4-12: in[9]
+ipv6-13: in[10]
+ipv4-14: in[11]
+ipv6-15: in[11]
+ipv4-16: in[12]
+ipv6-17: in[12]
 ipv4-18: defaultIn[0]
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout

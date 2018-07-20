@@ -16,6 +16,8 @@
 //
 
 
+import inet.common.INETDefs;
+
 namespace inet::httptools;
 
 //
@@ -23,14 +25,10 @@ namespace inet::httptools;
 //
 // Used by the controller to trigger popularity modifications for web sites.
 //
-// NEW: The definition has been migrated to OMNeT++ 4.0 and the latest INET version.
-//
 // @author  Kristjan V. Jonsson
 //
-packet HttpServerStatusUpdateMsg
+message HttpServerStatusUpdateMsg
 {
-    @omitGetVerb(true);
-    @fieldNameSuffix("_var");
     string www;             // Name of the WWW site.
     simtime_t setTime;      // The event set time.
     int eventKind;          // The event kind, e.g. ss_special.

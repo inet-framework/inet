@@ -1,10 +1,10 @@
 %description:
-Tests UDPSocket::bind() can not be called more than once on a socket.
+Tests UdpSocket::bind() can not be called more than once on a socket.
 
 %#--------------------------------------------------------------------------------------------------------------
 %file: TestApp.cc
-#include "inet/transportlayer/contract/udp/UDPSocket.h"
-#include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
+#include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 
 using namespace inet;
 namespace UDPSocket_2 {
@@ -21,8 +21,8 @@ Define_Module(TestApp);
 
 void TestApp::activity()
 {
-  UDPSocket s;
-  s.setOutputGate(gate("udpOut"));
+  UdpSocket s;
+  s.setOutputGate(gate("socketOut"));
   s.bind(100);
   s.bind(200); // will fail
 }
@@ -31,13 +31,13 @@ void TestApp::activity()
 
 %#--------------------------------------------------------------------------------------------------------------
 %file: TestApp.ned
-import inet.applications.contract.IUDPApp;
+import inet.applications.contract.IApp;
 
-simple TestApp like IUDPApp
+simple TestApp like IApp
 {
     gates:
-        input udpIn;
-        output udpOut;
+        input socketIn;
+        output socketOut;
 }
 
 %#--------------------------------------------------------------------------------------------------------------
@@ -54,8 +54,8 @@ output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
 output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
-**.client.numUdpApps = 1
-**.client.udpApp[0].typename = "TestApp"
+**.client.numApps = 1
+**.client.app[0].typename = "TestApp"
 
 %exitcode: 1
 
@@ -63,7 +63,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %postrun-command: grep "<!>" test.* > test_err.out || true
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: test_err.out
-(<!> Error in module \(inet::UDP\) SimpleTestNetwork\.client\.udp \(id=\d+\) at event \#\d+, t=0: bind: socket is already bound \(sockId=\d+\).)|(<!> Error: bind: socket is already bound \(sockId=\d+\) -- in module \(inet::UDP\) SimpleTestNetwork\.client\.udp \(id=\d+\), at t=0s, event \#\d+)
+(<!> Error in module \(inet::Udp\) SimpleTestNetwork\.client\.udp \(id=\d+\) at event \#\d+, t=0: bind: socket is already bound \(sockId=\d+\).)|(<!> Error: bind: socket is already bound \(sockId=\d+\) -- in module \(inet::Udp\) SimpleTestNetwork\.client\.udp \(id=\d+\), at t=0s, event \#\d+)
 %#--------------------------------------------------------------------------------------------------------------
 %# %not-contains: stdout
 %# undisposed object:

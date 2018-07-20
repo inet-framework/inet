@@ -88,12 +88,12 @@ class INET_API HttpServerBase : public HttpNodeBase
     virtual void handleMessage(cMessage *msg) override = 0;
 
     virtual void refreshDisplay() const override;
-    HttpReplyMessage *generateDocument(HttpRequestMessage *request, const char *resource, int size = 0);
-    HttpReplyMessage *generateResourceMessage(HttpRequestMessage *request, std::string resource, HttpContentType category);
-    HttpReplyMessage *handleGetRequest(HttpRequestMessage *request, std::string resource);
-    HttpReplyMessage *generateErrorReply(HttpRequestMessage *request, int code);
+    Packet *generateDocument(Packet *request, const char *resource, int size = 0);
+    Packet *generateResourceMessage(const Ptr<const HttpRequestMessage>& request, std::string resource, HttpContentType category);
+    Packet *handleGetRequest(Packet *pk, std::string resource);
+    Packet *generateErrorReply(const Ptr<const HttpRequestMessage>& request, int code);
     virtual std::string generateBody();
-    cPacket *handleReceivedMessage(cMessage *msg);
+    Packet *handleReceivedMessage(Packet *msg);
     void registerWithController();
     void readSiteDefinition(std::string file);
     std::string readHtmlBodyFile(std::string file, std::string path);

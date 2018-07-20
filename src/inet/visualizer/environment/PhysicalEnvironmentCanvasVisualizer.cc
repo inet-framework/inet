@@ -27,6 +27,8 @@ namespace inet {
 
 namespace visualizer {
 
+using namespace inet::physicalenvironment;
+
 Define_Module(PhysicalEnvironmentCanvasVisualizer);
 
 void PhysicalEnvironmentCanvasVisualizer::initialize(int stage)
@@ -124,7 +126,7 @@ void PhysicalEnvironmentCanvasVisualizer::computeFacePoints(const IPhysicalObjec
         const std::vector<Coord>& facePoints = *it;
         for (const auto & facePoint : facePoints)
         {
-            cFigure::Point canvPoint = canvasProjection->computeCanvasPoint(rotation.rotateVectorClockwise(facePoint) + position);
+            cFigure::Point canvPoint = canvasProjection->computeCanvasPoint(rotation.rotateVector(facePoint) + position);
             canvasPoints.push_back(canvPoint);
         }
         cPolygonFigure *figure = new cPolygonFigure("objectFace");

@@ -28,7 +28,10 @@
 #include "NetPerfMeter.h"
 #include "NetPerfMeter_m.h"
 
+#include "inet/common/packet/Message.h"
+#include "inet/applications/common/SocketTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/common/TimeTag_m.h"
 
 namespace inet {
 
@@ -122,14 +125,15 @@ void NetPerfMeter::parseExpressionVector(std::vector<cDynamicExpression>& expres
 void NetPerfMeter::initialize()
 {
    // ====== Handle parameters ==============================================
-   ActiveMode = (bool)par("activeMode");
-   if(strcmp((const char*)par("protocol"), "TCP") == 0) {
+   ActiveMode = par("activeMode");
+   const char * protocolPar = par("protocol");
+   if(strcmp(protocolPar, "TCP") == 0) {
       TransportProtocol = TCP;
    }
-   else if(strcmp((const char*)par("protocol"), "SCTP") == 0) {
+   else if(strcmp(protocolPar, "SCTP") == 0) {
       TransportProtocol = SCTP;
    }
-   else if(strcmp((const char*)par("protocol"), "UDP") == 0) {
+   else if(strcmp(protocolPar, "UDP") == 0) {
       TransportProtocol = UDP;
    }
    else {
@@ -164,8 +168,8 @@ void NetPerfMeter::initialize()
    parseExpressionVector(FrameSizeExpressionVector, par("frameSizeString"), ";");
 
    TraceIndex = ~0;
-   if(strcmp((const char*)par("traceFile"), "") != 0) {
-      std::fstream traceFile((const char*)par("traceFile"));
+   if(strcmp(par("traceFile").stringValue(), "") != 0) {
+      std::fstream traceFile(par("traceFile").stringValue());
       if(!traceFile.good()) {
          throw cRuntimeError("Unable to load trace file");
       }
@@ -176,7 +180,7 @@ void NetPerfMeter::initialize()
         traceEntry.StreamID        = 0;
 
         char line[256];
-        traceFile.getline((char*)&line, sizeof(line), '\n');
+        traceFile.getline(line, sizeof(line), '\n');
         if(sscanf(line, "%lf %u %u", &traceEntry.InterFrameDelay, &traceEntry.FrameSize, &traceEntry.StreamID) >= 2) {
            // std::cout << "Frame: " << traceEntry.InterFrameDelay << "\t" << traceEntry.FrameSize << "\t" << traceEntry.StreamID << endl;
            TraceVector.push_back(traceEntry);
@@ -271,7 +275,7 @@ void NetPerfMeter::refreshDisplay() const {
     }
 
     char status[64];
-    snprintf((char*)&status, sizeof(status), "In: %llu, Out: %llu",
+    snprintf(status, sizeof(status), "In: %llu, Out: %llu",
            totalReceivedBytes, totalSentBytes);
     getDisplayString().setTagArg("t", 0, status);
     //TODO also was setStatusString("Connecting"), setStatusString("Closed")
@@ -392,22 +396,26 @@ void NetPerfMeter::handleMessage(cMessage* msg)
          // ------ Data Arrival Indication ----------------------------------
          case SCTP_I_DATA_NOTIFICATION: {
             // Data has arrived -> request it from the SCTP module.
-            const SCTPCommand* dataIndication =
-               check_and_cast<const SCTPCommand*>(msg->getControlInfo());
-            SCTPSendInfo* command = new SCTPSendInfo("SendCommand");
-            command->setAssocId(dataIndication->getAssocId());
+            auto& tags = getTags(msg);
+            const SctpCommandReq* dataIndication = tags.getTag<SctpCommandReq>();
+           // SctpInfoReq* command = new SctpInfoReq("SendCommand");
+            SctpInfoReq* command = new SctpInfoReq();
+            command->setSocketId(dataIndication->getSocketId());
             command->setSid(dataIndication->getSid());
             command->setNumMsgs(dataIndication->getNumMsgs());
-            cPacket* cmsg = new cPacket("ReceiveRequest");
-            cmsg->setKind(SCTP_C_RECEIVE);
-            cmsg->setControlInfo(command);
+            Packet* cmsg = new Packet("ReceiveRequest", SCTP_C_RECEIVE);
+            SctpSendReq *cmd = cmsg->addTag<SctpSendReq>();
+            cmd->setSocketId(dataIndication->getSocketId());
+            cmd->setSid(dataIndication->getSid());
+            cmsg->addTag<SocketReq>()->setSocketId(dataIndication->getSocketId());
             send(cmsg, "sctpOut");
-           }
-          break;
+         }
+         break;
          // ------ Connection established -----------------------------------
          case SCTP_I_ESTABLISHED: {
-            const SCTPConnectInfo* connectInfo =
-               check_and_cast<const SCTPConnectInfo*>(msg->getControlInfo());
+             Message *message = check_and_cast<Message *>(msg);
+             auto& tags = getTags(message);
+             const SctpConnectReq *connectInfo = tags.getTag<SctpConnectReq>();
             ActualOutboundStreams = connectInfo->getOutboundStreams();
             if(ActualOutboundStreams > RequestedOutboundStreams) {
                ActualOutboundStreams = RequestedOutboundStreams;
@@ -423,8 +431,9 @@ void NetPerfMeter::handleMessage(cMessage* msg)
           break;
          // ------ Queue indication -----------------------------------------
          case SCTP_I_SENDQUEUE_ABATED: {
-            const SCTPSendQueueAbated* sendQueueAbatedIndication =
-               check_and_cast<SCTPSendQueueAbated*>(msg->getControlInfo());
+            Message *message = check_and_cast<Message *>(msg);
+            auto& tags = getTags(message);
+            const SctpSendQueueAbatedReq* sendQueueAbatedIndication = tags.getTag<SctpSendQueueAbatedReq>();
             assert(sendQueueAbatedIndication != nullptr);
             // Queue is underfull again -> give it more data.
             SendingAllowed = true;
@@ -469,8 +478,8 @@ void NetPerfMeter::handleMessage(cMessage* msg)
           break;
          // ------ Queue indication -----------------------------------------
          case TCP_I_SEND_MSG: {
-            const TCPCommand* tcpCommand =
-               check_and_cast<TCPCommand*>(msg->getControlInfo());
+            const TcpCommand* tcpCommand =
+               check_and_cast<TcpCommand*>(msg->getControlInfo());
             assert(tcpCommand != nullptr);
             // Queue is underfull again -> give it more data.
             if(SocketTCP != nullptr) {   // T.D. 16.11.2011: Ensure that there is still a TCP socket!
@@ -558,7 +567,7 @@ void NetPerfMeter::successfullyEstablishedConnection(cMessage*          msg,
 {
    if(HasFinished) {
       EV << "Already finished -> no new connection!" << endl;
-      SCTPSocket newSocket(msg);
+      SctpSocket newSocket(msg);
       newSocket.abort();
       return;
    }
@@ -576,13 +585,11 @@ void NetPerfMeter::successfullyEstablishedConnection(cMessage*          msg,
          if(IncomingSocketTCP != nullptr) {
             delete IncomingSocketTCP;
          }
-         IncomingSocketTCP = new TCPSocket(msg);
+         IncomingSocketTCP = new TcpSocket(msg);
          IncomingSocketTCP->setOutputGate(gate("tcpOut"));
-         IncomingSocketTCP->readDataTransferModePar(*this);
       }
 
-      TCPCommand* connectInfo = check_and_cast<TCPCommand*>(msg->getControlInfo());
-      ConnectionID = connectInfo->getConnId();
+      ConnectionID = check_and_cast<Indication *>(msg)->getTag<SocketInd>()->getSocketId();
       sendTCPQueueRequest(QueueSize);   // Limit the send queue as given.
    }
    else if(TransportProtocol == SCTP) {
@@ -591,12 +598,11 @@ void NetPerfMeter::successfullyEstablishedConnection(cMessage*          msg,
          if(IncomingSocketSCTP != nullptr) {
             delete IncomingSocketSCTP;
          }
-         IncomingSocketSCTP = new SCTPSocket(msg);
+         IncomingSocketSCTP = new SctpSocket(msg);
          IncomingSocketSCTP->setOutputGate(gate("sctpOut"));
       }
 
-      SCTPConnectInfo* connectInfo = check_and_cast<SCTPConnectInfo*>(msg->getControlInfo());
-      ConnectionID = connectInfo->getAssocId();
+      ConnectionID = check_and_cast<Indication *>(msg)->getTag<SocketInd>()->getSocketId();
       sendSCTPQueueRequest(QueueSize);   // Limit the send queue as given.
    }
 
@@ -691,7 +697,7 @@ void NetPerfMeter::createAndBindSocket()
 
    if(TransportProtocol == SCTP) {
       assert(SocketSCTP == nullptr);
-      SocketSCTP = new SCTPSocket;
+      SocketSCTP = new SctpSocket;
       SocketSCTP->setInboundStreams(MaxInboundStreams);
       SocketSCTP->setOutboundStreams(RequestedOutboundStreams);
       SocketSCTP->setOutputGate(gate("sctpOut"));
@@ -702,9 +708,8 @@ void NetPerfMeter::createAndBindSocket()
    }
    else if(TransportProtocol == TCP) {
       assert(SocketTCP == nullptr);
-      SocketTCP = new TCPSocket;
+      SocketTCP = new TcpSocket;
       SocketTCP->setOutputGate(gate("tcpOut"));
-      SocketTCP->readDataTransferModePar(*this);
       SocketTCP->bind(localAddr, localPort);
       if(ActiveMode == false) {
          SocketTCP->listen();
@@ -712,7 +717,7 @@ void NetPerfMeter::createAndBindSocket()
    }
    else if(TransportProtocol == UDP) {
       assert(SocketUDP == nullptr);
-      SocketUDP = new UDPSocket;
+      SocketUDP = new UdpSocket;
       SocketUDP->setOutputGate(gate("udpOut"));
       SocketUDP->bind(localAddr, localPort);
    }
@@ -887,18 +892,24 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
    unsigned long newlyQueuedBytes = 0;
    if(TransportProtocol == TCP) {
       // TCP is stream-oriented: just pass the amount of frame data.
-      NetPerfMeterDataMessage* tcpMessage = new NetPerfMeterDataMessage;
+      const auto& tcpMessage = new NetPerfMeterDataMessage();
       tcpMessage->setCreationTime(simTime());
       tcpMessage->setByteLength(frameSize);
-      tcpMessage->setKind(TCP_C_SEND);
+      /* ToDo: Just to make it compile */
+    /*  Packet* pk = new Packet();
+      const auto& tcpMessage = makeShared<NetPerfMeterDataMessage>();
+      tcpMessage->setChunkLength(B(frameSize));
+
+      pk->insertAtBack(tcpMessage);
+      pk->setKind(TCP_C_SEND);
 
       if(IncomingSocketTCP) {
-         IncomingSocketTCP->send(tcpMessage);
+         IncomingSocketTCP->send(pk);
       }
       else {
-         SocketTCP->send(tcpMessage);
+         SocketTCP->send(pk);
       }
-
+      */
       newlyQueuedBytes += frameSize;
       SenderStatistics* senderStatistics = getSenderStatistics(0);
       senderStatistics->SentBytes += frameSize;
@@ -912,24 +923,27 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
          const unsigned int msgSize =
             (bytesToSend > MaxMsgSize) ? MaxMsgSize : bytesToSend;
 
+         if (false) {
+         }
          // ====== SCTP =====================================================
-         if(TransportProtocol == SCTP) {
+#ifdef WITH_SCTP
+         else if(TransportProtocol == SCTP) {
             const bool sendUnordered  = (UnorderedMode > 0.0)  ? (uniform(0.0, 1.0) < UnorderedMode)  : false;
             const bool sendUnreliable = (UnreliableMode > 0.0) ? (uniform(0.0, 1.0) < UnreliableMode) : false;
 
-            NetPerfMeterDataMessage* dataMessage = new NetPerfMeterDataMessage;
-            dataMessage->setCreationTime(simTime());
-            dataMessage->setByteLength(msgSize);
-            /*
-            dataMessage->setDataArraySize(msgSize);
-            for(unsigned long i = 0; i < msgSize; i++)  {
-               dataMessage->setData(i, (i & 1) ? 'D' : 'T');
-            }
-            */
-            dataMessage->setDataLen(msgSize);
+            auto cmsg = new Packet("NetPerfMeterDataMessage");
+            auto dataMessage = makeShared<BytesChunk>();
+            std::vector<uint8_t> vec;
+            vec.resize(msgSize);
+            for (uint32 i = 0; i < msgSize; i++)
+                vec[i] = ((i & 1) ? 'D' : 'T');
+            dataMessage->setBytes(vec);
+            dataMessage->addTag<CreationTimeTag>()->setCreationTime(simTime());
+            cmsg->insertAtBack(dataMessage);
 
-            SCTPSendInfo* command = new SCTPSendInfo("SendRequest");
-            command->setAssocId(ConnectionID);
+            cmsg->addTagIfAbsent<SocketReq>()->setSocketId(ConnectionID);
+            auto command = cmsg->addTagIfAbsent<SctpSendReq>();
+            command->setSocketId(ConnectionID);
             command->setSid(streamID);
             command->setSendUnordered( (sendUnordered == true) ?
                                        COMPLETE_MESG_UNORDERED : COMPLETE_MESG_ORDERED );
@@ -939,25 +953,33 @@ unsigned long NetPerfMeter::transmitFrame(const unsigned int frameSize,
             command->setPrValue(1);
             command->setPrMethod( (sendUnreliable == true) ? 2 : 0 );   // PR-SCTP policy: RTX
 
-            SCTPSendInfo* cmsg = new SCTPSendInfo("ControlInfo");
+            //SctpSendInfo* cmsg = new SctpSendInfo("ControlInfo");
+            cmsg->setKind(sendUnordered ? SCTP_C_SEND_ORDERED : SCTP_C_SEND_UNORDERED);
+           /* SctpSendReq* cmsg = new SctpSendReq();
             cmsg->encapsulate(dataMessage);
             cmsg->setKind(SCTP_C_SEND);
             cmsg->setControlInfo(command);
-            cmsg->setByteLength(msgSize);
+            cmsg->setByteLength(msgSize);*/
             send(cmsg, "sctpOut");
 
             SenderStatistics* senderStatistics = getSenderStatistics(streamID);
             senderStatistics->SentBytes += msgSize;
             senderStatistics->SentMessages++;
          }
-
+#endif
          // ====== UDP ===================================================
          else if(TransportProtocol == UDP) {
-            NetPerfMeterDataMessage* dataMessage = new NetPerfMeterDataMessage;
+            const auto& dataMessage = new NetPerfMeterDataMessage();
             dataMessage->setCreationTime(simTime());
             dataMessage->setByteLength(msgSize);
-            SocketUDP->send(dataMessage);
+         /* ToDo: Just to make it compile */
+          /*  Packet* packet = new Packet();
+            const auto& dataMessage = makeShared<NetPerfMeterDataMessage>();
 
+            dataMessage->setChunkLength(B(msgSize));
+            packet->insertAtBack(dataMessage);
+            SocketUDP->send(packet);
+           */
             SenderStatistics* senderStatistics = getSenderStatistics(0);
             senderStatistics->SentBytes += msgSize;
             senderStatistics->SentMessages++;
@@ -1008,7 +1030,7 @@ unsigned long NetPerfMeter::getFrameSize(const unsigned int streamID)
 
 // ###### Send data of saturated streams ####################################
 void NetPerfMeter::sendDataOfSaturatedStreams(const unsigned long long   bytesAvailableInQueue,
-                                              const SCTPSendQueueAbated* sendQueueAbatedIndication)
+                                              const SctpSendQueueAbatedReq* sendQueueAbatedIndication)
 {
    if(OnTimer != nullptr) {
       // We are in Off mode -> nothing to send!
@@ -1157,22 +1179,23 @@ void NetPerfMeter::sendDataOfTraceFile(const unsigned long long bytesAvailableIn
 // ###### Receive data ######################################################
 void NetPerfMeter::receiveMessage(cMessage* msg)
 {
-   const cPacket* dataMessage =
-      dynamic_cast<const cPacket*>(msg);
-   if(dataMessage != nullptr) {
+   if (const Packet* dataMessage = dynamic_cast<const Packet*>(msg)) {
       unsigned int    streamID = 0;
-      const simtime_t delay    = simTime() - dataMessage->getCreationTime();
+      const auto& smsg = dataMessage->peekData();
 
       if(TransportProtocol == SCTP) {
-         const SCTPRcvInfo* receiveCommand =
-            check_and_cast<const SCTPRcvInfo*>(dataMessage->getControlInfo());
+         auto& tags = getTags(msg);
+         SctpRcvReq *receiveCommand = tags.findTag<SctpRcvReq>();
+        /* const SctpRcvInfo* receiveCommand =
+            check_and_cast<const SctpRcvInfo*>(dataMessage->getControlInfo());*/
          streamID = receiveCommand->getSid();
       }
 
       ReceiverStatistics* receiverStatistics = getReceiverStatistics(streamID);
       receiverStatistics->ReceivedMessages++;
-      receiverStatistics->ReceivedBytes += dataMessage->getByteLength();
-      receiverStatistics->ReceivedDelayHistogram.collect(delay);
+      receiverStatistics->ReceivedBytes += B(smsg->getChunkLength()).get();
+      for (auto& region : smsg->getAllTags<CreationTimeTag>())
+          receiverStatistics->ReceivedDelayHistogram.collect(simTime() - region.getTag()->getCreationTime());
    }
 }
 
@@ -1186,13 +1209,13 @@ void NetPerfMeter::sendSCTPQueueRequest(const unsigned int queueSize)
    // When the queue is able accept more data again, it will be indicated by
    // SCTP_I_SENDQUEUE_ABATED!
 
-   SCTPInfo* queueInfo = new SCTPInfo();
+   Request* cmsg = new Request("QueueRequest");
+   auto& tags = getTags(cmsg);
+   SctpInfoReq* queueInfo = tags.addTagIfAbsent<SctpInfoReq>();
    queueInfo->setText(queueSize);
-   queueInfo->setAssocId(ConnectionID);
+   queueInfo->setSocketId(ConnectionID);
 
-   cPacket* cmsg = new cPacket("QueueRequest");
    cmsg->setKind(SCTP_C_QUEUE_BYTES_LIMIT);
-   cmsg->setControlInfo(queueInfo);
    if(IncomingSocketSCTP) {
       IncomingSocketSCTP->sendRequest(cmsg);
    }
@@ -1211,18 +1234,17 @@ void NetPerfMeter::sendTCPQueueRequest(const unsigned int queueSize)
    // When the queue is able accept more data again, it will be indicated by
    // TCP_I_SEND_MSG!
 
-   TCPCommand* queueInfo = new TCPCommand();
+   TcpCommand* queueInfo = new TcpCommand();
    queueInfo->setUserId(queueSize);
-   queueInfo->setConnId(ConnectionID);
 
-   cPacket* cmsg = new cPacket("QueueRequest");
-   cmsg->setKind(TCP_C_QUEUE_BYTES_LIMIT);
-   cmsg->setControlInfo(queueInfo);
+   auto request = new Request("QueueRequest", TCP_C_QUEUE_BYTES_LIMIT);
+   request->setControlInfo(queueInfo);
+   request->addTagIfAbsent<SocketReq>()->setSocketId(ConnectionID);
    if(IncomingSocketTCP) {
-      IncomingSocketTCP->sendCommand(cmsg);
+      IncomingSocketTCP->sendCommand(request);
    }
    else {
-      SocketTCP->sendCommand(cmsg);
+      SocketTCP->sendCommand(request);
    }
 }
 
@@ -1233,9 +1255,9 @@ opp_string NetPerfMeter::format(const char* formatString, ...)
    char    str[1024];
    va_list args;
    va_start(args, formatString);
-   vsnprintf((char*)&str, sizeof(str), formatString, args);
+   vsnprintf(str, sizeof(str), formatString, args);
    va_end(args);
    return(opp_string(str));
 }
 
-}  // namespace inet
+} // namespace inet

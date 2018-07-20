@@ -36,12 +36,12 @@ class INET_API GridNeighborCache : public cSimpleModule, public INeighborCache
       protected:
         RadioMedium *radioMedium;
         IRadio *transmitter;
-        const IRadioFrame *frame;
+        const ISignal *signal;
 
       public:
         void visit(const cObject *radio) const override;
-        GridNeighborCacheVisitor(RadioMedium *radioMedium, IRadio *transmitter, const IRadioFrame *frame) :
-            radioMedium(radioMedium), transmitter(transmitter), frame(frame) {}
+        GridNeighborCacheVisitor(RadioMedium *radioMedium, IRadio *transmitter, const ISignal *signal) :
+            radioMedium(radioMedium), transmitter(transmitter), signal(signal) {}
     };
   protected:
     SpatialGrid *grid;
@@ -67,7 +67,7 @@ class INET_API GridNeighborCache : public cSimpleModule, public INeighborCache
 
     virtual void addRadio(const IRadio *radio) override;
     virtual void removeRadio(const IRadio *radio) override;
-    virtual void sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range) const override;
+    virtual void sendToNeighbors(IRadio *transmitter, const ISignal *signal, double range) const override;
 };
 
 } // namespace physicallayer

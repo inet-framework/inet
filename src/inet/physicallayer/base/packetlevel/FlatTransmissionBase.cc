@@ -21,10 +21,10 @@ namespace inet {
 
 namespace physicallayer {
 
-FlatTransmissionBase::FlatTransmissionBase(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, int headerBitLength, int payloadBitLength, bps bitrate, const IModulation *modulation, Hz carrierFrequency, Hz bandwidth) :
-    NarrowbandTransmissionBase(transmitter, macFrame, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, modulation, carrierFrequency, bandwidth),
-    headerBitLength(headerBitLength),
-    dataBitLength(payloadBitLength),
+FlatTransmissionBase::FlatTransmissionBase(const IRadio *transmitter, const Packet *packet, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, b headerLength, b dataLength, bps bitrate, const IModulation *modulation, Hz carrierFrequency, Hz bandwidth) :
+    NarrowbandTransmissionBase(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, modulation, carrierFrequency, bandwidth),
+    headerLength(headerLength),
+    dataLength(dataLength),
     bitrate(bitrate)
 {
 }
@@ -34,8 +34,8 @@ std::ostream& FlatTransmissionBase::printToStream(std::ostream& stream, int leve
     if (level <= PRINT_LEVEL_DETAIL)
         stream << ", bitrate = " << bitrate;
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", headerBitLength = " << headerBitLength
-               << ", payloadBitLength = " << dataBitLength;
+        stream << ", headerLength = " << headerLength
+               << ", dataLength = " << dataLength;
     return NarrowbandTransmissionBase::printToStream(stream, level);
 }
 

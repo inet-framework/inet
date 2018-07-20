@@ -33,21 +33,16 @@ namespace inet {
 class INET_API StationaryMobility : public MobilityBase
 {
   protected:
-    /** @brief Never happens. */
-    virtual void handleSelfMessage(cMessage *message) override;
+    virtual void handleSelfMessage(cMessage *message) override { throw cRuntimeError("Invalid operation"); }
 
   public:
-    StationaryMobility()
-    {
-    }
+    virtual EulerAngles getCurrentAngularPosition() override { return lastOrientation; }
+    virtual EulerAngles getCurrentAngularVelocity() override { return EulerAngles::ZERO; }
+    virtual EulerAngles getCurrentAngularAcceleration() override { return EulerAngles::ZERO; }
 
-    StationaryMobility(Coord position) { lastPosition = position; }
-
-    /** @brief Returns the current position at the current simulation time. */
     virtual Coord getCurrentPosition() override { return lastPosition; }
-
-    /** @brief Returns the current speed at the current simulation time. */
-    virtual Coord getCurrentSpeed() override { return Coord::ZERO; }
+    virtual Coord getCurrentVelocity() override { return Coord::ZERO; }
+    virtual Coord getCurrentAcceleration() override { return Coord::ZERO; }
 
     virtual double getMaxSpeed() const override { return 0; }
 

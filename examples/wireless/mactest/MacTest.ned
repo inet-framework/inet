@@ -18,30 +18,29 @@
 
 package inet.examples.wireless.mactest;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
-import inet.node.inet.WirelessHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.AdhocHost;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-
 
 network MacTest
 {
     parameters:
         @display("b=297,203");
     submodules:
-        configurator: IPv4NetworkConfigurator {
-            @display("p=61,164");
+        configurator: Ipv4NetworkConfigurator {
+            @display("p=100,100;is=s");
         }
-        srvHost: WirelessHost {
+        srvHost: AdhocHost {
             parameters:
-                @display("r=,,#707070;p=589,111");
+                @display("r=,,#707070;p=400,150");
         }
-        cliHost: WirelessHost {
+        cliHost: AdhocHost {
             parameters:
-                @display("r=,,#707070;p=349,111");
+                @display("r=,,#707070;p=250,150");
         }
         radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
-                @display("p=61,46");
+                @display("p=100,200;is=s");
         }
 }
 

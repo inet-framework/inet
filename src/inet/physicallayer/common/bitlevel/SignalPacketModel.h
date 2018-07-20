@@ -27,37 +27,27 @@ namespace physicallayer {
 class INET_API SignalPacketModel : public virtual ISignalPacketModel
 {
   protected:
-    const cPacket *packet;
-    const BitVector *serializedPacket;
+    const Packet *packet;
     const bps bitrate;
 
   public:
-    SignalPacketModel(const cPacket *packet, const BitVector *serializedPacket, bps bitrate);
-    virtual ~SignalPacketModel();
+    SignalPacketModel(const Packet *packet, bps bitrate);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
-    virtual const cPacket *getPacket() const override { return packet; }
-    virtual const BitVector *getSerializedPacket() const override { return serializedPacket; }
+    virtual const Packet *getPacket() const override { return packet; }
     virtual bps getBitrate() const override { return bitrate; }
 };
 
 class INET_API TransmissionPacketModel : public SignalPacketModel, public virtual ITransmissionPacketModel
 {
   public:
-    TransmissionPacketModel(const cPacket *packet, const BitVector *serializedPacket, bps bitrate);
+    TransmissionPacketModel(const Packet *packet, bps bitrate);
 };
 
 class INET_API ReceptionPacketModel : public SignalPacketModel, public IReceptionPacketModel
 {
-  protected:
-    const double per;
-    const bool packetErrorless;
-
   public:
-    ReceptionPacketModel(const cPacket *packet, const BitVector *serializedPacket, bps bitrate, double per, bool packetErrorless);
-
-    virtual double getPER() const override { return per; }
-    virtual bool isPacketErrorless() const override { return packetErrorless; }
+    ReceptionPacketModel(const Packet *packet, bps bitrate);
 };
 
 } // namespace physicallayer

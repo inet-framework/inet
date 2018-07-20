@@ -18,13 +18,13 @@
 package inet.visualizer.base;
 
 //
-// This is a base module for radio medium visualizer simple modules. It keeps
-// track of ongoing transmissions, ongoing receptions, and propagating signals.
+// This is a base module for medium visualizer simple modules. It keeps track
+// of ongoing signal departures, ongoing signal arrivals, and propagating signals.
 //
-// It subscribes for radioAdded, radioRemoved, transmissionAdded, transmissionRemoved,
-// transmissionStarted, transmissionEnded, receptionStarted, receptionEnded
-// signals at the module determined by the mediumModule parameter. The actual
-// visualization of the radio medium is done in derived modules.
+// It subscribes for signalSourceAdded, signalSourceRemoved, signalAdded,
+// signalRemoved, signalDepartureStarted, signalDepartureEnded, signalArrivalStarted,
+// signalArrivalEnded simulation signals at the module determined by the mediumModule
+// parameter. The actual visualization of the medium is done in derived modules.
 //
 // @see ~MediumCanvasVisualizer, ~MediumOsgVisualizer, ~IMediumVisualizer, ~VisualizerBase
 //
@@ -37,25 +37,26 @@ simple MediumVisualizerBase extends VisualizerBase
         string nodeFilter = default("*"); // which nodes are considered, matches all nodes by default
         string interfaceFilter = default("*"); // which interfaces are considered, matches all interfaces by default
         string packetFilter = default("*"); // which packets are considered, matches all packets by default
+        string packetDataFilter = default("*"); // which packets are considered based on the data they contain, matches all packets by default
 
         bool displaySignals = default(false); // display signals propagating through the medium, disabled by default
         string signalColor @enum("light", "dark") = default("dark"); // signal color is a list of colors, a set of dark colors by default
-        double signalPropagationAnimationSpeed = default(0/0); // animation speed while the very beginning or end of a signal is propagating on the medium, value must be in the range (0, +inf) or NaN, the latter means automatic setting
+        double signalPropagationAnimationSpeed = default(nan); // animation speed while the very beginning or end of a signal is propagating on the medium, value must be in the range (0, +inf) or NaN, the latter means automatic setting
         double signalPropagationAnimationTime @unit(s) = default(1s); // signal propagation animation duration when signalPropagationAnimationSpeed is unspecified
         double signalPropagationAdditionalTime @unit(s) = default(0s); // additional simulation time to animate signal propagation after leaving last receiver
-        double signalTransmissionAnimationSpeed = default(0/0); // animation speed while a signal is being transmitted on the medium, value must be in the range (0, +inf) or NaN, the latter means automatic setting
+        double signalTransmissionAnimationSpeed = default(nan); // animation speed while a signal is being transmitted on the medium, value must be in the range (0, +inf) or NaN, the latter means automatic setting
         double signalTransmissionAnimationTime @unit(s) = default(1s); // signal transmission animation duration when signalTransmissionAnimationSpeed is unspecified
         double signalAnimationSpeedChangeTime @unit(s) = default(1s); // animation speed changes smoothly from propagationAnimationSpeed to transmissionAnimationSpeed in the specified real time
 
-        bool displayTransmissions = default(false); // display an image where a transmission is currently in progress, disabled by default
-        string transmissionImage = default("misc/transmission.png"); // transmission image for ongoing transmissions
-        string transmissionPlacementHint = default("topCenter"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
-        double transmissionPlacementPriority = default(1); // determines the order of annotation positioning
+        bool displaySignalDepartures = default(false); // display an image where a signal departure is currently in progress, disabled by default
+        string signalDepartureImage = default("misc/signal_departure.png"); // image for ongoing signal departures
+        string signalDeparturePlacementHint = default("topCenter"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
+        double signalDeparturePlacementPriority = default(1); // determines the order of annotation positioning
 
-        bool displayReceptions = default(false); // display an image where a reception is currently in progress, disabled by default
-        string receptionImage = default("misc/reception.png"); // reception image for ongoing receptions
-        string receptionPlacementHint = default("topCenter"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc. 
-        double receptionPlacementPriority = default(-1); // determines the order of annotation positioning
+        bool displaySignalArrivals = default(false); // display an image where a signal arrival is currently in progress, disabled by default
+        string signalArrivalImage = default("misc/signal_arrival.png"); // image for ongoing signal arrivals
+        string signalArrivalPlacementHint = default("topCenter"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc. 
+        double signalArrivalPlacementPriority = default(-1); // determines the order of annotation positioning
 
         bool displayCommunicationRanges = default(false); // display communication ranges as circles around radios, enabled by default
         string communicationRangeLineColor = default("blue"); // communication range circle line color, blue by default

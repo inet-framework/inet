@@ -17,7 +17,10 @@
 
 package inet.applications.packetdrill;
 
-simple PacketDrillApp
+import inet.applications.contract.IApp;
+
+
+simple PacketDrillApp like IApp
 {
     parameters:
         string scriptFile;
@@ -26,19 +29,16 @@ simple PacketDrillApp
         int remotePort;
         string localAddress;
         string remoteAddress;
+        string interfaceTableModule;
+        string interface;   // tun interface name
         int inboundStreams = default(20);
         int outboundStreams = default(20);
         int streamReset = default(0);
-        string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
+        string crcMode @enum("declared", "computed") = default("declared");
         double latency @unit(s) = default(0s);
         @display("i=block/app");
     gates:
-        input udpIn @labels(UDPControlInfo/up);
-        output udpOut @labels(UDPControlInfo/down);
-        input tcpIn @labels(TCPCommand/up);
-        output tcpOut @labels(TCPCommand/down);
-        input sctpIn @labels(SCTPCommand/up);
-        output sctpOut @labels(SCTPCommand/down);
-        input tunIn @labels(TunInterface/up);
-        output tunOut @labels(TunInterface/down);
+        input socketIn;
+        output socketOut;
 }
+

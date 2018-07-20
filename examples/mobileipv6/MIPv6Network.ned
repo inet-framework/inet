@@ -24,7 +24,7 @@
 package inet.examples.mobileipv6;
 
 import inet.linklayer.ethernet.EtherHub;
-import inet.networklayer.configurator.ipv6.FlatNetworkConfigurator6;
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
 import inet.node.ipv6.Router6;
 import inet.node.wireless.AccessPoint;
 import inet.node.xmipv6.CorrespondentNode6;
@@ -56,13 +56,13 @@ network mIPv6Network
 
         @display("bgb=799,698");
     submodules:
-        configurator: FlatNetworkConfigurator6 {
+        configurator: Ipv6FlatNetworkConfigurator {
             parameters:
-                @display("p=763,53");
+                @display("p=100,100;is=s");
         }
         radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
-                @display("p=753,123");
+                @display("p=100,200;is=s");
         }
         Home_Agent: HomeAgent6 {
             parameters:

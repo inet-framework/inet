@@ -18,7 +18,7 @@
 #ifndef __INET_LEGACYDUPLICATEDETECTOR_H
 #define __INET_LEGACYDUPLICATEDETECTOR_H
 
-#include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee80211/mac/common/SequenceControlField.h"
 #include "inet/linklayer/ieee80211/mac/contract/IDuplicateRemoval.h"
 #include <map>
@@ -29,10 +29,10 @@ namespace ieee80211 {
 class INET_API LegacyDuplicateRemoval : public IDuplicateRemoval
 {
     protected:
-        std::map<MACAddress, SequenceControlField> lastSeenSeqNumCache; // cache of last seen sequence numbers per TA
+        std::map<MacAddress, SequenceControlField> lastSeenSeqNumCache; // cache of last seen sequence numbers per TA
 
     public:
-        virtual bool isDuplicate(Ieee80211DataOrMgmtFrame *frame) override;
+        virtual bool isDuplicate(const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;
 };
 
 } // namespace ieee80211

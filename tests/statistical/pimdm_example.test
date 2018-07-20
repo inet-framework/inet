@@ -9,8 +9,8 @@ Testing the number of received multicast datagrams in examples/pim/dm/ simulatio
 ned-path = .;../../../../src;../../../../examples
 sim-time-limit = 500s
 output-scalar-file = test.sca
-**.udpApp[*].sentPk*.scalar-recording = true
-**.udpApp[*].rcvdPk*.scalar-recording = true
+**.app[*].packetSent*.scalar-recording = true
+**.app[*].packetReceived*.scalar-recording = true
 **.scalar-recording = false
 **.vector-recording = false
 
@@ -20,10 +20,10 @@ include ../../../../examples/pim/dm/basic/omnetpp.ini
 
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: test.sca
-scalar pimDMFinal.Source1.udpApp\[0\]\s+sentPk:count\s+20
+scalar pimDMFinal.Source1.app\[0\]\s+packetSent:count\s+20
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: test.sca
-scalar pimDMFinal.Source2.udpApp\[0\]\s+sentPk:count\s+10
+scalar pimDMFinal.Source2.app\[0\]\s+packetSent:count\s+10
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: test.sca
-scalar pimDMFinal.Host2.udpApp\[0\]\s+rcvdPk:count\s+20
+scalar pimDMFinal.Host2.app\[0\]\s+packetReceived:count\s+20

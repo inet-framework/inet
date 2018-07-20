@@ -22,6 +22,16 @@ import inet.mobility.contract.IMobility;
 //
 // Abstract base module for mobility models.
 //
+// Format directives:
+//  - %p position
+//  - %v velocity
+//  - %s speed
+//  - %a acceleration
+//  - %P angular position
+//  - %V angular velocity
+//  - %S angular speed
+//  - %A angular acceleration
+//
 // @author Andras Varga
 //
 simple MobilityBase like IMobility
@@ -29,13 +39,14 @@ simple MobilityBase like IMobility
     parameters:
         @signal[mobilityStateChanged](type=MobilityBase);
         @display("i=block/cogwheel");
+        string subjectModule = default("^"); // module path which determines the subject module, the motion of which this mobility model describes, the default value is the parent module
         string coordinateSystemModule = default(""); // module path of the geographic coordinate system module
-        bool visualizeMobility = default(true); // false means this mobility module does no visualization
-        string visualRepresentation = default("^"); // determines the module that is moved by this mobility
-        double constraintAreaMinX @unit(m) = default(-1m/0); // min x position of the constraint area, unconstrained by default (negative infinity)
-        double constraintAreaMinY @unit(m) = default(-1m/0); // min y position of the constraint area, unconstrained by default (negative infinity)
-        double constraintAreaMinZ @unit(m) = default(-1m/0); // min z position of the constraint area, unconstrained by default (negative infinity)
-        double constraintAreaMaxX @unit(m) = default(1m/0); // max x position of the constraint area, unconstrained by default (positive infinity)
-        double constraintAreaMaxY @unit(m) = default(1m/0); // max y position of the constraint area, unconstrained by default (positive infinity)
-        double constraintAreaMaxZ @unit(m) = default(1m/0); // max z position of the constraint area, unconstrained by default (positive infinity)
+        string displayStringTextFormat = default("p: %p\nv: %v"); // format string for the mobility module's display string text
+        bool updateDisplayString = default(true); // enables continuous update of the subject module's position via the display string
+        double constraintAreaMinX @unit(m) = default(-inf m); // min x position of the constraint area, unconstrained by default (negative infinity)
+        double constraintAreaMinY @unit(m) = default(-inf m); // min y position of the constraint area, unconstrained by default (negative infinity)
+        double constraintAreaMinZ @unit(m) = default(-inf m); // min z position of the constraint area, unconstrained by default (negative infinity)
+        double constraintAreaMaxX @unit(m) = default(inf m); // max x position of the constraint area, unconstrained by default (positive infinity)
+        double constraintAreaMaxY @unit(m) = default(inf m); // max y position of the constraint area, unconstrained by default (positive infinity)
+        double constraintAreaMaxZ @unit(m) = default(inf m); // max z position of the constraint area, unconstrained by default (positive infinity)
 }

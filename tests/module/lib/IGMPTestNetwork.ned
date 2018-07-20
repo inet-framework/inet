@@ -2,7 +2,7 @@ import inet.node.ethernet.EtherSwitch;
 import ned.DatarateChannel;
 import inet.node.inet.StandardHost;
 import inet.node.inet.Router;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.common.scenario.ScenarioManager;
 
 network IGMPTestNetwork
@@ -14,7 +14,7 @@ network IGMPTestNetwork
             datarate = 10Mbps;
         }
     submodules:
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             config = default(xml("\
                <config>\
                  <interface hosts='*' address='10.x.x.x' netmask='255.0.0.0'/>\

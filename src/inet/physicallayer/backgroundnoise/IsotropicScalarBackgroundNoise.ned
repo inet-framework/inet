@@ -17,14 +17,14 @@
 
 package inet.physicallayer.backgroundnoise;
 
-import inet.physicallayer.contract.packetlevel.IRadioBackgroundNoise;
+import inet.physicallayer.contract.packetlevel.IBackgroundNoise;
 
 //
 // This background noise model describes noise that does not change over space,
 // time and frequency. It produces scalar noise signals that can be further used
 // in scalar computations.
 //
-module IsotropicScalarBackgroundNoise like IRadioBackgroundNoise
+module IsotropicScalarBackgroundNoise like IBackgroundNoise
 {
     parameters:
         double power @unit(dBm); // noise power

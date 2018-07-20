@@ -19,28 +19,29 @@
 #define __INET_PACKETDRILLAPP_H_
 
 #include "inet/common/INETDefs.h"
+#include "inet/applications/tcpapp/TcpSessionApp.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
-#include "inet/transportlayer/contract/udp/UDPSocket.h"
-#include "inet/transportlayer/contract/tcp/TCPSocket.h"
-#include "inet/transportlayer/contract/sctp/SCTPSocket.h"
-#include "inet/transportlayer/tcp_common/TCPSegment_m.h"
-#include "inet/transportlayer/udp/UDPPacket_m.h"
-#include "inet/transportlayer/tcp/TCPConnection.h"
-#include "inet/networklayer/ipv4/IPv4Datagram.h"
-#include "inet/applications/tcpapp/TCPSessionApp.h"
-#include "PacketDrill.h"
-#include "PacketDrillUtils.h"
+#include "inet/linklayer/tun/TunSocket.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
+#include "inet/transportlayer/contract/tcp/TcpSocket.h"
+#include "inet/transportlayer/contract/sctp/SctpSocket.h"
+#include "inet/transportlayer/tcp/TcpConnection.h"
+#include "inet/transportlayer/tcp_common/TcpHeader_m.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
+#include "inet/applications/packetdrill/PacketDrill.h"
+#include "inet/applications/packetdrill/PacketDrillUtils.h"
+
+namespace inet {
 
 class PacketDrill;
 class PacketDrillScript;
 
-namespace inet {
-
 /**
  * Implements the packetdrill application simple module. See the NED file for more info.
  */
-class INET_API PacketDrillApp : public TCPSessionApp, public ILifecycle
+class INET_API PacketDrillApp : public TcpSessionApp, public ILifecycle
 {
     public:
         PacketDrillApp();
@@ -49,10 +50,10 @@ class INET_API PacketDrillApp : public TCPSessionApp, public ILifecycle
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override
     { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
-    const int getLocalPort() { return localPort;};
-    const int getRemotePort() { return remotePort;};
-    const uint32 getIdInbound() { return idInbound;};
-    const uint32 getIdOutbound() { return idOutbound;};
+    int getLocalPort() const { return localPort;};
+    int getRemotePort() const { return remotePort;};
+    uint32 getIdInbound() const { return idInbound;};
+    uint32 getIdOutbound() const { return idOutbound;};
     uint32 getPeerTS() { return peerTS; };
     void increaseIdInbound() { idInbound++;};
     void increaseIdOutbound() { idOutbound++;};
@@ -66,6 +67,7 @@ class INET_API PacketDrillApp : public TCPSessionApp, public ILifecycle
     void setSeqNumMap(uint32 ownNum, uint32 liveNum) { seqNumMap[ownNum] = liveNum; };
     uint32 getSeqNumMap(uint32 ownNum) { return seqNumMap[ownNum]; };
     bool findSeqNumMap(uint32 num);
+    CrcMode getCrcMode() { return crcMode; };
 
     protected:
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -85,9 +87,13 @@ class INET_API PacketDrillApp : public TCPSessionApp, public ILifecycle
         int protocol;
         int tcpConnId;
         int sctpAssocId;
-        UDPSocket udpSocket;
-        TCPSocket tcpSocket;
-        SCTPSocket sctpSocket;
+        int tunSocketId;
+        int udpSocketId;
+        int tunInterfaceId;
+        UdpSocket udpSocket;
+        TcpSocket tcpSocket;
+        SctpSocket sctpSocket;
+        TunSocket tunSocket;
         PacketDrill *pd;
         bool msgArrived;
         bool recvFromSet;
@@ -107,7 +113,7 @@ class INET_API PacketDrillApp : public TCPSessionApp, public ILifecycle
         uint16 peerWindow;
         uint16 peerInStreams;
         uint16 peerOutStreams;
-        SCTPCookie *peerCookie;
+        sctp::SctpCookie *peerCookie;
         uint16 peerCookieLength;
         uint32 initPeerTsn;
         uint32 initLocalTsn;
@@ -123,6 +129,7 @@ class INET_API PacketDrillApp : public TCPSessionApp, public ILifecycle
         std::map<uint32, uint32> seqNumMap;
         simtime_t peerHeartbeatTime;
         cMessage *eventTimer;
+        CrcMode crcMode = CRC_MODE_UNDEFINED;
 
 
         void scheduleEvent();
@@ -161,23 +168,23 @@ class INET_API PacketDrillApp : public TCPSessionApp, public ILifecycle
 
         int syscallSctpSend(struct syscall_spec *syscall, cQueue *args, char **error);
 
-        bool compareDatagram(IPv4Datagram *storedDatagram, IPv4Datagram *liveDatagram);
+        bool compareDatagram(Packet *storedDatagram, Packet *liveDatagram);
 
-        bool compareUdpPacket(UDPPacket *storedUdp, UDPPacket *liveUdp);
+        bool compareUdpHeader(const Ptr<const UdpHeader>& storedUdp, const Ptr<const UdpHeader>& liveUdp);
 
-        bool compareTcpPacket(tcp::TCPSegment *storedTcp, tcp::TCPSegment *liveTcp);
+        bool compareTcpHeader(const Ptr<const tcp::TcpHeader>& storedTcp, const Ptr<const tcp::TcpHeader>& liveTcp);
 
-        bool compareSctpPacket(SCTPMessage *storedSctp, SCTPMessage *liveSctp);
+        bool compareSctpPacket(const Ptr<const sctp::SctpHeader>& storedSctp, const Ptr<const sctp::SctpHeader>& liveSctp);
 
-        bool compareInitPacket(SCTPInitChunk* storedInitChunk, SCTPInitChunk* liveInitChunk);
+        bool compareInitPacket(const sctp::SctpInitChunk* storedInitChunk, const sctp::SctpInitChunk* liveInitChunk);
 
-        bool compareDataPacket(SCTPDataChunk* storedDataChunk, SCTPDataChunk* liveDataChunk);
+        bool compareDataPacket(const sctp::SctpDataChunk* storedDataChunk, const sctp::SctpDataChunk* liveDataChunk);
 
-        bool compareSackPacket(SCTPSackChunk* storedSackChunk, SCTPSackChunk* liveSackChunk);
+        bool compareSackPacket(const sctp::SctpSackChunk* storedSackChunk, const sctp::SctpSackChunk* liveSackChunk);
 
-        bool compareInitAckPacket(SCTPInitAckChunk* storedInitAckChunk, SCTPInitAckChunk* liveInitAckChunk);
+        bool compareInitAckPacket(const sctp::SctpInitAckChunk* storedInitAckChunk, const sctp::SctpInitAckChunk* liveInitAckChunk);
 
-        bool compareReconfigPacket(SCTPStreamResetChunk* storedReconfigChunk, SCTPStreamResetChunk* liveReconfigChunk);
+        bool compareReconfigPacket(const sctp::SctpStreamResetChunk* storedReconfigChunk, const sctp::SctpStreamResetChunk* liveReconfigChunk);
 
         int verifyTime(enum eventTime_t timeType,
             simtime_t script_usecs, simtime_t script_usecs_end,

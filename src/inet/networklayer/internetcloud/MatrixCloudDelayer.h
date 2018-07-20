@@ -35,7 +35,7 @@ class PatternMatcher;
 class INET_API MatrixCloudDelayer : public CloudDelayerBase
 {
   protected:
-    //FIXME modified copy of 'Matcher' class from IPv4NetworkConfigurator
+    //FIXME modified copy of 'Matcher' class from Ipv4NetworkConfigurator
     class Matcher
     {
       private:
@@ -78,12 +78,12 @@ class INET_API MatrixCloudDelayer : public CloudDelayerBase
         Descriptor() {}
     };
 
-    typedef std::pair<int, int> IDPair;
-    typedef std::map<IDPair, Descriptor> IDPairToDescriptorMap;
+    typedef std::pair<int, int> IdPair;
+    typedef std::map<IdPair, Descriptor> IdPairToDescriptorMap;
     typedef std::vector<MatrixEntry *> MatrixEntryPtrVector;
 
     MatrixEntryPtrVector matrixEntries;
-    IDPairToDescriptorMap idPairToDescriptorMap;
+    IdPairToDescriptorMap idPairToDescriptorMap;
 
     IInterfaceTable *ift = nullptr;
     cModule *host = nullptr;

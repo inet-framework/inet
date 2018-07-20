@@ -56,8 +56,8 @@ class INET_API BonnMotionFile
 class INET_API BonnMotionFileCache
 {
   protected:
-    typedef std::map<std::string, BonnMotionFile> BMFileMap;
-    BMFileMap cache;
+    typedef std::map<std::string, BonnMotionFile> BmFileMap;
+    BmFileMap cache;
     static BonnMotionFileCache *inst;
     void parseFile(const char *filename, BonnMotionFile& bmFile);
     BonnMotionFileCache() {}

@@ -18,6 +18,7 @@
 #ifndef __INET_COSINEANTENNA_H
 #define __INET_COSINEANTENNA_H
 
+#include "inet/common/INETDefs.h"
 #include "inet/physicallayer/base/packetlevel/AntennaBase.h"
 
 namespace inet {
@@ -27,18 +28,29 @@ namespace physicallayer {
 class INET_API CosineAntenna : public AntennaBase
 {
   protected:
-    double maxGain;
-    degree beamWidth;
-
-  protected:
     virtual void initialize(int stage) override;
+
+    class AntennaGain : public IAntennaGain
+    {
+      public:
+        AntennaGain(double maxGain, deg beamWidth);
+        virtual double getMinGain() const override { return 0; }
+        virtual double getMaxGain() const override { return maxGain; }
+        virtual deg getBeamWidth() const { return beamWidth; }
+        virtual double computeGain(const EulerAngles direction) const override;
+
+      protected:
+        double maxGain;
+        deg beamWidth;
+    };
+
+    Ptr<AntennaGain> gain;
 
   public:
     CosineAntenna();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
-    virtual double getMaxGain() const override { return maxGain; }
-    virtual double computeGain(const EulerAngles direction) const override;
+    virtual Ptr<const IAntennaGain> getGain() const override { return gain; }
 };
 
 } // namespace physicallayer

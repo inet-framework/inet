@@ -18,7 +18,7 @@
 
 package inet.examples.inet.configurator;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth1G;
 import inet.node.inet.StandardHost;
 
@@ -26,21 +26,21 @@ network SimpleConfiguratorNetwork
 {
     @display("bgb=450,300");
     submodules:
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=50,50");
+                @display("p=100,100;is=s");
         }
         host11: StandardHost {
             parameters:
-                @display("p=200,50");
+                @display("p=250,100");
         }
         host21: StandardHost {
             parameters:
-                @display("p=400,50");
+                @display("p=400,100");
         }
         host12: StandardHost {
             parameters:
-                @display("p=200,250");
+                @display("p=250,250");
         }
         host22: StandardHost {
             parameters:

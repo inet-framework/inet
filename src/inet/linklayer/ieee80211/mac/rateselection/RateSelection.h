@@ -42,44 +42,44 @@ class INET_API RateSelection : public IRateSelection, public cSimpleModule, publ
 {
     protected:
         IRateControl *dataOrMgmtRateControl = nullptr;
-        const IIeee80211Mode *fastestMandatoryMode = nullptr;
+        const physicallayer::IIeee80211Mode *fastestMandatoryMode = nullptr;
 
-        const Ieee80211ModeSet *modeSet = nullptr;
-        std::map<MACAddress, const IIeee80211Mode *> lastTransmittedFrameMode;
+        const physicallayer::Ieee80211ModeSet *modeSet = nullptr;
+        std::map<MacAddress, const physicallayer::IIeee80211Mode *> lastTransmittedFrameMode;
 
         // originator frame modes
-        const IIeee80211Mode *multicastFrameMode = nullptr;
+        const physicallayer::IIeee80211Mode *multicastFrameMode = nullptr;
 
-        const IIeee80211Mode *dataFrameMode = nullptr;
-        const IIeee80211Mode *mgmtFrameMode = nullptr;
-        const IIeee80211Mode *controlFrameMode = nullptr;
+        const physicallayer::IIeee80211Mode *dataFrameMode = nullptr;
+        const physicallayer::IIeee80211Mode *mgmtFrameMode = nullptr;
+        const physicallayer::IIeee80211Mode *controlFrameMode = nullptr;
 
-        const IIeee80211Mode *responseAckFrameMode = nullptr;
-        const IIeee80211Mode *responseCtsFrameMode = nullptr;
+        const physicallayer::IIeee80211Mode *responseAckFrameMode = nullptr;
+        const physicallayer::IIeee80211Mode *responseCtsFrameMode = nullptr;
 
     protected:
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
         virtual void initialize(int stage) override;
         virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
-        virtual const IIeee80211Mode *getMode(Ieee80211Frame *frame);
-        virtual const IIeee80211Mode *computeControlFrameMode(Ieee80211Frame *frame);
-        virtual const IIeee80211Mode *computeDataOrMgmtFrameMode(Ieee80211DataOrMgmtFrame *dataOrMgmtFrame);
+        virtual const physicallayer::IIeee80211Mode *getMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
+        virtual const physicallayer::IIeee80211Mode *computeControlFrameMode(const Ptr<const Ieee80211MacHeader>& header);
+        virtual const physicallayer::IIeee80211Mode *computeDataOrMgmtFrameMode(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader);
 
     public:
-        static void setFrameMode(Ieee80211Frame *frame, const IIeee80211Mode *mode);
+        static void setFrameMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, const physicallayer::IIeee80211Mode *mode);
 
         // A control response frame is a control frame that is transmitted as a response to the reception of a frame a SIFS
         // time after the PPDU containing the frame that elicited the response, e.g. a CTS in response to an RTS
         // reception, an ACK in response to a DATA reception, a BlockAck in response to a BlockAckReq reception. In
         // some situations, the transmission of a control frame is not a control response transmission, such as when a CTS
         // is used to initiate a TXOP.
-        virtual const IIeee80211Mode *computeResponseCtsFrameMode(Ieee80211RTSFrame *rtsFrame) override;
-        virtual const IIeee80211Mode *computeResponseAckFrameMode(Ieee80211DataOrMgmtFrame *dataOrMgmtFrame) override;
+        virtual const physicallayer::IIeee80211Mode *computeResponseCtsFrameMode(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame) override;
+        virtual const physicallayer::IIeee80211Mode *computeResponseAckFrameMode(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) override;
 
-        virtual const IIeee80211Mode *computeMode(Ieee80211Frame* frame) override;
+        virtual const physicallayer::IIeee80211Mode *computeMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override;
 
-        virtual void frameTransmitted(Ieee80211Frame *frame);
+        virtual void frameTransmitted(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
 };
 
 } // namespace ieee80211

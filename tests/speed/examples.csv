@@ -1,0 +1,447 @@
+# workingdir,                        args,                                          simtimelimit,    runtime
+/examples/adhoc/hostautoconf/,       -f omnetpp.ini -c General -r 0,                100s,            0.33
+/examples/adhoc/idealwireless/,      -f omnetpp.ini -c Ping1 -r 0,                  100s,            0.39
+# /examples/adhoc/idealwireless/,      -f omnetpp.ini -c Ping2 -r 0,                   100s,           0.0    # interactive config, needed a *.numHosts parameter
+/examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping1 -r 0,                  1000s,           2.68
+# /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping2 -r 0,                  100s,            0.0    # [Config Ping2]    # interactive config, needed a *.numHosts parameter
+# /examples/adhoc/qos/,                -f omnetpp.ini -c MacBase -r 0,                100s,            0.0    # MacBase extended
+/examples/adhoc/qos/,                -f omnetpp.ini -c MacNonQos -r 0,              10s,             14.74
+/examples/adhoc/qos/,                -f omnetpp.ini -c MacNonQos -r 1,              10s,             15.14
+# /examples/adhoc/qos/,                -f omnetpp.ini -c Edca -r 0,                   100s,            0.0    # Edca extended
+/examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 0,                 10s,             17.13
+/examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 1,                 10s,             18.37
+
+/examples/aodv/,                     -f omnetpp.ini -c IPv4SlowMobility -r 0,          50s,          0.97
+/examples/aodv/,                     -f omnetpp.ini -c IPv4ModerateFastMobility -r 0,  50s,          0.94
+/examples/aodv/,                     -f omnetpp.ini -c IPv4FastMobility -r 0,          50s,          1.55
+/examples/aodv/,                     -f omnetpp.ini -c Static -r 0,                    50s,          0.59
+/examples/aodv/,                     -f omnetpp.ini -c Dynamic -r 0,                   60s,          0.69
+/examples/aodv/,                     -f omnetpp.ini -c MoreDynamic -r 0,              100s,          0.77
+/examples/aodv/,                     -f omnetpp.ini -c SimpleRREQ -r 0,               100s,          0.27
+/examples/aodv/,                     -f omnetpp.ini -c SimpleRREQ2 -r 0,              100s,          0.26
+/examples/aodv/,                     -f omnetpp.ini -c SimpleLifecycle -r 0,          100s,          0.33
+/examples/aodv/,                     -f omnetpp.ini -c ShortestPath -r 0,             100s,          0.3
+
+/examples/bgpv4/BGP2RoutersInAS/,    -f omnetpp.ini -c config1 -r 0,                1000s,           0.26
+/examples/bgpv4/BGP3Routers/,        -f omnetpp.ini -c config1 -r 0,                1000s,           0.3
+/examples/bgpv4/BGPCompleteTest/,    -f omnetpp.ini -c config1 -r 0,                1000s,           0.32
+/examples/bgpv4/BGPOpen/,            -f omnetpp.ini -c config1 -r 0,                62s,             0.35
+/examples/bgpv4/BGPUpdate/,          -f omnetpp.ini -c config1 -r 0,                30s,             0.23
+/examples/bgpv4/BGPandOSPF/,         -f omnetpp.ini -c config1 -r 0,                1000s,           0.29
+/examples/bgpv4/BGPandOSPFSimple/,   -f omnetpp.ini -c config1 -r 0,                1000s,           0.34
+
+/examples/dhcp/,                     -f omnetpp.ini -c WiredDHCP -r 0,              5000s,           0.33
+/examples/dhcp/,                     -f omnetpp.ini -c WirelessDHCP -r 0,           500s,            0.32
+/examples/dhcp/,                     -f omnetpp.ini -c Wireless2DHCP -r 0,          500s,            0.22
+/examples/dhcp/,                     -f omnetpp.ini -c RebootingDHCP -r 0,          500s,            0.22
+
+/examples/diffserv/onedomain,        -f omnetpp.ini -c Exp11 -r 0,                  10s,             0.29
+/examples/diffserv/onedomain,        -f omnetpp.ini -c Exp21 -r 0,                  10s,             0.25
+/examples/diffserv/onedomain,        -f omnetpp.ini -c Exp31 -r 0,                  10s,             0.34
+/examples/diffserv/onedomain,        -f omnetpp.ini -c Exp51 -r 0,                  10s,             0.25
+
+# /examples/emulation/extclient/,      -f omnetpp.ini -c General -r 0,                100s,         0.0    # pcap devices not supported
+# /examples/emulation/extserver/,      -f omnetpp.ini -c Uplink_Traffic -r 0,         100s,         0.0    # pcap devices not supported
+# /examples/emulation/extserver/,      -f omnetpp.ini -c Downlink_Traffic -r 0,       100s,         0.0    # pcap devices not supported
+# /examples/emulation/extserver/,      -f omnetpp.ini -c Uplink_and_Downlink_Traffic -r 0, 100s,    0.0    # pcap devices not supported
+# /examples/emulation/traceroute/,     -f omnetpp.ini -c General -r 0,                100s,         0.0    # pcap devices not supported
+
+/examples/ethernet/arptest/,         -f omnetpp.ini -c ARPTest -r 0,                500s,            2.7
+/examples/ethernet/arptest2/,        -f omnetpp.ini -c ARPTest -r 0,                500s,            4.8
+/examples/ethernet/lans/,            -f bus.ini -c BusLAN -r 0,                     100s,            0.37
+# /examples/ethernet/lans/,            -f defaults.ini -c General -r 0,               -1s,             0.0    # not a complete simulations, defaults.ini included by other ini files
+/examples/ethernet/lans/,            -f duplexswitch.ini -c SwitchedDuplexLAN -r 0, 50s,             4.55
+/examples/ethernet/lans/,            -f hub.ini -c Hub1 -r 0,                       100s,            0.38
+/examples/ethernet/lans/,            -f hub.ini -c Hub2 -r 0,                       10s,             3.88
+/examples/ethernet/lans/,            -f hub.ini -c Hub3 -r 0,                       100s,            0.34
+/examples/ethernet/lans/,            -f hub.ini -c Hub4 -r 0,                       100s,            0.42
+/examples/ethernet/lans/,            -f largeNet.ini -c LargeNet -r 0,              5s,              8.93
+/examples/ethernet/lans/,            -f mixed.ini -c MixedLAN -r 0,                 100s,            0.98
+/examples/ethernet/lans/,            -f omnetpp.ini -c MixedLAN1 -r 0,              500s,            2.75
+/examples/ethernet/lans/,            -f switch.ini -c SwitchedLAN1 -r 0,            5000s,           5.08
+/examples/ethernet/lans/,            -f twoHosts.ini -c TwoHosts1 -r 0,             4000s,           0.8626
+
+/examples/geometry/,                 -f omnetpp.ini -c General -r 0,                100s,            0.34
+
+/examples/httptools/direct/flashdirect/, -f omnetpp.ini -c General -r 0,               500000s,      0.26
+/examples/httptools/direct/pairdirect/, -f omnetpp.ini -c random -r 0,                 500000s,      0.31
+/examples/httptools/direct/pairdirect/, -f omnetpp.ini -c scripted -r 0,               500000s,      0.31
+/examples/httptools/socket/pairsocket/, -f omnetpp.ini -c random -r 0,                 500000s,      0.32
+/examples/httptools/socket/pairsocket/, -f omnetpp.ini -c scripted -r 0,               500000s,      0.28
+/examples/httptools/socket/simpleddos/, -f omnetpp.ini -c General -r 0,                500000s,      0.32
+/examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c uniform -r 0,          50000s,       0.3
+/examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c histogram -r 0,        50000s,       0.34
+
+# /examples/ieee8021d/,                -f omnetpp.ini -c LargeNet -r 0,               100s,            0.0    # LargeNet extended
+# /examples/ieee8021d/,                -f omnetpp.ini -c RSTP -r 0,                   100s,            0.0    # RSTP extended
+# /examples/ieee8021d/,                -f omnetpp.ini -c STP -r 0,                    100s,            0.0    # STP extended
+# /examples/ieee8021d/,                -f omnetpp.ini -c Switch3RootByPriority -r 0,  100s,            0.0    # Switch3RootByPriority extended
+# /examples/ieee8021d/,                -f omnetpp.ini -c Switch7to4BySrcPriority -r 0, 100s,           0.0    # Switch7to4BySrcPriority extended
+# /examples/ieee8021d/,                -f omnetpp.ini -c TopologyChange -r 0,         100s,            0.0    # TopologyChange extended
+# /examples/ieee8021d/,                -f omnetpp.ini -c LinkReconnect -r 0,          100s,            0.0    # LinkReconnect extended
+/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-Switch1RootByMAC -r 0,   180s,           0.31
+/examples/ieee8021d/,                -f omnetpp.ini -c STP-Switch1RootByMAC -r 0,    180s,           0.32
+/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-Switch3RootByPriority -r 0, 180s,        0.31
+/examples/ieee8021d/,                -f omnetpp.ini -c STP-Switch3RootByPriority -r 0, 180s,         0.24
+/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-Switch7to4BySrcPriority -r 0, 180s,      0.32
+/examples/ieee8021d/,                -f omnetpp.ini -c STP-Switch7to4BySrcPriority -r 0, 180s,       0.32
+/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-LargeNet -r 0,           180s,           0.31
+/examples/ieee8021d/,                -f omnetpp.ini -c STP-LargeNet -r 0,            180s,           0.32
+/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-LinkReconnect -r 0,      180s,           0.33
+/examples/ieee8021d/,                -f omnetpp.ini -c STP-LinkReconnect -r 0,       180s,           0.3
+
+/examples/inet/ber/,                 -f omnetpp.ini -c ber-sack-experiment -r 0,    20s,             2.54
+/examples/inet/ber/,                 -f omnetpp.ini -c ber-flavour-experiment -r 0, 20s,             2.72
+
+/examples/inet/broadcast/,           -f omnetpp.ini -c General -r 0,                20s,             0.29
+
+/examples/inet/bulktransfer/,        -f omnetpp.ini -c inet__inet -r 0,             500s,             18.49781
+/examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2a -r 0,           500s,             6.861548
+/examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2b -r 0,           500s,             5.42903888889
+
+/examples/inet/configurator/,        -f complex.ini -c General -r 0,                100s,            1.05
+/examples/inet/configurator/,        -f simple.ini -c Default -r 0,                 10s,             0.27
+/examples/inet/configurator/,        -f simple.ini -c DisableNode -r 0,             10s,             0.36
+/examples/inet/configurator/,        -f simple.ini -c DisableLink -r 0,             10s,             0.24
+/examples/inet/configurator/,        -f simple.ini -c DisableSourceHost -r 0,       10s,             0.37
+/examples/inet/configurator/,        -f simple.ini -c DisableDestinationInterfaces -r 0, 10s,        0.32
+
+/examples/inet/flatnet/,             -f omnetpp.ini -c General -r 0,                200s,            3.45
+
+/examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts1 -r 0,                 10000s,          0.3
+/examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts16 -r 0,                10000s,          1.21
+/examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts256 -r 0,               20s,             8.88
+/examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts1280 -r 0,              1s,              33.43
+# /examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts9000 -r 0,              1s,              0.0    # cpu time limit exceeded during 0s simtime
+
+/examples/inet/hierarchical99/,      -f networklayer.ini -c IPv4 -r 0,              10000s,          1.1
+/examples/inet/hierarchical99/,      -f networklayer.ini -c IPv6 -r 0,              10000s,          1.1
+/examples/inet/hierarchical99/,      -f networklayer.ini -c Generic -r 0,           10000s,          1.14
+/examples/inet/hierarchical99/,      -f networklayer.ini -c Flooding -r 0,          10000s,          0.21
+/examples/inet/hierarchical99/,      -f networklayer.ini -c ProbabilisticBroadcast -r 0,              10000s,          0.27
+/examples/inet/hierarchical99/,      -f networklayer.ini -c AdaptiveProbabilisticBroadcast -r 0,      10000s,          0.22
+/examples/inet/hierarchical99/,      -f networklayer.ini -c WiseRoute -r 0,         10000s,          0.31
+/examples/inet/hierarchical99/,      -f omnetpp.ini -c General -r 0,                10000s,          11.56
+
+/examples/inet/igmp/,                -f omnetpp.ini -c IGMPv2 -r 0,                 200s,            0.35
+/examples/inet/igmp/,                -f omnetpp.ini -c IGMPv3 -r 0,                 200s,            0.34
+
+/examples/inet/ipv4hook/,            -f omnetpp.ini -c General -r 0,                100s,            0.34
+
+/examples/inet/ipv4largenet/,        -f omnetpp.ini -c IPv4LargeNet -r 0,           20s,             8.96
+
+/examples/inet/kidsnw1/,             -f omnetpp.ini -c General -r 0,                1000s,           2.7
+
+/examples/inet/multicast/,           -f omnetpp.ini -c General -r 0,                2000s,           2.93
+
+/examples/inet/nclients/,            -f basicHTTP.ini -c General -r 0,              500000s,         1.9
+/examples/inet/nclients/,            -f filetransfer.ini -c General -r 0,           50s,             3.68
+/examples/inet/nclients/,            -f nclients2.ini -c General -r 0,              50s,             3.46
+/examples/inet/nclients/,            -f nclients2.ini -c General -r 1,              50s,             2.59
+/examples/inet/nclients/,            -f omnetpp-ping.ini -c General -r 0,           10s,             0.38
+/examples/inet/nclients/,            -f omnetpp.ini -c inet__inet -r 0,             200s,            0.54
+/examples/inet/nclients/,            -f omnetpp.ini -c General -r 0,                3000s,           0.59
+/examples/inet/nclients/,            -f video.ini -c General -r 0,                  50s,             4.8
+
+/examples/inet/netperfmeter/,        -f omnetpp.ini -c TraceFile -r 0,              100s,            0.38
+/examples/inet/netperfmeter/,        -f omnetpp.ini -c SCTP-with-OLIA -r 0,         100s,            0.29
+
+/examples/inet/pcaprecorder/,        -f omnetpp.ini -c General -r 0,                5000s,           1.05
+
+/examples/inet/routerperf/,          -f omnetpp.ini -c General -r 0,                100s,            0.49
+
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c Ping -r 0,                   100s,            0.41
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c UDP_Basic_Echo -r 0,         100s,            0.37
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c UDP_Burst_Sink -r 0,         100s,            0.73
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c UDP_VideoStream -r 0,        100s,            0.32
+# /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP_common -r 0,             100s,            0.0    # TCP_common extended
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP -r 0,                    100s,            0.64
+
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex_externalQueue -r 0, 5s,    0.38
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex_externalQueue -r 1, 5s,    0.26
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex_internalQueue -r 0, 5s,    0.38
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex_internalQueue -r 1, 5s,    0.42
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_externalQueue_fullduplex -r 0, 3s,   0.24
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_externalQueue_fullduplex -r 1, 3s,   0.39
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_internalQueue_fullduplex -r 0, 3s,   0.34
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_internalQueue_fullduplex -r 1, 3s,   0.42
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_externalQueue_halfduplex -r 0, 2s,   0.39
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_externalQueue_halfduplex -r 1, 2s,   0.43
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_internalQueue_halfduplex -r 0, 2s,   0.39
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_internalQueue_halfduplex -r 1, 2s,   0.43
+
+/examples/inet/tcp_ppp_reconnect/,   -f omnetpp.ini -c with_externalqueue -r 0,     5s,              0.38
+/examples/inet/tcp_ppp_reconnect/,   -f omnetpp.ini -c with_internalQueue -r 0,     5s,              1.36
+
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c default_tcp -r 0,            100s,            2.25
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__inet -r 0,             100s,            2.1
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__inet_msg -r 0,         100s,            2.26
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__inet_stream -r 0,      100s,            2.88
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-reno -r 0,              500s,            0.96
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-reno -r 1,              500s,            0.94
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-reno -r 2,              500s,            0.88
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-reno -r 3,              500s,            0.89
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-reno -r 4,              500s,            0.97
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-reno -r 5,              500s,            0.88
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-reno -r 6,              500s,            0.75
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-newreno -r 0,           500s,            0.84
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-newreno -r 1,           500s,            0.94
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-newreno -r 2,           500s,            0.89
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-newreno -r 3,           500s,            0.66
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-newreno -r 4,           500s,            0.86
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-newreno -r 5,           500s,            0.8
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-newreno -r 6,           500s,            0.88
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-tahoe -r 0,             500s,            0.94
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-tahoe -r 1,             500s,            0.98
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-tahoe -r 2,             500s,            0.56
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-tahoe -r 3,             500s,            0.94
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-tahoe -r 4,             500s,            0.94
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-tahoe -r 5,             500s,            0.89
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-tahoe -r 6,             500s,            0.9
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-vegas -r 0,             500s,            0.94
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-vegas -r 1,             500s,            0.93
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-vegas -r 2,             500s,            0.8
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-vegas -r 3,             500s,            0.99
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-vegas -r 4,             500s,            0.8
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-vegas -r 5,             500s,            0.96
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-vegas -r 6,             500s,            1.01
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 0,          500s,            0.84
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 1,          500s,            0.68
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 2,          500s,            0.91
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 3,          500s,            1.0
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 4,          500s,            0.92
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 5,          500s,            0.72
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 6,          500s,            0.91
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-dumb -r 0,              500s,            1.07
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-dumb -r 1,              500s,            1.2
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-dumb -r 2,              500s,            1.04
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-dumb -r 3,              500s,            0.85
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-dumb -r 4,              500s,            1.02
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-dumb -r 5,              500s,            1.16
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-dumb -r 6,              500s,            1.22
+
+/examples/inet/tcpsack/,             -f omnetpp.ini -c One -r 0,                    1.5s,            7.78
+/examples/inet/tcpsack/,             -f omnetpp.ini -c Two -r 0,                    1.5s,            8.29
+/examples/inet/tcpsack/,             -f omnetpp.ini -c Three -r 0,                  1.5s,            7.86
+/examples/inet/tcpsack/,             -f omnetpp.ini -c Four -r 0,                   1.5s,            0.36
+/examples/inet/tcpsack/,             -f omnetpp.ini -c Five -r 0,                   1.5s,            0.27
+/examples/inet/tcpsack/,             -f omnetpp.ini -c Six -r 0,                    1.5s,            8.27
+
+/examples/inet/tcptimestamps/,       -f omnetpp.ini -c One -r 0,                    1.5s,            1.92
+/examples/inet/tcptimestamps/,       -f omnetpp.ini -c Two -r 0,                    1.5s,            0.36
+
+/examples/inet/tcpwindowscale/,      -f omnetpp.ini -c WS_disabled -r 0,            1.5s,            0.33
+/examples/inet/tcpwindowscale/,      -f omnetpp.ini -c WS_enabled -r 0,             1.5s,            0.33
+
+/examples/inet/tunnel/,              -f omnetpp.ini -c UDPApp -r 0,                 10s,             0.28
+/examples/inet/tunnel/,              -f omnetpp.ini -c TcpApp -r 0,                 10s,             0.34
+
+/examples/inet/udpburst/,            -f omnetpp.ini -c General -r 0,                1000s,           1.61
+
+/examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c simple -r 0,                 100s,            0.32
+/examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c two_senders -r 0,            100s,            0.23
+/examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c ten_senders -r 0,            100s,            0.34
+/examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c simple -r 0,                 100s,            0.35
+/examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c two_senders -r 0,            100s,            0.36
+/examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c ten_senders -r 0,            100s,            0.42
+/examples/internetcloud/earthcloud/, -f omnetpp.ini -c General -r 0,                100s,            0.31
+
+/examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                50000s,          3.28
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_inet -r 0,              50s,             6.76
+/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c ETH -r 0,                    50s,             0.42
+/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c PPP -r 0,                    50s,             0.26
+/examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           0.32
+/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           0.34
+/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            0.32
+
+### /examples/manetrouting/* : see manet.csv
+
+/examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,                    25s,             0.32
+
+/examples/mobility/,                 -f omnetpp.ini -c ANSimMobility -r 0,          10000s,          0.24
+/examples/mobility/,                 -f omnetpp.ini -c BonnMotionMobility1 -r 0,    10000s,          0.32
+/examples/mobility/,                 -f omnetpp.ini -c BonnMotionMobility2 -r 0,    10000s,          7.54    # do not move nodes simtime always 0 at all events
+/examples/mobility/,                 -f omnetpp.ini -c ChiangMobility -r 0,         10000s,          0.64
+/examples/mobility/,                 -f omnetpp.ini -c CircleMobility1 -r 0,        10000s,          2.18
+/examples/mobility/,                 -f omnetpp.ini -c CircleMobility2 -r 0,        10000s,          2.78
+# /examples/mobility/,                 -f omnetpp.ini -c ConstSpeedMobility -r 0,     ---100s,          0.0    # ConstSpeedMobility extended
+/examples/mobility/,                 -f omnetpp.ini -c ConstSpeedMobility01 -r 0,   10000s,          2.08
+/examples/mobility/,                 -f omnetpp.ini -c ConstSpeedMobility1 -r 0,    10000s,          0.53
+/examples/mobility/,                 -f omnetpp.ini -c ConstSpeedMobility10 -r 0,   10000s,          0.36
+/examples/mobility/,                 -f omnetpp.ini -c ConstSpeedMobility100 -r 0,  10000s,          0.37
+/examples/mobility/,                 -f omnetpp.ini -c ConstSpeedMobility1000 -r 0, 10000s,          0.22
+/examples/mobility/,                 -f omnetpp.ini -c GaussMarkovMobility -r 0,    10000s,          1.09
+# /examples/mobility/,                 -f omnetpp.ini -c LinearMobility -r 0,         ---100s,         0.0    # LinearMobility extended
+/examples/mobility/,                 -f omnetpp.ini -c LinearMobility01 -r 0,       10000s,          1.88
+/examples/mobility/,                 -f omnetpp.ini -c LinearMobility1 -r 0,        10000s,          0.3
+/examples/mobility/,                 -f omnetpp.ini -c LinearMobility10 -r 0,       10000s,          0.34
+/examples/mobility/,                 -f omnetpp.ini -c LinearMobility100 -r 0,      10000s,          0.32
+/examples/mobility/,                 -f omnetpp.ini -c LinearMobility1000 -r 0,     10000s,          0.23
+/examples/mobility/,                 -f omnetpp.ini -c LinearMobility_accdown -r 0, 10000s,          0.3
+/examples/mobility/,                 -f omnetpp.ini -c LinearMobility_accup -r 0,   10000s,          1.88
+/examples/mobility/,                 -f omnetpp.ini -c MassMobility -r 0,           5000s,           2.2
+/examples/mobility/,                 -f omnetpp.ini -c MassMobilityWithScenario -r 0, 10000s,        4.1
+/examples/mobility/,                 -f omnetpp.ini -c MoBANMobility1 -r 0,         10000s,          7.64
+/examples/mobility/,                 -f omnetpp.ini -c MoBANMobility2 -r 0,         10000s,          16.57
+/examples/mobility/,                 -f omnetpp.ini -c RandomWPMobility -r 0,       5000s,           2.08
+/examples/mobility/,                 -f omnetpp.ini -c RectangleMobility -r 0,      10000s,          1.7
+/examples/mobility/,                 -f omnetpp.ini -c StaticGridMobility -r 0,     0s,              0.32    # (zero time simulated)
+/examples/mobility/,                 -f omnetpp.ini -c StationaryMobility -r 0,     0s,              0.32    # (zero time simulated)
+/examples/mobility/,                 -f omnetpp.ini -c TractorMobility -r 0,        10000s,          1.0
+/examples/mobility/,                 -f omnetpp.ini -c TurtleMobility1 -r 0,        10000s,          0.32
+/examples/mobility/,                 -f omnetpp.ini -c TurtleMobility2 -r 0,        10000s,          0.33
+/examples/mobility/,                 -f omnetpp.ini -c TurtleMobility3 -r 0,        10000s,          1.93
+/examples/mobility/,                 -f omnetpp.ini -c TurtleMobility4 -r 0,        10000s,          3.96
+/examples/mobility/,                 -f omnetpp.ini -c TurtleMobility5 -r 0,        10000s,          4.11
+/examples/mobility/,                 -f omnetpp.ini -c TurtleMobility6 -r 0,        10000s,          3.83
+
+/examples/mpls/ldp/,                 -f omnetpp.ini -c General -r 0,                50s,             0.25
+# /examples/mpls/net37/,               -f omnetpp.ini -c General -r 0,                100s,            0.0    # <!> Error in module (TED) R37.LSR0.ted (id=45) during network initialization: Model error: ASSERT: condition !remote.isUnspecified() false in function initialize, networklayer/ted/TED.cc line 86.
+/examples/mpls/testte_failure/,      -f omnetpp.ini -c General -r 0,                10s,             0.32
+/examples/mpls/testte_failure2/,     -f omnetpp.ini -c General -r 0,                100s,            0.32
+/examples/mpls/testte_reroute/,      -f omnetpp.ini -c General -r 0,                50s,             0.31
+/examples/mpls/testte_routing/,      -f omnetpp.ini -c General -r 0,                10s,             0.31
+/examples/mpls/testte_tunnel/,       -f omnetpp.ini -c General -r 0,                50s,             0.29
+
+/examples/neighborcache/,            -f omnetpp.ini -c WithoutNeighborCache -r 0,      100s,         2.3
+/examples/neighborcache/,            -f omnetpp.ini -c QuadTreeNeighborCache -r 0,     100s,         1.92
+/examples/neighborcache/,            -f omnetpp.ini -c NeighborListNeighborCache -r 0, 100s,         1.58
+/examples/neighborcache/,            -f omnetpp.ini -c GridNeighborCache -r 0,         100s,         1.68
+
+/examples/objectcache/,              -f omnetpp.ini -c WithoutCache -r 0,           20s,             9.6
+/examples/objectcache/,              -f omnetpp.ini -c GridObjectCache -r 0,        20s,             1.82
+/examples/objectcache/,              -f omnetpp.ini -c BVHObjectCache -r 0,         20s,             1.9
+
+/examples/ospfv2/areas/,             -f omnetpp.ini -c General -r 0,                500s,            0.35
+/examples/ospfv2/areatests/,         -f omnetpp.ini -c backbone -r 0,               100s,            0.31
+/examples/ospfv2/areatests/,         -f omnetpp.ini -c backboneandonestub -r 0,     100s,            0.3
+/examples/ospfv2/areatests/,         -f omnetpp.ini -c backboneandtwostubs -r 0,    100s,            0.31
+/examples/ospfv2/areatests/,         -f omnetpp.ini -c mininet-A -r 0,              100s,            0.31
+/examples/ospfv2/areatests/,         -f omnetpp.ini -c mininet-B -r 0,              100s,            0.31
+# /examples/ospfv2/backbone/,          -f omnetpp.ini -c General -r 0,                100s,            0.0    # <!> Error in module (OSPFRouting) Backbone.R6.ospf (id=132) at event #23916, t=45.089338342798: check_and_cast(): cannot cast (OSPF::NetworkLSA *) to type 'OSPF::RouterLSA *'.
+/examples/ospfv2/dynamictest/,       -f omnetpp.ini -c static -r 0,                 1000s,           0.33
+/examples/ospfv2/dynamictest/,       -f omnetpp.ini -c dynamic1 -r 0,               1000s,           0.29
+/examples/ospfv2/dynamictest/,       -f omnetpp.ini -c dynamic2 -r 0,               1000s,           0.27
+/examples/ospfv2/fulltest/,          -f omnetpp.ini -c General -r 0,                100s,            0.32
+/examples/ospfv2/simpletest/,        -f omnetpp.ini -c AlwaysUp -r 0,               500s,            0.3
+/examples/ospfv2/simpletest/,        -f omnetpp.ini -c ShutdownAndRestart -r 0,     500s,            0.33
+/examples/ospfv2/simpletest/,        -f omnetpp.ini -c CrashAndReboot -r 0,        500s,             0.33
+
+/examples/pim/dm/assert/,            -f omnetpp.ini -c General -r 0,                300s,            0.31
+/examples/pim/dm/basic/,             -f omnetpp.ini -c General -r 0,                300s,            0.31
+/examples/pim/iptv/,                 -f omnetpp.ini -c PIM_SM -r 0,                  35s,            0.32
+/examples/pim/iptv/,                 -f omnetpp.ini -c PIM_DM -r 0,                  35s,            0.27
+/examples/pim/sm/basic/,             -f omnetpp.ini -c Scenario1 -r 0,              100s,            0.25
+/examples/pim/sm/basic/,             -f omnetpp.ini -c Scenario2 -r 0,              150s,            0.34
+/examples/pim/sm/basic/,             -f omnetpp.ini -c Scenario3 -r 0,              300s,            0.34
+/examples/pim/sm/basic/,             -f omnetpp.ini -c Scenario4 -r 0,              100s,            0.31
+
+/examples/rip/dynamictest/,          -f omnetpp.ini -c stable -r 0,                 100s,            0.22
+/examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic1 -r 0,               500s,            0.3
+/examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic2 -r 0,               500s,            0.32
+/examples/rip/infinitycount/,        -f omnetpp.ini -c General -r 0,                100s,            0.32
+/examples/rip/mixednetwork/,         -f omnetpp.ini -c stable -r 0,                 100s,            0.32
+/examples/rip/mixednetwork/,         -f omnetpp.ini -c disconnect -r 0,             100s,            0.36
+/examples/rip/mixednetwork/,         -f omnetpp.ini -c shutdown-restart -r 0,       100s,            0.41
+/examples/rip/simpletest/,           -f omnetpp.ini -c IPv4 -r 0,                   100s,            0.24
+/examples/rip/simpletest/,           -f omnetpp.ini -c IPv6 -r 0,                   100s,            0.3
+/examples/rip/simpletest/,           -f omnetpp.ini -c MultiIPv4 -r 0,              100s,            0.33
+
+/examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0,                500s,           0.33
+/examples/rtp/unicast/,              -f omnetpp.ini -c General -r 0,                1500s,           0.28
+/examples/rtp/unicast1/,             -f omnetpp.ini -c General -r 0,                1000s,           0.24
+/examples/rtp/unicast2/,             -f omnetpp.ini -c General -r 0,                500s,           0.3
+
+/examples/sctp/cmttest/,             -f omnetpp.ini -c General -r 0,                100s,            0.33
+/examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,            0.27
+/examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0,                500s,            0.35
+
+/examples/voip/,                     -f omnetpp.ini -c GoodChannel -r 0,            200s,            0.32
+/examples/voip/,                     -f omnetpp.ini -c BadChannel -r 0,             200s,            0.34
+/examples/voip/,                     -f omnetpp.ini -c PeriodicChannel -r 0,        200s,            0.3
+
+### /examples/voipstream/* : see voipstream.csv
+
+/examples/wireless/crosstalk/,       -f omnetpp.ini -c General -r 0,                2s,           33.52
+
+/examples/wireless/dynamic/,         -f omnetpp.ini -c General -r 0,                100s,         0.38
+
+/examples/wireless/errorrate/,       -f omnetpp.ini -c General -r 0,                100s,         0.35
+
+/examples/wireless/handover/,        -f omnetpp.ini -c General -r 0,                1500s,        7.35
+
+/examples/wireless/hiddennode/,      -f omnetpp.ini -c General -r 0,                5s,         0.76
+
+/examples/wireless/hosttohost/,      -f omnetpp.ini -c Throughput1 -r 0,            5s,           7.41
+
+/examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c TwoHosts -r 0,           100s,         7.58
+# /examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c NHosts -r 0,             100s,         0.0    # interactive config, needed a *.numHosts parameter
+/examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming1 -r 0,   50s,          9.0
+# /examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming2 -r 0,   100s,         0.0    # interactive config, needed a *.numHosts parameter
+/examples/wireless/lan80211/,        -f omnetpp.ini -c Ping1 -r 0,                  25s,          6.61
+# /examples/wireless/lan80211/,        -f omnetpp.ini -c Ping2 -r 0,                100s,            0.0    # [Config Ping2] # __interactive__
+
+/examples/wireless/layered80211/,    -f omnetpp.ini -c LayeredCompliant80211Ping -r 0, 100s,      1.64
+/examples/wireless/layered80211/,    -f omnetpp.ini -c LayeredNonCompliant80211Ping -r 0, 100s,   1.5
+
+/examples/wireless/layeredapsk/,     -f omnetpp.ini -c General -r 0,                100s,            0.33
+
+/examples/wireless/multiradio/,      -f omnetpp.ini -c IndependentWlans -r 0,       100s,            0.5
+/examples/wireless/multiradio/,      -f omnetpp.ini -c SwitchedWlans -r 0,          100s,            0.54
+/examples/wireless/multiradio/,      -f omnetpp.ini -c RoutedWlans -r 0,            100s,            1.06
+
+# /examples/wireless/nic/,             -f omnetpp.ini -c AbstractIdealMac -r 0,       ---100s,         0.0    # AbstractIdealMac extended
+# /examples/wireless/nic/,             -f omnetpp.ini -c AbstractBMac -r 0,           ---100s,         0.0    # AbstractBMac extended
+# /examples/wireless/nic/,             -f omnetpp.ini -c AbstractLMac -r 0,           ---100s,         0.0    # AbstractLMac extended
+# /examples/wireless/nic/,             -f omnetpp.ini -c AbstractCSMA -r 0,           ---100s,         0.0    # AbstractCSMA extended
+# /examples/wireless/nic/,             -f omnetpp.ini -c AbstractIeee80211Mac -r 0,   ---100s,         0.0    # AbstractIeee80211Mac extended
+# /examples/wireless/nic/,             -f omnetpp.ini -c AbstractIdealRadio -r 0,     ---100s,         0.0    # AbstractIdealRadio extended
+# /examples/wireless/nic/,             -f omnetpp.ini -c AbstractAPSKScalarRadio -r 0, ---100s,        0.0    # AbstractAPSKScalarRadio extended
+# /examples/wireless/nic/,             -f omnetpp.ini -c AbstractAPSKDimensionalRadio -r 0, ---100s,   0.0    # AbstractAPSKDimensionalRadio extended
+/examples/wireless/nic/,             -f omnetpp.ini -c IdealMacWithIdealRadio -r 0,               100s,     0.42
+/examples/wireless/nic/,             -f omnetpp.ini -c IdealMacWithAPSKScalarRadio -r 0,          100s,     0.39
+/examples/wireless/nic/,             -f omnetpp.ini -c IdealMacWithAPSKDimensionalRadio -r 0,     100s,     0.5
+/examples/wireless/nic/,             -f omnetpp.ini -c LMacWithIdealRadio -r 0,                   100s,     0.45
+/examples/wireless/nic/,             -f omnetpp.ini -c LMacWithAPSKScalarRadio -r 0,              100s,     0.6
+/examples/wireless/nic/,             -f omnetpp.ini -c LMacWithAPSKDimensionalRadio -r 0,         100s,     1.71
+/examples/wireless/nic/,             -f omnetpp.ini -c CSMAWithIdealRadio -r 0,                   100s,     0.39
+/examples/wireless/nic/,             -f omnetpp.ini -c CSMAWithAPSKScalarRadio -r 0,              100s,     0.39
+/examples/wireless/nic/,             -f omnetpp.ini -c CSMAWithAPSKDimensionalRadio -r 0,         100s,     0.57
+/examples/wireless/nic/,             -f omnetpp.ini -c CsmaCaWithIdealRadio -r 0,                 100s,    0.39
+/examples/wireless/nic/,             -f omnetpp.ini -c CsmaCaWithAPSKScalarRadio -r 0,            100s,    0.44
+/examples/wireless/nic/,             -f omnetpp.ini -c CsmaCaWithAPSKDimensionalRadio -r 0,       100s,    0.62
+/examples/wireless/nic/,             -f omnetpp.ini -c BMacWithIdealRadio -r 0,                   100s,     0.61
+/examples/wireless/nic/,             -f omnetpp.ini -c BMacWithAPSKScalarRadio -r 0,              100s,     0.62
+/examples/wireless/nic/,             -f omnetpp.ini -c BMacWithAPSKDimensionalRadio -r 0,         100s,     2.5
+/examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacWithIdealRadio -r 0,           100s,     0.45
+/examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacWithIeee80211ScalarRadio -r 0, 100s,     0.43
+
+/examples/wireless/obstacle/,        -f omnetpp.ini -c Outdoor -r 0,                100s,            1.27
+/examples/wireless/obstacle/,        -f omnetpp.ini -c Indoor -r 0,                 100s,            0.48
+/examples/wireless/obstacle/,        -f omnetpp.ini -c Orbit -r 0,                  100s,            0.44
+
+/examples/wireless/power/,           -f omnetpp.ini -c General -r 0,                100s,            2.36
+
+/examples/wireless/qos/,             -f omnetpp.ini -c MacNonQos -r 0,                100s,         24.57
+/examples/wireless/qos/,             -f omnetpp.ini -c MacQos -r 0,                    10s,         12.3
+/examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithoutAggregation -r 0,                10s,         14.53
+/examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithRtsCts -r 0,          10s,         15.42
+/examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithBlockAck -r 0,        10s,         46.94
+
+/examples/wireless/ratecontrol/, -f omnetpp.ini -c Mac -r 0,                    100s,            0.79
+
+# /examples/wireless/scaling/,         -f omnetpp.ini -c AbstractIdealMac -r 0,       ---100s,         0.0    # AbstractIdealMac extended
+/examples/wireless/scaling/,         -f omnetpp.ini -c IdealRadioMedium -r 0,       10s,               21.01
+/examples/wireless/scaling/,         -f omnetpp.ini -c ScalarRadioMedium -r 0,      10s,               11.33
+/examples/wireless/scaling/,         -f omnetpp.ini -c DimensionalRadioMedium -r 0, 1s,                12.24
+
+/examples/wireless/synchronized/,    -f omnetpp.ini -c Synchronized -r 0,           2s,              5.1
+/examples/wireless/synchronized/,    -f omnetpp.ini -c NonSynchronized -r 0,        2s,              9.96
+
+/examples/wireless/testnewmac/,      -f omnetpp.ini -c Mac -r 0,                    100s,          18.03
+
+/examples/wireless/throughput/,      -f omnetpp.ini -c Throughput1 -r 0,            20s,           1.62
+# /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput2 -r 0,            100s,         0.0    # Throughput2 extended
+/examples/wireless/throughput/,      -f omnetpp.ini -c Mac -r 0,                    10s,         1.93
+
+/examples/wireless/wiredandwirelesshostswithap/, -f omnetpp.ini -c General -r 0,                100s,      0.8

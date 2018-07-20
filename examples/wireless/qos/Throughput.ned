@@ -18,7 +18,7 @@
 
 package inet.examples.wireless.qos;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
@@ -27,26 +27,25 @@ import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 network QosThroughput
 {
     parameters:
-        @display("b=297,203");
     submodules:
-        configurator: IPv4NetworkConfigurator {
-            @display("p=61,164");
+        configurator: Ipv4NetworkConfigurator {
+            @display("p=100,100;is=s");
         }
         ap: AccessPoint {
             parameters:
-                @display("p=200,200;r=,,#707070");
+                @display("p=400,200;r=,,#707070");
         }
         srvHost: WirelessHost {
             parameters:
-                @display("r=,,#707070");
+                @display("r=,,#707070;p=550,100");
         }
         cliHost: WirelessHost {
             parameters:
-                @display("r=,,#707070");
+                @display("r=,,#707070;p=250,100");
         }
         radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
-                @display("p=61,46");
+                @display("p=100,200;is=s");
         }
 }
 

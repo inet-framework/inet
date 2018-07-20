@@ -18,6 +18,7 @@
 #ifndef __INET_ICTSPOLICY_H
 #define __INET_ICTSPOLICY_H
 
+#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 namespace inet {
@@ -28,11 +29,11 @@ class INET_API ICtsPolicy
     public:
         virtual ~ICtsPolicy() { }
 
-        virtual bool isCtsNeeded(Ieee80211RTSFrame *rtsFrame) const = 0;
-        virtual simtime_t computeCtsDurationField(Ieee80211RTSFrame *frame) const = 0;
+        virtual bool isCtsNeeded(const Ptr<const Ieee80211RtsFrame>& rtsFrame) const = 0;
+        virtual simtime_t computeCtsDurationField(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame) const = 0;
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif // ifndef __INET_ICTSPOLICY_H

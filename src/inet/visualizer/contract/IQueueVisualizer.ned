@@ -26,5 +26,5 @@ package inet.visualizer.contract;
 moduleinterface IQueueVisualizer
 {
     parameters:
-        @display("i=block/app_s");
+        @display("i=block/app");
 }

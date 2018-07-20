@@ -56,7 +56,8 @@ class INET_API LineManager
   protected:
     std::map<std::pair<int, int>, CacheEntry> cacheEntries;
 
-    static std::map<const cCanvas *, LineManager> lineManagers;
+    static std::map<const cCanvas *, LineManager> canvasLineManagers;
+    static std::map<const cCanvas *, LineManager> osgLineManagers;
 
   protected:
     std::pair<int, int> getKey(int fromModuleId, int toModuleId) {
@@ -79,7 +80,8 @@ class INET_API LineManager
 
     Coord getLineShift(int sourceModuleId, int destinationModuleId, const Coord& sourcePosition, const Coord& destinationPosition, const char *shiftMode, int shiftOffset);
 
-    static LineManager *getLineManager(const cCanvas *canvas);
+    static LineManager *getCanvasLineManager(const cCanvas *canvas);
+    static LineManager *getOsgLineManager(const cCanvas *canvas);
 };
 
 } // namespace visualizer

@@ -13,18 +13,19 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
+import inet.common.INETDefs;
+
 cplusplus {{
 #include "inet/common/queue/PacketQueue.h"
 }}
 
 namespace inet;
 
-class cPacketQueue extends cObject;
-
 class PacketQueue extends cPacketQueue
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
     int maxPacketLength;
     int64_t maxBitLength;
 }
+

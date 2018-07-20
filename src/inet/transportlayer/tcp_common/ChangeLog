@@ -1,3 +1,168 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-25  Zoltan Bojthe
+
+	CRC insertion calculates CRC only when crcMode is CRC_COMPUTED.
+
+2018-06-18  Zoltan Bojthe
+
+	CrcInsertion doesn't calculate CRC for fragmented packets and forwarded packets.
+
+2018-06-01  Zoltan Bojthe
+
+	Added B/b units to length constants and length fields of chunks.
+
+2018-05-25  Zoltan Bojthe
+
+	Removed @clone(->dup()) KLUDGEs from MSG files for owned pointers.
+
+2018-05-10  Zoltan Bojthe
+
+	Moved header serializers to the corresponding protocol folders.
+
+2018-03-09  Zoltan Bojthe
+
+	Optimized CRC calculation.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-03-07  Zoltan Bojthe
+
+	Added TcpProtocolPrinter.
+
+2018-03-06  Zoltan Bojthe
+
+	Added TcpProtocolDissector.
+
+2018-01-18  Zoltan Bojthe
+
+	Revised MSG customization: Sack, TcpHeader.
+	Removed unnecessary @customize where possible.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IPv4 -> Ipv4
+	    IPv4ControlInfo -> Ipv4ControlInfo
+	    IPv6 -> Ipv6
+	    IPv6ControlInfo -> Ipv6ControlInfo
+	    ITCP -> ITcp
+	    TCPCommand -> TcpCommand
+	    TCPIPchecksum -> TcpIpChecksum
+	    TCP -> Tcp
+	    TCPOption -> TcpOption
+	    TCPOptionEnd -> TcpOptionEnd
+	    TCPOptionMaxSegmentSize -> TcpOptionMaxSegmentSize
+	    TCPOptionNop -> TcpOptionNop
+	    TCPOptionNumbers -> TcpOptionNumbers
+	    TCPOptionSack -> TcpOptionSack
+	    TCPOptionSackPermitted -> TcpOptionSackPermitted
+	    TCPOptionTimestamp -> TcpOptionTimestamp
+	    TCPOptionUnknown -> TcpOptionUnknown
+	    TCPOptionWindowScale -> TcpOptionWindowScale
+	    TCPSegment -> TcpHeader
+	    TCPSpoof -> TcpSpoof
+
+2017-12-15  Zoltan Bojthe
+
+	Removed unnecessary cPar::doubleValue(), cPar::longValue() calls.
+
+	Motivation: rely on cast operators instead because they can detect
+	overflows (when the value is cast to a smaller integer type that can not
+	represent it). Removed unnecessary .longvalue() calls. Replaced to
+	.intValue() in comparisons.
+
+2017-12-14  Levente Mészáros
+
+	Replaced pushHeader, pushTrailer with insertHeader, insertTrailer.
+	Removed unnecessary markImmutable() calls.
+
+2017-12-11  Zoltan Bojthe
+
+	Updated for new msgc function names: getFooForUpdate, insertFoo, eraseFoo, etc.
+
+2017-11-16  Levente Mészáros
+
+	Moved rcvdPkSignal and sentPkSignal into Simsignals.
+
+2017-11-23  Levente Mészáros
+
+	Removed protocolId @override from subclasses. The protocolId was not
+	protocol agnostic, and there's a separate protocol field anyway.
+
+2017-11-21  Levente Mészáros
+
+	Eliminated all #define statements from MSG files.
+
+2017-11-13  Zoltan Bojthe
+
+	Converted TCPOptionNumbers enum, default CRC case was missed.
+
+2017-11-14  Zoltan Bojthe
+
+	Replaced "int foo @enum(FooEnum)" to FooEnum foo.
+
+2017-11-13  Zoltan Bojthe
+
+	Converted TCPOptionNumbers to enum, default CRC case was missed.
+
+2017-06-28  Zoltan Bojthe
+
+	Switched to using pointer array in MSG files for TCPOption.
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-07-05  Levente Mészáros
+
+	Adapted transport protocols to use the new L3 tools.
+
+2017-04-24  Zoltan Bojthe
+
+	Replaced ITransportPacket with TransportHeaderBase (based on FieldsChunk).
+
+2017-04-06  Zoltan Bojthe
+
+	Removed unused functions: truncateSegment(), truncateData().
+
+2017-03-29  Zoltan Bojthe
+
+	Added TcpCrcInsertionHook and optimized crc handling.
+
+2017-03-07  Levente Mészáros
+
+	Removed unused parts from TcpHeader.
+
+2017-02-22  Levente Mészáros
+
+	Ported serialization of TCP options.
+
+2017-02-21  Levente Mészáros
+
+	Ported TcpHeaderSerializer to new API.
+2017-01-25  Zoltan Bojthe
+
+	Renamed TCPSegment to TcpHeader.
+
+2016-10-26  Zoltan Bojthe
+
+	Removed compatibility macros required for OMNeT++ 4.x builds.
+
+2016-06-03  Levente Mészáros
+
+	Changed appIn/appOut gate vectors to simple gates.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------
@@ -14,20 +179,20 @@
 
 2017-02-17  Rudolf Hornig
 
-    build: removed OMNeT 5.0 compatibility code
+	build: removed OMNeT 5.0 compatibility code
 
 2016-12-23  Rudolf Hornig
 
-    build: removed deprecation warings
+	build: removed deprecation warings
 
 2016-10-20  Rudolf Hornig
 
-    refactoring: removed compatibility macros required for OMNeT++ 4.x builds
-    + warning fixes
+	refactoring: removed compatibility macros required for OMNeT++ 4.x builds
+	+ warning fixes
 
 2016-08-03  Zoltan Bojthe
 
-    MSG: @fieldNameSuffix("_var") removed when @omitGetVerb(true) not used
+	MSG: @fieldNameSuffix("_var") removed when @omitGetVerb(true) not used
 
 2016-06-15  ------ inet-3.4.0 released ------
 

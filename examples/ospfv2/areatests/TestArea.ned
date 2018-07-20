@@ -4,7 +4,7 @@ package inet.examples.ospfv2.areatests;
 import inet.common.misc.ThruputMeteringChannel;
 import inet.linklayer.ethernet.EtherHub;
 import inet.node.inet.StandardHost;
-import inet.node.ospfv2.OSPFRouter;
+import inet.node.ospfv2.OspfRouter;
 
 
 module TestArea
@@ -24,11 +24,17 @@ module TestArea
         }
     submodules:
         H[numHosts]: StandardHost {
-            @display("i=device/laptop");
+            @display("i=device/laptop;p=100,400,row,100");
         }
-        N[numHosts]: EtherHub;
-        R[numHosts]: OSPFRouter;
-        B[extGates]: OSPFRouter;
+        N[numHosts]: EtherHub {
+            @display("p=100,300,row,100");
+        }
+        R[numHosts]: OspfRouter {
+            @display("p=100,200,row,100");
+        }
+        B[extGates]: OspfRouter {
+            @display("p=100,100,row,100");
+        }
     connections:
         // host to router links
         for i=0..numHosts-1 {

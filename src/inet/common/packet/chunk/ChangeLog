@@ -1,0 +1,226 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-25  Levente Mészáros
+
+	Changed region tag getter functions to return const tags, because chunks can be shared.
+
+2018-05-15  Levente Mészáros
+
+	Added missing checkImmutable calls into Chunk::mark* methods.
+
+2018-05-03  Andras Varga
+
+	Chunk.msg: bits[] and bytes[] were confusing, renamed them.
+
+	When Qtenv displayed something like bits[8] and bytes[2], one would think
+	that [8] and [2] indicate the number of bits and bytes, but no: they
+	indicate the number of *lines* in a binary and hex *dump* of the data.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-03-21  Levente Mészáros
+
+	Common: Refactored Packet API for clarity and consistency.
+
+	Renamed canInsertAtBeginning to canInsertAtFront in Chunk and subclasses.
+	Renamed canInsertAtEnd to canInsertAtBack in Chunk and subclasses.
+	Renamed doInsertAtBeginning to doInsertAtFront in Chunk and subclasses.
+	Renamed doInsertAtBack to canInsertAtBack in Chunk and subclasses.
+	Renamed doRemoveFromBeginning to doRemoveAtFront in Chunk and subclasses.
+	Renamed doRemoveFromEnd to doRemoveAtBack in Chunk and subclasses.
+
+2018-02-14  Levente Mészáros
+
+	Added PF_ALLOW_ALL flag that disables throwing errors from peek/pop functions.
+
+2018-02-01  Levente Mészáros
+
+	Added Chunk::isEmpty.
+	Removed virtual qualifier from Chunk methods where it's unnecessary.
+	Changed SliceChunk and SequenceChunk to forbid using mutable chunks inside.
+
+2018-01-12  Levente Mészáros
+
+	Fixed findTag to return type in Chunk.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IPv4Option -> Ipv4Option
+
+2017-12-11  Levente Mészáros
+
+	Added doInsert* and doRemove* to Chunk in order to reuse tag maintaining code.
+
+2017-12-08  Levente Mészáros
+
+	Added checkMutable() calls to chunk tag API.
+
+2017-12-07  Levente Mészáros
+
+	Added RegionTagSet based tags to Chunk.
+	Added tags to Chunk descriptor.
+
+2017-11-28  Levente Mészáros
+
+	Removed obsolete @getval property.
+
+2017-11-17  Zoltan Bojthe
+
+	Added @beforeChange(handleChange()) to Chunk.
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-10-09  Levente Mészáros
+
+	Fixed all problems with using the newly introduced intrusive shared pointer.
+
+2017-09-12  Levente Mészáros
+
+	Added alias for std::make_shared, std::dynamic_pointer_cast, etc.
+	to support replacing the implementation.
+
+2017-09-11  Levente Mészáros
+
+	Renamed byte -> B and bit -> b according to IEC & IEEE unit conventions.
+
+2017-09-11  Levente Mészáros
+
+	Added SliceChunk::forEachChild().
+
+2017-07-04  Levente Mészáros
+
+	Extracted makeExclusivelyOwnedMutableChunk template function.
+	Changed simplify to allow incomplete, incorrect and improperly represented chunks.
+
+2017-07-05  Levente Mészáros
+
+	Replaced Ptr<Chunk> to Ptr<const Chunk> wherever it's possible.
+
+2017-07-04  Levente Mészáros
+
+	Added bool data field to BitCountChunk.
+	Added uint8_t data field to ByteCountChunk.
+
+2017-07-03  Levente Mészáros
+
+	Changed class descriptor to return error message for bits/bytes.
+
+2017-06-21  Levente Mészáros
+
+	Added bits and bytes as an array of formatted strings to chunk descriptor.
+
+2017-06-16  Levente Mészáros
+
+	Reverted to macros in error handling even if guarded.
+
+2017-06-14  Zoltan Bojthe
+
+	Fixed unused variables, fixed CHUNK_CHECK_IMPLEMENTATION and CHUNK_CHECK_USAGE macros.
+
+2017-04-24  Levente Mészáros
+
+	Added properties for packet data filtering in the GUI.
+
+2017-04-20  Levente Mészáros
+
+	Added forEachChild to chunks.
+
+2017-04-11  Levente Mészáros
+
+	Added type alias for std::shared_ptr called Ptr,
+	this allows replacing the default implementation.
+
+2017-04-06  Levente Mészáros
+
+	Replaced plain asserts with CHECK macros to allow disabling/enabling them.
+
+2017-04-03  Levente Mészáros
+
+	Replaced nullptr contents with EmptyChunk in Packet and ChunkQueue.
+
+2017-03-31  Levente Mészáros
+
+	Fixed setting trailer pop offset.
+
+2017-03-29  Levente Mészáros
+
+	Reanmed function to peekConverted.
+	Added PF_ALLOW_SERIALIZATION flag.
+	Added flags argument to peekWithConversion and converChunk.
+	Fixed peeking incomplete FieldsChunk.
+	Fixed compilation errors for GCC.
+
+2017-03-27  Levente Mészáros
+
+	Replaced std::function with plain old function pointers for efficiency.
+
+2017-03-24  Levente Mészáros
+
+	Renamed internal function to convertChunk.
+
+2017-03-22  Zoltan Bojthe
+
+	Added public handleChange(), protected get/setSerializedBytes() to FieldsChunk.
+
+2017-03-22  Levente Mészáros
+
+	Implemented peeking with conversion using backward iterator.
+
+2017-03-22  Levente Mészáros
+
+	Added Chunk::simplify and usages where appropriate.
+
+2017-03-21  Levente Mészáros
+
+	Added chunk id.
+	Added asserts for chunk length after (de)serialization.
+
+2017-03-21  Levente Mészáros
+
+	Added chunkLength to FieldsChunk.
+
+2017-03-20  Levente Mészáros
+
+	Moved peekUnchecked to protected region.
+	Renamed to peekWithConversion.
+
+2017-03-20  Levente Mészáros
+
+	Dropped assert* function from public interface.
+
+2017-03-20  Levente Mészáros
+
+	Changed all flag reader functions to be virtual.
+	Overridden flag reader functions for SequenceChunk and SliceChunk.
+
+2017-03-17  Zoltan Bojthe
+
+	Added check to throw error when inserting a 0 length chunk into SequenceChunk.
+
+2017-03-17  Levente Mészáros
+
+	Added flags optional parameter to peek variants.
+	Removed special case for returning complete/incomplete chunks.
+	Renamed enum to ChunkFlag and ChunkType and changed prefix.
+
+2017-03-08  Zoltan Bojthe
+
+	Extended BytesChunk consructor, setter, getter for buffer with specified by pointer and length.
+
+2017-03-02  Levente Mészáros
+
+	Extracted Chunk.msg from Packet.msg
+
+2017-03-02  Levente Mészáros
+
+	Moved MemoryInputStream and MemoryOutputStream under common.
+	Moved ChunkSerializer under common/packet/serializer.

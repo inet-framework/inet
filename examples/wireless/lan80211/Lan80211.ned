@@ -18,7 +18,7 @@
 
 package inet.examples.wireless.lan80211;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
@@ -32,23 +32,24 @@ network Lan80211
     submodules:
         visualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
             parameters:
-                @display("p=100,50");
+                @display("p=100,300;is=s");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=100,150");
+                @display("p=100,100;is=s");
                 config = xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.0.0'/></config>");
         }
         radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
-                @display("p=100,250");
+                @display("p=100,200;is=s");
         }
         host[numHosts]: WirelessHost {
             @display("r=,,#707070");
-            wlan[*].mgmtType = "Ieee80211MgmtSTASimplified";
+            wlan[*].mgmt.typename = "Ieee80211MgmtStaSimplified";
+            wlan[*].agent.typename = "";
         }
         ap: AccessPoint {
             @display("p=213,174;r=,,#707070");
-            wlan[*].mgmtType = "Ieee80211MgmtAPSimplified";
+            wlan[*].mgmt.typename = "Ieee80211MgmtApSimplified";
         }
 }

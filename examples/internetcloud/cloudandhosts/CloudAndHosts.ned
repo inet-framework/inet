@@ -18,7 +18,7 @@
 
 package inet.examples.internetcloud.cloudandhosts;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
 import inet.node.internetcloud.InternetCloud;
 import ned.DatarateChannel;
@@ -36,14 +36,20 @@ network CloudAndHosts
             datarate = 5Mbps;
         }
     submodules:
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=61,163");
+                @display("p=100,100;is=s");
         }
 
-        sender[numSenders]: StandardHost;
-        recip: StandardHost;
-        internet: InternetCloud;
+        sender[numSenders]: StandardHost {
+            @display("p=250,100,row,100");
+        }
+        recip: StandardHost {
+            @display("p=250,500");
+        }
+        internet: InternetCloud {
+            @display("p=250,300;is=vl");
+        }
     connections:
         recip.pppg++ <--> C <--> internet.pppg++;
         for i=0..numSenders-1 {

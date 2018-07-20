@@ -18,28 +18,29 @@
 
 package inet.examples.inet.routerperf;
 
-import inet.applications.generic.IIPvXTrafficGenerator;
-import inet.node.inet.NodeBase;
-
+import inet.applications.generic.IIpvxTrafficGenerator;
+import inet.node.base.TransportLayerNodeBase;
 
 //
 // Definition of an IP node with a transport generator that connects
 // to IP directly, without TCP or UDP.
 //
-module BurstHost extends NodeBase
+module BurstHost extends TransportLayerNodeBase
 {
     parameters:
         @networkNode();
         @display("i=device/pc3");
-        string trafGenType;
+        hasUdp = false;
+        hasTcp = false;
+        *.routingTableModule = default("^.ipv4.routingTable");
     submodules:
-        trafGen: <trafGenType> like IIPvXTrafficGenerator {
+        trafGen: <> like IIpvxTrafficGenerator {
             parameters:
                 @display("p=329,81");
         }
     connections allowunconnected:
         // transport connections
-        networkLayer.transportOut++ --> trafGen.ipIn;
-        networkLayer.transportIn++ <-- trafGen.ipOut;
+        trafGen.ipOut --> tn.in++;
+        trafGen.ipIn <-- tn.out++;
 }
 

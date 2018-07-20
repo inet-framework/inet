@@ -23,10 +23,10 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
-#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 
 namespace inet {
 
@@ -53,22 +53,22 @@ void HostAutoConfigurator::setupNetworkLayer()
 {
     EV_INFO << "host auto configuration started" << std::endl;
 
-    std::string interfaces = par("interfaces").stringValue();
-    IPv4Address addressBase = IPv4Address(par("addressBase").stringValue());
-    IPv4Address netmask = IPv4Address(par("netmask").stringValue());
-    std::string mcastGroups = par("mcastGroups").stringValue();
+    std::string interfaces = par("interfaces");
+    Ipv4Address addressBase = Ipv4Address(par("addressBase").stringValue());
+    Ipv4Address netmask = Ipv4Address(par("netmask").stringValue());
+    std::string mcastGroups = par("mcastGroups").stdstringValue();
 
     // get our host module
     cModule *host = getContainingNode(this);
 
-    IPv4Address myAddress = IPv4Address(addressBase.getInt() + uint32(host->getId()));
+    Ipv4Address myAddress = Ipv4Address(addressBase.getInt() + uint32(host->getId()));
 
     // address test
-    if (!IPv4Address::maskedAddrAreEqual(myAddress, addressBase, netmask))
+    if (!Ipv4Address::maskedAddrAreEqual(myAddress, addressBase, netmask))
         throw cRuntimeError("Generated IP address is out of specified address range");
 
     // get our routing table
-    IIPv4RoutingTable *routingTable = L3AddressResolver().routingTableOf(host);
+    IIpv4RoutingTable *routingTable = L3AddressResolver().getIpv4RoutingTableOf(host);
     if (!routingTable)
         throw cRuntimeError("No routing table found");
 
@@ -98,14 +98,14 @@ void HostAutoConfigurator::setupNetworkLayer()
         ie->setBroadcast(true);
 
         // associate interface with default multicast groups
-        ie->ipv4Data()->joinMulticastGroup(IPv4Address::ALL_HOSTS_MCAST);
-        ie->ipv4Data()->joinMulticastGroup(IPv4Address::ALL_ROUTERS_MCAST);
+        ie->ipv4Data()->joinMulticastGroup(Ipv4Address::ALL_HOSTS_MCAST);
+        ie->ipv4Data()->joinMulticastGroup(Ipv4Address::ALL_ROUTERS_MCAST);
 
         // associate interface with specified multicast groups
         cStringTokenizer interfaceTokenizer(mcastGroups.c_str());
         const char *mcastGroup_s;
         while ((mcastGroup_s = interfaceTokenizer.nextToken()) != nullptr) {
-            IPv4Address mcastGroup(mcastGroup_s);
+            Ipv4Address mcastGroup(mcastGroup_s);
             ie->ipv4Data()->joinMulticastGroup(mcastGroup);
         }
     }

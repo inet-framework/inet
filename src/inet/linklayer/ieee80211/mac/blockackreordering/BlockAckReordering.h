@@ -18,6 +18,7 @@
 #ifndef __INET_BLOCKACKREORDERING_H
 #define __INET_BLOCKACKREORDERING_H
 
+#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mac/blockackreordering/ReceiveBuffer.h"
 
 namespace inet {
@@ -32,17 +33,17 @@ class RecipientBlockAckAgreement;
 class INET_API BlockAckReordering
 {
     public:
-        typedef std::vector<Ieee80211DataFrame *> Fragments;
+        typedef std::vector<Packet *> Fragments;
         typedef std::map<SequenceNumber, Fragments> ReorderBuffer;
 
     protected:
-        std::map<std::pair<Tid, MACAddress>, ReceiveBuffer *> receiveBuffers;
+        std::map<std::pair<Tid, MacAddress>, ReceiveBuffer *> receiveBuffers;
 
     protected:
         ReorderBuffer collectCompletePrecedingMpdus(ReceiveBuffer *receiveBuffer, int startingSequenceNumber);
         ReorderBuffer collectConsecutiveCompleteFollowingMpdus(ReceiveBuffer *receiveBuffer, int startingSequenceNumber);
 
-        std::vector<Ieee80211DataFrame*> getEarliestCompleteMsduOrAMsduIfExists(ReceiveBuffer *receiveBuffer);
+        std::vector<Packet *> getEarliestCompleteMsduOrAMsduIfExists(ReceiveBuffer *receiveBuffer);
         bool isComplete(const Fragments& fragments);
         void passedUp(ReceiveBuffer *receiveBuffer, int sequenceNumber);
         void releaseReceiveBuffer(ReceiveBuffer *receiveBuffer, const ReorderBuffer& reorderBuffer);
@@ -52,9 +53,9 @@ class INET_API BlockAckReordering
     public:
         virtual ~BlockAckReordering();
 
-        void processReceivedDelba(Ieee80211Delba *delba);
-        ReorderBuffer processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Ieee80211DataFrame* dataFrame);
-        ReorderBuffer processReceivedBlockAckReq(Ieee80211BlockAckReq* frame);
+        void processReceivedDelba(const Ptr<const Ieee80211Delba>& delba);
+        ReorderBuffer processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader);
+        ReorderBuffer processReceivedBlockAckReq(const Ptr<const Ieee80211BlockAckReq>& blockAckReq);
 };
 
 } /* namespace ieee80211 */

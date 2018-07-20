@@ -20,7 +20,7 @@
 #include "inet/physicallayer/base/packetlevel/DimensionalAnalogModelBase.h"
 #include "inet/physicallayer/analogmodel/packetlevel/DimensionalReception.h"
 #include "inet/physicallayer/analogmodel/packetlevel/DimensionalNoise.h"
-#include "inet/physicallayer/analogmodel/packetlevel/DimensionalSNIR.h"
+#include "inet/physicallayer/analogmodel/packetlevel/DimensionalSnir.h"
 
 namespace inet {
 
@@ -52,9 +52,6 @@ std::ostream& DimensionalAnalogModelBase::printToStream(std::ostream& stream, in
 const ConstMapping *DimensionalAnalogModelBase::computeReceptionPower(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
 {
     const IRadioMedium *radioMedium = receiverRadio->getMedium();
-    const IRadio *transmitterRadio = transmission->getTransmitter();
-    const IAntenna *receiverAntenna = receiverRadio->getAntenna();
-    const IAntenna *transmitterAntenna = transmitterRadio->getAntenna();
     const INarrowbandSignal *narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(transmission->getAnalogModel());
     const IDimensionalSignal *dimensionalSignalAnalogModel = check_and_cast<const IDimensionalSignal *>(transmission->getAnalogModel());
     const simtime_t transmissionStartTime = transmission->getStartTime();
@@ -62,12 +59,9 @@ const ConstMapping *DimensionalAnalogModelBase::computeReceptionPower(const IRad
     const simtime_t receptionStartTime = arrival->getStartTime();
     const simtime_t receptionEndTime = arrival->getEndTime();
     const Coord receptionStartPosition = arrival->getStartPosition();
-    const Coord receptionEndPosition = arrival->getEndPosition();
-    const EulerAngles transmissionDirection = computeTransmissionDirection(transmission, arrival);
-    const EulerAngles transmissionAntennaDirection = transmission->getStartOrientation() - transmissionDirection;
-    const EulerAngles receptionAntennaDirection = transmissionDirection - arrival->getStartOrientation();
-    double transmitterAntennaGain = transmitterAntenna->computeGain(transmissionAntennaDirection);
-    double receiverAntennaGain = receiverAntenna->computeGain(receptionAntennaDirection);
+    // TODO: could be used for doppler shift? const Coord receptionEndPosition = arrival->getEndPosition();
+    double transmitterAntennaGain = computeAntennaGain(transmission->getTransmitterAntennaGain(), transmission->getStartPosition(), arrival->getStartPosition(), transmission->getStartOrientation());
+    double receiverAntennaGain = computeAntennaGain(receiverRadio->getAntenna()->getGain().get(), arrival->getStartPosition(), transmission->getStartPosition(), arrival->getStartOrientation());
     m distance = m(receptionStartPosition.distance(transmission->getStartPosition()));
     mps propagationSpeed = radioMedium->getPropagation()->getPropagationSpeed();
     const ConstMapping *transmissionPower = dimensionalSignalAnalogModel->getPower();
@@ -145,11 +139,26 @@ const INoise *DimensionalAnalogModelBase::computeNoise(const IListening *listeni
     return new DimensionalNoise(listening->getStartTime(), listening->getEndTime(), carrierFrequency, bandwidth, noisePower);
 }
 
-const ISNIR *DimensionalAnalogModelBase::computeSNIR(const IReception *reception, const INoise *noise) const
+const INoise *DimensionalAnalogModelBase::computeNoise(const IReception *reception, const INoise *noise) const
+{
+    auto dimensionalReception = check_and_cast<const DimensionalReception *>(reception);
+    auto dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
+    std::vector<ConstMapping *> receptionPowers;
+    receptionPowers.push_back(const_cast<ConstMapping *>(dimensionalReception->getPower()));
+    receptionPowers.push_back(const_cast<ConstMapping *>(dimensionalNoise->getPower()));
+    DimensionSet dimensions = dimensionalReception->getPower()->getDimensionSet();
+    if (!dimensions.hasDimension(Dimension::time))
+        dimensions.addDimension(Dimension::time);
+    ConstMapping *receptionMapping = MappingUtils::createMapping(Argument::MappedZero, dimensions, Mapping::STEPS);
+    ConcatConstMapping<std::plus<double> > *noisePower = new ConcatConstMapping<std::plus<double> >(receptionMapping, receptionPowers.begin(), receptionPowers.end(), false, Argument::MappedZero);
+    return new DimensionalNoise(reception->getStartTime(), reception->getEndTime(), dimensionalReception->getCarrierFrequency(), dimensionalReception->getBandwidth(), noisePower);
+}
+
+const ISnir *DimensionalAnalogModelBase::computeSNIR(const IReception *reception, const INoise *noise) const
 {
     const DimensionalReception *dimensionalReception = check_and_cast<const DimensionalReception *>(reception);
     const DimensionalNoise *dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
-    return new DimensionalSNIR(dimensionalReception, dimensionalNoise);
+    return new DimensionalSnir(dimensionalReception, dimensionalNoise);
 }
 
 } // namespace physicallayer

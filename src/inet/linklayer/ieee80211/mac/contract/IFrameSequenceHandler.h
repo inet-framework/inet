@@ -30,14 +30,14 @@ class INET_API IFrameSequenceHandler
         class INET_API ICallback
         {
             public:
-                virtual ~ICallback() {}
+                virtual ~ICallback() { }
 
-                virtual void transmitFrame(Ieee80211Frame *frame, simtime_t ifs) = 0;
+                virtual void transmitFrame(Packet *packet, simtime_t ifs) = 0;
 
-                virtual void originatorProcessRtsProtectionFailed(Ieee80211DataOrMgmtFrame *protectedFrame) = 0;
-                virtual void originatorProcessTransmittedFrame(Ieee80211Frame* transmittedFrame) = 0;
-                virtual void originatorProcessReceivedFrame(Ieee80211Frame *frame, Ieee80211Frame *lastTransmittedFrame) = 0;
-                virtual void originatorProcessFailedFrame(Ieee80211DataOrMgmtFrame* failedFrame) = 0;
+                virtual void originatorProcessRtsProtectionFailed(Packet *packet) = 0;
+                virtual void originatorProcessTransmittedFrame(Packet *packet) = 0;
+                virtual void originatorProcessReceivedFrame(Packet *packet, Packet *lastTransmittedFrame) = 0;
+                virtual void originatorProcessFailedFrame(Packet *packet) = 0;
                 virtual void frameSequenceFinished() = 0;
                 virtual void scheduleStartRxTimer(simtime_t timeout) = 0;
         };
@@ -45,14 +45,15 @@ class INET_API IFrameSequenceHandler
     public:
         virtual ~IFrameSequenceHandler() { }
 
+        virtual const IFrameSequence *getFrameSequence() const = 0;
         virtual void startFrameSequence(IFrameSequence *frameSequence, FrameSequenceContext *context, ICallback *callback) = 0;
-        virtual void processResponse(Ieee80211Frame *frame) = 0;
+        virtual void processResponse(Packet *frame) = 0;
         virtual void transmissionComplete() = 0;
         virtual bool isSequenceRunning() = 0;
         virtual void handleStartRxTimeout() = 0;
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif // ifndef __INET_IFRAMESEQUENCEHANDLER_H

@@ -53,13 +53,13 @@ CommunicationCacheBase::RadioCacheEntry::~RadioCacheEntry()
 
 CommunicationCacheBase::TransmissionCacheEntry::TransmissionCacheEntry() :
     interferenceEndTime(NaN),
-    frame(nullptr),
+    signal(nullptr),
     receptionCacheEntries(nullptr)
 {
 }
 
 CommunicationCacheBase::ReceptionCacheEntry::ReceptionCacheEntry() :
-    frame(nullptr),
+    signal(nullptr),
     arrival(nullptr),
     interval(nullptr),
     listening(nullptr),
@@ -72,7 +72,7 @@ CommunicationCacheBase::ReceptionCacheEntry::ReceptionCacheEntry() :
 }
 
 CommunicationCacheBase::ReceptionCacheEntry::ReceptionCacheEntry(ReceptionCacheEntry &&other) :
-    frame(other.frame),
+    signal(other.signal),
     arrival(other.arrival),
     interval(other.interval),
     listening(other.listening),
@@ -83,7 +83,7 @@ CommunicationCacheBase::ReceptionCacheEntry::ReceptionCacheEntry(ReceptionCacheE
     receptionDecisions(other.receptionDecisions),
     receptionResult(other.receptionResult)
 {
-    other.frame = nullptr;
+    other.signal = nullptr;
     other.arrival = nullptr;
     other.interval = nullptr;
     other.listening = nullptr;
@@ -107,7 +107,7 @@ CommunicationCacheBase::ReceptionCacheEntry &CommunicationCacheBase::ReceptionCa
         for (auto receptionDecision : receptionDecisions)
             delete receptionDecision;
         delete receptionResult;
-        frame = other.frame;
+        signal = other.signal;
         arrival = other.arrival;
         interval = other.interval;
         listening = other.listening;
@@ -117,7 +117,7 @@ CommunicationCacheBase::ReceptionCacheEntry &CommunicationCacheBase::ReceptionCa
         snir = other.snir;
         receptionDecisions = other.receptionDecisions;
         receptionResult = other.receptionResult;
-        other.frame = nullptr;
+        other.signal = nullptr;
         other.arrival = nullptr;
         other.interval  = nullptr;
         other.listening = nullptr;
@@ -181,19 +181,19 @@ void CommunicationCacheBase::removeCachedInterferenceEndTime(const ITransmission
     getTransmissionCacheEntry(transmission)->interferenceEndTime = -1;
 }
 
-const IRadioFrame *CommunicationCacheBase::getCachedFrame(const ITransmission *transmission)
+const ISignal *CommunicationCacheBase::getCachedSignal(const ITransmission *transmission)
 {
-    return getTransmissionCacheEntry(transmission)->frame;
+    return getTransmissionCacheEntry(transmission)->signal;
 }
 
-void CommunicationCacheBase::setCachedFrame(const ITransmission *transmission, const IRadioFrame *frame)
+void CommunicationCacheBase::setCachedSignal(const ITransmission *transmission, const ISignal *signal)
 {
-    getTransmissionCacheEntry(transmission)->frame = frame;
+    getTransmissionCacheEntry(transmission)->signal = signal;
 }
 
-void CommunicationCacheBase::removeCachedFrame(const ITransmission *transmission)
+void CommunicationCacheBase::removeCachedSignal(const ITransmission *transmission)
 {
-    getTransmissionCacheEntry(transmission)->frame = nullptr;
+    getTransmissionCacheEntry(transmission)->signal = nullptr;
 }
 
 const IArrival *CommunicationCacheBase::getCachedArrival(const IRadio *receiver, const ITransmission *transmission)
@@ -332,13 +332,13 @@ void CommunicationCacheBase::removeCachedNoise(const IRadio *receiver, const ITr
         cacheEntry->noise = nullptr;
 }
 
-const ISNIR *CommunicationCacheBase::getCachedSNIR(const IRadio *receiver, const ITransmission *transmission)
+const ISnir *CommunicationCacheBase::getCachedSNIR(const IRadio *receiver, const ITransmission *transmission)
 {
     ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     return cacheEntry ? cacheEntry->snir : nullptr;
 }
 
-void CommunicationCacheBase::setCachedSNIR(const IRadio *receiver, const ITransmission *transmission, const ISNIR *snir)
+void CommunicationCacheBase::setCachedSNIR(const IRadio *receiver, const ITransmission *transmission, const ISnir *snir)
 {
     ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     if (cacheEntry == nullptr)
@@ -404,26 +404,26 @@ void CommunicationCacheBase::removeCachedReceptionResult(const IRadio *receiver,
         cacheEntry->receptionResult = nullptr;
 }
 
-const IRadioFrame *CommunicationCacheBase::getCachedFrame(const IRadio *receiver, const ITransmission *transmission)
+const ISignal *CommunicationCacheBase::getCachedSignal(const IRadio *receiver, const ITransmission *transmission)
 {
     ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
-    return cacheEntry ? cacheEntry->frame : nullptr;
+    return cacheEntry ? cacheEntry->signal : nullptr;
 }
 
-void CommunicationCacheBase::setCachedFrame(const IRadio *receiver, const ITransmission *transmission, const IRadioFrame *frame)
+void CommunicationCacheBase::setCachedSignal(const IRadio *receiver, const ITransmission *transmission, const ISignal *signal)
 {
     ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     if (cacheEntry == nullptr)
         throw cRuntimeError("Cache entry not found");
     else
-        cacheEntry->frame = frame;
+        cacheEntry->signal = signal;
 }
 
-void CommunicationCacheBase::removeCachedFrame(const IRadio *receiver, const ITransmission *transmission)
+void CommunicationCacheBase::removeCachedSignal(const IRadio *receiver, const ITransmission *transmission)
 {
     ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(receiver, transmission);
     if (cacheEntry != nullptr)
-        cacheEntry->frame = nullptr;
+        cacheEntry->signal = nullptr;
 }
 
 } // namespace physicallayer

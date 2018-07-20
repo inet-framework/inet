@@ -42,6 +42,8 @@ simple ThresholdDropper
         int frameCapacity = default(-1); // if positive, then limits the sum of frames in output queues
         int byteCapacity = default(-1);  // if positive, then limits the sum of bytes in the output queues
         @display("i=block/downarrow");
+        @signal[packetDropped](type=cPacket);
+        @statistic[packetDropCongestion](title="packet drop: congestion"; source=packetDropReasonIsCongestion(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
 
     gates:
         input in[numGates];

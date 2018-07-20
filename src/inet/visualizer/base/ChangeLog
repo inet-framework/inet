@@ -1,3 +1,154 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-26  Levente Mészáros
+
+	Refactored StatisticVisualizerBase to use cStatisticBuilder.
+
+	Removed recordingMode parameter. Added statisticExpression parameter.
+
+2018-06-14  Levente Mészáros
+
+	Fixed crash caused by dynamically deleted mobility modules.
+
+2018-06-08  Gyorgy Szaszko
+
+	Added metric to RoutingTableVisualizerBase labelFormat directives.
+
+2018-06-04  Levente Mészáros
+
+	Replaced 0/0 NED parameter values with nan.
+
+2018-05-29  Levente Mészáros
+
+	Fixed bug #333.
+
+2018-04-25  Levente Mészáros
+
+	Replaced submodule based orientation figure size with parameter.
+	Changed default filter of MobilityVisualizerBase to '**.mobility'.
+	Renamed master switch in MobilityVisualizerBase.
+	Added position visualization support to MobilityVisualizerBase.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-03-19  Levente Mészáros
+
+	Replaced cArcFigure with cPieSliceFigure in MobilityCanvasVisualizer.
+
+2018-03-16  TÖRÖK Attila
+
+	Fixed OSG bug: don't draw a playground of infinite size.
+
+	This fixes the flood of "CullVisitor::apply(Geode&) detected NaN" errors
+	in at least some cases (like in showcases/visualizer/osgdemo).
+
+2018-02-20  Levente Mészáros
+
+	Replaced old PacketFilter with the new one which is based on PacketDissector.
+
+2018-02-15  TÖRÖK Attila
+
+	Take zoom level into account for line shifts and contact spacings.
+	Added overlay option to OSG link visualizers.
+
+2018-02-15  Levente Mészáros
+
+	Renamed LinkVisualizerBase parameter to packetDataFilter.
+
+2018-02-14  Levente Mészáros
+
+	Switched LinkVisualizerBase to use the new PacketFilter.
+
+2018-02-08  Levente Mészáros
+
+	Separated Canvas and OSG line managers.
+
+2018-02-07  Levente Mészáros
+
+	Implemented basic support for mobility in LinkOsgVisualizerBase.
+
+2018-01-10  Levente Mészáros
+
+	Added refreshDisplay to 802.11 visualizer to update rx power icon continuously.
+	Extended Ieee80211 visualizers to indicate signal power with the wireless network icon.
+	Fixed 802.11 power icon for OSG.
+
+2018-01-04  Levente Mészáros
+
+	Replaced @editable(false) with the simpler @descriptor(readonly).
+
+2017-12-12  Levente Mészáros
+
+	Fixed missing images for reception and transmission state.
+
+2017-12-06  Levente Mészáros
+
+	Fixed refreshDisplay in LinkCanvasVisualizerBase for dynamic hosts.
+	Links were still fading while the host was removed.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    APInfo -> ApInfo
+	    IIPv4RoutingTable -> IIpv4RoutingTable
+	    IPv4 -> Ipv4
+	    IPv4Address -> Ipv4Address
+	    IPv4InterfaceData -> Ipv4InterfaceData
+	    IPv4Route -> Ipv4Route
+	    IPv4RoutingTable -> Ipv4RoutingTable
+	    IPv6 -> Ipv6
+	    IPv6InterfaceData -> Ipv6InterfaceData
+	    Ieee80211MgmtAP -> Ieee80211MgmtAp
+	    Ieee80211MgmtSTA -> Ieee80211MgmtSta
+	    MACAddress -> MacAddress
+	    OSGScene -> OsgScene
+	    OSGUtils -> OsgUtils
+	    TCP -> Tcp
+	    TCPConnection -> TcpConnection
+
+2017-12-15  Zoltan Bojthe
+
+	Renamed deprecated info() to str().
+
+2017-11-27  Levente Mészáros
+
+	Added holdAnimationTime parameter to LinkVisualizerBase.
+
+2017-11-16  Levente Mészáros
+
+	Added activityLevel parameter to LinkVisualizerBase to control what activity
+	is displayed. Possible values are: service, peer, protocol.
+
+2017-11-16  Levente Mészáros
+
+	Moved packetSentTo*Signal and packetReceivedFrom*Signal into Simsignals.
+
+2017-11-14  Zoltan Bojthe
+
+	Replaced "int foo @enum(FooEnum)" to FooEnum foo.
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-10-09  Levente Mészáros
+
+	Added guard against visualizing paths with less than 2 elements.
+
+2017-06-21  Levente Mészáros
+
+	Simplified PacketDrop descriptor with recent omnetpp changes.
+
+2017-03-21  Levente Mészáros
+
+	Changed link and path identification to be based on chunk id instead of packet id.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

@@ -34,7 +34,7 @@ class INET_API NarrowbandTransmissionBase : public TransmissionBase, public virt
     const Hz bandwidth;
 
   public:
-    NarrowbandTransmissionBase(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const IModulation *modulation, Hz carrierFrequency, Hz bandwidth);
+    NarrowbandTransmissionBase(const IRadio *transmitter, const Packet *packet, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const IModulation *modulation, Hz carrierFrequency, Hz bandwidth);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 

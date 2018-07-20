@@ -19,15 +19,17 @@
 
 #include "inet/common/INETDefs.h"
 
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
-#include "inet/linklayer/common/MACAddress.h"
+#include "inet/linklayer/common/MacAddress.h"
 
 namespace inet {
 
 class INET_API EthTestApp : public cSimpleModule
 {
   protected:
-    MACAddress destAddr;
+    MacAddress destAddr;
 
   public:
     EthTestApp() {}
@@ -47,7 +49,7 @@ Define_Module(EthTestApp);
 void EthTestApp::initialize()
 {
     const char *addr = par("destAddr");
-    destAddr = MACAddress(addr);
+    destAddr = MacAddress(addr);
     const char *script = par("script");
     parseScript(script);
 }
@@ -56,9 +58,17 @@ void EthTestApp::createCommand(simtime_t t, int bytes)
 {
     char name[100];
     sprintf(name, "PK at %s: %i Bytes", SIMTIME_STR(t), bytes);
-    EtherFrame *packet = new EtherFrame(name);
-    packet->setByteLength(bytes);
-    packet->setDest(destAddr);
+    Packet *packet = new Packet(name);
+    const auto& hdr = makeShared<EthernetMacHeader>();
+    hdr->setDest(destAddr);
+    hdr->setChunkLength(B(14));
+    packet->insertAtFront(hdr);
+    const auto& payload = makeShared<ByteCountChunk>(B(bytes-14-4));
+    packet->insertAtBack(payload);
+    const auto& fcs = makeShared<EthernetFcs>();
+    fcs->setFcsMode(FCS_DECLARED_CORRECT);
+    packet->insertAtBack(fcs);
+    ASSERT(packet->getByteLength() == bytes);
     //TODO set packet->destAddr
     scheduleAt(t, packet);
 }

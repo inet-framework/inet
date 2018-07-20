@@ -27,12 +27,13 @@ import inet.mobility.contract.IMobility;
 module MobileHost
 {
     parameters:
-        string mobilityType = default("StationaryMobility");
         @networkNode();
-        @display("i=device/pocketpc_s");
+        @display("i=device/pocketpc");
         @statistic[coordX](title="coord X"; source="xCoord(mobilityPos(mobilityStateChanged))"; record=vector; interpolationmode=linear);
         @statistic[coordY](title="coord Y"; source="yCoord(mobilityPos(mobilityStateChanged))"; record=vector; interpolationmode=linear);
-        //@statistic[coordZ](title="coord Z";source="zCoord(mobilityPos(mobilityStateChanged))";record=vector; interpolationmode=linear);
+        @statistic[coordZ](title="coord Z"; source="zCoord(mobilityPos(mobilityStateChanged))"; record=vector; interpolationmode=linear);
     submodules:
-        mobility: <mobilityType> like IMobility;
+        mobility: <default("StationaryMobility")> like IMobility {
+            @display("p=100,100;is=s");
+        }
 }

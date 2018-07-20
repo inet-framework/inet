@@ -1,0 +1,60 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-04-25  Zoltan Bojthe
+
+	Refactored to use the new TcpSocket interface.
+
+2018-04-23  Zoltan Bojthe
+
+	Replaced TcpSocketMap with SocketMap.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-01-02  Levente Mészáros
+
+	Replaced cPacket with Packet.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    TCPSocket -> TcpSocket
+	    TCPSocketMap -> TcpSocketMap
+
+2017-12-15  Zoltan Bojthe
+
+	Removed unnecessary cPar::xmlValue() calls.
+
+2017-12-14  Levente Mészáros
+
+	Removed unnecessary markImmutable() calls.
+
+2017-11-23  Levente Mészáros
+
+	Removed all @omitGetVerb and @fieldNameSuffix properties.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-11-13  Levente Mészáros
+
+	Fixed memory leak found by Valgrind.
+
+2017-03-24  Levente Mészáros
+
+	Fixed data processing for slices.
+
+2016-08-01  Zoltan Bojthe
+
+	Added refreshDisplay().
+
+2016-06-02  Levente Mészáros
+
+	Refactored base module for HttpServer modules.
+
+2016-06-02  Levente Mészáros
+
+	Changed applications to implement the new IApp interface.
+	Renamed gates to socketIn/socketOut.

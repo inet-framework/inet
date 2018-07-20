@@ -2,9 +2,9 @@
 
 package inet.examples.rtp.unicast1;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.Router;
-import inet.node.rtp.RTPHost;
+import inet.node.rtp.RtpHost;
 import ned.DatarateChannel;
 
 
@@ -17,51 +17,51 @@ network RTPUnicast1
             datarate = 10Mbps;
         }
     submodules:
-        host1: RTPHost {
+        host1: RtpHost {
             parameters:
                 forwarding = false;
-                profileName = "inet.transportlayer.rtp.RTPAVProfile";
+                profileName = "inet.transportlayer.rtp.RtpAvProfile";
                 destinationAddress = "host4";
                 portNumber = 5004;
                 bandwidth = 8000;
-                @display("p=150,50");
+                @display("p=400,100");
         }
-        host2: RTPHost {
+        host2: RtpHost {
             parameters:
                 forwarding = false;
-                profileName = "inet.transportlayer.rtp.RTPAVProfile";
+                profileName = "inet.transportlayer.rtp.RtpAvProfile";
                 destinationAddress = "host4";
                 portNumber = 5004;
                 bandwidth = 8000;
-                @display("p=250,150");
+                @display("p=550,230");
         }
-        host3: RTPHost {
+        host3: RtpHost {
             parameters:
                 forwarding = false;
-                profileName = "inet.transportlayer.rtp.RTPAVProfile";
+                profileName = "inet.transportlayer.rtp.RtpAvProfile";
                 destinationAddress = "host4";
                 portNumber = 5004;
                 bandwidth = 8000;
-                @display("p=150,250");
+                @display("p=400,360");
         }
-        host4: RTPHost {
+        host4: RtpHost {
             parameters:
                 forwarding = false;
-                profileName = "inet.transportlayer.rtp.RTPAVProfile";
+                profileName = "inet.transportlayer.rtp.RtpAvProfile";
                 destinationAddress = "host1";
                 portNumber = 5004;
                 bandwidth = 8000;
-                @display("p=50,150");
+                @display("p=250,230");
         }
         router1: Router {
             parameters:
-                @display("p=150,150");
+                @display("p=400,230");
             gates:
                 pppg[];
 
         }
-        configurator: IPv4NetworkConfigurator {
-            @display("p=58,32");
+        configurator: Ipv4NetworkConfigurator {
+            @display("p=100,100;is=s");
         }
     connections:
         host1.pppg++ <--> ethernet <--> router1.pppg++;

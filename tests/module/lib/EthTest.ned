@@ -1,13 +1,13 @@
 
 
-import inet.linklayer.contract.IEtherMAC;
-import inet.linklayer.ethernet.EtherQoSQueue;
+import inet.linklayer.contract.IEtherMac;
+import inet.linklayer.ethernet.EtherQosQueue;
 
 
 simple EthTestApp
 {
     parameters:
-        string destAddr;    // MACAddress
+        string destAddr;    // MacAddress
         string script;      // space separated sequence of seconds:bytes pairs
     gates:
         input in;
@@ -18,7 +18,6 @@ module EthTestHost
 {
     parameters:
         bool csmacdSupport = default(true);  // by default use CSMA/CD
-        string macType = default(csmacdSupport ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
         string queueType = default(""); // DropTailQueue, DiffServQueue, or empty to use the internal queue
         *.interfaceTableModule = "";
         @networkNode();
@@ -28,12 +27,12 @@ module EthTestHost
         app: EthTestApp {
             @display("p=155,72");
         }
-        queue: EtherQoSQueue if queueType != "" {
+        queue: EtherQosQueue if queueType != "" {
             parameters:
                 dataQueueType = queueType;
                 @display("p=65,171;q=l2queue");
         }
-        mac: <macType> like IEtherMAC {
+        mac: <default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex")> like IEtherMac {
             parameters:
                 queueModule = (queueType == "" ? "" : "^.queue");
                 @display("p=155,272;q=txQueue");

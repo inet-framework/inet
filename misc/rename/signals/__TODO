@@ -1,0 +1,70 @@
+### "acceptConfirm" -> "acceptConfirm"      ### Ieee80211AgentSta
+### "backoff" -> "backoff"      ### EtherMac backoff - emit(slotNumber)
+### "badResponse" -> "badResponse"      ### Rip: dropPacket
+### "collision" -> "collision"      ### EtherMac: also doing emit(receiveStateSignal, RX_COLLISION_STATE);
+### "connState" -> "connState"      ### VoipStreamReceiver emit(1)/emit(-1)
+### "connect" -> "connect"      ### TcpAppBase: connect: emit(1), close emit(-1)
+### "datarate" -> "datarate"    ### RateControlBase: emit datarate
+### "decapPk" -> meaningless, use another or merge      ### EtherEncap
+### "delay" -> "delay"          ### VoipStreamReceiver: delay of received packet; common/queue/Delayer: generated delay (from parameter)
+### "dropConfirm" -> "dropConfirm"      ### Ieee80211AgentSta: emit @enum(Ieee80211PrimConfirmCode)
+### "dsap" -> "dsap"      ### EtherLlc
+### "duplPk" -> "duplPk"            ### common/queue/OrdinalBasedDuplicator: emit generated duplicated cMessage
+### "echoedPk" -> "echoedPk"        ### SctpClient, SctpPeer
+### "encapPk" -> meaningless, use another or merge      ### EtherEncap
+### "ipv4DataOnNonrpf" -> "ipv4DataOnNonrpf"          ### from Ipv4 to Pim
+### "ipv4DataOnRpf" -> "ipv4DataOnRpf"          ### from Ipv4 to Pim
+### "ipv4McastChange" -> "ipv4McastChange"          ### from Ipv4 to Igmpv3
+### "ipv4MdataRegister" -> "ipv4MdataRegister"          ### from Ipv4 to Pim
+### "ipv4NewMulticast" -> "ipv4NewMulticast"          ### from Ipv4 to Pim
+### "l2AssociatedNewAp" -> "l2AssociatedNewAp"          ### Ieee80211AgentSta
+### "l2AssociatedOldAp" -> "l2AssociatedOldAp"          ### Ieee80211AgentSta
+### "linkFullPromiscuous" -> "linkFullPromiscuous"      ### only subscribe to it, never found any emit
+### "linkPromiscuous" -> "linkPromiscuous"          ### only registerSignal, no emi, no subscribe
+### "lostPackets" -> "lostPackets"          ### VoipStreamReceiver: number of lost packets
+### "lostSamples" -> "lostSamples"          ### VoipStreamReceiver: number of lost samples
+### "numLost" -> "numLost"          ### PingApp: count of lost packets
+### "numOutOfOrderArrivals" -> "numOutOfOrderArrivals"          ### PingApp: count of out of order arrival packets
+### "numRoutes" -> "numRoutes"          ### Rip: number of RIP route entries. numRipRoutes???
+### "outOfOrderPk" -> "outOfOrderPk"        ### UdpBasicBurst
+### "packetHasVoice" -> "packetHasVoice"          ### VoipStreamReceiver: emit (1 | 0)
+### "pingRxSeq" -> "pingRxSeq"          ### PingApp
+### "pingTxSeq" -> "pingTxSeq"          ### PingApp
+### "pkClass" -> "pkClass"          ### diffserv
+### "queueLength" -> "queueLength"          ### number of packets in queue
+### "queueingTime" -> "queueingTime"            ### PassiveQueueBase: 
+### "rcvdAssertPk" -> "rcvdAssertPk"            ### Pim:
+### "rcvdGraftAckPk" -> "rcvdGraftAckPk"            ### Pim:
+### "rcvdGraftPk" -> "rcvdGraftPk"            ### Pim:
+### "rcvdHelloPk" -> "rcvdHelloPk"            ### Pim:
+### "rcvdJoinPrunePk" -> "rcvdJoinPrunePk"            ### Pim:
+### "rcvdPkRtpTimestamp" -> "rcvdPkRtpTimestamp"            ### Rtp
+### "rcvdRegisterPk" -> "rcvdRegisterPk"            ### Pim:
+### "rcvdRegisterStopPk" -> "rcvdRegisterStopPk"            ### Pim:
+### "rcvdResponse" -> "rcvdResponse"            ### Rip:
+### "rcvdStateRefreshPk" -> "rcvdStateRefreshPk"            ### Pim:
+### "reqStreamBytes" -> "reqStreamBytes"            ### UdpVideoStreamServer: length of the requested entire video
+### "rtt" -> "rtt"          ### PingApp: round trip time
+### "rxPausePkUnits" -> "rxPausePkUnits"            ### EtherMac
+### "rxPkOk" -> "rxPkOk"            ### EtherMac*, Ppp: when received from LL, packet is OK, before decapsulate and send to HL
+### "sentAssertPk" -> "sentAssertPk"            ### Pim
+### "sentGraftAckPk" -> "sentGraftAckPk"            ### Pim
+### "sentGraftPk" -> "sentGraftPk"            ### Pim
+### "sentHelloPk" -> "sentHelloPk"            ### Pim
+### "sentJoinPrunePk" -> "sentJoinPrunePk"            ### Pim
+### "sentRegisterPk" -> "sentRegisterPk"            ### Pim
+### "sentRegisterStopPk" -> "sentRegisterStopPk"            ### Pim
+### "sentRequest" -> "sentRequest"          ### Ieee80211AgentSta: @enum(Ieee80211PrimRequestCode); Rip: emit(pk)
+### "sentStateRefreshPk" -> "sentStateRefreshPk"            ### Pim
+### "sentUpdate" -> "sentUpdate"            ### Rip
+### "startDad" -> "startDad"            ### ipv6 ND: emit(1)
+### "tedChanged" -> "tedChanged"            ### Ldp,Rsvp, ted: 
+### "txPausePkUnits" -> "txPausePkUnits"          ### EtherMac*: long
+### "voipMosRate" -> "voipMosRate"          ### SimpleVoip
+### "voipPacketDelay" -> "voipPacketDelay"          ### SimpleVoip
+### "voipPacketLossRate" -> "voipPacketLossRate"          ### SimpleVoip
+### "voipPlayoutDelay" -> "voipPlayoutDelay"          ### SimpleVoip
+### "voipPlayoutLossRate" -> "voipPlayoutLossRate"          ### SimpleVoip
+### "voipTaildropLossRate" -> "voipTaildropLossRate"          ### SimpleVoip
+### rcvdPkRtpTimestampSignal -> rcvdPkRtpTimestampSignal          ### Rtp
+

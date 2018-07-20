@@ -1,0 +1,278 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-05-16  Levente Mészáros
+
+	Added MacAddressInd to outgoing packets.
+
+	This is required for mac address filtering the radio medium.
+
+2018-05-10  Zoltan Bojthe
+
+	Moved header serializers to the corresponding protocol folders.
+
+2018-03-14  Zoltan Bojthe
+
+	Added some AckingMacProtocolPrinter.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-02-27  Zoltan Bojthe
+
+	Added AckingMacProtocolDissector.
+
+2018-02-21  Zoltan Bojthe
+
+	Added packet protocol tag at encapsulation.
+
+2018-02-19  Zoltan Bojthe
+
+	Renamed functions to use camel case.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-11  Zoltan Bojthe
+
+	Renamed all *Nic modules to *Interface.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IMACProtocol -> IMacProtocol
+	    IdealMac -> AckingMac
+	    IdealMacHeader -> AckingMacHeader
+	    IdealRadio -> UnitDiskRadio
+	    IdealRadioMedium -> UnitDiskRadioMedium
+	    IdealWirelessNic -> AckingWirelessNic
+	    MACAddress -> MacAddress
+	    MACBase -> MacBase
+	    MACProtocolBase -> MacProtocolBase
+
+2017-12-18  Levente Mészáros
+
+	Added IMacProtocol interface to AckingMac.
+
+2017-12-18  Levente Mészáros
+
+	Changed AckingMac to work without a queue module.
+
+2017-12-15  Zoltan Bojthe
+
+	Removed unnecessary cPar::doubleValue(), cPar::longValue() calls.
+
+	Motivation: rely on cast operators instead because they can detect
+	overflows (when the value is cast to a smaller integer type that can not
+	represent it). Removed unnecessary .longvalue() calls. Replaced to
+	.intValue() in comparisons.
+
+2017-12-14  Levente Mészáros
+
+	Replaced pushHeader, pushTrailer with insertHeader, insertTrailer.
+	Removed unnecessary markImmutable() calls.
+
+2017-12-13  Levente Mészáros
+
+	Updated documentation for AckingMac.
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-07-14  Levente Mészáros
+
+	Replaced cPacket with Packet in LayeredProtocolBase and subclasses.
+
+2017-07-12  Levente Mészáros
+
+	Added linkBreak statistic.
+
+2017-07-12  Levente Mészáros
+
+	Added some missing packet drop signal emitting.
+	Replaced remaining packet drop signals with the generic one.
+	Replaced packetFromLowerDropped and packetFromUpperDropped with NF_PACKET_DROP signal.
+
+2017-07-10  Levente Mészáros
+
+	Updated packet drop signals and statistics.
+
+2017-07-11  Levente Mészáros
+
+	Fixed memory leaks when processing lower frames.
+
+2017-02-02  Levente Mészáros
+
+	Fixed to work with the new Packet class and other protocols.
+
+2017-01-19  Levente Mészáros
+
+	Renamed IdealMacFrame to IdealMacHeader.
+
+2017-03-07  Levente Mészáros
+
+	Changed to use Packet/Chunk instead of cPacket.
+
+2016-10-26  Zoltan Bojthe
+
+	Removed compatibility macros required for OMNeT++ 4.x builds.
+
+2015-07-01  Zoltan Bojthe
+
+	Added @nic property to all network interfaces.
+
+2015-06-11  Levente Mészáros
+
+	Added interfaceId to control info sent up from MACs.
+
+2015-06-11  Levente Mészáros
+
+	Added network protocol to ideal MAC frames.
+
+====== inet-3.x ======
+
+2018-03-21  ------ inet-3.6.4 released ------
+
+2017-12-22  ------ inet-3.6.3 released ------
+
+2017-10-02  ------ inet-3.6.2 released ------
+
+2017-07-06  ------ inet-3.6.1 released ------
+
+2017-06-09  ------ inet-3.6.0 released ------
+
+2017-01-13  Levente Mészáros
+
+	Added packet dropped signals.
+
+2017-02-20  ------ inet-3.5.0 released ------
+
+2016-10-20  Rudolf Hornig
+
+	Refactoring: removed compatibility macros required for OMNeT++ 4.x builds
+	+ warning fixes
+
+2016-08-09  Levente Meszaros
+
+	Radio: Removed misleading comment.
+
+2016-06-15  ------ inet-3.4.0 released ------
+
+2016-05-09  Levente Meszaros
+
+	IdealMac: Changed out-of-band ACK to be optional.
+
+2016-06-01  ------ inet-3.3.0 released ------
+
+2016-04-06  ------ inet-3.2.4 released ------
+
+2016-03-16  ------ inet-3.2.3 released ------
+
+2016-03-11  ------ inet-3.2.2 released ------
+
+2016-01-21  ------ inet-3.2.1 released ------
+
+2015-12-16  ------ inet-3.2.0 released ------
+
+2015-11-27  Zoltan Bojthe
+
+	Made the code compile with OMNeT++ 5.0b3
+
+2015-10-26  ------ inet-3.1.1 released ------
+
+2015-10-15  ------ inet-3.1.0 released ------
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-02-05  Zoltan Bojthe
+
+	Replace getParentModule calls with module parameters.
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-12-15  Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2014-09-18  Andras Varga
+
+	Moved all sources under the src/inet directory, so that all #include
+	statements begin with "inet/". The motivation is to rule out potential
+	filename clashes when multiple model frameworks are used together.
+
+	HINT: You can use the "opp_githist" command in inet/_scripts to find
+	all previous locations of the sources in this directory, and to view
+	the full history in gitk. Normal invocations of gitk can only show
+	file history back to the most recent move operation.
+
+2014-07-30  Andras Varga
+
+	Changes on the inet-3.x branch so far:
+
+	Code formatting (Zoltan Bojthe)
+	- using uncrustify, see _scripts/reformat/*
+	- common style for header guards
+
+	Namespace (Zoltan Bojthe, Zsolt Prontvai)
+	- code has been moved into the inet namespace
+
+	Init stages (Zoltan Bojthe, Andras Varga)
+	- init stages: reorganized by layers
+
+	Signals (Zoltan Bojthe)
+	- replace INotifiable and NotificationBoard by signals for
+	  publish/subscribe communication
+
+	Logging (Zoltan Bojthe, Benjamin Seregi)
+	- EV log statements revised and categorized: EV_ERROR, EV_WARN,
+	  EV_INFO, EV_DETAIL, EV_DEBUG, EV_TRACE
+
+2014-01-22  Levente Meszaros
+
+	Renamed IdealWirelessMac to IdealMac because it is independent of radios.
+
+====== inet-2.x ======
+
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-07-29  Zoltan Bojthe
+
+	MACBase and it descendants: added clearQueue() for clear outgoing queue
+	at CRASH operation
+
+	also added missing IdealWirelessMac::flushQueue() implementation
+
+2013-07-26  Zoltan Bojthe
+
+	MACBase: bugfix: isNodeUp() uses another module, should use it in stage
+	1 or later
+
+2013-04-09  Andras Varga
+
+	link layer: introduced MACBase (INotifiable and ILifecycle), all MACs
+	adapted to it
+
+2013-03-08  Zoltan Bojthe
+
+	Added the IdealWirelessMac and IdealWirelessNic modules, and the
+	IdealWirelessFrame msg. See IdealWirelessNic for details.

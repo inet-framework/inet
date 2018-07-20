@@ -18,14 +18,19 @@
 // Author: Mathieu Lacage <mathieu.lacage@sophia.inria.fr>
 //
 
-#include "inet/physicallayer/modulation/BPSKModulation.h"
-#include "inet/physicallayer/modulation/QPSKModulation.h"
-#include "inet/physicallayer/modulation/QAM16Modulation.h"
-#include "inet/physicallayer/modulation/QAM64Modulation.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211DSSSMode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211HRDSSSMode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OFDMMode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211DsssMode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211HrDsssMode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211HtMode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmMode.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211VhtMode.h"
 #include "inet/physicallayer/ieee80211/packetlevel/errormodel/Ieee80211YansErrorModel.h"
+#include "inet/physicallayer/modulation/BpskModulation.h"
+#include "inet/physicallayer/modulation/Qam1024Modulation.h"
+#include "inet/physicallayer/modulation/Qam16Modulation.h"
+#include "inet/physicallayer/modulation/Qam256Modulation.h"
+#include "inet/physicallayer/modulation/Qam64Modulation.h"
+#include "inet/physicallayer/modulation/QbpskModulation.h"
+#include "inet/physicallayer/modulation/QpskModulation.h"
 
 namespace inet {
 
@@ -139,31 +144,39 @@ double Ieee80211YansErrorModel::getFecQamBer(double snr, uint32_t nbits, Hz sign
     return pms;
 }
 
-double Ieee80211YansErrorModel::getOFDMAndERPOFDMChunkSuccessRate(const APSKModulationBase* subcarrierModulation, const ConvolutionalCode* convolutionalCode, unsigned int bitLength, bps grossBitrate, Hz bandwidth, double snr) const
+double Ieee80211YansErrorModel::getOFDMAndERPOFDMChunkSuccessRate(const ApskModulationBase* subcarrierModulation, const ConvolutionalCode* convolutionalCode, unsigned int bitLength, bps grossBitrate, Hz bandwidth, double snr) const
 {
-    if (subcarrierModulation == &BPSKModulation::singleton) {
+    if (subcarrierModulation == &BpskModulation::singleton || subcarrierModulation == &QbpskModulation::singleton) {
         if (convolutionalCode->getCodeRatePuncturingK() == 1 && convolutionalCode->getCodeRatePuncturingN() == 2)
             return getFecBpskBer(snr, bitLength, bandwidth, grossBitrate, 10, 11);
         else
             return getFecBpskBer(snr, bitLength, bandwidth, grossBitrate, 5, 8 );
     }
-    else if (subcarrierModulation == &QPSKModulation::singleton) {
+    else if (subcarrierModulation == &QpskModulation::singleton) {
         if (convolutionalCode->getCodeRatePuncturingK() == 1 && convolutionalCode->getCodeRatePuncturingN() == 2)
             return getFecQamBer(snr, bitLength, bandwidth, grossBitrate, 4, 10, 11, 0 );
         else
             return getFecQamBer(snr, bitLength, bandwidth, grossBitrate, 4, 5, 8, 31);
     }
-    else if (subcarrierModulation == &QAM16Modulation::singleton) {
+    else if (subcarrierModulation == &Qam16Modulation::singleton) {
         if (convolutionalCode->getCodeRatePuncturingK() == 1 && convolutionalCode->getCodeRatePuncturingN() == 2)
             return getFecQamBer(snr, bitLength, bandwidth, grossBitrate, 16, 10, 11, 0);
         else
             return getFecQamBer(snr, bitLength, bandwidth, grossBitrate, 16, 5, 8, 31);
     }
-    else if (subcarrierModulation == &QAM64Modulation::singleton) {
+    else if (subcarrierModulation == &Qam64Modulation::singleton) {
         if (convolutionalCode->getCodeRatePuncturingK() == 2 && convolutionalCode->getCodeRatePuncturingN() == 3)
             return getFecQamBer(snr, bitLength, bandwidth, grossBitrate, 64, 6, 1, 16);
+        else if (convolutionalCode->getCodeRatePuncturingK() == 5 && convolutionalCode->getCodeRatePuncturingN() == 6)
+            return getFecQamBer(snr, bitLength, bandwidth, grossBitrate, 64, 4, 14, 69);
         else
             return getFecQamBer(snr, bitLength, bandwidth, grossBitrate, 64, 5, 8, 31);
+    }
+    else if (subcarrierModulation == &Qam256Modulation::singleton) {
+        if (convolutionalCode->getCodeRatePuncturingK() == 5 && convolutionalCode->getCodeRatePuncturingN() == 6)
+            return getFecQamBer(snr, bitLength, bandwidth, grossBitrate, 256, 4, 14, 69);
+        else
+            return getFecQamBer(snr, bitLength, bandwidth, grossBitrate, 256, 5, 8, 31);
     }
     else
         throw cRuntimeError("Unknown modulation");
@@ -187,13 +200,38 @@ double Ieee80211YansErrorModel::getDSSSAndHrDSSSChunkSuccessRate(bps bitrate, un
 double Ieee80211YansErrorModel::getHeaderSuccessRate(const IIeee80211Mode* mode, unsigned int bitLength, double snr) const
 {
     double successRate = 0;
-    if (auto ofdmMode = dynamic_cast<const Ieee80211OFDMMode *>(mode))
+    if (auto ofdmMode = dynamic_cast<const Ieee80211OfdmMode *>(mode)) {
+        int chunkLength = bitLength - b(ofdmMode->getHeaderMode()->getServiceFieldLength()).get();
+        ASSERT(chunkLength == 24);
         successRate = getOFDMAndERPOFDMChunkSuccessRate(ofdmMode->getHeaderMode()->getModulation()->getSubcarrierModulation(),
                                                         ofdmMode->getHeaderMode()->getCode()->getConvolutionalCode(),
-                                                        bitLength,
+                                                        chunkLength,
                                                         ofdmMode->getHeaderMode()->getGrossBitrate(),
                                                         ofdmMode->getHeaderMode()->getBandwidth(),
                                                         snr);
+    }
+    else if (auto htMode = dynamic_cast<const Ieee80211HtMode *>(mode)) {
+        // int chunkLength = bitLength - b(htMode->getHeaderMode()->getHTLengthLength()).get();
+        // ASSERT(chunkLength == 24);
+        int chunkLength = bitLength;
+        successRate = getOFDMAndERPOFDMChunkSuccessRate(htMode->getHeaderMode()->getModulation()->getSubcarrierModulation(),
+                                                        htMode->getHeaderMode()->getCode()->getForwardErrorCorrection(),
+                                                        chunkLength,
+                                                        htMode->getHeaderMode()->getGrossBitrate(),
+                                                        htMode->getHeaderMode()->getBandwidth(),
+                                                        snr);
+    }
+    else if (auto vhtMode = dynamic_cast<const Ieee80211VhtMode *>(mode)) {
+        // int chunkLength = bitLength - b(vhtMode->getHeaderMode()->getHTLengthLength()).get();
+        // ASSERT(chunkLength == 24);
+        int chunkLength = bitLength;
+        successRate = getOFDMAndERPOFDMChunkSuccessRate(vhtMode->getHeaderMode()->getModulation()->getSubcarrierModulation(),
+                                                        vhtMode->getHeaderMode()->getCode()->getForwardErrorCorrection(),
+                                                        chunkLength,
+                                                        vhtMode->getHeaderMode()->getGrossBitrate(),
+                                                        vhtMode->getHeaderMode()->getBandwidth(),
+                                                        snr);
+    }
     else if (auto dsssMode = dynamic_cast<const Ieee80211DsssMode *>(mode))
         successRate = getDSSSAndHrDSSSChunkSuccessRate(dsssMode->getHeaderMode()->getNetBitrate(), bitLength, snr);
     else if (auto hrDsssMode = dynamic_cast<const Ieee80211HrDsssMode *>(mode))
@@ -209,12 +247,28 @@ double Ieee80211YansErrorModel::getHeaderSuccessRate(const IIeee80211Mode* mode,
 double Ieee80211YansErrorModel::getDataSuccessRate(const IIeee80211Mode* mode, unsigned int bitLength, double snr) const
 {
     double successRate = 0;
-    if (auto ofdmMode = dynamic_cast<const Ieee80211OFDMMode *>(mode))
+    if (auto ofdmMode = dynamic_cast<const Ieee80211OfdmMode *>(mode))
         successRate = getOFDMAndERPOFDMChunkSuccessRate(ofdmMode->getDataMode()->getModulation()->getSubcarrierModulation(),
                                                         ofdmMode->getDataMode()->getCode()->getConvolutionalCode(),
-                                                        bitLength,
+                                                        bitLength + b(ofdmMode->getHeaderMode()->getServiceFieldLength()).get(),
                                                         ofdmMode->getDataMode()->getGrossBitrate(),
                                                         ofdmMode->getHeaderMode()->getBandwidth(),
+                                                        snr);
+    else if (auto htMode = dynamic_cast<const Ieee80211HtMode *>(mode))
+        successRate = getOFDMAndERPOFDMChunkSuccessRate(htMode->getDataMode()->getModulation()->getSubcarrierModulation(),
+                                                        htMode->getDataMode()->getCode()->getForwardErrorCorrection(),
+                                                        //bitLength + b(htMode->getHeaderMode()->getHTLengthLength()).get(),
+                                                        bitLength,
+                                                        htMode->getDataMode()->getGrossBitrate(),
+                                                        htMode->getDataMode()->getBandwidth(),
+                                                        snr);
+    else if (auto vhtMode = dynamic_cast<const Ieee80211VhtMode *>(mode))
+        successRate = getOFDMAndERPOFDMChunkSuccessRate(vhtMode->getDataMode()->getModulation()->getSubcarrierModulation(),
+                                                        vhtMode->getDataMode()->getCode()->getForwardErrorCorrection(),
+                                                        //bitLength + b(vhtMode->getHeaderMode()->getHTLengthLength()).get(),
+                                                        bitLength,
+                                                        vhtMode->getDataMode()->getGrossBitrate(),
+                                                        vhtMode->getDataMode()->getBandwidth(),
                                                         snr);
     else if (auto dsssMode = dynamic_cast<const Ieee80211DsssMode *>(mode))
         successRate = getDSSSAndHrDSSSChunkSuccessRate(dsssMode->getDataMode()->getNetBitrate(), bitLength, snr);

@@ -4,7 +4,7 @@ Testing DHCP protocol
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
 
@@ -17,20 +17,20 @@ network Dhcptest
             datarate = 10Mbps;
         }
     submodules:
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 config = xml("<config><interface hosts='dhcpServer' address='192.168.1.1' netmask='255.255.255.0' /></config>");
         }
         dhcpClient: StandardHost {
             parameters:
-                numUdpApps = 1;
-                udpApp[0].typename = "DHCPClient";
+                numApps = 1;
+                app[0].typename = "DhcpClient";
                 @display("p=66,76");
         }
         dhcpServer: StandardHost {
             parameters:
-                numUdpApps = 1;
-                udpApp[0].typename = "DHCPServer";
+                numApps = 1;
+                app[0].typename = "DhcpServer";
                 @display("p=277,76");
         }
     connections:
@@ -56,11 +56,11 @@ network = Dhcptest
 sim-time-limit = 10500s
 cmdenv-express-mode = false
 
-**.dhcpServer.udpApp[0].typename = "DHCPServer"
-**.dhcpServer.udpApp[0].numReservedAddresses = 100    # ip to start to lease
-**.dhcpServer.udpApp[0].maxNumClients = 100     # number of ip to lease
-**.dhcpServer.udpApp[0].dns = ""         # dns to assign
-**.dhcpServer.udpApp[0].leaseTime = 1000s     # lease time in seconds
+**.dhcpServer.app[0].typename = "DhcpServer"
+**.dhcpServer.app[0].numReservedAddresses = 100    # ip to start to lease
+**.dhcpServer.app[0].maxNumClients = 100     # number of ip to lease
+**.dhcpServer.app[0].dns = ""         # dns to assign
+**.dhcpServer.app[0].leaseTime = 1000s     # lease time in seconds
 
 %#--------------------------------------------------------------------------------------------------------------
 %#--------------------------------------------------------------------------------------------------------------

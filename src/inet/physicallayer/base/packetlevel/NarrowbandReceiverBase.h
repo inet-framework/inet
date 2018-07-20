@@ -18,7 +18,7 @@
 #ifndef __INET_NARROWBANDRECEIVERBASE_H
 #define __INET_NARROWBANDRECEIVERBASE_H
 
-#include "inet/physicallayer/base/packetlevel/SNIRReceiverBase.h"
+#include "inet/physicallayer/base/packetlevel/SnirReceiverBase.h"
 #include "inet/physicallayer/contract/packetlevel/IModulation.h"
 #include "inet/physicallayer/contract/packetlevel/IErrorModel.h"
 
@@ -26,7 +26,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API NarrowbandReceiverBase : public SNIRReceiverBase
+class INET_API NarrowbandReceiverBase : public SnirReceiverBase
 {
   protected:
     const IModulation *modulation;
@@ -46,7 +46,7 @@ class INET_API NarrowbandReceiverBase : public SNIRReceiverBase
     virtual bool computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const override;
     virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override;
 
-    virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISNIR *snir) const override;
+    virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const override;
 
     virtual const IModulation *getModulation() const { return modulation; }
     virtual void setModulation(const IModulation *modulation) { this->modulation = modulation; }

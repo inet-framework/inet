@@ -3,9 +3,9 @@ package inet.examples.ospfv2.backbone;
 
 import inet.common.misc.ThruputMeteringChannel;
 import inet.linklayer.ethernet.EtherHub;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
-import inet.node.ospfv2.OSPFRouter;
+import inet.node.ospfv2.OspfRouter;
 
 
 network Backbone
@@ -20,97 +20,97 @@ network Backbone
             thruputDisplayFormat = "#N";
         }
     submodules:
-        R1: OSPFRouter {
+        R1: OspfRouter {
             parameters:
-                @display("p=372,340");
+                @display("p=500,460");
             gates:
                 ethg[3];
         }
         N1: EtherHub {
             parameters:
-                @display("p=368,268");
+                @display("p=500,370");
             gates:
                 ethg[2];
         }
         N2: EtherHub {
             parameters:
-                @display("p=452,384");
+                @display("p=617,520");
             gates:
                 ethg[3];
         }
-        R2: OSPFRouter {
+        R2: OspfRouter {
             parameters:
-                @display("p=368,188");
+                @display("p=500,280");
             gates:
                 ethg[2];
         }
-        R4: OSPFRouter {
+        R4: OspfRouter {
             parameters:
-                @display("p=216,432");
+                @display("p=266,580");
             gates:
                 ethg[2];
         }
-        R3: OSPFRouter {
+        R3: OspfRouter {
             parameters:
-                @display("p=532,428");
+                @display("p=734,580");
             gates:
                 ethg[2];
         }
         N4: EtherHub {
             parameters:
-                @display("p=368,100");
+                @display("p=500,190");
             gates:
                 ethg[4];
         }
         N5: EtherHub {
             parameters:
-                @display("p=612,476");
+                @display("p=850,640");
             gates:
                 ethg[3];
         }
-        R5: OSPFRouter {
+        R5: OspfRouter {
             parameters:
-                @display("p=488,284");
+                @display("p=675,415");
             gates:
                 ethg[2];
         }
-        R7: OSPFRouter {
+        R7: OspfRouter {
             parameters:
-                @display("p=256,284");
+                @display("p=325,415");
             gates:
                 ethg[2];
         }
-        R6: OSPFRouter {
+        R6: OspfRouter {
             parameters:
-                @display("p=372,476");
+                @display("p=500,640");
             gates:
                 ethg[2];
         }
         N6: EtherHub {
             parameters:
-                @display("p=136,476");
+                @display("p=150,640");
             gates:
                 ethg[3];
         }
         N3: EtherHub {
             parameters:
-                @display("p=292,384");
+                @display("p=383,520");
             gates:
                 ethg[2];
         }
         H1: StandardHost {
             parameters:
-                @display("p=372,420;i=device/laptop");
+                @display("p=500,550;i=device/laptop");
             gates:
                 ethg[1];
         }
         H2: StandardHost {
             parameters:
-                @display("p=368,40;i=device/laptop");
+                @display("p=500,100;i=device/laptop");
             gates:
                 ethg[1];
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 config = xml("<config>"+
                             "<interface hosts='R2' towards='N1 R1' address='192.168.1.1' netmask='255.255.255.0' metric='1' />"+
@@ -146,7 +146,7 @@ network Backbone
                             "</config>");
                 addStaticRoutes = false;
                 addDefaultRoutes = false;
-                @display("p=75,43");
+                @display("p=100,100;is=s");
         }
     connections:
         R1.ethg[0] <--> C <--> N1.ethg[1];

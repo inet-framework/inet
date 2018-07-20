@@ -1,3 +1,226 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-25  Zoltan Bojthe
+
+	CRC insertion calculates CRC only when crcMode is CRC_COMPUTED.
+	Calculate crc only once (CRC_COMPUTED calculated in Udp::CrcInsertion hook)
+
+2018-06-18  Zoltan Bojthe
+
+	CrcInsertion doesn't calculate crc for fragmented packets and forwarded packets.
+
+2018-06-06  Zoltan Bojthe
+
+	Fixed checks for too short totalLength, truncate padding (out of totalLength).
+
+2018-06-01  Zoltan Bojthe
+
+	Added B/b units to length constants and length fields of chunks.
+
+2018-05-10  Zoltan Bojthe
+
+	Moved header serializers to the corresponding protocol folders.
+
+2018-03-09  Zoltan Bojthe
+
+	Optimized CRC calculation.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-03-07  Zoltan Bojthe
+
+	Added UdpProtocolPrinter.
+
+2018-02-23  Levente Mészáros
+
+	Added incorrect packet support to UdpProtocolDissector.
+	Added isCorrectPacket which tests for bad CRC, bad total length and bit errors.
+
+2018-02-19  Zoltan Bojthe
+
+	Set transport protocol header in transportProtocolInd in sendUp().
+
+2018-02-16  Zoltan Bojthe
+
+	Fixed removing the PacketProtocolTag before sending up the packet.
+	Truncate padding before dissecting payload.
+	Added UdpProtocolDissector.
+
+2018-01-24  Levente Mészáros
+
+	Adapted registerProtocol calls to the new API based on OSI service primitives.
+
+2018-02-19  Zoltan Bojthe
+
+	Renamed functions to use camel case.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-12  Levente Mészáros
+
+	Replaced cMessage commands with Request and Indication.
+
+2018-01-03  Levente Mészáros
+
+	Switched from message pointer to packet pointer where available.
+
+2018-01-02  Levente Mészáros
+
+	Replaced cPacket with Packet.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    ICMP -> Icmp
+	    ICMPv6 -> Icmpv6
+	    ICMPv6Header -> Icmpv6Header
+	    IPv4 -> Ipv4
+	    IPv4ControlInfo -> Ipv4ControlInfo
+	    IPv4InterfaceData -> Ipv4InterfaceData
+	    IPv6 -> Ipv6
+	    IPv6ControlInfo -> Ipv6ControlInfo
+	    IPv6ExtensionHeaders -> Ipv6ExtensionHeaders
+	    IPv6Header -> Ipv6Header
+	    IPv6InterfaceData -> Ipv6InterfaceData
+	    IUDP -> IUdp
+	    TCPIPchecksum -> TcpIpChecksum
+	    UDP -> Udp
+	    UDPBindCommand -> UdpBindCommand
+	    UDPBlockMulticastSourcesCommand -> UdpBlockMulticastSourcesCommand
+	    UDPCommandCode -> UdpCommandCode
+	    UDPConnectCommand -> UdpConnectCommand
+	    UDPControlInfo -> UdpControlInfo
+	    UDPErrorIndication -> UdpErrorIndication
+	    UDPJoinMulticastGroupsCommand -> UdpJoinMulticastGroupsCommand
+	    UDPJoinMulticastSourcesCommand -> UdpJoinMulticastSourcesCommand
+	    UDPLeaveMulticastGroupsCommand -> UdpLeaveMulticastGroupsCommand
+	    UDPLeaveMulticastSourcesCommand -> UdpLeaveMulticastSourcesCommand
+	    UDPSetBroadcastCommand -> UdpSetBroadcastCommand
+	    UDPSetMulticastInterfaceCommand -> UdpSetMulticastInterfaceCommand
+	    UDPSetMulticastLoopCommand -> UdpSetMulticastLoopCommand
+	    UDPSetMulticastSourceFilterCommand -> UdpSetMulticastSourceFilterCommand
+	    UDPSetOptionCommand -> UdpSetOptionCommand
+	    UDPSetReuseAddressCommand -> UdpSetReuseAddressCommand
+	    UDPSetTimeToLiveCommand -> UdpSetTimeToLiveCommand
+	    UDPSetTypeOfServiceCommand -> UdpSetTypeOfServiceCommand
+	    UDPSourceFilterMode -> UdpSourceFilterMode
+	    UDPUnblockMulticastSourcesCommand -> UdpUnblockMulticastSourcesCommand
+
+2017-12-14  Levente Mészáros
+
+	Replaced pushHeader, pushTrailer with insertHeader, insertTrailer.
+	Removed unnecessary markImmutable() calls.
+
+2017-12-11  Zoltan Bojthe
+
+	Removed @customize from UdpHeader.
+
+2017-11-16  Levente Mészáros
+
+	Replaced all remaining dropPk* signals with packetDrop signal.
+	Replaced passedUpPk signal with packetSentToUpper signal.
+	Moved rcvdPkSignal and sentPkSignal into Simsignals.
+	Moved packetSentTo*Signal and packetReceivedFrom*Signal into Simsignals.
+
+2017-11-23  Levente Mészáros
+
+	Removed protocolId @override from subclasses. The protocolId was not
+	protocol agnostic, and there's a separate protocol field anyway.
+
+2017-11-14  Zoltan Bojthe
+
+	Replace "int foo @enum(FooEnum)" to FooEnum foo.
+
+2017-10-20  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-11-13  Levente Mészáros
+
+	Fixed IPV6 module path in transport layers.
+
+2017-09-27  Zoltan Bojthe
+
+	Initializing registerHook moved to later stage from STAGE_LOCAL.
+
+2017-07-05  Levente Mészáros
+
+	Adapted transport protocols to use the new L3 tools.
+
+2017-04-24  Zoltan Bojthe
+
+	Replaced ITransportPacket with TransportHeaderBase (based on FieldsChunk).
+
+2017-04-03  Zoltan Bojthe
+
+	Replaced deader position in NetworkProtocolInd tag replaced to
+	shared ptr of the network header.
+
+2017-03-16  Levente Mészáros
+
+	Properly implemented CRC handling.
+
+2017-02-21  Levente Mészáros
+
+	Added crcMode parameter.
+
+2017-02-16  Levente Mészáros
+
+	Ported UdpHeaderSerializer to new API.
+
+2017-02-06  Levente Mészáros
+
+	Change to use the new Packet API.
+
+2016-12-08  Zoltan Bojthe
+
+	Renamed UDPPacket to UdpHeader.
+
+2016-12-08  Zoltan Bojthe
+
+	Added proper pseudoheader and crc handling.
+	Renamed BitError to CrcMode.
+
+2016-06-28  Zoltan Bojthe
+
+	Fixed "icmp error answer to a fragmented udp packet" problems.
+	- fragmented udp may contain raw packet
+	- fragmented udp packet may not contain UDPPacket
+	- fragmented udp packet may contain entire UDPPacket,
+	  but the real packet does not contain udp header
+
+2016-06-01  Levente Mészáros
+
+	Updated ICMP module path according to new network node infrastructure.
+
+2016-06-01  Levente Mészáros
+
+	Added registerProtocol calls to transport protocols.
+
+2015-06-08  Levente Mészáros
+
+	Changed appIn/appOut gate vectors to simple gates.
+
+2015-06-11  Levente Mészáros
+
+	Renamed sockId to socketId to be able to implement generic interface.
+
+2016-05-02  Levente Mészáros
+
+	Added new registerProtocol() calls.
+
+2016-04-29  Levente Mészáros
+
+	Dropped obsolete IPSocket.registerProtocol() calls.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

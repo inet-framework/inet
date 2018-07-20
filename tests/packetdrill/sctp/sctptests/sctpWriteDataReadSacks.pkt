@@ -10,17 +10,17 @@
 +0     > sctp: DATA[flgs=BE, len=1016, tsn=0, sid=0, ssn=0, ppid=0] // Other flags allowed: IU
 +0.10  < sctp: SACK[flgs=0, cum_tsn=0, a_rwnd=100000, gaps=[], dups=[]]
 +0.05    write(3, ..., 1000) = 1000
-+0     > sctp: DATA[flgs=BE, len=1016, tsn=1, sid=1, ssn=0, ppid=0]
++0     > sctp: DATA[flgs=BE, len=1016, tsn=1, sid=0, ssn=1, ppid=0]
 +0       write(3, ..., 1000) = 1000
-+0     > sctp: DATA[flgs=BE, len=1016, tsn=2, sid=2, ssn=0, ppid=0]
++0     > sctp: DATA[flgs=BE, len=1016, tsn=2, sid=0, ssn=2, ppid=0]
 +0.10  < sctp: SACK[flgs=0, cum_tsn=0, a_rwnd=100000, gaps=[2 : 2], dups=[]]
 +0       write(3, ..., 1000) = 1000
-+0     > sctp: DATA[flgs=BE, len=1016, tsn=3, sid=3, ssn=0, ppid=0]
++0     > sctp: DATA[flgs=BE, len=1016, tsn=3, sid=0, ssn=3, ppid=0]
 +0.10  < sctp: SACK[flgs=0, cum_tsn=0, a_rwnd=100000, gaps=[2 : 3], dups=[]]
 +0       write(3, ..., 1000) = 1000
-+0     > sctp: DATA[flgs=BE, len=1016, tsn=4, sid=4, ssn=0, ppid=0]
++0     > sctp: DATA[flgs=BE, len=1016, tsn=4, sid=0, ssn=4, ppid=0]
 +0.10  < sctp: SACK[flgs=0, cum_tsn=0, a_rwnd=100000, gaps=[2 : 4], dups=[2 : 2]]
-+0     > sctp: DATA[flgs=BE, len=1016, tsn=1, sid=1, ssn=0, ppid=0]
++0     > sctp: DATA[flgs=BE, len=1016, tsn=1, sid=0, ssn=1, ppid=0]
 +0.10  < sctp: SACK[flgs=0, cum_tsn=4, a_rwnd=100000, gaps=[], dups=[]]
 +0.20    close(3) = 0
 +0     > sctp: SHUTDOWN[flgs=0, cum_tsn=...]

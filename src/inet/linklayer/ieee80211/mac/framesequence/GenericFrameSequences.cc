@@ -55,13 +55,19 @@ bool SequentialFs::completeStep(FrameSequenceContext *context)
     return elements[elementIndex]->completeStep(context);
 }
 
-std::string SequentialFs::getHistory()
+std::string SequentialFs::getHistory() const
 {
     ASSERT(step != -1);
-    std::string history = "(";
-    for (int i = 0; i < std::min(elementIndex + 1, (int)elements.size()); i++)
-        history += (i == 0 ? "" : " ") + elements.at(i)->getHistory();
-    history += ")";
+    std::string history;
+    for (int i = 0; i < std::min(elementIndex + 1, (int)elements.size()); i++) {
+        auto elementHistory = elements.at(i)->getHistory();
+        if (!elementHistory.empty()) {
+            if (!history.empty())
+                history += " ";
+            history += elementHistory;
+        }
+    }
+    history = "(" + history + ")";
     return history;
 }
 
@@ -100,7 +106,7 @@ bool OptionalFs::completeStep(FrameSequenceContext *context)
     return element->completeStep(context);
 }
 
-std::string OptionalFs::getHistory()
+std::string OptionalFs::getHistory() const
 {
     ASSERT(step != -1);
     return apply ? "["+ element->getHistory() + "]" : "";
@@ -158,13 +164,19 @@ bool RepeatingFs::completeStep(FrameSequenceContext *context)
     return complete;
 }
 
-std::string RepeatingFs::getHistory()
+std::string RepeatingFs::getHistory() const
 {
     ASSERT(step != -1);
-    std::string repeatHistory = "{" + histories.at(0);
-    for (int i = 1; i < (int) histories.size(); i++)
-        repeatHistory += " " + histories.at(i);
-    return repeatHistory + "}";
+    std::string history;
+    for (int i = 0; i < (int) histories.size(); i++) {
+        auto elementHistory = histories.at(i);
+        if (!elementHistory.empty()) {
+            if (!history.empty())
+                history += " ";
+            history += elementHistory;
+        }
+    }
+    return "{" + history + "}";
 }
 
 AlternativesFs::AlternativesFs(std::vector<IFrameSequence*> elements, std::function<int(AlternativesFs*, FrameSequenceContext*)> selector) :
@@ -192,9 +204,10 @@ bool AlternativesFs::completeStep(FrameSequenceContext *context)
     return elements[elementIndex]->completeStep(context);
 }
 
-std::string AlternativesFs::getHistory()
+std::string AlternativesFs::getHistory() const
 {
     ASSERT(step != -1);
+    ASSERT(0 <= elementIndex && (size_t)elementIndex < elements.size());
     return elements[elementIndex]->getHistory();
 }
 

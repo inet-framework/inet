@@ -1,12 +1,14 @@
 %description:
-Test the IPv6 fragmentation reassembly buffer (IPv6FragBuf class)
+Test the Ipv6 fragmentation reassembly buffer (Ipv6FragBuf class)
 Adapted from IPFragBuf_1.test.
 
 %includes:
 #include <vector>
-#include "inet/networklayer/ipv6/IPv6FragBuf.h"
-#include "inet/networklayer/ipv6/IPv6Datagram.h"
-#include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/networklayer/ipv6/Ipv6FragBuf.h"
+#include "inet/networklayer/ipv6/Ipv6Header.h"
+#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders_m.h"
 
 %global:
 
@@ -24,21 +26,28 @@ struct Frag
 
 typedef std::vector<Frag> FragVector;
 
-bool insertFragment(IPv6FragBuf& fragbuf, Frag& f)
+bool insertFragment(Ipv6FragBuf& fragbuf, Frag& f)
 {
-    IPv6Datagram *frag = new IPv6Datagram();
-    frag->setSrcAddress(IPv6Address(0,0,0,f.src));
-    frag->setDestAddress(IPv6Address(0,0,0,f.dest));
-    IPv6FragmentHeader *fh = new IPv6FragmentHeader();
+    Packet *pk = new Packet("Ipv6");
+    const auto& frag = makeShared<Ipv6Header>();
+    frag->setSrcAddress(Ipv6Address(0,0,0,f.src));
+    frag->setDestAddress(Ipv6Address(0,0,0,f.dest));
+    Ipv6FragmentHeader *fh = new Ipv6FragmentHeader();
     fh->setIdentification(f.id);
     fh->setFragmentOffset(f.offset);
     fh->setMoreFragments(!f.islast);
     frag->addExtensionHeader(fh);
-    frag->setByteLength(40+8+f.bytes);
+//    frag->setHeaderLength(40 + 8);
+    frag->setChunkLength(B(40 + 8));
+    frag->setPayloadLength(B(8 + f.bytes));
+    const auto& payload = makeShared<ByteCountChunk>(B(f.bytes));
+    pk->insertAtFront(payload);
+    pk->insertAtFront(frag);
+    ASSERT(pk->getByteLength() == 40+8+f.bytes);
 
-    IPv6Datagram *dgram = fragbuf.addFragment(frag, fh, 0);
-    delete dgram;
-    return dgram!=NULL;
+    Packet *pk2 = fragbuf.addFragment(pk, frag.get(), fh, 0);
+    delete pk2;
+    return pk2!=NULL;
 }
 
 %activity:
@@ -72,7 +81,7 @@ for (int j=0; j<v.size(); j++)
 EV << numdatagrams << " datagrams in " << v.size() << " fragments\n";
 
 // try assemble them, fragments in original order
-IPv6FragBuf fragbuf1;
+Ipv6FragBuf fragbuf1;
 int i, num;
 for (i=0, num=0; i<v.size(); i++)
     if (insertFragment(fragbuf1, v[i]))
@@ -80,7 +89,7 @@ for (i=0, num=0; i<v.size(); i++)
 EV << "assembled in original order: " << num << "\n";
 
 // try assemble fragments in reverse order
-IPv6FragBuf fragbuf2;
+Ipv6FragBuf fragbuf2;
 for (i=v.size()-1, num=0; i>=0; i--)
     if (insertFragment(fragbuf2, v[i]))
         num++;
@@ -95,7 +104,7 @@ for (i=0; i<100000; i++)
 }
 
 // try assemble shuffled fragments
-IPv6FragBuf fragbuf3;
+Ipv6FragBuf fragbuf3;
 for (i=0, num=0; i<v.size(); i++)
     if (insertFragment(fragbuf3, v[i]))
         num++;

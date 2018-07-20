@@ -17,7 +17,7 @@
 
 package inet.examples.internetcloud.earthcloud;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
@@ -32,9 +32,15 @@ network SimpleContinentCloud
     gates:
         inout pppg[];
     submodules:
-        router: Router;
-        client[numClients]: StandardHost;
-        server: StandardHost;
+        router: Router {
+            @display("p=250,100");
+        }
+        client[numClients]: StandardHost {
+            @display("p=400,100,col,100");
+        }
+        server: StandardHost {
+            @display("p=100,100");
+        }
     connections:
         for i=0..sizeof(pppg)-1 {
             pppg[i] <--> router.pppg++;
@@ -49,9 +55,9 @@ network EarthCloud
 {
     @display("bgi=maps/world;bgb=875,414");
     submodules:
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=75,315");
+                @display("p=100,200;is=s");
         }
 
         internet: InternetCloud {
@@ -70,7 +76,7 @@ network EarthCloud
             @display("p=446,77");
         }
         northAmerica: SimpleContinentCloud {
-            @display("p=153,90");
+            @display("p=170,120");
         }
         southAmerica: SimpleContinentCloud {
             @display("p=260,270");

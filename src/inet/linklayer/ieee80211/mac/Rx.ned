@@ -28,4 +28,5 @@ simple Rx like IRx
     parameters:
         string statisticsModule = default(""); // TODO
         @display("i=block/rx");
+        @signal[packetDropped];
 }

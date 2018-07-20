@@ -27,10 +27,10 @@ simple ThruputMeter like IHook
 {
     parameters:
         @networkNode();
-        double startTime @unit("s") = default(0s);
+        double startTime @unit(s) = default(0s);
         int batchSize = default(50);
-        double maxInterval @unit("s") = default(1s);
-        @display("i=block/timer_vs");
+        double maxInterval @unit(s) = default(1s);
+        @display("i=block/timer");
     gates:
         input in;
         output out;

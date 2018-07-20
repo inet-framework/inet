@@ -1,0 +1,73 @@
+#!/bin/bash
+# 17.08.15
+
+if [[ $1 == -h ]];
+then
+echo $'Parses all .md or .html files in current directory. Searches for images and videos NOT used in <img> tags, and moves them to /unused directory.\n'
+echo $'No input arguments. Looks for the following file types: mp4 png gif mkv m4v\n'
+else
+
+echo "####Moving unused images and videos to 'unused' directory####"
+set e
+
+rm -r temp
+rm listoffiles
+rm sources.list
+
+# create a list of source files
+ls | grep md >> sources.list
+ls | grep html >> sources.list
+
+# get images in image tags from the source files
+cat sources.list | while read line; do
+    	cat $line | grep -E 'src=".*.mp4"' -o >> listoffiles
+	cat $line | grep -E 'src=".*.png"' -o >> listoffiles
+	cat $line | grep -E 'src=".*.gif"' -o >> listoffiles
+	cat $line | grep -E 'src=".*.mkv"' -o >> listoffiles
+	cat $line | grep -E 'src=".*.m4v"' -o >> listoffiles
+	sed -e s/'src="'//g -i listoffiles
+	sed -e s/'"'//g -i listoffiles
+done
+
+# copy used files to temp dir, remove all, copy from temp dir
+mkdir temp
+xargs --arg-file=listoffiles cp -v --target-directory=temp
+
+xargs --arg-file=listoffiles rm -v
+
+mkdir unused
+numMp4Copied=$(cp *.mp4 unused -v | wc -l)
+numPngCopied=$(cp *.png unused -v | wc -l)
+numGifCopied=$(cp *.gif unused -v | wc -l)
+numMkvCopied=$(cp *.mkv unused -v | wc -l)
+numM4vCopied=$(cp *.m4v unused -v | wc -l)
+
+rm *.mp4
+rm *.png
+rm *.gif
+rm *.mkv
+rm *.m4v
+
+cp temp/*.mp4 .
+cp temp/*.png .
+cp temp/*.gif .
+cp temp/*.mkv .
+cp temp/*.m4v .
+
+numFilesCopied=$(($numMp4Copied + $numPngCopied + $numGifCopied + $numMkvCopied + $numM4vCopied))
+
+rm -r temp
+rm listoffiles
+rm sources.list
+
+echo "copied $numFilesCopied unused files"
+if [ $numFilesCopied -ne 0 ];
+then
+echo $numMp4Copied "mp4"
+echo $numPngCopied "png"
+echo $numGifCopied "gif"
+echo $numMkvCopied "mkv"
+echo $numM4vCopied "m4v"
+fi
+
+fi

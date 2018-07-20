@@ -32,7 +32,7 @@ simple SceneVisualizerBase extends VisualizerBase
     parameters:
         string physicalEnvironmentModule = default("physicalEnvironment"); // the physical environment module, refers to a top level submodule by default
         string networkNodeVisualizerModule = default("^.networkNodeVisualizer"); // the network node visualizer, refers to a sibling submodule by default
-        double axisLength @unit(m) = default(0m/0); // length of x, y, and z axes, no axis by default
+        double axisLength @unit(m) = default(nan m); // length of x, y, and z axes, no axis by default
         double animationSpeed = default(0); // always active animation speed independent of any visualization, value must be in the range (0, +inf)
         @class(SceneVisualizerBase);
 }

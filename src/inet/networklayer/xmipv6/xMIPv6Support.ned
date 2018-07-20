@@ -41,7 +41,7 @@ module xMIPv6Support like IxMIPv6Support
         *.ipv6NeighbourDiscoveryModule = default(absPath(ipv6NeighbourDiscoveryModule));
         *.bindingUpdateListModule = default(absPath(".buList"));
         *.bindingCacheModule = default(absPath(".bindingCache"));
-        @display("i=block/classifier2;bgb=163,154");
+        @display("i=block/classifier2");
     gates:
         input fromIPv6;
         output toIPv6;
@@ -49,15 +49,15 @@ module xMIPv6Support like IxMIPv6Support
         xMobileIPv6: xMIPv6 {
             isHomeAgent = isHomeAgent;
             isMobileNode = isMobileNode;
-            @display("p=104,79");
+            @display("p=250,150");
         }
         buList: BindingUpdateList {
             parameters:
-                @display("p=46,35;i=old/harddisk");
+                @display("p=100,100;i=old/harddisk");
         }
         bindingCache: BindingCache {
             parameters:
-                @display("p=46,110;i=old/harddisk");
+                @display("p=100,200;i=old/harddisk");
         }
     connections:
         fromIPv6 --> xMobileIPv6.fromIPv6;

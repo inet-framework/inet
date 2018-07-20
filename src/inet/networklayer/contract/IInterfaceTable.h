@@ -136,12 +136,6 @@ class INET_API IInterfaceTable
     virtual InterfaceEntry *getInterfaceByNodeInputGateId(int id) const = 0;
 
     /**
-     * Returns an interface given by its getNetworkLayerGateIndex().
-     * Returns nullptr if not found.
-     */
-    virtual InterfaceEntry *getInterfaceByNetworkLayerGateIndex(int index) = 0;
-
-    /**
      * Returns an interface by one of its component module (e.g. PPP).
      * Returns nullptr if not found.
      */

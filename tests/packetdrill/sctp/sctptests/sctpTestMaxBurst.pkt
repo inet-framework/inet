@@ -13,10 +13,10 @@
 +0.02  < sctp: SACK[flgs=0, cum_tsn=0, a_rwnd=99500, gaps=[], dups=[]]
 
 +0.25    write(3, ..., 3000) = 3000
-+0.00  > sctp: DATA[flgs=B, len=1016, tsn=1, sid=1, ssn=0, ppid=0]
-+0     > sctp: DATA[flgs=0, len=1016, tsn=2, sid=1, ssn=0, ppid=0]
++0.00  > sctp: DATA[flgs=B, len=1016, tsn=1, sid=0, ssn=1, ppid=0]
++0     > sctp: DATA[flgs=0, len=1016, tsn=2, sid=0, ssn=1, ppid=0]
 +0.01  < sctp: SACK[flgs=0, cum_tsn=2, a_rwnd=98000, gaps=[], dups=[]]
-+0.00  > sctp: DATA[flgs=E, len=1016, tsn=3, sid=1, ssn=0, ppid=0]
++0.00  > sctp: DATA[flgs=E, len=1016, tsn=3, sid=0, ssn=1, ppid=0]
 +0     < sctp: SACK[flgs=0, cum_tsn=3, a_rwnd=97000, gaps=[], dups=[]]
 
 +0.25    close(3) = 0

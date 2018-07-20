@@ -51,10 +51,10 @@ output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 network=IGMPTestNetwork
-**.igmpType = "TestIGMP"
+**.igmp.typename = "TestIGMP"
 
 **.scenarioManager.script = xmldoc("scenario.xml")
-**.host.networkLayer.igmp.outputFile = "host-output.txt"
+**.host.ipv4.igmp.outputFile = "host-output.txt"
 
 **.router.*.igmp.startupQueryInterval = 500s
 
@@ -62,19 +62,19 @@ network=IGMPTestNetwork
 <scenario>
 
 <!-- 1. join group, wait for timer expiry (max 10s), and leave group -->
-<join t="100" module="host.networkLayer.igmp" ifname="eth0" group="225.0.0.1"/>
-<leave t="111" module="host.networkLayer.igmp" ifname="eth0" group="225.0.0.1"/>
+<join t="100" module="host.ipv4.igmp" ifname="eth0" group="225.0.0.1"/>
+<leave t="111" module="host.ipv4.igmp" ifname="eth0" group="225.0.0.1"/>
 
 <!-- 2. join group and leave immediately -->
-<join t="200" module="host.networkLayer.igmp" ifname="eth0" group="225.0.0.2"/>
-<leave t="200" module="host.networkLayer.igmp" ifname="eth0" group="225.0.0.2"/>
+<join t="200" module="host.ipv4.igmp" ifname="eth0" group="225.0.0.2"/>
+<leave t="200" module="host.ipv4.igmp" ifname="eth0" group="225.0.0.2"/>
 
 <!-- 3. join group, wait for timer expiry, receive query, receive report, receive query, received query -->
-<join t="300" module="host.networkLayer.igmp" ifname="eth0" group="225.0.0.3"/>
-<send t="320" module="router.networkLayer.igmp" ifname="eth0" what="query" group="225.0.0.3"/>
-<join t="320" module="host2.networkLayer.igmp" ifname="eth0" group="225.0.0.3"/>
-<send t="350" module="router.networkLayer.igmp" ifname="eth0" what="query" group="225.0.0.3"/>
-<send t="350" module="router.networkLayer.igmp" ifname="eth0" what="query" group="225.0.0.3"/>
+<join t="300" module="host.ipv4.igmp" ifname="eth0" group="225.0.0.3"/>
+<send t="320" module="router.ipv4.igmp" ifname="eth0" what="query" group="225.0.0.3"/>
+<join t="320" module="host2.ipv4.igmp" ifname="eth0" group="225.0.0.3"/>
+<send t="350" module="router.ipv4.igmp" ifname="eth0" what="query" group="225.0.0.3"/>
+<send t="350" module="router.ipv4.igmp" ifname="eth0" what="query" group="225.0.0.3"/>
 
 </scenario>
 

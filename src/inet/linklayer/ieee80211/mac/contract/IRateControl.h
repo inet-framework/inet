@@ -18,15 +18,13 @@
 #ifndef __INET_IRATECONTROL_H
 #define __INET_IRATECONTROL_H
 
-#include "inet/common/INETDefs.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 namespace inet {
 namespace ieee80211 {
-
-using namespace physicallayer;
 
 /**
  * Abstract interface for auto rate control algorithms. Examples of rate
@@ -35,14 +33,14 @@ using namespace physicallayer;
 class INET_API IRateControl
 {
     public:
-        virtual ~IRateControl() {}
+        virtual ~IRateControl() { }
 
-        virtual const IIeee80211Mode *getRate() = 0;
-        virtual void frameTransmitted(const Ieee80211Frame *frame, int retryCount, bool isSuccessful, bool isGivenUp) = 0;
-        virtual void frameReceived(const Ieee80211Frame *frame, const Ieee80211ReceptionIndication *receptionIndication) = 0;
+        virtual const physicallayer::IIeee80211Mode *getRate() = 0;
+        virtual void frameTransmitted(Packet *frame, int retryCount, bool isSuccessful, bool isGivenUp) = 0;
+        virtual void frameReceived(Packet *frame) = 0;
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif // ifndef __INET_IRATECONTROL_H

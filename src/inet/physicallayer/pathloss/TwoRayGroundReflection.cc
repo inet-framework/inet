@@ -23,6 +23,8 @@ namespace inet {
 
 namespace physicallayer {
 
+using namespace inet::physicalenvironment;
+
 Define_Module(TwoRayGroundReflection);
 
 void TwoRayGroundReflection::initialize(int stage)
@@ -43,15 +45,15 @@ std::ostream& TwoRayGroundReflection::printToStream(std::ostream& stream, int le
 
 double TwoRayGroundReflection::computePathLoss(const ITransmission *transmission, const IArrival *arrival) const
 {
-    auto radioMedium = transmission->getTransmitter()->getMedium();
+    auto radioMedium = transmission->getMedium();
     auto narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(transmission->getAnalogModel());
     auto transmitterPosition = transmission->getStartPosition();
     auto recepiverPosition = arrival->getStartPosition();
     mps propagationSpeed = radioMedium->getPropagation()->getPropagationSpeed();
     Hz carrierFrequency = narrowbandSignalAnalogModel->getCarrierFrequency();
     m distance = m(recepiverPosition.distance(transmitterPosition));
-    m transmitterAltitude = m(transmitterPosition.z - physicalEnvironment->getGround()->getElevation(transmitterPosition));
-    m receiverAltitude = m(recepiverPosition.z - physicalEnvironment->getGround()->getElevation(recepiverPosition));
+    m transmitterAltitude = m(transmitterPosition.distance(physicalEnvironment->getGround()->computeGroundProjection(transmitterPosition)));
+    m receiverAltitude = m(recepiverPosition.distance(physicalEnvironment->getGround()->computeGroundProjection(recepiverPosition)));
     m waveLength = propagationSpeed / carrierFrequency;
     /**
      * At the cross over distance two ray model and free space model predict the same power

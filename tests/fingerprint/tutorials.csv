@@ -1,73 +1,73 @@
-# workingdir,                        args,                                                      simtimelimit,   fingerprint
-/tutorials/configurator/,            -f omnetpp.ini -c Step1 -r 0,                              500s,           4aa7-43a4/tplx
-/tutorials/configurator/,            -f omnetpp.ini -c Step2 -r 0,                              500s,           4aa7-43a4/tplx
-/tutorials/configurator/,            -f omnetpp.ini -c Step3 -r 0,                              500s,           4aa7-43a4/tplx
-/tutorials/configurator/,            -f omnetpp.ini -c Step4 -r 0,                              500s,           2542-e0a0/tplx   # Step4 extended
-/tutorials/configurator/,            -f omnetpp.ini -c Step5A -r 0,                             500s,           a431-a2c6/tplx
-/tutorials/configurator/,            -f omnetpp.ini -c Step5B -r 0,                             500s,           bcd2-6f2a/tplx
-/tutorials/configurator/,            -f omnetpp.ini -c Step6A -r 0,                             500s,           7e00-c823/tplx
-/tutorials/configurator/,            -f omnetpp.ini -c Step6B -r 0,                             500s,           7e00-c823/tplx
-/tutorials/configurator/,            -f omnetpp.ini -c Step7A -r 0,                             500s,           2585-ff33/tplx
-/tutorials/configurator/,            -f omnetpp.ini -c Step7B -r 0,                             500s,           2585-ff33/tplx
-/tutorials/configurator/,            -f omnetpp.ini -c Step7C -r 0,                             500s,           2585-ff33/tplx
-/tutorials/configurator/,            -f omnetpp.ini -c Step8A -r 0,                             100s,           8c51-b6ef/tplx   # Step8A extended
-/tutorials/configurator/,            -f omnetpp.ini -c Step8B -r 0,                             100s,           99f7-159c/tplx
-/tutorials/configurator/,            -f omnetpp.ini -c Step9 -r 0,                              100s,           33d0-0224/tplx
-/tutorials/configurator/,            -f omnetpp.ini -c Step10A -r 0,                            100s,           1d2e-09f1/tplx   # Step10A extended
-/tutorials/configurator/,            -f omnetpp.ini -c Step10B -r 0,                            100s,           1d2e-09f1/tplx   # Step10B extended
-/tutorials/configurator/,            -f omnetpp.ini -c Step10C -r 0,                            100s,           7bdc-5950/tplx
-/tutorials/configurator/,            -f omnetpp.ini -c Step11A -r 0,                            500s,           4aa7-43a4/tplx
-/tutorials/configurator/,            -f omnetpp.ini -c Step11B -r 0,                            500s,           1cd5-de27/tplx
-/tutorials/configurator/,            -f omnetpp.ini -c Step12 -r 0,                             100s,           0e6d-99a2/tplx
-# /tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial01 -r 0,         500s,           0000-0000/tplx   # old omnetpp.ini
-# /tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial02 -r 0,         500s,           0000-0000/tplx
-# /tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial03 -r 0,         500s,           0000-0000/tplx   # VisualizationTutorial03 extended
-# /tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial04 -r 0,         500s,           0000-0000/tplx   # VisualizationTutorial04 extended
-# /tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial05 -r 0,         500s,           0000-0000/tplx   # VisualizationTutorial05 extended
-# /tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial06 -r 0,         500s,           0000-0000/tplx   # VisualizationTutorial06 extended
-# /tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial07 -r 0,         500s,           0000-0000/tplx   # VisualizationTutorial07 extended
-# /tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial08 -r 0,         500s,           0000-0000/tplx   # VisualizationTutorial08 extended
-# /tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial09 -r 0,         500s,           0000-0000/tplx   # VisualizationTutorial09 extended
-# /tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial10 -r 0,         500s,           0000-0000/tplx   # VisualizationTutorial10 extended
-# /tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial11 -r 0,         500s,           0000-0000/tplx   # VisualizationTutorial11 extended
-# /tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial12 -r 0,         500s,           0000-0000/tplx   # VisualizationTutorial12 extended
-# /tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial13 -r 0,         500s,           0000-0000/tplx   # Osg doesn't work in command line
-# /tutorials/visualization/,           -f omnetpp.ini -c Visualization01 -r 0,                    500s,           0000-0000/tplx   # Visualization01 extended
-# /tutorials/visualization/,           -f omnetpp.ini -c Visualization02 -r 0,                    500s,           0000-0000/tplx   # Visualization02 extended
-# /tutorials/visualization/,           -f omnetpp.ini -c Visualization03 -r 0,                    500s,           0000-0000/tplx   # Visualization03 extended
-# /tutorials/visualization/,           -f omnetpp.ini -c Visualization04 -r 0,                    500s,           0000-0000/tplx   # Visualization04 extended
-# /tutorials/visualization/,           -f omnetpp.ini -c Visualization05 -r 0,                    500s,           0000-0000/tplx   # Visualization05 extended
-# /tutorials/visualization/,           -f omnetpp.ini -c Visualization06 -r 0,                    500s,           0000-0000/tplx   # Visualization06 extended
-# /tutorials/visualization/,           -f omnetpp.ini -c Visualization07 -r 0,                    500s,           0000-0000/tplx   # Visualization07 extended
-# /tutorials/visualization/,           -f omnetpp.ini -c Visualization08 -r 0,                    500s,           0000-0000/tplx   # Visualization08 extended
-# /tutorials/visualization/,           -f omnetpp.ini -c Visualization09 -r 0,                    500s,           0000-0000/tplx   # Visualization09 extended
-# /tutorials/visualization/,           -f omnetpp.ini -c Visualization10 -r 0,                    500s,           0000-0000/tplx   # Visualization10 extended
-# /tutorials/visualization/,           -f omnetpp.ini -c Visualization11 -r 0,                    500s,           0000-0000/tplx   # Visualization11 extended
-# /tutorials/visualization/,           -f omnetpp.ini -c Visualization12 -r 0,                    500s,           0000-0000/tplx   # Visualization12 extended
-# /tutorials/visualization/,           -f omnetpp.ini -c Visualization13 -r 0,                    500s,           0000-0000/tplx   # Visualization13 extended
-# /tutorials/visualization/,           -f omnetpp.ini -c Visualization14 -r 0,                    500s,           0000-0000/tplx   # Visualization14 extended
-# /tutorials/visualization/,           -f omnetpp.ini -c Visualization15 -r 0,                    500s,           0000-0000/tplx   # Visualization15 extended
-# /tutorials/visualization/,           -f omnetpp.ini -c Visualization16 -r 0,                    500s,           0000-0000/tplx   # Visualization16 extended
-# /tutorials/visualization/,           -f omnetpp.ini -c Visualization17 -r 0,                    500s,           0000-0000/tplx   # Visualization17 extended
-# /tutorials/visualization/,           -f omnetpp.ini -c Visualization18 -r 0,                    500s,           0000-0000/tplx   # Visualization18 extended
-# /tutorials/visualization/,           -f omnetpp.ini -c Visualization19 -r 0,                    500s,           0000-0000/tplx   # Visualization19 extended
-# /tutorials/visualization/,           -f omnetpp.ini -c Visualization20 -r 0,                    500s,           0000-0000/tplx   # Visualization20 extended
-# /tutorials/visualization/,           -f omnetpp.ini -c Visualization21 -r 0,                    500s,           0000-0000/tplx   # Visualization21 extended
-# /tutorials/visualization/,           -f omnetpp.ini -c Visualization22 -r 0,                    500s,           0000-0000/tplx   # Visualization22 extended
-# /tutorials/visualization/,           -f omnetpp.ini -c Visualization23 -r 0,                    500s,           0000-0000/tplx   # Visualization23 extended
-# /tutorials/visualization/,           -f omnetpp.ini -c Visualization24 -r 0,                    500s,           0000-0000/tplx   # Visualization24 extended
-# /tutorials/visualization/,           -f omnetpp.ini -c Visualization25 -r 0,                    500s,           0000-0000/tplx
-/tutorials/wireless/,                -f omnetpp.ini -c Wireless01 -r 0,                         25s,           e829-d234/tplx   # Wireless01 extended
-/tutorials/wireless/,                -f omnetpp.ini -c Wireless02 -r 0,                         25s,           e829-d234/tplx   # Wireless02 extended
-/tutorials/wireless/,                -f omnetpp.ini -c Wireless03 -r 0,                         25s,           081e-256d/tplx   # Wireless03 extended
-/tutorials/wireless/,                -f omnetpp.ini -c Wireless04 -r 0,                         25s,           5890-3768/tplx   # Wireless04 extended
-/tutorials/wireless/,                -f omnetpp.ini -c Wireless05 -r 0,                         25s,           fbbf-498e/tplx   # Wireless05 extended
-/tutorials/wireless/,                -f omnetpp.ini -c Wireless06 -r 0,                         25s,           9c9e-0242/tplx   # Wireless06 extended
-/tutorials/wireless/,                -f omnetpp.ini -c Wireless07 -r 0,                         25s,           fe2e-2e11/tplx   # Wireless07 extended
-/tutorials/wireless/,                -f omnetpp.ini -c Wireless08 -r 0,                         25s,           fe2e-2e11/tplx   # Wireless08 extended
-/tutorials/wireless/,                -f omnetpp.ini -c Wireless09 -r 0,                         25s,           6cd2-7c90/tplx   # Wireless09 extended
-/tutorials/wireless/,                -f omnetpp.ini -c Wireless10 -r 0,                         25s,           df45-b4c0/tplx   # Wireless10 extended
-/tutorials/wireless/,                -f omnetpp.ini -c Wireless11 -r 0,                         25s,           35b6-ce26/tplx   # Wireless11 extended
-/tutorials/wireless/,                -f omnetpp.ini -c Wireless12 -r 0,                         25s,           6e6a-17e2/tplx   # Wireless12 extended
-/tutorials/wireless/,                -f omnetpp.ini -c Wireless13 -r 0,                         25s,           e7dd-6043/tplx   # Wireless13 extended
-/tutorials/wireless/,                -f omnetpp.ini -c Wireless14 -r 0,                         25s,           e14d-d1c7/tplx
+# working directory, command line arguments, simulation time limit, fingerprint, expected result, tags
+/tutorials/configurator/,            -f omnetpp.ini -c Step1 -r 0,                              500s,           0000-0000/tplx, PASS,
+/tutorials/configurator/,            -f omnetpp.ini -c Step2 -r 0,                              500s,           0000-0000/tplx, PASS,
+/tutorials/configurator/,            -f omnetpp.ini -c Step3 -r 0,                              500s,           0000-0000/tplx, PASS,
+/tutorials/configurator/,            -f omnetpp.ini -c Step4 -r 0,                              500s,           656c-84e3/tplx, PASS,   # Step4 extended
+/tutorials/configurator/,            -f omnetpp.ini -c Step5A -r 0,                             500s,           8cca-650a/tplx, PASS,
+/tutorials/configurator/,            -f omnetpp.ini -c Step5B -r 0,                             500s,           e727-146c/tplx, PASS,
+/tutorials/configurator/,            -f omnetpp.ini -c Step6A -r 0,                             500s,           9853-53de/tplx, PASS,
+/tutorials/configurator/,            -f omnetpp.ini -c Step6B -r 0,                             500s,           9853-53de/tplx, PASS,
+/tutorials/configurator/,            -f omnetpp.ini -c Step7A -r 0,                             500s,           0000-0000/tplx, PASS,
+/tutorials/configurator/,            -f omnetpp.ini -c Step7B -r 0,                             500s,           0000-0000/tplx, PASS,
+/tutorials/configurator/,            -f omnetpp.ini -c Step7C -r 0,                             500s,           0000-0000/tplx, PASS,
+/tutorials/configurator/,            -f omnetpp.ini -c Step8A -r 0,                             100s,           bac0-218a/tplx, PASS,   # Step8A extended
+/tutorials/configurator/,            -f omnetpp.ini -c Step8B -r 0,                             100s,           bdbd-9af5/tplx, PASS,
+/tutorials/configurator/,            -f omnetpp.ini -c Step9 -r 0,                              100s,           16e4-a03d/tplx, PASS,
+/tutorials/configurator/,            -f omnetpp.ini -c Step10A -r 0,                            100s,           ccc1-d05c/tplx, PASS,   # Step10A extended
+/tutorials/configurator/,            -f omnetpp.ini -c Step10B -r 0,                            100s,           ccc1-d05c/tplx, PASS,   # Step10B extended
+/tutorials/configurator/,            -f omnetpp.ini -c Step10C -r 0,                            100s,           a932-b4b5/tplx, PASS,
+/tutorials/configurator/,            -f omnetpp.ini -c Step11A -r 0,                            500s,           0000-0000/tplx, PASS,
+/tutorials/configurator/,            -f omnetpp.ini -c Step11B -r 0,                            500s,           1c28-3171/tplx, PASS,
+/tutorials/configurator/,            -f omnetpp.ini -c Step12 -r 0,                             100s,           60df-5ae4/tplx, PASS,
+# /tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial01 -r 0,         500s,           0000-0000/tplx, PASS,   # old omnetpp.ini
+# /tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial02 -r 0,         500s,           0000-0000/tplx, PASS,
+# /tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial03 -r 0,         500s,           0000-0000/tplx, PASS,   # VisualizationTutorial03 extended
+# /tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial04 -r 0,         500s,           0000-0000/tplx, PASS,   # VisualizationTutorial04 extended
+# /tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial05 -r 0,         500s,           0000-0000/tplx, PASS,   # VisualizationTutorial05 extended
+# /tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial06 -r 0,         500s,           0000-0000/tplx, PASS,   # VisualizationTutorial06 extended
+# /tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial07 -r 0,         500s,           0000-0000/tplx, PASS,   # VisualizationTutorial07 extended
+# /tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial08 -r 0,         500s,           0000-0000/tplx, PASS,   # VisualizationTutorial08 extended
+# /tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial09 -r 0,         500s,           0000-0000/tplx, PASS,   # VisualizationTutorial09 extended
+# /tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial10 -r 0,         500s,           0000-0000/tplx, PASS,   # VisualizationTutorial10 extended
+# /tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial11 -r 0,         500s,           0000-0000/tplx, PASS,   # VisualizationTutorial11 extended
+# /tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial12 -r 0,         500s,           0000-0000/tplx, PASS,   # VisualizationTutorial12 extended
+# /tutorials/visualization/,           -f oldomnetpp.ini -c VisualizationTutorial13 -r 0,         500s,           0000-0000/tplx, PASS,   # Osg doesn't work in command line
+# /tutorials/visualization/,           -f omnetpp.ini -c Visualization01 -r 0,                    500s,           0000-0000/tplx, PASS,   # Visualization01 extended
+# /tutorials/visualization/,           -f omnetpp.ini -c Visualization02 -r 0,                    500s,           0000-0000/tplx, PASS,   # Visualization02 extended
+# /tutorials/visualization/,           -f omnetpp.ini -c Visualization03 -r 0,                    500s,           0000-0000/tplx, PASS,   # Visualization03 extended
+# /tutorials/visualization/,           -f omnetpp.ini -c Visualization04 -r 0,                    500s,           0000-0000/tplx, PASS,   # Visualization04 extended
+# /tutorials/visualization/,           -f omnetpp.ini -c Visualization05 -r 0,                    500s,           0000-0000/tplx, PASS,   # Visualization05 extended
+# /tutorials/visualization/,           -f omnetpp.ini -c Visualization06 -r 0,                    500s,           0000-0000/tplx, PASS,   # Visualization06 extended
+# /tutorials/visualization/,           -f omnetpp.ini -c Visualization07 -r 0,                    500s,           0000-0000/tplx, PASS,   # Visualization07 extended
+# /tutorials/visualization/,           -f omnetpp.ini -c Visualization08 -r 0,                    500s,           0000-0000/tplx, PASS,   # Visualization08 extended
+# /tutorials/visualization/,           -f omnetpp.ini -c Visualization09 -r 0,                    500s,           0000-0000/tplx, PASS,   # Visualization09 extended
+# /tutorials/visualization/,           -f omnetpp.ini -c Visualization10 -r 0,                    500s,           0000-0000/tplx, PASS,   # Visualization10 extended
+# /tutorials/visualization/,           -f omnetpp.ini -c Visualization11 -r 0,                    500s,           0000-0000/tplx, PASS,   # Visualization11 extended
+# /tutorials/visualization/,           -f omnetpp.ini -c Visualization12 -r 0,                    500s,           0000-0000/tplx, PASS,   # Visualization12 extended
+# /tutorials/visualization/,           -f omnetpp.ini -c Visualization13 -r 0,                    500s,           0000-0000/tplx, PASS,   # Visualization13 extended
+# /tutorials/visualization/,           -f omnetpp.ini -c Visualization14 -r 0,                    500s,           0000-0000/tplx, PASS,   # Visualization14 extended
+# /tutorials/visualization/,           -f omnetpp.ini -c Visualization15 -r 0,                    500s,           0000-0000/tplx, PASS,   # Visualization15 extended
+# /tutorials/visualization/,           -f omnetpp.ini -c Visualization16 -r 0,                    500s,           0000-0000/tplx, PASS,   # Visualization16 extended
+# /tutorials/visualization/,           -f omnetpp.ini -c Visualization17 -r 0,                    500s,           0000-0000/tplx, PASS,   # Visualization17 extended
+# /tutorials/visualization/,           -f omnetpp.ini -c Visualization18 -r 0,                    500s,           0000-0000/tplx, PASS,   # Visualization18 extended
+# /tutorials/visualization/,           -f omnetpp.ini -c Visualization19 -r 0,                    500s,           0000-0000/tplx, PASS,   # Visualization19 extended
+# /tutorials/visualization/,           -f omnetpp.ini -c Visualization20 -r 0,                    500s,           0000-0000/tplx, PASS,   # Visualization20 extended
+# /tutorials/visualization/,           -f omnetpp.ini -c Visualization21 -r 0,                    500s,           0000-0000/tplx, PASS,   # Visualization21 extended
+# /tutorials/visualization/,           -f omnetpp.ini -c Visualization22 -r 0,                    500s,           0000-0000/tplx, PASS,   # Visualization22 extended
+# /tutorials/visualization/,           -f omnetpp.ini -c Visualization23 -r 0,                    500s,           0000-0000/tplx, PASS,   # Visualization23 extended
+# /tutorials/visualization/,           -f omnetpp.ini -c Visualization24 -r 0,                    500s,           0000-0000/tplx, PASS,   # Visualization24 extended
+# /tutorials/visualization/,           -f omnetpp.ini -c Visualization25 -r 0,                    500s,           0000-0000/tplx, PASS,
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless01 -r 0,                         25s,           515f-288f/tplx, PASS, wireless adhoc # Wireless01 extended
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless02 -r 0,                         25s,           515f-288f/tplx, PASS, wireless adhoc # Wireless02 extended
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless03 -r 0,                         25s,           2b1d-d827/tplx, PASS, wireless adhoc # Wireless03 extended
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless04 -r 0,                         25s,           7ab3-4371/tplx, PASS, wireless adhoc # Wireless04 extended
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless05 -r 0,                         25s,           921a-b820/tplx, PASS, wireless adhoc # Wireless05 extended
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless06 -r 0,                         25s,           207e-8ee5/tplx, PASS, wireless adhoc # Wireless06 extended
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless07 -r 0,                         25s,           faf1-27c3/tplx, PASS, wireless adhoc # Wireless07 extended
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless08 -r 0,                         25s,           faf1-27c3/tplx, PASS, wireless adhoc # Wireless08 extended
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless09 -r 0,                         25s,           c094-deed/tplx, PASS, wireless adhoc # Wireless09 extended
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless10 -r 0,                         25s,           561e-7ca4/tplx, PASS, wireless adhoc # Wireless10 extended
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless11 -r 0,                         25s,           dac9-eff9/tplx, PASS, wireless adhoc # Wireless11 extended
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless12 -r 0,                         25s,           1ef8-f094/tplx, PASS, wireless adhoc # Wireless12 extended
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless13 -r 0,                         25s,           60e2-ac4a/tplx, PASS, wireless adhoc # Wireless13 extended
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless14 -r 0,                         25s,           3931-83d3/tplx, PASS, wireless adhoc

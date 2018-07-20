@@ -22,7 +22,7 @@
 
 package inet.examples.inet.flatnet;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
@@ -42,21 +42,19 @@ network FlatNet
             datarate = 10Mbps;
         }
     submodules:
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 config = xml("<config><interface hosts='*' address='192.168.x.x' netmask='255.255.x.x'/></config>");
+                @display("p=100,100;is=s");
         }
-        rte[57]: Router {
-            parameters:
-                @display("is=vs");
-        }
+        rte[57]: Router;
         cli[2]: StandardHost {
             parameters:
-                @display("i=device/laptop_s");
+                @display("i=device/laptop");
         }
         srv: StandardHost {
             parameters:
-                @display("i=device/server_s");
+                @display("i=device/server");
         }
     connections:
         cli[0].pppg++ <--> ethernetline <--> rte[50].pppg++;

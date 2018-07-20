@@ -1,0 +1,23 @@
+#!/bin/bash
+#17.08.14
+
+# This script creates a video from the images left in the /frames directory by the qtenv internal video recording tool.
+# The video will be optimized for web release. Specify output-file as argument.
+
+if [[ $1 == -h || $# == 0 ]];
+then
+echo "This script creates a video from the images left in the /frames directory by the qtenv internal video recording tool.
+The video will be optimized for web release. Specify output-file as argument."
+echo ""
+echo "Arguments: output-file"
+else
+
+OUTPUT_FILE=$1
+
+CONFIG_NAME=$(ls frames/ | head -1 | sed 's/#.*png//')
+
+echo "Config name: " $CONFIG_NAME
+
+ffmpeg -r 30 -f image2 -i "frames/$CONFIG_NAME#0_%04d.png" -vcodec libx264 -crf 23 -pix_fmt yuv420p -preset veryslow -profile:v baseline "$OUTPUT_FILE"
+
+fi

@@ -48,8 +48,11 @@ class INET_API MovingMobilityBase : public MobilityBase
      * The true value disables sending self messages. */
     bool stationary;
 
-    /** @brief The last speed that was reported at lastUpdate. */
-    Coord lastSpeed;
+    /** @brief The last velocity that was reported at lastUpdate. */
+    Coord lastVelocity;
+
+    /** @brief The last angular velocity that was reported at lastUpdate. */
+    EulerAngles lastAngularVelocity;
 
     /** @brief The simulation time when the mobility state was last updated. */
     simtime_t lastUpdate;
@@ -58,6 +61,8 @@ class INET_API MovingMobilityBase : public MobilityBase
      *
      * The -1 value turns off sending a self message for the next mobility state change. */
     simtime_t nextChange;
+
+    bool faceForward;
 
   protected:
     MovingMobilityBase();
@@ -78,20 +83,21 @@ class INET_API MovingMobilityBase : public MobilityBase
 
     /** @brief Moves according to the mobility model to the current simulation time.
      *
-     * Subclasses must override and update lastPosition, lastSpeed, lastUpdate, nextChange
+     * Subclasses must override and update lastPosition, lastVelocity, lastUpdate, nextChange
      * and other state according to the mobility model.
      */
     virtual void move() = 0;
 
+    virtual void orient();
+
   public:
-    /** @brief Returns the current position at the current simulation time. */
     virtual Coord getCurrentPosition() override;
+    virtual Coord getCurrentVelocity() override;
+    virtual Coord getCurrentAcceleration() override { throw cRuntimeError("Invalid operation"); }
 
-    /** @brief Returns the current speed at the current simulation time. */
-    virtual Coord getCurrentSpeed() override;
-
-    /** @brief Returns the current angular position at the current simulation time. */
     virtual EulerAngles getCurrentAngularPosition() override;
+    virtual EulerAngles getCurrentAngularVelocity() override;
+    virtual EulerAngles getCurrentAngularAcceleration() override { throw cRuntimeError("Invalid operation"); }
 };
 
 } // namespace inet

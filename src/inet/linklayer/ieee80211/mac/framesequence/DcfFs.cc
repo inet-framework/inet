@@ -61,7 +61,7 @@ int DcfFs::selectSelfCtsOrRtsCts(AlternativesFs *frameSequence, FrameSequenceCon
 
 bool DcfFs::hasMoreFragments(RepeatingFs *frameSequence, FrameSequenceContext *context)
 {
-    return context->getInProgressFrames()->hasInProgressFrames() && context->getInProgressFrames()->getFrameToTransmit()->getMoreFragments();
+    return context->getInProgressFrames()->hasInProgressFrames() && context->getInProgressFrames()->getFrameToTransmit()->peekAtFront<Ieee80211MacHeader>()->getMoreFragments();
 }
 
 bool DcfFs::isSelfCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *context)
@@ -72,7 +72,7 @@ bool DcfFs::isSelfCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *con
 bool DcfFs::isRtsCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *context)
 {
     auto protectedFrame = context->getInProgressFrames()->getFrameToTransmit();
-    return context->getRtsPolicy()->isRtsNeeded(protectedFrame);
+    return context->getRtsPolicy()->isRtsNeeded(protectedFrame, protectedFrame->peekAtFront<Ieee80211MacHeader>());
 }
 
 bool DcfFs::isCtsOrRtsCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *context)
@@ -86,7 +86,7 @@ bool DcfFs::isBroadcastManagementOrGroupDataSequenceNeeded(AlternativesFs *frame
 {
     if (context->getInProgressFrames()->hasInProgressFrames()) {
         auto frameToTransmit = context->getInProgressFrames()->getFrameToTransmit();
-        return frameToTransmit->getReceiverAddress().isMulticast();
+        return frameToTransmit->peekAtFront<Ieee80211MacHeader>()->getReceiverAddress().isMulticast();
     }
     else
         return false;
@@ -95,12 +95,12 @@ bool DcfFs::isBroadcastManagementOrGroupDataSequenceNeeded(AlternativesFs *frame
 int DcfFs::selectMulticastDataOrMgmt(AlternativesFs* frameSequence, FrameSequenceContext* context)
 {
     auto frameToTransmit = context->getInProgressFrames()->getFrameToTransmit();
-    return dynamic_cast<Ieee80211ManagementFrame*>(frameToTransmit) ? 0 : 1;
+    return dynamicPtrCast<const Ieee80211MgmtHeader>(frameToTransmit->peekAtFront<Ieee80211MacHeader>()) ? 0 : 1;
 }
 
 bool DcfFs::isFragFrameSequenceNeeded(AlternativesFs *frameSequence, FrameSequenceContext *context)
 {
-    return context->getInProgressFrames()->hasInProgressFrames() && dynamic_cast<Ieee80211DataOrMgmtFrame*>(context->getInProgressFrames()->getFrameToTransmit());
+    return context->getInProgressFrames()->hasInProgressFrames() && dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(context->getInProgressFrames()->getFrameToTransmit()->peekAtFront<Ieee80211MacHeader>());
 }
 
 } // namespace ieee80211

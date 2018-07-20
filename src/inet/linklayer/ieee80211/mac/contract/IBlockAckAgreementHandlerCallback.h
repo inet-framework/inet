@@ -31,7 +31,7 @@ class INET_API IBlockAckAgreementHandlerCallback
         virtual void scheduleInactivityTimer(simtime_t timeout) = 0;
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif // ifndef __INET_IBLOCKACKAGREEMENTHANDLERCALLBACK_H

@@ -20,15 +20,15 @@
 #include "inet/common/INETUtils.h"
 
 #ifdef WITH_IPv4
-#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-#include "inet/networklayer/ipv6/IPv6Datagram.h"
+#include "inet/networklayer/ipv6/Ipv6Header.h"
 #endif // ifdef WITH_IPv6
 
 #include "inet/networklayer/diffserv/DiffservUtil.h"
-#include "inet/networklayer/diffserv/DSCP_m.h"
+#include "inet/networklayer/diffserv/Dscp_m.h"
 
 namespace inet {
 
@@ -39,14 +39,6 @@ using namespace utils;
 // cached enums
 cEnum *dscpEnum = nullptr;
 cEnum *protocolEnum = nullptr;
-
-const char *getRequiredAttribute(cXMLElement *element, const char *attrName)
-{
-    const char *attrValue = element->getAttribute(attrName);
-    if (!attrValue)
-        throw cRuntimeError("missing attribute '%s' from <%s> element", attrName, element->getTagName());
-    return attrValue;
-}
 
 double parseInformationRate(const char *attrValue, const char *attrName, IInterfaceTable *ift, cSimpleModule& owner, int defaultValue)
 {
@@ -107,7 +99,7 @@ int parseProtocol(const char *attrValue, const char *attrName)
     if (isdigit(*attrValue))
         return parseIntAttribute(attrValue, attrName);
     if (!protocolEnum)
-        protocolEnum = cEnum::get("inet::IPProtocolId");
+        protocolEnum = cEnum::get("inet::IpProtocolId");
     char name[20];
     strcpy(name, "IP_PROT_");
     char *dest;
@@ -129,7 +121,7 @@ int parseDSCP(const char *attrValue, const char *attrName)
         return dscp;
     }
     if (!dscpEnum)
-        dscpEnum = cEnum::get("inet::DSCP");
+        dscpEnum = cEnum::get("inet::Dscp");
     char name[20];
     strcpy(name, "DSCP_");
     const char *src;
@@ -162,7 +154,7 @@ void parseDSCPs(const char *attrValue, const char *attrName, std::vector<int>& r
 std::string dscpToString(int dscp)
 {
     if (!dscpEnum)
-        dscpEnum = cEnum::get("inet::DSCP");
+        dscpEnum = cEnum::get("inet::Dscp");
     const char *name = dscpEnum->getStringFor(dscp);
     if (name) {
         if (!strncmp(name, "DSCP_", 5))
@@ -200,11 +192,11 @@ cPacket *findIPDatagramInPacket(cPacket *packet)
 {
     for ( ; packet; packet = packet->getEncapsulatedPacket()) {
 #ifdef WITH_IPv4
-        if (dynamic_cast<IPv4Datagram *>(packet))
+        if (dynamic_cast<Ipv4Header *>(packet))
             return packet;
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-        if (dynamic_cast<IPv6Datagram *>(packet))
+        if (dynamic_cast<Ipv6Header *>(packet))
             return packet;
 #endif // ifdef WITH_IPv6
     }
@@ -220,7 +212,7 @@ class ColorAttribute : public cObject
   public:
     ColorAttribute(int color) : color(color) {}
     virtual const char *getName() const override { return "dscolor"; }
-    virtual std::string info() const override { return colorToString(color); }
+    virtual std::string str() const override { return colorToString(color); }
     virtual cObject *dup() const override { return new ColorAttribute(color); }
 };
 

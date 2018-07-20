@@ -17,9 +17,8 @@
 
 package inet.examples.dhcp;
 
-import inet.common.lifecycle.LifecycleController;
 import inet.common.scenario.ScenarioManager;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth10M;
 import inet.node.inet.StandardHost;
 
@@ -28,21 +27,18 @@ network DHCPShutdownReboot
 {
     submodules:
         scenarioManager: ScenarioManager {
-            @display("p=73,59");
+            @display("p=100,200;is=s");
         }
-        lifecycleController: LifecycleController {
-            @display("p=73,185");
-        }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0'/></config>");
-                @display("p=73,116");
+                @display("p=100,100;is=s");
         }
         client: StandardHost {
-            @display("p=205,124");
+            @display("p=250,150");
         }
         server: StandardHost {
-            @display("p=553,124");
+            @display("p=450,150");
         }
     connections:
         client.ethg++ <--> Eth10M <--> server.ethg++;

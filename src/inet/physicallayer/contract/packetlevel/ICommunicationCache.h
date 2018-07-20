@@ -22,11 +22,11 @@
 #include "inet/physicallayer/contract/packetlevel/IArrival.h"
 #include "inet/physicallayer/contract/packetlevel/IBackgroundNoise.h"
 #include "inet/physicallayer/contract/packetlevel/IInterference.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioFrame.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioFrame.h"
+#include "inet/physicallayer/contract/packetlevel/ISignal.h"
+#include "inet/physicallayer/contract/packetlevel/ISignal.h"
 #include "inet/physicallayer/contract/packetlevel/IReceptionDecision.h"
 #include "inet/physicallayer/contract/packetlevel/IReceptionResult.h"
-#include "inet/physicallayer/contract/packetlevel/ISNIR.h"
+#include "inet/physicallayer/contract/packetlevel/ISnir.h"
 
 namespace inet {
 
@@ -60,9 +60,9 @@ class INET_API ICommunicationCache : public IPrintableObject
     virtual void setCachedInterferenceEndTime(const ITransmission *transmission, const simtime_t interferenceEndTime) = 0;
     virtual void removeCachedInterferenceEndTime(const ITransmission *transmission) = 0;
 
-    virtual const IRadioFrame *getCachedFrame(const ITransmission *transmission) = 0;
-    virtual void setCachedFrame(const ITransmission *transmission, const IRadioFrame *radioFrame) = 0;
-    virtual void removeCachedFrame(const ITransmission *transmission) = 0;
+    virtual const ISignal *getCachedSignal(const ITransmission *transmission) = 0;
+    virtual void setCachedSignal(const ITransmission *transmission, const ISignal *signal) = 0;
+    virtual void removeCachedSignal(const ITransmission *transmission) = 0;
     //@}
 
     /** @name Reception Cache */
@@ -91,8 +91,8 @@ class INET_API ICommunicationCache : public IPrintableObject
     virtual void setCachedNoise(const IRadio *receiver, const ITransmission *transmission, const INoise *noise) = 0;
     virtual void removeCachedNoise(const IRadio *receiver, const ITransmission *transmission) = 0;
 
-    virtual const ISNIR *getCachedSNIR(const IRadio *receiver, const ITransmission *transmission) = 0;
-    virtual void setCachedSNIR(const IRadio *receiver, const ITransmission *transmission, const ISNIR *snir) = 0;
+    virtual const ISnir *getCachedSNIR(const IRadio *receiver, const ITransmission *transmission) = 0;
+    virtual void setCachedSNIR(const IRadio *receiver, const ITransmission *transmission, const ISnir *snir) = 0;
     virtual void removeCachedSNIR(const IRadio *receiver, const ITransmission *transmission) = 0;
 
     virtual const IReceptionDecision *getCachedReceptionDecision(const IRadio *receiver, const ITransmission *transmission, IRadioSignal::SignalPart part) = 0;
@@ -103,9 +103,9 @@ class INET_API ICommunicationCache : public IPrintableObject
     virtual void setCachedReceptionResult(const IRadio *receiver, const ITransmission *transmission, const IReceptionResult *receptionResult) = 0;
     virtual void removeCachedReceptionResult(const IRadio *receiver, const ITransmission *transmission) = 0;
 
-    virtual const IRadioFrame *getCachedFrame(const IRadio *receiver, const ITransmission *transmission) = 0;
-    virtual void setCachedFrame(const IRadio *receiver, const ITransmission *transmission, const IRadioFrame *radioFrame) = 0;
-    virtual void removeCachedFrame(const IRadio *receiver, const ITransmission *transmission) = 0;
+    virtual const ISignal *getCachedSignal(const IRadio *receiver, const ITransmission *transmission) = 0;
+    virtual void setCachedSignal(const IRadio *receiver, const ITransmission *transmission, const ISignal *signal) = 0;
+    virtual void removeCachedSignal(const IRadio *receiver, const ITransmission *transmission) = 0;
     //@}
 };
 

@@ -1,3 +1,287 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-01  Zoltan Bojthe
+
+	Added B/b units to length constants and length fields of chunks.
+
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-05-23  Zoltan Bojthe
+
+	Fixed for received control/pause frames.
+
+2018-05-17  Zoltan Bojthe
+
+	Fixed pause frame transmit statistical and emitting code.
+
+2018-05-11  Zoltan Bojthe
+
+	Added 200Gbit and 400Gbit ethernet.
+
+2018-05-10  Zoltan Bojthe
+
+	Moved header serializers to the corresponding protocol folders.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-03-08  Zoltan Bojthe
+
+	Added EthernetProtocolPrinter.
+
+2018-02-26  Zoltan Bojthe
+
+	Added EthernetProtocolDissector.
+
+2018-02-21  Zoltan Bojthe
+
+	Fixed length parameter usage, it's required for popTrailer on byte representation.
+	Changed clearing tags when sending a packet to leave the PacketProtocolTag intact.
+	Added missing PacketProtocolTag.
+
+2018-02-21  Levente Mészáros
+
+	Fixed missing PacketProtocolTag for raw packets.
+
+2018-02-19  Zoltan Bojthe
+
+	Removed PacketProtocolTag before sending up the packet.
+	Renamed functions to use camel case.
+
+2018-02-09  Zoltan Bojthe
+
+	Renamed transmitState/receiveState to transmissionStateChanged/receptionStateChanged.
+	Renamed backoffSignal to backoffSlotsGeneratedSignal.
+	Removed txPk (~packetSentToLower), rxPkFromHl (~packetReceivedFromUpper).
+
+2018-02-08  Zoltan Bojthe
+
+	Added missing emit packetDropped signal.
+	Fixed packet padding, it was incompatible with chunks in EtherMacFullDuplex.
+	Fixed txPausePkUnitsSignal and numPauseFramesSent calculation.
+
+2018-02-07  Zoltan Bojthe
+
+	Changed backoffSignal to emit slotNumber (instead of constant 1).
+	Added missing packetDropped signal.
+
+2018-02-05  Zoltan Bojthe
+
+	Renamed signal pk to packetReceived.
+
+2018-01-24  Levente Mészáros
+
+	Adapted registerProtocol calls to the new API based on OSI service primitives.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-09  Zoltan Bojthe
+
+	Renamed @statistics to use camel case.
+
+2018-01-05  Zoltan Bojthe
+
+	Renamed NF_* signals to use camel case.
+	Renamed signal variables to *Signal.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    EtherAppCli -> EtherAppClient
+	    EtherAppSrv -> EtherAppServer
+	    EtherFilledIFG -> EtherFilledIfg
+	    EtherFrameWithLLC -> EtherFrameWithLlc
+	    EtherLLC -> EtherLlc
+	    EtherMAC -> EtherMac
+	    EtherMACBase -> EtherMacBase
+	    EtherMACFullDuplex -> EtherMacFullDuplex
+	    EtherQoSQueue -> EtherQosQueue
+	    IEtherMAC -> IEtherMac
+	    IMACRelayUnit -> IMacRelayUnit
+	    IPv4 -> Ipv4
+	    MACAddress -> MacAddress
+	    MACBase -> MacBase
+	    MACReceiveState -> MacReceiveState
+	    MACRelayUnit -> MacRelayUnit
+	    MACTransmitState -> MacTransmitState
+	    SAPCode -> SapCode
+
+2017-12-15  Zoltan Bojthe
+
+	Eliminated unused variable compiler warnings.
+
+2017-12-15  Zoltan Bojthe
+
+	Removed unnecessary cPar::doubleValue(), cPar::stringValue(), cPar::boolValue(), cPar::longValue() calls.
+
+	Motivation: rely on cast operators instead because they can detect
+	overflows (when the value is cast to a smaller integer type that can not
+	represent it). Removed unnecessary .longvalue() calls. Replaced to
+	.intValue() in comparisons.
+
+2017-11-23  Levente Mészáros
+
+	Fixed typos in result filter names in @statistics.
+
+2017-11-16  Levente Mészáros
+
+	Replaced all remaining dropPk* signals with packetDrop signal.
+	Replaced passedUpPk signal with packetSentToUpper signal.
+	Moved packetSentTo*Signal and packetReceivedFrom*Signal into Simsignals.
+
+2017-11-14  Zoltan Bojthe
+
+	replace "int foo @enum(FooEnum)" to FooEnum foo;
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-15  Zoltan Bojthe
+
+	Moved EthernetFcsMode to common.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-10-11  Zoltan Bojthe
+
+	Moved ethertype constants to new EtherType.msg file,
+	dropped some unused ethernet related structs
+
+2017-09-26  Zoltan Bojthe
+
+	Added missing PacketProtocolTag.
+
+2017-09-22  Zoltan Bojthe
+
+	Fixed fcs calculations.
+
+2017-09-13  Levente Mészáros
+
+	Correctly implemented EthernetPhyHeaderSerializer.
+
+2017-09-13  Levente Mészáros
+
+	Fixed deserializing non-representable control frames.
+
+2017-09-13  Levente Mészáros
+
+	Added clearTags() and removePoppedChunks() calls when reusing packets in relay units.
+	Replaced EtherPhyFrame with EthernetPhyHeader in MACs.
+	Replaced EtherPhyFrame with EthernetPhyHeader.
+	Renamed EtherTraffic to EthernetSignal and extracted jam processing.
+	Merged remaining enums from EtherTypeTag.msg into EtherFrame.msg.
+	Renamed protocol to ieee8022 and protocol group to ieee8022protocol.
+
+2017-09-12  Zoltan Bojthe
+
+	Switched to using new ethernet header structures.
+
+2017-09-12  Zoltan Bojthe
+
+	EtherEncap extends Ieee8022Llc module.
+	Normalized EtherEncap handleMessage.
+	Renamed ethernet, llc and snap headers.
+
+2017-09-11  Zoltan Bojthe
+
+	Switched to new Ethernet header structures.
+
+2017-08-09  Zoltan Bojthe
+
+	Fcs verification.
+
+2017-07-12  Levente Mészáros
+
+	Renamed NF_PACKET_DROP to packetDrop(Signal).
+
+2017-07-10  Levente Mészáros
+
+	Updated packet drop signals and statistics.
+
+2017-07-12  Levente Mészáros
+
+	Replaced remaining packet drop signals with the generic one.
+
+2017-04-12  Levente Mészáros
+
+	Removed discouraged setChunkLength calls from deserializers.
+
+2017-04-11  Levente Mészáros
+
+	Removed all chunkLength = -1 or chunkLength = 0 fields, they are useless.
+
+2017-03-30  Zoltan Bojthe
+
+	Added verifyCrcAndLength(); remove padding in decapsulate() when the
+	header contains payload length.
+
+	Split decapsulate() into verifyCrcAndLength() and decapsulate().
+	Added EtherFrameWithPayloadLength base header to msg file.
+
+2017-03-30  Zoltan Bojthe
+
+	Added missing setPayloadLength().
+
+2017-02-21  Zoltan Bojthe
+
+	Removed obsolete RawPacket.
+	Added static EtherEncap::decapsulate() function.
+
+2017-02-21  Levente Mészáros
+
+	Moved headerserializers one level up.
+
+2017-02-21  Levente Mészáros
+
+	Added fcsMode parameter.
+	Added sendRawBytes parameter to allow sending out serialized packets.
+	Added missing payloadLength field.
+	Added missing PacketProtocolTag after decapsulating from EtherPhyFrame.
+
+2017-02-06  Levente Mészáros
+
+	Added missing PacketProtocolTag after decapsulation.
+
+2017-01-31  Zoltan Bojthe
+
+	Added/used EtherEncap::addPaddingAndFcs().
+
+2017-01-25  Zoltan Bojthe
+
+	Moved phy layer frames to EtherPhyFrame.msg.
+
+2016-12-09  Zoltan Bojthe
+
+	Added more ethertype values.
+
+2016-12-08  Zoltan Bojthe
+
+	Fixed EtherPauseFrame.
+
+2016-10-26  Zoltan Bojthe
+
+	Removed compatibility macros required for OMNeT++ 4.x builds.
+
+2016-06-27  Zoltan Bojthe
+
+	InterfaceId optimization: get intarfaceId in initialize
+
+2015-07-01  Zoltan Bojthe
+
+	Added @nic property to all network interfaces.
+
+2015-06-11  Levente Mészáros
+
+	Added interfaceId to control info sent up from MACs.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

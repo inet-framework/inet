@@ -15,12 +15,16 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
+
 namespace inet;
 
 //
 // Generic application packet
 //
-packet ApplicationPacket
+// TODO: rename to ApplicationHeader and remove ByteCountChunk from ApplicationHeaderSerializer
+class ApplicationPacket extends FieldsChunk
 {
-    long sequenceNumber;
+    uint32_t sequenceNumber;
 }

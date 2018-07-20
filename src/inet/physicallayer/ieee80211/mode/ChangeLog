@@ -1,3 +1,118 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-05-28  Levente Mészáros
+
+	Added numSpatialStreams parameter for mode lookup in Ieee80211ModeSet.
+
+2018-04-26  Levente Mészáros
+
+	Moved default bitrate rante (0.1 Mbps) into mode lookup in Ieee80211ModeSet.
+	Extended finding a mode in a modeset with new variants taking a bitrate range.
+	Added getSpacing function to bands.
+	Added optional bandwidth parameter to finding mode in modeset.
+	Added getBandwidth function to data modes.
+
+2018-04-26  Alfonso Ariza
+
+	Added new 5GHz bands for 20, 40, 80, and 160 Mhz bandwidth.
+	Added 802.11/ac modes using VHT PHY.
+	Replaced interfaces with 802.11 specific classes in HT code and HT mode.
+	Added new OFDM codes and modulations.
+
+2018-04-24  Alfonso Ariza
+
+	Added Ieee80211VhtMode mode and related preamble, header and data modes.
+
+2018-04-16  Levente Mészáros
+
+	Fixed center frequency calculation in Ieee80211ArithmeticalBand.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-01-04  Levente Mészáros
+
+	Replaced @editable(false) with the simpler @descriptor(readonly).
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    16PPMModulation -> 16PpmModulation
+	    2GFSKModulation -> 2GfskModulation
+	    4GFSKModulation -> 4GfskModulation
+	    4PPMModulation -> 4PpmModulation
+	    APSKCode -> ApskCode
+	    APSKModulationBase -> ApskModulationBase
+	    BPSKModulation -> BpskModulation
+	    DBPSKModulation -> DbpskModulation
+	    DPSKModulationBase -> DpskModulationBase
+	    DQPSKModulation -> DqpskModulation
+	    GFSKModulationBase -> GfskModulationBase
+	    Ieee80211HTCode -> Ieee80211HtCode
+	    Ieee80211HTCompliantCodes -> Ieee80211HtCompliantCodes
+	    Ieee80211HTCompliantModes -> Ieee80211HtCompliantModes
+	    Ieee80211HTDataMode -> Ieee80211HtDataMode
+	    Ieee80211HTInterleaving -> Ieee80211HtInterleaving
+	    Ieee80211HTMCS -> Ieee80211Htmcs
+	    Ieee80211HTMCSTable -> Ieee80211HtmcsTable
+	    Ieee80211HTMode -> Ieee80211HtMode
+	    Ieee80211HTModeBase -> Ieee80211HtModeBase
+	    Ieee80211HTPreambleMode -> Ieee80211HtPreambleMode
+	    Ieee80211HTSignalMode -> Ieee80211HtSignalMode
+	    Ieee80211HTTimingRelatedParametersBase -> Ieee80211HtTimingRelatedParametersBase
+	    Ieee80211OFDMCode -> Ieee80211OfdmCode
+	    Ieee80211OFDMCompliantCodes -> Ieee80211OfdmCompliantCodes
+	    Ieee80211OFDMCompliantModes -> Ieee80211OfdmCompliantModes
+	    Ieee80211OFDMCompliantModulations -> Ieee80211OfdmCompliantModulations
+	    Ieee80211OFDMDataMode -> Ieee80211OfdmDataMode
+	    Ieee80211OFDMDefs -> Ieee80211OfdmDefs
+	    Ieee80211OFDMInterleaving -> Ieee80211OfdmInterleaving
+	    Ieee80211OFDMMode -> Ieee80211OfdmMode
+	    Ieee80211OFDMModeBase -> Ieee80211OfdmModeBase
+	    Ieee80211OFDMModulation -> Ieee80211OfdmModulation
+	    Ieee80211OFDMPreambleMode -> Ieee80211OfdmPreambleMode
+	    Ieee80211OFDMSignalMode -> Ieee80211OfdmSignalMode
+	    Ieee80211OFDMTimingRelatedParametersBase -> Ieee80211OfdmTimingRelatedParametersBase
+	    PPMModulationBase -> PpmModulationBase
+	    QAM16Modulation -> Qam16Modulation
+	    QAM64Modulation -> Qam64Modulation
+	    QBPSKModulation -> QbpskModulation
+	    QPSKModulation -> QpskModulation
+	    _16PPMModulation -> _16PpmModulation
+	    _2GFSKModulation -> _2GfskModulation
+	    _4GFSKModulation -> _4GfskModulation
+	    _4PPMModulation -> _4PpmModulation
+
+2017-12-05  Zoltan Bojthe
+
+	Replaced "typedef const Foo ConstFoo" statements in MSG files with proper const support.
+
+2017-11-22  Levente Mészáros
+
+	Split 802.11 MSG files to fix linking errors.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-10-30  Levente Mészáros
+
+	Renamed mode classes to have camel case names.
+	Renamed various 802.11 PHY header field length getters.
+	Renamed bitLength variables, arguments in 802.11 modes.
+	Replaced (unsigned) ints with b(its) where appropriate.
+
+2017-10-27  Levente Mészáros
+
+	Added OFDM signal field length to Ieee80211OFDMSignalMode.
+	Removed OFDM signal field length from Ieee80211OFDMDataMode. This change
+	only affects the bit length, the symbols produced by the modulation
+	should still have the signal field in the data part.
+	Added getPaddingLength() 802.11 modes.
+	Removed exceptions from 802.11 mode parameters, it prevents runtime UI inspection.
+	Added all 802.11 phy and preamble chunks.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

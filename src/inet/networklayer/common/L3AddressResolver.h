@@ -30,23 +30,23 @@ namespace inet {
 // Forward declarations:
 class IInterfaceTable;
 class InterfaceEntry;
-class IIPv4RoutingTable;
-class IPv6RoutingTable;
-class GenericRoutingTable;
+class IIpv4RoutingTable;
+class Ipv6RoutingTable;
+class NextHopRoutingTable;
 
-#define DEFAULT_ADDR_TYPE    (ADDR_IPv4 | ADDR_IPv6 | ADDR_MAC | ADDR_MODULEPATH | ADDR_MODULEID)
+#define DEFAULT_ADDR_TYPE    (ADDR_IPv4 | ADDR_IPv6 | ADDR_MODULEPATH | ADDR_MODULEID)
 
 /**
- * Utility class for finding IPv4 or IPv6 address of a host or router.
+ * Utility class for finding Ipv4 or Ipv6 address of a host or router.
  *
  * Syntax variations understood:
- *    - literal IPv4 address: "186.54.66.2"
- *    - literal IPv6 address: "3011:7cd6:750b:5fd6:aba3:c231:e9f9:6a43"
+ *    - literal Ipv4 address: "186.54.66.2"
+ *    - literal Ipv6 address: "3011:7cd6:750b:5fd6:aba3:c231:e9f9:6a43"
  *    - module name: "server", "subnet.server[3]"
  *    - interface of a host or router: "server%eth0", "subnet.server[3]%eth0"
- *    - IPv4 or IPv6 address of a host or router: "server(ipv4)",
+ *    - Ipv4 or Ipv6 address of a host or router: "server(ipv4)",
  *      "subnet.server[3](ipv6)"
- *    - IPv4 or IPv6 address of an interface of a host or router:
+ *    - Ipv4 or Ipv6 address of an interface of a host or router:
  *      "server%eth0(ipv4)", "subnet.server[3]%eth0(ipv6)"
  *    - routerId: "router1%routerId", "R1%routerId"
  *    - interface of a host or router toward defined another node: "client1>router"
@@ -55,21 +55,21 @@ class INET_API L3AddressResolver
 {
   protected:
     // internal
-    virtual bool getIPv4AddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask);
+    virtual bool getIpv4AddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask);
     // internal
-    virtual bool getIPv6AddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask);
+    virtual bool getIpv6AddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask);
     // internal
-    virtual bool getMACAddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask);
+    virtual bool getMacAddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask);
     // internal
     virtual bool getModulePathAddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask);
     // internal
     virtual bool getModuleIdAddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask);
     // internal
-    virtual bool getInterfaceIPv4Address(L3Address& ret, InterfaceEntry *ie, bool mask);
+    virtual bool getInterfaceIpv4Address(L3Address& ret, InterfaceEntry *ie, bool mask);
     // internal
-    virtual bool getInterfaceIPv6Address(L3Address& ret, InterfaceEntry *ie, bool mask);
+    virtual bool getInterfaceIpv6Address(L3Address& ret, InterfaceEntry *ie, bool mask);
     // internal
-    virtual bool getInterfaceMACAddress(L3Address& ret, InterfaceEntry *ie, bool mask);
+    virtual bool getInterfaceMacAddress(L3Address& ret, InterfaceEntry *ie, bool mask);
     // internal
     virtual bool getInterfaceModulePathAddress(L3Address& ret, InterfaceEntry *ie, bool mask);
     // internal
@@ -116,9 +116,9 @@ class INET_API L3AddressResolver
     /** @name Utility functions supporting resolve() */
     //@{
     /**
-     * Returns IPv4 or IPv6 address of the given host or router.
+     * Returns Ipv4 or Ipv6 address of the given host or router.
      *
-     * This function uses routingTableOf() to find the IIPv4RoutingTable module,
+     * This function uses routingTableOf() to find the IIpv4RoutingTable module,
      * then invokes getAddressFrom() to extract the IP address.
      */
     virtual L3Address addressOf(cModule *host, int addrType = DEFAULT_ADDR_TYPE);
@@ -129,7 +129,7 @@ class INET_API L3AddressResolver
     virtual L3Address addressOf(cModule *host, const char *ifname, int addrType = DEFAULT_ADDR_TYPE);
 
     /**
-     * Returns IPv4 or IPv6 address of the given host or router.
+     * Returns Ipv4 or Ipv6 address of the given host or router.
      *
      * This function find an interface of host connected to destmod
      * then invokes getAddressFrom() to extract the IP address.
@@ -138,18 +138,18 @@ class INET_API L3AddressResolver
 
     /**
      * Returns the router Id of the given router. Router Id is obtained from
-     * the getRouterId() method of the IIPv4RoutingTable submodule.
+     * the getRouterId() method of the IIpv4RoutingTable submodule.
      */
     virtual L3Address routerIdOf(cModule *host);
 
     /**
-     * Returns the IPv4 or IPv6 address of the given host or router, given its IInterfaceTable
-     * module. For IPv4, the first usable interface address is chosen.
+     * Returns the Ipv4 or Ipv6 address of the given host or router, given its IInterfaceTable
+     * module. For Ipv4, the first usable interface address is chosen.
      */
     virtual L3Address getAddressFrom(IInterfaceTable *ift, int addrType = DEFAULT_ADDR_TYPE);
 
     /**
-     * Returns the IPv4 or IPv6 address of the given interface (of a host or router).
+     * Returns the Ipv4 or Ipv6 address of the given interface (of a host or router).
      */
     virtual L3Address getAddressFrom(InterfaceEntry *ie, int addrType = DEFAULT_ADDR_TYPE);
 
@@ -161,18 +161,18 @@ class INET_API L3AddressResolver
     virtual IInterfaceTable *interfaceTableOf(cModule *host);
 
     /**
-     * The function tries to look up the IIPv4RoutingTable module as submodule
+     * The function tries to look up the IIpv4RoutingTable module as submodule
      * <tt>"routingTable"</tt> or <tt>"networkLayer.routingTable"</tt> within
      * the host/router module. Throws an error if not found.
      */
-    virtual IIPv4RoutingTable *routingTableOf(cModule *host);
+    virtual IIpv4RoutingTable *getIpv4RoutingTableOf(cModule *host);
 
     /**
-     * The function tries to look up the IPv6RoutingTable module as submodule
+     * The function tries to look up the Ipv6RoutingTable module as submodule
      * <tt>"routingTable6"</tt> or <tt>"networkLayer.routingTable6"</tt> within
      * the host/router module. Throws an error if not found.
      */
-    virtual IPv6RoutingTable *routingTable6Of(cModule *host);
+    virtual Ipv6RoutingTable *getIpv6RoutingTableOf(cModule *host);
 
     /**
      * Like interfaceTableOf(), but doesn't throw error if not found.
@@ -182,17 +182,17 @@ class INET_API L3AddressResolver
     /**
      * Like routingTableOf(), but doesn't throw error if not found.
      */
-    virtual IIPv4RoutingTable *findIPv4RoutingTableOf(cModule *host);
+    virtual IIpv4RoutingTable *findIpv4RoutingTableOf(cModule *host);
 
     /**
      * Like interfaceTableOf(), but doesn't throw error if not found.
      */
-    virtual IPv6RoutingTable *findIPv6RoutingTableOf(cModule *host);
+    virtual Ipv6RoutingTable *findIpv6RoutingTableOf(cModule *host);
 
     /**
      * Like interfaceTableOf(), but doesn't throw error if not found.
      */
-    virtual GenericRoutingTable *findGenericRoutingTableOf(cModule *host);
+    virtual NextHopRoutingTable *findNextHopRoutingTableOf(cModule *host);
 
     /**
      * Find the Host with the specified address.

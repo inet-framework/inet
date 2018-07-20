@@ -65,7 +65,7 @@
 						      srs_number_streams=1,
 						      srs_stream_list=[0]}, 10) = 0
 +0.0 > sctp: RECONFIG[flgs=0x00, INCOMING_SSN_RESET[req_sn=1, sids=[0]]]
-+0.0 < sctp: RECONFIG[flgs=0x00, RECONFIG_RESPONSE[resp_sn=1, result=2]]
++0.01 < sctp: RECONFIG[flgs=0x00, RECONFIG_RESPONSE[resp_sn=1, result=2]]
 
 // Send a second INCOMING_SSN_RESET_REQUEST to ensure that SUT increment the req_sn
 +0.1 setsockopt(3, IPPROTO_SCTP, SCTP_RESET_STREAMS, {srs_assoc_id=3,

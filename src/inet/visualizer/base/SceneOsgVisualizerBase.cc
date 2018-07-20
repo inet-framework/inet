@@ -16,8 +16,8 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/OSGScene.h"
-#include "inet/common/OSGUtils.h"
+#include "inet/common/OsgScene.h"
+#include "inet/common/OsgUtils.h"
 #include "inet/visualizer/base/SceneOsgVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeOsgVisualizer.h"
 
@@ -106,6 +106,10 @@ osg::Geode *SceneOsgVisualizerBase::createPlayground(const Coord& min, const Coo
 {
     auto dx = max.x - min.x;
     auto dy = max.y - min.y;
+
+    if (!std::isfinite(dx) || !std::isfinite(dy))
+        return new osg::Geode();
+
     auto d = shading ? sqrt(dx * dx + dy * dy) : 0;
     auto width = dx + 2 * d;
     auto height = dy + 2 * d;
@@ -188,10 +192,10 @@ osg::BoundingSphere SceneOsgVisualizerBase::getNetworkBoundingSphere()
         if (isNetworkNode(networkNode)) {
             nodeCount++;
             // NOTE: ignore network node annotations
-            auto visualRepresentation = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
-            auto mainNode = visualRepresentation->getMainPart();
+            auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
+            auto mainNode = networkNodeVisualization->getMainPart();
             auto radius = std::max(0.0f, mainNode->computeBound().radius());
-            auto drawable = new osg::ShapeDrawable(new osg::Sphere(visualRepresentation->getPosition(), radius));
+            auto drawable = new osg::ShapeDrawable(new osg::Sphere(networkNodeVisualization->getPosition(), radius));
             auto geode = new osg::Geode();
             geode->addDrawable(drawable);
             nodes->addChild(geode);

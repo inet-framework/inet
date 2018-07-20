@@ -1,0 +1,67 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-01  Zoltan Bojthe
+
+	Added B/b units to length constants and length fields of chunks.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-02-14  Zoltan Bojthe
+
+	Renamed functions to use camel case.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    AreaID -> AreaId
+	    DesignatedRouterID -> DesignatedRouterId
+	    IPv4Address -> Ipv4Address
+	    IPv4AddressRange -> Ipv4AddressRange
+	    IPv4InterfaceData -> Ipv4InterfaceData
+	    LSAKeyType -> LsaKeyType
+	    LSAType -> LsaType
+	    LinkStateID -> LinkStateId
+	    NetworkLSA -> NetworkLsa
+	    OSPFASExternalLSA -> OspfAsExternalLsa
+	    OSPFArea -> OspfArea
+	    OSPFHelloPacket -> OspfHelloPacket
+	    OSPFInterface -> OspfInterface
+	    OSPFInterfaceState -> OspfInterfaceState
+	    OSPFInterfaceStateBackup -> OspfInterfaceStateBackup
+	    OSPFInterfaceStateDesignatedRouter -> OspfInterfaceStateDesignatedRouter
+	    OSPFInterfaceStateDown -> OspfInterfaceStateDown
+	    OSPFInterfaceStateLoopback -> OspfInterfaceStateLoopback
+	    OSPFInterfaceStateNotDesignatedRouter -> OspfInterfaceStateNotDesignatedRouter
+	    OSPFInterfaceStatePointToPoint -> OspfInterfaceStatePointToPoint
+	    OSPFInterfaceStateWaiting -> OspfInterfaceStateWaiting
+	    OSPFInterfaceType -> OspfInterfaceType
+	    OSPFLSA -> OspfLsa
+	    OSPFLSAHeader -> OspfLsaHeader
+	    OSPFLinkStateAcknowledgementPacket -> OspfLinkStateAcknowledgementPacket
+	    OSPFLinkStateUpdatePacket -> OspfLinkStateUpdatePacket
+	    OSPFNeighbor -> OspfNeighbor
+	    OSPFNetworkLSA -> OspfNetworkLsa
+	    OSPFOptions -> OspfOptions
+	    OSPFRouter -> OspfRouter
+	    OSPFRouterLSA -> OspfRouterLsa
+	    OSPFSummaryLSA -> OspfSummaryLsa
+	    OSPFTimer -> OspfTimer
+	    OSPFcommon -> OspfCommon
+	    RouterID -> RouterId
+	    RouterLSA -> RouterLsa
+
+2017-12-14  Levente Mészáros
+
+	Replaced pushHeader with insertAtEnd because these chunks are not headers.
+	Removed unnecessary markImmutable() calls.
+
+2017-12-11  Zoltan Bojthe
+
+	Updated for new msgc function names: getFooForUpdate, insertFoo, eraseFoo, etc.
+
+2017-11-16  ------ inet-3.99.1 released ------
+

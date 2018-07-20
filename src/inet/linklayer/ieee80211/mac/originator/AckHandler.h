@@ -46,16 +46,16 @@ class INET_API AckHandler : public IAckHandler
     public:
         virtual ~AckHandler() { }
 
-        virtual void processReceivedAck(Ieee80211ACKFrame *ack, Ieee80211DataOrMgmtFrame *ackedFrame);
+        virtual void processReceivedAck(const Ptr<const Ieee80211AckFrame>& ack, const Ptr<const Ieee80211DataOrMgmtHeader>& ackedHeader);
 
-        virtual void frameGotInProgress(Ieee80211DataOrMgmtFrame *dataOrMgmtFrame) override; // TODO: rename
-        virtual void processTransmittedDataOrMgmtFrame(Ieee80211DataOrMgmtFrame *frame);
+        virtual void frameGotInProgress(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) override; // TODO: rename
+        virtual void processTransmittedDataOrMgmtFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& header);
 
-        virtual Status getAckStatus(Ieee80211DataOrMgmtFrame *frame);
-        virtual bool isEligibleToTransmit(Ieee80211DataOrMgmtFrame *frame) override;
-        virtual bool isOutstandingFrame(Ieee80211DataOrMgmtFrame *frame) override;
+        virtual Status getAckStatus(const Ptr<const Ieee80211DataOrMgmtHeader>& header);
+        virtual bool isEligibleToTransmit(const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;
+        virtual bool isOutstandingFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;
         virtual int getNumberOfFramesWithStatus(Status status);
-        virtual void processFailedFrame(Ieee80211DataOrMgmtFrame *dataOrMgmtFrame);
+        virtual void processFailedFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader);
 };
 
 } /* namespace ieee80211 */

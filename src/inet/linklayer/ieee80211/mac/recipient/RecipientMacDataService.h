@@ -20,8 +20,8 @@
 
 #include "inet/linklayer/ieee80211/mac/contract/IDefragmentation.h"
 #include "inet/linklayer/ieee80211/mac/contract/IDuplicateRemoval.h"
+#include "inet/linklayer/ieee80211/mac/contract/IReassembly.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRecipientMacDataService.h"
-#include "inet/linklayer/ieee80211/mac/fragmentation/BasicReassembly.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -32,10 +32,10 @@ namespace ieee80211 {
 class INET_API RecipientMacDataService : public cSimpleModule, public IRecipientMacDataService
 {
     protected:
-        typedef std::vector<Ieee80211DataOrMgmtFrame *> Fragments;
+        typedef std::vector<Ieee80211DataOrMgmtHeader*> Fragments;
 
     protected:
-        BasicReassembly *basicReassembly = nullptr; // FIXME: use Defragmentation
+        IReassembly *basicReassembly = nullptr; // FIXME: use Defragmentation
 
         // MpduHeaderAndCrcValidation *mpduHeaderAndCrcValidation = nullptr;
         // Address1Filtering *address1Filtering = nullptr;
@@ -46,15 +46,15 @@ class INET_API RecipientMacDataService : public cSimpleModule, public IRecipient
 
     protected:
         virtual void initialize() override;
-        Ieee80211DataOrMgmtFrame* defragment(Ieee80211DataOrMgmtFrame *dataOrMgmtFrame);
-        virtual std::vector<Ieee80211Frame *> dataOrMgmtFrameReceived(Ieee80211DataOrMgmtFrame *frame);
+        virtual Packet *defragment(Packet *dataOrMgmtFrame);
+        virtual std::vector<Packet *> dataOrMgmtFrameReceived(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header);
 
     public:
         virtual ~RecipientMacDataService();
 
-        virtual std::vector<Ieee80211Frame *> dataFrameReceived(Ieee80211DataFrame *dataFrame) override;
-        virtual std::vector<Ieee80211Frame *> managementFrameReceived(Ieee80211ManagementFrame *mgmtFrame) override;
-        virtual std::vector<Ieee80211Frame *> controlFrameReceived(Ieee80211Frame *controlFrame) override;
+        virtual std::vector<Packet *> dataFrameReceived(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader) override;
+        virtual std::vector<Packet *> managementFrameReceived(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader) override;
+        virtual std::vector<Packet *> controlFrameReceived(Packet *controlPacket, const Ptr<const Ieee80211MacHeader>& controlHeader) override;
 
 };
 

@@ -37,9 +37,9 @@ class INET_API SimpleCcBattery : public CcEnergyStorageBase
     C residualCapacity = C(NaN);
     simtime_t lastResidualCapacityUpdate = -1;
 
-    LifecycleController *lifecycleController = nullptr;
     cModule *networkNode = nullptr;
     NodeStatus *nodeStatus = nullptr;
+    LifecycleController lifecycleController;
 
   protected:
     virtual void initialize(int stage) override;

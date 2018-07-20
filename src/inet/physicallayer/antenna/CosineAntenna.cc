@@ -24,9 +24,7 @@ namespace physicallayer {
 Define_Module(CosineAntenna);
 
 CosineAntenna::CosineAntenna() :
-    AntennaBase(),
-    maxGain(NaN),
-    beamWidth(NaN)
+    AntennaBase()
 {
 }
 
@@ -34,8 +32,9 @@ void CosineAntenna::initialize(int stage)
 {
     AntennaBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        maxGain = math::dB2fraction(par("maxGain"));
-        beamWidth = degree(par("beamWidth"));
+        double maxGain = math::dB2fraction(par("maxGain"));
+        deg beamWidth = deg(par("beamWidth"));
+        gain = makeShared<AntennaGain>(maxGain, beamWidth);
     }
 }
 
@@ -43,15 +42,20 @@ std::ostream& CosineAntenna::printToStream(std::ostream& stream, int level) cons
 {
     stream << "CosineAntenna";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << ", maxGain = " << maxGain
-               << ", beamWidth = " << beamWidth;
+        stream << ", maxGain = " << gain->getMaxGain()
+               << ", beamWidth = " << gain->getBeamWidth();
     return AntennaBase::printToStream(stream, level);
 }
 
-double CosineAntenna::computeGain(const EulerAngles direction) const
+CosineAntenna::AntennaGain::AntennaGain(double maxGain, deg beamWidth) :
+    maxGain(maxGain), beamWidth(beamWidth)
+{
+}
+
+double CosineAntenna::AntennaGain::computeGain(const EulerAngles direction) const
 {
     double exponent = -3.0 / (20 * std::log10(std::cos(math::deg2rad(beamWidth.get()) / 4.0)));
-    return maxGain * std::pow(std::cos(direction.alpha / 2.0), exponent);
+    return maxGain * std::pow(std::abs(std::cos(rad(direction.alpha / 2.0).get())), exponent);
 }
 
 } // namespace physicallayer

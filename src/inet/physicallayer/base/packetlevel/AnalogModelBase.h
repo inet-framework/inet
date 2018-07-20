@@ -19,8 +19,7 @@
 #define __INET_ANALOGMODELBASE_H
 
 #include "inet/physicallayer/contract/packetlevel/IAnalogModel.h"
-#include "inet/physicallayer/contract/packetlevel/IArrival.h"
-#include "inet/physicallayer/contract/packetlevel/ITransmission.h"
+#include "inet/physicallayer/contract/packetlevel/IAntennaGain.h"
 
 namespace inet {
 
@@ -29,7 +28,7 @@ namespace physicallayer {
 class INET_API AnalogModelBase : public cModule, public virtual IAnalogModel
 {
   protected:
-    virtual EulerAngles computeTransmissionDirection(const ITransmission *transmission, const IArrival *arrival) const;
+    virtual double computeAntennaGain(const IAntennaGain* antenna, const Coord& startPosition, const Coord& endPosition, const EulerAngles& startOrientation) const;
 };
 
 } // namespace physicallayer

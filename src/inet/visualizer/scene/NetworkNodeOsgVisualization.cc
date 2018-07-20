@@ -17,7 +17,7 @@
 
 #include <algorithm>
 #include <omnetpp/osgutil.h>
-#include "inet/common/OSGUtils.h"
+#include "inet/common/OsgUtils.h"
 #include "inet/visualizer/scene/NetworkNodeOsgVisualization.h"
 
 #ifdef WITH_OSG

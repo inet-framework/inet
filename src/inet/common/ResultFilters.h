@@ -26,6 +26,26 @@ namespace utils {
 
 namespace filters {
 
+class VoidPtrWrapper : public cObject
+{
+  private:
+    void *object;
+
+  public:
+    VoidPtrWrapper(void *object) : object(object) { }
+
+    void *getObject() const { return object; }
+};
+
+/**
+ * Filter that expects a Packet and outputs the age of packet data in seconds.
+ */
+class INET_API DataAgeFilter : public cObjectResultFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
 /**
  * Filter that expects a cMessage and outputs its age in seconds
  * (t - msg->getCreationTime()).
@@ -40,7 +60,7 @@ class INET_API MessageAgeFilter : public cObjectResultFilter
  * Filter that expects a cMessage and outputs its age from the timestamp field
  * in seconds (t - msg->getTimestamp()).
  */
-class INET_API MessageTSAgeFilter : public cObjectResultFilter
+class INET_API MessageTsAgeFilter : public cObjectResultFilter
 {
   public:
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
@@ -73,10 +93,22 @@ class INET_API MobilityPosFilter : public cObjectResultFilter
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
 };
 
+class INET_API cPointerResultFilter : public cResultFilter
+{
+    protected:
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, bool b, cObject *details) override { }
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, long l, cObject *details) override { }
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, unsigned long l, cObject *details) override { }
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, double d, cObject *details) override { }
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, const SimTime& v, cObject *details) override { }
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, const char *s, cObject *details) override { }
+        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *obj, cObject *details) override { }
+};
+
 /**
  * Filter that expects a Coord and outputs its X coordinate
  */
-class INET_API XCoordFilter : public cObjectResultFilter
+class INET_API XCoordFilter : public cPointerResultFilter
 {
   public:
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
@@ -85,7 +117,7 @@ class INET_API XCoordFilter : public cObjectResultFilter
 /**
  * Filter that expects a Coord and outputs its Y coordinate
  */
-class INET_API YCoordFilter : public cObjectResultFilter
+class INET_API YCoordFilter : public cPointerResultFilter
 {
   public:
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
@@ -94,7 +126,7 @@ class INET_API YCoordFilter : public cObjectResultFilter
 /**
  * Filter that expects a Coord and outputs its Z coordinate
  */
-class INET_API ZCoordFilter : public cObjectResultFilter
+class INET_API ZCoordFilter : public cPointerResultFilter
 {
   public:
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
@@ -146,6 +178,53 @@ class INET_API ElapsedTimeFilter : public cResultFilter
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, const char *s, cObject *details) override {fire(this, t, getElapsedTime(), details);}
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *obj, cObject *details) override {fire(this, t, getElapsedTime(), details);}
 };
+
+class INET_API PacketDropReasonFilter : public cObjectResultFilter
+{
+  protected:
+    int reason = -1;
+
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+/**
+ * Filter that expects a Packet and outputs its minsnir from snirIndication tag if exists .
+ */
+class INET_API MinimumSnirFromSnirIndFilter : public cObjectResultFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+/**
+ * Filter that expects a Packet and outputs its packetErrorRate from ErrorRateInd tag if exists .
+ */
+class INET_API PacketErrorRateFromErrorRateIndFilter : public cObjectResultFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+/**
+ * Filter that expects a Packet and outputs its bitErrorRate from ErrorRateInd tag if exists .
+ */
+class INET_API BitErrorRateFromErrorRateIndFilter : public cObjectResultFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+/**
+ * Filter that expects a Packet and outputs its symbolErrorRate from ErrorRateInd tag if exists .
+ */
+class INET_API SymbolErrorRateFromErrorRateIndFilter : public cObjectResultFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+
 
 } // namespace filters
 

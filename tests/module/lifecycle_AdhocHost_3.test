@@ -22,11 +22,11 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.hasStatus = true
 **.initialStatus = "down"
 **.scenarioManager.script = xmldoc("scenario.xml")
-*.host.numRadios=2
+*.host.numWlanInterfaces=2
 
-*.host.networkLayer.configurator.networkConfiguratorModule = ""
+*.host.ipv4.configurator.networkConfiguratorModule = ""
 
-*.host.mobilityType = "StationaryMobility"
+*.host.mobility.typename = "StationaryMobility"
 **.mobility.constraintAreaMinX = 0m
 **.mobility.constraintAreaMinY = 0m
 **.mobility.constraintAreaMinZ = 0m
@@ -40,7 +40,6 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 %file: test.ned
 
-import inet.common.lifecycle.LifecycleController;
 import inet.node.inet.AdhocHost;
 import inet.status.NodeStatus;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
@@ -51,7 +50,6 @@ network Test
     submodules:
         radioMedium: Ieee80211ScalarRadioMedium;
         scenarioManager: ScenarioManager;
-        lifecycleController: LifecycleController;
         host: AdhocHost;
 }
 
@@ -59,7 +57,7 @@ network Test
 
 <scenario>
     <at t="1.0">
-        <tell module="lifecycleController" target="host" operation="NodeStartOperation"/>
+        <startup module="host"/>
     </at>
 </scenario>
 

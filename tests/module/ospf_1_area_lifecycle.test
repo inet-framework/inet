@@ -5,11 +5,10 @@ Testing OSPF routing
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import inet.common.lifecycle.LifecycleController;
 import inet.linklayer.ethernet.EtherHub;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
-import inet.node.ospfv2.OSPFRouter;
+import inet.node.ospfv2.OspfRouter;
 import inet.common.misc.ThruputMeteringChannel;
 import inet.common.scenario.ScenarioManager;
 
@@ -28,7 +27,6 @@ network Test1
         }
     submodules:
         scenarioManager: ScenarioManager;
-        lifecycleController: LifecycleController;
         H1: StandardHost {
             parameters:
                 @display("p=56,92;i=device/laptop");
@@ -41,17 +39,17 @@ network Test1
             gates:
                 ethg[2];
         }
-        R1: OSPFRouter {
+        R1: OspfRouter {
             parameters:
                 @display("p=296,92");
             gates:
                 ethg[2];
         }
-        RI[numIRouters]: OSPFRouter {
+        RI[numIRouters]: OspfRouter {
             gates:
                 ethg[2];
         }
-        R2: OSPFRouter {
+        R2: OspfRouter {
             parameters:
                 @display("p=416,92");
             gates:
@@ -69,7 +67,7 @@ network Test1
             gates:
                 ethg[1];
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 config = xml("<config>"+
                             "<interface among='H1 R1' address='192.168.1.x' netmask='255.255.255.0' />"+
@@ -122,17 +120,18 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 **.ospf.ospfConfig = xmldoc("ASConfig.xml")
 
-**.numUdpApps = 2
-**.udpApp[0].typename = "UDPBasicApp"
-**.udpApp[0].destPort = 1234
-**.udpApp[0].messageLength = 32 bytes
-**.udpApp[0].sendInterval = 1s
-**.udpApp[0].startTime = 10.5s
-**.udpApp[0].stopTime = 190.1s
-**.H2.udpApp[0].destAddresses = "H1"
-**.H1.udpApp[0].destAddresses = "H2"
-**.udpApp[1].typename = "UDPEchoApp"
-**.udpApp[1].localPort = 1234
+**.H1.numApps = 2
+**.H2.numApps = 2
+**.app[0].typename = "UdpBasicApp"
+**.app[0].destPort = 1234
+**.app[0].messageLength = 32 bytes
+**.app[0].sendInterval = 1s
+**.app[0].startTime = 10.5s
+**.app[0].stopTime = 190.1s
+**.H2.app[0].destAddresses = "H1"
+**.H1.app[0].destAddresses = "H2"
+**.app[1].typename = "UdpEchoApp"
+**.app[1].localPort = 1234
 
 **.arp.cacheTimeout = 1s
 
@@ -172,9 +171,9 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %file: scenario.xml
 
 <scenario>
-    <tell t="20.5"  module="lifecycleController" target="R1" operation="NodeStartOperation"/>
-    <tell t="100.0" module="lifecycleController" target="R1" operation="NodeShutdownOperation"/>
-    <tell t="140.5" module="lifecycleController" target="R1" operation="NodeStartOperation"/>
+    <startup t="20.5"  module="R1"/>
+    <shutdown t="100.0" module="R1"/>
+    <startup t="140.5" module="R1"/>
 </scenario>
 
 %#--------------------------------------------------------------------------------------------------------------
@@ -193,89 +192,89 @@ Test1.R1 starting up
 Test1.R1 started
 %#--------------------------------------------------------------------------------------------------------------
 %contains: results/General-0.sca
-scalar Test1.H1.udpApp[0] sentPk:count 180
+scalar Test1.H1.app[0] packetSent:count 180
 %contains: results/General-0.sca
-scalar Test1.H1.udpApp[0] rcvdPk:count 107
+scalar Test1.H1.app[0] packetReceived:count 107
 %contains: results/General-0.sca
-scalar Test1.H1.udpApp[1] echoedPk:count 107
+scalar Test1.H1.app[1] echoedPk:count 107
 %contains: results/General-0.sca
-scalar Test1.H2.udpApp[0] sentPk:count 180
+scalar Test1.H2.app[0] packetSent:count 180
 %contains: results/General-0.sca
-scalar Test1.H2.udpApp[0] rcvdPk:count 107
+scalar Test1.H2.app[0] packetReceived:count 107
 %contains: results/General-0.sca
-scalar Test1.H2.udpApp[1] echoedPk:count 107
+scalar Test1.H2.app[1] echoedPk:count 107
 %contains: results/General-1.sca
-scalar Test1.H1.udpApp[0] sentPk:count 180
+scalar Test1.H1.app[0] packetSent:count 180
 %contains: results/General-1.sca
-scalar Test1.H1.udpApp[0] rcvdPk:count 107
+scalar Test1.H1.app[0] packetReceived:count 107
 %contains: results/General-1.sca
-scalar Test1.H1.udpApp[1] echoedPk:count 107
+scalar Test1.H1.app[1] echoedPk:count 107
 %contains: results/General-1.sca
-scalar Test1.H2.udpApp[0] sentPk:count 180
+scalar Test1.H2.app[0] packetSent:count 180
 %contains: results/General-1.sca
-scalar Test1.H2.udpApp[0] rcvdPk:count 107
+scalar Test1.H2.app[0] packetReceived:count 107
 %contains: results/General-1.sca
-scalar Test1.H2.udpApp[1] echoedPk:count 107
+scalar Test1.H2.app[1] echoedPk:count 107
 %contains: results/General-2.sca
-scalar Test1.H1.udpApp[0] sentPk:count 180
+scalar Test1.H1.app[0] packetSent:count 180
 %contains: results/General-2.sca
-scalar Test1.H1.udpApp[0] rcvdPk:count 107
+scalar Test1.H1.app[0] packetReceived:count 107
 %contains: results/General-2.sca
-scalar Test1.H1.udpApp[1] echoedPk:count 107
+scalar Test1.H1.app[1] echoedPk:count 107
 %contains: results/General-2.sca
-scalar Test1.H2.udpApp[0] sentPk:count 180
+scalar Test1.H2.app[0] packetSent:count 180
 %contains: results/General-2.sca
-scalar Test1.H2.udpApp[0] rcvdPk:count 107
+scalar Test1.H2.app[0] packetReceived:count 107
 %contains: results/General-2.sca
-scalar Test1.H2.udpApp[1] echoedPk:count 107
+scalar Test1.H2.app[1] echoedPk:count 107
 %contains: results/General-3.sca
-scalar Test1.H1.udpApp[0] sentPk:count 180
+scalar Test1.H1.app[0] packetSent:count 180
 %contains: results/General-3.sca
-scalar Test1.H1.udpApp[0] rcvdPk:count 107
+scalar Test1.H1.app[0] packetReceived:count 107
 %contains: results/General-3.sca
-scalar Test1.H1.udpApp[1] echoedPk:count 107
+scalar Test1.H1.app[1] echoedPk:count 107
 %contains: results/General-3.sca
-scalar Test1.H2.udpApp[0] sentPk:count 180
+scalar Test1.H2.app[0] packetSent:count 180
 %contains: results/General-3.sca
-scalar Test1.H2.udpApp[0] rcvdPk:count 107
+scalar Test1.H2.app[0] packetReceived:count 107
 %contains: results/General-3.sca
-scalar Test1.H2.udpApp[1] echoedPk:count 107
+scalar Test1.H2.app[1] echoedPk:count 107
 %contains: results/General-4.sca
-scalar Test1.H1.udpApp[0] sentPk:count 180
+scalar Test1.H1.app[0] packetSent:count 180
 %contains: results/General-4.sca
-scalar Test1.H1.udpApp[0] rcvdPk:count 107
+scalar Test1.H1.app[0] packetReceived:count 107
 %contains: results/General-4.sca
-scalar Test1.H1.udpApp[1] echoedPk:count 107
+scalar Test1.H1.app[1] echoedPk:count 107
 %contains: results/General-4.sca
-scalar Test1.H2.udpApp[0] sentPk:count 180
+scalar Test1.H2.app[0] packetSent:count 180
 %contains: results/General-4.sca
-scalar Test1.H2.udpApp[0] rcvdPk:count 107
+scalar Test1.H2.app[0] packetReceived:count 107
 %contains: results/General-4.sca
-scalar Test1.H2.udpApp[1] echoedPk:count 107
+scalar Test1.H2.app[1] echoedPk:count 107
 %contains: results/General-5.sca
-scalar Test1.H1.udpApp[0] sentPk:count 180
+scalar Test1.H1.app[0] packetSent:count 180
 %contains: results/General-5.sca
-scalar Test1.H1.udpApp[0] rcvdPk:count 107
+scalar Test1.H1.app[0] packetReceived:count 107
 %contains: results/General-5.sca
-scalar Test1.H1.udpApp[1] echoedPk:count 107
+scalar Test1.H1.app[1] echoedPk:count 107
 %contains: results/General-5.sca
-scalar Test1.H2.udpApp[0] sentPk:count 180
+scalar Test1.H2.app[0] packetSent:count 180
 %contains: results/General-5.sca
-scalar Test1.H2.udpApp[0] rcvdPk:count 107
+scalar Test1.H2.app[0] packetReceived:count 107
 %contains: results/General-5.sca
-scalar Test1.H2.udpApp[1] echoedPk:count 107
+scalar Test1.H2.app[1] echoedPk:count 107
 %contains: results/General-6.sca
-scalar Test1.H1.udpApp[0] sentPk:count 180
+scalar Test1.H1.app[0] packetSent:count 180
 %contains: results/General-6.sca
-scalar Test1.H1.udpApp[0] rcvdPk:count 107
+scalar Test1.H1.app[0] packetReceived:count 107
 %contains: results/General-6.sca
-scalar Test1.H1.udpApp[1] echoedPk:count 107
+scalar Test1.H1.app[1] echoedPk:count 107
 %contains: results/General-6.sca
-scalar Test1.H2.udpApp[0] sentPk:count 180
+scalar Test1.H2.app[0] packetSent:count 180
 %contains: results/General-6.sca
-scalar Test1.H2.udpApp[0] rcvdPk:count 107
+scalar Test1.H2.app[0] packetReceived:count 107
 %contains: results/General-6.sca
-scalar Test1.H2.udpApp[1] echoedPk:count 107
+scalar Test1.H2.app[1] echoedPk:count 107
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:

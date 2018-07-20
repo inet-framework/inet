@@ -18,10 +18,12 @@
 
 #include "Edcaf.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/NotifierConsts.h"
+#include "inet/common/Simsignals.h"
 
 namespace inet {
 namespace ieee80211 {
+
+using namespace inet::physicallayer;
 
 Define_Module(Edcaf);
 
@@ -31,7 +33,7 @@ inline simtime_t fallback(simtime_t a, simtime_t b) {return a!=-1 ? a : b;}
 void Edcaf::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        getContainingNicModule(this)->subscribe(NF_MODESET_CHANGED, this);
+        getContainingNicModule(this)->subscribe(modesetChangedSignal, this);
         ac = getAccessCategory(par("accessCategory"));
         contention = check_and_cast<IContention *>(getSubmodule("contention"));
         collisionController = check_and_cast<IEdcaCollisionController *>(getModuleByPath(par("collisionControllerModule")));
@@ -40,9 +42,19 @@ void Edcaf::initialize(int stage)
         auto rx = check_and_cast<IRx *>(getModuleByPath(par("rxModule")));
         rx->registerContention(contention);
         calculateTimingParameters();
-        if (hasGUI())
-            updateDisplayString();
     }
+}
+
+void Edcaf::refreshDisplay() const
+{
+    std::string text(printAccessCategory(ac));
+    if (owning)
+        text += "\nOwning";
+    else if (contention->isContentionInProgress())
+        text += "\nContending";
+    else
+        text += "\nIdle";
+    getDisplayString().setTagArg("t", 0, text.c_str());
 }
 
 void Edcaf::calculateTimingParameters()
@@ -110,8 +122,6 @@ void Edcaf::channelAccessGranted()
         owning = true;
         callback->channelGranted(this);
     }
-    if (hasGUI())
-        updateDisplayString();
 }
 
 void Edcaf::releaseChannel(IChannelAccess::ICallback* callback)
@@ -119,8 +129,6 @@ void Edcaf::releaseChannel(IChannelAccess::ICallback* callback)
     ASSERT(owning);
     owning = false;
     this->callback = nullptr;
-    if (hasGUI())
-        updateDisplayString();
 }
 
 void Edcaf::requestChannel(IChannelAccess::ICallback* callback)
@@ -134,8 +142,6 @@ void Edcaf::requestChannel(IChannelAccess::ICallback* callback)
 //                  << eifs << ", slotTime = " << slotTime << std::endl;
         contention->startContention(cw, ifs, eifs, slotTime, this);
     }
-    if (hasGUI())
-        updateDisplayString();
 }
 
 void Edcaf::expectedChannelAccess(simtime_t time)
@@ -175,20 +181,10 @@ int Edcaf::getCwMin(AccessCategory ac, int aCwMin)
 void Edcaf::receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj, cObject* details)
 {
     Enter_Method("receiveModeSetChangeNotification");
-    if (signalID == NF_MODESET_CHANGED) {
+    if (signalID == modesetChangedSignal) {
         modeSet = check_and_cast<Ieee80211ModeSet*>(obj);
         calculateTimingParameters();
     }
-}
-
-void Edcaf::updateDisplayString()
-{
-    std::string displayString(printAccessCategory(ac));
-    if (owning)
-        displayString += "\n(Channel owner)";
-    else if (contention->isContentionInProgress())
-        displayString += "\n(Contention in progress)";
-    getDisplayString().setTagArg("t", 0, displayString.c_str());
 }
 
 } // namespace ieee80211

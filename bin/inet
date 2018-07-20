@@ -1,0 +1,83 @@
+#!/bin/sh
+#
+# This script is intended to run INET simulations both in debug and release mode.
+# It can be used only after the 'setenv' script has been run from both the OMNeT++
+# and the INET top level directory using the '. setenv' command. To run a simulation,
+# simply go into its directory and run 'inet' possibly passing additional command
+# line arguments. Please note that INET must be compiled either in debug and/or
+# release mode using 'make MODE=debug' and/or 'make MODE=release' before.
+#
+# This script takes a few additional command line arguments compared to the ones
+# already allowed by OMNeT++. The command line argument '--release' starts the
+# INET release version and '--debug' starts the debug version. If no such argument
+# is provided, then the script automatically selects one prefering the release
+# version over the debug version. The script can run INET independently of how
+# its compiled, as executable or shared lib.
+#
+
+DIR=`dirname $0`
+OUT=$DIR/../src
+
+TOOL=""
+MODE=""
+
+if [ "$1" = "--release" ]; then
+   MODE="release"
+   shift;
+fi
+
+if [ "$1" = "--debug" ]; then
+   MODE="debug"
+   shift;
+fi
+
+if [ "$1" = "--printcmd" ] || [ "$1" = "-p" ]; then
+   TOOL="echo"
+   shift;
+fi
+
+OPP_RUN_DBG=`which opp_run_dbg 2> /dev/null || echo opp_run_dbg`
+OPP_RUN_RELEASE=`which opp_run_release 2> /dev/null || echo opp_run_release`
+
+if [ "$MODE" = "" ]; then
+  if [ -f $OUT/INET ]; then
+    $TOOL $OUT/INET $INET_OMNETPP_OPTIONS
+  elif [ -f $OUT/INET_dbg ]; then
+    $TOOL $OUT/INET_dbg $INET_OMNETPP_OPTIONS
+  elif [ -f $OUT/INET.exe ]; then
+    $TOOL $OUT/INET.exe $INET_OMNETPP_OPTIONS
+  elif [ -f $OUT/INET_dbg.exe ]; then
+    $TOOL $OUT/INET_dbg.exe $INET_OMNETPP_OPTIONS
+  elif [ -f $OUT/libINET.so ] || [ -f $OUT/INET.dll ]; then
+    $TOOL $OPP_RUN_RELEASE -l $OUT/../src/INET $INET_OMNETPP_OPTIONS $@
+  elif [ -f $OUT/libINET_dbg.so ] || [ -f $OUT/INET_dbg.dll ]; then
+    $TOOL $OPP_RUN_DBG -l $OUT/../src/INET $INET_OMNETPP_OPTIONS $@
+  else
+    echo "INET executable or shared library not found"
+  fi
+fi
+
+if [ "$MODE" = "release" ]; then
+  if [ -f $OUT/INET ]; then
+    $TOOL $OUT/INET $INET_OMNETPP_OPTIONS
+  elif [ -f $OUT/INET.exe ]; then
+    $TOOL $OUT/INET.exe $INET_OMNETPP_OPTIONS
+  elif [ -f $OUT/libINET.so ] || [ -f $OUT/INET.dll ]; then
+    $TOOL $OPP_RUN_RELEASE -l $OUT/../src/INET $INET_OMNETPP_OPTIONS $@
+  else
+    echo "INET release executable or shared library not found"
+  fi
+fi
+
+if [ "$MODE" = "debug" ]; then
+  if [ -f $OUT/INET_dbg ]; then
+    $TOOL $OUT/INET_dbg $INET_OMNETPP_OPTIONS
+  elif [ -f $OUT/INET_dbg.exe ]; then
+    $TOOL $OUT/INET_dbg.exe $INET_OMNETPP_OPTIONS
+  elif [ -f $OUT/libINET_dbg.so ] || [ -f $OUT/INET_dbg.dll ]; then
+    $TOOL $OPP_RUN_DBG -l $OUT/../src/INET $INET_OMNETPP_OPTIONS $@
+  else
+    echo "INET debug executable or shared library not found"
+  fi
+fi
+

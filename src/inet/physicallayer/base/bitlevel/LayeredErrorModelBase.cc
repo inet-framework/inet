@@ -15,13 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/physicallayer/apskradio/bitlevel/ApskSymbol.h"
 #include "inet/physicallayer/base/bitlevel/LayeredErrorModelBase.h"
-#include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
+#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
 #include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
-#include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
+#include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
 #include "inet/physicallayer/common/bitlevel/SignalSampleModel.h"
-#include "inet/physicallayer/base/packetlevel/APSKModulationBase.h"
-#include "inet/physicallayer/apskradio/bitlevel/APSKSymbol.h"
+#include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
+#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 
 namespace inet {
 
@@ -29,30 +30,27 @@ namespace physicallayer {
 
 const IReceptionPacketModel *LayeredErrorModelBase::computePacketModel(const LayeredTransmission *transmission, double packetErrorRate) const
 {
-    const TransmissionPacketModel *transmissionPacketModel = check_and_cast<const TransmissionPacketModel *>(transmission->getPacketModel());
-    const cPacket* packet = transmissionPacketModel->getPacket();
-    if (packetErrorRate == 0)
-        return new ReceptionPacketModel(packet, new BitVector(*transmissionPacketModel->getSerializedPacket()), transmissionPacketModel->getBitrate(), packetErrorRate, true);
-    else {
-        if (uniform(0, 1) < packetErrorRate)
-            return new const ReceptionPacketModel(packet, new BitVector(), transmissionPacketModel->getBitrate(), packetErrorRate, false);
-        else
-            return new const ReceptionPacketModel(packet, new BitVector(*transmissionPacketModel->getSerializedPacket()), transmissionPacketModel->getBitrate(), packetErrorRate, true);
-    }
+    auto transmissionPacketModel = check_and_cast<const TransmissionPacketModel *>(transmission->getPacketModel());
+    auto transmittedPacket = transmissionPacketModel->getPacket();
+    auto receivedPacket = transmittedPacket->dup();
+    if (packetErrorRate != 0 && uniform(0, 1) < packetErrorRate)
+        receivedPacket->setBitError(true);
+    receivedPacket->addTagIfAbsent<ErrorRateInd>()->setPacketErrorRate(packetErrorRate);
+    return new ReceptionPacketModel(receivedPacket, transmissionPacketModel->getBitrate());
 }
 
 const IReceptionBitModel *LayeredErrorModelBase::computeBitModel(const LayeredTransmission *transmission, double bitErrorRate) const
 {
     const TransmissionBitModel *transmissionBitModel = check_and_cast<const TransmissionBitModel *>(transmission->getBitModel());
     if (bitErrorRate == 0)
-        return new const ReceptionBitModel(transmissionBitModel->getHeaderBitLength(), transmissionBitModel->getHeaderBitRate(), transmissionBitModel->getPayloadBitLength(), transmissionBitModel->getPayloadBitRate(), new BitVector(*transmissionBitModel->getBits()));
+        return new ReceptionBitModel(transmissionBitModel->getHeaderLength(), transmissionBitModel->getHeaderBitRate(), transmissionBitModel->getDataLength(), transmissionBitModel->getDataBitRate(), new BitVector(*transmissionBitModel->getBits()));
     else {
         BitVector *receivedBits = new BitVector(*transmissionBitModel->getBits());
         for (unsigned int i = 0; i < receivedBits->getSize(); i++) {
             if (uniform(0, 1) < bitErrorRate)
                 receivedBits->toggleBit(i);
         }
-        return new const ReceptionBitModel(transmissionBitModel->getHeaderBitLength(), transmissionBitModel->getHeaderBitRate(), transmissionBitModel->getPayloadBitLength(), transmissionBitModel->getPayloadBitRate(), receivedBits);
+        return new ReceptionBitModel(transmissionBitModel->getHeaderLength(), transmissionBitModel->getHeaderBitRate(), transmissionBitModel->getDataLength(), transmissionBitModel->getDataBitRate(), receivedBits);
     }
 }
 
@@ -64,16 +62,16 @@ const IReceptionSymbolModel *LayeredErrorModelBase::computeSymbolModel(const Lay
     }
     else {
         const TransmissionSymbolModel *transmissionSymbolModel = check_and_cast<const TransmissionSymbolModel *>(transmission->getSymbolModel());
-        const APSKModulationBase *modulation = check_and_cast<const APSKModulationBase *>(transmissionSymbolModel->getPayloadModulation());
+        const ApskModulationBase *modulation = check_and_cast<const ApskModulationBase *>(transmissionSymbolModel->getPayloadModulation());
         const std::vector<const ISymbol*> *transmittedSymbols = transmissionSymbolModel->getSymbols();
         std::vector<const ISymbol*> *receivedSymbols = new std::vector<const ISymbol *>();
         for (auto & transmittedSymbols_i : *transmittedSymbols) {
             if (uniform(0, 1) < symbolErrorRate) {
-                const APSKSymbol *transmittedSymbol = check_and_cast<const APSKSymbol *>(transmittedSymbols_i);
+                const ApskSymbol *transmittedSymbol = check_and_cast<const ApskSymbol *>(transmittedSymbols_i);
                 ShortBitVector bits = modulation->demapToBitRepresentation(transmittedSymbol);
                 int errorIndex = intuniform(0, bits.getSize() - 1);
                 bits.setBit(errorIndex, !bits.getBit(errorIndex));
-                const APSKSymbol *receivedSymbol = modulation->mapToConstellationDiagram(bits);
+                const ApskSymbol *receivedSymbol = modulation->mapToConstellationDiagram(bits);
                 receivedSymbols->push_back(receivedSymbol);
             }
             else

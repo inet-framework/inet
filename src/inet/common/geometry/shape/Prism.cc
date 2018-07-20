@@ -52,7 +52,7 @@ void Prism::genereateFaces()
 {
     faces.clear();
     faces.push_back(base);
-    Coord baseNormalUnitVector = base.getNormalUnitVector();
+    // TODO: Coord baseNormalUnitVector = base.getNormalUnitVector();
     const std::vector<Coord>& basePoints = base.getPoints();
     std::vector<Coord> translatedCopyPoints;
     for (auto & basePoint : basePoints)
@@ -98,14 +98,14 @@ bool Prism::isVisibleFromPoint(unsigned int faceId, const Coord& point, const Ro
     const std::vector<Coord>& polygonPoints = faces.at(faceId).getPoints();
     Coord facePoint = polygonPoints.at(0);
     Coord facePointPoint = point - facePoint;
-    Coord rotatedFaceNormal = rotation.rotateVectorClockwise(normalVectorsForFaces.at(faceId));
+    Coord rotatedFaceNormal = rotation.rotateVector(normalVectorsForFaces.at(faceId));
     return facePointPoint * rotatedFaceNormal > 0;
 }
 
 bool Prism::isVisibleFromView(unsigned int faceId, const Rotation& viewRotation, const Rotation& rotation) const
 {
     Coord zNormal(0,0,1);
-    Coord rotatedFaceNormal = viewRotation.rotateVectorClockwise(rotation.rotateVectorClockwise(normalVectorsForFaces.at(faceId)));
+    Coord rotatedFaceNormal = viewRotation.rotateVector(rotation.rotateVector(normalVectorsForFaces.at(faceId)));
     return rotatedFaceNormal * zNormal > 0;
 }
 
@@ -119,8 +119,8 @@ void Prism::computeOutwardNormalVectors()
 bool Prism::computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const
 {
     // Note: based on http://geomalgorithms.com/a13-_intersect-4.html
-    Coord p0 = lineSegment.getPoint1();
-    Coord p1 = lineSegment.getPoint2();
+    const auto& p0 = lineSegment.getPoint1();
+    const auto& p1 = lineSegment.getPoint2();
     if (p0 == p1)
     {
         normal1 = normal2 = Coord::NIL;
@@ -131,10 +131,10 @@ bool Prism::computeIntersection(const LineSegment& lineSegment, Coord& intersect
     double tL = 1;
     for (unsigned int i = 0; i < faces.size(); i++)
     {
-        Polygon face = faces[i];
-        Coord normalVec = normalVectorsForFaces[i];
+        const auto& face = faces[i];
+        const auto& normalVec = normalVectorsForFaces[i];
         const std::vector<Coord>& pointList = face.getPoints();
-        Coord f0 = pointList[0];
+        const auto& f0 = pointList[0];
         double N = (f0 - p0) * normalVec;
         double D = segmentDirection * normalVec;
         if (D < 0)

@@ -11,17 +11,15 @@ there were no batteries involved at all.
 
 %file: test.ned
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-import inet.common.lifecycle.LifecycleController;
 
 network Test
 {
     submodules:
-        lifecycleController: LifecycleController;
         radioMedium: Ieee80211ScalarRadioMedium;
-        configurator: IPv4NetworkConfigurator;
+        configurator: Ipv4NetworkConfigurator;
         hostSource: AdhocHost;
         hostDestination: AdhocHost;
 }
@@ -47,15 +45,15 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 *.hostDestination.status.initialStatus = "up"
 
 # power
-**.energyStorageType = "SimpleEpEnergyStorage"
-**.energyManagementType = "SimpleEpEnergyManagement"
-**.energyConsumerType = "StateBasedEpEnergyConsumer"
+**.energyStorage.typename = "SimpleEpEnergyStorage"
+**.energyManagement.typename = "SimpleEpEnergyManagement"
+**.energyConsumer.typename = "StateBasedEpEnergyConsumer"
 **.energyStorage.nominalCapacity = 1J
 **.energyManagement.nodeShutdownCapacity = 0J
 **.energyManagement.nodeStartCapacity = 0.2J
 *.hostSource.energyStorage.initialCapacity = 0J
 *.hostDestination.energyStorage.initialCapacity = 0.1J
-*.hostSource.energyGeneratorType = "AlternatingEpEnergyGenerator"
+*.hostSource.energyGenerator.typename = "AlternatingEpEnergyGenerator"
 *.hostSource.energyGenerator.energySinkModule = "hostSource.energyStorage"
 *.hostSource.energyGenerator.powerGeneration = 10mW
 *.hostSource.energyGenerator.sleepInterval = 0s
@@ -71,18 +69,19 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.mobility.initFromDisplayString = false
 **.mobility.initialY = 50m
 **.mobility.initialZ = 0m
-*.host*.mobilityType = "StationaryMobility"
+*.host*.mobility.typename = "StationaryMobility"
 *.hostSource.mobility.initialX = 20m
 *.hostDestination.mobility.initialX = 80m
 
 # ping app
-*.host*.numPingApps = 1
-*.hostSource.pingApp[0].destAddr = "hostDestination"
-*.hostSource.pingApp[0].printPing = true
+*.host*.numApps = 1
+*.host*.app[0].typename = "PingApp"
+*.hostSource.app[0].destAddr = "hostDestination"
+*.hostSource.app[0].printPing = true
 
 %contains: stdout
 --------------------------------------------------------
-	Test.hostSource.pingApp[0]
+	Test.hostSource.app[0]
 --------------------------------------------------------
 sent: 81   received: 30   loss rate (%): 62.963
 round-trip min/avg/max (ms): 0.2344/0.553547/1.5488

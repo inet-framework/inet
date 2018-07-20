@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/checksum/EthernetCRC.h"
 #include "inet/linklayer/ieee80211/mac/contract/IContention.h"
 #include "inet/linklayer/ieee80211/mac/contract/IStatistics.h"
 #include "inet/linklayer/ieee80211/mac/contract/ITx.h"
@@ -24,6 +25,8 @@
 
 namespace inet {
 namespace ieee80211 {
+
+using namespace inet::physicallayer;
 
 Define_Module(Rx);
 
@@ -62,22 +65,26 @@ void Rx::handleMessage(cMessage *msg)
         throw cRuntimeError("Unexpected self message");
 }
 
-bool Rx::lowerFrameReceived(Ieee80211Frame *frame)
+bool Rx::lowerFrameReceived(Packet *packet)
 {
-    Enter_Method("lowerFrameReceived(\"%s\")", frame->getName());
-    take(frame);
+    Enter_Method("lowerFrameReceived(\"%s\")", packet->getName());
+    take(packet);
 
-    bool isFrameOk = isFcsOk(frame);
+    bool isFrameOk = isFcsOk(packet);
     if (isFrameOk) {
-        EV_INFO << "Received frame from PHY: " << frame << endl;
-        if (frame->getReceiverAddress() != address)
-            setOrExtendNav(frame->getDuration());
+        EV_INFO << "Received frame from PHY: " << packet << endl;
+        const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
+        if (header->getReceiverAddress() != address)
+            setOrExtendNav(header->getDuration());
 //        statistics->frameReceived(frame);
         return true;
     }
     else {
         EV_INFO << "Received an erroneous frame from PHY, dropping it." << std::endl;
-        delete frame;
+        PacketDropDetails details;
+        details.setReason(INCORRECTLY_RECEIVED);
+        emit(packetDroppedSignal, packet, &details);
+        delete packet;
         for (auto contention : contentions)
             contention->corruptedFrameReceived();
 //        statistics->erroneousFrameReceived();
@@ -99,9 +106,30 @@ bool Rx::isReceptionInProgress() const
            (receivedPart == IRadioSignal::SIGNAL_PART_WHOLE || receivedPart == IRadioSignal::SIGNAL_PART_DATA);
 }
 
-bool Rx::isFcsOk(Ieee80211Frame *frame) const
+bool Rx::isFcsOk(Packet *packet) const
 {
-    return !frame->hasBitError();
+    if (packet->hasBitError() || !packet->peekData()->isCorrect())
+        return false;
+    else {
+        const auto& trailer = packet->peekAtBack<Ieee80211MacTrailer>(B(4));
+        switch (trailer->getFcsMode()) {
+            case FCS_DECLARED_INCORRECT:
+                return false;
+            case FCS_DECLARED_CORRECT:
+                return true;
+            case FCS_COMPUTED: {
+                const auto& fcsBytes = packet->peekDataAt<BytesChunk>(B(0), packet->getDataLength() - trailer->getChunkLength());
+                auto bufferLength = B(fcsBytes->getChunkLength()).get();
+                auto buffer = new uint8_t[bufferLength];
+                fcsBytes->copyToBuffer(buffer, bufferLength);
+                auto computedFcs = ethernetCRC(buffer, bufferLength);
+                delete [] buffer;
+                return computedFcs == trailer->getFcs();
+            }
+            default:
+                throw cRuntimeError("Unknown FCS mode");
+        }
+    }
 }
 
 void Rx::recomputeMediumFree()

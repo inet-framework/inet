@@ -19,13 +19,13 @@
 #define __INET_LINKVISUALIZERBASE_H
 
 #include "inet/common/geometry/common/Coord.h"
+#include "inet/common/packet/PacketFilter.h"
+#include "inet/common/StringFormat.h"
 #include "inet/visualizer/base/VisualizerBase.h"
 #include "inet/visualizer/util/AnimationPosition.h"
 #include "inet/visualizer/util/InterfaceFilter.h"
 #include "inet/visualizer/util/LineManager.h"
 #include "inet/visualizer/util/NetworkNodeFilter.h"
-#include "inet/visualizer/util/PacketFilter.h"
-#include "inet/visualizer/util/StringFormat.h"
 
 namespace inet {
 
@@ -34,6 +34,12 @@ namespace visualizer {
 class INET_API LinkVisualizerBase : public VisualizerBase, public cListener
 {
   protected:
+    enum ActivityLevel {
+        ACTIVITY_LEVEL_SERVICE,
+        ACTIVITY_LEVEL_PEER,
+        ACTIVITY_LEVEL_PROTOCOL,
+    };
+
     class INET_API LinkVisualization : public LineManager::ModuleLine {
       public:
         mutable AnimationPosition lastUsageAnimationPosition;
@@ -58,6 +64,7 @@ class INET_API LinkVisualizerBase : public VisualizerBase, public cListener
     /** @name Parameters */
     //@{
     bool displayLinks = false;
+    ActivityLevel activityLevel = static_cast<ActivityLevel>(-1);
     NetworkNodeFilter nodeFilter;
     InterfaceFilter interfaceFilter;
     PacketFilter packetFilter;
@@ -74,6 +81,7 @@ class INET_API LinkVisualizerBase : public VisualizerBase, public cListener
     const char *fadeOutMode = nullptr;
     double fadeOutTime = NaN;
     double fadeOutAnimationSpeed = NaN;
+    double holdAnimationTime = NaN;
     //@}
 
     LineManager *lineManager = nullptr;

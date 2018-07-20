@@ -27,16 +27,14 @@ import inet.visualizer.contract.IInfoVisualizer;
 module InfoVisualizer like IInfoVisualizer
 {
     parameters:
-        @display("i=block/app_s");
-        string canvasVisualizerType = default("InfoCanvasVisualizer");
-        string osgVisualizerType = default("InfoOsgVisualizer");
+        @display("i=block/app");
     submodules:
-        canvasVisualizer: <canvasVisualizerType> like IInfoVisualizer if canvasVisualizerType != "" {
+        canvasVisualizer: <default("InfoCanvasVisualizer")> like IInfoVisualizer if typename != "" {
             parameters:
-                @display("p=100,50");
+                @display("p=100,100");
         }
-        osgVisualizer: <osgVisualizerType> like IInfoVisualizer if osgVisualizerType != "" {
+        osgVisualizer: <default("InfoOsgVisualizer")> like IInfoVisualizer if typename != "" {
             parameters:
-                @display("p=100,150");
+                @display("p=100,200");
         }
 }

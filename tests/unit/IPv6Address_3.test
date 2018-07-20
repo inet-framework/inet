@@ -1,8 +1,8 @@
 %description:
-test IPv6Address prefix mask generation
+test Ipv6Address prefix mask generation
 
 %includes:
-#include "inet/networklayer/contract/ipv6/IPv6Address.h"
+#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 
 %global:
 
@@ -12,8 +12,8 @@ using namespace inet;
 for (int i=0; i<=128; i++)
 {
     uint32 mask[4];
-    IPv6Address::constructMask(i, mask);
-    EV << i << "  " << IPv6Address(mask[0], mask[1], mask[2], mask[3]) << "\n";
+    Ipv6Address::constructMask(i, mask);
+    EV << i << "  " << Ipv6Address(mask[0], mask[1], mask[2], mask[3]) << "\n";
 }
 EV << ".\n";
 

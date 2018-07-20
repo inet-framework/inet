@@ -29,7 +29,7 @@
 
 
 /**
- * A copy of UDPBasicApp, just for testing.
+ * A copy of UdpBasicApp, just for testing.
  * NOTE that this class is NOT declared INET_API!
  */
 class SomeUDPApp : public UDPAppBase

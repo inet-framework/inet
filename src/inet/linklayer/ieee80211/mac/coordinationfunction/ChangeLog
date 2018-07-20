@@ -1,0 +1,118 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IQoSRateSelection -> IQosRateSelection
+	    IRecipientQoSAckPolicy -> IRecipientQosAckPolicy
+	    IRecipientQoSMacDataService -> IRecipientQosMacDataService
+	    NonQoSRecoveryProcedure -> NonQosRecoveryProcedure
+	    OriginatorQoSAckPolicy -> OriginatorQosAckPolicy
+	    OriginatorQoSMacDataService -> OriginatorQosMacDataService
+	    QoSAckHandler -> QosAckHandler
+	    QoSCtsPolicy -> QosCtsPolicy
+	    QoSRateSelection -> QosRateSelection
+	    QoSRecoveryProcedure -> QosRecoveryProcedure
+	    QoSRtsPolicy -> QosRtsPolicy
+	    RecipientQoSAckPolicy -> RecipientQosAckPolicy
+	    RecipientQoSMacDataService -> RecipientQosMacDataService
+
+2017-11-16  Levente Mészáros
+
+	Added emitting packetSentToPeer and packetReceivedFromPeer signals.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-07-14  Levente Mészáros
+
+	Renamed variables, arguments to be more consistent.
+
+2017-07-14  Levente Mészáros
+
+	Fixed confusion between the last transmitted packet and the
+	received packet while processing received packet.
+
+2017-07-14  Levente Mészáros
+
+	Fixed bug that caused Ieee80211Retransmisson6.test to fail.
+
+2017-07-12  Levente Mészáros
+
+	Added some missing packet drop signal emitting.
+	Added limit to packetDrop signals with queueOverflow reason.
+	Added limit to packetDrop signals with retryLimitReached reason.
+
+2017-05-11  Levente Mészáros
+
+	Renamed frame variables to header where applicable.
+
+2017-05-10  Levente Mészáros
+
+	Added prefix to frame sequence display, and also added it as a tooltip.
+
+2017-05-10  Levente Mészáros
+
+	Changed to avoid copying shared_ptr.
+
+2017-05-10  Levente Mészáros
+
+	Added the currently running frame sequence to display string of Dcf and Hcf.
+
+2017-05-10  Levente Mészáros
+
+	Renamed MAC header arguments to *Header.
+
+2017-05-10  Levente Mészáros
+
+	Renamed some MAC headers and frames.
+
+	Ieee80211Frame -> Ieee80211MacHeader
+	Ieee80211OneAddressFrame -> Ieee80211OneAddressHeader
+	Ieee80211TwoAddressFrame -> Ieee80211TwoAddressHeader
+	Ieee80211ACKFrame -> Ieee80211AckFrame
+	Ieee80211RTSFrame -> Ieee80211RtsFrame
+	Ieee80211CTSFrame -> Ieee80211CtsFrame
+
+2017-05-09  Levente Mészáros
+
+	Renamed multiple header chunks.
+
+	Ieee80211DataFrame -> Ieee80211DataHeader
+	Ieee80211DataOrMgmtFrame -> Ieee80211DataOrMgmtHeader
+	Ieee80211ManagementHeader -> Ieee80211MgmtHeader
+	Ieee80211ManagementFrame -> Ieee80211MgmtFrame
+
+2017-05-09  Levente Mészáros
+
+	Added a separate sendUpFrame.
+
+2017-05-02  Levente Mészáros
+
+	Renamed to Ieee80211ManagementHeader.
+
+2017-04-27  Levente Mészáros
+
+	Moved Ieee80211MacTrailer handling so that fingerprints are kept.
+
+2017-04-20  Levente Mészáros
+
+	Refactored to use the new Packet API.
+
+2017-04-03  Levente Mészáros
+
+	Changed NF_LINK_BREAK object type to be Packet as assumed by receivers.
+	This will be replaced when the 802.11 model gets ported to the new API.

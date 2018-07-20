@@ -21,18 +21,19 @@
 #include <string.h>
 
 #include "inet/linklayer/loopback/Loopback.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 
 #include "inet/common/INETUtils.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/common/queue/IPassiveQueue.h"
-#include "inet/common/NotifierConsts.h"
+#include "inet/common/Simsignals.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
 
 namespace inet {
 
 Define_Module(Loopback);
-
-simsignal_t Loopback::packetSentToUpperSignal = registerSignal("packetSentToUpper");
-simsignal_t Loopback::packetReceivedFromUpperSignal = registerSignal("packetReceivedFromUpper");
 
 Loopback::~Loopback()
 {
@@ -40,7 +41,7 @@ Loopback::~Loopback()
 
 void Loopback::initialize(int stage)
 {
-    MACBase::initialize(stage);
+    MacBase::initialize(stage);
 
     // all initialization is done in the first stage
     if (stage == INITSTAGE_LOCAL) {
@@ -56,14 +57,14 @@ void Loopback::initialize(int stage)
 
 InterfaceEntry *Loopback::createInterfaceEntry()
 {
-    InterfaceEntry *ie = new InterfaceEntry(this);
+    InterfaceEntry *ie = getContainingNicModule(this);
 
 //    // generate a link-layer address to be used as interface token for IPv6
 //    InterfaceToken token(0, getSimulation()->getUniqueNumber(), 64);
 //    ie->setInterfaceToken(token);
 
     // capabilities
-    ie->setMtu(par("mtu").longValue());
+    ie->setMtu(par("mtu"));
     ie->setLoopback(true);
 
     return ie;
@@ -76,15 +77,21 @@ void Loopback::handleMessage(cMessage *msg)
         return;
     }
 
-    emit(packetReceivedFromUpperSignal, msg);
-    EV << "Received " << msg << " for transmission\n";
-    ASSERT(PK(msg)->hasBitError() == false);
+    auto packet = check_and_cast<Packet *>(msg);
+    emit(packetReceivedFromUpperSignal, packet);
+    EV << "Received " << packet << " for transmission\n";
+    ASSERT(packet->hasBitError() == false);
 
     // pass up payload
     numRcvdOK++;
-    emit(packetSentToUpperSignal, msg);
+    emit(packetSentToUpperSignal, packet);
     numSent++;
-    send(msg, "netwOut");
+    auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
+    packet->clearTags();
+    packet->addTag<DispatchProtocolReq>()->setProtocol(protocol);
+    packet->addTag<PacketProtocolTag>()->setProtocol(protocol);
+    packet->addTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    send(packet, "upperLayerOut");
 }
 
 void Loopback::flushQueue()
@@ -105,7 +112,7 @@ bool Loopback::isUpperMsg(cMessage *msg)
 void Loopback::refreshDisplay() const
 {
     /* TBD find solution for displaying IPv4 address without dependence on IPv4 or IPv6
-            IPv4Address addr = interfaceEntry->ipv4Data()->getIPAddress();
+            Ipv4Address addr = interfaceEntry->ipv4Data()->getIPAddress();
             sprintf(buf, "%s / %s\nrcv:%ld snt:%ld", addr.isUnspecified()?"-":addr.str().c_str(), datarateText, numRcvdOK, numSent);
      */
     char buf[80];

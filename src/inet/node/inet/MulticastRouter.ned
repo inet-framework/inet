@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 Andras Varga
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -20,6 +20,6 @@ package inet.node.inet;
 module MulticastRouter extends Router
 {
     parameters:
-        hasPIM = default(true);
+        hasPim = default(true);
         multicastForwarding = true;
 }

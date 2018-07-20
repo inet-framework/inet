@@ -1,0 +1,34 @@
+#!/bin/bash
+#17.08.14
+
+# This script can be used to crop videos with ffmpeg. Specify the number of pixels to crop from the top, bottom, left and right as arguments. 
+
+if [[ $1 == -h || $# == 0 ]];
+then
+echo "Arguments: input-file, output-file, top, bottom, left, right"
+else 
+
+INPUT_FILE=$1
+OUTPUT_FILE=$2
+TOP=$3
+BOTTOM=$4
+LEFT=$5
+RIGHT=$6
+
+# echo "args:" $INPUT_FILE $OUTPUT_FILE $TOP $BOTTOM $LEFT $RIGHT
+
+eval $(ffprobe -v error -of flat=s=_ -select_streams v:0 -show_entries stream=height,width $1)
+horizontal=${streams_stream_0_width}
+vertical=${streams_stream_0_height}
+
+let w=horizontal-LEFT-RIGHT
+let h=vertical-TOP-BOTTOM
+x=$LEFT
+y=$TOP
+
+
+ffmpeg -i $INPUT_FILE -filter:v "crop=$w:$h:$x:$y" $OUTPUT_FILE
+
+echo "output video dimensions: " $w "x" $h
+
+fi

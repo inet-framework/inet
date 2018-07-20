@@ -26,14 +26,14 @@ namespace ieee80211 {
 class INET_API IAckHandler
 {
     public:
-        virtual ~IAckHandler() { };
+        virtual ~IAckHandler() { }
 
-        virtual bool isEligibleToTransmit(Ieee80211DataOrMgmtFrame *frame) = 0;
-        virtual bool isOutstandingFrame(Ieee80211DataOrMgmtFrame *frame) = 0;
-        virtual void frameGotInProgress(Ieee80211DataOrMgmtFrame *dataOrMgmtFrame) = 0;
+        virtual bool isEligibleToTransmit(const Ptr<const Ieee80211DataOrMgmtHeader>& header) = 0;
+        virtual bool isOutstandingFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& header) = 0;
+        virtual void frameGotInProgress(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) = 0;
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif // ifndef __INET_IACKHANDLER_H

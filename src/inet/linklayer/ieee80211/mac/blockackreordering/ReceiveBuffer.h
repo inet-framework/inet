@@ -18,6 +18,7 @@
 #ifndef __INET_RECEIVEBUFFER_H
 #define __INET_RECEIVEBUFFER_H
 
+#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mac/common/Ieee80211Defs.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
@@ -27,7 +28,7 @@ namespace ieee80211 {
 class INET_API ReceiveBuffer
 {
     public:
-        typedef std::vector<Ieee80211DataFrame *> Fragments;
+        typedef std::vector<Packet *> Fragments;
         typedef std::map<SequenceNumber, Fragments> ReorderBuffer;
 
     protected:
@@ -43,7 +44,7 @@ class INET_API ReceiveBuffer
         ReceiveBuffer(int bufferSize, int nextExpectedSequenceNumber);
         virtual ~ReceiveBuffer();
 
-        bool insertFrame(Ieee80211DataFrame *dataFrame);
+        bool insertFrame(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader);
         void remove(int sequenceNumber);
 
         const ReorderBuffer& getBuffer() { return buffer; }

@@ -18,7 +18,7 @@
 
 package inet.examples.inet.hierarchical;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100G;
 import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.Eth1G;
@@ -37,16 +37,12 @@ network Hierarchical
         {
             parameters:
                 int numHosts = default(3);
-                @display("i=misc/cloud;is=s");
+                @display("i=misc/cloud");
             gates:
                 inout ethg[];
             submodules:
-                switch: EtherSwitch {
-                    @display("is=s");
-                }
-                host[numHosts]: StandardHost {
-                    @display("is=s");
-                }
+                switch: EtherSwitch;
+                host[numHosts]: StandardHost;
             connections:
                 for i=0..numHosts-1 {
                     host[i].ethg++ <--> Eth100M <--> switch.ethg++;
@@ -60,14 +56,12 @@ network Hierarchical
         {
             parameters:
                 int numAreas = default(3);
-                @display("i=misc/cloud;is=s");
+                @display("i=misc/cloud");
             gates:
                 inout ethg[];
             submodules:
                 lan[numAreas]: LAN;
-                router[numAreas]: Router {
-                    @display("is=s");
-                }
+                router[numAreas]: Router;
             connections:
                 for i=0..numAreas-1 {
                     router[i].ethg++ <--> Eth1G <--> router[(i+1)%numAreas].ethg++ if numAreas > 1;
@@ -77,12 +71,12 @@ network Hierarchical
         }
 
     submodules:
-        configurator: IPv4NetworkConfigurator {
-            @display("p=37,31");
+        configurator: Ipv4NetworkConfigurator {
+            @display("p=100,100;is=s");
             config = xmldoc("hierarchical.xml");
         }
         router[columns*rows]: Router {
-            @display("p=115,103,matrix,$columns;is=s");
+            @display("p=250,100,m,$columns,200,200");
         }
         area[columns*rows]: Area;
     connections:

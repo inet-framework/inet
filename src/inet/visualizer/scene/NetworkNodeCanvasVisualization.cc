@@ -32,12 +32,6 @@ NetworkNodeCanvasVisualization::Annotation::Annotation(cFigure *figure, const cF
 {
 }
 
-static BoxedLabelFigure *createRectangle(const char *label) {
-    auto figure = new BoxedLabelFigure();
-    figure->setText(label);
-    return figure;
-}
-
 NetworkNodeCanvasVisualization::NetworkNodeCanvasVisualization(cModule *networkNode, double annotationSpacing, double placementPenalty) :
     cGroupFigure(networkNode->getFullName()),
     networkNode(networkNode),
@@ -49,6 +43,16 @@ NetworkNodeCanvasVisualization::NetworkNodeCanvasVisualization(cModule *networkN
     submoduleBounds = getEnvir()->getSubmoduleBounds(networkNode);
     submoduleBounds.x = -submoduleBounds.width / 2;
     submoduleBounds.y = -submoduleBounds.height / 2;
+    if (networkNode->hasPar("canvasImage") && strlen(networkNode->par("canvasImage")) != 0) {
+        auto imageFigure = new cImageFigure("node");
+        imageFigure->setTooltip("This image represents a network node");
+        imageFigure->setTooltip("");
+        imageFigure->setAssociatedObject(networkNode);
+        imageFigure->setImageName(networkNode->par("canvasImage"));
+        if (networkNode->hasPar("canvasImageColor") && strlen(networkNode->par("canvasImageColor")) != 0)
+            imageFigure->setTintColor(cFigure::parseColor(networkNode->par("canvasImageColor")));
+        addFigure(imageFigure);
+    }
 }
 
 void NetworkNodeCanvasVisualization::refreshDisplay()
@@ -150,8 +154,7 @@ static cFigure::Rectangle createRectangle(const cFigure::Point& pt, const cFigur
 
 static void pushUnlessContains(std::vector<cFigure::Point>& pts, const std::vector<cFigure::Rectangle>& rcs, const cFigure::Point& pt)
 {
-    for (int j = 0; j < (int)rcs.size(); j++) {
-        cFigure::Rectangle rc = rcs[j];
+    for (const auto& rc: rcs) {
         if (containsPoint(rc, pt))
             return;
     }
@@ -244,9 +247,7 @@ void NetworkNodeCanvasVisualization::layout()
         cFigure::Rectangle bestRc;
 
         // for all candidate points
-        for (int j = 0; j < (int)pts.size(); j++) {
-            cFigure::Point pt = pts[j];
-
+        for (auto pt: pts) {
             // align annotation to candidate points with its various points
             for (int k = 0; k < 8; k++) {
                 cFigure::Rectangle candidateRc;
@@ -293,8 +294,7 @@ void NetworkNodeCanvasVisualization::layout()
 
                 // find an already positioned annotation which would intersect the candidate rectangle
                 bool intersects = false;
-                for (int l = 0; l < (int)rcs.size(); l++) {
-                    cFigure::Rectangle rc = rcs[l];
+                for (const auto& rc: rcs) {
                     if (intersectsRectangle(candidateRc, rc)) {
                         intersects = true;
                         break;
@@ -321,11 +321,11 @@ void NetworkNodeCanvasVisualization::layout()
         annotation.figure->setTransform(cFigure::Transform().translate(annotation.bounds.x, annotation.bounds.y));
 
         // delete candidate points covered by best rc
-        for (int j = 0; j < (int)pts.size(); j++) {
-            cFigure::Point pt = pts[j];
-
-            if (containsPoint(bestRc, pt))
-                pts.erase(pts.begin() + j--);
+        for (auto j = pts.begin(); j != pts.end(); ) {
+            if (containsPoint(bestRc, *j))
+                j = pts.erase(j);
+            else
+                ++j;
         }
 
         // push new candidates

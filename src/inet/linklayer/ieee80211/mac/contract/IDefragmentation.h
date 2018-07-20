@@ -18,22 +18,22 @@
 #ifndef __INET_IDEFRAGMENTATION_H
 #define __INET_IDEFRAGMENTATION_H
 
-#include "inet/common/INETDefs.h"
+#include "inet/common/packet/Packet.h"
 
 namespace inet {
 namespace ieee80211 {
 
-class Ieee80211DataOrMgmtFrame;
+class Ieee80211DataOrMgmtHeader;
 
 class INET_API IDefragmentation
 {
     public:
-        virtual ~IDefragmentation() {}
+        virtual ~IDefragmentation() { }
 
-        virtual Ieee80211DataOrMgmtFrame *defragmentFrames(std::vector<Ieee80211DataOrMgmtFrame *> *fragmentFrames) = 0;
+        virtual Packet *defragmentFrames(std::vector<Packet *> *fragmentFrames) = 0;
 };
 
 } // namespace ieee80211
 } // namespace inet
 
-#endif
+#endif // #ifndef __INET_IDEFRAGMENTATION_H

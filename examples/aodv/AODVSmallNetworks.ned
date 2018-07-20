@@ -17,53 +17,47 @@
 
 package inet.examples.aodv;
 
-import inet.common.lifecycle.LifecycleController;
 import inet.common.scenario.ScenarioManager;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
-import inet.node.aodv.AODVRouter;
-import inet.physicallayer.idealradio.IdealRadioMedium;
+import inet.node.aodv.AodvRouter;
+import inet.physicallayer.unitdisk.UnitDiskRadioMedium;
 
 
 network SimpleRREQ
 {
     parameters:
-        @display("bgb=525,437");
     submodules:
-        radioMedium: IdealRadioMedium {
+        radioMedium: UnitDiskRadioMedium {
             parameters:
-                @display("p=50,50");
+                @display("p=100,200;is=s");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 addDefaultRoutes = false;
                 addStaticRoutes = false;
                 addSubnetRoutes = false;
                 config = xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.0.0'/></config>");
-                @display("p=50,100");
+                @display("p=100,100;is=s");
         }
         routingTableRecorder: RoutingTableRecorder {
             parameters:
-                @display("p=50,150");
-        }
-        lifecycleController: LifecycleController {
-            parameters:
-                @display("p=50,200");
+                @display("p=100,300;is=s");
         }
         scenarioManager: ScenarioManager {
             parameters:
                 script = default(xml("<scenario/>"));
-                @display("p=50,250");
+                @display("p=100,400;is=s");
         }
-        sender: AODVRouter {
+        sender: AodvRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;p=270,51");
         }
-        intermediateNode: AODVRouter {
+        intermediateNode: AodvRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;p=270,214");
         }
-        receiver: AODVRouter {
+        receiver: AodvRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;p=270,377");
         }
@@ -73,46 +67,41 @@ network SimpleRREQ
 network SimpleRREQ2
 {
     parameters:
-        @display("bgb=961,662");
     submodules:
-        radioMedium: IdealRadioMedium {
+        radioMedium: UnitDiskRadioMedium {
             parameters:
-                @display("p=50,50");
+                @display("p=100,200;is=s");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 addDefaultRoutes = false;
                 addStaticRoutes = false;
                 addSubnetRoutes = false;
                 config = xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.0.0'/></config>");
-                @display("p=50,100");
+                @display("p=100,100;is=s");
         }
         routingTableRecorder: RoutingTableRecorder {
             parameters:
-                @display("p=50,150");
-        }
-        lifecycleController: LifecycleController {
-            parameters:
-                @display("p=50,200");
+                @display("p=100,300;is=s");
         }
         scenarioManager: ScenarioManager {
             parameters:
                 script = default(xml("<scenario/>"));
-                @display("p=50,250");
+                @display("p=100,400;is=s");
         }
-        sender: AODVRouter {
+        sender: AodvRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;p=284,51");
         }
-        intermediateNodeA: AODVRouter {
+        intermediateNodeA: AodvRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;p=203,206");
         }
-        intermediateNodeB: AODVRouter {
+        intermediateNodeB: AodvRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;p=386,206");
         }
-        receiver: AODVRouter {
+        receiver: AodvRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;p=284,378");
         }
@@ -122,50 +111,46 @@ network SimpleRREQ2
 network ShortestPath
 {
     parameters:
-        @display("bgb=961,662");
+        @display("bgb=650,550");
     submodules:
-        radioMedium: IdealRadioMedium {
+        radioMedium: UnitDiskRadioMedium {
             parameters:
-                @display("p=50,50");
+                @display("p=100,200;is=s");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 addDefaultRoutes = false;
                 addStaticRoutes = false;
                 addSubnetRoutes = false;
                 config = xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.0.0'/></config>");
-                @display("p=50,100");
+                @display("p=100,100;is=s");
         }
         routingTableRecorder: RoutingTableRecorder {
             parameters:
-                @display("p=50,150");
-        }
-        lifecycleController: LifecycleController {
-            parameters:
-                @display("p=50,200");
+                @display("p=100,300;is=s");
         }
         scenarioManager: ScenarioManager {
             parameters:
                 script = default(xml("<scenario/>"));
-                @display("p=50,250");
+                @display("p=100,400;is=s");
         }
-        sender: AODVRouter {
+        sender: AodvRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;p=283,63");
         }
-        intermediateNodeA: AODVRouter {
+        intermediateNodeA: AodvRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;p=203,206");
         }
-        intermediateNodeB: AODVRouter {
+        intermediateNodeB: AodvRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;p=385,256");
         }
-        intermediateNodeC: AODVRouter {
+        intermediateNodeC: AodvRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;p=292,325");
         }
-        receiver: AODVRouter {
+        receiver: AodvRouter {
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070;p=292,454");
         }

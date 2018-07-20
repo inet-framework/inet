@@ -15,25 +15,28 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtBase.h"
-
-#include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/common/INETUtils.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
-#include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtBase.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
 namespace inet {
 
 namespace ieee80211 {
 
+using namespace inet::physicallayer;
+
 void Ieee80211MgmtBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        numDataFramesReceived = 0;
+        mib = getModuleFromPar<Ieee80211Mib>(par("mibModule"), this);
         numMgmtFramesReceived = 0;
         numMgmtFramesDropped = 0;
-        WATCH(numDataFramesReceived);
         WATCH(numMgmtFramesReceived);
         WATCH(numMgmtFramesDropped);
     }
@@ -43,8 +46,8 @@ void Ieee80211MgmtBase::initialize(int stage)
     }
     else if (stage == INITSTAGE_LINK_LAYER_2) {
         // obtain our address from MAC
-        cModule *mac = getModuleFromPar<cModule>(par("macModule"), this);
-        myAddress.setAddress(mac->par("address").stringValue());
+        interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        myIface = interfaceTable->getInterfaceByName(utils::stripnonalnum(findModuleUnderContainingNode(this)->getFullName()).c_str());
     }
 }
 
@@ -61,8 +64,9 @@ void Ieee80211MgmtBase::handleMessage(cMessage *msg)
     else if (msg->arrivedOn("macIn")) {
         // process incoming frame
         EV << "Frame arrived from MAC: " << msg << "\n";
-        Ieee80211DataOrMgmtFrame *frame = check_and_cast<Ieee80211DataOrMgmtFrame *>(msg);
-        processFrame(frame);
+        auto packet = check_and_cast<Packet *>(msg);
+        const Ptr<const Ieee80211DataOrMgmtHeader>& header = packet->peekAt<Ieee80211DataOrMgmtHeader>(packet->getFrontOffset() - B(24));
+        processFrame(packet, header);
     }
     else if (msg->arrivedOn("agentIn")) {
         // process command from agent
@@ -73,94 +77,79 @@ void Ieee80211MgmtBase::handleMessage(cMessage *msg)
 
         handleCommand(msgkind, ctrl);
     }
-    else {
-        // packet from upper layers, to be sent out
-        cPacket *pk = PK(msg);
-        EV << "Packet arrived from upper layers: " << pk << "\n";
-        handleUpperMessage(pk);
-    }
+    else
+        throw cRuntimeError("Unknown message");
 }
 
-void Ieee80211MgmtBase::sendDown(cPacket *frame)
+void Ieee80211MgmtBase::sendDown(Packet *frame)
 {
     ASSERT(isOperational);
+    frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mgmt);
     send(frame, "macOut");
 }
 
-void Ieee80211MgmtBase::dropManagementFrame(Ieee80211ManagementFrame *frame)
+void Ieee80211MgmtBase::dropManagementFrame(Packet *frame)
 {
     EV << "ignoring management frame: " << (cMessage *)frame << "\n";
     delete frame;
     numMgmtFramesDropped++;
 }
 
-void Ieee80211MgmtBase::sendUp(cMessage *msg)
+void Ieee80211MgmtBase::processFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
-    ASSERT(isOperational);
-    send(msg, "upperLayerOut");
-}
-
-void Ieee80211MgmtBase::processFrame(Ieee80211DataOrMgmtFrame *frame)
-{
-    switch (frame->getType()) {
-        case ST_DATA:
-        case ST_DATA_WITH_QOS:
-            numDataFramesReceived++;
-            handleDataFrame(check_and_cast<Ieee80211DataFrame *>(frame));
-            break;
-
+    switch (header->getType()) {
         case ST_AUTHENTICATION:
             numMgmtFramesReceived++;
-            handleAuthenticationFrame(check_and_cast<Ieee80211AuthenticationFrame *>(frame));
+            handleAuthenticationFrame(packet, dynamicPtrCast<const Ieee80211MgmtHeader>(header));
             break;
 
         case ST_DEAUTHENTICATION:
             numMgmtFramesReceived++;
-            handleDeauthenticationFrame(check_and_cast<Ieee80211DeauthenticationFrame *>(frame));
+            handleDeauthenticationFrame(packet, dynamicPtrCast<const Ieee80211MgmtHeader>(header));
             break;
 
         case ST_ASSOCIATIONREQUEST:
             numMgmtFramesReceived++;
-            handleAssociationRequestFrame(check_and_cast<Ieee80211AssociationRequestFrame *>(frame));
+            handleAssociationRequestFrame(packet, dynamicPtrCast<const Ieee80211MgmtHeader>(header));
             break;
 
         case ST_ASSOCIATIONRESPONSE:
             numMgmtFramesReceived++;
-            handleAssociationResponseFrame(check_and_cast<Ieee80211AssociationResponseFrame *>(frame));
+            handleAssociationResponseFrame(packet, dynamicPtrCast<const Ieee80211MgmtHeader>(header));
             break;
 
         case ST_REASSOCIATIONREQUEST:
             numMgmtFramesReceived++;
-            handleReassociationRequestFrame(check_and_cast<Ieee80211ReassociationRequestFrame *>(frame));
+            handleReassociationRequestFrame(packet, dynamicPtrCast<const Ieee80211MgmtHeader>(header));
             break;
 
         case ST_REASSOCIATIONRESPONSE:
             numMgmtFramesReceived++;
-            handleReassociationResponseFrame(check_and_cast<Ieee80211ReassociationResponseFrame *>(frame));
+            handleReassociationResponseFrame(packet, dynamicPtrCast<const Ieee80211MgmtHeader>(header));
             break;
 
         case ST_DISASSOCIATION:
             numMgmtFramesReceived++;
-            handleDisassociationFrame(check_and_cast<Ieee80211DisassociationFrame *>(frame));
+            handleDisassociationFrame(packet, dynamicPtrCast<const Ieee80211MgmtHeader>(header));
             break;
 
         case ST_BEACON:
             numMgmtFramesReceived++;
-            handleBeaconFrame(check_and_cast<Ieee80211BeaconFrame *>(frame));
+            handleBeaconFrame(packet, dynamicPtrCast<const Ieee80211MgmtHeader>(header));
             break;
 
         case ST_PROBEREQUEST:
             numMgmtFramesReceived++;
-            handleProbeRequestFrame(check_and_cast<Ieee80211ProbeRequestFrame *>(frame));
+            handleProbeRequestFrame(packet, dynamicPtrCast<const Ieee80211MgmtHeader>(header));
             break;
 
         case ST_PROBERESPONSE:
             numMgmtFramesReceived++;
-            handleProbeResponseFrame(check_and_cast<Ieee80211ProbeResponseFrame *>(frame));
+            handleProbeResponseFrame(packet, dynamicPtrCast<const Ieee80211MgmtHeader>(header));
             break;
 
         default:
-            throw cRuntimeError("Unexpected frame type (%s)%s", frame->getClassName(), frame->getName());
+            throw cRuntimeError("Unexpected frame type (%s)%s", packet->getClassName(), packet->getName());
     }
 }
 
@@ -168,15 +157,15 @@ bool Ieee80211MgmtBase::handleOperationStage(LifecycleOperation *operation, int 
 {
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if ((NodeStartOperation::Stage)stage == NodeStartOperation::STAGE_PHYSICAL_LAYER)
+        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_PHYSICAL_LAYER)
             start();
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if ((NodeShutdownOperation::Stage)stage == NodeShutdownOperation::STAGE_PHYSICAL_LAYER)
+        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_PHYSICAL_LAYER)
             stop();
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if ((NodeCrashOperation::Stage)stage == NodeCrashOperation::STAGE_CRASH) // crash is immediate
+        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH) // crash is immediate
             stop();
     }
     else

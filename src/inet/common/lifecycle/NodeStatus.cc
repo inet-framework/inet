@@ -35,7 +35,7 @@ void NodeStatus::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         state = getStateByName(par("initialStatus"));
-        origIcon = getDisplayString().getTagArg("i", 0);
+        WATCH(state);
     }
 }
 
@@ -47,7 +47,7 @@ NodeStatus::State NodeStatus::getStateByName(const char *name)
     int state = e->lookup(temp.c_str(), -1);
     if (state == -1)
         throw cRuntimeError("Invalid state name '%s'", name);
-    return (State)state;
+    return static_cast<State>(state);
 }
 
 bool NodeStatus::handleOperationStage(LifecycleOperation *operation, int opStage, IDoneCallback *doneCallback)
@@ -111,33 +111,38 @@ void NodeStatus::setState(State s)
 void NodeStatus::refreshDisplay() const
 {
     const char *icon;
+    const char *text;
     switch (state) {
         case UP:
             icon = "";
+            text = "up";
             break;
-
         case DOWN:
             icon = "status/cross";
+            text = "down";
             break;
-
         case GOING_UP:
             icon = "status/execute";
+            text = "going up";
             break;
-
         case GOING_DOWN:
             icon = "status/execute";
+            text = "going down";
             break;
-
         default:
             throw cRuntimeError("Unknown status");
     }
+    auto& displayString = getDisplayString();
+    displayString.setTagArg("t", 0, text);
     cModule *node = getContainingNode(this);
-    const char *myicon = state == UP ? origIcon.c_str() : icon;
-    getDisplayString().setTagArg("i", 0, myicon);
-    if (*icon)
+    if (*icon) {
+        displayString.setTagArg("i2", 0, icon);
         node->getDisplayString().setTagArg("i2", 0, icon);
-    else
+    }
+    else {
+        displayString.removeTag("i2");
         node->getDisplayString().removeTag("i2");
+    }
 }
 
 } // namespace inet

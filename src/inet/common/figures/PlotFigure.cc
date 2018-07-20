@@ -18,13 +18,10 @@
 #include "PlotFigure.h"
 #include "InstrumentUtil.h"
 
-// for the moment commented out as omnet cannot instatiate it from a namespace
-using namespace inet;
-// namespace inet {
+namespace inet {
 
 Register_Figure("plot", PlotFigure);
 
-#define M_PI    3.14159265358979323846
 static const char *INIT_PLOT_COLOR = "blue";
 static const char *INIT_BACKGROUND_COLOR = "white";
 static const double TICK_LENGTH = 5;
@@ -168,7 +165,7 @@ void PlotFigure::setLabel(const char *text)
     labelFigure->setText(text);
 }
 
-const int PlotFigure::getLabelOffset() const
+int PlotFigure::getLabelOffset() const
 {
     return labelOffset;
 }
@@ -302,8 +299,8 @@ void PlotFigure::redrawValueTicks()
     }
 
     // Allocate ticks and numbers if needed
-    if (numTicks > valueTicks.size())
-        while (numTicks > valueTicks.size()) {
+    if ((size_t)numTicks > valueTicks.size())
+        while ((size_t)numTicks > valueTicks.size()) {
             cLineFigure *tick = new cLineFigure("valueTick");
             cLineFigure *dashLine = new cLineFigure("valueDashLine");
             cTextFigure *number = new cTextFigure("valueNumber");
@@ -326,7 +323,7 @@ void PlotFigure::redrawValueTicks()
             valueTicks.pop_back();
         }
 
-    for (int i = 0; i < valueTicks.size(); ++i) {
+    for (size_t i = 0; i < valueTicks.size(); ++i) {
         double x = bounds.x + bounds.width;
         double y = bounds.y + bounds.height - bounds.height * (i * valueTickSize) / std::abs(max - min);
         if (y > bounds.y && y < bounds.y + bounds.height) {
@@ -369,8 +366,8 @@ void PlotFigure::redrawTimeTicks()
     int numTimeTicks = (timeWindow - shifting) / timeTickSize + 1;
 
     // Allocate ticks and numbers if needed
-    if (numTimeTicks > timeTicks.size())
-        while (numTimeTicks > timeTicks.size()) {
+    if ((size_t)numTimeTicks > timeTicks.size())
+        while ((size_t)numTimeTicks > timeTicks.size()) {
             cLineFigure *tick = new cLineFigure("timeTick");
             cLineFigure *dashLine = new cLineFigure("timeDashLine");
             cTextFigure *number = new cTextFigure("timeNumber");
@@ -393,7 +390,7 @@ void PlotFigure::redrawTimeTicks()
             timeTicks.pop_back();
         }
 
-    for (int i = 0; i < timeTicks.size(); ++i) {
+    for (uint32 i = 0; i < timeTicks.size(); ++i) {
         double x = bounds.x + bounds.width * (i * timeTickSize + shifting) / timeWindow;
         double y = bounds.y + bounds.height;
         if (x > bounds.x && x < bounds.x + bounds.width) {
@@ -472,4 +469,5 @@ void PlotFigure::refresh()
         values.erase(++it, values.end());
 }
 
-// } // namespace inet
+} // namespace inet
+

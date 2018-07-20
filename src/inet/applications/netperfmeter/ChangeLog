@@ -1,3 +1,66 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-04-27  Andras Varga
+
+	Removed obsolete "dataTransferMode" parameters.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-02-09  Zoltan Bojthe
+
+	Replaced deprecated cDoubleHistogram with cHistogram.
+
+2018-01-22  Irene Ruengeler
+
+	Adapted to the new Packet API.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-12  Zoltan Bojthe
+
+	Renamed Request variables.
+	Moved Request kind into constructor argument.
+	Replaced cMessage commands with Request and Indication.
+	Fixed double and int inconsistency: NED vs. INI and NED vs. C++
+
+2018-01-02  Levente Mészáros
+
+	Replaced cPacket with Packet.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    ISCTP -> ISctp
+	    ITCP -> ITcp
+	    IUDP -> IUdp
+	    TCPCommand -> TcpCommand
+	    TCPSocket -> TcpSocket
+	    UDPSocket -> UdpSocket
+
+2017-12-14  Levente Mészáros
+
+	Removed unnecessary markImmutable() calls.
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-14  Zoltan Bojthe
+
+	Fixed base classes in MSG files.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2016-06-02  Levente Mészáros
+
+	Changed appIn/appOut vector gates to simple gates.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

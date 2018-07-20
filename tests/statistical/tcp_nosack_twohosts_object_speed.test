@@ -1,7 +1,7 @@
 %description:
 Testing TCP communication speed
     TCP
-    TCP_NSC
+    TcpNsc
 %#--------------------------------------------------------------------------------------------------------------
 %testprog: opp_run
 %#--------------------------------------------------------------------------------------------------------------
@@ -9,7 +9,7 @@ Testing TCP communication speed
 
 import ned.DatarateChannel;
 import inet.node.inet.StandardHost;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 
 
 channel C extends DatarateChannel
@@ -47,17 +47,17 @@ module STest
         clients_INET: SubTest {
             parameters:
                 srvTcpType = srvTcpType;
-                cliTcpType = "TCP";
+                cliTcpType = "Tcp";
         }
 //      clients_NSC: SubTest {
 //          parameters:
 //              srvTcpType = srvTcpType;
-//             cliTcpType = "TCP_NSC";
+//             cliTcpType = "TcpNsc";
 //      }
         clients_LWIP: SubTest {
             parameters:
                 srvTcpType = srvTcpType;
-                cliTcpType = "TCP_lwIP";
+                cliTcpType = "TcpLwip";
         }
 }
 
@@ -66,17 +66,17 @@ network TcpSpeedTest
     submodules:
         server_INET: STest {
             parameters:
-                srvTcpType = "TCP";
+                srvTcpType = "Tcp";
         }
 //      server_NSC: STest {
 //          parameters:
-//              srvTcpType = "TCP_NSC";
+//              srvTcpType = "TcpNsc";
 //      }
         server_LWIP: STest {
             parameters:
-                srvTcpType = "TCP_lwIP";
+                srvTcpType = "TcpLwip";
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             @display("p=70,40");
         }
 }
@@ -95,8 +95,8 @@ tkenv-plugin-path = ../../../etc/plugins
 #sim-time-limit = 2s+20s
 sim-time-limit = 2s+10s+20s+1.2s
 
-**.server*.tcpApp[0].typename = "TCPEchoApp"
-**.client*.tcpApp[0].typename = "TCPSessionApp"
+**.server*.tcpApp[0].typename = "TcpEchoApp"
+**.client*.tcpApp[0].typename = "TcpSessionApp"
 
 #client app:
 **.client*.tcpApp[0].active = true
@@ -118,7 +118,7 @@ sim-time-limit = 2s+10s+20s+1.2s
 
 
 # NIC configuration
-**.ppp[*].queueType = "DropTailQueue" # in routers
+**.ppp[*].queue.typename = "DropTailQueue" # in routers
 #**.ppp[*].queue.frameCapacity = 10
 **.ppp[*].queue.frameCapacity = 47  # good:(13,15,16,18,19,21-25, 7) bad:(17,20)
 

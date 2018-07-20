@@ -35,6 +35,7 @@ void NetworkNodeVisualizerBase::initialize(int stage)
 
 void NetworkNodeVisualizerBase::handleParameterChange(const char *name)
 {
+    if (!hasGUI()) return;
     if (name != nullptr) {
         if (!strcmp(name, "nodeFilter"))
             nodeFilter.setPattern(par("nodeFilter"));

@@ -22,25 +22,25 @@ output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 network=IGMPTestNetwork
-**.igmpType = "TestIGMP"
+**.igmp.typename = "TestIGMP"
 
 **.scenarioManager.script = xmldoc("scenario.xml")
-**.host.networkLayer.igmp.outputFile = "host-output.txt"
-**.router.networkLayer.igmp.outputFile = "router-output.txt"
+**.host.ipv4.igmp.outputFile = "host-output.txt"
+**.router.ipv4.igmp.outputFile = "router-output.txt"
 
 %file: scenario.xml
 <scenario>
 
-<dump t="1" module="host.networkLayer.igmp" ifname="eth0" what="groups"/>
-<dump t="1" module="router.networkLayer.igmp" ifname="eth0" what="groups"/>
+<dump t="1" module="host.ipv4.igmp" ifname="eth0" what="groups"/>
+<dump t="1" module="router.ipv4.igmp" ifname="eth0" what="groups"/>
 
-<join t="2" module="host.networkLayer.igmp" ifname="eth0" group="225.0.0.1"/>
-<dump t="2" module="host.networkLayer.igmp" ifname="eth0" what="groups"/>
-<dump t="2.1" module="router.networkLayer.igmp" ifname="eth0" what="listeners"/>
+<join t="2" module="host.ipv4.igmp" ifname="eth0" group="225.0.0.1"/>
+<dump t="2" module="host.ipv4.igmp" ifname="eth0" what="groups"/>
+<dump t="2.1" module="router.ipv4.igmp" ifname="eth0" what="listeners"/>
 
-<leave t="3" module="host.networkLayer.igmp" ifname="eth0" group="225.0.0.1"/>
-<dump t="3" module="host.networkLayer.igmp" ifname="eth0" what="groups"/>
-<dump t="5.1" module="router.networkLayer.igmp" node="router" ifname="eth0" what="listeners"/>
+<leave t="3" module="host.ipv4.igmp" ifname="eth0" group="225.0.0.1"/>
+<dump t="3" module="host.ipv4.igmp" ifname="eth0" what="groups"/>
+<dump t="5.1" module="router.ipv4.igmp" node="router" ifname="eth0" what="listeners"/>
 
 </scenario>
 

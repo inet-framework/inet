@@ -1,3 +1,112 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-25  Levente Mészáros
+
+	Added new generic FcsMode enumeration.
+	Replaced EthernetFcsMode with FcsMode.
+	Replaced parseEthernetFcsMode with parseFcsMode.
+	Added FCS_MODE_UNDEFINED enum members.
+
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-02-05  Zoltan Bojthe
+
+	Removed unused TxNotifDetails.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-11  Zoltan Bojthe
+
+	Renamed all *Nic modules to *Interface.
+
+2018-01-05  Zoltan Bojthe
+
+	Renamed NF_* signals to use camel case.
+	Renamed signal variables to *Signal.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    EtherFrameWithLLC -> EtherFrameWithLlc
+	    ExampleQoSClassifier -> ExampleQosClassifier
+	    IIeee8021QoSClassifier -> IIeee8021dQosClassifier
+	    IIeee8021dQoSClassifier -> IIeee8021dQosClassifier
+	    IMACProtocol -> IMacProtocol
+	    IPv4Address -> Ipv4Address
+	    IPv6Header -> Ipv6Header
+	    MACAddress -> MacAddress
+	    MACAddressType -> MacAddressType
+	    RandomQoSClassifier -> RandomQosClassifier
+	    SAPCode -> SapCode
+	    TCPSegment -> TcpHeader
+
+2017-12-18  Levente Mészáros
+
+	Changed WirelessNic to allow omitting the radio.
+
+2017-12-07  Zoltan Bojthe
+
+	Camelized property names in MSG files.
+
+2017-10-19  Zoltan Bojthe
+
+	Added MACAddress.msg file.
+
+2017-10-20  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-10-11  Zoltan Bojthe
+
+	Moved ethertype constants to new EtherType.msg file,
+	dropped some unused ethernet related structs.
+
+2017-09-13  Levente Mészáros
+
+	Merged remaining enums from EtherTypeTag.msg into EtherFrame.msg.
+
+2017-09-12  Zoltan Bojthe
+
+	Switched to using new ethernet header structures.
+
+2017-02-03  Levente Mészáros
+
+	Changed example Qos classifier to work with IPv6 headers too.
+
+2016-12-09  Zoltan Bojthe
+
+	Added more ethertype values.
+	Fixed EtherPauseFrame.
+
+2016-07-20  Zoltan Bojthe
+
+	Remove obsolete omnetpp 4.x code (#if OMNETPP_VERSION < 0x500).
+
+2015-07-01  Zoltan Bojthe
+
+	Added @nic property to all network interfaces.
+
+2015-06-12  Levente Mészáros
+
+	Added a separate IInterfaceControlInfo to specify interface id.
+
+2016-05-31  Levente Mészáros
+
+	Implemented IPacketControlInfo, IProtocolControlInfo, ISocketControlInfo
+	with link layer control infos.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

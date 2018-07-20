@@ -12,11 +12,11 @@
 +0.02  < sctp: SACK[flgs=0, cum_tsn=0, a_rwnd=99500, gaps=[], dups=[]]
 
 +0.25    write(3, ..., 2500) = 2500
-+0.00  > sctp: DATA[flgs=B, len=516, tsn=1, sid=1, ssn=0, ppid=0]; DATA[flgs=0, len=516, tsn=2, sid=1, ssn=0, ppid=0]
-+0.00  > sctp: DATA[flgs=0, len=516, tsn=3, sid=1, ssn=0, ppid=0]; DATA[flgs=0, len=516, tsn=4, sid=1, ssn=0, ppid=0]
++0.00  > sctp: DATA[flgs=B, len=516, tsn=1, sid=0, ssn=1, ppid=0]; DATA[flgs=0, len=516, tsn=2, sid=0, ssn=1, ppid=0]
++0.00  > sctp: DATA[flgs=0, len=516, tsn=3, sid=0, ssn=1, ppid=0]; DATA[flgs=0, len=516, tsn=4, sid=0, ssn=1, ppid=0]
 +0     < sctp: SACK[flgs=0, cum_tsn=4, a_rwnd=98000, gaps=[], dups=[]]  // Comment out when SCTP_NODELAY is set
 
-+0.00  > sctp: DATA[flgs=E, len=516, tsn=5, sid=1, ssn=0, ppid=0]
++0.00  > sctp: DATA[flgs=E, len=516, tsn=5, sid=0, ssn=1, ppid=0]
 
 +0.1  < sctp: SACK[flgs=0, cum_tsn=5, a_rwnd=100000, gaps=[], dups=[]]
 

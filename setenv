@@ -1,0 +1,22 @@
+#! /bin/sh
+
+case "$-" in
+*i*) ;;
+*)  if [ "$1" != "-f" ]; then # allow use from scripts, as ". setenv -f"
+        echo "Error: not a login shell -- run this script as 'source setenv' or '. setenv'"
+        exit 1
+    fi
+esac
+
+if [ ! -f bin/inet ]; then
+    echo "Error: current working directory does not look like an INET root directory"
+    # no exit -- it would close the shell
+else
+    INET_ROOT=`pwd`
+    echo $INET_ROOT
+    export PATH=$INET_ROOT/bin:$PATH
+    export INET_OMNETPP_OPTIONS="-n $INET_ROOT/src:$INET_ROOT/tutorials:$INET_ROOT/showcases:$INET_ROOT/examples --image-path=$INET_ROOT/images"
+    export INET_GDB_OPTIONS="-quiet -ex run --args"
+    export INET_VALGRIND_OPTIONS="-v --tool=memcheck --leak-check=yes --show-reachable=no --leak-resolution=high --num-callers=40 --freelist-vol=4000000"
+fi
+

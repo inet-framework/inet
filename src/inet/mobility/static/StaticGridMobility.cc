@@ -35,7 +35,7 @@ void StaticGridMobility::setInitialPosition()
     if (numHosts > rows * columns)
         throw cRuntimeError("parameter error: numHosts > rows * columns");
 
-    int index = visualRepresentation->getIndex();
+    int index = subjectModule->getIndex();
 
     int row = index / columns;
     int col = index % columns;

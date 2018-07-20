@@ -6,8 +6,8 @@ Testing manetrouting with AODV routing protocol, UDP forwarding
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import inet.networklayer.configurator.ipv4.FlatNetworkConfigurator;
-import inet.node.aodv.AODVRouter;
+import inet.networklayer.configurator.ipv4.Ipv4FlatNetworkConfigurator;
+import inet.node.aodv.AodvRouter;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 
@@ -22,21 +22,21 @@ network Net80211_aodv_test
         int numHosts;
         int distance @unit(m) = default(350m);
     submodules:
-        senderhost: AODVRouter {
+        senderhost: AodvRouter {
             parameters:
                 mobility.initialX = 1m;
                 mobility.initialY = 200m;
                 mobility.initialZ = 0m;
                 @display("i=device/pocketpc_s;r=,,#707070");
         }
-        rcvrhost: AODVRouter {
+        rcvrhost: AodvRouter {
             parameters:
                 mobility.initialX = 1m + (numHosts+1) * distance;
                 mobility.initialY = 200m;
                 mobility.initialZ = 0m;
                 @display("i=device/pocketpc_s;r=,,#707070");
         }
-        host[numHosts]: AODVRouter {
+        host[numHosts]: AodvRouter {
             parameters:
                 mobility.initialX = 1m + (index+1) * distance;
                 mobility.initialY = 200m;
@@ -47,7 +47,7 @@ network Net80211_aodv_test
             parameters:
                 @display("p=60,50;i=misc/sun");
         }
-        configurator: FlatNetworkConfigurator {
+        configurator: Ipv4FlatNetworkConfigurator {
             parameters:
                 networkAddress = "145.236.0.0";
                 netmask = "255.255.0.0";
@@ -87,39 +87,39 @@ description = "Aodv Simple test"
 # mobility
 **.mobility.initFromDisplayString = false
 
-**.host*.mobilityType = "StationaryMobility"
-**.*host.mobilityType = "StationaryMobility"
+**.host*.mobility.typename = "StationaryMobility"
+**.*host.mobility.typename = "StationaryMobility"
 
 # udp apps (on)
-**.senderhost.numUdpApps = 1
-**.senderhost.udpApp[*].typename = "UDPBasicBurst"
+**.senderhost.numApps = 1
+**.senderhost.app[*].typename = "UdpBasicBurst"
 
-**.udpApp[0].destAddresses = "rcvrhost"
-**.udpApp[0].localPort = 1234
-**.udpApp[0].destPort = 1234
-**.udpApp[0].messageLength = 512B  #
-**.udpApp[0].sendInterval = 10s + uniform(-0.001s,0.001s)
-**.udpApp[0].burstDuration = 0
-**.udpApp[0].chooseDestAddrMode = "perBurst"
-**.udpApp[0].sleepDuration = 1s
-**.udpApp[0].stopTime = -1s
-**.udpApp[0].startTime = 10s
-**.udpApp[0].delayLimit = 20s
-**.udpApp[0].destAddrRNG = 0
+**.app[0].destAddresses = "rcvrhost"
+**.app[0].localPort = 1234
+**.app[0].destPort = 1234
+**.app[0].messageLength = 512B  #
+**.app[0].sendInterval = 10s + uniform(-0.001s,0.001s)
+**.app[0].burstDuration = 0
+**.app[0].chooseDestAddrMode = "perBurst"
+**.app[0].sleepDuration = 1s
+**.app[0].stopTime = -1s
+**.app[0].startTime = 10s
+**.app[0].delayLimit = 20s
+**.app[0].destAddrRNG = 0
 
-**.rcvrhost.udpApp[*].typename = "UDPSink"
-**.rcvrhost.numUdpApps = 1
-**.rcvrhost.udpApp[0].localPort = 1234
+**.rcvrhost.numApps = 1
+**.rcvrhost.app[0].typename = "UdpSink"
+**.rcvrhost.app[0].localPort = 1234
 
 # tcp apps (off)
 **.numTcpApps = 0
 
 # ping app (senderhost pinged by others)
 # ping app (off)
-**.pingApp.count = 0
-**.pingApp.startTime = 1s
-**.pingApp.stopTime = -1s
-**.pingApp.printPing = true
+**.app.count = 0
+**.app.startTime = 1s
+**.app.stopTime = -1s
+**.app.printPing = true
 
 # ip settings
 **.ip.procDelay = 10us
@@ -181,8 +181,8 @@ cat("\n  MANETROUTING UDP TEST RESULT:\n")
 
 cat("\n    CHECKS SENT PACKETS:\n")
 
-x <- dataset$scalars[dataset$scalars$name == "sentPk:count",]
-xx <- x[grep("\\.senderhost\\.udpApp\\[0\\]",x$module),]
+x <- dataset$scalars[dataset$scalars$name == "packetSent:count",]
+xx <- x[grep("\\.senderhost\\.app\\[0\\]",x$module),]
 
 if(length(xx$value) != linecount)
 {
@@ -202,8 +202,8 @@ if(length(xx$value) != linecount)
 
 cat("\n    CHECKS RECEIVED PACKETS:\n")
 
-x <- dataset$scalars[dataset$scalars$name == "rcvdPk:count",]
-xx <- x[grep("\\.rcvrhost\\.udpApp\\[0\\]",x$module),]
+x <- dataset$scalars[dataset$scalars$name == "packetReceived:count",]
+xx <- x[grep("\\.rcvrhost\\.app\\[0\\]",x$module),]
 
 if(length(xx$value) != linecount)
 {

@@ -25,16 +25,14 @@ import inet.visualizer.contract.IIntegratedVisualizer;
 module IntegratedVisualizer like IIntegratedVisualizer
 {
     parameters:
-        @display("i=block/app_s");
-        string canvasVisualizerType = default("IntegratedCanvasVisualizer");
-        string osgVisualizerType = default(""); // TODO:  revive "IntegratedOsgVisualizer" when OSG visualizers are at least as good as Canvas based
+        @display("i=block/app");
     submodules:
-        canvasVisualizer: <canvasVisualizerType> like IIntegratedVisualizer if canvasVisualizerType != "" {
+        canvasVisualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if typename != "" {
             parameters:
-                @display("p=100,50");
+                @display("p=100,100");
         }
-        osgVisualizer: <osgVisualizerType> like IIntegratedVisualizer if osgVisualizerType != "" {
+        osgVisualizer: <default("")> like IIntegratedVisualizer if typename != "" {
             parameters:
-                @display("p=100,150");
+                @display("p=100,200");
         }
 }

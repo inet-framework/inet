@@ -1,3 +1,122 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-01  Zoltan Bojthe
+
+	Added B/b units to length constants and length fields of chunks.
+
+2018-05-04  Rudolf Hornig
+
+	Changed an integer parameter unit to second.
+	Added NED documentation for OSPFv2
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-02-26  Zoltan Bojthe
+
+	Added OspfProtocolDissector.
+
+2018-02-19  Zoltan Bojthe
+
+	Renamed functions to use camel case.
+
+2018-01-24  Levente Mészáros
+
+	Adapted registerProtocol calls to the new API based on OSI service primitives.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-12  Zoltan Bojthe
+
+	Removed 'Routing' from name of all routing protocol classes/files.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    ASExternalLSA -> AsExternalLsa
+	    AreaID -> AreaId
+	    BGPRouting -> BgpRouting
+	    ExternalTOSInfo -> ExternalTosInfo
+	    IIPRouting -> IIpRouting
+	    IIPv4RoutingTable -> IIpv4RoutingTable
+	    IPv4 -> Ipv4
+	    IPv4Address -> Ipv4Address
+	    IPv4AddressRange -> Ipv4AddressRange
+	    IPv4ControlInfo -> Ipv4ControlInfo
+	    IPv4InterfaceData -> Ipv4InterfaceData
+	    LSARequest -> LsaRequest
+	    LSAType -> LsaType
+	    OSPFASExternalLSA -> OspfAsExternalLsa
+	    OSPFASExternalLSAContents -> OspfAsExternalLsaContents
+	    OSPFArea -> OspfArea
+	    OSPFConfigReader -> OspfConfigReader
+	    OSPFDDOptions -> OspfDdOptions
+	    OSPFDatabaseDescriptionPacket -> OspfDatabaseDescriptionPacket
+	    OSPFHelloPacket -> OspfHelloPacket
+	    OSPFInterface -> OspfInterface
+	    OSPFLSA -> OspfLsa
+	    OSPFLSAHeader -> OspfLsaHeader
+	    OSPFLinkStateAcknowledgementPacket -> OspfLinkStateAcknowledgementPacket
+	    OSPFLinkStateRequestPacket -> OspfLinkStateRequestPacket
+	    OSPFLinkStateUpdatePacket -> OspfLinkStateUpdatePacket
+	    OSPFNetworkLSA -> OspfNetworkLsa
+	    OSPFOptions -> OspfOptions
+	    OSPFPacket -> OspfPacket
+	    OSPFPacketType -> OspfPacketType
+	    OSPFRouter -> OspfRouter
+	    OSPFRouterLSA -> OspfRouterLsa
+	    OSPFRouting -> OspfRouting
+	    OSPFSummaryLSA -> OspfSummaryLsa
+	    OSPFTimerType -> OspfTimerType
+	    OSPFcommon -> OspfCommon
+	    TOSData -> TosData
+
+2017-12-15  Zoltan Bojthe
+
+	Renamed deprecated info() to str(). Removed unnecessary cPar::xmlValue(),
+	cPar::stringValue(), cPar::boolValue(), cPar::longValue() calls.
+
+	Motivation: rely on cast operators instead because they can detect
+	overflows (when the value is cast to a smaller integer type that can not
+	represent it). Removed unnecessary .longvalue() calls. Replaced to
+	.intValue() in comparisons.
+
+2017-12-14  Levente Mészáros
+
+	Replaced pushHeader with insertAtEnd because these chunks are not headers.
+	Removed unnecessary markImmutable() calls.
+
+2017-12-11  Zoltan Bojthe
+
+	Updated for new msgc function names: getFooForUpdate, insertFoo, eraseFoo, etc.
+
+2017-11-14  Zoltan Bojthe
+
+	Replace "int foo @enum(FooEnum)" to FooEnum foo.
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-10-19  Zoltan Bojthe
+
+	Fixed class declaration namespace.
+
+2016-05-02  Levente Mészáros
+
+	Added new registerProtocol() calls.
+
+2016-04-29  Levente Mészáros
+
+	Dropped obsolete IPSocket.registerProtocol() calls.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

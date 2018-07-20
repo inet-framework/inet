@@ -13,20 +13,20 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
+import inet.common.INETDefs;
+import inet.common.geometry.Geometry;
+
 cplusplus {{
 #include "inet/environment/common/PhysicalObject.h"
 }}
 
 namespace inet::physicalenvironment;
 
-class noncobject Coord;
-class noncobject EulerAngles;
-
 class PhysicalObject extends cNamedObject
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
     int id;
-    Coord position @opaque;
-    EulerAngles orientation @opaque;
+    Coord position;
+    EulerAngles orientation;
 }

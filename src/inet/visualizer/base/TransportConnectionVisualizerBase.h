@@ -25,9 +25,9 @@
 #include "inet/visualizer/util/PortFilter.h"
 
 #ifdef WITH_TCP_INET
-#include "inet/transportlayer/tcp/TCPConnection.h"
+#include "inet/transportlayer/tcp/TcpConnection.h"
 #else
-namespace inet { namespace tcp { class TCPConnection; } }
+namespace inet { namespace tcp { class TcpConnection; } }
 #endif // WITH_TCP_INET
 
 namespace inet {
@@ -73,7 +73,7 @@ class INET_API TransportConnectionVisualizerBase : public VisualizerBase, public
     virtual void subscribe();
     virtual void unsubscribe();
 
-    virtual const TransportConnectionVisualization *createConnectionVisualization(cModule *source, cModule *destination, tcp::TCPConnection *tcpConnection) const = 0;
+    virtual const TransportConnectionVisualization *createConnectionVisualization(cModule *source, cModule *destination, tcp::TcpConnection *tcpConnection) const = 0;
     virtual void addConnectionVisualization(const TransportConnectionVisualization *connectionVisualization);
     virtual void removeConnectionVisualization(const TransportConnectionVisualization *connectionVisualization);
     virtual void removeAllConnectionVisualizations();

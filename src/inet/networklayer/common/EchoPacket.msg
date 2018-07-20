@@ -15,9 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-cplusplus {{
-#include "inet/common/INETDefs.h"
-}}
+import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
 
 namespace inet;
 
@@ -33,7 +32,10 @@ enum EchoProtocolType
 //
 // Generic network protocol packet for testing network connectivity.
 //
-packet EchoPacket
+class EchoPacket extends FieldsChunk
 {
-    int type @enum(EchoProtocolType);
+    EchoProtocolType type;
+    int identifier; // identifier to aid in matching Echo replies. May be Zero
+    int seqNumber; // sequence number to aid in matching Echo replies. May be Zero
 }
+

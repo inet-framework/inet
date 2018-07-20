@@ -1,0 +1,221 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-02-27  Zoltan Bojthe
+
+	Added UnitDiscProtocolDissector.
+
+2018-02-22  Zoltan Bojthe
+
+	Added unitdisk to known protocols, added payloadProtocol field for UnitDiskPhyHeader.
+
+2018-01-26  Levente Mészáros
+
+	Replaced headerBitLength with headerLength where the unit is already present.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-09  Levente Mészáros
+
+	Extended analog models to be able to compute the sum of a signal and a noise.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    ISNIR -> ISnir
+	    IdealAnalogModel -> UnitDiskAnalogModel
+	    IdealListening -> UnitDiskListening
+	    IdealNoise -> UnitDiskNoise
+	    IdealPhyHeader -> UnitDiskPhyHeader
+	    IdealRadio -> UnitDiskRadio
+	    IdealRadioMedium -> UnitDiskRadioMedium
+	    IdealReceiver -> UnitDiskReceiver
+	    IdealReception -> UnitDiskReception
+	    IdealSNIR -> UnitDiskSnir
+	    IdealTransmission -> UnitDiskTransmission
+	    IdealTransmitter -> UnitDiskTransmitter
+	    SNIRBase -> SnirBase
+
+2017-12-15  Andras Varga
+
+	Fixed int/double type mismatch between NED parameter and C++ usage.
+
+2017-12-15  Zoltan Bojthe
+
+	Removed unnecessary cPar::longValue() calls.
+
+	Motivation: rely on cast operators instead because they can detect
+	overflows (when the value is cast to a smaller integer type that can not
+	represent it). Removed unnecessary .longvalue() calls. Replaced to
+	.intValue() in comparisons.
+
+2017-12-14  Levente Mészáros
+
+	Replaced pushHeader, pushTrailer with insertHeader, insertTrailer.
+
+2017-12-14  Levente Mészáros
+
+	Removed unnecessary markImmutable() calls.
+
+2017-11-21  Levente Mészáros
+
+	Removed @opaque from fields, and added @opaque to types where needed.
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-01-26  Levente Mészáros
+
+	Switched to bit type where appropriate.
+
+2017-01-24  Levente Mészáros
+
+	Changed to use bit/byte where appropriate.
+
+2017-01-25  Zoltan Bojthe
+
+	Switched to use IdealPhyHeader and encapsulate/decapsulate in IdealRadio.
+
+2017-03-07  Levente Mészáros
+
+	Renamed getMacFrame to getPacket.
+
+2017-01-25  Zoltan Bojthe
+
+	Replaced cPacket* with Packet* where appropriate.
+
+	Added some TODOs in layered implementations.
+
+2017-01-25  Zoltan Bojthe
+
+	Added phy header to IdealRadio packets.
+
+====== inet-3.x ======
+
+2018-03-21  ------ inet-3.6.4 released ------
+
+2018-01-12  Zoltan Bojthe
+
+	Changed some module parameters from double to int.
+
+2017-12-22  ------ inet-3.6.3 released ------
+
+2017-10-02  ------ inet-3.6.2 released ------
+
+2017-07-06  ------ inet-3.6.1 released ------
+
+2017-06-09  ------ inet-3.6.0 released ------
+
+2017-02-09  Levente Mészáros
+
+	Added class descriptors for transmissions.
+
+2017-02-20  ------ inet-3.5.0 released ------
+
+2017-01-09  Levente Meszaros
+
+	Radio: Fixed IdealReceiver ignore interference bug #210.
+
+2016-06-15  ------ inet-3.4.0 released ------
+
+2016-05-12  Levente Meszaros
+
+	Radio: Renamed IdealTransmitter maxCommunicationRange to
+	communicationRange.
+
+	These parameters are not maximum values but the current values. Also
+	renamed maxInterferenceRange and maxDetectionRange.
+
+2016-04-19  Levente Meszaros
+
+	Followed recent logging API changes.
+
+2016-06-01  ------ inet-3.3.0 released ------
+
+2016-05-04  Levente Meszaros
+
+	Radio: Added IdealObstacleLoss support to IdealAnalogModel.
+
+2016-04-06  ------ inet-3.2.4 released ------
+
+2016-03-16  ------ inet-3.2.3 released ------
+
+2016-03-11  ------ inet-3.2.2 released ------
+
+2016-01-21  ------ inet-3.2.1 released ------
+
+2015-12-16  ------ inet-3.2.0 released ------
+
+2015-12-08  Levente Meszaros
+
+	Radio: Added some documentation and a few missing overrides.
+
+2015-11-12  Levente Meszaros
+
+	Radio: Added support for the simulation of separate signal parts.
+
+	The preamble, header and data parts can be optionally simulated
+	separately. This is results in more accurate simulation, because a
+	reception may be aborted before the data part is received.
+
+2015-11-12  Levente Meszaros
+
+	Radio: Added separate preambleDuration parameters to transmitters.
+
+2015-10-26  ------ inet-3.1.1 released ------
+
+2015-10-15  ------ inet-3.1.0 released ------
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-04-15  Levente Meszaros
+
+	Fixed noise and snir computation for IdealAnalogModel.
+
+2015-04-15  Levente Meszaros
+
+	Added snir parameter to computeIsReceptionSuccessful. Added snir parameter
+	to computeReceptionDecision.
+
+2015-04-03  Levente Meszaros
+
+	Added level parameter to printToStream functions.
+
+2015-03-17  Levente Meszaros
+
+	Added missing headerBitLength parameter to IdealTransmitter.
+
+2015-03-16  Levente Meszaros
+
+	Consistently renamed packet level and bit level implementations into
+	separate subdirectories. Renamed ideal to idealradio.
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2014-10-31  Levente Meszaros
+
+	Added initial implementation:
+	IdealAttenuation, IdealListening, IdealReceiver, IdealReception,
+	IdealTransmission, IdealTransmitter, IdealRadio, IdealRadioMedium
+
+====== inet-2.x ======

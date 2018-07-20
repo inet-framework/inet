@@ -4,7 +4,7 @@
 
 package inet.examples.wireless.multiradio;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.Router;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
@@ -15,21 +15,20 @@ import ned.DatarateChannel;
 network MultiRadio
 {
     parameters:
-        @display("bgb=500,300");
         bool useEthernetSwitching = default(true);
         bool useRouting = default(false);
     submodules:
         visualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
             parameters:
-                @display("p=100,50");
+                @display("p=100,300;is=s");
         }
         radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
-                @display("p=100,150");
+                @display("p=100,200;is=s");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
-                @display("p=100,250");
+                @display("p=100,100;is=s");
         }
         host1: WirelessHost {
             parameters:

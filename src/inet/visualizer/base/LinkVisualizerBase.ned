@@ -42,10 +42,12 @@ simple LinkVisualizerBase extends VisualizerBase
         string subscriptionModule = default("<root>"); // module where the visualizer subscribes for signals, root module by default
 
         bool displayLinks = default(false); // display arrows for active links, disabled by default
+        string activityLevel @enum("service", "peer", "protocol") = default("service"); // determines what level of activity is displayed, service level by default 
 
         string nodeFilter = default("*"); // which nodes are considered, matches all nodes by default
         string interfaceFilter = default("*"); // which interfaces are considered, matches all interfaces by default
         string packetFilter = default("*"); // which packets are considered, matches all packets by default
+        string packetDataFilter = default("*"); // which packets are considered based on the data they contain, matches all packets by default
 
         string lineColor = default("black"); // link arrow color, black by default
         string lineStyle = default("solid"); // link arrow style (solid, dashed, dotted)
@@ -64,6 +66,8 @@ simple LinkVisualizerBase extends VisualizerBase
         string fadeOutMode @enum("realTime", "animationTime", "simulationTime") = default("realTime"); // specifies how inactive links fade out
         double fadeOutTime @unit(s) = default(1s); // how quickly inactive links fade away, 1 second by default
         double fadeOutAnimationSpeed = default(0); // animation speed while there are active links, value must be in the range (0, +inf)
+
+        double holdAnimationTime @unit(s) = default(0s); // hold simulation (no progress) for the specified amount of animation time when the link is activated
 
         @class(LinkVisualizerBase);
 }

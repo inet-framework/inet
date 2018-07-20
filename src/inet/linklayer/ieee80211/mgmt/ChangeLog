@@ -1,3 +1,217 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-05-25  Levente Mészáros
+
+	Added IIeee80211Agent and replaced mgmtType with mgmt.typename parameter.
+
+2018-05-10  Zoltan Bojthe
+
+	Moved header serializers to the corresponding protocol folders.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-03-08  Zoltan Bojthe
+
+	Added Ieee80211MgmtProtocolPrinter.
+
+2018-03-06  Zoltan Bojthe
+
+	Added Ieee80211MgmtProtocolDissector.
+
+2018-02-07  Zoltan Bojthe
+
+	Removed unused linkPromiscuousSignal, linkFullPromiscuousSignal.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-12  Levente Mészáros
+
+	Replaced cMessage commands with Request and Indication.
+
+2018-01-11  Zoltan Bojthe
+
+	Renamed all *Nic modules to *Interface.
+
+2018-01-09  Levente Mészáros
+
+	Added getAssociatedAp to STA management.
+	Extended STA management with storing signal receive power in AP info.
+
+2018-01-05  Zoltan Bojthe
+
+	Renamed *Genericnetworkprotocolconfig* to *GnpConfig*.
+	Renamed *ArpResulotioSignal to arpResolution*Signal.
+
+2018-01-05  Zoltan Bojthe
+
+	Renamed NF_* signals to use camel case.
+	Renamed signal variables to *Signal.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    APInfo -> ApInfo
+	    AssociatedAPInfo -> AssociatedApInfo
+	    IMACRelayUnit -> IMacRelayUnit
+	    Ieee80211AgentSTA -> Ieee80211AgentSta
+	    Ieee80211BSSType -> Ieee80211BssType
+	    Ieee80211HWMPCode -> Ieee80211HwmpCode
+	    Ieee80211MgmtAP -> Ieee80211MgmtAp
+	    Ieee80211MgmtAPBase -> Ieee80211MgmtApBase
+	    Ieee80211MgmtAPSimplified -> Ieee80211MgmtApSimplified
+	    Ieee80211MgmtSTA -> Ieee80211MgmtSta
+	    Ieee80211MgmtSTASimplified -> Ieee80211MgmtStaSimplified
+	    Ieee80211Prim_BSSDescription -> Ieee80211Prim_BssDescription
+	    MACAddress -> MacAddress
+	    MAC_compare -> MacCompare
+	    STAInfo -> StaInfo
+	    STAList -> StaList
+
+2017-12-15  Zoltan Bojthe
+
+	Removed unnecessary cPar::doubleValue(), cPar::stringValue() calls.
+
+2017-12-14  Levente Mészáros
+
+	Removed unnecessary markImmutable() calls.
+
+2017-12-11  Zoltan Bojthe
+
+	Updated for new msgc function names: getFooForUpdate, insertFoo, eraseFoo, etc.
+
+2017-11-21  Levente Mészáros
+
+	Eliminated all #define statements from MSG files.
+
+2017-11-14  Zoltan Bojthe
+
+	Replace "int foo @enum(FooEnum)" to FooEnum foo.
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-05-11  Levente Mészáros
+
+	Renamed frame variables to header where applicable.
+
+2017-05-11  Levente Mészáros
+
+	Set BSSID to MAC address in AP too.
+
+2017-05-10  Levente Mészáros
+
+	Renamed MAC header arguments to *Header.
+
+2017-05-10  Levente Mészáros
+
+	Renamed some MAC headers and frames.
+
+	Ieee80211Frame -> Ieee80211MacHeader
+	Ieee80211OneAddressFrame -> Ieee80211OneAddressHeader
+	Ieee80211TwoAddressFrame -> Ieee80211TwoAddressHeader
+	Ieee80211ACKFrame -> Ieee80211AckFrame
+	Ieee80211RTSFrame -> Ieee80211RtsFrame
+	Ieee80211CTSFrame -> Ieee80211CtsFrame
+
+2017-05-09  Levente Mészáros
+
+	Extracted Ieee80211MgmtFrameSerializer from Ieee80211MacHeaderSerializer.
+
+2017-05-09  Levente Mészáros
+
+	Renamed to Ieee80211MgmtFrame.msg.
+
+2017-05-09  Levente Mészáros
+
+	Renamed multiple header chunks.
+
+	Ieee80211DataFrame -> Ieee80211DataHeader
+	Ieee80211DataOrMgmtFrame -> Ieee80211DataOrMgmtHeader
+	Ieee80211ManagementHeader -> Ieee80211MgmtHeader
+	Ieee80211ManagementFrame -> Ieee80211MgmtFrame
+
+2017-05-09  Levente Mészáros
+
+	Dropped obsolete code already moved to Ieee80211Portal and Ieee802Llc.
+	Moved important shared state information from MGMT to MIB.
+	Removed encapDecap parameter.
+	Moved MAC address from MGMT to MIB.
+	Removed MAC header from interface between MAC and MGMT.
+
+2017-05-08  Levente Mészáros
+
+	Added Ieee802Llc and Ieee80211Mib modules to Ieee80211Nic module.
+
+2017-05-03  Levente Mészáros
+
+	Removed connectedToHL flag.
+	Removed remaining MAC header encapsulation and data frame handling from MGMT.
+	Moved encapsulation into MAC from adhoc MGMT.
+	Dropped upperLayer gates from management modules.
+	Removed setToDS for management frames as the standard requires.
+
+2017-05-02  Levente Mészáros
+
+	Moved the insertion of the MAC trailer from MGMT into MAC.
+	Dropped duplicate Ieee80211ActionFrameBody.
+	Renamed authentication *FrameBody to *Frame.
+	Renamed to Ieee80211ManagementFrame.
+	Renamed to Ieee80211ManagementHeader.
+	Dropped obsolete authentication frame subtypes.
+	Moved management frame bodies into their own chunks.
+	Moved variable bodyLength values to modules from chunk
+	definitions, updated fingerprints.
+
+2017-04-28  Levente Mészáros
+
+	Moved chunkLength to C++ because it's not constant.
+
+2017-04-27  Levente Mészáros
+
+	Added Ieee80211MacTrailer to management frames.
+
+2017-04-26  Levente Mészáros
+
+	Renamed to Ieee80211MacTrailer.
+
+2017-04-26  Levente Mészáros
+
+	Removed Ieee80211DataFrameWithSNAP and add separate Ieee802SnapHeader.
+
+2017-04-25  Levente Mészáros
+
+	Added separate Ieee80211Fcs chunk and fixed body lengths.
+
+2017-04-20  Levente Mészáros
+
+	Refactored to use the new Packet API.
+
+2017-04-12  Levente Mészáros
+
+	Replace cPacket with Packet.
+
+2017-03-09  Levente Mészáros
+
+	Fixed ethernet header size.
+
+2016-10-26  Zoltan Bojthe
+
+	Removed compatibility macros required for OMNeT++ 4.x builds.
+
+2016-05-31  Levente Mészáros
+
+	Moved interface lookup to management base class and added
+	interface id to control infos.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

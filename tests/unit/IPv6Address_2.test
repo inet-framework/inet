@@ -1,8 +1,8 @@
 %description:
-a misc IPv6Address test
+a misc Ipv6Address test
 
 %includes:
-#include "inet/networklayer/contract/ipv6/IPv6Address.h"
+#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 
 %global:
 
@@ -10,11 +10,11 @@ using namespace inet;
 
 %activity:
 
-IPv6Address linkLocalAddr;
-IPv6Address siteLocalAddr;
-IPv6Address multicast;
-IPv6Address unspecified;
-IPv6Address loopback;
+Ipv6Address linkLocalAddr;
+Ipv6Address siteLocalAddr;
+Ipv6Address multicast;
+Ipv6Address unspecified;
+Ipv6Address loopback;
 
 EV << "This is a link local address." << endl;
 linkLocalAddr.set("fe80:1111:2222:3300:fe44:a555:6666:7777");

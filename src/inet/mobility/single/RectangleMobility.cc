@@ -82,25 +82,25 @@ void RectangleMobility::move()
         // top side
         lastPosition.x = constraintAreaMin.x + d;
         lastPosition.y = constraintAreaMin.y;
-        lastSpeed = Coord(speed, 0, 0);
+        lastVelocity = Coord(speed, 0, 0);
     }
     else if (d < corner2) {
         // right side
         lastPosition.x = constraintAreaMax.x;
         lastPosition.y = constraintAreaMin.y + d - corner1;
-        lastSpeed = Coord(0, speed, 0);
+        lastVelocity = Coord(0, speed, 0);
     }
     else if (d < corner3) {
         // bottom side
         lastPosition.x = constraintAreaMax.x - d + corner2;
         lastPosition.y = constraintAreaMax.y;
-        lastSpeed = Coord(-speed, 0, 0);
+        lastVelocity = Coord(-speed, 0, 0);
     }
     else {
         // left side
         lastPosition.x = constraintAreaMin.x;
         lastPosition.y = constraintAreaMax.y - d + corner3;
-        lastSpeed = Coord(0, -speed, 0);
+        lastVelocity = Coord(0, -speed, 0);
     }
 }
 

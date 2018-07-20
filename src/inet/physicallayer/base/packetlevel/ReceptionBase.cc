@@ -45,8 +45,8 @@ std::ostream& ReceptionBase::printToStream(std::ostream& stream, int level) cons
                << ", startTime = " << startTime
                << ", endTime = " << endTime
                << ", preambleDuration = " << preambleDuration
-               << ", headerPosition = " << headerDuration
-               << ", dataPosition = " << dataDuration
+               << ", headerDuration = " << headerDuration
+               << ", dataDuration = " << dataDuration
                << ", startPosition = " << startPosition
                << ", endPosition = " << endPosition
                << ", startOrientation = " << startOrientation

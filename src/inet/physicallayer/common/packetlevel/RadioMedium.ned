@@ -24,7 +24,7 @@ import inet.physicallayer.contract.packetlevel.INeighborCache;
 import inet.physicallayer.contract.packetlevel.IObstacleLoss;
 import inet.physicallayer.contract.packetlevel.IPathLoss;
 import inet.physicallayer.contract.packetlevel.IPropagation;
-import inet.physicallayer.contract.packetlevel.IRadioBackgroundNoise;
+import inet.physicallayer.contract.packetlevel.IBackgroundNoise;
 import inet.physicallayer.contract.packetlevel.IRadioMedium;
 
 //
@@ -40,67 +40,59 @@ module RadioMedium like IRadioMedium
         string physicalEnvironmentModule = default("physicalEnvironment"); // module path of the physical environment model
 
         // submodule type parameters
-        string propagationType;                   // NED type of the propagation model
-        string pathLossType;                      // NED type of the path loss model
-        string obstacleLossType = default("");    // NED type of the obstacle loss model
-        string analogModelType;                   // NED type of the analog model
-        string backgroundNoiseType = default(""); // NED type of the background noise model
-        string mediumLimitCacheType = default("MediumLimitCache"); // NED type of the medium limit cache model
-        string neighborCacheType = default("");   // NED type of the neighbor cache model
-        string communicationCacheType = default("VectorCommunicationCache"); // NED type of the communication cache model
 
-        // filter parameters that control when radio frames are sent to receiver radios
-        string rangeFilter = default("");       // when either set to 'interferenceRange' or 'communicationRange' the radio medium doesn't send radio frames to a radio if it's outside the provided range
-        bool radioModeFilter = default(false);  // when enabled the radio medium doesn't send radio frames to a radio if it's neither in receiver nor in transceiver mode
-        bool listeningFilter = default(false);  // when enabled the radio medium doesn't send radio frames to a radio if it listens on the channel in incompatible mode (e.g. different carrier frequency and bandwidth, different modulation)
-        bool macAddressFilter = default(false); // when enabled the radio medium doesn't send radio frames to a radio if it the destination mac address differs
+        // filter parameters that control when signals are sent to receiver radios
+        string rangeFilter = default("");       // when either set to 'interferenceRange' or 'communicationRange' the radio medium doesn't send signals to a radio if it's outside the provided range
+        bool radioModeFilter = default(false);  // when enabled the radio medium doesn't send signals to a radio if it's neither in receiver nor in transceiver mode
+        bool listeningFilter = default(false);  // when enabled the radio medium doesn't send signals to a radio if it listens on the channel in incompatible mode (e.g. different carrier frequency and bandwidth, different modulation)
+        bool macAddressFilter = default(false); // when enabled the radio medium doesn't send signals to a radio if it the destination mac address differs
 
         // logging parameters
         bool recordCommunicationLog = default(false); // when enabled the medium writes a communication log file that contains one line per transmission and per reception
 
         @class(RadioMedium);
-        @display("i=misc/sun_s");
+        @display("i=misc/sun");
 
         @signal[radioAdded];
         @signal[radioRemoved];
-        @signal[transmissionAdded];
-        @signal[transmissionRemoved];
-        @signal[transmissionStarted];
-        @signal[transmissionEnded];
-        @signal[receptionStarted];
-        @signal[receptionEnded];
+        @signal[signalAdded];
+        @signal[signalRemoved];
+        @signal[signalDepartureStarted];
+        @signal[signalDepartureEnded];
+        @signal[signalArrivalStarted];
+        @signal[signalArrivalEnded];
 
     submodules:
-        propagation: <propagationType> like IPropagation {
+        propagation: <> like IPropagation {
             parameters:
-                @display("p=100,50");
+                @display("p=100,100");
         }
-        analogModel: <analogModelType> like IAnalogModel {
+        analogModel: <> like IAnalogModel {
             parameters:
-                @display("p=100,150");
+                @display("p=100,200");
         }
-        backgroundNoise: <backgroundNoiseType> like IRadioBackgroundNoise if backgroundNoiseType != "" {
+        backgroundNoise: <default("")> like IBackgroundNoise if typename != "" {
             parameters:
-                @display("p=100,250");
+                @display("p=100,300");
         }
-        pathLoss: <pathLossType> like IPathLoss {
+        pathLoss: <> like IPathLoss {
             parameters:
-                @display("p=300,50");
+                @display("p=300,100");
         }
-        obstacleLoss: <obstacleLossType> like IObstacleLoss if obstacleLossType != "" {
+        obstacleLoss: <default("")> like IObstacleLoss if typename != "" {
             parameters:
-                @display("p=300,150");
+                @display("p=300,200");
         }
-        mediumLimitCache: <mediumLimitCacheType> like IMediumLimitCache {
+        mediumLimitCache: <default("MediumLimitCache")> like IMediumLimitCache {
             parameters:
-                @display("p=500,50");
+                @display("p=500,100");
         }
-        communicationCache: <communicationCacheType> like ICommunicationCache {
+        communicationCache: <default("VectorCommunicationCache")> like ICommunicationCache {
             parameters:
-                @display("p=500,250");
+                @display("p=500,300");
         }
-        neighborCache: <neighborCacheType> like INeighborCache if neighborCacheType != "" {
+        neighborCache: <default("")> like INeighborCache if typename != "" {
             parameters:
-                @display("p=500,150");
+                @display("p=500,200");
         }
 }

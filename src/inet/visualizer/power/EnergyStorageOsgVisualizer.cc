@@ -20,6 +20,8 @@
 
 namespace inet {
 
+using namespace power;
+
 namespace visualizer {
 
 Define_Module(EnergyStorageOsgVisualizer);
@@ -60,8 +62,9 @@ EnergyStorageVisualizerBase::EnergyStorageVisualization *EnergyStorageOsgVisuali
 
 void EnergyStorageOsgVisualizer::refreshEnergyStorageVisualization(const EnergyStorageVisualization *energyStorageVisualization) const
 {
-    auto infoOsgVisualization = static_cast<const EnergyStorageOsgVisualization *>(energyStorageVisualization);
-    auto node = infoOsgVisualization->node;
+    // TODO:
+    // auto infoOsgVisualization = static_cast<const EnergyStorageOsgVisualization *>(energyStorageVisualization);
+    // auto node = infoOsgVisualization->node;
 }
 
 #endif // ifdef WITH_OSG

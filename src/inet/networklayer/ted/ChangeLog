@@ -1,3 +1,80 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-01  Zoltan Bojthe
+
+	Added B/b units to length constants and length fields of chunks.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-03-01  Zoltan Bojthe
+
+	Added LsrProtocolDissector.
+	Added linkstaterouting to registered protocols and use it instead of ospf.
+
+2018-02-19  Zoltan Bojthe
+
+	Renamed functions to use camel case.
+
+2018-01-24  Levente Mészáros
+
+	Adapted registerProtocol calls to the new API based on OSI service primitives.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-05  Zoltan Bojthe
+
+	Renamed NF_* signals to use camel case.
+	Renamed signal variables to *Signal.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IIPv4RoutingTable -> IIpv4RoutingTable
+	    IPAddressVector -> Ipv4AddressVector
+	    IPv4 -> Ipv4
+	    IPv4Address -> Ipv4Address
+	    IPv4AddressVector -> Ipv4AddressVector
+	    IPv4ControlInfo -> Ipv4ControlInfo
+	    IPv4InterfaceData -> Ipv4InterfaceData
+	    IPv4Route -> Ipv4Route
+	    RSVP -> Rsvp
+	    TED -> Ted
+	    TEDChangeInfo -> TedChangeInfo
+	    TELinkStateInfo -> TeLinkStateInfo
+	    TELinkStateInfoVector -> TeLinkStateInfoVector
+
+2017-12-15  Zoltan Bojthe
+
+	Removed unnecessary cPar::doubleValue() calls.
+
+2017-12-14  Levente Mészáros
+
+	Removed unnecessary markImmutable() calls.
+
+2017-11-21  Levente Mészáros
+
+	Eliminated all #define statements from MSG files.
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2016-05-02  Levente Mészáros
+
+	Added new registerProtocol() calls.
+
+2016-04-29  Levente Mészáros
+
+	Dropped obsolete IPSocket.registerProtocol() calls.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

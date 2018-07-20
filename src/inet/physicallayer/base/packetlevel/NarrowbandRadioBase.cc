@@ -34,7 +34,6 @@ NarrowbandRadioBase::NarrowbandRadioBase() :
 void NarrowbandRadioBase::handleUpperCommand(cMessage *message)
 {
     if (message->getKind() == RADIO_C_CONFIGURE) {
-        Radio::handleUpperCommand(message);
         ConfigureRadioCommand *configureCommand = check_and_cast<ConfigureRadioCommand *>(message->getControlInfo());
         const IModulation *newModulation = configureCommand->getModulation();
         if (newModulation != nullptr)
@@ -46,8 +45,7 @@ void NarrowbandRadioBase::handleUpperCommand(cMessage *message)
         if (!std::isnan(newBandwidth.get()))
             setBandwidth(newBandwidth);
     }
-    else
-        Radio::handleUpperCommand(message);
+    Radio::handleUpperCommand(message);
 }
 
 void NarrowbandRadioBase::setModulation(const IModulation *newModulation)

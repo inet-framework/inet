@@ -18,7 +18,9 @@
 #ifndef __INET_IANTENNA_H
 #define __INET_IANTENNA_H
 
+#include "inet/common/INETDefs.h"
 #include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
+#include "inet/physicallayer/contract/packetlevel/IAntennaGain.h"
 #include "inet/mobility/contract/IMobility.h"
 
 namespace inet {
@@ -39,24 +41,16 @@ class INET_API IAntenna : public IPrintableObject
     virtual IMobility *getMobility() const = 0;
 
     /**
+     * Returns the antenna's gain calculator for directional selectivity.
+     * This object may be copied as needed, i.e. IAntennaGain objects are
+     * expected to have no reference to other objects.
+     */
+    virtual Ptr<const IAntennaGain> getGain() const = 0;
+
+    /**
      * Returns the number of antennas in the array.
      */
     virtual int getNumAntennas() const = 0;
-
-    /**
-     * Returns the maximum possible antenna gain independent of any direction.
-     */
-    virtual double getMaxGain() const = 0;
-
-    /**
-     * Returns the antenna gain in the provided direction. The direction is
-     * relative to the antenna geometry, so the result depends only on the
-     * antenna characteristics. For transmissions, it determines how well the
-     * antenna converts input power into radio waves headed in the specified
-     * direction. For receptions, it determines how well the antenna converts
-     * radio waves arriving from the the specified direction.
-     */
-    virtual double computeGain(const EulerAngles direction) const = 0;
 };
 
 } // namespace physicallayer

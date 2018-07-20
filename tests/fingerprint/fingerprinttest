@@ -1,0 +1,6 @@
+#!/bin/sh
+# INET_ROOT (absolute path is needed so the simulation can be started from any working directory)
+INET_ROOT=$(cd $(dirname $0)/../..; pwd)
+INET_OMNETPP_OPTIONS="-l $INET_ROOT/src/INET -n $INET_ROOT/src:$INET_ROOT/examples:$INET_ROOT/showcases:$INET_ROOT/tutorials:$INET_ROOT/tests/networks"
+
+$INET_ROOT/bin/inet_fingerprinttest "$@" --directory $INET_ROOT -e opp_run --oppargs $INET_OMNETPP_OPTIONS

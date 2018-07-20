@@ -38,9 +38,6 @@ void SimpleCcBattery::initialize(int stage)
             nodeStatus = dynamic_cast<NodeStatus *>(networkNode->getSubmodule("status"));
             if (!nodeStatus)
                 throw cRuntimeError("Cannot find node status");
-            lifecycleController = dynamic_cast<LifecycleController *>(getModuleByPath("lifecycleController"));
-            if (!lifecycleController)
-                throw cRuntimeError("Cannot find lifecycle controller");
         }
         setResidualCapacity(C(par("initialCapacity")));
         WATCH(residualCapacity);
@@ -92,7 +89,7 @@ void SimpleCcBattery::executeNodeOperation(C newResidualCapacity)
         LifecycleOperation::StringMap params;
         NodeCrashOperation *operation = new NodeCrashOperation();
         operation->initialize(networkNode, params);
-        lifecycleController->initiateOperation(operation);
+        lifecycleController.initiateOperation(operation);
     }
 }
 

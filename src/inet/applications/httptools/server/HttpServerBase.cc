@@ -46,7 +46,7 @@ void HttpServerBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         EV_DEBUG << "Initializing server component\n";
 
-        hostName = (const char *)par("hostName");
+        hostName = par("hostName").stdstringValue();
         if (hostName.empty()) {
             hostName = "www.";
             hostName += host->getFullName();
@@ -61,7 +61,7 @@ void HttpServerBase::initialize(int stage)
 
         httpProtocol = par("httpProtocol");
 
-        cXMLElement *rootelement = par("config").xmlValue();
+        cXMLElement *rootelement = par("config");
         if (rootelement == nullptr)
             throw cRuntimeError("Configuration file is not defined");
 
@@ -136,7 +136,7 @@ void HttpServerBase::initialize(int stage)
         activationTime = par("activationTime");
         EV_INFO << "Activation time is " << activationTime << endl;
 
-        std::string siteDefinition = (const char *)par("siteDefinition");
+        std::string siteDefinition = par("siteDefinition").stdstringValue();
         scriptedMode = !siteDefinition.empty();
         if (scriptedMode)
             readSiteDefinition(siteDefinition);
@@ -197,44 +197,44 @@ void HttpServerBase::handleMessage(cMessage *msg)
     // Override in derived classes
 }
 
-cPacket *HttpServerBase::handleReceivedMessage(cMessage *msg)
+Packet *HttpServerBase::handleReceivedMessage(Packet *msg)
 {
-    HttpRequestMessage *request = check_and_cast<HttpRequestMessage *>(msg);
+    const auto& request = msg->peekAtFront<HttpRequestMessage>();
     if (request == nullptr)
         throw cRuntimeError("Message (%s)%s is not a valid request", msg->getClassName(), msg->getName());
 
-    EV_DEBUG << "Handling received message " << msg->getName() << ". Target URL: " << request->targetUrl() << endl;
+    EV_DEBUG << "Handling received message " << msg->getName() << ". Target URL: " << request->getTargetUrl() << endl;
 
-    logRequest(request);
+    logRequest(msg);
 
-    if (extractServerName(request->targetUrl()) != hostName) {
+    if (extractServerName(request->getTargetUrl()) != hostName) {
         // This should never happen but lets check
-        throw cRuntimeError("Received message intended for '%s'", request->targetUrl());    // TODO: DEBUG HERE
+        throw cRuntimeError("Received message intended for '%s'", request->getTargetUrl());    // TODO: DEBUG HERE
         return nullptr;
     }
 
-    HttpReplyMessage *replymsg;
+    Packet *replymsg = nullptr;
 
     // Parse the request string on spaces
-    cStringTokenizer tokenizer = cStringTokenizer(request->heading(), " ");
+    cStringTokenizer tokenizer = cStringTokenizer(request->getHeading(), " ");
     std::vector<std::string> res = tokenizer.asVector();
     if (res.size() != 3) {
-        EV_ERROR << "Invalid request string: " << request->heading() << endl;
+        EV_ERROR << "Invalid request string: " << request->getHeading() << endl;
         replymsg = generateErrorReply(request, 400);
         logResponse(replymsg);
         return replymsg;
     }
 
-    if (request->badRequest()) {
+    if (request->getBadRequest()) {
         // Bad requests get a 404 reply.
         EV_ERROR << "Bad request - bad flag set. Message: " << request->getName() << endl;
         replymsg = generateErrorReply(request, 404);
     }
     else if (res[0] == "GET") {
-        replymsg = handleGetRequest(request, res[1]);    // Pass in the resource string part
+        replymsg = handleGetRequest(msg, res[1]);    // Pass in the resource string part
     }
     else {
-        EV_ERROR << "Unsupported request type " << res[0] << " for " << request->heading() << endl;
+        EV_ERROR << "Unsupported request type " << res[0] << " for " << request->getHeading() << endl;
         replymsg = generateErrorReply(request, 400);
     }
 
@@ -244,14 +244,15 @@ cPacket *HttpServerBase::handleReceivedMessage(cMessage *msg)
     return replymsg;
 }
 
-HttpReplyMessage *HttpServerBase::handleGetRequest(HttpRequestMessage *request, std::string resource)
+Packet *HttpServerBase::handleGetRequest(Packet *pk, std::string resource)
 {
+    const auto& request = pk->peekAtFront<HttpRequestMessage>();
     EV_DEBUG << "Handling GET request " << request->getName() << " resource: " << resource << endl;
 
     resource = trimLeft(resource, "/");
     std::vector<std::string> req = parseResourceName(resource);
     if (req.size() != 3) {
-        EV_ERROR << "Invalid GET request string: " << request->heading() << endl;
+        EV_ERROR << "Invalid GET request string: " << request->getHeading() << endl;
         return generateErrorReply(request, 400);
     }
 
@@ -261,12 +262,12 @@ HttpReplyMessage *HttpServerBase::handleGetRequest(HttpRequestMessage *request, 
         if (scriptedMode) {
             if (resource.empty() && htmlPages.find("root") != htmlPages.end()) {
                 EV_DEBUG << "Generating root resource" << endl;
-                return generateDocument(request, "root");
+                return generateDocument(pk, "root");
             }
             if (htmlPages.find(resource) == htmlPages.end()) {
                 if (htmlPages.find("default") != htmlPages.end()) {
                     EV_DEBUG << "Generating default resource" << endl;
-                    return generateDocument(request, "default");
+                    return generateDocument(pk, "default");
                 }
                 else {
                     EV_ERROR << "Page not found: " << resource << endl;
@@ -274,7 +275,7 @@ HttpReplyMessage *HttpServerBase::handleGetRequest(HttpRequestMessage *request, 
                 }
             }
         }
-        return generateDocument(request, resource.c_str());
+        return generateDocument(pk, resource.c_str());
     }
     else if (cat == CT_TEXT || cat == CT_IMAGE) {
         if (scriptedMode && resources.find(resource) == resources.end()) {
@@ -284,26 +285,28 @@ HttpReplyMessage *HttpServerBase::handleGetRequest(HttpRequestMessage *request, 
         return generateResourceMessage(request, resource, cat);
     }
     else {
-        EV_ERROR << "Unknown or unsupported resource requested in " << request->heading() << endl;
+        EV_ERROR << "Unknown or unsupported resource requested in " << request->getHeading() << endl;
         return generateErrorReply(request, 400);
     }
 }
 
-HttpReplyMessage *HttpServerBase::generateDocument(HttpRequestMessage *request, const char *resource, int size)
+Packet *HttpServerBase::generateDocument(Packet *pk, const char *resource, int size)
 {
-    EV_DEBUG << "Generating HTML document for request " << request->getName() << " from " << request->getSenderModule()->getName() << endl;
+    const auto& request = pk->peekAtFront<HttpRequestMessage>();
+    EV_DEBUG << "Generating HTML document for request " << pk->getName() << " from " << pk->getSenderModule()->getName() << endl;
 
     char szReply[512];
     sprintf(szReply, "HTTP/1.1 200 OK (%s)", resource);
-    HttpReplyMessage *replymsg = new HttpReplyMessage(szReply);
+    Packet *replyPk = new Packet(szReply);
+    const auto& replymsg = makeShared<HttpReplyMessage>();
     replymsg->setHeading("HTTP/1.1 200 OK");
     replymsg->setOriginatorUrl(hostName.c_str());
-    replymsg->setTargetUrl(request->originatorUrl());
-    replymsg->setProtocol(request->protocol());
-    replymsg->setSerial(request->serial());
+    replymsg->setTargetUrl(request->getOriginatorUrl());
+    replymsg->setProtocol(request->getProtocol());
+    replymsg->setSerial(request->getSerial());
     replymsg->setResult(200);
     replymsg->setContentType(CT_HTML);    // Emulates the content-type header field
-    replymsg->setKind(HTTPT_RESPONSE_MESSAGE);
+    replyPk->setKind(HTTPT_RESPONSE_MESSAGE);
 
     if (scriptedMode) {
         replymsg->setPayload(htmlPages[resource].body.c_str());
@@ -318,17 +321,19 @@ HttpReplyMessage *HttpServerBase::generateDocument(HttpRequestMessage *request, 
         size = (int)rdHtmlPageSize->draw();
     }
 
-    replymsg->setByteLength(size);
-    EV_DEBUG << "Serving a HTML document of length " << replymsg->getByteLength() << " bytes" << endl;
+    replymsg->setChunkLength(B(size));
+    replyPk->insertAtBack(replymsg);
+
+    EV_DEBUG << "Serving a HTML document of length " << replyPk->getByteLength() << " bytes" << endl;
 
     htmlDocsServed++;
 
-    return replymsg;
+    return replyPk;
 }
 
-HttpReplyMessage *HttpServerBase::generateResourceMessage(HttpRequestMessage *request, std::string resource, HttpContentType category)
+Packet *HttpServerBase::generateResourceMessage(const Ptr<const HttpRequestMessage>& request, std::string resource, HttpContentType category)
 {
-    EV_DEBUG << "Generating resource message in response to request " << request->heading() << " with serial " << request->serial() << endl;
+    EV_DEBUG << "Generating resource message in response to request " << request->getHeading() << " with serial " << request->getSerial() << endl;
 
     if (category == CT_TEXT)
         textResourcesServed++;
@@ -347,37 +352,41 @@ HttpReplyMessage *HttpServerBase::generateResourceMessage(HttpRequestMessage *re
 
     char szReply[512];
     sprintf(szReply, "HTTP/1.1 200 OK (%s)", resource.c_str());
-    HttpReplyMessage *replymsg = new HttpReplyMessage(szReply);
+    Packet *replyPk = new Packet(szReply);
+    const auto& replymsg = makeShared<HttpReplyMessage>();
     replymsg->setHeading("HTTP/1.1 200 OK");
     replymsg->setOriginatorUrl(hostName.c_str());
-    replymsg->setTargetUrl(request->originatorUrl());
-    replymsg->setProtocol(request->protocol());    // MIGRATE40: kvj
-    replymsg->setSerial(request->serial());
+    replymsg->setTargetUrl(request->getOriginatorUrl());
+    replymsg->setProtocol(request->getProtocol());    // MIGRATE40: kvj
+    replymsg->setSerial(request->getSerial());
     replymsg->setResult(200);
     replymsg->setContentType(category);    // Emulates the content-type header field
-    replymsg->setByteLength(size); // Set the resource size
-    replymsg->setKind(HTTPT_RESPONSE_MESSAGE);
+    replymsg->setChunkLength(B(size)); // Set the resource size
+    replyPk->insertAtBack(replymsg);
+    replyPk->setKind(HTTPT_RESPONSE_MESSAGE);
 
     sprintf(szReply, "RESOURCE-BODY:%s", resource.c_str());
-    return replymsg;
+    return replyPk;
 }
 
-HttpReplyMessage *HttpServerBase::generateErrorReply(HttpRequestMessage *request, int code)
+Packet *HttpServerBase::generateErrorReply(const Ptr<const HttpRequestMessage>& request, int code)
 {
     char szErrStr[32];
     sprintf(szErrStr, "HTTP/1.1 %.3d %s", code, htmlErrFromCode(code).c_str());
-    HttpReplyMessage *replymsg = new HttpReplyMessage(szErrStr);
+    Packet *replyPk = new Packet(szErrStr);
+    const auto& replymsg = makeShared<HttpReplyMessage>();
     replymsg->setHeading(szErrStr);
     replymsg->setOriginatorUrl(hostName.c_str());
-    replymsg->setTargetUrl(request->originatorUrl());
-    replymsg->setProtocol(request->protocol());    // MIGRATE40: kvj
-    replymsg->setSerial(request->serial());
+    replymsg->setTargetUrl(request->getOriginatorUrl());
+    replymsg->setProtocol(request->getProtocol());    // MIGRATE40: kvj
+    replymsg->setSerial(request->getSerial());
     replymsg->setResult(code);
-    replymsg->setByteLength((int)rdErrorMsgSize->draw());
-    replymsg->setKind(HTTPT_RESPONSE_MESSAGE);
+    replymsg->setChunkLength(B((int)rdErrorMsgSize->draw()));
+    replyPk->insertAtBack(replymsg);
+    replyPk->setKind(HTTPT_RESPONSE_MESSAGE);
 
     badRequests++;
-    return replymsg;
+    return replyPk;
 }
 
 std::string HttpServerBase::generateBody()
@@ -404,10 +413,8 @@ std::string HttpServerBase::generateBody()
 void HttpServerBase::registerWithController()
 {
     // Find controller object and register
-    HttpController *controller = check_and_cast_nullable<HttpController *>(getSimulation()->getSystemModule()->getSubmodule("controller"));
-    if (controller == nullptr)
-        throw cRuntimeError("Controller module not found");
-    controller->registerServer(host->getFullPath().c_str(), hostName.c_str(), port, INSERT_END, activationTime);
+    HttpController *controller = getModuleFromPar<HttpController>(par("httpControllerModule"), this);
+    controller->registerServer(this, host->getFullPath().c_str(), hostName.c_str(), port, INSERT_END, activationTime);
 }
 
 void HttpServerBase::readSiteDefinition(std::string file)

@@ -18,13 +18,12 @@
 //
 
 #include "inet/common/queue/Delayer.h"
+#include "inet/common/Simsignals.h"
 
 namespace inet {
 
 Define_Module(Delayer);
 
-simsignal_t Delayer::rcvdPkSignal = registerSignal("rcvdPk");
-simsignal_t Delayer::sentPkSignal = registerSignal("sentPk");
 simsignal_t Delayer::delaySignal = registerSignal("delay");
 
 void Delayer::initialize()
@@ -35,13 +34,13 @@ void Delayer::initialize()
 void Delayer::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
-        emit(sentPkSignal, msg);
+        emit(packetSentSignal, msg);
         send(msg, "out");
     }
     else {
-        emit(rcvdPkSignal, msg);
+        emit(packetReceivedSignal, msg);
 
-        simtime_t delay = delayPar->doubleValue();
+        simtime_t delay(*delayPar);
         emit(delaySignal, delay);
         scheduleAt(simTime() + delay, msg);
     }

@@ -1,0 +1,318 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-05-03  Levente Mészáros
+
+	Renamed gnp submodule to nextHop.
+	Renamed get/setNextHopProtocolData to get/setNextHopData.
+	Renamed Protocol::gnp to Protocol::nextHopForwarding.
+	Renamed NextHopDatagram to NextHopForwardingHeader.
+
+2018-04-27  Levente Mészáros
+
+	Renamed generic folder to nexthop.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-03-01  Zoltan Bojthe
+
+	Replaced totalLengthField with payloadLengthField.
+
+2018-02-26  Zoltan Bojthe
+
+	Added GenericNetworkProtocolDissector.
+	Added totalLengthField to header.
+	Added missing error handling (hasBitError).
+	Added missing packetDropped signals.
+
+2018-02-14  Zoltan Bojthe
+
+	Renamed functions to use camel case.
+
+2018-02-06  Zoltan Bojthe
+
+	Optimized payload protocol decoding.
+
+2018-01-29  Zoltan Bojthe
+
+	Fixed regression in handling of procDelay (#292).
+
+2018-01-25  Levente Mészáros
+
+	Adapted register protocol listeners to the new API based on OSI service primitives.
+
+2018-01-24  Levente Mészáros
+
+	Adapted registerProtocol calls to the new API based on OSI service primitives.
+
+2018-01-23  Levente Mészáros
+
+	Replaced MessageDispatcher lower/upper vector gates with a single one.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-05  Zoltan Bojthe
+
+	Renamed NF_* signals to use camel case.
+	Renamed signal variables to *Signal.
+
+2018-01-02  Levente Mészáros
+
+	Replaced cPacket with Packet.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    GenericARP -> GenericArp
+	    GenericTLVOptionTypes -> GenericTlvOptionTypes
+	    IARP -> IArp
+	    IPProtocolId -> IpProtocolId
+	    IPv4 -> Ipv4
+	    IPv4Address -> Ipv4Address
+	    IPv4ControlInfo -> Ipv4ControlInfo
+	    IPv4InterfaceData -> Ipv4InterfaceData
+	    MACAddress -> MacAddress
+	    TCPSegment -> TcpHeader
+	    TLVOption -> TlvOptions
+	    TLVOptions -> TlvOptions
+
+2017-12-15  Zoltan Bojthe
+
+	Renamed deprecated info() to str().
+
+2017-12-15  Zoltan Bojthe
+
+	Remove unnecessary cPar::stringValue(), cPar::boolValue(), cPar::longValue() calls.
+
+	Motivation: rely on cast operators instead because they can detect
+	overflows (when the value is cast to a smaller integer type that can not
+	represent it). Removed unnecessary .longvalue() calls. Replaced to
+	.intValue() in comparisons.
+
+2017-12-11  Zoltan Bojthe
+
+	Removed some unnecessary @customize from MSG files.
+
+2017-12-05  Zoltan Bojthe
+
+	Removed "typedef const Foo ConstFoo" statements from MSG files, replaced
+	with proper const support.
+
+2017-11-23  Levente Mészáros
+
+	Removed protocolId @override from NetworkHeaderBase subclasses.
+
+2017-11-13  Zoltan Bojthe
+
+	Replaced "int ipProtocolId @enum(IPProtocolId)" to "IPProtocolId ipProtocolId".
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-09-20  Zoltan Bojthe
+
+	Refactored Netfilter hooks: functions have only the Packet
+	parameter, in/out interfaces and nextHop are TAGs on the packet.
+
+2017-07-05  Levente Mészáros
+
+	Replaced generic Packet API calls with L3 protocol tools.
+
+2017-07-04  Levente Mészáros
+
+	Dropped unused return values from encapsulate/decapsulate.
+
+2017-06-14  Zoltan Bojthe
+
+	Added EV_DETAIL logging.
+
+2017-03-31  Zoltan Bojthe
+
+	Removed obsolete OrigNetworkDatagramTag.
+
+2017-02-02  Levente Mészáros
+
+	Followed netfilter changes with GenericNetworkProtocol.
+
+2016-11-17  Levente Mészáros
+
+	Fixed Gnp forwarding.
+
+2016-11-16  Zoltan Bojthe
+
+	Fixed for incoming immutable packets.
+
+2016-11-11  Zoltan Bojthe
+
+	Renamed handleMessageFromHL() to handlePacketFromHL()
+
+2016-06-27  Zoltan Bojthe
+
+	Adapted to NetFilter hook changes: auto unregister in destructor.
+
+2016-06-16  Zoltan Bojthe
+
+	Dropped unused pingIn/pingOut gates.
+
+2016-06-02  Levente Mészáros
+
+	Implemented raw L3Socket support in network protocols.
+
+2016-06-02  Levente Mészáros
+
+	Moved registerProtocol to network layer stage.
+
+2016-05-31  Levente Mészáros
+
+	Changed positions and icons in display string to at least have well-layouted
+	network nodes.
+
+2016-05-31  Levente Mészáros
+
+	Added MessageDispatcher to all network layers.
+
+2016-05-31  Levente Mészáros
+
+	Dropped vector gate handling towards transport protocol.
+
+2015-06-11  Levente Mészáros
+
+	Added interface id to control infos sent towards interfaces.
+
+2015-06-11  Levente Mészáros
+
+	Dropped obsolete queueOut gate vector indexing.
+
+2015-08-04  Zoltan Bojthe
+
+	Changed how and when receiving interface is determined similarly to IPv4.
+
+2016-05-30  Levente Mészáros
+
+	Added forwarding parameters to make sure parameter values reach the routing
+	tables. This allows the network node to control these parameters without
+	knowing the internal structure.
+
+2016-04-29  Levente Mészáros
+
+	Changed vector gates to scalar gates towards transport and link layer.
+
+2016-05-02  Levente Mészáros
+
+	Added handleRegisterProtocol where necessary.
+
+2016-05-02  Levente Mészáros
+
+	Added new registerProtocol() calls.
+
+2016-05-30  Levente Mészáros
+
+	Moved routing table modules under the corresponding network layer modules.
+
+2016-04-29  Levente Mészáros
+
+	Dropped obsolete RegisterTransportProtocolCommand handling.
+
+====== inet-3.x ======
+
+2018-03-21  ------ inet-3.6.4 released ------
+
+2017-12-22  ------ inet-3.6.3 released ------
+
+2017-10-02  ------ inet-3.6.2 released ------
+
+2017-07-06  ------ inet-3.6.1 released ------
+
+2017-06-09  ------ inet-3.6.0 released ------
+
+2017-02-20  ------ inet-3.5.0 released ------
+
+2017-02-17  Rudolf Hornig
+
+	build: removed OMNeT 5.0 compatibility code
+
+2016-12-23  Rudolf Hornig
+
+	build: removed deprecation warings
+
+2016-10-20  Rudolf Hornig
+
+	Refactoring: removed compatibility macros required for OMNeT++ 4.x builds
+	+ warning fixes
+
+2016-09-22  Zoltan Bojthe
+
+	omnetpp5: add/use refreshDisplay()
+
+2016-06-15  ------ inet-3.4.0 released ------
+
+2016-06-01  ------ inet-3.3.0 released ------
+
+2016-04-06  ------ inet-3.2.4 released ------
+
+2016-03-16  ------ inet-3.2.3 released ------
+
+2016-03-11  ------ inet-3.2.2 released ------
+
+2016-01-21  ------ inet-3.2.1 released ------
+
+2015-12-16  ------ inet-3.2.0 released ------
+
+2015-11-27  Zoltan Bojthe
+
+	Made the code compile with OMNeT++ 5.0b3
+
+2015-10-26  ------ inet-3.1.1 released ------
+
+2015-10-15  ------ inet-3.1.0 released ------
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-04-16  Zoltan Bojthe
+
+	Added nonstandard ETHERTYPE_INET_GENERIC to generic network protocol.
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-12-17  Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-12-09  Florian Meier
+
+	Added printRoutingTable function to GenericRoutingTable.
+
+2014-11-28  Levente Meszaros
+
+	Fixed generic network layer configuration and routing.
+
+2014-11-18  Zoltan Bojthe
+
+	Fixed memory leaks detected by valgrind memcheck.
+
+2014-11-14  Zoltan Bojthe
+
+	Network Protocol module should delete queued datagrams, hooks shouldn't
+	delete/send/scheduleat/take dgrams
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2013-02-06  Andras Varga
+
+	Added initial implementation:
+	GenericNetworkLayer, GenericNetworkProtocol, GenericDatagram,
+	GenericRoutingTable, GenericRoute, GenericNetworkProtocolInterfaceData
+
+====== inet-2.x ======

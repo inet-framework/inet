@@ -20,6 +20,6 @@ package inet.linklayer.ieee80211.mac.originator;
 simple TxopProcedure 
 {
     parameters:
-        double txopLimit @unit("s") = default(-1s);
+        double txopLimit @unit(s) = default(-1s);
         @display("i=block/timer");
 }

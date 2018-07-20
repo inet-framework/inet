@@ -18,7 +18,7 @@
 #ifndef __INET_IERRORMODEL_H
 #define __INET_IERRORMODEL_H
 
-#include "inet/physicallayer/contract/packetlevel/ISNIR.h"
+#include "inet/physicallayer/contract/packetlevel/ISnir.h"
 
 namespace inet {
 
@@ -34,25 +34,25 @@ namespace physicallayer {
 class INET_API IErrorModel : public IPrintableObject
 {
   public:
-    // TODO: virtual bool computePacketErroneous() const = 0;
+    virtual Packet *computeCorruptedPacket(const ISnir *snir) const = 0;
 
     /**
      * Returns the packet error rate based on SNIR, modulation, FEC encoding
      * and any other physical layer characteristics.
      */
-    virtual double computePacketErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const = 0;
+    virtual double computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const = 0;
 
     /**
      * Returns the bit error rate based on SNIR, modulation, FEC encoding
      * and any other physical layer characteristics.
      */
-    virtual double computeBitErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const = 0;
+    virtual double computeBitErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const = 0;
 
     /**
      * Returns the symbol error rate based on SNIR, modulation, and any other
      * physical layer characteristics.
      */
-    virtual double computeSymbolErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const = 0;
+    virtual double computeSymbolErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const = 0;
 };
 
 } // namespace physicallayer

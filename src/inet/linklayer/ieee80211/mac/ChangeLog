@@ -1,3 +1,258 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-08  Mani Amoozadeh
+
+	Added initialRadioMode parameter.
+
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-06-04  Levente Mészáros
+
+	Fixed BasicBlockAck chunk length.
+
+2018-05-28  Zoltan Bojthe
+
+	Removed obsolete Ieee80211CompatibleMac.
+
+2018-05-17  Levente Mészáros
+
+	Fixed bug when a packet was received from another Ap and sent up incorrectly.
+	Added missing emit(packetDroppedSignal) calls to Ds.
+	Set transmitter address early in encapsulate so that MAC data service will
+	se the correct address.
+	Added missing packetDropped signal to Ds.
+
+2018-05-16  Levente Mészáros
+
+	Added MacAddressInd to outgoing packets.
+
+2018-05-15  Levente Mészáros
+
+	Fixed available mode set (opMode) enumeraton values, bug #310.
+
+2018-05-10  Zoltan Bojthe
+
+	Moved header serializers to the corresponding protocol folders.
+
+2018-05-03  Levente Mészáros
+
+	Fixed ACK frame duration bug reported by Raphael Elsner.
+
+	The duration was incorrectly rounded up in seconds instead of
+	microseconds for data fragment ACKs.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-03-08  Zoltan Bojthe
+
+	Added Ieee80211MacProtocolPrinter.
+
+2018-03-06  Zoltan Bojthe
+
+	Added Ieee80211MacProtocolDissector.
+
+2018-02-19  Zoltan Bojthe
+
+	Renamed functions to use camel case.
+
+2018-02-14  Levente Mészáros
+
+	Fixed packet protocol tag for packets sent up.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-12  Levente Mészáros
+
+	Replaced cMessage commands with Request and Indication.
+	Renamed ACK packets to TcpAck and WlanAck to avoid confusion.
+
+2018-01-12  Zoltan Bojthe
+
+	Fixed double and int inconsistency: NED vs. INI and NED vs. C++
+
+2018-01-11  Zoltan Bojthe
+
+	Renamed all *Nic modules to *Interface.
+
+2018-01-09  Zoltan Bojthe
+
+	Renamed @statistics to use camel case.
+
+2018-01-05  Zoltan Bojthe
+
+	Renamed NF_* signals to use camel case.
+	Renamed signal variables to *Signal.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-11-14  Zoltan Bojthe
+
+	Changed ackPolicy to NORMAL_ACK in Ieee80211DataHeader constructor.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-10-24  Levente Mészáros
+
+	Revived MAC FCS computation and verification.
+
+2017-07-27  Levente Mészáros
+
+	Added Ieee80211MpduSubframeHeader and its serialization.
+
+2017-07-14  Levente Mészáros
+
+	Fixed confusion between the last transmitted packet and the
+	received packet while processing received packet.
+	Fixed bug that caused Ieee80211Retransmisson6.test to fail.
+
+2017-07-12  Levente Mészáros
+
+	Removed obsolete duplicated base modules, INET 4.0 requires OMNeT++ 5.0.
+
+2017-07-12  Levente Mészáros
+
+	Fixed missing signal declarations.
+	Added linkBreak statistic.
+	Renamed NF_PACKET_DROP to packetDrop(Signal).
+	Renamed NF_LINK_BREAK signal to linkBreak(Signal).
+	Added missing packet drop related statistics.
+	Added missing packetDrop signal emitting code.
+	Added limit to packetDrop signals with queueOverflow reason.
+	Added limit to packetDrop signals with retryLimitReached reason.
+	Added some missing packet drop signal emitting.
+	Replaced packetFromLowerDropped and packetFromUpperDropped with NF_PACKET_DROP signal.
+
+2017-07-11  Levente Mészáros
+
+	Fixed bug, popTrailer must be called with length to deserialize backwards.
+	Renamed variables, arguments, and functions to adapt to Chunk API.
+	Renamed frame variables to header where applicable.
+
+2017-07-10  Levente Mészáros
+
+	Added reason codes where packet drop signals are emitted.
+
+2017-05-10  Benjamin Martin Seregi
+
+	Changed Rx and Tx, because chunks don't have a name.
+
+2017-05-10  Levente Mészáros
+
+	Moved transmitter address setting to Tx.
+	Replaced unused qos field with parts of QoS control field.
+
+2017-05-10  Levente Mészáros
+
+	Renamed MAC header arguments to *Header.
+
+2017-05-10  Levente Mészáros
+
+	Renamed some MAC headers and frames.
+
+	Ieee80211Frame -> Ieee80211MacHeader
+	Ieee80211OneAddressFrame -> Ieee80211OneAddressHeader
+	Ieee80211TwoAddressFrame -> Ieee80211TwoAddressHeader
+	Ieee80211ACKFrame -> Ieee80211AckFrame
+	Ieee80211RTSFrame -> Ieee80211RtsFrame
+	Ieee80211CTSFrame -> Ieee80211CtsFrame
+
+2017-05-09  Levente Mészáros
+
+	Extracted Ieee80211MgmtFrameSerializer from Ieee80211MacHeaderSerializer.
+
+2017-05-09  Levente Mészáros
+
+	Renamed to Ieee80211MsduSubframeHeader.
+
+2017-05-09  Levente Mészáros
+
+	Renamed multiple header chunks.
+
+	Ieee80211DataFrame -> Ieee80211DataHeader
+	Ieee80211DataOrMgmtFrame -> Ieee80211DataOrMgmtHeader
+	Ieee80211ManagementHeader -> Ieee80211MgmtHeader
+	Ieee80211ManagementFrame -> Ieee80211MgmtFrame
+
+2017-05-09  Levente Mészáros
+
+	Properly implemented (revived) encapsulate/decapsulate in MAC.
+	Removed MAC header from interface between MAC and MGMT.
+	Moved MAC address to MIB.
+	Added Ds submodule to MAC.
+	Added fcsMode parameter.
+	Moved qos flag from MAC to MIB.
+	Added a separate sendUpFrame.
+	Renamed function to sendDownFrame.
+
+2017-05-08  Levente Mészáros
+
+	Added Ieee802Llc and Ieee80211Mib modules to Ieee80211Nic module.
+	Added a separate Ds (distribution service) module similarly how
+	the standard describes this service.
+
+2017-05-03  Levente Mészáros
+
+	Moved encapsulation into MAC from adhoc MGMT.
+	Added mgmt gates to mac module.
+
+2017-05-02  Levente Mészáros
+
+	Moved the insertion of the MAC trailer from MGMT into MAC.
+	Renamed to Ieee80211ManagementHeader.
+
+2017-04-27  Levente Mészáros
+
+	Added missing chunk types to Ieee80211MacHeaderSerializer.
+	Fixed Ieee80211MacHeader deserialization wrt. sequence control and QoS control.
+
+2017-04-27  Levente Mészáros
+
+	Moved dup in Tx.
+
+2017-04-26  Levente Mészáros
+
+	Added separate IEEE 802 LLC and SNAP headers and serializers.
+	Added TID to QoS control field in serializer.
+	Implemented Ieee80211FcsTrailerSerializer.
+	Renamed to Ieee80211MacTrailer and Ieee80211MacTrailerSerializer.
+
+2017-04-26  Levente Mészáros
+
+	Revived Ieee80211MacHeader::deserialize().
+	Renamed to Ieee80211MacTrailer.
+	Removed Ieee80211DataFrameWithSNAP and add separate Ieee802SnapHeader.
+
+2017-04-25  Levente Mészáros
+
+	Ported Ieee80211MacHeaderSerializer to new API.
+
+2017-04-25  Levente Mészáros
+
+	Added PacketProtocolTag to packets.
+
+2017-04-12  Levente Mészáros
+
+	Replaced cPacket with Packet.
+
+2017-04-03  Levente Mészáros
+
+	Changed NF_LINK_BREAK object type to be Packet as assumed by receivers.
+	This will be replaced when the 802.11 model gets ported to the new API.
+
+2017-03-07  Levente Mészáros
+
+	Changed to send/receive Packets instead of cPacket down.
+
+2016-10-26  Zoltan Bojthe
+
+	Removed compatibility macros required for OMNeT++ 4.x builds.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

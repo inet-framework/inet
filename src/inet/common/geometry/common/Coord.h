@@ -33,7 +33,7 @@ namespace inet {
  * @ingroup utils
  * @author Christian Frank
  */
-class INET_API Coord : public cObject
+class INET_API Coord
 {
   public:
     /** @brief Constant with all values set to 0. */
@@ -64,11 +64,23 @@ class INET_API Coord : public cObject
         : x(x), y(y), z(z) {}
 
     /** @brief Initializes coordinate from other coordinate. */
-    Coord(const Coord& other)
-        : cObject(other) { copy(other); }
+    Coord(const Coord& other) { copy(other); }
+
+    double getX() const { return x; }
+    void setX(double x) { this->x = x; }
+
+    double getY() const { return y; }
+    void setY(double y) { this->y = y; }
+
+    double getZ() const { return z; }
+    void setZ(double z) { this->z = z; }
 
     /** @brief Returns a string with the value of the coordinate. */
-    std::string info() const override;
+    std::string str() const;
+
+
+    /** @brief Returns the negated vector. */
+    Coord operator-() const { return Coord(-x, -y, -z); }
 
     /** @brief Adds two coordinate vectors. */
     friend Coord operator+(const Coord& a, const Coord& b)
@@ -160,7 +172,6 @@ class INET_API Coord : public cObject
     {
         if (this == &other)
             return *this;
-        cObject::operator=(other);
         copy(other);
         return *this;
     }
@@ -290,10 +301,10 @@ class INET_API Coord : public cObject
 
 inline std::ostream& operator<<(std::ostream& os, const Coord& coord)
 {
-    return os << "(" << coord.x << ", " << coord.y << ", " << coord.z << ")";
+    return os << "(" << coord.x << ", " << coord.y << ", " << coord.z << ") m";
 }
 
-inline std::string Coord::info() const
+inline std::string Coord::str() const
 {
     std::stringstream os;
     os << *this;

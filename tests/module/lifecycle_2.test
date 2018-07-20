@@ -21,15 +21,14 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.scenarioManager.script = xmldoc("scenario.xml")
 *.host.hasTcp = true
 *.host.hasUdp = true
-*.host.hasSctp = true
+*.host.hasSctp = haveClass("Sctp")
 *.host.eth[0].csmacdSupport = true
 *.host.eth[1].csmacdSupport = false
-*.host.networkLayer.configurator.networkConfiguratorModule = ""
+*.host.ipv4.configurator.networkConfiguratorModule = ""
 
 %file: test.ned
 
 import inet.node.inet.StandardHost;
-import inet.common.lifecycle.LifecycleController;
 import inet.status.NodeStatus;
 import inet.common.scenario.ScenarioManager;
 
@@ -37,7 +36,6 @@ network Test
 {
     submodules:
         scenarioManager: ScenarioManager;
-        lifecycleController: LifecycleController;
         host: StandardHost
         {
             gates:
@@ -53,10 +51,10 @@ network Test
 
 <scenario>
     <at t="1.0">
-        <tell module="lifecycleController" target="host" operation="NodeCrashOperation"/>
+        <crash module="host"/>
     </at>
     <at t="2.0">
-        <tell module="lifecycleController" target="host" operation="NodeStartOperation"/>
+        <startup module="host"/>
     </at>
 </scenario>
 

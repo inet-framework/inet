@@ -20,7 +20,7 @@
 package inet.examples.diffserv.onedomain;
 
 import inet.linklayer.contract.ITrafficConditioner;
-import inet.networklayer.diffserv.DSCPMarker;
+import inet.networklayer.diffserv.DscpMarker;
 import inet.networklayer.diffserv.MultiFieldClassifier;
 
 
@@ -38,10 +38,10 @@ module TC1 like ITrafficConditioner
         output out;
     submodules:
         classifier: MultiFieldClassifier {
-            @display("p=61,110");
+            @display("p=100,100");
         }
-        marker: DSCPMarker {
-            @display("p=192,110");
+        marker: DscpMarker {
+            @display("p=250,100");
         }
     connections:
         in --> classifier.in;

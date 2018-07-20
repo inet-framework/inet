@@ -21,6 +21,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/applications/httptools/common/HttpNodeBase.h"
+#include "inet/common/packet/Packet.h"
 
 namespace inet {
 
@@ -51,7 +52,7 @@ namespace httptools {
  *   variables from the simulation and simplifies setup considerably. This mode should be used
  *   whenever the topology of the network and the resulting effects are not of interest. This is
  *   implemented in the derived HttpBrowserDirect class.
- * - Socket mode, in which the INET TCPSocket is used to handle messages sent and received.
+ * - Socket mode, in which the INET TcpSocket is used to handle messages sent and received.
  *   This mode uses the full INET TCP/IP simulation. Requires the network topology to be set
  *   up -- routers, links, etc. This is implemented in the derived HttpBrowser class.
  *
@@ -82,7 +83,7 @@ class INET_API HttpBrowserBase : public HttpNodeBase
     /*
      * A list of HTTP requests to send.
      */
-    typedef std::deque<HttpRequestMessage *> HttpRequestQueue;
+    typedef std::deque<Packet *> HttpRequestQueue;
 
     cMessage *eventTimer = nullptr;    // The timer object used to trigger browsing events
     HttpController *controller = nullptr;    // Reference to the central controller object
@@ -119,7 +120,7 @@ class INET_API HttpBrowserBase : public HttpNodeBase
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void finish() override;
     virtual void handleMessage(cMessage *msg) override = 0;
-    void handleDataMessage(cMessage *msg);
+    void handleDataMessage(Packet *msg);
     void handleSelfMessages(cMessage *msg);
     void handleSelfActivityStart();
     void handleSelfStartSession();
@@ -132,16 +133,16 @@ class INET_API HttpBrowserBase : public HttpNodeBase
      * Pure virtual methods to communicate with the server. Must be implemented in derived classes
      */
     virtual void sendRequestToServer(BrowseEvent be) = 0;
-    virtual void sendRequestToServer(HttpRequestMessage *request) = 0;
+    virtual void sendRequestToServer(Packet *request) = 0;
     virtual void sendRequestToRandomServer() = 0;
     virtual void sendRequestsToServer(std::string www, HttpRequestQueue queue) = 0;
 
     /*
      * Methods for generating HTML page requests and resource requests
      */
-    HttpRequestMessage *generatePageRequest(std::string www, std::string page, bool bad = false, int size = 0);
-    HttpRequestMessage *generateRandomPageRequest(std::string www, bool bad = false, int size = 0);
-    HttpRequestMessage *generateResourceRequest(std::string www, std::string resource = "", int serial = 0, bool bad = false, int size = 0);
+    Packet *generatePageRequest(std::string www, std::string page, bool bad = false, int size = 0);
+    Packet *generateRandomPageRequest(std::string www, bool bad = false, int size = 0);
+    Packet *generateResourceRequest(std::string www, std::string resource = "", int serial = 0, bool bad = false, int size = 0);
 
     /*
      * Read scripted events from file. Triggered if the script file parameter is specified in the initialization file.

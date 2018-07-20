@@ -18,11 +18,12 @@
 
 package inet.examples.wireless.ratecontrol;
 
-import inet.applications.ethernet.EtherAppCli;
+import inet.applications.ethernet.EtherAppClient;
 import inet.common.queue.Sink;
 import inet.environment.common.PhysicalEnvironment;
-import inet.linklayer.ieee80211.Ieee80211Nic;
+import inet.linklayer.ieee80211.Ieee80211Interface;
 import inet.mobility.single.RectangleMobility;
+import inet.networklayer.common.InterfaceTable;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 
@@ -32,22 +33,27 @@ module SinkClient
         @networkNode();
         @labels(node);
         @display("i=device/cellphone");
-        *.interfaceTableModule = default("");
+        *.interfaceTableModule = default(absPath(".interfaceTable"));
+        wlan.radio.antenna.mobilityModule = default("^.^.^.mobility");
     gates:
         input radioIn @directIn;
     submodules:
+        interfaceTable: InterfaceTable {
+            @display("p=100,100;is=s");
+        }
         sink: Sink {
             parameters:
-                @display("p=169,124");
+                @display("p=300,100");
         }
-        wlan: Ieee80211Nic {
+        wlan: Ieee80211Interface {
             parameters:
-                @display("p=89,225;q=queue");
-                mgmtType = default("Ieee80211MgmtAdhoc");
+                @display("p=250,200;q=queue");
+                mgmt.typename = "Ieee80211MgmtAdhoc";
+                agent.typename = "";
         }
         mobility: RectangleMobility {
             parameters:
-                @display("p=71,121");
+                @display("p=100,200;is=s");
         }
     connections allowunconnected:
         radioIn --> { @display("m=s"); } --> wlan.radioIn;
@@ -59,24 +65,29 @@ module Client
     parameters:
         @display("i=device/wifilaptop");
         @networkNode();
-        *.interfaceTableModule = "";
+        *.interfaceTableModule = default(absPath(".interfaceTable"));
+        wlan.radio.antenna.mobilityModule = default("^.^.^.mobility");
     gates:
         input radioIn @directIn;
 
     submodules:
-        cli: EtherAppCli {
+        interfaceTable: InterfaceTable {
+            @display("p=100,100;is=s");
+        }
+        cli: EtherAppClient {
             parameters:
                 registerSAP = false;
-                @display("b=40,24;p=180,60,col");
+                @display("p=300,100");
         }
-        wlan: Ieee80211Nic {
+        wlan: Ieee80211Interface {
             parameters:
-                @display("p=112,134;q=queue");
-                mgmtType = default("Ieee80211MgmtAdhoc");
+                @display("p=250,200;q=queue");
+                mgmt.typename = "Ieee80211MgmtAdhoc";
+                agent.typename = "";
         }
         mobility: RectangleMobility {
             parameters:
-                @display("p=50,141");
+                @display("p=100,200;is=s");
         }
     connections allowunconnected:
         wlan.radioIn <-- radioIn;
@@ -87,7 +98,7 @@ network RateControlTest
 {
     parameters:
         int numCli;
-        @display("b=297,203;bgb=1300,460");
+        @display("bgb=1300,460");
     submodules:
         cliHost[numCli]: Client {
             parameters:
@@ -99,11 +110,11 @@ network RateControlTest
         }
         physicalEnvironment: PhysicalEnvironment {
             parameters:
-                @display("p=50,50");
+                @display("p=100,100;is=s");
         }
         radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
-                @display("p=61,46");
+                @display("p=100,200;is=s");
         }
 }
 

@@ -16,24 +16,25 @@ output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
 output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
-*.host*.numPingApps = 1
-*.hostSource.pingApp[0].startTime = 0.1s
-*.hostSource.pingApp[0].stopTime = 10s
-*.hostSource.pingApp[0].destAddr = "hostDestination"
-*.hostSource.pingApp[0].printPing = true
+*.host*.numApps = 1
+*.host*.app[0].typename = "PingApp"
+*.hostSource.app[0].startTime = 0.1s
+*.hostSource.app[0].stopTime = 10s
+*.hostSource.app[0].destAddr = "hostDestination"
+*.hostSource.app[0].printPing = true
 
 %file: test.ned
 
 import inet.node.ethernet.Eth10M;
 import inet.node.inet.StandardHost;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 
 network Test
 {
     submodules:
         hostSource: StandardHost;
         hostDestination: StandardHost;
-        configurator: IPv4NetworkConfigurator;
+        configurator: Ipv4NetworkConfigurator;
     connections:
         hostSource.ethg++ <--> Eth10M <--> hostDestination.ethg++;
 }

@@ -34,13 +34,13 @@ package inet.linklayer.ieee80211.mgmt;
 simple Ieee80211MgmtAdhoc like IIeee80211Mgmt
 {
     parameters:
+        string mibModule;
         string macModule;               // The path to the MAC module
+        string interfaceTableModule;   // The path to the InterfaceTable module
         @display("i=block/cogwheel");
     gates:
-        input upperLayerIn;
-        output upperLayerOut;
-        input macIn @labels(Ieee80211Frame);
-        output macOut @labels(Ieee80211Frame);
+        input macIn @labels(Ieee80211MacHeader);
+        output macOut @labels(Ieee80211MacHeader);
         input agentIn @loose;   // unused dummy to statisfy the IIeee80211Mgmt interface
         output agentOut @loose; // unused dummy to statisfy the IIeee80211Mgmt interface
 }

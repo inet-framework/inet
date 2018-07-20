@@ -19,7 +19,7 @@
 #define __INET_IRADIO_H
 
 #include "inet/physicallayer/contract/packetlevel/IPhysicalLayer.h"
-#include "inet/physicallayer/contract/packetlevel/IRadioFrame.h"
+#include "inet/physicallayer/contract/packetlevel/ISignal.h"
 #include "inet/physicallayer/contract/packetlevel/IAntenna.h"
 #include "inet/physicallayer/contract/packetlevel/IReceiver.h"
 #include "inet/physicallayer/contract/packetlevel/ITransmitter.h"
@@ -38,7 +38,7 @@ class IRadioMedium;
  *
  * @author Levente Meszaros
  */
-// TODO: add burst support, sending of radio frames back to back (using a resource limited queue)
+// TODO: add burst support, sending of signals back to back (using a resource limited queue)
 // TODO: rename *Changed signals to *Change signals and emit them just before overwriting
 //       the current state, and thus allowing listeners to use the current value too
 class INET_API IRadio : public IPhysicalLayer, public IPrintableObject
@@ -48,40 +48,64 @@ class INET_API IRadio : public IPhysicalLayer, public IPrintableObject
 
   public:
     /**
-     * This signal is emitted every time the radio mode changes.
-     * The signal value is the new radio mode.
+     * This signal is emitted when the radio mode of the radio is changed.
+     * The source is the radio and the emitted value is the new radio mode.
      */
     static simsignal_t radioModeChangedSignal;
 
     /**
-     * This signal is emitted every time the radio listening changes.
-     * The signal value is the new listening.
+     * This signal is emitted when the radio listening of the radio is changed.
+     * The source is the radio and the emitted value is the new listening.
      */
     static simsignal_t listeningChangedSignal;
 
     /**
-     * This signal is emitted every time the radio reception state changes.
-     * The signal value is the new radio reception state.
+     * This signal is emitted when the radio reception state of the radio is changed.
+     * The source is the radio and the emitted value is the new radio reception state.
      */
     static simsignal_t receptionStateChangedSignal;
 
     /**
-     * This signal is emitted every time the radio transmission state changes.
-     * The signal value is the new radio transmission state.
+     * This signal is emitted when the radio transmission state of the radio is changed.
+     * The source is the radio and the emitted value is the new radio transmission state.
      */
     static simsignal_t transmissionStateChangedSignal;
 
     /**
-     * This signal is emitted every time the received part changes.
-     * The signal value is the new received part.
+     * This signal is emitted when the received part is changed by the radio.
+     * The source is the radio and the emitted value is the new received part.
      */
     static simsignal_t receivedSignalPartChangedSignal;
 
     /**
-     * This signal is emitted every time the transmitted part changes.
-     * The signal value is the new transmitted part.
+     * This signal is emitted when the transmitted part is changed by the radio.
+     * The source is the radio and the emitted value is the new transmitted part.
      */
     static simsignal_t transmittedSignalPartChangedSignal;
+
+    /**
+     * This signal is emitted when a transmission is started by the radio.
+     * The source is the radio and the emitted value is the transmission.
+     */
+    static simsignal_t transmissionStartedSignal;
+
+    /**
+     * This signal is emitted when a transmission is ended by the radio.
+     * The source is the radio and the emitted value is the transmission.
+     */
+    static simsignal_t transmissionEndedSignal;
+
+    /**
+     * This signal is emitted when an attempted reception is started by the radio.
+     * The source is the radio and the emitted value is the reception.
+     */
+    static simsignal_t receptionStartedSignal;
+
+    /**
+     * This signal is emitted when an attempted reception is ended by the radio.
+     * The source is the radio and the emitted value is the reception.
+     */
+    static simsignal_t receptionEndedSignal;
 
     /**
      * This enumeration specifies the requested operational mode of the radio.
@@ -201,7 +225,7 @@ class INET_API IRadio : public IPhysicalLayer, public IPrintableObject
 
   public:
     /**
-     * Returns the gate of the radio that receives incoming radio frames.
+     * Returns the gate of the radio that receives incoming signals.
      */
     virtual const cGate *getRadioGate() const = 0;
 

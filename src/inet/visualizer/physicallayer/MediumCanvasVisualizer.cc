@@ -28,6 +28,8 @@ namespace inet {
 
 namespace visualizer {
 
+using namespace inet::physicallayer;
+
 Define_Module(MediumCanvasVisualizer);
 
 void MediumCanvasVisualizer::initialize(int stage)
@@ -162,52 +164,52 @@ void MediumCanvasVisualizer::setAnimationSpeed()
     visualizerTargetModule->getCanvas()->setAnimationSpeed(animationSpeed, this);
 }
 
-cFigure *MediumCanvasVisualizer::getTransmissionFigure(const IRadio *radio) const
+cFigure *MediumCanvasVisualizer::getSignalDepartureFigure(const IRadio *radio) const
 {
-    auto it = transmissionFigures.find(radio);
-    if (it == transmissionFigures.end())
+    auto it = signalDepartureFigures.find(radio);
+    if (it == signalDepartureFigures.end())
         return nullptr;
     else
         return it->second;
 }
 
-void MediumCanvasVisualizer::setTransmissionFigure(const IRadio *radio, cFigure *figure)
+void MediumCanvasVisualizer::setSignalDepartureFigure(const IRadio *radio, cFigure *figure)
 {
-    transmissionFigures[radio] = figure;
+    signalDepartureFigures[radio] = figure;
 }
 
-cFigure *MediumCanvasVisualizer::removeTransmissionFigure(const IRadio *radio)
+cFigure *MediumCanvasVisualizer::removeSignalDepartureFigure(const IRadio *radio)
 {
-    auto it = transmissionFigures.find(radio);
-    if (it == transmissionFigures.end())
+    auto it = signalDepartureFigures.find(radio);
+    if (it == signalDepartureFigures.end())
         return nullptr;
     else {
-        transmissionFigures.erase(it);
+        signalDepartureFigures.erase(it);
         return it->second;
     }
 }
 
-cFigure *MediumCanvasVisualizer::getReceptionFigure(const IRadio *radio) const
+cFigure *MediumCanvasVisualizer::getSignalArrivalFigure(const IRadio *radio) const
 {
-    auto it = receptionFigures.find(radio);
-    if (it == receptionFigures.end())
+    auto it = signalArrivalFigures.find(radio);
+    if (it == signalArrivalFigures.end())
         return nullptr;
     else
         return it->second;
 }
 
-void MediumCanvasVisualizer::setReceptionFigure(const IRadio *radio, cFigure *figure)
+void MediumCanvasVisualizer::setSignalArrivalFigure(const IRadio *radio, cFigure *figure)
 {
-    receptionFigures[radio] = figure;
+    signalArrivalFigures[radio] = figure;
 }
 
-cFigure *MediumCanvasVisualizer::removeReceptionFigure(const IRadio *radio)
+cFigure *MediumCanvasVisualizer::removeSignalArrivalFigure(const IRadio *radio)
 {
-    auto it = receptionFigures.find(radio);
-    if (it == receptionFigures.end())
+    auto it = signalArrivalFigures.find(radio);
+    if (it == signalArrivalFigures.end())
         return nullptr;
     else {
-        receptionFigures.erase(it);
+        signalArrivalFigures.erase(it);
         return it->second;
     }
 }
@@ -239,7 +241,7 @@ cFigure *MediumCanvasVisualizer::removeSignalFigure(const ITransmission *transmi
 
 cGroupFigure* MediumCanvasVisualizer::createSignalFigure(const ITransmission* transmission) const
 {
-    cFigure::Point position = canvasProjection->computeCanvasPoint( transmission->getStartPosition());
+    cFigure::Point position = canvasProjection->computeCanvasPoint(transmission->getStartPosition());
     cGroupFigure* groupFigure = new cGroupFigure("signal");
     cFigure::Color color = signalColorSet.getColor(transmission->getId());
     SignalFigure* signalFigure = new SignalFigure("bubble");
@@ -261,7 +263,7 @@ cGroupFigure* MediumCanvasVisualizer::createSignalFigure(const ITransmission* tr
     cLabelFigure* nameFigure = new cLabelFigure("packet name");
     nameFigure->setPosition(position);
     nameFigure->setTags((std::string("propagating_signal packet_name label ") + tags).c_str());
-    nameFigure->setText(transmission->getMacFrame()->getName());
+    nameFigure->setText(transmission->getPacket()->getName());
     nameFigure->setColor(color);
     groupFigure->addFigure(nameFigure);
     return groupFigure;
@@ -279,12 +281,12 @@ void MediumCanvasVisualizer::refreshSignalFigure(const ITransmission *transmissi
         double phi = transmission->getId();
         labelFigure->setTransform(cFigure::Transform().translate(endRadius * sin(phi), endRadius * cos(phi)));
         const Coord transmissionStart = transmission->getStartPosition();
-        // KLUDGE: to workaround overflow bugs in drawing
+        // KLUDGE: to workaround overflow bugs in drawing, Tkenv?
         double offset = std::fmod(startRadius, signalFigure->getWaveLength());
-        if (startRadius > 10000)
-            startRadius = 10000;
-        if (endRadius > 10000)
-            endRadius = 10000;
+//        if (startRadius > 10000)
+//            startRadius = 10000;
+//        if (endRadius > 10000)
+//            endRadius = 10000;
         switch (signalShape) {
             case SIGNAL_SHAPE_RING: {
                 // determine the rotated 2D canvas points by computing the 2D affine transformation from the 3D transformation of the environment
@@ -321,7 +323,7 @@ void MediumCanvasVisualizer::refreshSignalFigure(const ITransmission *transmissi
     }
 }
 
-void MediumCanvasVisualizer::radioAdded(const IRadio *radio)
+void MediumCanvasVisualizer::handleRadioAdded(const IRadio *radio)
 {
     Enter_Method_Silent();
     auto module = check_and_cast<const cModule *>(radio);
@@ -351,50 +353,50 @@ void MediumCanvasVisualizer::radioAdded(const IRadio *radio)
             communicationRangeFigure->setLineWidth(communicationRangeLineWidth);
             networkNodeVisualization->addFigure(communicationRangeFigure);
         }
-        if (displayTransmissions || displayReceptions) {
+        if (displaySignalDepartures || displaySignalArrivals) {
             auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
-            if (displayTransmissions) {
-                std::string imageName = par("transmissionImage");
-                auto transmissionFigure = new LabeledIconFigure("transmission");
-                transmissionFigure->setTags((std::string("transmission ") + tags).c_str());
-                transmissionFigure->setTooltip("This icon represents an ongoing transmission in a wireless interface");
-                transmissionFigure->setVisible(false);
-                auto iconFigure = transmissionFigure->getIconFigure();
+            if (displaySignalDepartures) {
+                std::string imageName = par("signalDepartureImage");
+                auto signalDepartureFigure = new LabeledIconFigure("signalDeparture");
+                signalDepartureFigure->setTags((std::string("signal_departure ") + tags).c_str());
+                signalDepartureFigure->setTooltip("This icon represents an ongoing signal departure");
+                signalDepartureFigure->setVisible(false);
+                auto iconFigure = signalDepartureFigure->getIconFigure();
                 iconFigure->setImageName(imageName.substr(0, imageName.find_first_of(".")).c_str());
                 iconFigure->setAnchor(cFigure::ANCHOR_NW);
-                auto labelFigure = transmissionFigure->getLabelFigure();
+                auto labelFigure = signalDepartureFigure->getLabelFigure();
                 labelFigure->setPosition(iconFigure->getBounds().getSize() / 2);
-                networkNodeVisualization->addAnnotation(transmissionFigure, transmissionFigure->getBounds().getSize(), transmissionPlacementHint, transmissionPlacementPriority);
-                setTransmissionFigure(radio, transmissionFigure);
+                networkNodeVisualization->addAnnotation(signalDepartureFigure, signalDepartureFigure->getBounds().getSize(), signalDeparturePlacementHint, signalDeparturePlacementPriority);
+                setSignalDepartureFigure(radio, signalDepartureFigure);
             }
-            if (displayReceptions) {
-                std::string imageName = par("receptionImage");
-                auto receptionFigure = new LabeledIconFigure("reception");
-                receptionFigure->setTags((std::string("reception ") + tags).c_str());
-                receptionFigure->setTooltip("This icon represents an ongoing reception in a wireless interface");
-                receptionFigure->setVisible(false);
-                auto iconFigure = receptionFigure->getIconFigure();
+            if (displaySignalArrivals) {
+                std::string imageName = par("signalArrivalImage");
+                auto signalArrivalFigure = new LabeledIconFigure("signalArrival");
+                signalArrivalFigure->setTags((std::string("signal_arrival ") + tags).c_str());
+                signalArrivalFigure->setTooltip("This icon represents an ongoing signal arrival");
+                signalArrivalFigure->setVisible(false);
+                auto iconFigure = signalArrivalFigure->getIconFigure();
                 iconFigure->setImageName(imageName.substr(0, imageName.find_first_of(".")).c_str());
                 iconFigure->setAnchor(cFigure::ANCHOR_NW);
-                auto labelFigure = receptionFigure->getLabelFigure();
+                auto labelFigure = signalArrivalFigure->getLabelFigure();
                 labelFigure->setPosition(iconFigure->getBounds().getSize() / 2);
-                networkNodeVisualization->addAnnotation(receptionFigure, receptionFigure->getBounds().getSize(), receptionPlacementHint, receptionPlacementPriority);
-                setReceptionFigure(radio, receptionFigure);
+                networkNodeVisualization->addAnnotation(signalArrivalFigure, signalArrivalFigure->getBounds().getSize(), signalArrivalPlacementHint, signalArrivalPlacementPriority);
+                setSignalArrivalFigure(radio, signalArrivalFigure);
             }
         }
     }
 }
 
-void MediumCanvasVisualizer::radioRemoved(const IRadio *radio)
+void MediumCanvasVisualizer::handleRadioRemoved(const IRadio *radio)
 {
     Enter_Method_Silent();
-    auto transmissionFigure = removeTransmissionFigure(radio);
+    auto transmissionFigure = removeSignalDepartureFigure(radio);
     if (transmissionFigure != nullptr) {
         auto module = const_cast<cModule *>(check_and_cast<const cModule *>(radio));
         auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(getContainingNode(module));
         networkNodeVisualization->removeAnnotation(transmissionFigure);
     }
-    auto figure = removeReceptionFigure(radio);
+    auto figure = removeSignalArrivalFigure(radio);
     if (figure != nullptr) {
         auto module = const_cast<cModule *>(check_and_cast<const cModule *>(radio));
         auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(getContainingNode(module));
@@ -402,7 +404,7 @@ void MediumCanvasVisualizer::radioRemoved(const IRadio *radio)
     }
 }
 
-void MediumCanvasVisualizer::transmissionAdded(const ITransmission *transmission)
+void MediumCanvasVisualizer::handleSignalAdded(const ITransmission *transmission)
 {
     Enter_Method_Silent();
     if (displaySignals && matchesTransmission(transmission)) {
@@ -414,7 +416,7 @@ void MediumCanvasVisualizer::transmissionAdded(const ITransmission *transmission
     }
 }
 
-void MediumCanvasVisualizer::transmissionRemoved(const ITransmission *transmission)
+void MediumCanvasVisualizer::handleSignalRemoved(const ITransmission *transmission)
 {
     Enter_Method_Silent();
     if (displaySignals && matchesTransmission(transmission)) {
@@ -427,15 +429,16 @@ void MediumCanvasVisualizer::transmissionRemoved(const ITransmission *transmissi
     }
 }
 
-void MediumCanvasVisualizer::transmissionStarted(const ITransmission *transmission)
+void MediumCanvasVisualizer::handleSignalDepartureStarted(const ITransmission *transmission)
 {
     Enter_Method_Silent();
     if (matchesTransmission(transmission)) {
         if (displaySignals)
             setAnimationSpeed();
-        if (displayTransmissions) {
+        if (displaySignalDepartures) {
             auto transmitter = transmission->getTransmitter();
-            auto figure = getTransmissionFigure(transmitter);
+            if (!transmitter) return;
+            auto figure = getSignalDepartureFigure(transmitter);
             auto networkNode = getContainingNode(check_and_cast<const cModule *>(transmitter));
             auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
             networkNodeVisualization->setAnnotationVisible(figure, true);
@@ -453,15 +456,16 @@ void MediumCanvasVisualizer::transmissionStarted(const ITransmission *transmissi
     }
 }
 
-void MediumCanvasVisualizer::transmissionEnded(const ITransmission *transmission)
+void MediumCanvasVisualizer::handleSignalDepartureEnded(const ITransmission *transmission)
 {
     Enter_Method_Silent();
     if (matchesTransmission(transmission)) {
         if (displaySignals)
             setAnimationSpeed();
-        if (displayTransmissions) {
+        if (displaySignalDepartures) {
             auto transmitter = transmission->getTransmitter();
-            auto figure = getTransmissionFigure(transmitter);
+            if (!transmitter) return;
+            auto figure = getSignalDepartureFigure(transmitter);
             auto networkNode = getContainingNode(check_and_cast<const cModule *>(transmitter));
             auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
             networkNodeVisualization->setAnnotationVisible(figure, false);
@@ -469,16 +473,16 @@ void MediumCanvasVisualizer::transmissionEnded(const ITransmission *transmission
     }
 }
 
-void MediumCanvasVisualizer::receptionStarted(const IReception *reception)
+void MediumCanvasVisualizer::handleSignalArrivalStarted(const IReception *reception)
 {
     Enter_Method_Silent();
     if (matchesTransmission(reception->getTransmission())) {
         if (displaySignals)
             setAnimationSpeed();
-        if (displayReceptions) {
+        if (displaySignalArrivals) {
             auto receiver = reception->getReceiver();
             if (networkNodeFilter.matches(check_and_cast<const cModule *>(receiver))) {
-                auto figure = getReceptionFigure(receiver);
+                auto figure = getSignalArrivalFigure(receiver);
                 auto networkNode = getContainingNode(check_and_cast<const cModule *>(receiver));
                 auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
                 networkNodeVisualization->setAnnotationVisible(figure, true);
@@ -509,16 +513,16 @@ void MediumCanvasVisualizer::receptionStarted(const IReception *reception)
     }
 }
 
-void MediumCanvasVisualizer::receptionEnded(const IReception *reception)
+void MediumCanvasVisualizer::handleSignalArrivalEnded(const IReception *reception)
 {
     Enter_Method_Silent();
     if (matchesTransmission(reception->getTransmission())) {
         if (displaySignals)
             setAnimationSpeed();
-        if (displayReceptions) {
+        if (displaySignalArrivals) {
             auto receiver = reception->getReceiver();
             if (networkNodeFilter.matches(check_and_cast<const cModule *>(receiver))) {
-                auto figure = getReceptionFigure(receiver);
+                auto figure = getSignalArrivalFigure(receiver);
                 auto networkNode = getContainingNode(check_and_cast<const cModule *>(receiver));
                 auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
                 networkNodeVisualization->setAnnotationVisible(figure, false);

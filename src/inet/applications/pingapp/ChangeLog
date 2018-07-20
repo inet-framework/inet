@@ -1,3 +1,124 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-05-07  Levente Mészáros
+
+	Changed PingApp to work with Ipv4Socket, Ipv6Socket and L3Socket.
+
+2018-05-04  Zoltan Bojthe
+
+	Refactored to use L3Socket with ICallback.
+
+2018-04-09  Levente Mészáros
+
+	Common: Changed protocol variable names to use camel case.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-03-02  Zoltan Bojthe
+
+	Added networkProtocol parameter to PingApp.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-12  Zoltan Bojthe
+
+	Fixed double and int inconsistency: NED vs. INI and NED vs. C++
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    ICMP -> Icmp
+	    ICMPEchoReply -> IcmpEchoReply
+	    ICMPEchoRequest -> IcmpEchoRequest
+	    ICMPv6 -> Icmpv6
+	    ICMPv6Header -> Icmpv6Header
+	    IPv4 -> Ipv4
+	    IPv4Address -> Ipv4Address
+	    IPv4InterfaceData -> Ipv4InterfaceData
+	    IPv6 -> Ipv6
+	    IPv6Address -> Ipv6Address
+	    IPv6InterfaceData -> Ipv6InterfaceData
+
+2017-12-15  Andras Varga
+
+	Fixed int/double type mismatch between NED parameter and C++ usage.
+
+2017-12-15  Zoltan Bojthe
+
+	Removed unnecessary cPar::doubleValue(), cPar::boolValue() calls.
+
+2017-12-14  Levente Mészáros
+
+	Removed unnecessary markImmutable() calls.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-10-18  Zoltan Bojthe
+
+	Fixed counting of lost packets and round trip times.
+
+2017-09-27  Zoltan Bojthe
+
+	Added ICMP, ICMPv6 crc handling mode.
+
+2017-07-11  Zoltan Bojthe
+
+	Fixed ping output to stdout.
+
+2017-06-16  Zoltan Bojthe
+
+	Changed default TTL to -1.
+
+2017-04-05  Zoltan Bojthe
+
+	Dropped PingPayload, ICMP headers contain the identifier and sequence number.
+
+2017-03-16  Zoltan Bojthe
+
+	Fixed IPv6 specific code - processing of ICMPv6_ECHO_REPLY
+
+2017-03-09  Levente Mészáros
+
+	Fixed for generic network protocols.
+
+2017-02-03  Levente Mészáros
+
+	Changed to work with the new Packet class using IPv6.
+
+2017-02-01  Levente Mészáros
+
+	Changed to use new echo protocol identifier.
+
+2017-02-01  Levente Mészáros
+
+	Fixed dispatch mechanism to avoid side effects.
+
+2017-01-16  Levente Mészáros
+
+	Fixed for Packet/Chunk infrastructure.
+
+2016-11-18  Zoltan Bojthe
+
+	Switched to using Packet, EchoPacket became a Chunk.
+
+2016-07-25  Andras Varga
+
+	Fixed inconsistency between @signal and @statistic
+
+2016-06-03  Zoltan Bojthe
+
+	Changed to work with a raw IP socket and implement IApp interface.
+
+2016-06-09  Zoltan Bojthe
+
+	Added getPid() to PingApp.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

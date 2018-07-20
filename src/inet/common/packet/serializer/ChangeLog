@@ -1,0 +1,57 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-05-03  Andras Varga
+
+	Added proper printing of class name in error messages.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-09-12  Levente Mészáros
+
+	Added alias for std::make_shared, std::dynamic_pointer_cast, etc.
+	to support replacing the implementation.
+
+2017-09-11  Levente Mészáros
+
+	Renamed byte -> B and bit -> b according to IEC & IEEE unit conventions.
+
+2017-07-11  Levente Mészáros
+
+	Fixed memory leak in ChunkSerializerRegistry.
+
+2017-06-21  Levente Mészáros
+
+	Fixed sequence chunk serialization, fixed corner cases which would not occur normally.
+
+2017-06-16  Levente Mészáros
+
+	Reverted to macros in error handling even if guarded.
+
+2017-04-24  Levente Mészáros
+
+	Changed serialization methods to protected visibility.
+
+2017-04-12  Levente Mészáros
+
+	Changed FieldsChunk serialization to work with non-byte aligned chunks.
+
+2017-04-11  Levente Mészáros
+
+	Renamed to Total(De)serializedLength now that its type is bit.
+	Renamed memory streams to MemoryInputStream and MemoryOutputStream.
+
+2017-03-21  Levente Mészáros
+
+	Set chunkLength according to actually deserialized length.
+
+2017-03-02  Levente Mészáros
+
+	Split Serializer.cc and Serializer.h according to subclasses.
+	Moved ChunkSerializer under common/packet/serializer.
+	Renamed to ChunkSerializerRegistry.

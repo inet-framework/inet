@@ -17,7 +17,7 @@
 
 #include "inet/routing/ospfv2/messagehandler/LinkStateAcknowledgementHandler.h"
 
-#include "inet/routing/ospfv2/router/OSPFRouter.h"
+#include "inet/routing/ospfv2/router/OspfRouter.h"
 
 namespace inet {
 
@@ -28,21 +28,21 @@ LinkStateAcknowledgementHandler::LinkStateAcknowledgementHandler(Router *contain
 {
 }
 
-void LinkStateAcknowledgementHandler::processPacket(OSPFPacket *packet, Interface *intf, Neighbor *neighbor)
+void LinkStateAcknowledgementHandler::processPacket(Packet *packet, Interface *intf, Neighbor *neighbor)
 {
     router->getMessageHandler()->printEvent("Link State Acknowledgement packet received", intf, neighbor);
 
     if (neighbor->getState() >= Neighbor::EXCHANGE_STATE) {
-        OSPFLinkStateAcknowledgementPacket *lsAckPacket = check_and_cast<OSPFLinkStateAcknowledgementPacket *>(packet);
+        const auto& lsAckPacket = packet->peekAtFront<OspfLinkStateAcknowledgementPacket>();
 
         int lsaCount = lsAckPacket->getLsaHeadersArraySize();
 
         EV_DETAIL << "  Processing packet contents:\n";
 
         for (int i = 0; i < lsaCount; i++) {
-            OSPFLSAHeader& lsaHeader = lsAckPacket->getLsaHeaders(i);
-            OSPFLSA *lsaOnRetransmissionList;
-            LSAKeyType lsaKey;
+            const OspfLsaHeader& lsaHeader = lsAckPacket->getLsaHeaders(i);
+            OspfLsa *lsaOnRetransmissionList;
+            LsaKeyType lsaKey;
 
             EV_DETAIL << "    " << lsaHeader << "\n";
 

@@ -31,7 +31,7 @@ class INET_API ColorSet
 
   public:
     void parseColors(const char *colorNames);
-    int getSize() const { return colors.size(); }
+    size_t getSize() const { return colors.size(); }
     cFigure::Color getColor(int index) const;
 };
 

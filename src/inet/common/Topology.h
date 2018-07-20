@@ -176,7 +176,7 @@ class INET_API Topology : public cOwnedObject
          * target node. (There may be several paths with the same
          * length.)
          */
-        LinkOut *getPath(int) const { return (LinkOut *)outPath; }
+        LinkOut *getPath(int) const { return (LinkOut *)outPath; }      //FIXME check_and_cast?
         //@}
     };
 
@@ -378,7 +378,7 @@ class INET_API Topology : public cOwnedObject
      * Produces a one-line description of the object's contents.
      * See cObject for more details.
      */
-    virtual std::string info() const override;
+    virtual std::string str() const override;
 
     /**
      * Serializes the object into an MPI send buffer.

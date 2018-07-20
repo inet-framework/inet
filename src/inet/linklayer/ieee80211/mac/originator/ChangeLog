@@ -1,0 +1,79 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-05  Levente Mészáros
+
+	Replaced fooType NED parameters with foo.typename parameters.
+
+2018-05-15  Andras Varga
+
+	RtsPolicy, QosRtsPolicy modules were in each other's NED files.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IQoSRateSelection -> IQosRateSelection
+	    Ieee80211HTMode -> Ieee80211HtMode
+	    Ieee80211OFDMMode -> Ieee80211OfdmMode
+	    MACAddress -> MacAddress
+	    NonQoSRecoveryProcedure -> NonQosRecoveryProcedure
+	    OriginatorQoSAckPolicy -> OriginatorQosAckPolicy
+	    OriginatorQoSMacDataService -> OriginatorQosMacDataService
+	    QoSAckHandler -> QosAckHandler
+	    QoSRecoveryProcedure -> QosRecoveryProcedure
+	    QoSRtsPolicy -> QosRtsPolicy
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-11-10  Levente Mészáros
+
+	Fixed leak caused by not deleting aMpduAggregation.
+
+2017-07-27  Levente Mészáros
+
+	Added MpduAggregation to OriginatorQosMacDataService.
+
+2017-05-11  Levente Mészáros
+
+	Renamed frame variables to header where applicable.
+
+2017-05-10  Levente Mészáros
+
+	Changed to Packet * and std::vector<Packet *> for block acks.
+
+2017-05-10  Levente Mészáros
+
+	Renamed MAC header arguments to *Header.
+
+2017-05-10  Levente Mészáros
+
+	Renamed some MAC headers and frames.
+
+	Ieee80211Frame -> Ieee80211MacHeader
+	Ieee80211OneAddressFrame -> Ieee80211OneAddressHeader
+	Ieee80211TwoAddressFrame -> Ieee80211TwoAddressHeader
+	Ieee80211ACKFrame -> Ieee80211AckFrame
+	Ieee80211RTSFrame -> Ieee80211RtsFrame
+	Ieee80211CTSFrame -> Ieee80211CtsFrame
+
+2017-05-09  Levente Mészáros
+
+	Renamed multiple header chunks.
+
+	Ieee80211DataFrame -> Ieee80211DataHeader
+	Ieee80211DataOrMgmtFrame -> Ieee80211DataOrMgmtHeader
+	Ieee80211ManagementHeader -> Ieee80211MgmtHeader
+	Ieee80211ManagementFrame -> Ieee80211MgmtFrame
+
+2017-05-02  Levente Mészáros
+
+	Renamed to Ieee80211ManagementHeader.
+
+2017-04-20  Levente Mészáros
+
+	Refactored to use the new Packet API.

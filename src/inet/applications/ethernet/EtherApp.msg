@@ -15,30 +15,26 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-cplusplus {{
-#include "inet/common/INETDefs.h"
-
-#define ETHERAPP_CLI_SAP  0xf0
-#define ETHERAPP_SRV_SAP  0xf1
-}}
+import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
 
 namespace inet;
 
 //
-// Request packet sent by ~EtherAppCli. Contains the number of bytes to be
+// Request packet sent by ~EtherAppClient. Contains the number of bytes to be
 // sent back as response; if this value is greater than ~1400, the reply
 // will consist of several Ethernet frames. See also ~EtherAppResp.
 //
-packet EtherAppReq
+class EtherAppReq extends FieldsChunk
 {
     long requestId;
     long responseBytes;
 }
 
 //
-// Packet sent back by ~EtherAppSrv in response to an ~EtherAppReq.
+// Packet sent back by ~EtherAppServer in response to an ~EtherAppReq.
 //
-packet EtherAppResp
+class EtherAppResp extends FieldsChunk
 {
     int requestId;
     int numFrames;

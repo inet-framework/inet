@@ -26,8 +26,8 @@ namespace ieee80211 {
 class INET_API OriginatorBlockAckProcedure : public IOriginatorBlockAckProcedure
 {
     public:
-        virtual Ieee80211BlockAckReq *buildCompressedBlockAckReqFrame(const MACAddress& receiverAddress, Tid tid, int startingSequenceNumber) const override;
-        virtual Ieee80211BlockAckReq *buildBasicBlockAckReqFrame(const MACAddress& receiverAddress, Tid tid, int startingSequenceNumber) const override;
+        virtual const Ptr<Ieee80211BlockAckReq> buildCompressedBlockAckReqFrame(const MacAddress& receiverAddress, Tid tid, int startingSequenceNumber) const override;
+        virtual const Ptr<Ieee80211BlockAckReq> buildBasicBlockAckReqFrame(const MacAddress& receiverAddress, Tid tid, int startingSequenceNumber) const override;
 };
 
 } /* namespace ieee80211 */

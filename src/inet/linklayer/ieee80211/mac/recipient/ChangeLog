@@ -1,0 +1,91 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-05-03  Levente Mészáros
+
+	Fixed ACK frame duration bug reported by Raphael Elsner.
+
+	The duration was incorrectly rounded up in seconds instead of
+	microseconds for data fragment ACKs.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-01-12  Levente Mészáros
+
+	Renamed ACK packets to TcpAck and WlanAck to avoid confusion.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IQoSRateSelection -> IQosRateSelection
+	    IRecipientQoSAckPolicy -> IRecipientQosAckPolicy
+	    IRecipientQoSMacDataService -> IRecipientQosMacDataService
+	    MACAddress -> MacAddress
+	    QoSCtsPolicy -> QosCtsPolicy
+	    RecipientQoSAckPolicy -> RecipientQosAckPolicy
+	    RecipientQoSMacDataService -> RecipientQosMacDataService
+
+2017-12-14  Levente Mészáros
+
+	Removed unnecessary markImmutable() calls.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-11-10  Levente Mészáros
+
+	Added MPDUDeaggregation field but it's not used yet.
+
+2017-07-14  Levente Mészáros
+
+	Renamed variables, arguments to be more consistent.
+
+2017-07-10  Levente Mészáros
+
+	Added at least a log statement to avoid silently ignoring an RTS.
+
+2017-05-11  Levente Mészáros
+
+	Renamed frame variables to header where applicable.
+
+2017-05-10  Levente Mészáros
+
+	Renamed MAC header arguments to *Header.
+
+2017-05-10  Levente Mészáros
+
+	Renamed some MAC headers and frames.
+
+	Ieee80211Frame -> Ieee80211MacHeader
+	Ieee80211OneAddressFrame -> Ieee80211OneAddressHeader
+	Ieee80211TwoAddressFrame -> Ieee80211TwoAddressHeader
+	Ieee80211ACKFrame -> Ieee80211AckFrame
+	Ieee80211RTSFrame -> Ieee80211RtsFrame
+	Ieee80211CTSFrame -> Ieee80211CtsFrame
+
+2017-05-09  Levente Mészáros
+
+	Renamed multiple header chunks.
+
+	Ieee80211DataFrame -> Ieee80211DataHeader
+	Ieee80211DataOrMgmtFrame -> Ieee80211DataOrMgmtHeader
+	Ieee80211ManagementHeader -> Ieee80211MgmtHeader
+	Ieee80211ManagementFrame -> Ieee80211MgmtFrame
+
+2017-05-02  Levente Mészáros
+
+	Renamed to Ieee80211ManagementHeader.
+
+2017-04-27  Levente Mészáros
+
+	Fixed when reassemly returns nullptr.
+
+2017-04-26  Benjamin Martin Seregi
+
+	RecipientQoSMacDataService: fixed memory leak.
+
+2017-04-20  Levente Mészáros
+
+	Removed obsolete solution from reassembly and switched to new chunk API.

@@ -1,0 +1,91 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-05-03  Levente Mészáros
+
+	Renamed networklayer/configurator/generic folder to */nexthop.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IPv4NetworkConfigurator -> Ipv4NetworkConfigurator
+	    IPv4RoutingTable -> Ipv4RoutingTable
+
+2017-12-15  Zoltan Bojthe
+
+	Renamed deprecated info() to str().
+
+2017-12-15  Zoltan Bojthe
+
+	Removed unnecessary cPar::boolValue() calls.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2016-06-16  Levente Mészáros
+
+	Removed icon size specification from module definitions.
+	We should use is=s instead in the submodule display strings when appropriate.
+
+====== inet-3.x ======
+
+2018-03-21  ------ inet-3.6.4 released ------
+
+2017-12-22  ------ inet-3.6.3 released ------
+
+2017-10-02  ------ inet-3.6.2 released ------
+
+2017-07-06  ------ inet-3.6.1 released ------
+
+2017-06-09  ------ inet-3.6.0 released ------
+
+2017-02-20  ------ inet-3.5.0 released ------
+
+2016-06-15  ------ inet-3.4.0 released ------
+
+2016-06-01  ------ inet-3.3.0 released ------
+
+2016-04-06  ------ inet-3.2.4 released ------
+
+2016-03-16  ------ inet-3.2.3 released ------
+
+2016-03-11  ------ inet-3.2.2 released ------
+
+2016-01-21  ------ inet-3.2.1 released ------
+
+2015-12-16  ------ inet-3.2.0 released ------
+
+2015-10-26  ------ inet-3.1.1 released ------
+
+2015-10-15  ------ inet-3.1.0 released ------
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-12-18  Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-12-09  Florian Meier & Levente Meszaros
+
+	Factored out the network topology extraction algorithm from IPv4NetworkConfigurator.
+	Added support to IPv4NetworkConfigurator for computing wireless shortest
+	paths based on packet error rate.
+	Added printing routing tables.
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+2013-02-20  Levente Meszaros
+
+	Added GenericNetworkConfigurator to configure GenericRoutingTables with static routes.
+
+====== inet-2.x ======

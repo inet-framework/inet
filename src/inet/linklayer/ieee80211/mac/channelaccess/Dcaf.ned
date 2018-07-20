@@ -17,13 +17,13 @@
 
 package inet.linklayer.ieee80211.mac.channelaccess;
 
-import inet.linklayer.ieee80211.mac.contention.Contention;
+import inet.linklayer.ieee80211.mac.contract.IContention;
 
 
 module Dcaf
 {
     parameters:
-        double difsTime @unit("s") = default(-1s);
+        int difsn = default(-1);
         int cwMin = default(-1);
         int cwMax = default(-1);
 
@@ -33,8 +33,8 @@ module Dcaf
         @class("Dcaf");
         @display("i=block/star");
     submodules:
-        contention: Contention {
+        contention: <default("Contention")> like IContention {
             parameters:
-	            @display("p=100,100");
+                @display("p=100,100");
         }
 }

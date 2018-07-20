@@ -20,20 +20,19 @@
 #define __INET_PACKETDRILL_H
 
 #include "inet/common/INETDefs.h"
-#include "omnetpp/platdep/sockets.h"
+//#include "omnetpp/platdep/sockets.h"
 
 #include "PacketDrillUtils.h"
-#include "inet/transportlayer/udp/UDPPacket.h"
-#include "inet/transportlayer/tcp_common/TCPSegment.h"
-#include "inet/networklayer/ipv4/IPv4Datagram_m.h"
-#include "inet/transportlayer/sctp/SCTPMessage.h"
-#include "inet/transportlayer/sctp/SCTPAssociation.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
+#include "inet/transportlayer/tcp_common/TcpHeader.h"
+#include "inet/networklayer/common/IpProtocolId_m.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/transportlayer/sctp/SctpHeader.h"
+#include "inet/transportlayer/sctp/SctpAssociation.h"
 #include "PacketDrillApp.h"
 
 namespace inet {
-using namespace sctp;
 class PacketDrillApp;
-}
 
 class INET_API PacketDrill
 {
@@ -44,15 +43,15 @@ class INET_API PacketDrill
         PacketDrill(PacketDrillApp* mod);
         ~PacketDrill();
 
-        static cPacket *buildUDPPacket(int address_family, enum direction_t direction,
+        static Packet *buildUDPPacket(int address_family, enum direction_t direction,
                                        uint16 udp_payload_bytes, char **error);
 
-        static cPacket* buildTCPPacket(int address_family, enum direction_t direction,
+        static Packet* buildTCPPacket(int address_family, enum direction_t direction,
                                        const char *flags, uint32 startSequence,
                                        uint16 tcpPayloadBytes, uint32 ackSequence,
                                        int32 window, cQueue *tcpOptions, char **error);
 
-        static cPacket* buildSCTPPacket(int address_family, enum direction_t direction,
+        static Packet* buildSCTPPacket(int address_family, enum direction_t direction,
                                         cQueue *chunks);
 
         static PacketDrillSctpChunk* buildDataChunk(int64 flgs, int64 len, int64 tsn, int64 sid, int64 ssn, int64 ppid);
@@ -83,7 +82,8 @@ class INET_API PacketDrill
 
         static PacketDrillSctpChunk* buildErrorChunk(int64 flgs, cQueue *causes);
 
-        static IPv4Datagram *makeIPPacket(int protocol, enum direction_t direction, L3Address localAddr, L3Address remoteAddr);
+        static Ptr<Ipv4Header> makeIpv4Header(IpProtocolId protocol, enum direction_t direction, L3Address localAddr, L3Address remoteAddr);
+        static void setIpv4HeaderCrc(Ptr<Ipv4Header> &ipv4Header);
 
         int evaluateExpressionList(cQueue *in_list, cQueue *out_list, char **error);
 
@@ -100,4 +100,7 @@ class INET_API PacketDrill
         int evaluateListExpression(PacketDrillExpression *in, PacketDrillExpression *out, char **error);
 };
 
+} // namespace inet
+
 #endif
+

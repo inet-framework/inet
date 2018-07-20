@@ -1,3 +1,47 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-05-04  Levente Mészáros
+
+	Extended error models with corruption mode parameter.
+
+	Available corruption modes: packet, chunk, byte, or bit level. 802.11
+	error models support packet corruption mode only but could be extended
+	with the others to do real MPDU aggregation.
+
+2018-04-26  Alfonso Ariza
+
+	Added HT and VHT modes to Nist and Yans error models.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    APSKModulationBase -> ApskModulationBase
+	    BPSKModulation -> BpskModulation
+	    ISNIR -> ISnir
+	    Ieee80211OFDMMode -> Ieee80211OfdmMode
+	    QAM16Modulation -> Qam16Modulation
+	    QAM64Modulation -> Qam64Modulation
+	    QPSKModulation -> QpskModulation
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-10-30  Levente Mészáros
+
+	Extended 802.11 layered error model for packet level simulation.
+	Changed 802.11 OFDM error models wrt. to the service field.
+	The service field is part of the PHY header in terms of bits but it's
+	sent in the data part in terms of symbols (modulation).
+
+2017-01-26  Levente Mészáros
+
+	Switched to bit type where appropriate.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

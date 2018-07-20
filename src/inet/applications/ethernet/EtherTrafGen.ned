@@ -18,29 +18,28 @@
 package inet.applications.ethernet;
 
 //
-// A simple traffic generator for the Ethernet model and the 802.11 model,
-// and generally for any L2 model that accepts Ieee80211Ctrl control info
-// on the packets. It should be connected directly to ~EtherEncap or
-// an Ieee802NicXXX module.
+// A simple traffic generator for the Ethernet model and the 802.11 model, and
+// generally for any L2 model that accepts Ieee802SapReq tag on packets. It
+// should be connected directly to ~EtherEncap module.
 //
 simple EtherTrafGen
 {
     parameters:
         string destAddress = default("");  // destination MAC address, or module path name of destination station; empty means off
-        int etherType = default(0);  // etherType to set on outgoing packets
+        int ssap = default(-1);  // llc ssap to set on outgoing packets
+        int dsap = default(-1);  // llc dsap to set on outgoing packets
         double startTime @unit(s) = default(this.sendInterval);  // time of sending the first packet
         double stopTime @unit(s) = default(-1s);  // time of finishing sending, negative values mean forever
         volatile double sendInterval @unit(s);  // interval between sending bursts
         volatile int numPacketsPerBurst = default(1);  // number of packets to send per burst (packets within a burst are sent at the same simulation time)
         volatile int packetLength @unit(B);  // length of packets to send
         @display("i=block/app");
-        @signal[sentPk](type=cPacket);
-        @signal[rcvdPk](type=cPacket);
-        @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-        @statistic[endToEndDelay](title="end-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
+        @signal[packetSent](type=Packet);
+        @signal[packetReceived](type=Packet);
+        @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[endToEndDelay](title="end-to-end delay"; source="dataAge(packetReceived)"; unit=s; record=histogram,vector; interpolationmode=none);
     gates:
         input in @labels(Ieee802Ctrl/up);
         output out @labels(Ieee802Ctrl/down);
 }
-

@@ -50,7 +50,7 @@ std::ostream& StochasticErrorModel::printToStream(std::ostream& stream, int leve
     return stream;
 }
 
-double StochasticErrorModel::computePacketErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const
+double StochasticErrorModel::computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
     Enter_Method_Silent();
     const IReception *reception = snir->getReception();
@@ -61,8 +61,8 @@ double StochasticErrorModel::computePacketErrorRate(const ISNIR *snir, IRadioSig
     else {
         const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(reception->getTransmission());
         double bitErrorRate = computeBitErrorRate(snir, part);
-        double headerSuccessRate = pow(1.0 - bitErrorRate, flatTransmission->getHeaderBitLength());
-        double dataSuccessRate = pow(1.0 - bitErrorRate, flatTransmission->getDataBitLength());
+        double headerSuccessRate = pow(1.0 - bitErrorRate, b(flatTransmission->getHeaderLength()).get());
+        double dataSuccessRate = pow(1.0 - bitErrorRate, b(flatTransmission->getDataLength()).get());
         switch (part) {
             case IRadioSignal::SIGNAL_PART_WHOLE:
                 return 1.0 - headerSuccessRate * dataSuccessRate;
@@ -78,7 +78,7 @@ double StochasticErrorModel::computePacketErrorRate(const ISNIR *snir, IRadioSig
     }
 }
 
-double StochasticErrorModel::computeBitErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const
+double StochasticErrorModel::computeBitErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
     Enter_Method_Silent();
     if (!std::isnan(bitErrorRate)) {
@@ -94,7 +94,7 @@ double StochasticErrorModel::computeBitErrorRate(const ISNIR *snir, IRadioSignal
     }
 }
 
-double StochasticErrorModel::computeSymbolErrorRate(const ISNIR *snir, IRadioSignal::SignalPart part) const
+double StochasticErrorModel::computeSymbolErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
     Enter_Method_Silent();
     return symbolErrorRate;

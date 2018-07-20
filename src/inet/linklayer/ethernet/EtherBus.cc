@@ -42,7 +42,7 @@ void EtherBus::initialize()
     numMessages = 0;
     WATCH(numMessages);
 
-    propagationSpeed = par("propagationSpeed").doubleValue();
+    propagationSpeed = par("propagationSpeed");  //TODO there is a hardcoded propagation speed in EtherMACBase.cc -- use that?
 
     // initialize the positions where the hosts connects to the bus
     numTaps = gateSize("ethg");
@@ -50,7 +50,7 @@ void EtherBus::initialize()
     outputGateBaseId = gateBaseId("ethg$o");
 
     // read positions and check if positions are defined in order (we're lazy to sort...)
-    std::vector<double> pos = cStringTokenizer(par("positions").stringValue()).asDoubleVector();
+    std::vector<double> pos = cStringTokenizer(par("positions")).asDoubleVector();
     int numPos = pos.size();
 
     if (numPos > numTaps)

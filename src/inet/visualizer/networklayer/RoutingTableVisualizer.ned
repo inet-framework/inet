@@ -27,16 +27,14 @@ import inet.visualizer.contract.IRoutingTableVisualizer;
 module RoutingTableVisualizer like IRoutingTableVisualizer
 {
     parameters:
-        @display("i=block/app_s");
-        string canvasVisualizerType = default("RoutingTableCanvasVisualizer");
-        string osgVisualizerType = default("RoutingTableOsgVisualizer");
+        @display("i=block/app");
     submodules:
-        canvasVisualizer: <canvasVisualizerType> like IRoutingTableVisualizer if canvasVisualizerType != "" {
+        canvasVisualizer: <default("RoutingTableCanvasVisualizer")> like IRoutingTableVisualizer if typename != "" {
             parameters:
-                @display("p=100,50");
+                @display("p=100,100");
         }
-        osgVisualizer: <osgVisualizerType> like IRoutingTableVisualizer if osgVisualizerType != "" {
+        osgVisualizer: <default("RoutingTableOsgVisualizer")> like IRoutingTableVisualizer if typename != "" {
             parameters:
-                @display("p=100,150");
+                @display("p=100,200");
         }
 }

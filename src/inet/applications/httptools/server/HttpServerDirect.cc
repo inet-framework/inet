@@ -57,7 +57,7 @@ void HttpServerDirect::handleMessage(cMessage *msg)
         cModule *senderHost = getContainingNode(senderModule);
         EV_DEBUG << "Sender is " << senderModule->getFullName()
                  << " in host " << senderHost->getFullName() << endl;
-        cPacket *reply = handleReceivedMessage(msg);
+        Packet *reply = handleReceivedMessage(check_and_cast<Packet *>(msg));
         // Echo back to the requester
         if (reply != nullptr)
             sendDirectToModule(senderModule, reply, 0.0, rdReplyDelay);

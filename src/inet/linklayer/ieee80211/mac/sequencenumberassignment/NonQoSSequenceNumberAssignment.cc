@@ -20,11 +20,11 @@
 namespace inet {
 namespace ieee80211 {
 
-void NonQoSSequenceNumberAssignment::assignSequenceNumber(Ieee80211DataOrMgmtFrame* frame)
+void NonQoSSequenceNumberAssignment::assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header)
 {
-    ASSERT(frame->getType() != ST_DATA_WITH_QOS);
+    ASSERT(header->getType() != ST_DATA_WITH_QOS);
     lastSeqNum = (lastSeqNum + 1) % 4096;
-    const MACAddress& address = frame->getReceiverAddress();
+    const MacAddress& address = header->getReceiverAddress();
     auto it = lastSentSeqNums.find(address);
     if (it == lastSentSeqNums.end())
         lastSentSeqNums[address] = lastSeqNum;
@@ -33,7 +33,7 @@ void NonQoSSequenceNumberAssignment::assignSequenceNumber(Ieee80211DataOrMgmtFra
             lastSeqNum = (lastSeqNum + 1) % 4096; // make it different from the last sequence number sent to that RA (spec: "add 2")
         it->second = lastSeqNum;
     }
-    frame->setSequenceNumber(lastSeqNum);
+    header->setSequenceNumber(lastSeqNum);
 }
 
 } /* namespace ieee80211 */

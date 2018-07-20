@@ -21,12 +21,12 @@ namespace inet {
 
 namespace physicallayer {
 
-SignalBitModel::SignalBitModel(int headerBitLength, bps headerBitRate, int payloadBitLength, bps payloadBitRate, const BitVector *bits) :
+SignalBitModel::SignalBitModel(b headerLength, bps headerBitRate, b dataLength, bps dataBitRate, const BitVector *bits) :
     bits(bits),
-    headerBitLength(headerBitLength),
+    headerLength(headerLength),
     headerBitRate(headerBitRate),
-    payloadBitLength(payloadBitLength),
-    payloadBitRate(payloadBitRate)
+    dataLength(dataLength),
+    dataBitRate(dataBitRate)
 {
 }
 
@@ -39,31 +39,31 @@ std::ostream& SignalBitModel::printToStream(std::ostream& stream, int level) con
 {
     stream << "SignalBitModel";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << ", headerBitLength = " << headerBitLength
+        stream << ", headerLength = " << headerLength
                << ", headerBitRate = " << headerBitRate
-               << ", payloadBitLength = " << payloadBitLength
-               << ", payloadBitRate = " << payloadBitRate;
+               << ", dataLength = " << dataLength
+               << ", dataBitRate = " << dataBitRate;
     return stream;
 }
 
 TransmissionBitModel::TransmissionBitModel(const BitVector *bits, const IForwardErrorCorrection *forwardErrorCorrection, const IScrambling *scrambling, const IInterleaving *interleaving) :
-    SignalBitModel(-1, bps(NaN), -1, bps(NaN), bits),
+    SignalBitModel(b(-1), bps(NaN), b(-1), bps(NaN), bits),
     forwardErrorCorrection(forwardErrorCorrection),
     scrambling(scrambling),
     interleaving(interleaving)
 {
 }
 
-TransmissionBitModel::TransmissionBitModel(int headerBitLength, bps headerBitRate, int payloadBitLength, bps payloadBitRate, const BitVector *bits, const IForwardErrorCorrection *forwardErrorCorrection, const IScrambling *scrambling, const IInterleaving *interleaving) :
-    SignalBitModel(headerBitLength, headerBitRate, payloadBitLength, payloadBitRate, bits),
+TransmissionBitModel::TransmissionBitModel(b headerLength, bps headerBitRate, b dataLength, bps dataBitRate, const BitVector *bits, const IForwardErrorCorrection *forwardErrorCorrection, const IScrambling *scrambling, const IInterleaving *interleaving) :
+    SignalBitModel(headerLength, headerBitRate, dataLength, dataBitRate, bits),
     forwardErrorCorrection(forwardErrorCorrection),
     scrambling(scrambling),
     interleaving(interleaving)
 {
 }
 
-ReceptionBitModel::ReceptionBitModel(int headerBitLength, bps headerBitRate, int payloadBitLength, bps payloadBitRate, const BitVector *bits) :
-    SignalBitModel(headerBitLength, headerBitRate, payloadBitLength, payloadBitRate, bits)
+ReceptionBitModel::ReceptionBitModel(b headerLength, bps headerBitRate, b dataLength, bps dataBitRate, const BitVector *bits) :
+    SignalBitModel(headerLength, headerBitRate, dataLength, dataBitRate, bits)
 {
 }
 

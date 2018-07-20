@@ -29,16 +29,16 @@ void AdaptiveProbabilisticBroadcast::initialize(int stage)
     }
 }
 
-void AdaptiveProbabilisticBroadcast::handleLowerPacket(cPacket *msg)
+void AdaptiveProbabilisticBroadcast::handleLowerPacket(Packet *packet)
 {
-    ProbabilisticBroadcastDatagram *m = check_and_cast<ProbabilisticBroadcastDatagram *>(msg);
+    const auto& macHeader = packet->peekAtFront<ProbabilisticBroadcastHeader>();
     // Update neighbors table before calling the method of the super class
     // because it may delete the message.
-    updateNeighMap(m);
-    ProbabilisticBroadcast::handleLowerPacket(msg);
+    updateNeighMap(macHeader.get());
+    ProbabilisticBroadcast::handleLowerPacket(packet);
 }
 
-void AdaptiveProbabilisticBroadcast::updateNeighMap(ProbabilisticBroadcastDatagram *m)
+void AdaptiveProbabilisticBroadcast::updateNeighMap(const ProbabilisticBroadcastHeader *m)
 {
     //find the network address of the node who sent the msg
     NeighborMap::key_type nodeAddress = m->getSrcAddr();

@@ -23,7 +23,7 @@
 namespace inet {
 namespace ieee80211 {
 
-class Ieee80211Frame;
+class Ieee80211MacHeader;
 
 /**
  * Abstract interface for processes that implement contention-based channel access.
@@ -48,7 +48,7 @@ class INET_API IContention
                 virtual void channelAccessGranted() = 0;
         };
 
-        virtual ~IContention() {}
+        virtual ~IContention() { }
 
         virtual void startContention(int cw, simtime_t ifs, simtime_t eifs, simtime_t slotTime, ICallback *callback) = 0;
         virtual bool isContentionInProgress() = 0;
@@ -61,5 +61,4 @@ class INET_API IContention
 } // namespace ieee80211
 } // namespace inet
 
-#endif
-
+#endif // #ifndef __INET_ICONTENTION_H

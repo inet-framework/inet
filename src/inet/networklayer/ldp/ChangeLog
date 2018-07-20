@@ -1,3 +1,93 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-01  Zoltan Bojthe
+
+	Added B/b units to length constants and length fields of chunks.
+
+2018-04-27  Zoltan Bojthe
+
+	Changed Ldp module to implement IApp.
+	Adapted ldp to use ISocket.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-02-19  Zoltan Bojthe
+
+	Renamed functions to use camel case.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-05  Zoltan Bojthe
+
+	Renamed NF_* signals to use camel case.
+	Renamed signal variables to *Signal.
+
+2018-01-03  Levente Mészáros
+
+	Replaced cMessage with Packet where applicable.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    FEC_TLV -> FecTlv
+	    IIPv4RoutingTable -> IIpv4RoutingTable
+	    IPv4 -> Ipv4
+	    IPv4Address -> Ipv4Address
+	    IPv4InterfaceData -> Ipv4InterfaceData
+	    IPv4Route -> Ipv4Route
+	    LDP -> Ldp
+	    LDPAddress -> LdpAddress
+	    LDPHello -> LdpHello
+	    LDPIni -> LdpIni
+	    LDPLabelMapping -> LdpLabelMapping
+	    LDPLabelRequest -> LdpLabelRequest
+	    LDPNotify -> LdpNotify
+	    LDPPacket -> LdpPacket
+	    LDP_MESSAGE_TYPES -> LdpMessageTypes
+	    LDP_STATUS_TYPES -> LdpStatusTypes
+	    LIBTable -> LibTable
+	    TCPCommand -> TcpCommand
+	    TCPSegment -> TcpHeader
+	    TCPSocket -> TcpSocket
+	    TCPSocketMap -> TcpSocketMap
+	    TCPStatusInfo -> TcpStatusInfo
+	    TED -> Ted
+	    TEDChangeInfo -> TedChangeInfo
+	    UDPControlInfo -> UdpControlInfo
+	    UDPSocket -> UdpSocket
+
+2017-12-15  Zoltan Bojthe
+
+	Removed unnecessary cPar::doubleValue() calls.
+
+2017-12-14  Levente Mészáros
+
+	Removed unnecessary markImmutable() calls.
+
+2017-11-21  Levente Mészáros
+
+	Eliminated all #define statements from MSG files.
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-08-09  Zoltan Bojthe
+
+	Switched to use removePoppedHeaders() before use removeHeader<T>().
+
+2017-08-09  Zoltan Bojthe
+
+	Removed const_pointer_cast kludge.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

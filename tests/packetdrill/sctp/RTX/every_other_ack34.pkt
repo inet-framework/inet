@@ -1,0 +1,50 @@
+--tolerance_usecs=20000
+
+ 0.0 `sysctl -i net.inet.sctp.initial_cwnd=10`
+
+// Create a non-blocking 1-to-1 style socket
++0.0 socket(..., SOCK_STREAM, IPPROTO_SCTP) = 3
++0.0 fcntl(3, F_SETFL, O_RDWR | O_NONBLOCK) = 0
++0.0 connect(3, ..., ...) = -1 EINPROGRESS (Operation now in progress)
+
+// Trigger the active associtation setup
++0.0 > sctp: INIT[flgs=0, tag=1, a_rwnd=..., os=..., is=..., tsn=1, ...]
++0.0 < sctp: INIT_ACK[flgs=0, tag=2, a_rwnd=99999, os=1, is=1, tsn=1, STATE_COOKIE[len=4, val=...]]
++0.0 > sctp: COOKIE_ECHO[flgs=0, len=..., val=...]
++0.0 < sctp: COOKIE_ACK[flgs=0]
+
+// Check if the setup was sucessful
++0.0 getsockopt(3, SOL_SOCKET, SO_ERROR, [0], [4]) = 0
+
+//Packets
++0 write(3, ..., 1452) = 1452
++0 write(3, ..., 1452) = 1452
++0 write(3, ..., 1452) = 1452
++0 write(3, ..., 1452) = 1452
++0 write(3, ..., 1452) = 1452
+
++0.0 > sctp: DATA[flgs=BE, len=1468, tsn=1, sid=0, ssn=0, ppid=0]
++0.0 < sctp: SACK[flgs=0, cum_tsn=1, a_rwnd=99999, gaps=[], dups=[]]
+
++0.0 > sctp: DATA[flgs=BE, len=1468, tsn=2, sid=0, ssn=1, ppid=0]
++0.0 < sctp: SACK[flgs=0, cum_tsn=2, a_rwnd=99999, gaps=[], dups=[]]
+
++0.0 > sctp: DATA[flgs=BE, len=1468, tsn=3, sid=0, ssn=2, ppid=0]
+//+0.0 < sctp: SACK[flgs=0, cum_tsn=1, a_rwnd=99999, gaps=[2:2], dups=[]]
+
++0.0 > sctp: DATA[flgs=BE, len=1468, tsn=4, sid=0, ssn=3, ppid=0]
+//+0.0 < sctp: SACK[flgs=0, cum_tsn=1, a_rwnd=99999, gaps=[2:3], dups=[]]
+
++0.0 > sctp: DATA[flgs=BE, len=1468, tsn=5, sid=0, ssn=4, ppid=0]
++0.0 < sctp: SACK[flgs=0, cum_tsn=2, a_rwnd=99999, gaps=[3:3], dups=[]]
+
++1.0 > sctp: DATA[flgs=BE, len=1468, tsn=3, sid=0, ssn=2, ppid=0]
++0.0 < sctp: SACK[flgs=0, cum_tsn=3, a_rwnd=99999, gaps=[2:2], dups=[]]
++0.0 > sctp: DATA[flgs=BE, len=1468, tsn=4, sid=0, ssn=3, ppid=0]
++0.0 < sctp: SACK[flgs=0, cum_tsn=5, a_rwnd=99999, gaps=[], dups=[]]
+
++0.0 close(3) = 0
+//Shutdown
++0.0 > sctp: SHUTDOWN[flgs=0, cum_tsn=0]
++0.0 < sctp: SHUTDOWN_ACK[flgs=0]
++0.0 > sctp: SHUTDOWN_COMPLETE[flgs=...]

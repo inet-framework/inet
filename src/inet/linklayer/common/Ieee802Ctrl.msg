@@ -15,14 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+import inet.common.INETDefs;
+import inet.linklayer.common.MacAddress;
 
-cplusplus {{
-#include "inet/linklayer/common/MACAddress.h"
-}}
-class noncobject MACAddress;
 namespace inet;
-
-
 
 //
 // Message kind values used with in communication between L3 and IEEE 802 L2
@@ -36,54 +32,19 @@ enum Ieee802MessageKind
 }
 
 
-//
-// Some 8-bit SAP values for IEEE 802.x LLC headers.
-//
-enum SAPCode
+class Ieee802RegisterDsapCommand extends cObject
 {
-    SAP_IBM_SNA = 0x04;
-    SAP_IP = 0x06;
-    SAP_3COM = 0x80;
-    SAP_SNAP = 0xAA;
-    SAP_BANYAN = 0xBC;
-    SAP_NOVELL_IPX = 0xE0;
-    SAP_LAN_MANAGER = 0xF4;
-    SAP_CLNS = 0xFE;
-    SAP_STP = 0x42;
+    int dsap;        // used with IEEE 802 LLC (see ~EtherFrameWithLlc)
 }
 
-
-//
-// Some EtherType values (Ethernet II).
-//
-enum EtherType
+class Ieee802DeregisterDsapCommand extends cObject
 {
-    ETHERTYPE_IPv4 = 0x0800;
-    ETHERTYPE_ARP = 0x0806;
-    ETHERTYPE_TRILL = 0x22F3;
-    ETHERTYPE_L2_ISIS = 0x22F4;
-    ETHERTYPE_RARP = 0x8035;
-    ETHERTYPE_IPv6 = 0x86DD;
-    ETHERTYPE_INET_GENERIC = 0x86FF;    // not in standard, INET spceific value for @GenericNetworkProtocol
-    ETHERTYPE_MPLS_UNICAST = 0x8847;
-    ETHERTYPE_MPLS_MULTICAST = 0x8848;
+    int dsap;        // used with IEEE 802 LLC (see ~EtherFrameWithLlc)
 }
 
-
-//
-// Control structure for communication between LLC and higher layers
-//
-class Ieee802Ctrl
+// used with IEEE802CTRL_SENDPAUSE
+class Ieee802PauseCommand extends cObject
 {
-    @customize(true);
-
-    MACAddress src;  // src MAC address (can be left empty when sending)
-    MACAddress dest; // dest MAC address
-    int etherType @enum(EtherType);   // used with ~EthernetIIFrame
-    int interfaceId; // incoming or outgoing interface (not needed everywhere)
-    int switchPort = -1; // swich port index (only in swiches)
-    int userPriority = -1; // 802.1d User Priority (UP), 0..7. Note: In 802.11, UP corresponds to 0..7 TID values, and there's a standard static mapping from TID to AC (Access Category)
-    int ssap;        // used with IEEE 802 LLC (see ~EtherFrameWithLLC)
-    int dsap;        // used with IEEE 802 LLC (see ~EtherFrameWithLLC)
-    int pauseUnits;  // used with IEEE802CTRL_SENDPAUSE
+    MacAddress destinationAddress;
+    int pauseUnits;
 }

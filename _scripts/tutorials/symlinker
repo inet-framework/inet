@@ -1,0 +1,13 @@
+#!/bin/bash
+
+if [[ $1 == -h ]]; then
+  echo "Creates symlink in this directory to the corresponding showcase directory in /_docs"
+else
+
+parentdir="$(dirname $(pwd))"
+currentdir="$(basename $(pwd))"
+last_of_parentdir="$(basename $parentdir)"
+
+ln -vs ../../_docs/$last_of_parentdir/$currentdir/ doc
+
+fi

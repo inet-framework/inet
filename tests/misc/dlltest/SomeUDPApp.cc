@@ -20,7 +20,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "SomeUDPApp.h"
-#include "inet/transportlayer/contract/udp/UDPControlInfo_m.h"
+#include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 #include "AddressResolver.h"
 
 

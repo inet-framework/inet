@@ -3,7 +3,7 @@
 package inet.examples.ospfv2.areas;
 
 import inet.common.misc.ThruputMeteringChannel;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 
 
 network OSPF_AreaTest
@@ -11,17 +11,17 @@ network OSPF_AreaTest
     submodules:
         Area1: TwoNetsArea {
             parameters:
-                @display("p=108,148;b=136,128");
+                @display("p=250,100;b=100,100");
             gates:
                 ethg[1];
         }
         Area2: OneNetArea {
             parameters:
-                @display("p=322,148;b=136,128");
+                @display("p=500,100;b=100,100");
             gates:
                 ethg[1];
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 config = xml("<config>"+
                             "<interface among='Area1.*' address='192.168.11.x' netmask='255.255.255.x' />"+
@@ -36,7 +36,7 @@ network OSPF_AreaTest
                 addStaticRoutes = false;
                 addDefaultRoutes = false;
                 assignDisjunctSubnetAddresses = false;
-                @display("p=75,43");
+                @display("p=100,100;is=s");
         }
     connections:
         Area1.ethg[0] <--> ThruputMeteringChannel {  delay = 0.1us; datarate = 100 Mbps; thruputDisplayFormat = "#N"; } <--> Area2.ethg[0];

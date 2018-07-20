@@ -1,19 +1,20 @@
 import inet.node.inet.StandardHost;
 import inet.node.inet.Router;
 import ned.DatarateChannel;
-import inet.transportlayer.sctp.SCTPNatRouter;
+import inet.transportlayer.sctp.SctpNatRouter;
 
 
 network multinat
 {
     parameters:
-        volatile double testTimeout;
+        volatile double testTimeout @unit(s);
         bool testing;
-        **.networkLayer.configurator.networkConfiguratorModule = "";
+        **.ipv4.configurator.networkConfiguratorModule = "";
     submodules:
         Peer_1: StandardHost {
             parameters:
                 forwarding = false;
+                ipv4.routingTable.routingFile = "../../lib/nat_peer1.mrt";
         @display("p=48,124;i=device/laptop");
             gates:
                 pppg[2];
@@ -21,35 +22,35 @@ network multinat
         Server: StandardHost {
             parameters:
                 forwarding = false;
-           //     routingTable.routingFile = "../../lib/nat_server.mrt";
+                ipv4.routingTable.routingFile = "../../lib/nat_server.mrt";
         @display("p=452,116;i=device/server");
             gates:
                 pppg[2];
     }
-        Nat_1_1: SCTPNatRouter {
+        Nat_1_1: SctpNatRouter {
             parameters:
-           //     routingTable.routingFile = "../../lib/nat1_1.mrt";
+                ipv4.routingTable.routingFile = "../../lib/nat1_1.mrt";
         @display("p=152,56;i=block/join");
             gates:
                 pppg[2];
     }
         Router_1: Router {
             parameters:
-          //      routingTable.routingFile = "../../lib/nat_mrouter_1.mrt";
+                ipv4.routingTable.routingFile = "../../lib/nat_mrouter_1.mrt";
         @display("p=300,56;i=abstract/router");
             gates:
                 pppg[2];
     }
-        Nat_1_2: SCTPNatRouter {
+        Nat_1_2: SctpNatRouter {
         parameters:
-          //      routingTable.routingFile = "../../lib/nat1_2.mrt";
+                ipv4.routingTable.routingFile = "../../lib/nat1_2.mrt";
         @display("p=156,172;i=block/join");
             gates:
                 pppg[2];
     }
         Router_2: Router {
         parameters:
-          //      routingTable.routingFile = "../../lib/nat_mrouter_2.mrt";
+                ipv4.routingTable.routingFile = "../../lib/nat_mrouter_2.mrt";
         @display("p=316,172;i=abstract/router");
             gates:
                 pppg[2];

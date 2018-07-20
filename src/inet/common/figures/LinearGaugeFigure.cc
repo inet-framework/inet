@@ -60,7 +60,7 @@ LinearGaugeFigure::LinearGaugeFigure(const char *name) : cGroupFigure(name)
 LinearGaugeFigure::~LinearGaugeFigure()
 {
     // delete figures which is not in canvas
-    for (int i = numTicks; i < tickFigures.size(); ++i) {
+    for (uint32 i = numTicks; i < tickFigures.size(); ++i) {
         delete tickFigures[i];
         delete numberFigures[i];
     }
@@ -107,7 +107,7 @@ void LinearGaugeFigure::setLabel(const char *text)
     labelFigure->setText(text);
 }
 
-const int LinearGaugeFigure::getLabelOffset() const
+int LinearGaugeFigure::getLabelOffset() const
 {
     return labelOffset;
 }
@@ -333,8 +333,8 @@ void LinearGaugeFigure::redrawTicks()
     numTicks = std::max(0.0, std::abs(max - min - shifting) / tickSize + 1);
 
     // Allocate ticks and numbers if needed
-    if (numTicks > tickFigures.size())
-        while (numTicks > tickFigures.size()) {
+    if ((size_t)numTicks > tickFigures.size())
+        while ((size_t)numTicks > tickFigures.size()) {
             cLineFigure *tick = new cLineFigure();
             cTextFigure *number = new cTextFigure();
 

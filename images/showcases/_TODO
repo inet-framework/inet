@@ -1,0 +1,2 @@
+The images in this folder are used in the showcases, but they should be in individual showcase folders.
+They are here because currently the image path cannot be overriden from the ini files.

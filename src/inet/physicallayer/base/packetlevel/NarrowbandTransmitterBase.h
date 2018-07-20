@@ -35,6 +35,9 @@ class INET_API NarrowbandTransmitterBase : public TransmitterBase
   protected:
     virtual void initialize(int stage) override;
 
+    virtual Hz computeCarrierFrequency(const Packet *packet) const;
+    virtual Hz computeBandwidth(const Packet *packet) const;
+
   public:
     NarrowbandTransmitterBase();
 

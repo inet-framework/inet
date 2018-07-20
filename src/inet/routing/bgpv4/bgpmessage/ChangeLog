@@ -1,0 +1,50 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-01  Zoltan Bojthe
+
+	Added B/b units to length constants and length fields of chunks.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-01-18  Zoltan Bojthe
+
+	Revise MSG customization.
+	Fixed BgpUpdateMessage::setWithdrawnRoutesArraySize(), it didn't resize the array.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    BGPASPathSegment -> BgpAsPathSegment
+	    BGPCommon -> BgpCommon
+	    BGPHeader -> BgpHeader
+	    BGPKeepAliveMessage -> BgpKeepAliveMessage
+	    BGPOpenMessage -> BgpOpenMessage
+	    BGPOptionalParameters -> BgpOptionalParameters
+	    BGPParameterValues -> BgpParameterValues
+	    BGPPathSegmentType -> BgpPathSegmentType
+	    BGPSessionType -> BgpSessionType
+	    BGPType -> BgpType
+	    BGPUpdate -> BgpUpdate
+	    BGPUpdateAtomicAggregateValues -> BgpUpdateAtomicAggregateValues
+	    BGPUpdateAttributeFlags -> BgpUpdateAttributeFlags
+	    BGPUpdateAttributeType -> BgpUpdateAttributeType
+	    BGPUpdateAttributeTypeCode -> BgpUpdateAttributeTypeCode
+	    BGPUpdateMessage -> BgpUpdateMessage
+	    BGPUpdateMessage_Base -> BgpUpdateMessage_Base
+	    BGPUpdateNLRI -> BgpUpdateNlri
+	    BGPUpdatePathAttributeList -> BgpUpdatePathAttributeList
+	    BGPUpdatePathAttributes -> BgpUpdatePathAttributes
+	    BGPUpdatePathAttributesASPath -> BgpUpdatePathAttributesAsPath
+	    BGPUpdatePathAttributesAtomicAggregate -> BgpUpdatePathAttributesAtomicAggregate
+	    BGPUpdatePathAttributesLocalPref -> BgpUpdatePathAttributesLocalPref
+	    BGPUpdatePathAttributesNextHop -> BgpUpdatePathAttributesNextHop
+	    BGPUpdatePathAttributesOrigin -> BgpUpdatePathAttributesOrigin
+	    BGPUpdateWithdrawnRoutes -> BgpUpdateWithdrawnRoutes
+	    IPv4 -> Ipv4
+	    IPv4Address -> Ipv4Address
+
+2017-11-16  ------ inet-3.99.1 released ------

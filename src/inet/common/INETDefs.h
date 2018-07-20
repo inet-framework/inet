@@ -37,14 +37,16 @@
 
 #include "inet/common/Compat.h"
 
+namespace inet {
 using namespace omnetpp;
+}
 
-#if OMNETPP_VERSION < 0x0501 || OMNETPP_BUILDNUM < 1010
-#  error At least OMNeT++/OMNEST version 5.1 required
-#endif // if OMNETPP_VERSION < 0x0501
+#if OMNETPP_VERSION < 0x0504 || OMNETPP_BUILDNUM < 1020
+#  error At least OMNeT++/OMNEST version 5.4.1 required
+#endif // if OMNETPP_VERSION < 0x0504
 
-#define INET_VERSION  0x0306
-#define INET_PATCH_LEVEL 0x04
+#define INET_VERSION  0x0400
+#define INET_PATCH_LEVEL 0x00
 
 #if defined(INET_EXPORT)
 #  define INET_API    OPP_DLLEXPORT
@@ -82,6 +84,8 @@ T *__checknull(T *p, const char *expr, const char *file, int line)
     return p;
 }
 
+//@}
+
 #define RNGCONTEXT  (cSimulation::getActiveSimulation()->getContext())->
 
 #define FINGERPRINT_ADD_EXTRA_DATA(x)  { if (cFingerprintCalculator *fpc = getSimulation()->getFingerprintCalculator()) fpc->addExtraData(x); }
@@ -93,7 +97,7 @@ T *__checknull(T *p, const char *expr, const char *file, int line)
 
 inline void printElapsedTime(const char *name, long startTime)
 {
-    EV_DEBUG << "Time spent in " << name << ": " << ((double)(clock() - startTime) / CLOCKS_PER_SEC) << "s" << endl;
+    EV_DEBUG << "Time spent in " << name << ": " << (static_cast<double>(clock() - startTime) / CLOCKS_PER_SEC) << "s" << endl;
 }
 
 #define TIME(CODE)    { long startTime = clock(); CODE; printElapsedTime( #CODE, startTime); }

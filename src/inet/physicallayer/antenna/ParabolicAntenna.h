@@ -18,6 +18,7 @@
 #ifndef __INET_PARABOLICANTENNA_H
 #define __INET_PARABOLICANTENNA_H
 
+#include "inet/common/INETDefs.h"
 #include "inet/physicallayer/base/packetlevel/AntennaBase.h"
 
 namespace inet {
@@ -27,9 +28,22 @@ namespace physicallayer {
 class INET_API ParabolicAntenna : public AntennaBase
 {
   protected:
-    double maxGain;
-    double minGain;
-    degree beamWidth;
+    class AntennaGain : public IAntennaGain
+    {
+      public:
+        AntennaGain(double maxGain, double minGain, deg beamWidth);
+        virtual double getMaxGain() const override { return maxGain; }
+        virtual double getMinGain() const override { return minGain; }
+        virtual deg getBeamWidth() const { return beamWidth; }
+        virtual double computeGain(const EulerAngles direction) const override;
+
+      protected:
+        double maxGain;
+        double minGain;
+        deg beamWidth;
+    };
+
+    Ptr<AntennaGain> gain;
 
   protected:
     virtual void initialize(int stage) override;
@@ -38,8 +52,7 @@ class INET_API ParabolicAntenna : public AntennaBase
     ParabolicAntenna();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
-    virtual double getMaxGain() const override { return maxGain; }
-    virtual double computeGain(const EulerAngles direction) const override;
+    virtual Ptr<const IAntennaGain> getGain() const override { return gain; }
 };
 
 } // namespace physicallayer

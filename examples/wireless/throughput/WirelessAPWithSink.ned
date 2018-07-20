@@ -19,9 +19,9 @@
 package inet.examples.wireless.throughput;
 
 import inet.common.queue.Sink;
-import inet.linklayer.ieee80211.Ieee80211Nic;
+import inet.linklayer.ieee80211.Ieee80211Interface;
 import inet.mobility.static.StationaryMobility;
-
+import inet.networklayer.common.InterfaceTable;
 
 //
 // Well, this models a 802.11 Access Point with a Sink.
@@ -32,23 +32,29 @@ module WirelessAPWithSink
         @networkNode();
         @labels(node);
         @display("i=device/accesspoint");
-        *.interfaceTableModule = default("");
+        *.interfaceTableModule = "^.interfaceTable";
+        wlan.radio.antenna.mobilityModule = default("^.^.^.mobility");
     gates:
         input radioIn @directIn;
     submodules:
+        interfaceTable: InterfaceTable {
+            parameters:
+                @display("p=100,100;is=s");
+        }
         sink: Sink {
             parameters:
-                @display("p=169,124");
+                @display("p=300,100");
         }
-        wlan: Ieee80211Nic {
+        wlan: Ieee80211Interface {
             parameters:
-                @display("p=89,225;q=queue");
-                mgmtType = default("Ieee80211MgmtAPSimplified");
-                mgmt.encapDecap = "false";
+                @display("p=250,200;q=queue");
+                llc.typename = "Ieee80211Portal";
+                mgmt.typename = "Ieee80211MgmtApSimplified";
+                agent.typename = "";
         }
         mobility: StationaryMobility {
             parameters:
-                @display("p=71,121");
+                @display("p=100,200;is=s");
         }
     connections allowunconnected:
         radioIn --> { @display("m=s"); } --> wlan.radioIn;

@@ -20,16 +20,16 @@
 namespace inet {
 namespace ieee80211 {
 
-BlockAckRecord::BlockAckRecord(MACAddress originatorAddress, Tid tid) :
+BlockAckRecord::BlockAckRecord(MacAddress originatorAddress, Tid tid) :
     originatorAddress(originatorAddress),
     tid(tid)
 {
 }
 
-void BlockAckRecord::blockAckPolicyFrameReceived(Ieee80211DataFrame* frame)
+void BlockAckRecord::blockAckPolicyFrameReceived(const Ptr<const Ieee80211DataHeader>& header)
 {
-    SequenceNumber sequenceNumber = frame->getSequenceNumber();
-    FragmentNumber fragmentNumber = frame->getFragmentNumber();
+    SequenceNumber sequenceNumber = header->getSequenceNumber();
+    FragmentNumber fragmentNumber = header->getFragmentNumber();
     acknowledgmentState[std::make_pair(sequenceNumber, fragmentNumber)] = true;
 }
 

@@ -31,7 +31,7 @@ class INET_API Ieee80211ScalarTransmitter : public Ieee80211TransmitterBase
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
-    virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, simtime_t startTime) const override;
+    virtual const ITransmission *createTransmission(const IRadio *radio, const Packet *packet, simtime_t startTime) const override;
 };
 
 } // namespace physicallayer

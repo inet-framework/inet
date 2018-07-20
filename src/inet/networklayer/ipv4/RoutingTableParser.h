@@ -30,7 +30,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/networklayer/ipv4/IPv4RoutingTable.h"
+#include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
 
 namespace inet {
 
@@ -41,13 +41,13 @@ class INET_API RoutingTableParser
 {
   protected:
     IInterfaceTable *ift;
-    IIPv4RoutingTable *rt;
+    IIpv4RoutingTable *rt;
 
   public:
     /**
      * Constructor
      */
-    RoutingTableParser(IInterfaceTable *ift, IIPv4RoutingTable *rt) : ift(ift), rt(rt) {}
+    RoutingTableParser(IInterfaceTable *ift, IIpv4RoutingTable *rt) : ift(ift), rt(rt) {}
 
     /**
      * Destructor

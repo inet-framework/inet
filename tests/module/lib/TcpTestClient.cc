@@ -17,7 +17,9 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/transportlayer/contract/tcp/TCPSocket.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
 namespace inet {
 
@@ -39,7 +41,7 @@ class INET_API TcpTestClient : public cSimpleModule
 
     int ctr;
 
-    TCPSocket socket;
+    TcpSocket socket;
 
     // statistics
     int64_t rcvdBytes;
@@ -122,8 +124,7 @@ void TcpTestClient::initialize()
     if (cmd.numBytes > 0 && commands.size() > 1)
         throw cRuntimeError("cannot use both sendScript and tSend+sendBytes");
 
-    socket.readDataTransferModePar(*this);
-    socket.setOutputGate(gate("tcpOut"));
+    socket.setOutputGate(gate("socketOut"));
 
     ctr = 0;
 
@@ -162,7 +163,7 @@ void TcpTestClient::handleSelfMessage(cMessage *msg)
 
             socket.bind(*localAddress ? L3Address(localAddress) : L3Address(), localPort);
 
-            if (par("active").boolValue())
+            if (par("active"))
                 socket.connect(L3Address(connectAddress), connectPort);
             else
                 socket.listenOnce();
@@ -171,7 +172,7 @@ void TcpTestClient::handleSelfMessage(cMessage *msg)
             break;
         }
         case TEST_SEND:
-            socket.send(msg);
+            socket.send(check_and_cast<Packet *>(msg));
             scheduleNextSend();
             break;
         case TEST_CLOSE:
@@ -190,8 +191,9 @@ void TcpTestClient::scheduleNextSend()
         return;
     Command cmd = commands.front();
     commands.pop_front();
-    cPacket *msg = new cPacket(makeMsgName().c_str(),TEST_SEND);
-    msg->setByteLength(cmd.numBytes);
+    Packet *msg = new Packet(makeMsgName().c_str(), TEST_SEND);
+    const auto& bytes = makeShared<ByteCountChunk>(B(cmd.numBytes));
+    msg->insertAtBack(bytes);
     scheduleAt(cmd.tSend, msg);
 }
 

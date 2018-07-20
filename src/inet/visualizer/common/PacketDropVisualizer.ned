@@ -27,16 +27,14 @@ import inet.visualizer.contract.IPacketDropVisualizer;
 module PacketDropVisualizer like IPacketDropVisualizer
 {
     parameters:
-        @display("i=block/app_s");
-        string canvasVisualizerType = default("PacketDropCanvasVisualizer");
-        string osgVisualizerType = default("PacketDropOsgVisualizer");
+        @display("i=block/app");
     submodules:
-        canvasVisualizer: <canvasVisualizerType> like IPacketDropVisualizer if canvasVisualizerType != "" {
+        canvasVisualizer: <default("PacketDropCanvasVisualizer")> like IPacketDropVisualizer if typename != "" {
             parameters:
-                @display("p=100,50");
+                @display("p=100,100");
         }
-        osgVisualizer: <osgVisualizerType> like IPacketDropVisualizer if osgVisualizerType != "" {
+        osgVisualizer: <default("PacketDropOsgVisualizer")> like IPacketDropVisualizer if typename != "" {
             parameters:
-                @display("p=100,150");
+                @display("p=100,200");
         }
 }

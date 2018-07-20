@@ -1,0 +1,101 @@
+%description:
+Test TcpSendQueue, TcpReceiveQueue classes
+Similar to TCPReceiveQueue_1.test, but sequence number is turn out zero.
+
+%includes:
+#include "TCPQueueTesterFunctions.h"
+
+%global:
+
+using namespace ::inet::tcp;
+
+%activity:
+TcpSendQueue sendQueue;
+TcpSendQueue *sq = &sendQueue;
+
+sq->init(4294967000);
+EV << sq->str() <<"\n";
+
+TcpReceiveQueue rcvQueue;
+TcpReceiveQueue *rq = &rcvQueue;
+
+rq->init(4294967000);
+EV << rq->str() <<"\n";
+
+enqueue(sq, "msg1", 100); // 4294967000..4294967100
+enqueue(sq, "msg2", 100); // 4294967100..4294967200
+enqueue(sq, "msg3", 296); // 4294967200..200
+enqueue(sq, "msg4", 600); // 200..800
+enqueue(sq, "msg5", 200); // 800..1000
+
+insertSegment(rq, createSegmentWithBytes(sq, 4294967000, 4294967099));
+insertSegment(rq, createSegmentWithBytes(sq, 4294967090, 4294967100));
+insertSegment(rq, createSegmentWithBytes(sq, 4294967090, 799));
+insertSegment(rq, createSegmentWithBytes(sq, 4294967090, 800));
+insertSegment(rq, createSegmentWithBytes(sq, 700, 799));
+insertSegment(rq, createSegmentWithBytes(sq, 700, 800));
+
+extractBytesUpTo(rq, 4294967099);
+discardUpTo(sq, 4294967099);
+extractBytesUpTo(rq, 799);
+extractBytesUpTo(rq, 799);
+discardUpTo(sq, 799);
+discardUpTo(sq, 799);
+
+extractBytesUpTo(rq, 800);
+extractBytesUpTo(rq, 800);
+discardUpTo(sq, 800);
+discardUpTo(sq, 800);
+
+insertSegment(rq, createSegmentWithBytes(sq, 800, 900));
+extractBytesUpTo(rq, 900);
+insertSegment(rq, createSegmentWithBytes(sq, 900, 1000));
+extractBytesUpTo(rq, 1000);
+discardUpTo(sq, 1000);
+
+EV << ".\n";
+
+%subst: /[\{\}]/ /
+
+%contains: stdout
+Running simulation...
+** Event #1  t=0   Test (Test, id=1)
+[4294967000..4294967000)EmptyChunk
+rcv_nxt=4294967000
+SQ:enqueue("msg1", 100): --> [4294967000..4294967100)ByteCountChunk, length = 100 B
+SQ:enqueue("msg2", 100): --> [4294967000..4294967200)ByteCountChunk, length = 200 B
+SQ:enqueue("msg3", 296): --> [4294967000..200)ByteCountChunk, length = 496 B
+SQ:enqueue("msg4", 600): --> [4294967000..800)ByteCountChunk, length = 1096 B
+SQ:enqueue("msg5", 200): --> [4294967000..1000)ByteCountChunk, length = 1296 B
+SQ:createSegmentWithBytes(4294967000, 4294967099): inet::ByteCountChunk[4294967000..4294967099)
+RQ:insertSeg [4294967000..4294967099) --> rcv_nxt=4294967099 [4294967000..4294967099)
+SQ:createSegmentWithBytes(4294967090, 4294967100): inet::ByteCountChunk[4294967090..4294967100)
+RQ:insertSeg [4294967090..4294967100) --> rcv_nxt=4294967100 [4294967000..4294967100)
+SQ:createSegmentWithBytes(4294967090, 799): inet::ByteCountChunk[4294967090..799)
+RQ:insertSeg [4294967090..799) --> rcv_nxt=799 [4294967000..799)
+SQ:createSegmentWithBytes(4294967090, 800): inet::ByteCountChunk[4294967090..800)
+RQ:insertSeg [4294967090..800) --> rcv_nxt=800 [4294967000..800)
+SQ:createSegmentWithBytes(700, 799): inet::ByteCountChunk[700..799)
+RQ:insertSeg [700..799) --> rcv_nxt=800 [4294967000..800)
+SQ:createSegmentWithBytes(700, 800): inet::ByteCountChunk[700..800)
+RQ:insertSeg [700..800) --> rcv_nxt=800 [4294967000..800)
+RQ:extractUpTo(4294967099): < < data: 99 bytes > > --> rcv_nxt=800 [4294967099..800)
+SQ:discardUpTo(4294967099): [4294967099..1000)ByteCountChunk, length = 1197 B
+RQ:extractUpTo(799): < < data: 996 bytes > > --> rcv_nxt=800 [799..800)
+RQ:extractUpTo(799): < > --> rcv_nxt=800 [799..800)
+SQ:discardUpTo(799): [799..1000)ByteCountChunk, length = 201 B
+SQ:discardUpTo(799): [799..1000)ByteCountChunk, length = 201 B
+RQ:extractUpTo(800): < < data: 1 bytes > > --> rcv_nxt=800
+RQ:extractUpTo(800): < > --> rcv_nxt=800
+SQ:discardUpTo(800): [800..1000)ByteCountChunk, length = 200 B
+SQ:discardUpTo(800): [800..1000)ByteCountChunk, length = 200 B
+SQ:createSegmentWithBytes(800, 900): inet::ByteCountChunk[800..900)
+RQ:insertSeg [800..900) --> rcv_nxt=900 [800..900)
+RQ:extractUpTo(900): < < data: 100 bytes > > --> rcv_nxt=900
+SQ:createSegmentWithBytes(900, 1000): inet::ByteCountChunk[900..1000)
+RQ:insertSeg [900..1000) --> rcv_nxt=1000 [900..1000)
+RQ:extractUpTo(1000): < < data: 100 bytes > > --> rcv_nxt=1000
+SQ:discardUpTo(1000): [1000..1000)EmptyChunk
+.
+
+<!> No more events, simulation completed -- at t=0s, event #1

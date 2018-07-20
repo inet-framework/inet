@@ -1,0 +1,591 @@
+\chapter{Differentiated Services}
+\label{cha:diffserv}
+
+
+\section{Overview}
+\label{sec:diffserv:overview}
+
+In the early days of the Internet, only best effort service was defined.
+The Internet delivers individually each packet, and delivery time is not
+guaranteed, moreover packets may even be dropped due to congestion at
+the routers of the network. It was assumed that transport protocols,
+and applications can overcome these deficiencies. This worked until
+FTP and email was the main applications of the Internet, but the newer
+applications such as Internet telephony and video conferencing cannot
+tolerate delay jitter and loss of data.
+
+% TypeOfService field
+
+The first attempt to add QoS capabilities to the IP routing was
+Integrated Services. Integrated services provide resource assurance
+through resource reservation for individual application flows.
+An application flow is identified by the source and destination
+addresses and ports and the protocol id. Before data packets are
+sent the necessary resources must be allocated along the path
+from the source to the destination. At the hops from the source
+to the destination each router must examine the packets, and decide
+if it belongs to a reserved application flow. This could cause a
+memory and processing demand in the routers.
+Other drawback is that
+the reservation must be periodically refreshed, so there is an overhead
+during the data transmission too.
+
+Differentiated Services is a more scalable approach to offer a better than
+best-effort service. Differentiated Services do not require resource reservation
+setup. Instead of making per-flow reservations, Differentiated
+Services divides the traffic into a small number of \emph{forwarding classes}.
+The forwarding class is directly encoded into the packet header. After packets are
+marked with their forwarding classes at the edge of the network, the interior nodes
+of the network can use this information to differentiate the treatment of packets.
+The forwarding classes may indicate drop priority and resource priority. For example,
+when a link is congested, the network will drop packets with the highest drop priority
+first.
+
+In the Differentiated Service architecture, the network is partitioned into
+DiffServ domains. Within each domain the resources of the domain are allocated
+to forwarding classes, taking into account the available resources and the
+traffic flows. There are \emph{service level agreements} (SLA) between the users
+and service providers, and between the domains that describe the mapping of
+packets to forwarding classes and the allowed traffic profile for each class.
+The routers at the edge of the network are responsible for marking the packets
+and protect the domain from misbehaving traffic sources. Nonconforming traffic
+may be dropped, delayed, or marked with a different forwarding class.
+
+
+\subsection{Implemented Standards}
+\label{sec:diffserv:implemented-standards}
+
+The implementation follows these RFCs below:
+
+\begin{itemize}
+  \item RFC 2474: Definition of the Differentiated Services Field (DS Field) in the IPv4 and IPv6 Headers
+  \item RFC 2475: An Architecture for Differentiated Services
+  \item RFC 2597: Assured Forwarding PHB Group
+  \item RFC 2697: A Single Rate Three Color Marker
+  \item RFC 2698: A Two Rate Three Color Marker
+  \item RFC 3246: An Expedited Forwarding PHB (Per-Hop Behavior)
+  \item RFC 3290: An Informal Management Model for Diffserv Routers
+\end{itemize}
+
+\section{Architecture of NICs}
+\label{sec:diffserv:architecture-of-nics}
+
+Network Interface Card (NIC) modules, such as \nedtype{PppInterface} and
+\nedtype{EthernetInterface}, may contain traffic conditioners in
+their input and output data path. Traffic conditioners have one input
+and one output gate as defined in the \nedtype{ITrafficConditioner}
+interface. They can transform the incoming traffic by dropping or
+delaying packets. They can also set the DSCP field of the packet,
+or mark them other way, for differentiated handling in the queues.
+
+The NICs may also contain an external queue component. If the \fpar{queueType}
+parameter is set, it must contain a module type implementing the \nedtype{IOutputQueue}
+module interface. If it is not specified, then \nedtype{Ppp} and \nedtype{EtherMac}
+use an internal drop tail queue to buffer the packets until the line is busy.
+
+\subsection{Traffic Conditioners}
+\label{sec:diffserv:traffic-conditioners}
+
+Traffic conditioners have one input
+and one output gate as defined in the \nedtype{ITrafficConditioner}
+interface. They can transform the incoming traffic by dropping or
+delaying packets. They can also set the DSCP field of the packet,
+or mark them other way, for differentiated handling in the queues.
+
+Traffic conditioners perform the following actions:
+\begin{itemize}
+ \item classify the incoming packets
+ \item meter the traffic in each class
+ \item marks/drops packets depending on the result of metering
+ \item shape the traffic by delaying packets to conform to the
+       desired traffic profile
+\end{itemize}
+
+INET provides classifier, meter, and marker modules, that can be
+composed to build a traffic conditioner as a compound module.
+
+\subsection{Output Queues}
+\label{sec:diffserv:output-queues}
+
+The queue component also has one input and one output gate. These components
+must implement a passive queue behaviour: they only deliver a packet,
+when the module connected to its output explicitly asks them.
+In terms of C++ it means, that the simple module owning the \fgate{out} gate,
+or which is connected to the \fgate{out} gate of the compound module,
+must implement the \cppclass{IPassiveQueue} interface. The next module
+asks a packet by calling the \ffunc{requestPacket()} method of this interface.
+
+
+\section{Simple modules}
+\label{sec:diffserv:simple-modules}
+
+This section describes the primitive elements from which traffic
+conditioners and output queues can be built. The next sections
+shows some examples, how these queues, schedulers, droppers,
+classifiers, meters, markers can be combined.
+
+The type of the components are:
+\begin{itemize}
+  \item \ttt{queue}: container of packets, accessed as FIFO
+  \item \ttt{dropper}: attached to one or more queue, it can
+    limit the queue length below some threshold
+    by selectively dropping packets
+  \item \ttt{scheduler}: decide which packet is transmitted first,
+     when more packets are available on their inputs
+  \item \ttt{classifier}: classify the received packets
+     according to their content (e.g. source/destination,
+     address and port, protocol, dscp field of IP datagrams)
+     and forward them to the corresponding output gate.
+  \item \ttt{meter}: classify the received packets
+      according to the temporal characteristic of their
+      traffic stream
+  \item \ttt{marker}: marks packets by setting their fields
+      to control their further processing
+\end{itemize}
+
+\subsection{Queues}
+\label{sec:diffserv:queues}
+
+When packets arrive at higher rate, than the interface can trasmit,
+they are getting queued.
+
+
+Queue elements store packets until they can be transmitted.
+They have one input and one output gate.
+Queues may have one or more thresholds associated with them.
+
+ Received packets
+are enqueued and stored until the module connected to their
+output asks a packet by calling the \ffunc{requestPacket()}
+method.
+
+They should be able to notify the module connected to its output
+about the arrival of new packets.
+
+\subsubsection{FIFO Queue}
+\label{sec:diffserv:fifo-queue}
+
+The \nedtype{FifoQueue} module implements a passive
+FIFO queue with unlimited buffer space. It can be combined
+with algorithmic droppers and schedulers to form an
+IOutputQueue compound module.
+
+The C++ class implements the \cppclass{IQueueAccess} and
+\cppclass{IPassiveQueue} interfaces.
+
+\subsubsection{DropTailQueue}
+\label{sec:diffserv:droptailqueue}
+
+The other primitive queue module is \nedtype{DropTailQueue}.
+Its capacity can be specified by the \fpar{frameCapacity}
+parameter. When the number of stored packet reached the capacity
+of the queue, further packets are dropped.
+Because this module contains a built-in dropping strategy, it
+cannot be combined with algorithmic droppers as \nedtype{FifoQueue}
+can be. However its output can be connected to schedulers.
+
+This module implements the \nedtype{IOutputQueue} interface,
+so it can be used as the queue component of interface card per se.
+
+\subsection{Droppers}
+\label{sec:diffserv:droppers}
+
+Algorithmic droppers selectively drop received packets based on some condition.
+The condition can be either deterministic (e.g. to bound the queue length),
+or probabilistic (e.g. RED queues).
+
+Other kind of droppers are absolute droppers; they drop each received
+packet. They can be used to discard excess traffic, i.e. packets whose
+arrival rate exceeds the allowed maximum. In INET the \nedtype{Sink}
+module can be used as an absolute dropper.
+
+The algorithmic droppers in INET are \nedtype{ThresholdDropper} and
+\nedtype{RedDropper}. These modules has multiple input and multiple
+output gates. Packets that arrive on gate \fgate{in[i]} are forwarded
+to gate \fgate{out[i]} (unless they are dropped). However the queues
+attached to the output gates are viewed as a whole, i.e. the queue
+length parameter of the dropping algorithm is the sum of the individual
+queue lengths. This way we can emulate shared buffers of the queues.
+Note, that it is also possible to connect each output to the same
+queue module.
+
+\subsubsection{Threshold Dropper}
+\label{sec:diffserv:threshold-dropper}
+
+The \nedtype{ThresholdDropper} module selectively drops packets,
+based on the available buffer space of the queues attached to its output.
+The buffer space can be specified as the count of packets, or as the size
+in bytes.
+
+The module sums the buffer lengths of its outputs
+and if enqueuing a packet would exceed the configured
+capacities, then the packet will be dropped instead.
+
+By attaching a \nedtype{ThresholdDropper} to the input of a FIFO
+queue, you can compose a drop tail queue. Shared buffer
+space can be modeled by attaching more FIFO queues
+to the output.
+
+\subsubsection*{RED Dropper}
+
+The \nedtype{RedDropper} module implements Random Early Detection
+(\cite{Floyd93randomearly}).
+
+It has $n$ input and $n$ output gates (specified by the
+\fpar{numGates} parameter). Packets that arrive at the $i^{th}$ input
+gate are forwarded to the $i^{th}$ output gate, or dropped.
+The output gates must be connected to simple modules implementing
+the \nedtype{IQueueAccess} C++ interface (e.g. \nedtype{FifoQueue}).
+
+The module sums the used buffer space of the queues attached
+to the output gates. If it is below a minimum threshold,
+the packet won't be dropped, if above a maximum threshold,
+it will be dropped, if it is between the minimum and
+maximum threshold, it will be dropped by a given probability.
+This probability determined by a linear function which is
+0 at the minth and maxp at maxth.
+
+\begin{pdfonly}
+\begin{center}
+\setlength{\unitlength}{1cm}
+\begin{picture}(7,4)(-1,-1)
+\put(-0.5,0){\vector(1,0){6.5}}
+\put(0,-0.5){\vector(0,1){3.5}}
+\put(5.8,-0.3){$qlen$}
+\put(-0.5,3){$p$}
+\put(1,0){\line(3,1){3}}
+\put(4,1){\line(0,1){1}}
+\put(4,2){\line(1,0){1.5}}
+\put(-0.5,1.9){$1$}
+%\put(-0.2,2){\line(1,0){0.2}}
+\multiput(0,2)(0.4,0){10}{\line(1,0){0.2}}
+%\put(-0.2,1){\line(1,0){0.2}}
+\multiput(0,1)(0.4,0){10}{\line(1,0){0.2}}
+\put(-1,0.9){$p_{max}$}
+\multiput(4,0)(0,0.4){3}{\line(0,1){0.2}}
+\put(0.9,-0.3){$th_{min}$}
+\put(3.9,-0.3){$th_{max}$}
+\end{picture}
+\end{center}
+\end{pdfonly}
+
+\begin{htmlonly}
+<center><img src="red-dropper.png" border="0" width="340"></center> <!-- screenshot from the PDF version -->
+\end{htmlonly}
+
+The queue length can be smoothed by specifying the \fpar{wq}
+parameter. The average queue length used in the tests
+are computed by the formula:
+
+ $$avg = (1-wq)*avg + wq*qlen$$
+
+The \fpar{minth}, \fpar{maxth}, and \fpar{maxp} parameters
+can be specified separately for each input gate, so this module
+can be used to implement different packet drop priorities.
+
+\subsection{Schedulers}
+\label{sec:diffserv:schedulers}
+
+Scheduler modules decide which queue can send a packet, when the
+interface is ready to transmit one. They have several input gates
+and one output gate.
+
+Modules that are connected to the inputs of a scheduler must
+implement the \cppclass{IPassiveQueue} C++ interface.
+Schedulers also implement \cppclass{IPassiveQueue}, so
+they can be cascaded to other schedulers, and can be used
+as the output module of \nedtype{IOutputQueue}s.
+
+There are several possible scheduling discipline (first come/first served,
+priority, weighted fair, weighted round-robin, deadline-based,
+rate-based). INET contains implementation
+of priority and weighted round-robin schedulers.
+
+\subsubsection{Priority Scheduler}
+\label{sec:diffserv:priority-scheduler}
+
+The \nedtype{PriorityScheduler} module implements a strict priority
+scheduler. Packets that arrived on \fgate{in[0]} has the highest priority,
+then packets arrived on \fgate{in[1]}, and so on. If more packets
+available when one is requested, then the one with highest priority
+is chosen. Packets with lower priority are transmitted only when
+there are no packets on the inputs with higher priorities.
+
+\nedtype{PriorityScheduler} must be used with care, because a
+large volume of higher packets can starve lower priority packets.
+Therefore it is necessary to limit the rate of higher priority
+packets to a fraction of the output datarate.
+
+\nedtype{PriorityScheduler} can be used to implement
+the \ttt{EF} PHB.
+
+\subsubsection*{Weighted Round Robin Scheduler}
+
+The \nedtype{WrrScheduler} module implements a weighted
+round-robin scheduler. The scheduler visits the input gates
+in turn and selects the number of packets for transmission
+based on their weight.
+
+For example if the module has three input gates, and the weights
+are 3, 2, and 1, then packets are transmitted in this order:
+
+\begin{verbatim}
+A, A, A, B, B, C, A, A, A, B, B, C, ...
+\end{verbatim}
+
+where A packets arrived on \fgate{in[0]}, B packets on \fgate{in[1]},
+and C packets on \fgate{in[2]}. If there are no packets in the current
+one when a packet is requested, then the next one is chosen that has
+enough tokens.
+
+If the size of the packets are equal, then \nedtype{WrrScheduler}
+divides the available bandwith according to the weights. In each
+case, it allocates the bandwith fairly. Each flow receives a guaranteed
+minimum bandwith, which is ensured even if other flows exceed
+their share (flow isolation). It is also efficiently uses the
+channel, because if some traffic is smaller than its share of
+bandwidth, then the rest is allocated to the other flows.
+
+\nedtype{WrrScheduler} can be used to implement the \ttt{AFxy} PHBs.
+
+\subsection{Classifiers}
+\label{sec:diffserv:classifiers}
+
+Classifier modules have one input and many output gates.
+They examine the received packets, and forward them to the
+appropriate output gate based on the content of some portion
+of the packet header. You can read more about classifiers
+in RFC 2475 2.3.1 and RFC 3290 4.
+
+The \nedtype{inet.networklayer.diffserv} package contains two
+classifiers: \nedtype{MultiFieldClassifier} to classify
+the packets at the edge routers of the DiffServ domain, and
+\nedtype{BehaviorAggregateClassifier} to classify the packets
+at the core routers.
+
+
+\subsubsection*{Multi-field Classifier}
+
+The \nedtype{MultiFieldClassifier} module can be used to identify
+micro-flows in the incoming traffic. The flow is identified
+by the source and destination addresses, the protocol id,
+and the source and destination ports of the IP packet.
+
+The classifier can be configured by specifying a list of filters.
+Each filter can specify a source/destination address mask, protocol,
+source/destination port range, and bits of TypeOfService/TrafficClass
+field to be matched. They also specify the index of the output gate
+matching packet should be forwarded to. The first matching filter
+determines the output gate, if there are no matching filters,
+then \fgate{defaultOut} is chosen.
+
+The configuration of the module is given as an XML document.
+The document element must contain a list of \ttt{<filter>} elements.
+The filter element has a mandatory \ttt{@gate} attribute that gives
+the index of the gate for packets matching the filter. Other attributes
+are optional and specify the condition of matching:
+\begin{compactitem}
+  \item \ttt{@srcAddress}, \ttt{@srcPrefixLength}: to match the source
+    address of the IP
+  \item \ttt{@destAddress}, \ttt{@destPrefixLength}:
+  \item \ttt{@protocol}: matches the protocol field of the IP packet.
+    Its value can be a name (e.g. ``udp'', ``tcp''),
+    or the numeric code of the protocol.
+  \item \ttt{@tos},{@tosMask}: matches bits of the TypeOfService/TrafficClass
+    field of the IP packet.
+  \item \ttt{@srcPort}: matches the source port of the TCP or UDP packet.
+  \item \ttt{@srcPortMin}, \ttt{@srcPortMax}: matches a range of source ports.
+  \item \ttt{@destPort}: matches the destination port of the TCP or UDP packet.
+  \item \ttt{@destPortMin}, \ttt{@destPortMax}: matches a range of
+     destination ports.
+\end{compactitem}
+
+The following example configuration specifies
+\begin{compactitem}
+  \item to transmit packets received from the 192.168.1.x subnet on gate 0,
+  \item to transmit packets addressed to port 5060 on gate 1,
+  \item to transmit packets having CS7 in their DSCP field on gate 2,
+  \item to transmit other packets on \fgate{defaultGate}.
+\end{compactitem}
+
+\begin{XML}
+<filters>
+  <filter srcAddress="192.168.1.0" srcPrefixLength="24" gate="0"/>
+  <filter protocol="udp" destPort="5060" gate="1"/>
+  <filter tos="0b00111000" tosMask="0x3f" gate="2"/>
+</filters>
+\end{XML}
+
+\subsubsection*{Behavior Aggregate Classifier}
+
+The \nedtype{BehaviorAggregateClassifier} module can be used to read
+the DSCP field from the IP datagram, and direct the packet to
+the corresponding output gate. The DSCP value is the lower
+six bits of the TypeOfService/TrafficClass field. Core routers
+usually use this classifier to guide the packet to the appropriate
+queue.
+
+DSCP values are enumerated in the \fpar{dscps} parameter.
+The first value is for gate \fgate{out[0]}, the second for
+\fgate{out[1]}, so on. If the received packet has a DSCP
+value not enumerated in the \fpar{dscps} parameter, it will
+be forwarded to the \nedtype{defaultOut} gate.
+
+\subsection{Meters}
+\label{sec:diffserv:meters}
+
+Meters classify the packets based on the temporal characteristics
+of their arrival. The arrival rate of packets is compared to an
+allowed traffic profile, and packets are decided to be green
+(in-profile) or red (out-of-profile). Some meters apply more than two
+conformance level, e.g. in three color meters the partially conforming
+packets are classified as yellow.
+
+The allowed traffic profile is usually specified by a token bucket.
+In this model, a bucket is filled in with tokens with a specified rate,
+until it reaches its maximum capacity. When a packet arrives, the
+bucket is examined. If it contains at least as many tokens as the
+length of the packet, then that tokens are removed, and the packet
+marked as conforming to the traffic profile. If the bucket contains
+less tokens than needed, it left unchanged, but the packet marked
+as non-conforming.
+
+Meters has two modes: color-blind and color-aware.
+In color-blind mode, the color assigned by a previous meter does not
+affect the classification of the packet in subsequent meters.
+In color-aware mode, the color of the packet can not be changed to a less
+conforming color: if a packet is classified as non-conforming by a meter,
+it also handled as non-conforming in later meters in the data path.
+
+\begin{important}
+Meters take into account the length of the IP packet only, L2 headers are omitted
+from the length calculation. If they receive a packet which is not
+an IP datagram and does not encapsulate an IP datagram, an error occurs.
+\end{important}
+
+\subsubsection*{TokenBucketMeter}
+
+The \nedtype{TokenBucketMeter} module implements a simple token bucket meter.
+The module has two output, one for green packets, and one for red packets.
+When a packet arrives, the gained tokens are added to the bucket, and
+the number of tokens equal to the size of the packet are subtracted.
+
+Packets are classified according to two parameters,
+Committed Information Rate ($cir$), Committed Burst Size ($cbs$),
+to be either green, or red.
+
+Green traffic is guaranteed to be under $cir*(t_1-t_0)+8*cbs$ in
+every $[t_0,t_1]$ interval.
+
+\subsubsection*{SingleRateThreeColorMeter}
+
+The \nedtype{SingleRateThreeColorMeter} module implements a
+Single Rate Three Color Meter (RFC 2697).
+The module has three output for green, yellow, and red packets.
+
+Packets are classified according to three parameters,
+Committed Information Rate ($cir$), Committed Burst Size ($cbs$),
+and Excess Burst Size ($ebs$), to be either green, yellow or red.
+The green traffic is guaranteed to be under $cir*(t_1-t_0)+8*cbs$,
+while the green+yellow traffic to be under $cir*(t_1-t_0)+8*(cbs+ebs)$
+in every $[t_0,t_1]$ interval.
+
+
+\subsubsection*{TwoRateThreeColorMeter}
+
+The \nedtype{TwoRateThreeColorMeter} module implements a
+Two Rate Three Color Meter (RFC 2698). The module has three output
+gates for the green, yellow, and red packets.
+
+It classifies the packets based on two rates, Peak Information Rate ($pir$)
+and Committed Information Rate ($cir$), and their associated burst sizes
+($pbs$ and $cbs$) to be either green, yellow or red. The green traffic
+is under $pir*(t_1-t_0)+8*pbs$ and $cir*(t_1-t_0)+8*cbs$, the yellow traffic
+is under $pir*(t_1-t_0)+8*pbs$ in every $[t_0,t_1]$ interval.
+
+\subsection{Markers}
+\label{sec:diffserv:markers}
+
+DSCP markers sets the codepoint of the crossing packets.
+The codepoint determines the further processing of the packet
+in the router or in the core of the DiffServ domain.
+
+The \nedtype{DscpMarker} module sets the DSCP field
+(lower six bit of TypeOfService/TrafficClass) of IP datagrams
+to the value specified by the \fpar{dscps} parameter.
+The \fpar{dscps} parameter is a space separated list
+of codepoints. You can specify a different value
+for each input gate; packets arrived at the $i^{th}$
+input gate are marked with the $i^{th}$ value.
+If there are fewer values, than gates, then the last
+one is used for extra gates.
+
+The DSCP values are enumerated in the \ffilename{DSCP.msg} file.
+You can use both names and integer values in the \fpar{dscps}
+parameter.
+
+For example the following lines are equivalent:
+\begin{inifile}
+**.dscps = "EF 0x0a 0b00001000"
+**.dscps = "46 AF11 8"
+\end{inifile}
+
+\section{Compound modules}
+\label{sec:diffserv:compound-modules}
+
+\subsection{AFxyQueue}
+\label{sec:diffserv:afxyqueue}
+
+The \nedtype{AFxyQueue} module is an example queue, that implements
+one class of the Assured Forwarding PHB group (RFC 2597).
+
+Packets with the same AFx class, but different drop priorities
+arrive at the \fgate{afx1In}, \fgate{afx2In}, and \fgate{afx3In} gates.
+The received packets are stored in the same queue. Before the packet
+is enqueued, a RED dropping algorithm may decide to selectively
+drop them, based on the average length of the queue and the RED parameters
+of the drop priority of the packet.
+
+The afxyMinth, afxyMaxth, and afxyMaxp parameters must have values that
+ensure that packets with lower drop priorities are dropped with lower
+or equal probability than packets with higher drop priorities.
+
+\subsection{DiffservQeueue}
+\label{sec:diffserv:diffservqeueue}
+
+The \nedtype{DiffservQueue} is an example queue, that can be used in
+interfaces of DS core and edge nodes to support
+the AFxy (RFC 2597) and EF (RFC 3246) PHBs.
+
+\begin{figure}[htbp]
+  \begin{center}
+    \includepng[scale=0.7]{figures/DiffservQueue}
+    \caption{DiffservQueue}
+    \label{fig:DiffservQueue}
+  \end{center}
+\end{figure}
+
+The incoming packets are first classified according to
+their DSCP field. DSCPs other than AFxy and EF are handled
+as BE (best effort).
+
+EF packets are stored in a dedicated queue, and served first
+when a packet is requested. Because they can preempt the other
+queues, the rate of the EF packets should be limited to a fraction
+of the bandwith of the link. This is achieved by metering the EF
+traffic with a token bucket meter and dropping packets that
+does not conform to the traffic profile.
+
+There are other queues for AFx classes and BE. The AFx queues
+use RED to implement 3 different drop priorities within the class.
+BE packets are stored in a drop tail queue.
+Packets from AFxy and BE queues are sheduled by a WRR scheduler,
+which ensures that the remaining bandwith is allocated among the classes
+according to the specified weights.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "usman"
+%%% End:
+
+

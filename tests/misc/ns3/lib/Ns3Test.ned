@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
@@ -41,7 +41,7 @@ network Ns3Test
         **.mobility.initFromDisplayString = false;
 
     submodules:
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             @display("p=61,164");
         }
         srvHost: AdhocHost {
@@ -51,7 +51,7 @@ network Ns3Test
                 mobility.initialX = 15m;
                 mobility.initialY = serverYPos;
                 mobility.initialZ = 0m;
-                wlan[*].classifierType =  withQos ? "ExampleQoSClassifier" : "";
+                wlan[*].classifier.typename =  withQos ? "ExampleQosClassifier" : "";
                 wlan[*].mac.EDCA = withQos;
                 @display("r=,,#707070");
         }
@@ -62,7 +62,7 @@ network Ns3Test
                 mobility.initialX = 10m + 10m * index();
                 mobility.initialY = 10m;
                 mobility.initialZ = 0m;
-                wlan[*].classifierType =  withQos ? "ExampleQoSClassifier" : "";
+                wlan[*].classifier.typename =  withQos ? "ExampleQosClassifier" : "";
                 wlan[*].mac.EDCA = withQos;
                 udpApp[*].startTime = appStartTime + appStartDelta * index();
                 @display("r=,,#707070");

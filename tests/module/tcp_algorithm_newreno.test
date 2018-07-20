@@ -33,31 +33,32 @@ total-stack = 7MiB
 
 
 description = "inet_TCP <---> inet_TCP with algorithms"
-*.server*.tcpType = "TCP"
-*.client*.tcpType = "TCP"
-**.tcp.tcpAlgorithmClass = "TCPNewReno"  # ${"DumbTCP", "TCPNewReno", "TCPReno", "TCPTahoe", "TCPVegas", "TCPWestwood"}
+*.server*.tcpType = "Tcp"
+*.client*.tcpType = "Tcp"
+**.tcp.tcpAlgorithmClass = "TcpNewReno"  # ${"DumbTcp", "TcpNewReno", "TcpReno", "TcpTahoe", "TcpVegas", "TcpWestwood"}
 *.per = 0.01 * ${0, 0.1, 0.2, 0.5, 1, 2, 5}
 
 
 
 ## tcp apps
-**.numTcpApps = 1
-**.client.tcpApp[*].typename = "TCPSessionApp"
-**.client.tcpApp[0].active = true
-**.client.tcpApp[0].localPort = -1
-**.client.tcpApp[0].connectAddress = "server"
-**.client.tcpApp[0].connectPort = 1000
-**.client.tcpApp[0].tOpen = 0.2s
-**.client.tcpApp[0].tSend = 0.4s
-**.client.tcpApp[0].sendBytes = 1000000B
-**.client.tcpApp[0].sendScript = ""
-**.client.tcpApp[0].tClose = 25s
+**.client.numApps = 1
+**.client.app[0].typename = "TcpSessionApp"
+**.client.app[0].active = true
+**.client.app[0].localPort = -1
+**.client.app[0].connectAddress = "server"
+**.client.app[0].connectPort = 1000
+**.client.app[0].tOpen = 0.2s
+**.client.app[0].tSend = 0.4s
+**.client.app[0].sendBytes = 1000000B
+**.client.app[0].sendScript = ""
+**.client.app[0].tClose = 25s
 
-**.server.tcpApp[*].typename="TCPSinkApp"
-**.server*.tcpApp[0].localPort = 1000
+**.server.numApps = 1
+**.server.app[0].typename="TcpSinkApp"
+**.server.app[0].localPort = 1000
 
 # NIC configuration
-**.ppp[*].queueType = "DropTailQueue"
+**.ppp[*].queue.typename = "DropTailQueue"
 **.ppp[*].queue.frameCapacity = 10
 
 *.configurator.config=xml("<config><interface hosts='*' address='192.168.1.x' netmask='255.255.255.0'/></config>")
@@ -66,25 +67,25 @@ description = "inet_TCP <---> inet_TCP with algorithms"
 %#################################################################################################################
 
 %contains: results/General-0.sca
-scalar ClientServer.server.tcpApp[0] rcvdPk:sum(packetBytes) 1000000
+scalar ClientServer.server.app[0] packetReceived:sum(packetBytes) 1000000
 
 %contains: results/General-1.sca
-scalar ClientServer.server.tcpApp[0] rcvdPk:sum(packetBytes) 1000000
+scalar ClientServer.server.app[0] packetReceived:sum(packetBytes) 1000000
 
 %contains: results/General-2.sca
-scalar ClientServer.server.tcpApp[0] rcvdPk:sum(packetBytes) 1000000
+scalar ClientServer.server.app[0] packetReceived:sum(packetBytes) 1000000
 
 %contains: results/General-3.sca
-scalar ClientServer.server.tcpApp[0] rcvdPk:sum(packetBytes) 1000000
+scalar ClientServer.server.app[0] packetReceived:sum(packetBytes) 1000000
 
 %contains: results/General-4.sca
-scalar ClientServer.server.tcpApp[0] rcvdPk:sum(packetBytes) 1000000
+scalar ClientServer.server.app[0] packetReceived:sum(packetBytes) 1000000
 
 %contains: results/General-5.sca
-scalar ClientServer.server.tcpApp[0] rcvdPk:sum(packetBytes) 1000000
+scalar ClientServer.server.app[0] packetReceived:sum(packetBytes) 1000000
 
 %contains: results/General-6.sca
-scalar ClientServer.server.tcpApp[0] rcvdPk:sum(packetBytes) 1000000
+scalar ClientServer.server.app[0] packetReceived:sum(packetBytes) 1000000
 
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout

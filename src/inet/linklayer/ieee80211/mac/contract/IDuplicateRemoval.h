@@ -28,11 +28,11 @@ class INET_API IDuplicateRemoval
     public:
         virtual ~IDuplicateRemoval() { }
 
-        virtual bool isDuplicate(Ieee80211DataOrMgmtFrame *frame) = 0;
+        virtual bool isDuplicate(const Ptr<const Ieee80211DataOrMgmtHeader>& header) = 0;
 
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif // ifndef __INET__IDUPLICATEREMOVAL_H

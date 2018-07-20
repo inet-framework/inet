@@ -25,7 +25,7 @@ network PacketDrillTcp
     submodules:
         pdhost: PacketDrillHost {
             parameters:
-                networkLayer.configurator.networkConfiguratorModule = "";
+                ipv4.configurator.networkConfiguratorModule = "";
                 @display("p=544,194;i=device/server_l");
         }
     connections:

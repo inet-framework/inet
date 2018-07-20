@@ -19,13 +19,13 @@
 //
 // @page eth-index.html, Ethernet Model Index
 //
-// The Ethernet model contains MAC models (a full-featured ~EtherMAC,
-// and a simplified, duplex-only ~EtherMACFullDuplex);
-// encapsulation/decapsulation models (~EtherEncap, ~EtherLLC);
+// The Ethernet model contains MAC models (a full-featured ~EtherMac,
+// and a simplified, duplex-only ~EtherMacFullDuplex);
+// encapsulation/decapsulation models (~EtherEncap, ~EtherLlc);
 // bus and hub models ((~EtherBus for modelling coaxial cable, and ~EtherHub);
-// a switch model (~EtherSwitch) with various relay units (~IMACRelayUnit,
-// ~MACRelayUnit and ~Ieee8021dRelay); some traffic generators
-// (~EtherTrafGen, ~EtherAppCli/~EtherAppSrv); and example host models
+// a switch model (~EtherSwitch) with various relay units (~IMacRelayUnit,
+// ~MacRelayUnit and ~Ieee8021dRelay); some traffic generators
+// (~EtherTrafGen, ~EtherAppClient/~EtherAppServer); and example host models
 // (~EtherHost, ~EtherHost2). In INET hosts, an Ethernet interface is
 // represented by ~EthernetInterface.
 //
@@ -51,9 +51,9 @@
 //
 // The models supports various Ethernet frame types: Ethernet II, 803.2 with
 // LLC header, and 803.3 with LLC and SNAP headers. The corresponding classes are:
-// ~EthernetIIFrame, ~EtherFrameWithLLC and ~EtherFrameWithSNAP. They all subclass
+// ~EthernetIIFrame, ~EtherFrameWithLlc and ~EtherFrameWithSNAP. They all subclass
 // from ~EtherFrame which only represents the basic MAC frame with source and
-// destination addresses. ~EtherMAC and ~EtherMACFullDuplex only deal with EtherFrames,
+// destination addresses. ~EtherMac and ~EtherMacFullDuplex only deal with EtherFrames,
 // and do not care about the specific subclass.
 //
 //
@@ -71,36 +71,36 @@
 //
 // <h3>MAC and higher layers</h3>
 //
-// MAC and LLC are implemented as separate modules (~EtherMAC and
-// ~EtherLLC/~EtherEncap) because encapsulation/decapsulation functionality
+// MAC and LLC are implemented as separate modules (~EtherMac and
+// ~EtherLlc/~EtherEncap) because encapsulation/decapsulation functionality
 // is not always needed. (Switches don't do encapsulation/decapsulation.)
-// In switches, ~EtherMAC is used with ~IMACRelayUnit.
+// In switches, ~EtherMac is used with ~IMacRelayUnit.
 //
 //
-// <h3>~EtherLLC and higher layers</h3>
+// <h3>~EtherLlc and higher layers</h3>
 //
-// The ~EtherLLC module can serve several applications (higher layer protocols),
+// The ~EtherLlc module can serve several applications (higher layer protocols),
 // and dispatch data to them. Higher layers are identified by DSAP.
 // See <a href="appreg.html">Application registration</a> for more info.
 //
 // ~EtherEncap doesn't have the functionality to dispatch to different
-// higher layers because in practice it'll always be used with ~IPv4.
+// higher layers because in practice it'll always be used with ~Ipv4.
 //
 //
 // @page llc-app.html, Ethernet: Communication between LLC and Higher Layers
 //
-// Higher layers (applications or protocols) talk to the ~EtherLLC module
+// Higher layers (applications or protocols) talk to the ~EtherLlc module
 // in the following way.
 //
 // When a higher layer wants to send a packet via Ethernet, it just
-// passes the data packet (a cPacket or any subclass) to ~EtherLLC.
+// passes the data packet (a cPacket or any subclass) to ~EtherLlc.
 // The message kind has to be set to IEEE802CTRL_DATA.
 //
-// In general, if ~EtherLLC receives a packet from the higher layers,
+// In general, if ~EtherLlc receives a packet from the higher layers,
 // it interprets the message kind as a command. The commands include
 // IEEE802CTRL_DATA (send a frame), IEEE802CTRL_REGISTER_DSAP (register highher layer)
 // IEEE802CTRL_DEREGISTER_DSAP (deregister higher layer) and IEEE802CTRL_SENDPAUSE
-// (send PAUSE frame) -- see ~EtherLLC for a more complete list.
+// (send PAUSE frame) -- see ~EtherLlc for a more complete list.
 //
 // The arguments to the command are in an ~Ieee802Ctrl control info object,
 // attached to the packet (see the getControlInfo() method of cPacket.)
@@ -110,25 +110,25 @@
 // to ETH_DATA ("please send this data packet" command),
 // fills in the ~Ieee802Ctrl structure with the destination MAC address and
 // the protocol identifier, adds the control info to the message, then sends
-// the packet to ~EtherLLC.
+// the packet to ~EtherLlc.
 //
 // When the command doesn't involve a data packet (e.g.
 // IEEE802CTRL_(DE)REGISTER_DSAP, IEEE802CTRL_SENDPAUSE), a dummy packet
 // (empty cMessage) is used.
 //
 //
-// @page appreg.html, EtherLLC: SAP Registration
+// @page appreg.html, EtherLlc: SAP Registration
 //
 // The Ethernet model supports multiple applications or higher layer
 // protocols.
 //
 // So that data arriving from the network can be dispatched to the
 // correct applications (higher layer protocols), applications
-// have to register themselves in ~EtherLLC. The registration
+// have to register themselves in ~EtherLlc. The registration
 // is done with the IEEE802CTRL_REGISTER_DSAP command
 // (see <a href="llc-app.html">communication between LLC and higher layers</a>)
 // which associates a SAP with the LLC port. Different applications
-// have to connect to different ports of ~EtherLLC.
+// have to connect to different ports of ~EtherLlc.
 //
 // The ETHERCTRL_REGISTER_DSAP and IEEE802CTRL_DEREGISTER_DSAP commands use
 // only the dsap field in the ~Ieee802Ctrl structure.
@@ -136,26 +136,26 @@
 //
 // @page physical.html, Ethernet: Messaging on the Physical Layer
 //
-// Messages sent by ~EtherMAC mark the beginning of a transmission.
+// Messages sent by ~EtherMac mark the beginning of a transmission.
 // The end of a transmission is not explicitly represented by a message,
-// but instead, the ~EtherMAC calculates it from the frame length and
+// but instead, the ~EtherMac calculates it from the frame length and
 // the transmission rate. Frames are represented by ~EtherFrame.
 //
 // When frames collide, the transmission is aborted -- in this case
-// ~EtherMAC makes use of the modelled jam signals to figure out
+// ~EtherMac makes use of the modelled jam signals to figure out
 // when colliding transmissions end.
 //
 // When a transmitting station senses a collision, it transmits a jam signal.
 // Jam signals are represented by a ~EtherJam message.
-// When ~EtherMAC received a jam signal, it knows that one transmission
+// When ~EtherMac received a jam signal, it knows that one transmission
 // has ended in jamming -- thus when it receives as many jam messages
 // as colliding frames, it can be sure all transmissions have been aborted.
 //
 // Receiving a jam message marks the beginning (and not the end)
-// of a jam signal, so actually ~EtherMAC has to wait for the duration
+// of a jam signal, so actually ~EtherMac has to wait for the duration
 // of the jamming before assuming the channel is free again.
 //
-// In burst mode, filled inter-frame gaps are represented with EtherFilledIFG
+// In burst mode, filled inter-frame gaps are represented with EtherFilledIfg
 // packets.
 //
 // Carrier extension is modelled by simply adding to the frame length,
@@ -172,15 +172,15 @@
 // another PAUSE frame to the transmitter with a timer value of zero,
 // allowing the transmitter to resume immediately.
 //
-// ~EtherMAC will properly respond to PAUSE frames it receives
+// ~EtherMac will properly respond to PAUSE frames it receives
 // (~EtherPauseFrame class), but it will never send a PAUSE frame by itself.
 // (For one thing, it doesn't have an input buffer that can overflow.)
 //
-// ~EtherMAC, however, transmits PAUSE frames received by higher layers,
-// and ~EtherLLC and ~EtherEncap can be instructed by a command to send
+// ~EtherMac, however, transmits PAUSE frames received by higher layers,
+// and ~EtherLlc and ~EtherEncap can be instructed by a command to send
 // a PAUSE frame to MAC.
 //
-// ~IMACRelayUnit types (and thus ~EtherSwitch) currently implement a very simple
+// ~IMacRelayUnit types (and thus ~EtherSwitch) currently implement a very simple
 // scheme for sending PAUSE frames -- this can be refined if the need arises.
 //
 

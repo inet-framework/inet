@@ -19,7 +19,7 @@ output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 network=TestIGMPNetwork
-**.igmpType = "IGMPv3"
+**.igmp.typename = "Igmpv3"
 **.IPForward = false
 **.multicastForwarding = false
 
@@ -30,22 +30,22 @@ network=TestIGMPNetwork
 %file: scenario.xml
 <scenario>
 
-<dump t="1" module="node.tester" ifname="eth0" what="groups"/>
+<dump t="1" module="node.tester.mac" ifname="eth0" what="groups"/>
 
-<set-filter t="2" module="node.tester" ifname="eth0" group="225.0.0.1" sources="I 10.0.0.1 10.0.0.2"/>
-<dump t="2" module="node.tester" ifname="eth0" what="groups"/>
+<set-filter t="2" module="node.tester.mac" ifname="eth0" group="225.0.0.1" sources="I 10.0.0.1 10.0.0.2"/>
+<dump t="2" module="node.tester.mac" ifname="eth0" what="groups"/>
 
-<set-filter t="3" module="node.tester" ifname="eth0" group="225.0.0.1" sources="I 10.0.0.1"/>
-<dump t="3" module="node.tester" ifname="eth0" what="groups"/>
+<set-filter t="3" module="node.tester.mac" ifname="eth0" group="225.0.0.1" sources="I 10.0.0.1"/>
+<dump t="3" module="node.tester.mac" ifname="eth0" what="groups"/>
 
-<set-filter t="4" module="node.tester" ifname="eth0" group="225.0.0.1" sources="E 10.0.0.2"/>
-<dump t="4" module="node.tester" ifname="eth0" what="groups"/>
+<set-filter t="4" module="node.tester.mac" ifname="eth0" group="225.0.0.1" sources="E 10.0.0.2"/>
+<dump t="4" module="node.tester.mac" ifname="eth0" what="groups"/>
 
-<set-filter t="5" module="node.tester" ifname="eth0" group="225.0.0.1" sources="E 10.0.0.1 10.0.0.2"/>
-<dump t="5" module="node.tester" ifname="eth0" what="groups"/>
+<set-filter t="5" module="node.tester.mac" ifname="eth0" group="225.0.0.1" sources="E 10.0.0.1 10.0.0.2"/>
+<dump t="5" module="node.tester.mac" ifname="eth0" what="groups"/>
 
-<set-filter t="6" module="node.tester" ifname="eth0" group="225.0.0.1" sources="I 10.0.0.1"/>
-<dump t="6" module="node.tester" ifname="eth0" what="groups"/>
+<set-filter t="6" module="node.tester.mac" ifname="eth0" group="225.0.0.1" sources="I 10.0.0.1"/>
+<dump t="6" module="node.tester.mac" ifname="eth0" what="groups"/>
 
 </scenario>
 
@@ -89,11 +89,11 @@ State of group '225.0.0.1' on interface 'eth0' has changed:
 %#
 %postrun-command: grep "IGMPTester: Received" test.out > received.out || true
 %contains: received.out
-IGMPTester: Received: inet::IGMPv3Report<225.0.0.1=ALLOW 10.0.0.1 10.0.0.2>.
-IGMPTester: Received: inet::IGMPv3Report<225.0.0.1=BLOCK 10.0.0.2>.
-IGMPTester: Received: inet::IGMPv3Report<225.0.0.1=TO_EX 10.0.0.2>.
-IGMPTester: Received: inet::IGMPv3Report<225.0.0.1=BLOCK 10.0.0.1>.
-IGMPTester: Received: inet::IGMPv3Report<225.0.0.1=TO_IN 10.0.0.1>.
+IGMPTester: Received: inet::Igmpv3Report<225.0.0.1=ALLOW 10.0.0.1 10.0.0.2>.
+IGMPTester: Received: inet::Igmpv3Report<225.0.0.1=BLOCK 10.0.0.2>.
+IGMPTester: Received: inet::Igmpv3Report<225.0.0.1=TO_EX 10.0.0.2>.
+IGMPTester: Received: inet::Igmpv3Report<225.0.0.1=BLOCK 10.0.0.1>.
+IGMPTester: Received: inet::Igmpv3Report<225.0.0.1=TO_IN 10.0.0.1>.
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:

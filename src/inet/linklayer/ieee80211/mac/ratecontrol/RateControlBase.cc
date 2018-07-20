@@ -15,11 +15,13 @@
 // along with this program; if not, see http://www.gnu.org/licenses/.
 //
 
-#include "inet/common/NotifierConsts.h"
+#include "inet/common/Simsignals.h"
 #include "inet/linklayer/ieee80211/mac/ratecontrol/RateControlBase.h"
 
 namespace inet {
 namespace ieee80211 {
+
+using namespace inet::physicallayer;
 
 simsignal_t RateControlBase::datarateSignal = cComponent::registerSignal("datarate");
 
@@ -49,7 +51,7 @@ void RateControlBase::emitDatarateSignal()
 void RateControlBase::receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj, cObject* details)
 {
     Enter_Method("receiveModeSetChangeNotification");
-    if (signalID == NF_MODESET_CHANGED) {
+    if (signalID == modesetChangedSignal) {
         modeSet = check_and_cast<Ieee80211ModeSet*>(obj);
         double initRate = par("initialRate");
         currentMode = initRate == -1 ? modeSet->getFastestMandatoryMode() : modeSet->getMode(bps(initRate));

@@ -1,0 +1,35 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-04-26  Levente Mészáros
+
+	Added display string text to NodeStatus.
+
+2018-04-16  Andras Varga
+
+	lifecycle: removed LifecycleController module type. Code lives on as C++ class.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-07-06  Levente Mészáros
+
+	Fixed incorrectly displayed NodeStatus submodule icon.
+	Added icon annotation instead of replacing the NodeStatus submodule icon.
+	Added watch for the state of the NodeStatus.
+
+2016-07-20  Zoltan Bojthe
+
+	Replaced deprecated cQueue functions: operator(), length(), empty().
+
+2016-06-16  Levente Mészáros
+
+	Changed @display strings for better positioning, icons, etc.
+
+2016-06-16  Levente Mészáros
+
+	Removed icon size specification from module definitions.

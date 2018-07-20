@@ -1,0 +1,5 @@
+ - Ieee80211ModeSet: "g" slotTime, cwMin must be the same
+ - layered physical model is broken
+ - add phy header fields
+ - add error models for modulations used in 802.11/n/ac
+ - add statistic collection

@@ -18,9 +18,7 @@
 
 package inet.linklayer.ieee802154;
 
-import inet.linklayer.csma.CSMA;
-
-simple Ieee802154NarrowbandMac extends CSMA
+simple Ieee802154NarrowbandMac extends Ieee802154Mac
 {
     parameters:
         useMACAcks = true;
@@ -37,7 +35,7 @@ simple Ieee802154NarrowbandMac extends CSMA
 
         // length of MAC header
         // aMinMPDUOverhead = 9 Octets (802.15.4-2006, page 159)
-        headerLength = default(72 bit);
+        headerLength = default(72 b);
 
         // Exponential Backoff
         backoffMethod = default("exponential");

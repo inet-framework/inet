@@ -38,8 +38,8 @@ void SingleRateThreeColorMeter::initialize(int stage)
         WATCH(numYellow);
         WATCH(numRed);
 
-        CBS = 8 * (int)par("cbs");
-        EBS = 8 * (int)par("ebs");
+        CBS = 8 * par("cbs").intValue();
+        EBS = 8 * par("ebs").intValue();
         colorAwareMode = par("colorAwareMode");
         Tc = CBS;
         Te = EBS;
@@ -54,9 +54,7 @@ void SingleRateThreeColorMeter::initialize(int stage)
 
 void SingleRateThreeColorMeter::handleMessage(cMessage *msg)
 {
-    cPacket *packet = findIPDatagramInPacket(check_and_cast<cPacket *>(msg));
-    if (!packet)
-        throw cRuntimeError("SingleRateThreeColorMeter received a packet that does not encapsulate an IP datagram.");
+    cPacket *packet = check_and_cast<cPacket *>(msg);
 
     numRcvd++;
     int color = meterPacket(packet);

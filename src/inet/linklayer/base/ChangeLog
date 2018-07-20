@@ -1,3 +1,58 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-01-25  Levente Mészáros
+
+	Common: Added both gates (in/out) to the interface registration API.
+
+2018-01-05  Zoltan Bojthe
+
+	Renamed NF_* signals to use camel case.
+	Renamed signal variables to *Signal.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    MACAddress -> MacAddress
+	    MACBase -> MacBase
+	    MACProtocolBase -> MacProtocolBase
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-07-12  Levente Mészáros
+
+	Replaced remaining packet drop signals with the generic one.
+
+2017-01-19  Levente Mészáros
+
+	Renamed MACFrameBase to MacHeaderBase.
+
+2016-10-26  Zoltan Bojthe
+
+	Removed compatibility macros required for OMNeT++ 4.x builds.
+
+2016-05-02  Levente Mészáros
+
+	Changed registerInterface calls to use the gate of the NIC module if possible.
+	This simplifies interface registration process for compound mac modules.
+
+2016-05-02  Levente Mészáros
+
+	Added new registerInterface() calls.
+
+2015-06-23  Levente Mészáros
+
+	Added network protocol to BMac, LMac, CSMA frames.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

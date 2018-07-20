@@ -1,0 +1,347 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-11  Zoltan Bojthe
+
+	Fixed memory leak in assignment and move operators of RegionTag.
+	Enhanced operator= in RegionTagSet, RegionTag for checking foo1 = foo1.
+
+2018-06-01  Zoltan Bojthe
+
+	Added B/b units to length constants and length fields of chunks.
+
+2018-05-04  Levente Mészáros
+
+	Removed implicit peek till end behavior from peekAt and peekDataAt.
+
+	No other variants support this, and the old behavior prevents peeking
+	into the current representation.
+
+2018-05-03  Andras Varga
+
+	Added proper printing of class name in error messages.
+
+2018-04-13  Levente Mészáros
+
+	Enhanced Packet API documentation.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-03-21  Levente Mészáros
+
+	Common: Refactored Packet API for clarity and consistency.
+
+	Removed getHeaderPoppedLength/getTrailerPoppedLength from Packet.
+	Merged insertAtBeginning into insertAtFront in Packet.
+	Merged insertAtEnd into insertAtBack in Packet.
+	Merged removeFromBeginning into removeAtFront in Packet.
+	Merged removeFromEnd into removeAtBack in Packet.
+
+	Renamed contents to content in Packet and ChunkQueue.
+
+	Renamed get/setHeaderPopOffset to get/setFrontOffset in Packet.
+	Renamed get/setTrailerPopOffset to get/setBackOffset in Packet.
+	Renamed peekHeader/peekTrailer to peekAtFront/peekAtBack in Packet.
+	Renamed popHeader/popTrailer to popAtFront/popAtBack in Packet.
+	Renamed hasHeader/hasTrailer to hasAtFront/hasAtBack in Packet.
+	Renamed removeHeader/removeTrailer to removeAtFront/removeAtBack in Packet.
+	Renamed peekDataBits/peekDataBytes to peekDataAsBits/peekDataAsBytes in Packet.
+	Renamed peekAllBits/peekAllBytes to peekAllAsBits/peekAllAsBytes in Packet.
+	Renamed removePoppedHeader/removePoppedTrailers to trimFront/trimBack in Packet.
+	Renamed removePoppedChunks to trim in Packet.
+
+2018-02-14  Levente Mészáros
+
+	Added PF_ALLOW_ALL flag that disables throwing errors from peek/pop functions.
+	Added a PacketFilter class that can filter packets based on the actual data.
+
+2018-02-01  Levente Mészáros
+
+	Disallowed inserting empty chunks into Packet, ChunkQueue and ChunkBuffer.
+
+	This may catch bugs early on in the user code.
+
+2018-01-12  Levente Mészáros
+
+	Added getTags to Packet to allow passing around the set of tags.
+	Added Message class, Request and Indication subclasses.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-02  Levente Mészáros
+
+	Added copying for tags in Packet copy constructor.
+	Added tags field to Packet descriptor.
+	Dropped header, data, trailer descriptor fields.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-18  Levente Mészáros
+
+	Added markImmutable() calls to insertion functions in ChunkQueue and ChunkBuffer.
+
+2017-12-14  Levente Mészáros
+
+	Chunks are automatically marked as immutable when inserted, removed obsolete
+	pushHeader and popHeader.
+
+2017-12-14  Levente Mészáros
+
+	Renamed Packet append() and prepend() to insertAtBeginning() and insertAtEnd()
+	to be consistent with chunk API.
+
+2017-12-08  Levente Mészáros
+
+	Split Buffers.msg into ChunkBuffer.msg and ChunkQueue.msg.
+
+2017-12-07  Levente Mészáros
+
+	Added TagSet based tags to Packet.
+	Added new TagSet for packet tags and RegionTagSet for chunk data tags.
+
+2017-12-07  Zoltan Bojthe
+
+	Buffer descriptors moved a separate file, added ReassemblyBuffer and ReorderBuffer descriptors
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-10-18  Levente Mészáros
+
+	Fixed Packet::popTrailer bug.
+
+2017-09-22  Zoltan Bojthe
+
+	Maintain totalLength in Packet for efficiency.
+
+2017-09-12  Levente Mészáros
+
+	Added alias for std::make_shared, std::dynamic_pointer_cast, etc.
+	to support replacing the implementation.
+
+2017-09-11  Levente Mészáros
+
+	Renamed byte -> B and bit -> b according to IEC & IEEE unit conventions.
+
+2017-08-30  Zoltan Bojthe
+
+	Fixed isIteratorConsistent().
+
+2017-07-28  Levente Mészáros
+
+	Changed getReassembledData to throw an error if incomplete.
+	Renamed function to ReassemblyBuffer::getReassembledData().
+	Renamed function to ReorderBuffer::popAvailableData().
+	Added length parameter to ReorderBuffer::popData().
+
+2017-07-05  Levente Mészáros
+
+	Replaced Ptr<Chunk> to Ptr<const Chunk> wherever it's possible.
+
+2017-06-16  Zoltan Bojthe
+
+	Added removeAll() function for clearing entire Packet
+
+2017-06-16  Levente Mészáros
+
+	Reverted to macros in error handling even if guarded.
+
+2017-05-08  Levente Mészáros
+
+	Added missing peek variants to Packet.
+
+2017-04-24  Levente Mészáros
+
+	Added properties for packet data filtering in the GUI.
+
+2017-04-20  Levente Mészáros
+
+	Added forEachChild to Packet, ChunkQueue and ChunkBuffer.
+
+2017-04-11  Levente Mészáros
+
+	Added type alias for std::shared_ptr called Ptr, this allows replacing the default implementation.
+	Completed MemoryInputStream implementation for bit streaming.
+	Completed MemoryOutputStream implementation for bit streaming.
+	Renamed to MemoryInputStream and MemoryOutputStream.
+
+2017-04-06  Levente Mészáros
+
+	Replaced plain asserts with CHECK macros to allow disabling/enabling them.
+
+2017-04-03  Levente Mészáros
+
+	Replaced nullptr contents with EmptyChunk in Packet and ChunkQueue.
+
+2017-03-29  Levente Mészáros
+
+	Added totalLength to msg file.
+	Added flags to peekAll*.
+	Renamed function to Packet::getTotalLength.
+
+2017-03-28  Levente Mészáros
+
+	Added convenience peek functions to ChunkQueue.
+	Added removeHeader and removeTrailer which return mutable chunks.
+	Added insertHeader and insertTrailer to Packet.
+	Renamed some function to peekAll* to include a discriminator.
+	Renamed functions to getPoppedLength and getPushedLength.
+
+2017-03-22  Levente Mészáros
+
+	Added Chunk::simplify and usages where appropriate.
+	Added flags arguments to peek & pop in ChunkQueue.
+
+2017-03-17  Zoltan Bojthe
+
+	Changed Packet::getEncapsulatedPacket() to return nullptr, shouldn't throw exception.
+	Packet::hasBitError() uses cPacket::hasBitError()
+
+2017-03-17  Levente Mészáros
+
+	Removed special case for returning complete/incomplete chunks.
+	Implemented flags argument for various peek functions.
+	Added peekBits and peekDataBits to Packet for convenience.
+	Added peekDataBytes and peekBytes to Packet for convenience.
+	Added flags optional parameter to peek variants.
+	Added override for hasBitError.
+
+2017-03-02  Levente Mészáros
+
+	Moved memory streams under common.
+	Moved packet recorders under common/packet/recorder.
+	Moved packet printers under common/packet/printer.
+	Moved ChunkSerializer under common/packet/serializer.
+
+2017-02-16  Levente Mészáros
+
+	Extended memory streams with address reader/writers.
+
+2017-01-23  Levente Mészáros
+
+	Changed length, offset fields and parameters to use the new bit or byte units.
+
+2017-01-19  Levente Mészáros
+
+	Changed Chunk classes to work with bit length instead of byte length.
+	Added BitCountChunk and BitsChunk.
+
+2017-01-18  Levente Mészáros
+
+	Changed SequenceChunk to return another SequenceChunk when peeking into subsequences.
+
+2016-12-23  Levente Mészáros
+
+	Fixed reference count checks for exclusive ownership.
+
+2016-12-21  Levente Mészáros
+
+	Removed mutability functions from Packet.
+	Changed Packet to work with immutable chunks.
+
+2016-12-19  Levente Mészáros
+
+	Fixed ChunkBuffer eraseEmptyRegions.
+	Changed insertion to reuse front/back chunk if possible.
+	Added markMutableIfExclusivelyOwned to Chunk for performance reasons.
+	Changed ChunkBuffer data chunks to be immutable.
+	Extracted canRemoveFromBeginning and canRemoveFromEnd.
+	Renamed to canInsertAtBeginning and canInsertAtEnd.
+
+2016-12-16  Levente Mészáros
+
+	Renamed enum member to TYPE_BYTECOUNT.
+	Extracted isInsertAtBeginningPossible and isInsertAtEndPossible.
+	Changed ChunkQueue to store an immutable chunk instead.
+	Changed peek to raise an error if mutable.
+	Dropped mutability related function from ChunkQueue.
+	Added some more querying and modification functions to ChunkBuffer.
+	Fixed offset when inserting at the beginning.
+	Fixed ChunkBuffer slicing when new region cuts the beginning or end of old region.
+
+2016-12-06  Levente Mészáros
+
+	Split ReassemblyBuffer, and renamed to ChunkBuffer.
+	Renamed chunk queue to ChunkQueue.
+
+2016-11-28  Levente Mészáros
+
+	Added getByte/setByte to BytesChunk.
+
+2016-11-25  Levente Mészáros
+
+	Changed SliceChunk peek to return inner chunk if possible.
+
+2016-11-24  Levente Mészáros
+
+	Added pushHeader and pusTrailer for completeness.
+	Replaced std::vector with std::deque in SequenceChunk.
+	Replaced append/prepend with the generic insertToBeginning/insertToEnd in SequenceChunk.
+
+2016-11-23  Levente Mészáros
+
+	Added getPacketLength to Packet, and changed getByteLength to return the length of the data part.
+
+2016-11-22  Levente Mészáros
+
+	Removed flatten flag because it's not needed anymore.
+	Dropped peek overload and added conversion constructor instead.
+	Renamed enum member to TYPE_FIELD.
+	Added ReassemblyBuffer class to support Tcp, Ipv4, Ipv6 fragmentation.
+
+2016-11-17  Levente Mészáros
+
+	Added missing insertToBeginning, added remove functions to Packet.
+	Changed makeImmutable to be virtual.
+
+2016-11-15  Levente Mészáros
+
+	Moved peek to base class to allow dynamic dispatch.
+	Refactored Iterator to get rid of SequenceIterator completely.
+	Changed Packet to use generic chunk as data.
+	Renamed Packet functions to get*Length.
+	Added getChunkType virtual function to avoid dynamic casts.
+	Added absolute peek functions, and changed peekData to accept offsets after headers.
+
+2016-11-14  Levente Mészáros
+
+	Added peek to SliceChunk to avoid having slices of SliceChunks.
+	Added pop, popHeader, popTrailer without template type parameter to Packet/Buffer.
+	Changed Buffer to allow for non SequenceChunk representation.
+	Merged ForwardIterator and BackwardIterator into base class to avoid diamond subclassing.
+	Refactored iterators towards non SequenceChunk dependent Packet/Buffer.
+
+2016-11-09  Levente Mészáros
+
+	Implemented cloning Packet, Buffer and Chunks.
+
+2016-10-28  Levente Mészáros
+
+	Moved peekAt() slow path into Chunk.
+	Added support for polymorphism to Packet/Chunk.
+	Changed deserialize to support polymorphism.
+	Fixed Packet length, cPacket::getByteLength() is not a virtual function.
+
+2016-10-27  Levente Mészáros
+
+	Added byte length counters to Buffer.
+	Added ENABLE_CHUNK_SERIALIZATION to prevent unpredictable performance degradation.
+
+2016-10-26  Levente Mészáros
+
+	Added new Chunk based Packet implementation.
+
+2016-10-26  Zoltan Bojthe
+
+	Removed compatibility macros required for OMNeT++ 4.x builds.
+
+2016-07-20  Zoltan Bojthe
+
+	Replaced deprecated cQueue functions: operator(), length(), empty().
+	Removed obsolete omnetpp 4.x code (#if OMNETPP_VERSION < 0x500).

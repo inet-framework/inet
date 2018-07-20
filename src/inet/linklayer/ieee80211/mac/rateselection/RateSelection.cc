@@ -16,28 +16,31 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/NotifierConsts.h"
+#include "inet/common/Simsignals.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateControl.h"
 #include "inet/linklayer/ieee80211/mac/rateselection/RateSelection.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
 #include "inet/physicallayer/ieee80211/mode/IIeee80211Mode.h"
+#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
 namespace inet {
 namespace ieee80211 {
+
+using namespace inet::physicallayer;
 
 Define_Module(RateSelection);
 
 void RateSelection::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        getContainingNicModule(this)->subscribe(NF_MODESET_CHANGED, this);
+        getContainingNicModule(this)->subscribe(modesetChangedSignal, this);
     }
     else if (stage == INITSTAGE_LINK_LAYER_2) {
         dataOrMgmtRateControl = dynamic_cast<IRateControl*>(getModuleByPath(par("rateControlModule")));
         double multicastFrameBitrate = par("multicastFrameBitrate");
         multicastFrameMode = (multicastFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(multicastFrameBitrate));
         double dataFrameBitrate = par("dataFrameBitrate");
-        dataFrameMode = (dataFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(dataFrameBitrate));
+        dataFrameMode = (dataFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(dataFrameBitrate), Hz(par("dataFrameBandwidth")), par("dataFrameNumSpatialStreams"));
         double mgmtFrameBitrate = par("mgmtFrameBitrate");
         mgmtFrameMode = (mgmtFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(mgmtFrameBitrate));
         double controlFrameBitrate = par("controlFrameBitrate");
@@ -65,14 +68,14 @@ void RateSelection::initialize(int stage)
     }
 }
 
-const IIeee80211Mode* RateSelection::getMode(Ieee80211Frame* frame)
+const IIeee80211Mode* RateSelection::getMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
-    auto txReq = dynamic_cast<Ieee80211TransmissionRequest*>(frame->getControlInfo());
-    if (txReq)
-        return txReq->getMode();
-    auto rxInd = dynamic_cast<Ieee80211ReceptionIndication*>(frame->getControlInfo());
-    if (rxInd)
-        return rxInd->getMode();
+    auto modeReqTag = packet->findTag<Ieee80211ModeReq>();
+    if (modeReqTag)
+        return modeReqTag->getMode();
+    auto modeIndTag = packet->findTag<Ieee80211ModeInd>();
+    if (modeIndTag)
+        return modeIndTag->getMode();
     throw cRuntimeError("Missing mode");
 }
 
@@ -82,25 +85,25 @@ const IIeee80211Mode* RateSelection::getMode(Ieee80211Frame* frame)
 // frame in the frame exchange sequence (as defined in 9.7), if this rate belongs to the PHY mandatory rates, or
 // else at the highest possible rate belonging to the PHY rates in the BSSBasicRateSet.
 //
-const IIeee80211Mode* RateSelection::computeResponseAckFrameMode(Ieee80211DataOrMgmtFrame *dataOrMgmtFrame)
+const IIeee80211Mode* RateSelection::computeResponseAckFrameMode(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
 {
     if (responseAckFrameMode)
         return responseAckFrameMode;
     else {
-        auto mode = getMode(dataOrMgmtFrame);
+        auto mode = getMode(packet, dataOrMgmtHeader);
         ASSERT(modeSet->containsMode(mode));
-        return  modeSet->getIsMandatory(mode) ? mode : fastestMandatoryMode; // TODO: BSSBasicRateSet
+        return modeSet->getIsMandatory(mode) ? mode : modeSet->getSlowerMandatoryMode(mode); // TODO: BSSBasicRateSet
     }
 }
 
-const IIeee80211Mode* RateSelection::computeResponseCtsFrameMode(Ieee80211RTSFrame *rtsFrame)
+const IIeee80211Mode* RateSelection::computeResponseCtsFrameMode(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame)
 {
     if (responseCtsFrameMode)
         return responseCtsFrameMode;
     else {
-        auto mode = getMode(rtsFrame);
+        auto mode = getMode(packet, rtsFrame);
         ASSERT(modeSet->containsMode(mode));
-        return modeSet->getIsMandatory(mode) ? mode : fastestMandatoryMode; // TODO: BSSBasicRateSet
+        return modeSet->getIsMandatory(mode) ? mode : modeSet->getSlowerMandatoryMode(mode); // TODO: BSSBasicRateSet
     }
 }
 
@@ -117,13 +120,13 @@ const IIeee80211Mode* RateSelection::computeResponseCtsFrameMode(Ieee80211RTSFra
 // Poll+CF-ACK, the rate chosen to transmit the frame must be supported by both the addressed recipient STA
 // and the STA to which the ACK is intended.
 //
-const IIeee80211Mode* RateSelection::computeDataOrMgmtFrameMode(Ieee80211DataOrMgmtFrame* dataOrMgmtFrame)
+const IIeee80211Mode* RateSelection::computeDataOrMgmtFrameMode(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
 {
-    if (dataOrMgmtFrame->getReceiverAddress().isMulticast() && multicastFrameMode)
+    if (dataOrMgmtHeader->getReceiverAddress().isMulticast() && multicastFrameMode)
         return multicastFrameMode;
-    if (dynamic_cast<Ieee80211DataFrame*>(dataOrMgmtFrame) && dataFrameMode)
+    if (dynamicPtrCast<const Ieee80211DataHeader>(dataOrMgmtHeader) && dataFrameMode)
         return dataFrameMode;
-    if (dynamic_cast<Ieee80211ManagementFrame*>(dataOrMgmtFrame) && mgmtFrameMode)
+    if (dynamicPtrCast<const Ieee80211MgmtHeader>(dataOrMgmtHeader) && mgmtFrameMode)
         return mgmtFrameMode;
     if (dataOrMgmtRateControl)
         return dataOrMgmtRateControl->getRate();
@@ -137,42 +140,39 @@ const IIeee80211Mode* RateSelection::computeDataOrMgmtFrameMode(Ieee80211DataOrM
 // (see 10.3.10.1), or at one of the rates in the PHY mandatory rate set so they will
 // be understood by all STAs.
 //
-const IIeee80211Mode* RateSelection::computeControlFrameMode(Ieee80211Frame* frame)
+const IIeee80211Mode* RateSelection::computeControlFrameMode(const Ptr<const Ieee80211MacHeader>& header)
 {
     // TODO: BSSBasicRateSet
     return fastestMandatoryMode;
 }
 
-const IIeee80211Mode* RateSelection::computeMode(Ieee80211Frame* frame)
+const IIeee80211Mode* RateSelection::computeMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
-    if (auto dataOrMgmtFrame = dynamic_cast<Ieee80211DataOrMgmtFrame*>(frame))
-        return computeDataOrMgmtFrameMode(dataOrMgmtFrame);
+    if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header))
+        return computeDataOrMgmtFrameMode(dataOrMgmtHeader);
     else
-        return computeControlFrameMode(frame);
+        return computeControlFrameMode(header);
 }
 
 void RateSelection::receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj, cObject* details)
 {
     Enter_Method("receiveModeSetChangeNotification");
-    if (signalID == NF_MODESET_CHANGED) {
+    if (signalID == modesetChangedSignal) {
         modeSet = check_and_cast<Ieee80211ModeSet*>(obj);
         fastestMandatoryMode = modeSet->getFastestMandatoryMode();
     }
 }
 
-void RateSelection::frameTransmitted(Ieee80211Frame* frame)
+void RateSelection::frameTransmitted(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
-    auto receiverAddr = frame->getReceiverAddress();
-    lastTransmittedFrameMode[receiverAddr] = getMode(frame);
+    auto receiverAddr = header->getReceiverAddress();
+    lastTransmittedFrameMode[receiverAddr] = getMode(packet, header);
 }
 
-void RateSelection::setFrameMode(Ieee80211Frame *frame, const IIeee80211Mode *mode)
+void RateSelection::setFrameMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, const IIeee80211Mode *mode)
 {
     ASSERT(mode != nullptr);
-    delete frame->removeControlInfo();
-    Ieee80211TransmissionRequest *ctrl = new Ieee80211TransmissionRequest();
-    ctrl->setMode(mode);
-    frame->setControlInfo(ctrl);
+    packet->addTagIfAbsent<Ieee80211ModeReq>()->setMode(mode);
 }
 
 

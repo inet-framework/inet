@@ -18,11 +18,12 @@
 
 package inet.examples.wireless.hosttohost;
 
-import inet.applications.ethernet.EtherAppCli;
+import inet.applications.ethernet.EtherAppClient;
 import inet.common.queue.Sink;
-import inet.linklayer.ieee80211.Ieee80211Nic;
+import inet.linklayer.ieee80211.Ieee80211Interface;
 import inet.mobility.single.CircleMobility;
 import inet.mobility.static.StationaryMobility;
+import inet.networklayer.common.InterfaceTable;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.visualizer.contract.IIntegratedVisualizer;
@@ -32,23 +33,29 @@ module ThroughputClient
     parameters:
         @display("i=device/wifilaptop");
         @networkNode();
-        *.interfaceTableModule = "";
+        *.interfaceTableModule = "^.interfaceTable";
+        wlan.radio.antenna.mobilityModule = default("^.^.^.mobility");
     gates:
         input radioIn @directIn;
     submodules:
-        cli: EtherAppCli {
+        cli: EtherAppClient {
             parameters:
                 registerSAP = false;
-                @display("b=40,24;p=180,60,col");
+                @display("p=300,100");
         }
-        wlan: Ieee80211Nic {
+        wlan: Ieee80211Interface {
             parameters:
-                @display("p=112,134;q=queue");
-                mgmtType = "Ieee80211MgmtSTASimplified";
+                @display("p=250,200;q=queue");
+                mgmt.typename = "Ieee80211MgmtStaSimplified";
+                agent.typename = "";
+        }
+        interfaceTable: InterfaceTable {
+            parameters:
+                @display("p=100,100;is=s");
         }
         mobility: CircleMobility {
             parameters:
-                @display("p=50,141");
+                @display("p=100,200;is=s");
         }
     connections allowunconnected:
         wlan.radioIn <-- radioIn;
@@ -60,23 +67,29 @@ module ThroughputServer
     parameters:
         @display("i=device/wifilaptop");
         @networkNode();
-        *.interfaceTableModule = "";
+        *.interfaceTableModule = "^.interfaceTable";
+        wlan.radio.antenna.mobilityModule = default("^.^.^.mobility");
     gates:
         input radioIn @directIn;
 
     submodules:
         sink: Sink {
             parameters:
-                @display("p=210,68,col");
+                @display("p=300,100");
         }
-        wlan: Ieee80211Nic {
+        wlan: Ieee80211Interface {
             parameters:
-                @display("p=120,158;q=queue");
-                mgmtType = "Ieee80211MgmtSTASimplified";
+                @display("p=250,200;q=queue");
+                mgmt.typename = "Ieee80211MgmtStaSimplified";
+                agent.typename = "";
+        }
+        interfaceTable: InterfaceTable {
+            parameters:
+                @display("p=100,100;is=s");
         }
         mobility: StationaryMobility {
             parameters:
-                @display("p=50,141");
+                @display("p=100,200;is=s");
         }
     connections allowunconnected:
         wlan.radioIn <-- radioIn;
@@ -87,15 +100,14 @@ network Throughput
 {
     parameters:
         int numCli;
-        @display("b=297,203");
     submodules:
         visualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
             parameters:
-                @display("p=100,50");
+                @display("p=100,200;is=s");
         }
         radioMedium: Ieee80211ScalarRadioMedium {
             parameters:
-                @display("p=100,150");
+                @display("p=100,100;is=s");
         }
         cliHost[numCli]: ThroughputClient {
             parameters:
@@ -108,6 +120,7 @@ network Throughput
         ap: AccessPoint {
             parameters:
                 @display("p=200,200;r=,,#707070");
-                wlan[*].mgmtType = "Ieee80211MgmtAPSimplified";
+                wlan[*].mgmt.typename = "Ieee80211MgmtApSimplified";
+                wlan[*].agent.typename = "";
         }
 }

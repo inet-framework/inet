@@ -1,3 +1,95 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-01  Zoltan Bojthe
+
+	Added B/b units to length constants and length fields of chunks.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-02-19  Zoltan Bojthe
+
+	Renamed functions to use camel case.
+
+2018-01-18  Zoltan Bojthe
+
+	Revised MSG customizations.
+	Fixed BgpUpdateMessage::setWithdrawnRoutesArraySize(), it didn't resize the array.
+
+2018-01-12  Zoltan Bojthe
+
+	Removed 'Routing' from name of all routing protocol classes/files.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    ASID -> AsId
+	    BGPCommon -> BgpCommon
+	    BGPFSM -> BgpFsm
+	    BGPHeader -> BgpHeader
+	    BGPKeepAliveMessage -> BgpKeepAliveMessage
+	    BGPOpenMessage -> BgpOpenMessage
+	    BGPPathSegmentType -> BgpPathSegmentType
+	    BGPRouting -> BgpRouting
+	    BGPRoutingTableEntry -> BgpRoutingTableEntry
+	    BGPSession -> BgpSession
+	    BGPSessionType -> BgpSessionType
+	    BGPUpdate -> BgpUpdate
+	    BGPUpdateMessage -> BgpUpdateMessage
+	    BGPUpdateNLRI -> BgpUpdateNlri
+	    BGPUpdatePathAttributeList -> BgpUpdatePathAttributeList
+	    IBGPRouting -> IBgpRouting
+	    IIPv4RoutingTable -> IIpv4RoutingTable
+	    IPv4 -> Ipv4
+	    IPv4Address -> Ipv4Address
+	    IPv4AddressRange -> Ipv4AddressRange
+	    IPv4InterfaceData -> Ipv4InterfaceData
+	    IPv4Route -> Ipv4Route
+	    IPv4RoutingTable -> Ipv4RoutingTable
+	    OSPFRouting -> OspfRouting
+	    SessionID -> SessionId
+	    TCPConnection -> TcpConnection
+	    TCPSocket -> TcpSocket
+	    TCPSocketMap -> TcpSocketMap
+
+2017-12-15  Zoltan Bojthe
+
+	Removed unnecessary cPar::xmlValue() calls.
+
+2017-12-14  Levente Mészáros
+
+	Replaced pushHeader, pushTrailer with insertHeader, insertTrailer.
+	Removed unnecessary markImmutable() calls.
+
+2017-12-11  Zoltan Bojthe
+
+	Updated for new msgc function names: getFooForUpdate, insertFoo, eraseFoo, etc.
+
+2017-11-23  Levente Mészáros
+
+	Removed all @omitGetVerb and @fieldNameSuffix properties.
+
+2017-11-14  Zoltan Bojthe
+
+	Replaced "int foo @enum(FooEnum)" to FooEnum foo.
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2016-06-02  Levente Mészáros
+
+	Changed BGPRouting to implement IApp interface.
+
+2015-06-11  Levente Mészáros
+
+	Added listening socket to socket map to allow processing TCP_I_AVAILABLE.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

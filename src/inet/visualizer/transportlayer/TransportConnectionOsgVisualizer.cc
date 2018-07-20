@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/OSGUtils.h"
+#include "inet/common/OsgUtils.h"
 #include "inet/visualizer/transportlayer/TransportConnectionOsgVisualizer.h"
 
 namespace inet {
@@ -43,7 +43,7 @@ void TransportConnectionOsgVisualizer::initialize(int stage)
     }
 }
 
-osg::Node *TransportConnectionOsgVisualizer::createConnectionEndNode(tcp::TCPConnection *tcpConnection) const
+osg::Node *TransportConnectionOsgVisualizer::createConnectionEndNode(tcp::TcpConnection *tcpConnection) const
 {
     auto path = resolveResourcePath((std::string(icon) + ".png").c_str());
     auto image = inet::osg::createImage(path.c_str());
@@ -65,7 +65,7 @@ osg::Node *TransportConnectionOsgVisualizer::createConnectionEndNode(tcp::TCPCon
     return geode;
 }
 
-const TransportConnectionVisualizerBase::TransportConnectionVisualization *TransportConnectionOsgVisualizer::createConnectionVisualization(cModule *source, cModule *destination, tcp::TCPConnection *tcpConnection) const
+const TransportConnectionVisualizerBase::TransportConnectionVisualization *TransportConnectionOsgVisualizer::createConnectionVisualization(cModule *source, cModule *destination, tcp::TcpConnection *tcpConnection) const
 {
     auto sourceNode = createConnectionEndNode(tcpConnection);
     auto destinationNode = createConnectionEndNode(tcpConnection);

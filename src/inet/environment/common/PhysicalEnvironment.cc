@@ -74,13 +74,13 @@ void PhysicalEnvironment::initialize(int stage)
 
 void PhysicalEnvironment::convertPoints(std::vector<Coord>& points)
 {
-    auto originPosition = coordinateSystem == nullptr ? GeoCoord(0, 0, 0) : coordinateSystem->computeGeographicCoordinate(Coord::ZERO);
+    auto originPosition = coordinateSystem == nullptr ? GeoCoord(deg(0), deg(0), m(0)) : coordinateSystem->computeGeographicCoordinate(Coord::ZERO);
     Box boundingBox = Box::computeBoundingBox(points);
     Coord center = boundingBox.getCenter();
     for (auto & point : points) {
         point -= center;
         if (coordinateSystem != nullptr)
-            point = coordinateSystem->computePlaygroundCoordinate(GeoCoord(point.x + originPosition.latitude, point.y + originPosition.longitude, 0));
+            point = coordinateSystem->computePlaygroundCoordinate(GeoCoord(deg(point.x) + originPosition.latitude, deg(point.y) + originPosition.longitude, m(0)));
     }
 }
 
@@ -246,6 +246,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         // name
         const char *name = element->getAttribute("name");
         // orientation
+        // TODO: what about geographic orientation? what about taking GeographicCoordinateSystem into account?
         EulerAngles orientation;
         const char *orientationAttribute = element->getAttribute("orientation");
         if (orientationAttribute)
@@ -253,13 +254,13 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
             cStringTokenizer tokenizer(orientationAttribute);
             if ((tok = tokenizer.nextToken()) == nullptr)
                 throw cRuntimeError("Missing orientation alpha at %s", element->getSourceLocation());
-            orientation.alpha = math::deg2rad(atof(tok));
+            orientation.alpha = deg(atof(tok));
             if ((tok = tokenizer.nextToken()) == nullptr)
                 throw cRuntimeError("Missing orientation beta at %s", element->getSourceLocation());
-            orientation.beta = math::deg2rad(atof(tok));
+            orientation.beta = deg(atof(tok));
             if ((tok = tokenizer.nextToken()) == nullptr)
                 throw cRuntimeError("Missing orientation gamma at %s", element->getSourceLocation());
-            orientation.gamma = math::deg2rad(atof(tok));
+            orientation.gamma = deg(atof(tok));
         }
         // shape
         Coord size = Coord::NIL;
@@ -371,7 +372,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
             else
                 throw cRuntimeError("Unknown position kind");
             if (coordinateSystem != nullptr) {
-                auto convertedPosition = coordinateSystem->computePlaygroundCoordinate(GeoCoord(position.x, position.y, 0));
+                auto convertedPosition = coordinateSystem->computePlaygroundCoordinate(GeoCoord(deg(position.x), deg(position.y), m(0)));
                 position.x = convertedPosition.x;
                 position.y = convertedPosition.y;
             }

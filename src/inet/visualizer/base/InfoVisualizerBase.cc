@@ -71,6 +71,7 @@ void InfoVisualizerBase::initialize(int stage)
 
 void InfoVisualizerBase::handleParameterChange(const char *name)
 {
+    if (!hasGUI()) return;
     if (name != nullptr) {
         if (!strcmp(name, "modules"))
             modules.setPattern(par("modules"));

@@ -29,8 +29,8 @@ class INET_API RtsProcedure : public IRtsProcedure
         int numSentRts = 0;
 
     public:
-        virtual Ieee80211RTSFrame *buildRtsFrame(Ieee80211DataOrMgmtFrame *dataOrMgmtFrame) const override;
-        virtual void processTransmittedRts(Ieee80211RTSFrame *rtsFrame) override;
+        virtual const Ptr<Ieee80211RtsFrame> buildRtsFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) const override;
+        virtual void processTransmittedRts(const Ptr<const Ieee80211RtsFrame>& rtsFrame) override;
 };
 
 } /* namespace ieee80211 */

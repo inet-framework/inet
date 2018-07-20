@@ -22,28 +22,28 @@ import inet.linklayer.ieee80211.mac.blockack.RecipientBlockAckAgreementPolicy;
 import inet.linklayer.ieee80211.mac.channelaccess.Edca;
 import inet.linklayer.ieee80211.mac.channelaccess.Hcca;
 import inet.linklayer.ieee80211.mac.contract.IRateControl;
-import inet.linklayer.ieee80211.mac.originator.NonQoSRecoveryProcedure;
-import inet.linklayer.ieee80211.mac.originator.OriginatorQoSAckPolicy;
-import inet.linklayer.ieee80211.mac.originator.OriginatorQoSMacDataService;
-import inet.linklayer.ieee80211.mac.originator.QoSRecoveryProcedure;
-import inet.linklayer.ieee80211.mac.originator.QoSRtsPolicy;
+import inet.linklayer.ieee80211.mac.contract.IHcf;
+import inet.linklayer.ieee80211.mac.originator.NonQosRecoveryProcedure;
+import inet.linklayer.ieee80211.mac.originator.OriginatorQosAckPolicy;
+import inet.linklayer.ieee80211.mac.originator.OriginatorQosMacDataService;
+import inet.linklayer.ieee80211.mac.originator.QosRecoveryProcedure;
+import inet.linklayer.ieee80211.mac.originator.QosRtsPolicy;
 import inet.linklayer.ieee80211.mac.originator.TxopProcedure;
 import inet.linklayer.ieee80211.mac.protectionmechanism.SingleProtectionMechanism;
-import inet.linklayer.ieee80211.mac.rateselection.QoSRateSelection;
-import inet.linklayer.ieee80211.mac.recipient.QoSCtsPolicy;
-import inet.linklayer.ieee80211.mac.recipient.RecipientQoSAckPolicy;
-import inet.linklayer.ieee80211.mac.recipient.RecipientQoSMacDataService;
+import inet.linklayer.ieee80211.mac.rateselection.QosRateSelection;
+import inet.linklayer.ieee80211.mac.recipient.QosCtsPolicy;
+import inet.linklayer.ieee80211.mac.recipient.RecipientQosAckPolicy;
+import inet.linklayer.ieee80211.mac.recipient.RecipientQosMacDataService;
 
 
 //
 // HCF -- Hybrid Coordination Function
 //
-module Hcf
+module Hcf like IHcf
 {
     parameters:
         int numEdcafs = default(4);
         int maxQueueSize = default(100); // -1 means unlimited
-        string rateControlType = default("");
         bool isBlockAckSupported = default(false);
         bool prioritizeMulticast = default(false); // if true, prioritize multicast frames (9.3.2.1 Fundamental access)
 
@@ -55,8 +55,8 @@ module Hcf
 
         @class(Hcf);
         @display("i=block/queue");
-        @signal[NF_LINK_BREAK](type=Ieee80211DataOrMgmtFrame);
-        @signal[NF_PACKET_DROP](type=Ieee80211Frame);
+        @signal[linkBroken](type=Packet);
+        @signal[packetDropped](type=Packet);
 
     submodules:
         edca: Edca {
@@ -68,66 +68,66 @@ module Hcf
             parameters:
                 @display("p=150,200");
         }
-        originatorMacDataService: OriginatorQoSMacDataService {
+        originatorMacDataService: OriginatorQosMacDataService {
             parameters:
                 @display("p=150,300");
         }
-        recipientMacDataService: RecipientQoSMacDataService {
+        recipientMacDataService: RecipientQosMacDataService {
             parameters:
                 @display("p=150,400");
         }
-        rateSelection: QoSRateSelection {
+        rateSelection: QosRateSelection {
             parameters:
                 rateControlModule = "^.rateControl";
-                @display("p=400,100");
+                @display("p=350,100");
         }
-        rateControl: <rateControlType> like IRateControl if rateControlType != "" {
+        rateControl: <default("")> like IRateControl if typename != "" {
             parameters:
-                @display("p=400,200");
+                @display("p=350,200");
         }
         singleProtectionMechanism: SingleProtectionMechanism {
             parameters:
-                @display("p=400,300");
+                @display("p=350,300");
         }
-        edcaMgmtAndNonQoSRecoveryProcedure: NonQoSRecoveryProcedure {
+        edcaMgmtAndNonQoSRecoveryProcedure: NonQosRecoveryProcedure {
             parameters:
                 cwCalculatorModule = "^.edca.edcaf[1]"; // best effort
                 rtsPolicyModule = "^.rtsPolicy";
-                @display("p=700,300");
+                @display("p=550,300");
         }
-        edcaDataRecoveryProcedures[numEdcafs]: QoSRecoveryProcedure {
+        edcaDataRecoveryProcedures[numEdcafs]: QosRecoveryProcedure {
             parameters:
                 cwCalculatorModule = "^.edca.edcaf[" + string(index) + "]";
                 rtsPolicyModule = "^.rtsPolicy";
-                @display("p=700,400,column,100");
+                @display("p=550,400,column,100");
         }
         edcaTxopProcedures[numEdcafs]: TxopProcedure {
             parameters:
-                @display("p=400,400,column,100");
+                @display("p=350,400,column,100");
         }
-        originatorAckPolicy: OriginatorQoSAckPolicy {
+        originatorAckPolicy: OriginatorQosAckPolicy {
             parameters:
-                @display("p=1000,100");
+                @display("p=750,100");
         }
-        recipientAckPolicy: RecipientQoSAckPolicy {
+        recipientAckPolicy: RecipientQosAckPolicy {
             parameters:
-                @display("p=1000,200");
+                @display("p=750,200");
         }
-        rtsPolicy: QoSRtsPolicy {
+        rtsPolicy: QosRtsPolicy {
             parameters:
-                @display("p=1000,300");
+                @display("p=750,300");
         }
-        ctsPolicy: QoSCtsPolicy {
+        ctsPolicy: QosCtsPolicy {
             parameters:
-                @display("p=1000,400");
+                @display("p=750,400");
         }
         originatorBlockAckAgreementPolicy: OriginatorBlockAckAgreementPolicy if isBlockAckSupported {
             parameters:
                 originatorAckPolicyModule = "^.originatorAckPolicy";
-                @display("p=1000,500");
+                @display("p=750,500");
         }
         recipientBlockAckAgreementPolicy: RecipientBlockAckAgreementPolicy if isBlockAckSupported {
             parameters:
-                @display("p=1000,600");
+                @display("p=750,600");
         }
 }

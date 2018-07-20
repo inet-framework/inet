@@ -41,6 +41,7 @@ class INET_API BitVector
     BitVector(unsigned int bits);
     BitVector(unsigned int bits, unsigned int fixedSize);
     BitVector(const BitVector& other) { copy(other); }
+    BitVector(const std::vector<uint8>& bytes) : bytes(bytes), size(bytes.size() * 8) { }
 
     unsigned int toDecimal() const;
     unsigned int reverseToDecimal() const;

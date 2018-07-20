@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+# This script is intended to run gdb with the most commonly used command line
+# arguments to debug INET simulations. The typical command line to debug the
+# INET debug version would be something like:
+# 'inet_gdb $(inet --debug -p -u Cmdenv)'.
+#
+
+gdb $INET_GDB_OPTIONS $@
+

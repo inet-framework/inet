@@ -24,10 +24,8 @@ package inet.networklayer.common;
 simple EchoProtocol
 {
     parameters:
-        @display("i=block/control_s");
+        @display("i=block/control");
     gates:
-        input localIn @labels(GenericNetworkProtocolControlInfo/up);
-        input pingIn[];  // ping requests from app
-        output pingOut[];  // result of ping
-        output sendOut @labels(GenericNetworkProtocolControlInfo/down);  // towards network
+        input ipIn;
+        output ipOut;
 }

@@ -19,13 +19,13 @@
 #define __INET_PATHVISUALIZERBASE_H
 
 #include "inet/common/geometry/common/Coord.h"
+#include "inet/common/packet/PacketFilter.h"
+#include "inet/common/StringFormat.h"
 #include "inet/visualizer/base/VisualizerBase.h"
 #include "inet/visualizer/util/AnimationPosition.h"
 #include "inet/visualizer/util/ColorSet.h"
 #include "inet/visualizer/util/LineManager.h"
 #include "inet/visualizer/util/NetworkNodeFilter.h"
-#include "inet/visualizer/util/PacketFilter.h"
-#include "inet/visualizer/util/StringFormat.h"
 
 namespace inet {
 
@@ -114,9 +114,9 @@ class INET_API PathVisualizerBase : public VisualizerBase, public cListener
     virtual void removeAllPathVisualizations();
     virtual void setAlpha(const PathVisualization *pathVisualization, double alpha) const = 0;
 
-    virtual const std::vector<int> *getIncompletePath(int treeId);
-    virtual void addToIncompletePath(int treeId, cModule *module);
-    virtual void removeIncompletePath(int treeId);
+    virtual const std::vector<int> *getIncompletePath(int chunkId);
+    virtual void addToIncompletePath(int chunkId, cModule *module);
+    virtual void removeIncompletePath(int chunkId);
 
     virtual std::string getPathVisualizationText(cPacket *packet) const;
     virtual void refreshPathVisualization(const PathVisualization *pathVisualization, cPacket *packet);

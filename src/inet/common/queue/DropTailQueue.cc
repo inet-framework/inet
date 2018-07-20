@@ -58,7 +58,7 @@ cMessage *DropTailQueue::dequeue()
     if (queue.isEmpty())
         return nullptr;
 
-    cMessage *msg = (cMessage *)queue.pop();
+    cMessage *msg = static_cast<cMessage *>(queue.pop());
 
     // statistics
     emit(queueLengthSignal, queue.getLength());

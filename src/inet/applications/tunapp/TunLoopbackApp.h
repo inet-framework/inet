@@ -18,18 +18,19 @@
 #ifndef __INET_TUNLOOPBACKAPP_H
 #define __INET_TUNLOOPBACKAPP_H
 
-#include "inet/common/INETDefs.h"
+#include "inet/linklayer/tun/TunSocket.h"
 
 namespace inet {
 
 class INET_API TunLoopbackApp : public cSimpleModule
 {
     protected:
+        const char *tunInterface;
+
         unsigned int packetsSent;
         unsigned int packetsReceived;
 
-        static simsignal_t sentPkSignal;
-        static simsignal_t rcvdPkSignal;
+        TunSocket tunSocket;
 
     public:
         TunLoopbackApp();
@@ -37,6 +38,7 @@ class INET_API TunLoopbackApp : public cSimpleModule
 
     protected:
         void initialize(int stage) override;
+        virtual int numInitStages() const override { return NUM_INIT_STAGES; }
         void handleMessage(cMessage *msg) override;
         void finish() override;
 };

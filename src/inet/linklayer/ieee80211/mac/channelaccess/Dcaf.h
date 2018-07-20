@@ -29,7 +29,7 @@ namespace ieee80211 {
 class INET_API Dcaf : public IChannelAccess, public IContention::ICallback, public IRecoveryProcedure::ICwCalculator, public ModeSetListener
 {
     protected:
-        Ieee80211ModeSet *modeSet = nullptr;
+        physicallayer::Ieee80211ModeSet *modeSet = nullptr;
         IContention *contention = nullptr;
         IChannelAccess::ICallback *callback = nullptr;
 
@@ -48,6 +48,7 @@ class INET_API Dcaf : public IChannelAccess, public IContention::ICallback, publ
     protected:
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
         virtual void initialize(int stage) override;
+        virtual void refreshDisplay() const override;
 
         virtual void calculateTimingParameters();
         virtual void receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj, cObject* details) override;

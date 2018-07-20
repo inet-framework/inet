@@ -11,17 +11,15 @@ there were no batteries involved at all.
 
 %file: test.ned
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-import inet.common.lifecycle.LifecycleController;
 
 network Test
 {
     submodules:
-        lifecycleController: LifecycleController;
         radioMedium: Ieee80211ScalarRadioMedium;
-        configurator: IPv4NetworkConfigurator;
+        configurator: Ipv4NetworkConfigurator;
         hostSource: AdhocHost;
         hostDestination: AdhocHost;
 }
@@ -39,8 +37,8 @@ cmdenv-express-mode = false
 **.hasStatus = true
 
 # power
-**.energyStorageType = "SimpleCcBattery"
-**.energyConsumerType = "StateBasedCcEnergyConsumer"
+**.energyStorage.typename = "SimpleCcBattery"
+**.energyConsumer.typename = "StateBasedCcEnergyConsumer"
 **.energyStorage.nominalCapacity = 1C
 **.energyStorage.nominalVoltage = 1.5V
 **.energyStorage.cutoffVoltage = 1.0V
@@ -58,23 +56,22 @@ cmdenv-express-mode = false
 **.mobility.initFromDisplayString = false
 **.mobility.initialY = 50m
 **.mobility.initialZ = 0m
-*.host*.mobilityType = "StationaryMobility"
+*.host*.mobility.typename = "StationaryMobility"
 *.hostSource.mobility.initialX = 20m
 *.hostDestination.mobility.initialX = 80m
 
 # ping app
-*.host*.numPingApps = 1
-*.hostSource.pingApp[0].destAddr = "hostDestination"
-*.hostSource.pingApp[0].printPing = true
+*.hostSource.numApps = 1
+*.hostSource.app[0].typename = "PingApp"
+*.hostSource.app[0].destAddr = "hostDestination"
+*.hostSource.app[0].printPing = true
 
 %contains: stdout
 --------------------------------------------------------
-	Test.hostSource.pingApp[0]
+	Test.hostSource.app[0]
 --------------------------------------------------------
 sent: 100   received: 50   loss rate (%): 50
-round-trip min/avg/max (ms): 0.2344/0.500888/1.0788
-stddev (ms): 0.198598   variance:3.94412e-08
---------------------------------------------------------
+round-trip min/avg/max (ms):
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:

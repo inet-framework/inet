@@ -19,18 +19,28 @@
 //
 
 #include <set>
-#include "inet/common/stlutils.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/stlutils.h"
 #include "inet/common/XMLUtils.h"
 #include "inet/networklayer/configurator/base/NetworkConfiguratorBase.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
 #ifdef WITH_RADIO
+#include "inet/physicallayer/base/packetlevel/FlatReceiverBase.h"
+#include "inet/physicallayer/base/packetlevel/FlatTransmitterBase.h"
+#include "inet/physicallayer/common/packetlevel/Interference.h"
+#include "inet/physicallayer/common/packetlevel/Radio.h"
+#include "inet/physicallayer/common/packetlevel/ReceptionDecision.h"
+#include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
-#include "inet/physicallayer/base/packetlevel/FlatTransmitterBase.h"
-#include "inet/physicallayer/base/packetlevel/FlatReceiverBase.h"
-#include "inet/physicallayer/common/packetlevel/Interference.h"
+#endif
+
+#ifdef WITH_ACKINGWIRELESS
+#include "inet/physicallayer/unitdisk/UnitDiskPhyHeader_m.h"
 #endif
 
 namespace inet {
@@ -142,9 +152,9 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
     // add extra links between all pairs of wireless interfaces within a LAN (full graph)
     for (auto & entry : wirelessIdToInterfaceInfosMap) {
         std::vector<InterfaceInfo *>& interfaceInfos = entry.second;
-        for (int i = 0; i < (int)interfaceInfos.size(); i++) {
+        for (size_t i = 0; i < interfaceInfos.size(); i++) {
             InterfaceInfo *interfaceInfoI = interfaceInfos.at(i);
-            for (int j = i + 1; j < (int)interfaceInfos.size(); j++) {
+            for (size_t j = i + 1; j < interfaceInfos.size(); j++) {
                 // assume bidirectional links
                 InterfaceInfo *interfaceInfoJ = interfaceInfos.at(j);
                 Link *linkIJ = new Link();
@@ -249,7 +259,7 @@ bool NetworkConfiguratorBase::isBridgeNode(Node *node)
 
 bool NetworkConfiguratorBase::isWirelessInterface(InterfaceEntry *interfaceEntry)
 {
-    return !strncmp(interfaceEntry->getName(), "wlan", 4);
+    return !strncmp(interfaceEntry->getInterfaceName(), "wlan", 4);
 }
 
 Topology::LinkOut *NetworkConfiguratorBase::findLinkOut(Node *node, int gateId)
@@ -334,7 +344,7 @@ double NetworkConfiguratorBase::computeWiredLinkWeight(Link *link, const char *m
             if (transmissionChannel) {
                 InterfaceInfo *sourceInterfaceInfo = link->sourceInterfaceInfo;
                 double bitErrorRate = transmissionChannel->getBitErrorRate();
-                double packetErrorRate = 1.0 - pow(1.0 - bitErrorRate, sourceInterfaceInfo->interfaceEntry->getMTU());
+                double packetErrorRate = 1.0 - pow(1.0 - bitErrorRate, sourceInterfaceInfo->interfaceEntry->getMtu());
                 return minLinkWeight - log(1 - packetErrorRate);
             }
             else
@@ -358,18 +368,18 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const char
             // compute the delay between the two interfaces using a dummy transmission
             const InterfaceInfo *transmitterInterfaceInfo = link->sourceInterfaceInfo;
             const InterfaceInfo *receiverInterfaceInfo = link->destinationInterfaceInfo;
-            cModule *transmitterInterfaceModule = transmitterInterfaceInfo->interfaceEntry->getInterfaceModule();
-            cModule *receiverInterfaceModule = receiverInterfaceInfo->interfaceEntry->getInterfaceModule();
+            cModule *transmitterInterfaceModule = transmitterInterfaceInfo->interfaceEntry;
+            cModule *receiverInterfaceModule = receiverInterfaceInfo->interfaceEntry;
             const IRadio *transmitterRadio = check_and_cast<IRadio *>(transmitterInterfaceModule->getSubmodule("radio"));
             const IRadio *receiverRadio = check_and_cast<IRadio *>(receiverInterfaceModule->getSubmodule("radio"));
-            const cPacket *macFrame = new cPacket();
+            const Packet *macFrame = new Packet();
             const IRadioMedium *radioMedium = receiverRadio->getMedium();
             const ITransmission *transmission = transmitterRadio->getTransmitter()->createTransmission(transmitterRadio, macFrame, simTime());
             const IArrival *arrival = radioMedium->getPropagation()->computeArrival(transmission, receiverRadio->getAntenna()->getMobility());
             return arrival->getStartPropagationTime().dbl();
         }
         else if (!strcmp(metric, "dataRate")) {
-            cModule *transmitterInterfaceModule = link->sourceInterfaceInfo->interfaceEntry->getInterfaceModule();
+            cModule *transmitterInterfaceModule = link->sourceInterfaceInfo->interfaceEntry;
             IRadio *transmitterRadio = check_and_cast<IRadio *>(transmitterInterfaceModule->getSubmodule("radio"));
             const FlatTransmitterBase *transmitter = dynamic_cast<const FlatTransmitterBase *>(transmitterRadio->getTransmitter());
             double dataRate = transmitter ? transmitter->getBitrate().get() : 0;
@@ -379,32 +389,47 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const char
             // compute the packet error rate between the two interfaces using a dummy transmission
             const InterfaceInfo *transmitterInterfaceInfo = link->sourceInterfaceInfo;
             const InterfaceInfo *receiverInterfaceInfo = link->destinationInterfaceInfo;
-            cModule *transmitterInterfaceModule = transmitterInterfaceInfo->interfaceEntry->getInterfaceModule();
-            cModule *receiverInterfaceModule = receiverInterfaceInfo->interfaceEntry->getInterfaceModule();
+            cModule *transmitterInterfaceModule = transmitterInterfaceInfo->interfaceEntry;
+            cModule *receiverInterfaceModule = receiverInterfaceInfo->interfaceEntry;
             const IRadio *transmitterRadio = check_and_cast<IRadio *>(transmitterInterfaceModule->getSubmodule("radio"));
             const IRadio *receiverRadio = check_and_cast<IRadio *>(receiverInterfaceModule->getSubmodule("radio"));
             const IRadioMedium *medium = receiverRadio->getMedium();
-            cPacket *macFrame = new cPacket();
-            macFrame->setByteLength(transmitterInterfaceInfo->interfaceEntry->getMTU());
-            const ITransmission *transmission = transmitterRadio->getTransmitter()->createTransmission(transmitterRadio, macFrame, simTime());
+            Packet *transmittedFrame = new Packet();
+            auto byteCountChunk = makeShared<ByteCountChunk>(B(transmitterInterfaceInfo->interfaceEntry->getMtu()));
+            transmittedFrame->insertAtBack(byteCountChunk);
+
+            // KLUDGE:
+            transmittedFrame->addTag<PacketProtocolTag>()->setProtocol(nullptr);
+            check_and_cast<const Radio *>(transmitterRadio)->encapsulate(transmittedFrame);
+
+            const ITransmission *transmission = transmitterRadio->getTransmitter()->createTransmission(transmitterRadio, transmittedFrame, simTime());
             const IArrival *arrival = medium->getPropagation()->computeArrival(transmission, receiverRadio->getAntenna()->getMobility());
             const IListening *listening = receiverRadio->getReceiver()->createListening(receiverRadio, arrival->getStartTime(), arrival->getEndTime(), arrival->getStartPosition(), arrival->getEndPosition());
             const INoise *noise = medium->getBackgroundNoise() != nullptr ? medium->getBackgroundNoise()->computeNoise(listening) : nullptr;
             const IReception *reception = medium->getAnalogModel()->computeReception(receiverRadio, transmission, arrival);
             const IInterference *interference = new Interference(noise, new std::vector<const IReception *>());
-            const ISNIR *snir = medium->getAnalogModel()->computeSNIR(reception, noise);
+            const ISnir *snir = medium->getAnalogModel()->computeSNIR(reception, noise);
             const IReceiver *receiver = receiverRadio->getReceiver();
-            const ReceptionIndication *receptionIndication = receiver->computeReceptionIndication(snir);
             bool isReceptionPossible = receiver->computeIsReceptionPossible(listening, reception, IRadioSignal::SIGNAL_PART_WHOLE);
-            double packetErrorRate = isReceptionPossible ? receptionIndication->getPacketErrorRate() : 1;
-            delete receptionIndication;
+            double packetErrorRate;
+            if (!isReceptionPossible)
+                packetErrorRate = 1;
+            else {
+                const IReceptionDecision *receptionDecision = new ReceptionDecision(reception, IRadioSignal::SIGNAL_PART_WHOLE, isReceptionPossible, true, true);
+                const std::vector<const IReceptionDecision *> *receptionDecisions = new std::vector<const IReceptionDecision *> {receptionDecision};
+                const IReceptionResult *receptionResult = receiver->computeReceptionResult(listening, reception, interference, snir, receptionDecisions);
+                Packet *receivedFrame = const_cast<Packet *>(receptionResult->getPacket());
+                packetErrorRate = receivedFrame->getTag<ErrorRateInd>()->getPacketErrorRate();
+                delete receptionResult;
+                delete receptionDecision;
+            }
             delete snir;
             delete interference;
             delete reception;
             delete listening;
             delete arrival;
             delete transmission;
-            delete macFrame;
+            delete transmittedFrame;
             // we want to have a maximum PER product along the path,
             // but still minimize the hop count if the PER is negligible
             return minLinkWeight - log(1 - packetErrorRate);
@@ -437,7 +462,7 @@ const char *NetworkConfiguratorBase::getWirelessId(InterfaceEntry *interfaceEntr
 
             // Note: "hosts", "interfaces" must ALL match on the interface for the rule to apply
             if ((hostMatcher.matchesAny() || hostMatcher.matches(hostShortenedFullPath.c_str()) || hostMatcher.matches(hostFullPath.c_str())) &&
-                (interfaceMatcher.matchesAny() || interfaceMatcher.matches(interfaceEntry->getFullName())))
+                (interfaceMatcher.matchesAny() || interfaceMatcher.matches(interfaceEntry->getInterfaceName())))
             {
                 const char *idAttr = wirelessElement->getAttribute("id");    // identifier of wireless connection
                 return idAttr ? idAttr : wirelessElement->getSourceLocation();
@@ -447,7 +472,7 @@ const char *NetworkConfiguratorBase::getWirelessId(InterfaceEntry *interfaceEntr
             throw cRuntimeError("Error in XML <wireless> element at %s: %s", wirelessElement->getSourceLocation(), e.what());
         }
     }
-    cModule *interfaceModule = interfaceEntry->getInterfaceModule();
+    cModule *interfaceModule = interfaceEntry;
     cModule *mgmtModule = interfaceModule->getSubmodule("mgmt");
     if (mgmtModule != nullptr) {
         if (mgmtModule->hasPar("ssid") && *mgmtModule->par("ssid").stringValue())
@@ -464,8 +489,9 @@ const char *NetworkConfiguratorBase::getWirelessId(InterfaceEntry *interfaceEntr
     cModule *radioModule = interfaceModule->getSubmodule("radio");
     const IRadio *radio = dynamic_cast<const IRadio *>(radioModule);
     if (radio != nullptr) {
-        const cModule *mediumModule = check_and_cast<const cModule *>(radio->getMedium());
-        return mediumModule->getFullName();
+        const cModule *mediumModule = dynamic_cast<const cModule *>(radio->getMedium());
+        if (mediumModule != nullptr)
+            return mediumModule->getFullName();
     }
 #endif
 
@@ -575,7 +601,7 @@ bool NetworkConfiguratorBase::InterfaceMatcher::matches(InterfaceInfo *interface
     if (matchesany)
         return true;
 
-    const char *interfaceName = interfaceInfo->interfaceEntry->getName();
+    const char *interfaceName = interfaceInfo->interfaceEntry->getInterfaceName();
     for (auto & nameMatcher : nameMatchers)
         if (nameMatcher->matches(interfaceName))
             return true;

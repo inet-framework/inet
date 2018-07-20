@@ -1,0 +1,23 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    MACAddress -> MacAddress
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-05-11  Levente Mészáros
+
+	Added display string text to MIB.
+
+2017-05-08  Levente Mészáros
+
+	Added a separate Ieee80211Mib module to store some shared
+	state similarly to the MIB in the standard.

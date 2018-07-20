@@ -1,0 +1,4 @@
+<config>
+  <interface hosts='pdhost' names='tun0' address='192.168.0.1' netmask='255.255.255.0' mtu='1500' metric='1'/>
+  <route hosts='pdhost' destination='192.168.0.2' netmask='255.255.255.255' interface='tun0'/>
+</config>

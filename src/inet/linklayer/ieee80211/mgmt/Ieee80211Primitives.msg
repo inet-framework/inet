@@ -15,27 +15,19 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 
 //
-// Required for MACAddress declarations
+// Required for MacAddress declarations
 //
-cplusplus {{
-#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrames_m.h"
-}}
-
-class noncobject MACAddress;
+import inet.common.INETDefs;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtFrame;
+import inet.linklayer.common.MacAddress;
 
 namespace inet::ieee80211;
-
-
-class noncobject Ieee80211SupportedRatesElement;
-
-enum Ieee80211ReasonCode;
-
 
 //
 // IEEE 802.11 command codes, sent by the agent to the management entity.
 // These constants should be set as message kind on the messages.
 //
-// @see ~Ieee80211PrimConfirmCode, ~Ieee80211MgmtSTA, ~Ieee80211AgentSTA
+// @see ~Ieee80211PrimConfirmCode, ~Ieee80211MgmtSta, ~Ieee80211AgentSta
 //
 enum Ieee80211PrimRequestCode
 {
@@ -53,7 +45,7 @@ enum Ieee80211PrimRequestCode
 // in response to the agents's requests.
 // These constants should be set as message kind on the messages.
 //
-// @see ~Ieee80211PrimRequestCode, ~Ieee80211MgmtSTA, ~Ieee80211AgentSTA
+// @see ~Ieee80211PrimRequestCode, ~Ieee80211MgmtSta, ~Ieee80211AgentSta
 //
 enum Ieee80211PrimConfirmCode
 {
@@ -66,7 +58,7 @@ enum Ieee80211PrimConfirmCode
     PR_DISASSOCIATE_CONFIRM = 6;
 }
 
-enum Ieee80211BSSType
+enum Ieee80211BssType
 {
 
     BSSTYPE_ANY = 0;
@@ -78,7 +70,7 @@ enum Ieee80211BSSType
 // Values for the resultCode field in confirm primitives, sent from
 // the management entity to the agent.
 //
-// @see ~Ieee80211PrimConfirmCode, ~Ieee80211MgmtSTA, ~Ieee80211AgentSTA
+// @see ~Ieee80211PrimConfirmCode, ~Ieee80211MgmtSta, ~Ieee80211AgentSta
 //
 enum Ieee80211PrimResultCode
 {
@@ -93,16 +85,16 @@ enum Ieee80211PrimResultCode
 //
 // Base class for request primitives
 //
-class Ieee80211PrimRequest
+class Ieee80211PrimRequest extends cObject
 {
 }
 
 //
 // Base class for confirm primitives
 //
-class Ieee80211PrimConfirm
+class Ieee80211PrimConfirm extends cObject
 {
-    int resultCode @enum(Ieee80211PrimResultCode);
+    Ieee80211PrimResultCode resultCode;
 }
 
 //
@@ -110,8 +102,8 @@ class Ieee80211PrimConfirm
 //
 class Ieee80211Prim_ScanRequest extends Ieee80211PrimRequest
 {
-    int BSSType @enum(Ieee80211BSSType); // determines type of BSS's to include in the scan
-    MACAddress BSSID; // specific BSSID to scan for (default: any)
+    Ieee80211BssType BSSType; // determines type of BSS's to include in the scan
+    MacAddress BSSID; // specific BSSID to scan for (default: any)
     string SSID;      // SSID to scan for SSID (default: any)
     bool activeScan;  // whether to perform active or passive scanning
     simtime_t probeDelay; // delay (in �s) to be used prior to transmitting a Probe frame during active scanning
@@ -120,10 +112,10 @@ class Ieee80211Prim_ScanRequest extends Ieee80211PrimRequest
     simtime_t maxChannelTime; // maximum time to spend on each channel when scanning
 }
 
-class Ieee80211Prim_BSSDescription
+class Ieee80211Prim_BssDescription extends cObject
 {
     int channelNumber;
-    MACAddress BSSID;
+    MacAddress BSSID;
     string SSID;
     Ieee80211SupportedRatesElement supportedRates;
     simtime_t beaconInterval;
@@ -137,7 +129,7 @@ class Ieee80211Prim_BSSDescription
 //
 class Ieee80211Prim_ScanConfirm extends Ieee80211PrimConfirm
 {
-    Ieee80211Prim_BSSDescription bssList[];
+    Ieee80211Prim_BssDescription bssList[];
 }
 
 //
@@ -150,7 +142,7 @@ class Ieee80211Prim_ScanConfirm extends Ieee80211PrimConfirm
 //
 class Ieee80211Prim_AuthenticateRequest extends Ieee80211PrimRequest
 {
-    MACAddress address;
+    MacAddress address;
     simtime_t timeout;
 }
 
@@ -160,7 +152,7 @@ class Ieee80211Prim_AuthenticateRequest extends Ieee80211PrimRequest
 //
 class Ieee80211Prim_AuthenticateConfirm extends Ieee80211PrimConfirm
 {
-    MACAddress address;
+    MacAddress address;
 }
 
 //
@@ -172,8 +164,8 @@ class Ieee80211Prim_AuthenticateConfirm extends Ieee80211PrimConfirm
 //
 class Ieee80211Prim_DeauthenticateRequest extends Ieee80211PrimRequest
 {
-    MACAddress address;
-    int reasonCode @enum(Ieee80211ReasonCode);
+    MacAddress address;
+    Ieee80211ReasonCode reasonCode;
 }
 
 //
@@ -181,7 +173,7 @@ class Ieee80211Prim_DeauthenticateRequest extends Ieee80211PrimRequest
 //
 class Ieee80211Prim_AssociateRequest extends Ieee80211PrimRequest
 {
-    MACAddress address;
+    MacAddress address;
     simtime_t timeout;
 }
 
@@ -191,7 +183,7 @@ class Ieee80211Prim_AssociateRequest extends Ieee80211PrimRequest
 //
 class Ieee80211Prim_AssociateConfirm extends Ieee80211PrimConfirm
 {
-    MACAddress address;
+    MacAddress address;
 }
 
 //
@@ -217,7 +209,7 @@ class Ieee80211Prim_ReassociateConfirm extends Ieee80211Prim_AssociateConfirm
 //
 class Ieee80211Prim_DisassociateRequest extends Ieee80211PrimRequest
 {
-    MACAddress address;
-    int reasonCode @enum(Ieee80211ReasonCode);
+    MacAddress address;
+    Ieee80211ReasonCode reasonCode;
 }
 

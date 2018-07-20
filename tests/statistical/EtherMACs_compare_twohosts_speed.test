@@ -4,7 +4,7 @@ The hosts have same ethernet configurations in pairs.
 
 variations:
  - queue: internal / external
- - implementation: EtherMAC / EtherMACFullDuplex
+ - implementation: EtherMac / EtherMacFullDuplex
 
 compare results of variations and checks:
  - the number of sent packets are equals (one packet different is acceptable, because the first event of endtime is processed.)
@@ -50,24 +50,24 @@ network CompareMACs
         }
         host_iq_2_F_A: EtherHost {
             parameters:
-                macType = "EtherMACFullDuplex";
+                macType = "EtherMacFullDuplex";
                 @display("p=70,210");
         }
         host_iq_2_F_B: EtherHost {
             parameters:
-                macType = "EtherMACFullDuplex";
+                macType = "EtherMacFullDuplex";
                 @display("p=210,210");
         }
         host_eq_2_F_A: EtherHost {
             parameters:
                 queueType = "DropTailQueue";
-                macType = "EtherMACFullDuplex";
+                macType = "EtherMacFullDuplex";
                 @display("p=70,280");
         }
         host_eq_2_F_B: EtherHost {
             parameters:
                 queueType = "DropTailQueue";
-                macType = "EtherMACFullDuplex";
+                macType = "EtherMacFullDuplex";
                 @display("p=210,280");
         }
 
@@ -141,7 +141,7 @@ cat("\nOMNETPP TEST RESULT:\n")
 
 cat("\nCHECK SENT PACKETS:\n")
 
-x <- dataset$scalars[dataset$scalars$name == "sentPk:count",]
+x <- dataset$scalars[dataset$scalars$name == "packetSent:count",]
 xx <- x[grep("_F_A.cli$",x$module)==1,]
 
 if(length(xx$value) != linecount)

@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/common/lifecycle/LifecycleController.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/power/management/SimpleEpEnergyManagement.h"
@@ -43,9 +44,6 @@ void SimpleEpEnergyManagement::initialize(int stage)
         nodeStatus = dynamic_cast<NodeStatus *>(networkNode->getSubmodule("status"));
         if (!nodeStatus)
             throw cRuntimeError("Cannot find node status");
-        lifecycleController = dynamic_cast<LifecycleController *>(getModuleByPath("lifecycleController"));
-        if (!lifecycleController)
-            throw cRuntimeError("Cannot find lifecycle controller");
         lifecycleOperationTimer = new cMessage("lifecycleOperation");
     }
 }
@@ -67,14 +65,14 @@ void SimpleEpEnergyManagement::executeNodeOperation(J estimatedEnergyCapacity)
         LifecycleOperation::StringMap params;
         NodeShutdownOperation *operation = new NodeShutdownOperation();
         operation->initialize(networkNode, params);
-        lifecycleController->initiateOperation(operation);
+        lifecycleController.initiateOperation(operation);
     }
     else if (!std::isnan(nodeStartCapacity.get()) && estimatedEnergyCapacity >= nodeStartCapacity && nodeStatus->getState() == NodeStatus::DOWN) {
         EV_INFO << "Capacity reached node start threshold" << endl;
         LifecycleOperation::StringMap params;
         NodeStartOperation *operation = new NodeStartOperation();
         operation->initialize(networkNode, params);
-        lifecycleController->initiateOperation(operation);
+        lifecycleController.initiateOperation(operation);
     }
 }
 

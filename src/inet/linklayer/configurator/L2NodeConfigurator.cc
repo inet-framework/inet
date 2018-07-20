@@ -36,7 +36,7 @@ void L2NodeConfigurator::initialize(int stage)
         nodeStatus = dynamic_cast<NodeStatus *>(host->getSubmodule("status"));
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         networkConfigurator = findModuleFromPar<L2NetworkConfigurator>(par("l2ConfiguratorModule"), this);
-        host->subscribe(NF_INTERFACE_CREATED, this);
+        host->subscribe(interfaceCreatedSignal, this);
     }
 }
 
@@ -44,7 +44,7 @@ bool L2NodeConfigurator::handleOperationStage(LifecycleOperation *operation, int
 {
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if ((NodeStartOperation::Stage)stage == NodeStartOperation::STAGE_LINK_LAYER) {
+        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_LINK_LAYER) {
             prepareNode();
             configureNode();
         }
@@ -84,7 +84,7 @@ void L2NodeConfigurator::receiveSignal(cComponent *source, simsignal_t signalID,
     if (nodeStatus && nodeStatus->getState() != NodeStatus::UP)
         return;
 
-    if (signalID == NF_INTERFACE_CREATED) {
+    if (signalID == interfaceCreatedSignal) {
         InterfaceEntry *ie = check_and_cast<InterfaceEntry *>(obj);
         prepareInterface(ie);
         if (networkConfigurator)

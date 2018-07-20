@@ -15,6 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#if 1
+
 #include "Ieee80211BitDomainTest.h"
 #include "inet/common/BitVector.h"
 #include "inet/common/ShortBitVector.h"
@@ -35,13 +37,13 @@ void Ieee80211BitDomainTest::initialize(int stage)
         if (!strcmp(testType,"convCoder"))
             convCoder = getModuleFromPar<ConvolutionalCoderModule>(par("convolutionalCoderModule"), this);
         else if(!strcmp(testType, "interleaver"))
-            interleaver = getModuleFromPar<Ieee80211OFDMInterleaverModule>(par("interleaverModule"), this);
+            interleaver = getModuleFromPar<Ieee80211OfdmInterleaverModule>(par("interleaverModule"), this);
         else if(!strcmp(testType, "scrambler"))
             scrambler = getModuleFromPar<AdditiveScramblerModule>(par("scramblerModule"), this);
         else if (!strcmp(testType, "all"))
         {
             convCoder = getModuleFromPar<ConvolutionalCoderModule>(par("convolutionalCoderModule"), this);
-            interleaver = getModuleFromPar<Ieee80211OFDMInterleaverModule>(par("interleaverModule"), this);
+            interleaver = getModuleFromPar<Ieee80211OfdmInterleaverModule>(par("interleaverModule"), this);
             scrambler = getModuleFromPar<AdditiveScramblerModule>(par("scramblerModule"), this);
         }
         else
@@ -132,3 +134,6 @@ void Ieee80211BitDomainTest::testIeee80211BitDomain() const
 }
 
 } /* namespace inet */
+
+#endif
+

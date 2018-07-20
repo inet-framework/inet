@@ -20,15 +20,13 @@
 
 #include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
 
-using namespace inet::physicallayer;
-
 namespace inet {
 namespace ieee80211 {
 
 class INET_API ModeSetListener : public cSimpleModule, public cListener
 {
     protected:
-        Ieee80211ModeSet *modeSet = nullptr;
+        physicallayer::Ieee80211ModeSet *modeSet = nullptr;
 
     protected:
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }

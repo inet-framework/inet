@@ -43,10 +43,10 @@ module Edca
     submodules:
         edcaf[numEdcafs]: Edcaf {
             parameters:
-	            @display("p=100,100,row,200");
+                @display("p=100,100,row,150");
         }
         collisionController: <default("EdcaCollisionController")> like ICollisionController {
-			parameters:
-	            @display("p=100,200");
+            parameters:
+                @display("p=100,200");
         }
 }

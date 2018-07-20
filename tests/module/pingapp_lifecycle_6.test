@@ -16,12 +16,13 @@ output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
 output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
 snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
-*.host.numPingApps = 1
-*.host.pingApp[0].destAddr = "192.168.0.42"
-*.host.pingApp[0].startTime = 0s
-*.host.pingApp[0].stopTime = 7s
+*.host.numApps = 1
+*.host.app[0].typename = "PingApp"
+*.host.app[0].destAddr = "192.168.0.42"
+*.host.app[0].startTime = 0s
+*.host.app[0].stopTime = 7s
 
-*.host.networkLayer.configurator.networkConfiguratorModule = ""
+*.host.ipv4.configurator.networkConfiguratorModule = ""
 
 **.hasStatus = true
 **.initialStatus = "down"
@@ -30,14 +31,12 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %file: test.ned
 
 import inet.node.inet.StandardHost;
-import inet.common.lifecycle.LifecycleController;
 import inet.common.scenario.ScenarioManager;
 
 network Test
 {
     submodules:
         scenarioManager: ScenarioManager;
-        lifecycleController: LifecycleController;
         host: StandardHost;
 }
 
@@ -46,7 +45,7 @@ network Test
 
 <scenario>
     <at t="3.0">
-        <tell module="lifecycleController" target="host" operation="NodeStartOperation"/>
+        <startup module="host"/>
     </at>
 </scenario>
 
@@ -54,16 +53,16 @@ network Test
 %contains-regex: stdout
 \*\* Event #\d+  t=3   Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <at> command\.\.\.
-processing <tell> command\.\.\.
+processing <startup> command\.\.\.
 Doing stage 0/8 of operation inet::NodeStartOperation on Test\.host
 Test\.host starting up
 .*
 Test\.host started
-\*\* Event #\d+  t=3   Test\.host\.pingApp\[0\] \(PingApp, id=\d+\)
+\*\* Event #\d+  t=3   Test\.host\.app\[0\] \(PingApp, id=\d+\)
 Starting up: dest=192\.168\.0\.42  src=<none>seqNo=0
 Sending ping request #0 to lower layer\.
 .*
-\*\* Event #\d+  t=6   Test\.host\.pingApp\[0\] \(PingApp, id=\d+\)
+\*\* Event #\d+  t=6   Test\.host\.app\[0\] \(PingApp, id=\d+\)
 Sending ping request #3 to lower layer\.
 .*
 

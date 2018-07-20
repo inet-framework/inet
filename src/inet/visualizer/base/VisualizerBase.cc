@@ -18,6 +18,9 @@
 #include "inet/common/geometry/object/LineSegment.h"
 #include "inet/common/geometry/shape/Cuboid.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/packet/chunk/SequenceChunk.h"
+#include "inet/common/packet/chunk/SliceChunk.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/visualizer/base/VisualizerBase.h"
@@ -53,6 +56,10 @@ Coord VisualizerBase::getPosition(const cModule *networkNode) const
 
 Coord VisualizerBase::getContactPosition(const cModule *networkNode, const Coord& fromPosition, const char *contactMode, double contactSpacing) const
 {
+    double zoomLevel = getEnvir()->getZoomLevel(networkNode->getParentModule());
+    if (std::isnan(zoomLevel))
+        zoomLevel = 1.0;
+
     if (!strcmp(contactMode, "circular")) {
         auto bounds = getSimulation()->getEnvir()->getSubmoduleBounds(networkNode);
         auto size = bounds.getSize();
@@ -61,13 +68,14 @@ Coord VisualizerBase::getContactPosition(const cModule *networkNode, const Coord
         auto direction = fromPosition - position;
         direction.normalize();
         direction *= radius + contactSpacing;
+        direction /= zoomLevel;
         return position + direction;
     }
     else if (!strcmp(contactMode, "rectangular")) {
         auto position = getPosition(networkNode);
         auto bounds = getSimulation()->getEnvir()->getSubmoduleBounds(networkNode);
         auto size = bounds.getSize();
-        Cuboid networkNodeShape(Coord(size.x + 2 * contactSpacing, size.y + 2 * contactSpacing, 1));
+        Cuboid networkNodeShape(Coord(size.x + 2 * contactSpacing / zoomLevel, size.y + 2 * contactSpacing / zoomLevel, 1));
         Coord intersection1, intersection2, normal1, normal2;
         networkNodeShape.computeIntersection(LineSegment(Coord::ZERO, fromPosition - position), intersection1, intersection2, normal1, normal2);
         return position + intersection2;
@@ -76,13 +84,16 @@ Coord VisualizerBase::getContactPosition(const cModule *networkNode, const Coord
         throw cRuntimeError("Unknown contact mode: %s", contactMode);
 }
 
-InterfaceEntry *VisualizerBase::getInterfaceEntry(cModule *networkNode, cModule *module) const
+void VisualizerBase::mapChunkIds(const Ptr<const Chunk>& chunk, const std::function<void(int)>& thunk) const
 {
-    L3AddressResolver addressResolver;
-    auto interfaceTable = addressResolver.findInterfaceTableOf(networkNode);
-    if (interfaceTable == nullptr)
-        return nullptr;
-    return interfaceTable->getInterfaceByInterfaceModule(module);
+    if (chunk->getChunkType() == Chunk::CT_SEQUENCE) {
+        for (const auto& elementChunk : staticPtrCast<const SequenceChunk>(chunk)->getChunks())
+            mapChunkIds(elementChunk, thunk);
+    }
+    else if (chunk->getChunkType() == Chunk::CT_SLICE)
+        thunk(staticPtrCast<const SliceChunk>(chunk)->getChunk()->getChunkId());
+    else
+        thunk(chunk->getChunkId());
 }
 
 } // namespace visualizer

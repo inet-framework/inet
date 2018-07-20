@@ -115,31 +115,31 @@ Define_Module(BasicStatistics);
 //    this->rateControl = rateControl;
 //}
 //
-//void BasicStatistics::frameTransmissionSuccessful(Ieee80211DataOrMgmtFrame *frame, int retryCount)
+//void BasicStatistics::frameTransmissionSuccessful(const Ptr<const Ieee80211DataOrMgmtHeader>& header, int retryCount)
 //{
 //    if (rateControl)
 //        rateControl->frameTransmitted(frame, utils->getFrameMode(frame), retryCount, true, false);
 //}
 //
-//void BasicStatistics::frameTransmissionUnsuccessful(Ieee80211DataOrMgmtFrame *frame, int retryCount)
+//void BasicStatistics::frameTransmissionUnsuccessful(const Ptr<const Ieee80211DataOrMgmtHeader>& header, int retryCount)
 //{
 //    if (rateControl)
 //        rateControl->frameTransmitted(frame, utils->getFrameMode(frame), retryCount, false, false);
 //}
 //
-//void BasicStatistics::frameTransmissionUnsuccessfulGivingUp(Ieee80211DataOrMgmtFrame *frame, int retryCount)
+//void BasicStatistics::frameTransmissionUnsuccessfulGivingUp(const Ptr<const Ieee80211DataOrMgmtHeader>& header, int retryCount)
 //{
 //    if (rateControl)
 //        rateControl->frameTransmitted(frame, utils->getFrameMode(frame), retryCount, false, true); //TODO for the last frame, both Unsuccessful() and GivenUp() will be called -- duplicate call!
 //}
 //
-//void BasicStatistics::frameTransmissionGivenUp(Ieee80211DataOrMgmtFrame *frame)
+//void BasicStatistics::frameTransmissionGivenUp(const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 //{
 //}
 //
-//void BasicStatistics::frameReceived(Ieee80211Frame *frame)
+//void BasicStatistics::frameReceived(const Ptr<const Ieee80211MacHeader>& header)
 //{
-//    if (dynamic_cast<Ieee80211DataOrMgmtFrame *>(frame)) {
+//    if (dynamic_cast<const Ptr<const Ieee80211DataOrMgmtHeader>& >(frame)) {
 //        if (!utils->isForUs(frame))
 //            numReceivedNotForUs++;
 //        else if (utils->isBroadcast(frame))

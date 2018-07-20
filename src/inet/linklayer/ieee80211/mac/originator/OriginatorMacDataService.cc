@@ -31,13 +31,12 @@ void OriginatorMacDataService::initialize()
     fragmentation = new Fragmentation();
 }
 
-Ieee80211DataOrMgmtFrame* OriginatorMacDataService::assignSequenceNumber(Ieee80211DataOrMgmtFrame* frame)
+void OriginatorMacDataService::assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header)
 {
-    sequenceNumberAssigment->assignSequenceNumber(frame);
-    return frame;
+    sequenceNumberAssigment->assignSequenceNumber(header);
 }
 
-OriginatorMacDataService::Fragments *OriginatorMacDataService::fragmentIfNeeded(Ieee80211DataOrMgmtFrame *frame)
+std::vector<Packet *> *OriginatorMacDataService::fragmentIfNeeded(Packet *frame)
 {
     auto fragmentSizes = fragmentationPolicy->computeFragmentSizes(frame);
     if (fragmentSizes.size() != 0) {
@@ -47,23 +46,26 @@ OriginatorMacDataService::Fragments *OriginatorMacDataService::fragmentIfNeeded(
     return nullptr;
 }
 
-OriginatorMacDataService::Fragments* OriginatorMacDataService::extractFramesToTransmit(PendingQueue *pendingQueue)
+std::vector<Packet *> *OriginatorMacDataService::extractFramesToTransmit(PendingQueue *pendingQueue)
 {
     if (pendingQueue->isEmpty())
         return nullptr;
     else {
         // if (msduRateLimiting)
         //    txRateLimitingIfNeeded();
-        Ieee80211DataOrMgmtFrame *frame = pendingQueue->pop();
-        if (sequenceNumberAssigment)
-            frame = assignSequenceNumber(frame);
+        Packet *packet = pendingQueue->pop();
+        if (sequenceNumberAssigment) {
+            auto frame = packet->removeAtFront<Ieee80211DataOrMgmtHeader>();
+            assignSequenceNumber(frame);
+            packet->insertAtFront(frame);
+        }
         // if (msduIntegrityAndProtection)
         //    frame = protectMsduIfNeeded(frame);
-        Fragments *fragments = nullptr;
+        std::vector<Packet *> *fragments = nullptr;
         if (fragmentationPolicy)
-            fragments = fragmentIfNeeded(frame);
+            fragments = fragmentIfNeeded(packet);
         if (!fragments)
-            fragments = new Fragments({frame});
+            fragments = new std::vector<Packet *>({packet});
         // if (mpduEncryptionAndIntegrity)
         //    fragments = encryptMpduIfNeeded(fragments);
         // if (mpduHeaderPlusCrc)

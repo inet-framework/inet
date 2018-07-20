@@ -22,63 +22,68 @@ namespace ieee80211 {
 
 Register_Class(MsduDeaggregation);
 
-void MsduDeaggregation::setExplodedFrameAddress(Ieee80211DataFrame* frame, Ieee80211MsduSubframe* subframe, Ieee80211DataFrame *aMsduFrame)
+void MsduDeaggregation::setExplodedFrameAddress(const Ptr<Ieee80211DataHeader>& header, const Ptr<const Ieee80211MsduSubframeHeader>& subframeHeader, const Ptr<const Ieee80211DataHeader>& aMsduHeader)
 {
-    bool toDS = aMsduFrame->getToDS();
-    bool fromDS = aMsduFrame->getFromDS();
+    bool toDS = aMsduHeader->getToDS();
+    bool fromDS = aMsduHeader->getFromDS();
     if (fromDS == 0 && toDS == 0) // STA to STA
     {
-        frame->setTransmitterAddress(aMsduFrame->getTransmitterAddress());
-        frame->setReceiverAddress(aMsduFrame->getReceiverAddress());
+        header->setTransmitterAddress(aMsduHeader->getTransmitterAddress());
+        header->setReceiverAddress(aMsduHeader->getReceiverAddress());
     }
     else if (fromDS == 1 && toDS == 0) // AP to STA
     {
-        frame->setTransmitterAddress(frame->getTransmitterAddress());
-        frame->setReceiverAddress(subframe->getDa());
-        frame->setAddress3(subframe->getSa());
+        header->setTransmitterAddress(aMsduHeader->getTransmitterAddress());
+        header->setReceiverAddress(subframeHeader->getDa());
+        header->setAddress3(subframeHeader->getSa());
     }
     else if (fromDS == 0 && toDS == 1) // STA to AP
     {
-        frame->setTransmitterAddress(subframe->getSa());
-        frame->setReceiverAddress(aMsduFrame->getReceiverAddress());
-        frame->setAddress3(subframe->getDa());
+        header->setTransmitterAddress(subframeHeader->getSa());
+        header->setReceiverAddress(aMsduHeader->getReceiverAddress());
+        header->setAddress3(subframeHeader->getDa());
     }
     else if (fromDS == 1 && toDS == 1) // AP to AP
     {
-        frame->setReceiverAddress(aMsduFrame->getReceiverAddress());
-        frame->setTransmitterAddress(aMsduFrame->getTransmitterAddress());
-        frame->setAddress3(subframe->getDa());
-        frame->setAddress4(subframe->getSa());
+        header->setReceiverAddress(aMsduHeader->getReceiverAddress());
+        header->setTransmitterAddress(aMsduHeader->getTransmitterAddress());
+        header->setAddress3(subframeHeader->getDa());
+        header->setAddress4(subframeHeader->getSa());
     }
+    ASSERT(!header->getReceiverAddress().isUnspecified());
+    ASSERT(!header->getTransmitterAddress().isUnspecified());
 }
 
-std::vector<Ieee80211DataFrame*> *MsduDeaggregation::deaggregateFrame(Ieee80211DataFrame* frame)
+std::vector<Packet *> *MsduDeaggregation::deaggregateFrame(Packet *aggregatedFrame)
 {
-    std::vector<Ieee80211DataFrame *> *frames = new std::vector<Ieee80211DataFrame *>();
-    Ieee80211AMsdu *aMsdu = check_and_cast<Ieee80211AMsdu *>(frame->getEncapsulatedPacket());
-    int tid = frame->getTid();
-    int numOfSubframes = aMsdu->getSubframesArraySize();
-    for (int i = 0; i < numOfSubframes; i++)
+    std::vector<Packet *> *frames = new std::vector<Packet *>();
+    const auto& amsduHeader = aggregatedFrame->popAtFront<Ieee80211DataHeader>();
+    aggregatedFrame->popAtBack<Ieee80211MacTrailer>();
+    int tid = amsduHeader->getTid();
+    int paddingLength = 0;
+    cStringTokenizer tokenizer(aggregatedFrame->getName(), "+");
+    while (aggregatedFrame->getDataLength() > b(0))
     {
-        Ieee80211MsduSubframe msduSubframe = aMsdu->getSubframes(i);
-        cPacket *msdu = msduSubframe.decapsulate();
-        Ieee80211DataFrame *dataFrame = nullptr;
-        // TODO: review, restore snap header, see Ieee80211MsduSubframe
-        dataFrame = (msduSubframe.getEtherType() != -1) ? new Ieee80211DataFrameWithSNAP(msduSubframe.getName()) : new Ieee80211DataFrame(msduSubframe.getName());
-        dataFrame->setType(ST_DATA_WITH_QOS);
-        dataFrame->addBitLength(QOSCONTROL_BITS);
-        dataFrame->setTransmitterAddress(msduSubframe.getSa());
-        dataFrame->setToDS(frame->getToDS());
-        dataFrame->setFromDS(frame->getFromDS());
-        dataFrame->setTid(tid);
-        // TODO: review, restore snap header, see Ieee80211MsduSubframe
-        if (auto dataFrameWithSnap = dynamic_cast<Ieee80211DataFrameWithSNAP*>(dataFrame))
-            dataFrameWithSnap->setEtherType(msduSubframe.getEtherType());
-        dataFrame->encapsulate(msdu);
-        setExplodedFrameAddress(dataFrame, &msduSubframe, frame);
-        frames->push_back(dataFrame);
+        aggregatedFrame->setFrontOffset(aggregatedFrame->getFrontOffset() + B(paddingLength == 4 ? 0 : paddingLength));
+        const auto& msduSubframeHeader = aggregatedFrame->popAtFront<Ieee80211MsduSubframeHeader>();
+        const auto& msdu = aggregatedFrame->peekDataAt(b(0), B(msduSubframeHeader->getLength()));
+        paddingLength = 4 - B(msduSubframeHeader->getChunkLength() + msdu->getChunkLength()).get() % 4;
+        aggregatedFrame->setFrontOffset(aggregatedFrame->getFrontOffset() + msdu->getChunkLength());
+        auto frame = new Packet();
+        frame->setName(tokenizer.nextToken());
+        frame->insertAtBack(msdu);
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setType(ST_DATA_WITH_QOS);
+        header->setChunkLength(header->getChunkLength() + QOSCONTROL_PART_LENGTH);
+        header->setToDS(amsduHeader->getToDS());
+        header->setFromDS(amsduHeader->getFromDS());
+        header->setTid(tid);
+        setExplodedFrameAddress(header, msduSubframeHeader, amsduHeader);
+        frame->insertAtFront(header);
+        frame->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        frames->push_back(frame);
     }
-    delete frame;
+    delete aggregatedFrame;
     return frames;
 }
 

@@ -19,8 +19,7 @@
 #ifndef __INET_INETWORKPROTOCOL_H
 #define __INET_INETWORKPROTOCOL_H
 
-#include "inet/networklayer/contract/INetworkProtocolControlInfo.h"
-#include "inet/networklayer/contract/NetworkProtocolCommand_m.h"
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 
@@ -31,10 +30,6 @@ class INET_API INetworkProtocol
 {
   public:
     virtual ~INetworkProtocol() {}
-
-//    virtual INetworkLayerControlInfo *createControlInfo() = 0;
-
-//    virtual Address resolveAddress(const char * address) = 0;
 };
 
 } // namespace inet

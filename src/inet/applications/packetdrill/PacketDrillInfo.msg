@@ -16,11 +16,13 @@
 //
 
 
+import inet.common.INETDefs;
+
 message PacketDrillInfo
 {
     simtime_t scriptTime;
     simtime_t scriptTimeEnd;
     simtime_t offset;
-    uint16 timeType;
+    uint16_t timeType;
     simtime_t liveTime;
 }

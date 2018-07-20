@@ -1,3 +1,84 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-04-25  Zoltan Bojthe
+
+	Refactored to use the new UdpSocket interface.
+
+2018-03-21  Zoltan Bojthe
+
+	Added missing units for zero values.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-02-05  Zoltan Bojthe
+
+	Renamed signals:
+		pk -> packetSent
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-02  Levente Mészáros
+
+	Replaced cPacket with Packet.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IPv4 -> Ipv4
+	    IPv4Address -> Ipv4Address
+	    IPv6 -> Ipv6
+	    UDP -> Udp
+	    UDPBasicApp -> UdpBasicApp
+	    UDPBasicBurst -> UdpBasicBurst
+	    UDPControlInfo -> UdpControlInfo
+	    UDPEchoApp -> UdpEchoApp
+	    UDPSink -> UdpSink
+	    UDPSocket -> UdpSocket
+	    UDPVideoStreamCli -> UdpVideoStreamClient
+	    UDPVideoStreamSvr -> UdpVideoStreamServer
+
+2017-12-15  Zoltan Bojthe
+
+	Removed unnecessary cPar::doubleValue(), cPar::stringValue(), cPar::boolValue(), cPar::longValue() calls.
+
+	Motivation: rely on cast operators instead because they can detect
+	overflows (when the value is cast to a smaller integer type that can not
+	represent it). Removed unnecessary .longvalue() calls. Replaced to
+	.intValue() in comparisons.
+
+2017-12-14  Levente Mészáros
+
+	Removed unnecessary markImmutable() calls.
+
+2017-12-07  Levente Mészáros
+
+	App: Added CreationTimeTag support to UdpBasicApp and TcpSessionApp.
+
+2017-11-16  Levente Mészáros
+
+	Replaced all remaining dropPk* signals with packetDrop signal.
+
+2017-11-16  Levente Mészáros
+
+	Moved rcvdPkSignal and sentPkSignal into Simsignals.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-04-03  Zoltan Bojthe
+
+	Fixed the parsing of destaddresses parameter in UDPBasicApp.
+
+2016-06-02  Levente Mészáros
+
+	Changed applications to implement the new IApp interface.
+	Renamed gates to socketIn/socketOut.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

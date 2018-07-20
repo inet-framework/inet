@@ -19,7 +19,7 @@
 #define __INET_SCENARIOMANAGER_H
 
 #include "inet/common/INETDefs.h"
-
+#include "inet/common/lifecycle/LifecycleController.h"
 #include "inet/common/scenario/IScriptable.h"
 
 namespace inet {
@@ -27,7 +27,7 @@ namespace inet {
 /**
  * Scenario Manager (experimental) which executes a script specified in XML.
  * ScenarioManager has a few built-in commands such as \<set-param>,
- * \<set-channel-attr>, etc, and can pass commands to modules that implement
+ * \<set-channel-param>, etc, and can pass commands to modules that implement
  * the IScriptable interface. The \<at> built-in command can be used to
  * group commands to be carried out at the same simulation time.
  *
@@ -43,9 +43,10 @@ class INET_API ScenarioManager : public cSimpleModule
     int numChanges = 0;
     int numDone = 0;
 
+    LifecycleController lifecycleController;
+
   protected:
     // utilities
-    const char *getRequiredAttribute(cXMLElement *node, const char *attr);
     virtual cModule *getRequiredModule(cXMLElement *node, const char *attr);
     virtual cGate *getRequiredGate(cXMLElement *node, const char *modattr, const char *gateattr);
     void createConnection(cXMLElementList& paramList, cChannelType *channelType,
@@ -57,12 +58,13 @@ class INET_API ScenarioManager : public cSimpleModule
     // command processors
     virtual void processAtCommand(cXMLElement *node);
     virtual void processSetParamCommand(cXMLElement *node);
-    virtual void processSetChannelAttrCommand(cXMLElement *node);
+    virtual void processSetChannelParamCommand(cXMLElement *node);
     virtual void processCreateModuleCommand(cXMLElement *node);
     virtual void processDeleteModuleCommand(cXMLElement *node);
     virtual void processConnectCommand(cXMLElement *node);
     virtual void processDisconnectCommand(cXMLElement *node);
     virtual void processModuleSpecificCommand(cXMLElement *node);
+    virtual void processLifecycleCommand(cXMLElement *node);
 
   public:
     ScenarioManager() {}

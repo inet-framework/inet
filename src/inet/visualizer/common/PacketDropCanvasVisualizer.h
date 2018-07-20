@@ -34,22 +34,24 @@ class INET_API PacketDropCanvasVisualizer : public PacketDropVisualizerBase
         LabeledIconFigure *figure;
 
       public:
-        PacketDropCanvasVisualization(LabeledIconFigure *figure, int moduleId, const cPacket *packet, const Coord& position);
-        virtual ~PacketDropCanvasVisualization() { delete figure; }
+        PacketDropCanvasVisualization(LabeledIconFigure *figure, const PacketDrop *packetDrop);
+        virtual ~PacketDropCanvasVisualization();
     };
 
   protected:
     double zIndex = NaN;
     const CanvasProjection *canvasProjection = nullptr;
     cGroupFigure *packetDropGroup = nullptr;
+    double dx = NaN;
+    double dy = NaN;
 
   protected:
     virtual void initialize(int stage) override;
     virtual void refreshDisplay() const override;
 
-    virtual const PacketDropVisualization *createPacketDropVisualization(cModule *module, cPacket *packet) const override;
-    virtual void addPacketDropVisualization(const PacketDropVisualization *packetDrop) override;
-    virtual void removePacketDropVisualization(const PacketDropVisualization *packetDrop) override;
+    virtual const PacketDropVisualization *createPacketDropVisualization(PacketDrop *packetDrop) const override;
+    virtual void addPacketDropVisualization(const PacketDropVisualization *packetDropVisualization) override;
+    virtual void removePacketDropVisualization(const PacketDropVisualization *packetDropVisualization) override;
     virtual void setAlpha(const PacketDropVisualization *packetDrop, double alpha) const override;
 };
 

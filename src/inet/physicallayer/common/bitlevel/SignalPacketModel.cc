@@ -21,16 +21,10 @@ namespace inet {
 
 namespace physicallayer {
 
-SignalPacketModel::SignalPacketModel(const cPacket *packet, const BitVector *serializedPacket, bps bitrate) :
+SignalPacketModel::SignalPacketModel(const Packet *packet, bps bitrate) :
     packet(packet),
-    serializedPacket(serializedPacket),
     bitrate(bitrate)
 {
-}
-
-SignalPacketModel::~SignalPacketModel()
-{
-    delete serializedPacket;
 }
 
 std::ostream& SignalPacketModel::printToStream(std::ostream& stream, int level) const
@@ -41,15 +35,13 @@ std::ostream& SignalPacketModel::printToStream(std::ostream& stream, int level) 
     return stream;
 }
 
-TransmissionPacketModel::TransmissionPacketModel(const cPacket *packet, const BitVector *serializedPacket, bps bitrate) :
-    SignalPacketModel(packet, serializedPacket, bitrate)
+TransmissionPacketModel::TransmissionPacketModel(const Packet *packet, bps bitrate) :
+    SignalPacketModel(packet, bitrate)
 {
 }
 
-ReceptionPacketModel::ReceptionPacketModel(const cPacket *packet, const BitVector *serializedPacket, bps bitrate, double per, bool packetErrorless) :
-    SignalPacketModel(packet, serializedPacket, bitrate),
-    per(per),
-    packetErrorless(packetErrorless)
+ReceptionPacketModel::ReceptionPacketModel(const Packet *packet, bps bitrate) :
+    SignalPacketModel(packet, bitrate)
 {
 }
 

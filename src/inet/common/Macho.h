@@ -693,7 +693,7 @@ class MachoLink : public P
 ////////////////////////////////////////////////////////////////////////////////
 // Unique identifier for state S.
 template<class S>
-class StateID
+class StateId
 {
   public:
     static const ID value;
@@ -894,7 +894,7 @@ class _SubstateInstance : public _StateInstance
 
     virtual ID id() override
     {
-        return StateID<S>::value;
+        return StateId<S>::value;
     }
 
     virtual Key key() override
@@ -1935,7 +1935,7 @@ class Machine : public _MachineBase
     friend class Snapshot<TOP>;
 #endif // ifdef MACHO_SNAPSHOTS
 
-    template<class T> friend class StateID;
+    template<class T> friend class StateId;
 
     // Next free identifier for StateInstance objects.
     static ID theStateCount;
@@ -1950,7 +1950,7 @@ ID Machine<TOP>::theStateCount = 1;
 // which allows use as index into a vector for fast access.
 // 'Root' always has zero as id.
 template<class S>
-const ID StateID<S>::value = Machine<typename S::TOP>::theStateCount++;
+const ID StateId<S>::value = Machine<typename S::TOP>::theStateCount++;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Implementation for StateSpecification
@@ -2086,7 +2086,7 @@ template<class C, class P>
 /* static */ inline _StateInstance& MachoLink<C, P>::_getInstance(_MachineBase& machine)
 {
     // Look first in machine for existing StateInstance.
-    _StateInstance *& instance = machine.getInstance(StateID<C>::value);
+    _StateInstance *& instance = machine.getInstance(StateId<C>::value);
     if (!instance)
         // Will create parent StateInstance object if not already created.
         instance = new _SubstateInstance<C>(machine, &P::_getInstance(machine));
@@ -2110,7 +2110,7 @@ template<class C, class P>
 template<class C, class P>
 /* static */ void MachoLink<C, P>::clearHistory(_MachineBase& machine)
 {
-    const _StateInstance *instance = machine.getInstance(StateID<C>::value);
+    const _StateInstance *instance = machine.getInstance(StateId<C>::value);
     if (instance)
         instance->setHistory(0);
 }
@@ -2118,7 +2118,7 @@ template<class C, class P>
 template<class C, class P>
 /* static */ void MachoLink<C, P>::clearHistoryDeep(_MachineBase& machine)
 {
-    const _StateInstance *instance = machine.getInstance(StateID<C>::value);
+    const _StateInstance *instance = machine.getInstance(StateId<C>::value);
     if (instance)
         machine.clearHistoryDeep(Machine<TOP>::theStateCount, *instance);
 }
@@ -2126,7 +2126,7 @@ template<class C, class P>
 template<class C, class P>
 /* static */ Alias MachoLink<C, P>::history(const _MachineBase& machine)
 {
-    const _StateInstance *instance = machine.getInstance(StateID<C>::value);
+    const _StateInstance *instance = machine.getInstance(StateId<C>::value);
     _StateInstance *history = 0;
 
     if (instance)
@@ -2139,7 +2139,7 @@ template<class C, class P>
 /* static */ inline Key MachoLink<C, P>::key()
 {
     static _KeyData k = {
-        _getInstance, isChild, C::_state_name, StateID<C>::value
+        _getInstance, isChild, C::_state_name, StateId<C>::value
     };
     return &k;
 }

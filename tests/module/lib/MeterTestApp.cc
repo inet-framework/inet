@@ -21,7 +21,7 @@
 #include <iomanip>
 
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/ipv4/IPv4Datagram.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 
 using namespace std;
 
@@ -81,8 +81,8 @@ void MeterTestApp::handleMessage(cMessage *msg)
     {
       ostringstream packetName;
       packetName << "packet-" << (++counter);
-      cPacket *packet = new IPv4Datagram(packetName.str().c_str());
-      packet->setByteLength(par("packetSize").longValue());
+      cPacket *packet = new cPacket(packetName.str().c_str());     //FIXME its was created an IPv4Datagram
+      packet->setByteLength(par("packetSize"));
       send(packet, "out");
 
       if ((numPackets == 0 || counter < numPackets) &&

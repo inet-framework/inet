@@ -33,7 +33,7 @@ class INET_API Sphere : public ShapeBase
   public:
     Sphere(double radius);
 
-    const double getRadius() const { return radius; }
+    double getRadius() const { return radius; }
     void setRadius(double radius) { this->radius = radius; }
 
     virtual Coord computeBoundingBoxSize() const override { return Coord(radius * 2, radius * 2, radius * 2); }

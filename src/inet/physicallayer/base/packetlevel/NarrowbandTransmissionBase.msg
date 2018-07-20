@@ -13,19 +13,20 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
+import inet.common.INETDefs;
+import inet.common.Units;
+import inet.physicallayer.base.packetlevel.TransmissionBase;
+
 cplusplus {{
 #include "inet/physicallayer/base/packetlevel/NarrowbandTransmissionBase.h"
 }}
 
 namespace inet::physicallayer;
 
-class noncobject Hz;
-class TransmissionBase extends cObject;
-
 class NarrowbandTransmissionBase extends TransmissionBase
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
-    Hz carrierFrequency @opaque;
-    Hz bandwidth @opaque;
+    Hz carrierFrequency;
+    Hz bandwidth;
 }

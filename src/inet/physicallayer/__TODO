@@ -1,3 +1,4 @@
+ - review dup calls for performance reasons, verify if they are justified
  - extract analog model from transmission/reception to avoid having too many classes
  - always add a PhyFrame, even in the simple case? or better yet rename RadioFrame to PhyFrame and make them the transmission/reception the analog model of it
  - rename speed to velocity (speed is scalar)

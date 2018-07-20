@@ -25,7 +25,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/networklayer/contract/ipv6/IPv6Address.h"
+#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
 
 namespace inet {
 
@@ -61,9 +61,9 @@ class INET_API BindingUpdateList : public cSimpleModule
     class BindingUpdateListEntry
     {
       public:
-        IPv6Address destAddress;    // is the address of the HA or the CN to which the MN has sent a BU message; reference to the key in the map
-        IPv6Address homeAddress;    // Home address of the MN for which that BU was sent.
-        IPv6Address careOfAddress;    // MN's CoA. With this entry teh MN can determine whether it has sent a BU to the destination node with its CoA or not.
+        Ipv6Address destAddress;    // is the address of the HA or the CN to which the MN has sent a BU message; reference to the key in the map
+        Ipv6Address homeAddress;    // Home address of the MN for which that BU was sent.
+        Ipv6Address careOfAddress;    // MN's CoA. With this entry teh MN can determine whether it has sent a BU to the destination node with its CoA or not.
         uint bindingLifetime;    // the initial value of the lifetime field sent in the BU to which this entry corresponds
         simtime_t bindingExpiry;    // the time at which the lifetime of the binding expires
         //uint remainingLifetime;    //initialised from bindingLifetime and is decremented until it reaches zero
@@ -106,7 +106,7 @@ class INET_API BindingUpdateList : public cSimpleModule
     };
 
     friend std::ostream& operator<<(std::ostream& os, const BindingUpdateListEntry& bul);
-    typedef std::map<IPv6Address, BindingUpdateListEntry> BindingUpdateList6;
+    typedef std::map<Ipv6Address, BindingUpdateListEntry> BindingUpdateList6;
     BindingUpdateList6 bindingUpdateList;
 
   public:
@@ -125,13 +125,13 @@ class INET_API BindingUpdateList : public cSimpleModule
     /**
      * Sets entry in the Binding Update List with provided values. If entry does not yet exist, a new one is created.
      */
-    virtual void addOrUpdateBUL(const IPv6Address& dest, const IPv6Address& hoa,
-            const IPv6Address& coa, const uint lifetime, const uint seq, const simtime_t buSentTime);    //,const simtime_t& nextBUSentTime );
+    virtual void addOrUpdateBUL(const Ipv6Address& dest, const Ipv6Address& hoa,
+            const Ipv6Address& coa, const uint lifetime, const uint seq, const simtime_t buSentTime);    //,const simtime_t& nextBUSentTime );
 
     /**
      * Creates a new entry in the BUL for the provided address.
      */
-    virtual BindingUpdateList::BindingUpdateListEntry *createBULEntry(const IPv6Address& dest);
+    virtual BindingUpdateList::BindingUpdateListEntry *createBULEntry(const Ipv6Address& dest);
 
     /**
      * Initializes the values of a BUL entry to initial values.
@@ -142,19 +142,19 @@ class INET_API BindingUpdateList : public cSimpleModule
     /**
      * Sets HoTI and/or CoTI values (transmission time, etc.) for the BUL entry.
      */
-    virtual void addOrUpdateBUL(const IPv6Address& dest, const IPv6Address& hoa,
+    virtual void addOrUpdateBUL(const Ipv6Address& dest, const Ipv6Address& hoa,
             simtime_t sentTime, int cookie, bool isHoTI);    // BU for HoTI/CoTI
 
     /**
      * Returns the BUL entry for a certain destination address.
      */
-    virtual BindingUpdateList::BindingUpdateListEntry *lookup(const IPv6Address& dest);    // checks whether BU exists for given address on provided interface
+    virtual BindingUpdateList::BindingUpdateListEntry *lookup(const Ipv6Address& dest);    // checks whether BU exists for given address on provided interface
 
     /**
      * Similiar to lookup(), but with the difference that this method always returns
      * a valid BUL entry. If none existed prior to the call, a new entry is created.
      */
-    virtual BindingUpdateList::BindingUpdateListEntry *fetch(const IPv6Address& dest);    // checks whether BU exists for given address on provided interface
+    virtual BindingUpdateList::BindingUpdateListEntry *fetch(const Ipv6Address& dest);    // checks whether BU exists for given address on provided interface
 
     //
     // The following methods are related to RR stuff.
@@ -163,55 +163,55 @@ class INET_API BindingUpdateList : public cSimpleModule
     /**
      * Returns the current mobility state for the CN identified by the provided IP address.
      */
-    virtual MobilityState getMobilityState(const IPv6Address& dest) const;
+    virtual MobilityState getMobilityState(const Ipv6Address& dest) const;
 
     /**
      * Sets the mobility state to provided state for the CN identified by the provided IP address.
      */
-    virtual void setMobilityState(const IPv6Address& dest, BindingUpdateList::MobilityState state);
+    virtual void setMobilityState(const Ipv6Address& dest, BindingUpdateList::MobilityState state);
 
     /**
      * Generates the Binding Authorization Data based on a certain destination address and CoA.
      */
-    virtual int generateBAuthData(const IPv6Address& dest, const IPv6Address& CoA);
+    virtual int generateBAuthData(const Ipv6Address& dest, const Ipv6Address& CoA);
 
     /**
      * Generates the key Kbm from home and care-of keygen token.
      * For now, this return the sum of both tokens.
      */
-    virtual int generateKey(int homeToken, int careOfToken, const IPv6Address& CoA);
+    virtual int generateKey(int homeToken, int careOfToken, const Ipv6Address& CoA);
 
     /**
      * Generates a home token from the provided parameters.
      * Returns a static value for now.
      */
-    virtual int generateHomeToken(const IPv6Address& HoA, int nonce);
+    virtual int generateHomeToken(const Ipv6Address& HoA, int nonce);
 
     /**
      * Generates a care-of token from the provided parameters.
      * Returns a static value for now.
      */
-    virtual int generateCareOfToken(const IPv6Address& CoA, int nonce);
+    virtual int generateCareOfToken(const Ipv6Address& CoA, int nonce);
 
     /**
      * Resets the token to UNDEFINED.
      */
-    virtual void resetHomeToken(const IPv6Address& dest, const IPv6Address& hoa);
+    virtual void resetHomeToken(const Ipv6Address& dest, const Ipv6Address& hoa);
 
     /**
      * Resets the token to UNDEFINED.
      */
-    virtual void resetCareOfToken(const IPv6Address& dest, const IPv6Address& hoa);
+    virtual void resetCareOfToken(const Ipv6Address& dest, const Ipv6Address& hoa);
 
     /**
      * Returns true if a home keygen token is available.
      */
-    virtual bool isHomeTokenAvailable(const IPv6Address& dest, InterfaceEntry *ie);
+    virtual bool isHomeTokenAvailable(const Ipv6Address& dest, InterfaceEntry *ie);
 
     /**
      * Returns true if a care-of keygen token is available.
      */
-    virtual bool isCareOfTokenAvailable(const IPv6Address& dest, InterfaceEntry *ie);
+    virtual bool isCareOfTokenAvailable(const Ipv6Address& dest, InterfaceEntry *ie);
 
     //
     // Additional methods
@@ -221,59 +221,59 @@ class INET_API BindingUpdateList : public cSimpleModule
      * Checks whether there exists an entry in the BUL for the given
      * destination address.
      */
-    virtual bool isInBindingUpdateList(const IPv6Address& dest) const;    // 10.9.07 - CB
+    virtual bool isInBindingUpdateList(const Ipv6Address& dest) const;    // 10.9.07 - CB
 
     /**
      * Returns the last used sequence number for the given dest. address.
      */
-    virtual uint getSequenceNumber(const IPv6Address& dest);    // 10.9.07 - CB
+    virtual uint getSequenceNumber(const Ipv6Address& dest);    // 10.9.07 - CB
 
     /**
      * Returns the CoA that was registered for the provided dest. address.
      */
-    virtual const IPv6Address& getCoA(const IPv6Address& dest);    // 24.9.07 - CB
+    virtual const Ipv6Address& getCoA(const Ipv6Address& dest);    // 24.9.07 - CB
 
     /**
      * Checks whether there exists an entry in the BUL for the given
      * destination address and home address.
      */
-    virtual bool isInBindingUpdateList(const IPv6Address& dest, const IPv6Address& HoA);    // 20.9.07 - CB
+    virtual bool isInBindingUpdateList(const Ipv6Address& dest, const Ipv6Address& HoA);    // 20.9.07 - CB
 
     /**
      * Returns true if a binding has been acknowledged and it's lifetime
      * has not yet expired.
      */
-    virtual bool isValidBinding(const IPv6Address& dest);
+    virtual bool isValidBinding(const Ipv6Address& dest);
 
     /**
      * Returns true if a binding is about to expire.
      */
-    virtual bool isBindingAboutToExpire(const IPv6Address& dest);
+    virtual bool isBindingAboutToExpire(const Ipv6Address& dest);
 
     /**
      * Returns true if a binding update has been sent to and acknowledged by
      * the provided destination address and the lifetime has not yet expired.
      */
-    virtual bool sentBindingUpdate(const IPv6Address& dest);
+    virtual bool sentBindingUpdate(const Ipv6Address& dest);
 
     /**
      * Deletes an entry from the binding update list for the provided
      * destination address.
      */
-    virtual void removeBinding(const IPv6Address& dest);
+    virtual void removeBinding(const Ipv6Address& dest);
 
     /**
      * Sets the state of the binding cache entry to "not usable".
      * Resets the BAck flag to false, etc.
      */
-    virtual void suspendBinding(const IPv6Address& dest);
+    virtual void suspendBinding(const Ipv6Address& dest);
 
     /**
      * These two methods indicate whether a CoTI or HoTI message
      * has been recently sent to the CN identified by parameter dest.
      */
-    virtual bool recentlySentCOTI(const IPv6Address& dest, InterfaceEntry *ie);
-    virtual bool recentlySentHOTI(const IPv6Address& dest, InterfaceEntry *ie);
+    virtual bool recentlySentCOTI(const Ipv6Address& dest, InterfaceEntry *ie);
+    virtual bool recentlySentHOTI(const Ipv6Address& dest, InterfaceEntry *ie);
 
   protected:
     /**

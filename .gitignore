@@ -38,6 +38,15 @@ precompiled_*.h.*
 *.sca
 *.vec
 *.vci
+*.aux
+*.bbl
+*.blg
+*.idx
+*.toc
+*.pdf
+*.ilg
+*.ind
+*.synctex.gz
 .buildlog*
 
 # ignore binary files

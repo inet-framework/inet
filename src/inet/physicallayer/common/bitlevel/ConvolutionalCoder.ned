@@ -17,7 +17,7 @@
 
 package inet.physicallayer.common.bitlevel;
 
-import inet.physicallayer.contract.bitlevel.IFECCoder;
+import inet.physicallayer.contract.bitlevel.IFecCoder;
 
 // Transfer function (octal) matrix
 // ================================
@@ -64,7 +64,7 @@ import inet.physicallayer.contract.bitlevel.IFECCoder;
 // The encoding process works in accordance with the industry-standards and starts
 // in the all-zeros state.
 //
-module ConvolutionalCoder like IFECCoder
+module ConvolutionalCoder like IFecCoder
 {
     parameters:
         string transferFunctionMatrix = default("133 171");

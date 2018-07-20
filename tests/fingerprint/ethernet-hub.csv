@@ -1,14 +1,14 @@
-# workingdir,                        args,                                          simtimelimit,    fingerprint
-.,                                   -f ethernet-hub.ini -r 0,                     ,                 5d56-ca3a/tplx
-.,                                   -f ethernet-hub.ini -r 1,                     ,                 66fe-9abf/tplx
-.,                                   -f ethernet-hub.ini -r 2,                     ,                 df62-e002/tplx
-.,                                   -f ethernet-hub.ini -r 3,                     ,                 406b-58b5/tplx
-.,                                   -f ethernet-hub.ini -r 4,                     ,                 f248-54ad/tplx
-.,                                   -f ethernet-hub.ini -r 5,                     ,                 9b55-8e81/tplx
-.,                                   -f ethernet-hub.ini -r 6,                     ,                 194a-0040/tplx
-.,                                   -f ethernet-hub.ini -r 7,                     ,                 8a64-f71d/tplx
-.,                                   -f ethernet-hub.ini -r 8,                     ,                 08b2-32b0/tplx
-.,                                   -f ethernet-hub.ini -r 9,                     ,                 91ea-e5f3/tplx
-.,                                   -f ethernet-hub.ini -r 10,                    ,                 6578-d621/tplx
-.,                                   -f ethernet-hub.ini -r 11,                    ,                 79f7-1040/tplx
-#.,                                   -f ethernet-hub.ini -r 12,                    ,                 0000-0000/tplx
+# working directory, command line arguments, simulation time limit, fingerprint, expected result, tags
+.,                                   -f ethernet-hub.ini -r 0,                     ,                 f9cc-b4b1/tplx, PASS,
+.,                                   -f ethernet-hub.ini -r 1,                     ,                 e06d-d078/tplx, PASS,
+.,                                   -f ethernet-hub.ini -r 2,                     ,                 64d9-4dc6/tplx, PASS,
+.,                                   -f ethernet-hub.ini -r 3,                     ,                 4a5a-a7d0/tplx, PASS,
+.,                                   -f ethernet-hub.ini -r 4,                     ,                 a47c-1856/tplx, PASS,
+.,                                   -f ethernet-hub.ini -r 5,                     ,                 3737-0eeb/tplx, PASS,
+.,                                   -f ethernet-hub.ini -r 6,                     ,                 a9f5-79dc/tplx, PASS,
+.,                                   -f ethernet-hub.ini -r 7,                     ,                 a2a9-fd88/tplx, PASS,
+.,                                   -f ethernet-hub.ini -r 8,                     ,                 b4dc-ea96/tplx, PASS,
+.,                                   -f ethernet-hub.ini -r 9,                     ,                 82d1-7e60/tplx, PASS,
+.,                                   -f ethernet-hub.ini -r 10,                    ,                 ff26-ba15/tplx, PASS,
+.,                                   -f ethernet-hub.ini -r 11,                    ,                 d4dd-993a/tplx, PASS,
+# .,                                   -f ethernet-hub.ini -r 12,                    ,                 0000-0000/tplx, PASS,

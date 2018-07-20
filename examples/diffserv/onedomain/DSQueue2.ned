@@ -19,10 +19,10 @@
 package inet.examples.diffserv.onedomain;
 
 import inet.common.queue.DropTailQueue;
-import inet.common.queue.FIFOQueue;
+import inet.common.queue.FifoQueue;
 import inet.common.queue.IOutputQueue;
-import inet.common.queue.REDDropper;
-import inet.common.queue.WRRScheduler;
+import inet.common.queue.RedDropper;
+import inet.common.queue.WrrScheduler;
 import inet.networklayer.diffserv.BehaviorAggregateClassifier;
 
 
@@ -38,20 +38,20 @@ module DSQueue2 like IOutputQueue
     submodules:
         classifier: BehaviorAggregateClassifier {
             dscps = "AF11 AF12 AF13";
-            @display("p=50,181");
+            @display("p=100,200");
         }
-        red: REDDropper {
+        red: RedDropper {
             numGates = 3;
-            @display("p=142,94");
+            @display("p=250,100");
         }
-        afQueue: FIFOQueue {
-            @display("p=266,94");
+        afQueue: FifoQueue {
+            @display("p=400,100");
         }
         beQueue: DropTailQueue {
-            @display("p=204,277");
+            @display("p=325,300");
         }
-        wrr: WRRScheduler {
-            @display("p=347,181");
+        wrr: WrrScheduler {
+            @display("p=550,200");
         }
     connections:
         in --> classifier.in;

@@ -1,0 +1,24 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-01-05  Zoltan Bojthe
+
+	Renamed NF_* signals to use camel case.
+	Renamed signal variables to *Signal.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    AARFRateControl -> AarfRateControl
+	    ARFRateControl -> ArfRateControl
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-04-20  Levente Mészáros
+
+	Refactored to use the new Packet API.

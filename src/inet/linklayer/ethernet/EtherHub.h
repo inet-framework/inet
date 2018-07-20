@@ -36,7 +36,6 @@ class INET_API EtherHub : public cSimpleModule, protected cListener
 
     // statistics
     long numMessages;    // number of messages handled
-    static simsignal_t pkSignal;
 
   protected:
     virtual void initialize() override;

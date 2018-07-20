@@ -1,3 +1,162 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-25  Zoltan Bojthe
+
+	CRC insertion calculates CRC only when crcMode is CRC_COMPUTED.
+
+2018-06-20  Zoltan Bojthe
+
+	Fixed CreationTimeTag.
+	Added fragmentation check to SctpNatHook.
+
+2018-06-18  Zoltan Bojthe
+
+	CrcInsertion doesn't calculate CRC for fragmented packets and forwarded packets.
+
+2018-06-12  Zoltan Bojthe
+
+	Fixed SctpHeaderSerializer to fill all unfilled bytes.
+
+2018-06-12  Zoltan Bojthe
+
+	Renamed SctpSerializer to SctpHeaderSerializer.
+
+2018-06-01  Zoltan Bojthe
+
+	Added B/b units to length constants and length fields of chunks.
+
+2018-05-18  Zoltan Bojthe
+
+	Moved CRC calculation code to SctpChecksum.cc.
+
+2018-05-15  Levente Mészáros
+
+	Removed sendRawBytes parameter, this parameter is supposed to be part of the physical layer.
+
+2018-05-11  Zoltan Bojthe
+
+	Remove unneeded headers, rename defs.h to Endian.h and moved to common.
+
+2018-05-10  Zoltan Bojthe
+
+	Moved header serializers to the corresponding protocol folders.
+
+2018-04-18  Zoltan Bojthe
+
+	Fixed bug where SctpHeader* was cast to Ptr<SctpHeader>.
+
+2018-04-11  Zoltan Bojthe
+
+	Fixed bug where cPacket is needed for encapsulation, but 'rt' was a cMessage.
+	Fixed bug related to it++, it doesn't work correctly after list::erase(it).
+
+2018-03-14  Zoltan Bojthe
+
+	Added SctpProtocolPrinter.
+
+2018-03-09  Zoltan Bojthe
+
+	Added SctpProtocolDissector.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-02-27  Irene Ruengeler
+
+	Changed PacketDrill and improve data handling.
+
+2018-02-19  Zoltan Bojthe
+
+	Renamed functions to use camel case.
+
+2018-01-25  Levente Mészáros
+
+	Replaced cMessage with Request and Indication subclasses of Message.
+
+	The reason is that cMessage doesn't support the tags API used by INET.
+
+2018-01-24  Levente Mészáros
+
+	Adapted registerProtocol calls to the new API based on OSI service primitives.
+
+2018-01-23  Irene Ruengeler
+
+	Renamed to SCTPAssociationRcvMessage.cc.
+
+2018-01-22  Irene Ruengeler
+
+	Adapted SCTP to the new Packet API.
+
+2018-01-22  Irene Ruengeler
+
+	Adapted SCTP serializer to the new Packet API.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-12  Zoltan Bojthe
+
+	Fixed double and int inconsistency: NED vs. INI and NED vs. C++
+
+2017-12-21  Irene Ruengeler
+
+	Fixed retransmission bugs:
+
+	The transmission counter was not advanced when the data was timer based retransmitted.
+	When fast recovery was active and the cumulative TSN advanced, the miss indications were not increased.
+	In PacketDrill the counting of Gap Reports was fixed.
+	A PacketDrill test to test fast Retransmissions was added.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-15  Zoltan Bojthe
+
+	Remove unnecessary cPar::stringValue(), cPar::boolValue(), cPar::longValue() calls.
+
+	Motivation: rely on cast operators instead because they can detect
+	overflows (when the value is cast to a smaller integer type that can not
+	represent it). Removed unnecessary .longvalue() calls. Replaced to
+	.intValue() in comparisons.
+
+2017-11-21  Levente Mészáros
+
+	Changed MSG files to use the canonical syntax.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2016-07-20  Zoltan Bojthe
+
+	Replace deprecated cQueue functions: operator(), length(), empty().
+
+2016-06-14  Levente Mészáros
+
+	Added missing registerProtocol() call.
+
+2016-06-14  Levente Mészáros
+
+	Dropped vector gates from appIn/appOut and ipIn/ipOut.
+	This patch prepares for using SCTP with the MessageDispatcher node infrastructure.
+
+2015-08-28  Zoltan Bojthe
+
+	Replaced numeric constants with existing constant identifiers.
+
+2016-06-14  Levente Mészáros
+
+	Renamed input/output gates according to other transport protocols.
+	Renamed from_appl/to_appl to appIn/appOut. Renamed from_ip/to_ip to ipIn/ipOut.
+	Renamed assocId to socketId in SCTPCommand.
+
+2016-05-02  Levente Mészáros
+
+	Added new registerProtocol() calls.
+
+2016-04-29  Levente Mészáros
+
+	Dropped obsolete IPSocket.registerProtocol() calls.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

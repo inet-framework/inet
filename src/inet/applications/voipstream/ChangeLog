@@ -1,3 +1,73 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-04-27  Zoltan Bojthe
+
+	Refactored to use the new UdpSocket interface.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-01-19  Zoltan Bojthe
+
+	Removed customization from ByteArray.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2018-01-02  Levente Mészáros
+
+	Replaced cPacket with Packet.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    RTP -> Rtp
+	    UDPControlInfo -> UdpControlInfo
+	    UDPSocket -> UdpSocket
+	    VoIPStreamPacket -> VoipStreamPacket
+	    VoIPStreamPacketType -> VoipStreamPacketType
+	    VoIPStreamReceiver -> VoipStreamReceiver
+	    VoIPStreamSender -> VoipStreamSender
+
+2017-12-15  Zoltan Bojthe
+
+	Remove unnecessary cPar::stringValue() calls.
+
+2017-12-14  Levente Mészáros
+
+	Removed unnecessary markImmutable() calls.
+
+2017-12-11  Zoltan Bojthe
+
+	Updated for new msgc function names: getFooForUpdate, insertFoo, eraseFoo, etc.
+
+2017-11-16  Levente Mészáros
+
+	Replaced all remaining dropPk* signals with packetDrop signal.
+
+2017-11-16  Levente Mészáros
+
+	Moved rcvdPkSignal and sentPkSignal into Simsignals.
+
+2017-11-14  Zoltan Bojthe
+
+	Replaced "int foo @enum(FooEnum)" to FooEnum foo.
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2016-06-02  Levente Mészáros
+
+	Changed applications to implement the new IApp interface.
+	Renamed gates to socketIn/socketOut.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

@@ -40,15 +40,14 @@ class INET_API Ieee80211TransmitterBase : public FlatTransmitterBase
   protected:
     virtual void initialize(int stage) override;
 
-    virtual const IIeee80211Mode *computeTransmissionMode(const TransmissionRequest *transmissionRequest) const;
-    virtual const Ieee80211Channel *computeTransmissionChannel(const TransmissionRequest *transmissionRequest) const;
-    virtual W computeTransmissionPower(const TransmissionRequest *transmissionRequest) const;
-
   public:
     Ieee80211TransmitterBase();
     virtual ~Ieee80211TransmitterBase();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+
+    virtual const IIeee80211Mode *computeTransmissionMode(const Packet *packet) const;
+    virtual const Ieee80211Channel *computeTransmissionChannel(const Packet *packet) const;
 
     virtual void setModeSet(const Ieee80211ModeSet *modeSet);
     virtual void setMode(const IIeee80211Mode *mode);

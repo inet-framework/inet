@@ -15,16 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/queue/OrdinalBasedDuplicator.h"
-
 #include "inet/common/INETUtils.h"
+#include "inet/common/queue/OrdinalBasedDuplicator.h"
+#include "inet/common/Simsignals.h"
 
 namespace inet {
 
 Define_Module(OrdinalBasedDuplicator);
 
-simsignal_t OrdinalBasedDuplicator::rcvdPkSignal = registerSignal("rcvdPk");
-simsignal_t OrdinalBasedDuplicator::sentPkSignal = registerSignal("sentPk");
 simsignal_t OrdinalBasedDuplicator::duplPkSignal = registerSignal("duplPk");
 
 void OrdinalBasedDuplicator::initialize()
@@ -53,14 +51,14 @@ void OrdinalBasedDuplicator::handleMessage(cMessage *msg)
 {
     numPackets++;
 
-    emit(rcvdPkSignal, msg);
+    emit(packetReceivedSignal, msg);
 
     if (generateFurtherDuplicates) {
         if (numPackets == duplicatesVector[0]) {
             EV << "DuplicatesGenerator: Duplicating packet number " << numPackets << " " << msg << endl;
             cMessage *dupmsg = utils::dupPacketAndControlInfo(msg);
             emit(duplPkSignal, dupmsg);
-            emit(sentPkSignal, dupmsg);
+            emit(packetSentSignal, dupmsg);
             send(dupmsg, "out");
             numDuplicated++;
             duplicatesVector.erase(duplicatesVector.begin());
@@ -70,7 +68,7 @@ void OrdinalBasedDuplicator::handleMessage(cMessage *msg)
             }
         }
     }
-    emit(sentPkSignal, msg);
+    emit(packetSentSignal, msg);
     send(msg, "out");
 }
 

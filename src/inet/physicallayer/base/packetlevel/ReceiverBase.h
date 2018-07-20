@@ -31,6 +31,10 @@ class INET_API ReceiverBase : public cModule, public virtual IReceiver
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
+    virtual W computeSignalPower(const IListening *listening, const ISnir *snir, const IInterference *interference) const;
+
+    virtual Packet *computeReceivedPacket(const ISnir *snir, bool isReceptionSuccessful) const;
+
   public:
     ReceiverBase() { }
 
@@ -42,17 +46,8 @@ class INET_API ReceiverBase : public cModule, public virtual IReceiver
     virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override;
     virtual bool computeIsReceptionAttempted(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference) const override;
 
-    virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISNIR *snir) const override;
-    virtual const IReceptionResult *computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISNIR *snir) const override;
-
-    /**
-     * Returns an empty reception indication (control info).
-     *
-     * This function called from computeReceptionIndication().
-     */
-    virtual ReceptionIndication *createReceptionIndication() const;
-
-    virtual const ReceptionIndication *computeReceptionIndication(const ISNIR *snir) const override;
+    virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const override;
+    virtual const IReceptionResult *computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const override;
 };
 
 } // namespace physicallayer

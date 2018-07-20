@@ -6,7 +6,7 @@
 
 package inet.examples.voip;
 
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
 import inet.node.internetcloud.InternetCloud;
 import ned.DatarateChannel;
@@ -17,7 +17,6 @@ import ned.DatarateChannel;
 //
 network Voip
 {
-    @display("bgb=327,282");
     types:
         channel C extends DatarateChannel
         {
@@ -27,17 +26,17 @@ network Voip
     submodules:
         senderHost: StandardHost {
             parameters:
-                @display("p=63,94");
+                @display("p=250,100");
         }
         receiverHost: StandardHost {
             parameters:
-                @display("p=260,94");
+                @display("p=650,100");
         }
-        configurator: IPv4NetworkConfigurator {
-            @display("p=126,20");
+        configurator: Ipv4NetworkConfigurator {
+            @display("p=100,100;is=s");
         }
         internetCloud: InternetCloud {
-            @display("p=157,218");
+            @display("p=450,100;is=vl");
         }
     connections:
         senderHost.pppg++ <--> C <--> internetCloud.pppg++;

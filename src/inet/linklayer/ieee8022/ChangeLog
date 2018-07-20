@@ -1,0 +1,61 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-05-10  Zoltan Bojthe
+
+	Moved header serializers to the corresponding protocol folders.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-03-08  Zoltan Bojthe
+
+	Added Ieee8022LlcProtocolPrinter.
+
+2018-03-06  Zoltan Bojthe
+
+	Added Ieee8022LlcProtocolDissector.
+
+2018-02-13  Levente Mészáros
+
+	Factored out reusable getProtocol for LLC header.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-10-19  Levente Mészáros
+
+	Fixed handling packets with bit errors.
+
+2017-09-13  Levente Mészáros
+
+	Renamed protocol to ieee8022 and protocol group to ieee8022protocol.
+
+2017-09-12  Zoltan Bojthe
+
+	Switched to using new ethernet header structures.
+
+2017-09-12  Zoltan Bojthe
+
+	Added support for 4 bytes LLC header.
+
+2017-09-12  Zoltan Bojthe
+
+	Renamed ethernet, llc and snap headers.
+
+2017-05-09  Levente Mészáros
+
+	Added Ieee8022LlcHeaderSerializer.
+
+2017-05-09  Levente Mészáros
+
+	Added Ieee8022Llc module.

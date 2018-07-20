@@ -15,34 +15,38 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 
-//
-// Required for MACAddress declarations
-//
+import inet.common.INETDefs;
+import inet.common.packet.chunk.Chunk;
+import inet.linklayer.common.FcsMode;
+import inet.linklayer.common.MacAddress;
+
 cplusplus {{
-#include "inet/linklayer/common/MACAddress.h"
-#include "inet/linklayer/common/Ieee802Ctrl_m.h" // for ~EtherType
 #include "inet/common/BitVector.h"
 }}
 
-class noncobject MACAddress;
-class noncobject BitVector;
+namespace inet;
 
-enum EtherType;
+class BitVector
+{
+    @existingClass;
+    @opaque;
+    @toString(.toString());
+}
 
 namespace inet::ieee80211;
 
 cplusplus {{
-const unsigned int LENGTH_RTS = 160;    //bits
-const unsigned int LENGTH_CTS = 112;    //bits
-const unsigned int LENGTH_ACK = 112;    //bits
-const unsigned int LENGTH_MGMT = 28 * 8;    //bits
-const unsigned int LENGTH_ADDBAREQ = LENGTH_MGMT + 9*8; // mgmt length + action body length
-const unsigned int LENGTH_BASIC_BLOCKACK = (16 + 2 + (2 + 128) + 4) * 8; // header + ba control + ba information + fcs
-const unsigned int DATAFRAME_HEADER_MINLENGTH = 28 * 8;    //bits without QoS, without Address4, without SNAP: 2 + 2 + 3*6(addresses) + 2 + 4(crc)
-const unsigned int QOSCONTROL_BITS = 2 * 8;    // QoS Control field length (bits)
-const unsigned int SNAP_HEADER_BYTES = 8;
+const b LENGTH_RTS = b(160);    //bits
+const b LENGTH_CTS = b(112);    //bits
+const b LENGTH_ACK = b(112);    //bits
+const b LENGTH_MGMT = B(28);    //bits
+const b LENGTH_ADDBAREQ = LENGTH_MGMT + B(9); // mgmt length + action body length
+const b LENGTH_BASIC_BLOCKACK = B(16 + 2 + (2 + 128) + 4); // header + ba control + ba information + fcs
+const b DATAFRAME_HEADER_MINLENGTH = B(2 + 2 + 3 * 6 + 2);    //bits without QoS, without Address4: 2 + 2 + 3*6(addresses) + 2
+const b QOSCONTROL_PART_LENGTH = b(2 * 8);    // QoS Control field length (bits)
 const short int MAX_NUM_FRAGMENTS = 16;
-const unsigned int LENGTH_A_MSDU_SUBFRAME_HEADER = 14 * 8; //48 + 48 + 16 bits
+const b LENGTH_A_MSDU_SUBFRAME_HEADER = B(14); //48 + 48 + 16 bits
+const b LENGTH_A_MPDU_SUBFRAME_HEADER = b(4 + 12 + 8 + 8);
 }}
 
 //
@@ -93,6 +97,13 @@ enum AckPolicy
     BLOCK_ACK = 3;
 }
 
+class Ieee80211MacTrailer extends FieldsChunk
+{
+    chunkLength = B(4);
+    uint32_t fcs = 0;
+    FcsMode fcsMode = FCS_MODE_UNDEFINED;
+}
+
 //
 // The common part of 802.11 frames.
 //
@@ -101,10 +112,10 @@ enum AckPolicy
 // Frame control format fields not supported by this model are omitted:
 // MoreFlag, PowerMgmt, MoreData, WEP, Order.
 //
-packet Ieee80211Frame
+class Ieee80211MacHeader extends FieldsChunk
 {
-    byteLength = LENGTH_ACK / 8;
-    short type @enum(Ieee80211FrameType); // type and subtype
+    chunkLength = LENGTH_ACK - B(4);
+    Ieee80211FrameType type; // type and subtype
     bool toDS;
     bool fromDS;
     bool retry;
@@ -112,60 +123,60 @@ packet Ieee80211Frame
     // TODO: rename to durationField (levy)
     simtime_t duration = -1; // "duration" in the Duration/ID field (-1=no duration)
     short AID = -1;          // "id" (Association ID) in the Duration/ID field (-1=no ID)
-    MACAddress receiverAddress; // aka address1
+    MacAddress receiverAddress; // aka address1
     simtime_t MACArrive;    // FIXME remove it, technical data, used inside of MAC module
 }
 
 //
 // Format of a 802.11 frame with address1 present, like ACK and CTS
 //
-packet Ieee80211OneAddressFrame extends Ieee80211Frame
+class Ieee80211OneAddressHeader extends Ieee80211MacHeader
 {
 }
 
 //
 // Format of the 802.11 ACK frame
 //
-packet Ieee80211ACKFrame extends Ieee80211OneAddressFrame
+class Ieee80211AckFrame extends Ieee80211OneAddressHeader
 {
-    byteLength = LENGTH_ACK / 8;
+    chunkLength = LENGTH_ACK - B(4);
     type = ST_ACK;
 }
 
 //
 // Format of a 802.11 frame with address1 and address2 present
 //
-packet Ieee80211TwoAddressFrame extends Ieee80211OneAddressFrame
+class Ieee80211TwoAddressHeader extends Ieee80211OneAddressHeader
 {
-    byteLength = LENGTH_RTS / 8;
-    MACAddress transmitterAddress; // aka address2
+    chunkLength = LENGTH_RTS - B(4);
+    MacAddress transmitterAddress; // aka address2
 }
 
 //
 // Format of the 802.11 RTS frame
 //
-packet Ieee80211RTSFrame extends Ieee80211TwoAddressFrame
+class Ieee80211RtsFrame extends Ieee80211TwoAddressHeader
 {
-    byteLength = LENGTH_RTS / 8;
+    chunkLength = LENGTH_RTS - B(4);
     type = ST_RTS;
 }
 
 //
 // Format of the 802.11 CTS frame
 //
-packet Ieee80211CTSFrame extends Ieee80211OneAddressFrame
+class Ieee80211CtsFrame extends Ieee80211OneAddressHeader
 {
-    byteLength = LENGTH_CTS / 8;
+    chunkLength = LENGTH_CTS - B(4);
     type = ST_CTS;
 }
 
 //
 // Common base class for 802.11 data and management frames
 //
-packet Ieee80211DataOrMgmtFrame extends Ieee80211TwoAddressFrame
+class Ieee80211DataOrMgmtHeader extends Ieee80211TwoAddressHeader
 {
-    byteLength = LENGTH_MGMT / 8;
-    MACAddress address3;
+    chunkLength = LENGTH_MGMT - B(4);
+    MacAddress address3;
     short fragmentNumber;
     uint16 sequenceNumber;
 }
@@ -173,79 +184,69 @@ packet Ieee80211DataOrMgmtFrame extends Ieee80211TwoAddressFrame
 //
 // Format of the 802.11 data frame
 //
-packet Ieee80211DataFrame extends Ieee80211DataOrMgmtFrame
+class Ieee80211DataHeader extends Ieee80211DataOrMgmtHeader
 {
 //  The presence of the Address 4 field is determined by the setting of the To DS and From DS subfields of
 //  the Frame Control field (see below). The QoS Control field is present when the QoS subfield of the Subtype
 //  field is set to 1 (8.3.2.1 Data frame format)
-//  FIXME: byteLength is not a constant value (DATAFRAME_HEADER_MINLENGTH / 8 = 28).
-//  For example, with Address 4 and without QoS the correct length is 34 bytes.
-//  Without Address 4 and QoS the correct value is indeed 28.
-//  With Address 4 and QoS the correct value is indeed 36.
-    byteLength = DATAFRAME_HEADER_MINLENGTH / 8;
+//  FIXME: chunkLength is not a constant value DATAFRAME_HEADER_MINLENGTH (24 bytes).
+//  For example, with Address 4 and without QoS the correct length is 30 bytes.
+//  Without Address 4 and QoS the correct value is indeed 24 bytes.
+//  With Address 4 and QoS the correct value is indeed 32 bytes.
+    chunkLength = DATAFRAME_HEADER_MINLENGTH;
     type = ST_DATA;         // or ST_DATA_WITH_QOS
-    MACAddress address4;    // optional field, exists when toDS and fromDS are true
-    uint16 qos;             // TODO nobody uses this currently, only its parts like tid below... 
-    int ackPolicy @enum(AckPolicy); //FIXME in real life this is part of the optional qos field above...
-    uint8 tid; //FIXME in real life this is part of the optional qos field above...
-    bool aMsduPresent = false; // 8.2.4.5.9 A-MSDU Present subfield FIXME in real life this is part of the optional qos field above...
+    MacAddress address4;    // optional field, exists when toDS and fromDS are true
+    AckPolicy ackPolicy = NORMAL_ACK;
+    uint8 tid;              // optional field, exists when type == ST_DATA_WITH_QOS
+    bool aMsduPresent = false; // 8.2.4.5.9 A-MSDU Present subfield
 }
 
 //TODO this can be introduced when the SNAP header 
-//packet Ieee80211QoSDataFrame extends Ieee80211DataFrame
+//class Ieee80211QoSDataHeader extends Ieee80211DataHeader
 //{
 //    type = ST_DATA_WITH_QOS;
-//    byteLength = (DATAFRAME_HEADER_MINLENGTH + QOSCONTROL_BITS) / 8;
-//    int ackPolicy @enum(AckPolicy); //FIXME in real life this is part of the optional qos field above...
+//    chunkLength = DATAFRAME_HEADER_MINLENGTH + QOSCONTROL_PART_LENGTH;
+//    AckPolicy ackPolicy = NORMAL_ACK; //FIXME in real life this is part of the optional qos field above...
 //    uint8 tid;
 //    // TODO: other QoS control field parts
 //}
 
 //
-// 802.11 data frame with the 8-byte SNAP header (AA AA 03, 00 00 00, <2-byte ~EtherType>)
-//
-packet Ieee80211DataFrameWithSNAP extends Ieee80211DataFrame
-{
-    byteLength = DATAFRAME_HEADER_MINLENGTH / 8 + SNAP_HEADER_BYTES; // TODO: LLC(SNAP) headers should be in a separate packet
-    int etherType @enum(EtherType);
-}
-
-//
 // Base class for 802.11 management frames (subclasses will add frame body contents)
 //
-packet Ieee80211ManagementFrame extends Ieee80211DataOrMgmtFrame
+class Ieee80211MgmtHeader extends Ieee80211DataOrMgmtHeader
 {
 }
 
 // 8.3.3.13 Action frame format -- mgmt frame with subtype action
-packet Ieee80211ActionFrame extends Ieee80211ManagementFrame
+class Ieee80211ActionFrame extends Ieee80211MgmtHeader
 {
     type = ST_ACTION;
     short category;
     // TODO: subclasses will add action subfield contents
-    //short action @enum(WirelessNetworkManagementAction); // action TODO: remove it
+    //WirelessNetworkManagementAction action; // action TODO: remove it
 }
 
-packet Ieee80211MsduSubframe
+class Ieee80211MsduSubframeHeader extends FieldsChunk
 {
-    bitLength = LENGTH_A_MSDU_SUBFRAME_HEADER; // + snap header if necessary
-    MACAddress sa; // source addr.
-    MACAddress da; // destination addr.
+    chunkLength = LENGTH_A_MSDU_SUBFRAME_HEADER;
+    MacAddress sa; // source addr.
+    MacAddress da; // destination addr.
     int length;
-    int etherType @enum(EtherType); // TODO: review optional snap header (the standard does not define it: Figure 8-32—A-MSDU subframe structure) 
 }
 
-packet Ieee80211AMsdu
+class Ieee80211MpduSubframeHeader extends FieldsChunk
 {
-    Ieee80211MsduSubframe subframes[];
+    chunkLength = LENGTH_A_MPDU_SUBFRAME_HEADER;
+    int length;
 }
 
 //
 // Table 8-203—ADDBA Request frame Action field format -- 736p.
 //
-packet Ieee80211AddbaRequest extends Ieee80211ActionFrame
+class Ieee80211AddbaRequest extends Ieee80211ActionFrame
 {
-    byteLength = LENGTH_ADDBAREQ / 8;
+    chunkLength = LENGTH_ADDBAREQ - B(4);
     category = 3; // representing Block Ack
     int blockAckAction = 0; // representing ADDBA request
     int dialogToken = 1; // nonzero, arbitrary
@@ -270,9 +271,9 @@ packet Ieee80211AddbaRequest extends Ieee80211ActionFrame
 
 }
 
-packet Ieee80211AddbaResponse extends Ieee80211ActionFrame
+class Ieee80211AddbaResponse extends Ieee80211ActionFrame
 {
-    // byteLength TODO
+    // chunkLength TODO
     category = 3; // representing Block Ack
     int blockAckAction = 1; // representing ADDBA response
     int dialogToken = 1; // The Dialog Token field value is copied from the corresponding received ADDBA Request frame.
@@ -294,9 +295,9 @@ packet Ieee80211AddbaResponse extends Ieee80211ActionFrame
 //
 // 8.5.5.4 DELBA frame format
 //
-packet Ieee80211Delba extends Ieee80211ActionFrame
+class Ieee80211Delba extends Ieee80211ActionFrame
 {
-    // byteLength TODO
+    // chunkLength TODO
     category = 3;
     int blockAckAction = 2; // representing DELBA
 
@@ -314,14 +315,12 @@ packet Ieee80211Delba extends Ieee80211ActionFrame
     int reasonCode;
 }
 
-
-
 //
 // 8.3.1.8 BlockAckReq frame format
 //
-packet Ieee80211BlockAckReq extends Ieee80211TwoAddressFrame
+class Ieee80211BlockAckReq extends Ieee80211TwoAddressHeader
 {
-    // byteLength TODO
+    // chunkLength TODO
     // The RA field of the BlockAck frame is the address of the recipient STA that requested the Block Ack.
     // The TA field is the address of the STA transmitting the BlockAck frame.
     type = ST_BLOCKACK_REQ;
@@ -331,9 +330,9 @@ packet Ieee80211BlockAckReq extends Ieee80211TwoAddressFrame
     bool barAckPolicy; // 0-Normal Acknowledgment, 1-No Acknowledgment.
 }
 
-packet Ieee80211BasicBlockAckReq extends Ieee80211BlockAckReq
+class Ieee80211BasicBlockAckReq extends Ieee80211BlockAckReq
 {
-    // byteLength TODO
+    // chunkLength TODO
 
     int tidInfo; //  The TID_INFO subfield of the BAR Control field of the Basic BlockAckReq frame contains the TID for which a Basic BlockAck frame is requested.
 
@@ -348,10 +347,9 @@ packet Ieee80211BasicBlockAckReq extends Ieee80211BlockAckReq
     compressedBitmap = 0;
 }
 
-
-packet Ieee80211CompressedBlockAckReq extends Ieee80211BlockAckReq
+class Ieee80211CompressedBlockAckReq extends Ieee80211BlockAckReq
 {
-    // byteLength TODO
+    // chunkLength TODO
 
     int tidInfo; // The TID_INFO subfield of the BAR Control field of the Compressed BlockAckReq frame contains the TID for which a BlockAck frame is requested.
 
@@ -371,9 +369,9 @@ packet Ieee80211CompressedBlockAckReq extends Ieee80211BlockAckReq
     compressedBitmap = 1;
 }
 
-packet Ieee80211MultiTidBlockAckReq extends Ieee80211BlockAckReq
+class Ieee80211MultiTidBlockAckReq extends Ieee80211BlockAckReq
 {
-    // byteLength TODO
+    // chunkLength TODO
     // The RA field of the BlockAck frame is the address of the recipient STA that requested the Block Ack.
     // The TA field is the address of the STA transmitting the BlockAck frame.
     type = ST_BLOCKACK_REQ;
@@ -389,13 +387,12 @@ packet Ieee80211MultiTidBlockAckReq extends Ieee80211BlockAckReq
     // TODO: unimplemented
 }
 
-
 //
 // 8.3.1.9 BlockAck frame format -- 410p.
 //
-packet Ieee80211BlockAck extends Ieee80211TwoAddressFrame
+class Ieee80211BlockAck extends Ieee80211TwoAddressHeader
 {
-    // byteLength TODO
+    // chunkLength TODO
     // The RA field of the BlockAck frame is the address of the recipient STA that requested the Block Ack.
     // The TA field is the address of the STA transmitting the BlockAck frame.
     type = ST_BLOCKACK;
@@ -411,9 +408,9 @@ packet Ieee80211BlockAck extends Ieee80211TwoAddressFrame
 //
 // 8.3.1.9.2 Basic BlockAck variant -- 411p.
 //
-packet Ieee80211BasicBlockAck extends Ieee80211BlockAck
+class Ieee80211BasicBlockAck extends Ieee80211BlockAck
 {
-    // byteLength TODO
+    chunkLength = LENGTH_BASIC_BLOCKACK - B(4);
     multiTid = 0;
     compressedBitmap = 0;
 
@@ -439,9 +436,9 @@ packet Ieee80211BasicBlockAck extends Ieee80211BlockAck
 //
 // 8.3.1.9.3 Compressed BlockAck variant
 //
-packet Ieee80211CompressedBlockAck extends Ieee80211BlockAck
+class Ieee80211CompressedBlockAck extends Ieee80211BlockAck
 {
-    // byteLength TODO
+    // chunkLength TODO
     multiTid = 0;
     compressedBitmap = 1;
 
@@ -460,9 +457,9 @@ packet Ieee80211CompressedBlockAck extends Ieee80211BlockAck
 //
 // 8.3.1.9.4 Multi-TID BlockAck variant
 //
-packet Ieee80211MultiTidBlockAck extends Ieee80211BlockAck
+class Ieee80211MultiTidBlockAck extends Ieee80211BlockAck
 {
-    // byteLength TODO
+    // chunkLength TODO
     multiTid = 1;
     compressedBitmap = 1;
 

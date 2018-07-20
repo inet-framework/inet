@@ -45,7 +45,7 @@ simple EtherBus
                            // of numbers separated by spaces. If there are too
                            // few values, the distance between the last two positions
                            // is repeated, or 5 meters is used.
-        double propagationSpeed @unit("mps") = default(200000000mps); // signal propagation speed on the bus
+        double propagationSpeed @unit(mps) = default(200000000mps); // signal propagation speed on the bus
     gates:
         inout ethg[] @labels(EtherFrame-conn);  // to stations; each one represents a tap
 }

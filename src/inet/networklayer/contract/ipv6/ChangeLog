@@ -1,0 +1,72 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-01  Zoltan Bojthe
+
+	Added B/b units to length constants and length fields of chunks.
+
+2018-05-09  Zoltan Bojthe
+
+	Implemented bind() and connect().
+
+2018-05-09  Levente Mészáros
+
+	Extended INetworkSockets and implementations with local/remote address filter.
+
+2018-05-07  Levente Mészáros
+
+	Changed all network sockets to implement the new INetworkSocket interface.
+	Separated setCallback from setUserData in all sockets.
+
+2018-05-04  Levente Mészáros
+
+	Added Ipv6Socket.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-02-12  Zoltan Bojthe
+
+	Added toString for some address descriptor.
+
+2018-01-15  Levente Mészáros
+
+	Moved extension headers under ipv6 folder.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IPv4 -> Ipv4
+	    IPv6 -> Ipv6
+	    IPv6Address -> Ipv6Address
+	    IPv6AddressType -> Ipv6AddressType
+	    IPv6ExtHeaderInd -> Ipv6ExtHeaderInd
+	    IPv6ExtHeaderReq -> Ipv6ExtHeaderReq
+	    IPv6ExtHeaderTagBase -> Ipv6ExtHeaderTagBase
+	    IPv6ExtHeaderTagBase_Base -> Ipv6ExtHeaderTagBase_Base
+	    IPv6Header -> Ipv6Header
+	    IPv6InterfaceData -> Ipv6InterfaceData
+
+2017-12-11  Zoltan Bojthe
+
+	Updated for new msgc function names: getFooForUpdate, insertFoo, eraseFoo, etc.
+
+2017-12-07  Zoltan Bojthe
+
+	Camelized property names in MSG files.
+
+2017-06-28  Zoltan Bojthe
+
+	Switched to using pointer in IPv6ExtHeaderTagBase MSG file.
+
+2017-10-19  Zoltan Bojthe
+
+	Added IPv6Address.msg file.
+
+2017-10-20  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-16  ------ inet-3.99.1 released ------

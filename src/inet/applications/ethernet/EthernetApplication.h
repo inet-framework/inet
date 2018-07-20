@@ -2,7 +2,7 @@
  ******************************************************
  * @file EthernetApplication.h
  * @brief Simple traffic generator.
- * It generates Etherapp requests and responses. Based in EtherAppCli and EtherAppSrv.
+ * It generates Etherapp requests and responses. Based in EtherAppClient and EtherAppServer.
  *
  * @author Juan Luis Garrote Molinero
  * @version 1.0
@@ -14,7 +14,8 @@
 #define __INET_ETHERNETAPPLICATION_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/linklayer/common/MACAddress.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/common/MacAddress.h"
 
 namespace inet {
 
@@ -32,14 +33,11 @@ class INET_API EthernetApplication : public cSimpleModule
     cPar *respLength = nullptr;
     cPar *waitTime = nullptr;
 
-    MACAddress destMACAddress;
+    MacAddress destMACAddress;
 
     // Reception statistics
     long packetsSent = 0;
     long packetsReceived = 0;
-
-    static simsignal_t sentPkSignal;
-    static simsignal_t rcvdPkSignal;
 
   protected:
 
@@ -51,7 +49,7 @@ class INET_API EthernetApplication : public cSimpleModule
     /*
      *	Gets the MAC address in case a host name was set in destAddress parameter
      */
-    virtual MACAddress resolveDestMACAddress();
+    virtual MacAddress resolveDestMACAddress();
 
     /*
      * sendPacket function for the server side
@@ -61,7 +59,7 @@ class INET_API EthernetApplication : public cSimpleModule
     /*
      * sendPacket function for the client side
      */
-    void sendPacket(cMessage *datapacket, const MACAddress& destAddr);
+    void sendPacket(Packet *datapacket, const MacAddress& destAddr);
 
     /*
      * generates response packet. Server side.

@@ -18,19 +18,17 @@
 #ifndef __INET_MEDIUMVISUALIZERBASE_H
 #define __INET_MEDIUMVISUALIZERBASE_H
 
+#include "inet/common/packet/PacketFilter.h"
 #include "inet/physicallayer/contract/packetlevel/IRadioMedium.h"
 #include "inet/visualizer/base/VisualizerBase.h"
 #include "inet/visualizer/util/ColorSet.h"
-#include "inet/visualizer/util/Placement.h"
 #include "inet/visualizer/util/InterfaceFilter.h"
 #include "inet/visualizer/util/NetworkNodeFilter.h"
-#include "inet/visualizer/util/PacketFilter.h"
+#include "inet/visualizer/util/Placement.h"
 
 namespace inet {
 
 namespace visualizer {
-
-using namespace inet::physicallayer;
 
 class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
 {
@@ -45,7 +43,7 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
   protected:
     /** @name Parameters */
     //@{
-    IRadioMedium *radioMedium = nullptr;
+    physicallayer::IRadioMedium *radioMedium = nullptr;
     NetworkNodeFilter networkNodeFilter;
     InterfaceFilter interfaceFilter;
     PacketFilter packetFilter;
@@ -57,12 +55,12 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
     double signalTransmissionAnimationSpeed = NaN;
     double signalTransmissionAnimationTime = NaN;
     double signalAnimationSpeedChangeTime = NaN;
-    bool displayTransmissions = false;
-    bool displayReceptions = false;
-    Placement transmissionPlacementHint;
-    Placement receptionPlacementHint;
-    double transmissionPlacementPriority;
-    double receptionPlacementPriority;
+    bool displaySignalDepartures = false;
+    bool displaySignalArrivals = false;
+    Placement signalDeparturePlacementHint;
+    Placement signalArrivalPlacementHint;
+    double signalDeparturePlacementPriority;
+    double signalArrivalPlacementPriority;
     bool displayInterferenceRanges = false;
     cFigure::Color interferenceRangeLineColor;
     cFigure::LineStyle interferenceRangeLineStyle;
@@ -83,21 +81,21 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
     virtual void initialize(int stage) override;
     virtual void handleParameterChange(const char *name) override;
 
-    virtual bool isSignalPropagationInProgress(const ITransmission *transmission) const;
-    virtual bool isSignalTransmissionInProgress(const ITransmission *transmission) const;
+    virtual bool isSignalPropagationInProgress(const physicallayer::ITransmission *transmission) const;
+    virtual bool isSignalTransmissionInProgress(const physicallayer::ITransmission *transmission) const;
 
-    virtual bool matchesTransmission(const ITransmission *transmission) const;
+    virtual bool matchesTransmission(const physicallayer::ITransmission *transmission) const;
 
-    virtual void radioAdded(const IRadio *radio) = 0;
-    virtual void radioRemoved(const IRadio *radio) = 0;
+    virtual void handleRadioAdded(const physicallayer::IRadio *radio) = 0;
+    virtual void handleRadioRemoved(const physicallayer::IRadio *radio) = 0;
 
-    virtual void transmissionAdded(const ITransmission *transmission) = 0;
-    virtual void transmissionRemoved(const ITransmission *transmission) = 0;
+    virtual void handleSignalAdded(const physicallayer::ITransmission *transmission) = 0;
+    virtual void handleSignalRemoved(const physicallayer::ITransmission *transmission) = 0;
 
-    virtual void transmissionStarted(const ITransmission *transmission) = 0;
-    virtual void transmissionEnded(const ITransmission *transmission) = 0;
-    virtual void receptionStarted(const IReception *reception) = 0;
-    virtual void receptionEnded(const IReception *reception) = 0;
+    virtual void handleSignalDepartureStarted(const physicallayer::ITransmission *transmission) = 0;
+    virtual void handleSignalDepartureEnded(const physicallayer::ITransmission *transmission) = 0;
+    virtual void handleSignalArrivalStarted(const physicallayer::IReception *reception) = 0;
+    virtual void handleSignalArrivalEnded(const physicallayer::IReception *reception) = 0;
 
   public:
     virtual ~MediumVisualizerBase();

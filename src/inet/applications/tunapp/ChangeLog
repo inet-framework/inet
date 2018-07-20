@@ -1,3 +1,60 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-05-07  Levente Mészáros
+
+	Refactored to use the new TunSocket interface.
+	Replaced L3Socket with Ipv4Socket in TunnelApp.
+
+2018-05-02  Zoltan Bojthe
+
+	Refactored TunnelApp to use ISocket, SocketMap.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-02-19  Zoltan Bojthe
+
+	Switched to using addTag() because all tags absent after clearTags().
+
+2018-02-19  Zoltan Bojthe
+
+	Fixed TunnelApp bug related to incoming packet protocol detection.
+
+2018-01-18  Levente Mészáros
+
+	Replaced packet tags API calls to use the new API.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    UDPControlInfo -> UdpControlInfo
+	    UDPSocket -> UdpSocket
+
+2017-11-16  Levente Mészáros
+
+	Moved rcvdPkSignal and sentPkSignal into Simsignals.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2017-10-10  Zoltan Bojthe
+
+	Fixed swapping of src/dest addresses and ports.
+
+2017-07-05  Levente Mészáros
+
+	Fixed network/transport header handling.
+
+2016-06-03  Levente Mészáros
+
+	Added a new tunnel application that works with TUN interfaces.
+
+2016-06-03  Levente Mészáros
+
+	Updated TunLoopbackApp to work with a TunSocket using the new IApp interface.
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

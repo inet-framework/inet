@@ -21,16 +21,18 @@
 
 #include "inet/applications/ethernet/EtherTrafGen.h"
 
-#include "inet/linklayer/common/Ieee802Ctrl.h"
-#include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/linklayer/common/Ieee802SapTag_m.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
 
 namespace inet {
 
 Define_Module(EtherTrafGen);
-
-simsignal_t EtherTrafGen::sentPkSignal = registerSignal("sentPk");
-simsignal_t EtherTrafGen::rcvdPkSignal = registerSignal("rcvdPk");
 
 EtherTrafGen::EtherTrafGen()
 {
@@ -54,7 +56,8 @@ void EtherTrafGen::initialize(int stage)
         sendInterval = &par("sendInterval");
         numPacketsPerBurst = &par("numPacketsPerBurst");
         packetLength = &par("packetLength");
-        etherType = par("etherType");
+        ssap = par("ssap");
+        dsap = par("dsap");
 
         seqNum = 0;
         WATCH(seqNum);
@@ -94,22 +97,22 @@ void EtherTrafGen::handleMessage(cMessage *msg)
         scheduleNextPacket(simTime());
     }
     else
-        receivePacket(check_and_cast<cPacket *>(msg));
+        receivePacket(check_and_cast<Packet *>(msg));
 }
 
 bool EtherTrafGen::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if ((NodeStartOperation::Stage)stage == NodeStartOperation::STAGE_APPLICATION_LAYER && isGenerator())
+        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_APPLICATION_LAYER && isGenerator())
             scheduleNextPacket(-1);
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if ((NodeShutdownOperation::Stage)stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER)
+        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_APPLICATION_LAYER)
             cancelNextPacket();
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if ((NodeCrashOperation::Stage)stage == NodeCrashOperation::STAGE_CRASH)
+        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH)
             cancelNextPacket();
     }
     else
@@ -135,7 +138,7 @@ void EtherTrafGen::scheduleNextPacket(simtime_t previous)
         timerMsg->setKind(START);
     }
     else {
-        next = previous + sendInterval->doubleValue();
+        next = previous + *sendInterval;
         timerMsg->setKind(NEXT);
     }
     if (stopTime < SIMTIME_ZERO || next < stopTime)
@@ -147,9 +150,9 @@ void EtherTrafGen::cancelNextPacket()
     cancelEvent(timerMsg);
 }
 
-MACAddress EtherTrafGen::resolveDestMACAddress()
+MacAddress EtherTrafGen::resolveDestMACAddress()
 {
-    MACAddress destMACAddress;
+    MacAddress destMACAddress;
     const char *destAddress = par("destAddress");
     if (destAddress[0]) {
         // try as mac address first, then as a module
@@ -170,36 +173,37 @@ MACAddress EtherTrafGen::resolveDestMACAddress()
 
 void EtherTrafGen::sendBurstPackets()
 {
-    int n = numPacketsPerBurst->longValue();
+    int n = *numPacketsPerBurst;
     for (int i = 0; i < n; i++) {
         seqNum++;
 
         char msgname[40];
         sprintf(msgname, "pk-%d-%ld", getId(), seqNum);
 
-        cPacket *datapacket = new cPacket(msgname, IEEE802CTRL_DATA);
+        Packet *datapacket = new Packet(msgname, IEEE802CTRL_DATA);
+        long len = *packetLength;
+        const auto& payload = makeShared<ByteCountChunk>(B(len));
+        datapacket->insertAtBack(payload);
+        datapacket->removeTagIfPresent<PacketProtocolTag>();
+//        datapacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(nullptr);
+        datapacket->addTagIfAbsent<MacAddressReq>()->setDestAddress(destMACAddress);
+        auto sapTag = datapacket->addTagIfAbsent<Ieee802SapReq>();
+        sapTag->setSsap(ssap);
+        sapTag->setDsap(dsap);
 
-        long len = packetLength->longValue();
-        datapacket->setByteLength(len);
-
-        Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
-        etherctrl->setEtherType(etherType);
-        etherctrl->setDest(destMACAddress);
-        datapacket->setControlInfo(etherctrl);
-
-        EV_INFO << "Send packet `" << msgname << "' dest=" << destMACAddress << " length=" << len << "B type=" << etherType << "\n";
-        emit(sentPkSignal, datapacket);
+        EV_INFO << "Send packet `" << msgname << "' dest=" << destMACAddress << " length=" << len << "B ssap/dsap=" << ssap << "/" << dsap << "\n";
+        emit(packetSentSignal, datapacket);
         send(datapacket, "out");
         packetsSent++;
     }
 }
 
-void EtherTrafGen::receivePacket(cPacket *msg)
+void EtherTrafGen::receivePacket(Packet *msg)
 {
     EV_INFO << "Received packet `" << msg->getName() << "' length= " << msg->getByteLength() << "B\n";
 
     packetsReceived++;
-    emit(rcvdPkSignal, msg);
+    emit(packetReceivedSignal, msg);
     delete msg;
 }
 

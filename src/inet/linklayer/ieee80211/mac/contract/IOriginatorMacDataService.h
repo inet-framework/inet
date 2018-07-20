@@ -26,13 +26,12 @@ namespace ieee80211 {
 class INET_API IOriginatorMacDataService
 {
     public:
-        typedef std::vector<Ieee80211DataOrMgmtFrame *> Fragments;
+        virtual ~IOriginatorMacDataService() { }
 
-    public:
-        virtual Fragments *extractFramesToTransmit(PendingQueue *pendingQueue) = 0;
+        virtual std::vector<Packet *> *extractFramesToTransmit(PendingQueue *pendingQueue) = 0;
 };
 
-} /* namespace ieee80211 */
-} /* namespace inet */
+} // namespace ieee80211
+} // namespace inet
 
 #endif // ifndef __INET_IORIGINATORMACDATASERVICE_H

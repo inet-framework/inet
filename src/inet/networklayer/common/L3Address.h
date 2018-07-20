@@ -20,9 +20,9 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
-#include "inet/networklayer/contract/ipv6/IPv6Address.h"
-#include "inet/linklayer/common/MACAddress.h"
+#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
+#include "inet/networklayer/contract/ipv6/Ipv6Address.h"
+#include "inet/linklayer/common/MacAddress.h"
 #include "inet/networklayer/common/ModuleIdAddress.h"
 #include "inet/networklayer/common/ModulePathAddress.h"
 
@@ -36,7 +36,7 @@ class IL3AddressType;
  * different address implementations should not subclass this class, they should rather provide
  * conversions to and from this class.
  *
- * @see IPv4Address, IPv6Address, MACAddress, ModulePathAddress, ModuleIdAddress
+ * @see Ipv4Address, Ipv6Address, MacAddress, ModulePathAddress, ModuleIdAddress
  */
 class INET_API L3Address
 {
@@ -60,22 +60,24 @@ class INET_API L3Address
 
   public:
     L3Address() { set(NONE, 0); }
+    L3Address(const L3Address& other) : hi(other.hi), lo(other.lo) { }
     explicit L3Address(const char *str) { tryParse(str); }
-    L3Address(const IPv4Address& addr) { set(addr); }
-    L3Address(const IPv6Address& addr) { set(addr); }
-    L3Address(const MACAddress& addr) { set(addr); }
+    L3Address(const Ipv4Address& addr) { set(addr); }
+    L3Address(const Ipv6Address& addr) { set(addr); }
+    L3Address(const MacAddress& addr) { set(addr); }
     L3Address(const ModuleIdAddress& addr) { set(addr); }
     L3Address(const ModulePathAddress& addr) { set(addr); }
 
-    void set(const IPv4Address& addr) { set(IPv4, addr.getInt()); }
-    void set(const IPv6Address& addr);
-    void set(const MACAddress& addr) { set(MAC, addr.getInt()); }
+    void set(const Ipv4Address& addr) { set(IPv4, addr.getInt()); }
+    void set(const Ipv6Address& addr);
+    void set(const MacAddress& addr) { set(MAC, addr.getInt()); }
     void set(const ModuleIdAddress& addr) { set(MODULEID, addr.getId()); }
     void set(const ModulePathAddress& addr) { set(MODULEPATH, addr.getId()); }
+    void reset() { set(NONE, 0); }
 
-    IPv4Address toIPv4() const { return getType() == NONE ? IPv4Address() : IPv4Address(get(IPv4)); }
-    IPv6Address toIPv6() const { return getType() == NONE ? IPv6Address() : IPv6Address(hi, lo); }
-    MACAddress toMAC() const { return getType() == NONE ? MACAddress() : MACAddress(get(MAC)); }
+    Ipv4Address toIpv4() const { return getType() == NONE ? Ipv4Address() : Ipv4Address(get(IPv4)); }
+    Ipv6Address toIpv6() const { return getType() == NONE ? Ipv6Address() : Ipv6Address(hi, lo); }
+    MacAddress toMac() const { return getType() == NONE ? MacAddress() : MacAddress(get(MAC)); }
     ModuleIdAddress toModuleId() const { return getType() == NONE ? ModuleIdAddress() : ModuleIdAddress(get(MODULEID)); }
     ModulePathAddress toModulePath() const { return getType() == NONE ? ModulePathAddress() : ModulePathAddress(get(MODULEPATH)); }
 
@@ -95,6 +97,8 @@ class INET_API L3Address
     bool isMulticast() const;
     bool isBroadcast() const;
     bool isLinkLocal() const;
+
+    L3Address& operator=(const L3Address& other) { hi = other.hi; lo = other.lo; return *this; }
 
     bool operator<(const L3Address& other) const;
     bool operator>(const L3Address& other) const { return other < *this; };

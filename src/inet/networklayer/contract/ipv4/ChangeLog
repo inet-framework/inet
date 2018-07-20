@@ -1,0 +1,43 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-05-09  Zoltan Bojthe
+
+	Implemented bind() and connect().
+
+2018-05-09  Levente Mészáros
+
+	Extended INetworkSockets and implementations with local/remote address filter.
+
+2018-05-07  Levente Mészáros
+
+	Changed all network sockets to implement the new INetworkSocket interface.
+	Separated setCallback from setUserData in all sockets.
+
+2018-05-04  Levente Mészáros
+
+	Added Ipv4Socket.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    IPAddressVector -> Ipv4AddressVector
+	    IPv4 -> Ipv4
+	    IPv4Address -> Ipv4Address
+	    IPv4AddressType -> Ipv4AddressType
+	    IPv4AddressVector -> Ipv4AddressVector
+
+2017-12-07  Zoltan Bojthe
+
+	Camelized property names in MSG files.
+
+2017-10-19  Zoltan Bojthe
+
+	Added IPv4Address.msg file.
+
+2017-11-16  ------ inet-3.99.1 released ------

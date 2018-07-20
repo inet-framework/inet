@@ -18,6 +18,7 @@
 #ifndef __INET_BASICREASSEMBLY_H
 #define __INET_BASICREASSEMBLY_H
 
+#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mac/common/Ieee80211Defs.h"
 #include "inet/linklayer/ieee80211/mac/contract/IReassembly.h"
 
@@ -28,14 +29,14 @@ class INET_API BasicReassembly : public IReassembly, public cObject
 {
     protected:
         struct Key {
-            MACAddress macAddress;
+            MacAddress macAddress;
             Tid tid;
             SequenceNumber seqNum;
             bool operator == (const Key& o) const { return macAddress == o.macAddress && tid == o.tid && seqNum == o.seqNum; }
             bool operator < (const Key& o) const { return macAddress < o.macAddress || (macAddress == o.macAddress && (tid < o.tid || (tid == o.tid && seqNum < o.seqNum))); }
         };
         struct Value {
-            Ieee80211DataOrMgmtFrame *frame = nullptr; // TODO: is this field really necessary?
+            std::vector<Packet *> fragments;
             uint16_t receivedFragments = 0; // each bit corresponds to a fragment number
             uint16_t allFragments = 0; // bits for all fragments set to one (0..numFragments-1); 0 means unfilled
         };
@@ -43,8 +44,8 @@ class INET_API BasicReassembly : public IReassembly, public cObject
         FragmentsMap fragmentsMap;
     public:
         virtual ~BasicReassembly();
-        virtual Ieee80211DataOrMgmtFrame *addFragment(Ieee80211DataOrMgmtFrame *frame) override;
-        virtual void purge(const MACAddress& address, int tid, int startSeqNumber, int endSeqNumber) override;
+        virtual Packet *addFragment(Packet *packet) override;
+        virtual void purge(const MacAddress& address, int tid, int startSeqNumber, int endSeqNumber) override;
 };
 
 } // namespace ieee80211

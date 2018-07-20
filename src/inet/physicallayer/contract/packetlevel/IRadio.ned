@@ -26,18 +26,18 @@ import inet.physicallayer.contract.packetlevel.IPhysicalLayer;
 // <b>Transmission</b>
 //
 // Upper layers (wireless L2 protocols) can send frames to the radio module.
-// Frames will be encapsulated into RadioFrame messages and distributed to
+// Frames will be encapsulated into Signal messages and distributed to
 // other network nodes within communication range.
 //
 // The global ~IRadioMedium module keeps track of node positions, and knows
 // which nodes are within communication and interference distance of others
 // (neighbour cache). When transmitting, the radio module obtains the neighbour
-// list, and sends a copy of the RadioFrame to each neighbour.
+// list, and sends a copy of the Signal to each neighbour.
 //
 //
 // <b>Reception</b>
 //
-// Received RadioFrame messages get delivered to the radioIn gate of the radio
+// Received Signal messages get delivered to the radioIn gate of the radio
 // module. If it was found to have been received correctly, it gets decapsulated
 // and the frame sent to the upper layer.
 //
@@ -48,11 +48,18 @@ moduleinterface IRadio extends IPhysicalLayer
 {
     parameters:
         @display("i=block/wrxtx");
-        @signal[radioModeChanged](type=long);
-        @signal[listeningChanged];
-        @signal[receptionStateChanged](type=long);
-        @signal[transmissionStateChanged](type=long);
-        @signal[radioChannelChanged](type=long);
+        @signal[radioModeChanged](type=long);    // type=inet::physicallayer::RadioMode
+        @signal[listeningChanged](type=long);    //TODO always emit 0
+        @signal[receptionStateChanged](type=long);    // type=inet::physicallayer::ReceptionState
+        @signal[transmissionStateChanged](type=long);    // type=inet::physicallayer::TransmissionState
+        @signal[radioChannelChanged](type=long);    // the long is the new channel number
+        @signal[receivedSignalPartChanged](type=long);    // type=IRadioSignal::SignalPart
+        @signal[transmittedSignalPartChanged](type=long);    // type=IRadioSignal::SignalPart
+        @signal[transmissionStarted](type=cObject);     // type=ITransmission
+        @signal[transmissionEnded](type=cObject);     // type=ITransmission
+        @signal[receptionStarted](type=cObject);     // type=IReception
+        @signal[receptionEnded](type=cObject);     // type=IReception
     gates:
-        input radioIn @labels(IRadioFrame);
+        input radioIn @labels(ISignal);
 }
+

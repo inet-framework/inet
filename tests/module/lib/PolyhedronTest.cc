@@ -65,8 +65,8 @@ void PolyhedronTest::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
     {
-        const char *strPoints = par("points").stringValue();
-        bool testWithConvexCombations = par("convexCombinationTest").boolValue();
+        const char *strPoints = par("points");
+        bool testWithConvexCombations = par("convexCombinationTest");
         parsePoints(strPoints);
         polyhedron = new Polyhedron(points);
         printFaces();

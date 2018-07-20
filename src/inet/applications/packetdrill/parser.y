@@ -81,6 +81,9 @@
 #include "PacketDrill.h"
 
 
+using namespace inet;
+using namespace inet::sctp;
+
 /* This include of the bison-generated .h file must go last so that we
  * can first include all of the declarations on which it depends.
  */
@@ -123,7 +126,7 @@ static PacketDrillScript *out_script = NULL;
 
 
 /* The test invocation to pass back to parse_and_finalize_config(). */
-struct invocation *invocation;
+Invocation *invocation;
 
 /* This standard callback is invoked by flex when it encounters
  * the end of a file. We return 1 to tell flex to return EOF.
@@ -138,7 +141,7 @@ int yywrap(void)
  * text script file with the given path name and fills in the script
  * object with the parsed representation.
  */
-int parse_script(PacketDrillConfig *config, PacketDrillScript *script, struct invocation *callback_invocation){
+int parse_script(PacketDrillConfig *config, PacketDrillScript *script, Invocation *callback_invocation){
     /* This bison-generated parser is not multi-thread safe, so we
      * have a lock to prevent more than one thread using the
      * parser at the same time. This is useful in the wire server
@@ -173,7 +176,7 @@ int parse_script(PacketDrillConfig *config, PacketDrillScript *script, struct in
     return result ? -1 : 0;
 }
 
-void parse_and_finalize_config(struct invocation *invocation)
+void parse_and_finalize_config(Invocation *invocation)
 {
     invocation->config->parseScriptOptions(invocation->script->getOptionList());
 }
@@ -537,7 +540,7 @@ tcp_packet_spec
         yylineno = @6.first_line;
         printf("<...> for TCP options can only be used with outbound packets");
     }
-    cPacket* pkt = PacketDrill::buildTCPPacket(in_config->getWireProtocol(), direction,
+    Packet *pkt = PacketDrill::buildTCPPacket(in_config->getWireProtocol(), direction,
                                                $2,
                                                $3.start_sequence, $3.payload_bytes,
                                                $4, $5, $6, &error);
@@ -559,7 +562,7 @@ udp_packet_spec
     PacketDrillPacket *outer = $1, *inner = NULL;
 
     enum direction_t direction = outer->getDirection();
-    cPacket* pkt = PacketDrill::buildUDPPacket(in_config->getWireProtocol(), direction, $4, &error);
+    Packet* pkt = PacketDrill::buildUDPPacket(in_config->getWireProtocol(), direction, $4, &error);
     if (direction == DIRECTION_INBOUND)
         pkt->setName("parserInbound");
     else
@@ -576,7 +579,7 @@ sctp_packet_spec
 : packet_prefix MYSCTP ':' sctp_chunk_list {
     PacketDrillPacket *inner = NULL;
     enum direction_t direction = $1->getDirection();
-    cPacket* pkt = PacketDrill::buildSCTPPacket(in_config->getWireProtocol(), direction, $4);
+    Packet* pkt = PacketDrill::buildSCTPPacket(in_config->getWireProtocol(), direction, $4);
     if (pkt) {
         if (direction == DIRECTION_INBOUND)
             pkt->setName("parserInbound");
@@ -1933,10 +1936,10 @@ sockaddr
     SIN_ADDR '=' INET_ADDR '(' MYSTRING ')' '}' {
     if (strcmp($4, "AF_INET") == 0) {
         $$ = new PacketDrillExpression(EXPR_SOCKET_ADDRESS_IPV4);
-        $$->setIp(new L3Address(IPv4Address()));
+        $$->setIp(new L3Address(Ipv4Address()));
     } else if (strcmp($4, "AF_INET6") == 0) {
         $$ = new PacketDrillExpression(EXPR_SOCKET_ADDRESS_IPV6);
-        $$->setIp(new L3Address(IPv6Address()));
+        $$->setIp(new L3Address(Ipv6Address()));
     }
 }
 ;
@@ -2409,4 +2412,7 @@ word_list
     free($2);
 }
 ;
+
+%%
+
 

@@ -13,7 +13,7 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#include "inet/common/ByteArray.h"
+#include "inet/common/ByteArray_m.h"
 
 namespace inet {
 

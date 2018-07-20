@@ -22,7 +22,7 @@
 
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/networklayer/ipv4/IIPv4RoutingTable.h"
+#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 
 namespace inet {
 
@@ -62,7 +62,7 @@ void NetworkInfo::dumpRoutingInfo(cModule *target, const char *filename, bool ap
         throw cRuntimeError("cannot open `%s' for write", filename);
 
     if (compat)
-        s << "Kernel IPv4 routing table" << endl;
+        s << "Kernel Ipv4 routing table" << endl;
     s << "Destination     Gateway         Genmask         ";
     if (compat)
         s << "Flags ";
@@ -75,9 +75,9 @@ void NetworkInfo::dumpRoutingInfo(cModule *target, const char *filename, bool ap
     if (rtmod) {
         std::vector<std::string> lines;
 
-        IIPv4RoutingTable *rt = check_and_cast<IIPv4RoutingTable *>(rtmod);
+        IIpv4RoutingTable *rt = check_and_cast<IIpv4RoutingTable *>(rtmod);
         for (int i = 0; i < rt->getNumRoutes(); i++) {
-            IPv4Address dest = rt->getRoute(i)->getDestination();
+            Ipv4Address dest = rt->getRoute(i)->getDestination();
 
             if (dest.isMulticast())
                 continue;
@@ -85,14 +85,14 @@ void NetworkInfo::dumpRoutingInfo(cModule *target, const char *filename, bool ap
             if (rt->getRoute(i)->getInterface()->isLoopback())
                 continue;
 
-            IPv4Address netmask = rt->getRoute(i)->getNetmask();
-            IPv4Address gateway = rt->getRoute(i)->getGateway();
+            Ipv4Address netmask = rt->getRoute(i)->getNetmask();
+            Ipv4Address gateway = rt->getRoute(i)->getGateway();
             int metric = rt->getRoute(i)->getMetric();
 
             std::ostringstream line;
 
             line << std::left;
-            IPv4Address prefix = compat ? dest.doAnd(netmask) : dest;    // typically dest in routes is already masked, so this is a no-op
+            Ipv4Address prefix = compat ? dest.doAnd(netmask) : dest;    // typically dest in routes is already masked, so this is a no-op
             line.width(16);
             if (prefix.isUnspecified())
                 line << "0.0.0.0";
@@ -118,7 +118,7 @@ void NetworkInfo::dumpRoutingInfo(cModule *target, const char *filename, bool ap
                     line << "G";
                 else
                     ++pad;
-                if (netmask.equals(IPv4Address::ALLONES_ADDRESS))
+                if (netmask.equals(Ipv4Address::ALLONES_ADDRESS))
                     line << "H";
                 else
                     ++pad;

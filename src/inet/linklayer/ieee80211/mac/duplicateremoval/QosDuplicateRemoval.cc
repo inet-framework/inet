@@ -21,21 +21,21 @@
 namespace inet {
 namespace ieee80211 {
 
-bool QoSDuplicateRemoval::isDuplicate(Ieee80211DataOrMgmtFrame *frame)
+bool QoSDuplicateRemoval::isDuplicate(const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
-    SequenceControlField seqVal(frame);
-    bool isManagementFrame = dynamic_cast<Ieee80211ManagementFrame *>(frame);
+    SequenceControlField seqVal(header);
+    bool isManagementFrame = dynamicPtrCast<const Ieee80211MgmtHeader>(header) != nullptr;
     bool isTimePriorityManagementFrame = isManagementFrame && false; // TODO: hack
     if (isTimePriorityManagementFrame || isManagementFrame)
     {
-        MACAddress transmitterAddr = frame->getTransmitterAddress();
+        MacAddress transmitterAddr = header->getTransmitterAddress();
         Mac2SeqValMap& cache = isTimePriorityManagementFrame ? lastSeenTimePriorityManagementSeqNumCache : lastSeenSharedSeqNumCache;
         auto it = cache.find(transmitterAddr);
         if (it == cache.end()) {
-            cache.insert(std::pair<MACAddress, SequenceControlField>(transmitterAddr, seqVal));
+            cache.insert(std::pair<MacAddress, SequenceControlField>(transmitterAddr, seqVal));
             return false;
         }
-        else if (it->second.getSequenceNumber() == seqVal.getSequenceNumber() && it->second.getFragmentNumber() == seqVal.getFragmentNumber() && frame->getRetry())
+        else if (it->second.getSequenceNumber() == seqVal.getSequenceNumber() && it->second.getFragmentNumber() == seqVal.getFragmentNumber() && header->getRetry())
             return true;
         else {
             it->second = seqVal;
@@ -44,14 +44,14 @@ bool QoSDuplicateRemoval::isDuplicate(Ieee80211DataOrMgmtFrame *frame)
     }
     else
     {
-        Ieee80211DataFrame *qosDataFrame = check_and_cast<Ieee80211DataFrame *>(frame);
-        Key key(frame->getTransmitterAddress(), qosDataFrame->getTid());
+        const Ptr<const Ieee80211DataHeader>& qosDataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header);
+        Key key(header->getTransmitterAddress(), qosDataHeader->getTid());
         auto it = lastSeenSeqNumCache.find(key);
         if (it == lastSeenSeqNumCache.end()) {
             lastSeenSeqNumCache.insert(std::pair<Key, SequenceControlField>(key, seqVal));
             return false;
         }
-        else if (it->second.getSequenceNumber() == seqVal.getSequenceNumber() && it->second.getFragmentNumber() == seqVal.getFragmentNumber() && frame->getRetry())
+        else if (it->second.getSequenceNumber() == seqVal.getSequenceNumber() && it->second.getFragmentNumber() == seqVal.getFragmentNumber() && header->getRetry())
             return true;
         else {
             it->second = seqVal;

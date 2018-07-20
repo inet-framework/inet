@@ -23,11 +23,7 @@ HeatMapFigure::HeatMapFigure(int size, const char *name) :
     cPixmapFigure(name)
 {
     setPixmap(cFigure::Pixmap(size, size));
-#if OMNETPP_BUILDNUM >= 1006
     fillPixmap(fromColor, 0);
-#else
-    fill(fromColor, 0);
-#endif
 }
 
 double HeatMapFigure::getHeat(int x, int y)

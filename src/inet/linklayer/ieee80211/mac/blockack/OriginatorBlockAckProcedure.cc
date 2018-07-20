@@ -20,19 +20,19 @@
 namespace inet {
 namespace ieee80211 {
 
-Ieee80211BlockAckReq* OriginatorBlockAckProcedure::buildCompressedBlockAckReqFrame(const MACAddress& receiverAddress, Tid tid, int startingSequenceNumber) const
+const Ptr<Ieee80211BlockAckReq> OriginatorBlockAckProcedure::buildCompressedBlockAckReqFrame(const MacAddress& receiverAddress, Tid tid, int startingSequenceNumber) const
 {
     throw cRuntimeError("Unsupported feature");
-    Ieee80211CompressedBlockAckReq *blockAckReq = new Ieee80211CompressedBlockAckReq("CompressedBlockAckReq");
+    auto blockAckReq = makeShared<Ieee80211CompressedBlockAckReq>();
     blockAckReq->setReceiverAddress(receiverAddress);
     blockAckReq->setStartingSequenceNumber(startingSequenceNumber);
     blockAckReq->setTidInfo(tid);
     return blockAckReq;
 }
 
-Ieee80211BlockAckReq* OriginatorBlockAckProcedure::buildBasicBlockAckReqFrame(const MACAddress& receiverAddress, Tid tid, int startingSequenceNumber) const
+const Ptr<Ieee80211BlockAckReq> OriginatorBlockAckProcedure::buildBasicBlockAckReqFrame(const MacAddress& receiverAddress, Tid tid, int startingSequenceNumber) const
 {
-    Ieee80211BasicBlockAckReq *blockAckReq = new Ieee80211BasicBlockAckReq("BasicBlockAckReq");
+    auto blockAckReq = makeShared<Ieee80211BasicBlockAckReq>();
     blockAckReq->setReceiverAddress(receiverAddress);
     blockAckReq->setStartingSequenceNumber(startingSequenceNumber);
     blockAckReq->setTidInfo(tid);

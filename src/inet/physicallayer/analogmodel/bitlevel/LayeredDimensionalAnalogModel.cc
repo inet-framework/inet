@@ -21,7 +21,7 @@
 #include "inet/physicallayer/analogmodel/packetlevel/DimensionalTransmission.h"
 #include "inet/physicallayer/analogmodel/packetlevel/DimensionalReception.h"
 #include "inet/physicallayer/analogmodel/packetlevel/DimensionalNoise.h"
-#include "inet/physicallayer/analogmodel/packetlevel/DimensionalSNIR.h"
+#include "inet/physicallayer/analogmodel/packetlevel/DimensionalSnir.h"
 #include "inet/physicallayer/common/bitlevel/LayeredTransmission.h"
 
 namespace inet {
@@ -47,7 +47,7 @@ const IReception *LayeredDimensionalAnalogModel::computeReception(const IRadio *
     const LayeredTransmission *layeredTransmission = check_and_cast<const LayeredTransmission *>(transmission);
     const DimensionalTransmissionSignalAnalogModel *transmissionSignalAnalogModel = check_and_cast<const DimensionalTransmissionSignalAnalogModel *>(layeredTransmission->getAnalogModel());
     const ConstMapping *receptionPower = computeReceptionPower(receiverRadio, transmission, arrival);
-    const DimensionalReceptionSignalAnalogModel *receptionSignalAnalogModel = new const DimensionalReceptionSignalAnalogModel(transmissionSignalAnalogModel->getDuration(), transmissionSignalAnalogModel->getCarrierFrequency(), transmissionSignalAnalogModel->getBandwidth(), receptionPower);
+    const DimensionalReceptionSignalAnalogModel *receptionSignalAnalogModel = new DimensionalReceptionSignalAnalogModel(transmissionSignalAnalogModel->getDuration(), transmissionSignalAnalogModel->getCarrierFrequency(), transmissionSignalAnalogModel->getBandwidth(), receptionPower);
     return new LayeredReception(receptionSignalAnalogModel, receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation);
 }
 

@@ -1,3 +1,31 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-02-12  Zoltan Bojthe
+
+	Renamed functions to use camel case.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-12-20  Zoltan Bojthe
+
+	Renaming:
+	    FlatNetworkConfigurator -> Ipv4FlatNetworkConfigurator
+	    FlatNetworkConfigurator6 -> Ipv6FlatNetworkConfigurator
+	    IPv6 -> Ipv6
+	    IPv6Address -> Ipv6Address
+	    IPv6InterfaceData -> Ipv6InterfaceData
+	    IPv6RoutingTable -> Ipv6RoutingTable
+
+2017-12-15  Zoltan Bojthe
+
+	Removed unnecessary cPar::boolValue() calls.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
 ====== inet-3.x ======
 
 2018-03-21  ------ inet-3.6.4 released ------

@@ -1,0 +1,75 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-05-23  Zoltan Bojthe
+
+	SctpStatusInfo automatically deleted when socketStatusArrived() returns.
+
+2018-05-09  Levente Mészáros
+
+	Renamed SctpSocket::sendMsg to send, and changed argument type to Packet.
+
+2018-05-07  Levente Mészáros
+
+	Separated setCallback from setUserData in all sockets.
+
+2018-05-04  Levente Mészáros
+
+	Added get/setUserData to all sockets.
+	Renamed yourPtr to userData in all sockets.
+
+2018-04-25  Zoltan Bojthe
+
+	Removed assocId and yourPtr parameters of ICallback functions.
+	Added SctpSocket* arguments to SctpSocket::ICallback functions.
+	Removed the unused SctpSocketMap replaced by SocketMap.
+	Refactored SctpSocket to implement ISocket.
+
+2018-04-23  Zoltan Bojthe
+
+	Renamed SctpSocket::CallbackInterface to ICallback.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-02-27  Irene Ruengeler
+
+	Changed PacketDrill and improve data handling.
+
+2018-01-25  Levente Mészáros
+
+	Replaced cMessage with Request and Indication subclasses of Message.
+
+	The reason is that cMessage doesn't support the tags API used by INET.
+
+2018-01-22  Irene Ruengeler
+
+	Adapted to the new Packet API.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-11-22  Levente Mészáros
+
+	Replaced packet declarations with message in SCTPCommand.
+
+2017-11-21  Levente Mészáros
+
+	Changed MSG files to use the canonical syntax.
+
+2017-11-14  Zoltan Bojthe
+
+	Replace "int foo @enum(FooEnum)" to FooEnum foo.
+
+2017-11-17  Zoltan Bojthe
+
+	Added required import statements to MSG files according to new syntax.
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+2016-06-14  Levente Mészáros
+
+	Implemented required interfaces with SCTPCommand.
+
+2016-06-14  Levente Mészáros
+
+	Renamed assocId to socketId in SCTPCommand.

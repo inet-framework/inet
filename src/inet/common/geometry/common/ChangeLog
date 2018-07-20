@@ -1,0 +1,71 @@
+====== inet-4.x ======
+
+2018-06-27  ------ inet-4.0.0 released ------
+
+2018-06-27  Levente Mészáros
+
+	Fixed Quaternion to EulerAngles conversion.
+
+2018-06-11  Levente Mészáros
+
+	Added CanvasProjection::computeCanvasPointInverse.
+
+2018-05-24  Levente Mészáros
+
+	Changed Coord and EulerAngles str methods to print the unit only once.
+
+2018-05-02  Levente Mészáros
+
+	Changed geographic heading and elevation to use the conventional definition.
+
+	Heading: 0deg means X axis points north, 90deg means X axis points east
+	Elevation: 0deg means X axis is horizontal, positive rotates X axis
+	towards the sky
+
+2018-03-23  TÖRÖK Attila
+
+	Replaced osgEarth::ObjectLocatorNode with GeoTransform and osg::PositionAttitudeTransform.
+
+2018-04-13  ------ inet-3.99.3 released ------
+
+2018-03-22  Levente Mészáros
+
+	Replaced type of altitude fields with m type.
+	Replaced types of longitude and latitude fields with degree types.
+	Replaced double with rad in EulerAngles to make sure the unit is always correct.
+
+2018-03-20  Levente Mészáros
+
+	Renamed files to GeographicCoordinateSystem.*
+
+2018-03-19  Levente Mészáros
+
+	Added documentation to EulerAngles.
+
+2018-03-18  TÖRÖK Attila
+
+	Switched to use Quaternion to convert from EulerAngles to a matrix in Rotation.
+
+2018-02-14  TÖRÖK Attila
+
+	Replaced the Quaternion class with a more useful one.
+
+2018-02-14  TÖRÖK Attila
+
+	Added Coord::operator-() for easier negation.
+
+2017-12-22  ------ inet-3.99.2 released ------
+
+2017-11-16  ------ inet-3.99.1 released ------
+
+====== inet-3.x ======
+
+2017-12-22  ------ inet-3.6.3 released ------
+
+2017-10-02  ------ inet-3.6.2 released ------
+
+2017-07-06  ------ inet-3.6.1 released ------
+
+2017-06-09  ------ inet-3.6.0 released ------
+
+2017-02-20  ------ inet-3.5.0 released ------

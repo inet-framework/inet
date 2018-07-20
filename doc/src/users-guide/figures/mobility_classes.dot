@@ -1,0 +1,31 @@
+digraph g {
+  fontsize=12; size="7,5"; rankdir="BT"
+  node[ shape = "rectangle" ]
+
+  IMobility [ label="IMobility" ]
+
+  MobilityBase -> IMobility [ arrowhead="empty" ]
+  MovingMobilityBase -> MobilityBase
+
+  StationaryMobility -> MobilityBase
+  StaticGridMobility -> StationaryMobility
+  CircleMobility -> MovingMobilityBase
+  LinearMobility -> MovingMobilityBase
+  RectangleMobility -> MovingMobilityBase
+
+  LineSegmentsMobilityBase -> MovingMobilityBase
+  TractorMobility -> LineSegmentsMobilityBase
+
+  RandomWPMobility -> LineSegmentsMobilityBase
+  GaussMarkovMobilityBase -> LineSegmentsMobilityBase
+  MassMobility -> LineSegmentsMobilityBase
+  ChiangMobility -> LineSegmentsMobilityBase
+  ConstSpeedMobility -> LineSegmentsMobilityBase
+
+  ANSimMobility -> LineSegmentsMobilityBase
+  BonnMotionMobility -> LineSegmentsMobilityBase
+  Ns2MotionMobility -> LineSegmentsMobilityBase
+
+  TurtleMobility -> LineSegmentsMobilityBase
+}
+

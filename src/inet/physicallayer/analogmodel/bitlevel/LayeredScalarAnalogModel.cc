@@ -21,7 +21,7 @@
 #include "inet/physicallayer/analogmodel/packetlevel/ScalarTransmission.h"
 #include "inet/physicallayer/analogmodel/packetlevel/ScalarReception.h"
 #include "inet/physicallayer/analogmodel/packetlevel/ScalarNoise.h"
-#include "inet/physicallayer/analogmodel/packetlevel/ScalarSNIR.h"
+#include "inet/physicallayer/analogmodel/packetlevel/ScalarSnir.h"
 #include "inet/physicallayer/common/bitlevel/LayeredTransmission.h"
 
 namespace inet {
@@ -46,7 +46,7 @@ const IReception *LayeredScalarAnalogModel::computeReception(const IRadio *recei
     const LayeredTransmission *layeredTransmission = check_and_cast<const LayeredTransmission *>(transmission);
     const ScalarTransmissionSignalAnalogModel *transmissionSignalAnalogModel = check_and_cast<const ScalarTransmissionSignalAnalogModel *>(layeredTransmission->getAnalogModel());
     const W receptionPower = computeReceptionPower(receiverRadio, transmission, arrival);
-    const ScalarReceptionSignalAnalogModel *receptionSignalAnalogModel = new const ScalarReceptionSignalAnalogModel(transmissionSignalAnalogModel->getDuration(), transmissionSignalAnalogModel->getCarrierFrequency(), transmissionSignalAnalogModel->getBandwidth(), receptionPower);
+    const ScalarReceptionSignalAnalogModel *receptionSignalAnalogModel = new ScalarReceptionSignalAnalogModel(transmissionSignalAnalogModel->getDuration(), transmissionSignalAnalogModel->getCarrierFrequency(), transmissionSignalAnalogModel->getBandwidth(), receptionPower);
     return new LayeredReception(receptionSignalAnalogModel, receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation);
 }
 

@@ -22,6 +22,8 @@ namespace inet {
 
 namespace visualizer {
 
+using namespace inet::physicallayer;
+
 Define_Module(TracingObstacleLossCanvasVisualizer);
 
 TracingObstacleLossCanvasVisualizer::ObstacleLossCanvasVisualization::ObstacleLossCanvasVisualization(LabeledLineFigure* intersectionFigure, cLineFigure* faceNormalFigure1, cLineFigure* faceNormalFigure2) :
@@ -69,8 +71,8 @@ const TracingObstacleLossVisualizerBase::ObstacleLossVisualization *TracingObsta
     auto loss = obstaclePenetratedEvent->loss;
     const Rotation rotation(object->getOrientation());
     const Coord& position = object->getPosition();
-    const Coord rotatedIntersection1 = rotation.rotateVectorClockwise(intersection1);
-    const Coord rotatedIntersection2 = rotation.rotateVectorClockwise(intersection2);
+    const Coord rotatedIntersection1 = rotation.rotateVector(intersection1);
+    const Coord rotatedIntersection2 = rotation.rotateVector(intersection2);
     double intersectionDistance = intersection2.distance(intersection1);
     LabeledLineFigure *intersectionLine = nullptr;
     if (displayIntersections) {
@@ -98,7 +100,7 @@ const TracingObstacleLossVisualizerBase::ObstacleLossVisualization *TracingObsta
         faceNormal1Line->setTags((std::string("obstacle_loss face_normal_vector ") + tags).c_str());
         faceNormal1Line->setTooltip("This line represents the face normal vector at the intersection of a propagating signal and an obstructing physical object.");
         faceNormal1Line->setStart(canvasProjection->computeCanvasPoint(rotatedIntersection1 + position));
-        faceNormal1Line->setEnd(canvasProjection->computeCanvasPoint(rotatedIntersection1 + position + rotation.rotateVectorClockwise(normalVisualization1)));
+        faceNormal1Line->setEnd(canvasProjection->computeCanvasPoint(rotatedIntersection1 + position + rotation.rotateVector(normalVisualization1)));
         faceNormal1Line->setLineColor(faceNormalLineColor);
         faceNormal1Line->setLineStyle(faceNormalLineStyle);
         faceNormal1Line->setLineWidth(faceNormalLineWidth);
@@ -107,7 +109,7 @@ const TracingObstacleLossVisualizerBase::ObstacleLossVisualization *TracingObsta
         faceNormal2Line->setTags((std::string("obstacle_loss face_normal_vector ") + tags).c_str());
         faceNormal2Line->setTooltip("This line represents the face normal vector at the intersection of a propagating signal and an obstructing physical object.");
         faceNormal2Line->setStart(canvasProjection->computeCanvasPoint(rotatedIntersection2 + position));
-        faceNormal2Line->setEnd(canvasProjection->computeCanvasPoint(rotatedIntersection2 + position + rotation.rotateVectorClockwise(normalVisualization2)));
+        faceNormal2Line->setEnd(canvasProjection->computeCanvasPoint(rotatedIntersection2 + position + rotation.rotateVector(normalVisualization2)));
         faceNormal2Line->setLineColor(faceNormalLineColor);
         faceNormal2Line->setLineStyle(faceNormalLineStyle);
         faceNormal2Line->setLineWidth(faceNormalLineWidth);
