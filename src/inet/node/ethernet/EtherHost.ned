@@ -23,6 +23,7 @@ import inet.applications.ethernet.EtherAppServer;
 import inet.common.lifecycle.NodeStatus;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.ethernet.EtherLlc;
+import inet.networklayer.common.InterfaceTable;
 
 
 //
@@ -41,7 +42,7 @@ module EtherHost
         @labels(node,ethernet-node);
         @display("i=device/pc2");
         eth.csmacdSupport = csmacdSupport;
-        *.interfaceTableModule = default("");
+        *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.fcsMode = fcsMode;
         eth.encap.typename = "EtherEncapDummy";
     gates:
@@ -49,6 +50,10 @@ module EtherHost
     submodules:
         status: NodeStatus if hasStatus {
             @display("p=100,100;is=s");
+        }
+        interfaceTable: InterfaceTable {
+            parameters:
+                @display("p=125,240;is=s");
         }
         cli: EtherAppClient {
             parameters:

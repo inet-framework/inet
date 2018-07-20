@@ -19,6 +19,7 @@ package inet.node.ethernet;
 
 import inet.applications.ethernet.EtherTrafGen;
 import inet.linklayer.contract.IEthernetInterface;
+import inet.networklayer.common.InterfaceTable;
 
 
 //
@@ -32,7 +33,7 @@ module EtherHost2
     parameters:
         bool csmacdSupport = default(true);  // by default use CSMA/CD
         string fcsMode @enum("declared", "computed") = default("declared");
-        *.interfaceTableModule = default("");
+        *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.fcsMode = fcsMode;
         eth.csmacdSupport = csmacdSupport;
         @networkNode();
@@ -43,6 +44,10 @@ module EtherHost2
     submodules:
         app: EtherTrafGen {
             @display("p=200,100");
+        }
+        interfaceTable: InterfaceTable {
+            parameters:
+                @display("p=125,240;is=s");
         }
         eth: <default("EthernetInterface")> like IEthernetInterface {
             parameters:
