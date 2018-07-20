@@ -1,24 +1,28 @@
 //
-// Copyright (C) 2005 Christian Dankbar, Irene Ruengeler, Michael Tuexen
+// Copyright (C) 2004 Andras Varga
+//               2010 Zoltan Bojthe
 //
 // This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
+// modify it under the terms of the GNU Lesser General Public License
 // as published by the Free Software Foundation; either version 2
 // of the License, or (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
+// GNU Lesser General Public License for more details.
 //
-// You should have received a copy of the GNU General Public License
+// You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.emulation.linklayer.ext;
+package inet.emulation.linklayer.ethernet;
 
 import inet.common.IHook;
-import inet.linklayer.contract.IExternalInterface;
+import inet.emulation.common.PcapCapturer;
+import inet.emulation.common.RawSocket;
+import inet.emulation.linklayer.ext.HackEncapDecap;
+import inet.linklayer.contract.IEthernetInterface;
 
 //
 // Implements an interface that corresponds to a real interface
@@ -27,7 +31,7 @@ import inet.linklayer.contract.IExternalInterface;
 //
 // Requires RealTimeScheduler to be configured as scheduler in omnetpp.ini.
 //
-module ExtInterface like IExternalInterface
+module ExtEthernetInterface like IEthernetInterface
 {
     parameters:
         @class(InterfaceEntry);
@@ -54,7 +58,7 @@ module ExtInterface like IExternalInterface
             parameters:
                 @display("p=100,200");
         }
-        pcapCapture: PcapCapture {
+        pcapCapturer: PcapCapturer {
             parameters:
                 @display("p=200,200");
         }
@@ -77,6 +81,6 @@ module ExtInterface like IExternalInterface
         inputHook[numInputHooks-1].out --> { @display("m=n"); } --> upperLayerOut if numInputHooks > 0;
 
         encapDecap.lowerLayerOut --> rawSocket.upperLayerIn;
-        encapDecap.lowerLayerIn <-- pcapCapture.upperLayerOut;
+        encapDecap.lowerLayerIn <-- pcapCapturer.upperLayerOut;
 }
 
