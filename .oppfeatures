@@ -355,7 +355,7 @@
         requires = "IPv4"
         labels = "nic"
         nedPackages = "
-                       inet.linklayer.ext
+                       inet.emulation
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_EXT_IF"
