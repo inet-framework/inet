@@ -26,9 +26,9 @@
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/emulation/linklayer/ext/PcapCapture.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ethernet/EtherEncap.h"
-#include "inet/linklayer/ext/PcapCapture.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {

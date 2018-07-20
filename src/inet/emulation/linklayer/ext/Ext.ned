@@ -18,7 +18,7 @@
 //
 
 
-package inet.linklayer.ext;
+package inet.emulation.linklayer.ext;
 
 //
 // Ext interface module implementation.
