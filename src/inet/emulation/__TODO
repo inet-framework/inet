@@ -1,0 +1,17 @@
+EthernetInterface
+TapInterface/Tap(TapSocket<-->other Socket)
+TunInterface/Tun(TunSocket<-->other Socket)
+
+Udp/UdpSocket
+Tcp/TcpSocket
+Ipv4/Ipv4Socket
+EthernetMac/EthernetSocket
+TapSocket(megfelel az open/read/write /dev/net/tun-ra)
+TunSocket(megfelel az open/read/write /dev/net/tun-ra)
+
+ExtHost
+ExtUdp/ExtUdpSocket
+ExtTcp/ExtTcpSocket
+ExtIpv4/ExtIpv4Socket
+ExtEthernet/ExtEthernetSocket
+ExtTapSocket(megfelel az open/read/write /dev/net/tun-ra)
