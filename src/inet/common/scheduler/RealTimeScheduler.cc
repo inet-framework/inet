@@ -51,6 +51,8 @@ RealTimeScheduler::~RealTimeScheduler()
 
 void RealTimeScheduler::addCallback(int fd, ICallback *callback)
 {
+    if (fd < 0)
+        throw cRuntimeError("RealTimeScheduler::addCallback(): fd is invalid");
     if (!callback)
         throw cRuntimeError("RealTimeScheduler::addCallback(): callback must be non-nullptr");
     callbackEntries.push_back(Entry(fd, callback));
