@@ -122,7 +122,7 @@ const MacAddress& Ieee80211Mac::isInterfaceRegistered()
 
 InterfaceEntry *Ieee80211Mac::createInterfaceEntry()
 {
-    MacAddress address = parseMacAddressPar(par("address"));
+    MacAddress address = parseMacAddressParameter(par("address"));
     //TODO the mib module should use the mac address from InterfaceEntry
     mib->address = address;
     //TODO the mib module should use the mac address from InterfaceEntry

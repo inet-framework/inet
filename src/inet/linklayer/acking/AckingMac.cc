@@ -102,7 +102,7 @@ void AckingMac::initialize(int stage)
 InterfaceEntry *AckingMac::createInterfaceEntry()
 {
     InterfaceEntry *e = getContainingNicModule(this);
-    MacAddress address = parseMacAddressPar(par("address"));
+    MacAddress address = parseMacAddressParameter(par("address"));
 
     // data rate
     e->setDatarate(bitrate);

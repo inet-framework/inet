@@ -170,7 +170,7 @@ Ieee802154Mac::~Ieee802154Mac()
 InterfaceEntry *Ieee802154Mac::createInterfaceEntry()
 {
     InterfaceEntry *e = getContainingNicModule(this);
-    MacAddress address = parseMacAddressPar(par("address"));
+    MacAddress address = parseMacAddressParameter(par("address"));
 
     // data rate
     e->setDatarate(bitrate);

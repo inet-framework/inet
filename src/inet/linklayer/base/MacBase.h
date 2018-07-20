@@ -52,7 +52,7 @@ class INET_API MacBase : public cSimpleModule, public ILifecycle, public cListen
     virtual void updateOperationalFlag(bool isNodeUp);
     virtual bool isNodeUp();
     virtual void handleMessageWhenDown(cMessage *msg);
-    virtual MacAddress parseMacAddressPar(cPar& par);
+    virtual MacAddress parseMacAddressParameter(const char *addrstr);
 
     /**
      * should create InterfaceEntry

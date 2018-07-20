@@ -147,7 +147,7 @@ void BMac::finish()
 
 InterfaceEntry *BMac::createInterfaceEntry()
 {
-    MacAddress address = parseMacAddressPar(par("address"));
+    MacAddress address = parseMacAddressParameter(par("address"));
     InterfaceEntry *e = getContainingNicModule(this);
 
     // data rate

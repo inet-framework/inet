@@ -35,9 +35,8 @@ MacBase::~MacBase()
 {
 }
 
-MacAddress MacBase::parseMacAddressPar(cPar& par)
+MacAddress MacBase::parseMacAddressParameter(const char *addrstr)
 {
-    const char *addrstr = par;
     MacAddress address;
 
     if (!strcmp(addrstr, "auto"))

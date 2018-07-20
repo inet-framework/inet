@@ -45,7 +45,7 @@ class INET_API MacProtocolBase : public LayeredProtocolBase, public cListener
     virtual void registerInterface();
     virtual InterfaceEntry *createInterfaceEntry() = 0;
 
-    virtual MacAddress parseMacAddressPar(cPar& par);
+    virtual MacAddress parseMacAddressParameter(const char *addrstr);
 
     virtual void sendUp(cMessage *message);
     virtual void sendDown(cMessage *message);
