@@ -26,41 +26,41 @@
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/emulation/linklayer/ext/PcapCapture.h"
+#include "inet/emulation/common/PcapCapturer.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ethernet/EtherEncap.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
 
-Define_Module(PcapCapture);
+Define_Module(PcapCapturer);
 
-void PcapCapture::ext_packet_handler(u_char *usermod, const struct pcap_pkthdr *hdr, const u_char *bytes)
+void PcapCapturer::ext_packet_handler(u_char *usermod, const struct pcap_pkthdr *hdr, const u_char *bytes)
 {
     EV_STATICCONTEXT;
-    PcapCapture *module = (PcapCapture*)usermod;
+    PcapCapturer *module = (PcapCapturer*)usermod;
     Packet *packet = new Packet("CapturedPacket", makeShared<BytesChunk>(bytes, hdr->caplen));
     EV << "Captured " << packet->getTotalLength() << " packet" << endl;
     module->realTimeScheduler->scheduleMessage(module, packet);
 }
 
-bool PcapCapture::notify(int fd)
+bool PcapCapturer::notify(int fd)
 {
     ASSERT(this->fd == fd);
     int32 n = pcap_dispatch(pd, 1, ext_packet_handler, (u_char *)this);
     if (n < 0)
-        throw cRuntimeError("PcapCapture::notify(): An error occured: %s", pcap_geterr(pd));
+        throw cRuntimeError("PcapCapturer::notify(): An error occured: %s", pcap_geterr(pd));
     return n > 0;
 }
 
-PcapCapture::~PcapCapture()
+PcapCapturer::~PcapCapturer()
 {
     if (pd != nullptr)
         pcap_close(pd);
     realTimeScheduler->removeCallback(fd, this);
 }
 
-void PcapCapture::initialize(int stage)
+void PcapCapturer::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -72,7 +72,7 @@ void PcapCapture::initialize(int stage)
     }
 }
 
-void PcapCapture::openPcap(const char *device, const char *filter)
+void PcapCapturer::openPcap(const char *device, const char *filter)
 {
     char errbuf[PCAP_ERRBUF_SIZE];
     struct bpf_program fcode;
@@ -120,7 +120,7 @@ void PcapCapture::openPcap(const char *device, const char *filter)
     EV << "Opened pcap device " << device << " with filter " << filter << " and datalink " << datalink << ".\n";
 }
 
-void PcapCapture::handleMessage(cMessage *msg)
+void PcapCapturer::handleMessage(cMessage *msg)
 {
     Packet *packet = check_and_cast<Packet *>(msg);
     if (msg->isSelfMessage()) {
@@ -137,14 +137,14 @@ void PcapCapture::handleMessage(cMessage *msg)
         throw cRuntimeError("Unknown message");
 }
 
-void PcapCapture::refreshDisplay() const
+void PcapCapturer::refreshDisplay() const
 {
     char buf[80];
     sprintf(buf, "device: %s\nrcv:%d", device, numRcvd);
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-void PcapCapture::finish()
+void PcapCapturer::finish()
 {
     realTimeScheduler->removeCallback(fd, this);
     std::cout << getFullPath() << ": " << numRcvd << " packets received.\n";
