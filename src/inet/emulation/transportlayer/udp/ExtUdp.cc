@@ -20,23 +20,23 @@
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/Simsignals.h"
+#include "inet/emulation/transportlayer/udp/ExtUdp.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/transportlayer/common/L4PortTag_m.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo.h"
-#include "inet/transportlayer/udp/OsUdp.h"
 
 namespace inet {
 
-Define_Module(OsUdp);
+Define_Module(ExtUdp);
 
-OsUdp::~OsUdp()
+ExtUdp::~ExtUdp()
 {
     for (auto& it : socketIdToSocketMap) {
         close(it.second->socketId);
     }
 }
 
-void OsUdp::initialize(int stage)
+void ExtUdp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -46,7 +46,7 @@ void OsUdp::initialize(int stage)
     }
 }
 
-void OsUdp::handleMessage(cMessage *message)
+void ExtUdp::handleMessage(cMessage *message)
 {
     switch (message->getKind()) {
         case UDP_C_BIND: {
@@ -153,13 +153,13 @@ void OsUdp::handleMessage(cMessage *message)
     delete message;
 }
 
-bool OsUdp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool ExtUdp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     // TODO:
     return true;
 }
 
-bool OsUdp::notify(int fd)
+bool ExtUdp::notify(int fd)
 {
     auto it = fdToSocketMap.find(fd);
     if (it == fdToSocketMap.end())
@@ -171,7 +171,7 @@ bool OsUdp::notify(int fd)
     }
 }
 
-OsUdp::Socket *OsUdp::open(int socketId)
+ExtUdp::Socket *ExtUdp::open(int socketId)
 {
     auto socket = new Socket(socketId);
     int fd = ::socket(AF_INET, SOCK_DGRAM, 0);
@@ -184,7 +184,7 @@ OsUdp::Socket *OsUdp::open(int socketId)
     return socket;
 }
 
-void OsUdp::bind(int socketId, const L3Address& localAddress, int localPort)
+void ExtUdp::bind(int socketId, const L3Address& localAddress, int localPort)
 {
     Socket *socket = nullptr;
     auto it = socketIdToSocketMap.find(socketId);
@@ -204,7 +204,7 @@ void OsUdp::bind(int socketId, const L3Address& localAddress, int localPort)
         throw cRuntimeError("Cannot bind socket: %d", n);
 }
 
-void OsUdp::connect(int socketId, const L3Address& remoteAddress, int remotePort)
+void ExtUdp::connect(int socketId, const L3Address& remoteAddress, int remotePort)
 {
     Socket *socket = nullptr;
     auto it = socketIdToSocketMap.find(socketId);
@@ -224,7 +224,7 @@ void OsUdp::connect(int socketId, const L3Address& remoteAddress, int remotePort
         throw cRuntimeError("Cannot connect socket: %d", n);
 }
 
-void OsUdp::close(int socketId)
+void ExtUdp::close(int socketId)
 {
     auto it = socketIdToSocketMap.find(socketId);
     if (it == socketIdToSocketMap.end())
@@ -238,7 +238,7 @@ void OsUdp::close(int socketId)
     }
 }
 
-void OsUdp::processPacketFromUpper(Packet *packet)
+void ExtUdp::processPacketFromUpper(Packet *packet)
 {
     emit(packetReceivedFromUpperSignal, packet);
     auto socketId = packet->getTag<SocketReq>()->getSocketId();
@@ -273,7 +273,7 @@ void OsUdp::processPacketFromUpper(Packet *packet)
     }
 }
 
-void OsUdp::processPacketFromLower(int fd)
+void ExtUdp::processPacketFromLower(int fd)
 {
     Enter_Method_Silent();
     auto it = fdToSocketMap.find(fd);
@@ -289,7 +289,7 @@ void OsUdp::processPacketFromLower(int fd)
         if (n < 0)
             throw cRuntimeError("Calling recv failed: %d", n);
         auto data = makeShared<BytesChunk>(static_cast<const uint8_t *>(buffer), n);
-        auto packet = new Packet("OsUdp", data);
+        auto packet = new Packet("ExtUdp", data);
         packet->addTag<SocketInd>()->setSocketId(socket->socketId);
         packet->addTag<L3AddressInd>()->setSrcAddress(Ipv4Address(ntohl(sockaddr.sin_addr.s_addr)));
         packet->addTag<L4PortInd>()->setSrcPort(sockaddr.sin_port);

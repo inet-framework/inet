@@ -13,11 +13,11 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.transportlayer.udp;
+package inet.emulation.transportlayer.udp;
 
 import inet.transportlayer.contract.IUdp;
 
-simple OsUdp like IUdp
+simple ExtUdp like IUdp
 {
     parameters:
         @display("i=block/transport");
