@@ -17,7 +17,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/emulation/linklayer/ext/HackEncapDecap.h"
+#include "inet/emulation/common/HackEncapDecap.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {

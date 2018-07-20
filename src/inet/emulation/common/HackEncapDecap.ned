@@ -15,7 +15,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.emulation.linklayer.ext;
+package inet.emulation.common;
 
 moduleinterface IEncapDecap
 {
