@@ -22,12 +22,12 @@
 #include "inet/applications/ethernet/EtherAppClient.h"
 
 #include "inet/applications/ethernet/EtherApp_m.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
-#include "inet/common/lifecycle/NodeOperations.h"
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 
 namespace inet {
