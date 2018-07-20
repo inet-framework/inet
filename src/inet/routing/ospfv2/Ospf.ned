@@ -137,7 +137,8 @@ simple Ospf like IOspf
         int pollInterval @unit(s) = default(120s);  // specifies the length of time, in seconds, between OSPF packets that the router send before adjacency is established with a neighbor
         int routerDeadInterval @unit(s) = default(40s);  // the interval during which at least one hello packet must be received from a neighbor before the router declares that neighbor as down
         int retransmissionInterval @unit(s) = default(5s);  // The time between OSPF LSA retransmissions for adjacencies that belongs to the interface
-        int interfaceOutputCost = default(1);  // cost of link on the interface (1-1000)
+        int referenceBandwidth @unit(bps) = default(1e8bps);   // reference bandwidth for cost calculation
+        int interfaceOutputCost = default(1);  // cost of link on the interface (1-1000), 0 means use reference bandwidth
         int interfaceTransmissionDelay @unit(s) = default(1s);  // The number of seconds required to transmit a link state update packet. Valid values are 1 to 65535.
         int routerPriority = default(1);  // Priority in DR/BDR election process. Specify 0 to exclude the router from the election.
         string authenticationType @enum("SimplePasswordType","CrytographicType","NullType") = default("NullType");

@@ -247,7 +247,11 @@ void OspfConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig)
     AreaId areaID = Ipv4Address(getStrAttrOrPar(ifConfig, "areaID"));
     intf->setAreaId(areaID);
 
-    intf->setOutputCost(getIntAttrOrPar(ifConfig, "interfaceOutputCost"));
+    Metric cost = getIntAttrOrPar(ifConfig, "interfaceOutputCost");
+    if(cost == 0)
+        intf->setOutputCost(round(par("referenceBandwidth").intValue() / ie->getDatarate()));
+    else
+        intf->setOutputCost(cost);
 
     intf->setRetransmissionInterval(getIntAttrOrPar(ifConfig, "retransmissionInterval"));
 
