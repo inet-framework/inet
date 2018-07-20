@@ -37,7 +37,7 @@ module EtherHost
     parameters:
         bool hasStatus = default(false);
         bool csmacdSupport = default(true);  // by default use CSMA/CD
-        string fcsMode @enum("declared", "computed") = default("declared");
+        string fcsMode @enum("declared","computed") = default("declared");
         @networkNode();
         @labels(node,ethernet-node);
         @display("i=device/pc2");

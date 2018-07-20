@@ -32,7 +32,7 @@ module EtherHost2
 {
     parameters:
         bool csmacdSupport = default(true);  // by default use CSMA/CD
-        string fcsMode @enum("declared", "computed") = default("declared");
+        string fcsMode @enum("declared","computed") = default("declared");
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.fcsMode = fcsMode;
         eth.csmacdSupport = csmacdSupport;
