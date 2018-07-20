@@ -61,6 +61,28 @@ std::vector<L3Address> L3AddressResolver::resolve(std::vector<std::string> strs,
     return result;
 }
 
+bool L3AddressResolver::tryParse(L3Address& result, const char *addr, int addrType)
+{
+    Ipv6Address ipv6;
+    MacAddress mac;
+    ModuleIdAddress moduleId;
+    ModulePathAddress modulePath;
+    if (((addrType & ADDR_IPv4) != 0) && Ipv4Address::isWellFormed(addr))
+        result.set(Ipv4Address(addr));
+    else if (((addrType & ADDR_IPv6) != 0) && ipv6.tryParse(addr))
+        result.set(ipv6);
+    else if (((addrType & ADDR_MAC) != 0) && mac.tryParse(addr))
+        result.set(mac);
+    else if (((addrType & ADDR_MODULEID) != 0) && moduleId.tryParse(addr))
+        result.set(moduleId);
+    else if (((addrType & ADDR_MODULEPATH) != 0) && modulePath.tryParse(addr))
+        result.set(modulePath);
+    else
+        return false;
+    return true;
+}
+
+
 bool L3AddressResolver::tryResolve(const char *s, L3Address& result, int addrType)
 {
     // empty address
@@ -69,7 +91,7 @@ bool L3AddressResolver::tryResolve(const char *s, L3Address& result, int addrTyp
         return true;
 
     // handle address literal
-    if (result.tryParse(s))
+    if (tryParse(result, s, addrType))
         return true;
 
     // must be " modulename [ { '%' interfacename | '>' destnode } ] [ '(' protocol ')' ] [ '/' ] " syntax

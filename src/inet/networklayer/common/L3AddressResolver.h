@@ -115,6 +115,8 @@ class INET_API L3AddressResolver
 
     /** @name Utility functions supporting resolve() */
     //@{
+    bool tryParse(L3Address& result, const char *addr, int addrType = DEFAULT_ADDR_TYPE);
+
     /**
      * Returns Ipv4 or Ipv6 address of the given host or router.
      *
