@@ -24,6 +24,9 @@ import inet.emulation.common.PcapCapturer;
 import inet.emulation.common.RawSocket;
 import inet.linklayer.contract.IEthernetInterface;
 
+// TODO: find a better name based on 
+// Ethernet Interface With External Upper Interface
+// Ethernet Interface With External Lower Interface
 
 //
 // Implements an interface that corresponds to a real interface

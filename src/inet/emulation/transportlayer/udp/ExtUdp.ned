@@ -17,6 +17,10 @@ package inet.emulation.transportlayer.udp;
 
 import inet.transportlayer.contract.IUdp;
 
+// TODO: find a better name based on 
+// Udp Protocol With External Upper Interface
+// Udp Protocol With External Lower Interface
+
 simple ExtUdp like IUdp
 {
     parameters:
