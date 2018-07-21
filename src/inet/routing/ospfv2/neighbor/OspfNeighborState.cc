@@ -55,7 +55,7 @@ void NeighborState::changeState(Neighbor *neighbor, NeighborState *newState, Nei
             }
         }
 
-        if (neighbor->getInterface()->getState() == Interface::DESIGNATED_ROUTER_STATE) {
+        if (neighbor->getInterface()->getState() == OspfInterface::DESIGNATED_ROUTER_STATE) {
             NetworkLsa *networkLSA = neighbor->getInterface()->getArea()->findNetworkLSA(neighbor->getInterface()->getAddressRange().address);
 
             if (networkLSA != nullptr) {

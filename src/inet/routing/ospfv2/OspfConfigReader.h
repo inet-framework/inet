@@ -69,7 +69,7 @@ class INET_API OspfConfigReader
     /**
      * Loads authenticationType and authenticationKey attributes for a router interface
      */
-    void loadAuthenticationConfig(Interface *intf, const cXMLElement& ifConfig);
+    void loadAuthenticationConfig(OspfInterface *intf, const cXMLElement& ifConfig);
 
     /**
      * Loads OSPF configuration information for a router interface.
