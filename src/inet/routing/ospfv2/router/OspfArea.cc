@@ -338,7 +338,7 @@ RouterLsa *Area::findRouterLSA(LinkStateId linkStateID)
 
 const RouterLsa *Area::findRouterLSA(LinkStateId linkStateID) const
 {
-    std::map<LinkStateId, RouterLsa *>::const_iterator lsaIt = routerLSAsByID.find(linkStateID);
+    auto lsaIt = routerLSAsByID.find(linkStateID);
     if (lsaIt != routerLSAsByID.end()) {
         return lsaIt->second;
     }
@@ -360,7 +360,7 @@ NetworkLsa *Area::findNetworkLSA(LinkStateId linkStateID)
 
 const NetworkLsa *Area::findNetworkLSA(LinkStateId linkStateID) const
 {
-    std::map<LinkStateId, NetworkLsa *>::const_iterator lsaIt = networkLSAsByID.find(linkStateID);
+    auto lsaIt = networkLSAsByID.find(linkStateID);
     if (lsaIt != networkLSAsByID.end()) {
         return lsaIt->second;
     }
@@ -382,7 +382,7 @@ SummaryLsa *Area::findSummaryLSA(LsaKeyType lsaKey)
 
 const SummaryLsa *Area::findSummaryLSA(LsaKeyType lsaKey) const
 {
-    std::map<LsaKeyType, SummaryLsa *, LsaKeyType_Less>::const_iterator lsaIt = summaryLSAsByID.find(lsaKey);
+    auto lsaIt = summaryLSAsByID.find(lsaKey);
     if (lsaIt != summaryLSAsByID.end()) {
         return lsaIt->second;
     }
@@ -1288,7 +1288,7 @@ SummaryLsa *Area::originateSummaryLSA(const RoutingTableEntry *entry,
                         lsaKey.linkStateID = lsaToReoriginate->getHeader().getLinkStateID();
                         lsaKey.advertisingRouter = parentRouter->getRouterID();
 
-                        std::map<LsaKeyType, bool, LsaKeyType_Less>::const_iterator originatedIt = originatedLSAs.find(lsaKey);
+                        auto originatedIt = originatedLSAs.find(lsaKey);
                         if (originatedIt != originatedLSAs.end()) {
                             delete (lsaToReoriginate);
                             lsaToReoriginate = nullptr;
@@ -1318,7 +1318,7 @@ SummaryLsa *Area::originateSummaryLSA(const RoutingTableEntry *entry,
                         lsaKey.linkStateID = newLinkStateID;
                         lsaKey.advertisingRouter = parentRouter->getRouterID();
 
-                        std::map<LsaKeyType, bool, LsaKeyType_Less>::const_iterator originatedIt = originatedLSAs.find(lsaKey);
+                        auto originatedIt = originatedLSAs.find(lsaKey);
                         if (originatedIt != originatedLSAs.end()) {
                             return nullptr;
                         }
