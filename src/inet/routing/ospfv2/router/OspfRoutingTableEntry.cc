@@ -125,7 +125,20 @@ bool RoutingTableEntry::operator==(const RoutingTableEntry& entry) const
 
 std::ostream& operator<<(std::ostream& out, const RoutingTableEntry& entry)
 {
-    out << "Destination: " << entry.getDestination() << "/" << entry.getNetmask() << " (";
+    out << "dest: " << entry.getDestination() << " ";
+    out << "nextHops: ";
+    for (unsigned int i = 0; i < entry.getNextHopCount(); i++) {
+        Ipv4Address gateway = entry.getNextHop(i).hopAddress;
+        if (gateway.isUnspecified())
+            out << "*  ";
+        else
+            out << gateway << "  ";
+    }
+    out << "mask: " << entry.getNetmask() << " ";
+    out << "cost: " << entry.getCost() << " ";
+    out << "if: " << entry.getInterfaceName() << " ";
+
+    out << "destType: ";
     if (entry.getDestinationType() == RoutingTableEntry::NETWORK_DESTINATION) {
         out << "Network";
     }
@@ -140,9 +153,8 @@ std::ostream& operator<<(std::ostream& out, const RoutingTableEntry& entry)
             out << "ASBoundaryRouter";
         }
     }
-    out << "), Area: "
-        << entry.getArea().str(false)
-        << ", PathType: ";
+    out << " area: " << entry.getArea().str(false) << " ";
+    out << "pathType: ";
     switch (entry.getPathType()) {
         case RoutingTableEntry::INTRAAREA:
             out << "IntraArea";
@@ -164,16 +176,9 @@ std::ostream& operator<<(std::ostream& out, const RoutingTableEntry& entry)
             out << "Unknown";
             break;
     }
-    out << ", iface: " << entry.getInterfaceName();
-    out << ", Cost: " << entry.getCost()
-        << ", Type2Cost: " << entry.getType2Cost()
-        << ", Origin: [" << entry.getLinkStateOrigin()->getHeader()
-        << "], NextHops: ";
 
-    unsigned int hopCount = entry.getNextHopCount();
-    for (unsigned int i = 0; i < hopCount; i++) {
-        out << entry.getNextHop(i).hopAddress << " ";
-    }
+    out << " Type2Cost: " << entry.getType2Cost() << " ";
+    out << "Origin: [" << entry.getLinkStateOrigin()->getHeader() << "] ";
 
     return out;
 }
