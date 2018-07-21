@@ -50,40 +50,76 @@ OspfConfigReader::~OspfConfigReader()
 {
 }
 
-InterfaceEntry *OspfConfigReader::getInterfaceByXMLAttributesOf(const cXMLElement& ifConfig)
+bool OspfConfigReader::loadConfigFromXML(cXMLElement *asConfig, Router *ospfRouter)
 {
-    const char *ifName = ifConfig.getAttribute("ifName");
-    if (ifName && *ifName) {
-        InterfaceEntry *ie = ift->getInterfaceByName(ifName);
-        if (!ie)
-            throw cRuntimeError("Error reading XML config: IInterfaceTable contains no interface named '%s' at %s", ifName, ifConfig.getSourceLocation());
-        return ie;
-    }
+    this->ospfRouter = ospfRouter;
 
-    const char *toward = getMandatoryFilledAttribute(ifConfig, "toward");
-    cModule *destnode = getSimulation()->getSystemModule()->getModuleByPath(toward);
-    if (!destnode)
-        throw cRuntimeError("toward module `%s' not found at %s", toward, ifConfig.getSourceLocation());
+    if (strcmp(asConfig->getTagName(), "OSPFASConfig"))
+        throw cRuntimeError("Cannot read OSPF configuration, unexpected element '%s' at %s", asConfig->getTagName(), asConfig->getSourceLocation());
 
-    cModule *host = ift->getHostModule();
-    for (int i = 0; i < ift->getNumInterfaces(); i++) {
-        InterfaceEntry *ie = ift->getInterface(i);
-        if (ie) {
-            int gateId = ie->getNodeOutputGateId();
-            if ((gateId != -1) && (host->gate(gateId)->pathContains(destnode)))
-                return ie;
+    cModule *myNode = findContainingNode(ospfModule);
+    ASSERT(myNode);
+    std::string nodeFullPath = myNode->getFullPath();
+    std::string nodeShortenedFullPath = nodeFullPath.substr(nodeFullPath.find('.') + 1);
+
+    // load information on this router
+    cXMLElementList routers = asConfig->getElementsByTagName("Router");
+    cXMLElement *routerNode = nullptr;
+    for (auto & router : routers) {
+        const char *nodeName = getMandatoryFilledAttribute(*(router), "name");
+        inet::PatternMatcher pattern(nodeName, true, true, true);
+        if (pattern.matches(nodeFullPath.c_str()) || pattern.matches(nodeShortenedFullPath.c_str())) {    // match Router@name and fullpath of my node
+            routerNode = router;
+            break;
         }
     }
-    throw cRuntimeError("Error reading XML config: IInterfaceTable contains no interface toward '%s' at %s", toward, ifConfig.getSourceLocation());
-}
+    if (routerNode == nullptr) {
+        throw cRuntimeError("No configuration for Router '%s' at '%s'", nodeFullPath.c_str(), asConfig->getSourceLocation());
+    }
 
-int OspfConfigReader::resolveInterfaceName(const std::string& name) const
-{
-    InterfaceEntry *ie = ift->getInterfaceByName(name.c_str());
-    if (!ie)
-        throw cRuntimeError("Error reading XML config: IInterfaceTable contains no interface named '%s'", name.c_str());
+    EV_DEBUG << "OspfConfigReader: Loading info for Router " << nodeFullPath << "\n";
 
-    return ie->getInterfaceId();
+    bool rfc1583Compatible = getBoolAttrOrPar(*routerNode, "RFC1583Compatible");
+    ospfRouter->setRFC1583Compatibility(rfc1583Compatible);
+
+    std::set<AreaId> areaList;
+    getAreaListFromXML(*routerNode, areaList);
+
+    // if the router is an area border router then it MUST be part of the backbone(area 0)
+    if ((areaList.size() > 1) && (areaList.find(BACKBONE_AREAID) == areaList.end())) {
+        areaList.insert(BACKBONE_AREAID);
+    }
+    // load area information
+    for (const auto & elem : areaList) {
+        loadAreaFromXML(*asConfig, elem);
+    }
+
+    // load interface information
+    cXMLElementList routerConfig = routerNode->getChildren();
+    for (auto & elem : routerConfig) {
+        std::string nodeName = (elem)->getTagName();
+        if ((nodeName == "PointToPointInterface") ||
+            (nodeName == "BroadcastInterface") ||
+            (nodeName == "NBMAInterface") ||
+            (nodeName == "PointToMultiPointInterface"))
+        {
+            loadInterfaceParameters(*(elem));
+        }
+        else if (nodeName == "ExternalInterface") {
+            loadExternalRoute(*(elem));
+        }
+        else if (nodeName == "HostInterface") {
+            loadHostRoute(*(elem));
+        }
+        else if (nodeName == "VirtualLink") {
+            loadVirtualLink(*(elem));
+        }
+        else {
+            throw cRuntimeError("Invalid '%s' node in Router '%s' at %s",
+                    nodeName.c_str(), nodeFullPath.c_str(), (elem)->getSourceLocation());
+        }
+    }
+    return true;
 }
 
 void OspfConfigReader::getAreaListFromXML(const cXMLElement& routerNode, std::set<AreaId>& areaList) const
@@ -142,77 +178,6 @@ void OspfConfigReader::loadAreaFromXML(const cXMLElement& asConfig, AreaId areaI
     ospfRouter->addArea(area);
 }
 
-int OspfConfigReader::getIntAttrOrPar(const cXMLElement& ifConfig, const char *name) const
-{
-    const char *attrStr = ifConfig.getAttribute(name);
-    if (attrStr && *attrStr)
-        return atoi(attrStr);
-    return par(name);
-}
-
-bool OspfConfigReader::getBoolAttrOrPar(const cXMLElement& ifConfig, const char *name) const
-{
-    const char *attrStr = ifConfig.getAttribute(name);
-    if (attrStr && *attrStr) {
-        if (strcmp(attrStr, "true") == 0 || strcmp(attrStr, "1") == 0)
-            return true;
-        if (strcmp(attrStr, "false") == 0 || strcmp(attrStr, "0") == 0)
-            return false;
-        throw cRuntimeError("Invalid boolean attribute %s = '%s' at %s", name, attrStr, ifConfig.getSourceLocation());
-    }
-    return par(name);
-}
-
-const char *OspfConfigReader::getStrAttrOrPar(const cXMLElement& ifConfig, const char *name) const
-{
-    const char *attrStr = ifConfig.getAttribute(name);
-    if (attrStr && *attrStr)
-        return attrStr;
-    return par(name);
-}
-
-void OspfConfigReader::joinMulticastGroups(int interfaceId)
-{
-    InterfaceEntry *ie = ift->getInterfaceById(interfaceId);
-    if (!ie)
-        throw cRuntimeError("Interface id=%d does not exist", interfaceId);
-    if (!ie->isMulticast())
-        return;
-    Ipv4InterfaceData *ipv4Data = ie->ipv4Data();
-    if (!ipv4Data)
-        throw cRuntimeError("Interface %s (id=%d) does not have Ipv4 data", ie->getInterfaceName(), interfaceId);
-    ipv4Data->joinMulticastGroup(Ipv4Address::ALL_OSPF_ROUTERS_MCAST);
-    ipv4Data->joinMulticastGroup(Ipv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST);
-}
-
-void OspfConfigReader::loadAuthenticationConfig(Interface *intf, const cXMLElement& ifConfig)
-{
-    std::string authenticationType = getStrAttrOrPar(ifConfig, "authenticationType");
-    if (authenticationType == "SimplePasswordType") {
-        intf->setAuthenticationType(SIMPLE_PASSWORD_TYPE);
-    }
-    else if (authenticationType == "CrytographicType") {
-        intf->setAuthenticationType(CRYTOGRAPHIC_TYPE);
-    }
-    else if (authenticationType == "NullType") {
-        intf->setAuthenticationType(NULL_TYPE);
-    }
-    else {
-        throw cRuntimeError("Invalid AuthenticationType '%s' at %s", authenticationType.c_str(), ifConfig.getSourceLocation());
-    }
-
-    std::string key = getStrAttrOrPar(ifConfig, "authenticationKey");
-    AuthenticationKeyType keyValue;
-    memset(keyValue.bytes, 0, sizeof(keyValue.bytes));
-    int keyLength = key.length();
-    if ((keyLength > 4) && (keyLength <= 18) && (keyLength % 2 == 0) && (key[0] == '0') && (key[1] == 'x')) {
-        for (int i = keyLength; (i > 2); i -= 2) {
-            keyValue.bytes[(i - 2) / 2 - 1] = hexPairToByte(key[i - 1], key[i]);
-        }
-    }
-    intf->setAuthenticationKey(keyValue);
-}
-
 void OspfConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig)
 {
     Interface *intf = new Interface;
@@ -224,6 +189,7 @@ void OspfConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig)
     EV_DEBUG << "        loading " << interfaceType << " " << ie->getInterfaceName() << " (ifIndex=" << ifIndex << ")\n";
 
     intf->setIfIndex(ift, ifIndex);
+
     if (interfaceType == "PointToPointInterface") {
         intf->setType(Interface::POINTTOPOINT);
     }
@@ -426,77 +392,102 @@ void OspfConfigReader::loadVirtualLink(const cXMLElement& virtualLinkConfig)
     }
 }
 
-bool OspfConfigReader::loadConfigFromXML(cXMLElement *asConfig, Router *ospfRouter)
+void OspfConfigReader::loadAuthenticationConfig(Interface *intf, const cXMLElement& ifConfig)
 {
-    this->ospfRouter = ospfRouter;
-
-    if (strcmp(asConfig->getTagName(), "OSPFASConfig"))
-        throw cRuntimeError("Cannot read OSPF configuration, unexpected element '%s' at %s", asConfig->getTagName(), asConfig->getSourceLocation());
-
-    cModule *myNode = findContainingNode(ospfModule);
-
-    ASSERT(myNode);
-    std::string nodeFullPath = myNode->getFullPath();
-    std::string nodeShortenedFullPath = nodeFullPath.substr(nodeFullPath.find('.') + 1);
-
-    // load information on this router
-    cXMLElementList routers = asConfig->getElementsByTagName("Router");
-    cXMLElement *routerNode = nullptr;
-    for (auto & router : routers) {
-        const char *nodeName = getMandatoryFilledAttribute(*(router), "name");
-        inet::PatternMatcher pattern(nodeName, true, true, true);
-        if (pattern.matches(nodeFullPath.c_str()) || pattern.matches(nodeShortenedFullPath.c_str())) {    // match Router@name and fullpath of my node
-            routerNode = router;
-            break;
-        }
+    std::string authenticationType = getStrAttrOrPar(ifConfig, "authenticationType");
+    if (authenticationType == "SimplePasswordType") {
+        intf->setAuthenticationType(SIMPLE_PASSWORD_TYPE);
     }
-    if (routerNode == nullptr) {
-        throw cRuntimeError("No configuration for Router '%s' at '%s'", nodeFullPath.c_str(), asConfig->getSourceLocation());
+    else if (authenticationType == "CrytographicType") {
+        intf->setAuthenticationType(CRYTOGRAPHIC_TYPE);
+    }
+    else if (authenticationType == "NullType") {
+        intf->setAuthenticationType(NULL_TYPE);
+    }
+    else {
+        throw cRuntimeError("Invalid AuthenticationType '%s' at %s", authenticationType.c_str(), ifConfig.getSourceLocation());
     }
 
-    EV_DEBUG << "OspfConfigReader: Loading info for Router " << nodeFullPath << "\n";
-
-    bool rfc1583Compatible = getBoolAttrOrPar(*routerNode, "RFC1583Compatible");
-    ospfRouter->setRFC1583Compatibility(rfc1583Compatible);
-
-    std::set<AreaId> areaList;
-    getAreaListFromXML(*routerNode, areaList);
-
-    // if the router is an area border router then it MUST be part of the backbone(area 0)
-    if ((areaList.size() > 1) && (areaList.find(BACKBONE_AREAID) == areaList.end())) {
-        areaList.insert(BACKBONE_AREAID);
-    }
-    // load area information
-    for (const auto & elem : areaList) {
-        loadAreaFromXML(*asConfig, elem);
-    }
-
-    // load interface information
-    cXMLElementList routerConfig = routerNode->getChildren();
-    for (auto & elem : routerConfig) {
-        std::string nodeName = (elem)->getTagName();
-        if ((nodeName == "PointToPointInterface") ||
-            (nodeName == "BroadcastInterface") ||
-            (nodeName == "NBMAInterface") ||
-            (nodeName == "PointToMultiPointInterface"))
-        {
-            loadInterfaceParameters(*(elem));
-        }
-        else if (nodeName == "ExternalInterface") {
-            loadExternalRoute(*(elem));
-        }
-        else if (nodeName == "HostInterface") {
-            loadHostRoute(*(elem));
-        }
-        else if (nodeName == "VirtualLink") {
-            loadVirtualLink(*(elem));
-        }
-        else {
-            throw cRuntimeError("Invalid '%s' node in Router '%s' at %s",
-                    nodeName.c_str(), nodeFullPath.c_str(), (elem)->getSourceLocation());
+    std::string key = getStrAttrOrPar(ifConfig, "authenticationKey");
+    AuthenticationKeyType keyValue;
+    memset(keyValue.bytes, 0, sizeof(keyValue.bytes));
+    int keyLength = key.length();
+    if ((keyLength > 4) && (keyLength <= 18) && (keyLength % 2 == 0) && (key[0] == '0') && (key[1] == 'x')) {
+        for (int i = keyLength; (i > 2); i -= 2) {
+            keyValue.bytes[(i - 2) / 2 - 1] = hexPairToByte(key[i - 1], key[i]);
         }
     }
-    return true;
+    intf->setAuthenticationKey(keyValue);
+}
+
+InterfaceEntry *OspfConfigReader::getInterfaceByXMLAttributesOf(const cXMLElement& ifConfig)
+{
+    const char *ifName = ifConfig.getAttribute("ifName");
+    if (ifName && *ifName) {
+        InterfaceEntry *ie = ift->getInterfaceByName(ifName);
+        if (!ie)
+            throw cRuntimeError("Error reading XML config: IInterfaceTable contains no interface named '%s' at %s", ifName, ifConfig.getSourceLocation());
+        return ie;
+    }
+
+    const char *toward = getMandatoryFilledAttribute(ifConfig, "toward");
+    cModule *destnode = getSimulation()->getSystemModule()->getModuleByPath(toward);
+    if (!destnode)
+        throw cRuntimeError("toward module `%s' not found at %s", toward, ifConfig.getSourceLocation());
+
+    cModule *host = ift->getHostModule();
+    for (int i = 0; i < ift->getNumInterfaces(); i++) {
+        InterfaceEntry *ie = ift->getInterface(i);
+        if (ie) {
+            int gateId = ie->getNodeOutputGateId();
+            if ((gateId != -1) && (host->gate(gateId)->pathContains(destnode)))
+                return ie;
+        }
+    }
+    throw cRuntimeError("Error reading XML config: IInterfaceTable contains no interface toward '%s' at %s", toward, ifConfig.getSourceLocation());
+}
+
+int OspfConfigReader::getIntAttrOrPar(const cXMLElement& ifConfig, const char *name) const
+{
+    const char *attrStr = ifConfig.getAttribute(name);
+    if (attrStr && *attrStr)
+        return atoi(attrStr);
+    return par(name);
+}
+
+bool OspfConfigReader::getBoolAttrOrPar(const cXMLElement& ifConfig, const char *name) const
+{
+    const char *attrStr = ifConfig.getAttribute(name);
+    if (attrStr && *attrStr) {
+        if (strcmp(attrStr, "true") == 0 || strcmp(attrStr, "1") == 0)
+            return true;
+        if (strcmp(attrStr, "false") == 0 || strcmp(attrStr, "0") == 0)
+            return false;
+        throw cRuntimeError("Invalid boolean attribute %s = '%s' at %s", name, attrStr, ifConfig.getSourceLocation());
+    }
+    return par(name);
+}
+
+const char *OspfConfigReader::getStrAttrOrPar(const cXMLElement& ifConfig, const char *name) const
+{
+    const char *attrStr = ifConfig.getAttribute(name);
+    if (attrStr && *attrStr)
+        return attrStr;
+    return par(name);
+}
+
+void OspfConfigReader::joinMulticastGroups(int interfaceId)
+{
+    InterfaceEntry *ie = ift->getInterfaceById(interfaceId);
+    if (!ie)
+        throw cRuntimeError("Interface id=%d does not exist", interfaceId);
+    if (!ie->isMulticast())
+        return;
+    Ipv4InterfaceData *ipv4Data = ie->ipv4Data();
+    if (!ipv4Data)
+        throw cRuntimeError("Interface %s (id=%d) does not have Ipv4 data", ie->getInterfaceName(), interfaceId);
+    ipv4Data->joinMulticastGroup(Ipv4Address::ALL_OSPF_ROUTERS_MCAST);
+    ipv4Data->joinMulticastGroup(Ipv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST);
 }
 
 } // namespace ospf

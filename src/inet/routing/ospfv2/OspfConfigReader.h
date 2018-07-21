@@ -48,11 +48,6 @@ class INET_API OspfConfigReader
     const char *getStrAttrOrPar(const cXMLElement& ifConfig, const char *name) const;
 
     /**
-     * Looks up the interface name in IInterfaceTable, and returns interfaceId a.k.a ifIndex.
-     */
-    int resolveInterfaceName(const std::string& name) const;
-
-    /**
      * Search an InterfaceEntry in IInterfaceTable by interface name or toward module name
      * an returns the InterfaceEntry pointer or throws an error.
      */
