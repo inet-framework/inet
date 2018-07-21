@@ -27,18 +27,18 @@ namespace inet {
 
 namespace ospf {
 
-void InterfaceStatePointToPoint::processEvent(Interface *intf, Interface::InterfaceEventType event)
+void InterfaceStatePointToPoint::processEvent(OspfInterface *intf, OspfInterface::OspfInterfaceEventType event)
 {
-    if (event == Interface::INTERFACE_DOWN) {
+    if (event == OspfInterface::INTERFACE_DOWN) {
         intf->reset();
         changeState(intf, new InterfaceStateDown, this);
     }
-    if (event == Interface::LOOP_INDICATION) {
+    if (event == OspfInterface::LOOP_INDICATION) {
         intf->reset();
         changeState(intf, new InterfaceStateLoopback, this);
     }
-    if (event == Interface::HELLO_TIMER) {
-        if (intf->getType() == Interface::VIRTUAL) {
+    if (event == OspfInterface::HELLO_TIMER) {
+        if (intf->getType() == OspfInterface::VIRTUAL) {
             if (intf->getNeighborCount() > 0) {
                 intf->sendHelloPacket(intf->getNeighbor(0)->getAddress(), VIRTUAL_LINK_TTL);
             }
@@ -48,7 +48,7 @@ void InterfaceStatePointToPoint::processEvent(Interface *intf, Interface::Interf
         }
         intf->getArea()->getRouter()->getMessageHandler()->startTimer(intf->getHelloTimer(), intf->getHelloInterval());
     }
-    if (event == Interface::ACKNOWLEDGEMENT_TIMER) {
+    if (event == OspfInterface::ACKNOWLEDGEMENT_TIMER) {
         intf->sendDelayedAcknowledgements();
     }
 }

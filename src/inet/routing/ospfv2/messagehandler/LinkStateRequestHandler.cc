@@ -31,7 +31,7 @@ LinkStateRequestHandler::LinkStateRequestHandler(Router *containingRouter) :
 {
 }
 
-void LinkStateRequestHandler::processPacket(Packet *packet, Interface *intf, Neighbor *neighbor)
+void LinkStateRequestHandler::processPacket(Packet *packet, OspfInterface *intf, Neighbor *neighbor)
 {
     router->getMessageHandler()->printEvent("Link State Request packet received", intf, neighbor);
 
@@ -75,15 +75,15 @@ void LinkStateRequestHandler::processPacket(Packet *packet, Interface *intf, Nei
 
         if (!error) {
             int updatesCount = lsas.size();
-            int ttl = (intf->getType() == Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
+            int ttl = (intf->getType() == OspfInterface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
             MessageHandler *messageHandler = router->getMessageHandler();
 
             for (int j = 0; j < updatesCount; j++) {
                 Packet *updatePacket = intf->createUpdatePacket(lsas[j]);
                 if (updatePacket != nullptr) {
-                    if (intf->getType() == Interface::BROADCAST) {
-                        if ((intf->getState() == Interface::DESIGNATED_ROUTER_STATE) ||
-                            (intf->getState() == Interface::BACKUP_STATE) ||
+                    if (intf->getType() == OspfInterface::BROADCAST) {
+                        if ((intf->getState() == OspfInterface::DESIGNATED_ROUTER_STATE) ||
+                            (intf->getState() == OspfInterface::BACKUP_STATE) ||
                             (intf->getDesignatedRouter() == NULL_DESIGNATEDROUTERID))
                         {
                             messageHandler->sendPacket(updatePacket, Ipv4Address::ALL_OSPF_ROUTERS_MCAST, intf->getIfIndex(), ttl);
@@ -93,7 +93,7 @@ void LinkStateRequestHandler::processPacket(Packet *packet, Interface *intf, Nei
                         }
                     }
                     else {
-                        if (intf->getType() == Interface::POINTTOPOINT) {
+                        if (intf->getType() == OspfInterface::POINTTOPOINT) {
                             messageHandler->sendPacket(updatePacket, Ipv4Address::ALL_OSPF_ROUTERS_MCAST, intf->getIfIndex(), ttl);
                         }
                         else {

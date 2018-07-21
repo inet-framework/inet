@@ -32,7 +32,7 @@ void NeighborStateDown::processEvent(Neighbor *neighbor, Neighbor::NeighborEvent
 {
     if (event == Neighbor::START) {
         MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
-        int ttl = (neighbor->getInterface()->getType() == Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
+        int ttl = (neighbor->getInterface()->getType() == OspfInterface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
 
         messageHandler->clearTimer(neighbor->getPollTimer());
         neighbor->getInterface()->sendHelloPacket(neighbor->getAddress(), ttl);
@@ -46,7 +46,7 @@ void NeighborStateDown::processEvent(Neighbor *neighbor, Neighbor::NeighborEvent
         changeState(neighbor, new NeighborStateInit, this);
     }
     if (event == Neighbor::POLL_TIMER) {
-        int ttl = (neighbor->getInterface()->getType() == Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
+        int ttl = (neighbor->getInterface()->getType() == OspfInterface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
         neighbor->getInterface()->sendHelloPacket(neighbor->getAddress(), ttl);
         MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
         messageHandler->startTimer(neighbor->getPollTimer(), neighbor->getInterface()->getPollInterval());

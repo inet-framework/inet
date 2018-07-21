@@ -25,11 +25,11 @@ namespace inet {
 
 namespace ospf {
 
-class INET_API InterfaceStateDown : public InterfaceState
+class INET_API InterfaceStateDown : public OspfInterfaceState
 {
   public:
-    virtual void processEvent(Interface *intf, Interface::InterfaceEventType event) override;
-    virtual Interface::InterfaceStateType getState() const override { return Interface::DOWN_STATE; }
+    virtual void processEvent(OspfInterface *intf, OspfInterface::OspfInterfaceEventType event) override;
+    virtual OspfInterface::OspfInterfaceStateType getState() const override { return OspfInterface::DOWN_STATE; }
 };
 
 } // namespace ospf

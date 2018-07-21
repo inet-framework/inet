@@ -61,43 +61,43 @@ void MessageHandler::handleTimer(cMessage *timer)
 {
     switch (timer->getKind()) {
         case INTERFACE_HELLO_TIMER: {
-            Interface *intf;
-            if (!(intf = reinterpret_cast<Interface *>(timer->getContextPointer()))) {
+            OspfInterface *intf;
+            if (!(intf = reinterpret_cast<OspfInterface *>(timer->getContextPointer()))) {
                 // should not reach this point
                 EV_INFO << "Discarding invalid InterfaceHelloTimer.\n";
                 delete timer;
             }
             else {
                 printEvent("Hello Timer expired", intf);
-                intf->processEvent(Interface::HELLO_TIMER);
+                intf->processEvent(OspfInterface::HELLO_TIMER);
             }
         }
         break;
 
         case INTERFACE_WAIT_TIMER: {
-            Interface *intf;
-            if (!(intf = reinterpret_cast<Interface *>(timer->getContextPointer()))) {
+            OspfInterface *intf;
+            if (!(intf = reinterpret_cast<OspfInterface *>(timer->getContextPointer()))) {
                 // should not reach this point
                 EV_INFO << "Discarding invalid InterfaceWaitTimer.\n";
                 delete timer;
             }
             else {
                 printEvent("Wait Timer expired", intf);
-                intf->processEvent(Interface::WAIT_TIMER);
+                intf->processEvent(OspfInterface::WAIT_TIMER);
             }
         }
         break;
 
         case INTERFACE_ACKNOWLEDGEMENT_TIMER: {
-            Interface *intf;
-            if (!(intf = reinterpret_cast<Interface *>(timer->getContextPointer()))) {
+            OspfInterface *intf;
+            if (!(intf = reinterpret_cast<OspfInterface *>(timer->getContextPointer()))) {
                 // should not reach this point
                 EV_INFO << "Discarding invalid InterfaceAcknowledgementTimer.\n";
                 delete timer;
             }
             else {
                 printEvent("Acknowledgement Timer expired", intf);
-                intf->processEvent(Interface::ACKNOWLEDGEMENT_TIMER);
+                intf->processEvent(OspfInterface::ACKNOWLEDGEMENT_TIMER);
             }
         }
         break;
@@ -183,7 +183,7 @@ void MessageHandler::handleTimer(cMessage *timer)
     }
 }
 
-void MessageHandler::processPacket(Packet *pk, Interface *unused1, Neighbor *unused2)
+void MessageHandler::processPacket(Packet *pk, OspfInterface *unused1, Neighbor *unused2)
 {
     const auto& packet = pk->peekAtFront<OspfPacket>();
     EV_INFO << "Received packet: (" << packet.get()->getClassName() << ")" << pk->getName() << "\n";
@@ -202,7 +202,7 @@ void MessageHandler::processPacket(Packet *pk, Interface *unused1, Neighbor *unu
 
         if (area != nullptr) {
             // packet Area ID must either match the Area ID of the receiving interface or...
-            Interface *intf = area->getInterface(interfaceId);
+            OspfInterface *intf = area->getInterface(interfaceId);
 
             if (intf == nullptr) {
                 // it must be the backbone area and...
@@ -216,7 +216,7 @@ void MessageHandler::processPacket(Packet *pk, Interface *unused1, Neighbor *unu
 
                             if (virtualLinkTransitArea != nullptr) {
                                 // the receiving interface must attach to the virtual link's configured transit area
-                                Interface *virtualLinkInterface = virtualLinkTransitArea->getInterface(interfaceId);
+                                OspfInterface *virtualLinkInterface = virtualLinkTransitArea->getInterface(interfaceId);
 
                                 if (virtualLinkInterface == nullptr) {
                                     intf = nullptr;
@@ -233,14 +233,14 @@ void MessageHandler::processPacket(Packet *pk, Interface *unused1, Neighbor *unu
                 Ipv4Address sourceAddress = pk->getTag<L3AddressInd>()->getSrcAddress().toIpv4();
                 Ipv4Address destinationAddress = pk->getTag<L3AddressInd>()->getDestAddress().toIpv4();
                 Ipv4Address allDRouters = Ipv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST;
-                Interface::InterfaceStateType interfaceState = intf->getState();
+                OspfInterface::OspfInterfaceStateType interfaceState = intf->getState();
 
                 // if destination address is ALL_D_ROUTERS the receiving interface must be in DesignatedRouter or Backup state
                 if (
                     ((destinationAddress == allDRouters) &&
                      (
-                         (interfaceState == Interface::DESIGNATED_ROUTER_STATE) ||
-                         (interfaceState == Interface::BACKUP_STATE)
+                         (interfaceState == OspfInterface::DESIGNATED_ROUTER_STATE) ||
+                         (interfaceState == OspfInterface::BACKUP_STATE)
                      )
                     ) ||
                     (destinationAddress != allDRouters)
@@ -254,14 +254,14 @@ void MessageHandler::processPacket(Packet *pk, Interface *unused1, Neighbor *unu
                         // all packets except HelloPackets are sent only along adjacencies, so a Neighbor must exist
                         if (packetType != HELLO_PACKET) {
                             switch (intf->getType()) {
-                                case Interface::BROADCAST:
-                                case Interface::NBMA:
-                                case Interface::POINTTOMULTIPOINT:
+                                case OspfInterface::BROADCAST:
+                                case OspfInterface::NBMA:
+                                case OspfInterface::POINTTOMULTIPOINT:
                                     neighbor = intf->getNeighborByAddress(sourceAddress);
                                     break;
 
-                                case Interface::POINTTOPOINT:
-                                case Interface::VIRTUAL:
+                                case OspfInterface::POINTTOPOINT:
+                                case OspfInterface::VIRTUAL:
                                     neighbor = intf->getNeighborById(packet->getRouterID());
                                     break;
 
@@ -376,7 +376,7 @@ void MessageHandler::startTimer(cMessage *timer, simtime_t delay)
     ospfModule->scheduleAt(simTime() + delay, timer);
 }
 
-void MessageHandler::printEvent(const char *eventString, const Interface *onInterface, const Neighbor *forNeighbor    /*= nullptr*/) const
+void MessageHandler::printEvent(const char *eventString, const OspfInterface *onInterface, const Neighbor *forNeighbor    /*= nullptr*/) const
 {
     EV_DETAIL << eventString;
     if ((onInterface != nullptr) || (forNeighbor != nullptr)) {
@@ -394,23 +394,23 @@ void MessageHandler::printEvent(const char *eventString, const Interface *onInte
                   << static_cast<short>(onInterface->getIfIndex())
                   << "] ";
         switch (onInterface->getType()) {
-            case Interface::POINTTOPOINT:
+            case OspfInterface::POINTTOPOINT:
                 EV_DETAIL << "(PointToPoint)";
                 break;
 
-            case Interface::BROADCAST:
+            case OspfInterface::BROADCAST:
                 EV_DETAIL << "(Broadcast)";
                 break;
 
-            case Interface::NBMA:
+            case OspfInterface::NBMA:
                 EV_DETAIL << "(NBMA).\n";
                 break;
 
-            case Interface::POINTTOMULTIPOINT:
+            case OspfInterface::POINTTOMULTIPOINT:
                 EV_DETAIL << "(PointToMultiPoint)";
                 break;
 
-            case Interface::VIRTUAL:
+            case OspfInterface::VIRTUAL:
                 EV_DETAIL << "(Virtual)";
                 break;
 

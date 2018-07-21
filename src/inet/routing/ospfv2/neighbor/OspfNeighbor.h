@@ -32,7 +32,7 @@ namespace inet {
 namespace ospf {
 
 class NeighborState;
-class Interface;
+class OspfInterface;
 
 class INET_API Neighbor
 {
@@ -117,7 +117,7 @@ class INET_API Neighbor
     std::list<TransmittedLsa> transmittedLSAs;
     Packet *lastTransmittedDDPacket = nullptr;
 
-    Interface *parentInterface = nullptr;
+    OspfInterface *parentInterface = nullptr;
 
     // TODO: Should come from a global unique number generator module.
     static unsigned long ddSequenceNumberInitSeed;
@@ -180,9 +180,9 @@ class INET_API Neighbor
     void setDatabaseExchangeRelationship(DatabaseExchangeRelationshipType relation) { databaseExchangeRelationship = relation; }
     DatabaseExchangeRelationshipType getDatabaseExchangeRelationship() const { return databaseExchangeRelationship; }
 
-    void setInterface(Interface *intf) { parentInterface = intf; }
-    Interface *getInterface() { return parentInterface; }
-    const Interface *getInterface() const { return parentInterface; }
+    void setInterface(OspfInterface *intf) { parentInterface = intf; }
+    OspfInterface *getInterface() { return parentInterface; }
+    const OspfInterface *getInterface() const { return parentInterface; }
 
     cMessage *getInactivityTimer() { return inactivityTimer; }
     cMessage *getPollTimer() { return pollTimer; }

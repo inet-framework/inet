@@ -27,24 +27,24 @@ namespace inet {
 
 namespace ospf {
 
-void InterfaceStateNotDesignatedRouter::processEvent(Interface *intf, Interface::InterfaceEventType event)
+void InterfaceStateNotDesignatedRouter::processEvent(OspfInterface *intf, OspfInterface::OspfInterfaceEventType event)
 {
-    if (event == Interface::NEIGHBOR_CHANGE) {
+    if (event == OspfInterface::NEIGHBOR_CHANGE) {
         calculateDesignatedRouter(intf);
     }
-    if (event == Interface::INTERFACE_DOWN) {
+    if (event == OspfInterface::INTERFACE_DOWN) {
         intf->reset();
         changeState(intf, new InterfaceStateDown, this);
     }
-    if (event == Interface::LOOP_INDICATION) {
+    if (event == OspfInterface::LOOP_INDICATION) {
         intf->reset();
         changeState(intf, new InterfaceStateLoopback, this);
     }
-    if (event == Interface::HELLO_TIMER) {
-        if (intf->getType() == Interface::BROADCAST) {
+    if (event == OspfInterface::HELLO_TIMER) {
+        if (intf->getType() == OspfInterface::BROADCAST) {
             intf->sendHelloPacket(Ipv4Address::ALL_OSPF_ROUTERS_MCAST);
         }
-        else {    // Interface::NBMA
+        else {    // OspfInterface::NBMA
             if (intf->getRouterPriority() > 0) {
                 unsigned long neighborCount = intf->getNeighborCount();
                 for (unsigned long i = 0; i < neighborCount; i++) {
@@ -61,7 +61,7 @@ void InterfaceStateNotDesignatedRouter::processEvent(Interface *intf, Interface:
         }
         intf->getArea()->getRouter()->getMessageHandler()->startTimer(intf->getHelloTimer(), intf->getHelloInterval());
     }
-    if (event == Interface::ACKNOWLEDGEMENT_TIMER) {
+    if (event == OspfInterface::ACKNOWLEDGEMENT_TIMER) {
         intf->sendDelayedAcknowledgements();
     }
 }

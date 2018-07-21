@@ -92,12 +92,12 @@ Area *Router::getAreaByAddr(Ipv4Address address)
     return nullptr;
 }
 
-Interface *Router::getNonVirtualInterface(unsigned char ifIndex)
+OspfInterface *Router::getNonVirtualInterface(unsigned char ifIndex)
 {
     long areaCount = areas.size();
 
     for (long i = 0; i < areaCount; i++) {
-        Interface *intf = areas[i]->getInterface(ifIndex);
+        OspfInterface *intf = areas[i]->getInterface(ifIndex);
         if (intf != nullptr) {
             return intf;
         }
@@ -426,7 +426,7 @@ bool Router::isOnAnyRetransmissionList(LsaKeyType lsaKey) const
     return false;
 }
 
-bool Router::floodLSA(const OspfLsa *lsa, AreaId areaID    /*= BACKBONE_AREAID*/, Interface *intf    /*= nullptr*/, Neighbor *neighbor    /*= nullptr*/)
+bool Router::floodLSA(const OspfLsa *lsa, AreaId areaID    /*= BACKBONE_AREAID*/, OspfInterface *intf    /*= nullptr*/, Neighbor *neighbor    /*= nullptr*/)
 {
     bool floodedBackOut = false;
 

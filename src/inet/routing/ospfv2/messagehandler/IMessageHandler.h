@@ -27,7 +27,7 @@ namespace inet {
 namespace ospf {
 
 class Router;
-class Interface;
+class OspfInterface;
 class Neighbor;
 
 class INET_API IMessageHandler
@@ -39,7 +39,7 @@ class INET_API IMessageHandler
     IMessageHandler(Router *containingRouter) { router = containingRouter; }
     virtual ~IMessageHandler() {}
 
-    virtual void processPacket(Packet *, Interface *intf, Neighbor *neighbor) = 0;
+    virtual void processPacket(Packet *, OspfInterface *intf, Neighbor *neighbor) = 0;
 };
 
 } // namespace ospf

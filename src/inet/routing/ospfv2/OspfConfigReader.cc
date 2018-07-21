@@ -180,7 +180,7 @@ void OspfConfigReader::loadAreaFromXML(const cXMLElement& asConfig, AreaId areaI
 
 void OspfConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig)
 {
-    Interface *intf = new Interface;
+    OspfInterface *intf = new OspfInterface;
     InterfaceEntry *ie = getInterfaceByXMLAttributesOf(ifConfig);
     int ifIndex = ie->getInterfaceId();
 
@@ -191,16 +191,16 @@ void OspfConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig)
     intf->setIfIndex(ift, ifIndex);
 
     if (interfaceType == "PointToPointInterface") {
-        intf->setType(Interface::POINTTOPOINT);
+        intf->setType(OspfInterface::POINTTOPOINT);
     }
     else if (interfaceType == "BroadcastInterface") {
-        intf->setType(Interface::BROADCAST);
+        intf->setType(OspfInterface::BROADCAST);
     }
     else if (interfaceType == "NBMAInterface") {
-        intf->setType(Interface::NBMA);
+        intf->setType(OspfInterface::NBMA);
     }
     else if (interfaceType == "PointToMultiPointInterface") {
-        intf->setType(Interface::POINTTOMULTIPOINT);
+        intf->setType(OspfInterface::POINTTOMULTIPOINT);
     }
     else {
         delete intf;
@@ -267,7 +267,7 @@ void OspfConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig)
     Area *area = ospfRouter->getAreaByID(areaID);
     if (area != nullptr) {
         area->addInterface(intf);
-        intf->processEvent(Interface::INTERFACE_UP);    // notification should come from the blackboard...
+        intf->processEvent(OspfInterface::INTERFACE_UP);    // notification should come from the blackboard...
     }
     else {
         delete intf;
@@ -357,13 +357,13 @@ void OspfConfigReader::loadHostRoute(const cXMLElement& hostRouteConfig)
 
 void OspfConfigReader::loadVirtualLink(const cXMLElement& virtualLinkConfig)
 {
-    Interface *intf = new Interface;
+    OspfInterface *intf = new OspfInterface;
     std::string endPoint = getMandatoryFilledAttribute(virtualLinkConfig, "endPointRouterID");
     Neighbor *neighbor = new Neighbor;
 
     EV_DEBUG << "        loading VirtualLink to " << endPoint << "\n";
 
-    intf->setType(Interface::VIRTUAL);
+    intf->setType(OspfInterface::VIRTUAL);
     neighbor->setNeighborID(ipv4AddressFromAddressString(endPoint.c_str()));
     intf->addNeighbor(neighbor);
 
@@ -392,7 +392,7 @@ void OspfConfigReader::loadVirtualLink(const cXMLElement& virtualLinkConfig)
     }
 }
 
-void OspfConfigReader::loadAuthenticationConfig(Interface *intf, const cXMLElement& ifConfig)
+void OspfConfigReader::loadAuthenticationConfig(OspfInterface *intf, const cXMLElement& ifConfig)
 {
     std::string authenticationType = getStrAttrOrPar(ifConfig, "authenticationType");
     if (authenticationType == "SimplePasswordType") {

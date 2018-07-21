@@ -190,7 +190,7 @@ void Neighbor::sendDatabaseDescriptionPacket(bool init)
         ddPacket->setAuthentication(i, authKey.bytes[i]);
     }
 
-    if (parentInterface->getType() != Interface::VIRTUAL) {
+    if (parentInterface->getType() != OspfInterface::VIRTUAL) {
         ddPacket->setInterfaceMTU(parentInterface->getMtu());
     }
     else {
@@ -245,13 +245,13 @@ void Neighbor::sendDatabaseDescriptionPacket(bool init)
     pk->insertAtBack(ddPacket);
 
     MessageHandler *messageHandler = parentInterface->getArea()->getRouter()->getMessageHandler();
-    int ttl = (parentInterface->getType() == Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
+    int ttl = (parentInterface->getType() == OspfInterface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
 
     if (lastTransmittedDDPacket != nullptr)
         delete lastTransmittedDDPacket;
     lastTransmittedDDPacket = pk->dup();
 
-    if (parentInterface->getType() == Interface::POINTTOPOINT) {
+    if (parentInterface->getType() == OspfInterface::POINTTOPOINT) {
         messageHandler->sendPacket(pk, Ipv4Address::ALL_OSPF_ROUTERS_MCAST, parentInterface->getIfIndex(), ttl);
     }
     else {
@@ -264,9 +264,9 @@ bool Neighbor::retransmitDatabaseDescriptionPacket()
     if (lastTransmittedDDPacket != nullptr) {
         Packet *ddPacket = new Packet(*lastTransmittedDDPacket);
         MessageHandler *messageHandler = parentInterface->getArea()->getRouter()->getMessageHandler();
-        int ttl = (parentInterface->getType() == Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
+        int ttl = (parentInterface->getType() == OspfInterface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
 
-        if (parentInterface->getType() == Interface::POINTTOPOINT) {
+        if (parentInterface->getType() == OspfInterface::POINTTOPOINT) {
             messageHandler->sendPacket(ddPacket, Ipv4Address::ALL_OSPF_ROUTERS_MCAST, parentInterface->getIfIndex(), ttl);
         }
         else {
@@ -314,7 +314,7 @@ void Neighbor::createDatabaseSummary()
         }
     }
 
-    if ((parentInterface->getType() != Interface::VIRTUAL) &&
+    if ((parentInterface->getType() != OspfInterface::VIRTUAL) &&
         (area->getExternalRoutingCapability()))
     {
         Router *router = area->getRouter();
@@ -375,8 +375,8 @@ void Neighbor::sendLinkStateRequestPacket()
     pk->insertAtBack(requestPacket);
 
     MessageHandler *messageHandler = parentInterface->getArea()->getRouter()->getMessageHandler();
-    int ttl = (parentInterface->getType() == Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
-    if (parentInterface->getType() == Interface::POINTTOPOINT) {
+    int ttl = (parentInterface->getType() == OspfInterface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
+    if (parentInterface->getType() == OspfInterface::POINTTOPOINT) {
         messageHandler->sendPacket(pk, Ipv4Address::ALL_OSPF_ROUTERS_MCAST, parentInterface->getIfIndex(), ttl);
     }
     else {
@@ -386,14 +386,14 @@ void Neighbor::sendLinkStateRequestPacket()
 
 bool Neighbor::needAdjacency()
 {
-    Interface::OspfInterfaceType interfaceType = parentInterface->getType();
+    OspfInterface::OspfInterfaceType interfaceType = parentInterface->getType();
     RouterId routerID = parentInterface->getArea()->getRouter()->getRouterID();
     DesignatedRouterId dRouter = parentInterface->getDesignatedRouter();
     DesignatedRouterId backupDRouter = parentInterface->getBackupDesignatedRouter();
 
-    if ((interfaceType == Interface::POINTTOPOINT) ||
-        (interfaceType == Interface::POINTTOMULTIPOINT) ||
-        (interfaceType == Interface::VIRTUAL) ||
+    if ((interfaceType == OspfInterface::POINTTOPOINT) ||
+        (interfaceType == OspfInterface::POINTTOMULTIPOINT) ||
+        (interfaceType == OspfInterface::VIRTUAL) ||
         (dRouter.routerID == routerID) ||
         (backupDRouter.routerID == routerID) ||
         ((neighborsDesignatedRouter.routerID == dRouter.routerID) ||
@@ -766,7 +766,7 @@ void Neighbor::retransmitUpdatePacket()
     pk->insertAtBack(updatePacket);
 
     MessageHandler *messageHandler = parentInterface->getArea()->getRouter()->getMessageHandler();
-    int ttl = (parentInterface->getType() == Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
+    int ttl = (parentInterface->getType() == OspfInterface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
     messageHandler->sendPacket(pk, neighborIPAddress, parentInterface->getIfIndex(), ttl);
 }
 
