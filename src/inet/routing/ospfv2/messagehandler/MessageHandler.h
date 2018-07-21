@@ -49,13 +49,13 @@ class INET_API MessageHandler : public IMessageHandler
     void messageReceived(cMessage *message);
     void handleTimer(cMessage *timer);
 
-    void processPacket(Packet *packet, Interface *unused1 = nullptr, Neighbor *unused2 = nullptr) override;
+    void processPacket(Packet *packet, OspfInterface *unused1 = nullptr, Neighbor *unused2 = nullptr) override;
 
     void sendPacket(Packet *packet, Ipv4Address destination, int outputIfIndex, short ttl = 1);
     void clearTimer(cMessage *timer);
     void startTimer(cMessage *timer, simtime_t delay);
 
-    void printEvent(const char *eventString, const Interface *onInterface = nullptr, const Neighbor *forNeighbor = nullptr) const;
+    void printEvent(const char *eventString, const OspfInterface *onInterface = nullptr, const Neighbor *forNeighbor = nullptr) const;
     void printHelloPacket(const OspfHelloPacket *helloPacket, Ipv4Address destination, int outputIfIndex) const;
     void printDatabaseDescriptionPacket(const OspfDatabaseDescriptionPacket *ddPacket, Ipv4Address destination, int outputIfIndex) const;
     void printLinkStateRequestPacket(const OspfLinkStateRequestPacket *requestPacket, Ipv4Address destination, int outputIfIndex) const;

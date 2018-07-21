@@ -116,7 +116,7 @@ class INET_API Router
      * nullptr if the Router doesn't have such an interface.
      * @param ifIndex [in] The interface index to look for.
      */
-    Interface *getNonVirtualInterface(unsigned char ifIndex);
+    OspfInterface *getNonVirtualInterface(unsigned char ifIndex);
 
     /**
      * Installs a new LSA into the Router database.
@@ -175,7 +175,7 @@ class INET_API Router
      * @param neighbor [in] The Nieghbor this LSA arrived from.
      * @return True if the LSA was floooded back out on the receiving Interface, false otherwise.
      */
-    bool floodLSA(const OspfLsa *lsa, AreaId areaID = BACKBONE_AREAID, Interface *intf = nullptr, Neighbor *neighbor = nullptr);
+    bool floodLSA(const OspfLsa *lsa, AreaId areaID = BACKBONE_AREAID, OspfInterface *intf = nullptr, Neighbor *neighbor = nullptr);
 
     /**
      * Returns true if the input Ipv4 address falls into any of the Router's Areas' configured
