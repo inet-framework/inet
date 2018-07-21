@@ -35,9 +35,10 @@ namespace ospf {
 /**
  * Implements the OSPFv2 routing protocol. See the NED file for more information.
  */
-class Ospf : public cSimpleModule, public ILifecycle
+class Ospf : public cSimpleModule, protected cListener, public ILifecycle
 {
   private:
+    cModule *host = nullptr;    // the host module that owns this module
     IIpv4RoutingTable *rt = nullptr;
     IInterfaceTable *ift = nullptr;
     bool isUp = false;
@@ -65,6 +66,7 @@ class Ospf : public cSimpleModule, public ILifecycle
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
     virtual void createOspfRouter();
 };
