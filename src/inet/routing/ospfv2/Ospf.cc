@@ -51,6 +51,7 @@ void Ospf::initialize(int stage)
     cSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
+        host = getContainingNode(this);
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
 
@@ -101,7 +102,51 @@ void Ospf::createOspfRouter()
         throw cRuntimeError("Error reading AS configuration from %s", ospfConfig->getSourceLocation());
 
     ospfRouter->addWatches();
+
+    // subscribe to interface created/deleted/changed notifications
+    host->subscribe(interfaceCreatedSignal, this);
+    host->subscribe(interfaceDeletedSignal, this);
+    host->subscribe(interfaceStateChangedSignal, this);
 }
+
+
+/**
+ * Listen on interface changes and update private data structures.
+ */
+void Ospf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+{
+    Enter_Method_Silent("Ospf::receiveChangeNotification(%s)", cComponent::getSignalName(signalID));
+
+    const InterfaceEntry *ie;
+    const InterfaceEntryChangeDetails *change;
+
+    if (signalID == interfaceCreatedSignal) {
+        // configure interface for RIP
+        ie = check_and_cast<const InterfaceEntry *>(obj);
+        if (ie->isMulticast() && !ie->isLoopback()) {
+            // TODO
+        }
+    }
+    else if (signalID == interfaceDeletedSignal) {
+        ie = check_and_cast<const InterfaceEntry *>(obj);
+        // TODO
+    }
+    else if (signalID == interfaceStateChangedSignal) {
+        change = check_and_cast<const InterfaceEntryChangeDetails *>(obj);
+        if (change->getFieldId() == InterfaceEntry::F_CARRIER || change->getFieldId() == InterfaceEntry::F_STATE) {
+            ie = change->getInterfaceEntry();
+            if (!ie->isUp()) {
+                // TODO
+            }
+            else {
+                // TODO
+            }
+        }
+    }
+    else
+        throw cRuntimeError("Unexpected signal: %s", getSignalName(signalID));
+}
+
 
 bool Ospf::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
