@@ -48,6 +48,7 @@ InterfaceEntry *ShortcutMac::createInterfaceEntry()
 {
     auto interfaceEntry = getContainingNicModule(this);
     MacAddress address = parseMacAddressPar(par("address"));
+    shortcutMacs[address] = this;
     interfaceEntry->setDatarate(bitrate);
     interfaceEntry->setMacAddress(address);
     interfaceEntry->setInterfaceToken(address.formInterfaceIdentifier());
