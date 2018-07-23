@@ -60,7 +60,6 @@ void BMac::initialize(int stage)
         macState = INIT;
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
-        initializeMacAddress();
         registerInterface();
 
         cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
@@ -146,24 +145,9 @@ void BMac::finish()
     //recordScalar("timeTX", timeTX);
 }
 
-void BMac::initializeMacAddress()
-{
-    const char *addrstr = par("address");
-
-    if (!strcmp(addrstr, "auto")) {
-        // assign automatic address
-        address = MacAddress::generateAutoAddress();
-
-        // change module parameter from "auto" to concrete address
-        par("address").setStringValue(address.str().c_str());
-    }
-    else {
-        address.setAddress(addrstr);
-    }
-}
-
 InterfaceEntry *BMac::createInterfaceEntry()
 {
+    MacAddress address = parseMacAddressPar(par("address"));
     InterfaceEntry *e = getContainingNicModule(this);
 
     // data rate
@@ -204,7 +188,7 @@ void BMac::handleUpperPacket(Packet *packet)
 void BMac::sendPreamble()
 {
     auto preamble = makeShared<BMacHeader>();
-    preamble->setSrcAddr(address);
+    preamble->setSrcAddr(interfaceEntry->getMacAddress());
     preamble->setDestAddr(MacAddress::BROADCAST_ADDRESS);
     preamble->setChunkLength(headerLength);
 
@@ -224,7 +208,7 @@ void BMac::sendPreamble()
 void BMac::sendMacAck()
 {
     auto ack = makeShared<BMacHeader>();
-    ack->setSrcAddr(address);
+    ack->setSrcAddr(interfaceEntry->getMacAddress());
     ack->setDestAddr(lastDataPktSrcAddr);
     ack->setChunkLength(headerLength);
 
@@ -471,6 +455,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                 return;
             }
             if (msg->getKind() == BMAC_DATA) {
+                MacAddress address = interfaceEntry->getMacAddress();
                 nbRxDataPackets++;
                 auto packet = check_and_cast<Packet *>(msg);
                 const auto bmacHeader = packet->peekAtFront<BMacHeader>();
@@ -773,7 +758,7 @@ void BMac::encapsulate(Packet *packet)
     delete packet->removeControlInfo();
 
     //set the src address to own mac address (nic module getId())
-    pkt->setSrcAddr(address);
+    pkt->setSrcAddr(interfaceEntry->getMacAddress());
 
     //encapsulate the network packet
     packet->insertAtFront(pkt);

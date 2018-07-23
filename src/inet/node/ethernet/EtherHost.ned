@@ -21,9 +21,9 @@ package inet.node.ethernet;
 import inet.applications.ethernet.EtherAppClient;
 import inet.applications.ethernet.EtherAppServer;
 import inet.common.lifecycle.NodeStatus;
-import inet.common.queue.IOutputQueue;
-import inet.linklayer.contract.IEtherMac;
+import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.ethernet.EtherLlc;
+
 
 //
 // An example host with one Ethernet port and a traffic generator that
@@ -40,8 +40,10 @@ module EtherHost
         @networkNode();
         @labels(node,ethernet-node);
         @display("i=device/pc2");
+        eth.csmacdSupport = csmacdSupport;
         *.interfaceTableModule = default("");
         *.fcsMode = fcsMode;
+        eth.encap.typename = "EtherEncapDummy";
     gates:
         inout ethg @labels(EtherFrame-conn);
     submodules:
@@ -65,14 +67,9 @@ module EtherHost
                 upperLayerIn[2];
                 upperLayerOut[2];
         }
-        queue: <default("")> like IOutputQueue if typename != "" {
+        eth: <default("EthernetInterface")> like IEthernetInterface {
             parameters:
-                @display("p=250,300;q=l2queue");
-        }
-        mac: <default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex")> like IEtherMac {
-            parameters:
-                queueModule = (!exists(queue) ? "" : "^.queue");
-                @display("p=350,400;q=txQueue");
+                @display("p=350,297,row,150;q=txQueue");
         }
     connections:
 
@@ -81,10 +78,9 @@ module EtherHost
         srv.out --> llc.upperLayerIn[1];
         srv.in <-- llc.upperLayerOut[1];
 
-        llc.lowerLayerOut --> queue.in if exists(queue);
-        queue.out --> mac.upperLayerIn if exists(queue);
-        llc.lowerLayerOut --> mac.upperLayerIn if !exists(queue);
-        mac.upperLayerOut --> llc.lowerLayerIn;
+        llc.lowerLayerOut --> eth.upperLayerIn;
+        eth.upperLayerOut --> llc.lowerLayerIn;
 
-        mac.phys <--> ethg;
+        eth.phys <--> { @display("m=s"); } <--> ethg;
 }
+

@@ -66,6 +66,7 @@ void Ieee80211VisualizerBase::initialize(int stage)
 
 void Ieee80211VisualizerBase::handleParameterChange(const char *name)
 {
+    if (!hasGUI()) return;
     if (name != nullptr) {
         if (!strcmp(name, "nodeFilter"))
             nodeFilter.setPattern(par("nodeFilter"));

@@ -34,11 +34,9 @@ class INET_API ShortcutMac : public MacProtocolBase
     cPar *lengthOverhead = nullptr;
     cPar *durationOverhead = nullptr;
     cPar *packetLoss = nullptr;
-    MacAddress address;
 
   protected:
     virtual void initialize(int stage) override;
-    virtual void initializeMacAddress();
     virtual InterfaceEntry *createInterfaceEntry() override;
 
     virtual void handleMessageWhenUp(cMessage *message) override;

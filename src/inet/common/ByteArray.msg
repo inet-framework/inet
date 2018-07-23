@@ -99,6 +99,6 @@ cplusplus(ByteArray) {{
      */
     virtual void expandData(unsigned int addLeft, unsigned int addRight);
 
-    virtual char *getDataPtr()  { return data; }
+    virtual const char *getDataPtr() const { return data; }
 }}
 

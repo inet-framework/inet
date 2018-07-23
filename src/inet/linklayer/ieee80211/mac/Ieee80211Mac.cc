@@ -74,13 +74,9 @@ void Ieee80211Mac::initialize(int stage)
         ds = check_and_cast<IDs *>(getSubmodule("ds"));
         rx = check_and_cast<IRx *>(getSubmodule("rx"));
         tx = check_and_cast<ITx *>(getSubmodule("tx"));
-        const char *addressString = par("address");
-        if (!strcmp(addressString, "auto")) {
-            // change module parameter from "auto" to concrete address
-            par("address").setStringValue(MacAddress::generateAutoAddress().str().c_str());
-            addressString = par("address");
-        }
-        mib->address.setAddress(addressString);
+        MacAddress address = parseMacAddressPar(par("address"));
+        //TODO the mib module should use the mac address from InterfaceEntry
+        mib->address = address;
         registerInterface();
         emit(modesetChangedSignal, modeSet);
         if (isOperational)
@@ -131,6 +127,7 @@ const MacAddress& Ieee80211Mac::isInterfaceRegistered()
 
 InterfaceEntry *Ieee80211Mac::createInterfaceEntry()
 {
+    //TODO the mib module should use the mac address from InterfaceEntry
     InterfaceEntry *e = getContainingNicModule(this);
     // address
     e->setMacAddress(mib->address);

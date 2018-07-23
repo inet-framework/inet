@@ -149,7 +149,7 @@ void EtherMacFullDuplex::processFrameFromUpperLayer(Packet *packet)
     emit(packetReceivedFromUpperSignal, packet);
 
     auto frame = packet->peekAtFront<EthernetMacHeader>();
-    if (frame->getDest().equals(address)) {
+    if (frame->getDest().equals(getMacAddress())) {
         throw cRuntimeError("logic error: frame %s from higher layer has local MAC address as dest (%s)",
                 packet->getFullName(), frame->getDest().str().c_str());
     }
@@ -175,7 +175,7 @@ void EtherMacFullDuplex::processFrameFromUpperLayer(Packet *packet)
     if (frame->getSrc().isUnspecified()) {
         frame = nullptr; // drop shared ptr
         auto newFrame = packet->removeAtFront<EthernetMacHeader>();
-        newFrame->setSrc(address);
+        newFrame->setSrc(getMacAddress());
         packet->insertAtFront(newFrame);
         frame = newFrame;
         auto oldFcs = packet->removeAtBack<EthernetFcs>();

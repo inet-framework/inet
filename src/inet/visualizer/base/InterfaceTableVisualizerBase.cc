@@ -137,6 +137,7 @@ void InterfaceTableVisualizerBase::initialize(int stage)
 
 void InterfaceTableVisualizerBase::handleParameterChange(const char *name)
 {
+    if (!hasGUI()) return;
     if (name != nullptr) {
         if (!strcmp(name, "nodeFilter"))
             nodeFilter.setPattern(par("nodeFilter"));

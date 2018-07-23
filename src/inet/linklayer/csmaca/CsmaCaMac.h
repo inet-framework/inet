@@ -36,7 +36,6 @@ class INET_API CsmaCaMac : public MacProtocolBase
      */
     //@{
     FcsMode fcsMode;
-    MacAddress address;
     bool useAck = true;
     double bitrate = NaN;
     b headerLength = b(-1);

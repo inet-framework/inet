@@ -30,12 +30,12 @@
 #include "inet/linklayer/base/MacBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
+#include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
 
 // Forward declarations:
 class EthernetSignal;
-class InterfaceEntry;
 
 /**
  * Base class for Ethernet MAC implementations.
@@ -133,7 +133,6 @@ class INET_API EtherMacBase : public MacBase
     // configuration
     bool sendRawBytes = false;
     const EtherDescr *curEtherDescr = nullptr;    // constants for the current Ethernet mode, e.g. txrate
-    MacAddress address;    // own MAC address
     bool connected = false;    // true if connected to a network, set automatically by exploring the network configuration
     bool disabled = false;    // true if the MAC is disabled, defined by the user
     bool promiscuous = false;    // if true, passes up all received frames
@@ -186,7 +185,7 @@ class INET_API EtherMacBase : public MacBase
     EtherMacBase();
     virtual ~EtherMacBase();
 
-    virtual MacAddress getMacAddress() { return address; }
+    virtual MacAddress getMacAddress() { return interfaceEntry ? interfaceEntry->getMacAddress() : MacAddress::UNSPECIFIED_ADDRESS; }
 
     double getTxRate() { return curEtherDescr->txrate; }
     bool isActive() { return connected && !disabled; }
@@ -201,7 +200,6 @@ class INET_API EtherMacBase : public MacBase
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initializeFlags();
-    virtual void initializeMacAddress();
     virtual void initializeQueueModule();
     virtual void initializeStatistics();
 

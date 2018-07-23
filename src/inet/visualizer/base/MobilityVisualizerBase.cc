@@ -75,6 +75,7 @@ void MobilityVisualizerBase::initialize(int stage)
 
 void MobilityVisualizerBase::handleParameterChange(const char *name)
 {
+    if (!hasGUI()) return;
     if (name != nullptr) {
         if (!strcmp(name, "moduleFilter"))
             moduleFilter.setPattern(par("moduleFilter"));

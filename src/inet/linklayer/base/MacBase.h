@@ -22,6 +22,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/linklayer/common/MacAddress.h"
 
 namespace inet {
 
@@ -51,6 +52,7 @@ class INET_API MacBase : public cSimpleModule, public ILifecycle, public cListen
     virtual void updateOperationalFlag(bool isNodeUp);
     virtual bool isNodeUp();
     virtual void handleMessageWhenDown(cMessage *msg);
+    virtual MacAddress parseMacAddressPar(cPar& par);
 
     /**
      * should create InterfaceEntry

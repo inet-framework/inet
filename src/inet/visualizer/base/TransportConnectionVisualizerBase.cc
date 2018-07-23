@@ -63,6 +63,7 @@ void TransportConnectionVisualizerBase::initialize(int stage)
 
 void TransportConnectionVisualizerBase::handleParameterChange(const char *name)
 {
+    if (!hasGUI()) return;
     if (name != nullptr) {
         if (!strcmp(name, "sourceNodeFilter"))
             sourceNodeFilter.setPattern(par("sourceNodeFilter"));

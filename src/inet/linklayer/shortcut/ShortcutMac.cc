@@ -40,24 +40,14 @@ void ShortcutMac::initialize(int stage)
         packetLoss = &par("packetLoss");
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
-        initializeMacAddress();
         registerInterface();
     }
-}
-
-void ShortcutMac::initializeMacAddress()
-{
-    const char *addressString = par("address");
-    if (!strcmp(addressString, "auto"))
-        address = MacAddress::generateAutoAddress();
-    else
-        address.setAddress(addressString);
-    shortcutMacs[address] = this;
 }
 
 InterfaceEntry *ShortcutMac::createInterfaceEntry()
 {
     auto interfaceEntry = getContainingNicModule(this);
+    MacAddress address = parseMacAddressPar(par("address"));
     interfaceEntry->setDatarate(bitrate);
     interfaceEntry->setMacAddress(address);
     interfaceEntry->setInterfaceToken(address.formInterfaceIdentifier());

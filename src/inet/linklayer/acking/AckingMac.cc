@@ -90,7 +90,6 @@ void AckingMac::initialize(int stage)
 
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
-        initializeMacAddress();
         registerInterface();
         radio->setRadioMode(fullDuplex ? IRadio::RADIO_MODE_TRANSCEIVER : IRadio::RADIO_MODE_RECEIVER);
         if (useAck)
@@ -100,25 +99,10 @@ void AckingMac::initialize(int stage)
     }
 }
 
-void AckingMac::initializeMacAddress()
-{
-    const char *addrstr = par("address");
-
-    if (!strcmp(addrstr, "auto")) {
-        // assign automatic address
-        address = MacAddress::generateAutoAddress();
-
-        // change module parameter from "auto" to concrete address
-        par("address").setStringValue(address.str().c_str());
-    }
-    else {
-        address.setAddress(addrstr);
-    }
-}
-
 InterfaceEntry *AckingMac::createInterfaceEntry()
 {
     InterfaceEntry *e = getContainingNicModule(this);
+    MacAddress address = parseMacAddressPar(par("address"));
 
     // data rate
     e->setDatarate(bitrate);
@@ -289,7 +273,7 @@ bool AckingMac::dropFrameNotForUs(Packet *packet)
     // All frames must be passed to the upper layer if the interface is
     // in promiscuous mode.
 
-    if (macHeader->getDest().equals(address))
+    if (macHeader->getDest().equals(interfaceEntry->getMacAddress()))
         return false;
 
     if (macHeader->getDest().isBroadcast())

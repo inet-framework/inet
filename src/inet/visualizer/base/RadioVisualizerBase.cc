@@ -76,6 +76,7 @@ void RadioVisualizerBase::initialize(int stage)
 
 void RadioVisualizerBase::handleParameterChange(const char *name)
 {
+    if (!hasGUI()) return;
     if (name != nullptr) {
         if (!strcmp(name, "radioFilter"))
             radioFilter.setPattern(par("radioFilter"));

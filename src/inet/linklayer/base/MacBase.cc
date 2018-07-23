@@ -35,6 +35,20 @@ MacBase::~MacBase()
 {
 }
 
+MacAddress MacBase::parseMacAddressPar(cPar& par)
+{
+    const char *addrstr = par;
+    MacAddress address;
+
+    if (!strcmp(addrstr, "auto"))
+        // assign automatic address
+        address = MacAddress::generateAutoAddress();
+    else
+        address.setAddress(addrstr);
+
+    return address;
+}
+
 void MacBase::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
@@ -99,13 +113,13 @@ void MacBase::updateOperationalFlag(bool isNodeUp)
 void MacBase::registerInterface()    //XXX registerInterfaceIfInterfaceTableExists() ???
 {
     ASSERT(interfaceEntry == nullptr);
+    interfaceEntry = createInterfaceEntry();
     IInterfaceTable *ift = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     if (ift) {
-        interfaceEntry = createInterfaceEntry();
         ift->addInterface(interfaceEntry);
-        auto module = getContainingNicModule(this);
-        inet::registerInterface(*interfaceEntry, module->gate("upperLayerIn"), module->gate("upperLayerOut"));
     }
+    auto module = getContainingNicModule(this);
+    inet::registerInterface(*interfaceEntry, module->gate("upperLayerIn"), module->gate("upperLayerOut"));
 }
 
 void MacBase::handleMessageWhenDown(cMessage *msg)

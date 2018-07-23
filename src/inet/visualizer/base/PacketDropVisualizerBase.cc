@@ -135,6 +135,7 @@ void PacketDropVisualizerBase::initialize(int stage)
 
 void PacketDropVisualizerBase::handleParameterChange(const char *name)
 {
+    if (!hasGUI()) return;
     if (name != nullptr) {
         if (!strcmp(name, "nodeFilter"))
             nodeFilter.setPattern(par("nodeFilter"));

@@ -96,6 +96,7 @@ void MediumVisualizerBase::initialize(int stage)
 
 void MediumVisualizerBase::handleParameterChange(const char *name)
 {
+    if (!hasGUI()) return;
     if (name != nullptr) {
         if (!strcmp(name, "networkNodeFilter"))
             networkNodeFilter.setPattern(par("nodeFilter"));
