@@ -51,6 +51,8 @@ module EtherSwitch
         eth[*].encap.typename = "EtherEncapDummy";
         eth[*].csmacdSupport = csmacdSupport;
         eth[*].mac.typename = default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex");
+        ext[*].encapDecap.typename = default("");
+        ext[*].rawSocket.protocol = default("ethernetMac");
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.macTableModule = default(absPath(".macTable"));
     gates:
@@ -83,7 +85,7 @@ module EtherSwitch
                 mac.promiscuous = true;
                 @display("p=250,300,row,150;q=txQueue");
         }
-        ext[numExtInterfaces]: <default("ExtInterface")> like IExternalInterface {
+        ext[numExtInterfaces]: <default("ExtInterface2")> like IExternalInterface {
             parameters:
                 @display("p=1125,616,row,150;q=txQueue");
         }

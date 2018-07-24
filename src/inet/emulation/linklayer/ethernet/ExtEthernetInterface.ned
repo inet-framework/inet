@@ -19,14 +19,10 @@
 package inet.emulation.linklayer.ethernet;
 
 import inet.common.IHook;
-import inet.emulation.common.HackEncapDecap;
+import inet.emulation.common.IEncapDecap;
 import inet.emulation.common.PcapCapturer;
 import inet.emulation.common.RawSocket;
-import inet.linklayer.contract.IEthernetInterface;
-
-// TODO: find a better name based on 
-// Ethernet Interface With External Upper Interface
-// Ethernet Interface With External Lower Interface
+import inet.linklayer.contract.IExternalInterface;
 
 //
 // Implements an interface that corresponds to a real interface
@@ -35,12 +31,13 @@ import inet.linklayer.contract.IEthernetInterface;
 //
 // Requires RealTimeScheduler to be configured as scheduler in omnetpp.ini.
 //
-module ExtEthernetInterface like IEthernetInterface
+module ExtEthernetInterface like IExternalInterface
 {
     parameters:
-        @class(InterfaceEntry);
+        @class(ExtInterface);
         @display("i=block/ifcard;bgl=53");
-        string interfaceTableModule;   // The path to the InterfaceTable module
+        string interfaceTableModule;   // path to the InterfaceTable module
+        int mtu @unit(B) = default(4470B);
         int numOutputHooks = default(0);
         int numInputHooks = default(0);
         *.interfaceTableModule = default(absPath(interfaceTableModule));
@@ -54,7 +51,7 @@ module ExtEthernetInterface like IEthernetInterface
         inputHook[numInputHooks]: <default("Nop")> like IHook if numInputHooks>0 {
             @display("p=177,33");
         }
-        encapDecap: HackEncapDecap {
+        encapDecap: <default("HackEncapDecap")> like IEncapDecap if typename != "" {
             parameters:
                 @display("p=150,100");
         }
@@ -86,5 +83,30 @@ module ExtEthernetInterface like IEthernetInterface
 
         encapDecap.lowerLayerOut --> rawSocket.upperLayerIn;
         encapDecap.lowerLayerIn <-- pcapCapturer.upperLayerOut;
+}
+
+module ExtInterface2 like IExternalInterface
+{
+    parameters:
+        @class(ExtInterface);
+        @display("i=block/ifcard;bgl=53");
+        string interfaceTableModule;   // path to the InterfaceTable module
+        int mtu @unit(B) = default(4470B);
+        *.interfaceTableModule = default(absPath(interfaceTableModule));
+    gates:
+        input upperLayerIn;
+        output upperLayerOut;
+    submodules:
+        rawSocket: RawSocket {
+            parameters:
+                @display("p=100,200");
+        }
+        pcapCapturer: PcapCapturer {
+            parameters:
+                @display("p=200,200");
+        }
+    connections:
+        upperLayerIn --> { @display("m=n"); } --> rawSocket.upperLayerIn;
+        upperLayerOut <-- { @display("m=n"); } <-- pcapCapturer.upperLayerOut;
 }
 
