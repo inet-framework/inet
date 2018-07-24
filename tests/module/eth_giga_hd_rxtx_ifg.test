@@ -29,17 +29,17 @@ cmdenv-express-mode=false
 
 *.host1.app.destAddr = "AA-00-00-00-00-02"
 *.host1.app.script = "10:92 10:92 20:92 20:92"
-*.host1.mac.address = "AA-00-00-00-00-01"
+*.host1.eth.mac.address = "AA-00-00-00-00-01"
 
 
 *.host2.app.destAddr = "AA-00-00-00-00-01"
 *.host2.app.script = "19.999999:1000"
-*.host2.mac.address = "AA-00-00-00-00-02"
+*.host2.eth.mac.address = "AA-00-00-00-00-02"
 
-*.host*.mac.typename = "EtherMac"    # ${"EtherMac","EtherMacFullDuplex"}
-*.host*.queue.typename = ${"", "DropTailQueue"}
-*.host*.mac.duplexMode = false     # Half duplex
-**.host*.mac.frameBursting = ${true,false}
+*.host*.eth.csmacdSupport = true
+*.host*.eth.queue.typename = ${"", "DropTailQueue"}
+*.host*.eth.mac.duplexMode = false     # Half duplex
+**.host*.eth.mac.frameBursting = ${true,false}
 #*.host1.ethg$o.channel.logfile="logfile-${runnumber}.txt"
 **.ethch2.logfile="logfile-${runnumber}.txt"
 
