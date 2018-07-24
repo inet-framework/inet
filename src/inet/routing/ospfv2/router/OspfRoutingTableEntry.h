@@ -32,7 +32,7 @@ namespace inet {
 
 namespace ospf {
 
-class INET_API RoutingTableEntry : public Ipv4Route
+class INET_API OspfRoutingTableEntry : public Ipv4Route
 {
   public:
     enum RoutingPathType {
@@ -63,12 +63,12 @@ class INET_API RoutingTableEntry : public Ipv4Route
     // Ipv4Route::gateway is nextHops[0].hopAddress
 
   public:
-    RoutingTableEntry(IInterfaceTable *ift);
-    RoutingTableEntry(const RoutingTableEntry& entry);
-    virtual ~RoutingTableEntry() {}
+    OspfRoutingTableEntry(IInterfaceTable *ift);
+    OspfRoutingTableEntry(const OspfRoutingTableEntry& entry);
+    virtual ~OspfRoutingTableEntry() {}
 
-    bool operator==(const RoutingTableEntry& entry) const;
-    bool operator!=(const RoutingTableEntry& entry) const { return !((*this) == entry); }
+    bool operator==(const OspfRoutingTableEntry& entry) const;
+    bool operator!=(const OspfRoutingTableEntry& entry) const { return !((*this) == entry); }
 
     void setDestinationType(RoutingDestinationType type) { destinationType = type; }
     RoutingDestinationType getDestinationType() const { return destinationType; }
@@ -90,7 +90,7 @@ class INET_API RoutingTableEntry : public Ipv4Route
     NextHop getNextHop(unsigned int index) const { return nextHops[index]; }
 };
 
-std::ostream& operator<<(std::ostream& out, const RoutingTableEntry& entry);
+std::ostream& operator<<(std::ostream& out, const OspfRoutingTableEntry& entry);
 
 } // namespace ospf
 
