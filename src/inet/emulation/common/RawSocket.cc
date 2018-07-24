@@ -93,9 +93,8 @@ void RawSocket::initialize(int stage)
 void RawSocket::handleMessage(cMessage *msg)
 {
     Packet *packet = check_and_cast<Packet *>(msg);
-    auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-    if (protocol != &Protocol::ipv4)
-        throw cRuntimeError("ExtInterface accepts ipv4 packets only");
+    if (protocol != packet->getTag<PacketProtocolTag>()->getProtocol())
+        throw cRuntimeError("Invalid protocol");
 
     struct sockaddr_in ip_addr;
     struct sockaddr_ll socket_address;
