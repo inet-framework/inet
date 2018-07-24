@@ -74,9 +74,6 @@ void RawSocket::initialize(int stage)
             throw cRuntimeError("Unknown protocol");
         if (fd == INVALID_SOCKET)
             throw cRuntimeError("RawSocket interface: Root privileges needed");
-        const int32 on = 1;
-        if (setsockopt(fd, IPPROTO_IP, IP_HDRINCL, (char *)&on, sizeof(on)) < 0)
-            throw cRuntimeError("RawSocket: couldn't set sockopt for raw socket");
         // bind to interface:
         struct ifreq ifr;
         memset(&ifr, 0, sizeof(ifr));
