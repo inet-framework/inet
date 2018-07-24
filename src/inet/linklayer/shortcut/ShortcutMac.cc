@@ -29,6 +29,19 @@ std::map<MacAddress, ShortcutMac *> ShortcutMac::shortcutMacs;
 
 Define_Module(ShortcutMac);
 
+ShortcutMac::~ShortcutMac()
+{
+    auto it = shortcutMacs.begin();
+    while (it != shortcutMacs.end()) {
+        if (it->second == this)
+            it = shortcutMacs.erase(it);
+        else
+            ++it;
+    }
+}
+
+//TODO for LifeCycle, should update the shortcutMacs vector on shutdown/crash/startup cases
+
 void ShortcutMac::initialize(int stage)
 {
     MacProtocolBase::initialize(stage);

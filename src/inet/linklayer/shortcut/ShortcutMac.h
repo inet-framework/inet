@@ -35,6 +35,9 @@ class INET_API ShortcutMac : public MacProtocolBase
     cPar *durationOverhead = nullptr;
     cPar *packetLoss = nullptr;
 
+  public:
+    ~ShortcutMac();
+
   protected:
     virtual void initialize(int stage) override;
     virtual InterfaceEntry *createInterfaceEntry() override;
