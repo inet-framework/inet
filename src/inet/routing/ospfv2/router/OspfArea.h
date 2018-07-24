@@ -145,6 +145,7 @@ class INET_API Area : public cObject
     RoutingTableEntry *createRoutingTableEntryFromSummaryLSA(const SummaryLsa& summaryLSA,
             unsigned short entryCost,
             const RoutingTableEntry& borderRouterEntry) const;
+    void printLSDB();
 };
 
 inline std::ostream& operator<<(std::ostream& ostr, Area& area)

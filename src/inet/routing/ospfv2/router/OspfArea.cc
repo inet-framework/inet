@@ -1403,6 +1403,8 @@ void Area::calculateShortestPathTree(std::vector<RoutingTableEntry *>& newRoutin
     unsigned long i, j, k;
     unsigned long lsaCount;
 
+    printLSDB();
+
     if (spfTreeRoot == nullptr) {
         RouterLsa *newLSA = originateRouterLSA();
 
@@ -2518,6 +2520,70 @@ void Area::recheckSummaryLSAs(std::vector<RoutingTableEntry *>& newRoutingTable)
                 }
             }
         }
+    }
+}
+
+void Area::printLSDB()
+{
+    // iterate over all routerLSA in all routers inside this area
+    for (unsigned int i = 0; i < routerLSAs.size(); i++) {
+        OspfRouterLsa *entry = check_and_cast<OspfRouterLsa *>(routerLSAs[i]);
+        // TODO: get the router id for each routerLSA entry
+        EV_INFO << "Router LSA in Area " << areaID.str(false) << " in OSPF router with ID " << "-" << std::endl;
+
+        // print header info
+        const OspfLsaHeader &head = entry->getHeader();
+        EV_INFO << "    LS age: " << head.getLsAge() << std::endl;
+        EV_INFO << "    LS type: " << head.getLsType() << std::endl;
+        EV_INFO << "    Link state ID: " << head.getLinkStateID() << std::endl;
+        EV_INFO << "    Advertising router: " << head.getAdvertisingRouter() << std::endl;
+        EV_INFO << "    Seq number: " << head.getLsSequenceNumber() << std::endl;
+        EV_INFO << "    Length: " << head.getLsaLength() << std::endl;
+
+        EV_INFO << "    Number of links: " << entry->getLinksArraySize() << std::endl << std::endl;
+        for(unsigned int j = 0; j < entry->getLinksArraySize(); j++) {
+            const Link &lEntry = entry->getLinks(j);
+            LinkType linkType = static_cast<LinkType>(lEntry.getType());
+            if(linkType == POINTTOPOINT_LINK) {
+                EV_INFO << "        Link connected to: another router (point-to-point)" << std::endl;
+                EV_INFO << "        Neighboring router ID (link ID): " << lEntry.getLinkID() << std::endl;
+                EV_INFO << "        Router interface address (link data): " << Ipv4Address(lEntry.getLinkData()).str(false) << std::endl;
+                EV_INFO << "        Link cost: " << lEntry.getLinkCost() << std::endl;
+            } else if(linkType == TRANSIT_LINK) {
+                EV_INFO << "        Link connected to: a transit network" << std::endl;
+                EV_INFO << "        DR address (link ID): " << lEntry.getLinkID() << std::endl;
+                EV_INFO << "        Router interface address (link data): " << Ipv4Address(lEntry.getLinkData()).str(false) << std::endl;
+                EV_INFO << "        Link cost: " << lEntry.getLinkCost() << std::endl;
+            } else if(linkType == STUB_LINK) {
+                EV_INFO << "        Link connected to: a stub network" << std::endl;
+                EV_INFO << "        Network/subnet number (link ID): " << lEntry.getLinkID() << std::endl;
+                EV_INFO << "        Network mask (link data): " << Ipv4Address(lEntry.getLinkData()).str(false) << std::endl;
+                EV_INFO << "        Link cost: " << lEntry.getLinkCost() << std::endl;
+            } else {
+                EV_INFO << "        Link connected to: a virtual link" << std::endl;
+            }
+            EV_INFO << std::endl;
+        }
+    }
+
+    // iterate over all networkLSA in all routers inside this area
+    for (unsigned int i = 0; i < networkLSAs.size(); i++) {
+        EV_INFO << "Network LSA in Area " << areaID.str(false) << std::endl;
+        OspfNetworkLsa *entry = check_and_cast<OspfNetworkLsa *>(networkLSAs[i]);
+
+        // print header info
+        const OspfLsaHeader &head = entry->getHeader();
+        EV_INFO << "    LS age: " << head.getLsAge() << std::endl;
+        EV_INFO << "    LS type: " << head.getLsType() << std::endl;
+        EV_INFO << "    Link state ID: " << head.getLinkStateID() << std::endl;
+        EV_INFO << "    Advertising router: " << head.getAdvertisingRouter() << std::endl;
+        EV_INFO << "    Seq number: " << head.getLsSequenceNumber() << std::endl;
+        EV_INFO << "    Length: " << head.getLsaLength() << std::endl;
+
+        EV_INFO << "    Number of attached routers: " << entry->getAttachedRoutersArraySize() << std::endl;
+        for(unsigned int j = 0; j < entry->getAttachedRoutersArraySize(); j++)
+            EV_INFO << "        Attached router: " << entry->getAttachedRouters(j) << std::endl;
+        EV_INFO << std::endl;
     }
 }
 
