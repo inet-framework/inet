@@ -45,7 +45,7 @@ class InterfaceEntry;
 class INET_API TapBridge : public cSimpleModule, public RealTimeScheduler::ICallback
 {
   protected:
-    RealTimeScheduler *rtScheduler = nullptr;
+    IFdScheduler *rtScheduler = nullptr;
     bool connected = false;
     uint8_t buffer[MAX_MTU_SIZE + 14 + 4];      //TODO allocate buffer related on MTU value
     unsigned long bufferLength = sizeof(buffer);

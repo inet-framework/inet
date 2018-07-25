@@ -141,7 +141,7 @@ void TapBridge::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         numSent = numRcvd = numDropped = pkId = 0;
 
-        if (auto scheduler = dynamic_cast<RealTimeScheduler *>(getSimulation()->getScheduler())) {
+        if (auto scheduler = dynamic_cast<IFdScheduler *>(getSimulation()->getScheduler())) {
             rtScheduler = scheduler;
             device = par("device").stdstringValue();
 
