@@ -85,7 +85,7 @@ module EtherSwitch
                 mac.promiscuous = true;
                 @display("p=250,300,row,150;q=txQueue");
         }
-        ext[numExtInterfaces]: <default("ExtInterface2")> like IExternalInterface {
+        ext[numExtInterfaces]: <default("ExtInterface")> like IExternalInterface {
             parameters:
                 @display("p=1125,616,row,150;q=txQueue");
         }
