@@ -25,7 +25,7 @@
 
 namespace inet {
 
-class INET_API RealTimeScheduler : public cScheduler
+class INET_API IFdScheduler
 {
   public:
     class INET_API ICallback
@@ -35,6 +35,24 @@ class INET_API RealTimeScheduler : public cScheduler
         virtual bool notify(int fd) = 0;
     };
 
+    virtual ~IFdScheduler() {}
+
+    /**
+     * To be called from the module which wishes to receive data from the
+     * fd. The method must be called from the module's initialize() function.
+     */
+    virtual void addCallback(int fd, ICallback *callback) = 0;
+    virtual void removeCallback(int fd, ICallback *callback) = 0;
+
+    /**
+     * Schedule a message for module at the current real time.
+     */
+    virtual void scheduleMessage(cModule *module, cMessage *msg) = 0;
+};
+
+class INET_API RealTimeScheduler : public cScheduler, public IFdScheduler
+{
+  public:
     class Entry {
       public:
         int fd = -1;
@@ -70,8 +88,8 @@ class INET_API RealTimeScheduler : public cScheduler
      * To be called from the module which wishes to receive data from the
      * fd. The method must be called from the module's initialize() function.
      */
-    void addCallback(int fd, ICallback *callback);
-    void removeCallback(int fd, ICallback *callback);
+    virtual void addCallback(int fd, ICallback *callback) override;
+    virtual void removeCallback(int fd, ICallback *callback) override;
 
     /**
      * Called at the beginning of a simulation run.
@@ -106,7 +124,7 @@ class INET_API RealTimeScheduler : public cScheduler
     /**
      * Schedule a message for module at the current real time.
      */
-    virtual void scheduleMessage(cModule *module, cMessage *msg);
+    virtual void scheduleMessage(cModule *module, cMessage *msg) override;
 };
 
 } // namespace inet
