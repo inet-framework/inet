@@ -23,8 +23,15 @@ simple RawSocket
         string device;
         string protocol @enum("ipv4","ethernetMac") = default("ipv4");
         @display("i=block/rxtx");
-        @signal[packetReceivedFromUpper](type=cPacket);
+        @signal[packetSentToUpper](type=Packet);
+        @signal[packetReceivedFromUpper](type=Packet);
+        @signal[packetSent](type=Packet);
+        @signal[packetReceived](type=Packet);
+        @statistic[packetSentFromUpper](title="packets sent to higher layer"; source=packetSentToUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[packetReceivedFromUpper](title="packets received from higher layer"; source=packetReceivedFromUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
     gates:
         input upperLayerIn;
+        output upperLayerOut @loose;
 }

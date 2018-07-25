@@ -19,6 +19,7 @@
 #define __INET_RAWSOCKET_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/scheduler/RealTimeScheduler.h"
 
 namespace inet {
 
@@ -27,7 +28,7 @@ namespace inet {
  *
  * See NED file for more details.
  */
-class INET_API RawSocket : public cSimpleModule
+class INET_API RawSocket : public cSimpleModule, public RealTimeScheduler::ICallback
 {
   protected:
     const char *device = nullptr;
@@ -36,11 +37,11 @@ class INET_API RawSocket : public cSimpleModule
 
     // statistics
     int numSent = 0;
-    int numDropped = 0;
+    int numReceived = 0;
 
     // state
-    int fd = INVALID_SOCKET; // RAW socket ID
-    MacAddress myMacAddress;    // for ethernet devices
+    int fd = INVALID_SOCKET;
+    MacAddress macAddress;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -53,6 +54,8 @@ class INET_API RawSocket : public cSimpleModule
 
   public:
     virtual ~RawSocket();
+
+    virtual bool notify(int fd) override;
 };
 
 } // namespace inet
