@@ -420,9 +420,9 @@
 /examples/pim/sm/basic/,             -f omnetpp.ini -c Scenario3 -r 0,              300s,            8017-6bd7/tplx, PASS,
 /examples/pim/sm/basic/,             -f omnetpp.ini -c Scenario4 -r 0,              100s,            4014-4edd/tplx, PASS,
 
-/examples/rip/dynamictest/,          -f omnetpp.ini -c stable -r 0,                 100s,            8c26-8a58/tplx, PASS,
-/examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic1 -r 0,               500s,            3bb2-1da4/tplx, PASS,
-/examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic2 -r 0,               500s,            b57b-189d/tplx, PASS,
+/examples/rip/dynamictest/,          -f omnetpp.ini -c stable -r 0,                 100s,            d375-ac48/tplx, PASS,
+/examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic1 -r 0,               500s,            48ae-a78f/tplx, PASS,
+/examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic2 -r 0,               500s,            cd16-cdfe/tplx, PASS,
 /examples/rip/infinitycount/,        -f omnetpp.ini -c General -r 0,                100s,            97e3-100e/tplx, PASS,
 /examples/rip/mixednetwork/,         -f omnetpp.ini -c stable -r 0,                 100s,            4cc8-cbc9/tplx, PASS,
 /examples/rip/mixednetwork/,         -f omnetpp.ini -c disconnect -r 0,             100s,            bf26-67b4/tplx, PASS,
