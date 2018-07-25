@@ -30,3 +30,4 @@ module ApskErrorModel extends ErrorModelBase
     parameters:
         @class(ApskErrorModel);
 }
+

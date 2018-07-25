@@ -40,3 +40,4 @@ simple EnergyStorageVisualizerBase extends VisualizerBase
 
         @class(EnergyStorageVisualizerBase);
 }
+

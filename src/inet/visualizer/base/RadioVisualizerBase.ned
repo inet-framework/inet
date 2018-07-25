@@ -38,7 +38,7 @@ simple RadioVisualizerBase extends VisualizerBase
 
         string radioModeImages = default("block/process_vs block/timer_vs block/wrx_vs block/wtx_vs block/wrxtx_vs block/cogwheel_vs");
         string receptionStateImages = default("- - misc/receiving misc/receiving");
-		string transmissionStateImages = default("- - misc/transmitting");
+        string transmissionStateImages = default("- - misc/transmitting");
         double width = default(16);
         double height = default(16);
         string placementHint = default("bottomRight"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
@@ -56,3 +56,4 @@ simple RadioVisualizerBase extends VisualizerBase
 
         @class(RadioVisualizerBase);
 }
+

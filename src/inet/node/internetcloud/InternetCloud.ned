@@ -19,7 +19,6 @@
 
 package inet.node.internetcloud;
 
-
 import inet.common.MessageDispatcher;
 import inet.common.packet.recorder.PcapRecorder;
 import inet.linklayer.contract.IWiredInterface;
@@ -31,7 +30,6 @@ import inet.networklayer.ipv4.Icmp;
 import inet.networklayer.ipv4.Ipv4;
 import inet.networklayer.ipv4.Ipv4RoutingTable;
 import inet.node.base.NetworkLayerNodeBase;
-
 
 //
 // This module is an IPv4 router that can delay or drop packets (while retaining their order)
@@ -74,3 +72,4 @@ module InternetCloud extends NetworkLayerNodeBase
         }
     connections allowunconnected:
 }
+

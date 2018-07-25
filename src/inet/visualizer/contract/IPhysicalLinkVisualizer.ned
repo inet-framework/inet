@@ -29,3 +29,4 @@ moduleinterface IPhysicalLinkVisualizer
     parameters:
         @display("i=block/app");
 }
+

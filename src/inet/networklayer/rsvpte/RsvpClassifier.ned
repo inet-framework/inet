@@ -12,11 +12,9 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-
 package inet.networklayer.rsvpte;
 
 import inet.networklayer.mpls.IIngressClassifier;
-
 
 //
 // Table-base ingress classifier.
@@ -36,3 +34,4 @@ simple RsvpClassifier like IIngressClassifier
         xml config = default(xml("<fectable/>"));
         @display("i=block/classifier");
 }
+

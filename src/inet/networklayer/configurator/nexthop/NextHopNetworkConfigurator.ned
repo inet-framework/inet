@@ -36,3 +36,4 @@ simple NextHopNetworkConfigurator extends NetworkConfiguratorBase
         bool dumpTopology = default(false);  // print extracted network topology to the module output
         bool dumpRoutes = default(false);    // print configured and optimized routing tables for all nodes to the module output
 }
+

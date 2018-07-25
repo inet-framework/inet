@@ -29,3 +29,4 @@ simple LayeredProtocolBase
         @signal[packetReceivedFromLower](type=cPacket);
         @signal[packetDropped](type=cPacket);
 }
+

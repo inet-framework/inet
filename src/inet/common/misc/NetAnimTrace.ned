@@ -38,3 +38,4 @@ simple NetAnimTrace
         @display("i=block/control");
         @labels(node);
 }
+

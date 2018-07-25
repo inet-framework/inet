@@ -1,4 +1,5 @@
 //
+// Copyright (C) OpenSim Ltd.
 // Copyright (C) 2003 Andras Varga; CTIE, Monash University, Australia
 //
 // This program is free software; you can redistribute it and/or

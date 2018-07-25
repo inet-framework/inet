@@ -27,3 +27,4 @@ module Ieee802154UwbIrRadio extends Radio
         receiver.typename = default("Ieee802154UwbIrReceiver");
         @class(Radio);
 }
+

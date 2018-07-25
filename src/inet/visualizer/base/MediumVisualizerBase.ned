@@ -33,7 +33,7 @@ simple MediumVisualizerBase extends VisualizerBase
     parameters:
         string mediumModule = default("radioMedium"); // the medium module that is displayed, refers to a top level submodule by default
         string networkNodeVisualizerModule = default("^.networkNodeVisualizer"); // the network node visualizer module, refers to a sibling submodule by default
-        
+
         string nodeFilter = default("*"); // which nodes are considered, matches all nodes by default
         string interfaceFilter = default("*"); // which interfaces are considered, matches all interfaces by default
         string packetFilter = default("*"); // which packets are considered, matches all packets by default
@@ -70,3 +70,4 @@ simple MediumVisualizerBase extends VisualizerBase
 
         @class(MediumVisualizerBase);
 }
+

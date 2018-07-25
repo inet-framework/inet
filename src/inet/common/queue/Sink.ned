@@ -15,8 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
-
 package inet.common.queue;
 
 //
@@ -31,3 +29,4 @@ simple Sink
     gates:
         input in[];
 }
+

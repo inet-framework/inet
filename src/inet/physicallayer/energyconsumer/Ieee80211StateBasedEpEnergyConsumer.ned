@@ -41,3 +41,4 @@ simple Ieee80211StateBasedEpEnergyConsumer extends StateBasedEpEnergyConsumer
         transmitterTransmittingHeaderPowerConsumption = default(transmitterTransmittingPowerConsumption);
         transmitterTransmittingDataPowerConsumption = default(transmitterTransmittingPowerConsumption);
 }
+

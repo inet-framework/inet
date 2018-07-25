@@ -35,3 +35,4 @@ moduleinterface ICloudDelayer
         string networkProtocolModule;
         @display("i=block/delay");
 }
+

@@ -30,3 +30,4 @@ simple EnergyStorageOsgVisualizer extends EnergyStorageVisualizerBase like IEner
     parameters:
         @class(EnergyStorageOsgVisualizer);
 }
+

@@ -1,4 +1,3 @@
-
 //
 // Copyright (C) 2004 Andras Varga
 //
@@ -19,7 +18,6 @@
 package inet.applications.tcpapp;
 
 import inet.applications.contract.IApp;
-
 
 //
 // Client for a generic request-response style protocol over TCP.

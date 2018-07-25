@@ -38,3 +38,4 @@ simple SimpleCcBattery extends CcEnergyStorageBase
         double internalResistance @unit(Ohm); // internal resistance
         @class(SimpleCcBattery);
 }
+

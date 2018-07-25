@@ -35,3 +35,4 @@ simple CircleMobility extends MovingMobilityBase
         double startAngle @unit(deg) = default(uniform(0deg, 360deg)); // starting angle
         @class(CircleMobility);
 }
+

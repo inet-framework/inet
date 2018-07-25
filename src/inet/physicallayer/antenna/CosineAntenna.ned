@@ -31,3 +31,4 @@ module CosineAntenna extends AntennaBase
         double beamWidth @unit(deg); // 3dB beam width
         @class(CosineAntenna);
 }
+

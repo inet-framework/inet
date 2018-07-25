@@ -17,7 +17,6 @@
 
 package inet.node.inet;
 
-
 //
 // A wireless host containing routing, mobility and energy components. Supports
 // IPv4 network protocol, TCP, UDP, and SCTP as transport protocol.
@@ -39,3 +38,4 @@ module AdhocHost extends WirelessHost
         wlan[*].agent.typename = default("");
         forwarding = default(true);
 }
+

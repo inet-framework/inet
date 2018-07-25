@@ -54,3 +54,4 @@ module WirelessInterface like IWirelessInterface
         mac.upperLayerIn <-- { @display("m=n"); } <-- classifier.out if exists(classifier);
         classifier.in <-- { @display("m=n"); } <-- upperLayerIn if exists(classifier);
 }
+

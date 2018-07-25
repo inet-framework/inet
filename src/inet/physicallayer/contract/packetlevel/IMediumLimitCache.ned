@@ -22,3 +22,4 @@ moduleinterface IMediumLimitCache
     parameters:
         @display("i=block/table2");
 }
+

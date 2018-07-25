@@ -45,3 +45,4 @@ simple TracingObstacleLossVisualizerBase extends VisualizerBase
 
         @class(TracingObstacleLossVisualizerBase);
 }
+

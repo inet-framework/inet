@@ -30,3 +30,4 @@ moduleinterface IMacProtocol
         input lowerLayerIn @labels(ILinkLayerFrame/up);
         output lowerLayerOut @labels(ILinkLayerFrame/down);
 }
+

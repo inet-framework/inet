@@ -31,3 +31,4 @@ moduleinterface IIntegratedVisualizer
     parameters:
         @display("i=block/app");
 }
+

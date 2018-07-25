@@ -19,7 +19,6 @@ package inet.common.misc;
 
 import inet.common.IHook;
 
-
 //
 // Thruput measurement utility module.
 //
@@ -35,5 +34,4 @@ simple ThruputMeter like IHook
         input in;
         output out;
 }
-
 

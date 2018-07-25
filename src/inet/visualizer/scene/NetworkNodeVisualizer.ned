@@ -38,3 +38,4 @@ module NetworkNodeVisualizer like INetworkNodeVisualizer
                 @display("p=100,200");
         }
 }
+

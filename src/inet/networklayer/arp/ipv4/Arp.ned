@@ -20,7 +20,6 @@ package inet.networklayer.arp.ipv4;
 
 import inet.networklayer.contract.IArp;
 
-
 //
 // Implements the Address Resolution Protocol for IPv4 and IEEE 802 6-byte
 // MAC addresses.
@@ -69,3 +68,4 @@ simple Arp like IArp
         input ifIn @labels(ArpPacket,Ieee802Ctrl);
         output ifOut @labels(ArpPacket,Ieee802Ctrl);
 }
+

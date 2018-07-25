@@ -26,3 +26,4 @@ moduleinterface IObstacleLoss
     parameters:
         @display("i=block/control");
 }
+

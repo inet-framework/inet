@@ -17,7 +17,10 @@
 
 package inet.transportlayer.sctp;
 
-
+//
+// TODO
+//
 simple SctpNatTable
 {
 }
+

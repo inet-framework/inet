@@ -15,7 +15,6 @@ package inet.linklayer.lmac;
 import inet.linklayer.base.MacProtocolBase;
 import inet.linklayer.contract.IMacProtocol;
 
-
 //
 // Implementation of L-MAC (Lightweight Medium Access Protocol for
 // Wireless Sensor Networks)
@@ -49,3 +48,4 @@ simple LMac extends MacProtocolBase like IMacProtocol
         @statistic[packetDropIncorrectlyReceived](title="packet drop: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
 }
+

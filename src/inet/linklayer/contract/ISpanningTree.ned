@@ -33,3 +33,4 @@ moduleinterface ISpanningTree
         input relayIn;
         output relayOut;
 }
+

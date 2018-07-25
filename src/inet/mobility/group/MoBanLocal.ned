@@ -55,3 +55,4 @@ simple MoBanLocal extends MovingMobilityBase
         int coordinatorIndex; // The index of the belonging coordinator module
         @class(MoBanLocal);
 }
+

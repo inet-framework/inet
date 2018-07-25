@@ -34,3 +34,4 @@ simple FacingMobility extends MobilityBase
         string targetMobility;
         @class(FacingMobility);
 }
+

@@ -43,3 +43,4 @@ simple Ieee80211StateBasedCcEnergyConsumer extends StateBasedCcEnergyConsumer
         transmitterTransmittingHeaderCurrentConsumption = default(transmitterTransmittingCurrentConsumption);
         transmitterTransmittingDataCurrentConsumption = default(transmitterTransmittingCurrentConsumption);
 }
+

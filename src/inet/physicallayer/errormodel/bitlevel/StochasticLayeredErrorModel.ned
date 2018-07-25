@@ -27,3 +27,4 @@ module StochasticLayeredErrorModel extends LayeredErrorModelBase
         double symbolErrorRate = default(nan);
         @class(StochasticLayeredErrorModel);
 }
+

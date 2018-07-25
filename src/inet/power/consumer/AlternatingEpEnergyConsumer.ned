@@ -37,3 +37,4 @@ simple AlternatingEpEnergyConsumer extends EpEnergyConsumerBase
         volatile double sleepInterval @unit(s); // time interval for sleep mode
         @class(AlternatingEpEnergyConsumer);
 }
+

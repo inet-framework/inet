@@ -58,3 +58,4 @@ module EtherHost2
         app.in <-- eth.upperLayerOut;
         eth.phys <--> { @display("m=s"); } <--> ethg;
 }
+

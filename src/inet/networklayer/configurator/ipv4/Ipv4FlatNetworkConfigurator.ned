@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 package inet.networklayer.configurator.ipv4;
 
 import inet.networklayer.configurator.contract.INetworkConfigurator;

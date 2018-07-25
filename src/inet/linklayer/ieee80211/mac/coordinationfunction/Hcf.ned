@@ -35,7 +35,6 @@ import inet.linklayer.ieee80211.mac.recipient.QosCtsPolicy;
 import inet.linklayer.ieee80211.mac.recipient.RecipientQosAckPolicy;
 import inet.linklayer.ieee80211.mac.recipient.RecipientQosMacDataService;
 
-
 //
 // HCF -- Hybrid Coordination Function
 //
@@ -131,3 +130,4 @@ module Hcf like IHcf
                 @display("p=750,600");
         }
 }
+

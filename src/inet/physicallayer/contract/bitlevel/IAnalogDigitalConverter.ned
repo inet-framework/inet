@@ -22,3 +22,4 @@ moduleinterface IAnalogDigitalConverter
     parameters:
         @display("i=block/control");
 }
+

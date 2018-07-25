@@ -33,3 +33,4 @@ moduleinterface IEnergyStorage extends IEnergySource, IEnergySink
     parameters:
         @display("i=block/plug");
 }
+

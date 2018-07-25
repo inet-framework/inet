@@ -31,3 +31,4 @@ module UwbIrStochasticPathLoss like IPathLoss
         @class(UwbIrStochasticPathLoss);
         @display("i=block/control");
 }
+

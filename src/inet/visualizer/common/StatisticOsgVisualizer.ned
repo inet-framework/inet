@@ -34,3 +34,4 @@ simple StatisticOsgVisualizer extends StatisticVisualizerBase like IStatisticVis
     parameters:
         @class(StatisticOsgVisualizer);
 }
+

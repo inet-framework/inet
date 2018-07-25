@@ -16,11 +16,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 package inet.applications.voipstream;
 
 import inet.applications.contract.IApp;
-
 
 //
 // VoipStreamSender accepts an audio file and a destination IP address/port as
@@ -57,3 +55,4 @@ simple VoipStreamSender like IApp
         input socketIn @labels(UdpControlInfo/up);
         output socketOut @labels(UdpControlInfo/down);
 }
+

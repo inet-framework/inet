@@ -71,3 +71,4 @@ simple LinkVisualizerBase extends VisualizerBase
 
         @class(LinkVisualizerBase);
 }
+

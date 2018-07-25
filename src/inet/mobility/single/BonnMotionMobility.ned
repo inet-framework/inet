@@ -43,3 +43,4 @@ simple BonnMotionMobility extends MovingMobilityBase
         int nodeId; // selects line in trace file; -1 gets substituted to parent module's index
         @class(BonnMotionMobility);
 }
+

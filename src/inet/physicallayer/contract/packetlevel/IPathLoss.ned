@@ -26,3 +26,4 @@ moduleinterface IPathLoss
     parameters:
         @display("i=block/control");
 }
+

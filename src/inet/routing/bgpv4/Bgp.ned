@@ -19,7 +19,6 @@ package inet.routing.bgpv4;
 
 import inet.routing.contract.IBgp;
 
-
 //
 // Implements BGP Version 4.
 // TODO config file!
@@ -63,5 +62,4 @@ simple Bgp like IBgp
         input socketIn;
         output socketOut;
 }
-
 

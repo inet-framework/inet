@@ -28,3 +28,4 @@ moduleinterface IEnergySource
     parameters:
         @display("i=block/plug");
 }
+

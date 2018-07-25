@@ -13,7 +13,6 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-
 package inet.networklayer.mpls;
 
 //
@@ -44,3 +43,4 @@ simple LibTable
         xml config = default(xml("<libtable/>")); // table contents to be loaded on startup
         @display("i=block/table2");
 }
+

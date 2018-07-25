@@ -51,3 +51,4 @@ simple LinkBreakVisualizerBase extends VisualizerBase
 
         @class(LinkBreakVisualizerBase);
 }
+

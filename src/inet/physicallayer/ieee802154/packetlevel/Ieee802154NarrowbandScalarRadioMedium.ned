@@ -42,3 +42,4 @@ module Ieee802154NarrowbandScalarRadioMedium extends RadioMedium
         backgroundNoise.power = default(-96.616dBm);
         backgroundNoise.dimensions = default("time");
 }
+

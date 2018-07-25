@@ -49,3 +49,4 @@ module Ieee80211OfdmErrorModel extends Ieee80211NistErrorModel like ILayeredErro
         @class(Ieee80211OfdmErrorModel);
         @display("i=block/broadcast");
 }
+

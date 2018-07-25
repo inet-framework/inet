@@ -24,3 +24,4 @@ module Ieee802154UwbIrTransmitter like ITransmitter
     parameters:
         @class(Ieee802154UwbIrTransmitter);
 }
+

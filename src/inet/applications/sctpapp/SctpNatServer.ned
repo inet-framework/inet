@@ -1,4 +1,4 @@
-package inet.applications.sctpapp;//
+//
 // Copyright (C) 2008 Irene Ruengeler
 //
 // This program is free software; you can redistribute it and/or
@@ -15,6 +15,8 @@ package inet.applications.sctpapp;//
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
+
+package inet.applications.sctpapp;
 
 import inet.applications.contract.IApp;
 
@@ -34,3 +36,4 @@ simple SctpNatServer like IApp
         input socketIn;
         output socketOut;
 }
+

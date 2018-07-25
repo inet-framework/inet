@@ -20,9 +20,8 @@ package inet.transportlayer.sctp;
 
 import inet.node.inet.StandardHost;
 
-
 //
-// \IP router.
+// SCTP NAT router
 //
 module SctpNatRouter extends StandardHost
 {
@@ -40,3 +39,4 @@ module SctpNatRouter extends StandardHost
                 @display("p=75,640;i=block/table;is=s");
         }
 }
+

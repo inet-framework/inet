@@ -61,3 +61,4 @@ simple PacketDropVisualizerBase extends VisualizerBase
 
         @class(PacketDropVisualizerBase);
 }
+

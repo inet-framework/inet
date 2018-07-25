@@ -39,3 +39,4 @@ simple StationaryMobility extends MobilityBase
         bool initFromDisplayString = default(true); // enables one time initialization from the subject module's display string
         @class(StationaryMobility);
 }
+

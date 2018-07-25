@@ -21,7 +21,6 @@ package inet.networklayer.diffserv;
 import inet.common.queue.FifoQueue;
 import inet.common.queue.RedDropper;
 
-
 //
 // This is an example queue, that implements
 // one class of the Assured Forwarding PHB group (RFC 2597).
@@ -84,3 +83,4 @@ module AFxyQueue
         redDropper.out[2] --> { @display("m=m,100,80,0,50"); } --> fifoQueue.in++;
         fifoQueue.out --> { @display("m=e"); } --> out;
 }
+

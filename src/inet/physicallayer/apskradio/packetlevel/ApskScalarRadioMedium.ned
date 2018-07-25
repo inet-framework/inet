@@ -36,3 +36,4 @@ module ApskScalarRadioMedium extends RadioMedium
         analogModel.typename = default("ScalarAnalogModel");
         backgroundNoise.typename = default("IsotropicScalarBackgroundNoise");
 }
+

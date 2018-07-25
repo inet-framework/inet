@@ -29,3 +29,4 @@ module BreakpointPathLoss like IPathLoss
         double breakpointDistance @unit(m);
         @class(BreakpointPathLoss);
 }
+

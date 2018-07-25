@@ -29,3 +29,4 @@ simple PimNeighborTable
     @signal[pimNeighborDeleted](type=PimNeighbor);
     @signal[pimNeighborChanged](type=PimNeighbor);
 }
+

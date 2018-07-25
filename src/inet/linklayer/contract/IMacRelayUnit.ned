@@ -52,3 +52,4 @@ moduleinterface IMacRelayUnit
         input stpIn @loose;
         output stpOut @loose;
 }
+

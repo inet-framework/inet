@@ -36,3 +36,4 @@ module ApskLayeredScalarRadioMedium extends RadioMedium
         mediumLimitCache.minReceptionPower = default(-85dBm);
         mediumLimitCache.minInterferencePower = default(-110dBm);
 }
+

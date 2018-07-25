@@ -32,3 +32,4 @@ moduleinterface ICcEnergySource extends IEnergySource
         @display("i=block/plug");
         @signal[currentConsumptionChanged](type=double);
 }
+

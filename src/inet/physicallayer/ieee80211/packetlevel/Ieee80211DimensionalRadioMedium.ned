@@ -31,3 +31,4 @@ module Ieee80211DimensionalRadioMedium extends Ieee80211RadioMedium
         analogModel.typename = default("DimensionalAnalogModel");
         backgroundNoise.typename = default("IsotropicDimensionalBackgroundNoise");
 }
+

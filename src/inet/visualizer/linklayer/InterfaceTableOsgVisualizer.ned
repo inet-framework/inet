@@ -31,3 +31,4 @@ simple InterfaceTableOsgVisualizer extends InterfaceTableVisualizerBase like IIn
     parameters:
         @class(InterfaceTableOsgVisualizer);
 }
+

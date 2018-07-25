@@ -23,8 +23,8 @@ simple NonQosRecoveryProcedure
     parameters:
         string cwCalculatorModule;
         string rtsPolicyModule;
-        
         int shortRetryLimit = default(7);
         int longRetryLimit = default(4);
         @display("i=block/cogwheel");
 }
+

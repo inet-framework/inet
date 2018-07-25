@@ -20,7 +20,6 @@ package inet.applications.voipstream;
 
 import inet.applications.contract.IApp;
 
-
 //
 // VoipStreamReceiver listens on an UDP port, and expects to receive VoIP packets on
 // it. The received voice is then saved into a result audio file that can be

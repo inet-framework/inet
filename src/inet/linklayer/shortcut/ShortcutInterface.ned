@@ -25,3 +25,4 @@ module ShortcutInterface extends WirelessInterface
         radio.typename = "";
         mac.typename = "ShortcutMac";
 }
+

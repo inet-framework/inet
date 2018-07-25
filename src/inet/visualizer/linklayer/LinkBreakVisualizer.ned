@@ -38,3 +38,4 @@ module LinkBreakVisualizer like ILinkBreakVisualizer
                 @display("p=100,200");
         }
 }
+

@@ -23,7 +23,6 @@ import inet.linklayer.base.MacProtocolBase;
 import inet.linklayer.contract.ILinkLayer;
 import inet.linklayer.contract.IMacProtocol;
 
-
 //
 // This module implements a trivial MAC protocol for use in ~AckingWirelessInterface.
 //

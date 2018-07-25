@@ -25,3 +25,4 @@ moduleinterface IRateSelection
     parameters:
         @display("i=block/cogwheel");
 }
+

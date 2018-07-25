@@ -14,7 +14,8 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-
+// @author Andras Varga
+//
 
 package inet.linklayer.ieee80211.mgmt;
 
@@ -36,8 +37,6 @@ package inet.linklayer.ieee80211.mgmt;
 // is not on the associated station's list. Multicast frames are broadcasted on
 // the wireless card and a copy sent also up to the relay unit so it can broadcast
 // it on other interfaces.
-//
-// @author Andras Varga
 //
 simple Ieee80211MgmtAp like IIeee80211Mgmt
 {

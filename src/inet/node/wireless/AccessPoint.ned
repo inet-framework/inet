@@ -24,7 +24,6 @@ import inet.linklayer.contract.IWirelessInterface;
 import inet.mobility.contract.IMobility;
 import inet.networklayer.common.InterfaceTable;
 
-
 //
 // A generic access point supporting multiple wireless radios, and
 // multiple ethernet ports. The type of the ethernet MAC, relay unit
@@ -110,3 +109,4 @@ module AccessPoint
             eth[i].upperLayerOut --> nl.in++ if sizeof(ethg)+numWlanInterfaces>1;
         }
 }
+

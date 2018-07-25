@@ -31,3 +31,4 @@ module Ieee80211DimensionalRadio extends Ieee80211Radio
         transmitter.typename = default("Ieee80211DimensionalTransmitter");
         receiver.typename = default("Ieee80211DimensionalReceiver");
 }
+

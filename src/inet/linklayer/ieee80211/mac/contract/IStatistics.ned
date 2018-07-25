@@ -25,3 +25,4 @@ moduleinterface IStatistics
     parameters:
         @display("i=block/table2");
 }
+

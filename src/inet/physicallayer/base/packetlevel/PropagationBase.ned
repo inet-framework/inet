@@ -28,3 +28,4 @@ module PropagationBase like IPropagation
         double propagationSpeed @unit(mps) = default(299792458mps); // the theoretical propagation speed of signals on the medium (used by path loss models)
         @display("i=block/timer");
 }
+

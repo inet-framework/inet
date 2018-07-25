@@ -32,3 +32,4 @@ simple ApskDemodulator like IDemodulator
         string modulation; // BPSK, QPSK, QAM-16, QAM-64, QAM-256, etc. (see ApskModulationBase::findModulation)
         @display("i=block/mac");
 }
+

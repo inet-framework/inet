@@ -41,3 +41,4 @@ simple NextHopForwarding
         input queueIn @labels(NextHopDatagram);
         output queueOut @labels(NextHopDatagram);
 }
+

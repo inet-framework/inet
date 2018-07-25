@@ -38,3 +38,4 @@ simple EtherAppServer
         input in @labels(Ieee802Ctrl/up);
         output out @labels(Ieee802Ctrl/down);
 }
+

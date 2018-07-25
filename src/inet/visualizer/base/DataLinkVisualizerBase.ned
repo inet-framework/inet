@@ -43,3 +43,4 @@ simple DataLinkVisualizerBase extends LinkVisualizerBase
         labelColor = default("darkcyan");
         @class(DataLinkVisualizerBase);
 }
+

@@ -22,8 +22,6 @@ import inet.mobility.base.MovingMobilityBase;
 //
 // Moves the node around a rectangle.
 //
-// @author Andras Varga
-//
 simple RectangleMobility extends MovingMobilityBase
 {
     parameters:
@@ -31,3 +29,4 @@ simple RectangleMobility extends MovingMobilityBase
         double speed @unit(mps); // speed of the host
         @class(RectangleMobility);
 }
+

@@ -19,7 +19,6 @@ package inet.applications.httptools.server;
 
 import inet.applications.contract.IApp;
 
-
 //
 // A Web server module for OMNeT++ simulations. This module is intended for use with the
 // INET StandardHost module and plugs in as a tcpApp. The INET TCP/IP stack modeling is

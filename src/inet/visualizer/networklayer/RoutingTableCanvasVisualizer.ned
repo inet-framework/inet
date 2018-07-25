@@ -34,3 +34,4 @@ simple RoutingTableCanvasVisualizer extends RoutingTableVisualizerBase like IRou
         double zIndex = default(0); // determines the drawing order of figures relative to other visualizers
         @class(RoutingTableCanvasVisualizer);
 }
+

@@ -19,7 +19,6 @@ package inet.applications.packetdrill;
 
 import inet.applications.contract.IApp;
 
-
 simple PacketDrillApp like IApp
 {
     parameters:

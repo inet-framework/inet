@@ -35,3 +35,4 @@ simple PacketDropCanvasVisualizer extends PacketDropVisualizerBase like IPacketD
         double dy = default(64); // specifies how far the animation turns over along the Y axis 
         @class(PacketDropCanvasVisualizer);
 }
+

@@ -32,3 +32,4 @@ simple SignalSource
         string signalName = "signalSourceOutput";
         volatile double value;
 }
+

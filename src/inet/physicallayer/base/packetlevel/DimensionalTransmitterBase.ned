@@ -34,3 +34,4 @@ module DimensionalTransmitterBase extends NarrowbandTransmitterBase
         modulation = default("BPSK");
         @class(DimensionalTransmitterBase);
 }
+

@@ -33,3 +33,4 @@ simple RoutingTableOsgVisualizer extends RoutingTableVisualizerBase like IRoutin
     parameters:
         @class(RoutingTableOsgVisualizer);
 }
+

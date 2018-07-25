@@ -35,3 +35,4 @@ module ApskDimensionalReceiver extends NarrowbandReceiverBase
         errorModel.typename = default("ApskErrorModel");
         @class(ApskDimensionalReceiver);
 }
+

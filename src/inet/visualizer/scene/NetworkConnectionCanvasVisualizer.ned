@@ -32,3 +32,4 @@ simple NetworkConnectionCanvasVisualizer extends NetworkConnectionVisualizerBase
         nodeFilter = default(""); // disabled because omnetpp displays network connections by default 
         @class(NetworkConnectionCanvasVisualizer);
 }
+

@@ -33,3 +33,4 @@ simple EpEnergySinkBase like IEpEnergySink
         @signal[powerGenerationChanged];
         @statistic[powerGeneration](title="Power generation"; source=powerGenerationChanged; record=vector; interpolationmode=sample-hold);
 }
+

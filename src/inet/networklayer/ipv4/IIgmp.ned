@@ -43,3 +43,4 @@ moduleinterface IIgmp
         input routerIn @labels(Ipv4ControlInfo/up);
         output routerOut @labels(Ipv4ControlInfo/down);
 }
+

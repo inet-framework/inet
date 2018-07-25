@@ -33,3 +33,4 @@ simple Ns2MotionMobility extends MovingMobilityBase
         double scrollY @unit(m) = default(0m);
         @class(Ns2MotionMobility);
 }
+

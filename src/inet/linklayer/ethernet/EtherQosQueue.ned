@@ -22,7 +22,6 @@ import inet.common.queue.DropTailQueue;
 import inet.common.queue.IOutputQueue;
 import inet.common.queue.PriorityScheduler;
 
-
 //
 // Queue module that gives the PAUSE frames a higher priority,
 // and can be parametrized with an ~IOutputQueue for serving the

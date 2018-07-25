@@ -33,3 +33,4 @@ simple LinkBreakOsgVisualizer extends LinkBreakVisualizerBase like ILinkBreakVis
     parameters:
         @class(LinkBreakOsgVisualizer);
 }
+

@@ -12,7 +12,6 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-
 package inet.networklayer.rsvpte;
 
 //

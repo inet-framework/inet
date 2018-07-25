@@ -19,7 +19,6 @@ package inet.linklayer.lmac;
 
 import inet.linklayer.common.WirelessInterface;
 
-
 module LMacInterface extends WirelessInterface
 {
     parameters:

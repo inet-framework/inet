@@ -25,3 +25,4 @@ module Ieee80211NistErrorModel extends ErrorModelBase
         @class(Ieee80211NistErrorModel);
         @display("i=block/broadcast");
 }
+

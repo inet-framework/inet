@@ -45,3 +45,4 @@ simple Ipv6RoutingTable like IRoutingTable
         @signal[mrouteDeleted](type=IPv6MulticastRoute);
         @signal[mrouteChanged](type=IPv6MulticastRoute);
 }
+

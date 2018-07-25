@@ -12,3 +12,4 @@ module ManetRouter extends AdhocHost
         routing.ipOut --> tn.in++;
         routing.ipIn <-- tn.out++;
 }
+

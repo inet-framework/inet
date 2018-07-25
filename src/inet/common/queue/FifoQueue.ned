@@ -46,3 +46,4 @@ simple FifoQueue
         input in[];
         output out;
 }
+

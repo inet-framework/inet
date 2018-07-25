@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 package inet.applications.udpapp;
 
 import inet.applications.contract.IApp;
@@ -37,3 +36,4 @@ simple UdpEchoApp like IApp
         input socketIn @labels(UdpControlInfo/up);
         output socketOut @labels(UdpControlInfo/down);
 }
+

@@ -36,3 +36,4 @@ simple NetworkConnectionVisualizerBase extends VisualizerBase
 
         @class(NetworkConnectionVisualizerBase);
 }
+

@@ -28,3 +28,4 @@ moduleinterface IRadioVisualizer
     parameters:
         @display("i=block/app");
 }
+

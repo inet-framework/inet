@@ -14,7 +14,8 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-
+// @author Andras Varga
+//
 
 package inet.linklayer.ieee80211.mgmt;
 
@@ -22,8 +23,6 @@ package inet.linklayer.ieee80211.mgmt;
 // Used in 802.11 infrastructure mode: handles management frames for a station (STA).
 //
 // Relies on the MAC layer (~Ieee80211Mac) for reception and transmission of frames.
-//
-// @author Andras Varga
 //
 simple Ieee80211MgmtSta like IIeee80211Mgmt
 {

@@ -26,3 +26,4 @@ moduleinterface IPropagation
     parameters:
         @display("i=block/timer");
 }
+

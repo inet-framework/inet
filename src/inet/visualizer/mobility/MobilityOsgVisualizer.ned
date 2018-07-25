@@ -32,3 +32,4 @@ simple MobilityOsgVisualizer extends MobilityVisualizerBase like IMobilityVisual
     parameters:
         @class(MobilityOsgVisualizer);
 }
+

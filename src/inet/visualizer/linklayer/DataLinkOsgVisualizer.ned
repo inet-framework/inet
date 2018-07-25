@@ -36,3 +36,4 @@ simple DataLinkOsgVisualizer extends DataLinkVisualizerBase like IDataLinkVisual
     parameters:
         @class(DataLinkOsgVisualizer);
 }
+

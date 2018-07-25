@@ -32,3 +32,4 @@ module StochasticErrorModel extends ErrorModelBase
         double symbolErrorRate = default(nan); // a probability in the range [0, 1] or NaN if not set
         @class(StochasticErrorModel);
 }
+

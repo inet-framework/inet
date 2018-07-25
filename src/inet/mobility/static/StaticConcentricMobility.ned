@@ -36,3 +36,4 @@ simple StaticConcentricMobility extends MobilityBase
 
         @class(StaticConcentricMobility);
 }
+

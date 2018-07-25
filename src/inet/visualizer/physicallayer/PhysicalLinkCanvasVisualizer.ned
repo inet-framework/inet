@@ -37,3 +37,4 @@ simple PhysicalLinkCanvasVisualizer extends PhysicalLinkVisualizerBase like IPhy
         double zIndex = default(1); // determines the drawing order of figures relative to other visualizers
         @class(PhysicalLinkCanvasVisualizer);
 }
+

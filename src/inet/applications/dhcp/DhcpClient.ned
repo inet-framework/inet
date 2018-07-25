@@ -40,3 +40,4 @@ simple DhcpClient like IApp
         input socketIn @labels(UdpControlInfo/up);
         output socketOut @labels(UdpControlInfo/down);
 }
+

@@ -16,11 +16,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 package inet.applications.udpapp;
 
 import inet.applications.contract.IApp;
-
 
 //
 // Sends UDP packets to the given IP address at the given interval.
@@ -69,3 +67,4 @@ simple UdpBasicApp like IApp
         input socketIn @labels(UdpControlInfo/up);
         output socketOut @labels(UdpControlInfo/down);
 }
+

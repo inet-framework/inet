@@ -35,3 +35,4 @@ simple EtherFrameClassifier
         output pauseOut;
         output defaultOut;
 }
+

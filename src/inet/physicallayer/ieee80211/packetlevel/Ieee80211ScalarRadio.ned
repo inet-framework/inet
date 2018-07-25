@@ -30,3 +30,4 @@ module Ieee80211ScalarRadio extends Ieee80211Radio
         transmitter.typename = default("Ieee80211ScalarTransmitter");
         receiver.typename = default("Ieee80211ScalarReceiver");
 }
+

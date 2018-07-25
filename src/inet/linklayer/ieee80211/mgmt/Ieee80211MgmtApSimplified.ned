@@ -14,7 +14,8 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-
+// @author Andras Varga
+//
 
 package inet.linklayer.ieee80211.mgmt;
 
@@ -43,8 +44,6 @@ package inet.linklayer.ieee80211.mgmt;
 // on the interface which is towards the destination or will broadcast it on all
 // interfaces (except on which it was received).
 //
-// @author Andras Varga
-//
 simple Ieee80211MgmtApSimplified like IIeee80211Mgmt
 {
     parameters:
@@ -58,3 +57,4 @@ simple Ieee80211MgmtApSimplified like IIeee80211Mgmt
         input agentIn @loose;   // unused dummy to statisfy the IIeee80211Mgmt interface
         output agentOut @loose; // unused dummy to statisfy the IIeee80211Mgmt interface
 }
+

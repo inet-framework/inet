@@ -35,3 +35,4 @@ module GridNeighborCache like INeighborCache
         @display("i=block/table2");
         @class(GridNeighborCache);
 }
+

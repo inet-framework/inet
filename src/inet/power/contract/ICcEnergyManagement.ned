@@ -31,3 +31,4 @@ moduleinterface ICcEnergyManagement extends IEnergyManagement
     parameters:
         @display("i=block/plug");
 }
+

@@ -33,3 +33,4 @@ simple IdealEpEnergyStorage extends EpEnergyStorageBase
     parameters:
         @class(IdealEpEnergyStorage);
 }
+

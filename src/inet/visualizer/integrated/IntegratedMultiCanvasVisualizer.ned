@@ -74,7 +74,7 @@ module IntegratedMultiCanvasVisualizer like IIntegratedVisualizer
         int numRoutingTableVisualizers = default(1);
         int numTransportRouteVisualizers = default(1);
         int numTransportConnectionVisualizers = default(1);
-   	*.networkNodeVisualizerModule = default(absPath(".networkNodeVisualizer[0]"));
+        *.networkNodeVisualizerModule = default(absPath(".networkNodeVisualizer[0]"));
     submodules:
         sceneVisualizer[numSceneVisualizers]: <default("SceneCanvasVisualizer")> like ISceneVisualizer {
             parameters:
@@ -165,3 +165,4 @@ module IntegratedMultiCanvasVisualizer like IIntegratedVisualizer
                 @display("p=450,1100,row,100");
         }
 }
+

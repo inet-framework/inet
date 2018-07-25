@@ -26,3 +26,4 @@ moduleinterface IAntenna
     parameters:
         @display("i=device/antennatower");
 }
+

@@ -12,7 +12,6 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-
 package inet.networklayer.mpls;
 
 //
@@ -23,3 +22,4 @@ moduleinterface IIngressClassifier
     parameters:
         @display("i=block/classifier");
 }
+

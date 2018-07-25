@@ -42,3 +42,4 @@ simple SceneOsgVisualizerBase extends SceneVisualizerBase
 
         @class(SceneOsgVisualizerBase);
 }
+

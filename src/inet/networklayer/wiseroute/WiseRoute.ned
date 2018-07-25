@@ -22,6 +22,7 @@
 // * ported to Mixim 2.0.1 by Theodoros Kapourniotis
 // * last modification: 06/02/11
 // **************************************************************************/
+
 package inet.networklayer.wiseroute;
 
 import inet.networklayer.base.NetworkProtocolBase;
@@ -71,3 +72,4 @@ simple WiseRoute extends NetworkProtocolBase like INetworkProtocol
         @display("i=block/fork");
         @class(WiseRoute);
 }
+

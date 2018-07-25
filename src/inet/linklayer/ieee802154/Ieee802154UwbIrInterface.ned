@@ -22,7 +22,6 @@ import inet.linklayer.acking.AckingMac;
 import inet.linklayer.contract.IWirelessInterface;
 import inet.physicallayer.contract.packetlevel.IRadio;
 
-
 module Ieee802154UwbIrInterface like IWirelessInterface
 {
     parameters:
@@ -55,3 +54,4 @@ module Ieee802154UwbIrInterface like IWirelessInterface
         radioIn --> { @display("m=s"); } --> radio.radioIn;
         radio.upperLayerOut --> mac.lowerLayerIn;
 }
+

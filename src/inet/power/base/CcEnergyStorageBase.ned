@@ -37,3 +37,4 @@ simple CcEnergyStorageBase like ICcEnergyStorage
         @statistic[currentGeneration](title="Current generation"; source=currentGenerationChanged; record=vector; interpolationmode=sample-hold);
         @statistic[residualChargeCapacity](title="Residual charge capacity"; source=residualChargeCapacityChanged; record=vector; interpolationmode=linear);
 }
+

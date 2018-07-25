@@ -24,7 +24,6 @@ import inet.common.queue.PriorityScheduler;
 import inet.common.queue.Sink;
 import inet.common.queue.WrrScheduler;
 
-
 //
 // This is an example queue, that can be used in
 // interfaces of DS core and edge nodes to support

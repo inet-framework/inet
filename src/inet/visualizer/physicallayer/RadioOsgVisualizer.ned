@@ -30,3 +30,4 @@ simple RadioOsgVisualizer extends RadioVisualizerBase like IRadioVisualizer
     parameters:
         @class(RadioOsgVisualizer);
 }
+

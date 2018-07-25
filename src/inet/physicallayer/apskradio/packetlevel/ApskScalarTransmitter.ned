@@ -32,3 +32,4 @@ module ApskScalarTransmitter extends NarrowbandTransmitterBase
         modulation = default("BPSK");
         @class(ApskScalarTransmitter);
 }
+

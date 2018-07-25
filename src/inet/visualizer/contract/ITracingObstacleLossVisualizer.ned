@@ -29,3 +29,4 @@ moduleinterface ITracingObstacleLossVisualizer
     parameters:
         @display("i=block/app");
 }
+

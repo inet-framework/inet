@@ -30,3 +30,4 @@ module ConstantTimePropagation extends PropagationBase
         double propagationTime @unit(s) = default(0s); // the time it takes for a signal to propagate from any transmitter to any receiver
         @class(ConstantTimePropagation);
 }
+

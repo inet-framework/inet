@@ -153,3 +153,4 @@ simple Ospf like IOspf
         input ipIn @labels(Ipv4ControlInfo/up);
         output ipOut @labels(Ipv4ControlInfo/down);
 }
+

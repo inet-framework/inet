@@ -29,3 +29,4 @@ module ErrorModelBase like IErrorModel
         @display("i=block/broadcast");
         @class(ErrorModelBase);
 }
+

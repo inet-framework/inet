@@ -29,3 +29,4 @@ simple VisualizerBase
         @class(VisualizerBase);
         @display("i=block/app");
 }
+

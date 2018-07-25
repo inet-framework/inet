@@ -70,3 +70,4 @@ module WiseRouteNetworkLayer like INetworkLayer
         ifIn --> { @display("m=s"); } --> np.queueIn;
         np.queueOut --> { @display("m=s"); } --> ifOut;
 }
+

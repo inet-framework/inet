@@ -39,3 +39,4 @@ simple LinearMobility extends MovingMobilityBase
         double acceleration = default(0); // acceleration of linear motion (m/s2)
         @class(LinearMobility);
 }
+

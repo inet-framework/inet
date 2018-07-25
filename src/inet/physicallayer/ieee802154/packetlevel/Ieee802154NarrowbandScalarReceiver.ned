@@ -28,3 +28,4 @@ module Ieee802154NarrowbandScalarReceiver extends NarrowbandReceiverBase
         double minInterferencePower @unit(dBm);
         @class(Ieee802154NarrowbandScalarReceiver);
 }
+

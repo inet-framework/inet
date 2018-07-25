@@ -38,3 +38,4 @@ module Ieee80211DimensionalTransmitter extends DimensionalTransmitterBase
         modulation = default("BPSK"); // TODO: this is simply wrong
         @class(Ieee80211DimensionalTransmitter);
 }
+

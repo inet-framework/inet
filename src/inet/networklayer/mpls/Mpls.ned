@@ -13,7 +13,6 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-
 package inet.networklayer.mpls;
 
 //
@@ -62,3 +61,4 @@ simple Mpls
         input ifIn @labels(MplsPacket,Ipv4Header);
         output ifOut @labels(MplsPacket,Ipv4Header);
 }
+

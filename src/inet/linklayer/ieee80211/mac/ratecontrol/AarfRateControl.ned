@@ -41,3 +41,4 @@ simple AarfRateControl like IRateControl
         @signal[datarate];
         @statistic[datarate](record=vector);
 }
+

@@ -29,3 +29,4 @@ moduleinterface IInterfaceTableVisualizer
     parameters:
         @display("i=block/app");
 }
+

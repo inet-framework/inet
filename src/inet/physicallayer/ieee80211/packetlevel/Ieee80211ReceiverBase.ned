@@ -38,3 +38,4 @@ module Ieee80211ReceiverBase extends NarrowbandReceiverBase
         // TODO: remove when opMode is removed from the error model
         *.opMode = opMode;
 }
+

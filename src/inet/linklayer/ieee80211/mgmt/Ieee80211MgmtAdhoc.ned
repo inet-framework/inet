@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 package inet.linklayer.ieee80211.mgmt;
 
 //
@@ -44,3 +43,4 @@ simple Ieee80211MgmtAdhoc like IIeee80211Mgmt
         input agentIn @loose;   // unused dummy to statisfy the IIeee80211Mgmt interface
         output agentOut @loose; // unused dummy to statisfy the IIeee80211Mgmt interface
 }
+

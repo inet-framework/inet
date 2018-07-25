@@ -32,3 +32,4 @@ simple TransportConnectionOsgVisualizer extends TransportConnectionVisualizerBas
     parameters:
         @class(TransportConnectionOsgVisualizer);
 }
+

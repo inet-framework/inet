@@ -36,3 +36,4 @@ simple NextHopRoutingTable like IRoutingTable
         @signal[routeDeleted](type=NextHopRoute);
         @signal[routeChanged](type=NextHopRoute);
 }
+

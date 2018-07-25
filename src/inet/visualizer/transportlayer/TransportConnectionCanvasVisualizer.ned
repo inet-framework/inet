@@ -33,3 +33,4 @@ simple TransportConnectionCanvasVisualizer extends TransportConnectionVisualizer
         double zIndex = default(4); // determines the drawing order of figures relative to other visualizers
         @class(TransportConnectionCanvasVisualizer);
 }
+

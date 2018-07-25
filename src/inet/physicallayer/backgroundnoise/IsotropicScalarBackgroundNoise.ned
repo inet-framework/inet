@@ -31,3 +31,4 @@ module IsotropicScalarBackgroundNoise like IBackgroundNoise
         @class(IsotropicScalarBackgroundNoise);
         @display("i=block/mac");
 }
+

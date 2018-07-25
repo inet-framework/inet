@@ -36,3 +36,4 @@ simple AdaptiveProbabilisticBroadcast extends ProbabilisticBroadcast
         @class(AdaptiveProbabilisticBroadcast);
         double timeInNeighboursTable @unit(s) = default(60 s);
 }
+

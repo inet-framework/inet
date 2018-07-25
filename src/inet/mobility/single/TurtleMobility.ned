@@ -115,3 +115,4 @@ simple TurtleMobility extends MovingMobilityBase
         xml turtleScript; // describes the movement
         @class(TurtleMobility);
 }
+

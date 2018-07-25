@@ -50,3 +50,4 @@ simple SingleRateThreeColorMeter
         output yellowOut;
         output redOut;
 }
+

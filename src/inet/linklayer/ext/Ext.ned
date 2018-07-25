@@ -17,7 +17,6 @@
 // Author: Zoltan Bojthe
 //
 
-
 package inet.linklayer.ext;
 
 //
@@ -43,3 +42,4 @@ simple Ext
         input upperLayerIn;
         output upperLayerOut;
 }
+

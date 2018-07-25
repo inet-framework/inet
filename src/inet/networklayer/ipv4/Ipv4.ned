@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 package inet.networklayer.ipv4;
 
 //
@@ -116,3 +115,4 @@ simple Ipv4
         input queueIn @labels(Ipv4Header,ArpPacket,Ieee802Ctrl);
         output queueOut @labels(Ipv4Header,ArpPacket,Ieee802Ctrl);
 }
+

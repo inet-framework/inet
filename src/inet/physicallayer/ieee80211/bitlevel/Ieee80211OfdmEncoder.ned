@@ -13,7 +13,7 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
-// 
+//
 
 package inet.physicallayer.ieee80211.bitlevel;
 
@@ -50,3 +50,4 @@ module Ieee80211OfdmEncoder like IEncoder
             @display("p=100,300");
         }
 }
+

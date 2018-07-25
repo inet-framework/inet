@@ -40,7 +40,7 @@ simple StatisticVisualizerBase extends VisualizerBase
     parameters:
         string networkNodeVisualizerModule = default("^.networkNodeVisualizer"); // the network node visualizer module, refers to a sibling submodule by default
         string subscriptionModule = default("<root>"); // module where the visualizer subscribes for the signal, root module by default
-        
+
         bool displayStatistics = default(true);
 
         string signalName = default(""); // signal name to subscribe, no signal name by default
@@ -49,7 +49,7 @@ simple StatisticVisualizerBase extends VisualizerBase
         string statisticExpression = default(""); // statistic expression, received value by default
         string sourceFilter = default("**"); // pattern that must match the signal source, no source filter by default
 
-		string format = default("%n: %v %u"); // determines what is displayed, info by default
+        string format = default("%n: %v %u"); // determines what is displayed, info by default
         string unit = default(""); // display the value in one of the specified units, statistic unit by default
 
         string font = default("<default>"); // statistic value font, automatic by default
@@ -61,3 +61,4 @@ simple StatisticVisualizerBase extends VisualizerBase
 
         @class(StatisticVisualizerBase);
 }
+

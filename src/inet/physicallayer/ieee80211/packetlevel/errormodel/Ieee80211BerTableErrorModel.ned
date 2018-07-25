@@ -27,3 +27,4 @@ module Ieee80211BerTableErrorModel extends ErrorModelBase
         @class(Ieee80211BerTableErrorModel);
         @display("i=block/broadcast");
 }
+

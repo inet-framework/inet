@@ -33,3 +33,4 @@ module IsotropicDimensionalBackgroundNoise like IBackgroundNoise
         @class(IsotropicDimensionalBackgroundNoise);
         @display("i=block/mac");
 }
+

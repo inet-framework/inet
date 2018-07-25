@@ -19,7 +19,6 @@ package inet.applications.httptools.browser;
 
 import inet.applications.httptools.common.IHttpDirectApp;
 
-
 //
 // This component is the direct message passing version of the browser simulation
 // component. It is derived from HttpBrowserBase. Use this component with the

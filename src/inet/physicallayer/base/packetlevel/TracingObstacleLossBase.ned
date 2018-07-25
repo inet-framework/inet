@@ -29,3 +29,4 @@ module TracingObstacleLossBase like IObstacleLoss
         @display("i=block/control");
         @signal[obstaclePenetrated];
 }
+

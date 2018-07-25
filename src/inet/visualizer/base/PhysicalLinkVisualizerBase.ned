@@ -44,3 +44,4 @@ simple PhysicalLinkVisualizerBase extends LinkVisualizerBase
         labelColor = default("olive");
         @class(PhysicalLinkVisualizerBase);
 }
+

@@ -46,3 +46,4 @@ simple TokenBucketMeter
         output greenOut;
         output redOut;
 }
+

@@ -48,3 +48,4 @@ simple MessageChecker
         input in;
         output out;
 }
+

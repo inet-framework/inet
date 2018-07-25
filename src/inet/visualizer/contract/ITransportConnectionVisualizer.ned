@@ -29,3 +29,4 @@ moduleinterface ITransportConnectionVisualizer
     parameters:
         @display("i=block/app");
 }
+

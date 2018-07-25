@@ -36,3 +36,4 @@ simple GaussMarkovMobility extends MovingMobilityBase
         double margin @unit(m);
         @class(GaussMarkovMobility);
 }
+

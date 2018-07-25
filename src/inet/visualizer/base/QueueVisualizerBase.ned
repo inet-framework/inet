@@ -40,3 +40,4 @@ simple QueueVisualizerBase extends VisualizerBase
 
         @class(QueueVisualizerBase);
 }
+

@@ -23,7 +23,6 @@ import inet.networklayer.contract.IArp;
 import inet.networklayer.configurator.ipv4.Ipv4NodeConfigurator;
 import inet.networklayer.contract.INetworkLayer;
 
-
 //
 // Network layer of an IPv4 node.
 //
@@ -124,3 +123,4 @@ module Ipv4NetworkLayer like INetworkLayer
         lp.out++ --> { @display("m=s"); } --> ifOut;
         lp.in++ <-- { @display("m=s"); } <-- ifIn;
 }
+

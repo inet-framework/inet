@@ -37,3 +37,4 @@ simple SimpleEpEnergyManagement like IEpEnergyManagement
         double nodeStartCapacity @unit(J) = default(nan J); // initiates node start when the residual energy capacity increases above this value
         @class(SimpleEpEnergyManagement);
 }
+

@@ -15,11 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 package inet.applications.udpapp;
 
 import inet.applications.contract.IApp;
-
 
 //
 // Video stream server. To be used with ~UdpVideoStreamClient.

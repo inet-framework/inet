@@ -76,3 +76,4 @@ simple PathVisualizerBase extends VisualizerBase
 
         @class(PathVisualizerBase);
 }
+

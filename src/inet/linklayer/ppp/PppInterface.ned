@@ -15,15 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
-
 package inet.linklayer.ppp;
 
 import inet.common.IHook;
 import inet.common.queue.IOutputQueue;
 import inet.linklayer.contract.IPppInterface;
 import inet.linklayer.contract.ITrafficConditioner;
-
 
 //
 // PPP interface. Complements the ~PPP module with an output queue

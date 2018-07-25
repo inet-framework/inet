@@ -50,3 +50,4 @@ simple RandomWaypointMobility extends MovingMobilityBase
         volatile double waitTime @unit(s) = default(0s); // wait time between reaching a target and choosing a new one
         @class(RandomWaypointMobility);
 }
+

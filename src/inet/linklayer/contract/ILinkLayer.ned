@@ -52,3 +52,4 @@ moduleinterface ILinkLayer extends ILinkLayerUpper, ILinkLayerLower
     parameters:
         @display("i=block/rxtx");
 }
+

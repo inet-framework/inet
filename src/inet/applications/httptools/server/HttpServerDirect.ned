@@ -19,7 +19,6 @@ package inet.applications.httptools.server;
 
 import inet.applications.httptools.common.IHttpDirectApp;
 
-
 //
 // A Web server module for OMNeT++ simulations and direct message passing between modules.
 // This module is intended for use with the HttpDirectHost module and plugs in as a tcpApp.

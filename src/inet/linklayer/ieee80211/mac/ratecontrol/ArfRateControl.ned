@@ -23,3 +23,4 @@ simple ArfRateControl extends AarfRateControl
         increaseThresholdFactor = default(1);
         @display("i=block/cogwheel");
 }
+

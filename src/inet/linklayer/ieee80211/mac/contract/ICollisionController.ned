@@ -27,3 +27,4 @@ moduleinterface ICollisionController
     parameters:
         @display("i=block/switch");
 }
+
