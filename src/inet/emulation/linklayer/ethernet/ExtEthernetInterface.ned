@@ -31,7 +31,7 @@ import inet.linklayer.contract.IExternalInterface;
 //
 // Requires RealTimeScheduler to be configured as scheduler in omnetpp.ini.
 //
-module ExtEthernetInterface like IExternalInterface
+module ExtInterface like IExternalInterface
 {
     parameters:
         @class(ExtInterface);
@@ -85,14 +85,13 @@ module ExtEthernetInterface like IExternalInterface
         encapDecap.lowerLayerIn <-- pcapCapturer.upperLayerOut;
 }
 
-module ExtInterface2 like IExternalInterface
+module ExtEthernetInterface like IExternalInterface
 {
     parameters:
         @class(ExtInterface);
         @display("i=block/ifcard;bgl=53");
         string interfaceTableModule;   // path to the InterfaceTable module
         int mtu @unit(B) = default(4470B);
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
     gates:
         input upperLayerIn;
         output upperLayerOut;
@@ -101,12 +100,7 @@ module ExtInterface2 like IExternalInterface
             parameters:
                 @display("p=100,200");
         }
-        pcapCapturer: PcapCapturer {
-            parameters:
-                @display("p=200,200");
-        }
     connections:
         upperLayerIn --> { @display("m=n"); } --> rawSocket.upperLayerIn;
-        upperLayerOut <-- { @display("m=n"); } <-- pcapCapturer.upperLayerOut;
+        upperLayerOut <-- { @display("m=n"); } <-- rawSocket.upperLayerOut;
 }
-
