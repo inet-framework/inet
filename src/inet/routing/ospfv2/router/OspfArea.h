@@ -92,6 +92,7 @@ class INET_API Area : public cObject
 
     bool containsAddress(Ipv4Address address) const;
     bool hasAddressRange(Ipv4AddressRange addressRange) const;
+    void addWatches();
     Ipv4AddressRange getContainingAddressRange(Ipv4AddressRange addressRange, bool *advertise = nullptr) const;
     void addInterface(OspfInterface *intf);
     OspfInterface *getInterface(unsigned char ifIndex);

@@ -87,6 +87,34 @@ OspfInterface::~OspfInterface()
     }
 }
 
+const char *OspfInterface::getTypeString(OspfInterfaceType intfType)
+{
+    switch (intfType) {
+        case UNKNOWN_TYPE:
+            return "Unknown";
+
+        case POINTTOPOINT:
+            return "PointToPoint";
+
+        case BROADCAST:
+            return "Broadcast";
+
+        case NBMA:
+            return "NBMA";
+
+        case POINTTOMULTIPOINT:
+            return "PointToMultiPoint";
+
+        case VIRTUAL:
+            return "Virtual";
+
+        default:
+            ASSERT(false);
+            break;
+    }
+    return "";
+}
+
 void OspfInterface::setIfIndex(IInterfaceTable *ift, int index)
 {
     ifIndex = index;
@@ -621,6 +649,32 @@ void OspfInterface::ageTransmittedLsaLists()
     for (long i = 0; i < neighborCount; i++) {
         neighboringRouters[i]->ageTransmittedLSAList();
     }
+}
+
+std::ostream& operator<<(std::ostream& stream, const OspfInterface& intf)
+{
+    return stream << "index: " << intf.ifIndex << " "
+            << "type: '" << intf.getTypeString(intf.interfaceType) << "' "
+            << "MTU: " << intf.mtu << " "
+            << "state: '" << intf.getStateString(intf.state->getState()) << "' "
+            << "cost: " << intf.interfaceOutputCost << " "
+
+            << "area: " << intf.areaID.str(false) << " "
+            << "transitArea: " << intf.transitAreaID.str(false) << " "
+
+            << "helloInterval: " << intf.helloInterval << " "
+            << "pollInterval: " << intf.pollInterval << " "
+            << "routerDeadInterval: " << intf.routerDeadInterval << " "
+            << "retransmissionInterval: " << intf.retransmissionInterval << " "
+
+            << "acknowledgementDelay: " << intf.acknowledgementDelay << " "
+            << "interfaceTransmissionDelay: " << intf.interfaceTransmissionDelay << " "
+
+            << "routerPriority: " << (int)(intf.routerPriority) << " "
+            << "designatedRouterID: " << intf.designatedRouter.routerID << " "
+            << "designatedRouterInterface: " << intf.designatedRouter.ipInterfaceAddress << " "
+            << "backupDesignatedRouterID: " << intf.backupDesignatedRouter.routerID << " "
+            << "backupDesignatedRouterInterface: " << intf.backupDesignatedRouter.ipInterfaceAddress;
 }
 
 } // namespace ospf
