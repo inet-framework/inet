@@ -24,13 +24,17 @@
 #include <sys/ioctl.h>
 #include <linux/if_packet.h>
 
+#include "inet/common/checksum/EthernetCRC.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/emulation/common/RawSocket.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/transportlayer/common/L4PortTag_m.h"
 
 namespace inet {
 
@@ -38,8 +42,10 @@ Define_Module(RawSocket);
 
 RawSocket::~RawSocket()
 {
-    close(fd);
-    fd = INVALID_SOCKET;
+    if (fd != INVALID_SOCKET) {
+        close(fd);
+        fd = INVALID_SOCKET;
+    }
 }
 
 void RawSocket::initialize(int stage)
@@ -68,7 +74,7 @@ void RawSocket::initialize(int stage)
             if (ioctl(fd, SIOCGIFHWADDR, &if_mac) < 0)
                 perror("SIOCGIFHWADDR");
             ifindex = if_idx.ifr_ifindex;
-            myMacAddress.setAddressBytes(if_mac.ifr_hwaddr.sa_data);
+            macAddress.setAddressBytes(if_mac.ifr_hwaddr.sa_data);
         }
         else
             throw cRuntimeError("Unknown protocol");
@@ -81,9 +87,23 @@ void RawSocket::initialize(int stage)
         if (setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, (void *)&ifr, sizeof(ifr)) < 0)
             throw cRuntimeError("RawSocket: couldn't bind raw socket to '%s' interface", device);
 
-        numSent = numDropped = 0;
+        struct sockaddr_ll socket_address;
+        memset(&socket_address, 0, sizeof (socket_address));
+        socket_address.sll_family = PF_PACKET;
+        socket_address.sll_ifindex = ifindex;
+        socket_address.sll_protocol = htons(ETH_P_ALL);
+        int n = bind(fd, (struct sockaddr *)&socket_address, sizeof(socket_address));
+        if (n < 0)
+            throw cRuntimeError("Cannot bind socket: %d", n);
+
+        if (gate("upperLayerOut")->isConnected()) {
+            auto scheduler = check_and_cast<RealTimeScheduler *>(getSimulation()->getScheduler());
+            scheduler->addCallback(fd, this);
+        }
+
+        numSent = numReceived;
         WATCH(numSent);
-        WATCH(numDropped);
+        WATCH(numReceived);
     }
 }
 
@@ -113,12 +133,12 @@ void RawSocket::handleMessage(cMessage *msg)
         /* Address length*/
         socket_address.sll_halen = ETH_ALEN;
         /* Destination MAC */
-        socket_address.sll_addr[0] = myMacAddress.getAddressByte(0);
-        socket_address.sll_addr[1] = myMacAddress.getAddressByte(1);
-        socket_address.sll_addr[2] = myMacAddress.getAddressByte(2);
-        socket_address.sll_addr[3] = myMacAddress.getAddressByte(3);
-        socket_address.sll_addr[4] = myMacAddress.getAddressByte(4);
-        socket_address.sll_addr[5] = myMacAddress.getAddressByte(5);
+        socket_address.sll_addr[0] = macAddress.getAddressByte(0);
+        socket_address.sll_addr[1] = macAddress.getAddressByte(1);
+        socket_address.sll_addr[2] = macAddress.getAddressByte(2);
+        socket_address.sll_addr[3] = macAddress.getAddressByte(3);
+        socket_address.sll_addr[4] = macAddress.getAddressByte(4);
+        socket_address.sll_addr[5] = macAddress.getAddressByte(5);
         addr = (struct sockaddr *)&socket_address;
         addrsize = sizeof(socket_address);
     }
@@ -151,15 +171,40 @@ void RawSocket::sendBytes(uint8 *buf, size_t numBytes, struct sockaddr *to, sock
 void RawSocket::refreshDisplay() const
 {
     char buf[80];
-    sprintf(buf, "device: %s\nsnt:%d", device, numSent);
+    sprintf(buf, "device: %s\nsnt:%d rcv:%d", device, numSent, numReceived);
     getDisplayString().setTagArg("t", 0, buf);
 }
 
 void RawSocket::finish()
 {
-    std::cout << getFullPath() << ": " << numSent << " packets sent, " << numDropped << " packets dropped.\n";
+    std::cout << getFullPath() << ": " << numSent << " packets sent, " << numReceived << " packets received\n";
     close(fd);
     fd = INVALID_SOCKET;
+}
+
+bool RawSocket::notify(int fd)
+{
+    Enter_Method_Silent();
+    ASSERT(this->fd == fd);
+    uint8_t buffer[1 << 16];
+    memset(&buffer, 0, sizeof(buffer));
+    // type of buffer in recvfrom(): win: char *, linux: void *
+    int n = ::recv(fd, (char *)buffer, sizeof(buffer), 0);
+    if (n < 0)
+        throw cRuntimeError("Calling recvfrom failed: %d", n);
+    n = std::max(n, ETHER_MIN_LEN - 4);
+    uint32_t checksum = htonl(ethernetCRC(buffer, n));
+    memcpy(&buffer[n], &checksum, sizeof(checksum));
+    auto data = makeShared<BytesChunk>(static_cast<const uint8_t *>(buffer), n + 4);
+    auto packet = new Packet("RawSocketPacket", data);
+    auto interfaceEntry = check_and_cast<InterfaceEntry *>(getContainingNicModule(this));
+    packet->addTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
+    packet->addTag<PacketProtocolTag>()->setProtocol(protocol);
+    packet->addTag<DispatchProtocolReq>()->setProtocol(protocol);
+    emit(packetReceivedSignal, packet);
+    send(packet, "upperLayerOut");
+    emit(packetSentToUpperSignal, packet);
+    return true;
 }
 
 } // namespace inet
