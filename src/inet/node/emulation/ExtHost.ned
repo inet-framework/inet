@@ -56,7 +56,7 @@ module ExtHost
         tapCfg[sizeof(ethg)+numWlanInterfaces]: TapCfg {
             parameters:
                 interfaceModule = index < sizeof(ethg) ? "^.eth["+string(index)+"]" : "^.wlan["+string(index - sizeof(ethg))+"]";
-                @display("p=232,104;q=txQueue");
+                @display("p=232,44;q=txQueue");
         }
         eth[sizeof(ethg)]: <default("EthernetInterface")> like IEthernetInterface {
             parameters:
