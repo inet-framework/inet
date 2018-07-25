@@ -69,7 +69,7 @@ std::ostream& operator<<(std::ostream& os, const RipInterfaceEntry& e)
             break;
 
         case SPLIT_HORIZON_POISONED_REVERSE:
-            os << "SplitHorizonPoisenedReverse";
+            os << "SplitHorizonPoisonedReverse";
             break;
 
         default:
