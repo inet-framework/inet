@@ -154,6 +154,7 @@ void OspfConfigReader::loadAreaFromXML(const cXMLElement& asConfig, AreaId areaI
     }
 
     Area *area = new Area(ift, areaID);
+    area->addWatches();
     cXMLElementList areaDetails = areaConfig->getChildren();
     for (auto & areaDetail : areaDetails) {
         std::string nodeName = (areaDetail)->getTagName();
