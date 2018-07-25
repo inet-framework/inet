@@ -58,6 +58,14 @@ Area::~Area()
     summaryLSAs.clear();
 }
 
+void Area::addWatches()
+{
+    WATCH_PTRVECTOR(routerLSAs);
+    WATCH_PTRVECTOR(networkLSAs);
+    WATCH_PTRVECTOR(summaryLSAs);
+    WATCH_PTRVECTOR(associatedInterfaces);
+}
+
 void Area::addInterface(OspfInterface *intf)
 {
     intf->setArea(this);

@@ -131,6 +131,7 @@ class INET_API OspfInterface
 
     void setType(OspfInterfaceType ifType) { interfaceType = ifType; }
     OspfInterfaceType getType() const { return interfaceType; }
+    static const char *getTypeString(OspfInterfaceType intfType);
     void setIfIndex(IInterfaceTable *ift, int index);
     int getIfIndex() const { return ifIndex; }
     void setMtu(unsigned short ifMTU) { mtu = ifMTU; }
@@ -174,6 +175,8 @@ class INET_API OspfInterface
     void setArea(Area *area) { parentArea = area; }
     Area *getArea() { return parentArea; }
     const Area *getArea() const { return parentArea; }
+
+    friend std::ostream& operator<<(std::ostream& stream, const OspfInterface& intf);
 };
 
 } // namespace ospf
