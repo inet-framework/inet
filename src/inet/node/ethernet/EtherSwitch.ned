@@ -99,7 +99,7 @@ module EtherSwitch
         encap: <default("EtherEncap")> like IEtherEncap {
             @display("p=800,220");
         }
-        ext[numExtInterfaces]: <default("ExtInterface2")> like IExternalInterface {
+        ext[numExtInterfaces]: <default("ExtInterface")> like IExternalInterface {
             parameters:
                 @display("p=1125,616,row,150;q=txQueue");
         }
