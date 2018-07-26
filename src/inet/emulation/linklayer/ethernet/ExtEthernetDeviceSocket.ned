@@ -20,8 +20,8 @@ package inet.emulation.linklayer.ethernet;
 simple ExtEthernetDeviceSocket
 {
     parameters:
-        string device;
-        string packetName = default("ExtPacket");
+        string device; // name of existing real ethernet device
+        string packetName = default("Ext"); // name of received packets
         @display("i=block/rxtx");
         @signal[packetSentToUpper](type=Packet);
         @signal[packetReceivedFromUpper](type=Packet);

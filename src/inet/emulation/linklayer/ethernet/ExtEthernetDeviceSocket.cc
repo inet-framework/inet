@@ -17,24 +17,20 @@
 
 #define WANT_WINSOCK2
 
-#include <omnetpp/platdep/sockets.h>
-#include <net/if.h>
 #include <arpa/inet.h>
-#include <netinet/ether.h>
-#include <sys/ioctl.h>
 #include <linux/if_packet.h>
+#include <net/if.h>
+#include <netinet/ether.h>
+#include <omnetpp/platdep/sockets.h>
+#include <sys/ioctl.h>
 
 #include "inet/common/checksum/EthernetCRC.h"
-#include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/emulation/linklayer/ethernet/ExtEthernetDeviceSocket.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
-#include "inet/networklayer/common/L3AddressTag_m.h"
-#include "inet/transportlayer/common/L4PortTag_m.h"
 
 namespace inet {
 
@@ -42,10 +38,7 @@ Define_Module(ExtEthernetDeviceSocket);
 
 ExtEthernetDeviceSocket::~ExtEthernetDeviceSocket()
 {
-    if (fd != INVALID_SOCKET) {
-        close(fd);
-        fd = INVALID_SOCKET;
-    }
+    closeSocket();
 }
 
 void ExtEthernetDeviceSocket::initialize(int stage)
@@ -53,45 +46,9 @@ void ExtEthernetDeviceSocket::initialize(int stage)
     cSimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         device = par("device");
-        packetName = par("packetName");
-        // open socket
-        struct ifreq if_mac;
-        struct ifreq if_idx;
-        fd = socket(AF_PACKET, SOCK_RAW, IPPROTO_RAW);
-        if (fd == INVALID_SOCKET)
-            throw cRuntimeError("Cannot open socket");
-        // get the index of the interface to send on
-        memset(&if_idx, 0, sizeof(struct ifreq));
-        strncpy(if_idx.ifr_name, device, IFNAMSIZ-1);
-        if (ioctl(fd, SIOCGIFINDEX, &if_idx) < 0)
-            perror("SIOCGIFINDEX");
-        ifindex = if_idx.ifr_ifindex;
-        // get the MAC address of the interface to send on
-        memset(&if_mac, 0, sizeof(struct ifreq));
-        strncpy(if_mac.ifr_name, device, IFNAMSIZ-1);
-        if (ioctl(fd, SIOCGIFHWADDR, &if_mac) < 0)
-            perror("SIOCGIFHWADDR");
-        macAddress.setAddressBytes(if_mac.ifr_hwaddr.sa_data);
-        // bind to interface
-        struct ifreq ifr;
-        memset(&ifr, 0, sizeof(ifr));
-        snprintf(ifr.ifr_name, sizeof(ifr.ifr_name), "%s", device);
-        if (setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, (void *)&ifr, sizeof(ifr)) < 0)
-            throw cRuntimeError("Cannot bind raw socket to '%s' interface", device);
-        // bind to all ethernet frames
-        struct sockaddr_ll socket_address;
-        memset(&socket_address, 0, sizeof (socket_address));
-        socket_address.sll_family = PF_PACKET;
-        socket_address.sll_ifindex = ifindex;
-        socket_address.sll_protocol = htons(ETH_P_ALL);
-        if (bind(fd, (struct sockaddr *)&socket_address, sizeof(socket_address)) < 0)
-            throw cRuntimeError("Cannot bind socket");
-        // add to scheduler
-        if (gate("upperLayerOut")->isConnected()) {
-            auto scheduler = check_and_cast<RealTimeScheduler *>(getSimulation()->getScheduler());
-            scheduler->addCallback(fd, this);
-        }
-        // statistics
+        packetName = par("packetName").stdstringValue();
+        rtScheduler = check_and_cast<RealTimeScheduler *>(getSimulation()->getScheduler());
+        openSocket();
         numSent = numReceived = 0;
         WATCH(numSent);
         WATCH(numReceived);
@@ -140,8 +97,53 @@ void ExtEthernetDeviceSocket::refreshDisplay() const
 
 void ExtEthernetDeviceSocket::finish()
 {
-    std::cout << getFullPath() << ": " << numSent << " packets sent, " << numReceived << " packets received\n";
+    std::cout << numSent << " packets sent, " << numReceived << " packets received\n";
+    closeSocket();
+}
+
+void ExtEthernetDeviceSocket::openSocket()
+{
+    // open socket
+    struct ifreq if_mac;
+    struct ifreq if_idx;
+    fd = socket(AF_PACKET, SOCK_RAW, IPPROTO_RAW);
+    if (fd == INVALID_SOCKET)
+        throw cRuntimeError("Cannot open socket");
+    // get the index of the interface to send on
+    memset(&if_idx, 0, sizeof(struct ifreq));
+    strncpy(if_idx.ifr_name, device, IFNAMSIZ-1);
+    if (ioctl(fd, SIOCGIFINDEX, &if_idx) < 0)
+        perror("SIOCGIFINDEX");
+    ifindex = if_idx.ifr_ifindex;
+    // get the MAC address of the interface to send on
+    memset(&if_mac, 0, sizeof(struct ifreq));
+    strncpy(if_mac.ifr_name, device, IFNAMSIZ-1);
+    if (ioctl(fd, SIOCGIFHWADDR, &if_mac) < 0)
+        perror("SIOCGIFHWADDR");
+    macAddress.setAddressBytes(if_mac.ifr_hwaddr.sa_data);
+    // bind to interface
+    struct ifreq ifr;
+    memset(&ifr, 0, sizeof(ifr));
+    snprintf(ifr.ifr_name, sizeof(ifr.ifr_name), "%s", device);
+    if (setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, (void *)&ifr, sizeof(ifr)) < 0)
+        throw cRuntimeError("Cannot bind raw socket to '%s' interface", device);
+    // bind to all ethernet frames
+    struct sockaddr_ll socket_address;
+    memset(&socket_address, 0, sizeof (socket_address));
+    socket_address.sll_family = PF_PACKET;
+    socket_address.sll_ifindex = ifindex;
+    socket_address.sll_protocol = htons(ETH_P_ALL);
+    if (bind(fd, (struct sockaddr *)&socket_address, sizeof(socket_address)) < 0)
+        throw cRuntimeError("Cannot bind socket");
+    if (gate("upperLayerOut")->isConnected())
+        rtScheduler->addCallback(fd, this);
+}
+
+void ExtEthernetDeviceSocket::closeSocket()
+{
     if (fd != INVALID_SOCKET) {
+        if (gate("upperLayerOut")->isConnected())
+            rtScheduler->removeCallback(fd, this);
         close(fd);
         fd = INVALID_SOCKET;
     }
@@ -161,7 +163,8 @@ bool ExtEthernetDeviceSocket::notify(int fd)
     uint32_t checksum = htonl(ethernetCRC(buffer, n));
     memcpy(&buffer[n], &checksum, sizeof(checksum));
     auto data = makeShared<BytesChunk>(static_cast<const uint8_t *>(buffer), n + 4);
-    auto packet = new Packet(packetName, data);
+    std::string completePacketName = packetName + std::to_string(numReceived);
+    auto packet = new Packet(completePacketName.c_str(), data);
     auto interfaceEntry = check_and_cast<InterfaceEntry *>(getContainingNicModule(this));
     packet->addTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);

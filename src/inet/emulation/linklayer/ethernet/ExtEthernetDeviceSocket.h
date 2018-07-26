@@ -22,18 +22,28 @@
 
 namespace inet {
 
+/**
+ * Implements an interface suitable for emulation that corresponds to a real
+ * interface on the host running the simulation .
+ *
+ * Requires RealTimeScheduler to be configured as scheduler in omnetpp.ini.
+ *
+ * See NED file for more details.
+ */
 class INET_API ExtEthernetDeviceSocket : public cSimpleModule, public RealTimeScheduler::ICallback
 {
   protected:
+    // parameters
     const char *device = nullptr;
-    const char *packetName = nullptr;
-    int ifindex = -1;
+    std::string packetName;
+    RealTimeScheduler *rtScheduler = nullptr;
 
     // statistics
     int numSent = 0;
     int numReceived = 0;
 
     // state
+    int ifindex = -1;
     int fd = INVALID_SOCKET;
     MacAddress macAddress;
 
@@ -43,6 +53,9 @@ class INET_API ExtEthernetDeviceSocket : public cSimpleModule, public RealTimeSc
     virtual void handleMessage(cMessage *message) override;
     virtual void refreshDisplay() const override;
     virtual void finish() override;
+
+    virtual void openSocket();
+    virtual void closeSocket();
 
   public:
     virtual ~ExtEthernetDeviceSocket();
