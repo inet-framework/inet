@@ -17,78 +17,105 @@
 
 #define WANT_WINSOCK2
 
-#include <stdio.h>
-#include <string.h>
-
 #include <arpa/inet.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
-#include <sys/ioctl.h>
-#include <net/if.h>
 #include <linux/if_tun.h>
+#include <net/if.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
-
-#include "inet/common/INETDefs.h"
 
 #include <omnetpp/platdep/sockets.h>
 
-#include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/common/packet/chunk/BytesChunk.h"
-
-#include "inet/linklayer/common/EtherType_m.h"
-#include "inet/linklayer/common/Ieee802Ctrl_m.h"
-#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/emulation/common/tap/ExtTapDeviceIo.h"
 #include "inet/linklayer/ethernet/EtherEncap.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
-#include "inet/linklayer/ethernet/Ethernet.h"
-#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
-#include "inet/emulation/common/tap/ExtTapDeviceIo.h"
-
-#include "inet/networklayer/common/InterfaceEntry.h"
-#include "inet/networklayer/common/IpProtocolId_m.h"
-#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 
 namespace inet {
 
 Define_Module(ExtTapDeviceIo);
 
-int openTap(std::string dev) {
-    struct ifreq ifr;
-    int fd, err;
-    const char *clonedev = "/dev/net/tun";
+ExtTapDeviceIo::~ExtTapDeviceIo()
+{
+    closeTap();
+}
 
-    /* Arguments taken by the function:
-     *
-     * char *dev: the name of an interface (or '\0'). MUST have enough
-     *   space to hold the interface name if '\0' is passed
-     * int flags: interface flags (eg, IFF_TUN etc.)
-     */
-
-    /* open the clone device */
-    if ((fd = open(clonedev, O_RDWR)) < 0) {
-        return fd;
+void ExtTapDeviceIo::initialize(int stage)
+{
+    cSimpleModule::initialize(stage);
+    if (stage == INITSTAGE_LOCAL) {
+        device = par("device").stdstringValue();
+        packetName = par("packetName").stdstringValue();
+        rtScheduler = check_and_cast<RealTimeScheduler *>(getSimulation()->getScheduler());
+        openTap(device);
+        numSent = numReceived = 0;
+        WATCH(numSent);
+        WATCH(numReceived);
     }
+}
 
-    /* preparation of the struct ifr, of type "struct ifreq" */
+void ExtTapDeviceIo::handleMessage(cMessage *msg)
+{
+    auto packet = check_and_cast<Packet *>(msg);
+    emit(packetReceivedFromLowerSignal, packet);
+    auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
+    if (protocol != &Protocol::ethernetMac)
+        throw cRuntimeError("ExtInterface accepts ethernet packets only");
+    const auto& ethHeader = packet->peekAtFront<EthernetMacHeader>();
+    auto bytesChunk = packet->peekDataAsBytes();
+    uint8_t buffer[packet->getByteLength() + 4];
+    buffer[0] = 0;
+    buffer[1] = 0;
+    buffer[2] = 0x86; // ethernet
+    buffer[3] = 0xdd;
+    size_t packetLength = bytesChunk->copyToBuffer(buffer + 4, sizeof(buffer) - 4);
+    ASSERT(packetLength == (size_t)packet->getByteLength());
+    packetLength += 4;
+    ssize_t nwrite = write(fd, buffer, packetLength);
+    if ((size_t)nwrite == packetLength) {
+        emit(packetSentSignal, packet);
+        EV_INFO << "Sent a " << packet->getTotalLength() << " packet from " << ethHeader->getSrc() << " to " << ethHeader->getDest() << " to tap device '" << device << "'.\n";
+        numSent++;
+    }
+    else
+        EV_ERROR << "Sending of an ethernet packet FAILED! (sendto returned " << nwrite << " (" << strerror(errno) << ") instead of " << packetLength << ").\n";
+    delete packet;
+}
+
+void ExtTapDeviceIo::refreshDisplay() const
+{
+    char buf[180];
+    sprintf(buf, "tap device: %s\nrcv:%d snt:%d", device.c_str(), numReceived, numSent);
+    getDisplayString().setTagArg("t", 0, buf);
+}
+
+void ExtTapDeviceIo::finish()
+{
+    EV_INFO << numSent << " packets sent, " << numReceived << " packets received.\n";
+    closeTap();
+}
+
+void ExtTapDeviceIo::openTap(std::string dev)
+{
+    if ((fd = open("/dev/net/tun", O_RDWR)) < 0)
+        throw cRuntimeError("Cannot open TAP device: %s", strerror(errno));
+
+    // preparation of the struct ifr, of type "struct ifreq"
+    struct ifreq ifr;
     memset(&ifr, 0, sizeof(ifr));
-
     ifr.ifr_flags = IFF_TAP; /* IFF_TUN or IFF_TAP, plus maybe IFF_NO_PI */
-
-    if (!dev.empty()) {
+    if (!dev.empty())
         /* if a device name was specified, put it in the structure; otherwise,
          * the kernel will try to allocate the "next" device of the
          * specified type */
         strncpy(ifr.ifr_name, dev.c_str(), IFNAMSIZ);
-    }
-
-    /* try to create the device */
-    if ((err = ioctl(fd, (TUNSETIFF), (void *) &ifr)) < 0) {
+    if (ioctl(fd, (TUNSETIFF), (void *) &ifr) < 0) {
         close(fd);
-        return err;
+        throw cRuntimeError("Cannot create TAP device: %s", strerror(errno));
     }
 
     /* if the operation was successful, write back the name of the
@@ -96,150 +123,46 @@ int openTap(std::string dev) {
      * it. Note that the caller MUST reserve space in *dev (see calling
      * code below) */
     dev = ifr.ifr_name;
+    rtScheduler->addCallback(fd, this);
+}
 
-    /* this is the special file descriptor that the caller will use to talk
-     * with the virtual interface */
-    return fd;
+void ExtTapDeviceIo::closeTap()
+{
+    if (fd != INVALID_SOCKET) {
+        rtScheduler->removeCallback(fd, this);
+        close(fd);
+        fd = -1;
+    }
 }
 
 bool ExtTapDeviceIo::notify(int fd)
 {
-    ASSERT(fd == this->tapFd);
-    ssize_t nread = read(fd, buffer, bufferLength);
-    if(nread < 0) {
-        perror("Reading from interface");
+    Enter_Method_Silent();
+    ASSERT(fd == this->fd);
+    uint8_t buffer[1 << 16];
+    ssize_t nread = read(fd, buffer, sizeof(buffer));
+    if (nread < 0) {
         close(fd);
-        throw cRuntimeError("Tap::notify(): An error occured on interface '%s': %s", device.c_str(), strerror(errno));
+        throw cRuntimeError("Cannot read '%s' device: %s", device.c_str(), strerror(errno));
     }
     else if (nread > 0) {
         ASSERT (nread > 4);
-        std::string pkName = device + "Captured" + std::to_string(pkId);
-        pkId++;
+        std::string completePacketName = packetName + std::to_string(numReceived);
         // buffer[0..1]: flags, buffer[2..3]: ethertype
-        Packet *packet = new Packet(pkName.c_str(), makeShared<BytesChunk>(buffer + 4, nread - 4));
+        Packet *packet = new Packet(completePacketName.c_str(), makeShared<BytesChunk>(buffer + 4, nread - 4));
         EtherEncap::addPaddingAndFcs(packet, FCS_COMPUTED);
         packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
         packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
-        EV << "Captured packet, length is " << packet->getTotalLength() << endl;
-
-        rtScheduler->scheduleMessage(this, packet);
+        emit(packetReceivedSignal, packet);
+        const auto& macHeader = packet->peekAtFront<EthernetMacHeader>();
+        EV_INFO << "Received a " << packet->getTotalLength() << " packet from " << macHeader->getSrc() << " to " << macHeader->getDest() << ".\n";
+        send(packet, "lowerLayerOut");
+        emit(packetSentToLowerSignal, packet);
+        numReceived++;
         return true;
     }
     else
         return false;
-}
-
-ExtTapDeviceIo::~ExtTapDeviceIo()
-{
-    rtScheduler->removeCallback(tapFd, this);
-    close(tapFd);
-}
-
-void ExtTapDeviceIo::initialize(int stage)
-{
-    // subscribe at scheduler for external messages
-    if (stage == INITSTAGE_LOCAL) {
-        numSent = numRcvd = numDropped = pkId = 0;
-
-        if (auto scheduler = dynamic_cast<RealTimeScheduler *>(getSimulation()->getScheduler())) {
-            rtScheduler = scheduler;
-            device = par("device").stdstringValue();
-
-            // Enabling sending makes no sense when we can't receive...
-            tapFd = openTap(device);
-            if (tapFd == INVALID_SOCKET)
-                throw cRuntimeError("Tap interface: open: error occured: %s", strerror(errno));
-            rtScheduler->addCallback(tapFd, this);
-            connected = true;
-        }
-        else {
-            // this simulation run works without external interface
-            connected = false;
-        }
-
-        WATCH(numSent);
-        WATCH(numRcvd);
-        WATCH(numDropped);
-    }
-}
-
-void ExtTapDeviceIo::handleMessage(cMessage *msg)
-{
-    if (msg->isSelfMessage()) {
-        Packet *packet = check_and_cast<Packet *>(msg);
-        // incoming real packet from real host (captured by tap interface)
-        const auto& nwHeader = packet->peekAtFront<EthernetMacHeader>();
-        EV << "Delivering a packet from "
-           << nwHeader->getSrc()
-           << " to "
-           << nwHeader->getDest()
-           << " and length of"
-           << packet->getByteLength()
-           << " bytes to networklayer.\n";
-        send(packet, "lowerLayerOut");
-        numRcvd++;
-    }
-    else {
-        // incoming packet from lower layer, sending it to tap interface
-        auto packet = check_and_cast<Packet *>(msg);
-        auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-        if (protocol != &Protocol::ethernetMac)
-            throw cRuntimeError("ExtInterface accepts ethernet packets only");
-        const auto& ethHeader = packet->peekAtFront<EthernetMacHeader>();
-        if (connected) {
-            if (tapFd == INVALID_SOCKET)
-                throw cRuntimeError("Tap: doesn't have socket for tap interface.");
-            auto bytesChunk = packet->peekDataAsBytes();
-            buffer[0] = 0;
-            buffer[1] = 0;
-            buffer[2] = 0x86;   // ethernet
-            buffer[3] = 0xdd;
-            size_t packetLength = bytesChunk->copyToBuffer(buffer+4, bufferLength-4);
-            ASSERT(packetLength == (size_t)packet->getByteLength());
-            packetLength += 4;
-            ssize_t nwrite = write(tapFd, buffer, packetLength);
-            if ((size_t)nwrite == packetLength) {
-                EV << "Sending a packet from "
-                   << ethHeader->getSrc()
-                   << " to "
-                   << ethHeader->getDest()
-                   << " and length of "
-                   << packet->getByteLength()
-                   << " bytes to tap device '" << device << "'.\n";
-                numSent++;
-            }
-            else
-                EV_ERROR << "Sending of an ethernet packet FAILED! (sendto returned " << nwrite << " (" << strerror(errno) << ") instead of " << packetLength << ").\n";
-            delete packet;
-        }
-        else {
-            EV_WARN << "Interface is not connected, dropping packet " << msg << endl;
-            numDropped++;
-            delete packet;
-        }
-    }
-}
-
-void ExtTapDeviceIo::refreshDisplay() const
-{
-    if (connected) {
-        char buf[180];
-        sprintf(buf, "tap device: %s\nrcv:%d snt:%d", device.c_str(), numRcvd, numSent);
-        getDisplayString().setTagArg("t", 0, buf);
-    }
-    else {
-        getDisplayString().setTagArg("t", 0, "not connected");
-    }
-}
-
-void ExtTapDeviceIo::finish()
-{
-    rtScheduler->removeCallback(tapFd, this);
-    EV << getFullPath() << ": " << numSent << " packets sent, "
-              << numRcvd << " packets received, " << numDropped << " packets dropped.\n";
-    //close tap socket:
-    close(tapFd);
-    tapFd = INVALID_SOCKET;
 }
 
 } // namespace inet
