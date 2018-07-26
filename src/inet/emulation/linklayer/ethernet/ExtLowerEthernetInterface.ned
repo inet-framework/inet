@@ -18,24 +18,37 @@
 
 package inet.emulation.linklayer.ethernet;
 
+import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.contract.IExternalInterface;
+import inet.linklayer.ethernet.IEtherEncap;
 
-module ExtLowerEthernetInterface like IExternalInterface
+module ExtLowerEthernetInterface like IExternalInterface, IEthernetInterface
 {
     parameters:
         string interfaceTableModule;
         int mtu @unit(B) = default(4470B);
+        *.interfaceTableModule = default(absPath(interfaceTableModule));
         @class(ExtInterface);
         @display("i=block/ifcard");
     gates:
         input upperLayerIn;
         output upperLayerOut;
+        inout phys @loose;
     submodules:
-        socket: ExtEthernetDeviceSocket {
+        encap: <default("EtherEncap")> like IEtherEncap {
             parameters:
                 @display("p=100,100");
         }
-    connections:
-        upperLayerIn --> { @display("m=n"); } --> socket.upperLayerIn;
-        upperLayerOut <-- { @display("m=n"); } <-- socket.upperLayerOut;
+        socket: ExtEthernetDeviceSocket {
+            parameters:
+                @display("p=100,300");
+        }
+    connections allowunconnected:
+        upperLayerIn --> { @display("m=n"); } --> encap.upperLayerIn if exists(encap);
+        upperLayerOut <-- { @display("m=n"); } <-- encap.upperLayerOut if exists(encap);
+        encap.lowerLayerOut --> socket.upperLayerIn if exists(encap);
+        encap.lowerLayerIn <-- socket.upperLayerOut if exists(encap);
+
+        upperLayerIn --> { @display("m=n"); } --> socket.upperLayerIn if !exists(encap);
+        upperLayerOut <-- { @display("m=n"); } <-- socket.upperLayerOut if !exists(encap);
 }
