@@ -22,11 +22,11 @@ package inet.emulation.common.tap;
 //
 // Tap bridge for connect real tap interface to simulation
 //
-// TapBridge write the packets arrived on 'toTap' gate to the specified
-// real tap device, and send out packets arrived from real tap device
-// on 'fromTap' gate.
+// ExtTapDeviceIo write the packets arrived on 'lowerLayerIn' gate to the
+// specified real tap device, and send out packets arrived from real tap
+// device on 'lowerLayerOut' gate.
 //
-simple TapBridge
+simple ExtTapDeviceIo
 {
     parameters:
         string device;  // name of existing real tap interface
