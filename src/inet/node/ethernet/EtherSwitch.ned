@@ -47,6 +47,7 @@ module EtherSwitch
         bool hasStatus = default(false);
         bool csmacdSupport = default(true);  // by default use CSMA/CD --FIXME remove
         string spanningTreeProtocol = default("");
+        int numEthInterfaces = default(0);  // minimum number of ethernet interfaces
         int numExtInterfaces = default(0);
         eth[*].encap.typename = "EtherEncapDummy";
         eth[*].csmacdSupport = csmacdSupport;
@@ -56,7 +57,7 @@ module EtherSwitch
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.macTableModule = default(absPath(".macTable"));
     gates:
-        inout ethg[] @labels(EtherFrame-conn);
+        inout ethg[numEthInterfaces] @labels(EtherFrame-conn);
     submodules:
         status: NodeStatus if hasStatus {
             @display("p=100,400;is=s");
