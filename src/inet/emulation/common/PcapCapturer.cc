@@ -21,15 +21,9 @@
 #include <net/if.h>
 #include <arpa/inet.h>
 
-#include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/common/ProtocolTag_m.h"
 #include "inet/emulation/common/PcapCapturer.h"
-#include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/linklayer/ethernet/EtherEncap.h"
-#include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
 
@@ -124,12 +118,6 @@ void PcapCapturer::handleMessage(cMessage *msg)
 {
     Packet *packet = check_and_cast<Packet *>(msg);
     if (msg->isSelfMessage()) {
-        packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(check_and_cast<InterfaceEntry*>(getParentModule())->getInterfaceId());
-        if (datalink == DLT_EN10MB) {
-            packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
-            packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
-            EtherEncap::addPaddingAndFcs(packet, FCS_COMPUTED);
-        }
         send(packet, "upperLayerOut");
         numRcvd++;
     }
