@@ -29,8 +29,17 @@ package inet.emulation.common.tap;
 simple ExtTapDeviceIo
 {
     parameters:
-        string device;  // name of existing real tap interface
+        string device; // name of existing real tap interface
+        string packetName = default("Ext");
         @display("i=block/rxtx");
+        @signal[packetSentToLower](type=Packet);
+        @signal[packetReceivedFromLower](type=Packet);
+        @signal[packetSent](type=Packet);
+        @signal[packetReceived](type=Packet);
+        @statistic[packetSentFromLower](title="packets sent to higher layer"; source=packetSentToLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[packetReceivedFromLower](title="packets received from higher layer"; source=packetReceivedFromLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
     gates:
         input lowerLayerIn @labels(EtherFrame);
         output lowerLayerOut @labels(EtherFrame);
