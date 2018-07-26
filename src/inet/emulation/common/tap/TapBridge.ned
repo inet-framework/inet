@@ -32,7 +32,7 @@ simple TapBridge
         string device;  // name of existing real tap interface
         @display("i=block/rxtx");
     gates:
-        input toTap @labels(EtherFrame);
-        output fromTap @labels(EtherFrame);
+        input lowerLayerIn @labels(EtherFrame);
+        output lowerLayerOut @labels(EtherFrame);
 }
 
