@@ -176,7 +176,7 @@ void TapBridge::handleMessage(cMessage *msg)
            << " and length of"
            << packet->getByteLength()
            << " bytes to networklayer.\n";
-        send(packet, "fromTap");
+        send(packet, "lowerLayerOut");
         numRcvd++;
     }
     else {
