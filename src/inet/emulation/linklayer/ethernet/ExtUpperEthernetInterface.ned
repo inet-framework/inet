@@ -18,10 +18,12 @@
 
 package inet.emulation.linklayer.ethernet;
 
-import inet.emulation.common.TapBridge;
+import inet.emulation.common.tap.TapBridge;
+import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.contract.IExternalInterface;
+import inet.physicallayer.ethernet.EtherPhy;
 
-module ExtUpperEthernetInterface like IExternalInterface
+module ExtUpperEthernetInterface like IExternalInterface, IEthernetInterface
 {
     parameters:
         string interfaceTableModule;
@@ -29,13 +31,20 @@ module ExtUpperEthernetInterface like IExternalInterface
         @class(ExtInterface);
         @display("i=block/ifcard");
     gates:
+        input upperLayerIn @loose;
+        output upperLayerOut @loose;
         inout phys @labels(EtherFrame);
     submodules:
         tapBridge: TapBridge {
             parameters:
                 @display("p=100,100");
         }
-    connections:
-        tapBridge.lowerLayerOut --> { @display("m=s"); } --> phys$o;
-        tapBridge.lowerLayerIn <-- { @display("m=s"); } <-- phys$i;
+        phy: EtherPhy {
+            parameters:
+                @display("p=100,300");
+        }
+    connections allowunconnected:
+        tapBridge.lowerLayerOut --> { @display("m=s"); } --> phy.upperLayerIn;
+        tapBridge.lowerLayerIn <-- { @display("m=s"); } <-- phy.upperLayerOut;
+        phy.phys <--> { @display("m=s"); } <--> phys;
 }
