@@ -31,14 +31,14 @@ void ExtInterface::initialize(int stage)
 
 void ExtInterface::registerInterface()
 {
-    setMtu(par("mtu"));      //TODO get mtu from real interface / or set mtu in real interface
+    setMtu(par("mtu"));
     setBroadcast(true);      //TODO
     setMulticast(true);      //TODO
     setPointToPoint(true);   //TODO
 
-    IInterfaceTable *ift = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-    if (ift)
-        ift->addInterface(this);
+    IInterfaceTable *interfaceTable = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+    if (interfaceTable)
+        interfaceTable->addInterface(this);
     inet::registerInterface(*this, gate("upperLayerIn"), gate("upperLayerOut"));
 }
 
