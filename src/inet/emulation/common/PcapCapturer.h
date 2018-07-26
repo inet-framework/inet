@@ -20,12 +20,11 @@
 
 #include <pcap.h>
 #include "inet/common/scheduler/RealTimeScheduler.h"
-#include "inet/linklayer/base/MacBase.h"
 
 namespace inet {
 
 /**
- * TODO
+ * This class captures packets on a real network device using PCAP.
  *
  * Requires RealTimeScheduler to be configured as scheduler in omnetpp.ini.
  *
