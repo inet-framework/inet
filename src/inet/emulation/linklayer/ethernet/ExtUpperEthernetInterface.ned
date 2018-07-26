@@ -1,6 +1,5 @@
 //
-// Copyright (C) 2004 Andras Varga
-//               2010 Zoltan Bojthe
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -18,7 +17,7 @@
 
 package inet.emulation.linklayer.ethernet;
 
-import inet.emulation.common.tap.TapBridge;
+import inet.emulation.common.tap.ExtTapDeviceIo;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.contract.IExternalInterface;
 import inet.physicallayer.ethernet.EtherPhy;
@@ -35,7 +34,7 @@ module ExtUpperEthernetInterface like IExternalInterface, IEthernetInterface
         output upperLayerOut @loose;
         inout phys @labels(EtherFrame);
     submodules:
-        tapBridge: TapBridge {
+        tap: ExtTapDeviceIo {
             parameters:
                 @display("p=100,100");
         }
@@ -44,7 +43,7 @@ module ExtUpperEthernetInterface like IExternalInterface, IEthernetInterface
                 @display("p=100,300");
         }
     connections allowunconnected:
-        tapBridge.lowerLayerOut --> { @display("m=s"); } --> phy.upperLayerIn;
-        tapBridge.lowerLayerIn <-- { @display("m=s"); } <-- phy.upperLayerOut;
+        tap.lowerLayerOut --> { @display("m=s"); } --> phy.upperLayerIn;
+        tap.lowerLayerIn <-- { @display("m=s"); } <-- phy.upperLayerOut;
         phy.phys <--> { @display("m=s"); } <--> phys;
 }
