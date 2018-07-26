@@ -46,7 +46,7 @@
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
 #include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
-#include "inet/emulation/common/tap/TapBridge.h"
+#include "inet/emulation/common/tap/ExtTapDeviceIo.h"
 
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
@@ -54,7 +54,7 @@
 
 namespace inet {
 
-Define_Module(TapBridge);
+Define_Module(ExtTapDeviceIo);
 
 int openTap(std::string dev) {
     struct ifreq ifr;
@@ -102,7 +102,7 @@ int openTap(std::string dev) {
     return fd;
 }
 
-bool TapBridge::notify(int fd)
+bool ExtTapDeviceIo::notify(int fd)
 {
     ASSERT(fd == this->tapFd);
     ssize_t nread = read(fd, buffer, bufferLength);
@@ -129,13 +129,13 @@ bool TapBridge::notify(int fd)
         return false;
 }
 
-TapBridge::~TapBridge()
+ExtTapDeviceIo::~ExtTapDeviceIo()
 {
     rtScheduler->removeCallback(tapFd, this);
     close(tapFd);
 }
 
-void TapBridge::initialize(int stage)
+void ExtTapDeviceIo::initialize(int stage)
 {
     // subscribe at scheduler for external messages
     if (stage == INITSTAGE_LOCAL) {
@@ -163,7 +163,7 @@ void TapBridge::initialize(int stage)
     }
 }
 
-void TapBridge::handleMessage(cMessage *msg)
+void ExtTapDeviceIo::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
         Packet *packet = check_and_cast<Packet *>(msg);
@@ -220,7 +220,7 @@ void TapBridge::handleMessage(cMessage *msg)
     }
 }
 
-void TapBridge::refreshDisplay() const
+void ExtTapDeviceIo::refreshDisplay() const
 {
     if (connected) {
         char buf[180];
@@ -232,7 +232,7 @@ void TapBridge::refreshDisplay() const
     }
 }
 
-void TapBridge::finish()
+void ExtTapDeviceIo::finish()
 {
     rtScheduler->removeCallback(tapFd, this);
     EV << getFullPath() << ": " << numSent << " packets sent, "

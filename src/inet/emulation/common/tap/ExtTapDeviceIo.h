@@ -17,8 +17,8 @@
 
 // This file is based on the Ppp.h of INET written by Andras Varga.
 
-#ifndef __INET_TAPBRIDGE_H
-#define __INET_TAPBRIDGE_H
+#ifndef __INET_EXTTAPDEVICEIO_H
+#define __INET_EXTTAPDEVICEIO_H
 
 #ifndef MAX_MTU_SIZE
 #define MAX_MTU_SIZE    4096
@@ -42,7 +42,7 @@ class InterfaceEntry;
  *
  * See NED file for more details.
  */
-class INET_API TapBridge : public cSimpleModule, public RealTimeScheduler::ICallback
+class INET_API ExtTapDeviceIo : public cSimpleModule, public RealTimeScheduler::ICallback
 {
   protected:
     RealTimeScheduler *rtScheduler = nullptr;
@@ -75,7 +75,7 @@ class INET_API TapBridge : public cSimpleModule, public RealTimeScheduler::ICall
     void sendBytes(unsigned char *buf, size_t numBytes, struct sockaddr *from, socklen_t addrlen);
 
   public:
-    virtual ~TapBridge();
+    virtual ~ExtTapDeviceIo();
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
@@ -84,5 +84,5 @@ class INET_API TapBridge : public cSimpleModule, public RealTimeScheduler::ICall
 
 } // namespace inet
 
-#endif // ifndef __INET_TAPBRIDGE_H
+#endif // ifndef __INET_EXTTAPDEVICEIO_H
 
