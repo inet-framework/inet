@@ -15,25 +15,19 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_RAWSOCKET_H
-#define __INET_RAWSOCKET_H
+#ifndef __INET_EXTIPV4SOCKET_H
+#define __INET_EXTIPV4SOCKET_H
 
-#include "inet/common/INETDefs.h"
 #include "inet/common/scheduler/RealTimeScheduler.h"
 
 namespace inet {
 
-/**
- * TODO
- *
- * See NED file for more details.
- */
-class INET_API RawSocket : public cSimpleModule, public RealTimeScheduler::ICallback
+class INET_API ExtIpv4Socket : public cSimpleModule, public RealTimeScheduler::ICallback
 {
   protected:
-    const char *device = nullptr;
-    const Protocol *protocol = nullptr;
-    int ifindex = -1;
+    // parameters
+    std::string packetName;
+    RealTimeScheduler *rtScheduler = nullptr;
 
     // statistics
     int numSent = 0;
@@ -41,7 +35,6 @@ class INET_API RawSocket : public cSimpleModule, public RealTimeScheduler::ICall
 
     // state
     int fd = INVALID_SOCKET;
-    MacAddress macAddress;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -50,15 +43,16 @@ class INET_API RawSocket : public cSimpleModule, public RealTimeScheduler::ICall
     virtual void finish() override;
     virtual void refreshDisplay() const override;
 
-    void sendBytes(unsigned char *buf, size_t numBytes, struct sockaddr *from, socklen_t addrlen);
+    virtual void openSocket();
+    virtual void closeSocket();
 
   public:
-    virtual ~RawSocket();
+    virtual ~ExtIpv4Socket();
 
     virtual bool notify(int fd) override;
 };
 
 } // namespace inet
 
-#endif // ifndef __INET_RAWSOCKET_H
+#endif // ifndef __INET_EXTIPV4SOCKET_H
 

@@ -15,13 +15,11 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.emulation.common;
+package inet.emulation.networklayer.ipv4;
 
-simple RawSocket
+simple ExtIpv4Socket
 {
     parameters:
-        string device;
-        string protocol @enum("ipv4","ethernetMac") = default("ipv4");
         @display("i=block/rxtx");
         @signal[packetSentToUpper](type=Packet);
         @signal[packetReceivedFromUpper](type=Packet);
