@@ -25,6 +25,7 @@ module ExtLowerEthernetInterface like IExternalInterface, IEthernetInterface
 {
     parameters:
         string interfaceTableModule;
+        string address = default("auto");
         int mtu @unit(B) = default(4470B);
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         @class(ExtInterface);
