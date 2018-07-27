@@ -66,6 +66,7 @@ void ExtTapDeviceIo::handleMessage(cMessage *msg)
     if (protocol != &Protocol::ethernetMac)
         throw cRuntimeError("ExtInterface accepts ethernet packets only");
     const auto& ethHeader = packet->peekAtFront<EthernetMacHeader>();
+    packet->popAtBack<EthernetFcs>(ETHER_FCS_BYTES);
     auto bytesChunk = packet->peekDataAsBytes();
     uint8_t buffer[packet->getByteLength() + 4];
     buffer[0] = 0;
