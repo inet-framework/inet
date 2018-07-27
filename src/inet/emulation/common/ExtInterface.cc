@@ -15,17 +15,20 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include <arpa/inet.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
-#include <sys/ioctl.h>
-#include <net/if.h>
+#include <arpa/inet.h>
 #include <linux/if_tun.h>
+#include <net/if.h>
+#include <net/if_arp.h>
+#include <netinet/in.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 #include <omnetpp/platdep/sockets.h>
 
+#include "inet/common/Endian.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/emulation/common/ExtInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -82,13 +85,11 @@ void ExtInterface::copyInterfaceConfigurationFromExt()
 
     //get the IPv4 address
     ioctl(fd, SIOCGIFADDR, &ifr);
-    // TODO: use uint32_t
-    Ipv4Address ipv4Address = Ipv4Address(inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr));
+    Ipv4Address ipv4Address = Ipv4Address(ntohl(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr.s_addr));
 
     //get the IPv4 netmask
     ioctl(fd, SIOCGIFNETMASK, &ifr);
-    // TODO: use uint32_t
-    Ipv4Address ipv4Netmask = Ipv4Address(inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr));
+    Ipv4Address ipv4Netmask = Ipv4Address(ntohl(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr.s_addr));
 
     ioctl(fd, SIOCGIFHWADDR, &ifr);
     MacAddress macAddress;
