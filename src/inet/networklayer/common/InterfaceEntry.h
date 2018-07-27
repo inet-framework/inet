@@ -224,6 +224,7 @@ class INET_API InterfaceEntry : public cModule
     //@{
     Ipv4InterfaceData *ipv4Data() const { return ipv4data; }
     Ipv4Address getIpv4Address() const;
+    Ipv4Address getNetmask() const;
     Ipv6InterfaceData *ipv6Data() const { return ipv6data; }
     NextHopInterfaceData *getNextHopData() const { return nextHopData; }
     TrillInterfaceData *trillData() const { return trilldata; }
