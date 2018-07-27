@@ -32,8 +32,6 @@ namespace inet {
  * on the host running the simulation. Suitable for hardware-in-the-loop
  * simulations.
  *
- * Requires RealTimeScheduler to be configured as scheduler in omnetpp.ini.
- *
  * See NED file for more details.
  */
 class INET_API TapCfg : public cSimpleModule

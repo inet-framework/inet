@@ -45,7 +45,7 @@
 #include "inet/linklayer/ethernet/EtherEncap.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
-#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
+//#include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #include "inet/emulation/common/tap/TapCfg.h"
 
 #include "inet/networklayer/common/InterfaceEntry.h"
@@ -96,8 +96,7 @@ void TapCfg::initialize(int stage)
 
         close(fd);
 
-        InterfaceEntry *interfaceEntry = getModuleFromPar<InterfaceEntry>(par("interfaceModule"), this);
-
+        InterfaceEntry *interfaceEntry = getContainingNicModule(this);
         Ipv4InterfaceData *interfaceData = interfaceEntry->ipv4Data();
         if (interfaceData == nullptr)
             interfaceEntry->setIpv4Data(interfaceData = new Ipv4InterfaceData());
