@@ -19,7 +19,6 @@ package inet.emulation.linklayer.ethernet;
 
 import inet.common.queue.IOutputQueue;
 import inet.emulation.common.ExtInterface;
-import inet.emulation.common.tap.ExtTapDeviceIo;
 import inet.linklayer.contract.IEtherMac;
 import inet.linklayer.contract.IEthernetInterface;
 
@@ -33,7 +32,7 @@ module ExtUpperEthernetInterface extends ExtInterface like IEthernetInterface
     gates:
         inout phys @labels(EtherFrame);
     submodules:
-        tap: ExtTapDeviceIo {
+        tap: ExtEthernetTapDeviceFileIo {
             parameters:
                 @display("p=100,100");
         }
