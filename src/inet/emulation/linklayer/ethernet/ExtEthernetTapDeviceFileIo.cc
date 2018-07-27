@@ -31,7 +31,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/emulation/common/tap/ExtTapDeviceIo.h"
+#include "inet/emulation/linklayer/ethernet/ExtEthernetTapDeviceFileIo.h"
 #include "inet/linklayer/ethernet/EtherEncap.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 
