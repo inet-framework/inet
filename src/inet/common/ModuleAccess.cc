@@ -86,9 +86,9 @@ cModule *findModuleUnderContainingNode(const cModule *from)
 InterfaceEntry *findContainingNicModule(const cModule *from)
 {
     for (cModule *curmod = const_cast<cModule *>(from); curmod; curmod = curmod->getParentModule()) {
-        cProperties *props = curmod->getProperties();
         if (auto interfaceEntry = dynamic_cast<InterfaceEntry *>(curmod))
             return interfaceEntry;
+        cProperties *props = curmod->getProperties();
         if (props && props->getAsBool("networkNode"))
             break;
     }
