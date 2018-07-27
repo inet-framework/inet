@@ -719,7 +719,7 @@ void Router::rebuildRoutingTable()
             if(ospfIfEntry) {
                 OspfRoutingTableEntry *entry = new OspfRoutingTableEntry(ift);
 
-                entry->setDestination(ifEntry->getIpv4Address());
+                entry->setDestination(ifEntry->getIpv4Address() & ifEntry->getNetmask());
                 entry->setNetmask(ifEntry->getNetmask());
                 entry->setLinkStateOrigin(areas[i]->findRouterLSA(areas[i]->getRouter()->getRouterID()));
                 entry->setArea(areas[i]->getAreaID());
