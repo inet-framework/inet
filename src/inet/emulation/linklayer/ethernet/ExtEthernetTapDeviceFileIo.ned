@@ -17,7 +17,7 @@
 // Author: Zoltan Bojthe
 //
 
-package inet.emulation.common.tap;
+package inet.emulation.linklayer.ethernet;
 
 //
 // Tap bridge for connect real tap interface to simulation
@@ -26,7 +26,7 @@ package inet.emulation.common.tap;
 // specified real tap device, and send out packets arrived from real tap
 // device on 'lowerLayerOut' gate.
 //
-simple ExtTapDeviceIo
+simple ExtEthernetTapDeviceFileIo
 {
     parameters:
         string device; // name of existing real tap interface
