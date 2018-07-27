@@ -30,6 +30,7 @@ module ExtUpperEthernetInterface like IExternalInterface, IEthernetInterface
     parameters:
         string tapDevice;
         string interfaceTableModule;
+        string address = default("auto");
         int mtu @unit(B) = default(4470B);
         bool csmacdSupport = default(false);  // by default CSMA/CD is turned off, so only point-to-point duplex links are supported.
         string fcsMode @enum("declared","computed") = default("declared");
