@@ -22,12 +22,12 @@ package inet.emulation.common.tap;
 //
 // TapCfg configures the simulated interface based on real tap interface 
 // in initialize phase.
+// Should be inserted to inside of an InterfaceEntry module
 //
 simple TapCfg
 {
     parameters:
         string device;  // name of existing real tap interface
-        string interfaceModule;     // should be an InterfaceEntry
         @display("i=block/rxtx");
 }
 
