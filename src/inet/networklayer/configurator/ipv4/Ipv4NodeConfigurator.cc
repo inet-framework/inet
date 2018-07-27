@@ -101,6 +101,11 @@ void Ipv4NodeConfigurator::prepareNode()
 
 void Ipv4NodeConfigurator::prepareInterface(InterfaceEntry *interfaceEntry)
 {
+    //FIXME KLUDGE
+    if (interfaceEntry->ipv4Data())
+        return;
+    //end of KLUDGE
+
     ASSERT(!interfaceEntry->ipv4Data());
     Ipv4InterfaceData *interfaceData = new Ipv4InterfaceData();
     interfaceEntry->setIpv4Data(interfaceData);

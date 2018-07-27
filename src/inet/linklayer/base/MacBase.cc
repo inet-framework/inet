@@ -29,6 +29,9 @@
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/ModuleAccess.h"
 
+//FIXME KLUDGE
+#include "inet/emulation/common/ExtInterface.h"
+
 namespace inet {
 
 MacBase::~MacBase()
@@ -111,6 +114,14 @@ void MacBase::updateOperationalFlag(bool isNodeUp)
 
 void MacBase::registerInterface()    //XXX registerInterfaceIfInterfaceTableExists() ???
 {
+    //FIXME KLUDGE
+    InterfaceEntry *ie = getContainingNicModule(this);
+    if (dynamic_cast<ExtInterface *>(ie)) {
+        interfaceEntry = ie;
+        return;
+    }
+    //end of KLUDGE
+
     ASSERT(interfaceEntry == nullptr);
     interfaceEntry = createInterfaceEntry();
     IInterfaceTable *ift = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
