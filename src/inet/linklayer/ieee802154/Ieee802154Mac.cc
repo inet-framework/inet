@@ -167,7 +167,7 @@ Ieee802154Mac::~Ieee802154Mac()
     }
 }
 
-InterfaceEntry *Ieee802154Mac::createInterfaceEntry()
+InterfaceEntry *Ieee802154Mac::configureInterfaceEntry()
 {
     InterfaceEntry *e = getContainingNicModule(this);
     MacAddress address = parseMacAddressParameter(par("address"));

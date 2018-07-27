@@ -114,7 +114,7 @@ LMac::~LMac()
     macQueue.clear();
 }
 
-InterfaceEntry *LMac::createInterfaceEntry()
+InterfaceEntry *LMac::configureInterfaceEntry()
 {
     InterfaceEntry *e = getContainingNicModule(this);
     MacAddress address = parseMacAddressParameter(par("address"));

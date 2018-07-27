@@ -55,7 +55,7 @@ void Loopback::initialize(int stage)
     }
 }
 
-InterfaceEntry *Loopback::createInterfaceEntry()
+InterfaceEntry *Loopback::configureInterfaceEntry()
 {
     InterfaceEntry *ie = getContainingNicModule(this);
 

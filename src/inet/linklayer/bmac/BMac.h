@@ -191,7 +191,7 @@ class INET_API BMac : public MacProtocolBase, public IMacProtocol
     bool stats = false;
 
     /** @brief Generate new interface address*/
-    virtual InterfaceEntry *createInterfaceEntry() override;
+    virtual InterfaceEntry *configureInterfaceEntry() override;
     virtual void handleCommand(cMessage *msg) {}
 
     /** @brief Internal function to send the first packet in the queue */

@@ -56,7 +56,7 @@ void MacProtocolBase::initialize(int stage)
 void MacProtocolBase::registerInterface()
 {
     ASSERT(interfaceEntry == nullptr);
-    interfaceEntry = createInterfaceEntry();
+    interfaceEntry = configureInterfaceEntry();
     IInterfaceTable *interfaceTable = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     if (interfaceTable) {
         interfaceTable->addInterface(interfaceEntry);

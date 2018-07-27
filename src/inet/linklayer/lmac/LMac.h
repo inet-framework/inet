@@ -119,7 +119,7 @@ class INET_API LMac : public MacProtocolBase, public IMacProtocol
 
   protected:
     /** @brief Generate new interface address*/
-    virtual InterfaceEntry *createInterfaceEntry() override;
+    virtual InterfaceEntry *configureInterfaceEntry() override;
     virtual void handleCommand(cMessage *msg) {}
 
     typedef std::list<Packet *> MacQueue;

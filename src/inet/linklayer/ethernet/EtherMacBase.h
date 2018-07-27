@@ -227,7 +227,7 @@ class INET_API EtherMacBase : public MacBase
     bool verifyCrcAndLength(Packet *packet);
 
     // MacBase
-    virtual InterfaceEntry *createInterfaceEntry() override;
+    virtual InterfaceEntry *configureInterfaceEntry() override;
     virtual void flushQueue() override;
     virtual void clearQueue() override;
     virtual bool isUpperMsg(cMessage *msg) override { return msg->getArrivalGate() == upperLayerInGate; }

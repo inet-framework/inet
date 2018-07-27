@@ -145,7 +145,7 @@ void BMac::finish()
     //recordScalar("timeTX", timeTX);
 }
 
-InterfaceEntry *BMac::createInterfaceEntry()
+InterfaceEntry *BMac::configureInterfaceEntry()
 {
     MacAddress address = parseMacAddressParameter(par("address"));
     InterfaceEntry *e = getContainingNicModule(this);

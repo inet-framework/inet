@@ -178,7 +178,7 @@ void XMac::finish()
     }
 }
 
-InterfaceEntry *XMac::createInterfaceEntry()
+InterfaceEntry *XMac::configureInterfaceEntry()
 {
     InterfaceEntry *e = getContainingNicModule(this);
     MacAddress address = parseMacAddressParameter(par("address"));

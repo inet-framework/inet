@@ -120,7 +120,7 @@ const MacAddress& Ieee80211Mac::isInterfaceRegistered()
     return MacAddress::UNSPECIFIED_ADDRESS;
 }
 
-InterfaceEntry *Ieee80211Mac::createInterfaceEntry()
+InterfaceEntry *Ieee80211Mac::configureInterfaceEntry()
 {
     MacAddress address = parseMacAddressParameter(par("address"));
     //TODO the mib module should use the mac address from InterfaceEntry

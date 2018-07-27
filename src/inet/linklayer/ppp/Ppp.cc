@@ -96,7 +96,7 @@ void Ppp::initialize(int stage)
     }
 }
 
-InterfaceEntry *Ppp::createInterfaceEntry()
+InterfaceEntry *Ppp::configureInterfaceEntry()
 {
     InterfaceEntry *e = getContainingNicModule(this);
 

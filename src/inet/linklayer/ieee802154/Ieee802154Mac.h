@@ -286,7 +286,7 @@ class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol
 
   protected:
     /** @brief Generate new interface address*/
-    virtual InterfaceEntry *createInterfaceEntry() override;
+    virtual InterfaceEntry *configureInterfaceEntry() override;
     virtual void handleCommand(cMessage *msg) {}
 
     virtual void flushQueue();

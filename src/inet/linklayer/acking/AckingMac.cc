@@ -99,7 +99,7 @@ void AckingMac::initialize(int stage)
     }
 }
 
-InterfaceEntry *AckingMac::createInterfaceEntry()
+InterfaceEntry *AckingMac::configureInterfaceEntry()
 {
     InterfaceEntry *e = getContainingNicModule(this);
     MacAddress address = parseMacAddressParameter(par("address"));

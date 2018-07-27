@@ -221,7 +221,7 @@ void Ext::openPcap(const char *device, const char *filter)
     EV << "Opened pcap device " << device << " with filter " << filter << " and datalink " << datalink << ".\n";
 }
 
-InterfaceEntry *Ext::createInterfaceEntry()
+InterfaceEntry *Ext::configureInterfaceEntry()
 {
     InterfaceEntry *e = getContainingNicModule(this);
 

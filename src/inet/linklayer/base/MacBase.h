@@ -46,7 +46,7 @@ class INET_API MacBase : public cSimpleModule, public ILifecycle, public cListen
     using cListener::receiveSignal;
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    void registerInterface();    // do not override! override createInterfaceEntry()
+    void registerInterface();    // do not override! override configureInterfaceEntry()
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
     virtual void updateOperationalFlag(bool isNodeUp);
@@ -57,7 +57,7 @@ class INET_API MacBase : public cSimpleModule, public ILifecycle, public cListen
     /**
      * should create InterfaceEntry
      */
-    virtual InterfaceEntry *createInterfaceEntry() = 0;
+    virtual InterfaceEntry *configureInterfaceEntry() = 0;
 
     /**
      * should clear queue and emit signal "packetDropped" with entire packets
