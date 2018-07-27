@@ -17,18 +17,26 @@
 
 package inet.emulation.linklayer.ethernet;
 
+import inet.common.queue.IOutputQueue;
 import inet.emulation.common.tap.ExtTapDeviceIo;
+import inet.emulation.common.tap.TapCfg;
+import inet.linklayer.contract.IEtherMac;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.contract.IExternalInterface;
-import inet.physicallayer.ethernet.EtherPhy;
+
 
 module ExtUpperEthernetInterface like IExternalInterface, IEthernetInterface
 {
     parameters:
+        string tapDevice;
         string interfaceTableModule;
         int mtu @unit(B) = default(4470B);
+        bool csmacdSupport = default(false);  // by default CSMA/CD is turned off, so only point-to-point duplex links are supported.
+        string fcsMode @enum("declared","computed") = default("declared");
         @class(ExtInterface);
         @display("i=block/ifcard");
+        *.interfaceTableModule = default(absPath(interfaceTableModule));
+        *.fcsMode = fcsMode;
     gates:
         input upperLayerIn @loose;
         output upperLayerOut @loose;
@@ -36,14 +44,30 @@ module ExtUpperEthernetInterface like IExternalInterface, IEthernetInterface
     submodules:
         tap: ExtTapDeviceIo {
             parameters:
+                device = tapDevice;
                 @display("p=100,100");
         }
-        phy: EtherPhy {
+        queue: <default("")> like IOutputQueue if typename != "" {
             parameters:
-                @display("p=100,300");
+                @display("p=100,400;q=l2queue");
+        }
+        mac: <default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex")> like IEtherMac {
+            parameters:
+                queueModule = (exists(queue) ? "^.queue" : "");
+                txQueueLimit = (exists(queue) ? 1 : 10000); // queue sends one packet at a time
+                @display("p=200,500");
+        }
+        cfg: TapCfg {
+            device = tapDevice;
+            @display("p=217,100");
         }
     connections allowunconnected:
-        tap.lowerLayerOut --> { @display("m=s"); } --> phy.upperLayerIn;
-        tap.lowerLayerIn <-- { @display("m=s"); } <-- phy.upperLayerOut;
-        phy.phys <--> { @display("m=s"); } <--> phys;
+        if exists(queue) {
+            tap.lowerLayerOut --> queue.in;
+            queue.out --> mac.upperLayerIn;
+        }
+        tap.lowerLayerOut --> { @display("m=s"); } --> mac.upperLayerIn if !exists(queue);
+        tap.lowerLayerIn <-- { @display("m=s"); } <-- mac.upperLayerOut;
+        mac.phys <--> { @display("m=s"); } <--> phys;
 }
+
