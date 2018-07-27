@@ -114,7 +114,7 @@ LMac::~LMac()
     macQueue.clear();
 }
 
-InterfaceEntry *LMac::configureInterfaceEntry()
+void LMac::configureInterfaceEntry()
 {
     InterfaceEntry *e = getContainingNicModule(this);
     MacAddress address = parseMacAddressParameter(par("address"));
@@ -130,8 +130,6 @@ InterfaceEntry *LMac::configureInterfaceEntry()
     e->setMtu(par("mtu"));
     e->setMulticast(false);
     e->setBroadcast(true);
-
-    return e;
 }
 
 /**

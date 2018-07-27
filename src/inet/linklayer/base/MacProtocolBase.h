@@ -43,7 +43,7 @@ class INET_API MacProtocolBase : public LayeredProtocolBase, public cListener
     virtual void initialize(int stage) override;
 
     virtual void registerInterface();
-    virtual InterfaceEntry *configureInterfaceEntry() = 0;
+    virtual void configureInterfaceEntry() = 0;
 
     virtual MacAddress parseMacAddressParameter(const char *addrstr);
 

@@ -273,7 +273,7 @@ void EtherMacBase::initializeStatistics()
     WATCH(numPauseFramesSent);
 }
 
-InterfaceEntry *EtherMacBase::configureInterfaceEntry()
+void EtherMacBase::configureInterfaceEntry()
 {
     InterfaceEntry *interfaceEntry = getContainingNicModule(this);
     MacAddress address = parseMacAddressParameter(par("address"));
@@ -292,8 +292,6 @@ InterfaceEntry *EtherMacBase::configureInterfaceEntry()
     // capabilities
     interfaceEntry->setMulticast(true);
     interfaceEntry->setBroadcast(true);
-
-    return interfaceEntry;
 }
 
 bool EtherMacBase::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)

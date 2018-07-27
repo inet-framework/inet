@@ -68,7 +68,7 @@ class INET_API Ppp : public MacBase
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
     // MacBase functions
-    virtual InterfaceEntry *configureInterfaceEntry() override;
+    virtual void configureInterfaceEntry() override;
     virtual bool isUpperMsg(cMessage *msg) override { return msg->arrivedOn("upperLayerIn"); }
     virtual void flushQueue() override;
     virtual void clearQueue() override;

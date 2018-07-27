@@ -167,7 +167,7 @@ void CsmaCaMac::finish()
     recordScalar("numReceivedBroadcast", numReceivedBroadcast);
 }
 
-InterfaceEntry *CsmaCaMac::configureInterfaceEntry()
+void CsmaCaMac::configureInterfaceEntry()
 {
     InterfaceEntry *e = getContainingNicModule(this);
     MacAddress address = parseMacAddressParameter(par("address"));
@@ -184,8 +184,6 @@ InterfaceEntry *CsmaCaMac::configureInterfaceEntry()
     e->setMulticast(true);
     e->setBroadcast(true);
     e->setPointToPoint(false);
-
-    return e;
 }
 
 /****************************************************************

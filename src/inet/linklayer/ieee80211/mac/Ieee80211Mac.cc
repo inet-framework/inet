@@ -120,7 +120,7 @@ const MacAddress& Ieee80211Mac::isInterfaceRegistered()
     return MacAddress::UNSPECIFIED_ADDRESS;
 }
 
-InterfaceEntry *Ieee80211Mac::configureInterfaceEntry()
+void Ieee80211Mac::configureInterfaceEntry()
 {
     MacAddress address = parseMacAddressParameter(par("address"));
     //TODO the mib module should use the mac address from InterfaceEntry
@@ -135,7 +135,6 @@ InterfaceEntry *Ieee80211Mac::configureInterfaceEntry()
     e->setBroadcast(true);
     e->setMulticast(true);
     e->setPointToPoint(false);
-    return e;
 }
 
 void Ieee80211Mac::handleMessageWhenUp(cMessage *message)

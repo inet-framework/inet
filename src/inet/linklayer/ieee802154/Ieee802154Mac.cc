@@ -167,7 +167,7 @@ Ieee802154Mac::~Ieee802154Mac()
     }
 }
 
-InterfaceEntry *Ieee802154Mac::configureInterfaceEntry()
+void Ieee802154Mac::configureInterfaceEntry()
 {
     InterfaceEntry *e = getContainingNicModule(this);
     MacAddress address = parseMacAddressParameter(par("address"));
@@ -183,8 +183,6 @@ InterfaceEntry *Ieee802154Mac::configureInterfaceEntry()
     e->setMtu(par("mtu"));
     e->setMulticast(true);
     e->setBroadcast(true);
-
-    return e;
 }
 
 /**

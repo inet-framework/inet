@@ -178,7 +178,7 @@ void XMac::finish()
     }
 }
 
-InterfaceEntry *XMac::configureInterfaceEntry()
+void XMac::configureInterfaceEntry()
 {
     InterfaceEntry *e = getContainingNicModule(this);
     MacAddress address = parseMacAddressParameter(par("address"));
@@ -194,8 +194,6 @@ InterfaceEntry *XMac::configureInterfaceEntry()
     e->setMtu(par("mtu"));
     e->setMulticast(false);
     e->setBroadcast(true);
-
-    return e;
 }
 
 /**

@@ -145,7 +145,7 @@ void BMac::finish()
     //recordScalar("timeTX", timeTX);
 }
 
-InterfaceEntry *BMac::configureInterfaceEntry()
+void BMac::configureInterfaceEntry()
 {
     MacAddress address = parseMacAddressParameter(par("address"));
     InterfaceEntry *e = getContainingNicModule(this);
@@ -161,8 +161,6 @@ InterfaceEntry *BMac::configureInterfaceEntry()
     e->setMtu(par("mtu"));
     e->setMulticast(false);
     e->setBroadcast(true);
-
-    return e;
 }
 
 /**

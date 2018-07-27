@@ -96,7 +96,7 @@ void Ppp::initialize(int stage)
     }
 }
 
-InterfaceEntry *Ppp::configureInterfaceEntry()
+void Ppp::configureInterfaceEntry()
 {
     InterfaceEntry *e = getContainingNicModule(this);
 
@@ -117,8 +117,6 @@ InterfaceEntry *Ppp::configureInterfaceEntry()
     // capabilities
     e->setMulticast(true);
     e->setPointToPoint(true);
-
-    return e;
 }
 
 void Ppp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)

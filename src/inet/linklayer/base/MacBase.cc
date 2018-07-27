@@ -112,13 +112,13 @@ void MacBase::updateOperationalFlag(bool isNodeUp)
 void MacBase::registerInterface()    //XXX registerInterfaceIfInterfaceTableExists() ???
 {
     ASSERT(interfaceEntry == nullptr);
-    interfaceEntry = configureInterfaceEntry();
+    interfaceEntry = getContainingNicModule(this);
+    configureInterfaceEntry();
     IInterfaceTable *ift = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     if (ift) {
         ift->addInterface(interfaceEntry);
     }
-    auto module = getContainingNicModule(this);
-    inet::registerInterface(*interfaceEntry, module->gate("upperLayerIn"), module->gate("upperLayerOut"));
+    inet::registerInterface(*interfaceEntry, interfaceEntry->gate("upperLayerIn"), interfaceEntry->gate("upperLayerOut"));
 }
 
 void MacBase::handleMessageWhenDown(cMessage *msg)

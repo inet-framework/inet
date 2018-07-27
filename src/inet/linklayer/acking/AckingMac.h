@@ -60,7 +60,7 @@ class INET_API AckingMac : public MacProtocolBase
     //@{
     virtual void flushQueue();
     virtual void clearQueue();
-    virtual InterfaceEntry *configureInterfaceEntry() override;
+    virtual void configureInterfaceEntry() override;
     //@}
 
     virtual void startTransmitting(Packet *msg);

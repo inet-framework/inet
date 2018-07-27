@@ -99,7 +99,7 @@ void AckingMac::initialize(int stage)
     }
 }
 
-InterfaceEntry *AckingMac::configureInterfaceEntry()
+void AckingMac::configureInterfaceEntry()
 {
     InterfaceEntry *e = getContainingNicModule(this);
     MacAddress address = parseMacAddressParameter(par("address"));
@@ -118,8 +118,6 @@ InterfaceEntry *AckingMac::configureInterfaceEntry()
     // capabilities
     e->setMulticast(true);
     e->setBroadcast(true);
-
-    return e;
 }
 
 void AckingMac::receiveSignal(cComponent *source, simsignal_t signalID, long value, cObject *details)

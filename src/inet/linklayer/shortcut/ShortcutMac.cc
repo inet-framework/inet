@@ -57,7 +57,7 @@ void ShortcutMac::initialize(int stage)
     }
 }
 
-InterfaceEntry *ShortcutMac::configureInterfaceEntry()
+void ShortcutMac::configureInterfaceEntry()
 {
     auto interfaceEntry = getContainingNicModule(this);
     MacAddress address = parseMacAddressParameter(par("address"));
@@ -67,7 +67,6 @@ InterfaceEntry *ShortcutMac::configureInterfaceEntry()
     interfaceEntry->setInterfaceToken(address.formInterfaceIdentifier());
     interfaceEntry->setMulticast(false);
     interfaceEntry->setBroadcast(true);
-    return interfaceEntry;
 }
 
 void ShortcutMac::handleMessageWhenUp(cMessage *message)
