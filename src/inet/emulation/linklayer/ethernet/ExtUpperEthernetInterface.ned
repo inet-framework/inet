@@ -26,7 +26,6 @@ import inet.linklayer.contract.IEthernetInterface;
 module ExtUpperEthernetInterface extends ExtInterface like IEthernetInterface
 {
     parameters:
-        string tapDevice;
         bool csmacdSupport = default(false);  // by default CSMA/CD is turned off, so only point-to-point duplex links are supported.
         string fcsMode @enum("declared","computed") = default("declared");
         @display("i=block/ifcard");
@@ -36,7 +35,6 @@ module ExtUpperEthernetInterface extends ExtInterface like IEthernetInterface
     submodules:
         tap: ExtTapDeviceIo {
             parameters:
-                device = tapDevice;
                 @display("p=100,100");
         }
         queue: <default("")> like IOutputQueue if typename != "" {
