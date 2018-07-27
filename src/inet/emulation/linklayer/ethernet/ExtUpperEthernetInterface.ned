@@ -18,29 +18,20 @@
 package inet.emulation.linklayer.ethernet;
 
 import inet.common.queue.IOutputQueue;
+import inet.emulation.common.ExtInterface;
 import inet.emulation.common.tap.ExtTapDeviceIo;
-import inet.emulation.common.tap.TapCfg;
 import inet.linklayer.contract.IEtherMac;
 import inet.linklayer.contract.IEthernetInterface;
-import inet.linklayer.contract.IExternalInterface;
 
-
-module ExtUpperEthernetInterface like IExternalInterface, IEthernetInterface
+module ExtUpperEthernetInterface extends ExtInterface like IEthernetInterface
 {
     parameters:
         string tapDevice;
-        string interfaceTableModule;
-        string address = default("auto");
-        int mtu @unit(B) = default(4470B);
         bool csmacdSupport = default(false);  // by default CSMA/CD is turned off, so only point-to-point duplex links are supported.
         string fcsMode @enum("declared","computed") = default("declared");
-        @class(ExtInterface);
         @display("i=block/ifcard");
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
         *.fcsMode = fcsMode;
     gates:
-        input upperLayerIn @loose;
-        output upperLayerOut @loose;
         inout phys @labels(EtherFrame);
     submodules:
         tap: ExtTapDeviceIo {
@@ -50,17 +41,13 @@ module ExtUpperEthernetInterface like IExternalInterface, IEthernetInterface
         }
         queue: <default("")> like IOutputQueue if typename != "" {
             parameters:
-                @display("p=100,400;q=l2queue");
+                @display("p=100,300;q=l2queue");
         }
         mac: <default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex")> like IEtherMac {
             parameters:
                 queueModule = (exists(queue) ? "^.queue" : "");
-                txQueueLimit = (exists(queue) ? 1 : 10000); // queue sends one packet at a time
-                @display("p=200,500");
-        }
-        cfg: TapCfg {
-            device = tapDevice;
-            @display("p=217,100");
+                txQueueLimit = (exists(queue) ? 1 : 10000);
+                @display("p=200,400");
         }
     connections allowunconnected:
         if exists(queue) {
@@ -71,4 +58,3 @@ module ExtUpperEthernetInterface like IExternalInterface, IEthernetInterface
         tap.lowerLayerIn <-- { @display("m=s"); } <-- mac.upperLayerOut;
         mac.phys <--> { @display("m=s"); } <--> phys;
 }
-
