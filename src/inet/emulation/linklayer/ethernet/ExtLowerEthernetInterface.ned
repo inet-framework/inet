@@ -17,22 +17,15 @@
 
 package inet.emulation.linklayer.ethernet;
 
+import inet.emulation.common.ExtInterface;
 import inet.linklayer.contract.IEthernetInterface;
-import inet.linklayer.contract.IExternalInterface;
 import inet.linklayer.ethernet.IEtherEncap;
 
-module ExtLowerEthernetInterface like IExternalInterface, IEthernetInterface
+module ExtLowerEthernetInterface extends ExtInterface like IEthernetInterface
 {
     parameters:
-        string interfaceTableModule;
-        string address = default("auto");
-        int mtu @unit(B) = default(4470B);
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
-        @class(ExtInterface);
         @display("i=block/ifcard");
     gates:
-        input upperLayerIn;
-        output upperLayerOut;
         inout phys @loose;
     submodules:
         encap: <default("EtherEncap")> like IEtherEncap {
