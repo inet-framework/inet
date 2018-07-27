@@ -37,14 +37,14 @@
 
 namespace inet {
 
-Define_Module(ExtTapDeviceIo);
+Define_Module(ExtEthernetTapDeviceFileIo);
 
-ExtTapDeviceIo::~ExtTapDeviceIo()
+ExtEthernetTapDeviceFileIo::~ExtEthernetTapDeviceFileIo()
 {
     closeTap();
 }
 
-void ExtTapDeviceIo::initialize(int stage)
+void ExtEthernetTapDeviceFileIo::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -58,7 +58,7 @@ void ExtTapDeviceIo::initialize(int stage)
     }
 }
 
-void ExtTapDeviceIo::handleMessage(cMessage *msg)
+void ExtEthernetTapDeviceFileIo::handleMessage(cMessage *msg)
 {
     auto packet = check_and_cast<Packet *>(msg);
     emit(packetReceivedFromLowerSignal, packet);
@@ -87,20 +87,20 @@ void ExtTapDeviceIo::handleMessage(cMessage *msg)
     delete packet;
 }
 
-void ExtTapDeviceIo::refreshDisplay() const
+void ExtEthernetTapDeviceFileIo::refreshDisplay() const
 {
     char buf[180];
     sprintf(buf, "tap device: %s\nrcv:%d snt:%d", device.c_str(), numReceived, numSent);
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-void ExtTapDeviceIo::finish()
+void ExtEthernetTapDeviceFileIo::finish()
 {
     EV_INFO << numSent << " packets sent, " << numReceived << " packets received.\n";
     closeTap();
 }
 
-void ExtTapDeviceIo::openTap(std::string dev)
+void ExtEthernetTapDeviceFileIo::openTap(std::string dev)
 {
     if ((fd = open("/dev/net/tun", O_RDWR)) < 0)
         throw cRuntimeError("Cannot open TAP device: %s", strerror(errno));
@@ -127,7 +127,7 @@ void ExtTapDeviceIo::openTap(std::string dev)
     rtScheduler->addCallback(fd, this);
 }
 
-void ExtTapDeviceIo::closeTap()
+void ExtEthernetTapDeviceFileIo::closeTap()
 {
     if (fd != INVALID_SOCKET) {
         rtScheduler->removeCallback(fd, this);
@@ -136,7 +136,7 @@ void ExtTapDeviceIo::closeTap()
     }
 }
 
-bool ExtTapDeviceIo::notify(int fd)
+bool ExtEthernetTapDeviceFileIo::notify(int fd)
 {
     Enter_Method_Silent();
     ASSERT(fd == this->fd);
