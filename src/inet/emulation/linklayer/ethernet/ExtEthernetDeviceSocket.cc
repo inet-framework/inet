@@ -170,6 +170,7 @@ bool ExtEthernetDeviceSocket::notify(int fd)
     packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
     packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
     emit(packetReceivedSignal, packet);
+    numReceived++;
     EV_INFO << "Received " << packet->getTotalLength() << " packet from '" << device << "' device.\n";
     send(packet, "upperLayerOut");
     emit(packetSentToUpperSignal, packet);
