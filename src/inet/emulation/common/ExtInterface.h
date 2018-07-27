@@ -27,6 +27,9 @@ class INET_API ExtInterface : public InterfaceEntry
 {
   protected:
     virtual void registerInterface();
+    virtual void configureInterface();
+    virtual void copyInterfaceConfigurationFromExt();
+    virtual void copyInterfaceConfigurationToExt();
 
   public:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
