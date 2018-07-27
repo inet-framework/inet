@@ -30,7 +30,7 @@ namespace inet {
  *
  * See NED file for more details.
  */
-class INET_API ExtTapDeviceIo : public cSimpleModule, public RealTimeScheduler::ICallback
+class INET_API ExtEthernetTapDeviceFileIo : public cSimpleModule, public RealTimeScheduler::ICallback
 {
   protected:
     // parameters
@@ -56,7 +56,7 @@ class INET_API ExtTapDeviceIo : public cSimpleModule, public RealTimeScheduler::
     virtual void closeTap();
 
   public:
-    virtual ~ExtTapDeviceIo();
+    virtual ~ExtEthernetTapDeviceFileIo();
 
     virtual bool notify(int fd) override;
 };
