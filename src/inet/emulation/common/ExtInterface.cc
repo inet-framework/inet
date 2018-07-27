@@ -115,7 +115,42 @@ void ExtInterface::copyInterfaceConfigurationFromExt()
 
 void ExtInterface::copyInterfaceConfigurationToExt()
 {
-    // TODO:
+    std::string device = par("device").stdstringValue();
+    int fd = socket(AF_INET, SOCK_DGRAM, 0);
+    struct ifreq ifr;
+    ifr.ifr_addr.sa_family = AF_INET;
+    strncpy(ifr.ifr_name , device.c_str() , IFNAMSIZ-1);
+
+    getMacAddress().getAddressBytes((unsigned char *)ifr.ifr_hwaddr.sa_data);
+    ifr.ifr_hwaddr.sa_family = ARPHRD_ETHER;
+    if (ioctl(fd, SIOCSIFHWADDR, &ifr) == -1)
+        throw cRuntimeError("error at mac address setting: %s", strerror(errno));
+
+    ifr.ifr_mtu = getMtu();
+    if (ioctl(fd, SIOCSIFMTU, &ifr) == -1)
+        throw cRuntimeError("error at mtu setting: %s", strerror(errno));
+
+    Ipv4InterfaceData *interfaceData = ipv4Data();
+    if (interfaceData) {
+
+        //set the IPv4 address
+        ((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr.s_addr = htonl(interfaceData->getIPAddress().getInt());
+        ifr.ifr_addr.sa_family = AF_INET;
+        if (ioctl(fd, SIOCSIFADDR, &ifr) == -1)
+            throw cRuntimeError("error at ipv4 address setting: %s", strerror(errno));
+
+        //set the IPv4 netmask
+        ((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr.s_addr = htonl(interfaceData->getNetmask().getInt());
+        ifr.ifr_addr.sa_family = AF_INET;
+        if (ioctl(fd, SIOCSIFNETMASK, &ifr) == -1)
+            throw cRuntimeError("error at ipv4 netmask setting: %s", strerror(errno));
+
+        //TODO set IPv4 multicast addresses
+
+        //TODO set IPv6 addresses
+    }
+
+    close(fd);
 }
 
 } // namespace inet
