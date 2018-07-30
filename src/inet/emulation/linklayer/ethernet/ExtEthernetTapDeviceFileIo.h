@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_EXTTAPDEVICEIO_H
-#define __INET_EXTTAPDEVICEIO_H
+#ifndef __INET_EXTETHERNETTAPDEVICEFILEIO_H
+#define __INET_EXTETHERNETTAPDEVICEFILEIO_H
 
 #include "inet/common/scheduler/RealTimeScheduler.h"
 
@@ -63,5 +63,5 @@ class INET_API ExtEthernetTapDeviceFileIo : public cSimpleModule, public RealTim
 
 } // namespace inet
 
-#endif // ifndef __INET_EXTTAPDEVICEIO_H
+#endif // ifndef __INET_EXTETHERNETTAPDEVICEFILEIO_H
 
