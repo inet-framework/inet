@@ -55,18 +55,18 @@ while($sor = <FILE>)
 %contains: postrun-command(1).out
 cli_tcp: INIT --> SYN_SENT  (on OPEN_ACTIVE)
 srv_tcp: INIT --> LISTEN  (on OPEN_PASSIVE)
-[0.001 A001] A.1000 > B.2000: S 0:0(0) win 16384
+[0.001 A001] A.1000 > B.2000: S 0:0(0) win 16384   Option(s): MaxSegSize
 srv_tcp: LISTEN --> SYN_RCVD  (on RCV_SYN)
-[0.003 B001] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384
+[0.003 B001] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384   Option(s): MaxSegSize
 cli_tcp: SYN_SENT --> ESTABLISHED  (on RCV_SYN_ACK)
 [0.005 A002] A.1000 > B.2000: A ack 501 win 16384 # deleting
-[3.003 B002] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384
+[3.003 B002] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384   Option(s): MaxSegSize
 [3.005 A003] A.1000 > B.2000: A ack 501 win 16384 # deleting
-[9.003 B003] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384
+[9.003 B003] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384   Option(s): MaxSegSize
 [9.005 A004] A.1000 > B.2000: A ack 501 win 16384 # deleting
-[21.003 B004] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384
+[21.003 B004] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384   Option(s): MaxSegSize
 [21.005 A005] A.1000 > B.2000: A ack 501 win 16384 # deleting
-[45.003 B005] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384
+[45.003 B005] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384   Option(s): MaxSegSize
 [45.005 A006] A.1000 > B.2000: A ack 501 win 16384 # deleting
 srv_tcp: SYN_RCVD --> LISTEN  (on TIMEOUT_CONN_ESTAB)
 [100.001 A007] A.1000 > B.2000: A 1:101(100) ack 501 win 16384
