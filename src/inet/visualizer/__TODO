@@ -1,3 +1,7 @@
+ - CanvasProjection is initialized in INITSTAGE_LOCAL of SceneCanvasVisualizer and also used in INITSTAGE_LOCAL by mobility and all other visualizers
+ - should be possible to set viewAngle, viewTranslation and get the same graphics with flipped Y
+ - add optional arguments to MobilityBase for inverse conversion
+
  - separate opp features: WITH_VISUALIZER and WITH_OSGGEO
  - AnimationSpeedController on demand animation hold to allow the user interpretation of quickly changing visualizations.
    e.g. "foo" should be displayed for at least 1 sec even if "bar" comes before that time is expired
