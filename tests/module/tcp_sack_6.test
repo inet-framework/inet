@@ -1,0 +1,134 @@
+%description:
+TCP SACK test
+ Examples from [RFC2883]:
+
+   "Reporting Full Duplicate Segments
+
+   We illustrate these guidelines with three examples.  In each example,
+   we assume that the data receiver has first received eight segments of
+   500 bytes each, and has sent an acknowledgement with the cumulative
+   acknowledgement field set to 4000 (assuming the first sequence number
+   is zero).  The D-SACK block is underlined in each example." [RFC2883]
+
+    "Example 3:  Reporting a duplicate of an out-of-order segment.
+
+   Because of a lost data packet, the receiver receives two out-of-order
+   segments.  The receiver next receives a duplicate segment for one of
+   these out-of-order segments:
+
+        Transmitted    Received    ACK Sent
+        Segment        Segment     (Including SACK Blocks)
+
+        3500-3999      3500-3999   4000
+        4000-4499      (data packet dropped)
+        4500-4999      4500-4999   4000, SACK=4500-5000
+        5000-5499      5000-5499   4000, SACK=4500-5500
+                       (duplicated packet)
+                       5000-5499   4000, SACK=5000-5500, 4500-5500
+                                              ---------" [RFC2883]
+
+
+%inifile: {}.ini
+[General]
+#preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
+ned-path = .;../../../../src;../../lib
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+network = TcpTestNet1
+
+#[Cmdenv]
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+#[Parameters]
+*.testing=false
+
+# for scriptabletester
+*.tcptester.script="A6 delete; A8 copy 0,0"
+
+# client test apps
+*.cli_app.active = true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.active=true
+*.cli_app.tOpen=0s
+*.cli_app.tSend=0s
+*.cli_app.sendBytes = 4000B
+*.cli_app.sendScript=""
+*.cli_app.tClose=-1s
+
+# server test apps
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+# tcp settings
+*.*_tcp.advertisedWindow = 5000                       # in bytes, corresponds with the maximal receiver buffer capacity (Note: normally, NIC queues should be at least this size)
+*.*_tcp.delayedAcksEnabled = false                    # delayed ACK algorithm (RFC 1122) enabled/disabled
+*.*_tcp.nagleEnabled = true                           # Nagle's algorithm (RFC 896) enabled/disabled
+*.*_tcp.limitedTransmitEnabled = false                # Limited Transmit algorithm (RFC 3042) enabled/disabled (can be used for TcpReno/TcpTahoe/TcpNewReno/TcpNoCongestionControl)
+*.*_tcp.increasedIWEnabled = false                    # Increased Initial Window (RFC 3390) enabled/disabled
+*.*_tcp.sackSupport = true                            # Selective Acknowledgment (RFC 2018, 2883, 3517) support (header option) (SACK will be enabled for a connection if both endpoints support it)
+*.*_tcp.windowScalingSupport = false                  # Window Scale (RFC 1323) support (header option) (WS will be enabled for a connection if both endpoints support it)
+*.*_tcp.timestampSupport = false                      # Timestamps (RFC 1323) support (header option) (TS will be enabled for a connection if both endpoints support it)
+*.*_tcp.mss = 500                                     # Maximum Segment Size (RFC 793) (header option)
+*.*_tcp.tcpAlgorithmClass = "TcpReno"                 # TcpReno/TcpTahoe/TcpNewReno/TcpNoCongestionControl/DumbTcp
+*.*_tcp.recordStats = true                            # recording of seqNum etc. into output vectors enabled/disabled
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+srv_tcp: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
+[0.007 B002] A.1000 < B.2000: A ack 501 win 5000
+[0.009 A003] A.1000 > B.2000: A 501:1001(500) ack 501 win 5000
+[0.009 A004] A.1000 > B.2000: A 1001:1501(500) ack 501 win 5000
+[0.011 B003] A.1000 < B.2000: A ack 1001 win 5000
+[0.011 B004] A.1000 < B.2000: A ack 1501 win 5000
+[0.013 A005] A.1000 > B.2000: A 1501:2001(500) ack 501 win 5000
+[0.013 A006] A.1000 > B.2000: A 2001:2501(500) ack 501 win 5000 # deleting
+[0.013 A007] A.1000 > B.2000: A 2501:3001(500) ack 501 win 5000
+[0.013 A008] A.1000 > B.2000: A 3001:3501(500) ack 501 win 5000 # removing original
+[0.013 A008] A.1000 > B.2000: A 3001:3501(500) ack 501 win 5000 # introducing copy
+[0.013 A008] A.1000 > B.2000: A 3001:3501(500) ack 501 win 5000 # introducing copy
+[0.015 B005] A.1000 < B.2000: A ack 2001 win 5000
+[0.015 B006] A.1000 < B.2000: A ack 2001 win 5000   Option(s): NOP NOP SACK[2501,3001)
+[0.015 B007] A.1000 < B.2000: A ack 2001 win 5000   Option(s): NOP NOP SACK[2501,3501)
+[0.015 B008] A.1000 < B.2000: A ack 2001 win 5000   Option(s): NOP NOP SACK[3001,3501)[2501,3501)
+[0.017 A009] A.1000 > B.2000: A 3501:4001(500) ack 501 win 5000
+[0.017 A010] A.1000 > B.2000: A 2001:2501(500) ack 501 win 5000
+[0.019 B009] A.1000 < B.2000: A ack 2001 win 5000   Option(s): NOP NOP SACK[2501,4001)
+[0.019 B010] A.1000 < B.2000: A ack 4001 win 5000
+[0.020] tcpdump finished, A:10 B:10 segments
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

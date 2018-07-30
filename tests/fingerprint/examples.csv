@@ -251,13 +251,6 @@
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-dumb -r 5,              500s,            d88d-cf93/tplx, PASS,
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-dumb -r 6,              500s,            2b0c-dedd/tplx, PASS,
 
-/examples/inet/tcpsack/,             -f omnetpp.ini -c One -r 0,                    1.5s,            ca6a-67b9/tplx, PASS,
-/examples/inet/tcpsack/,             -f omnetpp.ini -c Two -r 0,                    1.5s,            b4ef-5732/tplx, PASS,
-/examples/inet/tcpsack/,             -f omnetpp.ini -c Three -r 0,                  1.5s,            7c94-c3c9/tplx, PASS,
-/examples/inet/tcpsack/,             -f omnetpp.ini -c Four -r 0,                   1.5s,            3b18-9e7b/tplx, PASS,
-/examples/inet/tcpsack/,             -f omnetpp.ini -c Five -r 0,                   1.5s,            5c9a-fd8a/tplx, PASS,
-/examples/inet/tcpsack/,             -f omnetpp.ini -c Six -r 0,                    1.5s,            0342-37a4/tplx, PASS,
-
 /examples/inet/tcptimestamps/,       -f omnetpp.ini -c One -r 0,                    1.5s,            f1e3-b7b9/tplx, PASS,
 /examples/inet/tcptimestamps/,       -f omnetpp.ini -c Two -r 0,                    1.5s,            8e97-2f0f/tplx, PASS,
 

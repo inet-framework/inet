@@ -1,0 +1,132 @@
+%description:
+TCP SACK test
+ Examples from [RFC2018]:
+   "Assume the left window edge is 5000 and that the data transmitter
+   sends a burst of 8 segments, each containing 500 data bytes." [RFC2018]
+
+      "Case 2:  The first segment is dropped but the remaining 7 are
+      received.
+
+         Upon receiving each of the last seven packets, the data
+         receiver will return a TCP ACK segment that acknowledges
+         sequence number 5000 and contains a SACK option specifying
+         one block of queued data:
+
+             Triggering    ACK      Left Edge   Right Edge
+             Segment
+
+             5000         (lost)
+             5500         5000     5500       6000
+             6000         5000     5500       6500
+             6500         5000     5500       7000
+             7000         5000     5500       7500
+             7500         5000     5500       8000
+             8000         5000     5500       8500
+             8500         5000     5500       9000" [RFC2018]
+
+%inifile: {}.ini
+[General]
+#preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
+ned-path = .;../../../../src;../../lib
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+network = TcpTestNet1
+
+#[Cmdenv]
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+#[Parameters]
+*.testing=false
+
+# for scriptabletester
+*.tcptester.script="A9 delete"  # The first segment is dropped.
+
+# client test apps
+*.cli_app.active = true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.active=true
+*.cli_app.tOpen=0s
+*.cli_app.tSend=0s
+*.cli_app.sendBytes = 7500B
+*.cli_app.sendScript=""
+*.cli_app.tClose=-1s
+
+# server test apps
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+# tcp settings
+*.*_tcp.advertisedWindow = 5000                       # in bytes, corresponds with the maximal receiver buffer capacity (Note: normally, NIC queues should be at least this size)
+*.*_tcp.delayedAcksEnabled = false                    # delayed ACK algorithm (RFC 1122) enabled/disabled
+*.*_tcp.nagleEnabled = true                           # Nagle's algorithm (RFC 896) enabled/disabled
+*.*_tcp.limitedTransmitEnabled = false                # Limited Transmit algorithm (RFC 3042) enabled/disabled (can be used for TcpReno/TcpTahoe/TcpNewReno/TcpNoCongestionControl)
+*.*_tcp.increasedIWEnabled = false                    # Increased Initial Window (RFC 3390) enabled/disabled
+*.*_tcp.sackSupport = true                            # Selective Acknowledgment (RFC 2018, 2883, 3517) support (header option) (SACK will be enabled for a connection if both endpoints support it)
+*.*_tcp.windowScalingSupport = false                  # Window Scale (RFC 1323) support (header option) (WS will be enabled for a connection if both endpoints support it)
+*.*_tcp.timestampSupport = false                      # Timestamps (RFC 1323) support (header option) (TS will be enabled for a connection if both endpoints support it)
+*.*_tcp.mss = 500                                     # Maximum Segment Size (RFC 793) (header option)
+*.*_tcp.tcpAlgorithmClass = "TcpReno"                 # TcpReno/TcpTahoe/TcpNewReno/TcpNoCongestionControl/DumbTcp
+*.*_tcp.recordStats = true                            # recording of seqNum etc. into output vectors enabled/disabled
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%# the first 8 lines is the precondition - if false, then check is invalid
+%contains: postrun-command(1).out
+[0.017 A009] A.1000 > B.2000: A 3501:4001(500) ack 501 win 5000 # deleting
+[0.017 A010] A.1000 > B.2000: A 4001:4501(500) ack 501 win 5000
+[0.017 A011] A.1000 > B.2000: A 4501:5001(500) ack 501 win 5000
+[0.017 A012] A.1000 > B.2000: A 5001:5501(500) ack 501 win 5000
+[0.017 A013] A.1000 > B.2000: A 5501:6001(500) ack 501 win 5000
+[0.017 A014] A.1000 > B.2000: A 6001:6501(500) ack 501 win 5000
+[0.017 A015] A.1000 > B.2000: A 6501:7001(500) ack 501 win 5000
+[0.017 A016] A.1000 > B.2000: A 7001:7501(500) ack 501 win 5000
+[0.019 B009] A.1000 < B.2000: A ack 3501 win 5000   Option(s): NOP NOP SACK[4001,4501)
+[0.019 B010] A.1000 < B.2000: A ack 3501 win 5000   Option(s): NOP NOP SACK[4001,5001)
+[0.019 B011] A.1000 < B.2000: A ack 3501 win 5000   Option(s): NOP NOP SACK[4001,5501)
+[0.019 B012] A.1000 < B.2000: A ack 3501 win 5000   Option(s): NOP NOP SACK[4001,6001)
+[0.019 B013] A.1000 < B.2000: A ack 3501 win 5000   Option(s): NOP NOP SACK[4001,6501)
+[0.019 B014] A.1000 < B.2000: A ack 3501 win 5000   Option(s): NOP NOP SACK[4001,7001)
+[0.019 B015] A.1000 < B.2000: A ack 3501 win 5000   Option(s): NOP NOP SACK[4001,7501)
+[0.021 A017] A.1000 > B.2000: A 3501:4001(500) ack 501 win 5000
+[0.023 B016] A.1000 < B.2000: A ack 7501 win 5000
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+[0.024] tcpdump finished, A:17 B:16 segments
+
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------
