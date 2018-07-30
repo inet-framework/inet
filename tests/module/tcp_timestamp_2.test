@@ -1,0 +1,136 @@
+%description:
+TCP TimeStamp test
+  Examples from [RFC1323]:
+  "The following examples illustrate these rules.  Here A, B, C...
+  represent data segments occupying successive blocks of sequence
+  numbers, and ACK(A),...  represent the corresponding
+  acknowledgment segments.  Note that ACK(A) has the same sequence
+  number as B.  We show only one direction of timestamp echoing, for
+  clarity." [RFC1323]
+
+      "Packets arrive out of order, and every packet is
+      acknowledged.
+
+      By Case (B), the timestamp from the last segment that
+      advanced the left window edge is echoed, until the missing
+      segment arrives; it is echoed according to Case (C).  The
+      same sequence would occur if segments B and D were lost and
+      retransmitted..
+                                            TS.Recent
+          <A, TSval=1> ------------------->
+                                                1
+                   <---- <ACK(A), TSecr=1>
+                                                1
+          <C, TSval=3> ------------------->
+                                                1
+                   <---- <ACK(A), TSecr=1>
+                                                1
+          <B, TSval=2> ------------------->
+                                                2
+                   <---- <ACK(C), TSecr=2>
+                                                2
+          <E, TSval=5> ------------------->
+                                                2
+                   <---- <ACK(C), TSecr=2>
+                                                2
+          <D, TSval=4> ------------------->
+                                                4
+                   <---- <ACK(E), TSecr=4>
+          (etc)" [RFC1323]
+
+%inifile: {}.ini
+[General]
+#preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
+ned-path = .;../../../../src;../../lib
+
+#omnetpp 5.0 - 5.1 compatibility:
+eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
+output-scalar-file = "${resultdir}/${configname}-${runnumber}.sca"
+output-vector-file = "${resultdir}/${configname}-${runnumber}.vec"
+snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
+
+network = TcpTestNet1
+
+#[Cmdenv]
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+#[Parameters]
+*.testing=false
+
+# for scriptabletester
+*.tcptester.script="A4 delay 0.003; A6 delay 0.003"
+
+# client test apps
+*.cli_app.active = true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.active=true
+*.cli_app.tOpen=0s
+*.cli_app.tSend=1s
+*.cli_app.sendBytes = 2500B
+*.cli_app.sendScript=""
+*.cli_app.tClose=-1s
+
+# server test apps
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+# tcp settings
+*.*_tcp.advertisedWindow = 5000                       # in bytes, corresponds with the maximal receiver buffer capacity (Note: normally, NIC queues should be at least this size)
+*.*_tcp.delayedAcksEnabled = false                    # delayed ACK algorithm (RFC 1122) enabled/disabled
+*.*_tcp.nagleEnabled = false                          # Nagle's algorithm (RFC 896) enabled/disabled
+*.*_tcp.limitedTransmitEnabled = false                # Limited Transmit algorithm (RFC 3042) enabled/disabled (can be used for TcpReno/TcpTahoe/TcpNewReno/TcpNoCongestionControl)
+*.*_tcp.increasedIWEnabled = false                    # Increased Initial Window (RFC 3390) enabled/disabled
+*.*_tcp.sackSupport = false                           # Selective Acknowledgment (RFC 2018, 2883, 3517) support (header option) (SACK will be enabled for a connection if both endpoints support it)
+*.*_tcp.windowScalingSupport = false                  # Window Scale (RFC 1323) support (header option) (WS will be enabled for a connection if both endpoints support it)
+*.*_tcp.timestampSupport = true                       # Timestamps (RFC 1323) support (header option) (TS will be enabled for a connection if both endpoints support it)
+*.*_tcp.mss = 512                                     # Maximum Segment Size (RFC 793) (header option)
+*.*_tcp.tcpAlgorithmClass = "TcpReno"                 # TcpReno/TcpTahoe/TcpNewReno/TcpNoCongestionControl/DumbTcp
+*.*_tcp.recordStats = true                            # recording of seqNum etc. into output vectors enabled/disabled
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+srv_tcp: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
+[1.001 A003] A.1000 > B.2000: A 1:501(500) ack 501 win 5000   Option(s): NOP NOP TS(1000,0)
+[1.003 B002] A.1000 < B.2000: A ack 501 win 5000   Option(s): NOP NOP TS(1002,1000)
+[1.005 A004] A.1000 > B.2000: A 501:1001(500) ack 501 win 5000   Option(s): NOP NOP TS(1004,1002)# removing original
+[1.005 A005] A.1000 > B.2000: A 1001:1501(500) ack 501 win 5000   Option(s): NOP NOP TS(1004,1002)
+[1.007 B003] A.1000 < B.2000: A ack 501 win 5000   Option(s): NOP NOP TS(1006,1000)
+[1.008 A005] A.1000 > B.2000: A 501:1001(500) ack 501 win 5000   Option(s): NOP NOP TS(1004,1002)# introducing copy
+[1.010 B004] A.1000 < B.2000: A ack 1501 win 5000   Option(s): NOP NOP TS(1009,1004)
+[1.012 A006] A.1000 > B.2000: A 1501:2001(500) ack 501 win 5000   Option(s): NOP NOP TS(1011,1009)# removing original
+[1.012 A007] A.1000 > B.2000: A 2001:2501(500) ack 501 win 5000   Option(s): NOP NOP TS(1011,1009)
+[1.014 B005] A.1000 < B.2000: A ack 1501 win 5000   Option(s): NOP NOP TS(1013,1004)
+[1.015 A007] A.1000 > B.2000: A 1501:2001(500) ack 501 win 5000   Option(s): NOP NOP TS(1011,1009)# introducing copy
+[1.017 B006] A.1000 < B.2000: A ack 2501 win 5000   Option(s): NOP NOP TS(1016,1011)
+[1.018] tcpdump finished, A:7 B:6 segments
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

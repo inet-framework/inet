@@ -251,9 +251,6 @@
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-dumb -r 5,              500s,            d88d-cf93/tplx, PASS,
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-dumb -r 6,              500s,            2b0c-dedd/tplx, PASS,
 
-/examples/inet/tcptimestamps/,       -f omnetpp.ini -c One -r 0,                    1.5s,            f1e3-b7b9/tplx, PASS,
-/examples/inet/tcptimestamps/,       -f omnetpp.ini -c Two -r 0,                    1.5s,            8e97-2f0f/tplx, PASS,
-
 /examples/inet/tcpwindowscale/,      -f omnetpp.ini -c WS_disabled -r 0,            1.5s,            2e8e-2067/tplx, PASS,
 /examples/inet/tcpwindowscale/,      -f omnetpp.ini -c WS_enabled -r 0,             1.5s,            663a-031b/tplx, PASS,
 
