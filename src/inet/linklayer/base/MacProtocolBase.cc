@@ -58,11 +58,6 @@ void MacProtocolBase::registerInterface()
     ASSERT(interfaceEntry == nullptr);
     interfaceEntry = getContainingNicModule(this);
     configureInterfaceEntry();
-    IInterfaceTable *interfaceTable = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-    if (interfaceTable) {
-        interfaceTable->addInterface(interfaceEntry);
-    }
-    inet::registerInterface(*interfaceEntry, interfaceEntry->gate("upperLayerIn"), interfaceEntry->gate("upperLayerOut"));
 }
 
 void MacProtocolBase::sendUp(cMessage *message)
