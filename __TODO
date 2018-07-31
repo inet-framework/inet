@@ -1,3 +1,4 @@
+ - change all protocols (where applicable) to accept any kind of cPacket (not only Packet) for interoperability with 3rd party projects 
  - add test and check for std::dynamic_pointer_cast<Subclass1>(chunk->peek<Subclass1>()) != nullptr always holds when peek uses a variant type deserializer
  - remove obsolete HostAutoConfigurator, Ipv4FlatNetworkConfigurator modules?
  - revise and rename statistics to have a consistent naming scheme
