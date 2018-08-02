@@ -856,12 +856,17 @@ void Rip::addRoute(const L3Address& dest, int prefixLength, const InterfaceEntry
  */
 void Rip::updateRoute(RipRoute *ripRoute, const InterfaceEntry *ie, const L3Address& nextHop, int metric, uint16 routeTag, const L3Address& from)
 {
+    int oldMetric = ripRoute->getMetric();
+
     // we receive a route update that shows the unreachable route is now reachable
-    if(ripRoute->getMetric() == RIP_INFINITE_METRIC && metric < RIP_INFINITE_METRIC) {
-        simtime_t now = simTime();
-        // hold-down timer is active
-        if(holdDownTime > 0 && now < ripRoute->getLastInvalidationTime() + holdDownTime) {
+    if(oldMetric == RIP_INFINITE_METRIC && metric < RIP_INFINITE_METRIC) {
+        if(holdDownTime > 0 && simTime() < ripRoute->getLastInvalidationTime() + holdDownTime) {
             EV_DEBUG << "hold-down timer prevents update to route " << ripRoute->getDestination() << std::endl;
+            return;
+        }
+        IRoute *route = ripRoute->getRoute();
+        if(route && route->getMetric() <= metric) {
+            EV_DEBUG << "existing route " << ripRoute->getDestination() << " has a better metric" << std::endl;
             return;
         }
     }
@@ -869,20 +874,19 @@ void Rip::updateRoute(RipRoute *ripRoute, const InterfaceEntry *ie, const L3Addr
     EV_DEBUG << "Updating route to " << ripRoute->getDestination() << "/" << ripRoute->getPrefixLength() << ": "
              << "nextHop=" << nextHop << " metric=" << metric << std::endl;
 
-    int oldMetric = ripRoute->getMetric();
     ripRoute->setInterface(const_cast<InterfaceEntry *>(ie));
     ripRoute->setMetric(metric);
     ripRoute->setFrom(from);
     ripRoute->setRouteTag(routeTag);
 
     if (oldMetric == RIP_INFINITE_METRIC && metric < RIP_INFINITE_METRIC) {
-        ASSERT(!ripRoute->getRoute());
+        IRoute *route = ripRoute->getRoute();
+        if(route)
+            rt->deleteRoute(route);
         ripRoute->setType(RipRoute::RIP_ROUTE_RTE);
         ripRoute->setNextHop(nextHop);
-
-        IRoute *route = createRoute(ripRoute->getDestination(), ripRoute->getPrefixLength(), ie, nextHop, metric);
-
-        ripRoute->setRoute(route);
+        IRoute *newRoute = createRoute(ripRoute->getDestination(), ripRoute->getPrefixLength(), ie, nextHop, metric);
+        ripRoute->setRoute(newRoute);
     }
 
     if (oldMetric != RIP_INFINITE_METRIC) {
@@ -894,9 +898,8 @@ void Rip::updateRoute(RipRoute *ripRoute, const InterfaceEntry *ie, const L3Addr
         ripRoute->setNextHop(nextHop);
 
         if (metric < RIP_INFINITE_METRIC) {
-            route = createRoute(ripRoute->getDestination(), ripRoute->getPrefixLength(), ie, nextHop, metric);
-
-            ripRoute->setRoute(route);
+            IRoute *newRoute = createRoute(ripRoute->getDestination(), ripRoute->getPrefixLength(), ie, nextHop, metric);
+            ripRoute->setRoute(newRoute);
         }
     }
 
