@@ -24,9 +24,9 @@ PDFPICS = $(SVGPICS:.svg=.pdf) $(DOTPICS:.dot=.pdf)
 default: pdf html
 
 pdf: $(ALLTEX) $(PDFPICS) figures/*.png
-	pdflatex $(TEXMAIN)
-	pdflatex $(TEXMAIN)
-	pdflatex $(TEXMAIN)
+	pdflatex -halt-on-error $(TEXMAIN)
+	pdflatex -halt-on-error $(TEXMAIN)
+	pdflatex -halt-on-error $(TEXMAIN)
 	mkdir -p $(PDFDIR)
 	cp $(DOCNAME).pdf $(PDFDIR)
 
