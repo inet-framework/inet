@@ -6,28 +6,45 @@
 \section{Overview}
 \label{sec:80211:overview}
 
-This chapter provides an overview of the IEEE 802.11 model for the INET Framework.
+IEEE 802.11 a.k.a. WiFi is the most widely used and universal wireless networking
+standard. Specifications are updated every few years, adding more features and
+ever increasing bit rates. 
 
-An IEEE 802.11 interface (NIC) comes in several flavours, differring
-in their role (ad-hoc station, infrastructure mode station, or
-access point) and their level of detail:
+In INET, nodes become WiFi-enabled by adding a \nedtype{Ieee80211Interface} to
+them. (As mentioned earlier, \nedtype{WirelessHost} and \nedtype{AdhocHost} already
+contain one in their default configuration.) APs are represented with the
+\nedtype{AccessPoint} node type. WiFi networks require a matching transmission
+medium module to be present in the network, which is usually a 
+\nedtype{Ieee80211ScalarRadioMedium}.
+
+Operation mode (infrastructure vs ad hoc) is determined by the
+ingredients of the wireless interface. \nedtype{Ieee80211Interface} has
+the following submodules (incomplete list): 
 
 \begin{enumerate}
- \item \nedtype{Ieee80211Interface}: a generic (configurable) NIC
- \item \nedtype{Ieee80211NicAdhoc}: for ad-hoc mode
- \item \nedtype{Ieee80211NicAP}, \nedtype{Ieee80211NicAPSimplified}: for use in an access point
- \item \nedtype{Ieee80211NicSTA}, \nedtype{Ieee80211NicSTASimplified}: for use in an
-   infrastructure-mode station
+  \item \textit{management}: performs association/disassociation with access points, channel scanning, beaconing
+  \item \textit{agent}: initiates actions such as channel scanning and connecting to and disconnecting from access points
+  \item \textit{MAC}: transmits and receives frames according to the IEEE 802.11 medium access procedure
+  \item \textit{PHY}: represents the radio
 \end{enumerate}
 
-NICs consist of four layers, which are the following (in top-down order):
+The management component has several implementations which differ in their role
+and level of detail:
 
-\begin{enumerate}
-  \item agent
-  \item management
-  \item MAC
-  \item physical layer (radio)
-\end{enumerate}
+\begin{itemize}
+  \item \nedtype{Ieee80211MgmtAdhoc}: for ad hoc mode stations
+  \item \nedtype{Ieee80211MgmtSta}, \nedtype{Ieee80211MgmtStaSimplified}: for infrastructure mode stations
+  \item \nedtype{Ieee80211MgmtAp}, \nedtype{Ieee80211MgmtApSimplified}: for access points
+\end{itemize}
+
+The ``simplified'' ones assume that stations are statically associated to an
+access point for the entire duration of the simulation (the
+scan-authenticate-associate process is not simulated), so they cannot be used
+e.g. in experiments involving handover.
+
+\nedtype{Ieee80211MgmtSta} is does not take any action by itself, it requires an agent
+(\nedtype{Ieee80211AgentSta} or a custom one) to initiate actions.
+
 
 The following sections examine the above components.
 
@@ -35,7 +52,7 @@ The following sections examine the above components.
 \label{sec:80211:mac}
 
 The \nedtype{Ieee80211Mac} module type represents the IEEE 802.11 MAC.
-The implementation is entirely based on the standard IEEE 802.11™-2012 Part 11:
+The implementation is entirely based on the standard IEEE 802.11-2012 Part 11:
 Wireless LAN Medium Access Control (MAC) and Physical Layer (PHY)
 Specifications.
 
@@ -86,14 +103,22 @@ transmission and reception of frames. They model the characteristics of
 the radio channel, and determine if a frame was received correctly
 (that is, it did not suffer bit errors due to low signal power or
 interference in the radio channel). Frames received correctly are passed
-up to the MAC. The implementation of these modules is based on the
-Mobility Framework.
+up to the MAC.
+
+On the physical layer, one can choose from several radios with different levels
+of detail. The various radio types (with the matching transmission medium types
+in parentheses) are:
+
+\begin{itemize}
+  \item \nedtype{Ieee80211ScalarRadio} (\nedtype{Ieee80211ScalarRadioMedium}) 
+  \item \nedtype{Ieee80211DimensionalRadio} (\nedtype{Ieee80211DimensionalRadioMedium}) 
+  \item \nedtype{Ieee80211UnitDiskRadio} (\nedtype{Ieee80211UnitDiskMedium})
+\end{itemize}
 
 \section{Management}
 \label{sec:80211:management}
 
-\textit{The management layer} performs encapsulation and decapsulation of data packets
-for the MAC, and exchanges management frames via the MAC with its peer
+\textit{The management layer} exchanges management frames via the MAC with its peer
 management entities in other STAs and APs. Beacon, Probe Request/Response,
 Authentication, Association Request/Response etc frames are generated
 and interpreted by management entities, and transmitted/received via
@@ -116,10 +141,11 @@ scanning, authentication and association. The management layer itself
 just carries out these commands by performing the scanning, authentication
 and association procedures, and reports back the results to the agent.
 
-The agent layer is currenly only present in the \nedtype{Ieee80211NicSTA} NIC module,
-as an \nedtype{Ieee80211AgentSta} module. The managament entities in other NIC
-variants do not have as much freedom as to need an agent to control them.
+The agent component is currently only needed with the \nedtype{Ieee80211MgmtSta}
+module. The managament entities in other NIC variants do not have as much
+freedom as to need an agent to control them.
 
+\nedtype{Ieee80211MgmtSta} requires a \nedtype{Ieee80211AgentSta} or a custom agent.
 By modifying or replacing the agent, one can alter the dynamic behaviour
 of STAs in the network, for example implement different handover strategies.
 
