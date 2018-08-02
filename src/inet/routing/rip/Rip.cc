@@ -709,7 +709,7 @@ void Rip::processResponse(Packet *packet)
     int numEntries = ripPacket->getEntryArraySize();
     for (int i = 0; i < numEntries; ++i) {
         const RipEntry& entry = ripPacket->getEntry(i);
-        int metric = std::min((int)entry.metric + incomingIe->metric, RIP_INFINITE_METRIC);
+        int metric = std::min((int)entry.metric + std::max(incomingIe->metric, 1), RIP_INFINITE_METRIC);
         L3Address nextHop = entry.nextHop.isUnspecified() ? srcAddr : entry.nextHop;
 
         RipRoute *ripRoute = findRipRoute(entry.address, entry.prefixLength);
@@ -778,9 +778,9 @@ bool Rip::isValidResponse(Packet *packet)
     for (int i = 0; i < numEntries; ++i) {
         const RipEntry& entry = ripPacket->getEntry(i);
 
-        // check that metric is in range [1,16]
-        if (entry.metric < 1 || entry.metric > RIP_INFINITE_METRIC) {
-            EV_WARN << "received metric is not in the [1," << RIP_INFINITE_METRIC << "] range.\n";
+        // check that metric is in range [0,16]
+        if (entry.metric < 0 || entry.metric > RIP_INFINITE_METRIC) {
+            EV_WARN << "received metric is not in the [0," << RIP_INFINITE_METRIC << "] range.\n";
             return false;
         }
 
@@ -1085,7 +1085,7 @@ void Rip::addRipInterface(const InterfaceEntry *ie, cXMLElement *config)
 
         if (metricAttr) {
             int metric = atoi(metricAttr);
-            if (metric < 1 || metric >= RIP_INFINITE_METRIC)
+            if (metric < 0 || metric >= RIP_INFINITE_METRIC)
                 throw cRuntimeError("RIP: invalid metric in <interface> element at %s: %s", config->getSourceLocation(), metricAttr);
             ripInterface.metric = metric;
         }
