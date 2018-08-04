@@ -716,15 +716,34 @@ void Rip::processResponse(Packet *packet)
         if (ripRoute) {
             RipRoute::RouteType routeType = ripRoute->getType();
             int routeMetric = ripRoute->getMetric();
+            L3Address fromAddr = ripRoute->getFrom();
 
             if ((routeType == RipRoute::RIP_ROUTE_STATIC || routeType == RipRoute::RIP_ROUTE_DEFAULT) && routeMetric != RIP_INFINITE_METRIC)
                 continue;
 
-            if (ripRoute->getFrom() == srcAddr)
+            if (fromAddr == srcAddr)
                 ripRoute->setLastUpdateTime(simTime());
 
-            if ((ripRoute->getFrom() == srcAddr && ripRoute->getMetric() != metric) || metric < ripRoute->getMetric())
-                updateRoute(ripRoute, incomingIe->ie, nextHop, metric, entry.routeTag, srcAddr);
+            if (metric < routeMetric || (fromAddr == srcAddr && routeMetric != metric)) {
+                bool preventRouteUpdate = false;
+                // we receive a route update that shows the unreachable route is now reachable
+                if(routeMetric == RIP_INFINITE_METRIC && metric < RIP_INFINITE_METRIC) {
+                    if(holdDownTime > 0 && simTime() < ripRoute->getLastInvalidationTime() + holdDownTime) {
+                        EV_DEBUG << "hold-down timer prevents update to route " << ripRoute->getDestination() << std::endl;
+                        preventRouteUpdate = true;
+                    }
+                    else {
+                        IRoute *route = ripRoute->getRoute();
+                        if(route && route->getMetric() <= metric) {
+                            EV_DEBUG << "existing route " << ripRoute->getDestination() << " has a better metric" << std::endl;
+                            preventRouteUpdate = true;
+                        }
+                    }
+                }
+
+                if(!preventRouteUpdate)
+                    updateRoute(ripRoute, incomingIe->ie, nextHop, metric, entry.routeTag, srcAddr);
+            }
 
             // TODO RIPng: if the metric is the same as the old one, and the old route is about to expire (i.e. at least halfway to the expiration point)
             //             then update the old route with the new RTE
@@ -856,23 +875,10 @@ void Rip::addRoute(const L3Address& dest, int prefixLength, const InterfaceEntry
  */
 void Rip::updateRoute(RipRoute *ripRoute, const InterfaceEntry *ie, const L3Address& nextHop, int metric, uint16 routeTag, const L3Address& from)
 {
-    int oldMetric = ripRoute->getMetric();
-
-    // we receive a route update that shows the unreachable route is now reachable
-    if(oldMetric == RIP_INFINITE_METRIC && metric < RIP_INFINITE_METRIC) {
-        if(holdDownTime > 0 && simTime() < ripRoute->getLastInvalidationTime() + holdDownTime) {
-            EV_DEBUG << "hold-down timer prevents update to route " << ripRoute->getDestination() << std::endl;
-            return;
-        }
-        IRoute *route = ripRoute->getRoute();
-        if(route && route->getMetric() <= metric) {
-            EV_DEBUG << "existing route " << ripRoute->getDestination() << " has a better metric" << std::endl;
-            return;
-        }
-    }
-
     EV_DEBUG << "Updating route to " << ripRoute->getDestination() << "/" << ripRoute->getPrefixLength() << ": "
              << "nextHop=" << nextHop << " metric=" << metric << std::endl;
+
+    int oldMetric = ripRoute->getMetric();
 
     ripRoute->setInterface(const_cast<InterfaceEntry *>(ie));
     ripRoute->setMetric(metric);
@@ -906,7 +912,7 @@ void Rip::updateRoute(RipRoute *ripRoute, const InterfaceEntry *ie, const L3Addr
     ripRoute->setChanged(true);
     triggerUpdate();
 
-    if (metric == RIP_INFINITE_METRIC && oldMetric != RIP_INFINITE_METRIC)
+    if (oldMetric != RIP_INFINITE_METRIC && metric == RIP_INFINITE_METRIC)
         invalidateRoute(ripRoute);
     else
         ripRoute->setLastUpdateTime(simTime());
