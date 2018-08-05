@@ -653,6 +653,12 @@ void OspfInterface::ageTransmittedLsaLists()
 
 std::ostream& operator<<(std::ostream& stream, const OspfInterface& intf)
 {
+    std::string neighbors = "";
+    for(auto &neighbor : intf.neighboringRoutersByID) {
+        std::string neighborState = Neighbor::getStateString((neighbor.second)->getState());
+        neighbors = neighbors + (neighbor.first).str() + "(" + neighborState + ") ";
+    }
+
     return stream << "index: " << intf.ifIndex << " "
             << "type: '" << intf.getTypeString(intf.interfaceType) << "' "
             << "MTU: " << intf.mtu << " "
@@ -669,6 +675,8 @@ std::ostream& operator<<(std::ostream& stream, const OspfInterface& intf)
 
             << "acknowledgementDelay: " << intf.acknowledgementDelay << " "
             << "interfaceTransmissionDelay: " << intf.interfaceTransmissionDelay << " "
+
+            << "neighboringRouters: " << ((neighbors == "") ? "<none>(down)" : neighbors) << " "
 
             << "routerPriority: " << (int)(intf.routerPriority) << " "
             << "designatedRouterID: " << intf.designatedRouter.routerID << " "
