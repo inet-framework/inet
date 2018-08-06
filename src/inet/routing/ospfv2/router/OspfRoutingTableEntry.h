@@ -72,12 +72,14 @@ class INET_API OspfRoutingTableEntry : public Ipv4Route
 
     void setDestinationType(RoutingDestinationType type) { destinationType = type; }
     RoutingDestinationType getDestinationType() const { return destinationType; }
+    static const std::string getDestinationTypeString(RoutingDestinationType destType);
     void setOptionalCapabilities(OspfOptions options) { optionalCapabilities = options; }
     OspfOptions getOptionalCapabilities() const { return optionalCapabilities; }
     void setArea(AreaId source) { area = source; }
     AreaId getArea() const { return area; }
     void setPathType(RoutingPathType type);
     RoutingPathType getPathType() const { return pathType; }
+    static const std::string getPathTypeString(RoutingPathType pathType);
     void setCost(Metric pathCost);
     Metric getCost() const { return cost; }
     void setType2Cost(Metric pathCost);

@@ -16,6 +16,7 @@
 //
 
 #include "inet/routing/ospfv2/router/OspfRouter.h"
+#include "inet/routing/ospfv2/router/OspfRouteData.h"
 
 namespace inet {
 
@@ -765,8 +766,15 @@ void Router::rebuildRoutingTable()
     for (i = 0; i < routeCount; i++) {
         if (routingTable[i]->getDestinationType() == OspfRoutingTableEntry::NETWORK_DESTINATION) {
             if(!routingTable[i]->getNextHopAsGeneric().isUnspecified()) {
-                Ipv4Route *entry = new OspfRoutingTableEntry(*(routingTable[i]));
+                Ipv4Route *entry = new OspfRoutingTableEntry(*routingTable[i]);
                 entry->setAdminDist(Ipv4Route::dOSPF);
+                // adding protocol-specific fields
+                OspfRouteData *newProtocolData = new OspfRouteData();
+                newProtocolData->setDestType((*routingTable[i]).getDestinationType());
+                newProtocolData->setPathType((*routingTable[i]).getPathType());
+                newProtocolData->setArea((*routingTable[i]).getArea());
+                entry->setProtocolData(newProtocolData);
+                // eventually add the route
                 rt->addRoute(entry);
             }
         }
