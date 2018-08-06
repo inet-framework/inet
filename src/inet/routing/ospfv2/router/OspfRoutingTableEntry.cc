@@ -137,50 +137,55 @@ std::ostream& operator<<(std::ostream& out, const OspfRoutingTableEntry& entry)
     out << "mask: " << entry.getNetmask() << " ";
     out << "cost: " << entry.getCost() << " ";
     out << "if: " << entry.getInterfaceName() << " ";
+    out << "destType: " << OspfRoutingTableEntry::getDestinationTypeString(entry.getDestinationType());
+    out << " area: " << entry.getArea().str(false) << " ";
+    out << "pathType: " << OspfRoutingTableEntry::getPathTypeString(entry.getPathType());
+    out << " Type2Cost: " << entry.getType2Cost() << " ";
+    out << "Origin: [" << entry.getLinkStateOrigin()->getHeader() << "] ";
 
-    out << "destType: ";
-    if (entry.getDestinationType() == OspfRoutingTableEntry::NETWORK_DESTINATION) {
+    return out;
+}
+
+
+const std::string OspfRoutingTableEntry::getDestinationTypeString(RoutingDestinationType destType)
+{
+    std::stringstream out;
+
+    if (destType == OspfRoutingTableEntry::NETWORK_DESTINATION) {
         out << "Network";
     }
     else {
-        if ((entry.getDestinationType() & OspfRoutingTableEntry::AREA_BORDER_ROUTER_DESTINATION) != 0) {
+        if ((destType & OspfRoutingTableEntry::AREA_BORDER_ROUTER_DESTINATION) != 0) {
             out << "AreaBorderRouter";
         }
-        if ((entry.getDestinationType() & OspfRoutingTableEntry::AS_BOUNDARY_ROUTER_DESTINATION) != 0) {
-            if ((entry.getDestinationType() & OspfRoutingTableEntry::AREA_BORDER_ROUTER_DESTINATION) != 0) {
+        if ((destType & OspfRoutingTableEntry::AS_BOUNDARY_ROUTER_DESTINATION) != 0) {
+            if ((destType & OspfRoutingTableEntry::AREA_BORDER_ROUTER_DESTINATION) != 0) {
                 out << "+";
             }
             out << "ASBoundaryRouter";
         }
     }
-    out << " area: " << entry.getArea().str(false) << " ";
-    out << "pathType: ";
-    switch (entry.getPathType()) {
+
+    return out.str();
+}
+
+const std::string OspfRoutingTableEntry::getPathTypeString(RoutingPathType pathType)
+{
+    switch (pathType) {
         case OspfRoutingTableEntry::INTRAAREA:
-            out << "IntraArea";
-            break;
+            return "IntraArea";
 
         case OspfRoutingTableEntry::INTERAREA:
-            out << "InterArea";
-            break;
+            return "InterArea";
 
         case OspfRoutingTableEntry::TYPE1_EXTERNAL:
-            out << "Type1External";
-            break;
+            return "Type1External";
 
         case OspfRoutingTableEntry::TYPE2_EXTERNAL:
-            out << "Type2External";
-            break;
-
-        default:
-            out << "Unknown";
-            break;
+            return "Type2External";
     }
 
-    out << " Type2Cost: " << entry.getType2Cost() << " ";
-    out << "Origin: [" << entry.getLinkStateOrigin()->getHeader() << "] ";
-
-    return out;
+    return "Unknown";
 }
 
 } // namespace ospf
