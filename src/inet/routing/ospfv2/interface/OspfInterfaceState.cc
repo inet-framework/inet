@@ -129,11 +129,13 @@ void OspfInterfaceState::calculateDesignatedRouter(OspfInterface *intf)
     unsigned char repeatCount = 0;
     unsigned int i;
 
+    // BDR
     DesignatedRouterId declaredBackup;
     unsigned char declaredBackupPriority;
     RouterId declaredBackupID;
     bool backupDeclared;
 
+    // DR
     DesignatedRouterId declaredDesignatedRouter;
     unsigned char declaredDesignatedRouterPriority;
     RouterId declaredDesignatedRouterID;
@@ -154,12 +156,8 @@ void OspfInterfaceState::calculateDesignatedRouter(OspfInterface *intf)
             Neighbor *neighbor = intf->neighboringRouters[i];
             unsigned char neighborPriority = neighbor->getPriority();
 
-            if (neighbor->getState() < Neighbor::TWOWAY_STATE) {
+            if (neighbor->getState() < Neighbor::TWOWAY_STATE || neighborPriority == 0)
                 continue;
-            }
-            if (neighborPriority == 0) {
-                continue;
-            }
 
             RouterId neighborID = neighbor->getNeighborID();
             DesignatedRouterId neighborsDesignatedRouter = neighbor->getDesignatedRouter();
@@ -226,7 +224,7 @@ void OspfInterfaceState::calculateDesignatedRouter(OspfInterface *intf)
             }
         }
 
-        // calculating backup designated router
+        // calculating designated router
         declaredDesignatedRouter = NULL_DESIGNATEDROUTERID;
         declaredDesignatedRouterPriority = 0;
         declaredDesignatedRouterID = NULL_ROUTERID;
@@ -236,12 +234,8 @@ void OspfInterfaceState::calculateDesignatedRouter(OspfInterface *intf)
             Neighbor *neighbor = intf->neighboringRouters[i];
             unsigned char neighborPriority = neighbor->getPriority();
 
-            if (neighbor->getState() < Neighbor::TWOWAY_STATE) {
+            if (neighbor->getState() < Neighbor::TWOWAY_STATE || neighborPriority == 0)
                 continue;
-            }
-            if (neighborPriority == 0) {
-                continue;
-            }
 
             RouterId neighborID = neighbor->getNeighborID();
             DesignatedRouterId neighborsDesignatedRouter = neighbor->getDesignatedRouter();
@@ -316,6 +310,8 @@ void OspfInterfaceState::calculateDesignatedRouter(OspfInterface *intf)
         }
     } while (repeatCount < 2);
 
+    printElectionResult(intf, declaredDesignatedRouter, declaredBackup);
+
     RouterId routersOldDesignatedRouterID = intf->designatedRouter.routerID;
     RouterId routersOldBackupID = intf->backupDesignatedRouter.routerID;
 
@@ -383,6 +379,30 @@ void OspfInterfaceState::calculateDesignatedRouter(OspfInterface *intf)
             }
         }
     }
+}
+
+void OspfInterfaceState::printElectionResult(const OspfInterface *onInterface, DesignatedRouterId DR, DesignatedRouterId BDR)
+{
+    EV_DETAIL << "DR/BDR election is done for interface[" << static_cast<short>(onInterface->getIfIndex()) << "] ";
+    switch (onInterface->getType()) {
+    case OspfInterface::BROADCAST:
+        EV_DETAIL << "(Broadcast)";
+        break;
+
+    case OspfInterface::NBMA:
+        EV_DETAIL << "(NBMA)";
+        break;
+
+    default:
+        EV_DETAIL << "(Unknown)";
+        break;
+    }
+    EV_DETAIL << " (state: " << onInterface->getStateString(onInterface->getState()) << "):";
+    EV_DETAIL << "\n";
+    EV_DETAIL << "   DR id: " << DR.routerID.str(false) << ", DR interface: " << DR.ipInterfaceAddress.str(false);
+    EV_DETAIL << "\n";
+    EV_DETAIL << "   BDR id: " << BDR.routerID.str(false) << ", BDR interface: " << BDR.ipInterfaceAddress.str(false);
+    EV_DETAIL << "\n";
 }
 
 } // namespace ospf
