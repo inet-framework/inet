@@ -30,6 +30,7 @@ class INET_API OspfInterfaceState
   protected:
     void changeState(OspfInterface *intf, OspfInterfaceState *newState, OspfInterfaceState *currentState);
     void calculateDesignatedRouter(OspfInterface *intf);
+    void printElectionResult(const OspfInterface *onInterface, DesignatedRouterId DR, DesignatedRouterId BDR);
 
   public:
     virtual ~OspfInterfaceState() {}
