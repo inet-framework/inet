@@ -51,7 +51,7 @@ class INET_API MessageHandler : public IMessageHandler
 
     void processPacket(Packet *packet, OspfInterface *unused1 = nullptr, Neighbor *unused2 = nullptr) override;
 
-    void sendPacket(Packet *packet, Ipv4Address destination, int outputIfIndex, short ttl = 1);
+    void sendPacket(Packet *packet, Ipv4Address destination, OspfInterface *outputIf, short ttl = 1);
     void clearTimer(cMessage *timer);
     void startTimer(cMessage *timer, simtime_t delay);
 
