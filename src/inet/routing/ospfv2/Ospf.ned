@@ -143,6 +143,8 @@ simple Ospf like IOspf
         int routerDeadInterval @unit(s) = default(40s);  // the interval during which at least one hello packet must be received from a neighbor before the router declares that neighbor as down
         int retransmissionInterval @unit(s) = default(5s);  // The time between OSPF LSA retransmissions for adjacencies that belongs to the interface
         int interfaceTransmissionDelay @unit(s) = default(1s);  // The number of seconds required to transmit a link state update packet. Valid values are 1 to 65535
+        string interfaceMode @enum("Active","Passive","NoOSPF") = default("Active"); // NoOSPF: the interface is not advertized by OSPF
+        																			 // Passive: the interface is advertised, but no OSPF message is send out
                 
         int referenceBandwidth @unit(bps) = default(1e8bps);   // reference bandwidth for cost calculation
         int interfaceOutputCost = default(1);  // cost of link on the interface (1-1000), 0 means use reference bandwidth

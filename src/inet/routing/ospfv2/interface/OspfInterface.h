@@ -71,8 +71,15 @@ class INET_API OspfInterface
         DESIGNATED_ROUTER_STATE = 6
     };
 
+    enum OspfInterfaceMode {
+        ACTIVE = 0,
+        PASSIVE = 1,
+        NO_OSPF = 2,
+    };
+
   private:
     OspfInterfaceType interfaceType;
+    OspfInterfaceMode interfaceMode;
     OspfInterfaceState *state;
     OspfInterfaceState *previousState;
     int ifIndex;
@@ -132,6 +139,9 @@ class INET_API OspfInterface
     void setType(OspfInterfaceType ifType) { interfaceType = ifType; }
     OspfInterfaceType getType() const { return interfaceType; }
     static const char *getTypeString(OspfInterfaceType intfType);
+    OspfInterfaceMode getMode() const { return interfaceMode; }
+    static const char *getModeString(OspfInterfaceMode intfMode);
+    void setMode(OspfInterfaceMode intfMode) { interfaceMode = intfMode; }
     void setIfIndex(IInterfaceTable *ift, int index);
     int getIfIndex() const { return ifIndex; }
     void setMtu(unsigned short ifMTU) { mtu = ifMTU; }

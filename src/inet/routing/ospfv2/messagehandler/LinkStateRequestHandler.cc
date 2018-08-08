@@ -86,18 +86,18 @@ void LinkStateRequestHandler::processPacket(Packet *packet, OspfInterface *intf,
                             (intf->getState() == OspfInterface::BACKUP_STATE) ||
                             (intf->getDesignatedRouter() == NULL_DESIGNATEDROUTERID))
                         {
-                            messageHandler->sendPacket(updatePacket, Ipv4Address::ALL_OSPF_ROUTERS_MCAST, intf->getIfIndex(), ttl);
+                            messageHandler->sendPacket(updatePacket, Ipv4Address::ALL_OSPF_ROUTERS_MCAST, intf, ttl);
                         }
                         else {
-                            messageHandler->sendPacket(updatePacket, Ipv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST, intf->getIfIndex(), ttl);
+                            messageHandler->sendPacket(updatePacket, Ipv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST, intf, ttl);
                         }
                     }
                     else {
                         if (intf->getType() == OspfInterface::POINTTOPOINT) {
-                            messageHandler->sendPacket(updatePacket, Ipv4Address::ALL_OSPF_ROUTERS_MCAST, intf->getIfIndex(), ttl);
+                            messageHandler->sendPacket(updatePacket, Ipv4Address::ALL_OSPF_ROUTERS_MCAST, intf, ttl);
                         }
                         else {
-                            messageHandler->sendPacket(updatePacket, neighbor->getAddress(), intf->getIfIndex(), ttl);
+                            messageHandler->sendPacket(updatePacket, neighbor->getAddress(), intf, ttl);
                         }
                     }
                 }

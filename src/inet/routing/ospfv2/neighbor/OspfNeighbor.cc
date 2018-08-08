@@ -252,10 +252,10 @@ void Neighbor::sendDatabaseDescriptionPacket(bool init)
     lastTransmittedDDPacket = pk->dup();
 
     if (parentInterface->getType() == OspfInterface::POINTTOPOINT) {
-        messageHandler->sendPacket(pk, Ipv4Address::ALL_OSPF_ROUTERS_MCAST, parentInterface->getIfIndex(), ttl);
+        messageHandler->sendPacket(pk, Ipv4Address::ALL_OSPF_ROUTERS_MCAST, parentInterface, ttl);
     }
     else {
-        messageHandler->sendPacket(pk, neighborIPAddress, parentInterface->getIfIndex(), ttl);
+        messageHandler->sendPacket(pk, neighborIPAddress, parentInterface, ttl);
     }
 }
 
@@ -267,10 +267,10 @@ bool Neighbor::retransmitDatabaseDescriptionPacket()
         int ttl = (parentInterface->getType() == OspfInterface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
 
         if (parentInterface->getType() == OspfInterface::POINTTOPOINT) {
-            messageHandler->sendPacket(ddPacket, Ipv4Address::ALL_OSPF_ROUTERS_MCAST, parentInterface->getIfIndex(), ttl);
+            messageHandler->sendPacket(ddPacket, Ipv4Address::ALL_OSPF_ROUTERS_MCAST, parentInterface, ttl);
         }
         else {
-            messageHandler->sendPacket(ddPacket, neighborIPAddress, parentInterface->getIfIndex(), ttl);
+            messageHandler->sendPacket(ddPacket, neighborIPAddress, parentInterface, ttl);
         }
 
         return true;
@@ -377,10 +377,10 @@ void Neighbor::sendLinkStateRequestPacket()
     MessageHandler *messageHandler = parentInterface->getArea()->getRouter()->getMessageHandler();
     int ttl = (parentInterface->getType() == OspfInterface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
     if (parentInterface->getType() == OspfInterface::POINTTOPOINT) {
-        messageHandler->sendPacket(pk, Ipv4Address::ALL_OSPF_ROUTERS_MCAST, parentInterface->getIfIndex(), ttl);
+        messageHandler->sendPacket(pk, Ipv4Address::ALL_OSPF_ROUTERS_MCAST, parentInterface, ttl);
     }
     else {
-        messageHandler->sendPacket(pk, neighborIPAddress, parentInterface->getIfIndex(), ttl);
+        messageHandler->sendPacket(pk, neighborIPAddress, parentInterface, ttl);
     }
 }
 
@@ -767,7 +767,7 @@ void Neighbor::retransmitUpdatePacket()
 
     MessageHandler *messageHandler = parentInterface->getArea()->getRouter()->getMessageHandler();
     int ttl = (parentInterface->getType() == OspfInterface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
-    messageHandler->sendPacket(pk, neighborIPAddress, parentInterface->getIfIndex(), ttl);
+    messageHandler->sendPacket(pk, neighborIPAddress, parentInterface, ttl);
 }
 
 void Neighbor::deleteLastSentDDPacket()

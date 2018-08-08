@@ -185,6 +185,10 @@ void OspfConfigReader::loadAreaFromXML(const cXMLElement& asConfig, AreaId areaI
 
 void OspfConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig)
 {
+    std::string intfModeStr = getStrAttrOrPar(ifConfig, "interfaceMode");
+    if(intfModeStr == "NoOSPF")
+        return;
+
     OspfInterface *intf = new OspfInterface;
     InterfaceEntry *ie = getInterfaceByXMLAttributesOf(ifConfig);
     int ifIndex = ie->getInterfaceId();
@@ -210,6 +214,16 @@ void OspfConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig)
     else {
         delete intf;
         throw cRuntimeError("Unknown interface type '%s' for interface %s (ifIndex=%d) at %s",
+                interfaceType.c_str(), ie->getInterfaceName(), ifIndex, ifConfig.getSourceLocation());
+    }
+
+    if(intfModeStr == "Active")
+        intf->setMode(OspfInterface::ACTIVE);
+    else if(intfModeStr == "Passive")
+        intf->setMode(OspfInterface::PASSIVE);
+    else {
+        delete intf;
+        throw cRuntimeError("Unknown interface mode '%s' for interface %s (ifIndex=%d) at %s",
                 interfaceType.c_str(), ie->getInterfaceName(), ifIndex, ifConfig.getSourceLocation());
     }
 
