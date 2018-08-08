@@ -23,9 +23,9 @@ namespace ospf {
 std::string OspfRouteData::str() const
 {
     std::ostringstream out;
-    out << "destType = " << OspfRoutingTableEntry::getDestinationTypeString(destType)
-    << " pathType = " << OspfRoutingTableEntry::getPathTypeString(pathType)
-    << " area = " << area.str(false);
+    out << "destType:" << OspfRoutingTableEntry::getDestinationTypeString(destType)
+    << " pathType:" << OspfRoutingTableEntry::getPathTypeString(pathType)
+    << " area:" << area.str(false);
 
     return out.str();
 };
