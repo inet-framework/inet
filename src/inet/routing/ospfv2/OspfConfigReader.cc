@@ -147,11 +147,15 @@ void OspfConfigReader::loadAreaFromXML(const cXMLElement& asConfig, AreaId areaI
 
     cXMLElement *areaConfig = asConfig.getElementByPath(areaXPath.c_str());
     if (areaConfig == nullptr) {
-        throw cRuntimeError("No configuration for Area ID: %s at %s", areaID.str(false).c_str(), asConfig.getSourceLocation());
+        if(areaID != Ipv4Address("0.0.0.0"))
+            throw cRuntimeError("No configuration for Area ID: %s at %s", areaID.str(false).c_str(), asConfig.getSourceLocation());
+        Area *area = new Area(ift, areaID);
+        area->addWatches();
+        ospfRouter->addArea(area);
+        return;
     }
-    else {
-        EV_DEBUG << "    loading info for Area id = " << areaID.str(false) << "\n";
-    }
+
+    EV_DEBUG << "    loading info for Area id = " << areaID.str(false) << "\n";
 
     Area *area = new Area(ift, areaID);
     area->addWatches();
