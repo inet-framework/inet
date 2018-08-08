@@ -33,6 +33,7 @@ namespace ospf {
 
 OspfInterface::OspfInterface(OspfInterface::OspfInterfaceType ifType) :
     interfaceType(ifType),
+    interfaceMode(ACTIVE),
     ifIndex(0),
     mtu(0),
     interfaceAddressRange(NULL_IPV4ADDRESSRANGE),
@@ -107,6 +108,25 @@ const char *OspfInterface::getTypeString(OspfInterfaceType intfType)
 
         case VIRTUAL:
             return "Virtual";
+
+        default:
+            ASSERT(false);
+            break;
+    }
+    return "";
+}
+
+const char *OspfInterface::getModeString(OspfInterfaceMode intfMode)
+{
+    switch (intfMode) {
+        case ACTIVE:
+            return "Active";
+
+        case PASSIVE:
+            return "Passive";
+
+        case NO_OSPF:
+            return "NoOSPF";
 
         default:
             ASSERT(false);
@@ -200,7 +220,7 @@ void OspfInterface::sendHelloPacket(Ipv4Address destination, short ttl)
     Packet *pk = new Packet();
     pk->insertAtBack(helloPacket);
 
-    parentArea->getRouter()->getMessageHandler()->sendPacket(pk, destination, ifIndex, ttl);
+    parentArea->getRouter()->getMessageHandler()->sendPacket(pk, destination, this, ttl);
 }
 
 void OspfInterface::sendLsAcknowledgement(const OspfLsaHeader *lsaHeader, Ipv4Address destination)
@@ -224,7 +244,7 @@ void OspfInterface::sendLsAcknowledgement(const OspfLsaHeader *lsaHeader, Ipv4Ad
     pk->insertAtBack(lsAckPacket);
 
     int ttl = (interfaceType == OspfInterface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
-    parentArea->getRouter()->getMessageHandler()->sendPacket(pk, destination, ifIndex, ttl);
+    parentArea->getRouter()->getMessageHandler()->sendPacket(pk, destination, this, ttl);
 }
 
 Neighbor *OspfInterface::getNeighborById(RouterId neighborID)
@@ -401,7 +421,7 @@ bool OspfInterface::floodLsa(const OspfLsa *lsa, OspfInterface *intf, Neighbor *
                                 (getState() == OspfInterface::BACKUP_STATE) ||
                                 (designatedRouter == NULL_DESIGNATEDROUTERID))
                             {
-                                messageHandler->sendPacket(updatePacket, Ipv4Address::ALL_OSPF_ROUTERS_MCAST, ifIndex, ttl);
+                                messageHandler->sendPacket(updatePacket, Ipv4Address::ALL_OSPF_ROUTERS_MCAST, this, ttl);
                                 for (long k = 0; k < neighborCount; k++) {
                                     neighboringRouters[k]->addToTransmittedLSAList(lsaKey);
                                     if (!neighboringRouters[k]->isUpdateRetransmissionTimerActive()) {
@@ -410,7 +430,7 @@ bool OspfInterface::floodLsa(const OspfLsa *lsa, OspfInterface *intf, Neighbor *
                                 }
                             }
                             else {
-                                messageHandler->sendPacket(updatePacket, Ipv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST, ifIndex, ttl);
+                                messageHandler->sendPacket(updatePacket, Ipv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST, this, ttl);
                                 Neighbor *dRouter = getNeighborById(designatedRouter.routerID);
                                 Neighbor *backupDRouter = getNeighborById(backupDesignatedRouter.routerID);
                                 if (dRouter != nullptr) {
@@ -429,7 +449,7 @@ bool OspfInterface::floodLsa(const OspfLsa *lsa, OspfInterface *intf, Neighbor *
                         }
                         else {
                             if (interfaceType == OspfInterface::POINTTOPOINT) {
-                                messageHandler->sendPacket(updatePacket, Ipv4Address::ALL_OSPF_ROUTERS_MCAST, ifIndex, ttl);
+                                messageHandler->sendPacket(updatePacket, Ipv4Address::ALL_OSPF_ROUTERS_MCAST, this, ttl);
                                 if (neighborCount > 0) {
                                     neighboringRouters[0]->addToTransmittedLSAList(lsaKey);
                                     if (!neighboringRouters[0]->isUpdateRetransmissionTimerActive()) {
@@ -440,7 +460,7 @@ bool OspfInterface::floodLsa(const OspfLsa *lsa, OspfInterface *intf, Neighbor *
                             else {
                                 for (long m = 0; m < neighborCount; m++) {
                                     if (neighboringRouters[m]->getState() >= Neighbor::EXCHANGE_STATE) {
-                                        messageHandler->sendPacket(updatePacket, neighboringRouters[m]->getAddress(), ifIndex, ttl);
+                                        messageHandler->sendPacket(updatePacket, neighboringRouters[m]->getAddress(), this, ttl);
                                         neighboringRouters[m]->addToTransmittedLSAList(lsaKey);
                                         if (!neighboringRouters[m]->isUpdateRetransmissionTimerActive()) {
                                             neighboringRouters[m]->startUpdateRetransmissionTimer();
@@ -623,18 +643,18 @@ void OspfInterface::sendDelayedAcknowledgements()
                         (getState() == OspfInterface::BACKUP_STATE) ||
                         (designatedRouter == NULL_DESIGNATEDROUTERID))
                     {
-                        messageHandler->sendPacket(pk, Ipv4Address::ALL_OSPF_ROUTERS_MCAST, ifIndex, ttl);
+                        messageHandler->sendPacket(pk, Ipv4Address::ALL_OSPF_ROUTERS_MCAST, this, ttl);
                     }
                     else {
-                        messageHandler->sendPacket(pk, Ipv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST, ifIndex, ttl);
+                        messageHandler->sendPacket(pk, Ipv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST, this, ttl);
                     }
                 }
                 else {
                     if (interfaceType == OspfInterface::POINTTOPOINT) {
-                        messageHandler->sendPacket(pk, Ipv4Address::ALL_OSPF_ROUTERS_MCAST, ifIndex, ttl);
+                        messageHandler->sendPacket(pk, Ipv4Address::ALL_OSPF_ROUTERS_MCAST, this, ttl);
                     }
                     else {
-                        messageHandler->sendPacket(pk, elem.first, ifIndex, ttl);
+                        messageHandler->sendPacket(pk, elem.first, this, ttl);
                     }
                 }
             }
@@ -663,6 +683,7 @@ std::ostream& operator<<(std::ostream& stream, const OspfInterface& intf)
             << "type: '" << intf.getTypeString(intf.interfaceType) << "' "
             << "MTU: " << intf.mtu << " "
             << "state: '" << intf.getStateString(intf.state->getState()) << "' "
+            << "mode: '" << intf.getModeString(intf.interfaceMode) << "' "
             << "cost: " << intf.interfaceOutputCost << " "
 
             << "area: " << intf.areaID.str(false) << " "

@@ -309,8 +309,18 @@ void MessageHandler::processPacket(Packet *pk, OspfInterface *unused1, Neighbor 
     delete pk;
 }
 
-void MessageHandler::sendPacket(Packet *packet, Ipv4Address destination, int outputIfIndex, short ttl)
+void MessageHandler::sendPacket(Packet *packet, Ipv4Address destination, OspfInterface *outputIf, short ttl)
 {
+    if(outputIf->getMode() == OspfInterface::NO_OSPF) {
+        delete packet;
+        throw cRuntimeError("Interface '%u' is in NoOSPF mode and cannot send out OSPF messages");
+    }
+    else if(outputIf->getMode() == OspfInterface::PASSIVE) {
+        delete packet;
+        return;
+    }
+
+    int outputIfIndex = outputIf->getIfIndex();
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ospf);
     packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outputIfIndex);
     packet->addTagIfAbsent<L3AddressReq>()->setDestAddress(destination);
