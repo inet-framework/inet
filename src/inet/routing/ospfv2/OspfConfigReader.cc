@@ -296,6 +296,10 @@ void OspfConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig)
 
 void OspfConfigReader::loadExternalRoute(const cXMLElement& externalRouteConfig)
 {
+    std::string intfModeStr = getStrAttrOrPar(externalRouteConfig, "interfaceMode");
+    if(intfModeStr == "NoOSPF")
+        return;
+
     InterfaceEntry *ie = getInterfaceByXMLAttributesOf(externalRouteConfig);
     int ifIndex = ie->getInterfaceId();
 
@@ -348,6 +352,10 @@ void OspfConfigReader::loadExternalRoute(const cXMLElement& externalRouteConfig)
 
 void OspfConfigReader::loadHostRoute(const cXMLElement& hostRouteConfig)
 {
+    std::string intfModeStr = getStrAttrOrPar(hostRouteConfig, "interfaceMode");
+    if(intfModeStr == "NoOSPF")
+        return;
+
     HostRouteParameters hostParameters;
     AreaId hostArea;
 
@@ -376,6 +384,10 @@ void OspfConfigReader::loadHostRoute(const cXMLElement& hostRouteConfig)
 
 void OspfConfigReader::loadVirtualLink(const cXMLElement& virtualLinkConfig)
 {
+    std::string intfModeStr = getStrAttrOrPar(virtualLinkConfig, "interfaceMode");
+    if(intfModeStr == "NoOSPF")
+        return;
+
     OspfInterface *intf = new OspfInterface;
     std::string endPoint = getMandatoryFilledAttribute(virtualLinkConfig, "endPointRouterID");
     Neighbor *neighbor = new Neighbor;
