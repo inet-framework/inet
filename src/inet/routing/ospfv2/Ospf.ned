@@ -135,7 +135,7 @@ simple Ospf like IOspf
         // default values for attributes of interface xml entries:
         
         int routerPriority = default(1);  // Priority in DR/BDR election (Specify 0 to exclude the router from the election)
-        string areaID = default("");
+        string areaID = default("0.0.0.0");
         bool RFC1583Compatible = default(false);
         
         int helloInterval @unit(s) = default(10s);  // specifies the time in seconds between hello packets that the other router sends on an interface
