@@ -189,17 +189,28 @@ void OspfConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig)
     if(intfModeStr == "NoOSPF")
         return;
 
+    std::string interfaceType = ifConfig.getTagName();
+
     for(auto &ie : getInterfaceByXMLAttributesOf(ifConfig)) {
-        OspfInterface *intf = new OspfInterface;
         int ifIndex = ie->getInterfaceId();
-        std::string interfaceType = ifConfig.getTagName();
+        std::string ifName = ie->getInterfaceName();
 
-        EV_DEBUG << "        loading " << interfaceType << " " << ie->getInterfaceName() << " (ifIndex=" << ifIndex << ")\n";
+        // making sure the interface has not been added before
+        AreaId areaID = Ipv4Address(getStrAttrOrPar(ifConfig, "areaID"));
+        Area *areaPtr = ospfRouter->getAreaByID(areaID);
+        if (areaPtr != nullptr) {
+            OspfInterface *areaInterface = areaPtr->getInterface(ifIndex);
+            if(areaInterface)
+                continue;
+        }
 
-        intf->setIfName(ie->getInterfaceName());
+        EV_DEBUG << "        loading " << interfaceType << " " << ifName << " (ifIndex=" << ifIndex << ")\n";
 
-        // should be called before calling setType()
-        intf->setIfIndex(ift, ifIndex);
+        OspfInterface *intf = new OspfInterface;
+
+        intf->setIfName(ifName);
+        intf->setAreaId(areaID);
+        intf->setIfIndex(ift, ifIndex); // should be called before calling setType()
 
         if (interfaceType == "PointToPointInterface") {
             intf->setType(OspfInterface::POINTTOPOINT);
@@ -216,7 +227,7 @@ void OspfConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig)
         else {
             delete intf;
             throw cRuntimeError("Unknown interface type '%s' for interface %s (ifIndex=%d) at %s",
-                    interfaceType.c_str(), ie->getInterfaceName(), ifIndex, ifConfig.getSourceLocation());
+                    interfaceType.c_str(), ifName, ifIndex, ifConfig.getSourceLocation());
         }
 
         if(intfModeStr == "Active")
@@ -226,13 +237,8 @@ void OspfConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig)
         else {
             delete intf;
             throw cRuntimeError("Unknown interface mode '%s' for interface %s (ifIndex=%d) at %s",
-                    interfaceType.c_str(), ie->getInterfaceName(), ifIndex, ifConfig.getSourceLocation());
+                    interfaceType.c_str(), ifName, ifIndex, ifConfig.getSourceLocation());
         }
-
-        joinMulticastGroups(ifIndex);
-
-        AreaId areaID = Ipv4Address(getStrAttrOrPar(ifConfig, "areaID"));
-        intf->setAreaId(areaID);
 
         Metric cost = getIntAttrOrPar(ifConfig, "interfaceOutputCost");
         if(cost == 0)
@@ -284,6 +290,9 @@ void OspfConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig)
                 }
             }
         }
+
+        joinMulticastGroups(ifIndex);
+
         // add the interface to it's Area
         Area *area = ospfRouter->getAreaByID(areaID);
         if (area != nullptr) {
