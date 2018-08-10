@@ -51,7 +51,7 @@ class INET_API OspfConfigReader
      * Search an InterfaceEntry in IInterfaceTable by interface name or toward module name
      * an returns the InterfaceEntry pointer or throws an error.
      */
-    InterfaceEntry *getInterfaceByXMLAttributesOf(const cXMLElement& ifConfig);
+    std::vector<InterfaceEntry *> getInterfaceByXMLAttributesOf(const cXMLElement& ifConfig);
 
     /**
      * Loads a list of OSPF Areas connected to this router from the config XML.
