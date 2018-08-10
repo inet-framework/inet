@@ -129,8 +129,13 @@ simple Ospf like IOspf
     parameters:
         string interfaceTableModule;
         string routingTableModule;
-        xml ospfConfig; // xml containing the full OSPF AS configuration
         volatile double startupTime @unit(s) = default(0); // delay before starting OSPF
+        // xml containing the full OSPF AS configuration
+        xml ospfConfig = default(xml("<OSPFASConfig> \
+                <Router name='**' RFC1583Compatible='true'> \
+    				<BroadcastInterface ifName='eth[*]' areaID='0.0.0.0' interfaceOutputCost='0' search='relax' /> \
+    				<PointToPointInterface ifName='ppp[*]' areaID='0.0.0.0' interfaceOutputCost='0' search='relax' /> \
+    			</Router> </OSPFASConfig>"));
         
         // default values for attributes of interface xml entries:
         
