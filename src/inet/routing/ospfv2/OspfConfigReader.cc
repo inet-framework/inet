@@ -196,6 +196,8 @@ void OspfConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig)
 
         EV_DEBUG << "        loading " << interfaceType << " " << ie->getInterfaceName() << " (ifIndex=" << ifIndex << ")\n";
 
+        intf->setIfName(ie->getInterfaceName());
+
         // should be called before calling setType()
         intf->setIfIndex(ift, ifIndex);
 
