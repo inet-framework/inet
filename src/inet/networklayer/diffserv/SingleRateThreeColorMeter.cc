@@ -32,9 +32,11 @@ void SingleRateThreeColorMeter::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         numRcvd = 0;
+        numGreen = 0;
         numYellow = 0;
         numRed = 0;
         WATCH(numRcvd);
+        WATCH(numGreen);
         WATCH(numYellow);
         WATCH(numRed);
 
@@ -60,6 +62,7 @@ void SingleRateThreeColorMeter::handleMessage(cMessage *msg)
     int color = meterPacket(packet);
     switch (color) {
         case GREEN:
+            numGreen++;
             send(packet, "greenOut");
             break;
 
@@ -79,7 +82,9 @@ void SingleRateThreeColorMeter::refreshDisplay() const
 {
     char buf[80] = "";
     if (numRcvd > 0)
-        sprintf(buf + strlen(buf), "rcvd: %d ", numRcvd);
+        sprintf(buf + strlen(buf), "rcvd: %d\n", numRcvd);
+    if (numGreen > 0)
+        sprintf(buf + strlen(buf), "green:%d ", numGreen);
     if (numYellow > 0)
         sprintf(buf + strlen(buf), "yellow:%d ", numYellow);
     if (numRed > 0)

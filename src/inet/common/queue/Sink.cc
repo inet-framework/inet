@@ -47,6 +47,13 @@ void Sink::handleMessage(cMessage *msg)
     delete msg;
 }
 
+void Sink::refreshDisplay() const
+{
+    char buf[80] = "";
+    sprintf(buf, "rcvd: %d ", numPackets);
+    getDisplayString().setTagArg("t", 0, buf);
+}
+
 void Sink::finish()
 {
     recordScalar("throughput", throughput);

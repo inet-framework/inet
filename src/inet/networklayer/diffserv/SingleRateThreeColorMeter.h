@@ -45,6 +45,7 @@ class INET_API SingleRateThreeColorMeter : public cSimpleModule
     simtime_t lastUpdateTime;
 
     int numRcvd = 0;
+    int numGreen = 0;
     int numYellow = 0;
     int numRed = 0;
 
