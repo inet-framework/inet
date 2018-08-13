@@ -29,6 +29,7 @@ simsignal_t Delayer::delaySignal = registerSignal("delay");
 void Delayer::initialize()
 {
     delayPar = &par("delay");
+    gate("in")->setDeliverOnReceptionStart(true);
 }
 
 void Delayer::handleMessage(cMessage *msg)
