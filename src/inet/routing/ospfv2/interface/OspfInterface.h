@@ -80,6 +80,7 @@ class INET_API OspfInterface
   private:
     OspfInterfaceType interfaceType;
     OspfInterfaceMode interfaceMode;
+    CrcMode crcMode;
     OspfInterfaceState *state;
     OspfInterfaceState *previousState;
     std::string ifName;
@@ -143,6 +144,8 @@ class INET_API OspfInterface
     OspfInterfaceMode getMode() const { return interfaceMode; }
     static const char *getModeString(OspfInterfaceMode intfMode);
     void setMode(OspfInterfaceMode intfMode) { interfaceMode = intfMode; }
+    CrcMode getCrcMode() const { return crcMode; }
+    void setCrcMode(CrcMode crcMode) { this->crcMode = crcMode; }
     void setIfIndex(IInterfaceTable *ift, int index);
     int getIfIndex() const { return ifIndex; }
     void setIfName(std::string ifName) { this->ifName = ifName; }

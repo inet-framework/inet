@@ -18,6 +18,7 @@
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
 import inet.networklayer.contract.ipv4.Ipv4Address;
+import inet.transportlayer.common.CrcMode;
 
 namespace inet::ospf;
 
@@ -53,7 +54,10 @@ class OspfPacket extends FieldsChunk
 
     Ipv4Address routerID;
     Ipv4Address areaID;
-
+    
+    uint16_t crc = 0;
+    CrcMode crcMode = CRC_MODE_UNDEFINED;
+    
     short authenticationType = 0;
     char authentication[8];
 }
@@ -98,6 +102,7 @@ class OspfLsaHeader extends cObject
     Ipv4Address linkStateID;
     Ipv4Address advertisingRouter;
     long lsSequenceNumber = 0;
+    uint16_t lsCrc = 0;
     unsigned short lsaLength = 0;
 }
 
