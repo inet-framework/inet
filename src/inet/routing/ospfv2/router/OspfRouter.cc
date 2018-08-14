@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <algorithm>
 #include "inet/routing/ospfv2/router/OspfRouter.h"
 #include "inet/routing/ospfv2/router/OspfRouteData.h"
 
@@ -773,12 +774,8 @@ void Router::rebuildRoutingTable()
         }
     }
 
-    EV_INFO << "Deleting all OSPF routing entries: \n";
-    for (auto &entry : eraseEntries)
-        rt->deleteRoute(entry);
-
     // add the new routing entries
-    EV_INFO << "Adding updated OSPF routing entries: \n";
+    std::vector<Ipv4Route *> addEntries;
     for (auto &tableEntry : routingTable) {
         if (tableEntry->getDestinationType() == OspfRoutingTableEntry::NETWORK_DESTINATION) {
             if(!tableEntry->getNextHopAsGeneric().isUnspecified()) {
@@ -790,11 +787,52 @@ void Router::rebuildRoutingTable()
                 newProtocolData->setPathType((*tableEntry).getPathType());
                 newProtocolData->setArea((*tableEntry).getArea());
                 entry->setProtocolData(newProtocolData);
-                // eventually add the route
-                rt->addRoute(entry);
+                // pushing back into addEntries
+                addEntries.push_back(entry);
             }
         }
     }
+
+    // find the difference between two tables
+    std::vector<Ipv4Route *> diffAddEntries;
+    std::vector<Ipv4Route *> diffEraseEntries;
+    diffEraseEntries.assign(eraseEntries.begin(), eraseEntries.end());
+    for(auto &entry : addEntries) {
+        auto position = std::find_if(diffEraseEntries.begin(), diffEraseEntries.end(),
+                [&](const Ipv4Route *m) -> bool {
+            if (m->getDestination() != entry->getDestination())
+                return false;
+            else if(m->getNetmask() != entry->getNetmask())
+                return false;
+            else if(m->getGateway() != entry->getGateway())
+                return false;
+            else if(m->getMetric() != entry->getMetric())
+                return false;
+            else
+                return true;
+        });
+        if(position != diffEraseEntries.end())
+            diffEraseEntries.erase(position);
+        else
+            diffAddEntries.push_back(entry);
+    }
+
+    if (!diffEraseEntries.empty() || !diffAddEntries.empty()) {
+        EV_INFO << "OSPF routing table has changed: \n";
+        for(auto &entry : diffEraseEntries)
+            EV_INFO << "deleted: " << entry << "\n";
+        for(auto &entry : diffAddEntries)
+            EV_INFO << "added: " << entry << "\n";
+    }
+    else {
+        EV_INFO << "No changes to the OSPF routing table. \n";
+    }
+
+    for (auto &entry : eraseEntries)
+        rt->deleteRoute(entry);
+
+    for (auto &entry : addEntries)
+        rt->addRoute(entry);
 
     notifyAboutRoutingTableChanges(oldTable);
 
