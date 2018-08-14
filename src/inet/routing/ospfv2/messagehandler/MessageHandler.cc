@@ -313,7 +313,7 @@ void MessageHandler::sendPacket(Packet *packet, Ipv4Address destination, OspfInt
 {
     if(outputIf->getMode() == OspfInterface::NO_OSPF) {
         delete packet;
-        throw cRuntimeError("Interface '%u' is in NoOSPF mode and cannot send out OSPF messages");
+        throw cRuntimeError("Interface '%u' is in NoOSPF mode and cannot send out OSPF messages", outputIf->getIfIndex());
     }
     else if(outputIf->getMode() == OspfInterface::PASSIVE) {
         delete packet;
