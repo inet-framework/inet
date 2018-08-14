@@ -21,6 +21,7 @@
 #include "inet/routing/ospfv2/router/OspfCommon.h"
 #include "inet/routing/ospfv2/neighbor/OspfNeighbor.h"
 #include "inet/routing/ospfv2/router/OspfRouter.h"
+#include "inet/common/checksum/TcpIpChecksum.h"
 
 namespace inet {
 
@@ -336,15 +337,28 @@ void LinkStateUpdateHandler::acknowledgeLSA(const OspfLsaHeader& lsaHeader,
         ackPacket->setRouterID(Ipv4Address(router->getRouterID()));
         ackPacket->setAreaID(Ipv4Address(intf->getArea()->getAreaID()));
         ackPacket->setAuthenticationType(intf->getAuthenticationType());
-        AuthenticationKeyType authKey = intf->getAuthenticationKey();
-        for (int i = 0; i < 8; i++) {
-            ackPacket->setAuthentication(i, authKey.bytes[i]);
-        }
 
         ackPacket->setLsaHeadersArraySize(1);
         ackPacket->setLsaHeaders(0, lsaHeader);
 
         ackPacket->setChunkLength(OSPF_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH);
+
+        ackPacket->setCrcMode(intf->getCrcMode());
+        // making sure the crc field is zero
+        ackPacket->setCrc(0x0000);
+        // RFC 2328: OSPF checksum is calculated over the entire OSPF packet, excluding the 64-bit authentication field.
+        if(intf->getCrcMode() == CRC_COMPUTED) {
+            MemoryOutputStream stream;
+            Chunk::serialize(stream, ackPacket);
+            uint16_t crc = TcpIpChecksum::checksum(stream.getData());
+            ackPacket->setCrc(crc);
+        }
+
+        AuthenticationKeyType authKey = intf->getAuthenticationKey();
+        for (int i = 0; i < 8; i++) {
+            ackPacket->setAuthentication(i, authKey.bytes[i]);
+        }
+
         Packet *pk = new Packet();
         pk->insertAtBack(ackPacket);
 

@@ -25,6 +25,7 @@
 #include "inet/routing/ospfv2/neighbor/OspfNeighborState.h"
 #include "inet/routing/ospfv2/neighbor/OspfNeighborStateDown.h"
 #include "inet/routing/ospfv2/router/OspfRouter.h"
+#include "inet/common/checksum/TcpIpChecksum.h"
 
 namespace inet {
 
@@ -185,10 +186,6 @@ void Neighbor::sendDatabaseDescriptionPacket(bool init)
     ddPacket->setRouterID(Ipv4Address(parentInterface->getArea()->getRouter()->getRouterID()));
     ddPacket->setAreaID(Ipv4Address(parentInterface->getArea()->getAreaID()));
     ddPacket->setAuthenticationType(parentInterface->getAuthenticationType());
-    AuthenticationKeyType authKey = parentInterface->getAuthenticationKey();
-    for (int i = 0; i < 8; i++) {
-        ddPacket->setAuthentication(i, authKey.bytes[i]);
-    }
 
     if (parentInterface->getType() != OspfInterface::VIRTUAL) {
         ddPacket->setInterfaceMTU(parentInterface->getMtu());
@@ -241,6 +238,23 @@ void Neighbor::sendDatabaseDescriptionPacket(bool init)
     ddPacket->setDdOptions(ddOptions);
 
     ddPacket->setChunkLength(packetSize);
+
+    ddPacket->setCrcMode(parentInterface->getCrcMode());
+    // making sure the crc field is zero
+    ddPacket->setCrc(0x0000);
+    // RFC 2328: OSPF checksum is calculated over the entire OSPF packet, excluding the 64-bit authentication field.
+    if(parentInterface->getCrcMode() == CRC_COMPUTED) {
+        MemoryOutputStream stream;
+        Chunk::serialize(stream, ddPacket);
+        uint16_t crc = TcpIpChecksum::checksum(stream.getData());
+        ddPacket->setCrc(crc);
+    }
+
+    AuthenticationKeyType authKey = parentInterface->getAuthenticationKey();
+    for (int i = 0; i < 8; i++) {
+        ddPacket->setAuthentication(i, authKey.bytes[i]);
+    }
+
     Packet *pk = new Packet();
     pk->insertAtBack(ddPacket);
 
@@ -337,10 +351,6 @@ void Neighbor::sendLinkStateRequestPacket()
     requestPacket->setRouterID(Ipv4Address(parentInterface->getArea()->getRouter()->getRouterID()));
     requestPacket->setAreaID(Ipv4Address(parentInterface->getArea()->getAreaID()));
     requestPacket->setAuthenticationType(parentInterface->getAuthenticationType());
-    AuthenticationKeyType authKey = parentInterface->getAuthenticationKey();
-    for (int i = 0; i < 8; i++) {
-        requestPacket->setAuthentication(i, authKey.bytes[i]);
-    }
 
     B maxPacketSize = ((IPv4_MAX_HEADER_LENGTH + OSPF_HEADER_LENGTH + OSPF_REQUEST_LENGTH) > B(parentInterface->getMtu())) ?
                           IPV4_DATAGRAM_LENGTH :
@@ -371,6 +381,23 @@ void Neighbor::sendLinkStateRequestPacket()
     }
 
     requestPacket->setChunkLength(packetSize);
+
+    requestPacket->setCrcMode(parentInterface->getCrcMode());
+    // making sure the crc field is zero
+    requestPacket->setCrc(0x0000);
+    // RFC 2328: OSPF checksum is calculated over the entire OSPF packet, excluding the 64-bit authentication field.
+    if(parentInterface->getCrcMode() == CRC_COMPUTED) {
+        MemoryOutputStream stream;
+        Chunk::serialize(stream, requestPacket);
+        uint16_t crc = TcpIpChecksum::checksum(stream.getData());
+        requestPacket->setCrc(crc);
+    }
+
+    AuthenticationKeyType authKey = parentInterface->getAuthenticationKey();
+    for (int i = 0; i < 8; i++) {
+        requestPacket->setAuthentication(i, authKey.bytes[i]);
+    }
+
     Packet *pk = new Packet();
     pk->insertAtBack(requestPacket);
 
@@ -619,14 +646,10 @@ void Neighbor::retransmitUpdatePacket()
     updatePacket->setRouterID(Ipv4Address(parentInterface->getArea()->getRouter()->getRouterID()));
     updatePacket->setAreaID(Ipv4Address(parentInterface->getArea()->getAreaID()));
     updatePacket->setAuthenticationType(parentInterface->getAuthenticationType());
-    AuthenticationKeyType authKey = parentInterface->getAuthenticationKey();
-    for (int i = 0; i < 8; i++) {
-        updatePacket->setAuthentication(i, authKey.bytes[i]);
-    }
 
     bool packetFull = false;
     unsigned short lsaCount = 0;
-    B packetLength = IPv4_MAX_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH;
+    B packetLength = IPv4_MAX_HEADER_LENGTH + OSPF_HEADER_LENGTH + B(4);
     auto it = linkStateRetransmissionList.begin();
 
     while (!packetFull && (it != linkStateRetransmissionList.end())) {
@@ -762,6 +785,23 @@ void Neighbor::retransmitUpdatePacket()
     }
 
     updatePacket->setChunkLength(packetLength - IPv4_MAX_HEADER_LENGTH);
+
+    updatePacket->setCrcMode(parentInterface->getCrcMode());
+    // making sure the crc field is zero
+    updatePacket->setCrc(0x0000);
+    // RFC 2328: OSPF checksum is calculated over the entire OSPF packet, excluding the 64-bit authentication field.
+    if(parentInterface->getCrcMode() == CRC_COMPUTED) {
+        MemoryOutputStream stream;
+        Chunk::serialize(stream, updatePacket);
+        uint16_t crc = TcpIpChecksum::checksum(stream.getData());
+        updatePacket->setCrc(crc);
+    }
+
+    AuthenticationKeyType authKey = parentInterface->getAuthenticationKey();
+    for (int i = 0; i < 8; i++) {
+        updatePacket->setAuthentication(i, authKey.bytes[i]);
+    }
+
     Packet *pk = new Packet();
     pk->insertAtBack(updatePacket);
 
