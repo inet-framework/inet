@@ -995,6 +995,11 @@ RouterLsa *Area::originateRouterLSA()
         routerLSA->setLinks(linkIndex, stubLink);
     }
 
+    // update the length field in the LSA header
+    uint32_t totalSize = (OSPF_LSA_HEADER_LENGTH + OSPF_ROUTERLSA_HEADER_LENGTH +
+            B(routerLSA->getNumberOfLinks() * (OSPF_LINK_HEADER_LENGTH).get()) ).get();
+    lsaHeader.setLsaLength(totalSize);
+
     routerLSA->setSource(LsaTrackingInfo::ORIGINATED);
 
     return routerLSA;
@@ -1030,6 +1035,11 @@ NetworkLsa *Area::originateNetworkLSA(const OspfInterface *intf)
         unsigned short netIndex = networkLSA->getAttachedRoutersArraySize();
         networkLSA->setAttachedRoutersArraySize(netIndex + 1);
         networkLSA->setAttachedRouters(netIndex, Ipv4Address(parentRouter->getRouterID()));
+
+        // update the length field in the LSA header
+        uint32_t totalSize = (OSPF_LSA_HEADER_LENGTH + OSPF_NETWORKLSA_MASK_LENGTH +
+                B(networkLSA->getAttachedRoutersArraySize() * (OSPF_NETWORKLSA_ADDRESS_LENGTH).get()) ).get();
+        lsaHeader.setLsaLength(totalSize);
 
         return networkLSA;
     }
