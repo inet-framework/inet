@@ -707,11 +707,10 @@ void Router::rebuildRoutingTable()
     unsigned long areaCount = areas.size();
     bool hasTransitAreas = false;
     std::vector<OspfRoutingTableEntry *> newTable;
-    unsigned long i;
 
     EV_INFO << "--> Rebuilding routing table:\n";
 
-    for (i = 0; i < areaCount; i++) {
+    for (uint32_t i = 0; i < areaCount; i++) {
         // creating a OspfRoutingTableEntry for each existing OspfRoutingTableEntry
         for(int n = 0; n < ift->getNumInterfaces(); n++) {
             InterfaceEntry *ifEntry = ift->getInterface(n);
@@ -750,7 +749,7 @@ void Router::rebuildRoutingTable()
         }
     }
     if (hasTransitAreas) {
-        for (i = 0; i < areaCount; i++) {
+        for (uint32_t i = 0; i < areaCount; i++) {
             if (areas[i]->getTransitCapability()) {
                 areas[i]->recheckSummaryLSAs(newTable);
             }
@@ -759,17 +758,14 @@ void Router::rebuildRoutingTable()
     calculateASExternalRoutes(newTable);
 
     // backup the routing table
-    unsigned long routeCount = routingTable.size();
     std::vector<OspfRoutingTableEntry *> oldTable;
-
     oldTable.assign(routingTable.begin(), routingTable.end());
     routingTable.clear();
     routingTable.assign(newTable.begin(), newTable.end());
 
     std::vector<Ipv4Route *> eraseEntries;
-    unsigned long routingEntryNumber = rt->getNumRoutes();
     // remove entries from the Ipv4 routing table inserted by the OSPF module
-    for (i = 0; i < routingEntryNumber; i++) {
+    for (int32_t i = 0; i < rt->getNumRoutes(); i++) {
         Ipv4Route *entry = rt->getRoute(i);
         OspfRoutingTableEntry *ospfEntry = dynamic_cast<OspfRoutingTableEntry *>(entry);
         if (ospfEntry != nullptr) {
@@ -777,23 +773,22 @@ void Router::rebuildRoutingTable()
         }
     }
 
-    unsigned int eraseCount = eraseEntries.size();
-    for (i = 0; i < eraseCount; i++) {
-        rt->deleteRoute(eraseEntries[i]);
-    }
+    EV_INFO << "Deleting all OSPF routing entries: \n";
+    for (auto &entry : eraseEntries)
+        rt->deleteRoute(entry);
 
     // add the new routing entries
-    routeCount = routingTable.size();
-    for (i = 0; i < routeCount; i++) {
-        if (routingTable[i]->getDestinationType() == OspfRoutingTableEntry::NETWORK_DESTINATION) {
-            if(!routingTable[i]->getNextHopAsGeneric().isUnspecified()) {
-                Ipv4Route *entry = new OspfRoutingTableEntry(*routingTable[i]);
+    EV_INFO << "Adding updated OSPF routing entries: \n";
+    for (auto &tableEntry : routingTable) {
+        if (tableEntry->getDestinationType() == OspfRoutingTableEntry::NETWORK_DESTINATION) {
+            if(!tableEntry->getNextHopAsGeneric().isUnspecified()) {
+                Ipv4Route *entry = new OspfRoutingTableEntry(*tableEntry);
                 entry->setAdminDist(Ipv4Route::dOSPF);
                 // adding protocol-specific fields
                 OspfRouteData *newProtocolData = new OspfRouteData();
-                newProtocolData->setDestType((*routingTable[i]).getDestinationType());
-                newProtocolData->setPathType((*routingTable[i]).getPathType());
-                newProtocolData->setArea((*routingTable[i]).getArea());
+                newProtocolData->setDestType((*tableEntry).getDestinationType());
+                newProtocolData->setPathType((*tableEntry).getPathType());
+                newProtocolData->setArea((*tableEntry).getArea());
                 entry->setProtocolData(newProtocolData);
                 // eventually add the route
                 rt->addRoute(entry);
@@ -803,19 +798,14 @@ void Router::rebuildRoutingTable()
 
     notifyAboutRoutingTableChanges(oldTable);
 
-    routeCount = oldTable.size();
-    for (i = 0; i < routeCount; i++) {
-        delete (oldTable[i]);
-    }
+    for (auto &entry : oldTable)
+        delete (entry);
 
     EV_INFO << "<-- Routing table was rebuilt.\n"
             << "Results:\n";
 
-    routeCount = routingTable.size();
-    for (i = 0; i < routeCount; i++) {
-        EV_INFO << *routingTable[i]
-                << "\n";
-    }
+    for (auto &entry : routingTable)
+        EV_INFO << entry << "\n";
 }
 
 bool Router::hasRouteToASBoundaryRouter(const std::vector<OspfRoutingTableEntry *>& inRoutingTable, RouterId asbrRouterID) const
