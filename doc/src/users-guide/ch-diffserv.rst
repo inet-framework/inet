@@ -83,19 +83,14 @@ The implementation follows these RFCs below:
 Architecture of NICs
 --------------------
 
-Network Interface Card (NIC) modules, such as :ned:`PppInterface` and
+Network interface modules, such as :ned:`PppInterface` and
 :ned:`EthernetInterface`, may contain traffic conditioners in their
-input and output data path. Traffic conditioners have one input and one
-output gate as defined in the :ned:`ITrafficConditioner` interface. They
-can transform the incoming traffic by dropping or delaying packets. They
-can also set the DSCP field of the packet, or mark them other way, for
-differentiated handling in the queues.
+input and output data path.
 
-The NICs may also contain an external queue component. If the
-:par:`queueType` parameter is set, it must contain a module type
-implementing the :ned:`IOutputQueue` module interface. If it is not
-specified, then :ned:`Ppp` and :ned:`EtherMac` use an internal drop tail
-queue to buffer the packets until the line is busy.
+Network interfaces may also contain an optional external queue
+component. In the absence of an external queue module, :ned:`Ppp` and
+:ned:`EtherMac` use an internal drop-tail queue to buffer the packets
+while the line is busy.
 
 .. _usr:sec:diffserv:traffic-conditioners:
 
@@ -127,14 +122,13 @@ composed to build a traffic conditioner as a compound module.
 Output Queues
 ~~~~~~~~~~~~~
 
-The queue component also has one input and one output gate. These
+Queue components must implement the :ned:`IOutputQueue` module
+interface. In addition to having one input and one output gate, these
 components must implement a passive queue behaviour: they only deliver a
-packet, when the module connected to its output explicitly asks them. In
-terms of C++ it means, that the simple module owning the :gate:`out`
-gate, or which is connected to the :gate:`out` gate of the compound
-module, must implement the :cpp:`IPassiveQueue` interface. The next
-module asks a packet by calling the :fun:`requestPacket()` method of
-this interface.
+packet when the module connected to their output explicitly requests it.
+(In C++ terms, the module must implement the :cpp:`IPassiveQueue`
+interface. The next module requests a packet by calling the
+:fun:`requestPacket()` method of that interface.)
 
 .. _usr:sec:diffserv:simple-modules:
 
@@ -341,8 +335,6 @@ number of packets for transmission based on their weight.
 
 For example if the module has three input gates, and the weights are 3,
 2, and 1, then packets are transmitted in this order:
-
-
 
 ::
 

@@ -52,7 +52,7 @@ EtherSwitch
 :ned:`EtherSwitch` models an Ethernet switch. Ethernet switches play an
 important role in modern Ethernet LANs. Unlike passive hubs and
 repeaters that work in the physical layer, the switches operate in the
-data link layer and route data frames between the connected subnets.
+data link layer and relay frames between the connected subnets.
 
 In modern Ethernet LANs, each node is connected to the switch directly
 by full duplex lines, so no collisions are possible. In this case, the
@@ -225,20 +225,15 @@ MacRelayUnit
 INET framework ethernet switches are built from :ned:`IMacRelayUnit`
 components. Each relay unit has N input and output gates for
 sending/receiving Ethernet frames. They should be connected to
-:ned:`IEtherMac` modules.
+:ned:`EthernetInterface` modules.
 
 The relay unit holds a table for the destination address -> output port
 mapping in a :ned:`MacAddressTable` module. When the relay unit receives
 a data frame, it updates the table with the source address->input port.
-The table can also be pre-loaded from a text file while initializing the
-relay unit.
 
 If the destination address is not found in the table, the frame is
-broadcast. The frame is not sent to the same subnet it was received
-from, because the target already received the original frame. The only
-exception if the frame arrived through a radio channel, in this case the
-target can be out of range. The port range 0..:par:`numWirelessPorts`-1
-are reserved for wireless connections.
+broadcast. The frame is not sent to the same port it was received from,
+because then the target should already have received the original frame.
 
 A simple scheme for sending PAUSE frames is built in (although users
 will probably change it). When the buffer level goes above a high

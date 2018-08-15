@@ -8,25 +8,21 @@ IPv6 and Mobile IPv6
 Overview
 --------
 
-IPv6 support is implemented by several cooperating modules. The IPv6
-module implements IPv6 datagram handling (sending, forwarding etc). It
-relies on :ned:`Ipv6RoutingTable` to get access to the routes.
-:ned:`Ipv6RoutingTable` also contains the neighbour discovery data
-structures (destination cache, neighbour cache, prefix list – the latter
-effectively merged into the route table). Interface configuration
-(address, state, timeouts etc) is held in the :ned:`InterfaceTable`, in
-:cpp:`Ipv6InterfaceData` objects attached to :cpp:`InterfaceEntry` as
-its ``ipv6()`` member.
+Similarly to IPv4, IPv6 support is implemented by several cooperating
+modules. The base protocol is in the :ned:`Ipv6` module, which relies on
+the :ned:`Ipv6RoutingTable` to get access to the routes. Interface
+configuration (address, state, timeouts, etc.) is held in the node’s
+:ned:`InterfaceTable`.
 
-The module :ned:`Ipv6NeighbourDiscovery` implements all tasks associated
+The :ned:`Ipv6NeighbourDiscovery` module implements all tasks associated
 with neighbour discovery and stateless address autoconfiguration. The
 data structures themselves (destination cache, neighbour cache, prefix
-list) are kept in :ned:`Ipv6RoutingTable`, and are accessed via public
-C++ methods. Neighbour discovery packets are only sent and processed by
-this module – when IPv6 receives one, it forwards the packet to
-:ned:`Ipv6NeighbourDiscovery`.
+list) are kept in :ned:`Ipv6RoutingTable`. The rest of ICMPv6’s
+functionality, such as error messages, echo request/reply, etc.) is
+implemented in :ned:`Icmpv6`.
 
-The rest of ICMPv6 (ICMP errors, echo request/reply etc) is implemented
-in the module :ned:`Icmpv6`, just like with IPv4. ICMP errors are sent
-into :ned:`Ipv6ErrorHandling`, which the user can extend or replace to
-get errors handled in any way they like.
+Mobile IPv6 support has been contributed to INET by the xMIPv6 project.
+The main module is :ned:`xMIPv6`, which implements Fast MIPv6,
+Hierarchical MIPv6 and Fast Hierarchical MIPv6 (thus,
+:math:`x \in {F, H, FH}`). The binding cache and related data structures
+are kept in the :ned:`BindingCache` module.

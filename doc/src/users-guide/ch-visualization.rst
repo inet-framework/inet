@@ -67,17 +67,16 @@ Visualizing Transport Path Activity
 
 With INET simulations, it is often useful to be able to visualize
 network traffic. INET provides several visualizers for this task,
-operating at various levels of the network stack.
+operating at various levels of the network stack. One of such
+visualizers is :ned:`TransportRouteVisualizer` that provides graphical
+feedback about transport layer traffic.
 
-Transport path activity can be visualized by including a
-:ned:`TransportRouteVisualizer` module in the simulation.
-:ned:`TransportRouteVisualizer` that can provide graphical feedback
-about transport traffic, i.e. traffic that passes through the transport
-layers of two endpoints. Adding an :ned:`IntegratedVisualizer` is also
-an option, because it also contains a :ned:`TransportRouteVisualizer`.
-Transport path activity visualization is disabled by default, it can be
-enabled by setting the visualizer’s :par:`displayRoutes` parameter to
-true.
+:ned:`TransportRouteVisualizer` visualizes traffic that passes through
+the transport layers of two endpoints. Adding an
+:ned:`IntegratedVisualizer` is also an option, because it also contains
+a :ned:`TransportRouteVisualizer`. Transport path activity visualization
+is disabled by default, it can be enabled by setting the visualizer’s
+:par:`displayRoutes` parameter to true.
 
 :ned:`TransportRouteVisualizer` observes packets that pass through the
 transport layer, i.e. carry data from/to higher layers.
@@ -100,13 +99,7 @@ nodeFilter parameters.
 Visualizing Network Path Activity
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-With INET simulations, it is often useful to be able to visualize
-network traffic. INET offers several visualizers for this task,
-operating at various levels of the network stack. In this showcase, we
-examine :ned:`NetworkRouteVisualizer` that can provide graphical
-feedback about network layer level traffic.
-
-Network path activity can be visualized by including a
+Network layer traffic can be visualized by including a
 :ned:`NetworkRouteVisualizer` module in the simulation. Adding an
 :ned:`IntegratedVisualizer` module is also an option, because it also
 contains a :ned:`NetworkRouteVisualizer` module. Network path activity
@@ -137,16 +130,10 @@ nodeFilter parameters.
 Visualizing Data Link Activity
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-With INET simulations, it is often useful to be able to visualize
-network traffic. INET offers several visualizers for this task,
-operating at various levels of the network stack. In this showcase, we
-examine :ned:`DataLinkVisualizer` that can provide graphical feedback
-about data link level traffic.
-
-Data link activity can be visualized by including a
-:ned:`DataLinkVisualizer` module in the simulation. Adding an
-:ned:`IntegratedVisualizer` module is also an option, because it also
-contains a :ned:`DataLinkVisualizer` module. Data link visualization is
+Data link activity (layer 2 traffic) can be visualized by adding a
+:ned:`DataLinkVisualizer` module to the simulation. Adding an
+:ned:`IntegratedVisualizer` module is also an option, because it
+includes a :ned:`DataLinkVisualizer` module. Data link visualization is
 disabled by default, it can be enabled by setting the visualizer’s
 displayLinks parameter to true.
 
@@ -174,12 +161,6 @@ and :par:`nodeFilter` parameters.
 
 Visualizing Physical Link Activity
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-With INET simulations, it is often useful to be able to visualize
-network traffic. For this task, there are several visualizers in INET,
-operating at various levels of the network stack. In this showcase, we
-demonstrate working of :ned:`PhysicalLinkVisualizer` that can provide
-graphical feedback about physical layer traffic.
 
 Physical link activity can be visualized by including a
 :ned:`PhysicalLinkVisualizer` module in the simulation. Adding an
@@ -369,7 +350,7 @@ both ends of the connection. In addition to colors, letter codes (A, B,
 AA, …) may also be displayed to help in identifying connections. Note
 that this visualizer does not display the paths the packets take. If you
 are interested in that, take a look at :ned:`TransportRouteVisualizer`,
-covered in the Visualizing Transport Path Activity showcase.
+covered in section :ref:`usr:sec:visualization:transport-path-activity`.
 
 The visualization is turned off by default, it can be turned on by
 setting the :par:`displayTransportConnections` parameter of the

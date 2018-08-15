@@ -1,4 +1,4 @@
-.. _usr:cha:80211:
+.. _cha:80211:
 
 The 802.11 Model
 ================
@@ -8,33 +8,51 @@ The 802.11 Model
 Overview
 --------
 
-This chapter provides an overview of the IEEE 802.11 model for the INET
-Framework.
+IEEE 802.11 a.k.a. WiFi is the most widely used and universal wireless
+networking standard. Specifications are updated every few years, adding
+more features and ever increasing bit rates.
 
-An IEEE 802.11 interface (NIC) comes in several flavours, differring in
-their role (ad-hoc station, infrastructure mode station, or access
-point) and their level of detail:
+In INET, nodes become WiFi-enabled by adding a :ned:`Ieee80211Interface`
+to them. (As mentioned earlier, :ned:`WirelessHost` and :ned:`AdhocHost`
+already contain one in their default configuration.) APs are represented
+with the :ned:`AccessPoint` node type. WiFi networks require a matching
+transmission medium module to be present in the network, which is
+usually a :ned:`Ieee80211ScalarRadioMedium`.
 
-#. :ned:`Ieee80211Interface`: a generic (configurable) NIC
+Operation mode (infrastructure vs ad hoc) is determined by the
+ingredients of the wireless interface. :ned:`Ieee80211Interface` has the
+following submodules (incomplete list):
 
-#. :ned:`Ieee80211NicAdhoc`: for ad-hoc mode
+#. *management*: performs association/disassociation with access points,
+   channel scanning, beaconing
 
-#. :ned:`Ieee80211NicAP`, :ned:`Ieee80211NicAPSimplified`: for use in an
-   access point
+#. *agent*: initiates actions such as channel scanning and connecting to
+   and disconnecting from access points
 
-#. :ned:`Ieee80211NicSTA`, :ned:`Ieee80211NicSTASimplified`: for use in
-   an infrastructure-mode station
+#. *MAC*: transmits and receives frames according to the IEEE 802.11
+   medium access procedure
 
-NICs consist of four layers, which are the following (in top-down
-order):
+#. *PHY*: represents the radio
 
-#. agent
+The management component has several implementations which differ in
+their role and level of detail:
 
-#. management
+-  :ned:`Ieee80211MgmtAdhoc`: for ad hoc mode stations
 
-#. MAC
+-  :ned:`Ieee80211MgmtSta`, :ned:`Ieee80211MgmtStaSimplified`: for
+   infrastructure mode stations
 
-#. physical layer (radio)
+-  :ned:`Ieee80211MgmtAp`, :ned:`Ieee80211MgmtApSimplified`: for access
+   points
+
+The “simplified” ones assume that stations are statically associated to
+an access point for the entire duration of the simulation (the
+scan-authenticate-associate process is not simulated), so they cannot be
+used e.g. in experiments involving handover.
+
+:ned:`Ieee80211MgmtSta` is does not take any action by itself, it
+requires an agent (:ned:`Ieee80211AgentSta` or a custom one) to initiate
+actions.
 
 The following sections examine the above components.
 
@@ -44,7 +62,7 @@ MAC
 ---
 
 The :ned:`Ieee80211Mac` module type represents the IEEE 802.11 MAC. The
-implementation is entirely based on the standard IEEE 802.11™-2012 Part
+implementation is entirely based on the standard IEEE 802.11-2012 Part
 11: Wireless LAN Medium Access Control (MAC) and Physical Layer (PHY)
 Specifications.
 
@@ -112,17 +130,26 @@ transmission and reception of frames. They model the characteristics of
 the radio channel, and determine if a frame was received correctly (that
 is, it did not suffer bit errors due to low signal power or interference
 in the radio channel). Frames received correctly are passed up to the
-MAC. The implementation of these modules is based on the Mobility
-Framework.
+MAC.
+
+On the physical layer, one can choose from several radios with different
+levels of detail. The various radio types (with the matching
+transmission medium types in parentheses) are:
+
+-  :ned:`Ieee80211ScalarRadio` (:ned:`Ieee80211ScalarRadioMedium`)
+
+-  :ned:`Ieee80211DimensionalRadio`
+   (:ned:`Ieee80211DimensionalRadioMedium`)
+
+-  :ned:`Ieee80211UnitDiskRadio` (:ned:`Ieee80211UnitDiskMedium`)
 
 .. _usr:sec:80211:management:
 
 Management
 ----------
 
-*The management layer* performs encapsulation and decapsulation of data
-packets for the MAC, and exchanges management frames via the MAC with
-its peer management entities in other STAs and APs. Beacon, Probe
+*The management layer* exchanges management frames via the MAC with its
+peer management entities in other STAs and APs. Beacon, Probe
 Request/Response, Authentication, Association Request/Response etc
 frames are generated and interpreted by management entities, and
 transmitted/received via the MAC layer. During scanning, it is the
@@ -147,11 +174,12 @@ authentication and association. The management layer itself just carries
 out these commands by performing the scanning, authentication and
 association procedures, and reports back the results to the agent.
 
-The agent layer is currenly only present in the :ned:`Ieee80211NicSTA`
-NIC module, as an :ned:`Ieee80211AgentSta` module. The managament
-entities in other NIC variants do not have as much freedom as to need an
-agent to control them.
+The agent component is currently only needed with the
+:ned:`Ieee80211MgmtSta` module. The managament entities in other NIC
+variants do not have as much freedom as to need an agent to control
+them.
 
-By modifying or replacing the agent, one can alter the dynamic behaviour
-of STAs in the network, for example implement different handover
-strategies.
+:ned:`Ieee80211MgmtSta` requires a :ned:`Ieee80211AgentSta` or a custom
+agent. By modifying or replacing the agent, one can alter the dynamic
+behaviour of STAs in the network, for example implement different
+handover strategies.

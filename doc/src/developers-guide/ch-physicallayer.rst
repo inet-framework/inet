@@ -41,22 +41,22 @@ TODO which modules? C++ interface
 Overview
 --------
 
-Today’s electric devices use more and more wireless communication
-methods such as Wifi, Bluetooth, NFC, UMTS, and LTE. Despite the
-diversity of these devices there are many similarities in the modeling
-of their physical layer components. The models often have similar signal
+Today’s computing devices use a variety of wireless communication means,
+such as Wifi, Bluetooth, NFC, UMTS, and LTE. Despite the diversity of
+these devices, there are many commonalities in the way their physical
+layers can be simulated. The models often have similar signal
 representations and signal processing steps, and they also share the
 physical medium model where communication takes place.
 
-In general, the physical layer simulation is a very time consuming task.
-The simulation of signal propagation, signal fading, signal
-interference, and signal decoding in detail may often result in
-unacceptable performance. Finding the right abstractions, the right
-level of detail, and the right trade-offs between accuracy and
-performance is difficult and very important.
+Simulating the physical layer is generally a computation-intensive task.
+A detailed simulation of signal propagation, signal fading, signal
+interference, and signal decoding often results in an unacceptable
+performance. Finding the right abstractions, the right level of detail,
+and the right trade-offs between accuracy and performance is both
+difficult and important.
 
-To summarize, the physical layer is designed with the following goals in
-mind:
+The physical layer model in the INET Framework has been designed with
+the following goals in mind:
 
 -  customizability
 
@@ -74,24 +74,23 @@ corresponding NED and C++ source files.
 Customizability
 ~~~~~~~~~~~~~~~
 
-Real world communication devices often provide a wide variety of
-configuration options to allow adapting to the physical conditions where
-they are required to operate. For example, a Wifi router administration
-interface often provides parameters to configure the transmission power,
-bitrate, preamble type, carrier frequency, RTS threshold, beacon
-interval, etc. Mostly these parameters have default values assigned, so
-the user doesn’t have to set them separately, but may override them as
-needed.
+Real-world communication devices often provide a wide variety of
+configuration options to allow them to be adaped to the physical
+conditions where they are required to operate. For example, a Wifi
+router’s administration interface often provides parameters to configure
+the transmission power, bitrate, preamble type, carrier frequency, RTS
+threshold, beacon interval, etc. Most of those parameters have sensible
+default values assigned, so the user is not required to configure them,
+but may override them as needed.
 
-Similarly to real world devices the physical layer models also provide a
-wide variety of parameters to control their behavior. The most common
-NED parameters are various physical quantities with physical units such
-as transmission power ``[W]``, reception sensitivity ``[W]``,
-carrier frequency ``[Hz]``, communication range ``[m]``,
-propagation speed ``[m/s]``, SNIR reception threshold ``[dB]``,
-bitrate ``[b/s]``. Occasionally models support new parameters or new
-combinations, which don’t exist in real world hardware, to allow further
-experimentation.
+Similar to real-world devices, the INET physical layer models also
+provide a wide variety of parameters to control their behavior. Many NED
+parameters correspond to physical quantities such as transmission power
+``[W]``, reception sensitivity ``[W]``, carrier frequency
+``[Hz]``, communication range ``[m]``, propagation speed
+``[m/s]``, SNIR reception threshold ``[dB]``, or bitrate
+``[b/s]``. Occasionally, models have more degrees of freedom than the
+real devices, to allow further experimentation.
 
 Another important and commonly used parameter kind selects among
 alternative implementations of a particular interface by providing its
@@ -104,18 +103,18 @@ extensibility.
 Extensibility
 ~~~~~~~~~~~~~
 
-Similarly to designing other simulation models, modeling the physical
+Similar to designing other simulation models, modeling the physical
 layer is not at all an unambiguous task. For example, the research
 literature contains a number of different path loss models for signal
 propagation, there are different bit error models for a particular
 protocol standard, representing the signal in the analog domain can also
 be done in several different ways, and so on.
 
-In order to support this diversity the physical layer is designed to be
-extensible with alternative implementations at various parts of the
-model. This is realized by separately defining C++ and NED interfaces
-between modules, and also by providing parameters in their parent
-modules to easily select among the available implementations.
+In order to support this diversity, the physical layer model is designed
+to be extensible with alternative implementations at various parts of
+the model. This is realized by separately defining C++ and NED
+interfaces between modules, and also by providing parameters in their
+parent modules to easily select among the available implementations.
 
 New models can be added by implementing the required interfaces from
 scratch, or by deriving from already existing implementations and
@@ -130,7 +129,7 @@ There are many possible ways to model various aspects of the physical
 layer. The most important difference lies in the trade-off between
 performance versus accuracy. In order to support the different
 trade-offs the physical layer is designed to be scalable with respect to
-the simulated level of detail. In other words, it’s scalable from
+the simulated level of detail. In other words, it is scalable from
 high-performance less accurate simulations to high fidelity slower
 simulations.
 
@@ -210,8 +209,8 @@ model, a transmitter model, a receiver model, and an energy consumer
 model. The antenna model is shared between the transmitter model and the
 receiver model. The separation of the transmitter model and the receiver
 model allows asymmetric configurations. The energy consumer model is
-optional and it’s only used when the simulation of energy consumption is
-necessary.
+optional and it is only used when the simulation of energy consumption
+is necessary.
 
 The radio model has an operational mode that is called the radio mode.
 The radio mode is externally controlled usually by the MAC model. In
@@ -219,21 +218,19 @@ transceiver mode, the radio can simultaneously transmit and receive a
 signal. Changing the radio mode may optionally take a non-zero amount of
 time. The supported radio modes are the following:
 
--  ``off``: communication isn’t possible, energy consumption is zero
+-  *off*: communication isn’t possible, energy consumption is zero
 
--  ``sleep``: communication isn’t possible, energy consumption is
-   minimal
+-  *sleep*: communication isn’t possible, energy consumption is minimal
 
--  ``receiver``: only reception is possible, energy consumption is
-   low
+-  *receiver*: only reception is possible, energy consumption is low
 
--  ``transmitter``: only transmission is possible, energy consumption
-   is high
+-  *transmitter*: only transmission is possible, energy consumption is
+   high
 
--  ``transceiver``: reception and transmission is simultaneously
-   possible, energy consumption is high
+-  *transceiver*: reception and transmission is simultaneously possible,
+   energy consumption is high
 
--  ``switching``: communication isn’t possible, energy consumption is
+-  *switching*: communication isn’t possible, energy consumption is
    minimal
 
 In addition to the radio mode, the transmitter and the receiver models
@@ -241,25 +238,25 @@ have separate states which describe what they are doing. Changes to
 these states are automatically published by the radio. The signaled
 transmitter states are the following:
 
--  ``undefined``: isn’t operating
+-  *undefined*: not in operation
 
--  ``idle``: there’s no transmission in progress
+-  *idle*: no transmission in progress
 
--  ``transmitting``: transmission is in progress
+-  *transmitting*: a transmission is in progress
 
 The signaled receiver states are the following:
 
--  ``undefined``: isn’t operating
+-  *undefined*: not in operation
 
--  ``idle``: there’s no reception in progress
+-  *idle*: no reception in progress
 
--  ``busy``: received signal is not interpretable
+-  *busy*: received signal is not interpretable
 
--  ``synchronizing``: synchronization is in progress
+-  *synchronizing*: synchronization is in progress
 
--  ``receiving``: reception is in progress
+-  *receiving*: reception is in progress
 
-When a radio wants to transmit a signal on the medium it sends direct
+When a radio wants to transmit a signal on the medium, it sends direct
 messages to all affected radios with the help of the central medium
 module. The messages contain a shared data structure which describes the
 transmission the way it entered the medium. The messages arrive at the
@@ -269,9 +266,8 @@ central medium module. This kind of centralization allows the medium to
 do shared computations in a more efficient way and it also makes
 parallel computation possible.
 
-As stated above the radio module utilizes multiple submodules to further
-split its task. This design decision makes it more extensible and
-customizable. The following sections describe the parts of the radio
+To maintain modularity, the radio module delegates many of is functions
+to submodules. The following sections describe the parts of the radio
 model.
 
 Antenna Models
@@ -338,14 +334,14 @@ reception, along with an interference computed by the medium model, into
 a MAC packet and a reception indication. It also determines the
 following for each transmission:
 
--  ``is the reception possible or not``: based on the signal
+-  *is the reception possible or not*: based on the signal
    characteristics such as reception power, carrier frequency,
    bandwidth, preamble mode, modulation scheme
 
--  ``if the reception is possible, is reception attempted or not``:
-   based on the ongoing reception and the support of signal capturing
+-  *if the reception is possible, is reception attempted or not*: based
+   on the ongoing reception and the support of signal capturing
 
--  ``if the reception is attempted, is reception successful or not``:
+-  *if the reception is attempted, is reception successful or not*:
    based on the error model and the simulated part of the signal
    decoding
 
@@ -466,22 +462,21 @@ level of detail. In addition, the reception data structure might contain
 various physical layer indications, which are computed during the
 reception process. The following list provides some examples:
 
--  ``packet domain``: actual packet, packet error rate, packet error
-   bit, etc.
-
--  ``bit domain``: various bit lengths, bitrates, actual bits,
-   forward error correction code, interleaving scheme, scrambling
-   scheme, bit error rate, number of bit errors, actual erroneous bits,
+-  *packet domain*: actual packet, packet error rate, packet error bit,
    etc.
 
--  ``symbol domain``: number of symbols, symbol rate, actual symbols,
+-  *bit domain*: various bit lengths, bitrates, actual bits, forward
+   error correction code, interleaving scheme, scrambling scheme, bit
+   error rate, number of bit errors, actual erroneous bits, etc.
+
+-  *symbol domain*: number of symbols, symbol rate, actual symbols,
    modulation scheme, symbol error rate, number of symbol errors, actual
    erroneous symbols, etc.
 
--  ``sample domain``: number of samples, sampling rate, actual
-   samples, etc.
+-  *sample domain*: number of samples, sampling rate, actual samples,
+   etc.
 
--  ``analog domain``: space-time coordinates, antenna orientations,
+-  *analog domain*: space-time coordinates, antenna orientations,
    communication range, interference range, detection range, carrier
    frequency, subcarrier frequencies, bandwidths, scalar or dimensional
    power, receive signal strength indication, signal to noise and
@@ -490,11 +485,12 @@ reception process. The following list provides some examples:
 In simple case the packet domain specifies the MAC packet only, and the
 bit domain specifies the bit length and the bitrate. The symbol domain
 specifies the used modulation, and the sample domain is simply ignored.
-The most important part is the analog domain representation, because
-it’s indispensable to be able to compute some kind of signal to noise
-and interference ratio. The following figure shows four different kinds
-of analog domain representations, but other representations are also
+The most important part is the analog domain representation, because it
+is indispensable to be able to compute some kind of signal to noise and
+interference ratio. The following figure shows four different kinds of
+analog domain representations, but other representations are also
 possible.
+
 
 
 .. figure:: figures/phyanalog.*
@@ -503,10 +499,10 @@ possible.
 
    Various analog signal representations
 
-The first representation is called range-based, and it’s used by the
-unit disc radio. The advantage of this data structure is that it’s
+The first representation is called range-based, and it is used by the
+unit disc radio. The advantage of this data structure is that it is
 compact, predictable, and provides high performance. The disadvantage is
-that it’s very inaccurate in terms of modeling reality. Nevertheless,
+that it is very inaccurate in terms of modeling reality. Nevertheless,
 this representation might be sufficient for developing a new routing
 protocol if accurate simulation of packet loss is not important.
 
@@ -533,7 +529,7 @@ both ends of the band.
 The flat signal representation uses a single object to simulatenously
 describe all domains of the transmission or the reception. In contrast,
 the layered signal representation uses one object to describe every
-domain seperately. The advantage of the latter is that it’s extensible
+domain seperately. The advantage of the latter is that it is extensible
 with alternative implementations for each domain. The disadvantage is
 that it needs more allocation and resource management.
 
@@ -545,6 +541,8 @@ transmitter radio through the medium to the receiver radio. The figure
 focues on how data flows between the processing components of the
 physical layer. The blue boxes represent the data structures, and the
 red boxes represent the processing components.
+
+
 
 .. figure:: figures/phydataflow.*
    :align: center
@@ -558,7 +556,7 @@ transmitter or transceiver mode before receiving a MAC packet, otherwise
 it throws an exception. At first the transmitter model creates a data
 structure that describes the transmitted signal based on the received
 MAC packet and the attached transmission request. The resulting data
-structure is immutable, it’s not going to be changed in any later
+structure is immutable, it is not going to be changed in any later
 processing step.
 
 Thereafter the propagation model computes the arrival space-time
@@ -576,7 +574,7 @@ Thereafter the attenuation model computes the reception for the receiver
 using the original transmission and the arrival data structure. It
 applies the path loss model, the obstacle loss model and the multipath
 model to the transmission. The resulting data structure is also
-immutable, it’s not going to be changed in any later processing step.
+immutable, it is not going to be changed in any later processing step.
 
 Thereafter the medium model computes the interference for the reception
 by collecting all interfering receptions and noises. Another signal is
