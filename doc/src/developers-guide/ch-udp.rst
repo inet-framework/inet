@@ -1,4 +1,4 @@
-.. _dev:cha:udp:
+.. _dg:cha:udp:
 
 The UDP Model
 =============

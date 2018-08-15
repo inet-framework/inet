@@ -1,9 +1,9 @@
-.. _usr:cha:scenario-scripting:
+.. _ug:cha:scenario-scripting:
 
 Scenario Scripting
 ==================
 
-.. _usr:sec:scenario:overview:
+.. _ug:sec:scenario:overview:
 
 Overview
 --------
@@ -28,7 +28,7 @@ INET supports the following built-in actions:
 -  Initiate lifecycle operation (startup, shutdown, crash) on a network
    node or part of it
 
-.. _usr:sec:scenario:scenariomanager:
+.. _ug:sec:scenario:scenariomanager:
 
 ScenarioManager
 ---------------

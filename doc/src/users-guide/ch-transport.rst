@@ -1,9 +1,9 @@
-.. _usr:cha:transport-protocols:
+.. _ug:cha:transport-protocols:
 
 Transport Protocols
 ===================
 
-.. _usr:sec:transport:overview:
+.. _ug:sec:transport:overview:
 
 Overview
 --------
@@ -28,12 +28,12 @@ As RTP is more specialized that the other ones (multimedia streaming),
 INET provides a separate node type, :ned:`RtpHost`, for modeling RTP
 traffic.
 
-.. _usr:sec:transport:tcp:
+.. _ug:sec:transport:tcp:
 
 TCP
 ---
 
-.. _usr:sec:transport:tcp-overview:
+.. _ug:sec:transport:tcp-overview:
 
 Overview
 ~~~~~~~~
@@ -62,7 +62,7 @@ All three module types implement the :ned:`ITcp` interface and
 communicate with other layers through the same interface, so they can be
 interchanged and also mixed in the same network.
 
-.. _usr:sec:transport:tcpcore:
+.. _ug:sec:transport:tcpcore:
 
 Tcp
 ~~~
@@ -127,7 +127,7 @@ Values like ``"TcpVegas"`` name C++ classes. Indeed, :ned:`Tcp` can
 be extended with new congestion control schemes by implementing and
 registering them in C++.
 
-.. _usr:sec:transport:tcplwip:
+.. _ug:sec:transport:tcplwip:
 
 TcpLwip
 ~~~~~~~
@@ -179,7 +179,7 @@ Limitations
    remote addresses/ports of the connection and the MSS, SND.NXT,
    SND.WND, SND.WL1, SND.WL2, RCV.NXT, RCV.WND variables.
 
-.. _usr:sec:transport:tcpnsc:
+.. _ug:sec:transport:tcpnsc:
 
 TcpNsc
 ~~~~~~
@@ -244,7 +244,7 @@ Limitations
 -  TCP_C_STATUS command reports only local/remote addresses/ports and
    current window of the connection.
 
-.. _usr:sec:transport:udp:
+.. _ug:sec:transport:udp:
 
 UDP
 ---
@@ -259,7 +259,7 @@ module interface (:ned:`IUdp`) that defines the gates of the :ned:`Udp`
 component. In the :ned:`StandardHost` node, the UDP component can be any
 module implementing that interface.
 
-.. _usr:sec:transport:sctp:
+.. _ug:sec:transport:sctp:
 
 SCTP
 ----
@@ -270,7 +270,7 @@ over an ureliable network. The most prominent feature of SCTP is the
 capability of transmitting multiple streams of data at the same time
 between two end points that have established a connection.
 
-.. _usr:sec:transport:rtp:
+.. _ug:sec:transport:rtp:
 
 RTP
 ---

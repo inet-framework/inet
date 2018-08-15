@@ -1,9 +1,9 @@
-.. _usr:cha:network-interfaces:
+.. _ug:cha:network-interfaces:
 
 Network Interfaces
 ==================
 
-.. _usr:sec:interfaces:overview:
+.. _ug:sec:interfaces:overview:
 
 Overview
 --------
@@ -19,7 +19,7 @@ interfaces can be further categorized as wired and wireless; they
 conform to the :ned:`IWiredInterface` and :ned:`IWirelessInterface` NED
 types, respectively, which are subtypes of :ned:`INetworkInterface`.
 
-.. _usr:sec:interfaces:built-in-network-interfaces:
+.. _ug:sec:interfaces:built-in-network-interfaces:
 
 Built-in Network Interfaces
 ---------------------------
@@ -51,7 +51,7 @@ list gives the most commonly used network interfaces.
 -  :ned:`ExtInterface` represents a real-world interface, suitable for
    hardware-in-the-loop simulations
 
-.. _usr:sec:interfaces:anatomy-of-network-interfaces:
+.. _ug:sec:interfaces:anatomy-of-network-interfaces:
 
 Anatomy of Network Interfaces
 -----------------------------
@@ -85,7 +85,7 @@ Typical ingredients are:
 -  *Hooks* allow extra modules to be inserted in the incoming and
    outgoing paths of packets.
 
-.. _usr:sec:interfaces:internal-vs-external-output-queue:
+.. _ug:sec:interfaces:internal-vs-external-output-queue:
 
 Internal vs External Output Queue
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -128,7 +128,7 @@ on PPP interfaces:
    **.ppp[*].queueType = "DropTailQueue"
    **.ppp[*].queue.frameCapacity = 10
 
-.. _usr:sec:interfaces:traffic-conditioners:
+.. _ug:sec:interfaces:traffic-conditioners:
 
 Traffic Conditioners
 ~~~~~~~~~~~~~~~~~~~~
@@ -161,7 +161,7 @@ An example configuration with fictituous types:
    **.ppp[*].ingressTCType = "CustomIngressTC"
    **.ppp[*].egressTCType = "CustomEgressTC"
 
-.. _usr:sec:interfaces:hooks:
+.. _ug:sec:interfaces:hooks:
 
 Hooks
 ~~~~~
@@ -195,7 +195,7 @@ paths of PPP interfaces, a delayer and a throughput meter:
    **.ppp[*].outputHook[1].typename = "ThruputMeter"
    **.ppp[*].outputHook[0].delay = 3ms
 
-.. _usr:sec:interfaces:the-interface-table:
+.. _ug:sec:interfaces:the-interface-table:
 
 The Interface Table
 -------------------
@@ -210,7 +210,7 @@ Network interfaces register themselves in the interface table at the
 beginning of the simulation. Registration is usually the task of the MAC
 (or equivalent) module.
 
-.. _usr:sec:interfaces:wired-network-interfaces:
+.. _ug:sec:interfaces:wired-network-interfaces:
 
 Wired Network Interfaces
 ------------------------
@@ -227,7 +227,7 @@ Wired network interfaces are compound modules that implement the
 :ned:`IWiredInterface` interface. INET has the following wired network
 interfaces.
 
-.. _usr:sec:interfaces:ppp:
+.. _ug:sec:interfaces:ppp:
 
 PPP
 ~~~
@@ -236,7 +236,7 @@ Network interfaces for point-to-point links (:ned:`PppInterface`) are
 described in chapter :doc:`ch-ppp`. They are typically used
 in routers.
 
-.. _usr:sec:interfaces:ethernet:
+.. _ug:sec:interfaces:ethernet:
 
 Ethernet
 ~~~~~~~~
@@ -245,7 +245,7 @@ Ethernet interfaces (:ned:`EthernetInterface`), alongside with models of
 Ethernet devices such as switches and hubs, are described in chapter
 :doc:`ch-ethernet`.
 
-.. _usr:sec:interfaces:wireless-network-interfaces:
+.. _ug:sec:interfaces:wireless-network-interfaces:
 
 Wireless Network Interfaces
 ---------------------------
@@ -266,7 +266,7 @@ Wireless network interfaces are compound modules that implement the
 :ned:`IWirelessInterface` interface. In the following sections we give
 an overview of the wireless interfaces available in INET.
 
-.. _usr:sec:interfaces:generic-wireless-interface:
+.. _ug:sec:interfaces:generic-wireless-interface:
 
 Generic Wireless Interface
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -285,7 +285,7 @@ and the radio modules are fixed to a particular value. One example is
 :ned:`BMacInterface`, which contains a :ned:`BMac` and an
 :ned:`ApskRadio`.
 
-.. _usr:sec:interfaces:ieee-80211:
+.. _ug:sec:interfaces:ieee-80211:
 
 IEEE 802.11
 ~~~~~~~~~~~
@@ -294,7 +294,7 @@ IEEE 802.11 or Wifi network interfaces (:ned:`Ieee80211Interface`),
 alongside with models of devices acting as access points (AP), are
 covered in chapter :doc:`ch-80211`.
 
-.. _usr:sec:interfaces:ieee-802154:
+.. _ug:sec:interfaces:ieee-802154:
 
 IEEE 802.15.4
 ~~~~~~~~~~~~~
@@ -302,7 +302,7 @@ IEEE 802.15.4
 :ned:`Ieee802154Interface` is covered in a separate chapter, see
 :doc:`ch-802154`.
 
-.. _usr:sec:interfaces:wireless-sensor-networks:
+.. _ug:sec:interfaces:wireless-sensor-networks:
 
 Wireless Sensor Networks
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -311,7 +311,7 @@ MAC protocols for wireless sensor networks (WSNs) and the corresponding
 network interfaces are covered in chapter
 :doc:`ch-sensor-macs`.
 
-.. _usr:sec:interfaces:csma/ca:
+.. _ug:sec:interfaces:csma/ca:
 
 CSMA/CA
 ~~~~~~~
@@ -329,7 +329,7 @@ rate, etc. can be configured via NED parameters.
 :ned:`CsmaCaInterface` interface is a :ned:`WirelessInterface` with the
 MAC type set to :ned:`CsmaCaMac`.
 
-.. _usr:sec:interfaces:acking-mac:
+.. _ug:sec:interfaces:acking-mac:
 
 Acking MAC
 ~~~~~~~~~~
@@ -362,7 +362,7 @@ default. There is no retransmission: if the acknowledgement does not
 arrive after the first transmission, the MAC gives up and counts the
 packet as failed transmission.
 
-.. _usr:sec:interfaces:shortcut:
+.. _ug:sec:interfaces:shortcut:
 
 Shortcut
 ~~~~~~~~
@@ -377,12 +377,12 @@ bypassed. The corresponding network interface type,
 full connectivity is assumed, and Layer 1 and Layer 2 effects can be
 completely ignored.
 
-.. _usr:sec:interfaces:special-purpose-network-interfaces:
+.. _ug:sec:interfaces:special-purpose-network-interfaces:
 
 Special-Purpose Network Interfaces
 ----------------------------------
 
-.. _usr:sec:interfaces:tunnelling:
+.. _ug:sec:interfaces:tunnelling:
 
 Tunnelling
 ~~~~~~~~~~
@@ -397,7 +397,7 @@ To set up a tunnel, add an instance of :ned:`TunnelApp` to the node, and
 specify the protocol (IPv4 or UDP) and the remote endpoint of the tunnel
 (address and port) in parameters.
 
-.. _usr:sec:interfaces:local-loopback:
+.. _ug:sec:interfaces:local-loopback:
 
 Local Loopback
 ~~~~~~~~~~~~~~
@@ -405,7 +405,7 @@ Local Loopback
 :ned:`LoopbackInterface` provides local loopback within the network
 node.
 
-.. _usr:sec:interfaces:external-interface:
+.. _ug:sec:interfaces:external-interface:
 
 External Interface
 ~~~~~~~~~~~~~~~~~~
@@ -414,7 +414,7 @@ External Interface
 hardware-in-the-loop simulations. External interfaces are explained in
 chapter :doc:`ch-emulation`.
 
-.. _usr:sec:interfaces:custom-network-interfaces:
+.. _ug:sec:interfaces:custom-network-interfaces:
 
 Custom Network Interfaces
 -------------------------

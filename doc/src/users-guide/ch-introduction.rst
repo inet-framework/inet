@@ -1,9 +1,9 @@
-.. _usr:cha:introduction:
+.. _ug:cha:introduction:
 
 Introduction
 ============
 
-.. _usr:sec:introduction:what-is-inet-framework:
+.. _ug:sec:introduction:what-is-inet-framework:
 
 What is INET Framework
 ----------------------
@@ -28,7 +28,7 @@ Several other simulation frameworks take INET as a base, and extend it
 into specific directions, such as vehicular networks,
 overlay/peer-to-peer networks, or LTE.
 
-.. _usr:sec:introduction:designed-for-experimentation:
+.. _ug:sec:introduction:designed-for-experimentation:
 
 Designed for Experimentation
 ----------------------------
@@ -51,7 +51,7 @@ INET Framework is maintained by the OMNeT++ team for the community,
 utilizing patches and new models contributed by members of the
 community.
 
-.. _usr:sec:introduction:scope-of-this-manual:
+.. _ug:sec:introduction:scope-of-this-manual:
 
 Scope of this Manual
 --------------------

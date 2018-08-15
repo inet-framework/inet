@@ -1,4 +1,4 @@
-.. _dev:cha:power:
+.. _dg:cha:power:
 
 The Power Model
 ===============

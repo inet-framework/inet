@@ -1,9 +1,9 @@
-.. _usr:cha:routing:
+.. _ug:cha:routing:
 
 Internet Routing
 ================
 
-.. _usr:sec:routing:overview:
+.. _ug:sec:routing:overview:
 
 Overview
 --------
@@ -27,7 +27,7 @@ There are also NED types called :ned:`RipRouter`, :ned:`OspfRouter`,
 :ned:`BgpRouter`, which are all :ned:`Router`’s with appropriate routing
 protocol enabled.
 
-.. _usr:sec:routing:rip:
+.. _ug:sec:routing:rip:
 
 RIP
 ---
@@ -93,7 +93,7 @@ The following example sets the link metric between router ``R1`` and
      <interface among="R? R?" metric="1"/>
    </RIPConfig>
 
-.. _usr:sec:routing:ospf:
+.. _ug:sec:routing:ospf:
 
 OSPF
 ----
@@ -147,7 +147,7 @@ pont-to-point or broadcast interfaces.
      </Router>
    </OSPFASConfig>
 
-.. _usr:sec:routing:bgp:
+.. _ug:sec:routing:bgp:
 
 BGP
 ---

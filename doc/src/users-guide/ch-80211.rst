@@ -3,7 +3,7 @@
 The 802.11 Model
 ================
 
-.. _usr:sec:80211:overview:
+.. _ug:sec:80211:overview:
 
 Overview
 --------
@@ -56,7 +56,7 @@ actions.
 
 The following sections examine the above components.
 
-.. _usr:sec:80211:mac:
+.. _ug:sec:80211:mac:
 
 MAC
 ---
@@ -120,7 +120,7 @@ The new model also separates the following components:
 
 -  TX/RX
 
-.. _usr:sec:80211:physical-layer:
+.. _ug:sec:80211:physical-layer:
 
 Physical Layer
 --------------
@@ -143,7 +143,7 @@ transmission medium types in parentheses) are:
 
 -  :ned:`Ieee80211UnitDiskRadio` (:ned:`Ieee80211UnitDiskMedium`)
 
-.. _usr:sec:80211:management:
+.. _ug:sec:80211:management:
 
 Management
 ----------
@@ -164,7 +164,7 @@ role (STA/AP/ad-hoc) and level of detail: :ned:`Ieee80211MgmtAdhoc`,
 scan-authenticate-associate process, so they cannot be used in
 experiments involving handover.
 
-.. _usr:sec:80211:agent:
+.. _ug:sec:80211:agent:
 
 Agent
 -----

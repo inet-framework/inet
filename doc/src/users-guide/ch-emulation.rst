@@ -1,9 +1,9 @@
-.. _usr:cha:emulation:
+.. _ug:cha:emulation:
 
 Network Emulation
 =================
 
-.. _usr:sec:emulation:motivation:
+.. _ug:sec:emulation:motivation:
 
 Motivation
 ----------
@@ -30,7 +30,7 @@ Some example scenarios:
    with each other, sparing the need for HLA or a custom
    interoperability solution.
 
-.. _usr:sec:emulation:overview:
+.. _ug:sec:emulation:overview:
 
 Overview
 --------
@@ -61,7 +61,7 @@ This is achieved with two components in INET:
 
 The simulation is run under Qtenv,
 
-.. _usr:sec:emulation:preparation:
+.. _ug:sec:emulation:preparation:
 
 Preparation
 -----------
@@ -88,7 +88,7 @@ permissions. Sending uses raw sockets (type ``SOCK_RAW``), which, on
 many systems, is only allowed for processes that have root
 (administrator) privileges.
 
-.. _usr:sec:emulation:configuring:
+.. _ug:sec:emulation:configuring:
 
 Configuring
 -----------

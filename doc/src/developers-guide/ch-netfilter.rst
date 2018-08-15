@@ -1,4 +1,4 @@
-.. _dev:cha:netfilter-api:
+.. _dg:cha:netfilter-api:
 
 The Netfilter API
 =================

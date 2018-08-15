@@ -1,9 +1,9 @@
-.. _usr:cha:ppp:
+.. _ug:cha:ppp:
 
 Point-to-Point Links
 ====================
 
-.. _usr:sec:ppp:overview:
+.. _ug:sec:ppp:overview:
 
 Overview
 --------
@@ -37,7 +37,7 @@ are not simulated. In addition, header field compressions (PFC and ACFC)
 are also bot supported, so a simulated PPP frame always contains 1-byte
 Address and Control fields and a 2-byte Protocol field.
 
-.. _usr:sec:ppp:the-ppp-module:
+.. _ug:sec:ppp:the-ppp-module:
 
 The PPP module
 --------------
@@ -71,7 +71,7 @@ The PPP module registers itself in the interface table of the node. The
 parameter. The module checks the state of the physical link and updates
 the entry in the interface table.
 
-.. _usr:sec:ppp:pppinterface:
+.. _ug:sec:ppp:pppinterface:
 
 PppInterface
 ------------

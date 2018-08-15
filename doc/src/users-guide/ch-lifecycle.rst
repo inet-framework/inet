@@ -1,9 +1,9 @@
-.. _usr:cha:lifecycle:
+.. _ug:cha:lifecycle:
 
 Modeling Node Failures
 ======================
 
-.. _usr:sec:lifecycle:overview:
+.. _ug:sec:lifecycle:overview:
 
 Overview
 --------
@@ -74,7 +74,7 @@ modeling :doc:`ch-power` for details.
 In the following sections we outline the INET components that
 participate in lifecycle modeling, and show a usage example.
 
-.. _usr:sec:lifecycle:nodestatus:
+.. _ug:sec:lifecycle:nodestatus:
 
 NodeStatus
 ----------
@@ -97,7 +97,7 @@ the ini file to ensure that nodes have status modules:
 
    **.hasStatus = true
 
-.. _usr:sec:lifecycle:scripting:
+.. _ug:sec:lifecycle:scripting:
 
 Scripting
 ---------

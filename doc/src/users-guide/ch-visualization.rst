@@ -1,9 +1,9 @@
-.. _usr:cha:visualization:
+.. _ug:cha:visualization:
 
 Visualization
 =============
 
-.. _usr:sec:visualization:overview:
+.. _ug:sec:visualization:overview:
 
 Overview
 --------
@@ -14,12 +14,12 @@ wireless signal path loss, transport connections, routing table routes,
 and many more. Visualization is implemented as a collection of
 configurable INET modules that can be added to simulations at will.
 
-.. _usr:sec:visualization:network-communication:
+.. _ug:sec:visualization:network-communication:
 
 Visualizing Network Communication
 ---------------------------------
 
-.. _usr:sec:visualization:packet-drops:
+.. _ug:sec:visualization:packet-drops:
 
 Visualizing Packet Drops
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -60,7 +60,7 @@ Packets are dropped for the following reasons:
 
 -  interface down
 
-.. _usr:sec:visualization:transport-path-activity:
+.. _ug:sec:visualization:transport-path-activity:
 
 Visualizing Transport Path Activity
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -94,7 +94,7 @@ By default, all packets and nodes are considered for the visualization.
 This selection can be narrowed with the visualizer’s packetFilter and
 nodeFilter parameters.
 
-.. _usr:sec:visualization:network-path-activity:
+.. _ug:sec:visualization:network-path-activity:
 
 Visualizing Network Path Activity
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -125,7 +125,7 @@ By default, all packets and nodes are considered for the visualization.
 This selection can be narrowed with the visualizer’s packetFilter and
 nodeFilter parameters.
 
-.. _usr:sec:visualization:data-link-activity:
+.. _ug:sec:visualization:data-link-activity:
 
 Visualizing Data Link Activity
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -157,7 +157,7 @@ visualization. This selection can be narrowed to certain packets and/or
 nodes with the visualizer’s :par:`packetFilter`, :par:`interfaceFilter`,
 and :par:`nodeFilter` parameters.
 
-.. _usr:sec:visualization:physical-link-activity:
+.. _ug:sec:visualization:physical-link-activity:
 
 Visualizing Physical Link Activity
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -184,7 +184,7 @@ visualization. This selection can be narrowed with the visualizer’s
 :par:`packetFilter`, :par:`interfaceFilter`, and :par:`nodeFilter`
 parameters.
 
-.. _usr:sec:visualization:routing-tables:
+.. _ug:sec:visualization:routing-tables:
 
 Visualizing Routing Tables
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -237,7 +237,7 @@ by DHCP, the visualizer automatically updates the visualizations
 according to the specified filters. This is very useful e.g. for the
 simulation of mobile ad-hoc networks.
 
-.. _usr:sec:visualization:displaying-ip-addresses-and-other-interface-information:
+.. _ug:sec:visualization:displaying-ip-addresses-and-other-interface-information:
 
 Displaying IP Addresses and Other Interface Information
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -298,7 +298,7 @@ icons, instead of on the links. This can be done by setting the
 There are also several parameters for styling, such as color and font
 selection.
 
-.. _usr:sec:visualization:ieee-80211-network-membership:
+.. _ug:sec:visualization:ieee-80211-network-membership:
 
 Visualizing IEEE 802.11 Network Membership
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -325,7 +325,7 @@ memberships are visualized. The :par:`interfaceFilter` parameter selects
 which interfaces are considered in the visualization. By default, all
 interfaces of all nodes are considered.
 
-.. _usr:sec:visualization:transport-connections:
+.. _ug:sec:visualization:transport-connections:
 
 Visualizing Transport Connections
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -350,7 +350,7 @@ both ends of the connection. In addition to colors, letter codes (A, B,
 AA, …) may also be displayed to help in identifying connections. Note
 that this visualizer does not display the paths the packets take. If you
 are interested in that, take a look at :ned:`TransportRouteVisualizer`,
-covered in section :ref:`usr:sec:visualization:transport-path-activity`.
+covered in section :ref:`ug:sec:visualization:transport-path-activity`.
 
 The visualization is turned off by default, it can be turned on by
 setting the :par:`displayTransportConnections` parameter of the
@@ -365,12 +365,12 @@ achieved by setting the :par:`sourcePortFilter`,
 The icon, colors and other visual properties can be configured by
 setting the visualizer’s parameters.
 
-.. _usr:sec:visualization:the-infrastructure:
+.. _ug:sec:visualization:the-infrastructure:
 
 Visualizing The Infrastructure
 ------------------------------
 
-.. _usr:sec:visualization:the-physical-environment:
+.. _ug:sec:visualization:the-physical-environment:
 
 Visualizing the Physical Environment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -402,7 +402,7 @@ OpenSceneGraph (OSG) library. If the OMNeT++ installation has been
 compiled with OSG support, you can switch to 3D view using the Qtenv
 toolbar.
 
-.. _usr:sec:visualization:node-mobility:
+.. _ug:sec:visualization:node-mobility:
 
 Visualizing Node Mobility
 ~~~~~~~~~~~~~~~~~~~~~~~~~

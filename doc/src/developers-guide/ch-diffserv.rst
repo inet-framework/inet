@@ -1,4 +1,4 @@
-.. _dev:cha:diffserv:
+.. _dg:cha:diffserv:
 
 Differentiated Services
 =======================

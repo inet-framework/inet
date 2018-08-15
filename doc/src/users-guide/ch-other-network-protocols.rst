@@ -1,9 +1,9 @@
-.. _usr:cha:other-network-protocols:
+.. _ug:cha:other-network-protocols:
 
 Other Network Protocols
 =======================
 
-.. _usr:sec:networkprotocols:overview:
+.. _ug:sec:networkprotocols:overview:
 
 Overview
 --------
@@ -82,12 +82,12 @@ use. For example:
 
    **.app[*].networkProtocol = "flood"
 
-.. _usr:sec:networkprotocols:protocols:
+.. _ug:sec:networkprotocols:protocols:
 
 Protocols
 ---------
 
-.. _usr:sec:networkprotocols:flooding:
+.. _ug:sec:networkprotocols:flooding:
 
 Flooding
 ~~~~~~~~
@@ -96,7 +96,7 @@ Flooding
 broadcast. It remembers already broadcast messages, and does not
 rebroadcast them if it gets another copy of that message.
 
-.. _usr:sec:networkprotocols:probabilisticbroadcast:
+.. _ug:sec:networkprotocols:probabilisticbroadcast:
 
 ProbabilisticBroadcast
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -112,7 +112,7 @@ The transmission probability for each attempt, the time between two
 transmission attempts, the maximum number of broadcast transmissions of
 a packet, and some other settings are parameters.
 
-.. _usr:sec:networkprotocols:adaptiveprobabilisticbroadcast:
+.. _ug:sec:networkprotocols:adaptiveprobabilisticbroadcast:
 
 AdaptiveProbabilisticBroadcast
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -121,7 +121,7 @@ AdaptiveProbabilisticBroadcast
 :ned:`ProbabilisticBroadcast` that automatically adjusts transmission
 probabilities depending on the estimated number of neighbours.
 
-.. _usr:sec:networkprotocols:wiseroute:
+.. _ug:sec:networkprotocols:wiseroute:
 
 WiseRoute
 ~~~~~~~~~
@@ -145,7 +145,7 @@ set to zero for all nodes except the sink. Each
 procedure. Set it to a large value if you do not want the tree to be
 rebuilt.
 
-.. _usr:sec:networkprotocols:nexthopforwarding:
+.. _ug:sec:networkprotocols:nexthopforwarding:
 
 NextHopForwarding
 ~~~~~~~~~~~~~~~~~
@@ -158,7 +158,7 @@ The protocol needs an additional module, a :ned:`NextHopRoutingTable`
 for its operation. The routing table module is included in the
 :ned:`NextHopNetworkLayer` compound module.
 
-.. _usr:sec:networkprotocols:address-types:
+.. _ug:sec:networkprotocols:address-types:
 
 Address Types
 -------------
@@ -183,7 +183,7 @@ instance can be used to assign addresses to network interfaces. (Note
 that :ned:`IPv4NetworkConfigurator` also needs a per-node instance of
 :ned:`Ipv4NodeConfigurator` for it to work.)
 
-.. _usr:sec:networkprotocols:address-resolution:
+.. _ug:sec:networkprotocols:address-resolution:
 
 Address Resolution
 ------------------

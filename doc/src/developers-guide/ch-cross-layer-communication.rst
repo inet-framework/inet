@@ -1,4 +1,4 @@
-.. _dev:cha:cross-layer-communication:
+.. _dg:cha:cross-layer-communication:
 
 Cross-Layer Communication
 =========================

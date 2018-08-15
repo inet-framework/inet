@@ -1,9 +1,9 @@
-.. _usr:cha:environment:
+.. _ug:cha:environment:
 
 The Physical Environment
 ========================
 
-.. _usr:sec:environment:overview:
+.. _ug:sec:environment:overview:
 
 Overview
 --------
@@ -35,7 +35,7 @@ circumstances.
 The following sections provide a brief overview of the physical
 environment model.
 
-.. _usr:sec:environment:physicalenvironment:
+.. _ug:sec:environment:physicalenvironment:
 
 PhysicalEnvironment
 -------------------
@@ -68,7 +68,7 @@ and an object cache (for efficient queries):
    ground: <groundType> like IGround if groundType != "";
    objectCache: <objectCacheType> like IObjectCache if objectCacheType != "";
 
-.. _usr:sec:environment:physical-objects:
+.. _ug:sec:environment:physical-objects:
 
 Physical Objects
 ----------------
@@ -143,7 +143,7 @@ be used:
    :end-before: !End
    :name: Physical objects configuration example
 
-.. _usr:sec:environment:ground-models:
+.. _ug:sec:environment:ground-models:
 
 Ground Models
 -------------
@@ -165,7 +165,7 @@ OMNeT++ simple modules:
 -  :ned:`OsgEarthGround` is a more realistic model (based on ) which
    provides a terrain surface.
 
-.. _usr:sec:environment:geographic-coordinate-system-models:
+.. _ug:sec:environment:geographic-coordinate-system-models:
 
 Geographic Coordinate System Models
 -----------------------------------
@@ -211,7 +211,7 @@ geographic location and orientation.
    :end-before: !End
    :name: Geographic coordinate system configuration example
 
-.. _usr:sec:environment:object-cache:
+.. _ug:sec:environment:object-cache:
 
 Object Cache
 ------------

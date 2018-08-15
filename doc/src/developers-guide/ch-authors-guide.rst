@@ -1,9 +1,9 @@
-.. _dev:cha:authors-guide:
+.. _dg:cha:authors-guide:
 
 Appendix: Author’s Guide
 ========================
 
-.. _dev:sec:authorsguide:overview:
+.. _dg:sec:authorsguide:overview:
 
 Overview
 --------
@@ -36,12 +36,12 @@ Why is duplication to be avoided? Multiple reasons:
 
 -  It is extra effort for maintainers to keep all copies up to date
 
-.. _dev:sec:authorsguide:guidelines:
+.. _dg:sec:authorsguide:guidelines:
 
 Guidelines
 ----------
 
-.. _dev:sec:authorsguide:do-not-repeat-standard:
+.. _dg:sec:authorsguide:do-not-repeat-standard:
 
 Do Not Repeat the Standard
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -56,7 +56,7 @@ In particular, do not describe the *format of the protocol messages*. It
 surely looks nice and takes up a lot of space, but the same information
 can probably be found in a myriad places all over the internet.
 
-.. _dev:sec:authorsguide:do-not-repeat-neddoc:
+.. _dg:sec:authorsguide:do-not-repeat-neddoc:
 
 Do Not Repeat NED Documentation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -69,7 +69,7 @@ Detailed information on the module, such as *usage details* and the list
 of *implemented standards* should be covered in the module’s NED
 documentation, not in this *Guide*.
 
-.. _dev:sec:authorsguide:do-not-repeat-cpp:
+.. _dg:sec:authorsguide:do-not-repeat-cpp:
 
 Do Not Repeat C++ Documentation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -77,7 +77,7 @@ Do Not Repeat C++ Documentation
 Describing every minute detail of C++ classes, methods, arguments are
 expected to be appropriately present in their *doxygen* documentation.
 
-.. _dev:sec:authorsguide:what-then:
+.. _dg:sec:authorsguide:what-then:
 
 What then?
 ~~~~~~~~~~

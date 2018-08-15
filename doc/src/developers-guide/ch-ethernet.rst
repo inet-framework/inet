@@ -1,4 +1,4 @@
-.. _dev:cha:ethernet:
+.. _dg:cha:ethernet:
 
 The Ethernet Model
 ==================

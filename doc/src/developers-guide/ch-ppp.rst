@@ -1,4 +1,4 @@
-.. _dev:cha:ppp:
+.. _dg:cha:ppp:
 
 Point-to-Point Links
 ====================

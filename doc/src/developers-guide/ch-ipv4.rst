@@ -1,4 +1,4 @@
-.. _dev:cha:ipv4:
+.. _dg:cha:ipv4:
 
 Ipv4
 ====

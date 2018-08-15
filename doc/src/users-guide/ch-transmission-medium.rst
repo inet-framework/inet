@@ -1,9 +1,9 @@
-.. _usr:cha:transmission-medium:
+.. _ug:cha:transmission-medium:
 
 The Transmission Medium
 =======================
 
-.. _usr:sec:medium:overview:
+.. _ug:sec:medium:overview:
 
 Overview
 --------
@@ -31,7 +31,7 @@ interfering signals and noises. In addition, the medium module also
 contains various mechanisms and ways to improve the scalability of
 wireless network simulations.
 
-.. _usr:sec:medium:radiomedium:
+.. _ug:sec:medium:radiomedium:
 
 RadioMedium
 -----------
@@ -83,7 +83,7 @@ There are many preconfigured versions of :ned:`RadioMedium`:
 
 The following sections describe the parts of the medium model.
 
-.. _usr:sec:medium:propagation-models:
+.. _ug:sec:medium:propagation-models:
 
 Propagation Models
 ------------------
@@ -121,7 +121,7 @@ receiver movement. This effect becomes especially important for acoustic
 communication, because the propagation speed of the signal is much more
 comparable to the speed of the transceivers.
 
-.. _usr:sec:medium:path-loss-models:
+.. _ug:sec:medium:path-loss-models:
 
 Path Loss Models
 ----------------
@@ -175,7 +175,7 @@ with log normal shadowing:
    :end-before: !End
    :name: Path loss configuration example
 
-.. _usr:sec:medium:obstacle-loss-models:
+.. _ug:sec:medium:obstacle-loss-models:
 
 Obstacle Loss Models
 --------------------
@@ -216,7 +216,7 @@ but configuring one is very simple:
 Statistical obstacle loss models are also possible but currently not
 provided.
 
-.. _usr:sec:medium:background-noise-models:
+.. _ug:sec:medium:background-noise-models:
 
 Background Noise Models
 -----------------------
@@ -245,7 +245,7 @@ The simplest background noise model can be configured as follows:
    :end-before: !End
    :name: Background noise model configuration example
 
-.. _usr:sec:medium:analog-models:
+.. _ug:sec:medium:analog-models:
 
 Analog Models
 -------------
@@ -275,7 +275,7 @@ follows:
    :end-before: !End
    :name: Analog model configuration example
 
-.. _usr:sec:medium:neighbor-cache:
+.. _ug:sec:medium:neighbor-cache:
 
 Neighbor Cache
 --------------
@@ -323,7 +323,7 @@ their spatial distribution, their speed and movement pattern, their
 communication pattern, and so on. Note that not only the choice of
 neighbor cache but also its parameterization can affect performance.
 
-.. _usr:sec:medium:medium-limit-cache:
+.. _ug:sec:medium:medium-limit-cache:
 
 Medium Limit Cache
 ------------------
@@ -355,7 +355,7 @@ about the locations of nodes (i.e. the maximum distance they can move
 during some interval), about the possibility of interference, and about
 the possibility of a signal being receivable.
 
-.. _usr:sec:medium:communication-cache:
+.. _ug:sec:medium:communication-cache:
 
 Communication Cache
 -------------------
@@ -375,7 +375,7 @@ Implementations include:
 
 -  :ned:`VectorCommunicationCache`
 
-.. _usr:sec:medium:improving-scalability:
+.. _ug:sec:medium:improving-scalability:
 
 Improving Scalability
 ---------------------

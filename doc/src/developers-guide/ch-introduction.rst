@@ -1,9 +1,9 @@
-.. _dev:cha:introduction:
+.. _dg:cha:introduction:
 
 Introduction
 ============
 
-.. _dev:sec:introduction:what-is-inet:
+.. _dg:sec:introduction:what-is-inet:
 
 What is INET Framework
 ----------------------
@@ -28,7 +28,7 @@ Several other simulation frameworks take INET as a base, and extend it
 into specific directions, such as vehicular networks,
 overlay/peer-to-peer networks, or LTE.
 
-.. _dev:sec:introduction:scope-of-this-manual:
+.. _dg:sec:introduction:scope-of-this-manual:
 
 Scope of this Manual
 --------------------

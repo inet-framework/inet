@@ -1,9 +1,9 @@
-.. _usr:cha:network-nodes:
+.. _ug:cha:network-nodes:
 
 Network Nodes
 =============
 
-.. _usr:sec:nodes:overview:
+.. _ug:sec:nodes:overview:
 
 Overview
 --------
@@ -17,7 +17,7 @@ node models, in order to provide a deeper understanding of their
 customization possibilities and to give some guidance on how custom
 nodes models can be assembled.
 
-.. _usr:sec:nodes:ingredients:
+.. _ug:sec:nodes:ingredients:
 
 Ingredients
 -----------
@@ -63,7 +63,7 @@ modules fall into the following broad categories:
 
 -  *Link layer protocols* are usually simple modules sitting in network
    interface modules. Some protocols, for example :protocol:`IEEE 802.11 MAC`,
-   are modeled as a compound module themselves due to the complexity of the 
+   are modeled as a compound module themselves due to the complexity of the
    protocol.
 
 -  *Physical layer protocols* are compound modules also being part of
@@ -98,7 +98,7 @@ modules fall into the following broad categories:
 -  *Other modules* with particular functionality such as
    :ned:`PcapRecorder` are also available.
 
-.. _usr:sec:nodes:node-architecture:
+.. _ug:sec:nodes:node-architecture:
 
 Node Architecture
 -----------------
@@ -119,7 +119,7 @@ In there pre-assembled node models, dispatchers allow arbitrary protocol
 components to talk directly to each other, i.e. not only to ones in
 neighboring layers.
 
-.. _usr:sec:nodes:customizing-nodes:
+.. _ug:sec:nodes:customizing-nodes:
 
 Customizing Nodes
 -----------------
@@ -220,7 +220,7 @@ the following way:
        numWlanInterfaces = default(1);
    }
 
-.. _usr:sec:nodes:custom-network-nodes:
+.. _ug:sec:nodes:custom-network-nodes:
 
 Custom Network Nodes
 --------------------

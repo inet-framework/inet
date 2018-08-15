@@ -1,9 +1,9 @@
-.. _usr:cha:ethernet:
+.. _ug:cha:ethernet:
 
 The Ethernet Model
 ==================
 
-.. _usr:sec:ethernet:overview:
+.. _ug:sec:ethernet:overview:
 
 Overview
 --------
@@ -23,7 +23,7 @@ prevented by use of a spanning tree protocol (STP, RSTP) that disables
 selected links to eliminate cycles from the topology. Ethernet switch
 models in INET contain support for STP and RSTP.
 
-.. _usr:sec:ethernet:nodes:
+.. _ug:sec:ethernet:nodes:
 
 Nodes
 -----
@@ -44,7 +44,7 @@ There are several node models that can be used in an Ethernet network:
 -  :ned:`EtherHost` is a sample node which can be used to generate “raw”
    Ethernet traffic
 
-.. _usr:sec:ethernet:etherswitch:
+.. _ug:sec:ethernet:etherswitch:
 
 EtherSwitch
 ~~~~~~~~~~~
@@ -63,7 +63,7 @@ the medium connected to the port; if collisions are possible (it’s a bus
 or hub) it must be set to false, otherwise it can be set to true. By
 default it uses half-duplex MAC with CSMA/CD.
 
-.. _usr:sec:ethernet:etherhub:
+.. _ug:sec:ethernet:etherhub:
 
 EtherHub
 ~~~~~~~~
@@ -75,7 +75,7 @@ broadcast to every other port.
 The connections connected to the hub must have the same data rate. Cable
 lengths should be reflected in the delays of the connections.
 
-.. _usr:sec:ethernet:etherbus:
+.. _ug:sec:ethernet:etherbus:
 
 EtherBus
 ~~~~~~~~
@@ -93,7 +93,7 @@ incoming message in one direction and a copy of the message to the other
 direction (except at the ends). The propagation delays are computed from
 the distances of the taps and the :par:`propagationSpeed` parameter.
 
-.. _usr:sec:ethernet:the-physical-layer:
+.. _ug:sec:ethernet:the-physical-layer:
 
 The Physical Layer
 ------------------
@@ -127,7 +127,7 @@ There is currently no support for 200Gbps and 400Gbps Ethernet.
 :ned:`Ether10M`, :ned:`Ether100M`, :ned:`Ether1G`, :ned:`Eth10G`,
 :ned:`Eth40G`, :ned:`Eth100G`
 
-.. _usr:sec:ethernet:ethernet-interface:
+.. _ug:sec:ethernet:ethernet-interface:
 
 Ethernet Interface
 ------------------
@@ -155,7 +155,7 @@ because it supports only full-duplex connections. The :ned:`EtherMac`
 module implements the full MAC functionality including CSMA/CD, it can
 operate both half-duplex and full-duplex mode.
 
-.. _usr:sec:ethernet:components:
+.. _ug:sec:ethernet:components:
 
 Components
 ----------
@@ -176,7 +176,7 @@ The following components are present in the model:
 
 -  :ned:`Ieee802dRelay`
 
-.. _usr:sec:ethernet:ethermacfullduplex:
+.. _ug:sec:ethernet:ethermacfullduplex:
 
 EtherMacFullDuplex
 ~~~~~~~~~~~~~~~~~~
@@ -188,7 +188,7 @@ not need to implement CSMA/CD, so there is no collision detection,
 retransmission with exponential backoff, carrier extension and frame
 bursting.
 
-.. _usr:sec:ethernet:ethermac:
+.. _ug:sec:ethernet:ethermac:
 
 EtherMac
 ~~~~~~~~
@@ -201,7 +201,7 @@ exponential backoff algorithm. In Gigabit Ethernet networks it supports
 carrier extension and frame bursting. Carrier extension can be turned
 off by setting the :par:`carrierExtension` parameter to ``false``.
 
-.. _usr:sec:ethernet:etherencap:
+.. _ug:sec:ethernet:etherencap:
 
 EtherEncap
 ~~~~~~~~~~
@@ -209,7 +209,7 @@ EtherEncap
 The :ned:`EtherEncap` module performs Ethernet II or Ethernet with SNAP
 encapsulation/decapsulation.
 
-.. _usr:sec:ethernet:etherllc:
+.. _ug:sec:ethernet:etherllc:
 
 EtherLlc
 ~~~~~~~~
@@ -217,7 +217,7 @@ EtherLlc
 The :ned:`EtherLlc` module provides Ethernet 802.3
 encapsulation/decapsulation.
 
-.. _usr:sec:ethernet:macrelayunit:
+.. _ug:sec:ethernet:macrelayunit:
 
 MacRelayUnit
 ~~~~~~~~~~~~
@@ -241,7 +241,7 @@ watermark, PAUSE frames are sent on all ports. The watermark and the
 pause time is configurable; use zero values to disable the PAUSE
 feature.
 
-.. _usr:sec:ethernet:macaddresstable:
+.. _ug:sec:ethernet:macaddresstable:
 
 MacAddressTable
 ~~~~~~~~~~~~~~~
@@ -265,7 +265,7 @@ with ’#’ are also allowed:
 Entries are deleted if their age exceeds the duration given as the
 :par:`agingTime` parameter.
 
-.. _usr:sec:ethernet:ieee8021drelay:
+.. _ug:sec:ethernet:ieee8021drelay:
 
 Ieee8021dRelay
 ~~~~~~~~~~~~~~
@@ -273,7 +273,7 @@ Ieee8021dRelay
 :ned:`Ieee8021dRelay` is a MAC relay unit that should be used instead of
 :ned:`MacRelayUnit` that when STP or RSTP is needed.
 
-.. _usr:sec:ethernet:stp:
+.. _ug:sec:ethernet:stp:
 
 Stp
 ~~~
@@ -287,7 +287,7 @@ STP creates a spanning tree within a network of connected layer-2
 bridges, and disables those links that are not part of the spanning
 tree, leaving a single active path between any two network nodes.
 
-.. _usr:sec:ethernet:rstp:
+.. _ug:sec:ethernet:rstp:
 
 Rstp
 ~~~~
@@ -296,7 +296,7 @@ Rstp
 version of STP. RSTP provides significantly faster recovery in response
 to network changes or failures.
 
-.. _usr:sec:ethernet:implemented-standards:
+.. _ug:sec:ethernet:implemented-standards:
 
 Implemented Standards
 ---------------------

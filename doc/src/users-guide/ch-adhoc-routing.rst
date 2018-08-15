@@ -1,9 +1,9 @@
-.. _usr:cha:adhoc-routing:
+.. _ug:cha:adhoc-routing:
 
 Ad Hoc Routing
 ==============
 
-.. _usr:sec:adhocrouting:overview:
+.. _ug:sec:adhocrouting:overview:
 
 Overview
 --------
@@ -23,7 +23,7 @@ tables throughout the network. *Reactive* or *on-demand* protocols find
 a route on demand by flooding the network with Route Request packets.
 
 The INET Framework contains the implementation of several ad hoc routing
-protocols including :protocol:`AODV`, :protocol:`DSDV`, :protocol:`DYMO` 
+protocols including :protocol:`AODV`, :protocol:`DSDV`, :protocol:`DYMO`
 and :protocol:`GPSR`.
 
 The easiest way to add routing to an ad hoc network is to use the
@@ -44,7 +44,7 @@ There are also NED types called :ned:`AodvRouter`, :ned:`DymoRouter`,
 :ned:`DsvRouter`, :ned:`GpsrRouter`, which are all :ned:`ManetRouter`’s
 with the routing protocol submodule type set appropriately.
 
-.. _usr:sec:adhocrouting:aodv:
+.. _ug:sec:adhocrouting:aodv:
 
 AODV
 ----
@@ -60,7 +60,7 @@ The :ned:`Aodv` module type implements AODV, based on RFC 3561.
 :ned:`AodvRouter` is a :ned:`ManetRouter` with the routing module type
 set to :ned:`Aodv`.
 
-.. _usr:sec:adhocrouting:dsdv:
+.. _ug:sec:adhocrouting:dsdv:
 
 DSDV
 ----
@@ -75,7 +75,7 @@ implementation.
 :ned:`DsdvRouter` is a :ned:`ManetRouter` with the routing module type
 set to :ned:`Dsdv`.
 
-.. _usr:sec:adhocrouting:dymo:
+.. _ug:sec:adhocrouting:dymo:
 
 DYMO
 ----
@@ -91,7 +91,7 @@ The :ned:`Dymo` module type implements DYMO, based on the IETF draft
 :ned:`DymoRouter` is a :ned:`ManetRouter` with the routing module type
 set to :ned:`Dymo`.
 
-.. _usr:sec:adhocrouting:gpsr:
+.. _ug:sec:adhocrouting:gpsr:
 
 GPSR
 ----

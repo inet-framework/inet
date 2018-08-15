@@ -1,4 +1,4 @@
-.. _dev:cha:logging:
+.. _dg:cha:logging:
 
 Logging Guidelines
 ==================

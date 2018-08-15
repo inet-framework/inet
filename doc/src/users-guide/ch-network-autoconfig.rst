@@ -1,16 +1,16 @@
-.. _usr:cha:network-autoconfiguration:
+.. _ug:cha:network-autoconfiguration:
 
 Network Autoconfiguration
 =========================
 
-.. _usr:sec:autoconfig:overview:
+.. _ug:sec:autoconfig:overview:
 
 Overview
 --------
 
 This chapter describes static autoconfiguration of networks.
 
-.. _usr:sec:autoconfig:configuring-ipv4-networks:
+.. _ug:sec:autoconfig:configuring-ipv4-networks:
 
 Configuring IPv4 Networks
 -------------------------
@@ -38,7 +38,7 @@ The next section describes the usage of :ned:`Ipv4NetworkConfigurator`.
 The legacy solutions :ned:`Ipv4FlatNetworkConfigurator` and routing
 files are described in subsequent sections.
 
-.. _usr:sec:autoconfig:ipv4networkconfigurator:
+.. _ug:sec:autoconfig:ipv4networkconfigurator:
 
 Ipv4NetworkConfigurator
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -290,7 +290,7 @@ different id defines a separate subnet.
    of interface name patterns. Only interfaces with the specified names
    are affected. The default value is "*" that matches all interfaces.
 
-.. _usr:sec:autoconfig:multicast-groups:
+.. _ug:sec:autoconfig:multicast-groups:
 
 Multicast groups
 ^^^^^^^^^^^^^^^^
@@ -515,7 +515,7 @@ This list summarize the parameters of the :ned:`IPv4NetorkConfigurator`:
    given config file that can be fed back to speed up subsequent runs
    (network configurations)
 
-.. _usr:sec:autoconfig:ipv4flatnetworkconfigurator:
+.. _ug:sec:autoconfig:ipv4flatnetworkconfigurator:
 
 Ipv4FlatNetworkConfigurator (Legacy)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -585,7 +585,7 @@ tables. There are two kind of routes:
    will be proportional to $n^2$, and the time of the lookup of the
    best matching route will be proportional to $n$.
 
-.. _usr:sec:autoconfig:routing-files:
+.. _ug:sec:autoconfig:routing-files:
 
 Routing Files (Legacy)
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -727,7 +727,7 @@ is also accepted with the meaning ``0.0.0.0``.
    on each interface, then it must explicitly loop and specify the multicast
    interface.
 
-.. _usr:sec:autoconfig:configuring-layer-2:
+.. _ug:sec:autoconfig:configuring-layer-2:
 
 Configuring Layer 2
 -------------------

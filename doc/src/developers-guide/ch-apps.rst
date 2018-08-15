@@ -1,4 +1,4 @@
-.. _dev:cha:apps:
+.. _dg:cha:apps:
 
 Applications
 ============

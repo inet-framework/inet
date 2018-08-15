@@ -1,4 +1,4 @@
-.. _dev:cha:tcp:
+.. _dg:cha:tcp:
 
 The TCP Models
 ==============
@@ -369,7 +369,7 @@ connection. The TCP will respond with a TCP_I_STATUS message with a
 state, local and remote addresses and ports, the initial sequence
 numbers, windows of the receiver and sender, etc.
 
-.. _dev:sec:tcp_algorithms:
+.. _dg:sec:tcp_algorithms:
 
 TCP algorithms
 --------------

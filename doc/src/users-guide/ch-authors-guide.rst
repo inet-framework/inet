@@ -1,9 +1,9 @@
-.. _usr:cha:authors-guide:
+.. _ug:cha:authors-guide:
 
 Appendix: Author’s Guide
 ========================
 
-.. _usr:sec:authorsguide:overview:
+.. _ug:sec:authorsguide:overview:
 
 Overview
 --------
@@ -37,12 +37,12 @@ Why is duplication to be avoided? Multiple reasons:
 
 -  It is extra effort for maintainers to keep all copies up to date
 
-.. _usr:sec:authorsguide:guidelines:
+.. _ug:sec:authorsguide:guidelines:
 
 Guidelines
 ----------
 
-.. _usr:sec:authorsguide:do-not-repeat-the-standard:
+.. _ug:sec:authorsguide:do-not-repeat-the-standard:
 
 Do Not Repeat the Standard
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -57,7 +57,7 @@ In particular, do not describe the *format of the protocol messages*. It
 surely looks nice and takes up a lot of space, but the same information
 can probably be found in a myriad places all over the internet.
 
-.. _usr:sec:authorsguide:do-not-repeat-ned:
+.. _ug:sec:authorsguide:do-not-repeat-ned:
 
 Do Not Repeat NED
 ~~~~~~~~~~~~~~~~~
@@ -70,7 +70,7 @@ Detailed information on the module, such as *usage details* and the list
 of *implemented standards* should be covered in the module’s NED
 documentation, not in this *Guide*.
 
-.. _usr:sec:authorsguide:no-cplusplus:
+.. _ug:sec:authorsguide:no-cplusplus:
 
 No C++
 ~~~~~~
@@ -78,7 +78,7 @@ No C++
 Any content which only makes sense on C++ level should go to the
 *Developer’s Guide*, and has no place in this *Guide*.
 
-.. _usr:sec:authorsguide:keep-examples-short:
+.. _ug:sec:authorsguide:keep-examples-short:
 
 Keep Examples Short
 ~~~~~~~~~~~~~~~~~~~
@@ -92,7 +92,7 @@ simulation without much commentary should go under ``examples``. A
 practical, potentially multi-step guide to using a nontrivial feature
 should be written up as a tutorial.
 
-.. _usr:sec:authorsguide:no-reference-to-simulation-examples:
+.. _ug:sec:authorsguide:no-reference-to-simulation-examples:
 
 No Reference to Simulation Examples
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -102,7 +102,7 @@ the text, because they might get renamed, moved, merged or deleted, and
 when they do, no one will think about updating the reference in the
 *Users Guide*.
 
-.. _usr:sec:authorsguide:what-then:
+.. _ug:sec:authorsguide:what-then:
 
 What then?
 ~~~~~~~~~~

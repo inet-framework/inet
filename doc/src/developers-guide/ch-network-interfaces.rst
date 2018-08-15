@@ -1,4 +1,4 @@
-.. _dev:cha:network-interfaces:
+.. _dg:cha:network-interfaces:
 
 Network Interafces
 ==================

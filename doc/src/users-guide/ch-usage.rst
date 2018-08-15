@@ -1,9 +1,9 @@
-.. _usr:cha:usage:
+.. _ug:cha:usage:
 
 Using the INET Framework
 ========================
 
-.. _usr:sec:usage:installation:
+.. _ug:sec:usage:installation:
 
 Installation
 ------------
@@ -26,7 +26,7 @@ There are several ways to install the INET Framework:
    revision of your choice, and follow the INSTALL file in the project
    root.
 
-.. _usr:sec:usage:installing-inet-extensions:
+.. _ug:sec:usage:installing-inet-extensions:
 
 Installing INET Extensions
 --------------------------
@@ -40,7 +40,7 @@ works:
 -  First, check if the project root contains a file named
    :file:`.project`.
 
--  If it does, then the project can be imported into the IDE (use 
+-  If it does, then the project can be imported into the IDE (use
    :menuselection:`File --> Import --> General --> Existing Project`
    into workspace). Make sure
    that the project is recognized as an OMNeT++ project (the :guilabel:`Project
@@ -54,7 +54,7 @@ works:
    using the :guilabel:`Project References` page in the :guilabel:`Project Properties`
    dialog, and copy the source files into the project.
 
-.. _usr:sec:usage:getting-familiar-with-inet:
+.. _ug:sec:usage:getting-familiar-with-inet:
 
 Getting Familiar with INET
 --------------------------

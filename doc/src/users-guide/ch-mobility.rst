@@ -2,12 +2,12 @@
    :format: latex
 ..
 
-.. _usr:cha:mobility:
+.. _ug:cha:mobility:
 
 Node Mobility
 =============
 
-.. _usr:sec:mobility:overview:
+.. _ug:sec:mobility:overview:
 
 Overview
 --------
@@ -77,12 +77,12 @@ the following policies:
 
 -  stop the simulation with an error
 
-.. _usr:sec:mobility:built-in-mobility-models:
+.. _ug:sec:mobility:built-in-mobility-models:
 
 Built-In Mobility Models
 ------------------------
 
-.. _usr:sec:mobility:list-of-mobility-models:
+.. _ug:sec:mobility:list-of-mobility-models:
 
 List of Mobility Models
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -185,7 +185,7 @@ superposition and other ways.
    affected by the respective quantites and also the orientation of the
    referenced mobility.
 
-.. _usr:sec:mobility:more-information-on-some-mobility-models:
+.. _ug:sec:mobility:more-information-on-some-mobility-models:
 
 More Information on Some Mobility Models
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -311,7 +311,7 @@ probability that the state changes from :math:`i` to :math:`j`:
    \end{array}
    \right)
 
-.. _usr:sec:mobility:replaying-trace-files:
+.. _ug:sec:mobility:replaying-trace-files:
 
 Replaying trace files
 ~~~~~~~~~~~~~~~~~~~~~
@@ -397,7 +397,7 @@ Parameters of the module:
    elements and it ignores the ``start_time`` attribute. It starts the move
    on the next segment immediately.
 
-.. _usr:sec:mobility:turtlemobility:
+.. _ug:sec:mobility:turtlemobility:
 
 TurtleMobility
 ~~~~~~~~~~~~~~

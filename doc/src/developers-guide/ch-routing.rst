@@ -1,4 +1,4 @@
-.. _dev:cha:routing:
+.. _dg:cha:routing:
 
 Internet Routing
 ================

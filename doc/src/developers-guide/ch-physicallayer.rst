@@ -1,4 +1,4 @@
-.. _dev:cha:physicallayer:
+.. _dg:cha:physicallayer:
 
 The Physical Layer
 ==================

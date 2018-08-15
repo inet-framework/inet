@@ -1,9 +1,9 @@
-.. _dev:cha:packet-api:
+.. _dg:cha:packet-api:
 
 Working with Packets
 ====================
 
-.. _dev:sec:packets:overviews:
+.. _dg:sec:packets:overviews:
 
 Overview
 --------
@@ -47,7 +47,7 @@ example, communication protocols often need to enqueue data for sending
 services are provided as separate C++ data structures on top of the
 lower layer mentioned above.
 
-.. _dev:sec:packets:representing-data:
+.. _dg:sec:packets:representing-data:
 
 Representing Data
 -----------------
@@ -157,7 +157,7 @@ It’s important to distinguish the two length related fields in the
 (:var:`chunkLength`), the other is the value in the length field of the
 header (:var:`lengthField`).
 
-.. _dev:sec:packets:representing-packets:
+.. _dg:sec:packets:representing-packets:
 
 Representing Packets
 --------------------
@@ -198,7 +198,7 @@ the data stored in the packet.
    :end-before: !End
    :name: Packet processing example
 
-.. _dev:sec:packets:representing-signals:
+.. _dg:sec:packets:representing-signals:
 
 Representing Signals
 --------------------
@@ -221,7 +221,7 @@ Signals always encapsulate a packet and also contain a description of
 the analog domain representation. The most important physical properties
 of a signal are the signal duration and the signal power.
 
-.. _dev:sec:packets:representing-transmission-errors:
+.. _dg:sec:packets:representing-transmission-errors:
 
 Representing Transmission Errors
 --------------------------------
@@ -285,7 +285,7 @@ representations via configurable parameters. Higher layer protocols
 detect errors by chechking the error bit on packets and chunks, and by
 standard CRC mechanisms.
 
-.. _dev:sec:packets:packet-tagging:
+.. _dg:sec:packets:packet-tagging:
 
 Packet Tagging
 --------------
@@ -332,7 +332,7 @@ compiler. Tags come in three flavors:
    :end-before: !End
    :name: Tag definition example
 
-.. _dev:sec:packets:region-tagging:
+.. _dg:sec:packets:region-tagging:
 
 Region Tagging
 --------------
@@ -370,7 +370,7 @@ The above loop may run exactly once for the whole data, or it may run
 several times depending on how the data is provided at the sender and
 how the underlying network works.
 
-.. _dev:sec:packets:dissecting-packets:
+.. _dg:sec:packets:dissecting-packets:
 
 Dissecting Packets
 ------------------
@@ -416,7 +416,7 @@ interface will be notified for each part of the packet as the
    :end-before: !End
    :name: Packet dissection example
 
-.. _dev:sec:packets:filtering-packets:
+.. _dg:sec:packets:filtering-packets:
 
 Filtering Packets
 -----------------
@@ -447,7 +447,7 @@ prefix.
    :end-before: !End
    :name: Packet filtering example
 
-.. _dev:sec:packets:printing-packets:
+.. _dg:sec:packets:printing-packets:
 
 Printing Packets
 ----------------
@@ -479,7 +479,7 @@ The :cpp:`PacketPrinter` provides a few other functions which have
 additional options to control the details of the resulting human
 readable form.
 
-.. _dev:sec:packets:recording-pcap:
+.. _dg:sec:packets:recording-pcap:
 
 Recording PCAP
 --------------
@@ -497,7 +497,7 @@ used to reduce the file size and increase performance.
    :end-before: !End
    :name: PCAP recording example
 
-.. _dev:sec:packets:encapsulating-packets:
+.. _dg:sec:packets:encapsulating-packets:
 
 Encapsulating Packets
 ---------------------
@@ -540,7 +540,7 @@ the remaining unprocessed part of the packet, they don’t have effect on
 the actual packet data. That is when the packet reaches high level
 protocol, it still contains all the received data.
 
-.. _dev:sec:packets:fragmenting-packets:
+.. _dg:sec:packets:fragmenting-packets:
 
 Fragmenting Packets
 -------------------
@@ -576,7 +576,7 @@ packet from a set of coherent fragments:
    :end-before: !End
    :name: Packet defragmentation example
 
-.. _dev:sec:packets:aggregating-packets:
+.. _dg:sec:packets:aggregating-packets:
 
 Aggregating Packets
 -------------------
@@ -611,7 +611,7 @@ disaggregate a packet:
    :end-before: !End
    :name: Packet disaggregation example
 
-.. _dev:sec:packets:serializing-packets:
+.. _dg:sec:packets:serializing-packets:
 
 Serializing Packets
 -------------------
@@ -650,7 +650,7 @@ protocol header could be deserialized from a sequence of bytes:
    :end-before: !End
    :name: Packet deserialization example
 
-.. _dev:sec:packets:emulation-support:
+.. _dg:sec:packets:emulation-support:
 
 Emulation Support
 -----------------
@@ -696,7 +696,7 @@ calling :fun:`peekAtFront`) as they see fit. The Packet API always
 provides the requested representation, either because it’s already
 available in the packet, or because it gets automatically deserialized.
 
-.. _dev:sec:packets:queueing-packets:
+.. _dg:sec:packets:queueing-packets:
 
 Queueing Packets
 ----------------
@@ -722,7 +722,7 @@ it works with chunks. Similarly to the :cpp:`Packet` it also
 automatically merge consecutive data and selects the most appropriate
 representation.
 
-.. _dev:sec:packets:buffering-packets:
+.. _dg:sec:packets:buffering-packets:
 
 Buffering Packets
 -----------------
@@ -752,7 +752,7 @@ thereof. For example, :cpp:`ByteCountChunk`, :cpp:`BytesChunk`,
 :cpp:`FieldsChunk`, and :cpp:`SliceChunk` can be freely mixed in the
 same buffer.
 
-.. _dev:sec:packets:reassembling-packets:
+.. _dg:sec:packets:reassembling-packets:
 
 Reassembling Packets
 --------------------
@@ -783,7 +783,7 @@ The :cpp:`ReassemblyBuffer` supports replacing the stored data at a
 given offset, and it also provides the complete reassembled data with
 the expected length if available.
 
-.. _dev:sec:packets:reordering-packets:
+.. _dg:sec:packets:reordering-packets:
 
 Reordering Packets
 ------------------
@@ -816,7 +816,7 @@ The :cpp:`ReorderBuffer` supports replacing the stored data at a given
 offset, and it provides the available data from the expected offset if
 any.
 
-.. _dev:sec:packets:dispatching-packets:
+.. _dg:sec:packets:dispatching-packets:
 
 Dispatching Packets
 -------------------

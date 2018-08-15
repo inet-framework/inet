@@ -1,9 +1,9 @@
-.. _usr:cha:802154:
+.. _ug:cha:802154:
 
 The 802.15.4 Model
 ==================
 
-.. _usr:sec:802154:overview:
+.. _ug:sec:802154:overview:
 
 Overview
 --------
@@ -25,7 +25,7 @@ define the upper layers. (Thread is also 6LoWPAN-based.)
 The INET Framework contains a basic implementation of IEEE 802.15.4
 protocol.
 
-.. _usr:sec:802154:network-interfaces:
+.. _ug:sec:802154:network-interfaces:
 
 Network Interfaces
 ------------------
@@ -51,7 +51,7 @@ with the following line in the ini file:
 
    **.wlan[0].typename = "Ieee802154NarrowbandInterface"
 
-.. _usr:sec:802154:physical-layer:
+.. _ug:sec:802154:physical-layer:
 
 Physical Layer
 --------------
@@ -76,7 +76,7 @@ One must choose a matching medium model, for example
 :ned:`Ieee802154NarrowbandScalarRadioMedium` for
 :ned:`Ieee802154NarrowbandScalarRadio`.
 
-.. _usr:sec:802154:mac-protocol:
+.. _ug:sec:802154:mac-protocol:
 
 MAC Protocol
 ------------
