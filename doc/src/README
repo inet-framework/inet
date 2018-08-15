@@ -1,0 +1,17 @@
+INET Framework Documentation
+============================
+
+Building the documentation website
+----------------------------------
+
+The INET dosumentation can be built with the sphinx tool.
+
+First install the necessary packages:
+
+sudo apt-get install dvipng texlive-binaries
+sudo pip install -U Sphinx
+sudo pip install sphinx_materialdesign_theme
+sudo pip install recommonmark
+sudo pip install sphinxcontrib-doxylink
+sudo pip install sphinx-autobuild
+sudo pip install sphinxcontrib-inlinesyntaxhighlight
