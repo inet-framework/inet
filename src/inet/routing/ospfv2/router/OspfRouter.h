@@ -73,6 +73,7 @@ class INET_API Router
     void setRFC1583Compatibility(bool compatibility) { rfc1583Compatibility = compatibility; }
     bool getRFC1583Compatibility() const { return rfc1583Compatibility; }
     unsigned long getAreaCount() const { return areas.size(); }
+    std::vector<AreaId> getAreaIds();
 
     MessageHandler *getMessageHandler() { return messageHandler; }
 
@@ -211,6 +212,9 @@ class INET_API Router
      * @sa RFC2328 Section 16.
      */
     void rebuildRoutingTable();
+
+    // delete an entry from the OSPF routing table
+    bool deleteRoute(OspfRoutingTableEntry *entry);
 
     /**
      * Scans through the router's areas' preconfigured address ranges and returns

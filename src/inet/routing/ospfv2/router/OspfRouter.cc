@@ -94,6 +94,14 @@ Area *Router::getAreaByAddr(Ipv4Address address)
     return nullptr;
 }
 
+std::vector<AreaId> Router::getAreaIds()
+{
+    std::vector<AreaId> areaIds;
+    for(auto &entry : areas)
+        areaIds.push_back(entry->getAreaID());
+    return areaIds;
+}
+
 OspfInterface *Router::getNonVirtualInterface(unsigned char ifIndex)
 {
     long areaCount = areas.size();
@@ -844,6 +852,16 @@ void Router::rebuildRoutingTable()
 
     for (auto &entry : routingTable)
         EV_INFO << entry << "\n";
+}
+
+bool Router::deleteRoute(OspfRoutingTableEntry *entry)
+{
+    auto i = std::find(routingTable.begin(), routingTable.end(), entry);
+    if (i != routingTable.end()) {
+        routingTable.erase(i);
+        return true;
+    }
+    return false;
 }
 
 bool Router::hasRouteToASBoundaryRouter(const std::vector<OspfRoutingTableEntry *>& inRoutingTable, RouterId asbrRouterID) const
