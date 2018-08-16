@@ -56,7 +56,9 @@ class INET_API Neighbor
         LINK_DOWN = 13,
         DD_RETRANSMISSION_TIMER = 14,
         UPDATE_RETRANSMISSION_TIMER = 15,
-        REQUEST_RETRANSMISSION_TIMER = 16
+        REQUEST_RETRANSMISSION_TIMER = 16,
+        KILL_NEIGHBOR_NO_REBUILD = 17,
+        REBUILD = 18
     };
 
     enum NeighborStateType {

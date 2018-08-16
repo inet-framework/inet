@@ -25,6 +25,11 @@ namespace inet {
 
 namespace ospf {
 
+void NeighborState::changeState(Neighbor *neighbor, NeighborState *newState, NeighborState *currentState)
+{
+    neighbor->changeState(newState, currentState);
+}
+
 void NeighborState::changeStateAndRebuild(Neighbor *neighbor, NeighborState *newState, NeighborState *currentState)
 {
     neighbor->changeState(newState, currentState);

@@ -38,6 +38,12 @@ void NeighborStateExchangeStart::processEvent(Neighbor *neighbor, Neighbor::Neig
         messageHandler->clearTimer(neighbor->getInactivityTimer());
         changeStateAndRebuild(neighbor, new NeighborStateDown, this);
     }
+    else if(event == Neighbor::KILL_NEIGHBOR_NO_REBUILD) {
+        MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
+        neighbor->reset();
+        messageHandler->clearTimer(neighbor->getInactivityTimer());
+        changeState(neighbor, new NeighborStateDown, this);
+    }
     else if (event == Neighbor::INACTIVITY_TIMER) {
         neighbor->reset();
         if (neighbor->getInterface()->getType() == OspfInterface::NBMA) {
