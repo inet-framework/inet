@@ -83,7 +83,7 @@ class INET_API OspfInterface
     CrcMode crcMode;
     OspfInterfaceState *state;
     OspfInterfaceState *previousState;
-    std::string ifName;
+    std::string interfaceName;
     int ifIndex;
     unsigned short mtu;
     Ipv4AddressRange interfaceAddressRange;
@@ -148,8 +148,8 @@ class INET_API OspfInterface
     void setCrcMode(CrcMode crcMode) { this->crcMode = crcMode; }
     void setIfIndex(IInterfaceTable *ift, int index);
     int getIfIndex() const { return ifIndex; }
-    void setIfName(std::string ifName) { this->ifName = ifName; }
-    std::string getIfName() const { return ifName; }
+    void setInterfaceName(std::string ifName) { this->interfaceName = ifName; }
+    std::string getInterfaceName() const { return interfaceName; }
     void setMtu(unsigned short ifMTU) { mtu = ifMTU; }
     unsigned short getMtu() const { return mtu; }
     void setAreaId(AreaId areaId) { areaID = areaId; }

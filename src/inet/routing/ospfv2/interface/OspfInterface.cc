@@ -36,7 +36,7 @@ OspfInterface::OspfInterface(OspfInterface::OspfInterfaceType ifType) :
     interfaceType(ifType),
     interfaceMode(ACTIVE),
     crcMode(CRC_MODE_UNDEFINED),
-    ifName(""),
+    interfaceName(""),
     ifIndex(0),
     mtu(0),
     interfaceAddressRange(NULL_IPV4ADDRESSRANGE),
@@ -734,7 +734,7 @@ std::ostream& operator<<(std::ostream& stream, const OspfInterface& intf)
         neighbors = neighbors + (neighbor.first).str() + "(" + neighborState + ") ";
     }
 
-    return stream << "name: " << intf.getIfName() << " "
+    return stream << "name: " << intf.getInterfaceName() << " "
             << "index: " << intf.ifIndex << " "
             << "type: '" << intf.getTypeString(intf.interfaceType) << "' "
             << "MTU: " << intf.mtu << " "
