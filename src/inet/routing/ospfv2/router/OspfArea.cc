@@ -1807,6 +1807,37 @@ void Area::calculateShortestPathTree(std::vector<RoutingTableEntry *>& newRoutin
         }
     } while (!finished);
 
+    // set parent to null for all router LSAs not on the SPF tree
+    for (auto &routerLSA : routerLSAs) {
+        bool onTree = false;
+        for(auto &node : treeVertices) {
+            if(node == routerLSA) {
+                onTree = true;
+                break;
+            }
+        }
+        if (onTree)
+            continue;
+        else {
+            routerLSA->setParent(nullptr);
+        }
+    }
+    // set parent to null for all network LSAs not on the SPF tree
+    for (auto &networkLSA : networkLSAs) {
+        bool onTree = false;
+        for(auto &node : treeVertices) {
+            if(node == networkLSA) {
+                onTree = true;
+                break;
+            }
+        }
+        if (onTree)
+            continue;
+        else {
+            networkLSA->setParent(nullptr);
+        }
+    }
+
     unsigned int treeSize = treeVertices.size();
     for (i = 0; i < treeSize; i++) {
         RouterLsa *routerVertex = dynamic_cast<RouterLsa *>(treeVertices[i]);
