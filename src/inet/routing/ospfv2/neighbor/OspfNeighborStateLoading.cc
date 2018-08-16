@@ -39,7 +39,7 @@ void NeighborStateLoading::processEvent(Neighbor *neighbor, Neighbor::NeighborEv
         messageHandler->clearTimer(neighbor->getInactivityTimer());
         changeState(neighbor, new NeighborStateDown, this);
     }
-    if (event == Neighbor::INACTIVITY_TIMER) {
+    else if (event == Neighbor::INACTIVITY_TIMER) {
         neighbor->reset();
         if (neighbor->getInterface()->getType() == OspfInterface::NBMA) {
             MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
@@ -47,26 +47,26 @@ void NeighborStateLoading::processEvent(Neighbor *neighbor, Neighbor::NeighborEv
         }
         changeState(neighbor, new NeighborStateDown, this);
     }
-    if (event == Neighbor::ONEWAY_RECEIVED) {
+    else if (event == Neighbor::ONEWAY_RECEIVED) {
         neighbor->reset();
         changeState(neighbor, new NeighborStateInit, this);
     }
-    if (event == Neighbor::HELLO_RECEIVED) {
+    else if (event == Neighbor::HELLO_RECEIVED) {
         MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
         messageHandler->clearTimer(neighbor->getInactivityTimer());
         messageHandler->startTimer(neighbor->getInactivityTimer(), neighbor->getRouterDeadInterval());
     }
-    if (event == Neighbor::LOADING_DONE) {
+    else if (event == Neighbor::LOADING_DONE) {
         neighbor->clearRequestRetransmissionTimer();
         changeState(neighbor, new NeighborStateFull, this);
     }
-    if (event == Neighbor::IS_ADJACENCY_OK) {
+    else if (event == Neighbor::IS_ADJACENCY_OK) {
         if (!neighbor->needAdjacency()) {
             neighbor->reset();
             changeState(neighbor, new NeighborStateTwoWay, this);
         }
     }
-    if ((event == Neighbor::SEQUENCE_NUMBER_MISMATCH) || (event == Neighbor::BAD_LINK_STATE_REQUEST)) {
+    else if ((event == Neighbor::SEQUENCE_NUMBER_MISMATCH) || (event == Neighbor::BAD_LINK_STATE_REQUEST)) {
         MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
         neighbor->reset();
         neighbor->incrementDDSequenceNumber();
@@ -74,15 +74,15 @@ void NeighborStateLoading::processEvent(Neighbor *neighbor, Neighbor::NeighborEv
         messageHandler->startTimer(neighbor->getDDRetransmissionTimer(), neighbor->getInterface()->getRetransmissionInterval());
         changeState(neighbor, new NeighborStateExchangeStart, this);
     }
-    if (event == Neighbor::REQUEST_RETRANSMISSION_TIMER) {
+    else if (event == Neighbor::REQUEST_RETRANSMISSION_TIMER) {
         neighbor->sendLinkStateRequestPacket();
         neighbor->startRequestRetransmissionTimer();
     }
-    if (event == Neighbor::UPDATE_RETRANSMISSION_TIMER) {
+    else if (event == Neighbor::UPDATE_RETRANSMISSION_TIMER) {
         neighbor->retransmitUpdatePacket();
         neighbor->startUpdateRetransmissionTimer();
     }
-    if (event == Neighbor::DD_RETRANSMISSION_TIMER) {
+    else if (event == Neighbor::DD_RETRANSMISSION_TIMER) {
         neighbor->deleteLastSentDDPacket();
     }
 }

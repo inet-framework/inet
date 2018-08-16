@@ -38,7 +38,7 @@ void NeighborStateExchangeStart::processEvent(Neighbor *neighbor, Neighbor::Neig
         messageHandler->clearTimer(neighbor->getInactivityTimer());
         changeState(neighbor, new NeighborStateDown, this);
     }
-    if (event == Neighbor::INACTIVITY_TIMER) {
+    else if (event == Neighbor::INACTIVITY_TIMER) {
         neighbor->reset();
         if (neighbor->getInterface()->getType() == OspfInterface::NBMA) {
             MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
@@ -46,27 +46,27 @@ void NeighborStateExchangeStart::processEvent(Neighbor *neighbor, Neighbor::Neig
         }
         changeState(neighbor, new NeighborStateDown, this);
     }
-    if (event == Neighbor::ONEWAY_RECEIVED) {
+    else if (event == Neighbor::ONEWAY_RECEIVED) {
         neighbor->reset();
         changeState(neighbor, new NeighborStateInit, this);
     }
-    if (event == Neighbor::HELLO_RECEIVED) {
+    else if (event == Neighbor::HELLO_RECEIVED) {
         MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
         messageHandler->clearTimer(neighbor->getInactivityTimer());
         messageHandler->startTimer(neighbor->getInactivityTimer(), neighbor->getRouterDeadInterval());
     }
-    if (event == Neighbor::IS_ADJACENCY_OK) {
+    else if (event == Neighbor::IS_ADJACENCY_OK) {
         if (!neighbor->needAdjacency()) {
             neighbor->reset();
             changeState(neighbor, new NeighborStateTwoWay, this);
         }
     }
-    if (event == Neighbor::DD_RETRANSMISSION_TIMER) {
+    else if (event == Neighbor::DD_RETRANSMISSION_TIMER) {
         MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
         neighbor->retransmitDatabaseDescriptionPacket();
         messageHandler->startTimer(neighbor->getDDRetransmissionTimer(), neighbor->getInterface()->getRetransmissionInterval());
     }
-    if (event == Neighbor::NEGOTIATION_DONE) {
+    else if (event == Neighbor::NEGOTIATION_DONE) {
         neighbor->createDatabaseSummary();
         neighbor->sendDatabaseDescriptionPacket();
         MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
