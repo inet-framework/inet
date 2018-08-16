@@ -85,3 +85,4 @@ class Vimeo(VideoBase):
 class Video(VideoBase):
     html = '<video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" \
     src="%(video_id)s" width="%(width)u" height="%(height)u" class="align-%(align)s"></video>'
+    latex = '\\vskip 0.5em \\textbf{Video -- %(caption)s} \\vskip 0.5em'

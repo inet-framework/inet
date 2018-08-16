@@ -193,8 +193,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'INETFramework.tex', 'INET Framework Documentation',
-     'OpenSim Ltd.', 'manual'),
+    ('users-guide/index', 'users-guide.tex', "INET Framework User's Guide", 'OpenSim Ltd.', 'manual', False),
+    ('developers-guide/index', 'developers-guide.tex', "INET Framework Developer's Guide", 'OpenSim Ltd.', 'manual', False),
 ]
 
 
