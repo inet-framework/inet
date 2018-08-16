@@ -231,6 +231,14 @@ OspfInterface *Area::getInterface(Ipv4Address address)
     return nullptr;
 }
 
+std::vector<int> Area::getInterfaceIndices()
+{
+    std::vector<int> indices;
+    for(auto &intf : associatedInterfaces)
+        indices.push_back(intf->getIfIndex());
+    return indices;
+}
+
 bool Area::hasVirtualLink(AreaId withTransitArea) const
 {
     if ((areaID != BACKBONE_AREAID) || (withTransitArea == BACKBONE_AREAID)) {

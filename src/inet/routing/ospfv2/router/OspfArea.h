@@ -95,8 +95,10 @@ class INET_API Area : public cObject
     void addWatches();
     Ipv4AddressRange getContainingAddressRange(Ipv4AddressRange addressRange, bool *advertise = nullptr) const;
     void addInterface(OspfInterface *intf);
+    int getInterfaceCount() const {return associatedInterfaces.size();}
     OspfInterface *getInterface(unsigned char ifIndex);
     OspfInterface *getInterface(Ipv4Address address);
+    std::vector<int> getInterfaceIndices();
     bool hasVirtualLink(AreaId withTransitArea) const;
     OspfInterface *findVirtualLink(RouterId routerID);
 
