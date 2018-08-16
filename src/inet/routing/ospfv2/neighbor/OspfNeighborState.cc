@@ -25,69 +25,68 @@ namespace inet {
 
 namespace ospf {
 
-void NeighborState::changeState(Neighbor *neighbor, NeighborState *newState, NeighborState *currentState)
+void NeighborState::changeStateAndRebuild(Neighbor *neighbor, NeighborState *newState, NeighborState *currentState)
 {
-    Neighbor::NeighborStateType oldState = currentState->getState();
-    Neighbor::NeighborStateType nextState = newState->getState();
-    bool shouldRebuildRoutingTable = false;
-
-    EV_INFO << "Changing neighborhood state from '" << neighbor->getStateString(oldState) << "' to '" << neighbor->getStateString(nextState) << "'" << std::endl;
     neighbor->changeState(newState, currentState);
 
-    if ((oldState == Neighbor::FULL_STATE) || (nextState == Neighbor::FULL_STATE)) {
-        RouterId routerID = neighbor->getInterface()->getArea()->getRouter()->getRouterID();
-        RouterLsa *routerLSA = neighbor->getInterface()->getArea()->findRouterLSA(routerID);
+    if ((currentState->getState() == Neighbor::FULL_STATE) || (newState->getState() == Neighbor::FULL_STATE))
+        if (updateLsa(neighbor))
+            neighbor->getInterface()->getArea()->getRouter()->rebuildRoutingTable();
+}
 
-        if (routerLSA != nullptr) {
-            long sequenceNumber = routerLSA->getHeader().getLsSequenceNumber();
+bool NeighborState::updateLsa(Neighbor *neighbor)
+{
+    bool shouldRebuildRoutingTable = false;
+    RouterId routerID = neighbor->getInterface()->getArea()->getRouter()->getRouterID();
+    RouterLsa *routerLSA = neighbor->getInterface()->getArea()->findRouterLSA(routerID);
+
+    if (routerLSA != nullptr) {
+        long sequenceNumber = routerLSA->getHeader().getLsSequenceNumber();
+        if (sequenceNumber == MAX_SEQUENCE_NUMBER) {
+            routerLSA->getHeaderForUpdate().setLsAge(MAX_AGE);
+            neighbor->getInterface()->getArea()->floodLSA(routerLSA);
+            routerLSA->incrementInstallTime();
+        }
+        else {
+            RouterLsa *newLSA = neighbor->getInterface()->getArea()->originateRouterLSA();
+
+            newLSA->getHeaderForUpdate().setLsSequenceNumber(sequenceNumber + 1);
+            shouldRebuildRoutingTable |= routerLSA->update(newLSA);
+            delete newLSA;
+
+            neighbor->getInterface()->getArea()->floodLSA(routerLSA);
+        }
+    }
+
+    if (neighbor->getInterface()->getState() == OspfInterface::DESIGNATED_ROUTER_STATE) {
+        NetworkLsa *networkLSA = neighbor->getInterface()->getArea()->findNetworkLSA(neighbor->getInterface()->getAddressRange().address);
+
+        if (networkLSA != nullptr) {
+            long sequenceNumber = networkLSA->getHeader().getLsSequenceNumber();
             if (sequenceNumber == MAX_SEQUENCE_NUMBER) {
-                routerLSA->getHeaderForUpdate().setLsAge(MAX_AGE);
-                neighbor->getInterface()->getArea()->floodLSA(routerLSA);
-                routerLSA->incrementInstallTime();
+                networkLSA->getHeaderForUpdate().setLsAge(MAX_AGE);
+                neighbor->getInterface()->getArea()->floodLSA(networkLSA);
+                networkLSA->incrementInstallTime();
             }
             else {
-                RouterLsa *newLSA = neighbor->getInterface()->getArea()->originateRouterLSA();
+                NetworkLsa *newLSA = neighbor->getInterface()->getArea()->originateNetworkLSA(neighbor->getInterface());
 
-                newLSA->getHeaderForUpdate().setLsSequenceNumber(sequenceNumber + 1);
-                shouldRebuildRoutingTable |= routerLSA->update(newLSA);
-                delete newLSA;
-
-                neighbor->getInterface()->getArea()->floodLSA(routerLSA);
-            }
-        }
-
-        if (neighbor->getInterface()->getState() == OspfInterface::DESIGNATED_ROUTER_STATE) {
-            NetworkLsa *networkLSA = neighbor->getInterface()->getArea()->findNetworkLSA(neighbor->getInterface()->getAddressRange().address);
-
-            if (networkLSA != nullptr) {
-                long sequenceNumber = networkLSA->getHeader().getLsSequenceNumber();
-                if (sequenceNumber == MAX_SEQUENCE_NUMBER) {
+                if (newLSA != nullptr) {
+                    newLSA->getHeaderForUpdate().setLsSequenceNumber(sequenceNumber + 1);
+                    shouldRebuildRoutingTable |= networkLSA->update(newLSA);
+                    delete newLSA;
+                }
+                else {    // no neighbors on the network -> old NetworkLsa must be flushed
                     networkLSA->getHeaderForUpdate().setLsAge(MAX_AGE);
-                    neighbor->getInterface()->getArea()->floodLSA(networkLSA);
                     networkLSA->incrementInstallTime();
                 }
-                else {
-                    NetworkLsa *newLSA = neighbor->getInterface()->getArea()->originateNetworkLSA(neighbor->getInterface());
 
-                    if (newLSA != nullptr) {
-                        newLSA->getHeaderForUpdate().setLsSequenceNumber(sequenceNumber + 1);
-                        shouldRebuildRoutingTable |= networkLSA->update(newLSA);
-                        delete newLSA;
-                    }
-                    else {    // no neighbors on the network -> old NetworkLsa must be flushed
-                        networkLSA->getHeaderForUpdate().setLsAge(MAX_AGE);
-                        networkLSA->incrementInstallTime();
-                    }
-
-                    neighbor->getInterface()->getArea()->floodLSA(networkLSA);
-                }
+                neighbor->getInterface()->getArea()->floodLSA(networkLSA);
             }
         }
     }
 
-    if (shouldRebuildRoutingTable) {
-        neighbor->getInterface()->getArea()->getRouter()->rebuildRoutingTable();
-    }
+    return shouldRebuildRoutingTable;
 }
 
 } // namespace ospf

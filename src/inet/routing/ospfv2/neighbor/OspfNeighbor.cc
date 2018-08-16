@@ -88,6 +88,8 @@ Neighbor::~Neighbor()
 
 void Neighbor::changeState(NeighborState *newState, NeighborState *currentState)
 {
+    EV_INFO << "Changing neighborhood state from '" << getStateString(currentState->getState()) << "' to '" << getStateString(newState->getState()) << "'" << std::endl;
+
     if (previousState != nullptr) {
         delete previousState;
     }
