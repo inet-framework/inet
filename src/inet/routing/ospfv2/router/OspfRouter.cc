@@ -814,6 +814,8 @@ void Router::rebuildRoutingTable()
                 return false;
             else if(m->getNetmask() != entry->getNetmask())
                 return false;
+            else if(m->getInterface()->getInterfaceId() != entry->getInterface()->getInterfaceId())
+                return false;
             else if(m->getGateway() != entry->getGateway())
                 return false;
             else if(m->getMetric() != entry->getMetric())
