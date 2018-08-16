@@ -39,13 +39,13 @@ void NeighborStateDown::processEvent(Neighbor *neighbor, Neighbor::NeighborEvent
         messageHandler->startTimer(neighbor->getInactivityTimer(), neighbor->getRouterDeadInterval());
         changeState(neighbor, new NeighborStateAttempt, this);
     }
-    if (event == Neighbor::HELLO_RECEIVED) {
+    else if (event == Neighbor::HELLO_RECEIVED) {
         MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
         messageHandler->clearTimer(neighbor->getPollTimer());
         messageHandler->startTimer(neighbor->getInactivityTimer(), neighbor->getRouterDeadInterval());
         changeState(neighbor, new NeighborStateInit, this);
     }
-    if (event == Neighbor::POLL_TIMER) {
+    else if (event == Neighbor::POLL_TIMER) {
         int ttl = (neighbor->getInterface()->getType() == OspfInterface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
         neighbor->getInterface()->sendHelloPacket(neighbor->getAddress(), ttl);
         MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();

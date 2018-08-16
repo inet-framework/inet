@@ -37,7 +37,7 @@ void NeighborStateTwoWay::processEvent(Neighbor *neighbor, Neighbor::NeighborEve
         messageHandler->clearTimer(neighbor->getInactivityTimer());
         changeState(neighbor, new NeighborStateDown, this);
     }
-    if (event == Neighbor::INACTIVITY_TIMER) {
+    else if (event == Neighbor::INACTIVITY_TIMER) {
         neighbor->reset();
         if (neighbor->getInterface()->getType() == OspfInterface::NBMA) {
             MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
@@ -45,16 +45,16 @@ void NeighborStateTwoWay::processEvent(Neighbor *neighbor, Neighbor::NeighborEve
         }
         changeState(neighbor, new NeighborStateDown, this);
     }
-    if (event == Neighbor::ONEWAY_RECEIVED) {
+    else if (event == Neighbor::ONEWAY_RECEIVED) {
         neighbor->reset();
         changeState(neighbor, new NeighborStateInit, this);
     }
-    if (event == Neighbor::HELLO_RECEIVED) {
+    else if (event == Neighbor::HELLO_RECEIVED) {
         MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
         messageHandler->clearTimer(neighbor->getInactivityTimer());
         messageHandler->startTimer(neighbor->getInactivityTimer(), neighbor->getRouterDeadInterval());
     }
-    if (event == Neighbor::IS_ADJACENCY_OK) {
+    else if (event == Neighbor::IS_ADJACENCY_OK) {
         if (neighbor->needAdjacency()) {
             MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
             if (!(neighbor->isFirstAdjacencyInited())) {

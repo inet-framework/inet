@@ -36,7 +36,7 @@ void NeighborStateAttempt::processEvent(Neighbor *neighbor, Neighbor::NeighborEv
         messageHandler->clearTimer(neighbor->getInactivityTimer());
         changeState(neighbor, new NeighborStateDown, this);
     }
-    if (event == Neighbor::INACTIVITY_TIMER) {
+    else if (event == Neighbor::INACTIVITY_TIMER) {
         neighbor->reset();
         if (neighbor->getInterface()->getType() == OspfInterface::NBMA) {
             MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
@@ -44,7 +44,7 @@ void NeighborStateAttempt::processEvent(Neighbor *neighbor, Neighbor::NeighborEv
         }
         changeState(neighbor, new NeighborStateDown, this);
     }
-    if (event == Neighbor::HELLO_RECEIVED) {
+    else if (event == Neighbor::HELLO_RECEIVED) {
         MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
         messageHandler->clearTimer(neighbor->getInactivityTimer());
         messageHandler->startTimer(neighbor->getInactivityTimer(), neighbor->getRouterDeadInterval());
