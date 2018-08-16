@@ -2554,8 +2554,9 @@ void Area::printLSDB()
     // iterate over all routerLSA in all routers inside this area
     for (unsigned int i = 0; i < routerLSAs.size(); i++) {
         OspfRouterLsa *entry = check_and_cast<OspfRouterLsa *>(routerLSAs[i]);
-        // TODO: get the router id for each routerLSA entry
-        EV_INFO << "Router LSA in Area " << areaID.str(false) << " in OSPF router with ID " << "-" << std::endl;
+
+        std::string routerId = entry->getHeader().getAdvertisingRouter().str(false);
+        EV_INFO << "Router LSA in Area " << areaID.str(false) << " in OSPF router with ID " << routerId << std::endl;
 
         // print header info
         const OspfLsaHeader &head = entry->getHeader();
