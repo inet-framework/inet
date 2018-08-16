@@ -208,7 +208,7 @@ void OspfConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig)
 
         OspfInterface *intf = new OspfInterface;
 
-        intf->setIfName(ifName);
+        intf->setInterfaceName(ifName);
         intf->setAreaId(areaID);
         intf->setIfIndex(ift, ifIndex); // should be called before calling setType()
 
