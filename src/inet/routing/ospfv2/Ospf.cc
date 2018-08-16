@@ -153,7 +153,8 @@ void Ospf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj,
                 }
 
                 // Step 2: Zero or more remote routes are not reachable any more.
-                // Find all neighbors connected to this interface and rebuild the routing table
+                // Find all neighbors connected to this interface and reset them
+                std::vector<Neighbor *> neighbors;
                 for(auto &areaId : ospfRouter->getAreaIds()) {
                     Area *area = ospfRouter->getAreaByID(areaId);
                     if(area) {
@@ -163,14 +164,19 @@ void Ospf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj,
                                 int numNeighbors = intf->getNeighborCount();
                                 for(int i = 0; i < numNeighbors; i++) {
                                     Neighbor *neighbor = intf->getNeighbor(i);
-                                    if(neighbor) {
-                                        neighbor->processEvent(Neighbor::LINK_DOWN);
+                                    if(neighbor && neighbor->getState() != Neighbor::DOWN_STATE) {
+                                        neighbor->processEvent(Neighbor::KILL_NEIGHBOR_NO_REBUILD);
+                                        neighbors.push_back(neighbor);
                                     }
                                 }
                             }
                         }
                     }
                 }
+
+                // Step 3: Rebuild the routing table
+                for(auto &neighbor : neighbors)
+                    neighbor->processEvent(Neighbor::REBUILD);
             }
             else {
                 // interface went back online. Do nothing!

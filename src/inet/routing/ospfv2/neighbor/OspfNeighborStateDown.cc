@@ -51,6 +51,10 @@ void NeighborStateDown::processEvent(Neighbor *neighbor, Neighbor::NeighborEvent
         MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
         messageHandler->startTimer(neighbor->getPollTimer(), neighbor->getInterface()->getPollInterval());
     }
+    else if(event == Neighbor::REBUILD) {
+        if (updateLsa(neighbor))
+            neighbor->getInterface()->getArea()->getRouter()->rebuildRoutingTable();
+    }
 }
 
 } // namespace ospf
