@@ -119,6 +119,12 @@ In there pre-assembled node models, dispatchers allow arbitrary protocol
 components to talk directly to each other, i.e. not only to ones in
 neighboring layers.
 
+TODO standalone modules like Ipv4RoutingTable: other modules find them
+by name, see “routingTableModule” parameter
+
+TODO examples: direct connection between protocols, layered, star
+topology
+
 .. _ug:sec:nodes:customizing-nodes:
 
 Customizing Nodes

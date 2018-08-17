@@ -397,6 +397,8 @@ To set up a tunnel, add an instance of :ned:`TunnelApp` to the node, and
 specify the protocol (IPv4 or UDP) and the remote endpoint of the tunnel
 (address and port) in parameters.
 
+TODO example: see examples/inet/tunnel
+
 .. _ug:sec:interfaces:local-loopback:
 
 Local Loopback

@@ -31,6 +31,15 @@ model allows asymmetric configurations. The energy consumer model is
 optional, and it is only used when the simulation of energy consumption
 is necessary.
 
+TODO multiple implementations are provided for each model. For different
+level of detail (abstract/fast versus detailed), different modeling
+strategy, etc.
+
+TODO explain scalar, dimensional, and “layered”
+
+TODO different signal representations for models of different detail
+levels, etc.
+
 .. _ug:sec:phy:generic-radio:
 
 Generic Radio
@@ -129,6 +138,15 @@ Some of the transmitter types available in INET:
 -  :ned:`Ieee80211ScalarTransmitter`
 
 -  :ned:`Ieee80211DimensionalTransmitter`
+
+TODO scalar radio parameters: power frquency bandwidth ...
+
+TODO dimensional parameterization:
+
+ApskDimensionalTransmitter: string dimensions = default(“time”); //
+dimensions of power: time and/or frequency string timeGains = default(“0
+string frequencyGains = default(”0 string interpolationMode
+@enum(“linear”, “sample-hold”) = default(“sample-hold”);
 
 .. _ug:sec:phy:receiver-models:
 
@@ -307,6 +325,8 @@ medium model, :ned:`UnitDiskRadioMedium`.
 
 The following ini file fragment shows an example configuration.
 
+TODO wtf about those 0 meters in the next block???
+
 .. code-block:: ini
 
    *.radioMediumType = "UnitDiskRadioMedium"
@@ -348,6 +368,87 @@ configurable level of detail: the transmitter and receiver modules have
 simulated. These radio models must be used in conjuction with
 :ned:`ApskLayeredScalarRadioMedium` and
 :ned:`ApskLayeredDimensionalRadioMedium`, respectively.
+
+TODO ApskLayeredScalarRadio and ApskLayeredDimensionalRadio types are
+missing, actually create them!!!
+
+TODO limitations for usage in real-world protocol models
+
+TODO example: 1 for flat!
+
+
+
+ .. code-block:: ini
+
+    TODO
+
+TODO fragment for a layered one!
+
+
+
+ .. code-block:: ini
+
+    ## Iteration
+    **.wlan[*].radio.**.levelOfDetail = ${detail="packet", "bit", "symbol"}
+    **.wlan[*].radio.**.modulation = ${modulation="BPSK", "QPSK", "QAM-16", "QAM-64"}
+    **.wlan[*].radio.**.fecType = ${fecType="", "ConvolutionalCoder"}
+    **.bitrate = ${bitrate=$fecType == "" ? 36Mbps : 18Mbps} # we want to have the same 36Mbps gross bitrate (applying 1/2 code rate)
+
+    ## Transmitter
+    **.wlan[*].radio.transmitterType = "ApskLayeredTransmitter"
+    **.wlan[*].radio.transmitter.encoderType = "ApskEncoder"
+    **.wlan[*].radio.transmitter.modulatorType = "ApskModulator"
+
+    # scrambler
+    #**.wlan[*].radio.transmitter.scramblerType = "TODO"
+    **.wlan[*].radio.transmitter.scrambler.seed = "1011101"
+    **.wlan[*].radio.transmitter.scrambler.generatorPolynomial = "0001001"
+
+    # FEC
+    **.wlan[*].radio.transmitter.encoder.fecEncoder.transferFunctionMatrix = "1 3"
+    **.wlan[*].radio.transmitter.encoder.fecEncoder.constraintLengthVector = "2"
+    **.wlan[*].radio.transmitter.encoder.fecEncoder.puncturingMatrix = "1; 1"
+    **.wlan[*].radio.transmitter.encoder.fecEncoder.punctureK = 1
+    **.wlan[*].radio.transmitter.encoder.fecEncoder.punctureN = 2
+
+    # interleaver
+    # **.wlan[*].radio.transmitter.encoder.interleaverType = "TODO"
+
+    ## Receiver
+    **.wlan[*].radio.receiverType = "ApskLayeredReceiver"
+    **.wlan[*].radio.receiver.errorModelType = "ApskLayeredErrorModel"
+    **.wlan[*].radio.receiver.decoderType = "ApskDecoder"
+    **.wlan[*].radio.receiver.demodulatorType = "ApskDemodulator"
+
+    # descrambler
+    #**.wlan[*].radio.receiver.scramblerType = "TODO"
+    **.wlan[*].radio.receiver.descrambler.seed = "1011101"
+    **.wlan[*].radio.receiver.descrambler.generatorPolynomial = "0001001"
+
+    # FEC
+    **.wlan[*].radio.receiver.decoder.fecDecoder.transferFunctionMatrix = "1 3"
+    **.wlan[*].radio.receiver.decoder.fecDecoder.constraintLengthVector = "2"
+    **.wlan[*].radio.receiver.decoder.fecDecoder.puncturingMatrix = "1; 1"
+    **.wlan[*].radio.receiver.decoder.fecDecoder.punctureK = 1
+    **.wlan[*].radio.receiver.decoder.fecDecoder.punctureN = 2
+
+    # Deinterleaver
+    # **.wlan[*].radio.receiver.decoder.deinterleaverType = "TODO"
+
+IEEE 802.11 Radios
+~~~~~~~~~~~~~~~~~~
+
+TODO why 802.11 needs specialized models
+
+IEEE 802.15.4 Radios
+~~~~~~~~~~~~~~~~~~~~
+
+TODO why 802.15.4 needs specialized models
+
+UWB-IR Radios
+~~~~~~~~~~~~~
+
+TODO what is it
 
 .. [1]
    Wired network interfaces could similarly contain an explicit PHY

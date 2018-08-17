@@ -76,6 +76,14 @@ corresponding NED and C++ source files.
 Customizability
 ~~~~~~~~~~~~~~~
 
+XXX mit jelent a Customizability mint \*requirement\*? ez a section most
+azt mondja, hogy sok mindenfele parameter van a modellben, vagyis
+Customizability == Lots of Parameters? ez akar a mondanivalo lenni? Meg
+leirja hogy van ilyen meg olyan fajta parameter is, de nem latszik, mit
+akar ezzel kozolni
+
+XXX kellene egy ilyen: By customizability, we mean that....
+
 Real-world communication devices often provide a wide variety of
 configuration options to allow them to be adaped to the physical
 conditions where they are required to operate. For example, a Wifi
@@ -101,6 +109,9 @@ with their own set of parameters to avoid the confusion of mixing their
 unrelated parameters. Some modules may be split into more submodules.
 This further deepens the module hierarchy, but allows better
 extensibility.
+
+XXX itt azt akarjuk igazabol mondani, hogy bizonyos koddarabok
+kicserelhetok? mert nem a parameter a lenyeg itt, ha jol ertem
 
 Extensibility
 ~~~~~~~~~~~~~
@@ -715,6 +726,23 @@ start of the intersection to the end of it.
 
 TODO other stuff
 ----------------
+
+- exploit multiple CPUs and the highly parallel GPU to increase
+performance - provide performance vs. accuracy tradeoff configuration
+options (e.g. range filter, radio mode filter, listening mode filter,
+MAC address filter) - support different level of details (see details
+below) - support different transmitters and receivers (scale from flat
+to layered models) - support different radio signal models (scale from
+range based to accurate emulation models) - support different
+propagation models (scale from immediate to accurate models) - support
+different attenuation models (scale from free space to trace based
+models) - support different antenna models (scale from isotropic to
+directional models) - support different power consumption models (scale
+from mode based to signal based models) - provide concurrent transmitter
+and receiver mode (transceiver mode) - provide burst mode (back to back)
+transmissions - provide synchronization/preamble detection - provide
+capture during reception (switching to another transmission) - provide
+finite time radio mode switching
 
 TODO: scalar vs dimensional
 

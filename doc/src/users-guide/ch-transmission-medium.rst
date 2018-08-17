@@ -286,6 +286,15 @@ which transceivers are neighbors, because they are connected by wires.
 In contrast, in wireless communication determining which transceivers
 are neighbors isn’t obvious at all.
 
+TODO: it’s about \*notification\*, i.e. giving the radio a chance to
+react. Signals are counted as interference, regardless of being neighbor
+or not!
+
+TODO: if no cache, all receivers will be notified
+
+TODO: query always happens with a \*radius\*! “which radios are in your
+X-meter proximity”
+
 In INET, a neighbor cache is an OMNeT++ simple module which provides an
 efficient way of keeping track of the neighbor relationship between
 transceivers. Its main purpose is to compute the set of affected
@@ -421,3 +430,27 @@ There are several filters that can be enabled/disabled individually:
 The corresponding module parameters are called ``rangeFilter``,
 ``radioModeFilter``, ``listeningFilter`` and
 ``macAddressFilter``. By default, all filters are turned off.
+
+TODO when is it safe to use them?
+
+TODO example
+
+Pitfalls
+--------
+
+Why a packet is not received correctly by the radio (PHY)? - radio mode
+- listening mode - range filter (or out of range) - attenuation (signal
+too weak) - interference too strong - capture not supported (radio
+already receiving another frame, and does notswitch) - sensitivity is
+too low (threshold is too high) [W] - SNIR threshold - error model
+(random) - PHY layer checksum
+
+Optimizations
+-------------
+
+turn on filters
+
+experiment with caches (neighbor cache, comm cache, limits cache – this
+one may numerically alter results)
+
+use a more abstract radio model that’s still suitable

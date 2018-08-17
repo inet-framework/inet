@@ -163,12 +163,15 @@ When the above simulation is run, each client application connects to
 the server using a :protocol:`TCP` socket. Then each one of them sends
 1MB of data, which in turn is echoed back by the server, and the
 simulation concludes. The default statistics are written to the
+``results`` folder of the simulation for later analysis.
 :file:`results` folder of the simulation for later analysis.
 
 .. _ug:sec:networks:wireless-networks:
 
 Wireless Networks
 ~~~~~~~~~~~~~~~~~
+
+TODO: AccessPoint, WirelessHost infrastructure mode
 
 Wireless network connections are not modeled with OMNeT++ connections
 due the dynamically changing nature of connectivity. For wireless
@@ -242,13 +245,16 @@ Multiple Wireless Interfaces
 All built-in wireless network nodes support multiple wireless
 interfaces, but only one is enabled by default.
 
+Traffic Generation
+~~~~~~~~~~~~~~~~~~
 .. literalinclude:: lib/Snippets.ini
    :language: ini
    :start-after: !MultipleWirelessInterfacesExample
    :end-before: !End
    :name: Multiple wireless interfaces example
 
-.. _ug:sec:networks:specifying-addresses:
+TODO scripted, synthetic, CBR, VBR, trace-based, .... TODO app[]; other
+ways
 
 Specifying Addresses
 ~~~~~~~~~~~~~~~~~~~~
@@ -313,6 +319,26 @@ packet forwarding as simply as flipping a switch.
    :start-after: !ForwardingExample
    :end-before: !End
    :name: Forwarding example
+
+Adding Routing Protocols
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+TODO internet routing and ad hoc routing
+
+Node Mobility
+~~~~~~~~~~~~~
+
+TODO
+
+Topology Generation
+~~~~~~~~~~~~~~~~~~~
+
+TODO: wizards, generated topologies
+
+Hierarchical Networks
+~~~~~~~~~~~~~~~~~~~~~
+
+TODO: nested compound modules
 
 .. [1]
    Some components require additional configuration to be provided as

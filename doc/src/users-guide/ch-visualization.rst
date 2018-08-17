@@ -184,6 +184,34 @@ visualization. This selection can be narrowed with the visualizer’s
 :par:`packetFilter`, :par:`interfaceFilter`, and :par:`nodeFilter`
 parameters.
 
+.. _ug:sec:visualization:transmission-medium:
+
+Visualizing the Transmission Medium
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+TODO revise!
+
+In order to help understanding the communication in the network the
+physical layer supports visualizing its state. The following list shows
+what can be displayed:
+
+-  ongoing transmissions
+
+-  recent successful receptions
+
+-  recent obstacle intersections and surface normal vectors
+
+The ongoing transmissions can be displayed with 3 dimensional spheres or
+with 2 dimensional rings laying in the XY plane. As the signal
+propagates through space the figure grows with it to show where the
+beginning of the signal is. The inner circle of the ring figure shows as
+the end of the signal propagates through space.
+
+The recent successful receptions are displayed as straight lines between
+the original positions of the transmission and the reception. The recent
+obstacle intersections are also displayed as straight lines from the
+start of the intersection to the end of it.
+
 .. _ug:sec:visualization:routing-tables:
 
 Visualizing Routing Tables

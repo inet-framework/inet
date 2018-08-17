@@ -91,3 +91,7 @@ The :ned:`Ieee802154Mac` type in INET is currently a parameterized
 version of a generic CSMA/CA protocol model with ACK support.
 
 There is also a :ned:`Ieee802154NarrowbandMac`.
+
+TODO why does Ieee802154NarrowbandMac exist?
+
+Ieee802154UwbIrMac – missing?

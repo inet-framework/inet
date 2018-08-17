@@ -76,11 +76,11 @@ simulation.  [1]_
 In apps, you need to specify which network layer protocol you want to
 use. For example:
 
-
-
 .. code-block:: ini
 
    **.app[*].networkProtocol = "flood"
+
+TODO all apps support that?
 
 .. _ug:sec:networkprotocols:protocols:
 
@@ -190,6 +190,32 @@ Address Resolution
 
 Address resolution is done by :ned:`GlobalArp`. If the address type is
 IPv4, :ned:`Arp` can be used instead of :ned:`GlobalArp`.
+
+TODO /////////////////////////////////////////////////////////
+
+InternetCloud
+-------------
+
+This module is an IPv4 router that can delay or drop packets (while
+retaining their order) based on which interface card the packet arrived
+on and on which interface It is leaving the cloud. The delayer module is
+replacable.
+
+By default the delayer module is  MatrixCloudDelayer which lets you
+configure the delay, drop and datarate parameters in an XML file. Packet
+flows, as defined by incoming and outgoing interface pairs, are
+independent of each other.
+
+The  InternetCloud module can be used only to model the delay between
+two hops, but it is possible to build more complex networks using
+several  InternetCloud modules.
+
+PIM
+---
+
+Protocol Independent Multicast – not a network protocol
+
+models: :ned:`PimSm`, :ned:`PimDm`; :ned:`Pim` is a compound module
 
 .. [1]
    This is possible because the implementation of these modules simply

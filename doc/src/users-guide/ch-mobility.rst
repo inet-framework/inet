@@ -38,6 +38,24 @@ on each other.
 Mobility models can also be categorized as *trace-based*,
 *deterministic*, *stochastic*, and *combining* models.
 
+TODO:
+
+initial positioning vs movement (positioning over time) – example!
+
+how to create initial layout + independent movements after
+
+model controls what: position, orientation, or both (example: combining
+facing with movement)
+
+scope: single or group (making group mobility using superpositioning and
+“attached”)
+
+simple module or compound mobility, i.e. explain how use combining
+mobility
+
+method of configuration (ini+ned, vs. xml) “some models use XML or other
+files”
+
 Using Mobility Models
 ~~~~~~~~~~~~~~~~~~~~~
 
