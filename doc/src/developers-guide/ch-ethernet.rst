@@ -1,3 +1,5 @@
+:orphan:
+
 .. _dg:cha:ethernet:
 
 The Ethernet Model

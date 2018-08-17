@@ -1,3 +1,5 @@
+:orphan:
+
 .. _dg:cha:cross-layer-communication:
 
 Cross-Layer Communication

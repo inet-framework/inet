@@ -1,3 +1,5 @@
+:orphan:
+
 .. _dg:cha:power:
 
 The Power Model

@@ -1,3 +1,5 @@
+:orphan:
+
 .. _dg:cha:mpls:
 
 The MPLS Models

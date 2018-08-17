@@ -1,3 +1,5 @@
+:orphan:
+
 .. _dg:cha:ppp:
 
 Point-to-Point Links

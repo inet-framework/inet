@@ -1,3 +1,5 @@
+:orphan:
+
 .. _dg:cha:80211:
 
 The 802.11 Model
