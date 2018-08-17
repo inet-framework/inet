@@ -151,6 +151,10 @@ void OspfInterface::setIfIndex(IInterfaceTable *ift, int index)
 
 void OspfInterface::changeState(OspfInterfaceState *newState, OspfInterfaceState *currentState)
 {
+    EV_INFO << "Changing the state of interface " << this->getIfIndex() <<
+            " from '" << getStateString(currentState->getState()) <<
+            "' to '" << getStateString(newState->getState()) << "'" << std::endl;
+
     if (previousState != nullptr) {
         delete previousState;
     }
