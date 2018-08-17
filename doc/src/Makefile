@@ -17,8 +17,6 @@ users_guide:
 
 clean:
 	rm -rf $(BUILDDIR)
-	cd users-guide && make clean
-	cd developers-guide && make clean
 
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
