@@ -99,10 +99,10 @@ simple Ipv4
         @signal[packetSentToLower](type=cPacket);
         @signal[packetReceivedFromLower](type=cPacket);
         @signal[packetDropped](type=cPacket);
-        @signal[ipv4NewMulticast](type=Ipv4Header);
-        @signal[ipv4DataOnNonrpf](type=Ipv4Header);
-        @signal[ipv4DataOnRpf](type=Ipv4Header);
-        @signal[ipv4MdataRegister](type=Packet);
+        @signal[ipv4NewMulticast](type=inet::Ipv4Header);
+        @signal[ipv4DataOnNonrpf](type=inet::Ipv4Header);
+        @signal[ipv4DataOnRpf](type=inet::Ipv4Header);
+        @signal[ipv4MdataRegister](type=inet::Packet);
         @statistic[packetDropAddressResolutionFailed](title="packet drop: address resolution failed"; source=packetDropReasonIsAddressResolutionFailed(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropHopLimitReached](title="packet drop: hop limit reached"; source=packetDropReasonIsHopLimitReached(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropForwardingDisabled](title="packet drop: forwarding disabled"; source=packetDropReasonIsForwardingDisabled(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);

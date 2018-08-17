@@ -122,14 +122,14 @@ simple EtherMac like IEtherMac
         int mtu @unit(B) = default(1500B);
         @display("i=block/rxtx");
 
-        @signal[rxPkOk](type=Packet);
+        @signal[rxPkOk](type=inet::Packet);
         @signal[txPausePkUnits](type=long);
         @signal[rxPausePkUnits](type=long);
         @signal[packetDropped](type=Packet);
-        @signal[packetSentToLower](type=Packet);
-        @signal[packetReceivedFromLower](type=Packet);
-        @signal[packetSentToUpper](type=Packet);
-        @signal[packetReceivedFromUpper](type=Packet);
+        @signal[packetSentToLower](type=inet::Packet);
+        @signal[packetReceivedFromLower](type=inet::Packet);
+        @signal[packetSentToUpper](type=inet::Packet);
+        @signal[packetReceivedFromUpper](type=inet::Packet);
         @signal[collision](type=long);
         @signal[backoffSlotsGenerated](type=long);    // slotNumber value emitted
         @signal[transmissionStateChanged](type=long); // enum=MacTransmitState

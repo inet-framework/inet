@@ -27,7 +27,7 @@ simple IpvxTrafSink like IIpvxTrafficGenerator
     parameters:
         int protocol; // value for IPv4, IPv6 protocol field, accepts only between 143 and 254
         @display("i=block/sink");
-        @signal[packetReceived](type=Packet);
+        @signal[packetReceived](type=inet::Packet);
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[endToEndDelay](title="end-to-end delay"; source="dataAge(packetReceived)"; unit=s; record=histogram,vector; interpolationmode=none);
     gates:

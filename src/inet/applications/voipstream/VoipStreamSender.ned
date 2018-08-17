@@ -48,7 +48,7 @@ simple VoipStreamSender like IApp
         string soundFile;                       // file name of input audio file
         int repeatCount = default(1);
         string traceFileName = default("");     // file name to save output stream (wav), OFF when empty
-        @signal[packetSent](type=Packet);       // TODO first chunk is VoipStreamPacket
+        @signal[packetSent](type=inet::Packet);       // TODO first chunk is VoipStreamPacket
         @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @display("i=block/departure");
     gates:

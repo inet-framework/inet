@@ -47,8 +47,8 @@ module Dcf like IDcf
 
         @class(Dcf);
         @display("i=block/queue");
-        @signal[linkBroken](type=Packet);
-        @signal[packetDropped](type=Packet);
+        @signal[linkBroken](type=inet::Packet);
+        @signal[packetDropped](type=inet::Packet);
 
     submodules:
         channelAccess: Dcaf {

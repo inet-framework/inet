@@ -37,7 +37,7 @@ simple TcpSinkAppThread
 {
     parameters:
         @display("i=block/sink");
-        @signal[packetReceived](type=Packet);
+        @signal[packetReceived](type=inet::Packet);
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[endToEndDelay](title="end-to-end delay"; source="dataAge(packetReceived)"; unit=s; record=histogram,vector; interpolationmode=none);
 }

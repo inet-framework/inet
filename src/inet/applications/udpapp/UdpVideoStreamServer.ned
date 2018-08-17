@@ -48,7 +48,7 @@ simple UdpVideoStreamServer like IApp
         volatile int packetLen @unit(B);  // length of a video packet in bytes
         volatile int videoSize @unit(B);  // length of full a video stream in bytes
         @display("i=block/app");
-        @signal[packetSent](type=Packet);
+        @signal[packetSent](type=inet::Packet);
         @signal[reqStreamBytes](type=long);
         @statistic[reqStreamBytes](title="requested stream bytes"; record=count,sum,vector; interpolationmode=none);
         @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

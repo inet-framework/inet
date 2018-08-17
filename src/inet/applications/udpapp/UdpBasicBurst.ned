@@ -118,10 +118,10 @@ simple UdpBasicBurst like IApp
         volatile double sleepDuration @unit(s); // time between bursts (zero allowed)
         volatile double sendInterval @unit(s); // time between messages during bursts; usually a random value, e.g. 0.1s+uniform(-0.001s,0.001s); zero not allowed
         double delayLimit @unit(s) = default(0s); // maximum accepted delay for a packet; packets with a bigger delay are discarded (dropped), zero value means no limit
-        @signal[packetSent](type=Packet);
-        @signal[packetReceived](type=Packet);
-        @signal[packetDropped](type=Packet);
-        @signal[outOfOrderPk](type=Packet);
+        @signal[packetSent](type=inet::Packet);
+        @signal[packetReceived](type=inet::Packet);
+        @signal[packetDropped](type=inet::Packet);
+        @signal[outOfOrderPk](type=inet::Packet);
         @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[dropPk](title="packets dropped"; source=packetDropped; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

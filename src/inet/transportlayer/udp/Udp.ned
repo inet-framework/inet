@@ -77,7 +77,7 @@ simple Udp like IUdp
         @signal[packetReceivedFromUpper](type=cPacket);
         @signal[packetSentToLower](type=cPacket);
         @signal[packetReceivedFromLower](type=cPacket);
-        @signal[packetDropped](type=Packet);
+        @signal[packetDropped](type=inet::Packet);
         @signal[packetSent](type=cPacket);
         @signal[packetReceived](type=cPacket);
         @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

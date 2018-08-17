@@ -32,8 +32,8 @@ simple NextHopRoutingTable like IRoutingTable
                           // interface address; should be left empty ("") for hosts
         bool forwarding = default(true);  // turns IP forwarding on/off
         bool multicastForwarding = default(false); // turns multicast forwarding on/off
-        @signal[routeAdded](type=NextHopRoute);
-        @signal[routeDeleted](type=NextHopRoute);
-        @signal[routeChanged](type=NextHopRoute);
+        @signal[routeAdded](type=inet::NextHopRoute);
+        @signal[routeDeleted](type=inet::NextHopRoute);
+        @signal[routeChanged](type=inet::NextHopRoute);
 }
 

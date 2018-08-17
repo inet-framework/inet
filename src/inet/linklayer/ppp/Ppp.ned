@@ -52,9 +52,9 @@ simple Ppp
         @display("i=block/rxtx");
 
         @signal[transmissionStateChanged](type=long);    // 1:transmit, 0:idle
-        @signal[rxPkOk](type=Packet);
-        @signal[packetDropped](type=Packet);
-        @signal[packetSentToLower](type=Packet);
+        @signal[rxPkOk](type=inet::Packet);
+        @signal[packetDropped](type=inet::Packet);
+        @signal[packetSentToLower](type=inet::Packet);
         @signal[packetReceivedFromLower](type=cPacket);
         @signal[packetSentToUpper](type=cPacket);
         @signal[packetReceivedFromUpper](type=cPacket);

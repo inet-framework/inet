@@ -49,7 +49,7 @@ simple AckingMac extends MacProtocolBase like ILinkLayer, IMacProtocol
         double ackTimeout @unit(s) = default(100ms);
 
         @class(AckingMac);
-        @signal[linkBroken](type=Packet);
+        @signal[linkBroken](type=inet::Packet);
         @statistic[linkBroken](title="link break"; source=linkBroken; record=count; interpolationmode=none);
         @statistic[passedUpPk](title="packets passed to higher layer"; source=packetSentToUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[sentDownPk](title="packets sent to lower layer"; source=packetSentToLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
