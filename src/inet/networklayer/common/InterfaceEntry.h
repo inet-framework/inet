@@ -87,7 +87,7 @@ class INET_API InterfaceEntryChangeDetails : public cObject
     InterfaceEntry *getInterfaceEntry() const { return ie; }
     int getFieldId() const { return field; }
     virtual std::string str() const override;
-    virtual std::string detailedInfo() const override;
+    virtual std::string detailedInfo() const;
 };
 
 /**
@@ -165,7 +165,7 @@ class INET_API InterfaceEntry : public cModule
     InterfaceEntry();
     virtual ~InterfaceEntry();
     virtual std::string str() const override;
-    virtual std::string detailedInfo() const override;
+    virtual std::string detailedInfo() const;
     virtual std::string getInterfaceFullPath() const;
 
     /**

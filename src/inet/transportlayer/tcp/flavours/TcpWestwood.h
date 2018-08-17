@@ -37,7 +37,7 @@ class INET_API TcpWestwoodStateVariables : public TcpBaseAlgStateVariables
     TcpWestwoodStateVariables();
     ~TcpWestwoodStateVariables();
     virtual std::string str() const override;
-    virtual std::string detailedInfo() const override;
+    virtual std::string detailedInfo() const;
 
     uint32 ssthresh;    ///< slow start threshold
 

@@ -37,7 +37,7 @@ class INET_API TcpVegasStateVariables : public TcpBaseAlgStateVariables
     TcpVegasStateVariables();
     ~TcpVegasStateVariables();
     virtual std::string str() const override;
-    virtual std::string detailedInfo() const override;
+    virtual std::string detailedInfo() const;
 
     uint32 v_recoverypoint;
     simtime_t v_cwnd_changed;    // last time cwnd changes because of a rtx.

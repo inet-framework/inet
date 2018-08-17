@@ -35,7 +35,7 @@ class INET_API TcpBaseAlgStateVariables : public TcpStateVariables
   public:
     TcpBaseAlgStateVariables();
     virtual std::string str() const override;
-    virtual std::string detailedInfo() const override;
+    virtual std::string detailedInfo() const;
 
     /// retransmit count
     //@{

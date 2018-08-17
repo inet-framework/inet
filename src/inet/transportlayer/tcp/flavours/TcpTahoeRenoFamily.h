@@ -34,7 +34,7 @@ class INET_API TcpTahoeRenoFamilyStateVariables : public TcpBaseAlgStateVariable
   public:
     TcpTahoeRenoFamilyStateVariables();
     virtual std::string str() const override;
-    virtual std::string detailedInfo() const override;
+    virtual std::string detailedInfo() const;
     virtual void setSendQueueLimit(uint32 newLimit);
 
     uint32 ssthresh;    ///< slow start threshold

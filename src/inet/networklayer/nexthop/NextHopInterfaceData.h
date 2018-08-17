@@ -51,7 +51,7 @@ class INET_API NextHopInterfaceData : public InterfaceProtocolData
   public:
     NextHopInterfaceData() { metric = 0; }
     virtual std::string str() const override;
-    virtual std::string detailedInfo() const override;
+    virtual std::string detailedInfo() const;
 
     /** @name Getters */
     //@{

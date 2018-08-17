@@ -124,7 +124,7 @@ class INET_API Area : public cObject
     void recheckSummaryLSAs(std::vector<RoutingTableEntry *>& newRoutingTable);
 
     std::string str() const override;
-    std::string detailedInfo() const override;
+    std::string detailedInfo() const;
 
   private:
     SummaryLsa *originateSummaryLSA(const SummaryLsa *summaryLSA);
