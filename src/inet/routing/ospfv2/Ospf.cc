@@ -169,6 +169,8 @@ void Ospf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj,
                                         neighbors.push_back(neighbor);
                                     }
                                 }
+                                // should be called after the above 'for' loop
+                                intf->processEvent(OspfInterface::INTERFACE_DOWN);
                             }
                         }
                     }
