@@ -38,12 +38,10 @@ class VideoBase(Directive):
     optional_arguments = 0
     final_argument_whitespace = False
     option_spec = {
-        'height': directives.nonnegative_int,
-        'width': directives.nonnegative_int,
+        'height': directives.unchanged,
+        'width': directives.unchanged,
         'align': align,
     }
-    default_width = -1
-    default_height = -1
 
     def run(self):
         env = self.state.document.settings.env
@@ -51,15 +49,14 @@ class VideoBase(Directive):
 
         self.options['video_id'] = directives.uri(self.arguments[0])
         if not self.options.get('width'):
-            self.options['width'] = self.default_width
+            self.options['width'] = ''
         if not self.options.get('height'):
-            self.options['height'] = self.default_height
+            self.options['height'] = ''
         if not self.options.get('align'):
             self.options['align'] = 'center'
         if not self.options.get('caption'):
             self.options['caption'] = ''.join(self.content)
 
-#            self.options['align'] = 'left'
         if builder_name == 'latex':
             return [nodes.raw('', self.latex % self.options, format='latex')]
 
@@ -71,18 +68,18 @@ class VideoBase(Directive):
 
 class Youtube(VideoBase):
     html = '<div style="text-align: %(align)s"><iframe src="http://www.youtube.com/embed/%(video_id)s" \
-    width="%(width)u" height="%(height)u" frameborder="0" \
+    width="%(width)s" height="%(height)s" frameborder="0" \
     webkitAllowFullScreen mozallowfullscreen allowfullscreen \
     class="align-%(align)s"></iframe><div style="margin-top: 5px; margin-bottom: 5px"><i>%(caption)s</i></div></div>'
     latex = '\\vskip 0.5em \\textbf{YouTube -- %(caption)s} \\newline \\url{http://www.youtube.com/embed/%(video_id)s}\\vskip 0.5em'
 
 class Vimeo(VideoBase):
     html = '<iframe src="http://player.vimeo.com/video/%(video_id)s" \
-    width="%(width)u" height="%(height)u" frameborder="0" \
+    width="%(width)s" height="%(height)s" frameborder="0" \
     webkitAllowFullScreen mozallowfullscreen allowFullScreen \
     class="align-%(align)s"></iframe>'
 
 class Video(VideoBase):
     html = '<video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" \
-    src="%(video_id)s" width="%(width)u" height="%(height)u" class="align-%(align)s"></video>'
+    src="%(video_id)s" width="%(width)s" height="%(height)s" class="align-%(align)s"></video>'
     latex = '\\vskip 0.5em \\textbf{Video -- %(caption)s} \\vskip 0.5em'
