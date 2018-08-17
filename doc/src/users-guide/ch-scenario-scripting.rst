@@ -95,15 +95,11 @@ documentation.
 The script is usually placed in a separate file, and specified like
 this:
 
-
-
 .. code-block:: ini
 
    *.scenarioManager.script = xmldoc("scenario.xml")
 
 Short scripts can also be written inline:
-
-
 
 .. code-block:: ini
 

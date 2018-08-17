@@ -1,5 +1,5 @@
 # You can set these variables from the command line.
-SPHINXOPTS    =
+SPHINXOPTS    = -j8
 SPHINXBUILD   = sphinx-build
 SPHINXPROJ    = INETFramework
 SOURCEDIR     = .
@@ -16,6 +16,7 @@ users_guide:
 	cd users-guide && make
 
 clean:
+	rm -rf $(BUILDDIR)
 	cd users-guide && make clean
 	cd developers-guide && make clean
 

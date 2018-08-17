@@ -14,3 +14,7 @@ Table of Contents
    developers-guide/index
    NED Reference <https://omnetpp.org/doc/inet/api-current/neddoc/>
    ← Back to the INET Site <https://inet.omnetpp.org>
+
+.. raw:: html
+
+   <div style="height: 200px"></div>
