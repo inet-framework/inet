@@ -32,15 +32,15 @@ void InterfaceStateBackup::processEvent(OspfInterface *intf, OspfInterface::Ospf
     if (event == OspfInterface::NEIGHBOR_CHANGE) {
         calculateDesignatedRouter(intf);
     }
-    if (event == OspfInterface::INTERFACE_DOWN) {
+    else if (event == OspfInterface::INTERFACE_DOWN) {
         intf->reset();
         changeState(intf, new InterfaceStateDown, this);
     }
-    if (event == OspfInterface::LOOP_INDICATION) {
+    else if (event == OspfInterface::LOOP_INDICATION) {
         intf->reset();
         changeState(intf, new InterfaceStateLoopback, this);
     }
-    if (event == OspfInterface::HELLO_TIMER) {
+    else if (event == OspfInterface::HELLO_TIMER) {
         if (intf->getType() == OspfInterface::BROADCAST) {
             intf->sendHelloPacket(Ipv4Address::ALL_OSPF_ROUTERS_MCAST);
         }
@@ -53,7 +53,7 @@ void InterfaceStateBackup::processEvent(OspfInterface *intf, OspfInterface::Ospf
         }
         intf->getArea()->getRouter()->getMessageHandler()->startTimer(intf->getHelloTimer(), intf->getHelloInterval());
     }
-    if (event == OspfInterface::ACKNOWLEDGEMENT_TIMER) {
+    else if (event == OspfInterface::ACKNOWLEDGEMENT_TIMER) {
         intf->sendDelayedAcknowledgements();
     }
 }

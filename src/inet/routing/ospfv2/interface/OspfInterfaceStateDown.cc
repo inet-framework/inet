@@ -74,7 +74,7 @@ void InterfaceStateDown::processEvent(OspfInterface *intf, OspfInterface::OspfIn
                 break;
         }
     }
-    if (event == OspfInterface::LOOP_INDICATION) {
+    else if (event == OspfInterface::LOOP_INDICATION) {
         intf->reset();
         changeState(intf, new InterfaceStateLoopback, this);
     }

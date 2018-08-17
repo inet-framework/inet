@@ -33,11 +33,11 @@ void InterfaceStatePointToPoint::processEvent(OspfInterface *intf, OspfInterface
         intf->reset();
         changeState(intf, new InterfaceStateDown, this);
     }
-    if (event == OspfInterface::LOOP_INDICATION) {
+    else if (event == OspfInterface::LOOP_INDICATION) {
         intf->reset();
         changeState(intf, new InterfaceStateLoopback, this);
     }
-    if (event == OspfInterface::HELLO_TIMER) {
+    else if (event == OspfInterface::HELLO_TIMER) {
         if (intf->getType() == OspfInterface::VIRTUAL) {
             if (intf->getNeighborCount() > 0) {
                 intf->sendHelloPacket(intf->getNeighbor(0)->getAddress(), VIRTUAL_LINK_TTL);
@@ -48,7 +48,7 @@ void InterfaceStatePointToPoint::processEvent(OspfInterface *intf, OspfInterface
         }
         intf->getArea()->getRouter()->getMessageHandler()->startTimer(intf->getHelloTimer(), intf->getHelloInterval());
     }
-    if (event == OspfInterface::ACKNOWLEDGEMENT_TIMER) {
+    else if (event == OspfInterface::ACKNOWLEDGEMENT_TIMER) {
         intf->sendDelayedAcknowledgements();
     }
 }
