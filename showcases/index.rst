@@ -17,7 +17,6 @@ the simulations (NED, ini and other files) and the web pages are in the
 
 Recently released showcases:
 
-- :doc:`wireless/analogmodel/doc/index`
 - :doc:`wireless/crosstalk/doc/index`
 - :doc:`wireless/coexistence/doc/index`
 - :doc:`visualizer/spectrum/doc/index`
@@ -35,3 +34,10 @@ All showcases:
    routing/index
    visualizer/index
    wireless/index
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+   :caption: All showcases
+
+   */*/doc/index
