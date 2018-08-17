@@ -29,7 +29,7 @@ void InterfaceStateLoopback::processEvent(OspfInterface *intf, OspfInterface::Os
         intf->reset();
         changeState(intf, new InterfaceStateDown, this);
     }
-    if (event == OspfInterface::UNLOOP_INDICATION) {
+    else if (event == OspfInterface::UNLOOP_INDICATION) {
         changeState(intf, new InterfaceStateDown, this);
     }
 }
