@@ -36,12 +36,6 @@ void NeighborStateExchangeStart::processEvent(Neighbor *neighbor, Neighbor::Neig
         MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
         neighbor->reset();
         messageHandler->clearTimer(neighbor->getInactivityTimer());
-        changeStateAndRebuild(neighbor, new NeighborStateDown, this);
-    }
-    else if(event == Neighbor::KILL_NEIGHBOR_NO_REBUILD) {
-        MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
-        neighbor->reset();
-        messageHandler->clearTimer(neighbor->getInactivityTimer());
         changeState(neighbor, new NeighborStateDown, this);
     }
     else if (event == Neighbor::INACTIVITY_TIMER) {
@@ -50,11 +44,11 @@ void NeighborStateExchangeStart::processEvent(Neighbor *neighbor, Neighbor::Neig
             MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
             messageHandler->startTimer(neighbor->getPollTimer(), neighbor->getInterface()->getPollInterval());
         }
-        changeStateAndRebuild(neighbor, new NeighborStateDown, this);
+        changeState(neighbor, new NeighborStateDown, this);
     }
     else if (event == Neighbor::ONEWAY_RECEIVED) {
         neighbor->reset();
-        changeStateAndRebuild(neighbor, new NeighborStateInit, this);
+        changeState(neighbor, new NeighborStateInit, this);
     }
     else if (event == Neighbor::HELLO_RECEIVED) {
         MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
@@ -64,7 +58,7 @@ void NeighborStateExchangeStart::processEvent(Neighbor *neighbor, Neighbor::Neig
     else if (event == Neighbor::IS_ADJACENCY_OK) {
         if (!neighbor->needAdjacency()) {
             neighbor->reset();
-            changeStateAndRebuild(neighbor, new NeighborStateTwoWay, this);
+            changeState(neighbor, new NeighborStateTwoWay, this);
         }
     }
     else if (event == Neighbor::DD_RETRANSMISSION_TIMER) {
@@ -77,7 +71,7 @@ void NeighborStateExchangeStart::processEvent(Neighbor *neighbor, Neighbor::Neig
         neighbor->sendDatabaseDescriptionPacket();
         MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
         messageHandler->clearTimer(neighbor->getDDRetransmissionTimer());
-        changeStateAndRebuild(neighbor, new NeighborStateExchange, this);
+        changeState(neighbor, new NeighborStateExchange, this);
     }
 }
 

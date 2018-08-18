@@ -37,23 +37,19 @@ void NeighborStateDown::processEvent(Neighbor *neighbor, Neighbor::NeighborEvent
         messageHandler->clearTimer(neighbor->getPollTimer());
         neighbor->getInterface()->sendHelloPacket(neighbor->getAddress(), ttl);
         messageHandler->startTimer(neighbor->getInactivityTimer(), neighbor->getRouterDeadInterval());
-        changeStateAndRebuild(neighbor, new NeighborStateAttempt, this);
+        changeState(neighbor, new NeighborStateAttempt, this);
     }
     else if (event == Neighbor::HELLO_RECEIVED) {
         MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
         messageHandler->clearTimer(neighbor->getPollTimer());
         messageHandler->startTimer(neighbor->getInactivityTimer(), neighbor->getRouterDeadInterval());
-        changeStateAndRebuild(neighbor, new NeighborStateInit, this);
+        changeState(neighbor, new NeighborStateInit, this);
     }
     else if (event == Neighbor::POLL_TIMER) {
         int ttl = (neighbor->getInterface()->getType() == OspfInterface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
         neighbor->getInterface()->sendHelloPacket(neighbor->getAddress(), ttl);
         MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
         messageHandler->startTimer(neighbor->getPollTimer(), neighbor->getInterface()->getPollInterval());
-    }
-    else if(event == Neighbor::REBUILD) {
-        if (updateLsa(neighbor))
-            neighbor->getInterface()->getArea()->getRouter()->rebuildRoutingTable();
     }
 }
 
