@@ -69,6 +69,7 @@ class Ospf : public cSimpleModule, protected cListener, public ILifecycle
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
     virtual void createOspfRouter();
+    void handleInterfaceDown(const InterfaceEntry *ie);
 };
 
 } // namespace ospf

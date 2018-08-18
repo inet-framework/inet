@@ -794,6 +794,10 @@ RouterLsa *Area::originateRouterLSA()
         if (intf->getState() == OspfInterface::DOWN_STATE) {
             continue;
         }
+        InterfaceEntry *orig_intf = ift->getInterfaceById(intf->getIfIndex());
+        if(orig_intf && !orig_intf->isUp())
+            continue;
+
         if ((intf->getState() == OspfInterface::LOOPBACK_STATE) &&
             ((intf->getType() != OspfInterface::POINTTOPOINT) ||
              (intf->getAddressRange().address != NULL_IPV4ADDRESS)))
