@@ -28,11 +28,6 @@ namespace ospf {
 void NeighborState::changeState(Neighbor *neighbor, NeighborState *newState, NeighborState *currentState)
 {
     neighbor->changeState(newState, currentState);
-}
-
-void NeighborState::changeStateAndRebuild(Neighbor *neighbor, NeighborState *newState, NeighborState *currentState)
-{
-    neighbor->changeState(newState, currentState);
 
     if ((currentState->getState() == Neighbor::FULL_STATE) || (newState->getState() == Neighbor::FULL_STATE))
         if (updateLsa(neighbor))

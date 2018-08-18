@@ -222,7 +222,7 @@ void Ospf::handleInterfaceDown(const InterfaceEntry *ie)
         }
     }
 
-    // Step 2: find the OspfInterface associated with the ie
+    // Step 2: find the OspfInterface associated with the ie and take it down
     OspfInterface *foundIntf = nullptr;
     for(auto &areaId : ospfRouter->getAreaIds()) {
         Area *area = ospfRouter->getAreaByID(areaId);
@@ -234,30 +234,11 @@ void Ospf::handleInterfaceDown(const InterfaceEntry *ie)
                     break;
                 }
             }
-            if(foundIntf)
+            if(foundIntf) {
+                foundIntf->processEvent(OspfInterface::INTERFACE_DOWN);
                 break;
-        }
-    }
-
-    if(foundIntf) {
-        // Step 3: Zero or more remote routes are not reachable any more.
-        // Find all neighbors connected to this interface and reset them
-        std::vector<Neighbor *> neighbors;
-        int numNeighbors = foundIntf->getNeighborCount();
-        for(int i = 0; i < numNeighbors; i++) {
-            Neighbor *neighbor = foundIntf->getNeighbor(i);
-            if(neighbor && neighbor->getState() != Neighbor::DOWN_STATE) {
-                neighbor->processEvent(Neighbor::KILL_NEIGHBOR_NO_REBUILD);
-                neighbors.push_back(neighbor);
             }
         }
-
-        // Step 4: Rebuild the routing table
-        for(auto &neighbor : neighbors)
-            neighbor->processEvent(Neighbor::REBUILD);
-
-        // Step 5: now we can take the interface down
-        foundIntf->processEvent(OspfInterface::INTERFACE_DOWN);
     }
 }
 
