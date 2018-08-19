@@ -717,7 +717,7 @@ void Router::rebuildRoutingTable()
     bool hasTransitAreas = false;
     std::vector<OspfRoutingTableEntry *> newTable;
 
-    EV_INFO << "Rebuilding routing table:\n";
+    EV_INFO << "--> Rebuilding routing table:\n";
 
     for (uint32_t i = 0; i < areaCount; i++) {
         // creating a 'OspfRoutingTableEntry' entry for each directly-connected routes.
@@ -851,7 +851,7 @@ void Router::rebuildRoutingTable()
     for (auto &entry : oldTable)
         delete (entry);
 
-    EV_INFO << "Routing table was rebuilt.\n"
+    EV_INFO << "<-- Routing table was rebuilt.\n"
             << "Results:\n";
 
     for (auto &entry : routingTable)
