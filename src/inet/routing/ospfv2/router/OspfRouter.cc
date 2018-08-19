@@ -708,7 +708,7 @@ void Router::rebuildRoutingTable()
     std::vector<RoutingTableEntry *> newTable;
     unsigned long i;
 
-    EV_INFO << "Rebuilding routing table:\n";
+    EV_INFO << "--> Rebuilding routing table:\n";
 
     for (i = 0; i < areaCount; i++) {
         areas[i]->calculateShortestPathTree(newTable);
@@ -775,7 +775,7 @@ void Router::rebuildRoutingTable()
         delete (oldTable[i]);
     }
 
-    EV_INFO << "Routing table was rebuilt.\n"
+    EV_INFO << "<-- Routing table was rebuilt.\n"
             << "Results:\n";
 
     routeCount = routingTable.size();
