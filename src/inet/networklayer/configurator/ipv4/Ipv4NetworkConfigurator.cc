@@ -530,6 +530,7 @@ void Ipv4NetworkConfigurator::assignAddresses(Topology& topology)
                     if(itt == assignedAddressToInterfaceEntryMap.end()) {
                         assignedAddressToInterfaceEntryMap[completeAddress] = nullptr;
                         assignedInterfaceAddresses.push_back(completeAddress);
+                        EV_DEBUG << "reserving Ipv4 address " << Ipv4Address(completeAddress) << ".\n";
                     }
                 }
             }
