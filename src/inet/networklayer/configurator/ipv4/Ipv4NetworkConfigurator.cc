@@ -389,6 +389,30 @@ void Ipv4NetworkConfigurator::collectCompatibleInterfaces(const std::vector<Inte
 
 void Ipv4NetworkConfigurator::assignAddresses(Topology& topology)
 {
+    if(configureEachGroupSeparatly) {
+        std::map<int /*group id*/, std::vector<LinkInfo *>> networkGroups;
+        for (auto & selectedLink : topology.linkInfos) {
+            int groupId = selectedLink->groupId;
+            auto itt = networkGroups.find(groupId);
+            if(itt == networkGroups.end()) {
+                std::vector<LinkInfo *> collection = {selectedLink};
+                networkGroups[groupId] = collection;
+            }
+            else {
+                itt->second.push_back(selectedLink);
+            }
+        }
+
+        for(auto group : networkGroups)
+            assignAddressesPerGroup(group.second);
+    }
+    else {
+        assignAddressesPerGroup(topology.linkInfos);
+    }
+}
+
+void Ipv4NetworkConfigurator::assignAddressesPerGroup(std::vector<LinkInfo *> links)
+{
     int bitSize = sizeof(uint32) * 8;
     std::vector<uint32> assignedNetworkAddresses;
     std::vector<uint32> assignedNetworkNetmasks;
@@ -396,7 +420,7 @@ void Ipv4NetworkConfigurator::assignAddresses(Topology& topology)
     std::map<uint32, InterfaceEntry *> assignedAddressToInterfaceEntryMap;
 
     // iterate through all links and process them separately one by one
-    for (auto & selectedLink : topology.linkInfos) {
+    for (auto & selectedLink : links) {
         std::vector<InterfaceInfo *> unconfiguredInterfaces;
         for (auto & element : selectedLink->interfaceInfos)
             unconfiguredInterfaces.push_back(static_cast<InterfaceInfo *>(element));
@@ -474,7 +498,7 @@ void Ipv4NetworkConfigurator::assignAddresses(Topology& topology)
                         goto found;
                 }
             }
-          found: if (netmaskLength < minimumNetmaskLength || netmaskLength > maximumNetmaskLength)
+            found: if (netmaskLength < minimumNetmaskLength || netmaskLength > maximumNetmaskLength)
                 throw cRuntimeError("Failed to find address prefix (using %s with specified bits %s) and netmask (length from %d bits to %d bits) for interface %s and %d other interface(s). Please refine your parameters and try again!",
                         Ipv4Address(mergedAddress).str().c_str(), Ipv4Address(mergedAddressSpecifiedBits).str().c_str(), minimumNetmaskLength, maximumNetmaskLength,
                         compatibleInterfaces[0]->interfaceEntry->getInterfaceFullPath().c_str(), compatibleInterfaces.size() - 1);

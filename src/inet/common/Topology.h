@@ -75,6 +75,8 @@ class INET_API Topology : public cOwnedObject
         int moduleId;
         double weight;
         bool enabled;
+        bool visited;
+        int groupId;
         std::vector<Link *> inLinks;
         std::vector<Link *> outLinks;
 
@@ -86,7 +88,15 @@ class INET_API Topology : public cOwnedObject
         /**
          * Constructor
          */
-        Node(int moduleId = -1) { this->moduleId = moduleId; weight = 0; enabled = true; dist = INFINITY; outPath = nullptr; }
+        Node(int moduleId = -1) {
+            this->moduleId = moduleId;
+            weight = 0;
+            enabled = true;
+            visited = false;
+            groupId = 0;
+            dist = INFINITY;
+            outPath = nullptr;
+        }
         virtual ~Node() {}
 
         /** @name Node attributes: weight, enabled state, correspondence to modules. */
@@ -113,6 +123,28 @@ class INET_API Topology : public cOwnedObject
          * weighted shortest path finder methods of Topology.
          */
         void setWeight(double d) { weight = d; }
+
+        /**
+         * Returns the ID of the network to which this node corresponds.
+         * All nodes that belong to a connected network have the same group id.
+         */
+        double getGroupId() const { return groupId; }
+
+        /**
+         * Sets the ID of the network to which this node corresponds.
+         * All nodes that belong to a connected network have the same group id.
+         */
+        void setGroupId(int g) { groupId = g; }
+
+        /**
+         * Returns true if the node has been visited before in the group find traversal
+         */
+        bool isVisited() const { return visited; }
+
+        /**
+         * mark this node as visited or not visited in the group traversal
+         */
+        void setVisit(bool v) { visited = v; }
 
         /**
          * Returns true of this node is enabled. This has significance
@@ -339,6 +371,7 @@ class INET_API Topology : public cOwnedObject
 
     void unlinkFromSourceNode(Link *link);
     void unlinkFromDestNode(Link *link);
+    void findGroups(Node *);
 
   public:
     /** @name Constructors, destructor, assignment */
