@@ -66,6 +66,7 @@ void NetworkConfiguratorBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         minLinkWeight = par("minLinkWeight");
+        configureEachGroupSeparatly = par("configureEachGroupSeparatly").boolValue();
         configuration = par("config");
     }
 }
@@ -75,6 +76,25 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
     // extract topology
     topology.extractByProperty("networkNode");
     EV_DEBUG << "Topology found " << topology.getNumNodes() << " nodes\n";
+
+    // print group information
+    std::map<int /*group id*/, std::vector<Node *>> networkGroups;
+    for (int i = 0; i < topology.getNumNodes(); i++) {
+        Node *node = (Node *)topology.getNode(i);
+        int groupId = node->getGroupId();
+        auto itt = networkGroups.find(groupId);
+        if(itt == networkGroups.end()) {
+            std::vector<Node *> collection = {node};
+            networkGroups[groupId] = collection;
+        }
+        else {
+            itt->second.push_back(node);
+        }
+    }
+    if(networkGroups.size() == 1)
+        EV_DEBUG << "all network nodes belong to the same group. \n";
+    else
+        EV_DEBUG << "there exists " << networkGroups.size() << " groups. \n";
 
     // extract nodes, fill in interfaceTable and routingTable members in node
     for (int i = 0; i < topology.getNumNodes(); i++) {
@@ -100,6 +120,7 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
                         interfacesSeen.insert(interfaceEntry);
                         // create a new network link
                         LinkInfo *linkInfo = new LinkInfo();
+                        linkInfo->groupId = node->getGroupId();
                         topology.linkInfos.push_back(linkInfo);
                         // store interface as belonging to the new network link
                         InterfaceInfo *interfaceInfo = createInterfaceInfo(topology, node, isBridgeNode(node) ? nullptr : linkInfo, interfaceEntry);

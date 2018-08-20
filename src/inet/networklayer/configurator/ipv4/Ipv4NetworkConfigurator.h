@@ -229,6 +229,7 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
     virtual InterfaceInfo *findInterfaceOnLinkByNodeAddress(LinkInfo *linkInfo, Ipv4Address address);
     virtual LinkInfo *findLinkOfInterface(Topology& topology, InterfaceEntry *interfaceEntry);
     virtual IRoutingTable *findRoutingTable(NetworkConfiguratorBase::Node *node) override;
+    void assignAddressesPerGroup(std::vector<LinkInfo *> links);
 
     // helpers for address assignment
     static bool compareInterfaceInfos(InterfaceInfo *i, InterfaceInfo *j);
