@@ -403,8 +403,13 @@ void Ipv4NetworkConfigurator::assignAddresses(Topology& topology)
             }
         }
 
-        for(auto group : networkGroups)
+        int groupCount = 1;
+        for(auto group : networkGroups) {
+            EV_DEBUG << "--> configuring group " << groupCount << ". \n";
             assignAddressesPerGroup(group.second);
+            EV_DEBUG << "<-- configuring group " << groupCount << ". \n";
+            groupCount++;
+        }
     }
     else {
         assignAddressesPerGroup(topology.linkInfos);
