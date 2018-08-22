@@ -227,7 +227,7 @@ void OspfConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig)
         else {
             delete intf;
             throw cRuntimeError("Unknown interface type '%s' for interface %s (ifIndex=%d) at %s",
-                    interfaceType.c_str(), ifName, ifIndex, ifConfig.getSourceLocation());
+                    interfaceType.c_str(), ifName.c_str(), ifIndex, ifConfig.getSourceLocation());
         }
 
         if(intfModeStr == "Active")
@@ -237,7 +237,7 @@ void OspfConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig)
         else {
             delete intf;
             throw cRuntimeError("Unknown interface mode '%s' for interface %s (ifIndex=%d) at %s",
-                    interfaceType.c_str(), ifName, ifIndex, ifConfig.getSourceLocation());
+                    interfaceType.c_str(), ifName.c_str(), ifIndex, ifConfig.getSourceLocation());
         }
 
         std::string ospfCrcMode = par("crcMode").stdstringValue();
