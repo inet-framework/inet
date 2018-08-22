@@ -34,6 +34,7 @@ class INET_API RedMarker : public RedDropper
 
   protected:
     double *marks;
+    bool markNext;
 
   protected:
 
