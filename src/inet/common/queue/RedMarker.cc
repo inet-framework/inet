@@ -39,7 +39,7 @@ Define_Module(RedMarker);
 
 RedMarker::RedMarker()
 {
-
+  markNext = false;
 
 }
 
@@ -70,21 +70,61 @@ void RedMarker::initialize()
 
 void RedMarker::handleMessage(cMessage *msg)
 {
-  cPacket *packet = check_and_cast<cPacket *>(msg);
+  Packet *packet = check_and_cast<Packet *>(msg);
+
+  auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
+
+  if (protocol == &Protocol::ipv4)
+  {
+    packet->trimFront();
+    const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
+
+    //congestion experiencd CE
+    int ect = ipv4Header->getExplicitCongestionNotification();
+//      packet->insertAtFront(ipv4Header);
+
+// if packet supports marking (ECT(1) or ECT(0))
+    if ((ect & 0x01) || (ect & 0x02))
+    {
+      // if next packet should be marked and it is not
+      if (markNext && !(ect & 0x03))
+      {
+        markPacket(packet);
+        markNext = false;
+      }
+      else if (ect & 0x03)
+      {
+        if (shouldMark(packet))
+        {
+          markNext = true;
+        }
+      }
+      else
+      {
+        shouldMark(packet);
+
+      }
+      sendOut(packet);
+      return;
+    }
+
+  }
+
 
   if (shouldDrop(packet)){
     dropPacket(packet);
     return;
   }
-//  else if (shouldMark(packet))
-//  {
-//    markPacket(check_and_cast<Packet *>(packet));
-//  }
+
 
    sendOut(packet);
 }
-
-bool RedMarker::shouldDrop(cPacket *packet)
+/** It is almost copy&paste from RedDropper::shouldDrop.
+ *  Marks packet if avg queue lenght > maxth or random  when  minth < avg < maxth.
+ *  Drops when size is bigger then max allowed size.
+ *  Returns true when drop or mark occurs, false otherwise.
+ * **/
+bool RedMarker::shouldMark(cPacket *packet)
 {
     const int i = packet->getArrivalGate()->getIndex();
     ASSERT(i >= 0 && i < numGates);
@@ -118,18 +158,19 @@ bool RedMarker::shouldDrop(cPacket *packet)
             EV << "Random early packet drop (avg queue len=" << avg << ", pa=" << pb << ")\n";
             count[i] = 0;
             markPacket(check_and_cast<Packet *>(packet));
-            return false;
+            return true;
         }
     }
     else if (avg >= maxth) {
         EV << "Avg queue len " << avg << " >= maxth, dropping packet.\n";
         count[i] = 0;
         markPacket(check_and_cast<Packet *>(packet));
-        return false;
+        return true;
     }
     else if (queueLength >= maxth) {    // maxth is also the "hard" limit
         EV << "Queue len " << queueLength << " >= maxth, dropping packet.\n";
         count[i] = 0;
+        dropPacket(packet);
         return true;
     }
     else
@@ -140,7 +181,7 @@ bool RedMarker::shouldDrop(cPacket *packet)
     return false;
 }
 
-bool RedMarker::shouldMark(cPacket *packet)
+bool RedMarker::shouldDrop(cPacket *packet)
 {
   const int i = packet->getArrivalGate()->getIndex();
    ASSERT(i >= 0 && i < numGates);
@@ -206,7 +247,8 @@ bool RedMarker::markPacket(Packet *packet)
       packet->trimFront();
       const auto& ipv4Header = packet->removeAtFront<Ipv4Header>();
 
-      ipv4Header->setExplicitCongestionNotification(1);
+      //congestion experiencd CE
+      ipv4Header->setExplicitCongestionNotification(3);
       packet->insertAtFront(ipv4Header);
       return true;
   }
