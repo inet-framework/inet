@@ -395,7 +395,7 @@ void IGMPTester::sendIGMP(Packet *msg, InterfaceEntry *ie, Ipv4Address dest)
     msg->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::ipv4);
 
     EV << "IGMPTester: Sending: " << msg << ".\n";
-    send(msg, "igmpOut");
+    send(msg, "upperLayerOut");
 }
 
 void IGMPTester::parseIPv4AddressVector(const char *str, Ipv4AddressVector &result)
