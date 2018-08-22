@@ -25,6 +25,7 @@
 #include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 #include "inet/transportlayer/tcp/TcpReceiveQueue.h"
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
+#include "inet/networklayer/common/EcnTag_m.h"
 
 namespace inet {
 
@@ -480,6 +481,11 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *packet, const Ptr<c
         //"
 
         if (payloadLength > 0) {
+          auto ecnTag = packet->findTag<EcnInd>();
+
+          if (ecnTag->getExplicitCongestionNotification() == IP_ECN_CE){
+             state->ecnCe = true;
+          }
             // check for full sized segment
             if ((uint32_t)payloadLength == state->snd_mss || (uint32_t)payloadLength + B(tcpseg->getHeaderLength() - TCP_MIN_HEADER_LENGTH).get() == state->snd_mss)
                 state->full_sized_segment_counter++;
@@ -817,6 +823,12 @@ TcpEventCode TcpConnection::processSegmentInListen(Packet *packet, const Ptr<con
         if (tcpseg->getHeaderLength() > TCP_MIN_HEADER_LENGTH) // Header options present?
             readHeaderOptions(tcpseg);
 
+        if (state->ecnEnabled && (tcpseg->getEceBit() && tcpseg->getCwrBit()))
+        {
+          state->ecnSetupSynReceived = true;
+          state->ecnActive = true;
+        }
+
         state->ack_now = true;
         sendSynAck();
         startSynRexmitTimer();
@@ -1008,6 +1020,13 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *packet, const Ptr<co
 
             if (tcpseg->getHeaderLength() > TCP_MIN_HEADER_LENGTH) // Header options present?
                 readHeaderOptions(tcpseg);
+
+            //RFC 3168 - ECN enabled and received ECN-setup SYN-ACK packet
+            //ECN setup -> ECE = 1; CRW = 0
+            if (state->ecnEnabled && (tcpseg->getEceBit() && !tcpseg->getCwrBit()))
+            {
+              state->ecnActive = true;
+            }
 
             // notify tcpAlgorithm (it has to send ACK of SYN) and app layer
             state->ack_now = true;

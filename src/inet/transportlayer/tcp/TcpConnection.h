@@ -113,6 +113,13 @@ enum TcpEventCode {
     // are handled in TcpAlgorithm.
 };
 
+enum IpEcnCode {
+  IP_ECN_NOT_ECT,
+  IP_ECN_ECT_1,
+  IP_ECN_ECT_0,
+  IP_ECN_CE,
+};
+
 /** @name Timeout values */
 //@{
 #define TCP_TIMEOUT_CONN_ESTAB        75  // 75 seconds
@@ -261,6 +268,12 @@ class INET_API TcpStateVariables : public cObject
     uint32 usedRcvBuffer;    // current amount of used bytes in tcp receive queue
     uint32 freeRcvBuffer;    // current amount of free bytes in tcp receive queue
     uint32 tcpRcvQueueDrops;    // number of drops in tcp receive queue
+
+    bool ecnEnabled; // the user requests it
+    bool ecnSetupSynReceived; // indicates the next ACK-SYN should have ECN-setup (ECE = 1; CRW = 0) set
+    bool ecnActive; // ecn echoing is used on this connection (assumes ecnEnabled=true and successful handshake)
+
+    bool ecnCe;
 };
 
 /**

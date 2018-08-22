@@ -209,6 +209,7 @@ simple Tcp like ITcp
         string tcpAlgorithmClass @enum("TcpVegas", "TcpWestwood", "TcpNewReno", "TcpReno", "TcpTahoe", "TcpNoCongestionControl") = default("TcpReno");
         bool recordStats = default(true); // recording of seqNum etc. into output vectors enabled/disabled
         bool useDataNotification = default(false); // turn the notifications for arrived data on or off
+        bool ecnEnabled = default(false);
         @display("i=block/wheelbarrow");
         @signal[tcpConnectionAdded];
         @signal[tcpConnectionRemoved];
