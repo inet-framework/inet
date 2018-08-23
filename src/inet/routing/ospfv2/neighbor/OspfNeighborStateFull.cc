@@ -45,6 +45,10 @@ void NeighborStateFull::processEvent(Neighbor *neighbor, Neighbor::NeighborEvent
             messageHandler->startTimer(neighbor->getPollTimer(), neighbor->getInterface()->getPollInterval());
         }
         changeState(neighbor, new NeighborStateDown, this);
+
+        if (neighbor->getInterface()->getState() == OspfInterface::BACKUP_STATE &&
+                neighbor->getInterface()->getDesignatedRouter().routerID == neighbor->getNeighborID())
+            neighbor->getInterface()->processEvent(OspfInterface::NEIGHBOR_CHANGE);
     }
     else if (event == Neighbor::ONEWAY_RECEIVED) {
         neighbor->reset();
