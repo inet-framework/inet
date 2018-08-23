@@ -5,18 +5,12 @@ SPHINXPROJ    = INETFramework
 SOURCEDIR     = .
 BUILDDIR      = _build
 
-.PHONY: developers_guide users_guide help server
+.PHONY: pdf html clean deploy help server
 
-all: developers_guide users_guide
-
-developers_guide:
-	cd developers-guide && make
-
-users_guide:
-	cd users-guide && make
+all: html pdf
 
 clean:
-	rm -rf $(BUILDDIR)
+	@rm -rf $(BUILDDIR)
 
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
@@ -24,7 +18,7 @@ help:
 include tools/sphinx_deployment.mk
 
 server: Makefile
-	@sphinx-autobuild "$(SOURCEDIR)" "$(BUILDDIR)/html" $(SPHINXOPTS) $(O) -r .git
+	@sphinx-autobuild --host 0.0.0.0 --port 8000 "$(SOURCEDIR)" "$(BUILDDIR)/html" $(SPHINXOPTS) $(O) -r .git
 
 pdf: Makefile
 	@$(SPHINXBUILD) -M latexpdf "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
@@ -34,4 +28,3 @@ html: Makefile
 	@# copy the video files also to the output directory. This should be copied by the SPHINXBUILD itself, so this must be FIXED later.
 	@rsync -a --copy-links --prune-empty-dirs --exclude '_docs' --include '*/' --include '*.wav' --include '*.mp3' --include '*.mp4' --include '*.m4v' --exclude '*' tutorials _build/html
 	@rsync -a --copy-links --prune-empty-dirs --exclude '_docs' --include '*/' --include '*.wav' --include '*.mp3' --include '*.mp4' --include '*.m4v' --exclude '*' showcases _build/html
-

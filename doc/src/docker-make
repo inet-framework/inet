@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# NOTE: the tutorials and showcases dir must be sperately mounted because symbolic links do now work if they point out from a mounted volume
+
+# USAGE: docker-make target where target can be 'html', 'pdf', 'server', 'deploy'
+# when 'server' is used, the live website is available at http://localhost:8000
+
+docker run --rm -i -t -p 8000:8000 -v "${PWD}/../../tutorials:/doc/tutorials" -v "${PWD}/../../showcases:/doc/showcases" -v "${PWD}:/doc" -u "$(id -u):$(id -g)" omnetpp/docker-sphinx make $*

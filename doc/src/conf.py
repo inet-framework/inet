@@ -46,7 +46,7 @@ extensions = [
     'sphinx.ext.githubpages',
     'sphinx.ext.graphviz',
     'sphinx.ext.imgconverter',
-    'sphinxcontrib.doxylink',
+#    'sphinxcontrib.doxylink',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -218,6 +218,11 @@ texinfo_documents = [
      author, 'INETFramework', 'One line description of project.',
      'Miscellaneous'),
 ]
+
+# external link configuration
+extlinks = {
+  'wiki': ('https://en.wikipedia.org/wiki/%s', '')
+}
 
 # -- Doxylink config ---------------------------------------------------------
 
