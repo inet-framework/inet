@@ -411,10 +411,12 @@ lexers['ini'] = IniLexer(startinline=True)
 #######################################################################
 # -- setup the customizations
 import tools.video
+import tools.audio
 
 def setup(app):
     app.connect("source-read", opp_preprocess)
     app.add_directive('youtube', tools.video.Youtube)
     app.add_directive('vimeo', tools.video.Vimeo)
     app.add_directive('video', tools.video.Video)
+    app.add_directive('audio', tools.audio.Audio)
 
