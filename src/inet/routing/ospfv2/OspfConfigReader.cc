@@ -167,8 +167,11 @@ void OspfConfigReader::loadAreaFromXML(const cXMLElement& asConfig, AreaId areaI
             addressRange.address = ipv4AddressFromAddressString(getMandatoryFilledAttribute(*areaDetail, "address"));
             addressRange.mask = ipv4NetmaskFromAddressString(getMandatoryFilledAttribute(*areaDetail, "mask"));
             addressRange.address = addressRange.address & addressRange.mask;
-            std::string status = getMandatoryFilledAttribute(*areaDetail, "status");
-            area->addAddressRange(addressRange, status == "Advertise");
+            const char *adv = areaDetail->getAttribute("advertise");
+            if(!adv)
+                area->addAddressRange(addressRange, true);
+            else
+                area->addAddressRange(addressRange, std::string(adv) == "true");
         }
         else if (nodeName == "Stub") {
             if (areaID == BACKBONE_AREAID)
