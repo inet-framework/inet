@@ -116,51 +116,46 @@ void Area::addAddressRange(Ipv4AddressRange addressRange, bool advertise)
 
 std::string Area::str() const
 {
+    return areaID.str(false);
+}
+
+std::string Area::info() const
+{
     std::stringstream out;
-    out << "areaID: " << areaID.str(false);
+
+    out << "areaID: " << areaID.str(false) << ", ";
+    out << "transitCapability: " << (transitCapability ? "true" : "false") << ", ";
+    out << "externalRoutingCapability: " << (externalRoutingCapability ? "true" : "false") << ", ";
+    out << "stubDefaultCost: " << stubDefaultCost << ", ";
+    for (uint32_t i = 0; i < areaAddressRanges.size(); i++) {
+        out << "addressRanges[" << i << "]: ";
+        out << areaAddressRanges[i].address.str(false);
+        out << "/" << areaAddressRanges[i].mask.str(false) << " ";
+    }
+    for (uint32_t i = 0; i < associatedInterfaces.size(); i++) {
+        out << "interface[" << i << "]: ";
+        out << associatedInterfaces[i]->getAddressRange().address.str(false);
+        out << "/" << associatedInterfaces[i]->getAddressRange().mask.str(false) << " ";
+    }
+
     return out.str();
 }
 
 std::string Area::detailedInfo() const
 {
     std::stringstream out;
-    int i;
-    out << "\n    areaID: " << areaID.str(false) << ", ";
-    out << "transitCapability: " << (transitCapability ? "true" : "false") << ", ";
-    out << "externalRoutingCapability: " << (externalRoutingCapability ? "true" : "false") << ", ";
-    out << "stubDefaultCost: " << stubDefaultCost << "\n";
-    int addressRangeNum = areaAddressRanges.size();
-    for (i = 0; i < addressRangeNum; i++) {
-        out << "    addressRanges[" << i << "]: ";
-        out << areaAddressRanges[i].address.str(false);
-        out << "/" << areaAddressRanges[i].mask.str(false) << "\n";
-    }
-    int interfaceNum = associatedInterfaces.size();
-    for (i = 0; i < interfaceNum; i++) {
-        out << "    interface[" << i << "]: address: ";
-        out << associatedInterfaces[i]->getAddressRange().address.str(false);
-        out << "/" << associatedInterfaces[i]->getAddressRange().mask.str(false) << "\n";
-    }
 
-    out << "\n";
-    out << "    Database:\n";
-    out << "      RouterLSAs:\n";
-    long lsaCount = routerLSAs.size();
-    for (i = 0; i < lsaCount; i++) {
-        out << "        " << *routerLSAs[i] << "\n";
-    }
-    out << "      NetworkLSAs:\n";
-    lsaCount = networkLSAs.size();
-    for (i = 0; i < lsaCount; i++) {
-        out << "        " << *networkLSAs[i] << "\n";
-    }
-    out << "      SummaryLSAs:\n";
-    lsaCount = summaryLSAs.size();
-    for (i = 0; i < lsaCount; i++) {
-        out << "        " << *summaryLSAs[i] << "\n";
-    }
+    out << info();
 
-    out << "--------------------------------------------------------------------------------";
+    out << "RouterLSAs:\n";
+    for (auto &entry : routerLSAs)
+        out << "        " << entry << "\n";
+    out << "NetworkLSAs:\n";
+    for (auto &entry : networkLSAs)
+        out << "        " << entry << "\n";
+    out << "SummaryLSAs:\n";
+    for (auto &entry : summaryLSAs)
+        out << "        " << entry << "\n";
 
     return out.str();
 }

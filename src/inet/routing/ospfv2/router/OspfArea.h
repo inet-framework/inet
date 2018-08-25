@@ -125,6 +125,7 @@ class INET_API Area : public cObject
     void recheckSummaryLSAs(std::vector<RoutingTableEntry *>& newRoutingTable);
 
     std::string str() const override;
+    std::string info() const override;
     std::string detailedInfo() const override;
 
   private:
@@ -151,7 +152,7 @@ class INET_API Area : public cObject
 
 inline std::ostream& operator<<(std::ostream& ostr, Area& area)
 {
-    ostr << area.detailedInfo();
+    ostr << area.info();
     return ostr;
 }
 
