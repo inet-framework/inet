@@ -3,27 +3,27 @@
 
   <!-- Areas -->
   <Area id="0.0.0.0">
-    <AddressRange address="BBR[0]%eth0" mask="255.255.255.0" status="Advertise" />
+    <AddressRange address="BBR[0]%eth0" mask="255.255.255.0" />
   </Area>
 
   <Area id="0.0.0.1">
-    <AddressRange address="S1R[0]%eth0" mask="S1R[0]%eth0" status="Advertise" />
-    <AddressRange address="S1R[0]%eth1" mask="S1R[0]%eth1" status="Advertise" />
-    <AddressRange address="S1R[1]%eth0" mask="S1R[1]%eth0" status="Advertise" />
-    <AddressRange address="S1R[1]%eth1" mask="S1R[1]%eth1" status="Advertise" />
-    <AddressRange address="S1R[1]%eth2" mask="S1R[1]%eth2" status="Advertise" />
-    <AddressRange address="S1R[0]%eth0" mask="255.255.255.0" status="Advertise" />
+    <AddressRange address="S1R[0]%eth0" mask="S1R[0]%eth0" />
+    <AddressRange address="S1R[0]%eth1" mask="S1R[0]%eth1" />
+    <AddressRange address="S1R[1]%eth0" mask="S1R[1]%eth0" />
+    <AddressRange address="S1R[1]%eth1" mask="S1R[1]%eth1" />
+    <AddressRange address="S1R[1]%eth2" mask="S1R[1]%eth2" />
+    <AddressRange address="S1R[0]%eth0" mask="255.255.255.0" />
   </Area>
 
   <Area id="0.0.0.2">
 <!--
 -->
-    <AddressRange address="S2R[0]%eth0" mask="S2R[0]%eth0" status="Advertise" />
-    <AddressRange address="S2R[0]%eth1" mask="S2R[0]%eth1" status="Advertise" />
-    <AddressRange address="S2R[1]%eth0" mask="S2R[1]%eth0" status="Advertise" />
-    <AddressRange address="S2R[1]%eth1" mask="S2R[1]%eth1" status="Advertise" />
-    <AddressRange address="S2R[1]%eth2" mask="S2R[1]%eth2" status="Advertise" />
-    <AddressRange address="S2R[0]%eth0" mask="255.255.255.0" status="Advertise" />
+    <AddressRange address="S2R[0]%eth0" mask="S2R[0]%eth0" />
+    <AddressRange address="S2R[0]%eth1" mask="S2R[0]%eth1" />
+    <AddressRange address="S2R[1]%eth0" mask="S2R[1]%eth0" />
+    <AddressRange address="S2R[1]%eth1" mask="S2R[1]%eth1" />
+    <AddressRange address="S2R[1]%eth2" mask="S2R[1]%eth2" />
+    <AddressRange address="S2R[0]%eth0" mask="255.255.255.0" />
   </Area>
 
   <!-- Routers -->
