@@ -142,14 +142,15 @@ std::ostream& operator<<(std::ostream& ostr, const OspfLsaHeader& lsaHeader)
 
 std::ostream& operator<<(std::ostream& ostr, const OspfNetworkLsa& lsa)
 {
-    ostr << "Mask: " << lsa.getNetworkMask();
     unsigned int cnt = lsa.getAttachedRoutersArraySize();
+    ostr << "numAttachedRouters: " << cnt << ", ";
+    ostr << "Attached routers: ";
     if (cnt) {
-        ostr << ", Attached routers:";
         for (unsigned int i = 0; i < cnt; i++) {
-            ostr << " " << lsa.getAttachedRouters(i);
+            ostr << lsa.getAttachedRouters(i) << " ";
         }
     }
+    ostr << ", Mask: " << lsa.getNetworkMask();
     ostr << ", " << lsa.getHeader();
     return ostr;
 }
@@ -186,13 +187,14 @@ std::ostream& operator<<(std::ostream& ostr, const Link& link)
 
 std::ostream& operator<<(std::ostream& ostr, const OspfRouterLsa& lsa)
 {
+    ostr << "flags: ";
     if (lsa.getV_VirtualLinkEndpoint())
-        ostr << "V, ";
+        ostr << "V ";
     if (lsa.getE_ASBoundaryRouter())
-        ostr << "E, ";
+        ostr << "E ";
     if (lsa.getB_AreaBorderRouter())
-        ostr << "B, ";
-    ostr << "numberOfLinks: " << lsa.getNumberOfLinks() << ", ";
+        ostr << "B ";
+    ostr << ", numberOfLinks: " << lsa.getNumberOfLinks() << ", ";
     unsigned int cnt = lsa.getLinksArraySize();
     if (cnt) {
         ostr << "Links: {";
