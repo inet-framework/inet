@@ -153,7 +153,7 @@ simple Ospf like IOspf
         																			 // Passive: the interface is advertised, but no OSPF message is send out
                 
         int referenceBandwidth @unit(bps) = default(1e8bps);   // reference bandwidth for cost calculation
-        int interfaceOutputCost = default(1);  // cost of link on the interface (1-1000), 0 means use reference bandwidth
+        int interfaceOutputCost = default(0);  // cost of link on the interface (1-1000), 0 means use reference bandwidth
         int linkCost = default(1);  // cost of link (1-1000)
         int externalInterfaceOutputCost = default(1);  // cost of link (1-1000)
         string externalInterfaceOutputType = default("");  // Type1|Type2        
