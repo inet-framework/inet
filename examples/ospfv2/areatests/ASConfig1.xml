@@ -3,7 +3,7 @@
 
   <!-- Areas -->
   <Area id="0.0.0.0">
-    <AddressRange address="192.168.1.0" mask="255.255.255.0" status="Advertise" />
+    <AddressRange address="192.168.1.0" mask="255.255.255.0" />
   </Area>
 
   <!-- Routers -->

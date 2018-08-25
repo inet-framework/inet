@@ -3,10 +3,10 @@
 
   <!-- Areas -->
   <Area id="0.0.0.0">
-    <AddressRange address="H1" mask="H1" status="Advertise" />
-    <AddressRange address="H2" mask="H2" status="Advertise" />
-    <AddressRange address="R1>R2" mask="R1>R2" status="Advertise" />
-    <AddressRange address="R2>R1" mask="R2>R1" status="Advertise" />
+    <AddressRange address="H1" mask="H1" />
+    <AddressRange address="H2" mask="H2" />
+    <AddressRange address="R1>R2" mask="R1>R2" />
+    <AddressRange address="R2>R1" mask="R2>R1" />
   </Area>
 
   <!-- Routers -->

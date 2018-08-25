@@ -3,12 +3,12 @@
 
   <!-- Areas -->
   <Area id="0.0.0.0">
-    <AddressRange address="R1>N1" mask="R1>N1/" status="Advertise" />
-    <AddressRange address="R1>N2" mask="R1>N2/" status="Advertise" />
-    <AddressRange address="R1>N3" mask="R1>N3/" status="Advertise" />
-    <AddressRange address="R2>N4" mask="R2>N4/" status="Advertise" />
-    <AddressRange address="R3>N5" mask="R3>N5/" status="Advertise" />
-    <AddressRange address="R4>N6" mask="R4>N6/" status="Advertise" />
+    <AddressRange address="R1>N1" mask="R1>N1/" />
+    <AddressRange address="R1>N2" mask="R1>N2/" />
+    <AddressRange address="R1>N3" mask="R1>N3/" />
+    <AddressRange address="R2>N4" mask="R2>N4/" />
+    <AddressRange address="R3>N5" mask="R3>N5/" />
+    <AddressRange address="R4>N6" mask="R4>N6/" />
   </Area>
 
   <!-- Routers -->

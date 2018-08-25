@@ -3,34 +3,34 @@
 
   <!-- Areas -->
   <Area id="0.0.0.0">
-    <AddressRange address="BBR[0]%eth1" mask="BBR[0]%eth1" status="Advertise" />
-    <AddressRange address="BBR[1]%eth0" mask="BBR[1]%eth0" status="Advertise" />
-    <AddressRange address="BBR[1]%eth1" mask="BBR[1]%eth1" status="Advertise" />
-    <AddressRange address="BBR[2]%eth1" mask="BBR[2]%eth1" status="Advertise" />
+    <AddressRange address="BBR[0]%eth1" mask="BBR[0]%eth1" />
+    <AddressRange address="BBR[1]%eth0" mask="BBR[1]%eth0" />
+    <AddressRange address="BBR[1]%eth1" mask="BBR[1]%eth1" />
+    <AddressRange address="BBR[2]%eth1" mask="BBR[2]%eth1" />
   </Area>
 
   <Area id="0.0.0.1">
-    <AddressRange address="Stub1.B[0]%eth0" mask="Stub1.B[0]%eth0" status="Advertise" />
-    <AddressRange address="Stub1.B[0]%eth1" mask="Stub1.B[0]%eth1" status="Advertise" />
-    <AddressRange address="Stub1.B[0]%eth2" mask="Stub1.B[0]%eth2" status="Advertise" />
-    <AddressRange address="Stub1.R[0]%eth0" mask="Stub1.R[0]%eth0" status="Advertise" />
-    <AddressRange address="Stub1.R[0]%eth1" mask="Stub1.R[0]%eth1" status="Advertise" />
-    <AddressRange address="Stub1.R[0]%eth2" mask="Stub1.R[0]%eth2" status="Advertise" />
-    <AddressRange address="Stub1.R[1]%eth0" mask="Stub1.R[1]%eth0" status="Advertise" />
-    <AddressRange address="Stub1.R[1]%eth1" mask="Stub1.R[1]%eth1" status="Advertise" />
-    <AddressRange address="Stub1.R[1]%eth2" mask="Stub1.R[1]%eth2" status="Advertise" />
+    <AddressRange address="Stub1.B[0]%eth0" mask="Stub1.B[0]%eth0" />
+    <AddressRange address="Stub1.B[0]%eth1" mask="Stub1.B[0]%eth1" />
+    <AddressRange address="Stub1.B[0]%eth2" mask="Stub1.B[0]%eth2" />
+    <AddressRange address="Stub1.R[0]%eth0" mask="Stub1.R[0]%eth0" />
+    <AddressRange address="Stub1.R[0]%eth1" mask="Stub1.R[0]%eth1" />
+    <AddressRange address="Stub1.R[0]%eth2" mask="Stub1.R[0]%eth2" />
+    <AddressRange address="Stub1.R[1]%eth0" mask="Stub1.R[1]%eth0" />
+    <AddressRange address="Stub1.R[1]%eth1" mask="Stub1.R[1]%eth1" />
+    <AddressRange address="Stub1.R[1]%eth2" mask="Stub1.R[1]%eth2" />
   </Area>
 
   <Area id="0.0.0.2">
-    <AddressRange address="Stub2.B[0]%eth0" mask="Stub2.B[0]%eth0" status="Advertise" />
-    <AddressRange address="Stub2.B[0]%eth1" mask="Stub2.B[0]%eth1" status="Advertise" />
-    <AddressRange address="Stub2.B[0]%eth2" mask="Stub2.B[0]%eth2" status="Advertise" />
-    <AddressRange address="Stub2.R[0]%eth0" mask="Stub2.R[0]%eth0" status="Advertise" />
-    <AddressRange address="Stub2.R[0]%eth1" mask="Stub2.R[0]%eth1" status="Advertise" />
-    <AddressRange address="Stub2.R[0]%eth2" mask="Stub2.R[0]%eth2" status="Advertise" />
-    <AddressRange address="Stub2.R[1]%eth0" mask="Stub2.R[1]%eth0" status="Advertise" />
-    <AddressRange address="Stub2.R[1]%eth1" mask="Stub2.R[1]%eth1" status="Advertise" />
-    <AddressRange address="Stub2.R[1]%eth2" mask="Stub2.R[1]%eth2" status="Advertise" />
+    <AddressRange address="Stub2.B[0]%eth0" mask="Stub2.B[0]%eth0" />
+    <AddressRange address="Stub2.B[0]%eth1" mask="Stub2.B[0]%eth1" />
+    <AddressRange address="Stub2.B[0]%eth2" mask="Stub2.B[0]%eth2" />
+    <AddressRange address="Stub2.R[0]%eth0" mask="Stub2.R[0]%eth0" />
+    <AddressRange address="Stub2.R[0]%eth1" mask="Stub2.R[0]%eth1" />
+    <AddressRange address="Stub2.R[0]%eth2" mask="Stub2.R[0]%eth2" />
+    <AddressRange address="Stub2.R[1]%eth0" mask="Stub2.R[1]%eth0" />
+    <AddressRange address="Stub2.R[1]%eth1" mask="Stub2.R[1]%eth1" />
+    <AddressRange address="Stub2.R[1]%eth2" mask="Stub2.R[1]%eth2" />
   </Area>
 
   <!-- Routers -->
