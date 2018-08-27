@@ -194,7 +194,7 @@ void ExtUdp::bind(int socketId, const L3Address& localAddress, int localPort)
         socket = it->second;
     struct sockaddr_in sockaddr;
     sockaddr.sin_family = PF_INET;
-    sockaddr.sin_port = localPort;
+    sockaddr.sin_port = htons(localPort);
     sockaddr.sin_addr.s_addr = htonl(localAddress.toIpv4().getInt());
 #if !defined(linux) && !defined(__linux) && !defined(_WIN32)
         sockaddr.sin_len = sizeof(struct sockaddr_in);
@@ -214,7 +214,7 @@ void ExtUdp::connect(int socketId, const L3Address& remoteAddress, int remotePor
         socket = it->second;
     struct sockaddr_in sockaddr;
     sockaddr.sin_family = PF_INET;
-    sockaddr.sin_port = remotePort;
+    sockaddr.sin_port = htons(remotePort);
     sockaddr.sin_addr.s_addr = htonl(remoteAddress.toIpv4().getInt());
 #if !defined(linux) && !defined(__linux) && !defined(_WIN32)
     sockaddr.sin_len = sizeof(struct sockaddr_in);
@@ -253,7 +253,7 @@ void ExtUdp::processPacketFromUpper(Packet *packet)
         if (auto addressReq = packet->findTag<L3AddressReq>()) {
             struct sockaddr_in sockaddr;
             sockaddr.sin_family = PF_INET;
-            sockaddr.sin_port = packet->getTag<L4PortReq>()->getDestPort();
+            sockaddr.sin_port = htons(packet->getTag<L4PortReq>()->getDestPort());
             sockaddr.sin_addr.s_addr = htonl(addressReq->getDestAddress().toIpv4().getInt());
 #if !defined(linux) && !defined(__linux) && !defined(_WIN32)
             sockaddr.sin_len = sizeof(struct sockaddr_in);
@@ -292,7 +292,7 @@ void ExtUdp::processPacketFromLower(int fd)
         auto packet = new Packet("ExtUdp", data);
         packet->addTag<SocketInd>()->setSocketId(socket->socketId);
         packet->addTag<L3AddressInd>()->setSrcAddress(Ipv4Address(ntohl(sockaddr.sin_addr.s_addr)));
-        packet->addTag<L4PortInd>()->setSrcPort(sockaddr.sin_port);
+        packet->addTag<L4PortInd>()->setSrcPort(ntohs(sockaddr.sin_port));
         emit(packetReceivedSignal, packet);
         send(packet, "appOut");
         emit(packetSentToUpperSignal, packet);
