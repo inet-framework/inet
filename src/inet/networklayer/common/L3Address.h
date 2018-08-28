@@ -25,6 +25,7 @@
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/networklayer/common/ModuleIdAddress.h"
 #include "inet/networklayer/common/ModulePathAddress.h"
+#include "inet/networklayer/contract/clns/CLNSAddress.h"
 
 namespace inet {
 
@@ -36,7 +37,7 @@ class IL3AddressType;
  * different address implementations should not subclass this class, they should rather provide
  * conversions to and from this class.
  *
- * @see Ipv4Address, Ipv6Address, MacAddress, ModulePathAddress, ModuleIdAddress
+ * @see Ipv4Address, Ipv6Address, CLNSAddress, MacAddress, ModulePathAddress, ModuleIdAddress
  */
 class INET_API L3Address
 {
@@ -45,6 +46,7 @@ class INET_API L3Address
         NONE,
         IPv4,
         IPv6,
+        CLNS,
         MAC,
         MODULEPATH,
         MODULEID
@@ -67,12 +69,14 @@ class INET_API L3Address
     L3Address(const MacAddress& addr) { set(addr); }
     L3Address(const ModuleIdAddress& addr) { set(addr); }
     L3Address(const ModulePathAddress& addr) { set(addr); }
+    L3Address(const CLNSAddress& addr) { set(addr); }
 
     void set(const Ipv4Address& addr) { set(IPv4, addr.getInt()); }
     void set(const Ipv6Address& addr);
     void set(const MacAddress& addr) { set(MAC, addr.getInt()); }
     void set(const ModuleIdAddress& addr) { set(MODULEID, addr.getId()); }
     void set(const ModulePathAddress& addr) { set(MODULEPATH, addr.getId()); }
+    void set(const CLNSAddress& addr);
     void reset() { set(NONE, 0); }
 
     Ipv4Address toIpv4() const { return getType() == NONE ? Ipv4Address() : Ipv4Address(get(IPv4)); }
@@ -80,6 +84,7 @@ class INET_API L3Address
     MacAddress toMac() const { return getType() == NONE ? MacAddress() : MacAddress(get(MAC)); }
     ModuleIdAddress toModuleId() const { return getType() == NONE ? ModuleIdAddress() : ModuleIdAddress(get(MODULEID)); }
     ModulePathAddress toModulePath() const { return getType() == NONE ? ModulePathAddress() : ModulePathAddress(get(MODULEPATH)); }
+    CLNSAddress toCLNS() const { return getType() == NONE ? CLNSAddress() : CLNSAddress(hi, lo); }
 
     std::string str() const;
     AddressType getType() const;
