@@ -40,6 +40,7 @@ class Ipv6InterfaceData;
 class TrillInterfaceData;
 class IsisInterfaceData;
 class Ieee8021dInterfaceData;
+class CLNSInterfaceData;
 
 enum McastSourceFilterMode { MCAST_INCLUDE_SOURCES, MCAST_EXCLUDE_SOURCES };
 
@@ -125,6 +126,7 @@ class INET_API InterfaceEntry : public cModule
     IsisInterfaceData *isisdata = nullptr;    ///< ISIS-specific interface info
     TrillInterfaceData *trilldata = nullptr;    ///< TRILL-specific interface info
     Ieee8021dInterfaceData *ieee8021ddata = nullptr;
+    CLNSInterfaceData *clnsdata = nullptr;
     std::vector<MacEstimateCostProcess *> estimateCostProcessArray;
 
   private:
@@ -139,7 +141,7 @@ class INET_API InterfaceEntry : public cModule
         F_NAME, F_NODE_IN_GATEID, F_NODE_OUT_GATEID, F_NETW_GATEIDX,
         F_LOOPBACK, F_BROADCAST, F_MULTICAST, F_POINTTOPOINT,
         F_DATARATE, F_MTU, F_MACADDRESS, F_TOKEN,
-        F_IPV4_DATA, F_IPV6_DATA, F_NEXTHOP_DATA, F_ISIS_DATA, F_TRILL_DATA, F_IEEE8021D_DATA
+        F_IPV4_DATA, F_IPV6_DATA, F_NEXTHOP_DATA, F_ISIS_DATA, F_TRILL_DATA, F_IEEE8021D_DATA, F_CLNS_DATA
     };
 
   protected:
@@ -229,6 +231,7 @@ class INET_API InterfaceEntry : public cModule
     TrillInterfaceData *trillData() const { return trilldata; }
     IsisInterfaceData *isisData() const { return isisdata; }
     Ieee8021dInterfaceData *ieee8021dData() const { return ieee8021ddata; }
+    CLNSInterfaceData *clnsData() const { return clnsdata; }
     //@}
 
     virtual void joinMulticastGroup(const L3Address& address) const;    // XXX why const method?
@@ -244,6 +247,7 @@ class INET_API InterfaceEntry : public cModule
     virtual void setTrillInterfaceData(TrillInterfaceData *p);
     virtual void setIsisInterfaceData(IsisInterfaceData *p);
     virtual void setIeee8021dInterfaceData(Ieee8021dInterfaceData *p);
+    virtual void setCLNSData(CLNSInterfaceData *p);
     //@}
 
     /** @name access to the cost process estimation  */
