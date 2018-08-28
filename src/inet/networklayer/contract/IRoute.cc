@@ -60,7 +60,12 @@ const char *IRoute::sourceTypeName(SourceType sourceType)
 
         case AODV:
             return "AODV";
-
+        case EIGRP:
+            return "EIGRP";
+        case LISP:
+            return "LISP";
+        case BABEL:
+            return "BABEL";
         default:
             return "???";
     }
