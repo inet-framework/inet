@@ -264,6 +264,43 @@ const L3Address InterfaceEntry::getNetworkAddress() const
     return getModulePathAddress();
 }
 
+bool InterfaceEntry::hasNetworkAddress(const L3Address& address) const
+{
+    switch(address.getType()) {
+    case L3Address::NONE:
+        return false;
+
+    case L3Address::IPv4:
+#ifdef WITH_IPv4
+        return ipv4data != nullptr && ipv4data->getIPAddress() == address.toIPv4();
+#else
+        return false;
+#endif // ifdef WITH_IPv4
+
+    case L3Address::IPv6:
+#ifdef WITH_IPv6
+        return ipv6data != nullptr && ipv6data->hasAddress(address.toIPv6());
+#else
+        return false;
+#endif // ifdef WITH_IPv6
+
+    case L3Address::MAC:
+        return getMacAddress() == address.toMAC();
+
+    case L3Address::MODULEID:
+    case L3Address::MODULEPATH:
+#ifdef WITH_GENERIC
+        return genericNetworkProtocolData != nullptr && genericNetworkProtocolData->getAddress() == address;
+#else
+        return false;
+#endif // ifdef WITH_GENERIC
+
+    default:
+        break;
+    }
+    return false;
+}
+
 void InterfaceEntry::setIpv4Data(Ipv4InterfaceData *p)
 {
 #ifdef WITH_IPv4
