@@ -43,8 +43,10 @@ enum IPProtocolId
     IP_PROT_RSVP = 46;
     IP_PROT_IPv6_ICMP = 58;
     IP_PROT_NONE = 59;
+    IP_PROT_EIGRP = 88;
     IP_PROT_OSPF = 89;
     IP_PROT_PIM = 103;
+    IP_PROT_VRRP = 112;
     IP_PROT_SCTP = 132;
     IP_PROT_DSR  = 48;
     IP_PROT_MANET = 138;
