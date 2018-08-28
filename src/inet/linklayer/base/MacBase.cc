@@ -118,8 +118,8 @@ void MacBase::registerInterface()    //XXX registerInterfaceIfInterfaceTableExis
 
 void MacBase::handleMessageWhenDown(cMessage *msg)
 {
-    if (isUpperMsg(msg) || msg->isSelfMessage()) {    //FIXME remove 1st part -- it is not possible to ensure that no msg is sent by upper layer (race condition!!!)
-        throw cRuntimeError("Message received from higher layer while interface is off");
+    if (msg->isSelfMessage()) {
+        throw cRuntimeError("Self message received while interface is off");
     }
     else {
         EV << "Interface is turned off, dropping packet\n";
