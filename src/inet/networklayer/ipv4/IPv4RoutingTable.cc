@@ -242,7 +242,6 @@ void IPv4RoutingTable::deleteInterfaceRoutes(const InterfaceEntry *entry)
 void IPv4RoutingTable::invalidateCache()
 {
     routingCache.clear();
-    localAddresses.clear();
     localBroadcastAddresses.clear();
 }
 
@@ -325,7 +324,7 @@ InterfaceEntry *IPv4RoutingTable::getInterfaceByAddress(const IPv4Address& addr)
         return nullptr;
     for (int i = 0; i < ift->getNumInterfaces(); ++i) {
         InterfaceEntry *ie = ift->getInterface(i);
-        if (ie->ipv4Data()->getIPAddress() == addr)
+        if (ie->hasNetworkAddress(addr))
             return ie;
     }
     return nullptr;
@@ -351,16 +350,11 @@ bool IPv4RoutingTable::isLocalAddress(const IPv4Address& dest) const
 {
     Enter_Method("isLocalAddress(%u.%u.%u.%u)", dest.getDByte(0), dest.getDByte(1), dest.getDByte(2), dest.getDByte(3));    // note: str().c_str() too slow here
 
-    if (localAddresses.empty()) {
-        // collect interface addresses if not yet done
-        for (int i = 0; i < ift->getNumInterfaces(); i++) {
-            IPv4Address interfaceAddr = ift->getInterface(i)->ipv4Data()->getIPAddress();
-            localAddresses.insert(interfaceAddr);
-        }
+    for (int i = 0; i < ift->getNumInterfaces(); i++) {
+        if (ift->getInterface(i)->hasNetworkAddress(dest))
+            return true;
     }
-
-    auto it = localAddresses.find(dest);
-    return it != localAddresses.end();
+    return false;
 }
 
 // JcM add: check if the dest addr is local network broadcast
