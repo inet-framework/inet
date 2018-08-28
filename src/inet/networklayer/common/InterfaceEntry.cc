@@ -130,6 +130,8 @@ std::string InterfaceEntry::str() const
         out << " " << ((InterfaceProtocolData *)trilldata)->str(); // Khmm...
     if (ieee8021ddata)
         out << " " << ((InterfaceProtocolData *)ieee8021ddata)->str(); // Khmm...
+    if (clnsdata)
+        out << " " << ((InterfaceProtocolData *)clnsdata)->str(); //Kahim...
     return out.str();
 }
 
@@ -174,6 +176,8 @@ std::string InterfaceEntry::detailedInfo() const
         out << " " << ((InterfaceProtocolData *)trilldata)->str() << "\n"; // Khmm...
     if (ieee8021ddata)
         out << " " << ((InterfaceProtocolData *)ieee8021ddata)->str() << "\n"; // Khmm...
+    if (clnsdata)
+        out << " " << ((InterfaceProtocolData *)clnsdata)->str() << "\n"; // Kahim.. .
     return out.str();
 }
 
@@ -225,6 +229,9 @@ void InterfaceEntry::resetInterface()
     if (ieee8021ddata && ((InterfaceProtocolData *)ieee8021ddata)->ownerp == this)
         delete (InterfaceProtocolData *)ieee8021ddata;
     ieee8021ddata = nullptr;
+    if (clnsdata && ((InterfaceProtocolData *)clnsdata)->ownerp == this)
+        delete (InterfaceProtocolData *)clnsdata;
+    clnsdata = nullptr;
 }
 
 void InterfaceEntry::setNextHopData(NextHopInterfaceData *p)
@@ -308,6 +315,15 @@ void InterfaceEntry::setIeee8021dInterfaceData(Ieee8021dInterfaceData *p)
     ieee8021ddata = p;
     ((InterfaceProtocolData *)p)->ownerp = this;    // Khmm...
     configChanged(F_IEEE8021D_DATA);
+}
+
+void InterfaceEntry::setCLNSData(CLNSInterfaceData *p)
+{
+    if (clnsdata && ((InterfaceProtocolData *)clnsdata)->ownerp == this) // Kahimm...
+        delete (InterfaceProtocolData *)clnsdata; // Kahmim...
+    clnsdata = p;
+    ((InterfaceProtocolData *)p)->ownerp = this;    // Kahimm...
+    configChanged(F_CLNS_DATA);
 }
 
 bool InterfaceEntry::setEstimateCostProcess(int position, MacEstimateCostProcess *p)
