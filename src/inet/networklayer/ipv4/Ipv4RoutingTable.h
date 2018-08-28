@@ -94,7 +94,6 @@ class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable
 
     // local addresses cache (to speed up isLocalAddress())
     typedef std::set<Ipv4Address> AddressSet;
-    mutable AddressSet localAddresses;
     // JcM add: to handle the local broadcast address
     mutable AddressSet localBroadcastAddresses;
 
