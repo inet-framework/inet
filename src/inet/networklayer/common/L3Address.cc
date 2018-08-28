@@ -21,6 +21,7 @@
 #include "inet/linklayer/common/MACAddressType.h"
 #include "inet/networklayer/common/ModuleIdAddressType.h"
 #include "inet/networklayer/common/ModulePathAddressType.h"
+#include "inet/networklayer/contract/clns/CLNSAddressType.h"
 
 namespace inet {
 
@@ -47,6 +48,13 @@ void L3Address::set(const IPv6Address& addr)
     lo = ((uint64) * (words + 2) << 32) + *(words + 3);
     if (getType() != IPv6)
         throw cRuntimeError("Cannot set IPv6 address");
+}
+
+void L3Address::set(const CLNSAddress& addr)
+{
+
+    hi = addr.getAreaId();
+    lo = addr.getSystemId();
 }
 
 L3Address::AddressType L3Address::getType() const
@@ -78,6 +86,9 @@ IL3AddressType *L3Address::getAddressType() const
         case L3Address::MODULEPATH:
             return &ModulePathAddressType::INSTANCE;
 
+        case L3Address::CLNS:
+                    return &CLNSAddressType::INSTANCE;
+
         default:
             throw cRuntimeError("Unknown type");
     }
@@ -103,6 +114,8 @@ std::string L3Address::str() const
 
         case L3Address::MODULEPATH:
             return toModulePath().str();
+        case L3Address::CLNS:
+          return toCLNS().str();
 
         default:
             throw cRuntimeError("Unknown type");
