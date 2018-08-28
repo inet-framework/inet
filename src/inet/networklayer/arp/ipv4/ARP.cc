@@ -482,5 +482,46 @@ L3Address ARP::getL3AddressFor(const MACAddress& macAddr) const
     return IPv4Address::UNSPECIFIED_ADDRESS;
 }
 
+void ARP::sendARPGratuitous(const InterfaceEntry *ie, MACAddress srcAddr, IPv4Address ipAddr, int opCode)
+{
+    Enter_Method_Silent();
+
+    // both must be set
+    ASSERT(!srcAddr.isUnspecified());
+    ASSERT(!ipAddr.isUnspecified());
+
+    // fill out everything in ARP Request packet except dest MAC address
+    ARPPacket *arp = new ARPPacket("arpGrt");
+    arp->setByteLength(ARP_HEADER_BYTES);
+    arp->setOpcode(opCode);
+    arp->setSrcMACAddress(srcAddr);
+    arp->setSrcIPAddress(ipAddr);
+    arp->setDestIPAddress(ipAddr);
+    arp->setDestMACAddress(MACAddress::BROADCAST_ADDRESS);
+
+    // add control info with MAC address
+    Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
+    controlInfo->setDest(MACAddress::BROADCAST_ADDRESS);
+    controlInfo->setEtherType(ETHERTYPE_ARP);
+    controlInfo->setSrc(srcAddr);
+    controlInfo->setInterfaceId(ie->getInterfaceId());
+    arp->setControlInfo(controlInfo);
+
+    ARPCacheEntry *entry = new ARPCacheEntry();
+    auto where = arpCache.insert(arpCache.begin(), std::make_pair(ipAddr, entry));
+    entry->myIter = where;
+    entry->ie = ie;
+
+    entry->pending = false;
+    entry->timer = nullptr;
+    entry->numRetries = 0;
+
+//    updateARPCache(entry, srcAddr); //FIXME
+    // send out
+    send(arp, netwOutGate);
+//    sendPacketToNIC(arp, ie, srcAddr, ETHERTYPE_ARP);
+//    send(arp, nicOutBaseGateId + ie->getNetworkLayerGateIndex());
+}
+
 } // namespace inet
 

@@ -99,6 +99,8 @@ class INET_API ARP : public cSimpleModule, public IARP, public ILifecycle
     virtual L3Address getL3AddressFor(const MACAddress& addr) const override;
     /// @}
 
+    void sendARPGratuitous(const InterfaceEntry *ie, MACAddress srcAddr, IPv4Address ipAddr, int opCode);
+
   protected:
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
