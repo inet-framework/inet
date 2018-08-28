@@ -25,6 +25,33 @@ namespace inet {
 
 Register_Abstract_Class(IPv6Route);
 
+const char* inet::IPv6Route::getSourceTypeAbbreviation() const {
+    switch (_sourceType) {
+        case IFACENETMASK:
+            return "C";
+        case MANUAL:
+            return (getDestPrefix().isUnspecified() ? "S*": "S");
+        case ROUTER_ADVERTISEMENT:
+            return "ra";
+        case RIP:
+            return "R";
+        case OSPF:
+            return "O";
+        case BGP:
+            return "B";
+        case EIGRP:
+            return getAdminDist() < IPv6Route::dEIGRPExternal ? "D" : "D EX";
+        case LISP:
+            return "l";
+        case BABEL:
+            return "ba";
+        case ODR:
+            return "o";
+        default:
+            return "???";
+    }
+}
+
 std::string IPv6Route::info() const
 {
     std::stringstream out;
