@@ -87,6 +87,7 @@ simsignal_t NF_IPv6_MCAST_LEAVE = cComponent::registerSignal("NF_IPv6_MCAST_LEAV
 simsignal_t NF_IPv6_MCAST_REGISTERED = cComponent::registerSignal("NF_IPv6_MCAST_REGISTERED");
 simsignal_t NF_IPv6_MCAST_UNREGISTERED = cComponent::registerSignal("NF_IPv6_MCAST_UNREGISTERED");
 
+simsignal_t NF_INTERFACE_CLNSCONFIG_CHANGED = cComponent::registerSignal("NF_INTERFACE_CLNSCONFIG_CHANGED");
 simsignal_t NF_CLNS_ROUTE_ADDED = cComponent::registerSignal("NF_CLNS_ROUTE_ADDED");
 simsignal_t NF_CLNS_ROUTE_DELETED = cComponent::registerSignal("NF_CLNS_ROUTE_DELETED");
 simsignal_t NF_CLNS_ROUTE_CHANGED = cComponent::registerSignal("NF_CLNS_ROUTE_CHANGED");

@@ -63,6 +63,7 @@ extern INET_API simsignal_t    // admin
     NF_INTERFACE_IPv4CONFIG_CHANGED,
     NF_INTERFACE_IPv6CONFIG_CHANGED,
     NF_TED_CHANGED,
+    NF_INTERFACE_CLNSCONFIG_CHANGED,
 
 // layer 3 - Routing Table
     NF_ROUTE_ADDED,
