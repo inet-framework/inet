@@ -181,6 +181,7 @@ class INET_API InterfaceEntry : public cNamedObject
     const ModuleIdAddress getModuleIdAddress() const { return ModuleIdAddress(getInterfaceModule()->getId()); }
     const ModulePathAddress getModulePathAddress() const { return ModulePathAddress(getInterfaceModule()->getId()); }
     const L3Address getNetworkAddress() const;
+    virtual bool hasNetworkAddress(const L3Address& address) const;
 
     /** @name Field getters. Note they are non-virtual and inline, for performance reasons. */
     //@{
