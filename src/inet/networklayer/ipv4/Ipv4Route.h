@@ -52,6 +52,8 @@ class INET_API Ipv4Route : public cObject, public IRoute
         dEIGRPExternal = 170,
         dBGPInternal = 200,
         dDHCPlearned = 254,
+        dBABEL = 125,
+        dLISP = 210,
         dUnknown = 255
     };
 
@@ -98,6 +100,7 @@ class INET_API Ipv4Route : public cObject, public IRoute
     virtual void setGateway(Ipv4Address _gateway) { if (gateway != _gateway) { gateway = _gateway; changed(F_NEXTHOP); } }
     virtual void setInterface(InterfaceEntry *_interfacePtr) override { if (interfacePtr != _interfacePtr) { interfacePtr = _interfacePtr; changed(F_IFACE); } }
     virtual void setSourceType(SourceType _source) override { if (sourceType != _source) { sourceType = _source; changed(F_SOURCE); } }
+    const char* getSourceTypeAbbreviation() const;
     virtual void setAdminDist(unsigned int _adminDist) { if (adminDist != _adminDist) { adminDist = _adminDist; changed(F_ADMINDIST); } }
     virtual void setMetric(int _metric) override { if (metric != _metric) { metric = _metric; changed(F_METRIC); } }
 
