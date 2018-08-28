@@ -39,6 +39,33 @@ IPv4Route::~IPv4Route()
     delete protocolData;
 }
 
+const char* inet::IPv4Route::getSourceTypeAbbreviation() const {
+    switch (sourceType) {
+        case IFACENETMASK:
+            return "C";
+        case MANUAL:
+            return (getDestination().isUnspecified() ? "S*": "S");
+        case ROUTER_ADVERTISEMENT:
+            return "ra";
+        case RIP:
+            return "R";
+        case OSPF:
+            return "O";
+        case BGP:
+            return "B";
+        case EIGRP:
+            return getAdminDist() < IPv4Route::dEIGRPExternal ? "D" : "D EX";
+        case LISP:
+            return "l";
+        case BABEL:
+            return "ba";
+        case ODR:
+            return "o";
+        default:
+            return "???";
+    }
+}
+
 std::string IPv4Route::info() const
 {
     std::stringstream out;
