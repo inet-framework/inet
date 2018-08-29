@@ -26,6 +26,10 @@
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 
+#ifdef WITH_AODV
+#include "inet/routing/aodv/AodvRouteData.h"
+#endif
+
 namespace inet {
 
 Register_Class(Ipv4Route);
@@ -90,8 +94,7 @@ std::string Ipv4Route::str() const
     out << ", " << getInterfaceName();
 
 #ifdef WITH_AODV
-    if (dynamic_cast<AODVRouteData *>(protocolData)) {
-        AODVRouteData *data = (AODVRouteData *)protocolData;
+    if (auto data = dynamic_cast<aodv::AodvRouteData *>(protocolData)) {
         out << " " << data;
     }
 #endif // ifdef WITH_AODV

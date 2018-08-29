@@ -72,7 +72,7 @@ std::string Ipv6Route::str() const
         out << " via ";
         out << getNextHop();
     }
-    out << ", " << getInterface()->getName();
+    out << ", " << getInterface()->getInterfaceName();
     return out.str();
 }
 
