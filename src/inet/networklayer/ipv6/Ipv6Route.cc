@@ -25,7 +25,7 @@ namespace inet {
 
 Register_Abstract_Class(Ipv6Route);
 
-const char* inet::IPv6Route::getSourceTypeAbbreviation() const {
+const char* inet::Ipv6Route::getSourceTypeAbbreviation() const {
     switch (_sourceType) {
         case IFACENETMASK:
             return "C";
@@ -40,7 +40,7 @@ const char* inet::IPv6Route::getSourceTypeAbbreviation() const {
         case BGP:
             return "B";
         case EIGRP:
-            return getAdminDist() < IPv6Route::dEIGRPExternal ? "D" : "D EX";
+            return getAdminDist() < Ipv6Route::dEIGRPExternal ? "D" : "D EX";
         case LISP:
             return "l";
         case BABEL:
