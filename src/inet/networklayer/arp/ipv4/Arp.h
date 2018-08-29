@@ -28,6 +28,7 @@
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/MacAddress.h"
+#include "inet/networklayer/arp/ipv4/ArpPacket_m.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 
 namespace inet {
@@ -98,7 +99,7 @@ class INET_API Arp : public cSimpleModule, public IArp, public ILifecycle
     virtual L3Address getL3AddressFor(const MacAddress& addr) const override;
     /// @}
 
-    void sendARPGratuitous(const InterfaceEntry *ie, MACAddress srcAddr, IPv4Address ipAddr, int opCode);
+    void sendARPGratuitous(const InterfaceEntry *ie, MacAddress srcAddr, Ipv4Address ipAddr, ArpOpcode opCode);
 
   protected:
     virtual void initialize(int stage) override;
