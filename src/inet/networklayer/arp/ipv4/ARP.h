@@ -122,6 +122,8 @@ class INET_API ARP : public cSimpleModule, public IARP, public ILifecycle
     virtual void processARPPacket(ARPPacket *arp);
     virtual void updateARPCache(ARPCacheEntry *entry, const MACAddress& macAddress);
 
+    virtual MACAddress getMacAddressForArpReply(InterfaceEntry *ie, ARPPacket *arp);
+
     virtual void dumpARPPacket(ARPPacket *arp);
     virtual void updateDisplayString();
 };
