@@ -380,21 +380,25 @@ void InterfaceTable::updateLinkDisplayString(InterfaceEntry *entry)
         if (!outputGate->getChannel())
             return;
         cDisplayString& displayString = outputGate->getDisplayString();
-        char buf[128];
+        std::stringstream buf;
+        buf << entry->getFullName() << "\n";
 #ifdef WITH_IPv4
-        if (entry->ipv4Data()) {
-            sprintf(buf, "%s\n%s/%d", entry->getFullName(), entry->ipv4Data()->getIPAddress().str().c_str(), entry->ipv4Data()->getNetmask().getNetmaskLength());
-            displayString.setTagArg("t", 0, buf);
-            displayString.setTagArg("t", 1, "l");
+        if (entry->ipv4Data() && !(entry->ipv4Data()->getIPAddress().isUnspecified()) ) {
+            buf << entry->ipv4Data()->getIPAddress().str() << "/" << entry->ipv4Data()->getNetmask().getNetmaskLength() << "\n";
         }
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
         if (entry->ipv6Data() && entry->ipv6Data()->getNumAddresses() > 0) {
-            sprintf(buf, "%s\n%s", entry->getFullName(), entry->ipv6Data()->getPreferredAddress().str().c_str());
-            displayString.setTagArg("t", 0, buf);
-            displayString.setTagArg("t", 1, "l");
+            for (int i = 0; i < entry->ipv6Data()->getNumAddresses(); i++) {
+                if (entry->ipv6Data()->getAddress(i).isSolicitedNodeMulticastAddress()
+                        //|| (entry->ipv6Data()->getAddress(i).isLinkLocal() && entry->ipv6Data()->getAddress(i).)
+                        || entry->ipv6Data()->getAddress(i).isMulticast()) continue;
+                buf << entry->ipv6Data()->getAddress(i).str() << "/64" << "\n";
+            }
         }
 #endif // ifdef WITH_IPv6
+        displayString.setTagArg("t", 0, buf.str().c_str());
+        displayString.setTagArg("t", 1, "l");
     }
 }
 

@@ -69,38 +69,33 @@ const char* inet::IPv4Route::getSourceTypeAbbreviation() const {
 std::string IPv4Route::info() const
 {
     std::stringstream out;
-
-    out << "dest:";
-    if (dest.isUnspecified())
-        out << "*  ";
+    out << getSourceTypeAbbreviation();
+    out << " ";
+    if (getDestination().isUnspecified())
+        out << "0.0.0.0";
     else
-        out << dest << "  ";
-    out << "gw:";
-    if (gateway.isUnspecified())
-        out << "*  ";
+        out << getDestination();
+    out << "/";
+    if (getNetmask().isUnspecified())
+        out << "0";
     else
-        out << gateway << "  ";
-    out << "mask:";
-    if (netmask.isUnspecified())
-        out << "*  ";
+        out << getNetmask().getNetmaskLength();
+    if (getGateway().isUnspecified())
+    {
+        out << " is directly connected";
+    }
     else
-        out << netmask << "  ";
-    out << "metric:" << metric << " ";
-    out << "if:";
-    if (!interfacePtr)
-        out << "*";
-    else
-        out << interfacePtr->getName();
-    if (interfacePtr && interfacePtr->ipv4Data())
-        out << "(" << interfacePtr->ipv4Data()->getIPAddress() << ")";
-    out << "  ";
-    out << (gateway.isUnspecified() ? "DIRECT" : "REMOTE");
-    out << " " << IRoute::sourceTypeName(sourceType);
+    {
+        out << " [" << getAdminDist() << "/" << getMetric() << "]";
+        out << " via ";
+        out << getGateway();
+    }
+    out << ", " << getInterfaceName();
 
 #ifdef WITH_AODV
     if (dynamic_cast<AODVRouteData *>(protocolData)) {
         AODVRouteData *data = (AODVRouteData *)protocolData;
-        out << data;
+        out << " " << data;
     }
 #endif // ifdef WITH_AODV
     return out.str();

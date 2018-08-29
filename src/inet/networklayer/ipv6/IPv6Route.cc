@@ -55,12 +55,24 @@ const char* inet::IPv6Route::getSourceTypeAbbreviation() const {
 std::string IPv6Route::info() const
 {
     std::stringstream out;
-    out << getDestPrefix() << "/" << getPrefixLength() << " --> ";
-    out << "if:" << (_interfacePtr ? _interfacePtr->getName() : "*  ");
-    out << " next hop:" << getNextHop();
-    out << " " << IRoute::sourceTypeName(getSourceType());
-    if (getExpiryTime() > 0)
-        out << " exp:" << getExpiryTime();
+    out << getSourceTypeAbbreviation();
+    out << " ";
+    if (getDestPrefix().isUnspecified())
+        out << "::";
+    else
+        out << getDestPrefix();
+    out << "/" << getPrefixLength();
+    if (getNextHop().isUnspecified())
+    {
+        out << " is directly connected";
+    }
+    else
+    {
+        out << " [" << getAdminDist() << "/" << getMetric() << "]";
+        out << " via ";
+        out << getNextHop();
+    }
+    out << ", " << getInterface()->getName();
     return out.str();
 }
 
