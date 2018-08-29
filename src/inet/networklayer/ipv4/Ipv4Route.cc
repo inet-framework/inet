@@ -36,7 +36,7 @@ Ipv4Route::~Ipv4Route()
     delete protocolData;
 }
 
-const char* inet::IPv4Route::getSourceTypeAbbreviation() const {
+const char* inet::Ipv4Route::getSourceTypeAbbreviation() const {
     switch (sourceType) {
         case IFACENETMASK:
             return "C";
@@ -51,7 +51,7 @@ const char* inet::IPv4Route::getSourceTypeAbbreviation() const {
         case BGP:
             return "B";
         case EIGRP:
-            return getAdminDist() < IPv4Route::dEIGRPExternal ? "D" : "D EX";
+            return getAdminDist() < Ipv4Route::dEIGRPExternal ? "D" : "D EX";
         case LISP:
             return "l";
         case BABEL:
