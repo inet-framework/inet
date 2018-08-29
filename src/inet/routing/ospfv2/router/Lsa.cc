@@ -26,22 +26,22 @@ bool operator<(const OspfLsaHeader& leftLSA, const OspfLsaHeader& rightLSA)
     long leftSequenceNumber = leftLSA.getLsSequenceNumber();
     long rightSequenceNumber = rightLSA.getLsSequenceNumber();
 
-    if (leftSequenceNumber < rightSequenceNumber) {
+    if (leftSequenceNumber > rightSequenceNumber)
+        return false;
+    else if (leftSequenceNumber < rightSequenceNumber)
         return true;
-    }
-    if (leftSequenceNumber == rightSequenceNumber) {
+    else {
+        // TODO: checksum comparison should be added here
+
         unsigned short leftAge = leftLSA.getLsAge();
         unsigned short rightAge = rightLSA.getLsAge();
 
-        if ((leftAge != MAX_AGE) && (rightAge == MAX_AGE)) {
+        if ((leftAge != MAX_AGE) && (rightAge == MAX_AGE))
             return true;
-        }
-        if ((leftAge == MAX_AGE) && (rightAge != MAX_AGE)) {
+        else if ((leftAge == MAX_AGE) && (rightAge != MAX_AGE))
             return false;
-        }
-        if ((abs(leftAge - rightAge) > MAX_AGE_DIFF) && (leftAge > rightAge)) {
+        else if ((abs(leftAge - rightAge) > MAX_AGE_DIFF) && (leftAge > rightAge))
             return true;
-        }
     }
     return false;
 }
