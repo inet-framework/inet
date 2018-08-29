@@ -359,10 +359,13 @@ void Arp::processARPPacket(Packet *packet)
         switch (arp->getOpcode()) {
             case ARP_REQUEST: {
                 EV_DETAIL << "Packet was ARP REQUEST, sending REPLY\n";
+                MACAddress myMACAddress = getMacAddressForArpReply(ie, arp);
+                if (myMACAddress.isUnspecified()) {
+                    delete arp;
+                    return;
+                }
 
-                // find our own IPv4 address and MAC address on the given interface
-                MacAddress myMACAddress = ie->getMacAddress();
-                Ipv4Address myIPAddress = ie->ipv4Data()->getIPAddress();
+                IPv4Address myIPAddress = ie->ipv4Data()->getIPAddress();
 
                 // "Swap hardware and protocol fields", etc.
                 const auto& arpReply = makeShared<ArpPacket>();
@@ -406,6 +409,11 @@ void Arp::processARPPacket(Packet *packet)
         EV_INFO << "IPv4 address " << arp->getDestIpAddress() << " not recognized, dropping ARP packet\n";
     }
     delete packet;
+}
+
+MACAddress ARP::getMacAddressForArpReply(InterfaceEntry *ie, ARPPacket *arp)
+{
+    return ie->getMacAddress();
 }
 
 void Arp::updateARPCache(ArpCacheEntry *entry, const MacAddress& macAddress)
