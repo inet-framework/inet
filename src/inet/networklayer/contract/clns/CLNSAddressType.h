@@ -28,7 +28,6 @@
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/clns/CLNSAddress.h"
-#include "inet/networklayer/contract/clns/CLNSControlInfo.h"
 
 namespace inet {
 
@@ -48,7 +47,8 @@ class INET_API CLNSAddressType : public IL3AddressType
     virtual L3Address getBroadcastAddress() const override { return CLNSAddress::UNSPECIFIED_ADDRESS; }
     virtual L3Address getLinkLocalManetRoutersMulticastAddress() const override { return CLNSAddress::UNSPECIFIED_ADDRESS; }
     virtual L3Address getLinkLocalRIPRoutersMulticastAddress() const override { return CLNSAddress::UNSPECIFIED_ADDRESS; }
-    virtual INetworkProtocolControlInfo *createNetworkProtocolControlInfo() const override { return new CLNSControlInfo(); }
+    virtual const Protocol *getNetworkProtocol() const override { return &Protocol::clns; }
+
     virtual L3Address getLinkLocalAddress(const InterfaceEntry *ie) const override { return CLNSAddress::UNSPECIFIED_ADDRESS; }
 };
 
