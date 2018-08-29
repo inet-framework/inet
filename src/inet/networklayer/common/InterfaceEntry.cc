@@ -272,20 +272,20 @@ bool InterfaceEntry::hasNetworkAddress(const L3Address& address) const
 
     case L3Address::IPv4:
 #ifdef WITH_IPv4
-        return ipv4data != nullptr && ipv4data->getIPAddress() == address.toIPv4();
+        return ipv4data != nullptr && ipv4data->getIPAddress() == address.toIpv4();
 #else
         return false;
 #endif // ifdef WITH_IPv4
 
     case L3Address::IPv6:
 #ifdef WITH_IPv6
-        return ipv6data != nullptr && ipv6data->hasAddress(address.toIPv6());
+        return ipv6data != nullptr && ipv6data->hasAddress(address.toIpv6());
 #else
         return false;
 #endif // ifdef WITH_IPv6
 
     case L3Address::MAC:
-        return getMacAddress() == address.toMAC();
+        return getMacAddress() == address.toMac();
 
     case L3Address::MODULEID:
     case L3Address::MODULEPATH:
