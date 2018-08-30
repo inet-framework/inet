@@ -10,7 +10,7 @@ SUT is a server, i.e. it opens a socket and closes it.
 [General]
 network = PacketDrillUdp
 debug-on-errors = true
-tkenv-plugin-path = ../../../etc/plugins
+
 ned-path = .;../../../../../src;../../lib
 
 **.scriptFile="../../udptests/udpOpenClose.pkt"

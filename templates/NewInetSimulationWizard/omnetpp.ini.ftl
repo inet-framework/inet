@@ -1,14 +1,14 @@
-<#assign startTime = 0.1> 
+<#assign startTime = 0.1>
 
 [General]
 network = ${targetTypeName}
 total-stack = 7MiB
-tkenv-plugin-path = ../../../etc/plugins
+
 #debug-on-errors = true
 #record-eventlog = true
 
 
-<#assign tcpTraffic = tcpDataTraffic || telnetTraffic > 
+<#assign tcpTraffic = tcpDataTraffic || telnetTraffic >
 
 <#if tcpTraffic>
 # TCP Traffic Configuration:

@@ -108,7 +108,7 @@ ned-path = .;../../../../src;../../lib
 # record-eventlog = true
 # cmdenv-express-mode = false
 # debug-on-errors = true
-tkenv-plugin-path = ../../../etc/plugins
+
 sim-time-limit = 600s
 
 #omnetpp 5.0 - 5.1 compatibility:

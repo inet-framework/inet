@@ -84,7 +84,7 @@ network CompareMACs
 [General]
 sim-time-limit = 1s
 
-tkenv-plugin-path = ../../../etc/plugins
+
 #record-eventlog = true
 **.vector-recording = false
 

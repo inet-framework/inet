@@ -42,7 +42,7 @@ network Dhcptest
 
 [General]
 
-tkenv-plugin-path = ../../../etc/plugins
+
 ned-path = .;../../../../src;../../lib
 
 #omnetpp 5.0 - 5.1 compatibility:

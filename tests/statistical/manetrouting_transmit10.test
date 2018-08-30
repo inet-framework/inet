@@ -11,7 +11,7 @@ import inet.node.aodv.AodvRouter;
 import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
 
-// 
+//
 // Example network for testing aodv routing. Contains
 // fixed and mobile nodes. Mobile nodes are not moving,
 // but are scattered randomly on the playground.
@@ -68,7 +68,7 @@ seed-0-mt = 5
 network = Net80211_aodv_test
 
 cmdenv-express-mode = false
-tkenv-plugin-path = ../../../etc/plugins
+
 
 description = "Aodv Simple test"
 

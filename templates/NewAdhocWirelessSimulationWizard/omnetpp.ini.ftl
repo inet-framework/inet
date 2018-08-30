@@ -17,7 +17,7 @@ num-rngs = 3
 **.wlan[*].mac.rng-0 = 2
 #debug-on-errors = true
 
-tkenv-plugin-path = ../../../etc/plugins
+
 
 **.channelNumber = 0
 

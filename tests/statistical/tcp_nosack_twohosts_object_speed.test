@@ -87,7 +87,7 @@ network TcpSpeedTest
 [General]
 network = TcpSpeedTest
 total-stack = 7MiB
-tkenv-plugin-path = ../../../etc/plugins
+
 #debug-on-errors = true
 #record-eventlog = true
 **.vector-recording = false
@@ -114,7 +114,7 @@ sim-time-limit = 2s+10s+20s+1.2s
 **.server*.tcpApp[0].echoDelay = 0
 
 ## tcp apps
-**.tcpApp[*].dataTransferMode = "object" # bytecount | object | bytestream 
+**.tcpApp[*].dataTransferMode = "object" # bytecount | object | bytestream
 
 
 # NIC configuration

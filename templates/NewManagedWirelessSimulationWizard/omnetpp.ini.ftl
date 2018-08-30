@@ -11,7 +11,7 @@ network = ${targetTypeName}
 </#if>
 
 #debug-on-errors = true
-tkenv-plugin-path = ../../../etc/plugins
+
 
 **.mobility.constraintAreaMinZ = 0m
 **.mobility.constraintAreaMaxZ = 0m

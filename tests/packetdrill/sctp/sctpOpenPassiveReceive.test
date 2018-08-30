@@ -14,7 +14,7 @@ The client calls Shutdown.
 
 network = PacketDrillSctp
 debug-on-errors = true
-tkenv-plugin-path = ../../../etc/plugins
+
 ned-path = .;../../../../../src;../../lib
 
 **.scriptFile="../../sctptests/sctpOpenPassiveReceive.pkt"

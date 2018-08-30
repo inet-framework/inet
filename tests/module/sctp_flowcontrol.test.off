@@ -11,7 +11,7 @@ messages with higher TSNs have to be dropped to make room for the expected ones.
 network=SctpFeatureTest
 cmdenv-event-banners=false
 cmdenv-express-mode = false
-tkenv-plugin-path = ../../../etc/plugins
+
 ned-path = .;../../../../src;../../lib
 
 #omnetpp 5.0 - 5.1 compatibility:

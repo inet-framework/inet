@@ -165,7 +165,7 @@ description = "Full network test"
 network = Fig6
 ned-path = .;../../../../src;../../lib
 
-tkenv-plugin-path = ../../../etc/plugins
+
 
 sim-time-limit = 300s
 

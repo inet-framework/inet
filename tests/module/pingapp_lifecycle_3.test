@@ -6,7 +6,7 @@ Test ping stop followed by node startup.
 
 [General]
 network = Test
-tkenv-plugin-path = ../../../etc/plugins
+
 ned-path = .;../../../../src;../../lib
 cmdenv-express-mode = false
 
