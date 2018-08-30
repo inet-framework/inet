@@ -26,6 +26,10 @@
 //
 
 #include <omnetpp.h>
+
+// feature defines generated based on the actual feature enablement
+#include "inet/features.h"
+
 #include "inet/common/Compat.h"
 
 using namespace omnetpp;

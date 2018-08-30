@@ -1,4 +1,4 @@
-<features cppSourceRoots="src">
+<features cppSourceRoots="src" definesFile="src/inet/features.h">
     <feature
         id="TCP_common"
         name="TCP Common"
