@@ -150,6 +150,7 @@ class INET_API Area : public cObject
             unsigned short entryCost,
             const OspfRoutingTableEntry& borderRouterEntry) const;
     void printLSDB();
+    void printSummaryLsa();
 };
 
 inline std::ostream& operator<<(std::ostream& ostr, Area& area)

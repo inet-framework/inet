@@ -744,28 +744,25 @@ void Router::rebuildRoutingTable()
             }
         }
         areas[i]->calculateShortestPathTree(newTable);
-        if (areas[i]->getTransitCapability()) {
+        if (areas[i]->getTransitCapability())
             hasTransitAreas = true;
-        }
     }
+
     if (areaCount > 1) {
         Area *backbone = getAreaByID(BACKBONE_AREAID);
-        if (backbone != nullptr) {
+        if (backbone != nullptr)
             backbone->calculateInterAreaRoutes(newTable);
-        }
     }
-    else {
-        if (areaCount == 1) {
-            areas[0]->calculateInterAreaRoutes(newTable);
-        }
-    }
+    else if (areaCount == 1)
+        areas[0]->calculateInterAreaRoutes(newTable);
+
     if (hasTransitAreas) {
         for (uint32_t i = 0; i < areaCount; i++) {
-            if (areas[i]->getTransitCapability()) {
+            if (areas[i]->getTransitCapability())
                 areas[i]->recheckSummaryLSAs(newTable);
-            }
         }
     }
+
     calculateASExternalRoutes(newTable);
 
     // backup the routing table
@@ -779,9 +776,8 @@ void Router::rebuildRoutingTable()
     for (int32_t i = 0; i < rt->getNumRoutes(); i++) {
         Ipv4Route *entry = rt->getRoute(i);
         OspfRoutingTableEntry *ospfEntry = dynamic_cast<OspfRoutingTableEntry *>(entry);
-        if (ospfEntry != nullptr) {
+        if (ospfEntry != nullptr)
             eraseEntries.push_back(entry);
-        }
     }
 
     // add the new routing entries
@@ -1006,6 +1002,8 @@ void Router::calculateASExternalRoutes(std::vector<OspfRoutingTableEntry *>& new
     // see RFC 2328 16.4.
     unsigned long lsaCount = asExternalLSAs.size();
     unsigned long i;
+
+    printAsExternalLsa();
 
     for (i = 0; i < lsaCount; i++) {
         AsExternalLsa *currentLSA = asExternalLSAs[i];
@@ -1499,6 +1497,33 @@ void Router::removeExternalRoute(Ipv4Address networkAddress)
     auto externalIt = externalRoutes.find(networkAddress);
     if (externalIt != externalRoutes.end()) {
         externalRoutes.erase(externalIt);
+    }
+}
+
+void Router::printAsExternalLsa()
+{
+    for (uint32_t i = 0; i < asExternalLSAs.size(); i++) {
+        OspfAsExternalLsa *entry = check_and_cast<OspfAsExternalLsa *>(asExternalLSAs[i]);
+
+        const OspfLsaHeader& head = entry->getHeader();
+        std::string routerId = head.getAdvertisingRouter().str(false);
+        EV_INFO << "AS External LSA in OSPF router with ID " << routerId << std::endl;
+
+        // print header info
+        EV_INFO << "    LS age: " << head.getLsAge() << std::endl;
+        EV_INFO << "    LS type: " << head.getLsType() << std::endl;
+        EV_INFO << "    Link state ID (IP network): " << head.getLinkStateID() << std::endl;
+        EV_INFO << "    Advertising router: " << head.getAdvertisingRouter() << std::endl;
+        EV_INFO << "    Seq number: " << head.getLsSequenceNumber() << std::endl;
+        EV_INFO << "    Length: " << head.getLsaLength() << std::endl;
+
+        EV_INFO << "    Network Mask: " << entry->getContents().getNetworkMask().str(false) << std::endl;
+        EV_INFO << "    Metric: " << entry->getContents().getRouteCost() << std::endl;
+        EV_INFO << "    E flag: " << ((entry->getContents().getE_ExternalMetricType() == true) ? "set" : "unset") << std::endl;
+        EV_INFO << "    Forwarding Address: " << entry->getContents().getForwardingAddress().str(false) << std::endl;
+        EV_INFO << "    External Route Tag: " << entry->getContents().getExternalRouteTag() << std::endl;
+        // todo: add ExternalTosInfo externalTOSInfo[];
+        EV_INFO << std::endl;
     }
 }
 

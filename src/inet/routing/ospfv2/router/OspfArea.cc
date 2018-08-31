@@ -2353,6 +2353,8 @@ void Area::calculateInterAreaRoutes(std::vector<OspfRoutingTableEntry *>& newRou
     unsigned long j = 0;
     unsigned long lsaCount = summaryLSAs.size();
 
+    printSummaryLsa();
+
     for (i = 0; i < lsaCount; i++) {
         SummaryLsa *currentLSA = summaryLSAs[i];
         const OspfLsaHeader& currentHeader = currentLSA->getHeader();
@@ -2579,14 +2581,14 @@ void Area::recheckSummaryLSAs(std::vector<OspfRoutingTableEntry *>& newRoutingTa
 void Area::printLSDB()
 {
     // iterate over all routerLSA in all routers inside this area
-    for (unsigned int i = 0; i < routerLSAs.size(); i++) {
+    for (uint32_t i = 0; i < routerLSAs.size(); i++) {
         OspfRouterLsa *entry = check_and_cast<OspfRouterLsa *>(routerLSAs[i]);
 
-        std::string routerId = entry->getHeader().getAdvertisingRouter().str(false);
+        const OspfLsaHeader &head = entry->getHeader();
+        std::string routerId = head.getAdvertisingRouter().str(false);
         EV_INFO << "Router LSA in Area " << areaID.str(false) << " in OSPF router with ID " << routerId << std::endl;
 
         // print header info
-        const OspfLsaHeader &head = entry->getHeader();
         EV_INFO << "    LS age: " << head.getLsAge() << std::endl;
         EV_INFO << "    LS type: " << head.getLsType() << std::endl;
         EV_INFO << "    Link state ID: " << head.getLinkStateID() << std::endl;
@@ -2637,6 +2639,29 @@ void Area::printLSDB()
         EV_INFO << "    Number of attached routers: " << entry->getAttachedRoutersArraySize() << std::endl;
         for(unsigned int j = 0; j < entry->getAttachedRoutersArraySize(); j++)
             EV_INFO << "        Attached router: " << entry->getAttachedRouters(j) << std::endl;
+        EV_INFO << std::endl;
+    }
+}
+
+void Area::printSummaryLsa()
+{
+    for (uint32_t i = 0; i < summaryLSAs.size(); i++) {
+        OspfSummaryLsa *entry = check_and_cast<OspfSummaryLsa *>(summaryLSAs[i]);
+
+        const OspfLsaHeader& head = entry->getHeader();
+        std::string routerId = head.getAdvertisingRouter().str(false);
+        EV_INFO << "Summary LSA from OSPF router with ID " << routerId << std::endl;
+
+        // print header info
+        EV_INFO << "    LS age: " << head.getLsAge() << std::endl;
+        EV_INFO << "    LS type: " << head.getLsType() << std::endl;
+        EV_INFO << "    Link state ID (IP network): " << head.getLinkStateID() << std::endl;
+        EV_INFO << "    Advertising router: " << head.getAdvertisingRouter() << std::endl;
+        EV_INFO << "    Seq number: " << head.getLsSequenceNumber() << std::endl;
+        EV_INFO << "    Length: " << head.getLsaLength() << std::endl;
+
+        EV_INFO << "    Network Mask: " << entry->getNetworkMask().str(false) << std::endl;
+        EV_INFO << "    Metric: " << entry->getRouteCost() << std::endl;
         EV_INFO << std::endl;
     }
 }
