@@ -63,6 +63,7 @@ class INET_API Protocol
     static const Protocol arp;
     static const Protocol bgp;
     static const Protocol bmac;
+    static const Protocol cdp;
     static const Protocol clns;
     static const Protocol dsdv2;
     static const Protocol dsr;
