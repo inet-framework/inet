@@ -139,15 +139,32 @@ void GridNeighborCache::sendToNeighbors(IRadio *transmitter, const ISignal *sign
 {
     double radius = range + (maxSpeed * refillPeriod);
     Coord transmitterPos = transmitter->getAntenna()->getMobility()->getCurrentPosition();
-    GridNeighborCacheVisitor visitor(radioMedium, transmitter, signal);
+    SendVisitor visitor(radioMedium, transmitter, signal);
     grid->rangeQuery(transmitterPos, radius, &visitor);
 }
 
-void GridNeighborCache::GridNeighborCacheVisitor::visit(const cObject *radio) const
+GridNeighborCache::Radios GridNeighborCache::getPotentialNeighbors(const IRadio *radio, double range) const
+{
+    double radius = range + (maxSpeed * refillPeriod);
+    Coord radioPos = radio->getAntenna()->getMobility()->getCurrentPosition();
+    Radios result;
+    CollectVisitor visitor(radioMedium, radio, result);
+    grid->rangeQuery(radioPos, radius, &visitor);
+    return result;
+}
+
+void GridNeighborCache::SendVisitor::visit(const cObject *radio) const
 {
     const IRadio *neighbor = check_and_cast<const IRadio *>(radio);
     if (transmitter->getId() != neighbor->getId())
         radioMedium->sendToRadio(transmitter, neighbor, signal);
+}
+
+void GridNeighborCache::CollectVisitor::visit(const cObject *radio) const
+{
+    const IRadio *neighbor = check_and_cast<const IRadio *>(radio);
+    if (transmitter->getId() != neighbor->getId())
+        result.push_back(neighbor);
 }
 
 GridNeighborCache::~GridNeighborCache()

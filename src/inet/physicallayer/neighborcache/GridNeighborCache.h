@@ -31,7 +31,7 @@ class INET_API GridNeighborCache : public cSimpleModule, public INeighborCache
     typedef std::vector<const IRadio *> Radios;
 
   protected:
-    class GridNeighborCacheVisitor : public IVisitor
+    class SendVisitor : public IVisitor
     {
       protected:
         RadioMedium *radioMedium;
@@ -40,8 +40,20 @@ class INET_API GridNeighborCache : public cSimpleModule, public INeighborCache
 
       public:
         void visit(const cObject *radio) const override;
-        GridNeighborCacheVisitor(RadioMedium *radioMedium, IRadio *transmitter, const ISignal *signal) :
+        SendVisitor(RadioMedium *radioMedium, IRadio *transmitter, const ISignal *signal) :
             radioMedium(radioMedium), transmitter(transmitter), signal(signal) {}
+    };
+    class CollectVisitor : public IVisitor
+    {
+      protected:
+        RadioMedium *radioMedium;
+        const IRadio *transmitter;
+        Radios& result;
+
+      public:
+        void visit(const cObject *radio) const override;
+        CollectVisitor(RadioMedium *radioMedium, const IRadio *transmitter, Radios& result) :
+            radioMedium(radioMedium), transmitter(transmitter), result(result) {}
     };
   protected:
     SpatialGrid *grid;
@@ -68,6 +80,7 @@ class INET_API GridNeighborCache : public cSimpleModule, public INeighborCache
     virtual void addRadio(const IRadio *radio) override;
     virtual void removeRadio(const IRadio *radio) override;
     virtual void sendToNeighbors(IRadio *transmitter, const ISignal *signal, double range) const override;
+    virtual Radios getPotentialNeighbors(const IRadio *radio, double range) const override;
 };
 
 } // namespace physicallayer

@@ -30,6 +30,9 @@ namespace physicallayer {
 class INET_API INeighborCache : public IPrintableObject
 {
   public:
+    typedef std::vector<const IRadio *> Radios;
+
+  public:
     virtual void addRadio(const IRadio *radio) = 0;
 
     virtual void removeRadio(const IRadio *radio) = 0;
@@ -39,6 +42,12 @@ class INET_API INeighborCache : public IPrintableObject
      * the given range.
      */
     virtual void sendToNeighbors(IRadio *transmitter, const ISignal *signal, double range) const = 0;
+
+    /**
+     * Return the list of radios that MAY be within the given range.
+     */
+    virtual Radios getPotentialNeighbors(const IRadio *radio, double range) const = 0;
+
 };
 
 } // namespace physicallayer

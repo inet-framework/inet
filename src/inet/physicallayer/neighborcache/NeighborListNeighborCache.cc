@@ -74,6 +74,19 @@ void NeighborListNeighborCache::sendToNeighbors(IRadio *transmitter, const ISign
         radioMedium->sendToRadio(transmitter, elem, signal);
 }
 
+NeighborListNeighborCache::Radios NeighborListNeighborCache::getPotentialNeighbors(const IRadio *radio, double range) const
+{
+    if (this->range < range)
+        throw cRuntimeError("The radio's (id: %d) range is bigger then the cache range", radio->getId());
+
+    RadioEntryCache::const_iterator it = radioToEntry.find(radio);
+    if (it == radioToEntry.end())
+        throw cRuntimeError("Radio not found");
+
+    RadioEntry *radioEntry = it->second;
+    return radioEntry->neighborVector;
+}
+
 void NeighborListNeighborCache::handleMessage(cMessage *msg)
 {
     if (!msg->isSelfMessage())

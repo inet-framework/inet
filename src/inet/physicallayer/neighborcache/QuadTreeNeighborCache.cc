@@ -121,8 +121,18 @@ void QuadTreeNeighborCache::sendToNeighbors(IRadio *transmitter, const ISignal *
 {
     double radius = range + refillPeriod * maxSpeed;
     Coord transmitterPos = transmitter->getAntenna()->getMobility()->getCurrentPosition();
-    QuadTreeNeighborCacheVisitor visitor(radioMedium, transmitter, signal);
+    SendVisitor visitor(radioMedium, transmitter, signal);
     quadTree->rangeQuery(transmitterPos, radius, &visitor);
+}
+
+QuadTreeNeighborCache::Radios QuadTreeNeighborCache::getPotentialNeighbors(const IRadio *radio, double range) const
+{
+    double radius = range + refillPeriod * maxSpeed;
+    Coord radioPos = radio->getAntenna()->getMobility()->getCurrentPosition();
+    Radios result;
+    CollectVisitor visitor(radioMedium, radio, result);
+    quadTree->rangeQuery(radioPos, radius, &visitor);
+    return result;
 }
 
 void QuadTreeNeighborCache::fillQuadTreeWithRadios()
@@ -147,11 +157,18 @@ QuadTreeNeighborCache::~QuadTreeNeighborCache()
     cancelAndDelete(rebuildQuadTreeTimer);
 }
 
-void QuadTreeNeighborCache::QuadTreeNeighborCacheVisitor::visit(const cObject *radio) const
+void QuadTreeNeighborCache::SendVisitor::visit(const cObject *radio) const
 {
     const IRadio *neighbor = check_and_cast<const IRadio *>(radio);
     if (neighbor->getId() != transmitter->getId())
         radioMedium->sendToRadio(transmitter, neighbor, signal);
+}
+
+void QuadTreeNeighborCache::CollectVisitor::visit(const cObject *radio) const
+{
+    const IRadio *neighbor = check_and_cast<const IRadio *>(radio);
+    if (neighbor->getId() != transmitter->getId())
+        result.push_back(neighbor);
 }
 
 } // namespace physicallayer

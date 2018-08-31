@@ -40,7 +40,6 @@ class INET_API NeighborListNeighborCache : public cSimpleModule, public INeighbo
         }
     };
     typedef std::vector<RadioEntry *> RadioEntries;
-    typedef std::vector<const IRadio *> Radios;
     typedef std::map<const IRadio *, RadioEntry *> RadioEntryCache;
 
   protected:
@@ -68,6 +67,7 @@ class INET_API NeighborListNeighborCache : public cSimpleModule, public INeighbo
     virtual void addRadio(const IRadio *radio) override;
     virtual void removeRadio(const IRadio *radio) override;
     virtual void sendToNeighbors(IRadio *transmitter, const ISignal *signal, double range) const override;
+    virtual Radios getPotentialNeighbors(const IRadio *radio, double range) const override;
 };
 
 } // namespace physicallayer

@@ -27,11 +27,8 @@ namespace physicallayer {
 
 class INET_API QuadTreeNeighborCache : public cSimpleModule, public INeighborCache
 {
-  public:
-    typedef std::vector<const IRadio *> Radios;
-
   protected:
-    class QuadTreeNeighborCacheVisitor : public IVisitor
+    class SendVisitor : public IVisitor
     {
       protected:
         RadioMedium *radioMedium;
@@ -40,8 +37,20 @@ class INET_API QuadTreeNeighborCache : public cSimpleModule, public INeighborCac
 
       public:
         void visit(const cObject *radio) const override;
-        QuadTreeNeighborCacheVisitor(RadioMedium *radioMedium, IRadio *transmitter, const ISignal *signal) :
+        SendVisitor(RadioMedium *radioMedium, IRadio *transmitter, const ISignal *signal) :
             radioMedium(radioMedium), transmitter(transmitter), signal(signal) {}
+    };
+    class CollectVisitor : public IVisitor
+    {
+      protected:
+        RadioMedium *radioMedium;
+        const IRadio *transmitter;
+        Radios& result;
+
+      public:
+        void visit(const cObject *radio) const override;
+        CollectVisitor(RadioMedium *radioMedium, const IRadio *transmitter, Radios& result) :
+            radioMedium(radioMedium), transmitter(transmitter), result(result) {}
     };
 
   protected:
@@ -69,6 +78,7 @@ class INET_API QuadTreeNeighborCache : public cSimpleModule, public INeighborCac
     virtual void addRadio(const IRadio *radio) override;
     virtual void removeRadio(const IRadio *radio) override;
     virtual void sendToNeighbors(IRadio *transmitter, const ISignal *signal, double range) const override;
+    virtual Radios getPotentialNeighbors(const IRadio *radio, double range) const override;
 };
 
 } // namespace physicallayer
