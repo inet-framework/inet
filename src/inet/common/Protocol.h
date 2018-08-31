@@ -82,6 +82,7 @@ class INET_API Protocol
     static const Protocol igp;
     static const Protocol ipv4;
     static const Protocol ipv6;
+    static const Protocol lldp;
     static const Protocol lmac;
     static const Protocol manet;
     static const Protocol mobileipv6;

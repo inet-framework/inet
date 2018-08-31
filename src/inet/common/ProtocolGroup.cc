@@ -77,6 +77,7 @@ ProtocolGroup ProtocolGroup::ethertype("ethertype", {
     { 0x86FE, &Protocol::wiseRoute },         // ETHERTYPE_INET_WISE, not in any standards
     { 0x86FF, &Protocol::nextHopForwarding },         // ETHERTYPE_INET_NEXTHOP
     { 0x8847, &Protocol::mpls },
+    { 0x88CC, &Protocol::lldp },
 });
 
 // excerpt from http://www.iana.org/assignments/ppp-numbers/ppp-numbers.xhtml#ppp-numbers-2
