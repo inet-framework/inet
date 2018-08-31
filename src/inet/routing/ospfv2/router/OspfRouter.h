@@ -374,6 +374,8 @@ class INET_API Router
      * @return The least cost entry or nullptr if entries is empty.
      */
     OspfRoutingTableEntry *selectLeastCostRoutingEntry(std::vector<OspfRoutingTableEntry *>& entries) const;
+
+    void printAsExternalLsa();
 };
 
 } // namespace ospf
