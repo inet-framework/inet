@@ -176,29 +176,6 @@ bool Ospf::handleOperationStage(LifecycleOperation *operation, int stage, IDoneC
     return true;
 }
 
-void Ospf::insertExternalRoute(int ifIndex, const Ipv4AddressRange& netAddr)
-{
-    Enter_Method_Silent();
-    OspfAsExternalLsaContents newExternalContents;
-    newExternalContents.setRouteCost(OSPF_BGP_DEFAULT_COST);
-    newExternalContents.setExternalRouteTag(OSPF_EXTERNAL_ROUTES_LEARNED_BY_BGP);
-    const Ipv4Address netmask = netAddr.mask;
-    newExternalContents.setNetworkMask(netmask);
-    ospfRouter->updateExternalRoute(netAddr.address, newExternalContents, ifIndex);
-}
-
-bool Ospf::checkExternalRoute(const Ipv4Address& route)
-{
-    Enter_Method_Silent();
-    for (unsigned long i = 1; i < ospfRouter->getASExternalLSACount(); i++) {
-        AsExternalLsa *externalLSA = ospfRouter->getASExternalLSA(i);
-        Ipv4Address externalAddr = externalLSA->getHeader().getLinkStateID();
-        if (externalAddr == route) //FIXME was this meant???
-            return true;
-    }
-    return false;
-}
-
 void Ospf::handleInterfaceDown(const InterfaceEntry *ie)
 {
     EV_DEBUG << "interface " << ie->getInterfaceId() << " went down. \n";
@@ -240,6 +217,29 @@ void Ospf::handleInterfaceDown(const InterfaceEntry *ie)
             }
         }
     }
+}
+
+void Ospf::insertExternalRoute(int ifIndex, const Ipv4AddressRange& netAddr)
+{
+    Enter_Method_Silent();
+    OspfAsExternalLsaContents newExternalContents;
+    newExternalContents.setRouteCost(OSPF_BGP_DEFAULT_COST);
+    newExternalContents.setExternalRouteTag(OSPF_EXTERNAL_ROUTES_LEARNED_BY_BGP);
+    const Ipv4Address netmask = netAddr.mask;
+    newExternalContents.setNetworkMask(netmask);
+    ospfRouter->updateExternalRoute(netAddr.address, newExternalContents, ifIndex);
+}
+
+bool Ospf::checkExternalRoute(const Ipv4Address& route)
+{
+    Enter_Method_Silent();
+    for (unsigned long i = 1; i < ospfRouter->getASExternalLSACount(); i++) {
+        AsExternalLsa *externalLSA = ospfRouter->getASExternalLSA(i);
+        Ipv4Address externalAddr = externalLSA->getHeader().getLinkStateID();
+        if (externalAddr == route) //FIXME was this meant???
+            return true;
+    }
+    return false;
 }
 
 } // namespace ospf
