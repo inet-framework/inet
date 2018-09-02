@@ -326,11 +326,9 @@ void OspfConfigReader::loadExternalRoute(const cXMLElement& externalRouteConfig)
         return;
 
     for(auto &ie : getInterfaceByXMLAttributesOf(externalRouteConfig)) {
-        int ifIndex = ie->getInterfaceId();
-
         OspfAsExternalLsaContents asExternalRoute;
-        //RoutingTableEntry externalRoutingEntry; // only used here to keep the path cost calculation in one place
         Ipv4AddressRange networkAddress;
+        int ifIndex = ie->getInterfaceId();
 
         EV_DEBUG << "        loading ExternalInterface " << ie->getInterfaceName() << " ifIndex[" << ifIndex << "]\n";
 
@@ -345,21 +343,18 @@ void OspfConfigReader::loadExternalRoute(const cXMLElement& externalRouteConfig)
         asExternalRoute.setRouteCost(routeCost);
 
         std::string metricType = getStrAttrOrPar(externalRouteConfig, "externalInterfaceOutputType");
-        if (metricType == "Type2") {
-            asExternalRoute.setE_ExternalMetricType(true);
-            //externalRoutingEntry.setType2Cost(routeCost);
-            //externalRoutingEntry.setPathType(RoutingTableEntry::TYPE2_EXTERNAL);
-        }
-        else if (metricType == "Type1") {
+        if (metricType == "Type1")
             asExternalRoute.setE_ExternalMetricType(false);
-            //externalRoutingEntry.setCost(routeCost);
-            //externalRoutingEntry.setPathType(RoutingTableEntry::TYPE1_EXTERNAL);
-        }
-        else {
+        else if (metricType == "Type2")
+            asExternalRoute.setE_ExternalMetricType(true);
+        else
             throw cRuntimeError("Invalid 'externalInterfaceOutputType' at interface '%s' at ", ie->getInterfaceName(), externalRouteConfig.getSourceLocation());
-        }
 
-        asExternalRoute.setForwardingAddress(ipv4AddressFromAddressString(getMandatoryFilledAttribute(externalRouteConfig, "forwardingAddress")));
+        const char *forwardingAddr = externalRouteConfig.getAttribute("forwardingAddress");
+        if(forwardingAddr)
+            asExternalRoute.setForwardingAddress(ipv4AddressFromAddressString(getMandatoryFilledAttribute(externalRouteConfig, "forwardingAddress")));
+        else
+            asExternalRoute.setForwardingAddress(ipv4AddressFromAddressString("0.0.0.0"));
 
         long externalRouteTagVal = 0;    // default value
         const char *externalRouteTag = externalRouteConfig.getAttribute("externalRouteTag");
