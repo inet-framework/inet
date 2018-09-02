@@ -107,8 +107,8 @@ B calculateLSASize(const OspfAsExternalLsa *asExternalLSA)
 
 std::ostream& operator<<(std::ostream& ostr, const OspfLsaHeader& lsaHeader)
 {
-    ostr << "LSAHeader: age=" << lsaHeader.getLsAge()
-         << ", type=";
+    ostr << "LSAHeader (age: " << lsaHeader.getLsAge()
+         << ", type: ";
     switch (lsaHeader.getLsType()) {
         case ROUTERLSA_TYPE:
             ostr << "RouterLsa";
@@ -134,9 +134,10 @@ std::ostream& operator<<(std::ostream& ostr, const OspfLsaHeader& lsaHeader)
             ostr << "Unknown";
             break;
     }
-    ostr << ", LSID=" << lsaHeader.getLinkStateID().str(false)
-         << ", advertisingRouter=" << lsaHeader.getAdvertisingRouter().str(false)
-         << ", seqNumber=" << lsaHeader.getLsSequenceNumber();
+    ostr << ", LSID: " << lsaHeader.getLinkStateID().str(false)
+         << ", advertisingRouter: " << lsaHeader.getAdvertisingRouter().str(false)
+         << ", seqNumber: " << lsaHeader.getLsSequenceNumber();
+    ostr << ")";
     return ostr;
 }
 
@@ -237,8 +238,8 @@ std::ostream& operator<<(std::ostream& ostr, const OspfAsExternalLsa& lsa)
     const OspfAsExternalLsaContents& contents = lsa.getContents();
     ostr << "Mask: " << contents.getNetworkMask()
          << ", Cost: " << contents.getRouteCost()
-         << ", MetricType: " << contents.getE_ExternalMetricType()
-         << ", Forward: " << contents.getForwardingAddress()
+         << ", MetricType: " << (contents.getE_ExternalMetricType() == false ? "Type1" : "Type2")
+         << ", ForwardingAddress: " << contents.getForwardingAddress().str(false)
          << ", ExtRouteTag: " << contents.getExternalRouteTag()
          << ", ";
     unsigned int cnt = contents.getExternalTOSInfoArraySize();
