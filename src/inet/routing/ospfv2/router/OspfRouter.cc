@@ -181,10 +181,9 @@ bool Router::installASExternalLSA(const OspfAsExternalLsa *lsa)
     // TODO: how to solve this problem?
 
     RouterId advertisingRouter = lsa->getHeader().getAdvertisingRouter();
-    bool reachable = false;
-    unsigned int routeCount = routingTable.size();
 
-    for (unsigned int i = 0; i < routeCount; i++) {
+    bool reachable = false;
+    for (uint32_t i = 0; i < routingTable.size(); i++) {
         if ((((routingTable[i]->getDestinationType() & OspfRoutingTableEntry::AREA_BORDER_ROUTER_DESTINATION) != 0) ||
              ((routingTable[i]->getDestinationType() & OspfRoutingTableEntry::AS_BOUNDARY_ROUTER_DESTINATION) != 0)) &&
             (routingTable[i]->getDestination() == advertisingRouter))
@@ -771,8 +770,8 @@ void Router::rebuildRoutingTable()
     routingTable.clear();
     routingTable.assign(newTable.begin(), newTable.end());
 
-    std::vector<Ipv4Route *> eraseEntries;
     // remove entries from the Ipv4 routing table inserted by the OSPF module
+    std::vector<Ipv4Route *> eraseEntries;
     for (int32_t i = 0; i < rt->getNumRoutes(); i++) {
         Ipv4Route *entry = rt->getRoute(i);
         OspfRoutingTableEntry *ospfEntry = dynamic_cast<OspfRoutingTableEntry *>(entry);
@@ -1000,12 +999,10 @@ OspfRoutingTableEntry *Router::getPreferredEntry(const OspfLsa& lsa, bool skipSe
 void Router::calculateASExternalRoutes(std::vector<OspfRoutingTableEntry *>& newRoutingTable)
 {
     // see RFC 2328 16.4.
-    unsigned long lsaCount = asExternalLSAs.size();
-    unsigned long i;
 
     printAsExternalLsa();
 
-    for (i = 0; i < lsaCount; i++) {
+    for (uint32_t i = 0; i < asExternalLSAs.size(); i++) {
         AsExternalLsa *currentLSA = asExternalLSAs[i];
         const OspfLsaHeader& currentHeader = currentLSA->getHeader();
         unsigned short externalCost = currentLSA->getContents().getRouteCost();
@@ -1232,7 +1229,6 @@ void Router::notifyAboutRoutingTableChanges(std::vector<OspfRoutingTableEntry *>
                 if (newLSA != nullptr) {
                     if (lsaToReoriginate != nullptr) {
                         areas[i]->installSummaryLSA(lsaToReoriginate);
-//                        floodLSA(lsaToReoriginate, BACKBONE_AREAID);
                         floodLSA(lsaToReoriginate, areas[i]->getAreaID());
 
                         lsaKey.linkStateID = lsaToReoriginate->getHeader().getLinkStateID();
@@ -1243,7 +1239,6 @@ void Router::notifyAboutRoutingTableChanges(std::vector<OspfRoutingTableEntry *>
                     }
 
                     areas[i]->installSummaryLSA(newLSA);
-//                    floodLSA(newLSA, BACKBONE_AREAID);
                     floodLSA(newLSA, areas[i]->getAreaID());
 
                     lsaKey.linkStateID = newLSA->getHeader().getLinkStateID();
@@ -1261,7 +1256,6 @@ void Router::notifyAboutRoutingTableChanges(std::vector<OspfRoutingTableEntry *>
                     if (newLSA != nullptr) {
                         if (lsaToReoriginate != nullptr) {
                             areas[i]->installSummaryLSA(lsaToReoriginate);
-//                            floodLSA(lsaToReoriginate, BACKBONE_AREAID);
                             floodLSA(lsaToReoriginate, areas[i]->getAreaID());
 
                             lsaKey.linkStateID = lsaToReoriginate->getHeader().getLinkStateID();
@@ -1272,7 +1266,6 @@ void Router::notifyAboutRoutingTableChanges(std::vector<OspfRoutingTableEntry *>
                         }
 
                         areas[i]->installSummaryLSA(newLSA);
-//                        floodLSA(newLSA, BACKBONE_AREAID);
                         floodLSA(newLSA, areas[i]->getAreaID());
 
                         lsaKey.linkStateID = newLSA->getHeader().getLinkStateID();
@@ -1318,7 +1311,6 @@ void Router::notifyAboutRoutingTableChanges(std::vector<OspfRoutingTableEntry *>
                             if (summaryLSA != nullptr) {
                                 if (oneLessCost != 0) {    // there's an other entry in this range
                                     summaryLSA->setRouteCost(oneLessCost);
-//                                    floodLSA(summaryLSA, BACKBONE_AREAID);
                                     floodLSA(summaryLSA, areas[i]->getAreaID());
 
                                     originatedLSAMap[lsaKey] = true;
@@ -1327,7 +1319,6 @@ void Router::notifyAboutRoutingTableChanges(std::vector<OspfRoutingTableEntry *>
                                     std::map<LsaKeyType, bool, LsaKeyType_Less>::const_iterator deletedIt = deletedLSAMap.find(lsaKey);
                                     if (deletedIt == deletedLSAMap.end()) {
                                         summaryLSA->getHeaderForUpdate().setLsAge(MAX_AGE);
-//                                        floodLSA(summaryLSA, BACKBONE_AREAID);
                                         floodLSA(summaryLSA, areas[i]->getAreaID());
 
                                         deletedLSAMap[lsaKey] = true;
@@ -1380,7 +1371,7 @@ void Router::notifyAboutRoutingTableChanges(std::vector<OspfRoutingTableEntry *>
                     if (summaryLSA != nullptr) {
                         if (maxRangeCost > 0) {    // there's an other entry in this range
                             summaryLSA->setRouteCost(maxRangeCost);
-                            floodLSA(summaryLSA, BACKBONE_AREAID);
+                            floodLSA(summaryLSA, areas[i]->getAreaID());
 
                             originatedLSAMap[lsaKey] = true;
                         }
@@ -1388,7 +1379,7 @@ void Router::notifyAboutRoutingTableChanges(std::vector<OspfRoutingTableEntry *>
                             std::map<LsaKeyType, bool, LsaKeyType_Less>::const_iterator deletedIt = deletedLSAMap.find(lsaKey);
                             if (deletedIt == deletedLSAMap.end()) {
                                 summaryLSA->getHeaderForUpdate().setLsAge(MAX_AGE);
-                                floodLSA(summaryLSA, BACKBONE_AREAID);
+                                floodLSA(summaryLSA, areas[i]->getAreaID());
 
                                 deletedLSAMap[lsaKey] = true;
                             }
@@ -1409,13 +1400,15 @@ void Router::updateExternalRoute(Ipv4Address networkAddress, const OspfAsExterna
 
     unsigned long routingEntryNumber = rt->getNumRoutes();
     bool inRoutingTable = false;
+    Ipv4Route *entry = nullptr;
     // add the external route to the routing table if it was not added by another module
     for (unsigned long i = 0; i < routingEntryNumber; i++) {
-        const Ipv4Route *entry = rt->getRoute(i);
+        entry = rt->getRoute(i);
         if ((entry->getDestination() == networkAddress)
             && (entry->getNetmask() == externalRouteContents.getNetworkMask()))    //TODO is it enough?
         {
             inRoutingTable = true;
+            break;
         }
     }
 
@@ -1427,6 +1420,10 @@ void Router::updateExternalRoute(Ipv4Address networkAddress, const OspfAsExterna
         entry->setSourceType(IRoute::MANUAL);
         entry->setMetric(externalRouteContents.getRouteCost());
         rt->addRoute(entry);    // IIpv4RoutingTable deletes entry pointer
+    }
+    else {
+        ASSERT(entry);
+        entry->setMetric(externalRouteContents.getRouteCost());
     }
 
     lsaHeader.setLsAge(0);
@@ -1455,11 +1452,9 @@ void Router::updateExternalRoute(Ipv4Address networkAddress, const OspfAsExterna
 
 void Router::addExternalRouteInIPTable(Ipv4Address networkAddress, const OspfAsExternalLsaContents& externalRouteContents, int ifIndex)
 {
-    int routingEntryNumber = rt->getNumRoutes();
-    bool inRoutingTable = false;
-
     // add the external route to the Ipv4 routing table if it was not added by another module
-    for (int i = 1; i < routingEntryNumber; i++) {
+    bool inRoutingTable = false;
+    for (int32_t i = 1; i < rt->getNumRoutes(); i++) {
         const Ipv4Route *entry = rt->getRoute(i);
         if ((entry->getDestination() == networkAddress)
             && (entry->getNetmask() == externalRouteContents.getNetworkMask()))    //TODO is it enough?
