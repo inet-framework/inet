@@ -43,6 +43,7 @@ import inet.routing.contract.IOspf;
 //   It may contain various child elements.
 //   - @name - A required string containing a node path specifying the router to which this configuration belongs to.
 //   - @RFC1583Compatible - optional true or false value
+//
 //   - <PointToPointInterface> - Describes the parameters of a point-to-point interface. It is identified
 //     in the router by its ifName value, or name of toward module.
 //     - @ifName - A unique name of the interface (e.g. eth0) or ...
@@ -114,6 +115,16 @@ import inet.routing.contract.IOspf;
 //         - @networkInterfaceAddress - A string which is resolvable by IPvXAddressResolver class. (e.g. Area1.R1>Area1.N1)
 //         - @neighborPriority - neighbor's priority in the DR/BDR election process.
 //
+//   - <ExternalInterface>
+//     - @ifName - A unique name of the interface (e.g. eth0) or ...
+//     - @toward - a string containing a node path, for example "R2"
+//     - @advertisedExternalNetworkAddress - Network address of the external network
+//     - @advertisedExternalNetworkMask - Network mask of the external network
+//     - @externalInterfaceOutputCost - The associated cost to reach the external network
+//     - @externalInterfaceOutputType - Type1 (no external metric) or Type2 (external metric)
+//     - @forwardingAddress - Optional (set 0.0.0.0 by default)
+//     - @externalRouteTag - Optional (set 0 by default)
+
 //   - <VirtualLink>
 //     - @endPointRouterID - the router ID of the endpoint of the virtual link (required)
 //     - @transitAreaID - the ID of the area which is used for tansit
