@@ -901,7 +901,7 @@ std::vector<OspfRoutingTableEntry *> Router::getRoutesToASBoundaryRouter(const s
             else {
                 // ASBR is a directly-connected router
                 for (uint32_t i = 0; i < areas.size(); i++) {
-                    OspfInterface *ospfIfEntry = areas[i]->getInterface(routingEntry->getInterface()->getId());
+                    OspfInterface *ospfIfEntry = areas[i]->getInterface(routingEntry->getInterface()->getInterfaceId());
                     if(ospfIfEntry) {
                         Neighbor *neighbor = ospfIfEntry->getNeighborById(asbrRouterID);
                         if(neighbor) {
@@ -1061,8 +1061,10 @@ void Router::calculateASExternalRoutes(std::vector<OspfRoutingTableEntry *>& new
 
             for (unsigned int j = 0; j < preferredEntry->getNextHopCount(); j++) {
                 NextHop nextHop = preferredEntry->getNextHop(j);
-                nextHop.advertisingRouter = originatingRouter;
-                newEntry->addNextHop(nextHop);
+                if(!nextHop.hopAddress.isUnspecified()) {
+                    nextHop.advertisingRouter = originatingRouter;
+                    newEntry->addNextHop(nextHop);
+                }
             }
 
             newRoutingTable.push_back(newEntry);
@@ -1119,9 +1121,10 @@ void Router::calculateASExternalRoutes(std::vector<OspfRoutingTableEntry *>& new
                 for (unsigned int j = 0; j < nextHopCount; j++) {
                     // TODO: merge next hops, not add
                     NextHop nextHop = preferredEntry->getNextHop(j);
-
-                    nextHop.advertisingRouter = originatingRouter;
-                    destinationEntry->addNextHop(nextHop);
+                    if(!nextHop.hopAddress.isUnspecified()) {
+                        nextHop.advertisingRouter = originatingRouter;
+                        destinationEntry->addNextHop(nextHop);
+                    }
                 }
                 continue;
             }
@@ -1142,9 +1145,10 @@ void Router::calculateASExternalRoutes(std::vector<OspfRoutingTableEntry *>& new
 
             for (unsigned int j = 0; j < nextHopCount; j++) {
                 NextHop nextHop = preferredEntry->getNextHop(j);
-
-                nextHop.advertisingRouter = originatingRouter;
-                destinationEntry->addNextHop(nextHop);
+                if(!nextHop.hopAddress.isUnspecified()) {
+                    nextHop.advertisingRouter = originatingRouter;
+                    destinationEntry->addNextHop(nextHop);
+                }
             }
         }
     }
