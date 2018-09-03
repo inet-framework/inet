@@ -865,13 +865,26 @@ bool Router::deleteRoute(OspfRoutingTableEntry *entry)
 
 bool Router::hasRouteToASBoundaryRouter(const std::vector<OspfRoutingTableEntry *>& inRoutingTable, RouterId asbrRouterID) const
 {
-    long routeCount = inRoutingTable.size();
-    for (long i = 0; i < routeCount; i++) {
+    for (uint32_t i = 0; i < inRoutingTable.size(); i++) {
         OspfRoutingTableEntry *routingEntry = inRoutingTable[i];
-        if (((routingEntry->getDestinationType() & OspfRoutingTableEntry::AS_BOUNDARY_ROUTER_DESTINATION) != 0) &&
-            (routingEntry->getDestination() == asbrRouterID))
-        {
-            return true;
+        if(routingEntry->getDestination() == (asbrRouterID & routingEntry->getNetmask())) {
+            if(!routingEntry->getGateway().isUnspecified())
+                return true;
+            else {
+                // ASBR is a directly-connected router
+                bool nextHopFound = false;
+                for (uint32_t i = 0; i < areas.size(); i++) {
+                    OspfInterface *ospfIfEntry = areas[i]->getInterface(routingEntry->getInterface()->getInterfaceId());
+                    if(ospfIfEntry) {
+                        Neighbor *neighbor = ospfIfEntry->getNeighborById(asbrRouterID);
+                        if(neighbor) {
+                            nextHopFound = true;
+                            break;
+                        }
+                    }
+                }
+                return nextHopFound;
+            }
         }
     }
     return false;
@@ -880,14 +893,24 @@ bool Router::hasRouteToASBoundaryRouter(const std::vector<OspfRoutingTableEntry 
 std::vector<OspfRoutingTableEntry *> Router::getRoutesToASBoundaryRouter(const std::vector<OspfRoutingTableEntry *>& fromRoutingTable, RouterId asbrRouterID) const
 {
     std::vector<OspfRoutingTableEntry *> results;
-    long routeCount = fromRoutingTable.size();
-
-    for (long i = 0; i < routeCount; i++) {
+    for (uint32_t i = 0; i < fromRoutingTable.size(); i++) {
         OspfRoutingTableEntry *routingEntry = fromRoutingTable[i];
-        if (((routingEntry->getDestinationType() & OspfRoutingTableEntry::AS_BOUNDARY_ROUTER_DESTINATION) != 0) &&
-            (routingEntry->getDestination() == asbrRouterID))
-        {
-            results.push_back(routingEntry);
+        if (routingEntry->getDestination() == (asbrRouterID & routingEntry->getNetmask())) {
+            if(!routingEntry->getGateway().isUnspecified())
+                results.push_back(routingEntry);
+            else {
+                // ASBR is a directly-connected router
+                for (uint32_t i = 0; i < areas.size(); i++) {
+                    OspfInterface *ospfIfEntry = areas[i]->getInterface(routingEntry->getInterface()->getId());
+                    if(ospfIfEntry) {
+                        Neighbor *neighbor = ospfIfEntry->getNeighborById(asbrRouterID);
+                        if(neighbor) {
+                            results.push_back(routingEntry);
+                            break;
+                        }
+                    }
+                }
+            }
         }
     }
     return results;
@@ -1019,7 +1042,6 @@ void Router::calculateASExternalRoutes(std::vector<OspfRoutingTableEntry *>& new
         OspfRoutingTableEntry *destinationEntry = lookup(destination, &newRoutingTable);    // (5)
         if (destinationEntry == nullptr) {
             bool type2ExternalMetric = currentLSA->getContents().getE_ExternalMetricType();
-            unsigned int nextHopCount = preferredEntry->getNextHopCount();
             OspfRoutingTableEntry *newEntry = new OspfRoutingTableEntry(ift);
 
             newEntry->setDestination(destination);
@@ -1037,9 +1059,8 @@ void Router::calculateASExternalRoutes(std::vector<OspfRoutingTableEntry *>& new
             newEntry->setOptionalCapabilities(currentHeader.getLsOptions());
             newEntry->setLinkStateOrigin(currentLSA);
 
-            for (unsigned int j = 0; j < nextHopCount; j++) {
+            for (unsigned int j = 0; j < preferredEntry->getNextHopCount(); j++) {
                 NextHop nextHop = preferredEntry->getNextHop(j);
-
                 nextHop.advertisingRouter = originatingRouter;
                 newEntry->addNextHop(nextHop);
             }
