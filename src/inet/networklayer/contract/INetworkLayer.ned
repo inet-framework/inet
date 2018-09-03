@@ -21,14 +21,25 @@ package inet.networklayer.contract;
 //
 // This module interface provides an abstraction for different network layers.
 //
-moduleinterface INetworkLayer
+moduleinterface INetworkLayerUpper
 {
     parameters:
         @display("i=block/fork");
     gates:
         input transportIn @labels(ITransportPacket/down);
         output transportOut @labels(ITransportPacket/up);
+}
+
+moduleinterface INetworkLayerLower
+{
+    parameters:
+        @display("i=block/fork");
+    gates:
         input ifIn @labels(INetworkHeader/up);
         output ifOut @labels(INetworkHeader/down);
+}
+
+moduleinterface INetworkLayer extends INetworkLayerUpper, INetworkLayerLower
+{
 }
 
