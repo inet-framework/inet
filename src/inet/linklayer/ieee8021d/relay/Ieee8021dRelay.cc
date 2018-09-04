@@ -68,7 +68,6 @@ void Ieee8021dRelay::initialize(int stage)
                 throw cRuntimeError("No non-loopback interface found!");
         }
 
-//        isStpAware = gate("stpIn")->isConnected();    // if the stpIn is not connected then the switch is STP/RSTP unaware
 
         WATCH(bridgeAddress);
         WATCH(numReceivedNetworkFrames);
@@ -79,13 +78,10 @@ void Ieee8021dRelay::initialize(int stage)
     }
 }
 
-
 void Ieee8021dRelay::registerAddress(MacAddress mac)
 {
     registerAddresses(mac, mac);
-
 }
-
 
 void Ieee8021dRelay::registerAddresses(MacAddress startMac, MacAddress endMac)
 {
@@ -116,13 +112,6 @@ void Ieee8021dRelay::handleMessage(cMessage *msg)
         emit(packetReceivedFromLowerSignal, packet);
         handleAndDispatchFrame(packet);
     }
-//    // messages from STP process
-//    else if (msg->arrivedOn("stpIn")) {
-//        Packet *packet = check_and_cast<Packet *>(msg);
-//        numReceivedBPDUsFromSTP++;
-//        EV_INFO << "Received " << msg << " from STP/RSTP module." << endl;
-//        dispatchBPDU(packet);
-//    }
     // unknown gate
     else
         throw cRuntimeError("Message arrived on unknown gate");
