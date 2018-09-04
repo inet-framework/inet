@@ -29,9 +29,8 @@ namespace inet {
 class INET_API MacRelayUnit : public cSimpleModule, public ILifecycle
 {
   protected:
-    IMacAddressTable *addressTable = nullptr;
-    int numPorts = 0;
     IInterfaceTable *ift = nullptr;
+    IMacAddressTable *addressTable = nullptr;
 
     // Parameters for statistics collection
     long numProcessedFrames = 0;
@@ -49,13 +48,13 @@ class INET_API MacRelayUnit : public cSimpleModule, public ILifecycle
      *
      * The message pointer should not be referenced any more after this call.
      */
-    virtual void handleAndDispatchFrame(Packet *packet, const Ptr<const EthernetMacHeader>& frame);
+    virtual void handleAndDispatchFrame(Packet *packet);
 
     /**
      * Utility function: sends the frame on all ports except inputport.
      * The message pointer should not be referenced any more after this call.
      */
-    virtual void broadcastFrame(Packet *frame, int inputport);
+    virtual void broadcast(Packet *frame, int inputport);
 
     /**
      * Calls handleIncomingFrame() for frames arrived from outside,
@@ -76,6 +75,7 @@ class INET_API MacRelayUnit : public cSimpleModule, public ILifecycle
   protected:
     virtual void start();
     virtual void stop();
+    virtual void learn(MacAddress srcAddr, int arrivalInterfaceId);
 };
 
 } // namespace inet
