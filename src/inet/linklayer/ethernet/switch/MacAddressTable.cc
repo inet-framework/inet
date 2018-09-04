@@ -135,7 +135,7 @@ int MacAddressTable::getPortForAddress(const MacAddress& address, unsigned int v
 bool MacAddressTable::updateTableWithAddress(int portno, const MacAddress& address, unsigned int vid)
 {
     Enter_Method("MacAddressTable::updateTableWithAddress()");
-    if (address.isBroadcast())
+    if (address.isMulticast())      // broadcast or multicast
         return false;
 
     AddressTable::iterator iter;
