@@ -25,7 +25,6 @@
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/linklayer/ieee8021d/common/Ieee8021dBpdu_m.h"
 
 namespace inet {
 
