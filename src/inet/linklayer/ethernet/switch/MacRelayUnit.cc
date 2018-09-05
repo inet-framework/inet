@@ -72,7 +72,7 @@ void MacRelayUnit::handleMessage(cMessage *msg)
         throw cRuntimeError("Message arrived on unknown gate");
 }
 
-void MacRelayUnit::broadcast(Packet *packet, int inputInterfaceId)
+void MacRelayUnit::broadcast(Packet *packet, int arrivalInterfaceId)
 {
     EV_DETAIL << "Broadcast frame " << packet << endl;
 
@@ -84,12 +84,12 @@ void MacRelayUnit::broadcast(Packet *packet, int inputInterfaceId)
     packet->trim();
 
     int numPorts = ifTable->getNumInterfaces();
-    for (int i = 0; i < numPorts; ++i) {
+    for (int i = 0; i < numPorts; i++) {
         InterfaceEntry *ie = ifTable->getInterface(i);
         if (ie->isLoopback() || !ie->isBroadcast())
             continue;
         int ifId = ie->getInterfaceId();
-        if (inputInterfaceId != ifId) {
+        if (arrivalInterfaceId != ifId) {
             Packet *dupFrame = packet->dup();
             dupFrame->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ifId);
             emit(packetSentToLowerSignal, dupFrame);
