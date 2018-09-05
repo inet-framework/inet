@@ -40,7 +40,6 @@ void Ieee8021dRelay::initialize(int stage)
         // statistics
         numDispatchedBDPUFrames = numDispatchedNonBPDUFrames = numDeliveredBDPUsToSTP = 0;
         numReceivedBPDUsFromSTP = numReceivedNetworkFrames = numDroppedFrames = 0;
-        fcsMode = parseFcsMode(par("fcsMode"));
         isStpAware = par("hasStp");
     }
     else if (stage == INITSTAGE_LINK_LAYER) {

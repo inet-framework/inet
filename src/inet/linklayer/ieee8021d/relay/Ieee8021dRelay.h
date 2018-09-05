@@ -53,7 +53,6 @@ class INET_API Ieee8021dRelay : public cSimpleModule, public ILifecycle
     IInterfaceTable *ifTable = nullptr;
     IMacAddressTable *macTable = nullptr;
     InterfaceEntry *ie = nullptr;
-    FcsMode fcsMode = FCS_MODE_UNDEFINED;
     bool isOperational = false;
     bool isStpAware = false;
 
