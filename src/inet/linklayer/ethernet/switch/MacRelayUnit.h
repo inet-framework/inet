@@ -29,8 +29,8 @@ namespace inet {
 class INET_API MacRelayUnit : public cSimpleModule, public ILifecycle
 {
   protected:
-    IInterfaceTable *ift = nullptr;
-    IMacAddressTable *addressTable = nullptr;
+    IInterfaceTable *ifTable = nullptr;
+    IMacAddressTable *macTable = nullptr;
 
     // Parameters for statistics collection
     long numProcessedFrames = 0;

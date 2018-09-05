@@ -36,8 +36,8 @@ void MacRelayUnit::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         numProcessedFrames = numDiscardedFrames = 0;
 
-        addressTable = getModuleFromPar<IMacAddressTable>(par("macTableModule"), this);
-        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        macTable = getModuleFromPar<IMacAddressTable>(par("macTableModule"), this);
+        ifTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
 
         WATCH(numProcessedFrames);
         WATCH(numDiscardedFrames);
@@ -83,9 +83,9 @@ void MacRelayUnit::broadcast(Packet *packet, int inputInterfaceId)
     delete oldPacketProtocolTag;
     packet->trim();
 
-    int numPorts = ift->getNumInterfaces();
+    int numPorts = ifTable->getNumInterfaces();
     for (int i = 0; i < numPorts; ++i) {
-        InterfaceEntry *ie = ift->getInterface(i);
+        InterfaceEntry *ie = ifTable->getInterface(i);
         if (ie->isLoopback() || !ie->isBroadcast())
             continue;
         int ifId = ie->getInterfaceId();
@@ -120,7 +120,7 @@ void MacRelayUnit::handleAndDispatchFrame(Packet *packet)
 
     // Finds output port of destination address and sends to output port
     // if not found then broadcasts to all other ports instead
-    int outputInterfaceId = addressTable->getPortForAddress(frame->getDest());
+    int outputInterfaceId = macTable->getPortForAddress(frame->getDest());
     // should not send out the same frame on the same ethernet port
     // (although wireless ports are ok to receive the same message)
     if (arrivalInterfaceId == outputInterfaceId) {
@@ -151,13 +151,13 @@ void MacRelayUnit::handleAndDispatchFrame(Packet *packet)
 
 void MacRelayUnit::start()
 {
-    addressTable->clearTable();
+    macTable->clearTable();
     isOperational = true;
 }
 
 void MacRelayUnit::stop()
 {
-    addressTable->clearTable();
+    macTable->clearTable();
     isOperational = false;
 }
 
@@ -189,7 +189,7 @@ bool MacRelayUnit::handleOperationStage(LifecycleOperation *operation, int stage
 
 void MacRelayUnit::learn(MacAddress srcAddr, int arrivalInterfaceId)
 {
-    addressTable->updateTableWithAddress(arrivalInterfaceId, srcAddr);
+    macTable->updateTableWithAddress(arrivalInterfaceId, srcAddr);
 }
 
 void MacRelayUnit::finish()
