@@ -1216,9 +1216,13 @@ LinkStateId Router::getUniqueLinkStateID(const Ipv4AddressRange& destination,
 // TODO: review this algorithm + add virtual link changes(RFC2328 Section 16.7.).
 void Router::notifyAboutRoutingTableChanges(std::vector<OspfRoutingTableEntry *>& oldRoutingTable)
 {
-    if (areas.size() <= 1) {
+    // return if this router is not an ABR
+    if (areas.size() <= 1)
         return;
-    }
+    auto position = std::find_if(areas.begin(), areas.end(),
+            [&](const Area *m) -> bool {return (m->getAreaID() == BACKBONE_AREAID);});
+    if(position == areas.end())
+        return;
 
     typedef std::map<Ipv4AddressRange, OspfRoutingTableEntry *> RoutingTableEntryMap;
     unsigned long routeCount = oldRoutingTable.size();
