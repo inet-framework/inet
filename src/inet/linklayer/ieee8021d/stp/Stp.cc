@@ -18,14 +18,13 @@
 // Authors: ANSA Team, Benjamin Martin Seregi
 //
 
+#include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ieee8021d/stp/Stp.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
-
-
-#include "inet/common/IProtocolRegistrationListener.h"
 
 namespace inet {
 
@@ -153,10 +152,10 @@ void Stp::handleTCN(Packet *packet, const Ptr<const Bpdu>& tcn)
     if (!isRoot) {
         Packet *outPacket = new Packet(packet->getName());
         outPacket->insertAtBack(tcn);
-        outPacket->addTagIfAbsent<InterfaceReq>()->setInterfaceId(rootInterfaceId);
-        outPacket->addTagIfAbsent<MacAddressReq>()->setSrcAddress(bridgeAddress);
-        outPacket->addTagIfAbsent<MacAddressReq>()->setDestAddress(destAddress);
-
+        outPacket->addTag<InterfaceReq>()->setInterfaceId(rootInterfaceId);
+        auto macAddressReq = outPacket->addTag<MacAddressReq>();
+        macAddressReq->setSrcAddress(bridgeAddress);
+        macAddressReq->setDestAddress(destAddress);
         outPacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
         outPacket->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
         send(outPacket, "relayOut");
@@ -168,9 +167,10 @@ void Stp::generateBPDU(int interfaceId, const MacAddress& address, bool tcFlag, 
 {
     Packet *packet = new Packet("BPDU");
     const auto& bpdu = makeShared<Bpdu>();
-    packet->addTagIfAbsent<MacAddressReq>()->setSrcAddress(bridgeAddress);
-    packet->addTagIfAbsent<MacAddressReq>()->setDestAddress(address);
-    packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
+    auto macAddressReq = packet->addTag<MacAddressReq>();
+    macAddressReq->setSrcAddress(bridgeAddress);
+    macAddressReq->setDestAddress(address);
+    packet->addTag<InterfaceReq>()->setInterfaceId(interfaceId);
     packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
     packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
 
@@ -213,10 +213,6 @@ void Stp::generateTCN()
             // exist root port to notifying
             topologyChangeNotification = false;
             Packet *packet = new Packet("BPDU");
-
-            packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
-            packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
-
             const auto& tcn = makeShared<Bpdu>();
             tcn->setProtocolIdentifier(0);
             tcn->setProtocolVersionIdentifier(0);
@@ -224,9 +220,12 @@ void Stp::generateTCN()
             // 1 if Topology Change Notification BPDU
             tcn->setBpduType(1);
 
-            packet->addTagIfAbsent<MacAddressReq>()->setSrcAddress(bridgeAddress);
-            packet->addTagIfAbsent<MacAddressReq>()->setDestAddress(MacAddress::STP_MULTICAST_ADDRESS);
-            packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(rootInterfaceId);
+            auto macAddressReq = packet->addTag<MacAddressReq>();
+            macAddressReq->setSrcAddress(bridgeAddress);
+            macAddressReq->setDestAddress(MacAddress::STP_MULTICAST_ADDRESS);
+            packet->addTag<InterfaceReq>()->setInterfaceId(rootInterfaceId);
+            packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
+            packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
 
             packet->insertAtBack(tcn);
             EV_INFO << "The topology has changed. Sending Topology Change Notification BPDU " << tcn << " to the Root Switch." << endl;
