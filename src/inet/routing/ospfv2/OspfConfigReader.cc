@@ -85,10 +85,6 @@ bool OspfConfigReader::loadConfigFromXML(cXMLElement *asConfig, Router *ospfRout
     std::set<AreaId> areaList;
     getAreaListFromXML(*routerNode, areaList);
 
-    // if the router is an area border router then it MUST be part of the backbone(area 0)
-    if ((areaList.size() > 1) && (areaList.find(BACKBONE_AREAID) == areaList.end())) {
-        areaList.insert(BACKBONE_AREAID);
-    }
     // load area information
     for (const auto & elem : areaList) {
         loadAreaFromXML(*asConfig, elem);
