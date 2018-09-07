@@ -2237,13 +2237,11 @@ bool Area::findSameOrWorseCostRoute(const std::vector<OspfRoutingTableEntry *>& 
     destinationInRoutingTable = false;
     sameOrWorseCost.clear();
 
-    long routeCount = newRoutingTable.size();
     Ipv4AddressRange destination;
-
     destination.address = summaryLSA.getHeader().getLinkStateID();
     destination.mask = summaryLSA.getNetworkMask();
 
-    for (long j = 0; j < routeCount; j++) {
+    for (uint32_t j = 0; j < newRoutingTable.size(); j++) {
         OspfRoutingTableEntry *routingEntry = newRoutingTable[j];
         bool foundMatching = false;
 
@@ -2267,7 +2265,7 @@ bool Area::findSameOrWorseCostRoute(const std::vector<OspfRoutingTableEntry *>& 
         if (foundMatching) {
             destinationInRoutingTable = true;
 
-            /* If the matching entry is an INTRAAREA getRoute(intra-area paths are
+            /* If the matching entry is an INTRAAREA route (intra-area paths are
              * always preferred to other paths of any cost), or it's a cheaper INTERAREA
              * route, then skip this LSA.
              */
@@ -2360,12 +2358,10 @@ void Area::calculateInterAreaRoutes(std::vector<OspfRoutingTableEntry *>& newRou
         destination.mask = currentLSA->getNetworkMask();
 
         if ((lsType == SUMMARYLSA_NETWORKS_TYPE) && (parentRouter->hasAddressRange(destination))) {    // (3)
-            bool foundIntraAreaRoute = false;
-
             // look for an "Active" INTRAAREA route
+            bool foundIntraAreaRoute = false;
             for (uint32_t j = 0; j < routeCount; j++) {
                 OspfRoutingTableEntry *routingEntry = newRoutingTable[j];
-
                 if ((routingEntry->getDestinationType() == OspfRoutingTableEntry::NETWORK_DESTINATION) &&
                     (routingEntry->getPathType() == OspfRoutingTableEntry::INTRAAREA) &&
                     destination.containedByRange(routingEntry->getDestination(), routingEntry->getNetmask()))
@@ -2374,9 +2370,8 @@ void Area::calculateInterAreaRoutes(std::vector<OspfRoutingTableEntry *>& newRou
                     break;
                 }
             }
-            if (foundIntraAreaRoute) {
+            if (foundIntraAreaRoute)
                 continue;
-            }
         }
 
         OspfRoutingTableEntry *borderRouterEntry = nullptr;

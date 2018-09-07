@@ -50,42 +50,6 @@ OspfRoutingTableEntry::OspfRoutingTableEntry(const OspfRoutingTableEntry& entry)
     setMetric(entry.getMetric());
 }
 
-void OspfRoutingTableEntry::setPathType(RoutingPathType type)
-{
-    pathType = type;
-    // FIXME: this is a hack. But the correct way to do it is to implement a separate IIpv4RoutingTable module for OSPF...
-    if (pathType == OspfRoutingTableEntry::TYPE2_EXTERNAL) {
-        setMetric(cost + type2Cost * 1000);
-    }
-    else {
-        setMetric(cost);
-    }
-}
-
-void OspfRoutingTableEntry::setCost(Metric pathCost)
-{
-    cost = pathCost;
-    // FIXME: this is a hack. But the correct way to do it is to implement a separate IIpv4RoutingTable module for OSPF...
-    if (pathType == OspfRoutingTableEntry::TYPE2_EXTERNAL) {
-        setMetric(cost + type2Cost * 1000);
-    }
-    else {
-        setMetric(cost);
-    }
-}
-
-void OspfRoutingTableEntry::setType2Cost(Metric pathCost)
-{
-    type2Cost = pathCost;
-    // FIXME: this is a hack. But the correct way to do it is to implement a separate IIpv4RoutingTable module for OSPF...
-    if (pathType == OspfRoutingTableEntry::TYPE2_EXTERNAL) {
-        setMetric(cost + type2Cost * 1000);
-    }
-    else {
-        setMetric(cost);
-    }
-}
-
 void OspfRoutingTableEntry::addNextHop(NextHop hop)
 {
     if (nextHops.size() == 0) {
@@ -137,11 +101,12 @@ std::ostream& operator<<(std::ostream& out, const OspfRoutingTableEntry& entry)
     }
     out << "mask: " << entry.getNetmask() << " ";
     out << "cost: " << entry.getCost() << " ";
+    if(entry.getPathType() == OspfRoutingTableEntry::TYPE2_EXTERNAL)
+        out << "type2Cost: " << entry.getType2Cost() << " ";
     out << "if: " << entry.getInterfaceName() << " ";
     out << "destType: " << OspfRoutingTableEntry::getDestinationTypeString(entry.getDestinationType());
     out << " area: " << entry.getArea().str(false) << " ";
-    out << "pathType: " << OspfRoutingTableEntry::getPathTypeString(entry.getPathType());
-    out << " Type2Cost: " << entry.getType2Cost() << " ";
+    out << "pathType: " << OspfRoutingTableEntry::getPathTypeString(entry.getPathType()) << " ";
     out << "Origin: [" << entry.getLinkStateOrigin()->getHeader() << "] ";
 
     return out;
