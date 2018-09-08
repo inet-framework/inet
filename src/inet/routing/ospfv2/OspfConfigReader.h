@@ -88,6 +88,11 @@ class INET_API OspfConfigReader
     void loadHostRoute(const cXMLElement& hostRouteConfig);
 
     /**
+     * Loads the configuration of a loopback interface.
+     */
+    void loadLoopbackParameters(const cXMLElement& loConfig);
+
+    /**
      * Loads the configuration of an OSPf virtual link (virtual connection between two backbone routers).
      */
     void loadVirtualLink(const cXMLElement& virtualLinkConfig);

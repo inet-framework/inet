@@ -95,6 +95,11 @@ import inet.routing.contract.IOspf;
 //     - @areaID - An optional attribute containing the area ID in dotted decimal notation
 //     - @attachedHost - IPv4 address of attached host
 //     - @linkCost - An optional attribute specifying the associated cost (>=0 and <1000)
+
+//   - <LoopbackInterface>
+//     - @ifName - A unique name of the loopback interface (e.g. lo1)
+//     - @areaID - An optional attribute containing the area ID in dotted decimal notation
+//     - @linkCost - An optional attribute specifying the associated cost (>=0 and <1000)
 //
 //   - <NBMAInterface>
 //     - @ifName - A unique name of the interface (e.g. eth0) or ...
@@ -166,9 +171,10 @@ simple Ospf like IOspf
 
         int referenceBandwidth @unit(bps) = default(1e8bps);   // reference bandwidth for cost calculation
         int interfaceOutputCost = default(0);  // cost of link on the interface (1-1000), 0 means use reference bandwidth
-        int linkCost = default(1);  // cost of link (1-1000)
         int externalInterfaceOutputCost = default(1);  // cost of link (1-1000)
-        string externalInterfaceOutputType = default("");  // Type1|Type2        
+        string externalInterfaceOutputType = default("Type2");  // Type1|Type2 
+        string forwardingAddress = default("0.0.0.0");
+        int linkCost = default(1);  // cost of link (1-1000) for HostInterface and LoopbackInterface only      
 
         string authenticationType @enum("SimplePasswordType","CrytographicType","NullType") = default("NullType");
         string authenticationKey = default("0x00");  // 0xnn..nn

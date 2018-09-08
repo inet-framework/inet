@@ -107,6 +107,9 @@ bool OspfConfigReader::loadConfigFromXML(cXMLElement *asConfig, Router *ospfRout
         else if (nodeName == "HostInterface") {
             loadHostRoute(*(elem));
         }
+        else if (nodeName == "LoopbackInterface") {
+            loadLoopbackParameters(*(elem));
+        }
         else if (nodeName == "VirtualLink") {
             loadVirtualLink(*(elem));
         }
@@ -351,11 +354,7 @@ void OspfConfigReader::loadExternalRoute(const cXMLElement& externalRouteConfig)
         else
             throw cRuntimeError("Invalid 'externalInterfaceOutputType' at interface '%s' at ", ie->getInterfaceName(), externalRouteConfig.getSourceLocation());
 
-        const char *forwardingAddr = externalRouteConfig.getAttribute("forwardingAddress");
-        if(forwardingAddr)
-            asExternalRoute.setForwardingAddress(ipv4AddressFromAddressString(getMandatoryFilledAttribute(externalRouteConfig, "forwardingAddress")));
-        else
-            asExternalRoute.setForwardingAddress(ipv4AddressFromAddressString("0.0.0.0"));
+        asExternalRoute.setForwardingAddress(ipv4AddressFromAddressString(getStrAttrOrPar(externalRouteConfig, "forwardingAddress")));
 
         long externalRouteTagVal = 0;    // default value
         const char *externalRouteTag = externalRouteConfig.getAttribute("externalRouteTag");
@@ -403,6 +402,52 @@ void OspfConfigReader::loadHostRoute(const cXMLElement& hostRouteConfig)
             throw cRuntimeError("Loading HostInterface '%s' aborted, unknown area %s at %s", ie->getInterfaceName(), hostArea.str(false).c_str(), hostRouteConfig.getSourceLocation());
         }
     }
+}
+
+void OspfConfigReader::loadLoopbackParameters(const cXMLElement& loConfig)
+{
+    std::string intfModeStr = getStrAttrOrPar(loConfig, "interfaceMode");
+    if(intfModeStr == "NoOSPF")
+        return;
+
+    const char *ifName = loConfig.getAttribute("ifName");
+    InterfaceEntry *ie = nullptr;
+    if (ifName && *ifName) {
+        inet::PatternMatcher pattern(ifName, true, true, true);
+        for (int n = 0; n < ift->getNumInterfaces(); n++) {
+            InterfaceEntry *intf = ift->getInterface(n);
+            if (pattern.matches(intf->getFullName()) ||
+                    pattern.matches(intf->getInterfaceFullPath().c_str()) ||
+                    pattern.matches(intf->getInterfaceName())) {
+                ie = intf;
+                break;
+            }
+        }
+        if(!ie)
+            throw cRuntimeError("Error reading XML config: IInterfaceTable contains no ifName '%s' at %s", ifName, loConfig.getSourceLocation());
+    }
+    else
+        throw cRuntimeError("Error reading XML config: IInterfaceTable contains no ifName '%s' at %s", ifName, loConfig.getSourceLocation());
+
+    ASSERT(ie);
+    int ifIndex = ie->getInterfaceId();
+    EV_DEBUG << "        loading LoopbackInterface " << ie->getInterfaceName() << " ifIndex[" << ifIndex << "]\n";
+
+    joinMulticastGroups(ifIndex);
+
+    // Loopbacks are considered host routes in OSPF, and they are advertised as /32
+    HostRouteParameters hostParameters;
+    hostParameters.ifIndex = ifIndex;
+    AreaId hostArea = ipv4AddressFromAddressString(getStrAttrOrPar(loConfig, "areaID"));
+    hostParameters.address = ie->getIpv4Address();
+    hostParameters.linkCost = getIntAttrOrPar(loConfig, "linkCost");
+
+    // add the host route to the OSPF data structure.
+    Area *area = ospfRouter->getAreaByID(hostArea);
+    if (area != nullptr)
+        area->addHostRoute(hostParameters);
+    else
+        throw cRuntimeError("Loading LoopbackInterface '%s' aborted, unknown area %s at %s", ie->getInterfaceName(), hostArea.str(false).c_str(), loConfig.getSourceLocation());
 }
 
 void OspfConfigReader::loadVirtualLink(const cXMLElement& virtualLinkConfig)
