@@ -228,13 +228,18 @@ class INET_API Router
     Ipv4AddressRange getContainingAddressRange(const Ipv4AddressRange& addressRange, bool *advertise = nullptr) const;
 
     /**
+     * get the default route in the routing table.
+     */
+    Ipv4Route* getDefaultRoute();
+
+    /**
      * Stores information on an AS External Route in externalRoutes and intalls(or
      * updates) a new AsExternalLsa into the database.
      * @param networkAddress        [in] The external route's network address.
      * @param externalRouteContents [in] Route configuration data for the external route.
      * @param ifIndex               [in]
      */
-    void updateExternalRoute(Ipv4Address networkAddress, const OspfAsExternalLsaContents& externalRouteContents, int ifIndex);
+    void updateExternalRoute(Ipv4Address networkAddress, const OspfAsExternalLsaContents& externalRouteContents, int ifIndex = -1);
 
     /**
      * Add an AS External Route in IPRoutingTable
