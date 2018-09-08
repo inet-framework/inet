@@ -92,6 +92,11 @@ class INET_API OspfConfigReader
      */
     void loadVirtualLink(const cXMLElement& virtualLinkConfig);
 
+    /**
+     * Distributes the configure default route on this router with AS-External LSAs to other OSPF routers.
+     */
+    void initiateDefaultRouteDistribution();
+
     void joinMulticastGroups(int interfaceId);
 
   public:

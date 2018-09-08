@@ -115,6 +115,11 @@ bool OspfConfigReader::loadConfigFromXML(cXMLElement *asConfig, Router *ospfRout
                     nodeName.c_str(), nodeFullPath.c_str(), (elem)->getSourceLocation());
         }
     }
+
+    bool DistributeDefaultRoute = getBoolAttrOrPar(*routerNode, "DistributeDefaultRoute");
+    if(DistributeDefaultRoute)
+        initiateDefaultRouteDistribution();
+
     return true;
 }
 
@@ -467,6 +472,31 @@ void OspfConfigReader::loadAuthenticationConfig(OspfInterface *intf, const cXMLE
         }
     }
     intf->setAuthenticationKey(keyValue);
+}
+
+void OspfConfigReader::initiateDefaultRouteDistribution()
+{
+    Ipv4Route *entry = ospfRouter->getDefaultRoute();
+    // if a default route exist on this router
+    if(entry) {
+        EV_DEBUG << "        distributing the default route. \n";
+
+        Ipv4AddressRange networkAddress;
+        networkAddress.address = ipv4AddressFromAddressString("0.0.0.0");
+        networkAddress.mask = ipv4NetmaskFromAddressString("0.0.0.0");
+        networkAddress.address = networkAddress.address & networkAddress.mask;
+
+        OspfAsExternalLsaContents asExternalRoute;
+        asExternalRoute.setNetworkMask(networkAddress.mask);
+        // default route is advertised with cost of 1 of 'type 2' external metric
+        asExternalRoute.setRouteCost(1);
+        asExternalRoute.setE_ExternalMetricType(true);
+        asExternalRoute.setForwardingAddress(ipv4AddressFromAddressString("0.0.0.0"));
+        asExternalRoute.setExternalRouteTag(0);
+
+        // add the external route to the OSPF data structure
+        ospfRouter->updateExternalRoute(networkAddress.address, asExternalRoute);
+    }
 }
 
 std::vector<InterfaceEntry *> OspfConfigReader::getInterfaceByXMLAttributesOf(const cXMLElement& ifConfig)

@@ -1421,39 +1421,50 @@ void Router::notifyAboutRoutingTableChanges(std::vector<OspfRoutingTableEntry *>
     }
 }
 
+Ipv4Route* Router::getDefaultRoute()
+{
+    for (int32_t i = 0; i < rt->getNumRoutes(); i++) {
+        Ipv4Route *entry = rt->getRoute(i);
+        if (entry->getDestination().isUnspecified() && entry->getNetmask().isUnspecified())
+            return entry;
+    }
+    return nullptr;
+}
+
 void Router::updateExternalRoute(Ipv4Address networkAddress, const OspfAsExternalLsaContents& externalRouteContents, int ifIndex)
 {
     AsExternalLsa *asExternalLSA = new AsExternalLsa;
     OspfLsaHeader& lsaHeader = asExternalLSA->getHeaderForUpdate();
     OspfOptions lsaOptions;
-    //LsaKeyType lsaKey;
 
-    unsigned long routingEntryNumber = rt->getNumRoutes();
-    bool inRoutingTable = false;
-    Ipv4Route *entry = nullptr;
-    // add the external route to the routing table if it was not added by another module
-    for (unsigned long i = 0; i < routingEntryNumber; i++) {
-        entry = rt->getRoute(i);
-        if ((entry->getDestination() == networkAddress)
-            && (entry->getNetmask() == externalRouteContents.getNetworkMask()))    //TODO is it enough?
-        {
-            inRoutingTable = true;
-            break;
+    if(ifIndex != -1) {
+        unsigned long routingEntryNumber = rt->getNumRoutes();
+        bool inRoutingTable = false;
+        Ipv4Route *entry = nullptr;
+        // add the external route to the routing table if it was not added by another module
+        for (unsigned long i = 0; i < routingEntryNumber; i++) {
+            entry = rt->getRoute(i);
+            if ((entry->getDestination() == networkAddress)
+                    && (entry->getNetmask() == externalRouteContents.getNetworkMask()))    //TODO is it enough?
+            {
+                inRoutingTable = true;
+                break;
+            }
         }
-    }
 
-    if (!inRoutingTable) {
-        Ipv4Route *entry = new Ipv4Route;
-        entry->setDestination(networkAddress);
-        entry->setNetmask(externalRouteContents.getNetworkMask());
-        entry->setInterface(ift->getInterfaceById(ifIndex));
-        entry->setSourceType(IRoute::MANUAL);
-        entry->setMetric(externalRouteContents.getRouteCost());
-        rt->addRoute(entry);    // IIpv4RoutingTable deletes entry pointer
-    }
-    else {
-        ASSERT(entry);
-        entry->setMetric(externalRouteContents.getRouteCost());
+        if (!inRoutingTable) {
+            Ipv4Route *entry = new Ipv4Route;
+            entry->setDestination(networkAddress);
+            entry->setNetmask(externalRouteContents.getNetworkMask());
+            entry->setInterface(ift->getInterfaceById(ifIndex));
+            entry->setSourceType(IRoute::MANUAL);
+            entry->setMetric(externalRouteContents.getRouteCost());
+            rt->addRoute(entry);    // IIpv4RoutingTable deletes entry pointer
+        }
+        else {
+            ASSERT(entry);
+            entry->setMetric(externalRouteContents.getRouteCost());
+        }
     }
 
     lsaHeader.setLsAge(0);
