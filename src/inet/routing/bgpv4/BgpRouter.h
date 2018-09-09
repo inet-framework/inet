@@ -38,10 +38,10 @@ class BgpSession;
 class INET_API BgpRouter : public TcpSocket::ICallback
 {
 private:
-    IIpv4RoutingTable *rt = nullptr;    // The IP routing table
-    RouterId routerID;    // The router ID assigned by the IP layer
-    AsId myAsId = 0;
+    IInterfaceTable *ift = nullptr;
+    IIpv4RoutingTable *rt = nullptr;
     cSimpleModule *bgpModule = nullptr;
+    AsId myAsId = 0;
     SocketMap _socketMap;
     SessionId _currSessionId = 0;
     std::map<SessionId, BgpSession *> _BGPSessions;
@@ -55,11 +55,10 @@ private:
     std::vector<AsId> _ASListOUT;
 
   public:
-    BgpRouter(RouterId id, cSimpleModule *bgpModule, IIpv4RoutingTable *rt);
+    BgpRouter(cSimpleModule *bgpModule, IInterfaceTable *ift, IIpv4RoutingTable *rt);
     virtual ~BgpRouter();
 
-    void setRouterId(RouterId routerID) { this->routerID = routerID; }
-    RouterId getRouterId() { return routerID; }
+    RouterId getRouterId() { return rt->getRouterId(); }
     void setAsId(AsId myAsId) { this->myAsId = myAsId; }
     AsId getAsId() { return myAsId; }
     int getNumBgpSessions() { return _BGPSessions.size(); }

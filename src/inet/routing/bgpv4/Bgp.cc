@@ -89,7 +89,7 @@ void Bgp::handleMessage(cMessage *msg)
 
 void Bgp::createBgpRouter()
 {
-    bgpRouter = new BgpRouter(rt->getRouterId(), this, rt);
+    bgpRouter = new BgpRouter(this, ift, rt);
 
     // read BGP configuration
     cXMLElement *bgpConfig = par("bgpConfig");
