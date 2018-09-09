@@ -33,9 +33,42 @@ namespace bgp {
 
 class INET_API BgpSession : public cObject
 {
-  public:
-    BgpSession(Bgp& _bgpRouting);
+private:
+  SessionInfo _info;
+  BgpRouter& bgpRouter;
 
+  //Timers
+  simtime_t _StartEventTime;
+  cMessage *_ptrStartEvent;
+  unsigned int _connectRetryCounter;
+  simtime_t _connectRetryTime;
+  cMessage *_ptrConnectRetryTimer;
+  simtime_t _holdTime;
+  cMessage *_ptrHoldTimer;
+  simtime_t _keepAliveTime;
+  cMessage *_ptrKeepAliveTimer;
+
+  //Statistics
+  unsigned int _openMsgSent;
+  unsigned int _openMsgRcv;
+  unsigned int _keepAliveMsgSent;
+  unsigned int _keepAliveMsgRcv;
+  unsigned int _updateMsgSent;
+  unsigned int _updateMsgRcv;
+
+  //FINAL STATE MACHINE
+  fsm::TopState::Box *_box;
+  Macho::Machine<fsm::TopState> *_fsm;
+
+  friend struct fsm::Idle;
+  friend struct fsm::Connect;
+  friend struct fsm::Active;
+  friend struct fsm::OpenSent;
+  friend struct fsm::OpenConfirm;
+  friend struct fsm::Established;
+
+  public:
+    BgpSession(BgpRouter& bgpRouter);
     virtual ~BgpSession();
 
     void startConnection();
@@ -45,9 +78,9 @@ class INET_API BgpSession : public cObject
     void sendOpenMessage();
     void sendKeepAliveMessage();
     void addUpdateMsgSent() { _updateMsgSent++; }
-    void listenConnectionFromPeer() { _bgpRouting.listenConnectionFromPeer(_info.sessionID); }
-    void openTCPConnectionToPeer() { _bgpRouting.openTCPConnectionToPeer(_info.sessionID); }
-    SessionId findAndStartNextSession(BgpSessionType type) { return _bgpRouting.findNextSession(type, true); }
+    void listenConnectionFromPeer() { bgpRouter.listenConnectionFromPeer(_info.sessionID); }
+    void openTCPConnectionToPeer() { bgpRouter.openTCPConnectionToPeer(_info.sessionID); }
+    SessionId findAndStartNextSession(BgpSessionType type) { return bgpRouter.findNextSession(type, true); }
 
     //setters for creating and editing the information in the Bgp session:
     void setInfo(SessionInfo info);
@@ -65,50 +98,11 @@ class INET_API BgpSession : public cObject
     Ipv4Address getPeerAddr() { return _info.peerAddr; }
     TcpSocket *getSocket() { return _info.socket; }
     TcpSocket *getSocketListen() { return _info.socketListen; }
-    IIpv4RoutingTable *getIPRoutingTable() { return _bgpRouting.getIPRoutingTable(); }
-    std::vector<BgpRoutingTableEntry *> getBGPRoutingTable() { return _bgpRouting.getBGPRoutingTable(); }
+    IIpv4RoutingTable *getIPRoutingTable() { return bgpRouter.getIPRoutingTable(); }
+    std::vector<BgpRoutingTableEntry *> getBGPRoutingTable() { return bgpRouter.getBGPRoutingTable(); }
     Macho::Machine<fsm::TopState>& getFSM() { return *_fsm; }
-    bool checkExternalRoute(const Ipv4Route *ospfRoute) { return _bgpRouting.checkExternalRoute(ospfRoute); }
-    void updateSendProcess(BgpRoutingTableEntry *entry) { return _bgpRouting.updateSendProcess(NEW_SESSION_ESTABLISHED, _info.sessionID, entry); }
-
-  private:
-    SessionInfo _info;
-    Bgp& _bgpRouting;
-
-    static const int BGP_RETRY_TIME = 120;
-    static const int BGP_HOLD_TIME = 180;
-    static const int BGP_KEEP_ALIVE = 60;    // 1/3 of BGP_HOLD_TIME
-    static const int NB_SEC_START_EGP_SESSION = 1;
-
-    //Timers
-    simtime_t _StartEventTime;
-    cMessage *_ptrStartEvent;
-    unsigned int _connectRetryCounter;
-    simtime_t _connectRetryTime;
-    cMessage *_ptrConnectRetryTimer;
-    simtime_t _holdTime;
-    cMessage *_ptrHoldTimer;
-    simtime_t _keepAliveTime;
-    cMessage *_ptrKeepAliveTimer;
-
-    //Statistics
-    unsigned int _openMsgSent;
-    unsigned int _openMsgRcv;
-    unsigned int _keepAliveMsgSent;
-    unsigned int _keepAliveMsgRcv;
-    unsigned int _updateMsgSent;
-    unsigned int _updateMsgRcv;
-
-    //FINAL STATE MACHINE
-    fsm::TopState::Box *_box;
-    Macho::Machine<fsm::TopState> *_fsm;
-
-    friend struct fsm::Idle;
-    friend struct fsm::Connect;
-    friend struct fsm::Active;
-    friend struct fsm::OpenSent;
-    friend struct fsm::OpenConfirm;
-    friend struct fsm::Established;
+    bool checkExternalRoute(const Ipv4Route *ospfRoute) { return bgpRouter.checkExternalRoute(ospfRoute); }
+    void updateSendProcess(BgpRoutingTableEntry *entry) { return bgpRouter.updateSendProcess(NEW_SESSION_ESTABLISHED, _info.sessionID, entry); }
 };
 
 } // namespace bgp

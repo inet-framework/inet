@@ -23,8 +23,8 @@ namespace inet {
 
 namespace bgp {
 
-BgpSession::BgpSession(Bgp& _bgpRouting)
-    : _bgpRouting(_bgpRouting), _ptrStartEvent(nullptr), _connectRetryCounter(0)
+BgpSession::BgpSession(BgpRouter& bgpRouter)
+    : bgpRouter(bgpRouter), _ptrStartEvent(nullptr), _connectRetryCounter(0)
     , _connectRetryTime(BGP_RETRY_TIME), _ptrConnectRetryTimer(nullptr)
     , _holdTime(BGP_HOLD_TIME), _ptrHoldTimer(nullptr)
     , _keepAliveTime(BGP_KEEP_ALIVE), _ptrKeepAliveTimer(nullptr)
@@ -38,10 +38,10 @@ BgpSession::BgpSession(Bgp& _bgpRouting)
 
 BgpSession::~BgpSession()
 {
-    _bgpRouting.getCancelAndDelete(_ptrConnectRetryTimer);
-    _bgpRouting.getCancelAndDelete(_ptrStartEvent);
-    _bgpRouting.getCancelAndDelete(_ptrHoldTimer);
-    _bgpRouting.getCancelAndDelete(_ptrKeepAliveTimer);
+    bgpRouter.getCancelAndDelete(_ptrConnectRetryTimer);
+    bgpRouter.getCancelAndDelete(_ptrStartEvent);
+    bgpRouter.getCancelAndDelete(_ptrHoldTimer);
+    bgpRouter.getCancelAndDelete(_ptrKeepAliveTimer);
     delete _info.socket;
     delete _info.socketListen;
     delete _fsm;
@@ -69,7 +69,7 @@ void BgpSession::setTimers(simtime_t *delayTab)
     else if (delayTab[3] != SIMTIME_ZERO) {
         _StartEventTime = delayTab[3];
         _ptrStartEvent = new cMessage("BGP Start", START_EVENT_KIND);
-        _bgpRouting.getScheduleAt(_bgpRouting.getSimTime() + _StartEventTime, _ptrStartEvent);
+        bgpRouter.getScheduleAt(simTime() + _StartEventTime, _ptrStartEvent);
         _ptrStartEvent->setContextPointer(this);
     }
     _ptrConnectRetryTimer = new cMessage("BGP Connect Retry", CONNECT_RETRY_KIND);
@@ -87,10 +87,10 @@ void BgpSession::startConnection()
         _ptrStartEvent = new cMessage("BGP Start", START_EVENT_KIND);
     }
     if (_info.sessionType == IGP) {
-        if (_bgpRouting.getSimTime() > _StartEventTime) {
-            _StartEventTime = _bgpRouting.getSimTime();
+        if (simTime() > _StartEventTime) {
+            _StartEventTime = simTime();
         }
-        _bgpRouting.getScheduleAt(_StartEventTime, _ptrStartEvent);
+        bgpRouter.getScheduleAt(_StartEventTime, _ptrStartEvent);
         _ptrStartEvent->setContextPointer(this);
     }
 }
@@ -98,22 +98,22 @@ void BgpSession::startConnection()
 void BgpSession::restartsHoldTimer()
 {
     if (_holdTime != 0) {
-        _bgpRouting.getCancelEvent(_ptrHoldTimer);
-        _bgpRouting.getScheduleAt(_bgpRouting.getSimTime() + _holdTime, _ptrHoldTimer);
+        bgpRouter.getCancelEvent(_ptrHoldTimer);
+        bgpRouter.getScheduleAt(simTime() + _holdTime, _ptrHoldTimer);
     }
 }
 
 void BgpSession::restartsKeepAliveTimer()
 {
-    _bgpRouting.getCancelEvent(_ptrKeepAliveTimer);
-    _bgpRouting.getScheduleAt(_bgpRouting.getSimTime() + _keepAliveTime, _ptrKeepAliveTimer);
+    bgpRouter.getCancelEvent(_ptrKeepAliveTimer);
+    bgpRouter.getScheduleAt(simTime() + _keepAliveTime, _ptrKeepAliveTimer);
 }
 
 void BgpSession::restartsConnectRetryTimer(bool start)
 {
-    _bgpRouting.getCancelEvent(_ptrConnectRetryTimer);
+    bgpRouter.getCancelEvent(_ptrConnectRetryTimer);
     if (!start) {
-        _bgpRouting.getScheduleAt(_bgpRouting.getSimTime() + _connectRetryTime, _ptrConnectRetryTimer);
+        bgpRouter.getScheduleAt(simTime() + _connectRetryTime, _ptrConnectRetryTimer);
     }
 }
 

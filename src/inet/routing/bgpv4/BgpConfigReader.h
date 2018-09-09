@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_BGPROUTING_H
-#define __INET_BGPROUTING_H
+#ifndef __INET_BGPCONFIGREADER
+#define __INET_BGPCONFIGREADER
 
 #include "inet/common/INETDefs.h"
 
@@ -25,38 +25,38 @@
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/routing/bgpv4/bgpmessage/BgpHeader_m.h"
+#include "inet/routing/bgpv4/bgpmessage/BgpUpdate.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {
 
 namespace bgp {
 
-class INET_API Bgp : public cSimpleModule, protected cListener, public ILifecycle
+class INET_API BgpConfigReader
 {
 private:
-    IIpv4RoutingTable *rt = nullptr;
+    cModule *bgpModule = nullptr;
     IInterfaceTable *ift = nullptr;
-    bool isUp = false;
-    BgpRouter *bgpRouter = nullptr;    // data structure to fill in
-    cMessage *startupTimer = nullptr;    // timer for delayed startup
+    BgpRouter *bgpRouter = nullptr;
 
   public:
-    Bgp();
-    virtual ~Bgp();
+    BgpConfigReader(cModule *bgpModule, IInterfaceTable *ift);
+    virtual ~BgpConfigReader() {};
 
-  protected:
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *msg) override;
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
-    void createBgpRouter();
-    void handleTimer(cMessage *timer);
-    virtual void finish() override;
+    void loadConfigFromXML(cXMLElement *bgpConfig, BgpRouter *bgpRouter);
+
+  private:
+    std::vector<const char *> loadASConfig(cXMLElementList& ASConfig);
+    void loadSessionConfig(cXMLElementList& sessionList, simtime_t *delayTab);
+    AsId findMyAS(cXMLElementList& ASList, int& outRouterPosition);
+    void loadTimerConfig(cXMLElementList& timerConfig, simtime_t *delayTab);
+    int isInInterfaceTable(IInterfaceTable *rtTable, Ipv4Address addr);
+    unsigned int calculateStartDelay(int rtListSize, unsigned char rtPosition, unsigned char rtPeerPosition);
 };
 
 } // namespace bgp
 
 } // namespace inet
 
-#endif // ifndef __INET_BGPROUTING_H
+#endif // ifndef __INET_BGPCONFIGREADER
 
