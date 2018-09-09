@@ -66,10 +66,10 @@ class INET_API BgpSession : public cObject
     TcpSocket *getSocket() { return _info.socket; }
     TcpSocket *getSocketListen() { return _info.socketListen; }
     IIpv4RoutingTable *getIPRoutingTable() { return _bgpRouting.getIPRoutingTable(); }
-    std::vector<RoutingTableEntry *> getBGPRoutingTable() { return _bgpRouting.getBGPRoutingTable(); }
+    std::vector<BgpRoutingTableEntry *> getBGPRoutingTable() { return _bgpRouting.getBGPRoutingTable(); }
     Macho::Machine<fsm::TopState>& getFSM() { return *_fsm; }
     bool checkExternalRoute(const Ipv4Route *ospfRoute) { return _bgpRouting.checkExternalRoute(ospfRoute); }
-    void updateSendProcess(RoutingTableEntry *entry) { return _bgpRouting.updateSendProcess(NEW_SESSION_ESTABLISHED, _info.sessionID, entry); }
+    void updateSendProcess(BgpRoutingTableEntry *entry) { return _bgpRouting.updateSendProcess(NEW_SESSION_ESTABLISHED, _info.sessionID, entry); }
 
   private:
     SessionInfo _info;

@@ -69,8 +69,8 @@ class INET_API Bgp : public cSimpleModule, public ILifecycle, public TcpSocket::
     void getCancelAndDelete(cMessage *msg) { return cancelAndDelete(msg); }
     cMessage *getCancelEvent(cMessage *msg) { return cancelEvent(msg); }
     cGate *getGate(const char *gateName) { return gate(gateName); }
-    IIpv4RoutingTable *getIPRoutingTable() { return _rt; }
-    std::vector<RoutingTableEntry *> getBGPRoutingTable() { return _BGPRoutingTable; }
+    IIpv4RoutingTable *getIPRoutingTable() { return rt; }
+    std::vector<BgpRoutingTableEntry *> getBGPRoutingTable() { return bgpRoutingTable; }
     /**
      * \brief active listenSocket for a given session (used by fsm)
      */
@@ -82,7 +82,7 @@ class INET_API Bgp : public cSimpleModule, public ILifecycle, public TcpSocket::
     /**
      * \brief RFC 4271, 9.2 : Update-Send Process / Sent or not new UPDATE messages to its peers
      */
-    void updateSendProcess(const unsigned char decisionProcessResult, SessionId sessionIndex, RoutingTableEntry *entry);
+    void updateSendProcess(const unsigned char decisionProcessResult, SessionId sessionIndex, BgpRoutingTableEntry *entry);
     /**
      * \brief find the next SessionId compared to his type and start this session if boolean is true
      */
@@ -102,24 +102,24 @@ class INET_API Bgp : public cSimpleModule, public ILifecycle, public TcpSocket::
     void processMessage(const BgpKeepAliveMessage& msg);
     void processMessage(const BgpUpdateMessage& msg);
 
-    bool deleteBGPRoutingEntry(RoutingTableEntry *entry);
+    bool deleteBGPRoutingEntry(BgpRoutingTableEntry *entry);
     /**
      * \brief RFC 4271: 9.1. : Decision Process used when an UPDATE message is received
      *  As matches, routes are sent or not to UpdateSentProcess
      *  The result can be ROUTE_DESTINATION_CHANGED, NEW_ROUTE_ADDED or 0 if no routingTable modification
      */
-    unsigned char decisionProcess(const BgpUpdateMessage& msg, RoutingTableEntry *entry, SessionId sessionIndex);
+    unsigned char decisionProcess(const BgpUpdateMessage& msg, BgpRoutingTableEntry *entry, SessionId sessionIndex);
     /**
      * \brief RFC 4271: 9.1.2.2 Breaking Ties used when BGP speaker may have several routes
      *  to the same destination that have the same degree of preference.
      *
      * \return bool, true if this process changed the route, false else
      */
-    bool tieBreakingProcess(RoutingTableEntry *oldEntry, RoutingTableEntry *entry);
+    bool tieBreakingProcess(BgpRoutingTableEntry *oldEntry, BgpRoutingTableEntry *entry);
 
     SessionId createSession(BgpSessionType typeSession, const char *peerAddr);
-    bool isInASList(std::vector<AsId> ASList, RoutingTableEntry *entry);
-    unsigned long isInTable(std::vector<RoutingTableEntry *> rtTable, RoutingTableEntry *entry);
+    bool isInASList(std::vector<AsId> ASList, BgpRoutingTableEntry *entry);
+    unsigned long isInTable(std::vector<BgpRoutingTableEntry *> rtTable, BgpRoutingTableEntry *entry);
 
     std::vector<const char *> loadASConfig(cXMLElementList& ASConfig);
     void loadSessionConfig(cXMLElementList& sessionList, simtime_t *delayTab);
@@ -127,7 +127,7 @@ class INET_API Bgp : public cSimpleModule, public ILifecycle, public TcpSocket::
     AsId findMyAS(cXMLElementList& ASList, int& outRouterPosition);
     bool ospfExist(IIpv4RoutingTable *rtTable);
     void loadTimerConfig(cXMLElementList& timerConfig, simtime_t *delayTab);
-    unsigned char asLoopDetection(RoutingTableEntry *entry, AsId myAS);
+    unsigned char asLoopDetection(BgpRoutingTableEntry *entry, AsId myAS);
     SessionId findIdFromPeerAddr(std::map<SessionId, BgpSession *> sessions, Ipv4Address peerAddr);
     int isInRoutingTable(IIpv4RoutingTable *rtTable, Ipv4Address addr);
     int isInInterfaceTable(IInterfaceTable *rtTable, Ipv4Address addr);
@@ -138,10 +138,10 @@ class INET_API Bgp : public cSimpleModule, public ILifecycle, public TcpSocket::
     AsId _myAS = 0;
     SessionId _currSessionId = 0;
 
-    IInterfaceTable *_inft = nullptr;
-    IIpv4RoutingTable *_rt = nullptr;    // The IP routing table
-    typedef std::vector<RoutingTableEntry *> RoutingTableEntryVector;
-    RoutingTableEntryVector _BGPRoutingTable;    // The BGP routing table
+    IInterfaceTable *ift = nullptr;
+    IIpv4RoutingTable *rt = nullptr;    // The IP routing table
+    typedef std::vector<BgpRoutingTableEntry *> RoutingTableEntryVector;
+    RoutingTableEntryVector bgpRoutingTable;    // The BGP routing table
     RoutingTableEntryVector _prefixListIN;
     RoutingTableEntryVector _prefixListOUT;
     RoutingTableEntryVector _prefixListINOUT;      // store union of pointers in _prefixListIN and _prefixListOUT
