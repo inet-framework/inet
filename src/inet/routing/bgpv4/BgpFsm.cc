@@ -408,7 +408,7 @@ void Established::entry()
     //if it's an EGP Session, send update messages with all routing information to BGP peer
     //if it's an IGP Session, send update message with only the BGP routes learned by EGP
     const Ipv4Route *rtEntry;
-    RoutingTableEntry *BGPEntry;
+    BgpRoutingTableEntry *BGPEntry;
     IIpv4RoutingTable *IPRoutingTable = session.getIPRoutingTable();
 
     for (int i = 1; i < IPRoutingTable->getNumRoutes(); i++) {
@@ -425,7 +425,7 @@ void Established::entry()
             if (rtEntry->getSourceType() == IRoute::OSPF && session.checkExternalRoute(rtEntry)) {
                 continue;
             }
-            BGPEntry = new RoutingTableEntry(rtEntry);
+            BGPEntry = new BgpRoutingTableEntry(rtEntry);
             std::string entryh = rtEntry->getDestination().str();
             std::string entryn = rtEntry->getNetmask().str();
             BGPEntry->addAS(session._info.ASValue);
@@ -434,7 +434,7 @@ void Established::entry()
         }
     }
 
-    std::vector<RoutingTableEntry *> BGPRoutingTable = session.getBGPRoutingTable();
+    std::vector<BgpRoutingTableEntry *> BGPRoutingTable = session.getBGPRoutingTable();
     for (auto & elem : BGPRoutingTable) {
         session.updateSendProcess((elem));
     }

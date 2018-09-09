@@ -25,36 +25,35 @@ namespace inet {
 
 namespace bgp {
 
-class INET_API RoutingTableEntry : public Ipv4Route
+class INET_API BgpRoutingTableEntry : public Ipv4Route
 {
-  public:
+private:
     typedef unsigned char RoutingPathType;
+    // destinationID is RoutingEntry::host
+    // addressMask is RoutingEntry::netmask
+    RoutingPathType _pathType = INCOMPLETE;
+    std::vector<AsId> _ASList;
 
-    RoutingTableEntry(void);
-    RoutingTableEntry(const Ipv4Route *entry);
-    virtual ~RoutingTableEntry(void) {}
+  public:
+    BgpRoutingTableEntry(void);
+    BgpRoutingTableEntry(const Ipv4Route *entry);
+    virtual ~BgpRoutingTableEntry(void) {}
 
     void setPathType(RoutingPathType type) { _pathType = type; }
     RoutingPathType getPathType(void) const { return _pathType; }
     void addAS(AsId newAS) { _ASList.push_back(newAS); }
     unsigned int getASCount(void) const { return _ASList.size(); }
     AsId getAS(unsigned int index) const { return _ASList[index]; }
-
-  private:
-    // destinationID is RoutingEntry::host
-    // addressMask is RoutingEntry::netmask
-    RoutingPathType _pathType = INCOMPLETE;
-    std::vector<AsId> _ASList;
 };
 
-inline RoutingTableEntry::RoutingTableEntry(void)
+inline BgpRoutingTableEntry::BgpRoutingTableEntry(void)
 {
     setNetmask(Ipv4Address::ALLONES_ADDRESS);
     setMetric(DEFAULT_COST);
     setSourceType(IRoute::BGP);
 }
 
-inline RoutingTableEntry::RoutingTableEntry(const Ipv4Route *entry)
+inline BgpRoutingTableEntry::BgpRoutingTableEntry(const Ipv4Route *entry)
 {
     setDestination(entry->getDestination());
     setNetmask(entry->getNetmask());
@@ -64,39 +63,34 @@ inline RoutingTableEntry::RoutingTableEntry(const Ipv4Route *entry)
     setSourceType(IRoute::BGP);
 }
 
-inline std::ostream& operator<<(std::ostream& out, RoutingTableEntry& entry)
+inline std::ostream& operator<<(std::ostream& out, BgpRoutingTableEntry& entry)
 {
-    out << "BGP - Destination: "
-        << entry.getDestination().str()
-        << '/'
-        << entry.getNetmask().str()
-        << " , PathType: ";
+    out << "dest: " << entry.getDestination().str(false)
+        << " nextHop: " << entry.getGateway().str(false)
+        << " mask: " << entry.getNetmask().str()
+        << " cost: " << entry.getMetric()
+        << " if: " << entry.getInterfaceName()
+        << " pathType: ";
     switch (entry.getPathType()) {
         case EGP:
             out << "EGP";
             break;
-
         case IGP:
             out << "IGP";
             break;
-
         case INCOMPLETE:
             out << "Incomplete";
             break;
-
         default:
             out << "Unknown";
             break;
     }
-
-    out << " , NextHops: "
-        << entry.getGateway()
-        << " , AS: ";
-    unsigned int ASCount = entry.getASCount();
-    for (unsigned int i = 0; i < ASCount; i++) {
+    out << " ASlist: ";
+    for (uint32_t i = 0; i < entry.getASCount(); i++) {
         out << entry.getAS(i)
             << ' ';
     }
+
     return out;
 }
 
