@@ -24,10 +24,10 @@ namespace inet {
 
 namespace bgp {
 
-BgpRouter::BgpRouter(RouterId id, cSimpleModule *bgpModule, IIpv4RoutingTable *rt)
+BgpRouter::BgpRouter(cSimpleModule *bgpModule, IInterfaceTable *ift, IIpv4RoutingTable *rt)
 {
-    this->routerID = id;
     this->bgpModule = bgpModule;
+    this->ift = ift;
     this->rt = rt;
 }
 
