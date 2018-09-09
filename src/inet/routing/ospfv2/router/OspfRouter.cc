@@ -47,9 +47,9 @@ Router::~Router()
     for (long j = 0; j < lsaCount; j++) {
         delete asExternalLSAs[j];
     }
-    long routeCount = routingTable.size();
+    long routeCount = ospfRoutingTable.size();
     for (long k = 0; k < routeCount; k++) {
-        delete routingTable[k];
+        delete ospfRoutingTable[k];
     }
     messageHandler->clearTimer(ageTimer);
     delete ageTimer;
@@ -61,7 +61,7 @@ void Router::addWatches()
     WATCH(routerID);
     WATCH_PTRVECTOR(areas);
     WATCH_PTRVECTOR(asExternalLSAs);
-    WATCH_PTRVECTOR(routingTable);
+    WATCH_PTRVECTOR(ospfRoutingTable);
 }
 
 void Router::addArea(Area *area)
@@ -183,10 +183,10 @@ bool Router::installASExternalLSA(const OspfAsExternalLsa *lsa)
     RouterId advertisingRouter = lsa->getHeader().getAdvertisingRouter();
 
     bool reachable = false;
-    for (uint32_t i = 0; i < routingTable.size(); i++) {
-        if ((((routingTable[i]->getDestinationType() & OspfRoutingTableEntry::AREA_BORDER_ROUTER_DESTINATION) != 0) ||
-             ((routingTable[i]->getDestinationType() & OspfRoutingTableEntry::AS_BOUNDARY_ROUTER_DESTINATION) != 0)) &&
-            (routingTable[i]->getDestination() == advertisingRouter))
+    for (uint32_t i = 0; i < ospfRoutingTable.size(); i++) {
+        if ((((ospfRoutingTable[i]->getDestinationType() & OspfRoutingTableEntry::AREA_BORDER_ROUTER_DESTINATION) != 0) ||
+             ((ospfRoutingTable[i]->getDestinationType() & OspfRoutingTableEntry::AS_BOUNDARY_ROUTER_DESTINATION) != 0)) &&
+            (ospfRoutingTable[i]->getDestination() == advertisingRouter))
         {
             reachable = true;
             break;
@@ -623,7 +623,7 @@ bool Router::isDestinationUnreachable(OspfLsa *lsa) const
 
 OspfRoutingTableEntry *Router::lookup(Ipv4Address destination, std::vector<OspfRoutingTableEntry *> *table    /*= nullptr*/) const
 {
-    const std::vector<OspfRoutingTableEntry *>& rTable = (table == nullptr) ? routingTable : (*table);
+    const std::vector<OspfRoutingTableEntry *>& rTable = (table == nullptr) ? ospfRoutingTable : (*table);
     unsigned long dest = destination.getInt();
     unsigned long routingTableSize = rTable.size();
     bool unreachable = false;
@@ -771,9 +771,9 @@ void Router::rebuildRoutingTable()
 
     // backup the routing table
     std::vector<OspfRoutingTableEntry *> oldTable;
-    oldTable.assign(routingTable.begin(), routingTable.end());
-    routingTable.clear();
-    routingTable.assign(newTable.begin(), newTable.end());
+    oldTable.assign(ospfRoutingTable.begin(), ospfRoutingTable.end());
+    ospfRoutingTable.clear();
+    ospfRoutingTable.assign(newTable.begin(), newTable.end());
 
     // remove entries from the Ipv4 routing table inserted by the OSPF module
     std::vector<Ipv4Route *> eraseEntries;
@@ -786,7 +786,7 @@ void Router::rebuildRoutingTable()
 
     // add the new routing entries
     std::vector<Ipv4Route *> addEntries;
-    for (auto &tableEntry : routingTable) {
+    for (auto &tableEntry : ospfRoutingTable) {
         if (tableEntry->getDestinationType() == OspfRoutingTableEntry::NETWORK_DESTINATION) {
             if(!tableEntry->getNextHopAsGeneric().isUnspecified()) {
                 Ipv4Route *entry = new OspfRoutingTableEntry(*tableEntry);
@@ -849,7 +849,7 @@ void Router::rebuildRoutingTable()
     EV_INFO << "<-- Routing table was rebuilt.\n"
             << "Results:\n";
 
-    for (auto &entry : routingTable)
+    for (auto &entry : ospfRoutingTable)
         EV_INFO << entry << "\n";
 
     notifyAboutRoutingTableChanges(oldTable);
@@ -860,9 +860,9 @@ void Router::rebuildRoutingTable()
 
 bool Router::deleteRoute(OspfRoutingTableEntry *entry)
 {
-    auto i = std::find(routingTable.begin(), routingTable.end(), entry);
-    if (i != routingTable.end()) {
-        routingTable.erase(i);
+    auto i = std::find(ospfRoutingTable.begin(), ospfRoutingTable.end(), entry);
+    if (i != ospfRoutingTable.end()) {
+        ospfRoutingTable.erase(i);
         return true;
     }
     return false;
@@ -975,7 +975,7 @@ OspfRoutingTableEntry *Router::getPreferredEntry(const OspfLsa& lsa, bool skipSe
 {
     // see RFC 2328 16.3. and 16.4.
     if (fromRoutingTable == nullptr) {
-        fromRoutingTable = &routingTable;
+        fromRoutingTable = &ospfRoutingTable;
     }
 
     const OspfLsaHeader& lsaHeader = lsa.getHeader();
@@ -1238,9 +1238,9 @@ void Router::notifyAboutRoutingTableChanges(std::vector<OspfRoutingTableEntry *>
         oldTableMap[destination] = oldRoutingTable[i];
     }
 
-    for (uint32_t i = 0; i < routingTable.size(); i++) {
-        Ipv4AddressRange destination(routingTable[i]->getDestination() & routingTable[i]->getNetmask(), routingTable[i]->getNetmask());
-        newTableMap[destination] = routingTable[i];
+    for (uint32_t i = 0; i < ospfRoutingTable.size(); i++) {
+        Ipv4AddressRange destination(ospfRoutingTable[i]->getDestination() & ospfRoutingTable[i]->getNetmask(), ospfRoutingTable[i]->getNetmask());
+        newTableMap[destination] = ospfRoutingTable[i];
     }
 
     for (uint32_t i = 0; i < areas.size(); i++) {
@@ -1249,12 +1249,12 @@ void Router::notifyAboutRoutingTableChanges(std::vector<OspfRoutingTableEntry *>
         LsaKeyType lsaKey;
 
         // iterate over the new routing table and look for new or modified entries
-        for (uint32_t j = 0; j < routingTable.size(); j++) {
-            Ipv4AddressRange destination(routingTable[j]->getDestination() & routingTable[j]->getNetmask(), routingTable[j]->getNetmask());
+        for (uint32_t j = 0; j < ospfRoutingTable.size(); j++) {
+            Ipv4AddressRange destination(ospfRoutingTable[j]->getDestination() & ospfRoutingTable[j]->getNetmask(), ospfRoutingTable[j]->getNetmask());
             auto destIt = oldTableMap.find(destination);
             if (destIt == oldTableMap.end()) {    // new routing entry
                 SummaryLsa *lsaToReoriginate = nullptr;
-                SummaryLsa *newLSA = areas[i]->originateSummaryLSA(routingTable[j], originatedLSAMap, lsaToReoriginate);
+                SummaryLsa *newLSA = areas[i]->originateSummaryLSA(ospfRoutingTable[j], originatedLSAMap, lsaToReoriginate);
 
                 if (newLSA != nullptr) {
                     if (lsaToReoriginate != nullptr) {
@@ -1279,9 +1279,9 @@ void Router::notifyAboutRoutingTableChanges(std::vector<OspfRoutingTableEntry *>
                 }
             }
             else {
-                if (*(routingTable[j]) != *(destIt->second)) {    // modified routing entry
+                if (*(ospfRoutingTable[j]) != *(destIt->second)) {    // modified routing entry
                     SummaryLsa *lsaToReoriginate = nullptr;
-                    SummaryLsa *newLSA = areas[i]->originateSummaryLSA(routingTable[j], originatedLSAMap, lsaToReoriginate);
+                    SummaryLsa *newLSA = areas[i]->originateSummaryLSA(ospfRoutingTable[j], originatedLSAMap, lsaToReoriginate);
 
                     if (newLSA != nullptr) {
                         if (lsaToReoriginate != nullptr) {
@@ -1305,11 +1305,11 @@ void Router::notifyAboutRoutingTableChanges(std::vector<OspfRoutingTableEntry *>
                         delete newLSA;
                     }
                     else {
-                        Ipv4AddressRange destinationAddressRange(routingTable[j]->getDestination(), routingTable[j]->getNetmask());
+                        Ipv4AddressRange destinationAddressRange(ospfRoutingTable[j]->getDestination(), ospfRoutingTable[j]->getNetmask());
 
-                        if ((routingTable[j]->getDestinationType() == OspfRoutingTableEntry::NETWORK_DESTINATION) &&
-                            ((routingTable[j]->getPathType() == OspfRoutingTableEntry::INTRAAREA) ||
-                             (routingTable[j]->getPathType() == OspfRoutingTableEntry::INTERAREA)))
+                        if ((ospfRoutingTable[j]->getDestinationType() == OspfRoutingTableEntry::NETWORK_DESTINATION) &&
+                            ((ospfRoutingTable[j]->getPathType() == OspfRoutingTableEntry::INTRAAREA) ||
+                             (ospfRoutingTable[j]->getPathType() == OspfRoutingTableEntry::INTERAREA)))
                         {
                             Ipv4AddressRange containingAddressRange = getContainingAddressRange(destinationAddressRange);
                             if (containingAddressRange != NULL_IPV4ADDRESSRANGE) {
@@ -1320,19 +1320,19 @@ void Router::notifyAboutRoutingTableChanges(std::vector<OspfRoutingTableEntry *>
                         Metric maxRangeCost = 0;
                         Metric oneLessCost = 0;
 
-                        for (uint32_t k = 0; k < routingTable.size(); k++) {
-                            if ((routingTable[k]->getDestinationType() == OspfRoutingTableEntry::NETWORK_DESTINATION) &&
-                                (routingTable[k]->getPathType() == OspfRoutingTableEntry::INTRAAREA) &&
-                                ((routingTable[k]->getDestination().getInt() & routingTable[k]->getNetmask().getInt() & destinationAddressRange.mask.getInt()) ==
+                        for (uint32_t k = 0; k < ospfRoutingTable.size(); k++) {
+                            if ((ospfRoutingTable[k]->getDestinationType() == OspfRoutingTableEntry::NETWORK_DESTINATION) &&
+                                (ospfRoutingTable[k]->getPathType() == OspfRoutingTableEntry::INTRAAREA) &&
+                                ((ospfRoutingTable[k]->getDestination().getInt() & ospfRoutingTable[k]->getNetmask().getInt() & destinationAddressRange.mask.getInt()) ==
                                  (destinationAddressRange.address & destinationAddressRange.mask).getInt()) &&
-                                (routingTable[k]->getCost() > maxRangeCost))
+                                (ospfRoutingTable[k]->getCost() > maxRangeCost))
                             {
                                 oneLessCost = maxRangeCost;
-                                maxRangeCost = routingTable[k]->getCost();
+                                maxRangeCost = ospfRoutingTable[k]->getCost();
                             }
                         }
 
-                        if (maxRangeCost == routingTable[j]->getCost()) {    // this entry gives the range's cost
+                        if (maxRangeCost == ospfRoutingTable[j]->getCost()) {    // this entry gives the range's cost
                             lsaKey.linkStateID = destinationAddressRange.address;
                             lsaKey.advertisingRouter = routerID;
 
@@ -1380,15 +1380,15 @@ void Router::notifyAboutRoutingTableChanges(std::vector<OspfRoutingTableEntry *>
 
                 Metric maxRangeCost = 0;
 
-                unsigned long newRouteCount = routingTable.size();
+                unsigned long newRouteCount = ospfRoutingTable.size();
                 for (uint32_t k = 0; k < newRouteCount; k++) {
-                    if ((routingTable[k]->getDestinationType() == OspfRoutingTableEntry::NETWORK_DESTINATION) &&
-                        (routingTable[k]->getPathType() == OspfRoutingTableEntry::INTRAAREA) &&
-                        ((routingTable[k]->getDestination().getInt() & routingTable[k]->getNetmask().getInt() & destinationAddressRange.mask.getInt()) ==
+                    if ((ospfRoutingTable[k]->getDestinationType() == OspfRoutingTableEntry::NETWORK_DESTINATION) &&
+                        (ospfRoutingTable[k]->getPathType() == OspfRoutingTableEntry::INTRAAREA) &&
+                        ((ospfRoutingTable[k]->getDestination().getInt() & ospfRoutingTable[k]->getNetmask().getInt() & destinationAddressRange.mask.getInt()) ==
                          (destinationAddressRange.address & destinationAddressRange.mask).getInt()) &&    //FIXME correcting network comparison
-                        (routingTable[k]->getCost() > maxRangeCost))
+                        (ospfRoutingTable[k]->getCost() > maxRangeCost))
                     {
-                        maxRangeCost = routingTable[k]->getCost();
+                        maxRangeCost = ospfRoutingTable[k]->getCost();
                     }
                 }
 
