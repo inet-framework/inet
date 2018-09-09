@@ -100,7 +100,7 @@ class INET_API Rip : public cSimpleModule, protected cListener, public ILifecycl
     IL3AddressType *addressType = nullptr;    // address type of the routing table
     // state
     InterfaceVector ripInterfaces;    // interfaces on which RIP is used
-    RouteVector ripRoutes;    // all advertised routes (imported or learned)
+    RouteVector ripRoutingTable;    // all advertised routes (imported or learned)
     UdpSocket socket;    // bound to the RIP port (see udpPort parameter)
     cMessage *updateTimer = nullptr;    // for sending unsolicited Response messages in every ~30 seconds.
     cMessage *triggeredUpdateTimer = nullptr;    // scheduled when there are pending changes
