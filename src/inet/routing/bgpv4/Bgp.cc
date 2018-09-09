@@ -57,6 +57,12 @@ void Bgp::initialize(int stage)
 
 void Bgp::finish()
 {
+    if (!isUp)
+    {
+        EV_ERROR << "Protocol is turned off. \n";
+        return;
+    }
+
     bgpRouter->recordStatistics();
 }
 
