@@ -23,10 +23,10 @@ namespace inet {
 
 namespace ospf {
 
-Router::Router(RouterId id, cSimpleModule *containingModule, IInterfaceTable *ift, IIpv4RoutingTable *rt) :
+Router::Router(cSimpleModule *containingModule, IInterfaceTable *ift, IIpv4RoutingTable *rt) :
     ift(ift),
     rt(rt),
-    routerID(id),
+    routerID(rt->getRouterId()),
     rfc1583Compatibility(false)
 {
     messageHandler = new MessageHandler(this, containingModule);

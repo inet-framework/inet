@@ -88,7 +88,7 @@ void Ospf::handleMessage(cMessage *msg)
 
 void Ospf::createOspfRouter()
 {
-    ospfRouter = new Router(rt->getRouterId(), this, ift, rt);
+    ospfRouter = new Router(this, ift, rt);
 
     // read the OSPF AS configuration
     cXMLElement *ospfConfig = par("ospfConfig");
