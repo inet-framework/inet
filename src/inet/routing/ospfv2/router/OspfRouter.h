@@ -51,7 +51,7 @@ class INET_API Router
     std::vector<AsExternalLsa *> asExternalLSAs;    ///< A list of the ASExternalLSAs advertised by this router.
     std::map<Ipv4Address, OspfAsExternalLsaContents> externalRoutes;    ///< A map of the external route advertised by this router.
     cMessage *ageTimer;    ///< Database age timer - fires every second.
-    std::vector<OspfRoutingTableEntry *> routingTable;    ///< The OSPF routing table - contains more information than the one in the IP layer.
+    std::vector<OspfRoutingTableEntry *> ospfRoutingTable;    ///< The OSPF routing table - contains more information than the one in the IP layer.
     MessageHandler *messageHandler;    ///< The message dispatcher class.
     bool rfc1583Compatibility;    ///< Decides whether to handle the preferred routing table entry to an AS boundary router as defined in RFC1583 or not.
 
@@ -82,10 +82,10 @@ class INET_API Router
     const AsExternalLsa *getASExternalLSA(unsigned long i) const { return asExternalLSAs[i]; }
     bool getASBoundaryRouter() const { return externalRoutes.size() > 0; }
 
-    unsigned long getRoutingTableEntryCount() const { return routingTable.size(); }
-    OspfRoutingTableEntry *getRoutingTableEntry(unsigned long i) { return routingTable[i]; }
-    const OspfRoutingTableEntry *getRoutingTableEntry(unsigned long i) const { return routingTable[i]; }
-    void addRoutingTableEntry(OspfRoutingTableEntry *entry) { routingTable.push_back(entry); }
+    unsigned long getRoutingTableEntryCount() const { return ospfRoutingTable.size(); }
+    OspfRoutingTableEntry *getRoutingTableEntry(unsigned long i) { return ospfRoutingTable[i]; }
+    const OspfRoutingTableEntry *getRoutingTableEntry(unsigned long i) const { return ospfRoutingTable[i]; }
+    void addRoutingTableEntry(OspfRoutingTableEntry *entry) { ospfRoutingTable.push_back(entry); }
 
     /**
      * Adds OMNeT++ watches for the routerID, the list of Areas and the list of AS External LSAs.
