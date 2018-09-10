@@ -2,19 +2,20 @@ package inet.examples.bgpv4.BgpUpdate;
 
 import inet.common.misc.ThruputMeteringChannel;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 import inet.node.inet.StandardHost;
-
+import ned.DatarateChannel;
 
 network BGPTest
 {
     types:
-        channel LINK_100 extends ThruputMeteringChannel
+        channel LINK_100 extends DatarateChannel
         {
             parameters:
                 delay = 0s;
                 datarate = 100Mbps;
-                thruputDisplayFormat = "#N";
         }
+
     submodules:
         A: BGPRouterEx {
             parameters:
@@ -43,14 +44,16 @@ network BGPTest
                 ethg[1];
         }
         configurator: Ipv4NetworkConfigurator {
-            @display("p=100,100;is=s");
+            @display("p=100,100");
             config = xmldoc("IPv4Config.xml");
-            //assignAddresses = false;
-            //assignDisjunctSubnetAddresses = false;
             addStaticRoutes = false;
             addDefaultRoutes = false;
             addSubnetRoutes = false;
         }
+        visualizer: IntegratedCanvasVisualizer {
+            @display("p=100,38");
+        }
+
     connections:
         H1.ethg[0] <--> LINK_100 <--> A.ethg[0];
         A.pppg[0] <--> LINK_100 <--> B.pppg[0];
