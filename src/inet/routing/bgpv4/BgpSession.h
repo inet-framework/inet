@@ -76,8 +76,8 @@ private:
     void restartsKeepAliveTimer();
     void restartsConnectRetryTimer(bool start = true);
     void sendOpenMessage();
+    void sendUpdateMessage(BgpUpdatePathAttributeList &content, BgpUpdateNlri &NLRI);
     void sendKeepAliveMessage();
-    void addUpdateMsgSent() { _updateMsgSent++; }
     void listenConnectionFromPeer() { bgpRouter.listenConnectionFromPeer(_info.sessionID); }
     void openTCPConnectionToPeer() { bgpRouter.openTCPConnectionToPeer(_info.sessionID); }
     SessionId findAndStartNextSession(BgpSessionType type) { return bgpRouter.findNextSession(type, true); }

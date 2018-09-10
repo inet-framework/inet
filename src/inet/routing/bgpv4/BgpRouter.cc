@@ -443,16 +443,7 @@ void BgpRouter::updateSendProcess(const unsigned char type, SessionId sessionInd
             Ipv4Address netMask = entry->getNetmask();
             NLRI.prefix = entry->getDestination().doAnd(netMask);
             NLRI.length = (unsigned char)netMask.getNetmaskLength();
-            {
-                Packet *pk = new Packet("BgpUpdate");
-                const auto& updateMsg = makeShared<BgpUpdateMessage>();
-                updateMsg->setPathAttributeListArraySize(1);
-                updateMsg->setPathAttributeList(content);
-                updateMsg->setNLRI(NLRI);
-                pk->insertAtFront(updateMsg);
-                (elem).second->getSocket()->send(pk);
-                (elem).second->addUpdateMsgSent();
-            }
+            (elem).second->sendUpdateMessage(content, NLRI);
         }
     }
 }
