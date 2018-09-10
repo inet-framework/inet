@@ -404,11 +404,9 @@ const SummaryLsa *Area::findSummaryLSA(LsaKeyType lsaKey) const
 
 void Area::ageDatabase()
 {
-    long lsaCount = routerLSAs.size();
     bool shouldRebuildRoutingTable = false;
-    long i;
 
-    for (i = 0; i < lsaCount; i++) {
+    for (uint32_t i = 0; i < routerLSAs.size(); i++) {
         RouterLsa *lsa = routerLSAs[i];
         unsigned short lsAge = lsa->getHeader().getLsAge();
         bool selfOriginated = (lsa->getHeader().getAdvertisingRouter() == parentRouter->getRouterID());
@@ -491,8 +489,7 @@ void Area::ageDatabase()
         }
     }
 
-    lsaCount = networkLSAs.size();
-    for (i = 0; i < lsaCount; i++) {
+    for (uint32_t i = 0; i < networkLSAs.size(); i++) {
         unsigned short lsAge = networkLSAs[i]->getHeader().getLsAge();
         bool unreachable = parentRouter->isDestinationUnreachable(networkLSAs[i]);
         NetworkLsa *lsa = networkLSAs[i];
@@ -595,8 +592,7 @@ void Area::ageDatabase()
         }
     }
 
-    lsaCount = summaryLSAs.size();
-    for (i = 0; i < lsaCount; i++) {
+    for (uint32_t i = 0; i < summaryLSAs.size(); i++) {
         unsigned short lsAge = summaryLSAs[i]->getHeader().getLsAge();
         bool selfOriginated = (summaryLSAs[i]->getHeader().getAdvertisingRouter() == parentRouter->getRouterID());
         bool unreachable = parentRouter->isDestinationUnreachable(summaryLSAs[i]);
@@ -694,14 +690,11 @@ void Area::ageDatabase()
         }
     }
 
-    long interfaceCount = associatedInterfaces.size();
-    for (long m = 0; m < interfaceCount; m++) {
+    for (uint32_t m = 0; m < associatedInterfaces.size(); m++)
         associatedInterfaces[m]->ageTransmittedLsaLists();
-    }
 
-    if (shouldRebuildRoutingTable) {
+    if (shouldRebuildRoutingTable)
         parentRouter->rebuildRoutingTable();
-    }
 }
 
 bool Area::hasAnyNeighborInStates(int states) const
