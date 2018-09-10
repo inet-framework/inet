@@ -394,10 +394,9 @@ void Router::ageDatabase()
         }
     }
 
-    long areaCount = areas.size();
-    for (long j = 0; j < areaCount; j++) {
+    for (uint32_t j = 0; j < areas.size(); j++)
         areas[j]->ageDatabase();
-    }
+
     messageHandler->startTimer(ageTimer, 1.0);
 
     if (shouldRebuildRoutingTable) {
