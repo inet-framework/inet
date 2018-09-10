@@ -129,6 +129,18 @@ void BgpSession::sendOpenMessage()
     _openMsgSent++;
 }
 
+void BgpSession::sendUpdateMessage(BgpUpdatePathAttributeList &content, BgpUpdateNlri &NLRI)
+{
+    Packet *pk = new Packet("BgpUpdate");
+    const auto& updateMsg = makeShared<BgpUpdateMessage>();
+    updateMsg->setPathAttributeListArraySize(1);
+    updateMsg->setPathAttributeList(content);
+    updateMsg->setNLRI(NLRI);
+    pk->insertAtFront(updateMsg);
+    _info.socket->send(pk);
+    _updateMsgSent++;
+}
+
 void BgpSession::sendKeepAliveMessage()
 {
     Packet *pk = new Packet("BgpKeepAlive");
