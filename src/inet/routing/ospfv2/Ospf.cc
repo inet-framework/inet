@@ -59,8 +59,13 @@ void Ospf::initialize(int stage)
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {  // interfaces and static routes are already initialized
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isUp = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
-        if (isUp)
-            scheduleAt(simTime() + par("startupTime"), startupTimer);
+        if (isUp) {
+            simtime_t startupTime = par("startupTime");
+            if (startupTime == 0)
+                createOspfRouter();
+            else
+                scheduleAt(simTime() + startupTime, startupTimer);
+        }
 
         registerService(Protocol::ospf, nullptr, gate("ipIn"));
         registerProtocol(Protocol::ospf, gate("ipOut"), nullptr);
