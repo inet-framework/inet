@@ -33,18 +33,24 @@ body { font-family: "Helvetica","Arial",sans-serif }
 .align-center { text-align: center; display: block; margin-left: auto; margin-right: auto; }
 .align-right { text-align: right; display: block; margin-left: auto; }
 
-/* 'literal' roles */
-.protocol { font-style: italic; }
-.literal-cpp { color: darkblue; }
-.literal-ini { color: darkorange; }
-.literal-ned { color: darkgreen; }
-.literal-msg { color: purple; }
+/* 'literal and doxytag reference' roles */
+.reference-cpp, .reference-ned, .refeence-ini, .reference-msg {
+    font-size: 0.95rem;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding-left: 2px;
+    padding-right: 2px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 2px;
+    text-decoration: none;
+    font-family: monospace;
+}
 
-/* higlighter backgrounds */
-.highlight-cpp .highlight { background-color: #e6f3ff }
-.highlight-ini .highlight { background-color: #fef5d6 }
-.highlight-ned .highlight { background-color: #eeffe4 }
-.highlight-msg .highlight { background-color: #fcf5ff }
+.literal-cpp, .reference-cpp { color: darkblue; }
+.literal-ini, .reference-ini { color: darkorange; }
+.literal-ned, .reference-ned { color: darkgreen; }
+.literal-msg, .reference-msg { color: purple; }
+.protocol { font-style: italic; }
 
 .page-content code.literal {
     font-size: 0.95rem;
@@ -53,3 +59,10 @@ body { font-family: "Helvetica","Arial",sans-serif }
     padding-left: 2px;
     padding-right: 2px;
 }
+
+/* higlighter backgrounds */
+.highlight-cpp .highlight { background-color: #e6f3ff }
+.highlight-ini .highlight { background-color: #fef5d6 }
+.highlight-ned .highlight { background-color: #eeffe4 }
+.highlight-msg .highlight { background-color: #fcf5ff }
+
