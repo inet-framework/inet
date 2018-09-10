@@ -1,0 +1,37 @@
+<scenario>
+  <at t="0.0">
+    <disconnect src-module="sourceNode2" src-gate="ethg[0]" />
+    <disconnect src-module="switch" src-gate="ethg[1]" />
+  </at>
+  <at t="3.0">
+    <disconnect src-module="destinationNode" src-gate="ethg[0]" />
+    <disconnect src-module="backboneRouter" src-gate="ethg[0]" />
+  </at>
+  <at t="4.0">
+    <connect src-module="destinationNode" src-gate="ethg[0]"
+      dest-module="backboneRouter" dest-gate="ethg[0]"
+      channel-type="inet.node.ethernet.Eth10M">
+    </connect>
+  </at>
+  <at t="6.0">
+    <connect src-module="sourceNode2" src-gate="ethg[0]"
+      dest-module="switch" dest-gate="ethg[1]"
+      channel-type="inet.node.ethernet.Eth10M">
+    </connect>
+  </at>
+  <at t="8.0">
+    <crash module="edgeRouter"/>
+  </at>
+  <at t="10.0">
+    <initiate module="edgeRouter" operation="startup"/>
+  </at>
+  <set-param t="12.0" module="sourceNode1.app[0]" par="sendInterval" value="0.02s"/>
+  <at t="14.0">
+      <initiate module="sourceNode1" operation="shutdown"/>
+      <initiate module="sourceNode2" operation="shutdown"/>
+  </at>
+  <at t="16.0">
+      <disconnect src-module="sourceNode1" src-gate="ethg[0]" />
+      <disconnect src-module="sourceNode2" src-gate="ethg[0]" />
+  </at>
+</scenario>
