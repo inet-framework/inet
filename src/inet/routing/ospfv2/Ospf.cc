@@ -62,8 +62,10 @@ void Ospf::initialize(int stage)
         isUp = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
         if (isUp) {
             simtime_t startupTime = par("startupTime");
-            if (startupTime == 0)
+            if (startupTime == 0) {
                 createOspfRouter();
+                subscribe();
+            }
             else
                 scheduleAt(simTime() + startupTime, startupTimer);
         }
@@ -84,8 +86,10 @@ void Ospf::handleMessage(cMessage *msg)
         return;
     }
 
-    if(msg == startupTimer)
+    if (msg == startupTimer) {
         createOspfRouter();
+        subscribe();
+    }
     else
         ospfRouter->getMessageHandler()->messageReceived(msg);
 
@@ -102,13 +106,21 @@ void Ospf::createOspfRouter()
         throw cRuntimeError("Error reading AS configuration from %s", ospfConfig->getSourceLocation());
 
     ospfRouter->addWatches();
+}
 
-    // subscribe to interface created/deleted/changed notifications
+void Ospf::subscribe()
+{
     host->subscribe(interfaceCreatedSignal, this);
     host->subscribe(interfaceDeletedSignal, this);
     host->subscribe(interfaceStateChangedSignal, this);
 }
 
+void Ospf::unsubscribe()
+{
+    host->unsubscribe(interfaceCreatedSignal, this);
+    host->unsubscribe(interfaceDeletedSignal, this);
+    host->unsubscribe(interfaceStateChangedSignal, this);
+}
 
 /**
  * Listen on interface changes and update private data structures.
@@ -157,6 +169,7 @@ bool Ospf::handleOperationStage(LifecycleOperation *operation, int stage, IDoneC
             ASSERT(ospfRouter == nullptr);
             isUp = true;
             createOspfRouter();
+            subscribe();
         }
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
@@ -165,6 +178,7 @@ bool Ospf::handleOperationStage(LifecycleOperation *operation, int stage, IDoneC
             isUp = false;
             delete ospfRouter;
             ospfRouter = nullptr;
+            unsubscribe();
         }
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
@@ -173,6 +187,7 @@ bool Ospf::handleOperationStage(LifecycleOperation *operation, int stage, IDoneC
             isUp = false;
             delete ospfRouter;
             ospfRouter = nullptr;
+            unsubscribe();
         }
     }
     else {
