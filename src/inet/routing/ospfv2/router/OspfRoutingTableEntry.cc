@@ -32,6 +32,7 @@ OspfRoutingTableEntry::OspfRoutingTableEntry(IInterfaceTable *_ift) :
 }
 
 OspfRoutingTableEntry::OspfRoutingTableEntry(const OspfRoutingTableEntry& entry) :
+    ift(entry.ift),
     destinationType(entry.destinationType),
     optionalCapabilities(entry.optionalCapabilities),
     area(entry.area),
