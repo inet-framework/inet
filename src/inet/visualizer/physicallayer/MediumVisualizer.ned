@@ -28,6 +28,8 @@ module MediumVisualizer like IMediumVisualizer
 {
     parameters:
         @display("i=block/app");
+        *.visualizationTargetModule = default("^.^");
+        *.visualizationSubjectModule = default("^.^");
     submodules:
         canvasVisualizer: <default("MediumCanvasVisualizer")> like IMediumVisualizer if typename != "" {
             parameters:
