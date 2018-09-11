@@ -151,7 +151,6 @@ void InterfaceTableVisualizerBase::handleParameterChange(const char *name)
 
 void InterfaceTableVisualizerBase::subscribe()
 {
-    auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
     visualizationSubjectModule->subscribe(interfaceCreatedSignal, this);
     visualizationSubjectModule->subscribe(interfaceDeletedSignal, this);
     visualizationSubjectModule->subscribe(interfaceConfigChangedSignal, this);

@@ -178,7 +178,6 @@ void PacketDropVisualizerBase::refreshDisplay() const
 
 void PacketDropVisualizerBase::subscribe()
 {
-    auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
     visualizationSubjectModule->subscribe(packetDroppedSignal, this);
 
 }

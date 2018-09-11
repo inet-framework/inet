@@ -132,7 +132,6 @@ void LinkVisualizerBase::refreshDisplay() const
 
 void LinkVisualizerBase::subscribe()
 {
-    auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
     if (activityLevel == ACTIVITY_LEVEL_SERVICE) {
         visualizationSubjectModule->subscribe(packetSentToUpperSignal, this);
         visualizationSubjectModule->subscribe(packetReceivedFromUpperSignal, this);

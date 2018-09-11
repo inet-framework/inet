@@ -109,7 +109,6 @@ void RoutingTableVisualizerBase::handleParameterChange(const char *name)
 
 void RoutingTableVisualizerBase::subscribe()
 {
-    auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
     visualizationSubjectModule->subscribe(routeAddedSignal, this);
     visualizationSubjectModule->subscribe(routeDeletedSignal, this);
     visualizationSubjectModule->subscribe(routeChangedSignal, this);
