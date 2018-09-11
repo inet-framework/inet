@@ -185,7 +185,7 @@ void InterfaceTableVisualizerBase::addInterfaceVisualization(const InterfaceVisu
 
 void InterfaceTableVisualizerBase::addAllInterfaceVisualizations()
 {
-    for (cModule::SubmoduleIterator it(getSystemModule()); !it.end(); it++) {
+    for (cModule::SubmoduleIterator it(visualizationSubjectModule); !it.end(); it++) {
         auto networkNode = *it;
         if (isNetworkNode(networkNode) && nodeFilter.matches(networkNode)) {
             L3AddressResolver addressResolver;
