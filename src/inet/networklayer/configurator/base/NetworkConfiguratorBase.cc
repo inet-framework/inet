@@ -77,24 +77,23 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
     topology.extractByProperty("networkNode");
     EV_DEBUG << "Topology found " << topology.getNumNodes() << " nodes\n";
 
-    // print group information
-    std::map<int /*group id*/, std::vector<Node *>> networkGroups;
+    // print isolated networks information
+    std::map<int, std::vector<Node *>> isolatedNetworks;
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
         int networkId = node->getNetworkId();
-        auto itt = networkGroups.find(networkId);
-        if(itt == networkGroups.end()) {
+        auto networkNodes = isolatedNetworks.find(networkId);
+        if (networkNodes == isolatedNetworks.end()) {
             std::vector<Node *> collection = {node};
-            networkGroups[networkId] = collection;
+            isolatedNetworks[networkId] = collection;
         }
-        else {
-            itt->second.push_back(node);
-        }
+        else
+            networkNodes->second.push_back(node);
     }
-    if(networkGroups.size() == 1)
-        EV_DEBUG << "all network nodes belong to the same group. \n";
+    if (isolatedNetworks.size() == 1)
+        EV_DEBUG << "All network nodes belong to a connected network.\n";
     else
-        EV_DEBUG << "there exists " << networkGroups.size() << " groups. \n";
+        EV_DEBUG << "There exists " << isolatedNetworks.size() << " isolated networks.\n";
 
     // extract nodes, fill in interfaceTable and routingTable members in node
     for (int i = 0; i < topology.getNumNodes(); i++) {
