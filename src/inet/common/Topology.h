@@ -137,14 +137,14 @@ class INET_API Topology : public cOwnedObject
         void setNetworkId(int g) { networkId = g; }
 
         /**
-         * Returns true if the node has been visited before in the network find traversal
+         * Returns true if the node has been visited before in a traversal,
          */
         bool isVisited() const { return visited; }
 
         /**
-         * mark this node as visited or not visited in the network traversal
+         * Marks this node as visited or not visited in a traversal.
          */
-        void setVisit(bool v) { visited = v; }
+        void setVisited(bool v) { visited = v; }
 
         /**
          * Returns true of this node is enabled. This has significance

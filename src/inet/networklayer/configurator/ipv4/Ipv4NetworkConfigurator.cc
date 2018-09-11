@@ -389,34 +389,29 @@ void Ipv4NetworkConfigurator::collectCompatibleInterfaces(const std::vector<Inte
 
 void Ipv4NetworkConfigurator::assignAddresses(Topology& topology)
 {
-    if(configureIsolatedNetworksSeparatly) {
-        std::map<int /*network id*/, std::vector<LinkInfo *>> isolatedNetworks;
-        for (auto & selectedLink : topology.linkInfos) {
-            int networkId = selectedLink->networkId;
-            auto itt = isolatedNetworks.find(networkId);
-            if(itt == isolatedNetworks.end()) {
-                std::vector<LinkInfo *> collection = {selectedLink};
+    if (configureIsolatedNetworksSeparatly) {
+        std::map<int, std::vector<LinkInfo *>> isolatedNetworks;
+        for (auto & linkInfo : topology.linkInfos) {
+            int networkId = linkInfo->networkId;
+            auto network = isolatedNetworks.find(networkId);
+            if (network == isolatedNetworks.end()) {
+                std::vector<LinkInfo *> collection = {linkInfo};
                 isolatedNetworks[networkId] = collection;
             }
-            else {
-                itt->second.push_back(selectedLink);
-            }
+            else
+                network->second.push_back(linkInfo);
         }
-
-        int networkCount = 1;
-        for(auto network : isolatedNetworks) {
-            EV_DEBUG << "--> configuring isolated network " << networkCount << ". \n";
-            assignAddresses(network.second);
-            EV_DEBUG << "<-- configuring isolated network " << networkCount << ". \n";
-            networkCount++;
+        for (auto & it : isolatedNetworks) {
+            EV_DEBUG << "--> configuring isolated network " << it.first << ". \n";
+            assignAddresses(it.second);
+            EV_DEBUG << "<-- configuring isolated network " << it.first << ". \n";
         }
     }
-    else {
-        assignAddressesPerGroup(topology.linkInfos);
-    }
+    else
+        assignAddresses(topology.linkInfos);
 }
 
-void Ipv4NetworkConfigurator::assignAddressesPerGroup(std::vector<LinkInfo *> links)
+void Ipv4NetworkConfigurator::assignAddresses(std::vector<LinkInfo *> links)
 {
     int bitSize = sizeof(uint32) * 8;
     std::vector<uint32> assignedNetworkAddresses;
