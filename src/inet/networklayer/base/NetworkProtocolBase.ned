@@ -33,3 +33,4 @@ simple NetworkProtocolBase extends LayeredProtocolBase
         input queueIn @labels(INetworkHeader);
         output queueOut @labels(INetworkHeader);
 }
+

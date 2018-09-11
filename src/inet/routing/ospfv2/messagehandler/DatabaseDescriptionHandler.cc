@@ -31,7 +31,7 @@ DatabaseDescriptionHandler::DatabaseDescriptionHandler(Router *containingRouter)
 {
 }
 
-void DatabaseDescriptionHandler::processPacket(Packet *packet, Interface *intf, Neighbor *neighbor)
+void DatabaseDescriptionHandler::processPacket(Packet *packet, OspfInterface *intf, Neighbor *neighbor)
 {
     router->getMessageHandler()->printEvent("Database Description packet received", intf, neighbor);
 
@@ -188,7 +188,7 @@ void DatabaseDescriptionHandler::processPacket(Packet *packet, Interface *intf, 
     }
 }
 
-bool DatabaseDescriptionHandler::processDDPacket(const OspfDatabaseDescriptionPacket *ddPacket, Interface *intf, Neighbor *neighbor, bool inExchangeStart)
+bool DatabaseDescriptionHandler::processDDPacket(const OspfDatabaseDescriptionPacket *ddPacket, OspfInterface *intf, Neighbor *neighbor, bool inExchangeStart)
 {
     EV_INFO << "  Processing packet contents(ddOptions="
             << ((ddPacket->getDdOptions().I_Init) ? "I " : "_ ")

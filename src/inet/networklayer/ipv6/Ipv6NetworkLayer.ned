@@ -17,6 +17,7 @@
 //
 // Edited with OMNeT++ Academic/Noncommercial Edition.
 //
+
 package inet.networklayer.ipv6;
 
 import inet.common.MessageDispatcher;
@@ -121,3 +122,4 @@ module Ipv6NetworkLayer like INetworkLayer
         ipv6.queueOut --> { @display("m=s"); } --> ifOut;
         ipv6.queueIn <-- { @display("m=s"); } <-- ifIn;
 }
+

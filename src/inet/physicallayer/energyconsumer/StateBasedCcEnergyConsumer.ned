@@ -47,3 +47,4 @@ simple StateBasedCcEnergyConsumer extends CcEnergyConsumerBase
         @display("i=block/cogwheel");
         @class(StateBasedCcEnergyConsumer);
 }
+

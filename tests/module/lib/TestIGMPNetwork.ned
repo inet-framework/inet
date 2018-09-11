@@ -14,15 +14,15 @@ module IgmpTesterNic
         *.routingTableModule = absPath(routingTableModule);
         @class(InterfaceEntry);
     gates:
-        input igmpIn;
-        output igmpOut;
+        input upperLayerIn;
+        output upperLayerOut;
     submodules:
         mac: IGMPTester {
             @display("p=70,153");
         }
     connections:
-        igmpIn --> mac.igmpIn;
-        igmpOut <-- mac.igmpOut;
+        upperLayerIn --> mac.upperLayerIn;
+        upperLayerOut <-- mac.upperLayerOut;
 }
 
 network TestIGMPNetwork
@@ -53,8 +53,8 @@ network TestIGMPNetwork
                     configureRoutingTable = false;
                 }
             connections allowunconnected:
-                tester.igmpOut --> igmp.ipIn;
-                igmp.ipOut --> tester.igmpIn;
+                tester.upperLayerOut --> igmp.ipIn;
+                igmp.ipOut --> tester.upperLayerIn;
         }
     submodules:
         node: TestIGMPNode;

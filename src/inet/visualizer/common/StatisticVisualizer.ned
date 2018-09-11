@@ -38,3 +38,4 @@ module StatisticVisualizer like IStatisticVisualizer
                 @display("p=100,200");
         }
 }
+

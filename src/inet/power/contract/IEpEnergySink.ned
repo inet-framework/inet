@@ -32,3 +32,4 @@ moduleinterface IEpEnergySink extends IEnergySink
         @display("i=block/plug");
         @signal[powerGenerationChanged](type=double);
 }
+

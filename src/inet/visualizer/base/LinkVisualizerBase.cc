@@ -132,37 +132,36 @@ void LinkVisualizerBase::refreshDisplay() const
 
 void LinkVisualizerBase::subscribe()
 {
-    auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
     if (activityLevel == ACTIVITY_LEVEL_SERVICE) {
-        subscriptionModule->subscribe(packetSentToUpperSignal, this);
-        subscriptionModule->subscribe(packetReceivedFromUpperSignal, this);
+        visualizationSubjectModule->subscribe(packetSentToUpperSignal, this);
+        visualizationSubjectModule->subscribe(packetReceivedFromUpperSignal, this);
     }
     else if (activityLevel == ACTIVITY_LEVEL_PEER) {
-        subscriptionModule->subscribe(packetSentToPeerSignal, this);
-        subscriptionModule->subscribe(packetReceivedFromPeerSignal, this);
+        visualizationSubjectModule->subscribe(packetSentToPeerSignal, this);
+        visualizationSubjectModule->subscribe(packetReceivedFromPeerSignal, this);
     }
     else if (activityLevel == ACTIVITY_LEVEL_PROTOCOL) {
-        subscriptionModule->subscribe(packetSentToLowerSignal, this);
-        subscriptionModule->subscribe(packetReceivedFromLowerSignal, this);
+        visualizationSubjectModule->subscribe(packetSentToLowerSignal, this);
+        visualizationSubjectModule->subscribe(packetReceivedFromLowerSignal, this);
     }
 }
 
 void LinkVisualizerBase::unsubscribe()
 {
     // NOTE: lookup the module again because it may have been deleted first
-    auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this, false);
-    if (subscriptionModule != nullptr) {
+    auto visualizationSubjectModule = getModuleFromPar<cModule>(par("visualizationSubjectModule"), this, false);
+    if (visualizationSubjectModule != nullptr) {
         if (activityLevel == ACTIVITY_LEVEL_SERVICE) {
-            subscriptionModule->unsubscribe(packetSentToUpperSignal, this);
-            subscriptionModule->unsubscribe(packetReceivedFromUpperSignal, this);
+            visualizationSubjectModule->unsubscribe(packetSentToUpperSignal, this);
+            visualizationSubjectModule->unsubscribe(packetReceivedFromUpperSignal, this);
         }
         else if (activityLevel == ACTIVITY_LEVEL_PEER) {
-            subscriptionModule->unsubscribe(packetSentToPeerSignal, this);
-            subscriptionModule->unsubscribe(packetReceivedFromPeerSignal, this);
+            visualizationSubjectModule->unsubscribe(packetSentToPeerSignal, this);
+            visualizationSubjectModule->unsubscribe(packetReceivedFromPeerSignal, this);
         }
         else if (activityLevel == ACTIVITY_LEVEL_PROTOCOL) {
-            subscriptionModule->unsubscribe(packetSentToLowerSignal, this);
-            subscriptionModule->unsubscribe(packetReceivedFromLowerSignal, this);
+            visualizationSubjectModule->unsubscribe(packetSentToLowerSignal, this);
+            visualizationSubjectModule->unsubscribe(packetReceivedFromLowerSignal, this);
         }
     }
 }
@@ -183,7 +182,7 @@ void LinkVisualizerBase::addLinkVisualization(std::pair<int, int> sourceAndDesti
 {
     linkVisualizations[sourceAndDestination] = linkVisualization;
     if (holdAnimationTime != 0)
-        visualizerTargetModule->getCanvas()->holdSimulationFor(holdAnimationTime);
+        visualizationTargetModule->getCanvas()->holdSimulationFor(holdAnimationTime);
 }
 
 void LinkVisualizerBase::removeLinkVisualization(const LinkVisualization *linkVisualization)

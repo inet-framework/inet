@@ -31,3 +31,4 @@ moduleinterface IEnergyGenerator
     parameters:
         @display("i=block/plug");
 }
+

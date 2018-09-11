@@ -1,4 +1,3 @@
-package inet.applications.sctpapp;
 // Copyright (C) 2008 Irene Ruengeler
 //
 // This program is free software; you can redistribute it and/or
@@ -16,6 +15,9 @@ package inet.applications.sctpapp;
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+package inet.applications.sctpapp;
+
+import inet.applications.contract.IApp;
 
 //
 // Accepts any number of incoming TCP connections, and sends back the
@@ -33,8 +35,6 @@ package inet.applications.sctpapp;
 // app sent a single 100 MB message, it will be echoed only when all
 // 100 megabytes have arrived.
 //
-import inet.applications.contract.IApp;
-
 simple SctpNatPeer like IApp
 {
     parameters:

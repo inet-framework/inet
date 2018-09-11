@@ -1,6 +1,7 @@
 //
 // This program is property of its copyright holder. All rights reserved.
 //
+
 package inet.common.misc;
 
 //
@@ -29,3 +30,4 @@ channel ThruputMeteringChannel extends ned.DatarateChannel
     @class(ThruputMeteringChannel);
     string thruputDisplayFormat = default("");  // the format string for display on the link. Leave empty to disable display
 }
+

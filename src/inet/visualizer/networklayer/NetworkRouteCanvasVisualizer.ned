@@ -37,3 +37,4 @@ simple NetworkRouteCanvasVisualizer extends PathVisualizerBase like INetworkRout
         double zIndex = default(3); // determines the drawing order of figures relative to other visualizers
         @class(NetworkRouteCanvasVisualizer);
 }
+

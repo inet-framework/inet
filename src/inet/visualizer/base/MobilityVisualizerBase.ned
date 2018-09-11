@@ -20,7 +20,7 @@ package inet.visualizer.base;
 //
 // This is a base module for mobility visualizer simple modules. It subscribes
 // for the mobilityStateChanged signal at the module determined by the
-// subscriptionModule parameter. The actual visualization of mobility is done in
+// visualizationSubjectModule parameter. The actual visualization of mobility is done in
 // derived modules.
 //
 // @see ~MobilityCanvasVisualizer, ~MobilityOsgVisualizer, ~IMobilityVisualizer, ~VisualizerBase
@@ -29,11 +29,10 @@ simple MobilityVisualizerBase extends VisualizerBase
 {
     parameters:
         string networkNodeVisualizerModule = default("^.networkNodeVisualizer"); // the network node visualizer module, refers to a sibling submodule by default
-        string subscriptionModule = default("<root>"); // module where the visualizer subscribes for mobility signals, root module by default
-        
+
         bool displayMobility = default(true); // display mobility, enabled by default
         double animationSpeed = default(0); // animation speed while objects are moving around, value must be in the range (0, +inf)
-        
+
         string moduleFilter = default("**.mobility"); // which mobilities are considered, matches all mobilities by default
 
         bool displayPositions = default(false); // display a circle indicating the current position, disabled by default
@@ -65,3 +64,4 @@ simple MobilityVisualizerBase extends VisualizerBase
 
         @class(MobilityVisualizerBase);
 }
+

@@ -13,11 +13,9 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-
 package inet.networklayer.ldp;
 
 import inet.applications.contract.IApp;
-
 
 //
 // Handles and processes LDP messages.
@@ -51,3 +49,4 @@ simple Ldp like IApp
         input socketIn @labels(TcpCommand/up,UdpControlInfo/up);
         output socketOut @labels(TcpCommand/down,UdpControlInfo/down);
 }
+

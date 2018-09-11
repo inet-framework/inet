@@ -26,7 +26,7 @@ package inet.visualizer.base;
 // in derived modules.
 //
 // This module subscribes for packetReceivedFromUpper and packetSentToUpper on
-// the module determined by the subscriptionModule parameter. If the visualizer
+// the module determined by the visualizationSubjectModule parameter. If the visualizer
 // receives a packetReceivedFromUpper from a MAC protocol module, then it stores
 // the corresponding packet id. If later on the visualizer receives a
 // packetSentToUpper from another MAC protocol module with the same packet id,
@@ -43,3 +43,4 @@ simple DataLinkVisualizerBase extends LinkVisualizerBase
         labelColor = default("darkcyan");
         @class(DataLinkVisualizerBase);
 }
+

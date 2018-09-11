@@ -20,7 +20,6 @@ package inet.applications.voipstream;
 
 import inet.applications.contract.IApp;
 
-
 //
 // VoipStreamReceiver listens on an UDP port, and expects to receive VoIP packets on
 // it. The received voice is then saved into a result audio file that can be
@@ -39,8 +38,8 @@ simple VoipStreamReceiver like IApp
         int localPort;
         double playoutDelay @unit(s) = default(20ms);
         string resultFile;
-        @signal[packetReceived](type=Packet); // expected type=VoipStreamPacket
-        @signal[packetDropped](type=Packet);
+        @signal[packetReceived](type=inet::Packet); // expected type=VoipStreamPacket
+        @signal[packetDropped](type=inet::Packet);
         @signal[lostSamples](type=long);
         @signal[lostPackets](type=long);
         @signal[packetHasVoice](type=long);  // 1=yes, 0=no

@@ -22,3 +22,4 @@ moduleinterface ITunnelInterface extends INetworkInterface
     parameters:
         @display("i=block/ifcard");
 }
+

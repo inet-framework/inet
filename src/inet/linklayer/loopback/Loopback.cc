@@ -55,7 +55,7 @@ void Loopback::initialize(int stage)
     }
 }
 
-InterfaceEntry *Loopback::createInterfaceEntry()
+void Loopback::configureInterfaceEntry()
 {
     InterfaceEntry *ie = getContainingNicModule(this);
 
@@ -66,8 +66,6 @@ InterfaceEntry *Loopback::createInterfaceEntry()
     // capabilities
     ie->setMtu(par("mtu"));
     ie->setLoopback(true);
-
-    return ie;
 }
 
 void Loopback::handleMessage(cMessage *msg)

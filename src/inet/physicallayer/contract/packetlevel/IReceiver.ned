@@ -26,3 +26,4 @@ moduleinterface IReceiver
     parameters:
         @display("i=block/wrx");
 }
+

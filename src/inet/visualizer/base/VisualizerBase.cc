@@ -34,10 +34,13 @@ void VisualizerBase::initialize(int stage)
     cSimpleModule::initialize(stage);
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
-        const char *path = par("visualizerTargetModule");
-        visualizerTargetModule = getModuleByPath(path);
-        if (visualizerTargetModule == nullptr)
-            throw cRuntimeError("Module not found on path '%s' defined by par 'visualizerTargetModule'", path);
+        const char *path = par("visualizationTargetModule");
+        visualizationTargetModule = getModuleByPath(path);
+        if (visualizationTargetModule == nullptr)
+            throw cRuntimeError("Module not found on path '%s' defined by par 'visualizationTargetModule'", path);
+        visualizationSubjectModule = getModuleByPath(path);
+        if (visualizationSubjectModule == nullptr)
+            throw cRuntimeError("Module not found on path '%s' defined by par 'visualizationSubjectModule'", path);
         tags = par("tags");
     }
 }

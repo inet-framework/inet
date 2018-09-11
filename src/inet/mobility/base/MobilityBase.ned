@@ -37,7 +37,7 @@ import inet.mobility.contract.IMobility;
 simple MobilityBase like IMobility
 {
     parameters:
-        @signal[mobilityStateChanged](type=MobilityBase);
+        @signal[mobilityStateChanged](type=inet::MobilityBase);     // it's work in inet, but not work in extended module in other namespace
         @display("i=block/cogwheel");
         string subjectModule = default("^"); // module path which determines the subject module, the motion of which this mobility model describes, the default value is the parent module
         string coordinateSystemModule = default(""); // module path of the geographic coordinate system module
@@ -50,3 +50,4 @@ simple MobilityBase like IMobility
         double constraintAreaMaxY @unit(m) = default(inf m); // max y position of the constraint area, unconstrained by default (positive infinity)
         double constraintAreaMaxZ @unit(m) = default(inf m); // max z position of the constraint area, unconstrained by default (positive infinity)
 }
+

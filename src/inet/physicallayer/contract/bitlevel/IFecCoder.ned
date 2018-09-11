@@ -22,3 +22,4 @@ moduleinterface IFecCoder
     parameters:
         @display("i=block/segm");
 }
+

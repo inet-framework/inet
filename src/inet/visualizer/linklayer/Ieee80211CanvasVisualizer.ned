@@ -32,3 +32,4 @@ simple Ieee80211CanvasVisualizer extends Ieee80211VisualizerBase like IIeee80211
         double zIndex = default(2); // determines the drawing order of figures relative to other visualizers
         @class(Ieee80211CanvasVisualizer);
 }
+

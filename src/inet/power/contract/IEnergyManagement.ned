@@ -30,3 +30,4 @@ moduleinterface IEnergyManagement
     parameters:
         @display("i=block/plug");
 }
+

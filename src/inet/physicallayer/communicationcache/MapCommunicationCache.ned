@@ -29,3 +29,4 @@ module MapCommunicationCache like ICommunicationCache
         @display("i=block/table2");
         @class(MapCommunicationCache);
 }
+

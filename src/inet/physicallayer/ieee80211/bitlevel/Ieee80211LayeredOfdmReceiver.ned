@@ -70,3 +70,4 @@ module Ieee80211LayeredOfdmReceiver like IReceiver
             @display("p=100,400");
         }
 }
+

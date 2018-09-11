@@ -40,7 +40,7 @@ class INET_API Loopback : public MacBase
     long numRcvdOK = 0;
 
   protected:
-    virtual InterfaceEntry *createInterfaceEntry() override;
+    virtual void configureInterfaceEntry() override;
     virtual void flushQueue() override;
     virtual void clearQueue() override;
     virtual bool isUpperMsg(cMessage *msg) override;

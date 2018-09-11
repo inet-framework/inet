@@ -63,3 +63,4 @@ simple MoBanCoordinator extends MovingMobilityBase
         string mobilityPatternFile; // The input file for mobility pattern if it is going to be used.
         @class(MoBanCoordinator);
 }
+

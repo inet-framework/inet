@@ -33,3 +33,4 @@ simple NetworkNodeCanvasVisualizer extends NetworkNodeVisualizerBase like INetwo
         double zIndex = default(0); // determines the drawing order of figures relative to other visualizers
         @class(NetworkNodeCanvasVisualizer);
 }
+

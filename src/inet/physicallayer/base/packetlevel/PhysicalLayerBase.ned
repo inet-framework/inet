@@ -31,3 +31,4 @@ simple PhysicalLayerBase extends LayeredProtocolBase
         output upperLayerOut @labels(ILinkLayerFrame/up);
         input radioIn @labels(ISignal);
 }
+

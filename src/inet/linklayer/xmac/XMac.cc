@@ -76,7 +76,6 @@ void XMac::initialize(int stage)
         radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
         radio = check_and_cast<IRadio *>(radioModule);
 
-        initializeMacAddress();
         registerInterface();
 
         wakeup = new cMessage("wakeup");
@@ -179,25 +178,10 @@ void XMac::finish()
     }
 }
 
-void XMac::initializeMacAddress()
-{
-    const char *addrstr = par("address");
-
-    if (!strcmp(addrstr, "auto")) {
-        // assign automatic address
-        address = MacAddress::generateAutoAddress();
-
-        // change module parameter from "auto" to concrete address
-        par("address").setStringValue(address.str().c_str());
-    }
-    else {
-        address.setAddress(addrstr);
-    }
-}
-
-InterfaceEntry *XMac::createInterfaceEntry()
+void XMac::configureInterfaceEntry()
 {
     InterfaceEntry *e = getContainingNicModule(this);
+    MacAddress address = parseMacAddressParameter(par("address"));
 
     // data rate
     e->setDatarate(bitrate);
@@ -210,8 +194,6 @@ InterfaceEntry *XMac::createInterfaceEntry()
     e->setMtu(par("mtu"));
     e->setMulticast(false);
     e->setBroadcast(true);
-
-    return e;
 }
 
 /**
@@ -240,7 +222,7 @@ void XMac::sendPreamble(MacAddress preamble_address)
 {
     //~ diff with XMAC, @ in preamble!
     auto preamble = makeShared<XMacHeader>();
-    preamble->setSrcAddr(address);
+    preamble->setSrcAddr(interfaceEntry->getMacAddress());
     preamble->setDestAddr(preamble_address);
     preamble->setChunkLength(b(headerLength));
     preamble->setType(XMAC_PREAMBLE);
@@ -257,7 +239,7 @@ void XMac::sendPreamble(MacAddress preamble_address)
 void XMac::sendMacAck()
 {
     auto ack = makeShared<XMacHeader>();
-    ack->setSrcAddr(address);
+    ack->setSrcAddr(interfaceEntry->getMacAddress());
     //~ diff with XMAC, ack_preamble_based
     ack->setDestAddr(lastPreamblePktSrcAddr);
     ack->setChunkLength(b(headerLength));
@@ -274,6 +256,8 @@ void XMac::sendMacAck()
  */
 void XMac::handleSelfMessage(cMessage *msg)
 {
+    MacAddress address = interfaceEntry->getMacAddress();
+
     switch (macState)
     {
     case INIT:
@@ -734,7 +718,7 @@ void XMac::encapsulate(Packet *packet)
     delete packet->removeControlInfo();
 
     //set the src address to own mac address (nic module getId())
-    pkt->setSrcAddr(address);
+    pkt->setSrcAddr(interfaceEntry->getMacAddress());
 
     pkt->setType(XMAC_DATA);
     packet->setKind(XMAC_DATA);

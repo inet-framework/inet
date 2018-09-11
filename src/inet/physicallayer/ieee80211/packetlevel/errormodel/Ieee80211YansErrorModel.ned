@@ -25,3 +25,4 @@ module Ieee80211YansErrorModel extends ErrorModelBase
         @class(Ieee80211YansErrorModel);
         @display("i=block/broadcast");
 }
+

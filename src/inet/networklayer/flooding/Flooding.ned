@@ -57,3 +57,4 @@ simple Flooding extends NetworkProtocolBase like INetworkProtocol
         int defaultTtl = default(10); // Default time-to-live (ttl) used for this module expressed in  number of hops.
         @class(Flooding);
 }
+

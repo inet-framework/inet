@@ -50,31 +50,31 @@ while($sor = <FILE>)
 %contains: postrun-command(1).out
 cli_tcp: INIT --> SYN_SENT  (on OPEN_ACTIVE)
 srv_tcp: INIT --> LISTEN  (on OPEN_PASSIVE)
-[0.001 A001] A.1000 > B.2000: S 0:0(0) win 16384 # removing original
-[0.001 A001] A.1000 > B.2000: S 0:0(0) win 16384 # introducing copy
-[0.001 A001] A.1000 > B.2000: S 0:0(0) win 16384 # introducing copy
+[0.001 A001] A.1000 > B.2000: S 0:0(0) win 16384   Option(s): MaxSegSize# removing original
+[0.001 A001] A.1000 > B.2000: S 0:0(0) win 16384   Option(s): MaxSegSize# introducing copy
+[0.001 A001] A.1000 > B.2000: S 0:0(0) win 16384   Option(s): MaxSegSize# introducing copy
 srv_tcp: LISTEN --> SYN_RCVD  (on RCV_SYN)
-[0.003 B001] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384 # removing original
-[0.003 B001] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384 # introducing copy
-[0.003 B001] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384 # introducing copy
+[0.003 B001] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384   Option(s): MaxSegSize# removing original
+[0.003 B001] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384   Option(s): MaxSegSize# introducing copy
+[0.003 B001] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384   Option(s): MaxSegSize# introducing copy
 [0.003 B002] A.1000 < B.2000: A ack 1 win 16384
 cli_tcp: SYN_SENT --> ESTABLISHED  (on RCV_SYN_ACK)
 [0.005 A002] A.1000 > B.2000: A ack 501 win 16384
 [0.005 A003] A.1000 > B.2000: A ack 501 win 16384
 srv_tcp: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
-[0.101 A003] A.1000 > B.2000: S 0:0(0) win 16384 # introducing copy
-[0.103 B002] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384 # introducing copy
+[0.101 A003] A.1000 > B.2000: S 0:0(0) win 16384   Option(s): MaxSegSize# introducing copy
+[0.103 B002] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384   Option(s): MaxSegSize# introducing copy
 [0.103 B003] A.1000 < B.2000: A ack 1 win 16384
 [0.105 A004] A.1000 > B.2000: A ack 501 win 16384
-[1.001 A004] A.1000 > B.2000: S 0:0(0) win 16384 # introducing copy
+[1.001 A004] A.1000 > B.2000: S 0:0(0) win 16384   Option(s): MaxSegSize# introducing copy
 [1.001 A005] A.1000 > B.2000: A 1:101(100) ack 501 win 16384
 [1.001 B004] A.1000 < B.2000: A 501:601(100) ack 1 win 16384
-[1.003 B004] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384 # introducing copy
+[1.003 B004] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384   Option(s): MaxSegSize# introducing copy
 [1.003 B005] A.1000 < B.2000: A ack 1 win 16384
 [1.005 A006] A.1000 > B.2000: A ack 601 win 16384
 [1.203 B006] A.1000 < B.2000: A ack 101 win 16384
-[5.001 A006] A.1000 > B.2000: S 0:0(0) win 16384 # introducing copy
-[5.003 B006] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384 # introducing copy
+[5.001 A006] A.1000 > B.2000: S 0:0(0) win 16384   Option(s): MaxSegSize# introducing copy
+[5.003 B006] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384   Option(s): MaxSegSize# introducing copy
 [5.003 B007] A.1000 < B.2000: A ack 101 win 16384
 [5.005 A007] A.1000 > B.2000: A ack 601 win 16384
 %#--------------------------------------------------------------------------------------------------------------

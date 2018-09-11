@@ -38,3 +38,4 @@ module EnergyStorageVisualizer like IEnergyStorageVisualizer
                 @display("p=100,200");
         }
 }
+

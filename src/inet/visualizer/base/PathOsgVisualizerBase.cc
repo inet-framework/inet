@@ -48,7 +48,7 @@ void PathOsgVisualizerBase::initialize(int stage)
     PathVisualizerBase::initialize(stage);
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
-        auto canvas = visualizerTargetModule->getCanvas();
+        auto canvas = visualizationTargetModule->getCanvas();
         lineManager = LineManager::getOsgLineManager(canvas);
     }
 }
@@ -57,7 +57,7 @@ void PathOsgVisualizerBase::refreshDisplay() const
 {
     PathVisualizerBase::refreshDisplay();
     // TODO: switch to osg canvas when API is extended
-    visualizerTargetModule->getCanvas()->setAnimationSpeed(pathVisualizations.empty() ? 0 : fadeOutAnimationSpeed, this);
+    visualizationTargetModule->getCanvas()->setAnimationSpeed(pathVisualizations.empty() ? 0 : fadeOutAnimationSpeed, this);
 }
 
 const PathVisualizerBase::PathVisualization *PathOsgVisualizerBase::createPathVisualization(const std::vector<int>& path, cPacket *packet) const
@@ -76,7 +76,7 @@ void PathOsgVisualizerBase::addPathVisualization(const PathVisualization *pathVi
 {
     PathVisualizerBase::addPathVisualization(pathVisualization);
     auto pathOsgVisualization = static_cast<const PathOsgVisualization *>(pathVisualization);
-    auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
+    auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizationTargetModule);
     lineManager->addModulePath(pathVisualization);
     scene->addChild(pathOsgVisualization->node);
 }

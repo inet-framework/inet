@@ -15,11 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 package inet.applications.udpapp;
 
 import inet.applications.contract.IApp;
-
 
 //
 // Video streaming client.
@@ -42,7 +40,7 @@ simple UdpVideoStreamClient like IApp
         int serverPort;  // server port
         double startTime @unit(s) = default(1s);
         @display("i=block/app");
-        @signal[packetReceived](type=Packet);
+        @signal[packetReceived](type=inet::Packet);
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[throughput](title="throughput"; unit=bps; source="throughput(packetReceived)"; record=vector);
         @statistic[endToEndDelay](title="end-to-end delay"; source="dataAge(packetReceived)"; unit=s; record=histogram,vector; interpolationmode=none);

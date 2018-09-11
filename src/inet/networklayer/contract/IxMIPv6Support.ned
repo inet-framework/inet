@@ -35,3 +35,4 @@ moduleinterface IxMIPv6Support
         input fromIPv6;
         output toIPv6;
 }
+

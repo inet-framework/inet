@@ -15,11 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 package inet.node.ospfv2;
 
 import inet.node.inet.Router;
-
 
 //
 // An OSPFv2 router.

@@ -18,11 +18,9 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
 package inet.node.xmipv6;
 
 import inet.node.ipv6.StandardHost6;
-
 
 //
 // An Ipv6 host with MIPv6 support and contains a Binding Cache which gets updated with every BU received.

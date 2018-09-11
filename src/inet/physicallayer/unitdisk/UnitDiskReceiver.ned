@@ -35,3 +35,4 @@ module UnitDiskReceiver like IReceiver
         @class(UnitDiskReceiver);
         @display("i=block/wrx");
 }
+

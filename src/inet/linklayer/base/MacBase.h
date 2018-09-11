@@ -22,6 +22,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/linklayer/common/MacAddress.h"
 
 namespace inet {
 
@@ -45,17 +46,18 @@ class INET_API MacBase : public cSimpleModule, public ILifecycle, public cListen
     using cListener::receiveSignal;
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    void registerInterface();    // do not override! override createInterfaceEntry()
+    void registerInterface();    // do not override! override configureInterfaceEntry()
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
     virtual void updateOperationalFlag(bool isNodeUp);
     virtual bool isNodeUp();
     virtual void handleMessageWhenDown(cMessage *msg);
+    virtual MacAddress parseMacAddressParameter(const char *addrstr);
 
     /**
      * should create InterfaceEntry
      */
-    virtual InterfaceEntry *createInterfaceEntry() = 0;
+    virtual void configureInterfaceEntry() = 0;
 
     /**
      * should clear queue and emit signal "packetDropped" with entire packets

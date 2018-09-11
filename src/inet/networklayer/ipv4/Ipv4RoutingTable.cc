@@ -161,7 +161,7 @@ void Ipv4RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, c
         return; // ignore notifications during initialize
 
     Enter_Method_Silent();
-    printSignalBanner(signalID, obj);
+    printSignalBanner(signalID, obj, details);
 
     if (signalID == interfaceCreatedSignal) {
         // add netmask route for the new interface
@@ -580,8 +580,9 @@ void Ipv4RoutingTable::internalAddRoute(Ipv4Route *entry)
 void Ipv4RoutingTable::addRoute(Ipv4Route *entry)
 {
     Enter_Method("addRoute(...)");
-    EV_INFO << "add route " << entry->str() << "\n";
+    // This method should be called before calling entry->str()
     internalAddRoute(entry);
+    EV_INFO << "add route " << entry->str() << "\n";
     emit(routeAddedSignal, entry);
 }
 

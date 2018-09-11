@@ -26,3 +26,4 @@ moduleinterface IObjectCache
     parameters:
         @display("i=block/table2");
 }
+

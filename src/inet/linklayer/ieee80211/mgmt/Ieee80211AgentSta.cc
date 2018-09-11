@@ -117,7 +117,7 @@ void Ieee80211AgentSta::handleResponse(cMessage *msg)
 void Ieee80211AgentSta::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method_Silent();
-    printSignalBanner(signalID, obj);
+    printSignalBanner(signalID, obj, details);
 
     if (signalID == l2BeaconLostSignal) {
         //XXX should check details if it's about this NIC

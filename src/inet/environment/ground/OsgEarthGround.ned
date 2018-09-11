@@ -26,3 +26,4 @@ module OsgEarthGround like IGround
         string osgEarthSceneVisualizerModule = default("");
         string coordinateSystemModule = default("");
 }
+

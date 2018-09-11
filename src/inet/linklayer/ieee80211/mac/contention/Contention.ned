@@ -31,3 +31,4 @@ simple Contention like IContention
         @signal[stateChanged](type=long); // TODO: enum=inet::ieee80211::Contention::State
         @statistic[state](title="contention state"; source=stateChanged; record=vector; interpolationmode=none);
 }
+

@@ -16,11 +16,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 package inet.applications.voipstream;
 
 import inet.applications.contract.IApp;
-
 
 //
 // VoipStreamSender accepts an audio file and a destination IP address/port as
@@ -50,10 +48,11 @@ simple VoipStreamSender like IApp
         string soundFile;                       // file name of input audio file
         int repeatCount = default(1);
         string traceFileName = default("");     // file name to save output stream (wav), OFF when empty
-        @signal[packetSent](type=Packet);       // TODO first chunk is VoipStreamPacket
+        @signal[packetSent](type=inet::Packet);       // TODO first chunk is VoipStreamPacket
         @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @display("i=block/departure");
     gates:
         input socketIn @labels(UdpControlInfo/up);
         output socketOut @labels(UdpControlInfo/down);
 }
+

@@ -24,7 +24,6 @@ import inet.physicallayer.contract.packetlevel.IReceiver;
 import inet.physicallayer.contract.packetlevel.ITransmitter;
 import inet.power.contract.IEnergyConsumer;
 
-
 //
 // The radio model describes the physical device that is capable of transmitting
 // and receiving signals on the medium. It contains an antenna model, a
@@ -111,3 +110,4 @@ module Radio extends PhysicalLayerBase like IRadio
                 @display("p=100,400");
         }
 }
+

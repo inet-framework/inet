@@ -15,7 +15,6 @@
 // License along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 package inet.networklayer.icmpv6;
 
 //
@@ -43,3 +42,4 @@ simple Ipv6NeighbourDiscovery
         input ipv6In;
         output ipv6Out;
 }
+

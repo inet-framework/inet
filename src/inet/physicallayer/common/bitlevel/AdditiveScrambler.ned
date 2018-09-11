@@ -45,3 +45,4 @@ module AdditiveScrambler like IScrambler
         @class(AdditiveScramblerModule);
         @display("i=block/tunnel");
 }
+

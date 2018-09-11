@@ -46,3 +46,4 @@ simple Ipv4NodeConfigurator
         bool configureRoutingTable = default(true);     // add routing entries to routing table (uses the configurator module)
         @display("i=block/cogwheel");
 }
+

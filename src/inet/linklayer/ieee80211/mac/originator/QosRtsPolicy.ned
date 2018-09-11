@@ -13,11 +13,11 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see http://www.gnu.org/licenses/.
-// 
+//
 
 package inet.linklayer.ieee80211.mac.originator;
 
-simple QosRtsPolicy 
+simple QosRtsPolicy
 {
     parameters:
         string rateSelectionModule;
@@ -25,3 +25,4 @@ simple QosRtsPolicy
         int rtsThreshold @unit(B) = default(2346B);
         @display("i=block/control");
 }
+

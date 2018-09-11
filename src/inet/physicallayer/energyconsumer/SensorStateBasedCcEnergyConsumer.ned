@@ -39,3 +39,4 @@ simple SensorStateBasedCcEnergyConsumer extends StateBasedCcEnergyConsumer
         transmitterIdleCurrentConsumption @unit(A) = default(2mA);
         transmitterTransmittingCurrentConsumption @unit(A) = default(25mA);
 }
+

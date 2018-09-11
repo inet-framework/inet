@@ -32,3 +32,4 @@ simple VehicleMobility extends MovingMobilityBase
         double initialZ @unit(m) = default(nanToZero(uniform(constraintAreaMinZ, constraintAreaMaxZ)));
         bool initFromDisplayString = default(true); // enables one time initialization from the subject module's display string
 }
+

@@ -80,16 +80,15 @@ void TracingObstacleLossVisualizerBase::refreshDisplay() const
 
 void TracingObstacleLossVisualizerBase::subscribe()
 {
-    auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
-    subscriptionModule->subscribe(ITracingObstacleLoss::obstaclePenetratedSignal, this);
+    visualizationSubjectModule->subscribe(ITracingObstacleLoss::obstaclePenetratedSignal, this);
 }
 
 void TracingObstacleLossVisualizerBase::unsubscribe()
 {
     // NOTE: lookup the module again because it may have been deleted first
-    auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this, false);
-    if (subscriptionModule != nullptr)
-        subscriptionModule->unsubscribe(ITracingObstacleLoss::obstaclePenetratedSignal, this);
+    auto visualizationSubjectModule = getModuleFromPar<cModule>(par("visualizationSubjectModule"), this, false);
+    if (visualizationSubjectModule != nullptr)
+        visualizationSubjectModule->unsubscribe(ITracingObstacleLoss::obstaclePenetratedSignal, this);
 }
 
 void TracingObstacleLossVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)

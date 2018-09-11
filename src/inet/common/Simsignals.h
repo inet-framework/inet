@@ -109,7 +109,8 @@ extern INET_API simsignal_t    // admin
 /**
  * Utility function
  */
-void printSignalBanner(simsignal_t signalID, const cObject *obj);
+void printSignalBanner(simsignal_t signalID, const cObject *obj, const cObject *details);
+void printSignalBanner(simsignal_t signalID, long value, const cObject *details);
 
 } // namespace inet
 

@@ -27,3 +27,4 @@ moduleinterface IMacAddressTable
         double agingTime @unit(s);
         string addressTableFile;
 }
+

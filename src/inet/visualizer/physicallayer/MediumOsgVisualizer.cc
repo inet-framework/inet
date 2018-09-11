@@ -124,7 +124,7 @@ void MediumOsgVisualizer::setAnimationSpeed() const
     }
     animationSpeed = animationSpeed == DBL_MAX ? 0 : animationSpeed;
     // TODO: switch to osg canvas when API is extended
-    visualizerTargetModule->getCanvas()->setAnimationSpeed(animationSpeed, this);
+    visualizationTargetModule->getCanvas()->setAnimationSpeed(animationSpeed, this);
 }
 
 osg::Node *MediumOsgVisualizer::getRadioOsgNode(const IRadio *radio) const
@@ -422,7 +422,7 @@ void MediumOsgVisualizer::handleSignalAdded(const ITransmission *transmission)
     if (displaySignals) {
         transmissions.push_back(transmission);
         auto node = createSignalNode(transmission);
-        auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
+        auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizationTargetModule);
         scene->addChild(node);
         setSignalOsgNode(transmission, node);
         setAnimationSpeed();

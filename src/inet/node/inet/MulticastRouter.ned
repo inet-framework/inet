@@ -23,3 +23,4 @@ module MulticastRouter extends Router
         hasPim = default(true);
         multicastForwarding = true;
 }
+

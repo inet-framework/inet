@@ -25,3 +25,4 @@ module Ieee80211UnitDiskReceiver extends Ieee80211ReceiverBase
     parameters:
         @class(Ieee80211UnitDiskReceiver);
 }
+

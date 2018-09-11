@@ -60,7 +60,7 @@ simple EtherLlc
         @signal[encapPk](type=cPacket);
         @signal[decapPk](type=cPacket);
         @signal[packetSentToUpper](type=cPacket);
-        @signal[packetDropped](type=Packet);
+        @signal[packetDropped](type=inet::Packet);
         @signal[pauseSent](type=long); // pause units
         @statistic[dsap](title="dsap registering";record=sum,vector);
         @statistic[encapPk](title="packets encapsulated";source=encapPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

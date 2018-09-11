@@ -15,11 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 package inet.node.rip;
 
 import inet.node.inet.Router;
-
 
 //
 // An RIPv2 router.

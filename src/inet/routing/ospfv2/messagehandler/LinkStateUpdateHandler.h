@@ -42,12 +42,12 @@ class INET_API LinkStateUpdateHandler : public IMessageHandler
 
   private:
     bool validateLSChecksum(const OspfLsa *lsa) { return true; }    // not implemented
-    void acknowledgeLSA(const OspfLsaHeader& lsaHeader, Interface *intf, AcknowledgementFlags acknowledgementFlags, RouterId lsaSource);
+    void acknowledgeLSA(const OspfLsaHeader& lsaHeader, OspfInterface *intf, AcknowledgementFlags acknowledgementFlags, RouterId lsaSource);
 
   public:
     LinkStateUpdateHandler(Router *containingRouter);
 
-    void processPacket(Packet *packet, Interface *intf, Neighbor *neighbor) override;
+    void processPacket(Packet *packet, OspfInterface *intf, Neighbor *neighbor) override;
 };
 
 } // namespace ospf

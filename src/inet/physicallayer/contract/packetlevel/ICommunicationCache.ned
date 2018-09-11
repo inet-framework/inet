@@ -20,3 +20,4 @@ moduleinterface ICommunicationCache
     parameters:
         @display("i=block/table2");
 }
+

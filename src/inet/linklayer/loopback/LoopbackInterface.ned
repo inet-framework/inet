@@ -17,12 +17,10 @@
 // Author: Zoltan Bojthe
 //
 
-
 package inet.linklayer.loopback;
 
 import inet.common.IHook;
 import inet.linklayer.contract.ILoopbackInterface;
-
 
 //
 // Loopback interface. Complements the ~Loopback module.

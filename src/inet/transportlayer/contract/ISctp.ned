@@ -30,3 +30,4 @@ moduleinterface ISctp
         output appOut @labels(SctpCommand/up);
         output ipOut;
 }
+

@@ -42,3 +42,4 @@ simple MultiFieldClassifier
         output outs[];
         output defaultOut;
 }
+

@@ -76,3 +76,4 @@ module ConvolutionalCoder like IFecCoder
         @display("i=block/segm");
         @class(ConvolutionalCoderModule);
 }
+

@@ -38,3 +38,4 @@ module TracingObstacleLossVisualizer like ITracingObstacleLossVisualizer
                 @display("p=100,200");
         }
 }
+

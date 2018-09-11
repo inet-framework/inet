@@ -1,0 +1,5 @@
+#!/bin/sh
+echo Convering $1...
+perl -p $(dirname $0)/tex2rst-preprocess.pl <$1 >tmp.tex
+pandoc -s tmp.tex -o tmp.rst
+perl -p $(dirname $0)/tex2rst-postprocess.pl <tmp.rst >$(basename $1 .tex).rst

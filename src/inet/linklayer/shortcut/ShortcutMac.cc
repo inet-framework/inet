@@ -29,6 +29,19 @@ std::map<MacAddress, ShortcutMac *> ShortcutMac::shortcutMacs;
 
 Define_Module(ShortcutMac);
 
+ShortcutMac::~ShortcutMac()
+{
+    auto it = shortcutMacs.begin();
+    while (it != shortcutMacs.end()) {
+        if (it->second == this)
+            it = shortcutMacs.erase(it);
+        else
+            ++it;
+    }
+}
+
+//TODO for LifeCycle, should update the shortcutMacs vector on shutdown/crash/startup cases
+
 void ShortcutMac::initialize(int stage)
 {
     MacProtocolBase::initialize(stage);
@@ -40,30 +53,20 @@ void ShortcutMac::initialize(int stage)
         packetLoss = &par("packetLoss");
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
-        initializeMacAddress();
         registerInterface();
     }
 }
 
-void ShortcutMac::initializeMacAddress()
-{
-    const char *addressString = par("address");
-    if (!strcmp(addressString, "auto"))
-        address = MacAddress::generateAutoAddress();
-    else
-        address.setAddress(addressString);
-    shortcutMacs[address] = this;
-}
-
-InterfaceEntry *ShortcutMac::createInterfaceEntry()
+void ShortcutMac::configureInterfaceEntry()
 {
     auto interfaceEntry = getContainingNicModule(this);
+    MacAddress address = parseMacAddressParameter(par("address"));
+    shortcutMacs[address] = this;
     interfaceEntry->setDatarate(bitrate);
     interfaceEntry->setMacAddress(address);
     interfaceEntry->setInterfaceToken(address.formInterfaceIdentifier());
     interfaceEntry->setMulticast(false);
     interfaceEntry->setBroadcast(true);
-    return interfaceEntry;
 }
 
 void ShortcutMac::handleMessageWhenUp(cMessage *message)

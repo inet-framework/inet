@@ -25,3 +25,4 @@ module Ieee80211OfdmRadio extends FlatRadioBase
         antenna.typename = default("IsotropicAntenna");
         @class(Ieee80211OfdmRadio);
 }
+

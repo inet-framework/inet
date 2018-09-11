@@ -32,8 +32,8 @@ class INET_API Ipv4NatTable : public cSimpleModule, public NetfilterBase::HookBa
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *message);
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *message) override;
     virtual void parseConfig();
     virtual Result processPacket(Packet *packet, INetfilter::IHook::Type type);
 

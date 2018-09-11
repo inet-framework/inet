@@ -73,7 +73,9 @@ module IntegratedMultiOsgVisualizer like IIntegratedVisualizer
         int numRoutingTableVisualizers = default(1);
         int numTransportRouteVisualizers = default(1);
         int numTransportConnectionVisualizers = default(1);
-   	*.networkNodeVisualizerModule = default(absPath(".networkNodeVisualizer[0]"));
+        *.visualizationTargetModule = default("^.^");
+        *.visualizationSubjectModule = default("^.^");
+        *.networkNodeVisualizerModule = default(absPath(".networkNodeVisualizer[0]"));
     submodules:
         sceneVisualizer[numSceneVisualizers]: <default("SceneOsgVisualizer")> like ISceneVisualizer {
             parameters:
@@ -164,3 +166,4 @@ module IntegratedMultiOsgVisualizer like IIntegratedVisualizer
                 @display("p=450,1100,row,100");
         }
 }
+

@@ -37,3 +37,4 @@ simple AttachedMobility extends MobilityBase
         double offsetBank @unit(deg) = default(0deg);
         @class(AttachedMobility);
 }
+

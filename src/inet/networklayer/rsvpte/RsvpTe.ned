@@ -12,7 +12,6 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-
 package inet.networklayer.rsvpte;
 
 //
@@ -109,7 +108,7 @@ simple RsvpTe
         double helloInterval @unit(s);
         double helloTimeout @unit(s);
         @display("i=block/control");
-        @signal[tedChanged](type=TedChangeInfo);
+        @signal[tedChanged](type=inet::TedChangeInfo);
     gates:
         input ipIn @labels(Ipv4ControlInfo/up);
         output ipOut @labels(Ipv4ControlInfo/down);

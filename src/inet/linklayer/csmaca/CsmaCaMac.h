@@ -36,7 +36,6 @@ class INET_API CsmaCaMac : public MacProtocolBase
      */
     //@{
     FcsMode fcsMode;
-    MacAddress address;
     bool useAck = true;
     double bitrate = NaN;
     b headerLength = b(-1);
@@ -136,7 +135,7 @@ class INET_API CsmaCaMac : public MacProtocolBase
     virtual void initialize(int stage) override;
     virtual void initializeQueueModule();
     virtual void finish() override;
-    virtual InterfaceEntry *createInterfaceEntry() override;
+    virtual void configureInterfaceEntry() override;
     //@}
 
     /**

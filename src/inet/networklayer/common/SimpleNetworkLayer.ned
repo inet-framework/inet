@@ -79,3 +79,4 @@ module SimpleNetworkLayer like INetworkLayer
         lp.in++ <-- { @display("m=s"); } <-- ifIn;
         lp.out++ --> { @display("m=s"); } --> ifOut;
 }
+

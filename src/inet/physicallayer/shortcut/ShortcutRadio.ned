@@ -1,5 +1,5 @@
 //
-// Copyright (C) OpenSim Ltd
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -39,3 +39,4 @@ simple ShortcutRadio extends PhysicalLayerBase like IRadio
         volatile double packetLoss = default(0); // packet loss probability
         @class(ShortcutRadio);
 }
+

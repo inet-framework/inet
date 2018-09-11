@@ -33,3 +33,4 @@ simple StaticLinearMobility extends StationaryMobility
         double orientation @unit(deg) = default(0deg);
         @class(StaticLinearMobility);
 }
+

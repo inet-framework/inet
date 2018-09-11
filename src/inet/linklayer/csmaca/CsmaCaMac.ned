@@ -80,10 +80,11 @@ simple CsmaCaMac extends MacProtocolBase like IMacProtocol
         int cwMulticast = default(cwMin); // multicast contention window
         int retryLimit = default(7); // maximum number of retries
         @class(CsmaCaMac);
-        @signal[linkBroken](type=Packet);
+        @signal[linkBroken](type=inet::Packet);
         @statistic[linkBroken](title="link break"; source=linkBroken; record=count; interpolationmode=none);
         @statistic[packetDropIncorrectlyReceived](title="packet drop: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropQueueOverflow](title="packet drop: queue overflow"; source=packetDropReasonIsQueueOverflow(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropRetryLimitReached](title="packet drop: retry limit reached"; source=packetDropReasonIsRetryLimitReached(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
 }
+

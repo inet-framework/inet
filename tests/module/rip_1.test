@@ -134,6 +134,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 <RIPConfig>
   <!-- Interfaces -->
   <interface among="R*" metric="1"/>
+  <interface source="R*" dest="H*" mode="PASSIVE" metric="1"/>
 </RIPConfig>
 %#--------------------------------------------------------------------------------------------------------------
 %contains: results/General-0.sca

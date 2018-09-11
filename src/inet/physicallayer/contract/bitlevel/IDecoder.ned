@@ -22,3 +22,4 @@ moduleinterface IDecoder
     parameters:
         @display("i=block/blackboard");
 }
+

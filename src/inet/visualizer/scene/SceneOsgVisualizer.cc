@@ -52,7 +52,7 @@ void SceneOsgVisualizer::initialize(int stage)
 void SceneOsgVisualizer::initializeScene()
 {
     SceneOsgVisualizerBase::initializeScene();
-    auto topLevelScene = check_and_cast<inet::osg::TopLevelScene *>(visualizerTargetModule->getOsgCanvas()->getScene());
+    auto topLevelScene = check_and_cast<inet::osg::TopLevelScene *>(visualizationTargetModule->getOsgCanvas()->getScene());
     topLevelScene->addChild(new inet::osg::SimulationScene());
 }
 
@@ -64,7 +64,7 @@ void SceneOsgVisualizer::initializeViewpoint()
     double cameraDistanceFactor = par("cameraDistanceFactor");
     auto eye = cOsgCanvas::Vec3d(center.x() + cameraDistanceFactor * radius, center.y() + cameraDistanceFactor * radius, center.z() + cameraDistanceFactor * radius);
     auto viewpointCenter = cOsgCanvas::Vec3d(center.x(), center.y(), center.z());
-    auto osgCanvas = visualizerTargetModule->getOsgCanvas();
+    auto osgCanvas = visualizationTargetModule->getOsgCanvas();
     osgCanvas->setGenericViewpoint(cOsgCanvas::Viewpoint(eye, viewpointCenter, cOsgCanvas::Vec3d(0, 0, 1)));
 }
 

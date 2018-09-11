@@ -62,3 +62,4 @@ simple MassMobility extends MovingMobilityBase
         volatile double speed @unit(mps); // speed (can be random, updated every changeInterval)
         @class(MassMobility);
 }
+

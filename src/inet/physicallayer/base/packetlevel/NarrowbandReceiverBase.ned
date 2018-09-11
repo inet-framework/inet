@@ -39,3 +39,4 @@ module NarrowbandReceiverBase like IReceiver
             @display("p=100,100");
         }
 }
+

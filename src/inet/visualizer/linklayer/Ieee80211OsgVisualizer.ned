@@ -31,3 +31,4 @@ simple Ieee80211OsgVisualizer extends Ieee80211VisualizerBase like IIeee80211Vis
     parameters:
         @class(Ieee80211OsgVisualizer);
 }
+

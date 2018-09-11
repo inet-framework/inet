@@ -56,3 +56,4 @@ simple Ieee802154NarrowbandMac extends Ieee802154Mac
         // 802.15.4-2006, page 163
         macMaxBE = default(5);
 }
+

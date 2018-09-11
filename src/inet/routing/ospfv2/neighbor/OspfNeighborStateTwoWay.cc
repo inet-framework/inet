@@ -39,7 +39,7 @@ void NeighborStateTwoWay::processEvent(Neighbor *neighbor, Neighbor::NeighborEve
     }
     if (event == Neighbor::INACTIVITY_TIMER) {
         neighbor->reset();
-        if (neighbor->getInterface()->getType() == Interface::NBMA) {
+        if (neighbor->getInterface()->getType() == OspfInterface::NBMA) {
             MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
             messageHandler->startTimer(neighbor->getPollTimer(), neighbor->getInterface()->getPollInterval());
         }

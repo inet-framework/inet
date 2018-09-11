@@ -109,22 +109,21 @@ void RoutingTableVisualizerBase::handleParameterChange(const char *name)
 
 void RoutingTableVisualizerBase::subscribe()
 {
-    auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
-    subscriptionModule->subscribe(routeAddedSignal, this);
-    subscriptionModule->subscribe(routeDeletedSignal, this);
-    subscriptionModule->subscribe(routeChangedSignal, this);
-    subscriptionModule->subscribe(interfaceIpv4ConfigChangedSignal, this);
+    visualizationSubjectModule->subscribe(routeAddedSignal, this);
+    visualizationSubjectModule->subscribe(routeDeletedSignal, this);
+    visualizationSubjectModule->subscribe(routeChangedSignal, this);
+    visualizationSubjectModule->subscribe(interfaceIpv4ConfigChangedSignal, this);
 }
 
 void RoutingTableVisualizerBase::unsubscribe()
 {
     // NOTE: lookup the module again because it may have been deleted first
-    auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this, false);
-    if (subscriptionModule != nullptr) {
-        subscriptionModule->unsubscribe(routeAddedSignal, this);
-        subscriptionModule->unsubscribe(routeDeletedSignal, this);
-        subscriptionModule->unsubscribe(routeChangedSignal, this);
-        subscriptionModule->unsubscribe(interfaceIpv4ConfigChangedSignal, this);
+    auto visualizationSubjectModule = getModuleFromPar<cModule>(par("visualizationSubjectModule"), this, false);
+    if (visualizationSubjectModule != nullptr) {
+        visualizationSubjectModule->unsubscribe(routeAddedSignal, this);
+        visualizationSubjectModule->unsubscribe(routeDeletedSignal, this);
+        visualizationSubjectModule->unsubscribe(routeChangedSignal, this);
+        visualizationSubjectModule->unsubscribe(interfaceIpv4ConfigChangedSignal, this);
     }
 }
 
@@ -166,7 +165,7 @@ std::vector<Ipv4Address> RoutingTableVisualizerBase::getDestinations()
 {
     L3AddressResolver addressResolver;
     std::vector<Ipv4Address> destinations;
-    for (cModule::SubmoduleIterator it(getSystemModule()); !it.end(); it++) {
+    for (cModule::SubmoduleIterator it(visualizationSubjectModule); !it.end(); it++) {
         auto networkNode = *it;
         if (isNetworkNode(networkNode) && destinationFilter.matches(networkNode)) {
             auto interfaceTable = addressResolver.findInterfaceTableOf(networkNode);
@@ -240,7 +239,7 @@ void RoutingTableVisualizerBase::updateRouteVisualizations(IIpv4RoutingTable *ro
 void RoutingTableVisualizerBase::updateAllRouteVisualizations()
 {
     removeAllRouteVisualizations();
-    for (cModule::SubmoduleIterator it(getSystemModule()); !it.end(); it++) {
+    for (cModule::SubmoduleIterator it(visualizationSubjectModule); !it.end(); it++) {
         auto networkNode = *it;
         if (isNetworkNode(networkNode) && nodeFilter.matches(networkNode)) {
             L3AddressResolver addressResolver;

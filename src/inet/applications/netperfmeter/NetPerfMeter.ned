@@ -26,6 +26,7 @@
 // *   Contact: dreibh@iem.uni-due.de
 
 package inet.applications.netperfmeter;
+
 import inet.applications.contract.INetPerfMeterApp;
 
 //
@@ -87,3 +88,4 @@ simple NetPerfMeter like INetPerfMeterApp
         input  udpIn;
         output udpOut;
 }
+

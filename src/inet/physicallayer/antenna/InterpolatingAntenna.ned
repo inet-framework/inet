@@ -33,3 +33,4 @@ module InterpolatingAntenna extends AntennaBase
         string bankGains = default("0 0");      // sequence of angle [degree] and gain [dB] pairs
         @class(InterpolatingAntenna);
 }
+

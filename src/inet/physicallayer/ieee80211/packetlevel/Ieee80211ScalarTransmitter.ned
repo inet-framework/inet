@@ -30,3 +30,4 @@ module Ieee80211ScalarTransmitter extends Ieee80211TransmitterBase
     parameters:
         @class(Ieee80211ScalarTransmitter);
 }
+

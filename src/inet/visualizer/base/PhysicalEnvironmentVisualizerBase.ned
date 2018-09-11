@@ -34,3 +34,4 @@ simple PhysicalEnvironmentVisualizerBase extends VisualizerBase
 
         @class(PhysicalEnvironmentVisualizerBase);
 }
+

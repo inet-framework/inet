@@ -71,7 +71,7 @@ class INET_API Ext : public MacBase, public RealTimeScheduler::ICallback
     virtual void refreshDisplay() const override;
 
     // MacBase functions
-    InterfaceEntry *createInterfaceEntry() override;
+    virtual void configureInterfaceEntry() override;
     virtual void flushQueue() override;
     virtual void clearQueue() override;
     virtual bool isUpperMsg(cMessage *msg) override { return msg->arrivedOn("upperLayerIn"); }

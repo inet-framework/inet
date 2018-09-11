@@ -33,11 +33,12 @@ simple NextHopForwarding
         int hopLimit = default(32);
         int headerLength @unit(B) = default(10B);
         @display("i=block/routing");
-        @signal[packetDropped](type=Packet);
-        @signal[packetSentToUpper](type=Packet);
+        @signal[packetDropped](type=inet::Packet);
+        @signal[packetSentToUpper](type=inet::Packet);
     gates:
         input transportIn @labels(TcpHeader,UdpHeader);
         output transportOut @labels(TcpHeader,UdpHeader);
         input queueIn @labels(NextHopDatagram);
         output queueOut @labels(NextHopDatagram);
 }
+

@@ -129,27 +129,41 @@ simple Ospf like IOspf
     parameters:
         string interfaceTableModule;
         string routingTableModule;
-        xml ospfConfig; // xml containing the full OSPF AS configuration
-
+        string crcMode @enum("disabled", "computed") = default("disabled");
+        volatile double startupTime @unit(s) = default(0); // delay before starting OSPF
+        // xml containing the full OSPF AS configuration
+        xml ospfConfig = default(xml("<OSPFASConfig> \
+                <Router name='**' RFC1583Compatible='true'> \
+    				<BroadcastInterface ifName='eth[*]' areaID='0.0.0.0' interfaceOutputCost='0' search='relax' /> \
+    				<PointToPointInterface ifName='ppp[*]' areaID='0.0.0.0' interfaceOutputCost='0' search='relax' /> \
+    			</Router> </OSPFASConfig>"));
+        
         // default values for attributes of interface xml entries:
+        
+        int routerPriority = default(1);  // Priority in DR/BDR election (Specify 0 to exclude the router from the election)
+        string areaID = default("0.0.0.0");
+        bool RFC1583Compatible = default(false);
+        
         int helloInterval @unit(s) = default(10s);  // specifies the time in seconds between hello packets that the other router sends on an interface
         int pollInterval @unit(s) = default(120s);  // specifies the length of time, in seconds, between OSPF packets that the router send before adjacency is established with a neighbor
         int routerDeadInterval @unit(s) = default(40s);  // the interval during which at least one hello packet must be received from a neighbor before the router declares that neighbor as down
         int retransmissionInterval @unit(s) = default(5s);  // The time between OSPF LSA retransmissions for adjacencies that belongs to the interface
-        int interfaceOutputCost = default(1);  // cost of link on the interface (1-1000)
-        int interfaceTransmissionDelay @unit(s) = default(1s);  // The number of seconds required to transmit a link state update packet. Valid values are 1 to 65535.
-        int routerPriority = default(1);  // Priority in DR/BDR election process. Specify 0 to exclude the router from the election.
+        int interfaceTransmissionDelay @unit(s) = default(1s);  // The number of seconds required to transmit a link state update packet. Valid values are 1 to 65535
+        string interfaceMode @enum("Active","Passive","NoOSPF") = default("Active"); // NoOSPF: the interface is not advertized by OSPF
+        																			 // Passive: the interface is advertised, but no OSPF message is send out
+                
+        int referenceBandwidth @unit(bps) = default(1e8bps);   // reference bandwidth for cost calculation
+        int interfaceOutputCost = default(1);  // cost of link on the interface (1-1000), 0 means use reference bandwidth
+        int linkCost = default(1);  // cost of link (1-1000)
+        int externalInterfaceOutputCost = default(1);  // cost of link (1-1000)
+        string externalInterfaceOutputType = default("");  // Type1|Type2        
+                
         string authenticationType @enum("SimplePasswordType","CrytographicType","NullType") = default("NullType");
         string authenticationKey = default("0x00");  // 0xnn..nn
-        int linkCost = default(1);  // cost of link (1-1000)
-        bool RFC1583Compatible = default(false);
-
-        string areaID = default("");
-        int externalInterfaceOutputCost = default(1);  // cost of link (1-1000)
-        string externalInterfaceOutputType = default("");  // Type1|Type2
 
         @display("i=block/network2");
     gates:
         input ipIn @labels(Ipv4ControlInfo/up);
         output ipOut @labels(Ipv4ControlInfo/down);
 }
+

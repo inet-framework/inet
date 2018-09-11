@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 package inet.linklayer.ethernet;
 
 //
@@ -45,3 +44,4 @@ simple EtherHub
     gates:
         inout ethg[] @labels(EtherFrame-conn);  // to stations; each one represents a port
 }
+

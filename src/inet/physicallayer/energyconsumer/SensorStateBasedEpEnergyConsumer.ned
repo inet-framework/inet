@@ -39,3 +39,4 @@ simple SensorStateBasedEpEnergyConsumer extends StateBasedEpEnergyConsumer
         transmitterIdlePowerConsumption = default(5mW);
         transmitterTransmittingPowerConsumption = default(75mW);
 }
+

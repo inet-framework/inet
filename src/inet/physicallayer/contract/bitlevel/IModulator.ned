@@ -22,3 +22,4 @@ moduleinterface IModulator
     parameters:
         @display("i=block/mac");
 }
+

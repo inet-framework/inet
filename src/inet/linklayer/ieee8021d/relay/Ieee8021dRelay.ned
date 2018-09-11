@@ -17,7 +17,6 @@ package inet.linklayer.ieee8021d.relay;
 
 import inet.linklayer.contract.IMacRelayUnit;
 
-
 //
 // This modul forwards frames (~EtherFrame) based on their destination MAC addresses to appropriate ports.
 //
@@ -46,3 +45,4 @@ simple Ieee8021dRelay like IMacRelayUnit
         input stpIn @loose;
         output stpOut @loose;
 }
+

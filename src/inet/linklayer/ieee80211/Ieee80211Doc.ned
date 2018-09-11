@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 //
 // @page ieee80211.html, IEEE 802.11 Model
 //

@@ -54,3 +54,4 @@ simple OsgGeographicCoordinateSystem like IGeographicCoordinateSystem
         double playgroundElevation @unit(deg) = default(0deg); // geographic elevation of the playground (0deg means X axis is horizontal, positive rotates X axis towards the sky)
         double playgroundBank @unit(deg) = default(0deg); // bank of the playground
 }
+

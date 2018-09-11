@@ -20,11 +20,10 @@ package inet.mobility.contract;
 //
 // The module interface for mobility models.
 //
-// @author Andras Varga
-//
 moduleinterface IMobility
 {
     parameters:
         @display("i=block/cogwheel");
         @signal[mobilityStateChanged];
 }
+

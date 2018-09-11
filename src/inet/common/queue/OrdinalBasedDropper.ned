@@ -15,12 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
-
 package inet.common.queue;
 
 import inet.common.IHook;
-
 
 //
 // Ordinal Based Dropper module.
@@ -41,3 +38,4 @@ simple OrdinalBasedDropper like IHook
         input in;
         output out;
 }
+

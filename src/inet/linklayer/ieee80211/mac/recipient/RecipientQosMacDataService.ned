@@ -23,3 +23,4 @@ module RecipientQosMacDataService
         @class("RecipientQosMacDataService");
         @display("i=block/join");
 }
+

@@ -17,7 +17,6 @@
 // Author: Zoltan Bojthe
 //
 
-
 package inet.linklayer.loopback;
 
 //

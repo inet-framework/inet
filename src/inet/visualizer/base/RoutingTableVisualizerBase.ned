@@ -24,7 +24,7 @@ package inet.visualizer.base;
 // The actual visualization of routes is done in derived modules.
 //
 // This module subscribes for routeAdded, routeChanged, routeDeleted,
-// interfaceIpv4ConfigChanged on the module determined by the subscriptionModule
+// interfaceIpv4ConfigChanged on the module determined by the visualizationSubjectModule
 // parameter.
 //
 // The format string can contain the following directives:
@@ -41,8 +41,6 @@ package inet.visualizer.base;
 simple RoutingTableVisualizerBase extends VisualizerBase
 {
     parameters:
-        string subscriptionModule = default("<root>"); // module where the visualizer subscribes for routing table signals, root module by default
-        
         bool displayRoutingTables = default(false); // display routing table data, disabled by default
         bool displayRoutesIndividually = default(true); // display routes between the same network nodes individually, enabled by default
         bool displayLabels = default(true); // display labels on arrows, enabled by default
@@ -66,3 +64,4 @@ simple RoutingTableVisualizerBase extends VisualizerBase
 
         @class(RoutingTableVisualizerBase);
 }
+

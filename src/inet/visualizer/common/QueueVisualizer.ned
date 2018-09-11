@@ -38,3 +38,4 @@ module QueueVisualizer like IQueueVisualizer
                 @display("p=100,200");
         }
 }
+

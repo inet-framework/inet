@@ -29,3 +29,4 @@ module ConstantGainAntenna extends AntennaBase
         double gain @unit(dB); // antenna gain indepent of transmission or reception direction
         @class(ConstantGainAntenna);
 }
+

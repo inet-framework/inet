@@ -27,3 +27,4 @@ moduleinterface IRoutingTable
         bool forwarding;
         bool multicastForwarding;
 }
+

@@ -35,6 +35,7 @@ void TCPTesterBase::initialize()
     fromASeq = 0;
     fromBSeq = 0;
     tcpdump.setOutStream(EVSTREAM);
+    tcpdump.setVerbose(true);
 }
 
 void TCPTesterBase::dump(const Ptr<const inet::tcp::TcpHeader>& seg, int tcpLength, bool fromA, const char *comment)

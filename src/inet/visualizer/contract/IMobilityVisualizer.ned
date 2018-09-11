@@ -30,3 +30,4 @@ moduleinterface IMobilityVisualizer
     parameters:
         @display("i=block/app");
 }
+

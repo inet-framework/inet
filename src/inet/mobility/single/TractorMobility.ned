@@ -48,3 +48,4 @@ simple TractorMobility extends MovingMobilityBase
         int rowCount; // the number of rows on the field
         @class(TractorMobility);
 }
+

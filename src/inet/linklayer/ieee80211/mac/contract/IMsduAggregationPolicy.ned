@@ -22,3 +22,4 @@ moduleinterface IMsduAggregationPolicy
     parameters:
         @display("i=block/control");
 }
+

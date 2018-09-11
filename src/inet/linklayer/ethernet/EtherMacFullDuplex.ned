@@ -16,11 +16,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 package inet.linklayer.ethernet;
 
 import inet.linklayer.contract.IEtherMac;
-
 
 //
 // Ethernet MAC which supports full-duplex operation ONLY.
@@ -134,16 +132,16 @@ simple EtherMacFullDuplex like IEtherMac
         int mtu @unit(B) = default(1500B);
         @display("i=block/rxtx");
 
-        @signal[txPk](type=Packet);
-        @signal[rxPkOk](type=Packet);
+        @signal[txPk](type=inet::Packet);
+        @signal[rxPkOk](type=inet::Packet);
         @signal[txPausePkUnits](type=long);
         @signal[rxPausePkUnits](type=long);
-        @signal[rxPkFromHl](type=Packet);
-        @signal[packetDropped](type=Packet);
-        @signal[packetSentToLower](type=Packet);
-        @signal[packetReceivedFromLower](type=Packet);
-        @signal[packetSentToUpper](type=Packet);
-        @signal[packetReceivedFromUpper](type=Packet);
+        @signal[rxPkFromHl](type=inet::Packet);
+        @signal[packetDropped](type=inet::Packet);
+        @signal[packetSentToLower](type=inet::Packet);
+        @signal[packetReceivedFromLower](type=inet::Packet);
+        @signal[packetSentToUpper](type=inet::Packet);
+        @signal[packetReceivedFromUpper](type=inet::Packet);
         @signal[transmissionStateChanged](type=long); // enum=MacTransmitState
         @signal[receptionStateChanged](type=long); // enum=MacReceiveState
 

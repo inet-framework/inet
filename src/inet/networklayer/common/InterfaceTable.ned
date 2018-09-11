@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with this program; if not, see <http://www.gnu.org/licenses/>.
 
-
 package inet.networklayer.common;
 
 //
@@ -38,19 +37,19 @@ simple InterfaceTable
     parameters:
         bool displayAddresses = default(false);  // whether to display IP addresses on links
         @display("i=block/table");
-        @signal[interfaceCreated](type=InterfaceEntry);
-        @signal[interfaceDeleted](type=InterfaceEntry);
-        @signal[interfaceStateChanged](type=InterfaceEntryChangeDetails);
-        @signal[interfaceConfigChanged](type=InterfaceEntryChangeDetails);
-        @signal[interfaceIpv4ConfigChanged](type=InterfaceEntryChangeDetails);
-        @signal[interfaceIpv6ConfigChanged](type=InterfaceEntryChangeDetails);
-        @signal[interfaceGnpConfigChanged](type=InterfaceEntryChangeDetails);
-        @signal[ipv4MulticastGroupJoined](type=Ipv4MulticastGroupInfo);
-        @signal[ipv4MulticastGroupLeft](type=Ipv4MulticastGroupInfo);
-        @signal[ipv4McastChange](type=Ipv4MulticastGroupSourceInfo);
-        @signal[ipv4MulticastGroupRegistered](type=Ipv4MulticastGroupInfo);
-        @signal[ipv4MulticastGroupUnregistered](type=Ipv4MulticastGroupInfo);
-        @signal[ipv6MulticastGroupJoined](type=Ipv6MulticastGroupInfo);
-        @signal[ipv6MulticastGroupLeft](type=Ipv6MulticastGroupInfo);
+        @signal[interfaceCreated](type=inet::InterfaceEntry);
+        @signal[interfaceDeleted](type=inet::InterfaceEntry);
+        @signal[interfaceStateChanged](type=inet::InterfaceEntryChangeDetails);
+        @signal[interfaceConfigChanged](type=inet::InterfaceEntryChangeDetails);
+        @signal[interfaceIpv4ConfigChanged](type=inet::InterfaceEntryChangeDetails);
+        @signal[interfaceIpv6ConfigChanged](type=inet::InterfaceEntryChangeDetails);
+        @signal[interfaceGnpConfigChanged](type=inet::InterfaceEntryChangeDetails);
+        @signal[ipv4MulticastGroupJoined](type=inet::Ipv4MulticastGroupInfo);
+        @signal[ipv4MulticastGroupLeft](type=inet::Ipv4MulticastGroupInfo);
+        @signal[ipv4McastChange](type=inet::Ipv4MulticastGroupSourceInfo);
+        @signal[ipv4MulticastGroupRegistered](type=inet::Ipv4MulticastGroupInfo);
+        @signal[ipv4MulticastGroupUnregistered](type=inet::Ipv4MulticastGroupInfo);
+        @signal[ipv6MulticastGroupJoined](type=inet::Ipv6MulticastGroupInfo);
+        @signal[ipv6MulticastGroupLeft](type=inet::Ipv6MulticastGroupInfo);
 }
 

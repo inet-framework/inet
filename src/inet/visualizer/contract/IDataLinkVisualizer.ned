@@ -29,3 +29,4 @@ moduleinterface IDataLinkVisualizer
     parameters:
         @display("i=block/app");
 }
+

@@ -29,3 +29,4 @@ moduleinterface ILinkBreakVisualizer
     parameters:
         @display("i=block/app");
 }
+

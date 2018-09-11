@@ -45,7 +45,7 @@ const short PORT_MAX = 0x7fff;
 class INET_API Ipv4Address
 {
   protected:
-    // Address is encoded in a single uint32
+    // Address is encoded in a single uint32 in host byte order (e.g. "10.0.0.1" is 0x0A000001)
     uint32 addr;
 
   protected:
@@ -148,7 +148,7 @@ class INET_API Ipv4Address
     /** name Setting the address */
     //@{
     /**
-     * Ipv4 address as int
+     * Ipv4 address as uint32 in host byte order (e.g. "10.0.0.1" is 0x0A000001)
      */
     void set(uint32 ip) { addr = ip; }
 
@@ -192,7 +192,7 @@ class INET_API Ipv4Address
     std::string str(bool printUnspec = true) const;
 
     /**
-     * Returns the address as an int.
+     * Returns the address as an uint32 in host byte order (e.g. "10.0.0.1" is 0x0A000001).
      */
     uint32 getInt() const { return addr; }
 

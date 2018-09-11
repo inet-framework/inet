@@ -31,6 +31,7 @@ void NeighborState::changeState(Neighbor *neighbor, NeighborState *newState, Nei
     Neighbor::NeighborStateType nextState = newState->getState();
     bool shouldRebuildRoutingTable = false;
 
+    EV_INFO << "Changing neighborhood state from '" << neighbor->getStateString(oldState) << "' to '" << neighbor->getStateString(nextState) << "'" << std::endl;
     neighbor->changeState(newState, currentState);
 
     if ((oldState == Neighbor::FULL_STATE) || (nextState == Neighbor::FULL_STATE)) {
@@ -55,7 +56,7 @@ void NeighborState::changeState(Neighbor *neighbor, NeighborState *newState, Nei
             }
         }
 
-        if (neighbor->getInterface()->getState() == Interface::DESIGNATED_ROUTER_STATE) {
+        if (neighbor->getInterface()->getState() == OspfInterface::DESIGNATED_ROUTER_STATE) {
             NetworkLsa *networkLSA = neighbor->getInterface()->getArea()->findNetworkLSA(neighbor->getInterface()->getAddressRange().address);
 
             if (networkLSA != nullptr) {

@@ -30,3 +30,4 @@ module IdealObstacleLoss extends TracingObstacleLossBase
     parameters:
         @class(IdealObstacleLoss);
 }
+

@@ -25,3 +25,4 @@ import inet.physicallayer.common.packetlevel.Radio;
 module FlatRadioBase extends NarrowbandRadioBase
 {
 }
+

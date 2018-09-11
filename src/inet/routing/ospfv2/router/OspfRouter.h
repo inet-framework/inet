@@ -51,7 +51,7 @@ class INET_API Router
     std::vector<AsExternalLsa *> asExternalLSAs;    ///< A list of the ASExternalLSAs advertised by this router.
     std::map<Ipv4Address, OspfAsExternalLsaContents> externalRoutes;    ///< A map of the external route advertised by this router.
     cMessage *ageTimer;    ///< Database age timer - fires every second.
-    std::vector<RoutingTableEntry *> routingTable;    ///< The OSPF routing table - contains more information than the one in the IP layer.
+    std::vector<OspfRoutingTableEntry *> routingTable;    ///< The OSPF routing table - contains more information than the one in the IP layer.
     MessageHandler *messageHandler;    ///< The message dispatcher class.
     bool rfc1583Compatibility;    ///< Decides whether to handle the preferred routing table entry to an AS boundary router as defined in RFC1583 or not.
 
@@ -82,9 +82,9 @@ class INET_API Router
     bool getASBoundaryRouter() const { return externalRoutes.size() > 0; }
 
     unsigned long getRoutingTableEntryCount() const { return routingTable.size(); }
-    RoutingTableEntry *getRoutingTableEntry(unsigned long i) { return routingTable[i]; }
-    const RoutingTableEntry *getRoutingTableEntry(unsigned long i) const { return routingTable[i]; }
-    void addRoutingTableEntry(RoutingTableEntry *entry) { routingTable.push_back(entry); }
+    OspfRoutingTableEntry *getRoutingTableEntry(unsigned long i) { return routingTable[i]; }
+    const OspfRoutingTableEntry *getRoutingTableEntry(unsigned long i) const { return routingTable[i]; }
+    void addRoutingTableEntry(OspfRoutingTableEntry *entry) { routingTable.push_back(entry); }
 
     /**
      * Adds OMNeT++ watches for the routerID, the list of Areas and the list of AS External LSAs.
@@ -116,7 +116,7 @@ class INET_API Router
      * nullptr if the Router doesn't have such an interface.
      * @param ifIndex [in] The interface index to look for.
      */
-    Interface *getNonVirtualInterface(unsigned char ifIndex);
+    OspfInterface *getNonVirtualInterface(unsigned char ifIndex);
 
     /**
      * Installs a new LSA into the Router database.
@@ -175,7 +175,7 @@ class INET_API Router
      * @param neighbor [in] The Nieghbor this LSA arrived from.
      * @return True if the LSA was floooded back out on the receiving Interface, false otherwise.
      */
-    bool floodLSA(const OspfLsa *lsa, AreaId areaID = BACKBONE_AREAID, Interface *intf = nullptr, Neighbor *neighbor = nullptr);
+    bool floodLSA(const OspfLsa *lsa, AreaId areaID = BACKBONE_AREAID, OspfInterface *intf = nullptr, Neighbor *neighbor = nullptr);
 
     /**
      * Returns true if the input Ipv4 address falls into any of the Router's Areas' configured
@@ -204,7 +204,7 @@ class INET_API Router
      * @param table       [in] The routing table to do the lookup in.
      * @return The RoutingTableEntry describing the input destination if there's one, false otherwise.
      */
-    RoutingTableEntry *lookup(Ipv4Address destination, std::vector<RoutingTableEntry *> *table = nullptr) const;
+    OspfRoutingTableEntry *lookup(Ipv4Address destination, std::vector<OspfRoutingTableEntry *> *table = nullptr) const;
 
     /**
      * Rebuilds the routing table from scratch(based on the LSA database).
@@ -265,7 +265,7 @@ class INET_API Router
      * @sa RFC2328 Section 16.4. points(1) through(3)
      * @sa Area::originateSummaryLSA
      */
-    RoutingTableEntry *getPreferredEntry(const OspfLsa& lsa, bool skipSelfOriginated, std::vector<RoutingTableEntry *> *fromRoutingTable = nullptr);
+    OspfRoutingTableEntry *getPreferredEntry(const OspfLsa& lsa, bool skipSelfOriginated, std::vector<OspfRoutingTableEntry *> *fromRoutingTable = nullptr);
 
   private:
     /**
@@ -325,7 +325,7 @@ class INET_API Router
      *                                 calculations.
      * @sa RFC2328 Section 16.4.
      */
-    void calculateASExternalRoutes(std::vector<RoutingTableEntry *>& newRoutingTable);
+    void calculateASExternalRoutes(std::vector<OspfRoutingTableEntry *>& newRoutingTable);
 
     /**
      * After a routing table rebuild the changes in the routing table are
@@ -335,7 +335,7 @@ class INET_API Router
      *                             is then compared with the one in routingTable).
      * @sa RFC2328 Section 12.4. points(5) through(6).
      */
-    void notifyAboutRoutingTableChanges(std::vector<RoutingTableEntry *>& oldRoutingTable);
+    void notifyAboutRoutingTableChanges(std::vector<OspfRoutingTableEntry *>& oldRoutingTable);
 
     /**
      * Returns true if there is a route to the AS Boundary Router identified by
@@ -343,7 +343,7 @@ class INET_API Router
      * @param inRoutingTable [in] The routing table to look in.
      * @param asbrRouterID   [in] The ID of the AS Boundary Router to look for.
      */
-    bool hasRouteToASBoundaryRouter(const std::vector<RoutingTableEntry *>& inRoutingTable, RouterId routerID) const;
+    bool hasRouteToASBoundaryRouter(const std::vector<OspfRoutingTableEntry *>& inRoutingTable, RouterId routerID) const;
 
     /**
      * Returns an std::vector of routes leading to the AS Boundary Router
@@ -352,8 +352,8 @@ class INET_API Router
      * @param fromRoutingTable [in] The routing table to look in.
      * @param asbrRouterID     [in] The ID of the AS Boundary Router to look for.
      */
-    std::vector<RoutingTableEntry *>
-    getRoutesToASBoundaryRouter(const std::vector<RoutingTableEntry *>& fromRoutingTable, RouterId routerID) const;
+    std::vector<OspfRoutingTableEntry *>
+    getRoutesToASBoundaryRouter(const std::vector<OspfRoutingTableEntry *>& fromRoutingTable, RouterId routerID) const;
 
     /**
      * Prunes the input std::vector of RoutingTableEntries according to the RFC2328
@@ -361,7 +361,7 @@ class INET_API Router
      * @param asbrEntries [in/out] The list of RoutingTableEntries to prune.
      * @sa RFC2328 Section 16.4.1.
      */
-    void pruneASBoundaryRouterEntries(std::vector<RoutingTableEntry *>& asbrEntries) const;
+    void pruneASBoundaryRouterEntries(std::vector<OspfRoutingTableEntry *>& asbrEntries) const;
 
     /**
      * Selects the least cost RoutingTableEntry from the input std::vector of
@@ -369,7 +369,7 @@ class INET_API Router
      * @param entries [in] The RoutingTableEntries to choose the least cost one from.
      * @return The least cost entry or nullptr if entries is empty.
      */
-    RoutingTableEntry *selectLeastCostRoutingEntry(std::vector<RoutingTableEntry *>& entries) const;
+    OspfRoutingTableEntry *selectLeastCostRoutingEntry(std::vector<OspfRoutingTableEntry *>& entries) const;
 };
 
 } // namespace ospf

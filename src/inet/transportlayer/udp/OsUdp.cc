@@ -13,9 +13,6 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
 #include <omnetpp/platdep/sockets.h>
 
 #include "inet/applications/common/SocketTag_m.h"
@@ -261,12 +258,14 @@ void OsUdp::processPacketFromUpper(Packet *packet)
 #if !defined(linux) && !defined(__linux) && !defined(_WIN32)
             sockaddr.sin_len = sizeof(struct sockaddr_in);
 #endif
-            int n = ::sendto(socket->fd, buffer, packetLength, 0, (struct sockaddr *)&sockaddr, sizeof(sockaddr));
+            // type of buffer in sendto(): win: char *, linux: void *
+            int n = ::sendto(socket->fd, (char *)buffer, packetLength, 0, (struct sockaddr *)&sockaddr, sizeof(sockaddr));
             if (n < 0)
                 throw cRuntimeError("Calling sendto failed: %d", n);
         }
         else {
-            int n = ::send(socket->fd, buffer, packetLength, 0);
+            // type of buffer in send(): win: char *, linux: void *
+            int n = ::send(socket->fd, (char *)buffer, packetLength, 0);
             if (n < 0)
                 throw cRuntimeError("Calling send failed: %d", n);
         }
@@ -285,7 +284,8 @@ void OsUdp::processPacketFromLower(int fd)
         uint8_t buffer[1 << 16];
         struct sockaddr_in sockaddr;
         socklen_t socklen = sizeof(sockaddr);
-        int n = ::recvfrom(fd, buffer, sizeof(buffer), 0, (struct sockaddr*)&sockaddr, &socklen);
+        // type of buffer in recvfrom(): win: char *, linux: void *
+        int n = ::recvfrom(fd, (char *)buffer, sizeof(buffer), 0, (struct sockaddr*)&sockaddr, &socklen);
         if (n < 0)
             throw cRuntimeError("Calling recv failed: %d", n);
         auto data = makeShared<BytesChunk>(static_cast<const uint8_t *>(buffer), n);

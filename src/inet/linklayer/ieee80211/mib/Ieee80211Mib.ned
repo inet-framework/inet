@@ -22,3 +22,4 @@ simple Ieee80211Mib
     parameters:
         @display("i=block/table");
 }
+

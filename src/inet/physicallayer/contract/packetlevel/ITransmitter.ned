@@ -26,3 +26,4 @@ moduleinterface ITransmitter
     parameters:
         @display("i=block/wtx");
 }
+

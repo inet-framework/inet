@@ -28,3 +28,4 @@ module Ieee80211UnitDiskTransmitter extends Ieee80211TransmitterBase
         double detectionRange @unit(m) = default(interferenceRange);     // the range where transmissions produced by this transmitter can be detected at all
         @class(Ieee80211UnitDiskTransmitter);
 }
+

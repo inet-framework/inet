@@ -29,3 +29,4 @@ moduleinterface IPhysicalEnvironmentVisualizer
     parameters:
         @display("i=block/app");
 }
+

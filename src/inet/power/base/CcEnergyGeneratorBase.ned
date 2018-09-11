@@ -33,3 +33,4 @@ simple CcEnergyGeneratorBase like ICcEnergyGenerator
         @signal[currentGenerationChanged];
         @statistic[currentGeneration](title="Current generation"; source=currentGenerationChanged; record=vector; interpolationmode=sample-hold);
 }
+

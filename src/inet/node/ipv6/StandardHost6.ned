@@ -20,7 +20,6 @@ package inet.node.ipv6;
 
 import inet.node.inet.StandardHost;
 
-
 //
 // IPv6 host with TCP, SCTP and UDP layers and applications.
 // see ~StandardHost for configuration.

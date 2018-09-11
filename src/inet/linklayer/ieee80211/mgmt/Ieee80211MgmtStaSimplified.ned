@@ -14,7 +14,8 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-
+// @author Andras Varga
+//
 
 package inet.linklayer.ieee80211.mgmt;
 
@@ -28,8 +29,6 @@ package inet.linklayer.ieee80211.mgmt;
 //
 // This module never switches channels, that is, it will operate on the channel
 // the physical layer is configured for (see channelNumber in ~Ieee80211Radio).
-//
-// @author Andras Varga
 //
 simple Ieee80211MgmtStaSimplified like IIeee80211Mgmt
 {

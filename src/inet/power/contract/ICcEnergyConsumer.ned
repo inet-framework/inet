@@ -32,3 +32,4 @@ moduleinterface ICcEnergyConsumer extends IEnergyConsumer
         @display("i=block/plug");
         @signal[currentConsumptionChanged](type=double);
 }
+

@@ -22,7 +22,6 @@ package inet.networklayer.ipv6tunneling;
 
 import inet.networklayer.contract.IIpv6Tunneling;
 
-
 //
 // \Ipv6 Tunnel Manager
 //

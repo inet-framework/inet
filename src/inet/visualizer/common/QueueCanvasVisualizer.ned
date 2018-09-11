@@ -31,3 +31,4 @@ simple QueueCanvasVisualizer extends QueueVisualizerBase like IQueueVisualizer
         double zIndex = default(10); // determines the drawing order of figures relative to other visualizers
         @class(QueueCanvasVisualizer);
 }
+

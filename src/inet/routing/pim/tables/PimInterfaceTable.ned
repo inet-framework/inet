@@ -46,3 +46,4 @@ simple PimInterfaceTable
         string interfaceTableModule;
         xml pimConfig = default(xml("<config/>"));
 }
+

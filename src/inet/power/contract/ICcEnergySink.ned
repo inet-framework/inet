@@ -32,3 +32,4 @@ moduleinterface ICcEnergySink extends IEnergySink
         @display("i=block/plug");
         @signal[currentGenerationChanged](type=double);
 }
+

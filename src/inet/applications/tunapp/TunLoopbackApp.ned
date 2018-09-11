@@ -29,3 +29,4 @@ simple TunLoopbackApp like IApp
         input socketIn @labels(TunInterface/up);
         output socketOut @labels(TunInterface/down);
 }
+

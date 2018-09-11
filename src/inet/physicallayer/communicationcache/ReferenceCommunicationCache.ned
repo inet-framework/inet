@@ -29,3 +29,4 @@ module ReferenceCommunicationCache like ICommunicationCache
         @display("i=block/table2");
         @class(ReferenceCommunicationCache);
 }
+

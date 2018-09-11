@@ -70,3 +70,4 @@ module Ieee802154NarrowbandScalarRadio extends FlatRadioBase
 
         @class(FlatRadioBase);
 }
+

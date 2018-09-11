@@ -32,3 +32,4 @@ simple TracingObstacleLossOsgVisualizer extends TracingObstacleLossVisualizerBas
     parameters:
         @class(TracingObstacleLossOsgVisualizer);
 }
+

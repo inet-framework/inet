@@ -31,3 +31,4 @@ simple InfoOsgVisualizer extends InfoVisualizerBase like IInfoVisualizer
     parameters:
         @class(InfoOsgVisualizer);
 }
+

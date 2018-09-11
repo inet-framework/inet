@@ -46,3 +46,4 @@ simple ConstSpeedMobility extends MovingMobilityBase
         bool initFromDisplayString = default(true); // enables one time initialization from the subject module's display string
         @class(ConstSpeedMobility);
 }
+

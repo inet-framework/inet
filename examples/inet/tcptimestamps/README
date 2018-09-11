@@ -1,7 +1,0 @@
-In this example the network consists of one client and one server.
-IP addresses and routing tables are set up by using mrt files.
-
-The client sends 100 MB of data to the server using TCP.
-
-Different configurations reflect examples from RFC 1323 to evaluate
-the implementation of TCP's optional Timestamps option.

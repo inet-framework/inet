@@ -29,3 +29,4 @@ moduleinterface INetworkRouteVisualizer
     parameters:
         @display("i=block/app");
 }
+

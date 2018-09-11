@@ -30,3 +30,4 @@ simple QueueOsgVisualizer extends QueueVisualizerBase like IQueueVisualizer
     parameters:
         @class(QueueOsgVisualizer);
 }
+

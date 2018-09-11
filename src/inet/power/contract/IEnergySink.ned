@@ -28,3 +28,4 @@ moduleinterface IEnergySink
     parameters:
         @display("i=block/plug");
 }
+

@@ -24,7 +24,6 @@ package inet.networklayer.xmipv6;
 
 import inet.networklayer.contract.IxMIPv6Support;
 
-
 //
 // Implements xMIPv6 (where x = F, H, F-H).
 //

@@ -50,3 +50,4 @@ module Ieee802154NarrowbandInterface like IWirelessInterface
         radioIn --> { @display("m=s"); } --> radio.radioIn;
         radio.upperLayerOut --> mac.lowerLayerIn;
 }
+

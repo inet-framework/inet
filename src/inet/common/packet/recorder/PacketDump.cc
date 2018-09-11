@@ -581,15 +581,44 @@ void PacketDump::tcpDump(bool l2r, const char *label, const Ptr<const tcp::TcpHe
 
     // options present?
     if (tcpHeader->getHeaderLength() > TCP_MIN_HEADER_LENGTH) {
-        const char *direction = l2r ? "sent" : "received";
-
         if (verbose) {
             unsigned short numOptions = tcpHeader->getHeaderOptionArraySize();
-            out << "\n  TCP Header Option(s) " << direction << ":\n";
+            out << "  Option(s):";
 
             for (int i = 0; i < numOptions; i++) {
                 const TcpOption *option = tcpHeader->getHeaderOption(i);
-                out << "    " << (i + 1) << ". option kind=" << option->getKind() << " length=" << option->getLength() << "\n";
+                switch (option->getKind()) {
+                    case TCPOPTION_END_OF_OPTION_LIST:
+                        break;
+                    case TCPOPTION_NO_OPERATION:
+                        out << " NOP";
+                        break;
+                    case TCPOPTION_MAXIMUM_SEGMENT_SIZE:
+                        out << " MaxSegSize";
+                        break;
+                    case TCPOPTION_WINDOW_SCALE:
+                        out << " WinScale";
+                        break;
+                    case TCPOPTION_SACK_PERMITTED:
+                        out << " SackPermitted";
+                        break;
+                    case TCPOPTION_SACK: {
+                        auto sackOpt = check_and_cast<const TcpOptionSack *>(option);
+                        out << " SACK";
+                        for (int k = 0; k < sackOpt->getSackItemArraySize(); k++) {
+                            const auto& sackItem = sackOpt->getSackItem(k);
+                            out << "[" << sackItem.getStart() << "," << sackItem.getEnd() << ")";
+                        }
+                        break;
+                    }
+                    case TCPOPTION_TIMESTAMP: {
+                        auto tsOpt = check_and_cast<const TcpOptionTimestamp *>(option);
+                        out << " TS(" << tsOpt->getSenderTimestamp() << "," << tsOpt->getEchoedTimestamp() << ")";
+                        break;
+                    }
+                    default:
+                        out << " (kind=" << option->getKind() << " length=" << option->getLength() << ")"; break;
+                }
             }
         }
     }

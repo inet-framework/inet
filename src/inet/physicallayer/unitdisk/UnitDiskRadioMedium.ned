@@ -34,3 +34,4 @@ module UnitDiskRadioMedium extends RadioMedium
         pathLoss.typename = default("FreeSpacePathLoss");
         analogModel.typename = default("UnitDiskAnalogModel");
 }
+

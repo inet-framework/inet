@@ -34,8 +34,8 @@ simple EtherTrafGen
         volatile int numPacketsPerBurst = default(1);  // number of packets to send per burst (packets within a burst are sent at the same simulation time)
         volatile int packetLength @unit(B);  // length of packets to send
         @display("i=block/app");
-        @signal[packetSent](type=Packet);
-        @signal[packetReceived](type=Packet);
+        @signal[packetSent](type=inet::Packet);
+        @signal[packetReceived](type=inet::Packet);
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[endToEndDelay](title="end-to-end delay"; source="dataAge(packetReceived)"; unit=s; record=histogram,vector; interpolationmode=none);
@@ -43,3 +43,4 @@ simple EtherTrafGen
         input in @labels(Ieee802Ctrl/up);
         output out @labels(Ieee802Ctrl/down);
 }
+

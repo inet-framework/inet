@@ -27,3 +27,4 @@ moduleinterface IBackgroundNoise
     parameters:
         @display("i=block/mac");
 }
+

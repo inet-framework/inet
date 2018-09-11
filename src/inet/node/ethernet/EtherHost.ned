@@ -15,15 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 package inet.node.ethernet;
 
 import inet.applications.ethernet.EtherAppClient;
 import inet.applications.ethernet.EtherAppServer;
 import inet.common.lifecycle.NodeStatus;
-import inet.common.queue.IOutputQueue;
-import inet.linklayer.contract.IEtherMac;
+import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.ethernet.EtherLlc;
+import inet.networklayer.common.InterfaceTable;
+
 
 //
 // An example host with one Ethernet port and a traffic generator that
@@ -36,17 +36,23 @@ module EtherHost
     parameters:
         bool hasStatus = default(false);
         bool csmacdSupport = default(true);  // by default use CSMA/CD
-        string fcsMode @enum("declared", "computed") = default("declared");
+        string fcsMode @enum("declared","computed") = default("declared");
         @networkNode();
         @labels(node,ethernet-node);
         @display("i=device/pc2");
-        *.interfaceTableModule = default("");
+        eth.csmacdSupport = csmacdSupport;
+        *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.fcsMode = fcsMode;
+        eth.encap.typename = "EtherEncapDummy";
     gates:
         inout ethg @labels(EtherFrame-conn);
     submodules:
         status: NodeStatus if hasStatus {
             @display("p=100,100;is=s");
+        }
+        interfaceTable: InterfaceTable {
+            parameters:
+                @display("p=125,240;is=s");
         }
         cli: EtherAppClient {
             parameters:
@@ -65,14 +71,9 @@ module EtherHost
                 upperLayerIn[2];
                 upperLayerOut[2];
         }
-        queue: <default("")> like IOutputQueue if typename != "" {
+        eth: <default("EthernetInterface")> like IEthernetInterface {
             parameters:
-                @display("p=250,300;q=l2queue");
-        }
-        mac: <default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex")> like IEtherMac {
-            parameters:
-                queueModule = (!exists(queue) ? "" : "^.queue");
-                @display("p=350,400;q=txQueue");
+                @display("p=350,297,row,150;q=txQueue");
         }
     connections:
 
@@ -81,10 +82,9 @@ module EtherHost
         srv.out --> llc.upperLayerIn[1];
         srv.in <-- llc.upperLayerOut[1];
 
-        llc.lowerLayerOut --> queue.in if exists(queue);
-        queue.out --> mac.upperLayerIn if exists(queue);
-        llc.lowerLayerOut --> mac.upperLayerIn if !exists(queue);
-        mac.upperLayerOut --> llc.lowerLayerIn;
+        llc.lowerLayerOut --> eth.upperLayerIn;
+        eth.upperLayerOut --> llc.lowerLayerIn;
 
-        mac.phys <--> ethg;
+        eth.phys <--> { @display("m=s"); } <--> ethg;
 }
+

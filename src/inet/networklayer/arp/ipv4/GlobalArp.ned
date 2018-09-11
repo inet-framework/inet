@@ -20,7 +20,6 @@ package inet.networklayer.arp.ipv4;
 
 import inet.networklayer.contract.IArp;
 
-
 //
 // This module provides global address resolution without exchanging packets.
 //
@@ -34,3 +33,4 @@ simple GlobalArp like IArp
         input ifIn @labels(ArpPacket,Ieee802Ctrl);
         output ifOut @labels(ArpPacket,Ieee802Ctrl);
 }
+

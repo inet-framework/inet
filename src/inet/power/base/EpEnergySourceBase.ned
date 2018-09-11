@@ -33,3 +33,4 @@ simple EpEnergySourceBase like IEpEnergySource
         @signal[powerConsumptionChanged];
         @statistic[powerConsumption](title="Power consumption"; source=powerConsumptionChanged; record=vector; interpolationmode=sample-hold);
 }
+

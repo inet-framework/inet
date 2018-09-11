@@ -29,7 +29,7 @@ class INET_API IGMPTester : public cSimpleModule, public IScriptable
 
   protected:
     typedef Ipv4InterfaceData::Ipv4AddressVector Ipv4AddressVector;
-    virtual int numInitStages() const override { return 2; }
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
     virtual void processCommand(const cXMLElement &node) override;
@@ -116,10 +116,8 @@ static ostream &operator<<(ostream &out, const IgmpMessage* msg)
 
 void IGMPTester::initialize(int stage)
 {
-    if (stage == 0)
-    {
+    if (stage == INITSTAGE_LINK_LAYER) {
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-
         interfaceEntry = getContainingNicModule(this);
         interfaceEntry->setInterfaceName("eth0");
         MacAddress address("AA:00:00:00:00:01");
@@ -128,11 +126,8 @@ void IGMPTester::initialize(int stage)
         interfaceEntry->setMtu(par("mtu"));
         interfaceEntry->setMulticast(true);
         interfaceEntry->setBroadcast(true);
-
-        ift->addInterface(interfaceEntry);
     }
-    else if (stage == 2)
-    {
+    else if (stage == INITSTAGE_NETWORK_LAYER_2) {
         interfaceEntry->ipv4Data()->setIPAddress(Ipv4Address("192.168.1.1"));
         interfaceEntry->ipv4Data()->setNetmask(Ipv4Address("255.255.0.0"));
     }
@@ -400,7 +395,7 @@ void IGMPTester::sendIGMP(Packet *msg, InterfaceEntry *ie, Ipv4Address dest)
     msg->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::ipv4);
 
     EV << "IGMPTester: Sending: " << msg << ".\n";
-    send(msg, "igmpOut");
+    send(msg, "upperLayerOut");
 }
 
 void IGMPTester::parseIPv4AddressVector(const char *str, Ipv4AddressVector &result)

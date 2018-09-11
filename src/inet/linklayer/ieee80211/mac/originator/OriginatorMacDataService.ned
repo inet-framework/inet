@@ -19,7 +19,6 @@ package inet.linklayer.ieee80211.mac.originator;
 
 import inet.linklayer.ieee80211.mac.contract.IFragmentationPolicy;
 
-
 module OriginatorMacDataService
 {
     parameters:
@@ -31,3 +30,4 @@ module OriginatorMacDataService
                 @display("p=100,100");
         }
 }
+

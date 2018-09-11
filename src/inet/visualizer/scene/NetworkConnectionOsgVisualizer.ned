@@ -30,3 +30,4 @@ simple NetworkConnectionOsgVisualizer extends NetworkConnectionVisualizerBase li
     parameters:
         @class(NetworkConnectionOsgVisualizer);
 }
+

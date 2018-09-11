@@ -35,3 +35,4 @@ simple LinkStateRouting
         input ipIn @labels(Ipv4ControlInfo/up);
         output ipOut @labels(Ipv4ControlInfo/down);
 }
+

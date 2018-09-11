@@ -29,3 +29,4 @@ moduleinterface IEnergyStorageVisualizer
     parameters:
         @display("i=block/app");
 }
+

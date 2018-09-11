@@ -50,3 +50,4 @@ simple MediumCanvasVisualizer extends MediumVisualizerBase like IMediumVisualize
 
         @class(MediumCanvasVisualizer);
 }
+

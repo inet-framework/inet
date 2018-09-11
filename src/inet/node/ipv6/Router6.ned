@@ -19,7 +19,6 @@ package inet.node.ipv6;
 
 import inet.node.inet.Router;
 
-
 //
 // Ipv6 router.
 //

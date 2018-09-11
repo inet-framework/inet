@@ -31,3 +31,4 @@ moduleinterface IEpEnergyManagement extends IEnergyManagement
     parameters:
         @display("i=block/plug");
 }
+

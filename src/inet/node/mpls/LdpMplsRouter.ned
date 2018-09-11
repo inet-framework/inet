@@ -25,7 +25,6 @@ import inet.networklayer.ted.Ted;
 import inet.transportlayer.contract.ITcp;
 import inet.transportlayer.contract.IUdp;
 
-
 //
 // An LDP-capable router.
 //
@@ -160,3 +159,4 @@ module LdpMplsRouter
         mpls.ifOut --> ml.in++;
         ml.out++ --> mpls.ifIn;
 }
+

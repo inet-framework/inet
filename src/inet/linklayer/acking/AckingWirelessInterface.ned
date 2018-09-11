@@ -17,7 +17,6 @@
 // author: Zoltan Bojthe
 //
 
-
 package inet.linklayer.acking;
 
 import inet.common.queue.IOutputQueue;
@@ -73,3 +72,4 @@ module AckingWirelessInterface like IWirelessInterface
         radioIn --> { @display("m=s"); } --> radio.radioIn;
         radio.upperLayerOut --> mac.lowerLayerIn;
 }
+

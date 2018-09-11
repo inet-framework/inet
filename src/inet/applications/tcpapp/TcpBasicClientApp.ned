@@ -1,4 +1,3 @@
-
 //
 // Copyright (C) 2004 Andras Varga
 //
@@ -19,7 +18,6 @@
 package inet.applications.tcpapp;
 
 import inet.applications.contract.IApp;
-
 
 //
 // Client for a generic request-response style protocol over TCP.
@@ -80,8 +78,8 @@ simple TcpBasicClientApp like IApp
         volatile double idleInterval @unit(s); // time gap between sessions
         volatile double reconnectInterval @unit(s) = default(30s);  // if connection breaks, waits this much before trying to reconnect
         @display("i=block/app");
-        @signal[packetSent](type=Packet);
-        @signal[packetReceived](type=Packet);
+        @signal[packetSent](type=inet::Packet);
+        @signal[packetReceived](type=inet::Packet);
         @signal[connect](type=long);  // 1 for open, -1 for close
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

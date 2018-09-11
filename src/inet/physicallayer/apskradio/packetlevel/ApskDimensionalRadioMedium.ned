@@ -36,3 +36,4 @@ module ApskDimensionalRadioMedium extends RadioMedium
         analogModel.typename = default("DimensionalAnalogModel");
         backgroundNoise.typename = default("IsotropicDimensionalBackgroundNoise");
 }
+

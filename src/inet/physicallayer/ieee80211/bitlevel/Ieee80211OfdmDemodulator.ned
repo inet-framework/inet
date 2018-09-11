@@ -29,3 +29,4 @@ simple Ieee80211OfdmDemodulator like IDemodulator
         @display("i=block/mac");
         @class(Ieee80211OfdmDemodulatorModule);
 }
+

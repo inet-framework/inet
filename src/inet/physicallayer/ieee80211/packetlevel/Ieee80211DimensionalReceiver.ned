@@ -32,3 +32,4 @@ module Ieee80211DimensionalReceiver extends Ieee80211ReceiverBase
     parameters:
         @class(Ieee80211DimensionalReceiver);
 }
+

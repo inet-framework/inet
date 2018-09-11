@@ -25,3 +25,4 @@ moduleinterface IRateControl
     parameters:
         @display("i=block/cogwheel");
 }
+

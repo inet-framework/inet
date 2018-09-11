@@ -17,11 +17,9 @@
 // @author: Zoltan Bojthe
 //
 
-
 package inet.common.queue;
 
 import inet.common.IHook;
-
 
 //
 // Delayer module.
@@ -41,3 +39,4 @@ simple Delayer like IHook
         input in;
         output out;
 }
+

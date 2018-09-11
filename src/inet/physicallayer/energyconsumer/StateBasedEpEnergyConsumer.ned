@@ -45,3 +45,4 @@ simple StateBasedEpEnergyConsumer extends EpEnergyConsumerBase
         @display("i=block/cogwheel");
         @class(StateBasedEpEnergyConsumer);
 }
+

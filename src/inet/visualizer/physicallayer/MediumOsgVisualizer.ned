@@ -51,3 +51,4 @@ simple MediumOsgVisualizer extends MediumVisualizerBase like IMediumVisualizer
 
         @class(MediumOsgVisualizer);
 }
+

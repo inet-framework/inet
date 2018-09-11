@@ -14,7 +14,8 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-
+// @author Andras Varga
+//
 
 package inet.linklayer.ieee80211.mgmt;
 
@@ -37,8 +38,6 @@ package inet.linklayer.ieee80211.mgmt;
 // the wireless card and a copy sent also up to the relay unit so it can broadcast
 // it on other interfaces.
 //
-// @author Andras Varga
-//
 simple Ieee80211MgmtAp like IIeee80211Mgmt
 {
     parameters:
@@ -51,8 +50,8 @@ simple Ieee80211MgmtAp like IIeee80211Mgmt
         string mibModule;
         string macModule;               // The path to the MAC module
         @display("i=block/cogwheel");
-        @signal[l2ApAssociated](type="Ieee80211MgmtAp::NotificationInfoSta");
-        @signal[l2ApDisassociated](type="Ieee80211MgmtAp::NotificationInfoSta");
+        @signal[l2ApAssociated](type="inet::ieee80211::Ieee80211MgmtAp::NotificationInfoSta");
+        @signal[l2ApDisassociated](type="inet::ieee80211::Ieee80211MgmtAp::NotificationInfoSta");
     gates:
         input macIn @labels(Ieee80211MacHeader); // from ~Ieee80211Mac
         output macOut @labels(Ieee80211MacHeader); // to ~Ieee80211Mac

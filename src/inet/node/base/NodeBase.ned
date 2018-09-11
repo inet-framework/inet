@@ -68,3 +68,4 @@ module NodeBase like INetworkNode
                 @display("p=125,160;is=s");
         }
 }
+

@@ -29,3 +29,4 @@ moduleinterface IRoutingTableVisualizer
     parameters:
         @display("i=block/app");
 }
+

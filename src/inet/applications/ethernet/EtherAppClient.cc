@@ -22,12 +22,13 @@
 #include "inet/applications/ethernet/EtherAppClient.h"
 
 #include "inet/applications/ethernet/EtherApp_m.h"
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
-#include "inet/common/lifecycle/NodeOperations.h"
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/packet/Packet.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
 
 namespace inet {
 
@@ -153,18 +154,8 @@ MacAddress EtherAppClient::resolveDestMACAddress()
     MacAddress destMACAddress;
     const char *destAddress = par("destAddress");
     if (destAddress[0]) {
-        // try as mac address first, then as a module
-        if (!destMACAddress.tryParse(destAddress)) {
-            cModule *destStation = getModuleByPath(destAddress);
-            if (!destStation)
-                throw cRuntimeError("cannot resolve MAC address '%s': not a 12-hex-digit MAC address or a valid module path name", destAddress);
-
-            cModule *destMAC = destStation->getSubmodule("mac");
-            if (!destMAC)
-                throw cRuntimeError("module '%s' has no 'mac' submodule", destAddress);
-
-            destMACAddress.setAddress(destMAC->par("address"));
-        }
+        if (!destMACAddress.tryParse(destAddress))
+            destMACAddress = L3AddressResolver().resolve(destAddress, L3AddressResolver::ADDR_MAC).toMac();
     }
     return destMACAddress;
 }

@@ -36,3 +36,4 @@ moduleinterface IRadioMedium
         @signal[signalArrivalStarted](type=cObject);    // (type=IReception)
         @signal[signalArrivalEnded](type=cObject);    // (type=IReception)
 }
+

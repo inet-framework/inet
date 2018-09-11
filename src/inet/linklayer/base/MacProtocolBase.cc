@@ -29,6 +29,19 @@ MacProtocolBase::MacProtocolBase() :
 {
 }
 
+MacAddress MacProtocolBase::parseMacAddressParameter(const char *addrstr)
+{
+    MacAddress address;
+
+    if (!strcmp(addrstr, "auto"))
+        // assign automatic address
+        address = MacAddress::generateAutoAddress();
+    else
+        address.setAddress(addrstr);
+
+    return address;
+}
+
 void MacProtocolBase::initialize(int stage)
 {
     LayeredProtocolBase::initialize(stage);
@@ -43,13 +56,8 @@ void MacProtocolBase::initialize(int stage)
 void MacProtocolBase::registerInterface()
 {
     ASSERT(interfaceEntry == nullptr);
-    IInterfaceTable *interfaceTable = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-    if (interfaceTable) {
-        interfaceEntry = createInterfaceEntry();
-        interfaceTable->addInterface(interfaceEntry);
-        auto module = getContainingNicModule(this);
-        inet::registerInterface(*interfaceEntry, module->gate("upperLayerIn"), module->gate("upperLayerOut"));
-    }
+    interfaceEntry = getContainingNicModule(this);
+    configureInterfaceEntry();
 }
 
 void MacProtocolBase::sendUp(cMessage *message)

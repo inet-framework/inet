@@ -38,3 +38,4 @@ simple SimpleEpEnergyStorage extends EpEnergyStorageBase
         double printCapacityStep @unit(J) = default(0.01 * nominalCapacity); // displays residual capacity changes in the log
         @class(SimpleEpEnergyStorage);
 }
+

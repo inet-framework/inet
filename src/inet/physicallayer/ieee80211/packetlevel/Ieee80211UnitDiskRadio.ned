@@ -31,3 +31,4 @@ module Ieee80211UnitDiskRadio extends Ieee80211Radio
         receiver.typename = default("Ieee80211UnitDiskReceiver");
         @class(Radio);
 }
+

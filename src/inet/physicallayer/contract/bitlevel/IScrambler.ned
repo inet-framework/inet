@@ -22,3 +22,4 @@ moduleinterface IScrambler
     parameters:
         @display("i=block/tunnel");
 }
+

@@ -19,7 +19,6 @@ package inet.linklayer.csmaca;
 
 import inet.linklayer.common.WirelessInterface;
 
-
 module CsmaCaInterface extends WirelessInterface
 {
     parameters:

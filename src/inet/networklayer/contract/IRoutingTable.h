@@ -40,6 +40,11 @@ class INET_API IRoutingTable
     virtual bool isForwardingEnabled() const = 0;    //XXX IP modulba?
 
     /**
+     * Administrative distance on/off
+     */
+    virtual bool isAdminDistEnabled() const = 0;
+
+    /**
      * Multicast forwarding on/off
      */
     virtual bool isMulticastForwardingEnabled() const = 0;    //XXX IP modulba?

@@ -17,6 +17,7 @@
 //
 
 package inet.linklayer.ieee8021d.rstp;
+
 import inet.linklayer.contract.ISpanningTree;
 
 //
@@ -82,3 +83,4 @@ simple Rstp like ISpanningTree
         input relayIn;
         output relayOut;
 }
+

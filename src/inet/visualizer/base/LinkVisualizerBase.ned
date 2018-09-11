@@ -39,8 +39,6 @@ package inet.visualizer.base;
 simple LinkVisualizerBase extends VisualizerBase
 {
     parameters:
-        string subscriptionModule = default("<root>"); // module where the visualizer subscribes for signals, root module by default
-
         bool displayLinks = default(false); // display arrows for active links, disabled by default
         string activityLevel @enum("service", "peer", "protocol") = default("service"); // determines what level of activity is displayed, service level by default 
 
@@ -71,3 +69,4 @@ simple LinkVisualizerBase extends VisualizerBase
 
         @class(LinkVisualizerBase);
 }
+

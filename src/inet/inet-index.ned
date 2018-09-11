@@ -34,7 +34,6 @@
 //
 // Introductory material:
 //  - <a href="inet-architecture.html">INET Framework architecture</a>
-//  - <a href="../inet-manual-draft.pdf">INET Framework Manual (draft) (pdf)</a>
 //
 // A few useful starting points for browsing the documentation:
 //  - hosts, routers, switches and other network level modules:
@@ -45,7 +44,7 @@
 //  - IPv4 layer: ~Ipv4, ~Arp and ~Icmp; ~Ipv4RoutingTable
 //  - IPv6 support: ~Ipv6, ~Ipv6NeighbourDiscovery, ~Icmpv6, ~Ipv6RoutingTable;
 //    see <a href="ipv6overview.html">Ipv6 model overview</a>
-//  - transport layer: ~Tcp, ~Udp, ~SCTP
+//  - transport layer: ~Tcp, ~Udp, ~Sctp
 //  - ~InterfaceTable and ~Ipv4RoutingTable can be found in every
 //    host and router model
 //  - queues in router network interfaces: ~DropTailQueue, ~DiffservQueue.
@@ -53,10 +52,8 @@
 //    sets up static routes;
 //  - ~ScenarioManager lets you change things in the model in the middle
 //    of the simulation to study transient behaviour
-//  - message classes: ~Ipv4Header, ~TcpHeader, ~UdpHeader, ~EthernetIIFrame,
-//    ~ArpPacket, ~PppFrame, ~GenericAppMsg, ~EtherAppReq, etc.
 //  - control info classes (used in communication between protocol layers):
-//    ~TcpCommand, ~UdpControlInfo, ~Ieee802Ctrl, etc.
+//    ~TcpCommand, ~UdpControlInfo, etc.
 //  - application models: ~UdpVideoStreamServer, ~UdpVideoStreamClient, ~UdpBasicApp, ~UdpEchoApp,
 //    ~TcpSessionApp, ~TcpBasicClientApp, ~TcpGenericServerApp, ~TcpSinkApp,
 //    ~TcpServerHostApp, ~EtherAppClient, ~EtherAppServer, ~PingApp, ~SimpleVoipSender,

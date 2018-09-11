@@ -221,15 +221,13 @@ void Ext::openPcap(const char *device, const char *filter)
     EV << "Opened pcap device " << device << " with filter " << filter << " and datalink " << datalink << ".\n";
 }
 
-InterfaceEntry *Ext::createInterfaceEntry()
+void Ext::configureInterfaceEntry()
 {
     InterfaceEntry *e = getContainingNicModule(this);
 
     e->setMtu(par("mtu"));      //TODO get mtu from real interface / or set mtu in real interface
     e->setMulticast(true);      //TODO
     e->setPointToPoint(true);   //TODO
-
-    return e;
 }
 
 void Ext::handleMessage(cMessage *msg)

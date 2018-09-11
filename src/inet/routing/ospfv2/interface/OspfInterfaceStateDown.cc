@@ -29,20 +29,20 @@ namespace inet {
 
 namespace ospf {
 
-void InterfaceStateDown::processEvent(Interface *intf, Interface::InterfaceEventType event)
+void InterfaceStateDown::processEvent(OspfInterface *intf, OspfInterface::OspfInterfaceEventType event)
 {
-    if (event == Interface::INTERFACE_UP) {
+    if (event == OspfInterface::INTERFACE_UP) {
         MessageHandler *messageHandler = intf->getArea()->getRouter()->getMessageHandler();
         messageHandler->startTimer(intf->getHelloTimer(), RNGCONTEXT truncnormal(0.1, 0.01));    // add some deviation to avoid startup collisions
         messageHandler->startTimer(intf->getAcknowledgementTimer(), intf->getAcknowledgementDelay());
         switch (intf->getType()) {
-            case Interface::POINTTOPOINT:
-            case Interface::POINTTOMULTIPOINT:
-            case Interface::VIRTUAL:
+            case OspfInterface::POINTTOPOINT:
+            case OspfInterface::POINTTOMULTIPOINT:
+            case OspfInterface::VIRTUAL:
                 changeState(intf, new InterfaceStatePointToPoint, this);
                 break;
 
-            case Interface::NBMA:
+            case OspfInterface::NBMA:
                 if (intf->getRouterPriority() == 0) {
                     changeState(intf, new InterfaceStateNotDesignatedRouter, this);
                 }
@@ -60,7 +60,7 @@ void InterfaceStateDown::processEvent(Interface *intf, Interface::InterfaceEvent
                 }
                 break;
 
-            case Interface::BROADCAST:
+            case OspfInterface::BROADCAST:
                 if (intf->getRouterPriority() == 0) {
                     changeState(intf, new InterfaceStateNotDesignatedRouter, this);
                 }
@@ -74,7 +74,7 @@ void InterfaceStateDown::processEvent(Interface *intf, Interface::InterfaceEvent
                 break;
         }
     }
-    if (event == Interface::LOOP_INDICATION) {
+    if (event == OspfInterface::LOOP_INDICATION) {
         intf->reset();
         changeState(intf, new InterfaceStateLoopback, this);
     }

@@ -76,3 +76,20 @@ channel Eth100G extends EtherLink
 {
     datarate = 100Gbps;
 }
+
+//
+// 200 gigabit/sec Ethernet link
+//
+channel Eth200G extends EtherLink
+{
+    datarate = 200Gbps;
+}
+
+//
+// 400 gigabit/sec Ethernet link
+//
+channel Eth400G extends EtherLink
+{
+    datarate = 400Gbps;
+}
+

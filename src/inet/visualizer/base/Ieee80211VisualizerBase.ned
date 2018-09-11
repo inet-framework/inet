@@ -24,7 +24,7 @@ package inet.visualizer.base;
 //
 // This module subscribes for l2Associated, l2Disassociated,
 // l2ApAssociated,l2ApDisassociated on the module determined by the
-// subscriptionModule parameter.
+// visualizationSubjectModule parameter.
 //
 // @see ~Ieee80211CanvasVisualizer, ~Ieee80211OsgVisualizer, ~IIeee80211Visualizer, ~VisualizerBase
 //
@@ -32,8 +32,7 @@ simple Ieee80211VisualizerBase extends VisualizerBase
 {
     parameters:
         string networkNodeVisualizerModule = default("^.networkNodeVisualizer"); // module path to the network node visualizer module, refers to a sibling submodule by default
-        string subscriptionModule = default("<root>"); // module where the visualizer subscribes for interface changed signals, root module by default
-        
+
         bool displayAssociations = default(false); // display association icon and SSID, disabled by default
 
         string nodeFilter = default("*"); // which nodes are considered, matches all nodes by default
@@ -51,3 +50,4 @@ simple Ieee80211VisualizerBase extends VisualizerBase
 
         @class(Ieee80211VisualizerBase);
 }
+

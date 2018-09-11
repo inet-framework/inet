@@ -31,3 +31,4 @@ module Ieee80211ScalarRadioMedium extends Ieee80211RadioMedium
         analogModel.typename = default("ScalarAnalogModel");
         backgroundNoise.typename = default("IsotropicScalarBackgroundNoise");
 }
+

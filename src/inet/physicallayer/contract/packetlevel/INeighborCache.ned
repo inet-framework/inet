@@ -25,3 +25,4 @@ moduleinterface INeighborCache
         double refillPeriod @unit(s);
         @display("i=block/table2");
 }
+

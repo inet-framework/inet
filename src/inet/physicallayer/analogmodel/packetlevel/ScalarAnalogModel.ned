@@ -30,3 +30,4 @@ module ScalarAnalogModel like IAnalogModel
         @display("i=block/tunnel");
         @class(ScalarAnalogModel);
 }
+

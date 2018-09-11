@@ -30,3 +30,4 @@ simple TransportProtocolBase extends LayeredProtocolBase
         input lowerLayerIn @labels(ITransportPacket/up);
         output lowerLayerOut @labels(ITransportPacket/down);
 }
+

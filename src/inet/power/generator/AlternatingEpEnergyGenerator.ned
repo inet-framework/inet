@@ -37,3 +37,4 @@ simple AlternatingEpEnergyGenerator extends EpEnergyGeneratorBase
         volatile double sleepInterval @unit(s); // time interval for sleep mode
         @class(AlternatingEpEnergyGenerator);
 }
+

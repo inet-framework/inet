@@ -35,3 +35,4 @@ module Ieee80211TransmitterBase extends NarrowbandTransmitterBase
         int channelNumber;
         modulation = default("BPSK"); // TODO: this is simply wrong
 }
+

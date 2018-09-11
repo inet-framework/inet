@@ -37,7 +37,7 @@ simple InfoVisualizerBase extends VisualizerBase
 {
     parameters:
         string networkNodeVisualizerModule = default("^.networkNodeVisualizer"); // module path to the network node visualizer module, refers to a sibling submodule by default
-        
+
         bool displayInfos = default(true);
 
         string modules = default(""); // specifies the path of the submodules of network nodes, no submodules by default
@@ -52,3 +52,4 @@ simple InfoVisualizerBase extends VisualizerBase
 
         @class(InfoVisualizerBase);
 }
+

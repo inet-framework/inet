@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd
+// Copyright (C) 2013 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -23,3 +23,4 @@ module RicianFading extends FreeSpacePathLoss
         double k @unit(dB) = default(8dB);
         @class(RicianFading);
 }
+

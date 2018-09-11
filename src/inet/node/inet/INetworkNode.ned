@@ -27,3 +27,4 @@ moduleinterface INetworkNode
         @networkNode;
         @labels(node,ethernet-node,wireless-node);
 }
+

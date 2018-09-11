@@ -19,7 +19,6 @@ package inet.linklayer.ieee80211.mac.channelaccess;
 
 import inet.linklayer.ieee80211.mac.contract.IContention;
 
-
 module Dcaf
 {
     parameters:
@@ -38,3 +37,4 @@ module Dcaf
                 @display("p=100,100");
         }
 }
+

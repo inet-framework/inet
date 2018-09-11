@@ -31,3 +31,4 @@ moduleinterface INetworkProtocol
         input queueIn @labels(INetworkHeader);
         output queueOut @labels(INetworkHeader);
 }
+

@@ -25,3 +25,4 @@ module LayeredScalarAnalogModel like IAnalogModel
         @display("i=block/tunnel");
         @class(LayeredScalarAnalogModel);
 }
+

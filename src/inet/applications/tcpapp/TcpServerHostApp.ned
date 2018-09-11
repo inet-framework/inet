@@ -15,11 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 package inet.applications.tcpapp;
 
 import inet.applications.contract.IApp;
-
 
 //
 // This module hosts TCP-based server applications. It dynamically creates

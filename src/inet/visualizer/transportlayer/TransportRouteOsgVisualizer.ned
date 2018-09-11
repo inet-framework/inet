@@ -36,3 +36,4 @@ simple TransportRouteOsgVisualizer extends PathVisualizerBase like ITransportRou
     parameters:
         @class(TransportRouteOsgVisualizer);
 }
+

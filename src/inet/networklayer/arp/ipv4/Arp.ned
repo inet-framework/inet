@@ -20,7 +20,6 @@ package inet.networklayer.arp.ipv4;
 
 import inet.networklayer.contract.IArp;
 
-
 //
 // Implements the Address Resolution Protocol for IPv4 and IEEE 802 6-byte
 // MAC addresses.
@@ -53,11 +52,11 @@ simple Arp like IArp
         double cacheTimeout @unit(s) = default(120s); // number seconds unused entries in the cache will time out
         bool respondToProxyARP = default(true);        // reply to proxy ARP requests (i.e. for IP addresses that this node can route)
         @display("i=block/layer");
-        @signal[arpRequestSent](type=Packet);
-        @signal[arpReplySent](type=Packet);
-        @signal[arpResolutionInitiated](type=IArp::Notification);
-        @signal[arpResolutionCompleted](type=IArp::Notification);
-        @signal[arpResolutionFailed](type=IArp::Notification);
+        @signal[arpRequestSent](type=inet::Packet);
+        @signal[arpReplySent](type=inet::Packet);
+        @signal[arpResolutionInitiated](type=inet::IArp::Notification);
+        @signal[arpResolutionCompleted](type=inet::IArp::Notification);
+        @signal[arpResolutionFailed](type=inet::IArp::Notification);
         @statistic[arpRequestSent](title="ARP request sent"; source=arpRequestSent; record=count,"sum(packetBytes)","vector(packetBytes)");
         @statistic[arpReplySent](title="ARP replies sent"; source=arpReplySent; record=count,"sum(packetBytes)","vector(packetBytes)");
         @statistic[arpResolutionInitiated](title="ARP initiated resolutions"; record=count);
@@ -69,3 +68,4 @@ simple Arp like IArp
         input ifIn @labels(ArpPacket,Ieee802Ctrl);
         output ifOut @labels(ArpPacket,Ieee802Ctrl);
 }
+

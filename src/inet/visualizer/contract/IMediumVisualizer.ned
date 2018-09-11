@@ -29,3 +29,4 @@ moduleinterface IMediumVisualizer
     parameters:
         @display("i=block/app");
 }
+

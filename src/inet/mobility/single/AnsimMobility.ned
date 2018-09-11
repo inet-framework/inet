@@ -32,3 +32,4 @@ simple AnsimMobility extends MovingMobilityBase
         int nodeId; // <position_change> elements to match; -1 gets substituted to parent module's index
         @class(AnsimMobility);
 }
+

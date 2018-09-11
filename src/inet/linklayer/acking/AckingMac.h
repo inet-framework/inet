@@ -43,7 +43,6 @@ class INET_API AckingMac : public MacProtocolBase
     int headerLength = 0;    // AckingMacFrame header length in bytes
     double bitrate = 0;    // [bits per sec]
     bool promiscuous = false;    // promiscuous mode
-    MacAddress address;    // MAC address
     bool fullDuplex = false;
     bool useAck = true;
 
@@ -61,14 +60,13 @@ class INET_API AckingMac : public MacProtocolBase
     //@{
     virtual void flushQueue();
     virtual void clearQueue();
-    virtual InterfaceEntry *createInterfaceEntry() override;
+    virtual void configureInterfaceEntry() override;
     //@}
 
     virtual void startTransmitting(Packet *msg);
     virtual bool dropFrameNotForUs(Packet *frame);
     virtual void encapsulate(Packet *msg);
     virtual void decapsulate(Packet *frame);
-    virtual void initializeMacAddress();
     virtual void acked(Packet *packet);    // called by other AckingMac module, when receiving a packet with my moduleID
 
     // get MSG from queue

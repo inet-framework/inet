@@ -1,0 +1,16 @@
+:orphan:
+
+.. _dg:cha:80211:
+
+The 802.11 Model
+================
+
+Sending and Receiving 802.11 Frames
+-----------------------------------
+
+TODO tags, etc.
+
+Architecture of the 802.11 MAC Model
+------------------------------------
+
+TODO

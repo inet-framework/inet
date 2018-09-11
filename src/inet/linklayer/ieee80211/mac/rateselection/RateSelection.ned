@@ -25,10 +25,10 @@ simple RateSelection like IRateSelection
         string rateControlModule;
 
         double multicastFrameBitrate @unit(bps) = default(-1bps);
-        
+
         double responseAckFrameBitrate @unit(bps) = default(-1bps);
         double responseCtsFrameBitrate @unit(bps) = default(-1bps);
-        
+
         double dataFrameBitrate @unit(bps) = default(-1bps); // fastest
         double dataFrameBandwidth @unit(Hz) = default(0Hz/0); // unspecified by default
         int dataFrameNumSpatialStreams = default(-1); // unspecified by default
@@ -37,3 +37,4 @@ simple RateSelection like IRateSelection
         double controlFrameBitrate @unit(bps) = default(-1bps);
         @display("i=block/cogwheel");
 }
+

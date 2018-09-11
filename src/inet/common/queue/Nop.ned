@@ -15,12 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
-
 package inet.common.queue;
 
 import inet.common.IHook;
-
 
 //
 // Just lets messages through without any change or delay.

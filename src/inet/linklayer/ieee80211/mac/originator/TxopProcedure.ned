@@ -13,13 +13,14 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see http://www.gnu.org/licenses/.
-// 
+//
 
 package inet.linklayer.ieee80211.mac.originator;
 
-simple TxopProcedure 
+simple TxopProcedure
 {
     parameters:
         double txopLimit @unit(s) = default(-1s);
         @display("i=block/timer");
 }
+

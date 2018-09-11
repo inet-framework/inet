@@ -37,3 +37,4 @@ simple NetworkNodeOsgVisualizer extends NetworkNodeVisualizerBase like INetworkN
         @class(NetworkNodeOsgVisualizer);
         bool displayModuleName = default(true); // display network node name, enabled by default
 }
+

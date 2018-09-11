@@ -29,3 +29,4 @@ moduleinterface IInfoVisualizer
     parameters:
         @display("i=block/app");
 }
+

@@ -21,10 +21,10 @@ simple OsUdp like IUdp
 {
     parameters:
         @display("i=block/transport");
-        @signal[packetSentToUpper](type=Packet);
-        @signal[packetReceivedFromUpper](type=Packet);
-        @signal[packetSent](type=Packet);
-        @signal[packetReceived](type=Packet);
+        @signal[packetSentToUpper](type=inet::Packet);
+        @signal[packetReceivedFromUpper](type=inet::Packet);
+        @signal[packetSent](type=inet::Packet);
+        @signal[packetReceived](type=inet::Packet);
         @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
 

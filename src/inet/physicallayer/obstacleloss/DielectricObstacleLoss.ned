@@ -30,3 +30,4 @@ module DielectricObstacleLoss extends TracingObstacleLossBase
     parameters:
         @class(DielectricObstacleLoss);
 }
+

@@ -32,3 +32,4 @@ moduleinterface ICcEnergyGenerator extends IEnergyGenerator
         @display("i=block/plug");
         @signal[currentGenerationChanged](type=double);
 }
+

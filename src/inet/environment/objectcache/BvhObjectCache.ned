@@ -32,3 +32,4 @@ module BvhObjectCache like IObjectCache
         @display("i=block/table2");
         @class(BvhObjectCache);
 }
+

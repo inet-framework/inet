@@ -31,3 +31,4 @@ module Ieee80211LayeredDimensionalRadioMedium extends RadioMedium
         mediumLimitCache.minReceptionPower = default(-85dBm);
         mediumLimitCache.minInterferencePower = default(-110dBm);
 }
+

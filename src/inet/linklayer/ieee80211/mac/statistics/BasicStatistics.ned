@@ -27,3 +27,4 @@ simple BasicStatistics like IStatistics
     parameters:
         @display("i=block/table2");
 }
+

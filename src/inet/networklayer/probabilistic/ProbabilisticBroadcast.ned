@@ -55,3 +55,4 @@ simple ProbabilisticBroadcast extends NetworkProtocolBase like INetworkProtocol
         // MAC backoff, propagation delay and clock drift.
         double timeInQueueAfterDeath @unit(s) = default(60 s);
 }
+

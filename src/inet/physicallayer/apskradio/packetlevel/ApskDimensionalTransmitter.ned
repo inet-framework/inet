@@ -37,3 +37,4 @@ module ApskDimensionalTransmitter extends NarrowbandTransmitterBase
         modulation = default("BPSK");
         @class(ApskDimensionalTransmitter);
 }
+

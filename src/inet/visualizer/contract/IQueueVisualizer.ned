@@ -28,3 +28,4 @@ moduleinterface IQueueVisualizer
     parameters:
         @display("i=block/app");
 }
+

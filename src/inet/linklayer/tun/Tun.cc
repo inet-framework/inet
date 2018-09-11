@@ -38,11 +38,10 @@ void Tun::initialize(int stage)
         registerInterface();
 }
 
-InterfaceEntry *Tun::createInterfaceEntry()
+void Tun::configureInterfaceEntry()
 {
     InterfaceEntry *e = getContainingNicModule(this);
     e->setMtu(par("mtu"));
-    return e;
 }
 
 void Tun::handleMessage(cMessage *message)

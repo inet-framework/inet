@@ -29,3 +29,4 @@ moduleinterface IStatisticVisualizer
     parameters:
         @display("i=block/app");
 }
+

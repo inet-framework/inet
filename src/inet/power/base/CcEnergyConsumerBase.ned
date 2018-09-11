@@ -33,3 +33,4 @@ simple CcEnergyConsumerBase like ICcEnergyConsumer
         @signal[currentConsumptionChanged](type=double);
         @statistic[currentConsumption](title="Current consumption"; source=currentConsumptionChanged; record=vector; interpolationmode=sample-hold);
 }
+

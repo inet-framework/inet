@@ -26,3 +26,4 @@ module Ieee802154NarrowbandScalarTransmitter extends NarrowbandTransmitterBase
         modulation = default("DSSS-OQPSK-16");
         @class(Ieee802154NarrowbandScalarTransmitter);
 }
+

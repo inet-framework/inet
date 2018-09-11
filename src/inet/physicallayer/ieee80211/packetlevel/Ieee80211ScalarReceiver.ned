@@ -32,3 +32,4 @@ module Ieee80211ScalarReceiver extends Ieee80211ReceiverBase
     parameters:
         @class(Ieee80211ScalarReceiver);
 }
+

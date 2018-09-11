@@ -35,7 +35,6 @@ import inet.linklayer.ieee80211.mac.recipient.QosCtsPolicy;
 import inet.linklayer.ieee80211.mac.recipient.RecipientQosAckPolicy;
 import inet.linklayer.ieee80211.mac.recipient.RecipientQosMacDataService;
 
-
 //
 // HCF -- Hybrid Coordination Function
 //
@@ -55,8 +54,8 @@ module Hcf like IHcf
 
         @class(Hcf);
         @display("i=block/queue");
-        @signal[linkBroken](type=Packet);
-        @signal[packetDropped](type=Packet);
+        @signal[linkBroken](type=inet::Packet);
+        @signal[packetDropped](type=inet::Packet);
 
     submodules:
         edca: Edca {
@@ -131,3 +130,4 @@ module Hcf like IHcf
                 @display("p=750,600");
         }
 }
+

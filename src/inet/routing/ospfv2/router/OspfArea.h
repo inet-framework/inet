@@ -41,7 +41,7 @@ class INET_API Area : public cObject
     AreaId areaID;
     std::map<Ipv4AddressRange, bool> advertiseAddressRanges;
     std::vector<Ipv4AddressRange> areaAddressRanges;
-    std::vector<Interface *> associatedInterfaces;
+    std::vector<OspfInterface *> associatedInterfaces;
     std::vector<HostRouteParameters> hostRoutes;
     std::map<LinkStateId, RouterLsa *> routerLSAsByID;
     std::vector<RouterLsa *> routerLSAs;
@@ -92,12 +92,13 @@ class INET_API Area : public cObject
 
     bool containsAddress(Ipv4Address address) const;
     bool hasAddressRange(Ipv4AddressRange addressRange) const;
+    void addWatches();
     Ipv4AddressRange getContainingAddressRange(Ipv4AddressRange addressRange, bool *advertise = nullptr) const;
-    void addInterface(Interface *intf);
-    Interface *getInterface(unsigned char ifIndex);
-    Interface *getInterface(Ipv4Address address);
+    void addInterface(OspfInterface *intf);
+    OspfInterface *getInterface(unsigned char ifIndex);
+    OspfInterface *getInterface(Ipv4Address address);
     bool hasVirtualLink(AreaId withTransitArea) const;
-    Interface *findVirtualLink(RouterId routerID);
+    OspfInterface *findVirtualLink(RouterId routerID);
 
     bool installRouterLSA(const OspfRouterLsa *lsa);
     bool installNetworkLSA(const OspfNetworkLsa *lsa);
@@ -112,16 +113,16 @@ class INET_API Area : public cObject
     bool hasAnyNeighborInStates(int states) const;
     void removeFromAllRetransmissionLists(LsaKeyType lsaKey);
     bool isOnAnyRetransmissionList(LsaKeyType lsaKey) const;
-    bool floodLSA(const OspfLsa *lsa, Interface *intf = nullptr, Neighbor *neighbor = nullptr);
+    bool floodLSA(const OspfLsa *lsa, OspfInterface *intf = nullptr, Neighbor *neighbor = nullptr);
     bool isLocalAddress(Ipv4Address address) const;
     RouterLsa *originateRouterLSA();
-    NetworkLsa *originateNetworkLSA(const Interface *intf);
-    SummaryLsa *originateSummaryLSA(const RoutingTableEntry *entry,
+    NetworkLsa *originateNetworkLSA(const OspfInterface *intf);
+    SummaryLsa *originateSummaryLSA(const OspfRoutingTableEntry *entry,
             const std::map<LsaKeyType, bool, LsaKeyType_Less>& originatedLSAs,
             SummaryLsa *& lsaToReoriginate);
-    void calculateShortestPathTree(std::vector<RoutingTableEntry *>& newRoutingTable);
-    void calculateInterAreaRoutes(std::vector<RoutingTableEntry *>& newRoutingTable);
-    void recheckSummaryLSAs(std::vector<RoutingTableEntry *>& newRoutingTable);
+    void calculateShortestPathTree(std::vector<OspfRoutingTableEntry *>& newRoutingTable);
+    void calculateInterAreaRoutes(std::vector<OspfRoutingTableEntry *>& newRoutingTable);
+    void recheckSummaryLSAs(std::vector<OspfRoutingTableEntry *>& newRoutingTable);
 
     std::string str() const override;
     std::string detailedInfo() const override;
@@ -136,15 +137,16 @@ class INET_API Area : public cObject
             Metric destinationCost,
             SummaryLsa *& lsaToReoriginate) const;
 
-    bool findSameOrWorseCostRoute(const std::vector<RoutingTableEntry *>& newRoutingTable,
+    bool findSameOrWorseCostRoute(const std::vector<OspfRoutingTableEntry *>& newRoutingTable,
             const SummaryLsa& currentLSA,
             unsigned short currentCost,
             bool& destinationInRoutingTable,
-            std::list<RoutingTableEntry *>& sameOrWorseCost) const;
+            std::list<OspfRoutingTableEntry *>& sameOrWorseCost) const;
 
-    RoutingTableEntry *createRoutingTableEntryFromSummaryLSA(const SummaryLsa& summaryLSA,
+    OspfRoutingTableEntry *createRoutingTableEntryFromSummaryLSA(const SummaryLsa& summaryLSA,
             unsigned short entryCost,
-            const RoutingTableEntry& borderRouterEntry) const;
+            const OspfRoutingTableEntry& borderRouterEntry) const;
+    void printLSDB();
 };
 
 inline std::ostream& operator<<(std::ostream& ostr, Area& area)

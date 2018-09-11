@@ -30,3 +30,4 @@ module NarrowbandRadioBase extends Radio
         *.carrierFrequency = carrierFrequency; // passed down to transmitter and receiver by default
         *.bandwidth = bandwidth;               // passed down to transmitter and receiver by default
 }
+

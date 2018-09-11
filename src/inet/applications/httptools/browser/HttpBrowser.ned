@@ -19,7 +19,6 @@ package inet.applications.httptools.browser;
 
 import inet.applications.contract.IApp;
 
-
 //
 // The component is derived from HttpBrowseBase and is intended to be used
 // with the INET frameworks StandardHost and TCP/IP stack modeling.

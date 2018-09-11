@@ -31,3 +31,4 @@ moduleinterface IIpvxTrafficGenerator
         input ipIn @labels(Ipv4ControlInfo/up,Ipv6ControlInfo/up);
         output ipOut @labels(Ipv4ControlInfo/down,Ipv6ControlInfo/down);
 }
+

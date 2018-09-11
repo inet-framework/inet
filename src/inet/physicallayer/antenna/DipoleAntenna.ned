@@ -30,3 +30,4 @@ module DipoleAntenna extends AntennaBase
         double length @unit(m); // the length of the dipole antenna
         @class(DipoleAntenna);
 }
+

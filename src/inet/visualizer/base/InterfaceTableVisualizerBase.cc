@@ -151,22 +151,21 @@ void InterfaceTableVisualizerBase::handleParameterChange(const char *name)
 
 void InterfaceTableVisualizerBase::subscribe()
 {
-    auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
-    subscriptionModule->subscribe(interfaceCreatedSignal, this);
-    subscriptionModule->subscribe(interfaceDeletedSignal, this);
-    subscriptionModule->subscribe(interfaceConfigChangedSignal, this);
-    subscriptionModule->subscribe(interfaceIpv4ConfigChangedSignal, this);
+    visualizationSubjectModule->subscribe(interfaceCreatedSignal, this);
+    visualizationSubjectModule->subscribe(interfaceDeletedSignal, this);
+    visualizationSubjectModule->subscribe(interfaceConfigChangedSignal, this);
+    visualizationSubjectModule->subscribe(interfaceIpv4ConfigChangedSignal, this);
 }
 
 void InterfaceTableVisualizerBase::unsubscribe()
 {
     // NOTE: lookup the module again because it may have been deleted first
-    auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this, false);
-    if (subscriptionModule != nullptr) {
-        subscriptionModule->unsubscribe(interfaceCreatedSignal, this);
-        subscriptionModule->unsubscribe(interfaceDeletedSignal, this);
-        subscriptionModule->unsubscribe(interfaceConfigChangedSignal, this);
-        subscriptionModule->unsubscribe(interfaceIpv4ConfigChangedSignal, this);
+    auto visualizationSubjectModule = getModuleFromPar<cModule>(par("visualizationSubjectModule"), this, false);
+    if (visualizationSubjectModule != nullptr) {
+        visualizationSubjectModule->unsubscribe(interfaceCreatedSignal, this);
+        visualizationSubjectModule->unsubscribe(interfaceDeletedSignal, this);
+        visualizationSubjectModule->unsubscribe(interfaceConfigChangedSignal, this);
+        visualizationSubjectModule->unsubscribe(interfaceIpv4ConfigChangedSignal, this);
     }
 }
 
@@ -185,7 +184,7 @@ void InterfaceTableVisualizerBase::addInterfaceVisualization(const InterfaceVisu
 
 void InterfaceTableVisualizerBase::addAllInterfaceVisualizations()
 {
-    for (cModule::SubmoduleIterator it(getSystemModule()); !it.end(); it++) {
+    for (cModule::SubmoduleIterator it(visualizationSubjectModule); !it.end(); it++) {
         auto networkNode = *it;
         if (isNetworkNode(networkNode) && nodeFilter.matches(networkNode)) {
             L3AddressResolver addressResolver;

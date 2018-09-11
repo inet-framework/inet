@@ -24,3 +24,4 @@ module Ieee802154UwbIrReceiver like IReceiver
     parameters:
         @class(Ieee802154UwbIrReceiver);
 }
+

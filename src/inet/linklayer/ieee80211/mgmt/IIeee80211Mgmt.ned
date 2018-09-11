@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 package inet.linklayer.ieee80211.mgmt;
 
 //
@@ -34,3 +33,4 @@ moduleinterface IIeee80211Mgmt
         input agentIn;   // optional gates used for the agent in stations
         output agentOut; // optional gates used for the agent in stations
 }
+

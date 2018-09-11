@@ -41,8 +41,8 @@ simple IpvxTrafGen like IIpvxTrafficGenerator
         volatile int packetLength @unit(B); // packet length in bytes
         string destAddresses = default(""); // list of destination addresses, separated by spaces
         @display("i=block/source");
-        @signal[packetSent](type=Packet);
-        @signal[packetReceived](type=Packet);
+        @signal[packetSent](type=inet::Packet);
+        @signal[packetReceived](type=inet::Packet);
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[endToEndDelay](title="end-to-end delay"; source="dataAge(packetReceived)"; unit=s; record=histogram,vector; interpolationmode=none);
@@ -50,3 +50,4 @@ simple IpvxTrafGen like IIpvxTrafficGenerator
         input ipIn @labels(Ipv4ControlInfo/up,Ipv6ControlInfo/up);
         output ipOut @labels(Ipv4ControlInfo/down,Ipv6ControlInfo/down);
 }
+

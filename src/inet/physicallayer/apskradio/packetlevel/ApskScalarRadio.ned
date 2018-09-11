@@ -32,3 +32,4 @@ module ApskScalarRadio extends ApskRadio
         transmitter.typename = default("ApskScalarTransmitter");
         receiver.typename = default("ApskScalarReceiver");
 }
+

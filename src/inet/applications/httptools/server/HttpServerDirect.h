@@ -29,7 +29,7 @@ namespace httptools {
  *
  * This module implements a flexible Web server for direct message passing. It is part of the HttpTools project
  * and should be used in conjunction with a number of clients running the HttpBrowserDirect.
- * The module plugs into the DirectHost module.
+ * The module plugs into the HttpDirectHost module.
  *
  * @see HttpServerBase
  * @see HttpServer

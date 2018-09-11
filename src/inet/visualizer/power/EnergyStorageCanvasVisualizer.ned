@@ -31,3 +31,4 @@ simple EnergyStorageCanvasVisualizer extends EnergyStorageVisualizerBase like IE
         double zIndex = default(10); // determines the drawing order of figures relative to other visualizers
         @class(EnergyStorageCanvasVisualizer);
 }
+

@@ -106,7 +106,6 @@ void Ieee802154Mac::initialize(int stage)
         txAttempts = 0;
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
-        initializeMacAddress();
         registerInterface();
 
         cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
@@ -168,25 +167,10 @@ Ieee802154Mac::~Ieee802154Mac()
     }
 }
 
-void Ieee802154Mac::initializeMacAddress()
-{
-    const char *addrstr = par("address");
-
-    if (!strcmp(addrstr, "auto")) {
-        // assign automatic address
-        address = MacAddress::generateAutoAddress();
-
-        // change module parameter from "auto" to concrete address
-        par("address").setStringValue(address.str().c_str());
-    }
-    else {
-        address.setAddress(addrstr);
-    }
-}
-
-InterfaceEntry *Ieee802154Mac::createInterfaceEntry()
+void Ieee802154Mac::configureInterfaceEntry()
 {
     InterfaceEntry *e = getContainingNicModule(this);
+    MacAddress address = parseMacAddressParameter(par("address"));
 
     // data rate
     e->setDatarate(bitrate);
@@ -199,8 +183,6 @@ InterfaceEntry *Ieee802154Mac::createInterfaceEntry()
     e->setMtu(par("mtu"));
     e->setMulticast(true);
     e->setBroadcast(true);
-
-    return e;
 }
 
 /**
@@ -218,7 +200,7 @@ void Ieee802154Mac::handleUpperPacket(Packet *packet)
     macPkt->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(packet->getTag<PacketProtocolTag>()->getProtocol()));
     macPkt->setDestAddr(dest);
     delete packet->removeControlInfo();
-    macPkt->setSrcAddr(address);
+    macPkt->setSrcAddr(interfaceEntry->getMacAddress());
 
     if (useMACAcks) {
         if (SeqNrParent.find(dest) == SeqNrParent.end()) {
@@ -863,6 +845,7 @@ void Ieee802154Mac::handleLowerPacket(Packet *packet)
     const MacAddress& src = csmaHeader->getSrcAddr();
     const MacAddress& dest = csmaHeader->getDestAddr();
     long ExpectedNr = 0;
+    MacAddress address = interfaceEntry->getMacAddress();
 
     EV_DETAIL << "Received frame name= " << csmaHeader->getName()
               << ", myState=" << macState << " src=" << src

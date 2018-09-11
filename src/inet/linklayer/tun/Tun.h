@@ -30,7 +30,7 @@ class INET_API Tun : public MacBase
         std::vector<int> socketIds;
 
     protected:
-        InterfaceEntry *createInterfaceEntry() override;
+        virtual void configureInterfaceEntry() override;
         virtual void flushQueue() override;
         virtual void clearQueue() override;
         virtual bool isUpperMsg(cMessage *message) override { return message->arrivedOn("upperLayerIn"); }

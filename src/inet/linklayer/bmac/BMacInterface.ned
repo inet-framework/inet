@@ -19,7 +19,6 @@ package inet.linklayer.bmac;
 
 import inet.linklayer.common.WirelessInterface;
 
-
 module BMacInterface extends WirelessInterface
 {
     parameters:

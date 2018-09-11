@@ -29,3 +29,4 @@ module VectorCommunicationCache like ICommunicationCache
         @display("i=block/table2");
         @class(VectorCommunicationCache);
 }
+

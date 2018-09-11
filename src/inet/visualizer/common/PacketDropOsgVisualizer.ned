@@ -32,3 +32,4 @@ simple PacketDropOsgVisualizer extends PacketDropVisualizerBase like IPacketDrop
     parameters:
         @class(PacketDropOsgVisualizer);
 }
+

@@ -25,3 +25,4 @@ moduleinterface IIeee80211Agent
         input mgmtIn;
         output mgmtOut;
 }
+

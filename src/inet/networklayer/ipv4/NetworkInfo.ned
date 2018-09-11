@@ -41,3 +41,4 @@ package inet.networklayer.ipv4;
 simple NetworkInfo
 {
 }
+

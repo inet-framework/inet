@@ -32,3 +32,4 @@ module ApskRadio extends FlatRadioBase
         antenna.typename = default("IsotropicAntenna");
         @class(ApskRadio);
 }
+

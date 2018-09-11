@@ -27,7 +27,6 @@ import inet.linklayer.contract.IMacRelayUnit;
 import inet.linklayer.contract.ISpanningTree;
 import inet.networklayer.common.InterfaceTable;
 
-
 //
 // Model of an Ethernet switch.
 //
@@ -95,3 +94,4 @@ module EtherSwitch
             stp.relayOut --> relayUnit.stpIn;
         }
 }
+

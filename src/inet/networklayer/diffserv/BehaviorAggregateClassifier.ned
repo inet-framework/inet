@@ -39,3 +39,4 @@ simple BehaviorAggregateClassifier
         output outs[];
         output defaultOut;
 }
+

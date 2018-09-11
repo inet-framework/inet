@@ -31,3 +31,4 @@ moduleinterface INetworkLayer
         input ifIn @labels(INetworkHeader/up);
         output ifOut @labels(INetworkHeader/down);
 }
+

@@ -30,3 +30,4 @@ module WirelessHost extends StandardHost
         numWlanInterfaces = default(1);
         @display("i=device/wifilaptop");
 }
+

@@ -34,3 +34,4 @@ simple NetworkRouteOsgVisualizer extends PathVisualizerBase like INetworkRouteVi
     parameters:
         @class(NetworkRouteOsgVisualizer);
 }
+

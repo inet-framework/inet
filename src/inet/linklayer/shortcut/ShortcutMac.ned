@@ -45,3 +45,4 @@ simple ShortcutMac extends MacProtocolBase like ILinkLayer, IMacProtocol
     gates:
         input peerIn;
 }
+

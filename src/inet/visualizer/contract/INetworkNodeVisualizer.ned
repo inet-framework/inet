@@ -29,3 +29,4 @@ moduleinterface INetworkNodeVisualizer
     parameters:
         @display("i=block/app");
 }
+

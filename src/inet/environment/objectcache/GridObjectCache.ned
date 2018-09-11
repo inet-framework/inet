@@ -36,3 +36,4 @@ module GridObjectCache like IObjectCache
         @display("i=block/table2");
         @class(GridObjectCache);
 }
+

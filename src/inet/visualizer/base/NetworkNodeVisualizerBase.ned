@@ -33,3 +33,4 @@ simple NetworkNodeVisualizerBase extends VisualizerBase
 
         @class(NetworkNodeVisualizerBase);
 }
+

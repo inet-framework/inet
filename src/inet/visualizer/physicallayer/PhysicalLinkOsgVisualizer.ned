@@ -36,3 +36,4 @@ simple PhysicalLinkOsgVisualizer extends PhysicalLinkVisualizerBase like IPhysic
     parameters:
         @class(PhysicalLinkOsgVisualizer);
 }
+

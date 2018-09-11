@@ -35,3 +35,4 @@ module MediumLimitCache like IMediumLimitCache
         @display("i=block/table2");
         @class(MediumLimitCache);
 }
+

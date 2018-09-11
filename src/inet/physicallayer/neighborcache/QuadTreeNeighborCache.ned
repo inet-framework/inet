@@ -30,3 +30,4 @@ module QuadTreeNeighborCache like INeighborCache
         @display("i=block/table2");
         @class(QuadTreeNeighborCache);
 }
+

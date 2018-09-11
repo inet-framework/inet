@@ -26,7 +26,6 @@ import inet.linklayer.contract.ITunnelInterface;
 import inet.linklayer.contract.IWirelessInterface;
 import inet.networklayer.common.InterfaceTable;
 
-
 module LinkLayerNodeBase extends NodeBase
 {
     parameters:
@@ -96,3 +95,4 @@ module LinkLayerNodeBase extends NodeBase
             pppg[i] <--> { @display("m=s"); } <--> ppp[i].phys;
         }
 }
+

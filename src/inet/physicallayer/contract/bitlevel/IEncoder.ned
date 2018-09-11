@@ -22,3 +22,4 @@ moduleinterface IEncoder
     parameters:
         @display("i=block/blackboard");
 }
+
