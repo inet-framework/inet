@@ -77,9 +77,7 @@ bool operator==(const OspfOptions& leftOptions, const OspfOptions& rightOptions)
 B calculateLSASize(const OspfRouterLsa *routerLSA)
 {
     B lsaLength = OSPF_LSA_HEADER_LENGTH + OSPF_ROUTERLSA_HEADER_LENGTH;
-    unsigned short linkCount = routerLSA->getLinksArraySize();
-
-    for (unsigned short i = 0; i < linkCount; i++) {
+    for (uint32_t i = 0; i < routerLSA->getLinksArraySize(); i++) {
         const Link& link = routerLSA->getLinks(i);
         lsaLength += OSPF_LINK_HEADER_LENGTH + (OSPF_TOS_LENGTH * link.getTosDataArraySize());
     }
