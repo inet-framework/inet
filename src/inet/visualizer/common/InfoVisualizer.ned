@@ -28,6 +28,8 @@ module InfoVisualizer like IInfoVisualizer
 {
     parameters:
         @display("i=block/app");
+        *.visualizationTargetModule = default("^.^");
+        *.visualizationSubjectModule = default("^.^");
     submodules:
         canvasVisualizer: <default("InfoCanvasVisualizer")> like IInfoVisualizer if typename != "" {
             parameters:

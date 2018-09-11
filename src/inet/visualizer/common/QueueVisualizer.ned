@@ -28,6 +28,8 @@ module QueueVisualizer like IQueueVisualizer
 {
     parameters:
         @display("i=block/app");
+        *.visualizationTargetModule = default("^.^");
+        *.visualizationSubjectModule = default("^.^");
     submodules:
         canvasVisualizer: <default("QueueCanvasVisualizer")> like IQueueVisualizer if typename != "" {
             parameters:
