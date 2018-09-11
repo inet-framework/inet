@@ -85,7 +85,6 @@ void RadioVisualizerBase::handleParameterChange(const char *name)
 
 void RadioVisualizerBase::subscribe()
 {
-    auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
     visualizationSubjectModule->subscribe(IRadio::radioModeChangedSignal, this);
     visualizationSubjectModule->subscribe(IRadio::receptionStateChangedSignal, this);
     visualizationSubjectModule->subscribe(IRadio::transmissionStateChangedSignal, this);

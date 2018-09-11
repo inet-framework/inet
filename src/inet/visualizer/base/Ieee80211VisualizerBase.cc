@@ -78,7 +78,6 @@ void Ieee80211VisualizerBase::handleParameterChange(const char *name)
 
 void Ieee80211VisualizerBase::subscribe()
 {
-    auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
     visualizationSubjectModule->subscribe(l2AssociatedSignal, this);
     visualizationSubjectModule->subscribe(l2DisassociatedSignal, this);
     visualizationSubjectModule->subscribe(l2ApAssociatedSignal, this);

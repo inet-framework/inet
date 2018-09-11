@@ -105,7 +105,6 @@ void StatisticVisualizerBase::handleParameterChange(const char *name)
 
 void StatisticVisualizerBase::subscribe()
 {
-    auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
     if (*signalName != '\0')
         visualizationSubjectModule->subscribe(registerSignal(signalName), this);
 }

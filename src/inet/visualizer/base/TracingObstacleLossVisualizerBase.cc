@@ -80,7 +80,6 @@ void TracingObstacleLossVisualizerBase::refreshDisplay() const
 
 void TracingObstacleLossVisualizerBase::subscribe()
 {
-    auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
     visualizationSubjectModule->subscribe(ITracingObstacleLoss::obstaclePenetratedSignal, this);
 }
 

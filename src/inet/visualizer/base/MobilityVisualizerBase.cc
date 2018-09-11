@@ -85,7 +85,6 @@ void MobilityVisualizerBase::handleParameterChange(const char *name)
 
 void MobilityVisualizerBase::subscribe()
 {
-    auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
     visualizationSubjectModule->subscribe(IMobility::mobilityStateChangedSignal, this);
     visualizationSubjectModule->subscribe(PRE_MODEL_CHANGE, this);
 }

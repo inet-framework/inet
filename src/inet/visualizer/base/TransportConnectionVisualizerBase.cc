@@ -80,7 +80,6 @@ void TransportConnectionVisualizerBase::handleParameterChange(const char *name)
 void TransportConnectionVisualizerBase::subscribe()
 {
 #ifdef WITH_TCP_INET
-    auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
     visualizationSubjectModule->subscribe(inet::tcp::Tcp::tcpConnectionAddedSignal, this);
 #endif // WITH_TCP_INET
 }

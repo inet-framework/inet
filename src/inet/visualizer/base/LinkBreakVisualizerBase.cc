@@ -104,7 +104,6 @@ void LinkBreakVisualizerBase::refreshDisplay() const
 
 void LinkBreakVisualizerBase::subscribe()
 {
-    auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
     visualizationSubjectModule->subscribe(linkBrokenSignal, this);
 }
 

@@ -120,7 +120,6 @@ void PathVisualizerBase::refreshDisplay() const
 
 void PathVisualizerBase::subscribe()
 {
-    auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
     visualizationSubjectModule->subscribe(packetSentToUpperSignal, this);
     visualizationSubjectModule->subscribe(packetReceivedFromUpperSignal, this);
     visualizationSubjectModule->subscribe(packetReceivedFromLowerSignal, this);
