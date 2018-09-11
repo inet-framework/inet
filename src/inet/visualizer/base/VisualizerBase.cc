@@ -38,6 +38,9 @@ void VisualizerBase::initialize(int stage)
         visualizerTargetModule = getModuleByPath(path);
         if (visualizerTargetModule == nullptr)
             throw cRuntimeError("Module not found on path '%s' defined by par 'visualizerTargetModule'", path);
+        visualizationSubjectModule = getModuleByPath(path);
+        if (visualizationSubjectModule == nullptr)
+            throw cRuntimeError("Module not found on path '%s' defined by par 'visualizationSubjectModule'", path);
         tags = par("tags");
     }
 }

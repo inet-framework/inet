@@ -25,6 +25,7 @@ simple VisualizerBase
 {
     parameters:
         string visualizerTargetModule = default("<root>"); // module path relative to the visualizer where the visualization should appear in the user interface, root module by default
+        string visualizationSubjectModule = default("^"); // module path relative to the visualizer which determines what part of the simulation model the visualizer displays in the user interface, parent module by default
         string tags = default(""); // tag added to each visualization for disambiguation in the runtime environment
         @class(VisualizerBase);
         @display("i=block/app");

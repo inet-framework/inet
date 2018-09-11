@@ -31,6 +31,7 @@ class INET_API VisualizerBase : public cSimpleModule
 {
   protected:
     cModule *visualizerTargetModule = nullptr;
+    cModule *visualizationSubjectModule = nullptr;
     const char *tags = nullptr;
 
   protected:
