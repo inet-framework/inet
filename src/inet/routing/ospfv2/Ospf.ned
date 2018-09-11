@@ -150,8 +150,8 @@ simple Ospf like IOspf
         // xml containing the full OSPF AS configuration
         xml ospfConfig = default(xml("<OSPFASConfig> \
                 <Router name='**' RFC1583Compatible='true'> \
-                    <BroadcastInterface ifName='eth[*]' areaID='0.0.0.0' interfaceOutputCost='0' search='relax' /> \
-                    <PointToPointInterface ifName='ppp[*]' areaID='0.0.0.0' interfaceOutputCost='0' search='relax' /> \
+                    <BroadcastInterface ifName='eth[*]' areaID='0.0.0.0' interfaceOutputCost='0' /> \
+                    <PointToPointInterface ifName='ppp[*]' areaID='0.0.0.0' interfaceOutputCost='0' /> \
                 </Router> </OSPFASConfig>"));
 
         // default values for attributes of interface xml entries:
