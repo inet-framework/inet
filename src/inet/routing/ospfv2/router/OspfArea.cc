@@ -756,9 +756,7 @@ RouterLsa *Area::originateRouterLSA()
 {
     RouterLsa *routerLSA = new RouterLsa;
     OspfLsaHeader& lsaHeader = routerLSA->getHeaderForUpdate();
-    long interfaceCount = associatedInterfaces.size();
     OspfOptions lsOptions;
-    long i;
 
     lsaHeader.setLsAge(0);
     memset(&lsOptions, 0, sizeof(OspfOptions));
@@ -776,7 +774,7 @@ RouterLsa *Area::originateRouterLSA()
 
     routerLSA->setNumberOfLinks(0);
     routerLSA->setLinksArraySize(0);
-    for (i = 0; i < interfaceCount; i++) {
+    for (uint32_t i = 0; i < associatedInterfaces.size(); i++) {
         OspfInterface *intf = associatedInterfaces[i];
 
         if (intf->getState() == OspfInterface::DOWN_STATE) {
@@ -976,8 +974,7 @@ RouterLsa *Area::originateRouterLSA()
         }
     }
 
-    long hostRouteCount = hostRoutes.size();
-    for (i = 0; i < hostRouteCount; i++) {
+    for (uint32_t i = 0; i < hostRoutes.size(); i++) {
         Link stubLink;
         stubLink.setType(STUB_LINK);
         stubLink.setLinkID(hostRoutes[i].address);
@@ -993,9 +990,7 @@ RouterLsa *Area::originateRouterLSA()
     }
 
     // update the length field in the LSA header
-    uint32_t totalSize = (OSPF_LSA_HEADER_LENGTH + OSPF_ROUTERLSA_HEADER_LENGTH +
-            B(routerLSA->getNumberOfLinks() * (OSPF_LINK_HEADER_LENGTH).get()) ).get();
-    lsaHeader.setLsaLength(totalSize);
+    lsaHeader.setLsaLength(calculateLSASize(routerLSA).get());
 
     routerLSA->setSource(LsaTrackingInfo::ORIGINATED);
 
