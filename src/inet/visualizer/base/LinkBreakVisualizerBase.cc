@@ -167,7 +167,7 @@ void LinkBreakVisualizerBase::removeLinkBreakVisualization(const LinkBreakVisual
 cModule *LinkBreakVisualizerBase::findNode(MacAddress address)
 {
     L3AddressResolver addressResolver;
-    for (cModule::SubmoduleIterator it(getSystemModule()); !it.end(); it++) {
+    for (cModule::SubmoduleIterator it(visualizationSubjectModule); !it.end(); it++) {
         auto networkNode = *it;
         if (isNetworkNode(networkNode)) {
             auto interfaceTable = addressResolver.findInterfaceTableOf(networkNode);

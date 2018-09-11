@@ -187,7 +187,7 @@ osg::BoundingSphere SceneOsgVisualizerBase::getNetworkBoundingSphere()
     int nodeCount = 0;
     auto nodes = new osg::Group();
     auto networkNodeVisualizer = getModuleFromPar<NetworkNodeOsgVisualizer>(par("networkNodeVisualizerModule"), this);
-    for (cModule::SubmoduleIterator it(getSystemModule()); !it.end(); it++) {
+    for (cModule::SubmoduleIterator it(visualizationSubjectModule); !it.end(); it++) {
         auto networkNode = *it;
         if (isNetworkNode(networkNode)) {
             nodeCount++;

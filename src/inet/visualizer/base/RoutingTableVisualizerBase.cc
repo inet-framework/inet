@@ -166,7 +166,7 @@ std::vector<Ipv4Address> RoutingTableVisualizerBase::getDestinations()
 {
     L3AddressResolver addressResolver;
     std::vector<Ipv4Address> destinations;
-    for (cModule::SubmoduleIterator it(getSystemModule()); !it.end(); it++) {
+    for (cModule::SubmoduleIterator it(visualizationSubjectModule); !it.end(); it++) {
         auto networkNode = *it;
         if (isNetworkNode(networkNode) && destinationFilter.matches(networkNode)) {
             auto interfaceTable = addressResolver.findInterfaceTableOf(networkNode);
@@ -240,7 +240,7 @@ void RoutingTableVisualizerBase::updateRouteVisualizations(IIpv4RoutingTable *ro
 void RoutingTableVisualizerBase::updateAllRouteVisualizations()
 {
     removeAllRouteVisualizations();
-    for (cModule::SubmoduleIterator it(getSystemModule()); !it.end(); it++) {
+    for (cModule::SubmoduleIterator it(visualizationSubjectModule); !it.end(); it++) {
         auto networkNode = *it;
         if (isNetworkNode(networkNode) && nodeFilter.matches(networkNode)) {
             L3AddressResolver addressResolver;
