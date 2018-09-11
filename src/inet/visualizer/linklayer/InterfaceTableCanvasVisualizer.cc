@@ -120,7 +120,7 @@ void InterfaceTableCanvasVisualizer::addInterfaceVisualization(const InterfaceVi
         displayString.setTagArg("t", 0, getVisualizationText(getInterfaceEntry(interfaceVisualization)).c_str());
         displayString.setTagArg("t", 1, "l");
     }
-    else
+    else if(interfaceCanvasVisualization->networkNodeVisualization)
         interfaceCanvasVisualization->networkNodeVisualization->addAnnotation(interfaceCanvasVisualization->figure, interfaceCanvasVisualization->figure->getBounds().getSize(), placementHint, placementPriority);
 }
 
@@ -131,7 +131,7 @@ void InterfaceTableCanvasVisualizer::removeInterfaceVisualization(const Interfac
     auto gate = displayWiredInterfacesAtConnections ? getOutputGate(interfaceVisualization) : nullptr;
     if (gate != nullptr)
         gate->getDisplayString().setTagArg("t", 0, "");
-    else
+    else if(interfaceCanvasVisualization->networkNodeVisualization)
         interfaceCanvasVisualization->networkNodeVisualization->removeAnnotation(interfaceCanvasVisualization->figure);
 }
 
@@ -144,7 +144,8 @@ void InterfaceTableCanvasVisualizer::refreshInterfaceVisualization(const Interfa
     else {
         auto figure = interfaceCanvasVisualization->figure;
         figure->setText(getVisualizationText(interfaceEntry).c_str());
-        interfaceCanvasVisualization->networkNodeVisualization->setAnnotationSize(figure, figure->getBounds().getSize());
+        if(interfaceCanvasVisualization->networkNodeVisualization)
+            interfaceCanvasVisualization->networkNodeVisualization->setAnnotationSize(figure, figure->getBounds().getSize());
     }
 }
 
