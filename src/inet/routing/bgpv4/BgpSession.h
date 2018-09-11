@@ -39,22 +39,24 @@ private:
 
   //Timers
   simtime_t _StartEventTime;
-  cMessage *_ptrStartEvent;
-  unsigned int _connectRetryCounter;
-  simtime_t _connectRetryTime;
-  cMessage *_ptrConnectRetryTimer;
-  simtime_t _holdTime;
-  cMessage *_ptrHoldTimer;
-  simtime_t _keepAliveTime;
-  cMessage *_ptrKeepAliveTimer;
+  cMessage *_ptrStartEvent = nullptr;
+  unsigned int _connectRetryCounter = 0;
+  simtime_t _connectRetryTime = BGP_RETRY_TIME;
+  cMessage *_ptrConnectRetryTimer = nullptr;
+  simtime_t _holdTime = BGP_HOLD_TIME;
+  cMessage *_ptrHoldTimer = nullptr;
+  simtime_t _keepAliveTime = BGP_KEEP_ALIVE;
+  cMessage *_ptrKeepAliveTimer = nullptr;
 
   //Statistics
-  unsigned int _openMsgSent;
-  unsigned int _openMsgRcv;
-  unsigned int _keepAliveMsgSent;
-  unsigned int _keepAliveMsgRcv;
-  unsigned int _updateMsgSent;
-  unsigned int _updateMsgRcv;
+  unsigned int _openMsgSent = 0;
+  unsigned int _openMsgRcv = 0;
+  unsigned int _updateMsgSent = 0;
+  unsigned int _updateMsgRcv = 0;
+  unsigned int _notificationMsgSent = 0;
+  unsigned int _notificationMsgRcv = 0;
+  unsigned int _keepAliveMsgSent = 0;
+  unsigned int _keepAliveMsgRcv = 0;
 
   //FINAL STATE MACHINE
   fsm::TopState::Box *_box;
@@ -75,9 +77,12 @@ private:
     void restartsHoldTimer();
     void restartsKeepAliveTimer();
     void restartsConnectRetryTimer(bool start = true);
+
     void sendOpenMessage();
     void sendUpdateMessage(BgpUpdatePathAttributeList &content, BgpUpdateNlri &NLRI);
+    void sendNotificationMessage();
     void sendKeepAliveMessage();
+
     void listenConnectionFromPeer() { bgpRouter.listenConnectionFromPeer(_info.sessionID); }
     void openTCPConnectionToPeer() { bgpRouter.openTCPConnectionToPeer(_info.sessionID); }
     SessionId findAndStartNextSession(BgpSessionType type) { return bgpRouter.findNextSession(type, true); }
