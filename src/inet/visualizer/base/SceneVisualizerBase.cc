@@ -31,7 +31,7 @@ void SceneVisualizerBase::initialize(int stage)
     VisualizerBase::initialize(stage);
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL)
-        visualizerTargetModule->getCanvas()->setAnimationSpeed(par("animationSpeed"), this);
+        visualizationTargetModule->getCanvas()->setAnimationSpeed(par("animationSpeed"), this);
 }
 
 Box SceneVisualizerBase::getPlaygroundBounds()
@@ -40,7 +40,7 @@ Box SceneVisualizerBase::getPlaygroundBounds()
     Coord playgroundMin = Coord::ZERO;
     Coord playgroundMax = Coord::ZERO;
     if (physicalEnvironment == nullptr) {
-        auto displayString = visualizerTargetModule->getDisplayString();
+        auto displayString = visualizationTargetModule->getDisplayString();
         auto width = atof(displayString.getTagArg("bgb", 0));
         auto height = atof(displayString.getTagArg("bgb", 1));
         playgroundMin = Coord(0.0, 0.0, 0.0);

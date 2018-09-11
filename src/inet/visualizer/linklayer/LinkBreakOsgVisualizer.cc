@@ -47,7 +47,7 @@ void LinkBreakOsgVisualizer::refreshDisplay() const
 {
     LinkBreakVisualizerBase::refreshDisplay();
     // TODO: switch to osg canvas when API is extended
-    visualizerTargetModule->getCanvas()->setAnimationSpeed(linkBreakVisualizations.empty() ? 0 : fadeOutAnimationSpeed, this);
+    visualizationTargetModule->getCanvas()->setAnimationSpeed(linkBreakVisualizations.empty() ? 0 : fadeOutAnimationSpeed, this);
 }
 
 const LinkBreakVisualizerBase::LinkBreakVisualization *LinkBreakOsgVisualizer::createLinkBreakVisualization(cModule *transmitter, cModule *receiver) const
@@ -79,7 +79,7 @@ void LinkBreakOsgVisualizer::addLinkBreakVisualization(const LinkBreakVisualizat
 {
     LinkBreakVisualizerBase::addLinkBreakVisualization(linkBreakVisualization);
     auto linkBreakOsgVisualization = static_cast<const LinkBreakOsgVisualization *>(linkBreakVisualization);
-    auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
+    auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizationTargetModule);
     scene->addChild(linkBreakOsgVisualization->node);
 }
 

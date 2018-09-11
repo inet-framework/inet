@@ -52,7 +52,7 @@ void NetworkConnectionOsgVisualizer::createNetworkConnectionVisualization(cModul
     auto lineWidth = new osg::LineWidth();
     lineWidth->setWidth(this->lineWidth);
     stateSet->setAttributeAndModes(lineWidth, osg::StateAttribute::ON);
-    auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
+    auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizationTargetModule);
     scene->addChild(geode);
 }
 

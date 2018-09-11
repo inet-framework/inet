@@ -36,9 +36,9 @@ namespace visualizer {
 
 void SceneOsgVisualizerBase::initializeScene()
 {
-    auto osgCanvas = visualizerTargetModule->getOsgCanvas();
+    auto osgCanvas = visualizationTargetModule->getOsgCanvas();
     if (osgCanvas->getScene() != nullptr)
-        throw cRuntimeError("OSG canvas scene at '%s' has been already initialized", visualizerTargetModule->getFullPath().c_str());
+        throw cRuntimeError("OSG canvas scene at '%s' has been already initialized", visualizationTargetModule->getFullPath().c_str());
     else {
         auto topLevelScene = new inet::osg::TopLevelScene();
         osgCanvas->setScene(topLevelScene);
@@ -74,7 +74,7 @@ void SceneOsgVisualizerBase::initializeAxis(double axisLength)
     geode->addChild(inet::osg::createLine(Coord::ZERO, Coord(0.0, 0.0, axisLength), cFigure::ARROW_NONE, cFigure::ARROW_BARBED));
     auto stateSet = inet::osg::createStateSet(cFigure::BLACK, 1.0, false);
     geode->setStateSet(stateSet);
-    auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
+    auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizationTargetModule);
     scene->addChild(geode);
     double spacing = 1;
     scene->addChild(inet::osg::createAutoTransform(inet::osg::createText("X", Coord::ZERO, cFigure::BLACK), osg::AutoTransform::ROTATE_TO_SCREEN, true, Coord(axisLength + spacing, 0.0, 0.0)));
@@ -97,7 +97,7 @@ void SceneOsgVisualizerBase::initializePlayground()
         double opacity = par("playgroundOpacity");
         bool shading = par("playgroundShading");
         auto playground = createPlayground(playgroundBounds.getMin(), playgroundBounds.getMax(), color, image, imageSize, opacity, shading);
-        auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
+        auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizationTargetModule);
         scene->addChild(playground);
     }
 }

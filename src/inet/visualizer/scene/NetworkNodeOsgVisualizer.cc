@@ -35,7 +35,7 @@ void NetworkNodeOsgVisualizer::initialize(int stage)
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
         displayModuleName = par("displayModuleName");
-        auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
+        auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizationTargetModule);
         for (cModule::SubmoduleIterator it(visualizationSubjectModule); !it.end(); it++) {
             auto networkNode = *it;
             if (isNetworkNode(networkNode) && nodeFilter.matches(networkNode)) {
