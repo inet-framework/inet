@@ -74,7 +74,7 @@ module IntegratedMultiCanvasVisualizer like IIntegratedVisualizer
         int numRoutingTableVisualizers = default(1);
         int numTransportRouteVisualizers = default(1);
         int numTransportConnectionVisualizers = default(1);
-        *.visualizerTargetModule = default("^.^");
+        *.visualizationTargetModule = default("^.^");
         *.visualizationSubjectModule = default("^.^");
         *.networkNodeVisualizerModule = default(absPath(".networkNodeVisualizer[0]"));
     submodules:

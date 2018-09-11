@@ -76,7 +76,7 @@ void PathCanvasVisualizerBase::initialize(int stage)
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
         zIndex = par("zIndex");
-        auto canvas = visualizerTargetModule->getCanvas();
+        auto canvas = visualizationTargetModule->getCanvas();
         lineManager = LineManager::getCanvasLineManager(canvas);
         canvasProjection = CanvasProjection::getCanvasProjection(canvas);
         pathGroup = new cGroupFigure("paths");
@@ -137,7 +137,7 @@ void PathCanvasVisualizerBase::refreshDisplay() const
         }
         pathCanvasVisualization->figure->setPoints(points);
     }
-    visualizerTargetModule->getCanvas()->setAnimationSpeed(pathVisualizations.empty() ? 0 : fadeOutAnimationSpeed, this);
+    visualizationTargetModule->getCanvas()->setAnimationSpeed(pathVisualizations.empty() ? 0 : fadeOutAnimationSpeed, this);
 }
 
 const PathVisualizerBase::PathVisualization *PathCanvasVisualizerBase::createPathVisualization(const std::vector<int>& path, cPacket *packet) const

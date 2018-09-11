@@ -182,7 +182,7 @@ void LinkVisualizerBase::addLinkVisualization(std::pair<int, int> sourceAndDesti
 {
     linkVisualizations[sourceAndDestination] = linkVisualization;
     if (holdAnimationTime != 0)
-        visualizerTargetModule->getCanvas()->holdSimulationFor(holdAnimationTime);
+        visualizationTargetModule->getCanvas()->holdSimulationFor(holdAnimationTime);
 }
 
 void LinkVisualizerBase::removeLinkVisualization(const LinkVisualization *linkVisualization)

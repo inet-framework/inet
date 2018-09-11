@@ -30,7 +30,7 @@ void NetworkNodeCanvasVisualizer::initialize(int stage)
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
         zIndex = par("zIndex");
-        auto canvas = visualizerTargetModule->getCanvas();
+        auto canvas = visualizationTargetModule->getCanvas();
         canvasProjection = CanvasProjection::getCanvasProjection(canvas);
         for (cModule::SubmoduleIterator it(visualizationSubjectModule); !it.end(); it++) {
             auto networkNode = *it;
@@ -38,7 +38,7 @@ void NetworkNodeCanvasVisualizer::initialize(int stage)
                 auto visualization = createNetworkNodeVisualization(networkNode);
                 visualization->setZIndex(zIndex);
                 setNetworkNodeVisualization(networkNode, visualization);
-                visualizerTargetModule->getCanvas()->addFigure(visualization);
+                visualizationTargetModule->getCanvas()->addFigure(visualization);
             }
         }
     }

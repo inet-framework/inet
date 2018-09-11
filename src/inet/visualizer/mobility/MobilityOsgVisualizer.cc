@@ -54,7 +54,7 @@ void MobilityOsgVisualizer::refreshDisplay() const
 {
     MobilityVisualizerBase::refreshDisplay();
     // TODO: switch to osg canvas when API is extended
-    visualizerTargetModule->getCanvas()->setAnimationSpeed(mobilityVisualizations.empty() ? 0 : animationSpeed, this);
+    visualizationTargetModule->getCanvas()->setAnimationSpeed(mobilityVisualizations.empty() ? 0 : animationSpeed, this);
 }
 
 MobilityOsgVisualizer::MobilityOsgVisualization *MobilityOsgVisualizer::getMobilityVisualization(const IMobility *mobility) const
@@ -84,7 +84,7 @@ MobilityOsgVisualizer::MobilityOsgVisualization* MobilityOsgVisualizer::ensureMo
         auto trail = new osg::Geode();
         trail->setStateSet(inet::osg::createStateSet(movementTrailLineColorSet.getColor(module->getId()), 1.0));
         auto networkNode = networkNodeVisualizer->getNetworkNodeVisualization(getContainingNode(module));
-        auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
+        auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizationTargetModule);
         scene->addChild(trail);
         mobilityVisualization = new MobilityOsgVisualization(networkNode, trail);
         setMobilityVisualization(mobility, mobilityVisualization);

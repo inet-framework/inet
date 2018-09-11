@@ -37,8 +37,8 @@ void PhysicalEnvironmentCanvasVisualizer::initialize(int stage)
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
         zIndex = par("zIndex");
-        cCanvas *canvas = visualizerTargetModule->getCanvas();
-        canvasProjection = CanvasProjection::getCanvasProjection(visualizerTargetModule->getCanvas());
+        cCanvas *canvas = visualizationTargetModule->getCanvas();
+        canvasProjection = CanvasProjection::getCanvasProjection(visualizationTargetModule->getCanvas());
         objectsLayer = new cGroupFigure("objectsLayer");
         objectsLayer->setZIndex(zIndex);
         objectsLayer->insertBelow(canvas->getSubmodulesLayer());

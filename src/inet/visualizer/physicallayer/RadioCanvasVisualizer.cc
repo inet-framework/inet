@@ -49,7 +49,7 @@ void RadioCanvasVisualizer::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         zIndex = par("zIndex");
         networkNodeVisualizer = getModuleFromPar<NetworkNodeCanvasVisualizer>(par("networkNodeVisualizerModule"), this);
-        canvasProjection = CanvasProjection::getCanvasProjection(visualizerTargetModule->getCanvas());
+        canvasProjection = CanvasProjection::getCanvasProjection(visualizationTargetModule->getCanvas());
     }
 }
 
