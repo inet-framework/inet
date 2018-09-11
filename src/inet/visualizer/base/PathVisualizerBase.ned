@@ -47,7 +47,7 @@ package inet.visualizer.base;
 simple PathVisualizerBase extends VisualizerBase
 {
     parameters:
-        string subscriptionModule = default("<root>"); // module where the visualizer subscribes for network layer signals, root module by default
+        string subscriptionModule = default("^"); // module where the visualizer subscribes for network layer signals, root module by default
 
         bool displayRoutes = default(false); // display polyline arrow for active routes, disabled by default
 

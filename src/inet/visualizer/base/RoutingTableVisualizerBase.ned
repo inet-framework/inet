@@ -41,7 +41,7 @@ package inet.visualizer.base;
 simple RoutingTableVisualizerBase extends VisualizerBase
 {
     parameters:
-        string subscriptionModule = default("<root>"); // module where the visualizer subscribes for routing table signals, root module by default
+        string subscriptionModule = default("^"); // module where the visualizer subscribes for routing table signals, root module by default
 
         bool displayRoutingTables = default(false); // display routing table data, disabled by default
         bool displayRoutesIndividually = default(true); // display routes between the same network nodes individually, enabled by default

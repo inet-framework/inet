@@ -33,7 +33,7 @@ simple TransportConnectionVisualizerBase extends VisualizerBase
 {
     parameters:
         string networkNodeVisualizerModule = default("^.networkNodeVisualizer"); // the network node visualizer module, refers to a sibling submodule by default
-        string subscriptionModule = default("<root>"); // module where the visualizer subscribes for connection signals, root module by default
+        string subscriptionModule = default("^"); // module where the visualizer subscribes for connection signals, root module by default
 
         bool displayTransportConnections = default(false);// display transport connection end points, disabled by default
 

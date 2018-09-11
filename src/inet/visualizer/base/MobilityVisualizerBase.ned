@@ -29,7 +29,7 @@ simple MobilityVisualizerBase extends VisualizerBase
 {
     parameters:
         string networkNodeVisualizerModule = default("^.networkNodeVisualizer"); // the network node visualizer module, refers to a sibling submodule by default
-        string subscriptionModule = default("<root>"); // module where the visualizer subscribes for mobility signals, root module by default
+        string subscriptionModule = default("^"); // module where the visualizer subscribes for mobility signals, root module by default
 
         bool displayMobility = default(true); // display mobility, enabled by default
         double animationSpeed = default(0); // animation speed while objects are moving around, value must be in the range (0, +inf)
