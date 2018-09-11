@@ -44,7 +44,7 @@ void BgpConfigReader::loadConfigFromXML(cXMLElement *bgpConfig, BgpRouter *bgpRo
     simtime_t delayTab[NB_TIMERS];
     loadTimerConfig(timerConfig, delayTab);
 
-    //find my AS
+    // find my AS
     cXMLElementList ASList = bgpConfig->getElementsByTagName("AS");
     int routerPosition;
     AsId myAsId = findMyAS(ASList, routerPosition);
