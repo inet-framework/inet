@@ -32,7 +32,7 @@ package inet.visualizer.base;
 simple LinkBreakVisualizerBase extends VisualizerBase
 {
     parameters:
-        string subscriptionModule = default("<root>"); // module where the visualizer subscribes for link break signals, root module by default
+        string subscriptionModule = default("^"); // module where the visualizer subscribes for link break signals, root module by default
 
         bool displayLinkBreaks = default(false); // display icons for link breaks, disabled by default
 
