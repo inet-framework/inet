@@ -197,7 +197,7 @@ void Topology::extractFromNetwork(bool (*predicate)(cModule *, void *), void *da
 {
     clear();
 
-    int groupCounter = 0;
+    int networkIdCounter = 0;
 
     // Loop through all modules and find those that satisfy the criteria
     for (int modId = 0; modId <= getSimulation()->getLastComponentId(); modId++)
@@ -205,7 +205,7 @@ void Topology::extractFromNetwork(bool (*predicate)(cModule *, void *), void *da
         cModule *module = getSimulation()->getModule(modId);
         if (module && predicate(module, data)) {
             Node *node = createNode(module);
-            node->setGroupId(++groupCounter);
+            node->setNetworkId(++networkIdCounter);
             nodes.push_back(node);
         }
     }
@@ -250,7 +250,7 @@ void Topology::extractFromNetwork(bool (*predicate)(cModule *, void *), void *da
     }
 
     for(auto & elem : nodes)
-        findGroups(elem);
+        findNetworks(elem);
 }
 
 int Topology::addNode(Node *node)
@@ -474,7 +474,7 @@ void Topology::calculateWeightedSingleShortestPathsTo(Node *_target)
     }
 }
 
-void Topology::findGroups(Node *node)
+void Topology::findNetworks(Node *node)
 {
     if(node->isVisited())
         return;
@@ -499,8 +499,8 @@ void Topology::findGroups(Node *node)
             Node *nextNode = getNodeFor(gate->getOwnerModule());
             if(nextNode) {
                 if(!nextNode->isVisited()) {
-                    nextNode->setGroupId(node->getGroupId());
-                    findGroups(nextNode);
+                    nextNode->setNetworkId(node->getNetworkId());
+                    findNetworks(nextNode);
                 }
             }
         }

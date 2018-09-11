@@ -389,26 +389,26 @@ void Ipv4NetworkConfigurator::collectCompatibleInterfaces(const std::vector<Inte
 
 void Ipv4NetworkConfigurator::assignAddresses(Topology& topology)
 {
-    if(configureEachGroupSeparatly) {
-        std::map<int /*group id*/, std::vector<LinkInfo *>> networkGroups;
+    if(configureIsolatedNetworksSeparatly) {
+        std::map<int /*network id*/, std::vector<LinkInfo *>> isolatedNetworks;
         for (auto & selectedLink : topology.linkInfos) {
-            int groupId = selectedLink->groupId;
-            auto itt = networkGroups.find(groupId);
-            if(itt == networkGroups.end()) {
+            int networkId = selectedLink->networkId;
+            auto itt = isolatedNetworks.find(networkId);
+            if(itt == isolatedNetworks.end()) {
                 std::vector<LinkInfo *> collection = {selectedLink};
-                networkGroups[groupId] = collection;
+                isolatedNetworks[networkId] = collection;
             }
             else {
                 itt->second.push_back(selectedLink);
             }
         }
 
-        int groupCount = 1;
-        for(auto group : networkGroups) {
-            EV_DEBUG << "--> configuring group " << groupCount << ". \n";
-            assignAddressesPerGroup(group.second);
-            EV_DEBUG << "<-- configuring group " << groupCount << ". \n";
-            groupCount++;
+        int networkCount = 1;
+        for(auto network : isolatedNetworks) {
+            EV_DEBUG << "--> configuring isolated network " << networkCount << ". \n";
+            assignAddresses(network.second);
+            EV_DEBUG << "<-- configuring isolated network " << networkCount << ". \n";
+            networkCount++;
         }
     }
     else {

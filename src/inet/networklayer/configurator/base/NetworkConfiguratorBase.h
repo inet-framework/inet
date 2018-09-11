@@ -103,7 +103,7 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
       public:
         std::vector<InterfaceInfo *> interfaceInfos;    // interfaces on that LAN or point-to-point link
         InterfaceInfo *gatewayInterfaceInfo = nullptr;    // non-NULL if all hosts have 1 non-loopback interface except one host that has two of them (this will be the gateway)
-        int groupId = 0;
+        int networkId = 0;
 
       public:
         LinkInfo() { }
@@ -158,7 +158,7 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
   protected:
     // parameters
     double minLinkWeight = NaN;
-    bool configureEachGroupSeparatly = false;
+    bool configureIsolatedNetworksSeparatly = false;
     cXMLElement *configuration = nullptr;
 
   protected:

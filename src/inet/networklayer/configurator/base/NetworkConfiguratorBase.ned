@@ -23,6 +23,6 @@ simple NetworkConfiguratorBase like INetworkConfigurator
 {
     parameters:
         double minLinkWeight = default(1E-3);
-        bool configureEachGroupSeparatly = default(false);
+        bool configureIsolatedNetworksSeparatly = default(false);
 }
 

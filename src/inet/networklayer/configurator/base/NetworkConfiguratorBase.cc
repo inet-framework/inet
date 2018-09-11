@@ -66,7 +66,7 @@ void NetworkConfiguratorBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         minLinkWeight = par("minLinkWeight");
-        configureEachGroupSeparatly = par("configureEachGroupSeparatly").boolValue();
+        configureIsolatedNetworksSeparatly = par("configureIsolatedNetworksSeparatly").boolValue();
         configuration = par("config");
     }
 }
@@ -81,11 +81,11 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
     std::map<int /*group id*/, std::vector<Node *>> networkGroups;
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
-        int groupId = node->getGroupId();
-        auto itt = networkGroups.find(groupId);
+        int networkId = node->getNetworkId();
+        auto itt = networkGroups.find(networkId);
         if(itt == networkGroups.end()) {
             std::vector<Node *> collection = {node};
-            networkGroups[groupId] = collection;
+            networkGroups[networkId] = collection;
         }
         else {
             itt->second.push_back(node);
@@ -120,7 +120,7 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
                         interfacesSeen.insert(interfaceEntry);
                         // create a new network link
                         LinkInfo *linkInfo = new LinkInfo();
-                        linkInfo->groupId = node->getGroupId();
+                        linkInfo->networkId = node->getNetworkId();
                         topology.linkInfos.push_back(linkInfo);
                         // store interface as belonging to the new network link
                         InterfaceInfo *interfaceInfo = createInterfaceInfo(topology, node, isBridgeNode(node) ? nullptr : linkInfo, interfaceEntry);
