@@ -21,6 +21,8 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
 
+#include "inet/common/Protocol.h"
+
 namespace inet {
 
 class INET_API Ieee8022Llc : public cSimpleModule
