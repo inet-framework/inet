@@ -25,7 +25,7 @@ package inet.visualizer.base;
 // in derived modules.
 //
 // This module subscribes for tcpConnectionAdded and tcpConnectionRemoved on the
-// module determined by the subscriptionModule parameter.
+// module determined by the visualizationSubjectModule parameter.
 //
 // @see ~TransportConnectionCanvasVisualizer, ~TransportConnectionOsgVisualizer, ~ITransportConnectionVisualizer, ~VisualizerBase
 //
@@ -33,7 +33,6 @@ simple TransportConnectionVisualizerBase extends VisualizerBase
 {
     parameters:
         string networkNodeVisualizerModule = default("^.networkNodeVisualizer"); // the network node visualizer module, refers to a sibling submodule by default
-        string subscriptionModule = default("^"); // module where the visualizer subscribes for connection signals, root module by default
 
         bool displayTransportConnections = default(false);// display transport connection end points, disabled by default
 
