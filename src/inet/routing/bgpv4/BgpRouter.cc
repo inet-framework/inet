@@ -17,7 +17,6 @@
 
 #include "inet/routing/bgpv4/BgpRouter.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/routing/ospfv2/Ospf.h"
 #include "inet/routing/bgpv4/BgpSession.h"
 
 namespace inet {
@@ -29,6 +28,8 @@ BgpRouter::BgpRouter(cSimpleModule *bgpModule, IInterfaceTable *ift, IIpv4Routin
     this->bgpModule = bgpModule;
     this->ift = ift;
     this->rt = rt;
+
+    ospfModule = getModuleFromPar<ospf::Ospf>(bgpModule->par("ospfRoutingModule"), bgpModule);
 }
 
 BgpRouter::~BgpRouter(void)
@@ -363,11 +364,10 @@ unsigned char BgpRouter::decisionProcess(const BgpUpdateMessage& msg, BgpRouting
             ospf::Ipv4AddressRange OSPFnetAddr;
             OSPFnetAddr.address = entry->getDestination();
             OSPFnetAddr.mask = entry->getNetmask();
-            ospf::Ospf *ospf = getModuleFromPar<ospf::Ospf>(bgpModule->par("ospfRoutingModule"), bgpModule);
             InterfaceEntry *ie = entry->getInterface();
             if (!ie)
                 throw cRuntimeError("Model error: interface entry is nullptr");
-            ospf->insertExternalRoute(ie->getInterfaceId(), OSPFnetAddr);
+            ospfModule->insertExternalRoute(ie->getInterfaceId(), OSPFnetAddr);
         }
     }
     return NEW_ROUTE_ADDED;     //FIXME model error: When returns NEW_ROUTE_ADDED then entry stored in bgpRoutingTable, but sometimes not stored in rt
@@ -446,15 +446,6 @@ void BgpRouter::updateSendProcess(const unsigned char type, SessionId sessionInd
             (elem).second->sendUpdateMessage(content, NLRI);
         }
     }
-}
-
-bool BgpRouter::checkExternalRoute(const Ipv4Route *route)
-{
-    Ipv4Address OSPFRoute;
-    OSPFRoute = route->getDestination();
-    ospf::Ospf *ospf = getModuleFromPar<ospf::Ospf>(bgpModule->par("ospfRoutingModule"), bgpModule);
-    bool returnValue = ospf->checkExternalRoute(OSPFRoute);
-    return returnValue;
 }
 
 /*

@@ -28,6 +28,7 @@
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/routing/bgpv4/bgpmessage/BgpHeader_m.h"
 #include "inet/routing/bgpv4/bgpmessage/BgpUpdate.h"
+#include "inet/routing/ospfv2/Ospf.h"
 
 namespace inet {
 
@@ -41,6 +42,7 @@ private:
     IInterfaceTable *ift = nullptr;
     IIpv4RoutingTable *rt = nullptr;
     cSimpleModule *bgpModule = nullptr;
+    ospf::Ospf *ospfModule = nullptr;
     AsId myAsId = 0;
     SocketMap _socketMap;
     SessionId _currSessionId = 0;
@@ -114,7 +116,7 @@ private:
      *
      * \return true if it is, false else
      */
-    bool checkExternalRoute(const Ipv4Route *ospfRoute);
+    bool checkExternalRoute(const Ipv4Route *ospfRoute) { return ospfModule->checkExternalRoute(ospfRoute->getDestination()); }
 
   private:
 
