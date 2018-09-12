@@ -221,6 +221,15 @@ void BgpRouter::socketEstablished(TcpSocket *socket)
     }
 }
 
+void BgpRouter::socketFailure(TcpSocket *socket, int code)
+{
+    int connId = socket->getSocketId();
+    _currSessionId = findIdFromSocketConnId(_BGPSessions, connId);
+    if (_currSessionId != static_cast<SessionId>(-1)) {
+        _BGPSessions[_currSessionId]->getFSM()->TcpConnectionFails();
+    }
+}
+
 void BgpRouter::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
 {
     _currSessionId = findIdFromSocketConnId(_BGPSessions, socket->getSocketId());
@@ -248,31 +257,34 @@ void BgpRouter::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
     delete msg;
 }
 
-void BgpRouter::socketFailure(TcpSocket *socket, int code)
-{
-    int connId = socket->getSocketId();
-    _currSessionId = findIdFromSocketConnId(_BGPSessions, connId);
-    if (_currSessionId != static_cast<SessionId>(-1)) {
-        _BGPSessions[_currSessionId]->getFSM()->TcpConnectionFails();
-    }
-}
-
 void BgpRouter::processMessage(const BgpOpenMessage& msg)
 {
-    EV_INFO << "Processing BGP OPEN message" << std::endl;
-    _BGPSessions[_currSessionId]->getFSM()->OpenMsgEvent();
+    BgpSession *session = _BGPSessions[_currSessionId];
+    EV_INFO << "Processing BGP OPEN message from " <<
+            session->getPeerAddr().str(false) <<
+            " with contents: \n";
+    printOpenMessage(msg);
+    session->getFSM()->OpenMsgEvent();
 }
 
 void BgpRouter::processMessage(const BgpKeepAliveMessage& msg)
 {
-    EV_INFO << "Processing BGP Keep Alive message" << std::endl;
-    _BGPSessions[_currSessionId]->getFSM()->KeepAliveMsgEvent();
+    BgpSession *session = _BGPSessions[_currSessionId];
+    EV_INFO << "Processing BGP Keep Alive message from " <<
+            session->getPeerAddr().str(false) <<
+            " with contents: \n";
+    printKeepAliveMessage(msg);
+    session->getFSM()->KeepAliveMsgEvent();
 }
 
 void BgpRouter::processMessage(const BgpUpdateMessage& msg)
 {
-    EV_INFO << "Processing BGP Update message" << std::endl;
-    _BGPSessions[_currSessionId]->getFSM()->UpdateMsgEvent();
+    BgpSession *session = _BGPSessions[_currSessionId];
+    EV_INFO << "Processing BGP Update message from " <<
+            session->getPeerAddr().str(false) <<
+            " with contents: \n";
+    printUpdateMessage(msg);
+    session->getFSM()->UpdateMsgEvent();
 
     unsigned char decisionProcessResult;
     Ipv4Address netMask(Ipv4Address::ALLONES_ADDRESS);
@@ -570,6 +582,94 @@ SessionId BgpRouter::findIdFromPeerAddr(std::map<SessionId, BgpSession *> sessio
             return (session).first;
     }
     return -1;
+}
+
+void BgpRouter::printOpenMessage(const BgpOpenMessage& openMsg)
+{
+    EV_INFO << "  My AS: " << openMsg.getMyAS() << "\n";
+    EV_INFO << "  Hold time: " << openMsg.getHoldTime() << "s \n";
+    EV_INFO << "  BGP Id: " << openMsg.getBGPIdentifier() << "\n";
+    if(openMsg.getOptionalParametersArraySize() == 0)
+        EV_INFO << "  Optional parameters: empty \n";
+    for(uint32_t i = 0; i < openMsg.getOptionalParametersArraySize(); i++) {
+        const BgpOptionalParameters& optParams = openMsg.getOptionalParameters(i);
+        EV_INFO << "  Optional parameter " << i+1 << ": \n";
+        EV_INFO << "    Parameter type: " << optParams.parameterType << "\n";
+        EV_INFO << "    Parameter length: " << optParams.parameterLength << "\n";
+    }
+}
+
+void BgpRouter::printUpdateMessage(const BgpUpdateMessage& updateMsg)
+{
+    if(updateMsg.getWithdrawnRoutesArraySize() == 0)
+        EV_INFO << "  Withdrawn routes: empty \n";
+    for(uint32_t i = 0; i < updateMsg.getWithdrawnRoutesArraySize(); i++) {
+        const BgpUpdateWithdrawnRoutes& withdrwan = updateMsg.getWithdrawnRoutes(i);
+        EV_INFO << "  Withdrawn route " << i+1 << ": \n";
+        EV_INFO << "    length: " << (int)withdrwan.length << "\n";
+        EV_INFO << "    prefix: " << withdrwan.prefix << "\n";
+    }
+    if(updateMsg.getPathAttributeListArraySize() == 0)
+        EV_INFO << "  Path attribute: empty \n";
+    for(uint32_t i = 0; i < updateMsg.getPathAttributeListArraySize(); i++) {
+        const BgpUpdatePathAttributeList& pathAttrib = updateMsg.getPathAttributeList(i);
+        EV_INFO << "  Path attribute " << i+1 << ": \n";
+        EV_INFO << "    ORIGIN: ";
+        inet::bgp::BgpSessionType sessionType = pathAttrib.getOrigin().getValue();
+        if(sessionType == IGP)
+            EV_INFO << "IGP \n";
+        else if(sessionType == EGP)
+            EV_INFO << "EGP \n";
+        else if(sessionType == INCOMPLETE)
+            EV_INFO << "INCOMPLETE \n";
+        else
+            EV_INFO << "Unknown \n";
+        EV_INFO << "    AS_PATH: ";
+        if(pathAttrib.getAsPathArraySize() == 0)
+            EV_INFO << "empty";
+        for(uint32_t j = 0; j < pathAttrib.getAsPathArraySize(); j++) {
+            const BgpUpdatePathAttributesAsPath& asPath = pathAttrib.getAsPath(j);
+            for(uint32_t k = 0; k < asPath.getValueArraySize(); k++) {
+                const BgpAsPathSegment& asPathVal = asPath.getValue(k);
+                for(uint32_t n = 0; n < asPathVal.getAsValueArraySize(); n++) {
+                    EV_INFO << asPathVal.getAsValue(n) << " ";
+                }
+            }
+        }
+        EV_INFO << "\n";
+        EV_INFO << "    NEXT_HOP: " << pathAttrib.getNextHop().getValue().str(false) << "\n";
+        EV_INFO << "    LOCAL_PREF: ";
+        if(pathAttrib.getLocalPrefArraySize() == 0)
+            EV_INFO << "empty";
+        for(uint32_t j = 0; j < pathAttrib.getLocalPrefArraySize(); j++) {
+            const BgpUpdatePathAttributesLocalPref& localPref = pathAttrib.getLocalPref(j);
+            EV_INFO << localPref.getValue() << " ";
+        }
+        EV_INFO << "\n";
+        EV_INFO << "    ATOMIC_AGGREGATE: ";
+        if(pathAttrib.getAtomicAggregateArraySize() == 0)
+            EV_INFO << "empty";
+        for(uint32_t j = 0; j < pathAttrib.getAtomicAggregateArraySize(); j++) {
+            const BgpUpdatePathAttributesAtomicAggregate& attomicAgg = pathAttrib.getAtomicAggregate(j);
+            EV_INFO << attomicAgg.getValue() << " ";
+        }
+        EV_INFO << "\n";
+    }
+
+    const auto NLRI_Base = dynamic_cast<const BgpUpdateMessage_Base *>(&updateMsg)->getNLRI();
+    EV_INFO << "  Network Layer Reachability Information (NLRI): \n";
+    EV_INFO << "    NLRI length: " << (int)NLRI_Base.length << "\n";
+    EV_INFO << "    NLRI prefix: " << NLRI_Base.prefix << "\n";
+}
+
+//  void printNotificationMessage(const BgpNotificationMessage& notificationMsg)
+//{
+
+//}
+
+void BgpRouter::printKeepAliveMessage(const BgpKeepAliveMessage& keepAliveMsg)
+{
+
 }
 
 } // namespace bgp

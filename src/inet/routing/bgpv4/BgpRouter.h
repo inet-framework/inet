@@ -74,6 +74,11 @@ private:
     void addToAsList(std::string nodeName, AsId id);
     void processMessageFromTCP(cMessage *msg);
 
+    void printOpenMessage(const BgpOpenMessage& msg);
+    void printUpdateMessage(const BgpUpdateMessage& msg);
+  //  void printNotificationMessage(const BgpNotificationMessage& msg);
+    void printKeepAliveMessage(const BgpKeepAliveMessage& msg);
+
   protected:
     /** @name TcpSocket::ICallback callback methods */
     //@{

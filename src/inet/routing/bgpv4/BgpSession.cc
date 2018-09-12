@@ -118,20 +118,10 @@ void BgpSession::sendOpenMessage()
     openMsg->setHoldTime(_holdTime);
     openMsg->setBGPIdentifier(_info.socket->getLocalAddress().toIpv4());
 
-    EV_INFO << "Sending BGP Open packet to " << _info.peerAddr.str(false) <<
+    EV_INFO << "Sending BGP Open message to " << _info.peerAddr.str(false) <<
             " on interface " << _info.linkIntf->getInterfaceName() <<
             "[" << _info.linkIntf->getInterfaceId() << "] with contents:\n";
-    EV_INFO << "  My AS: " << openMsg->getMyAS() << "\n";
-    EV_INFO << "  Hold time: " << openMsg->getHoldTime() << "s \n";
-    EV_INFO << "  BGP Id: " << openMsg->getBGPIdentifier() << "\n";
-    if(openMsg->getOptionalParametersArraySize() == 0)
-        EV_INFO << "  Optional parameters: empty \n";
-    for(uint32_t i = 0; i < openMsg->getOptionalParametersArraySize(); i++) {
-        const BgpOptionalParameters& optParams = openMsg->getOptionalParameters(i);
-        EV_INFO << "  Optional parameter " << i+1 << ": \n";
-        EV_INFO << "    Parameter type: " << optParams.parameterType << "\n";
-        EV_INFO << "    Parameter length: " << optParams.parameterLength << "\n";
-    }
+    bgpRouter.printOpenMessage(*openMsg);
 
     Packet *pk = new Packet("BgpOpen");
     pk->insertAtFront(openMsg);
@@ -147,68 +137,10 @@ void BgpSession::sendUpdateMessage(BgpUpdatePathAttributeList &content, BgpUpdat
     updateMsg->setPathAttributeList(content);
     updateMsg->setNLRI(NLRI);
 
-    EV_INFO << "Sending BGP Update packet to " << _info.peerAddr.str(false) <<
+    EV_INFO << "Sending BGP Update message to " << _info.peerAddr.str(false) <<
             " on interface " << _info.linkIntf->getInterfaceName() <<
             "[" << _info.linkIntf->getInterfaceId() << "] with contents:\n";
-
-    if(updateMsg->getWithdrawnRoutesArraySize() == 0)
-        EV_INFO << "  Withdrawn routes: empty \n";
-    for(uint32_t i = 0; i < updateMsg->getWithdrawnRoutesArraySize(); i++) {
-        const BgpUpdateWithdrawnRoutes& withdrwan = updateMsg->getWithdrawnRoutes(i);
-        EV_INFO << "  Withdrawn route " << i+1 << ": \n";
-        EV_INFO << "    length: " << (int)withdrwan.length << "\n";
-        EV_INFO << "    prefix: " << withdrwan.prefix << "\n";
-    }
-    if(updateMsg->getPathAttributeListArraySize() == 0)
-        EV_INFO << "  Path attribute: empty \n";
-    for(uint32_t i = 0; i < updateMsg->getPathAttributeListArraySize(); i++) {
-        const BgpUpdatePathAttributeList& pathAttrib = updateMsg->getPathAttributeList(i);
-        EV_INFO << "  Path attribute " << i+1 << ": \n";
-        EV_INFO << "    ORIGIN: ";
-        inet::bgp::BgpSessionType sessionType = pathAttrib.getOrigin().getValue();
-        if(sessionType == IGP)
-            EV_INFO << "IGP \n";
-        else if(sessionType == EGP)
-            EV_INFO << "EGP \n";
-        else if(sessionType == INCOMPLETE)
-            EV_INFO << "INCOMPLETE \n";
-        else
-            EV_INFO << "Unknown \n";
-        EV_INFO << "    AS_PATH: ";
-        if(pathAttrib.getAsPathArraySize() == 0)
-            EV_INFO << "empty";
-        for(uint32_t j = 0; j < pathAttrib.getAsPathArraySize(); j++) {
-            const BgpUpdatePathAttributesAsPath& asPath = pathAttrib.getAsPath(j);
-            for(uint32_t k = 0; k < asPath.getValueArraySize(); k++) {
-                const BgpAsPathSegment& asPathVal = asPath.getValue(k);
-                for(uint32_t n = 0; n < asPathVal.getAsValueArraySize(); n++) {
-                    EV_INFO << asPathVal.getAsValue(n) << " ";
-                }
-            }
-        }
-        EV_INFO << "\n";
-        EV_INFO << "    NEXT_HOP: " << pathAttrib.getNextHop().getValue().str(false) << "\n";
-        EV_INFO << "    LOCAL_PREF: ";
-        if(pathAttrib.getLocalPrefArraySize() == 0)
-            EV_INFO << "empty";
-        for(uint32_t j = 0; j < pathAttrib.getLocalPrefArraySize(); j++) {
-            const BgpUpdatePathAttributesLocalPref& localPref = pathAttrib.getLocalPref(j);
-            EV_INFO << localPref.getValue() << " ";
-        }
-        EV_INFO << "\n";
-        EV_INFO << "    ATOMIC_AGGREGATE: ";
-        if(pathAttrib.getAtomicAggregateArraySize() == 0)
-            EV_INFO << "empty";
-        for(uint32_t j = 0; j < pathAttrib.getAtomicAggregateArraySize(); j++) {
-            const BgpUpdatePathAttributesAtomicAggregate& attomicAgg = pathAttrib.getAtomicAggregate(j);
-            EV_INFO << attomicAgg.getValue() << " ";
-        }
-        EV_INFO << "\n";
-    }
-    auto& NLRI_Base = updateMsg.get()->getNLRI();
-    EV_INFO << "  Network Layer Reachability Information (NLRI): \n";
-    EV_INFO << "    NLRI length: " << (int)NLRI_Base.length << "\n";
-    EV_INFO << "    NLRI prefix: " << NLRI_Base.prefix << "\n";
+    bgpRouter.printUpdateMessage(*updateMsg);
 
     Packet *pk = new Packet("BgpUpdate");
     pk->insertAtFront(updateMsg);
@@ -223,7 +155,7 @@ void BgpSession::sendNotificationMessage()
 
     // const auto& updateMsg = makeShared<BgpNotificationMessage>();
 
-//    EV_INFO << "Sending BGP Notification packet to " << _info.peerAddr.str(false) <<
+//    EV_INFO << "Sending BGP Notification message to " << _info.peerAddr.str(false) <<
 //            " on interface " << _info.linkIntf->getInterfaceName() <<
 //            "[" << _info.linkIntf->getInterfaceId() << "] with contents:\n";
 
@@ -238,9 +170,10 @@ void BgpSession::sendKeepAliveMessage()
 {
     const auto &keepAliveMsg = makeShared<BgpKeepAliveMessage>();
 
-    EV_INFO << "Sending BGP Keep-alive packet to " << _info.peerAddr.str(false) <<
+    EV_INFO << "Sending BGP Keep-alive message to " << _info.peerAddr.str(false) <<
             " on interface " << _info.linkIntf->getInterfaceName() <<
             "[" << _info.linkIntf->getInterfaceId() << "] \n";
+    bgpRouter.printKeepAliveMessage(*keepAliveMsg);
 
     Packet *pk = new Packet("BgpKeepAlive");
     pk->insertAtFront(keepAliveMsg);
