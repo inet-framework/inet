@@ -32,6 +32,7 @@ RoutingTableEntry::RoutingTableEntry(IInterfaceTable *_ift) :
 }
 
 RoutingTableEntry::RoutingTableEntry(const RoutingTableEntry& entry) :
+    ift(entry.ift),
     destinationType(entry.destinationType),
     optionalCapabilities(entry.optionalCapabilities),
     area(entry.area),
