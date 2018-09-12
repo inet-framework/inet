@@ -55,9 +55,9 @@ simple ARP like IARP
         @display("i=block/layer");
         @signal[sentReq](type=long);
         @signal[sentReply](type=long);
-        @signal[initiatedARPResolution](type=IARP::Notification);
-        @signal[completedARPResolution](type=IARP::Notification);
-        @signal[failedARPResolution](type=IARP::Notification);
+        @signal[initiatedARPResolution](type=inet::IARP::Notification);
+        @signal[completedARPResolution](type=inet::IARP::Notification);
+        @signal[failedARPResolution](type=inet::IARP::Notification);
         @statistic[sentReq](title="ARP request sent"; record=count,vector);
         @statistic[sentReply](title="ARP replies sent"; record=count,vector);
         @statistic[initiatedARPResolution](title="ARP initiated resolutions"; record=count);

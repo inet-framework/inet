@@ -48,9 +48,9 @@ simple SCTPPeer like ISCTPApp
         string streamPriorities = default("");
 
         @display("i=block/app");
-        @signal[sentPk](type=SCTPSimpleMessage);
+        @signal[sentPk](type=inet::SCTPSimpleMessage);
         @signal[rcvdPk](type=cPacket);
-        @signal[echoedPk](type=SCTPSimpleMessage);
+        @signal[echoedPk](type=inet::SCTPSimpleMessage);
         @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[echoedPk](title="packets echoed"; source=echoedPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

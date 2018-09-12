@@ -53,16 +53,16 @@ simple PPP
         @display("i=block/rxtx");
 
         @signal[txState](type=long);    // 1:transmit, 0:idle
-        @signal[rxPkOk](type=PPPFrame);
+        @signal[rxPkOk](type=inet::PPPFrame);
         @signal[dropPkIfaceDown](type=cPacket);  //TODO currently both upper and lower; todo separate them
         @signal[dropPkBitError](type=cPacket);
-        @signal[packetSentToLower](type=PPPFrame);
+        @signal[packetSentToLower](type=inet::PPPFrame);
         @signal[packetReceivedFromLower](type=cPacket);
         @signal[packetSentToUpper](type=cPacket);
         @signal[packetReceivedFromUpper](type=cPacket);
-        @signal[NF_PP_TX_BEGIN](type=TxNotifDetails);
-        @signal[NF_PP_TX_END](type=TxNotifDetails);
-        @signal[NF_PP_RX_END](type=TxNotifDetails);
+        @signal[NF_PP_TX_BEGIN](type=inet::TxNotifDetails);
+        @signal[NF_PP_TX_END](type=inet::TxNotifDetails);
+        @signal[NF_PP_RX_END](type=inet::TxNotifDetails);
         @statistic[txState](title="tx state"; record=timeavg,vector; interpolationmode=sample-hold);
         @statistic[txPk](title="packets transmitted"; source=packetSentToLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[rxPkOk](title="packets received OK"; source=rxPkOk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

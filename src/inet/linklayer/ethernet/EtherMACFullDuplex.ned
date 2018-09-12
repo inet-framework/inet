@@ -133,19 +133,19 @@ simple EtherMACFullDuplex like IEtherMAC
         int mtu @unit("B") = default(1500B);
         @display("i=block/rxtx");
 
-        @signal[txPk](type=EtherFrame);
-        @signal[rxPkOk](type=EtherFrame);
+        @signal[txPk](type=inet::EtherFrame);
+        @signal[rxPkOk](type=inet::EtherFrame);
         @signal[txPausePkUnits](type=long);
         @signal[rxPausePkUnits](type=long);
-        @signal[rxPkFromHL](type=EtherFrame);
-        @signal[dropPkNotForUs](type=EtherFrame);
-        @signal[dropPkBitError](type=EtherFrame);
-        @signal[dropPkIfaceDown](type=EtherFrame);        // emitted at end of receiving
-        @signal[dropPkFromHLIfaceDown](type=EtherFrame);
-        @signal[packetSentToLower](type=EtherFrame);
-        @signal[packetReceivedFromLower](type=EtherFrame);
-        @signal[packetSentToUpper](type=EtherFrame);
-        @signal[packetReceivedFromUpper](type=EtherFrame);
+        @signal[rxPkFromHL](type=inet::EtherFrame);
+        @signal[dropPkNotForUs](type=inet::EtherFrame);
+        @signal[dropPkBitError](type=inet::EtherFrame);
+        @signal[dropPkIfaceDown](type=inet::EtherFrame);        // emitted at end of receiving
+        @signal[dropPkFromHLIfaceDown](type=inet::EtherFrame);
+        @signal[packetSentToLower](type=inet::EtherFrame);
+        @signal[packetReceivedFromLower](type=inet::EtherFrame);
+        @signal[packetSentToUpper](type=inet::EtherFrame);
+        @signal[packetReceivedFromUpper](type=inet::EtherFrame);
         @signal[transmitState](type=long); // enum=MACTransmitState
         @signal[receiveState](type=long); // enum=MACReceiveState
 

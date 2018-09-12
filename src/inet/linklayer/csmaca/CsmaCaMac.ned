@@ -79,5 +79,5 @@ simple CsmaCaMac extends MACProtocolBase like IMACProtocol
         int cwMulticast = default(cwMin); // multicast contention window
         int retryLimit = default(7); // maximum number of retries
         @class(CsmaCaMac);
-        @signal[NF_LINK_BREAK](type=CsmaCaMacFrame);
+        @signal[NF_LINK_BREAK](type=inet::CsmaCaMacFrame);
 }

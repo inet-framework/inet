@@ -50,8 +50,8 @@ simple Ieee80211MgmtAP like IIeee80211Mgmt
         string radioModule = default("^.radio");   // The path to the Radio module  //FIXME remove default value
         string macModule;               // The path to the MAC module
         @display("i=block/cogwheel");
-        @signal[NF_L2_AP_ASSOCIATED](type="Ieee80211MgmtAP::NotificationInfoSta");
-        @signal[NF_L2_AP_DISASSOCIATED](type="Ieee80211MgmtAP::NotificationInfoSta");
+        @signal[NF_L2_AP_ASSOCIATED](type="inet::ieee80211::Ieee80211MgmtAP::NotificationInfoSta");
+        @signal[NF_L2_AP_DISASSOCIATED](type="inet::ieee80211::Ieee80211MgmtAP::NotificationInfoSta");
     gates:
         input upperLayerIn; // from ~IMACRelayUnit; can be left unconnected
         output upperLayerOut; // to ~IMACRelayUnit; can be left unconnected

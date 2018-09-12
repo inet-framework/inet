@@ -59,10 +59,10 @@ simple IPv4RoutingTable like IRoutingTable
         bool multicastForwarding = default(false); // turns multicast forwarding on/off
         bool useAdminDist = default(false);     // Use Cisco like administrative distances
         string routingFile = default("");  // routing table file name
-        @signal[NF_ROUTE_ADDED](type=IPv4Route);
-        @signal[NF_ROUTE_DELETED](type=IPv4Route);
-        @signal[NF_ROUTE_CHANGED](type=IPv4Route);
-        @signal[NF_MROUTE_ADDED](type=IPv4MulticastRoute);
-        @signal[NF_MROUTE_DELETED](type=IPv4MulticastRoute);
-        @signal[NF_MROUTE_CHANGED](type=IPv4MulticastRoute);
+        @signal[NF_ROUTE_ADDED](type=inet::IPv4Route);
+        @signal[NF_ROUTE_DELETED](type=inet::IPv4Route);
+        @signal[NF_ROUTE_CHANGED](type=inet::IPv4Route);
+        @signal[NF_MROUTE_ADDED](type=inet::IPv4MulticastRoute);
+        @signal[NF_MROUTE_DELETED](type=inet::IPv4MulticastRoute);
+        @signal[NF_MROUTE_CHANGED](type=inet::IPv4MulticastRoute);
 }

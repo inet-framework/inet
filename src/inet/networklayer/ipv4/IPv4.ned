@@ -103,10 +103,10 @@ simple IPv4
         @signal[packetSentToLower](type=cPacket);
         @signal[packetReceivedFromLower](type=cPacket);
         @signal[packetFromLowerDropped](type=cPacket);
-        @signal[NF_IPv4_NEW_MULTICAST](type=IPv4Datagram);
-        @signal[NF_IPv4_DATA_ON_NONRPF](type=IPv4Datagram);
-        @signal[NF_IPv4_DATA_ON_RPF](type=IPv4Datagram);
-        @signal[NF_IPv4_MDATA_REGISTER](type=IPv4Datagram);
+        @signal[NF_IPv4_NEW_MULTICAST](type=inet::IPv4Datagram);
+        @signal[NF_IPv4_DATA_ON_NONRPF](type=inet::IPv4Datagram);
+        @signal[NF_IPv4_DATA_ON_RPF](type=inet::IPv4Datagram);
+        @signal[NF_IPv4_MDATA_REGISTER](type=inet::IPv4Datagram);
     gates:
         input transportIn[] @labels(IPv4ControlInfo/down,TCPSegment,UDPPacket);
         output transportOut[] @labels(IPv4ControlInfo/up,TCPSegment,UDPPacket);

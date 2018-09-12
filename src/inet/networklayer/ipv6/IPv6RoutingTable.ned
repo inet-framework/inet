@@ -38,10 +38,10 @@ simple IPv6RoutingTable like IRoutingTable
         bool isRouter = default(this.forwarding);
         bool multicastForwarding = default(false);
         bool useAdminDist = default(false);     // Use Cisco like administrative distances
-        @signal[NF_ROUTE_ADDED](type=IPv6Route);
-        @signal[NF_ROUTE_CHANGED](type=IPv6Route);
-        @signal[NF_ROUTE_DELETED](type=IPv6Route);
-        @signal[NF_MROUTE_ADDED](type=IPv6MulticastRoute);
-        @signal[NF_MROUTE_DELETED](type=IPv6MulticastRoute);
-        @signal[NF_MROUTE_CHANGED](type=IPv6MulticastRoute);
+        @signal[NF_ROUTE_ADDED](type=inet::IPv6Route);
+        @signal[NF_ROUTE_CHANGED](type=inet::IPv6Route);
+        @signal[NF_ROUTE_DELETED](type=inet::IPv6Route);
+        @signal[NF_MROUTE_ADDED](type=inet::IPv6MulticastRoute);
+        @signal[NF_MROUTE_DELETED](type=inet::IPv6MulticastRoute);
+        @signal[NF_MROUTE_CHANGED](type=inet::IPv6MulticastRoute);
 }

@@ -27,7 +27,7 @@ import inet.mobility.contract.IMobility;
 simple MobilityBase like IMobility
 {
     parameters:
-        @signal[mobilityStateChanged](type=MobilityBase);
+        @signal[mobilityStateChanged](type=inet::MobilityBase);
         @display("i=block/cogwheel");
         string coordinateSystemModule = default(""); // module path of the geographic coordinate system module
         bool visualizeMobility = default(true); // false means this mobility module does no visualization

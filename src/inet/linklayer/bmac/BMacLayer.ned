@@ -78,5 +78,5 @@ simple BMacLayer extends MACProtocolBase like IMACProtocol
         int maxTxAttempts = default(2);     //  Maximum transmission attempts per data packet, when ACKs are used
 
         @class(BMacLayer);
-        @signal[NF_LINK_BREAK](type=BMacFrame);
+        @signal[NF_LINK_BREAK](type=inet::BMacFrame);
 }

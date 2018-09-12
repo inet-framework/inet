@@ -38,19 +38,19 @@ simple InterfaceTable
     parameters:
         bool displayAddresses = default(false);  // whether to display IP addresses on links
         @display("i=block/table");
-        @signal[NF_INTERFACE_CREATED](type=InterfaceEntry);
-        @signal[NF_INTERFACE_DELETED](type=InterfaceEntry);
-        @signal[NF_INTERFACE_STATE_CHANGED](type=InterfaceEntryChangeDetails);
-        @signal[NF_INTERFACE_CONFIG_CHANGED](type=InterfaceEntryChangeDetails);
-        @signal[NF_INTERFACE_IPv4CONFIG_CHANGED](type=InterfaceEntryChangeDetails);
-        @signal[NF_INTERFACE_IPv6CONFIG_CHANGED](type=InterfaceEntryChangeDetails);
-        @signal[NF_INTERFACE_GENERICNETWORKPROTOCOLCONFIG_CHANGED](type=InterfaceEntryChangeDetails);
-        @signal[NF_IPv4_MCAST_JOIN](type=IPv4MulticastGroupInfo);
-        @signal[NF_IPv4_MCAST_LEAVE](type=IPv4MulticastGroupInfo);
-        @signal[NF_IPv4_MCAST_CHANGE](type=IPv4MulticastGroupSourceInfo);
-        @signal[NF_IPv4_MCAST_REGISTERED](type=IPv4MulticastGroupInfo);
-        @signal[NF_IPv4_MCAST_UNREGISTERED](type=IPv4MulticastGroupInfo);
-        @signal[NF_IPv6_MCAST_JOIN](type=IPv6MulticastGroupInfo);
-        @signal[NF_IPv6_MCAST_LEAVE](type=IPv6MulticastGroupInfo);
+        @signal[NF_INTERFACE_CREATED](type=inet::InterfaceEntry);
+        @signal[NF_INTERFACE_DELETED](type=inet::InterfaceEntry);
+        @signal[NF_INTERFACE_STATE_CHANGED](type=inet::InterfaceEntryChangeDetails);
+        @signal[NF_INTERFACE_CONFIG_CHANGED](type=inet::InterfaceEntryChangeDetails);
+        @signal[NF_INTERFACE_IPv4CONFIG_CHANGED](type=inet::InterfaceEntryChangeDetails);
+        @signal[NF_INTERFACE_IPv6CONFIG_CHANGED](type=inet::InterfaceEntryChangeDetails);
+        @signal[NF_INTERFACE_GENERICNETWORKPROTOCOLCONFIG_CHANGED](type=inet::InterfaceEntryChangeDetails);
+        @signal[NF_IPv4_MCAST_JOIN](type=inet::IPv4MulticastGroupInfo);
+        @signal[NF_IPv4_MCAST_LEAVE](type=inet::IPv4MulticastGroupInfo);
+        @signal[NF_IPv4_MCAST_CHANGE](type=inet::IPv4MulticastGroupSourceInfo);
+        @signal[NF_IPv4_MCAST_REGISTERED](type=inet::IPv4MulticastGroupInfo);
+        @signal[NF_IPv4_MCAST_UNREGISTERED](type=inet::IPv4MulticastGroupInfo);
+        @signal[NF_IPv6_MCAST_JOIN](type=inet::IPv6MulticastGroupInfo);
+        @signal[NF_IPv6_MCAST_LEAVE](type=inet::IPv6MulticastGroupInfo);
 }
 

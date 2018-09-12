@@ -32,7 +32,7 @@ simple GenericRoutingTable like IRoutingTable
                           // interface address; should be left empty ("") for hosts
         bool forwarding = default(true);  // turns IP forwarding on/off
         bool multicastForwarding = default(false); // turns multicast forwarding on/off
-        @signal[NF_ROUTE_ADDED](type=GenericRoute);
-        @signal[NF_ROUTE_DELETED](type=GenericRoute);
-        @signal[NF_ROUTE_CHANGED](type=GenericRoute);
+        @signal[NF_ROUTE_ADDED](type=inet::GenericRoute);
+        @signal[NF_ROUTE_DELETED](type=inet::GenericRoute);
+        @signal[NF_ROUTE_CHANGED](type=inet::GenericRoute);
 }
