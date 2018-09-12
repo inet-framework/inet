@@ -1,11 +1,9 @@
 <scenario>
   <at t="0.0">
     <disconnect src-module="sourceNode2" src-gate="ethg[0]" />
-    <disconnect src-module="switch" src-gate="ethg[1]" />
   </at>
   <at t="3.0">
     <disconnect src-module="destinationNode" src-gate="ethg[0]" />
-    <disconnect src-module="backboneRouter" src-gate="ethg[0]" />
   </at>
   <at t="4.0">
     <connect src-module="destinationNode" src-gate="ethg[0]"
