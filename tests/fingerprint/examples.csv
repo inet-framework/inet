@@ -23,13 +23,13 @@
 /examples/aodv/,                     -f omnetpp.ini -c SimpleLifecycle -r 0,          100s,          c45d-d69d/tplx, PASS, wireless adhoc
 /examples/aodv/,                     -f omnetpp.ini -c ShortestPath -r 0,             100s,          e7eb-f942/tplx, PASS, wireless adhoc
 
-/examples/bgpv4/Bgp2RoutersInAS/,    -f omnetpp.ini -c config1 -r 0,                1000s,           d734-e4c1/tplx, PASS,
-/examples/bgpv4/Bgp3Routers/,        -f omnetpp.ini -c config1 -r 0,                1000s,           78c6-e252/tplx, PASS,
-/examples/bgpv4/BgpCompleteTest/,    -f omnetpp.ini -c config1 -r 0,                1000s,           c61a-0368/tplx, PASS,
+/examples/bgpv4/Bgp2RoutersInAS/,    -f omnetpp.ini -c config1 -r 0,                1000s,           29bf-8684/tplx, PASS,
+/examples/bgpv4/Bgp3Routers/,        -f omnetpp.ini -c config1 -r 0,                1000s,           0d4d-f7ab/tplx, PASS,
+/examples/bgpv4/BgpCompleteTest/,    -f omnetpp.ini -c config1 -r 0,                1000s,           9b33-96ba/tplx, PASS,
 /examples/bgpv4/BgpOpen/,            -f omnetpp.ini -c config1 -r 0,                62s,             6118-0c48/tplx, PASS,
 /examples/bgpv4/BgpUpdate/,          -f omnetpp.ini -c config1 -r 0,                30s,             3624-5032/tplx, PASS,
-/examples/bgpv4/BgpAndOspf/,         -f omnetpp.ini -c config1 -r 0,                1000s,           250b-b834/tplx, PASS,
-/examples/bgpv4/BgpAndOspfSimple/,   -f omnetpp.ini -c config1 -r 0,                1000s,           92fd-bfb7/tplx, PASS,
+/examples/bgpv4/BgpAndOspf/,         -f omnetpp.ini -c config1 -r 0,                1000s,           3460-caba/tplx, PASS,
+/examples/bgpv4/BgpAndOspfSimple/,   -f omnetpp.ini -c config1 -r 0,                1000s,           58d9-4662/tplx, PASS,
 
 /examples/dhcp/,                     -f omnetpp.ini -c WiredDHCP -r 0,              5000s,           c008-8e7e/tplx, PASS,
 /examples/dhcp/,                     -f omnetpp.ini -c WirelessDHCP -r 0,           500s,            2d5b-4e4c/tplx, PASS, wireless
@@ -403,8 +403,8 @@
 
 /examples/pim/dm/assert/,            -f omnetpp.ini -c General -r 0,                300s,            ffdc-9c1b/tplx, PASS,
 /examples/pim/dm/basic/,             -f omnetpp.ini -c General -r 0,                300s,            edf1-9918/tplx, PASS,
-/examples/pim/iptv/,                 -f omnetpp.ini -c PIM_SM -r 0,                  35s,            f93f-b1fa/tplx, PASS,
-/examples/pim/iptv/,                 -f omnetpp.ini -c PIM_DM -r 0,                  35s,            b299-190b/tplx, PASS,
+/examples/pim/iptv/,                 -f omnetpp.ini -c PIM_SM -r 0,                  35s,            0fd6-b6d2/tplx, PASS,
+/examples/pim/iptv/,                 -f omnetpp.ini -c PIM_DM -r 0,                  35s,            4fc5-d804/tplx, PASS,
 /examples/pim/sm/basic/,             -f omnetpp.ini -c Scenario1 -r 0,              100s,            fdb9-f592/tplx, PASS,
 /examples/pim/sm/basic/,             -f omnetpp.ini -c Scenario2 -r 0,              150s,            8a58-2a82/tplx, PASS,
 /examples/pim/sm/basic/,             -f omnetpp.ini -c Scenario3 -r 0,              300s,            8017-6bd7/tplx, PASS,
