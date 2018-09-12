@@ -12,7 +12,7 @@
 	<initiate module="destinationNode" operation="shutdown"/>
   </at>
   <at t="10.0">
-	<initiate module="destinationNode" operation="startup"/>
+	<startup module="destinationNode"/>
   </at>
   <at t="14.0">
     <crash module="sourceNode0"/>
