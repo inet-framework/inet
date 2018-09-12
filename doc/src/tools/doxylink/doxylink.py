@@ -137,7 +137,7 @@ def parse_tag_file(doc: ET.ElementTree) -> dict:
             # If the member doesn't have an <anchorfile> element, use the parent compounds <filename> instead
             # This is the way it is in the qt.tag and is perhaps an artefact of old Doxygen
             anchorfile = member.findtext('anchorfile') or compound_filename
-            member_symbol = compound_name + '::' + member.findtext('name')
+            member_symbol = compound_name + '.' + member.findtext('name')
             member_kind = member.get('kind')
             arglist_text = member.findtext('./arglist')  # If it has an <arglist> then we assume it's a function. Empty <arglist> returns '', not None. Things like typedefs and enums can have empty arglists
 
@@ -161,7 +161,7 @@ def parse_tag_file(doc: ET.ElementTree) -> dict:
     return mapping
 
 
-def match_piecewise(candidates: set, symbol: str, sep: str='::') -> set:
+def match_piecewise(candidates: set, symbol: str, sep: str='.') -> set:
     """
     Match the requested symbol reverse piecewise (split on ``::``) against the candidates.
     This allows you to under-specify the base namespace so that ``"MyClass"`` can match ``my_namespace::MyClass``

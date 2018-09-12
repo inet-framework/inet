@@ -7,6 +7,9 @@
 .. role:: fun(code)
    :class: literal-cpp
 
+.. role:: cpp(code)
+   :class: literal-cpp
+
 .. role:: gate(code)
    :class: literal-ned
 
