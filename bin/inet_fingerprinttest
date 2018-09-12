@@ -65,7 +65,7 @@ class FingerprintTestCaseGenerator():
 
         testcases = []
         for simulation in simulations:
-            title = simulation['wd'] + " " + simulation['args']
+            title = simulation['wd'] + " " + simulation['args'] + " " + simulation['tags']
             if not filterRegexList or ['x' for regex in filterRegexList if re.search(regex, title)]: # if any regex matches title
                 if not excludeFilterRegexList or not ['x' for regex in excludeFilterRegexList if re.search(regex, title)]: # if NO exclude-regex matches title
                     testcases.append(FingerprintTestCase(title, simulation['file'], simulation['wd'], simulation['args'],
@@ -88,7 +88,7 @@ class FingerprintTestCaseGenerator():
             elif len(fields) == 6:
                 if fields[4] in ['PASS', 'FAIL', 'ERROR']:
                     simulations.append({'file': csvFile, 'line' : csvReader.line_num,
-                            'wd': fields[0], 'args': fields[1], 'simtimelimit': fields[2], 'fingerprint': fields[3], 'expectedResult': fields[4]})
+                            'wd': fields[0], 'args': fields[1], 'simtimelimit': fields[2], 'fingerprint': fields[3], 'expectedResult': fields[4], 'tags': fields[5]})
                 else:
                     raise Exception(csvFile + " Line " + str(csvReader.line_num) + ": the 5th item must contain one of 'PASS', 'FAIL', 'ERROR'" + ": " + '"' + '", "'.join(fields) + '"')
             else:
