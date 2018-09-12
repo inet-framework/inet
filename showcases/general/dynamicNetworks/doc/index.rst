@@ -49,7 +49,8 @@ The showcase presents two example simulations:
 The following image shows the layout of the network for the wireless simulation:
 
 .. figure:: Wireless_layout.png
-   :width: 100%
+   :scale: 100%
+   :align: center
 
 The network contains ``destinationNode`` and a vector of ``sourceNodes``'s. The number of ``sourceNodes``
 is initially set to zero, because the nodes are created with the help of the scenario scripting
@@ -58,7 +59,8 @@ during the simulation.
 The layout of the wired simulation looks like the following:
 
 .. figure:: Wired_layout.png
-   :width: 100%
+   :scale: 100%
+   :align: center
 
 It contains two ``sourceNode``'s and one ``destinationNode`` connected through two routers and a switch.
 
@@ -101,40 +103,78 @@ The key part of the configuration regarding this showcase is the following:
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: # scenario script to create and destroy nodes dynamically
-   :end-at: *.scenarioManager.script = xmldoc("scenario.xml")
+   :end-at: *.scenarioManager.script = xmldoc("wireless.xml")
 
-The ``scenario.xml`` file contains the script for the wireless simulation. Two :ned:`DynamicHost`:s,
-``sourceNode[0]`` and ``sourceNode[1]`` are created at the beginning of the simulation:
+The ``scenario.xml`` file contains the script for the wireless simulation.
+
+Note that is life-cycle modeling is required, the following line must be added to the
+ini file to ensure that nodes have status modules:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: # lifecycle
+   :end-at: **.hasStatus = true
+
+Two :ned:`DynamicHost`:s, ``sourceNode[0]`` and ``sourceNode[1]`` are created at
+the beginning of the simulation. This is achieved as the following in the XML file:
 
 .. literalinclude:: ../wireless.xml
    :language: xml
    :start-at: <at t="0.0">
    :end-before: <at t="6.0">
 
+As you can see, the ``<create-module>`` element has four attributes, one for the type,
+one for the submodule name, one for the parent module and one for indicating that it is a vector of modules.
+We create a vector of modules named ``sourceNode`` with the type of the previously mentioned :ned:`DynamicHost`.
 The created modules will have a random position inside the parent module.
-The parent module in this case is the playground, because the parent module is ``"."``.
+The parent module in this case is the playground, because the ``parent`` attribute is set to is ``"."``.
 
-The ``destinationNode`` is shut down for four seconds, and during this, the ping request messages
-can not reach it:
+The ``destinationNode`` is shut down at ``t=6.0`` and remains so for two seconds. During this, the ping request messages
+can not reach it. To achieve this behavior, two life-cycle operations need to be used. With the ``<shutdown>`` element
+a module, given in the ``module`` attribute, can be shut down. This operation represents the process of orderly
+shutting down a network node.
+It is recommended to first initiate the shut down operation
+with the ``<initiate>`` attribute. The ``destinationNode`` is then started after two seconds using the ``<startup>``
+element. The ``<startup>`` operation represents the process of turning on a network node after a shutdown or
+crash. Here you can see the parts in question of  the scrip in the XML file:
 
 .. literalinclude:: ../wireless.xml
    :language: xml
    :start-at: <at t="6.0">
    :end-before: <at t="10.0">
 
-After that, ``sourceNode[0]`` crashes before both modules are destroyed:
+Another life-cycle operation to be mentioned is the crash of a node, which can be achieved with the
+``<crash>`` element. This operation represents the process of crashing a network node. The
+difference between this operation and shutdown operation is that the
+network node will not do a graceful shutdown (e.g. routing protocols will
+not have chance of notifying peers about broken routes). In this simulation,
+``sourceNode[0]`` crashes due to a theoretical malfunction, so that it
+does not send ping request messages anymore:
 
 .. literalinclude:: ../wireless.xml
    :language: xml
    :start-at: <at t="10.0">
+   :end-before: <at t="12.0">
+
+At the end of the simulation, both ``sourceNode[0]`` and ``sourceNode[1]`` are
+destroyed using the ``<delete-module>`` element:
+
+.. literalinclude:: ../wireless.xml
+   :language: xml
+   :start-at: <at t="12.0">
    :end-before: </scenario>
 
-We can simply see how these operations took place during the simulation
-if we take a look at specific statistics. The following image shows the
+We can simply confirm that these operations truely took place during the simulation
+if we take a look at the statistics. The following image shows the
 ``radioMode`` of the destination node:
 
 .. figure:: RadioMode.png
-   :width: 100%
+   :scale: 100%
+   :align: center
+
+We can clearly see for example that ``destinationNode`` was indeed shut down
+for two seconds between ``t=6.0s`` and ``t=8.0s``, and that ``sourceNode[0]`` truly
+crashed at ``t=10.0s``.
 
 Wired
 ~~~~~
@@ -143,17 +183,18 @@ In this example simulation, there are neither dynamically created nor dynamicall
 modules, therefore the :ned:`Ipv4NetworkConfigurator` can be used.
 
 All of the connections between the nodes (even the later dynamically created ones)
-is set in the ned file:
+is set in the ned file. This needs to be done because the number of gates of a module can not
+be modified after the initialization.
 
 .. literalinclude:: ../scenMan.ned
    :language: ned
    :start-at: connections:
    :end-before: backboneRouter.ethg++ <--> Eth10M <--> destinationNode.ethg++;
 
-This needs to be done because the number of gates of a module can not
-be modified after the initialization. At the beginning, ``sourceNode2`` is
-disconnected from the network, and the connection between the ``backboneRouter``
-and the ``destinationNode`` modules is also destroyed during the simulation:
+At the beginning of the simulation, ``sourceNode2`` is
+disconnected from the network. At ``t=3.0s`` the connection between the ``backboneRouter``
+and the ``destinationNode`` modules is also destroyed. This can be done with the ``<disconnect>``
+element. Note that if the ``src-gate`` parameter names and inout gate, both directions will be disconnected.
 
 .. literalinclude:: ../wired.xml
    :language: xml
@@ -161,8 +202,8 @@ and the ``destinationNode`` modules is also destroyed during the simulation:
    :end-before: <at t="4.0">
 
 While the ``destinationNode`` is disconnected from the network, the ping request
-messages sent by ``sourceNode1`` can not reach it. After the connection between them
-is re-established, the request can reach their destination again:
+messages sent by ``sourceNode1`` can not reach it. A connection can be established (or
+re-established in our case) between ``desstinationNode`` and ``backboneRouter`` using the ``<connect>`` element:
 
 .. literalinclude:: ../wired.xml
    :language: xml
@@ -174,12 +215,11 @@ and it starts to send the ping requests to ``destinationNode`` as well:
 
 .. literalinclude:: ../wired.xml
    :language: xml
-   :start-at: <at t="4.0">
+   :start-at: <at t="6.0">
    :end-before: <at t="8.0">
 
 Not only the malfunction of ``destinationNode`` or its connection can cause that the
 ping request can not reach their target, but the routers can crash as well.
-
 The malfunction of the routers has the same consequence as when ``destinationNode`` was
 disconnected from the network. In this simulation, the router crashes for two seconds before
 it is restarted:
@@ -189,8 +229,8 @@ it is restarted:
    :start-at: <at t="8.0">
    :end-before: <at t="10.0">
 
-We can also change the parameters of the nodes during the simulation. In this case, the
-:par:`sendInterval` parameter of ``sourceNode1`` is modified:
+We can also change the parameters of the nodes during the simulation with the help of the
+<set-param> element. In this case, the :par:`sendInterval` parameter of ``sourceNode1`` is modified:
 
 .. literalinclude:: ../wired.xml
    :language: xml
@@ -205,12 +245,17 @@ and disconnected from the network:
    :start-at: <at t="14.0">
    :end-before: </scenario>
 
-We can see that the desired actions were actually executed by the ``ScenarioManager``
+We can see that the desired actions were indeed executed by the :ned:`ScenarioManager`
 during the simulation, if we take a look at the ``transmissionState`` statistic
 of ``backboneRouter``'s PPP interface:
 
 .. figure:: TransmissionState.png
-   :width: 100%
+   :scale: 100%
+   :align: center
+
+The plot clearly shows the time intervals when the ping request messages (for some reason)
+could not be forwarded to ``destinationNode``. From the density of the state changes we can also see
+when the :par:`sendInterval` parameter of ``sourceNode1`` was modified to a smaller value than it was before.
 
 Discussion
 ----------
