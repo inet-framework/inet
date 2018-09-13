@@ -5,14 +5,14 @@
   <at t="3.0">
     <create-module type="inet.showcases.general.dynamicNetworks.DynamicHost" parent="." submodule="sourceNode1"/>
   </at>
-  <at t="12.0">
-    <create-module type="inet.showcases.general.dynamicNetworks.DynamicHost" parent="." submodule="sourceNode2"/>
-  </at>
   <at t="6.0">
 	<initiate module="destinationNode" operation="shutdown"/>
   </at>
   <at t="10.0">
 	<startup module="destinationNode"/>
+  </at>
+  <at t="12.0">
+    <create-module type="inet.showcases.general.dynamicNetworks.DynamicHost" parent="." submodule="sourceNode2"/>
   </at>
   <at t="14.0">
     <crash module="sourceNode0"/>
