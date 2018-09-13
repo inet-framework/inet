@@ -41,8 +41,6 @@ simple Ieee8021dRelay like IMacRelayUnit
         @signal[packetReceivedFromLower](type=cPacket);
 
         bool hasStp;
-//        bool hasCDP;
-//        bool hasLLDP;
 
     gates:
         input ifIn;
