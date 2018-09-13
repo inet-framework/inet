@@ -25,5 +25,6 @@ module TwoRayInterference like IPathLoss
         @class(TwoRayInterference);
         @display("i=block/control");
         double epsilon_r = default(1.02);
+        string polarization = default("horizontal");
 }
 

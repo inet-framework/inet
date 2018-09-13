@@ -26,9 +26,11 @@ public:
 
 protected:
     double epsilon_r;
+    char polarization;
 
 protected:
     virtual double computeTwoRayInterference(const Coord& posTx, const Coord& posRx, m waveLength) const;
+    virtual double reflectionCoefficient(double cos_theta, double sin_theta) const;
 };
 
 } // namespace physicallayer
