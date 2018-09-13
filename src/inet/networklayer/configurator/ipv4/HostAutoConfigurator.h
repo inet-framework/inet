@@ -21,15 +21,20 @@
 
 #include <omnetpp.h>
 #include "inet/common/INETDefs.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 
 namespace inet {
 
 /**
- * HostAutoConfigurator automatically assigns IP addresses and sets up routing table.
+ * HostAutoConfigurator automatically assigns IP addresses and sets up the
+ * routing table for the host it is part of.
+ *
+ * For more info please see the NED file.
  *
  * @author Christoph Sommer
  */
-class INET_API HostAutoConfigurator : public cSimpleModule
+class INET_API HostAutoConfigurator : public cSimpleModule, public ILifecycle
 {
   public:
     virtual void initialize(int stage) override;
@@ -39,7 +44,8 @@ class INET_API HostAutoConfigurator : public cSimpleModule
     virtual void handleMessage(cMessage *msg) override;
 
   protected:
-    void setupNetworkLayer();
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    virtual void setupNetworkLayer();
 };
 
 } // namespace inet
