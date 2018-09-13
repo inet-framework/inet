@@ -482,6 +482,21 @@ void Ipv4NetworkConfigurator::assignAddresses(std::vector<LinkInfo *> links)
                 for (uint32 networkAddressUnspecifiedPart = networkAddressUnspecifiedPartMaximum; networkAddressUnspecifiedPart <= networkAddressUnspecifiedPartLimit; networkAddressUnspecifiedPart++) {
                     networkAddress = setPackedBits(networkAddress, networkAddressUnspecifiedBits, networkAddressUnspecifiedPart);
                     EV_TRACE << "Trying network address: " << Ipv4Address(networkAddress) << endl;
+                    uint32 networkAddressMaximum = networkAddress | ~networkNetmask;
+
+                    // check for overlapping network address ranges
+                    if (assignDisjunctSubnetAddressesParameter) {
+                        bool overlaps = false;
+                        for (int i = 0; i < (int)assignedNetworkAddresses.size(); i++) {
+                            uint32 assignedNetworkAddress = assignedNetworkAddresses[i];
+                            uint32 assignedNetworkNetmask = assignedNetworkNetmasks[i];
+                            uint32 assignedNetworkAddressMaximum = assignedNetworkAddress | ~assignedNetworkNetmask;
+                            if (networkAddress <= assignedNetworkAddressMaximum && assignedNetworkAddress <= networkAddressMaximum)
+                                overlaps = true;
+                        }
+                        if (overlaps)
+                            continue;
+                    }
 
                     // count interfaces that have the same address prefix
                     int interfaceCount = 0;
