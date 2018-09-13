@@ -24,6 +24,9 @@
 #include "inet/linklayer/ieee8021d/stp/Stp.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
+
+#include "inet/common/IProtocolRegistrationListener.h"
+
 namespace inet {
 
 Define_Module(Stp);
@@ -41,6 +44,11 @@ void Stp::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         tick = new cMessage("STP_TICK", 0);
         WATCH(bridgeAddress);
+    }else if (stage == INITSTAGE_LINK_LAYER)
+    {
+        //register sservice and protocol
+        registerService(Protocol::stp, nullptr, gate("relayIn"));
+        registerProtocol(Protocol::stp, gate("relayOut"), nullptr);
     }
 }
 
@@ -148,6 +156,9 @@ void Stp::handleTCN(Packet *packet, const Ptr<const Bpdu>& tcn)
         outPacket->addTagIfAbsent<InterfaceReq>()->setInterfaceId(rootInterfaceId);
         outPacket->addTagIfAbsent<MacAddressReq>()->setSrcAddress(srcAddress);
         outPacket->addTagIfAbsent<MacAddressReq>()->setDestAddress(destAddress);
+
+        outPacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
+        outPacket->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
         send(outPacket, "relayOut");
     }
     delete packet;
@@ -159,6 +170,8 @@ void Stp::generateBPDU(int interfaceId, const MacAddress& address, bool tcFlag, 
     const auto& bpdu = makeShared<Bpdu>();
     packet->addTagIfAbsent<MacAddressReq>()->setDestAddress(address);
     packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
+    packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
+    packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
 
     bpdu->setProtocolIdentifier(0);
     bpdu->setProtocolVersionIdentifier(0);
@@ -199,6 +212,10 @@ void Stp::generateTCN()
             // exist root port to notifying
             topologyChangeNotification = false;
             Packet *packet = new Packet("BPDU");
+
+            packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
+            packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
+
             const auto& tcn = makeShared<Bpdu>();
             tcn->setProtocolIdentifier(0);
             tcn->setProtocolVersionIdentifier(0);

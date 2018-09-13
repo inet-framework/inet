@@ -22,7 +22,7 @@ package inet.visualizer.base;
 // of the last value of a statistic for multiple network nodes. The actual
 // visualization of statistic values is done in derived modules. It subscribes
 // for the signal determined by the signalName parameter at the module specified
-// by the subscriptionModule parameter. If the visualizer receives such a signal
+// by the visualizationSubjectModule parameter. If the visualizer receives such a signal
 // it checks if the source matches the sourceFilter parameter. If the signal
 // passes the check it determines the last value of the statistic specified by
 // the statisticName parameter.
@@ -39,7 +39,6 @@ simple StatisticVisualizerBase extends VisualizerBase
 {
     parameters:
         string networkNodeVisualizerModule = default("^.networkNodeVisualizer"); // the network node visualizer module, refers to a sibling submodule by default
-        string subscriptionModule = default("<root>"); // module where the visualizer subscribes for the signal, root module by default
 
         bool displayStatistics = default(true);
 

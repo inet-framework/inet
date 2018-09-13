@@ -37,6 +37,7 @@ cpuTimeLimit = "300s"
 logFile = "test.out"
 extraOppRunArgs = ""
 debug=False
+release=False
 exitCode = 0
 
 class FingerprintTestCaseGenerator():
@@ -64,7 +65,7 @@ class FingerprintTestCaseGenerator():
 
         testcases = []
         for simulation in simulations:
-            title = simulation['wd'] + " " + simulation['args']
+            title = simulation['wd'] + " " + simulation['args'] + " " + simulation['tags']
             if not filterRegexList or ['x' for regex in filterRegexList if re.search(regex, title)]: # if any regex matches title
                 if not excludeFilterRegexList or not ['x' for regex in excludeFilterRegexList if re.search(regex, title)]: # if NO exclude-regex matches title
                     testcases.append(FingerprintTestCase(title, simulation['file'], simulation['wd'], simulation['args'],
@@ -87,7 +88,7 @@ class FingerprintTestCaseGenerator():
             elif len(fields) == 6:
                 if fields[4] in ['PASS', 'FAIL', 'ERROR']:
                     simulations.append({'file': csvFile, 'line' : csvReader.line_num,
-                            'wd': fields[0], 'args': fields[1], 'simtimelimit': fields[2], 'fingerprint': fields[3], 'expectedResult': fields[4]})
+                            'wd': fields[0], 'args': fields[1], 'simtimelimit': fields[2], 'fingerprint': fields[3], 'expectedResult': fields[4], 'tags': fields[5]})
                 else:
                     raise Exception(csvFile + " Line " + str(csvReader.line_num) + ": the 5th item must contain one of 'PASS', 'FAIL', 'ERROR'" + ": " + '"' + '", "'.join(fields) + '"')
             else:
@@ -304,7 +305,7 @@ class FingerprintTestCase(SimulationTestCase):
 
     def runTest(self):
         # CPU time limit is a safety guard: fingerprint checks shouldn't take forever
-        global rootDir, executable, debug, cpuTimeLimit, extraOppRunArgs
+        global rootDir, executable, debug, release, cpuTimeLimit, extraOppRunArgs
 
 
         # run the simulation
@@ -320,7 +321,7 @@ class FingerprintTestCase(SimulationTestCase):
         # Otherwise, assume the first word as the name of the executable.
         (exeName, progArgs) = (executable, self.cmdLine) if (self.cmdLine.startswith("-")) else self.cmdLine.split(maxsplit=1)
 
-        command =  (exeName+"_dbg" if debug else exeName) + " -u Cmdenv " + progArgs + \
+        command = (exeName + "_dbg" if debug else exeName + "_release" if release else exeName) + " -u Cmdenv " + progArgs + \
             _iif(self.simtimelimit != "", " --sim-time-limit=" + self.simtimelimit, "") + \
             " \"--fingerprint=" + self.fingerprint + "\" --cpu-time-limit=" + cpuTimeLimit + \
             " --vector-recording=false --scalar-recording=true" + \
@@ -633,6 +634,7 @@ if __name__ == "__main__":
     parser.add_argument('-e', '--executable', help='Determines which binary to execute (e.g. opp_run_dbg, opp_run_release)')
     parser.add_argument('-C', '--directory', help='Change to DIRECTORY before executing the tests. Working dirs in the CSV files are relative to this.')
     parser.add_argument('-d', '--debug', action='store_true', help='Run debug executables: use the debug version of the executable (appends _dbg to the executable name)')
+    parser.add_argument('-s', '--release', action='store_true', help='Run release executables: use the release version of the executable (appends _release to the executable name)')
     parser.add_argument('-a', '--oppargs', action='append', metavar='oppargs', nargs=argparse.REMAINDER, help='extra opp_run arguments until the end of the line')
     args = parser.parse_args()
 
@@ -655,6 +657,7 @@ if __name__ == "__main__":
         rootDir = os.path.abspath(args.directory)
 
     debug = args.debug
+    release = args.release
 
     generator = FingerprintTestCaseGenerator()
     testcases = generator.generateFromCSV(args.testspecfiles, args.match, args.exclude, args.repeat)

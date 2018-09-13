@@ -28,6 +28,8 @@ module MobilityVisualizer like IMobilityVisualizer
 {
     parameters:
         @display("i=block/app");
+        *.visualizationTargetModule = default("^.^");
+        *.visualizationSubjectModule = default("^.^");
     submodules:
         canvasVisualizer: <default("MobilityCanvasVisualizer")> like IMobilityVisualizer if typename != "" {
             parameters:

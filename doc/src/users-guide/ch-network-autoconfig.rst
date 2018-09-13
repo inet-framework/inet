@@ -474,7 +474,7 @@ same way by the optimized routing table.
 Parameters
 ^^^^^^^^^^
 
-This list summarize the parameters of the :ned:`IPv4NetorkConfigurator`:
+This list summarize the parameters of the :ned:`Ipv4NetworkConfigurator`:
 
 -  :par:`config`: XML configuration parameters for IP address assignment
    and adding manual routes.
@@ -603,7 +603,7 @@ table.
 
 .. warning::
 
-   :ned:`Routing files` are considered legacy, use do not use them for new
+   *Routing files* are considered legacy, use do not use them for new
    projects. Their contents can be expressed in :ned:`Ipv4NetworkConfigurator`
    config files.
 
@@ -732,7 +732,7 @@ is also accepted with the meaning ``0.0.0.0``.
 Configuring Layer 2
 -------------------
 
-The :ned:`L2Configurator` module allows configuring network scenarios at
+The :ned:`L2NetworkConfigurator` module allows configuring network scenarios at
 layer 2. The STP/RTP-related parameters such as link cost, port priority
 and the “is-edge” flag can be configured with XML files.
 

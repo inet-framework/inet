@@ -28,6 +28,8 @@ module TracingObstacleLossVisualizer like ITracingObstacleLossVisualizer
 {
     parameters:
         @display("i=block/app");
+        *.visualizationTargetModule = default("^.^");
+        *.visualizationSubjectModule = default("^.^");
     submodules:
         canvasVisualizer: <default("TracingObstacleLossCanvasVisualizer")> like ITracingObstacleLossVisualizer if typename != "" {
             parameters:

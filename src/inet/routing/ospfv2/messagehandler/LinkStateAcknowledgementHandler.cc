@@ -28,7 +28,7 @@ LinkStateAcknowledgementHandler::LinkStateAcknowledgementHandler(Router *contain
 {
 }
 
-void LinkStateAcknowledgementHandler::processPacket(Packet *packet, Interface *intf, Neighbor *neighbor)
+void LinkStateAcknowledgementHandler::processPacket(Packet *packet, OspfInterface *intf, Neighbor *neighbor)
 {
     router->getMessageHandler()->printEvent("Link State Acknowledgement packet received", intf, neighbor);
 

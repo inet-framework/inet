@@ -42,6 +42,7 @@ Ospf::Ospf()
 
 Ospf::~Ospf()
 {
+    cancelAndDelete(startupTimer);
     delete ospfRouter;
 }
 
@@ -49,15 +50,49 @@ void Ospf::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
+    if (stage == INITSTAGE_LOCAL) {
+        host = getContainingNode(this);
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
-        isUp = isNodeUp();
-        if (isUp)
-            createOspfRouter();
+
+        startupTimer = new cMessage("OSPF-startup");
+    }
+    else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {  // interfaces and static routes are already initialized
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isUp = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
+        if (isUp) {
+            simtime_t startupTime = par("startupTime");
+            if (startupTime == 0) {
+                createOspfRouter();
+                subscribe();
+            }
+            else
+                scheduleAt(simTime() + startupTime, startupTimer);
+        }
+
         registerService(Protocol::ospf, nullptr, gate("ipIn"));
         registerProtocol(Protocol::ospf, gate("ipOut"), nullptr);
     }
+}
+
+void Ospf::handleMessage(cMessage *msg)
+{
+    if (!isUp)
+    {
+        if (msg->isSelfMessage())
+            throw cRuntimeError("Model error: self msg '%s' received when protocol is down", msg->getName());
+        EV_ERROR << "Protocol is turned off, dropping '" << msg->getName() << "' message\n";
+        delete msg;
+        return;
+    }
+
+    if (msg == startupTimer) {
+        createOspfRouter();
+        subscribe();
+    }
+    else
+        ospfRouter->getMessageHandler()->messageReceived(msg);
+
 }
 
 void Ospf::createOspfRouter()
@@ -73,21 +108,57 @@ void Ospf::createOspfRouter()
     ospfRouter->addWatches();
 }
 
-void Ospf::handleMessage(cMessage *msg)
+void Ospf::subscribe()
 {
-    if (!isUp)
-        handleMessageWhenDown(msg);
-    else
-        ospfRouter->getMessageHandler()->messageReceived(msg);
+    host->subscribe(interfaceCreatedSignal, this);
+    host->subscribe(interfaceDeletedSignal, this);
+    host->subscribe(interfaceStateChangedSignal, this);
 }
 
-void Ospf::handleMessageWhenDown(cMessage *msg)
+void Ospf::unsubscribe()
 {
-    if (msg->isSelfMessage())
-        throw cRuntimeError("Model error: self msg '%s' received when protocol is down", msg->getName());
-    EV_ERROR << "Protocol is turned off, dropping '" << msg->getName() << "' message\n";
-    delete msg;
+    host->unsubscribe(interfaceCreatedSignal, this);
+    host->unsubscribe(interfaceDeletedSignal, this);
+    host->unsubscribe(interfaceStateChangedSignal, this);
 }
+
+/**
+ * Listen on interface changes and update private data structures.
+ */
+void Ospf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+{
+    Enter_Method_Silent("Ospf::receiveChangeNotification(%s)", cComponent::getSignalName(signalID));
+
+    const InterfaceEntry *ie;
+    const InterfaceEntryChangeDetails *change;
+
+    if (signalID == interfaceCreatedSignal) {
+        // configure interface for RIP
+        ie = check_and_cast<const InterfaceEntry *>(obj);
+        if (ie->isMulticast() && !ie->isLoopback()) {
+            // TODO
+        }
+    }
+    else if (signalID == interfaceDeletedSignal) {
+        ie = check_and_cast<const InterfaceEntry *>(obj);
+        // TODO
+    }
+    else if (signalID == interfaceStateChangedSignal) {
+        change = check_and_cast<const InterfaceEntryChangeDetails *>(obj);
+        if (change->getFieldId() == InterfaceEntry::F_CARRIER || change->getFieldId() == InterfaceEntry::F_STATE) {
+            ie = change->getInterfaceEntry();
+            if (!ie->isUp()) {
+                // TODO
+            }
+            else {
+                // TODO
+            }
+        }
+    }
+    else
+        throw cRuntimeError("Unexpected signal: %s", getSignalName(signalID));
+}
+
 
 bool Ospf::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
@@ -98,6 +169,7 @@ bool Ospf::handleOperationStage(LifecycleOperation *operation, int stage, IDoneC
             ASSERT(ospfRouter == nullptr);
             isUp = true;
             createOspfRouter();
+            subscribe();
         }
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
@@ -106,6 +178,7 @@ bool Ospf::handleOperationStage(LifecycleOperation *operation, int stage, IDoneC
             isUp = false;
             delete ospfRouter;
             ospfRouter = nullptr;
+            unsubscribe();
         }
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
@@ -114,18 +187,13 @@ bool Ospf::handleOperationStage(LifecycleOperation *operation, int stage, IDoneC
             isUp = false;
             delete ospfRouter;
             ospfRouter = nullptr;
+            unsubscribe();
         }
     }
     else {
         throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
     }
     return true;
-}
-
-bool Ospf::isNodeUp()
-{
-    NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
 }
 
 void Ospf::insertExternalRoute(int ifIndex, const Ipv4AddressRange& netAddr)

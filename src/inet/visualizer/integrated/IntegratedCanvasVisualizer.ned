@@ -52,6 +52,8 @@ module IntegratedCanvasVisualizer like IIntegratedVisualizer
 {
     parameters:
         @display("i=block/app");
+        *.visualizationTargetModule = default("^.^");
+        *.visualizationSubjectModule = default("^.^");
     submodules:
         sceneVisualizer: <default("SceneCanvasVisualizer")> like ISceneVisualizer if typename != "" {
             parameters:

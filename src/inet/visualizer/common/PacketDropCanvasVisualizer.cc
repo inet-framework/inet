@@ -44,7 +44,7 @@ void PacketDropCanvasVisualizer::initialize(int stage)
         zIndex = par("zIndex");
         dx = par("dx");
         dy = par("dx");
-        auto canvas = visualizerTargetModule->getCanvas();
+        auto canvas = visualizationTargetModule->getCanvas();
         canvasProjection = CanvasProjection::getCanvasProjection(canvas);
         packetDropGroup = new cGroupFigure("packet drops");
         packetDropGroup->setZIndex(zIndex);
@@ -55,7 +55,7 @@ void PacketDropCanvasVisualizer::initialize(int stage)
 void PacketDropCanvasVisualizer::refreshDisplay() const
 {
     PacketDropVisualizerBase::refreshDisplay();
-    visualizerTargetModule->getCanvas()->setAnimationSpeed(packetDropVisualizations.empty() ? 0 : fadeOutAnimationSpeed, this);
+    visualizationTargetModule->getCanvas()->setAnimationSpeed(packetDropVisualizations.empty() ? 0 : fadeOutAnimationSpeed, this);
 }
 
 const PacketDropVisualizerBase::PacketDropVisualization *PacketDropCanvasVisualizer::createPacketDropVisualization(PacketDrop *packetDrop) const

@@ -28,6 +28,8 @@ module NetworkRouteVisualizer like INetworkRouteVisualizer
 {
     parameters:
         @display("i=block/app");
+        *.visualizationTargetModule = default("^.^");
+        *.visualizationSubjectModule = default("^.^");
     submodules:
         canvasVisualizer: <default("NetworkRouteCanvasVisualizer")> like INetworkRouteVisualizer if typename != "" {
             parameters:

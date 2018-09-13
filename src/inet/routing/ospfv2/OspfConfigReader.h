@@ -48,15 +48,10 @@ class INET_API OspfConfigReader
     const char *getStrAttrOrPar(const cXMLElement& ifConfig, const char *name) const;
 
     /**
-     * Looks up the interface name in IInterfaceTable, and returns interfaceId a.k.a ifIndex.
-     */
-    int resolveInterfaceName(const std::string& name) const;
-
-    /**
      * Search an InterfaceEntry in IInterfaceTable by interface name or toward module name
      * an returns the InterfaceEntry pointer or throws an error.
      */
-    InterfaceEntry *getInterfaceByXMLAttributesOf(const cXMLElement& ifConfig);
+    std::vector<InterfaceEntry *> getInterfaceByXMLAttributesOf(const cXMLElement& ifConfig);
 
     /**
      * Loads a list of OSPF Areas connected to this router from the config XML.
@@ -74,7 +69,7 @@ class INET_API OspfConfigReader
     /**
      * Loads authenticationType and authenticationKey attributes for a router interface
      */
-    void loadAuthenticationConfig(Interface *intf, const cXMLElement& ifConfig);
+    void loadAuthenticationConfig(OspfInterface *intf, const cXMLElement& ifConfig);
 
     /**
      * Loads OSPF configuration information for a router interface.

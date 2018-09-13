@@ -28,6 +28,8 @@ module StatisticVisualizer like IStatisticVisualizer
 {
     parameters:
         @display("i=block/app");
+        *.visualizationTargetModule = default("^.^");
+        *.visualizationSubjectModule = default("^.^");
     submodules:
         canvasVisualizer: <default("StatisticCanvasVisualizer")> like IStatisticVisualizer if typename != "" {
             parameters:

@@ -35,8 +35,8 @@ list gives the most commonly used network interfaces.
 -  :ned:`Ieee80211Interface` represents a Wifi (:protocol:`IEEE 802.11`)
    interface
 
--  :ned:`Ieee802154Interface` represents a :protocol:`IEEE 802.15.4`
-   interface
+-  :ned:`Ieee802154NarrowbandInterface` and :ned:`Ieee802154UwbIrInterface`
+   represent a :protocol:`IEEE 802.15.4` interface
 
 -  :ned:`BMacInterface`, :ned:`LMacInterface`, :ned:`XMacInterface`
    provide low-power wireless sensor MAC protocols along with a simple
@@ -299,7 +299,7 @@ covered in chapter :doc:`ch-80211`.
 IEEE 802.15.4
 ~~~~~~~~~~~~~
 
-:ned:`Ieee802154Interface` is covered in a separate chapter, see
+:ned:`Ieee802154NarrowbandInterface` is covered in a separate chapter, see
 :doc:`ch-802154`.
 
 .. _ug:sec:interfaces:wireless-sensor-networks:

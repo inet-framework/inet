@@ -49,7 +49,7 @@ moduleinterface IMacRelayUnit
     gates:
         input ifIn @labels(EtherFrame);
         output ifOut @labels(EtherFrame);
-        input stpIn @loose;
-        output stpOut @loose;
+        input upperLayerIn;
+        output upperLayerOut;
 }
 

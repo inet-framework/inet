@@ -49,7 +49,7 @@ The core modules are:
 
 -  :ned:`LinkStateRouting` is a simple link-state routing protocol
 
--  :ned:`SimpleClassifier` is a configurable ingress classifier for MPLS
+-  :ned:`RsvpClassifier` is a configurable ingress classifier for MPLS
 
 .. _ug:sec:mpls:mpls:
 
@@ -193,7 +193,7 @@ traffic is routed through the network.
 
 When :ned:`RsvpTe` is used as signaling protocol, :ned:`Mpls` needs a
 separate ingress classifier module, which is usually a
-:ned:`SimpleClassifier`.
+:ned:`RsvpClassifier`.
 
 The :ned:`RsvpTe` module allows LSPs to be specified statically in an
 XML config file. An example ``traffic.xml`` file:

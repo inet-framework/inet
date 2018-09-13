@@ -132,8 +132,6 @@ describing motion.
 -  :ned:`FacingMobility` orients towards the position of another
    mobility model.
 
--  :ned:`RotatingMobility` rotates with a constant speed.
-
 Trace-Based
 ^^^^^^^^^^^
 

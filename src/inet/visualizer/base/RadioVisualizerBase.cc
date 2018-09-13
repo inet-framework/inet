@@ -85,20 +85,19 @@ void RadioVisualizerBase::handleParameterChange(const char *name)
 
 void RadioVisualizerBase::subscribe()
 {
-    auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
-    subscriptionModule->subscribe(IRadio::radioModeChangedSignal, this);
-    subscriptionModule->subscribe(IRadio::receptionStateChangedSignal, this);
-    subscriptionModule->subscribe(IRadio::transmissionStateChangedSignal, this);
+    visualizationSubjectModule->subscribe(IRadio::radioModeChangedSignal, this);
+    visualizationSubjectModule->subscribe(IRadio::receptionStateChangedSignal, this);
+    visualizationSubjectModule->subscribe(IRadio::transmissionStateChangedSignal, this);
 }
 
 void RadioVisualizerBase::unsubscribe()
 {
     // NOTE: lookup the module again because it may have been deleted first
-    auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this, false);
-    if (subscriptionModule != nullptr) {
-        subscriptionModule->unsubscribe(IRadio::radioModeChangedSignal, this);
-        subscriptionModule->unsubscribe(IRadio::receptionStateChangedSignal, this);
-        subscriptionModule->unsubscribe(IRadio::transmissionStateChangedSignal, this);
+    auto visualizationSubjectModule = getModuleFromPar<cModule>(par("visualizationSubjectModule"), this, false);
+    if (visualizationSubjectModule != nullptr) {
+        visualizationSubjectModule->unsubscribe(IRadio::radioModeChangedSignal, this);
+        visualizationSubjectModule->unsubscribe(IRadio::receptionStateChangedSignal, this);
+        visualizationSubjectModule->unsubscribe(IRadio::transmissionStateChangedSignal, this);
     }
 }
 

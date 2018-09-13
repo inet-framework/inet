@@ -48,7 +48,7 @@ void RoutingTableOsgVisualizer::initialize(int stage)
     RoutingTableVisualizerBase::initialize(stage);
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
-        auto canvas = visualizerTargetModule->getCanvas();
+        auto canvas = visualizationTargetModule->getCanvas();
         lineManager = LineManager::getOsgLineManager(canvas);
     }
 }
@@ -71,7 +71,7 @@ void RoutingTableOsgVisualizer::addRouteVisualization(const RouteVisualization *
 {
     RoutingTableVisualizerBase::addRouteVisualization(routeVisualization);
     auto routeOsgVisualization = static_cast<const RouteOsgVisualization *>(routeVisualization);
-    auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
+    auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizationTargetModule);
     scene->addChild(routeOsgVisualization->node);
 }
 

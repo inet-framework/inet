@@ -28,6 +28,8 @@ module Ieee80211Visualizer like IIeee80211Visualizer
 {
     parameters:
         @display("i=block/app");
+        *.visualizationTargetModule = default("^.^");
+        *.visualizationSubjectModule = default("^.^");
     submodules:
         canvasVisualizer: <default("Ieee80211CanvasVisualizer")> like IIeee80211Visualizer if typename != "" {
             parameters:

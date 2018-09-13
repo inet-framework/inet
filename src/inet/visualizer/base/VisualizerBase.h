@@ -30,7 +30,8 @@ namespace visualizer {
 class INET_API VisualizerBase : public cSimpleModule
 {
   protected:
-    cModule *visualizerTargetModule = nullptr;
+    cModule *visualizationTargetModule = nullptr;
+    cModule *visualizationSubjectModule = nullptr;
     const char *tags = nullptr;
 
   protected:

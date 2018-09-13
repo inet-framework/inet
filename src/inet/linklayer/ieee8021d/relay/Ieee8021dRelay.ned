@@ -36,13 +36,16 @@ simple Ieee8021dRelay like IMacRelayUnit
         @display("i=block/broadcast;bgb=425,114");
         string interfaceTableModule = default("^.interfaceTable"); // The path to the InterfaceTable module
         string macTableModule = default("^.macTable");             // The path to the MacAddressTable module
-        string fcsMode @enum("declared", "computed") = default("declared");
+        string fcsMode @enum("declared","computed") = default("declared");
         @signal[packetSentToLower](type=cPacket);
         @signal[packetReceivedFromLower](type=cPacket);
+
+        bool hasStp;
+
     gates:
         input ifIn;
         output ifOut;
-        input stpIn @loose;
-        output stpOut @loose;
+        input upperLayerIn;
+        output upperLayerOut;
 }
 

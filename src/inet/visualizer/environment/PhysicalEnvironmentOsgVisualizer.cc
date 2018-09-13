@@ -54,7 +54,7 @@ void PhysicalEnvironmentOsgVisualizer::refreshDisplay() const
 {
     // only update after initialize
     if (physicalEnvironment != nullptr && getSimulation()->getEventNumber() == 0) {
-        auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
+        auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizationTargetModule);
         for (int i = 0; i < physicalEnvironment->getNumObjects(); i++) {
             const IPhysicalObject *object = physicalEnvironment->getObject(i);
             const ShapeBase *shape = object->getShape();

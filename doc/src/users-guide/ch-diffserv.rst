@@ -258,7 +258,7 @@ It has :math:`n` input and :math:`n` output gates (specified by the
 :par:`numGates` parameter). Packets that arrive at the :math:`i^{th}`
 input gate are forwarded to the :math:`i^{th}` output gate, or dropped.
 The output gates must be connected to simple modules implementing the
-:ned:`IQueueAccess` C++ interface (e.g. :ned:`FifoQueue`).
+:cpp:`IQueueAccess` C++ interface (e.g. :ned:`FifoQueue`).
 
 The module sums the used buffer space of the queues attached to the
 output gates. If it is below a minimum threshold, the packet won’t be
@@ -365,7 +365,7 @@ the received packets, and forward them to the appropriate output gate
 based on the content of some portion of the packet header. You can read
 more about classifiers in RFC 2475 and RFC 3290.
 
-The :ned:`inet.networklayer.diffserv` package contains two classifiers:
+The ``inet.networklayer.diffserv`` package contains two classifiers:
 :ned:`MultiFieldClassifier` to classify the packets at the edge routers
 of the DiffServ domain, and :ned:`BehaviorAggregateClassifier` to
 classify the packets at the core routers.

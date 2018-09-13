@@ -81,9 +81,8 @@ void QueueVisualizerBase::removeQueueVisualization(const QueueVisualization *que
 
 void QueueVisualizerBase::addQueueVisualizations()
 {
-    auto simulation = getSimulation();
     QueueVisitor queueVisitor;
-    simulation->getSystemModule()->forEachChild(&queueVisitor);
+    visualizationSubjectModule->forEachChild(&queueVisitor);
     for (auto queue : queueVisitor.queues) {
         if (queueFilter.matches(queue))
             addQueueVisualization(createQueueVisualization(queue));

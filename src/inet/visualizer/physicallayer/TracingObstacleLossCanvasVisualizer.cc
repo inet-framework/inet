@@ -46,19 +46,19 @@ void TracingObstacleLossCanvasVisualizer::initialize(int stage)
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
         zIndex = par("zIndex");
-        cCanvas *canvas = visualizerTargetModule->getCanvas();
+        cCanvas *canvas = visualizationTargetModule->getCanvas();
         obstacleLossLayer = new cGroupFigure("obstacle_loss");
         obstacleLossLayer->setZIndex(zIndex);
         obstacleLossLayer->insertBefore(canvas->getSubmodulesLayer());
     }
     else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT)
-        canvasProjection = CanvasProjection::getCanvasProjection(visualizerTargetModule->getCanvas());
+        canvasProjection = CanvasProjection::getCanvasProjection(visualizationTargetModule->getCanvas());
 }
 
 void TracingObstacleLossCanvasVisualizer::refreshDisplay() const
 {
     TracingObstacleLossVisualizerBase::refreshDisplay();
-    visualizerTargetModule->getCanvas()->setAnimationSpeed(obstacleLossVisualizations.empty() ? 0 : fadeOutAnimationSpeed, this);
+    visualizationTargetModule->getCanvas()->setAnimationSpeed(obstacleLossVisualizations.empty() ? 0 : fadeOutAnimationSpeed, this);
 }
 
 const TracingObstacleLossVisualizerBase::ObstacleLossVisualization *TracingObstacleLossCanvasVisualizer::createObstacleLossVisualization(const ITracingObstacleLoss::ObstaclePenetratedEvent *obstaclePenetratedEvent) const

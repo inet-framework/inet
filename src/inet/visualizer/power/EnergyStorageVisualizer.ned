@@ -28,6 +28,8 @@ module EnergyStorageVisualizer like IEnergyStorageVisualizer
 {
     parameters:
         @display("i=block/app");
+        *.visualizationTargetModule = default("^.^");
+        *.visualizationSubjectModule = default("^.^");
     submodules:
         canvasVisualizer: <default("EnergyStorageCanvasVisualizer")> like IEnergyStorageVisualizer if typename != "" {
             parameters:

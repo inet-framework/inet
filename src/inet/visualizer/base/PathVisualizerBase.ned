@@ -26,7 +26,7 @@ package inet.visualizer.base;
 // in derived modules.
 //
 // This module subscribes for packetReceivedFromUpper, packetSentToUpper, and
-// packetReceivedFromLower on the module determined by the subscriptionModule
+// packetReceivedFromLower on the module determined by the visualizationSubjectModule
 // parameter. If the visualizer receives a packetReceivedFromUpper from a
 // protocol module, then it stores the corresponding packet id. If later on the
 // visualizer receives a packetSentToUpper from another corresponding protocol
@@ -47,8 +47,6 @@ package inet.visualizer.base;
 simple PathVisualizerBase extends VisualizerBase
 {
     parameters:
-        string subscriptionModule = default("<root>"); // module where the visualizer subscribes for network layer signals, root module by default
-
         bool displayRoutes = default(false); // display polyline arrow for active routes, disabled by default
 
         string nodeFilter = default("*"); // which nodes are considered, matches all nodes by default

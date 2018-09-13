@@ -191,7 +191,7 @@ The module parameters of :ned:`Arp` are:
 Igmp
 ----
 
-The :ned:`Igmp` module implements the Internet Group Management Protocol
+The :ned:`Igmpv3` module implements the Internet Group Management Protocol
 (IGMP). IGMP is a communications protocol used by hosts and adjacent
 routers on IPv4 networks to establish multicast group memberships. IGMP
 is an integral part of IP multicast.

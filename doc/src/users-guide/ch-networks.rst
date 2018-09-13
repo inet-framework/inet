@@ -94,7 +94,7 @@ other aspects. Some of them are:
    optional component.
 
 -  *Configurators* such as :ned:`Ipv4NetworkConfigurator`,
-   :ned:`L2NetworkConfigurator` and :ned:`GenericNetworkConfigurator`
+   :ned:`L2NetworkConfigurator` and :ned:`NextHopNetworkConfigurator`
    configure various aspects of the network. For example,
    :ned:`Ipv4NetworkConfigurator` assigns IP addresses to hosts and
    routers, and sets up static routing. It is used when modeling dynamic
@@ -128,8 +128,8 @@ Wired Networks
 
 Wired network connections, for example :protocol:`Ethernet` cables, are
 represented with standard OMNeT++ connections using the
-:ned:`DatarateChannel` NED type. The channel’s :ned:`datarate` and
-:ned:`delay` parameters must be provided for all wired connections.
+:ned:`DatarateChannel` NED type. The channel’s :par:`datarate` and
+:par:`delay` parameters must be provided for all wired connections.
 
 The following example shows how straightforward it is to create a model
 for a simple wired network. This network contains a server connected to

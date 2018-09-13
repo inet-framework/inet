@@ -51,6 +51,8 @@ module IntegratedOsgVisualizer like IIntegratedVisualizer
 {
     parameters:
         @display("i=block/app");
+        *.visualizationTargetModule = default("^.^");
+        *.visualizationSubjectModule = default("^.^");
     submodules:
         sceneVisualizer: <default("SceneOsgVisualizer")> like ISceneVisualizer if typename != "" {
             parameters:

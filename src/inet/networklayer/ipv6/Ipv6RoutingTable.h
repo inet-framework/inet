@@ -385,6 +385,7 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
     // IRoutingTable methods:
+    virtual bool isAdminDistEnabled() const override { return useAdminDist; }
     virtual bool isForwardingEnabled() const override { return isRouter(); }    //XXX inconsistent names
     virtual bool isMulticastForwardingEnabled() const override { return true;    /*TODO isMulticastForwardingEnabled();*/ }
     virtual L3Address getRouterIdAsGeneric() const override { return L3Address(Ipv6Address());    /*TODO getRouterId();*/ }

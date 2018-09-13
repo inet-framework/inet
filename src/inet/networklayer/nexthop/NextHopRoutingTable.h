@@ -86,6 +86,11 @@ class INET_API NextHopRoutingTable : public cSimpleModule, public IRoutingTable,
     virtual bool isForwardingEnabled() const override;    //XXX IP modulba?
 
     /**
+     * Administrative distance on/off
+     */
+    virtual bool isAdminDistEnabled() const override { return false; }
+
+    /**
      * Multicast forwarding on/off
      */
     virtual bool isMulticastForwardingEnabled() const override;    //XXX IP modulba?
