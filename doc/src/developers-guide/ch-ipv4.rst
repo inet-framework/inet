@@ -164,7 +164,7 @@ is not connected, the datagram will be silently dropped.
 
 Some protocols are handled differently:
 
--  ``Icmp``: ICMP errors are delivered to the protocol whose packet
+-  :ned:`Icmp`: ICMP errors are delivered to the protocol whose packet
    triggered the error. Only ICMP query requests and responses are sent
    to the :ned:`Icmp` module.
 

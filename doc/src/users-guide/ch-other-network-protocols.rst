@@ -64,7 +64,7 @@ The list of network layer protocols that can be plugged into
    one
 
 In addition to the network layer protocol, :ned:`SimpleNetworkLayer`
-includes an instance of ``GlobalArp`` for address resolution, and an
+includes an instance of :ned:`GlobalArp` for address resolution, and an
 instance of :ned:`EchoProtocol`, a module type that implements a simple
 *ping*-like protocol.
 
