@@ -21,6 +21,8 @@ export PATH="/root/omnetpp-5.4.1-linux/bin:/usr/lib/ccache:$PATH"
 # this is where the cloned INET repo is mounted into the container (as prescribed in /.travis.yml)
 cd /$TRAVIS_REPO_SLUG
 
+. setenv -f
+
 cp -r /root/nsc-0.5.3 3rdparty
 
 opp_featuretool enable VoIPStream VoIPStream_examples TCP_NSC TCP_lwIP
