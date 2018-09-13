@@ -29,8 +29,6 @@ simple MacRelayUnit like IMacRelayUnit
         @signal[packetReceivedFromLower](type=cPacket);
                 
         bool hasStp;
-        bool hasCDP;
-        bool hasLLDP;
     gates:
         input ifIn @labels(EtherFrame);
         output ifOut @labels(EtherFrame);
