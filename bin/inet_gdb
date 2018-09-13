@@ -6,5 +6,5 @@
 # 'inet_gdb $(inet --debug -p -u Cmdenv)'.
 #
 
-gdb $INET_GDB_OPTIONS $@
+gdb $INET_GDB_OPTIONS "$@"
 

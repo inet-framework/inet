@@ -6,4 +6,4 @@
 # 'inet_valgrind $(inet --release -p -u Cmdenv)'.
 #
 
-valgrind $INET_VALGRIND_OPTIONS $@
+valgrind $INET_VALGRIND_OPTIONS "$@"
