@@ -43,12 +43,18 @@ void Ieee8021dRelay::initialize(int stage)
         numDispatchedBDPUFrames = numDispatchedNonBPDUFrames = numDeliveredBDPUsToSTP = 0;
         numReceivedBPDUsFromSTP = numReceivedNetworkFrames = numDroppedFrames = 0;
         fcsMode = parseFcsMode(par("fcsMode"));
+        isStpAware = par("hasStp");
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-        registerService(Protocol::ethernetMac, gate("stpIn"), gate("ifIn"));
-        registerProtocol(Protocol::ethernetMac, gate("ifOut"), gate("stpOut"));
+        registerService(Protocol::ethernetMac, nullptr, gate("ifIn"));
+        registerProtocol(Protocol::ethernetMac, gate("ifOut"), nullptr);
+
+        //TODO FIX Move it at least to STP module (like in ANSA's CDP/LLDP)
+        if(isStpAware) {
+            registerAddress(MacAddress::STP_MULTICAST_ADDRESS);
+        }
     }
     else if (stage == INITSTAGE_LINK_LAYER_2) {
 
@@ -58,13 +64,14 @@ void Ieee8021dRelay::initialize(int stage)
         if (isOperational) {
             ie = chooseInterface();
 
-            if (ie)
+            if (ie) {
                 bridgeAddress = ie->getMacAddress(); // get the bridge's MAC address
-            else
+                registerAddress(bridgeAddress); // register bridge's MAC address
+            } else
                 throw cRuntimeError("No non-loopback interface found!");
         }
 
-        isStpAware = gate("stpIn")->isConnected();    // if the stpIn is not connected then the switch is STP/RSTP unaware
+//        isStpAware = gate("stpIn")->isConnected();    // if the stpIn is not connected then the switch is STP/RSTP unaware
 
         WATCH(bridgeAddress);
         WATCH(numReceivedNetworkFrames);
@@ -73,6 +80,20 @@ void Ieee8021dRelay::initialize(int stage)
         WATCH(numDeliveredBDPUsToSTP);
         WATCH(numDispatchedNonBPDUFrames);
     }
+}
+
+
+void Ieee8021dRelay::registerAddress(MacAddress mac)
+{
+    registerAddresses(mac, mac);
+
+}
+
+
+void Ieee8021dRelay::registerAddresses(MacAddress startMac, MacAddress endMac)
+{
+    registeredMacAddresses.insert(MacAddressPair(startMac, endMac));
+
 }
 
 void Ieee8021dRelay::handleMessage(cMessage *msg)
@@ -85,6 +106,10 @@ void Ieee8021dRelay::handleMessage(cMessage *msg)
     else if (msg->isSelfMessage())
         throw cRuntimeError("This module doesn't handle self-messages!");
 
+    else if (msg->arrivedOn("upperLayerIn"))
+    {
+        handleAndDispatchFrameFromHL(check_and_cast<Packet *>(msg));
+    }
     // messages from network
     else if (msg->arrivedOn("ifIn")) {
         Packet *packet = check_and_cast<Packet *>(msg);
@@ -94,16 +119,45 @@ void Ieee8021dRelay::handleMessage(cMessage *msg)
         emit(packetReceivedFromLowerSignal, packet);
         handleAndDispatchFrame(packet);
     }
-    // messages from STP process
-    else if (msg->arrivedOn("stpIn")) {
-        Packet *packet = check_and_cast<Packet *>(msg);
-        numReceivedBPDUsFromSTP++;
-        EV_INFO << "Received " << msg << " from STP/RSTP module." << endl;
-        dispatchBPDU(packet);
-    }
+//    // messages from STP process
+//    else if (msg->arrivedOn("stpIn")) {
+//        Packet *packet = check_and_cast<Packet *>(msg);
+//        numReceivedBPDUsFromSTP++;
+//        EV_INFO << "Received " << msg << " from STP/RSTP module." << endl;
+//        dispatchBPDU(packet);
+//    }
     // unknown gate
     else
         throw cRuntimeError("Message arrived on unknown gate");
+}
+
+void Ieee8021dRelay::handleAndDispatchFrameFromHL(Packet *packet)
+{
+    const auto& frame = packet->peekAtFront<EthernetMacHeader>();
+
+    InterfaceReq* interfaceReq = packet->findTag<InterfaceReq>();
+    int interfaceId =
+            interfaceReq == nullptr ? -1 : interfaceReq->getInterfaceId();
+
+    if (interfaceId != -1) {
+        InterfaceEntry *ie = ifTable->getInterfaceById(interfaceId);
+        dispatch(packet, ie);
+    } else if (frame->getDest().isBroadcast()) {    // broadcast address
+        broadcast(packet, -1);
+    } else {
+        int outInterfaceId = macTable->getPortForAddress(frame->getDest());
+        // Not known -> broadcast
+        if (outInterfaceId == -1) {
+            EV_DETAIL << "Destination address = " << frame->getDest()
+                             << " unknown, broadcasting frame " << frame
+                             << endl;
+            broadcast(packet, -1);
+        } else {
+            InterfaceEntry *ie = ifTable->getInterfaceById(interfaceId);
+            dispatch(packet, ie);
+
+        }
+    }
 }
 
 bool Ieee8021dRelay::isForwardingInterface(InterfaceEntry *ie)
@@ -167,12 +221,16 @@ void Ieee8021dRelay::handleAndDispatchFrame(Packet *packet)
             && arrivalPortData->getRole() != Ieee8021dInterfaceData::DISABLED
             && isBpdu(packet, frame)) {
         EV_DETAIL << "Deliver BPDU to the STP/RSTP module" << endl;
-        deliverBPDU(packet);    // deliver to the STP/RSTP module
+        sendUp(packet);    // deliver to the STP/RSTP module
     }
     else if (isStpAware && !arrivalPortData->isForwarding()) {
         EV_INFO << "The arrival port is not forwarding! Discarding it!" << endl;
         numDroppedFrames++;
         delete packet;
+    }
+    else if (in_range(registeredMacAddresses, frame->getDest())) {
+        // destination MAC address is registered, send it up
+        sendUp(packet);
     }
     else if (frame->getDest().isBroadcast()) {    // broadcast address
         broadcast(packet, arrivalInterfaceId);
@@ -227,6 +285,12 @@ void Ieee8021dRelay::learn(MacAddress srcAddr, int arrivalInterfaceId)
 
     if (!isStpAware || port->isLearning())
         macTable->updateTableWithAddress(arrivalInterfaceId, srcAddr);
+}
+
+void Ieee8021dRelay::sendUp(Packet *packet)
+{
+
+    send(packet, "upperLayerOut");
 }
 
 void Ieee8021dRelay::dispatchBPDU(Packet *packet)
