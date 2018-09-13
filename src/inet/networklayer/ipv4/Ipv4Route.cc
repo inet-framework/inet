@@ -80,26 +80,11 @@ std::string Ipv4Route::str() const
     if (getNetmask().isUnspecified())
         out << "0";
     else
-<<<<<<< HEAD
         out << getNetmask().getNetmaskLength();
     if (getGateway().isUnspecified())
     {
         out << " is directly connected";
     }
-=======
-        out << gateway << "  ";
-    out << "mask:";
-    if (netmask.isUnspecified())
-        out << "*  ";
-    else
-        out << netmask << "  ";
-    if(rt && rt->isAdminDistEnabled())
-        out << "AD:" << adminDist << "  ";
-    out << "metric:" << metric << "  ";
-    out << "if:";
-    if (!interfacePtr)
-        out << "*";
->>>>>>> master
     else
     {
         out << " [" << getAdminDist() << "/" << getMetric() << "]";
@@ -267,4 +252,3 @@ void Ipv4MulticastRoute::changed(int fieldCode)
 }
 
 } // namespace inet
-
