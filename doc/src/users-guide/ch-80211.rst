@@ -1,4 +1,4 @@
-.. _cha:80211:
+.. _ug:cha:80211:
 
 The 802.11 Model
 ================
@@ -141,7 +141,7 @@ transmission medium types in parentheses) are:
 -  :ned:`Ieee80211DimensionalRadio`
    (:ned:`Ieee80211DimensionalRadioMedium`)
 
--  :ned:`Ieee80211UnitDiskRadio` (:ned:`Ieee80211UnitDiskMedium`)
+-  :ned:`Ieee80211UnitDiskRadio` (:ned:`UnitDiskRadioMedium`)
 
 .. _ug:sec:80211:management:
 

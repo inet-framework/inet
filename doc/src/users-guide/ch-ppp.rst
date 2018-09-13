@@ -43,10 +43,10 @@ The PPP module
 --------------
 
 The PPP module receives packets from the upper layer in the
-:var:`netwIn` gate, encapsulates them into :msg:`PppFrame`’s, and send
-it to the physical layer through the :var:`phys` gate. The
-:msg:`PppFrame`’s received from the :var:`phys` gate are decapsulated
-and sent to the upper layer immediately through the :var:`netwOut` gate.
+:gate:`netwIn` gate, adds a :msg:`PppHeader`, and send
+it to the physical layer through the :gate:`phys` gate. The packet with
+:msg:`PppHeader` is received from the :gate:`phys` and sent to the upper
+layer immediately through the :gate:`netwOut` gate.
 
 Incoming datagrams are waiting in a queue if the line is currently busy.
 In routers, PPP relies on an external queue module (implementing
@@ -81,7 +81,7 @@ PppInterface
 passive queue for the messages received from the network layer.
 
 The queue type is specified by the :par:`queueType` parameter. It can be
-set to :ned:`NoQueue` or to a module type implementing the
+set to ``NoQueue`` or to a module type implementing the
 :ned:`IOutputQueue` interface. There are implementations with QoS and
 RED support.
 

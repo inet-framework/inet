@@ -53,7 +53,7 @@ modules fall into the following broad categories:
    :ned:`Ipv4NetworkLayer` for :protocol:`IPv4`, and
    :ned:`Ipv6NetworkLayer` for :protocol:`IPv6`. The
    :ned:`Ipv4NetworkLayer` module contains several protocol modules:
-   :ned:`Ipv4`, :ned:`Arp`, and :ned:`Icmpv4`.
+   :ned:`Ipv4`, :ned:`Arp`, :ned:`Icmp` and :ned:`Icmpv6`.
 
 -  *Network interfaces* are represented by compound modules which are
    connected to the network layer protocols and other network interfaces

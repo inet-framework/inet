@@ -178,9 +178,9 @@ The following address types are available:
 Protocols described in this chapter work with “generic” L3 addresses,
 they can use any address type.
 
-When choosing IPv4 addresses, an :ned:`IPv4NetworkConfigurator` global
+When choosing IPv4 addresses, an :ned:`Ipv4NetworkConfigurator` global
 instance can be used to assign addresses to network interfaces. (Note
-that :ned:`IPv4NetworkConfigurator` also needs a per-node instance of
+that :ned:`Ipv4NetworkConfigurator` also needs a per-node instance of
 :ned:`Ipv4NodeConfigurator` for it to work.)
 
 .. _ug:sec:networkprotocols:address-resolution:
