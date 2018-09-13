@@ -63,7 +63,7 @@ module EtherSwitch
         status: NodeStatus if hasStatus {
             @display("p=100,400;is=s");
         }
-        l2NodeConfigurator: L2NodeConfigurator if spanningTreeProtocol != "" {
+        l2NodeConfigurator: L2NodeConfigurator if hasStp {
             @display("p=100,300;is=s");
         }
         interfaceTable: InterfaceTable {
@@ -75,7 +75,7 @@ module EtherSwitch
         relayUnit: <default(firstAvailable("Ieee8021dRelay","MacRelayUnit"))> like IMacRelayUnit {
             @display("p=800,300;is=m");
         }
-        stp: <spanningTreeProtocol> like ISpanningTree if spanningTreeProtocol != "" {
+        stp: <spanningTreeProtocol> like ISpanningTree if hasStp {
             @display("p=474,92");
         }
         up: MessageDispatcher {
