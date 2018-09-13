@@ -38,6 +38,17 @@ class INET_API Ieee8021dRelay : public cSimpleModule, public ILifecycle
   public:
     Ieee8021dRelay();
 
+    /**
+     * Register single MAC address that this switch supports.
+     */
+
+    void registerAddress(MacAddress mac);
+
+    /**
+     * Register range of MAC addresses that this switch supports.
+     */
+    void registerAddresses(MacAddress startMac, MacAddress endMac);
+
   protected:
     MacAddress bridgeAddress;
     IInterfaceTable *ifTable = nullptr;
@@ -46,6 +57,25 @@ class INET_API Ieee8021dRelay : public cSimpleModule, public ILifecycle
     FcsMode fcsMode = FCS_MODE_UNDEFINED;
     bool isOperational = false;
     bool isStpAware = false;
+
+    typedef std::pair<MacAddress, MacAddress> MacAddressPair;
+
+
+    struct Comp
+    {
+        bool operator() (const MacAddressPair& first, const MacAddressPair& second) const
+        {
+            return (first.first < second.first && first.second < second.first);
+        }
+    };
+
+    bool in_range(const std::set<MacAddressPair, Comp>& ranges, MacAddress value)
+    {
+        return ranges.find(MacAddressPair(value, value)) != ranges.end();
+    }
+
+
+    std::set<MacAddressPair, Comp> registeredMacAddresses;
 
     // statistics: see finish() for details.
     int numReceivedNetworkFrames = 0;
@@ -69,6 +99,9 @@ class INET_API Ieee8021dRelay : public cSimpleModule, public ILifecycle
      *
      */
     void handleAndDispatchFrame(Packet *packet);
+
+    void handleAndDispatchFrameFromHL(Packet *packet);
+
     void dispatch(Packet *packet, InterfaceEntry *ie);
     void learn(MacAddress srcAddr, int arrivalInterfaceId);
     void broadcast(Packet *packet, int arrivalInterfaceId);
@@ -84,6 +117,8 @@ class INET_API Ieee8021dRelay : public cSimpleModule, public ILifecycle
      * Sets the BPDU's Ieee802Ctrl info according to the arriving EtherFrame.
      */
     void deliverBPDU(Packet *packet);
+
+    void sendUp(Packet *packet);
 
     // For lifecycle
     virtual void start();

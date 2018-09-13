@@ -27,10 +27,14 @@ simple MacRelayUnit like IMacRelayUnit
         string interfaceTableModule = default("^.interfaceTable"); // The path to the InterfaceTable module
         @signal[packetSentToLower](type=cPacket);
         @signal[packetReceivedFromLower](type=cPacket);
+                
+        bool hasStp;
+        bool hasCDP;
+        bool hasLLDP;
     gates:
         input ifIn @labels(EtherFrame);
         output ifOut @labels(EtherFrame);
-        input stpIn @loose;
-        output stpOut @loose;
+        input upperLayerIn;
+        output upperLayerOut;
 }
 
