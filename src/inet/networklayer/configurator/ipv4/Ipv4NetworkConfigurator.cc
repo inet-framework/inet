@@ -463,23 +463,11 @@ void Ipv4NetworkConfigurator::assignAddresses(std::vector<LinkInfo *> links)
                 EV_TRACE << "Trying network netmask: " << Ipv4Address(networkNetmask) << " : " << netmaskLength << endl;
                 networkAddress = mergedAddress & mergedAddressSpecifiedBits & networkNetmask;
                 uint32 networkAddressUnspecifiedBits = ~mergedAddressSpecifiedBits & networkNetmask;    // 1 means the network address unspecified
-                uint32 networkAddressUnspecifiedPartMaximum = 0;
-                for (int i = 0; i < (int)assignedNetworkAddresses.size(); i++) {
-                    uint32 assignedNetworkAddress = assignedNetworkAddresses[i];
-                    uint32 assignedNetworkNetmask = assignedNetworkNetmasks[i];
-                    uint32 assignedNetworkAddressMaximum = assignedNetworkAddress | ~assignedNetworkNetmask;
-                    EV_TRACE << "Checking against assigned network address " << Ipv4Address(assignedNetworkAddress) << endl;
-                    if ((assignedNetworkAddress & ~networkAddressUnspecifiedBits) == (networkAddress & ~networkAddressUnspecifiedBits)) {
-                        uint32 assignedAddressUnspecifiedPart = getPackedBits(assignedNetworkAddressMaximum, networkAddressUnspecifiedBits);
-                        if (assignedAddressUnspecifiedPart > networkAddressUnspecifiedPartMaximum)
-                            networkAddressUnspecifiedPartMaximum = assignedAddressUnspecifiedPart;
-                    }
-                }
                 uint32 networkAddressUnspecifiedPartLimit = getPackedBits(~(uint32)0, networkAddressUnspecifiedBits) + (uint32)1;
-                EV_TRACE << "Counting from: " << networkAddressUnspecifiedPartMaximum + (uint32)1 << " to: " << networkAddressUnspecifiedPartLimit << endl;
+                EV_TRACE << "Counting from: " << 0 << " to: " << networkAddressUnspecifiedPartLimit << endl;
 
                 // we start with +1 so that the network address will be more likely different
-                for (uint32 networkAddressUnspecifiedPart = networkAddressUnspecifiedPartMaximum; networkAddressUnspecifiedPart <= networkAddressUnspecifiedPartLimit; networkAddressUnspecifiedPart++) {
+                for (uint32 networkAddressUnspecifiedPart = 0; networkAddressUnspecifiedPart <= networkAddressUnspecifiedPartLimit; networkAddressUnspecifiedPart++) {
                     networkAddress = setPackedBits(networkAddress, networkAddressUnspecifiedBits, networkAddressUnspecifiedPart);
                     EV_TRACE << "Trying network address: " << Ipv4Address(networkAddress) << endl;
                     uint32 networkAddressMaximum = networkAddress | ~networkNetmask;
