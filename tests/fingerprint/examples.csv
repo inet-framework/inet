@@ -26,8 +26,8 @@
 /examples/bgpv4/Bgp2RoutersInAS/,    -f omnetpp.ini -c config1 -r 0,                1000s,           29bf-8684/tplx, PASS, ospf
 /examples/bgpv4/Bgp3Routers/,        -f omnetpp.ini -c config1 -r 0,                1000s,           0d4d-f7ab/tplx, PASS, ospf
 /examples/bgpv4/BgpCompleteTest/,    -f omnetpp.ini -c config1 -r 0,                1000s,           9b33-96ba/tplx, PASS, ospf
-/examples/bgpv4/BgpOpen/,            -f omnetpp.ini -c config1 -r 0,                62s,             6118-0c48/tplx, PASS,
-/examples/bgpv4/BgpUpdate/,          -f omnetpp.ini -c config1 -r 0,                30s,             3624-5032/tplx, PASS,
+/examples/bgpv4/BgpOpen/,            -f omnetpp.ini -c config1 -r 0,                62s,             6118-0c48/tplx, PASS, ospf
+/examples/bgpv4/BgpUpdate/,          -f omnetpp.ini -c config1 -r 0,                30s,             3624-5032/tplx, PASS, ospf
 /examples/bgpv4/BgpAndOspf/,         -f omnetpp.ini -c config1 -r 0,                1000s,           3460-caba/tplx, PASS, ospf
 /examples/bgpv4/BgpAndOspfSimple/,   -f omnetpp.ini -c config1 -r 0,                1000s,           58d9-4662/tplx, PASS, ospf
 
