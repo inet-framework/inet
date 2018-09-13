@@ -46,7 +46,7 @@ extensions = [
     'sphinx.ext.githubpages',
     'sphinx.ext.graphviz',
     'sphinx.ext.imgconverter',
-#    'sphinxcontrib.doxylink',
+    'tools.doxylink',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -226,10 +226,11 @@ extlinks = {
 
 # -- Doxylink config ---------------------------------------------------------
 
-#doxylink = {
-#        'cpp' : ('_static/reference/doxytags.xml', '_static/reference/cpp/'),
-#        'ned' : ('_static/reference/nedtags.xml', '_static/reference/ned/'),
-#}
+doxylink = {
+#        'cpp' : ('doxytags.xml', 'https://omnetpp.org/doc/inet/api-current/doxy/'),
+        'ned' : ('nedtags.xml', 'https://omnetpp.org/doc/inet/api-current/neddoc/'),
+        'msg' : ('msgtags.xml', 'https://omnetpp.org/doc/inet/api-current/neddoc/'),
+}
 
 # -- Extension configuration -------------------------------------------------
 rst_prolog = open('global.rst', 'r').read()

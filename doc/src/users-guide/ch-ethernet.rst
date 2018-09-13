@@ -105,7 +105,7 @@ the standard.
 
 In the INET framework, the cables are represented by connections. The
 connections used in Ethernet LANs must be derived from
-:ned:`DatarateConnection` and should have their :par:`delay` and
+ned::``DatarateChannel`` and should have their :par:`delay` and
 :par:`datarate` parameters set. The delay parameter can be used to model
 the distance between the nodes. The datarate parameter can have four
 values:
@@ -124,7 +124,7 @@ values:
 
 There is currently no support for 200Gbps and 400Gbps Ethernet.
 
-:ned:`Ether10M`, :ned:`Ether100M`, :ned:`Ether1G`, :ned:`Eth10G`,
+:ned:`Eth10M`, :ned:`Eth100M`, :ned:`Eth1G`, :ned:`Eth10G`,
 :ned:`Eth40G`, :ned:`Eth100G`
 
 .. _ug:sec:ethernet:ethernet-interface:
@@ -174,7 +174,7 @@ The following components are present in the model:
 
 -  :ned:`MacAddressTable`
 
--  :ned:`Ieee802dRelay`
+-  :ned:`Ieee8021dRelay`
 
 .. _ug:sec:ethernet:ethermacfullduplex:
 

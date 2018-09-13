@@ -34,13 +34,22 @@ namespace inet {
 
 namespace ospf {
 
-class InterfaceState;
+class OspfInterfaceState;
 class Area;
 
-class INET_API Interface
+class INET_API OspfInterface
 {
   public:
-    enum InterfaceEventType {
+    enum OspfInterfaceType {
+        UNKNOWN_TYPE = 0,
+        POINTTOPOINT = 1,
+        BROADCAST = 2,
+        NBMA = 3,
+        POINTTOMULTIPOINT = 4,
+        VIRTUAL = 5
+    };
+
+    enum OspfInterfaceEventType {
         INTERFACE_UP = 0,
         HELLO_TIMER = 1,
         WAIT_TIMER = 2,
@@ -52,16 +61,7 @@ class INET_API Interface
         INTERFACE_DOWN = 8
     };
 
-    enum OspfInterfaceType {
-        UNKNOWN_TYPE = 0,
-        POINTTOPOINT = 1,
-        BROADCAST = 2,
-        NBMA = 3,
-        POINTTOMULTIPOINT = 4,
-        VIRTUAL = 5
-    };
-
-    enum InterfaceStateType {
+    enum OspfInterfaceStateType {
         DOWN_STATE = 0,
         LOOPBACK_STATE = 1,
         WAITING_STATE = 2,
@@ -71,10 +71,19 @@ class INET_API Interface
         DESIGNATED_ROUTER_STATE = 6
     };
 
+    enum OspfInterfaceMode {
+        ACTIVE = 0,
+        PASSIVE = 1,
+        NO_OSPF = 2,
+    };
+
   private:
     OspfInterfaceType interfaceType;
-    InterfaceState *state;
-    InterfaceState *previousState;
+    OspfInterfaceMode interfaceMode;
+    CrcMode crcMode;
+    OspfInterfaceState *state;
+    OspfInterfaceState *previousState;
+    std::string ifName;
     int ifIndex;
     unsigned short mtu;
     Ipv4AddressRange interfaceAddressRange;
@@ -103,26 +112,26 @@ class INET_API Interface
     Area *parentArea;
 
   private:
-    friend class InterfaceState;
-    void changeState(InterfaceState *newState, InterfaceState *currentState);
+    friend class OspfInterfaceState;
+    void changeState(OspfInterfaceState *newState, OspfInterfaceState *currentState);
 
   public:
-    Interface(OspfInterfaceType ifType = UNKNOWN_TYPE);
-    virtual ~Interface();
+    OspfInterface(OspfInterfaceType ifType = UNKNOWN_TYPE);
+    virtual ~OspfInterface();
 
-    void processEvent(InterfaceEventType event);
+    void processEvent(OspfInterfaceEventType event);
     void reset();
     void sendHelloPacket(Ipv4Address destination, short ttl = 1);
     void sendLsAcknowledgement(const OspfLsaHeader *lsaHeader, Ipv4Address destination);
     Neighbor *getNeighborById(RouterId neighborID);
     Neighbor *getNeighborByAddress(Ipv4Address address);
     void addNeighbor(Neighbor *neighbor);
-    InterfaceStateType getState() const;
-    static const char *getStateString(InterfaceStateType stateType);
+    OspfInterfaceStateType getState() const;
+    static const char *getStateString(OspfInterfaceStateType stateType);
     bool hasAnyNeighborInStates(int states) const;
     void removeFromAllRetransmissionLists(LsaKeyType lsaKey);
     bool isOnAnyRetransmissionList(LsaKeyType lsaKey) const;
-    bool floodLsa(const OspfLsa *lsa, Interface *intf = nullptr, Neighbor *neighbor = nullptr);
+    bool floodLsa(const OspfLsa *lsa, OspfInterface *intf = nullptr, Neighbor *neighbor = nullptr);
     void addDelayedAcknowledgement(const OspfLsaHeader& lsaHeader);
     void sendDelayedAcknowledgements();
     void ageTransmittedLsaLists();
@@ -131,8 +140,16 @@ class INET_API Interface
 
     void setType(OspfInterfaceType ifType) { interfaceType = ifType; }
     OspfInterfaceType getType() const { return interfaceType; }
+    static const char *getTypeString(OspfInterfaceType intfType);
+    OspfInterfaceMode getMode() const { return interfaceMode; }
+    static const char *getModeString(OspfInterfaceMode intfMode);
+    void setMode(OspfInterfaceMode intfMode) { interfaceMode = intfMode; }
+    CrcMode getCrcMode() const { return crcMode; }
+    void setCrcMode(CrcMode crcMode) { this->crcMode = crcMode; }
     void setIfIndex(IInterfaceTable *ift, int index);
     int getIfIndex() const { return ifIndex; }
+    void setIfName(std::string ifName) { this->ifName = ifName; }
+    std::string getIfName() const { return ifName; }
     void setMtu(unsigned short ifMTU) { mtu = ifMTU; }
     unsigned short getMtu() const { return mtu; }
     void setAreaId(AreaId areaId) { areaID = areaId; }
@@ -174,6 +191,8 @@ class INET_API Interface
     void setArea(Area *area) { parentArea = area; }
     Area *getArea() { return parentArea; }
     const Area *getArea() const { return parentArea; }
+
+    friend std::ostream& operator<<(std::ostream& stream, const OspfInterface& intf);
 };
 
 } // namespace ospf

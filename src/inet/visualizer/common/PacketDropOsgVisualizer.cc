@@ -43,7 +43,7 @@ void PacketDropOsgVisualizer::refreshDisplay() const
 {
     PacketDropVisualizerBase::refreshDisplay();
     // TODO: switch to osg canvas when API is extended
-    visualizerTargetModule->getCanvas()->setAnimationSpeed(packetDropVisualizations.empty() ? 0 : fadeOutAnimationSpeed, this);
+    visualizationTargetModule->getCanvas()->setAnimationSpeed(packetDropVisualizations.empty() ? 0 : fadeOutAnimationSpeed, this);
 }
 
 const PacketDropVisualizerBase::PacketDropVisualization *PacketDropOsgVisualizer::createPacketDropVisualization(PacketDrop *packetDrop) const
@@ -76,7 +76,7 @@ void PacketDropOsgVisualizer::addPacketDropVisualization(const PacketDropVisuali
 {
     PacketDropVisualizerBase::addPacketDropVisualization(packetDropVisualization);
     auto packetDropOsgVisualization = static_cast<const PacketDropOsgVisualization *>(packetDropVisualization);
-    auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
+    auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizationTargetModule);
     scene->addChild(packetDropOsgVisualization->node);
 }
 

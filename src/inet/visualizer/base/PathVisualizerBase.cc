@@ -120,20 +120,19 @@ void PathVisualizerBase::refreshDisplay() const
 
 void PathVisualizerBase::subscribe()
 {
-    auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
-    subscriptionModule->subscribe(packetSentToUpperSignal, this);
-    subscriptionModule->subscribe(packetReceivedFromUpperSignal, this);
-    subscriptionModule->subscribe(packetReceivedFromLowerSignal, this);
+    visualizationSubjectModule->subscribe(packetSentToUpperSignal, this);
+    visualizationSubjectModule->subscribe(packetReceivedFromUpperSignal, this);
+    visualizationSubjectModule->subscribe(packetReceivedFromLowerSignal, this);
 }
 
 void PathVisualizerBase::unsubscribe()
 {
     // NOTE: lookup the module again because it may have been deleted first
-    auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this, false);
-    if (subscriptionModule != nullptr) {
-        subscriptionModule->unsubscribe(packetSentToUpperSignal, this);
-        subscriptionModule->unsubscribe(packetReceivedFromUpperSignal, this);
-        subscriptionModule->unsubscribe(packetReceivedFromLowerSignal, this);
+    auto visualizationSubjectModule = getModuleFromPar<cModule>(par("visualizationSubjectModule"), this, false);
+    if (visualizationSubjectModule != nullptr) {
+        visualizationSubjectModule->unsubscribe(packetSentToUpperSignal, this);
+        visualizationSubjectModule->unsubscribe(packetReceivedFromUpperSignal, this);
+        visualizationSubjectModule->unsubscribe(packetReceivedFromLowerSignal, this);
     }
 }
 

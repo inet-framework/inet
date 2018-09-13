@@ -41,7 +41,7 @@ ini file line:
    **.routingProtocolType = "Aodv"
 
 There are also NED types called :ned:`AodvRouter`, :ned:`DymoRouter`,
-:ned:`DsvRouter`, :ned:`GpsrRouter`, which are all :ned:`ManetRouter`’s
+:ned:`DsdvRouter`, :ned:`GpsrRouter`, which are all :ned:`ManetRouter`’s
 with the routing protocol submodule type set appropriately.
 
 .. _ug:sec:adhocrouting:aodv:

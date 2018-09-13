@@ -54,7 +54,7 @@ void MediumCanvasVisualizer::initialize(int stage)
         signalWaveLength = par("signalWaveLength");
         signalWaveWidth = par("signalWaveWidth");
         signalWaveFadingAnimationSpeedFactor = par("signalWaveFadingAnimationSpeedFactor");
-        cCanvas *canvas = visualizerTargetModule->getCanvas();
+        cCanvas *canvas = visualizationTargetModule->getCanvas();
         if (displaySignals) {
             signalLayer = new cGroupFigure("communication");
             signalLayer->setZIndex(zIndex);
@@ -72,7 +72,7 @@ void MediumCanvasVisualizer::initialize(int stage)
         networkNodeVisualizer = getModuleFromPar<NetworkNodeCanvasVisualizer>(par("networkNodeVisualizerModule"), this);
     }
     else if (stage == INITSTAGE_LAST) {
-        canvasProjection = CanvasProjection::getCanvasProjection(visualizerTargetModule->getCanvas());
+        canvasProjection = CanvasProjection::getCanvasProjection(visualizationTargetModule->getCanvas());
         if (communicationHeat != nullptr) {
             const IMediumLimitCache *mediumLimitCache = radioMedium->getMediumLimitCache();
             Coord min = mediumLimitCache->getMinConstraintArea();
@@ -161,7 +161,7 @@ void MediumCanvasVisualizer::setAnimationSpeed()
     lastSignalInProgress = newSignalInProgress;
     double animationSpeed = animationSpeedInterpolator.getCurrentAnimationSpeed();
     ASSERT(!std::isnan(animationSpeed));
-    visualizerTargetModule->getCanvas()->setAnimationSpeed(animationSpeed, this);
+    visualizationTargetModule->getCanvas()->setAnimationSpeed(animationSpeed, this);
 }
 
 cFigure *MediumCanvasVisualizer::getSignalDepartureFigure(const IRadio *radio) const

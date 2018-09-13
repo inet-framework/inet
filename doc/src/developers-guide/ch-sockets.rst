@@ -1055,14 +1055,12 @@ When the protocol stack within the network node sends a datagram to a
 :protocol:`TUN` interface, the packet appears for the application which
 uses a :cpp:`TunSocket` as if the packet were sent to the network.
 
-TODO
+.. IEEE 802.2 Socket
+   -----------------
 
-IEEE 802.2 Socket
------------------
+.. Ethernet Socket
+   ---------------
 
-Ethernet Socket
----------------
-
-IEEE 802.11 Socket
-------------------
+.. IEEE 802.11 Socket
+   ------------------
 

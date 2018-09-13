@@ -80,8 +80,7 @@ void TransportConnectionVisualizerBase::handleParameterChange(const char *name)
 void TransportConnectionVisualizerBase::subscribe()
 {
 #ifdef WITH_TCP_INET
-    auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
-    subscriptionModule->subscribe(inet::tcp::Tcp::tcpConnectionAddedSignal, this);
+    visualizationSubjectModule->subscribe(inet::tcp::Tcp::tcpConnectionAddedSignal, this);
 #endif // WITH_TCP_INET
 }
 
@@ -89,9 +88,9 @@ void TransportConnectionVisualizerBase::unsubscribe()
 {
 #ifdef WITH_TCP_INET
     // NOTE: lookup the module again because it may have been deleted first
-    auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this, false);
-    if (subscriptionModule != nullptr)
-        subscriptionModule->unsubscribe(inet::tcp::Tcp::tcpConnectionAddedSignal, this);
+    auto visualizationSubjectModule = getModuleFromPar<cModule>(par("visualizationSubjectModule"), this, false);
+    if (visualizationSubjectModule != nullptr)
+        visualizationSubjectModule->unsubscribe(inet::tcp::Tcp::tcpConnectionAddedSignal, this);
 #endif // WITH_TCP_INET
 }
 

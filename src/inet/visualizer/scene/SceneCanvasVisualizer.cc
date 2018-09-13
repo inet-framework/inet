@@ -30,7 +30,7 @@ void SceneCanvasVisualizer::initialize(int stage)
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
         zIndex = par("zIndex");
-        cCanvas *canvas = visualizerTargetModule->getCanvas();
+        cCanvas *canvas = visualizationTargetModule->getCanvas();
         bool invertY;
         canvasProjection.setRotation(parseViewAngle(par("viewAngle"), invertY));
         canvasProjection.setScale(parse2D(par("viewScale"), invertY));
@@ -221,7 +221,7 @@ cFigure::Point SceneCanvasVisualizer::parse2D(const char* text, bool invertY)
 
 void SceneCanvasVisualizer::displayDescription(const char *descriptionFigurePath)
 {
-    cFigure* descriptionFigure = visualizerTargetModule->getCanvas()->getFigureByPath(descriptionFigurePath);
+    cFigure* descriptionFigure = visualizationTargetModule->getCanvas()->getFigureByPath(descriptionFigurePath);
     if (!descriptionFigure)
         throw cRuntimeError("Figure \"%s\" not found", descriptionFigurePath);
     auto descriptionTextFigure = check_and_cast<cAbstractTextFigure*>(descriptionFigure);

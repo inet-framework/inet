@@ -78,22 +78,21 @@ void Ieee80211VisualizerBase::handleParameterChange(const char *name)
 
 void Ieee80211VisualizerBase::subscribe()
 {
-    auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
-    subscriptionModule->subscribe(l2AssociatedSignal, this);
-    subscriptionModule->subscribe(l2DisassociatedSignal, this);
-    subscriptionModule->subscribe(l2ApAssociatedSignal, this);
-    subscriptionModule->subscribe(l2ApDisassociatedSignal, this);
+    visualizationSubjectModule->subscribe(l2AssociatedSignal, this);
+    visualizationSubjectModule->subscribe(l2DisassociatedSignal, this);
+    visualizationSubjectModule->subscribe(l2ApAssociatedSignal, this);
+    visualizationSubjectModule->subscribe(l2ApDisassociatedSignal, this);
 }
 
 void Ieee80211VisualizerBase::unsubscribe()
 {
     // NOTE: lookup the module again because it may have been deleted first
-    auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this, false);
-    if (subscriptionModule != nullptr) {
-        subscriptionModule->unsubscribe(l2AssociatedSignal, this);
-        subscriptionModule->unsubscribe(l2DisassociatedSignal, this);
-        subscriptionModule->unsubscribe(l2ApAssociatedSignal, this);
-        subscriptionModule->unsubscribe(l2ApDisassociatedSignal, this);
+    auto visualizationSubjectModule = getModuleFromPar<cModule>(par("visualizationSubjectModule"), this, false);
+    if (visualizationSubjectModule != nullptr) {
+        visualizationSubjectModule->unsubscribe(l2AssociatedSignal, this);
+        visualizationSubjectModule->unsubscribe(l2DisassociatedSignal, this);
+        visualizationSubjectModule->unsubscribe(l2ApAssociatedSignal, this);
+        visualizationSubjectModule->unsubscribe(l2ApDisassociatedSignal, this);
     }
 }
 

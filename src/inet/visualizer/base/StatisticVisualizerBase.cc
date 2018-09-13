@@ -105,18 +105,17 @@ void StatisticVisualizerBase::handleParameterChange(const char *name)
 
 void StatisticVisualizerBase::subscribe()
 {
-    auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
     if (*signalName != '\0')
-        subscriptionModule->subscribe(registerSignal(signalName), this);
+        visualizationSubjectModule->subscribe(registerSignal(signalName), this);
 }
 
 void StatisticVisualizerBase::unsubscribe()
 {
     // NOTE: lookup the module again because it may have been deleted first
-    auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this, false);
-    if (subscriptionModule != nullptr) {
+    auto visualizationSubjectModule = getModuleFromPar<cModule>(par("visualizationSubjectModule"), this, false);
+    if (visualizationSubjectModule != nullptr) {
         if (*signalName != '\0')
-            subscriptionModule->unsubscribe(registerSignal(signalName), this);
+            visualizationSubjectModule->unsubscribe(registerSignal(signalName), this);
     }
 }
 

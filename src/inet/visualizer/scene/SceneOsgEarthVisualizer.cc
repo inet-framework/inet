@@ -69,7 +69,7 @@ void SceneOsgEarthVisualizer::initializeScene()
     auto mapScene = osgDB::readNodeFile(mapFileString);
     if (mapScene == nullptr)
         throw cRuntimeError("Could not read earth map file '%s'", mapFileString);
-    auto osgCanvas = visualizerTargetModule->getOsgCanvas();
+    auto osgCanvas = visualizationTargetModule->getOsgCanvas();
     osgCanvas->setViewerStyle(cOsgCanvas::STYLE_EARTH);
     auto topLevelScene = check_and_cast<inet::osg::TopLevelScene *>(osgCanvas->getScene());
     topLevelScene->addChild(mapScene);
@@ -102,7 +102,7 @@ void SceneOsgEarthVisualizer::initializeViewpoint()
     auto radius = boundingSphere.radius();
     auto euclideanCenter = boundingSphere.center();
     auto geographicSrsEye = coordinateSystem->computeGeographicCoordinate(Coord(euclideanCenter.x(), euclideanCenter.y(), euclideanCenter.z()));
-    auto osgCanvas = visualizerTargetModule->getOsgCanvas();
+    auto osgCanvas = visualizationTargetModule->getOsgCanvas();
 #if OMNETPP_BUILDNUM >= 1012
     osgCanvas->setEarthViewpoint(cOsgCanvas::EarthViewpoint(deg(geographicSrsEye.longitude).get(), deg(geographicSrsEye.latitude).get(), m(geographicSrsEye.altitude).get(), -45, -45, cameraDistanceFactor * radius));
 #else

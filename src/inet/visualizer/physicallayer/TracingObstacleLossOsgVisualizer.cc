@@ -42,7 +42,7 @@ void TracingObstacleLossOsgVisualizer::initialize(int stage)
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
         obstacleLossNode = new osg::Group();
-        auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
+        auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizationTargetModule);
         scene->addChild(obstacleLossNode);
     }
 }
@@ -51,7 +51,7 @@ void TracingObstacleLossOsgVisualizer::refreshDisplay() const
 {
     TracingObstacleLossVisualizerBase::refreshDisplay();
     // TODO: switch to osg canvas when API is extended
-    visualizerTargetModule->getCanvas()->setAnimationSpeed(obstacleLossVisualizations.empty() ? 0 : fadeOutAnimationSpeed, this);
+    visualizationTargetModule->getCanvas()->setAnimationSpeed(obstacleLossVisualizations.empty() ? 0 : fadeOutAnimationSpeed, this);
 }
 
 const TracingObstacleLossVisualizerBase::ObstacleLossVisualization *TracingObstacleLossOsgVisualizer::createObstacleLossVisualization(const ITracingObstacleLoss::ObstaclePenetratedEvent *obstaclePenetratedEvent) const
@@ -93,7 +93,7 @@ void TracingObstacleLossOsgVisualizer::addObstacleLossVisualization(const Obstac
 {
     TracingObstacleLossVisualizerBase::addObstacleLossVisualization(obstacleLossVisualization);
     auto obstacleLossOsgVisualization = static_cast<const ObstacleLossOsgVisualization *>(obstacleLossVisualization);
-    auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizerTargetModule);
+    auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizationTargetModule);
     scene->addChild(obstacleLossOsgVisualization->node);
 }
 

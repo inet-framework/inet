@@ -25,17 +25,18 @@ namespace inet {
 
 namespace ospf {
 
-class INET_API InterfaceState
+class INET_API OspfInterfaceState
 {
   protected:
-    void changeState(Interface *intf, InterfaceState *newState, InterfaceState *currentState);
-    void calculateDesignatedRouter(Interface *intf);
+    void changeState(OspfInterface *intf, OspfInterfaceState *newState, OspfInterfaceState *currentState);
+    void calculateDesignatedRouter(OspfInterface *intf);
+    void printElectionResult(const OspfInterface *onInterface, DesignatedRouterId DR, DesignatedRouterId BDR);
 
   public:
-    virtual ~InterfaceState() {}
+    virtual ~OspfInterfaceState() {}
 
-    virtual void processEvent(Interface *intf, Interface::InterfaceEventType event) = 0;
-    virtual Interface::InterfaceStateType getState() const = 0;
+    virtual void processEvent(OspfInterface *intf, OspfInterface::OspfInterfaceEventType event) = 0;
+    virtual OspfInterface::OspfInterfaceStateType getState() const = 0;
 };
 
 } // namespace ospf

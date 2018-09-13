@@ -198,11 +198,13 @@ void Topology::extractFromNetwork(bool (*predicate)(cModule *, void *), void *da
     clear();
 
     // Loop through all modules and find those that satisfy the criteria
+    int networkId = 0;
     for (int modId = 0; modId <= getSimulation()->getLastComponentId(); modId++)
     {
         cModule *module = getSimulation()->getModule(modId);
         if (module && predicate(module, data)) {
             Node *node = createNode(module);
+            node->setNetworkId(++networkId);
             nodes.push_back(node);
         }
     }
@@ -245,6 +247,9 @@ void Topology::extractFromNetwork(bool (*predicate)(cModule *, void *), void *da
             link->destNode->inLinks.push_back(link);
         }
     }
+
+    for (auto & elem : nodes)
+        findNetworks(elem);
 }
 
 int Topology::addNode(Node *node)
@@ -463,6 +468,39 @@ void Topology::calculateWeightedSingleShortestPathsTo(Node *_target)
                         break;
 
                 q.insert(it, src);
+            }
+        }
+    }
+}
+
+void Topology::findNetworks(Node *node)
+{
+    if (node->isVisited())
+        return;
+
+    cModule *mod = getSimulation()->getModule(node->moduleId);
+    if (!mod)
+        return;
+
+    for (cModule::GateIterator i(mod); !i.end(); i++) {
+        cGate *gate = *i;
+        if (gate->getType() != cGate::OUTPUT)
+            continue;
+
+        // follow path
+        do {
+            gate = gate->getNextGate();
+        } while (gate && !gate->getOwnerModule());
+
+        // if we arrived at a module in the topology, record it.
+        if (gate) {
+            node->setVisited(true);
+            Node *nextNode = getNodeFor(gate->getOwnerModule());
+            if (nextNode) {
+                if (!nextNode->isVisited()) {
+                    nextNode->setNetworkId(node->getNetworkId());
+                    findNetworks(nextNode);
+                }
             }
         }
     }

@@ -28,6 +28,8 @@ module RadioVisualizer like IRadioVisualizer
 {
     parameters:
         @display("i=block/app");
+        *.visualizationTargetModule = default("^.^");
+        *.visualizationSubjectModule = default("^.^");
     submodules:
         canvasVisualizer: <default("RadioCanvasVisualizer")> like IRadioVisualizer if typename != "" {
             parameters:

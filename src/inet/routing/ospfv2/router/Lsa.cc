@@ -136,8 +136,7 @@ std::ostream& operator<<(std::ostream& ostr, const OspfLsaHeader& lsaHeader)
     }
     ostr << ", LSID=" << lsaHeader.getLinkStateID().str(false)
          << ", advertisingRouter=" << lsaHeader.getAdvertisingRouter().str(false)
-         << ", seqNumber=" << lsaHeader.getLsSequenceNumber()
-         << endl;
+         << ", seqNumber=" << lsaHeader.getLsSequenceNumber();
     return ostr;
 }
 

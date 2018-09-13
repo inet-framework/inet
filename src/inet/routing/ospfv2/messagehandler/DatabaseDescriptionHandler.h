@@ -28,12 +28,12 @@ namespace ospf {
 class INET_API DatabaseDescriptionHandler : public IMessageHandler
 {
   private:
-    bool processDDPacket(const OspfDatabaseDescriptionPacket *ddPacket, Interface *intf, Neighbor *neighbor, bool inExchangeStart);
+    bool processDDPacket(const OspfDatabaseDescriptionPacket *ddPacket, OspfInterface *intf, Neighbor *neighbor, bool inExchangeStart);
 
   public:
     DatabaseDescriptionHandler(Router *containingRouter);
 
-    void processPacket(Packet *packet, Interface *intf, Neighbor *neighbor) override;
+    void processPacket(Packet *packet, OspfInterface *intf, Neighbor *neighbor) override;
 };
 
 } // namespace ospf

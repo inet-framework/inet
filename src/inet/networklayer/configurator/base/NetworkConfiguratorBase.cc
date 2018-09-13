@@ -66,6 +66,7 @@ void NetworkConfiguratorBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         minLinkWeight = par("minLinkWeight");
+        configureIsolatedNetworksSeparatly = par("configureIsolatedNetworksSeparatly").boolValue();
         configuration = par("config");
     }
 }
@@ -75,6 +76,24 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
     // extract topology
     topology.extractByProperty("networkNode");
     EV_DEBUG << "Topology found " << topology.getNumNodes() << " nodes\n";
+
+    // print isolated networks information
+    std::map<int, std::vector<Node *>> isolatedNetworks;
+    for (int i = 0; i < topology.getNumNodes(); i++) {
+        Node *node = (Node *)topology.getNode(i);
+        int networkId = node->getNetworkId();
+        auto networkNodes = isolatedNetworks.find(networkId);
+        if (networkNodes == isolatedNetworks.end()) {
+            std::vector<Node *> collection = {node};
+            isolatedNetworks[networkId] = collection;
+        }
+        else
+            networkNodes->second.push_back(node);
+    }
+    if (isolatedNetworks.size() == 1)
+        EV_DEBUG << "All network nodes belong to a connected network.\n";
+    else
+        EV_DEBUG << "There exists " << isolatedNetworks.size() << " isolated networks.\n";
 
     // extract nodes, fill in interfaceTable and routingTable members in node
     for (int i = 0; i < topology.getNumNodes(); i++) {
@@ -100,6 +119,7 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
                         interfacesSeen.insert(interfaceEntry);
                         // create a new network link
                         LinkInfo *linkInfo = new LinkInfo();
+                        linkInfo->networkId = node->getNetworkId();
                         topology.linkInfos.push_back(linkInfo);
                         // store interface as belonging to the new network link
                         InterfaceInfo *interfaceInfo = createInterfaceInfo(topology, node, isBridgeNode(node) ? nullptr : linkInfo, interfaceEntry);

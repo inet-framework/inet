@@ -1,7 +1,7 @@
-| CI Status | master | integration |
-|-----------|:------:|:-----------:|
-| Build and fingerprint tests | [![Travis CI][travis-master]][1] | [![Travis CI][travis-integration]][2] |
-| Feature enablement tests    | [![CircleCI][circle-master]][3]  | [![CircleCI][circle-integration]][4]  |
+| CI Status | master |
+|-----------|:------:|
+| Build and fingerprint tests | [![Travis CI][travis-master]][1] |
+| Feature enablement tests    | [![CircleCI][circle-master]][3]  |
 
 INET Framework for OMNEST/OMNeT++
 =================================

@@ -30,7 +30,7 @@ void NetworkConnectionCanvasVisualizer::initialize(int stage)
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
         zIndex = par("zIndex");
-        canvasProjection = CanvasProjection::getCanvasProjection(visualizerTargetModule->getCanvas());
+        canvasProjection = CanvasProjection::getCanvasProjection(visualizationTargetModule->getCanvas());
     }
 }
 
@@ -44,7 +44,7 @@ void NetworkConnectionCanvasVisualizer::createNetworkConnectionVisualization(cMo
     lineFigure->setEnd(canvasProjection->computeCanvasPoint(getPosition(endNetworkNode)));
     lineFigure->setEndArrowhead(cFigure::ARROW_BARBED);
     lineFigure->setZIndex(zIndex);
-    visualizerTargetModule->getCanvas()->addFigure(lineFigure);
+    visualizationTargetModule->getCanvas()->addFigure(lineFigure);
 }
 
 } // namespace visualizer

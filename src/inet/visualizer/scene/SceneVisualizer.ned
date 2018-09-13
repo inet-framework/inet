@@ -28,6 +28,8 @@ module SceneVisualizer like ISceneVisualizer
 {
     parameters:
         @display("i=block/app");
+        *.visualizationTargetModule = default("^.^");
+        *.visualizationSubjectModule = default("^.^");
     submodules:
         canvasVisualizer: <default("SceneCanvasVisualizer")> like ISceneVisualizer if typename != "" {
             parameters:
