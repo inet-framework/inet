@@ -32,6 +32,8 @@
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
+#include "inet/common/IProtocolRegistrationListener.h"
+
 namespace inet {
 
 Define_Module(EtherEncap);
@@ -51,6 +53,13 @@ void EtherEncap::initialize(int stage)
         WATCH(totalFromHigherLayer);
         WATCH(totalFromMAC);
         WATCH(totalPauseSent);
+    }
+    else if (stage == INITSTAGE_LINK_LAYER)
+    {
+        //register sservice and protocol
+        registerService(Protocol::ethernetMac, gate("upperLayerIn"), nullptr);
+        registerProtocol(Protocol::ethernetMac, nullptr, gate("upperLayerOut"));
+
     }
 }
 
