@@ -41,8 +41,6 @@ void Ipv4NodeConfigurator::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         cModule *node = getContainingNode(this);
-        if (!node)
-            throw cRuntimeError("The container @networkNode module not found");
         const char *networkConfiguratorPath = par("networkConfiguratorModule");
         nodeStatus = dynamic_cast<NodeStatus *>(node->getSubmodule("status"));
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
