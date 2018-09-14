@@ -53,6 +53,7 @@ module AccessPoint
         wlan[*].radio.antenna.mobilityModule = default("^.^.^.mobility");
         eth[*].encap.typename = "EtherEncapDummy";
         *.interfaceTableModule = default(absPath(".interfaceTable"));
+        relayUnit.hasStp = false;
     gates:
         input radioIn[numWlanInterfaces] @directIn;
         inout ethg[] @labels(EtherFrame-conn);
