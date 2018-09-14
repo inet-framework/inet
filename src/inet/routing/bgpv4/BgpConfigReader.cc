@@ -39,7 +39,6 @@ void BgpConfigReader::loadConfigFromXML(cXMLElement *bgpConfig, BgpRouter *bgpRo
     cXMLElement *paramNode = bgpConfig->getElementByPath("TimerParams");
     if (paramNode == nullptr)
         throw cRuntimeError("BGP Error: No configuration for BGP timer parameters");
-
     cXMLElementList timerConfig = paramNode->getChildren();
     simtime_t delayTab[NB_TIMERS];
     loadTimerConfig(timerConfig, delayTab);
@@ -62,16 +61,15 @@ void BgpConfigReader::loadConfigFromXML(cXMLElement *bgpConfig, BgpRouter *bgpRo
     // load AS information
     char ASXPath[32];
     sprintf(ASXPath, "AS[@id='%d']", myAsId);
-
     cXMLElement *ASNode = bgpConfig->getElementByPath(ASXPath);
-    std::vector<const char *> routerInSameASList;
     if (ASNode == nullptr)
         throw cRuntimeError("BGP Error:  No configuration for AS ID: %d", myAsId);
 
+    // get all BGP speakers in my AS
     cXMLElementList ASConfig = ASNode->getChildren();
-    routerInSameASList = loadASConfig(ASConfig);
+    auto routerInSameASList = loadASConfig(ASConfig);
 
-    //create IGP Session(s)
+    // create an IGP Session with each BGP speaker in my AS
     if (routerInSameASList.size()) {
         unsigned int routerPeerPosition = 1;
         delayTab[3] += sessionList.size() * 2;
@@ -127,13 +125,15 @@ void BgpConfigReader::loadSessionConfig(cXMLElementList& sessionList, simtime_t 
 {
     simtime_t saveStartDelay = delayTab[3];
     for (auto sessionListIt = sessionList.begin(); sessionListIt != sessionList.end(); sessionListIt++, delayTab[3] = saveStartDelay) {
-        const char *exterAddr = (*sessionListIt)->getFirstChild()->getAttribute("exterAddr");
-        Ipv4Address routerAddr1 = Ipv4Address(exterAddr);
-        exterAddr = (*sessionListIt)->getLastChild()->getAttribute("exterAddr");
-        Ipv4Address routerAddr2 = Ipv4Address(exterAddr);
-        if (isInInterfaceTable(ift, routerAddr1) == -1 && isInInterfaceTable(ift, routerAddr2) == -1) {
+        auto numRouters = (*sessionListIt)->getChildren();
+        if(numRouters.size() != 2)
+            throw cRuntimeError("BGP Error: Number of routers is invalid for session ID : %s", (*sessionListIt)->getAttribute("id"));
+
+        Ipv4Address routerAddr1 = Ipv4Address((*sessionListIt)->getFirstChild()->getAttribute("exterAddr"));
+        Ipv4Address routerAddr2 = Ipv4Address((*sessionListIt)->getLastChild()->getAttribute("exterAddr"));
+        if (isInInterfaceTable(ift, routerAddr1) == -1 && isInInterfaceTable(ift, routerAddr2) == -1)
             continue;
-        }
+
         Ipv4Address peerAddr;
         if (isInInterfaceTable(ift, routerAddr1) != -1) {
             peerAddr = routerAddr2;
@@ -143,9 +143,9 @@ void BgpConfigReader::loadSessionConfig(cXMLElementList& sessionList, simtime_t 
             peerAddr = routerAddr1;
             delayTab[3] += atoi((*sessionListIt)->getAttribute("id")) + 0.5;
         }
-        if (peerAddr.isUnspecified()) {
+
+        if (peerAddr.isUnspecified())
             throw cRuntimeError("BGP Error: No valid external address for session ID : %s", (*sessionListIt)->getAttribute("id"));
-        }
 
         SessionId newSessionID = bgpRouter->createSession(EGP, peerAddr.str().c_str());
         bgpRouter->setTimer(newSessionID, delayTab);

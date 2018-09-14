@@ -405,6 +405,8 @@ void Established::entry()
     BgpSession& session = TopState::box().getModule();
     session._info.sessionEstablished = true;
 
+    EV_DEBUG << "BGP session is established. \n";
+
     //if it's an EGP Session, send update messages with all routing information to BGP peer
     //if it's an IGP Session, send update message with only the BGP routes learned by EGP
     const Ipv4Route *rtEntry;
@@ -432,12 +434,10 @@ void Established::entry()
         }
     }
 
-    std::vector<BgpRoutingTableEntry *> BGPRoutingTable = session.getBGPRoutingTable();
-    for (auto & elem : BGPRoutingTable) {
+    for (auto & elem : session.getBGPRoutingTable())
         session.updateSendProcess((elem));
-    }
 
-    //when all EGP Session is in established state, start IGP Session(s)
+    //when all EGP Sessions are in established state, start IGP Session(s)
     SessionId nextSession = session.findAndStartNextSession(EGP);
     if (nextSession == static_cast<SessionId>(-1)) {
         session.findAndStartNextSession(IGP);
