@@ -66,22 +66,23 @@ const char* inet::Ipv4Route::getSourceTypeAbbreviation() const {
 std::string Ipv4Route::str() const
 {
     std::stringstream out;
-
-    out << "dest:";
-    if (dest.isUnspecified())
-        out << "*  ";
+    out << getSourceTypeAbbreviation();
+    out << " ";
+    if (getDestination().isUnspecified())
+        out << "0.0.0.0";
     else
-        out << dest << "  ";
+        out << getDestination();
+    out << "/";
+    if (getNetmask().isUnspecified())
+        out << "0";
+    else
+        out << getNetmask().getNetmaskLength();
     out << "gw:";
     if (gateway.isUnspecified())
         out << "*  ";
     else
-        out << gateway << "  ";
+        out << getGateway() << "  ";
     out << "mask:";
-    if (netmask.isUnspecified())
-        out << "*  ";
-    else
-        out << netmask << "  ";
     if(rt && rt->isAdminDistEnabled())
         out << "AD:" << adminDist << "  ";
     out << "metric:" << metric << "  ";
@@ -89,14 +90,12 @@ std::string Ipv4Route::str() const
     if (!interfacePtr)
         out << "*";
     else
-        out << interfacePtr->getInterfaceName();
-    if (interfacePtr && interfacePtr->ipv4Data())
-        out << "(" << interfacePtr->ipv4Data()->getIPAddress() << ")";
-    out << "  ";
-    out << (gateway.isUnspecified() ? "DIRECT" : "REMOTE");
+        out << getInterfaceName();
+
     out << " " << IRoute::sourceTypeName(sourceType);
     if (protocolData)
         out << " " << protocolData->str();
+
     return out.str();
 }
 
