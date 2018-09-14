@@ -130,7 +130,7 @@ simple Ospf like IOspf
         string interfaceTableModule;
         string routingTableModule;
         string crcMode @enum("disabled", "computed") = default("disabled");
-        volatile double startupTime @unit(s) = default(0); // delay before starting OSPF
+        volatile double startupTime @unit(s) = default(0s); // delay before starting OSPF
         // xml containing the full OSPF AS configuration
         xml ospfConfig = default(xml("<OSPFASConfig> \
                 <Router name='**' RFC1583Compatible='true'> \
