@@ -24,6 +24,9 @@
 #include "inet/linklayer/ieee8021d/rstp/Rstp.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
+
+#include "inet/common/IProtocolRegistrationListener.h"
+
 namespace inet {
 
 Define_Module(Rstp);
@@ -48,6 +51,11 @@ void Rstp::initialize(int stage)
         migrateTime = par("migrateTime");
         helloTimer = new cMessage("itshellotime", SELF_HELLOTIME);
         upgradeTimer = new cMessage("upgrade", SELF_UPGRADE);
+    }else if (stage == INITSTAGE_LINK_LAYER)
+    {
+        //register service and protocol
+        registerService(Protocol::stp, nullptr, gate("relayIn"));
+        registerProtocol(Protocol::stp, gate("relayOut"), nullptr);
     }
 }
 
@@ -603,6 +611,8 @@ void Rstp::sendTCNtoRoot()
                 macAddressReq->setDestAddress(MacAddress::STP_MULTICAST_ADDRESS);
                 packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(r);
 
+                packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
+                packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
                 send(packet, "relayOut");
             }
         }
@@ -669,6 +679,8 @@ void Rstp::sendBPDU(int interfaceId)
         macAddressReq->setDestAddress(MacAddress::STP_MULTICAST_ADDRESS);
         packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
 
+        packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
+        packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
         send(packet, "relayOut");
     }
 }
