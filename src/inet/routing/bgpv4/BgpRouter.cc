@@ -44,7 +44,7 @@ BgpRouter::~BgpRouter(void)
 void BgpRouter::addWatches()
 {
     WATCH(myAsId);
-    WATCH_MAP(_BGPSessions);
+    WATCH_PTRMAP(_BGPSessions);
     WATCH_PTRVECTOR(bgpRoutingTable);
 }
 
@@ -616,14 +616,7 @@ void BgpRouter::printUpdateMessage(const BgpUpdateMessage& updateMsg)
         EV_INFO << "  Path attribute " << i+1 << ": \n";
         EV_INFO << "    ORIGIN: ";
         inet::bgp::BgpSessionType sessionType = pathAttrib.getOrigin().getValue();
-        if(sessionType == IGP)
-            EV_INFO << "IGP \n";
-        else if(sessionType == EGP)
-            EV_INFO << "EGP \n";
-        else if(sessionType == INCOMPLETE)
-            EV_INFO << "INCOMPLETE \n";
-        else
-            EV_INFO << "Unknown \n";
+        EV_INFO << BgpSession::getTypeString(sessionType);
         EV_INFO << "    AS_PATH: ";
         if(pathAttrib.getAsPathArraySize() == 0)
             EV_INFO << "empty";
