@@ -56,10 +56,11 @@ void EtherEncap::initialize(int stage)
     }
     else if (stage == INITSTAGE_LINK_LAYER)
     {
-        //register sservice and protocol
-        registerService(Protocol::ethernetMac, gate("upperLayerIn"), nullptr);
-        registerProtocol(Protocol::ethernetMac, nullptr, gate("upperLayerOut"));
-
+        if (par("registerProtocol").boolValue()) {    //FIXME //KUDGE should redesign place of EtherEncap and LLC modules
+            //register service and protocol
+            registerService(Protocol::ethernetMac, gate("upperLayerIn"), nullptr);
+            registerProtocol(Protocol::ethernetMac, nullptr, gate("upperLayerOut"));
+        }
     }
 }
 
