@@ -46,7 +46,7 @@ void Stp::initialize(int stage)
         WATCH(bridgeAddress);
     }else if (stage == INITSTAGE_LINK_LAYER)
     {
-        //register sservice and protocol
+        //register service and protocol
         registerService(Protocol::stp, nullptr, gate("relayIn"));
         registerProtocol(Protocol::stp, gate("relayOut"), nullptr);
     }
