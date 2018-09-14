@@ -92,7 +92,6 @@ std::string Ipv4Route::str() const
     else
         out << getInterfaceName();
 
-    out << " " << IRoute::sourceTypeName(sourceType);
     if (protocolData)
         out << " " << protocolData->str();
 
