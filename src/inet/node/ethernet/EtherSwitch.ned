@@ -56,6 +56,7 @@ module EtherSwitch
         *.macTableModule = default(absPath(".macTable"));
 
         relayUnit.hasStp = hasStp;
+        encap.registerProtocol = true;
 
     gates:
         inout ethg[] @labels(EtherFrame-conn);
