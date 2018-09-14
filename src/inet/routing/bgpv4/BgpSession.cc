@@ -192,6 +192,32 @@ void BgpSession::getStatistics(unsigned int *statTab)
     statTab[5] += _updateMsgRcv;
 }
 
+const std::string BgpSession::getTypeString(BgpSessionType sessionType)
+{
+    if(sessionType == IGP)
+        return "IGP";
+    else if(sessionType == EGP)
+        return "EGP";
+    else if(sessionType == INCOMPLETE)
+        return "INCOMPLETE";
+
+    return "Unknown";
+}
+
+std::ostream& operator<<(std::ostream& out, const BgpSession& entry)
+{
+    out << "sessionId: " << entry.getSessionID() << " "
+            << "sessionType: " << entry.getTypeString(entry.getType()) << " "
+            << "established: " << (entry.isEstablished() == true ? "true" : "false") << " "
+            << "peer: " << entry.getPeerAddr().str(false) << " "
+            << "startEventTime: " << entry.getStartEventTime() << " "
+            << "connectionRetryTime: " << entry.getConnectionRetryTime() << " "
+            << "holdTime: " << entry.getHoldTime() << " "
+            << "keepAliveTime: " << entry.getKeepAliveTime();
+
+    return out;
+}
+
 } // namespace bgp
 
 } // namespace inet
