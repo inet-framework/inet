@@ -29,7 +29,7 @@ BgpRouter::BgpRouter(cSimpleModule *bgpModule, IInterfaceTable *ift, IIpv4Routin
     this->ift = ift;
     this->rt = rt;
 
-    ospfModule = getModuleFromPar<ospf::Ospf>(bgpModule->par("ospfRoutingModule"), bgpModule);
+    ospfModule = getModuleFromPar<ospf::Ospf>(bgpModule->par("ospfRoutingModule"), bgpModule, false);
 }
 
 BgpRouter::~BgpRouter(void)
