@@ -412,7 +412,7 @@ void Established::entry()
                     rtEntry->getSourceType() == IRoute::IFACENETMASK ||
                     rtEntry->getSourceType() == IRoute::MANUAL ||
                     rtEntry->getSourceType() == IRoute::BGP ||
-                    (rtEntry->getSourceType() == IRoute::OSPF && session.checkExternalRoute(rtEntry)))
+                    (rtEntry->getSourceType() == IRoute::OSPF && !session.checkExternalRoute(rtEntry)))
             {
                 continue;
             }
