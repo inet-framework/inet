@@ -409,13 +409,11 @@ void Established::entry()
 
     //if it's an EGP Session, send update messages with all routing information to BGP peer
     //if it's an IGP Session, send update message with only the BGP routes learned by EGP
-    const Ipv4Route *rtEntry;
-    BgpRoutingTableEntry *BGPEntry;
-    IIpv4RoutingTable *IPRoutingTable = session.getIPRoutingTable();
 
     if (session.getType() == EGP) {
+        IIpv4RoutingTable *IPRoutingTable = session.getIPRoutingTable();
         for (int i = 0; i < IPRoutingTable->getNumRoutes(); i++) {
-            rtEntry = IPRoutingTable->getRoute(i);
+            const Ipv4Route *rtEntry = IPRoutingTable->getRoute(i);
             if (rtEntry->getNetmask() == Ipv4Address::ALLONES_ADDRESS ||
                     rtEntry->getSourceType() == IRoute::IFACENETMASK ||
                     rtEntry->getSourceType() == IRoute::MANUAL ||
@@ -425,7 +423,7 @@ void Established::entry()
                 continue;
             }
 
-            BGPEntry = new BgpRoutingTableEntry(rtEntry);
+            BgpRoutingTableEntry *BGPEntry = new BgpRoutingTableEntry(rtEntry);
             BGPEntry->addAS(session._info.ASValue);
             session.updateSendProcess(BGPEntry);
             delete BGPEntry;
