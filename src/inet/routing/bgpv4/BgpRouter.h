@@ -128,6 +128,7 @@ private:
 
   private:
 
+    void processChunks(const BgpHeader& ptrHdr);
     void processMessage(const BgpOpenMessage& msg);
     void processMessage(const BgpKeepAliveMessage& msg);
     void processMessage(const BgpUpdateMessage& msg);

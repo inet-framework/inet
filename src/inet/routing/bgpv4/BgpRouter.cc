@@ -239,27 +239,40 @@ void BgpRouter::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
 {
     _currSessionId = findIdFromSocketConnId(_BGPSessions, socket->getSocketId());
     if (_currSessionId != static_cast<SessionId>(-1)) {
-        //TODO: should queuing incoming payloads, and peek from the queue
-        const auto& ptrHdr = msg->peekAtFront<BgpHeader>();
-        switch (ptrHdr->getType()) {
-            case BGP_OPEN:
-                //BgpOpenMessage* ptrMsg = check_and_cast<BgpOpenMessage*>(msg);
-                processMessage(*check_and_cast<const BgpOpenMessage *>(ptrHdr.get()));
-                break;
-
-            case BGP_KEEPALIVE:
-                processMessage(*check_and_cast<const BgpKeepAliveMessage *>(ptrHdr.get()));
-                break;
-
-            case BGP_UPDATE:
-                processMessage(*check_and_cast<const BgpUpdateMessage *>(ptrHdr.get()));
-                break;
-
-            default:
-                throw cRuntimeError("Invalid BGP message type %d", ptrHdr->getType());
+        const Ptr<const Chunk>& chunk = msg->peekAll();
+        auto cType = chunk->getChunkType();
+        if(cType == Chunk::CT_FIELDS) {
+            processChunks(*check_and_cast<const BgpHeader *>(chunk.get()));
         }
+        else if(cType == Chunk::CT_SEQUENCE) {
+            for (const auto& elementChunk : staticPtrCast<const SequenceChunk>(chunk)->getChunks()) {
+                processChunks(*check_and_cast<const BgpHeader *>(elementChunk.get()));
+            }
+        }
+        else
+            throw cRuntimeError("Invalid chunk type %d", cType);
     }
     delete msg;
+}
+
+void BgpRouter::processChunks(const BgpHeader& ptrHdr)
+{
+    switch (ptrHdr.getType()) {
+        case BGP_OPEN:
+            processMessage(*check_and_cast<const BgpOpenMessage *>(&ptrHdr));
+            break;
+
+        case BGP_KEEPALIVE:
+            processMessage(*check_and_cast<const BgpKeepAliveMessage *>(&ptrHdr));
+            break;
+
+        case BGP_UPDATE:
+            processMessage(*check_and_cast<const BgpUpdateMessage *>(&ptrHdr));
+            break;
+
+        default:
+            throw cRuntimeError("Invalid BGP message type %d", ptrHdr.getType());
+    }
 }
 
 void BgpRouter::processMessage(const BgpOpenMessage& msg)
