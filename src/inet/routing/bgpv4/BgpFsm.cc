@@ -413,20 +413,18 @@ void Established::entry()
     BgpRoutingTableEntry *BGPEntry;
     IIpv4RoutingTable *IPRoutingTable = session.getIPRoutingTable();
 
-    for (int i = 1; i < IPRoutingTable->getNumRoutes(); i++) {
-        rtEntry = IPRoutingTable->getRoute(i);
-        if (rtEntry->getNetmask() == Ipv4Address::ALLONES_ADDRESS ||
-            rtEntry->getSourceType() == IRoute::IFACENETMASK ||
-            rtEntry->getSourceType() == IRoute::MANUAL ||
-            rtEntry->getSourceType() == IRoute::BGP)
-        {
-            continue;
-        }
-
-        if (session.getType() == EGP) {
-            if (rtEntry->getSourceType() == IRoute::OSPF && session.checkExternalRoute(rtEntry)) {
+    if (session.getType() == EGP) {
+        for (int i = 1; i < IPRoutingTable->getNumRoutes(); i++) {
+            rtEntry = IPRoutingTable->getRoute(i);
+            if (rtEntry->getNetmask() == Ipv4Address::ALLONES_ADDRESS ||
+                    rtEntry->getSourceType() == IRoute::IFACENETMASK ||
+                    rtEntry->getSourceType() == IRoute::MANUAL ||
+                    rtEntry->getSourceType() == IRoute::BGP ||
+                    (rtEntry->getSourceType() == IRoute::OSPF && session.checkExternalRoute(rtEntry)))
+            {
                 continue;
             }
+
             BGPEntry = new BgpRoutingTableEntry(rtEntry);
             BGPEntry->addAS(session._info.ASValue);
             session.updateSendProcess(BGPEntry);
