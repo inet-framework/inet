@@ -414,7 +414,7 @@ void Established::entry()
     IIpv4RoutingTable *IPRoutingTable = session.getIPRoutingTable();
 
     if (session.getType() == EGP) {
-        for (int i = 1; i < IPRoutingTable->getNumRoutes(); i++) {
+        for (int i = 0; i < IPRoutingTable->getNumRoutes(); i++) {
             rtEntry = IPRoutingTable->getRoute(i);
             if (rtEntry->getNetmask() == Ipv4Address::ALLONES_ADDRESS ||
                     rtEntry->getSourceType() == IRoute::IFACENETMASK ||
