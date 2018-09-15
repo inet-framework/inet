@@ -565,6 +565,8 @@ SessionId BgpRouter::findNextSession(BgpSessionType type, bool startSession)
         }
     }
     if (startSession == true && type == IGP && sessionID != static_cast<SessionId>(-1)) {
+        // note: if the internal peer is not directly-connected to us, then we should know how to reach it.
+        // this is done with the help of an intra-AS routing protocol (RIP, OSPF, EIGRP).
         InterfaceEntry *linkIntf = rt->getInterfaceForDestAddr(_BGPSessions[sessionID]->getPeerAddr());
         if (linkIntf == nullptr) {
             throw cRuntimeError("No configuration interface for peer address: %s", _BGPSessions[sessionID]->getPeerAddr().str().c_str());
