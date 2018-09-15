@@ -183,7 +183,7 @@ void Ospf::insertExternalRoute(int ifIndex, const Ipv4AddressRange& netAddr)
 bool Ospf::checkExternalRoute(const Ipv4Address& route)
 {
     Enter_Method_Silent();
-    for (unsigned long i = 1; i < ospfRouter->getASExternalLSACount(); i++) {
+    for (uint32_t i = 0; i < ospfRouter->getASExternalLSACount(); i++) {
         AsExternalLsa *externalLSA = ospfRouter->getASExternalLSA(i);
         Ipv4Address externalAddr = externalLSA->getHeader().getLinkStateID();
         if (externalAddr == route) //FIXME was this meant???
