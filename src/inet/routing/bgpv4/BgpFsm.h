@@ -129,8 +129,8 @@ SUBSTATE(Idle, TopState) {
     void ManualStart() override;
 
   private:
-    void entry() override { std::cout << "Idle::entry" << std::endl; }
-    void exit() override { std::cout << "Idle::exit" << std::endl; }
+    void entry() override { EV_STATICCONTEXT; EV_DEBUG << "Idle::entry" << std::endl; }
+    void exit() override { EV_STATICCONTEXT; EV_DEBUG << "Idle::exit" << std::endl; }
 };
 
 // A substate
@@ -146,8 +146,8 @@ SUBSTATE(Connect, TopState) {
     void UpdateMsgEvent() override;
 
   private:
-    void entry() override { std::cout << "Connect::entry" << std::endl; }
-    void exit() override { std::cout << "Connect::exit" << std::endl; }
+    void entry() override { EV_STATICCONTEXT; EV_DEBUG << "Connect::entry" << std::endl; }
+    void exit() override { EV_STATICCONTEXT; EV_DEBUG << "Connect::exit" << std::endl; }
 };
 
 // A substate
@@ -164,8 +164,8 @@ SUBSTATE(Active, TopState) {
     void UpdateMsgEvent() override;
 
   private:
-    void entry() override { std::cout << "Active::entry" << std::endl; }
-    void exit() override { std::cout << "Active::exit" << std::endl; }
+    void entry() override { EV_STATICCONTEXT; EV_DEBUG << "Active::entry" << std::endl; }
+    void exit() override { EV_STATICCONTEXT; EV_DEBUG << "Active::exit" << std::endl; }
 };
 
 // A substate
@@ -181,8 +181,8 @@ SUBSTATE(OpenSent, TopState) {
     void UpdateMsgEvent() override;
 
   private:
-    void entry() override { std::cout << "OpenSent::entry" << std::endl; }
-    void exit() override { std::cout << "OpenSent::exit" << std::endl; }
+    void entry() override { EV_STATICCONTEXT; EV_DEBUG << "OpenSent::entry" << std::endl; }
+    void exit() override { EV_STATICCONTEXT; EV_DEBUG << "OpenSent::exit" << std::endl; }
 };
 
 // A substate
@@ -198,8 +198,8 @@ SUBSTATE(OpenConfirm, TopState) {
     void UpdateMsgEvent() override;
 
   private:
-    void entry() override { std::cout << "OpenConfirm::entry" << std::endl; }
-    void exit() override { std::cout << "OpenConfirm::exit" << std::endl; }
+    void entry() override { EV_STATICCONTEXT; EV_DEBUG << "OpenConfirm::entry" << std::endl; }
+    void exit() override { EV_STATICCONTEXT; EV_DEBUG << "OpenConfirm::exit" << std::endl; }
 };
 
 // A substate
@@ -216,7 +216,7 @@ SUBSTATE(Established, TopState) {
 
   private:
     void entry() override;
-    void exit() override { std::cout << "Established::exit" << std::endl; }
+    void exit() override { EV_STATICCONTEXT; EV_DEBUG << "Established::exit" << std::endl; }
 };
 
 } // namespace fsm

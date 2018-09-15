@@ -312,7 +312,6 @@ void OpenSent::UpdateMsgEvent()
 //RFC 4271 - 8.2.2.  Finite State Machine - OpenConfirmState
 void OpenConfirm::ConnectRetryTimer_Expires()
 {
-    std::cout << "OpenConfirm::ConnectRetryTimer_Expires" << std::endl;
     EV_TRACE << "Processing OpenConfirm::ConnectRetryTimer_Expires" << std::endl;
     //In response to any other event (Events 9, 12-13, 20, 27-28), the local system:
     BgpSession& session = TopState::box().getModule();
@@ -330,7 +329,6 @@ void OpenConfirm::ConnectRetryTimer_Expires()
 
 void OpenConfirm::HoldTimer_Expires()
 {
-    std::cout << "OpenConfirm::HoldTimer_Expires" << std::endl;
     EV_TRACE << "Processing OpenConfirm::HoldTimer_Expires" << std::endl;
     BgpSession& session = TopState::box().getModule();
     //If the HoldTimer_Expires event (Event 10) occurs before a KEEPALIVE message is received, the local system:
@@ -347,7 +345,6 @@ void OpenConfirm::HoldTimer_Expires()
 
 void OpenConfirm::KeepaliveTimer_Expires()
 {
-    std::cout << "OpenConfirm::KeepaliveTimer_Expires" << std::endl;
     EV_TRACE << "Processing OpenConfirm::KeepaliveTimer_Expires" << std::endl;
     BgpSession& session = TopState::box().getModule();
     //If the local system receives a KeepaliveTimer_Expires event (Event 11), the local system:
@@ -360,7 +357,7 @@ void OpenConfirm::KeepaliveTimer_Expires()
 
 void OpenConfirm::TcpConnectionFails()
 {
-    std::cout << "OpenConfirm::TcpConnectionFails" << std::endl;
+    EV_TRACE << "OpenConfirm::TcpConnectionFails" << std::endl;
     setState<Idle>();
 }
 
@@ -378,7 +375,6 @@ void OpenConfirm::OpenMsgEvent()
 
 void OpenConfirm::KeepAliveMsgEvent()
 {
-    std::cout << "OpenConfirm::KeepAliveMsgEvent" << std::endl;
     EV_TRACE << "Processing OpenConfirm::KeepAliveMsgEvent" << std::endl;
     BgpSession& session = TopState::box().getModule();
     session._keepAliveMsgRcv++;
@@ -391,7 +387,6 @@ void OpenConfirm::KeepAliveMsgEvent()
 
 void OpenConfirm::UpdateMsgEvent()
 {
-    std::cout << "OpenConfirm::UpdateMsgEvent" << std::endl;
     EV_TRACE << "Processing OpenConfirm::UpdateMsgEvent" << std::endl;
     BgpSession& session = TopState::box().getModule();
     session._updateMsgRcv++;
@@ -401,11 +396,10 @@ void OpenConfirm::UpdateMsgEvent()
 //RFC 4271 - 8.2.2.  Finite State Machine - Established State
 void Established::entry()
 {
-    std::cout << "Established::entry - send an update message" << std::endl;
+    EV_DEBUG << "BGP session is established. \n";
+
     BgpSession& session = TopState::box().getModule();
     session._info.sessionEstablished = true;
-
-    EV_DEBUG << "BGP session is established. \n";
 
     //if it's an EGP Session, send update messages with all routing information to BGP peer
     //if it's an IGP Session, send update message with only the BGP routes learned by EGP
