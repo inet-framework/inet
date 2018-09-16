@@ -368,8 +368,6 @@ unsigned char BgpRouter::decisionProcess(const BgpUpdateMessage& msg, BgpRouting
     bgpRoutingTable.push_back(entry);
 
     if (_BGPSessions[sessionIndex]->getType() == EGP) {
-        std::string entryh = entry->getDestination().str();
-        std::string entryn = entry->getNetmask().str();
         rt->addRoute(entry);
         //insertExternalRoute on OSPF ExternalRoutingTable if OSPF exist on this BGP router
         if (ospfExist(rt)) {
@@ -616,9 +614,7 @@ void BgpRouter::printUpdateMessage(const BgpUpdateMessage& updateMsg)
     for(uint32_t i = 0; i < updateMsg.getPathAttributeListArraySize(); i++) {
         const BgpUpdatePathAttributeList& pathAttrib = updateMsg.getPathAttributeList(i);
         EV_INFO << "  Path attribute " << i+1 << ": \n";
-        EV_INFO << "    ORIGIN: ";
-        inet::bgp::BgpSessionType sessionType = pathAttrib.getOrigin().getValue();
-        EV_INFO << BgpSession::getTypeString(sessionType);
+        EV_INFO << "    ORIGIN: " << BgpSession::getTypeString(pathAttrib.getOrigin().getValue()) << "\n";
         EV_INFO << "    AS_PATH: ";
         if(pathAttrib.getAsPathArraySize() == 0)
             EV_INFO << "empty";
