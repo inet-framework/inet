@@ -45,6 +45,7 @@ private:
     void addAS(AsId newAS) { _ASList.push_back(newAS); }
     unsigned int getASCount(void) const { return _ASList.size(); }
     AsId getAS(unsigned int index) const { return _ASList[index]; }
+    virtual std::string str() const;
 };
 
 inline BgpRoutingTableEntry::BgpRoutingTableEntry(void)
@@ -89,6 +90,47 @@ inline std::ostream& operator<<(std::ostream& out, BgpRoutingTableEntry& entry)
         out << entry.getAS(i) << ' ';
 
     return out;
+}
+
+inline std::string BgpRoutingTableEntry::str() const
+{
+    std::stringstream out;
+
+    out << "dest:";
+    if (getDestination().isUnspecified())
+        out << "*  ";
+    else
+        out << getDestination() << "  ";
+    out << "gw:";
+    if (getGateway().isUnspecified())
+        out << "*  ";
+    else
+        out << getGateway() << "  ";
+    out << "mask:";
+    if (getNetmask().isUnspecified())
+        out << "*  ";
+    else
+        out << getNetmask() << "  ";
+    if(getRoutingTable() && getRoutingTable()->isAdminDistEnabled())
+        out << "AD:" << getAdminDist() << "  ";
+    out << "metric:" << getMetric() << "  ";
+    out << "if:";
+    if (!getInterface())
+        out << "*";
+    else
+        out << getInterface()->getInterfaceName();
+    if (getInterface() && getInterface()->ipv4Data())
+        out << "(" << getInterface()->getIpv4Address() << ")";
+    out << "  ";
+    out << (getGateway().isUnspecified() ? "DIRECT" : "REMOTE");
+    out << " " << IRoute::sourceTypeName(getSourceType());
+
+    out << " pathType: " << BgpRoutingTableEntry::getPathTypeString(_pathType)
+    << " ASlist: ";
+    for (auto &element : _ASList)
+        out << element << ' ';
+
+    return out.str();
 }
 
 } // namespace bgp
