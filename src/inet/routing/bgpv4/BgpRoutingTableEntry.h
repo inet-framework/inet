@@ -41,6 +41,7 @@ private:
 
     void setPathType(RoutingPathType type) { _pathType = type; }
     RoutingPathType getPathType(void) const { return _pathType; }
+    static const std::string getPathTypeString(RoutingPathType type);
     void addAS(AsId newAS) { _ASList.push_back(newAS); }
     unsigned int getASCount(void) const { return _ASList.size(); }
     AsId getAS(unsigned int index) const { return _ASList[index]; }
@@ -63,6 +64,18 @@ inline BgpRoutingTableEntry::BgpRoutingTableEntry(const Ipv4Route *entry)
     setSourceType(IRoute::BGP);
 }
 
+inline const std::string BgpRoutingTableEntry::getPathTypeString(RoutingPathType type)
+{
+    if(type == IGP)
+        return "IGP";
+    else if(type == EGP)
+        return "EGP";
+    else if(type == INCOMPLETE)
+        return "INCOMPLETE";
+
+    return "Unknown";
+}
+
 inline std::ostream& operator<<(std::ostream& out, BgpRoutingTableEntry& entry)
 {
     out << "dest: " << entry.getDestination().str(false)
@@ -70,26 +83,10 @@ inline std::ostream& operator<<(std::ostream& out, BgpRoutingTableEntry& entry)
         << " mask: " << entry.getNetmask().str()
         << " cost: " << entry.getMetric()
         << " if: " << entry.getInterfaceName()
-        << " pathType: ";
-    switch (entry.getPathType()) {
-        case EGP:
-            out << "EGP";
-            break;
-        case IGP:
-            out << "IGP";
-            break;
-        case INCOMPLETE:
-            out << "Incomplete";
-            break;
-        default:
-            out << "Unknown";
-            break;
-    }
-    out << " ASlist: ";
-    for (uint32_t i = 0; i < entry.getASCount(); i++) {
-        out << entry.getAS(i)
-            << ' ';
-    }
+        << " pathType: " << BgpRoutingTableEntry::getPathTypeString(entry.getPathType())
+        << " ASlist: ";
+    for (uint32_t i = 0; i < entry.getASCount(); i++)
+        out << entry.getAS(i) << ' ';
 
     return out;
 }
