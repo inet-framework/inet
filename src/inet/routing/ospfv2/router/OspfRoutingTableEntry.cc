@@ -29,6 +29,7 @@ OspfRoutingTableEntry::OspfRoutingTableEntry(IInterfaceTable *_ift) :
 {
     setNetmask(Ipv4Address::ALLONES_ADDRESS);
     setSourceType(IRoute::OSPF);
+    setAdminDist(Ipv4Route::dOSPF);
 }
 
 OspfRoutingTableEntry::OspfRoutingTableEntry(const OspfRoutingTableEntry& entry) :
@@ -48,6 +49,7 @@ OspfRoutingTableEntry::OspfRoutingTableEntry(const OspfRoutingTableEntry& entry)
     setInterface(entry.getInterface());
     setSourceType(entry.getSourceType());
     setMetric(entry.getMetric());
+    setAdminDist(Ipv4Route::dOSPF);
 }
 
 void OspfRoutingTableEntry::addNextHop(NextHop hop)
@@ -112,6 +114,45 @@ std::ostream& operator<<(std::ostream& out, const OspfRoutingTableEntry& entry)
     return out;
 }
 
+std::string OspfRoutingTableEntry::str() const
+{
+    std::stringstream out;
+
+    out << "dest:";
+    if (getDestination().isUnspecified())
+        out << "*  ";
+    else
+        out << getDestination() << "  ";
+    out << "gw:";
+    if (getGateway().isUnspecified())
+        out << "*  ";
+    else
+        out << getGateway() << "  ";
+    out << "mask:";
+    if (getNetmask().isUnspecified())
+        out << "*  ";
+    else
+        out << getNetmask() << "  ";
+    if(getRoutingTable() && getRoutingTable()->isAdminDistEnabled())
+        out << "AD:" << getAdminDist() << "  ";
+    out << "metric:" << getMetric() << "  ";
+    out << "if:";
+    if (!getInterface())
+        out << "*";
+    else
+        out << getInterface()->getInterfaceName();
+    if (getInterface() && getInterface()->ipv4Data())
+        out << "(" << getInterface()->getIpv4Address() << ")";
+    out << "  ";
+    out << (getGateway().isUnspecified() ? "DIRECT" : "REMOTE");
+    out << " " << IRoute::sourceTypeName(getSourceType());
+
+    out << "destType:" << OspfRoutingTableEntry::getDestinationTypeString(destinationType)
+    << " pathType:" << OspfRoutingTableEntry::getPathTypeString(pathType)
+    << " area:" << area.str(false);
+
+    return out.str();
+}
 
 const std::string OspfRoutingTableEntry::getDestinationTypeString(RoutingDestinationType destType)
 {

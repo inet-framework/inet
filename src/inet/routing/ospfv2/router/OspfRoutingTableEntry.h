@@ -90,6 +90,7 @@ class INET_API OspfRoutingTableEntry : public Ipv4Route
     void clearNextHops() { nextHops.clear(); }
     unsigned int getNextHopCount() const { return nextHops.size(); }
     NextHop getNextHop(unsigned int index) const { return nextHops[index]; }
+    virtual std::string str() const;
 };
 
 std::ostream& operator<<(std::ostream& out, const OspfRoutingTableEntry& entry);
