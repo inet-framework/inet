@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.showcases.general.dynamicNetworks;
+package inet.showcases.general.scenarioScripting;
 
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.HostAutoConfigurator;
