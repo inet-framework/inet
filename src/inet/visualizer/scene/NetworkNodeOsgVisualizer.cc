@@ -47,6 +47,20 @@ void NetworkNodeOsgVisualizer::initialize(int stage)
     }
 }
 
+void NetworkNodeOsgVisualizer::refreshDisplay() const
+{
+    for (auto it : networkNodeVisualizations) {
+        auto networkNode = it.first;
+        auto visualization = it.second;
+        auto position = getPosition(networkNode);
+        auto orientation = getOrientation(networkNode);
+        visualization->setPosition(osg::Vec3d(position.x, position.y, position.z));
+        visualization->setAttitude(osg::Quat(rad(orientation.gamma).get(), osg::Vec3d(1.0, 0.0, 0.0)) *
+                                   osg::Quat(rad(orientation.beta).get(), osg::Vec3d(0.0, 1.0, 0.0)) *
+                                   osg::Quat(rad(orientation.alpha).get(), osg::Vec3d(0.0, 0.0, 1.0)));
+    }
+}
+
 NetworkNodeOsgVisualization *NetworkNodeOsgVisualizer::createNetworkNodeVisualization(cModule *networkNode) const
 {
     return new NetworkNodeOsgVisualization(networkNode, displayModuleName);

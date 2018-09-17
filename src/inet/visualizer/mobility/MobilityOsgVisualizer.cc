@@ -36,8 +36,8 @@ Define_Module(MobilityOsgVisualizer);
 
 #ifdef WITH_OSG
 
-MobilityOsgVisualizer::MobilityOsgVisualization::MobilityOsgVisualization(NetworkNodeOsgVisualization *networkNode, osg::Geode *trail) :
-    networkNode(networkNode),
+MobilityOsgVisualizer::MobilityOsgVisualization::MobilityOsgVisualization(osg::Geode *trail, IMobility *mobility) :
+    MobilityVisualization(mobility),
     trail(trail)
 {
 }
@@ -46,13 +46,18 @@ void MobilityOsgVisualizer::initialize(int stage)
 {
     MobilityVisualizerBase::initialize(stage);
     if (!hasGUI()) return;
-    if (stage == INITSTAGE_LOCAL)
-        networkNodeVisualizer = getModuleFromPar<NetworkNodeOsgVisualizer>(par("networkNodeVisualizerModule"), this);
 }
 
 void MobilityOsgVisualizer::refreshDisplay() const
 {
     MobilityVisualizerBase::refreshDisplay();
+    for (auto it : mobilityVisualizations) {
+        auto mobilityVisualization = it.second;
+        auto mobility = mobilityVisualization->mobility;
+        auto position = mobility->getCurrentPosition();
+        if (displayMovementTrails)
+            extendMovementTrail(mobilityVisualization->trail, position);
+    }
     // TODO: switch to osg canvas when API is extended
     visualizationTargetModule->getCanvas()->setAnimationSpeed(mobilityVisualizations.empty() ? 0 : animationSpeed, this);
 }
@@ -76,23 +81,22 @@ void MobilityOsgVisualizer::removeMobilityVisualization(const IMobility *mobilit
     mobilityVisualizations.erase(mobility);
 }
 
-MobilityOsgVisualizer::MobilityOsgVisualization* MobilityOsgVisualizer::ensureMobilityVisualization(const IMobility *mobility)
+MobilityOsgVisualizer::MobilityOsgVisualization* MobilityOsgVisualizer::ensureMobilityVisualization(IMobility *mobility)
 {
     auto mobilityVisualization = getMobilityVisualization(mobility);
     if (mobilityVisualization == nullptr) {
         auto module = const_cast<cModule *>(check_and_cast<const cModule *>(mobility));
         auto trail = new osg::Geode();
         trail->setStateSet(inet::osg::createStateSet(movementTrailLineColorSet.getColor(module->getId()), 1.0));
-        auto networkNode = networkNodeVisualizer->getNetworkNodeVisualization(getContainingNode(module));
         auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizationTargetModule);
         scene->addChild(trail);
-        mobilityVisualization = new MobilityOsgVisualization(networkNode, trail);
+        mobilityVisualization = new MobilityOsgVisualization(trail, mobility);
         setMobilityVisualization(mobility, mobilityVisualization);
     }
     return mobilityVisualization;
 }
 
-void MobilityOsgVisualizer::extendMovementTrail(osg::Geode *trail, const Coord& position)
+void MobilityOsgVisualizer::extendMovementTrail(osg::Geode *trail, const Coord& position) const
 {
     if (trail->getNumDrawables() == 0)
         trail->addDrawable(inet::osg::createLineGeometry(position, position));
@@ -121,17 +125,8 @@ void MobilityOsgVisualizer::receiveSignal(cComponent *source, simsignal_t signal
 {
     Enter_Method_Silent();
     if (signal == IMobility::mobilityStateChangedSignal) {
-        auto mobility = check_and_cast<IMobility *>(object);
-        auto position = mobility->getCurrentPosition();
-        auto orientation = mobility->getCurrentAngularPosition();
-        auto mobilityVisualization = ensureMobilityVisualization(mobility);
-        auto networkNode = mobilityVisualization->networkNode;
-        networkNode->setPosition(osg::Vec3d(position.x, position.y, position.z));
-        networkNode->setAttitude(osg::Quat(rad(orientation.gamma).get(), osg::Vec3d(1.0, 0.0, 0.0)) *
-                                 osg::Quat(rad(orientation.beta).get(), osg::Vec3d(0.0, 1.0, 0.0)) *
-                                 osg::Quat(rad(orientation.alpha).get(), osg::Vec3d(0.0, 0.0, 1.0)));
-        if (displayMovementTrails)
-            extendMovementTrail(mobilityVisualization->trail, position);
+        if (moduleFilter.matches(check_and_cast<cModule *>(source)))
+            ensureMobilityVisualization(dynamic_cast<IMobility *>(source));
     }
     else if (signal == PRE_MODEL_CHANGE) {
         if (dynamic_cast<cPreModuleDeleteNotification *>(object)) {

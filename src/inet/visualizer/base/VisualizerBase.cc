@@ -87,6 +87,15 @@ Coord VisualizerBase::getContactPosition(const cModule *networkNode, const Coord
         throw cRuntimeError("Unknown contact mode: %s", contactMode);
 }
 
+EulerAngles VisualizerBase::getOrientation(const cModule *networkNode) const
+{
+    auto mobility = networkNode->getSubmodule("mobility");
+    if (mobility == nullptr)
+        return EulerAngles::ZERO;
+    else
+        return check_and_cast<IMobility *>(mobility)->getCurrentAngularPosition();
+}
+
 void VisualizerBase::mapChunkIds(const Ptr<const Chunk>& chunk, const std::function<void(int)>& thunk) const
 {
     if (chunk->getChunkType() == Chunk::CT_SEQUENCE) {

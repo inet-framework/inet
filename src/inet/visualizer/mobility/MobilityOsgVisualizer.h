@@ -32,17 +32,15 @@ class INET_API MobilityOsgVisualizer : public MobilityVisualizerBase
 #ifdef WITH_OSG
 
   protected:
-    class INET_API MobilityOsgVisualization {
+    class INET_API MobilityOsgVisualization : public MobilityVisualization {
       public:
-        NetworkNodeOsgVisualization *networkNode;
         osg::Geode *trail;
 
       public:
-        MobilityOsgVisualization(NetworkNodeOsgVisualization *networkNode, osg::Geode *trail);
+        MobilityOsgVisualization(osg::Geode *trail, IMobility *mobility);
     };
 
   protected:
-    NetworkNodeOsgVisualizer *networkNodeVisualizer = nullptr;
     std::map<const IMobility *, MobilityOsgVisualization *> mobilityVisualizations;
 
   protected:
@@ -52,9 +50,9 @@ class INET_API MobilityOsgVisualizer : public MobilityVisualizerBase
     virtual MobilityOsgVisualization *getMobilityVisualization(const IMobility *mobility) const;
     virtual void setMobilityVisualization(const IMobility *mobility, MobilityOsgVisualization *entry);
     virtual void removeMobilityVisualization(const IMobility *mobility);
-    virtual MobilityOsgVisualization* ensureMobilityVisualization(const IMobility *mobility);
+    virtual MobilityOsgVisualization* ensureMobilityVisualization(IMobility *mobility);
 
-    virtual void extendMovementTrail(osg::Geode *trail, const Coord& position);
+    virtual void extendMovementTrail(osg::Geode *trail, const Coord& position) const;
 
   public:
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
