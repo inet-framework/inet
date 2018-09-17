@@ -56,8 +56,9 @@ simple Bgp like IBgp
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
         string ospfRoutingModule;
-        @display("i=block/network2");
+        volatile double startupTime @unit(s) = default(0s); // delay before starting BGP
         xml bgpConfig;
+        @display("i=block/network2");
     gates:
         input socketIn;
         output socketOut;
