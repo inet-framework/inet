@@ -25,7 +25,7 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/common/geometry/common/Coord.h"
-#include "inet/common/geometry/common/EulerAngles.h"
+#include "inet/common/geometry/common/Quaternion.h"
 
 namespace inet {
 
@@ -82,17 +82,17 @@ class INET_API IMobility
     /**
      * Returns the current angular position at the current simulation time.
      */
-    virtual EulerAngles getCurrentAngularPosition() = 0;
+    virtual Quaternion getCurrentAngularPosition() = 0;
 
     /**
      * Returns the current angular velocity at the current simulation time.
      */
-    virtual EulerAngles getCurrentAngularVelocity() = 0;
+    virtual Quaternion getCurrentAngularVelocity() = 0;
 
     /**
      * Returns the current angular acceleration at the current simulation time.
      */
-    virtual EulerAngles getCurrentAngularAcceleration() = 0;
+    virtual Quaternion getCurrentAngularAcceleration() = 0;
 
     /**
      * Returns the maximum positions along each axes.

@@ -19,7 +19,6 @@ namespace inet {
 
 LinearRotatingMobilityBase::LinearRotatingMobilityBase()
 {
-    targetOrientation = EulerAngles::ZERO;
 }
 
 void LinearRotatingMobilityBase::initializeOrientation()
@@ -49,7 +48,7 @@ void LinearRotatingMobilityBase::rotate()
     }
 }
 
-EulerAngles LinearRotatingMobilityBase::slerp(EulerAngles from, EulerAngles to, double delta)
+Quaternion LinearRotatingMobilityBase::slerp(Quaternion from, Quaternion to, double delta)
 {
     return from + (to - from) * delta;
 }

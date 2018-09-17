@@ -56,8 +56,7 @@ MobilityBase::MobilityBase() :
     canvasProjection(nullptr),
     constraintAreaMin(Coord::ZERO),
     constraintAreaMax(Coord::ZERO),
-    lastPosition(Coord::ZERO),
-    lastOrientation(EulerAngles::ZERO)
+    lastPosition(Coord::ZERO)
 {
 }
 
@@ -83,10 +82,10 @@ const char *MobilityBase::DirectiveResolver::resolveDirective(char directive)
             result = mobility->getCurrentAngularVelocity().str();
             break;
         case 'S': {
-            Quaternion quaternion(mobility->getCurrentAngularVelocity());
+            auto angularVelocity = mobility->getCurrentAngularVelocity();
             Coord axis;
             double angle;
-            quaternion.toAxisAngle(axis, angle);
+            angularVelocity.toAxisAngle(axis, angle);
             result = std::to_string(angle);
             break;
         }
@@ -183,11 +182,12 @@ void MobilityBase::checkPosition()
 void MobilityBase::initializeOrientation()
 {
     if (hasPar("initialHeading") && hasPar("initialElevation") && hasPar("initialBank")) {
-        lastOrientation.alpha = deg(par("initialHeading"));
+        auto alpha = deg(par("initialHeading"));
         auto initialElevation = deg(par("initialElevation"));
         // NOTE: negation is needed, see IMobility comments on orientation
-        lastOrientation.beta = -initialElevation;
-        lastOrientation.gamma = deg(par("initialBank"));
+        auto beta = -initialElevation;
+        auto gamma = deg(par("initialBank"));
+        lastOrientation = Quaternion(EulerAngles(alpha, beta, gamma));
     }
 }
 

@@ -27,7 +27,7 @@ class INET_API AttachedMobility : public MobilityBase, public cListener
   protected:
     IMobility *mobility = nullptr;
     Coord positionOffset = Coord::NIL;
-    EulerAngles orientationOffset = EulerAngles::NIL;
+    Quaternion orientationOffset = Quaternion::NIL;
     bool isZeroOffset = false;
 
   protected:
@@ -40,9 +40,9 @@ class INET_API AttachedMobility : public MobilityBase, public cListener
     virtual Coord getCurrentVelocity() override;
     virtual Coord getCurrentAcceleration() override;
 
-    virtual EulerAngles getCurrentAngularPosition() override;
-    virtual EulerAngles getCurrentAngularVelocity() override;
-    virtual EulerAngles getCurrentAngularAcceleration() override;
+    virtual Quaternion getCurrentAngularPosition() override;
+    virtual Quaternion getCurrentAngularVelocity() override;
+    virtual Quaternion getCurrentAngularAcceleration() override;
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 };

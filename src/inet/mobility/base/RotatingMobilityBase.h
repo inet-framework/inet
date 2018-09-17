@@ -37,7 +37,7 @@ class INET_API RotatingMobilityBase : public MobilityBase
     bool stationary;
 
     /** @brief The last velocity that was reported at lastUpdate. */
-    EulerAngles lastAngularVelocity;
+    Quaternion lastAngularVelocity;
 
     /** @brief The simulation time when the mobility state was last updated. */
     simtime_t lastUpdate;
@@ -73,10 +73,10 @@ class INET_API RotatingMobilityBase : public MobilityBase
 
   public:
     /** @brief Returns the current angular position at the current simulation time. */
-    virtual EulerAngles getCurrentAngularPosition() override;
+    virtual Quaternion getCurrentAngularPosition() override;
 
     /** @brief Returns the current angular velocity at the current simulation time. */
-    virtual EulerAngles getCurrentAngularVelocity() override;
+    virtual Quaternion getCurrentAngularVelocity() override;
 };
 
 } // namespace inet

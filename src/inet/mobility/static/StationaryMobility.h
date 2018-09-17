@@ -36,9 +36,9 @@ class INET_API StationaryMobility : public MobilityBase
     virtual void handleSelfMessage(cMessage *message) override { throw cRuntimeError("Invalid operation"); }
 
   public:
-    virtual EulerAngles getCurrentAngularPosition() override { return lastOrientation; }
-    virtual EulerAngles getCurrentAngularVelocity() override { return EulerAngles::ZERO; }
-    virtual EulerAngles getCurrentAngularAcceleration() override { return EulerAngles::ZERO; }
+    virtual Quaternion getCurrentAngularPosition() override { return lastOrientation; }
+    virtual Quaternion getCurrentAngularVelocity() override { return Quaternion::IDENTITY; }
+    virtual Quaternion getCurrentAngularAcceleration() override { return Quaternion::IDENTITY; }
 
     virtual Coord getCurrentPosition() override { return lastPosition; }
     virtual Coord getCurrentVelocity() override { return Coord::ZERO; }

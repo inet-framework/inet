@@ -38,9 +38,9 @@ class INET_API FacingMobility : public MobilityBase
     virtual Coord getCurrentVelocity() override { return Coord::ZERO; }
     virtual Coord getCurrentAcceleration() override { return Coord::ZERO; }
 
-    virtual EulerAngles getCurrentAngularPosition() override;
-    virtual EulerAngles getCurrentAngularVelocity() override { return EulerAngles::NIL; }
-    virtual EulerAngles getCurrentAngularAcceleration() override { return EulerAngles::NIL; }
+    virtual Quaternion getCurrentAngularPosition() override;
+    virtual Quaternion getCurrentAngularVelocity() override { return Quaternion::NIL; }
+    virtual Quaternion getCurrentAngularAcceleration() override { return Quaternion::NIL; }
 };
 
 } // namespace inet

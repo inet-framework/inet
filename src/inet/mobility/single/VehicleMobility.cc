@@ -146,7 +146,7 @@ void VehicleMobility::orient()
         // and finally rotating around the now-ground-orthogonal local Z
         quat *= Quaternion(Coord(0, 0, 1), angle);
 
-        lastOrientation = quat.toEulerAngles();
+        lastOrientation = quat;
     }
     else
         MovingMobilityBase::orient();

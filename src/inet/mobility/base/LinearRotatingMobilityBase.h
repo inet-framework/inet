@@ -24,12 +24,12 @@ class INET_API LinearRotatingMobilityBase : public RotatingMobilityBase
 {
   protected:
     /** @brief End position of current linear movement. */
-    EulerAngles targetOrientation;
+    Quaternion targetOrientation;
 
   protected:
     virtual void initializeOrientation() override;
 
-    virtual EulerAngles slerp(EulerAngles from, EulerAngles to, double delta);
+    virtual Quaternion slerp(Quaternion from, Quaternion to, double delta);
 
     virtual void rotate() override;
 

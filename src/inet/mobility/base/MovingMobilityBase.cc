@@ -76,9 +76,10 @@ void MovingMobilityBase::orient()
         if (lastVelocity != Coord::ZERO) {
             Coord direction = lastVelocity;
             direction.normalize();
-            lastOrientation.alpha = rad(atan2(direction.y, direction.x));
-            lastOrientation.beta = rad(-asin(direction.z));
-            lastOrientation.gamma = rad(0.0);
+            auto alpha = rad(atan2(direction.y, direction.x));
+            auto beta = rad(-asin(direction.z));
+            auto gamma = rad(0.0);
+            lastOrientation = Quaternion(EulerAngles(alpha, beta, gamma));
         }
     }
 }
@@ -119,13 +120,13 @@ Coord MovingMobilityBase::getCurrentVelocity()
     return lastVelocity;
 }
 
-EulerAngles MovingMobilityBase::getCurrentAngularPosition()
+Quaternion MovingMobilityBase::getCurrentAngularPosition()
 {
     moveAndUpdate();
     return lastOrientation;
 }
 
-EulerAngles MovingMobilityBase::getCurrentAngularVelocity()
+Quaternion MovingMobilityBase::getCurrentAngularVelocity()
 {
     moveAndUpdate();
     return lastAngularVelocity;

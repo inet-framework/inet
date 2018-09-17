@@ -122,18 +122,18 @@ Coord SuperpositioningMobility::getCurrentAcceleration()
     }
 }
 
-EulerAngles SuperpositioningMobility::getCurrentAngularPosition()
+Quaternion SuperpositioningMobility::getCurrentAngularPosition()
 {
     switch (orientationComposition) {
         case OrientationComposition::OC_NONE: {
-            lastOrientation = EulerAngles::ZERO;
+            lastOrientation = Quaternion::IDENTITY;
             break;
         }
         case OrientationComposition::OC_SUM: {
             Quaternion angularPosition;
             for (auto element : elements)
                 angularPosition *= Quaternion(element->getCurrentAngularPosition());
-            lastOrientation = angularPosition.toEulerAngles();
+            lastOrientation = angularPosition;
             break;
         }
         case OrientationComposition::OC_AVERAGE: {
@@ -160,7 +160,7 @@ EulerAngles SuperpositioningMobility::getCurrentAngularPosition()
             matrix[1][2] = rotatedZ.y;
             matrix[2][2] = rotatedZ.z;
             if (!rotatedX.isUnspecified() && !rotatedY.isUnspecified() && !rotatedZ.isUnspecified())
-                lastOrientation = Rotation(matrix).toEulerAngles();
+                lastOrientation = Rotation(matrix).toQuaternion();
             break;
         }
         case OrientationComposition::OC_FACE_FORWARD: {
@@ -169,9 +169,10 @@ EulerAngles SuperpositioningMobility::getCurrentAngularPosition()
             if (lastVelocity != Coord::ZERO) {
                 Coord direction = lastVelocity;
                 direction.normalize();
-                lastOrientation.alpha = rad(atan2(direction.y, direction.x));
-                lastOrientation.beta = rad(-asin(direction.z));
-                lastOrientation.gamma = rad(0.0);
+                auto alpha = rad(atan2(direction.y, direction.x));
+                auto beta = rad(-asin(direction.z));
+                auto gamma = rad(0.0);
+                lastOrientation = Quaternion(EulerAngles(alpha, beta, gamma));
             }
             break;
         }
@@ -181,41 +182,41 @@ EulerAngles SuperpositioningMobility::getCurrentAngularPosition()
     return lastOrientation;
 }
 
-EulerAngles SuperpositioningMobility::getCurrentAngularVelocity()
+Quaternion SuperpositioningMobility::getCurrentAngularVelocity()
 {
     switch (orientationComposition) {
         case OrientationComposition::OC_NONE:
-            return EulerAngles::ZERO;
+            return Quaternion::IDENTITY;
         case OrientationComposition::OC_SUM: {
             Quaternion angularVelocity;
             for (auto element : elements)
                 angularVelocity *= Quaternion(element->getCurrentAngularVelocity());
-            return angularVelocity.toEulerAngles();
+            return angularVelocity;
         }
         case OrientationComposition::OC_AVERAGE:
-            return EulerAngles::NIL;
+            return Quaternion::NIL;
         case OrientationComposition::OC_FACE_FORWARD:
-            return EulerAngles::NIL;
+            return Quaternion::NIL;
         default:
             throw cRuntimeError("Unknown orientation composition");
     }
 }
 
-EulerAngles SuperpositioningMobility::getCurrentAngularAcceleration()
+Quaternion SuperpositioningMobility::getCurrentAngularAcceleration()
 {
     switch (orientationComposition) {
         case OrientationComposition::OC_NONE:
-            return EulerAngles::ZERO;
+            return Quaternion::IDENTITY;
         case OrientationComposition::OC_SUM: {
             Quaternion angularAcceleration;
             for (auto element : elements)
                 angularAcceleration *= Quaternion(element->getCurrentAngularAcceleration());
-            return angularAcceleration.toEulerAngles();
+            return angularAcceleration;
         }
         case OrientationComposition::OC_AVERAGE:
-            return EulerAngles::NIL;
+            return Quaternion::NIL;
         case OrientationComposition::OC_FACE_FORWARD:
-            return EulerAngles::NIL;
+            return Quaternion::NIL;
         default:
             throw cRuntimeError("Unknown orientation composition");
     }
