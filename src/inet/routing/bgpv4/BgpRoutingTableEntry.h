@@ -79,9 +79,16 @@ inline const std::string BgpRoutingTableEntry::getPathTypeString(RoutingPathType
 
 inline std::ostream& operator<<(std::ostream& out, BgpRoutingTableEntry& entry)
 {
-    out << "dest: " << entry.getDestination().str(false)
-        << " nextHop: " << entry.getGateway().str(false)
-        << " mask: " << entry.getNetmask().str()
+    if (entry.getDestination().isUnspecified())
+        out << "0.0.0.0";
+    else
+        out << entry.getDestination();
+    out << "/";
+    if (entry.getNetmask().isUnspecified())
+        out << "0";
+    else
+        out << entry.getNetmask().getNetmaskLength();
+    out << " nextHop: " << entry.getGateway().str(false)
         << " cost: " << entry.getMetric()
         << " if: " << entry.getInterfaceName()
         << " pathType: " << BgpRoutingTableEntry::getPathTypeString(entry.getPathType())
@@ -95,22 +102,22 @@ inline std::ostream& operator<<(std::ostream& out, BgpRoutingTableEntry& entry)
 inline std::string BgpRoutingTableEntry::str() const
 {
     std::stringstream out;
-
-    out << "dest:";
+    out << getSourceTypeAbbreviation();
+    out << " ";
     if (getDestination().isUnspecified())
-        out << "*  ";
+        out << "0.0.0.0";
     else
-        out << getDestination() << "  ";
-    out << "gw:";
+        out << getDestination();
+    out << "/";
+    if (getNetmask().isUnspecified())
+        out << "0";
+    else
+        out << getNetmask().getNetmaskLength();
+    out << " gw:";
     if (getGateway().isUnspecified())
         out << "*  ";
     else
         out << getGateway() << "  ";
-    out << "mask:";
-    if (getNetmask().isUnspecified())
-        out << "*  ";
-    else
-        out << getNetmask() << "  ";
     if(getRoutingTable() && getRoutingTable()->isAdminDistEnabled())
         out << "AD:" << getAdminDist() << "  ";
     out << "metric:" << getMetric() << "  ";
@@ -118,12 +125,7 @@ inline std::string BgpRoutingTableEntry::str() const
     if (!getInterface())
         out << "*";
     else
-        out << getInterface()->getInterfaceName();
-    if (getInterface() && getInterface()->ipv4Data())
-        out << "(" << getInterface()->getIpv4Address() << ")";
-    out << "  ";
-    out << (getGateway().isUnspecified() ? "DIRECT" : "REMOTE");
-    out << " " << IRoute::sourceTypeName(getSourceType());
+        out << getInterfaceName();
 
     out << " pathType: " << BgpRoutingTableEntry::getPathTypeString(_pathType)
     << " ASlist: ";
