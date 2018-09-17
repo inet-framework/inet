@@ -16,12 +16,12 @@
 //
 
 #include "inet/networklayer/common/L3Address.h"
+#include "inet/networklayer/contract/clns/ClnsAddressType.h"
 #include "inet/networklayer/contract/ipv4/Ipv4AddressType.h"
 #include "inet/networklayer/contract/ipv6/Ipv6AddressType.h"
 #include "inet/linklayer/common/MacAddressType.h"
 #include "inet/networklayer/common/ModuleIdAddressType.h"
 #include "inet/networklayer/common/ModulePathAddressType.h"
-#include "inet/networklayer/contract/clns/CLNSAddressType.h"
 
 namespace inet {
 
@@ -50,7 +50,7 @@ void L3Address::set(const Ipv6Address& addr)
         throw cRuntimeError("Cannot set Ipv6 address");
 }
 
-void L3Address::set(const CLNSAddress& addr)
+void L3Address::set(const ClnsAddress& addr)
 {
 
     hi = ((uint64)RESERVED_IPV6_ADDRESS_RANGE << 48) | ((addr.getAreaId() & 0xFFFFFFFFL) << 16) | (uint64)addr.getNsel() << 8 | (uint64)L3Address::CLNS;
@@ -116,7 +116,7 @@ std::string L3Address::str() const
             return toModulePath().str();
 
         case L3Address::CLNS:
-            return toCLNS().str();
+            return toClns().str();
 
         default:
             throw cRuntimeError("Unknown type");
@@ -413,14 +413,14 @@ const char *L3Address::getTypeName(AddressType t)
 #undef CASE
 }
 
-CLNSAddress L3Address::toCLNS() const
+ClnsAddress L3Address::toClns() const
 {
     switch (getType()) {
         case L3Address::NONE:
-            return CLNSAddress();
+            return ClnsAddress();
 
         case L3Address::CLNS:
-            return CLNSAddress((hi & 0x0000FFFFFFFF0000L) >> 16, lo, (hi & 0xFF00L) >> 8);
+            return ClnsAddress((hi & 0x0000FFFFFFFF0000L) >> 16, lo, (hi & 0xFF00L) >> 8);
 
         default:
             throw cRuntimeError("Address is not of the given type");

@@ -22,35 +22,35 @@
  * @detail Class representing a CLNS Address. It should be probably called NSAPAddress or something similar.
  */
 
-#include "inet/networklayer/contract/clns/CLNSAddress.h"
+#include "inet/networklayer/contract/clns/ClnsAddress.h"
 
 namespace inet{
 
 static const int CLNSADDRESS_STRING_SIZE = 25;
-const CLNSAddress CLNSAddress::UNSPECIFIED_ADDRESS;
+const ClnsAddress ClnsAddress::UNSPECIFIED_ADDRESS;
 
-CLNSAddress::CLNSAddress()
+ClnsAddress::ClnsAddress()
 {
     areaID = 0;
     systemID = 0;
     nsel = 0;
 }
 
-CLNSAddress::CLNSAddress(uint64 areaID, uint64 systemID, uint8 nsel) :
-    areaID(areaID),
+ClnsAddress::ClnsAddress(uint64 areaID, uint64 systemID, uint8 nsel) :
     systemID(systemID),
+    areaID(areaID),
     nsel(nsel)
 {
 }
 
-void CLNSAddress::set(uint64 areaID, uint64 systemID, uint8 nsel)
+void ClnsAddress::set(uint64 areaID, uint64 systemID, uint8 nsel)
 {
     this->areaID = areaID;
     this->systemID = systemID;
     this->nsel = nsel;
 }
 
-CLNSAddress::CLNSAddress(std::string net)
+ClnsAddress::ClnsAddress(std::string net)
 {
     areaID = 0;
     systemID = 0;
@@ -112,17 +112,17 @@ CLNSAddress::CLNSAddress(std::string net)
     //        this->nickname = this->sysId[ISIS_SYSTEM_ID - 1] + this->sysId[ISIS_SYSTEM_ID - 2] * 0xFF;
 }
 
-CLNSAddress::~CLNSAddress()
+ClnsAddress::~ClnsAddress()
 {
     // TODO Auto-generated destructor stub
 }
 
-bool CLNSAddress::isUnspecified() const
+bool ClnsAddress::isUnspecified() const
 {
     return systemID == 0 && areaID == 0;
 }
 
-std::string CLNSAddress::str(bool printUnspec    /* = true */) const
+std::string ClnsAddress::str(bool printUnspec    /* = true */) const
 {
     if (printUnspec && isUnspecified())
         return std::string("<unspec>");
@@ -132,22 +132,22 @@ std::string CLNSAddress::str(bool printUnspec    /* = true */) const
     return std::string(buf);
 }
 
-uint64 CLNSAddress::getAreaId() const
+uint64 ClnsAddress::getAreaId() const
 {
     return areaID;
 }
 
-uint8 CLNSAddress::getNsel() const
+uint8 ClnsAddress::getNsel() const
 {
     return nsel;
 }
 
-void CLNSAddress::setNsel(uint8 nsel)
+void ClnsAddress::setNsel(uint8 nsel)
 {
     this->nsel = nsel;
 }
 
-uint64 CLNSAddress::getSystemId() const
+uint64 ClnsAddress::getSystemId() const
 {
     return systemID;
 }

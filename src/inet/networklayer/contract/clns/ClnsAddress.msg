@@ -20,16 +20,16 @@
 import inet.common.INETDefs;
 
 cplusplus {{
-#include "inet/networklayer/contract/clns/CLNSAddress.h"
+#include "inet/networklayer/contract/clns/ClnsAddress.h"
 }}
 
 namespace inet;
 
-class CLNSAddress
+class ClnsAddress
 {
     @existingClass;
     @opaque;
     @toString(.str());
-    @fromString(CLNSAddress($));
+    @fromString(ClnsAddress($));
 }
 

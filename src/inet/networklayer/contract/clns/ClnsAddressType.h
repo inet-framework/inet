@@ -26,8 +26,8 @@
 #define ANSA_NETWORKLAYER_CLNS_CLNSADDRESSTYPE_H_
 
 #include "inet/common/INETDefs.h"
+#include "inet/networklayer/contract/clns/ClnsAddress.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
-#include "inet/networklayer/contract/clns/CLNSAddress.h"
 
 namespace inet {
 
@@ -43,13 +43,13 @@ class INET_API CLNSAddressType : public IL3AddressType
 
     virtual int getAddressBitLength() const override { return 32; }
     virtual int getMaxPrefixLength() const override { return 32; }
-    virtual L3Address getUnspecifiedAddress() const override { return CLNSAddress::UNSPECIFIED_ADDRESS; }
-    virtual L3Address getBroadcastAddress() const override { return CLNSAddress::UNSPECIFIED_ADDRESS; }
-    virtual L3Address getLinkLocalManetRoutersMulticastAddress() const override { return CLNSAddress::UNSPECIFIED_ADDRESS; }
-    virtual L3Address getLinkLocalRIPRoutersMulticastAddress() const override { return CLNSAddress::UNSPECIFIED_ADDRESS; }
+    virtual L3Address getUnspecifiedAddress() const override { return ClnsAddress::UNSPECIFIED_ADDRESS; }
+    virtual L3Address getBroadcastAddress() const override { return ClnsAddress::UNSPECIFIED_ADDRESS; }
+    virtual L3Address getLinkLocalManetRoutersMulticastAddress() const override { return ClnsAddress::UNSPECIFIED_ADDRESS; }
+    virtual L3Address getLinkLocalRIPRoutersMulticastAddress() const override { return ClnsAddress::UNSPECIFIED_ADDRESS; }
     virtual const Protocol *getNetworkProtocol() const override { return &Protocol::clns; }
 
-    virtual L3Address getLinkLocalAddress(const InterfaceEntry *ie) const override { return CLNSAddress::UNSPECIFIED_ADDRESS; }
+    virtual L3Address getLinkLocalAddress(const InterfaceEntry *ie) const override { return ClnsAddress::UNSPECIFIED_ADDRESS; }
 };
 
 } /* namespace inet */

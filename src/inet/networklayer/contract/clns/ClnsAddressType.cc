@@ -21,7 +21,7 @@
  * @brief Class representing a CLNS Address type
  */
 
-#include "inet/networklayer/contract/clns/CLNSAddressType.h"
+#include "inet/networklayer/contract/clns/ClnsAddressType.h"
 
 namespace inet {
 
