@@ -29,39 +29,29 @@ namespace inet{
 static const int CLNSADDRESS_STRING_SIZE = 25;
 const CLNSAddress CLNSAddress::UNSPECIFIED_ADDRESS;
 
-
-
 CLNSAddress::CLNSAddress()
 {
-
-
     areaID = 0;
     systemID = 0;
     nsel = 0;
-
 }
 
 CLNSAddress::CLNSAddress(uint64 areaID, uint64 systemID)
 {
-
       this->areaID = areaID;
       this->systemID = systemID;
       nsel = 0;
-
 }
 
 void CLNSAddress::set(uint64 areaID, uint64 systemID)
 {
-
       this->areaID = areaID;
       this->systemID = systemID;
       nsel = 0;
-
 }
 
 CLNSAddress::CLNSAddress(std::string net)
 {
-
   areaID = 0;
   systemID = 0;
   nsel = 0;
@@ -87,10 +77,8 @@ CLNSAddress::CLNSAddress(std::string net)
       case 2:
         dots++;
         // area[0] = (unsigned char) (atoi(net.substr(0, 2).c_str()));
-//                    cout << "BEZ ATOI" << net.substr(0, 2).c_str() << endl;
         break;
       case 7:
-
         areaID += strtoul(net.substr(3, 2).c_str(), NULL, 16);
         areaID += strtoul(net.substr(5, 2).c_str(), NULL, 16) << 8;
         dots++;
@@ -125,21 +113,17 @@ CLNSAddress::CLNSAddress(std::string net)
 
   nsel =  strtoul(net.substr(23, 2).c_str(), NULL, 16);
 
-
-
   //49.0001.1921.6801.2003.00
-
 //        this->nickname = this->sysId[ISIS_SYSTEM_ID - 1] + this->sysId[ISIS_SYSTEM_ID - 2] * 0xFF;
-
-
-
 }
 
-CLNSAddress::~CLNSAddress() {
+CLNSAddress::~CLNSAddress()
+{
     // TODO Auto-generated destructor stub
 }
 
-bool CLNSAddress::isUnspecified() const {
+bool CLNSAddress::isUnspecified() const
+{
     return systemID == 0 && areaID == 0;
 }
 
@@ -152,8 +136,6 @@ std::string CLNSAddress::str(bool printUnspec    /* = true */) const
     sprintf(buf, "%02lX.%04lX.%04lX.%04lX.%04lX.%02X", (areaID >> 16) & (0xFF), areaID & (0xFFFF), (systemID >> 32) & (0xFFFF), (systemID >> 16) & (0xFFFF), systemID & (0xFFFF), nsel & 255);
     return std::string(buf);
 }
-
-
 
 uint64 CLNSAddress::getAreaId() const
 {
@@ -176,3 +158,4 @@ uint64 CLNSAddress::getSystemId() const
 }
 
 }  //end of namespace inet
+

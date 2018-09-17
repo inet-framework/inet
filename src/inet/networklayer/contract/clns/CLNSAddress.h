@@ -30,25 +30,19 @@
 
 #include "inet/common/INETDefs.h"
 
-
 namespace inet {
 
-class CLNSAddress {
-private:
+class CLNSAddress
+{
+  private:
     uint64 systemID;
     uint64 areaID;
-//    unsigned char* areaID;
-//    unsigned char* systemID;
     uint8 nsel; //this field is probably not part of NET, but part of NSAP (still confused)
 
-
-public:
-
+  public:
     enum AddressCategory {
         UNSPECIFIED    // 00.0000.0000.0000.0000.00
-
     };
-
 
     static const CLNSAddress UNSPECIFIED_ADDRESS;
 
@@ -67,17 +61,14 @@ public:
     std::string str(bool printUnspec = true) const;
 
     /**
-         * Returns true if the two addresses are equal
-         */
+     * Returns true if the two addresses are equal
+     */
     bool equals(const CLNSAddress& toCmp) const { return (systemID == toCmp.systemID && areaID == toCmp.areaID); }
-
-
 
     uint64 getAreaId() const;
     uint64 getSystemId() const;
     uint8 getNsel() const;
     void setNsel(uint8 nsel);
-
 
     /**
      * Returns equals(addr).
@@ -96,9 +87,6 @@ public:
     bool operator<=(const CLNSAddress& addr1) const { if(areaID == addr1.getAreaId()){return systemID <= addr1.getSystemId();}else{ return areaID < addr1.getAreaId();} }
     bool operator>(const CLNSAddress& addr1) const { if(areaID == addr1.getAreaId()){return systemID > addr1.getSystemId();}else{ return areaID > addr1.getAreaId();} }
     bool operator>=(const CLNSAddress& addr1) const { if(areaID == addr1.getAreaId()){return systemID >= addr1.getSystemId();}else{ return areaID > addr1.getAreaId();} }
-
-
-//    static CLNSAddress makeNetmask(int length) { _checkNetmaskLength(length); return CLNSAddress(_makeNetmask(length)); }
 };
 
 inline std::ostream& operator<<(std::ostream& os, const CLNSAddress& net)
@@ -106,6 +94,7 @@ inline std::ostream& operator<<(std::ostream& os, const CLNSAddress& net)
     return os << net.str();
 }
 
-}//end of namespace inet
+} //end of namespace inet
 
 #endif /* ANSA_NETWORKLAYER_CLNS_CLNSADDRESS_H_ */
+
