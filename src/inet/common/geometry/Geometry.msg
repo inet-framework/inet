@@ -8,6 +8,7 @@ import inet.common.Units;
 cplusplus{{
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/geometry/common/EulerAngles.h"
+#include "inet/common/geometry/common/Quaternion.h"
 }}
 
 namespace inet;
@@ -26,4 +27,9 @@ class EulerAngles
     rad alpha;
     rad beta;
     rad gamma;
+}
+
+class Quaternion
+{
+    @existingClass;
 }
