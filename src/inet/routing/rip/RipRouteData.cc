@@ -23,20 +23,16 @@ namespace inet {
 std::string RipRoute::str() const
 {
     std::stringstream out;
-
-    out << "dest:";
     if (dest.isUnspecified())
-        out << "*  ";
+        out << "0.0.0.0";
     else
-        out << dest << "  ";
-
-    out << "gw:";
+        out << dest;
+    out << "/" << prefixLength;
+    out << " gw: ";
     if (nextHop.isUnspecified())
         out << "*  ";
     else
         out << nextHop << "  ";
-
-    out << "prefix:" << prefixLength << "  ";
 
     out << "metric:" << metric << " ";
 
