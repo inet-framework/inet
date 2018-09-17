@@ -108,9 +108,21 @@ class INET_API Quaternion
 
     // adapted from https://svn.code.sf.net/p/irrlicht/code/trunk/include/quaternion.h
     static Quaternion rotationFromTo(const Coord& from, const Coord& to);
+
+    std::string str() const;
 };
 
+inline std::ostream& operator<<(std::ostream& os, const Quaternion& q)
+{
+    return os << "(" << q.s << ", " << q.v.x << ", " << q.v.y << ", " << q.v.z << ")";
+}
 
+inline std::string Quaternion::str() const
+{
+    std::stringstream os;
+    os << *this;
+    return os.str();
+}
 
 } /* namespace inet */
 
