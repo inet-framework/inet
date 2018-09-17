@@ -1,7 +1,7 @@
 :orphan:
 
-Simulating Dynamic Networks
-===========================
+Scenario Scripting
+==================
 
 Goals
 -----
