@@ -22,8 +22,8 @@
  * @detail Class representing a CLNS Address. It should be probably called NSAPAddress or something similar.
  */
 
-#ifndef ANSA_NETWORKLAYER_CLNS_CLNSADDRESS_H_
-#define ANSA_NETWORKLAYER_CLNS_CLNSADDRESS_H_
+#ifndef INET_NETWORKLAYER_CLNS_CLNSADDRESS_H_
+#define INET_NETWORKLAYER_CLNS_CLNSADDRESS_H_
 
 #include <iostream>
 #include <string>
@@ -96,5 +96,5 @@ inline std::ostream& operator<<(std::ostream& os, const CLNSAddress& net)
 
 } //end of namespace inet
 
-#endif /* ANSA_NETWORKLAYER_CLNS_CLNSADDRESS_H_ */
+#endif /* INET_NETWORKLAYER_CLNS_CLNSADDRESS_H_ */
 
