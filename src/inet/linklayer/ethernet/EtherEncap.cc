@@ -104,6 +104,7 @@ void EtherEncap::refreshDisplay() const
 
 void EtherEncap::processPacketFromHigherLayer(Packet *packet)
 {
+    delete packet->removeTagIfPresent<DispatchProtocolReq>();
     if (packet->getDataLength() > MAX_ETHERNET_DATA_BYTES)
         throw cRuntimeError("packet from higher layer (%d bytes) exceeds maximum Ethernet payload length (%d)", (int)packet->getByteLength(), MAX_ETHERNET_DATA_BYTES);
 
