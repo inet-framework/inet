@@ -40,7 +40,7 @@ class INET_API LayeredReception : public ReceptionBase
     const IReceptionAnalogModel *analogModel;
 
   public:
-    LayeredReception(const IReceptionAnalogModel *analogModel, const IRadio *radio, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation);
+    LayeredReception(const IReceptionAnalogModel *analogModel, const IRadio *radio, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const Quaternion startOrientation, const Quaternion endOrientation);
     virtual ~LayeredReception();
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;

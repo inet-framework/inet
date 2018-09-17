@@ -61,8 +61,8 @@ const ITransmission *ApskDimensionalTransmitter::createTransmission(const IRadio
     IMobility *mobility = transmitter->getAntenna()->getMobility();
     const Coord startPosition = mobility->getCurrentPosition();
     const Coord endPosition = mobility->getCurrentPosition();
-    const EulerAngles startOrientation = mobility->getCurrentAngularPosition();
-    const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
+    const Quaternion startOrientation = mobility->getCurrentAngularPosition();
+    const Quaternion endOrientation = mobility->getCurrentAngularPosition();
     const ConstMapping *powerMapping = createPowerMapping(startTime, endTime, carrierFrequency, bandwidth, transmissionPower);
     return new ApskDimensionalTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, modulation, headerLength, dataLength, transmissionCarrierFrequency, transmissionBandwidth, transmissionBitrate, powerMapping);
 }

@@ -36,7 +36,7 @@ class INET_API ConstantGainAntenna : public AntennaBase
         AntennaGain(double gain) : gain(gain) {}
         virtual double getMinGain() const override { return gain; }
         virtual double getMaxGain() const override { return gain; }
-        virtual double computeGain(const EulerAngles direction) const override { return gain; }
+        virtual double computeGain(const Quaternion direction) const override { return gain; }
 
       protected:
         double gain;

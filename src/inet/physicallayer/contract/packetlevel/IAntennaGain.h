@@ -18,7 +18,7 @@
 #ifndef __INET_IANTENNAGAIN_H
 #define __INET_IANTENNAGAIN_H
 
-#include "inet/common/geometry/common/EulerAngles.h"
+#include "inet/common/geometry/common/Quaternion.h"
 #include "inet/common/Ptr.h"
 #include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
 
@@ -53,7 +53,7 @@ class INET_API IAntennaGain : public IPrintableObject
      * direction. For receptions, it determines how well the antenna converts
      * radio waves arriving from the the specified direction.
      */
-    virtual double computeGain(const EulerAngles direction) const = 0;
+    virtual double computeGain(const Quaternion direction) const = 0;
 };
 
 } // namespace physicallayer

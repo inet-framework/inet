@@ -43,7 +43,7 @@ class INET_API UnitDiskReception : public ReceptionBase
     const Power power;
 
   public:
-    UnitDiskReception(const IRadio *radio, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const Power power);
+    UnitDiskReception(const IRadio *radio, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const Quaternion startOrientation, const Quaternion endOrientation, const Power power);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
     virtual Power getPower() const { return power; }

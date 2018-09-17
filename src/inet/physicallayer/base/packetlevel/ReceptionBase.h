@@ -38,11 +38,11 @@ class INET_API ReceptionBase : public virtual IReception, public virtual IRecept
     const simtime_t dataDuration;
     const Coord startPosition;
     const Coord endPosition;
-    const EulerAngles startOrientation;
-    const EulerAngles endOrientation;
+    const Quaternion startOrientation;
+    const Quaternion endOrientation;
 
   public:
-    ReceptionBase(const IRadio *receiver, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation);
+    ReceptionBase(const IRadio *receiver, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const Quaternion startOrientation, const Quaternion endOrientation);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 
@@ -71,8 +71,8 @@ class INET_API ReceptionBase : public virtual IReception, public virtual IRecept
     virtual const Coord& getStartPosition() const override { return startPosition; }
     virtual const Coord& getEndPosition() const override { return endPosition; }
 
-    virtual const EulerAngles& getStartOrientation() const override { return startOrientation; }
-    virtual const EulerAngles& getEndOrientation() const override { return endOrientation; }
+    virtual const Quaternion& getStartOrientation() const override { return startOrientation; }
+    virtual const Quaternion& getEndOrientation() const override { return endOrientation; }
 
     virtual const IReceptionAnalogModel *getAnalogModel() const override { return check_and_cast<const IReceptionAnalogModel *>(this); }
 };

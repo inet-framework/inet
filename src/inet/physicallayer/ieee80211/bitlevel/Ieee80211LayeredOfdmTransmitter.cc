@@ -331,8 +331,8 @@ const ITransmission *Ieee80211LayeredOfdmTransmitter::createTransmission(const I
     const simtime_t endTime = startTime + analogModel->getDuration();
     const Coord startPosition = mobility->getCurrentPosition();
     const Coord endPosition = mobility->getCurrentPosition();
-    const EulerAngles startOrientation = mobility->getCurrentAngularPosition();
-    const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
+    const Quaternion startOrientation = mobility->getCurrentAngularPosition();
+    const Quaternion endOrientation = mobility->getCurrentAngularPosition();
     // TODO: compute channel
     return new Ieee80211LayeredTransmission(packetModel, bitModel, symbolModel, sampleModel, analogModel, transmitter, packet, startTime, endTime, -1, -1, -1, startPosition, endPosition, startOrientation, endOrientation, mode, nullptr);
 }

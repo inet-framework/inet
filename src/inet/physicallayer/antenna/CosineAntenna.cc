@@ -52,10 +52,10 @@ CosineAntenna::AntennaGain::AntennaGain(double maxGain, deg beamWidth) :
 {
 }
 
-double CosineAntenna::AntennaGain::computeGain(const EulerAngles direction) const
+double CosineAntenna::AntennaGain::computeGain(const Quaternion direction) const
 {
     double exponent = -3.0 / (20 * std::log10(std::cos(math::deg2rad(beamWidth.get()) / 4.0)));
-    return maxGain * std::pow(std::abs(std::cos(rad(direction.alpha / 2.0).get())), exponent);
+    return maxGain * std::pow(std::abs(std::cos(rad(direction.toEulerAngles().alpha / 2.0).get())), exponent);
 }
 
 } // namespace physicallayer

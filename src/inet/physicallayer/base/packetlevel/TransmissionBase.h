@@ -43,11 +43,11 @@ class INET_API TransmissionBase : public virtual ITransmission, public virtual I
     const simtime_t dataDuration;
     const Coord startPosition;
     const Coord endPosition;
-    const EulerAngles startOrientation;
-    const EulerAngles endOrientation;
+    const Quaternion startOrientation;
+    const Quaternion endOrientation;
 
   public:
-    TransmissionBase(const IRadio *transmitter, const Packet *packet, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation);
+    TransmissionBase(const IRadio *transmitter, const Packet *packet, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const Quaternion startOrientation, const Quaternion endOrientation);
 
     virtual int getId() const override { return id; }
 
@@ -81,8 +81,8 @@ class INET_API TransmissionBase : public virtual ITransmission, public virtual I
     virtual const Coord& getStartPosition() const override { return startPosition; }
     virtual const Coord& getEndPosition() const override { return endPosition; }
 
-    virtual const EulerAngles& getStartOrientation() const override { return startOrientation; }
-    virtual const EulerAngles& getEndOrientation() const override { return endOrientation; }
+    virtual const Quaternion& getStartOrientation() const override { return startOrientation; }
+    virtual const Quaternion& getEndOrientation() const override { return endOrientation; }
 
     virtual const ITransmissionAnalogModel *getAnalogModel() const override { return check_and_cast<const ITransmissionAnalogModel *>(this); }
 };

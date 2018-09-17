@@ -164,8 +164,8 @@ const ITransmission *ApskLayeredTransmitter::createTransmission(const IRadio *tr
     const simtime_t endTime = startTime + analogModel->getDuration();
     const Coord startPosition = mobility->getCurrentPosition();
     const Coord endPosition = mobility->getCurrentPosition();
-    const EulerAngles startOrientation = mobility->getCurrentAngularPosition();
-    const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
+    const Quaternion startOrientation = mobility->getCurrentAngularPosition();
+    const Quaternion endOrientation = mobility->getCurrentAngularPosition();
     return new LayeredTransmission(packetModel, bitModel, symbolModel, sampleModel, analogModel, transmitter, packet, startTime, endTime, -1, -1, -1, startPosition, endPosition, startOrientation, endOrientation);
 }
 

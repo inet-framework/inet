@@ -32,7 +32,7 @@ class INET_API NarrowbandReceptionBase : public ReceptionBase, public virtual IN
     const Hz bandwidth;
 
   public:
-    NarrowbandReceptionBase(const IRadio *receiver, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, Hz carrierFrequency, Hz bandwidth);
+    NarrowbandReceptionBase(const IRadio *receiver, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const Quaternion startOrientation, const Quaternion endOrientation, Hz carrierFrequency, Hz bandwidth);
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 

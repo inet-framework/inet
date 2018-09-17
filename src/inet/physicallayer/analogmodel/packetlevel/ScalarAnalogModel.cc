@@ -35,8 +35,8 @@ const IReception *ScalarAnalogModel::computeReception(const IRadio *receiverRadi
     const INarrowbandSignal *narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(transmission->getAnalogModel());
     const simtime_t receptionStartTime = arrival->getStartTime();
     const simtime_t receptionEndTime = arrival->getEndTime();
-    const EulerAngles receptionStartOrientation = arrival->getStartOrientation();
-    const EulerAngles receptionEndOrientation = arrival->getEndOrientation();
+    const Quaternion receptionStartOrientation = arrival->getStartOrientation();
+    const Quaternion receptionEndOrientation = arrival->getEndOrientation();
     const Coord receptionStartPosition = arrival->getStartPosition();
     const Coord receptionEndPosition = arrival->getEndPosition();
     W receptionPower = computeReceptionPower(receiverRadio, transmission, arrival);

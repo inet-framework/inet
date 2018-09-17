@@ -71,7 +71,7 @@ const IArrival *ConstantSpeedPropagation::computeArrival(const ITransmission *tr
     const Coord startArrivalPosition = ignoreMovementDuringPropagation ? mobility->getCurrentPosition() : computeArrivalPosition(startTime, startPosition, mobility);
     const simtime_t startPropagationTime = startPosition.distance(startArrivalPosition) / propagationSpeed.get();
     const simtime_t startArrivalTime = startTime + startPropagationTime;
-    const EulerAngles startArrivalOrientation = mobility->getCurrentAngularPosition();
+    const Quaternion startArrivalOrientation = mobility->getCurrentAngularPosition();
     if (ignoreMovementDuringReception) {
         const Coord endArrivalPosition = startArrivalPosition;
         const simtime_t endPropagationTime = startPropagationTime;
@@ -79,7 +79,7 @@ const IArrival *ConstantSpeedPropagation::computeArrival(const ITransmission *tr
         const simtime_t preambleDuration = transmission->getPreambleDuration();
         const simtime_t headerDuration = transmission->getHeaderDuration();
         const simtime_t dataDuration = transmission->getDataDuration();
-        const EulerAngles endArrivalOrientation = mobility->getCurrentAngularPosition();
+        const Quaternion endArrivalOrientation = mobility->getCurrentAngularPosition();
         return new Arrival(startPropagationTime, endPropagationTime, startArrivalTime, endArrivalTime, preambleDuration, headerDuration, dataDuration, startArrivalPosition, endArrivalPosition, startArrivalOrientation, endArrivalOrientation);
     }
     else {
@@ -89,7 +89,7 @@ const IArrival *ConstantSpeedPropagation::computeArrival(const ITransmission *tr
         const simtime_t preambleDuration = transmission->getPreambleDuration();
         const simtime_t headerDuration = transmission->getHeaderDuration();
         const simtime_t dataDuration = transmission->getDataDuration();
-        const EulerAngles endArrivalOrientation = mobility->getCurrentAngularPosition();
+        const Quaternion endArrivalOrientation = mobility->getCurrentAngularPosition();
         return new Arrival(startPropagationTime, endPropagationTime, startArrivalTime, endArrivalTime, preambleDuration, headerDuration, dataDuration, startArrivalPosition, endArrivalPosition, startArrivalOrientation, endArrivalOrientation);
     }
 }

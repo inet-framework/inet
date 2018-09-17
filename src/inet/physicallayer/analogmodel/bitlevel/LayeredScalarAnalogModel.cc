@@ -39,8 +39,8 @@ const IReception *LayeredScalarAnalogModel::computeReception(const IRadio *recei
 {
     const simtime_t receptionStartTime = arrival->getStartTime();
     const simtime_t receptionEndTime = arrival->getEndTime();
-    const EulerAngles receptionStartOrientation = arrival->getStartOrientation();
-    const EulerAngles receptionEndOrientation = arrival->getEndOrientation();
+    const Quaternion receptionStartOrientation = arrival->getStartOrientation();
+    const Quaternion receptionEndOrientation = arrival->getEndOrientation();
     const Coord receptionStartPosition = arrival->getStartPosition();
     const Coord receptionEndPosition = arrival->getEndPosition();
     const LayeredTransmission *layeredTransmission = check_and_cast<const LayeredTransmission *>(transmission);

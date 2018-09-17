@@ -22,14 +22,14 @@ namespace inet {
 
 namespace physicallayer {
 
-double AnalogModelBase::computeAntennaGain(const IAntennaGain* antennaGain, const Coord& startPosition, const Coord& endPosition, const EulerAngles& startOrientation) const
+double AnalogModelBase::computeAntennaGain(const IAntennaGain* antennaGain, const Coord& startPosition, const Coord& endPosition, const Quaternion& startOrientation) const
 {
     if (antennaGain->getMinGain() == antennaGain->getMaxGain())
         return antennaGain->getMinGain();
     else {
         auto direction = Quaternion::rotationFromTo(Coord::X_AXIS, endPosition - startPosition);
         auto antennaLocalDirection = Quaternion(startOrientation).inverse() * direction;
-        return antennaGain->computeGain(antennaLocalDirection.toEulerAngles().normalize());
+        return antennaGain->computeGain(antennaLocalDirection);
     }
 }
 

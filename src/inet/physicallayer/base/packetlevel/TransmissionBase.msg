@@ -29,10 +29,10 @@ class TransmissionBase extends cObject
     int id;
     simtime_t startTime;
     Coord startPosition;
-    EulerAngles startOrientation;
+    Quaternion startOrientation;
     simtime_t endTime;
     Coord endPosition;
-    EulerAngles endOrientation;
+    Quaternion endOrientation;
     simtime_t duration;
     simtime_t preambleDuration;
     simtime_t headerDuration;

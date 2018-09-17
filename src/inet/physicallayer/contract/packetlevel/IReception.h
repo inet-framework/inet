@@ -110,13 +110,13 @@ class INET_API IReception : public IPrintableObject
      * Returns the antenna's orientation when the receiver started to receive
      * the corresponding transmission.
      */
-    virtual const EulerAngles& getStartOrientation() const = 0;
+    virtual const Quaternion& getStartOrientation() const = 0;
 
     /**
      * Returns the antenna's orientation when the receiver ended to receive
      * the corresponding transmission.
      */
-    virtual const EulerAngles& getEndOrientation() const = 0;
+    virtual const Quaternion& getEndOrientation() const = 0;
 
     /**
      * Returns the analog model of the received signal.

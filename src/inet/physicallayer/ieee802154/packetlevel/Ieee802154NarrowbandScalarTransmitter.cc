@@ -49,8 +49,8 @@ const ITransmission *Ieee802154NarrowbandScalarTransmitter::createTransmission(c
     IMobility *mobility = transmitter->getAntenna()->getMobility();
     const Coord startPosition = mobility->getCurrentPosition();
     const Coord endPosition = mobility->getCurrentPosition();
-    const EulerAngles startOrientation = mobility->getCurrentAngularPosition();
-    const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
+    const Quaternion startOrientation = mobility->getCurrentAngularPosition();
+    const Quaternion endOrientation = mobility->getCurrentAngularPosition();
     return new ScalarTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, modulation, headerLength, packet->getTotalLength(), carrierFrequency, bandwidth, transmissionBitrate, transmissionPower);
 }
 

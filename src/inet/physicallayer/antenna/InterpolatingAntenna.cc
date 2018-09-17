@@ -103,11 +103,12 @@ double InterpolatingAntenna::AntennaGain::computeGain(const std::map<rad, double
     }
 }
 
-double InterpolatingAntenna::AntennaGain::computeGain(EulerAngles direction) const
+double InterpolatingAntenna::AntennaGain::computeGain(Quaternion direction) const
 {
-    return computeGain(headingGainMap, direction.alpha) *
-           computeGain(elevationGainMap, direction.beta) *
-           computeGain(bankGainMap, direction.gamma);
+    auto eulerAngles = direction.toEulerAngles();
+    return computeGain(headingGainMap, eulerAngles.alpha) *
+           computeGain(elevationGainMap, eulerAngles.beta) *
+           computeGain(bankGainMap, eulerAngles.gamma);
 }
 
 } // namespace physicallayer

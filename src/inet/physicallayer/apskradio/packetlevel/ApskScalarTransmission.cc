@@ -21,7 +21,7 @@ namespace inet {
 
 namespace physicallayer {
 
-ApskScalarTransmission::ApskScalarTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const IModulation *modulation, b headerLength, b payloadLength, Hz carrierFrequency, Hz bandwidth, bps bitrate, W power) :
+ApskScalarTransmission::ApskScalarTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime, const simtime_t endTime, const simtime_t preambleDuration, const simtime_t headerDuration, const simtime_t dataDuration, const Coord startPosition, const Coord endPosition, const Quaternion startOrientation, const Quaternion endOrientation, const IModulation *modulation, b headerLength, b payloadLength, Hz carrierFrequency, Hz bandwidth, bps bitrate, W power) :
     ScalarTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, modulation, headerLength, payloadLength, carrierFrequency, bandwidth, bitrate, power)
 {
 }

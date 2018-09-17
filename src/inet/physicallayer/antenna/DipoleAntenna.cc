@@ -47,9 +47,9 @@ DipoleAntenna::AntennaGain::AntennaGain(m length_) : length(length_)
 {
 }
 
-double DipoleAntenna::AntennaGain::computeGain(EulerAngles direction) const
+double DipoleAntenna::AntennaGain::computeGain(Quaternion direction) const
 {
-    double q = sin(rad(direction.beta - rad(M_PI_2)).get());
+    double q = sin(rad(direction.toEulerAngles().beta - rad(M_PI_2)).get());
     return 1.5 * q * q;
 }
 

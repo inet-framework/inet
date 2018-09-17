@@ -40,7 +40,7 @@ const IArrival *ConstantTimePropagation::computeArrival(const ITransmission *tra
 {
     arrivalComputationCount++;
     const Coord position = mobility->getCurrentPosition();
-    const EulerAngles orientation = mobility->getCurrentAngularPosition();
+    const Quaternion orientation = mobility->getCurrentAngularPosition();
     const simtime_t startTime = transmission->getStartTime();
     const simtime_t endTime = transmission->getEndTime();
     const simtime_t preambleDuration = transmission->getPreambleDuration();

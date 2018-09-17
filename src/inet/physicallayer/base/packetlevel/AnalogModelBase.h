@@ -28,7 +28,7 @@ namespace physicallayer {
 class INET_API AnalogModelBase : public cModule, public virtual IAnalogModel
 {
   protected:
-    virtual double computeAntennaGain(const IAntennaGain* antenna, const Coord& startPosition, const Coord& endPosition, const EulerAngles& startOrientation) const;
+    virtual double computeAntennaGain(const IAntennaGain* antenna, const Coord& startPosition, const Coord& endPosition, const Quaternion& startOrientation) const;
 };
 
 } // namespace physicallayer

@@ -27,9 +27,9 @@ class Arrival
     @descriptor(readonly);
     simtime_t startTime;
     Coord startPosition;
-    EulerAngles startOrientation;
+    Quaternion startOrientation;
     simtime_t endTime;
     Coord endPosition;
-    EulerAngles endOrientation;
+    Quaternion endOrientation;
 }
 
