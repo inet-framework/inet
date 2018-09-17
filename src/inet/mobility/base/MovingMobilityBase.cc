@@ -73,11 +73,13 @@ void MovingMobilityBase::orient()
 {
     if (faceForward) {
         // determine orientation based on direction
-        Coord direction = lastVelocity;
-        direction.normalize();
-        lastOrientation.alpha = rad(atan2(direction.y, direction.x));
-        lastOrientation.beta = rad(-asin(direction.z));
-        lastOrientation.gamma = rad(0.0);
+        if (lastVelocity != Coord::ZERO) {
+            Coord direction = lastVelocity;
+            direction.normalize();
+            lastOrientation.alpha = rad(atan2(direction.y, direction.x));
+            lastOrientation.beta = rad(-asin(direction.z));
+            lastOrientation.gamma = rad(0.0);
+        }
     }
 }
 
