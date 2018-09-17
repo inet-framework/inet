@@ -106,18 +106,6 @@ class INET_API Ieee8021dRelay : public cSimpleModule, public ILifecycle
     void learn(MacAddress srcAddr, int arrivalInterfaceId);
     void broadcast(Packet *packet, int arrivalInterfaceId);
 
-    /**
-     * Receives BPDU from the STP/RSTP module and dispatch it to network.
-     * Sets EherFrame destination, source, etc. according to the BPDU's Ieee802Ctrl info.
-     */
-    void dispatchBPDU(Packet *packet);
-
-    /**
-     * Deliver BPDU to the STP/RSTP module.
-     * Sets the BPDU's Ieee802Ctrl info according to the arriving EtherFrame.
-     */
-    void deliverBPDU(Packet *packet);
-
     void sendUp(Packet *packet);
 
     // For lifecycle
