@@ -48,8 +48,8 @@ class CLNSAddress
 
     CLNSAddress();
     CLNSAddress(std::string net);
-    CLNSAddress(uint64 areaID, uint64 systemID);
-    void set(uint64 areaID, uint64 systemID);
+    CLNSAddress(uint64 areaID, uint64 systemID, uint8 nsel = 0);   //FIXME remove nsel initialization
+    void set(uint64 areaID, uint64 systemID, uint8 nsel = 0);   //FIXME remove nsel initialization
     virtual ~CLNSAddress();
 
     bool isUnspecified() const;

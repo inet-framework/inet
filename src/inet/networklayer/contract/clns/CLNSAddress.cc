@@ -36,18 +36,18 @@ CLNSAddress::CLNSAddress()
     nsel = 0;
 }
 
-CLNSAddress::CLNSAddress(uint64 areaID, uint64 systemID)
+CLNSAddress::CLNSAddress(uint64 areaID, uint64 systemID, uint8 nsel) :
+    areaID(areaID),
+    systemID(systemID),
+    nsel(nsel)
 {
-    this->areaID = areaID;
-    this->systemID = systemID;
-    nsel = 0;
 }
 
-void CLNSAddress::set(uint64 areaID, uint64 systemID)
+void CLNSAddress::set(uint64 areaID, uint64 systemID, uint8 nsel)
 {
     this->areaID = areaID;
     this->systemID = systemID;
-    nsel = 0;
+    this->nsel = nsel;
 }
 
 CLNSAddress::CLNSAddress(std::string net)
