@@ -1,6 +1,8 @@
 Multiple Wireless Interfaces
 ============================
 
+TODO: needs a proper title
+
 Goals
 -----
 
