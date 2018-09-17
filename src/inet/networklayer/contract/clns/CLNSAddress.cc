@@ -74,28 +74,25 @@ CLNSAddress::CLNSAddress(std::string net)
     while (found != std::string::npos) {
         switch (found) {
         case 2:
-        dots++;
-        // area[0] = (unsigned char) (atoi(net.substr(0, 2).c_str()));
+            dots++;
+            // area[0] = (unsigned char) (atoi(net.substr(0, 2).c_str()));
+            areaID += strtoul(net.substr(0, 2).c_str(), NULL, 16) << 16;
             break;
         case 7:
-        areaID += strtoul(net.substr(3, 2).c_str(), NULL, 16);
-        areaID += strtoul(net.substr(5, 2).c_str(), NULL, 16) << 8;
-        dots++;
+            areaID += strtoul(net.substr(3, 4).c_str(), NULL, 16);
+            dots++;
             break;
         case 12:
-        dots++;
-        systemID += strtoul(net.substr(8, 2).c_str(), NULL, 16);
-        systemID += strtoul(net.substr(10, 2).c_str(), NULL, 16) << 8;
+            dots++;
+            systemID += strtoul(net.substr(8, 4).c_str(), NULL, 16) << 32;
             break;
         case 17:
-        dots++;
-        systemID += strtoul(net.substr(13, 2).c_str(), NULL, 16) << 16;
-        systemID += strtoul(net.substr(15, 2).c_str(), NULL, 16) << 24;
+            dots++;
+            systemID += strtoul(net.substr(13, 4).c_str(), NULL, 16) << 16;
             break;
         case 22:
-        dots++;
-        systemID += strtoul(net.substr(18, 2).c_str(), NULL, 16) << 32;
-        systemID += strtoul(net.substr(20, 2).c_str(), NULL, 16) << 36;
+            dots++;
+            systemID += strtoul(net.substr(18, 4).c_str(), NULL, 16);
             break;
         default:
             return;
