@@ -359,7 +359,7 @@ void Arp::processARPPacket(Packet *packet)
         switch (arp->getOpcode()) {
             case ARP_REQUEST: {
                 EV_DETAIL << "Packet was ARP REQUEST, sending REPLY\n";
-                MacAddress myMACAddress = getMacAddressForArpReply(ie, arp.get());
+                MacAddress myMACAddress = resolveMacAddressForArpReply(ie, arp.get());
                 if (myMACAddress.isUnspecified()) {
                     delete packet;
                     return;
@@ -411,7 +411,7 @@ void Arp::processARPPacket(Packet *packet)
     delete packet;
 }
 
-MacAddress Arp::getMacAddressForArpReply(const InterfaceEntry *ie, const ArpPacket *arp)
+MacAddress Arp::resolveMacAddressForArpReply(const InterfaceEntry *ie, const ArpPacket *arp)
 {
     return ie->getMacAddress();
 }
