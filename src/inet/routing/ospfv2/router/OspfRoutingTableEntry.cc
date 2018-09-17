@@ -92,8 +92,16 @@ bool OspfRoutingTableEntry::operator==(const OspfRoutingTableEntry& entry) const
 
 std::ostream& operator<<(std::ostream& out, const OspfRoutingTableEntry& entry)
 {
-    out << "dest: " << entry.getDestination() << " ";
-    out << "nextHops: ";
+    if (entry.getDestination().isUnspecified())
+        out << "0.0.0.0";
+    else
+        out << entry.getDestination();
+    out << "/";
+    if (entry.getNetmask().isUnspecified())
+        out << "0";
+    else
+        out << entry.getNetmask().getNetmaskLength();
+    out << " nextHops: ";
     for (unsigned int i = 0; i < entry.getNextHopCount(); i++) {
         Ipv4Address gateway = entry.getNextHop(i).hopAddress;
         if (gateway.isUnspecified())
@@ -101,7 +109,6 @@ std::ostream& operator<<(std::ostream& out, const OspfRoutingTableEntry& entry)
         else
             out << gateway << "  ";
     }
-    out << "mask: " << entry.getNetmask() << " ";
     out << "cost: " << entry.getCost() << " ";
     if(entry.getPathType() == OspfRoutingTableEntry::TYPE2_EXTERNAL)
         out << "type2Cost: " << entry.getType2Cost() << " ";
@@ -117,22 +124,22 @@ std::ostream& operator<<(std::ostream& out, const OspfRoutingTableEntry& entry)
 std::string OspfRoutingTableEntry::str() const
 {
     std::stringstream out;
-
-    out << "dest:";
+    out << getSourceTypeAbbreviation();
+    out << " ";
     if (getDestination().isUnspecified())
-        out << "*  ";
+        out << "0.0.0.0";
     else
-        out << getDestination() << "  ";
-    out << "gw:";
+        out << getDestination();
+    out << "/";
+    if (getNetmask().isUnspecified())
+        out << "0";
+    else
+        out << getNetmask().getNetmaskLength();
+    out << " gw:";
     if (getGateway().isUnspecified())
         out << "*  ";
     else
         out << getGateway() << "  ";
-    out << "mask:";
-    if (getNetmask().isUnspecified())
-        out << "*  ";
-    else
-        out << getNetmask() << "  ";
     if(getRoutingTable() && getRoutingTable()->isAdminDistEnabled())
         out << "AD:" << getAdminDist() << "  ";
     out << "metric:" << getMetric() << "  ";
@@ -140,14 +147,9 @@ std::string OspfRoutingTableEntry::str() const
     if (!getInterface())
         out << "*";
     else
-        out << getInterface()->getInterfaceName();
-    if (getInterface() && getInterface()->ipv4Data())
-        out << "(" << getInterface()->getIpv4Address() << ")";
-    out << "  ";
-    out << (getGateway().isUnspecified() ? "DIRECT" : "REMOTE");
-    out << " " << IRoute::sourceTypeName(getSourceType());
+        out << getInterfaceName();
 
-    out << "destType:" << OspfRoutingTableEntry::getDestinationTypeString(destinationType)
+    out << " destType:" << OspfRoutingTableEntry::getDestinationTypeString(destinationType)
     << " pathType:" << OspfRoutingTableEntry::getPathTypeString(pathType)
     << " area:" << area.str(false);
 
