@@ -53,7 +53,7 @@ void L3Address::set(const Ipv6Address& addr)
 void L3Address::set(const CLNSAddress& addr)
 {
 
-    hi = addr.getAreaId();
+    hi = ((uint64)RESERVED_IPV6_ADDRESS_RANGE << 48) | ((addr.getAreaId() & 0xFFFFFFFFL) << 16) | (uint64)addr.getNsel() << 8 | (uint64)L3Address::CLNS;
     lo = addr.getSystemId();
 }
 
@@ -114,8 +114,9 @@ std::string L3Address::str() const
 
         case L3Address::MODULEPATH:
             return toModulePath().str();
+
         case L3Address::CLNS:
-          return toCLNS().str();
+            return toCLNS().str();
 
         default:
             throw cRuntimeError("Unknown type");
@@ -410,6 +411,20 @@ const char *L3Address::getTypeName(AddressType t)
             return "Unknown type";
     }
 #undef CASE
+}
+
+CLNSAddress L3Address::toCLNS() const
+{
+    switch (getType()) {
+        case L3Address::NONE:
+            return CLNSAddress();
+
+        case L3Address::CLNS:
+            return CLNSAddress((hi & 0x0000FFFFFFFF0000L) >> 16, lo, (hi & 0xFF00L) >> 8);
+
+        default:
+            throw cRuntimeError("Address is not of the given type");
+    }
 }
 
 } // namespace inet

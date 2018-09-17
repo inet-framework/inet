@@ -84,7 +84,7 @@ class INET_API L3Address
     MacAddress toMac() const { return getType() == NONE ? MacAddress() : MacAddress(get(MAC)); }
     ModuleIdAddress toModuleId() const { return getType() == NONE ? ModuleIdAddress() : ModuleIdAddress(get(MODULEID)); }
     ModulePathAddress toModulePath() const { return getType() == NONE ? ModulePathAddress() : ModulePathAddress(get(MODULEPATH)); }
-    CLNSAddress toCLNS() const { return getType() == NONE ? CLNSAddress() : CLNSAddress(hi, lo); }
+    CLNSAddress toCLNS() const;
 
     std::string str() const;
     AddressType getType() const;
