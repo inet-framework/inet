@@ -25,6 +25,24 @@ namespace inet {
 class INET_API SuperpositioningMobility : public MobilityBase, public cListener
 {
   protected:
+    enum class PositionComposition {
+        PC_UNDEFINED = -1,
+        PC_NONE,
+        PC_SUM,
+        PC_AVERAGE,
+    };
+
+    enum class OrientationComposition {
+        OC_UNDEFINED = -1,
+        OC_NONE,
+        OC_SUM,
+        OC_AVERAGE,
+        OC_FACE_FORWARD
+    };
+
+  protected:
+    PositionComposition positionComposition = PositionComposition::PC_UNDEFINED;
+    OrientationComposition orientationComposition = OrientationComposition::OC_UNDEFINED;
     std::vector<IMobility *> elements;
 
   protected:

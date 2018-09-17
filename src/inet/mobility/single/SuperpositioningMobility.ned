@@ -35,6 +35,8 @@ module SuperpositioningMobility extends MobilityBase
 {
     parameters:
         int numElements; // number of combined mobility modules
+        string positionComposition @enum("none", "sum", "average") = default("sum");
+        string orientationComposition @enum("none", "sum", "average", "faceForward") = default("sum");
         element[*].subjectModule = default(""); // disable visual subject module of superposition elements by default 
         @class(SuperpositioningMobility);
     submodules:
