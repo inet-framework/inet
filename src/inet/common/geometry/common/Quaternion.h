@@ -26,8 +26,11 @@ namespace inet {
 // borrowed and adapted from https://github.com/MegaManSE/willperone/blob/master/Math/quaternion.h
 class INET_API Quaternion
 {
-public:
+  public:
+    static Quaternion IDENTITY;
+    static Quaternion NIL;
 
+  public:
     double s = 1; //!< the real component
     Coord v; //!< the imaginary components
 

@@ -19,6 +19,9 @@
 
 namespace inet {
 
+Quaternion Quaternion::IDENTITY = Quaternion();
+Quaternion Quaternion::NIL = Quaternion(NaN, NaN, NaN, NaN);
+
 Quaternion::Quaternion(const Coord &axis, double angle) : Quaternion(std::cos(angle/2), axis*std::sin(angle/2))
 {
     // nothing
