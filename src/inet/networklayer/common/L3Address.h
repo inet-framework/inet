@@ -80,7 +80,7 @@ class INET_API L3Address
     void reset() { set(NONE, 0); }
 
     Ipv4Address toIpv4() const { return getType() == NONE ? Ipv4Address() : Ipv4Address(get(IPv4)); }
-    Ipv6Address toIpv6() const { return getType() == NONE ? Ipv6Address() : Ipv6Address(hi, lo); }
+    Ipv6Address toIpv6() const { return getType() == NONE ? Ipv6Address() : Ipv6Address(hi, get(IPv6)); }
     MacAddress toMac() const { return getType() == NONE ? MacAddress() : MacAddress(get(MAC)); }
     ModuleIdAddress toModuleId() const { return getType() == NONE ? ModuleIdAddress() : ModuleIdAddress(get(MODULEID)); }
     ModulePathAddress toModulePath() const { return getType() == NONE ? ModulePathAddress() : ModulePathAddress(get(MODULEPATH)); }
