@@ -67,26 +67,24 @@ std::string Ipv4Route::str() const
 {
     std::stringstream out;
     out << getSourceTypeAbbreviation();
-    out << " ";
     if (getDestination().isUnspecified())
-        out << "0.0.0.0";
+        out << " 0.0.0.0";
     else
-        out << getDestination();
+        out << " " << getDestination();
     out << "/";
     if (getNetmask().isUnspecified())
         out << "0";
     else
         out << getNetmask().getNetmaskLength();
-    out << "gw:";
+    out << " gw:";
     if (gateway.isUnspecified())
-        out << "*  ";
+        out << "*";
     else
-        out << getGateway() << "  ";
-    out << "mask:";
+        out << getGateway();
     if(rt && rt->isAdminDistEnabled())
-        out << "AD:" << adminDist << "  ";
-    out << "metric:" << metric << "  ";
-    out << "if:";
+        out << " AD:" << adminDist;
+    out << " metric:" << metric;
+    out << " if:";
     if (!interfacePtr)
         out << "*";
     else

@@ -56,11 +56,10 @@ std::string Ipv6Route::str() const
 {
     std::stringstream out;
     out << getSourceTypeAbbreviation();
-    out << " ";
     if (getDestPrefix().isUnspecified())
-        out << "::";
+        out << " ::";
     else
-        out << getDestPrefix();
+        out << " " << getDestPrefix();
     out << "/" << getPrefixLength();
     if (getNextHop().isUnspecified())
     {
