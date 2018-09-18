@@ -45,8 +45,8 @@ void Ieee8021dRelay::initialize(int stage)
     else if (stage == INITSTAGE_LINK_LAYER) {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-        registerService(Protocol::ethernetMac, nullptr, gate("ifIn"));
-        registerProtocol(Protocol::ethernetMac, gate("ifOut"), nullptr);
+        registerService(Protocol::ethernetMac, gate("upperLayerIn"), gate("ifIn"));
+        registerProtocol(Protocol::ethernetMac, gate("ifOut"), gate("upperLayerOut"));
 
         //TODO FIX Move it at least to STP module (like in ANSA's CDP/LLDP)
         if(isStpAware) {
