@@ -87,11 +87,11 @@ Coord VisualizerBase::getContactPosition(const cModule *networkNode, const Coord
         throw cRuntimeError("Unknown contact mode: %s", contactMode);
 }
 
-EulerAngles VisualizerBase::getOrientation(const cModule *networkNode) const
+Quaternion VisualizerBase::getOrientation(const cModule *networkNode) const
 {
     auto mobility = networkNode->getSubmodule("mobility");
     if (mobility == nullptr)
-        return EulerAngles::ZERO;
+        return Quaternion::IDENTITY;
     else
         return check_and_cast<IMobility *>(mobility)->getCurrentAngularPosition();
 }

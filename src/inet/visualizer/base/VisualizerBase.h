@@ -20,7 +20,7 @@
 
 #include <functional>
 #include "inet/common/geometry/common/Coord.h"
-#include "inet/common/geometry/common/EulerAngles.h"
+#include "inet/common/geometry/common/Quaternion.h"
 #include "inet/common/packet/chunk/Chunk.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
@@ -41,7 +41,7 @@ class INET_API VisualizerBase : public cSimpleModule
 
     virtual Coord getPosition(const cModule *networkNode) const;
     virtual Coord getContactPosition(const cModule *networkNode, const Coord& fromPosition, const char *contactMode, double contactSpacing) const;
-    virtual EulerAngles getOrientation(const cModule *networkNode) const;
+    virtual Quaternion getOrientation(const cModule *networkNode) const;
 
     virtual void mapChunkIds(const Ptr<const Chunk>& chunk, const std::function<void(int)>& thunk) const;
 };

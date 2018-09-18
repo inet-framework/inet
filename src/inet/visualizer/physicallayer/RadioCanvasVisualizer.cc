@@ -174,7 +174,7 @@ void RadioCanvasVisualizer::refreshAntennaLobe(const IAntenna *antenna, cPolygon
         }
         else
             throw cRuntimeError("Unknown antennaLobePlane");
-        double gain = antenna->getGain()->computeGain(direction.normalize());
+        double gain = antenna->getGain()->computeGain(Quaternion(direction.normalize()));
         cFigure::Point point = lobeCanvasOffset * antennaLobeRadius * gain;
         if (antennaLobeFigure->getNumPoints() > i)
             antennaLobeFigure->setPoint(i, point);
