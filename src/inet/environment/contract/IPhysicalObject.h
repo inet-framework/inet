@@ -18,7 +18,7 @@
 #ifndef __INET_IPHYSICALOBJECT_H
 #define __INET_IPHYSICALOBJECT_H
 
-#include "inet/common/geometry/common/EulerAngles.h"
+#include "inet/common/geometry/common/Quaternion.h"
 #include "inet/common/geometry/base/ShapeBase.h"
 #include "inet/environment/contract/IMaterial.h"
 
@@ -30,7 +30,7 @@ class INET_API IPhysicalObject
 {
   public:
     virtual const Coord& getPosition() const = 0;
-    virtual const EulerAngles& getOrientation() const = 0;
+    virtual const Quaternion& getOrientation() const = 0;
 
     virtual const ShapeBase *getShape() const = 0;
     virtual const IMaterial *getMaterial() const = 0;

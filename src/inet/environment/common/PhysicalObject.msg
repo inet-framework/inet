@@ -28,5 +28,5 @@ class PhysicalObject extends cNamedObject
     @descriptor(readonly);
     int id;
     Coord position;
-    EulerAngles orientation;
+    Quaternion orientation;
 }

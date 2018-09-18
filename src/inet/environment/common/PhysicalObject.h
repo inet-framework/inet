@@ -19,7 +19,7 @@
 #define __INET_PHYSICALOBJECT_H
 
 #include "inet/common/geometry/base/ShapeBase.h"
-#include "inet/common/geometry/common/EulerAngles.h"
+#include "inet/common/geometry/common/Quaternion.h"
 #include "inet/environment/contract/IPhysicalObject.h"
 #include "inet/environment/common/Material.h"
 
@@ -50,7 +50,7 @@ class INET_API PhysicalObject : public cNamedObject, public IPhysicalObject
     /**
      * The orientation of the object relative to the default orientation of the shape.
      */
-    EulerAngles orientation;
+    Quaternion orientation;
     /**
      * The shape of the object independently of its position and orientation.
      * The physical object doesn't own its shape.
@@ -74,12 +74,12 @@ class INET_API PhysicalObject : public cNamedObject, public IPhysicalObject
     //@}
 
   public:
-    PhysicalObject(const char *name, int id, const Coord& position, const EulerAngles& orientation, const ShapeBase *shape, const Material *material, double lineWidth, const cFigure::Color& lineColor, const cFigure::Color& fillColor, double opacity, const char *texture, const char *tags);
+    PhysicalObject(const char *name, int id, const Coord& position, const Quaternion& orientation, const ShapeBase *shape, const Material *material, double lineWidth, const cFigure::Color& lineColor, const cFigure::Color& fillColor, double opacity, const char *texture, const char *tags);
 
     virtual int getId() const { return id; }
 
     virtual const Coord& getPosition() const override { return position; }
-    virtual const EulerAngles& getOrientation() const override { return orientation; }
+    virtual const Quaternion& getOrientation() const override { return orientation; }
 
     virtual const ShapeBase *getShape() const override { return shape; }
     virtual const Material *getMaterial() const override { return material; }

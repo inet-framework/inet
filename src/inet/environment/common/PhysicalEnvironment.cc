@@ -247,20 +247,21 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         const char *name = element->getAttribute("name");
         // orientation
         // TODO: what about geographic orientation? what about taking GeographicCoordinateSystem into account?
-        EulerAngles orientation;
+        Quaternion orientation;
         const char *orientationAttribute = element->getAttribute("orientation");
         if (orientationAttribute)
         {
             cStringTokenizer tokenizer(orientationAttribute);
             if ((tok = tokenizer.nextToken()) == nullptr)
                 throw cRuntimeError("Missing orientation alpha at %s", element->getSourceLocation());
-            orientation.alpha = deg(atof(tok));
+            auto alpha = deg(atof(tok));
             if ((tok = tokenizer.nextToken()) == nullptr)
                 throw cRuntimeError("Missing orientation beta at %s", element->getSourceLocation());
-            orientation.beta = deg(atof(tok));
+            auto beta = deg(atof(tok));
             if ((tok = tokenizer.nextToken()) == nullptr)
                 throw cRuntimeError("Missing orientation gamma at %s", element->getSourceLocation());
-            orientation.gamma = deg(atof(tok));
+            auto gamma = deg(atof(tok));
+            orientation = Quaternion(EulerAngles(alpha, beta, gamma));
         }
         // shape
         Coord size = Coord::NIL;
