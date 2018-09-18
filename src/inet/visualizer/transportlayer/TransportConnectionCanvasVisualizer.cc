@@ -76,6 +76,14 @@ const TransportConnectionVisualizerBase::TransportConnectionVisualization *Trans
 {
     auto sourceFigure = createConnectionEndFigure(tcpConnection);
     auto destinationFigure = createConnectionEndFigure(tcpConnection);
+    auto sourceNetworkNode = getContainingNode(source);
+    auto sourceVisualization = networkNodeVisualizer->getNetworkNodeVisualization(sourceNetworkNode);
+    if (sourceVisualization == nullptr)
+        throw cRuntimeError("Cannot create transport connection visualization for '%s', because network node visualization is not found for '%s'", source->getFullPath().c_str(), sourceNetworkNode->getFullPath().c_str());
+    auto destinationNetworkNode = getContainingNode(destination);
+    auto destinationVisualization = networkNodeVisualizer->getNetworkNodeVisualization(destinationNetworkNode);
+    if (destinationVisualization == nullptr)
+        throw cRuntimeError("Cannot create transport connection visualization for '%s', because network node visualization is not found for '%s'", source->getFullPath().c_str(), destinationNetworkNode->getFullPath().c_str());
     return new TransportConnectionCanvasVisualization(sourceFigure, destinationFigure, source->getId(), destination->getId(), 1);
 }
 

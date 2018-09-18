@@ -329,8 +329,10 @@ void MediumCanvasVisualizer::handleRadioAdded(const IRadio *radio)
     auto module = check_and_cast<const cModule *>(radio);
     auto networkNode = getContainingNode(module);
     if (networkNodeFilter.matches(networkNode)) {
+        auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
+        if (networkNodeVisualization == nullptr)
+            throw cRuntimeError("Cannot create medium visualization for '%s', because network node visualization is not found for '%s'", module->getFullPath().c_str(), networkNode->getFullPath().c_str());
         if (displayInterferenceRanges || (module->hasPar("displayInterferenceRange") && module->par("displayInterferenceRange"))) {
-            auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
             auto interferenceRangeFigure = new cOvalFigure("interferenceRange");
             m maxInterferenceRange = check_and_cast<const IRadioMedium *>(radio->getMedium())->getMediumLimitCache()->getMaxInterferenceRange(radio);
             interferenceRangeFigure->setTags((std::string("interference_range ") + tags).c_str());
@@ -342,7 +344,6 @@ void MediumCanvasVisualizer::handleRadioAdded(const IRadio *radio)
             networkNodeVisualization->addFigure(interferenceRangeFigure);
         }
         if (displayCommunicationRanges || (module->hasPar("displayCommunicationRange") && module->par("displayCommunicationRange"))) {
-            auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
             auto communicationRangeFigure = new cOvalFigure("communicationRange");
             m maxCommunicationRange = check_and_cast<const IRadioMedium *>(radio->getMedium())->getMediumLimitCache()->getMaxCommunicationRange(radio);
             communicationRangeFigure->setTags((std::string("communication_range ") + tags).c_str());
@@ -354,7 +355,6 @@ void MediumCanvasVisualizer::handleRadioAdded(const IRadio *radio)
             networkNodeVisualization->addFigure(communicationRangeFigure);
         }
         if (displaySignalDepartures || displaySignalArrivals) {
-            auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
             if (displaySignalDepartures) {
                 std::string imageName = par("signalDepartureImage");
                 auto signalDepartureFigure = new LabeledIconFigure("signalDeparture");

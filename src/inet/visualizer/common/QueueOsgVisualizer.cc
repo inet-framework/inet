@@ -54,8 +54,11 @@ QueueVisualizerBase::QueueVisualization *QueueOsgVisualizer::createQueueVisualiz
     auto module = check_and_cast<cModule *>(queue->getOwner());
     auto geode = new osg::Geode();
     geode->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
-    auto visualization = networkNodeVisualizer->getNetworkNodeVisualization(getContainingNode(module));
-    return new QueueOsgVisualization(visualization, geode, queue);
+    auto networkNode = getContainingNode(module);
+    auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
+    if (networkNodeVisualization == nullptr)
+        throw cRuntimeError("Cannot create queue visualization for '%s', because network node visualization is not found for '%s'", queue->getFullPath().c_str(), networkNode->getFullPath().c_str());
+    return new QueueOsgVisualization(networkNodeVisualization, geode, queue);
 }
 
 void QueueOsgVisualizer::refreshQueueVisualization(const QueueVisualization *queueVisualization) const

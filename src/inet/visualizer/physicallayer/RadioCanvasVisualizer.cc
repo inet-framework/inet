@@ -87,6 +87,8 @@ RadioVisualizerBase::RadioVisualization *RadioCanvasVisualizer::createRadioVisua
     antennaLobeFigure->setSmooth(true);
     auto networkNode = getContainingNode(module);
     auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
+    if (networkNodeVisualization == nullptr)
+        throw cRuntimeError("Cannot create radio visualization for '%s', because network node visualization is not found for '%s'", module->getFullPath().c_str(), networkNode->getFullPath().c_str());
     auto antenna = radio->getAntenna();
     refreshAntennaLobe(antenna, antennaLobeFigure);
     return new RadioCanvasVisualization(networkNodeVisualization, radioModeFigure, receptionStateFigure, transmissionStateFigure, antennaLobeFigure, module->getId());
