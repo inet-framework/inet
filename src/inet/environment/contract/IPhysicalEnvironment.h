@@ -20,7 +20,7 @@
 
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/geometry/common/EulerAngles.h"
-#include "inet/common/geometry/common/Rotation.h"
+#include "inet/common/geometry/common/RotationMatrix.h"
 #include "inet/common/IVisitor.h"
 #include "inet/environment/contract/IGround.h"
 #include "inet/environment/contract/IMaterialRegistry.h"

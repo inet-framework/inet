@@ -18,14 +18,14 @@
 #ifndef __INET_CANVASPROJECTION_H
 #define __INET_CANVASPROJECTION_H
 
-#include "inet/common/geometry/common/Rotation.h"
+#include "inet/common/geometry/common/RotationMatrix.h"
 
 namespace inet {
 
 class INET_API CanvasProjection
 {
   protected:
-    Rotation rotation;
+    RotationMatrix rotation;
     cFigure::Point scale;
     cFigure::Point translation;
 
@@ -34,10 +34,10 @@ class INET_API CanvasProjection
 
   public:
     CanvasProjection() : scale(cFigure::Point(1, 1)) {}
-    CanvasProjection(Rotation rotation, cFigure::Point translation);
+    CanvasProjection(RotationMatrix rotation, cFigure::Point translation);
 
-    const Rotation& getRotation() const { return rotation; }
-    void setRotation(const Rotation& rotation) { this->rotation = rotation; }
+    const RotationMatrix& getRotation() const { return rotation; }
+    void setRotation(const RotationMatrix& rotation) { this->rotation = rotation; }
 
     const cFigure::Point& getScale() const { return scale; }
     void setScale(const cFigure::Point& scale) { this->scale = scale; }

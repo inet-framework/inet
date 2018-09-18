@@ -31,10 +31,10 @@ class INET_API PhysicalEnvironmentCanvasVisualizer : public PhysicalEnvironmentV
     class ObjectPositionComparator
     {
       protected:
-        const Rotation &viewRotation;
+        const RotationMatrix &viewRotation;
 
       public:
-        ObjectPositionComparator(const Rotation &viewRotation) : viewRotation(viewRotation) {}
+        ObjectPositionComparator(const RotationMatrix &viewRotation) : viewRotation(viewRotation) {}
 
         bool operator() (const physicalenvironment::IPhysicalObject *left, const physicalenvironment::IPhysicalObject *right) const
         {
@@ -58,7 +58,7 @@ class INET_API PhysicalEnvironmentCanvasVisualizer : public PhysicalEnvironmentV
     virtual void initialize(int stage) override;
     virtual void refreshDisplay() const override;
 
-    virtual void computeFacePoints(const physicalenvironment::IPhysicalObject *object, std::vector<std::vector<Coord> >& faces, const Rotation& rotation) const;
+    virtual void computeFacePoints(const physicalenvironment::IPhysicalObject *object, std::vector<std::vector<Coord> >& faces, const RotationMatrix& rotation) const;
 };
 
 } // namespace visualizer

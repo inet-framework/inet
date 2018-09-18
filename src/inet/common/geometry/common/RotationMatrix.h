@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ROTATION_H
-#define __INET_ROTATION_H
+#ifndef __INET_ROTATIONMATRIX_H
+#define __INET_ROTATIONMATRIX_H
 
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/geometry/common/EulerAngles.h"
@@ -25,9 +25,9 @@
 namespace inet {
 
 /*
- * This class efficiently computes the rotation of an arbitrary vector by an Euler Angle
+ * Represents a 3D rotation matrix.
  */
-class INET_API Rotation
+class INET_API RotationMatrix
 {
     protected:
         double matrix[3][3];
@@ -37,9 +37,9 @@ class INET_API Rotation
         double computeDeterminant() const;
 
     public:
-        Rotation();
-        Rotation(const double matrix[3][3]);
-        Rotation(const EulerAngles& eulerAngles);
+        RotationMatrix();
+        RotationMatrix(const double matrix[3][3]);
+        RotationMatrix(const EulerAngles& eulerAngles);
 
         Coord rotateVector(const Coord& vector) const;
         Coord rotateVectorInverse(const Coord& vector) const;
@@ -48,6 +48,6 @@ class INET_API Rotation
         Quaternion toQuaternion() const;
 };
 
-} /* namespace inet */
+} // namespace inet
 
-#endif // ifndef __INET_ROTATION_H
+#endif // ifndef __INET_ROTATIONMATRIX_H

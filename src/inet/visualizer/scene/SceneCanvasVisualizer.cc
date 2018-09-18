@@ -129,7 +129,7 @@ void SceneCanvasVisualizer::handleParameterChange(const char* name)
         refreshAxis(axisLength);
 }
 
-Rotation SceneCanvasVisualizer::parseViewAngle(const char* viewAngle, bool& invertY)
+RotationMatrix SceneCanvasVisualizer::parseViewAngle(const char* viewAngle, bool& invertY)
 {
     double a, b, c;
     if (*viewAngle == 'x' || *viewAngle == 'y' || *viewAngle == 'z') {
@@ -182,7 +182,7 @@ Rotation SceneCanvasVisualizer::parseViewAngle(const char* viewAngle, bool& inve
         }
         else
             invertY = true;
-        return Rotation(matrix);
+        return RotationMatrix(matrix);
     }
     else if (!strncmp(viewAngle, "isometric", 9)) {
         int v;
@@ -201,11 +201,11 @@ Rotation SceneCanvasVisualizer::parseViewAngle(const char* viewAngle, bool& inve
         deg beta = deg(v / 24 % 2 ? 35.27 : -35.27);
         deg gamma = deg(30 + v / 4 % 6 * 60);
         invertY = false;
-        return Rotation(EulerAngles(alpha, beta, gamma));
+        return RotationMatrix(EulerAngles(alpha, beta, gamma));
     }
     else if (sscanf(viewAngle, "%lf %lf %lf", &a, &b, &c) == 3) {
         invertY = false;
-        return Rotation(EulerAngles(deg(a), deg(b), deg(c)));
+        return RotationMatrix(EulerAngles(deg(a), deg(b), deg(c)));
     }
     else
         throw cRuntimeError("Invalid viewAngle parameter value: '%s'", viewAngle);

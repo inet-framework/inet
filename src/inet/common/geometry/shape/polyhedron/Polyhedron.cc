@@ -434,7 +434,7 @@ bool Polyhedron::computeIntersection(const LineSegment& lineSegment, Coord& inte
     return true;
 }
 
-void Polyhedron::computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const Rotation& rotation, const Rotation& viewRotation) const
+void Polyhedron::computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const RotationMatrix& rotation, const RotationMatrix& viewRotation) const
 {
     for (auto face : this->faces)
     {
@@ -454,7 +454,7 @@ void Polyhedron::computeVisibleFaces(std::vector<std::vector<Coord> >& faces, co
     }
 }
 
-bool Polyhedron::isVisibleFromView(const PolyhedronFace *face, const Rotation& viewRotation, const Rotation& rotation) const
+bool Polyhedron::isVisibleFromView(const PolyhedronFace *face, const RotationMatrix& viewRotation, const RotationMatrix& rotation) const
 {
     Coord zNormal(0,0,1);
     Coord rotatedFaceNormal = viewRotation.rotateVector(rotation.rotateVector(face->getOutwardNormalVector()));

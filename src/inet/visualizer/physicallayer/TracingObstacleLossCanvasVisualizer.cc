@@ -69,7 +69,7 @@ const TracingObstacleLossVisualizerBase::ObstacleLossVisualization *TracingObsta
     auto normal1 = obstaclePenetratedEvent->normal1;
     auto normal2 = obstaclePenetratedEvent->normal2;
     auto loss = obstaclePenetratedEvent->loss;
-    const Rotation rotation(object->getOrientation());
+    const RotationMatrix rotation(object->getOrientation());
     const Coord& position = object->getPosition();
     const Coord rotatedIntersection1 = rotation.rotateVector(intersection1);
     const Coord rotatedIntersection2 = rotation.rotateVector(intersection2);

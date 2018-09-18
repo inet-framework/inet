@@ -22,7 +22,7 @@ namespace inet {
 CanvasProjection CanvasProjection::defaultCanvasProjection;
 std::map<const cCanvas *, const CanvasProjection *> CanvasProjection::canvasProjections;
 
-CanvasProjection::CanvasProjection(Rotation rotation, cFigure::Point translation) :
+CanvasProjection::CanvasProjection(RotationMatrix rotation, cFigure::Point translation) :
     rotation(rotation),
     scale(cFigure::Point(1, 1)),
     translation(translation)

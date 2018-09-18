@@ -53,7 +53,7 @@ Coord AttachedMobility::getCurrentPosition()
     if (isZeroOffset)
         return mobility->getCurrentPosition();
     else {
-        Rotation rotation(mobility->getCurrentAngularPosition().toEulerAngles());
+        RotationMatrix rotation(mobility->getCurrentAngularPosition().toEulerAngles());
         return mobility->getCurrentPosition() + rotation.rotateVector(positionOffset);
     }
 }
@@ -63,7 +63,7 @@ Coord AttachedMobility::getCurrentVelocity()
     if (isZeroOffset)
         return mobility->getCurrentVelocity();
     else {
-        Rotation rotation(mobility->getCurrentAngularPosition().toEulerAngles());
+        RotationMatrix rotation(mobility->getCurrentAngularPosition().toEulerAngles());
         Coord rotatedOffset = rotation.rotateVector(positionOffset);
         Quaternion quaternion(mobility->getCurrentAngularVelocity());
         Coord rotationAxis;

@@ -60,7 +60,7 @@ void PhysicalEnvironmentCanvasVisualizer::refreshDisplay() const
             const ShapeBase *shape = object->getShape();
             const Coord& position = object->getPosition();
             const EulerAngles& orientation = object->getOrientation();
-            const Rotation rotation(orientation);
+            const RotationMatrix rotation(orientation);
             // cuboid
             const Cuboid *cuboid = dynamic_cast<const Cuboid *>(shape);
             if (cuboid) {
@@ -117,7 +117,7 @@ void PhysicalEnvironmentCanvasVisualizer::refreshDisplay() const
     }
 }
 
-void PhysicalEnvironmentCanvasVisualizer::computeFacePoints(const IPhysicalObject *object, std::vector<std::vector<Coord> >& faces, const Rotation& rotation) const
+void PhysicalEnvironmentCanvasVisualizer::computeFacePoints(const IPhysicalObject *object, std::vector<std::vector<Coord> >& faces, const RotationMatrix& rotation) const
 {
     const Coord& position = object->getPosition();
     for (std::vector<std::vector<Coord> >::const_iterator it = faces.begin(); it != faces.end(); it++)

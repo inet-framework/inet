@@ -20,7 +20,7 @@
 
 #include "inet/common/geometry/base/ShapeBase.h"
 #include "inet/common/geometry/object/Polygon.h"
-#include "inet/common/geometry/common/Rotation.h"
+#include "inet/common/geometry/common/RotationMatrix.h"
 
 namespace inet {
 
@@ -43,8 +43,8 @@ class INET_API Prism : public ShapeBase
     void genereateFaces();
     Coord computeOutwardNormalVector(unsigned int faceId) const;
     void computeOutwardNormalVectors();
-    bool isVisibleFromPoint(unsigned int faceId, const Coord& point, const Rotation& rotation) const;
-    bool isVisibleFromView(unsigned int faceId, const Rotation& viewRotation, const Rotation& rotation) const;
+    bool isVisibleFromPoint(unsigned int faceId, const Coord& point, const RotationMatrix& rotation) const;
+    bool isVisibleFromView(unsigned int faceId, const RotationMatrix& viewRotation, const RotationMatrix& rotation) const;
 
   public:
     Prism() : height(0) {}
@@ -60,7 +60,7 @@ class INET_API Prism : public ShapeBase
 
     virtual Coord computeBoundingBoxSize() const override;
     virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const override;
-    void computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const Rotation& rotation, const Rotation& viewRotation) const;
+    void computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const RotationMatrix& rotation, const RotationMatrix& viewRotation) const;
 };
 
 } // namespace inet

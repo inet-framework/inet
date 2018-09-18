@@ -18,11 +18,11 @@
 #ifndef __INET_POLYHEDRON_H
 #define __INET_POLYHEDRON_H
 
-#include "inet/common/geometry/shape/polyhedron/PolyhedronPoint.h"
+#include "inet/common/geometry/base/ShapeBase.h"
+#include "inet/common/geometry/common/RotationMatrix.h"
 #include "inet/common/geometry/shape/polyhedron/PolyhedronEdge.h"
 #include "inet/common/geometry/shape/polyhedron/PolyhedronFace.h"
-#include "inet/common/geometry/base/ShapeBase.h"
-#include "inet/common/geometry/common/Rotation.h"
+#include "inet/common/geometry/shape/polyhedron/PolyhedronPoint.h"
 
 namespace inet {
 
@@ -58,12 +58,12 @@ class INET_API Polyhedron : public ShapeBase
         PolyhedronPoint computeOutwardNormalVector(const PolyhedronFace *face) const;
         void addFace(PolyhedronFace *face);
         Edges computeHorizonEdges(const Faces& visibleFaces) const;
-        bool isVisibleFromView(const PolyhedronFace *face, const Rotation& viewRotation, const Rotation& rotation) const;
+        bool isVisibleFromView(const PolyhedronFace *face, const RotationMatrix& viewRotation, const RotationMatrix& rotation) const;
 
     public:
         Polyhedron(const std::vector<Coord>& points);
         Coord computeBoundingBoxSize() const override;
-        void computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const Rotation& rotation, const Rotation& viewRotation) const;
+        void computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const RotationMatrix& rotation, const RotationMatrix& viewRotation) const;
         bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const override;
         const Faces& getFaces() const { return faces; }
         const Points& getPoints() const { return points; }

@@ -15,13 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/INETMath.h"
 #include "inet/common/geometry/common/Quaternion.h"
-#include "inet/common/geometry/common/Rotation.h"
+#include "inet/common/geometry/common/RotationMatrix.h"
+#include "inet/common/INETMath.h"
 
 namespace inet {
 
-Rotation::Rotation()
+RotationMatrix::RotationMatrix()
 {
     // identity matrix
     matrix[0][0] = 1;
@@ -32,7 +32,7 @@ Rotation::Rotation()
     matrix[2][1] = matrix[2][0] = 0;
 }
 
-Rotation::Rotation(const double matrix[3][3])
+RotationMatrix::RotationMatrix(const double matrix[3][3])
 {
     for (int i = 0; i < 3; i++)
         for (int j = 0; j < 3; j++)
@@ -40,13 +40,13 @@ Rotation::Rotation(const double matrix[3][3])
     ASSERT(inet::math::close(computeDeterminant(), 1));
 }
 
-Rotation::Rotation(const EulerAngles& eulerAngles)
+RotationMatrix::RotationMatrix(const EulerAngles& eulerAngles)
 {
     Quaternion q(eulerAngles);
     computeRotationMatrix(q.s, q.v.x, q.v.y, q.v.z);
 }
 
-void Rotation::computeRotationMatrix(const double& q0, const double& q1, const double& q2, const double& q3)
+void RotationMatrix::computeRotationMatrix(const double& q0, const double& q1, const double& q2, const double& q3)
 {
     // Ref: http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
     matrix[0][0] = 1 - 2*(q2*q2 + q3*q3);
@@ -60,26 +60,26 @@ void Rotation::computeRotationMatrix(const double& q0, const double& q1, const d
     matrix[2][2] = 1 - 2*(q1*q1 + q2*q2);
 }
 
-double Rotation::computeDeterminant() const
+double RotationMatrix::computeDeterminant() const
 {
     return matrix[0][0] * ((matrix[1][1] * matrix[2][2]) -(matrix[2][1] * matrix[1][2])) -matrix[0][1] * (matrix[1][0] * matrix[2][2] - matrix[2][0] * matrix[1][2]) + matrix[0][2] * (matrix[1][0] * matrix[2][1] - matrix[2][0] * matrix[1][1]);
 }
 
-Coord Rotation::rotateVector(const Coord& vector) const
+Coord RotationMatrix::rotateVector(const Coord& vector) const
 {
     return Coord(vector.x * matrix[0][0] + vector.y * matrix[0][1] + vector.z * matrix[0][2],
                  vector.x * matrix[1][0] + vector.y * matrix[1][1] + vector.z * matrix[1][2],
                  vector.x * matrix[2][0] + vector.y * matrix[2][1] + vector.z * matrix[2][2]);
 }
 
-Coord Rotation::rotateVectorInverse(const Coord& vector) const
+Coord RotationMatrix::rotateVectorInverse(const Coord& vector) const
 {
     return Coord(vector.x * matrix[0][0] + vector.y * matrix[1][0] + vector.z * matrix[2][0],
                  vector.x * matrix[0][1] + vector.y * matrix[1][1] + vector.z * matrix[2][1],
                  vector.x * matrix[0][2] + vector.y * matrix[1][2] + vector.z * matrix[2][2]);
 }
 
-EulerAngles Rotation::toEulerAngles() const
+EulerAngles RotationMatrix::toEulerAngles() const
 {
     // Ref: http://planning.cs.uiuc.edu/node103.html
     // NOTE: this algorithm works only if matrix[0][0] != 0 and matrix[2][2] != 0
@@ -89,7 +89,7 @@ EulerAngles Rotation::toEulerAngles() const
     return EulerAngles(rad(tz), rad(ty), rad(tx));
 }
 
-Quaternion Rotation::toQuaternion() const
+Quaternion RotationMatrix::toQuaternion() const
 {
     // Ref: http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
     double w, x, y, z;

@@ -160,7 +160,7 @@ Quaternion SuperpositioningMobility::getCurrentAngularPosition()
             matrix[1][2] = rotatedZ.y;
             matrix[2][2] = rotatedZ.z;
             if (!rotatedX.isUnspecified() && !rotatedY.isUnspecified() && !rotatedZ.isUnspecified())
-                lastOrientation = Rotation(matrix).toQuaternion();
+                lastOrientation = RotationMatrix(matrix).toQuaternion();
             break;
         }
         case OrientationComposition::OC_FACE_FORWARD: {

@@ -93,7 +93,7 @@ Coord Prism::computeOutwardNormalVector(unsigned int faceId) const
     return faceNormal;
 }
 
-bool Prism::isVisibleFromPoint(unsigned int faceId, const Coord& point, const Rotation& rotation) const
+bool Prism::isVisibleFromPoint(unsigned int faceId, const Coord& point, const RotationMatrix& rotation) const
 {
     const std::vector<Coord>& polygonPoints = faces.at(faceId).getPoints();
     Coord facePoint = polygonPoints.at(0);
@@ -102,7 +102,7 @@ bool Prism::isVisibleFromPoint(unsigned int faceId, const Coord& point, const Ro
     return facePointPoint * rotatedFaceNormal > 0;
 }
 
-bool Prism::isVisibleFromView(unsigned int faceId, const Rotation& viewRotation, const Rotation& rotation) const
+bool Prism::isVisibleFromView(unsigned int faceId, const RotationMatrix& viewRotation, const RotationMatrix& rotation) const
 {
     Coord zNormal(0,0,1);
     Coord rotatedFaceNormal = viewRotation.rotateVector(rotation.rotateVector(normalVectorsForFaces.at(faceId)));
@@ -209,7 +209,7 @@ void inet::Prism::setBase(const Polygon& base)
     }
 }
 
-void Prism::computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const Rotation& rotation, const Rotation& viewRotation) const
+void Prism::computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const RotationMatrix& rotation, const RotationMatrix& viewRotation) const
 {
     for (unsigned int i = 0; i < this->faces.size(); i++)
     {

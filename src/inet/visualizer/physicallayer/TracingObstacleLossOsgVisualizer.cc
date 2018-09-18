@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/geometry/common/Rotation.h"
+#include "inet/common/geometry/common/RotationMatrix.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/OsgScene.h"
 #include "inet/common/OsgUtils.h"
@@ -62,7 +62,7 @@ const TracingObstacleLossVisualizerBase::ObstacleLossVisualization *TracingObsta
     auto normal1 = obstaclePenetratedEvent->normal1;
     auto normal2 = obstaclePenetratedEvent->normal2;
     // TODO: display auto loss = obstaclePenetratedEvent->loss;
-    const Rotation rotation(object->getOrientation());
+    const RotationMatrix rotation(object->getOrientation());
     const Coord& position = object->getPosition();
     const Coord rotatedIntersection1 = rotation.rotateVector(intersection1);
     const Coord rotatedIntersection2 = rotation.rotateVector(intersection2);

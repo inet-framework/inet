@@ -20,7 +20,7 @@
 
 #include "inet/common/geometry/base/ShapeBase.h"
 #include "inet/common/geometry/common/GeographicCoordinateSystem.h"
-#include "inet/common/geometry/common/Rotation.h"
+#include "inet/common/geometry/common/RotationMatrix.h"
 #include "inet/common/geometry/object/LineSegment.h"
 #include "inet/common/IVisitor.h"
 #include "inet/environment/common/MaterialRegistry.h"

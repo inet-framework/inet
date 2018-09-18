@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/geometry/base/ShapeBase.h"
-#include "inet/common/geometry/common/Rotation.h"
+#include "inet/common/geometry/common/RotationMatrix.h"
 #include "inet/common/geometry/object/LineSegment.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/physicallayer/obstacleloss/IdealObstacleLoss.h"
@@ -51,7 +51,7 @@ bool IdealObstacleLoss::isObstacle(const IPhysicalObject *object, const Coord& t
     const ShapeBase *shape = object->getShape();
     const Coord& position = object->getPosition();
     const EulerAngles& orientation = object->getOrientation();
-    Rotation rotation(orientation);
+    RotationMatrix rotation(orientation);
     const LineSegment lineSegment(rotation.rotateVectorInverse(transmissionPosition - position), rotation.rotateVectorInverse(receptionPosition - position));
     Coord intersection1, intersection2, normal1, normal2;
     bool hasIntersections = shape->computeIntersection(lineSegment, intersection1, intersection2, normal1, normal2);
