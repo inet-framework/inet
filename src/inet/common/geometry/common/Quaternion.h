@@ -45,6 +45,12 @@ class INET_API Quaternion
     //! from 3 euler angles
     explicit Quaternion(const EulerAngles& angles);
 
+    double getS() const { return s; }
+    void setS(double s) { this->s = s; }
+
+    const Coord& getV() const { return v; }
+    void setV(const Coord& v) { this->v = v; }
+
     //! basic operations
     Quaternion &operator =(const Quaternion &q) { s = q.s; v = q.v; return *this; }
 

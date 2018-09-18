@@ -32,4 +32,6 @@ class EulerAngles
 class Quaternion
 {
     @existingClass;
+    double s;
+    Coord v;
 }
