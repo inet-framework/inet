@@ -30,6 +30,7 @@
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 
+#include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 #ifdef WITH_IPv4
@@ -116,22 +117,9 @@ std::string InterfaceEntry::str() const
     else
         out << getMacAddress();
 
-#ifdef WITH_IPv4
-    if (ipv4data)
-        out << " " << ipv4data->str();
-#endif // ifdef WITH_IPv4
-#ifdef WITH_IPv6
-    if (ipv6data)
-        out << " " << ipv6data->str();
-#endif // ifdef WITH_IPv6
-    if (isisdata)
-        out << " " << ((InterfaceProtocolData *)isisdata)->str(); // Khmm...
-    if (trilldata)
-        out << " " << ((InterfaceProtocolData *)trilldata)->str(); // Khmm...
-    if (ieee8021ddata)
-        out << " " << ((InterfaceProtocolData *)ieee8021ddata)->str(); // Khmm...
-    if (clnsdata)
-        out << " " << ((InterfaceProtocolData *)clnsdata)->str(); //Kahim...
+    for (int i=0; i<protocolDataSet.getNumTags(); i++)
+        out << " " << protocolDataSet.getTag(i)->str();
+
     return out.str();
 }
 
@@ -158,26 +146,9 @@ std::string InterfaceEntry::detailedInfo() const
     else
         out << getMacAddress();
     out << "\n";
-#ifdef WITH_IPv4
-    if (ipv4data)
-        out << " " << ipv4data->detailedInfo() << "\n";
-#endif // ifdef WITH_IPv4
-#ifdef WITH_IPv6
-    if (ipv6data)
-        out << " " << ipv6data->detailedInfo() << "\n";
-#endif // ifdef WITH_IPv6
-#ifdef WITH_NEXTHOP
-    if (nextHopData)
-        out << " " << nextHopData->detailedInfo() << "\n";
-#endif // ifdef WITH_NEXTHOP
-    if (isisdata)
-        out << " " << ((InterfaceProtocolData *)isisdata)->str() << "\n"; // Khmm...
-    if (trilldata)
-        out << " " << ((InterfaceProtocolData *)trilldata)->str() << "\n"; // Khmm...
-    if (ieee8021ddata)
-        out << " " << ((InterfaceProtocolData *)ieee8021ddata)->str() << "\n"; // Khmm...
-    if (clnsdata)
-        out << " " << ((InterfaceProtocolData *)clnsdata)->str() << "\n"; // Kahim.. .
+    for (int i=0; i<protocolDataSet.getNumTags(); i++)
+        out << " " << protocolDataSet.getTag(i)->str();
+
     return out.str();
 }
 
@@ -196,69 +167,21 @@ void InterfaceEntry::changed(simsignal_t signalID, int fieldId)
 
 void InterfaceEntry::resetInterface()
 {
-#ifdef WITH_IPv4
-    if (ipv4data && ipv4data->ownerp == this)
-        delete ipv4data;
-    ipv4data = nullptr;
-#else // ifdef WITH_IPv4
-    if (ipv4data)
-        throw cRuntimeError(this, "Model error: ipv4data filled, but INET was compiled without IPv4 support");
-#endif // ifdef WITH_IPv4
-#ifdef WITH_IPv6
-    if (ipv6data && ipv6data->ownerp == this)
-        delete ipv6data;
-    ipv6data = nullptr;
-#else // ifdef WITH_IPv6
-    if (ipv6data)
-        throw cRuntimeError(this, "Model error: ipv6data filled, but INET was compiled without IPv6 support");
-#endif // ifdef WITH_IPv6
-#ifdef WITH_NEXTHOP
-    if (nextHopData && nextHopData->ownerp == this)
-        delete nextHopData;
-    nextHopData = nullptr;
-#else // ifdef WITH_NEXTHOP
-    if (nextHopData)
-        throw cRuntimeError(this, "Model error: nextHopProtocolData filled, but INET was compiled without Next Hop Forwarding support");
-#endif // ifdef WITH_NEXTHOP
-    if (isisdata && ((InterfaceProtocolData *)isisdata)->ownerp == this)
-        delete (InterfaceProtocolData *)isisdata;
-    isisdata = nullptr;
-    if (trilldata && ((InterfaceProtocolData *)trilldata)->ownerp == this)
-        delete (InterfaceProtocolData *)trilldata;
-    trilldata = nullptr;
-    if (ieee8021ddata && ((InterfaceProtocolData *)ieee8021ddata)->ownerp == this)
-        delete (InterfaceProtocolData *)ieee8021ddata;
-    ieee8021ddata = nullptr;
-    if (clnsdata && ((InterfaceProtocolData *)clnsdata)->ownerp == this)
-        delete (InterfaceProtocolData *)clnsdata;
-    clnsdata = nullptr;
-}
-
-void InterfaceEntry::setNextHopData(NextHopInterfaceData *p)
-{
-#ifdef WITH_NEXTHOP
-    if (nextHopData && nextHopData->ownerp == this)
-        delete nextHopData;
-    nextHopData = p;
-    p->ownerp = this;
-    configChanged(F_NEXTHOP_DATA);
-#else // ifdef WITH_NEXTHOP
-    throw cRuntimeError(this, "setNextHopProtocolData(): INET was compiled without Next Hop Forwarding support");
-#endif // ifdef WITH_NEXTHOP
+    protocolDataSet.clearTags();
 }
 
 const L3Address InterfaceEntry::getNetworkAddress() const
 {
 #ifdef WITH_IPv4
-    if (ipv4data)
+    if (auto ipv4data = findProtocolData<Ipv4InterfaceData>())
         return ipv4data->getIPAddress();
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-    if (ipv6data)
+    if (auto ipv6data = findProtocolData<Ipv6InterfaceData>())
         return ipv6data->getPreferredAddress();
 #endif // ifdef WITH_IPv6
 #ifdef WITH_NEXTHOP
-    if (nextHopData)
+    if (auto nextHopData = findProtocolData<NextHopInterfaceData>())
         return nextHopData->getAddress();
 #endif // ifdef WITH_NEXTHOP
     return getModulePathAddress();
@@ -270,97 +193,38 @@ bool InterfaceEntry::hasNetworkAddress(const L3Address& address) const
     case L3Address::NONE:
         return false;
 
-    case L3Address::IPv4:
+    case L3Address::IPv4: {
 #ifdef WITH_IPv4
+        auto ipv4data = findProtocolData<Ipv4InterfaceData>();
         return ipv4data != nullptr && ipv4data->getIPAddress() == address.toIpv4();
 #else
         return false;
 #endif // ifdef WITH_IPv4
-
-    case L3Address::IPv6:
+    }
+    case L3Address::IPv6: {
 #ifdef WITH_IPv6
+        auto ipv6data = findProtocolData<Ipv6InterfaceData>();
         return ipv6data != nullptr && ipv6data->hasAddress(address.toIpv6());
 #else
         return false;
 #endif // ifdef WITH_IPv6
-
-    case L3Address::MAC:
+    }
+    case L3Address::MAC: {
         return getMacAddress() == address.toMac();
-
+    }
     case L3Address::MODULEID:
-    case L3Address::MODULEPATH:
-#ifdef WITH_GENERIC
-        return genericNetworkProtocolData != nullptr && genericNetworkProtocolData->getAddress() == address;
+    case L3Address::MODULEPATH: {
+#ifdef WITH_NEXTHOP
+        auto nextHopData = findProtocolData<NextHopInterfaceData>();
+        return nextHopData != nullptr && nextHopData->getAddress() == address;
 #else
         return false;
-#endif // ifdef WITH_GENERIC
-
+#endif // ifdef WITH_NEXTHOP
+    }
     default:
         break;
     }
     return false;
-}
-
-void InterfaceEntry::setIpv4Data(Ipv4InterfaceData *p)
-{
-#ifdef WITH_IPv4
-    if (ipv4data && ipv4data->ownerp == this)
-        delete ipv4data;
-    ipv4data = p;
-    p->ownerp = this;
-    configChanged(F_IPV4_DATA);
-#else // ifdef WITH_IPv4
-    throw cRuntimeError(this, "setIPv4Data(): INET was compiled without IPv4 support");
-#endif // ifdef WITH_IPv4
-}
-
-void InterfaceEntry::setIpv6Data(Ipv6InterfaceData *p)
-{
-#ifdef WITH_IPv6
-    if (ipv6data && ipv6data->ownerp == this)
-        delete ipv6data;
-    ipv6data = p;
-    p->ownerp = this;
-    configChanged(F_IPV6_DATA);
-#else // ifdef WITH_IPv6
-    throw cRuntimeError(this, "setIPv6Data(): INET was compiled without IPv6 support");
-#endif // ifdef WITH_IPv6
-}
-
-void InterfaceEntry::setTrillInterfaceData(TrillInterfaceData *p)
-{
-    if (trilldata && ((InterfaceProtocolData *)trilldata)->ownerp == this) // Khmm...
-        delete (InterfaceProtocolData *)trilldata; // Khmm...
-    trilldata = p;
-    ((InterfaceProtocolData *)p)->ownerp = this;    // Khmm...
-    configChanged(F_TRILL_DATA);
-}
-
-void InterfaceEntry::setIsisInterfaceData(IsisInterfaceData *p)
-{
-    if (isisdata && ((InterfaceProtocolData *)isisdata)->ownerp == this) // Khmm...
-        delete (InterfaceProtocolData *)isisdata; // Khmm...
-    isisdata = p;
-    ((InterfaceProtocolData *)p)->ownerp = this;    // Khmm...
-    configChanged(F_ISIS_DATA);
-}
-
-void InterfaceEntry::setIeee8021dInterfaceData(Ieee8021dInterfaceData *p)
-{
-    if (ieee8021ddata && ((InterfaceProtocolData *)ieee8021ddata)->ownerp == this) // Khmm...
-        delete (InterfaceProtocolData *)ieee8021ddata; // Khmm...
-    ieee8021ddata = p;
-    ((InterfaceProtocolData *)p)->ownerp = this;    // Khmm...
-    configChanged(F_IEEE8021D_DATA);
-}
-
-void InterfaceEntry::setCLNSData(CLNSInterfaceData *p)
-{
-    if (clnsdata && ((InterfaceProtocolData *)clnsdata)->ownerp == this) // Kahimm...
-        delete (InterfaceProtocolData *)clnsdata; // Kahmim...
-    clnsdata = p;
-    ((InterfaceProtocolData *)p)->ownerp = this;    // Kahimm...
-    configChanged(F_CLNS_DATA);
 }
 
 bool InterfaceEntry::setEstimateCostProcess(int position, MacEstimateCostProcess *p)
@@ -456,10 +320,43 @@ void InterfaceEntry::changeMulticastGroupMembership(const L3Address& multicastAd
 
 Ipv4Address InterfaceEntry::getIpv4Address() const {
 #ifdef WITH_IPv4
+    auto ipv4data = findProtocolData<Ipv4InterfaceData>();
     return ipv4data == nullptr ? Ipv4Address::UNSPECIFIED_ADDRESS : ipv4data->getIPAddress();
 #else
     return Ipv4Address::UNSPECIFIED_ADDRESS;
 #endif // ifdef WITH_IPv4
+}
+
+Ipv4InterfaceData *InterfaceEntry::ipv4Data() const
+{
+#ifdef WITH_IPv4
+    return getProtocolData<Ipv4InterfaceData>();
+#else
+    throw cRuntimeError("INET was compiled without IPv4 support");
+#endif // ifdef WITH_IPv4
+}
+
+Ipv6InterfaceData *InterfaceEntry::ipv6Data() const
+{
+#ifdef WITH_IPv6
+    return getProtocolData<Ipv6InterfaceData>();
+#else
+    throw cRuntimeError("INET was compiled without IPv6 support");
+#endif // ifdef WITH_IPv6
+}
+
+NextHopInterfaceData *InterfaceEntry::getNextHopData() const
+{
+#ifdef WITH_NEXTHOP
+    return getProtocolData<NextHopInterfaceData>();
+#else // ifdef WITH_NEXTHOP
+    throw cRuntimeError(this, "INET was compiled without Next Hop Forwarding support");
+#endif // ifdef WITH_NEXTHOP
+}
+
+Ieee8021dInterfaceData *InterfaceEntry::ieee8021dData() const
+{
+    return getProtocolData<Ieee8021dInterfaceData>();
 }
 
 } // namespace inet

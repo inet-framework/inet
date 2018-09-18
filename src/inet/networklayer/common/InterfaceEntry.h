@@ -21,11 +21,12 @@
 #include <vector>
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/Simsignals.h"
+#include "inet/common/packet/tag/TagSet.h"
 
-#include "inet/networklayer/common/L3Address.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/networklayer/common/InterfaceToken.h"
-#include "inet/common/Simsignals.h"
+#include "inet/networklayer/common/L3Address.h"
 
 namespace inet {
 
@@ -120,13 +121,7 @@ class INET_API InterfaceEntry : public cModule
     MacAddress macAddr;    ///< link-layer address (for now, only IEEE 802 MAC addresses are supported)
     InterfaceToken token;    ///< for Ipv6 stateless autoconfig (RFC 1971), interface identifier (RFC 2462)
 
-    Ipv4InterfaceData *ipv4data = nullptr;    ///< Ipv4-specific interface info (Ipv4 address, etc)
-    Ipv6InterfaceData *ipv6data = nullptr;    ///< Ipv6-specific interface info (Ipv6 addresses, etc)
-    NextHopInterfaceData *nextHopData = nullptr;    ///< NextHopForwarding-specific interface info (Address, etc)
-    IsisInterfaceData *isisdata = nullptr;    ///< ISIS-specific interface info
-    TrillInterfaceData *trilldata = nullptr;    ///< TRILL-specific interface info
-    Ieee8021dInterfaceData *ieee8021ddata = nullptr;
-    CLNSInterfaceData *clnsdata = nullptr;
+    TagSet protocolDataSet;
     std::vector<MacEstimateCostProcess *> estimateCostProcessArray;
 
   private:
@@ -223,33 +218,87 @@ class INET_API InterfaceEntry : public cModule
     virtual void setInterfaceToken(const InterfaceToken& t) { token = t; configChanged(F_TOKEN); }
     //@}
 
+    /** @name Tag related functions */
+    //@{
+    /**
+     * Returns the message tag at the given index.
+     */
+    cObject *getProtocolData(int index) const {
+        return protocolDataSet.getTag(index);
+    }
+
+    /**
+     * Clears the set of message tags.
+     */
+    void clearProtocolDataSet() {
+        protocolDataSet.clearTags();
+    }
+
+    /**
+     * Returns the message tag for the provided type or returns nullptr if no such message tag is found.
+     */
+    template<typename T> T *findProtocolData() const {
+        return protocolDataSet.findTag<T>();
+    }
+
+    /**
+     * Returns the message tag for the provided type or throws an exception if no such message tag is found.
+     */
+    template<typename T> T *getProtocolData() const {
+        return protocolDataSet.getTag<T>();
+    }
+
+    /**
+     * Returns a newly added message tag for the provided type, or throws an exception if such a message tag is already present.
+     */
+    template<typename T> T *addProtocolData() {
+        auto t = protocolDataSet.addTag<T>();
+        check_and_cast<InterfaceProtocolData *>(t)->ownerp = this;
+        return t;
+    }
+
+    /**
+     * Returns a newly added message tag for the provided type if absent, or returns the message tag that is already present.
+     */
+    template<typename T> T *addProtocolDataIfAbsent() {
+        auto t = protocolDataSet.addTagIfAbsent<T>();
+        check_and_cast<InterfaceProtocolData *>(t)->ownerp = this;
+        return t;
+    }
+
+    /**
+     * Removes the message tag for the provided type, or throws an exception if no such message tag is found.
+     */
+    template<typename T> T *removeProtocolData() {
+        auto t = protocolDataSet.removeTag<T>();
+        check_and_cast<InterfaceProtocolData *>(t)->ownerp = nullptr;
+        return t;
+    }
+
+    /**
+     * Removes the message tag for the provided type if present, or returns nullptr if no such message tag is found.
+     */
+    template<typename T> T *removeProtocolDataIfPresent() {
+        auto t = protocolDataSet.removeTagIfPresent<T>();
+        if (t != nullptr)
+            check_and_cast<InterfaceProtocolData *>(t)->ownerp = nullptr;
+        return t;
+    }
+    //@}
+
     /** @name Accessing protocol-specific interface data. Note methods are non-virtual, for performance reasons. */
     //@{
-    Ipv4InterfaceData *ipv4Data() const { return ipv4data; }
+    Ipv4InterfaceData *ipv4Data() const;
     Ipv4Address getIpv4Address() const;
-    Ipv6InterfaceData *ipv6Data() const { return ipv6data; }
-    NextHopInterfaceData *getNextHopData() const { return nextHopData; }
-    TrillInterfaceData *trillData() const { return trilldata; }
-    IsisInterfaceData *isisData() const { return isisdata; }
-    Ieee8021dInterfaceData *ieee8021dData() const { return ieee8021ddata; }
-    CLNSInterfaceData *clnsData() const { return clnsdata; }
+    Ipv6InterfaceData *ipv6Data() const;
+    NextHopInterfaceData *getNextHopData() const;
+    Ieee8021dInterfaceData *ieee8021dData() const;
     //@}
 
     virtual void joinMulticastGroup(const L3Address& address) const;    // XXX why const method?
     virtual void changeMulticastGroupMembership(const L3Address& multicastAddress,
             McastSourceFilterMode oldFilterMode, const std::vector<L3Address>& oldSourceList,
             McastSourceFilterMode newFilterMode, const std::vector<L3Address>& newSourceList);
-
-    /** @name Installing protocol-specific interface data */
-    //@{
-    virtual void setIpv4Data(Ipv4InterfaceData *p);
-    virtual void setIpv6Data(Ipv6InterfaceData *p);
-    virtual void setNextHopData(NextHopInterfaceData *p);
-    virtual void setTrillInterfaceData(TrillInterfaceData *p);
-    virtual void setIsisInterfaceData(IsisInterfaceData *p);
-    virtual void setIeee8021dInterfaceData(Ieee8021dInterfaceData *p);
-    virtual void setCLNSData(CLNSInterfaceData *p);
-    //@}
 
     /** @name access to the cost process estimation  */
     //@{
