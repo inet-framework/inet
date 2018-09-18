@@ -160,6 +160,7 @@ EulerAngles Quaternion::toEulerAngles(bool homogenous) const
         euler.beta = rad(std::asin(std::min(1.0, std::max(-1.0, -2.0 * (v.x*v.z - v.y*s)))));
         euler.alpha = rad(std::atan2(2.0 * (v.x*v.y + v.z*s), 1 - 2*(sqy + sqz)));
     }
+    euler.normalize();
     return euler;
 }
 
