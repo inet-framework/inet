@@ -42,6 +42,7 @@ module DynamicHost extends AdhocHost
         }
 }
 
+
 network DynamicShowcase
 {
     @display("bgb=600,400");
@@ -61,11 +62,6 @@ network DynamicShowcase
         destinationNode: DynamicHost {
             parameters:
                 @display("p=350,200");
-        }
-        sourceNode[0]: DynamicHost {
-            parameters:
-                @dynamic(true);
-                @display("p=500,200");
         }
 }
 
@@ -118,26 +114,4 @@ network DynamicShowcase2
 	    switch.ethg++ <--> Eth10M <--> edgeRouter.ethg++;
 	    edgeRouter.pppg++ <--> Eth10M <--> backboneRouter.pppg++;
 	    backboneRouter.ethg++ <--> Eth10M <--> destinationNode.ethg++;
-}
-
-network DynamicShowcase3
-{
-    @display("bgb=600,400");
-    submodules:
-        visualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
-            parameters:
-                @display("is=s;p=100,50");
-        }
-        radioMedium: Ieee80211ScalarRadioMedium {
-            parameters:
-                @display("is=s;p=100,150");
-        }
-        scenarioManager: ScenarioManager {
-            parameters:
-                @display("is=s;p=100,250");
-        }
-        destinationNode: DynamicHost {
-            parameters:
-                @display("p=350,200");
-        }
 }
