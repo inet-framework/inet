@@ -44,13 +44,8 @@ void LinearRotatingMobilityBase::rotate()
     else if (now > lastUpdate) {
         ASSERT(nextChange == -1 || now < nextChange);
         double delta = (simTime() - lastUpdate).dbl() / (nextChange - lastUpdate).dbl();
-        lastOrientation = slerp(lastOrientation, targetOrientation, delta);
+        lastOrientation = Quaternion::slerp(lastOrientation, targetOrientation, delta);
     }
-}
-
-Quaternion LinearRotatingMobilityBase::slerp(Quaternion from, Quaternion to, double delta)
-{
-    return from + (to - from) * delta;
 }
 
 } // namespace inet
