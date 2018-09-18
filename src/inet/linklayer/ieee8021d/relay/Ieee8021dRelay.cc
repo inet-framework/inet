@@ -275,7 +275,7 @@ void Ieee8021dRelay::learn(MacAddress srcAddr, int arrivalInterfaceId)
 
 void Ieee8021dRelay::sendUp(Packet *packet)
 {
-
+    EV_INFO << "Sending frame " << packet << " to the upper layer" << endl;
     send(packet, "upperLayerOut");
 }
 
