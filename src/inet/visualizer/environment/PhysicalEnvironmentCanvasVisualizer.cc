@@ -59,8 +59,8 @@ void PhysicalEnvironmentCanvasVisualizer::refreshDisplay() const
         for (auto object : objectsCopy) {
             const ShapeBase *shape = object->getShape();
             const Coord& position = object->getPosition();
-            const EulerAngles& orientation = object->getOrientation();
-            const RotationMatrix rotation(orientation);
+            const Quaternion& orientation = object->getOrientation();
+            const RotationMatrix rotation(orientation.toEulerAngles());
             // cuboid
             const Cuboid *cuboid = dynamic_cast<const Cuboid *>(shape);
             if (cuboid) {

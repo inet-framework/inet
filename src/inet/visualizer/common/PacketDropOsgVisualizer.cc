@@ -67,7 +67,7 @@ const PacketDropVisualizerBase::PacketDropVisualization *PacketDropOsgVisualizer
     material->setDiffuse(osg::Material::FRONT_AND_BACK, colorVec);
     material->setAlpha(osg::Material::FRONT_AND_BACK, 1.0);
     autoTransform->getChild(0)->getOrCreateStateSet()->setAttribute(material);
-    auto positionAttitudeTransform = inet::osg::createPositionAttitudeTransform(packetDrop->getPosition(), EulerAngles::ZERO);
+    auto positionAttitudeTransform = inet::osg::createPositionAttitudeTransform(packetDrop->getPosition(), Quaternion::IDENTITY);
     positionAttitudeTransform->addChild(autoTransform);
     return new PacketDropOsgVisualization(positionAttitudeTransform, packetDrop);
 }

@@ -227,7 +227,7 @@ osg::Node *MediumOsgVisualizer::createRingSignalNode(const ITransmission *transm
     label->setText(transmission->getPacket()->getName());
     auto labelAutoTransform = inet::osg::createAutoTransform(label, osg::AutoTransform::ROTATE_TO_SCREEN, true);
     labelAutoTransform->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
-    auto positionAttitudeTransform = inet::osg::createPositionAttitudeTransform(transmissionStart, EulerAngles::ZERO);
+    auto positionAttitudeTransform = inet::osg::createPositionAttitudeTransform(transmissionStart, Quaternion::IDENTITY);
     positionAttitudeTransform->setNodeMask(0);
     positionAttitudeTransform->addChild(signalAutoTransform);
     positionAttitudeTransform->addChild(labelAutoTransform);

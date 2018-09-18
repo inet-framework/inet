@@ -90,10 +90,7 @@ void SceneOsgEarthVisualizer::initializeLocator()
             deg(playgroundPosition.longitude).get(), deg(playgroundPosition.latitude).get(), m(playgroundPosition.altitude).get()));
 
     auto playgroundOrientation = coordinateSystem->getPlaygroundOrientation();
-    localTransform->setAttitude(
-        osg::Quat(rad(playgroundOrientation.gamma).get(), osg::Vec3d(1.0, 0.0, 0.0)) *
-        osg::Quat(rad(playgroundOrientation.beta).get(), osg::Vec3d(0.0, 1.0, 0.0)) *
-        osg::Quat(rad(playgroundOrientation.alpha).get(), osg::Vec3d(0.0, 0.0, 1.0)));
+    localTransform->setAttitude(osg::Quat(osg::Vec4d(playgroundOrientation.v.x, playgroundOrientation.v.y, playgroundOrientation.v.z, playgroundOrientation.s)));
 }
 
 void SceneOsgEarthVisualizer::initializeViewpoint()

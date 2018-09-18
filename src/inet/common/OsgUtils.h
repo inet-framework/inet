@@ -19,7 +19,7 @@
 #define __INET_OSGUTILS_H
 
 #include "inet/common/geometry/common/Coord.h"
-#include "inet/common/geometry/common/EulerAngles.h"
+#include "inet/common/geometry/common/Quaternion.h"
 
 #if defined(WITH_OSG) && defined(WITH_VISUALIZERS)
 #include <omnetpp/osgutil.h>
@@ -62,7 +62,7 @@ Node *createPolyline(const std::vector<Coord>& coords, cFigure::Arrowhead startA
 osgText::Text *createText(const char *string, const Coord& position, const cFigure::Color& color);
 
 AutoTransform *createAutoTransform(Drawable *drawable, AutoTransform::AutoRotateMode mode, bool autoScaleToScreen, const Coord& position = Coord::ZERO);
-PositionAttitudeTransform *createPositionAttitudeTransform(const Coord& position, const EulerAngles& orientation);
+PositionAttitudeTransform *createPositionAttitudeTransform(const Coord& position, const Quaternion& orientation);
 
 Image* createImage(const char *fileName);
 Texture2D *createTexture(const char *name, bool repeat);

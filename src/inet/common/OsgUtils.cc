@@ -232,13 +232,11 @@ AutoTransform *createAutoTransform(Drawable *drawable, AutoTransform::AutoRotate
     return autoTransform;
 }
 
-PositionAttitudeTransform *createPositionAttitudeTransform(const Coord& position, const EulerAngles& orientation)
+PositionAttitudeTransform *createPositionAttitudeTransform(const Coord& position, const Quaternion& orientation)
 {
     auto pat = new PositionAttitudeTransform();
     pat->setPosition(Vec3d(position.x, position.y, position.z));
-    pat->setAttitude(Quat(rad(orientation.alpha).get(), Vec3d(1.0, 0.0, 0.0)) *
-                     Quat(rad(orientation.beta).get(), Vec3d(0.0, 1.0, 0.0)) *
-                     Quat(rad(orientation.gamma).get(), Vec3d(0.0, 0.0, 1.0)));
+    pat->setAttitude(osg::Quat(osg::Vec4d(orientation.v.x, orientation.v.y, orientation.v.z, orientation.s)));
     return pat;
 }
 

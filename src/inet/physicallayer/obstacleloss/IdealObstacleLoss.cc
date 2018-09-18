@@ -50,8 +50,8 @@ bool IdealObstacleLoss::isObstacle(const IPhysicalObject *object, const Coord& t
 {
     const ShapeBase *shape = object->getShape();
     const Coord& position = object->getPosition();
-    const EulerAngles& orientation = object->getOrientation();
-    RotationMatrix rotation(orientation);
+    const Quaternion& orientation = object->getOrientation();
+    RotationMatrix rotation(orientation.toEulerAngles());
     const LineSegment lineSegment(rotation.rotateVectorInverse(transmissionPosition - position), rotation.rotateVectorInverse(receptionPosition - position));
     Coord intersection1, intersection2, normal1, normal2;
     bool hasIntersections = shape->computeIntersection(lineSegment, intersection1, intersection2, normal1, normal2);

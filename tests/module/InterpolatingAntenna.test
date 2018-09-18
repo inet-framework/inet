@@ -27,11 +27,11 @@ void AntennaTest::initialize(int stage)
     if (stage == INITSTAGE_LAST)
     {
         IAntenna *antenna = check_and_cast<IAntenna *>(getSimulation()->getModuleByPath("host.wlan[0].radio.antenna"));
-        EV_INFO << antenna->getGain()->computeGain(EulerAngles::ZERO) << " "
-                << antenna->getGain()->computeGain(EulerAngles(rad(M_PI / 2), rad(0), rad(0))) << " "
-                << antenna->getGain()->computeGain(EulerAngles(rad(M_PI), rad(0), rad(0))) << " "
-                << antenna->getGain()->computeGain(EulerAngles(rad(3 * M_PI / 2), rad(0), rad(0))) << " "
-                << antenna->getGain()->computeGain(EulerAngles(rad(2 * M_PI), rad(0), rad(0))) << "\n";
+        EV_INFO << antenna->getGain()->computeGain(Quaternion(EulerAngles::ZERO)) << " "
+                << antenna->getGain()->computeGain(Quaternion(EulerAngles(rad(M_PI / 2), rad(0), rad(0)))) << " "
+                << antenna->getGain()->computeGain(Quaternion(EulerAngles(rad(M_PI), rad(0), rad(0)))) << " "
+                << antenna->getGain()->computeGain(Quaternion(EulerAngles(rad(3 * M_PI / 2), rad(0), rad(0)))) << " "
+                << antenna->getGain()->computeGain(Quaternion(EulerAngles(rad(2 * M_PI), rad(0), rad(0)))) << "\n";
     }
 }
 
