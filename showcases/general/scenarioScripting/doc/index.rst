@@ -107,7 +107,7 @@ The key part of the configuration regarding this showcase is the following:
 
 The ``scenario.xml`` file contains the script for the wireless simulation.
 
-Note that is life-cycle modeling is required, the following line must be added to the
+Note that if life-cycle modeling is required, the following line must be added to the
 ini file to ensure that nodes have status modules:
 
 .. literalinclude:: ../omnetpp.ini
@@ -115,7 +115,7 @@ ini file to ensure that nodes have status modules:
    :start-at: # lifecycle
    :end-at: **.hasStatus = true
 
-Two :ned:`DynamicHost`:s, ``sourceNode[0]`` and ``sourceNode[1]`` are created at
+Two :ned:`DynamicHost`:s, ``sourceNode0`` and ``sourceNode1`` are created at
 the beginning of the simulation. This is achieved as the following in the XML file:
 
 .. literalinclude:: ../wireless.xml
@@ -124,8 +124,8 @@ the beginning of the simulation. This is achieved as the following in the XML fi
    :end-before: <at t="6.0">
 
 As you can see, the ``<create-module>`` element has four attributes, one for the type,
-one for the submodule name, one for the parent module and one for indicating that it is a vector of modules.
-We create a vector of modules named ``sourceNode`` with the type of the previously mentioned :ned:`DynamicHost`.
+one for the submodule name and one for the parent module.
+We create two modules named ``sourceNode0`` and ``sourceNode1``, both with the type of the previously mentioned :ned:`DynamicHost`.
 The created modules will have a random position inside the parent module.
 The parent module in this case is the playground, because the ``parent`` attribute is set to is ``"."``.
 
@@ -133,10 +133,12 @@ The ``destinationNode`` is shut down at ``t=6.0`` and remains so for two seconds
 can not reach it. To achieve this behavior, two life-cycle operations need to be used. With the ``<shutdown>`` element
 a module, given in the ``module`` attribute, can be shut down. This operation represents the process of orderly
 shutting down a network node.
-It is recommended to first initiate the shut down operation
-with the ``<initiate>`` attribute. The ``destinationNode`` is then started after two seconds using the ``<startup>``
+The ``destinationNode`` is then started after two seconds using the ``<startup>``
 element. The ``<startup>`` operation represents the process of turning on a network node after a shutdown or
-crash. Here you can see the parts in question of  the scrip in the XML file:
+crash.
+Note that the ``<startup>`` and ``<shutdown>`` life-cycle operations are equal to the ``<initiate>`` operation used with the
+``operation`` attribute set to either ``"startup"`` or ``"shutdown"``.
+Here you can see the parts in question of  the scrip in the XML file:
 
 .. literalinclude:: ../wireless.xml
    :language: xml
@@ -156,7 +158,7 @@ does not send ping request messages anymore:
    :start-at: <at t="10.0">
    :end-before: <at t="12.0">
 
-At the end of the simulation, both ``sourceNode[0]`` and ``sourceNode[1]`` are
+At the end of the simulation, both ``sourceNode0`` and ``sourceNode1`` are
 destroyed using the ``<delete-module>`` element:
 
 .. literalinclude:: ../wireless.xml
@@ -173,7 +175,7 @@ if we take a look at the statistics. The following image shows the
    :align: center
 
 We can clearly see for example that ``destinationNode`` was indeed shut down
-for two seconds between ``t=6.0s`` and ``t=8.0s``, and that ``sourceNode[0]`` truly
+for two seconds between ``t=6.0s`` and ``t=8.0s``, and that ``sourceNode0`` truly
 crashed at ``t=10.0s``.
 
 Wired
@@ -184,7 +186,7 @@ modules, therefore the :ned:`Ipv4NetworkConfigurator` can be used.
 
 All of the connections between the nodes (even the later dynamically created ones)
 is set in the ned file. This needs to be done because the number of gates of a module can not
-be modified after the initialization.
+be modified after the initialization, if the :ned:`HostAutoConfigurator` is not used.
 
 .. literalinclude:: ../scenMan.ned
    :language: ned
