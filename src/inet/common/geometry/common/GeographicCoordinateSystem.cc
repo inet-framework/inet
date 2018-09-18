@@ -72,7 +72,7 @@ void OsgGeographicCoordinateSystem::initialize(int stage)
 
         // The parameter is conventional direction of heading and elevation (positive heading turns left,
         // positive elevation lifts nose), but the EulerAngles class has different expectations.
-        playgroundOrientation = EulerAngles(-rad(playgroundHeading - deg(90)), -rad(playgroundElevation), rad(playgroundBank));
+        playgroundOrientation = Quaternion(EulerAngles(-rad(playgroundHeading - deg(90)), -rad(playgroundElevation), rad(playgroundBank)));
 
         osg::ref_ptr<osgEarth::GeoTransform> geoTransform = new osgEarth::GeoTransform();
         osg::ref_ptr<osg::PositionAttitudeTransform> localTransform = new osg::PositionAttitudeTransform();
@@ -81,10 +81,7 @@ void OsgGeographicCoordinateSystem::initialize(int stage)
         geoTransform->setPosition(osgEarth::GeoPoint(mapNode->getMapSRS()->getGeographicSRS(),
             deg(playgroundPosition.longitude).get(), deg(playgroundPosition.latitude).get(), m(playgroundPosition.altitude).get()));
 
-        localTransform->setAttitude(
-            osg::Quat(rad(playgroundOrientation.gamma).get(), osg::Vec3d(1.0, 0.0, 0.0)) *
-            osg::Quat(rad(playgroundOrientation.beta).get(), osg::Vec3d(0.0, 1.0, 0.0)) *
-            osg::Quat(rad(playgroundOrientation.alpha).get(), osg::Vec3d(0.0, 0.0, 1.0)));
+        localTransform->setAttitude(osg::Quat(osg::Vec4d(playgroundOrientation.v.x, playgroundOrientation.v.y, playgroundOrientation.v.z, playgroundOrientation.s)));
 
         osg::ref_ptr<osg::Group> child = new osg::Group();
         localTransform->addChild(child);

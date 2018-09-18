@@ -19,7 +19,7 @@
 #define __INET_GEOGRAPHICCOORDINATESYSTEM_H
 
 #include "inet/common/geometry/common/Coord.h"
-#include "inet/common/geometry/common/EulerAngles.h"
+#include "inet/common/geometry/common/Quaternion.h"
 
 #if defined(WITH_OSGEARTH) && defined(WITH_VISUALIZERS)
 #include <osgEarth/MapNode>
@@ -48,7 +48,7 @@ class INET_API IGeographicCoordinateSystem
 {
   public:
     virtual GeoCoord getPlaygroundPosition() const = 0;
-    virtual EulerAngles getPlaygroundOrientation() const = 0;
+    virtual Quaternion getPlaygroundOrientation() const = 0;
 
     virtual Coord computePlaygroundCoordinate(const GeoCoord& geographicCoordinate) const = 0;
     virtual GeoCoord computeGeographicCoordinate(const Coord& playgroundCoordinate) const = 0;
@@ -67,7 +67,7 @@ class INET_API SimpleGeographicCoordinateSystem : public cSimpleModule, public I
 
   public:
     virtual GeoCoord getPlaygroundPosition() const override { return GeoCoord(playgroundLatitude, playgroundLongitude, playgroundAltitude); }
-    virtual EulerAngles getPlaygroundOrientation() const override { return EulerAngles::ZERO; }
+    virtual Quaternion getPlaygroundOrientation() const override { return Quaternion::IDENTITY; }
 
     virtual Coord computePlaygroundCoordinate(const GeoCoord& geographicCoordinate) const override;
     virtual GeoCoord computeGeographicCoordinate(const Coord& playgroundCoordinate) const override;
@@ -79,7 +79,7 @@ class INET_API OsgGeographicCoordinateSystem : public cSimpleModule, public IGeo
 {
   protected:
     GeoCoord playgroundPosition = GeoCoord::NIL;
-    EulerAngles playgroundOrientation = EulerAngles::NIL;
+    Quaternion playgroundOrientation = Quaternion::NIL;
     osgEarth::MapNode *mapNode = nullptr;
     osg::Matrixd locatorMatrix;
     osg::Matrixd inverseLocatorMatrix;
@@ -89,7 +89,7 @@ class INET_API OsgGeographicCoordinateSystem : public cSimpleModule, public IGeo
 
   public:
     virtual GeoCoord getPlaygroundPosition() const override { return playgroundPosition; }
-    virtual EulerAngles getPlaygroundOrientation() const override { return playgroundOrientation; }
+    virtual Quaternion getPlaygroundOrientation() const override { return playgroundOrientation; }
 
     virtual Coord computePlaygroundCoordinate(const GeoCoord& geographicCoordinate) const override;
     virtual GeoCoord computeGeographicCoordinate(const Coord& playgroundCoordinate) const override;
