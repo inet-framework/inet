@@ -337,8 +337,6 @@
 /examples/mobility/,                 -f omnetpp.ini -c LinearMobility10 -r 0
 /examples/mobility/,                 -f omnetpp.ini -c LinearMobility100 -r 0
 /examples/mobility/,                 -f omnetpp.ini -c LinearMobility1000 -r 0
-/examples/mobility/,                 -f omnetpp.ini -c LinearMobility_accdown -r 0
-/examples/mobility/,                 -f omnetpp.ini -c LinearMobility_accup -r 0
 /examples/mobility/,                 -f omnetpp.ini -c MassMobility -r 0
 /examples/mobility/,                 -f omnetpp.ini -c MassMobilityWithScenario -r 0
 /examples/mobility/,                 -f omnetpp.ini -c MoBANMobility1 -r 0

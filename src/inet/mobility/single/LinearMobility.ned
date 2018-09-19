@@ -36,7 +36,6 @@ simple LinearMobility extends MovingMobilityBase
         bool initFromDisplayString = default(true); // enables one time initialization from the subject module's display string
         double speed @unit(mps) = default(0mps); // speed of the host
         double angle @unit(deg) = default(uniform(0deg, 360deg)); // angle of linear motion
-        double acceleration = default(0); // acceleration of linear motion (m/s2)
         @class(LinearMobility);
 }
 

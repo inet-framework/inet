@@ -351,8 +351,6 @@
 /examples/mobility/,                 -f omnetpp.ini -c LinearMobility10 -r 0,       10000s,          ecf3-5334/tplx, PASS,
 /examples/mobility/,                 -f omnetpp.ini -c LinearMobility100 -r 0,      10000s,          fcd5-da2e/tplx, PASS,
 /examples/mobility/,                 -f omnetpp.ini -c LinearMobility1000 -r 0,     10000s,          380f-162e/tplx, PASS,
-/examples/mobility/,                 -f omnetpp.ini -c LinearMobility_accdown -r 0, 10000s,          ce84-30b6/tplx, PASS,
-/examples/mobility/,                 -f omnetpp.ini -c LinearMobility_accup -r 0,   10000s,          4860-beb1/tplx, PASS,
 /examples/mobility/,                 -f omnetpp.ini -c MassMobility -r 0,           5000s,           b764-ab4a/tplx, PASS,
 /examples/mobility/,                 -f omnetpp.ini -c MassMobilityWithScenario -r 0, 10000s,        bb94-612c/tplx, PASS,
 /examples/mobility/,                 -f omnetpp.ini -c MoBANMobility1 -r 0,         10000s,          7e9a-4c42/tplx, PASS,

@@ -27,7 +27,6 @@ LinearMobility::LinearMobility()
 {
     speed = 0;
     angle = deg(0);
-    acceleration = 0;
 }
 
 void LinearMobility::initialize(int stage)
@@ -38,8 +37,7 @@ void LinearMobility::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         speed = par("speed");
         angle = deg(fmod(par("angle").doubleValue(), 360));
-        acceleration = par("acceleration");
-        stationary = (speed == 0) && (acceleration == 0.0);
+        stationary = (speed == 0);
     }
 }
 
@@ -53,13 +51,6 @@ void LinearMobility::move()
     // do something if we reach the wall
     Coord dummy;
     handleIfOutside(REFLECT, dummy, dummy, angle);
-
-    // accelerate
-    speed += acceleration * elapsedTime;
-    if (speed <= 0) {
-        speed = 0;
-        stationary = true;
-    }
 }
 
 } // namespace inet

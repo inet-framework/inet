@@ -36,7 +36,6 @@ class INET_API LinearMobility : public MovingMobilityBase
   protected:
     double speed;    ///< speed of the host
     rad angle;    ///< angle of linear motion
-    double acceleration;    ///< acceleration of linear motion
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
