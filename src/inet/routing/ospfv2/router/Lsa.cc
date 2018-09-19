@@ -208,7 +208,7 @@ std::ostream& operator<<(std::ostream& ostr, const OspfRouterLsa& lsa)
 
 std::ostream& operator<<(std::ostream& ostr, const OspfSummaryLsa& lsa)
 {
-    ostr << "Mask: " << lsa.getNetworkMask()
+    ostr << "Mask: " << lsa.getNetworkMask().str(false)
          << ", Cost: " << lsa.getRouteCost() << ", ";
     unsigned int cnt = lsa.getTosDataArraySize();
     if (cnt) {

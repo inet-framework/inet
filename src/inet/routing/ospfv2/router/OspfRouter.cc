@@ -439,10 +439,22 @@ bool Router::floodLSA(const OspfLsa *lsa, AreaId areaID    /*= BACKBONE_AREAID*/
 
     if (lsa != nullptr) {
         if (lsa->getHeader().getLsType() == AS_EXTERNAL_LSA_TYPE) {
-            long areaCount = areas.size();
-            for (long i = 0; i < areaCount; i++) {
+            for (uint32_t i = 0; i < areas.size(); i++) {
                 if (areas[i]->getExternalRoutingCapability()) {
                     if (areas[i]->floodLSA(lsa, intf, neighbor)) {
+                        floodedBackOut = true;
+                    }
+                }
+                /* RFC 2328, Section 3.6: In order to take advantage of the OSPF stub area support,
+                    default routing must be used in the stub area.  This is
+                    accomplished as follows.  One or more of the stub area's area
+                    border routers must advertise a default route into the stub area
+                    via summary-LSAs.  These summary defaults are flooded throughout
+                    the stub area, but no further.
+                 */
+                else {
+                    SummaryLsa *summaryLsa = areas[i]->originateSummaryLSA_Stub();
+                    if (areas[i]->floodLSA(summaryLsa, intf, neighbor)) {
                         floodedBackOut = true;
                     }
                 }
@@ -622,26 +634,15 @@ bool Router::isDestinationUnreachable(OspfLsa *lsa) const
 OspfRoutingTableEntry *Router::lookup(Ipv4Address destination, std::vector<OspfRoutingTableEntry *> *table    /*= nullptr*/) const
 {
     const std::vector<OspfRoutingTableEntry *>& rTable = (table == nullptr) ? ospfRoutingTable : (*table);
-    unsigned long dest = destination.getInt();
-    unsigned long routingTableSize = rTable.size();
     bool unreachable = false;
     std::vector<OspfRoutingTableEntry *> discard;
-    unsigned long i;
 
-    unsigned long areaCount = areas.size();
-    for (i = 0; i < areaCount; i++) {
-        unsigned int addressRangeCount = areas[i]->getAddressRangeCount();
-        for (unsigned int j = 0; j < addressRangeCount; j++) {
+    for (uint32_t i = 0; i < areas.size(); i++) {
+        for (uint32_t j = 0; j < areas[i]->getAddressRangeCount(); j++) {
             Ipv4AddressRange range = areas[i]->getAddressRange(j);
-
-            for (unsigned int k = 0; k < routingTableSize; k++) {
-                OspfRoutingTableEntry *entry = rTable[k];
-
-                if (entry->getDestinationType() != OspfRoutingTableEntry::NETWORK_DESTINATION) {
+            for (auto entry : rTable) {
+                if (entry->getDestinationType() != OspfRoutingTableEntry::NETWORK_DESTINATION)
                     continue;
-                }
-//                if (((entry->getDestination().getInt() & entry->getNetmask().getInt() & range.mask.getInt()) == (range.address & range.mask).getInt()) &&
-//                    (entry->getPathType() == OspfRoutingTableEntry::INTRAAREA))
                 if (range.containsRange(entry->getDestination(), entry->getNetmask()) &&
                     (entry->getPathType() == OspfRoutingTableEntry::INTRAAREA))
                 {
@@ -661,32 +662,27 @@ OspfRoutingTableEntry *Router::lookup(Ipv4Address destination, std::vector<OspfR
 
     OspfRoutingTableEntry *bestMatch = nullptr;
     unsigned long longestMatch = 0;
+    unsigned long dest = destination.getInt();
 
-    for (i = 0; i < routingTableSize; i++) {
-        if (rTable[i]->getDestinationType() == OspfRoutingTableEntry::NETWORK_DESTINATION) {
-            OspfRoutingTableEntry *entry = rTable[i];
-            unsigned long entryAddress = entry->getDestination().getInt();
-            unsigned long entryMask = entry->getNetmask().getInt();
-
-            if ((entryAddress & entryMask) == (dest & entryMask)) {
-                if ((dest & entryMask) > longestMatch) {
-                    longestMatch = (dest & entryMask);
-                    bestMatch = entry;
-                }
+    for (auto entry : rTable) {
+        if (entry->getDestinationType() == OspfRoutingTableEntry::NETWORK_DESTINATION)
+            continue;
+        unsigned long entryAddress = entry->getDestination().getInt();
+        unsigned long entryMask = entry->getNetmask().getInt();
+        if ((entryAddress & entryMask) == (dest & entryMask)) {
+            if ((dest & entryMask) > longestMatch) {
+                longestMatch = (dest & entryMask);
+                bestMatch = entry;
             }
         }
     }
 
-    unsigned int discardCount = discard.size();
-    if (bestMatch == nullptr) {
+    if (bestMatch == nullptr)
         unreachable = true;
-    }
     else {
-        for (i = 0; i < discardCount; i++) {
-            OspfRoutingTableEntry *entry = discard[i];
+        for (auto entry : discard) {
             unsigned long entryAddress = entry->getDestination().getInt();
             unsigned long entryMask = entry->getNetmask().getInt();
-
             if ((entryAddress & entryMask) == (dest & entryMask)) {
                 if ((dest & entryMask) > longestMatch) {
                     unreachable = true;
@@ -696,16 +692,13 @@ OspfRoutingTableEntry *Router::lookup(Ipv4Address destination, std::vector<OspfR
         }
     }
 
-    for (i = 0; i < discardCount; i++) {
+    for (uint32_t i = 0; i < discard.size(); i++)
         delete discard[i];
-    }
 
-    if (unreachable) {
+    if (unreachable)
         return nullptr;
-    }
-    else {
+    else
         return bestMatch;
-    }
 }
 
 void Router::rebuildRoutingTable()
