@@ -32,10 +32,10 @@ void SceneCanvasVisualizer::initialize(int stage)
         zIndex = par("zIndex");
         cCanvas *canvas = visualizationTargetModule->getCanvas();
         bool invertY;
-        canvasProjection.setRotation(parseViewAngle(par("viewAngle"), invertY));
-        canvasProjection.setScale(parse2D(par("viewScale"), invertY));
-        canvasProjection.setTranslation(parse2D(par("viewTranslation")));
-        CanvasProjection::setCanvasProjection(canvas, &canvasProjection);
+        canvasProjection = CanvasProjection::getCanvasProjection(canvas);
+        canvasProjection->setRotation(parseViewAngle(par("viewAngle"), invertY));
+        canvasProjection->setScale(parse2D(par("viewScale"), invertY));
+        canvasProjection->setTranslation(parse2D(par("viewTranslation")));
         axisLayer = new cGroupFigure("axisLayer");
         axisLayer->setZIndex(zIndex);
         axisLayer->insertBelow(canvas->getSubmodulesLayer());
@@ -96,15 +96,15 @@ void SceneCanvasVisualizer::refreshAxis(double axisLength)
     auto xLabel = check_and_cast<cLabelFigure *>(axisLayer->getFigure(3));
     auto yLabel = check_and_cast<cLabelFigure *>(axisLayer->getFigure(4));
     auto zLabel = check_and_cast<cLabelFigure *>(axisLayer->getFigure(5));
-    xAxis->setStart(canvasProjection.computeCanvasPoint(Coord::ZERO));
-    yAxis->setStart(canvasProjection.computeCanvasPoint(Coord::ZERO));
-    zAxis->setStart(canvasProjection.computeCanvasPoint(Coord::ZERO));
-    xAxis->setEnd(canvasProjection.computeCanvasPoint(Coord(axisLength, 0, 0)));
-    yAxis->setEnd(canvasProjection.computeCanvasPoint(Coord(0, axisLength, 0)));
-    zAxis->setEnd(canvasProjection.computeCanvasPoint(Coord(0, 0, axisLength)));
-    xLabel->setPosition(canvasProjection.computeCanvasPoint(Coord(axisLength, 0, 0)));
-    yLabel->setPosition(canvasProjection.computeCanvasPoint(Coord(0, axisLength, 0)));
-    zLabel->setPosition(canvasProjection.computeCanvasPoint(Coord(0, 0, axisLength)));
+    xAxis->setStart(canvasProjection->computeCanvasPoint(Coord::ZERO));
+    yAxis->setStart(canvasProjection->computeCanvasPoint(Coord::ZERO));
+    zAxis->setStart(canvasProjection->computeCanvasPoint(Coord::ZERO));
+    xAxis->setEnd(canvasProjection->computeCanvasPoint(Coord(axisLength, 0, 0)));
+    yAxis->setEnd(canvasProjection->computeCanvasPoint(Coord(0, axisLength, 0)));
+    zAxis->setEnd(canvasProjection->computeCanvasPoint(Coord(0, 0, axisLength)));
+    xLabel->setPosition(canvasProjection->computeCanvasPoint(Coord(axisLength, 0, 0)));
+    yLabel->setPosition(canvasProjection->computeCanvasPoint(Coord(0, axisLength, 0)));
+    zLabel->setPosition(canvasProjection->computeCanvasPoint(Coord(0, 0, axisLength)));
 }
 
 void SceneCanvasVisualizer::handleParameterChange(const char* name)
@@ -112,16 +112,16 @@ void SceneCanvasVisualizer::handleParameterChange(const char* name)
     if (!hasGUI()) return;
     if (name && !strcmp(name, "viewAngle")) {
         bool invertY;
-        canvasProjection.setRotation(parseViewAngle(par("viewAngle"), invertY));
-        canvasProjection.setScale(parse2D(par("viewScale"), invertY));
+        canvasProjection->setRotation(parseViewAngle(par("viewAngle"), invertY));
+        canvasProjection->setScale(parse2D(par("viewScale"), invertY));
         // TODO: update all visualizers
     }
     else if (name && !strcmp(name, "viewScale")) {
-        canvasProjection.setScale(parse2D(par("viewScale")));
+        canvasProjection->setScale(parse2D(par("viewScale")));
         // TODO: update all visualizers
     }
     else if (name && !strcmp(name, "viewTranslation")) {
-        canvasProjection.setTranslation(parse2D(par("viewTranslation")));
+        canvasProjection->setTranslation(parse2D(par("viewTranslation")));
         // TODO: update all visualizers
     }
     double axisLength = par("axisLength");

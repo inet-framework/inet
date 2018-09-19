@@ -19,14 +19,19 @@
 
 namespace inet {
 
-CanvasProjection CanvasProjection::defaultCanvasProjection;
-std::map<const cCanvas *, const CanvasProjection *> CanvasProjection::canvasProjections;
+std::map<const cCanvas *, CanvasProjection *> CanvasProjection::canvasProjections;
 
 CanvasProjection::CanvasProjection(RotationMatrix rotation, cFigure::Point translation) :
     rotation(rotation),
     scale(cFigure::Point(1, 1)),
     translation(translation)
 {
+}
+
+CanvasProjection::~CanvasProjection()
+{
+    for (auto it : canvasProjections)
+        delete it.second;
 }
 
 cFigure::Point CanvasProjection::computeCanvasPoint(const Coord& point) const
@@ -48,18 +53,13 @@ Coord CanvasProjection::computeCanvasPointInverse(const cFigure::Point& point, d
     return rotation.rotateVectorInverse(p);
 }
 
-const CanvasProjection *CanvasProjection::getCanvasProjection(const cCanvas *canvas)
+CanvasProjection *CanvasProjection::getCanvasProjection(const cCanvas *canvas)
 {
     auto it = canvasProjections.find(canvas);
     if (it == canvasProjections.end())
-        return &defaultCanvasProjection;
+        return canvasProjections[canvas] = new CanvasProjection();
     else
         return it->second;
-}
-
-void CanvasProjection::setCanvasProjection(const cCanvas *canvas, const CanvasProjection *canvasProjection)
-{
-    canvasProjections[canvas] = canvasProjection;
 }
 
 } // namespace inet

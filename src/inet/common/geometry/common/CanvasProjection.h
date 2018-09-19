@@ -29,12 +29,12 @@ class INET_API CanvasProjection
     cFigure::Point scale;
     cFigure::Point translation;
 
-    static CanvasProjection defaultCanvasProjection;
-    static std::map<const cCanvas *, const CanvasProjection *> canvasProjections;
+    static std::map<const cCanvas *, CanvasProjection *> canvasProjections;
 
   public:
     CanvasProjection() : scale(cFigure::Point(1, 1)) {}
     CanvasProjection(RotationMatrix rotation, cFigure::Point translation);
+    virtual ~CanvasProjection();
 
     const RotationMatrix& getRotation() const { return rotation; }
     void setRotation(const RotationMatrix& rotation) { this->rotation = rotation; }
@@ -49,8 +49,7 @@ class INET_API CanvasProjection
     cFigure::Point computeCanvasPoint(const Coord& point, double& depth) const;
     Coord computeCanvasPointInverse(const cFigure::Point& point, double depth) const;
 
-    static const CanvasProjection *getCanvasProjection(const cCanvas *canvas);
-    static void setCanvasProjection(const cCanvas *canvas, const CanvasProjection *canvasProjection);
+    static CanvasProjection *getCanvasProjection(const cCanvas *canvas);
 };
 
 } // namespace inet

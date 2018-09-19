@@ -29,7 +29,7 @@ class INET_API SceneCanvasVisualizer : public SceneVisualizerBase
 {
   protected:
     double zIndex = NaN;
-    CanvasProjection canvasProjection;
+    CanvasProjection *canvasProjection = nullptr;
     cGroupFigure *axisLayer = nullptr;
 
   protected:
