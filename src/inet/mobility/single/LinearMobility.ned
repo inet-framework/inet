@@ -35,7 +35,8 @@ simple LinearMobility extends MovingMobilityBase
         double initialZ @unit(m) = default(nanToZero(uniform(this.constraintAreaMinZ, this.constraintAreaMaxZ)));
         bool initFromDisplayString = default(true); // enables one time initialization from the subject module's display string
         double speed @unit(mps) = default(0mps); // speed of the host
-        double angle @unit(deg) = default(uniform(0deg, 360deg)); // angle of linear motion
+        double initialMovementHeading @unit(deg) = default(uniform(0deg, 360deg));
+        double initialMovementElevation @unit(deg) = default(0deg);
         @class(LinearMobility);
 }
 

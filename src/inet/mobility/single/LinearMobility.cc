@@ -26,7 +26,6 @@ Define_Module(LinearMobility);
 LinearMobility::LinearMobility()
 {
     speed = 0;
-    angle = deg(0);
 }
 
 void LinearMobility::initialize(int stage)
@@ -36,21 +35,23 @@ void LinearMobility::initialize(int stage)
     EV_TRACE << "initializing LinearMobility stage " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {
         speed = par("speed");
-        angle = deg(fmod(par("angle").doubleValue(), 360));
         stationary = (speed == 0);
+        rad heading = deg(fmod(par("initialMovementHeading").doubleValue(), 360));
+        rad elevation = deg(fmod(par("initialMovementElevation").doubleValue(), 360));
+        Coord direction(cos(rad(heading).get())*cos(rad(elevation).get()), sin(rad(heading).get())*cos(rad(elevation).get()), sin(rad(elevation).get()));
+        lastVelocity = direction * speed;
     }
 }
 
 void LinearMobility::move()
 {
-    Coord direction(cos(rad(angle).get()), sin(rad(angle).get()));
-    lastVelocity = direction * speed;
     double elapsedTime = (simTime() - lastUpdate).dbl();
     lastPosition += lastVelocity * elapsedTime;
 
     // do something if we reach the wall
     Coord dummy;
-    handleIfOutside(REFLECT, dummy, dummy, angle);
+    rad dummy2;
+    handleIfOutside(REFLECT, dummy, lastVelocity, dummy2);
 }
 
 } // namespace inet
