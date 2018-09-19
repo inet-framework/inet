@@ -247,9 +247,10 @@ void ExtUdp::processPacketFromUpper(Packet *packet)
         throw cRuntimeError("Unknown socket");
     else {
         auto socket = it->second;
-        uint8_t buffer[1 << 16];
         auto bytesChunk = packet->peekAllAsBytes();
-        size_t packetLength = bytesChunk->copyToBuffer(buffer, sizeof(buffer));
+        uint8_t buffer[packet->getByteLength()];
+        size_t packetLength = bytesChunk->copyToBuffer(buffer, packet->getByteLength());
+        ASSERT(packetLength == (size_t)packet->getByteLength());
         if (auto addressReq = packet->findTag<L3AddressReq>()) {
             struct sockaddr_in sockaddr;
             sockaddr.sin_family = PF_INET;
