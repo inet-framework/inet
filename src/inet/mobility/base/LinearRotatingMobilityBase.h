@@ -29,8 +29,6 @@ class INET_API LinearRotatingMobilityBase : public RotatingMobilityBase
   protected:
     virtual void initializeOrientation() override;
 
-    virtual Quaternion slerp(Quaternion from, Quaternion to, double delta);
-
     virtual void rotate() override;
 
     /**
