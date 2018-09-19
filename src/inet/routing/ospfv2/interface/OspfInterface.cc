@@ -74,21 +74,20 @@ OspfInterface::OspfInterface(OspfInterface::OspfInterfaceType ifType) :
 
 OspfInterface::~OspfInterface()
 {
-    MessageHandler *messageHandler = parentArea->getRouter()->getMessageHandler();
-    messageHandler->clearTimer(helloTimer);
+    if(parentArea) {
+        MessageHandler *messageHandler = parentArea->getRouter()->getMessageHandler();
+        messageHandler->clearTimer(helloTimer);
+        messageHandler->clearTimer(waitTimer);
+        messageHandler->clearTimer(acknowledgementTimer);
+    }
     delete helloTimer;
-    messageHandler->clearTimer(waitTimer);
     delete waitTimer;
-    messageHandler->clearTimer(acknowledgementTimer);
     delete acknowledgementTimer;
-    if (previousState != nullptr) {
+    if (previousState)
         delete previousState;
-    }
     delete state;
-    long neighborCount = neighboringRouters.size();
-    for (long i = 0; i < neighborCount; i++) {
+    for (uint32_t i = 0; i < neighboringRouters.size(); i++)
         delete neighboringRouters[i];
-    }
 }
 
 const char *OspfInterface::getTypeString(OspfInterfaceType intfType)

@@ -72,17 +72,18 @@ Neighbor::Neighbor(RouterId neighbor) :
 Neighbor::~Neighbor()
 {
     reset();
-    MessageHandler *messageHandler = parentInterface->getArea()->getRouter()->getMessageHandler();
-    messageHandler->clearTimer(inactivityTimer);
-    messageHandler->clearTimer(pollTimer);
+    if(parentInterface && parentInterface->getArea()) {
+        MessageHandler *messageHandler = parentInterface->getArea()->getRouter()->getMessageHandler();
+        messageHandler->clearTimer(inactivityTimer);
+        messageHandler->clearTimer(pollTimer);
+    }
     delete inactivityTimer;
     delete pollTimer;
     delete ddRetransmissionTimer;
     delete updateRetransmissionTimer;
     delete requestRetransmissionTimer;
-    if (previousState != nullptr) {
+    if (previousState)
         delete previousState;
-    }
     delete state;
 }
 
@@ -107,21 +108,20 @@ void Neighbor::processEvent(Neighbor::NeighborEventType event)
 void Neighbor::reset()
 {
     for (auto & elem : linkStateRetransmissionList)
-    {
-        delete (elem);
-    }
+        delete elem;
     linkStateRetransmissionList.clear();
 
-    for (auto & elem : databaseSummaryList) {
-        delete (elem);
-    }
+    for (auto & elem : databaseSummaryList)
+        delete elem;
     databaseSummaryList.clear();
-    for (auto & elem : linkStateRequestList) {
-        delete (elem);
-    }
+
+    for (auto & elem : linkStateRequestList)
+        delete elem;
     linkStateRequestList.clear();
 
-    parentInterface->getArea()->getRouter()->getMessageHandler()->clearTimer(ddRetransmissionTimer);
+    if(parentInterface && parentInterface->getArea())
+        parentInterface->getArea()->getRouter()->getMessageHandler()->clearTimer(ddRetransmissionTimer);
+
     clearUpdateRetransmissionTimer();
     clearRequestRetransmissionTimer();
 
@@ -539,8 +539,10 @@ void Neighbor::startUpdateRetransmissionTimer()
 
 void Neighbor::clearUpdateRetransmissionTimer()
 {
-    MessageHandler *messageHandler = parentInterface->getArea()->getRouter()->getMessageHandler();
-    messageHandler->clearTimer(updateRetransmissionTimer);
+    if(parentInterface && parentInterface->getArea()) {
+        MessageHandler *messageHandler = parentInterface->getArea()->getRouter()->getMessageHandler();
+        messageHandler->clearTimer(updateRetransmissionTimer);
+    }
     updateRetransmissionTimerActive = false;
 }
 
@@ -603,8 +605,10 @@ void Neighbor::startRequestRetransmissionTimer()
 
 void Neighbor::clearRequestRetransmissionTimer()
 {
-    MessageHandler *messageHandler = parentInterface->getArea()->getRouter()->getMessageHandler();
-    messageHandler->clearTimer(requestRetransmissionTimer);
+    if(parentInterface && parentInterface->getArea()) {
+        MessageHandler *messageHandler = parentInterface->getArea()->getRouter()->getMessageHandler();
+        messageHandler->clearTimer(requestRetransmissionTimer);
+    }
     requestRetransmissionTimerActive = false;
 }
 

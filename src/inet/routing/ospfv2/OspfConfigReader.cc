@@ -221,18 +221,14 @@ void OspfConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig, Inte
     intf->setAreaId(areaID);
     intf->setIfIndex(ift, ifIndex); // should be called before calling setType()
 
-    if (interfaceType == "PointToPointInterface") {
+    if (interfaceType == "PointToPointInterface")
         intf->setType(OspfInterface::POINTTOPOINT);
-    }
-    else if (interfaceType == "BroadcastInterface") {
+    else if (interfaceType == "BroadcastInterface")
         intf->setType(OspfInterface::BROADCAST);
-    }
-    else if (interfaceType == "NBMAInterface") {
+    else if (interfaceType == "NBMAInterface")
         intf->setType(OspfInterface::NBMA);
-    }
-    else if (interfaceType == "PointToMultiPointInterface") {
+    else if (interfaceType == "PointToMultiPointInterface")
         intf->setType(OspfInterface::POINTTOMULTIPOINT);
-    }
     else {
         delete intf;
         throw cRuntimeError("Unknown interface type '%s' for interface %s (ifIndex=%d) at %s",
@@ -326,10 +322,6 @@ void OspfConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig, Inte
 
 void OspfConfigReader::loadExternalRoute(const cXMLElement& externalRouteConfig)
 {
-    std::string intfModeStr = getStrAttrOrPar(externalRouteConfig, "interfaceMode");
-    if(intfModeStr == "NoOSPF")
-        return;
-
     for(auto &ie : getInterfaceByXMLAttributesOf(externalRouteConfig)) {
         OspfAsExternalLsaContents asExternalRoute;
         Ipv4AddressRange networkAddress;
@@ -407,10 +399,6 @@ void OspfConfigReader::loadHostRoute(const cXMLElement& hostRouteConfig)
 
 void OspfConfigReader::loadLoopbackParameters(const cXMLElement& loConfig, InterfaceEntry& ie)
 {
-    std::string intfModeStr = getStrAttrOrPar(loConfig, "interfaceMode");
-    if(intfModeStr == "NoOSPF")
-        return;
-
     int ifIndex = ie.getInterfaceId();
     EV_DEBUG << "        loading LoopbackInterface " << ie.getInterfaceName() << " ifIndex[" << ifIndex << "]\n";
 
@@ -433,42 +421,45 @@ void OspfConfigReader::loadLoopbackParameters(const cXMLElement& loConfig, Inter
 
 void OspfConfigReader::loadVirtualLink(const cXMLElement& virtualLinkConfig)
 {
-    std::string intfModeStr = getStrAttrOrPar(virtualLinkConfig, "interfaceMode");
-    if(intfModeStr == "NoOSPF")
-        return;
+    std::string endPoint = getMandatoryFilledAttribute(virtualLinkConfig, "endPointRouterID");
+    Ipv4Address routerId = ipv4AddressFromAddressString(endPoint.c_str());
+
+    EV_DEBUG << "        loading VirtualLink to OSPF router " << routerId.str(false) << "\n";
+
+    Neighbor *neighbor = new Neighbor;
+    neighbor->setNeighborID(routerId);
 
     OspfInterface *intf = new OspfInterface;
-    std::string endPoint = getMandatoryFilledAttribute(virtualLinkConfig, "endPointRouterID");
-    Neighbor *neighbor = new Neighbor;
-
-    EV_DEBUG << "        loading VirtualLink to " << endPoint << "\n";
 
     intf->setType(OspfInterface::VIRTUAL);
-    neighbor->setNeighborID(ipv4AddressFromAddressString(endPoint.c_str()));
+    intf->setInterfaceName("virtual");
     intf->addNeighbor(neighbor);
-
     intf->setTransitAreaId(ipv4AddressFromAddressString(getMandatoryFilledAttribute(virtualLinkConfig, "transitAreaID")));
-
     intf->setRetransmissionInterval(getIntAttrOrPar(virtualLinkConfig, "retransmissionInterval"));
-
     intf->setTransmissionDelay(getIntAttrOrPar(virtualLinkConfig, "interfaceTransmissionDelay"));
-
     intf->setHelloInterval(getIntAttrOrPar(virtualLinkConfig, "helloInterval"));
-
     intf->setRouterDeadInterval(getIntAttrOrPar(virtualLinkConfig, "routerDeadInterval"));
 
     loadAuthenticationConfig(intf, virtualLinkConfig);
 
-    // add the virtual link to the OSPF data structure.
-    Area *transitArea = ospfRouter->getAreaByID(intf->getAreaId());
-    Area *backbone = ospfRouter->getAreaByID(BACKBONE_AREAID);
-
-    if ((backbone != nullptr) && (transitArea != nullptr) && (transitArea->getExternalRoutingCapability())) {
-        backbone->addInterface(intf);
+    AreaId transitAreaId = intf->getTransitAreaId();
+    Area *transitArea = ospfRouter->getAreaByID(transitAreaId);
+    if (!transitArea) {
+        delete intf;
+        throw cRuntimeError("Virtual link to router %s cannot be configured through a non-existence transit area '%s' at %s", routerId.str(false).c_str(), transitAreaId.str(false).c_str(), virtualLinkConfig.getSourceLocation());
     }
+    else if (!transitArea->getExternalRoutingCapability()) {
+        delete intf;
+        throw cRuntimeError("Virtual link to router %s cannot be configured through a stub area '%s' at %s", routerId.str(false).c_str(), transitAreaId.str(false).c_str(), virtualLinkConfig.getSourceLocation());
+    }
+
+    // add the virtual link to the OSPF data structure
+    Area *backbone = ospfRouter->getAreaByID(BACKBONE_AREAID);
+    if (backbone)
+        backbone->addInterface(intf);
     else {
-        throw cRuntimeError("Loading VirtualLink to %s through Area %s aborted at ", endPoint.c_str(), intf->getAreaId().str(false).c_str(), virtualLinkConfig.getSourceLocation());
-        //delete intf;
+        delete intf;
+        throw cRuntimeError("Loading VirtualLink to router %s through area '%s' aborted at %s", routerId.str(false).c_str(), transitAreaId.str(false).c_str(), virtualLinkConfig.getSourceLocation());
     }
 }
 
