@@ -28,8 +28,8 @@ void SuperpositioningMobility::initialize(int stage)
     EV_TRACE << "initializing SuperpositioningMobility stage " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {
         const char *positionCompositionAsString = par("positionComposition");
-        if (!strcmp(positionCompositionAsString, "none"))
-            positionComposition = PositionComposition::PC_NONE;
+        if (!strcmp(positionCompositionAsString, "zero"))
+            positionComposition = PositionComposition::PC_ZERO;
         else if (!strcmp(positionCompositionAsString, "sum"))
             positionComposition = PositionComposition::PC_SUM;
         else if (!strcmp(positionCompositionAsString, "average"))
@@ -37,8 +37,8 @@ void SuperpositioningMobility::initialize(int stage)
         else
             throw cRuntimeError("Unknown position Composition");
         const char *orientationCompositionAsString = par("orientationComposition");
-        if (!strcmp(orientationCompositionAsString, "none"))
-            orientationComposition = OrientationComposition::OC_NONE;
+        if (!strcmp(orientationCompositionAsString, "zero"))
+            orientationComposition = OrientationComposition::OC_ZERO;
         else if (!strcmp(orientationCompositionAsString, "sum"))
             orientationComposition = OrientationComposition::OC_SUM;
         else if (!strcmp(orientationCompositionAsString, "average"))
@@ -66,7 +66,7 @@ void SuperpositioningMobility::setInitialPosition()
 Coord SuperpositioningMobility::getCurrentPosition()
 {
     switch (positionComposition) {
-        case PositionComposition::PC_NONE:
+        case PositionComposition::PC_ZERO:
             lastPosition = Coord::ZERO;
         case PositionComposition::PC_AVERAGE:
         case PositionComposition::PC_SUM: {
@@ -87,7 +87,7 @@ Coord SuperpositioningMobility::getCurrentPosition()
 Coord SuperpositioningMobility::getCurrentVelocity()
 {
     switch (positionComposition) {
-        case PositionComposition::PC_NONE:
+        case PositionComposition::PC_ZERO:
             return Coord::ZERO;
         case PositionComposition::PC_AVERAGE:
         case PositionComposition::PC_SUM: {
@@ -106,7 +106,7 @@ Coord SuperpositioningMobility::getCurrentVelocity()
 Coord SuperpositioningMobility::getCurrentAcceleration()
 {
     switch (positionComposition) {
-        case PositionComposition::PC_NONE:
+        case PositionComposition::PC_ZERO:
             return Coord::ZERO;
         case PositionComposition::PC_AVERAGE:
         case PositionComposition::PC_SUM: {
@@ -125,7 +125,7 @@ Coord SuperpositioningMobility::getCurrentAcceleration()
 Quaternion SuperpositioningMobility::getCurrentAngularPosition()
 {
     switch (orientationComposition) {
-        case OrientationComposition::OC_NONE: {
+        case OrientationComposition::OC_ZERO: {
             lastOrientation = Quaternion::IDENTITY;
             break;
         }
@@ -185,7 +185,7 @@ Quaternion SuperpositioningMobility::getCurrentAngularPosition()
 Quaternion SuperpositioningMobility::getCurrentAngularVelocity()
 {
     switch (orientationComposition) {
-        case OrientationComposition::OC_NONE:
+        case OrientationComposition::OC_ZERO:
             return Quaternion::IDENTITY;
         case OrientationComposition::OC_SUM: {
             Quaternion angularVelocity;
@@ -205,7 +205,7 @@ Quaternion SuperpositioningMobility::getCurrentAngularVelocity()
 Quaternion SuperpositioningMobility::getCurrentAngularAcceleration()
 {
     switch (orientationComposition) {
-        case OrientationComposition::OC_NONE:
+        case OrientationComposition::OC_ZERO:
             return Quaternion::IDENTITY;
         case OrientationComposition::OC_SUM: {
             Quaternion angularAcceleration;
