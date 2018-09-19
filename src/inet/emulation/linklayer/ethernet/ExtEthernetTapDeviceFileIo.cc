@@ -73,7 +73,7 @@ void ExtEthernetTapDeviceFileIo::handleMessage(cMessage *msg)
     buffer[1] = 0;
     buffer[2] = 0x86; // ethernet
     buffer[3] = 0xdd;
-    size_t packetLength = bytesChunk->copyToBuffer(buffer + 4, sizeof(buffer) - 4);
+    size_t packetLength = bytesChunk->copyToBuffer(buffer + 4, packet->getByteLength());
     ASSERT(packetLength == (size_t)packet->getByteLength());
     packetLength += 4;
     ssize_t nwrite = write(fd, buffer, packetLength);
