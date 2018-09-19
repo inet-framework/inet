@@ -52,41 +52,41 @@ const char *InterfaceTableVisualizerBase::DirectiveResolver::resolveDirective(ch
             break;
         case 'l': // TODO: Ipv4 or Ipv6
 #ifdef WITH_IPv4
-            if (interfaceEntry->ipv4Data() != nullptr)
-                result = std::to_string(interfaceEntry->ipv4Data()->getNetmask().getNetmaskLength());
+            if (auto ipv4Data = interfaceEntry->findProtocolData<Ipv4InterfaceData>())
+                result = std::to_string(ipv4Data->getNetmask().getNetmaskLength());
 #endif // WITH_IPv4
             break;
         case '4':
 #ifdef WITH_IPv4
-            if (interfaceEntry->ipv4Data() != nullptr)
-                result = interfaceEntry->ipv4Data()->getIPAddress().str();
+            if (auto ipv4Data = interfaceEntry->findProtocolData<Ipv4InterfaceData>())
+                result = ipv4Data->getIPAddress().str();
 #endif // WITH_IPv4
             break;
         case '6':
 #ifdef WITH_IPv6
-            if (interfaceEntry->ipv6Data() != nullptr)
-                result = interfaceEntry->ipv6Data()->getLinkLocalAddress().str();
+            if (auto ipv6Data = interfaceEntry->findProtocolData<Ipv6InterfaceData>())
+                result = ipv6Data->getLinkLocalAddress().str();
 #endif // WITH_IPv6
             break;
         case 'a':
             if (false) {}
 #ifdef WITH_IPv4
-            else if (interfaceEntry->ipv4Data() != nullptr)
-                result = interfaceEntry->ipv4Data()->getIPAddress().str();
+            else if (auto ipv4Data = interfaceEntry->findProtocolData<Ipv4InterfaceData>())
+                result = ipv4Data->getIPAddress().str();
 #endif // WITH_IPv4
 #ifdef WITH_IPv6
-            else if (interfaceEntry->ipv6Data() != nullptr)
-                result = interfaceEntry->ipv6Data()->getLinkLocalAddress().str();
+            else if (auto ipv6Data = interfaceEntry->findProtocolData<Ipv6InterfaceData>())
+                result = ipv6Data->getLinkLocalAddress().str();
 #endif // WITH_IPv6
 #ifdef WITH_NEXTHOP
-            else if (interfaceEntry->getNextHopData() != nullptr)
-                result = interfaceEntry->getNextHopData()->getAddress().str();
+            else if (auto nextHopData = interfaceEntry->findProtocolData<NextHopInterfaceData>())
+                result = nextHopData->getAddress().str();
 #endif // WITH_NEXTHOP
             break;
         case 'g':
 #ifdef WITH_NEXTHOP
-            if (interfaceEntry->getNextHopData() != nullptr)
-                result = interfaceEntry->getNextHopData()->getAddress().str();
+            if (auto nextHopData = interfaceEntry->findProtocolData<NextHopInterfaceData>())
+                result = nextHopData->getAddress().str();
 #endif // WITH_NEXTHOP
             break;
         case 'n':

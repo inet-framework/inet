@@ -525,7 +525,7 @@ void DhcpServer::startApp()
 
     simtime_t start = std::max(startTime, simTime());
     ie = chooseInterface();
-    Ipv4InterfaceData *ipv4data = ie->ipv4Data();
+    Ipv4InterfaceData *ipv4data = ie->findProtocolData<Ipv4InterfaceData>();
     if (ipv4data == nullptr)
         throw cRuntimeError("interface %s is not configured for IPv4", ie->getFullName());
     const char *gatewayStr = par("gateway");

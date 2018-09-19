@@ -124,21 +124,24 @@ InterfaceEntry *InterfaceTable::findInterfaceByAddress(const L3Address& address)
             InterfaceEntry *ie = elem;
             if (ie) {
 #ifdef WITH_NEXTHOP
-                if (ie->getNextHopData() && ie->getNextHopData()->getAddress() == address)
-                    return ie;
+                if (auto nextHopData = ie->findProtocolData<NextHopInterfaceData>())
+                    if (nextHopData->getAddress() == address)
+                        return ie;
 #endif // ifdef WITH_NEXTHOP
                 switch (addrType) {
 #ifdef WITH_IPv4
                     case L3Address::IPv4:
-                        if (ie->ipv4Data() && ie->ipv4Data()->getIPAddress() == address.toIpv4())
-                            return ie;
+                        if (auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>())
+                            if (ipv4Data->getIPAddress() == address.toIpv4())
+                                return ie;
                         break;
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
                     case L3Address::IPv6:
-                        if (ie->ipv6Data() && ie->ipv6Data()->hasAddress(address.toIpv6()))
-                            return ie;
+                        if (auto ipv6Data = ie->findProtocolData<Ipv6InterfaceData>())
+                            if (ipv6Data->hasAddress(address.toIpv6()))
+                                return ie;
                         break;
 #endif // ifdef WITH_IPv6
 
@@ -177,11 +180,13 @@ bool InterfaceTable::isNeighborAddress(const L3Address& address) const
         case L3Address::IPv4:
             for (auto & elem : idToInterface) {
                 InterfaceEntry *ie = elem;
-                if (ie && ie->ipv4Data()) {
-                    Ipv4Address ipv4Addr = ie->ipv4Data()->getIPAddress();
-                    Ipv4Address netmask = ie->ipv4Data()->getNetmask();
-                    if (Ipv4Address::maskedAddrAreEqual(address.toIpv4(), ipv4Addr, netmask))
-                        return address != ipv4Addr;
+                if (ie) {
+                    if (auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>()) {
+                        Ipv4Address ipv4Addr = ipv4Data->getIPAddress();
+                        Ipv4Address netmask = ipv4Data->getNetmask();
+                        if (Ipv4Address::maskedAddrAreEqual(address.toIpv4(), ipv4Addr, netmask))
+                            return address != ipv4Addr;
+                    }
                 }
             }
             break;
@@ -191,12 +196,13 @@ bool InterfaceTable::isNeighborAddress(const L3Address& address) const
         case L3Address::IPv6:
             for (auto & elem : idToInterface) {
                 InterfaceEntry *ie = elem;
-                if (ie && ie->ipv6Data()) {
-                    Ipv6InterfaceData *ipv6Data = ie->ipv6Data();
-                    for (int j = 0; j < ipv6Data->getNumAdvPrefixes(); j++) {
-                        const Ipv6InterfaceData::AdvPrefix& advPrefix = ipv6Data->getAdvPrefix(j);
-                        if (address.toIpv6().matches(advPrefix.prefix, advPrefix.prefixLength))
-                            return address != advPrefix.prefix;
+                if (ie) {
+                    if (auto ipv6Data = ie->findProtocolData<Ipv6InterfaceData>()) {
+                        for (int j = 0; j < ipv6Data->getNumAdvPrefixes(); j++) {
+                            const Ipv6InterfaceData::AdvPrefix& advPrefix = ipv6Data->getAdvPrefix(j);
+                            if (address.toIpv6().matches(advPrefix.prefix, advPrefix.prefixLength))
+                                return address != advPrefix.prefix;
+                        }
                     }
                 }
             }
@@ -381,17 +387,19 @@ void InterfaceTable::updateLinkDisplayString(InterfaceEntry *entry) const
         std::stringstream buf;
         buf << entry->getFullName() << "\n";
 #ifdef WITH_IPv4
-        if (entry->ipv4Data() && !(entry->ipv4Data()->getIPAddress().isUnspecified()) ) {
-            buf << entry->ipv4Data()->getIPAddress().str() << "/" << entry->ipv4Data()->getNetmask().getNetmaskLength() << "\n";
+        auto ipv4Data = entry->findProtocolData<Ipv4InterfaceData>();
+        if (ipv4Data && !(ipv4Data->getIPAddress().isUnspecified()) ) {
+            buf << ipv4Data->getIPAddress().str() << "/" << ipv4Data->getNetmask().getNetmaskLength() << "\n";
         }
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-        if (entry->ipv6Data() && entry->ipv6Data()->getNumAddresses() > 0) {
-            for (int i = 0; i < entry->ipv6Data()->getNumAddresses(); i++) {
-                if (entry->ipv6Data()->getAddress(i).isSolicitedNodeMulticastAddress()
-                        //|| (entry->ipv6Data()->getAddress(i).isLinkLocal() && entry->ipv6Data()->getAddress(i).)
-                        || entry->ipv6Data()->getAddress(i).isMulticast()) continue;
-                buf << entry->ipv6Data()->getAddress(i).str() << "/64" << "\n";
+        auto ipv6Data = entry->findProtocolData<Ipv6InterfaceData>();
+        if (ipv6Data && ipv6Data->getNumAddresses() > 0) {
+            for (int i = 0; i < ipv6Data->getNumAddresses(); i++) {
+                if (ipv6Data->getAddress(i).isSolicitedNodeMulticastAddress()
+                        //|| (ipv6Data->getAddress(i).isLinkLocal() && ipv6Data->getAddress(i).)
+                        || ipv6Data->getAddress(i).isMulticast()) continue;
+                buf << ipv6Data->getAddress(i).str() << "/64" << "\n";
             }
         }
 #endif // ifdef WITH_IPv6
@@ -524,10 +532,11 @@ MulticastGroupList InterfaceTable::collectMulticastGroups() const
 #ifdef WITH_IPv4
         InterfaceEntry *ie = getInterface(i);
         int interfaceId = ie->getInterfaceId();
-        if (ie->ipv4Data()) {
-            int numOfMulticastGroups = ie->ipv4Data()->getNumOfJoinedMulticastGroups();
+        auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
+        if (ipv4Data) {
+            int numOfMulticastGroups = ipv4Data->getNumOfJoinedMulticastGroups();
             for (int j = 0; j < numOfMulticastGroups; ++j) {
-                mglist.push_back(MulticastGroup(ie->ipv4Data()->getJoinedMulticastGroup(j), interfaceId));
+                mglist.push_back(MulticastGroup(ipv4Data->getJoinedMulticastGroup(j), interfaceId));
             }
         }
 #endif // ifdef WITH_IPv4

@@ -116,10 +116,8 @@ void Ted::initializeTED()
         //
         TeLinkStateInfo entry;
         entry.advrouter = routerId;
-        ASSERT(ie->ipv4Data());
         entry.local = ie->ipv4Data()->getIPAddress();
         entry.linkid = destRouterId;
-        ASSERT(destIe->ipv4Data());
         entry.remote = destIe->ipv4Data()->getIPAddress();
         entry.MaxBandwidth = linkBandwidth;
         for (int j = 0; j < 8; j++)

@@ -167,7 +167,7 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
             ie = ift->getInterfaceByName(name);
             if (!ie)
                 throw cRuntimeError("Error in routing file: interface name `%s' not registered by any L2 module", name);
-            if (!ie->ipv4Data())
+            if (!ie->findProtocolData<Ipv4InterfaceData>())
                 throw cRuntimeError("Error in routing file: interface name `%s' doesn't have Ipv4 data fields", name);
 
             continue;

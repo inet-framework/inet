@@ -171,8 +171,8 @@ std::vector<Ipv4Address> RoutingTableVisualizerBase::getDestinations()
             auto interfaceTable = addressResolver.findInterfaceTableOf(networkNode);
             for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
                 auto interface = interfaceTable->getInterface(i);
-                if (interface->ipv4Data() != nullptr) {
-                    auto address = interface->ipv4Data()->getIPAddress();
+                if (auto ipv4Data = interface->findProtocolData<Ipv4InterfaceData>()) {
+                    auto address = ipv4Data->getIPAddress();
                     if (!address.isUnspecified())
                         destinations.push_back(address);
                 }

@@ -380,16 +380,17 @@ void Ldp::rebuildFecList()
 //        if (ie->getNetworkLayerGateIndex() < 0)
 //            continue;
 
-        if (!ie->ipv4Data())
+        auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
+        if (!ipv4Data)
             continue;
 
-        auto it = findFecEntry(oldList, ie->ipv4Data()->getIPAddress(), 32);
+        auto it = findFecEntry(oldList, ipv4Data->getIPAddress(), 32);
         if (it == oldList.end()) {
             fec_t newItem;
             newItem.fecid = ++maxFecid;
-            newItem.addr = ie->ipv4Data()->getIPAddress();
+            newItem.addr = ipv4Data->getIPAddress();
             newItem.length = 32;
-            newItem.nextHop = ie->ipv4Data()->getIPAddress();
+            newItem.nextHop = ipv4Data->getIPAddress();
             fecList.push_back(newItem);
         }
         else {

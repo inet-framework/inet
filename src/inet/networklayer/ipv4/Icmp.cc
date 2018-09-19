@@ -163,15 +163,18 @@ bool Icmp::possiblyLocalBroadcast(const Ipv4Address& addr, int interfaceId)
     IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     if (interfaceId != -1) {
         InterfaceEntry *ie = ift->getInterfaceById(interfaceId);
-        bool interfaceUnconfigured = (ie->ipv4Data() == nullptr) || ie->ipv4Data()->getIPAddress().isUnspecified();
+        auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
+        bool interfaceUnconfigured = (ipv4Data == nullptr) || ipv4Data->getIPAddress().isUnspecified();
         return interfaceUnconfigured;
     }
     else {
         // if all interfaces are configured, we are OK
         bool allInterfacesConfigured = true;
-        for (int i = 0; i < ift->getNumInterfaces(); i++)
-            if ((ift->getInterface(i)->ipv4Data() == nullptr) || ift->getInterface(i)->ipv4Data()->getIPAddress().isUnspecified())
+        for (int i = 0; i < ift->getNumInterfaces(); i++) {
+            auto ipv4Data = ift->getInterface(i)->findProtocolData<Ipv4InterfaceData>();
+            if ((ipv4Data == nullptr) || ipv4Data->getIPAddress().isUnspecified())
                 allInterfacesConfigured = false;
+        }
 
         return !allInterfacesConfigured;
     }

@@ -123,8 +123,12 @@ void Ipv4RoutingTable::configureRouterId()
             // choose highest interface address as routerId
             for (int i = 0; i < ift->getNumInterfaces(); ++i) {
                 InterfaceEntry *ie = ift->getInterface(i);
-                if (!ie->isLoopback() && ie->ipv4Data() && ie->ipv4Data()->getIPAddress().getInt() > routerId.getInt())
-                    routerId = ie->ipv4Data()->getIPAddress();
+                if (!ie->isLoopback()) {
+                    auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
+                    if (ipv4Data && ipv4Data->getIPAddress().getInt() > routerId.getInt()) {
+                        routerId = ipv4Data->getIPAddress();
+                    }
+                }
             }
         }
     }
@@ -294,8 +298,7 @@ std::vector<Ipv4Address> Ipv4RoutingTable::gatherAddresses() const
 
 void Ipv4RoutingTable::configureInterfaceForIpv4(InterfaceEntry *ie)
 {
-    Ipv4InterfaceData *d = new Ipv4InterfaceData();
-    ie->setIpv4Data(d);
+    Ipv4InterfaceData *d = ie->addProtocolData<Ipv4InterfaceData>();
 
     // metric: some hints: OSPF cost (2e9/bps value), MS KB article Q299540, ...
     d->setMetric((int)ceil(2e9 / ie->getDatarate()));    // use OSPF cost as default
@@ -328,11 +331,10 @@ void Ipv4RoutingTable::configureLoopbackForIpv4()
     if (ie) {
         // add Ipv4 info. Set 127.0.0.1/8 as address by default --
         // we may reconfigure later it to be the routerId
-        Ipv4InterfaceData *d = new Ipv4InterfaceData();
+        Ipv4InterfaceData *d = ie->addProtocolData<Ipv4InterfaceData>();
         d->setIPAddress(Ipv4Address::LOOPBACK_ADDRESS);
         d->setNetmask(Ipv4Address::LOOPBACK_NETMASK);
         d->setMetric(1);
-        ie->setIpv4Data(d);
     }
 }
 
@@ -762,22 +764,26 @@ void Ipv4RoutingTable::updateNetmaskRoutes()
     PatternMatcher interfaceNameMatcher(netmaskRoutes, false, true, true);
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
         InterfaceEntry *ie = ift->getInterface(i);
-        if (interfaceNameMatcher.matches(ie->getFullName()) && ie->ipv4Data() && ie->ipv4Data()->getNetmask() != Ipv4Address::ALLONES_ADDRESS)
+        if (interfaceNameMatcher.matches(ie->getFullName()))
         {
-            Ipv4Route *route = createNewRoute();
-            route->setSourceType(IRoute::IFACENETMASK);
-            route->setSource(ie);
-            route->setDestination(ie->ipv4Data()->getIPAddress().doAnd(ie->ipv4Data()->getNetmask()));
-            route->setNetmask(ie->ipv4Data()->getNetmask());
-            route->setGateway(Ipv4Address());
-            route->setAdminDist(Ipv4Route::dDirectlyConnected);
-            route->setMetric(ie->ipv4Data()->getMetric());
-            route->setInterface(ie);
-            route->setRoutingTable(this);
-            auto pos = upper_bound(routes.begin(), routes.end(), route, RouteLessThan(*this));
-            routes.insert(pos, route);
-            invalidateCache();
-            emit(routeAddedSignal, route);
+            auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
+            if (ipv4Data && ipv4Data->getNetmask() != Ipv4Address::ALLONES_ADDRESS)
+            {
+                Ipv4Route *route = createNewRoute();
+                route->setSourceType(IRoute::IFACENETMASK);
+                route->setSource(ie);
+                route->setDestination(ipv4Data->getIPAddress().doAnd(ipv4Data->getNetmask()));
+                route->setNetmask(ipv4Data->getNetmask());
+                route->setGateway(Ipv4Address());
+                route->setAdminDist(Ipv4Route::dDirectlyConnected);
+                route->setMetric(ipv4Data->getMetric());
+                route->setInterface(ie);
+                route->setRoutingTable(this);
+                auto pos = upper_bound(routes.begin(), routes.end(), route, RouteLessThan(*this));
+                routes.insert(pos, route);
+                invalidateCache();
+                emit(routeAddedSignal, route);
+            }
         }
     }
 }

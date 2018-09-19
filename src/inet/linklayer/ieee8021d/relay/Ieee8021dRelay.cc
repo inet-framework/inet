@@ -196,7 +196,7 @@ void Ieee8021dRelay::handleAndDispatchFrame(Packet *packet)
     const auto& frame = packet->peekAtFront<EthernetMacHeader>();
     int arrivalInterfaceId = packet->getTag<InterfaceInd>()->getInterfaceId();
     InterfaceEntry *arrivalInterface = ifTable->getInterfaceById(arrivalInterfaceId);
-    Ieee8021dInterfaceData *arrivalPortData = arrivalInterface->ieee8021dData();
+    Ieee8021dInterfaceData *arrivalPortData = arrivalInterface->findProtocolData<Ieee8021dInterfaceData>();
     if (isStpAware && arrivalPortData == nullptr)
         throw cRuntimeError("Ieee8021dInterfaceData not found for interface %s", arrivalInterface->getFullName());
     learn(frame->getSrc(), arrivalInterfaceId);

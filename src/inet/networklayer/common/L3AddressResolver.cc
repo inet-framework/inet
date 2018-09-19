@@ -319,9 +319,10 @@ bool L3AddressResolver::getIpv6AddressFrom(L3Address& retAddr, IInterfaceTable *
 
     for (int i = 0; i < ift->getNumInterfaces() && retScope != Ipv6Address::GLOBAL; i++) {
         InterfaceEntry *ie = ift->getInterface(i);
-        if (!ie->ipv6Data() || ie->isLoopback())
+        auto ipv6Data = ie->findProtocolData<Ipv6InterfaceData>();
+        if (!ipv6Data || ie->isLoopback())
             continue;
-        Ipv6Address curAddr = ie->ipv6Data()->getPreferredAddress();
+        Ipv6Address curAddr = ipv6Data->getPreferredAddress();
         Ipv6Address::Scope curScope = curAddr.getScope();
         if (curScope > retScope) {
             retAddr = curAddr;
@@ -389,8 +390,8 @@ bool L3AddressResolver::getInterfaceIpv6Address(L3Address& ret, InterfaceEntry *
 #ifdef WITH_IPv6
     if (netmask)
         return false; // Ipv6 netmask not supported yet
-    if (ie->ipv6Data()) {
-        Ipv6Address addr = ie->ipv6Data()->getPreferredAddress();
+    if (auto ipv6Data = ie->findProtocolData<Ipv6InterfaceData>()) {
+        Ipv6Address addr = ipv6Data->getPreferredAddress();
         if (!addr.isUnspecified()) {
             ret.set(addr);
             return true;
@@ -403,10 +404,10 @@ bool L3AddressResolver::getInterfaceIpv6Address(L3Address& ret, InterfaceEntry *
 bool L3AddressResolver::getInterfaceIpv4Address(L3Address& ret, InterfaceEntry *ie, bool netmask)
 {
 #ifdef WITH_IPv4
-    if (ie->ipv4Data()) {
-        Ipv4Address addr = ie->ipv4Data()->getIPAddress();
+    if (auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>()) {
+        Ipv4Address addr = ipv4Data->getIPAddress();
         if (!addr.isUnspecified()) {
-            ret.set(netmask ? ie->ipv4Data()->getNetmask() : addr);
+            ret.set(netmask ? ipv4Data->getNetmask() : addr);
             return true;
         }
     }
@@ -530,7 +531,7 @@ cModule *L3AddressResolver::findHostWithAddress(const L3Address& add)
 #endif // ifdef WITH_IPv6
 #ifdef WITH_IPv4
                     case L3Address::IPv4:
-                        if (entry->ipv4Data() && entry->ipv4Data()->getIPAddress() == add.toIpv4())
+                        if (entry->ipv4Data()->getIPAddress() == add.toIpv4())
                             return mod;
                         break;
 

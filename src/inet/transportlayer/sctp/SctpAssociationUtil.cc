@@ -614,16 +614,16 @@ void SctpAssociation::sendInit()
     if (localAddressList.front().isUnspecified()) {
         for (int32 i = 0; i < ift->getNumInterfaces(); ++i) {
 #ifdef WITH_IPv4
-            if (ift->getInterface(i)->ipv4Data() != nullptr) {
-                adv.push_back(ift->getInterface(i)->ipv4Data()->getIPAddress());
+            if (auto ipv4Data = ift->getInterface(i)->findProtocolData<Ipv4InterfaceData>()) {
+                adv.push_back(ipv4Data->getIPAddress());
             }
             else
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-            if (ift->getInterface(i)->ipv6Data() != nullptr) {
-                for (int32 j = 0; j < ift->getInterface(i)->ipv6Data()->getNumAddresses(); j++) {
-                    EV_DETAIL << "add address " << ift->getInterface(i)->ipv6Data()->getAddress(j) << "\n";
-                    adv.push_back(ift->getInterface(i)->ipv6Data()->getAddress(j));
+            if (auto ipv6Data = ift->getInterface(i)->findProtocolData<Ipv6InterfaceData>()) {
+                for (int32 j = 0; j < ipv6Data->getNumAddresses(); j++) {
+                    EV_DETAIL << "add address " << ipv6Data->getAddress(j) << "\n";
+                    adv.push_back(ipv6Data->getAddress(j));
                 }
             }
             else

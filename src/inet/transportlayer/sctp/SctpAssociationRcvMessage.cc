@@ -591,16 +591,16 @@ bool SctpAssociation::processInitArrived(SctpInitChunk *initchunk, int32 srcPort
             state->localAddresses.clear();
             if (localAddressList.front().isUnspecified()) {
                 for (int32 i = 0; i < ift->getNumInterfaces(); ++i) {
-                    if (ift->getInterface(i)->ipv4Data() != nullptr) {
+                    if (auto ipv4Data = ift->getInterface(i)->findProtocolData<Ipv4InterfaceData>()) {
 #ifdef WITH_IPv4
-                        adv.push_back(ift->getInterface(i)->ipv4Data()->getIPAddress());
+                        adv.push_back(ipv4Data->getIPAddress());
 #else // ifdef WITH_IPv4
                         throw cRuntimeError("INET was compiled without IPv4 support");
 #endif // ifdef WITH_IPv4
                     }
-                    else if (ift->getInterface(i)->ipv6Data() != nullptr) {
+                    else if (auto ipv6Data = ift->getInterface(i)->findProtocolData<Ipv6InterfaceData>()) {
 #ifdef WITH_IPv6
-                        adv.push_back(ift->getInterface(i)->ipv6Data()->getAddress(0));
+                        adv.push_back(ipv6Data->getAddress(0));
 #else // ifdef WITH_IPv6
                         throw cRuntimeError("INET was compiled without IPv6 support");
 #endif // ifdef WITH_IPv6

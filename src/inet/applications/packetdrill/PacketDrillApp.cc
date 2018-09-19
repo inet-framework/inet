@@ -139,7 +139,7 @@ void PacketDrillApp::initialize(int stage)
         InterfaceEntry *interfaceEntry = interfaceTable->getInterfaceByName(interface);
         if (interfaceEntry == nullptr)
             throw cRuntimeError("TUN interface not found: %s", interface);
-        Ipv4InterfaceData *idat = interfaceEntry->ipv4Data();
+        auto *idat = interfaceEntry->getProtocolData<Ipv4InterfaceData>();
         idat->setIPAddress(localAddress.toIpv4());
         tunSocket.setOutputGate(gate("socketOut"));
         tunSocket.open(interfaceEntry->getInterfaceId());

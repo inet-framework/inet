@@ -396,9 +396,11 @@ L3Address Gpsr::getSelfAddress() const
     if (ret.getType() == L3Address::IPv6) {
         for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
             InterfaceEntry *ie = interfaceTable->getInterface(i);
-            if ((!ie->isLoopback()) && ie->ipv6Data() != nullptr) {
-                ret = interfaceTable->getInterface(i)->ipv6Data()->getPreferredAddress();
-                break;
+            if ((!ie->isLoopback())) {
+                if (auto ipv6Data = ie->findProtocolData<Ipv6InterfaceData>()) {
+                    ret = ipv6Data->getPreferredAddress();
+                    break;
+                }
             }
         }
     }

@@ -43,8 +43,9 @@ std::string NextHopRoute::str() const
         out << "*";
     else
         out << interface->getInterfaceName();
-    if (interface && interface->getNextHopData())
-        out << "(" << interface->getNextHopData()->getAddress() << ")";
+    if (interface)
+        if (auto nextHopData = interface->findProtocolData<NextHopInterfaceData>())
+            out << "(" << nextHopData->getAddress() << ")";
     out << "  ";
     out << (nextHop.isUnspecified() ? "DIRECT" : "REMOTE");
     out << " " << IRoute::sourceTypeName(sourceType);

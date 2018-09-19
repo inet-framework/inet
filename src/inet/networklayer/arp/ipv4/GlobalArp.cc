@@ -93,21 +93,21 @@ void GlobalArp::initialize(int stage)
             InterfaceEntry *interfaceEntry = interfaceTable->getInterface(i);
             if (!interfaceEntry->isLoopback()) {
 #ifdef WITH_IPv4
-                if (auto ipv4Data = interfaceEntry->ipv4Data()) {
+                if (auto ipv4Data = interfaceEntry->findProtocolData<Ipv4InterfaceData>()) {
                     Ipv4Address ipv4Address = ipv4Data->getIPAddress();
                     if (!ipv4Address.isUnspecified())
                         ensureCacheEntry(ipv4Address, interfaceEntry);
                 }
 #endif
 #ifdef WITH_IPv6
-                if (auto ipv6Data = interfaceEntry->ipv6Data()) {
+                if (auto ipv6Data = interfaceEntry->findProtocolData<Ipv6InterfaceData>()) {
                     Ipv6Address ipv6Address = ipv6Data->getLinkLocalAddress();
                     if (!ipv6Address.isUnspecified())
                         ensureCacheEntry(ipv6Address, interfaceEntry);
                 }
 #endif
 #ifdef WITH_NEXTHOP
-                if (auto genericData = interfaceEntry->getNextHopData()) {
+                if (auto genericData = interfaceEntry->findProtocolData<NextHopInterfaceData>()) {
                     L3Address address = genericData->getAddress();
                     if (!address.isUnspecified())
                         ensureCacheEntry(address, interfaceEntry);
@@ -318,7 +318,8 @@ void GlobalArp::receiveSignal(cComponent *source, simsignal_t signalID, cObject 
                     break;
             }
             if (it == globalArpCache.end()) {
-                if (!interfaceEntry->ipv4Data() || interfaceEntry->ipv4Data()->getIPAddress().isUnspecified())
+                auto ipv4Data = interfaceEntry->findProtocolData<Ipv4InterfaceData>();
+                if (!ipv4Data || ipv4Data->getIPAddress().isUnspecified())
                     return; // if the address is not defined it isn't included in the global cache
                 entry = new ArpCacheEntry();
                 entry->owner = this;
@@ -329,7 +330,8 @@ void GlobalArp::receiveSignal(cComponent *source, simsignal_t signalID, cObject 
                 entry = it->second;
                 ASSERT(entry->owner == this);
                 globalArpCache.erase(it);
-                if (!interfaceEntry->ipv4Data() || interfaceEntry->ipv4Data()->getIPAddress().isUnspecified()) {
+                auto ipv4Data = interfaceEntry->findProtocolData<Ipv4InterfaceData>();
+                if (!ipv4Data || ipv4Data->getIPAddress().isUnspecified()) {
                     delete entry;
                     return;    // if the address is not defined it isn't included in the global cache
                 }
@@ -347,7 +349,8 @@ void GlobalArp::receiveSignal(cComponent *source, simsignal_t signalID, cObject 
                     break;
             }
             if (it == globalArpCache.end()) {
-                if (!interfaceEntry->ipv6Data() || interfaceEntry->ipv6Data()->getLinkLocalAddress().isUnspecified())
+                auto ipv6Data = interfaceEntry->findProtocolData<Ipv6InterfaceData>();
+                if (ipv6Data == nullptr || ipv6Data->getLinkLocalAddress().isUnspecified())
                     return; // if the address is not defined it isn't included in the global cache
                 entry = new ArpCacheEntry();
                 entry->owner = this;
@@ -358,7 +361,8 @@ void GlobalArp::receiveSignal(cComponent *source, simsignal_t signalID, cObject 
                 entry = it->second;
                 ASSERT(entry->owner == this);
                 globalArpCache.erase(it);
-                if (!interfaceEntry->ipv6Data() || interfaceEntry->ipv6Data()->getLinkLocalAddress().isUnspecified()) {
+                auto ipv6Data = interfaceEntry->findProtocolData<Ipv6InterfaceData>();
+                if (ipv6Data == nullptr || ipv6Data->getLinkLocalAddress().isUnspecified()) {
                     delete entry;
                     return;    // if the address is not defined it isn't included in the global cache
                 }

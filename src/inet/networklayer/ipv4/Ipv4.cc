@@ -810,7 +810,7 @@ void Ipv4::fragmentAndSend(Packet *packet)
     const InterfaceEntry *destIE = ift->getInterfaceById(packet->getTag<InterfaceReq>()->getInterfaceId());
     Ipv4Address nextHopAddr = getNextHop(packet);
     if (nextHopAddr.isUnspecified()) {
-        Ipv4InterfaceData *ipv4Data = destIE->ipv4Data();
+        Ipv4InterfaceData *ipv4Data = destIE->getProtocolData<Ipv4InterfaceData>();
         const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
         Ipv4Address destAddress = ipv4Header->getDestAddress();
         if (Ipv4Address::maskedAddrAreEqual(destAddress, ipv4Data->getIPAddress(), ipv4Data->getNetmask()))

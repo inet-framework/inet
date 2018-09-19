@@ -551,16 +551,18 @@ std::vector<L3Address> PingApp::getAllAddresses()
                 InterfaceEntry *ie = ift->getInterface(j);
                 if (ie && !ie->isLoopback()) {
 #ifdef WITH_IPv4
-                    if (ie->ipv4Data()) {
-                        Ipv4Address address = ie->ipv4Data()->getIPAddress();
+                    auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
+                    if (ipv4Data != nullptr) {
+                        Ipv4Address address = ipv4Data->getIPAddress();
                         if (!address.isUnspecified())
                             result.push_back(L3Address(address));
                     }
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-                    if (ie->ipv6Data()) {
-                        for (int k = 0; k < ie->ipv6Data()->getNumAddresses(); k++) {
-                            Ipv6Address address = ie->ipv6Data()->getAddress(k);
+                    auto ipv6Data = ie->findProtocolData<Ipv6InterfaceData>();
+                    if (ipv6Data != nullptr) {
+                        for (int k = 0; k < ipv6Data->getNumAddresses(); k++) {
+                            Ipv6Address address = ipv6Data->getAddress(k);
                             if (!address.isUnspecified() && address.isGlobal())
                                 result.push_back(L3Address(address));
                         }

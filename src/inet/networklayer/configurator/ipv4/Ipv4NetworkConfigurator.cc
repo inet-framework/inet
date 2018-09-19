@@ -189,7 +189,7 @@ void Ipv4NetworkConfigurator::configureInterface(InterfaceInfo *interfaceInfo)
 {
     EV_DETAIL << "Configuring network interface " << interfaceInfo->getFullPath() << ".\n";
     InterfaceEntry *interfaceEntry = interfaceInfo->interfaceEntry;
-    Ipv4InterfaceData *interfaceData = interfaceEntry->ipv4Data();
+    Ipv4InterfaceData *interfaceData = interfaceEntry->getProtocolData<Ipv4InterfaceData>();
     if (interfaceInfo->mtu != -1)
         interfaceEntry->setMtu(interfaceInfo->mtu);
     if (interfaceInfo->metric != -1)
@@ -559,7 +559,7 @@ void Ipv4NetworkConfigurator::assignAddresses(std::vector<LinkInfo *> links)
 Ipv4NetworkConfigurator::InterfaceInfo *Ipv4NetworkConfigurator::createInterfaceInfo(NetworkConfiguratorBase::Topology& topology, NetworkConfiguratorBase::Node *node, LinkInfo *linkInfo, InterfaceEntry *ie)
 {
     InterfaceInfo *interfaceInfo = new InterfaceInfo(static_cast<Ipv4NetworkConfigurator::Node *>(node), linkInfo, ie);
-    Ipv4InterfaceData *ipv4Data = ie->ipv4Data();
+    Ipv4InterfaceData *ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
     if (ipv4Data) {
         Ipv4Address address = ipv4Data->getIPAddress();
         Ipv4Address netmask = ipv4Data->getNetmask();
@@ -768,7 +768,7 @@ void Ipv4NetworkConfigurator::dumpConfig(Topology& topology)
         for (auto & element : linkInfo->interfaceInfos) {
             InterfaceInfo *interfaceInfo = static_cast<InterfaceInfo *>(element);
             InterfaceEntry *interfaceEntry = interfaceInfo->interfaceEntry;
-            Ipv4InterfaceData *interfaceData = interfaceEntry->ipv4Data();
+            Ipv4InterfaceData *interfaceData = interfaceEntry->getProtocolData<Ipv4InterfaceData>();
             std::stringstream stream;
             stream << "   <interface hosts=\"" << interfaceInfo->node->module->getFullPath() << "\" names=\"" << interfaceEntry->getInterfaceName()
                    << "\" address=\"" << interfaceData->getIPAddress() << "\" netmask=\"" << interfaceData->getNetmask()
@@ -783,7 +783,7 @@ void Ipv4NetworkConfigurator::dumpConfig(Topology& topology)
         for (auto & element : linkInfo->interfaceInfos) {
             InterfaceInfo *interfaceInfo = static_cast<InterfaceInfo *>(element);
             InterfaceEntry *interfaceEntry = interfaceInfo->interfaceEntry;
-            Ipv4InterfaceData *interfaceData = interfaceEntry->ipv4Data();
+            Ipv4InterfaceData *interfaceData = interfaceEntry->getProtocolData<Ipv4InterfaceData>();
             int numOfMulticastGroups = interfaceData->getNumOfJoinedMulticastGroups();
             if (numOfMulticastGroups > 0) {
                 std::stringstream stream;

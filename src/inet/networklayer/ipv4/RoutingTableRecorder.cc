@@ -299,13 +299,14 @@ void RoutingTableRecorder::recordInterfaceChange(cModule *host, const InterfaceE
 
     // action, eventNo, simtime, moduleId, ifname, address
     ensureRoutingLogFileOpen();
+    auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
     fprintf(routingLogFile, "%s  %" PRId64 "  %s  %d  %s %s\n",
             tag,
             getSimulation()->getEventNumber(),
             SIMTIME_STR(simTime()),
             host->getId(),
             ie->getInterfaceName(),
-            (ie->ipv4Data() != nullptr ? ie->ipv4Data()->getIPAddress().str().c_str() : Ipv4Address().str().c_str())
+            (ipv4Data != nullptr ? ipv4Data->getIPAddress().str().c_str() : Ipv4Address().str().c_str())
             );
     fflush(routingLogFile);
 }

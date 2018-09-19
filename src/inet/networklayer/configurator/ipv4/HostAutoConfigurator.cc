@@ -116,20 +116,21 @@ void HostAutoConfigurator::setupNetworkLayer()
 
         EV_INFO << "interface " << ifname << " gets " << myAddress.str() << "/" << netmask.str() << std::endl;
 
-        ie->ipv4Data()->setIPAddress(myAddress);
-        ie->ipv4Data()->setNetmask(netmask);
+        auto ipv4Data = ie->getProtocolData<Ipv4InterfaceData>();
+        ipv4Data->setIPAddress(myAddress);
+        ipv4Data->setNetmask(netmask);
         ie->setBroadcast(true);
 
         // associate interface with default multicast groups
-        ie->ipv4Data()->joinMulticastGroup(Ipv4Address::ALL_HOSTS_MCAST);
-        ie->ipv4Data()->joinMulticastGroup(Ipv4Address::ALL_ROUTERS_MCAST);
+        ipv4Data->joinMulticastGroup(Ipv4Address::ALL_HOSTS_MCAST);
+        ipv4Data->joinMulticastGroup(Ipv4Address::ALL_ROUTERS_MCAST);
 
         // associate interface with specified multicast groups
         cStringTokenizer interfaceTokenizer(mcastGroups.c_str());
         const char *mcastGroup_s;
         while ((mcastGroup_s = interfaceTokenizer.nextToken()) != nullptr) {
             Ipv4Address mcastGroup(mcastGroup_s);
-            ie->ipv4Data()->joinMulticastGroup(mcastGroup);
+            ipv4Data->joinMulticastGroup(mcastGroup);
         }
     }
 }

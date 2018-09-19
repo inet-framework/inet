@@ -94,9 +94,10 @@ void Ipv6FlatNetworkConfigurator::configureAdvPrefixes(cTopology& topo)
         // assign prefix to interfaces
         for (int k = 0; k < ift->getNumInterfaces(); k++) {
             InterfaceEntry *ie = ift->getInterface(k);
-            if (!ie->ipv6Data() || ie->isLoopback())
+            auto ipv6Data = ie->findProtocolData<Ipv6InterfaceData>();
+            if (!ipv6Data || ie->isLoopback())
                 continue;
-            if (ie->ipv6Data()->getNumAdvPrefixes() > 0)
+            if (ipv6Data->getNumAdvPrefixes() > 0)
                 continue; // already has one
 
             // add a prefix
@@ -120,11 +121,11 @@ void Ipv6FlatNetworkConfigurator::configureAdvPrefixes(cTopology& topo)
 #ifdef WITH_xMIPv6
             p.advRtrAddr = false;
 #endif
-            ie->ipv6Data()->addAdvPrefix(p);
+            ipv6Data->addAdvPrefix(p);
 
             // add a link-local address (tentative) if it doesn't have one
-            if (ie->ipv6Data()->getLinkLocalAddress().isUnspecified())
-                ie->ipv6Data()->assignAddress(Ipv6Address::formLinkLocalAddress(ie->getInterfaceToken()), true, SIMTIME_ZERO, SIMTIME_ZERO);
+            if (ipv6Data->getLinkLocalAddress().isUnspecified())
+                ipv6Data->assignAddress(Ipv6Address::formLinkLocalAddress(ie->getInterfaceToken()), true, SIMTIME_ZERO, SIMTIME_ZERO);
         }
     }
 }
@@ -156,11 +157,11 @@ void Ipv6FlatNetworkConfigurator::addOwnAdvPrefixRoutes(cTopology& topo)
 
             if (ie->isLoopback())
                 continue;
-
-            for (int y = 0; y < ie->ipv6Data()->getNumAdvPrefixes(); y++)
-                if (ie->ipv6Data()->getAdvPrefix(y).prefix.isGlobal())
-                    rt->addOrUpdateOwnAdvPrefix(ie->ipv6Data()->getAdvPrefix(y).prefix,
-                            ie->ipv6Data()->getAdvPrefix(y).prefixLength,
+            auto ipv6Data = ie->getProtocolData<Ipv6InterfaceData>();
+            for (int y = 0; y < ipv6Data->getNumAdvPrefixes(); y++)
+                if (ipv6Data->getAdvPrefix(y).prefix.isGlobal())
+                    rt->addOrUpdateOwnAdvPrefix(ipv6Data->getAdvPrefix(y).prefix,
+                            ipv6Data->getAdvPrefix(y).prefixLength,
                             ie->getInterfaceId(), SIMTIME_ZERO);
 
         }
@@ -206,10 +207,10 @@ void Ipv6FlatNetworkConfigurator::addStaticRoutes(cTopology& topo)
             if (destIf->isLoopback())
                 continue;
 
-            for (int y = 0; y < destIf->ipv6Data()->getNumAdvPrefixes(); y++)
-                if (destIf->ipv6Data()->getAdvPrefix(y).prefix.isGlobal())
-                    destPrefixes.push_back(&destIf->ipv6Data()->getAdvPrefix(y));
-
+            auto ipv6Data = destIf->getProtocolData<Ipv6InterfaceData>();
+            for (int y = 0; y < ipv6Data->getNumAdvPrefixes(); y++)
+                if (ipv6Data->getAdvPrefix(y).prefix.isGlobal())
+                    destPrefixes.push_back(&ipv6Data->getAdvPrefix(y));
         }
 
         std::string destModName = destNode->getModule()->getFullName();
