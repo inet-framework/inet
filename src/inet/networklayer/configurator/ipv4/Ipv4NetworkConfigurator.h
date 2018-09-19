@@ -124,6 +124,7 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
     // parameters
     bool assignAddressesParameter = false;
     bool assignDisjunctSubnetAddressesParameter = false;
+    bool useStrictDisjunctSubnetAddressParameter = false;
     bool addStaticRoutesParameter = false;
     bool addSubnetRoutesParameter = false;
     bool addDefaultRoutesParameter = false;

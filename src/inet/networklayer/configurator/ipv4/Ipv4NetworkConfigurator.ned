@@ -416,6 +416,7 @@ simple Ipv4NetworkConfigurator extends NetworkConfiguratorBase
         xml config = default(xml("<config><interface hosts='**' address='10.x.x.x' netmask='255.x.x.x'/></config>")); // XML configuration parameters for IP address assignment and adding manual routes
         bool assignAddresses = default(true); // assign IP addresses to all interfaces in the network
         bool assignDisjunctSubnetAddresses = default(true); // avoid using the same address prefix and netmask on different links when assigning IP addresses to interfaces
+        bool useStrictDisjunctSubnetAddress = default(false); // reserve all host bits in a network (used only if assignDisjunctSubnetAddresses is true)
         bool addStaticRoutes = default(true);  // add static routes to the routing tables of all nodes to route to all destination interfaces (only where applicable; turn off when config file contains manual routes)
         bool addDefaultRoutes = default(true); // add default routes if all routes from a source node go through the same gateway (used only if addStaticRoutes is true)
         bool addSubnetRoutes = default(true);  // add subnet routes instead of destination interface routes (only where applicable; used only if addStaticRoutes is true)

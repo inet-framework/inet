@@ -68,6 +68,7 @@ void Ipv4NetworkConfigurator::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         assignAddressesParameter = par("assignAddresses");
         assignDisjunctSubnetAddressesParameter = par("assignDisjunctSubnetAddresses");
+        useStrictDisjunctSubnetAddressParameter = par("useStrictDisjunctSubnetAddress");
         addStaticRoutesParameter = par("addStaticRoutes");
         addSubnetRoutesParameter = par("addSubnetRoutes");
         addDefaultRoutesParameter = par("addDefaultRoutes");
@@ -547,6 +548,18 @@ void Ipv4NetworkConfigurator::assignAddresses(std::vector<LinkInfo *> links)
 
                 // remove configured interface
                 unconfiguredInterfaces.erase(find(unconfiguredInterfaces, compatibleInterface));
+            }
+
+            if(assignDisjunctSubnetAddressesParameter && useStrictDisjunctSubnetAddressParameter) {
+                for(int n = 1; n < (1 << (32-netmaskLength))-1; n++) {
+                    uint32 completeAddress = networkAddress + n;
+                    auto itt = assignedAddressToInterfaceEntryMap.find(completeAddress);
+                    if(itt == assignedAddressToInterfaceEntryMap.end()) {
+                        assignedAddressToInterfaceEntryMap[completeAddress] = nullptr;
+                        assignedInterfaceAddresses.push_back(completeAddress);
+                        EV_DEBUG << "reserving Ipv4 address " << Ipv4Address(completeAddress) << ".\n";
+                    }
+                }
             }
 
             // register the network address and netmask as being used
