@@ -122,6 +122,7 @@ class INET_API Area : public cObject
     SummaryLsa *originateSummaryLSA(const OspfRoutingTableEntry *entry,
             const std::map<LsaKeyType, bool, LsaKeyType_Less>& originatedLSAs,
             SummaryLsa *& lsaToReoriginate);
+    SummaryLsa *originateSummaryLSA_Stub();
     void calculateShortestPathTree(std::vector<OspfRoutingTableEntry *>& newRoutingTable);
     void calculateInterAreaRoutes(std::vector<OspfRoutingTableEntry *>& newRoutingTable);
     void recheckSummaryLSAs(std::vector<OspfRoutingTableEntry *>& newRoutingTable);
@@ -151,6 +152,8 @@ class INET_API Area : public cObject
             const OspfRoutingTableEntry& borderRouterEntry) const;
     void printLSDB();
     void printSummaryLsa();
+    bool isDefaultRoute(OspfRoutingTableEntry *entry) const;
+    bool isAllZero(Ipv4AddressRange entry) const;
 };
 
 inline std::ostream& operator<<(std::ostream& ostr, Area& area)

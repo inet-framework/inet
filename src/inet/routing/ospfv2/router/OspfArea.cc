@@ -730,9 +730,8 @@ bool Area::isOnAnyRetransmissionList(LsaKeyType lsaKey) const
 bool Area::floodLSA(const OspfLsa *lsa, OspfInterface *intf, Neighbor *neighbor)
 {
     bool floodedBackOut = false;
-    long interfaceCount = associatedInterfaces.size();
 
-    for (long i = 0; i < interfaceCount; i++) {
+    for (uint32_t i = 0; i < associatedInterfaces.size(); i++) {
         if (associatedInterfaces[i]->floodLsa(lsa, intf, neighbor)) {
             floodedBackOut = true;
         }
@@ -1356,6 +1355,30 @@ SummaryLsa *Area::originateSummaryLSA(const OspfRoutingTableEntry *entry,
     }
 
     return nullptr;
+}
+
+SummaryLsa *Area::originateSummaryLSA_Stub()
+{
+    SummaryLsa *summaryLSA = new SummaryLsa;
+    OspfLsaHeader& lsaHeader = summaryLSA->getHeaderForUpdate();
+    OspfOptions lsOptions;
+
+    lsaHeader.setLsAge(0);
+    memset(&lsOptions, 0, sizeof(OspfOptions));
+    lsOptions.E_ExternalRoutingCapability = externalRoutingCapability;
+    lsaHeader.setLsOptions(lsOptions);
+    lsaHeader.setLsType(SUMMARYLSA_NETWORKS_TYPE);
+    lsaHeader.setLinkStateID(Ipv4Address("0.0.0.0"));
+    lsaHeader.setAdvertisingRouter(Ipv4Address(parentRouter->getRouterID()));
+    lsaHeader.setLsSequenceNumber(INITIAL_SEQUENCE_NUMBER);
+
+    summaryLSA->setNetworkMask(Ipv4Address("0.0.0.0"));
+    summaryLSA->setRouteCost(stubDefaultCost);
+    summaryLSA->setTosDataArraySize(0);
+
+    summaryLSA->setSource(LsaTrackingInfo::ORIGINATED);
+
+    return summaryLSA;
 }
 
 SummaryLsa *Area::originateSummaryLSA(const SummaryLsa *summaryLSA)
@@ -2229,15 +2252,17 @@ bool Area::findSameOrWorseCostRoute(const std::vector<OspfRoutingTableEntry *>& 
     destination.address = summaryLSA.getHeader().getLinkStateID();
     destination.mask = summaryLSA.getNetworkMask();
 
-    for (uint32_t j = 0; j < newRoutingTable.size(); j++) {
-        OspfRoutingTableEntry *routingEntry = newRoutingTable[j];
+    for (auto routingEntry : newRoutingTable) {
         bool foundMatching = false;
 
         if (summaryLSA.getHeader().getLsType() == SUMMARYLSA_NETWORKS_TYPE) {
             if ((routingEntry->getDestinationType() == OspfRoutingTableEntry::NETWORK_DESTINATION) &&
                     destination.containedByRange(routingEntry->getDestination(), routingEntry->getNetmask()))
             {
-                foundMatching = true;
+                if(isDefaultRoute(routingEntry) && !isAllZero(destination))
+                    foundMatching = false;
+                else
+                    foundMatching = true;
             }
         }
         else {
@@ -2273,6 +2298,7 @@ bool Area::findSameOrWorseCostRoute(const std::vector<OspfRoutingTableEntry *>& 
             }
         }
     }
+
     return false;
 }
 
@@ -2618,7 +2644,7 @@ void Area::printSummaryLsa()
         // print header info
         EV_INFO << "    LS age: " << head.getLsAge() << std::endl;
         EV_INFO << "    LS type: " << head.getLsType() << std::endl;
-        EV_INFO << "    Link state ID (IP network): " << head.getLinkStateID() << std::endl;
+        EV_INFO << "    Link state ID (IP network): " << head.getLinkStateID().str(false) << std::endl;
         EV_INFO << "    Advertising router: " << head.getAdvertisingRouter() << std::endl;
         EV_INFO << "    Seq number: " << head.getLsSequenceNumber() << std::endl;
         EV_INFO << "    Length: " << head.getLsaLength() << std::endl;
@@ -2627,6 +2653,20 @@ void Area::printSummaryLsa()
         EV_INFO << "    Metric: " << entry->getRouteCost() << std::endl;
         EV_INFO << std::endl;
     }
+}
+
+bool Area::isDefaultRoute(OspfRoutingTableEntry *entry) const
+{
+    if(entry->getDestination().getInt() == 0 && entry->getNetmask().getInt() == 0)
+        return true;
+    return false;
+}
+
+bool Area::isAllZero(Ipv4AddressRange entry) const
+{
+    if(entry.address.getInt() == 0 && entry.mask.getInt() == 0)
+        return true;
+    return false;
 }
 
 } // namespace ospf
