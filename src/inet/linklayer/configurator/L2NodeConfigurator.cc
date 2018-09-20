@@ -66,7 +66,7 @@ void L2NodeConfigurator::prepareNode()
 
 void L2NodeConfigurator::prepareInterface(InterfaceEntry *interfaceEntry)
 {
-    // ASSERT(!interfaceEntry->ieee8021dData());
+    // ASSERT(!interfaceEntry->getProtocolData<Ieee8021dInterfaceData>());
     interfaceEntry->addProtocolData<Ieee8021dInterfaceData>();
 }
 

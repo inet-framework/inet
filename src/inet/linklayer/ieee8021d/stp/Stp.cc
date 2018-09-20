@@ -526,11 +526,11 @@ void Stp::selectRootPort()
     desPorts.clear();
     unsigned int xRootIdx = 0;
     int result;
-    Ieee8021dInterfaceData *best = ifTable->getInterface(0)->ieee8021dData();
+    Ieee8021dInterfaceData *best = ifTable->getInterface(0)->getProtocolData<Ieee8021dInterfaceData>();
     Ieee8021dInterfaceData *currentPort = nullptr;
 
     for (unsigned int i = 0; i < numPorts; i++) {
-        currentPort = ifTable->getInterface(i)->ieee8021dData();
+        currentPort = ifTable->getInterface(i)->getProtocolData<Ieee8021dInterfaceData>();
         currentPort->setRole(Ieee8021dInterfaceData::NOTASSIGNED);
         result = comparePorts(currentPort, best);
         if (result > 0) {
@@ -578,7 +578,7 @@ void Stp::selectDesignatedPorts()
 
     for (unsigned int i = 0; i < numPorts; i++) {
         InterfaceEntry *ie = ifTable->getInterface(i);
-        Ieee8021dInterfaceData *portData = ie->ieee8021dData();
+        Ieee8021dInterfaceData *portData = ie->getProtocolData<Ieee8021dInterfaceData>();
         ASSERT(portData != nullptr);
 
         if (portData->getRole() == Ieee8021dInterfaceData::ROOT || portData->getRole() == Ieee8021dInterfaceData::DISABLED)
@@ -615,7 +615,7 @@ void Stp::setAllDesignated()
     desPorts.clear();
     for (unsigned int i = 0; i < numPorts; i++) {
         InterfaceEntry *ie = ifTable->getInterface(i);
-        Ieee8021dInterfaceData *portData = ie->ieee8021dData();
+        Ieee8021dInterfaceData *portData = ie->getProtocolData<Ieee8021dInterfaceData>();
         ASSERT(portData != nullptr);
         if (portData->getRole() == Ieee8021dInterfaceData::DISABLED)
             continue;

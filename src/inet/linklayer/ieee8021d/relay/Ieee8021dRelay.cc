@@ -149,9 +149,9 @@ void Ieee8021dRelay::handleAndDispatchFrameFromHL(Packet *packet)
 bool Ieee8021dRelay::isForwardingInterface(InterfaceEntry *ie)
 {
     if (isStpAware) {
-        if (!ie->ieee8021dData())
+        if (!ie->getProtocolData<Ieee8021dInterfaceData>())
             throw cRuntimeError("Ieee8021dInterfaceData not found for interface %s", ie->getFullName());
-        return ie->ieee8021dData()->isForwarding();
+        return ie->getProtocolData<Ieee8021dInterfaceData>()->isForwarding();
     }
     return true;
 }
@@ -283,7 +283,7 @@ Ieee8021dInterfaceData *Ieee8021dRelay::getPortInterfaceData(unsigned int interf
 {
     if (isStpAware) {
         InterfaceEntry *gateIfEntry = ifTable->getInterfaceById(interfaceId);
-        Ieee8021dInterfaceData *portData = gateIfEntry ? gateIfEntry->ieee8021dData() : nullptr;
+        Ieee8021dInterfaceData *portData = gateIfEntry ? gateIfEntry->getProtocolData<Ieee8021dInterfaceData>() : nullptr;
 
         if (!portData)
             throw cRuntimeError("Ieee8021dInterfaceData not found for port = %d", interfaceId);
