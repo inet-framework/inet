@@ -457,10 +457,8 @@ void OspfConfigReader::loadVirtualLink(const cXMLElement& virtualLinkConfig)
     Area *backbone = ospfRouter->getAreaByID(BACKBONE_AREAID);
     if (backbone)
         backbone->addInterface(intf);
-    else {
-        delete intf;
-        throw cRuntimeError("Loading VirtualLink to router %s through area '%s' aborted at %s", routerId.str(false).c_str(), transitAreaId.str(false).c_str(), virtualLinkConfig.getSourceLocation());
-    }
+    else
+        transitArea->addInterface(intf);
 }
 
 void OspfConfigReader::loadAuthenticationConfig(OspfInterface *intf, const cXMLElement& ifConfig)
