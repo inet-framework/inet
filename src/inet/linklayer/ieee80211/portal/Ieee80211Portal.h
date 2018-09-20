@@ -21,13 +21,13 @@
 #include "inet/common/Protocol.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/FcsMode_m.h"
-#include "inet/linklayer/ieee80211/llc/Ieee80211Llc.h"
+#include "inet/linklayer/ieee80211/llc/IIeee80211Llc.h"
 
 namespace inet {
 
 namespace ieee80211 {
 
-class INET_API Ieee80211Portal : public cSimpleModule, public Ieee80211Llc
+class INET_API Ieee80211Portal : public cSimpleModule, public IIeee80211Llc
 {
   protected:
     FcsMode fcsMode = FCS_MODE_UNDEFINED;

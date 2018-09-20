@@ -17,7 +17,7 @@
 
 package inet.linklayer.ieee80211.llc;
 
-simple Ieee80211LlcEpd like Ieee80211Llc
+simple Ieee80211LlcEpd like IIeee80211Llc
 {
     parameters:
         @display("i=block/layer");

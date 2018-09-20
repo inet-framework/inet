@@ -19,7 +19,7 @@ package inet.linklayer.ieee80211;
 
 import inet.linklayer.common.IIeee8021dQosClassifier;
 import inet.linklayer.contract.IWirelessInterface;
-import inet.linklayer.ieee80211.llc.Ieee80211Llc;
+import inet.linklayer.ieee80211.llc.IIeee80211Llc;
 import inet.linklayer.ieee80211.mgmt.IIeee80211Agent;
 import inet.linklayer.ieee80211.mgmt.IIeee80211Mgmt;
 import inet.linklayer.ieee80211.mib.Ieee80211Mib;
@@ -61,7 +61,7 @@ module Ieee80211Interface like IWirelessInterface
             parameters:
                 @display("p=100,100;is=s");
         }
-        llc: <default(opMode == "p" ? "Ieee80211LlcEpd" : "Ieee80211LlcLpd")> like Ieee80211Llc {
+        llc: <default(opMode == "p" ? "Ieee80211LlcEpd" : "Ieee80211LlcLpd")> like IIeee80211Llc {
             parameters:
                 @display("p=250,200");
         }

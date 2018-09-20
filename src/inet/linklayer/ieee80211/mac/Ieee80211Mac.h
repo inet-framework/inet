@@ -36,7 +36,7 @@ namespace ieee80211 {
 
 class IContention;
 class IRx;
-class Ieee80211Llc;
+class IIeee80211Llc;
 class Ieee80211MacHeader;
 
 /**
@@ -50,7 +50,7 @@ class INET_API Ieee80211Mac : public MacProtocolBase
     FcsMode fcsMode;
 
     Ieee80211Mib *mib = nullptr;
-    Ieee80211Llc *llc = nullptr;
+    IIeee80211Llc *llc = nullptr;
     IDs *ds = nullptr;
 
     IRx *rx = nullptr;

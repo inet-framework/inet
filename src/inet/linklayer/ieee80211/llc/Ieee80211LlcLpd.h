@@ -19,13 +19,13 @@
 #define __INET_IEEE80211LLCLPD_H
 
 #include "inet/common/packet/Packet.h"
-#include "inet/linklayer/ieee80211/llc/Ieee80211Llc.h"
+#include "inet/linklayer/ieee80211/llc/IIeee80211Llc.h"
 #include "inet/linklayer/ieee8022/Ieee8022Llc.h"
 
 namespace inet {
 namespace ieee80211 {
 
-class INET_API Ieee80211LlcLpd : public Ieee8022Llc, public Ieee80211Llc
+class INET_API Ieee80211LlcLpd : public Ieee8022Llc, public IIeee80211Llc
 {
   protected:
     virtual void encapsulate(Packet *frame) override;

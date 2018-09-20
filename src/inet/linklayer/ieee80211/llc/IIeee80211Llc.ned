@@ -15,21 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IEEE80211LLC_H
-#define __INET_IEEE80211LLC_H
+package inet.linklayer.ieee80211.llc;
 
-#include "inet/common/Protocol.h"
-
-namespace inet {
-namespace ieee80211 {
-
-class INET_API Ieee80211Llc
+moduleinterface IIeee80211Llc
 {
-  public:
-    virtual const Protocol *getProtocol() const = 0;
-};
-
-} // namespace ieee80211
-} // namespace inet
-
-#endif // ifndef __INET_IEEE80211LLC_H
+    parameters:
+        @display("i=block/layer");
+    gates:
+        input upperLayerIn;
+        output upperLayerOut;
+        input lowerLayerIn;
+        output lowerLayerOut;
+}
