@@ -35,7 +35,7 @@ void PcapCapturer::ext_packet_handler(u_char *usermod, const struct pcap_pkthdr 
     PcapCapturer *module = (PcapCapturer*)usermod;
     Packet *packet = new Packet("CapturedPacket", makeShared<BytesChunk>(bytes, hdr->caplen));
     EV << "Captured " << packet->getTotalLength() << " packet" << endl;
-    module->realTimeScheduler->scheduleMessage(module, packet);
+    module->send(packet, "upperLayerOut");
 }
 
 bool PcapCapturer::notify(int fd)
