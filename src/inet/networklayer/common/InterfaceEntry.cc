@@ -267,7 +267,7 @@ void InterfaceEntry::joinMulticastGroup(const L3Address& address) const
         case L3Address::MAC:
         case L3Address::MODULEID:
         case L3Address::MODULEPATH:
-            getNextHopData()->joinMulticastGroup(address);
+            getProtocolData<NextHopInterfaceData>()->joinMulticastGroup(address);
             break;
 
 #endif // ifdef WITH_NEXTHOP
@@ -325,15 +325,6 @@ Ipv4Address InterfaceEntry::getIpv4Address() const {
 #else
     return Ipv4Address::UNSPECIFIED_ADDRESS;
 #endif // ifdef WITH_IPv4
-}
-
-NextHopInterfaceData *InterfaceEntry::getNextHopData() const
-{
-#ifdef WITH_NEXTHOP
-    return getProtocolData<NextHopInterfaceData>();
-#else // ifdef WITH_NEXTHOP
-    throw cRuntimeError(this, "INET was compiled without Next Hop Forwarding support");
-#endif // ifdef WITH_NEXTHOP
 }
 
 Ieee8021dInterfaceData *InterfaceEntry::ieee8021dData() const
