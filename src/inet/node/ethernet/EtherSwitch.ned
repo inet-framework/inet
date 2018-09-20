@@ -54,6 +54,8 @@ module EtherSwitch
         eth[*].csmacdSupport = csmacdSupport;
         eth[*].mac.typename = default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex");
         *.fcsMode = fcsMode;
+        ext[*].encapDecap.typename = default("");
+        ext[*].rawSocket.protocol = default("ethernetMac");
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.macTableModule = default(absPath(".macTable"));
 
@@ -97,7 +99,7 @@ module EtherSwitch
         encap: <default("EtherEncap")> like IEtherEncap {
             @display("p=800,220");
         }
-        ext[numExtInterfaces]: <default("ExtInterface")> like IExternalInterface {
+        ext[numExtInterfaces]: <default("ExtInterface2")> like IExternalInterface {
             parameters:
                 @display("p=1125,616,row,150;q=txQueue");
         }
