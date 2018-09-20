@@ -101,15 +101,15 @@ void NextHopNetworkConfigurator::addStaticRoutes(Topology& topology)
                 // add the same routes for all destination interfaces (IP packets are accepted from any interface at the destination)
                 for (int j = 0; j < destinationInterfaceTable->getNumInterfaces(); j++) {
                     InterfaceEntry *destinationInterfaceEntry = destinationInterfaceTable->getInterface(j);
-                    if (!destinationInterfaceEntry->getNextHopData())
+                    if (!destinationInterfaceEntry->getProtocolData<NextHopInterfaceData>())
                         continue;
-                    L3Address destinationAddress = destinationInterfaceEntry->getNextHopData()->getAddress();
-                    if (!destinationInterfaceEntry->isLoopback() && !destinationAddress.isUnspecified() && nextHopInterfaceEntry->getNextHopData()) {
+                    L3Address destinationAddress = destinationInterfaceEntry->getProtocolData<NextHopInterfaceData>()->getAddress();
+                    if (!destinationInterfaceEntry->isLoopback() && !destinationAddress.isUnspecified() && nextHopInterfaceEntry->getProtocolData<NextHopInterfaceData>()) {
                         NextHopRoute *route = new NextHopRoute();
                         route->setSourceType(IRoute::MANUAL);
                         route->setDestination(destinationAddress);
                         route->setInterface(sourceInterfaceEntry);
-                        L3Address nextHopAddress = nextHopInterfaceEntry->getNextHopData()->getAddress();
+                        L3Address nextHopAddress = nextHopInterfaceEntry->getProtocolData<NextHopInterfaceData>()->getAddress();
                         if (nextHopAddress != destinationAddress)
                             route->setNextHop(nextHopAddress);
                         EV_DEBUG << "Adding route " << sourceInterfaceEntry->getInterfaceFullPath() << " -> " << destinationInterfaceEntry->getInterfaceFullPath() << " as " << route->str() << endl;

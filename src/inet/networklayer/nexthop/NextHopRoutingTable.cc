@@ -147,7 +147,7 @@ void NextHopRoutingTable::configureRouterId()
             for (int i = 0; i < ift->getNumInterfaces(); ++i) {
                 InterfaceEntry *ie = ift->getInterface(i);
                 if (!ie->isLoopback()) {
-                    L3Address interfaceAddr = ie->getNextHopData()->getAddress();
+                    L3Address interfaceAddr = ie->getProtocolData<NextHopInterfaceData>()->getAddress();
                     if (routerId.isUnspecified() || routerId < interfaceAddr)
                         routerId = interfaceAddr;
                 }
@@ -240,7 +240,7 @@ bool NextHopRoutingTable::isLocalAddress(const L3Address& dest) const
 
     // collect interface addresses if not yet done
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
-        L3Address interfaceAddr = ift->getInterface(i)->getNextHopData()->getAddress();
+        L3Address interfaceAddr = ift->getInterface(i)->getProtocolData<NextHopInterfaceData>()->getAddress();
         if (interfaceAddr == dest)
             return true;
     }
@@ -252,7 +252,7 @@ InterfaceEntry *NextHopRoutingTable::getInterfaceByAddress(const L3Address& addr
     // collect interface addresses if not yet done
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
         InterfaceEntry *ie = ift->getInterface(i);
-        L3Address interfaceAddr = ie->getNextHopData()->getAddress();
+        L3Address interfaceAddr = ie->getProtocolData<NextHopInterfaceData>()->getAddress();
         if (interfaceAddr == address)
             return ie;
     }
