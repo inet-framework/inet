@@ -259,7 +259,7 @@ void InterfaceEntry::joinMulticastGroup(const L3Address& address) const
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
         case L3Address::IPv6:
-            ipv6Data()->joinMulticastGroup(address.toIpv6());
+            getProtocolData<Ipv6InterfaceData>()->joinMulticastGroup(address.toIpv6());
             break;
 
 #endif // ifdef WITH_IPv6
@@ -325,15 +325,6 @@ Ipv4Address InterfaceEntry::getIpv4Address() const {
 #else
     return Ipv4Address::UNSPECIFIED_ADDRESS;
 #endif // ifdef WITH_IPv4
-}
-
-Ipv6InterfaceData *InterfaceEntry::ipv6Data() const
-{
-#ifdef WITH_IPv6
-    return getProtocolData<Ipv6InterfaceData>();
-#else
-    throw cRuntimeError("INET was compiled without IPv6 support");
-#endif // ifdef WITH_IPv6
 }
 
 NextHopInterfaceData *InterfaceEntry::getNextHopData() const
