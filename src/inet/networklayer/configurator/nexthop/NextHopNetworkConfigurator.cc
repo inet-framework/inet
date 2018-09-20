@@ -101,10 +101,11 @@ void NextHopNetworkConfigurator::addStaticRoutes(Topology& topology)
                 // add the same routes for all destination interfaces (IP packets are accepted from any interface at the destination)
                 for (int j = 0; j < destinationInterfaceTable->getNumInterfaces(); j++) {
                     InterfaceEntry *destinationInterfaceEntry = destinationInterfaceTable->getInterface(j);
-                    if (!destinationInterfaceEntry->getProtocolData<NextHopInterfaceData>())
+                    auto destIeNextHopInterfaceData = destinationInterfaceEntry->findProtocolData<NextHopInterfaceData>();
+                    if (destIeNextHopInterfaceData == nullptr)
                         continue;
-                    L3Address destinationAddress = destinationInterfaceEntry->getProtocolData<NextHopInterfaceData>()->getAddress();
-                    if (!destinationInterfaceEntry->isLoopback() && !destinationAddress.isUnspecified() && nextHopInterfaceEntry->getProtocolData<NextHopInterfaceData>()) {
+                    L3Address destinationAddress = destIeNextHopInterfaceData->getAddress();
+                    if (!destinationInterfaceEntry->isLoopback() && !destinationAddress.isUnspecified() && nextHopInterfaceEntry->findProtocolData<NextHopInterfaceData>()) {
                         NextHopRoute *route = new NextHopRoute();
                         route->setSourceType(IRoute::MANUAL);
                         route->setDestination(destinationAddress);
