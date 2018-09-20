@@ -52,8 +52,7 @@ void LinkBreakOsgVisualizer::refreshDisplay() const
 
 const LinkBreakVisualizerBase::LinkBreakVisualization *LinkBreakOsgVisualizer::createLinkBreakVisualization(cModule *transmitter, cModule *receiver) const
 {
-    auto path = resolveResourcePath((std::string(icon) + ".png").c_str());
-    auto image = inet::osg::createImage(path.c_str());
+    auto image = inet::osg::createImageFromResource(icon);
     auto texture = new osg::Texture2D();
     texture->setImage(image);
     auto geometry = osg::createTexturedQuadGeometry(osg::Vec3(-image->s() / 2, 0.0, 0.0), osg::Vec3(image->s(), 0.0, 0.0), osg::Vec3(0.0, image->t(), 0.0), 0.0, 0.0, 1.0, 1.0);

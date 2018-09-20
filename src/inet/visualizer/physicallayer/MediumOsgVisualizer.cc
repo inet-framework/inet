@@ -64,17 +64,15 @@ void MediumOsgVisualizer::initialize(int stage)
         signalWaveAmplitude = par("signalWaveAmplitude");
         signalWaveFadingAnimationSpeedFactor = par("signalWaveFadingAnimationSpeedFactor");
         if (displaySignalDepartures) {
-            const char *transmissionImageString = par("transmissionImage");
-            auto path = resolveResourcePath(transmissionImageString);
-            transmissionImage = inet::osg::createImage(path.c_str());
+            const char *transmissionImageName = par("transmissionImage");
+            transmissionImage = inet::osg::createImageFromResource(transmissionImageName);
             auto imageStream = dynamic_cast<osg::ImageStream *>(transmissionImage);
             if (imageStream != nullptr)
                 imageStream->play();
         }
         if (displaySignalArrivals) {
-            const char *receptionImageString = par("receptionImage");
-            auto path = resolveResourcePath(receptionImageString);
-            receptionImage = inet::osg::createImage(path.c_str());
+            const char *receptionImageName = par("receptionImage");
+            receptionImage = inet::osg::createImageFromResource(receptionImageName);
             auto imageStream = dynamic_cast<osg::ImageStream *>(receptionImage);
             if (imageStream != nullptr)
                 imageStream->play();

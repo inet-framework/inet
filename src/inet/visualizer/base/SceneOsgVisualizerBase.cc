@@ -86,12 +86,8 @@ void SceneOsgVisualizerBase::initializePlayground()
 {
     Box playgroundBounds = getPlaygroundBounds();
     if (playgroundBounds.getMin() != playgroundBounds.getMax()) {
-        const char *imageString = par("playgroundImage");
-        osg::Image *image = nullptr;
-        if (*imageString != '\0') {
-            std::string imagePath = resolveResourcePath(imageString);
-            image = inet::osg::createImage(imagePath.c_str());
-        }
+        const char *imageName = par("playgroundImage");
+        osg::Image *image = *imageName ? inet::osg::createImageFromResource(imageName) : nullptr;
         double imageSize = par("playgroundImageSize");
         auto color = cFigure::Color(par("playgroundColor"));
         double opacity = par("playgroundOpacity");

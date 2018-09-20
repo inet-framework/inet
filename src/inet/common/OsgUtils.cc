@@ -240,19 +240,35 @@ PositionAttitudeTransform *createPositionAttitudeTransform(const Coord& position
     return pat;
 }
 
+std::string resolveImageResource(const char *imageName, cComponent *context)
+{
+    if (context == nullptr)
+        context = getSimulation()->getContextModule();
+    std::string path;
+    for (auto ext : {"", ".png", ".gif", ".jpg"}) {
+        path = context->resolveResourcePath((std::string(imageName) + ext).c_str());
+        if (!path.empty())
+            return path;
+    }
+    throw cRuntimeError("Image '%s' not found", imageName);
+}
+
 osg::Image* createImage(const char *fileName)
 {
     auto image = osgDB::readImageFile(fileName);
     if (image == nullptr)
-        throw cRuntimeError("Image '%s' not found", fileName);
+        throw cRuntimeError("Cannot load image '%s'", fileName);
     return image;
 }
 
-Texture2D *createTexture(const char *name, bool repeat)
+osg::Image* createImageFromResource(const char *imageName)
 {
-    auto image = createImage(name);
-    if (image == nullptr)
-        throw cRuntimeError("Cannot find image: '%s'", name);
+    return createImage(resolveImageResource(imageName).c_str());
+}
+
+Texture2D *createTexture(const char *fileName, bool repeat)
+{
+    auto image = createImage(fileName);
     auto texture = new Texture2D();
     texture->setImage(image);
     if (repeat) {
@@ -261,6 +277,11 @@ Texture2D *createTexture(const char *name, bool repeat)
         texture->setWrap(Texture2D::WRAP_R, Texture2D::REPEAT);
     }
     return texture;
+}
+
+Texture2D *createTextureFromResource(const char *imageName, bool repeat)
+{
+    return createTexture(resolveImageResource(imageName).c_str(), repeat);
 }
 
 StateSet *createStateSet(const cFigure::Color& color, double opacity, bool cullBackFace)
