@@ -327,15 +327,6 @@ Ipv4Address InterfaceEntry::getIpv4Address() const {
 #endif // ifdef WITH_IPv4
 }
 
-Ipv4InterfaceData *InterfaceEntry::ipv4Data() const
-{
-#ifdef WITH_IPv4
-    return getProtocolData<Ipv4InterfaceData>();
-#else
-    throw cRuntimeError("INET was compiled without IPv4 support");
-#endif // ifdef WITH_IPv4
-}
-
 Ipv6InterfaceData *InterfaceEntry::ipv6Data() const
 {
 #ifdef WITH_IPv6
