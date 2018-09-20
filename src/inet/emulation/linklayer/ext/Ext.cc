@@ -23,24 +23,21 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "inet/common/INETDefs.h"
-
 #include <omnetpp/platdep/sockets.h>
 
 #include <net/if.h>
 
+#include "inet/common/INETDefs.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/ProtocolTag_m.h"
-#include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
-
+#include "inet/common/packet/Packet.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/emulation/linklayer/ext/Ext.h"
 #include "inet/linklayer/common/EtherType_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ethernet/Ethernet.h"
-#include "inet/linklayer/ext/Ext.h"
-
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/common/InterfaceTable.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"

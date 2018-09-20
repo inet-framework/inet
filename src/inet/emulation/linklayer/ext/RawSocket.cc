@@ -29,7 +29,7 @@
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/linklayer/ext/RawSocket.h"
+#include "inet/emulation/linklayer/ext/RawSocket.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {

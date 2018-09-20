@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.ext;
+package inet.emulation.linklayer.ext;
 
 import inet.common.IHook;
 import inet.linklayer.contract.IExternalInterface;
@@ -75,7 +75,7 @@ module ExtInterface like IExternalInterface
             inputHook[i].out --> inputHook[i+1].in;
         }
         inputHook[numInputHooks-1].out --> { @display("m=n"); } --> upperLayerOut if numInputHooks > 0;
-        
+
         encapDecap.lowerLayerOut --> rawSocket.upperLayerIn;
         encapDecap.lowerLayerIn <-- pcapCapture.upperLayerOut;
 }

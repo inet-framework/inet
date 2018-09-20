@@ -15,16 +15,16 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.linklayer.ext;
+package inet.emulation.linklayer.ext;
 
-simple RawSocket
+simple PcapCapture
 {
     parameters:
+        string filterString;
         string device;
-        string protocol @enum("ipv4", "ethernetMac") = default("ipv4");
         @display("i=block/rxtx");
-        @signal[packetReceivedFromUpper](type=cPacket);
-        @statistic[packetReceivedFromUpper](title="packets received from higher layer"; source=packetReceivedFromUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @signal[packetSentToUpper](type=Packet);
+        @statistic[passedUpPk](title="packets passed to higher layer"; source=packetSentToUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
     gates:
-        input upperLayerIn;
+        output upperLayerOut;
 }
