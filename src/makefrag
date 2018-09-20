@@ -83,6 +83,12 @@ CFLAGS += -Wno-overloaded-virtual
 # Set this to "no" if you want to avoid using the precompiled header. The default is "yes".
 USE_PRECOMPILED_HEADER ?= yes
 
+# force turning off precompiled headers if ccache is used as it is not compatible with precompiled headers.
+ifneq (,$(findstring ccache,$(shell (which $(CC)))))
+  USE_PRECOMPILED_HEADER = no
+  $(info *** CCACHE detected - precompiled headers disabled)
+endif
+
 PRECOMPILED_HEADER=inet/common/precompiled_$(MODE).h
 
 ifeq ($(USE_PRECOMPILED_HEADER),yes)
