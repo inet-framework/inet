@@ -107,7 +107,7 @@ bool OspfConfigReader::loadConfigFromXML(cXMLElement *asConfig, Router *ospfRout
 
     // load remaining information
     for (auto & elem : routerConfig) {
-        std::string nodeName = (elem)->getTagName();
+        std::string nodeName = elem->getTagName();
         if ((nodeName == "PointToPointInterface") ||
             (nodeName == "BroadcastInterface") ||
             (nodeName == "NBMAInterface") ||
@@ -117,17 +117,17 @@ bool OspfConfigReader::loadConfigFromXML(cXMLElement *asConfig, Router *ospfRout
             continue;
         }
         else if (nodeName == "ExternalInterface") {
-            loadExternalRoute(*(elem));
+            loadExternalRoute(*elem);
         }
         else if (nodeName == "HostInterface") {
-            loadHostRoute(*(elem));
+            loadHostRoute(*elem);
         }
         else if (nodeName == "VirtualLink") {
-            loadVirtualLink(*(elem));
+            loadVirtualLink(*elem, *asConfig);
         }
         else {
             throw cRuntimeError("Invalid '%s' node in Router '%s' at %s",
-                    nodeName.c_str(), nodeFullPath.c_str(), (elem)->getSourceLocation());
+                    nodeName.c_str(), nodeFullPath.c_str(), elem->getSourceLocation());
         }
     }
 
@@ -419,7 +419,7 @@ void OspfConfigReader::loadLoopbackParameters(const cXMLElement& loConfig, Inter
         throw cRuntimeError("Loading LoopbackInterface '%s' aborted, unknown area %s at %s", ie.getInterfaceName(), hostArea.str(false).c_str(), loConfig.getSourceLocation());
 }
 
-void OspfConfigReader::loadVirtualLink(const cXMLElement& virtualLinkConfig)
+void OspfConfigReader::loadVirtualLink(const cXMLElement& virtualLinkConfig, cXMLElement& asConfig)
 {
     std::string endPoint = getMandatoryFilledAttribute(virtualLinkConfig, "endPointRouterID");
     Ipv4Address routerId = ipv4AddressFromAddressString(endPoint.c_str());
@@ -455,27 +455,24 @@ void OspfConfigReader::loadVirtualLink(const cXMLElement& virtualLinkConfig)
 
     // add the virtual link to the OSPF data structure
     Area *backbone = ospfRouter->getAreaByID(BACKBONE_AREAID);
-    if (backbone)
-        backbone->addInterface(intf);
-    else
-        transitArea->addInterface(intf);
+    if (!backbone) {
+        loadAreaFromXML(asConfig, BACKBONE_AREAID);
+        backbone = ospfRouter->getAreaByID(BACKBONE_AREAID);
+    }
+    backbone->addInterface(intf);
 }
 
 void OspfConfigReader::loadAuthenticationConfig(OspfInterface *intf, const cXMLElement& ifConfig)
 {
     std::string authenticationType = getStrAttrOrPar(ifConfig, "authenticationType");
-    if (authenticationType == "SimplePasswordType") {
+    if (authenticationType == "SimplePasswordType")
         intf->setAuthenticationType(SIMPLE_PASSWORD_TYPE);
-    }
-    else if (authenticationType == "CrytographicType") {
+    else if (authenticationType == "CrytographicType")
         intf->setAuthenticationType(CRYTOGRAPHIC_TYPE);
-    }
-    else if (authenticationType == "NullType") {
+    else if (authenticationType == "NullType")
         intf->setAuthenticationType(NULL_TYPE);
-    }
-    else {
+    else
         throw cRuntimeError("Invalid AuthenticationType '%s' at %s", authenticationType.c_str(), ifConfig.getSourceLocation());
-    }
 
     std::string key = getStrAttrOrPar(ifConfig, "authenticationKey");
     AuthenticationKeyType keyValue;
@@ -541,15 +538,9 @@ cXMLElement * OspfConfigReader::findMatchingConfig(const cXMLElementList& router
             if (!destnode)
                 throw cRuntimeError("toward module `%s' not found at %s", toward, (*ifConfig).getSourceLocation());
 
-            cModule *host = ift->getHostModule();
-            for (int i = 0; i < ift->getNumInterfaces(); i++) {
-                InterfaceEntry *ie = ift->getInterface(i);
-                if (ie) {
-                    int gateId = ie->getNodeOutputGateId();
-                    if ((gateId != -1) && (host->gate(gateId)->pathContains(destnode)))
-                        return ifConfig;
-                }
-            }
+            int gateId = intf.getNodeOutputGateId();
+            if ((gateId != -1) && ift->getHostModule()->gate(gateId)->pathContains(destnode))
+                return ifConfig;
         }
     }
 

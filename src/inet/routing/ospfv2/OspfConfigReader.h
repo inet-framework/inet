@@ -97,7 +97,7 @@ class INET_API OspfConfigReader
     /**
      * Loads the configuration of an OSPf virtual link (virtual connection between two backbone routers).
      */
-    void loadVirtualLink(const cXMLElement& virtualLinkConfig);
+    void loadVirtualLink(const cXMLElement& virtualLinkConfig, cXMLElement& asConfig);
 
     /**
      * Distributes the configure default route on this router with AS-External LSAs to other OSPF routers.
