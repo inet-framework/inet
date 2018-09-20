@@ -289,7 +289,6 @@ class INET_API InterfaceEntry : public cModule
     /** @name Accessing protocol-specific interface data. Note methods are non-virtual, for performance reasons. */
     //@{
     Ipv4Address getIpv4Address() const;
-    Ieee8021dInterfaceData *ieee8021dData() const;
     //@}
 
     virtual void joinMulticastGroup(const L3Address& address) const;    // XXX why const method?

@@ -327,10 +327,5 @@ Ipv4Address InterfaceEntry::getIpv4Address() const {
 #endif // ifdef WITH_IPv4
 }
 
-Ieee8021dInterfaceData *InterfaceEntry::ieee8021dData() const
-{
-    return getProtocolData<Ieee8021dInterfaceData>();
-}
-
 } // namespace inet
 
