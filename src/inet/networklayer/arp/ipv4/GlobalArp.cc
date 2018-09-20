@@ -367,7 +367,7 @@ void GlobalArp::receiveSignal(cComponent *source, simsignal_t signalID, cObject 
                     return;    // if the address is not defined it isn't included in the global cache
                 }
             }
-            Ipv6Address ipv6Address = interfaceEntry->ipv6Data()->getLinkLocalAddress();
+            Ipv6Address ipv6Address = interfaceEntry->getProtocolData<Ipv6InterfaceData>()->getLinkLocalAddress();
             auto where = globalArpCache.insert(globalArpCache.begin(), std::make_pair(ipv6Address, entry));
             ASSERT(where->second == entry);
         }

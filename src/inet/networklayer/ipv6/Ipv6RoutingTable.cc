@@ -110,10 +110,10 @@ void Ipv6RoutingTable::initialize(int stage)
                 if (ie->isLoopback())
                     continue;
 
-                for (int y = 0; y < ie->ipv6Data()->getNumAdvPrefixes(); y++)
-                    if (ie->ipv6Data()->getAdvPrefix(y).prefix.isGlobal())
-                        addOrUpdateOwnAdvPrefix(ie->ipv6Data()->getAdvPrefix(y).prefix,
-                                ie->ipv6Data()->getAdvPrefix(y).prefixLength,
+                for (int y = 0; y < ie->getProtocolData<Ipv6InterfaceData>()->getNumAdvPrefixes(); y++)
+                    if (ie->getProtocolData<Ipv6InterfaceData>()->getAdvPrefix(y).prefix.isGlobal())
+                        addOrUpdateOwnAdvPrefix(ie->getProtocolData<Ipv6InterfaceData>()->getAdvPrefix(y).prefix,
+                                ie->getProtocolData<Ipv6InterfaceData>()->getAdvPrefix(y).prefixLength,
                                 ie->getInterfaceId(), SIMTIME_ZERO);
 
             }
@@ -254,17 +254,17 @@ void Ipv6RoutingTable::assignRequiredNodeAddresses(InterfaceEntry *ie)
 
     //o  The loopback address.
     if (ie->isLoopback()) {
-        ie->ipv6Data()->assignAddress(Ipv6Address("::1"), false, SIMTIME_ZERO, SIMTIME_ZERO);
+        ie->getProtocolData<Ipv6InterfaceData>()->assignAddress(Ipv6Address("::1"), false, SIMTIME_ZERO, SIMTIME_ZERO);
         return;
     }
     //o  Its required Link-Local Address for each interface.
 
 #ifndef WITH_xMIPv6
     //Ipv6Address linkLocalAddr = Ipv6Address().formLinkLocalAddress(ie->getInterfaceToken());
-    //ie->ipv6Data()->assignAddress(linkLocalAddr, true, 0, 0);
+    //ie->getProtocolData<Ipv6InterfaceData>()->assignAddress(linkLocalAddr, true, 0, 0);
 #else /* WITH_xMIPv6 */
     Ipv6Address linkLocalAddr = Ipv6Address().formLinkLocalAddress(ie->getInterfaceToken());
-    ie->ipv6Data()->assignAddress(linkLocalAddr, true, SIMTIME_ZERO, SIMTIME_ZERO);
+    ie->getProtocolData<Ipv6InterfaceData>()->assignAddress(linkLocalAddr, true, SIMTIME_ZERO, SIMTIME_ZERO);
 #endif /* WITH_xMIPv6 */
 
     /*o  Any additional Unicast and Anycast Addresses that have been configured
@@ -316,7 +316,7 @@ void Ipv6RoutingTable::configureInterfaceFromXml(InterfaceEntry *ie, cXMLElement
        in RAs. The Ipv6 interface data gets overwritten if lines 249 to 262 is uncommented.
        The fix is to create an XML file with all the default values. Customised XML files
        can be used for future protocols that requires different values. (MIPv6)*/
-    Ipv6InterfaceData *d = ie->ipv6Data();
+    Ipv6InterfaceData *d = ie->getProtocolData<Ipv6InterfaceData>();
 
     // parse basic config (attributes)
     d->setAdvSendAdvertisements(toBool(getRequiredAttr(cfg, "AdvSendAdvertisements")));
@@ -408,7 +408,7 @@ InterfaceEntry *Ipv6RoutingTable::getInterfaceByAddress(const Ipv6Address& addr)
 
     for (int i = 0; i < ift->getNumInterfaces(); ++i) {
         InterfaceEntry *ie = ift->getInterface(i);
-        if (ie->ipv6Data()->hasAddress(addr))
+        if (ie->getProtocolData<Ipv6InterfaceData>()->hasAddress(addr))
             return ie;
     }
     return nullptr;
@@ -426,7 +426,7 @@ bool Ipv6RoutingTable::isLocalAddress(const Ipv6Address& dest) const
     // first, check if we have an interface with this address
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
         InterfaceEntry *ie = ift->getInterface(i);
-        if (ie->ipv6Data()->hasAddress(dest))
+        if (ie->getProtocolData<Ipv6InterfaceData>()->hasAddress(dest))
             return true;
     }
 
@@ -444,7 +444,7 @@ bool Ipv6RoutingTable::isLocalAddress(const Ipv6Address& dest) const
     if (dest.matches(Ipv6Address::SOLICITED_NODE_PREFIX, 104)) {
         for (int i = 0; i < ift->getNumInterfaces(); i++) {
             InterfaceEntry *ie = ift->getInterface(i);
-            if (ie->ipv6Data()->matchesSolicitedNodeMulticastAddress(dest))
+            if (ie->getProtocolData<Ipv6InterfaceData>()->matchesSolicitedNodeMulticastAddress(dest))
                 return true;
         }
     }
@@ -765,7 +765,7 @@ const Ipv6Address& Ipv6RoutingTable::getHomeAddress()
     for (int i = 0; i < ift->getNumInterfaces(); ++i) {
         InterfaceEntry *ie = ift->getInterface(i);
 
-        return ie->ipv6Data()->getMNHomeAddress();
+        return ie->getProtocolData<Ipv6InterfaceData>()->getMNHomeAddress();
     }
 
     return Ipv6Address::UNSPECIFIED_ADDRESS;
@@ -778,7 +778,7 @@ bool Ipv6RoutingTable::isHomeAddress(const Ipv6Address& addr)
     // provided address as HoA
     for (int i = 0; i < ift->getNumInterfaces(); ++i) {
         InterfaceEntry *ie = ift->getInterface(i);
-        if (ie->ipv6Data()->getMNHomeAddress() == addr)
+        if (ie->getProtocolData<Ipv6InterfaceData>()->getMNHomeAddress() == addr)
             return true;
     }
 
@@ -836,8 +836,8 @@ bool Ipv6RoutingTable::isOnLinkAddress(const Ipv6Address& address)
     for (int j = 0; j < ift->getNumInterfaces(); j++) {
         InterfaceEntry *ie = ift->getInterface(j);
 
-        for (int i = 0; i < ie->ipv6Data()->getNumAdvPrefixes(); i++)
-            if (address.matches(ie->ipv6Data()->getAdvPrefix(i).prefix, ie->ipv6Data()->getAdvPrefix(i).prefixLength))
+        for (int i = 0; i < ie->getProtocolData<Ipv6InterfaceData>()->getNumAdvPrefixes(); i++)
+            if (address.matches(ie->getProtocolData<Ipv6InterfaceData>()->getAdvPrefix(i).prefix, ie->getProtocolData<Ipv6InterfaceData>()->getAdvPrefix(i).prefixLength))
                 return true;
 
     }

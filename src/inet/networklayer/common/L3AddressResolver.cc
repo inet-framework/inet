@@ -524,7 +524,7 @@ cModule *L3AddressResolver::findHostWithAddress(const L3Address& add)
                 switch (add.getType()) {
 #ifdef WITH_IPv6
                     case L3Address::IPv6:
-                        if (entry->ipv6Data()->hasAddress(add.toIpv6()))
+                        if (entry->getProtocolData<Ipv6InterfaceData>()->hasAddress(add.toIpv6()))
                             return mod;
                         break;
 

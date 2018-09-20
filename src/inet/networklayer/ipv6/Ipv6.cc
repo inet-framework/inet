@@ -186,7 +186,7 @@ void Ipv6::endService(cPacket *msg)
         ScheduledDatagram *sDgram = check_and_cast<ScheduledDatagram *>(msg);
 
         // take care of datagram which was supposed to be sent over a tentative address
-        if (sDgram->getIE()->ipv6Data()->isTentativeAddress(sDgram->getSrcAddress())) {
+        if (sDgram->getIE()->getProtocolData<Ipv6InterfaceData>()->isTentativeAddress(sDgram->getSrcAddress())) {
             // address is still tentative - enqueue again
             //queue.insert(sDgram);
             scheduleAt(simTime() + 1.0, sDgram);    //FIXME KLUDGE wait 1s for tentative->permanent. MISSING: timeout for drop or send back icmpv6 error, processing signals from IE, need another msg queue for waiting (similar to Ipv4 ARP)
@@ -470,8 +470,8 @@ void Ipv6::resolveMACAddressAndSendPacket(Packet *packet, int interfaceId, Ipv6A
     if (rt->isMobileNode()) {
         // if the source address is the HoA and we have a CoA then drop the packet
         // (address is topologically incorrect!)
-        if (ipv6Header->getSrcAddress() == ie->ipv6Data()->getMNHomeAddress()
-            && !ie->ipv6Data()->getGlobalAddress(Ipv6InterfaceData::CoA).isUnspecified())
+        if (ipv6Header->getSrcAddress() == ie->getProtocolData<Ipv6InterfaceData>()->getMNHomeAddress()
+            && !ie->getProtocolData<Ipv6InterfaceData>()->getGlobalAddress(Ipv6InterfaceData::CoA).isUnspecified())
         {
             EV_WARN << "Using HoA instead of CoA... dropping datagram" << endl;
             delete packet;
@@ -614,7 +614,7 @@ void Ipv6::routeMulticastPacket(Packet *packet, const InterfaceEntry *destIE, co
 
                 // set datagram source address if not yet set
                 if (datagramCopy->getSrcAddress().isUnspecified())
-                    datagramCopy->setSrcAddress(ift->interfaceByPortNo(outputGateIndex)->ipv6Data()->getIPAddress());
+                    datagramCopy->setSrcAddress(ift->interfaceByPortNo(outputGateIndex)->getProtocolData<Ipv6InterfaceData>()->getIPAddress());
 
                 // send
                 Ipv6Address nextHopAddr = routes[i].gateway;
@@ -820,7 +820,7 @@ void Ipv6::fragmentPostRouting(Packet *packet, const InterfaceEntry *ie, const M
         !ipv6Header->getDestAddress().isSolicitedNodeMulticastAddress())
     {
         // source address can be unspecified during DAD
-        const Ipv6Address& srcAddr = ie->ipv6Data()->getPreferredAddress();
+        const Ipv6Address& srcAddr = ie->getProtocolData<Ipv6InterfaceData>()->getPreferredAddress();
         ASSERT(!srcAddr.isUnspecified());    // FIXME what if we don't have an address yet?
 
         // TODO: factor out
@@ -853,7 +853,7 @@ void Ipv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MacAd
         !ipv6Header->getDestAddress().isSolicitedNodeMulticastAddress())
     {
         // source address can be unspecified during DAD
-        const Ipv6Address& srcAddr = ie->ipv6Data()->getPreferredAddress();
+        const Ipv6Address& srcAddr = ie->getProtocolData<Ipv6InterfaceData>()->getPreferredAddress();
         ASSERT(!srcAddr.isUnspecified());    // FIXME what if we don't have an address yet?
 
         // TODO: factor out
@@ -867,7 +867,7 @@ void Ipv6::fragmentAndSend(Packet *packet, const InterfaceEntry *ie, const MacAd
     #ifdef WITH_xMIPv6
         // if the datagram has a tentative address as source we have to reschedule it
         // as it can not be sent before the address' tentative status is cleared - CB
-        if (ie->ipv6Data()->isTentativeAddress(srcAddr)) {
+        if (ie->getProtocolData<Ipv6InterfaceData>()->isTentativeAddress(srcAddr)) {
             EV_INFO << "Source address is tentative - enqueueing datagram for later resubmission." << endl;
             ScheduledDatagram *sDgram = new ScheduledDatagram(packet, ipv6Header.get(), ie, nextHopAddr, fromHL);
             // queue.insert(sDgram);

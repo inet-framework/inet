@@ -512,13 +512,13 @@ void Ipv6Tunneling::decapsulateDatagram(Packet *packet)
     // Alain Tigyo, 21.03.2008
     // The following code is used for triggering RO to a CN
     InterfaceEntry *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
-    if (rt->isMobileNode() && (srcAddr == ie->ipv6Data()->getHomeAgentAddress())
+    if (rt->isMobileNode() && (srcAddr == ie->getProtocolData<Ipv6InterfaceData>()->getHomeAgentAddress())
         && (ipv6Header->getProtocolId() != IP_PROT_IPv6EXT_MOB))
     {
         EV_INFO << "Checking Route Optimization for: " << ipv6Header->getSrcAddress() << endl;
         xMIPv6 *mipv6 = findModuleFromPar<xMIPv6>(par("xmipv6Module"), this);
         if (mipv6)
-            mipv6->triggerRouteOptimization(ipv6Header->getSrcAddress(), ie->ipv6Data()->getMNHomeAddress(), ie);
+            mipv6->triggerRouteOptimization(ipv6Header->getSrcAddress(), ie->getProtocolData<Ipv6InterfaceData>()->getMNHomeAddress(), ie);
     }
 #endif // ifdef WITH_xMIPv6
 }

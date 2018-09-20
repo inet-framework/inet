@@ -179,7 +179,7 @@ void Icmpv6::processEchoRequest(Packet *requestPacket, const Ptr<const Icmpv6Ech
 
     if (addressInd->getDestAddress().isMulticast()    /*TODO check for anycast too*/) {
         IInterfaceTable *it = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        Ipv6InterfaceData *ipv6Data = it->getInterfaceById(requestPacket->getTag<InterfaceInd>()->getInterfaceId())->ipv6Data();
+        Ipv6InterfaceData *ipv6Data = it->getInterfaceById(requestPacket->getTag<InterfaceInd>()->getInterfaceId())->getProtocolData<Ipv6InterfaceData>();
         addressReq->setSrcAddress(ipv6Data->getPreferredAddress());
         // TODO implement default address selection properly.
         //      According to RFC 3484, the source address to be used

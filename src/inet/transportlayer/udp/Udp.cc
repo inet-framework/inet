@@ -965,7 +965,7 @@ void Udp::addMulticastAddressToInterface(InterfaceEntry *ie, const L3Address& mu
     }
     else if (multicastAddr.getType() == L3Address::IPv6) {
 #ifdef WITH_IPv6
-        ie->ipv6Data()->assignAddress(multicastAddr.toIpv6(), false, SimTime::getMaxTime(), SimTime::getMaxTime());
+        ie->getProtocolData<Ipv6InterfaceData>()->assignAddress(multicastAddr.toIpv6(), false, SimTime::getMaxTime(), SimTime::getMaxTime());
 #endif // ifdef WITH_IPv6
     }
     else

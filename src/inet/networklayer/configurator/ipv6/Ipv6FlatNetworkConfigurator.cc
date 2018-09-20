@@ -260,7 +260,7 @@ void Ipv6FlatNetworkConfigurator::addStaticRoutes(cTopology& topo)
             InterfaceEntry *nextHopOnlinkIf = nextHopIft->getInterfaceByNodeInputGateId(remoteGate->getId());
 
             // find link-local address for next hop
-            Ipv6Address nextHopLinkLocalAddr = nextHopOnlinkIf->ipv6Data()->getLinkLocalAddress();
+            Ipv6Address nextHopLinkLocalAddr = nextHopOnlinkIf->getProtocolData<Ipv6InterfaceData>()->getLinkLocalAddress();
 
             // traverse through address of each node
             // add to route table
