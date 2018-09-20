@@ -131,7 +131,7 @@ const INoise *DimensionalAnalogModelBase::computeNoise(const IListening *listeni
     DimensionSet dimensions = receptionPowers[0]->getDimensionSet();
     if (!dimensions.hasDimension(Dimension::time))
         dimensions.addDimension(Dimension::time);
-    ConstMapping *listeningMapping = MappingUtils::createMapping(Argument::MappedZero, dimensions, Mapping::STEPS);
+    ConstMapping *listeningMapping = MappingUtils::createMapping(Argument::MappedZero, dimensions, interpolationMode);
     ConcatConstMapping<std::plus<double> > *noisePower = new ConcatConstMapping<std::plus<double> >(listeningMapping, receptionPowers.begin(), receptionPowers.end(), false, Argument::MappedZero);
     EV_TRACE << "Noise power begin " << endl;
     noisePower->print(EVSTREAM);
@@ -149,7 +149,7 @@ const INoise *DimensionalAnalogModelBase::computeNoise(const IReception *recepti
     DimensionSet dimensions = dimensionalReception->getPower()->getDimensionSet();
     if (!dimensions.hasDimension(Dimension::time))
         dimensions.addDimension(Dimension::time);
-    ConstMapping *receptionMapping = MappingUtils::createMapping(Argument::MappedZero, dimensions, Mapping::STEPS);
+    ConstMapping *receptionMapping = MappingUtils::createMapping(Argument::MappedZero, dimensions, interpolationMode);
     ConcatConstMapping<std::plus<double> > *noisePower = new ConcatConstMapping<std::plus<double> >(receptionMapping, receptionPowers.begin(), receptionPowers.end(), false, Argument::MappedZero);
     return new DimensionalNoise(reception->getStartTime(), reception->getEndTime(), dimensionalReception->getCarrierFrequency(), dimensionalReception->getBandwidth(), noisePower);
 }

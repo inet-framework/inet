@@ -19,7 +19,7 @@
 #define __INET_DIMENSIONALTRANSMITTERBASE_H
 
 #include "inet/common/mapping/MappingBase.h"
-#include "inet/physicallayer/base/packetlevel/PhysicalLayerDefs.h"
+#include "inet/physicallayer/contract/packetlevel/IPrintableObject.h"
 
 namespace inet {
 

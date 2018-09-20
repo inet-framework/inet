@@ -146,7 +146,6 @@ ConstMapping *DimensionalTransmitterBase::createPowerMapping(const simtime_t sta
         powerMapping->setValue(position, 0);
         // iterate over timeGains and frequencyGains
         for (const auto & timeGainEntry : timeGains) {
-
             switch (timeGainEntry.timeUnit) {
                 case 's':
                     position.setTime(timeGainEntry.time >= 0 ? startTime + timeGainEntry.time : endTime - timeGainEntry.time);
@@ -158,7 +157,6 @@ ConstMapping *DimensionalTransmitterBase::createPowerMapping(const simtime_t sta
                     throw cRuntimeError("Unknown time unit");
             }
             for (const auto & frequencyGainEntry : frequencyGains) {
-
                 switch (frequencyGainEntry.frequencyUnit) {
                     case 's':
                         position.setArgValue(Dimension::frequency, frequencyGainEntry.frequency >= 0 ? startFrequency + frequencyGainEntry.frequency : endFrequency - frequencyGainEntry.frequency);
@@ -189,7 +187,6 @@ ConstMapping *DimensionalTransmitterBase::createPowerMapping(const simtime_t sta
         powerMapping->setValue(position, 0);
         // iterate over timeGains
         for (const auto & timeGainEntry : timeGains) {
-
             switch (timeGainEntry.timeUnit) {
                 case 's':
                     position.setTime(timeGainEntry.time >= 0 ? startTime + timeGainEntry.time : endTime - timeGainEntry.time);
@@ -214,7 +211,6 @@ ConstMapping *DimensionalTransmitterBase::createPowerMapping(const simtime_t sta
         powerMapping->setValue(position, 0);
         // iterate over frequencyGains
         for (const auto & frequencyGainEntry : frequencyGains) {
-
             switch (frequencyGainEntry.frequencyUnit) {
                 case 's':
                     position.setArgValue(Dimension::frequency, frequencyGainEntry.frequency >= 0 ? startFrequency + frequencyGainEntry.frequency : endFrequency - frequencyGainEntry.frequency);
