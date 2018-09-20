@@ -49,6 +49,7 @@ module EtherSwitch
         bool csmacdSupport = default(true);  // by default use CSMA/CD --FIXME remove
         string fcsMode @enum("declared","computed") = default("declared");
         string spanningTreeProtocol = default("Stp");
+        int numEthInterfaces = default(0);  // minimum number of ethernet interfaces
         int numExtInterfaces = default(0);
         eth[*].encap.typename = "EtherEncapDummy";
         eth[*].csmacdSupport = csmacdSupport;
@@ -63,7 +64,7 @@ module EtherSwitch
         encap.registerProtocol = true;
 
     gates:
-        inout ethg[] @labels(EtherFrame-conn);
+        inout ethg[numEthInterfaces] @labels(EtherFrame-conn);
     submodules:
         status: NodeStatus if hasStatus {
             @display("p=100,400;is=s");
