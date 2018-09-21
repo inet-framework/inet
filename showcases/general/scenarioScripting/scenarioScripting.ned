@@ -38,7 +38,7 @@ module DynamicHost extends AdhocHost
         @display("i=misc/smartphone");
     submodules:
         autoConfigurator: HostAutoConfigurator {
-            @display("p=171,335");
+            @display("is=s;p=125,625");
         }
 }
 
