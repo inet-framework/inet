@@ -55,6 +55,7 @@ private:
     RoutingTableEntryVector _prefixListINOUT;   // store union of pointers in _prefixListIN and _prefixListOUT
     std::vector<AsId> _ASListIN;
     std::vector<AsId> _ASListOUT;
+    std::vector<std::string> advertiseList;
 
   public:
     BgpRouter(cSimpleModule *bgpModule, IInterfaceTable *ift, IIpv4RoutingTable *rt);
@@ -70,6 +71,7 @@ private:
     SessionId createSession(BgpSessionType typeSession, const char *peerAddr);
     void setTimer(SessionId id, simtime_t *delayTab);
     void setSocketListen(SessionId id);
+    void addToAdvertiseList(std::string ifName);
     void addToPrefixList(std::string nodeName, BgpRoutingTableEntry *entry);
     void addToAsList(std::string nodeName, AsId id);
     void processMessageFromTCP(cMessage *msg);
@@ -99,6 +101,7 @@ private:
     cMessage *getCancelEvent(cMessage *msg) { return bgpModule->cancelEvent(msg); }
     IIpv4RoutingTable *getIPRoutingTable() { return rt; }
     std::vector<BgpRoutingTableEntry *> getBGPRoutingTable() { return bgpRoutingTable; }
+    bool isadvertised(std::string ifName);
 
     /**
      * \brief active listenSocket for a given session (used by fsm)

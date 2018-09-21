@@ -110,6 +110,7 @@ private:
     TcpSocket *getSocketListen() const { return _info.socketListen; }
     IIpv4RoutingTable *getIPRoutingTable() const { return bgpRouter.getIPRoutingTable(); }
     std::vector<BgpRoutingTableEntry *> getBGPRoutingTable() const { return bgpRouter.getBGPRoutingTable(); }
+    bool isadvertised(std::string ifName) const { return bgpRouter.isadvertised(ifName); }
     Macho::Machine<fsm::TopState>& getFSM() const { return *_fsm; }
     bool checkExternalRoute(const Ipv4Route *ospfRoute) const { return bgpRouter.checkExternalRoute(ospfRoute); }
     void updateSendProcess(BgpRoutingTableEntry *entry) const { return bgpRouter.updateSendProcess(NEW_SESSION_ESTABLISHED, _info.sessionID, entry); }

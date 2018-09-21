@@ -405,14 +405,15 @@ void Established::entry()
     //if it's an IGP Session, send update message with only the BGP routes learned by EGP
 
     if (session.getType() == EGP) {
-        IIpv4RoutingTable *IPRoutingTable = session.getIPRoutingTable();
+        auto IPRoutingTable = session.getIPRoutingTable();
         for (int i = 0; i < IPRoutingTable->getNumRoutes(); i++) {
             const Ipv4Route *rtEntry = IPRoutingTable->getRoute(i);
-            if (rtEntry->getNetmask() == Ipv4Address::ALLONES_ADDRESS ||
+            if (!session.isadvertised(std::string(rtEntry->getInterfaceName())) &&
+                    (rtEntry->getNetmask() == Ipv4Address::ALLONES_ADDRESS ||
                     rtEntry->getSourceType() == IRoute::IFACENETMASK ||
                     rtEntry->getSourceType() == IRoute::MANUAL ||
                     rtEntry->getSourceType() == IRoute::BGP ||
-                    (rtEntry->getSourceType() == IRoute::OSPF && session.checkExternalRoute(rtEntry)))
+                    (rtEntry->getSourceType() == IRoute::OSPF && session.checkExternalRoute(rtEntry))))
             {
                 continue;
             }
