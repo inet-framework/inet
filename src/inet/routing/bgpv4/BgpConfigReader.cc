@@ -155,17 +155,28 @@ void BgpConfigReader::loadSessionConfig(cXMLElementList& sessionList, simtime_t 
 
 std::vector<const char *> BgpConfigReader::loadASConfig(cXMLElementList& ASConfig)
 {
-    //create deny Lists
+    // create deny Lists
     std::vector<const char *> routerInSameASList;
 
     for (auto & elem : ASConfig) {
         std::string nodeName = (elem)->getTagName();
         if (nodeName == "Router") {
-            if (isInInterfaceTable(ift, Ipv4Address((elem)->getAttribute("interAddr"))) == -1) {
+            if (isInInterfaceTable(ift, Ipv4Address((elem)->getAttribute("interAddr"))) == -1)
                 routerInSameASList.push_back((elem)->getAttribute("interAddr"));
+            for (auto & entry : elem->getChildren()) {
+                const char *name = entry->getAttribute("names");
+                if(name && *name) {
+                    if (isInInterfaceTable(ift, std::string(name)) == -1)
+                        throw cRuntimeError("Error reading XML config: IInterfaceTable contains no interface with name '%s' for AS %u", name, bgpRouter->getAsId());
+                    bgpRouter->addToAdvertiseList(std::string(name));
+                }
+                else
+                    throw cRuntimeError("BGP Error: attribute 'names' is mandatory");
             }
+
             continue;
         }
+
         if (nodeName == "DenyRoute" || nodeName == "DenyRouteIN" || nodeName == "DenyRouteOUT") {
             BgpRoutingTableEntry *entry = new BgpRoutingTableEntry();     //FIXME Who will delete this entry?
             entry->setDestination(Ipv4Address((elem)->getAttribute("Address")));
@@ -176,9 +187,8 @@ std::vector<const char *> BgpConfigReader::loadASConfig(cXMLElementList& ASConfi
             AsId ASCur = atoi((elem)->getNodeValue());
             bgpRouter->addToAsList(nodeName, ASCur);
         }
-        else {
+        else
             throw cRuntimeError("BGP Error: unknown element named '%s' for AS %u", nodeName.c_str(), bgpRouter->getAsId());
-        }
     }
     return routerInSameASList;
 }
@@ -187,6 +197,16 @@ int BgpConfigReader::isInInterfaceTable(IInterfaceTable *ifTable, Ipv4Address ad
 {
     for (int i = 0; i < ifTable->getNumInterfaces(); i++) {
         if (ifTable->getInterface(i)->ipv4Data()->getIPAddress() == addr) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+int BgpConfigReader::isInInterfaceTable(IInterfaceTable *ifTable, std::string ifName)
+{
+    for (int i = 0; i < ifTable->getNumInterfaces(); i++) {
+        if (std::string(ifTable->getInterface(i)->getInterfaceName()) == ifName) {
             return i;
         }
     }

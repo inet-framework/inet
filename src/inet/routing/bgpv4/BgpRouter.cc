@@ -103,6 +103,11 @@ void BgpRouter::setSocketListen(SessionId id)
     _BGPSessions[id]->setSocketListen(socketListenEGP);
 }
 
+void BgpRouter::addToAdvertiseList(std::string ifName)
+{
+    advertiseList.push_back(ifName);
+}
+
 void BgpRouter::addToPrefixList(std::string nodeName, BgpRoutingTableEntry *entry)
 {
     if (nodeName == "DenyRouteIN") {
@@ -674,6 +679,15 @@ void BgpRouter::printUpdateMessage(const BgpUpdateMessage& updateMsg)
 void BgpRouter::printKeepAliveMessage(const BgpKeepAliveMessage& keepAliveMsg)
 {
 
+}
+
+bool BgpRouter::isadvertised(std::string ifName)
+{
+    for(auto &entry : advertiseList) {
+        if(entry == ifName)
+            return true;
+    }
+    return false;
 }
 
 } // namespace bgp
