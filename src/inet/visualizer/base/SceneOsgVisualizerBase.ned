@@ -35,7 +35,7 @@ simple SceneOsgVisualizerBase extends SceneVisualizerBase
 
         bool displayPlayground = default(true); // display the playground, enabled by default
         string playgroundColor = default("#A0E0A0"); // playground solid color if playground texture is not provided, gray by default
-        double playgroundOpacity = default(1.0); // playground opacity, opaque by default
+        double playgroundOpacity = default(1.0); // playground opacity, opaque by default (not recommended to change)
         string playgroundImage = default(""); // playground texture (repeated), no image by default
         double playgroundImageSize @unit(m) = default(1m); // playground texture size
         bool playgroundShading = default(true); // exponential shading for playground color, enabled by default
