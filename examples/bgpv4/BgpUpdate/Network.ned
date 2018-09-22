@@ -11,7 +11,7 @@ network BGPTest
         channel LINK_100 extends ThruputMeteringChannel
         {
             parameters:
-                delay = 0s;
+                delay = 50us;
                 datarate = 100Mbps;
                 thruputDisplayFormat = "#N";
         }
