@@ -10,11 +10,17 @@
     </TimerParams>
 
     <AS id="65324">
-        <Router interAddr="192.168.1.254"/> <!--router A-->
+        <!--router A-->
+        <Router interAddr="192.168.1.254">
+        	<interface names='eth0' />
+        </Router>
     </AS>
 
     <AS id="65248">
-        <Router interAddr="192.168.2.254"/> <!--router B-->
+        <!--router B-->
+        <Router interAddr="192.168.2.254">
+        	<interface names='eth0' />
+        </Router>
     </AS>
 
    <Session id="1">
