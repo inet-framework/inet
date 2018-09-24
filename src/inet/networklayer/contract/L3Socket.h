@@ -26,7 +26,7 @@
 namespace inet {
 
 /**
- * Thie class implements a raw L3 socket.
+ * This class implements a raw L3 socket.
  */
 class INET_API L3Socket : public INetworkSocket
 {

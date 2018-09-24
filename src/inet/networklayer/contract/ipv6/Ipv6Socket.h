@@ -26,7 +26,7 @@
 namespace inet {
 
 /**
- * Thie class implements a raw IPv6 socket.
+ * This class implements a raw IPv6 socket.
  */
 class INET_API Ipv6Socket : public INetworkSocket
 {

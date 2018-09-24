@@ -26,7 +26,7 @@
 namespace inet {
 
 /**
- * Thie class implements a raw IPv4 socket.
+ * This class implements a raw IPv4 socket.
  */
 class INET_API Ipv4Socket : public INetworkSocket
 {
