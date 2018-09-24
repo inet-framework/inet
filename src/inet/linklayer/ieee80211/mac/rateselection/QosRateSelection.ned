@@ -29,7 +29,7 @@ simple QosRateSelection
         double responseCtsFrameBitrate @unit(bps) = default(-1bps);
 
         double dataFrameBitrate @unit(bps) = default(-1bps); // fastest
-        double dataFrameBandwidth @unit(Hz) = default(0Hz/0); // unspecified by default
+        double dataFrameBandwidth @unit(Hz) = default(nan Hz); // unspecified by default
         int dataFrameNumSpatialStreams = default(-1); // unspecified by default
 
         double mgmtFrameBitrate @unit(bps) = default(-1bps); // fastest
