@@ -195,7 +195,7 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
         if (streq(ifconfigFile + charpointer, "inet_addr:")) {
             if (!ie)
                 throw cRuntimeError("Error in routing file: missing the `name:' entry");
-            ie->ipv4Data()->setIPAddress(Ipv4Address(parseEntry(ifconfigFile, "inet_addr:", charpointer, buf)));
+            ie->getProtocolData<Ipv4InterfaceData>()->setIPAddress(Ipv4Address(parseEntry(ifconfigFile, "inet_addr:", charpointer, buf)));
             continue;
         }
 
@@ -212,7 +212,7 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
         if (streq(ifconfigFile + charpointer, "Mask:")) {
             if (!ie)
                 throw cRuntimeError("Error in routing file: missing the `name:' entry");
-            ie->ipv4Data()->setNetmask(Ipv4Address(parseEntry(ifconfigFile, "Mask:", charpointer, buf)));
+            ie->getProtocolData<Ipv4InterfaceData>()->setNetmask(Ipv4Address(parseEntry(ifconfigFile, "Mask:", charpointer, buf)));
             continue;
         }
 
@@ -237,7 +237,7 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
         if (streq(ifconfigFile + charpointer, "Metric:")) {
             if (!ie)
                 throw cRuntimeError("Error in routing file: missing the `name:' entry");
-            ie->ipv4Data()->setMetric(atoi(parseEntry(ifconfigFile, "Metric:", charpointer, buf)));
+            ie->getProtocolData<Ipv4InterfaceData>()->setMetric(atoi(parseEntry(ifconfigFile, "Metric:", charpointer, buf)));
             continue;
         }
 
@@ -297,7 +297,7 @@ void RoutingTableParser::parseMulticastGroups(char *groupStr, InterfaceEntry *it
     cStringTokenizer tokenizer(groupStr, ":");
     const char *token;
     while ((token = tokenizer.nextToken()) != nullptr)
-        itf->ipv4Data()->joinMulticastGroup(Ipv4Address(token));
+        itf->getProtocolData<Ipv4InterfaceData>()->joinMulticastGroup(Ipv4Address(token));
 }
 
 void RoutingTableParser::parseRouting(char *routeFile)

@@ -204,7 +204,7 @@ void Arp::sendARPRequest(const InterfaceEntry *ie, Ipv4Address ipAddress)
 {
     // find our own IPv4 address and MAC address on the given interface
     MacAddress myMACAddress = ie->getMacAddress();
-    Ipv4Address myIPAddress = ie->ipv4Data()->getIPAddress();
+    Ipv4Address myIPAddress = ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
 
     // both must be set
     ASSERT(!myMACAddress.isUnspecified());
@@ -365,7 +365,7 @@ void Arp::processARPPacket(Packet *packet)
                     return;
                 }
 
-                Ipv4Address myIPAddress = ie->ipv4Data()->getIPAddress();
+                Ipv4Address myIPAddress = ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
 
                 // "Swap hardware and protocol fields", etc.
                 const auto& arpReply = makeShared<ArpPacket>();

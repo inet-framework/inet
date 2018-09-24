@@ -207,7 +207,7 @@ void DhcpServer::processDHCPMessage(Packet *packet)
             EV_INFO << "DHCPREQUEST arrived. Handling it." << endl;
 
             // check if the request was in response of an offering
-            if (dhcpMsg->getOptions().getServerIdentifier() == ie->ipv4Data()->getIPAddress()) {
+            if (dhcpMsg->getOptions().getServerIdentifier() == ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress()) {
                 // the REQUEST is in response to an offering (because SERVER_ID is filled)
                 // otherwise the msg is a request to extend an existing lease (e. g. INIT-REBOOT)
 
@@ -306,7 +306,7 @@ void DhcpServer::sendNAK(const Ptr<const DhcpMessage>& msg)
     nak->setBroadcast(msg->getBroadcast());
     nak->setGiaddr(msg->getGiaddr());    // next server IP
     nak->setChaddr(msg->getChaddr());
-    nak->getOptionsForUpdate().setServerIdentifier(ie->ipv4Data()->getIPAddress());
+    nak->getOptionsForUpdate().setServerIdentifier(ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
     nak->getOptionsForUpdate().setMessageType(DHCPNAK);
 
     pk->insertAtBack(nak);
@@ -354,7 +354,7 @@ void DhcpServer::sendACK(DhcpLease *lease, const Ptr<const DhcpMessage>& packet)
     ack->getOptionsForUpdate().setDns(0, lease->dns);
 
     // add the server ID as the RFC says
-    ack->getOptionsForUpdate().setServerIdentifier(ie->ipv4Data()->getIPAddress());
+    ack->getOptionsForUpdate().setServerIdentifier(ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
     pk->insertAtBack(ack);
 
     // register the lease time
@@ -422,7 +422,7 @@ void DhcpServer::sendOffer(DhcpLease *lease, const Ptr<const DhcpMessage>& packe
     offer->getOptionsForUpdate().setDns(0, lease->dns);
 
     // add the server_id as the RFC says
-    offer->getOptionsForUpdate().setServerIdentifier(ie->ipv4Data()->getIPAddress());
+    offer->getOptionsForUpdate().setServerIdentifier(ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
 
     // register the offering time // todo: ?
     lease->leaseTime = simTime();

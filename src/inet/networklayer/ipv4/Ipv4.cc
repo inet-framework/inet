@@ -318,7 +318,7 @@ void Ipv4::preroutingFinish(Packet *packet)
     else if (destAddr.isMulticast()) {
         // check for local delivery
         // Note: multicast routers will receive IGMP datagrams even if their interface is not joined to the group
-        if (fromIE->ipv4Data()->isMemberOfMulticastGroup(destAddr) ||
+        if (fromIE->getProtocolData<Ipv4InterfaceData>()->isMemberOfMulticastGroup(destAddr) ||
             (rt->isMulticastForwardingEnabled() && ipv4Header->getProtocolId() == IP_PROT_IGMP))
             reassembleAndDeliver(packet->dup());
         else
@@ -345,7 +345,7 @@ void Ipv4::preroutingFinish(Packet *packet)
 
         // check for local delivery; we must accept also packets coming from the interfaces that
         // do not yet have an IP address assigned. This happens during DHCP requests.
-        if (rt->isLocalAddress(destAddr) || fromIE->ipv4Data()->getIPAddress().isUnspecified()) {
+        if (rt->isLocalAddress(destAddr) || fromIE->getProtocolData<Ipv4InterfaceData>()->getIPAddress().isUnspecified()) {
             reassembleAndDeliver(packet);
         }
         else if (destAddr.isLimitedBroadcastAddress() || (broadcastIE = rt->findInterfaceByLocalBroadcastAddress(destAddr))) {
@@ -664,10 +664,10 @@ void Ipv4::forwardMulticastPacket(Packet *packet)
             Ipv4MulticastRoute::OutInterface *outInterface = route->getOutInterface(i);
             const InterfaceEntry *destIE = outInterface->getInterface();
             if (destIE != fromIE && outInterface->isEnabled()) {
-                int ttlThreshold = destIE->ipv4Data()->getMulticastTtlThreshold();
+                int ttlThreshold = destIE->getProtocolData<Ipv4InterfaceData>()->getMulticastTtlThreshold();
                 if (ipv4Header->getTimeToLive() <= ttlThreshold)
                     EV_WARN << "Not forwarding to " << destIE->getInterfaceName() << " (ttl treshold reached)\n";
-                else if (outInterface->isLeaf() && !destIE->ipv4Data()->hasMulticastListener(destAddr))
+                else if (outInterface->isLeaf() && !destIE->getProtocolData<Ipv4InterfaceData>()->hasMulticastListener(destAddr))
                     EV_WARN << "Not forwarding to " << destIE->getInterfaceName() << " (no listeners)\n";
                 else {
                     EV_DETAIL << "Forwarding to " << destIE->getInterfaceName() << "\n";
@@ -787,7 +787,7 @@ void Ipv4::fragmentPostRouting(Packet *packet)
     // fill in source address
     if (packet->peekAtFront<Ipv4Header>()->getSrcAddress().isUnspecified()) {
         auto ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
-        ipv4Header->setSrcAddress(destIE->ipv4Data()->getIPAddress());
+        ipv4Header->setSrcAddress(destIE->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
         insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
     }
     if (datagramPostRoutingHook(packet) == INetfilter::IHook::ACCEPT)
@@ -1062,7 +1062,7 @@ void Ipv4::arpResolutionTimedOut(IArp::Notification *entry)
 
 MacAddress Ipv4::resolveNextHopMacAddress(cPacket *packet, Ipv4Address nextHopAddr, const InterfaceEntry *destIE)
 {
-    if (nextHopAddr.isLimitedBroadcastAddress() || nextHopAddr == destIE->ipv4Data()->getNetworkBroadcastAddress()) {
+    if (nextHopAddr.isLimitedBroadcastAddress() || nextHopAddr == destIE->getProtocolData<Ipv4InterfaceData>()->getNetworkBroadcastAddress()) {
         EV_DETAIL << "destination address is broadcast, sending packet to broadcast MAC address\n";
         return MacAddress::BROADCAST_ADDRESS;
     }

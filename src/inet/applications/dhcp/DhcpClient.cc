@@ -114,7 +114,7 @@ InterfaceEntry *DhcpClient::chooseInterface()
             throw cRuntimeError("No non-loopback interface found to be configured via DHCP");
     }
 
-    if (!ie->ipv4Data()->getIPAddress().isUnspecified())
+    if (!ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress().isUnspecified())
         throw cRuntimeError("Refusing to start DHCP on interface \"%s\" that already has an IP address", ie->getInterfaceName());
     return ie;
 }
@@ -322,8 +322,8 @@ void DhcpClient::recordLease(const Ptr<const DhcpMessage>& dhcpACK)
 
 void DhcpClient::bindLease()
 {
-    ie->ipv4Data()->setIPAddress(lease->ip);
-    ie->ipv4Data()->setNetmask(lease->subnetMask);
+    ie->getProtocolData<Ipv4InterfaceData>()->setIPAddress(lease->ip);
+    ie->getProtocolData<Ipv4InterfaceData>()->setNetmask(lease->subnetMask);
 
     std::string banner = "Got IP " + lease->ip.str();
     host->bubble(banner.c_str());
@@ -373,8 +373,8 @@ void DhcpClient::unbindLease()
     cancelEvent(leaseTimer);
 
     irt->deleteRoute(route);
-    ie->ipv4Data()->setIPAddress(Ipv4Address());
-    ie->ipv4Data()->setNetmask(Ipv4Address::ALLONES_ADDRESS);
+    ie->getProtocolData<Ipv4InterfaceData>()->setIPAddress(Ipv4Address());
+    ie->getProtocolData<Ipv4InterfaceData>()->setNetmask(Ipv4Address::ALLONES_ADDRESS);
 }
 
 void DhcpClient::initClient()

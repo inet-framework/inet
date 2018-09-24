@@ -88,7 +88,7 @@ INetfilter::IHook::Result SctpNatHook::datagramForwardHook(Packet *datagram)
         entry->setLocalPort(sctpMsg->getSrcPort());
         entry->setGlobalAddress(dgram->getDestAddress());
         entry->setGlobalPort(sctpMsg->getDestPort());
-        entry->setNattedAddress(outIE->ipv4Data()->getIPAddress());
+        entry->setNattedAddress(outIE->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
         entry->setNattedPort(sctpMsg->getSrcPort());
         entry->setGlobalVTag(sctpMsg->getVTag());
         if (chunk->getSctpChunkType() == INIT) {
@@ -103,7 +103,7 @@ INetfilter::IHook::Result SctpNatHook::datagramForwardHook(Packet *datagram)
             SctpAsconfChunk *asconfChunk = check_and_cast<SctpAsconfChunk *>(chunk);
             entry->setLocalVTag(asconfChunk->getPeerVTag());
         }
-        networkHeader->setSrcAddress(outIE->ipv4Data()->getIPAddress());
+        networkHeader->setSrcAddress(outIE->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
         sctp->setSrcPort(entry->getNattedPort());
         natTable->natEntries.push_back(entry);
         natTable->printNatTable();
@@ -133,13 +133,13 @@ INetfilter::IHook::Result SctpNatHook::datagramForwardHook(Packet *datagram)
             else {
                 EV << "VTag doesn't match: old VTag=" << entry->getLocalVTag() << ", new VTag=" << sctpMsg->getVTag() << "\n";
                 entry->setLocalVTag(sctpMsg->getVTag());
-                networkHeader->setSrcAddress(outIE->ipv4Data()->getIPAddress());
+                networkHeader->setSrcAddress(outIE->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
                 sctp->setSrcPort(entry->getNattedPort());
                 EV << "srcAddress set to " << dgram->getSrcAddress() << ", srcPort set to " << sctpMsg->getSrcPort() << "\n";
             }
         }
         else {
-            networkHeader->setSrcAddress(outIE->ipv4Data()->getIPAddress());
+            networkHeader->setSrcAddress(outIE->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
             sctp->setSrcPort(entry->getNattedPort());
             EV << "srcAddress set to " << dgram->getSrcAddress() << ", srcPort set to " << sctpMsg->getSrcPort() << "\n";
         }

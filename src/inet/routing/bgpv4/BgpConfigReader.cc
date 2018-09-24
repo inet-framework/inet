@@ -111,7 +111,7 @@ AsId BgpConfigReader::findMyAS(cXMLElementList& asList, int& outRouterPosition)
         for (auto & routerList_routerListIt : routerList) {
             Ipv4Address routerAddr = Ipv4Address((routerList_routerListIt)->getAttribute("interAddr"));
             for (int i = 0; i < ift->getNumInterfaces(); i++) {
-                if (ift->getInterface(i)->ipv4Data()->getIPAddress() == routerAddr)
+                if (ift->getInterface(i)->getProtocolData<Ipv4InterfaceData>()->getIPAddress() == routerAddr)
                     return atoi((routerList_routerListIt)->getParentNode()->getAttribute("id"));
             }
             outRouterPosition++;
@@ -186,7 +186,7 @@ std::vector<const char *> BgpConfigReader::loadASConfig(cXMLElementList& ASConfi
 int BgpConfigReader::isInInterfaceTable(IInterfaceTable *ifTable, Ipv4Address addr)
 {
     for (int i = 0; i < ifTable->getNumInterfaces(); i++) {
-        if (ifTable->getInterface(i)->ipv4Data()->getIPAddress() == addr) {
+        if (ifTable->getInterface(i)->getProtocolData<Ipv4InterfaceData>()->getIPAddress() == addr) {
             return i;
         }
     }

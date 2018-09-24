@@ -107,7 +107,7 @@ bool PimBase::handleNodeStart(IDoneCallback *doneCallback)
     for (int i = 0; i < pimIft->getNumInterfaces(); i++) {
         PimInterface *pimInterface = pimIft->getInterface(i);
         if (pimInterface->getMode() == mode) {
-            pimInterface->getInterfacePtr()->ipv4Data()->joinMulticastGroup(ALL_PIM_ROUTERS_MCAST);
+            pimInterface->getInterfacePtr()->getProtocolData<Ipv4InterfaceData>()->joinMulticastGroup(ALL_PIM_ROUTERS_MCAST);
             isEnabled = true;
         }
     }

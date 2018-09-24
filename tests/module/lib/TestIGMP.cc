@@ -214,12 +214,12 @@ void TestIGMP::processCommand(const cXMLElement &node)
   if (!strcmp(tag, "join"))
   {
     const char *group = node.getAttribute("group");
-    ie->ipv4Data()->joinMulticastGroup(Ipv4Address(group));
+    ie->getProtocolData<Ipv4InterfaceData>()->joinMulticastGroup(Ipv4Address(group));
   }
   else if (!strcmp(tag, "leave"))
   {
     const char *group = node.getAttribute("group");
-    ie->ipv4Data()->leaveMulticastGroup(Ipv4Address(group));
+    ie->getProtocolData<Ipv4InterfaceData>()->leaveMulticastGroup(Ipv4Address(group));
   }
   else if (!strcmp(tag, "dump"))
   {
@@ -229,9 +229,9 @@ void TestIGMP::processCommand(const cXMLElement &node)
         if (!ie)
             throw cRuntimeError("'ifname' attribute is missing at XML node ", node.str().c_str());
         Ipv4AddressVector joinedGroups;
-        const int count = ie->ipv4Data()->getNumOfJoinedMulticastGroups();
+        const int count = ie->getProtocolData<Ipv4InterfaceData>()->getNumOfJoinedMulticastGroups();
         for (int i = 0; i < count; ++i)
-            joinedGroups.push_back(ie->ipv4Data()->getJoinedMulticastGroup(i));
+            joinedGroups.push_back(ie->getProtocolData<Ipv4InterfaceData>()->getJoinedMulticastGroup(i));
         dumpMulticastGroups(what, ifname, joinedGroups);
     }
     else if (!strcmp(what, "listeners"))
@@ -239,9 +239,9 @@ void TestIGMP::processCommand(const cXMLElement &node)
         if (!ie)
             throw cRuntimeError("'ifname' attribute is missing at XML node ", node.str().c_str());
         Ipv4AddressVector reportedGroups;
-        const int count = ie->ipv4Data()->getNumOfReportedMulticastGroups();
+        const int count = ie->getProtocolData<Ipv4InterfaceData>()->getNumOfReportedMulticastGroups();
         for (int i = 0; i < count; ++i)
-            reportedGroups.push_back(ie->ipv4Data()->getReportedMulticastGroup(i));
+            reportedGroups.push_back(ie->getProtocolData<Ipv4InterfaceData>()->getReportedMulticastGroup(i));
         dumpMulticastGroups("listeners", ifname, reportedGroups);
     }
   }

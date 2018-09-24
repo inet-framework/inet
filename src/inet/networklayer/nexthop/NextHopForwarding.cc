@@ -416,7 +416,7 @@ void NextHopForwarding::routeMulticastPacket(Packet *datagram, const InterfaceEn
 //
 //        // set datagram source address if not yet set
 //        if (datagram->getSourceAddress().isUnspecified())
-//            datagram->setSourceAddress(destIE->ipv4Data()->getGenericAddress());
+//            datagram->setSourceAddress(destIE->getProtocolData<Ipv4InterfaceData>()->getGenericAddress());
 //
 //        // send
 //        sendDatagramToOutput(datagram, destIE, datagram->getDestinationAddress());
@@ -445,7 +445,7 @@ void NextHopForwarding::routeMulticastPacket(Packet *datagram, const InterfaceEn
 //
 //                // set datagram source address if not yet set
 //                if (datagramCopy->getSourceAddress().isUnspecified())
-//                    datagramCopy->setSourceAddress(destIE->ipv4Data()->getGenericAddress());
+//                    datagramCopy->setSourceAddress(destIE->getProtocolData<Ipv4InterfaceData>()->getGenericAddress());
 //
 //                // send
 //                Address nextHop = routes[i].gateway;

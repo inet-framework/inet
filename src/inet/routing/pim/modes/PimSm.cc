@@ -400,7 +400,7 @@ void PimSm::processJoinG(Ipv4Address group, Ipv4Address rp, Ipv4Address upstream
     //
 
     // check UpstreamNeighbor field
-    if (upstreamNeighborField != inInterface->ipv4Data()->getIPAddress())
+    if (upstreamNeighborField != inInterface->getProtocolData<Ipv4InterfaceData>()->getIPAddress())
         return;
 
     bool newRoute = false;
@@ -461,7 +461,7 @@ void PimSm::processJoinSG(Ipv4Address source, Ipv4Address group, Ipv4Address ups
     //
 
     // check UpstreamNeighbor field
-    if (upstreamNeighborField != inInterface->ipv4Data()->getIPAddress())
+    if (upstreamNeighborField != inInterface->getProtocolData<Ipv4InterfaceData>()->getIPAddress())
         return;
 
     Route *routeSG = findRouteSG(source, group);
@@ -520,7 +520,7 @@ void PimSm::processPruneG(Ipv4Address group, Ipv4Address upstreamNeighborField, 
     //
 
     // check UpstreamNeighbor field
-    if (upstreamNeighborField != inInterface->ipv4Data()->getIPAddress())
+    if (upstreamNeighborField != inInterface->getProtocolData<Ipv4InterfaceData>()->getIPAddress())
         return;
 
     Route *routeG = findRouteG(group);
@@ -554,7 +554,7 @@ void PimSm::processPruneSG(Ipv4Address source, Ipv4Address group, Ipv4Address up
     //
 
     // check UpstreamNeighbor field
-    if (upstreamNeighborField != inInterface->ipv4Data()->getIPAddress())
+    if (upstreamNeighborField != inInterface->getProtocolData<Ipv4InterfaceData>()->getIPAddress())
         return;
 
     Route *routeSG = findRouteSG(source, group);
@@ -729,7 +729,7 @@ void PimSm::processAssertSG(PimsmInterface *interface, const AssertMetric& recei
 {
     Route *routeSG = interface->route();
     AssertMetric myMetric = interface->couldAssert() ? // XXX check routeG metric too
-        routeSG->metric.setAddress(interface->ie->ipv4Data()->getIPAddress()) :
+        routeSG->metric.setAddress(interface->ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress()) :
         AssertMetric::PIM_INFINITE;
 
     // A "preferred assert" is one with a better metric than the current winner.
@@ -837,7 +837,7 @@ void PimSm::processAssertG(PimsmInterface *interface, const AssertMetric& receiv
 {
     Route *routeG = interface->route();
     AssertMetric myMetric = interface->couldAssert() ?
-        routeG->metric.setAddress(interface->ie->ipv4Data()->getIPAddress()) :
+        routeG->metric.setAddress(interface->ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress()) :
         AssertMetric::PIM_INFINITE;
 
     // A "preferred assert" is one with a better metric than the current winner.
@@ -1056,7 +1056,7 @@ void PimSm::processPrunePendingTimer(cMessage *timer)
             // overridden by another router is lost locally on the LAN, then
             // the PruneEcho may be received and cause the override to happen.
             Ipv4Address pruneAddr = route->type == G ? route->rpAddr : route->source;
-            Ipv4Address upstreamNeighborField = downstream->ie->ipv4Data()->getIPAddress();
+            Ipv4Address upstreamNeighborField = downstream->ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
             sendPIMPrune(route->group, pruneAddr, upstreamNeighborField, route->type);
         }
     }
@@ -1268,7 +1268,7 @@ void PimSm::multicastPacketArrivedOnNonRpfInterface(Route *route, int interfaceI
             // Actions A1 (below), which will initiate the assert negotiation
             // for (S,G) or (*,G).
             downstream->assertState = Interface::I_WON_ASSERT;
-            downstream->winnerMetric = route->metric.setAddress(downstream->ie->ipv4Data()->getIPAddress());
+            downstream->winnerMetric = route->metric.setAddress(downstream->ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
             sendPIMAssert(route->source, route->group, downstream->winnerMetric, downstream->ie, route->type == G);
             downstream->startAssertTimer(assertTime - assertOverrideInterval);
         }
@@ -1636,7 +1636,7 @@ void PimSm::updateDesignatedRouterAddress(InterfaceEntry *ie)
             eachNeighborHasPriority = false;
 
 
-    Ipv4Address drAddress = ie->ipv4Data()->getIPAddress();
+    Ipv4Address drAddress = ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
     int drPriority = this->designatedRouterPriority;
     for (int i = 0; i < numNeighbors; i++) {
         PimNeighbor *neighbor = pimNbt->getNeighbor(interfaceId, i);
@@ -1658,7 +1658,7 @@ void PimSm::updateDesignatedRouterAddress(InterfaceEntry *ie)
         pimInterface->setDRAddress(drAddress);
         designatedRouterAddressHasChanged(ie);
 
-        Ipv4Address myAddress = ie->ipv4Data()->getIPAddress();
+        Ipv4Address myAddress = ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
         bool iWasDR = oldDRAddress.isUnspecified() || oldDRAddress == myAddress;
         bool iAmDR = drAddress == myAddress;
         if (iWasDR != iAmDR)
@@ -1715,7 +1715,7 @@ bool PimSm::IamDR(InterfaceEntry *ie)
     PimInterface *pimInterface = pimIft->getInterfaceById(ie->getInterfaceId());
     ASSERT(pimInterface);
     Ipv4Address drAddress = pimInterface->getDRAddress();
-    return drAddress.isUnspecified() || drAddress == ie->ipv4Data()->getIPAddress();
+    return drAddress.isUnspecified() || drAddress == ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
 }
 
 PimInterface *PimSm::getIncomingInterface(InterfaceEntry *fromIE)

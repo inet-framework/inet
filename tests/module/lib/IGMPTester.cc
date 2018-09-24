@@ -128,8 +128,8 @@ void IGMPTester::initialize(int stage)
         interfaceEntry->setBroadcast(true);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_2) {
-        interfaceEntry->ipv4Data()->setIPAddress(Ipv4Address("192.168.1.1"));
-        interfaceEntry->ipv4Data()->setNetmask(Ipv4Address("255.255.0.0"));
+        interfaceEntry->getProtocolData<Ipv4InterfaceData>()->setIPAddress(Ipv4Address("192.168.1.1"));
+        interfaceEntry->getProtocolData<Ipv4InterfaceData>()->setNetmask(Ipv4Address("255.255.0.0"));
     }
 }
 
@@ -282,7 +282,7 @@ void IGMPTester::processJoinCommand(Ipv4Address group, const Ipv4AddressVector &
 {
     if (sources.empty())
     {
-        ie->ipv4Data()->joinMulticastGroup(group);
+        ie->getProtocolData<Ipv4InterfaceData>()->joinMulticastGroup(group);
         socketState[group] = Ipv4MulticastSourceList::ALL_SOURCES;
     }
     else
@@ -293,7 +293,7 @@ void IGMPTester::processJoinCommand(Ipv4Address group, const Ipv4AddressVector &
         for (Ipv4AddressVector::const_iterator source = sources.begin(); source != sources.end(); ++source)
             sourceList.add(*source);
         if (oldSources != sourceList.sources)
-            ie->ipv4Data()->changeMulticastGroupMembership(group, MCAST_INCLUDE_SOURCES, oldSources, MCAST_INCLUDE_SOURCES, sourceList.sources);
+            ie->getProtocolData<Ipv4InterfaceData>()->changeMulticastGroupMembership(group, MCAST_INCLUDE_SOURCES, oldSources, MCAST_INCLUDE_SOURCES, sourceList.sources);
     }
 }
 
@@ -301,7 +301,7 @@ void IGMPTester::processLeaveCommand(Ipv4Address group, const Ipv4AddressVector 
 {
     if (sources.empty())
     {
-        ie->ipv4Data()->leaveMulticastGroup(group);
+        ie->getProtocolData<Ipv4InterfaceData>()->leaveMulticastGroup(group);
         socketState.erase(group);
     }
     else
@@ -312,7 +312,7 @@ void IGMPTester::processLeaveCommand(Ipv4Address group, const Ipv4AddressVector 
         for (Ipv4AddressVector::const_iterator source = sources.begin(); source != sources.end(); ++source)
             sourceList.remove(*source);
         if (oldSources != sourceList.sources)
-            ie->ipv4Data()->changeMulticastGroupMembership(group, MCAST_INCLUDE_SOURCES, oldSources, MCAST_INCLUDE_SOURCES, sourceList.sources);
+            ie->getProtocolData<Ipv4InterfaceData>()->changeMulticastGroupMembership(group, MCAST_INCLUDE_SOURCES, oldSources, MCAST_INCLUDE_SOURCES, sourceList.sources);
         if (sourceList.sources.empty())
             socketState.erase(group);
     }
@@ -327,7 +327,7 @@ void IGMPTester::processBlockCommand(Ipv4Address group, const Ipv4AddressVector 
     for (Ipv4AddressVector::const_iterator source = sources.begin(); source != sources.end(); ++source)
         it->second.add(*source);
     if (oldSources != it->second.sources)
-        ie->ipv4Data()->changeMulticastGroupMembership(group, MCAST_EXCLUDE_SOURCES, oldSources, MCAST_EXCLUDE_SOURCES, it->second.sources);
+        ie->getProtocolData<Ipv4InterfaceData>()->changeMulticastGroupMembership(group, MCAST_EXCLUDE_SOURCES, oldSources, MCAST_EXCLUDE_SOURCES, it->second.sources);
 }
 
 void IGMPTester::processAllowCommand(Ipv4Address group, const Ipv4AddressVector &sources, InterfaceEntry *ie)
@@ -339,7 +339,7 @@ void IGMPTester::processAllowCommand(Ipv4Address group, const Ipv4AddressVector 
     for (Ipv4AddressVector::const_iterator source = sources.begin(); source != sources.end(); ++source)
         it->second.remove(*source);
     if (oldSources != it->second.sources)
-        ie->ipv4Data()->changeMulticastGroupMembership(group, MCAST_EXCLUDE_SOURCES, oldSources, MCAST_EXCLUDE_SOURCES, it->second.sources);
+        ie->getProtocolData<Ipv4InterfaceData>()->changeMulticastGroupMembership(group, MCAST_EXCLUDE_SOURCES, oldSources, MCAST_EXCLUDE_SOURCES, it->second.sources);
 }
 
 void IGMPTester::processSetFilterCommand(Ipv4Address group, McastSourceFilterMode filterMode, const Ipv4AddressVector &sources, InterfaceEntry *ie)
@@ -352,7 +352,7 @@ void IGMPTester::processSetFilterCommand(Ipv4Address group, McastSourceFilterMod
     sourceList.sources = sources;
 
     if (filterMode != oldFilterMode || oldSources != sourceList.sources)
-        ie->ipv4Data()->changeMulticastGroupMembership(group, oldFilterMode, oldSources, sourceList.filterMode, sourceList.sources);
+        ie->getProtocolData<Ipv4InterfaceData>()->changeMulticastGroupMembership(group, oldFilterMode, oldSources, sourceList.filterMode, sourceList.sources);
     if (sourceList.filterMode == MCAST_INCLUDE_SOURCES && sourceList.sources.empty())
         socketState.erase(group);
 }
@@ -363,19 +363,19 @@ void IGMPTester::processDumpCommand(string what, InterfaceEntry *ie)
 
     if (what == "groups")
     {
-        for (int i = 0; i < ie->ipv4Data()->getNumOfJoinedMulticastGroups(); i++)
+        for (int i = 0; i < ie->getProtocolData<Ipv4InterfaceData>()->getNumOfJoinedMulticastGroups(); i++)
         {
-            Ipv4Address group = ie->ipv4Data()->getJoinedMulticastGroup(i);
-            const Ipv4MulticastSourceList &sourceList = ie->ipv4Data()->getJoinedMulticastSources(i);
+            Ipv4Address group = ie->getProtocolData<Ipv4InterfaceData>()->getJoinedMulticastGroup(i);
+            const Ipv4MulticastSourceList &sourceList = ie->getProtocolData<Ipv4InterfaceData>()->getJoinedMulticastSources(i);
             EV << (i==0 ? "" : ", ") << group << " " << sourceList.str();
         }
     }
     else if (what == "listeners")
     {
-        for (int i = 0; i < ie->ipv4Data()->getNumOfReportedMulticastGroups(); i++)
+        for (int i = 0; i < ie->getProtocolData<Ipv4InterfaceData>()->getNumOfReportedMulticastGroups(); i++)
         {
-            Ipv4Address group = ie->ipv4Data()->getReportedMulticastGroup(i);
-            const Ipv4MulticastSourceList &sourceList = ie->ipv4Data()->getReportedMulticastSources(i);
+            Ipv4Address group = ie->getProtocolData<Ipv4InterfaceData>()->getReportedMulticastGroup(i);
+            const Ipv4MulticastSourceList &sourceList = ie->getProtocolData<Ipv4InterfaceData>()->getReportedMulticastSources(i);
             EV << (i==0 ? "" : ", ") << group << " " << sourceList.str();
         }
     }

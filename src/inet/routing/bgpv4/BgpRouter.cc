@@ -76,7 +76,7 @@ SessionId BgpRouter::createSession(BgpSessionType typeSession, const char *peerA
         info.linkIntf = rt->getInterfaceForDestAddr(info.peerAddr);
         if (info.linkIntf == nullptr)
             throw cRuntimeError("BGP Error: No configuration interface for peer address: %s", peerAddr);
-        info.sessionID = info.peerAddr.getInt() + info.linkIntf->ipv4Data()->getIPAddress().getInt();
+        info.sessionID = info.peerAddr.getInt() + info.linkIntf->getProtocolData<Ipv4InterfaceData>()->getIPAddress().getInt();
     }
     else
         info.sessionID = info.peerAddr.getInt() + info.routerID.getInt();
@@ -188,7 +188,7 @@ void BgpRouter::openTCPConnectionToPeer(SessionId sessionID)
     socket->setCallback(this);
     socket->setUserData((void *)(uintptr_t)sessionID);
     socket->setOutputGate(bgpModule->gate("socketOut"));
-    socket->bind(intfEntry->ipv4Data()->getIPAddress(), 0);
+    socket->bind(intfEntry->getProtocolData<Ipv4InterfaceData>()->getIPAddress(), 0);
     _socketMap.addSocket(socket);
 
     socket->connect(_BGPSessions[sessionID]->getPeerAddr(), TCP_PORT);
@@ -449,7 +449,7 @@ void BgpRouter::updateSendProcess(const unsigned char type, SessionId sessionInd
 
             InterfaceEntry *iftEntry = (elem).second->getLinkIntf();
             content.getOriginForUpdate().setValue((elem).second->getType());
-            content.getNextHopForUpdate().setValue(iftEntry->ipv4Data()->getIPAddress());
+            content.getNextHopForUpdate().setValue(iftEntry->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
             Ipv4Address netMask = entry->getNetmask();
             NLRI.prefix = entry->getDestination().doAnd(netMask);
             NLRI.length = (unsigned char)netMask.getNetmaskLength();

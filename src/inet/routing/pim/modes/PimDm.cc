@@ -287,7 +287,7 @@ void PimDm::processPrune(Route *route, int intId, int holdTime, int numRpfNeighb
         return;
 
     // does packet belong to this router?
-    if (upstreamNeighborField != downstream->ie->ipv4Data()->getIPAddress())
+    if (upstreamNeighborField != downstream->ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress())
         return;
 
     //
@@ -357,7 +357,7 @@ void PimDm::processJoin(Route *route, int intId, int numRpfNeighbors, Ipv4Addres
         return;
 
     // does packet belong to this router?
-    if (upstreamNeighborField != downstream->ie->ipv4Data()->getIPAddress())
+    if (upstreamNeighborField != downstream->ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress())
         return;
 
     if (downstream->pruneState == DownstreamInterface::PRUNE_PENDING)
@@ -394,7 +394,7 @@ void PimDm::processGraftPacket(Packet *pk)
     InterfaceEntry *incomingInterface = ift->getInterfaceById(pk->getTag<InterfaceInd>()->getInterfaceId());
 
     // does packet belong to this router?
-    if (pkt->getUpstreamNeighborAddress() != incomingInterface->ipv4Data()->getIPAddress()) {
+    if (pkt->getUpstreamNeighborAddress() != incomingInterface->getProtocolData<Ipv4InterfaceData>()->getIPAddress()) {
         delete pk;
         return;
     }
@@ -557,7 +557,7 @@ void PimDm::processGraftAckPacket(Packet *pk)
 
             // If the destination address of the GraftAck packet is not
             // the address of the upstream interface, then no state transition occur.
-            if (destAddress != upstream->ie->ipv4Data()->getIPAddress())
+            if (destAddress != upstream->ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress())
                 continue;
 
             // upstream state transition
@@ -722,7 +722,7 @@ void PimDm::processAssert(Interface *incomingInterface, AssertMetric receivedMet
     // Assert State Machine
     //
     AssertMetric currentMetric = incomingInterface->assertState == Interface::NO_ASSERT_INFO ?
-        route->metric.setAddress(incomingInterface->ie->ipv4Data()->getIPAddress()) :
+        route->metric.setAddress(incomingInterface->ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress()) :
         incomingInterface->winnerMetric;
     bool isEqual = receivedMetric == currentMetric;
     bool isBetter = receivedMetric < currentMetric;
@@ -1009,7 +1009,7 @@ void PimDm::processStateRefreshTimer(cMessage *timer)
             restartTimer(downstream->pruneTimer, pruneInterval);
 
         // Send StateRefresh message downstream
-        Ipv4Address originator = downstream->ie->ipv4Data()->getIPAddress();
+        Ipv4Address originator = downstream->ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
         sendStateRefreshPacket(originator, route, downstream, upstream->maxTtlSeen);
     }
 
@@ -1167,7 +1167,7 @@ void PimDm::unroutableMulticastPacketArrived(Ipv4Address source, Ipv4Address gro
             continue;
 
         bool hasPIMNeighbors = pimNbt->getNumNeighbors(pimInterface->getInterfaceId()) > 0;
-        bool hasConnectedReceivers = pimInterface->getInterfacePtr()->ipv4Data()->hasMulticastListener(group);
+        bool hasConnectedReceivers = pimInterface->getInterfacePtr()->getProtocolData<Ipv4InterfaceData>()->hasMulticastListener(group);
 
         // if there are neighbors on interface, we will forward
         if (hasPIMNeighbors || hasConnectedReceivers) {
@@ -1326,7 +1326,7 @@ void PimDm::multicastPacketArrivedOnNonRpfInterface(Ipv4Address group, Ipv4Addre
         // the Assert_Timer (AT(S,G,I) to Assert_Time, thereby initiating
         // the Assert negotiation for (S,G).
         downstream->assertState = DownstreamInterface::I_WON_ASSERT;
-        downstream->winnerMetric = route->metric.setAddress(downstream->ie->ipv4Data()->getIPAddress());
+        downstream->winnerMetric = route->metric.setAddress(downstream->ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
         sendAssertPacket(source, group, route->metric, downstream->ie);
         downstream->startAssertTimer(assertTime);
     }

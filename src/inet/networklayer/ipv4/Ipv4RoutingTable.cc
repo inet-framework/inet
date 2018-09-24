@@ -138,8 +138,8 @@ void Ipv4RoutingTable::configureRouterId()
         if (getInterfaceByAddress(routerId) == nullptr) {
             InterfaceEntry *lo0 = ift->getFirstLoopbackInterface();
             ASSERT(lo0);
-            lo0->ipv4Data()->setIPAddress(routerId);
-            lo0->ipv4Data()->setNetmask(Ipv4Address::ALLONES_ADDRESS);
+            lo0->getProtocolData<Ipv4InterfaceData>()->setIPAddress(routerId);
+            lo0->getProtocolData<Ipv4InterfaceData>()->setNetmask(Ipv4Address::ALLONES_ADDRESS);
         }
     }
 }
@@ -255,7 +255,7 @@ void Ipv4RoutingTable::printRoutingTable() const
                 route->getNetmask().isUnspecified() ? "*" : route->getNetmask().str().c_str(),
                 route->getGateway().isUnspecified() ? "*" : route->getGateway().str().c_str(),
                 !interfacePtr ? "*" : interfacePtr->getInterfaceName(),
-                !interfacePtr ? "(*)" : (std::string("(") + interfacePtr->ipv4Data()->getIPAddress().str() + ")").c_str(),
+                !interfacePtr ? "(*)" : (std::string("(") + interfacePtr->getProtocolData<Ipv4InterfaceData>()->getIPAddress().str() + ")").c_str(),
                 route->getMetric());
     }
     EV << "\n";
@@ -290,7 +290,7 @@ std::vector<Ipv4Address> Ipv4RoutingTable::gatherAddresses() const
     std::vector<Ipv4Address> addressvector;
 
     for (int i = 0; i < ift->getNumInterfaces(); ++i)
-        addressvector.push_back(ift->getInterface(i)->ipv4Data()->getIPAddress());
+        addressvector.push_back(ift->getInterface(i)->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
     return addressvector;
 }
 
@@ -362,8 +362,8 @@ bool Ipv4RoutingTable::isLocalBroadcastAddress(const Ipv4Address& dest) const
             InterfaceEntry *ie = ift->getInterface(i);
             if (!ie->isBroadcast())
                 continue;
-            Ipv4Address interfaceAddr = ie->ipv4Data()->getIPAddress();
-            Ipv4Address broadcastAddr = interfaceAddr.makeBroadcastAddress(ie->ipv4Data()->getNetmask());
+            Ipv4Address interfaceAddr = ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
+            Ipv4Address broadcastAddr = interfaceAddr.makeBroadcastAddress(ie->getProtocolData<Ipv4InterfaceData>()->getNetmask());
             if (!broadcastAddr.isUnspecified()) {
                 localBroadcastAddresses.insert(broadcastAddr);
             }
@@ -380,8 +380,8 @@ InterfaceEntry *Ipv4RoutingTable::findInterfaceByLocalBroadcastAddress(const Ipv
         InterfaceEntry *ie = ift->getInterface(i);
         if (!ie->isBroadcast())
             continue;
-        Ipv4Address interfaceAddr = ie->ipv4Data()->getIPAddress();
-        Ipv4Address broadcastAddr = interfaceAddr.makeBroadcastAddress(ie->ipv4Data()->getNetmask());
+        Ipv4Address interfaceAddr = ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
+        Ipv4Address broadcastAddr = interfaceAddr.makeBroadcastAddress(ie->getProtocolData<Ipv4InterfaceData>()->getNetmask());
         if (broadcastAddr == dest)
             return ie;
     }
@@ -394,7 +394,7 @@ bool Ipv4RoutingTable::isLocalMulticastAddress(const Ipv4Address& dest) const
 
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
         InterfaceEntry *ie = ift->getInterface(i);
-        if (ie->ipv4Data()->isMemberOfMulticastGroup(dest))
+        if (ie->getProtocolData<Ipv4InterfaceData>()->isMemberOfMulticastGroup(dest))
             return true;
     }
     return false;

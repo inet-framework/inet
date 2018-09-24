@@ -99,7 +99,7 @@ void Ipv4NodeConfigurator::prepareNode()
 
 void Ipv4NodeConfigurator::prepareInterface(InterfaceEntry *interfaceEntry)
 {
-    // ASSERT(!interfaceEntry->ipv4Data());
+    // ASSERT(!interfaceEntry->getProtocolData<Ipv4InterfaceData>());
     Ipv4InterfaceData *interfaceData = interfaceEntry->addProtocolData<Ipv4InterfaceData>();
     if (interfaceEntry->isLoopback()) {
         // we may reconfigure later it to be the routerId

@@ -960,7 +960,7 @@ void Udp::addMulticastAddressToInterface(InterfaceEntry *ie, const L3Address& mu
 
     if (multicastAddr.getType() == L3Address::IPv4) {
 #ifdef WITH_IPv4
-        ie->ipv4Data()->joinMulticastGroup(multicastAddr.toIpv4());
+        ie->getProtocolData<Ipv4InterfaceData>()->joinMulticastGroup(multicastAddr.toIpv4());
 #endif // ifdef WITH_IPv4
     }
     else if (multicastAddr.getType() == L3Address::IPv6) {

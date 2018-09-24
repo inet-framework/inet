@@ -145,7 +145,7 @@ void RoutingTableRecorder::recordInterface(cModule *host, const InterfaceEntry *
     // moduleId, ifname, address
     std::stringstream content;
     content << host->getId() << " " << interface->getName() << " ";
-    content << (interface->ipv4Data() != nullptr ? interface->ipv4Data()->getIPAddress().str() : Ipv4Address().str());
+    content << (interface->getProtocolData<Ipv4InterfaceData>() != nullptr ? interface->getProtocolData<Ipv4InterfaceData>()->getIPAddress().str() : Ipv4Address().str());
 
     if (signalID == interfaceCreatedSignal) {
         envir->customCreatedEntry("IT", interfaceKey, content.str().c_str());

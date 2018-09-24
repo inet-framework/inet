@@ -440,7 +440,7 @@ void Igmpv3::initialize(int stage)
         registerService(Protocol::igmp, nullptr, gate("ipIn"));
         registerProtocol(Protocol::igmp, gate("ipOut"), nullptr);
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER_2) {    // ipv4Data() created in INITSTAGE_NETWORK_LAYER
+    else if (stage == INITSTAGE_NETWORK_LAYER_2) {    // getProtocolData<Ipv4InterfaceData>() created in INITSTAGE_NETWORK_LAYER
         for (int i = 0; i < ift->getNumInterfaces(); ++i) {
             InterfaceEntry *ie = ift->getInterface(i);
             if (ie->isMulticast())
@@ -451,7 +451,7 @@ void Igmpv3::initialize(int stage)
             for (int i = 0; i < ift->getNumInterfaces(); ++i) {
                 InterfaceEntry *ie = ift->getInterface(i);
                 if (ie->isMulticast())
-                    ie->ipv4Data()->joinMulticastGroup(Ipv4Address::ALL_IGMPV3_ROUTERS_MCAST);
+                    ie->getProtocolData<Ipv4InterfaceData>()->joinMulticastGroup(Ipv4Address::ALL_IGMPV3_ROUTERS_MCAST);
             }
         }
     }
@@ -948,7 +948,7 @@ void Igmpv3::processQuery(Packet *packet)
     if (rt->isMulticastForwardingEnabled()) {
         //Querier Election
         RouterInterfaceData *routerInterfaceData = getRouterInterfaceData(ie);
-        if (packet->getTag<L3AddressInd>()->getSrcAddress().toIpv4() < ie->ipv4Data()->getIPAddress()) {
+        if (packet->getTag<L3AddressInd>()->getSrcAddress().toIpv4() < ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress()) {
             startTimer(routerInterfaceData->generalQueryTimer, otherQuerierPresentInterval);
             routerInterfaceData->state = IGMPV3_RS_NON_QUERIER;
         }
@@ -1261,7 +1261,7 @@ void Igmpv3::processReport(Packet *packet)
             groupData->collectForwardedSources(newSourceList);
 
             if (newSourceList != oldSourceList) {
-                ie->ipv4Data()->setMulticastListeners(groupData->groupAddr, newSourceList.filterMode, newSourceList.sources);
+                ie->getProtocolData<Ipv4InterfaceData>()->setMulticastListeners(groupData->groupAddr, newSourceList.filterMode, newSourceList.sources);
                 // TODO notifications?
             }
         }
@@ -1296,7 +1296,7 @@ void Igmpv3::processRouterGroupTimer(cMessage *msg)
         groupData->filter = IGMPV3_FM_INCLUDE;
         if (!timerRunning) {
             EV_DETAIL << "Deleting multicast listener for group '" << groupData->groupAddr << "' from the interface table.\n";
-            ie->ipv4Data()->removeMulticastListener(groupData->groupAddr);
+            ie->getProtocolData<Ipv4InterfaceData>()->removeMulticastListener(groupData->groupAddr);
             groupData->parent->deleteGroupData(groupData->groupAddr);
 
             EV_DETAIL << "New Router State is <deleted>.\n";
@@ -1329,7 +1329,7 @@ void Igmpv3::processRouterSourceTimer(cMessage *msg)
         }
     }
     if (last) {
-        ie->ipv4Data()->removeMulticastListener(groupData->groupAddr);
+        ie->getProtocolData<Ipv4InterfaceData>()->removeMulticastListener(groupData->groupAddr);
         groupData->parent->deleteGroupData(groupData->groupAddr);
     }
 }

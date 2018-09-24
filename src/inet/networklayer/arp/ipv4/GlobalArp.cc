@@ -336,7 +336,7 @@ void GlobalArp::receiveSignal(cComponent *source, simsignal_t signalID, cObject 
                     return;    // if the address is not defined it isn't included in the global cache
                 }
             }
-            Ipv4Address ipv4Address = interfaceEntry->ipv4Data()->getIPAddress();
+            Ipv4Address ipv4Address = interfaceEntry->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
             auto where = globalArpCache.insert(globalArpCache.begin(), std::make_pair(ipv4Address, entry));
             ASSERT(where->second == entry);
         }

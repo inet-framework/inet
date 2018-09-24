@@ -322,7 +322,7 @@ void RsvpTe::setupHello()
     while ((token = tokenizer.nextToken()) != nullptr) {
         ASSERT(ift->getInterfaceByName(token));
 
-        Ipv4Address peer = tedmod->getPeerByLocalAddress(ift->getInterfaceByName(token)->ipv4Data()->getIPAddress());
+        Ipv4Address peer = tedmod->getPeerByLocalAddress(ift->getInterfaceByName(token)->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
 
         HelloState h;
 
@@ -1079,7 +1079,7 @@ bool RsvpTe::evalNextHopInterface(Ipv4Address destAddr, const EroVector& ERO, Ip
                 return false;
             }
 
-            OI = ie->ipv4Data()->getIPAddress();
+            OI = ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
         }
         else {
             OI = tedmod->getInterfaceAddrByPeerAddress(ERO[0].node);
@@ -1105,7 +1105,7 @@ bool RsvpTe::evalNextHopInterface(Ipv4Address destAddr, const EroVector& ERO, Ip
                 return false;
             }
 
-            OI = ie->ipv4Data()->getIPAddress();
+            OI = ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
 
             HelloState *h = findHello(tedmod->getPeerByLocalAddress(OI));
             if (!h) {

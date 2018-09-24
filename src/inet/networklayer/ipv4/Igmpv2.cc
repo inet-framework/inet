@@ -696,7 +696,7 @@ void Igmpv2::processLeaveTimer(cMessage *msg)
     EV_DEBUG << "Igmpv2: Leave Timer expired, deleting " << ctx->routerGroup->groupAddr << " from listener list of '" << ctx->ie->getInterfaceName() << "'\n";
 
     // notify Ipv4InterfaceData to update its listener list
-    ctx->ie->ipv4Data()->removeMulticastListener(ctx->routerGroup->groupAddr);
+    ctx->ie->getProtocolData<Ipv4InterfaceData>()->removeMulticastListener(ctx->routerGroup->groupAddr);
     numRouterGroups--;
 
     if (ctx->routerGroup->state == IGMP_RGS_CHECKING_MEMBERSHIP)
@@ -753,7 +753,7 @@ void Igmpv2::processQuery(InterfaceEntry *ie, Packet *packet)
         }
 
         RouterInterfaceData *routerInterfaceData = getRouterInterfaceData(ie);
-        if (sender < ie->ipv4Data()->getIPAddress()) {
+        if (sender < ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress()) {
             startTimer(routerInterfaceData->igmpQueryTimer, otherQuerierPresentInterval);
             routerInterfaceData->igmpRouterState = IGMP_RS_NON_QUERIER;
         }
@@ -833,7 +833,7 @@ void Igmpv2::processV2Report(InterfaceEntry *ie, Packet *packet)
 
         if (routerGroupData->state == IGMP_RGS_NO_MEMBERS_PRESENT) {
             // notify Ipv4InterfaceData to update its listener list
-            ie->ipv4Data()->addMulticastListener(groupAddr);
+            ie->getProtocolData<Ipv4InterfaceData>()->addMulticastListener(groupAddr);
             numRouterGroups++;
         }
         else if (routerGroupData->state == IGMP_RGS_CHECKING_MEMBERSHIP)

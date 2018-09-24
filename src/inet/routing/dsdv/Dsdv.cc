@@ -108,7 +108,7 @@ void Dsdv::start()
                 rt->deleteRoute(entry);
         }
     }
-    CHK(interface80211ptr->ipv4Data())->joinMulticastGroup(Ipv4Address::LL_MANET_ROUTERS);
+    CHK(interface80211ptr->getProtocolData<Ipv4InterfaceData>())->joinMulticastGroup(Ipv4Address::LL_MANET_ROUTERS);
 
     // schedules a random periodic event: the hello message broadcast from DSDV module
 
@@ -156,7 +156,7 @@ void Dsdv::handleSelfMessage(cMessage *msg)
 
         // Filling the DsdvHello fields
         // Ipv4Address source = (ie->ipv4()->getIPAddress());
-        Ipv4Address source = (interface80211ptr->ipv4Data()->getIPAddress());
+        Ipv4Address source = (interface80211ptr->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
         hello->setChunkLength(b(128)); ///size of Hello message in bits
         hello->setSrcAddress(source);
         sequencenumber += 2;
@@ -233,7 +233,7 @@ void Dsdv::handleMessage(cMessage *msg)
         // it adds/replaces the information in routing table for the one contained in the message
         // but only if it's useful/up-to-date. If not the DSDV module ignores the message.
         packet->addTagIfAbsent<L3AddressReq>()->setDestAddress(Ipv4Address(255, 255, 255, 255)); //let's try the limited broadcast 255.255.255.255 but multicast goes from 224.0.0.0 to 239.255.255.255
-        packet->addTagIfAbsent<L3AddressReq>()->setSrcAddress(interface80211ptr->ipv4Data()->getIPAddress());
+        packet->addTagIfAbsent<L3AddressReq>()->setSrcAddress(interface80211ptr->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
         packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interface80211ptr->getInterfaceId());
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::manet);
         packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
@@ -247,7 +247,7 @@ void Dsdv::handleMessage(cMessage *msg)
         if (msg->arrivedOn("ipIn")) {
             ASSERT((!isForwardHello && recHello) || (isForwardHello && fhp->hello));
             bubble("Received hello message");
-            Ipv4Address source = interface80211ptr->ipv4Data()->getIPAddress();
+            Ipv4Address source = interface80211ptr->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
 
             //reads DSDV hello message fields
             Ipv4Address src;

@@ -110,7 +110,7 @@ bool Loopback::isUpperMsg(cMessage *msg)
 void Loopback::refreshDisplay() const
 {
     /* TBD find solution for displaying IPv4 address without dependence on IPv4 or IPv6
-            Ipv4Address addr = interfaceEntry->ipv4Data()->getIPAddress();
+            Ipv4Address addr = interfaceEntry->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
             sprintf(buf, "%s / %s\nrcv:%ld snt:%ld", addr.isUnspecified()?"-":addr.str().c_str(), datarateText, numRcvdOK, numSent);
      */
     char buf[80];
