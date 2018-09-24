@@ -104,9 +104,7 @@ void ExtInterface::copyInterfaceConfigurationFromExt()
 
     close(fd);
 
-    Ipv4InterfaceData *interfaceData = ipv4Data();
-    if (interfaceData == nullptr)
-        setIpv4Data(interfaceData = new Ipv4InterfaceData());
+    Ipv4InterfaceData *interfaceData = addProtocolDataIfAbsent<Ipv4InterfaceData>();
     setMacAddress(macAddress);
     setMtu(mtu);
     interfaceData->setIPAddress(Ipv4Address(ipv4Address));
@@ -130,7 +128,7 @@ void ExtInterface::copyInterfaceConfigurationToExt()
     if (ioctl(fd, SIOCSIFMTU, &ifr) == -1)
         throw cRuntimeError("error at mtu setting: %s", strerror(errno));
 
-    Ipv4InterfaceData *interfaceData = ipv4Data();
+    Ipv4InterfaceData *interfaceData = findProtocolData<Ipv4InterfaceData>();
     if (interfaceData) {
 
         //set the IPv4 address
