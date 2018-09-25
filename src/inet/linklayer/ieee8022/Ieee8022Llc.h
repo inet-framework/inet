@@ -18,15 +18,28 @@
 #ifndef __INET_IEEE8022LLC_H
 #define __INET_IEEE8022LLC_H
 
+#include "inet/common/Protocol.h"
+#include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
-
-#include "inet/common/Protocol.h"
 
 namespace inet {
 
 class INET_API Ieee8022Llc : public cSimpleModule
 {
+protected:
+    struct SocketDescriptor
+    {
+        int socketId = -1;
+        int localSap = -1;
+        int remoteSap = -1;
+
+        SocketDescriptor(int socketId, int localSap, int remoteSap = -1)
+                : socketId(socketId), localSap(localSap), remoteSap(remoteSap) { }
+    };
+
+    std::map<int, SocketDescriptor *> socketIdToSocketDescriptor;
+
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
@@ -34,6 +47,9 @@ class INET_API Ieee8022Llc : public cSimpleModule
 
     virtual void encapsulate(Packet *frame);
     virtual void decapsulate(Packet *frame);
+    virtual void processPacketFromHigherLayer(Packet *msg);
+    virtual void processPacketFromMac(Packet *packet);
+    virtual void processCommandFromHigherLayer(Request *request);
 
   public:
     static const Protocol *getProtocol(const Ptr<const Ieee8022LlcHeader>& header);

@@ -44,6 +44,7 @@ simsignal_t EtherEncap::pauseSentSignal = registerSignal("pauseSent");
 
 void EtherEncap::initialize(int stage)
 {
+    Ieee8022Llc::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         fcsMode = parseFcsMode(par("fcsMode"));
         seqNum = 0;
@@ -64,35 +65,12 @@ void EtherEncap::initialize(int stage)
     }
 }
 
-void EtherEncap::handleMessage(cMessage *msg)
+void EtherEncap::processCommandFromHigherLayer(Request *msg)
 {
-    if (msg->arrivedOn("upperLayerIn")) {
-        EV_INFO << "Received " << msg << " from upper layer." << endl;
-        // from higher layer
-        if (msg->isPacket())
-            processPacketFromHigherLayer(check_and_cast<Packet *>(msg));
-        else
-            processCommandFromHigherLayer(msg);
-    }
-    else if (msg->arrivedOn("lowerLayerIn")) {
-        EV_INFO << "Received " << msg << " from lower layer." << endl;
-        processFrameFromMAC(check_and_cast<Packet *>(msg));
-    }
+    if (dynamic_cast<Ieee802PauseCommand *>(msg->getControlInfo()) != nullptr)
+        handleSendPause(msg);
     else
-        throw cRuntimeError("Unknown message");
-}
-
-void EtherEncap::processCommandFromHigherLayer(cMessage *msg)
-{
-    switch (msg->getKind()) {
-        case IEEE802CTRL_SENDPAUSE:
-            // higher layer want MAC to send PAUSE frame
-            handleSendPause(msg);
-            break;
-
-        default:
-            throw cRuntimeError("Received message `%s' with unknown message kind %d", msg->getName(), msg->getKind());
-    }
+        Ieee8022Llc::processCommandFromHigherLayer(msg);
 }
 
 void EtherEncap::refreshDisplay() const
@@ -220,7 +198,7 @@ const Ptr<const EthernetMacHeader> EtherEncap::decapsulateMacLlcSnap(Packet *pac
     return ethHeader;
 }
 
-void EtherEncap::processFrameFromMAC(Packet *packet)
+void EtherEncap::processPacketFromMac(Packet *packet)
 {
     // decapsulate and attach control info
     decapsulateMacLlcSnap(packet);

@@ -15,6 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/Simsignals.h"
@@ -31,30 +33,61 @@ void Ieee8022Llc::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         // TODO: parameterization for llc or snap?
     }
-}
-
-void Ieee8022Llc::handleMessage(cMessage *message)
-{
-    if (message->arrivedOn("upperLayerIn")) {
-        auto packet = check_and_cast<Packet *>(message);
-        encapsulate(packet);
-        send(packet, "lowerLayerOut");
-    }
-    else if (message->arrivedOn("lowerLayerIn")) {
-        auto packet = check_and_cast<Packet *>(message);
-        decapsulate(packet);
-        if (packet->getTag<PacketProtocolTag>()->getProtocol() != nullptr || packet->findTag<Ieee802SapInd>() != nullptr)
-            send(packet, "upperLayerOut");
-        else {
-            EV_WARN << "Unknown protocol or SAP, dropping packet\n";
-            PacketDropDetails details;
-            details.setReason(NO_PROTOCOL_FOUND);
-            emit(packetDroppedSignal, packet, &details);
-            delete packet;
+    else if (stage == INITSTAGE_LINK_LAYER)
+    {
+        if (par("registerProtocol").boolValue()) {    //FIXME //KUDGE should redesign place of EtherEncap and LLC modules
+            //register service and protocol
+            registerService(Protocol::ieee8022, gate("upperLayerIn"), nullptr);
+            registerProtocol(Protocol::ieee8022, nullptr, gate("upperLayerOut"));
         }
     }
+}
+
+void Ieee8022Llc::handleMessage(cMessage *msg)
+{
+    if (msg->arrivedOn("upperLayerIn")) {
+        // from upper layer
+        EV_INFO << "Received " << msg << " from upper layer." << endl;
+        if (msg->isPacket())
+            processPacketFromHigherLayer(check_and_cast<Packet *>(msg));
+        else
+            processCommandFromHigherLayer(check_and_cast<Request *>(msg));
+    }
+    else if (msg->arrivedOn("lowerLayerIn")) {
+        EV_INFO << "Received " << msg << " from lower layer." << endl;
+        processPacketFromMac(check_and_cast<Packet *>(msg));
+    }
     else
-        throw cRuntimeError("Unknown message");
+        throw cRuntimeError("Unknown gate");
+}
+
+void Ieee8022Llc::processPacketFromHigherLayer(Packet *packet)
+{
+    encapsulate(packet);
+    send(packet, "lowerLayerOut");
+}
+
+void Ieee8022Llc::processCommandFromHigherLayer(Request *request)
+{
+    auto ctrl = request->getControlInfo();
+    if (ctrl == nullptr)
+        throw cRuntimeError("Request '%s' arrived without controlinfo", request->getName());
+    else
+        throw cRuntimeError("Unknown command: '%s' with %s", request->getName(), ctrl->getClassName());
+}
+
+void Ieee8022Llc::processPacketFromMac(Packet *packet)
+{
+    decapsulate(packet);
+    if (packet->getTag<PacketProtocolTag>()->getProtocol() != nullptr || packet->findTag<Ieee802SapInd>() != nullptr)
+        send(packet, "upperLayerOut");
+    else {
+        EV_WARN << "Unknown protocol, dropping packet\n";
+        PacketDropDetails details;
+        details.setReason(NO_PROTOCOL_FOUND);
+        emit(packetDroppedSignal, packet, &details);
+        delete packet;
+    }
 }
 
 void Ieee8022Llc::encapsulate(Packet *frame)

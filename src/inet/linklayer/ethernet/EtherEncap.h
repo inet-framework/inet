@@ -47,11 +47,10 @@ class INET_API EtherEncap : public Ieee8022Llc
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *msg) override;
 
-    virtual void processCommandFromHigherLayer(cMessage *msg);
-    virtual void processPacketFromHigherLayer(Packet *msg);
-    virtual void processFrameFromMAC(Packet *packet);
+    virtual void processCommandFromHigherLayer(Request *msg) override;
+    virtual void processPacketFromHigherLayer(Packet *msg) override;
+    virtual void processPacketFromMac(Packet *packet) override;
     virtual void handleSendPause(cMessage *msg);
 
     virtual void refreshDisplay() const override;
