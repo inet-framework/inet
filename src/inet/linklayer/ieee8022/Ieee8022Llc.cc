@@ -23,6 +23,7 @@
 #include "inet/common/Simsignals_m.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022Llc.h"
+#include "inet/linklayer/ieee8022/LlcSocketCommand_m.h"
 
 namespace inet {
 
@@ -72,6 +73,21 @@ void Ieee8022Llc::processCommandFromHigherLayer(Request *request)
     auto ctrl = request->getControlInfo();
     if (ctrl == nullptr)
         throw cRuntimeError("Request '%s' arrived without controlinfo", request->getName());
+    else if (auto command = dynamic_cast<LlcSocketOpenCommand *>(ctrl)) {
+        int socketId = request->getTag<SocketReq>()->getSocketId();
+        SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getLocalSap());
+        socketIdToSocketDescriptor[socketId] = descriptor;
+        delete request;
+    }
+    else if (dynamic_cast<LlcSocketCloseCommand *>(ctrl) != nullptr) {
+        int socketId = request->getTag<SocketReq>()->getSocketId();
+        auto it = socketIdToSocketDescriptor.find(socketId);
+        if (it != socketIdToSocketDescriptor.end()) {
+            delete it->second;
+            socketIdToSocketDescriptor.erase(it);
+        }
+        delete request;
+    }
     else
         throw cRuntimeError("Unknown command: '%s' with %s", request->getName(), ctrl->getClassName());
 }
@@ -79,13 +95,33 @@ void Ieee8022Llc::processCommandFromHigherLayer(Request *request)
 void Ieee8022Llc::processPacketFromMac(Packet *packet)
 {
     decapsulate(packet);
-    if (packet->getTag<PacketProtocolTag>()->getProtocol() != nullptr || packet->findTag<Ieee802SapInd>() != nullptr)
+    bool hasSocket = false;
+
+    // deliver to sockets
+    if (auto sap = packet->findTag<Ieee802SapInd>()) {
+        int localSap = sap->getDsap();
+        int remoteSap = sap->getSsap();
+        for (const auto &elem: socketIdToSocketDescriptor) {
+            if ((elem.second->localSap == localSap || elem.second->localSap == -1)
+                    && (elem.second->remoteSap == remoteSap || elem.second->remoteSap == -1)) {
+                auto *packetCopy = packet->dup();
+                packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
+                EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
+                send(packetCopy, "upperLayerOut");
+                hasSocket = true;
+            }
+        }
+    }
+
+    if (packet->getTag<PacketProtocolTag>()->getProtocol() != nullptr)
         send(packet, "upperLayerOut");
     else {
-        EV_WARN << "Unknown protocol, dropping packet\n";
-        PacketDropDetails details;
-        details.setReason(NO_PROTOCOL_FOUND);
-        emit(packetDroppedSignal, packet, &details);
+        if (!hasSocket) {
+            EV_WARN << "Unknown protocol, dropping packet\n";
+            PacketDropDetails details;
+            details.setReason(NO_PROTOCOL_FOUND);
+            emit(packetDroppedSignal, packet, &details);
+        }
         delete packet;
     }
 }
