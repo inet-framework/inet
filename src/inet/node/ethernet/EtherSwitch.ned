@@ -125,8 +125,8 @@ module EtherSwitch
             stp.relayOut --> up.in++; // relayUnit.stpIn;
         }
         for i=0..numExtInterfaces-1 {
-            ext[i].upperLayerOut --> nl.in++;
-            ext[i].upperLayerIn <-- nl.out++;
+            ext[i].upperLayerOut --> down.in++;
+            ext[i].upperLayerIn <-- down.out++;
         }
 }
 
