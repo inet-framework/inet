@@ -19,17 +19,19 @@
 #define __INET_ETHERAPPCLI_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/MacAddress.h"
-#include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/linklayer/ieee8022/LlcSocket.h"
+#include "inet/linklayer/ieee8022/LlcSocketCommand_m.h"
 
 namespace inet {
 
 /**
  * Simple traffic generator for the Ethernet model.
  */
-class INET_API EtherAppClient : public cSimpleModule, public ILifecycle
+class INET_API EtherAppClient : public cSimpleModule, public ILifecycle, public LlcSocket::ICallback
 {
   protected:
     enum Kinds { START = 100, NEXT };
@@ -50,6 +52,8 @@ class INET_API EtherAppClient : public cSimpleModule, public ILifecycle
     simtime_t startTime;
     simtime_t stopTime;
 
+    LlcSocket llcSocket;
+
     // receive statistics
     long packetsSent = 0;
     long packetsReceived = 0;
@@ -68,7 +72,7 @@ class INET_API EtherAppClient : public cSimpleModule, public ILifecycle
     virtual MacAddress resolveDestMACAddress();
 
     virtual void sendPacket();
-    virtual void receivePacket(Packet *msg);
+    virtual void socketDataArrived(LlcSocket*, Packet *msg) override;
     virtual void registerDSAP(int dsap);
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 

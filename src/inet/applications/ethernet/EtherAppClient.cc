@@ -63,6 +63,8 @@ void EtherAppClient::initialize(int stage)
         stopTime = par("stopTime");
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
+        llcSocket.setOutputGate(gate("out"));
+        llcSocket.setCallback(this);
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         if (isGenerator())
@@ -83,7 +85,7 @@ void EtherAppClient::handleMessage(cMessage *msg)
         if (msg->getKind() == START) {
             bool registerSAP = par("registerSAP");
             if (registerSAP)
-                registerDSAP(localSAP);
+                llcSocket.open(-1, localSAP);
 
             destMACAddress = resolveDestMACAddress();
             // if no dest address given, nothing to do
@@ -94,7 +96,7 @@ void EtherAppClient::handleMessage(cMessage *msg)
         scheduleNextPacket(false);
     }
     else
-        receivePacket(check_and_cast<Packet *>(msg));
+        llcSocket.processMessage(msg);
 }
 
 bool EtherAppClient::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
@@ -164,9 +166,9 @@ void EtherAppClient::registerDSAP(int dsap)
 {
     EV_DEBUG << getFullPath() << " registering DSAP " << dsap << "\n";
 
-    Ieee802RegisterDsapCommand *etherctrl = new Ieee802RegisterDsapCommand();
-    etherctrl->setDsap(dsap);
-    cMessage *msg = new cMessage("register_DSAP", IEEE802CTRL_REGISTER_DSAP);
+    auto *etherctrl = new LlcSocketOpenCommand();
+    etherctrl->setLocalSap(dsap);
+    cMessage *msg = new cMessage("register_DSAP", IEEE8022_LLC_C_OPEN);
     msg->setControlInfo(etherctrl);
 
     send(msg, "out");
@@ -198,11 +200,11 @@ void EtherAppClient::sendPacket()
     ieee802SapReq->setDsap(remoteSAP);
 
     emit(packetSentSignal, datapacket);
-    send(datapacket, "out");
+    llcSocket.send(datapacket);
     packetsSent++;
 }
 
-void EtherAppClient::receivePacket(Packet *msg)
+void EtherAppClient::socketDataArrived(LlcSocket*, Packet *msg)
 {
     EV_INFO << "Received packet `" << msg->getName() << "'\n";
 

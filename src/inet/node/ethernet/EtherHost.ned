@@ -19,6 +19,7 @@ package inet.node.ethernet;
 
 import inet.applications.ethernet.EtherAppClient;
 import inet.applications.ethernet.EtherAppServer;
+import inet.common.MessageDispatcher;
 import inet.common.lifecycle.NodeStatus;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.ethernet.EtherLlc;
@@ -52,7 +53,7 @@ module EtherHost
         }
         interfaceTable: InterfaceTable {
             parameters:
-                @display("p=125,240;is=s");
+                @display("p=100,240;is=s");
         }
         cli: EtherAppClient {
             parameters:
@@ -64,23 +65,27 @@ module EtherHost
                 registerSAP = true;
                 @display("p=450,100");
         }
+        dispatcher: MessageDispatcher {
+            parameters:
+                @display("p=350,158;b=300,5,,,,1");
+        }
         llc: EtherLlc {
             parameters:
-                @display("p=350,200");
-            gates:
-                upperLayerIn[2];
-                upperLayerOut[2];
+                registerProtocol = true;
+                @display("p=350,240");
         }
         eth: <default("EthernetInterface")> like IEthernetInterface {
             parameters:
-                @display("p=350,297,row,150;q=txQueue");
+                @display("p=350,336,row,150;q=txQueue");
         }
     connections:
+        cli.out --> dispatcher.in++;
+        dispatcher.out++ --> cli.in;
+        srv.out --> dispatcher.in++;
+        dispatcher.out++ --> srv.in;
 
-        cli.out --> llc.upperLayerIn[0];
-        cli.in <-- llc.upperLayerOut[0];
-        srv.out --> llc.upperLayerIn[1];
-        srv.in <-- llc.upperLayerOut[1];
+        dispatcher.out++ --> llc.upperLayerIn;
+        llc.upperLayerOut --> dispatcher.in++;
 
         llc.lowerLayerOut --> eth.upperLayerIn;
         eth.upperLayerOut --> llc.lowerLayerIn;

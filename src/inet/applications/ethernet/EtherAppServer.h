@@ -19,11 +19,13 @@
 #define __INET_ETHERAPPSRV_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/packet/Packet.h"
-#include "inet/linklayer/common/MacAddress.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/common/MacAddress.h"
+#include "inet/linklayer/ieee8022/LlcSocket.h"
+#include "inet/linklayer/ieee8022/LlcSocketCommand_m.h"
 
 namespace inet {
 
@@ -32,11 +34,13 @@ namespace inet {
 /**
  * Server-side process EtherAppClient.
  */
-class INET_API EtherAppServer : public cSimpleModule, public ILifecycle
+class INET_API EtherAppServer : public cSimpleModule, public ILifecycle, public LlcSocket::ICallback
 {
   protected:
     int localSAP = 0;
     NodeStatus *nodeStatus = nullptr;
+
+    LlcSocket llcSocket;
 
     // statistics
     long packetsSent = 0;
@@ -54,6 +58,7 @@ class INET_API EtherAppServer : public cSimpleModule, public ILifecycle
     virtual bool isNodeUp();
     void registerDSAP(int dsap);
     void sendPacket(Packet *datapacket, const MacAddress& destAddr, int destSap);
+    virtual void socketDataArrived(LlcSocket*, Packet *msg) override;
 };
 
 } // namespace inet

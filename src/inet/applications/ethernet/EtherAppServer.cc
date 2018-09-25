@@ -21,13 +21,13 @@
 #include "inet/applications/ethernet/EtherAppServer.h"
 
 #include "inet/applications/ethernet/EtherApp_m.h"
-#include "inet/linklayer/common/Ieee802Ctrl.h"
-#include "inet/linklayer/common/Ieee802SapTag_m.h"
-#include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/linklayer/common/Ieee802Ctrl.h"
+#include "inet/linklayer/common/Ieee802SapTag_m.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
 
 namespace inet {
 
@@ -42,6 +42,10 @@ void EtherAppServer::initialize(int stage)
 
         // statistics
         packetsSent = packetsReceived = 0;
+
+        // socket
+        llcSocket.setOutputGate(gate("out"));
+        llcSocket.setCallback(this);
 
         WATCH(packetsSent);
         WATCH(packetsReceived);
@@ -76,17 +80,21 @@ void EtherAppServer::handleMessage(cMessage *msg)
 {
     if (!isNodeUp())
         throw cRuntimeError("Application is not running");
+    else
+        llcSocket.processMessage(msg);
+}
 
+void EtherAppServer::socketDataArrived(LlcSocket*, Packet *msg)
+{
     EV_INFO << "Received packet `" << msg->getName() << "'\n";
-    Packet *reqPk = check_and_cast<Packet *>(msg);
-    const auto& req = reqPk->peekDataAt<EtherAppReq>(B(0));
+    const auto& req = msg->peekAtFront<EtherAppReq>();
     if (req == nullptr)
-        throw cRuntimeError("data type error: not an EtherAppReq arrived in packet %s", reqPk->str().c_str());
+        throw cRuntimeError("data type error: not an EtherAppReq arrived in packet %s", msg->str().c_str());
     packetsReceived++;
-    emit(packetReceivedSignal, reqPk);
+    emit(packetReceivedSignal, msg);
 
-    MacAddress srcAddr = reqPk->getTag<MacAddressInd>()->getSrcAddress();
-    int srcSap = reqPk->getTag<Ieee802SapInd>()->getSsap();
+    MacAddress srcAddr = msg->getTag<MacAddressInd>()->getSrcAddress();
+    int srcSap = msg->getTag<Ieee802SapInd>()->getSsap();
     long requestId = req->getRequestId();
     long replyBytes = req->getResponseBytes();
 
@@ -120,7 +128,7 @@ void EtherAppServer::sendPacket(Packet *datapacket, const MacAddress& destAddr, 
     ieee802SapReq->setDsap(destSap);
 
     emit(packetSentSignal, datapacket);
-    send(datapacket, "out");
+    llcSocket.send(datapacket);
     packetsSent++;
 }
 
@@ -128,12 +136,7 @@ void EtherAppServer::registerDSAP(int dsap)
 {
     EV_DEBUG << getFullPath() << " registering DSAP " << dsap << "\n";
 
-    auto *etherctrl = new Ieee802RegisterDsapCommand();
-    etherctrl->setDsap(dsap);
-    cMessage *msg = new cMessage("register_DSAP", IEEE802CTRL_REGISTER_DSAP);
-    msg->setControlInfo(etherctrl);
-
-    send(msg, "out");
+    llcSocket.open(-1, dsap);
 }
 
 bool EtherAppServer::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
