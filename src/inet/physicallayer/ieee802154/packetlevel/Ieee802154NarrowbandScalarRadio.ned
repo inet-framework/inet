@@ -27,7 +27,7 @@ module Ieee802154NarrowbandScalarRadio extends FlatRadioBase
         transmitter.typename = default("Ieee802154NarrowbandScalarTransmitter");
         receiver.typename = default("Ieee802154NarrowbandScalarReceiver");
 
-        carrierFrequency = 2450 MHz;
+        carrierFrequency = default(2450 MHz);
 
         // B_20dB ATmega256RFR2 (page 564)
         bandwidth = default(2.8 MHz);
