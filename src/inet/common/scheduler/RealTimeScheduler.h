@@ -43,7 +43,7 @@ class INET_API RealTimeScheduler : public cScheduler
         Entry(int fd, ICallback *callback) : fd(fd), callback(callback) {}
     };
 
-    int64_t baseTime; // in microseconds, as returned by opp_get_monotonic_clock_usecs()
+    int64_t baseTime; // in nanoseconds, as returned by opp_get_monotonic_clock_nsecs()
 
   protected:
     class BeginSimulationEvent : public cEvent
@@ -61,7 +61,7 @@ class INET_API RealTimeScheduler : public cScheduler
   protected:
     virtual void advanceSimTime();
     virtual bool receiveWithTimeout(long usec);
-    virtual int receiveUntil(int64_t targetTime); // in microseconds, as returned by opp_get_monotonic_clock_usecs()
+    virtual int receiveUntil(int64_t targetTime); // in nanoseconds, as returned by opp_get_monotonic_clock_nsecs()
 
   public:
     RealTimeScheduler();
