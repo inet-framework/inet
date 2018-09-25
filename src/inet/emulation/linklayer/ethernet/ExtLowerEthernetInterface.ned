@@ -21,6 +21,11 @@ import inet.emulation.common.ExtInterface;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.ethernet.IEtherEncap;
 
+//
+// Provides an Ethernet network interface suitable for emulation. The lower part
+// of the network interface is realized in the real world using an real ethernet
+// socket of the computer which is running the simulation.
+//
 module ExtLowerEthernetInterface extends ExtInterface like IEthernetInterface
 {
     parameters:

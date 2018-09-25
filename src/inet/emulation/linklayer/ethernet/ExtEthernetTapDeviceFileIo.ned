@@ -22,7 +22,7 @@ package inet.emulation.linklayer.ethernet;
 //
 // Tap bridge for connect real tap interface to simulation
 //
-// ExtTapDeviceIo write the packets arrived on 'lowerLayerIn' gate to the
+// This module writes the packets arrived on 'lowerLayerIn' gate to the
 // specified real tap device, and send out packets arrived from real tap
 // device on 'lowerLayerOut' gate.
 //

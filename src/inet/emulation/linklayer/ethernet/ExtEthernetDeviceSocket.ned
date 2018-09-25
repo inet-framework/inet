@@ -17,6 +17,11 @@
 
 package inet.emulation.linklayer.ethernet;
 
+//
+// This module writes the packets arrived on 'upperLayerIn' gate to the
+// specified real socket, and send out packets arrived from real socket
+// on 'upperLayerOut' gate.
+//
 simple ExtEthernetDeviceSocket
 {
     parameters:

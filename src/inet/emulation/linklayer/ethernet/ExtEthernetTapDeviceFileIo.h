@@ -24,7 +24,7 @@ namespace inet {
 
 /**
  * Implements an interface suitable for emulation that corresponds to a real
- * interface on the host running the simulation .
+ * interface on the host running the simulation.
  *
  * Requires RealTimeScheduler to be configured as scheduler in omnetpp.ini.
  *
