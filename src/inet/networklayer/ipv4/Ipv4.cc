@@ -152,31 +152,41 @@ void Ipv4::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-void Ipv4::handleMessage(cMessage *msg)
+void Ipv4::handleRequest(Request *request)
 {
-    auto request = dynamic_cast<Request *>(msg);
-    if (Ipv4SocketBindCommand *command = dynamic_cast<Ipv4SocketBindCommand *>(msg->getControlInfo())) {
+    auto ctrl = request->getControlInfo();
+    if (ctrl == nullptr)
+        throw cRuntimeError("Request '%s' arrived without controlinfo", request->getName());
+    else if (Ipv4SocketBindCommand *command = dynamic_cast<Ipv4SocketBindCommand *>(ctrl)) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
         SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocol()->getId(), command->getLocalAddress());
         socketIdToSocketDescriptor[socketId] = descriptor;
-        delete msg;
+        delete request;
     }
-    else if (Ipv4SocketConnectCommand *command = dynamic_cast<Ipv4SocketConnectCommand *>(msg->getControlInfo())) {
+    else if (Ipv4SocketConnectCommand *command = dynamic_cast<Ipv4SocketConnectCommand *>(ctrl)) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
         if (socketIdToSocketDescriptor.find(socketId) == socketIdToSocketDescriptor.end())
             throw cRuntimeError("Ipv4Socket: should use bind() before connect()");
         socketIdToSocketDescriptor[socketId]->remoteAddress = command->getRemoteAddress();
-        delete msg;
+        delete request;
     }
-    else if (dynamic_cast<Ipv4SocketCloseCommand *>(msg->getControlInfo()) != nullptr) {
+    else if (dynamic_cast<Ipv4SocketCloseCommand *>(ctrl) != nullptr) {
         int socketId = 0; request->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketDescriptor.find(socketId);
         if (it != socketIdToSocketDescriptor.end()) {
             delete it->second;
             socketIdToSocketDescriptor.erase(it);
         }
-        delete msg;
+        delete request;
     }
+    else
+        throw cRuntimeError("Unknown command: '%s' with %s", request->getName(), ctrl->getClassName());
+}
+
+void Ipv4::handleMessage(cMessage *msg)
+{
+    if (auto request = dynamic_cast<Request *>(msg))
+        handleRequest(request);
     else
         QueueBase::handleMessage(msg);
 }
