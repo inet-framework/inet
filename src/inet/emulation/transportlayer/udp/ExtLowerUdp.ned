@@ -21,7 +21,7 @@ import inet.transportlayer.contract.IUdp;
 // Udp Protocol With External Upper Interface
 // Udp Protocol With External Lower Interface
 
-simple ExtUdp like IUdp
+simple ExtLowerUdp like IUdp
 {
     parameters:
         @display("i=block/transport");

@@ -14,29 +14,28 @@
 //
 
 #include <omnetpp/platdep/sockets.h>
-
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/Simsignals.h"
-#include "inet/emulation/transportlayer/udp/ExtUdp.h"
+#include "inet/emulation/transportlayer/udp/ExtLowerUdp.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/transportlayer/common/L4PortTag_m.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo.h"
 
 namespace inet {
 
-Define_Module(ExtUdp);
+Define_Module(ExtLowerUdp);
 
-ExtUdp::~ExtUdp()
+ExtLowerUdp::~ExtLowerUdp()
 {
     for (auto& it : socketIdToSocketMap) {
         close(it.second->socketId);
     }
 }
 
-void ExtUdp::initialize(int stage)
+void ExtLowerUdp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -46,7 +45,7 @@ void ExtUdp::initialize(int stage)
     }
 }
 
-void ExtUdp::handleMessage(cMessage *message)
+void ExtLowerUdp::handleMessage(cMessage *message)
 {
     switch (message->getKind()) {
         case UDP_C_BIND: {
@@ -153,13 +152,13 @@ void ExtUdp::handleMessage(cMessage *message)
     delete message;
 }
 
-bool ExtUdp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool ExtLowerUdp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     // TODO:
     return true;
 }
 
-bool ExtUdp::notify(int fd)
+bool ExtLowerUdp::notify(int fd)
 {
     auto it = fdToSocketMap.find(fd);
     if (it == fdToSocketMap.end())
@@ -171,7 +170,7 @@ bool ExtUdp::notify(int fd)
     }
 }
 
-ExtUdp::Socket *ExtUdp::open(int socketId)
+ExtLowerUdp::Socket *ExtLowerUdp::open(int socketId)
 {
     auto socket = new Socket(socketId);
     int fd = ::socket(AF_INET, SOCK_DGRAM, 0);
@@ -184,7 +183,7 @@ ExtUdp::Socket *ExtUdp::open(int socketId)
     return socket;
 }
 
-void ExtUdp::bind(int socketId, const L3Address& localAddress, int localPort)
+void ExtLowerUdp::bind(int socketId, const L3Address& localAddress, int localPort)
 {
     Socket *socket = nullptr;
     auto it = socketIdToSocketMap.find(socketId);
@@ -204,7 +203,7 @@ void ExtUdp::bind(int socketId, const L3Address& localAddress, int localPort)
         throw cRuntimeError("Cannot bind socket: %d", n);
 }
 
-void ExtUdp::connect(int socketId, const L3Address& remoteAddress, int remotePort)
+void ExtLowerUdp::connect(int socketId, const L3Address& remoteAddress, int remotePort)
 {
     Socket *socket = nullptr;
     auto it = socketIdToSocketMap.find(socketId);
@@ -224,7 +223,7 @@ void ExtUdp::connect(int socketId, const L3Address& remoteAddress, int remotePor
         throw cRuntimeError("Cannot connect socket: %d", n);
 }
 
-void ExtUdp::close(int socketId)
+void ExtLowerUdp::close(int socketId)
 {
     auto it = socketIdToSocketMap.find(socketId);
     if (it == socketIdToSocketMap.end())
@@ -238,7 +237,7 @@ void ExtUdp::close(int socketId)
     }
 }
 
-void ExtUdp::processPacketFromUpper(Packet *packet)
+void ExtLowerUdp::processPacketFromUpper(Packet *packet)
 {
     emit(packetReceivedFromUpperSignal, packet);
     auto socketId = packet->getTag<SocketReq>()->getSocketId();
@@ -274,7 +273,7 @@ void ExtUdp::processPacketFromUpper(Packet *packet)
     }
 }
 
-void ExtUdp::processPacketFromLower(int fd)
+void ExtLowerUdp::processPacketFromLower(int fd)
 {
     Enter_Method_Silent();
     auto it = fdToSocketMap.find(fd);
@@ -290,7 +289,7 @@ void ExtUdp::processPacketFromLower(int fd)
         if (n < 0)
             throw cRuntimeError("Calling recv failed: %d", n);
         auto data = makeShared<BytesChunk>(static_cast<const uint8_t *>(buffer), n);
-        auto packet = new Packet("ExtUdp", data);
+        auto packet = new Packet("ExtLowerUdp", data);
         packet->addTag<SocketInd>()->setSocketId(socket->socketId);
         packet->addTag<L3AddressInd>()->setSrcAddress(Ipv4Address(ntohl(sockaddr.sin_addr.s_addr)));
         packet->addTag<L4PortInd>()->setSrcPort(ntohs(sockaddr.sin_port));
