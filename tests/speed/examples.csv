@@ -264,12 +264,6 @@
 /examples/mobility/,                 -f omnetpp.ini -c ChiangMobility -r 0,         10000s,          0.64
 /examples/mobility/,                 -f omnetpp.ini -c CircleMobility1 -r 0,        10000s,          2.18
 /examples/mobility/,                 -f omnetpp.ini -c CircleMobility2 -r 0,        10000s,          2.78
-# /examples/mobility/,                 -f omnetpp.ini -c ConstSpeedMobility -r 0,     ---100s,          0.0    # ConstSpeedMobility extended
-/examples/mobility/,                 -f omnetpp.ini -c ConstSpeedMobility01 -r 0,   10000s,          2.08
-/examples/mobility/,                 -f omnetpp.ini -c ConstSpeedMobility1 -r 0,    10000s,          0.53
-/examples/mobility/,                 -f omnetpp.ini -c ConstSpeedMobility10 -r 0,   10000s,          0.36
-/examples/mobility/,                 -f omnetpp.ini -c ConstSpeedMobility100 -r 0,  10000s,          0.37
-/examples/mobility/,                 -f omnetpp.ini -c ConstSpeedMobility1000 -r 0, 10000s,          0.22
 /examples/mobility/,                 -f omnetpp.ini -c GaussMarkovMobility -r 0,    10000s,          1.09
 # /examples/mobility/,                 -f omnetpp.ini -c LinearMobility -r 0,         ---100s,         0.0    # LinearMobility extended
 /examples/mobility/,                 -f omnetpp.ini -c LinearMobility01 -r 0,       10000s,          1.88
