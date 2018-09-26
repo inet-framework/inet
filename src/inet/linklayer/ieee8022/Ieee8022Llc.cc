@@ -113,7 +113,7 @@ void Ieee8022Llc::processPacketFromMac(Packet *packet)
         }
     }
 
-    if (packet->getTag<PacketProtocolTag>()->getProtocol() != nullptr)
+    if (packet->findTag<PacketProtocolTag>())
         send(packet, "upperLayerOut");
     else {
         if (!hasSocket) {
@@ -183,8 +183,14 @@ void Ieee8022Llc::decapsulate(Packet *frame)
             throw cRuntimeError("LLC header indicates SNAP header, but SNAP header is missing");
     }
     auto payloadProtocol = getProtocol(llcHeader);
-    frame->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
-    frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
+    if (payloadProtocol) {
+        frame->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
+        frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
+    }
+    else {
+        delete frame->removeTagIfPresent<DispatchProtocolReq>();
+        delete frame->removeTagIfPresent<PacketProtocolTag>();
+    }
 }
 
 const Protocol *Ieee8022Llc::getProtocol(const Ptr<const Ieee8022LlcHeader>& llcHeader)
