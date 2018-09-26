@@ -23,7 +23,6 @@ import inet.physicallayer.base.packetlevel.FlatRadioBase;
 module Ieee802154NarrowbandScalarRadio extends FlatRadioBase
 {
     parameters:
-        antenna.typename = default("IsotropicAntenna");
         transmitter.typename = default("Ieee802154NarrowbandScalarTransmitter");
         receiver.typename = default("Ieee802154NarrowbandScalarReceiver");
 

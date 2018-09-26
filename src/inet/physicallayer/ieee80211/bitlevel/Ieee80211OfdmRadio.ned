@@ -22,7 +22,6 @@ import inet.physicallayer.base.packetlevel.FlatRadioBase;
 module Ieee80211OfdmRadio extends FlatRadioBase
 {
     parameters:
-        antenna.typename = default("IsotropicAntenna");
         @class(Ieee80211OfdmRadio);
 }
 

@@ -93,7 +93,7 @@ module Radio extends PhysicalLayerBase like IRadio
         @statistic[symbolErrorRate](title="Symbol error rate"; source=symbolErrorRate(packetSentToUpper); record=histogram);
 
     submodules:
-        antenna: <> like IAntenna {
+        antenna: <default("IsotropicAntenna")> like IAntenna {
             parameters:
                 @display("p=100,100");
         }

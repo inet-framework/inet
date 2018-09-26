@@ -29,7 +29,6 @@ import inet.physicallayer.base.packetlevel.FlatRadioBase;
 module ApskRadio extends FlatRadioBase
 {
     parameters:
-        antenna.typename = default("IsotropicAntenna");
         @class(ApskRadio);
 }
 
