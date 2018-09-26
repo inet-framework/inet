@@ -38,7 +38,8 @@ void LinearMobility::initialize(int stage)
         stationary = (speed == 0);
         rad heading = deg(fmod(par("initialMovementHeading").doubleValue(), 360));
         rad elevation = deg(fmod(par("initialMovementElevation").doubleValue(), 360));
-        Coord direction(cos(rad(heading).get())*cos(rad(elevation).get()), sin(rad(heading).get())*cos(rad(elevation).get()), sin(rad(elevation).get()));
+        Coord direction = Quaternion(EulerAngles(heading, -elevation, rad(0))).rotate(Coord::X_AXIS);
+
         lastVelocity = direction * speed;
     }
 }
