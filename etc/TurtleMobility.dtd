@@ -6,10 +6,14 @@
 <!ELEMENT repeat (repeat|set|forward|turn|wait|moveto|moveby)*>
 <!ATTLIST repeat n CDATA #IMPLIED>
 
+<!-- note: "angle" is a deprecated synonym for "heading", left in for compatibility -->
 <!ELEMENT set EMPTY>
 <!ATTLIST set x     CDATA #IMPLIED
               y     CDATA #IMPLIED
+              z     CDATA #IMPLIED
               speed CDATA #IMPLIED
+              heading CDATA #IMPLIED
+              elevation CDATA #IMPLIED
               angle CDATA #IMPLIED
               borderPolicy (reflect|wrap|placerandomly|error) #IMPLIED>
 
@@ -17,8 +21,12 @@
 <!ATTLIST forward d CDATA #IMPLIED
                   t CDATA #IMPLIED>
 
+
+<!-- note: "angle" is a deprecated synonym for "heading", left in for compatibility -->
 <!ELEMENT turn EMPTY>
-<!ATTLIST turn angle CDATA #REQUIRED>
+<!ATTLIST turn heading CDATA #IMPLIED
+               elevation CDATA #IMPLIED
+               angle CDATA #IMPLIED>
 
 <!ELEMENT wait EMPTY>
 <!ATTLIST wait t CDATA #REQUIRED>
@@ -26,9 +34,12 @@
 <!ELEMENT moveto EMPTY>
 <!ATTLIST moveto x CDATA #IMPLIED
                  y CDATA #IMPLIED
+                 z CDATA #IMPLIED
                  t CDATA #IMPLIED>
 
 <!ELEMENT moveby EMPTY>
 <!ATTLIST moveby x CDATA #IMPLIED
                  y CDATA #IMPLIED
+                 z CDATA #IMPLIED
                  t CDATA #IMPLIED>
+

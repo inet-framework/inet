@@ -26,7 +26,8 @@ TurtleMobility::TurtleMobility() :
     turtleScript(nullptr),
     nextStatement(nullptr),
     speed(0),
-    angle(deg(0)),
+    heading(deg(0)),
+    elevation(deg(0)),
     borderPolicy(REFLECT),
     maxSpeed(0)
 {
@@ -39,7 +40,8 @@ void TurtleMobility::initialize(int stage)
     EV_TRACE << "initializing TurtleMobility stage " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {
         WATCH(speed);
-        WATCH(angle);
+        WATCH(heading);
+        WATCH(elevation);
         WATCH(borderPolicy);
         computeMaxSpeed(par("turtleScript"));
     }
@@ -53,7 +55,8 @@ void TurtleMobility::setInitialPosition()
     nextStatement = turtleScript->getFirstChild();
 
     speed = 1;
-    angle = deg(0);
+    heading = deg(0);
+    elevation = deg(0);
     borderPolicy = REFLECT;
 
     // a dirty trick to extract starting position out of the script
@@ -76,8 +79,8 @@ void TurtleMobility::setTargetPosition()
 void TurtleMobility::move()
 {
     LineSegmentsMobilityBase::move();
-    Coord dummy;
-    handleIfOutside(borderPolicy, targetPosition, dummy, angle);
+    Coord dummyCoord;
+    handleIfOutside(borderPolicy, targetPosition, dummyCoord, heading, elevation);
 }
 
 /**
@@ -122,22 +125,32 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
     }
     else if (!strcmp(tag, "set")) {
         const char *speedAttr = stmt->getAttribute("speed");
-        const char *angleAttr = stmt->getAttribute("angle");
+        const char *headingAttr = stmt->getAttribute("heading");
+        if (headingAttr == nullptr)
+            headingAttr = stmt->getAttribute("angle"); // for backward compatibility
+        const char *elevationAttr = stmt->getAttribute("elevation");
         const char *xAttr = stmt->getAttribute("x");
         const char *yAttr = stmt->getAttribute("y");
+        const char *zAttr = stmt->getAttribute("z");
         const char *bpAttr = stmt->getAttribute("borderPolicy");
 
         if (speedAttr)
             speed = getValue(speedAttr);
 
-        if (angleAttr)
-            angle = deg(getValue(angleAttr));
+        if (headingAttr)
+            heading = deg(getValue(headingAttr));
+
+        if (elevationAttr)
+            elevation = deg(getValue(elevationAttr));
 
         if (xAttr)
             targetPosition.x = lastPosition.x = getValue(xAttr);
 
         if (yAttr)
             targetPosition.y = lastPosition.y = getValue(yAttr);
+
+        if (zAttr)
+            targetPosition.z = lastPosition.z = getValue(zAttr);
 
         if (speed <= 0)
             throw cRuntimeError("<set>: speed is negative or zero at %s", stmt->getSourceLocation());
@@ -176,8 +189,8 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
             d = getValue(dAttr);
             t = d / speed;
         }
-        else {    // tAttr only
-                  // travel for time t at current speed
+        else {
+            // tAttr only: travel for time t at current speed
             t = getValue(tAttr);
             d = speed * t;
         }
@@ -188,18 +201,22 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
         if (d < 0)
             throw cRuntimeError("<forward>: distance (attribute d) is negative at %s", stmt->getSourceLocation());
 
-        // FIXME handle zeros properly...
-        targetPosition.x += d * cos(rad(angle).get());
-        targetPosition.y += d * sin(rad(angle).get());
+        Coord direction = Quaternion(EulerAngles(heading, -elevation, rad(0))).rotate(Coord::X_AXIS);
+
+        targetPosition += direction * d;
         nextChange += t;
     }
     else if (!strcmp(tag, "turn")) {
-        const char *angleAttr = stmt->getAttribute("angle");
+        const char *headingAttr = stmt->getAttribute("heading");
+        if (headingAttr == nullptr)
+            headingAttr = stmt->getAttribute("angle"); // for backward compatibility
+        const char *elevationAttr = stmt->getAttribute("elevation");
 
-        if (!angleAttr)
-            throw cRuntimeError("<turn>: required attribute 'angle' missing at %s", stmt->getSourceLocation());
+        if (headingAttr)
+            heading += deg(getValue(headingAttr));
 
-        angle += deg(getValue(angleAttr));
+        if (elevationAttr)
+            elevation += deg(getValue(elevationAttr));
     }
     else if (!strcmp(tag, "wait")) {
         const char *tAttr = stmt->getAttribute("t");
@@ -217,6 +234,7 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
     else if (!strcmp(tag, "moveto")) {
         const char *xAttr = stmt->getAttribute("x");
         const char *yAttr = stmt->getAttribute("y");
+        const char *zAttr = stmt->getAttribute("z");
         const char *tAttr = stmt->getAttribute("t");
 
         if (xAttr)
@@ -225,18 +243,21 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
         if (yAttr)
             targetPosition.y = getValue(yAttr);
 
+        if (zAttr)
+            targetPosition.z = getValue(zAttr);
+
         // travel to targetPosition at current speed, or get there in time t (ignoring current speed then)
         double t = tAttr ? getValue(tAttr) : lastPosition.distance(targetPosition) / speed;
 
         if (t < 0)
-            throw cRuntimeError("<wait>: time (attribute t) is negative at %s",
-                    stmt->getSourceLocation());
+            throw cRuntimeError("<wait>: time (attribute t) is negative at %s", stmt->getSourceLocation());
 
         nextChange += t;
     }
     else if (!strcmp(tag, "moveby")) {
         const char *xAttr = stmt->getAttribute("x");
         const char *yAttr = stmt->getAttribute("y");
+        const char *zAttr = stmt->getAttribute("z");
         const char *tAttr = stmt->getAttribute("t");
 
         if (xAttr)
@@ -245,12 +266,14 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
         if (yAttr)
             targetPosition.y += getValue(yAttr);
 
+        if (zAttr)
+            targetPosition.z += getValue(zAttr);
+
         // travel to targetPosition at current speed, or get there in time t (ignoring current speed then)
         double t = tAttr ? getValue(tAttr) : lastPosition.distance(targetPosition) / speed;
 
         if (t < 0)
-            throw cRuntimeError("<wait>: time (attribute t) is negative at %s",
-                    stmt->getSourceLocation());
+            throw cRuntimeError("<wait>: time (attribute t) is negative at %s", stmt->getSourceLocation());
 
         nextChange += t;
     }
@@ -261,12 +284,14 @@ double TurtleMobility::getValue(const char *s)
     // first, textually replace $MAXX and $MAXY with their actual values
     std::string str;
     if (strchr(s, '$')) {
-        char strMinX[32], strMinY[32];
-        char strMaxX[32], strMaxY[32];
+        char strMinX[32], strMinY[32], strMinZ[32];
+        char strMaxX[32], strMaxY[32], strMaxZ[32];
         sprintf(strMinX, "%g", constraintAreaMin.x);
         sprintf(strMinY, "%g", constraintAreaMin.y);
+        sprintf(strMinZ, "%g", constraintAreaMin.z);
         sprintf(strMaxX, "%g", constraintAreaMax.x);
         sprintf(strMaxY, "%g", constraintAreaMax.y);
+        sprintf(strMaxZ, "%g", constraintAreaMax.z);
 
         str = s;
         std::string::size_type pos;
@@ -277,11 +302,17 @@ double TurtleMobility::getValue(const char *s)
         while ((pos = str.find("$MINY")) != std::string::npos)
             str.replace(pos, sizeof("$MINY") - 1, strMinY);
 
+        while ((pos = str.find("$MINZ")) != std::string::npos)
+            str.replace(pos, sizeof("$MINZ") - 1, strMinZ);
+
         while ((pos = str.find("$MAXX")) != std::string::npos)
             str.replace(pos, sizeof("$MAXX") - 1, strMaxX);
 
         while ((pos = str.find("$MAXY")) != std::string::npos)
             str.replace(pos, sizeof("$MAXY") - 1, strMaxY);
+
+        while ((pos = str.find("$MAXZ")) != std::string::npos)
+            str.replace(pos, sizeof("$MAXZ") - 1, strMaxZ);
 
         s = str.c_str();
     }
@@ -347,8 +378,7 @@ void TurtleMobility::computeMaxSpeed(cXMLElement *nodes)
     for (auto & child : childs)
     {
         const char *speedAttr = child->getAttribute("speed");
-        if (speedAttr)
-        {
+        if (speedAttr) {
             double speed = atof(speedAttr);
             if (speed > maxSpeed)
                 maxSpeed = speed;

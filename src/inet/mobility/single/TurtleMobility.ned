@@ -109,6 +109,7 @@ import inet.mobility.base.MovingMobilityBase;
 //
 // @author Andras Varga
 //
+//TODO update documentation; <turn heading=".."> is strange
 simple TurtleMobility extends MovingMobilityBase
 {
     parameters:

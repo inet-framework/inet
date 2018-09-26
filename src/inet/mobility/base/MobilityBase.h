@@ -172,10 +172,10 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
     /** @brief Invokes one of reflectIfOutside(), wrapIfOutside() and
      * placeRandomlyIfOutside(), depending on the given border policy.
      */
-    virtual void handleIfOutside(BorderPolicy policy, Coord& targetPosition, Coord& velocity, rad& heading, rad& elevation, Quaternion& quaternion);
-    virtual void handleIfOutside(BorderPolicy policy, Coord& targetPosition, Coord& velocity, rad& heading, rad& elevation);
     virtual void handleIfOutside(BorderPolicy policy, Coord& targetPosition, Coord& velocity);
-    _OPPDEPRECATED void handleIfOutside(BorderPolicy policy, Coord& targetPosition, Coord& velocity, rad& heading);
+    virtual void handleIfOutside(BorderPolicy policy, Coord& targetPosition, Coord& velocity, rad& heading);
+    virtual void handleIfOutside(BorderPolicy policy, Coord& targetPosition, Coord& velocity, rad& heading, rad& elevation);
+    virtual void handleIfOutside(BorderPolicy policy, Coord& targetPosition, Coord& velocity, rad& heading, rad& elevation, Quaternion& quaternion);
 
   public:
     virtual double getMaxSpeed() const override { return NaN; }
