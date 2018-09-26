@@ -42,7 +42,7 @@ module Node
         }
         cli: EtherAppClient {
             parameters:
-                registerSAP = false;
+                registerSAP = true;
                 @display("p=300,100");
         }
         wlan: Ieee80211Interface {
