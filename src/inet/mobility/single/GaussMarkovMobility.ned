@@ -31,7 +31,7 @@ simple GaussMarkovMobility extends MovingMobilityBase
     parameters:
         double alpha = default(0.5); // [0;1], 0 - brown motion, 1 - linear motion
         double speed @unit(mps);
-        double angle @unit(deg) = default(uniform(0deg, 360deg));
+        double angle @unit(deg) = default(uniform(0deg, 360deg)); //TODO heading? initialHeading? initialMotionHeading?
         double variance;
         double margin @unit(m);
         @class(GaussMarkovMobility);
