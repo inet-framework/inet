@@ -195,19 +195,29 @@ void EtherEncap::processPacketFromMac(Packet *packet)
         payloadProtocol = ProtocolGroup::ethertype.getProtocol(ethHeader->getTypeOrLength());
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
         packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
+
+        if (upperProtocols.find(payloadProtocol) != upperProtocols.end()) {
+            EV_DETAIL << "Decapsulating frame `" << packet->getName() << "', passing up contained packet `"
+                      << packet->getName() << "' to higher layer\n";
+
+            totalFromMAC++;
+            emit(decapPkSignal, packet);
+
+            // pass up to higher layers.
+            EV_INFO << "Sending " << packet << " to upper layer.\n";
+            send(packet, "upperLayerOut");
+        }
+        else {
+            EV_WARN << "Unknown protocol, dropping packet\n";
+            PacketDropDetails details;
+            details.setReason(NO_PROTOCOL_FOUND);
+            emit(packetDroppedSignal, packet, &details);
+            delete packet;
+        }
     }
     else
         throw cRuntimeError("Unknown ethernet header");
 
-    EV_DETAIL << "Decapsulating frame `" << packet->getName() << "', passing up contained packet `"
-              << packet->getName() << "' to higher layer\n";
-
-    totalFromMAC++;
-    emit(decapPkSignal, packet);
-
-    // pass up to higher layers.
-    EV_INFO << "Sending " << packet << " to upper layer.\n";
-    send(packet, "upperLayerOut");
 }
 
 void EtherEncap::handleSendPause(cMessage *msg)

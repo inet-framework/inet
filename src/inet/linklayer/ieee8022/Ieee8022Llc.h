@@ -18,6 +18,7 @@
 #ifndef __INET_IEEE8022LLC_H
 #define __INET_IEEE8022LLC_H
 
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
@@ -25,7 +26,7 @@
 
 namespace inet {
 
-class INET_API Ieee8022Llc : public cSimpleModule
+class INET_API Ieee8022Llc : public cSimpleModule, public IProtocolRegistrationListener
 {
 protected:
     struct SocketDescriptor
@@ -38,6 +39,7 @@ protected:
                 : socketId(socketId), localSap(localSap), remoteSap(remoteSap) { }
     };
 
+    std::set<const Protocol *> upperProtocols;    // where to send packets after decapsulation
     std::map<int, SocketDescriptor *> socketIdToSocketDescriptor;
 
   protected:
@@ -50,6 +52,9 @@ protected:
     virtual void processPacketFromHigherLayer(Packet *msg);
     virtual void processPacketFromMac(Packet *packet);
     virtual void processCommandFromHigherLayer(Request *request);
+
+    virtual void handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive) override;
+    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive) override;
 
   public:
     static const Protocol *getProtocol(const Ptr<const Ieee8022LlcHeader>& header);

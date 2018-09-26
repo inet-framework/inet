@@ -95,7 +95,7 @@ void Ieee8022Llc::processCommandFromHigherLayer(Request *request)
 void Ieee8022Llc::processPacketFromMac(Packet *packet)
 {
     decapsulate(packet);
-    bool hasSocket = false;
+    bool isSent = false;
 
     // deliver to sockets
     if (auto sap = packet->findTag<Ieee802SapInd>()) {
@@ -108,20 +108,20 @@ void Ieee8022Llc::processPacketFromMac(Packet *packet)
                 packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
                 EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
                 send(packetCopy, "upperLayerOut");
-                hasSocket = true;
+                isSent = true;
             }
         }
     }
 
-    if (packet->findTag<PacketProtocolTag>())
+    auto protocolTag = packet->findTag<PacketProtocolTag>();
+    if (protocolTag != nullptr && upperProtocols.find(protocolTag->getProtocol()) != upperProtocols.end()) {
         send(packet, "upperLayerOut");
-    else {
-        if (!hasSocket) {
-            EV_WARN << "Unknown protocol, dropping packet\n";
-            PacketDropDetails details;
-            details.setReason(NO_PROTOCOL_FOUND);
-            emit(packetDroppedSignal, packet, &details);
-        }
+    }
+    else if (!isSent) {
+        EV_WARN << "Unknown protocol, dropping packet\n";
+        PacketDropDetails details;
+        details.setReason(NO_PROTOCOL_FOUND);
+        emit(packetDroppedSignal, packet, &details);
         delete packet;
     }
 }
@@ -210,6 +210,18 @@ const Protocol *Ieee8022Llc::getProtocol(const Ptr<const Ieee8022LlcHeader>& llc
         payloadProtocol = ProtocolGroup::ieee8022protocol.findProtocol(sapData);    // do not use getProtocol
     }
     return payloadProtocol;
+}
+
+void Ieee8022Llc::handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)
+{
+    Enter_Method("handleRegisterService");
+}
+
+void Ieee8022Llc::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
+{
+    Enter_Method("handleRegisterProtocol");
+    if (!strcmp("upperLayerIn", in->getBaseName()))
+        upperProtocols.insert(&protocol);
 }
 
 } // namespace inet
