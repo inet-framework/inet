@@ -39,8 +39,6 @@ module RadioMedium like IRadioMedium
     parameters:
         string physicalEnvironmentModule = default("physicalEnvironment"); // module path of the physical environment model
 
-        // submodule type parameters
-
         // filter parameters that control when signals are sent to receiver radios
         string rangeFilter = default("");       // when either set to 'interferenceRange' or 'communicationRange' the radio medium doesn't send signals to a radio if it's outside the provided range
         bool radioModeFilter = default(false);  // when enabled the radio medium doesn't send signals to a radio if it's neither in receiver nor in transceiver mode
@@ -63,7 +61,7 @@ module RadioMedium like IRadioMedium
         @signal[signalArrivalEnded];
 
     submodules:
-        propagation: <> like IPropagation {
+        propagation: <default("ConstantSpeedPropagation")> like IPropagation {
             parameters:
                 @display("p=100,100");
         }
@@ -75,7 +73,7 @@ module RadioMedium like IRadioMedium
             parameters:
                 @display("p=100,300");
         }
-        pathLoss: <> like IPathLoss {
+        pathLoss: <default("FreeSpacePathLoss")> like IPathLoss {
             parameters:
                 @display("p=300,100");
         }

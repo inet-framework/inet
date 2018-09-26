@@ -27,8 +27,6 @@ import inet.physicallayer.common.packetlevel.RadioMedium;
 module ApskLayeredScalarRadioMedium extends RadioMedium
 {
     parameters:
-        propagation.typename = default("ConstantSpeedPropagation");
-        pathLoss.typename = default("FreeSpacePathLoss");
         analogModel.typename = default("LayeredScalarAnalogModel");
         backgroundNoise.typename = default("IsotropicScalarBackgroundNoise");
         backgroundNoise.power = default(-110dBm);

@@ -23,8 +23,6 @@ import inet.physicallayer.common.packetlevel.RadioMedium;
 module Ieee802154NarrowbandScalarRadioMedium extends RadioMedium
 {
     parameters:
-        propagation.typename = default("ConstantSpeedPropagation");
-        analogModel.typename = default("ScalarAnalogModel");
         backgroundNoise.typename = default("IsotropicScalarBackgroundNoise");
 
         mediumLimitCache.carrierFrequency = 2450 MHz;
