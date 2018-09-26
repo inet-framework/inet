@@ -85,6 +85,60 @@ const char *PacketDropVisualizerBase::DirectiveResolver::resolveDirective(char d
         case 'r':
             result = std::to_string(packetDrop->getReason());
             break;
+        case 't':
+
+            int res;
+
+//                ADDRESS_RESOLUTION_FAILED = 0,
+//                FORWARDING_DISABLED = 1,
+//                HOP_LIMIT_REACHED = 2,
+//                INCORRECTLY_RECEIVED = 3,
+//                INTERFACE_DOWN = 4,
+//                NO_INTERFACE_FOUND = 5,
+//                NO_ROUTE_FOUND = 6,
+//                NOT_ADDRESSED_TO_US = 7,
+//                QUEUE_OVERFLOW = 8,
+//                RETRY_LIMIT_REACHED = 9,
+//                LIFETIME_EXPIRED = 10,
+//                CONGESTION = 11,
+//                NO_PROTOCOL_FOUND = 12,
+//                NO_PORT_FOUND = 13,
+//                OTHER_PACKET_DROP = 99
+
+            res = packetDrop->getReason();
+            if(res == 0)
+                result = "ADDR RESOLUTION FAILED";
+            else if(res == 1)
+                result = "FWD DISABLED";
+            else if(res == 2)
+                result = "HOP LIMIT REACHED";
+            else if(res == 3)
+                result = "INCORRECTLY RCVD";
+            else if(res == 4)
+                result = "INTERFACE DOWN";
+            else if(res == 5)
+                result = "NO INTERFACE FOUND";
+            else if(res == 6)
+                result = "NO ROUTE FOUND";
+            else if(res == 7)
+                result = "NOT ADDRESSES TO US";
+            else if(res == 8)
+                result = "QUEUE OVERFLOW";
+            else if(res == 9)
+                result = "RETRY LIMIT REACHED";
+            else if(res == 10)
+                result = "LIFETIME EXP";
+            else if(res == 11)
+                result = "CONGESTION";
+            else if(res == 12)
+                result = "NO PROTOCOL FOUND";
+            else if(res == 13)
+                result = "NO PORT FOUND";
+            else if(res == 14)
+                result = "OTHER REASON";
+            else
+                result = "unknown";
+            break;
         default:
             throw cRuntimeError("Unknown directive: %c", directive);
     }
