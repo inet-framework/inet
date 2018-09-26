@@ -84,8 +84,8 @@ void EtherAppClient::handleMessage(cMessage *msg)
     if (msg->isSelfMessage()) {
         if (msg->getKind() == START) {
             bool registerSAP = par("registerSAP");
-            if (registerSAP)
-                llcSocket.open(-1, localSAP);
+            ASSERT(registerSAP);
+            llcSocket.open(-1, localSAP);
 
             destMACAddress = resolveDestMACAddress();
             // if no dest address given, nothing to do

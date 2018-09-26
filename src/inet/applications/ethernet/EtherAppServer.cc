@@ -67,8 +67,8 @@ void EtherAppServer::startApp()
 {
     EV_INFO << "Starting application\n";
     bool registerSAP = par("registerSAP");
-    if (registerSAP)
-        registerDSAP(localSAP);
+    ASSERT(registerSAP);
+    registerDSAP(localSAP);
 }
 
 void EtherAppServer::stopApp()
