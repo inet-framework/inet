@@ -55,8 +55,6 @@ class INET_API EtherEncap : public Ieee8022Llc
 
     virtual void refreshDisplay() const override;
 
-    virtual const Ptr<const EthernetMacHeader> decapsulateMacLlcSnap(Packet *packet);
-
   public:
     static void addPaddingAndFcs(Packet *packet, FcsMode fcsMode, B requiredMinByteLength = MIN_ETHERNET_FRAME_BYTES);
     static void addFcs(Packet *packet, FcsMode fcsMode);

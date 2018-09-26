@@ -181,31 +181,23 @@ const Ptr<const EthernetMacHeader> EtherEncap::decapsulateMacHeader(Packet *pack
     return ethHeader;
 }
 
-const Ptr<const EthernetMacHeader> EtherEncap::decapsulateMacLlcSnap(Packet *packet)
+void EtherEncap::processPacketFromMac(Packet *packet)
 {
     const Protocol *payloadProtocol = nullptr;
     auto ethHeader = decapsulateMacHeader(packet);
 
     // remove llc header if possible
     if (isIeee8023Header(*ethHeader)) {
-        this->Ieee8022Llc::decapsulate(packet);
+        Ieee8022Llc::processPacketFromMac(packet);
+        return;
     }
     else if (isEth2Header(*ethHeader)) {
         payloadProtocol = ProtocolGroup::ethertype.getProtocol(ethHeader->getTypeOrLength());
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
+        packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
     }
-
-    return ethHeader;
-}
-
-void EtherEncap::processPacketFromMac(Packet *packet)
-{
-    // decapsulate and attach control info
-    decapsulateMacLlcSnap(packet);
-
-    auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-    if (protocol)
-        packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
+    else
+        throw cRuntimeError("Unknown ethernet header");
 
     EV_DETAIL << "Decapsulating frame `" << packet->getName() << "', passing up contained packet `"
               << packet->getName() << "' to higher layer\n";
