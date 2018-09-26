@@ -110,6 +110,9 @@ void Ieee802154Mac::initialize(int stage)
         sifsTimer = new cMessage("timer-sifs");
         rxAckTimer = new cMessage("timer-rxAck");
         macState = IDLE_1;
+        char buf[20]="IDLE";
+        getDisplayString().setTagArg("t", 1, "r");
+        getDisplayString().setTagArg("t", 0, buf);
         txAttempts = 0;
         txQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
         radio = getModuleFromPar<IRadio>(par("radioModule"), this);
@@ -683,6 +686,34 @@ void Ieee802154Mac::manageQueue()
 void Ieee802154Mac::updateMacState(t_mac_states newMacState)
 {
     macState = newMacState;
+    char buf[20];
+
+//            IDLE_1 = 1,
+//            BACKOFF_2,
+//            CCA_3,
+//            TRANSMITFRAME_4,
+//            WAITACK_5,
+//            WAITSIFS_6,
+//            TRANSMITACK_7
+
+    if(macState == 1)
+        strcpy(buf,"IDLE");
+    else if(macState == 2)
+        strcpy(buf,"BACKOFF");
+    else if(macState == 3)
+        strcpy(buf,"CCA");
+    else if(macState == 4)
+        strcpy(buf,"TXFRAME");
+    else if(macState == 5)
+        strcpy(buf,"WAITACK");
+    else if(macState == 6)
+        strcpy(buf,"WAITSIFS");
+    else if(macState == 7)
+        strcpy(buf,"TXACK");
+    else
+        strcpy(buf,"unknown");
+
+    getDisplayString().setTagArg("t", 0, buf);
 }
 
 /*
