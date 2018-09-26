@@ -31,9 +31,8 @@ void RandomWaypointMobility::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL) {
-        stationary = (par("speed").getType() == 'L' || par("speed").getType() == 'D') && par("speed").doubleValue() == 0.0;
-    }
+    if (stage == INITSTAGE_LOCAL)
+        stationary = !par("speed").isExpression() && par("speed").doubleValue() == 0;
 }
 
 void RandomWaypointMobility::setTargetPosition()
