@@ -29,6 +29,9 @@ import inet.physicallayer.base.packetlevel.FlatRadioBase;
 module ApskRadio extends FlatRadioBase
 {
     parameters:
+        string signalAnalogRepresentation @enum("scalar", "dimensional") = default("scalar");
+        transmitter.typename = default(signalAnalogRepresentation == "scalar" ? "ApskScalarTransmitter" : signalAnalogRepresentation == "dimensional" ? "ApskDimensionalTransmitter" : "");
+        receiver.typename = default(signalAnalogRepresentation == "scalar" ? "ApskScalarReceiver" : signalAnalogRepresentation == "dimensional" ? "ApskDimensionalReceiver" : "");
         @class(ApskRadio);
 }
 

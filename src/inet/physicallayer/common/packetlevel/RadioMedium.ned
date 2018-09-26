@@ -38,6 +38,7 @@ module RadioMedium like IRadioMedium
 {
     parameters:
         string physicalEnvironmentModule = default("physicalEnvironment"); // module path of the physical environment model
+        string signalAnalogRepresentation @enum("unitDisk", "scalar", "dimensional") = default("scalar");
 
         // filter parameters that control when signals are sent to receiver radios
         string rangeFilter = default("");       // when either set to 'interferenceRange' or 'communicationRange' the radio medium doesn't send signals to a radio if it's outside the provided range
@@ -65,11 +66,11 @@ module RadioMedium like IRadioMedium
             parameters:
                 @display("p=100,100");
         }
-        analogModel: <> like IAnalogModel {
+        analogModel: <default(signalAnalogRepresentation == "unitDisk" ? "UnitDiskAnalogModel" : signalAnalogRepresentation == "scalar" ? "ScalarAnalogModel" : signalAnalogRepresentation == "dimensional" ? "DimensionalAnalogModel" : "")> like IAnalogModel {
             parameters:
                 @display("p=100,200");
         }
-        backgroundNoise: <default("")> like IBackgroundNoise if typename != "" {
+        backgroundNoise: <default(signalAnalogRepresentation == "scalar" ? "IsotropicScalarBackgroundNoise" : signalAnalogRepresentation == "dimensional" ? "IsotropicDimensionalBackgroundNoise" : "")> like IBackgroundNoise if typename != "" {
             parameters:
                 @display("p=100,300");
         }
