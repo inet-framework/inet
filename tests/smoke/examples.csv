@@ -341,7 +341,8 @@
 /examples/mobility/,                 -f omnetpp.ini -c MassMobilityWithScenario -r 0
 /examples/mobility/,                 -f omnetpp.ini -c MoBANMobility1 -r 0
 /examples/mobility/,                 -f omnetpp.ini -c MoBANMobility2 -r 0
-/examples/mobility/,                 -f omnetpp.ini -c RandomWaypointMobility -r 0
+/examples/mobility/,                 -f omnetpp.ini -c RandomWaypointMobility1 -r 0
+/examples/mobility/,                 -f omnetpp.ini -c RandomWaypointMobility2 -r 0
 /examples/mobility/,                 -f omnetpp.ini -c RectangleMobility -r 0
 # /examples/mobility/,                 -f omnetpp.ini -c StaticGridMobility -r 0    # zero time simulated
 # /examples/mobility/,                 -f omnetpp.ini -c StationaryMobility -r 0    # zero time simulated

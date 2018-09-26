@@ -38,6 +38,7 @@ class INET_API RandomWaypointMobility : public LineSegmentsMobilityBase
     bool nextMoveIsWait;
     cPar *speedParameter = nullptr;
     cPar *waitTimeParameter = nullptr;
+    bool hasWaitTime;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
