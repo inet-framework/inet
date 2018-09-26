@@ -40,12 +40,14 @@ import inet.mobility.base.MovingMobilityBase;
 // wall at the same angle; in our simulated world, there is little other
 // choice."
 //
-// This implementation can be parameterized a bit more, via the changeInterval,
-// angleDelta and changeSpeedBy parameters. The parameters described above
+// This implementation can be parameterized a bit more, via the changeInterval
+// and angleDelta parameters. The parameters described above
 // correspond to the following settings:
 //    - changeInterval = normal(5, 0.1)
 //    - angleDelta = normal(0, 30)
 //    - speed = normal(avgSpeed, 0.01)
+//
+// 3D (spatial movement) is also supported using rotationAxisAngle parameter.
 //
 // @author Emin Ilker Cetinbas, Andras Varga
 //
@@ -55,10 +57,12 @@ simple MassMobility extends MovingMobilityBase
         double initialX @unit(m) = default(uniform(constraintAreaMinX, constraintAreaMaxX));
         double initialY @unit(m) = default(uniform(constraintAreaMinY, constraintAreaMaxY));
         double initialZ @unit(m) = default(nanToZero(uniform(constraintAreaMinZ, constraintAreaMaxZ)));
-        double startAngle @unit(deg) = default(uniform(0deg, 360deg)); // initial angle in degrees
+        double initialMovementHeading @unit(deg) = default(uniform(0deg, 360deg)); // initial heading
+        double initialMovementElevation @unit(deg) = default(0deg); // initial elevation
         bool initFromDisplayString = default(true); // enables one time initialization from the subject module's display string
         volatile double changeInterval @unit(s); // frequency of changing speed and angle (can be random)
-        volatile double angleDelta @unit(deg); // change angle by this much (can be random)
+        volatile double angleDelta @unit(deg); // rotate velocity vector by this much around the rotation axis defined by the rotationAxisAngle parameter (can be random)
+        volatile double rotationAxisAngle @unit(deg) = default(0deg); // defines a vector in the plane perpendicular to the velocity, where 0 deg means the Z axis when bank is zero (can be random)
         volatile double speed @unit(mps); // speed (can be random, updated every changeInterval)
         @class(MassMobility);
 }
