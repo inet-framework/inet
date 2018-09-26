@@ -70,8 +70,7 @@ void CircleMobility::move()
     lastVelocity.z = 0;
     // do something if we reach the wall
     Coord dummyCoord;
-    rad dummyAngle;
-    handleIfOutside(REFLECT, dummyCoord, dummyCoord, dummyAngle);
+    handleIfOutside(REFLECT, dummyCoord, dummyCoord);
 }
 
 } // namespace inet

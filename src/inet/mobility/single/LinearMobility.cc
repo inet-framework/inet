@@ -49,9 +49,8 @@ void LinearMobility::move()
     lastPosition += lastVelocity * elapsedTime;
 
     // do something if we reach the wall
-    Coord dummy;
-    rad dummy2;
-    handleIfOutside(REFLECT, dummy, lastVelocity, dummy2);
+    Coord dummyCoord;
+    handleIfOutside(REFLECT, dummyCoord, lastVelocity);
 }
 
 } // namespace inet
