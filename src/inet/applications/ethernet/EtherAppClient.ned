@@ -34,7 +34,7 @@ simple EtherAppClient
         volatile double sendInterval @unit(s) = default(uniform(0s,1s));  // interval between sending requests
         volatile int reqLength @unit(B) = default(100B);  // length of request packets
         volatile int respLength @unit(B) = default(1KiB);  // length of response packets
-        bool registerSAP = default(false);   // whether to sent IEEE802CTRL_REGISTER_DSAP on startup
+        bool registerSAP = default(true);   // whether to sent IEEE802CTRL_REGISTER_DSAP on startup
         @display("i=block/app");
         @signal[packetSent](type=inet::Packet);
         @signal[packetReceived](type=inet::Packet);
