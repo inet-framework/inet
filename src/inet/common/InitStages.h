@@ -45,34 +45,34 @@ enum InitStages {
     /**
      * Initialization stage of power model: energy storage, energy consumer, energy generator, and energy management models.
      */
-    INITSTAGE_POWER = 2,
+    INITSTAGE_POWER = 3,
 
     /**
      * Initialization of mobility modules regarding position and orientation.
      */
-    INITSTAGE_MOBILITY = 3,
+    INITSTAGE_MOBILITY = 4,
 
     /**
      * Initialization of the physical layer of protocol stacks. Radio publishes the initial RadioState;
      * radios are registered in RadioMedium.
      */
-    INITSTAGE_PHYSICAL_LAYER = 3,
+    INITSTAGE_PHYSICAL_LAYER = 5,
 
     /**
      * Initialization of link-layer protocols. Automatic MAC addresses are
      * assigned; interfaces are registered in InterfaceTable.
      */
-    INITSTAGE_LINK_LAYER = 4,
+    INITSTAGE_LINK_LAYER = 6,
 
     /**
      * Additional link-layer initializations that depend on the previous stage.
      */
-    INITSTAGE_LINK_LAYER_2 = 5,
+    INITSTAGE_LINK_LAYER_2 = 7,
 
     /**
      * Initialization of network-layer protocols.
      */
-    INITSTAGE_NETWORK_LAYER = 6,
+    INITSTAGE_NETWORK_LAYER = 8,
 
     /**
      * Initialization of network configurators (e.g. Ipv4NetworkConfigurator).
@@ -80,48 +80,48 @@ enum InitStages {
      * data (e.g. Ipv4InterfaceData) are added to InterfaceEntry; netf7ilter
      * hooks are registered in Ipv4; etc.
      */
-    INITSTAGE_NETWORK_CONFIGURATOR = 6,
+    INITSTAGE_NETWORK_CONFIGURATOR = 9,
 
     /**
      * Initialization of network addresses.
      */
-    INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT = 7,
+    INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT = 10,
 
     /**
      * Initialization of static routes.
      */
-    INITSTAGE_STATIC_ROUTING = 8,
+    INITSTAGE_STATIC_ROUTING = 11,
 
     /**
      * Initialization of static routes.
      */
-    INITSTAGE_NETWORK_LAYER_3 = 8,
+    INITSTAGE_NETWORK_LAYER_3 = 12,
 
     /**
      * Initialization of transport-layer protocols. Transport protocols register
      * their protocol IDs in IP, etc.
      */
-    INITSTAGE_TRANSPORT_LAYER = 9,
+    INITSTAGE_TRANSPORT_LAYER = 13,
 
     /**
      * Initialization of routing protocols.
      */
-    INITSTAGE_ROUTING_PROTOCOLS = 11,
+    INITSTAGE_ROUTING_PROTOCOLS = 14,
 
     /**
      * Initialization of applications.
      */
-    INITSTAGE_APPLICATION_LAYER = 12,
+    INITSTAGE_APPLICATION_LAYER = 15,
 
     /**
      * Operations that no other initializations can depend on, e.g. display string updates.
      */
-    INITSTAGE_LAST = 13,
+    INITSTAGE_LAST = 16,
 
     /**
      * The number of initialization stages.
      */
-    NUM_INIT_STAGES,
+    NUM_INIT_STAGES = 17,
 };
 
 } // namespace inet
