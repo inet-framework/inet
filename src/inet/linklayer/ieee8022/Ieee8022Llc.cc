@@ -41,6 +41,8 @@ void Ieee8022Llc::initialize(int stage)
             registerService(Protocol::ieee8022, gate("upperLayerIn"), nullptr);
             registerProtocol(Protocol::ieee8022, nullptr, gate("upperLayerOut"));
         }
+        WATCH_PTRMAP(socketIdToSocketDescriptor);
+        WATCH_PTRSET(upperProtocols);
     }
 }
 
