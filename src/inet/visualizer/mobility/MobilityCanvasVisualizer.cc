@@ -43,7 +43,7 @@ void MobilityCanvasVisualizer::initialize(int stage)
 {
     MobilityVisualizerBase::initialize(stage);
     if (!hasGUI()) return;
-    if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT) {
+    if (stage == INITSTAGE_LOCAL) {
         zIndex = par("zIndex");
         canvasProjection = CanvasProjection::getCanvasProjection(visualizationTargetModule->getCanvas());
     }
