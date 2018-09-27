@@ -23,12 +23,19 @@
 namespace inet {
 
 /**
- * Initialization stages.
+ * This enum provides constants for initialization stages for modules overriding
+ * cComponent::initialize(int stage).
  */
 enum InitStages {
     /**
-     * Initialization of local state that don't use or affect other modules takes
-     * place (e.g. reading of parameters); modules may subscribe to notifications.
+     * Initialization of local state that don't use or affect other modules includes:
+     *  - initializing member variables
+     *  - initializing statistic collection
+     *  - reading module parameters
+     *  - reading configuration files
+     *  - adding watches
+     *  - looking up other modules without actually using them
+     *  - subscribing to module signals
      */
     INITSTAGE_LOCAL = 0,
 
@@ -43,24 +50,26 @@ enum InitStages {
     INITSTAGE_PHYSICAL_OBJECT_CACHE = 2,
 
     /**
-     * Initialization stage of power model: energy storage, energy consumer, energy generator, and energy management models.
+     * Initialization of the power model: energy storage, energy consumer, energy generator, and energy management modules.
      */
     INITSTAGE_POWER = 3,
 
     /**
-     * Initialization of mobility modules regarding position and orientation.
+     * Initialization of mobility modules: calculating the initial position and orientation.
      */
     INITSTAGE_MOBILITY = 4,
 
     /**
-     * Initialization of the physical layer of protocol stacks.
-     * Radio publishes the initial RadioState; radios are registered in RadioMedium.
+     * Initialization of physical layer of protocols:
+     *  - registering radios in the RadioMedium
+     *  - initializing radio mode, transmission and reception states
      */
     INITSTAGE_PHYSICAL_LAYER = 5,
 
     /**
-     * Initialization of network interfaces, automatic MAC address assignment and
-     * network interfaces are registered in the InterfaceTable.
+     * Initialization of network interfaces:
+     *  - assigning MAC addresses
+     *  - registering network interfaces in the InterfaceTable
      */
     INITSTAGE_NETWORK_INTERFACE_CONFIGURATION = 6,
 
@@ -70,10 +79,9 @@ enum InitStages {
     INITSTAGE_LINK_LAYER = 7,
 
     /**
-     * Initialization of network configurators (e.g. Ipv4NetworkConfigurator).
-     * Network configurators compute IP addresses and static routes;
-     * protocol-specific data (e.g. Ipv4InterfaceData) are added to InterfaceEntry;
-     * netfilter hooks are registered in Ipv4; etc.
+     * Initialization of network configurators (e.g. Ipv4NetworkConfigurator) includes:
+     *  - determining IP addresses and static routes
+     *  - adding protocol-specific data (e.g. Ipv4InterfaceData) to InterfaceEntry
      */
     INITSTAGE_NETWORK_CONFIGURATOR = 8,
 
