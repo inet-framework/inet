@@ -74,6 +74,7 @@ void EtherTrafGen::initialize(int stage)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
+        llcSocket.setOutputGate(gate("out"));
         if (isGenerator())
             timerMsg = new cMessage("generateNextPacket");
 
@@ -89,6 +90,7 @@ void EtherTrafGen::handleMessage(cMessage *msg)
         throw cRuntimeError("Application is not running");
     if (msg->isSelfMessage()) {
         if (msg->getKind() == START) {
+            llcSocket.open(-1, ssap);
             destMACAddress = resolveDestMACAddress();
             // if no dest address given, nothing to do
             if (destMACAddress.isUnspecified())

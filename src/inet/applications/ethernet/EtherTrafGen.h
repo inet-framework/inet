@@ -20,9 +20,11 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/linklayer/common/MacAddress.h"
-#include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/linklayer/common/MacAddress.h"
+#include "inet/linklayer/ieee8022/LlcSocket.h"
+#include "inet/linklayer/ieee8022/LlcSocketCommand_m.h"
 
 namespace inet {
 
@@ -45,6 +47,7 @@ class INET_API EtherTrafGen : public cSimpleModule, public ILifecycle
     MacAddress destMACAddress;
     NodeStatus *nodeStatus = nullptr;
 
+    LlcSocket llcSocket;
     // self messages
     cMessage *timerMsg = nullptr;
     simtime_t startTime;
