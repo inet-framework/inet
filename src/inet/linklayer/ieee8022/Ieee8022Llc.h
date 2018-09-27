@@ -37,7 +37,10 @@ protected:
 
         SocketDescriptor(int socketId, int localSap, int remoteSap = -1)
                 : socketId(socketId), localSap(localSap), remoteSap(remoteSap) { }
+
     };
+
+    friend std::ostream& operator << (std::ostream& o, const SocketDescriptor& t);
 
     std::set<const Protocol *> upperProtocols;    // where to send packets after decapsulation
     std::map<int, SocketDescriptor *> socketIdToSocketDescriptor;

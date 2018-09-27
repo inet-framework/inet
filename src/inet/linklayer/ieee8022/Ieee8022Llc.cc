@@ -224,5 +224,11 @@ void Ieee8022Llc::handleRegisterProtocol(const Protocol& protocol, cGate *in, Se
         upperProtocols.insert(&protocol);
 }
 
+std::ostream& operator << (std::ostream& o, const Ieee8022Llc::SocketDescriptor& t)
+{
+    o << "(id:" << t.socketId << ",lsap:" << t.localSap << ",rsap" << t.remoteSap << ")";
+    return o;
+}
+
 } // namespace inet
 
