@@ -35,16 +35,19 @@ enum InitStages {
     INITSTAGE_LOCAL = 0,
 
     /**
-     * Physical environment initializations (mobility, obstacles, battery, annotations, etc).
+     * Physical environment initializations (obstacles, battery, annotations, etc).
      */
     INITSTAGE_PHYSICAL_ENVIRONMENT = 1,
 
     /**
-     * Additional physical environment initializations that depend on the previous stage.
-     * Some mobility modules (namely group mobility) compute and publish locations in this stage,
-     * because they learn their mobility coordinator in the previous stage.
+     * Initialization of the cache of physical objects present in the physical environment.
      */
-    INITSTAGE_PHYSICAL_ENVIRONMENT_2 = 2,
+    INITSTAGE_PHYSICAL_OBJECT_CACHE = 2,
+
+    /**
+     * Initialization of mobility modules regarding position and orientation.
+     */
+    INITSTAGE_MOBILITY = 3,
 
     /**
      * Initialization of the physical layer of protocol stacks. Radio publishes the initial RadioState;

@@ -37,8 +37,6 @@ void VehicleMobility::initialize(int stage)
         targetPointIndex = 0;
         heading = 0;
         angularSpeed = 0;
-    }
-    else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT) {
         readWaypointsFromFile(par("waypointFile"));
         ground = findModuleFromPar<IGround>(par("groundModule"), this);
     }

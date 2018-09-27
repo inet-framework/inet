@@ -45,7 +45,7 @@ void BvhObjectCache::initialize(int stage)
         leafCapacity = par("leafCapacity");
         axisOrder = par("axisOrder");
     }
-    else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT_2)
+    else if (stage == INITSTAGE_PHYSICAL_OBJECT_CACHE)
     {
         for (int i = 0; i < physicalEnvironment->getNumObjects(); i++)
             insertObject(physicalEnvironment->getObject(i));
