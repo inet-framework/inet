@@ -117,11 +117,13 @@ void Ieee8022Llc::processPacketFromMac(Packet *packet)
     if (protocolTag != nullptr && upperProtocols.find(protocolTag->getProtocol()) != upperProtocols.end()) {
         send(packet, "upperLayerOut");
     }
-    else if (!isSent) {
-        EV_WARN << "Unknown protocol, dropping packet\n";
-        PacketDropDetails details;
-        details.setReason(NO_PROTOCOL_FOUND);
-        emit(packetDroppedSignal, packet, &details);
+    else {
+        if (!isSent) {
+            EV_WARN << "Unknown protocol, dropping packet\n";
+            PacketDropDetails details;
+            details.setReason(NO_PROTOCOL_FOUND);
+            emit(packetDroppedSignal, packet, &details);
+        }
         delete packet;
     }
 }
