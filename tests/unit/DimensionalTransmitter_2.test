@@ -1,5 +1,5 @@
 %description:
-This test checks the correctness of dimensional signal power representation with sample-hold interpolation.
+This test checks the correctness of dimensional signal power representation with linear interpolation.
 
 %includes:
 #include "inet/common/mapping/MappingUtils.h"
@@ -46,7 +46,7 @@ class DimensionalTransmitterTest : public DimensionalTransmitterBase
 
 void DimensionalTransmitterTest::testTime1()
 {
-    interpolationMode = Mapping::STEPS;
+    interpolationMode = Mapping::LINEAR;
     dimensions = DimensionSet();
     dimensions.addDimension(Dimension::time);
     timeGains.clear();
@@ -60,7 +60,7 @@ void DimensionalTransmitterTest::testTime1()
 
 void DimensionalTransmitterTest::testTime2()
 {
-    interpolationMode = Mapping::STEPS;
+    interpolationMode = Mapping::LINEAR;
     dimensions = DimensionSet();
     dimensions.addDimension(Dimension::time);
     timeGains.clear();
@@ -79,7 +79,7 @@ void DimensionalTransmitterTest::testTime2()
 
 void DimensionalTransmitterTest::testFrequency1()
 {
-    interpolationMode = Mapping::STEPS;
+    interpolationMode = Mapping::LINEAR;
     dimensions = DimensionSet();
     dimensions.addDimension(Dimension::frequency);
     frequencyGains.clear();
@@ -93,7 +93,7 @@ void DimensionalTransmitterTest::testFrequency1()
 
 void DimensionalTransmitterTest::testFrequency2()
 {
-    interpolationMode = Mapping::STEPS;
+    interpolationMode = Mapping::LINEAR;
     dimensions = DimensionSet();
     dimensions.addDimension(Dimension::frequency);
     frequencyGains.clear();
@@ -112,7 +112,7 @@ void DimensionalTransmitterTest::testFrequency2()
 
 void DimensionalTransmitterTest::testDual1()
 {
-    interpolationMode = Mapping::STEPS;
+    interpolationMode = Mapping::LINEAR;
     dimensions = DimensionSet();
     dimensions.addDimension(Dimension::time);
     dimensions.addDimension(Dimension::frequency);
@@ -131,7 +131,7 @@ void DimensionalTransmitterTest::testDual1()
 
 void DimensionalTransmitterTest::testDual2()
 {
-    interpolationMode = Mapping::STEPS;
+    interpolationMode = Mapping::LINEAR;
     dimensions = DimensionSet();
     dimensions.addDimension(Dimension::time);
     dimensions.addDimension(Dimension::frequency);
@@ -169,7 +169,7 @@ Value at 10: 1
 Value at 15: 1
 Value at 20: 1
 Value at 25: 1
-Value at 30: 0
+Value at 30: 1
 Value at 35: 0
 Value at 40: 0
 Value at 45: 0
@@ -180,9 +180,9 @@ Value at 10: 1
 Value at 15: 1
 Value at 20: 11
 Value at 25: 11
-Value at 30: 10
+Value at 30: 11
 Value at 35: 10
-Value at 40: 0
+Value at 40: 10
 Value at 45: 0
 Max value: 11
 .*
@@ -192,7 +192,7 @@ Value at 900 MHz: 1
 Value at 950 MHz: 1
 Value at 1 GHz: 1
 Value at 1.05 GHz: 1
-Value at 1.1 GHz: 0
+Value at 1.1 GHz: 1
 Value at 1.15 GHz: 0
 Value at 1.2 GHz: 0
 Value at 1.25 GHz: 0
@@ -203,9 +203,9 @@ Value at 900 MHz: 1
 Value at 950 MHz: 1
 Value at 1 GHz: 11
 Value at 1.05 GHz: 11
-Value at 1.1 GHz: 10
+Value at 1.1 GHz: 11
 Value at 1.15 GHz: 10
-Value at 1.2 GHz: 0
+Value at 1.2 GHz: 10
 Value at 1.25 GHz: 0
 Max value: 11
 .*
@@ -235,7 +235,7 @@ Value at 10 900 MHz: 1
 Value at 10 950 MHz: 1
 Value at 10 1 GHz: 1
 Value at 10 1.05 GHz: 1
-Value at 10 1.1 GHz: 0
+Value at 10 1.1 GHz: 1
 Value at 10 1.15 GHz: 0
 Value at 10 1.2 GHz: 0
 Value at 10 1.25 GHz: 0
@@ -245,7 +245,7 @@ Value at 15 900 MHz: 1
 Value at 15 950 MHz: 1
 Value at 15 1 GHz: 1
 Value at 15 1.05 GHz: 1
-Value at 15 1.1 GHz: 0
+Value at 15 1.1 GHz: 1
 Value at 15 1.15 GHz: 0
 Value at 15 1.2 GHz: 0
 Value at 15 1.25 GHz: 0
@@ -255,7 +255,7 @@ Value at 20 900 MHz: 1
 Value at 20 950 MHz: 1
 Value at 20 1 GHz: 1
 Value at 20 1.05 GHz: 1
-Value at 20 1.1 GHz: 0
+Value at 20 1.1 GHz: 1
 Value at 20 1.15 GHz: 0
 Value at 20 1.2 GHz: 0
 Value at 20 1.25 GHz: 0
@@ -265,17 +265,17 @@ Value at 25 900 MHz: 1
 Value at 25 950 MHz: 1
 Value at 25 1 GHz: 1
 Value at 25 1.05 GHz: 1
-Value at 25 1.1 GHz: 0
+Value at 25 1.1 GHz: 1
 Value at 25 1.15 GHz: 0
 Value at 25 1.2 GHz: 0
 Value at 25 1.25 GHz: 0
 Value at 30 800 MHz: 0
 Value at 30 850 MHz: 0
-Value at 30 900 MHz: 0
-Value at 30 950 MHz: 0
-Value at 30 1 GHz: 0
-Value at 30 1.05 GHz: 0
-Value at 30 1.1 GHz: 0
+Value at 30 900 MHz: 1
+Value at 30 950 MHz: 1
+Value at 30 1 GHz: 1
+Value at 30 1.05 GHz: 1
+Value at 30 1.1 GHz: 1
 Value at 30 1.15 GHz: 0
 Value at 30 1.2 GHz: 0
 Value at 30 1.25 GHz: 0
@@ -336,7 +336,7 @@ Value at 10 900 MHz: 1
 Value at 10 950 MHz: 1
 Value at 10 1 GHz: 1
 Value at 10 1.05 GHz: 1
-Value at 10 1.1 GHz: 0
+Value at 10 1.1 GHz: 1
 Value at 10 1.15 GHz: 0
 Value at 10 1.2 GHz: 0
 Value at 10 1.25 GHz: 0
@@ -346,7 +346,7 @@ Value at 15 900 MHz: 1
 Value at 15 950 MHz: 1
 Value at 15 1 GHz: 1
 Value at 15 1.05 GHz: 1
-Value at 15 1.1 GHz: 0
+Value at 15 1.1 GHz: 1
 Value at 15 1.15 GHz: 0
 Value at 15 1.2 GHz: 0
 Value at 15 1.25 GHz: 0
@@ -356,9 +356,9 @@ Value at 20 900 MHz: 1
 Value at 20 950 MHz: 1
 Value at 20 1 GHz: 11
 Value at 20 1.05 GHz: 11
-Value at 20 1.1 GHz: 10
+Value at 20 1.1 GHz: 11
 Value at 20 1.15 GHz: 10
-Value at 20 1.2 GHz: 0
+Value at 20 1.2 GHz: 10
 Value at 20 1.25 GHz: 0
 Value at 25 800 MHz: 0
 Value at 25 850 MHz: 0
@@ -366,19 +366,19 @@ Value at 25 900 MHz: 1
 Value at 25 950 MHz: 1
 Value at 25 1 GHz: 11
 Value at 25 1.05 GHz: 11
-Value at 25 1.1 GHz: 10
+Value at 25 1.1 GHz: 11
 Value at 25 1.15 GHz: 10
-Value at 25 1.2 GHz: 0
+Value at 25 1.2 GHz: 10
 Value at 25 1.25 GHz: 0
 Value at 30 800 MHz: 0
 Value at 30 850 MHz: 0
-Value at 30 900 MHz: 0
-Value at 30 950 MHz: 0
-Value at 30 1 GHz: 10
-Value at 30 1.05 GHz: 10
-Value at 30 1.1 GHz: 10
+Value at 30 900 MHz: 1
+Value at 30 950 MHz: 1
+Value at 30 1 GHz: 11
+Value at 30 1.05 GHz: 11
+Value at 30 1.1 GHz: 11
 Value at 30 1.15 GHz: 10
-Value at 30 1.2 GHz: 0
+Value at 30 1.2 GHz: 10
 Value at 30 1.25 GHz: 0
 Value at 35 800 MHz: 0
 Value at 35 850 MHz: 0
@@ -388,17 +388,17 @@ Value at 35 1 GHz: 10
 Value at 35 1.05 GHz: 10
 Value at 35 1.1 GHz: 10
 Value at 35 1.15 GHz: 10
-Value at 35 1.2 GHz: 0
+Value at 35 1.2 GHz: 10
 Value at 35 1.25 GHz: 0
 Value at 40 800 MHz: 0
 Value at 40 850 MHz: 0
 Value at 40 900 MHz: 0
 Value at 40 950 MHz: 0
-Value at 40 1 GHz: 0
-Value at 40 1.05 GHz: 0
-Value at 40 1.1 GHz: 0
-Value at 40 1.15 GHz: 0
-Value at 40 1.2 GHz: 0
+Value at 40 1 GHz: 10
+Value at 40 1.05 GHz: 10
+Value at 40 1.1 GHz: 10
+Value at 40 1.15 GHz: 10
+Value at 40 1.2 GHz: 10
 Value at 40 1.25 GHz: 0
 Value at 45 800 MHz: 0
 Value at 45 850 MHz: 0
