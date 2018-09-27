@@ -132,18 +132,24 @@ ConstMapping *DimensionalTransmitterBase::createPowerMapping(const simtime_t sta
         double startFrequency = (carrierFrequency - bandwidth / 2).get();
         double endFrequency = (carrierFrequency + bandwidth / 2).get();
         // must be 0 before the start
-        position.setTime(0);
-        position.setArgValue(Dimension::frequency, 0);
-        powerMapping->setValue(position, 0);
-        position.setTime(startTime);
-        powerMapping->setValue(position, 0);
-        position.setTime(endTime);
-        powerMapping->setValue(position, 0);
-        position.setTime(0);
-        position.setArgValue(Dimension::frequency, startFrequency);
-        powerMapping->setValue(position, 0);
-        position.setArgValue(Dimension::frequency, endFrequency);
-        powerMapping->setValue(position, 0);
+        if (interpolationMode == Mapping::STEPS)
+            ; // already 0 where unspecified
+        else if (interpolationMode == Mapping::LINEAR) {
+            auto previousTime = startTime;
+            previousTime.setRaw(previousTime.raw() - 1);
+            position.setTime(previousTime);
+            position.setArgValue(Dimension::frequency, startFrequency);
+            powerMapping->setValue(position, 0);
+            position.setArgValue(Dimension::frequency, endFrequency);
+            powerMapping->setValue(position, 0);
+            position.setTime(startTime);
+            position.setArgValue(Dimension::frequency, nexttoward(startFrequency, DBL_MIN));
+            powerMapping->setValue(position, 0);
+            position.setArgValue(Dimension::frequency, nexttoward(endFrequency, DBL_MAX));
+            powerMapping->setValue(position, 0);
+        }
+        else
+            throw cRuntimeError("Unknown interpolation mode");
         // iterate over timeGains and frequencyGains
         for (const auto & timeGainEntry : timeGains) {
             switch (timeGainEntry.timeUnit) {
@@ -171,20 +177,46 @@ ConstMapping *DimensionalTransmitterBase::createPowerMapping(const simtime_t sta
             }
         }
         // must be 0 after the end
-        position.setTime(startTime);
-        position.setArgValue(Dimension::frequency, endFrequency);
-        powerMapping->setValue(position, 0);
-        position.setTime(endTime);
-        position.setArgValue(Dimension::frequency, startFrequency);
-        powerMapping->setValue(position, 0);
-        position.setTime(endTime);
-        position.setArgValue(Dimension::frequency, endFrequency);
-        powerMapping->setValue(position, 0);
+        if (interpolationMode == Mapping::STEPS) {
+            position.setTime(startTime);
+            position.setArgValue(Dimension::frequency, endFrequency);
+            powerMapping->setValue(position, 0);
+            position.setTime(endTime);
+            position.setArgValue(Dimension::frequency, startFrequency);
+            powerMapping->setValue(position, 0);
+            position.setTime(endTime);
+            position.setArgValue(Dimension::frequency, endFrequency);
+            powerMapping->setValue(position, 0);
+        }
+        else if (interpolationMode == Mapping::LINEAR) {
+            auto nextTime = endTime;
+            nextTime.setRaw(nextTime.raw() + 1);
+            position.setTime(nextTime);
+            position.setArgValue(Dimension::frequency, startFrequency);
+            powerMapping->setValue(position, 0);
+            position.setArgValue(Dimension::frequency, endFrequency);
+            powerMapping->setValue(position, 0);
+            position.setTime(endTime);
+            position.setArgValue(Dimension::frequency, nexttoward(startFrequency, DBL_MIN));
+            powerMapping->setValue(position, 0);
+            position.setArgValue(Dimension::frequency, nexttoward(endFrequency, DBL_MAX));
+            powerMapping->setValue(position, 0);
+        }
+        else
+            throw cRuntimeError("Unknown interpolation mode");
     }
     else if (hasTimeDimension) {
         // must be 0 before the start
-        position.setTime(0);
-        powerMapping->setValue(position, 0);
+        if (interpolationMode == Mapping::STEPS)
+            ; // already 0 where unspecified
+        else if (interpolationMode == Mapping::LINEAR) {
+            auto previousTime = startTime;
+            previousTime.setRaw(previousTime.raw() - 1);
+            position.setTime(previousTime);
+            powerMapping->setValue(position, 0);
+        }
+        else
+            throw cRuntimeError("Unknown interpolation mode");
         // iterate over timeGains
         for (const auto & timeGainEntry : timeGains) {
             switch (timeGainEntry.timeUnit) {
@@ -200,15 +232,29 @@ ConstMapping *DimensionalTransmitterBase::createPowerMapping(const simtime_t sta
             powerMapping->setValue(position, timeGainEntry.gain * power.get());
         }
         // must be 0 after the end
-        position.setTime(endTime);
+        if (interpolationMode == Mapping::STEPS)
+            position.setTime(endTime);
+        else if (interpolationMode == Mapping::LINEAR) {
+            auto nextTime = endTime;
+            nextTime.setRaw(nextTime.raw() + 1);
+            position.setTime(nextTime);
+        }
+        else
+            throw cRuntimeError("Unknown interpolation mode");
         powerMapping->setValue(position, 0);
     }
     else if (hasFrequencyDimension) {
         double startFrequency = (carrierFrequency - bandwidth / 2).get();
         double endFrequency = (carrierFrequency + bandwidth / 2).get();
         // must be 0 before the start
-        position.setArgValue(Dimension::frequency, 0);
-        powerMapping->setValue(position, 0);
+        if (interpolationMode == Mapping::STEPS)
+            ; // already 0 where unspecified
+        else if (interpolationMode == Mapping::LINEAR) {
+            position.setArgValue(Dimension::frequency, nexttoward(startFrequency, DBL_MIN));
+            powerMapping->setValue(position, 0);
+        }
+        else
+            throw cRuntimeError("Unknown interpolation mode");
         // iterate over frequencyGains
         for (const auto & frequencyGainEntry : frequencyGains) {
             switch (frequencyGainEntry.frequencyUnit) {
@@ -224,7 +270,12 @@ ConstMapping *DimensionalTransmitterBase::createPowerMapping(const simtime_t sta
             powerMapping->setValue(position, frequencyGainEntry.gain * power.get());
         }
         // must be 0 after the end
-        position.setArgValue(Dimension::frequency, endFrequency);
+        if (interpolationMode == Mapping::STEPS)
+            position.setArgValue(Dimension::frequency, endFrequency);
+        else if (interpolationMode == Mapping::LINEAR)
+            position.setArgValue(Dimension::frequency, nexttoward(endFrequency, DBL_MAX));
+        else
+            throw cRuntimeError("Unknown interpolation mode");
         powerMapping->setValue(position, 0);
     }
     else
