@@ -54,11 +54,11 @@ void LlcSocket::processMessage(cMessage *msg)
 
 void LlcSocket::open(int interfaceId, int localSap)
 {
-    if (localSap < 0 || localSap > 255)
+    if (localSap < -1 || localSap > 255)
         throw cRuntimeError("LlcSocket::open(): Invalid localSap value: %d", localSap);
     this->interfaceId = interfaceId;
     this->localSap = localSap;
-    auto request = new Request("OPEN", IEEE8022_LLC_C_OPEN);
+    auto request = new Request("LLC_OPEN", IEEE8022_LLC_C_OPEN);
     LlcSocketOpenCommand *command = new LlcSocketOpenCommand();
     command->setLocalSap(localSap);
     request->setControlInfo(command);
@@ -75,7 +75,7 @@ void LlcSocket::send(Packet *packet)
 
 void LlcSocket::close()
 {
-    auto request = new Request("CLOSE", IEEE8022_LLC_C_CLOSE);
+    auto request = new Request("LLC_CLOSE", IEEE8022_LLC_C_CLOSE);
     LlcSocketCloseCommand *command = new LlcSocketCloseCommand();
     request->setControlInfo(command);
     sendToLlc(request);
