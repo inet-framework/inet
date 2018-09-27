@@ -40,7 +40,6 @@ module ThroughputClient
     submodules:
         cli: EtherAppClient {
             parameters:
-                registerSAP = true;
                 @display("p=300,100");
         }
         wlan: Ieee80211Interface {
