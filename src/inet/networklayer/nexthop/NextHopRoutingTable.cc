@@ -85,12 +85,14 @@ void NextHopRoutingTable::initialize(int stage)
         host->subscribe(interfaceConfigChangedSignal, this);
         host->subscribe(interfaceIpv4ConfigChangedSignal, this);
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER) {
+    else if (stage == INITSTAGE_LINK_LAYER_2) {
         // At this point, all L2 modules have registered themselves (added their
         // interface entries). Create the per-interface Ipv4 data structures.
         IInterfaceTable *interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         for (int i = 0; i < interfaceTable->getNumInterfaces(); ++i)
             configureInterface(interfaceTable->getInterface(i));
+    }
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
         configureLoopback();
 
 //        // read routing table file (and interface configuration)
@@ -104,8 +106,6 @@ void NextHopRoutingTable::initialize(int stage)
 //        const char *routerIdStr = par("routerId");
 //        if (strcmp(routerIdStr, "") && strcmp(routerIdStr, "auto"))
 //            routerId = Ipv4Address(routerIdStr);
-    }
-    else if (stage == INITSTAGE_NETWORK_LAYER_3) {
         // routerID selection must be after network autoconfiguration assigned interface addresses
         configureRouterId();
 

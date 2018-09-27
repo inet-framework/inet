@@ -104,8 +104,6 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
-    }
-    else if (stage == INITSTAGE_NETWORK_LAYER_3) {
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         rt6 = getModuleFromPar<Ipv6RoutingTable>(par("routingTableModule"), this);
         icmpv6 = getModuleFromPar<Icmpv6>(par("icmpv6Module"), this);

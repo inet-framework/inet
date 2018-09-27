@@ -115,8 +115,6 @@ void Dymo::initialize(int stage)
         networkProtocol = getModuleFromPar<INetfilter>(par("networkProtocolModule"), this);
         // internal
         expungeTimer = new cMessage("ExpungeTimer");
-    }
-    else if (stage == INITSTAGE_NETWORK_LAYER_3) {
         L3AddressResolver addressResolver;
         cStringTokenizer tokenizer(clientAddresses);
         while (tokenizer.hasMoreTokens()) {

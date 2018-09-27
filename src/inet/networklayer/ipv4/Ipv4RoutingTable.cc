@@ -86,7 +86,7 @@ void Ipv4RoutingTable::initialize(int stage)
         WATCH(multicastForward);
         WATCH(routerId);
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER) {
+    else if (stage == INITSTAGE_STATIC_ROUTING) {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isNodeUp = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
         if (isNodeUp) {
@@ -97,7 +97,7 @@ void Ipv4RoutingTable::initialize(int stage)
                 routerId = Ipv4Address(routerIdStr);
         }
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER_3) {
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
         if (isNodeUp) {
             // read routing table file (and interface configuration)
             const char *filename = par("routingFile");

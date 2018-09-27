@@ -108,6 +108,9 @@ void Ipv4::initialize(int stage)
         arpModule->subscribe(IArp::arpResolutionCompletedSignal, this);
         arpModule->subscribe(IArp::arpResolutionFailedSignal, this);
 
+        registerService(Protocol::ipv4, gate("transportIn"), gate("queueIn"));
+        registerProtocol(Protocol::ipv4, gate("queueOut"), gate("transportOut"));
+
         WATCH(numMulticast);
         WATCH(numLocalDeliver);
         WATCH(numDropped);
@@ -118,8 +121,6 @@ void Ipv4::initialize(int stage)
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         isUp = isNodeUp();
-        registerService(Protocol::ipv4, gate("transportIn"), gate("queueIn"));
-        registerProtocol(Protocol::ipv4, gate("queueOut"), gate("transportOut"));
     }
 }
 

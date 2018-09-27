@@ -92,13 +92,14 @@ void Ipv6RoutingTable::initialize(int stage)
         host->subscribe(interfaceConfigChangedSignal, this);
         host->subscribe(interfaceIpv6ConfigChangedSignal, this);
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER) {
+    else if (stage == INITSTAGE_LINK_LAYER_2) {
         // add Ipv6InterfaceData to interfaces
         for (int i = 0; i < ift->getNumInterfaces(); i++) {
             InterfaceEntry *ie = ift->getInterface(i);
             configureInterfaceForIpv6(ie);
         }
-
+    }
+    else if (stage == INITSTAGE_NETWORK_CONFIGURATOR) {
         parseXmlConfigFile();
 
         // skip hosts

@@ -385,13 +385,11 @@ void Igmpv2::initialize(int stage)
         WATCH(numLeavesSent);
         WATCH(numLeavesRecv);
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER) {
+    else if (stage == INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT) {
         cModule *host = getContainingNode(this);
         host->subscribe(interfaceCreatedSignal, this);
         registerService(Protocol::igmp, nullptr, gate("ipIn"));
         registerProtocol(Protocol::igmp, gate("ipOut"), nullptr);
-    }
-    else if (stage == INITSTAGE_NETWORK_LAYER_2) {
         for (int i = 0; i < ift->getNumInterfaces(); ++i) {
             InterfaceEntry *ie = ift->getInterface(i);
             if (ie->isMulticast())

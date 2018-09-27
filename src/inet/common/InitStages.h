@@ -70,11 +70,6 @@ enum InitStages {
     INITSTAGE_LINK_LAYER_2 = 7,
 
     /**
-     * Initialization of network-layer protocols.
-     */
-    INITSTAGE_NETWORK_LAYER = 8,
-
-    /**
      * Initialization of network configurators (e.g. Ipv4NetworkConfigurator).
      * Configurators compute IP addresses and static routes; protocol-specific
      * data (e.g. Ipv4InterfaceData) are added to InterfaceEntry; netf7ilter
@@ -95,7 +90,7 @@ enum InitStages {
     /**
      * Initialization of static routes.
      */
-    INITSTAGE_NETWORK_LAYER_3 = 12,
+    INITSTAGE_NETWORK_LAYER = 12,
 
     /**
      * Initialization of transport-layer protocols. Transport protocols register

@@ -29,7 +29,7 @@ Define_Module(NextHopNetworkConfigurator);
 void NextHopNetworkConfigurator::initialize(int stage)
 {
     NetworkConfiguratorBase::initialize(stage);
-    if (stage == INITSTAGE_NETWORK_LAYER_3) {
+    if (stage == INITSTAGE_NETWORK_LAYER) {
         long initializeStartTime = clock();
         Topology topology;
         // extract topology into the Topology object, then fill in a LinkInfo[] vector

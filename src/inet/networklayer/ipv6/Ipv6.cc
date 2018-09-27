@@ -100,6 +100,9 @@ void Ipv6::initialize(int stage)
 
         numMulticast = numLocalDeliver = numDropped = numUnroutable = numForwarded = 0;
 
+        registerService(Protocol::ipv6, gate("transportIn"), gate("queueIn"));
+        registerProtocol(Protocol::ipv6, gate("queueOut"), gate("transportOut"));
+
         WATCH(numMulticast);
         WATCH(numLocalDeliver);
         WATCH(numDropped);
@@ -112,8 +115,6 @@ void Ipv6::initialize(int stage)
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
-        registerService(Protocol::ipv6, gate("transportIn"), gate("queueIn"));
-        registerProtocol(Protocol::ipv6, gate("queueOut"), gate("transportOut"));
     }
 }
 

@@ -434,13 +434,11 @@ void Igmpv3::initialize(int stage)
         WATCH(numReportsSent);
         WATCH(numReportsRecv);
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER) {
+    else if (stage == INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT) {
         cModule *host = getContainingNode(this);
         host->subscribe(interfaceCreatedSignal, this);
         registerService(Protocol::igmp, nullptr, gate("ipIn"));
         registerProtocol(Protocol::igmp, gate("ipOut"), nullptr);
-    }
-    else if (stage == INITSTAGE_NETWORK_LAYER_2) {    // getProtocolData<Ipv4InterfaceData>() created in INITSTAGE_NETWORK_LAYER
         for (int i = 0; i < ift->getNumInterfaces(); ++i) {
             InterfaceEntry *ie = ift->getInterface(i);
             if (ie->isMulticast())
