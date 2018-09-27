@@ -26,7 +26,7 @@ package inet.applications.ethernet;
 simple EtherAppServer
 {
     parameters:
-        bool registerSAP; // whether to sent IEEE802CTRL_REGISTER_DSAP on startup
+        bool registerSAP = true; // whether to sent IEEE802CTRL_REGISTER_DSAP on startup
         int localSAP = default(0xf1);
         @display("i=block/app");
         @signal[packetSent](type=inet::Packet);

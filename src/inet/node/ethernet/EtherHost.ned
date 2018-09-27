@@ -57,12 +57,10 @@ module EtherHost
         }
         cli: EtherAppClient {
             parameters:
-                registerSAP = true;
                 @display("p=250,100");
         }
         srv: EtherAppServer {
             parameters:
-                registerSAP = true;
                 @display("p=450,100");
         }
         dispatcher: MessageDispatcher {
