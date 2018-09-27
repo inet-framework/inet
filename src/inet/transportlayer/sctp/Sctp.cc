@@ -135,8 +135,6 @@ void Sctp::initialize(int stage)
                 ipv6->registerHook(0, &crcInsertion);
 #endif
         }
-    }
-    else if (stage == INITSTAGE_TRANSPORT_LAYER_2) {
         if (par("udpEncapsEnabled")) {
             EV_INFO << "udpEncapsEnabled" << endl;
 #ifdef WITH_IPv4

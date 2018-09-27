@@ -96,12 +96,6 @@ enum InitStages {
     INITSTAGE_TRANSPORT_LAYER = 9,
 
     /**
-     * Initialization of transport-layer protocols, 2nd stage. Exists because SCTP
-     * may be transported over UDP.
-     */
-    INITSTAGE_TRANSPORT_LAYER_2 = 10,
-
-    /**
      * Initialization of routing protocols.
      */
     INITSTAGE_ROUTING_PROTOCOLS = 11,
