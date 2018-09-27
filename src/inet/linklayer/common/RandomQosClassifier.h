@@ -19,6 +19,7 @@
 #define __INET_RANDOMQOSCLASSIFIER_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/IProtocolRegistrationListener.h"
 
 namespace inet {
 
@@ -26,8 +27,12 @@ namespace inet {
  * A QoS classifier that assigns a random User Priority. This is useful
  * for testing purposes.
  */
-class INET_API RandomQosClassifier : public cSimpleModule
+class INET_API RandomQosClassifier : public cSimpleModule, public IProtocolRegistrationListener
 {
+  protected:
+    virtual void handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive) override;
+    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive) override;
+
   public:
     void handleMessage(cMessage *msg) override;
 };
