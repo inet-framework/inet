@@ -26,10 +26,6 @@ Define_Module(MassMobility);
 
 MassMobility::MassMobility()
 {
-    changeIntervalParameter = nullptr;
-    angleDeltaParameter = nullptr;
-    speedParameter = nullptr;
-    angle = deg(0);
 }
 
 void MassMobility::initialize(int stage)

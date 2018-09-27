@@ -37,12 +37,12 @@ class INET_API MassMobility : public LineSegmentsMobilityBase
 {
   protected:
     // config (see NED file for explanation)
-    cPar *changeIntervalParameter;
-    cPar *angleDeltaParameter;
-    cPar *speedParameter;
+    cPar *changeIntervalParameter = nullptr;
+    cPar *angleDeltaParameter = nullptr;
+    cPar *speedParameter = nullptr;
 
     // current state
-    rad angle;    ///< angle of linear motion
+    rad angle = deg(0);    ///< angle of linear motion
 
     simtime_t previousChange;
     Coord sourcePosition;
