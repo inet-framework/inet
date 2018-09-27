@@ -105,7 +105,7 @@ void Ieee802154Mac::initialize(int stage)
         macState = IDLE_1;
         txAttempts = 0;
     }
-    else if (stage == INITSTAGE_LINK_LAYER) {
+    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         registerInterface();
 
         cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);

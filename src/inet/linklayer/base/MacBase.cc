@@ -57,7 +57,7 @@ void MacBase::initialize(int stage)
         if (hostModule)
             hostModule->subscribe(interfaceDeletedSignal, this);
     }
-    else if (stage == INITSTAGE_LINK_LAYER) {
+    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         updateOperationalFlag(isNodeUp());    // needs to be done when interface is already registered (=last stage)
     }
 }

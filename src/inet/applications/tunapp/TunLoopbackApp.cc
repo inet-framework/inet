@@ -41,7 +41,7 @@ TunLoopbackApp::~TunLoopbackApp()
 void TunLoopbackApp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
-    if (stage == INITSTAGE_LINK_LAYER_2) {
+    if (stage == INITSTAGE_LINK_LAYER) {
         tunInterface = par("tunInterface");
         packetsSent = 0;
         packetsReceived = 0;

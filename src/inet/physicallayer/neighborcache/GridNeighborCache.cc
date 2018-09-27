@@ -46,7 +46,7 @@ void GridNeighborCache::initialize(int stage)
         refillPeriod = par("refillPeriod");
         refillCellsTimer = new cMessage("refillCellsTimer");
     }
-    else if (stage == INITSTAGE_LINK_LAYER_2) {
+    else if (stage == INITSTAGE_LINK_LAYER) {
         constraintAreaMin = radioMedium->getMediumLimitCache()->getMinConstraintArea();
         constraintAreaMax = radioMedium->getMediumLimitCache()->getMaxConstraintArea();
         maxSpeed = radioMedium->getMediumLimitCache()->getMaxSpeed().get();

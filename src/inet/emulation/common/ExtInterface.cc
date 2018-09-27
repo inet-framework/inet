@@ -41,14 +41,14 @@ Define_Module(ExtInterface);
 void ExtInterface::initialize(int stage)
 {
     InterfaceEntry::initialize(stage);
-    if (stage == INITSTAGE_LINK_LAYER) {
+    if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         registerInterface();
         if (!strcmp("copyFromExt", par("copyConfiguration")))
             copyInterfaceConfigurationFromExt();
         else
             configureInterface();
     }
-    else if (stage == INITSTAGE_LINK_LAYER_2) {
+    else if (stage == INITSTAGE_LINK_LAYER) {
         if (!strcmp("copyToExt", par("copyConfiguration")))
             copyInterfaceConfigurationToExt();
     }

@@ -32,7 +32,7 @@ void Dcaf::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         getContainingNicModule(this)->subscribe(modesetChangedSignal, this);
     }
-    else if (stage == INITSTAGE_LINK_LAYER_2) {
+    else if (stage == INITSTAGE_LINK_LAYER) {
         // TODO: calculateTimingParameters()
         contention = check_and_cast<IContention *>(getSubmodule("contention"));
         auto rx = check_and_cast<IRx *>(getModuleByPath(par("rxModule")));

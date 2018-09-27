@@ -70,7 +70,7 @@ void XMac::initialize(int stage)
         macState = INIT;
         WATCH(macState);
     }
-    else if (stage == INITSTAGE_LINK_LAYER) {
+    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
         radioModule->subscribe(IRadio::radioModeChangedSignal, this);
         radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);

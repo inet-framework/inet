@@ -42,7 +42,7 @@ void ShortcutRadio::initialize(int stage)
         packetLoss = &par("packetLoss");
         gate("radioIn")->setDeliverOnReceptionStart(true);
     }
-    else if (stage == INITSTAGE_LINK_LAYER_2) {
+    else if (stage == INITSTAGE_LINK_LAYER) {
         auto interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         auto interfaceEntry = interfaceTable->getInterfaceByInterfaceModule(this);
         auto address = interfaceEntry->getMacAddress();

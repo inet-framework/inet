@@ -48,7 +48,7 @@ void Rx::initialize(int stage)
         WATCH(transmissionState);
         WATCH(mediumFree);
     }
-    else if (stage == INITSTAGE_LINK_LAYER) {
+    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         // statistics = check_and_cast<IStatistics *>(getModuleByPath(par("statisticsModule")));
         address = check_and_cast<Ieee80211Mac*>(getContainingNicModule(this)->getSubmodule("mac"))->getAddress();
         recomputeMediumFree();

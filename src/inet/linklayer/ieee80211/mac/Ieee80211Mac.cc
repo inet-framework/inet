@@ -63,7 +63,7 @@ void Ieee80211Mac::initialize(int stage)
         modeSet = Ieee80211ModeSet::getModeSet(par("modeSet"));
         fcsMode = parseFcsMode(par("fcsMode"));
     }
-    else if (stage == INITSTAGE_LINK_LAYER) {
+    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         mib = getModuleFromPar<Ieee80211Mib>(par("mibModule"), this);
         mib->qos = par("qosStation");
         cModule *llcModule = gate("upperLayerOut")->getNextGate()->getOwnerModule();
@@ -82,7 +82,7 @@ void Ieee80211Mac::initialize(int stage)
         if (isOperational)
             initializeRadioMode();
     }
-    else if (stage == INITSTAGE_LINK_LAYER_2) {
+    else if (stage == INITSTAGE_LINK_LAYER) {
         rx = check_and_cast<IRx *>(getSubmodule("rx"));
         tx = check_and_cast<ITx *>(getSubmodule("tx"));
         dcf = check_and_cast<Dcf *>(getSubmodule("dcf"));

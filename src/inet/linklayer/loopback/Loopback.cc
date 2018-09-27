@@ -49,7 +49,7 @@ void Loopback::initialize(int stage)
         WATCH(numSent);
         WATCH(numRcvdOK);
     }
-    else if (stage == INITSTAGE_LINK_LAYER) {
+    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         // register our interface entry in IInterfaceTable
         registerInterface();
     }

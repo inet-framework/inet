@@ -86,7 +86,7 @@ void InterfaceEntry::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         setInterfaceName(utils::stripnonalnum(getFullName()).c_str());
     }
-    else if (stage == INITSTAGE_LINK_LAYER) {
+    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         IInterfaceTable *ift = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         if (ift) {
             ift->addInterface(this);

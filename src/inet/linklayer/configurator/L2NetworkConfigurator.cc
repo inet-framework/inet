@@ -46,7 +46,7 @@ void L2NetworkConfigurator::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
         configuration = par("config");
-    else if (stage == INITSTAGE_LINK_LAYER)
+    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION)
         ensureConfigurationComputed(topology);
 }
 

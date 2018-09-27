@@ -54,7 +54,7 @@ void EtherEncap::initialize(int stage)
         WATCH(totalFromMAC);
         WATCH(totalPauseSent);
     }
-    else if (stage == INITSTAGE_LINK_LAYER)
+    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION)
     {
         if (par("registerProtocol").boolValue()) {    //FIXME //KUDGE should redesign place of EtherEncap and LLC modules
             //register service and protocol

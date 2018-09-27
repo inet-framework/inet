@@ -40,11 +40,11 @@ void Ieee80211MgmtBase::initialize(int stage)
         WATCH(numMgmtFramesReceived);
         WATCH(numMgmtFramesDropped);
     }
-    else if (stage == INITSTAGE_LINK_LAYER) {
+    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
     }
-    else if (stage == INITSTAGE_LINK_LAYER_2) {
+    else if (stage == INITSTAGE_LINK_LAYER) {
         // obtain our address from MAC
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         myIface = interfaceTable->getInterfaceByName(utils::stripnonalnum(findModuleUnderContainingNode(this)->getFullName()).c_str());

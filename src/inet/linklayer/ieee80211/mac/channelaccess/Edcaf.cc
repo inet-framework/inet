@@ -38,7 +38,7 @@ void Edcaf::initialize(int stage)
         contention = check_and_cast<IContention *>(getSubmodule("contention"));
         collisionController = check_and_cast<IEdcaCollisionController *>(getModuleByPath(par("collisionControllerModule")));
     }
-    else if (stage == INITSTAGE_LINK_LAYER_2) {
+    else if (stage == INITSTAGE_LINK_LAYER) {
         auto rx = check_and_cast<IRx *>(getModuleByPath(par("rxModule")));
         rx->registerContention(contention);
         calculateTimingParameters();

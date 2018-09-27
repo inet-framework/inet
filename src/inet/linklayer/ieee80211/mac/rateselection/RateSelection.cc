@@ -35,7 +35,7 @@ void RateSelection::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         getContainingNicModule(this)->subscribe(modesetChangedSignal, this);
     }
-    else if (stage == INITSTAGE_LINK_LAYER_2) {
+    else if (stage == INITSTAGE_LINK_LAYER) {
         dataOrMgmtRateControl = dynamic_cast<IRateControl*>(getModuleByPath(par("rateControlModule")));
         double multicastFrameBitrate = par("multicastFrameBitrate");
         multicastFrameMode = (multicastFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(multicastFrameBitrate));

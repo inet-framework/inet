@@ -89,7 +89,7 @@ void AckingMac::initialize(int stage)
         queueModule = dynamic_cast<IPassiveQueue *>(queueOut->getOwnerModule());
 
     }
-    else if (stage == INITSTAGE_LINK_LAYER) {
+    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         registerInterface();
         radio->setRadioMode(fullDuplex ? IRadio::RADIO_MODE_TRANSCEIVER : IRadio::RADIO_MODE_RECEIVER);
         if (useAck)

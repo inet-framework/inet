@@ -53,27 +53,27 @@ enum InitStages {
     INITSTAGE_MOBILITY = 4,
 
     /**
-     * Initialization of the physical layer of protocol stacks. Radio publishes the initial RadioState;
-     * radios are registered in RadioMedium.
+     * Initialization of the physical layer of protocol stacks.
+     * Radio publishes the initial RadioState; radios are registered in RadioMedium.
      */
     INITSTAGE_PHYSICAL_LAYER = 5,
 
     /**
-     * Initialization of link-layer protocols. Automatic MAC addresses are
-     * assigned; interfaces are registered in InterfaceTable.
+     * Initialization of network interfaces, automatic MAC address assignment and
+     * network interfaces are registered in the InterfaceTable.
      */
-    INITSTAGE_LINK_LAYER = 6,
+    INITSTAGE_NETWORK_INTERFACE_CONFIGURATION = 6,
 
     /**
-     * Additional link-layer initializations that depend on the previous stage.
+     * Initialization of link-layer protocols.
      */
-    INITSTAGE_LINK_LAYER_2 = 7,
+    INITSTAGE_LINK_LAYER = 7,
 
     /**
      * Initialization of network configurators (e.g. Ipv4NetworkConfigurator).
-     * Configurators compute IP addresses and static routes; protocol-specific
-     * data (e.g. Ipv4InterfaceData) are added to InterfaceEntry; netf7ilter
-     * hooks are registered in Ipv4; etc.
+     * Network configurators compute IP addresses and static routes;
+     * protocol-specific data (e.g. Ipv4InterfaceData) are added to InterfaceEntry;
+     * netfilter hooks are registered in Ipv4; etc.
      */
     INITSTAGE_NETWORK_CONFIGURATOR = 9,
 
@@ -83,18 +83,17 @@ enum InitStages {
     INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT = 10,
 
     /**
-     * Initialization of static routes.
+     * Initialization of static routing.
      */
     INITSTAGE_STATIC_ROUTING = 11,
 
     /**
-     * Initialization of static routes.
+     * Initialization of network layer protocols.
      */
     INITSTAGE_NETWORK_LAYER = 12,
 
     /**
-     * Initialization of transport-layer protocols. Transport protocols register
-     * their protocol IDs in IP, etc.
+     * Initialization of transport-layer protocols.
      */
     INITSTAGE_TRANSPORT_LAYER = 13,
 

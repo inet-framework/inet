@@ -44,7 +44,7 @@ void QuadTreeNeighborCache::initialize(int stage)
         refillPeriod = par("refillPeriod");
         maxNumOfPointsPerQuadrant = par("maxNumOfPointsPerQuadrant");
     }
-    else if (stage == INITSTAGE_LINK_LAYER_2) {
+    else if (stage == INITSTAGE_LINK_LAYER) {
         constraintAreaMin = radioMedium->getMediumLimitCache()->getMinConstraintArea();
         constraintAreaMax = radioMedium->getMediumLimitCache()->getMaxConstraintArea();
         quadTree = new QuadTree(constraintAreaMin, constraintAreaMax, maxNumOfPointsPerQuadrant, nullptr);

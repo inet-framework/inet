@@ -55,7 +55,7 @@ void EtherLlc::initialize(int stage)
         WATCH(totalPassedUp);
         WATCH(droppedUnknownDSAP);
     }
-    else if (stage == INITSTAGE_LINK_LAYER) {
+    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         // lifecycle
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isUp = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;

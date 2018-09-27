@@ -128,7 +128,7 @@ void CsmaCaMac::initialize(int stage)
         WATCH(numSentBroadcast);
         WATCH(numReceivedBroadcast);
     }
-    else if (stage == INITSTAGE_LINK_LAYER) {
+    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         registerInterface();
 
         // subscribe for the information of the carrier sense

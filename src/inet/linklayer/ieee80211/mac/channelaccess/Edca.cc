@@ -24,7 +24,7 @@ Define_Module(Edca);
 
 void Edca::initialize(int stage)
 {
-    if (stage == INITSTAGE_LINK_LAYER_2) {
+    if (stage == INITSTAGE_LINK_LAYER) {
         numEdcafs = par("numEdcafs");
         edcafs = new Edcaf*[numEdcafs];
         for (int ac = 0; ac < numEdcafs; ac++) {

@@ -46,7 +46,7 @@ void StpBase::initialize(int stage)
         switchModule = getContainingNode(this);
     }
 
-    if (stage == INITSTAGE_LINK_LAYER_2) {    // "auto" MAC addresses assignment takes place in stage 0
+    if (stage == INITSTAGE_LINK_LAYER) {    // "auto" MAC addresses assignment takes place in stage 0
         numPorts = ifTable->getNumInterfaces();
         switchModule->subscribe(interfaceStateChangedSignal, this);
 

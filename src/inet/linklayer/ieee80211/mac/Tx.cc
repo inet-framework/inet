@@ -46,7 +46,7 @@ void Tx::initialize(int stage)
         // statistics = check_and_cast<IStatistics*>(getModuleByPath(par("statisticsModule")));
         WATCH(transmitting);
     }
-    else if (stage == INITSTAGE_LINK_LAYER) {
+    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         refreshDisplay();
     }
 }

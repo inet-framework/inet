@@ -53,7 +53,7 @@ class INET_API MacProtocolBase : public LayeredProtocolBase, public cListener
     virtual bool isUpperMessage(cMessage *message) override;
     virtual bool isLowerMessage(cMessage *message) override;
 
-    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_LINK_LAYER; }
+    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION; }
     virtual bool isNodeStartStage(int stage) override { return stage == NodeStartOperation::STAGE_LINK_LAYER; }
     virtual bool isNodeShutdownStage(int stage) override { return stage == NodeShutdownOperation::STAGE_LINK_LAYER; }
 };

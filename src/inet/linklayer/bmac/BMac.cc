@@ -59,7 +59,7 @@ void BMac::initialize(int stage)
 
         macState = INIT;
     }
-    else if (stage == INITSTAGE_LINK_LAYER) {
+    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         registerInterface();
 
         cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
