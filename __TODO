@@ -1,3 +1,16 @@
+ - help ANSA porting to INET 4.0
+ - LTE PHY support and porting to INET 4.0
+
+ - merge BGP changes by Mani
+ - merge OSPF changes by Mani
+ - route source type should be a protocol, CISCO admin dist should be calculated from the source type
+ - all protocols must set their protocol as source to routes added
+ - long term: extract OspfRouteData from OspfRoutingTableEntry and add as protocolData into Ipv4Route
+ - long term: extract OspfInterfaceData from OspfInterface and add to InterfaceEntry as tag?
+ - OspfConfigReader: search = "strict|relaxed" should be changed :)
+ - OspfConfigReader: collects all OSPF interfaces based on XML config entries, result may contain the same interface twice, should work the other way around by starting with all the interfaces and finding the first OSPF config entry in the XML for that interface
+ - OspfArea::originateRouterLSA calculates a different LSA length field than Lsa.cc:B calculateLSASize(const OspfRouterLsa *routerLSA)
+
  - change all protocols (where applicable) to accept any kind of cPacket (not only Packet) for interoperability with 3rd party projects 
  - add test and check for std::dynamic_pointer_cast<Subclass1>(chunk->peek<Subclass1>()) != nullptr always holds when peek uses a variant type deserializer
  - remove obsolete HostAutoConfigurator, Ipv4FlatNetworkConfigurator modules?
