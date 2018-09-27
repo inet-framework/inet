@@ -27,15 +27,13 @@ namespace inet {
  */
 enum InitStages {
     /**
-     * Local initializations. Initializations that don't use or affect
-     * other modules take place (e.g. reading of parameters); modules may
-     * subscribe to notifications. NodeStatus, IPassiveQueue,
-     * etc. are available for other modules after this stage.
+     * Initialization of local state that don't use or affect other modules takes
+     * place (e.g. reading of parameters); modules may subscribe to notifications.
      */
     INITSTAGE_LOCAL = 0,
 
     /**
-     * Physical environment initializations (obstacles, battery, annotations, etc).
+     * Initialization of the physical environment.
      */
     INITSTAGE_PHYSICAL_ENVIRONMENT = 1,
 
