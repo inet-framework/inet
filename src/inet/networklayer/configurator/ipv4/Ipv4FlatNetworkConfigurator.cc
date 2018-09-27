@@ -33,7 +33,7 @@ void Ipv4FlatNetworkConfigurator::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_NETWORK_LAYER_2) {
+    if (stage == INITSTAGE_NETWORK_CONFIGURATOR) {
         cTopology topo("topo");
         NodeInfoVector nodeInfo;    // will be of size topo.nodes[]
 

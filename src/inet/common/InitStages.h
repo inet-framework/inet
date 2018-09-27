@@ -70,22 +70,30 @@ enum InitStages {
     INITSTAGE_LINK_LAYER_2 = 5,
 
     /**
-     * Initialization of network-layer protocols, stage 1. Network configurators
-     * (e.g. Ipv4NetworkConfigurator) run in this stage and compute IP addresses
-     * and static routes; protocol-specific data (e.g. Ipv4InterfaceData)
-     * are added to InterfaceEntry; netf7ilter hooks are registered in Ipv4; etc.
+     * Initialization of network-layer protocols.
      */
     INITSTAGE_NETWORK_LAYER = 6,
 
     /**
-     * Initialization of network-layer protocols, stage 2. IP addresses
-     * are assigned in this stage.
+     * Initialization of network configurators (e.g. Ipv4NetworkConfigurator).
+     * Configurators compute IP addresses and static routes; protocol-specific
+     * data (e.g. Ipv4InterfaceData) are added to InterfaceEntry; netf7ilter
+     * hooks are registered in Ipv4; etc.
      */
-    INITSTAGE_NETWORK_LAYER_2 = 7,
+    INITSTAGE_NETWORK_CONFIGURATOR = 6,
 
     /**
-     * Initialization of network-layer protocols, stage 3. Static routes
-     * are added, routerIDs are computed, etc.
+     * Initialization of network addresses.
+     */
+    INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT = 7,
+
+    /**
+     * Initialization of static routes.
+     */
+    INITSTAGE_STATIC_ROUTING = 8,
+
+    /**
+     * Initialization of static routes.
      */
     INITSTAGE_NETWORK_LAYER_3 = 8,
 
