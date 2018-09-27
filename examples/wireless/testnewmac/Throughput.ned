@@ -93,7 +93,8 @@ module ThroughputServer
         }
     connections allowunconnected:
         wlan.radioIn <-- radioIn;
-        sink.in++ <-- wlan.upperLayerOut;
+        sink.in <-- wlan.upperLayerOut;
+        sink.out --> wlan.upperLayerIn;
 }
 
 network Throughput
