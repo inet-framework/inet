@@ -19,7 +19,7 @@
 package inet.examples.wireless.ratecontrol;
 
 import inet.applications.ethernet.EtherAppClient;
-import inet.common.queue.Sink;
+import inet.applications.ethernet.EtherAppServer;
 import inet.environment.common.PhysicalEnvironment;
 import inet.linklayer.ieee80211.Ieee80211Interface;
 import inet.mobility.single.RectangleMobility;
@@ -41,7 +41,7 @@ module SinkClient
         interfaceTable: InterfaceTable {
             @display("p=100,100;is=s");
         }
-        sink: Sink {
+        sink: EtherAppServer {
             parameters:
                 @display("p=300,100");
         }
@@ -57,7 +57,8 @@ module SinkClient
         }
     connections allowunconnected:
         radioIn --> { @display("m=s"); } --> wlan.radioIn;
-        wlan.upperLayerOut --> sink.in++;
+        wlan.upperLayerOut --> sink.in;
+        sink.out --> wlan.upperLayerIn;
 }
 
 module Client

@@ -19,7 +19,7 @@
 package inet.examples.wireless.hiddennode;
 
 import inet.applications.ethernet.EtherAppClient;
-import inet.common.queue.Sink;
+import inet.applications.ethernet.EtherAppServer;
 import inet.linklayer.ieee80211.Ieee80211Interface;
 import inet.mobility.static.StationaryMobility;
 import inet.networklayer.common.InterfaceTable;
@@ -42,7 +42,6 @@ module Node
         }
         cli: EtherAppClient {
             parameters:
-                registerSAP = true;
                 @display("p=300,100");
         }
         wlan: Ieee80211Interface {
@@ -75,7 +74,7 @@ module SinkNode
         interfaceTable: InterfaceTable {
             @display("p=100,100;is=s");
         }
-        sink: Sink {
+        sink: EtherAppServer {
             parameters:
                 @display("p=300,100");
         }
@@ -92,7 +91,8 @@ module SinkNode
         }
     connections allowunconnected:
         wlan.radioIn <-- radioIn;
-        sink.in++ <-- wlan.upperLayerOut;
+        sink.in <-- wlan.upperLayerOut;
+        sink.out --> wlan.upperLayerIn;
 }
 
 

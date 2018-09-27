@@ -19,7 +19,7 @@
 package inet.examples.wireless.testnewmac;
 
 import inet.applications.ethernet.EtherAppClient;
-import inet.common.queue.Sink;
+import inet.applications.ethernet.EtherAppServer;
 import inet.linklayer.ieee80211.Ieee80211Interface;
 import inet.mobility.single.CircleMobility;
 import inet.mobility.static.StationaryMobility;
@@ -44,7 +44,6 @@ module ThroughputClient
         }
         cli: EtherAppClient {
             parameters:
-                registerSAP = true;
                 @display("p=300,100");
         }
         wlan: Ieee80211Interface {
@@ -78,7 +77,7 @@ module ThroughputServer
             parameters:
                 @display("p=100,100;is=s");
         }
-        sink: Sink {
+        sink: EtherAppServer {
             parameters:
                 @display("p=300,100");
         }
