@@ -31,5 +31,6 @@ module UnitDiskRadioMedium extends RadioMedium
 {
     parameters:
         analogModel.typename = default("UnitDiskAnalogModel");
+        signalAnalogRepresentation = default("unitDisk");
 }
 
