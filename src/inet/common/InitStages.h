@@ -75,47 +75,47 @@ enum InitStages {
      * protocol-specific data (e.g. Ipv4InterfaceData) are added to InterfaceEntry;
      * netfilter hooks are registered in Ipv4; etc.
      */
-    INITSTAGE_NETWORK_CONFIGURATOR = 9,
+    INITSTAGE_NETWORK_CONFIGURATOR = 8,
 
     /**
      * Initialization of network addresses.
      */
-    INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT = 10,
+    INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT = 9,
 
     /**
      * Initialization of static routing.
      */
-    INITSTAGE_STATIC_ROUTING = 11,
+    INITSTAGE_STATIC_ROUTING = 10,
 
     /**
      * Initialization of network layer protocols.
      */
-    INITSTAGE_NETWORK_LAYER = 12,
+    INITSTAGE_NETWORK_LAYER = 11,
 
     /**
      * Initialization of transport-layer protocols.
      */
-    INITSTAGE_TRANSPORT_LAYER = 13,
+    INITSTAGE_TRANSPORT_LAYER = 12,
 
     /**
      * Initialization of routing protocols.
      */
-    INITSTAGE_ROUTING_PROTOCOLS = 14,
+    INITSTAGE_ROUTING_PROTOCOLS = 13,
 
     /**
      * Initialization of applications.
      */
-    INITSTAGE_APPLICATION_LAYER = 15,
+    INITSTAGE_APPLICATION_LAYER = 14,
 
     /**
      * Operations that no other initializations can depend on, e.g. display string updates.
      */
-    INITSTAGE_LAST = 16,
+    INITSTAGE_LAST = 15,
 
     /**
      * The number of initialization stages.
      */
-    NUM_INIT_STAGES = 17,
+    NUM_INIT_STAGES = 16,
 };
 
 } // namespace inet
