@@ -38,7 +38,7 @@ class INET_API MassMobility : public LineSegmentsMobilityBase
   protected:
     // config (see NED file for explanation)
     cPar *changeIntervalParameter;
-    cPar *changeAngleByParameter;
+    cPar *angleDeltaParameter;
     cPar *speedParameter;
 
     // current state

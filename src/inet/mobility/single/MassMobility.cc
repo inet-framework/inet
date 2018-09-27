@@ -27,7 +27,7 @@ Define_Module(MassMobility);
 MassMobility::MassMobility()
 {
     changeIntervalParameter = nullptr;
-    changeAngleByParameter = nullptr;
+    angleDeltaParameter = nullptr;
     speedParameter = nullptr;
     angle = deg(0);
 }
@@ -40,14 +40,14 @@ void MassMobility::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         angle = deg(par("startAngle"));
         changeIntervalParameter = &par("changeInterval");
-        changeAngleByParameter = &par("changeAngleBy");
+        angleDeltaParameter = &par("angleDelta");
         speedParameter = &par("speed");
     }
 }
 
 void MassMobility::setTargetPosition()
 {
-    angle += deg(changeAngleByParameter->doubleValue());
+    angle += deg(angleDeltaParameter->doubleValue());
     EV_DEBUG << "angle: " << angle << endl;
     Coord direction(cos(rad(angle).get()), sin(rad(angle).get()));
     simtime_t nextChangeInterval = *changeIntervalParameter;

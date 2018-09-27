@@ -41,10 +41,10 @@ import inet.mobility.base.MovingMobilityBase;
 // choice."
 //
 // This implementation can be parameterized a bit more, via the changeInterval,
-// changeAngleBy and changeSpeedBy parameters. The parameters described above
+// angleDelta and changeSpeedBy parameters. The parameters described above
 // correspond to the following settings:
 //    - changeInterval = normal(5, 0.1)
-//    - changeAngleBy = normal(0, 30)
+//    - angleDelta = normal(0, 30)
 //    - speed = normal(avgSpeed, 0.01)
 //
 // @author Emin Ilker Cetinbas, Andras Varga
@@ -58,7 +58,7 @@ simple MassMobility extends MovingMobilityBase
         double startAngle @unit(deg) = default(uniform(0deg, 360deg)); // initial angle in degrees
         bool initFromDisplayString = default(true); // enables one time initialization from the subject module's display string
         volatile double changeInterval @unit(s); // frequency of changing speed and angle (can be random)
-        volatile double changeAngleBy @unit(deg); // change angle by this much (can be random)
+        volatile double angleDelta @unit(deg); // change angle by this much (can be random)
         volatile double speed @unit(mps); // speed (can be random, updated every changeInterval)
         @class(MassMobility);
 }
