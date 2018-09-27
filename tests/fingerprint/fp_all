@@ -1,3 +1,3 @@
 # ./fingerprinttest examples.csv.TODO -m 8021d -a --fingerprint-modules="\\(NOT\\(fullPath\\(*.*.relayUnit\\)\\)\\)AND\\(NOT\\(fullPath\\(*.*.encap\\)\\)\\)" --record-eventlog=true --cmdenv-express-mode=false --scalar-recording=true --cmdenv-log-prefix=%g: --cmdenv-event-banners=true
 
-./fingerprinttest -d without_register_dsap.csv -a --fingerprint-events="\\(NOT\\(name\\(register_DSAP\\)\\)\\)"
+./fingerprinttest -d without_register_dsap.csv -a --fingerprint-events="\\(NOT\\(name\\(LLC_OPEN\\)\\)\\)"

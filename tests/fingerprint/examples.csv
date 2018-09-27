@@ -451,9 +451,9 @@
 
 /examples/wireless/handover/,        -f omnetpp.ini -c General -r 0,                1500s,        fc92-21ef/tplx, PASS, wireless
 
-/examples/wireless/hiddennode/,      -f omnetpp.ini -c General -r 0,                5s,         a24a-dd6e/tplx, PASS, wireless
+/examples/wireless/hiddennode/,      -f omnetpp.ini -c General -r 0,                5s,         cfcf-f30c/tplx, PASS, wireless
 
-/examples/wireless/hosttohost/,      -f omnetpp.ini -c Throughput1 -r 0,            5s,           a03e-1258/tplx, PASS, wireless
+/examples/wireless/hosttohost/,      -f omnetpp.ini -c Throughput1 -r 0,            5s,           7a95-e848/tplx, PASS, wireless
 
 # /examples/wireless/lan80211/,        -f .qtenv.ini -c General -r 0
 /examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c TwoHosts -r 0,           100s,         bbdc-53eb/tplx, PASS, wireless
@@ -523,7 +523,7 @@
 /examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithRtsCts -r 0,          10s,         fb64-d9f1/tplx, PASS, wireless
 /examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithBlockAck -r 0,        10s,         e6f3-70f8/tplx, PASS, wireless
 
-/examples/wireless/ratecontrol/, -f omnetpp.ini -c Mac -r 0,                    100s,            1061-45c2/tplx, PASS, wireless
+/examples/wireless/ratecontrol/, -f omnetpp.ini -c Mac -r 0,                    100s,            05b1-91e8/tplx, PASS, wireless
 
 # /examples/wireless/scaling/,         -f omnetpp.ini -c AbstractAckingMac -r 0,       ---100s,         0000-0000/tplx, ERROR, wireless # AbstractAckingMac extended
 /examples/wireless/scaling/,         -f omnetpp.ini -c UnitDiskRadioMedium -r 0,       10s,               d302-86a3/tplx, PASS, wireless
@@ -536,10 +536,10 @@
 /examples/wireless/synchronized/,    -f omnetpp.ini -c Synchronized -r 0,           2s,              bbba-a77a/tplx, PASS, wireless
 /examples/wireless/synchronized/,    -f omnetpp.ini -c NonSynchronized -r 0,        2s,              f793-dfa9/tplx, PASS, wireless
 
-/examples/wireless/testnewmac/,      -f omnetpp.ini -c Mac -r 0,                    10s,          163d-6ab5/tplx, PASS, wireless
+/examples/wireless/testnewmac/,      -f omnetpp.ini -c Mac -r 0,                    10s,          0583-d082/tplx, PASS, wireless
 
-/examples/wireless/throughput/,      -f omnetpp.ini -c Throughput1 -r 0,            20s,           fe7b-db43/tplx, PASS, wireless
+/examples/wireless/throughput/,      -f omnetpp.ini -c Throughput1 -r 0,            20s,           8d04-23cd/tplx, PASS, wireless
 # /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput2 -r 0,            100s,         0000-0000/tplx, ERROR, wireless # Throughput2 extended
-/examples/wireless/throughput/,      -f omnetpp.ini -c Mac -r 0,                    10s,         eb11-057e/tplx, PASS, wireless
+/examples/wireless/throughput/,      -f omnetpp.ini -c Mac -r 0,                    10s,         6794-0997/tplx, PASS, wireless
 
 /examples/wireless/wiredandwirelesshostswithap/, -f omnetpp.ini -c General -r 0,                100s,      2cf0-4d26/tplx, PASS, wireless
