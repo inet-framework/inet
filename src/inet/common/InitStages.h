@@ -50,14 +50,14 @@ enum InitStages {
     INITSTAGE_PHYSICAL_OBJECT_CACHE = 2,
 
     /**
-     * Initialization of the power model: energy storage, energy consumer, energy generator, and energy management modules.
-     */
-    INITSTAGE_POWER = 3,
-
-    /**
      * Initialization of mobility modules: calculating the initial position and orientation.
      */
-    INITSTAGE_MOBILITY = 4,
+    INITSTAGE_MOBILITY = 3,
+
+    /**
+     * Initialization of the power model: energy storage, energy consumer, energy generator, and energy management modules.
+     */
+    INITSTAGE_POWER = 4,
 
     /**
      * Initialization of physical layer protocols includes:
