@@ -30,8 +30,15 @@ void SceneVisualizerBase::initialize(int stage)
 {
     VisualizerBase::initialize(stage);
     if (!hasGUI()) return;
-    if (stage == INITSTAGE_LOCAL)
+    if (stage == INITSTAGE_LOCAL) {
         visualizationTargetModule->getCanvas()->setAnimationSpeed(par("animationSpeed"), this);
+        sceneMin.x = par("sceneMinX");
+        sceneMin.y = par("sceneMinY");
+        sceneMin.z = par("sceneMinZ");
+        sceneMax.x = par("sceneMaxX");
+        sceneMax.y = par("sceneMaxY");
+        sceneMax.z = par("sceneMaxZ");
+    }
 }
 
 Box SceneVisualizerBase::getPlaygroundBounds()
@@ -57,6 +64,8 @@ Box SceneVisualizerBase::getPlaygroundBounds()
             playgroundMax = playgroundMax.max(mobility->getConstraintAreaMax());
         }
     }
+    playgroundMin = sceneMin.min(playgroundMin);
+    playgroundMax = sceneMax.max(playgroundMax);
     return Box(playgroundMin, playgroundMax);
 }
 
