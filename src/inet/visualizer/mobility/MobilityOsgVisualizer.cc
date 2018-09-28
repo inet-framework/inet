@@ -88,6 +88,7 @@ MobilityOsgVisualizer::MobilityOsgVisualization* MobilityOsgVisualizer::ensureMo
         auto module = const_cast<cModule *>(check_and_cast<const cModule *>(mobility));
         auto trail = new osg::Geode();
         trail->setStateSet(inet::osg::createStateSet(movementTrailLineColorSet.getColor(module->getId()), 1.0));
+        trail->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
         auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizationTargetModule);
         scene->addChild(trail);
         mobilityVisualization = new MobilityOsgVisualization(trail, mobility);
