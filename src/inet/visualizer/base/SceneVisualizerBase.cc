@@ -44,29 +44,29 @@ void SceneVisualizerBase::initialize(int stage)
 Box SceneVisualizerBase::getPlaygroundBounds()
 {
     auto physicalEnvironment = getModuleFromPar<IPhysicalEnvironment>(par("physicalEnvironmentModule"), this, false);
-    Coord playgroundMin = Coord::ZERO;
-    Coord playgroundMax = Coord::ZERO;
+    Coord min = Coord::ZERO;
+    Coord max = Coord::ZERO;
     if (physicalEnvironment == nullptr) {
         auto displayString = visualizationTargetModule->getDisplayString();
         auto width = atof(displayString.getTagArg("bgb", 0));
         auto height = atof(displayString.getTagArg("bgb", 1));
-        playgroundMin = Coord(0.0, 0.0, 0.0);
-        playgroundMax = Coord(width, height, 0.0);
+        min = Coord(0.0, 0.0, 0.0);
+        max = Coord(width, height, 0.0);
     }
     else {
-        playgroundMin = physicalEnvironment->getSpaceMin();
-        playgroundMax = physicalEnvironment->getSpaceMax();
+        min = physicalEnvironment->getSpaceMin();
+        max = physicalEnvironment->getSpaceMax();
     }
     for (int id = 0; id <= getSimulation()->getLastComponentId(); id++) {
         auto mobility = dynamic_cast<IMobility *>(getSimulation()->getModule(id));
         if (mobility != nullptr) {
-            playgroundMin = playgroundMin.min(mobility->getConstraintAreaMin());
-            playgroundMax = playgroundMax.max(mobility->getConstraintAreaMax());
+            min = min.min(mobility->getConstraintAreaMin());
+            max = max.max(mobility->getConstraintAreaMax());
         }
     }
-    playgroundMin = sceneMin.min(playgroundMin);
-    playgroundMax = sceneMax.max(playgroundMax);
-    return Box(playgroundMin, playgroundMax);
+    min = sceneMin.min(min);
+    max = sceneMax.max(max);
+    return Box(min, max);
 }
 
 } // namespace visualizer
