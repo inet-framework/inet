@@ -43,9 +43,9 @@ void SceneVisualizerBase::initialize(int stage)
 
 Box SceneVisualizerBase::getPlaygroundBounds()
 {
+    Coord min;
+    Coord max;
     auto physicalEnvironment = getModuleFromPar<IPhysicalEnvironment>(par("physicalEnvironmentModule"), this, false);
-    Coord min = Coord::ZERO;
-    Coord max = Coord::ZERO;
     if (physicalEnvironment == nullptr) {
         auto displayString = visualizationTargetModule->getDisplayString();
         auto width = atof(displayString.getTagArg("bgb", 0));
@@ -60,8 +60,8 @@ Box SceneVisualizerBase::getPlaygroundBounds()
     for (int id = 0; id <= getSimulation()->getLastComponentId(); id++) {
         auto mobility = dynamic_cast<IMobility *>(getSimulation()->getModule(id));
         if (mobility != nullptr) {
-            min = min.min(mobility->getConstraintAreaMin());
-            max = max.max(mobility->getConstraintAreaMax());
+            min = mobility->getConstraintAreaMin().min(min);
+            max = mobility->getConstraintAreaMax().max(max);
         }
     }
     min = sceneMin.min(min);
