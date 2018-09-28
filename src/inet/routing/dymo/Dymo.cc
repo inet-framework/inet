@@ -143,6 +143,7 @@ void Dymo::initialize(int stage)
         networkProtocol->registerHook(0, this);
         if (isNodeUp())
             configureInterfaces();
+        multicastRouteSet.setSelftAddress(getSelfAddress());
     }
 }
 
@@ -493,6 +494,8 @@ bool Dymo::permissibleRteMsg(Packet *packet, const Ptr<const RteMsg>& rteMsg)
     //    Cost(L)), where 'L' is the incoming link, the RteMsg is
     //    disregarded.
     // TODO: implement
+    if (multicastRouteSet.check(rteMsg))
+        return false;
     return true;
 }
 

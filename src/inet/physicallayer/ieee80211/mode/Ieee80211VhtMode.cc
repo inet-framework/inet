@@ -48,7 +48,14 @@ Ieee80211VhtPreambleMode::Ieee80211VhtPreambleMode(const Ieee80211VhtSignalMode*
         highThroughputSignalMode(highThroughputSignalMode),
         legacySignalMode(legacySignalMode),
         preambleFormat(preambleFormat),
-        numberOfHTLongTrainings(computeNumberOfHTLongTrainings(computeNumberOfSpaceTimeStreams(numberOfSpatialStream)))
+        numberOfHTLongTrainings(computeNumberOfHTLongTrainings(computeNumberOfSpaceTimeStreams(numberOfSpatialStream))),
+        header(new Ieee80211VhtSignalModeHeader(highThroughputSignalMode))
+{
+}
+
+Ieee80211VhtSignalMode::Ieee80211VhtSignalMode(const Ieee80211VhtSignalMode * c) : Ieee80211VhtModeBase(c->getMcsIndex(), 1, c->getBandwidth(), c->getGuardIntervalType()),
+        modulation(c->getModulation()),
+        code(c->getCode())
 {
 }
 
@@ -66,6 +73,11 @@ Ieee80211VhtSignalMode::Ieee80211VhtSignalMode(unsigned int modulationAndCodingS
 {
 }
 
+Ieee80211VhtSignalModeHeader::Ieee80211VhtSignalModeHeader(const Ieee80211VhtSignalMode *base): Ieee80211VhtSignalMode(base)
+{
+}
+
+
 
 Ieee80211VhtDataMode::Ieee80211VhtDataMode(const Ieee80211Vhtmcs *modulationAndCodingScheme, const Hz bandwidth, GuardIntervalType guardIntervalType) :
         Ieee80211VhtModeBase(modulationAndCodingScheme->getMcsIndex(), computeNumberOfSpatialStreams(modulationAndCodingScheme), bandwidth, guardIntervalType),
@@ -73,7 +85,6 @@ Ieee80211VhtDataMode::Ieee80211VhtDataMode(const Ieee80211Vhtmcs *modulationAndC
         numberOfBccEncoders(computeNumberOfBccEncoders())
 {
 }
-
 
 
 Ieee80211Vhtmcs::Ieee80211Vhtmcs(unsigned int mcsIndex, const Ieee80211VhtCode* code, const Ieee80211OfdmModulation* stream1Modulation, const Ieee80211OfdmModulation* stream2Modulation, const Ieee80211OfdmModulation* stream3Modulation, const Ieee80211OfdmModulation* stream4Modulation, const Ieee80211OfdmModulation* stream5Modulation, const Ieee80211OfdmModulation* stream6Modulation, const Ieee80211OfdmModulation* stream7Modulation, const Ieee80211OfdmModulation* stream8Modulation) :

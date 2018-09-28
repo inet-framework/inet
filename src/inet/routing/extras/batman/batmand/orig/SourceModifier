@@ -1,0 +1,66 @@
+#!/bin/bash
+
+# script for modifying the original batmand code to be able to better compare to the inet version
+
+# copy the following files from batmand to this folder and rename them to *.c.txt, *.h.txt
+#   batman.c
+#   batman.h
+#   bitarray.c
+#   hna.c
+#   hna.h
+#   originator.c
+#   originator.h
+#   ring_buffer.c
+#   schedule.c
+#   schedule.h
+
+
+for file in *.c.txt
+do
+
+sed -r -n '
+# if the first line copy the pattern to the hold buffer
+1h
+# if not the first line then append the pattern to the hold buffer
+1!H
+# if the last line then ...
+${
+    # copy from the hold to the pattern buffer
+    g
+    # do the search and replace
+    s/\t/    /g
+    s/\( +/(/g
+    s/ +\)/)/g
+    s/\n\n+( *\})/\n\1/g
+    s/\{\n+/\{\n/g
+    s/\n\n\n+ /\n\n /g
+    s/\n\n\n\n+/\n\n\n/g
+    s/\bstruct orig_node\b/OrigNode/g
+    s/\bstruct neigh_node\b/NeighNode/g
+    s/\bstruct bat_packet\b/BatmanPacket/g
+    s/\bstruct batman_if\b/BatmanIf/g
+    s/\bstruct gw_node\b/GwNode/g
+    s/\bstruct forw_node\b/ForwNode/g
+    s/\bstruct hna_task\b/HnaTask/g
+    s/\bstruct hna_element\b/HnaElement/g
+    s/\bstruct hna_global_entry\b/HnaGlobalEntry/g
+    s/\bstruct hna_local_entry\b/HnaLocalEntry/g
+    s/\bdebug_output\(([0-9]), */debug_output(\1) << /g
+    s/\bhna_global_hash\b/hnaMap/g
+    s/->batman_if\b/->batmanIf/g
+    s/\.batman_if\b/\.batmanIf/g
+    s/\n+ +prof_start\( *\w+ *\);//g
+    s/\n+ +prof_stop\( *\w+ *\);//g
+    s/\blist_empty\( *&((\w+)(->\w+)*) *\)/\1.empty()/g
+    s/\blist_for_each\( *(\w+), *\&((\w+)(->\w+)*) *\)/for (unsigned int \1 = 0; \1 < \2.size(); \1++)/g
+    #s/\blist_entry\( *(\w+), *(\w+), *(\w+)\)/(*\1)/g
+    s/\blist_add_tail\( *\&(\w+)->list, *\&(\w+) *\);/\2.push_back(\1);/g
+    s/\bget_time_msec\(/getTime(/g
+    s/\bdebugMalloc\(sizeof\( *(\w+) *\), *[0-9]+ *\)/new \1()/g
+    s/\bdebugFree\( *((\w+)(->\w+)*), *[0-9]+ *\)/delete \1/g
+    #s/\b\b//g
+    # print
+    p
+}' ${file} >${file}_new
+
+done

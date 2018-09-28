@@ -1,0 +1,8 @@
+<scenario>
+    <at t="10.0">
+        <startup module="host[0]"/>
+    </at>
+    <at t="20.0">
+        <shutdown module="host[16]"/>
+    </at>
+</scenario>

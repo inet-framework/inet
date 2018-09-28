@@ -1,0 +1,138 @@
+====== inet-3.x ======
+
+2016-04-06  ------ inet-3.2.4 released ------
+
+2016-03-16  ------ inet-3.2.3 released ------
+
+2016-03-11  ------ inet-3.2.2 released ------
+
+2016-01-21  ------ inet-3.2.1 released ------
+
+2015-12-16  ------ inet-3.2.0 released ------
+
+2015-11-27  Zoltan Bojthe
+
+	simtime-related 5.x compatibility fix: SIMTIME_RAW
+
+2015-10-26  ------ inet-3.1.1 released ------
+
+2015-10-15  ------ inet-3.1.0 released ------
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2015-01-13  Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+====== inet-2.x ======
+
+2015-03-04  ------ inet-2.6 released ------
+
+2014-11-07  ------ inet-2.5.1 released ------
+
+2014-10-29  ------ inet-2.5.0 released ------
+
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-05-03  Alfonso Ariza Quintana
+
+	manet: synced with INETMANET (20130503)
+
+	olsr, dymo, dsr, dsdv, batman, aodv, olsr, dsdv: synced with INETMANET
+	manetbase: introduced GlobalWirelessInspector, updated manet base.
+
+	Z.B.: remove GlobalWirelessLinkInspector; added/fixed parameter units
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-11-19  Zoltan Bojthe
+
+	Batman:
+	- Updated and expanded documantation
+	- Updated the code to the lates available Batman version.
+	- Numerous optimizations.
+	- Fixed several memory leaks
+	- Fixed routing table corruption and possible crash when multiple
+	  radios were used in a single host
+	- Fixed decapsulation of incoming packets. Now it checks for the
+	  type of decapsulated packet.
+	- Fix for a problem when aggregated batman packets were
+	  dropped erronously.
+	- Added HNA support. Nodes can advertise external networks,
+	  so traffic towards those networks can be routed correctly.
+	  Use the announcedNetworks parameter to specufy multiple connected
+	  external networks.
+
+2012-10-10  Zoltan Bojthe
+
+	Batman: added SourceModifier script for converting from the
+	original batmand code.
+	 - fixes spaces, tabs and empty lines
+	 - replaces some c-style structs to c++-style classes
+	 - replaces some batmand specified list manipulators to c++ code
+	 - replaces batmand specified malloc/free to new/delete
+	 - removes prof_start()/prof_stop() calls
+
+2012-08-07  ------ inet-2.0.0 released ------
+
+2012-06-25  ------ inet-1.99.5 released ------
+
+2012-03-20  ------ inet-1.99.4 released ------
+
+2012-02-24  ------ inet-1.99.3 released ------
+
+2012-02-11  Rudolf Hornig
+
+	Takeover from INETMANET @ fff5dfd
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-11-13  Levente Meszaros, Zoltan Bojthe
+
+	Refactored operator= and copy constructor in all INET classes.
+	See base/ChangeLog for details.
+
+2011-10-19  Zoltan Bojthe
+
+	Batman: bugfix
+
+2011-07-19  Andras Varga
+
+	cPolymorphic -> cObject (cPolymorphic became cObject in OMNeT++ 4.0)
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-27  Andras Varga
+
+	tab-to-space in all source files
+
+2011-05-26  Zoltan Bojthe
+
+	Renamed IP... classes to IPv4... or IPvX...
+
+2011-04-20  Rudolf Hornig
+
+	Initial takeover of MANET routing protocols from INETMANET.

@@ -1,0 +1,225 @@
+====== inet-3.x ======
+
+2016-04-06  ------ inet-3.2.4 released ------
+
+2016-03-16  ------ inet-3.2.3 released ------
+
+2016-03-11  ------ inet-3.2.2 released ------
+
+2016-01-21  ------ inet-3.2.1 released ------
+
+2015-12-16  ------ inet-3.2.0 released ------
+
+2015-11-27  Zoltan Bojthe
+
+	Made the code compile with OMNeT++ 5.0b3
+
+2015-10-26  ------ inet-3.1.1 released ------
+
+2015-10-15  ------ inet-3.1.0 released ------
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2015-01-13  Zoltan Bojthe
+
+	Fixed defects found by static code analyzer (Coverity).
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+====== inet-2.x ======
+
+2015-03-04  ------ inet-2.6 released ------
+
+2014-11-07  ------ inet-2.5.1 released ------
+
+2014-10-29  ------ inet-2.5.0 released ------
+
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2014-01-15  Zoltan Bojthe
+
+	backport: IPv4Route: renamed source to sourceType, getSource to
+	getSourceType, setSource to setSourceType
+
+2014-01-15  Zoltan Bojthe
+
+	backported registerProtocol
+
+2014-01-14  Zoltan Bojthe
+
+	backport: MANET protocols backport (uses ipv4::netfilter)
+
+2013-12-02  Zoltan Bojthe
+
+	ICMPv4: sendErrorMessage(): better check for multicast/broadcast dest
+	address -- fingerprints changed
+
+	We must not send ICMP error in reply to any bcast/mcast packet, but
+	network-directed bcasts (e.g. 10.0.0.255) were checked for.
+
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-05-03  Alfonso Ariza Quintana
+
+	manet: synced with INETMANET (20130503)
+
+	olsr, dymo, dsr, dsdv, batman, aodv, olsr, dsdv: synced with INETMANET
+	manetbase: introduced GlobalWirelessInspector, updated manet base.
+
+	Z.B.: remove GlobalWirelessLinkInspector; added/fixed parameter units
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-11-23  Zoltan Bojthe
+
+	ManetroutingBase:
+	- updated documentation
+	- Removed:
+	    - unused ManetTimer and BatmanTimer class
+	    - unused static variables
+	    - isIpLocalAddress(), uses isLocalAddress()
+	    - convertAddressToString()
+		- removed getXPos(), getYPos() functions, you should use
+	      getPosition() instead.
+
+	- redesigned coordinate and speed storage and access
+	  replaced double x,y with a Coord.  getDirection() returns the
+	  speed vector (in Coord)
+	- getters returns UNSPECIFIED_ADDRESS if addrType==UNDEFINED
+
+2012-08-07  ------ inet-2.0.0 released ------
+
+2012-06-25  ------ inet-1.99.5 released ------
+
+2012-06-15  Zoltan Bojthe
+
+	IPv4Route: removed RouteType type field, and getType(), setType()
+	functions, too
+
+2012-03-20  ------ inet-1.99.4 released ------
+
+2012-02-24  ------ inet-1.99.3 released ------
+
+2012-02-11  Rudolf Hornig
+
+	Takeover from INETMANET @ fff5dfd
+
+2012-01-19  Andras Varga
+
+	ManetRoutingBase: compile fix: a const std::set<> can only be iterated
+	with const_iterator
+
+	It appears to be a bug in gcc that it accepts plain iterator (only for
+	std::set though, the same with std::vector or std::map causes an error).
+
+2012-01-19  Andras Varga
+
+	ManetRoutingBase: follow IPv4Route change: "host" in IPv4Route was
+	renamed to "destination"
+
+2012-01-19  Zoltan Bojthe
+
+	ManetRoutingBase: follow RoutingTable change: returned IPv4Route
+	pointers are no longer const
+
+2012-01-10  Zoltan Bojthe
+
+	ManetRoutingBase: added some FIXMEs/TODOs
+
+2012-01-09  Zoltan Bojthe
+
+	ManetRoutingBase: removed setTimeToLiveRoutingEntry() / getTimeToLive-
+	RoutingEntry() utility functions. (This is a change related to
+	DSDV-related fields/functions being moved from RoutingTable to DSDV)
+
+2012-01-09  Zoltan Bojthe
+
+	manetrouting: use 255.255.255.255 netmask for routes
+
+	Before it used the IP address class' netmask.
+
+2012-01-09  Zoltan Bojthe
+
+	ManetRoutingBase: bugfix for #497: dynamic routing protocols (manetrouting)
+	modify routing entries. Solution: remove routing entry and add a new one,
+	instead of modifying the existing route.
+
+	[Note: this fix is no longer needed, as a later RoutingTable/IPv4Route
+	change makes it possible to change routes on the fly.]
+
+2012-01-11  Zoltan Bojthe
+
+	ManetRoutingBase: Removed compatibility code for older OMNeT++ versions
+	(INET itself requires OMNeT++ 4.2)
+
+2011-08-02  Zoltan Bojthe
+
+	ManetRoutingBase: added TODO note in the code that etherType should be
+	filled in on outgoing packets (missing ctrl->setEtherType(...) call)
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-07-19  Levente Meszaros
+
+	Follow refactoring of mobility modules.
+
+	See ChangeLog in the mobility directory for details.
+
+2011-07-27  Andras Varga
+
+	manetrouting: compile fixes for MSVC
+
+	debug_aodv.h: there seems to have been some confusion around the DEBUG
+	macro. Rewrote it as to what I think was the original intent: the DEBUG
+	variable should control whether we want logging or not, and the same
+	macro is used throughout the code for log statements.
+
+2011-07-25  Zoltan Bojthe
+
+	MACAddress, ManetRouting, Ieee80211Mesh: Fixes for changed internal
+	MACAddress representation from unsigned char[6] to uint64.
+
+2011-07-19  Andras Varga
+
+	cPolymorphic -> cObject (cPolymorphic became cObject in OMNeT++ 4.0)
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-27  Andras Varga
+
+	tab-to-space in all source files
+
+2011-05-26  Zoltan Bojthe
+
+	Renamed IP... classes to IPv4... or IPvX...
+
+2011-04-28  Rudolf Hornig
+
+	Added Mesh network support to Ieee80211
+
+2011-04-27  Rudolf Hornig
+
+	INET now compiles with MANET turnened off.
+
+2011-04-20  Rudolf Hornig
+
+	Initial takeover of MANET routing protocols from INETMANET.

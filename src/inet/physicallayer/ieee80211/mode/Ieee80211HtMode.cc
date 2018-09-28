@@ -47,9 +47,18 @@ Ieee80211HtPreambleMode::Ieee80211HtPreambleMode(const Ieee80211HtSignalMode* hi
         highThroughputSignalMode(highThroughputSignalMode),
         legacySignalMode(legacySignalMode),
         preambleFormat(preambleFormat),
-        numberOfHTLongTrainings(computeNumberOfHTLongTrainings(computeNumberOfSpaceTimeStreams(numberOfSpatialStream)))
+        numberOfHTLongTrainings(computeNumberOfHTLongTrainings(computeNumberOfSpaceTimeStreams(numberOfSpatialStream))),
+        header(new Ieee80211HtSignalModeHeader(highThroughputSignalMode))
 {
 }
+
+
+Ieee80211HtSignalMode::Ieee80211HtSignalMode(const Ieee80211HtSignalMode * c) : Ieee80211HtModeBase(c->getMcsIndex(), 1, c->getBandwidth(), c->getGuardIntervalType()),
+        modulation(c->getModulation()),
+        code(c->getCode())
+{
+}
+
 
 Ieee80211HtSignalMode::Ieee80211HtSignalMode(unsigned int modulationAndCodingScheme, const Ieee80211OfdmModulation *modulation, const Ieee80211HtCode *code, const Hz bandwidth, GuardIntervalType guardIntervalType) :
         Ieee80211HtModeBase(modulationAndCodingScheme, 1, bandwidth, guardIntervalType),
@@ -65,6 +74,23 @@ Ieee80211HtSignalMode::Ieee80211HtSignalMode(unsigned int modulationAndCodingSch
 {
 }
 
+Ieee80211HtSignalModeHeader::Ieee80211HtSignalModeHeader(const Ieee80211HtSignalMode *base): Ieee80211HtSignalMode(base)
+{
+};
+
+const simtime_t Ieee80211HtSignalModeHeader::getDuration() const
+{
+    if (modulation == &Ieee80211OfdmCompliantModulations::bpskModulation)
+        return 0;
+    return  4E-6;
+}
+
+b Ieee80211HtSignalModeHeader::getLength() const
+{
+    if (modulation == &Ieee80211OfdmCompliantModulations::bpskModulation)
+           return b(0);
+       return  Ieee80211HtSignalModeHeader::getLength();
+}
 
 Ieee80211HtDataMode::Ieee80211HtDataMode(const Ieee80211Htmcs *modulationAndCodingScheme, const Hz bandwidth, GuardIntervalType guardIntervalType) :
         Ieee80211HtModeBase(modulationAndCodingScheme->getMcsIndex(), computeNumberOfSpatialStreams(modulationAndCodingScheme->getModulation(), modulationAndCodingScheme->getStreamExtension1Modulation(), modulationAndCodingScheme->getStreamExtension2Modulation(), modulationAndCodingScheme->getStreamExtension3Modulation()), bandwidth, guardIntervalType),

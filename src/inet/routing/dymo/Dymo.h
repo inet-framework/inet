@@ -23,6 +23,8 @@
 #include <vector>
 #include <map>
 #include <omnetpp.h>
+
+#include "inet/routing/dymo/DymoSets.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetfilter.h"
@@ -92,6 +94,7 @@ class INET_API Dymo : public cSimpleModule, public ILifecycle, public cListener,
     std::map<L3Address, RreqTimer *> targetAddressToRREQTimer;
     std::multimap<L3Address, Packet *> targetAddressToDelayedPackets;
     std::vector<std::pair<L3Address, int> > clientAddressAndPrefixLengthPairs;    // 5.3.  Router Clients and Client Networks
+    DymoSets multicastRouteSet;
 
   public:
     Dymo();

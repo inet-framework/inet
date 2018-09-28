@@ -85,6 +85,7 @@ class INET_API Ieee80211HtSignalMode : public IIeee80211HeaderMode, public Ieee8
         virtual bps computeNetBitrate() const override;
 
     public:
+        Ieee80211HtSignalMode(const Ieee80211HtSignalMode * c);
         Ieee80211HtSignalMode(unsigned int modulationAndCodingScheme, const Ieee80211OfdmModulation *modulation, const Ieee80211HtCode *code, const Hz bandwidth, GuardIntervalType guardIntervalType);
         Ieee80211HtSignalMode(unsigned int modulationAndCodingScheme, const Ieee80211OfdmModulation *modulation, const Ieee80211ConvolutionalCode *convolutionalCode, const Hz bandwidth, GuardIntervalType guardIntervalType);
         virtual ~Ieee80211HtSignalMode();
@@ -122,6 +123,14 @@ class INET_API Ieee80211HtSignalMode : public IIeee80211HeaderMode, public Ieee8
         virtual Ptr<Ieee80211PhyHeader> createHeader() const override { return makeShared<Ieee80211HtPhyHeader>(); }
 };
 
+class INET_API Ieee80211HtSignalModeHeader : public Ieee80211HtSignalMode
+{
+    public:
+        Ieee80211HtSignalModeHeader(const Ieee80211HtSignalMode *b);
+        virtual const simtime_t getDuration() const override;
+        virtual b getLength() const override;
+};
+
 /*
  * The HT preambles are defined in HT-mixed format and in HT-greenfield format to carry the required
  * information to operate in a system with multiple transmit and multiple receive antennas. (20.3.9 HT preamble)
@@ -137,9 +146,11 @@ class INET_API Ieee80211HtPreambleMode : public IIeee80211PreambleMode, public I
 
     protected:
         const Ieee80211HtSignalMode *highThroughputSignalMode; // In HT-terminology the HT-SIG (signal field) and L-SIG are part of the preamble
+        const Ieee80211HtSignalModeHeader *highThroughputHeader; // In HT-terminology the HT-SIG (signal field) and L-SIG are part of the preamble
         const Ieee80211OfdmSignalMode *legacySignalMode; // L-SIG
         const HighTroughputPreambleFormat preambleFormat;
         const unsigned int numberOfHTLongTrainings; // N_LTF, 20.3.9.4.6 HT-LTF definition
+        const Ieee80211HtSignalModeHeader *header; // In HT-terminology the HT-SIG (signal field) and L-SIG are part of the preamble
 
     protected:
         virtual unsigned int computeNumberOfSpaceTimeStreams(unsigned int numberOfSpatialStreams) const;
@@ -151,6 +162,8 @@ class INET_API Ieee80211HtPreambleMode : public IIeee80211PreambleMode, public I
 
         HighTroughputPreambleFormat getPreambleFormat() const { return preambleFormat; }
         virtual const Ieee80211HtSignalMode *getSignalMode() const { return highThroughputSignalMode; }
+        virtual const Ieee80211HtSignalModeHeader *getSignalModeHeader() const { return header; }
+
         virtual const Ieee80211OfdmSignalMode *getLegacySignalMode() const { return legacySignalMode; }
         virtual const Ieee80211HtSignalMode* getHighThroughputSignalMode() const { return highThroughputSignalMode; }
 
@@ -252,7 +265,7 @@ class INET_API Ieee80211HtMode : public Ieee80211ModeBase
 
         virtual const Ieee80211HtDataMode* getDataMode() const override { return dataMode; }
         virtual const Ieee80211HtPreambleMode* getPreambleMode() const override { return preambleMode; }
-        virtual const Ieee80211HtSignalMode *getHeaderMode() const override { return preambleMode->getSignalMode(); }
+        virtual const Ieee80211HtSignalMode *getHeaderMode() const override { return preambleMode->getSignalModeHeader(); }
         virtual const Ieee80211OfdmSignalMode *getLegacySignalMode() const { return preambleMode->getLegacySignalMode(); }
 
         // Table 20-25—MIMO PHY characteristics
@@ -268,7 +281,7 @@ class INET_API Ieee80211HtMode : public Ieee80211ModeBase
         virtual inline int getMpduMaxLength() const override { return 65535; } // in octets
         virtual BandMode getCarrierFrequencyMode() const { return carrierFrequencyMode; }
 
-        virtual const simtime_t getDuration(b dataLength) const override { return preambleMode->getDuration() + dataMode->getDuration(dataLength); }
+        virtual const simtime_t getDuration(b dataLength) const override { return preambleMode->getDuration() + getHeaderMode()->getDuration() + dataMode->getDuration(dataLength); }
 };
 
 // A specification of the high-throughput (HT) physical layer (PHY)

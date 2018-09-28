@@ -1104,6 +1104,20 @@
         linkerFlags = ""
         />
     <feature
+        id="ExtraManetRouting"
+        name="ExtraManetRouting"
+        description = "InetManet routing protocols"
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.routing.extras
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_EXTRAMANETROUTING"
+        linkerFlags = ""
+        />
+    <feature
         id="wirelesstutorial"
         name="Wireless tutorial"
         description = "A step-by-step tutorial starting from the basics, and introducing new features and concepts related to wireless communication networks."
