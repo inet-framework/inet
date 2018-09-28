@@ -80,6 +80,7 @@ void MoBanCoordinator::initialize(int stage)
     LineSegmentsMobilityBase::initialize(stage);
 
     EV_TRACE << "initializing MoBanCoordinator stage " << stage << endl;
+    // TODO: INITSTAGE
     if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT) {
         useMobilityPattern = par("useMobilityPattern");
         collectLocalModules(getParentModule());

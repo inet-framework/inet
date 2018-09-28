@@ -49,8 +49,6 @@ void IpvxTrafGen::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    // because of IPvXAddressResolver, we need to wait until interfaces are registered,
-    // address auto-assignment takes place etc.
     if (stage == INITSTAGE_LOCAL) {
         int protocolId = par("protocol");
         if (protocolId < 143 || protocolId > 254)

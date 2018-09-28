@@ -60,14 +60,14 @@ enum InitStages {
     INITSTAGE_MOBILITY = 4,
 
     /**
-     * Initialization of physical layer of protocols:
+     * Initialization of physical layer protocols includes:
      *  - registering radios in the RadioMedium
      *  - initializing radio mode, transmission and reception states
      */
     INITSTAGE_PHYSICAL_LAYER = 5,
 
     /**
-     * Initialization of network interfaces:
+     * Initialization of network interfaces includes:
      *  - assigning MAC addresses
      *  - registering network interfaces in the InterfaceTable
      */
