@@ -99,7 +99,7 @@ void Ipv6RoutingTable::initialize(int stage)
             configureInterfaceForIpv6(ie);
         }
     }
-    else if (stage == INITSTAGE_NETWORK_CONFIGURATOR) {
+    else if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
         parseXmlConfigFile();
 
         // skip hosts

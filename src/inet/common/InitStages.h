@@ -79,11 +79,11 @@ enum InitStages {
     INITSTAGE_LINK_LAYER = 7,
 
     /**
-     * Initialization of network configurators (e.g. Ipv4NetworkConfigurator) includes:
+     * Initialization of network configuration (e.g. Ipv4NetworkConfigurator) includes:
      *  - determining IP addresses and static routes
      *  - adding protocol-specific data (e.g. Ipv4InterfaceData) to InterfaceEntry
      */
-    INITSTAGE_NETWORK_CONFIGURATOR = 8,
+    INITSTAGE_NETWORK_CONFIGURATION = 8,
 
     /**
      * Initialization of network addresses.

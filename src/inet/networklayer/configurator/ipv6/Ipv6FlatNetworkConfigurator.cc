@@ -35,7 +35,7 @@ void Ipv6FlatNetworkConfigurator::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_NETWORK_CONFIGURATOR) {
+    if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
         cTopology topo("topo");
 
         // extract topology

@@ -55,7 +55,7 @@ void Ipv4NodeConfigurator::initialize(int stage)
             networkConfigurator = check_and_cast<Ipv4NetworkConfigurator *>(module);
         }
     }
-    else if (stage == INITSTAGE_NETWORK_CONFIGURATOR) {
+    else if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
         if (!nodeStatus || nodeStatus->getState() == NodeStatus::UP)
             prepareNode();
     }

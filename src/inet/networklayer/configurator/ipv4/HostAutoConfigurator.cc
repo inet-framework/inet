@@ -38,7 +38,7 @@ void HostAutoConfigurator::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_NETWORK_CONFIGURATOR) {
+    if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
         cModule *node = getContainingNode(this);
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(node->getSubmodule("status"));
         if (!nodeStatus || nodeStatus->getState() == NodeStatus::UP)
