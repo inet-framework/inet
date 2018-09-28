@@ -38,7 +38,6 @@ module ThroughputClient
     submodules:
         cli: EtherAppClient {
             parameters:
-                registerSAP = false;
                 destAddress = "20:00:00:00:00:0"+string(idx % maxSrv);
                 @display("b=40,24;p=180,60,col");
         }
