@@ -83,8 +83,6 @@ void EtherAppClient::handleMessage(cMessage *msg)
         throw cRuntimeError("Application is not running");
     if (msg->isSelfMessage()) {
         if (msg->getKind() == START) {
-            bool registerSAP = par("registerSAP");
-            ASSERT(registerSAP);
             llcSocket.open(-1, localSAP);
 
             destMACAddress = resolveDestMACAddress();

@@ -66,8 +66,6 @@ bool EtherAppServer::isNodeUp()
 void EtherAppServer::startApp()
 {
     EV_INFO << "Starting application\n";
-    bool registerSAP = par("registerSAP");
-    ASSERT(registerSAP);
     registerDSAP(localSAP);
 }
 
