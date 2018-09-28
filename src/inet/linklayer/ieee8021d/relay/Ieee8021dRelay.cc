@@ -42,7 +42,7 @@ void Ieee8021dRelay::initialize(int stage)
         numReceivedBPDUsFromSTP = numReceivedNetworkFrames = numDroppedFrames = 0;
         isStpAware = par("hasStp");
     }
-    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
+    else if (stage == INITSTAGE_LINK_LAYER) {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         registerService(Protocol::ethernetMac, gate("upperLayerIn"), gate("ifIn"));
@@ -52,8 +52,6 @@ void Ieee8021dRelay::initialize(int stage)
         if(isStpAware) {
             registerAddress(MacAddress::STP_MULTICAST_ADDRESS);
         }
-    }
-    else if (stage == INITSTAGE_LINK_LAYER) {
 
         macTable = getModuleFromPar<IMacAddressTable>(par("macTableModule"), this);
         ifTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);

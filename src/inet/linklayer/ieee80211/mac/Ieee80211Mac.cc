@@ -62,10 +62,13 @@ void Ieee80211Mac::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         modeSet = Ieee80211ModeSet::getModeSet(par("modeSet"));
         fcsMode = parseFcsMode(par("fcsMode"));
-    }
-    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         mib = getModuleFromPar<Ieee80211Mib>(par("mibModule"), this);
         mib->qos = par("qosStation");
+    }
+    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
+        registerInterface();
+    }
+    else if (stage == INITSTAGE_LINK_LAYER) {
         cModule *llcModule = gate("upperLayerOut")->getNextGate()->getOwnerModule();
         llc = check_and_cast<IIeee80211Llc *>(llcModule);
         cModule *radioModule = gate("lowerLayerOut")->getNextGate()->getOwnerModule();
@@ -77,12 +80,9 @@ void Ieee80211Mac::initialize(int stage)
         ds = check_and_cast<IDs *>(getSubmodule("ds"));
         rx = check_and_cast<IRx *>(getSubmodule("rx"));
         tx = check_and_cast<ITx *>(getSubmodule("tx"));
-        registerInterface();
         emit(modesetChangedSignal, modeSet);
         if (isOperational)
             initializeRadioMode();
-    }
-    else if (stage == INITSTAGE_LINK_LAYER) {
         rx = check_and_cast<IRx *>(getSubmodule("rx"));
         tx = check_and_cast<ITx *>(getSubmodule("tx"));
         dcf = check_and_cast<Dcf *>(getSubmodule("dcf"));

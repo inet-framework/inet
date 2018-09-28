@@ -196,6 +196,8 @@ void EtherMacBase::initialize(int stage)
     }
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         registerInterface();
+    }
+    else if (stage == INITSTAGE_LINK_LAYER) {
         initializeQueueModule();
         readChannelParameters(true);
     }

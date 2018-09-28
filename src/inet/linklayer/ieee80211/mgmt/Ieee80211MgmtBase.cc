@@ -40,6 +40,7 @@ void Ieee80211MgmtBase::initialize(int stage)
         WATCH(numMgmtFramesReceived);
         WATCH(numMgmtFramesDropped);
     }
+    // TODO: INITSTAGE
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;

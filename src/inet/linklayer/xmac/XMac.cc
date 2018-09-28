@@ -71,12 +71,13 @@ void XMac::initialize(int stage)
         WATCH(macState);
     }
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
+        registerInterface();
+    }
+    else if (stage == INITSTAGE_LINK_LAYER) {
         cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
         radioModule->subscribe(IRadio::radioModeChangedSignal, this);
         radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
         radio = check_and_cast<IRadio *>(radioModule);
-
-        registerInterface();
 
         wakeup = new cMessage("wakeup");
         wakeup->setKind(XMAC_WAKE_UP);

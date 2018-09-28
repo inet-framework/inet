@@ -43,14 +43,14 @@ void ExtInterface::initialize(int stage)
     InterfaceEntry::initialize(stage);
     if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         registerInterface();
-        if (!strcmp("copyFromExt", par("copyConfiguration")))
+        const char *copyConfiguration = par("copyConfiguration");
+        if (!strcmp("copyFromExt", copyConfiguration))
             copyInterfaceConfigurationFromExt();
-        else
+        else {
             configureInterface();
-    }
-    else if (stage == INITSTAGE_LINK_LAYER) {
-        if (!strcmp("copyToExt", par("copyConfiguration")))
-            copyInterfaceConfigurationToExt();
+            if (!strcmp("copyToExt", copyConfiguration))
+                copyInterfaceConfigurationToExt();
+        }
     }
 }
 

@@ -68,16 +68,6 @@ void Ppp::initialize(int stage)
         queueModule = nullptr;
     }
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
-        if (par("queueModule").stringValue()[0]) {
-            cModule *mod = getModuleFromPar<cModule>(par("queueModule"), this);
-            if (mod->isSimple())
-                queueModule = check_and_cast<IPassiveQueue *>(mod);
-            else {
-                cGate *queueOut = mod->gate("out")->getPathStartGate();
-                queueModule = check_and_cast<IPassiveQueue *>(queueOut->getOwnerModule());
-            }
-        }
-
         // remember the output gate now, to speed up send()
         physOutGate = gate("phys$o");
 
@@ -87,6 +77,17 @@ void Ppp::initialize(int stage)
         datarateChannel = connected ? physOutGate->getTransmissionChannel() : nullptr;
         // register our interface entry in IInterfaceTable
         registerInterface();
+    }
+    else if (stage == INITSTAGE_LINK_LAYER) {
+        if (par("queueModule").stringValue()[0]) {
+            cModule *mod = getModuleFromPar<cModule>(par("queueModule"), this);
+            if (mod->isSimple())
+                queueModule = check_and_cast<IPassiveQueue *>(mod);
+            else {
+                cGate *queueOut = mod->gate("out")->getPathStartGate();
+                queueModule = check_and_cast<IPassiveQueue *>(queueOut->getOwnerModule());
+            }
+        }
 
         // request first frame to send
         if (queueModule && 0 == queueModule->getNumPendingRequests()) {
