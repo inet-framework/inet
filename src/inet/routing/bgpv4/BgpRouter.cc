@@ -77,9 +77,12 @@ SessionId BgpRouter::createSession(BgpSessionType typeSession, const char *peerA
         if (info.linkIntf == nullptr)
             throw cRuntimeError("BGP Error: No configuration interface for peer address: %s", peerAddr);
         info.sessionID = info.peerAddr.getInt() + info.linkIntf->getProtocolData<Ipv4InterfaceData>()->getIPAddress().getInt();
+        numEgpSessions++;
     }
-    else
+    else {
         info.sessionID = info.peerAddr.getInt() + info.routerID.getInt();
+        numIgpSessions++;
+    }
 
     SessionId newSessionId;
     newSessionId = info.sessionID;
@@ -99,13 +102,27 @@ void BgpRouter::setTimer(SessionId id, simtime_t *delayTab)
 
 void BgpRouter::setSocketListen(SessionId id)
 {
-    TcpSocket *socketListenEGP = new TcpSocket();
-    _BGPSessions[id]->setSocketListen(socketListenEGP);
+    TcpSocket *socketListen = new TcpSocket();
+    _BGPSessions[id]->setSocketListen(socketListen);
 }
 
-void BgpRouter::addToAdvertiseList(std::string ifName)
+void BgpRouter::addToAdvertiseList(Ipv4Address address)
 {
-    advertiseList.push_back(ifName);
+    bool routeFound = false;
+    const Ipv4Route *rtEntry = nullptr;
+    for (int i = 0; i < rt->getNumRoutes(); i++) {
+        rtEntry = rt->getRoute(i);
+        if(rtEntry->getDestination() == address) {
+            routeFound = true;
+            break;
+        }
+    }
+    if(!routeFound)
+        throw cRuntimeError("No valid route exists for network '%s' in router %s", address.str(false), bgpModule->getFullName());
+
+    BgpRoutingTableEntry *BGPEntry = new BgpRoutingTableEntry(rtEntry);
+    BGPEntry->addAS(myAsId);
+    bgpRoutingTable.push_back(BGPEntry);
 }
 
 void BgpRouter::addToPrefixList(std::string nodeName, BgpRoutingTableEntry *entry)
@@ -174,6 +191,9 @@ void BgpRouter::listenConnectionFromPeer(SessionId sessionID)
     }
 
     if (_BGPSessions[sessionID]->getSocketListen()->getState() != TcpSocket::LISTENING) {
+        EV_DEBUG << "Start listening to TCP socket on port " << (int)TCP_PORT
+                << " for " << BgpSession::getTypeString(_BGPSessions[sessionID]->getType()) << " session." << std::endl;
+
         _BGPSessions[sessionID]->getSocketListen()->setOutputGate(bgpModule->gate("socketOut"));
         _BGPSessions[sessionID]->getSocketListen()->bind(TCP_PORT);
         _BGPSessions[sessionID]->getSocketListen()->listen();
@@ -183,7 +203,18 @@ void BgpRouter::listenConnectionFromPeer(SessionId sessionID)
 
 void BgpRouter::openTCPConnectionToPeer(SessionId sessionID)
 {
+    EV_DEBUG << "Opening a TCP connection to remote port " << (int)TCP_PORT
+            << " for " << BgpSession::getTypeString(_BGPSessions[sessionID]->getType()) << " session." << std::endl;
+
     InterfaceEntry *intfEntry = _BGPSessions[sessionID]->getLinkIntf();
+    if(!intfEntry && _BGPSessions[sessionID]->getType() == IGP) {
+        intfEntry = rt->getInterfaceForDestAddr(_BGPSessions[sessionID]->getPeerAddr());
+        _BGPSessions[sessionID]->setlinkIntf(intfEntry);
+    }
+
+    if (intfEntry == nullptr)
+        throw cRuntimeError("No configuration interface for peer address: %s", _BGPSessions[sessionID]->getPeerAddr().str().c_str());
+
     TcpSocket *socket = _BGPSessions[sessionID]->getSocket();
     if (socket->getState() != TcpSocket::NOT_BOUND) {
         _socketMap.removeSocket(socket);
@@ -197,6 +228,7 @@ void BgpRouter::openTCPConnectionToPeer(SessionId sessionID)
     _socketMap.addSocket(socket);
 
     socket->connect(_BGPSessions[sessionID]->getPeerAddr(), TCP_PORT);
+
 }
 
 void BgpRouter::socketEstablished(TcpSocket *socket)
@@ -304,30 +336,37 @@ void BgpRouter::processMessage(const BgpUpdateMessage& msg)
     printUpdateMessage(msg);
     session->getFSM()->UpdateMsgEvent();
 
-    unsigned char decisionProcessResult;
-    Ipv4Address netMask(Ipv4Address::ALLONES_ADDRESS);
     BgpRoutingTableEntry *entry = new BgpRoutingTableEntry();
-    const unsigned char length = msg.getNLRI().length;
-    unsigned int ASValueCount = msg.getPathAttributeList(0).getAsPath(0).getValue(0).getAsValueArraySize();
-
     entry->setDestination(msg.getNLRI().prefix);
-    netMask = Ipv4Address::makeNetmask(length);
-    entry->setNetmask(netMask);
-    for (unsigned int j = 0; j < ASValueCount; j++) {
-        entry->addAS(msg.getPathAttributeList(0).getAsPath(0).getValue(0).getAsValue(j));
-    }
 
-    decisionProcessResult = asLoopDetection(entry, myAsId);
+    Ipv4Address netMask(Ipv4Address::ALLONES_ADDRESS);
+    netMask = Ipv4Address::makeNetmask(msg.getNLRI().length);
+    entry->setNetmask(netMask);
+
+    unsigned int ASValueCount = msg.getPathAttributeList(0).getAsPath(0).getValue(0).getAsValueArraySize();
+    for (unsigned int j = 0; j < ASValueCount; j++)
+        entry->addAS(msg.getPathAttributeList(0).getAsPath(0).getValue(0).getAsValue(j));
+
+    unsigned char decisionProcessResult = asLoopDetection(entry, myAsId);
 
     if (decisionProcessResult == ASLOOP_NO_DETECTED) {
         // RFC 4271, 9.1.  Decision Process
         decisionProcessResult = decisionProcess(msg, entry, _currSessionId);
-        //RFC 4271, 9.2.  Update-Send Process
+        // RFC 4271, 9.2.  Update-Send Process
         if (decisionProcessResult != 0)
             updateSendProcess(decisionProcessResult, _currSessionId, entry);
     }
     else
         delete entry;
+}
+
+unsigned char BgpRouter::asLoopDetection(BgpRoutingTableEntry *entry, AsId myAS)
+{
+    for (unsigned int i = 1; i < entry->getASCount(); i++) {
+        if (myAS == entry->getAS(i))
+            return ASLOOP_DETECTED;
+    }
+    return ASLOOP_NO_DETECTED;
 }
 
 /* add entry to routing table, or delete entry */
@@ -344,7 +383,15 @@ unsigned char BgpRouter::decisionProcess(const BgpUpdateMessage& msg, BgpRouting
     entry->setPathType(msg.getPathAttributeList(0).getOrigin().getValue());
     entry->setGateway(msg.getPathAttributeList(0).getNextHop().getValue());
 
-    //if the route already exist in BGP routing table, tieBreakingProcess();
+    BgpSessionType type = _BGPSessions[sessionIndex]->getType();
+    if(type == IGP)
+        entry->setAdminDist(Ipv4Route::dBGPInternal);
+    else if(type == EGP)
+        entry->setAdminDist(Ipv4Route::dBGPExternal);
+    else
+        entry->setAdminDist(Ipv4Route::dUnknown);
+
+    //if the route already exists in BGP routing table, tieBreakingProcess();
     //(RFC 4271: 9.1.2.2 Breaking Ties)
     unsigned long BGPindex = isInTable(bgpRoutingTable, entry);
     if (BGPindex != (unsigned long)-1) {
@@ -360,25 +407,34 @@ unsigned char BgpRouter::decisionProcess(const BgpUpdateMessage& msg, BgpRouting
         }
     }
 
-    //Don't add the route if it exists in Ipv4 routing table except if the msg come from IGP session
     int indexIP = isInRoutingTable(rt, entry->getDestination());
-    if (indexIP != -1 && rt->getRoute(indexIP)->getSourceType() != IRoute::BGP) {
-        if (_BGPSessions[sessionIndex]->getType() != IGP) {
-            delete entry;
-            return 0;
+    //if the route already exists in the IPv4 routing table
+    if (indexIP != -1) {
+        // and it was not added by BGP before
+        if(rt->getRoute(indexIP)->getSourceType() != IRoute::BGP)
+        {
+            // and the Update msg is coming from IGP session
+            if (_BGPSessions[sessionIndex]->getType() == IGP) {
+                Ipv4Route *oldEntry = rt->getRoute(indexIP);
+                BgpRoutingTableEntry *BGPEntry = new BgpRoutingTableEntry(oldEntry);
+                BGPEntry->addAS(myAsId);
+                BGPEntry->setPathType(IGP);
+                BGPEntry->setAdminDist(Ipv4Route::dBGPInternal);
+                rt->addRoute(BGPEntry);
+                // Note: No need to delete the existing route. Let the administrative distance decides.
+                // rt->deleteRoute(oldEntry);
+            }
+            else {
+                delete entry;
+                return 0;
+            }
         }
-        else {
-            Ipv4Route *oldEntry = rt->getRoute(indexIP);
-            Ipv4Route *newEntry = new Ipv4Route;
-            newEntry->setDestination(oldEntry->getDestination());
-            newEntry->setNetmask(oldEntry->getNetmask());
-            newEntry->setGateway(oldEntry->getGateway());
-            newEntry->setInterface(oldEntry->getInterface());
-            newEntry->setSourceType(IRoute::BGP);
-            rt->deleteRoute(oldEntry);
-            rt->addRoute(newEntry);
-            //FIXME model error: the BgpRoutingTableEntry *entry will be stored in bgpRoutingTable, but not stored in rt, memory leak
-            //FIXME model error: The entry inserted to bgpRoutingTable, but newEntry inserted to rt; entry and newEntry are differ.
+    }
+    else {
+        // and the Update msg is coming from IGP session
+        if (_BGPSessions[sessionIndex]->getType() == IGP) {
+            entry->setInterface(_BGPSessions[sessionIndex]->getLinkIntf());
+            rt->addRoute(entry);
         }
     }
 
@@ -387,14 +443,19 @@ unsigned char BgpRouter::decisionProcess(const BgpUpdateMessage& msg, BgpRouting
 
     if (_BGPSessions[sessionIndex]->getType() == EGP) {
         rt->addRoute(entry);
-        //insertExternalRoute on OSPF ExternalRoutingTable if OSPF exist on this BGP router
-        if (ospfExist(rt)) {
-            ospf::Ipv4AddressRange OSPFnetAddr;
-            OSPFnetAddr.address = entry->getDestination();
-            OSPFnetAddr.mask = entry->getNetmask();
+
+        // if redistributeInternal is true, then insert the new external route into the OSPF (if exists).
+        // The OSPF module then floods AS-External LSA into the AS and lets other routers know
+        // about the new external route.
+        if (ospfExist(rt) && redistributeInternal) {
             InterfaceEntry *ie = entry->getInterface();
             if (!ie)
                 throw cRuntimeError("Model error: interface entry is nullptr");
+            ospf::Ipv4AddressRange OSPFnetAddr;
+            OSPFnetAddr.address = entry->getDestination();
+            OSPFnetAddr.mask = entry->getNetmask();
+            if(!ospfModule)
+                throw cRuntimeError("Cannot find the OSPF module on router %s", bgpModule->getFullName());
             ospfModule->insertExternalRoute(ie->getInterfaceId(), OSPFnetAddr);
         }
     }
@@ -503,7 +564,10 @@ int BgpRouter::isInRoutingTable(IIpv4RoutingTable *rtTable, Ipv4Address addr)
     for (int i = 0; i < rtTable->getNumRoutes(); i++) {
         const Ipv4Route *entry = rtTable->getRoute(i);
         if (Ipv4Address::maskedAddrAreEqual(addr, entry->getDestination(), entry->getNetmask())) {
-            return i;
+            if(isDefaultRoute(entry) && addr.getInt() != 0)
+                continue;
+            else
+                return i;
         }
     }
     return -1;
@@ -559,16 +623,6 @@ bool BgpRouter::ospfExist(IIpv4RoutingTable *rtTable)
     return false;
 }
 
-unsigned char BgpRouter::asLoopDetection(BgpRoutingTableEntry *entry, AsId myAS)
-{
-    for (unsigned int i = 1; i < entry->getASCount(); i++) {
-        if (myAS == entry->getAS(i)) {
-            return ASLOOP_DETECTED;
-        }
-    }
-    return ASLOOP_NO_DETECTED;
-}
-
 /*return sessionID if the session is found, -1 else*/
 SessionId BgpRouter::findNextSession(BgpSessionType type, bool startSession)
 {
@@ -584,9 +638,9 @@ SessionId BgpRouter::findNextSession(BgpSessionType type, bool startSession)
         // note: if the internal peer is not directly-connected to us, then we should know how to reach it.
         // this is done with the help of an intra-AS routing protocol (RIP, OSPF, EIGRP).
         InterfaceEntry *linkIntf = rt->getInterfaceForDestAddr(_BGPSessions[sessionID]->getPeerAddr());
-        if (linkIntf == nullptr) {
+        if (linkIntf == nullptr)
             throw cRuntimeError("No configuration interface for peer address: %s", _BGPSessions[sessionID]->getPeerAddr().str().c_str());
-        }
+
         _BGPSessions[sessionID]->setlinkIntf(linkIntf);
         _BGPSessions[sessionID]->startConnection();
     }
@@ -678,15 +732,72 @@ void BgpRouter::printUpdateMessage(const BgpUpdateMessage& updateMsg)
 
 void BgpRouter::printKeepAliveMessage(const BgpKeepAliveMessage& keepAliveMsg)
 {
-
+    // TODO: add code once implemented
 }
 
-bool BgpRouter::isadvertised(std::string ifName)
+bool BgpRouter::isRouteExcluded(const Ipv4Route &rtEntry)
 {
-    for(auto &entry : advertiseList) {
-        if(entry == ifName)
+    // all host-specific routes are excluded
+    if(rtEntry.getNetmask() == Ipv4Address::ALLONES_ADDRESS)
+        return true;
+
+    // all static routes are excluded
+    if(rtEntry.getSourceType() == IRoute::MANUAL)
+        return true;
+
+    // all BGP routes are excluded
+    if(rtEntry.getSourceType() == IRoute::BGP)
+        return true;
+
+    // all RIP routes are excluded when redistributeRip is false
+    if(rtEntry.getSourceType() == IRoute::RIP) {
+        if(!redistributeRip)
             return true;
+        else
+            return false;
     }
+
+    if(rtEntry.getSourceType() == IRoute::OSPF) {
+        // all OSPF routes are excluded when redistributeOspf is false
+        if(!redistributeOspf)
+            return true;
+        else {
+            // all OSPF external routes are excluded
+            if(checkExternalRoute(&rtEntry))
+                return true;
+            else
+                return false;
+        }
+    }
+
+    if (rtEntry.getSourceType() == IRoute::IFACENETMASK) {
+        if(!redistributeRip && !redistributeOspf)
+            return true;
+        else
+            return isExternalAddress(rtEntry);
+    }
+
+    // exclude all other routes
+    return true;
+}
+
+bool BgpRouter::isExternalAddress(const Ipv4Route &rtEntry)
+{
+    for(auto &session : _BGPSessions) {
+        if(session.second->getType() == EGP) {
+            InterfaceEntry *exIntf = rt->getInterfaceForDestAddr(session.second->getPeerAddr());
+            if(exIntf == rtEntry.getInterface())
+                return true;
+        }
+    }
+
+    return false;
+}
+
+bool BgpRouter::isDefaultRoute(const Ipv4Route *entry) const
+{
+    if(entry->getDestination().getInt() == 0 && entry->getNetmask().getInt() == 0)
+        return true;
     return false;
 }
 
