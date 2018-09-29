@@ -74,7 +74,7 @@ void BgpConfigReader::loadConfigFromXML(cXMLElement *bgpConfig, BgpRouter *bgpRo
         unsigned int routerPeerPosition = 1;
         delayTab[3] += sessionList.size() * 2;
         for (auto it = routerInSameASList.begin(); it != routerInSameASList.end(); it++, routerPeerPosition++) {
-            SessionId newSessionID = bgpRouter->createSession(IGP, (*it));
+            SessionId newSessionID = bgpRouter->createSession(IGP, *it /*peer address*/);
             delayTab[3] += calculateStartDelay(routerInSameASList.size(), routerPosition, routerPeerPosition);
             bgpRouter->setTimer(newSessionID, delayTab);
             bgpRouter->setSocketListen(newSessionID);
@@ -141,7 +141,7 @@ void BgpConfigReader::loadSessionConfig(cXMLElementList& sessionList, simtime_t 
         }
         else {
             peerAddr = routerAddr1;
-            delayTab[3] += atoi((*sessionListIt)->getAttribute("id")) + 0.5;
+            delayTab[3] += atoi((*sessionListIt)->getAttribute("id")) + bgpModule->par("ExternalPeerStartDelayOffset").doubleValue();
         }
 
         if (peerAddr.isUnspecified())
@@ -161,17 +161,23 @@ std::vector<const char *> BgpConfigReader::loadASConfig(cXMLElementList& ASConfi
     for (auto & elem : ASConfig) {
         std::string nodeName = (elem)->getTagName();
         if (nodeName == "Router") {
-            if (isInInterfaceTable(ift, Ipv4Address((elem)->getAttribute("interAddr"))) == -1)
-                routerInSameASList.push_back((elem)->getAttribute("interAddr"));
-            for (auto & entry : elem->getChildren()) {
-                const char *name = entry->getAttribute("names");
-                if(name && *name) {
-                    if (isInInterfaceTable(ift, std::string(name)) == -1)
-                        throw cRuntimeError("Error reading XML config: IInterfaceTable contains no interface with name '%s' for AS %u", name, bgpRouter->getAsId());
-                    bgpRouter->addToAdvertiseList(std::string(name));
+            if (isInInterfaceTable(ift, Ipv4Address(elem->getAttribute("interAddr"))) == -1)
+                routerInSameASList.push_back(elem->getAttribute("interAddr"));
+            else {
+                bgpRouter->setRedistributeInternal(getBoolAttrOrPar(*elem, "redistributeInternal"));
+                bgpRouter->setRedistributeOspf(getBoolAttrOrPar(*elem, "redistributeOspf"));
+                bgpRouter->setRedistributeRip(getBoolAttrOrPar(*elem, "redistributeRip"));
+
+                for (auto & entry : elem->getChildren()) {
+                    std::string nodeName = entry->getTagName();
+                    if (nodeName == "Network") {
+                        const char *address = entry->getAttribute("address");
+                        if(address && *address)
+                            bgpRouter->addToAdvertiseList(Ipv4Address(address));
+                        else
+                            throw cRuntimeError("BGP Error: attribute 'address' is mandatory");
+                    }
                 }
-                else
-                    throw cRuntimeError("BGP Error: attribute 'names' is mandatory");
             }
 
             continue;
@@ -236,6 +242,19 @@ unsigned int BgpConfigReader::calculateStartDelay(int rtListSize, unsigned char 
         startDelay = (rtListSize - 1) * 2 + 1;
     }
     return startDelay;
+}
+
+bool BgpConfigReader::getBoolAttrOrPar(const cXMLElement& ifConfig, const char *name) const
+{
+    const char *attrStr = ifConfig.getAttribute(name);
+    if (attrStr && *attrStr) {
+        if (strcmp(attrStr, "true") == 0 || strcmp(attrStr, "1") == 0)
+            return true;
+        if (strcmp(attrStr, "false") == 0 || strcmp(attrStr, "0") == 0)
+            return false;
+        throw cRuntimeError("Invalid boolean attribute %s = '%s' at %s", name, attrStr, ifConfig.getSourceLocation());
+    }
+    return bgpModule->par(name);
 }
 
 } // namespace bgp

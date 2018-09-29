@@ -44,9 +44,14 @@ private:
     cSimpleModule *bgpModule = nullptr;
     ospf::Ospf *ospfModule = nullptr;
     AsId myAsId = 0;
+    bool redistributeInternal = false;
+    bool redistributeRip = false;
+    bool redistributeOspf = false;
     SocketMap _socketMap;
     SessionId _currSessionId = 0;
     std::map<SessionId, BgpSession *> _BGPSessions;
+    uint32_t numEgpSessions = 0;
+    uint32_t numIgpSessions = 0;
 
     typedef std::vector<BgpRoutingTableEntry *> RoutingTableEntryVector;
     RoutingTableEntryVector bgpRoutingTable;    // The BGP routing table
@@ -55,7 +60,6 @@ private:
     RoutingTableEntryVector _prefixListINOUT;   // store union of pointers in _prefixListIN and _prefixListOUT
     std::vector<AsId> _ASListIN;
     std::vector<AsId> _ASListOUT;
-    std::vector<std::string> advertiseList;
 
   public:
     BgpRouter(cSimpleModule *bgpModule, IInterfaceTable *ift, IIpv4RoutingTable *rt);
@@ -65,15 +69,24 @@ private:
     void setAsId(AsId myAsId) { this->myAsId = myAsId; }
     AsId getAsId() { return myAsId; }
     int getNumBgpSessions() { return _BGPSessions.size(); }
+    int getNumEgpSessions() { return numEgpSessions; }
+    int getNumIgpSessions() { return numIgpSessions; }
+    bool getRedistributeInternal() { return redistributeInternal; }
+    void setRedistributeInternal(bool x) { this->redistributeInternal = x; }
+    bool getRedistributeRip() { return redistributeRip; }
+    void setRedistributeRip(bool x) { this->redistributeRip = x; }
+    bool getRedistributeOspf() { return redistributeOspf; }
+    void setRedistributeOspf(bool x) { this->redistributeOspf = x; }
     void addWatches();
     void recordStatistics();
 
     SessionId createSession(BgpSessionType typeSession, const char *peerAddr);
     void setTimer(SessionId id, simtime_t *delayTab);
     void setSocketListen(SessionId id);
-    void addToAdvertiseList(std::string ifName);
+    void addToAdvertiseList(Ipv4Address address);
     void addToPrefixList(std::string nodeName, BgpRoutingTableEntry *entry);
     void addToAsList(std::string nodeName, AsId id);
+    bool isExternalAddress(const Ipv4Route &rtEntry);
     void processMessageFromTCP(cMessage *msg);
 
     void printOpenMessage(const BgpOpenMessage& msg);
@@ -101,7 +114,6 @@ private:
     cMessage *getCancelEvent(cMessage *msg) { return bgpModule->cancelEvent(msg); }
     IIpv4RoutingTable *getIPRoutingTable() { return rt; }
     std::vector<BgpRoutingTableEntry *> getBGPRoutingTable() { return bgpRoutingTable; }
-    bool isadvertised(std::string ifName);
 
     /**
      * \brief active listenSocket for a given session (used by fsm)
@@ -119,12 +131,6 @@ private:
      * \brief find the next SessionId compared to his type and start this session if boolean is true
      */
     SessionId findNextSession(BgpSessionType type, bool startSession = false);
-    /**
-     * \brief check if the route is in OSPF external Ipv4RoutingTable
-     *
-     * \return true if it is, false else
-     */
-    bool checkExternalRoute(const Ipv4Route *ospfRoute) { return ospfModule->checkExternalRoute(ospfRoute->getDestination()); }
 
   private:
 
@@ -152,10 +158,14 @@ private:
     unsigned long isInTable(std::vector<BgpRoutingTableEntry *> rtTable, BgpRoutingTableEntry *entry);
 
     bool ospfExist(IIpv4RoutingTable *rtTable);
+    // check if the route is in OSPF external Ipv4RoutingTable
+    bool checkExternalRoute(const Ipv4Route *ospfRoute) { return ospfModule->checkExternalRoute(ospfRoute->getDestination()); }
     unsigned char asLoopDetection(BgpRoutingTableEntry *entry, AsId myAS);
     int isInRoutingTable(IIpv4RoutingTable *rtTable, Ipv4Address addr);
     SessionId findIdFromPeerAddr(std::map<SessionId, BgpSession *> sessions, Ipv4Address peerAddr);
     SessionId findIdFromSocketConnId(std::map<SessionId, BgpSession *> sessions, int connId);
+    bool isRouteExcluded(const Ipv4Route &rtEntry);
+    bool isDefaultRoute(const Ipv4Route *entry) const;
 };
 
 } // namespace bgp

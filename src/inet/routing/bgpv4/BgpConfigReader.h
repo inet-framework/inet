@@ -53,6 +53,7 @@ private:
     int isInInterfaceTable(IInterfaceTable *ifTable, Ipv4Address addr);
     int isInInterfaceTable(IInterfaceTable *ifTable, std::string ifName);
     unsigned int calculateStartDelay(int rtListSize, unsigned char rtPosition, unsigned char rtPeerPosition);
+    bool getBoolAttrOrPar(const cXMLElement& ifConfig, const char *name) const;
 };
 
 } // namespace bgp

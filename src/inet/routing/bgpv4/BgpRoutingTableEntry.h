@@ -63,6 +63,7 @@ inline BgpRoutingTableEntry::BgpRoutingTableEntry(const Ipv4Route *entry)
     setInterface(entry->getInterface());
     setMetric(DEFAULT_COST);
     setSourceType(IRoute::BGP);
+    setAdminDist(dBGPExternal);
 }
 
 inline const std::string BgpRoutingTableEntry::getPathTypeString(RoutingPathType type)
