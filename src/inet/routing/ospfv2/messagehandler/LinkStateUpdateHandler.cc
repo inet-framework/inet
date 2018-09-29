@@ -275,9 +275,8 @@ void LinkStateUpdateHandler::processPacket(Packet *packet, OspfInterface *intf, 
         }
     }
 
-    if (shouldRebuildRoutingTable) {
+    if (shouldRebuildRoutingTable)
         router->rebuildRoutingTable();
-    }
 }
 
 void LinkStateUpdateHandler::acknowledgeLSA(const OspfLsaHeader& lsaHeader,
