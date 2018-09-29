@@ -49,7 +49,7 @@ OspfRoutingTableEntry::OspfRoutingTableEntry(const OspfRoutingTableEntry& entry)
     setInterface(entry.getInterface());
     setSourceType(entry.getSourceType());
     setMetric(entry.getMetric());
-    setAdminDist(Ipv4Route::dOSPF);
+    setAdminDist(entry.getAdminDist());
 }
 
 void OspfRoutingTableEntry::addNextHop(NextHop hop)
