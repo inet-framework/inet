@@ -1839,15 +1839,12 @@ void Area::calculateShortestPathTree(std::vector<OspfRoutingTableEntry *>& newRo
             if (link.getType() != STUB_LINK)
                 continue;
 
-            unsigned long distance = routerVertex->getDistance() + link.getLinkCost();
             unsigned long destinationID = (link.getLinkID().getInt() & link.getLinkData());
             OspfRoutingTableEntry *entry = nullptr;
-            unsigned long routeCount = newRoutingTable.size();
             unsigned long longestMatch = 0;
 
-            for (uint32_t k = 0; k < routeCount; k++) {
-                if (newRoutingTable[k]->getDestinationType() == OspfRoutingTableEntry::NETWORK_DESTINATION) {
-                    OspfRoutingTableEntry *routingEntry = newRoutingTable[k];
+            for (auto routingEntry : newRoutingTable) {
+                if (routingEntry->getDestinationType() == OspfRoutingTableEntry::NETWORK_DESTINATION) {
                     unsigned long entryAddress = routingEntry->getDestination().getInt();
                     unsigned long entryMask = routingEntry->getNetmask().getInt();
 
@@ -1860,29 +1857,29 @@ void Area::calculateShortestPathTree(std::vector<OspfRoutingTableEntry *>& newRo
                 }
             }
 
+            unsigned long distance = routerVertex->getDistance() + link.getLinkCost();
+
             if (entry != nullptr) {
                 Metric entryCost = entry->getCost();
 
-                if (distance > entryCost) {
+                if (distance > entryCost)
                     continue;
-                }
-                if (distance < entryCost) {
+                else if (distance < entryCost) {
                     entry->setCost(distance);
                     entry->clearNextHops();
                     entry->setLinkStateOrigin(routerVertex);
                 }
-                if (distance == entryCost) {
+                else if (distance == entryCost) {
                     // no const version from check_and_cast
                     const OspfLsa *lsOrigin = entry->getLinkStateOrigin();
                     if (dynamic_cast<const RouterLsa *>(lsOrigin) || dynamic_cast<const NetworkLsa *>(lsOrigin)) {
-                        if (lsOrigin->getHeader().getLinkStateID() < routerVertex->getHeader().getLinkStateID()) {
+                        if (lsOrigin->getHeader().getLinkStateID() < routerVertex->getHeader().getLinkStateID())
                             entry->setLinkStateOrigin(routerVertex);
-                        }
                     }
-                    else {
+                    else
                         throw cRuntimeError("Can not cast class '%s' to RouterLsa or NetworkLsa", lsOrigin->getClassName());
-                    }
                 }
+
                 std::vector<NextHop> *newNextHops = calculateNextHops(link, routerVertex);    // (destination, parent)
                 for (auto it = newNextHops->begin(); it != newNextHops->end(); ++it)
                     entry->addNextHop(*it);
