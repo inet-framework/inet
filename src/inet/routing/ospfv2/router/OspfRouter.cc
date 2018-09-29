@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include "inet/routing/ospfv2/router/OspfRouter.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 
 namespace inet {
 
@@ -707,8 +708,9 @@ void Router::rebuildRoutingTable()
                 if(ospfIfEntry) {
                     OspfRoutingTableEntry *entry = new OspfRoutingTableEntry(ift);
 
-                    entry->setDestination(ifEntry->getIpv4Address() & ifEntry->getNetmask());
-                    entry->setNetmask(ifEntry->getNetmask());
+                    Ipv4InterfaceData *ipv4data = ifEntry->findProtocolData<Ipv4InterfaceData>();
+                    entry->setDestination(ifEntry->getIpv4Address() & ipv4data->getNetmask());
+                    entry->setNetmask(ipv4data->getNetmask());
                     entry->setLinkStateOrigin(areas[i]->findRouterLSA(areas[i]->getRouter()->getRouterID()));
                     entry->setArea(areas[i]->getAreaID());
                     entry->setPathType(OspfRoutingTableEntry::INTRAAREA);
@@ -765,11 +767,9 @@ void Router::rebuildRoutingTable()
     // add the new routing entries
     std::vector<Ipv4Route *> addEntries;
     for (auto &tableEntry : ospfRoutingTable) {
-        if (tableEntry->getDestinationType() == OspfRoutingTableEntry::NETWORK_DESTINATION) {
-            if(!tableEntry->getNextHopAsGeneric().isUnspecified()) {
-                Ipv4Route *entry = new OspfRoutingTableEntry(*tableEntry);
-                addEntries.push_back(entry);
-            }
+        if (tableEntry->getDestinationType() == OspfRoutingTableEntry::NETWORK_DESTINATION && !isDirectRoute(*tableEntry)) {
+            Ipv4Route *entry = new OspfRoutingTableEntry(*tableEntry);
+            addEntries.push_back(entry);
         }
     }
 
@@ -1520,6 +1520,24 @@ void Router::printAsExternalLsa()
         // todo: add ExternalTosInfo externalTOSInfo[];
         EV_INFO << std::endl;
     }
+}
+
+bool Router::isDirectRoute(OspfRoutingTableEntry &entry)
+{
+    if(entry.getGateway().isUnspecified())
+        return true;
+
+    for(int i = 0; i < ift->getNumInterfaces(); i++) {
+        Ipv4InterfaceData *ipv4data = ift->getInterface(i)->findProtocolData<Ipv4InterfaceData>();
+        if(ipv4data) {
+            if(entry.getNetmask() == ipv4data->getNetmask()) {
+                if((entry.getDestination() & ipv4data->getNetmask()) == (ipv4data->getIPAddress() & ipv4data->getNetmask()))
+                    return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 } // namespace ospf

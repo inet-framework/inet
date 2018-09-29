@@ -400,13 +400,5 @@ Ipv4Address InterfaceEntry::getIpv4Address() const {
 #endif // ifdef WITH_IPv4
 }
 
-Ipv4Address InterfaceEntry::getNetmask() const {
-#ifdef WITH_IPv4
-    return ipv4data == nullptr ? Ipv4Address::UNSPECIFIED_ADDRESS : ipv4data->getNetmask();
-#else
-    return Ipv4Address::UNSPECIFIED_ADDRESS;
-#endif // ifdef WITH_IPv4
-}
-
 } // namespace inet
 

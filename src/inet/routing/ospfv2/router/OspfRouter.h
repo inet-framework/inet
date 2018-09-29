@@ -381,6 +381,7 @@ class INET_API Router
     OspfRoutingTableEntry *selectLeastCostRoutingEntry(std::vector<OspfRoutingTableEntry *>& entries) const;
 
     void printAsExternalLsa();
+    bool isDirectRoute(OspfRoutingTableEntry &entry);
 };
 
 } // namespace ospf
