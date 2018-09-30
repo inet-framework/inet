@@ -41,7 +41,7 @@ void SceneVisualizerBase::initialize(int stage)
     }
 }
 
-Box SceneVisualizerBase::getPlaygroundBounds()
+Box SceneVisualizerBase::getSceneBounds()
 {
     Coord min;
     Coord max;

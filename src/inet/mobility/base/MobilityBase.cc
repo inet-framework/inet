@@ -161,7 +161,7 @@ void MobilityBase::setInitialPosition()
         auto initialLatitude = deg(par("initialLatitude"));
         auto initialLongitude = deg(par("initialLongitude"));
         auto initialAltitude = m(par("initialAltitude"));
-        lastPosition = coordinateSystem->computePlaygroundCoordinate(GeoCoord(initialLatitude, initialLongitude, initialAltitude));
+        lastPosition = coordinateSystem->computeSceneCoordinate(GeoCoord(initialLatitude, initialLongitude, initialAltitude));
         filled = true;
     }
     if (!filled)

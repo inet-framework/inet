@@ -33,12 +33,12 @@ simple SceneOsgVisualizerBase extends SceneVisualizerBase
         double fieldOfView @unit(deg) = default(30deg); // camera field of view
         string clearColor = default(""); // scene background color, not set by default
 
-        bool displayPlayground = default(true); // display the playground, enabled by default
-        string playgroundColor = default("#A0E0A0"); // playground solid color if playground texture is not provided, gray by default
-        double playgroundOpacity = default(1.0); // playground opacity, opaque by default (not recommended to change)
-        string playgroundImage = default(""); // playground texture (repeated), no image by default
-        double playgroundImageSize @unit(m) = default(1m); // playground texture size
-        bool playgroundShading = default(true); // exponential shading for playground color, enabled by default
+        bool displayScene = default(true); // display the playground, enabled by default
+        string sceneColor = default("#A0E0A0"); // playground solid color if playground texture is not provided, gray by default
+        double sceneOpacity = default(1.0); // playground opacity, opaque by default (not recommended to change)
+        string sceneImage = default(""); // playground texture (repeated), no image by default
+        double sceneImageSize @unit(m) = default(1m); // playground texture size
+        bool sceneShading = default(true); // exponential shading for playground color, enabled by default
 
         @class(SceneOsgVisualizerBase);
 }

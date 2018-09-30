@@ -82,23 +82,23 @@ void SceneOsgVisualizerBase::initializeAxis(double axisLength)
     scene->addChild(inet::osg::createAutoTransform(inet::osg::createText("Z", Coord::ZERO, cFigure::BLACK), osg::AutoTransform::ROTATE_TO_SCREEN, true, Coord(0.0, 0.0, axisLength + spacing)));
 }
 
-void SceneOsgVisualizerBase::initializePlaygroundFloor()
+void SceneOsgVisualizerBase::initializeSceneFloor()
 {
-    Box playgroundBounds = getPlaygroundBounds();
-    if (playgroundBounds.getMin() != playgroundBounds.getMax()) {
-        const char *imageName = par("playgroundImage");
+    Box sceneBounds = getSceneBounds();
+    if (sceneBounds.getMin() != sceneBounds.getMax()) {
+        const char *imageName = par("sceneImage");
         osg::Image *image = *imageName ? inet::osg::createImageFromResource(imageName) : nullptr;
-        double imageSize = par("playgroundImageSize");
-        auto color = cFigure::Color(par("playgroundColor"));
-        double opacity = par("playgroundOpacity");
-        bool shading = par("playgroundShading");
-        auto playgroundFloor = createPlaygroundFloor(playgroundBounds.getMin(), playgroundBounds.getMax(), color, image, imageSize, opacity, shading);
+        double imageSize = par("sceneImageSize");
+        auto color = cFigure::Color(par("sceneColor"));
+        double opacity = par("sceneOpacity");
+        bool shading = par("sceneShading");
+        auto sceneFloor = createSceneFloor(sceneBounds.getMin(), sceneBounds.getMax(), color, image, imageSize, opacity, shading);
         auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizationTargetModule);
-        scene->addChild(playgroundFloor);
+        scene->addChild(sceneFloor);
     }
 }
 
-osg::Geode *SceneOsgVisualizerBase::createPlaygroundFloor(const Coord& min, const Coord& max, cFigure::Color& color, osg::Image *image, double imageSize, double opacity, bool shading) const
+osg::Geode *SceneOsgVisualizerBase::createSceneFloor(const Coord& min, const Coord& max, cFigure::Color& color, osg::Image *image, double imageSize, double opacity, bool shading) const
 {
     auto dx = max.x - min.x;
     auto dy = max.y - min.y;

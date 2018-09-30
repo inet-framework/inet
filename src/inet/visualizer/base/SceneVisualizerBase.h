@@ -33,7 +33,7 @@ class INET_API SceneVisualizerBase : public VisualizerBase
 
   protected:
     virtual void initialize(int stage) override;
-    virtual Box getPlaygroundBounds();
+    virtual Box getSceneBounds();
 };
 
 } // namespace visualizer

@@ -80,7 +80,7 @@ void PhysicalEnvironment::convertPoints(std::vector<Coord>& points)
     for (auto & point : points) {
         point -= center;
         if (coordinateSystem != nullptr)
-            point = coordinateSystem->computePlaygroundCoordinate(GeoCoord(deg(point.x) + originPosition.latitude, deg(point.y) + originPosition.longitude, m(0)));
+            point = coordinateSystem->computeSceneCoordinate(GeoCoord(deg(point.x) + originPosition.latitude, deg(point.y) + originPosition.longitude, m(0)));
     }
 }
 
@@ -373,7 +373,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
             else
                 throw cRuntimeError("Unknown position kind");
             if (coordinateSystem != nullptr) {
-                auto convertedPosition = coordinateSystem->computePlaygroundCoordinate(GeoCoord(deg(position.x), deg(position.y), m(0)));
+                auto convertedPosition = coordinateSystem->computeSceneCoordinate(GeoCoord(deg(position.x), deg(position.y), m(0)));
                 position.x = convertedPosition.x;
                 position.y = convertedPosition.y;
             }
