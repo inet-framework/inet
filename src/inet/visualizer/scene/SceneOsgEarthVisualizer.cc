@@ -54,7 +54,7 @@ void SceneOsgEarthVisualizer::initialize(int stage)
     else if (stage == INITSTAGE_LAST) {
         initializeLocator();
         if (par("displayPlayground"))
-            initializePlayground();
+            initializePlaygroundFloor();
         double axisLength = par("axisLength");
         if (!std::isnan(axisLength))
             initializeAxis(axisLength);

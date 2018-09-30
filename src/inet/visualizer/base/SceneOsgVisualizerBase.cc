@@ -82,7 +82,7 @@ void SceneOsgVisualizerBase::initializeAxis(double axisLength)
     scene->addChild(inet::osg::createAutoTransform(inet::osg::createText("Z", Coord::ZERO, cFigure::BLACK), osg::AutoTransform::ROTATE_TO_SCREEN, true, Coord(0.0, 0.0, axisLength + spacing)));
 }
 
-void SceneOsgVisualizerBase::initializePlayground()
+void SceneOsgVisualizerBase::initializePlaygroundFloor()
 {
     Box playgroundBounds = getPlaygroundBounds();
     if (playgroundBounds.getMin() != playgroundBounds.getMax()) {
@@ -92,13 +92,13 @@ void SceneOsgVisualizerBase::initializePlayground()
         auto color = cFigure::Color(par("playgroundColor"));
         double opacity = par("playgroundOpacity");
         bool shading = par("playgroundShading");
-        auto playground = createPlayground(playgroundBounds.getMin(), playgroundBounds.getMax(), color, image, imageSize, opacity, shading);
+        auto playgroundFloor = createPlaygroundFloor(playgroundBounds.getMin(), playgroundBounds.getMax(), color, image, imageSize, opacity, shading);
         auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizationTargetModule);
-        scene->addChild(playground);
+        scene->addChild(playgroundFloor);
     }
 }
 
-osg::Geode *SceneOsgVisualizerBase::createPlayground(const Coord& min, const Coord& max, cFigure::Color& color, osg::Image *image, double imageSize, double opacity, bool shading) const
+osg::Geode *SceneOsgVisualizerBase::createPlaygroundFloor(const Coord& min, const Coord& max, cFigure::Color& color, osg::Image *image, double imageSize, double opacity, bool shading) const
 {
     auto dx = max.x - min.x;
     auto dy = max.y - min.y;
