@@ -85,7 +85,7 @@ void EtherAppClient::handleMessage(cMessage *msg)
         if (msg->getKind() == START) {
             llcSocket.open(-1, localSAP);
 
-            destMACAddress = resolveDestMACAddress();
+            destMACAddress = resolveDestMacAddress();
             // if no dest address given, nothing to do
             if (destMACAddress.isUnspecified())
                 return;
@@ -149,15 +149,15 @@ void EtherAppClient::cancelNextPacket()
         cancelEvent(timerMsg);
 }
 
-MacAddress EtherAppClient::resolveDestMACAddress()
+MacAddress EtherAppClient::resolveDestMacAddress()
 {
-    MacAddress destMACAddress;
+    MacAddress destMacAddress;
     const char *destAddress = par("destAddress");
     if (destAddress[0]) {
-        if (!destMACAddress.tryParse(destAddress))
-            destMACAddress = L3AddressResolver().resolve(destAddress, L3AddressResolver::ADDR_MAC).toMac();
+        if (!destMacAddress.tryParse(destAddress))
+            destMacAddress = L3AddressResolver().resolve(destAddress, L3AddressResolver::ADDR_MAC).toMac();
     }
-    return destMACAddress;
+    return destMacAddress;
 }
 
 void EtherAppClient::sendPacket()

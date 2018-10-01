@@ -69,7 +69,7 @@ class INET_API EtherAppClient : public cSimpleModule, public ILifecycle, public 
     virtual void scheduleNextPacket(bool start);
     virtual void cancelNextPacket();
 
-    virtual MacAddress resolveDestMACAddress();
+    virtual MacAddress resolveDestMacAddress();
 
     virtual void sendPacket();
     virtual void socketDataArrived(LlcSocket*, Packet *msg) override;
