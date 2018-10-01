@@ -122,14 +122,14 @@ void MobilityBase::initialize(int stage)
     else if (stage == INITSTAGE_SINGLE_MOBILITY) {
         initializeOrientation();
         initializePosition();
+        checkPosition();
+        emitMobilityStateChangedSignal();
     }
 }
 
 void MobilityBase::initializePosition()
 {
     setInitialPosition();
-    checkPosition();
-    emitMobilityStateChangedSignal();
 }
 
 void MobilityBase::setInitialPosition()
