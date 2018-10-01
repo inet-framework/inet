@@ -30,9 +30,6 @@ simple StationaryMobility extends MobilityBase
         double initialX @unit(m) = default(uniform(this.constraintAreaMinX, this.constraintAreaMaxX));
         double initialY @unit(m) = default(uniform(this.constraintAreaMinY, this.constraintAreaMaxY));
         double initialZ @unit(m) = default(nanToZero(uniform(this.constraintAreaMinZ, this.constraintAreaMaxZ)));
-        double initialLatitude @unit(deg) = default(nan deg);
-        double initialLongitude @unit(deg) = default(nan deg);
-        double initialAltitude @unit(m) = default(0m);
         double initialHeading @unit(deg) = default(0deg);
         double initialElevation @unit(deg) = default(0deg);
         double initialBank @unit(deg) = default(0deg);
