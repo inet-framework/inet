@@ -23,6 +23,7 @@ simple VehicleMobility extends MovingMobilityBase
 {
     parameters:
         @class(VehicleMobility);
+        string coordinateSystemModule = default("coordinateSystem");
         string waypointFile;
         double waypointProximity @unit(m);
         double speed @unit(mps);
