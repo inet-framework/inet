@@ -80,7 +80,7 @@ nodes should be created or deleted and when, etc.
    -->
 
 The :ned:`ScenarioManager` module
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The :ned:`ScenarioManager` module executes an XML script. The XML script
 can be specified inline with the ``xml()`` function, or as an external
