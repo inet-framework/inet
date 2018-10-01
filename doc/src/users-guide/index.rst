@@ -44,5 +44,6 @@ recommend the *INET Developer's Guide*.)
    ch-lifecycle
    ch-collecting-results
    ch-visualization
+   ch-instrument-figures
    ch-authors-guide
    ch-history
