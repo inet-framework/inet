@@ -64,8 +64,6 @@ Using Instrument Figures
 Instrument figures visualize statistics derived from signals emitted by
 modules in the network. This statistic is declared in the NED file, with
 the ``@statistic`` property. The property's ``source`` attribute is an
-expression that specifies the source signal and mathematical operations
-to derive the statistic. The property's ``source`` attribute is an
 expression that specifies which signals to use from which modules, and
 the mathematical operations on it, to derive the statistic. The
 ``record`` attribute specifies where the values of the statistic is
