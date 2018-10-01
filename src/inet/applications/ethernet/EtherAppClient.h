@@ -73,7 +73,6 @@ class INET_API EtherAppClient : public cSimpleModule, public ILifecycle, public 
 
     virtual void sendPacket();
     virtual void socketDataArrived(LlcSocket*, Packet *msg) override;
-    virtual void registerDSAP(int dsap);
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
   public:

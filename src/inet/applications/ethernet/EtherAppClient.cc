@@ -160,18 +160,6 @@ MacAddress EtherAppClient::resolveDestMACAddress()
     return destMACAddress;
 }
 
-void EtherAppClient::registerDSAP(int dsap)
-{
-    EV_DEBUG << getFullPath() << " registering DSAP " << dsap << "\n";
-
-    auto *etherctrl = new LlcSocketOpenCommand();
-    etherctrl->setLocalSap(dsap);
-    cMessage *msg = new cMessage("register_DSAP", IEEE8022_LLC_C_OPEN);
-    msg->setControlInfo(etherctrl);
-
-    send(msg, "out");
-}
-
 void EtherAppClient::sendPacket()
 {
     seqNum++;
