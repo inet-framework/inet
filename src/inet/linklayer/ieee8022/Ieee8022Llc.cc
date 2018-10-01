@@ -17,10 +17,13 @@
 
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/Simsignals_m.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022Llc.h"
 #include "inet/linklayer/ieee8022/LlcSocketCommand_m.h"
@@ -29,6 +32,11 @@ namespace inet {
 
 Define_Module(Ieee8022Llc);
 
+Ieee8022Llc::~Ieee8022Llc()
+{
+    clearSockets();
+}
+
 void Ieee8022Llc::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
@@ -36,11 +44,15 @@ void Ieee8022Llc::initialize(int stage)
     }
     else if (stage == INITSTAGE_LINK_LAYER)
     {
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+
         if (par("registerProtocol").boolValue()) {    //FIXME //KUDGE should redesign place of EtherEncap and LLC modules
             //register service and protocol
             registerService(Protocol::ieee8022, gate("upperLayerIn"), nullptr);
             registerProtocol(Protocol::ieee8022, nullptr, gate("upperLayerOut"));
         }
+
         WATCH_PTRMAP(socketIdToSocketDescriptor);
         WATCH_PTRSET(upperProtocols);
     }
@@ -48,7 +60,12 @@ void Ieee8022Llc::initialize(int stage)
 
 void Ieee8022Llc::handleMessage(cMessage *msg)
 {
-    if (msg->arrivedOn("upperLayerIn")) {
+    if (!isOperational) {
+        EV_ERROR << "Message '" << msg << "' arrived when module status is down, dropped it." << endl;
+        delete msg;
+        return;
+    }
+    else if (msg->arrivedOn("upperLayerIn")) {
         // from upper layer
         EV_INFO << "Received " << msg << " from upper layer." << endl;
         if (msg->isPacket())
@@ -232,6 +249,53 @@ std::ostream& operator << (std::ostream& o, const Ieee8022Llc::SocketDescriptor&
 {
     o << "(id:" << t.socketId << ",lsap:" << t.localSap << ",rsap" << t.remoteSap << ")";
     return o;
+}
+
+bool Ieee8022Llc::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
+        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_LINK_LAYER) {
+            start();
+        }
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
+        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_LINK_LAYER) {
+            stop();
+        }
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
+        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH) {
+            stop();
+        }
+    }
+    else {
+        throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
+    }
+
+    return true;
+}
+
+void Ieee8022Llc::clearSockets()
+{
+    for (auto &elem: socketIdToSocketDescriptor) {
+        delete elem.second;
+        elem.second = nullptr;
+    }
+    socketIdToSocketDescriptor.clear();
+}
+
+void Ieee8022Llc::start()
+{
+    clearSockets();
+    isOperational = true;
+}
+
+void Ieee8022Llc::stop()
+{
+    clearSockets();
+    isOperational = false;
 }
 
 } // namespace inet

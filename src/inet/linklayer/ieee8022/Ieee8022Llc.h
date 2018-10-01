@@ -20,13 +20,14 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/Protocol.h"
+#include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
 
 namespace inet {
 
-class INET_API Ieee8022Llc : public cSimpleModule, public IProtocolRegistrationListener
+class INET_API Ieee8022Llc : public cSimpleModule, public IProtocolRegistrationListener, public ILifecycle
 {
 protected:
     struct SocketDescriptor
@@ -42,10 +43,12 @@ protected:
 
     friend std::ostream& operator << (std::ostream& o, const SocketDescriptor& t);
 
+    bool isOperational = false;    // for lifecycle
     std::set<const Protocol *> upperProtocols;    // where to send packets after decapsulation
     std::map<int, SocketDescriptor *> socketIdToSocketDescriptor;
 
   protected:
+    void clearSockets();
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
@@ -59,7 +62,13 @@ protected:
     virtual void handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive) override;
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive) override;
 
+    // for lifecycle:
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    virtual void start();
+    virtual void stop();
+
   public:
+    virtual ~Ieee8022Llc();
     static const Protocol *getProtocol(const Ptr<const Ieee8022LlcHeader>& header);
 };
 
