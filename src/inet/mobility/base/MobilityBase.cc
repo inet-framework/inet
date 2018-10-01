@@ -20,7 +20,6 @@
  * part of:     framework implementation developed by tkn
  **************************************************************************/
 
-#include "inet/common/geometry/common/GeographicCoordinateSystem.h"
 #include "inet/common/geometry/common/Quaternion.h"
 #include "inet/common/INETMath.h"
 #include "inet/mobility/base/MobilityBase.h"
@@ -137,7 +136,6 @@ void MobilityBase::setInitialPosition()
 {
     // reading the coordinates from omnetpp.ini makes predefined scenarios a lot easier
     bool filled = false;
-    auto coordinateSystem = getModuleFromPar<IGeographicCoordinateSystem>(par("coordinateSystemModule"), this, false);
     if (subjectModule != nullptr && hasPar("initFromDisplayString") && par("initFromDisplayString")) {
         const char *s = subjectModule->getDisplayString().getTagArg("p", 2);
         if (s && *s)
@@ -151,17 +149,10 @@ void MobilityBase::setInitialPosition()
         }
     }
     // not all mobility models have "initialX", "initialY" and "initialZ" parameters
-    else if (coordinateSystem == nullptr && hasPar("initialX") && hasPar("initialY") && hasPar("initialZ")) {
+    else if (hasPar("initialX") && hasPar("initialY") && hasPar("initialZ")) {
         lastPosition.x = par("initialX");
         lastPosition.y = par("initialY");
         lastPosition.z = par("initialZ");
-        filled = true;
-    }
-    else if (coordinateSystem != nullptr && hasPar("initialLatitude") && hasPar("initialLongitude") && hasPar("initialAltitude")) {
-        auto initialLatitude = deg(par("initialLatitude"));
-        auto initialLongitude = deg(par("initialLongitude"));
-        auto initialAltitude = m(par("initialAltitude"));
-        lastPosition = coordinateSystem->computeSceneCoordinate(GeoCoord(initialLatitude, initialLongitude, initialAltitude));
         filled = true;
     }
     if (!filled)
