@@ -79,6 +79,16 @@ class INET_API LlcSocket : public ISocket
      */
     virtual int getSocketId() const override { return socketId; }
 
+    /**
+     * Returns the interface Id.
+     */
+    virtual int getInterfaceId() const { return interfaceId; }
+
+    /**
+     * Returns the local Sap Id.
+     */
+    virtual int getLocalSap() const { return localSap; }
+
     void open(int interfaceId, int localSap);
     void send(Packet *packet);
     void close();
