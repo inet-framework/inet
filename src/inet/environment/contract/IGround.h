@@ -30,7 +30,7 @@ class INET_API IGround
     /**
      * Returns a point on the ground "underneath" (or above) the given position.
      * The projection might alter only the Z coordinate in simple cases, or it might
-     * alter all coordinates in case of a large playground on a globe model, or a playground
+     * alter all coordinates in case of a large scene on a globe model, or a scene
      * placed at an angle above the ground (using a IGeographicCoordinateSystem).
      */
     virtual Coord computeGroundProjection(const Coord &position) const = 0;

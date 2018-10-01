@@ -80,7 +80,7 @@ modules fall into the following broad categories:
    best matching route for datagrams.
 
 -  *Mobility modules* are responsible for moving around the network node
-   in the simulated playground. The mobility model is mandatory for
+   in the simulated scene. The mobility model is mandatory for
    wireless simulations even if the network node is stationary. The
    mobility module stores the location of the network node which is
    needed to compute wireless propagation and path loss. Different

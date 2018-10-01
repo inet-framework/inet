@@ -19,8 +19,8 @@ package inet.visualizer.base;
 
 //
 // This is a base module for scene visualizer simple modules. It determines the
-// bounds of the playground, that is the minimum area where the whole simulation
-// fits in. The playground encloses all physical objects and the constraint area
+// bounds of the scene, that is the minimum area where the whole simulation
+// fits in. The scene encloses all physical objects and the constraint area
 // of all mobile nodes. The visualizer also provides a timer which can be used
 // to periodically update the user interface independently of the underlying
 // simulation. The actual visualization of the scene is done in derived modules.
