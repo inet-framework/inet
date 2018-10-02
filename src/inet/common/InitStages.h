@@ -69,71 +69,71 @@ enum InitStages {
      *  - registering radios in the RadioMedium
      *  - initializing radio mode, transmission and reception states
      */
-    INITSTAGE_PHYSICAL_LAYER = 3,
+    INITSTAGE_PHYSICAL_LAYER = 2,
 
     /**
      * Initialization of physical layer neighbor cache.
      */
-    INITSTAGE_PHYSICAL_LAYER_NEIGHBOR_CACHE = 4,
+    INITSTAGE_PHYSICAL_LAYER_NEIGHBOR_CACHE = 3,
 
     /**
      * Initialization of network interfaces includes:
      *  - assigning MAC addresses
      *  - registering network interfaces in the InterfaceTable
      */
-    INITSTAGE_NETWORK_INTERFACE_CONFIGURATION = 4,
+    INITSTAGE_NETWORK_INTERFACE_CONFIGURATION = 2,
 
     /**
      * Initialization of link-layer protocols.
      */
-    INITSTAGE_LINK_LAYER = 5,
+    INITSTAGE_LINK_LAYER = 3,
 
     /**
      * Initialization of network configuration (e.g. Ipv4NetworkConfigurator) includes:
      *  - determining IP addresses and static routes
      *  - adding protocol-specific data (e.g. Ipv4InterfaceData) to InterfaceEntry
      */
-    INITSTAGE_NETWORK_CONFIGURATION = 6,
+    INITSTAGE_NETWORK_CONFIGURATION = 4,
 
     /**
      * Initialization of network addresses.
      */
-    INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT = 7,
+    INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT = 5,
 
     /**
      * Initialization of static routing.
      */
-    INITSTAGE_STATIC_ROUTING = 8,
+    INITSTAGE_STATIC_ROUTING = 6,
 
     /**
      * Initialization of network layer protocols.
      */
-    INITSTAGE_NETWORK_LAYER = 9,
+    INITSTAGE_NETWORK_LAYER = 7,
 
     /**
      * Initialization of transport-layer protocols.
      */
-    INITSTAGE_TRANSPORT_LAYER = 10,
+    INITSTAGE_TRANSPORT_LAYER = 8,
 
     /**
      * Initialization of routing protocols.
      */
-    INITSTAGE_ROUTING_PROTOCOLS = 11,
+    INITSTAGE_ROUTING_PROTOCOLS = 9,
 
     /**
      * Initialization of applications.
      */
-    INITSTAGE_APPLICATION_LAYER = 12,
+    INITSTAGE_APPLICATION_LAYER = 10,
 
     /**
      * Operations that no other initializations can depend on, e.g. display string updates.
      */
-    INITSTAGE_LAST = 13,
+    INITSTAGE_LAST = 11,
 
     /**
      * The number of initialization stages.
      */
-    NUM_INIT_STAGES = 14,
+    NUM_INIT_STAGES = 12,
 };
 
 } // namespace inet
