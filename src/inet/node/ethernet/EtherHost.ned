@@ -63,7 +63,7 @@ module EtherHost
             parameters:
                 @display("p=450,100");
         }
-        dispatcher: MessageDispatcher {
+        dp: MessageDispatcher {
             parameters:
                 @display("p=350,158;b=300,5,,,,1");
         }
@@ -77,13 +77,13 @@ module EtherHost
                 @display("p=350,336,row,150;q=txQueue");
         }
     connections:
-        cli.out --> dispatcher.in++;
-        dispatcher.out++ --> cli.in;
-        srv.out --> dispatcher.in++;
-        dispatcher.out++ --> srv.in;
+        cli.out --> dp.in++;
+        dp.out++ --> cli.in;
+        srv.out --> dp.in++;
+        dp.out++ --> srv.in;
 
-        dispatcher.out++ --> llc.upperLayerIn;
-        llc.upperLayerOut --> dispatcher.in++;
+        dp.out++ --> llc.upperLayerIn;
+        llc.upperLayerOut --> dp.in++;
 
         llc.lowerLayerOut --> eth.upperLayerIn;
         eth.upperLayerOut --> llc.lowerLayerIn;
