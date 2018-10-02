@@ -43,13 +43,15 @@ void ExtInterface::initialize(int stage)
     InterfaceEntry::initialize(stage);
     if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         const char *copyConfiguration = par("copyConfiguration");
+        if (strcmp("copyFromExt", copyConfiguration))
+            configureInterface();
+    }
+    else if (stage == INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT) {
+        const char *copyConfiguration = par("copyConfiguration");
         if (!strcmp("copyFromExt", copyConfiguration))
             copyInterfaceConfigurationFromExt();
-        else {
-            configureInterface();
-            if (!strcmp("copyToExt", copyConfiguration))
-                copyInterfaceConfigurationToExt();
-        }
+        else if (!strcmp("copyToExt", copyConfiguration))
+            copyInterfaceConfigurationToExt();
     }
 }
 
@@ -95,7 +97,7 @@ void ExtInterface::copyInterfaceConfigurationFromExt()
 
     close(fd);
 
-    Ipv4InterfaceData *interfaceData = addProtocolDataIfAbsent<Ipv4InterfaceData>();
+    auto interfaceData = getProtocolData<Ipv4InterfaceData>();
     setMacAddress(macAddress);
     setMtu(mtu);
     interfaceData->setIPAddress(Ipv4Address(ipv4Address));
