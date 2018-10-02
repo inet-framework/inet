@@ -22,7 +22,6 @@
 
 #include "inet/applications/ethernet/EtherApp_m.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
@@ -35,7 +34,7 @@ Define_Module(EtherAppServer);
 
 void EtherAppServer::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    OperationalBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         localSap = par("localSAP");
@@ -50,36 +49,29 @@ void EtherAppServer::initialize(int stage)
         WATCH(packetsSent);
         WATCH(packetsReceived);
     }
-    else if (stage == INITSTAGE_APPLICATION_LAYER) {
-        nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-
-        if (isNodeUp())
-            startApp();
-    }
 }
 
-bool EtherAppServer::isNodeUp()
-{
-    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
-}
-
-void EtherAppServer::startApp()
+bool EtherAppServer::handleNodeStart(IDoneCallback *doneCallback)
 {
     EV_INFO << "Starting application\n";
     registerDsap(localSap);
+    return true;
 }
 
-void EtherAppServer::stopApp()
+bool EtherAppServer::handleNodeShutdown(IDoneCallback *doneCallback)
 {
     EV_INFO << "Stop the application\n";
+    return true;
 }
 
-void EtherAppServer::handleMessage(cMessage *msg)
+void EtherAppServer::handleNodeCrash()
 {
-    if (!isNodeUp())
-        throw cRuntimeError("Application is not running");
-    else
-        llcSocket.processMessage(msg);
+    EV_INFO << "Crash the application\n";
+}
+
+void EtherAppServer::handleMessageWhenUp(cMessage *msg)
+{
+    llcSocket.processMessage(msg);
 }
 
 void EtherAppServer::socketDataArrived(Ieee8022LlcSocket*, Packet *msg)
@@ -135,26 +127,6 @@ void EtherAppServer::registerDsap(int dsap)
     EV_DEBUG << getFullPath() << " registering DSAP " << dsap << "\n";
 
     llcSocket.open(-1, dsap);
-}
-
-bool EtherAppServer::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-{
-    Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_APPLICATION_LAYER)
-            startApp();
-    }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_APPLICATION_LAYER)
-            stopApp();
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH)
-            stopApp();
-    }
-    else
-        throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
-    return true;
 }
 
 void EtherAppServer::finish()
