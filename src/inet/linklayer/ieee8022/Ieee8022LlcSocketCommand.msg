@@ -19,22 +19,22 @@ import inet.common.INETDefs;
 
 namespace inet;
 
-enum LlcSocketCommandCode
+enum Ieee8022LlcSocketCommandCode
 {
     IEEE8022_LLC_C_OPEN  = 1;
     IEEE8022_LLC_C_CLOSE = 2;
 }
 
-class LlcSocketCommand extends cObject
+class Ieee8022LlcSocketCommand extends cObject
 {
 }
 
-class LlcSocketOpenCommand extends LlcSocketCommand
+class Ieee8022LlcSocketOpenCommand extends Ieee8022LlcSocketCommand
 {
     int localSap;
 }
 
-class LlcSocketCloseCommand extends LlcSocketCommand
+class Ieee8022LlcSocketCloseCommand extends Ieee8022LlcSocketCommand
 {
 }
 
