@@ -654,7 +654,7 @@ OspfRoutingTableEntry *Router::lookup(Ipv4Address destination, std::vector<OspfR
     unsigned long dest = destination.getInt();
 
     for (auto entry : rTable) {
-        if (entry->getDestinationType() == OspfRoutingTableEntry::NETWORK_DESTINATION)
+        if (entry->getDestinationType() != OspfRoutingTableEntry::NETWORK_DESTINATION)
             continue;
         unsigned long entryAddress = entry->getDestination().getInt();
         unsigned long entryMask = entry->getNetmask().getInt();
@@ -699,29 +699,6 @@ void Router::rebuildRoutingTable()
     EV_INFO << "--> Rebuilding routing table:\n";
 
     for (uint32_t i = 0; i < areaCount; i++) {
-        // creating a 'OspfRoutingTableEntry' entry for each directly-connected routes.
-        for(int n = 0; n < ift->getNumInterfaces(); n++) {
-            InterfaceEntry *ifEntry = ift->getInterface(n);
-            if(ifEntry->isUp()) {
-                int ifId = ifEntry->getInterfaceId();
-                OspfInterface *ospfIfEntry = areas[i]->getInterface(ifId);
-                if(ospfIfEntry) {
-                    OspfRoutingTableEntry *entry = new OspfRoutingTableEntry(ift);
-
-                    Ipv4InterfaceData *ipv4data = ifEntry->findProtocolData<Ipv4InterfaceData>();
-                    entry->setDestination(ifEntry->getIpv4Address() & ipv4data->getNetmask());
-                    entry->setNetmask(ipv4data->getNetmask());
-                    entry->setLinkStateOrigin(areas[i]->findRouterLSA(areas[i]->getRouter()->getRouterID()));
-                    entry->setArea(areas[i]->getAreaID());
-                    entry->setPathType(OspfRoutingTableEntry::INTRAAREA);
-                    entry->setCost(ospfIfEntry->getOutputCost());
-                    entry->setDestinationType(OspfRoutingTableEntry::NETWORK_DESTINATION);
-                    entry->setInterface(ifEntry);
-
-                    newTable.push_back(entry);
-                }
-            }
-        }
         areas[i]->calculateShortestPathTree(newTable);
         if (areas[i]->getTransitCapability())
             hasTransitAreas = true;
@@ -1530,10 +1507,8 @@ bool Router::isDirectRoute(OspfRoutingTableEntry &entry)
     for(int i = 0; i < ift->getNumInterfaces(); i++) {
         Ipv4InterfaceData *ipv4data = ift->getInterface(i)->findProtocolData<Ipv4InterfaceData>();
         if(ipv4data) {
-            if(entry.getNetmask() == ipv4data->getNetmask()) {
-                if((entry.getDestination() & ipv4data->getNetmask()) == (ipv4data->getIPAddress() & ipv4data->getNetmask()))
-                    return true;
-            }
+            if((entry.getDestination() & ipv4data->getNetmask()) == (ipv4data->getIPAddress() & ipv4data->getNetmask()))
+                return true;
         }
     }
 
