@@ -146,6 +146,7 @@ void OspfConfigReader::getAreaListFromXML(const cXMLElement& routerNode, std::se
         if ((nodeName == "PointToPointInterface") ||
             (nodeName == "BroadcastInterface") ||
             (nodeName == "NBMAInterface") ||
+            (nodeName == "LoopbackInterface") ||
             (nodeName == "PointToMultiPointInterface"))
         {
             AreaId areaID = Ipv4Address(getStrAttrOrPar(*elem, "areaID"));
@@ -567,7 +568,7 @@ std::vector<InterfaceEntry *> OspfConfigReader::getInterfaceByXMLAttributesOf(co
     const char *toward = getMandatoryFilledAttribute(ifConfig, "toward");
     cModule *destnode = getSimulation()->getSystemModule()->getModuleByPath(toward);
     if (!destnode)
-        throw cRuntimeError("toward module `%s' not found at %s", toward, ifConfig.getSourceLocation());
+        throw cRuntimeError("'ifName' or 'toward' module `%s' not found at %s", toward, ifConfig.getSourceLocation());
 
     cModule *host = ift->getHostModule();
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
