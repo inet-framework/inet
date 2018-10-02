@@ -91,9 +91,9 @@ void EtherTrafGen::handleMessage(cMessage *msg)
     if (msg->isSelfMessage()) {
         if (msg->getKind() == START) {
             llcSocket.open(-1, ssap);
-            destMACAddress = resolveDestMACAddress();
+            destMacAddress = resolveDestMacAddress();
             // if no dest address given, nothing to do
-            if (destMACAddress.isUnspecified())
+            if (destMacAddress.isUnspecified())
                 return;
         }
         sendBurstPackets();
@@ -153,15 +153,15 @@ void EtherTrafGen::cancelNextPacket()
     cancelEvent(timerMsg);
 }
 
-MacAddress EtherTrafGen::resolveDestMACAddress()
+MacAddress EtherTrafGen::resolveDestMacAddress()
 {
-    MacAddress destMACAddress;
+    MacAddress destMacAddress;
     const char *destAddress = par("destAddress");
     if (destAddress[0]) {
-        if (!destMACAddress.tryParse(destAddress))
-            destMACAddress = L3AddressResolver().resolve(destAddress, L3AddressResolver::ADDR_MAC).toMac();
+        if (!destMacAddress.tryParse(destAddress))
+            destMacAddress = L3AddressResolver().resolve(destAddress, L3AddressResolver::ADDR_MAC).toMac();
     }
-    return destMACAddress;
+    return destMacAddress;
 }
 
 void EtherTrafGen::sendBurstPackets()
@@ -179,12 +179,12 @@ void EtherTrafGen::sendBurstPackets()
         datapacket->insertAtBack(payload);
         datapacket->removeTagIfPresent<PacketProtocolTag>();
         datapacket->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8022);
-        datapacket->addTagIfAbsent<MacAddressReq>()->setDestAddress(destMACAddress);
+        datapacket->addTagIfAbsent<MacAddressReq>()->setDestAddress(destMacAddress);
         auto sapTag = datapacket->addTagIfAbsent<Ieee802SapReq>();
         sapTag->setSsap(ssap);
         sapTag->setDsap(dsap);
 
-        EV_INFO << "Send packet `" << msgname << "' dest=" << destMACAddress << " length=" << len << "B ssap/dsap=" << ssap << "/" << dsap << "\n";
+        EV_INFO << "Send packet `" << msgname << "' dest=" << destMacAddress << " length=" << len << "B ssap/dsap=" << ssap << "/" << dsap << "\n";
         emit(packetSentSignal, datapacket);
         send(datapacket, "out");
         packetsSent++;
