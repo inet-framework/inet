@@ -42,7 +42,6 @@ void ExtInterface::initialize(int stage)
 {
     InterfaceEntry::initialize(stage);
     if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
-        registerInterface();
         const char *copyConfiguration = par("copyConfiguration");
         if (!strcmp("copyFromExt", copyConfiguration))
             copyInterfaceConfigurationFromExt();
@@ -64,14 +63,6 @@ void ExtInterface::configureInterface()
     setBroadcast(true);      //TODO
     setMulticast(true);      //TODO
     setPointToPoint(true);   //TODO
-}
-
-void ExtInterface::registerInterface()
-{
-    IInterfaceTable *interfaceTable = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-    if (interfaceTable)
-        interfaceTable->addInterface(this);
-    inet::registerInterface(*this, gate("upperLayerIn"), gate("upperLayerOut"));
 }
 
 void ExtInterface::copyInterfaceConfigurationFromExt()

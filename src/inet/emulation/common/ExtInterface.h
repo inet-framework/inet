@@ -26,7 +26,6 @@ namespace inet {
 class INET_API ExtInterface : public InterfaceEntry
 {
   protected:
-    virtual void registerInterface();
     virtual void configureInterface();
     virtual void copyInterfaceConfigurationFromExt();
     virtual void copyInterfaceConfigurationToExt();
