@@ -23,7 +23,7 @@ import inet.linklayer.contract.IEtherMac;
 //
 // Ethernet MAC layer. MAC performs transmission and reception of frames.
 // See the ~IEtherMac for the Ethernet MAC layer general informations.
-// Doesn't do encapsulation/decapsulation; see ~EtherLlc and ~EtherEncap for
+// Doesn't do encapsulation/decapsulation; see ~Ieee8022Llc and ~EtherEncap for
 // that.
 //
 // Supported variations:
@@ -61,7 +61,7 @@ import inet.linklayer.contract.IEtherMac;
 //   broadcast frames are passed up.
 //
 // The module does not perform encapsulation or decapsulation of frames --
-// this is done by higher layers (~EtherLlc or ~EtherEncap).
+// this is done by higher layers (~Ieee8022Llc and ~EtherEncap).
 //
 // When a frame is received from the higher layers, it must be an ~EtherFrame,
 // and with all protocol fields filled out
@@ -102,7 +102,7 @@ import inet.linklayer.contract.IEtherMac;
 //
 // Please see <a href="physical.html">Messaging on the physical layer</a>.
 //
-// @see ~EtherMacFullDuplex, ~EthernetInterface, ~IOutputQueue, ~EtherEncap, ~EtherLlc
+// @see ~EtherMacFullDuplex, ~EthernetInterface, ~IOutputQueue, ~EtherEncap, ~Ieee8022Llc
 // @see ~EtherFrame, ~EthernetIIFrame, ~EtherFrameWithLlc, ~Ieee802Ctrl
 //
 simple EtherMac like IEtherMac
@@ -148,8 +148,8 @@ simple EtherMac like IEtherMac
         @statistic[backoffSlotsGenerated](title="backoff"; record=count,vector; interpolationmode=none);
 
     gates:
-        input upperLayerIn @labels(EtherFrame);    // to ~EtherLlc or ~EtherEncap or ~IMacRelayUnit
-        output upperLayerOut @labels(EtherFrame);  // to ~EtherLlc or ~EtherEncap or ~IMacRelayUnit
+        input upperLayerIn @labels(EtherFrame);    // to ~EtherEncap or ~IMacRelayUnit
+        output upperLayerOut @labels(EtherFrame);  // to ~EtherEncap or ~IMacRelayUnit
         inout phys @labels(EtherFrame); // to physical layer or the network
 }
 

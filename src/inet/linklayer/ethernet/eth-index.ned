@@ -21,7 +21,7 @@
 //
 // The Ethernet model contains MAC models (a full-featured ~EtherMac,
 // and a simplified, duplex-only ~EtherMacFullDuplex);
-// encapsulation/decapsulation models (~EtherEncap, ~EtherLlc);
+// encapsulation/decapsulation models (~EtherEncap);
 // bus and hub models ((~EtherBus for modelling coaxial cable, and ~EtherHub);
 // a switch model (~EtherSwitch) with various relay units (~IMacRelayUnit,
 // ~MacRelayUnit and ~Ieee8021dRelay); some traffic generators
@@ -72,7 +72,7 @@
 // <h3>MAC and higher layers</h3>
 //
 // MAC and LLC are implemented as separate modules (~EtherMac and
-// ~EtherLlc/~EtherEncap) because encapsulation/decapsulation functionality
+// ~EtherEncap) because encapsulation/decapsulation functionality
 // is not always needed. (Switches don't do encapsulation/decapsulation.)
 // In switches, ~EtherMac is used with ~IMacRelayUnit.
 //
@@ -177,7 +177,7 @@
 // (For one thing, it doesn't have an input buffer that can overflow.)
 //
 // ~EtherMac, however, transmits PAUSE frames received by higher layers,
-// and ~EtherLlc and ~EtherEncap can be instructed by a command to send
+// and ~EtherEncap can be instructed by a command to send
 // a PAUSE frame to MAC.
 //
 // ~IMacRelayUnit types (and thus ~EtherSwitch) currently implement a very simple

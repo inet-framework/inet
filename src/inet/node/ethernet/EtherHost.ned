@@ -22,7 +22,7 @@ import inet.applications.ethernet.EtherAppServer;
 import inet.common.MessageDispatcher;
 import inet.common.lifecycle.NodeStatus;
 import inet.linklayer.contract.IEthernetInterface;
-import inet.linklayer.ethernet.EtherLlc;
+import inet.linklayer.ethernet.EtherEncap;
 import inet.networklayer.common.InterfaceTable;
 
 
@@ -67,7 +67,7 @@ module EtherHost
             parameters:
                 @display("p=350,158;b=300,5,,,,1");
         }
-        llc: EtherLlc {
+        llc: EtherEncap {
             parameters:
                 registerProtocol = true;
                 @display("p=350,240");

@@ -38,7 +38,7 @@ import inet.linklayer.contract.IEtherMac;
 // and therefore more complicated Ethernet MAC model.)
 //
 // ~EtherMacFullDuplex performs transmission and reception of frames.
-// It does not do encapsulation/decapsulation; see ~EtherLlc and ~EtherEncap
+// It does not do encapsulation/decapsulation; see ~Ieee8022Llc and ~EtherEncap
 // for that.
 //
 // Supported variations:
@@ -71,7 +71,7 @@ import inet.linklayer.contract.IEtherMac;
 //   broadcast frames are passed up.
 //
 // The module does not perform encapsulation or decapsulation of frames --
-// this is done by higher layers (~EtherLlc or ~EtherEncap).
+// this is done by higher layers (~EtherEncap).
 //
 // When a frame is received from the higher layers, it must be an ~EtherFrame,
 // and with all protocol fields filled out
@@ -111,7 +111,7 @@ import inet.linklayer.contract.IEtherMac;
 //
 // Please see <a href="physical.html">Messaging on the physical layer</a>.
 //
-// @see ~EtherMac, ~EthernetInterface, ~IOutputQueue, ~EtherEncap, ~EtherLlc
+// @see ~EtherMac, ~EthernetInterface, ~IOutputQueue, ~EtherEncap, ~Ieee8022Llc
 // @see ~EtherFrame, ~EthernetIIFrame, ~EtherFrameWithLlc, ~Ieee802Ctrl
 //
 simple EtherMacFullDuplex like IEtherMac
@@ -156,8 +156,8 @@ simple EtherMacFullDuplex like IEtherMac
         @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
 
     gates:
-        input upperLayerIn @labels(EtherFrame);    // to ~EtherLlc or ~EtherEncap or ~IMacRelayUnit
-        output upperLayerOut @labels(EtherFrame);  // to ~EtherLlc or ~EtherEncap or ~IMacRelayUnit
+        input upperLayerIn @labels(EtherFrame);    // to ~EtherEncap or ~IMacRelayUnit
+        output upperLayerOut @labels(EtherFrame);  // to ~EtherEncap or ~IMacRelayUnit
         inout phys @labels(EtherFrame);            // to physical layer or the network
 }
 
