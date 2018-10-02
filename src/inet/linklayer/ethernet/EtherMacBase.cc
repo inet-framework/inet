@@ -163,7 +163,6 @@ EtherMacBase::~EtherMacBase()
 void EtherMacBase::initialize(int stage)
 {
     MacBase::initialize(stage);
-
     if (stage == INITSTAGE_LOCAL) {
         physInGate = gate("phys$i");
         physOutGate = gate("phys$o");
@@ -194,9 +193,8 @@ void EtherMacBase::initialize(int stage)
 
         subscribe(POST_MODEL_CHANGE, this);
     }
-    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
+    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION)
         registerInterface();
-    }
     else if (stage == INITSTAGE_LINK_LAYER) {
         initializeQueueModule();
         readChannelParameters(true);

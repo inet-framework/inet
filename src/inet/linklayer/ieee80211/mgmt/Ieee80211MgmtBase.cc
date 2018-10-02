@@ -35,6 +35,8 @@ void Ieee80211MgmtBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         mib = getModuleFromPar<Ieee80211Mib>(par("mibModule"), this);
+        interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        myIface = getContainingNicModule(this);
         numMgmtFramesReceived = 0;
         numMgmtFramesDropped = 0;
         WATCH(numMgmtFramesReceived);
@@ -44,11 +46,6 @@ void Ieee80211MgmtBase::initialize(int stage)
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-    }
-    else if (stage == INITSTAGE_LINK_LAYER) {
-        // obtain our address from MAC
-        interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        myIface = interfaceTable->getInterfaceByName(utils::stripnonalnum(findModuleUnderContainingNode(this)->getFullName()).c_str());
     }
 }
 

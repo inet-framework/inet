@@ -39,7 +39,6 @@ Define_Module(XMac);
 void XMac::initialize(int stage)
 {
     MacProtocolBase::initialize(stage);
-
     if (stage == INITSTAGE_LOCAL) {
         queueLength   = par("queueLength");
         animation     = par("animation");
@@ -70,9 +69,8 @@ void XMac::initialize(int stage)
         macState = INIT;
         WATCH(macState);
     }
-    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
+    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION)
         registerInterface();
-    }
     else if (stage == INITSTAGE_LINK_LAYER) {
         cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
         radioModule->subscribe(IRadio::radioModeChangedSignal, this);

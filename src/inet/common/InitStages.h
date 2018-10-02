@@ -55,7 +55,7 @@ enum InitStages {
     INITSTAGE_GROUP_MOBILITY = 1,
 
     /**
-     * Initialization of signle mobility modules: calculating the initial position and orientation.
+     * Initialization of single mobility modules: calculating the initial position and orientation.
      */
     INITSTAGE_SINGLE_MOBILITY = 2,
 

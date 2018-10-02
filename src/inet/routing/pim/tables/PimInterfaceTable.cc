@@ -63,6 +63,7 @@ void PimInterfaceTable::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         WATCH_VECTOR(pimInterfaces);
     }
+    // TODO: INITSTAGE
     else if (stage == INITSTAGE_LINK_LAYER) {
         configureInterfaces(par("pimConfig"));
 

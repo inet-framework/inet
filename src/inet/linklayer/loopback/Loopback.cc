@@ -42,16 +42,13 @@ Loopback::~Loopback()
 void Loopback::initialize(int stage)
 {
     MacBase::initialize(stage);
-
-    // all initialization is done in the first stage
     if (stage == INITSTAGE_LOCAL) {
         numSent = numRcvdOK = 0;
         WATCH(numSent);
         WATCH(numRcvdOK);
     }
-    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
+    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION)
         registerInterface();
-    }
 }
 
 void Loopback::configureInterfaceEntry()
