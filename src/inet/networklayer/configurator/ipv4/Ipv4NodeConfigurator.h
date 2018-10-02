@@ -52,9 +52,9 @@ class INET_API Ipv4NodeConfigurator : public cSimpleModule, public ILifecycle
     virtual void handleMessage(cMessage *msg) override { throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()"); }
     virtual void initialize(int stage) override;
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
-    virtual void prepareNode();
+    virtual void prepareAllInterfaces();
     virtual void prepareInterface(InterfaceEntry *interfaceEntry);
-    virtual void configureInterface();
+    virtual void configureAllInterfaces();
     virtual void configureRoutingTable();
 };
 
