@@ -297,21 +297,6 @@ std::vector<Ipv4Address> Ipv4RoutingTable::gatherAddresses() const
 
 //---
 
-void Ipv4RoutingTable::configureInterfaceForIpv4(InterfaceEntry *ie)
-{
-    Ipv4InterfaceData *d = ie->addProtocolData<Ipv4InterfaceData>();
-
-    // metric: some hints: OSPF cost (2e9/bps value), MS KB article Q299540, ...
-    d->setMetric((int)ceil(2e9 / ie->getDatarate()));    // use OSPF cost as default
-
-    // join "224.0.0.1" and "224.0.0.2" (if router) multicast groups automatically
-    if (ie->isMulticast()) {
-        d->joinMulticastGroup(Ipv4Address::ALL_HOSTS_MCAST);
-        if (forwarding)
-            d->joinMulticastGroup(Ipv4Address::ALL_ROUTERS_MCAST);
-    }
-}
-
 InterfaceEntry *Ipv4RoutingTable::getInterfaceByAddress(const Ipv4Address& addr) const
 {
     Enter_Method("getInterfaceByAddress(%u.%u.%u.%u)", addr.getDByte(0), addr.getDByte(1), addr.getDByte(2), addr.getDByte(3));    // note: str().c_str() too slow here
@@ -324,19 +309,6 @@ InterfaceEntry *Ipv4RoutingTable::getInterfaceByAddress(const Ipv4Address& addr)
             return ie;
     }
     return nullptr;
-}
-
-void Ipv4RoutingTable::configureLoopbackForIpv4()
-{
-    InterfaceEntry *ie = ift->getFirstLoopbackInterface();
-    if (ie) {
-        // add Ipv4 info. Set 127.0.0.1/8 as address by default --
-        // we may reconfigure later it to be the routerId
-        Ipv4InterfaceData *d = ie->addProtocolData<Ipv4InterfaceData>();
-        d->setIPAddress(Ipv4Address::LOOPBACK_ADDRESS);
-        d->setNetmask(Ipv4Address::LOOPBACK_NETMASK);
-        d->setMetric(1);
-    }
 }
 
 //---
