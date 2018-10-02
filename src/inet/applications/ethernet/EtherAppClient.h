@@ -19,7 +19,8 @@
 #define __INET_ETHERAPPCLIENT_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/OperationalBase.h"
+#include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/MacAddress.h"
@@ -31,7 +32,7 @@ namespace inet {
 /**
  * Simple traffic generator for the Ethernet model.
  */
-class INET_API EtherAppClient : public cSimpleModule, public ILifecycle, public Ieee8022LlcSocket::ICallback
+class INET_API EtherAppClient : public OperationalBase, public Ieee8022LlcSocket::ICallback
 {
   protected:
     enum Kinds { START = 100, NEXT };
@@ -45,7 +46,6 @@ class INET_API EtherAppClient : public cSimpleModule, public ILifecycle, public 
     int localSap = -1;
     int remoteSap = -1;
     MacAddress destMacAddress;
-    NodeStatus *nodeStatus = nullptr;
 
     // self messages
     cMessage *timerMsg = nullptr;
@@ -61,10 +61,9 @@ class INET_API EtherAppClient : public cSimpleModule, public ILifecycle, public 
   protected:
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void finish() override;
 
-    virtual bool isNodeUp();
     virtual bool isGenerator();
     virtual void scheduleNextPacket(bool start);
     virtual void cancelNextPacket();
@@ -73,7 +72,13 @@ class INET_API EtherAppClient : public cSimpleModule, public ILifecycle, public 
 
     virtual void sendPacket();
     virtual void socketDataArrived(Ieee8022LlcSocket*, Packet *msg) override;
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+
+    virtual bool handleNodeStart(IDoneCallback *doneCallback);
+    virtual bool handleNodeShutdown(IDoneCallback *doneCallback);
+    virtual void handleNodeCrash();
+    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_APPLICATION_LAYER; }
+    virtual bool isNodeStartStage(int stage) override { return stage == NodeStartOperation::STAGE_APPLICATION_LAYER; }
+    virtual bool isNodeShutdownStage(int stage) override { return stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER; }
 
   public:
     EtherAppClient() {}

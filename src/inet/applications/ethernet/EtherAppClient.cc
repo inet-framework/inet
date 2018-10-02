@@ -23,7 +23,6 @@
 
 #include "inet/applications/ethernet/EtherApp_m.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
@@ -41,7 +40,10 @@ EtherAppClient::~EtherAppClient()
 
 void EtherAppClient::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    if (stage == INITSTAGE_APPLICATION_LAYER && isGenerator())
+        timerMsg = new cMessage("generateNextPacket");
+
+    OperationalBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         reqLength = &par("reqLength");
@@ -66,21 +68,10 @@ void EtherAppClient::initialize(int stage)
         llcSocket.setOutputGate(gate("out"));
         llcSocket.setCallback(this);
     }
-    else if (stage == INITSTAGE_APPLICATION_LAYER) {
-        if (isGenerator())
-            timerMsg = new cMessage("generateNextPacket");
-
-        nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-
-        if (isNodeUp() && isGenerator())
-            scheduleNextPacket(true);
-    }
 }
 
-void EtherAppClient::handleMessage(cMessage *msg)
+void EtherAppClient::handleMessageWhenUp(cMessage *msg)
 {
-    if (!isNodeUp())
-        throw cRuntimeError("Application is not running");
     if (msg->isSelfMessage()) {
         if (msg->getKind() == START) {
             EV_DEBUG << getFullPath() << " registering DSAP " << localSap << "\n";
@@ -98,29 +89,22 @@ void EtherAppClient::handleMessage(cMessage *msg)
         llcSocket.processMessage(msg);
 }
 
-bool EtherAppClient::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool EtherAppClient::handleNodeStart(IDoneCallback *doneCallback)
 {
-    Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_APPLICATION_LAYER && isGenerator())
-            scheduleNextPacket(true);
-    }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_APPLICATION_LAYER)
-            cancelNextPacket();
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH)
-            cancelNextPacket();
-    }
-    else
-        throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    if (isGenerator())
+        scheduleNextPacket(true);
     return true;
 }
 
-bool EtherAppClient::isNodeUp()
+bool EtherAppClient::handleNodeShutdown(IDoneCallback *doneCallback)
 {
-    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
+    cancelNextPacket();
+    return true;
+}
+
+void EtherAppClient::handleNodeCrash()
+{
+    cancelNextPacket();
 }
 
 bool EtherAppClient::isGenerator()
