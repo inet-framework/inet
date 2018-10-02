@@ -20,14 +20,14 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/Protocol.h"
-#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
 
 namespace inet {
 
-class INET_API Ieee8022Llc : public cSimpleModule, public IProtocolRegistrationListener, public ILifecycle
+class INET_API Ieee8022Llc : public OperationalBase, public IProtocolRegistrationListener
 {
 protected:
     struct SocketDescriptor
@@ -51,7 +51,7 @@ protected:
     void clearSockets();
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *message) override;
+    virtual void handleMessageWhenUp(cMessage *message) override;
 
     virtual void encapsulate(Packet *frame);
     virtual void decapsulate(Packet *frame);
@@ -63,9 +63,12 @@ protected:
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive) override;
 
     // for lifecycle:
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
-    virtual void start();
-    virtual void stop();
+    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_LINK_LAYER; }
+    virtual bool isNodeStartStage(int stage) override { return stage == INITSTAGE_LINK_LAYER; }
+    virtual bool isNodeShutdownStage(int stage) override { return stage == INITSTAGE_LINK_LAYER; }
+    virtual bool handleNodeStart(IDoneCallback *) override;
+    virtual bool handleNodeShutdown(IDoneCallback *) override;
+    virtual void handleNodeCrash() override;
 
   public:
     virtual ~Ieee8022Llc();

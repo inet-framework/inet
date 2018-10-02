@@ -39,14 +39,12 @@ Ieee8022Llc::~Ieee8022Llc()
 
 void Ieee8022Llc::initialize(int stage)
 {
+    OperationalBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         // TODO: parameterization for llc or snap?
     }
     else if (stage == INITSTAGE_LINK_LAYER)
     {
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-
         if (par("registerProtocol").boolValue()) {    //FIXME //KUDGE should redesign place of EtherEncap and LLC modules
             //register service and protocol
             registerService(Protocol::ieee8022, gate("upperLayerIn"), nullptr);
@@ -58,14 +56,9 @@ void Ieee8022Llc::initialize(int stage)
     }
 }
 
-void Ieee8022Llc::handleMessage(cMessage *msg)
+void Ieee8022Llc::handleMessageWhenUp(cMessage *msg)
 {
-    if (!isOperational) {
-        EV_ERROR << "Message '" << msg << "' arrived when module status is down, dropped it." << endl;
-        delete msg;
-        return;
-    }
-    else if (msg->arrivedOn("upperLayerIn")) {
+    if (msg->arrivedOn("upperLayerIn")) {
         // from upper layer
         EV_INFO << "Received " << msg << " from upper layer." << endl;
         if (msg->isPacket())
@@ -251,32 +244,6 @@ std::ostream& operator << (std::ostream& o, const Ieee8022Llc::SocketDescriptor&
     return o;
 }
 
-bool Ieee8022Llc::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-{
-    Enter_Method_Silent();
-
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_LINK_LAYER) {
-            start();
-        }
-    }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_LINK_LAYER) {
-            stop();
-        }
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH) {
-            stop();
-        }
-    }
-    else {
-        throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
-    }
-
-    return true;
-}
-
 void Ieee8022Llc::clearSockets()
 {
     for (auto &elem: socketIdToSocketDescriptor) {
@@ -286,16 +253,21 @@ void Ieee8022Llc::clearSockets()
     socketIdToSocketDescriptor.clear();
 }
 
-void Ieee8022Llc::start()
+bool Ieee8022Llc::handleNodeStart(IDoneCallback *)
 {
     clearSockets();
-    isOperational = true;
+    return true;
 }
 
-void Ieee8022Llc::stop()
+bool Ieee8022Llc::handleNodeShutdown(IDoneCallback *)
 {
     clearSockets();
-    isOperational = false;
+    return true;
+}
+
+void Ieee8022Llc::handleNodeCrash()
+{
+    clearSockets();
 }
 
 } // namespace inet
