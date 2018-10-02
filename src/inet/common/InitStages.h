@@ -50,9 +50,14 @@ enum InitStages {
     INITSTAGE_PHYSICAL_OBJECT_CACHE = 2,
 
     /**
-     * Initialization of mobility modules: calculating the initial position and orientation.
+     * Initialization of group mobility modules: calculating the initial position and orientation.
      */
-    INITSTAGE_MOBILITY = 3,
+    INITSTAGE_GROUP_MOBILITY = 3,
+
+    /**
+     * Initialization of signle mobility modules: calculating the initial position and orientation.
+     */
+    INITSTAGE_SINGLE_MOBILITY = 4,
 
     /**
      * Initialization of the power model: energy storage, energy consumer, energy generator, and energy management modules.

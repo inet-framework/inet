@@ -120,7 +120,7 @@ void MobilityBase::initialize(int stage)
         WATCH(lastPosition);
         WATCH(lastOrientation);
     }
-    else if (stage == INITSTAGE_MOBILITY) {
+    else if (stage == INITSTAGE_SINGLE_MOBILITY) {
         initializeOrientation();
         initializePosition();
     }
