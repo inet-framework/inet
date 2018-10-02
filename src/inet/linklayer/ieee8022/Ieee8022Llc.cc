@@ -26,7 +26,7 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022Llc.h"
-#include "inet/linklayer/ieee8022/LlcSocketCommand_m.h"
+#include "inet/linklayer/ieee8022/Ieee8022LlcSocketCommand_m.h"
 
 namespace inet {
 
@@ -92,13 +92,13 @@ void Ieee8022Llc::processCommandFromHigherLayer(Request *request)
     auto ctrl = request->getControlInfo();
     if (ctrl == nullptr)
         throw cRuntimeError("Request '%s' arrived without controlinfo", request->getName());
-    else if (auto command = dynamic_cast<LlcSocketOpenCommand *>(ctrl)) {
+    else if (auto command = dynamic_cast<Ieee8022LlcSocketOpenCommand *>(ctrl)) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
         SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getLocalSap());
         socketIdToSocketDescriptor[socketId] = descriptor;
         delete request;
     }
-    else if (dynamic_cast<LlcSocketCloseCommand *>(ctrl) != nullptr) {
+    else if (dynamic_cast<Ieee8022LlcSocketCloseCommand *>(ctrl) != nullptr) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketDescriptor.find(socketId);
         if (it != socketIdToSocketDescriptor.end()) {

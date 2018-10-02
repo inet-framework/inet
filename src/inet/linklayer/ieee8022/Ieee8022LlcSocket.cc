@@ -22,7 +22,7 @@
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcSocket.h"
-#include "inet/linklayer/ieee8022/LlcSocketCommand_m.h"
+#include "inet/linklayer/ieee8022/Ieee8022LlcSocketCommand_m.h"
 
 namespace inet {
 
@@ -60,7 +60,7 @@ void Ieee8022LlcSocket::open(int interfaceId, int localSap)
     this->interfaceId = interfaceId;
     this->localSap = localSap;
     auto request = new Request("LLC_OPEN", IEEE8022_LLC_C_OPEN);
-    LlcSocketOpenCommand *command = new LlcSocketOpenCommand();
+    Ieee8022LlcSocketOpenCommand *command = new Ieee8022LlcSocketOpenCommand();
     command->setLocalSap(localSap);
     request->setControlInfo(command);
     isOpen = true;
@@ -77,7 +77,7 @@ void Ieee8022LlcSocket::send(Packet *packet)
 void Ieee8022LlcSocket::close()
 {
     auto request = new Request("LLC_CLOSE", IEEE8022_LLC_C_CLOSE);
-    LlcSocketCloseCommand *command = new LlcSocketCloseCommand();
+    Ieee8022LlcSocketCloseCommand *command = new Ieee8022LlcSocketCloseCommand();
     request->setControlInfo(command);
     sendToLlc(request);
     interfaceId = -1;

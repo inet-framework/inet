@@ -18,13 +18,13 @@
 #ifndef __INET_ETHERTRAFGEN_H
 #define __INET_ETHERTRAFGEN_H
 
-#include "inet/linklayer/ieee8022/Ieee8022LlcSocket.h"
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/linklayer/common/MacAddress.h"
-#include "inet/linklayer/ieee8022/LlcSocketCommand_m.h"
+#include "inet/linklayer/ieee8022/Ieee8022LlcSocket.h"
+#include "inet/linklayer/ieee8022/Ieee8022LlcSocketCommand_m.h"
 
 namespace inet {
 
