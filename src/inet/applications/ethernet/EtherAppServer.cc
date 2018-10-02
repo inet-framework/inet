@@ -82,7 +82,7 @@ void EtherAppServer::handleMessage(cMessage *msg)
         llcSocket.processMessage(msg);
 }
 
-void EtherAppServer::socketDataArrived(LlcSocket*, Packet *msg)
+void EtherAppServer::socketDataArrived(Ieee8022LlcSocket*, Packet *msg)
 {
     EV_INFO << "Received packet `" << msg->getName() << "'\n";
     const auto& req = msg->peekAtFront<EtherAppReq>();

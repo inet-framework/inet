@@ -23,7 +23,7 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/MacAddress.h"
-#include "inet/linklayer/ieee8022/LlcSocket.h"
+#include "inet/linklayer/ieee8022/Ieee8022LlcSocket.h"
 #include "inet/linklayer/ieee8022/LlcSocketCommand_m.h"
 
 namespace inet {
@@ -31,7 +31,7 @@ namespace inet {
 /**
  * Simple traffic generator for the Ethernet model.
  */
-class INET_API EtherAppClient : public cSimpleModule, public ILifecycle, public LlcSocket::ICallback
+class INET_API EtherAppClient : public cSimpleModule, public ILifecycle, public Ieee8022LlcSocket::ICallback
 {
   protected:
     enum Kinds { START = 100, NEXT };
@@ -52,7 +52,7 @@ class INET_API EtherAppClient : public cSimpleModule, public ILifecycle, public 
     simtime_t startTime;
     simtime_t stopTime;
 
-    LlcSocket llcSocket;
+    Ieee8022LlcSocket llcSocket;
 
     // receive statistics
     long packetsSent = 0;
@@ -72,7 +72,7 @@ class INET_API EtherAppClient : public cSimpleModule, public ILifecycle, public 
     virtual MacAddress resolveDestMacAddress();
 
     virtual void sendPacket();
-    virtual void socketDataArrived(LlcSocket*, Packet *msg) override;
+    virtual void socketDataArrived(Ieee8022LlcSocket*, Packet *msg) override;
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
   public:
