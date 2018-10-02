@@ -41,7 +41,6 @@ EtherTrafGen::EtherTrafGen()
     numPacketsPerBurst = nullptr;
     packetLength = nullptr;
     timerMsg = nullptr;
-    nodeStatus = nullptr;
 }
 
 EtherTrafGen::~EtherTrafGen()
@@ -51,7 +50,10 @@ EtherTrafGen::~EtherTrafGen()
 
 void EtherTrafGen::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    if (stage == INITSTAGE_APPLICATION_LAYER && isGenerator())
+        timerMsg = new cMessage("generateNextPacket");
+
+    OperationalBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         sendInterval = &par("sendInterval");
@@ -72,22 +74,12 @@ void EtherTrafGen::initialize(int stage)
         stopTime = par("stopTime");
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
-    }
-    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         llcSocket.setOutputGate(gate("out"));
-        if (isGenerator())
-            timerMsg = new cMessage("generateNextPacket");
-
-        nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        if (isNodeUp() && isGenerator())
-            scheduleNextPacket(-1);
     }
 }
 
-void EtherTrafGen::handleMessage(cMessage *msg)
+void EtherTrafGen::handleMessageWhenUp(cMessage *msg)
 {
-    if (!isNodeUp())
-        throw cRuntimeError("Application is not running");
     if (msg->isSelfMessage()) {
         if (msg->getKind() == START) {
             llcSocket.open(-1, ssap);
@@ -103,29 +95,23 @@ void EtherTrafGen::handleMessage(cMessage *msg)
         receivePacket(check_and_cast<Packet *>(msg));
 }
 
-bool EtherTrafGen::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool EtherTrafGen::handleNodeStart(IDoneCallback *doneCallback)
 {
-    Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_APPLICATION_LAYER && isGenerator())
-            scheduleNextPacket(-1);
+    if (isGenerator()) {
+        scheduleNextPacket(-1);
     }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_APPLICATION_LAYER)
-            cancelNextPacket();
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH)
-            cancelNextPacket();
-    }
-    else
-        throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
     return true;
 }
 
-bool EtherTrafGen::isNodeUp()
+bool EtherTrafGen::handleNodeShutdown(IDoneCallback *doneCallback)
 {
-    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
+    cancelNextPacket();
+    return true;
+}
+
+void EtherTrafGen::handleNodeCrash()
+{
+    cancelNextPacket();
 }
 
 bool EtherTrafGen::isGenerator()

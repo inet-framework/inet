@@ -20,8 +20,9 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcSocket.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcSocketCommand_m.h"
@@ -31,7 +32,7 @@ namespace inet {
 /**
  * Simple traffic generator for the Ethernet model.
  */
-class INET_API EtherTrafGen : public cSimpleModule, public ILifecycle
+class INET_API EtherTrafGen : public OperationalBase
 {
   protected:
     enum Kinds { START = 100, NEXT };
@@ -45,7 +46,6 @@ class INET_API EtherTrafGen : public cSimpleModule, public ILifecycle
     int ssap = -1;
     int dsap = -1;
     MacAddress destMacAddress;
-    NodeStatus *nodeStatus = nullptr;
 
     Ieee8022LlcSocket llcSocket;
     // self messages
@@ -60,10 +60,9 @@ class INET_API EtherTrafGen : public cSimpleModule, public ILifecycle
   protected:
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void finish() override;
 
-    virtual bool isNodeUp();
     virtual bool isGenerator();
     virtual void scheduleNextPacket(simtime_t previous);
     virtual void cancelNextPacket();
@@ -72,7 +71,13 @@ class INET_API EtherTrafGen : public cSimpleModule, public ILifecycle
 
     virtual void sendBurstPackets();
     virtual void receivePacket(Packet *msg);
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+
+    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_APPLICATION_LAYER; }
+    virtual bool isNodeStartStage(int stage) override { return stage == NodeStartOperation::STAGE_APPLICATION_LAYER; }
+    virtual bool isNodeShutdownStage(int stage) override { return stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER; }
+    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
+    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
+    virtual void handleNodeCrash() override;
 
   public:
     EtherTrafGen();
