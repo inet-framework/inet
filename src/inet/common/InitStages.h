@@ -24,7 +24,8 @@ namespace inet {
 
 /**
  * This enum provides constants for initialization stages for modules overriding
- * cComponent::initialize(int stage).
+ * cComponent::initialize(int stage). The stage numbering is not necessarily
+ * sequential, because several initialization stages don't depend on each other.
  */
 enum InitStages {
     /**

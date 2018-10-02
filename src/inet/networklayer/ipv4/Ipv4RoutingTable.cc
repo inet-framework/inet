@@ -86,6 +86,7 @@ void Ipv4RoutingTable::initialize(int stage)
         WATCH(multicastForward);
         WATCH(routerId);
     }
+    // TODO: INITSTAGE
     else if (stage == INITSTAGE_STATIC_ROUTING) {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isNodeUp = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;

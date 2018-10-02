@@ -34,6 +34,7 @@ void RsvpClassifier::initialize(int stage)
         maxLabel = 0;
         WATCH_VECTOR(bindings);
     }
+    // TODO: INITSTAGE
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         IIpv4RoutingTable *rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
         routerId = rt->getRouterId();

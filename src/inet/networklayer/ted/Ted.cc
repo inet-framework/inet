@@ -44,7 +44,7 @@ Ted::~Ted()
 void Ted::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
-
+    // TODO: INITSTAGE
     if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         maxMessageId = 0;
 

@@ -385,6 +385,7 @@ void Igmpv2::initialize(int stage)
         WATCH(numLeavesSent);
         WATCH(numLeavesRecv);
     }
+    // TODO: INITSTAGE
     else if (stage == INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT) {
         cModule *host = getContainingNode(this);
         host->subscribe(interfaceCreatedSignal, this);

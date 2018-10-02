@@ -100,6 +100,7 @@ void Ipv6RoutingTable::initialize(int stage)
             configureInterfaceForIpv6(ie);
         }
     }
+    // TODO: INITSTAGE
     else if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
         parseXmlConfigFile();
 
