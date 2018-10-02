@@ -21,8 +21,6 @@
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/Simsignals.h"
-#include "inet/common/Simsignals_m.h"
-#include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022Llc.h"
