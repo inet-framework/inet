@@ -48,8 +48,8 @@ void EtherAppClient::initialize(int stage)
         respLength = &par("respLength");
         sendInterval = &par("sendInterval");
 
-        localSAP = par("localSAP");
-        remoteSAP = par("remoteSAP");
+        localSap = par("localSAP");
+        remoteSap = par("remoteSAP");
 
         seqNum = 0;
         WATCH(seqNum);
@@ -83,12 +83,12 @@ void EtherAppClient::handleMessage(cMessage *msg)
         throw cRuntimeError("Application is not running");
     if (msg->isSelfMessage()) {
         if (msg->getKind() == START) {
-            EV_DEBUG << getFullPath() << " registering DSAP " << localSAP << "\n";
-            llcSocket.open(-1, localSAP);
+            EV_DEBUG << getFullPath() << " registering DSAP " << localSap << "\n";
+            llcSocket.open(-1, localSap);
 
-            destMACAddress = resolveDestMacAddress();
+            destMacAddress = resolveDestMacAddress();
             // if no dest address given, nothing to do
-            if (destMACAddress.isUnspecified())
+            if (destMacAddress.isUnspecified())
                 return;
         }
         sendPacket();
@@ -181,10 +181,10 @@ void EtherAppClient::sendPacket()
     data->setResponseBytes(respLen);
     datapacket->insertAtBack(data);
 
-    datapacket->addTagIfAbsent<MacAddressReq>()->setDestAddress(destMACAddress);
+    datapacket->addTagIfAbsent<MacAddressReq>()->setDestAddress(destMacAddress);
     auto ieee802SapReq = datapacket->addTagIfAbsent<Ieee802SapReq>();
-    ieee802SapReq->setSsap(localSAP);
-    ieee802SapReq->setDsap(remoteSAP);
+    ieee802SapReq->setSsap(localSap);
+    ieee802SapReq->setDsap(remoteSap);
 
     emit(packetSentSignal, datapacket);
     llcSocket.send(datapacket);

@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ETHERAPPCLI_H
-#define __INET_ETHERAPPCLI_H
+#ifndef __INET_ETHERAPPCLIENT_H
+#define __INET_ETHERAPPCLIENT_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/ILifecycle.h"
@@ -42,9 +42,9 @@ class INET_API EtherAppClient : public cSimpleModule, public ILifecycle, public 
     cPar *respLength = nullptr;
     cPar *sendInterval = nullptr;
 
-    int localSAP = -1;
-    int remoteSAP = -1;
-    MacAddress destMACAddress;
+    int localSap = -1;
+    int remoteSap = -1;
+    MacAddress destMacAddress;
     NodeStatus *nodeStatus = nullptr;
 
     // self messages
@@ -82,5 +82,5 @@ class INET_API EtherAppClient : public cSimpleModule, public ILifecycle, public 
 
 } // namespace inet
 
-#endif // ifndef __INET_ETHERAPPCLI_H
+#endif // ifndef __INET_ETHERAPPCLIENT_H
 
