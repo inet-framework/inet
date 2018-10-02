@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ETHERAPPSRV_H
-#define __INET_ETHERAPPSRV_H
+#ifndef __INET_ETHERAPPSERVER_H
+#define __INET_ETHERAPPSERVER_H
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/ILifecycle.h"
@@ -37,7 +37,7 @@ namespace inet {
 class INET_API EtherAppServer : public cSimpleModule, public ILifecycle, public Ieee8022LlcSocket::ICallback
 {
   protected:
-    int localSAP = 0;
+    int localSap = 0;
     NodeStatus *nodeStatus = nullptr;
 
     Ieee8022LlcSocket llcSocket;
@@ -56,12 +56,12 @@ class INET_API EtherAppServer : public cSimpleModule, public ILifecycle, public 
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
     virtual bool isNodeUp();
-    void registerDSAP(int dsap);
+    void registerDsap(int dsap);
     void sendPacket(Packet *datapacket, const MacAddress& destAddr, int destSap);
     virtual void socketDataArrived(Ieee8022LlcSocket*, Packet *msg) override;
 };
 
 } // namespace inet
 
-#endif // ifndef __INET_ETHERAPPSRV_H
+#endif // ifndef __INET_ETHERAPPSERVER_H
 

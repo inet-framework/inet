@@ -38,7 +38,7 @@ void EtherAppServer::initialize(int stage)
     cSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        localSAP = par("localSAP");
+        localSap = par("localSAP");
 
         // statistics
         packetsSent = packetsReceived = 0;
@@ -66,7 +66,7 @@ bool EtherAppServer::isNodeUp()
 void EtherAppServer::startApp()
 {
     EV_INFO << "Starting application\n";
-    registerDSAP(localSAP);
+    registerDsap(localSap);
 }
 
 void EtherAppServer::stopApp()
@@ -110,7 +110,7 @@ void EtherAppServer::socketDataArrived(Ieee8022LlcSocket*, Packet *msg)
         outPayload->setChunkLength(B(l));
         outPacket->insertAtBack(outPayload);
 
-        EV_INFO << "Send response `" << outPacket->getName() << "' to " << srcAddr << " ssap=" << localSAP << " dsap=" << srcSap << " length=" << l << "B requestId=" << requestId << "\n";
+        EV_INFO << "Send response `" << outPacket->getName() << "' to " << srcAddr << " ssap=" << localSap << " dsap=" << srcSap << " length=" << l << "B requestId=" << requestId << "\n";
 
         sendPacket(outPacket, srcAddr, srcSap);
     }
@@ -122,7 +122,7 @@ void EtherAppServer::sendPacket(Packet *datapacket, const MacAddress& destAddr, 
 {
     datapacket->addTagIfAbsent<MacAddressReq>()->setDestAddress(destAddr);
     auto ieee802SapReq = datapacket->addTagIfAbsent<Ieee802SapReq>();
-    ieee802SapReq->setSsap(localSAP);
+    ieee802SapReq->setSsap(localSap);
     ieee802SapReq->setDsap(destSap);
 
     emit(packetSentSignal, datapacket);
@@ -130,7 +130,7 @@ void EtherAppServer::sendPacket(Packet *datapacket, const MacAddress& destAddr, 
     packetsSent++;
 }
 
-void EtherAppServer::registerDSAP(int dsap)
+void EtherAppServer::registerDsap(int dsap)
 {
     EV_DEBUG << getFullPath() << " registering DSAP " << dsap << "\n";
 
