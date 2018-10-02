@@ -41,7 +41,7 @@ void NeighborListNeighborCache::initialize(int stage)
         range = par("range");
         updateNeighborListsTimer = new cMessage("updateNeighborListsTimer");
     }
-    else if (stage == INITSTAGE_LINK_LAYER) {
+    else if (stage == INITSTAGE_PHYSICAL_LAYER_NEIGHBOR_CACHE) {
         maxSpeed = radioMedium->getMediumLimitCache()->getMaxSpeed().get();
         updateNeighborLists();
         scheduleAt(simTime() + refillPeriod, updateNeighborListsTimer);

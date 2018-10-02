@@ -72,6 +72,11 @@ enum InitStages {
     INITSTAGE_PHYSICAL_LAYER = 3,
 
     /**
+     * Initialization of physical layer neighbor cache.
+     */
+    INITSTAGE_PHYSICAL_LAYER_NEIGHBOR_CACHE = 4,
+
+    /**
      * Initialization of network interfaces includes:
      *  - assigning MAC addresses
      *  - registering network interfaces in the InterfaceTable
