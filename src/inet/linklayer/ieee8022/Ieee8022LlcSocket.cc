@@ -15,34 +15,35 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Message.h"
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/ieee8022/Ieee8022LlcSocket.h"
 #include "inet/linklayer/ieee8022/LlcSocketCommand_m.h"
-#include "inet/linklayer/ieee8022/LlcSocket.h"
 
 namespace inet {
 
-LlcSocket::LlcSocket()
+Ieee8022LlcSocket::Ieee8022LlcSocket()
 {
     socketId = getEnvir()->getUniqueNumber();
 }
 
-void LlcSocket::setCallback(ICallback *callback)
+void Ieee8022LlcSocket::setCallback(ICallback *callback)
 {
     this->callback = callback;
 }
 
-bool LlcSocket::belongsToSocket(cMessage *msg) const
+bool Ieee8022LlcSocket::belongsToSocket(cMessage *msg) const
 {
     auto& tags = getTags(msg);
     int msgSocketId = tags.getTag<SocketInd>()->getSocketId();
     return socketId == msgSocketId;
 }
 
-void LlcSocket::processMessage(cMessage *msg)
+void Ieee8022LlcSocket::processMessage(cMessage *msg)
 {
     ASSERT(belongsToSocket(msg));
 
@@ -52,7 +53,7 @@ void LlcSocket::processMessage(cMessage *msg)
         delete msg;
 }
 
-void LlcSocket::open(int interfaceId, int localSap)
+void Ieee8022LlcSocket::open(int interfaceId, int localSap)
 {
     if (localSap < -1 || localSap > 255)
         throw cRuntimeError("LlcSocket::open(): Invalid localSap value: %d", localSap);
@@ -66,14 +67,14 @@ void LlcSocket::open(int interfaceId, int localSap)
     sendToLlc(request);
 }
 
-void LlcSocket::send(Packet *packet)
+void Ieee8022LlcSocket::send(Packet *packet)
 {
     if (! isOpen)
         throw cRuntimeError("Socket is closed");
     sendToLlc(packet);
 }
 
-void LlcSocket::close()
+void Ieee8022LlcSocket::close()
 {
     auto request = new Request("LLC_CLOSE", IEEE8022_LLC_C_CLOSE);
     LlcSocketCloseCommand *command = new LlcSocketCloseCommand();
@@ -83,7 +84,7 @@ void LlcSocket::close()
     isOpen = false;
 }
 
-void LlcSocket::sendToLlc(cMessage *msg)
+void Ieee8022LlcSocket::sendToLlc(cMessage *msg)
 {
     if (!outputGate)
         throw cRuntimeError("LlcSocket: setOutputGate() must be invoked before socket can be used");

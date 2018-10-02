@@ -24,14 +24,14 @@
 
 namespace inet {
 
-class INET_API LlcSocket : public ISocket
+class INET_API Ieee8022LlcSocket : public ISocket
 {
   public:
     class INET_API ICallback
     {
       public:
         virtual ~ICallback() {}
-        virtual void socketDataArrived(LlcSocket *socket, Packet *packet) = 0;
+        virtual void socketDataArrived(Ieee8022LlcSocket *socket, Packet *packet) = 0;
     };
   protected:
     int socketId = -1;
@@ -46,8 +46,8 @@ class INET_API LlcSocket : public ISocket
     void sendToLlc(cMessage *msg);
 
   public:
-    LlcSocket();
-    ~LlcSocket() {}
+    Ieee8022LlcSocket();
+    ~Ieee8022LlcSocket() {}
 
     /**
      * Sets the gate on which to send raw packets. Must be invoked before socket
