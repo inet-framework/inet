@@ -53,7 +53,7 @@ void EtherTrafGen::initialize(int stage)
     if (stage == INITSTAGE_APPLICATION_LAYER && isGenerator())
         timerMsg = new cMessage("generateNextPacket");
 
-    OperationalBase::initialize(stage);
+    ApplicationBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         sendInterval = &par("sendInterval");

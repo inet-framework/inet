@@ -34,7 +34,7 @@ Define_Module(EtherAppServer);
 
 void EtherAppServer::initialize(int stage)
 {
-    OperationalBase::initialize(stage);
+    ApplicationBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         localSap = par("localSAP");
