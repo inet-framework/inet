@@ -175,6 +175,72 @@ void ThroughputFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObj
     }
 }
 
+Register_ResultFilter("liveThroughput", LiveThroughputFilter);
+
+class TimerEvent : public cEvent
+{
+  protected:
+     LiveThroughputFilter *target;
+  public:
+    TimerEvent(const char *name, LiveThroughputFilter *target) : cEvent(name), target(target) {}
+    ~TimerEvent() {target->timerDeleted();}
+    virtual cEvent *dup() const override {copyNotSupported(); return nullptr;}
+    virtual cObject *getTargetObject() const override {return target;}
+    virtual void execute() override {target->timerExpired();}
+};
+
+void LiveThroughputFilter::init(cComponent *component, cProperty *attrsProperty)
+{
+    cObjectResultFilter::init(component, attrsProperty);
+
+    event = new TimerEvent("updateLiveThroughput", this);
+    simtime_t now = simTime();
+    event->setArrivalTime(now + interval);
+    getSimulation()->getFES()->insert(event);
+}
+
+LiveThroughputFilter::~LiveThroughputFilter()
+{
+    if (event) {
+        ASSERT(event->isScheduled());
+        getSimulation()->getFES()->remove(event);
+        delete event;
+    }
+}
+
+void LiveThroughputFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+    if (auto packet = dynamic_cast<cPacket *>(object))
+        bytes += packet->getByteLength();
+}
+
+void LiveThroughputFilter::timerExpired()
+{
+    simtime_t now = simTime();
+    double throughput = 8 * bytes / (now - lastSignal).dbl();
+    fire(this, now, throughput, nullptr);
+    lastSignal = now;
+    bytes = 0;
+
+    event->setArrivalTime(now + interval);
+    getSimulation()->getFES()->insert(event);
+}
+
+void LiveThroughputFilter::timerDeleted()
+{
+    event = nullptr;
+}
+
+void LiveThroughputFilter::finish(cComponent *component, simsignal_t signalID)
+{
+    simtime_t now = simTime();
+    if (lastSignal < now) {
+        double throughput = 8 * bytes / (now - lastSignal).dbl();
+        fire(this, now, throughput, nullptr);
+    }
+}
+
+
 Register_ResultFilter("elapsedTime", ElapsedTimeFilter);
 
 ElapsedTimeFilter::ElapsedTimeFilter()

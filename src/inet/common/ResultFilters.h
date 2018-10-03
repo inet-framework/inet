@@ -160,6 +160,26 @@ class INET_API ThroughputFilter : public cObjectResultFilter
 };
 
 /**
+ * Filter that expects a cPacket and outputs the throughput as double.
+ */
+class INET_API LiveThroughputFilter : public cObjectResultFilter
+{
+  protected:
+    simtime_t interval = 0.1;
+    simtime_t lastSignal = 0;
+    double bytes = 0;
+    cEvent *event = nullptr;
+
+  public:
+    ~LiveThroughputFilter();
+    virtual void init(cComponent *component, cProperty *attrsProperty) override;
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+    virtual void finish(cComponent *component, simsignal_t signalID) override;
+    virtual void timerExpired();
+    virtual void timerDeleted();
+};
+
+/**
  * Filter that outputs the elapsed time since the creation of this filter object.
  */
 class INET_API ElapsedTimeFilter : public cResultFilter
