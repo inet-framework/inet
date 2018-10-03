@@ -957,6 +957,13 @@ OspfRoutingTableEntry *Router::getPreferredEntry(const OspfLsa& lsa, bool skipSe
             return nullptr;
         }
 
+        // if a direct delivery, update hop address to point to the forward address
+        if(isDirectRoute(*forwardEntry)) {
+            forwardEntry->clearNextHops();
+            NextHop hop = {forwardEntry->getInterface()->getInterfaceId(), forwardingAddress, routerID};
+            forwardEntry->addNextHop(hop);
+        }
+
         return forwardEntry;
     }
 
