@@ -21,13 +21,14 @@
 #define __INET_DHCPCLIENT_H
 
 #include <vector>
-#include "inet/linklayer/common/MacAddress.h"
-#include "inet/applications/dhcp/DhcpMessage_m.h"
+
 #include "inet/applications/dhcp/DhcpLease.h"
+#include "inet/applications/dhcp/DhcpMessage_m.h"
+#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/linklayer/common/MacAddress.h"
 #include "inet/networklayer/common/InterfaceTable.h"
 #include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
-#include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {
 
