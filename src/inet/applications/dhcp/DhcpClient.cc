@@ -41,6 +41,8 @@ DhcpClient::~DhcpClient()
 
 void DhcpClient::initialize(int stage)
 {
+    ApplicationBase::initialize(stage);
+
     if (stage == INITSTAGE_LOCAL) {
         timerT1 = new cMessage("T1 Timer", T1);
         timerT2 = new cMessage("T2 Timer", T2);
@@ -48,11 +50,6 @@ void DhcpClient::initialize(int stage)
         leaseTimer = new cMessage("Lease Timeout", LEASE_TIMEOUT);
         startTimer = new cMessage("Starting DHCP", START_DHCP);
         startTime = par("startTime");
-    }
-    else if (stage == INITSTAGE_APPLICATION_LAYER) {
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-
         numSent = 0;
         numReceived = 0;
         xid = 0;
@@ -66,26 +63,19 @@ void DhcpClient::initialize(int stage)
         // DHCP UDP ports
         clientPort = 68;    // client
         serverPort = 67;    // server
-
-        // get the hostname
-        host = getContainingNode(this);
-
-        // for a wireless interface subscribe the association event to start the DHCP protocol
-        host->subscribe(l2AssociatedSignal, this);
-        host->subscribe(interfaceDeletedSignal, this);
-
         // get the routing table to update and subscribe it to the blackboard
         irt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
         // set client to idle state
         clientState = IDLE;
         // get the interface to configure
+    }
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
+        // get the hostname
+        host = getContainingNode(this);
+        // for a wireless interface subscribe the association event to start the DHCP protocol
+        host->subscribe(l2AssociatedSignal, this);
+        host->subscribe(interfaceDeletedSignal, this);
 
-        if (isOperational) {
-            ie = chooseInterface();
-            // grab the interface MAC address
-            macAddress = ie->getMacAddress();
-            startApp();
-        }
     }
 }
 
@@ -192,13 +182,9 @@ void DhcpClient::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, getStateName(clientState));
 }
 
-void DhcpClient::handleMessage(cMessage *msg)
+void DhcpClient::handleMessageWhenUp(cMessage *msg)
 {
-    if (!isOperational) {
-        EV_ERROR << "Message '" << msg << "' arrived when module status is down, dropping." << endl;
-        delete msg;
-    }
-    else if (msg->isSelfMessage()) {
+    if (msg->isSelfMessage()) {
         handleTimer(msg);
     }
     else if (msg->arrivedOn("socketIn")) {
@@ -695,11 +681,13 @@ void DhcpClient::openSocket()
     EV_INFO << "DHCP server bound to port " << serverPort << "." << endl;
 }
 
-void DhcpClient::startApp()
+bool DhcpClient::handleNodeStart(IDoneCallback *doneCallback)
 {
     simtime_t start = std::max(startTime, simTime());
     ie = chooseInterface();
+    macAddress = ie->getMacAddress();
     scheduleAt(start, startTimer);
+    return true;
 }
 
 void DhcpClient::stopApp()
@@ -709,38 +697,11 @@ void DhcpClient::stopApp()
     cancelEvent(timerTo);
     cancelEvent(leaseTimer);
     cancelEvent(startTimer);
+    ie = nullptr;
 
     // TODO: Client should send DHCPRELEASE to the server. However, the correct operation
     // of DHCP does not depend on the transmission of DHCPRELEASE messages.
     // TODO: socket.close();
-}
-
-bool DhcpClient::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-{
-    Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_APPLICATION_LAYER) {
-            startApp();
-            isOperational = true;
-        }
-    }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
-            stopApp();
-            isOperational = false;
-            ie = nullptr;
-        }
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH) {
-            stopApp();
-            isOperational = false;
-            ie = nullptr;
-        }
-    }
-    else
-        throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
-    return true;
 }
 
 } // namespace inet

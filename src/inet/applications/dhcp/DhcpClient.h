@@ -22,6 +22,7 @@
 
 #include <vector>
 
+#include "inet/applications/base/ApplicationBase.h"
 #include "inet/applications/dhcp/DhcpLease.h"
 #include "inet/applications/dhcp/DhcpMessage_m.h"
 #include "inet/common/lifecycle/ILifecycle.h"
@@ -35,7 +36,7 @@ namespace inet {
 /**
  * Implements a DHCP client. See NED file for more details.
  */
-class INET_API DhcpClient : public cSimpleModule, public cListener, public ILifecycle, public UdpSocket::ICallback
+class INET_API DhcpClient : public ApplicationBase, public cListener, public UdpSocket::ICallback
 {
   protected:
     // DHCP timer types (RFC 2131 4.4.5)
@@ -64,7 +65,6 @@ class INET_API DhcpClient : public cSimpleModule, public cListener, public ILife
     cMessage *timerTo = nullptr;    // response timeout: WAIT_ACK, WAIT_OFFER
     cMessage *leaseTimer = nullptr;    // length of time the lease is valid
     cMessage *startTimer = nullptr;    // self message to start DHCP initialization
-    bool isOperational = false;    // lifecycle
     ClientState clientState = INIT;    // current state
     unsigned int xid = 0;    // transaction id; to associate messages and responses between a client and a server
     DhcpLease *lease = nullptr;    // leased IP information
@@ -79,7 +79,7 @@ class INET_API DhcpClient : public cSimpleModule, public cListener, public ILife
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void finish() override;
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void scheduleTimerTO(TimerType type);
     virtual void scheduleTimerT1();
     virtual void scheduleTimerT2();
@@ -181,9 +181,10 @@ class INET_API DhcpClient : public cSimpleModule, public cListener, public ILife
     virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
 
     // Lifecycle methods
-    virtual void startApp();
+    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
+    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override { stopApp(); return true; }
+    virtual void handleNodeCrash() override { stopApp(); }
     virtual void stopApp();
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
   public:
     DhcpClient() {}
