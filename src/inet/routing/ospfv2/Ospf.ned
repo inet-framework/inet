@@ -42,7 +42,8 @@ import inet.routing.contract.IOspf;
 //   identified by its Router ID, which is given as an IPv4 address (but isn't necessarily one).
 //   It may contain various child elements.
 //   - @name - A required string containing a node path specifying the router to which this configuration belongs to.
-//   - @RFC1583Compatible - optional true or false value
+//   - @RFC1583Compatible - optional true or false value (defined in RFC 3101)
+//   - @DistributeDefaultRoute - optional true or false value (distribute the default route, if exists, using AS-External LSA)
 //
 //   - <PointToPointInterface> - Describes the parameters of a point-to-point interface. It is identified
 //     in the router by its ifName value, or name of toward module.
@@ -158,8 +159,8 @@ simple Ospf like IOspf
 
         int routerPriority = default(1);  // Priority in DR/BDR election (Specify 0 to exclude the router from the election)
         string areaID = default("0.0.0.0");
-        bool RFC1583Compatible = default(false);
-        bool DistributeDefaultRoute = default(false);
+        bool RFC1583Compatible = default(false); // if 'false', prune the set of routing table entries for the ASBR (RFC 3101)
+        bool DistributeDefaultRoute = default(false); // distribute the default route (if exists) using AS-External LSA
 
         int helloInterval @unit(s) = default(10s);  // specifies the time in seconds between hello packets that the other router sends on an interface
         int pollInterval @unit(s) = default(120s);  // specifies the length of time, in seconds, between OSPF packets that the router send before adjacency is established with a neighbor
