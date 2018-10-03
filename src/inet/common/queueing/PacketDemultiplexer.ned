@@ -1,0 +1,37 @@
+//
+// Copyright (C) OpenSim Ltd.
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program; if not, see http://www.gnu.org/licenses/.
+//
+
+package inet.common.queueing;
+
+import inet.common.queueing.contract.IPacketCollector;
+import inet.common.queueing.contract.IPacketProvider;
+
+//
+// This module connects multiple packet collectors to one packet provider. When
+// a packet is popped by one of the connected packet providers, then the demultiplexer
+// simply pops a packet from the connected packet provider.
+//
+simple PacketDemultiplexer like IPacketCollector // TODO: , IPacketProvider // out gate is vector
+{
+    parameters:
+        string displayStringTextFormat = default("passed %p pk (%l)"); // %p number of packet, %l total length
+        @class(PacketDemultiplexer);
+        @display("i=block/fork");
+    gates:
+        input in @labels(pop);
+        output out[] @labels(pop);
+}
