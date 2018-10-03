@@ -11,16 +11,12 @@
 
     <AS id="65324">
         <!--router A-->
-        <Router interAddr="192.168.1.254">
-        	<interface names='eth0' />
-        </Router>
+        <Router interAddr="192.168.1.254"/>
     </AS>
 
     <AS id="65248">
         <!--router B-->
-        <Router interAddr="192.168.2.254">
-        	<interface names='eth0' />
-        </Router>
+        <Router interAddr="192.168.2.254"/>
     </AS>
 
    <Session id="1">
