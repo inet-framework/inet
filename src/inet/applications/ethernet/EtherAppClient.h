@@ -19,9 +19,8 @@
 #define __INET_ETHERAPPCLIENT_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/lifecycle/OperationalBase.h"
-#include "inet/common/lifecycle/NodeOperations.h"
-#include "inet/common/lifecycle/NodeStatus.h"
+
+#include "inet/applications/base/ApplicationBase.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcSocket.h"
@@ -32,7 +31,7 @@ namespace inet {
 /**
  * Simple traffic generator for the Ethernet model.
  */
-class INET_API EtherAppClient : public OperationalBase, public Ieee8022LlcSocket::ICallback
+class INET_API EtherAppClient : public ApplicationBase, public Ieee8022LlcSocket::ICallback
 {
   protected:
     enum Kinds { START = 100, NEXT };
@@ -73,12 +72,9 @@ class INET_API EtherAppClient : public OperationalBase, public Ieee8022LlcSocket
     virtual void sendPacket();
     virtual void socketDataArrived(Ieee8022LlcSocket*, Packet *msg) override;
 
-    virtual bool handleNodeStart(IDoneCallback *doneCallback);
-    virtual bool handleNodeShutdown(IDoneCallback *doneCallback);
-    virtual void handleNodeCrash();
-    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_APPLICATION_LAYER; }
-    virtual bool isNodeStartStage(int stage) override { return stage == NodeStartOperation::STAGE_APPLICATION_LAYER; }
-    virtual bool isNodeShutdownStage(int stage) override { return stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER; }
+    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
+    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
+    virtual void handleNodeCrash() override;
 
   public:
     EtherAppClient() {}

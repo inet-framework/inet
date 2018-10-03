@@ -19,10 +19,9 @@
 #define __INET_ETHERTRAFGEN_H
 
 #include "inet/common/INETDefs.h"
+
+#include "inet/applications/base/ApplicationBase.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/common/lifecycle/NodeOperations.h"
-#include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcSocket.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcSocketCommand_m.h"
@@ -32,7 +31,7 @@ namespace inet {
 /**
  * Simple traffic generator for the Ethernet model.
  */
-class INET_API EtherTrafGen : public OperationalBase
+class INET_API EtherTrafGen : public ApplicationBase
 {
   protected:
     enum Kinds { START = 100, NEXT };
@@ -72,9 +71,6 @@ class INET_API EtherTrafGen : public OperationalBase
     virtual void sendBurstPackets();
     virtual void receivePacket(Packet *msg);
 
-    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_APPLICATION_LAYER; }
-    virtual bool isNodeStartStage(int stage) override { return stage == NodeStartOperation::STAGE_APPLICATION_LAYER; }
-    virtual bool isNodeShutdownStage(int stage) override { return stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER; }
     virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
     virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
     virtual void handleNodeCrash() override;

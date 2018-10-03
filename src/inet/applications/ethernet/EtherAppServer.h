@@ -19,10 +19,8 @@
 #define __INET_ETHERAPPSERVER_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/lifecycle/LifecycleOperation.h"
-#include "inet/common/lifecycle/NodeOperations.h"
-#include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/common/lifecycle/OperationalBase.h"
+
+#include "inet/applications/base/ApplicationBase.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcSocket.h"
@@ -35,7 +33,7 @@ namespace inet {
 /**
  * Server-side process EtherAppClient.
  */
-class INET_API EtherAppServer : public OperationalBase, public Ieee8022LlcSocket::ICallback
+class INET_API EtherAppServer : public ApplicationBase, public Ieee8022LlcSocket::ICallback
 {
   protected:
     int localSap = 0;
@@ -55,9 +53,6 @@ class INET_API EtherAppServer : public OperationalBase, public Ieee8022LlcSocket
     virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
     virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
     virtual void handleNodeCrash() override;
-    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_APPLICATION_LAYER; }
-    virtual bool isNodeStartStage(int stage) override { return stage == NodeStartOperation::STAGE_APPLICATION_LAYER; }
-    virtual bool isNodeShutdownStage(int stage) override { return stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER; }
 
     void registerDsap(int dsap);
     void sendPacket(Packet *datapacket, const MacAddress& destAddr, int destSap);
