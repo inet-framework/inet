@@ -799,14 +799,14 @@ bool Gpsr::handleOperationStage(LifecycleOperation *operation, int stage, IDoneC
 {
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_APPLICATION_LAYER) {
+        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_ROUTING_PROTOCOLS) {
             configureInterfaces();
             storeSelfPositionInGlobalRegistry();
             scheduleBeaconTimer();
         }
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
+        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_ROUTING_PROTOCOLS) {
             // TODO: send a beacon to remove ourself from peers neighbor position table
             neighborPositionTable.clear();
             cancelEvent(beaconTimer);
