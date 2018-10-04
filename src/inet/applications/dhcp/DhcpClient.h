@@ -20,12 +20,9 @@
 #ifndef __INET_DHCPCLIENT_H
 #define __INET_DHCPCLIENT_H
 
-#include <vector>
-
 #include "inet/applications/base/ApplicationBase.h"
 #include "inet/applications/dhcp/DhcpLease.h"
 #include "inet/applications/dhcp/DhcpMessage_m.h"
-#include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/networklayer/common/InterfaceTable.h"
 #include "inet/networklayer/ipv4/Ipv4RoutingTable.h"

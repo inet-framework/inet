@@ -20,13 +20,12 @@
 #include <algorithm>
 
 #include "inet/applications/dhcp/DhcpServer.h"
-
-#include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
-#include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/networklayer/common/InterfaceTable.h"
-#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/common/Simsignals.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/common/InterfaceTable.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 
 namespace inet {
 

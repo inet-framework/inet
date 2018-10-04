@@ -18,12 +18,11 @@
 //
 
 #include "inet/applications/dhcp/DhcpClient.h"
-
-#include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-#include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 
 namespace inet {
 
