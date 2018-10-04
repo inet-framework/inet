@@ -738,9 +738,15 @@ void Router::rebuildRoutingTable()
     // add the new routing entries
     std::vector<Ipv4Route *> addEntries;
     for (auto &tableEntry : ospfRoutingTable) {
-        if (tableEntry->getDestinationType() == OspfRoutingTableEntry::NETWORK_DESTINATION && !isDirectRoute(*tableEntry)) {
-            Ipv4Route *entry = new OspfRoutingTableEntry(*tableEntry);
-            addEntries.push_back(entry);
+        if (tableEntry->getDestinationType() == OspfRoutingTableEntry::NETWORK_DESTINATION) {
+            // OSPF never adds direct routes into the IP routing table
+            if(!isDirectRoute(*tableEntry)) {
+                // ignore advertised loopback addresses with dest=gateway
+                if(tableEntry->getDestination() != tableEntry->getGateway()) {
+                    Ipv4Route *entry = new OspfRoutingTableEntry(*tableEntry);
+                    addEntries.push_back(entry);
+                }
+            }
         }
     }
 
@@ -1506,10 +1512,13 @@ bool Router::isDirectRoute(OspfRoutingTableEntry &entry)
         return true;
 
     for(int i = 0; i < ift->getNumInterfaces(); i++) {
-        Ipv4InterfaceData *ipv4data = ift->getInterface(i)->findProtocolData<Ipv4InterfaceData>();
-        if(ipv4data) {
-            if((entry.getDestination() & ipv4data->getNetmask()) == (ipv4data->getIPAddress() & ipv4data->getNetmask()))
-                return true;
+        InterfaceEntry *intf = ift->getInterface(i);
+        if(intf && !intf->isLoopback()) {
+            Ipv4InterfaceData *ipv4data = intf->findProtocolData<Ipv4InterfaceData>();
+            if(ipv4data) {
+                if((entry.getDestination() & ipv4data->getNetmask()) == (ipv4data->getIPAddress() & ipv4data->getNetmask()))
+                    return true;
+            }
         }
     }
 
