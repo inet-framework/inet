@@ -18,8 +18,7 @@
 #ifndef __INET_TCPGENERICSRVAPP_H
 #define __INET_TCPGENERICSRVAPP_H
 
-#include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/ChunkQueue.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
@@ -31,7 +30,7 @@ namespace inet {
  *
  * @see GenericAppMsg, TcpAppBase
  */
-class INET_API TcpGenericServerApp : public cSimpleModule, public ILifecycle
+class INET_API TcpGenericServerApp : public cSimpleModule, public LifecycleUnsupported
 {
   protected:
     TcpSocket socket;
@@ -54,9 +53,6 @@ class INET_API TcpGenericServerApp : public cSimpleModule, public ILifecycle
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
     virtual void refreshDisplay() const override;
-
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override
-    { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 };
 
 } // namespace inet

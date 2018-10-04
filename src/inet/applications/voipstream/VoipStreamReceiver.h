@@ -40,18 +40,15 @@ extern "C" {
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 #include "inet/applications/voipstream/VoipStreamPacket_m.h"
 #include "inet/applications/voipstream/AudioOutFile.h"
-#include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/common/lifecycle/LifecycleUnsupported.h"
 
 namespace inet {
 
-class INET_API VoipStreamReceiver : public cSimpleModule, public ILifecycle, public UdpSocket::ICallback
+class INET_API VoipStreamReceiver : public cSimpleModule, public LifecycleUnsupported, public UdpSocket::ICallback
 {
   public:
     VoipStreamReceiver() {}
     ~VoipStreamReceiver();
-
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
   protected:
     virtual void initialize(int stage) override;

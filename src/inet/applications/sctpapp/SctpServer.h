@@ -21,8 +21,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Message.h"
-#include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/transportlayer/contract/sctp/SctpSocket.h"
 #include "inet/transportlayer/sctp/SctpAssociation.h"
 
@@ -31,7 +30,7 @@ namespace inet {
 /**
  * Implements the SctpServer simple module. See the NED file for more info.
  */
-class INET_API SctpServer : public cSimpleModule, public ILifecycle
+class INET_API SctpServer : public cSimpleModule, public LifecycleUnsupported
 {
   protected:
     struct ServerAssocStat
@@ -98,9 +97,6 @@ class INET_API SctpServer : public cSimpleModule, public ILifecycle
     Message *makeReceiveRequest(cMessage *msg);
     Message *makeDefaultReceive();
     void generateAndSend();
-
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override
-    { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
   public:
     virtual ~SctpServer();

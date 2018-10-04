@@ -15,8 +15,7 @@
 #define __INET_SCTPNATSERVER_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
 #include "inet/transportlayer/contract/sctp/SctpSocket.h"
 #include "inet/transportlayer/sctp/SctpAssociation.h"
@@ -46,7 +45,7 @@ typedef struct natInfo
 } NatInfo;
 typedef std::vector<NatInfo *> NatVector;
 
-class INET_API SctpNatServer : public cSimpleModule, public ILifecycle
+class INET_API SctpNatServer : public cSimpleModule, public LifecycleUnsupported
 {
   protected:
     int32 notifications;
@@ -83,8 +82,6 @@ class INET_API SctpNatServer : public cSimpleModule, public ILifecycle
     void generateAndSend();
     void sendInfo(NatInfo *info);
     void printNatVector();
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override
-    { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 };
 
 } // namespace inet

@@ -18,7 +18,6 @@
 #include "inet/transportlayer/rtp/Rtcp.h"
 
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
-#include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/transportlayer/rtp/RtcpPacket_m.h"
@@ -515,14 +514,6 @@ void Rtcp::calculateAveragePacketSize(int size)
     // add size of ip and udp header to given size before calculating
     double sumPacketSize = (double)(_packetsCalculated) * _averagePacketSize + (double)(size + 20 + 8);
     _averagePacketSize = sumPacketSize / (double)(++_packetsCalculated);
-}
-
-bool Rtcp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-{
-    Enter_Method_Silent();
-
-    throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
-    return true;
 }
 
 } // namespace rtp
