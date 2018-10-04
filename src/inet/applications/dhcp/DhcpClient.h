@@ -94,7 +94,7 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
      * Handles incoming DHCP messages, and implements the
      * state-transition diagram for DHCP clients.
      */
-    virtual void handleDHCPMessage(Packet *packet);
+    virtual void handleDhcpMessage(Packet *packet);
 
     /*
      * Performs state changes and requests according to the timer expiration events
@@ -110,7 +110,7 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
     /*
      * Performs UDP transmission.
      */
-    virtual void sendToUDP(Packet *msg, int srcPort, const L3Address& destAddr, int destPort);
+    virtual void sendToUdp(Packet *msg, int srcPort, const L3Address& destAddr, int destPort);
 
     /*
      * Client broadcast to locate available servers.
@@ -166,7 +166,7 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
      * Handles DHCPACK in any state. Note that, handleDHCPACK() doesn't handle DHCPACK messages
      * in response to DHCPINFORM messages.
      */
-    virtual void handleDHCPACK(const Ptr<const DhcpMessage>& msg);
+    virtual void handleDhcpAck(const Ptr<const DhcpMessage>& msg);
 
     /*
      * Selects the first non-loopback interface

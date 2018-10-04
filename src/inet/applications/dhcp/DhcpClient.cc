@@ -196,7 +196,7 @@ void DhcpClient::handleMessageWhenUp(cMessage *msg)
 void DhcpClient::socketDataArrived(UdpSocket *socket, Packet *packet)
 {
     // process incoming packet
-    handleDHCPMessage(packet);
+    handleDhcpMessage(packet);
     delete packet;
 }
 
@@ -383,7 +383,7 @@ void DhcpClient::initRebootedClient()
     clientState = REBOOTING;
 }
 
-void DhcpClient::handleDHCPMessage(Packet *packet)
+void DhcpClient::handleDhcpMessage(Packet *packet)
 {
     ASSERT(isOperational && ie != nullptr);
 
@@ -422,7 +422,7 @@ void DhcpClient::handleDHCPMessage(Packet *packet)
             }
             else if (messageType == DHCPACK) {
                 EV_INFO << "DHCPACK message arrived in REQUESTING state. The requested IP address is available in the server's pool of addresses." << endl;
-                handleDHCPACK(msg);
+                handleDhcpAck(msg);
                 clientState = BOUND;
             }
             else if (messageType == DHCPNAK) {
@@ -440,7 +440,7 @@ void DhcpClient::handleDHCPMessage(Packet *packet)
 
         case RENEWING:
             if (messageType == DHCPACK) {
-                handleDHCPACK(msg);
+                handleDhcpAck(msg);
                 EV_INFO << "DHCPACK message arrived in RENEWING state. The renewing process was successful." << endl;
                 clientState = BOUND;
             }
@@ -461,7 +461,7 @@ void DhcpClient::handleDHCPMessage(Packet *packet)
                 initClient();
             }
             else if (messageType == DHCPACK) {
-                handleDHCPACK(msg);
+                handleDhcpAck(msg);
                 EV_INFO << "DHCPACK message arrived in REBINDING state. The rebinding process was successful." << endl;
                 clientState = BOUND;
             }
@@ -472,7 +472,7 @@ void DhcpClient::handleDHCPMessage(Packet *packet)
 
         case REBOOTING:
             if (messageType == DHCPACK) {
-                handleDHCPACK(msg);
+                handleDhcpAck(msg);
                 EV_INFO << "DHCPACK message arrived in REBOOTING state. Initialization with known IP address was successful." << endl;
                 clientState = BOUND;
             }
@@ -570,7 +570,7 @@ void DhcpClient::sendRequest()
     else
         throw cRuntimeError("Invalid state");
     packet->insertAtBack(request);
-    sendToUDP(packet, clientPort, destAddr, serverPort);
+    sendToUdp(packet, clientPort, destAddr, serverPort);
 }
 
 void DhcpClient::sendDiscover()
@@ -605,7 +605,7 @@ void DhcpClient::sendDiscover()
     packet->insertAtBack(discover);
 
     EV_INFO << "Sending DHCPDISCOVER." << endl;
-    sendToUDP(packet, clientPort, Ipv4Address::ALLONES_ADDRESS, serverPort);
+    sendToUdp(packet, clientPort, Ipv4Address::ALLONES_ADDRESS, serverPort);
 }
 
 void DhcpClient::sendDecline(Ipv4Address declinedIp)
@@ -630,10 +630,10 @@ void DhcpClient::sendDecline(Ipv4Address declinedIp)
     packet->insertAtBack(decline);
 
     EV_INFO << "Sending DHCPDECLINE." << endl;
-    sendToUDP(packet, clientPort, Ipv4Address::ALLONES_ADDRESS, serverPort);
+    sendToUdp(packet, clientPort, Ipv4Address::ALLONES_ADDRESS, serverPort);
 }
 
-void DhcpClient::handleDHCPACK(const Ptr<const DhcpMessage>& msg)
+void DhcpClient::handleDhcpAck(const Ptr<const DhcpMessage>& msg)
 {
     recordLease(msg);
     cancelEvent(timerTo);
@@ -664,7 +664,7 @@ void DhcpClient::scheduleTimerT2()
     scheduleAt(simTime() + (lease->rebindTime), timerT2);    // RFC 2131 4.4.5
 }
 
-void DhcpClient::sendToUDP(Packet *msg, int srcPort, const L3Address& destAddr, int destPort)
+void DhcpClient::sendToUdp(Packet *msg, int srcPort, const L3Address& destAddr, int destPort)
 {
     EV_INFO << "Sending packet " << msg << endl;
     msg->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());

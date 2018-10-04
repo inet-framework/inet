@@ -134,7 +134,7 @@ void DhcpServer::handleMessageWhenUp(cMessage *msg)
 void DhcpServer::socketDataArrived(UdpSocket *socket, Packet *packet)
 {
     // process incoming packet
-    processDHCPMessage(packet);
+    processDhcpMessage(packet);
 }
 
 void DhcpServer::socketErrorArrived(UdpSocket *socket, Indication *indication)
@@ -152,7 +152,7 @@ void DhcpServer::handleSelfMessages(cMessage *msg)
         throw cRuntimeError("Unknown selfmessage type!");
 }
 
-void DhcpServer::processDHCPMessage(Packet *packet)
+void DhcpServer::processDhcpMessage(Packet *packet)
 {
     ASSERT(isOperational && ie != nullptr);
 
@@ -207,7 +207,7 @@ void DhcpServer::processDHCPMessage(Packet *packet)
                 if (lease != nullptr) {
                     if (lease->ip != dhcpMsg->getOptions().getRequestedIp()) {
                         EV_ERROR << "The 'requested IP address' must be filled in with the 'yiaddr' value from the chosen DHCPOFFER." << endl;
-                        sendNAK(dhcpMsg);
+                        sendNak(dhcpMsg);
                     }
                     else {
                         EV_INFO << "From now " << lease->ip << " is leased to " << lease->mac << "." << endl;
@@ -216,14 +216,14 @@ void DhcpServer::processDHCPMessage(Packet *packet)
                         lease->leased = true;
 
                         // TODO: final check before ACK (it is not necessary but recommended)
-                        sendACK(lease, dhcpMsg);
+                        sendAck(lease, dhcpMsg);
 
                         // TODO: update the display string to inform how many clients are assigned
                     }
                 }
                 else {
                     EV_ERROR << "There is no available lease for " << dhcpMsg->getChaddr() << ". Probably, the client missed to send DHCPDISCOVER before DHCPREQUEST." << endl;
-                    sendNAK(dhcpMsg);
+                    sendNak(dhcpMsg);
                 }
             }
             else {
@@ -244,11 +244,11 @@ void DhcpServer::processDHCPMessage(Packet *packet)
                         lease->leased = true;
 
                         // TODO: final check before ACK (it is not necessary but recommended)
-                        sendACK(lease, dhcpMsg);
+                        sendAck(lease, dhcpMsg);
                     }
                     else {
                         EV_ERROR << "The requested IP address is incorrect, or is on the wrong network." << endl;
-                        sendNAK(dhcpMsg);
+                        sendNak(dhcpMsg);
                     }
                 }
                 else {    // renewing or rebinding: in this case ciaddr must be filled in with client's IP address
@@ -261,11 +261,11 @@ void DhcpServer::processDHCPMessage(Packet *packet)
                         lease->leased = true;
 
                         // unicast ACK to ciaddr
-                        sendACK(lease, dhcpMsg);
+                        sendAck(lease, dhcpMsg);
                     }
                     else {
                         EV_ERROR << "Renewal/rebinding process failed: requested IP address " << dhcpMsg->getCiaddr() << " not found in the server's database!" << endl;
-                        sendNAK(dhcpMsg);
+                        sendNak(dhcpMsg);
                     }
                 }
             }
@@ -283,7 +283,7 @@ void DhcpServer::processDHCPMessage(Packet *packet)
     numReceived++;
 }
 
-void DhcpServer::sendNAK(const Ptr<const DhcpMessage>& msg)
+void DhcpServer::sendNak(const Ptr<const DhcpMessage>& msg)
 {
     // EV_INFO << "Sending NAK to " << lease->mac << "." << endl;
     Packet *pk = new Packet("DHCPNAK");
@@ -313,7 +313,7 @@ void DhcpServer::sendNAK(const Ptr<const DhcpMessage>& msg)
     sendToUDP(pk, serverPort, destAddr, clientPort);
 }
 
-void DhcpServer::sendACK(DhcpLease *lease, const Ptr<const DhcpMessage>& packet)
+void DhcpServer::sendAck(DhcpLease *lease, const Ptr<const DhcpMessage>& packet)
 {
     EV_INFO << "Sending the ACK to " << lease->mac << "." << endl;
 

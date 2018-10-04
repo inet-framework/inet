@@ -85,7 +85,7 @@ class INET_API DhcpServer : public ApplicationBase, public cListener, public Udp
     /*
      * Implements the server's state machine.
      */
-    virtual void processDHCPMessage(Packet *packet);
+    virtual void processDhcpMessage(Packet *packet);
 
     /*
      * Send DHCPOFFER message to client in response to DHCPDISCOVER with offer of configuration
@@ -96,13 +96,13 @@ class INET_API DhcpServer : public ApplicationBase, public cListener, public Udp
     /*
      * Send DHCPACK message to client with configuration parameters, including committed network address.
      */
-    virtual void sendACK(DhcpLease *lease, const Ptr<const DhcpMessage>& dhcpMsg);
+    virtual void sendAck(DhcpLease *lease, const Ptr<const DhcpMessage>& dhcpMsg);
 
     /*
      * Send DHCPNAK message to client indicating client's notion of network address is incorrect
      * (e.g., client has moved to new subnet) or client's lease as expired.
      */
-    virtual void sendNAK(const Ptr<const DhcpMessage>& dhcpMsg);
+    virtual void sendNak(const Ptr<const DhcpMessage>& dhcpMsg);
 
     virtual void handleSelfMessages(cMessage *msg);
     virtual InterfaceEntry *chooseInterface();
