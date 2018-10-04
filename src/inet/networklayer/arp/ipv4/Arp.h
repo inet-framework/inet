@@ -68,7 +68,7 @@ class INET_API Arp : public OperationalBase, public IArp
     simtime_t retryTimeout;
     int retryCount = 0;
     simtime_t cacheTimeout;
-    bool respondToProxyARP = false;
+    bool respondToProxyArp = false;
     long numResolutions = 0;
     long numFailedResolutions = 0;
     long numRequestsSent = 0;
@@ -96,7 +96,7 @@ class INET_API Arp : public OperationalBase, public IArp
     virtual L3Address getL3AddressFor(const MacAddress& addr) const override;
     /// @}
 
-    void sendARPGratuitous(const InterfaceEntry *ie, MacAddress srcAddr, Ipv4Address ipAddr, ArpOpcode opCode);
+    void sendArpGratuitous(const InterfaceEntry *ie, MacAddress srcAddr, Ipv4Address ipAddr, ArpOpcode opCode);
 
   protected:
     virtual void initialize(int stage) override;
@@ -112,16 +112,16 @@ class INET_API Arp : public OperationalBase, public IArp
     virtual void handleNodeCrash() override;
     virtual void flush();
 
-    virtual void initiateARPResolution(ArpCacheEntry *entry);
-    virtual void sendARPRequest(const InterfaceEntry *ie, Ipv4Address ipAddress);
+    virtual void initiateArpResolution(ArpCacheEntry *entry);
+    virtual void sendArpRequest(const InterfaceEntry *ie, Ipv4Address ipAddress);
     virtual void requestTimedOut(cMessage *selfmsg);
     virtual bool addressRecognized(Ipv4Address destAddr, InterfaceEntry *ie);
-    virtual void processARPPacket(Packet *packet);
-    virtual void updateARPCache(ArpCacheEntry *entry, const MacAddress& macAddress);
+    virtual void processArpPacket(Packet *packet);
+    virtual void updateArpCache(ArpCacheEntry *entry, const MacAddress& macAddress);
 
     virtual MacAddress resolveMacAddressForArpReply(const InterfaceEntry *ie, const ArpPacket *arp);
 
-    virtual void dumpARPPacket(const ArpPacket *arp);
+    virtual void dumpArpPacket(const ArpPacket *arp);
     virtual void refreshDisplay() const override;
 };
 

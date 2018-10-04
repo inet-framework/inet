@@ -61,7 +61,7 @@ void Arp::initialize(int stage)
         retryTimeout = par("retryTimeout");
         retryCount = par("retryCount");
         cacheTimeout = par("cacheTimeout");
-        respondToProxyARP = par("respondToProxyARP");
+        respondToProxyArp = par("respondToProxyARP");
 
         // init statistics
         numRequestsSent = numRepliesSent = 0;
@@ -98,7 +98,7 @@ void Arp::handleMessageWhenUp(cMessage *msg)
     }
     else {
         Packet *packet = check_and_cast<Packet *>(msg);
-        processARPPacket(packet);
+        processArpPacket(packet);
     }
 }
 
@@ -141,14 +141,14 @@ void Arp::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, os.str().c_str());
 }
 
-void Arp::initiateARPResolution(ArpCacheEntry *entry)
+void Arp::initiateArpResolution(ArpCacheEntry *entry)
 {
     Ipv4Address nextHopAddr = entry->myIter->first;
     entry->pending = true;
     entry->numRetries = 0;
     entry->lastUpdate = SIMTIME_ZERO;
     entry->macAddress = MacAddress::UNSPECIFIED_ADDRESS;
-    sendARPRequest(entry->ie, nextHopAddr);
+    sendArpRequest(entry->ie, nextHopAddr);
 
     // start timer
     cMessage *msg = entry->timer = new cMessage("ARP timeout");
@@ -160,7 +160,7 @@ void Arp::initiateARPResolution(ArpCacheEntry *entry)
     emit(arpResolutionInitiatedSignal, &signal);
 }
 
-void Arp::sendARPRequest(const InterfaceEntry *ie, Ipv4Address ipAddress)
+void Arp::sendArpRequest(const InterfaceEntry *ie, Ipv4Address ipAddress)
 {
     // find our own IPv4 address and MAC address on the given interface
     MacAddress myMACAddress = ie->getMacAddress();
@@ -197,7 +197,7 @@ void Arp::requestTimedOut(cMessage *selfmsg)
         // retry
         Ipv4Address nextHopAddr = entry->myIter->first;
         EV_INFO << "ARP request for " << nextHopAddr << " timed out, resending\n";
-        sendARPRequest(entry->ie, nextHopAddr);
+        sendArpRequest(entry->ie, nextHopAddr);
         scheduleAt(simTime() + retryTimeout, selfmsg);
         return;
     }
@@ -219,7 +219,7 @@ bool Arp::addressRecognized(Ipv4Address destAddr, InterfaceEntry *ie)
     if (rt->isLocalAddress(destAddr)) {
         return true;
     }
-    else if (respondToProxyARP) {
+    else if (respondToProxyArp) {
         // respond to Proxy ARP request: if we can route this packet (and the
         // output port is different from this one), say yes
         InterfaceEntry *rtie = rt->getInterfaceForDestAddr(destAddr);
@@ -230,18 +230,18 @@ bool Arp::addressRecognized(Ipv4Address destAddr, InterfaceEntry *ie)
     }
 }
 
-void Arp::dumpARPPacket(const ArpPacket *arp)
+void Arp::dumpArpPacket(const ArpPacket *arp)
 {
     EV_DETAIL << (arp->getOpcode() == ARP_REQUEST ? "ARP_REQ" : arp->getOpcode() == ARP_REPLY ? "ARP_REPLY" : "unknown type")
               << "  src=" << arp->getSrcIpAddress() << " / " << arp->getSrcMacAddress()
               << "  dest=" << arp->getDestIpAddress() << " / " << arp->getDestMacAddress() << "\n";
 }
 
-void Arp::processARPPacket(Packet *packet)
+void Arp::processArpPacket(Packet *packet)
 {
     EV_INFO << "Received " << packet << " from network protocol.\n";
     const auto& arp = packet->peekAtFront<ArpPacket>();
-    dumpARPPacket(arp.get());
+    dumpArpPacket(arp.get());
 
     // extract input port
     InterfaceEntry *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
@@ -274,21 +274,21 @@ void Arp::processARPPacket(Packet *packet)
     //             the same hardware on which the request was received.
     //
 
-    MacAddress srcMACAddress = arp->getSrcMacAddress();
-    Ipv4Address srcIPAddress = arp->getSrcIpAddress();
+    MacAddress srcMacAddress = arp->getSrcMacAddress();
+    Ipv4Address srcIpAddress = arp->getSrcIpAddress();
 
-    if (srcMACAddress.isUnspecified())
+    if (srcMacAddress.isUnspecified())
         throw cRuntimeError("wrong ARP packet: source MAC address is empty");
-    if (srcIPAddress.isUnspecified())
+    if (srcIpAddress.isUnspecified())
         throw cRuntimeError("wrong ARP packet: source IPv4 address is empty");
 
     bool mergeFlag = false;
     // "If ... sender protocol address is already in my translation table"
-    auto it = arpCache.find(srcIPAddress);
+    auto it = arpCache.find(srcIpAddress);
     if (it != arpCache.end()) {
         // "update the sender hardware address field"
         ArpCacheEntry *entry = it->second;
-        updateARPCache(entry, srcMACAddress);
+        updateArpCache(entry, srcMacAddress);
         mergeFlag = true;
     }
 
@@ -304,7 +304,7 @@ void Arp::processARPPacket(Packet *packet)
             }
             else {
                 entry = new ArpCacheEntry();
-                auto where = arpCache.insert(arpCache.begin(), std::make_pair(srcIPAddress, entry));
+                auto where = arpCache.insert(arpCache.begin(), std::make_pair(srcIpAddress, entry));
                 entry->myIter = where;
                 entry->ie = ie;
 
@@ -312,7 +312,7 @@ void Arp::processARPPacket(Packet *packet)
                 entry->timer = nullptr;
                 entry->numRetries = 0;
             }
-            updateARPCache(entry, srcMACAddress);
+            updateArpCache(entry, srcMacAddress);
         }
 
         // "?Is the opcode ares_op$REQUEST?  (NOW look at the opcode!!)"
@@ -330,14 +330,14 @@ void Arp::processARPPacket(Packet *packet)
                 // "Swap hardware and protocol fields", etc.
                 const auto& arpReply = makeShared<ArpPacket>();
                 Ipv4Address origDestAddress = arp->getDestIpAddress();
-                arpReply->setDestIpAddress(srcIPAddress);
-                arpReply->setDestMacAddress(srcMACAddress);
+                arpReply->setDestIpAddress(srcIpAddress);
+                arpReply->setDestMacAddress(srcMacAddress);
                 arpReply->setSrcIpAddress(origDestAddress);
                 arpReply->setSrcMacAddress(myMACAddress);
                 arpReply->setOpcode(ARP_REPLY);
                 Packet *outPk = new Packet("arpREPLY");
                 outPk->insertAtFront(arpReply);
-                outPk->addTag<MacAddressReq>()->setDestAddress(srcMACAddress);
+                outPk->addTag<MacAddressReq>()->setDestAddress(srcMacAddress);
                 outPk->addTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
                 outPk->addTag<PacketProtocolTag>()->setProtocol(&Protocol::arp);
 
@@ -376,7 +376,7 @@ MacAddress Arp::resolveMacAddressForArpReply(const InterfaceEntry *ie, const Arp
     return ie->getMacAddress();
 }
 
-void Arp::updateARPCache(ArpCacheEntry *entry, const MacAddress& macAddress)
+void Arp::updateArpCache(ArpCacheEntry *entry, const MacAddress& macAddress)
 {
     EV_DETAIL << "Updating ARP cache entry: " << entry->myIter->first << " <--> " << macAddress << "\n";
 
@@ -408,7 +408,7 @@ MacAddress Arp::resolveL3Address(const L3Address& address, const InterfaceEntry 
         entry->ie = ie;
 
         EV << "Starting ARP resolution for " << addr << "\n";
-        initiateARPResolution(entry);
+        initiateArpResolution(entry);
         return MacAddress::UNSPECIFIED_ADDRESS;
     }
     else if (it->second->pending) {
@@ -423,7 +423,7 @@ MacAddress Arp::resolveL3Address(const L3Address& address, const InterfaceEntry 
         EV << "ARP cache entry for " << addr << " expired, starting new ARP resolution\n";
         ArpCacheEntry *entry = it->second;
         entry->ie = ie;    // routing table may have changed
-        initiateARPResolution(entry);
+        initiateArpResolution(entry);
     }
     return MacAddress::UNSPECIFIED_ADDRESS;
 }
@@ -444,7 +444,7 @@ L3Address Arp::getL3AddressFor(const MacAddress& macAddr) const
     return Ipv4Address::UNSPECIFIED_ADDRESS;
 }
 
-void Arp::sendARPGratuitous(const InterfaceEntry *ie, MacAddress srcAddr, Ipv4Address ipAddr, ArpOpcode opCode)
+void Arp::sendArpGratuitous(const InterfaceEntry *ie, MacAddress srcAddr, Ipv4Address ipAddr, ArpOpcode opCode)
 {
     Enter_Method_Silent();
 
