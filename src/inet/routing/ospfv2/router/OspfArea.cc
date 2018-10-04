@@ -694,30 +694,24 @@ void Area::ageDatabase()
 
 bool Area::hasAnyNeighborInStates(int states) const
 {
-    long interfaceCount = associatedInterfaces.size();
-    for (long i = 0; i < interfaceCount; i++) {
-        if (associatedInterfaces[i]->hasAnyNeighborInStates(states)) {
+    for (uint32_t i = 0; i < associatedInterfaces.size(); i++) {
+        if (associatedInterfaces[i]->hasAnyNeighborInStates(states))
             return true;
-        }
     }
     return false;
 }
 
 void Area::removeFromAllRetransmissionLists(LsaKeyType lsaKey)
 {
-    long interfaceCount = associatedInterfaces.size();
-    for (long i = 0; i < interfaceCount; i++) {
+    for (uint32_t i = 0; i <  associatedInterfaces.size(); i++)
         associatedInterfaces[i]->removeFromAllRetransmissionLists(lsaKey);
-    }
 }
 
 bool Area::isOnAnyRetransmissionList(LsaKeyType lsaKey) const
 {
-    long interfaceCount = associatedInterfaces.size();
-    for (long i = 0; i < interfaceCount; i++) {
-        if (associatedInterfaces[i]->isOnAnyRetransmissionList(lsaKey)) {
+    for (uint32_t i = 0; i < associatedInterfaces.size(); i++) {
+        if (associatedInterfaces[i]->isOnAnyRetransmissionList(lsaKey))
             return true;
-        }
     }
     return false;
 }
@@ -725,23 +719,19 @@ bool Area::isOnAnyRetransmissionList(LsaKeyType lsaKey) const
 bool Area::floodLSA(const OspfLsa *lsa, OspfInterface *intf, Neighbor *neighbor)
 {
     bool floodedBackOut = false;
-
     for (uint32_t i = 0; i < associatedInterfaces.size(); i++) {
         if (associatedInterfaces[i]->floodLsa(lsa, intf, neighbor)) {
             floodedBackOut = true;
         }
     }
-
     return floodedBackOut;
 }
 
 bool Area::isLocalAddress(Ipv4Address address) const
 {
-    long interfaceCount = associatedInterfaces.size();
-    for (long i = 0; i < interfaceCount; i++) {
-        if (associatedInterfaces[i]->getAddressRange().address == address) {
+    for (uint32_t i = 0; i < associatedInterfaces.size(); i++) {
+        if (associatedInterfaces[i]->getAddressRange().address == address)
             return true;
-        }
     }
     return false;
 }
