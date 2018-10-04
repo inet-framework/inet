@@ -20,15 +20,16 @@
 #define __INET_ARP_H
 
 #include <map>
+#include <vector>
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/common/lifecycle/OperationalBase.h"
-#include "inet/networklayer/contract/IArp.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/networklayer/arp/ipv4/ArpPacket_m.h"
+#include "inet/networklayer/contract/IArp.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 
 namespace inet {
