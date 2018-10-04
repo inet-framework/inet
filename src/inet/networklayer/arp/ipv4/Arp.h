@@ -23,9 +23,9 @@
 
 #include "inet/common/INETDefs.h"
 
+#include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/networklayer/contract/IArp.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/networklayer/arp/ipv4/ArpPacket_m.h"
@@ -42,7 +42,7 @@ class IIpv4RoutingTable;
 /**
  * ARP implementation.
  */
-class INET_API Arp : public cSimpleModule, public IArp, public ILifecycle
+class INET_API Arp : public OperationalBase, public IArp
 {
   public:
     class ArpCacheEntry;
@@ -69,9 +69,6 @@ class INET_API Arp : public cSimpleModule, public IArp, public ILifecycle
     int retryCount = 0;
     simtime_t cacheTimeout;
     bool respondToProxyARP = false;
-
-    bool isUp = false;
-
     long numResolutions = 0;
     long numFailedResolutions = 0;
     long numRequestsSent = 0;
@@ -103,14 +100,16 @@ class INET_API Arp : public cSimpleModule, public IArp, public ILifecycle
 
   protected:
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *msg) override;
-    virtual void handleMessageWhenDown(cMessage *msg);
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void finish() override;
 
-    virtual bool isNodeUp();
-    virtual void stop();
-    virtual void start();
+    // Lifecycle methods
+    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_NETWORK_LAYER; }
+    virtual bool isNodeStartStage(int stage) override { return stage == NodeStartOperation::STAGE_NETWORK_LAYER; }
+    virtual bool isNodeShutdownStage(int stage) override { return stage == NodeShutdownOperation::STAGE_NETWORK_LAYER; }
+    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
+    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
+    virtual void handleNodeCrash() override;
     virtual void flush();
 
     virtual void initiateARPResolution(ArpCacheEntry *entry);

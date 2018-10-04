@@ -55,7 +55,7 @@ Arp::Arp()
 
 void Arp::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    OperationalBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         retryTimeout = par("retryTimeout");
@@ -76,7 +76,6 @@ void Arp::initialize(int stage)
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
-        isUp = isNodeUp();
         registerService(Protocol::arp, gate("netwIn"), gate("ifIn"));
         registerProtocol(Protocol::arp, gate("ifOut"), gate("netwOut"));
     }
@@ -92,13 +91,8 @@ Arp::~Arp()
         delete elem.second;
 }
 
-void Arp::handleMessage(cMessage *msg)
+void Arp::handleMessageWhenUp(cMessage *msg)
 {
-    if (!isUp) {
-        handleMessageWhenDown(msg);
-        return;
-    }
-
     if (msg->isSelfMessage()) {
         requestTimedOut(msg);
     }
@@ -108,45 +102,20 @@ void Arp::handleMessage(cMessage *msg)
     }
 }
 
-void Arp::handleMessageWhenDown(cMessage *msg)
+bool Arp::handleNodeStart(IDoneCallback *doneCallback)
 {
-    if (msg->isSelfMessage())
-        throw cRuntimeError("Model error: self msg '%s' received when protocol is down", msg->getName());
-    EV_WARN << "Protocol is turned off, dropping '" << msg->getName() << "' message\n";
-    delete msg;
-}
-
-bool Arp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-{
-    Enter_Method_Silent();
-
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_NETWORK_LAYER)
-            start();
-    }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_NETWORK_LAYER)
-            stop();
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH)
-            stop();
-    }
-    else {
-        throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
-    }
+    ASSERT(arpCache.empty());
     return true;
 }
 
-void Arp::start()
+bool Arp::handleNodeShutdown(IDoneCallback *doneCallback)
 {
-    ASSERT(arpCache.empty());
-    isUp = true;
+    flush();
+    return true;
 }
 
-void Arp::stop()
+void Arp::handleNodeCrash()
 {
-    isUp = false;
     flush();
 }
 
@@ -160,12 +129,6 @@ void Arp::flush()
         delete entry;
         arpCache.erase(i);
     }
-}
-
-bool Arp::isNodeUp()
-{
-    NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
 }
 
 void Arp::refreshDisplay() const
