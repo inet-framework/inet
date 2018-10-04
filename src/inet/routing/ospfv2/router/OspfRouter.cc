@@ -406,30 +406,24 @@ void Router::ageDatabase()
 
 bool Router::hasAnyNeighborInStates(int states) const
 {
-    long areaCount = areas.size();
-    for (long i = 0; i < areaCount; i++) {
-        if (areas[i]->hasAnyNeighborInStates(states)) {
+    for (uint32_t i = 0; i < areas.size(); i++) {
+        if (areas[i]->hasAnyNeighborInStates(states))
             return true;
-        }
     }
     return false;
 }
 
 void Router::removeFromAllRetransmissionLists(LsaKeyType lsaKey)
 {
-    long areaCount = areas.size();
-    for (long i = 0; i < areaCount; i++) {
+    for (uint32_t i = 0; i < areas.size(); i++)
         areas[i]->removeFromAllRetransmissionLists(lsaKey);
-    }
 }
 
 bool Router::isOnAnyRetransmissionList(LsaKeyType lsaKey) const
 {
-    long areaCount = areas.size();
-    for (long i = 0; i < areaCount; i++) {
-        if (areas[i]->isOnAnyRetransmissionList(lsaKey)) {
+    for (uint32_t i = 0; i < areas.size(); i++) {
+        if (areas[i]->isOnAnyRetransmissionList(lsaKey))
             return true;
-        }
     }
     return false;
 }
@@ -706,8 +700,8 @@ void Router::rebuildRoutingTable()
 
     if (areaCount > 1) {
         Area *backbone = getAreaByID(BACKBONE_AREAID);
-        // if this is an ABR
-        if (backbone != nullptr)
+        // if this is an ABR and at least one adjacency in FULL state is built over the backbone
+        if (backbone && backbone->hasAnyNeighborInStates(Neighbor::FULL_STATE))
             backbone->calculateInterAreaRoutes(newTable);
         else {
             for(auto &area : areas)
