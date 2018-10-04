@@ -25,8 +25,6 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/InterfaceTable.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-#include "inet/common/lifecycle/NodeOperations.h"
-#include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/Simsignals.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 
@@ -47,11 +45,11 @@ DhcpServer::~DhcpServer()
 
 void DhcpServer::initialize(int stage)
 {
+    ApplicationBase::initialize(stage);
+
     if (stage == INITSTAGE_LOCAL) {
         startTimer = new cMessage("Start DHCP server", START_DHCP);
         startTime = par("startTime");
-    }
-    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         numSent = 0;
         numReceived = 0;
         WATCH(numSent);
@@ -61,15 +59,10 @@ void DhcpServer::initialize(int stage)
         // DHCP UDP ports
         clientPort = 68;    // client
         serverPort = 67;    // server
-
+    }
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         cModule *host = getContainingNode(this);
         host->subscribe(interfaceDeletedSignal, this);
-
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(host->getSubmodule("status"));
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-
-        if (isOperational)
-            startApp();
     }
 }
 
@@ -127,7 +120,7 @@ InterfaceEntry *DhcpServer::chooseInterface()
     return ie;
 }
 
-void DhcpServer::handleMessage(cMessage *msg)
+void DhcpServer::handleMessageWhenUp(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
         handleSelfMessages(msg);
@@ -518,8 +511,9 @@ void DhcpServer::sendToUDP(Packet *msg, int srcPort, const L3Address& destAddr, 
     socket.sendTo(msg, destAddr, destPort);
 }
 
-void DhcpServer::startApp()
+bool DhcpServer::handleNodeStart(IDoneCallback *doneCallback)
 {
+    (void)doneCallback; // unused variable
     maxNumOfClients = par("maxNumClients");
     leaseTime = par("leaseTime");
 
@@ -539,6 +533,7 @@ void DhcpServer::startApp()
     if (!Ipv4Address::maskedAddrAreEqual(ipv4data->getIPAddress(), Ipv4Address(ipAddressStart.getInt() + maxNumOfClients - 1), subnetMask))
         throw cRuntimeError("Not enough IP addresses in subnet for %d clients", maxNumOfClients);
     scheduleAt(start, startTimer);
+    return true;
 }
 
 void DhcpServer::stopApp()
@@ -547,32 +542,6 @@ void DhcpServer::stopApp()
     ie = nullptr;
     cancelEvent(startTimer);
     // socket.close(); TODO:
-}
-
-bool DhcpServer::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-{
-    Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_APPLICATION_LAYER) {
-            startApp();
-            isOperational = true;
-        }
-    }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
-            stopApp();
-            isOperational = false;
-        }
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH) {
-            stopApp();
-            isOperational = false;
-        }
-    }
-    else
-        throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
-    return true;
 }
 
 } // namespace inet
