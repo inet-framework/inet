@@ -136,6 +136,21 @@ void MessageSourceAddrFilter::receiveSignal(cResultFilter *prev, simtime_t_cref 
 
 Register_ResultFilter("throughput", ThroughputFilter);
 
+void ThroughputFilter::emitThroughput(simtime_t endInterval, cObject *details)
+{
+    if (bytes == 0) {
+        fire(this, endInterval, 0.0, details);
+        lastSignal = endInterval;
+    }
+    else {
+        double throughput = 8 * bytes / (endInterval - lastSignal).dbl();
+        fire(this, endInterval, throughput, details);
+        lastSignal = endInterval;
+        bytes = 0;
+        packets = 0;
+    }
+}
+
 void ThroughputFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
     if (auto packet = dynamic_cast<cPacket *>(object)) {
@@ -143,35 +158,40 @@ void ThroughputFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObj
         packets++;
         if (packets >= packetLimit) {
             bytes += packet->getByteLength();
-            double throughput = 8 * bytes / (now - lastSignal).dbl();
-            fire(this, now, throughput, details);
-            lastSignal = now;
-            bytes = 0;
-            packets = 0;
+            emitThroughput(now, details);
         }
-        else if (now - lastSignal >= interval) {
-            double throughput = 8 * bytes / interval.dbl();
-            fire(this, lastSignal + interval, throughput, details);
-            lastSignal = lastSignal + interval;
-            bytes = 0;
-            packets = 0;
+        else if (lastSignal + interval <= now) {
+            emitThroughput(lastSignal + interval, details);
             if (emitIntermediateZeros) {
-                while (now - lastSignal >= interval) {
-                    fire(this, lastSignal + interval, 0.0, details);
-                    lastSignal = lastSignal + interval;
-                }
+                while (lastSignal + interval <= now)
+                    emitThroughput(lastSignal + interval, details);
             }
             else {
-                if (now - lastSignal >= interval) { // no packets arrived for a long period
+                if (lastSignal + interval <= now) { // no packets arrived for a long period
                     // zero should have been signaled at the beginning of this packet (approximation)
-                    fire(this, now - interval, 0.0, details);
-                    lastSignal = now - interval;
+                    emitThroughput(now - interval, details);
                 }
             }
             bytes += packet->getByteLength();
         }
         else
             bytes += packet->getByteLength();
+    }
+}
+
+void ThroughputFilter::finish(cComponent *component, simsignal_t signalID)
+{
+    const simtime_t now = simTime();
+    if (lastSignal < now) {
+        cObject *details = nullptr;
+        if (lastSignal + interval < now) {
+            emitThroughput(lastSignal + interval, details);
+            if (emitIntermediateZeros) {
+                while (lastSignal + interval < now)
+                    emitThroughput(lastSignal + interval, details);
+            }
+        }
+        emitThroughput(now, details);
     }
 }
 
@@ -250,7 +270,7 @@ ElapsedTimeFilter::ElapsedTimeFilter()
 
 double ElapsedTimeFilter::getElapsedTime()
 {
-    long t = time(nullptr);
+    time_t t = time(nullptr);
     return t - startTime;
 }
 

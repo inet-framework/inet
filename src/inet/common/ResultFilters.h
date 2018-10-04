@@ -143,6 +143,14 @@ class INET_API MessageSourceAddrFilter : public cObjectResultFilter
 
 /**
  * Filter that expects a cPacket and outputs the throughput as double.
+ * Throughput is computed for the *past* interval every 0.1s or 100 packets,
+ * whichever comes first.
+ *
+ * Note that this filter is unsuitable for interactive use (with instrument figures,
+ * for example), because zeroes for long silent periods are only emitted retroactively,
+ * when the silent period (or the simulation) is over.
+ *
+ * Recommended interpolation mode: backward sample-hold.
  */
 class INET_API ThroughputFilter : public cObjectResultFilter
 {
@@ -155,12 +163,22 @@ class INET_API ThroughputFilter : public cObjectResultFilter
     double bytes = 0;
     int packets = 0;
 
+  protected:
+    void emitThroughput(simtime_t endInterval, cObject *details);
   public:
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+    virtual void finish(cComponent *component, simsignal_t signalID) override;
 };
 
 /**
  * Filter that expects a cPacket and outputs the throughput as double.
+ * Throughput is computed and emitted for the *past* interval strictly
+ * every 0.1s. (To achieve that, this filter employs a timer event.)
+ *
+ * For interactive use (with instrument figures, for example), this filter
+ * should be preferred to ThroughputFilter.
+ *
+ * Recommended interpolation mode: backward sample-hold.
  */
 class INET_API LiveThroughputFilter : public cObjectResultFilter
 {
@@ -185,7 +203,7 @@ class INET_API LiveThroughputFilter : public cObjectResultFilter
 class INET_API ElapsedTimeFilter : public cResultFilter
 {
   protected:
-    long startTime;
+    time_t startTime;
   public:
     ElapsedTimeFilter();
   protected:
