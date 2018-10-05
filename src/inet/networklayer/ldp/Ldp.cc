@@ -232,6 +232,10 @@ bool Ldp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCa
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
         if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH) {
+            for (auto & elem : myPeers)
+                cancelAndDelete(elem.timeout);
+            myPeers.clear();
+            cancelEvent(sendHelloMsg);
         }
     }
     else
