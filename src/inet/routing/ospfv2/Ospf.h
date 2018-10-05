@@ -24,9 +24,9 @@
 
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/routing/base/RoutingLifecycleBase.h"
 #include "inet/routing/ospfv2/OspfPacket_m.h"
 #include "inet/routing/ospfv2/router/OspfRouter.h"
-#include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {
 
@@ -35,13 +35,12 @@ namespace ospf {
 /**
  * Implements the OSPFv2 routing protocol. See the NED file for more information.
  */
-class Ospf : public cSimpleModule, protected cListener, public ILifecycle
+class Ospf : public RoutingLifecycleBase, protected cListener
 {
   private:
     cModule *host = nullptr;    // the host module that owns this module
     IIpv4RoutingTable *rt = nullptr;
     IInterfaceTable *ift = nullptr;
-    bool isUp = false;
     Router *ospfRouter = nullptr;    // root object of the OSPF data structure
     cMessage *startupTimer = nullptr;    // timer for delayed startup
 
@@ -65,12 +64,16 @@ class Ospf : public cSimpleModule, protected cListener, public ILifecycle
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
     virtual void subscribe();
     virtual void unsubscribe();
     virtual void createOspfRouter();
+
+    // lifecycle
+    virtual bool handleNodeStart(IDoneCallback *) override;
+    virtual bool handleNodeShutdown(IDoneCallback *) override;
+    virtual void handleNodeCrash() override;
 };
 
 } // namespace ospf

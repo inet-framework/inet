@@ -21,8 +21,6 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
-#include "inet/common/lifecycle/NodeOperations.h"
-#include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/stlutils.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
@@ -33,7 +31,6 @@
 #include "inet/routing/rip/RipPacket_m.h"
 #include "inet/routing/rip/Rip.h"
 #include "inet/transportlayer/common/L4PortTag_m.h"
-#include "inet/transportlayer/udp/Udp.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 
 namespace inet {
@@ -102,7 +99,7 @@ simsignal_t Rip::numRoutesSignal = registerSignal("numRoutes");
 
 void Rip::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    RoutingLifecycleBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         host = getContainingNode(this);
@@ -136,25 +133,10 @@ void Rip::initialize(int stage)
         WATCH_VECTOR(ripInterfaces);
         WATCH_PTRVECTOR(ripRoutingTable);
     }
-    else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {    // interfaces and static routes are already initialized
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        isOperational = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
-        if (isOperational)
-            scheduleAt(simTime() + par("startupTime"), startupTimer);
-    }
 }
 
-
-void Rip::handleMessage(cMessage *msg)
+void Rip::handleMessageWhenUp(cMessage *msg)
 {
-    if (!isOperational) {
-        if (msg->isSelfMessage())
-            throw cRuntimeError("Model error: self msg '%s' received when isOperational is false", msg->getName());
-        EV_ERROR << "Application is turned off, dropping '" << msg->getName() << "' message\n";
-        delete msg;
-        return;
-    }
-
     if (msg->isSelfMessage()) {
         if (msg == updateTimer) {
             processUpdate(false);
@@ -427,45 +409,34 @@ void Rip::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
         throw cRuntimeError("Unexpected signal: %s", getSignalName(signalID));
 }
 
-bool Rip::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool Rip::handleNodeStart(IDoneCallback *)
 {
-    Enter_Method_Silent();
-
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_ROUTING_PROTOCOLS) {
-            isOperational = true;
-            cancelEvent(startupTimer);
-            scheduleAt(simTime() + par("startupTime"), startupTimer);
-            return true;
-        }
-    }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_ROUTING_PROTOCOLS) {
-            // invalidate routes
-            for (auto & elem : ripRoutingTable)
-                invalidateRoute(elem);
-            // send updates to neighbors
-            for (auto & elem : ripInterfaces)
-                sendRoutes(addressType->getLinkLocalRIPRoutersMulticastAddress(), ripUdpPort, elem, false);
-
-            stopRIPRouting();
-
-            // wait a few seconds before calling doneCallback, so that UDP can send the messages
-            shutdownTimer->setContextPointer(doneCallback);
-            scheduleAt(simTime() + shutdownTime, shutdownTimer);
-
-            return false;
-        }
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH) {
-            stopRIPRouting();
-            isOperational = false;
-            return true;
-        }
-    }
-
+    cancelEvent(startupTimer);
+    scheduleAt(simTime() + par("startupTime"), startupTimer);
     return true;
+}
+
+bool Rip::handleNodeShutdown(IDoneCallback *doneCallback)
+{
+    // invalidate routes
+    for (auto & elem : ripRoutingTable)
+        invalidateRoute(elem);
+    // send updates to neighbors
+    for (auto & elem : ripInterfaces)
+        sendRoutes(addressType->getLinkLocalRIPRoutersMulticastAddress(), ripUdpPort, elem, false);
+
+    stopRIPRouting();
+
+    // wait a few seconds before calling doneCallback, so that UDP can send the messages
+    shutdownTimer->setContextPointer(doneCallback);
+    scheduleAt(simTime() + shutdownTime, shutdownTimer);
+
+    return false;
+}
+
+void Rip::handleNodeCrash()
+{
+    stopRIPRouting();
 }
 
 /**

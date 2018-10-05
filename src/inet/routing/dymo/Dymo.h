@@ -22,16 +22,15 @@
 
 #include <vector>
 #include <map>
-#include <omnetpp.h>
-#include "inet/common/lifecycle/ILifecycle.h"
+
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
-#include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/transportlayer/udp/UdpHeader_m.h"
+#include "inet/routing/base/RoutingLifecycleBase.h"
 #include "inet/routing/dymo/DymoDefs.h"
 #include "inet/routing/dymo/DymoRouteData.h"
 #include "inet/routing/dymo/Dymo_m.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
 
 namespace inet {
 
@@ -53,7 +52,7 @@ namespace dymo {
  *  - 13.6. Message Aggregation
  *    RFC5148 add jitter to broadcasts
  */
-class INET_API Dymo : public cSimpleModule, public ILifecycle, public cListener, public NetfilterBase::HookBase
+class INET_API Dymo : public RoutingLifecycleBase, public cListener, public NetfilterBase::HookBase
 {
   private:
     // Dymo parameters from RFC
@@ -79,7 +78,6 @@ class INET_API Dymo : public cSimpleModule, public ILifecycle, public cListener,
 
     // context
     cModule *host;
-    NodeStatus *nodeStatus;
     IL3AddressType *addressType;
     IInterfaceTable *interfaceTable;
     IRoutingTable *routingTable;
@@ -101,7 +99,7 @@ class INET_API Dymo : public cSimpleModule, public ILifecycle, public cListener,
     // module interface
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     void initialize(int stage) override;
-    void handleMessage(cMessage *message) override;
+    void handleMessageWhenUp(cMessage *message) override;
 
   private:
     // handling messages
@@ -193,7 +191,6 @@ class INET_API Dymo : public cSimpleModule, public ILifecycle, public cListener,
     DymoRouteState getRouteState(DymoRouteData *routeData);
 
     // configuration
-    bool isNodeUp();
     void configureInterfaces();
 
     // address
@@ -218,7 +215,9 @@ class INET_API Dymo : public cSimpleModule, public ILifecycle, public cListener,
     virtual Result datagramLocalOutHook(Packet *datagram) override { Enter_Method("datagramLocalOutHook"); return ensureRouteForDatagram(datagram); }
 
     // lifecycle
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    virtual bool handleNodeStart(IDoneCallback *) override;
+    virtual bool handleNodeShutdown(IDoneCallback *) override;
+    virtual void handleNodeCrash() override;
 
     // notification
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;

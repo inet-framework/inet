@@ -30,7 +30,6 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/lifecycle/NodeOperations.h"
 
 namespace inet {
 namespace aodv {
@@ -39,6 +38,11 @@ Define_Module(Aodv);
 
 void Aodv::initialize(int stage)
 {
+    if (stage == INITSTAGE_ROUTING_PROTOCOLS)
+        addressType = getSelfIPAddress().getAddressType();  // needed for handleNodeStart()
+
+    RoutingLifecycleBase::initialize(stage);
+
     if (stage == INITSTAGE_LOCAL) {
         lastBroadcastTime = SIMTIME_ZERO;
         rebootTime = SIMTIME_ZERO;
@@ -75,48 +79,23 @@ void Aodv::initialize(int stage)
         netTraversalTime = par("netTraversalTime");
         nextHopWait = par("nextHopWait");
         pathDiscoveryTime = par("pathDiscoveryTime");
-    }
-    else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(host->getSubmodule("status"));
-        isOperational = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
-        addressType = getSelfIPAddress().getAddressType();
-        registerService(Protocol::manet, nullptr, gate("ipIn"));
-        registerProtocol(Protocol::manet, gate("ipOut"), nullptr);
-        networkProtocol->registerHook(0, this);
-        host->subscribe(linkBrokenSignal, this);
-
-        if (useHelloMessages) {
-            helloMsgTimer = new cMessage("HelloMsgTimer");
-
-            // RFC 5148:
-            // Jitter SHOULD be applied by reducing this delay by a random amount, so that
-            // the delay between consecutive transmissions of messages of the same type is
-            // equal to (MESSAGE_INTERVAL - jitter), where jitter is the random value.
-            if (isOperational)
-                scheduleAt(simTime() + helloInterval - *periodicJitter, helloMsgTimer);
-        }
-
         expungeTimer = new cMessage("ExpungeTimer");
         counterTimer = new cMessage("CounterTimer");
         rrepAckTimer = new cMessage("RrepAckTimer");
         blacklistTimer = new cMessage("BlackListTimer");
-
-        if (isOperational)
-            scheduleAt(simTime() + 1, counterTimer);
+        if (useHelloMessages)
+            helloMsgTimer = new cMessage("HelloMsgTimer");
+    }
+    else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
+        registerService(Protocol::manet, nullptr, gate("ipIn"));
+        registerProtocol(Protocol::manet, gate("ipOut"), nullptr);
+        networkProtocol->registerHook(0, this);
+        host->subscribe(linkBrokenSignal, this);
     }
 }
 
-void Aodv::handleMessage(cMessage *msg)
+void Aodv::handleMessageWhenUp(cMessage *msg)
 {
-    if (!isOperational) {
-        if (msg->isSelfMessage())
-            throw cRuntimeError("Model error: self msg '%s' received when isOperational is false", msg->getName());
-
-        EV_ERROR << "Application is turned off, dropping '" << msg->getName() << "' message\n";
-        delete msg;
-        return;
-    }
-
     if (msg->isSelfMessage()) {
         if (auto waitForRrep = dynamic_cast<WaitForRrep *>(msg))
             handleWaitForRREP(waitForRrep);
@@ -1194,36 +1173,30 @@ void Aodv::handleRERR(const Ptr<const Rerr>& rerr, const L3Address& sourceAddr)
     }
 }
 
-bool Aodv::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool Aodv::handleNodeStart(IDoneCallback *)
 {
-    Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_ROUTING_PROTOCOLS) {
-            isOperational = true;
-            rebootTime = simTime();
+    rebootTime = simTime();
 
-            if (useHelloMessages)
-                scheduleAt(simTime() + helloInterval - *periodicJitter, helloMsgTimer);
+    // RFC 5148:
+    // Jitter SHOULD be applied by reducing this delay by a random amount, so that
+    // the delay between consecutive transmissions of messages of the same type is
+    // equal to (MESSAGE_INTERVAL - jitter), where jitter is the random value.
+    if (useHelloMessages)
+        scheduleAt(simTime() + helloInterval - *periodicJitter, helloMsgTimer);
 
-            scheduleAt(simTime() + 1, counterTimer);
-        }
-    }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_ROUTING_PROTOCOLS) {
-            isOperational = false;
-            clearState();
-        }
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH) {
-            isOperational = false;
-            clearState();
-        }
-    }
-    else
-        throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
-
+    scheduleAt(simTime() + 1, counterTimer);
     return true;
+}
+
+bool Aodv::handleNodeShutdown(IDoneCallback *)
+{
+    clearState();
+    return true;
+}
+
+void Aodv::handleNodeCrash()
+{
+    clearState();
 }
 
 void Aodv::clearState()

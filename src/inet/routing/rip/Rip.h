@@ -24,8 +24,8 @@
 #include "inet/networklayer/contract/IRoute.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
+#include "inet/routing/base/RoutingLifecycleBase.h"
 #include "inet/routing/rip/RipRouteData.h"
 
 namespace inet {
@@ -88,7 +88,7 @@ struct RipInterfaceEntry
  * 2. There is no merging of subnet routes. RFC 2453 3.7 suggests that subnetted network routes should
  *    not be advertised outside the subnetted network.
  */
-class INET_API Rip : public cSimpleModule, protected cListener, public ILifecycle
+class INET_API Rip : public RoutingLifecycleBase, protected cListener
 {
     enum Mode { RIPv2, RIPng };
     typedef std::vector<RipInterfaceEntry> InterfaceVector;
@@ -115,7 +115,6 @@ class INET_API Rip : public cSimpleModule, protected cListener, public ILifecycl
     simtime_t holdDownTime;
     simtime_t shutdownTime;    // time of shutdown processing
     bool triggeredUpdate = false;
-    bool isOperational = false;
 
     // signals
     static simsignal_t sentRequestSignal;
@@ -131,9 +130,13 @@ public:
 protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+
+    // lifecycle
+    virtual bool handleNodeStart(IDoneCallback *) override;
+    virtual bool handleNodeShutdown(IDoneCallback *) override;
+    virtual void handleNodeCrash() override;
 
     virtual void startRIPRouting();
     virtual void stopRIPRouting();

@@ -70,7 +70,10 @@ Gpsr::~Gpsr()
 
 void Gpsr::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    if (stage == INITSTAGE_ROUTING_PROTOCOLS)
+        addressType = getSelfAddress().getAddressType();
+
+    RoutingLifecycleBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         // Gpsr parameters
@@ -90,7 +93,6 @@ void Gpsr::initialize(int stage)
         displayBubbles = par("displayBubbles");
         // context
         host = getContainingNode(this);
-        nodeStatus = dynamic_cast<NodeStatus *>(host->getSubmodule("status"));
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         outputInterface = par("outputInterface");
         mobility = check_and_cast<IMobility *>(host->getSubmodule("mobility"));
@@ -108,18 +110,12 @@ void Gpsr::initialize(int stage)
         registerService(Protocol::manet, nullptr, gate("ipIn"));
         registerProtocol(Protocol::manet, gate("ipOut"), nullptr);
         host->subscribe(linkBrokenSignal, this);
-        addressType = getSelfAddress().getAddressType();
         networkProtocol->registerHook(0, this);
-        if (isNodeUp()) {
-            configureInterfaces();
-            storeSelfPositionInGlobalRegistry();
-            scheduleBeaconTimer();
-        }
         WATCH(neighborPositionTable);
     }
 }
 
-void Gpsr::handleMessage(cMessage *message)
+void Gpsr::handleMessageWhenUp(cMessage *message)
 {
     if (message->isSelfMessage())
         processSelfMessage(message);
@@ -286,11 +282,6 @@ int Gpsr::computeOptionLength(GpsrOption *option)
 //
 // configuration
 //
-
-bool Gpsr::isNodeUp() const
-{
-    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
-}
 
 void Gpsr::configureInterfaces()
 {
@@ -795,34 +786,28 @@ INetfilter::IHook::Result Gpsr::datagramLocalOutHook(Packet *packet)
 // lifecycle
 //
 
-bool Gpsr::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool Gpsr::handleNodeStart(IDoneCallback *)
 {
-    Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_ROUTING_PROTOCOLS) {
-            configureInterfaces();
-            storeSelfPositionInGlobalRegistry();
-            scheduleBeaconTimer();
-        }
-    }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_ROUTING_PROTOCOLS) {
-            // TODO: send a beacon to remove ourself from peers neighbor position table
-            neighborPositionTable.clear();
-            cancelEvent(beaconTimer);
-            cancelEvent(purgeNeighborsTimer);
-        }
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH) {
-            neighborPositionTable.clear();
-            cancelEvent(beaconTimer);
-            cancelEvent(purgeNeighborsTimer);
-        }
-    }
-    else
-        throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    configureInterfaces();
+    storeSelfPositionInGlobalRegistry();
+    scheduleBeaconTimer();
     return true;
+}
+
+bool Gpsr::handleNodeShutdown(IDoneCallback *)
+{
+    // TODO: send a beacon to remove ourself from peers neighbor position table
+    neighborPositionTable.clear();
+    cancelEvent(beaconTimer);
+    cancelEvent(purgeNeighborsTimer);
+    return true;
+}
+
+void Gpsr::handleNodeCrash()
+{
+    neighborPositionTable.clear();
+    cancelEvent(beaconTimer);
+    cancelEvent(purgeNeighborsTimer);
 }
 
 //

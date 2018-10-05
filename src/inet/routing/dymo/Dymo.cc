@@ -19,7 +19,6 @@
 
 #include "inet/common/INETMath.h"
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -62,7 +61,6 @@ Dymo::Dymo() :
     minHopLimit(-1),
     maxHopLimit(-1),
     host(nullptr),
-    nodeStatus(nullptr),
     addressType(nullptr),
     interfaceTable(nullptr),
     routingTable(nullptr),
@@ -85,7 +83,11 @@ Dymo::~Dymo()
 
 void Dymo::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
+        addressType = getSelfAddress().getAddressType();    // addressType need for handleNodeStart()  and handleNodeStart() called by RoutingLifecycleBase::initialize();
+    }
+
+    RoutingLifecycleBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         // Dymo parameters from RFC
@@ -109,7 +111,6 @@ void Dymo::initialize(int stage)
         maxHopLimit = par("maxHopLimit");
         // context
         host = getContainingNode(this);
-        nodeStatus = dynamic_cast<NodeStatus *>(host->getSubmodule("status"));
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         routingTable = getModuleFromPar<IRoutingTable>(par("routingTableModule"), this);
         networkProtocol = getModuleFromPar<INetfilter>(par("networkProtocolModule"), this);
@@ -137,17 +138,12 @@ void Dymo::initialize(int stage)
         registerService(Protocol::manet, nullptr, gate("ipIn"));
         registerProtocol(Protocol::manet, gate("ipOut"), nullptr);
         host->subscribe(linkBrokenSignal, this);
-        addressType = getSelfAddress().getAddressType();
         networkProtocol->registerHook(0, this);
-        if (isNodeUp())
-            configureInterfaces();
     }
 }
 
-void Dymo::handleMessage(cMessage *message)
+void Dymo::handleMessageWhenUp(cMessage *message)
 {
-    if (!isNodeUp())
-        throw cRuntimeError("Routing protocol is not running");
     if (message->isSelfMessage())
         processSelfMessage(message);
     else
@@ -1276,11 +1272,6 @@ DymoRouteState Dymo::getRouteState(DymoRouteData *routeData)
 // configuration
 //
 
-bool Dymo::isNodeUp()
-{
-    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
-}
-
 void Dymo::configureInterfaces()
 {
     // join multicast groups
@@ -1405,30 +1396,25 @@ INetfilter::IHook::Result Dymo::ensureRouteForDatagram(Packet *datagram)
 // lifecycle
 //
 
-bool Dymo::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool Dymo::handleNodeStart(IDoneCallback *)
 {
-    Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_ROUTING_PROTOCOLS)
-            configureInterfaces();
-    }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_ROUTING_PROTOCOLS)
-            // TODO: send a RERR to notify peers about broken routes
-            for (auto & elem : targetAddressToRREQTimer)
-                cancelRouteDiscovery(elem.first);
-
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH) {
-            targetAddressToSequenceNumber.clear();
-            targetAddressToRREQTimer.clear();
-            targetAddressToDelayedPackets.clear();
-        }
-    }
-    else
-        throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    configureInterfaces();
     return true;
+}
+
+bool Dymo::handleNodeShutdown(IDoneCallback *)
+{
+    // TODO: send a RERR to notify peers about broken routes
+    for (auto & elem : targetAddressToRREQTimer)
+        cancelRouteDiscovery(elem.first);
+    return true;
+}
+
+void Dymo::handleNodeCrash()
+{
+    targetAddressToSequenceNumber.clear();
+    targetAddressToRREQTimer.clear();
+    targetAddressToDelayedPackets.clear();
 }
 
 //

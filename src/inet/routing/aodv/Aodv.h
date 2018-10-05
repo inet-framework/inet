@@ -22,14 +22,13 @@
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
-#include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/networklayer/contract/INetfilter.h"
-#include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/transportlayer/contract/udp/UdpSocket.h"
-#include "inet/routing/aodv/AodvRouteData.h"
-#include "inet/transportlayer/udp/UdpHeader_m.h"
+#include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/routing/aodv/AodvControlPackets_m.h"
+#include "inet/routing/aodv/AodvRouteData.h"
+#include "inet/routing/base/RoutingLifecycleBase.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
 #include <map>
 
 namespace inet {
@@ -40,7 +39,7 @@ namespace aodv {
  * in the IP-layer required by this protocol.
  */
 
-class INET_API Aodv : public cSimpleModule, public ILifecycle, public NetfilterBase::HookBase, public cListener
+class INET_API Aodv : public RoutingLifecycleBase, public NetfilterBase::HookBase, public cListener
 {
   protected:
     /*
@@ -134,13 +133,12 @@ class INET_API Aodv : public cSimpleModule, public ILifecycle, public NetfilterB
 
     // lifecycle
     simtime_t rebootTime;    // the last time when the node rebooted
-    bool isOperational = false;
 
     // internal
     std::multimap<L3Address, Packet *> targetAddressToDelayedPackets;    // queue for the datagrams we have no route for
 
   protected:
-    void handleMessage(cMessage *msg) override;
+    void handleMessageWhenUp(cMessage *msg) override;
     void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
@@ -208,7 +206,9 @@ class INET_API Aodv : public cSimpleModule, public ILifecycle, public NetfilterB
     void clearState();
 
     /* Lifecycle */
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    virtual bool handleNodeStart(IDoneCallback *) override;
+    virtual bool handleNodeShutdown(IDoneCallback *) override;
+    virtual void handleNodeCrash() override;
 
   public:
     Aodv();
