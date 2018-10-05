@@ -27,8 +27,7 @@ package inet.visualizer.base;
 // The format string can contain the following directives:
 //  - %n module full name
 //  - %p module full path
-//  - %d display string text
-//  - %i cModule::info()
+//  - %t display string text
 //  - %s cModule::str()
 //
 // @see ~InfoCanvasVisualizer, ~InfoOsgVisualizer, ~IInfoVisualizer, ~VisualizerBase

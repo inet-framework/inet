@@ -36,7 +36,7 @@ const char *InfoVisualizerBase::DirectiveResolver::resolveDirective(char directi
         case 'p':
             result = module->getFullPath();
             break;
-        case 'd':
+        case 't':
             result = module->getDisplayString().getTagArg("t", 0);
             break;
         case 's':
