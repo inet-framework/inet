@@ -70,7 +70,8 @@ bool OperationalBase::handleOperationStage(LifecycleOperation *operation, int st
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
         if (isNodeShutdownStage(stage)) {
             bool done = handleNodeShutdown(doneCallback);
-            setOperational(false);
+            if (done)
+                setOperational(false);
             return done;
         }
     }
