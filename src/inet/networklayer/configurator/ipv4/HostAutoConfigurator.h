@@ -19,10 +19,9 @@
 #ifndef __INET_HOSTAUTOCONFIGURATOR_H
 #define __INET_HOSTAUTOCONFIGURATOR_H
 
-#include <omnetpp.h>
 #include "inet/common/INETDefs.h"
-#include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/lifecycle/OperationalBase.h"
+#include "inet/common/lifecycle/NodeOperations.h"
 
 namespace inet {
 
@@ -34,17 +33,24 @@ namespace inet {
  *
  * @author Christoph Sommer
  */
-class INET_API HostAutoConfigurator : public cSimpleModule, public ILifecycle
+class INET_API HostAutoConfigurator : public OperationalBase
 {
   public:
     virtual void initialize(int stage) override;
     virtual void finish() override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
 
   protected:
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    // lifecycle
+    virtual bool handleNodeStart(IDoneCallback *) override { setupNetworkLayer(); return true; }
+    virtual bool handleNodeShutdown(IDoneCallback *) override { return true; }
+    virtual void handleNodeCrash() override {}
+    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_NETWORK_CONFIGURATION; }
+    virtual bool isNodeStartStage(int stage) override { return stage == NodeStartOperation::STAGE_NETWORK_LAYER; }
+    virtual bool isNodeShutdownStage(int stage) override { return stage == NodeShutdownOperation::STAGE_NETWORK_LAYER; }
+
     virtual void setupNetworkLayer();
 };
 
