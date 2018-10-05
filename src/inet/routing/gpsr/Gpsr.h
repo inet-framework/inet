@@ -98,8 +98,8 @@ class INET_API Gpsr : public RoutingLifecycleBase, public cListener, public Netf
     void processPurgeNeighborsTimer();
 
     // handling UDP packets
-    void sendUDPPacket(Packet *packet);
-    void processUDPPacket(Packet *packet);
+    void sendUdpPacket(Packet *packet);
+    void processUdpPacket(Packet *packet);
 
     // handling beacons
     const Ptr<GpsrBeacon> createBeacon();

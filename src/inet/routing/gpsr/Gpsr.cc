@@ -140,7 +140,7 @@ void Gpsr::processSelfMessage(cMessage *message)
 void Gpsr::processMessage(cMessage *message)
 {
     if (auto pk = dynamic_cast<Packet *>(message))
-        processUDPPacket(pk);
+        processUdpPacket(pk);
     else
         throw cRuntimeError("Unknown message");
 }
@@ -202,12 +202,12 @@ void Gpsr::processPurgeNeighborsTimer()
 // handling UDP packets
 //
 
-void Gpsr::sendUDPPacket(Packet *packet)
+void Gpsr::sendUdpPacket(Packet *packet)
 {
     send(packet, "ipOut");
 }
 
-void Gpsr::processUDPPacket(Packet *packet)
+void Gpsr::processUdpPacket(Packet *packet)
 {
     packet->popAtFront<UdpHeader>();
     processBeacon(packet);
@@ -242,7 +242,7 @@ void Gpsr::sendBeacon(const Ptr<GpsrBeacon>& beacon)
     udpPacket->addTagIfAbsent<HopLimitReq>()->setHopLimit(255);
     udpPacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::manet);
     udpPacket->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
-    sendUDPPacket(udpPacket);
+    sendUdpPacket(udpPacket);
 }
 
 void Gpsr::processBeacon(Packet *packet)
