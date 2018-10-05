@@ -1,3 +1,14 @@
+ERRORS:
+
+- Earth & Network node visualization showcases (and possibly others):
+*.visualizer.osgVisualizer.typename = "IntegratedOsgVisualizer" # TODO: remove when enabled by default
+- Transportconnection showcase: A runtime error occurred:
+Tag 'inet::Ipv4InterfaceData' is absent -- in module (inet::visualizer::TransportConnectionCanvasVisualizer) TransportConnectionVisualizationMultipleConnectionsShowcase.visualizer.canvasVisualizer.transportConnectionVisualizer (id=222), at t=0.00006972s, event #232
+- RadioVisualizer: displayAntennaLobes parameter is unused (cannot turn off antenna lobe visualization)
+- RoutingTableVisualizer: Tag 'inet::Ipv4InterfaceData' is absent -- in module (inet::visualizer::RoutingTableCanvasVisualizer)
+
+MISC:
+
 - Ieee80211LevelOfDetail: packet level: Implicit chunk serialization is disabled to prevent unpredictable performance degradation (you may consider changing the Chunk::enableImplicitChunkSerialization flag or passing the PF_ALLOW_SERIALIZATION flag to peek) -- in module (inet::ieee80211::Rx) Ieee80211LevelofDetailShowcase.host[0].wlan[0].mac.rx (id=60), at t=0.374724514587s, event #15
 - Ieee80211LevelOfDetail: bit level when out of communication range: The calculated data field length = 4032 is greater then the actual bitvector length = 1392 -- in module (inet::physicallayer::Ieee80211OFDMRadio) Ieee80211LevelofDetailShowcase.host[0].wlan[0].
 - Netmask routes default metric should be higher than the metric of routes added by the configurator ? need some sensible default
