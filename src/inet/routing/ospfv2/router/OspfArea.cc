@@ -2354,62 +2354,55 @@ void Area::calculateInterAreaRoutes(std::vector<OspfRoutingTableEntry *>& newRou
                 break;
             }
         }
-        if (borderRouterEntry == nullptr) {
+        if (!borderRouterEntry)
+            continue;
+
+        /* (5) "this LSA describes an inter-area path to destination N,
+         * whose cost is the distance to BR plus the cost specified in the LSA.
+         * Call the cost of this inter-area path IAC."
+         */
+        bool destinationInRoutingTable = true;
+        unsigned short currentCost = routeCost + borderRouterEntry->getCost();
+        std::list<OspfRoutingTableEntry *> sameOrWorseCost;
+
+        if (findSameOrWorseCostRoute(newRoutingTable,
+                *currentLSA,
+                currentCost,
+                destinationInRoutingTable,
+                sameOrWorseCost))
+        {
             continue;
         }
-        else {    // (5)
-            /* "Else, this LSA describes an inter-area path to destination N,
-             * whose cost is the distance to BR plus the cost specified in the LSA.
-             * Call the cost of this inter-area path IAC."
+
+        if (destinationInRoutingTable && (sameOrWorseCost.size() > 0)) {
+            OspfRoutingTableEntry *equalEntry = nullptr;
+
+            /* Look for an equal cost entry in the sameOrWorseCost list, and
+             * also clear the more expensive entries from the newRoutingTable.
              */
-            bool destinationInRoutingTable = true;
-            unsigned short currentCost = routeCost + borderRouterEntry->getCost();
-            std::list<OspfRoutingTableEntry *> sameOrWorseCost;
-
-            if (findSameOrWorseCostRoute(newRoutingTable,
-                        *currentLSA,
-                        currentCost,
-                        destinationInRoutingTable,
-                        sameOrWorseCost))
-            {
-                continue;
-            }
-
-            if (destinationInRoutingTable && (sameOrWorseCost.size() > 0)) {
-                OspfRoutingTableEntry *equalEntry = nullptr;
-
-                /* Look for an equal cost entry in the sameOrWorseCost list, and
-                 * also clear the more expensive entries from the newRoutingTable.
-                 */
-                //FIXME The code does not work according to the comment
-                for (auto checkedEntry : sameOrWorseCost) {
-                    if (checkedEntry->getCost() > currentCost) {
-                        for (auto entryIt = newRoutingTable.begin(); entryIt != newRoutingTable.end(); entryIt++) {
-                            if (checkedEntry == (*entryIt)) {
-                                newRoutingTable.erase(entryIt);
-                                break;
-                            }
+            //FIXME The code does not work according to the comment
+            for (auto checkedEntry : sameOrWorseCost) {
+                if (checkedEntry->getCost() > currentCost) {
+                    for (auto entryIt = newRoutingTable.begin(); entryIt != newRoutingTable.end(); entryIt++) {
+                        if (checkedEntry == (*entryIt)) {
+                            newRoutingTable.erase(entryIt);
+                            break;
                         }
                     }
-                    else {    // EntryCost == currentCost
-                        equalEntry = checkedEntry;    // should be only one - if there are more they are ignored
-                    }
                 }
-
-                unsigned long nextHopCount = borderRouterEntry->getNextHopCount();
-
-                if (equalEntry != nullptr) {
-                    /* Add the next hops of the border router advertising this destination
-                     * to the equal entry.
-                     */
-                    for (unsigned long j = 0; j < nextHopCount; j++) {
-                        equalEntry->addNextHop(borderRouterEntry->getNextHop(j));
-                    }
+                else {    // EntryCost == currentCost
+                    equalEntry = checkedEntry;    // should be only one - if there are more they are ignored
                 }
-                else {
-                    OspfRoutingTableEntry *newEntry = createRoutingTableEntryFromSummaryLSA(*currentLSA, currentCost, *borderRouterEntry);
-                    ASSERT(newEntry != nullptr);
-                    newRoutingTable.push_back(newEntry);
+            }
+
+            unsigned long nextHopCount = borderRouterEntry->getNextHopCount();
+
+            if (equalEntry != nullptr) {
+                /* Add the next hops of the border router advertising this destination
+                 * to the equal entry.
+                 */
+                for (unsigned long j = 0; j < nextHopCount; j++) {
+                    equalEntry->addNextHop(borderRouterEntry->getNextHop(j));
                 }
             }
             else {
@@ -2417,6 +2410,11 @@ void Area::calculateInterAreaRoutes(std::vector<OspfRoutingTableEntry *>& newRou
                 ASSERT(newEntry != nullptr);
                 newRoutingTable.push_back(newEntry);
             }
+        }
+        else {
+            OspfRoutingTableEntry *newEntry = createRoutingTableEntryFromSummaryLSA(*currentLSA, currentCost, *borderRouterEntry);
+            ASSERT(newEntry != nullptr);
+            newRoutingTable.push_back(newEntry);
         }
     }
 }
