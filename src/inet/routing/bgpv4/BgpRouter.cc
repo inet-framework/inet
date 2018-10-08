@@ -118,7 +118,7 @@ void BgpRouter::addToAdvertiseList(Ipv4Address address)
         }
     }
     if(!routeFound)
-        throw cRuntimeError("No valid route exists for network '%s' in router %s", address.str(false), bgpModule->getFullName());
+        throw cRuntimeError("Network address '%s' is not found in the routing table of %s", address.str(false).c_str(), bgpModule->getOwner()->getFullName());
 
     BgpRoutingTableEntry *BGPEntry = new BgpRoutingTableEntry(rtEntry);
     BGPEntry->addAS(myAsId);
