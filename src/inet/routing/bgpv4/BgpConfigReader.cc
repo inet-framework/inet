@@ -52,6 +52,9 @@ void BgpConfigReader::loadConfigFromXML(cXMLElement *bgpConfig, BgpRouter *bgpRo
 
     bgpRouter->setAsId(myAsId);
 
+    bool nextHopSelf = bgpModule->par("nextHopSelf").boolValue();
+    bgpRouter->setNextHopSelf(nextHopSelf);
+
     // load EGP Session informations
     cXMLElementList sessionList = bgpConfig->getElementsByTagName("Session");
     simtime_t saveStartDelay = delayTab[3];

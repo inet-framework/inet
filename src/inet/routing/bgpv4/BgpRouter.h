@@ -47,6 +47,7 @@ private:
     bool redistributeInternal = false;
     bool redistributeRip = false;
     bool redistributeOspf = false;
+    bool nextHopSelf = false;
     SocketMap _socketMap;
     SessionId _currSessionId = 0;
     std::map<SessionId, BgpSession *> _BGPSessions;
@@ -77,6 +78,8 @@ private:
     void setRedistributeRip(bool x) { this->redistributeRip = x; }
     bool getRedistributeOspf() { return redistributeOspf; }
     void setRedistributeOspf(bool x) { this->redistributeOspf = x; }
+    void setNextHopSelf(bool x) { this->nextHopSelf = x; }
+    bool getNextHopSelf() { return nextHopSelf; }
     void addWatches();
     void recordStatistics();
 

@@ -433,8 +433,11 @@ unsigned char BgpRouter::decisionProcess(const BgpUpdateMessage& msg, BgpRouting
     else {
         // and the Update msg is coming from IGP session
         if (_BGPSessions[sessionIndex]->getType() == IGP) {
-            entry->setInterface(_BGPSessions[sessionIndex]->getLinkIntf());
-            rt->addRoute(entry);
+            // if the next hop is reachable
+            if(isInRoutingTable(rt, entry->getGateway()) != -1) {
+                entry->setInterface(_BGPSessions[sessionIndex]->getLinkIntf());
+                rt->addRoute(entry);
+            }
         }
     }
 
@@ -526,9 +529,13 @@ void BgpRouter::updateSendProcess(const unsigned char type, SessionId sessionInd
                 }
             }
 
-            InterfaceEntry *iftEntry = (elem).second->getLinkIntf();
+            if(_BGPSessions[sessionIndex]->getType() == EGP || nextHopSelf) {
+                InterfaceEntry *iftEntry = (elem).second->getLinkIntf();
+                content.getNextHopForUpdate().setValue(iftEntry->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
+            }
+            else
+                content.getNextHopForUpdate().setValue(entry->getGateway());
             content.getOriginForUpdate().setValue((elem).second->getType());
-            content.getNextHopForUpdate().setValue(iftEntry->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
             Ipv4Address netMask = entry->getNetmask();
             NLRI.prefix = entry->getDestination().doAnd(netMask);
             NLRI.length = (unsigned char)netMask.getNetmaskLength();
@@ -804,4 +811,3 @@ bool BgpRouter::isDefaultRoute(const Ipv4Route *entry) const
 } // namespace bgp
 
 } // namespace inet
-
