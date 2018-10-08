@@ -778,7 +778,9 @@ bool BgpRouter::isRouteExcluded(const Ipv4Route &rtEntry)
     }
 
     if (rtEntry.getSourceType() == IRoute::IFACENETMASK) {
-        if(!redistributeRip && !redistributeOspf)
+        if(rtEntry.getInterface()->isLoopback())
+            return true;
+        else if(!redistributeRip && !redistributeOspf)
             return true;
         else
             return isExternalAddress(rtEntry);
