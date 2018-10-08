@@ -144,7 +144,6 @@ class INET_API EtherMacBase : public MacBase
     cChannel *transmissionChannel = nullptr;    // transmission channel
     cGate *physInGate = nullptr;    // pointer to the "phys$i" gate
     cGate *physOutGate = nullptr;    // pointer to the "phys$o" gate
-    cGate *upperLayerInGate = nullptr;    // pointer to the "upperLayerIn" gate
 
     // state
     bool channelsDiffer = false;    // true when tx and rx channels differ (only one of them exists, or 'datarate' or 'disable' parameters differ) (configuration error, or between changes of tx/rx channels)
@@ -193,7 +192,9 @@ class INET_API EtherMacBase : public MacBase
     MacTransmitState getTransmitState(){ return transmitState; }
     MacReceiveState getReceiveState(){ return receiveState; }
 
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
+    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
+    virtual void handleNodeCrash() override;
 
   protected:
     //  initialization
@@ -230,7 +231,6 @@ class INET_API EtherMacBase : public MacBase
     virtual void configureInterfaceEntry() override;
     virtual void flushQueue() override;
     virtual void clearQueue() override;
-    virtual bool isUpperMsg(cMessage *msg) override { return msg->getArrivalGate() == upperLayerInGate; }
 
     // display
     virtual void refreshDisplay() const override;

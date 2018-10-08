@@ -64,28 +64,21 @@ void Loopback::configureInterfaceEntry()
     ie->setLoopback(true);
 }
 
-void Loopback::handleMessage(cMessage *msg)
+void Loopback::handleUpperPacket(Packet *packet)
 {
-    if (!isOperational) {
-        handleMessageWhenDown(msg);
-        return;
-    }
-
-    auto packet = check_and_cast<Packet *>(msg);
-    emit(packetReceivedFromUpperSignal, packet);
     EV << "Received " << packet << " for transmission\n";
     ASSERT(packet->hasBitError() == false);
 
     // pass up payload
     numRcvdOK++;
-    emit(packetSentToUpperSignal, packet);
     numSent++;
     auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     packet->clearTags();
     packet->addTag<DispatchProtocolReq>()->setProtocol(protocol);
     packet->addTag<PacketProtocolTag>()->setProtocol(protocol);
     packet->addTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
-    send(packet, "upperLayerOut");
+    emit(packetSentToUpperSignal, packet);
+    send(packet, upperLayerOutGateId);
 }
 
 void Loopback::flushQueue()
@@ -96,11 +89,6 @@ void Loopback::flushQueue()
 void Loopback::clearQueue()
 {
     // do nothing, lo interface doesn't have any queue
-}
-
-bool Loopback::isUpperMsg(cMessage *msg)
-{
-    return true;
 }
 
 void Loopback::refreshDisplay() const

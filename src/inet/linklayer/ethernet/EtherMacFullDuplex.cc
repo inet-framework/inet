@@ -67,7 +67,7 @@ void EtherMacFullDuplex::initializeFlags()
     physInGate->setDeliverOnReceptionStart(false);
 }
 
-void EtherMacFullDuplex::handleMessage(cMessage *msg)
+void EtherMacFullDuplex::handleMessageWhenUp(cMessage *msg)
 {
     if (!isOperational) {
         handleMessageWhenDown(msg);
@@ -79,8 +79,8 @@ void EtherMacFullDuplex::handleMessage(cMessage *msg)
 
     if (msg->isSelfMessage())
         handleSelfMessage(msg);
-    else if (msg->getArrivalGate() == upperLayerInGate)
-        processFrameFromUpperLayer(check_and_cast<Packet *>(msg));
+    else if (msg->getArrivalGateId() == upperLayerInGateId)
+        handleUpperPacket(check_and_cast<Packet *>(msg));
     else if (msg->getArrivalGate() == physInGate)
         processMsgFromNetwork(check_and_cast<EthernetSignal *>(msg));
     else
@@ -139,7 +139,7 @@ void EtherMacFullDuplex::startFrameTransmission()
     changeTransmissionState(TRANSMITTING_STATE);
 }
 
-void EtherMacFullDuplex::processFrameFromUpperLayer(Packet *packet)
+void EtherMacFullDuplex::handleUpperPacket(Packet *packet)
 {
     ASSERT(packet->getDataLength() >= MIN_ETHERNET_FRAME_BYTES);
 
@@ -364,7 +364,7 @@ void EtherMacFullDuplex::processReceivedDataFrame(Packet *packet, const Ptr<cons
     emit(packetSentToUpperSignal, packet);
     // pass up to upper layer
     EV_INFO << "Sending " << packet << " to upper layer.\n";
-    send(packet, "upperLayerOut");
+    send(packet, upperLayerOutGateId);
 }
 
 void EtherMacFullDuplex::processPauseCommand(int pauseUnits)

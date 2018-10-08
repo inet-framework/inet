@@ -69,7 +69,6 @@ class INET_API Ppp : public MacBase
 
     // MacBase functions
     virtual void configureInterfaceEntry() override;
-    virtual bool isUpperMsg(cMessage *msg) override { return msg->arrivedOn("upperLayerIn"); }
     virtual void flushQueue() override;
     virtual void clearQueue() override;
 
@@ -79,7 +78,9 @@ class INET_API Ppp : public MacBase
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void handleSelfMessage(cMessage *message) override;
+    virtual void handleUpperPacket(Packet *packet) override;
+    virtual void handleLowerPacket(Packet *packet) override;
 };
 
 } // namespace inet

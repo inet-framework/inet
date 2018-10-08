@@ -43,7 +43,6 @@ class INET_API Loopback : public MacBase
     virtual void configureInterfaceEntry() override;
     virtual void flushQueue() override;
     virtual void clearQueue() override;
-    virtual bool isUpperMsg(cMessage *msg) override;
 
   public:
     Loopback() {}
@@ -52,7 +51,7 @@ class INET_API Loopback : public MacBase
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void handleUpperPacket(Packet *packet) override;
     virtual void refreshDisplay() const override;
 };
 
