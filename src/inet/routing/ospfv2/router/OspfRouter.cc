@@ -1240,6 +1240,15 @@ void Router::notifyAboutRoutingTableChanges(std::vector<OspfRoutingTableEntry *>
                             delete lsaToReoriginate;
                         }
 
+                        /*
+                         * A router uses initial sequence number the first time it originates any LSA.
+                         * Afterwards, the LSA's sequence number is incremented each time the router
+                         * originates a new instance of the LSA.
+                         */
+                        int32_t sequenceNumber = newLSA->getHeader().getLsSequenceNumber();
+                        if (sequenceNumber != MAX_SEQUENCE_NUMBER)
+                            newLSA->getHeaderForUpdate().setLsSequenceNumber(sequenceNumber + 1);
+
                         areas[i]->installSummaryLSA(newLSA);
                         floodLSA(newLSA, areas[i]->getAreaID());
 
