@@ -34,8 +34,6 @@ Define_Module(Tun);
 void Tun::initialize(int stage)
 {
     MacBase::initialize(stage);
-    if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION)
-        registerInterface();
 }
 
 void Tun::configureInterfaceEntry()

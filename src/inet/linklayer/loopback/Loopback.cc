@@ -47,8 +47,6 @@ void Loopback::initialize(int stage)
         WATCH(numSent);
         WATCH(numRcvdOK);
     }
-    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION)
-        registerInterface();
 }
 
 void Loopback::configureInterfaceEntry()

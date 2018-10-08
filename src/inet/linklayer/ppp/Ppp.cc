@@ -70,8 +70,6 @@ void Ppp::initialize(int stage)
         // find queueModule
         queueModule = nullptr;
     }
-    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION)
-        registerInterface();
     else if (stage == INITSTAGE_LINK_LAYER) {
         if (par("queueModule").stringValue()[0]) {
             cModule *mod = getModuleFromPar<cModule>(par("queueModule"), this);
