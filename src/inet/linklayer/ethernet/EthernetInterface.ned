@@ -62,16 +62,23 @@ module EthernetInterface like IEthernetInterface
             parameters:
                 @display("p=250,300");
         }
+        vlan: <default("EtherVlan")> like IEtherVlan {
+            parameters:
+                @display("p=250,400");
+        }
     connections:
-        mac.upperLayerOut --> encap.lowerLayerIn;
+        mac.upperLayerOut --> vlan.lowerLayerIn;
         mac.phys <--> { @display("m=s"); } <--> phys;
 
+        encap.lowerLayerOut --> vlan.upperLayerIn;
+        encap.lowerLayerIn <-- vlan.upperLayerOut;
+
         if exists(queue) {
-            encap.lowerLayerOut --> queue.in;
+            vlan.lowerLayerOut --> queue.in;
             queue.out --> mac.upperLayerIn;
         }
 
-        encap.lowerLayerOut --> mac.upperLayerIn if !exists(queue);
+        vlan.lowerLayerOut --> mac.upperLayerIn if !exists(queue);
 
         // no ingressTC
         encap.upperLayerOut --> { @display("m=n"); } --> upperLayerOut if !exists(ingressTC);
