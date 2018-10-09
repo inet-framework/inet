@@ -35,6 +35,11 @@ enum EthernetControlOpCode
 
 enum SapCode;
 
+class EthernetVlanTag extends FieldsChunk
+{
+    int vlanId = -1;
+}
+
 //
 // Ethernet MAC header
 //
@@ -43,6 +48,8 @@ class EthernetMacHeader extends FieldsChunk
     chunkLength = B(14);
     MacAddress dest;
     MacAddress src;
+    EthernetVlanTag cTag;
+    EthernetVlanTag sTag;
     int typeOrLength;
 }
 
