@@ -32,6 +32,14 @@ void EthernetMacHeaderSerializer::serialize(MemoryOutputStream& stream, const Pt
     const auto& ethernetMacHeader = staticPtrCast<const EthernetMacHeader>(chunk);
     stream.writeMacAddress(ethernetMacHeader->getDest());
     stream.writeMacAddress(ethernetMacHeader->getSrc());
+    if (ethernetMacHeader->getSTag().getVlanId() != -1) {
+        stream.writeUint16Be(0x88A8);
+        stream.writeUint16Be(ethernetMacHeader->getSTag().getVlanId());
+    }
+    if (ethernetMacHeader->getCTag().getVlanId() != -1) {
+        stream.writeUint16Be(0x8100);
+        stream.writeUint16Be(ethernetMacHeader->getCTag().getVlanId());
+    }
     stream.writeUint16Be(ethernetMacHeader->getTypeOrLength());
 }
 
@@ -40,10 +48,15 @@ const Ptr<Chunk> EthernetMacHeaderSerializer::deserialize(MemoryInputStream& str
     Ptr<EthernetMacHeader> ethernetMacHeader = makeShared<EthernetMacHeader>();
     MacAddress destAddr = stream.readMacAddress();
     MacAddress srcAddr = stream.readMacAddress();
-    uint16_t typeOrLength = stream.readUint16Be();
+    uint16_t value = stream.readUint16Be();
     ethernetMacHeader->setDest(destAddr);
     ethernetMacHeader->setSrc(srcAddr);
-    ethernetMacHeader->setTypeOrLength(typeOrLength);
+    if (value == 0x88A8)
+        ethernetMacHeader->getSTagForUpdate().setVlanId(stream.readUint16Be() & 0xFFF);
+    else if (value == 0x8100)
+        ethernetMacHeader->getCTagForUpdate().setVlanId(stream.readUint16Be() & 0xFFF);
+    else
+        ethernetMacHeader->setTypeOrLength(value);
     return ethernetMacHeader;
 }
 
