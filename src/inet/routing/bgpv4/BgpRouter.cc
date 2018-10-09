@@ -500,6 +500,12 @@ void BgpRouter::updateSendProcess(const unsigned char type, SessionId sessionInd
         {
             continue;
         }
+
+        // if the next hop is not reachable
+        Ipv4Address nextHop = entry->getGateway();
+        if(!nextHop.isUnspecified() && isInRoutingTable(rt, nextHop) == -1)
+            continue;
+
         if ((_BGPSessions[sessionIndex]->getType() == IGP && (elem).second->getType() == EGP) ||
             _BGPSessions[sessionIndex]->getType() == EGP ||
             type == ROUTE_DESTINATION_CHANGED ||

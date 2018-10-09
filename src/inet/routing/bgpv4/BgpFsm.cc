@@ -418,7 +418,7 @@ void Established::entry()
     }
 
     for (auto & elem : session.getBGPRoutingTable())
-        session.updateSendProcess((elem));
+        session.updateSendProcess(elem);
 
     //when all EGP Sessions are in established state, start IGP Session(s)
     SessionId nextSession = session.findAndStartNextSession(EGP);
