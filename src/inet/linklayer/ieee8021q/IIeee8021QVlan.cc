@@ -19,6 +19,7 @@
 #include "inet/linklayer/ethernet/EtherEncap.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ieee8021q/Ieee8021QVlan.h"
+#include "inet/linklayer/ieee8021q/VlanTag_m.h"
 
 namespace inet {
 
@@ -62,27 +63,29 @@ void Ieee8021QVlan::processPacket(Packet *packet, std::vector<int>& vlanIdFilter
         vlanTag = &ethernetMacHeader->getSTagForUpdate();
     else
         throw cRuntimeError("Unknown VLAN tag type");
-    auto oldVlanId = vlanTag != nullptr ? vlanTag->getVid() : -1;
+    auto vlanReq = packet->removeTagIfPresent<VlanReq>();
+    auto requestedVlanId = vlanReq != nullptr ? vlanReq->getVid() : -1;
+    if (requestedVlanId != -1)
+        vlanTag->setVid(requestedVlanId);
+    auto oldVlanId = vlanTag->getVid();
     bool acceptPacket = vlanIdFilter.empty() || std::find(vlanIdFilter.begin(), vlanIdFilter.end(), oldVlanId) != vlanIdFilter.end();
     if (acceptPacket) {
-        auto newVlanId = oldVlanId;
         auto it = vlanIdMap.find(oldVlanId);
-        B chunkLengthDelta(0);
         if (it != vlanIdMap.end()) {
-            newVlanId = it->second;
-            if (oldVlanId == -1 && newVlanId != -1)
-                chunkLengthDelta = B(4);
-            else if (oldVlanId != -1 && newVlanId == -1)
-                chunkLengthDelta = -B(4);
-        }
-        ethernetMacHeader->setChunkLength(ethernetMacHeader->getChunkLength() + chunkLengthDelta);
-        packet->insertAtFront(ethernetMacHeader);
-        if (oldVlanId != newVlanId) {
+            auto newVlanId = it->second;
             EV_WARN << "Changing VLAN ID: new = " << newVlanId << ", old = " << oldVlanId << ".\n";
             vlanTag->setVid(newVlanId);
+            if (oldVlanId == -1 && newVlanId != -1)
+                ethernetMacHeader->setChunkLength(ethernetMacHeader->getChunkLength() + B(4));
+            else if (oldVlanId != -1 && newVlanId == -1)
+                ethernetMacHeader->setChunkLength(ethernetMacHeader->getChunkLength() - B(4));
+            packet->insertAtFront(ethernetMacHeader);
             auto oldFcs = packet->removeAtBack<EthernetFcs>();
             EtherEncap::addFcs(packet, oldFcs->getFcsMode());
         }
+        else
+            packet->insertAtFront(ethernetMacHeader);
+        packet->addTagIfAbsent<VlanInd>()->setVid(vlanTag->getVid());
         send(packet, gate);
     }
     else {
