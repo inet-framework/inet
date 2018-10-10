@@ -41,6 +41,27 @@ BgpRouter::~BgpRouter(void)
         delete (elem);
 }
 
+void BgpRouter::printSessionSummary()
+{
+    EV_DEBUG << "summary of BGP sessions: \n";
+    for(auto &entry : _BGPSessions) {
+        BgpSession *session = entry.second;
+        BgpSessionType type = session->getType();
+        if(type == IGP) {
+            EV_DEBUG << "  IGP session to internal peer '" << session->getPeerAddr().str(false) <<
+                    "' starts at " << session->getStartEventTime() << "s \n";
+        }
+        else if(type == EGP) {
+            EV_DEBUG << "  EGP session to external peer '" << session->getPeerAddr().str(false) <<
+                    "' starts at " << session->getStartEventTime() << "s \n";
+        }
+        else {
+            EV_DEBUG << "  Unknown session to peer '" << session->getPeerAddr().str(false) <<
+                    "' starts at " << session->getStartEventTime() << "s \n";
+        }
+    }
+}
+
 void BgpRouter::addWatches()
 {
     WATCH(myAsId);

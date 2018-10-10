@@ -80,6 +80,7 @@ private:
     void setRedistributeOspf(bool x) { this->redistributeOspf = x; }
     void setNextHopSelf(bool x) { this->nextHopSelf = x; }
     bool getNextHopSelf() { return nextHopSelf; }
+    void printSessionSummary();
     void addWatches();
     void recordStatistics();
 

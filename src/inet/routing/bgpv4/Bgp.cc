@@ -96,6 +96,7 @@ void Bgp::createBgpRouter()
     BgpConfigReader configReader(this, ift);
     configReader.loadConfigFromXML(bgpConfig, bgpRouter);
 
+    bgpRouter->printSessionSummary();
     bgpRouter->addWatches();
 }
 
