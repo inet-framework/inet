@@ -35,12 +35,14 @@ static void serializeQtag(MemoryOutputStream& stream, uint16_t ethType, const Ie
                          (qtag->getDe() ? 0x1000 : 0));
 }
 
-static void deserializeQtag(MemoryInputStream& stream, Ieee8021QTag *qtag)
+static Ieee8021QTag *deserializeQtag(MemoryInputStream& stream)
 {
+    auto qtag = new Ieee8021QTag();
     uint16_t qtagValue = stream.readUint16Be();
     qtag->setVid(qtagValue & 0xFFF);
     qtag->setPcp((qtagValue >> 13) & 7);
     qtag->setDe((qtagValue & 0x1000) != 0);
+    return qtag;
 }
 
 void EthernetMacHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
@@ -64,15 +66,11 @@ const Ptr<Chunk> EthernetMacHeaderSerializer::deserialize(MemoryInputStream& str
     ethernetMacHeader->setDest(destAddr);
     ethernetMacHeader->setSrc(srcAddr);
     if (value == 0x88A8) {
-        auto qtag = new Ieee8021QTag();
-        deserializeQtag(stream, qtag);
-        ethernetMacHeader->setSTag(qtag);
+        ethernetMacHeader->setSTag(deserializeQtag(stream));
         value = stream.readUint16Be();
     }
     if (value == 0x8100) {
-        auto qtag = new Ieee8021QTag();
-        deserializeQtag(stream, qtag);
-        ethernetMacHeader->setCTag(qtag);
+        ethernetMacHeader->setCTag(deserializeQtag(stream));
         value = stream.readUint16Be();
     }
     ethernetMacHeader->setTypeOrLength(value);
