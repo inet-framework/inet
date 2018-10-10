@@ -96,8 +96,9 @@ void Ieee8021QVlan::processPacket(Packet *packet, std::vector<int>& vlanIdFilter
     bool acceptPacket = vlanIdFilter.empty() || std::find(vlanIdFilter.begin(), vlanIdFilter.end(), newVlanId) != vlanIdFilter.end();
     if (acceptPacket) {
         auto it = vlanIdMap.find(newVlanId);
-        if (it != vlanIdMap.end()) {
+        if (it != vlanIdMap.end())
             newVlanId = it->second;
+        if (newVlanId != oldVlanId) {
             EV_WARN << "Changing VLAN ID: new = " << newVlanId << ", old = " << oldVlanId << ".\n";
             if (oldVlanId == -1 && newVlanId != -1)
                 addVlanTag(ethernetMacHeader)->setVid(newVlanId);
