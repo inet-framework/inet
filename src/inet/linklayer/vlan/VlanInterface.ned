@@ -21,6 +21,8 @@ import inet.linklayer.contract.INetworkInterface;
 
 moduleinterface IVlanInterface extends INetworkInterface
 {
+    parameters:
+        @display("i=block/tunnel");
 }
 
 module VlanInterface like IVlanInterface
@@ -29,12 +31,15 @@ module VlanInterface like IVlanInterface
         string interfaceTableModule;
         string address = default("auto");
         *.interfaceTableModule = default(absPath(interfaceTableModule));
+        @display("i=block/tunnel");
         @class(VlanInterface);
     gates:
         input upperLayerIn;
         output upperLayerOut;
     submodules:
-        vlan: Vlan;
+        vlan: Vlan {
+            @display("p=100,100");
+        }
     connections:
         upperLayerIn --> vlan.upperLayerIn;
         upperLayerOut <-- vlan.upperLayerOut;
@@ -46,6 +51,7 @@ simple Vlan
         string interfaceTableModule;
         int vlanId;
         string interfaceName;
+        @display("i=block/cogwheel");
     gates:
         input upperLayerIn;
         output upperLayerOut;
