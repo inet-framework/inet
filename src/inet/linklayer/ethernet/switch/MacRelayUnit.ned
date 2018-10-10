@@ -25,10 +25,10 @@ simple MacRelayUnit like IMacRelayUnit
         @display("i=block/switch");
         string macTableModule = default("^.macTable"); // The path to the MacAddressTable module
         string interfaceTableModule = default("^.interfaceTable"); // The path to the InterfaceTable module
-        @signal[packetSentToLower](type=cPacket);
-        @signal[packetReceivedFromLower](type=cPacket);
-                
         bool hasStp;
+        @signal[packetSentToLower](type=cPacket);
+        @signal[packetReceivedFromUpper](type=cPacket);
+        @signal[packetReceivedFromLower](type=cPacket);
     gates:
         input ifIn @labels(EtherFrame);
         output ifOut @labels(EtherFrame);
