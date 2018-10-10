@@ -63,23 +63,24 @@ module EthernetInterface like IEthernetInterface
             parameters:
                 @display("p=250,300");
         }
-        vlan: <default("Ieee8021QVlan")> like IIeee8021QVlan {
+        vlan: <default("")> like IIeee8021QVlan if typename != "" {
             parameters:
                 @display("p=250,400");
         }
     connections:
-        mac.upperLayerOut --> vlan.lowerLayerIn;
+        mac.upperLayerOut --> vlan.lowerLayerIn if exists(vlan);
+        mac.upperLayerOut --> encap.lowerLayerIn if !exists(vlan);
+
+        mac.upperLayerIn <-- queue.out if exists(queue);
+        mac.upperLayerIn <-- vlan.lowerLayerOut if !exists(queue) && exists(vlan);
+        mac.upperLayerIn <-- encap.lowerLayerOut if !exists(queue) && !exists(vlan);
+
+        encap.lowerLayerOut --> vlan.upperLayerIn if exists(vlan);
+        encap.lowerLayerIn <-- vlan.upperLayerOut if exists(vlan);
+
+        vlan.lowerLayerOut --> queue.in if exists(vlan) && exists(queue);
+
         mac.phys <--> { @display("m=s"); } <--> phys;
-
-        encap.lowerLayerOut --> vlan.upperLayerIn;
-        encap.lowerLayerIn <-- vlan.upperLayerOut;
-
-        if exists(queue) {
-            vlan.lowerLayerOut --> queue.in;
-            queue.out --> mac.upperLayerIn;
-        }
-
-        vlan.lowerLayerOut --> mac.upperLayerIn if !exists(queue);
 
         // no ingressTC
         encap.upperLayerOut --> { @display("m=n"); } --> upperLayerOut if !exists(ingressTC);
