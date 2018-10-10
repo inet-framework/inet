@@ -25,7 +25,7 @@
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/NodeOperations.h"
-
+#include "inet/common/lifecycle/NodeStatus.h"
 namespace inet {
 
 Define_Module(IpvxTrafSink);
