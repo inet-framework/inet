@@ -38,6 +38,7 @@ simple Ieee8021dRelay like IMacRelayUnit
         string macTableModule = default("^.macTable");             // The path to the MacAddressTable module
         @signal[packetSentToLower](type=cPacket);
         @signal[packetReceivedFromLower](type=cPacket);
+        @signal[packetReceivedFromUpper](type=cPacket);
 
         bool hasStp;
 
