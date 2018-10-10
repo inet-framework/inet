@@ -22,7 +22,7 @@ import inet.common.queue.IOutputQueue;
 import inet.linklayer.contract.IEtherMac;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.contract.ITrafficConditioner;
-import inet.linklayer.ieee8021q.IEtherVlan;
+import inet.linklayer.ieee8021q.IIeee8021QVlan;
 
 //
 // Ethernet network interface. Complements ~EtherMac and ~EtherEncap
@@ -63,7 +63,7 @@ module EthernetInterface like IEthernetInterface
             parameters:
                 @display("p=250,300");
         }
-        vlan: <default("EtherVlan")> like IEtherVlan {
+        vlan: <default("Ieee8021QVlan")> like IIeee8021QVlan {
             parameters:
                 @display("p=250,400");
         }

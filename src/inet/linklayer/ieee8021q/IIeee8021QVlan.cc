@@ -18,13 +18,13 @@
 #include "inet/common/Simsignals.h"
 #include "inet/linklayer/ethernet/EtherEncap.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
-#include "inet/linklayer/ieee8021q/EtherVlan.h"
+#include "inet/linklayer/ieee8021q/Ieee8021QVlan.h"
 
 namespace inet {
 
-Define_Module(EtherVlan);
+Define_Module(Ieee8021QVlan);
 
-void EtherVlan::initialize(int stage)
+void Ieee8021QVlan::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -38,7 +38,7 @@ void EtherVlan::initialize(int stage)
     }
 }
 
-void EtherVlan::parseParameters(const char *filterParameterName, const char *mapParameterName, std::vector<int>& vlanIdFilter, std::map<int, int>& vlanIdMap)
+void Ieee8021QVlan::parseParameters(const char *filterParameterName, const char *mapParameterName, std::vector<int>& vlanIdFilter, std::map<int, int>& vlanIdMap)
 {
     cStringTokenizer filterTokenizer(par(filterParameterName));
     while (filterTokenizer.hasMoreTokens())
@@ -51,7 +51,7 @@ void EtherVlan::parseParameters(const char *filterParameterName, const char *map
     }
 }
 
-void EtherVlan::processPacket(Packet *packet, std::vector<int>& vlanIdFilter, std::map<int, int>& vlanIdMap, cGate *gate)
+void Ieee8021QVlan::processPacket(Packet *packet, std::vector<int>& vlanIdFilter, std::map<int, int>& vlanIdMap, cGate *gate)
 {
     packet->trimFront();
     const auto& ethernetMacHeader = packet->removeAtFront<EthernetMacHeader>();
@@ -94,7 +94,7 @@ void EtherVlan::processPacket(Packet *packet, std::vector<int>& vlanIdFilter, st
     }
 }
 
-void EtherVlan::handleMessage(cMessage *message)
+void Ieee8021QVlan::handleMessage(cMessage *message)
 {
     if (message->getArrivalGate()->isName("upperLayerIn"))
         processPacket(check_and_cast<Packet *>(message), outboundVlanIdFilter, outboundVlanIdMap, gate("lowerLayerOut"));

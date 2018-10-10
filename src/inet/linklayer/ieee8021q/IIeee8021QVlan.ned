@@ -15,21 +15,13 @@
 
 package inet.linklayer.ieee8021q;
 
-simple EtherVlan like IEtherVlan
+moduleinterface IIeee8021QVlan
 {
     parameters:
-        string vlanTagType @enum("c","s") = default("s");
-        string inboundVlanIdFilter = default("");
-        string inboundVlanIdMap = default("");
-        string outboundVlanIdFilter = default("");
-        string outboundVlanIdMap = default("");
         @display("i=block/cogwheel");
-        @signal[packetDropped](type=inet::Packet);
-        @statistic[packetDropped](title="packet dropped"; source=packetDropped; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
     gates:
         input upperLayerIn;
         output upperLayerOut;
         input lowerLayerIn;
         output lowerLayerOut;
 }
-

@@ -13,14 +13,14 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_ETHERVLAN_H
-#define __INET_ETHERVLAN_H
+#ifndef __INET_IEEE8021QVLAN_H
+#define __INET_IEEE8021QVLAN_H
 
 #include "inet/common/INETDefs.h"
 
 namespace inet {
 
-class INET_API EtherVlan : public cSimpleModule
+class INET_API Ieee8021QVlan : public cSimpleModule
 {
   protected:
     const char *vlanTagType = nullptr;
@@ -39,5 +39,5 @@ class INET_API EtherVlan : public cSimpleModule
 
 } // namespace inet
 
-#endif // ifndef __INET_ETHERVLAN_H
+#endif // ifndef __INET_IEEE8021QVLAN_H
 
