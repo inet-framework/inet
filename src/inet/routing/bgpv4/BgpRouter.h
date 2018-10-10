@@ -169,6 +169,7 @@ private:
     SessionId findIdFromSocketConnId(std::map<SessionId, BgpSession *> sessions, int connId);
     bool isRouteExcluded(const Ipv4Route &rtEntry);
     bool isDefaultRoute(const Ipv4Route *entry) const;
+    bool isReachable(const Ipv4Address addr) const;
 };
 
 } // namespace bgp

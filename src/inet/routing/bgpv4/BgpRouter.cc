@@ -434,7 +434,7 @@ unsigned char BgpRouter::decisionProcess(const BgpUpdateMessage& msg, BgpRouting
         // and the Update msg is coming from IGP session
         if (_BGPSessions[sessionIndex]->getType() == IGP) {
             // if the next hop is reachable
-            if(isInRoutingTable(rt, entry->getGateway()) != -1) {
+            if(isReachable(entry->getGateway())) {
                 entry->setInterface(_BGPSessions[sessionIndex]->getLinkIntf());
                 rt->addRoute(entry);
             }
@@ -502,8 +502,7 @@ void BgpRouter::updateSendProcess(const unsigned char type, SessionId sessionInd
         }
 
         // if the next hop is not reachable
-        Ipv4Address nextHop = entry->getGateway();
-        if(!nextHop.isUnspecified() && isInRoutingTable(rt, nextHop) == -1)
+        if(!isReachable(entry->getGateway()))
             continue;
 
         if ((_BGPSessions[sessionIndex]->getType() == IGP && (elem).second->getType() == EGP) ||
@@ -813,6 +812,25 @@ bool BgpRouter::isDefaultRoute(const Ipv4Route *entry) const
 {
     if(entry->getDestination().getInt() == 0 && entry->getNetmask().getInt() == 0)
         return true;
+    return false;
+}
+
+bool BgpRouter::isReachable(const Ipv4Address addr) const
+{
+    if(addr.isUnspecified())
+        return true;
+
+    for(int i = 0; i < ift->getNumInterfaces(); i++) {
+        InterfaceEntry *intf = ift->getInterface(i);
+        if(intf && !intf->isLoopback()) {
+            Ipv4InterfaceData *ipv4data = intf->findProtocolData<Ipv4InterfaceData>();
+            if(ipv4data) {
+                if(addr.doAnd(ipv4data->getNetmask()) == ipv4data->getIPAddress().doAnd(ipv4data->getNetmask()))
+                    return true;
+            }
+        }
+    }
+
     return false;
 }
 
