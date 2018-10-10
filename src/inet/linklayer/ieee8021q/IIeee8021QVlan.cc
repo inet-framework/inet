@@ -19,7 +19,6 @@
 #include "inet/linklayer/ethernet/EtherEncap.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ieee8021q/Ieee8021QVlan.h"
-#include "inet/linklayer/ieee8021q/VlanTag_m.h"
 
 namespace inet {
 
@@ -63,7 +62,7 @@ void Ieee8021QVlan::processPacket(Packet *packet, std::vector<int>& vlanIdFilter
         vlanTag = &ethernetMacHeader->getSTagForUpdate();
     else
         throw cRuntimeError("Unknown VLAN tag type");
-    auto vlanReq = packet->removeTagIfPresent<VlanReq>();
+    auto vlanReq = packet->removeTagIfPresent<Ieee8021QReq>();
     auto requestedVlanId = vlanReq != nullptr ? vlanReq->getVid() : -1;
     if (requestedVlanId != -1)
         vlanTag->setVid(requestedVlanId);
@@ -85,7 +84,7 @@ void Ieee8021QVlan::processPacket(Packet *packet, std::vector<int>& vlanIdFilter
         }
         else
             packet->insertAtFront(ethernetMacHeader);
-        packet->addTagIfAbsent<VlanInd>()->setVid(vlanTag->getVid());
+        packet->addTagIfAbsent<Ieee8021QInd>()->setVid(vlanTag->getVid());
         send(packet, gate);
     }
     else {

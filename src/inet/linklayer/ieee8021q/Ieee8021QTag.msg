@@ -14,6 +14,7 @@
 //
 
 import inet.common.INETDefs;
+import inet.common.TagBase;
 import inet.common.packet.chunk.Chunk;
 
 namespace inet;
@@ -30,3 +31,28 @@ class Ieee8021QTag extends FieldsChunk
                        // the 802.1Q tag specifies only a priority and is referred to as a priority tag. On bridges,
                        // VLAN 1 (the default VLAN ID) is often reserved for a management VLAN; this is vendor-specific.
 }
+
+//
+// This is an abstract base class that should not be directly added as a tag.
+//
+class Ieee8021QTagBase extends TagBase
+{
+    int vid = -1;
+}
+
+//
+// This request determines the vlan that should be used to send the packet.
+// It may be present on a packet from the application to the mac protocol.
+//
+class Ieee8021QReq extends Ieee8021QTagBase
+{
+}
+
+//
+// This indication specifies the vlan that was used to receive the packet.
+// It may be present on a packet from the mac protocol to the application.
+//
+class Ieee8021QInd extends Ieee8021QTagBase
+{
+}
+
