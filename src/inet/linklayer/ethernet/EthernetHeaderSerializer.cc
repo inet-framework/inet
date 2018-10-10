@@ -64,11 +64,15 @@ const Ptr<Chunk> EthernetMacHeaderSerializer::deserialize(MemoryInputStream& str
     ethernetMacHeader->setDest(destAddr);
     ethernetMacHeader->setSrc(srcAddr);
     if (value == 0x88A8) {
-        deserializeQtag(stream, ethernetMacHeader->getSTagForUpdate());
+        auto qtag = new Ieee8021QTag();
+        deserializeQtag(stream, qtag);
+        ethernetMacHeader->setSTag(qtag);
         value = stream.readUint16Be();
     }
     if (value == 0x8100) {
-        deserializeQtag(stream, ethernetMacHeader->getCTagForUpdate());
+        auto qtag = new Ieee8021QTag();
+        deserializeQtag(stream, qtag);
+        ethernetMacHeader->setCTag(qtag);
         value = stream.readUint16Be();
     }
     ethernetMacHeader->setTypeOrLength(value);
