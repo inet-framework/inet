@@ -342,7 +342,8 @@ void EtherMacFullDuplex::handleEndPausePeriod()
         throw cRuntimeError("End of PAUSE event occurred when not in PAUSE_STATE!");
 
     EV_DETAIL << "Pause finished, resuming transmissions\n";
-    getNextFrameFromQueue();
+    if (!curTxFrame)
+        getNextFrameFromQueue();
     beginSendFrames();
 }
 
