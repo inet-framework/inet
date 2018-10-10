@@ -35,7 +35,7 @@ enum EthernetControlOpCode
 
 enum SapCode;
 
-class EthernetVlanTag
+class Ieee8021QTag
 {
     uint8_t pcp;       // Priority Code Point (PCP): a 3-bit field which refers to the IEEE 802.1p priority. It indicates the frame priority level.
                        // Values are from 0 (best effort) to 7 (highest); 1 represents the lowest priority.
@@ -55,8 +55,8 @@ class EthernetMacHeader extends FieldsChunk
     chunkLength = B(14);
     MacAddress dest;
     MacAddress src;
-    EthernetVlanTag cTag;
-    EthernetVlanTag sTag;
+    Ieee8021QTag cTag;
+    Ieee8021QTag sTag;
     int typeOrLength;
 }
 

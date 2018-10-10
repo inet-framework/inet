@@ -55,7 +55,7 @@ void EtherVlan::processPacket(Packet *packet, std::vector<int>& vlanIdFilter, st
 {
     packet->trimFront();
     const auto& ethernetMacHeader = packet->removeAtFront<EthernetMacHeader>();
-    EthernetVlanTag *vlanTag;
+    Ieee8021QTag *vlanTag;
     if (*vlanTagType == 'c')
         vlanTag = &ethernetMacHeader->getCTagForUpdate();
     else if (*vlanTagType == 's')
