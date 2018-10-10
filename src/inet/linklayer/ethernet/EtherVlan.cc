@@ -62,7 +62,7 @@ void EtherVlan::processPacket(Packet *packet, std::vector<int>& vlanIdFilter, st
         vlanTag = &ethernetMacHeader->getSTagForUpdate();
     else
         throw cRuntimeError("Unknown VLAN tag type");
-    auto oldVlanId = vlanTag != nullptr ? vlanTag->getVlanId() : -1;
+    auto oldVlanId = vlanTag != nullptr ? vlanTag->getVid() : -1;
     bool acceptPacket = vlanIdFilter.empty() || std::find(vlanIdFilter.begin(), vlanIdFilter.end(), oldVlanId) != vlanIdFilter.end();
     if (acceptPacket) {
         auto newVlanId = oldVlanId;
@@ -79,7 +79,7 @@ void EtherVlan::processPacket(Packet *packet, std::vector<int>& vlanIdFilter, st
         packet->insertAtFront(ethernetMacHeader);
         if (oldVlanId != newVlanId) {
             EV_WARN << "Changing VLAN ID: new = " << newVlanId << ", old = " << oldVlanId << ".\n";
-            vlanTag->setVlanId(newVlanId);
+            vlanTag->setVid(newVlanId);
             auto oldFcs = packet->removeAtBack<EthernetFcs>();
             EtherEncap::addFcs(packet, oldFcs->getFcsMode());
         }
