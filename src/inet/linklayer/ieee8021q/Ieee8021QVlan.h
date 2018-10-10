@@ -33,6 +33,9 @@ class INET_API Ieee8021QVlan : public cSimpleModule
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
 
+    virtual Ieee8021QTag *findVlanTag(const Ptr<EthernetMacHeader>& ethernetMacHeader);
+    virtual Ieee8021QTag *addVlanTag(const Ptr<EthernetMacHeader>& ethernetMacHeader);
+    virtual Ieee8021QTag *removeVlanTag(const Ptr<EthernetMacHeader>& ethernetMacHeader);
     virtual void parseParameters(const char *filterParameterName, const char *mapParameterName, std::vector<int>& vlanIdFilter, std::map<int, int>& vlanIdMap);
     virtual void processPacket(Packet *packet, std::vector<int>& vlanIdFilter, std::map<int, int>& vlanIdMap, cGate *gate);
 };

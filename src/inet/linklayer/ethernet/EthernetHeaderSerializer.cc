@@ -27,20 +27,20 @@ Register_Serializer(EthernetPadding, EthernetPaddingSerializer);
 Register_Serializer(EthernetFcs, EthernetFcsSerializer);
 Register_Serializer(EthernetPhyHeader, EthernetPhyHeaderSerializer);
 
-static void serializeQtag(MemoryOutputStream& stream, uint16_t ethType, const Ieee8021QTag& qtag)
+static void serializeQtag(MemoryOutputStream& stream, uint16_t ethType, const Ieee8021QTag *qtag)
 {
     stream.writeUint16Be(ethType);
-    stream.writeUint16Be((qtag.getVid() & 0xFFF) |
-                         ((qtag.getPcp() & 7) << 13) |
-                         (qtag.getDe() ? 0x1000 : 0));
+    stream.writeUint16Be((qtag->getVid() & 0xFFF) |
+                         ((qtag->getPcp() & 7) << 13) |
+                         (qtag->getDe() ? 0x1000 : 0));
 }
 
-static void deserializeQtag(MemoryInputStream& stream, Ieee8021QTag& qtag)
+static void deserializeQtag(MemoryInputStream& stream, Ieee8021QTag *qtag)
 {
     uint16_t qtagValue = stream.readUint16Be();
-    qtag.setVid(qtagValue & 0xFFF);
-    qtag.setPcp((qtagValue >> 13) & 7);
-    qtag.setDe((qtagValue & 0x1000) != 0);
+    qtag->setVid(qtagValue & 0xFFF);
+    qtag->setPcp((qtagValue >> 13) & 7);
+    qtag->setDe((qtagValue & 0x1000) != 0);
 }
 
 void EthernetMacHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
@@ -48,9 +48,9 @@ void EthernetMacHeaderSerializer::serialize(MemoryOutputStream& stream, const Pt
     const auto& ethernetMacHeader = staticPtrCast<const EthernetMacHeader>(chunk);
     stream.writeMacAddress(ethernetMacHeader->getDest());
     stream.writeMacAddress(ethernetMacHeader->getSrc());
-    if (ethernetMacHeader->getSTag().getVid() != -1)
+    if (ethernetMacHeader->getSTag() != nullptr)
         serializeQtag(stream, 0x88A8, ethernetMacHeader->getSTag());
-    if (ethernetMacHeader->getCTag().getVid() != -1)
+    if (ethernetMacHeader->getCTag() != nullptr)
         serializeQtag(stream, 0x8100, ethernetMacHeader->getCTag());
     stream.writeUint16Be(ethernetMacHeader->getTypeOrLength());
 }

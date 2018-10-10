@@ -51,40 +51,67 @@ void Ieee8021QVlan::parseParameters(const char *filterParameterName, const char 
     }
 }
 
+Ieee8021QTag *Ieee8021QVlan::findVlanTag(const Ptr<EthernetMacHeader>& ethernetMacHeader)
+{
+    if (*vlanTagType == 'c')
+        return ethernetMacHeader->getCTagForUpdate();
+    else if (*vlanTagType == 's')
+        return ethernetMacHeader->getSTagForUpdate();
+    else
+        throw cRuntimeError("Unknown VLAN tag type");
+}
+
+Ieee8021QTag *Ieee8021QVlan::addVlanTag(const Ptr<EthernetMacHeader>& ethernetMacHeader)
+{
+    auto vlanTag = new Ieee8021QTag();
+    ethernetMacHeader->setChunkLength(ethernetMacHeader->getChunkLength() + B(4));
+    if (*vlanTagType == 'c')
+        ethernetMacHeader->setCTag(vlanTag);
+    else if (*vlanTagType == 's')
+        ethernetMacHeader->setSTag(vlanTag);
+    else
+        throw cRuntimeError("Unknown VLAN tag type");
+    return vlanTag;
+}
+
+Ieee8021QTag *Ieee8021QVlan::removeVlanTag(const Ptr<EthernetMacHeader>& ethernetMacHeader)
+{
+    ethernetMacHeader->setChunkLength(ethernetMacHeader->getChunkLength() - B(4));
+    if (*vlanTagType == 'c')
+        return ethernetMacHeader->dropCTag();
+    else if (*vlanTagType == 's')
+        return ethernetMacHeader->dropSTag();
+    else
+        throw cRuntimeError("Unknown VLAN tag type");
+}
+
 void Ieee8021QVlan::processPacket(Packet *packet, std::vector<int>& vlanIdFilter, std::map<int, int>& vlanIdMap, cGate *gate)
 {
     packet->trimFront();
     const auto& ethernetMacHeader = packet->removeAtFront<EthernetMacHeader>();
-    Ieee8021QTag *vlanTag;
-    if (*vlanTagType == 'c')
-        vlanTag = &ethernetMacHeader->getCTagForUpdate();
-    else if (*vlanTagType == 's')
-        vlanTag = &ethernetMacHeader->getSTagForUpdate();
-    else
-        throw cRuntimeError("Unknown VLAN tag type");
+    Ieee8021QTag *vlanTag = findVlanTag(ethernetMacHeader);
+    auto oldVlanId = vlanTag != nullptr ? vlanTag->getVid() : -1;
     auto vlanReq = packet->removeTagIfPresent<Ieee8021QReq>();
-    auto requestedVlanId = vlanReq != nullptr ? vlanReq->getVid() : -1;
-    if (requestedVlanId != -1)
-        vlanTag->setVid(requestedVlanId);
-    auto oldVlanId = vlanTag->getVid();
-    bool acceptPacket = vlanIdFilter.empty() || std::find(vlanIdFilter.begin(), vlanIdFilter.end(), oldVlanId) != vlanIdFilter.end();
+    auto newVlanId = vlanReq != nullptr ? vlanReq->getVid() : oldVlanId;
+    bool acceptPacket = vlanIdFilter.empty() || std::find(vlanIdFilter.begin(), vlanIdFilter.end(), newVlanId) != vlanIdFilter.end();
     if (acceptPacket) {
-        auto it = vlanIdMap.find(oldVlanId);
+        auto it = vlanIdMap.find(newVlanId);
         if (it != vlanIdMap.end()) {
-            auto newVlanId = it->second;
+            newVlanId = it->second;
             EV_WARN << "Changing VLAN ID: new = " << newVlanId << ", old = " << oldVlanId << ".\n";
-            vlanTag->setVid(newVlanId);
             if (oldVlanId == -1 && newVlanId != -1)
-                ethernetMacHeader->setChunkLength(ethernetMacHeader->getChunkLength() + B(4));
+                addVlanTag(ethernetMacHeader)->setVid(newVlanId);
             else if (oldVlanId != -1 && newVlanId == -1)
-                ethernetMacHeader->setChunkLength(ethernetMacHeader->getChunkLength() - B(4));
+                removeVlanTag(ethernetMacHeader);
+            else
+                vlanTag->setVid(newVlanId);
             packet->insertAtFront(ethernetMacHeader);
             auto oldFcs = packet->removeAtBack<EthernetFcs>();
             EtherEncap::addFcs(packet, oldFcs->getFcsMode());
         }
         else
             packet->insertAtFront(ethernetMacHeader);
-        packet->addTagIfAbsent<Ieee8021QInd>()->setVid(vlanTag->getVid());
+        packet->addTagIfAbsent<Ieee8021QInd>()->setVid(newVlanId);
         send(packet, gate);
     }
     else {

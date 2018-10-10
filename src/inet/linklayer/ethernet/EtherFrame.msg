@@ -44,8 +44,8 @@ class EthernetMacHeader extends FieldsChunk
     chunkLength = B(14);
     MacAddress dest;
     MacAddress src;
-    Ieee8021QTag cTag;
-    Ieee8021QTag sTag;
+    Ieee8021QTag *cTag @owned;
+    Ieee8021QTag *sTag @owned;
     int typeOrLength;
 }
 
