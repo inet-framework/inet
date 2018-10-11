@@ -53,6 +53,7 @@ private:
     std::map<SessionId, BgpSession *> _BGPSessions;
     uint32_t numEgpSessions = 0;
     uint32_t numIgpSessions = 0;
+    Ipv4Address internalAddress = Ipv4Address::UNSPECIFIED_ADDRESS;
 
     typedef std::vector<BgpRoutingTableEntry *> RoutingTableEntryVector;
     RoutingTableEntryVector bgpRoutingTable;    // The BGP routing table
@@ -72,6 +73,8 @@ private:
     int getNumBgpSessions() { return _BGPSessions.size(); }
     int getNumEgpSessions() { return numEgpSessions; }
     int getNumIgpSessions() { return numIgpSessions; }
+    Ipv4Address getInternalAddress() { return internalAddress; }
+    void setInternalAddress(Ipv4Address x) { internalAddress = x; }
     bool getRedistributeInternal() { return redistributeInternal; }
     void setRedistributeInternal(bool x) { this->redistributeInternal = x; }
     bool getRedistributeRip() { return redistributeRip; }

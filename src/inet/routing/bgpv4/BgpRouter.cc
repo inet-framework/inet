@@ -227,15 +227,6 @@ void BgpRouter::openTCPConnectionToPeer(SessionId sessionID)
     EV_DEBUG << "Opening a TCP connection to remote port " << (int)TCP_PORT
             << " for " << BgpSession::getTypeString(_BGPSessions[sessionID]->getType()) << " session." << std::endl;
 
-    InterfaceEntry *intfEntry = _BGPSessions[sessionID]->getLinkIntf();
-    if(!intfEntry && _BGPSessions[sessionID]->getType() == IGP) {
-        intfEntry = rt->getInterfaceForDestAddr(_BGPSessions[sessionID]->getPeerAddr());
-        _BGPSessions[sessionID]->setlinkIntf(intfEntry);
-    }
-
-    if (intfEntry == nullptr)
-        throw cRuntimeError("No configuration interface for peer address: %s", _BGPSessions[sessionID]->getPeerAddr().str().c_str());
-
     TcpSocket *socket = _BGPSessions[sessionID]->getSocket();
     if (socket->getState() != TcpSocket::NOT_BOUND) {
         _socketMap.removeSocket(socket);
@@ -245,7 +236,23 @@ void BgpRouter::openTCPConnectionToPeer(SessionId sessionID)
     socket->setCallback(this);
     socket->setUserData((void *)(uintptr_t)sessionID);
     socket->setOutputGate(bgpModule->gate("socketOut"));
-    socket->bind(intfEntry->getProtocolData<Ipv4InterfaceData>()->getIPAddress(), 0);
+    if(_BGPSessions[sessionID]->getType() == EGP) {
+        InterfaceEntry *intfEntry = _BGPSessions[sessionID]->getLinkIntf();
+        if (intfEntry == nullptr)
+            throw cRuntimeError("No configuration interface for external peer address: %s", _BGPSessions[sessionID]->getPeerAddr().str().c_str());
+        socket->bind(intfEntry->getProtocolData<Ipv4InterfaceData>()->getIPAddress(), 0);
+    }
+    else if(_BGPSessions[sessionID]->getType() == IGP) {
+        InterfaceEntry *intfEntry = _BGPSessions[sessionID]->getLinkIntf();
+        if(!intfEntry)
+            intfEntry = rt->getInterfaceForDestAddr(_BGPSessions[sessionID]->getPeerAddr());
+        if (intfEntry == nullptr)
+            throw cRuntimeError("No configuration interface for internal peer address: %s", _BGPSessions[sessionID]->getPeerAddr().str().c_str());
+        _BGPSessions[sessionID]->setlinkIntf(intfEntry);
+        if(internalAddress == Ipv4Address::UNSPECIFIED_ADDRESS)
+            throw cRuntimeError("Internal address is not specified for router %s", bgpModule->getOwner()->getFullName());
+        socket->bind(internalAddress, 0);
+    }
     _socketMap.addSocket(socket);
 
     socket->connect(_BGPSessions[sessionID]->getPeerAddr(), TCP_PORT);
