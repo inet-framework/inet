@@ -143,5 +143,12 @@
 // feedback, reporting bugs, suggesting features and contributing patches;
 // I'd like to acknowledge their help here as well.
 //
+// @page whatsnew.html, What's New
+//
+// <pre>
+// <nohtml>
+// @include ../../WHATSNEW
+// </nohtml>
+// </pre>
 
 package inet;
