@@ -44,6 +44,21 @@ class INET_API EtherEncap : public Ieee8022Llc
     static simsignal_t pauseSentSignal;
     bool useSNAP;    // true: generate EtherFrameWithSNAP, false: generate EthernetIIFrame
 
+    struct Socket
+    {
+      int socketId = -1;
+      MacAddress sourceAddress;
+      MacAddress destinationAddress;
+      const Protocol *protocol = nullptr;
+      int vlanId = -1;
+
+      Socket(int socketId) : socketId(socketId) {}
+
+      bool matches(Packet *packet, const Ptr<const EthernetMacHeader>& ethernetMacHeader);
+    };
+
+    std::map<int, Socket *> socketIdToSocketMap;
+
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
