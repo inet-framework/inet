@@ -113,6 +113,8 @@ ini file to ensure that nodes have status modules:
    :start-at: # lifecycle
    :end-at: **.hasStatus = true
 
+This module keeps track of the status of network node (up, down, etc.) for other modules, and also displays it.
+
 The key part of the configuration regarding this showcase is the configuration of the :ned:`ScenarioManager` module:
 
 .. literalinclude:: ../omnetpp.ini
@@ -132,7 +134,7 @@ the beginning of the simulation. This is specified as the following in the XML f
 As you can see, the ``<create-module>`` element has three attributes, one for the type,
 one for the submodule name and one for the parent module.
 We create two modules named ``sourceNode0`` and ``sourceNode1``, both with the type of the previously mentioned :ned:`DynamicHost`.
-The parent module in this case is the playground, because the ``parent`` attribute is set to is ``"."``.
+The parent module in this case is the playground, so the ``parent`` attribute is set to is ``"."``.
 
 The ``destinationNode`` is shut down at ``t=6.0`` and remains so for two seconds. During this, the ping request messages
 can not reach it. To achieve this behavior, two lifecycle operations need to be used. The ``<shutdown>``
@@ -153,7 +155,7 @@ Another lifecycle operation to be mentioned is the crash of a node, which can be
 The difference between this operation and shutdown operation is that the
 network node will not do a graceful shutdown (e.g. routing protocols will
 not have chance of notifying peers about broken routes). In this simulation,
-``sourceNode[0]`` crashes due to a theoretical malfunction, so that it
+``sourceNode0`` crashes due to a theoretical malfunction, so that it
 does not send ping request messages anymore:
 
 .. literalinclude:: ../wireless.xml
@@ -177,7 +179,7 @@ if we take a look at the statistics. The following image shows the
    :scale: 100%
    :align: center
 
-We can clearly see for example that ``destinationNode`` was indeed shut down
+We can clearly see, for example, that ``destinationNode`` was indeed shut down
 for two seconds between ``t=6.0s`` and ``t=8.0s``, and that ``sourceNode0`` truly
 crashed at ``t=10.0s``.
 
@@ -227,7 +229,7 @@ and it starts to send the ping request messages to ``destinationNode`` as well:
    :end-before: <at t="8.0">
 
 Not only the malfunction of ``destinationNode`` or its connection can cause that the
-ping request can not reach their target, but the routers can crash as well.
+ping request do not reach their target, but the routers can crash as well.
 The crash of the routers has the same consequence as when ``destinationNode`` was
 disconnected from the network. In this simulation, the router crashes for two seconds before
 it is restarted:
@@ -263,7 +265,7 @@ of ``backboneRouter``'s PPP interface:
 
 The plot clearly shows the time intervals when the ping request messages
 could not be forwarded to ``destinationNode``. From the density of the state changes we can also see
-when the :par:`sendInterval` parameter of ``sourceNode1`` was modified to a smaller value than it was before.
+when the :par:`sendInterval` parameter of ``sourceNode1`` was modified.
 
 Discussion
 ----------
