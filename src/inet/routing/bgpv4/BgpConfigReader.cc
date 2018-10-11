@@ -164,9 +164,11 @@ std::vector<const char *> BgpConfigReader::loadASConfig(cXMLElementList& ASConfi
     for (auto & elem : ASConfig) {
         std::string nodeName = (elem)->getTagName();
         if (nodeName == "Router") {
-            if (isInInterfaceTable(ift, Ipv4Address(elem->getAttribute("interAddr"))) == -1)
+            Ipv4Address internalAddr = Ipv4Address(elem->getAttribute("interAddr"));
+            if (isInInterfaceTable(ift, internalAddr) == -1)
                 routerInSameASList.push_back(elem->getAttribute("interAddr"));
             else {
+                bgpRouter->setInternalAddress(internalAddr);
                 bgpRouter->setRedistributeInternal(getBoolAttrOrPar(*elem, "redistributeInternal"));
                 bgpRouter->setRedistributeOspf(getBoolAttrOrPar(*elem, "redistributeOspf"));
                 bgpRouter->setRedistributeRip(getBoolAttrOrPar(*elem, "redistributeRip"));
