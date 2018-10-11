@@ -52,7 +52,7 @@ int Ipv4NetworkConfigurator::RoutingTableInfo::addRouteInfo(RouteInfo *routeInfo
     return index;
 }
 
-Ipv4NetworkConfigurator::RouteInfo *Ipv4NetworkConfigurator::RoutingTableInfo::findBestMatchingRouteInfo(const uint32 destination, int begin, int end) const
+Ipv4NetworkConfigurator::RouteInfo *Ipv4NetworkConfigurator::RoutingTableInfo::findBestMatchingRouteInfo(const std::vector<RouteInfo *>& routeInfos, const uint32 destination, int begin, int end)
 {
     for (int index = begin; index < end; index++) {
         RouteInfo *routeInfo = routeInfos.at(index);
@@ -1517,7 +1517,8 @@ void Ipv4NetworkConfigurator::checkOriginalRoutes(const RoutingTableInfo& routin
     // assert that all original routes are routed with the same color
     for (auto & originalRouteInfo : originalRouteInfos) {
         Ipv4NetworkConfigurator::RouteInfo *matchingRouteInfo = routingTableInfo.findBestMatchingRouteInfo(originalRouteInfo->destination);
-        if (!(matchingRouteInfo && matchingRouteInfo->color == originalRouteInfo->color))
+        Ipv4NetworkConfigurator::RouteInfo *matchingOriginalRouteInfo = RoutingTableInfo::findBestMatchingRouteInfo(originalRouteInfos, originalRouteInfo->destination, 0, originalRouteInfos.size());
+        if (!(matchingRouteInfo && matchingRouteInfo->color == matchingOriginalRouteInfo->color))
             ASSERT(false);
     }
 }
