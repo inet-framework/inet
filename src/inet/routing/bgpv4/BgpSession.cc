@@ -89,7 +89,8 @@ void BgpSession::startConnection()
     if (_info.sessionType == IGP) {
         if (simTime() > _StartEventTime)
             _StartEventTime = simTime();
-        bgpRouter.getScheduleAt(_StartEventTime, _ptrStartEvent);
+        if(!_ptrStartEvent->isScheduled())
+            bgpRouter.getScheduleAt(_StartEventTime, _ptrStartEvent);
         _ptrStartEvent->setContextPointer(this);
     }
 }
