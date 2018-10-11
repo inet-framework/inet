@@ -17,21 +17,10 @@
 
 package inet.linklayer.vlan;
 
-module VlanInterface like IVlanInterface
+import inet.linklayer.contract.INetworkInterface;
+
+moduleinterface IVlanInterface extends INetworkInterface
 {
     parameters:
-        string interfaceTableModule;
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
         @display("i=block/tunnel");
-        @class(InterfaceEntry);
-    gates:
-        input upperLayerIn;
-        output upperLayerOut;
-    submodules:
-        vlan: Vlan {
-            @display("p=100,100");
-        }
-    connections:
-        upperLayerIn --> vlan.upperLayerIn;
-        upperLayerOut <-- vlan.upperLayerOut;
 }

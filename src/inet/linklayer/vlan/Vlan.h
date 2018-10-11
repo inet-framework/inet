@@ -15,33 +15,32 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_VLANINTERFACE_H
-#define __INET_VLANINTERFACE_H
+#ifndef __INET_VLAN_H
+#define __INET_VLAN_H
 
+#include "inet/linklayer/ethernet/EthernetSocket.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 
 namespace inet {
 
-class INET_API VlanInterface : public InterfaceEntry
-{
-  protected:
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage) override;
-};
-
-class Vlan : public cSimpleModule
+class Vlan : public cSimpleModule, public EthernetSocket::ICallback
 {
   protected:
     int vlanId = -1;
+    InterfaceEntry *realInterfaceEntry = nullptr;
     InterfaceEntry *interfaceEntry = nullptr;
+    EthernetSocket socket;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
+
+    virtual void socketDataArrived(EthernetSocket *socket, Packet *packet) override;
+    virtual void socketErrorArrived(EthernetSocket *socket, Indication *indication) override;
 };
 
 } // namespace inet
 
-#endif // ifndef __INET_VLANINTERFACE_H
+#endif // ifndef __INET_VLAN_H
 
