@@ -212,20 +212,31 @@ void BgpRouter::listenConnectionFromPeer(SessionId sessionID)
     }
 
     if (_BGPSessions[sessionID]->getSocketListen()->getState() != TcpSocket::LISTENING) {
-        EV_DEBUG << "Start listening to TCP socket on port " << (int)TCP_PORT
-                << " for " << BgpSession::getTypeString(_BGPSessions[sessionID]->getType()) << " session." << std::endl;
-
         _BGPSessions[sessionID]->getSocketListen()->setOutputGate(bgpModule->gate("socketOut"));
-        _BGPSessions[sessionID]->getSocketListen()->bind(TCP_PORT);
+        if(_BGPSessions[sessionID]->getType() == EGP) {
+            InterfaceEntry *intf = _BGPSessions[sessionID]->getLinkIntf();
+            ASSERT(intf);
+            Ipv4Address localAddr = intf->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
+            _BGPSessions[sessionID]->getSocketListen()->bind(localAddr, TCP_PORT);
+        }
+        else
+            _BGPSessions[sessionID]->getSocketListen()->bind(TCP_PORT);
         _BGPSessions[sessionID]->getSocketListen()->listen();
         _socketMap.addSocket(_BGPSessions[sessionID]->getSocketListen());
+
+        EV_DEBUG << "Start listening to incoming TCP connections on " <<
+                _BGPSessions[sessionID]->getSocketListen()->getLocalAddress() <<
+                ":" << (int)TCP_PORT <<
+                " for " << BgpSession::getTypeString(_BGPSessions[sessionID]->getType()) << " session" <<
+                " to peer " << _BGPSessions[sessionID]->getPeerAddr() << std::endl;
     }
 }
 
 void BgpRouter::openTCPConnectionToPeer(SessionId sessionID)
 {
-    EV_DEBUG << "Opening a TCP connection to remote port " << (int)TCP_PORT
-            << " for " << BgpSession::getTypeString(_BGPSessions[sessionID]->getType()) << " session." << std::endl;
+    EV_DEBUG << "Opening a TCP connection to " <<
+            _BGPSessions[sessionID]->getPeerAddr() <<
+            ":" << (int)TCP_PORT << std::endl;
 
     TcpSocket *socket = _BGPSessions[sessionID]->getSocket();
     if (socket->getState() != TcpSocket::NOT_BOUND) {
@@ -256,7 +267,6 @@ void BgpRouter::openTCPConnectionToPeer(SessionId sessionID)
     _socketMap.addSocket(socket);
 
     socket->connect(_BGPSessions[sessionID]->getPeerAddr(), TCP_PORT);
-
 }
 
 void BgpRouter::socketEstablished(TcpSocket *socket)
