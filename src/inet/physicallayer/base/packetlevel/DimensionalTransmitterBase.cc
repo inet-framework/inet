@@ -95,7 +95,7 @@ void DimensionalTransmitterBase::initialize(int stage)
                 frequencyUnit = '%';
                 frequency /= 100;
                 if (frequency < 0 || frequency > 1)
-                    throw cRuntimeError("Invalid percentage in frequencyGains parameter");
+                    throw cRuntimeError("Invalid percentage in frequencyGains parameter (gain should be between 0 and 1)");
             }
             else {
                 frequencyUnit = 'H';
@@ -106,7 +106,7 @@ void DimensionalTransmitterBase::initialize(int stage)
             if (end && !strcmp(end, "dB"))
                 gain = math::dB2fraction(gain);
             if (gain < 0 || gain > 1)
-                throw cRuntimeError("Invalid gain in frequencyGains parameter");
+                throw cRuntimeError("Invalid gain in frequencyGains parameter (gain should be between 0 and 1)");
             frequencyGains.push_back(FrequencyGainEntry(frequencyUnit, frequency, gain));
         }
     }
