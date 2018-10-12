@@ -6,6 +6,7 @@ ERRORS:
 Tag 'inet::Ipv4InterfaceData' is absent -- in module (inet::visualizer::TransportConnectionCanvasVisualizer) TransportConnectionVisualizationMultipleConnectionsShowcase.visualizer.canvasVisualizer.transportConnectionVisualizer (id=222), at t=0.00006972s, event #232
 - RadioVisualizer: displayAntennaLobes parameter is unused (cannot turn off antenna lobe visualization)
 - RoutingTableVisualizer: Tag 'inet::Ipv4InterfaceData' is absent -- in module (inet::visualizer::RoutingTableCanvasVisualizer)
+- Earth showcase: 3rd config: the initial viewport is not centered on the nodes
 
 MISC:
 
