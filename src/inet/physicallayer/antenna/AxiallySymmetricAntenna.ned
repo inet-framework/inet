@@ -28,6 +28,6 @@ module AxiallySymmetricAntenna extends AntennaBase
     parameters:
         string gains = default("0 0"); // sequence of angle [degree] in the range (0, 180) and gain [dB] pairs
         string axisOfSymmetry = default("x"); // allows matching the antenna radiation pattern (IAntennaGain) to the visual representation, antenna orientation is determined by the antenna's mobility model
-        @class(InterpolatingAntenna);
+        @class(AxiallySymmetricAntenna);
 }
 
