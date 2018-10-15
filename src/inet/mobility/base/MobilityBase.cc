@@ -85,7 +85,7 @@ const char *MobilityBase::DirectiveResolver::resolveDirective(char directive)
             auto angularVelocity = mobility->getCurrentAngularVelocity();
             Coord axis;
             double angle;
-            angularVelocity.toAxisAngle(axis, angle);
+            angularVelocity.getRotationAxisAndAngle(axis, angle);
             result = std::to_string(angle);
             break;
         }
