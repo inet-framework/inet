@@ -47,11 +47,15 @@ class INET_API IAntennaGain : public IPrintableObject
 
     /**
      * Returns the antenna gain in the provided direction. The direction is
-     * relative to the antenna geometry, so the result depends only on the
-     * antenna characteristics. For transmissions, it determines how well the
-     * antenna converts input power into radio waves headed in the specified
-     * direction. For receptions, it determines how well the antenna converts
-     * radio waves arriving from the the specified direction.
+     * determined by rotating the X axis using the given quaternion. The direction
+     * is to be interpreted in the local coordinate system of the radiation pattern.
+     * This way the gain depends only on the antenna radion pattern characteristics,
+     * and not on the antenna orientation determined by the antenna's mobility model.
+     *
+     * For transmissions, it determines how well the antenna converts input
+     * power into radio waves headed in the specified direction. For receptions,
+     * it determines how well the antenna converts radio waves arriving from
+     * the specified direction.
      */
     virtual double computeGain(const Quaternion direction) const = 0;
 };
