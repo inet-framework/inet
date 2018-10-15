@@ -100,11 +100,13 @@ void ExtInterface::copyInterfaceConfigurationFromExt()
 
     close(fd);
 
-    auto interfaceData = getProtocolData<Ipv4InterfaceData>();
     setMacAddress(macAddress);
     setMtu(mtu);
-    interfaceData->setIPAddress(Ipv4Address(ipv4Address));
-    interfaceData->setNetmask(Ipv4Address(ipv4Netmask));
+    auto interfaceData = findProtocolData<Ipv4InterfaceData>();
+    if (interfaceData != nullptr) {
+        interfaceData->setIPAddress(Ipv4Address(ipv4Address));
+        interfaceData->setNetmask(Ipv4Address(ipv4Netmask));
+    }
 }
 
 void ExtInterface::copyInterfaceConfigurationToExt()
@@ -127,8 +129,7 @@ void ExtInterface::copyInterfaceConfigurationToExt()
         throw cRuntimeError("error at mtu setting: %s", strerror(errno));
 
     Ipv4InterfaceData *interfaceData = findProtocolData<Ipv4InterfaceData>();
-    if (interfaceData) {
-
+    if (interfaceData != nullptr) {
         //set the IPv4 address
         ((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr.s_addr = htonl(interfaceData->getIPAddress().getInt());
         ifr.ifr_addr.sa_family = AF_INET;
