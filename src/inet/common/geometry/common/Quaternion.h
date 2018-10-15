@@ -109,7 +109,7 @@ class INET_API Quaternion
     void getRotationAxisAndAngle(Coord &axis, double &angle) const;
 
     //! rotates v by this quaternion (quaternion must be unit)
-    Coord rotate(const Coord &v);
+    Coord rotate(const Coord &v) const;
 
     //! returns the euler angles from a rotation Quaternion
     EulerAngles toEulerAngles(bool homogenous=false) const;

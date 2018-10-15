@@ -133,7 +133,7 @@ void Quaternion::getRotationAxisAndAngle(Coord &axis, double &angle) const
     angle *= 2;
 }
 
-Coord Quaternion::rotate(const Coord &v)
+Coord Quaternion::rotate(const Coord &v) const
 {
     Quaternion V(0, v);
     Quaternion conjugate(*this);
