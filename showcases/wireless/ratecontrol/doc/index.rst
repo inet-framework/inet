@@ -11,9 +11,8 @@ framework implements several variants. This showcase demonstrates the
 802.11 rate control mechanism in INET, and examines how rate control can
 improve application level throughput.
 
-INET version: ``3.6``
-
-Source files location: `inet/showcases/wireless/ratecontrol <https://github.com/inet-framework/inet-showcases/tree/master/wireless/ratecontrol>`__
+| INET version: ``4.0``
+| Source files location: `inet/showcases/wireless/ratecontrol <https://github.com/inet-framework/inet-showcases/tree/master/wireless/ratecontrol>`__
 
 The model
 ---------
@@ -143,9 +142,6 @@ These results shows that rate control is effective in increasing the performance
 of the wireless network, as it increases throughput during varying
 channel conditions. Also, throughput is not zero in situations when it
 would be if rate control weren't used.
-
-More information can be found in the `INET
-Reference <https://omnetpp.org/doc/inet/api-current/neddoc/index.html>`__.
 
 Discussion
 ----------
