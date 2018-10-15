@@ -118,7 +118,7 @@ Quaternion Quaternion::slerp(const Quaternion &q1, const Quaternion &q2, double 
         return lerp(q1, q3, t);
 }
 
-void Quaternion::toAxisAngle(Coord &axis, double &angle) const
+void Quaternion::getRotationAxisAndAngle(Coord &axis, double &angle) const
 {
     angle = std::acos(s);
 
