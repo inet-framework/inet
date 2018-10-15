@@ -48,6 +48,7 @@ simple RadioVisualizerBase extends VisualizerBase
         double antennaLobeRadius = default(100); // radius of the polyline for 1 gain
         double antennaLobeStep @unit(deg) = default(10deg);
         double antennaLobeOpacity = default(0.25); // opacity of the antenna lobe
+        bool antennaLobeLineSmooth = default(true);
         string antennaLobeLineColor = default("black"); // antenna lobe line color, black by default
         string antennaLobeLineStyle = default("solid"); // antenna lobe line style (solid, dashed, dotted)
         double antennaLobeLineWidth = default(1); // antenna lobe line width

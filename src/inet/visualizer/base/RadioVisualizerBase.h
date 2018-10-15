@@ -62,6 +62,7 @@ class INET_API RadioVisualizerBase : public VisualizerBase, public cListener
     double antennaLobeRadius = NaN;
     deg antennaLobeStep = deg(NaN);
     double antennaLobeOpacity = NaN;
+    bool antennaLobeLineSmooth = false;
     cFigure::Color antennaLobeLineColor;
     cFigure::LineStyle antennaLobeLineStyle;
     double antennaLobeLineWidth = NaN;

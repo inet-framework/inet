@@ -84,7 +84,7 @@ RadioVisualizerBase::RadioVisualization *RadioCanvasVisualizer::createRadioVisua
     antennaLobeFigure->setFilled(true);
     antennaLobeFigure->setFillColor(antennaLobeFillColor);
     antennaLobeFigure->setFillOpacity(antennaLobeOpacity);
-    antennaLobeFigure->setSmooth(true);
+    antennaLobeFigure->setSmooth(antennaLobeLineSmooth);
     auto networkNode = getContainingNode(module);
     auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
     if (networkNodeVisualization == nullptr)
