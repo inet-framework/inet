@@ -26,7 +26,7 @@
 #include "inet/networklayer/rsvpte/RsvpHelloMsg_m.h"
 #include "inet/networklayer/rsvpte/SignallingMsg_m.h"
 #include "inet/networklayer/rsvpte/IRsvpClassifier.h"
-#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/routing/base/RoutingLifecycleBase.h"
 
 namespace inet {
 
@@ -39,7 +39,7 @@ class LibTable;
 /**
  * TODO documentation
  */
-class INET_API RsvpTe : public cSimpleModule, public IScriptable, public ILifecycle
+class INET_API RsvpTe : public RoutingLifecycleBase, public IScriptable
 {
   protected:
 
@@ -285,10 +285,12 @@ class INET_API RsvpTe : public cSimpleModule, public IScriptable, public ILifecy
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
 
     virtual void clear();
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    virtual bool handleNodeStart(IDoneCallback *) override;
+    virtual bool handleNodeShutdown(IDoneCallback *) override;
+    virtual void handleNodeCrash() override;
 
     // IScriptable implementation
     virtual void processCommand(const cXMLElement& node) override;
