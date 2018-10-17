@@ -33,6 +33,13 @@ StpBase::StpBase()
 
 void StpBase::initialize(int stage)
 {
+    if (stage == INITSTAGE_LINK_LAYER) {    // "auto" MAC addresses assignment takes place in stage 0
+        numPorts = ifTable->getNumInterfaces();
+        switchModule->subscribe(interfaceStateChangedSignal, this);
+    }
+
+    OperationalBase::initialize(stage);
+
     if (stage == INITSTAGE_LOCAL) {
         visualize = par("visualize");
         bridgePriority = par("bridgePriority");
@@ -45,22 +52,10 @@ void StpBase::initialize(int stage)
         ifTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         switchModule = getContainingNode(this);
     }
-
-    if (stage == INITSTAGE_LINK_LAYER) {    // "auto" MAC addresses assignment takes place in stage 0
-        numPorts = ifTable->getNumInterfaces();
-        switchModule->subscribe(interfaceStateChangedSignal, this);
-
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(switchModule->getSubmodule("status"));
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-
-        if (isOperational)
-            start();
-    }
 }
 
 void StpBase::start()
 {
-    isOperational = true;
     ie = chooseInterface();
 
     if (ie)
@@ -71,7 +66,6 @@ void StpBase::start()
 
 void StpBase::stop()
 {
-    isOperational = false;
     ie = nullptr;
 }
 
@@ -188,26 +182,21 @@ InterfaceEntry *StpBase::chooseInterface()
     return nullptr;
 }
 
-bool StpBase::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool StpBase::handleNodeStart(IDoneCallback *)
 {
-    Enter_Method_Silent();
-
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_LINK_LAYER)
-            start();
-    }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_LINK_LAYER)
-            stop();
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH)
-            stop();
-    }
-    else
-        throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
-
+    start();
     return true;
+}
+
+bool StpBase::handleNodeShutdown(IDoneCallback *)
+{
+    stop();
+    return true;
+}
+
+void StpBase::handleNodeCrash()
+{
+    stop();
 }
 
 } // namespace inet

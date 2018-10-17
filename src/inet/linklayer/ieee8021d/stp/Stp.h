@@ -82,7 +82,7 @@ class INET_API Stp : public StpBase
      * Topology change handling
      */
     void handleTCN(Packet *packet, const Ptr<const Bpdu>& tcn);
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 

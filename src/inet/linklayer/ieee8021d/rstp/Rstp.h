@@ -92,7 +92,7 @@ class INET_API Rstp : public StpBase
     /**
      * @brief General processing
      */
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
 
     /**
      * @brief BPDU processing.
