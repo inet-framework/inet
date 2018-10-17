@@ -224,11 +224,6 @@ void Ipv6NeighbourDiscovery::processNDMessage(Packet *packet, const Icmpv6Header
     }
 }
 
-bool Ipv6NeighbourDiscovery::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-{
-    throw cRuntimeError("Lifecycle operation support not implemented");
-}
-
 void Ipv6NeighbourDiscovery::finish()
 {
 }

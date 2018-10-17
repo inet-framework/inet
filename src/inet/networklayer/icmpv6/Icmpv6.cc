@@ -337,12 +337,6 @@ void Icmpv6::errorOut(const Ptr<const Icmpv6Header>& icmpv6msg)
 {
 }
 
-bool Icmpv6::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-{
-    //pingMap.clear();
-    throw cRuntimeError("Lifecycle operation support not implemented");
-}
-
 void Icmpv6::handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterService");

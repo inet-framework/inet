@@ -1038,11 +1038,6 @@ bool Ipv6::processExtensionHeaders(Packet *packet, const Ipv6Header *ipv6Header)
 
 #endif /* WITH_xMIPv6 */
 
-bool Ipv6::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-{
-    throw cRuntimeError("Lifecycle operation support not implemented");
-}
-
 // NetFilter:
 void Ipv6::registerHook(int priority, INetfilter::IHook *hook)
 {
