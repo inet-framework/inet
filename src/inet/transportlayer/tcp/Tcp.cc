@@ -91,11 +91,8 @@ void Tcp::initialize(int stage)
         useDataNotification = par("useDataNotification");
 
         const char *crcModeString = par("crcMode");
-        if (!strcmp(crcModeString, "declared"))
-            crcMode = CRC_DECLARED_CORRECT;
-        else if (!strcmp(crcModeString, "computed"))
-            crcMode = CRC_COMPUTED;
-        else
+        crcMode = parseCrcMode(crcModeString);
+        if (crcMode == CRC_DISABLED)
             throw cRuntimeError("Unknown crc mode: '%s'", crcModeString);
         crcInsertion.setCrcMode(crcMode);
     }
