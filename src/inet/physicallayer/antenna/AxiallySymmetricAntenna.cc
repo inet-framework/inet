@@ -49,16 +49,6 @@ AxiallySymmetricAntenna::AntennaGain::AntennaGain(const char *axis, const char *
 {
     axisOfSymmetryDirection = Coord::parse(axis);
     cStringTokenizer tokenizer(gains);
-    const char *firstAngle = tokenizer.nextToken();
-    if (!firstAngle)
-        throw cRuntimeError("Insufficient number of values");
-    if (strcmp(firstAngle, "0"))
-        throw cRuntimeError("The first angle must be 0");
-    const char *firstGain = tokenizer.nextToken();
-    if (!firstGain)
-        throw cRuntimeError("Insufficient number of values");
-    gainMap.insert(std::pair<rad, double>(rad(0), math::dB2fraction(atof(firstGain))));
-    gainMap.insert(std::pair<rad, double>(rad(M_PI), math::dB2fraction(atof(firstGain))));
     while (tokenizer.hasMoreTokens()) {
         const char *angleString = tokenizer.nextToken();
         const char *gainString = tokenizer.nextToken();
@@ -72,7 +62,10 @@ AxiallySymmetricAntenna::AntennaGain::AntennaGain(const char *axis, const char *
             maxGain = gain;
         gainMap.insert(std::pair<rad, double>(angle, gain));
     }
-}
+    if (gainMap.find(deg(0)) == gainMap.end())
+        throw cRuntimeError("The first angle must be 0");
+    if (gainMap.find(deg(180)) == gainMap.end())
+        throw cRuntimeError("The last angle must be 180");}
 
 double AxiallySymmetricAntenna::AntennaGain::computeGain(const Quaternion direction) const
 {
