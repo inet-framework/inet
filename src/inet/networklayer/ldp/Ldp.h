@@ -24,10 +24,10 @@
 
 #include "inet/common/socket/SocketMap.h"
 #include "inet/networklayer/ldp/LdpPacket_m.h"
-#include "inet/transportlayer/contract/udp/UdpSocket.h"
-#include "inet/transportlayer/contract/tcp/TcpSocket.h"
 #include "inet/networklayer/mpls/IIngressClassifier.h"
 #include "inet/routing/base/RoutingLifecycleBase.h"
+#include "inet/transportlayer/contract/tcp/TcpSocket.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {
 
