@@ -120,7 +120,7 @@ Udp::~Udp()
 
 void Udp::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    OperationalBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         WATCH_PTRMAP(socketsByIdMap);
@@ -151,8 +151,6 @@ void Udp::initialize(int stage)
         WATCH(numPassedUp);
         WATCH(numDroppedWrongPort);
         WATCH(numDroppedBadChecksum);
-
-        isOperational = false;
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
         if (crcMode == CRC_COMPUTED) {
@@ -167,19 +165,13 @@ void Udp::initialize(int stage)
                 ipv6->registerHook(0, &crcInsertion);
 #endif
         }
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-
         registerService(Protocol::udp, gate("appIn"), gate("ipIn"));
         registerProtocol(Protocol::udp, gate("ipOut"), gate("appOut"));
     }
 }
 
-void Udp::handleMessage(cMessage *msg)
+void Udp::handleMessageWhenUp(cMessage *msg)
 {
-    if (!isOperational)
-        throw cRuntimeError("Message '%s' received when Udp is OFF", msg->getName());
-
     // received from IP layer
     if (msg->arrivedOn("ipIn")) {
         Packet *packet = check_and_cast<Packet *>(msg);
@@ -1167,38 +1159,26 @@ void Udp::setMulticastSourceFilter(SockDesc *sd, InterfaceEntry *ie, L3Address m
     }
 }
 
-bool Udp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool Udp::handleNodeStart(IDoneCallback *)
 {
-    Enter_Method_Silent();
-
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_TRANSPORT_LAYER) {
-            icmp = nullptr;
-            icmpv6 = nullptr;
-            isOperational = true;
-        }
-    }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_TRANSPORT_LAYER) {
-            clearAllSockets();
-            icmp = nullptr;
-            icmpv6 = nullptr;
-            isOperational = false;
-        }
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH) {
-            clearAllSockets();
-            icmp = nullptr;
-            icmpv6 = nullptr;
-            isOperational = false;
-        }
-    }
-    else {
-        throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
-    }
-
+    icmp = nullptr;
+    icmpv6 = nullptr;
     return true;
+}
+
+bool Udp::handleNodeShutdown(IDoneCallback *)
+{
+    clearAllSockets();
+    icmp = nullptr;
+    icmpv6 = nullptr;
+    return true;
+}
+
+void Udp::handleNodeCrash()
+{
+    clearAllSockets();
+    icmp = nullptr;
+    icmpv6 = nullptr;
 }
 
 /*
