@@ -27,8 +27,7 @@
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 #include "inet/networklayer/mpls/IIngressClassifier.h"
-#include "inet/common/lifecycle/OperationalBase.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/routing/base/RoutingLifecycleBase.h"
 
 namespace inet {
 
@@ -53,7 +52,7 @@ class Ted;
 /**
  * LDP (rfc 3036) protocol implementation.
  */
-class INET_API Ldp : public OperationalBase, public TcpSocket::ICallback, public UdpSocket::ICallback, public IIngressClassifier, public cListener
+class INET_API Ldp : public RoutingLifecycleBase, public TcpSocket::ICallback, public UdpSocket::ICallback, public IIngressClassifier, public cListener
 {
   public:
 
@@ -185,9 +184,6 @@ class INET_API Ldp : public OperationalBase, public TcpSocket::ICallback, public
     virtual bool handleNodeStart(IDoneCallback *) override;
     virtual bool handleNodeShutdown(IDoneCallback *) override;
     virtual void handleNodeCrash() override;
-    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_ROUTING_PROTOCOLS; }
-    virtual bool isNodeStartStage(int stage) override { return stage == NodeStartOperation::STAGE_ROUTING_PROTOCOLS; }
-    virtual bool isNodeShutdownStage(int stage) override { return stage == NodeShutdownOperation::STAGE_ROUTING_PROTOCOLS; }
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
