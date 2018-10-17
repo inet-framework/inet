@@ -127,16 +127,9 @@ void Udp::initialize(int stage)
         WATCH_MAP(socketsByPortMap);
 
         const char *crcModeString = par("crcMode");
-        if (!strcmp(crcModeString, "disabled"))
-            crcMode = CRC_DISABLED;
-        else if (!strcmp(crcModeString, "declared"))
-            crcMode = CRC_DECLARED_CORRECT;
-        else if (!strcmp(crcModeString, "computed")) {
-            crcMode = CRC_COMPUTED;
+        crcMode = parseCrcMode(crcModeString);
+        if (crcMode == CRC_COMPUTED)
             crcInsertion.udp = this;
-        }
-        else
-            throw cRuntimeError("Unknown CRC mode: '%s'", crcModeString);
 
         lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
