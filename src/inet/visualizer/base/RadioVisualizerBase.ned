@@ -45,7 +45,10 @@ simple RadioVisualizerBase extends VisualizerBase
 
         bool antennaLobePlaneGlobal = default(true); // compute antenna lobe relative to the global or antenna local coordinate systems, global by default
         string antennaLobePlane @enum("view", "xy", "xz", "yz") = default("view"); // compute antenna lobe in this plane, view by default
-        double antennaLobeRadius = default(100); // radius of the polyline for 1 gain
+        string antennaLobeMode @enum("logarithmic", "linear") = default("logarithmic");
+        double antennaLobeLogarithmicBase = default(10);
+        double antennaLobeLogarithmicScale = default(100);
+        double antennaLobeRadius = default(100); // radius of the polyline for 0dB (1 gain)
         double antennaLobeStep @unit(deg) = default(10deg);
         double antennaLobeOpacity = default(0.25); // opacity of the antenna lobe
         bool antennaLobeLineSmooth = default(true);
