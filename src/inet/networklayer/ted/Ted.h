@@ -19,7 +19,7 @@
 
 #include "inet/networklayer/ted/Ted_m.h"
 #include "inet/networklayer/rsvpte/IntServ_m.h"
-#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/routing/base/RoutingLifecycleBase.h"
 
 namespace inet {
 
@@ -33,7 +33,7 @@ class InterfaceEntry;
  *
  * See NED file for more info.
  */
-class INET_API Ted : public cSimpleModule, public ILifecycle
+class INET_API Ted : public RoutingLifecycleBase
 {
   public:
     /**
@@ -70,7 +70,7 @@ class INET_API Ted : public cSimpleModule, public ILifecycle
   protected:
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
 
     virtual void initializeTED();
 
@@ -93,7 +93,9 @@ class INET_API Ted : public cSimpleModule, public ILifecycle
     virtual void rebuildRoutingTable();
     //@}
 
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    virtual bool handleNodeStart(IDoneCallback *) override;
+    virtual bool handleNodeShutdown(IDoneCallback *) override;
+    virtual void handleNodeCrash() override;
 
   protected:
     IIpv4RoutingTable *rt = nullptr;
