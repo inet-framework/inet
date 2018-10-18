@@ -24,6 +24,7 @@ import inet.transportlayer.contract.IUdp;
 simple ExtLowerUdp like IUdp
 {
     parameters:
+        string namespace = default("");
         @display("i=block/transport");
         @signal[packetSentToUpper](type=inet::Packet);
         @signal[packetReceivedFromUpper](type=inet::Packet);

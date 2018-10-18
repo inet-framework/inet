@@ -15,6 +15,7 @@
 
 #include <omnetpp/platdep/sockets.h>
 #include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/NetworkNamespaceContext.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
@@ -172,6 +173,7 @@ bool ExtLowerUdp::notify(int fd)
 
 ExtLowerUdp::Socket *ExtLowerUdp::open(int socketId)
 {
+    NetworkNamespaceContext context(par("namespace"));
     auto socket = new Socket(socketId);
     int fd = ::socket(AF_INET, SOCK_DGRAM, 0);
     if (fd < 0)
@@ -185,6 +187,7 @@ ExtLowerUdp::Socket *ExtLowerUdp::open(int socketId)
 
 void ExtLowerUdp::bind(int socketId, const L3Address& localAddress, int localPort)
 {
+    NetworkNamespaceContext context(par("namespace"));
     Socket *socket = nullptr;
     auto it = socketIdToSocketMap.find(socketId);
     if (it == socketIdToSocketMap.end())
@@ -225,6 +228,7 @@ void ExtLowerUdp::connect(int socketId, const L3Address& remoteAddress, int remo
 
 void ExtLowerUdp::close(int socketId)
 {
+    NetworkNamespaceContext context(par("namespace"));
     auto it = socketIdToSocketMap.find(socketId);
     if (it == socketIdToSocketMap.end())
         throw cRuntimeError("Unknown socket");

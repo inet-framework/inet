@@ -24,11 +24,13 @@ module ExtInterface like IExternalInterface
     parameters:
         string interfaceTableModule;
         string device;
+        string namespace = default("");
         string copyConfiguration @enum("", "copyToExt", "copyFromExt") = default("");
         string address = default("auto");
         int mtu @unit(B) = default(4470B);
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         *.device = default(device);
+        *.namespace = default(namespace);
         @class(ExtInterface);
     gates:
         input upperLayerIn @loose;

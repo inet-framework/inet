@@ -30,6 +30,7 @@
 
 #include "inet/common/Endian.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/NetworkNamespaceContext.h"
 #include "inet/emulation/common/ExtInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
@@ -69,6 +70,8 @@ void ExtInterface::configureInterface()
 
 void ExtInterface::copyInterfaceConfigurationFromExt()
 {
+    NetworkNamespaceContext context(par("namespace"));
+
     std::string device = par("device").stdstringValue();
     int fd = socket(AF_INET, SOCK_DGRAM, 0);
 
@@ -106,6 +109,8 @@ void ExtInterface::copyInterfaceConfigurationFromExt()
 
 void ExtInterface::copyInterfaceConfigurationToExt()
 {
+    NetworkNamespaceContext context(par("namespace"));
+
     std::string device = par("device").stdstringValue();
     int fd = socket(AF_INET, SOCK_DGRAM, 0);
     struct ifreq ifr;

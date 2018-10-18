@@ -43,7 +43,7 @@ class INET_API ExtEthernetTapDeviceFileIo : public cSimpleModule, public RealTim
     int numReceived = 0;
 
     // state
-    int fd = INVALID_SOCKET;
+    int fd = -1;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

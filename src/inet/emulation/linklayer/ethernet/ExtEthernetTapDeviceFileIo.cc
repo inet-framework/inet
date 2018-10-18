@@ -29,6 +29,7 @@
 #include <omnetpp/platdep/sockets.h>
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/NetworkNamespaceContext.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/emulation/linklayer/ethernet/ExtEthernetTapDeviceFileIo.h"
@@ -102,6 +103,7 @@ void ExtEthernetTapDeviceFileIo::finish()
 
 void ExtEthernetTapDeviceFileIo::openTap(std::string dev)
 {
+    NetworkNamespaceContext context(par("namespace"));
     if ((fd = open("/dev/net/tun", O_RDWR)) < 0)
         throw cRuntimeError("Cannot open TAP device: %s", strerror(errno));
 
@@ -129,6 +131,7 @@ void ExtEthernetTapDeviceFileIo::openTap(std::string dev)
 
 void ExtEthernetTapDeviceFileIo::closeTap()
 {
+    NetworkNamespaceContext context(par("namespace"));
     if (fd != INVALID_SOCKET) {
         rtScheduler->removeCallback(fd, this);
         close(fd);
