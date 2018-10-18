@@ -543,10 +543,12 @@ void BgpRouter::updateSendProcess(const unsigned char type, SessionId sessionInd
         if(!isReachable(entry->getGateway()))
             continue;
 
-        if ((_BGPSessions[sessionIndex]->getType() == IGP && (elem).second->getType() == EGP) ||
-            _BGPSessions[sessionIndex]->getType() == EGP ||
-            type == ROUTE_DESTINATION_CHANGED ||
-            type == NEW_SESSION_ESTABLISHED)
+        BgpSessionType sType = _BGPSessions[sessionIndex]->getType();
+
+        if ((sType == IGP && (elem).second->getType() == EGP) ||
+                sType == EGP ||
+                type == ROUTE_DESTINATION_CHANGED ||
+                type == NEW_SESSION_ESTABLISHED)
         {
             BgpUpdateNlri NLRI;
             BgpUpdatePathAttributeList content;
@@ -555,24 +557,31 @@ void BgpRouter::updateSendProcess(const unsigned char type, SessionId sessionInd
             content.setAsPathArraySize(1);
             content.getAsPathForUpdate(0).setValueArraySize(1);
             content.getAsPathForUpdate(0).getValueForUpdate(0).setType(AS_SEQUENCE);
-            //RFC 4271 : set My AS in first position if it is not already
-            if (entry->getAS(0) != myAsId) {
-                content.getAsPathForUpdate(0).getValueForUpdate(0).setAsValueArraySize(nbAS + 1);
-                content.getAsPathForUpdate(0).getValueForUpdate(0).setLength(1);
-                content.getAsPathForUpdate(0).getValueForUpdate(0).setAsValue(0, myAsId);
-                for (unsigned int j = 1; j < nbAS + 1; j++) {
-                    content.getAsPathForUpdate(0).getValueForUpdate(0).setAsValue(j, entry->getAS(j - 1));
+            if((elem).second->getType() == EGP) {
+                // RFC 4271 : set My AS in first position if it is not already
+                if (entry->getAS(0) != myAsId) {
+                    content.getAsPathForUpdate(0).getValueForUpdate(0).setAsValueArraySize(nbAS + 1);
+                    content.getAsPathForUpdate(0).getValueForUpdate(0).setLength(1);
+                    content.getAsPathForUpdate(0).getValueForUpdate(0).setAsValue(0, myAsId);
+                    for (unsigned int j = 1; j < nbAS + 1; j++)
+                        content.getAsPathForUpdate(0).getValueForUpdate(0).setAsValue(j, entry->getAS(j - 1));
+                }
+                else {
+                    content.getAsPathForUpdate(0).getValueForUpdate(0).setAsValueArraySize(nbAS);
+                    content.getAsPathForUpdate(0).getValueForUpdate(0).setLength(1);
+                    for (unsigned int j = 0; j < nbAS; j++)
+                        content.getAsPathForUpdate(0).getValueForUpdate(0).setAsValue(j, entry->getAS(j));
                 }
             }
-            else {
+            // no AS number is added when the route is being advertised between internal peers
+            else if((elem).second->getType() == IGP) {
                 content.getAsPathForUpdate(0).getValueForUpdate(0).setAsValueArraySize(nbAS);
                 content.getAsPathForUpdate(0).getValueForUpdate(0).setLength(1);
-                for (unsigned int j = 0; j < nbAS; j++) {
+                for (unsigned int j = 0; j < nbAS; j++)
                     content.getAsPathForUpdate(0).getValueForUpdate(0).setAsValue(j, entry->getAS(j));
-                }
             }
 
-            if(_BGPSessions[sessionIndex]->getType() == EGP || nextHopSelf) {
+            if(sType == EGP || nextHopSelf) {
                 InterfaceEntry *iftEntry = (elem).second->getLinkIntf();
                 content.getNextHopForUpdate().setValue(iftEntry->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
             }
