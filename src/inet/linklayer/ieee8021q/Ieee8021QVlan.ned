@@ -18,7 +18,7 @@ package inet.linklayer.ieee8021q;
 simple Ieee8021QVlan like IIeee8021QVlan
 {
     parameters:
-        string vlanTagType @enum("c","s") = default("s");
+        string vlanTagType @enum("c","s") = default("c");
         string inboundVlanIdFilter = default("");
         string inboundVlanIdMap = default("");
         string outboundVlanIdFilter = default("");
