@@ -228,6 +228,7 @@ const Ptr<Chunk> Icmpv6HeaderSerializer::deserialize(MemoryInputStream& stream) 
             break;
         }
     }
+    icmpv6Header->setCrcMode(CRC_COMPUTED);
     icmpv6Header->setChksum(chksum);
     return icmpv6Header;
 }
