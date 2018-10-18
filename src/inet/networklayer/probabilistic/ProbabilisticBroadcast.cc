@@ -43,7 +43,7 @@ void ProbabilisticBroadcast::initialize(int stage)
         nbDataPacketsForwarded = 0;
         nbHops = 0;
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER_3) {
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
         myNetwAddr = interfaceTable->getInterface(1)->getNetworkAddress();
     }
 }

@@ -177,11 +177,11 @@ visualization and as the map provider.
 
 However, INET carries out all geometric computation internally
 (including signal propagation and path loss) in a 3D Euclidean
-coordinate system. The discrepancy between the internal playground
+coordinate system. The discrepancy between the internal scene
 coordinate system and the usual geographic coordinate systems must be
 resolved.
 
-A geographic coordinate system model maps playground coordinates to
+A geographic coordinate system model maps scene coordinates to
 geographic coordinates, and vice versa. Such a model allows positioning
 physical objects and describing network node mobility using geographical
 coordinates (e.g longitude, latitude, altitude).
@@ -200,7 +200,7 @@ coordinate system module must be included in the network. The desired
 physical environment module and mobility modules must be configured
 (using module path parameters) to use the geographic coordinate system
 module. The following example also shows how the geographic coordinate
-system module can be configured to place the playground at a particular
+system module can be configured to place the scene at a particular
 geographic location and orientation.
 
 

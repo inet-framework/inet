@@ -44,6 +44,7 @@ simsignal_t EtherEncap::pauseSentSignal = registerSignal("pauseSent");
 
 void EtherEncap::initialize(int stage)
 {
+    Ieee8022Llc::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         fcsMode = parseFcsMode(par("fcsMode"));
         seqNum = 0;
@@ -64,35 +65,12 @@ void EtherEncap::initialize(int stage)
     }
 }
 
-void EtherEncap::handleMessage(cMessage *msg)
+void EtherEncap::processCommandFromHigherLayer(Request *msg)
 {
-    if (msg->arrivedOn("upperLayerIn")) {
-        EV_INFO << "Received " << msg << " from upper layer." << endl;
-        // from higher layer
-        if (msg->isPacket())
-            processPacketFromHigherLayer(check_and_cast<Packet *>(msg));
-        else
-            processCommandFromHigherLayer(msg);
-    }
-    else if (msg->arrivedOn("lowerLayerIn")) {
-        EV_INFO << "Received " << msg << " from lower layer." << endl;
-        processFrameFromMAC(check_and_cast<Packet *>(msg));
-    }
+    if (dynamic_cast<Ieee802PauseCommand *>(msg->getControlInfo()) != nullptr)
+        handleSendPause(msg);
     else
-        throw cRuntimeError("Unknown message");
-}
-
-void EtherEncap::processCommandFromHigherLayer(cMessage *msg)
-{
-    switch (msg->getKind()) {
-        case IEEE802CTRL_SENDPAUSE:
-            // higher layer want MAC to send PAUSE frame
-            handleSendPause(msg);
-            break;
-
-        default:
-            throw cRuntimeError("Received message `%s' with unknown message kind %d", msg->getName(), msg->getKind());
-    }
+        Ieee8022Llc::processCommandFromHigherLayer(msg);
 }
 
 void EtherEncap::refreshDisplay() const
@@ -203,41 +181,43 @@ const Ptr<const EthernetMacHeader> EtherEncap::decapsulateMacHeader(Packet *pack
     return ethHeader;
 }
 
-const Ptr<const EthernetMacHeader> EtherEncap::decapsulateMacLlcSnap(Packet *packet)
+void EtherEncap::processPacketFromMac(Packet *packet)
 {
     const Protocol *payloadProtocol = nullptr;
     auto ethHeader = decapsulateMacHeader(packet);
 
     // remove llc header if possible
     if (isIeee8023Header(*ethHeader)) {
-        this->Ieee8022Llc::decapsulate(packet);
+        Ieee8022Llc::processPacketFromMac(packet);
+        return;
     }
     else if (isEth2Header(*ethHeader)) {
         payloadProtocol = ProtocolGroup::ethertype.getProtocol(ethHeader->getTypeOrLength());
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
+        packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
+
+        if (upperProtocols.find(payloadProtocol) != upperProtocols.end()) {
+            EV_DETAIL << "Decapsulating frame `" << packet->getName() << "', passing up contained packet `"
+                      << packet->getName() << "' to higher layer\n";
+
+            totalFromMAC++;
+            emit(decapPkSignal, packet);
+
+            // pass up to higher layers.
+            EV_INFO << "Sending " << packet << " to upper layer.\n";
+            send(packet, "upperLayerOut");
+        }
+        else {
+            EV_WARN << "Unknown protocol, dropping packet\n";
+            PacketDropDetails details;
+            details.setReason(NO_PROTOCOL_FOUND);
+            emit(packetDroppedSignal, packet, &details);
+            delete packet;
+        }
     }
+    else
+        throw cRuntimeError("Unknown ethernet header");
 
-    return ethHeader;
-}
-
-void EtherEncap::processFrameFromMAC(Packet *packet)
-{
-    // decapsulate and attach control info
-    decapsulateMacLlcSnap(packet);
-
-    auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-    if (protocol)
-        packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
-
-    EV_DETAIL << "Decapsulating frame `" << packet->getName() << "', passing up contained packet `"
-              << packet->getName() << "' to higher layer\n";
-
-    totalFromMAC++;
-    emit(decapPkSignal, packet);
-
-    // pass up to higher layers.
-    EV_INFO << "Sending " << packet << " to upper layer.\n";
-    send(packet, "upperLayerOut");
 }
 
 void EtherEncap::handleSendPause(cMessage *msg)

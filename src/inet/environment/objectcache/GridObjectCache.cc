@@ -39,7 +39,7 @@ void GridObjectCache::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
         physicalEnvironment = getModuleFromPar<PhysicalEnvironment>(par("physicalEnvironmentModule"), this);
-    else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT_2) {
+    else if (stage == INITSTAGE_PHYSICAL_OBJECT_CACHE) {
         double cellSizeX = par("cellSizeX");
         double cellSizeY = par("cellSizeY");
         double cellSizeZ = par("cellSizeZ");

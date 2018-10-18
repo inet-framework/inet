@@ -30,5 +30,23 @@ void RandomQosClassifier::handleMessage(cMessage *msg)
     send(msg, "out");
 }
 
+void RandomQosClassifier::handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)
+{
+    Enter_Method("handleRegisterService");
+    if (!strcmp("out", out->getName()))
+        registerService(protocol, gate("in"), servicePrimitive);
+    else
+        throw cRuntimeError("Unknown gate: %s", out->getName());
+}
+
+void RandomQosClassifier::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
+{
+    Enter_Method("handleRegisterProtocol");
+    if (!strcmp("in", in->getName()))
+        registerProtocol(protocol, gate("out"), servicePrimitive);
+    else
+        throw cRuntimeError("Unknown gate: %s", in->getName());
+}
+
 } // namespace inet
 

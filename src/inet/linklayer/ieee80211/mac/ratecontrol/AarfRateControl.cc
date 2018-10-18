@@ -41,7 +41,7 @@ void AarfRateControl::initialize(int stage)
         WATCH(probing);
         WATCH(numberOfConsSuccTransmissions);
     }
-    else if (stage == INITSTAGE_LINK_LAYER_2) {
+    else if (stage == INITSTAGE_LINK_LAYER) {
         updateDisplayString();
     }
 }

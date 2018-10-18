@@ -53,8 +53,6 @@ class INET_API IIpv4RoutingTable : public IRoutingTable
 
     /** @name Interfaces */
     //@{
-    virtual void configureInterfaceForIpv4(InterfaceEntry *ie) = 0;
-
     /**
      * Returns an interface given by its address. Returns nullptr if not found.
      */

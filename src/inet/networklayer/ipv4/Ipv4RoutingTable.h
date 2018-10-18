@@ -109,9 +109,6 @@ class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable
     MulticastRouteVector multicastRoutes;    // Multicast route array, sorted by netmask desc, origin asc, metric asc
 
   protected:
-    // set Ipv4 address etc on local loopback
-    virtual void configureLoopbackForIpv4();
-
     // set router Id
     virtual void configureRouterId();
 
@@ -186,8 +183,6 @@ class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable
 
     /** @name Interfaces */
     //@{
-    virtual void configureInterfaceForIpv4(InterfaceEntry *ie) override;
-
     /**
      * Returns an interface given by its address. Returns nullptr if not found.
      */

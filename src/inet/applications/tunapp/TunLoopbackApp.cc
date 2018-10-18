@@ -41,10 +41,12 @@ TunLoopbackApp::~TunLoopbackApp()
 void TunLoopbackApp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
-    if (stage == INITSTAGE_LINK_LAYER_2) {
+    if (stage == INITSTAGE_LOCAL) {
         tunInterface = par("tunInterface");
         packetsSent = 0;
         packetsReceived = 0;
+    }
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         IInterfaceTable *interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         InterfaceEntry *interfaceEntry = interfaceTable->getInterfaceByName(tunInterface);
         if (interfaceEntry == nullptr)

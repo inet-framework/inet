@@ -30,34 +30,43 @@ void SceneVisualizerBase::initialize(int stage)
 {
     VisualizerBase::initialize(stage);
     if (!hasGUI()) return;
-    if (stage == INITSTAGE_LOCAL)
+    if (stage == INITSTAGE_LOCAL) {
         visualizationTargetModule->getCanvas()->setAnimationSpeed(par("animationSpeed"), this);
+        sceneMin.x = par("sceneMinX");
+        sceneMin.y = par("sceneMinY");
+        sceneMin.z = par("sceneMinZ");
+        sceneMax.x = par("sceneMaxX");
+        sceneMax.y = par("sceneMaxY");
+        sceneMax.z = par("sceneMaxZ");
+    }
 }
 
-Box SceneVisualizerBase::getPlaygroundBounds()
+Box SceneVisualizerBase::getSceneBounds()
 {
+    Coord min;
+    Coord max;
     auto physicalEnvironment = getModuleFromPar<IPhysicalEnvironment>(par("physicalEnvironmentModule"), this, false);
-    Coord playgroundMin = Coord::ZERO;
-    Coord playgroundMax = Coord::ZERO;
     if (physicalEnvironment == nullptr) {
         auto displayString = visualizationTargetModule->getDisplayString();
         auto width = atof(displayString.getTagArg("bgb", 0));
         auto height = atof(displayString.getTagArg("bgb", 1));
-        playgroundMin = Coord(0.0, 0.0, 0.0);
-        playgroundMax = Coord(width, height, 0.0);
+        min = Coord(0.0, 0.0, 0.0);
+        max = Coord(width, height, 0.0);
     }
     else {
-        playgroundMin = physicalEnvironment->getSpaceMin();
-        playgroundMax = physicalEnvironment->getSpaceMax();
+        min = physicalEnvironment->getSpaceMin();
+        max = physicalEnvironment->getSpaceMax();
     }
     for (int id = 0; id <= getSimulation()->getLastComponentId(); id++) {
         auto mobility = dynamic_cast<IMobility *>(getSimulation()->getModule(id));
         if (mobility != nullptr) {
-            playgroundMin = playgroundMin.min(mobility->getConstraintAreaMin());
-            playgroundMax = playgroundMax.max(mobility->getConstraintAreaMax());
+            min = mobility->getConstraintAreaMin().min(min);
+            max = mobility->getConstraintAreaMax().max(max);
         }
     }
-    return Box(playgroundMin, playgroundMax);
+    min = sceneMin.min(min);
+    max = sceneMax.max(max);
+    return Box(min, max);
 }
 
 } // namespace visualizer

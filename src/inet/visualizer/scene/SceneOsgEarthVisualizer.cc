@@ -53,8 +53,8 @@ void SceneOsgEarthVisualizer::initialize(int stage)
     }
     else if (stage == INITSTAGE_LAST) {
         initializeLocator();
-        if (par("displayPlayground"))
-            initializePlayground();
+        if (par("displayScene"))
+            initializeSceneFloor();
         double axisLength = par("axisLength");
         if (!std::isnan(axisLength))
             initializeAxis(axisLength);
@@ -85,12 +85,12 @@ void SceneOsgEarthVisualizer::initializeScene()
 
 void SceneOsgEarthVisualizer::initializeLocator()
 {
-    auto playgroundPosition = coordinateSystem->getPlaygroundPosition();
+    auto scenePosition = coordinateSystem->getScenePosition();
     geoTransform->setPosition(osgEarth::GeoPoint(mapNode->getMapSRS()->getGeographicSRS(),
-            deg(playgroundPosition.longitude).get(), deg(playgroundPosition.latitude).get(), m(playgroundPosition.altitude).get()));
+            deg(scenePosition.longitude).get(), deg(scenePosition.latitude).get(), m(scenePosition.altitude).get()));
 
-    auto playgroundOrientation = coordinateSystem->getPlaygroundOrientation();
-    localTransform->setAttitude(osg::Quat(osg::Vec4d(playgroundOrientation.v.x, playgroundOrientation.v.y, playgroundOrientation.v.z, playgroundOrientation.s)));
+    auto sceneOrientation = coordinateSystem->getSceneOrientation();
+    localTransform->setAttitude(osg::Quat(osg::Vec4d(sceneOrientation.v.x, sceneOrientation.v.y, sceneOrientation.v.z, sceneOrientation.s)));
 }
 
 void SceneOsgEarthVisualizer::initializeViewpoint()

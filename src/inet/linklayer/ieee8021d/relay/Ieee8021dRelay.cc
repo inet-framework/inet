@@ -52,8 +52,6 @@ void Ieee8021dRelay::initialize(int stage)
         if(isStpAware) {
             registerAddress(MacAddress::STP_MULTICAST_ADDRESS);
         }
-    }
-    else if (stage == INITSTAGE_LINK_LAYER_2) {
 
         macTable = getModuleFromPar<IMacAddressTable>(par("macTableModule"), this);
         ifTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);

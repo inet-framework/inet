@@ -43,9 +43,8 @@ void Stp::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         tick = new cMessage("STP_TICK", 0);
         WATCH(bridgeAddress);
-    }else if (stage == INITSTAGE_LINK_LAYER)
-    {
-        //register service and protocol
+    }
+    else if (stage == INITSTAGE_LINK_LAYER) {
         registerService(Protocol::stp, nullptr, gate("relayIn"));
         registerProtocol(Protocol::stp, gate("relayOut"), nullptr);
     }

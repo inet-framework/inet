@@ -26,20 +26,7 @@ namespace inet;
 enum Ieee802MessageKind
 {
     IEEE802CTRL_DATA = 2003;  // data to/from higher layer
-    IEEE802CTRL_REGISTER_DSAP = 2004;  // higher layer registers itself in LLC
-    IEEE802CTRL_DEREGISTER_DSAP = 2005;  // higher layer deregisters itself in LLC
     IEEE802CTRL_SENDPAUSE = 2006;  // higher layer wants MAC to send PAUSE frame
-}
-
-
-class Ieee802RegisterDsapCommand extends cObject
-{
-    int dsap;        // used with IEEE 802 LLC (see ~EtherFrameWithLlc)
-}
-
-class Ieee802DeregisterDsapCommand extends cObject
-{
-    int dsap;        // used with IEEE 802 LLC (see ~EtherFrameWithLlc)
 }
 
 // used with IEEE802CTRL_SENDPAUSE

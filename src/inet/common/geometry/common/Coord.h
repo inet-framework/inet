@@ -297,6 +297,28 @@ class INET_API Coord
     {
         return acos(*this * a / length() / a.length());
     }
+
+    static Coord parse(const char *text) {
+        if (!strcmp(text, "x") || !strcmp(text, "+x"))
+            return Coord::X_AXIS;
+        else if (!strcmp(text, "-x"))
+            return -Coord::X_AXIS;
+        else if (!strcmp(text, "y") || !strcmp(text, "+y"))
+            return Coord::Y_AXIS;
+        else if (!strcmp(text, "-y"))
+            return -Coord::Y_AXIS;
+        else if (!strcmp(text, "z") || !strcmp(text, "+z"))
+            return Coord::Z_AXIS;
+        else if (!strcmp(text, "-z"))
+            return -Coord::Z_AXIS;
+        else {
+            cStringTokenizer tokenizer(text);
+            double x = atof(tokenizer.nextToken());
+            double y = atof(tokenizer.nextToken());
+            double z = atof(tokenizer.nextToken());
+            return Coord(x, y, z);
+        }
+    }
 };
 
 inline std::ostream& operator<<(std::ostream& os, const Coord& coord)

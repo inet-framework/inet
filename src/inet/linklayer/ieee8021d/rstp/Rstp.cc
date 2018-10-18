@@ -51,9 +51,8 @@ void Rstp::initialize(int stage)
         migrateTime = par("migrateTime");
         helloTimer = new cMessage("itshellotime", SELF_HELLOTIME);
         upgradeTimer = new cMessage("upgrade", SELF_UPGRADE);
-    }else if (stage == INITSTAGE_LINK_LAYER)
-    {
-        //register service and protocol
+    }
+    else if (stage == INITSTAGE_LINK_LAYER) {
         registerService(Protocol::stp, nullptr, gate("relayIn"));
         registerProtocol(Protocol::stp, gate("relayOut"), nullptr);
     }

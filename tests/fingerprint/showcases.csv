@@ -1,7 +1,28 @@
 # working directory, command line arguments, simulation time limit, fingerprint, expected result, tags
+/showcases/general/diffserv/,        -f omnetpp.ini -c VoIP_WithoutQoS -r 0,        50s,         5272-144d/tplx, PASS,
+/showcases/general/diffserv/,        -f omnetpp.ini -c VoIP_WithPolicing -r 0,      50s,         e865-a6ba/tplx, PASS,
+/showcases/general/diffserv/,        -f omnetpp.ini -c VoIP_WithPolicingAndQueueing -r 0, 50s,   5d25-7ea9/tplx, PASS,
+
 /showcases/general/dynamic/,         -f omnetpp.ini -c General -r 0,                100s,         8f13-047c/tplx, PASS,
 
 /showcases/general/pcaprecording/,   -f omnetpp.ini -c PcapRecording -r 0,          10s,         cdaa-f06e/tplx, PASS,
+
+/showcases/mobility/basic/,          -f omnetpp.ini -c LinearMobility -r 0,         100s,         1211-c17f/tplx, PASS,
+/showcases/mobility/basic/,          -f omnetpp.ini -c CircleMobility -r 0,         100s,         6226-0ee5/tplx, PASS,
+/showcases/mobility/basic/,          -f omnetpp.ini -c TurtleMobility -r 0,         100s,         bab2-85af/tplx, PASS,
+/showcases/mobility/basic/,          -f omnetpp.ini -c FacingMobility -r 0,         100s,         1fca-7a6f/tplx, PASS,
+/showcases/mobility/basic/,          -f omnetpp.ini -c GaussMarkovMobility -r 0,    100s,         1211-c17f/tplx, PASS,
+/showcases/mobility/basic/,          -f omnetpp.ini -c StaticGridMobility -r 0,     100s,         0000-0000/tplx, PASS,
+/showcases/mobility/basic/,          -f omnetpp.ini -c StationaryMobility -r 0,     100s,         0000-0000/tplx, PASS,
+/showcases/mobility/basic/,          -f omnetpp.ini -c BonnMotionMobility -r 0,     100s,         22bd-a72c/tplx, PASS,
+/showcases/mobility/combining/,      -f omnetpp.ini -c Attached1 -r 0,              100s,         1fca-7a6f/tplx, PASS,
+/showcases/mobility/combining/,      -f omnetpp.ini -c Attached2 -r 0,              100s,         1fca-7a6f/tplx, PASS,
+/showcases/mobility/combining/,      -f omnetpp.ini -c Superpositioning1 -r 0,      100s,         1380-5e68/tplx, PASS,
+/showcases/mobility/combining/,      -f omnetpp.ini -c Superpositioning2 -r 0,      100s,         37d4-b1ec/tplx, PASS,
+/showcases/mobility/combining/,      -f omnetpp.ini -c AntennaOrientation -r 0,     100s,         8b9e-18a2/tplx, PASS,
+/showcases/mobility/combining/,      -f omnetpp.ini -c Attached3D -r 0,             100s,         37d4-b1ec/tplx, PASS,
+/showcases/mobility/spatial/,        -f omnetpp.ini -c Spiral -r 0,                 100s,         1380-5e68/tplx, PASS,
+/showcases/mobility/spatial/,        -f omnetpp.ini -c Drone -r 0,                  100s,         a626-644b/tplx, PASS,
 
 # /showcases/routing/manet/,           -f omnetpp.ini -c MobileNodesBase -r 0,        100s,         0000-0000/tplx, PASS,   # MobileNodesBase extended
 /showcases/routing/manet/,           -f omnetpp.ini -c Aodv -r 0,                   100s,         4b33-b7f2/tplx, PASS,
@@ -33,14 +54,18 @@
 /showcases/visualizer/info/,         -f omnetpp.ini -c VisualizingSubmoduleInformation -r 0,                    5s,            074a-17ee/tplx, PASS,   # VisualizingSubmoduleInformation extended
 /showcases/visualizer/info/,         -f omnetpp.ini -c MultipleModules -r 0,                                    5s,            074a-17ee/tplx, PASS,
 
-/showcases/visualizer/instrument/,    -f omnetpp.ini -c General -r 0,                                            3s,              9b60-2e32/tplx, PASS,
+/showcases/visualizer/instrumentfigures/,    -f omnetpp.ini -c General -r 0,                                            3s,              9b60-2e32/tplx, PASS,
 
 /showcases/visualizer/interfacetable/, -f omnetpp.ini -c EnablingVisualization -r 0,                  5s,            0000-0000/tplx, PASS,
 /showcases/visualizer/interfacetable/, -f omnetpp.ini -c AdvancedFeatures -r 0,                       5s,            cb71-ccd3/tplx, PASS,
 
 /showcases/visualizer/mobility/,     -f omnetpp.ini -c VisualizingFeatures -r 0,                                500s,            54a1-0f8d/tplx, PASS,
 
-/showcases/visualizer/networknode/,  -f omnetpp.ini -c VisualizingNodes -r 0,                                   500s,            07ed-0015/tplx, PASS,
+/showcases/visualizer/networknode/,  -f omnetpp.ini -c Canvas -r 0,                 1s,         0000-0000/tplx, PASS,
+/showcases/visualizer/networknode/,  -f omnetpp.ini -c Basic3D -r 0,                1s,         0000-0000/tplx, PASS,
+/showcases/visualizer/networknode/,  -f omnetpp.ini -c Using3DModels -r 0,          1s,         0000-0000/tplx, PASS,
+/showcases/visualizer/networknode/,  -f omnetpp.ini -c AddingMovement -r 0,         1s,         3a4c-d088/tplx, PASS,
+/showcases/visualizer/networknode/,  -f omnetpp.ini -c BoxmanRotated -r 0,          1s,         3a4c-d088/tplx, PASS,
 
 /showcases/visualizer/networkpathactivity/, -f omnetpp.ini -c EnablingVisualization -r 0,                       500s,            9f43-7e0a/tplx, PASS,
 /showcases/visualizer/networkpathactivity/, -f omnetpp.ini -c StaticNetworkPaths -r 0,                          500s,            b42b-614c/tplx, PASS,

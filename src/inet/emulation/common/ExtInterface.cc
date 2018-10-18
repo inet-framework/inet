@@ -41,15 +41,16 @@ Define_Module(ExtInterface);
 void ExtInterface::initialize(int stage)
 {
     InterfaceEntry::initialize(stage);
-    if (stage == INITSTAGE_LINK_LAYER) {
-        registerInterface();
-        if (!strcmp("copyFromExt", par("copyConfiguration")))
-            copyInterfaceConfigurationFromExt();
-        else
+    if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
+        const char *copyConfiguration = par("copyConfiguration");
+        if (strcmp("copyFromExt", copyConfiguration))
             configureInterface();
     }
-    else if (stage == INITSTAGE_LINK_LAYER_2) {
-        if (!strcmp("copyToExt", par("copyConfiguration")))
+    else if (stage == INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT) {
+        const char *copyConfiguration = par("copyConfiguration");
+        if (!strcmp("copyFromExt", copyConfiguration))
+            copyInterfaceConfigurationFromExt();
+        else if (!strcmp("copyToExt", copyConfiguration))
             copyInterfaceConfigurationToExt();
     }
 }
@@ -64,14 +65,6 @@ void ExtInterface::configureInterface()
     setBroadcast(true);      //TODO
     setMulticast(true);      //TODO
     setPointToPoint(true);   //TODO
-}
-
-void ExtInterface::registerInterface()
-{
-    IInterfaceTable *interfaceTable = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-    if (interfaceTable)
-        interfaceTable->addInterface(this);
-    inet::registerInterface(*this, gate("upperLayerIn"), gate("upperLayerOut"));
 }
 
 void ExtInterface::copyInterfaceConfigurationFromExt()
@@ -104,7 +97,7 @@ void ExtInterface::copyInterfaceConfigurationFromExt()
 
     close(fd);
 
-    Ipv4InterfaceData *interfaceData = addProtocolDataIfAbsent<Ipv4InterfaceData>();
+    auto interfaceData = getProtocolData<Ipv4InterfaceData>();
     setMacAddress(macAddress);
     setMtu(mtu);
     interfaceData->setIPAddress(Ipv4Address(ipv4Address));

@@ -50,7 +50,7 @@ Coord OsgEarthGround::computeGroundProjection(const Coord &position) const
     else {
         // TODO: throw cRuntimeError ?
     }
-    return coordinateSystem->computePlaygroundCoordinate(geoCoord);
+    return coordinateSystem->computeSceneCoordinate(geoCoord);
 }
 
 Coord OsgEarthGround::computeGroundNormal(const Coord &position) const

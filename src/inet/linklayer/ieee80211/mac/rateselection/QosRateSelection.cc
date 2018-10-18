@@ -30,7 +30,7 @@ Define_Module(QosRateSelection);
 void QosRateSelection::initialize(int stage)
 {
     ModeSetListener::initialize(stage);
-    if (stage == INITSTAGE_LINK_LAYER_2) {
+    if (stage == INITSTAGE_LINK_LAYER) {
         dataOrMgmtRateControl = dynamic_cast<IRateControl*>(getModuleByPath(par("rateControlModule")));
         double multicastFrameBitrate = par("multicastFrameBitrate");
         multicastFrameMode = (multicastFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(multicastFrameBitrate));

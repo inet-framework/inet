@@ -68,7 +68,7 @@ RsvpTe::~RsvpTe()
 void RsvpTe::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
-
+    // TODO: INITSTAGE
     if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         tedmod = getModuleFromPar<Ted>(par("tedModule"), this);
         rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);

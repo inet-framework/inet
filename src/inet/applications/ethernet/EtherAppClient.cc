@@ -23,7 +23,6 @@
 
 #include "inet/applications/ethernet/EtherApp_m.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
@@ -41,15 +40,18 @@ EtherAppClient::~EtherAppClient()
 
 void EtherAppClient::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    if (stage == INITSTAGE_APPLICATION_LAYER && isGenerator())
+        timerMsg = new cMessage("generateNextPacket");
+
+    ApplicationBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         reqLength = &par("reqLength");
         respLength = &par("respLength");
         sendInterval = &par("sendInterval");
 
-        localSAP = par("localSAP");
-        remoteSAP = par("remoteSAP");
+        localSap = par("localSAP");
+        remoteSap = par("remoteSAP");
 
         seqNum = 0;
         WATCH(seqNum);
@@ -63,63 +65,46 @@ void EtherAppClient::initialize(int stage)
         stopTime = par("stopTime");
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
-    }
-    else if (stage == INITSTAGE_APPLICATION_LAYER) {
-        if (isGenerator())
-            timerMsg = new cMessage("generateNextPacket");
-
-        nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-
-        if (isNodeUp() && isGenerator())
-            scheduleNextPacket(true);
+        llcSocket.setOutputGate(gate("out"));
+        llcSocket.setCallback(this);
     }
 }
 
-void EtherAppClient::handleMessage(cMessage *msg)
+void EtherAppClient::handleMessageWhenUp(cMessage *msg)
 {
-    if (!isNodeUp())
-        throw cRuntimeError("Application is not running");
     if (msg->isSelfMessage()) {
         if (msg->getKind() == START) {
-            bool registerSAP = par("registerSAP");
-            if (registerSAP)
-                registerDSAP(localSAP);
+            EV_DEBUG << getFullPath() << " registering DSAP " << localSap << "\n";
+            llcSocket.open(-1, localSap);
 
-            destMACAddress = resolveDestMACAddress();
+            destMacAddress = resolveDestMacAddress();
             // if no dest address given, nothing to do
-            if (destMACAddress.isUnspecified())
+            if (destMacAddress.isUnspecified())
                 return;
         }
         sendPacket();
         scheduleNextPacket(false);
     }
     else
-        receivePacket(check_and_cast<Packet *>(msg));
+        llcSocket.processMessage(msg);
 }
 
-bool EtherAppClient::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool EtherAppClient::handleNodeStart(IDoneCallback *doneCallback)
 {
-    Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_APPLICATION_LAYER && isGenerator())
-            scheduleNextPacket(true);
-    }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_APPLICATION_LAYER)
-            cancelNextPacket();
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH)
-            cancelNextPacket();
-    }
-    else
-        throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    if (isGenerator())
+        scheduleNextPacket(true);
     return true;
 }
 
-bool EtherAppClient::isNodeUp()
+bool EtherAppClient::handleNodeShutdown(IDoneCallback *doneCallback)
 {
-    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
+    cancelNextPacket();
+    return true;
+}
+
+void EtherAppClient::handleNodeCrash()
+{
+    cancelNextPacket();
 }
 
 bool EtherAppClient::isGenerator()
@@ -149,27 +134,15 @@ void EtherAppClient::cancelNextPacket()
         cancelEvent(timerMsg);
 }
 
-MacAddress EtherAppClient::resolveDestMACAddress()
+MacAddress EtherAppClient::resolveDestMacAddress()
 {
-    MacAddress destMACAddress;
+    MacAddress destMacAddress;
     const char *destAddress = par("destAddress");
     if (destAddress[0]) {
-        if (!destMACAddress.tryParse(destAddress))
-            destMACAddress = L3AddressResolver().resolve(destAddress, L3AddressResolver::ADDR_MAC).toMac();
+        if (!destMacAddress.tryParse(destAddress))
+            destMacAddress = L3AddressResolver().resolve(destAddress, L3AddressResolver::ADDR_MAC).toMac();
     }
-    return destMACAddress;
-}
-
-void EtherAppClient::registerDSAP(int dsap)
-{
-    EV_DEBUG << getFullPath() << " registering DSAP " << dsap << "\n";
-
-    Ieee802RegisterDsapCommand *etherctrl = new Ieee802RegisterDsapCommand();
-    etherctrl->setDsap(dsap);
-    cMessage *msg = new cMessage("register_DSAP", IEEE802CTRL_REGISTER_DSAP);
-    msg->setControlInfo(etherctrl);
-
-    send(msg, "out");
+    return destMacAddress;
 }
 
 void EtherAppClient::sendPacket()
@@ -192,17 +165,17 @@ void EtherAppClient::sendPacket()
     data->setResponseBytes(respLen);
     datapacket->insertAtBack(data);
 
-    datapacket->addTagIfAbsent<MacAddressReq>()->setDestAddress(destMACAddress);
+    datapacket->addTagIfAbsent<MacAddressReq>()->setDestAddress(destMacAddress);
     auto ieee802SapReq = datapacket->addTagIfAbsent<Ieee802SapReq>();
-    ieee802SapReq->setSsap(localSAP);
-    ieee802SapReq->setDsap(remoteSAP);
+    ieee802SapReq->setSsap(localSap);
+    ieee802SapReq->setDsap(remoteSap);
 
     emit(packetSentSignal, datapacket);
-    send(datapacket, "out");
+    llcSocket.send(datapacket);
     packetsSent++;
 }
 
-void EtherAppClient::receivePacket(Packet *msg)
+void EtherAppClient::socketDataArrived(Ieee8022LlcSocket*, Packet *msg)
 {
     EV_INFO << "Received packet `" << msg->getName() << "'\n";
 

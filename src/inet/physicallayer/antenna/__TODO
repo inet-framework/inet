@@ -1,0 +1,4 @@
+ - Refactor InterpolatingAntenna to use Delaunay triangulation on unit sphere, i.e. triangulate result from enclosing spherical triangle as seen from the center
+ - Add SphericalHarmonicsAntenna which approximates antenna gain using a method similar to the Fourier transformation
+ - Add MatrixSphericalProjectionAntenna (Mercator projection) or whatever to map a matrix (or image) to the sphere for antenna gains
+ - Implement spherical and cartesion interpolation for all interpolation based models

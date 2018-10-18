@@ -51,8 +51,12 @@ void Ppp::initialize(int stage)
         sendRawBytes = par("sendRawBytes");
         txQueue.setName("txQueue");
         endTransmissionEvent = new cMessage("pppEndTxEvent");
-
         txQueueLimit = par("txQueueLimit");
+        physOutGate = gate("phys$o");
+        // we're connected if other end of connection path is an input gate
+        bool connected = physOutGate->getPathEndGate()->getType() == cGate::INPUT;
+        // if we're connected, get the gate with transmission rate
+        datarateChannel = connected ? physOutGate->getTransmissionChannel() : nullptr;
 
         numSent = numRcvdOK = numBitErr = numDroppedIfaceDown = 0;
         WATCH(numSent);
@@ -61,12 +65,13 @@ void Ppp::initialize(int stage)
         WATCH(numDroppedIfaceDown);
 
         subscribe(POST_MODEL_CHANGE, this);
-
         emit(transmissionStateChangedSignal, 0L);
 
         // find queueModule
         queueModule = nullptr;
     }
+    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION)
+        registerInterface();
     else if (stage == INITSTAGE_LINK_LAYER) {
         if (par("queueModule").stringValue()[0]) {
             cModule *mod = getModuleFromPar<cModule>(par("queueModule"), this);
@@ -77,16 +82,6 @@ void Ppp::initialize(int stage)
                 queueModule = check_and_cast<IPassiveQueue *>(queueOut->getOwnerModule());
             }
         }
-
-        // remember the output gate now, to speed up send()
-        physOutGate = gate("phys$o");
-
-        // we're connected if other end of connection path is an input gate
-        bool connected = physOutGate->getPathEndGate()->getType() == cGate::INPUT;
-        // if we're connected, get the gate with transmission rate
-        datarateChannel = connected ? physOutGate->getTransmissionChannel() : nullptr;
-        // register our interface entry in IInterfaceTable
-        registerInterface();
 
         // request first frame to send
         if (queueModule && 0 == queueModule->getNumPendingRequests()) {

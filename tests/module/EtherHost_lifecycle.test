@@ -1,6 +1,6 @@
 %description:
 
-Test shutdown and startup operations on EtherAppClient/EtherAppServer/EtherLlc modules.
+Test shutdown and startup operations on EtherAppClient/EtherAppServer/EtherEncap modules.
 The EtherSwitch, EtherMac modules tested, too.
 
 sender[0] and recip start at down

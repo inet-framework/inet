@@ -20,13 +20,12 @@ package inet.applications.ethernet;
 //
 // Server side of the EtherAppCliend model -- generates packets containing
 // ~EtherAppResp chunks with the number of bytes requested by the client in
-// corresponding ~EtherAppReq. It should be connected directly to ~EtherLlc
+// corresponding ~EtherAppReq. It should be connected directly to ~EtherEncap/~Ieee8022Llc
 // module.
 //
 simple EtherAppServer
 {
     parameters:
-        bool registerSAP; // whether to sent IEEE802CTRL_REGISTER_DSAP on startup
         int localSAP = default(0xf1);
         @display("i=block/app");
         @signal[packetSent](type=inet::Packet);

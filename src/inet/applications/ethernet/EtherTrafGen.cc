@@ -41,7 +41,6 @@ EtherTrafGen::EtherTrafGen()
     numPacketsPerBurst = nullptr;
     packetLength = nullptr;
     timerMsg = nullptr;
-    nodeStatus = nullptr;
 }
 
 EtherTrafGen::~EtherTrafGen()
@@ -51,7 +50,10 @@ EtherTrafGen::~EtherTrafGen()
 
 void EtherTrafGen::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    if (stage == INITSTAGE_APPLICATION_LAYER && isGenerator())
+        timerMsg = new cMessage("generateNextPacket");
+
+    ApplicationBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         sendInterval = &par("sendInterval");
@@ -72,26 +74,18 @@ void EtherTrafGen::initialize(int stage)
         stopTime = par("stopTime");
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
-    }
-    else if (stage == INITSTAGE_APPLICATION_LAYER) {
-        if (isGenerator())
-            timerMsg = new cMessage("generateNextPacket");
-
-        nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        if (isNodeUp() && isGenerator())
-            scheduleNextPacket(-1);
+        llcSocket.setOutputGate(gate("out"));
     }
 }
 
-void EtherTrafGen::handleMessage(cMessage *msg)
+void EtherTrafGen::handleMessageWhenUp(cMessage *msg)
 {
-    if (!isNodeUp())
-        throw cRuntimeError("Application is not running");
     if (msg->isSelfMessage()) {
         if (msg->getKind() == START) {
-            destMACAddress = resolveDestMACAddress();
+            llcSocket.open(-1, ssap);
+            destMacAddress = resolveDestMacAddress();
             // if no dest address given, nothing to do
-            if (destMACAddress.isUnspecified())
+            if (destMacAddress.isUnspecified())
                 return;
         }
         sendBurstPackets();
@@ -101,29 +95,23 @@ void EtherTrafGen::handleMessage(cMessage *msg)
         receivePacket(check_and_cast<Packet *>(msg));
 }
 
-bool EtherTrafGen::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool EtherTrafGen::handleNodeStart(IDoneCallback *doneCallback)
 {
-    Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_APPLICATION_LAYER && isGenerator())
-            scheduleNextPacket(-1);
+    if (isGenerator()) {
+        scheduleNextPacket(-1);
     }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_APPLICATION_LAYER)
-            cancelNextPacket();
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH)
-            cancelNextPacket();
-    }
-    else
-        throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
     return true;
 }
 
-bool EtherTrafGen::isNodeUp()
+bool EtherTrafGen::handleNodeShutdown(IDoneCallback *doneCallback)
 {
-    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
+    cancelNextPacket();
+    return true;
+}
+
+void EtherTrafGen::handleNodeCrash()
+{
+    cancelNextPacket();
 }
 
 bool EtherTrafGen::isGenerator()
@@ -151,15 +139,15 @@ void EtherTrafGen::cancelNextPacket()
     cancelEvent(timerMsg);
 }
 
-MacAddress EtherTrafGen::resolveDestMACAddress()
+MacAddress EtherTrafGen::resolveDestMacAddress()
 {
-    MacAddress destMACAddress;
+    MacAddress destMacAddress;
     const char *destAddress = par("destAddress");
     if (destAddress[0]) {
-        if (!destMACAddress.tryParse(destAddress))
-            destMACAddress = L3AddressResolver().resolve(destAddress, L3AddressResolver::ADDR_MAC).toMac();
+        if (!destMacAddress.tryParse(destAddress))
+            destMacAddress = L3AddressResolver().resolve(destAddress, L3AddressResolver::ADDR_MAC).toMac();
     }
-    return destMACAddress;
+    return destMacAddress;
 }
 
 void EtherTrafGen::sendBurstPackets()
@@ -176,13 +164,13 @@ void EtherTrafGen::sendBurstPackets()
         const auto& payload = makeShared<ByteCountChunk>(B(len));
         datapacket->insertAtBack(payload);
         datapacket->removeTagIfPresent<PacketProtocolTag>();
-//        datapacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(nullptr);
-        datapacket->addTagIfAbsent<MacAddressReq>()->setDestAddress(destMACAddress);
+        datapacket->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8022);
+        datapacket->addTagIfAbsent<MacAddressReq>()->setDestAddress(destMacAddress);
         auto sapTag = datapacket->addTagIfAbsent<Ieee802SapReq>();
         sapTag->setSsap(ssap);
         sapTag->setDsap(dsap);
 
-        EV_INFO << "Send packet `" << msgname << "' dest=" << destMACAddress << " length=" << len << "B ssap/dsap=" << ssap << "/" << dsap << "\n";
+        EV_INFO << "Send packet `" << msgname << "' dest=" << destMacAddress << " length=" << len << "B ssap/dsap=" << ssap << "/" << dsap << "\n";
         emit(packetSentSignal, datapacket);
         send(datapacket, "out");
         packetsSent++;

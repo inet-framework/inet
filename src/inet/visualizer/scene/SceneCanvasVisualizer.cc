@@ -57,9 +57,9 @@ void SceneCanvasVisualizer::initializeAxis(double axisLength)
     xAxis->setTags(axisTags.c_str());
     yAxis->setTags(axisTags.c_str());
     zAxis->setTags(axisTags.c_str());
-    xAxis->setTooltip("This arrow represents the X axis of the playground");
-    yAxis->setTooltip("This arrow represents the Y axis of the playground");
-    zAxis->setTooltip("This arrow represents the Z axis of the playground");
+    xAxis->setTooltip("Scene X axis");
+    yAxis->setTooltip("Scene Y axis");
+    zAxis->setTooltip("Scene Z axis");
     xAxis->setLineWidth(1);
     yAxis->setLineWidth(1);
     zAxis->setLineWidth(1);

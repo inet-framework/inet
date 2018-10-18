@@ -136,6 +136,21 @@ void MessageSourceAddrFilter::receiveSignal(cResultFilter *prev, simtime_t_cref 
 
 Register_ResultFilter("throughput", ThroughputFilter);
 
+void ThroughputFilter::emitThroughput(simtime_t endInterval, cObject *details)
+{
+    if (bytes == 0) {
+        fire(this, endInterval, 0.0, details);
+        lastSignal = endInterval;
+    }
+    else {
+        double throughput = 8 * bytes / (endInterval - lastSignal).dbl();
+        fire(this, endInterval, throughput, details);
+        lastSignal = endInterval;
+        bytes = 0;
+        packets = 0;
+    }
+}
+
 void ThroughputFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
     if (auto packet = dynamic_cast<cPacket *>(object)) {
@@ -143,29 +158,18 @@ void ThroughputFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObj
         packets++;
         if (packets >= packetLimit) {
             bytes += packet->getByteLength();
-            double throughput = 8 * bytes / (now - lastSignal).dbl();
-            fire(this, now, throughput, details);
-            lastSignal = now;
-            bytes = 0;
-            packets = 0;
+            emitThroughput(now, details);
         }
-        else if (now - lastSignal >= interval) {
-            double throughput = 8 * bytes / interval.dbl();
-            fire(this, lastSignal + interval, throughput, details);
-            lastSignal = lastSignal + interval;
-            bytes = 0;
-            packets = 0;
+        else if (lastSignal + interval <= now) {
+            emitThroughput(lastSignal + interval, details);
             if (emitIntermediateZeros) {
-                while (now - lastSignal >= interval) {
-                    fire(this, lastSignal + interval, 0.0, details);
-                    lastSignal = lastSignal + interval;
-                }
+                while (lastSignal + interval <= now)
+                    emitThroughput(lastSignal + interval, details);
             }
             else {
-                if (now - lastSignal >= interval) { // no packets arrived for a long period
+                if (lastSignal + interval <= now) { // no packets arrived for a long period
                     // zero should have been signaled at the beginning of this packet (approximation)
-                    fire(this, now - interval, 0.0, details);
-                    lastSignal = now - interval;
+                    emitThroughput(now - interval, details);
                 }
             }
             bytes += packet->getByteLength();
@@ -174,6 +178,88 @@ void ThroughputFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObj
             bytes += packet->getByteLength();
     }
 }
+
+void ThroughputFilter::finish(cComponent *component, simsignal_t signalID)
+{
+    const simtime_t now = simTime();
+    if (lastSignal < now) {
+        cObject *details = nullptr;
+        if (lastSignal + interval < now) {
+            emitThroughput(lastSignal + interval, details);
+            if (emitIntermediateZeros) {
+                while (lastSignal + interval < now)
+                    emitThroughput(lastSignal + interval, details);
+            }
+        }
+        emitThroughput(now, details);
+    }
+}
+
+Register_ResultFilter("liveThroughput", LiveThroughputFilter);
+
+class TimerEvent : public cEvent
+{
+  protected:
+     LiveThroughputFilter *target;
+  public:
+    TimerEvent(const char *name, LiveThroughputFilter *target) : cEvent(name), target(target) {}
+    ~TimerEvent() {target->timerDeleted();}
+    virtual cEvent *dup() const override {copyNotSupported(); return nullptr;}
+    virtual cObject *getTargetObject() const override {return target;}
+    virtual void execute() override {target->timerExpired();}
+};
+
+void LiveThroughputFilter::init(cComponent *component, cProperty *attrsProperty)
+{
+    cObjectResultFilter::init(component, attrsProperty);
+
+    event = new TimerEvent("updateLiveThroughput", this);
+    simtime_t now = simTime();
+    event->setArrivalTime(now + interval);
+    getSimulation()->getFES()->insert(event);
+}
+
+LiveThroughputFilter::~LiveThroughputFilter()
+{
+    if (event) {
+        ASSERT(event->isScheduled());
+        getSimulation()->getFES()->remove(event);
+        delete event;
+    }
+}
+
+void LiveThroughputFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+    if (auto packet = dynamic_cast<cPacket *>(object))
+        bytes += packet->getByteLength();
+}
+
+void LiveThroughputFilter::timerExpired()
+{
+    simtime_t now = simTime();
+    double throughput = 8 * bytes / (now - lastSignal).dbl();
+    fire(this, now, throughput, nullptr);
+    lastSignal = now;
+    bytes = 0;
+
+    event->setArrivalTime(now + interval);
+    getSimulation()->getFES()->insert(event);
+}
+
+void LiveThroughputFilter::timerDeleted()
+{
+    event = nullptr;
+}
+
+void LiveThroughputFilter::finish(cComponent *component, simsignal_t signalID)
+{
+    simtime_t now = simTime();
+    if (lastSignal < now) {
+        double throughput = 8 * bytes / (now - lastSignal).dbl();
+        fire(this, now, throughput, nullptr);
+    }
+}
+
 
 Register_ResultFilter("elapsedTime", ElapsedTimeFilter);
 
@@ -184,7 +270,7 @@ ElapsedTimeFilter::ElapsedTimeFilter()
 
 double ElapsedTimeFilter::getElapsedTime()
 {
-    long t = time(nullptr);
+    time_t t = time(nullptr);
     return t - startTime;
 }
 

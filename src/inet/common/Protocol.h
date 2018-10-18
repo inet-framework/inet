@@ -116,6 +116,8 @@ class INET_API Protocol
     static const Protocol wiseRoute;
 };
 
+inline std::ostream& operator << (std::ostream& o, const Protocol& t) { o << t.str(); return o; }
+
 } // namespace inet
 
 #endif // ifndef __INET_PROTOCOL_H

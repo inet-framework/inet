@@ -122,5 +122,23 @@ int ExampleQosClassifier::getUserPriority(cMessage *msg)
     return UP_BE;
 }
 
+void ExampleQosClassifier::handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)
+{
+    Enter_Method("handleRegisterService");
+    if (!strcmp("out", out->getName()))
+        registerService(protocol, gate("in"), servicePrimitive);
+    else
+        throw cRuntimeError("Unknown gate: %s", out->getName());
+}
+
+void ExampleQosClassifier::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
+{
+    Enter_Method("handleRegisterProtocol");
+    if (!strcmp("in", in->getName()))
+        registerProtocol(protocol, gate("out"), servicePrimitive);
+    else
+        throw cRuntimeError("Unknown gate: %s", in->getName());
+}
+
 } // namespace inet
 

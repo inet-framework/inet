@@ -18,24 +18,61 @@
 #ifndef __INET_IEEE8022LLC_H
 #define __INET_IEEE8022LLC_H
 
+#include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/Protocol.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/OperationalBase.h"
+#include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
 
-#include "inet/common/Protocol.h"
-
 namespace inet {
 
-class INET_API Ieee8022Llc : public cSimpleModule
+class INET_API Ieee8022Llc : public OperationalBase, public IProtocolRegistrationListener
 {
+protected:
+    struct SocketDescriptor
+    {
+        int socketId = -1;
+        int localSap = -1;
+        int remoteSap = -1;
+
+        SocketDescriptor(int socketId, int localSap, int remoteSap = -1)
+                : socketId(socketId), localSap(localSap), remoteSap(remoteSap) { }
+
+    };
+
+    friend std::ostream& operator << (std::ostream& o, const SocketDescriptor& t);
+
+    bool isOperational = false;    // for lifecycle
+    std::set<const Protocol *> upperProtocols;    // where to send packets after decapsulation
+    std::map<int, SocketDescriptor *> socketIdToSocketDescriptor;
+
   protected:
+    void clearSockets();
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *message) override;
+    virtual void handleMessageWhenUp(cMessage *message) override;
 
     virtual void encapsulate(Packet *frame);
     virtual void decapsulate(Packet *frame);
+    virtual void processPacketFromHigherLayer(Packet *msg);
+    virtual void processPacketFromMac(Packet *packet);
+    virtual void processCommandFromHigherLayer(Request *request);
+
+    virtual void handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive) override;
+    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive) override;
+
+    // for lifecycle:
+    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_LINK_LAYER; }
+    virtual bool isNodeStartStage(int stage) override { return stage == NodeStartOperation::STAGE_LINK_LAYER; }
+    virtual bool isNodeShutdownStage(int stage) override { return stage == NodeShutdownOperation::STAGE_LINK_LAYER; }
+    virtual bool handleNodeStart(IDoneCallback *) override;
+    virtual bool handleNodeShutdown(IDoneCallback *) override;
+    virtual void handleNodeCrash() override;
 
   public:
+    virtual ~Ieee8022Llc();
     static const Protocol *getProtocol(const Ptr<const Ieee8022LlcHeader>& header);
 };
 

@@ -59,7 +59,7 @@ void StateBasedCcEnergyConsumer::initialize(int stage)
         currentConsumption = A(0);
         WATCH(currentConsumption);
     }
-    else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT)
+    else if (stage == INITSTAGE_POWER)
         energySource->addEnergyConsumer(this);
 }
 

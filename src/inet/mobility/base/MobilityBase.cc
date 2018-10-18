@@ -85,7 +85,7 @@ const char *MobilityBase::DirectiveResolver::resolveDirective(char directive)
             auto angularVelocity = mobility->getCurrentAngularVelocity();
             Coord axis;
             double angle;
-            angularVelocity.toAxisAngle(axis, angle);
+            angularVelocity.getRotationAxisAndAngle(axis, angle);
             result = std::to_string(angle);
             break;
         }
@@ -120,7 +120,7 @@ void MobilityBase::initialize(int stage)
         WATCH(lastPosition);
         WATCH(lastOrientation);
     }
-    else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT_2) {
+    else if (stage == INITSTAGE_SINGLE_MOBILITY) {
         initializeOrientation();
         initializePosition();
     }
@@ -161,7 +161,7 @@ void MobilityBase::setInitialPosition()
         auto initialLatitude = deg(par("initialLatitude"));
         auto initialLongitude = deg(par("initialLongitude"));
         auto initialAltitude = m(par("initialAltitude"));
-        lastPosition = coordinateSystem->computePlaygroundCoordinate(GeoCoord(initialLatitude, initialLongitude, initialAltitude));
+        lastPosition = coordinateSystem->computeSceneCoordinate(GeoCoord(initialLatitude, initialLongitude, initialAltitude));
         filled = true;
     }
     if (!filled)

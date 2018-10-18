@@ -32,15 +32,16 @@ class INET_API DipoleAntenna : public AntennaBase
 
     class AntennaGain : public IAntennaGain
     {
+      protected:
+        Coord wireAxisDirection;
+        m length;
+
       public:
-        AntennaGain(m length);
+        AntennaGain(const char *wireAxis, m length);
         virtual m getLength() const { return length; }
         virtual double getMinGain() const override { return 0; }
         virtual double getMaxGain() const override { return 1.5; }
         virtual double computeGain(const Quaternion direction) const override;
-
-      protected:
-        m length;
     };
 
     Ptr<AntennaGain> gain;

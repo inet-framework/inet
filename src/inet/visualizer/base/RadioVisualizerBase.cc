@@ -62,9 +62,13 @@ void RadioVisualizerBase::initialize(int stage)
         displayAntennaLobes = par("displayAntennaLobes");
         antennaLobePlaneGlobal = par("antennaLobePlaneGlobal");
         antennaLobePlane = par("antennaLobePlane");
+        antennaLobeMode = par("antennaLobeMode");
+        antennaLobeLogarithmicBase = par("antennaLobeLogarithmicBase");
+        antennaLobeLogarithmicScale = par("antennaLobeLogarithmicScale");
         antennaLobeRadius = par("antennaLobeRadius");
         antennaLobeStep = deg(par("antennaLobeStep"));
         antennaLobeOpacity = par("antennaLobeOpacity");
+        antennaLobeLineSmooth = par("antennaLobeLineSmooth");
         antennaLobeLineColor = cFigure::parseColor(par("antennaLobeLineColor"));
         antennaLobeLineStyle = cFigure::parseLineStyle(par("antennaLobeLineStyle"));
         antennaLobeLineWidth = par("antennaLobeLineWidth");

@@ -76,7 +76,8 @@ void Ieee80211MgmtAp::initialize(int stage)
         // start beacon timer (randomize startup time)
         beaconTimer = new cMessage("beaconTimer");
     }
-    else if (stage == INITSTAGE_LINK_LAYER) {
+    // TODO: INITSTAGE
+    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         if (isOperational)
             scheduleAt(simTime() + uniform(0, beaconInterval), beaconTimer);
     }

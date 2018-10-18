@@ -50,8 +50,8 @@ possible to model a vehicle facing forward while moving on a road that
 contains multiple transceiver antennas at different relative locations
 with different orientations.
 
-The Playground
-~~~~~~~~~~~~~~
+The Scene
+~~~~~~~~~
 
 Many mobility models allow the user to define a cubic volume that the
 node can not leave. The volume is configured by setting the
@@ -216,7 +216,7 @@ RandomWaypointMobility
 
 In the Random Waypoint mobility model the nodes move in line segments.
 For each line segment, a random destination position (distributed
-uniformly over the playground) and a random speed is chosen. You can
+uniformly over the scene) and a random speed is chosen. You can
 define a speed as a variate from which a new value will be drawn for
 each line segment; it is customary to specify it as
 ``uniform(minSpeed, maxSpeed)``. When the node reaches the target

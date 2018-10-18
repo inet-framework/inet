@@ -104,10 +104,12 @@ class INET_API Quaternion
     static Quaternion slerp(const Quaternion &q1, const Quaternion &q2, double t);
 
     //! returns the axis and angle of this unit Quaternion
-    void toAxisAngle(Coord &axis, double &angle) const;
+    Coord getRotationAxis() const { Coord axis; double angle; getRotationAxisAndAngle(axis, angle); return axis; }
+    double getRotationAngle() const { return std::acos(s) * 2; }
+    void getRotationAxisAndAngle(Coord &axis, double &angle) const;
 
     //! rotates v by this quaternion (quaternion must be unit)
-    Coord rotate(const Coord &v);
+    Coord rotate(const Coord &v) const;
 
     //! returns the euler angles from a rotation Quaternion
     EulerAngles toEulerAngles(bool homogenous=false) const;

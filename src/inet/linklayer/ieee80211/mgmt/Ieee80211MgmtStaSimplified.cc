@@ -38,7 +38,7 @@ void Ieee80211MgmtStaSimplified::initialize(int stage)
         mib->bssStationData.isAssociated = true;
         mib->bssData.bssid.setAddress(par("accessPointAddress"));
     }
-    else if (stage == INITSTAGE_LINK_LAYER_2) {
+    else if (stage == INITSTAGE_LINK_LAYER) {
         L3AddressResolver addressResolver;
         auto host = addressResolver.findHostWithAddress(mib->bssData.bssid);
         auto interfaceTable = addressResolver.findInterfaceTableOf(host);

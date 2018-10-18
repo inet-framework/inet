@@ -15,21 +15,23 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ETHERAPPCLI_H
-#define __INET_ETHERAPPCLI_H
+#ifndef __INET_ETHERAPPCLIENT_H
+#define __INET_ETHERAPPCLIENT_H
 
 #include "inet/common/INETDefs.h"
+
+#include "inet/applications/base/ApplicationBase.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/MacAddress.h"
-#include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/linklayer/ieee8022/Ieee8022LlcSocket.h"
+#include "inet/linklayer/ieee8022/Ieee8022LlcSocketCommand_m.h"
 
 namespace inet {
 
 /**
  * Simple traffic generator for the Ethernet model.
  */
-class INET_API EtherAppClient : public cSimpleModule, public ILifecycle
+class INET_API EtherAppClient : public ApplicationBase, public Ieee8022LlcSocket::ICallback
 {
   protected:
     enum Kinds { START = 100, NEXT };
@@ -40,15 +42,16 @@ class INET_API EtherAppClient : public cSimpleModule, public ILifecycle
     cPar *respLength = nullptr;
     cPar *sendInterval = nullptr;
 
-    int localSAP = -1;
-    int remoteSAP = -1;
-    MacAddress destMACAddress;
-    NodeStatus *nodeStatus = nullptr;
+    int localSap = -1;
+    int remoteSap = -1;
+    MacAddress destMacAddress;
 
     // self messages
     cMessage *timerMsg = nullptr;
     simtime_t startTime;
     simtime_t stopTime;
+
+    Ieee8022LlcSocket llcSocket;
 
     // receive statistics
     long packetsSent = 0;
@@ -57,20 +60,21 @@ class INET_API EtherAppClient : public cSimpleModule, public ILifecycle
   protected:
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void finish() override;
 
-    virtual bool isNodeUp();
     virtual bool isGenerator();
     virtual void scheduleNextPacket(bool start);
     virtual void cancelNextPacket();
 
-    virtual MacAddress resolveDestMACAddress();
+    virtual MacAddress resolveDestMacAddress();
 
     virtual void sendPacket();
-    virtual void receivePacket(Packet *msg);
-    virtual void registerDSAP(int dsap);
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    virtual void socketDataArrived(Ieee8022LlcSocket*, Packet *msg) override;
+
+    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
+    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
+    virtual void handleNodeCrash() override;
 
   public:
     EtherAppClient() {}
@@ -79,5 +83,5 @@ class INET_API EtherAppClient : public cSimpleModule, public ILifecycle
 
 } // namespace inet
 
-#endif // ifndef __INET_ETHERAPPCLI_H
+#endif // ifndef __INET_ETHERAPPCLIENT_H
 

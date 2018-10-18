@@ -19,7 +19,7 @@ package inet.visualizer.base;
 
 //
 // This is a base module for scene visualizer simple modules on a 3D osg scene.
-// It displays the playground either as a filled rectangle or as an image.
+// It displays the scene either as a filled rectangle or as an image.
 //
 // @see ~SceneOsgVisualizer, ~SceneOsgEarthVisualizer, ~SceneVisualizerBase
 //
@@ -33,12 +33,12 @@ simple SceneOsgVisualizerBase extends SceneVisualizerBase
         double fieldOfView @unit(deg) = default(30deg); // camera field of view
         string clearColor = default(""); // scene background color, not set by default
 
-        bool displayPlayground = default(true); // display the playground, enabled by default
-        string playgroundColor = default("#A0E0A0"); // playground solid color if playground texture is not provided, gray by default
-        double playgroundOpacity = default(1.0); // playground opacity, opaque by default (not recommended to change)
-        string playgroundImage = default(""); // playground texture (repeated), no image by default
-        double playgroundImageSize @unit(m) = default(1m); // playground texture size
-        bool playgroundShading = default(true); // exponential shading for playground color, enabled by default
+        bool displayScene = default(true); // display the scene, enabled by default
+        string sceneColor = default("#A0E0A0"); // scene solid color if scene texture is not provided, gray by default
+        double sceneOpacity = default(1.0); // scene opacity, opaque by default (not recommended to change)
+        string sceneImage = default(""); // scene texture (repeated), no image by default
+        double sceneImageSize @unit(m) = default(1m); // scene texture size
+        bool sceneShading = default(true); // exponential shading for scene color, enabled by default
 
         @class(SceneOsgVisualizerBase);
 }

@@ -47,12 +47,11 @@ void TracingObstacleLossCanvasVisualizer::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         zIndex = par("zIndex");
         cCanvas *canvas = visualizationTargetModule->getCanvas();
+        canvasProjection = CanvasProjection::getCanvasProjection(canvas);
         obstacleLossLayer = new cGroupFigure("obstacle_loss");
         obstacleLossLayer->setZIndex(zIndex);
         obstacleLossLayer->insertBefore(canvas->getSubmodulesLayer());
     }
-    else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT)
-        canvasProjection = CanvasProjection::getCanvasProjection(visualizationTargetModule->getCanvas());
 }
 
 void TracingObstacleLossCanvasVisualizer::refreshDisplay() const

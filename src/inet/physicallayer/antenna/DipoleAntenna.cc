@@ -32,7 +32,7 @@ void DipoleAntenna::initialize(int stage)
 {
     AntennaBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
-        gain = makeShared<AntennaGain>(m(par("length")));
+        gain = makeShared<AntennaGain>(par("wireAxis"), m(par("length")));
 }
 
 std::ostream& DipoleAntenna::printToStream(std::ostream& stream, int level) const
@@ -43,13 +43,16 @@ std::ostream& DipoleAntenna::printToStream(std::ostream& stream, int level) cons
     return AntennaBase::printToStream(stream, level);
 }
 
-DipoleAntenna::AntennaGain::AntennaGain(m length_) : length(length_)
+DipoleAntenna::AntennaGain::AntennaGain(const char *wireAxis, m length) :
+    length(length)
 {
+    wireAxisDirection = Coord::parse(wireAxis);
 }
 
 double DipoleAntenna::AntennaGain::computeGain(Quaternion direction) const
 {
-    double q = sin(rad(direction.toEulerAngles().beta - rad(M_PI_2)).get());
+    double angle = std::acos(direction.rotate(Coord::X_AXIS) * wireAxisDirection);
+    double q = sin(angle);
     return 1.5 * q * q;
 }
 

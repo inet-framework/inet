@@ -15,15 +15,16 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ETHERAPPSRV_H
-#define __INET_ETHERAPPSRV_H
+#ifndef __INET_ETHERAPPSERVER_H
+#define __INET_ETHERAPPSERVER_H
 
 #include "inet/common/INETDefs.h"
+
+#include "inet/applications/base/ApplicationBase.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/MacAddress.h"
-#include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/common/lifecycle/LifecycleOperation.h"
-#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/linklayer/ieee8022/Ieee8022LlcSocket.h"
+#include "inet/linklayer/ieee8022/Ieee8022LlcSocketCommand_m.h"
 
 namespace inet {
 
@@ -32,11 +33,12 @@ namespace inet {
 /**
  * Server-side process EtherAppClient.
  */
-class INET_API EtherAppServer : public cSimpleModule, public ILifecycle
+class INET_API EtherAppServer : public ApplicationBase, public Ieee8022LlcSocket::ICallback
 {
   protected:
-    int localSAP = 0;
-    NodeStatus *nodeStatus = nullptr;
+    int localSap = 0;
+
+    Ieee8022LlcSocket llcSocket;
 
     // statistics
     long packetsSent = 0;
@@ -45,18 +47,19 @@ class INET_API EtherAppServer : public cSimpleModule, public ILifecycle
   protected:
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void startApp();
-    virtual void stopApp();
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void finish() override;
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
-    virtual bool isNodeUp();
-    void registerDSAP(int dsap);
+    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
+    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
+    virtual void handleNodeCrash() override;
+
+    void registerDsap(int dsap);
     void sendPacket(Packet *datapacket, const MacAddress& destAddr, int destSap);
+    virtual void socketDataArrived(Ieee8022LlcSocket*, Packet *msg) override;
 };
 
 } // namespace inet
 
-#endif // ifndef __INET_ETHERAPPSRV_H
+#endif // ifndef __INET_ETHERAPPSERVER_H
 

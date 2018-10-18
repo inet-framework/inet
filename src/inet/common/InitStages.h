@@ -23,97 +23,118 @@
 namespace inet {
 
 /**
- * Initialization stages.
+ * This enum provides constants for initialization stages for modules overriding
+ * cComponent::initialize(int stage). The stage numbering is not necessarily
+ * sequential, because several initialization stages don't depend on each other.
  */
 enum InitStages {
     /**
-     * Local initializations. Initializations that don't use or affect
-     * other modules take place (e.g. reading of parameters); modules may
-     * subscribe to notifications. NodeStatus, IPassiveQueue,
-     * etc. are available for other modules after this stage.
+     * Initialization of local state that don't use or affect other modules includes:
+     *  - initializing member variables
+     *  - initializing statistic collection
+     *  - reading module parameters
+     *  - reading configuration files
+     *  - adding watches
+     *  - looking up other modules without actually using them
+     *  - subscribing to module signals
      */
     INITSTAGE_LOCAL = 0,
 
     /**
-     * Physical environment initializations (mobility, obstacles, battery, annotations, etc).
+     * Initialization of the physical environment.
      */
     INITSTAGE_PHYSICAL_ENVIRONMENT = 1,
 
     /**
-     * Additional physical environment initializations that depend on the previous stage.
-     * Some mobility modules (namely group mobility) compute and publish locations in this stage,
-     * because they learn their mobility coordinator in the previous stage.
+     * Initialization of the cache of physical objects present in the physical environment.
      */
-    INITSTAGE_PHYSICAL_ENVIRONMENT_2 = 2,
+    INITSTAGE_PHYSICAL_OBJECT_CACHE = 2,
 
     /**
-     * Initialization of the physical layer of protocol stacks. Radio publishes the initial RadioState;
-     * radios are registered in RadioMedium.
+     * Initialization of group mobility modules: calculating the initial position and orientation.
      */
-    INITSTAGE_PHYSICAL_LAYER = 3,
+    INITSTAGE_GROUP_MOBILITY = 1,
 
     /**
-     * Initialization of link-layer protocols. Automatic MAC addresses are
-     * assigned; interfaces are registered in InterfaceTable.
+     * Initialization of single mobility modules: calculating the initial position and orientation.
      */
-    INITSTAGE_LINK_LAYER = 4,
+    INITSTAGE_SINGLE_MOBILITY = 2,
 
     /**
-     * Additional link-layer initializations that depend on the previous stage.
+     * Initialization of the power model: energy storage, energy consumer, energy generator, and energy management modules.
      */
-    INITSTAGE_LINK_LAYER_2 = 5,
+    INITSTAGE_POWER = 1,
 
     /**
-     * Initialization of network-layer protocols, stage 1. Network configurators
-     * (e.g. Ipv4NetworkConfigurator) run in this stage and compute IP addresses
-     * and static routes; protocol-specific data (e.g. Ipv4InterfaceData)
-     * are added to InterfaceEntry; netf7ilter hooks are registered in Ipv4; etc.
+     * Initialization of physical layer protocols includes:
+     *  - registering radios in the RadioMedium
+     *  - initializing radio mode, transmission and reception states
      */
-    INITSTAGE_NETWORK_LAYER = 6,
+    INITSTAGE_PHYSICAL_LAYER = 2,
 
     /**
-     * Initialization of network-layer protocols, stage 2. IP addresses
-     * are assigned in this stage.
+     * Initialization of physical layer neighbor cache.
      */
-    INITSTAGE_NETWORK_LAYER_2 = 7,
+    INITSTAGE_PHYSICAL_LAYER_NEIGHBOR_CACHE = 3,
 
     /**
-     * Initialization of network-layer protocols, stage 3. Static routes
-     * are added, routerIDs are computed, etc.
+     * Initialization of network interfaces includes:
+     *  - assigning MAC addresses
+     *  - registering network interfaces in the InterfaceTable
      */
-    INITSTAGE_NETWORK_LAYER_3 = 8,
+    INITSTAGE_NETWORK_INTERFACE_CONFIGURATION = 2,
 
     /**
-     * Initialization of transport-layer protocols. Transport protocols register
-     * their protocol IDs in IP, etc.
+     * Initialization of link-layer protocols.
      */
-    INITSTAGE_TRANSPORT_LAYER = 9,
+    INITSTAGE_LINK_LAYER = 3,
 
     /**
-     * Initialization of transport-layer protocols, 2nd stage. Exists because SCTP
-     * may be transported over UDP.
+     * Initialization of network configuration (e.g. Ipv4NetworkConfigurator) includes:
+     *  - determining IP addresses and static routes
+     *  - adding protocol-specific data (e.g. Ipv4InterfaceData) to InterfaceEntry
      */
-    INITSTAGE_TRANSPORT_LAYER_2 = 10,
+    INITSTAGE_NETWORK_CONFIGURATION = 4,
+
+    /**
+     * Initialization of network addresses.
+     */
+    INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT = 5,
+
+    /**
+     * Initialization of static routing.
+     */
+    INITSTAGE_STATIC_ROUTING = 6,
+
+    /**
+     * Initialization of network layer protocols.
+     */
+    INITSTAGE_NETWORK_LAYER = 7,
+
+    /**
+     * Initialization of transport-layer protocols.
+     */
+    INITSTAGE_TRANSPORT_LAYER = 8,
 
     /**
      * Initialization of routing protocols.
      */
-    INITSTAGE_ROUTING_PROTOCOLS = 11,
+    INITSTAGE_ROUTING_PROTOCOLS = 9,
 
     /**
      * Initialization of applications.
      */
-    INITSTAGE_APPLICATION_LAYER = 12,
+    INITSTAGE_APPLICATION_LAYER = 10,
 
     /**
      * Operations that no other initializations can depend on, e.g. display string updates.
      */
-    INITSTAGE_LAST = 13,
+    INITSTAGE_LAST = 11,
 
     /**
      * The number of initialization stages.
      */
-    NUM_INIT_STAGES,
+    NUM_INIT_STAGES = 12,
 };
 
 } // namespace inet

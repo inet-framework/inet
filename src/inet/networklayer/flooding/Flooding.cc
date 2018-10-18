@@ -62,7 +62,7 @@ void Flooding::initialize(int stage)
                << " bcDelTime = " << bcDelTime << endl;
         }
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER_3) {
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
         myNetwAddr = interfaceTable->getInterface(1)->getNetworkAddress();
     }
 }

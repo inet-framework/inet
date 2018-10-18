@@ -74,9 +74,6 @@ void Arp::initialize(int stage)
         WATCH_PTRMAP(arpCache);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
-        // TODO: registerProtocol
-    }
-    else if (stage == INITSTAGE_NETWORK_LAYER_3) {    // IP addresses should be available
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
         isUp = isNodeUp();

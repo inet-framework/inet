@@ -28,8 +28,12 @@ namespace visualizer {
 class INET_API SceneVisualizerBase : public VisualizerBase
 {
   protected:
+    Coord sceneMin;
+    Coord sceneMax;
+
+  protected:
     virtual void initialize(int stage) override;
-    virtual Box getPlaygroundBounds();
+    virtual Box getSceneBounds();
 };
 
 } // namespace visualizer

@@ -15,46 +15,127 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/Simsignals.h"
-#include "inet/common/Simsignals_m.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022Llc.h"
+#include "inet/linklayer/ieee8022/Ieee8022LlcSocketCommand_m.h"
 
 namespace inet {
 
 Define_Module(Ieee8022Llc);
 
+Ieee8022Llc::~Ieee8022Llc()
+{
+    clearSockets();
+}
+
 void Ieee8022Llc::initialize(int stage)
 {
+    OperationalBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         // TODO: parameterization for llc or snap?
     }
+    else if (stage == INITSTAGE_LINK_LAYER)
+    {
+        if (par("registerProtocol").boolValue()) {    //FIXME //KUDGE should redesign place of EtherEncap and LLC modules
+            //register service and protocol
+            registerService(Protocol::ieee8022, gate("upperLayerIn"), nullptr);
+            registerProtocol(Protocol::ieee8022, nullptr, gate("upperLayerOut"));
+        }
+
+        WATCH_PTRMAP(socketIdToSocketDescriptor);
+        WATCH_PTRSET(upperProtocols);
+    }
 }
 
-void Ieee8022Llc::handleMessage(cMessage *message)
+void Ieee8022Llc::handleMessageWhenUp(cMessage *msg)
 {
-    if (message->arrivedOn("upperLayerIn")) {
-        auto packet = check_and_cast<Packet *>(message);
-        encapsulate(packet);
-        send(packet, "lowerLayerOut");
+    if (msg->arrivedOn("upperLayerIn")) {
+        // from upper layer
+        EV_INFO << "Received " << msg << " from upper layer." << endl;
+        if (msg->isPacket())
+            processPacketFromHigherLayer(check_and_cast<Packet *>(msg));
+        else
+            processCommandFromHigherLayer(check_and_cast<Request *>(msg));
     }
-    else if (message->arrivedOn("lowerLayerIn")) {
-        auto packet = check_and_cast<Packet *>(message);
-        decapsulate(packet);
-        if (packet->getTag<PacketProtocolTag>()->getProtocol() != nullptr || packet->findTag<Ieee802SapInd>() != nullptr)
-            send(packet, "upperLayerOut");
-        else {
-            EV_WARN << "Unknown protocol or SAP, dropping packet\n";
+    else if (msg->arrivedOn("lowerLayerIn")) {
+        EV_INFO << "Received " << msg << " from lower layer." << endl;
+        processPacketFromMac(check_and_cast<Packet *>(msg));
+    }
+    else
+        throw cRuntimeError("Unknown gate");
+}
+
+void Ieee8022Llc::processPacketFromHigherLayer(Packet *packet)
+{
+    encapsulate(packet);
+    send(packet, "lowerLayerOut");
+}
+
+void Ieee8022Llc::processCommandFromHigherLayer(Request *request)
+{
+    auto ctrl = request->getControlInfo();
+    if (ctrl == nullptr)
+        throw cRuntimeError("Request '%s' arrived without controlinfo", request->getName());
+    else if (auto command = dynamic_cast<Ieee8022LlcSocketOpenCommand *>(ctrl)) {
+        int socketId = request->getTag<SocketReq>()->getSocketId();
+        SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getLocalSap());
+        socketIdToSocketDescriptor[socketId] = descriptor;
+        delete request;
+    }
+    else if (dynamic_cast<Ieee8022LlcSocketCloseCommand *>(ctrl) != nullptr) {
+        int socketId = request->getTag<SocketReq>()->getSocketId();
+        auto it = socketIdToSocketDescriptor.find(socketId);
+        if (it != socketIdToSocketDescriptor.end()) {
+            delete it->second;
+            socketIdToSocketDescriptor.erase(it);
+        }
+        delete request;
+    }
+    else
+        throw cRuntimeError("Unknown command: '%s' with %s", request->getName(), ctrl->getClassName());
+}
+
+void Ieee8022Llc::processPacketFromMac(Packet *packet)
+{
+    decapsulate(packet);
+    bool isSent = false;
+
+    // deliver to sockets
+    if (auto sap = packet->findTag<Ieee802SapInd>()) {
+        int localSap = sap->getDsap();
+        int remoteSap = sap->getSsap();
+        for (const auto &elem: socketIdToSocketDescriptor) {
+            if ((elem.second->localSap == localSap || elem.second->localSap == -1)
+                    && (elem.second->remoteSap == remoteSap || elem.second->remoteSap == -1)) {
+                auto *packetCopy = packet->dup();
+                packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
+                EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
+                send(packetCopy, "upperLayerOut");
+                isSent = true;
+            }
+        }
+    }
+
+    auto protocolTag = packet->findTag<PacketProtocolTag>();
+    if (protocolTag != nullptr && upperProtocols.find(protocolTag->getProtocol()) != upperProtocols.end()) {
+        send(packet, "upperLayerOut");
+    }
+    else {
+        if (!isSent) {
+            EV_WARN << "Unknown protocol, dropping packet\n";
             PacketDropDetails details;
             details.setReason(NO_PROTOCOL_FOUND);
             emit(packetDroppedSignal, packet, &details);
-            delete packet;
         }
+        delete packet;
     }
-    else
-        throw cRuntimeError("Unknown message");
 }
 
 void Ieee8022Llc::encapsulate(Packet *frame)
@@ -114,8 +195,14 @@ void Ieee8022Llc::decapsulate(Packet *frame)
             throw cRuntimeError("LLC header indicates SNAP header, but SNAP header is missing");
     }
     auto payloadProtocol = getProtocol(llcHeader);
-    frame->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
-    frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
+    if (payloadProtocol) {
+        frame->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
+        frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
+    }
+    else {
+        delete frame->removeTagIfPresent<DispatchProtocolReq>();
+        delete frame->removeTagIfPresent<PacketProtocolTag>();
+    }
 }
 
 const Protocol *Ieee8022Llc::getProtocol(const Ptr<const Ieee8022LlcHeader>& llcHeader)
@@ -135,6 +222,50 @@ const Protocol *Ieee8022Llc::getProtocol(const Ptr<const Ieee8022LlcHeader>& llc
         payloadProtocol = ProtocolGroup::ieee8022protocol.findProtocol(sapData);    // do not use getProtocol
     }
     return payloadProtocol;
+}
+
+void Ieee8022Llc::handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)
+{
+    Enter_Method("handleRegisterService");
+}
+
+void Ieee8022Llc::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePrimitive servicePrimitive)
+{
+    Enter_Method("handleRegisterProtocol");
+    if (!strcmp("upperLayerIn", in->getBaseName()))
+        upperProtocols.insert(&protocol);
+}
+
+std::ostream& operator << (std::ostream& o, const Ieee8022Llc::SocketDescriptor& t)
+{
+    o << "(id:" << t.socketId << ",lsap:" << t.localSap << ",rsap" << t.remoteSap << ")";
+    return o;
+}
+
+void Ieee8022Llc::clearSockets()
+{
+    for (auto &elem: socketIdToSocketDescriptor) {
+        delete elem.second;
+        elem.second = nullptr;
+    }
+    socketIdToSocketDescriptor.clear();
+}
+
+bool Ieee8022Llc::handleNodeStart(IDoneCallback *)
+{
+    clearSockets();
+    return true;
+}
+
+bool Ieee8022Llc::handleNodeShutdown(IDoneCallback *)
+{
+    clearSockets();
+    return true;
+}
+
+void Ieee8022Llc::handleNodeCrash()
+{
+    clearSockets();
 }
 
 } // namespace inet

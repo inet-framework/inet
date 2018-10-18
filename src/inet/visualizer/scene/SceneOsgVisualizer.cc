@@ -40,8 +40,8 @@ void SceneOsgVisualizer::initialize(int stage)
     if (stage == INITSTAGE_LOCAL)
         initializeScene();
     else if (stage == INITSTAGE_LAST) {
-        if (par("displayPlayground"))
-            initializePlayground();
+        if (par("displayScene"))
+            initializeSceneFloor();
         double axisLength = par("axisLength");
         if (!std::isnan(axisLength))
             initializeAxis(axisLength);

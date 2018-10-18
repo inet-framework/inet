@@ -68,7 +68,7 @@ Coord AttachedMobility::getCurrentVelocity()
         Quaternion quaternion(mobility->getCurrentAngularVelocity());
         Coord rotationAxis;
         double rotationAngle;
-        quaternion.toAxisAngle(rotationAxis, rotationAngle);
+        quaternion.getRotationAxisAndAngle(rotationAxis, rotationAngle);
         auto additionalVelocity = rotationAngle == 0 ? Coord::ZERO : rotationAxis % rotatedOffset * rotationAngle;
         return mobility->getCurrentVelocity() + additionalVelocity;
     }

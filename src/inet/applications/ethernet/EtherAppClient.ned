@@ -21,7 +21,7 @@ package inet.applications.ethernet;
 // A simple traffic generator for the Ethernet model and the 802.11 model,
 // and generally for any L2 model that accepts Ieee802SapReq tags on the
 // packets. It generates packets containing ~EtherAppReq chunks. It should
-// be connected directly to ~EtherLlc.
+// be connected directly to ~EtherEncap/~Ieee8022Llc.
 //
 simple EtherAppClient
 {
@@ -34,7 +34,6 @@ simple EtherAppClient
         volatile double sendInterval @unit(s) = default(uniform(0s,1s));  // interval between sending requests
         volatile int reqLength @unit(B) = default(100B);  // length of request packets
         volatile int respLength @unit(B) = default(1KiB);  // length of response packets
-        bool registerSAP = default(false);   // whether to sent IEEE802CTRL_REGISTER_DSAP on startup
         @display("i=block/app");
         @signal[packetSent](type=inet::Packet);
         @signal[packetReceived](type=inet::Packet);

@@ -59,9 +59,13 @@ class INET_API RadioVisualizerBase : public VisualizerBase, public cListener
     bool displayAntennaLobes = false;
     bool antennaLobePlaneGlobal = false;
     const char *antennaLobePlane = nullptr;
+    const char *antennaLobeMode = nullptr;
+    double antennaLobeLogarithmicBase = NaN;
+    double antennaLobeLogarithmicScale = NaN;
     double antennaLobeRadius = NaN;
     deg antennaLobeStep = deg(NaN);
     double antennaLobeOpacity = NaN;
+    bool antennaLobeLineSmooth = false;
     cFigure::Color antennaLobeLineColor;
     cFigure::LineStyle antennaLobeLineStyle;
     double antennaLobeLineWidth = NaN;

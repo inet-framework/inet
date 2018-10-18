@@ -61,7 +61,6 @@ CsmaCaMac::~CsmaCaMac()
 void CsmaCaMac::initialize(int stage)
 {
     MacProtocolBase::initialize(stage);
-
     if (stage == INITSTAGE_LOCAL) {
         EV << "Initializing stage 0\n";
         fcsMode = parseFcsMode(par("fcsMode"));
@@ -128,9 +127,9 @@ void CsmaCaMac::initialize(int stage)
         WATCH(numSentBroadcast);
         WATCH(numReceivedBroadcast);
     }
-    else if (stage == INITSTAGE_LINK_LAYER) {
+    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION)
         registerInterface();
-
+    else if (stage == INITSTAGE_LINK_LAYER) {
         // subscribe for the information of the carrier sense
         cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
         radioModule->subscribe(IRadio::receptionStateChangedSignal, this);

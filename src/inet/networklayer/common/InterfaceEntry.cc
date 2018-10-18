@@ -83,14 +83,11 @@ InterfaceEntry::~InterfaceEntry()
 
 void InterfaceEntry::initialize(int stage)
 {
-    if (stage == INITSTAGE_LOCAL) {
+    if (stage == INITSTAGE_LOCAL)
         setInterfaceName(utils::stripnonalnum(getFullName()).c_str());
-    }
-    else if (stage == INITSTAGE_LINK_LAYER) {
-        IInterfaceTable *ift = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        if (ift) {
-            ift->addInterface(this);
-        }
+    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
+        if (auto interfaceTable = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this))
+            interfaceTable->addInterface(this);
         inet::registerInterface(*this, gate("upperLayerIn"), gate("upperLayerOut"));
     }
 }

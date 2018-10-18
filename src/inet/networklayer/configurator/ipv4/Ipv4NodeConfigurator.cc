@@ -55,15 +55,15 @@ void Ipv4NodeConfigurator::initialize(int stage)
             networkConfigurator = check_and_cast<Ipv4NetworkConfigurator *>(module);
         }
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER) {
+    else if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
         if (!nodeStatus || nodeStatus->getState() == NodeStatus::UP)
-            prepareNode();
+            prepareAllInterfaces();
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER_2) {
+    else if (stage == INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT) {
         if ((!nodeStatus || nodeStatus->getState() == NodeStatus::UP) && networkConfigurator)
-            configureInterface();
+            configureAllInterfaces();
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER_3) {
+    else if (stage == INITSTAGE_STATIC_ROUTING) {
         if ((!nodeStatus || nodeStatus->getState() == NodeStatus::UP) && networkConfigurator)
             configureRoutingTable();
     }
@@ -74,9 +74,9 @@ bool Ipv4NodeConfigurator::handleOperationStage(LifecycleOperation *operation, i
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
         if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_LINK_LAYER)
-            prepareNode();
+            prepareAllInterfaces();
         else if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_NETWORK_LAYER && networkConfigurator) {
-            configureInterface();
+            configureAllInterfaces();
             configureRoutingTable();
         }
     }
@@ -91,7 +91,7 @@ bool Ipv4NodeConfigurator::handleOperationStage(LifecycleOperation *operation, i
     return true;
 }
 
-void Ipv4NodeConfigurator::prepareNode()
+void Ipv4NodeConfigurator::prepareAllInterfaces()
 {
     for (int i = 0; i < interfaceTable->getNumInterfaces(); i++)
         prepareInterface(interfaceTable->getInterface(i));
@@ -123,7 +123,7 @@ void Ipv4NodeConfigurator::prepareInterface(InterfaceEntry *interfaceEntry)
     }
 }
 
-void Ipv4NodeConfigurator::configureInterface()
+void Ipv4NodeConfigurator::configureAllInterfaces()
 {
     ASSERT(networkConfigurator);
     for (int i = 0; i < interfaceTable->getNumInterfaces(); i++)

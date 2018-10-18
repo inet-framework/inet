@@ -36,8 +36,8 @@ class INET_API SceneOsgVisualizerBase : public SceneVisualizerBase
   protected:
     virtual void initializeScene();
     virtual void initializeAxis(double axisLength);
-    virtual void initializePlayground();
-    virtual osg::Geode *createPlayground(const Coord& min, const Coord& max, cFigure::Color& color, osg::Image *image, double imageSize, double opacity, bool shading) const;
+    virtual void initializeSceneFloor();
+    virtual osg::Geode *createSceneFloor(const Coord& min, const Coord& max, cFigure::Color& color, osg::Image *image, double imageSize, double opacity, bool shading) const;
     virtual osg::BoundingSphere getNetworkBoundingSphere();
 
 #endif // ifdef WITH_OSG

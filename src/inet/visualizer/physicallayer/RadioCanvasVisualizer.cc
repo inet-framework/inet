@@ -84,7 +84,7 @@ RadioVisualizerBase::RadioVisualization *RadioCanvasVisualizer::createRadioVisua
     antennaLobeFigure->setFilled(true);
     antennaLobeFigure->setFillColor(antennaLobeFillColor);
     antennaLobeFigure->setFillOpacity(antennaLobeOpacity);
-    antennaLobeFigure->setSmooth(true);
+    antennaLobeFigure->setSmooth(antennaLobeLineSmooth);
     auto networkNode = getContainingNode(module);
     auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
     if (networkNodeVisualization == nullptr)
@@ -177,7 +177,14 @@ void RadioCanvasVisualizer::refreshAntennaLobe(const IAntenna *antenna, cPolygon
         else
             throw cRuntimeError("Unknown antennaLobePlane");
         double gain = antenna->getGain()->computeGain(Quaternion(direction.normalize()));
-        cFigure::Point point = lobeCanvasOffset * antennaLobeRadius * gain;
+        double radius;
+        if (!strcmp("logarithmic", antennaLobeMode))
+            radius = std::max(0.0, antennaLobeRadius + antennaLobeLogarithmicScale * std::log(gain) / std::log(antennaLobeLogarithmicBase));
+        else if (!strcmp("linear", antennaLobeMode))
+            radius = antennaLobeRadius * gain;
+        else
+            throw cRuntimeError("Unknown antenna lobe mode");
+        cFigure::Point point = lobeCanvasOffset * radius;
         if (antennaLobeFigure->getNumPoints() > i)
             antennaLobeFigure->setPoint(i, point);
         else

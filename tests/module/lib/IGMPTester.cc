@@ -127,7 +127,7 @@ void IGMPTester::initialize(int stage)
         interfaceEntry->setMulticast(true);
         interfaceEntry->setBroadcast(true);
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER_2) {
+    else if (stage == INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT) {
         interfaceEntry->getProtocolData<Ipv4InterfaceData>()->setIPAddress(Ipv4Address("192.168.1.1"));
         interfaceEntry->getProtocolData<Ipv4InterfaceData>()->setNetmask(Ipv4Address("255.255.0.0"));
     }

@@ -19,9 +19,10 @@ package inet.node.ethernet;
 
 import inet.applications.ethernet.EtherAppClient;
 import inet.applications.ethernet.EtherAppServer;
+import inet.common.MessageDispatcher;
 import inet.common.lifecycle.NodeStatus;
 import inet.linklayer.contract.IEthernetInterface;
-import inet.linklayer.ethernet.EtherLlc;
+import inet.linklayer.ethernet.EtherEncap;
 import inet.networklayer.common.InterfaceTable;
 
 
@@ -52,35 +53,37 @@ module EtherHost
         }
         interfaceTable: InterfaceTable {
             parameters:
-                @display("p=125,240;is=s");
+                @display("p=100,240;is=s");
         }
         cli: EtherAppClient {
             parameters:
-                registerSAP = true;
                 @display("p=250,100");
         }
         srv: EtherAppServer {
             parameters:
-                registerSAP = true;
                 @display("p=450,100");
         }
-        llc: EtherLlc {
+        dp: MessageDispatcher {
             parameters:
-                @display("p=350,200");
-            gates:
-                upperLayerIn[2];
-                upperLayerOut[2];
+                @display("p=350,158;b=300,5,,,,1");
+        }
+        llc: EtherEncap {
+            parameters:
+                registerProtocol = true;
+                @display("p=350,240");
         }
         eth: <default("EthernetInterface")> like IEthernetInterface {
             parameters:
-                @display("p=350,297,row,150;q=txQueue");
+                @display("p=350,336,row,150;q=txQueue");
         }
     connections:
+        cli.out --> dp.in++;
+        dp.out++ --> cli.in;
+        srv.out --> dp.in++;
+        dp.out++ --> srv.in;
 
-        cli.out --> llc.upperLayerIn[0];
-        cli.in <-- llc.upperLayerOut[0];
-        srv.out --> llc.upperLayerIn[1];
-        srv.in <-- llc.upperLayerOut[1];
+        dp.out++ --> llc.upperLayerIn;
+        llc.upperLayerOut --> dp.in++;
 
         llc.lowerLayerOut --> eth.upperLayerIn;
         eth.upperLayerOut --> llc.lowerLayerIn;
