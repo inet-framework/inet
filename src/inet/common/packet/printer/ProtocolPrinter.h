@@ -32,6 +32,7 @@ class INET_API ProtocolPrinter : public cObject
       public:
         std::stringstream sourceColumn;
         std::stringstream destinationColumn;
+        std::stringstream typeColumn;
         std::stringstream infoColumn;
     };
 
