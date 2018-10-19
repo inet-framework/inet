@@ -58,7 +58,7 @@ const ProtocolPrinter& PacketPrinter::getProtocolPrinter(const Protocol *protoco
 std::set<std::string> PacketPrinter::getSupportedTags() const
 {
     return {"Print inside out", "Print left to right",
-            "Show 'Source' column", "Show 'Destination' column", "Show 'Protocol' column", "Show 'Length' column", "Show 'Info' column",
+            "Show 'Source' column", "Show 'Destination' column", "Show 'Protocol' column", "Show 'Type' column", "Show 'Length' column", "Show 'Info' column",
             "Show all PDU source fields", "Show all PDU destination fields", "Show all PDU protocols", "Show all PDU lengths",
             "Show physical layer info", "Show link layer info", "Show network layer info", "Show transport layer info", "Show all info", "Show innermost info",
             "Show auto source fields", "Show auto destination fields", "Show auto info"};
@@ -67,7 +67,7 @@ std::set<std::string> PacketPrinter::getSupportedTags() const
 std::set<std::string> PacketPrinter::getDefaultEnabledTags() const
 {
     return {"Print inside out",
-            "Show 'Source' column", "Show 'Destination' column", "Show 'Protocol' column", "Show 'Length' column", "Show 'Info' column",
+            "Show 'Source' column", "Show 'Destination' column", "Show 'Protocol' column", "Show 'Type' column", "Show 'Length' column", "Show 'Info' column",
             "Show auto source fields", "Show auto destination fields", "Show auto info"};
 }
 
@@ -80,6 +80,8 @@ std::vector<std::string> PacketPrinter::getColumnNames(const Options *options) c
         columnNames.push_back("Destination");
     if (isEnabledOption(options, "Show 'Protocol' column"))
         columnNames.push_back("Protocol");
+    if (isEnabledOption(options, "Show 'Type' column"))
+        columnNames.push_back("Type");
     if (isEnabledOption(options, "Show 'Length' column"))
         columnNames.push_back("Length");
     if (isEnabledOption(options, "Show 'Info' column"))
@@ -98,6 +100,8 @@ void PacketPrinter::printContext(std::ostream& stream, const Options *options, C
        stream << context.destinationColumn.str() << "\t";
     if (isEnabledOption(options, "Show 'Protocol' column"))
        stream << "\x1b[34m" << context.protocolColumn.str() << "\x1b[30m\t";
+    if (isEnabledOption(options, "Show 'Type' column"))
+       stream << "\x1b[34m" << context.typeColumn.str() << "\x1b[30m\t";
     if (isEnabledOption(options, "Show 'Length' column"))
        stream << context.lengthColumn.str() << "\t";
     if (isEnabledOption(options, "Show 'Info' column"))
@@ -199,11 +203,20 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
                 bool showAutoInfo = isEnabledOption(options, "Show auto info");
                 bool showInnermostInfo = isEnabledOption(options, "Show innermost info");
                 if (showAutoInfo || showInnermostInfo || isEnabledInfo(options, protocol)) {
-                    if (showInnermostInfo && !(showAutoInfo && protocol == nullptr))
+                    if (showInnermostInfo && !(showAutoInfo && protocol == nullptr)) {
+                        context.typeColumn.str("");
                         context.infoColumn.str("");
-                    if (context.infoColumn.str().length() != 0)
-                        protocolContext.infoColumn << " | ";
-                    context.infoColumn.str(protocolContext.infoColumn.str() + context.infoColumn.str());
+                    }
+                    if (protocolContext.typeColumn.str().length() != 0) {
+                        if (context.typeColumn.str().length() != 0)
+                            protocolContext.typeColumn << " | ";
+                        context.typeColumn.str(protocolContext.typeColumn.str() + context.typeColumn.str());
+                    }
+                    if (protocolContext.infoColumn.str().length() != 0) {
+                        if (context.infoColumn.str().length() != 0)
+                            protocolContext.infoColumn << " | ";
+                        context.infoColumn.str(protocolContext.infoColumn.str() + context.infoColumn.str());
+                    }
                 }
             }
         }
@@ -230,6 +243,9 @@ void PacketPrinter::printPacketLeftToRight(const Ptr<const PacketDissector::Prot
             }
             // append info column
             if (isEnabledInfo(options, protocol)) {
+                if (context.typeColumn.str().length() != 0)
+                    context.typeColumn << " | ";
+                context.typeColumn << protocolContext.typeColumn.str();
                 if (context.infoColumn.str().length() != 0)
                     context.infoColumn << " | ";
                 context.infoColumn << protocolContext.infoColumn.str();
