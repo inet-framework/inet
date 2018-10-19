@@ -22,12 +22,12 @@ namespace inet {
 
 Register_Protocol_Dissector(nullptr, DefaultDissector);
 
-void DefaultDissector::dissect(Packet *packet, ICallback& callback) const
+void DefaultDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
-    callback.startProtocolDataUnit(nullptr);
-    callback.visitChunk(packet->peekData(), nullptr);
+    callback.startProtocolDataUnit(protocol);
+    callback.visitChunk(packet->peekData(), protocol);
     packet->setFrontOffset(packet->getBackOffset());
-    callback.endProtocolDataUnit(nullptr);
+    callback.endProtocolDataUnit(protocol);
 }
 
 } // namespace

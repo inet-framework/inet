@@ -30,7 +30,7 @@ namespace inet {
 Register_Protocol_Dissector(&Protocol::ethernetMac, EthernetMacDissector);
 Register_Protocol_Dissector(&Protocol::ethernetPhy, EthernetPhyDissector);
 
-void EthernetPhyDissector::dissect(Packet *packet, ICallback& callback) const
+void EthernetPhyDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
     const auto& header = packet->popAtFront<EthernetPhyHeader>();
     callback.startProtocolDataUnit(&Protocol::ethernetPhy);
@@ -39,7 +39,7 @@ void EthernetPhyDissector::dissect(Packet *packet, ICallback& callback) const
     callback.endProtocolDataUnit(&Protocol::ethernetPhy);
 }
 
-void EthernetMacDissector::dissect(Packet *packet, ICallback& callback) const
+void EthernetMacDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
     const auto& header = packet->popAtFront<EthernetMacHeader>();
     callback.startProtocolDataUnit(&Protocol::ethernetMac);

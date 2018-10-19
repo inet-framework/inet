@@ -29,7 +29,7 @@ namespace inet {
 
 Register_Protocol_Dissector(&Protocol::ieee80211Mac, Ieee80211MacProtocolDissector);
 
-void Ieee80211MacProtocolDissector::dissect(Packet *packet, ICallback& callback) const
+void Ieee80211MacProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
     const Protocol *llcProtocol = &Protocol::ieee8022; // default for most IEEE 802.11 deployments
     if (const auto llcTag = packet->findTag<ieee80211::LlcProtocolTag>())

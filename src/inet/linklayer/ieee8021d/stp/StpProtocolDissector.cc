@@ -27,7 +27,7 @@ namespace inet {
 
 Register_Protocol_Dissector(&Protocol::stp, StpProtocolDissector);
 
-void StpProtocolDissector::dissect(Packet *packet, ICallback& callback) const
+void StpProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
     auto stpPacket = packet->popAtFront<Bpdu>();
     callback.startProtocolDataUnit(&Protocol::stp);

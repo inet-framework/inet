@@ -27,7 +27,7 @@ namespace inet {
 
 Register_Protocol_Dissector(&Protocol::ieee80211Mgmt, Ieee80211MgmtProtocolDissector);
 
-void Ieee80211MgmtProtocolDissector::dissect(Packet *packet, ICallback& callback) const
+void Ieee80211MgmtProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
     callback.startProtocolDataUnit(&Protocol::ieee80211Mgmt);
     //TODO popHeader<Ieee80211MgmtHeader>

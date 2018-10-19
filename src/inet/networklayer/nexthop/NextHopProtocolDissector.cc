@@ -25,7 +25,7 @@ namespace inet {
 
 Register_Protocol_Dissector(&Protocol::nextHopForwarding, NextHopProtocolDissector);
 
-void NextHopProtocolDissector::dissect(Packet *packet, ICallback& callback) const
+void NextHopProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
     auto header = packet->popAtFront<NextHopForwardingHeader>();
     auto trailerPopOffset = packet->getBackOffset();

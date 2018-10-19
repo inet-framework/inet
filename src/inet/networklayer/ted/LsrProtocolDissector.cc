@@ -27,7 +27,7 @@ namespace inet {
 
 Register_Protocol_Dissector(&Protocol::linkStateRouting, LsrProtocolDissector);
 
-void LsrProtocolDissector::dissect(Packet *packet, ICallback& callback) const
+void LsrProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
     auto header = packet->popAtFront<LinkStateMsg>();
     callback.startProtocolDataUnit(&Protocol::linkStateRouting);

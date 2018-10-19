@@ -28,7 +28,7 @@ namespace inet {
 
 Register_Protocol_Dissector(&Protocol::ieee802154, Ieee802154ProtocolDissector);
 
-void Ieee802154ProtocolDissector::dissect(Packet *packet, ICallback& callback) const
+void Ieee802154ProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
     const auto& header = packet->popAtFront<Ieee802154MacHeader>();
     callback.startProtocolDataUnit(&Protocol::ieee802154);

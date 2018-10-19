@@ -25,7 +25,7 @@ namespace inet {
 
 Register_Protocol_Dissector(&Protocol::ipv4, Ipv4ProtocolDissector);
 
-void Ipv4ProtocolDissector::dissect(Packet *packet, ICallback& callback) const
+void Ipv4ProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
     auto trailerPopOffset = packet->getBackOffset();
     auto ipv4EndOffset = packet->getFrontOffset();

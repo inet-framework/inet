@@ -23,7 +23,7 @@ namespace inet {
 
 Register_Protocol_Dissector(&Protocol::shortcutMac, ShortcutMacProtocolDissector);
 
-void ShortcutMacProtocolDissector::dissect(Packet *packet, ICallback& callback) const
+void ShortcutMacProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
     const auto& header = packet->popAtFront<ShortcutMacHeader>();
     callback.startProtocolDataUnit(&Protocol::shortcutMac);

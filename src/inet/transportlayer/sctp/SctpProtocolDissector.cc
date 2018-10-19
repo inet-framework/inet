@@ -27,7 +27,7 @@ namespace sctp {
 
 Register_Protocol_Dissector(&Protocol::sctp, SctpProtocolDissector);
 
-void SctpProtocolDissector::dissect(Packet *packet, ICallback& callback) const
+void SctpProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
     //TODO
     callback.startProtocolDataUnit(&Protocol::sctp);

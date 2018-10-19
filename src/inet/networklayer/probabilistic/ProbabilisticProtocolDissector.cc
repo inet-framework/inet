@@ -27,7 +27,7 @@ namespace inet {
 
 Register_Protocol_Dissector(&Protocol::probabilistic, ProbabilisticProtocolDissector);
 
-void ProbabilisticProtocolDissector::dissect(Packet *packet, ICallback& callback) const
+void ProbabilisticProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
     auto header = packet->popAtFront<ProbabilisticBroadcastHeader>();
     auto trailerPopOffset = packet->getBackOffset();

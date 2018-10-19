@@ -28,7 +28,7 @@ namespace inet {
 
 Register_Protocol_Dissector(&Protocol::udp, UdpProtocolDissector);
 
-void UdpProtocolDissector::dissect(Packet *packet, ICallback& callback) const
+void UdpProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
     auto originalTrailerPopOffset = packet->getBackOffset();
     auto udpHeaderOffset = packet->getFrontOffset();

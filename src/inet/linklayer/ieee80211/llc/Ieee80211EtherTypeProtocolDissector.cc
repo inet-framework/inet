@@ -24,7 +24,7 @@ namespace ieee80211 {
 
 Register_Protocol_Dissector(&Protocol::ieee80211EtherType, Ieee80211EtherTypeProtocolDissector);
 
-void Ieee80211EtherTypeProtocolDissector::dissect(Packet *packet, ICallback& callback) const
+void Ieee80211EtherTypeProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
     const auto& header = packet->popAtFront<inet::Ieee80211EtherTypeHeader>();
     callback.startProtocolDataUnit(&Protocol::ieee80211EtherType);
