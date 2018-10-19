@@ -17,11 +17,10 @@
 // @author: Zoltan Bojthe
 //
 
-#include "inet/transportlayer/tcp_common/TcpProtocolDissector.h"
-
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
+#include "inet/common/ProtocolGroup.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
-
+#include "inet/transportlayer/tcp_common/TcpProtocolDissector.h"
 
 namespace inet {
 
@@ -32,8 +31,10 @@ void TcpProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICa
     const auto& header = packet->popAtFront<tcp::TcpHeader>();
     callback.startProtocolDataUnit(&Protocol::tcp);
     callback.visitChunk(header, &Protocol::tcp);
-    if (packet->getDataLength() != b(0))
-        callback.dissectPacket(packet, nullptr);
+    if (packet->getDataLength() != b(0)) {
+        auto dataProtocol = ProtocolGroup::tcpprotocol.findProtocol(header->getDestPort());
+        callback.dissectPacket(packet, dataProtocol);
+    }
     callback.endProtocolDataUnit(&Protocol::tcp);
 }
 
