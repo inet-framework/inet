@@ -32,7 +32,8 @@ void AxiallySymmetricAntenna::initialize(int stage)
 {
     AntennaBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        gain = makeShared<AntennaGain>(par("axisOfSymmetry"), par("gains"));
+        double baseGain = math::dB2fraction(par("baseGain"));
+        gain = makeShared<AntennaGain>(par("axisOfSymmetry"), baseGain, par("gains"));
     }
 }
 
@@ -43,7 +44,7 @@ std::ostream& AxiallySymmetricAntenna::printToStream(std::ostream& stream, int l
     return AntennaBase::printToStream(stream, level);
 }
 
-AxiallySymmetricAntenna::AntennaGain::AntennaGain(const char *axis, const char *gains) :
+AxiallySymmetricAntenna::AntennaGain::AntennaGain(const char *axis, double baseGain, const char *gains) :
     minGain(NaN),
     maxGain(NaN)
 {
@@ -55,7 +56,7 @@ AxiallySymmetricAntenna::AntennaGain::AntennaGain(const char *axis, const char *
         if (!angleString || !gainString)
             throw cRuntimeError("Insufficient number of values");
         auto angle = deg(atof(angleString));
-        double gain = math::dB2fraction(atof(gainString));
+        double gain = baseGain * math::dB2fraction(atof(gainString));
         if (std::isnan(minGain) || gain < minGain)
             minGain = gain;
         if (std::isnan(maxGain) || gain > maxGain)
