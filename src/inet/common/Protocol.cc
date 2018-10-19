@@ -75,6 +75,7 @@ const Protocol *Protocol::getProtocol(const char *name)
 // Standard protocol identifiers
 const Protocol Protocol::aodv("aodv", "AODV");
 const Protocol Protocol::arp("arp", "ARP", Protocol::NetworkLayer);
+const Protocol Protocol::babel("babel", "BABEL");
 const Protocol Protocol::bgp("bgp", "BGP");
 const Protocol Protocol::bmac("bmac", "B-MAC", Protocol::LinkLayer);
 const Protocol Protocol::cdp("cdp", "CDP", Protocol::NetworkLayer);
@@ -86,6 +87,7 @@ const Protocol Protocol::egp("egp", "EGP");
 const Protocol Protocol::ethernetMac("ethernetmac", "Ethernet MAC", Protocol::LinkLayer);
 const Protocol Protocol::ethernetPhy("ethernetphy", "Ethernet PHY", Protocol::PhysicalLayer);
 const Protocol Protocol::gpsr("gpsr", "GPSR");
+const Protocol Protocol::http("http", "HTTP");
 const Protocol Protocol::icmpv4("icmpv4", "ICMPv4", Protocol::NetworkLayer);
 const Protocol Protocol::icmpv6("icmpv6", "ICMPv6", Protocol::NetworkLayer);
 const Protocol Protocol::ieee80211EtherType("ieee80211ethertype", "IEEE 802.11 LLC (EtherType)", Protocol::LinkLayer);

@@ -61,6 +61,7 @@ class INET_API Protocol
     // Standard protocol identifiers (in alphanumeric order)
     static const Protocol aodv;
     static const Protocol arp;
+    static const Protocol babel;
     static const Protocol bgp;
     static const Protocol bmac;
     static const Protocol cdp;
@@ -72,6 +73,7 @@ class INET_API Protocol
     static const Protocol ethernetMac;
     static const Protocol ethernetPhy;
     static const Protocol gpsr;
+    static const Protocol http;
     static const Protocol icmpv4;
     static const Protocol icmpv6;
     static const Protocol ieee80211EtherType;
