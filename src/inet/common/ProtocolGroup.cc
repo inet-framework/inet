@@ -129,5 +129,13 @@ ProtocolGroup ProtocolGroup::ieee8022protocol("ieee8022protocol", {
     { 0x4242, &Protocol::stp },
 });
 
+ProtocolGroup ProtocolGroup::udpprotocol("udpprotocol", {
+    { 6696, &Protocol::babel },
+});
+
+ProtocolGroup ProtocolGroup::tcpprotocol("tcpprotocol", {
+    { 80, &Protocol::http },
+});
+
 } // namespace inet
 
