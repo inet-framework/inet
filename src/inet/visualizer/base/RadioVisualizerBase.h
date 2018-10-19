@@ -56,6 +56,8 @@ class INET_API RadioVisualizerBase : public VisualizerBase, public cListener
     Placement placementHint;
     double placementPriority;
     // antennaLobe
+    bool antennaLobeNormalize = false;
+    bool antennaLobeRelativeLabels = false;
     bool displayAntennaLobes = false;
     bool antennaLobePlaneGlobal = false;
     const char *antennaLobePlane = nullptr;
