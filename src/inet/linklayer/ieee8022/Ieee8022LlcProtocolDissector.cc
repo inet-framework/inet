@@ -17,13 +17,12 @@
 // @author: Zoltan Bojthe
 //
 
-#include "inet/linklayer/ieee8022/Ieee8022LlcProtocolDissector.h"
-
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022Llc.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
+#include "inet/linklayer/ieee8022/Ieee8022LlcProtocolDissector.h"
 
 namespace inet {
 
@@ -34,8 +33,8 @@ void Ieee802LlcDissector::dissect(Packet *packet, const Protocol *protocol, ICal
     const auto& header = packet->popAtFront<inet::Ieee8022LlcHeader>();
     callback.startProtocolDataUnit(&Protocol::ieee8022);
     callback.visitChunk(header, &Protocol::ieee8022);
-    auto nestedProtocol = Ieee8022Llc::getProtocol(header);
-    callback.dissectPacket(packet, nestedProtocol);
+    auto dataProtocol = Ieee8022Llc::getProtocol(header);
+    callback.dissectPacket(packet, dataProtocol);
     callback.endProtocolDataUnit(&Protocol::ieee8022);
 }
 
