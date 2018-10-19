@@ -54,7 +54,7 @@ namespace inet {
 class INET_API MobilityBase : public cSimpleModule, public IMobility
 {
   protected:
-    class DirectiveResolver : public inet::visualizer::StringFormat::IDirectiveResolver {
+    class DirectiveResolver : public inet::StringFormat::IDirectiveResolver {
       protected:
         IMobility *mobility = nullptr;
         std::string result;
@@ -93,7 +93,7 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
     /** @brief The last orientation that was reported. */
     Quaternion lastOrientation;
 
-    inet::visualizer::StringFormat format;
+    StringFormat format;
 
   protected:
     MobilityBase();
