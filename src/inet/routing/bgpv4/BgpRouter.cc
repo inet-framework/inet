@@ -867,15 +867,10 @@ bool BgpRouter::isReachable(const Ipv4Address addr) const
     if(addr.isUnspecified())
         return true;
 
-    for(int i = 0; i < ift->getNumInterfaces(); i++) {
-        InterfaceEntry *intf = ift->getInterface(i);
-        if(intf && !intf->isLoopback()) {
-            Ipv4InterfaceData *ipv4data = intf->findProtocolData<Ipv4InterfaceData>();
-            if(ipv4data) {
-                if(addr.doAnd(ipv4data->getNetmask()) == ipv4data->getIPAddress().doAnd(ipv4data->getNetmask()))
-                    return true;
-            }
-        }
+    for(int i = 0; i < rt->getNumRoutes(); i++) {
+        Ipv4Route *route = rt->getRoute(i);
+        if(addr.doAnd(route->getNetmask()) == route->getDestination().doAnd(route->getNetmask()))
+            return true;
     }
 
     return false;
