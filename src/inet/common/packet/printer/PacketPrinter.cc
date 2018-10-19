@@ -21,6 +21,36 @@ namespace inet {
 
 Register_MessagePrinter(PacketPrinter);
 
+const char *PacketPrinter::DirectiveResolver::resolveDirective(char directive)
+{
+    switch (directive) {
+        case 's':
+            result = context.sourceColumn.str();
+            break;
+        case 'd':
+            result = context.destinationColumn.str();
+            break;
+        case 'p':
+            result = context.protocolColumn.str();
+            break;
+        case 'l':
+            result = context.lengthColumn.str();
+            break;
+        case 't':
+            result = context.typeColumn.str();
+            break;
+        case 'i':
+            result = context.infoColumn.str();
+            break;
+        case 'n':
+            result = std::to_string(numPacket);
+            break;
+        default:
+            throw cRuntimeError("Unknown directive: %c", directive);
+    }
+    return result.c_str();
+}
+
 int PacketPrinter::getScoreFor(cMessage *msg) const
 {
     return msg->isPacket() ? 100 : 0;
@@ -154,18 +184,25 @@ void PacketPrinter::printSignal(inet::physicallayer::Signal *signal, const Optio
 }
 #endif // WITH_RADIO
 
-void PacketPrinter::printPacket(std::ostream& stream, Packet *packet) const
+void PacketPrinter::printPacket(std::ostream& stream, Packet *packet, const char *format) const
 {
     Options options;
     options.enabledTags = getDefaultEnabledTags();
-    printPacket(stream, packet, &options);
+    printPacket(stream, packet, &options, format);
 }
 
-void PacketPrinter::printPacket(std::ostream& stream, Packet *packet, const Options *options) const
+void PacketPrinter::printPacket(std::ostream& stream, Packet *packet, const Options *options, const char *format) const
 {
     Context context;
     printPacket(packet, options, context);
-    printContext(stream, options, context);
+    if (format == nullptr)
+        printContext(stream, options, context);
+    else {
+        DirectiveResolver directiveResolver(context, numPacket++);
+        StringFormat stringFormat;
+        stringFormat.parseFormat(format);
+        stream << stringFormat.formatString(&directiveResolver);
+    }
 }
 
 void PacketPrinter::printPacket(Packet *packet, const Options *options, Context& context) const
@@ -180,6 +217,20 @@ void PacketPrinter::printPacket(Packet *packet, const Options *options, Context&
         const_cast<PacketPrinter *>(this)->printPacketInsideOut(protocolDataUnit, options, context);
     else
         const_cast<PacketPrinter *>(this)->printPacketLeftToRight(protocolDataUnit, options, context);
+}
+
+std::string PacketPrinter::printPacketToString(Packet *packet, const char *format) const
+{
+    std::stringstream stream;
+    printPacket(stream, packet, format);
+    return stream.str();
+}
+
+std::string PacketPrinter::printPacketToString(Packet *packet, const Options *options, const char *format) const
+{
+    std::stringstream stream;
+    printPacket(stream, packet, options, format);
+    return stream.str();
 }
 
 void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::ProtocolDataUnit>& protocolDataUnit, const Options *options, Context& context) const
