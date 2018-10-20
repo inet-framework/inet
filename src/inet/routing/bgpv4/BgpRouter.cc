@@ -545,6 +545,14 @@ void BgpRouter::updateSendProcess(const unsigned char type, SessionId sessionInd
 
         BgpSessionType sType = _BGPSessions[sessionIndex]->getType();
 
+        // BGP split horizon: skip if this prefix is learned over I-BGP and we are
+        // advertising it to another internal peer.
+        if(entry->getPathType() == IGP && sType == IGP && elem.second->getType() == IGP) {
+            EV_INFO << "BGP Split Horizon: prevent advertisement of network " <<
+                    entry->getDestination() << "\\" << entry->getNetmask();
+            continue;
+        }
+
         if ((sType == IGP && (elem).second->getType() == EGP) ||
                 sType == EGP ||
                 type == ROUTE_DESTINATION_CHANGED ||
