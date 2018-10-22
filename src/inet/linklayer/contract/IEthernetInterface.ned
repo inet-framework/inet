@@ -18,7 +18,7 @@
 package inet.linklayer.contract;
 
 //
-// Prototype module for Ethernet interfaces.
+// Module interface for Ethernet interfaces.
 //
 moduleinterface IEthernetInterface extends IWiredInterface
 {

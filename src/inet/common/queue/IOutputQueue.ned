@@ -18,7 +18,7 @@
 package inet.common.queue;
 
 //
-// Prototype for output queues. Concrete queues can implement
+// Module interface for output queues. Concrete queues can implement
 // drop-tail, RED etc. policy.
 //
 // The implementation of IOutputQueue
