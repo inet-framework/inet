@@ -56,7 +56,6 @@ class INET_API NodeStartOperation : public NodeOperation
 
   public:
     virtual int getNumStages() const override { return STAGE_LAST + 1; }
-    virtual Kind getKind() const override { return UP; }
 };
 
 /**
@@ -81,7 +80,6 @@ class INET_API NodeShutdownOperation : public NodeOperation
 
   public:
     virtual int getNumStages() const override { return STAGE_LAST + 1; }
-    virtual Kind getKind() const override { return DOWN; }
 };
 
 /** TODO:
@@ -130,7 +128,6 @@ class INET_API NodeCrashOperation : public NodeOperation
 
   public:
     virtual int getNumStages() const override { return STAGE_LAST + 1; }
-    virtual Kind getKind() const override { return DOWN; }
 };
 
 } // namespace inet

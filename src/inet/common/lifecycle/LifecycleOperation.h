@@ -36,12 +36,6 @@ class INET_API LifecycleOperation : public cObject, public noncopyable
     friend class LifecycleController;
     typedef std::map<std::string, std::string> StringMap;
 
-    enum Kind {
-        UP,    ///< Start, boot, resume, recover, interface up, etc.
-        DOWN,    ///< Shutdown, suspend, stop, crash, interface down, etc.
-        MOMENTARY    ///< Some kind of incident, e.g. corruption of a memory cell
-    };
-
   private:
     cModule *rootModule;
     int currentStage;
@@ -62,13 +56,6 @@ class INET_API LifecycleOperation : public cObject, public noncopyable
      * unrecognized by the operation.
      */
     virtual void initialize(cModule *module, StringMap& params) { rootModule = module; }
-
-    /**
-     * Returns the "kind" or "direction" of the operation. This attribute is
-     * provided for convenience, it is not used by the lifecycle infrastructure
-     * itself.
-     */
-    virtual Kind getKind() const = 0;    //TODO not sure this is actually useful
 
     /**
      * Returns the module the operation is initiated on.
