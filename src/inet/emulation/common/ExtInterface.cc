@@ -46,13 +46,17 @@ void ExtInterface::initialize(int stage)
         const char *copyConfiguration = par("copyConfiguration");
         if (strcmp("copyFromExt", copyConfiguration))
             configureInterface();
+        if (!strcmp("copyFromExt", copyConfiguration))
+            copyNetworkInterfaceConfigurationFromExt();
+        else if (!strcmp("copyToExt", copyConfiguration))
+            copyNetworkInterfaceConfigurationToExt();
     }
     else if (stage == INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT) {
         const char *copyConfiguration = par("copyConfiguration");
         if (!strcmp("copyFromExt", copyConfiguration))
-            copyInterfaceConfigurationFromExt();
+            copyNetworkAddressFromExt();
         else if (!strcmp("copyToExt", copyConfiguration))
-            copyInterfaceConfigurationToExt();
+            copyNetworkAddressToExt();
     }
 }
 
@@ -68,7 +72,31 @@ void ExtInterface::configureInterface()
     setPointToPoint(true);   //TODO
 }
 
-void ExtInterface::copyInterfaceConfigurationFromExt()
+void ExtInterface::copyNetworkInterfaceConfigurationFromExt()
+{
+    NetworkNamespaceContext context(par("namespace"));
+
+    std::string device = par("device").stdstringValue();
+    int fd = socket(AF_INET, SOCK_DGRAM, 0);
+
+    struct ifreq ifr;
+    ifr.ifr_addr.sa_family = AF_INET;
+    strncpy(ifr.ifr_name , device.c_str() , IFNAMSIZ-1);
+
+    ioctl(fd, SIOCGIFHWADDR, &ifr);
+    MacAddress macAddress;
+    macAddress.setAddressBytes((unsigned char *)ifr.ifr_hwaddr.sa_data);
+
+    ioctl(fd, SIOCGIFMTU, &ifr);
+    int mtu = ifr.ifr_mtu;
+
+    close(fd);
+
+    setMacAddress(macAddress);
+    setMtu(mtu);
+}
+
+void ExtInterface::copyNetworkAddressFromExt()
 {
     NetworkNamespaceContext context(par("namespace"));
 
@@ -87,21 +115,12 @@ void ExtInterface::copyInterfaceConfigurationFromExt()
     ioctl(fd, SIOCGIFNETMASK, &ifr);
     Ipv4Address ipv4Netmask = Ipv4Address(ntohl(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr.s_addr));
 
-    ioctl(fd, SIOCGIFHWADDR, &ifr);
-    MacAddress macAddress;
-    macAddress.setAddressBytes((unsigned char *)ifr.ifr_hwaddr.sa_data);
-
-    ioctl(fd, SIOCGIFMTU, &ifr);
-    int mtu = ifr.ifr_mtu;
-
     //TODO get IPv4 multicast addresses
 
     //TODO get IPv6 addresses
 
     close(fd);
 
-    setMacAddress(macAddress);
-    setMtu(mtu);
     auto interfaceData = findProtocolData<Ipv4InterfaceData>();
     if (interfaceData != nullptr) {
         interfaceData->setIPAddress(Ipv4Address(ipv4Address));
@@ -109,7 +128,7 @@ void ExtInterface::copyInterfaceConfigurationFromExt()
     }
 }
 
-void ExtInterface::copyInterfaceConfigurationToExt()
+void ExtInterface::copyNetworkInterfaceConfigurationToExt()
 {
     NetworkNamespaceContext context(par("namespace"));
 
@@ -127,6 +146,19 @@ void ExtInterface::copyInterfaceConfigurationToExt()
     ifr.ifr_mtu = getMtu();
     if (ioctl(fd, SIOCSIFMTU, &ifr) == -1)
         throw cRuntimeError("error at mtu setting: %s", strerror(errno));
+
+    close(fd);
+}
+
+void ExtInterface::copyNetworkAddressToExt()
+{
+    NetworkNamespaceContext context(par("namespace"));
+
+    std::string device = par("device").stdstringValue();
+    int fd = socket(AF_INET, SOCK_DGRAM, 0);
+    struct ifreq ifr;
+    ifr.ifr_addr.sa_family = AF_INET;
+    strncpy(ifr.ifr_name , device.c_str() , IFNAMSIZ-1);
 
     Ipv4InterfaceData *interfaceData = findProtocolData<Ipv4InterfaceData>();
     if (interfaceData != nullptr) {
