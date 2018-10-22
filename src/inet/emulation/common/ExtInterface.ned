@@ -19,6 +19,9 @@ package inet.emulation.common;
 
 import inet.linklayer.contract.IExternalInterface;
 
+//
+// This module provides a base module for external network interfaces.
+//
 module ExtInterface like IExternalInterface
 {
     parameters:

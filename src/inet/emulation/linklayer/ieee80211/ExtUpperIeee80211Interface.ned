@@ -29,9 +29,10 @@ import inet.linklayer.ieee80211.mib.Ieee80211Mib;
 import inet.physicallayer.contract.packetlevel.IRadio;
 
 //
-// Provides an IEEE 802.11 network interface suitable for emulation. The upper part
-// of the network interface is realized in the real world using an real TAP device
-// of the computer which is running the simulation.
+// This module provides an IEEE 802.11 network interface suitable for emulation.
+//
+// The upper part of the network interface is realized in the real world using
+// a real TAP device of the host computer which is running the simulation.
 //
 module ExtUpperIeee80211Interface extends ExtInterface like IWirelessInterface
 {
