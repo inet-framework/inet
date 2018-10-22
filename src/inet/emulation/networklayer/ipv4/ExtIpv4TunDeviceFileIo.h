@@ -54,8 +54,8 @@ class INET_API ExtIpv4TunDeviceFileIo : public cSimpleModule, public RealTimeSch
     virtual void refreshDisplay() const override;
     virtual void finish() override;
 
-    virtual void openTap(std::string dev);
-    virtual void closeTap();
+    virtual void openTun(std::string dev);
+    virtual void closeTun();
 
   public:
     virtual ~ExtIpv4TunDeviceFileIo();
