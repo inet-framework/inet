@@ -22,8 +22,8 @@ achieve this under linux.
 
 The suggested solution is to use setcap to set the application permissions:
 
-$ sudo setcap cap_net_raw,cap_net_admin=eip opp_run_dbg
-$ sudo setcap cap_net_raw,cap_net_admin=eip opp_run_release
+$ sudo setcap cap_net_raw,cap_net_admin,cap_sys_admin=eip opp_run_dbg
+$ sudo setcap cap_net_raw,cap_net_admin,cap_sys_admin=eip opp_run_release
 
 This solution makes running the examples from the IDE possible. Alternatively,
 the application can be started with root privileges from command line:
