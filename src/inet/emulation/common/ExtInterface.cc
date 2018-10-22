@@ -62,10 +62,6 @@ void ExtInterface::initialize(int stage)
 
 void ExtInterface::configureInterface()
 {
-    const char *addressString = par("address");
-    MacAddress address = strcmp(addressString, "auto") ? MacAddress(addressString) : MacAddress::generateAutoAddress();
-    setMacAddress(address);
-    setInterfaceToken(address.formInterfaceIdentifier());
     setMtu(par("mtu"));
     setBroadcast(true);      //TODO
     setMulticast(true);      //TODO
