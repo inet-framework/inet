@@ -177,6 +177,20 @@ void BgpRouter::addToAsList(std::string nodeName, AsId id)
     }
 }
 
+void BgpRouter::setNextHopSelf(Ipv4Address peer, bool nextHopSelf)
+{
+    bool found = false;
+    for(auto &session : _BGPSessions) {
+        if(session.second->getPeerAddr() == peer) {
+            found = true;
+            session.second->setNextHopSelf(nextHopSelf);
+            break;
+        }
+    }
+    if(!found)
+        throw cRuntimeError("Neighbor address '%s' cannot be found in BGP router %s", peer.str(false).c_str(), bgpModule->getOwner()->getFullName());
+}
+
 void BgpRouter::processMessageFromTCP(cMessage *msg)
 {
     TcpSocket *socket = check_and_cast_nullable<TcpSocket*>(_socketMap.findSocketFor(msg));
@@ -483,7 +497,8 @@ unsigned char BgpRouter::decisionProcess(const BgpUpdateMessage& msg, BgpRouting
     bgpRoutingTable.push_back(entry);
 
     if (_BGPSessions[sessionIndex]->getType() == EGP) {
-        rt->addRoute(entry);
+        if(isReachable(entry->getGateway()))
+            rt->addRoute(entry);
 
         // if redistributeInternal is true, then insert the new external route into the OSPF (if exists).
         // The OSPF module then floods AS-External LSA into the AS and lets other routers know
@@ -589,7 +604,7 @@ void BgpRouter::updateSendProcess(const unsigned char type, SessionId sessionInd
                     content.getAsPathForUpdate(0).getValueForUpdate(0).setAsValue(j, entry->getAS(j));
             }
 
-            if(sType == EGP || nextHopSelf) {
+            if(sType == EGP || _BGPSessions[sessionIndex]->getNextHopSelf()) {
                 InterfaceEntry *iftEntry = (elem).second->getLinkIntf();
                 content.getNextHopForUpdate().setValue(iftEntry->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
             }
@@ -877,8 +892,10 @@ bool BgpRouter::isReachable(const Ipv4Address addr) const
 
     for(int i = 0; i < rt->getNumRoutes(); i++) {
         Ipv4Route *route = rt->getRoute(i);
-        if(addr.doAnd(route->getNetmask()) == route->getDestination().doAnd(route->getNetmask()))
-            return true;
+        if(!isDefaultRoute(route) && route->getSourceType() != IRoute::BGP) {
+            if(addr.doAnd(route->getNetmask()) == route->getDestination().doAnd(route->getNetmask()))
+                return true;
+        }
     }
 
     return false;

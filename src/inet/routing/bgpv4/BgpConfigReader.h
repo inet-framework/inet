@@ -46,7 +46,8 @@ private:
     void loadConfigFromXML(cXMLElement *bgpConfig, BgpRouter *bgpRouter);
 
   private:
-    std::vector<const char *> loadASConfig(cXMLElementList& ASConfig);
+    std::vector<const char *> findInternalPeers(cXMLElementList& ASConfig);
+    void loadASConfig(cXMLElementList& ASConfig);
     void loadSessionConfig(cXMLElementList& sessionList, simtime_t *delayTab);
     AsId findMyAS(cXMLElementList& ASList, int& outRouterPosition);
     void loadTimerConfig(cXMLElementList& timerConfig, simtime_t *delayTab);

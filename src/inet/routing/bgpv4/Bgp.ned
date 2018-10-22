@@ -39,7 +39,6 @@ simple Bgp like IBgp
         bool redistributeRip = default(false);        // redistribute routes learned by RIP into BGP
         bool redistributeOspf = default(false);       // redistribute routes learned by OSPF into BGP
         bool redistributeInternal = default(false);   // redistribute BGP routes into OSPF (as external routes)
-        bool nextHopSelf = default(true);
         @display("i=block/network2");
     gates:
         input socketIn;

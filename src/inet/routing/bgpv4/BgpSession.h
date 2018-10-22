@@ -91,6 +91,7 @@ private:
     void setInfo(SessionInfo info);
     void setTimers(simtime_t *delayTab);
     void setlinkIntf(InterfaceEntry *intf) { _info.linkIntf = intf; }
+    void setNextHopSelf(bool nextHopSelf) { _info.nextHopSelf = nextHopSelf; }
     void setSocket(TcpSocket *socket) { delete _info.socket; _info.socket = socket; }
     void setSocketListen(TcpSocket *socket) { delete _info.socketListen; _info.socketListen = socket; }
 
@@ -106,6 +107,7 @@ private:
     static const std::string getTypeString(BgpSessionType sessionType);
     InterfaceEntry *getLinkIntf() const { return _info.linkIntf; }
     Ipv4Address getPeerAddr() const { return _info.peerAddr; }
+    bool getNextHopSelf() const { return _info.nextHopSelf; }
     TcpSocket *getSocket() const { return _info.socket; }
     TcpSocket *getSocketListen() const { return _info.socketListen; }
     IIpv4RoutingTable *getIPRoutingTable() const { return bgpRouter.getIPRoutingTable(); }
