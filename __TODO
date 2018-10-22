@@ -1,3 +1,4 @@
+ - add parameter to mobility base which determines what should happen if the energy storage is depleted. For example, a drone should just stop, but a satellite should continue its motion.
  - help ANSA porting to INET 4.0
  - LTE PHY support and porting to INET 4.0
 
