@@ -131,7 +131,6 @@ void ExtEthernetTapDeviceFileIo::openTap(std::string dev)
 
 void ExtEthernetTapDeviceFileIo::closeTap()
 {
-    NetworkNamespaceContext context(par("namespace"));
     if (fd != INVALID_SOCKET) {
         rtScheduler->removeCallback(fd, this);
         close(fd);

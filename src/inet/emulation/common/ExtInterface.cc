@@ -74,7 +74,6 @@ void ExtInterface::copyNetworkInterfaceConfigurationFromExt()
 
     std::string device = par("device").stdstringValue();
     int fd = socket(AF_INET, SOCK_DGRAM, 0);
-
     struct ifreq ifr;
     ifr.ifr_addr.sa_family = AF_INET;
     strncpy(ifr.ifr_name , device.c_str() , IFNAMSIZ-1);
@@ -98,7 +97,6 @@ void ExtInterface::copyNetworkAddressFromExt()
 
     std::string device = par("device").stdstringValue();
     int fd = socket(AF_INET, SOCK_DGRAM, 0);
-
     struct ifreq ifr;
     ifr.ifr_addr.sa_family = AF_INET;
     strncpy(ifr.ifr_name , device.c_str() , IFNAMSIZ-1);

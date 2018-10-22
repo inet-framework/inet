@@ -26,6 +26,7 @@
 
 #include "inet/common/checksum/EthernetCRC.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/NetworkNamespaceContext.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/emulation/linklayer/ethernet/ExtEthernetDeviceSocket.h"
@@ -103,6 +104,7 @@ void ExtEthernetDeviceSocket::finish()
 
 void ExtEthernetDeviceSocket::openSocket()
 {
+    NetworkNamespaceContext context(par("namespace"));
     // open socket
     struct ifreq if_mac;
     struct ifreq if_idx;

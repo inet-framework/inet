@@ -30,6 +30,7 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/NetworkNamespaceContext.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/emulation/networklayer/ipv4/ExtIpv4TunDeviceFileIo.h"
@@ -99,6 +100,7 @@ void ExtIpv4TunDeviceFileIo::finish()
 
 void ExtIpv4TunDeviceFileIo::openTun(std::string dev)
 {
+    NetworkNamespaceContext context(par("namespace"));
     if ((fd = open("/dev/net/tun", O_RDWR)) < 0)
         throw cRuntimeError("Cannot open TUN device: %s", strerror(errno));
 

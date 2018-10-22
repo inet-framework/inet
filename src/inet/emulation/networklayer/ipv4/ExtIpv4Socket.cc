@@ -26,6 +26,7 @@
 #include <omnetpp/platdep/sockets.h>
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/NetworkNamespaceContext.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/emulation/networklayer/ipv4/ExtIpv4Socket.h"
@@ -96,6 +97,7 @@ void ExtIpv4Socket::finish()
 
 void ExtIpv4Socket::openSocket()
 {
+    NetworkNamespaceContext context(par("namespace"));
     fd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
     if (fd == INVALID_SOCKET)
         throw cRuntimeError("Cannot open socket");

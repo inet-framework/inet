@@ -187,7 +187,6 @@ ExtLowerUdp::Socket *ExtLowerUdp::open(int socketId)
 
 void ExtLowerUdp::bind(int socketId, const L3Address& localAddress, int localPort)
 {
-    NetworkNamespaceContext context(par("namespace"));
     Socket *socket = nullptr;
     auto it = socketIdToSocketMap.find(socketId);
     if (it == socketIdToSocketMap.end())
@@ -228,7 +227,6 @@ void ExtLowerUdp::connect(int socketId, const L3Address& remoteAddress, int remo
 
 void ExtLowerUdp::close(int socketId)
 {
-    NetworkNamespaceContext context(par("namespace"));
     auto it = socketIdToSocketMap.find(socketId);
     if (it == socketIdToSocketMap.end())
         throw cRuntimeError("Unknown socket");
