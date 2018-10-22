@@ -49,7 +49,7 @@ void ExtIpv4TunDeviceFileIo::initialize(int stage)
     cSimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         device = par("device").stdstringValue();
-        packetName = par("packetName").stdstringValue();
+        packetNameFormat = par("packetNameFormat");
         rtScheduler = check_and_cast<RealTimeScheduler *>(getSimulation()->getScheduler());
         openTap(device);
         numSent = numReceived = 0;

@@ -31,7 +31,7 @@ simple ExtEthernetTapDeviceFileIo
     parameters:
         string device; // name of existing real tap interface
         string namespace = default("");
-        string packetName = default("Ext");
+        string packetName = default("Ext-%p-%t-%n");
         @display("i=block/rxtx");
         @signal[packetSentToLower](type=Packet);
         @signal[packetReceivedFromLower](type=Packet);

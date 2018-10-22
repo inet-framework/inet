@@ -18,6 +18,7 @@
 #ifndef __INET_EXTETHERNETTAPDEVICEFILEIO_H
 #define __INET_EXTETHERNETTAPDEVICEFILEIO_H
 
+#include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/scheduler/RealTimeScheduler.h"
 
 namespace inet {
@@ -35,7 +36,7 @@ class INET_API ExtEthernetTapDeviceFileIo : public cSimpleModule, public RealTim
   protected:
     // parameters
     std::string device;
-    std::string packetName;
+    const char *packetNameFormat = nullptr;
     RealTimeScheduler *rtScheduler = nullptr;
 
     // statistics
@@ -43,6 +44,7 @@ class INET_API ExtEthernetTapDeviceFileIo : public cSimpleModule, public RealTim
     int numReceived = 0;
 
     // state
+    PacketPrinter packetPrinter;
     int fd = -1;
 
   protected:

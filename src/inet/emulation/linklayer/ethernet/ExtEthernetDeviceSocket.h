@@ -18,6 +18,7 @@
 #ifndef __INET_EXTETHERNETDEVICESOCKET_H
 #define __INET_EXTETHERNETDEVICESOCKET_H
 
+#include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/scheduler/RealTimeScheduler.h"
 
 namespace inet {
@@ -35,7 +36,7 @@ class INET_API ExtEthernetDeviceSocket : public cSimpleModule, public RealTimeSc
   protected:
     // parameters
     const char *device = nullptr;
-    std::string packetName;
+    const char *packetNameFormat = nullptr;
     RealTimeScheduler *rtScheduler = nullptr;
 
     // statistics
@@ -43,6 +44,7 @@ class INET_API ExtEthernetDeviceSocket : public cSimpleModule, public RealTimeSc
     int numReceived = 0;
 
     // state
+    PacketPrinter packetPrinter;
     int ifindex = -1;
     int fd = INVALID_SOCKET;
     MacAddress macAddress;

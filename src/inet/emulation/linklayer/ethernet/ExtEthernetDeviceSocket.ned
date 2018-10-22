@@ -26,7 +26,7 @@ simple ExtEthernetDeviceSocket
 {
     parameters:
         string device; // name of existing real ethernet device
-        string packetName = default("Ext"); // name of received packets
+        string packetNameFormat = default("Ext-%p-%t-%n"); // name of received packets
         @display("i=block/rxtx");
         @signal[packetSentToUpper](type=Packet);
         @signal[packetReceivedFromUpper](type=Packet);

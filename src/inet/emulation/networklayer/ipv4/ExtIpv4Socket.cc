@@ -45,7 +45,7 @@ void ExtIpv4Socket::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        packetName = par("packetName").stdstringValue();
+        packetNameFormat = par("packetName");
         rtScheduler = check_and_cast<RealTimeScheduler *>(getSimulation()->getScheduler());
         openSocket();
         numSent = numReceived = 0;
@@ -124,12 +124,12 @@ bool ExtIpv4Socket::notify(int fd)
     if (n < 0)
         throw cRuntimeError("Calling recvfrom failed: %d", n);
     auto data = makeShared<BytesChunk>(static_cast<const uint8_t *>(buffer), n);
-    std::string completePacketName = packetName + std::to_string(numReceived);
-    auto packet = new Packet(completePacketName.c_str(), data);
+    auto packet = new Packet(nullptr, data);
     auto interfaceEntry = check_and_cast<InterfaceEntry *>(getContainingNicModule(this));
     packet->addTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
     packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+    packet->setName(packetPrinter.printPacketToString(packet, packetNameFormat).c_str());
     emit(packetReceivedSignal, packet);
     send(packet, "upperLayerOut");
     emit(packetSentToUpperSignal, packet);

@@ -50,7 +50,7 @@ void ExtEthernetTapDeviceFileIo::initialize(int stage)
     cSimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         device = par("device").stdstringValue();
-        packetName = par("packetName").stdstringValue();
+        packetNameFormat = par("packetNameFormat");
         rtScheduler = check_and_cast<RealTimeScheduler *>(getSimulation()->getScheduler());
         openTap(device);
         numSent = numReceived = 0;
@@ -151,9 +151,8 @@ bool ExtEthernetTapDeviceFileIo::notify(int fd)
     }
     else if (nread > 0) {
         ASSERT (nread > 4);
-        std::string completePacketName = packetName + std::to_string(numReceived);
         // buffer[0..1]: flags, buffer[2..3]: ethertype
-        Packet *packet = new Packet(completePacketName.c_str(), makeShared<BytesChunk>(buffer + 4, nread - 4));
+        Packet *packet = new Packet(nullptr, makeShared<BytesChunk>(buffer + 4, nread - 4));
         EtherEncap::addPaddingAndFcs(packet, FCS_COMPUTED);
         packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
         packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);

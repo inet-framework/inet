@@ -19,6 +19,7 @@ package inet.emulation.networklayer.ipv4;
 
 simple ExtIpv4TunDeviceFileIo
 {
+        string packetNameFormat = default("Ext");
     gates:
         input lowerLayerIn @labels(EtherFrame);
         output lowerLayerOut @labels(EtherFrame);

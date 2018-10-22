@@ -20,6 +20,7 @@ package inet.emulation.networklayer.ipv4;
 simple ExtIpv4Socket
 {
     parameters:
+        string packetName = default("Ext-%p-%t-%n");
         @display("i=block/rxtx");
         @signal[packetSentToUpper](type=Packet);
         @signal[packetReceivedFromUpper](type=Packet);
