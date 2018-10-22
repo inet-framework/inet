@@ -86,6 +86,14 @@ void InterfaceEntry::initialize(int stage)
     if (stage == INITSTAGE_LOCAL)
         setInterfaceName(utils::stripnonalnum(getFullName()).c_str());
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
+        if (hasPar("address")) {
+            const char *address = par("address");
+            if (!strcmp(address, "auto"))
+                setMacAddress(MacAddress::generateAutoAddress());
+            else
+                setMacAddress(MacAddress(address));
+            setInterfaceToken(macAddr.formInterfaceIdentifier());
+        }
         if (auto interfaceTable = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this))
             interfaceTable->addInterface(this);
         inet::registerInterface(*this, gate("upperLayerIn"), gate("upperLayerOut"));
