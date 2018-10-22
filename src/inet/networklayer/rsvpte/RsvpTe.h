@@ -26,7 +26,7 @@
 #include "inet/networklayer/rsvpte/RsvpHelloMsg_m.h"
 #include "inet/networklayer/rsvpte/SignallingMsg_m.h"
 #include "inet/networklayer/rsvpte/IRsvpClassifier.h"
-#include "inet/routing/base/RoutingLifecycleBase.h"
+#include "inet/routing/base/RoutingProtocolBase.h"
 
 namespace inet {
 
@@ -39,7 +39,7 @@ class LibTable;
 /**
  * TODO documentation
  */
-class INET_API RsvpTe : public RoutingLifecycleBase, public IScriptable
+class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
 {
   protected:
 

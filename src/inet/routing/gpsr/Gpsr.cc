@@ -73,7 +73,7 @@ void Gpsr::initialize(int stage)
     if (stage == INITSTAGE_ROUTING_PROTOCOLS)
         addressType = getSelfAddress().getAddressType();
 
-    RoutingLifecycleBase::initialize(stage);
+    RoutingProtocolBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         // Gpsr parameters

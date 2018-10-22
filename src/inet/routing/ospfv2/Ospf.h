@@ -24,7 +24,7 @@
 
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
-#include "inet/routing/base/RoutingLifecycleBase.h"
+#include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/routing/ospfv2/OspfPacket_m.h"
 #include "inet/routing/ospfv2/router/OspfRouter.h"
 
@@ -35,7 +35,7 @@ namespace ospf {
 /**
  * Implements the OSPFv2 routing protocol. See the NED file for more information.
  */
-class Ospf : public RoutingLifecycleBase, protected cListener
+class Ospf : public RoutingProtocolBase, protected cListener
 {
   private:
     cModule *host = nullptr;    // the host module that owns this module

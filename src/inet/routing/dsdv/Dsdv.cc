@@ -45,7 +45,7 @@ Dsdv::~Dsdv()
 
 void Dsdv::initialize(int stage)
 {
-    RoutingLifecycleBase::initialize(stage);
+    RoutingProtocolBase::initialize(stage);
 
     //reads from omnetpp.ini
     if (stage == INITSTAGE_LOCAL)

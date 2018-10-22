@@ -19,7 +19,7 @@
 
 #include "inet/networklayer/ted/Ted_m.h"
 #include "inet/networklayer/rsvpte/IntServ_m.h"
-#include "inet/routing/base/RoutingLifecycleBase.h"
+#include "inet/routing/base/RoutingProtocolBase.h"
 
 namespace inet {
 
@@ -33,7 +33,7 @@ class InterfaceEntry;
  *
  * See NED file for more info.
  */
-class INET_API Ted : public RoutingLifecycleBase
+class INET_API Ted : public RoutingProtocolBase
 {
   public:
     /**

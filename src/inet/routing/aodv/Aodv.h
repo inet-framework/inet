@@ -26,7 +26,7 @@
 #include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/routing/aodv/AodvControlPackets_m.h"
 #include "inet/routing/aodv/AodvRouteData.h"
-#include "inet/routing/base/RoutingLifecycleBase.h"
+#include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 #include <map>
@@ -39,7 +39,7 @@ namespace aodv {
  * in the IP-layer required by this protocol.
  */
 
-class INET_API Aodv : public RoutingLifecycleBase, public NetfilterBase::HookBase, public cListener
+class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase, public cListener
 {
   protected:
     /*

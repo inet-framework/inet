@@ -27,7 +27,7 @@
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
-#include "inet/routing/base/RoutingLifecycleBase.h"
+#include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/routing/gpsr/Gpsr_m.h"
 #include "inet/routing/gpsr/PositionTable.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
@@ -45,7 +45,7 @@ namespace inet {
 // TODO: implement position piggybacking that is all packets should carry the position of the sender, all packets act as a beacon and reset beacon timer
 // TODO: implement promiscuous mode, all receivers should process all packets with respect to neighbor positions
 // KLUDGE: implement position registry protocol instead of using a global variable
-class INET_API Gpsr : public RoutingLifecycleBase, public cListener, public NetfilterBase::HookBase
+class INET_API Gpsr : public RoutingProtocolBase, public cListener, public NetfilterBase::HookBase
 {
   private:
     // GPSR parameters

@@ -41,7 +41,7 @@ void Aodv::initialize(int stage)
     if (stage == INITSTAGE_ROUTING_PROTOCOLS)
         addressType = getSelfIPAddress().getAddressType();  // needed for handleNodeStart()
 
-    RoutingLifecycleBase::initialize(stage);
+    RoutingProtocolBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         lastBroadcastTime = SIMTIME_ZERO;

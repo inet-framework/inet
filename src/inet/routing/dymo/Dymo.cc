@@ -84,10 +84,10 @@ Dymo::~Dymo()
 void Dymo::initialize(int stage)
 {
     if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
-        addressType = getSelfAddress().getAddressType();    // addressType need for handleNodeStart()  and handleNodeStart() called by RoutingLifecycleBase::initialize();
+        addressType = getSelfAddress().getAddressType();    // addressType need for handleNodeStart()  and handleNodeStart() called by RoutingProtocolBase::initialize();
     }
 
-    RoutingLifecycleBase::initialize(stage);
+    RoutingProtocolBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         // Dymo parameters from RFC

@@ -25,7 +25,7 @@
 #include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
-#include "inet/routing/base/RoutingLifecycleBase.h"
+#include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/routing/rip/RipRouteData.h"
 
 namespace inet {
@@ -88,7 +88,7 @@ struct RipInterfaceEntry
  * 2. There is no merging of subnet routes. RFC 2453 3.7 suggests that subnetted network routes should
  *    not be advertised outside the subnetted network.
  */
-class INET_API Rip : public RoutingLifecycleBase, protected cListener
+class INET_API Rip : public RoutingProtocolBase, protected cListener
 {
     enum Mode { RIPv2, RIPng };
     typedef std::vector<RipInterfaceEntry> InterfaceVector;

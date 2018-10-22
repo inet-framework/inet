@@ -25,7 +25,7 @@
 #include "inet/common/socket/SocketMap.h"
 #include "inet/networklayer/ldp/LdpPacket_m.h"
 #include "inet/networklayer/mpls/IIngressClassifier.h"
-#include "inet/routing/base/RoutingLifecycleBase.h"
+#include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 
@@ -52,7 +52,7 @@ class Ted;
 /**
  * LDP (rfc 3036) protocol implementation.
  */
-class INET_API Ldp : public RoutingLifecycleBase, public TcpSocket::ICallback, public UdpSocket::ICallback, public IIngressClassifier, public cListener
+class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::ICallback, public UdpSocket::ICallback, public IIngressClassifier, public cListener
 {
   public:
 

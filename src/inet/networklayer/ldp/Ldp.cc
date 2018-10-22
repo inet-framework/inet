@@ -100,7 +100,7 @@ Ldp::~Ldp()
 
 void Ldp::initialize(int stage)
 {
-    RoutingLifecycleBase::initialize(stage);
+    RoutingProtocolBase::initialize(stage);
 
     //FIXME move bind() and listen() calls to a new startModule() function, and call it from initialize() and from handleOperationStage()
     //FIXME register to InterfaceEntry changes, for detecting the interface add/delete, and detecting multicast config changes:

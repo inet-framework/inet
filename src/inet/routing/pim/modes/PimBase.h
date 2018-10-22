@@ -25,7 +25,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
-#include "inet/routing/base/RoutingLifecycleBase.h"
+#include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/routing/pim/PimPacket_m.h"
 #include "inet/routing/pim/tables/PimInterfaceTable.h"
 #include "inet/routing/pim/tables/PimNeighborTable.h"
@@ -35,7 +35,7 @@ namespace inet {
 /**
  * Base class of PimSm and PimDm modules.
  */
-class INET_API PimBase : public RoutingLifecycleBase
+class INET_API PimBase : public RoutingProtocolBase
 {
   protected:
 

@@ -67,7 +67,7 @@ RsvpTe::~RsvpTe()
 
 void RsvpTe::initialize(int stage)
 {
-    RoutingLifecycleBase::initialize(stage);
+    RoutingProtocolBase::initialize(stage);
     // TODO: INITSTAGE
     if (stage == INITSTAGE_LOCAL) {
         tedmod = getModuleFromPar<Ted>(par("tedModule"), this);

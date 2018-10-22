@@ -48,7 +48,7 @@ Ospf::~Ospf()
 
 void Ospf::initialize(int stage)
 {
-    RoutingLifecycleBase::initialize(stage);
+    RoutingProtocolBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         host = getContainingNode(this);

@@ -99,7 +99,7 @@ simsignal_t Rip::numRoutesSignal = registerSignal("numRoutes");
 
 void Rip::initialize(int stage)
 {
-    RoutingLifecycleBase::initialize(stage);
+    RoutingProtocolBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         host = getContainingNode(this);
