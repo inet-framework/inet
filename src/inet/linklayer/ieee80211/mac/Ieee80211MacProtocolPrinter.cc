@@ -38,92 +38,94 @@ void Ieee80211MacProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Pro
             context.sourceColumn << twoAddressHeader->getTransmitterAddress();
         switch (macHeader->getType()) {
             case ST_ASSOCIATIONREQUEST:
-                context.infoColumn << " assoc req";    //TODO
+                context.typeColumn << "AssocReq";    //TODO
                 break;
 
             case ST_ASSOCIATIONRESPONSE:
-                context.infoColumn << " assoc resp";    //TODO
+                context.typeColumn << "AssocResp";    //TODO
                 break;
 
             case ST_REASSOCIATIONREQUEST:
-                context.infoColumn << " reassoc req";    //TODO
+                context.typeColumn << "ReassocReq";    //TODO
                 break;
 
             case ST_REASSOCIATIONRESPONSE:
-                context.infoColumn << " reassoc resp";    //TODO
+                context.typeColumn << "ReassocResp";    //TODO
                 break;
 
             case ST_PROBEREQUEST:
-                context.infoColumn << " probe request";    //TODO
+                context.typeColumn << "ProbeRequest";    //TODO
                 break;
 
             case ST_PROBERESPONSE:
-                context.infoColumn << " probe response";    //TODO
+                context.typeColumn << "ProbeResponse";    //TODO
                 break;
 
             case ST_BEACON:
-                context.infoColumn << "beacon";    //TODO
+                context.typeColumn << "Beacon";    //TODO
                 break;
 
             case ST_ATIM:
-                context.infoColumn << " atim";    //TODO
+                context.typeColumn << "Atim";    //TODO
                 break;
 
             case ST_DISASSOCIATION:
-                context.infoColumn << " disassoc";    //TODO
+                context.typeColumn << "Disassoc";    //TODO
                 break;
 
             case ST_AUTHENTICATION:
-                context.infoColumn << " auth";    //TODO
+                context.typeColumn << "Auth";    //TODO
                 break;
 
             case ST_DEAUTHENTICATION:
-                context.infoColumn << " deauth";    //TODO
+                context.typeColumn << "Deauth";    //TODO
                 break;
 
             case ST_ACTION:
-                context.infoColumn << " action";    //TODO
+                context.typeColumn << "Action";    //TODO
                 break;
 
             case ST_NOACKACTION:
-                context.infoColumn << " noackaction";    //TODO
+                context.typeColumn << "Noackaction";    //TODO
                 break;
 
             case ST_PSPOLL:
-                context.infoColumn << " pspoll";    //TODO
+                context.typeColumn << "Pspoll";    //TODO
             break;
 
             case ST_RTS: {
-                context.infoColumn << "RTS";
+                context.typeColumn << "RTS";
                 break;
             }
             case ST_CTS:
-                context.infoColumn << "CTS" << macHeader->getReceiverAddress();
+                context.typeColumn << "CTS";
+                context.infoColumn << macHeader->getReceiverAddress();
                 break;
 
             case ST_ACK:
-                context.infoColumn << "ACK" << macHeader->getReceiverAddress();
+                context.typeColumn << "ACK";
+                context.infoColumn << macHeader->getReceiverAddress();
                 break;
 
             case ST_BLOCKACK_REQ:
-                context.infoColumn << "BlockAckReq";    //TODO
+                context.typeColumn << "BlockAckReq";    //TODO
                 break;
 
             case ST_BLOCKACK:
-                context.infoColumn << "BlockAck";    //TODO
+                context.typeColumn << "BlockAck";    //TODO
                 break;
 
             case ST_DATA:
             case ST_DATA_WITH_QOS:
-                context.infoColumn << "DATA";    //TODO
+                context.typeColumn << "DATA";    //TODO
                 break;
 
             case ST_LBMS_REQUEST:
-                context.infoColumn << " lbms req";    //TODO
+                context.typeColumn << "LbmsReq";    //TODO
                 break;
 
             case ST_LBMS_REPORT:
-                context.infoColumn << " lbms report";    //TODO
+                context.typeColumn << "LbmsReport";    //TODO
                 break;
 
             default:
