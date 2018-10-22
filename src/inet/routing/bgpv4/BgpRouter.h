@@ -47,7 +47,6 @@ private:
     bool redistributeInternal = false;
     bool redistributeRip = false;
     bool redistributeOspf = false;
-    bool nextHopSelf = false;
     SocketMap _socketMap;
     SessionId _currSessionId = 0;
     std::map<SessionId, BgpSession *> _BGPSessions;
@@ -81,8 +80,6 @@ private:
     void setRedistributeRip(bool x) { this->redistributeRip = x; }
     bool getRedistributeOspf() { return redistributeOspf; }
     void setRedistributeOspf(bool x) { this->redistributeOspf = x; }
-    void setNextHopSelf(bool x) { this->nextHopSelf = x; }
-    bool getNextHopSelf() { return nextHopSelf; }
     void printSessionSummary();
     void addWatches();
     void recordStatistics();
@@ -93,6 +90,7 @@ private:
     void addToAdvertiseList(Ipv4Address address);
     void addToPrefixList(std::string nodeName, BgpRoutingTableEntry *entry);
     void addToAsList(std::string nodeName, AsId id);
+    void setNextHopSelf(Ipv4Address peer, bool nextHopSelf);
     bool isExternalAddress(const Ipv4Route &rtEntry);
     void processMessageFromTCP(cMessage *msg);
 

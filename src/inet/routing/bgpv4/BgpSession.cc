@@ -217,6 +217,7 @@ std::ostream& operator<<(std::ostream& out, const BgpSession& entry)
             << "established: " << (entry.isEstablished() == true ? "true" : "false") << " "
             << "state: " << entry.getFSM().currentState().name() << " "
             << "peer: " << entry.getPeerAddr().str(false) << " "
+            << "nextHopSelf: " << (entry.getNextHopSelf() == true ? "true" : "false") << " "
             << "startEventTime: " << entry.getStartEventTime() << " "
             << "connectionRetryTime: " << entry.getConnectionRetryTime() << " "
             << "holdTime: " << entry.getHoldTime() << " "

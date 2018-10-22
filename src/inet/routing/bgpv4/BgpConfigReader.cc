@@ -52,9 +52,6 @@ void BgpConfigReader::loadConfigFromXML(cXMLElement *bgpConfig, BgpRouter *bgpRo
 
     bgpRouter->setAsId(myAsId);
 
-    bool nextHopSelf = bgpModule->par("nextHopSelf").boolValue();
-    bgpRouter->setNextHopSelf(nextHopSelf);
-
     // load EGP Session informations
     cXMLElementList sessionList = bgpConfig->getElementsByTagName("Session");
     simtime_t saveStartDelay = delayTab[3];
@@ -70,7 +67,7 @@ void BgpConfigReader::loadConfigFromXML(cXMLElement *bgpConfig, BgpRouter *bgpRo
 
     // get all BGP speakers in my AS
     cXMLElementList ASConfig = ASNode->getChildren();
-    auto routerInSameASList = loadASConfig(ASConfig);
+    auto routerInSameASList = findInternalPeers(ASConfig);
 
     // create an IGP Session with each BGP speaker in my AS
     if (routerInSameASList.size()) {
@@ -83,6 +80,9 @@ void BgpConfigReader::loadConfigFromXML(cXMLElement *bgpConfig, BgpRouter *bgpRo
             bgpRouter->setSocketListen(newSessionID);
         }
     }
+
+    // load BGP speaker configs
+    loadASConfig(ASConfig);
 }
 
 void BgpConfigReader::loadTimerConfig(cXMLElementList& timerConfig, simtime_t *delayTab)
@@ -156,19 +156,29 @@ void BgpConfigReader::loadSessionConfig(cXMLElementList& sessionList, simtime_t 
     }
 }
 
-std::vector<const char *> BgpConfigReader::loadASConfig(cXMLElementList& ASConfig)
+std::vector<const char *> BgpConfigReader::findInternalPeers(cXMLElementList& ASConfig)
 {
-    // create deny Lists
     std::vector<const char *> routerInSameASList;
-
     for (auto & elem : ASConfig) {
-        std::string nodeName = (elem)->getTagName();
+        std::string nodeName = elem->getTagName();
         if (nodeName == "Router") {
             Ipv4Address internalAddr = Ipv4Address(elem->getAttribute("interAddr"));
             if (isInInterfaceTable(ift, internalAddr) == -1)
                 routerInSameASList.push_back(elem->getAttribute("interAddr"));
-            else {
+            else
                 bgpRouter->setInternalAddress(internalAddr);
+        }
+    }
+    return routerInSameASList;
+}
+
+void BgpConfigReader::loadASConfig(cXMLElementList& ASConfig)
+{
+    for (auto & elem : ASConfig) {
+        std::string nodeName = elem->getTagName();
+        if (nodeName == "Router") {
+            Ipv4Address internalAddr = Ipv4Address(elem->getAttribute("interAddr"));
+            if (isInInterfaceTable(ift, internalAddr) != -1) {
                 bgpRouter->setRedistributeInternal(getBoolAttrOrPar(*elem, "redistributeInternal"));
                 bgpRouter->setRedistributeOspf(getBoolAttrOrPar(*elem, "redistributeOspf"));
                 bgpRouter->setRedistributeRip(getBoolAttrOrPar(*elem, "redistributeRip"));
@@ -180,15 +190,23 @@ std::vector<const char *> BgpConfigReader::loadASConfig(cXMLElementList& ASConfi
                         if(address && *address)
                             bgpRouter->addToAdvertiseList(Ipv4Address(address));
                         else
-                            throw cRuntimeError("BGP Error: attribute 'address' is mandatory");
+                            throw cRuntimeError("BGP Error: attribute 'address' is mandatory in 'Network'");
                     }
+                    else if(nodeName == "Neighbor") {
+                        const char *peer = entry->getAttribute("address");
+                        if(peer && *peer) {
+                            bool nextHopSelf = getBoolAttrOrPar(*entry, "nextHopSelf");
+                            bgpRouter->setNextHopSelf(Ipv4Address(peer), nextHopSelf);
+                        }
+                        else
+                            throw cRuntimeError("BGP Error: attribute 'address' is mandatory in 'Neighbor'");
+                    }
+                    else
+                        throw cRuntimeError("BGP Error: attribute '%s' is invalid in 'Router'", nodeName.c_str());
                 }
             }
-
-            continue;
         }
-
-        if (nodeName == "DenyRoute" || nodeName == "DenyRouteIN" || nodeName == "DenyRouteOUT") {
+        else if (nodeName == "DenyRoute" || nodeName == "DenyRouteIN" || nodeName == "DenyRouteOUT") {
             BgpRoutingTableEntry *entry = new BgpRoutingTableEntry();     //FIXME Who will delete this entry?
             entry->setDestination(Ipv4Address((elem)->getAttribute("Address")));
             entry->setNetmask(Ipv4Address((elem)->getAttribute("Netmask")));
@@ -201,7 +219,6 @@ std::vector<const char *> BgpConfigReader::loadASConfig(cXMLElementList& ASConfi
         else
             throw cRuntimeError("BGP Error: unknown element named '%s' for AS %u", nodeName.c_str(), bgpRouter->getAsId());
     }
-    return routerInSameASList;
 }
 
 int BgpConfigReader::isInInterfaceTable(IInterfaceTable *ifTable, Ipv4Address addr)
