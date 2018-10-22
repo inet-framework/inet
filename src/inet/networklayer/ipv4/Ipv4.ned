@@ -17,6 +17,15 @@
 
 package inet.networklayer.ipv4;
 
+moduleinterface IIpv4
+{
+    gates:
+        input transportIn @labels(Ipv4ControlInfo/down,TcpHeader,UdpHeader,SctpHeader);
+        output transportOut @labels(Ipv4ControlInfo/up,TcpHeader,UdpHeader,SctpHeader);
+        input queueIn @labels(Ipv4Header,ArpPacket,Ieee802Ctrl);
+        output queueOut @labels(Ipv4Header,ArpPacket,Ieee802Ctrl);
+}
+
 //
 // Implements the IPv4 protocol. The protocol header is represented
 // by the ~Ipv4Header message class.
@@ -79,7 +88,7 @@ package inet.networklayer.ipv4;
 //
 // @author Andras Varga
 //
-simple Ipv4
+simple Ipv4 like IIpv4
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
