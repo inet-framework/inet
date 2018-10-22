@@ -122,14 +122,9 @@ const MacAddress& Ieee80211Mac::isInterfaceRegistered()
 
 void Ieee80211Mac::configureInterfaceEntry()
 {
-    MacAddress address = parseMacAddressParameter(par("address"));
-    //TODO the mib module should use the mac address from InterfaceEntry
-    mib->address = address;
-    //TODO the mib module should use the mac address from InterfaceEntry
     InterfaceEntry *e = getContainingNicModule(this);
-    // address
-    e->setMacAddress(address);
-    e->setInterfaceToken(address.formInterfaceIdentifier());
+    //TODO the mib module should use the mac address from InterfaceEntry
+    mib->address = e->getMacAddress();
     e->setMtu(par("mtu"));
     // capabilities
     e->setBroadcast(true);
