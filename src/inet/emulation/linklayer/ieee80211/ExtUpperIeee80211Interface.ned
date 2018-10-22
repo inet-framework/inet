@@ -18,6 +18,7 @@
 package inet.emulation.linklayer.ieee80211;
 
 import inet.emulation.common.ExtInterface;
+import inet.emulation.linklayer.ethernet.ExtEthernetTapDeviceFileIo;
 import inet.linklayer.common.IIeee8021dQosClassifier;
 import inet.linklayer.contract.IWirelessInterface;
 import inet.linklayer.ieee80211.IIeee80211Mac;
@@ -55,7 +56,7 @@ module ExtUpperIeee80211Interface extends ExtInterface like IWirelessInterface
             parameters:
                 @display("p=100,100;is=s");
         }
-        tap: ExtIeee80211TapDeviceFileIo {
+        tap: ExtEthernetTapDeviceFileIo {
             parameters:
                 @display("p=250,100");
         }
