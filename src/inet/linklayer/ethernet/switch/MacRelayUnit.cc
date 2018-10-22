@@ -135,13 +135,11 @@ void MacRelayUnit::handleAndDispatchFrame(Packet *packet)
 void MacRelayUnit::start()
 {
     macTable->clearTable();
-    isOperational = true;
 }
 
 void MacRelayUnit::stop()
 {
     macTable->clearTable();
-    isOperational = false;
 }
 
 void MacRelayUnit::learn(MacAddress srcAddr, int arrivalInterfaceId)

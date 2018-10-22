@@ -69,11 +69,6 @@ void EtherMacFullDuplex::initializeFlags()
 
 void EtherMacFullDuplex::handleMessageWhenUp(cMessage *msg)
 {
-    if (!isOperational) {
-        handleMessageWhenDown(msg);
-        return;
-    }
-
     if (channelsDiffer)
         readChannelParameters(true);
 
