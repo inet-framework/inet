@@ -23,10 +23,10 @@
 
 namespace inet {
 
-class INET_API RoutingLifecycleBase : public OperationalBase
+class INET_API RoutingProtocolBase : public OperationalBase
 {
   public:
-    RoutingLifecycleBase() {}
+    RoutingProtocolBase() {}
 
   protected:
     virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_ROUTING_PROTOCOLS; }
