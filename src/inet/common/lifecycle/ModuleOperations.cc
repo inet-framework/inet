@@ -17,23 +17,16 @@
 // Author: Levente Meszaros <levy@omnetpp.org>, Andras Varga (andras@omnetpp.org)
 //
 
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/ModuleAccess.h"
 
 namespace inet {
 
-Register_Class(NodeStartOperation);
-Register_Class(NodeShutdownOperation);
-Register_Class(NodeCrashOperation);
-//Register_Class(NodeSuspendOperation);
-
-void NodeOperation::initialize(cModule *module, StringMap& params)
-{
-    if (!isNetworkNode(module))
-        throw cRuntimeError("Node operations may only be applied to network nodes (host, router, etc.)");
-
-    LifecycleOperation::initialize(module, params);
-}
+Register_Class(ModuleStartOperation);
+Register_Class(ModuleStopOperation);
+Register_Class(ModuleCrashOperation);
+Register_Class(ModuleSuspendOperation);
+Register_Class(ModuleResumeOperation);
 
 } // namespace inet
 
