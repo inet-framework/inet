@@ -41,6 +41,7 @@ module Ipv4NetworkLayer like INetworkLayer
         *.arpModule = default(absPath(".arp"));
         *.icmpModule = default(absPath(".icmp"));
         arp.respondToProxyARP = proxyARP;
+        ip.useProxyARP = true; // as routes with unspecified next-hop addr are quite common
         @display("i=block/fork");
 
     gates:
@@ -78,9 +79,8 @@ module Ipv4NetworkLayer like INetworkLayer
             parameters:
                 @display("p=550,300;b=600,5");
         }
-        ip: Ipv4 {
+        ip: <default("Ipv4")> like IIpv4 {
             parameters:
-                useProxyARP = true; // as routes with unspecified next-hop addr are quite common
                 @display("p=700,400;q=queue");
         }
         arp: <default("Arp")> like IArp {
