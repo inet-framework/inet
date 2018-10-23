@@ -81,7 +81,7 @@ void BgpConfigReader::loadConfigFromXML(cXMLElement *bgpConfig, BgpRouter *bgpRo
         }
     }
 
-    // load BGP speaker configs
+    bgpRouter->setDefaultConfig();
     loadASConfig(ASConfig);
 }
 
