@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <algorithm>
 #include "inet/routing/bgpv4/BgpRouter.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/routing/bgpv4/BgpSession.h"
@@ -141,8 +142,15 @@ void BgpRouter::addToAdvertiseList(Ipv4Address address)
     if(!routeFound)
         throw cRuntimeError("Network address '%s' is not found in the routing table of %s", address.str(false).c_str(), bgpModule->getOwner()->getFullName());
 
+    auto position = std::find_if(advertiseList.begin(), advertiseList.end(),
+            [&](const Ipv4Address m) -> bool { return (m == address); });
+    if(position != advertiseList.end())
+        throw cRuntimeError("Network address '%s' is already added to the advertised list of %s", address.str(false).c_str(), bgpModule->getOwner()->getFullName());
+    advertiseList.push_back(address);
+
     BgpRoutingTableEntry *BGPEntry = new BgpRoutingTableEntry(rtEntry);
     BGPEntry->addAS(myAsId);
+    BGPEntry->setPathType(IGP);
     bgpRoutingTable.push_back(BGPEntry);
 }
 
@@ -453,8 +461,10 @@ unsigned char BgpRouter::decisionProcess(const BgpUpdateMessage& msg, BgpRouting
         entry->setLocalPreference(msg.getPathAttributeList(0).getLocalPref(0).getValue());
 
     BgpSessionType type = _BGPSessions[sessionIndex]->getType();
-    if(type == IGP)
+    if(type == IGP) {
         entry->setAdminDist(Ipv4Route::dBGPInternal);
+        entry->setIBgpLearned(true);
+    }
     else if(type == EGP)
         entry->setAdminDist(Ipv4Route::dBGPExternal);
     else
@@ -552,10 +562,11 @@ bool BgpRouter::tieBreakingProcess(BgpRoutingTableEntry *oldEntry, BgpRoutingTab
 
     /* Remove from consideration all routes that are not tied for
          having the lowest Origin number in their Origin attribute.*/
-    //if (entry->getPathType() < oldEntry->getPathType()) {
-   //     deleteBGPRoutingEntry(oldEntry);
-  //      return false;
-  //  }
+    if (entry->getPathType() < oldEntry->getPathType()) {
+        deleteBGPRoutingEntry(oldEntry);
+        return false;
+    }
+
     return true;
 }
 
@@ -584,7 +595,7 @@ void BgpRouter::updateSendProcess(const unsigned char type, SessionId sessionInd
 
         // BGP split horizon: skip if this prefix is learned over I-BGP and we are
         // advertising it to another internal peer.
-        if(entry->getPathType() == IGP && sType == IGP && elem.second->getType() == IGP) {
+        if(entry->isIBgpLearned() && sType == IGP && elem.second->getType() == IGP) {
             EV_INFO << "BGP Split Horizon: prevent advertisement of network " <<
                     entry->getDestination() << "\\" << entry->getNetmask();
             continue;
@@ -636,10 +647,13 @@ void BgpRouter::updateSendProcess(const unsigned char type, SessionId sessionInd
             }
             else
                 content.getNextHopForUpdate().setValue(entry->getGateway());
-            content.getOriginForUpdate().setValue((elem).second->getType());
+
+            content.getOriginForUpdate().setValue((BgpSessionType)entry->getPathType());
+
             Ipv4Address netMask = entry->getNetmask();
             NLRI.prefix = entry->getDestination().doAnd(netMask);
             NLRI.length = (unsigned char)netMask.getNetmaskLength();
+
             (elem).second->sendUpdateMessage(content, NLRI);
         }
     }

@@ -34,6 +34,7 @@ private:
     RoutingPathType _pathType = INCOMPLETE;
     std::vector<AsId> _ASList;
     int localPreference = 0;
+    bool IBGP_learned = false;
 
   public:
     BgpRoutingTableEntry(void);
@@ -48,6 +49,8 @@ private:
     AsId getAS(unsigned int index) const { return _ASList[index]; }
     int getLocalPreference(void) const { return localPreference; }
     void setLocalPreference(int l) { localPreference = l; }
+    bool isIBgpLearned(void) { return IBGP_learned; }
+    void setIBgpLearned(bool i) { IBGP_learned = i;}
     virtual std::string str() const;
 };
 
@@ -95,7 +98,7 @@ inline std::ostream& operator<<(std::ostream& out, BgpRoutingTableEntry& entry)
     out << " nextHop: " << entry.getGateway().str(false)
         << " cost: " << entry.getMetric()
         << " if: " << entry.getInterfaceName()
-        << " pathType: " << BgpRoutingTableEntry::getPathTypeString(entry.getPathType())
+        << " origin: " << BgpRoutingTableEntry::getPathTypeString(entry.getPathType())
         << " localPref: " << ((entry.getPathType() == IGP) ? std::to_string(entry.getLocalPreference()) : "<empty>")
         << " ASlist: ";
     for (uint32_t i = 0; i < entry.getASCount(); i++)
@@ -132,7 +135,7 @@ inline std::string BgpRoutingTableEntry::str() const
     else
         out << getInterfaceName();
 
-    out << " pathType: " << BgpRoutingTableEntry::getPathTypeString(_pathType)
+    out << " origin: " << BgpRoutingTableEntry::getPathTypeString(_pathType)
     << " localPref: " << ((_pathType == IGP) ? std::to_string(getLocalPreference()) : "<empty>")
     << " ASlist: ";
     for (auto &element : _ASList)

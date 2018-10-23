@@ -56,6 +56,7 @@ private:
 
     typedef std::vector<BgpRoutingTableEntry *> RoutingTableEntryVector;
     RoutingTableEntryVector bgpRoutingTable;    // The BGP routing table
+    std::vector<Ipv4Address> advertiseList;
     RoutingTableEntryVector _prefixListIN;
     RoutingTableEntryVector _prefixListOUT;
     RoutingTableEntryVector _prefixListINOUT;   // store union of pointers in _prefixListIN and _prefixListOUT
