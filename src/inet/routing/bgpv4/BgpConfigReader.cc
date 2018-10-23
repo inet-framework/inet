@@ -197,6 +197,9 @@ void BgpConfigReader::loadASConfig(cXMLElementList& ASConfig)
                         if(peer && *peer) {
                             bool nextHopSelf = getBoolAttrOrPar(*entry, "nextHopSelf");
                             bgpRouter->setNextHopSelf(Ipv4Address(peer), nextHopSelf);
+
+                            int localPreference = getIntAttrOrPar(*entry, "localPreference");
+                            bgpRouter->setLocalPreference(Ipv4Address(peer), localPreference);
                         }
                         else
                             throw cRuntimeError("BGP Error: attribute 'address' is mandatory in 'Neighbor'");
@@ -276,6 +279,14 @@ bool BgpConfigReader::getBoolAttrOrPar(const cXMLElement& ifConfig, const char *
             return false;
         throw cRuntimeError("Invalid boolean attribute %s = '%s' at %s", name, attrStr, ifConfig.getSourceLocation());
     }
+    return bgpModule->par(name);
+}
+
+int BgpConfigReader::getIntAttrOrPar(const cXMLElement& ifConfig, const char *name) const
+{
+    const char *attrStr = ifConfig.getAttribute(name);
+    if (attrStr && *attrStr)
+        return atoi(attrStr);
     return bgpModule->par(name);
 }
 

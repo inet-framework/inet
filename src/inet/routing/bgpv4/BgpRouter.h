@@ -91,6 +91,7 @@ private:
     void addToPrefixList(std::string nodeName, BgpRoutingTableEntry *entry);
     void addToAsList(std::string nodeName, AsId id);
     void setNextHopSelf(Ipv4Address peer, bool nextHopSelf);
+    void setLocalPreference(Ipv4Address peer, int localPref);
     bool isExternalAddress(const Ipv4Route &rtEntry);
     void processMessageFromTCP(cMessage *msg);
 

@@ -72,6 +72,7 @@ struct SessionInfo
     Ipv4Address routerID;
     Ipv4Address peerAddr;
     bool nextHopSelf = false;
+    int localPreference = 0;
     InterfaceEntry *linkIntf = nullptr;
     TcpSocket *socket = nullptr;
     TcpSocket *socketListen = nullptr;

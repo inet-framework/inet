@@ -55,6 +55,7 @@ private:
     int isInInterfaceTable(IInterfaceTable *ifTable, std::string ifName);
     unsigned int calculateStartDelay(int rtListSize, unsigned char rtPosition, unsigned char rtPeerPosition);
     bool getBoolAttrOrPar(const cXMLElement& ifConfig, const char *name) const;
+    int getIntAttrOrPar(const cXMLElement& ifConfig, const char *name) const;
 };
 
 } // namespace bgp
