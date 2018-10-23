@@ -128,6 +128,17 @@ void BgpRouter::setSocketListen(SessionId id)
     _BGPSessions[id]->setSocketListen(socketListen);
 }
 
+void BgpRouter::setDefaultConfig()
+{
+    bool nextHopSelf = bgpModule->par("nextHopSelf").boolValue();
+    int localPreference = bgpModule->par("localPreference").intValue();
+
+    for(auto &session : _BGPSessions) {
+        session.second->setNextHopSelf(nextHopSelf);
+        session.second->setLocalPreference(localPreference);
+    }
+}
+
 void BgpRouter::addToAdvertiseList(Ipv4Address address)
 {
     bool routeFound = false;
@@ -151,6 +162,7 @@ void BgpRouter::addToAdvertiseList(Ipv4Address address)
     BgpRoutingTableEntry *BGPEntry = new BgpRoutingTableEntry(rtEntry);
     BGPEntry->addAS(myAsId);
     BGPEntry->setPathType(IGP);
+    BGPEntry->setLocalPreference(bgpModule->par("localPreference").intValue());
     bgpRoutingTable.push_back(BGPEntry);
 }
 
@@ -499,6 +511,8 @@ unsigned char BgpRouter::decisionProcess(const BgpUpdateMessage& msg, BgpRouting
                 BGPEntry->addAS(myAsId);
                 BGPEntry->setPathType(IGP);
                 BGPEntry->setAdminDist(Ipv4Route::dBGPInternal);
+                BGPEntry->setIBgpLearned(true);
+                BGPEntry->setLocalPreference(entry->getLocalPreference());
                 rt->addRoute(BGPEntry);
                 // Note: No need to delete the existing route. Let the administrative distance decides.
                 // rt->deleteRoute(oldEntry);

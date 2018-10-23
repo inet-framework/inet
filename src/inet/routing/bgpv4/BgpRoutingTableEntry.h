@@ -98,9 +98,10 @@ inline std::ostream& operator<<(std::ostream& out, BgpRoutingTableEntry& entry)
     out << " nextHop: " << entry.getGateway().str(false)
         << " cost: " << entry.getMetric()
         << " if: " << entry.getInterfaceName()
-        << " origin: " << BgpRoutingTableEntry::getPathTypeString(entry.getPathType())
-        << " localPref: " << ((entry.getPathType() == IGP) ? std::to_string(entry.getLocalPreference()) : "<empty>")
-        << " ASlist: ";
+        << " origin: " << BgpRoutingTableEntry::getPathTypeString(entry.getPathType());
+    if(entry.isIBgpLearned())
+        out << " localPref: " << entry.getLocalPreference();
+    out << " ASlist: ";
     for (uint32_t i = 0; i < entry.getASCount(); i++)
         out << entry.getAS(i) << ' ';
 
@@ -135,9 +136,10 @@ inline std::string BgpRoutingTableEntry::str() const
     else
         out << getInterfaceName();
 
-    out << " origin: " << BgpRoutingTableEntry::getPathTypeString(_pathType)
-    << " localPref: " << ((_pathType == IGP) ? std::to_string(getLocalPreference()) : "<empty>")
-    << " ASlist: ";
+    out << " origin: " << BgpRoutingTableEntry::getPathTypeString(_pathType);
+    if(IBGP_learned)
+        out << " localPref: " << getLocalPreference();
+    out << " ASlist: ";
     for (auto &element : _ASList)
         out << element << ' ';
 

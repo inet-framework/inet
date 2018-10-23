@@ -73,6 +73,7 @@ private:
     int getNumBgpSessions() { return _BGPSessions.size(); }
     int getNumEgpSessions() { return numEgpSessions; }
     int getNumIgpSessions() { return numIgpSessions; }
+    void setDefaultConfig();
     Ipv4Address getInternalAddress() { return internalAddress; }
     void setInternalAddress(Ipv4Address x) { internalAddress = x; }
     bool getRedistributeInternal() { return redistributeInternal; }
