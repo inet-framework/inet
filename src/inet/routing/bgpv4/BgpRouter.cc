@@ -191,6 +191,20 @@ void BgpRouter::setNextHopSelf(Ipv4Address peer, bool nextHopSelf)
         throw cRuntimeError("Neighbor address '%s' cannot be found in BGP router %s", peer.str(false).c_str(), bgpModule->getOwner()->getFullName());
 }
 
+void BgpRouter::setLocalPreference(Ipv4Address peer, int localPref)
+{
+    bool found = false;
+    for(auto &session : _BGPSessions) {
+        if(session.second->getPeerAddr() == peer) {
+            found = true;
+            session.second->setLocalPreference(localPref);
+            break;
+        }
+    }
+    if(!found)
+        throw cRuntimeError("Neighbor address '%s' cannot be found in BGP router %s", peer.str(false).c_str(), bgpModule->getOwner()->getFullName());
+}
+
 void BgpRouter::processMessageFromTCP(cMessage *msg)
 {
     TcpSocket *socket = check_and_cast_nullable<TcpSocket*>(_socketMap.findSocketFor(msg));
@@ -389,6 +403,7 @@ void BgpRouter::processMessage(const BgpUpdateMessage& msg)
     session->getFSM()->UpdateMsgEvent();
 
     BgpRoutingTableEntry *entry = new BgpRoutingTableEntry();
+    entry->setLocalPreference(bgpModule->par("localPreference").intValue());
     entry->setDestination(msg.getNLRI().prefix);
 
     Ipv4Address netMask(Ipv4Address::ALLONES_ADDRESS);
@@ -434,6 +449,8 @@ unsigned char BgpRouter::decisionProcess(const BgpUpdateMessage& msg, BgpRouting
        route should be excluded from the decision process. */
     entry->setPathType(msg.getPathAttributeList(0).getOrigin().getValue());
     entry->setGateway(msg.getPathAttributeList(0).getNextHop().getValue());
+    if(msg.getPathAttributeList(0).getLocalPrefArraySize() != 0)
+        entry->setLocalPreference(msg.getPathAttributeList(0).getLocalPref(0).getValue());
 
     BgpSessionType type = _BGPSessions[sessionIndex]->getType();
     if(type == IGP)
@@ -520,7 +537,12 @@ unsigned char BgpRouter::decisionProcess(const BgpUpdateMessage& msg, BgpRouting
 
 bool BgpRouter::tieBreakingProcess(BgpRoutingTableEntry *oldEntry, BgpRoutingTableEntry *entry)
 {
-    /*a) Remove from consideration all routes that are not tied for
+    if(entry->getLocalPreference() > oldEntry->getLocalPreference()) {
+        deleteBGPRoutingEntry(oldEntry);
+        return false;
+    }
+
+    /* Remove from consideration all routes that are not tied for
          having the smallest number of AS numbers present in their
          AS_PATH attributes.*/
     if (entry->getASCount() < oldEntry->getASCount()) {
@@ -528,12 +550,12 @@ bool BgpRouter::tieBreakingProcess(BgpRoutingTableEntry *oldEntry, BgpRoutingTab
         return false;
     }
 
-    /* b) Remove from consideration all routes that are not tied for
+    /* Remove from consideration all routes that are not tied for
          having the lowest Origin number in their Origin attribute.*/
-    if (entry->getPathType() < oldEntry->getPathType()) {
-        deleteBGPRoutingEntry(oldEntry);
-        return false;
-    }
+    //if (entry->getPathType() < oldEntry->getPathType()) {
+   //     deleteBGPRoutingEntry(oldEntry);
+  //      return false;
+  //  }
     return true;
 }
 
@@ -602,6 +624,10 @@ void BgpRouter::updateSendProcess(const unsigned char type, SessionId sessionInd
                 content.getAsPathForUpdate(0).getValueForUpdate(0).setLength(1);
                 for (unsigned int j = 0; j < nbAS; j++)
                     content.getAsPathForUpdate(0).getValueForUpdate(0).setAsValue(j, entry->getAS(j));
+
+                content.setLocalPrefArraySize(1);
+                content.getLocalPrefForUpdate(0).setLength(1);
+                content.getLocalPrefForUpdate(0).setValue(_BGPSessions[sessionIndex]->getLocalPreference());
             }
 
             if(sType == EGP || _BGPSessions[sessionIndex]->getNextHopSelf()) {
