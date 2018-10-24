@@ -49,9 +49,6 @@ moduleinterface IEtherMac
     parameters:
         bool promiscuous;       // if true, all packets are received, otherwise only the
                                 // ones with matching destination MAC address
-        string address;         // MAC address as hex string (12 hex digits), or
-                                // "auto". "auto" values will be replaced by
-                                // a generated MAC address in init stage 0.
         bool duplexMode;        // selects full-duplex (true) or half-duplex (false) operation
         int txQueueLimit;       // maximum number of frames queued up for transmission;
                                 // additional frames are dropped. Only used if queueModule==""

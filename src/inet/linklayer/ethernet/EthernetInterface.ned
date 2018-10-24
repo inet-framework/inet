@@ -33,6 +33,9 @@ module EthernetInterface like IEthernetInterface
     parameters:
         @class(InterfaceEntry);
         string interfaceTableModule;
+        string address = default("auto");   // MAC address as hex string (12 hex digits), or
+                                            // "auto". "auto" values will be replaced by
+                                            // a generated MAC address in init stage 0.
         bool csmacdSupport = default(false);  // by default CSMA/CD is turned off, so only point-to-point duplex links are supported.
         string fcsMode @enum("declared", "computed") = default("declared");
         @display("i=block/ifcard;bgl=2");
