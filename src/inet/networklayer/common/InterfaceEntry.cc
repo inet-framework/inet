@@ -94,6 +94,12 @@ void InterfaceEntry::initialize(int stage)
                 setMacAddress(MacAddress(address));
             setInterfaceToken(macAddr.formInterfaceIdentifier());
         }
+        if (hasPar("broadcast"))
+            setBroadcast(par("broadcast"));
+        if (hasPar("multicast"))
+            setMulticast(par("multicast"));
+        if (hasPar("pointToPoint"))
+            setPointToPoint(par("pointToPoint"));
         if (auto interfaceTable = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this))
             interfaceTable->addInterface(this);
         inet::registerInterface(*this, gate("upperLayerIn"), gate("upperLayerOut"));
