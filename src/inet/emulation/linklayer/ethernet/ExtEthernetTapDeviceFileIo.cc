@@ -155,6 +155,7 @@ bool ExtEthernetTapDeviceFileIo::notify(int fd)
         EtherEncap::addPaddingAndFcs(packet, FCS_COMPUTED);
         packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
         packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
+        packet->setName(packetPrinter.printPacketToString(packet, packetNameFormat).c_str());
         emit(packetReceivedSignal, packet);
         const auto& macHeader = packet->peekAtFront<EthernetMacHeader>();
         EV_INFO << "Received a " << packet->getTotalLength() << " packet from " << macHeader->getSrc() << " to " << macHeader->getDest() << ".\n";
