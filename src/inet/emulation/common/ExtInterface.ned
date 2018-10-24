@@ -30,6 +30,9 @@ module ExtInterface like IExternalInterface
         string namespace = default("");
         string copyConfiguration @enum("", "copyToExt", "copyFromExt") = default("");
         string address = default("auto");
+        bool broadcast = default(true);
+        bool multicast = default(true);
+        bool pointToPoint = default(false);
         int mtu @unit(B) = default(4470B);
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         *.device = default(device);

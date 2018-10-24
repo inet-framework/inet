@@ -63,9 +63,6 @@ void ExtInterface::initialize(int stage)
 void ExtInterface::configureInterface()
 {
     setMtu(par("mtu"));
-    setBroadcast(true);      //TODO
-    setMulticast(true);      //TODO
-    setPointToPoint(true);   //TODO
 }
 
 void ExtInterface::copyNetworkInterfaceConfigurationFromExt()
