@@ -35,7 +35,8 @@ void OperationalBase::initialize(int stage)
         WATCH(isOperational);
     }
     if (isInitializeStage(stage)) {
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        cModule *node = findContainingNode(this);
+        NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
         setOperational(!nodeStatus || nodeStatus->getState() == NodeStatus::UP);
         if (isOperational)
             handleNodeStart(nullptr);
