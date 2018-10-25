@@ -157,7 +157,6 @@ class INET_API Tcp : public OperationalBase
     static bool logverbose;    // if !testing, turns on more verbose logging
 
     bool recordStatistics = false;    // output vectors on/off
-    bool isOperational = false;    // lifecycle: node is up/down
 
     bool useDataNotification = false;
     CrcMode crcMode = CRC_MODE_UNDEFINED;

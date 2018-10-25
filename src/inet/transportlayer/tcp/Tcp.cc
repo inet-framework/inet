@@ -257,7 +257,7 @@ void Tcp::refreshDisplay() const
     //char buf[40];
     //sprintf(buf,"%d conns", tcpAppConnMap.size());
     //getDisplayString().setTagArg("t",0,buf);
-    if (isOperational)
+    if (operational != NOT_OPERATING)
         getDisplayString().removeTag("i2");
     else
         getDisplayString().setTagArg("i2", 0, "status/cross");
