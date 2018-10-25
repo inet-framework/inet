@@ -88,24 +88,51 @@ void BgpRouter::recordStatistics()
     bgpModule->recordScalar("UpdateMsgRcv", statTab[5]);
 }
 
-SessionId BgpRouter::createSession(BgpSessionType typeSession, const char *peerAddr)
+SessionId BgpRouter::createIbgpSession(const char *peerAddr)
 {
     SessionInfo info;
-    info.sessionType = typeSession;
+    info.sessionType = IGP;
     info.ASValue = myAsId;
     info.routerID = rt->getRouterId();
     info.peerAddr.set(peerAddr);
-    if (typeSession == EGP) {
-        info.linkIntf = rt->getInterfaceForDestAddr(info.peerAddr);
-        if (info.linkIntf == nullptr)
-            throw cRuntimeError("BGP Error: No configuration interface for peer address: %s", peerAddr);
-        info.sessionID = info.peerAddr.getInt() + info.linkIntf->getProtocolData<Ipv4InterfaceData>()->getIPAddress().getInt();
-        numEgpSessions++;
+    info.sessionID = info.peerAddr.getInt() + info.routerID.getInt();
+
+    numIgpSessions++;
+
+    SessionId newSessionId;
+    newSessionId = info.sessionID;
+
+    BgpSession *newSession = new BgpSession(*this);
+    newSession->setInfo(info);
+
+    _BGPSessions[newSessionId] = newSession;
+
+    return newSessionId;
+}
+
+SessionId BgpRouter::createEbgpSession(const char *peerAddr, SessionInfo& externalInfo)
+{
+    SessionInfo info;
+
+    // set external info
+    info.myAddr = externalInfo.myAddr;
+    info.checkConnection = externalInfo.checkConnection;
+    info.ebgpMultihop = externalInfo.ebgpMultihop;
+
+    info.sessionType = EGP;
+    info.ASValue = myAsId;
+    info.routerID = rt->getRouterId();
+    info.peerAddr.set(peerAddr);
+    info.linkIntf = rt->getInterfaceForDestAddr(info.peerAddr);
+    if(!info.linkIntf) {
+        if(info.checkConnection)
+            throw cRuntimeError("BGP Error: External BGP neighbor at address %s is not directly connected to BGP router %s", peerAddr, bgpModule->getOwner()->getFullName());
+        else
+            info.linkIntf = rt->getInterfaceForDestAddr(info.myAddr);
     }
-    else {
-        info.sessionID = info.peerAddr.getInt() + info.routerID.getInt();
-        numIgpSessions++;
-    }
+    ASSERT(info.linkIntf);
+    info.sessionID = info.peerAddr.getInt() + info.linkIntf->getProtocolData<Ipv4InterfaceData>()->getIPAddress().getInt();
+    numEgpSessions++;
 
     SessionId newSessionId;
     newSessionId = info.sessionID;
@@ -131,9 +158,17 @@ void BgpRouter::setSocketListen(SessionId id)
 
 void BgpRouter::setDefaultConfig()
 {
+    // per router params
+    bool redistributeInternal = bgpModule->par("redistributeInternal").boolValue();
+    bool redistributeOspf = bgpModule->par("redistributeOspf").boolValue();
+    bool redistributeRip = bgpModule->par("redistributeRip").boolValue();
+    setRedistributeInternal(redistributeInternal);
+    setRedistributeOspf(redistributeOspf);
+    setRedistributeRip(redistributeRip);
+
+    // per session params
     bool nextHopSelf = bgpModule->par("nextHopSelf").boolValue();
     int localPreference = bgpModule->par("localPreference").intValue();
-
     for(auto &session : _BGPSessions) {
         session.second->setNextHopSelf(nextHopSelf);
         session.second->setLocalPreference(localPreference);

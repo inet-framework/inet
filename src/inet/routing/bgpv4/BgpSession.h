@@ -19,9 +19,7 @@
 #define __INET_BGPSESSION_H
 
 #include <vector>
-
 #include "inet/common/INETDefs.h"
-
 #include "inet/routing/bgpv4/BgpCommon.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 #include "inet/routing/bgpv4/Bgp.h"
@@ -107,6 +105,7 @@ private:
     BgpSessionType getType() const { return _info.sessionType; }
     static const std::string getTypeString(BgpSessionType sessionType);
     InterfaceEntry *getLinkIntf() const { return _info.linkIntf; }
+    bool getCheckConnection() const { return _info.checkConnection; }
     Ipv4Address getPeerAddr() const { return _info.peerAddr; }
     bool getNextHopSelf() const { return _info.nextHopSelf; }
     int getLocalPreference() const { return _info.localPreference; }
