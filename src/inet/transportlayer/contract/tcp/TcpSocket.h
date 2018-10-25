@@ -223,10 +223,10 @@ class INET_API TcpSocket : public ISocket
 
     /** @name Getter functions */
     //@{
-    L3Address getLocalAddress() { return localAddr; }
-    int getLocalPort() { return localPrt; }
-    L3Address getRemoteAddress() { return remoteAddr; }
-    int getRemotePort() { return remotePrt; }
+    L3Address getLocalAddress() const { return localAddr; }
+    int getLocalPort() const { return localPrt; }
+    L3Address getRemoteAddress() const { return remoteAddr; }
+    int getRemotePort() const { return remotePrt; }
     //@}
 
     /** @name Opening and closing connections, sending data */

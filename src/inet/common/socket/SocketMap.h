@@ -64,7 +64,11 @@ class INET_API SocketMap
      * Deletes the socket objects.
      */
     void deleteSockets();
+
+    void addWatch();
 };
+
+std::ostream& operator<<(std::ostream& out, const ISocket& entry);
 
 } // namespace inet
 
