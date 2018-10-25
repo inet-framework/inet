@@ -1302,7 +1302,8 @@ void Ipv4::flush()
 
 bool Ipv4::isNodeUp()
 {
-    NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+    cModule *node = findContainingNode(this);
+    NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
     return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
 }
 

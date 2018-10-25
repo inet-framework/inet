@@ -63,7 +63,8 @@ void TcpSessionApp::initialize(int stage)
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         timeoutMsg = new cMessage("timer");
-        nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        cModule *node = findContainingNode(this);
+        nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
 
         if (isNodeUp()) {
             timeoutMsg->setKind(MSGKIND_CONNECT);

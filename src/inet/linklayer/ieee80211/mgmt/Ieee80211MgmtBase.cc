@@ -44,7 +44,8 @@ void Ieee80211MgmtBase::initialize(int stage)
     }
     // TODO: INITSTAGE
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        cModule *node = findContainingNode(this);
+        NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
     }
 }

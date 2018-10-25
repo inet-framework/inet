@@ -88,7 +88,8 @@ void Ipv4RoutingTable::initialize(int stage)
     }
     // TODO: INITSTAGE
     else if (stage == INITSTAGE_STATIC_ROUTING) {
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        cModule *node = findContainingNode(this);
+        NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
         isNodeUp = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
         if (isNodeUp) {
             // set routerId if param is not "" (==no routerId) or "auto" (in which case we'll

@@ -95,7 +95,8 @@ void SctpServer::initialize(int stage)
             socket->setStreamPriority(streamNum, (unsigned int)atoi(token));
         }
 
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        cModule *node = findContainingNode(this);
+        NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
         bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
