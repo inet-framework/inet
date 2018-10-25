@@ -86,7 +86,8 @@ private:
     void addWatches();
     void recordStatistics();
 
-    SessionId createSession(BgpSessionType typeSession, const char *peerAddr);
+    SessionId createEbgpSession(const char *peerAddr, SessionInfo& externalInfo);
+    SessionId createIbgpSession(const char *peerAddr);
     void setTimer(SessionId id, simtime_t *delayTab);
     void setSocketListen(SessionId id);
     void addToAdvertiseList(Ipv4Address address);

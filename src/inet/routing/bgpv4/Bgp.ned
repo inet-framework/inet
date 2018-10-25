@@ -41,6 +41,8 @@ simple Bgp like IBgp
         bool redistributeInternal = default(false);   // redistribute BGP routes into OSPF (as external routes)
         bool nextHopSelf = default(false);
         int localPreference = default(100);
+        bool connectedCheck = default(true);
+        int ebgpMultihop = default(1);
         @display("i=block/network2");
     gates:
         input socketIn;

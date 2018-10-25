@@ -48,7 +48,7 @@ private:
   private:
     std::vector<const char *> findInternalPeers(cXMLElementList& ASConfig);
     void loadASConfig(cXMLElementList& ASConfig);
-    void loadSessionConfig(cXMLElementList& sessionList, simtime_t *delayTab);
+    void loadEbgpSessionConfig(cXMLElementList& ASConfig, cXMLElementList& sessionList, simtime_t *delayTab);
     AsId findMyAS(cXMLElementList& ASList, int& outRouterPosition);
     void loadTimerConfig(cXMLElementList& timerConfig, simtime_t *delayTab);
     int isInInterfaceTable(IInterfaceTable *ifTable, Ipv4Address addr);
