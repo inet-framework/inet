@@ -321,6 +321,11 @@ void PingApp::stopSendingPingRequests()
     destAddresses.clear();
     destAddrIdx = -1;
     cancelNextPingRequest();
+    if (l3Socket) {
+        l3Socket->close();
+        delete l3Socket;
+        l3Socket = nullptr;
+    }
 }
 
 void PingApp::scheduleNextPingRequest(simtime_t previous, bool withSleep)
