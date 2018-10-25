@@ -25,9 +25,21 @@ namespace inet {
 class INET_API OperationalBase : public cSimpleModule, public ILifecycle
 {
   protected:
-    enum State { UP, DOWN, GOING_UP, GOING_DOWN };
-    State operational;
+    enum State { STARTING_OPERATION, OPERATING, STOPPING_OPERATION, CRASHING_OPERATION, NOT_OPERATING, SUSPENDING_OPERATION, OPERATION_SUSPENDED, RESUMING_OPERATION };
+    class DoneCallback : public IDoneCallback
+    {
+        OperationalBase *module = nullptr;
+        IDoneCallback *orig = nullptr;
+        State state = static_cast<State>(-1);
+      public:
+        DoneCallback(OperationalBase *module) : module(module) { }
+        void setOrig(IDoneCallback *newOrig, State newState);
+        void done();
+        virtual void invoke() override;
+    };
+    State operational = static_cast<State>(-1);
     simtime_t lastChange;
+    DoneCallback myDoneCallback;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -38,13 +50,17 @@ class INET_API OperationalBase : public cSimpleModule, public ILifecycle
     virtual void handleMessageWhenUp(cMessage *msg) = 0;
 
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
-    virtual bool handleNodeStart(IDoneCallback *doneCallback);
-    virtual bool handleNodeShutdown(IDoneCallback *doneCallback);
-    virtual void handleNodeCrash();
+    virtual bool handleStartOperation(IDoneCallback *doneCallback);
+    virtual bool handleStopOperation(IDoneCallback *doneCallback);
+    virtual void handleCrashOperation();
+    virtual bool handleSuspendOperation(IDoneCallback *doneCallback);
+    virtual bool handleResumeOperation(IDoneCallback *doneCallback);
 
     virtual bool isInitializeStage(int stage) = 0;
-    virtual bool isNodeStartStage(int stage) = 0;
-    virtual bool isNodeShutdownStage(int stage) = 0;
+    virtual bool isModuleStartStage(int stage) = 0;
+    virtual bool isModuleStopStage(int stage) = 0;
+
+    virtual bool isWorking() const { return operational != NOT_OPERATING && operational != OPERATION_SUSPENDED; }
 
     virtual void setOperational(State newState);
 

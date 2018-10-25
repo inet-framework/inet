@@ -19,13 +19,38 @@
 
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 
 namespace inet {
 
+void OperationalBase::DoneCallback::setOrig(IDoneCallback *newOrig, State newState)
+{
+    ASSERT(orig == nullptr || newOrig == nullptr);
+    orig = newOrig;
+    state = newState;
+}
+
+void OperationalBase::DoneCallback::done()
+{
+    ASSERT(state != (State)-1);
+    module->setOperational(state);
+    orig = nullptr;
+    state = (State)-1;
+}
+void OperationalBase::DoneCallback::invoke()
+{
+    ASSERT(state != (State)-1);
+    module->setOperational(state);
+    if (orig)
+        orig->invoke();
+    orig = nullptr;
+    state = (State)-1;
+}
+
 OperationalBase::OperationalBase() :
-    operational(DOWN)
+    operational(NOT_OPERATING),
+    myDoneCallback(this)
 {
 }
 
@@ -37,18 +62,30 @@ void OperationalBase::initialize(int stage)
     if (isInitializeStage(stage)) {
         cModule *node = findContainingNode(this);
         NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
-        setOperational((!nodeStatus || nodeStatus->getState() == NodeStatus::UP) ? UP : DOWN);
-        if (operational != DOWN)
-            handleNodeStart(nullptr);
+        setOperational((!nodeStatus || nodeStatus->getState() == NodeStatus::UP) ? OPERATING : NOT_OPERATING);
+        if (operational != NOT_OPERATING)
+            handleStartOperation(nullptr);
     }
 }
 
 void OperationalBase::handleMessage(cMessage *message)
 {
-    if (operational != DOWN)
-        handleMessageWhenUp(message);
-    else
-        handleMessageWhenDown(message);
+    switch (operational) {
+        case STARTING_OPERATION:
+        case OPERATING:
+        case STOPPING_OPERATION:
+        case CRASHING_OPERATION:
+        case SUSPENDING_OPERATION:
+        case RESUMING_OPERATION:
+            handleMessageWhenUp(message);
+            break;
+        case OPERATION_SUSPENDED:
+        case NOT_OPERATING:
+            handleMessageWhenDown(message);
+            break;
+        default:
+            throw cRuntimeError("invalid operational status: %d", (int)operational);
+    }
 }
 
 void OperationalBase::handleMessageWhenDown(cMessage *message)
@@ -65,45 +102,58 @@ void OperationalBase::handleMessageWhenDown(cMessage *message)
 bool OperationalBase::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (isNodeStartStage(stage)) {
-            setOperational(GOING_UP);
-            bool done = handleNodeStart(doneCallback);
+    if (dynamic_cast<ModuleStartOperation *>(operation)) {
+        if (isModuleStartStage(stage)) {
+            operational = STARTING_OPERATION;
+            myDoneCallback.setOrig(doneCallback, OPERATING);
+            bool done = handleStartOperation(&myDoneCallback);
             if (done)
-                setOperational(UP);
+                myDoneCallback.done();
             return done;
         }
     }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (isNodeShutdownStage(stage)) {
-            setOperational(GOING_DOWN);
-            bool done = handleNodeShutdown(doneCallback);
+    else if (dynamic_cast<ModuleStopOperation *>(operation)) {
+        if (isModuleStopStage(stage)) {
+            operational = STOPPING_OPERATION;
+            myDoneCallback.setOrig(doneCallback, NOT_OPERATING);
+            bool done = handleStopOperation(&myDoneCallback);
             if (done)
-                setOperational(DOWN);
+                myDoneCallback.done();
             return done;
         }
     }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (stage == NodeCrashOperation::STAGE_CRASH) {
-            handleNodeCrash();
-            setOperational(DOWN);
+    else if (dynamic_cast<ModuleCrashOperation *>(operation)) {
+        if (stage == ModuleCrashOperation::STAGE_CRASH) {
+            operational = CRASHING_OPERATION;
+            handleCrashOperation();
+            setOperational(NOT_OPERATING);
             return true;
         }
     }
     return true;
 }
 
-bool OperationalBase::handleNodeStart(IDoneCallback *doneCallback)
+bool OperationalBase::handleStartOperation(IDoneCallback *doneCallback)
 {
     return true;
 }
 
-bool OperationalBase::handleNodeShutdown(IDoneCallback *doneCallback)
+bool OperationalBase::handleStopOperation(IDoneCallback *doneCallback)
 {
     return true;
 }
 
-void OperationalBase::handleNodeCrash()
+bool OperationalBase::handleSuspendOperation(IDoneCallback *doneCallback)
+{
+    return true;
+}
+
+bool OperationalBase::handleResumeOperation(IDoneCallback *doneCallback)
+{
+    return true;
+}
+
+void OperationalBase::handleCrashOperation()
 {
 }
 
