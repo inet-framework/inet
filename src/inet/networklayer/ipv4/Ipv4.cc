@@ -171,7 +171,7 @@ void Ipv4::handleRequest(Request *request)
         delete request;
     }
     else if (dynamic_cast<Ipv4SocketCloseCommand *>(ctrl) != nullptr) {
-        int socketId = 0; request->getTag<SocketReq>()->getSocketId();
+        int socketId = request->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketDescriptor.find(socketId);
         if (it != socketIdToSocketDescriptor.end()) {
             delete it->second;
