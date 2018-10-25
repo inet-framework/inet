@@ -560,7 +560,7 @@ void NextHopForwarding::sendDatagramToHL(Packet *packet)
         }
     }
     if (upperProtocols.find(protocol) != upperProtocols.end()) {
-        EV_INFO << "Passing up to protocol " << protocol << "\n";
+        EV_INFO << "Passing up to protocol " << *protocol << "\n";
         emit(packetSentToUpperSignal, packet);
         send(packet, "transportOut");
         numLocalDeliver++;
