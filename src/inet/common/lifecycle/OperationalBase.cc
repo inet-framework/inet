@@ -25,27 +25,27 @@
 namespace inet {
 
 OperationalBase::OperationalBase() :
-    isOperational(false)
+    operational(DOWN)
 {
 }
 
 void OperationalBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        WATCH(isOperational);
+        WATCH(operational);
     }
     if (isInitializeStage(stage)) {
         cModule *node = findContainingNode(this);
         NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
-        setOperational(!nodeStatus || nodeStatus->getState() == NodeStatus::UP);
-        if (isOperational)
+        setOperational((!nodeStatus || nodeStatus->getState() == NodeStatus::UP) ? UP : DOWN);
+        if (operational != DOWN)
             handleNodeStart(nullptr);
     }
 }
 
 void OperationalBase::handleMessage(cMessage *message)
 {
-    if (isOperational)
+    if (operational != DOWN)
         handleMessageWhenUp(message);
     else
         handleMessageWhenDown(message);
@@ -67,22 +67,26 @@ bool OperationalBase::handleOperationStage(LifecycleOperation *operation, int st
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
         if (isNodeStartStage(stage)) {
-            setOperational(true);
-            return handleNodeStart(doneCallback);
+            setOperational(GOING_UP);
+            bool done = handleNodeStart(doneCallback);
+            if (done)
+                setOperational(UP);
+            return done;
         }
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
         if (isNodeShutdownStage(stage)) {
+            setOperational(GOING_DOWN);
             bool done = handleNodeShutdown(doneCallback);
             if (done)
-                setOperational(false);
+                setOperational(DOWN);
             return done;
         }
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
         if (stage == NodeCrashOperation::STAGE_CRASH) {
             handleNodeCrash();
-            setOperational(false);
+            setOperational(DOWN);
             return true;
         }
     }
@@ -103,9 +107,9 @@ void OperationalBase::handleNodeCrash()
 {
 }
 
-void OperationalBase::setOperational(bool isOperational)
+void OperationalBase::setOperational(State newState)
 {
-    this->isOperational = isOperational;
+    operational = newState;
     lastChange = simTime();
 }
 

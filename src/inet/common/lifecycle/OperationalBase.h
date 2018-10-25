@@ -25,7 +25,8 @@ namespace inet {
 class INET_API OperationalBase : public cSimpleModule, public ILifecycle
 {
   protected:
-    bool isOperational;
+    enum State { UP, DOWN, GOING_UP, GOING_DOWN };
+    State operational;
     simtime_t lastChange;
 
   protected:
@@ -45,7 +46,7 @@ class INET_API OperationalBase : public cSimpleModule, public ILifecycle
     virtual bool isNodeStartStage(int stage) = 0;
     virtual bool isNodeShutdownStage(int stage) = 0;
 
-    virtual void setOperational(bool isOperational);
+    virtual void setOperational(State newState);
 
   public:
     OperationalBase();

@@ -81,7 +81,7 @@ void DhcpServer::receiveSignal(cComponent *source, int signalID, cObject *obj, c
     Enter_Method_Silent();
 
     if (signalID == interfaceDeletedSignal) {
-        if (isOperational) {
+        if (operational != DOWN) {
             InterfaceEntry *nie = check_and_cast<InterfaceEntry *>(obj);
             if (ie == nie)
                 throw cRuntimeError("Reacting to interface deletions is not implemented in this module");
@@ -154,7 +154,7 @@ void DhcpServer::handleSelfMessages(cMessage *msg)
 
 void DhcpServer::processDhcpMessage(Packet *packet)
 {
-    ASSERT(isOperational && ie != nullptr);
+    ASSERT(operational != DOWN && ie != nullptr);
 
     const auto& dhcpMsg = packet->peekAtFront<DhcpMessage>();
 

@@ -149,7 +149,7 @@ void Rip::handleMessageWhenUp(cMessage *msg)
             startRIPRouting();
         }
         else if (msg == shutdownTimer) {
-            isOperational = false;
+            setOperational(DOWN);
             IDoneCallback *doneCallback = (IDoneCallback *)msg->getContextPointer();
             msg->setContextPointer(nullptr);
             doneCallback->invoke();

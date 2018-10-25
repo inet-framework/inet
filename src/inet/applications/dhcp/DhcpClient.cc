@@ -385,7 +385,7 @@ void DhcpClient::initRebootedClient()
 
 void DhcpClient::handleDhcpMessage(Packet *packet)
 {
-    ASSERT(isOperational && ie != nullptr);
+    ASSERT(operational != DOWN && ie != nullptr);
 
     const auto& msg = packet->peekAtFront<DhcpMessage>();
     if (msg->getOp() != BOOTREPLY) {
@@ -506,7 +506,7 @@ void DhcpClient::receiveSignal(cComponent *source, int signalID, cObject *obj, c
         }
     }
     else if (signalID == interfaceDeletedSignal) {
-        if (isOperational)
+        if (operational != DOWN)
             throw cRuntimeError("Reacting to interface deletions is not implemented in this module");
     }
 }
