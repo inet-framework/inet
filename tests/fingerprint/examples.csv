@@ -34,7 +34,7 @@
 /examples/dhcp/,                     -f omnetpp.ini -c WiredDHCP -r 0,              5000s,           c008-8e7e/tplx, PASS,
 /examples/dhcp/,                     -f omnetpp.ini -c WirelessDHCP -r 0,           500s,            2d5b-4e4c/tplx, PASS, wireless
 /examples/dhcp/,                     -f omnetpp.ini -c Wireless2DHCP -r 0,          500s,            bee6-e9d9/tplx, PASS, wireless
-/examples/dhcp/,                     -f omnetpp.ini -c RebootingDHCP -r 0,          500s,            83f6-910a/tplx, PASS,
+/examples/dhcp/,                     -f omnetpp.ini -c RebootingDHCP -r 0,          500s,            6ae4-05fd/tplx, PASS,
 
 # /examples/diffserv/onedomain/,       -f omnetpp.ini -c Apps -r 0,                  10s,             0000-0000/tplx, PASS,   # Apps extended
 # /examples/diffserv/onedomain/,       -f omnetpp.ini -c Exp1 -r 0,                  10s,             0000-0000/tplx, PASS,   # Exp1 extended
@@ -188,9 +188,9 @@
 
 /examples/inet/routerperf/,          -f omnetpp.ini -c General -r 0,                100s,            9c6b-d207/tplx, PASS,
 
-/examples/inet/shutdownrestart/,     -f omnetpp.ini -c Ping -r 0,                   100s,            0018-145c/tplx, PASS,
-/examples/inet/shutdownrestart/,     -f omnetpp.ini -c UDP_Basic_Echo -r 0,         100s,            4476-268a/tplx, PASS,
-/examples/inet/shutdownrestart/,     -f omnetpp.ini -c UDP_Burst_Sink -r 0,         100s,            7c0b-2a86/tplx, PASS,
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c Ping -r 0,                   100s,            d53b-b3a1/tplx, PASS,
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c UDP_Basic_Echo -r 0,         100s,            55f9-385a/tplx, PASS,
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c UDP_Burst_Sink -r 0,         100s,            7143-6561/tplx, PASS,
 /examples/inet/shutdownrestart/,     -f omnetpp.ini -c UDP_VideoStream -r 0,        100s,            f52b-892a/tplx, PASS,
 # /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP_common -r 0,             100s,            0000-0000/tplx, ERROR,   # TCP_common extended
 /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP -r 0,                    100s,            b3fe-cad0/tplx, PASS,
@@ -522,7 +522,7 @@
 /examples/wireless/obstacle/,        -f omnetpp.ini -c Indoor -r 0,                 100s,            0153-f1a9/tplx, PASS, wireless
 /examples/wireless/obstacle/,        -f omnetpp.ini -c Orbit -r 0,                  100s,            9e4a-cf24/tplx, PASS, wireless
 
-/examples/wireless/power/,           -f omnetpp.ini -c General -r 0,                100s,            c53f-c220/tplx, PASS, wireless
+/examples/wireless/power/,           -f omnetpp.ini -c General -r 0,                100s,            99b0-fefc/tplx, PASS, wireless
 
 /examples/wireless/qos/,             -f omnetpp.ini -c MacNonQos -r 0,                100s,         f16e-8286/tplx, PASS, wireless
 /examples/wireless/qos/,             -f omnetpp.ini -c MacQos -r 0,                    10s,         f965-fdd2/tplx, PASS, wireless
