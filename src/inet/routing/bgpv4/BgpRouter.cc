@@ -68,6 +68,7 @@ void BgpRouter::addWatches()
     WATCH(myAsId);
     WATCH_PTRMAP(_BGPSessions);
     WATCH_PTRVECTOR(bgpRoutingTable);
+    _socketMap.addWatch();
 }
 
 void BgpRouter::recordStatistics()
@@ -235,7 +236,9 @@ void BgpRouter::processMessageFromTCP(cMessage *msg)
         SessionId i = findIdFromPeerAddr(_BGPSessions, peerAddr);
         if (i == static_cast<SessionId>(-1)) {
             socket->close();
+            _socketMap.removeSocket(socket);
             delete socket;
+            socket = nullptr;
             delete msg;
             return;
         }
@@ -244,6 +247,7 @@ void BgpRouter::processMessageFromTCP(cMessage *msg)
 
         _socketMap.addSocket(socket);
         _BGPSessions[i]->getSocket()->abort();
+        _socketMap.removeSocket(_BGPSessions[i]->getSocket());
         _BGPSessions[i]->setSocket(socket);
     }
 
