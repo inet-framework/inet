@@ -79,8 +79,10 @@ void ScenarioManager::processCommand(cXMLElement *node)
         processConnectCommand(node);
     else if (!strcmp(tag, "disconnect"))
         processDisconnectCommand(node);
-    else if (!strcmp(tag, "initiate") || !strcmp(tag, "start") || !strcmp(tag, "startup") ||
-            !strcmp(tag, "shutdown") || !strcmp(tag, "crash"))
+    else if (!strcmp(tag, "initiate") || !strcmp(tag, "start") || !strcmp(tag, "startup")
+            || !strcmp(tag, "stop") || !strcmp(tag, "shutdown") || !strcmp(tag, "crash")
+            || !strcmp(tag, "suspend") || !strcmp(tag, "resume")
+            )
         processLifecycleCommand(node);
     else
         processModuleSpecificCommand(node);
