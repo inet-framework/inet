@@ -237,16 +237,15 @@ bool UdpBasicApp::handleStartOperation(IDoneCallback *doneCallback)
 
 bool UdpBasicApp::handleStopOperation(IDoneCallback *doneCallback)
 {
-    if (selfMsg)
-        cancelEvent(selfMsg);
-    //TODO if(socket.isOpened()) socket.close();
+    cancelEvent(selfMsg);
+    socket.close();
     return true;
 }
 
 void UdpBasicApp::handleCrashOperation()
 {
-    if (selfMsg)
-        cancelEvent(selfMsg);
+    cancelEvent(selfMsg);
+    socket.close();
 }
 
 } // namespace inet

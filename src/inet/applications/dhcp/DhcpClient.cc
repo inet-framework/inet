@@ -702,7 +702,8 @@ void DhcpClient::stopApp()
 
     // TODO: Client should send DHCPRELEASE to the server. However, the correct operation
     // of DHCP does not depend on the transmission of DHCPRELEASE messages.
-    // TODO: socket.close();
+
+    socket.close();
 }
 
 } // namespace inet

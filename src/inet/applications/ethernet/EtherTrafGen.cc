@@ -106,12 +106,14 @@ bool EtherTrafGen::handleStartOperation(IDoneCallback *doneCallback)
 bool EtherTrafGen::handleStopOperation(IDoneCallback *doneCallback)
 {
     cancelNextPacket();
+    llcSocket.close();
     return true;
 }
 
 void EtherTrafGen::handleCrashOperation()
 {
     cancelNextPacket();
+    llcSocket.close();
 }
 
 bool EtherTrafGen::isGenerator()

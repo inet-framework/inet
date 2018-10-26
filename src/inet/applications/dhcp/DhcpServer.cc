@@ -540,7 +540,7 @@ void DhcpServer::stopApp()
     leased.clear();
     ie = nullptr;
     cancelEvent(startTimer);
-    // socket.close(); TODO:
+    socket.close();
 }
 
 } // namespace inet

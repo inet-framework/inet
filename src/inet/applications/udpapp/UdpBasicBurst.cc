@@ -340,7 +340,7 @@ bool UdpBasicBurst::handleStopOperation(IDoneCallback *doneCallback)
     if (timerNext)
         cancelEvent(timerNext);
     activeBurst = false;
-    //TODO if(socket.isOpened()) socket.close();
+    socket.close();
     return true;
 }
 
@@ -349,6 +349,7 @@ void UdpBasicBurst::handleCrashOperation()
     if (timerNext)
         cancelEvent(timerNext);
     activeBurst = false;
+    socket.close();
 }
 
 } // namespace inet

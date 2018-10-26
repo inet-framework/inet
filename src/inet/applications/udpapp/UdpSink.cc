@@ -158,16 +158,15 @@ bool UdpSink::handleStartOperation(IDoneCallback *doneCallback)
 
 bool UdpSink::handleStopOperation(IDoneCallback *doneCallback)
 {
-    if (selfMsg)
-        cancelEvent(selfMsg);
-    //TODO if(socket.isOpened()) socket.close();
+    cancelEvent(selfMsg);
+    processStop();
     return true;
 }
 
 void UdpSink::handleCrashOperation()
 {
-    if (selfMsg)
-        cancelEvent(selfMsg);
+    cancelEvent(selfMsg);
+    processStop();
 }
 
 } // namespace inet
