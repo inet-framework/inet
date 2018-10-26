@@ -20,9 +20,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/common/lifecycle/LifecycleOperation.h"
-#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/applications/base/ApplicationBase.h"
 #include "inet/common/socket/SocketMap.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
@@ -36,18 +34,17 @@ class TcpServerThreadBase;
  * is a sSimpleModule). Creates one instance (using dynamic module creation)
  * for each incoming connection. More info in the corresponding NED file.
  */
-class INET_API TcpServerHostApp : public cSimpleModule, public ILifecycle, public TcpSocket::ICallback
+class INET_API TcpServerHostApp : public ApplicationBase, public TcpSocket::ICallback
 {
   protected:
     TcpSocket serverSocket;
     SocketMap socketMap;
     typedef std::set<TcpServerThreadBase *> ThreadSet;
     ThreadSet threadSet;
-    NodeStatus *nodeStatus = nullptr;
 
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void finish() override;
     virtual void refreshDisplay() const override;
 
@@ -60,11 +57,9 @@ class INET_API TcpServerHostApp : public cSimpleModule, public ILifecycle, publi
     virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override { }
     virtual void socketDeleted(TcpSocket *socket) override {}
 
-    bool isNodeUp() { return !nodeStatus || nodeStatus->getState() == NodeStatus::UP; }
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
-    virtual void start();
-    virtual void stop();
-    virtual void crash();
+    virtual bool handleStartOperation(IDoneCallback *doneCallback) override;
+    virtual bool handleStopOperation(IDoneCallback *doneCallback) override;
+    virtual void handleCrashOperation() override;
 
   public:
     virtual ~TcpServerHostApp() { socketMap.deleteSockets(); }

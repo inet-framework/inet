@@ -28,17 +28,10 @@ Define_Module(TcpServerHostApp);
 
 void TcpServerHostApp::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
-
-    if (stage == INITSTAGE_APPLICATION_LAYER) {
-        cModule *node = findContainingNode(this);
-        nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
-        if (isNodeUp())
-            start();
-    }
+    ApplicationBase::initialize(stage);
 }
 
-void TcpServerHostApp::start()
+bool TcpServerHostApp::handleStartOperation(IDoneCallback *)
 {
     const char *localAddress = par("localAddress");
     int localPort = par("localPort");
@@ -47,18 +40,21 @@ void TcpServerHostApp::start()
     serverSocket.setCallback(this);
     serverSocket.bind(localAddress[0] ? L3Address(localAddress) : L3Address(), localPort);
     serverSocket.listen();
+
+    return true;
 }
 
-void TcpServerHostApp::stop()
+bool TcpServerHostApp::handleStopOperation(IDoneCallback *)
 {
     //FIXME close sockets?
 
     // remove and delete threads
     while (!threadSet.empty())
         removeThread(*threadSet.begin());
+    return true;
 }
 
-void TcpServerHostApp::crash()
+void TcpServerHostApp::handleCrashOperation()
 {
     // remove and delete threads
     while (!threadSet.empty())
@@ -72,14 +68,9 @@ void TcpServerHostApp::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-void TcpServerHostApp::handleMessage(cMessage *msg)
+void TcpServerHostApp::handleMessageWhenUp(cMessage *msg)
 {
-    if (!isNodeUp()) {
-        //TODO error?
-        EV_ERROR << "message " << msg->getFullName() << "(" << msg->getClassName() << ") arrived when module is down\n";
-        delete msg;
-    }
-    else if (msg->isSelfMessage()) {
+    if (msg->isSelfMessage()) {
         TcpServerThreadBase *thread = (TcpServerThreadBase *)msg->getContextPointer();
         if (threadSet.find(thread) == threadSet.end())
             throw cRuntimeError("Invalid thread pointer in the timer (msg->contextPointer is invalid)");
@@ -101,7 +92,9 @@ void TcpServerHostApp::handleMessage(cMessage *msg)
 
 void TcpServerHostApp::finish()
 {
-    stop();
+    // remove and delete threads
+    while (!threadSet.empty())
+        removeThread(*threadSet.begin());
 }
 
 void TcpServerHostApp::socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo)
@@ -135,28 +128,6 @@ void TcpServerHostApp::removeThread(TcpServerThreadBase *thread)
 
     // remove thread object
     delete thread;
-}
-
-bool TcpServerHostApp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-{
-    Enter_Method_Silent();
-    if (dynamic_cast<ModuleStartOperation *>(operation)) {
-        if (static_cast<ModuleStartOperation::Stage>(stage) == ModuleStartOperation::STAGE_APPLICATION_LAYER) {
-            start();
-        }
-    }
-    else if (dynamic_cast<ModuleStopOperation *>(operation)) {
-        if (static_cast<ModuleStopOperation::Stage>(stage) == ModuleStopOperation::STAGE_APPLICATION_LAYER) {
-            stop();
-        }
-    }
-    else if (dynamic_cast<ModuleCrashOperation *>(operation)) {
-        if (static_cast<ModuleCrashOperation::Stage>(stage) == ModuleCrashOperation::STAGE_CRASH)
-            crash();
-    }
-    else
-        throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
-    return true;
 }
 
 void TcpServerThreadBase::refreshDisplay() const
