@@ -75,7 +75,7 @@ void UdpSocket::bind(L3Address localAddr, int localPort)
     UdpBindCommand *ctrl = new UdpBindCommand();
     ctrl->setLocalAddr(localAddr);
     ctrl->setLocalPort(localPort);
-    auto request = new Request("BIND", UDP_C_BIND);
+    auto request = new Request("bind", UDP_C_BIND);
     request->setControlInfo(ctrl);
     sendToUDP(request);
 }
@@ -90,7 +90,7 @@ void UdpSocket::connect(L3Address addr, int port)
     UdpConnectCommand *ctrl = new UdpConnectCommand();
     ctrl->setRemoteAddr(addr);
     ctrl->setRemotePort(port);
-    auto request = new Request("CONNECT", UDP_C_CONNECT);
+    auto request = new Request("connect", UDP_C_CONNECT);
     request->setControlInfo(ctrl);
     sendToUDP(request);
 }
@@ -113,7 +113,7 @@ void UdpSocket::send(Packet *pk)
 
 void UdpSocket::close()
 {
-    auto request = new Request("CLOSE", UDP_C_CLOSE);
+    auto request = new Request("close", UDP_C_CLOSE);
     UdpCloseCommand *ctrl = new UdpCloseCommand();
     request->setControlInfo(ctrl);
     sendToUDP(request);
@@ -121,7 +121,7 @@ void UdpSocket::close()
 
 void UdpSocket::setBroadcast(bool broadcast)
 {
-    auto request = new Request("SetBroadcast", UDP_C_SETOPTION);
+    auto request = new Request("setBroadcast", UDP_C_SETOPTION);
     UdpSetBroadcastCommand *ctrl = new UdpSetBroadcastCommand();
     ctrl->setBroadcast(broadcast);
     request->setControlInfo(ctrl);
@@ -130,7 +130,7 @@ void UdpSocket::setBroadcast(bool broadcast)
 
 void UdpSocket::setTimeToLive(int ttl)
 {
-    auto request = new Request("SetTTL", UDP_C_SETOPTION);
+    auto request = new Request("setTTL", UDP_C_SETOPTION);
     UdpSetTimeToLiveCommand *ctrl = new UdpSetTimeToLiveCommand();
     ctrl->setTtl(ttl);
     request->setControlInfo(ctrl);
@@ -139,7 +139,7 @@ void UdpSocket::setTimeToLive(int ttl)
 
 void UdpSocket::setTypeOfService(unsigned char tos)
 {
-    auto request = new Request("SetTOS", UDP_C_SETOPTION);
+    auto request = new Request("setTOS", UDP_C_SETOPTION);
     UdpSetTypeOfServiceCommand *ctrl = new UdpSetTypeOfServiceCommand();
     ctrl->setTos(tos);
     request->setControlInfo(ctrl);
@@ -148,7 +148,7 @@ void UdpSocket::setTypeOfService(unsigned char tos)
 
 void UdpSocket::setMulticastOutputInterface(int interfaceId)
 {
-    auto request = new Request("SetMulticastOutputIf", UDP_C_SETOPTION);
+    auto request = new Request("setMulticastOutputIf", UDP_C_SETOPTION);
     UdpSetMulticastInterfaceCommand *ctrl = new UdpSetMulticastInterfaceCommand();
     ctrl->setInterfaceId(interfaceId);
     request->setControlInfo(ctrl);
@@ -157,7 +157,7 @@ void UdpSocket::setMulticastOutputInterface(int interfaceId)
 
 void UdpSocket::setMulticastLoop(bool value)
 {
-    auto request = new Request("SetMulticastLoop", UDP_C_SETOPTION);
+    auto request = new Request("setMulticastLoop", UDP_C_SETOPTION);
     UdpSetMulticastLoopCommand *ctrl = new UdpSetMulticastLoopCommand();
     ctrl->setLoop(value);
     request->setControlInfo(ctrl);
@@ -166,7 +166,7 @@ void UdpSocket::setMulticastLoop(bool value)
 
 void UdpSocket::setReuseAddress(bool value)
 {
-    auto request = new Request("SetReuseAddress", UDP_C_SETOPTION);
+    auto request = new Request("setReuseAddress", UDP_C_SETOPTION);
     UdpSetReuseAddressCommand *ctrl = new UdpSetReuseAddressCommand();
     ctrl->setReuseAddress(value);
     request->setControlInfo(ctrl);
@@ -175,7 +175,7 @@ void UdpSocket::setReuseAddress(bool value)
 
 void UdpSocket::joinMulticastGroup(const L3Address& multicastAddr, int interfaceId)
 {
-    auto request = new Request("JoinMulticastGroups", UDP_C_SETOPTION);
+    auto request = new Request("joinMulticastGroups", UDP_C_SETOPTION);
     UdpJoinMulticastGroupsCommand *ctrl = new UdpJoinMulticastGroupsCommand();
     ctrl->setMulticastAddrArraySize(1);
     ctrl->setMulticastAddr(0, multicastAddr);
@@ -197,7 +197,7 @@ void UdpSocket::joinLocalMulticastGroups(MulticastGroupList mgl)
             ctrl->setInterfaceId(j, mgl[j].interfaceId);
         }
 
-        auto request = new Request("JoinMulticastGroups", UDP_C_SETOPTION);
+        auto request = new Request("joinMulticastGroups", UDP_C_SETOPTION);
         request->setControlInfo(ctrl);
         sendToUDP(request);
     }
@@ -205,7 +205,7 @@ void UdpSocket::joinLocalMulticastGroups(MulticastGroupList mgl)
 
 void UdpSocket::leaveMulticastGroup(const L3Address& multicastAddr)
 {
-    auto request = new Request("LeaveMulticastGroups", UDP_C_SETOPTION);
+    auto request = new Request("leaveMulticastGroups", UDP_C_SETOPTION);
     UdpLeaveMulticastGroupsCommand *ctrl = new UdpLeaveMulticastGroupsCommand();
     ctrl->setMulticastAddrArraySize(1);
     ctrl->setMulticastAddr(0, multicastAddr);
@@ -223,7 +223,7 @@ void UdpSocket::leaveLocalMulticastGroups(MulticastGroupList mgl)
             ctrl->setMulticastAddr(j, mgl[j].multicastAddr);
         }
 
-        auto request = new Request("LeaveMulticastGroups", UDP_C_SETOPTION);
+        auto request = new Request("leaveMulticastGroups", UDP_C_SETOPTION);
         request->setControlInfo(ctrl);
         sendToUDP(request);
     }
@@ -231,7 +231,7 @@ void UdpSocket::leaveLocalMulticastGroups(MulticastGroupList mgl)
 
 void UdpSocket::blockMulticastSources(int interfaceId, const L3Address& multicastAddr, const std::vector<L3Address>& sourceList)
 {
-    auto request = new Request("BlockMulticastSources", UDP_C_SETOPTION);
+    auto request = new Request("blockMulticastSources", UDP_C_SETOPTION);
     UdpBlockMulticastSourcesCommand *ctrl = new UdpBlockMulticastSourcesCommand();
     ctrl->setInterfaceId(interfaceId);
     ctrl->setMulticastAddr(multicastAddr);
@@ -244,7 +244,7 @@ void UdpSocket::blockMulticastSources(int interfaceId, const L3Address& multicas
 
 void UdpSocket::unblockMulticastSources(int interfaceId, const L3Address& multicastAddr, const std::vector<L3Address>& sourceList)
 {
-    auto request = new Request("UnblockMulticastSources", UDP_C_SETOPTION);
+    auto request = new Request("unblockMulticastSources", UDP_C_SETOPTION);
     UdpUnblockMulticastSourcesCommand *ctrl = new UdpUnblockMulticastSourcesCommand();
     ctrl->setInterfaceId(interfaceId);
     ctrl->setMulticastAddr(multicastAddr);
@@ -257,7 +257,7 @@ void UdpSocket::unblockMulticastSources(int interfaceId, const L3Address& multic
 
 void UdpSocket::joinMulticastSources(int interfaceId, const L3Address& multicastAddr, const std::vector<L3Address>& sourceList)
 {
-    auto request = new Request("JoinMulticastSources", UDP_C_SETOPTION);
+    auto request = new Request("joinMulticastSources", UDP_C_SETOPTION);
     UdpJoinMulticastSourcesCommand *ctrl = new UdpJoinMulticastSourcesCommand();
     ctrl->setInterfaceId(interfaceId);
     ctrl->setMulticastAddr(multicastAddr);
@@ -270,7 +270,7 @@ void UdpSocket::joinMulticastSources(int interfaceId, const L3Address& multicast
 
 void UdpSocket::leaveMulticastSources(int interfaceId, const L3Address& multicastAddr, const std::vector<L3Address>& sourceList)
 {
-    auto request = new Request("LeaveMulticastSources", UDP_C_SETOPTION);
+    auto request = new Request("leaveMulticastSources", UDP_C_SETOPTION);
     UdpLeaveMulticastSourcesCommand *ctrl = new UdpLeaveMulticastSourcesCommand();
     ctrl->setInterfaceId(interfaceId);
     ctrl->setMulticastAddr(multicastAddr);
@@ -284,7 +284,7 @@ void UdpSocket::leaveMulticastSources(int interfaceId, const L3Address& multicas
 void UdpSocket::setMulticastSourceFilter(int interfaceId, const L3Address& multicastAddr,
         UdpSourceFilterMode filterMode, const std::vector<L3Address>& sourceList)
 {
-    auto request = new Request("SetMulticastSourceFilter", UDP_C_SETOPTION);
+    auto request = new Request("setMulticastSourceFilter", UDP_C_SETOPTION);
     UdpSetMulticastSourceFilterCommand *ctrl = new UdpSetMulticastSourceFilterCommand();
     ctrl->setInterfaceId(interfaceId);
     ctrl->setMulticastAddr(multicastAddr);
