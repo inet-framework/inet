@@ -57,6 +57,8 @@ void TcpSinkApp::refreshDisplay() const
 
 void TcpSinkApp::finish()
 {
+    TcpServerHostApp::finish();
+
     recordScalar("bytesRcvd", bytesRcvd);
 }
 

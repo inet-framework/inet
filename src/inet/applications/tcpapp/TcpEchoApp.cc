@@ -74,6 +74,8 @@ void TcpEchoApp::refreshDisplay() const
 
 void TcpEchoApp::finish()
 {
+    TcpServerHostApp::finish();
+
     recordScalar("bytesRcvd", bytesRcvd);
     recordScalar("bytesSent", bytesSent);
 }
