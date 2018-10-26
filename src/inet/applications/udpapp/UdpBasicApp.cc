@@ -210,6 +210,8 @@ void UdpBasicApp::socketErrorArrived(UdpSocket *socket, Indication *indication)
 
 void UdpBasicApp::refreshDisplay() const
 {
+    ApplicationBase::refreshDisplay();
+
     char buf[100];
     sprintf(buf, "rcvd: %d pks\nsent: %d pks", numReceived, numSent);
     getDisplayString().setTagArg("t", 0, buf);

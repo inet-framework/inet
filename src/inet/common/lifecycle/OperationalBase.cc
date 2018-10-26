@@ -163,5 +163,31 @@ void OperationalBase::setOperational(State newState)
     lastChange = simTime();
 }
 
+void OperationalBase::refreshDisplay() const
+{
+    switch (operational) {
+    case STARTING_OPERATION:
+    case RESUMING_OPERATION:
+        getDisplayString().setTagArg("i2", 0, "status/up");
+        break;
+    case OPERATING:
+        getDisplayString().removeTag("i2");
+        break;
+    case STOPPING_OPERATION:
+    case CRASHING_OPERATION:
+    case SUSPENDING_OPERATION:
+        getDisplayString().setTagArg("i2", 0, "status/down");
+        break;
+    case NOT_OPERATING:
+        getDisplayString().setTagArg("i2", 0, "status/cross");
+        break;
+    case OPERATION_SUSPENDED:
+        getDisplayString().setTagArg("i2", 0, "status/stop");
+        break;
+    default:
+        break;
+    }
+}
+
 } // namespace inet
 

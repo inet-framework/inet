@@ -66,6 +66,8 @@ void TcpEchoApp::sendDown(Packet *msg)
 
 void TcpEchoApp::refreshDisplay() const
 {
+    ApplicationBase::refreshDisplay();
+
     char buf[160];
     sprintf(buf, "threads: %d\nrcvd: %ld bytes\nsent: %ld bytes", socketMap.size(), bytesRcvd, bytesSent);
     getDisplayString().setTagArg("t", 0, buf);

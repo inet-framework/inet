@@ -133,6 +133,8 @@ void Arp::flush()
 
 void Arp::refreshDisplay() const
 {
+    OperationalBase::refreshDisplay();
+
     std::stringstream os;
 
     os << "size:" << arpCache.size() << " sent:" << numRequestsSent << "\n"

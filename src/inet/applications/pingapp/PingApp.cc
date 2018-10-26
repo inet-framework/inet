@@ -287,6 +287,8 @@ void PingApp::socketDataArrived(INetworkSocket *socket, Packet *packet)
 
 void PingApp::refreshDisplay() const
 {
+    ApplicationBase::refreshDisplay();
+
     char buf[40];
     sprintf(buf, "sent: %ld pks\nrcvd: %ld pks", sentCount, numPongs);
     getDisplayString().setTagArg("t", 0, buf);

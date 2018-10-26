@@ -178,6 +178,8 @@ const char *DhcpClient::getAndCheckMessageTypeName(DhcpMessageType type)
 
 void DhcpClient::refreshDisplay() const
 {
+    ApplicationBase::refreshDisplay();
+
     getDisplayString().setTagArg("t", 0, getStateName(clientState));
 }
 

@@ -248,20 +248,14 @@ void Tcp::segmentArrivalWhileClosed(Packet *packet, const Ptr<const TcpHeader>& 
 
 void Tcp::refreshDisplay() const
 {
+    OperationalBase::refreshDisplay();
+
     if (getEnvir()->isExpressMode()) {
         // in express mode, we don't bother to update the display
         // (std::map's iteration is not very fast if map is large)
         getDisplayString().setTagArg("t", 0, "");
         return;
     }
-
-    //char buf[40];
-    //sprintf(buf,"%d conns", tcpAppConnMap.size());
-    //getDisplayString().setTagArg("t",0,buf);
-    if (isOperational)
-        getDisplayString().removeTag("i2");
-    else
-        getDisplayString().setTagArg("i2", 0, "status/cross");
 
     int numINIT = 0, numCLOSED = 0, numLISTEN = 0, numSYN_SENT = 0, numSYN_RCVD = 0,
         numESTABLISHED = 0, numCLOSE_WAIT = 0, numLAST_ACK = 0, numFIN_WAIT_1 = 0,

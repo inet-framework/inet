@@ -63,6 +63,8 @@ void TcpServerHostApp::handleCrashOperation()
 
 void TcpServerHostApp::refreshDisplay() const
 {
+    ApplicationBase::refreshDisplay();
+
     char buf[32];
     sprintf(buf, "%d threads", socketMap.size());
     getDisplayString().setTagArg("t", 0, buf);

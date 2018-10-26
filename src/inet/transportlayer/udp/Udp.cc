@@ -188,6 +188,8 @@ void Udp::handleMessageWhenUp(cMessage *msg)
 
 void Udp::refreshDisplay() const
 {
+    OperationalBase::refreshDisplay();
+
     char buf[80];
     sprintf(buf, "passed up: %d pks\nsent: %d pks", numPassedUp, numSent);
     if (numDroppedWrongPort > 0) {

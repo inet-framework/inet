@@ -85,6 +85,8 @@ void UdpSink::socketErrorArrived(UdpSocket *socket, Indication *indication)
 
 void UdpSink::refreshDisplay() const
 {
+    ApplicationBase::refreshDisplay();
+
     char buf[50];
     sprintf(buf, "rcvd: %d pks", numReceived);
     getDisplayString().setTagArg("t", 0, buf);
