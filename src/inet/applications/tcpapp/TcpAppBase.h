@@ -19,6 +19,7 @@
 #define __INET_TCPAPPBASE_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
 namespace inet {
@@ -29,7 +30,7 @@ namespace inet {
  *
  * It needs the following NED parameters: localAddress, localPort, connectAddress, connectPort.
  */
-class INET_API TcpAppBase : public cSimpleModule, public TcpSocket::ICallback
+class INET_API TcpAppBase : public cSimpleModule, public ILifecycle, public TcpSocket::ICallback
 {
   protected:
     TcpSocket socket;

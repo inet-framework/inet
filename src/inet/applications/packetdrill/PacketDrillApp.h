@@ -187,6 +187,12 @@ class INET_API PacketDrillApp : public TcpSessionApp, public LifecycleUnsupporte
             simtime_t offset, simtime_t liveTime, const char *description);
 
         void adjustTimes(PacketDrillEvent *event);
+
+        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override
+        {
+            throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+            return true;
+        }
 };
 
 } // namespace inet

@@ -29,7 +29,7 @@ namespace inet {
 /**
  * An example request-reply based client application.
  */
-class INET_API TcpBasicClientApp : public TcpAppBase, public ILifecycle
+class INET_API TcpBasicClientApp : public TcpAppBase
 {
   protected:
     cMessage *timeoutMsg = nullptr;
