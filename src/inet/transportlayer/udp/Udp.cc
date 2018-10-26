@@ -690,8 +690,10 @@ void Udp::close(int sockId)
 {
     // remove from socketsByIdMap
     auto it = socketsByIdMap.find(sockId);
-    if (it == socketsByIdMap.end())
-        throw cRuntimeError("socket id=%d doesn't exist (already closed?)", sockId);
+    if (it == socketsByIdMap.end()) {
+        EV_ERROR << "socket id=" << sockId << " doesn't exist (already closed?)\n";
+        return;
+    }
     SockDesc *sd = it->second;
     socketsByIdMap.erase(it);
 
