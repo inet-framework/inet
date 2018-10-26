@@ -70,14 +70,6 @@ network NClients
         }
         scenarioManager: ScenarioManager {
             @display("p=100,200;is=s");
-            script = xml("<script>\n" +
-                "<at t='3s'><shutdown module='r2'/></at>\n" +
-                "<at t='6s'><startup module='r2'/></at>\n" +
-                "<at t='9s'><shutdown module='r2'/></at>\n" +
-                "<at t='12s'><startup module='r2'/></at>\n" +
-                "<at t='15s'><shutdown module='cli[0]'/></at>\n" +
-                "<at t='18s'><startup module='cli[0]'/></at>\n" +
-                "</script>");
         }
     connections:
         for i=0..n-1 {
