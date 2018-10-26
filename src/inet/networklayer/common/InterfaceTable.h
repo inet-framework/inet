@@ -24,7 +24,8 @@
 
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
-#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/lifecycle/OperationalBase.h"
 
 namespace inet {
 
@@ -66,7 +67,7 @@ namespace inet {
  * @see InterfaceEntry
  */
 
-class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, protected cListener, public ILifecycle
+class INET_API InterfaceTable : public OperationalBase, public IInterfaceTable, protected cListener
 {
   protected:
     cModule *host;    // cached pointer
@@ -110,7 +111,7 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
     /**
      * Raises an error.
      */
-    virtual void handleMessage(cMessage *) override;
+    virtual void handleMessageWhenUp(cMessage *) override;
 
   public:
     /**
@@ -221,9 +222,14 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
     virtual InterfaceEntry *getFirstMulticastInterface() const override;
 
     /**
-     * ILifecycle method
+     * Lifecycle method
      */
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_LINK_LAYER; }
+    virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOrResumeOperationBase::STAGE_LINK_LAYER; }
+    virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOrSuspendOperationBase::STAGE_LINK_LAYER; }
+    virtual bool handleStartOperation(IDoneCallback *) override;
+    virtual bool handleStopOperation(IDoneCallback *) override;
+    virtual void handleCrashOperation() override;
 
     /**
      * Returns all multicast group address, with it's interfaceId
