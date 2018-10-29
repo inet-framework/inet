@@ -37,11 +37,11 @@ class INET_API LifecycleOperation : public cObject, public noncopyable
     typedef std::map<std::string, std::string> StringMap;
 
   private:
-    cModule *rootModule;
-    int currentStage;
+    cModule *rootModule = nullptr;
+    int currentStage = 0;
     std::vector<IDoneCallback *> pendingList;
-    bool insideInitiateOperation;
-    IDoneCallback *operationCompletionCallback;
+    bool insideInitiateOperation = false;
+    IDoneCallback *operationCompletionCallback = nullptr;
 
   public:
     LifecycleOperation() :
