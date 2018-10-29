@@ -90,6 +90,7 @@ class INET_API PingApp : public ApplicationBase, public INetworkSocket::ICallbac
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void handleMessageWhenUp(cMessage *msg) override;
+    virtual void handleSelfMessage(cMessage *msg);
     virtual void finish() override;
     virtual void refreshDisplay() const override;
 

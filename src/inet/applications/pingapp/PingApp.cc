@@ -161,76 +161,80 @@ void PingApp::parseDestAddressesPar()
     }
 }
 
+void PingApp::handleSelfMessage(cMessage *msg)
+{
+    if (msg->getKind() == PING_FIRST_ADDR) {
+        srcAddr = L3AddressResolver().resolve(par("srcAddr"));
+        parseDestAddressesPar();
+        if (destAddresses.empty()) {
+            return;
+        }
+        destAddrIdx = 0;
+        msg->setKind(PING_CHANGE_ADDR);
+    }
+
+    if (msg->getKind() == PING_CHANGE_ADDR) {
+        if (destAddrIdx >= (int)destAddresses.size())
+            return;
+        destAddr = destAddresses[destAddrIdx];
+        EV_INFO << "Starting up: dest=" << destAddr << "  src=" << srcAddr << "seqNo=" << sendSeqNo << endl;
+        ASSERT(!destAddr.isUnspecified());
+        const Protocol *networkProtocol = nullptr;
+        const char *networkProtocolAsString = par("networkProtocol");
+        if (*networkProtocolAsString)
+            networkProtocol = Protocol::getProtocol(networkProtocolAsString);
+        else {
+            switch (destAddr.getType()) {
+                case L3Address::IPv4: networkProtocol = &Protocol::ipv4; break;
+                case L3Address::IPv6: networkProtocol = &Protocol::ipv6; break;
+                case L3Address::MODULEID:
+                case L3Address::MODULEPATH: networkProtocol = &Protocol::nextHopForwarding; break;
+                default: throw cRuntimeError("unknown address type: %d(%s)", (int)destAddr.getType(), L3Address::getTypeName(destAddr.getType()));
+            }
+        }
+        const Protocol *icmp = l3Echo.at(networkProtocol);
+
+        if (!l3Socket || l3Socket->getNetworkProtocol() != networkProtocol) {
+            if (l3Socket) {
+                l3Socket->close();
+                delete l3Socket;
+            }
+            if (networkProtocol == &Protocol::ipv4)
+                l3Socket = new Ipv4Socket(gate("socketOut"));
+            else if (networkProtocol == &Protocol::ipv6)
+                l3Socket = new Ipv6Socket(gate("socketOut"));
+            else
+                l3Socket = new L3Socket(networkProtocol, gate("socketOut"));
+            l3Socket->bind(icmp, L3Address());
+            l3Socket->setCallback(this);
+        }
+        msg->setKind(PING_SEND);
+    }
+
+    ASSERT2(msg->getKind() == PING_SEND, "Unknown kind in self message.");
+
+    // send a ping
+    sendPingRequest();
+
+    if (count > 0 && sendSeqNo % count == 0) {
+        // choose next dest address
+        destAddrIdx++;
+        msg->setKind(PING_CHANGE_ADDR);
+        if (destAddrIdx >= (int)destAddresses.size()) {
+            if (continuous) {
+                destAddrIdx = destAddrIdx % destAddresses.size();
+            }
+        }
+    }
+
+    // then schedule next one if needed
+    scheduleNextPingRequest(simTime(), msg->getKind() == PING_CHANGE_ADDR);
+}
+
 void PingApp::handleMessageWhenUp(cMessage *msg)
 {
-    if (msg->isSelfMessage()) {
-        if (msg->getKind() == PING_FIRST_ADDR) {
-            srcAddr = L3AddressResolver().resolve(par("srcAddr"));
-            parseDestAddressesPar();
-            if (destAddresses.empty()) {
-                return;
-            }
-            destAddrIdx = 0;
-            msg->setKind(PING_CHANGE_ADDR);
-        }
-
-        if (msg->getKind() == PING_CHANGE_ADDR) {
-            if (destAddrIdx >= (int)destAddresses.size())
-                return;
-            destAddr = destAddresses[destAddrIdx];
-            EV_INFO << "Starting up: dest=" << destAddr << "  src=" << srcAddr << "seqNo=" << sendSeqNo << endl;
-            ASSERT(!destAddr.isUnspecified());
-            const Protocol *networkProtocol = nullptr;
-            const char *networkProtocolAsString = par("networkProtocol");
-            if (*networkProtocolAsString)
-                networkProtocol = Protocol::getProtocol(networkProtocolAsString);
-            else {
-                switch (destAddr.getType()) {
-                    case L3Address::IPv4: networkProtocol = &Protocol::ipv4; break;
-                    case L3Address::IPv6: networkProtocol = &Protocol::ipv6; break;
-                    case L3Address::MODULEID:
-                    case L3Address::MODULEPATH: networkProtocol = &Protocol::nextHopForwarding; break;
-                    default: throw cRuntimeError("unknown address type: %d(%s)", (int)destAddr.getType(), L3Address::getTypeName(destAddr.getType()));
-                }
-            }
-            const Protocol *icmp = l3Echo.at(networkProtocol);
-
-            if (!l3Socket || l3Socket->getNetworkProtocol() != networkProtocol) {
-                if (l3Socket) {
-                    l3Socket->close();
-                    delete l3Socket;
-                }
-                if (networkProtocol == &Protocol::ipv4)
-                    l3Socket = new Ipv4Socket(gate("socketOut"));
-                else if (networkProtocol == &Protocol::ipv6)
-                    l3Socket = new Ipv6Socket(gate("socketOut"));
-                else
-                    l3Socket = new L3Socket(networkProtocol, gate("socketOut"));
-                l3Socket->bind(icmp, L3Address());
-                l3Socket->setCallback(this);
-            }
-            msg->setKind(PING_SEND);
-        }
-
-        ASSERT2(msg->getKind() == PING_SEND, "Unknown kind in self message.");
-
-        // send a ping
-        sendPingRequest();
-
-        if (count > 0 && sendSeqNo % count == 0) {
-            // choose next dest address
-            destAddrIdx++;
-            msg->setKind(PING_CHANGE_ADDR);
-            if (destAddrIdx >= (int)destAddresses.size()) {
-                if (continuous) {
-                    destAddrIdx = destAddrIdx % destAddresses.size();
-                }
-            }
-        }
-
-        // then schedule next one if needed
-        scheduleNextPingRequest(simTime(), msg->getKind() == PING_CHANGE_ADDR);
-    }
+    if (msg->isSelfMessage())
+        handleSelfMessage(msg);
     else if (l3Socket->belongsToSocket(msg))
         l3Socket->processMessage(msg);
     else
