@@ -33,13 +33,14 @@ class INET_API OperationalBase : public cSimpleModule, public ILifecycle
         State state = static_cast<State>(-1);
       public:
         DoneCallback(OperationalBase *module) : module(module) { }
-        void setOrig(IDoneCallback *newOrig, State newState);
+        void init(IDoneCallback *newOrig, State newState);
         void done();
+        IDoneCallback * getOrig() { return orig; }
         virtual void invoke() override;
     };
     State operational = static_cast<State>(-1);
     simtime_t lastChange;
-    DoneCallback myDoneCallback;
+    DoneCallback *spareCallback = nullptr;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -64,9 +65,14 @@ class INET_API OperationalBase : public cSimpleModule, public ILifecycle
     virtual bool isWorking() const { return operational != NOT_OPERATING && operational != OPERATION_SUSPENDED; }
 
     virtual void setOperational(State newState);
+    virtual void operationalInvoked(DoneCallback *callback);
+
+    DoneCallback *newDoneCallback(OperationalBase *module);
+    void deleteDoneCallback(DoneCallback *callback);
 
   public:
     OperationalBase();
+    ~OperationalBase();
 };
 
 } // namespace inet

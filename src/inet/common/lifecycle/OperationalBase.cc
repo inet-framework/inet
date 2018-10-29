@@ -24,34 +24,49 @@
 
 namespace inet {
 
-void OperationalBase::DoneCallback::setOrig(IDoneCallback *newOrig, State newState)
+void OperationalBase::DoneCallback::init(IDoneCallback *orig, State state)
 {
-    ASSERT(orig == nullptr || newOrig == nullptr);
-    orig = newOrig;
-    state = newState;
+    this->orig = orig;
+    this->state = state;
 }
 
 void OperationalBase::DoneCallback::done()
 {
-    ASSERT(state != (State)-1);
     module->setOperational(state);
-    orig = nullptr;
-    state = (State)-1;
 }
 void OperationalBase::DoneCallback::invoke()
 {
-    ASSERT(state != (State)-1);
-    module->setOperational(state);
-    if (orig)
-        orig->invoke();
-    orig = nullptr;
-    state = (State)-1;
+    done();
+    module->operationalInvoked(this);
 }
 
 OperationalBase::OperationalBase() :
-    operational(NOT_OPERATING),
-    myDoneCallback(this)
+    operational(NOT_OPERATING)
 {
+}
+
+OperationalBase::~OperationalBase()
+{
+    delete spareCallback;
+}
+
+OperationalBase::DoneCallback *OperationalBase::newDoneCallback(OperationalBase *module)
+{
+    if (spareCallback != nullptr) {
+        auto callback = spareCallback;
+        spareCallback = nullptr;
+        return callback;
+    }
+    else
+        return new DoneCallback(this);
+}
+
+void OperationalBase::deleteDoneCallback(OperationalBase::DoneCallback *callback)
+{
+    if (spareCallback != nullptr)
+        delete callback;
+    else
+        spareCallback = callback;
 }
 
 void OperationalBase::initialize(int stage)
@@ -66,6 +81,13 @@ void OperationalBase::initialize(int stage)
         if (operational != NOT_OPERATING)
             handleStartOperation(nullptr);
     }
+}
+
+void OperationalBase::operationalInvoked(OperationalBase::DoneCallback *callback)
+{
+    IDoneCallback *origCallback = callback->getOrig();
+    deleteDoneCallback(callback);
+    origCallback->invoke();
 }
 
 void OperationalBase::handleMessage(cMessage *message)
@@ -105,20 +127,26 @@ bool OperationalBase::handleOperationStage(LifecycleOperation *operation, int st
     if (dynamic_cast<ModuleStartOperation *>(operation)) {
         if (isModuleStartStage(stage)) {
             operational = STARTING_OPERATION;
-            myDoneCallback.setOrig(doneCallback, OPERATING);
-            bool done = handleStartOperation(&myDoneCallback);
-            if (done)
-                myDoneCallback.done();
+            DoneCallback *callback = newDoneCallback(this);
+            callback->init(doneCallback, OPERATING);
+            bool done = handleStartOperation(callback);
+            if (done) {
+                callback->done();
+                deleteDoneCallback(callback);
+            }
             return done;
         }
     }
     else if (dynamic_cast<ModuleStopOperation *>(operation)) {
         if (isModuleStopStage(stage)) {
             operational = STOPPING_OPERATION;
-            myDoneCallback.setOrig(doneCallback, NOT_OPERATING);
-            bool done = handleStopOperation(&myDoneCallback);
-            if (done)
-                myDoneCallback.done();
+            DoneCallback *callback = newDoneCallback(this);
+            callback->init(doneCallback, NOT_OPERATING);
+            bool done = handleStopOperation(callback);
+            if (done) {
+                callback->done();
+                deleteDoneCallback(callback);
+            }
             return done;
         }
     }
