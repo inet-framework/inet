@@ -26,7 +26,7 @@ simsignal_t TcpAppBase::connectSignal = registerSignal("connect");
 
 void TcpAppBase::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    ApplicationBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         numSessions = numBroken = packetsSent = packetsRcvd = bytesSent = bytesRcvd = 0;
@@ -49,7 +49,7 @@ void TcpAppBase::initialize(int stage)
     }
 }
 
-void TcpAppBase::handleMessage(cMessage *msg)
+void TcpAppBase::handleMessageWhenUp(cMessage *msg)
 {
     if (msg->isSelfMessage())
         handleTimer(msg);

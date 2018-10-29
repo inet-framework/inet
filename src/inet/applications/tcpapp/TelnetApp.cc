@@ -51,54 +51,39 @@ void TelnetApp::initialize(int stage)
         numCharsToType = numLinesToType = 0;
         WATCH(numCharsToType);
         WATCH(numLinesToType);
-    }
-    else if (stage == INITSTAGE_APPLICATION_LAYER) {
-        cModule *node = findContainingNode(this);
-        NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
-        bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-        if (!isOperational)
-            throw cRuntimeError("This module doesn't support starting in node DOWN state");
-
         simtime_t startTime = par("startTime");
         stopTime = par("stopTime");
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
-
         timeoutMsg = new cMessage("timer");
-        timeoutMsg->setKind(MSGKIND_CONNECT);
-        scheduleAt(startTime, timeoutMsg);
     }
 }
 
-bool TelnetApp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool TelnetApp::handleStartOperation(IDoneCallback *doneCallback)
 {
-    Enter_Method_Silent();
-    if (dynamic_cast<ModuleStartOperation *>(operation)) {
-        if (static_cast<ModuleStartOperation::Stage>(stage) == ModuleStartOperation::STAGE_APPLICATION_LAYER) {
-            simtime_t now = simTime();
-            simtime_t startTime = par("startTime");
-            simtime_t start = std::max(startTime, now);
-            if (timeoutMsg && ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime))) {
-                timeoutMsg->setKind(MSGKIND_CONNECT);
-                scheduleAt(start, timeoutMsg);
-            }
-        }
+    simtime_t now = simTime();
+    simtime_t startTime = par("startTime");
+    simtime_t start = std::max(startTime, now);
+    if (timeoutMsg && ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime))) {
+        timeoutMsg->setKind(MSGKIND_CONNECT);
+        scheduleAt(start, timeoutMsg);
     }
-    else if (dynamic_cast<ModuleStopOperation *>(operation)) {
-        if (static_cast<ModuleStopOperation::Stage>(stage) == ModuleStopOperation::STAGE_APPLICATION_LAYER) {
-            cancelEvent(timeoutMsg);
-            if (socket.getState() == TcpSocket::CONNECTED || socket.getState() == TcpSocket::CONNECTING || socket.getState() == TcpSocket::PEER_CLOSED)
-                close();
-            // TODO: wait until socket is closed
-        }
-    }
-    else if (dynamic_cast<ModuleCrashOperation *>(operation)) {
-        if (static_cast<ModuleCrashOperation::Stage>(stage) == ModuleCrashOperation::STAGE_CRASH)
-            cancelEvent(timeoutMsg);
-    }
-    else
-        throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
     return true;
+}
+
+bool TelnetApp::handleStopOperation(IDoneCallback *doneCallback)
+{
+    cancelEvent(timeoutMsg);
+    if (socket.getState() == TcpSocket::CONNECTED || socket.getState() == TcpSocket::CONNECTING || socket.getState() == TcpSocket::PEER_CLOSED)
+        close();
+    // TODO: wait until socket is closed
+    return true;
+}
+
+void TelnetApp::handleCrashOperation()
+{
+    //TODO needed rapid close sockets
+    cancelEvent(timeoutMsg);
 }
 
 void TelnetApp::handleTimer(cMessage *msg)

@@ -154,7 +154,7 @@ void PacketDrillApp::initialize(int stage)
 }
 
 
-void PacketDrillApp::handleMessage(cMessage *msg)
+void PacketDrillApp::handleMessageWhenUp(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
         handleTimer(msg);

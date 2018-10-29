@@ -40,7 +40,7 @@ class PacketDrillScript;
 /**
  * Implements the packetdrill application simple module. See the NED file for more info.
  */
-class INET_API PacketDrillApp : public TcpSessionApp, public LifecycleUnsupported
+class INET_API PacketDrillApp : public TcpSessionApp
 {
     public:
         PacketDrillApp();
@@ -68,7 +68,7 @@ class INET_API PacketDrillApp : public TcpSessionApp, public LifecycleUnsupporte
     protected:
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
         void initialize(int stage) override;
-        void handleMessage(cMessage *msg) override;
+        void handleMessageWhenUp(cMessage *msg) override;
         void finish() override;
 
         void handleTimer(cMessage *msg) override;

@@ -45,7 +45,9 @@ class INET_API TelnetApp : public TcpAppBase
     virtual void checkedScheduleAt(simtime_t t, cMessage *msg);
     virtual void sendGenericAppMsg(int numBytes, int expectedReplyBytes);
 
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    virtual bool handleStartOperation(IDoneCallback *doneCallback) override;
+    virtual bool handleStopOperation(IDoneCallback *doneCallback) override;
+    virtual void handleCrashOperation() override;
 
   public:
     TelnetApp() {}

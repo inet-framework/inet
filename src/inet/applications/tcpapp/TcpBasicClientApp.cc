@@ -47,52 +47,34 @@ void TcpBasicClientApp::initialize(int stage)
         stopTime = par("stopTime");
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
-    }
-    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         timeoutMsg = new cMessage("timer");
-        cModule *node = findContainingNode(this);
-        nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
-
-        if (isNodeUp()) {
-            timeoutMsg->setKind(MSGKIND_CONNECT);
-            scheduleAt(startTime, timeoutMsg);
-        }
     }
 }
 
-bool TcpBasicClientApp::isNodeUp()
+bool TcpBasicClientApp::handleStartOperation(IDoneCallback *)
 {
-    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
-}
-
-bool TcpBasicClientApp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-{
-    Enter_Method_Silent();
-    if (dynamic_cast<ModuleStartOperation *>(operation)) {
-        if (static_cast<ModuleStartOperation::Stage>(stage) == ModuleStartOperation::STAGE_APPLICATION_LAYER) {
-            simtime_t now = simTime();
-            simtime_t start = std::max(startTime, now);
-            if (timeoutMsg && ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime))) {
-                timeoutMsg->setKind(MSGKIND_CONNECT);
-                scheduleAt(start, timeoutMsg);
-            }
-        }
+    simtime_t now = simTime();
+    simtime_t start = std::max(startTime, now);
+    if (timeoutMsg && ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime))) {
+        timeoutMsg->setKind(MSGKIND_CONNECT);
+        scheduleAt(start, timeoutMsg);
     }
-    else if (dynamic_cast<ModuleStopOperation *>(operation)) {
-        if (static_cast<ModuleStopOperation::Stage>(stage) == ModuleStopOperation::STAGE_APPLICATION_LAYER) {
-            cancelEvent(timeoutMsg);
-            if (socket.getState() == TcpSocket::CONNECTED || socket.getState() == TcpSocket::CONNECTING || socket.getState() == TcpSocket::PEER_CLOSED)
-                close();
-            // TODO: wait until socket is closed
-        }
-    }
-    else if (dynamic_cast<ModuleCrashOperation *>(operation)) {
-        if (static_cast<ModuleCrashOperation::Stage>(stage) == ModuleCrashOperation::STAGE_CRASH)
-            cancelEvent(timeoutMsg);
-    }
-    else
-        throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
     return true;
+}
+
+bool TcpBasicClientApp::handleStopOperation(IDoneCallback *)
+{
+    cancelEvent(timeoutMsg);
+    if (socket.getState() == TcpSocket::CONNECTED || socket.getState() == TcpSocket::CONNECTING || socket.getState() == TcpSocket::PEER_CLOSED)
+        close();
+    // TODO: wait until socket is closed
+    return true;
+}
+
+void TcpBasicClientApp::handleCrashOperation()
+{
+    cancelEvent(timeoutMsg);
+    // TODO: rapid socket close
 }
 
 void TcpBasicClientApp::sendRequest()
