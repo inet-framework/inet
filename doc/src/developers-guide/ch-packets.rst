@@ -22,48 +22,35 @@ detail, and we shed light on many common API usages through examples.
    setting fields have been omitted, and some algorithms have been simplified to
    ease understanding.
 
-The representation of packets is an essential modeling support for
+The representation of packets is essential for
 communication network simulation. Applications and communication
 protocols construct, deconstruct, encapsulate, fragment, aggregate, and
 manipulate packets in many ways. In order to ease the implementation of
-said behavioral patterns, the Packet API primarily provides a
-feature-rich and general purpose :cpp:`Packet` data structure.
+these behavioral patterns, INET provides a feature-rich general data structure,
+the :cpp:`Packet` class.
 
 The :cpp:`Packet` data structure is capable of representing application
 packets, :protocol:`TCP` segments, :protocol:`IP` datagrams,
 :protocol:`Ethernet` frames, :protocol:`IEEE 802.11` frames, and all
 kinds of digital data. It is designed to provide efficient storage,
 duplication, sharing, encapsulation, aggregation, fragmentation,
-serialization, and data representation selection. The :cpp:`Packet` data
-structure consists of two layers, built on one another. The upper layer
-deals with packets, and the lower layer deals with alternative data
-representations.
-
-The Packet API, despite its name, does not only provide the
-:cpp:`Packet` data structure but several other functionality. For
-example, communication protocols often need to enqueue data for sending
-(e.g., :protocol:`TCP`), or buffer received data for reassembly (e.g.,
-:protocol:`IP`) or for reordering (e.g., :protocol:`IEEE 802.11`). These
-services are provided as separate C++ data structures on top of the
-lower layer mentioned above.
+serialization, and data representation selection. Additional functionality,
+such as support for enqueueing data for transmisson and buffering received
+data for reassembly and/or for reordering, is provided as separate C++
+data structures on top of :cpp:`Packet`.
 
 .. _dg:sec:packets:representing-data:
 
 Representing Data
 -----------------
 
-The :cpp:`Packet` data structure is a compound data structure that
-builds on top of another set of data structures called chunks. The
-:cpp:`Chunk` data structures provide several alternatives to represent a
-piece of data. Chunks can be simple or compound if they are built using
-other chunks.
+The :cpp:`Packet` data structure builds on top of another set of data
+structures called chunks. Chunks provide several alternatives to represent
+a piece of data.
 
-Communication protocols and applications may define their own chunks or
-use already existing ones. User defined chunks are most often genereted
-by the OMNeT++ MSG compiler as a subclass of :cpp:`FieldsChunk`. It’s
-also possible to write a user defined chunk from scratch.
+INET provides the following built-in chunk C++ classes:
 
-INET provides the following built-in chunks:
+-  :cpp:`Chunk`, the base class for all chunk classes
 
 -  repeated byte or bit chunk (:cpp:`ByteCountChunk`,
    :cpp:`BitCountChunk`)
@@ -78,11 +65,15 @@ INET provides the following built-in chunks:
 -  many protocol specific field based chunks (e.g. :cpp:`Ipv4Header`
    subclass of :cpp:`FieldsChunk`)
 
-Applications and communication protocols most often construct simple
-chunks to represent application data and protocol headers. The following
-examples demonstrate the construction of various simple chunks.
+In addition, communication protocols and applications often define
+their own chunk types. User-defined chunks are normally defined in
+``msg`` files as a subclass of :cpp:`FieldsChunk`, which the
+OMNeT++ MSG compiler turns into C++ code.
+It is also possible to write a user defined chunk from scratch.
 
-
+Chunks usually represent application data and protocol headers.
+The following examples demonstrate the construction of various
+chunks.
 
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
@@ -90,14 +81,13 @@ examples demonstrate the construction of various simple chunks.
    :end-before: !End
    :name: Chunk construction example
 
-In general, chunks must be constructed with a call to :cpp:`makeShared`
-instead of the standard C++ :cpp:`new` operator. The special
-construction mechanism is required for the efficient sharing of chunks
-among packets using C++ shared pointers.
+In general, chunks must be constructed with a call to the :cpp:`makeShared`
+function instead of the standard C++ :cpp:`new` operator, because chunks
+are shared among packets using C++ shared pointers.
 
-Packets most often contain several chunks inserted by different
-protocols as they are passed through the protocol layers. The most
-common way to represent packet contents, is forming a compound chunk by
+Packets most often contain several chunks, inserted by different
+protocols, as they are passed through the protocol layers. The most
+common way to represent packet contents is to form a compound chunk by
 concatenation.
 
 
@@ -132,8 +122,6 @@ chunk API provides automatic merging for consecutive chunk slices.
 
 Alternative representations can be easily converted into one another
 using automatic serialization as a common ground.
-
-
 
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
@@ -183,11 +171,13 @@ processing.
    :name: Packet construction example
 
 In order to facilitate packet processing by communication protocols at
-the receiver node, packets are split into three parts: front popped
+the receiver node, :cpp:`Packet` maintains two offsets into the packet data
+that divide the data into three regions: front popped
 part, data part, and back popped part. During packet processing, as the
 packet is passed through the protocol layers, headers and trailers are
-popped from the beginning and from the end. This effectively reduces the
-remaining unprocessed part called the data part, but it doesn’t affect
+popped from the beginning and from the end of the packet, moving the
+corresponding offsets. This effectively reduces the remaining
+unprocessed part called the data part, but it doesn’t affect
 the data stored in the packet.
 
 
