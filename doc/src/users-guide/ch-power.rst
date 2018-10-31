@@ -13,15 +13,15 @@ increasing number of embedded devices and the upcoming Internet of
 Things. Mobile personal medical devices, large scale wireless
 environment monitoring devices, electric vehicles, solar panels,
 low-power wireless sensors, etc. require paying special attention to
-power consumption. The high fidelity simulation of power consumption
-allows designing power sensitive routing protocols, MAC protocols,
-physical layers, etc. which in turn results in more energy efficient
+power consumption. High-fidelity simulation of power consumption
+allows designing power-sensitive routing protocols, MAC protocols with 
+power management features, etc., which in turn results in more energy efficient
 devices.
 
-In order to help the modeling process the power model is separated from
-other simulation models. This separation makes the model extensible and
-it also allows easy experimentation with alternative implementations. In
-a nutshell the power model consists of the following components:
+In order to help the modeling process, the INET power model is separated
+from other simulation models. This separation makes the power model
+extensible, and it also allows easy experimentation with alternative
+implementations. In a nutshell, the power model consists of the following components:
 
 -  energy consumption models
 
@@ -47,8 +47,8 @@ Energy Consumer Models
 
 Energy consumer models describe the energy consumption of devices over
 time. For example, a transceiver consumes energy when it transmits or
-receives signals, a CPU consumes energy when the network protocol routes
-packets, and a display consumes energy when it’s turned on.
+receives a signal, a CPU consumes energy when the network protocol forwards
+a packet, and a display consumes energy when it is turned on.
 
 In INET, an energy consumer model is an OMNeT++ simple module that
 implements the energy consumption of software processes or hardware
@@ -85,7 +85,7 @@ Energy Generator Models
 
 Energy generator models describe the energy generation of devices over
 time. A solar panel, for example, produces energy based on time, the
-panel’s position on the globe, its orientation towards the sun and the
+panel’s location on the globe, its orientation towards the sun and the
 actual weather conditions. Energy generators connect to an energy
 storage that absorbs the generated energy.
 
