@@ -27,8 +27,6 @@ The following sections first introduce the shared functionality of
 sockets, and then list all INET sockets in detail, mostly by shedding
 light on many common usages through examples.
 
-
-
 .. note::
 
    Code fragments in this chapter have been somewhat simplified for brevity. For
@@ -68,8 +66,6 @@ be configured prior to use. In order to send packets and service
 requests on the correct gate towards the underlying communication
 protocol, the output gate must be configured:
 
-
-
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
    :start-after: !SocketConfigureExample
@@ -104,8 +100,6 @@ methods.
 For example, the most common callback method is the one which processes
 incoming packets:
 
-
-
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
    :start-after: !SocketCallbackInterfaceExample
@@ -122,8 +116,6 @@ socket where they belong to.
 For example, an application can simply go through each knonwn socket in
 any order, and decide which one should process the received message as
 follows:
-
-
 
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
@@ -148,8 +140,6 @@ For example, after the socket is properly configured, the application
 can start sending packets without attaching any tags, because the socket
 takes care of the necessary technical details:
 
-
-
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
    :start-after: !SocketSendExample
@@ -161,8 +151,6 @@ Receiving Data
 
 For example, the application may directly implement the :cpp:`ICallback`
 interface of the socket and print the received data as follows:
-
-
 
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
@@ -181,8 +169,6 @@ nework node, or potentially somewhere else in the network.
 For example, a socket for a connection oriented protocol must be closed
 to release the allocated resources at the peer:
 
-
-
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
    :start-after: !SocketCloseExample
@@ -200,8 +186,6 @@ interface simultaneously.
 
 For example, processing an incoming packet or service indication can be
 done as follows:
-
-
 
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
@@ -234,8 +218,6 @@ The :cpp:`UdpSocket` deconstructs the message and uses the
 :cpp:`UdpSocket::ICallback` interface to notify the application about
 received data and error indications:
 
-
-
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
    :start-after: !UdpSocketCallbackInterface
@@ -257,8 +239,6 @@ pair must be unique within the same network node.
 Here is how to bind to a specific local address and port to receive
 :protocol:`UDP` datagrams:
 
-
-
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
    :start-after: !UdpSocketBindExample
@@ -269,8 +249,6 @@ For only receiving :protocol:`UDP` datagrams from a specific remote
 address/port, the socket can be connected to the desired remote
 address/port:
 
-
-
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
    :start-after: !UdpSocketConnectExample
@@ -280,8 +258,6 @@ address/port:
 There are several other socket options (e.g. receiving broadcasts,
 managing multicast groups, setting type of service) which can also be
 configured using the :cpp:`UdpSocket` class:
-
-
 
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
@@ -297,8 +273,6 @@ Sending Data
 After the socket has been configured, applications can send datagrams to
 a remote address and port via a simple function call:
 
-
-
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
    :start-after: !UdpSocketSendToExample
@@ -312,8 +286,6 @@ The :protocol:`UDP` protocol is in fact connectionless, so when the
 :ned:`Udp` module receives the connect request, it simply remembers the
 remote address and port, and use it as default destination for later
 sends.
-
-
 
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
@@ -331,8 +303,6 @@ Receiving Data
 For example, the application may directly implement the
 :cpp:`UdpSocket::ICallback` interface and print the received data as
 follows:
-
-
 
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
@@ -361,8 +331,6 @@ deconstructs the message and uses the :cpp:`TcpSocket::ICallback`
 interface to notify the application about the received data or service
 indication:
 
-
-
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
    :start-after: !TcpSocketCallbackInterface
@@ -375,8 +343,6 @@ Configuring Connections
 The :ned:`Tcp` module supports several :protocol:`TCP` different
 congestion algorithms, which can also be configured using the
 :cpp:`TcpSocket`:
-
-
 
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
@@ -395,8 +361,6 @@ must be established before applications can exchange data. On the one
 side, the application listens at a local address and port for incoming
 :protocol:`TCP` connections:
 
-
-
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
    :start-after: !TcpSocketListenExample
@@ -405,8 +369,6 @@ side, the application listens at a local address and port for incoming
 
 On the other side, the application connects to a remote address and port
 to establish a new connection:
-
-
 
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
@@ -422,8 +384,6 @@ incoming connections. The socket in turn notifies the application using
 the :fun:`ICallback::socketAvailable` method of the callback interface.
 Finally, incoming :protocol:`TCP` connections must be accepted by the
 application before they can be used:
-
-
 
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
@@ -441,8 +401,6 @@ Sending Data
 
 After the connection has been established, applications can send data to
 the remote application via a simple function call:
-
-
 
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
@@ -466,8 +424,6 @@ were sent due to the nature of :protocol:`TCP` protocol.
 For example, the application may directly implement the
 :cpp:`TcpSocket::ICallback` interface and print the received data as
 follows:
-
-
 
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
@@ -496,8 +452,6 @@ deconstructs the message and uses the :cpp:`SctpSocket::ICallback`
 interface to notify the application about the received data or service
 indication:
 
-
-
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
    :start-after: !SctpSocketCallbackInterface
@@ -511,8 +465,6 @@ Configuring Connections
 
 The :cpp:`SctpSocket` class supports setting several :protocol:`SCTP`
 specific connection parameters directly:
-
-
 
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
@@ -533,8 +485,6 @@ must be established before applications can exchange data. On the one
 side, the application listens at a local address and port for incoming
 :protocol:`SCTP` connections:
 
-
-
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
    :start-after: !SctpSocketListenExample
@@ -543,8 +493,6 @@ side, the application listens at a local address and port for incoming
 
 On the other side, the application connects to a remote address and port
 to establish a new connection:
-
-
 
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
@@ -563,8 +511,6 @@ using the :fun:`ICallback::socketAvailable` method of the callback
 interface. Finally, incoming :protocol:`SCTP` connections must be
 accepted by the application before they can be used:
 
-
-
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
    :start-after: !SctpSocketAcceptExample
@@ -578,8 +524,6 @@ Sending Data
 
 After the connection has been established, applications can send data to
 the remote applica- tion via a simple function call:
-
-
 
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
@@ -603,8 +547,6 @@ were sent due to the nature of :protocol:`SCTP` protocol.
 For example, the application may directly implement the
 :cpp:`SctpSocket::ICallback` interface and print the received data as
 follows:
-
-
 
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
@@ -632,8 +574,6 @@ socket where they belong as shown in the general section. The
 :cpp:`Ipv4Socket::ICallback` interface to notify the application about
 the received data:
 
-
-
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
    :start-after: !Ipv4SocketCallbackInterface
@@ -653,8 +593,6 @@ For example, the following code fragment shows how the INET
 :ned:`PingApp` binds to the :protocol:`ICMPv4` protocol to receive all
 incoming :protocol:`ICMPv4` Echo Reply messages:
 
-
-
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
    :start-after: !Ipv4SocketBindExample
@@ -663,8 +601,6 @@ incoming :protocol:`ICMPv4` Echo Reply messages:
 
 For only receiving :protocol:`IPv4` datagrams from a specific remote
 address, the socket can be connected to the desired remote address:
-
-
 
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
@@ -681,8 +617,6 @@ After the socket has been configured, applications can immediately start
 sending :protocol:`IPv4` datagrams to a remote address via a simple
 function call:
 
-
-
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
    :start-after: !Ipv4SocketSendToExample
@@ -692,8 +626,6 @@ function call:
 If the application wants to send several :protocol:`IPv4` datagrams to
 the same destination address, it can optionally connect to the
 destination:
-
-
 
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
@@ -717,8 +649,6 @@ Receiving Data
 For example, the application may directly implement the
 :cpp:`Ipv4Socket::ICallback` interface and print the received data as
 follows:
-
-
 
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
@@ -746,8 +676,6 @@ socket where they belong as shown in the general section. The
 :cpp:`Ipv6Socket::ICallback` interface to notify the application about
 the received data:
 
-
-
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
    :start-after: !Ipv6SocketCallbackInterface
@@ -767,8 +695,6 @@ For example, the following code fragment shows how the INET
 :ned:`PingApp` binds to the :protocol:`ICMPv6` protocol to receive all
 incoming :protocol:`ICMPv6` Echo Reply messages:
 
-
-
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
    :start-after: !Ipv6SocketBindExample
@@ -777,8 +703,6 @@ incoming :protocol:`ICMPv6` Echo Reply messages:
 
 For only receiving :protocol:`IPv6` datagrams from a specific remote
 address, the socket can be connected to the desired remote address:
-
-
 
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
@@ -795,8 +719,6 @@ After the socket has been configured, applications can immediately start
 sending :protocol:`IPv6` datagrams to a remote address via a simple
 function call:
 
-
-
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
    :start-after: !Ipv6SocketSendAtExample
@@ -806,8 +728,6 @@ function call:
 If the application wants to send several :protocol:`IPv6` datagrams to
 the same destination address, it can optionally connect to the
 destination:
-
-
 
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
@@ -831,8 +751,6 @@ Receiving Data
 For example, the application may directly implement the
 :cpp:`Ipv6Socket::ICallback` interface and print the received data as
 follows:
-
-
 
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
@@ -863,8 +781,6 @@ the associated socket where as shown in the general section. The
 :cpp:`L3Socket::ICallback` interface to notify the application about the
 received data:
 
-
-
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
    :start-after: !L3SocketCallbackInterface
@@ -878,8 +794,6 @@ Configuring Sockets
 
 Since the :cpp:`L3Socket` class is network protocol agnostic, it must be
 configured to connect to a desired network protocol:
-
-
 
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
@@ -897,8 +811,6 @@ For example, the following code fragment shows how the INET
 :ned:`PingApp` binds to the :protocol:`Echo` protocol to receive all
 incoming :protocol:`Echo` Reply messages:
 
-
-
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
    :start-after: !L3SocketBindExample
@@ -907,8 +819,6 @@ incoming :protocol:`Echo` Reply messages:
 
 For only receiving datagrams from a specific remote address, the socket
 can be connected to the desired remote address:
-
-
 
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
@@ -924,8 +834,6 @@ Sending Data
 After the socket has been configured, applications can immediately start
 sending datagrams to a remote address via a simple function call:
 
-
-
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
    :start-after: !L3SocketSendToExample
@@ -934,8 +842,6 @@ sending datagrams to a remote address via a simple function call:
 
 If the application wants to send several datagrams to the same
 destination address, it can optionally connect to the destination:
-
-
 
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
@@ -958,8 +864,6 @@ Receiving Data
 For example, the application may directly implement the
 :cpp:`L3Socket::ICallback` interface and print the received data as
 follows:
-
-
 
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
@@ -992,8 +896,6 @@ socket where they belong as shown in the general section. The
 :cpp:`TunSocket::ICallback` interface to notify the application about
 the received data:
 
-
-
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
    :start-after: !TunSocketCallbackInterface
@@ -1008,8 +910,6 @@ Configuring Sockets
 A :cpp:`TunSocket` must be associated with a :protocol:`TUN` interface
 before it can be used:
 
-
-
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
    :start-after: !TunSocketOpenExample
@@ -1022,8 +922,6 @@ Sending Packets
 As soon as the :cpp:`TunSocket` is associated with a :protocol:`TUN`
 interface, applications can immediately start sending datagrams via a
 simple function call:
-
-
 
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
@@ -1042,8 +940,6 @@ Messages received from the :protocol:`TUN` interface must be processed
 by the corresponding :cpp:`TunSocket`. The :cpp:`TunSocket` deconstructs
 the message and uses the :cpp:`TunSocket::ICallback` interface to notify
 the application about the received data:
-
-
 
 .. literalinclude:: lib/Snippets.cc
    :language: cpp
