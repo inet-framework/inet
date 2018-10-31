@@ -22,6 +22,11 @@
 
 
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/linklayer/ethernet/EtherFrame_m.h"
+#include "inet/linklayer/ethernet/Ethernet.h"
+#include "inet/linklayer/ethernet/EtherEncap.h"
+
+#include "inet/networklayer/common/L3Tools.h"
 
 
 //#ifdef WITH_IPv6
@@ -72,42 +77,53 @@ void RedMarker::handleMessage(cMessage *msg)
 {
   Packet *packet = check_and_cast<Packet *>(msg);
 
-  auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
+  const Protocol *payloadProtocol = nullptr;
+  auto headerOffset = packet->getFrontOffset();
 
-  if (protocol == &Protocol::ipv4)
+  auto ethHeader = packet->peekAtFront<EthernetMacHeader>();
+  if (isEth2Header(*ethHeader))
   {
-    packet->trimFront();
-    const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
-
-    //congestion experiencd CE
-    int ect = ipv4Header->getExplicitCongestionNotification();
-//      packet->insertAtFront(ipv4Header);
-
-// if packet supports marking (ECT(1) or ECT(0))
-    if ((ect & 0x01) || (ect & 0x02))
+    payloadProtocol = ProtocolGroup::ethertype.getProtocol(ethHeader->getTypeOrLength());
+    if (*payloadProtocol == Protocol::ipv4)
     {
-      // if next packet should be marked and it is not
-      if (markNext && !(ect & 0x03))
+//      auto headerOffset = packet->getFrontOffset();
+
+      packet->setFrontOffset(headerOffset + ethHeader->getChunkLength());
+      auto ipv4Header = packet->peekAtFront<Ipv4Header>();
+
+      //congestion experiencd CE
+      int ect = ipv4Header->getExplicitCongestionNotification();
+  //      packet->insertAtFront(ipv4Header);
+
+  // if packet supports marking (ECT(1) or ECT(0))
+      if ((ect & 0x01) || (ect & 0x02))
       {
-        markPacket(packet);
-        markNext = false;
-      }
-      else if (ect & 0x03)
-      {
-        if (shouldMark(packet))
+
+        // if next packet should be marked and it is not
+        if (markNext && !(ect & 0x03))
         {
-          markNext = true;
+          markPacket(packet);
+          markNext = false;
         }
-      }
-      else
-      {
-        shouldMark(packet);
+        else if (ect & 0x03)
+        {
+          if (shouldMark(packet))
+          {
+            markNext = true;
+          }
+        }
+        else
+        {
+          shouldMark(packet);
 
+        }
+        packet->setFrontOffset(headerOffset);
+        sendOut(packet);
+        return;
       }
-      sendOut(packet);
-      return;
+      packet->setFrontOffset(headerOffset);
+
     }
-
   }
 
 
@@ -237,21 +253,35 @@ bool RedMarker::shouldDrop(cPacket *packet)
 bool RedMarker::markPacket(Packet *packet)
 {
   EV_DETAIL << "Marking packet with ECN \n";
+  std::cout << "Marking packet with ECN \n";
 
-  auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
+  packet->setFrontOffset(b(0));
+  auto macHeader = packet->popAtFront<EthernetMacHeader>();
+  packet->popAtBack<EthernetFcs>(ETHER_FCS_BYTES);
 
-  //TODO processing link-layer headers when exists
+  const auto& ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
+  ipv4Header->setExplicitCongestionNotification(3);
+  insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
+
+  packet->insertAtFront(macHeader);
+
+  EtherEncap::addPaddingAndFcs(packet, FCS_DECLARED_CORRECT);
 
 
-  if (protocol == &Protocol::ipv4) {
-      packet->trimFront();
-      const auto& ipv4Header = packet->removeAtFront<Ipv4Header>();
+//
+//  auto networkHeader = getNetworkProtocolHeader(packet);
+//
+//  Ipv4Header* ipv4Header = static_cast<Ipv4Header*>(networkHeader);
+//
+//  //  auto ipv4Header = packet->peekAtFront<Ipv4Header>();
+////  auto ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
+//
+//  //congestion experiencd CE
+//  ipv4Header->setExplicitCongestionNotification(3);
+//  insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
 
-      //congestion experiencd CE
-      ipv4Header->setExplicitCongestionNotification(3);
-      packet->insertAtFront(ipv4Header);
-      return true;
-  }
+  return true;
+
 
 //#ifdef WITH_IPv6
 //  if (protocol == &Protocol::ipv6) {
