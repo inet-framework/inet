@@ -128,6 +128,7 @@ void RedMarker::handleMessage(cMessage *msg)
 
 
   if (shouldDrop(packet)){
+    std::cout<< "RedMarker: Dropping packet "<< std::endl;
     dropPacket(packet);
     return;
   }
@@ -253,7 +254,7 @@ bool RedMarker::shouldDrop(cPacket *packet)
 bool RedMarker::markPacket(Packet *packet)
 {
   EV_DETAIL << "Marking packet with ECN \n";
-  std::cout << "Marking packet with ECN \n";
+//  std::cout << "Marking packet with ECN \n";
 
   packet->setFrontOffset(b(0));
   auto macHeader = packet->popAtFront<EthernetMacHeader>();
