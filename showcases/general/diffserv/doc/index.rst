@@ -30,7 +30,7 @@ into a limited number of forwarding classes, and encodes the forwarding
 class into the 6-bit DSCP field of the IP header. The DSCP field will
 then determine the treatment of packets (resource priority and drop
 priority) at intermediate nodes.
-In theory, a network could have up to 64 (i.e. 26) different traffic
+In theory, a network could have up to 64 (i.e. 2^6) different traffic
 classes using different DSCPs. In practice, however, most networks use
 the following commonly defined per-hop behaviors:
 
