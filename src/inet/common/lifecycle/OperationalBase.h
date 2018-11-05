@@ -51,7 +51,7 @@ class INET_API OperationalBase : public cSimpleModule, public ILifecycle
     virtual void handleMessageWhenDown(cMessage *msg);
     virtual void handleMessageWhenUp(cMessage *msg) = 0;
 
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    virtual bool handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
     virtual bool handleStartOperation(IDoneCallback *doneCallback);
     virtual bool handleStopOperation(IDoneCallback *doneCallback);
     virtual void handleCrashOperation();

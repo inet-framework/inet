@@ -50,9 +50,10 @@ NodeStatus::State NodeStatus::getStateByName(const char *name)
     return static_cast<State>(state);
 }
 
-bool NodeStatus::handleOperationStage(LifecycleOperation *operation, int opStage, IDoneCallback *doneCallback)
+bool NodeStatus::handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
+    int opStage = operation->getCurrentStage();
     cModule *node = getContainingNode(this);
     if (dynamic_cast<ModuleStartOperation *>(operation)) {
         if (opStage == 0) {

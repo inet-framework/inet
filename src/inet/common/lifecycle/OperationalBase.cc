@@ -121,9 +121,10 @@ void OperationalBase::handleMessageWhenDown(cMessage *message)
     delete message;
 }
 
-bool OperationalBase::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool OperationalBase::handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
+    int stage = operation->getCurrentStage();
     if (dynamic_cast<ModuleStartOperation *>(operation)) {
         if (isModuleStartStage(stage)) {
             operational = STARTING_OPERATION;
