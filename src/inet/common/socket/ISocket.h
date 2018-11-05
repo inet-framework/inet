@@ -44,6 +44,12 @@ class INET_API ISocket
      * Examines the message, takes ownership, and updates socket state.
      */
     virtual void processMessage(cMessage *msg) = 0;
+
+    /**
+     * Notify the protocol that the owner of ISocket has destroyed the socket.
+     * Typically used when the owner of ISocket has crashed.
+     */
+    virtual void destroy() = 0;
 };
 
 } // namespace inet
