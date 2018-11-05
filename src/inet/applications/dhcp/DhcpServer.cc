@@ -535,12 +535,22 @@ bool DhcpServer::handleStartOperation(LifecycleOperation *operation, IDoneCallba
     return true;
 }
 
-void DhcpServer::stopApp()
+bool DhcpServer::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     leased.clear();
     ie = nullptr;
     cancelEvent(startTimer);
-    socket.close();
+    socket.close();     //TODO return false and waiting socket close
+    return true;
+}
+
+void DhcpServer::handleCrashOperation(LifecycleOperation *operation)
+{
+    leased.clear();
+    ie = nullptr;
+    cancelEvent(startTimer);
+    if (operation->getRootModule() == this)     // closes socket when the application crashed only
+        socket.close();         //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
 }
 
 } // namespace inet

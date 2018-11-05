@@ -74,7 +74,8 @@ bool TcpBasicClientApp::handleStopOperation(LifecycleOperation *operation, IDone
 void TcpBasicClientApp::handleCrashOperation(LifecycleOperation *operation)
 {
     cancelEvent(timeoutMsg);
-    // TODO: rapid socket close
+    if (operation->getRootModule() == this)
+        socket.abort(); // TODO: rapid socket close
 }
 
 void TcpBasicClientApp::sendRequest()

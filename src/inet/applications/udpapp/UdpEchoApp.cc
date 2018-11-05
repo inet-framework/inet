@@ -88,13 +88,15 @@ bool UdpEchoApp::handleStartOperation(LifecycleOperation *operation, IDoneCallba
 
 bool UdpEchoApp::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
-    //TODO if(socket.isOpened()) socket.close();
-    socket.setCallback(nullptr);
+    socket.close();     //TODO return false and waiting socket close
     return true;
 }
 
 void UdpEchoApp::handleCrashOperation(LifecycleOperation *operation)
 {
+    if (operation->getRootModule() == this)     // closes socket when the application crashed only
+        socket.close();         //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
+    socket.setCallback(nullptr);
 }
 
 } // namespace inet

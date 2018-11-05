@@ -104,13 +104,15 @@ bool UdpVideoStreamClient::handleStartOperation(LifecycleOperation *operation, I
 bool UdpVideoStreamClient::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     cancelEvent(selfMsg);
-    //TODO if(socket.isOpened()) socket.close();
+    socket.close();    //TODO return false and waiting socket close
     return true;
 }
 
 void UdpVideoStreamClient::handleCrashOperation(LifecycleOperation *operation)
 {
     cancelEvent(selfMsg);
+    if (operation->getRootModule() == this)     // closes socket when the application crashed only
+        socket.close();    //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
 }
 
 } // namespace inet

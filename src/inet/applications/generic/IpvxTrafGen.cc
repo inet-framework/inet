@@ -208,6 +208,23 @@ void IpvxTrafGen::processPacket(Packet *msg)
     numReceived++;
 }
 
+bool IpvxTrafGen::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+{
+    startApp();
+    return true;
+}
+
+bool IpvxTrafGen::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+{
+    cancelNextPacket();
+    return true;
+}
+
+void IpvxTrafGen::handleCrashOperation(LifecycleOperation *operation)
+{
+    cancelNextPacket();
+}
+
 void ipvxTrafGenClearProtocols()
 {
     for (auto *p: IpvxTrafGen::allocatedProtocols)

@@ -46,19 +46,26 @@ bool TcpServerHostApp::handleStartOperation(LifecycleOperation *operation, IDone
 
 bool TcpServerHostApp::handleStopOperation(LifecycleOperation *operation, IDoneCallback *)
 {
-    //FIXME close sockets?
-
     // remove and delete threads
-    while (!threadSet.empty())
-        removeThread(*threadSet.begin());
+    while (!threadSet.empty()) {
+        auto thread = *threadSet.begin();
+        thread->getSocket()->close();
+        removeThread(thread);
+    }
+    serverSocket.close();
     return true;
 }
 
 void TcpServerHostApp::handleCrashOperation(LifecycleOperation *operation)
 {
     // remove and delete threads
-    while (!threadSet.empty())
-        removeThread(*threadSet.begin());
+    while (!threadSet.empty()) {
+        auto thread = *threadSet.begin();
+        thread->getSocket()->close();
+        removeThread(thread);
+    }
+    if (operation->getRootModule() == this)
+        serverSocket.abort(); // TODO: rapid socket close
 }
 
 void TcpServerHostApp::refreshDisplay() const

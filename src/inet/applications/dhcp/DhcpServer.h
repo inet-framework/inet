@@ -119,9 +119,8 @@ class INET_API DhcpServer : public ApplicationBase, public cListener, public Udp
 
     // Lifecycle methods
     virtual bool handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
-    virtual bool handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override { stopApp(); return true; }
-    virtual void handleCrashOperation(LifecycleOperation *operation) override { stopApp(); }
-    virtual void stopApp();
+    virtual bool handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
   public:
     DhcpServer();

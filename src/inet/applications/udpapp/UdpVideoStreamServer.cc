@@ -161,7 +161,7 @@ bool UdpVideoStreamServer::handleStartOperation(LifecycleOperation *operation, I
 bool UdpVideoStreamServer::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     clearStreams();
-    //TODO if(socket.isOpened()) socket.close();
+    socket.close();     //TODO return false and waiting socket close
     socket.setCallback(nullptr);
     return true;
 }
@@ -169,6 +169,8 @@ bool UdpVideoStreamServer::handleStopOperation(LifecycleOperation *operation, ID
 void UdpVideoStreamServer::handleCrashOperation(LifecycleOperation *operation)
 {
     clearStreams();
+    if (operation->getRootModule() == this)     // closes socket when the application crashed only
+        socket.close();    //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
     socket.setCallback(nullptr);
 }
 

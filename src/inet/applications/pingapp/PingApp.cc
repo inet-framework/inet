@@ -316,7 +316,7 @@ void PingApp::startSendingPingRequests()
     scheduleNextPingRequest(-1, false);
 }
 
-void PingApp::stopSendingPingRequests()
+bool PingApp::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     pid = -1;
     lastStart = -1;
@@ -326,10 +326,27 @@ void PingApp::stopSendingPingRequests()
     destAddrIdx = -1;
     cancelNextPingRequest();
     if (l3Socket) {
-        l3Socket->close();
-        delete l3Socket;
-        l3Socket = nullptr;
+        l3Socket->close();      //TODO doneCallback + selfMessage
     }
+    delete l3Socket;
+    l3Socket = nullptr;
+    return true;
+}
+
+void PingApp::handleCrashOperation(LifecycleOperation *operation)
+{
+    pid = -1;
+    lastStart = -1;
+    sendSeqNo = expectedReplySeqNo = 0;
+    srcAddr = destAddr = L3Address();
+    destAddresses.clear();
+    destAddrIdx = -1;
+    cancelNextPingRequest();
+    if (l3Socket && operation->getRootModule() == this) {
+        l3Socket->close();
+    }
+    delete l3Socket;
+    l3Socket = nullptr;
 }
 
 void PingApp::scheduleNextPingRequest(simtime_t previous, bool withSleep)

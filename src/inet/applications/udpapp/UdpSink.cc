@@ -159,14 +159,20 @@ bool UdpSink::handleStartOperation(LifecycleOperation *operation, IDoneCallback 
 bool UdpSink::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     cancelEvent(selfMsg);
-    processStop();
+    if (!multicastGroup.isUnspecified())
+        socket.leaveMulticastGroup(multicastGroup); // FIXME should be done by socket.close()
+    socket.close();     //TODO return false and waiting socket close
     return true;
 }
 
 void UdpSink::handleCrashOperation(LifecycleOperation *operation)
 {
     cancelEvent(selfMsg);
-    processStop();
+    if (operation->getRootModule() == this) {     // closes socket when the application crashed only
+        if (!multicastGroup.isUnspecified())
+            socket.leaveMulticastGroup(multicastGroup); // FIXME should be done by socket.close()
+        socket.close();    //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
+    }
 }
 
 } // namespace inet

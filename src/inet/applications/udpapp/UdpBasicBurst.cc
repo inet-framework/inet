@@ -340,7 +340,7 @@ bool UdpBasicBurst::handleStopOperation(LifecycleOperation *operation, IDoneCall
     if (timerNext)
         cancelEvent(timerNext);
     activeBurst = false;
-    socket.close();
+    socket.close();     //TODO return false and waiting socket close
     return true;
 }
 
@@ -349,7 +349,8 @@ void UdpBasicBurst::handleCrashOperation(LifecycleOperation *operation)
     if (timerNext)
         cancelEvent(timerNext);
     activeBurst = false;
-    socket.close();
+    if (operation->getRootModule() == this)     // closes socket when the application crashed only
+        socket.close();         //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
 }
 
 } // namespace inet

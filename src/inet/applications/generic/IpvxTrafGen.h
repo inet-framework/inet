@@ -74,9 +74,9 @@ class INET_API IpvxTrafGen : public ApplicationBase
     virtual void printPacket(Packet *msg);
     virtual void processPacket(Packet *msg);
 
-    virtual bool handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override { startApp(); return true; }
-    virtual bool handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override { cancelNextPacket(); return true; }
-    virtual void handleCrashOperation(LifecycleOperation *operation) override { cancelNextPacket(); }
+    virtual bool handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
+    virtual bool handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
   public:
     IpvxTrafGen();

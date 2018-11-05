@@ -96,7 +96,6 @@ class INET_API PingApp : public ApplicationBase, public INetworkSocket::ICallbac
 
     virtual void parseDestAddressesPar();
     virtual void startSendingPingRequests();
-    virtual void stopSendingPingRequests();
     virtual void scheduleNextPingRequest(simtime_t previous, bool withSleep);
     virtual void cancelNextPingRequest();
     virtual bool isEnabled();
@@ -107,8 +106,8 @@ class INET_API PingApp : public ApplicationBase, public INetworkSocket::ICallbac
 
     // Lifecycle methods
     virtual bool handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
-    virtual bool handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override { stopSendingPingRequests(); return true; }
-    virtual void handleCrashOperation(LifecycleOperation *operation) override { stopSendingPingRequests(); }
+    virtual bool handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
     //INetworkSocket::ICallback:
     virtual void socketDataArrived(INetworkSocket *socket, Packet *packet) override;

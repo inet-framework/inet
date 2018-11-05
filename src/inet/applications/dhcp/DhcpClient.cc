@@ -691,7 +691,7 @@ bool DhcpClient::handleStartOperation(LifecycleOperation *operation, IDoneCallba
     return true;
 }
 
-void DhcpClient::stopApp()
+bool DhcpClient::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     cancelEvent(timerT1);
     cancelEvent(timerT2);
@@ -703,7 +703,21 @@ void DhcpClient::stopApp()
     // TODO: Client should send DHCPRELEASE to the server. However, the correct operation
     // of DHCP does not depend on the transmission of DHCPRELEASE messages.
 
-    socket.close();
+    socket.close();     //TODO return false and waiting socket close
+    return true;
+}
+
+void DhcpClient::handleCrashOperation(LifecycleOperation *operation)
+{
+    cancelEvent(timerT1);
+    cancelEvent(timerT2);
+    cancelEvent(timerTo);
+    cancelEvent(leaseTimer);
+    cancelEvent(startTimer);
+    ie = nullptr;
+
+    if (operation->getRootModule() == this)     // closes socket when the application crashed only
+        socket.close();         //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
 }
 
 } // namespace inet
