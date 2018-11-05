@@ -79,7 +79,7 @@ void OperationalBase::initialize(int stage)
         NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
         setOperational((!nodeStatus || nodeStatus->getState() == NodeStatus::UP) ? OPERATING : NOT_OPERATING);
         if (operational != NOT_OPERATING)
-            handleStartOperation(nullptr);
+            handleStartOperation(nullptr, nullptr);     //TODO use an InitializeOperation with current stage value
     }
 }
 
@@ -130,7 +130,7 @@ bool OperationalBase::handleOperationStage(LifecycleOperation *operation, IDoneC
             operational = STARTING_OPERATION;
             DoneCallback *callback = newDoneCallback(this);
             callback->init(doneCallback, OPERATING);
-            bool done = handleStartOperation(callback);
+            bool done = handleStartOperation(operation, callback);
             if (done) {
                 callback->done();
                 deleteDoneCallback(callback);
@@ -143,7 +143,7 @@ bool OperationalBase::handleOperationStage(LifecycleOperation *operation, IDoneC
             operational = STOPPING_OPERATION;
             DoneCallback *callback = newDoneCallback(this);
             callback->init(doneCallback, NOT_OPERATING);
-            bool done = handleStopOperation(callback);
+            bool done = handleStopOperation(operation, callback);
             if (done) {
                 callback->done();
                 deleteDoneCallback(callback);
@@ -154,7 +154,7 @@ bool OperationalBase::handleOperationStage(LifecycleOperation *operation, IDoneC
     else if (dynamic_cast<ModuleCrashOperation *>(operation)) {
         if (stage == ModuleCrashOperation::STAGE_CRASH) {
             operational = CRASHING_OPERATION;
-            handleCrashOperation();
+            handleCrashOperation(operation);
             setOperational(NOT_OPERATING);
             return true;
         }
@@ -162,27 +162,27 @@ bool OperationalBase::handleOperationStage(LifecycleOperation *operation, IDoneC
     return true;
 }
 
-bool OperationalBase::handleStartOperation(IDoneCallback *doneCallback)
+bool OperationalBase::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     return true;
 }
 
-bool OperationalBase::handleStopOperation(IDoneCallback *doneCallback)
+bool OperationalBase::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     return true;
 }
 
-bool OperationalBase::handleSuspendOperation(IDoneCallback *doneCallback)
+bool OperationalBase::handleSuspendOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     return true;
 }
 
-bool OperationalBase::handleResumeOperation(IDoneCallback *doneCallback)
+bool OperationalBase::handleResumeOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     return true;
 }
 
-void OperationalBase::handleCrashOperation()
+void OperationalBase::handleCrashOperation(LifecycleOperation *operation)
 {
 }
 

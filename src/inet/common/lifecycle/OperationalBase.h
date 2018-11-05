@@ -52,11 +52,11 @@ class INET_API OperationalBase : public cSimpleModule, public ILifecycle
     virtual void handleMessageWhenUp(cMessage *msg) = 0;
 
     virtual bool handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
-    virtual bool handleStartOperation(IDoneCallback *doneCallback);
-    virtual bool handleStopOperation(IDoneCallback *doneCallback);
-    virtual void handleCrashOperation();
-    virtual bool handleSuspendOperation(IDoneCallback *doneCallback);
-    virtual bool handleResumeOperation(IDoneCallback *doneCallback);
+    virtual bool handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback);
+    virtual bool handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback);
+    virtual void handleCrashOperation(LifecycleOperation *operation);
+    virtual bool handleSuspendOperation(LifecycleOperation *operation, IDoneCallback *doneCallback);
+    virtual bool handleResumeOperation(LifecycleOperation *operation, IDoneCallback *doneCallback);
 
     virtual bool isInitializeStage(int stage) = 0;
     virtual bool isModuleStartStage(int stage) = 0;
