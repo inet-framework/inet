@@ -94,7 +94,7 @@ class INET_API Ieee80211MgmtBase : public cSimpleModule, public ILifecycle
     virtual void stop();
 
   public:
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    virtual bool handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
     //@}
 };
 

@@ -43,7 +43,7 @@ class INET_API ExtLowerUdp : public cSimpleModule, public ILifecycle, public Rea
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    virtual bool handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
     virtual bool notify(int fd) override;
 
     virtual Socket *open(int socketId);

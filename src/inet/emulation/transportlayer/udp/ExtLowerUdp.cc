@@ -153,7 +153,7 @@ void ExtLowerUdp::handleMessage(cMessage *message)
     delete message;
 }
 
-bool ExtLowerUdp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool ExtLowerUdp::handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     // TODO:
     return true;

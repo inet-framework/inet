@@ -301,7 +301,7 @@ class INET_API Ipv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     /**
      * ILifecycle method
      */
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    virtual bool handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
 
     /// cListener method
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;

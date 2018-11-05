@@ -874,9 +874,10 @@ void Ipv6RoutingTable::deleteInterfaceRoutes(const InterfaceEntry *entry)
     }
 }
 
-bool Ipv6RoutingTable::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool Ipv6RoutingTable::handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
+    int stage = operation->getCurrentStage();
     if (dynamic_cast<ModuleStartOperation *>(operation)) {
         if (static_cast<ModuleStartOperation::Stage>(stage) == ModuleStartOperation::STAGE_NETWORK_LAYER)
             ; // TODO:

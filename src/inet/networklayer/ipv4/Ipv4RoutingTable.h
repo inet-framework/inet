@@ -373,7 +373,7 @@ class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable
     /**
      * ILifecycle method
      */
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    virtual bool handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
 
     virtual L3Address getRouterIdAsGeneric() const override { return getRouterId(); }
     virtual bool isLocalAddress(const L3Address& dest) const override { return isLocalAddress(dest.toIpv4()); }

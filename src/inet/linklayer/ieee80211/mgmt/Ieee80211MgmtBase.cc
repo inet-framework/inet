@@ -152,9 +152,10 @@ void Ieee80211MgmtBase::processFrame(Packet *packet, const Ptr<const Ieee80211Da
     }
 }
 
-bool Ieee80211MgmtBase::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool Ieee80211MgmtBase::handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
+    int stage = operation->getCurrentStage();
     if (dynamic_cast<ModuleStartOperation *>(operation)) {
         if (static_cast<ModuleStartOperation::Stage>(stage) == ModuleStartOperation::STAGE_PHYSICAL_LAYER)
             start();

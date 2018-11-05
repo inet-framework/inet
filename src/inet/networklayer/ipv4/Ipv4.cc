@@ -1248,9 +1248,10 @@ INetfilter::IHook::Result Ipv4::datagramPostRoutingHook(Packet *packet)
     return INetfilter::IHook::ACCEPT;
 }
 
-bool Ipv4::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool Ipv4::handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
+    int stage = operation->getCurrentStage();
     if (dynamic_cast<ModuleStartOperation *>(operation)) {
         if (static_cast<ModuleStartOperation::Stage>(stage) == ModuleStartOperation::STAGE_NETWORK_LAYER)
             start();
