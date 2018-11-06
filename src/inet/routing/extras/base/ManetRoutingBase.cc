@@ -1254,47 +1254,49 @@ bool ManetRoutingBase::setRoute(const L3Address & destination, const L3Address &
     return setRoute(destination, nextHop, index, hops, mask);
 };
 
-void ManetRoutingBase::sendICMP(Packet *pkt)
+bool ManetRoutingBase::sendICMP(Packet *pkt)
 {
-    if (pkt==nullptr)
-        return;
+    if (pkt == nullptr)
+        return false;
 
-    if (icmpModule==nullptr || !sendToICMP)
-    {
-        delete pkt;
-        return;
+    if (!sendToICMP)
+        return false;
+
+    if (icmpModule == nullptr) {
+        return false;
     }
 
-    if (mac_layer_)
-    {
+    auto pktAux = pkt->dup();
 
-        pkt->popAtFront<Ieee80211MacHeader>();
+    if (mac_layer_) {
+        pktAux->popAtFront<Ieee80211MacHeader>();
         // The packet is encapsulated in a Ieee802 frame
     }
 
-    const auto& networkHeader = pkt->peekAtFront<Ipv4Header>();
+    // TODO: Reinjec the packet, the IP layer should send the notification
+    const auto& networkHeader = pktAux->peekAtFront<Ipv4Header>();
 
-    if (networkHeader == nullptr)
-    {
-        delete pkt;
-        return;
+    if (networkHeader == nullptr) {
+        delete pktAux;
+        return false;
     }
     // don't send ICMP error messages for multicast messages
-    if (networkHeader->getDestAddress().isMulticast())
-    {
-        EV_INFO << "won't send ICMP error messages for multicast message " << pkt << endl;
-        delete pkt;
-        return;
+    if (networkHeader->getDestAddress().isMulticast()) {
+        delete pktAux;
+        return false;
     }
     // check source address
     if (networkHeader->getSourceAddress().isUnspecified() && par("setICMPSourceAddress")) {
-
-        const auto& ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(pkt);
+        const auto& ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(pktAux);
         ipv4Header->setSourceAddress(inet_ift->getInterface(0)->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
-        insertNetworkProtocolHeader(pkt, Protocol::ipv4, ipv4Header);
+        insertNetworkProtocolHeader(pktAux, Protocol::ipv4, ipv4Header);
     }
+
     EV_DETAIL << "issuing ICMP Destination Unreachable for packets waiting in queue for failed route discovery.\n";
-    icmpModule->sendErrorMessage(pkt, -1 /*TODO*/, ICMP_DESTINATION_UNREACHABLE, 0);
+    int interfaceId = pkt->getTag<InterfaceInd>()->getInterfaceId();
+    icmpModule->sendErrorMessage(pktAux, interfaceId , ICMP_DESTINATION_UNREACHABLE, 0);
+
+    return true;
 }
 // The address group allows to implement the anycast. Any address in the group is valid for the route
 // Address group methods

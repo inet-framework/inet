@@ -547,6 +547,9 @@ class OLSR : public ManetRoutingBase
     virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
     virtual void handleNodeCrash() override;
 
+
+    virtual Result ensureRouteForDatagram(Packet *datagram) override {throw cRuntimeError("ensureRouteForDatagram called with OLSR protocol");}
+
 };
 
 } // namespace inetmanet

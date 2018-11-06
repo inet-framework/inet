@@ -149,7 +149,7 @@ void Batman::initialize(int stage)
         pref_gateway =  L3AddressResolver().resolve(preferedGateWay, L3AddressResolver::ADDR_IPv4);
 
         /*
-        IPv4Address vis = par("visualizationServer");
+        Ipv4Address vis = par("visualizationServer");
 
         if (!vis.isUnspecified())
         {

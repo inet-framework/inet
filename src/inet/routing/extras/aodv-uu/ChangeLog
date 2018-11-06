@@ -1,0 +1,173 @@
+====== inet-3.x ======
+
+2016-04-06  ------ inet-3.2.4 released ------
+
+2016-03-16  ------ inet-3.2.3 released ------
+
+2016-03-11  ------ inet-3.2.2 released ------
+
+2016-01-21  ------ inet-3.2.1 released ------
+
+2015-12-16  ------ inet-3.2.0 released ------
+
+2015-10-26  ------ inet-3.1.1 released ------
+
+2015-10-15  ------ inet-3.1.0 released ------
+
+2015-06-22  ------ inet-3.0.0 released ------
+
+2015-05-13  ------ inet-2.99.1 released ------
+
+2015-01-21  Zoltan Bojthe
+
+	Applied C++ source code modernizer.
+
+2014-12-10  Zoltan Bojthe
+
+	Fixed memory management problems found by valgrind memcheck.
+
+2015-01-13  Zoltan Bojthe
+
+	Simplified cost calculation.
+
+2015-01-13  Zoltan Bojthe
+
+	Simplified sending one packet on more interfaces.
+
+2014-11-13  Zoltan Bojthe
+
+	Fixed memory management problems found by valgrind memcheck.
+
+2014-11-07  ------ inet-2.99.0 released ------
+
+====== inet-2.x ======
+
+2015-03-04  ------ inet-2.6 released ------
+
+2014-11-07  ------ inet-2.5.1 released ------
+
+2014-10-29  ------ inet-2.5.0 released ------
+
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2014-01-14  Zoltan Bojthe
+
+	backport: MANET protocols backport (uses ipv4::netfilter)
+
+2013-09-20  Andras Varga
+
+	ev->EV and related OMNeT++ 5.0 logging compatible fixes
+
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-05-03  Alfonso Ariza Quintana
+
+	manet: synced with INETMANET (20130503)
+
+	olsr, dymo, dsr, dsdv, batman, aodv, olsr, dsdv: synced with INETMANET
+	manetbase: introduced GlobalWirelessInspector, updated manet base.
+
+	Z.B.: remove GlobalWirelessLinkInspector; added/fixed parameter units
+
+2013-03-25  Andras Varga
+
+	aodv-uu: compile fix for MSVC
+
+2013-02-20  Andras Varga
+
+	const fixes (in OMNeT++ 5.0, check_and_cast<> no longer silently
+	discards const modifier)
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-11-19  Zoltan Bojthe
+
+	- AODV's hand-written descriptors were replaced with generated ones
+	  [with A.Varga]
+	- aodv_msg_struct.h: added getter methods expected by the generated
+	  descriptors removed hand-written aodv_msg_struct_descriptor.cc
+	- now using std::max instead of a macro in aodv-uu
+
+2012-08-07  ------ inet-2.0.0 released ------
+
+2012-06-25  ------ inet-1.99.5 released ------
+
+2012-06-15  Zoltan Bojthe
+
+	OMNeT++ 4.3 compatibility fixes - for cClassDescriptor changes
+	  ( cClassDescriptor::getArraySize() renamed to getFieldArraySize() )
+
+2012-03-20  ------ inet-1.99.4 released ------
+
+2012-02-24  ------ inet-1.99.3 released ------
+
+2012-02-11 Rudolf Hornig
+
+	Takeover from INETMANET @ fff5dfd
+
+2012-01-09  Zoltan Bojthe
+
+	manetrouting: use 255.255.255.255 netmask for routes
+
+	Before it used the IP address class' netmask.
+
+2011-11-18  ------ INET-1.99.2 released ------
+
+2011-11-13  Levente Meszaros, Zoltan Bojthe
+
+	Refactored operator= and copy constructor in all INET classes.
+	See base/ChangeLog for details.
+
+2011-09-14  Zoltan Bojthe
+
+	bug #347: fixes some compiler warnings.
+
+2011-09-12  Zoltan Bojthe
+
+	manetrouting: adds message descriptors for AODV messages
+
+	for show/edit these messages in TkEnv interface
+
+2011-08-02  Zoltan Bojthe
+
+	fixes for cppcheck
+
+2011-07-28  Zoltan Bojthe
+
+	manetrouting: compile fixes for linux
+
+2011-07-27  Andras Varga
+
+	manetrouting: compile fixes for MSVC
+
+	debug_aodv.h: there seems to have been some confusion around the DEBUG
+	macro. Rewrote it as to what I think was the original intent: the DEBUG
+	variable should control whether we want logging or not, and the same
+	macro is used throughout the code for log statements.
+
+2011-07-19  Andras Varga
+
+	cPolymorphic -> cObject (cPolymorphic became cObject in OMNeT++ 4.0)
+
+2011-06-03  Andras Varga
+
+	cosmetics: space usage made somewhat more consistent throughout the code
+
+	Notes:
+	- if you have an INET fork and want to compare the code, use the
+	 "Ignore spaces" option of your visual diff tool. Most tools have
+	 this option; Meld and Araxis Merge certainly do.
+
+	- I used omnetpp/_scripts/tidymodel/spaces.pl, plus some manual tweaks
+
+2011-05-30  ------ INET-1.99.1 released ------
+
+2011-05-26  Zoltan Bojthe
+
+	Renamed IP... classes to IPv4... or IPvX...
+
+2011-04-20  Rudolf Hornig
+
+	Initial takeover of MANET routing protocols from INETMANET.

@@ -117,6 +117,10 @@ class INET_API INetfilter
      * route discovery process.
      */
     virtual void reinjectQueuedDatagram(const Packet *datagram) = 0;
+
+    /* Force the enque of a new packet in prerouting mode */
+    virtual void enqueuePreRoutingRoutingHook(Packet *datagram) = 0;
+
 };
 
 class INET_API NetfilterBase : public INetfilter {

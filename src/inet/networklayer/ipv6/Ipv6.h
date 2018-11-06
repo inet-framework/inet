@@ -230,6 +230,7 @@ class INET_API Ipv6 : public QueueBase, public NetfilterBase, public ILifecycle,
     virtual void unregisterHook(IHook *hook) override;
     virtual void dropQueuedDatagram(const Packet *packet) override;
     virtual void reinjectQueuedDatagram(const Packet *packet) override;
+    virtual void enqueuePreRoutingRoutingHook(Packet *datagram) override {queuedDatagramsForHooks.push_back(QueuedDatagramForHook(datagram, INetfilter::IHook::PREROUTING));};
 
   protected:
     /**

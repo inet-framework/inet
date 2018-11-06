@@ -295,6 +295,8 @@ class INET_API Ipv4 : public QueueBase, public NetfilterBase, public ILifecycle,
      */
     virtual void reinjectQueuedDatagram(const Packet *datagram) override;
 
+    virtual void enqueuePreRoutingRoutingHook(Packet *datagram) override {queuedDatagramsForHooks.push_back(QueuedDatagramForHook(datagram, INetfilter::IHook::PREROUTING));};
+
     /**
      * ILifecycle method
      */

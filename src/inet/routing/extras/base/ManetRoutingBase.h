@@ -72,7 +72,7 @@ typedef std::set<L3Address>::const_iterator AddressGroupConstIterator;
 /**
  * Base class for Manet Routing
  */
-class INET_API ManetRoutingBase : public ApplicationBase, public UdpSocket::ICallback, public cListener
+class INET_API ManetRoutingBase : public ApplicationBase, public UdpSocket::ICallback, public cListener, public NetfilterBase::HookBase
 {
     friend class  ManetTimer;
   private:
@@ -80,18 +80,17 @@ class INET_API ManetRoutingBase : public ApplicationBase, public UdpSocket::ICal
 
     typedef std::map<L3Address,L3Address> RouteMap;
 
-    class ProtocolRoutingData
-    {
+    class ProtocolRoutingData {
         public:
-            RouteMap* routesVector = nullptr;
-            bool isProactive = false;
+        RouteMap* routesVector = nullptr;
+        bool isProactive = false;
     };
 
     class DelayTimer : public ManetTimer {
         Packet *msg = nullptr;
         L3Address destAddr;
         int destPort;
-    public:
+        public:
         DelayTimer(Packet *m, L3Address d, int port, ManetRoutingBase *a) : ManetTimer(a){msg = m; destAddr = d;  destPort = port;}
         void expire() override {
             if (msg != nullptr) {
@@ -119,6 +118,7 @@ class INET_API ManetRoutingBase : public ApplicationBase, public UdpSocket::ICal
 
     IRoutingTable *inet_rt = nullptr;
     IInterfaceTable *inet_ift = nullptr;
+    INetfilter *networkProtocol = nullptr;
     cModule *hostModule = nullptr;
     Icmp *icmpModule = nullptr;
     bool mac_layer_ = false;
@@ -196,7 +196,22 @@ class INET_API ManetRoutingBase : public ApplicationBase, public UdpSocket::ICal
     virtual void createTimerQueue();
     virtual void scheduleEvent();
     virtual bool checkTimer(cMessage *msg);
+//  Hook register.
 
+
+    /* Netfilter hooks */
+    virtual void registerHook() {
+            networkProtocol = getModuleFromPar<INetfilter>(par("networkProtocolModule"), this);
+            networkProtocol->registerHook(0, this);
+        }
+
+    /* Netfilter hooks */
+    virtual Result ensureRouteForDatagram(Packet *datagram) = 0;
+    virtual Result datagramPreRoutingHook(Packet *datagram) override { Enter_Method("datagramPreRoutingHook"); return ensureRouteForDatagram(datagram); }
+    virtual Result datagramForwardHook(Packet *datagram) override { return ACCEPT; }
+    virtual Result datagramPostRoutingHook(Packet *datagram) override { return ACCEPT; }
+    virtual Result datagramLocalInHook(Packet *datagram) override { return ACCEPT; }
+    virtual Result datagramLocalOutHook(Packet *datagram) override { Enter_Method("datagramLocalOutHook"); return ensureRouteForDatagram(datagram); }
 
 /////////////////////////////////
 //
@@ -278,7 +293,7 @@ class INET_API ManetRoutingBase : public ApplicationBase, public UdpSocket::ICal
     virtual void processLinkBreakManagement(const Packet *details);
     virtual void processLocatorAssoc(const Packet *details);
     virtual void processLocatorDisAssoc(const Packet *details);
-    virtual void processChangeInterface(simsignal_t signalID,const cObject *details);
+    virtual void processChangeInterface(simsignal_t signalID, const cObject *details);
 
     //@}
 
@@ -346,8 +361,7 @@ class INET_API ManetRoutingBase : public ApplicationBase, public UdpSocket::ICal
     virtual void getListRelatedAp(const L3Address &, std::vector<L3Address>&);
     virtual void setRouteInternalStorege(const L3Address &, const L3Address &, const bool &);
 
-
-
+    virtual INetfilter * getNetworkProtocol() const {return networkProtocol;}
   public:
     std::string convertAddressToString(const L3Address&);
     virtual void setCollaborativeProtocol(cObject *p) {collaborativeProtocol = dynamic_cast<ManetRoutingBase*>(p);}
@@ -410,7 +424,7 @@ class INET_API ManetRoutingBase : public ApplicationBase, public UdpSocket::ICal
     virtual const void *getPtr()const {return commonPtr;}
 
     /// send an ICMP DEST UNREACHABLE error based on pk
-    virtual void sendICMP(Packet *pk);
+    virtual bool sendICMP(Packet *pk); // return true if it is possible to send, in other case false and delete the packet
 
     /// returns true if ICMP error sending is enabled
     virtual bool getSendToICMP() {return sendToICMP;}

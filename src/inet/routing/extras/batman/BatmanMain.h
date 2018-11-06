@@ -181,6 +181,8 @@ class Batman : public ManetRoutingBase
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
     virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
 
+    virtual Result ensureRouteForDatagram(Packet *datagram) override {throw cRuntimeError("ensureRouteForDatagram called with OLSR protocol");}
+
 };
 
 } // namespace inetmanet
