@@ -22,6 +22,7 @@
 #include <list>
 #include <map>
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/queue/QueueBase.h"
@@ -43,7 +44,7 @@ namespace inet {
  * interface to allow routing protocols to kick in. It doesn't provide datagram fragmentation
  * and reassembling.
  */
-class INET_API NextHopForwarding : public QueueBase, public NetfilterBase, public INetworkProtocol, public IProtocolRegistrationListener
+class INET_API NextHopForwarding : public QueueBase, public NetfilterBase, public INetworkProtocol, public IProtocolRegistrationListener, public ILifecycle
 {
   protected:
     /**
@@ -85,6 +86,7 @@ class INET_API NextHopForwarding : public QueueBase, public NetfilterBase, publi
     // working vars
     std::set<const Protocol *> upperProtocols;    // where to send packets after decapsulation
     std::map<int, SocketDescriptor *> socketIdToSocketDescriptor;
+    bool isUp = false;
 
     // hooks
     typedef std::list<QueuedDatagramForHook> DatagramQueueForHooks;
@@ -185,6 +187,17 @@ class INET_API NextHopForwarding : public QueueBase, public NetfilterBase, publi
      * Processing of datagrams. Called when a datagram reaches the front of the queue.
      */
     virtual void endService(cPacket *packet) override;
+
+    /**
+     * ILifecycle method
+     */
+    virtual bool handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
+
+  protected:
+    virtual bool isNodeUp();
+    virtual void stop();
+    virtual void start();
+    virtual void flush();
 };
 
 } // namespace inet

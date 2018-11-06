@@ -19,6 +19,8 @@
 #include "inet/applications/common/SocketTag_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
@@ -78,6 +80,7 @@ void NextHopForwarding::initialize(int stage)
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         registerService(Protocol::nextHopForwarding, gate("transportIn"), gate("queueIn"));
         registerProtocol(Protocol::nextHopForwarding, gate("queueOut"), gate("transportOut"));
+        isUp = isNodeUp();
     }
 }
 
@@ -145,6 +148,11 @@ void NextHopForwarding::handleCommand(Request *request)
 
 void NextHopForwarding::endService(cPacket *pk)
 {
+    if (!isUp) {
+        EV_ERROR << "NextHopForwarding is down -- discarding message\n";
+        delete pk;
+        return;
+    }
     if (pk->getArrivalGate()->isName("transportIn"))
         handlePacketFromHL(check_and_cast<Packet *>(pk));
     else {
@@ -838,6 +846,69 @@ INetfilter::IHook::Result NextHopForwarding::datagramLocalOutHook(Packet *datagr
         }
     }
     return IHook::ACCEPT;
+}
+
+bool NextHopForwarding::handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+    int stage = operation->getCurrentStage();
+    if (dynamic_cast<ModuleStartOperation *>(operation)) {
+        if (static_cast<ModuleStartOperation::Stage>(stage) == ModuleStartOperation::STAGE_NETWORK_LAYER)
+            start();
+    }
+    else if (dynamic_cast<ModuleStopOperation *>(operation)) {
+        if (static_cast<ModuleStopOperation::Stage>(stage) == ModuleStopOperation::STAGE_NETWORK_LAYER)
+            stop();
+    }
+    else if (dynamic_cast<ModuleCrashOperation *>(operation)) {
+        if (static_cast<ModuleCrashOperation::Stage>(stage) == ModuleCrashOperation::STAGE_CRASH)
+            stop();
+    }
+    return true;
+}
+
+void NextHopForwarding::start()
+{
+    ASSERT(queue.isEmpty());
+    isUp = true;
+}
+
+void NextHopForwarding::stop()
+{
+    isUp = false;
+    flush();
+    for (auto it : socketIdToSocketDescriptor)
+        delete it.second;
+    socketIdToSocketDescriptor.clear();
+}
+
+void NextHopForwarding::flush()
+{
+    delete cancelService();
+    EV_DEBUG << "Ipv4::flush(): packets in queue: " << queue.str() << endl;
+    queue.clear();
+
+//    EV_DEBUG << "Ipv4::flush(): pending packets:\n";
+//    for (auto & elem : pendingPackets) {
+//        EV_DEBUG << "Ipv4::flush():    " << elem.first << ": " << elem.second.str() << endl;
+//        elem.second.clear();
+//    }
+//    pendingPackets.clear();
+
+    EV_DEBUG << "Ipv4::flush(): packets in hooks: " << queuedDatagramsForHooks.size() << endl;
+    for (auto & elem : queuedDatagramsForHooks) {
+        delete elem.datagram;
+    }
+    queuedDatagramsForHooks.clear();
+
+//    fragbuf.flush();
+}
+
+bool NextHopForwarding::isNodeUp()
+{
+    cModule *node = findContainingNode(this);
+    NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
+    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
 }
 
 } // namespace inet
