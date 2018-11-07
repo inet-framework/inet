@@ -197,12 +197,12 @@ void NS_CLASS neighbor_link_break(rt_table_t * rt)
         }
     }
 
-    Packet *p = new Packet();
-    p->insertAtFront(rerr);
 
     if (rerr != nullptr)
     {
         DEBUG(LOG_DEBUG, 0, "RERR created, %d bytes.", RERR_CALC_SIZE(rerr));
+
+        Packet *p = new Packet("Aodv RERR", rerr);
 
         rt_u = rt_table_find(rerr_unicast_dest);
         if (rt_u && rerr->dest_count == 1 && (!rerr_unicast_dest.s_addr.isUnspecified())) {
