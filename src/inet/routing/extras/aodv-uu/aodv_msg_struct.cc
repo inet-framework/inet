@@ -145,7 +145,7 @@ RERR::~RERR()
     clearUdest();
 }
 
-void RERR::addUdest(const L3Address & src_addr, unsigned int udest_seqno)
+void RERR::addUdest(const L3Address & src_addr, unsigned int udest_seqno, int addrSize)
 {
 
     RERR_udest *temp_udest;
@@ -160,8 +160,7 @@ void RERR::addUdest(const L3Address & src_addr, unsigned int udest_seqno)
     temp_udest[dest_count].dest_seqno = udest_seqno;
     _udest = temp_udest;
     dest_count++;
-    ManetRoutingBase * owner = check_and_cast<ManetRoutingBase*>(this->getOwner());
-    int udestSize = (4+owner->getAddressSize())*8;
+    int udestSize = (4 + addrSize)*8;
     this->setChunkLength(this->getChunkLength()+b(udestSize));
 }
 

@@ -105,7 +105,7 @@ public:
     unsigned short getN() const {return n;}
     unsigned short getRes2() const {return res2;}
     int getUdestArraySize() {return dest_count;}
-    void addUdest(const L3Address &,unsigned int);
+    void addUdest(const L3Address &,unsigned int, int addrSize);
     void clearUdest();
     RERR_udest *getUdest(int);
     RERR_udest& getUdestRef(int i) {return *getUdest(i);}

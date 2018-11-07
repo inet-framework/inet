@@ -58,9 +58,10 @@ Ptr<RERR> NS_CLASS rerr_create(u_int8_t flags,struct in_addr dest_addr,
     rerr->dest_seqno = htonl(dest_seqno);
 #else
     auto rerr = makeShared<RERR>();
-    rerr->addUdest (dest_addr.s_addr,htonl(dest_seqno));
-    totalRerrSend++;
     rerr->setChunkLength(b((8+(this->getAddressSize()*2))*8));
+    rerr->addUdest (dest_addr.s_addr,htonl(dest_seqno), this->getAddressSize());
+    totalRerrSend++;
+
 #endif
     rerr->type = AODV_RERR;
     rerr->n = (flags & RERR_NODELETE ? 1 : 0);
@@ -80,7 +81,7 @@ void NS_CLASS rerr_add_udest(Ptr<RERR> &rerr,struct in_addr udest,
     ud->dest_seqno = htonl(udest_seqno);
     rerr->dest_count++;
 #else
-    rerr->addUdest( udest.s_addr, htonl(udest_seqno));
+    rerr->addUdest( udest.s_addr, htonl(udest_seqno), this->getAddressSize());
 #endif
 }
 
