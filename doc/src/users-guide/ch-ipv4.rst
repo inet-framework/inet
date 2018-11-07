@@ -48,13 +48,15 @@ layer of hosts and routers:
    OSPF, Manet, etc. protocols.
 
 -  The :ned:`Icmp` module can be used to generate ICMP error packets. It
-   also supports ICMP echo applications.
+   also supports ICMP echo (ping) applications.
 
--  The :ned:`Arp` module performs the dynamic translation of IP
-   addresses to MAC addresses.
+-  The :ned:`Arp` and module performs the dynamic translation of IP
+   addresses to MAC addresses. An alternative implementation is
+   :ned:`GlobalArp`, which looks up addresses in a shared global table
+   without actually exchanging ARP protocol messages.
 
--  The :ned:`Igmpv2` module to generate and process multicast group
-   membership reports.
+-  The :ned:`Igmpv3` and :ned:`Igmpv2` modules generate and process
+   multicast group membership reports.
 
 These modules are assembled into a complete network layer module called
 :ned:`Ipv4NetworkLayer`. The :ned:`Ipv4NetworkLayer` module is present
@@ -169,22 +171,13 @@ address directly to the node that sent the request. When the original
 node receives the ARP response, it updates its ARP cache and sends the
 delayed IP packet using the learned MAC address.
 
-ARP resolution is initiated with a C++ call.
+Settings like retry timeout, maximum number of attempts, cache timeout
+and proxy ARP support can be supplied via module parameters.
 
-The module parameters of :ned:`Arp` are:
-
--  :par:`retryTimeout`: number of seconds ARP waits between retries to
-   resolve an IPv4 address (default is 1s)
-
--  :par:`retryCount`: number of times ARP will attempt to resolve an
-   IPv4 address (default is 3)
-
--  :par:`cacheTimeout`: number of seconds unused entries in the cache
-   will time out (default is 120s)
-
--  :par:`proxyARP`: enables proxy ARP mode (default is ``true``)
-
--  :par:`globalARP`: use global ARP cache (default is ``false``)
+An alternative implementation is :ned:`GlobalArp`, which looks up
+addresses in a shared global table without actually exchanging
+ARP protocol messages. It can be used in scenarios where simulating
+the actual ARP exchanges is not necessary.
 
 .. _ug:sec:ipv4:igmp:
 
