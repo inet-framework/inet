@@ -46,6 +46,7 @@ simple TcpServerHostApp like IApp
         int localPort = default(1000); // port number to listen on
         string serverThreadModuleType; // module type of "thread" module to launch on incoming connections
         @display("i=block/app");
+        @lifecycleSupport;
     gates:
         input socketIn @labels(TcpCommand/up);
         output socketOut @labels(TcpCommand/down);

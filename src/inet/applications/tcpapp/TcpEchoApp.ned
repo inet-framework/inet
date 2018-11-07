@@ -35,6 +35,7 @@ simple TcpEchoApp extends TcpServerHostApp
         double echoFactor = default(1);
         double echoDelay @unit(s) = default(0s);
         serverThreadModuleType = default("inet.applications.tcpapp.TcpEchoAppThread"); // module type of "thread" module to launch on incoming connections
+        @lifecycleSupport;
         @signal[packetSent](type=inet::Packet);
         @signal[packetReceived](type=inet::Packet);
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

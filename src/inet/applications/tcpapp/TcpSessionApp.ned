@@ -94,6 +94,7 @@ simple TcpSessionApp like IApp
         string sendScript = default("");
         double tClose @unit(s) = default(2s);
         @display("i=block/app");
+        @lifecycleSupport;
         @signal[connect](type=long);
         @signal[packetSent](type=inet::Packet);
         @signal[packetReceived](type=inet::Packet);

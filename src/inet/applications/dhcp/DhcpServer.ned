@@ -39,6 +39,7 @@ simple DhcpServer like IApp
         int leaseTime @unit(s); // lease time in seconds
         double startTime @unit(s) = default(0s); // application start time
         @display("i=block/app2");
+        @lifecycleSupport;
     gates:
         input socketIn @labels(UdpControlInfo/up);
         output socketOut @labels(UdpControlInfo/down);

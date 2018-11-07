@@ -40,6 +40,7 @@ simple UdpVideoStreamClient like IApp
         int serverPort;  // server port
         double startTime @unit(s) = default(1s);
         @display("i=block/app");
+        @lifecycleSupport;
         @signal[packetReceived](type=inet::Packet);
         @statistic[packetReceived](title="packets received"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[throughput](title="throughput"; unit=bps; source="throughput(packetReceived)"; record=vector);
