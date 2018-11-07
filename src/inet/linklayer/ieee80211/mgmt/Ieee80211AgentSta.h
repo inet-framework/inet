@@ -38,7 +38,7 @@ namespace ieee80211 {
  *
  * @author Andras Varga
  */
-class INET_API Ieee80211AgentSta : public cSimpleModule, public cListener
+class INET_API Ieee80211AgentSta : public cSimpleModule, public cListener       //TODO add ILifecycle
 {
   protected:
     InterfaceEntry *myIface = nullptr;
