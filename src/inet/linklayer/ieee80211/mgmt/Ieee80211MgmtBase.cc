@@ -33,6 +33,8 @@ using namespace inet::physicallayer;
 
 void Ieee80211MgmtBase::initialize(int stage)
 {
+    OperationalBase::initialize(stage);
+
     if (stage == INITSTAGE_LOCAL) {
         mib = getModuleFromPar<Ieee80211Mib>(par("mibModule"), this);
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
@@ -42,19 +44,10 @@ void Ieee80211MgmtBase::initialize(int stage)
         WATCH(numMgmtFramesReceived);
         WATCH(numMgmtFramesDropped);
     }
-    // TODO: INITSTAGE
-    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
-        cModule *node = findContainingNode(this);
-        NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-    }
 }
 
-void Ieee80211MgmtBase::handleMessage(cMessage *msg)
+void Ieee80211MgmtBase::handleMessageWhenUp(cMessage *msg)
 {
-    if (!isOperational)
-        throw cRuntimeError("Message '%s' received when module is OFF", msg->getName());
-
     if (msg->isSelfMessage()) {
         // process timers
         EV << "Timer expired: " << msg << "\n";
@@ -82,7 +75,7 @@ void Ieee80211MgmtBase::handleMessage(cMessage *msg)
 
 void Ieee80211MgmtBase::sendDown(Packet *frame)
 {
-    ASSERT(isOperational);
+    ASSERT(isWorking());
     frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mgmt);
     send(frame, "macOut");
 }
@@ -152,35 +145,12 @@ void Ieee80211MgmtBase::processFrame(Packet *packet, const Ptr<const Ieee80211Da
     }
 }
 
-bool Ieee80211MgmtBase::handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback)
-{
-    Enter_Method_Silent();
-    int stage = operation->getCurrentStage();
-    if (dynamic_cast<ModuleStartOperation *>(operation)) {
-        if (static_cast<ModuleStartOperation::Stage>(stage) == ModuleStartOperation::STAGE_PHYSICAL_LAYER)
-            start();
-    }
-    else if (dynamic_cast<ModuleStopOperation *>(operation)) {
-        if (static_cast<ModuleStopOperation::Stage>(stage) == ModuleStopOperation::STAGE_PHYSICAL_LAYER)
-            stop();
-    }
-    else if (dynamic_cast<ModuleCrashOperation *>(operation)) {
-        if (static_cast<ModuleCrashOperation::Stage>(stage) == ModuleCrashOperation::STAGE_CRASH) // crash is immediate
-            stop();
-    }
-    else
-        throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
-    return true;
-}
-
 void Ieee80211MgmtBase::start()
 {
-    isOperational = true;
 }
 
 void Ieee80211MgmtBase::stop()
 {
-    isOperational = false;
 }
 
 } // namespace ieee80211

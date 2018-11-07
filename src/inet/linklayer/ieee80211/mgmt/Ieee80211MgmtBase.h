@@ -19,7 +19,8 @@
 #define __INET_IEEE80211MGMTBASE_H
 
 #include "inet/common/packet/Packet.h"
-#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/queue/PassiveQueueBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
@@ -36,12 +37,10 @@ namespace ieee80211 {
  *
  * @author Andras Varga
  */
-class INET_API Ieee80211MgmtBase : public cSimpleModule, public ILifecycle
+class INET_API Ieee80211MgmtBase : public OperationalBase
 {
   protected:
     // configuration
-    bool isOperational;    // for lifecycle
-
     Ieee80211Mib *mib = nullptr;
     IInterfaceTable *interfaceTable = nullptr;
     InterfaceEntry *myIface = nullptr;
@@ -55,7 +54,7 @@ class INET_API Ieee80211MgmtBase : public cSimpleModule, public ILifecycle
     virtual void initialize(int) override;
 
     /** Dispatches incoming messages to handleTimer(), handleUpperMessage() or processFrame(). */
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
 
     /** Should be redefined to deal with self-messages */
     virtual void handleTimer(cMessage *frame) = 0;
@@ -88,13 +87,17 @@ class INET_API Ieee80211MgmtBase : public cSimpleModule, public ILifecycle
 
     /** lifecycle support */
     //@{
+    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION; }    // TODO: INITSTAGE
+    virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOrResumeOperationBase::STAGE_PHYSICAL_LAYER; }
+    virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOrSuspendOperationBase::STAGE_PHYSICAL_LAYER; }
+
+    virtual bool handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override { start(); return true; }
+    virtual bool handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override { stop(); return true; }
+    virtual void handleCrashOperation(LifecycleOperation *operation) override { stop(); }
 
   protected:
     virtual void start();
     virtual void stop();
-
-  public:
-    virtual bool handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
     //@}
 };
 
