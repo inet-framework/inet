@@ -21,6 +21,7 @@
 
 #include <list>
 #include <map>
+#include <set>
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/packet/Message.h"
@@ -33,8 +34,6 @@
 #include "inet/networklayer/nexthop/NextHopForwardingHeader_m.h"
 #include "inet/networklayer/nexthop/NextHopRoutingTable.h"
 
-#include <map>
-#include <set>
 
 namespace inet {
 
