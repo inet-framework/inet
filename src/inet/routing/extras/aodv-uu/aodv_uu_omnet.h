@@ -231,7 +231,7 @@ class AODVUU : public ManetRoutingBase
   public:
     static int  log_file_fd;
     static bool log_file_fd_init;
-    AODVUU() { progname = nullptr; isRoot = false; is_init = false; log_file_fd_init = false; sendMessageEvent = new cMessage(); mapSeqNum.clear(); /*&messageEvent;*/storeRreq = false;}
+    AODVUU() { progname = nullptr; isRoot = false; is_init = false; log_file_fd_init = false; sendMessageEvent = new cMessage("AodvUU-sendMessageEvent"); mapSeqNum.clear(); /*&messageEvent;*/storeRreq = false;}
     ~AODVUU();
 
     void actualizeTablesWithCollaborative(const L3Address &);
@@ -276,7 +276,7 @@ class AODVUU : public ManetRoutingBase
     virtual void initialize(int stage) override;
 
 
-    cMessage * sendMessageEvent;
+    cMessage * sendMessageEvent = nullptr;
 
     void recvAODVUUPacket(Packet * p);
     INetfilter::IHook::Result processPacket(Packet *,unsigned int);

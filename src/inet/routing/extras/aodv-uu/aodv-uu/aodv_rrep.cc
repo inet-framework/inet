@@ -65,6 +65,7 @@ Ptr<RREP> NS_CLASS rrep_create(u_int8_t flags,
 #else
     auto rrep =  makeShared<RREP>();
     rrep->cost=0;
+    rrep->setChunkLength(b((12+(this->getAddressSize()*2))*8));
 #endif
     rrep->type = AODV_RREP;
     rrep->res1 = 0;
@@ -102,6 +103,7 @@ Ptr<RREP_ack> NS_CLASS rrep_ack_create()
     rrep_ack = (RREP_ack *) aodv_socket_new_msg();
 #else
     auto rrep_ack = makeShared<RREP_ack>();
+    rrep_ack->setChunkLength(b(2*8));
 #endif
     rrep_ack->type = AODV_RREP_ACK;
 

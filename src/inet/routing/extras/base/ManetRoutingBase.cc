@@ -237,7 +237,7 @@ void ManetRoutingBase::registerRoutingModule()
     inet_rt = findModuleFromPar<IRoutingTable>(par("routingTableModule"), this);
     inet_ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     hostModule = getContainingNode(this);
-
+    networkProtocol = getModuleFromPar<INetfilter>(par("networkProtocolModule"), this);
 
     if (routesVector)
         routesVector->clear();
@@ -1006,7 +1006,7 @@ InterfaceEntry *ManetRoutingBase::getWlanInterfaceEntry(int i) const
 void ManetRoutingBase::createTimerQueue()
 {
     if (timerMessagePtr == nullptr)
-        timerMessagePtr = new cMessage();
+        timerMessagePtr = new cMessage("ManetRoutingBase TimerQueue");
     if (timerMultiMapPtr == nullptr)
         timerMultiMapPtr = new TimerMultiMap;
 }
@@ -1037,11 +1037,11 @@ void ManetRoutingBase::scheduleEvent()
     if (timerMessagePtr->isScheduled()) {
         if (e->first < timerMessagePtr->getArrivalTime())  {
             cancelEvent(timerMessagePtr);
-            scheduleAt(e->first,timerMessagePtr);
+            scheduleAt(e->first, timerMessagePtr);
         }
         else if (e->first>timerMessagePtr->getArrivalTime()) { // Possible throw cRuntimeError, or the first event has been canceled
             cancelEvent(timerMessagePtr);
-            scheduleAt(e->first,timerMessagePtr);
+            scheduleAt(e->first, timerMessagePtr);
             EV << "timer Queue problem";
             // throw cRuntimeError("timer Queue problem");
         }

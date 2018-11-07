@@ -66,6 +66,7 @@ Ptr<RREQ> NS_CLASS rreq_create(u_int8_t flags,struct in_addr dest_addr,
 #else
     auto rreq = makeShared<RREQ>();
     rreq->cost=0;
+    rreq->setChunkLength(b((16+(this->getAddressSize()*2))*8));
 #endif
     rreq->type = AODV_RREQ;
     rreq->res1 = 0;

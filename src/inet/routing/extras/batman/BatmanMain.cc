@@ -254,7 +254,7 @@ void Batman::initialize(int stage)
             schedule_own_packet(batman_if);
         }*/
 
-        timer = new cMessage();
+        timer = new cMessage("Batmant Timer");
         WATCH_PTRMAP(origMap);
 
         //simtime_t curr_time = simTime();

@@ -259,6 +259,7 @@ void NS_CLASS aodv_socket_process_packet(Packet * pkt, int len,
 
     /* Check what type of msg we received and call the corresponding
        function to handle the msg... */
+    pkt->trimFront();
     switch (aodv_msg->type) {
         case AODV_RREQ:
         {
@@ -328,6 +329,7 @@ void NS_CLASS aodv_socket_send(Packet *aodvPkt, struct in_addr dst,
     if (wait_on_reboot && aodv_msgAux->type == AODV_RREP)
     {
         delete aodvPkt;
+        return;
     }
 
     /* If rate limiting is enabled, check if we are sending either a
@@ -449,9 +451,9 @@ void NS_CLASS aodv_socket_send(Packet *aodvPkt, struct in_addr dst,
 
     aodvPkt->insertAtFront(aodv_msg);
     if (useIndex)
-        sendToIp(aodvPkt, 654, destAdd, 654, ttl, delay, dev->ifindex);
+        sendToIp(aodvPkt, par("UdpPort").intValue(), destAdd, par("UdpPort").intValue(), ttl, delay, dev->ifindex);
     else
-        sendToIp(aodvPkt, 654, destAdd, 654, ttl, delay, dev->ipaddr.s_addr);
+        sendToIp(aodvPkt, par("UdpPort").intValue(), destAdd, 654, ttl, delay, dev->ipaddr.s_addr);
     totalSend++;
 
     return;

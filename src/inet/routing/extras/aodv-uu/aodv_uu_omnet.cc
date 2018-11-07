@@ -91,6 +91,7 @@ void NS_CLASS initialize(int stage)
        after binding them! The desired default values should be set in
        ~ns/tcl/lib/ns-default.tcl instead.
      */
+    ManetRoutingBase::initialize(stage);
     if (stage == INITSTAGE_ROUTING_PROTOCOLS)
     {
 
@@ -284,6 +285,8 @@ void NS_CLASS initialize(int stage)
             timer_init(&proactive_rreq_timer,&NS_CLASS rreq_proactive, nullptr);
             timer_set_timeout(&proactive_rreq_timer, par("startRreqProactive").intValue());
         }
+        if (!isInMacLayer())
+            registerHook();
 
         propagateProactive = par("propagateProactive");
         nodeName = getContainingNode(this)->getFullName();
@@ -570,6 +573,13 @@ void NS_CLASS handleMessageWhenUp(cMessage *msg)
         scheduleNextEvent();
         return;
     }
+
+    if (msg->isSelfMessage() && checkTimer(msg))
+    {
+        scheduleEvent();
+        return;
+    }
+
     Packet *pkt = check_and_cast<Packet *>(msg);
     const auto aodvMsg = pkt->peekAtFront<AODV_msg>();
     if (msg->isSelfMessage() && aodvMsg != nullptr) {
@@ -728,7 +738,8 @@ IPv4Datagram *NS_CLASS pkt_decapsulate(IPv4Datagram *p)
 void NS_CLASS scheduleNextEvent()
 {
     simtime_t timer;
-    simtime_t timeout = timer_age_queue();
+    // simtime_t timeout = timer_age_queue();
+    timer_age_queue();
 
     if (!aodvTimerMap.empty())
     {
@@ -746,6 +757,7 @@ void NS_CLASS scheduleNextEvent()
             scheduleAt(timer, sendMessageEvent);
         }
     }
+    scheduleEvent();
 }
 #else
 void NS_CLASS scheduleNextEvent()

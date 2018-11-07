@@ -60,6 +60,7 @@ Ptr<RERR> NS_CLASS rerr_create(u_int8_t flags,struct in_addr dest_addr,
     auto rerr = makeShared<RERR>();
     rerr->addUdest (dest_addr.s_addr,htonl(dest_seqno));
     totalRerrSend++;
+    rerr->setChunkLength(b((8+(this->getAddressSize()*2))*8));
 #endif
     rerr->type = AODV_RERR;
     rerr->n = (flags & RERR_NODELETE ? 1 : 0);

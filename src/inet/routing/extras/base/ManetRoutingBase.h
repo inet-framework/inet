@@ -201,9 +201,10 @@ class INET_API ManetRoutingBase : public ApplicationBase, public UdpSocket::ICal
 
     /* Netfilter hooks */
     virtual void registerHook() {
+        if (networkProtocol == nullptr)
             networkProtocol = getModuleFromPar<INetfilter>(par("networkProtocolModule"), this);
-            networkProtocol->registerHook(0, this);
-        }
+        networkProtocol->registerHook(0, this);
+     }
 
     /* Netfilter hooks */
     virtual Result ensureRouteForDatagram(Packet *datagram) = 0;

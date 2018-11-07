@@ -98,8 +98,6 @@ public:
         res2 = 0;
         dest_count = 0;
         _udest = nullptr;
-        ManetRoutingBase * owner = check_and_cast<ManetRoutingBase*>(this->getOwner());
-        setChunkLength(b((8+(owner->getAddressSize()*2))*8));
     }
     ~RERR ();
     RERR (const RERR &m);
@@ -144,8 +142,6 @@ public:
     uint8_t  totalHops;
     explicit RREP () : AODV_msg ()
     {
-        ManetRoutingBase * owner = check_and_cast<ManetRoutingBase*>(this->getOwner());
-        setChunkLength(b((12+(owner->getAddressSize()*2))*8));
         res1 = 0;
         a = 0;
         r = 0;
@@ -189,7 +185,7 @@ class RREP_ack : public AODV_msg
 
   public:
     uint8_t reserved;
-    explicit RREP_ack () : AODV_msg () {setChunkLength(b(2*8));}
+    explicit RREP_ack () : AODV_msg () {}
     RREP_ack (const RREP_ack  &m);
     RREP_ack &  operator= (const RREP_ack &m);
     virtual RREP_ack *dup() const override {return new RREP_ack(*this);}
@@ -234,8 +230,6 @@ public:
         orig_seqno = 0;
         cost = 0;
         hopfix = 0;
-        ManetRoutingBase * owner = check_and_cast<ManetRoutingBase*>(this->getOwner());
-        setChunkLength(b((16+(owner->getAddressSize()*2))*8));
     }
 
     RREQ (const RREQ &m);
