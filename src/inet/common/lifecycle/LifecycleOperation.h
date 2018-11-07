@@ -55,7 +55,13 @@ class INET_API LifecycleOperation : public cObject, public noncopyable
      * treat that as an error, and report the remaining parameters as
      * unrecognized by the operation.
      */
-    virtual void initialize(cModule *module, StringMap& params) { rootModule = module; }
+    virtual void initialize(cModule *module, StringMap& params) {
+        cProperties *props = module->getProperties();
+        if (props && (props->getAsBool("networkNode") || props->getAsBool("lifecycleSupport")))
+            rootModule = module;
+        else
+            throw cRuntimeError("LifecycleOperation not accepted directly by '(%s)%s' module", module->getClassName(), module->getFullPath().c_str());
+    }
 
     /**
      * Returns the module the operation is initiated on.
