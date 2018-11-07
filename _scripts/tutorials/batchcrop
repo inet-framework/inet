@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# Run the crop script for all png's in the folder. Specify the number of pixels to crop from the top, bottom, left and right as arguments.
+
+if [[ $1 == -h || $# == 0 ]];
+then
+echo "Arguments: top, bottom, left, right"
+elif [ $# == 4 ]
+then
+
+rm list
+ls | grep png > list
+
+TOP=$1
+BOTTOM=$2
+LEFT=$3
+RIGHT=$4
+
+# echo "args:" $INPUT_FILE $OUTPUT_FILE $TOP $BOTTOM $LEFT $RIGHT
+
+# read -p "Continue..."
+
+lines=$(wc -l < list)
+echo $lines files
+
+read -p "Continue..."
+
+# for file in $(<list)
+# do
+#     echo COMMAND: crop "${file}" "cropped_${file}" $TOP $BOTTOM $LEFT $RIGHT
+# done
+
+# read -p "Continue..."
+
+for file in $(<list)
+do
+    crop "${file}" "cropped_${file}" $TOP $BOTTOM $LEFT $RIGHT
+done
+
+rm list
+
+else
+echo "need 4 arguments"
+
+fi
