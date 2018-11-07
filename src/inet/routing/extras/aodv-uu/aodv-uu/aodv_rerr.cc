@@ -263,7 +263,7 @@ void NS_CLASS rerr_process(Ptr<RERR> rerr, int rerrlen,struct in_addr ip_src,
 
         rt = rt_table_find(rerr_unicast_dest);
         new_rerr->ttl=1;
-        Packet *p = new Packet();
+        Packet *p = new Packet("Aodv RERR");
         p->insertAtFront(new_rerr);
 
         if (rt && new_rerr->dest_count == 1 && !rerr_unicast_dest.s_addr.isUnspecified())

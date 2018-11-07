@@ -187,7 +187,7 @@ void NS_CLASS rreq_forward(Ptr<RREQ> rreq, int size, int ttl)
         totalRreqSend++;
         auto rreq_new = Ptr<RREQ>(rreq->dup());
         rreq_new->ttl=ttl;
-        Packet *pkt = new Packet();
+        Packet *pkt = new Packet("Aodv RREQ");
         pkt->insertAtFront(rreq_new);
         aodv_socket_send(pkt, dest, size, ttl, &DEV_NR(i),delay);
 
