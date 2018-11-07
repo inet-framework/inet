@@ -20,7 +20,7 @@
 //
 
 import inet.linklayer.common.MacAddress;
-import inet.networklayer.contract.ipv4.IPv4Address;
+import inet.networklayer.contract.ipv4.Ipv4Address;
 
 namespace inet::inetmanet;
 
