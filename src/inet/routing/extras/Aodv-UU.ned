@@ -44,7 +44,7 @@ simple AodvUU extends BaseRouting
         int rt_log_interval @unit(ms) = default(0ms);     // periodically log routing table to routing table logfile, value is the interval in msecs (0 = off)
         int unidir_hack = default(0);         // detect and avoid unidirectional links (boolean) (section 6.8)
         int receive_n_hellos = default(1);    // receive N HELLOs before treating as neighbor (non RFC parameter)
-        int wait_on_reboot = default(1);      // wait after reboot and gather routes before sending out routing info (section 6.13)
+        int wait_on_reboot = default(0);      // wait after reboot and gather routes before sending out routing info (section 6.13)
         int ratelimit = default(1);            // do not send out more than 10 RERR or RREQ (boolean) (section 6.3 abd 6.11)
         int active_timeout @unit(ms) = default(3000ms);    // active route timeout in (ms) (section 6.2 and 6.7)
         bool llfeedback = default(false);      // allow layer2 link-detection instead of sending hello messages (section 6.10)
