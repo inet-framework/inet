@@ -205,7 +205,7 @@ class AODVUU : public ManetRoutingBase
         u_int32_t origin_seqno;
         uint32_t cost;
         uint8_t  hopfix;
-        cPacket *pkt;
+        Packet *pkt = nullptr;
     };
 
     struct RREQProcessed : cMessage
@@ -222,7 +222,7 @@ class AODVUU : public ManetRoutingBase
         struct in_addr dst;
         int len;
         u_int8_t ttl;
-        struct dev_info *dev;
+        struct dev_info *dev = nullptr;
     };
     bool storeRreq;
     bool checkRrep;
@@ -284,7 +284,7 @@ class AODVUU : public ManetRoutingBase
 
     int initialized;
     int  node_id;
-    L3Address *gateWayAddress;
+    L3Address *gateWayAddress = nullptr;
 
     int NS_DEV_NR;
     int NS_IFINDEX;

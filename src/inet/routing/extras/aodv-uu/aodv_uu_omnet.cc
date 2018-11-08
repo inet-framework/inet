@@ -367,7 +367,8 @@ NS_CLASS ~AODVUU()
     packet_queue_destroy();
     cancelAndDelete(sendMessageEvent);
     log_cleanup();
-    delete gateWayAddress;
+    if (gateWayAddress)
+        delete gateWayAddress;
 }
 
 /*
