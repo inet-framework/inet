@@ -24,23 +24,24 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "inet/common/INETDefs.h"
 
-#include "OLSR_ETX_state.h"
-#include "OLSR_ETX.h"
+
+#include "inet/common/INETDefs.h"
+#include "inet/routing/extras/olsr/Olrs_Etx_state.h"
+#include "inet/routing/extras/olsr/Olrs_Etx.h"
 
 namespace inet {
 
 namespace inetmanet {
 
-OLSR_ETX_state::OLSR_ETX_state(OLSR_ETX_parameter *p)
+Olsr_Etx_state::Olsr_Etx_state(Olsr_Etx_parameter *p)
 {
     parameter = p;
 }
 
-OLSR_ETX_link_tuple*  OLSR_ETX_state::find_best_sym_link_tuple(const nsaddr_t &main_addr, double now)
+Olsr_Etx_link_tuple*  Olsr_Etx_state::find_best_sym_link_tuple(const nsaddr_t &main_addr, double now)
 {
-    OLSR_ETX_link_tuple* best = nullptr;
+    Olsr_Etx_link_tuple* best = nullptr;
 
     for (auto it = ifaceassocset_.begin();
             it != ifaceassocset_.end(); it++)
@@ -48,11 +49,11 @@ OLSR_ETX_link_tuple*  OLSR_ETX_state::find_best_sym_link_tuple(const nsaddr_t &m
         OLSR_ETX_iface_assoc_tuple* iface_assoc_tuple = *it;
         if (iface_assoc_tuple->main_addr() == main_addr)
         {
-            OLSR_link_tuple *tupleAux = find_sym_link_tuple(iface_assoc_tuple->iface_addr(), now);
+            Olsr_link_tuple *tupleAux = find_sym_link_tuple(iface_assoc_tuple->iface_addr(), now);
             if (tupleAux == nullptr)
                 continue;
-            OLSR_ETX_link_tuple* tuple =
-                dynamic_cast<OLSR_ETX_link_tuple*> (tupleAux);
+            Olsr_Etx_link_tuple* tuple =
+                dynamic_cast<Olsr_Etx_link_tuple*> (tupleAux);
             if (best == nullptr)
                 best = tuple;
             else
@@ -86,9 +87,9 @@ OLSR_ETX_link_tuple*  OLSR_ETX_state::find_best_sym_link_tuple(const nsaddr_t &m
     }
     if (best == nullptr)
     {
-        OLSR_link_tuple *tuple = find_sym_link_tuple(main_addr, now);
+        Olsr_link_tuple *tuple = find_sym_link_tuple(main_addr, now);
         if (tuple!=nullptr)
-            best = check_and_cast<OLSR_ETX_link_tuple*>(tuple);
+            best = check_and_cast<Olsr_Etx_link_tuple*>(tuple);
     }
     return best;
 }

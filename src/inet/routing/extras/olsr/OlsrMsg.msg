@@ -17,7 +17,7 @@ cplusplus {{
 #include "inet/routing/extras/olsr/OlsrMsg.h"
 }}
 
-class OLSR_msg
+class OlsrMsg
 {
     @existingClass;
     @opaque;

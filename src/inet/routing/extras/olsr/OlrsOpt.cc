@@ -30,12 +30,14 @@
 ///
 
 
+
+
 #include <math.h>
 #include <limits.h>
 
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-#include "inet/routing/extras/olsr/OLSRpkt_m.h"
-#include "inet/routing/extras/olsr/OLSROPT.h"
+#include "inet/routing/extras/olsr/OlrsPkt_m.h"
+#include "inet/routing/extras/olsr/OlrsOpt.h"
 
 namespace inet {
 
@@ -57,14 +59,14 @@ namespace inetmanet {
 /// \param arg OLSR agent passed for a callback.
 ///
 
-Define_Module(OLSROPT);
+Define_Module(OlsrOpt);
 
 
 /********** OLSR class **********/
 
 
 void
-OLSROPT::recv_olsr(Packet* msg)
+OlsrOpt::recv_olsr(Packet* msg)
 {
 
     nsaddr_t src_addr;
@@ -79,7 +81,7 @@ OLSROPT::recv_olsr(Packet* msg)
         delete msg;
         return;
     }
-    auto &op = msg->popAtFront<OLSR_pkt>();
+    auto &op = msg->popAtFront<OlsrPkt>();
 
     // If the packet contains no messages must be silently discarded.
     // There could exist a message with an empty body, so the size of
@@ -96,7 +98,7 @@ OLSROPT::recv_olsr(Packet* msg)
     for (int i = 0; i < (int) op->msgArraySize(); i++)
     {
         auto msgAux = op->msg(i);
-        OLSR_msg msg = msgAux;
+        OlsrMsg msg = msgAux;
 
         // If ttl is less than or equal to zero, or
         // the receiver is the same as the originator,
@@ -108,7 +110,7 @@ OLSROPT::recv_olsr(Packet* msg)
         // If the message has been processed it must not be
         // processed again
         bool do_forwarding = true;
-        OLSR_dup_tuple* duplicated = state_.find_dup_tuple(msg.orig_addr(), msg.msg_seq_num());
+        Olsr_dup_tuple* duplicated = state_.find_dup_tuple(msg.orig_addr(), msg.msg_seq_num());
         if (duplicated == nullptr)
         {
             // Process the message according to its type
@@ -176,7 +178,7 @@ OLSROPT::recv_olsr(Packet* msg)
 /// \param sender_iface the address of the interface where the message was sent from.
 ///
 bool
-OLSROPT::process_hello(OLSR_msg& msg, const nsaddr_t &receiver_iface, const nsaddr_t &sender_iface, const int &index)
+OlsrOpt::process_hello(OlsrMsg& msg, const nsaddr_t &receiver_iface, const nsaddr_t &sender_iface, const int &index)
 {
     assert(msg.msg_type() == OLSR_HELLO_MSG);
 
@@ -201,15 +203,15 @@ OLSROPT::process_hello(OLSR_msg& msg, const nsaddr_t &receiver_iface, const nsad
 /// \param sender_iface the address of the interface where the message was sent from.
 ///
 bool
-OLSROPT::process_tc(OLSR_msg& msg, const nsaddr_t &sender_iface, const int &index)
+OlsrOpt::process_tc(OlsrMsg& msg, const nsaddr_t &sender_iface, const int &index)
 {
     assert(msg.msg_type() == OLSR_TC_MSG);
     double now = CURRENT_TIME;
-    OLSR_tc& tc = msg.tc();
+    Olsr_tc& tc = msg.tc();
 
     // 1. If the sender interface of this message is not in the symmetric
     // 1-hop neighborhood of this node, the message MUST be discarded.
-    OLSR_link_tuple* link_tuple = state_.find_sym_link_tuple(sender_iface, now);
+    Olsr_link_tuple* link_tuple = state_.find_sym_link_tuple(sender_iface, now);
     if (link_tuple == nullptr)
         return false;
 
@@ -218,7 +220,7 @@ OLSROPT::process_tc(OLSR_msg& msg, const nsaddr_t &sender_iface, const int &inde
     //  T_seq       >  ANSN,
     // then further processing of this TC message MUST NOT be
     // performed.
-    OLSR_topology_tuple* topology_tuple =
+    Olsr_topology_tuple* topology_tuple =
         state_.find_newer_topology_tuple(msg.orig_addr(), tc.ansn());
     if (topology_tuple != nullptr)
         return false;
@@ -226,11 +228,11 @@ OLSROPT::process_tc(OLSR_msg& msg, const nsaddr_t &sender_iface, const int &inde
 }
 
 int
-OLSROPT::update_topology_tuples(OLSR_msg& msg, int index)
+OlsrOpt::update_topology_tuples(OlsrMsg& msg, int index)
 {
 
     double now = CURRENT_TIME;
-    OLSR_tc& tc = msg.tc();
+    Olsr_tc& tc = msg.tc();
     if (tc.count == 0)
         return 0;
     int changedTuples = 0; // needed to know if we have to recalculate the routes
@@ -281,7 +283,7 @@ OLSROPT::update_topology_tuples(OLSR_msg& msg, int index)
                 assert(i >= 0 && i < OLSR_MAX_ADDRS);
                 nsaddr_t addr = tc.nb_main_addr(i);
                 if((*it)->dest_addr() == addr){ // found a tuple to be updated
-                    (*it)->time() = now + OLSROPT::emf_to_seconds(msg.vtime());
+                    (*it)->time() = now + OlsrOpt::emf_to_seconds(msg.vtime());
                     (*it)->seq() = tc.ansn();
                     foundTuple = 1;
                     tccounter.insert(i);
@@ -302,16 +304,16 @@ OLSROPT::update_topology_tuples(OLSR_msg& msg, int index)
     {
         if(tccounter.find(i) == tccounter.end()){ // we did not update this, let's add it
             nsaddr_t addr = tc.nb_main_addr(i);
-            OLSR_topology_tuple* topology_tuple = new OLSR_topology_tuple;
+            Olsr_topology_tuple* topology_tuple = new Olsr_topology_tuple;
             topology_tuple->dest_addr() = addr;
             topology_tuple->last_addr() = msg.orig_addr();
             topology_tuple->seq() = tc.ansn();
-            topology_tuple->time() = now + OLSROPT::emf_to_seconds(msg.vtime());
+            topology_tuple->time() = now + OlsrOpt::emf_to_seconds(msg.vtime());
             topology_tuple->local_iface_index() = index;
             add_topology_tuple(topology_tuple);
             // Schedules topology tuple deletion
-            OLSR_TopologyTupleTimer* topology_timer =
-                    new OLSR_TopologyTupleTimer(this, topology_tuple);
+            Olsr_TopologyTupleTimer* topology_timer =
+                    new Olsr_TopologyTupleTimer(this, topology_tuple);
             topology_timer->resched(DELAY(topology_tuple->time()));
             changedTuples++;
         }
@@ -329,35 +331,35 @@ OLSROPT::update_topology_tuples(OLSR_msg& msg, int index)
 /// \param sender_iface the address of the interface where the message was sent from.
 ///
 bool
-OLSROPT::link_sensing(OLSR_msg& msg, const nsaddr_t &receiver_iface, const nsaddr_t &sender_iface, const int &index)
+OlsrOpt::link_sensing(OlsrMsg& msg, const nsaddr_t &receiver_iface, const nsaddr_t &sender_iface, const int &index)
 {
-    OLSR_hello& hello = msg.hello();
+    Olsr_hello& hello = msg.hello();
     double now = CURRENT_TIME;
     bool updated = false;
     bool created = false;
 
-    OLSR_link_tuple* link_tuple = state_.find_link_tuple(sender_iface);
+    Olsr_link_tuple* link_tuple = state_.find_link_tuple(sender_iface);
     if (link_tuple == nullptr)
     {
         // We have to create a new tuple
-        link_tuple = new OLSR_link_tuple;
+        link_tuple = new Olsr_link_tuple;
         link_tuple->nb_iface_addr() = sender_iface;
         link_tuple->local_iface_addr() = receiver_iface;
         link_tuple->local_iface_index() = index;
         link_tuple->sym_time() = now - 1;
         link_tuple->lost_time() = 0.0;
-        link_tuple->time() = now + OLSROPT::emf_to_seconds(msg.vtime());
+        link_tuple->time() = now + OlsrOpt::emf_to_seconds(msg.vtime());
         add_link_tuple(link_tuple, hello.willingness());
         created = true;
     }
 //    else
 //        updated = true;
 
-    link_tuple->asym_time() = now + OLSROPT::emf_to_seconds(msg.vtime());
+    link_tuple->asym_time() = now + OlsrOpt::emf_to_seconds(msg.vtime());
     assert(hello.count >= 0 && hello.count <= OLSR_MAX_HELLOS);
     for (int i = 0; i < hello.count; i++)
     {
-        OLSR_hello_msg& hello_msg = hello.hello_msg(i);
+        Olsr_hello_msg& hello_msg = hello.hello_msg(i);
         int lt = hello_msg.link_code() & 0x03;
         int nt = hello_msg.link_code() >> 2;
 
@@ -380,7 +382,7 @@ OLSROPT::link_sensing(OLSR_msg& msg, const nsaddr_t &receiver_iface, const nsadd
                 else if (lt == OLSR_SYM_LINK || lt == OLSR_ASYM_LINK)
                 {
                     link_tuple->sym_time() =
-                        now + OLSROPT::emf_to_seconds(msg.vtime());
+                        now + OlsrOpt::emf_to_seconds(msg.vtime());
                     link_tuple->time() =
                         link_tuple->sym_time() + OLSR_NEIGHB_HOLD_TIME;
                     link_tuple->lost_time() = 0.0;
@@ -399,8 +401,8 @@ OLSROPT::link_sensing(OLSR_msg& msg, const nsaddr_t &receiver_iface, const nsadd
     // Schedules link tuple deletion
     if (created && link_tuple != nullptr)
     {
-        OLSR_LinkTupleTimer* link_timer =
-            new OLSR_LinkTupleTimer(this, link_tuple);
+        Olsr_LinkTupleTimer* link_timer =
+            new Olsr_LinkTupleTimer(this, link_tuple);
         link_timer->resched(DELAY(MIN(link_tuple->time(), link_tuple->sym_time())));
     }
     return (updated || created);
@@ -413,11 +415,11 @@ OLSROPT::link_sensing(OLSR_msg& msg, const nsaddr_t &receiver_iface, const nsadd
 /// \param msg the %OLSR message which contains the HELLO message.
 ///
 bool
-OLSROPT::populate_nbset(OLSR_msg& msg)
+OlsrOpt::populate_nbset(OlsrMsg& msg)
 {
-    OLSR_hello& hello = msg.hello();
+    Olsr_hello& hello = msg.hello();
 
-    OLSR_nb_tuple* nb_tuple = state_.find_nb_tuple(msg.orig_addr());
+    Olsr_nb_tuple* nb_tuple = state_.find_nb_tuple(msg.orig_addr());
     if (nb_tuple != nullptr){ // it was already present
         nb_tuple->willingness() = hello.willingness();
     }
@@ -432,15 +434,15 @@ OLSROPT::populate_nbset(OLSR_msg& msg)
 /// \param msg the %OLSR message which contains the HELLO message.
 ///
 bool
-OLSROPT::populate_nb2hopset(OLSR_msg& msg)
+OlsrOpt::populate_nb2hopset(OlsrMsg& msg)
 {
     double now = CURRENT_TIME;
-    OLSR_hello& hello = msg.hello();
+    Olsr_hello& hello = msg.hello();
     bool changedTopology = false;
 
     for (auto it_lt = linkset().begin(); it_lt != linkset().end(); it_lt++)
     {
-        OLSR_link_tuple* link_tuple = *it_lt;
+        Olsr_link_tuple* link_tuple = *it_lt;
         if (get_main_addr(link_tuple->nb_iface_addr()) == msg.orig_addr())
         {
             if (link_tuple->sym_time() >= now)
@@ -448,7 +450,7 @@ OLSROPT::populate_nb2hopset(OLSR_msg& msg)
                 assert(hello.count >= 0 && hello.count <= OLSR_MAX_HELLOS);
                 for (int i = 0; i < hello.count; i++)
                 {
-                    OLSR_hello_msg& hello_msg = hello.hello_msg(i);
+                    Olsr_hello_msg& hello_msg = hello.hello_msg(i);
                     int nt = hello_msg.link_code() >> 2;
                     assert(hello_msg.count >= 0 &&
                            hello_msg.count <= OLSR_MAX_ADDRS);
@@ -465,30 +467,30 @@ OLSROPT::populate_nb2hopset(OLSR_msg& msg)
                             if (nb2hop_addr != ra_addr())
                             {
                                 // Otherwise, a 2-hop tuple is created
-                                OLSR_nb2hop_tuple* nb2hop_tuple =
+                                Olsr_nb2hop_tuple* nb2hop_tuple =
                                     state_.find_nb2hop_tuple(msg.orig_addr(), nb2hop_addr);
                                 if (nb2hop_tuple == nullptr)
                                 {
                                     nb2hop_tuple =
-                                        new OLSR_nb2hop_tuple;
+                                        new Olsr_nb2hop_tuple;
                                     nb2hop_tuple->nb_main_addr() =
                                         msg.orig_addr();
                                     nb2hop_tuple->nb2hop_addr() =
                                         nb2hop_addr;
                                     add_nb2hop_tuple(nb2hop_tuple);
                                     nb2hop_tuple->time() =
-                                        now + OLSROPT::emf_to_seconds(msg.vtime());
+                                        now + OlsrOpt::emf_to_seconds(msg.vtime());
                                     // Schedules nb2hop tuple
                                     // deletion
-                                    OLSR_Nb2hopTupleTimer* nb2hop_timer =
-                                        new OLSR_Nb2hopTupleTimer(this, nb2hop_tuple);
+                                    Olsr_Nb2hopTupleTimer* nb2hop_timer =
+                                        new Olsr_Nb2hopTupleTimer(this, nb2hop_tuple);
                                     nb2hop_timer->resched(DELAY(nb2hop_tuple->time()));
                                     changedTopology = true;
                                 }
                                 else
                                 {
                                     nb2hop_tuple->time() =
-                                        now + OLSROPT::emf_to_seconds(msg.vtime());
+                                        now + OlsrOpt::emf_to_seconds(msg.vtime());
                                 }
 
                             }
@@ -521,7 +523,7 @@ OLSROPT::populate_nb2hopset(OLSR_msg& msg)
 /// \param tuple link tuple with the information of the link to the neighbor which has been lost.
 ///
 void
-OLSROPT::nb_loss(OLSR_link_tuple* tuple)
+OlsrOpt::nb_loss(Olsr_link_tuple* tuple)
 {
     bool topologychanged = false;
     debug("%f: Node %s detects neighbor %s loss\n",

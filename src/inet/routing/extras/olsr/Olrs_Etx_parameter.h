@@ -39,7 +39,7 @@ namespace inetmanet {
 #define OLSR_ETX_CAPPROBE_PACKET_SIZE 1000
 #define CAPPROBE_MAX_ARRAY              16
 
-class OLSR_ETX_parameter : public cObject
+class Olsr_Etx_parameter : public cObject
 {
     /// Determine which MPR selection algorithm to use
 
@@ -87,7 +87,7 @@ class OLSR_ETX_parameter : public cObject
 
 
   public:
-    inline OLSR_ETX_parameter() {}
+    inline Olsr_Etx_parameter() {}
 
     inline int&     mpr_algorithm() { return mpr_algorithm_; }
     inline int&     routing_algorithm() { return routing_algorithm_; }

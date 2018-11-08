@@ -26,9 +26,10 @@
 /// \brief  Implementation of our routing table.
 ///
 
-#include "inet/routing/extras/olsr/OLSR.h"
-#include "inet/routing/extras/olsr/OLSR_rtable.h"
-#include "inet/routing/extras/olsr/OLSR_repositories.h"
+#include "inet/routing/extras/olsr/Olrs_rtable.h"
+
+#include "inet/routing/extras/olsr/Olrs.h"
+#include "inet/routing/extras/olsr/Olrs_repositories.h"
 
 namespace inet {
 
@@ -37,11 +38,11 @@ namespace inetmanet {
 ///
 /// \brief Creates a new empty routing table.
 ///
-OLSR_rtable::OLSR_rtable()
+Olsr_rtable::Olsr_rtable()
 {
 }
 
-OLSR_rtable::OLSR_rtable(const OLSR_rtable& rtable)
+Olsr_rtable::Olsr_rtable(const Olsr_rtable& rtable)
 {
     for (rtable_t::const_iterator itRtTable = rtable.getInternalTable()->begin();itRtTable != rtable.getInternalTable()->begin();++itRtTable)
     {
@@ -52,7 +53,7 @@ OLSR_rtable::OLSR_rtable(const OLSR_rtable& rtable)
 ///
 /// \brief Destroys the routing table and all its entries.
 ///
-OLSR_rtable::~OLSR_rtable()
+Olsr_rtable::~Olsr_rtable()
 {
     // Iterates over the routing table deleting each OLSR_rt_entry*.
     for (auto it = rt_.begin(); it != rt_.end(); it++)
@@ -63,7 +64,7 @@ OLSR_rtable::~OLSR_rtable()
 /// \brief Clears the routing table and frees the memory assigned to each one of its entries.
 ///
 void
-OLSR_rtable::clear()
+Olsr_rtable::clear()
 {
     // Iterates over the routing table deleting each OLSR_rt_entry*.
     for (auto it = rt_.begin(); it != rt_.end(); it++)
@@ -78,7 +79,7 @@ OLSR_rtable::clear()
 /// \param dest address of the destination node.
 ///
 void
-OLSR_rtable::rm_entry(const nsaddr_t &dest)
+Olsr_rtable::rm_entry(const nsaddr_t &dest)
 {
     // Remove the pair whose key is dest
     rt_.erase(dest);
@@ -90,8 +91,8 @@ OLSR_rtable::rm_entry(const nsaddr_t &dest)
 /// \return the routing table entry for that destination address, or nullptr
 ///     if such an entry does not exist
 ///
-OLSR_rt_entry*
-OLSR_rtable::lookup(const nsaddr_t &dest)
+Olsr_rt_entry*
+Olsr_rtable::lookup(const nsaddr_t &dest)
 {
     // Get the iterator at "dest" position
     auto it = rt_.find(dest);
@@ -119,10 +120,10 @@ OLSR_rtable::lookup(const nsaddr_t &dest)
 ///         hop which must be used for forwarding a data packet, or nullptr
 ///         if there is no such entry.
 ///
-OLSR_rt_entry*
-OLSR_rtable::find_send_entry(OLSR_rt_entry* entry)
+Olsr_rt_entry*
+Olsr_rtable::find_send_entry(Olsr_rt_entry* entry)
 {
-    OLSR_rt_entry* e = entry;
+    Olsr_rt_entry* e = entry;
     while (e != nullptr && e->dest_addr() != e->next_addr())
         e = lookup(e->next_addr());
     return e;
@@ -139,11 +140,11 @@ OLSR_rtable::find_send_entry(OLSR_rt_entry* entry)
 /// \param dist     distance to the destination node.
 /// \return     the routing table entry which has been added.
 ///
-OLSR_rt_entry*
-OLSR_rtable::add_entry(const nsaddr_t &dest, const nsaddr_t & next, const nsaddr_t & iface, uint32_t dist, const int &index, double quality, double delay)
+Olsr_rt_entry*
+Olsr_rtable::add_entry(const nsaddr_t &dest, const nsaddr_t & next, const nsaddr_t & iface, uint32_t dist, const int &index, double quality, double delay)
 {
     // Creates a new rt entry with specified values
-    OLSR_rt_entry* entry = new OLSR_rt_entry();
+    Olsr_rt_entry* entry = new Olsr_rt_entry();
     entry->dest_addr() = dest;
     entry->next_addr() = next;
     entry->iface_addr() = iface;
@@ -166,11 +167,11 @@ OLSR_rtable::add_entry(const nsaddr_t &dest, const nsaddr_t & next, const nsaddr
     return entry;
 }
 
-OLSR_rt_entry*
-OLSR_rtable::add_entry(const nsaddr_t & dest, const nsaddr_t & next, const nsaddr_t & iface, uint32_t dist, const int &index, OLSR_rt_entry *entryAux, double quality, double delay)
+Olsr_rt_entry*
+Olsr_rtable::add_entry(const nsaddr_t & dest, const nsaddr_t & next, const nsaddr_t & iface, uint32_t dist, const int &index, Olsr_rt_entry *entryAux, double quality, double delay)
 {
     // Creates a new rt entry with specified values
-    OLSR_rt_entry* entry = new OLSR_rt_entry();
+    Olsr_rt_entry* entry = new Olsr_rt_entry();
     entry->dest_addr() = dest;
     entry->next_addr() = next;
     entry->iface_addr() = iface;
@@ -198,7 +199,7 @@ OLSR_rtable::add_entry(const nsaddr_t & dest, const nsaddr_t & next, const nsadd
 /// \return the number of entries in the routing table.
 ///
 uint32_t
-OLSR_rtable::size()
+Olsr_rtable::size()
 {
     return rt_.size();
 }
@@ -212,16 +213,16 @@ OLSR_rtable::size()
 ///
 ///
 
-std::string OLSR_rtable::str() const
+std::string Olsr_rtable::str() const
 {
     std::stringstream out;
 
     for (auto it = rt_.begin(); it != rt_.end(); it++)
     {
-        OLSR_rt_entry* entry = dynamic_cast<OLSR_rt_entry *> ((*it).second);
-        out << "dest:"<< OLSR::node_id(entry->dest_addr()) << " ";
-        out << "gw:" << OLSR::node_id(entry->next_addr()) << " ";
-        out << "iface:" << OLSR::node_id(entry->iface_addr()) << " ";
+        Olsr_rt_entry* entry = dynamic_cast<Olsr_rt_entry *> ((*it).second);
+        out << "dest:"<< Olsr::node_id(entry->dest_addr()) << " ";
+        out << "gw:" << Olsr::node_id(entry->next_addr()) << " ";
+        out << "iface:" << Olsr::node_id(entry->iface_addr()) << " ";
         out << "dist:" << entry->dist() << " ";
         out <<"\n";
     }

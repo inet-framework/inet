@@ -26,8 +26,8 @@
 
 /*** New File Added ***/
 
-#include "OLSR_ETX_dijkstra.h"
-#include "OLSR_ETX.h"
+#include "inet/routing/extras/olsr/Olrs_Etx.h"
+#include "inet/routing/extras/olsr/Olrs_Etx_dijkstra.h"
 
 namespace inet {
 
@@ -41,7 +41,7 @@ Dijkstra::Dijkstra()
     nonprocessed_nodes_ = new NodesSet;
     link_array_ = new LinkArray;
     all_nodes_ = new NodesSet;
-    parameter = &(dynamic_cast<OLSR_ETX*>(getOwner())->parameter_);
+    parameter = &(dynamic_cast<Olsr_Etx*>(getOwner())->parameter_);
 }
 
 void Dijkstra::add_edge(const nsaddr_t & dest_node, const nsaddr_t & last_node, double delay,

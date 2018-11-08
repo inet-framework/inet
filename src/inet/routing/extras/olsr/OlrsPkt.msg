@@ -40,12 +40,12 @@ import inet.routing.extras.olsr.OlsrMsg;
 
 namespace inet::inetmanet;
 
-class OLSR_pkt extends FieldsChunk
+class OlsrPkt extends FieldsChunk
 {
     @omitGetVerb(true);
     bool reduceFuncionality=false;
     short pkt_seq_num;          ///< Packet sequence number.
     long sn;                    /// CapProbe packet sequence number
     double send_time;           /// Packet sending timestamp
-    OLSR_msg msg[];             ///< Packet body.
+    OlsrMsg msg[];             ///< Packet body.
 }

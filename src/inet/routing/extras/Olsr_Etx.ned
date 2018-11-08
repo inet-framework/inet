@@ -36,10 +36,10 @@ import inet.routing.extras.base.BaseRouting;
 //
 // see: <a>http://www.inf.ufrgs.br/~~wlccordeiro/resources/olsr/README.html</a>
 //
-simple OLSR_ETX extends BaseRouting
+simple Olsr_Etx extends BaseRouting
 {
     parameters:
-        @class(OLSR_ETX);
+        @class(Olsr_Etx);
 
         UdpPort = default(698);
         int Willingness = default(3); // (0..7) The node's willingness to carry traffic on behalf of other nodes. 0:NEVER .. 7:ALWAYS (section 18.8)

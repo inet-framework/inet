@@ -2,11 +2,6 @@
  *   Copyright (C) 2004 by Francisco J. Ros                                *
  *   fjrm@dif.um.es                                                        *
  *                                                                         *
- *   Modified by Weverton Cordeiro                                         *
- *   (C) 2007 wevertoncordeiro@gmail.com                                   *
- *   Adapted for omnetpp                                                   *
- *   2008 Alfonso Ariza Quintana aarizaq@uma.es                            *
- *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
  *   the Free Software Foundation; either version 2 of the License, or     *
@@ -24,28 +19,50 @@
  ***************************************************************************/
 
 ///
-/// \file  OLSR_ETX_state.h
-/// \brief  This header file declares and defines internal state of an OLSR_ETX node.
+/// \file   OLSR_printer.h
+/// \brief  Header file which includes all printing functions related to OLSR.
 ///
 
-#ifndef __OLSR_ETX_state_h__
-#define __OLSR_ETX_state_h__
+#ifndef __OLSR_printer_h__
+#define __OLSR_printer_h__
 
-#include "OLSR_ETX_repositories.h"
-#include "OLSR_state.h"
+#include "inet/routing/extras/olsr/Olrs.h"
+#include "inet/routing/extras/olsr/Olrs_repositories.h"
+#include "inet/routing/extras/olsr/OlrsPkt_m.h"
+
+#if 0
+#include <packet.h>
+#include <ip.h>
+#include <trace.h>
+#endif
 
 namespace inet {
 
 namespace inetmanet {
 
-/// This class encapsulates all data structures needed for maintaining internal state of an OLSR_ETX node.
-class OLSR_ETX_state : public OLSR_state
+/// Encapsulates all printing functions for OLSR data structures and messages.
+class OLSR_printer
 {
-    friend class OLSR_ETX;
-    OLSR_ETX_parameter *parameter;
+    friend class Olsr;
+
   protected:
-    OLSR_ETX_link_tuple*  find_best_sym_link_tuple(const nsaddr_t &main_addr, double now);
-    OLSR_ETX_state(OLSR_ETX_parameter *);
+    static void print_linkset(Trace*, linkset_t&);
+    static void print_nbset(Trace*, nbset_t&);
+    static void print_nb2hopset(Trace*, nb2hopset_t&);
+    static void print_mprset(Trace*, mprset_t&);
+    static void print_mprselset(Trace*, mprselset_t&);
+    static void print_topologyset(Trace*, topologyset_t&);
+
+    static void print_olsr_pkt(FILE*, OlsrPkt*);
+    static void print_olsr_msg(FILE*, OlsrMsg&);
+    static void print_olsr_hello(FILE*, Olsr_hello&);
+    static void print_olsr_tc(FILE*, Olsr_tc&);
+    static void print_olsr_mid(FILE*, Olsr_mid&);
+#if 0
+  public:
+    static void print_cmn_hdr(FILE*, struct hdr_cmn*);
+    static void print_ip_hdr(FILE*, struct hdr_ip*);
+#endif
 };
 
 } // namespace inetmanet
@@ -53,3 +70,4 @@ class OLSR_ETX_state : public OLSR_state
 } // namespace inet
 
 #endif
+

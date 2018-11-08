@@ -32,13 +32,14 @@
 ///
 
 
+#include "inet/routing/extras/olsr/Olrs_Etx.h"
+
 #include <math.h>
 #include <limits.h>
 
 #include <omnetpp.h>
-#include "inet/routing/extras/olsr/OLSRpkt_m.h"
-#include "inet/routing/extras/olsr/OLSR_ETX.h"
-#include "inet/routing/extras/olsr/OLSR_ETX_dijkstra.h"
+#include "inet/routing/extras/olsr/Olrs_Etx_dijkstra.h"
+#include "inet/routing/extras/olsr/OlrsPkt_m.h"
 
 namespace inet {
 
@@ -61,16 +62,16 @@ namespace inetmanet {
 ///
 
 
-Define_Module(OLSR_ETX);
+Define_Module(Olsr_Etx);
 
 /********** Timers **********/
 
-void OLSR_ETX_LinkQualityTimer::expire()
+void Olsr_Etx_LinkQualityTimer::expire()
 {
-    OLSR_ETX *agentaux = check_and_cast<OLSR_ETX *>(agent_);
-    agentaux->OLSR_ETX::link_quality();
+    Olsr_Etx *agentaux = check_and_cast<Olsr_Etx *>(agent_);
+    agentaux->Olsr_Etx::link_quality();
     // agentaux->scheduleAt(simTime()+agentaux->hello_ival_,this);
-    agentaux->getTimerMultimMap()->insert(std::pair<simtime_t, OLSR_Timer *>(simTime() + agentaux->hello_ival(), this));
+    agentaux->getTimerMultimMap()->insert(std::pair<simtime_t, Olsr_Timer *>(simTime() + agentaux->hello_ival(), this));
 }
 
 
@@ -78,7 +79,7 @@ void OLSR_ETX_LinkQualityTimer::expire()
 ///
 ///
 void
-OLSR_ETX::initialize(int stage)
+Olsr_Etx::initialize(int stage)
 {
     //TODO this function is a modified copy of OLSR::initialize(int stage)
     ManetRoutingBase::initialize(stage);
@@ -147,19 +148,19 @@ OLSR_ETX::initialize(int stage)
 
         // Starts all timers
 
-        helloTimer = new OLSR_HelloTimer(); ///< Timer for sending HELLO messages.
-        tcTimer = new OLSR_TcTimer();   ///< Timer for sending TC messages.
-        midTimer = new OLSR_MidTimer(); ///< Timer for sending MID messages.
-        linkQualityTimer = new OLSR_ETX_LinkQualityTimer();
+        helloTimer = new Olsr_HelloTimer(); ///< Timer for sending HELLO messages.
+        tcTimer = new Olsr_TcTimer();   ///< Timer for sending TC messages.
+        midTimer = new Olsr_MidTimer(); ///< Timer for sending MID messages.
+        linkQualityTimer = new Olsr_Etx_LinkQualityTimer();
 
-        state_ptr = state_etx_ptr = new OLSR_ETX_state(&this->parameter_);
+        state_ptr = state_etx_ptr = new Olsr_Etx_state(&this->parameter_);
 
         for (int i = 0; i< getNumWlanInterfaces(); i++)
         {
             // Create never expiring interface association tuple entries for our
             // own network interfaces, so that GetMainAddress () works to
             // translate the node's own interface addresses into the main address.
-            OLSR_iface_assoc_tuple* tuple = new OLSR_iface_assoc_tuple;
+            Olsr_iface_assoc_tuple* tuple = new Olsr_iface_assoc_tuple;
             int index = getWlanInterfaceIndex(i);
             tuple->iface_addr() = getIfaceAddressFromIndex(index);
             tuple->main_addr() = ra_addr();
@@ -202,7 +203,7 @@ OLSR_ETX::initialize(int stage)
 /// \param p received packet.
 ///
 void
-OLSR_ETX::recv_olsr(Packet* msg)
+Olsr_Etx::recv_olsr(Packet* msg)
 {
     nsaddr_t src_addr;
     int index;
@@ -216,7 +217,7 @@ OLSR_ETX::recv_olsr(Packet* msg)
         delete msg;
         return;
     }
-    auto &op = msg->popAtFront<OLSR_pkt>();
+    auto &op = msg->popAtFront<OlsrPkt>();
 
 
     // If the packet contains no messages must be silently discarded.
@@ -235,7 +236,7 @@ OLSR_ETX::recv_olsr(Packet* msg)
     nsaddr_t receiverIfaceAddr = getIfaceAddressFromIndex(index);
     for (int i = 0; i < (int) op->msgArraySize(); i++) {
         auto msgAux = op->msg(i);
-        OLSR_msg msg = msgAux;
+        OlsrMsg msg = msgAux;
 
         // If ttl is less than or equal to zero, or
         // the receiver is the same as the originator,
@@ -295,16 +296,16 @@ OLSR_ETX::recv_olsr(Packet* msg)
 // Link delay extension
     if (parameter_.link_delay() && op->sn() > 0)
     {
-        OLSR_ETX_link_tuple *link_tuple = nullptr;
-        OLSR_link_tuple *link_aux = state_.find_link_tuple(src_addr);
+        Olsr_Etx_link_tuple *link_tuple = nullptr;
+        Olsr_link_tuple *link_aux = state_.find_link_tuple(src_addr);
         if (link_aux)
         {
-            link_tuple = dynamic_cast<OLSR_ETX_link_tuple*> (link_aux);
+            link_tuple = dynamic_cast<Olsr_Etx_link_tuple*> (link_aux);
             if (!link_tuple)
                 throw cRuntimeError("\n Error conversion link tuple to link ETX tuple");
         }
         if (link_tuple) {
-            OLSR_pkt opAux = *op;
+            OlsrPkt opAux = *op;
             link_tuple->link_delay_computation(&opAux);
         }
     }
@@ -332,7 +333,7 @@ OLSR_ETX::recv_olsr(Packet* msg)
 //void
 //OLSR::mpr_computation()
 void
-OLSR_ETX::olsr_mpr_computation()
+Olsr_Etx::olsr_mpr_computation()
 {
     mpr_computation();
 }
@@ -343,7 +344,7 @@ OLSR_ETX::olsr_mpr_computation()
 /// \brief Computates MPR set of a node.
 ///
 void
-OLSR_ETX::olsr_r1_mpr_computation()
+Olsr_Etx::olsr_r1_mpr_computation()
 {
     // For further details please refer to paper
     // Quality of Service Routing in Ad Hoc Networks Using OLSR
@@ -385,7 +386,7 @@ OLSR_ETX::olsr_r1_mpr_computation()
         bool ok = false;
         for (nbset_t::const_iterator it2 = N.begin(); it2 != N.end(); it2++)
         {
-            OLSR_nb_tuple* neigh = *it2;
+            Olsr_nb_tuple* neigh = *it2;
             if (neigh->nb_main_addr() == nb2hop_tuple->nb_main_addr())
             {
                 if (neigh->willingness() == OLSR_WILL_NEVER)
@@ -518,7 +519,7 @@ OLSR_ETX::olsr_r1_mpr_computation()
             for (auto it2 = N2.begin(); i < distance; i++) // check now the first section
             {
 
-                OLSR_nb2hop_tuple* nb2hop_tuple2 = *it2;
+                Olsr_nb2hop_tuple* nb2hop_tuple2 = *it2;
                 if (nb2hop_tuple1->nb_main_addr() == nb2hop_tuple2->nb_main_addr())
                 {
                     deleted_addrs.insert(nb2hop_tuple2->nb2hop_addr());
@@ -616,20 +617,20 @@ OLSR_ETX::olsr_r1_mpr_computation()
                         }
                         else if (r == max_r)
                         {
-                            OLSR_ETX_link_tuple *nb_link_tuple = nullptr, *max_link_tuple = nullptr;
-                            OLSR_link_tuple * link_tuple_aux;
+                            Olsr_Etx_link_tuple *nb_link_tuple = nullptr, *max_link_tuple = nullptr;
+                            Olsr_link_tuple * link_tuple_aux;
                             double now = CURRENT_TIME;
                             link_tuple_aux = state_.find_sym_link_tuple(nb_tuple->nb_main_addr(), now);
                             if (link_tuple_aux)
                             {
-                                nb_link_tuple = dynamic_cast<OLSR_ETX_link_tuple *>(link_tuple_aux);
+                                nb_link_tuple = dynamic_cast<Olsr_Etx_link_tuple *>(link_tuple_aux);
                                 if (!nb_link_tuple)
                                     throw cRuntimeError("\n Error conversion link tuple");
                             }
                             link_tuple_aux = state_.find_sym_link_tuple(max->nb_main_addr(), now);
                             if (link_tuple_aux)
                             {
-                                max_link_tuple = dynamic_cast<OLSR_ETX_link_tuple *>(link_tuple_aux);
+                                max_link_tuple = dynamic_cast<Olsr_Etx_link_tuple *>(link_tuple_aux);
                                 if (!max_link_tuple)
                                     throw cRuntimeError("\n Error conversion link tuple");
                             }
@@ -739,7 +740,7 @@ OLSR_ETX::olsr_r1_mpr_computation()
 /// \brief Computates MPR set of a node.
 ///
 void
-OLSR_ETX::olsr_r2_mpr_computation()
+Olsr_Etx::olsr_r2_mpr_computation()
 {
     // For further details please refer to paper
     // Quality of Service Routing in Ad Hoc Networks Using OLSR
@@ -835,21 +836,21 @@ OLSR_ETX::olsr_r2_mpr_computation()
                     }
                     else
                     {
-                        OLSR_ETX_link_tuple *nb_link_tuple = nullptr, *max_link_tuple = nullptr;
-                        OLSR_link_tuple *link_tuple_aux;
+                        Olsr_Etx_link_tuple *nb_link_tuple = nullptr, *max_link_tuple = nullptr;
+                        Olsr_link_tuple *link_tuple_aux;
                         double now = CURRENT_TIME;
 
                         link_tuple_aux = state_.find_sym_link_tuple(nb_tuple->nb_main_addr(), now);
                         if (link_tuple_aux)
                         {
-                            nb_link_tuple = dynamic_cast<OLSR_ETX_link_tuple *>(link_tuple_aux);
+                            nb_link_tuple = dynamic_cast<Olsr_Etx_link_tuple *>(link_tuple_aux);
                             if (!nb_link_tuple)
                                 throw cRuntimeError("\n Error conversion link tuple");
                         }
                         link_tuple_aux = state_.find_sym_link_tuple(max->nb_main_addr(), now);
                         if (link_tuple_aux)
                         {
-                            max_link_tuple = dynamic_cast<OLSR_ETX_link_tuple *>(link_tuple_aux);
+                            max_link_tuple = dynamic_cast<Olsr_Etx_link_tuple *>(link_tuple_aux);
                             if (!max_link_tuple)
                                 throw cRuntimeError("\n Error conversion link tuple");
                         }
@@ -958,7 +959,7 @@ OLSR_ETX::olsr_r2_mpr_computation()
 /// \brief Computates MPR set of a node.
 ///
 void
-OLSR_ETX::qolsr_mpr_computation()
+Olsr_Etx::qolsr_mpr_computation()
 {
     // For further details please refer to paper
     // QoS Routing in OLSR with Several Classes of Services
@@ -1029,7 +1030,7 @@ OLSR_ETX::qolsr_mpr_computation()
             reachability[r].push_back(nb_tuple);
         }
         // Select a node z from N2
-        OLSR_nb2hop_tuple* t_aux = *(N2.begin());
+        Olsr_nb2hop_tuple* t_aux = *(N2.begin());
         OLSR_ETX_nb2hop_tuple* z = nullptr;
         if (t_aux)
         {
@@ -1076,21 +1077,21 @@ OLSR_ETX::qolsr_mpr_computation()
                         }
                         else
                         {
-                            OLSR_ETX_link_tuple *nb_link_tuple = nullptr, *max_link_tuple = nullptr;
+                            Olsr_Etx_link_tuple *nb_link_tuple = nullptr, *max_link_tuple = nullptr;
                             double now = CURRENT_TIME;
 
 
-                            OLSR_link_tuple *link_tuple_aux = state_.find_sym_link_tuple(nb_tuple->nb_main_addr(), now); /* bug */
+                            Olsr_link_tuple *link_tuple_aux = state_.find_sym_link_tuple(nb_tuple->nb_main_addr(), now); /* bug */
                             if (link_tuple_aux)
                             {
-                                nb_link_tuple = dynamic_cast<OLSR_ETX_link_tuple *>(link_tuple_aux);
+                                nb_link_tuple = dynamic_cast<Olsr_Etx_link_tuple *>(link_tuple_aux);
                                 if (!nb_link_tuple)
                                     throw cRuntimeError("\n Error conversion link tuple");
                             }
                             link_tuple_aux = state_.find_sym_link_tuple(max->nb_main_addr(), now); /* bug */
                             if (link_tuple_aux)
                             {
-                                max_link_tuple = dynamic_cast<OLSR_ETX_link_tuple *>(link_tuple_aux);
+                                max_link_tuple = dynamic_cast<Olsr_Etx_link_tuple *>(link_tuple_aux);
                                 if (!max_link_tuple)
                                     throw cRuntimeError("\n Error conversion link tuple");
                             }
@@ -1208,7 +1209,7 @@ OLSR_ETX::qolsr_mpr_computation()
 /// \brief Computates MPR set of a node.
 ///
 void
-OLSR_ETX::olsr_r2_mpr_computation()
+Olsr_Etx::olsr_r2_mpr_computation()
 {
     // For further details please refer to paper
     // Quality of Service Routing in Ad Hoc Networks Using OLSR
@@ -1247,7 +1248,7 @@ OLSR_ETX::olsr_r2_mpr_computation()
         bool ok = false;
         for (nbset_t::const_iterator it2 = N.begin(); it2 != N.end(); it2++)
         {
-            OLSR_nb_tuple* neigh = *it2;
+            Olsr_nb_tuple* neigh = *it2;
             if (neigh->nb_main_addr() == nb2hop_tuple->nb_main_addr())
             {
                 if (neigh->willingness() == OLSR_WILL_NEVER)
@@ -1272,7 +1273,7 @@ OLSR_ETX::olsr_r2_mpr_computation()
         //       link to this node on some interface.
         for (auto it2 = N.begin(); it2 != N.end(); it2++)
         {
-            OLSR_nb_tuple* neigh = *it2;
+            Olsr_nb_tuple* neigh = *it2;
             if (neigh->nb_main_addr() == nb2hop_tuple->nb2hop_addr())
             {
                 ok = false;
@@ -1286,7 +1287,7 @@ OLSR_ETX::olsr_r2_mpr_computation()
     // N_willingness equal to WILL_ALWAYS
     for (auto it = N.begin(); it != N.end(); it++)
     {
-        OLSR_nb_tuple* nb_tuple = *it;
+        Olsr_nb_tuple* nb_tuple = *it;
         if (nb_tuple->willingness() == OLSR_WILL_ALWAYS)
         {
             state_.insert_mpr_addr(nb_tuple->nb_main_addr());
@@ -1306,12 +1307,12 @@ OLSR_ETX::olsr_r2_mpr_computation()
     std::set<nsaddr_t> coveredTwoHopNeighbors;
     for (auto it = N2.begin(); it != N2.end(); it++)
     {
-        OLSR_nb2hop_tuple* twoHopNeigh = *it;
+        Olsr_nb2hop_tuple* twoHopNeigh = *it;
         bool onlyOne = true;
         // try to find another neighbor that can reach twoHopNeigh->twoHopNeighborAddr
         for (nb2hopset_t::const_iterator it2 = N2.begin(); it2 != N2.end(); it2++)
         {
-            OLSR_nb2hop_tuple* otherTwoHopNeigh = *it2;
+            Olsr_nb2hop_tuple* otherTwoHopNeigh = *it2;
             if (otherTwoHopNeigh->nb2hop_addr() == twoHopNeigh->nb2hop_addr()
                     && otherTwoHopNeigh->nb_main_addr() != twoHopNeigh->nb_main_addr())
             {
@@ -1326,7 +1327,7 @@ OLSR_ETX::olsr_r2_mpr_computation()
             // take note of all the 2-hop neighbors reachable by the newly elected MPR
             for (nb2hopset_t::const_iterator it2 = N2.begin(); it2 != N2.end(); it2++)
             {
-                OLSR_nb2hop_tuple* otherTwoHopNeigh = *it2;
+                Olsr_nb2hop_tuple* otherTwoHopNeigh = *it2;
                 if (otherTwoHopNeigh->nb_main_addr() == twoHopNeigh->nb_main_addr())
                 {
                     coveredTwoHopNeighbors.insert(otherTwoHopNeigh->nb2hop_addr());
@@ -1382,21 +1383,21 @@ OLSR_ETX::olsr_r2_mpr_computation()
                     }
                     else
                     {
-                        OLSR_ETX_link_tuple *nb_link_tuple = nullptr, *max_link_tuple = nullptr;
-                        OLSR_link_tuple *link_tuple_aux;
+                        Olsr_Etx_link_tuple *nb_link_tuple = nullptr, *max_link_tuple = nullptr;
+                        Olsr_link_tuple *link_tuple_aux;
                         double now = CURRENT_TIME;
 
                         link_tuple_aux = state_.find_sym_link_tuple(nb_tuple->nb_main_addr(), now);
                         if (link_tuple_aux)
                         {
-                            nb_link_tuple = dynamic_cast<OLSR_ETX_link_tuple *>(link_tuple_aux);
+                            nb_link_tuple = dynamic_cast<Olsr_Etx_link_tuple *>(link_tuple_aux);
                             if (!nb_link_tuple)
                                 throw cRuntimeError("\n Error conversion link tuple");
                         }
                         link_tuple_aux = state_.find_sym_link_tuple(max->nb_main_addr(), now);
                         if (link_tuple_aux)
                         {
-                            max_link_tuple = dynamic_cast<OLSR_ETX_link_tuple *>(link_tuple_aux);
+                            max_link_tuple = dynamic_cast<Olsr_Etx_link_tuple *>(link_tuple_aux);
                             if (!max_link_tuple)
                                 throw cRuntimeError("\n Error conversion link tuple");
                         }
@@ -1519,7 +1520,7 @@ OLSR_ETX::olsr_r2_mpr_computation()
 /// \brief Computates MPR set of a node.
 ///
 void
-OLSR_ETX::qolsr_mpr_computation()
+Olsr_Etx::qolsr_mpr_computation()
 {
     // For further details please refer to paper
     // QoS Routing in OLSR with Several Classes of Services
@@ -1556,7 +1557,7 @@ OLSR_ETX::qolsr_mpr_computation()
         bool ok = false;
         for (nbset_t::const_iterator it2 = N.begin(); it2 != N.end(); it2++)
         {
-            OLSR_nb_tuple* neigh = *it2;
+            Olsr_nb_tuple* neigh = *it2;
             if (neigh->nb_main_addr() == nb2hop_tuple->nb_main_addr())
             {
                 if (neigh->willingness() == OLSR_WILL_NEVER)
@@ -1581,7 +1582,7 @@ OLSR_ETX::qolsr_mpr_computation()
         //       link to this node on some interface.
         for (auto it2 = N.begin(); it2 != N.end(); it2++)
         {
-            OLSR_nb_tuple* neigh = *it2;
+            Olsr_nb_tuple* neigh = *it2;
             if (neigh->nb_main_addr() == nb2hop_tuple->nb2hop_addr())
             {
                 ok = false;
@@ -1597,7 +1598,7 @@ OLSR_ETX::qolsr_mpr_computation()
     // N_willingness equal to WILL_ALWAYS
     for (auto it = N.begin(); it != N.end(); it++)
     {
-        OLSR_nb_tuple* nb_tuple = *it;
+        Olsr_nb_tuple* nb_tuple = *it;
         if (nb_tuple->willingness() == OLSR_WILL_ALWAYS)
         {
             state_.insert_mpr_addr(nb_tuple->nb_main_addr());
@@ -1617,12 +1618,12 @@ OLSR_ETX::qolsr_mpr_computation()
     std::set<nsaddr_t> coveredTwoHopNeighbors;
     for (auto it = N2.begin(); it != N2.end(); it++)
     {
-        OLSR_nb2hop_tuple* twoHopNeigh = *it;
+        Olsr_nb2hop_tuple* twoHopNeigh = *it;
         bool onlyOne = true;
         // try to find another neighbor that can reach twoHopNeigh->twoHopNeighborAddr
         for (nb2hopset_t::const_iterator it2 = N2.begin(); it2 != N2.end(); it2++)
         {
-            OLSR_nb2hop_tuple* otherTwoHopNeigh = *it2;
+            Olsr_nb2hop_tuple* otherTwoHopNeigh = *it2;
             if (otherTwoHopNeigh->nb2hop_addr() == twoHopNeigh->nb2hop_addr()
                     && otherTwoHopNeigh->nb_main_addr() != twoHopNeigh->nb_main_addr())
             {
@@ -1637,7 +1638,7 @@ OLSR_ETX::qolsr_mpr_computation()
             // take note of all the 2-hop neighbors reachable by the newly elected MPR
             for (nb2hopset_t::const_iterator it2 = N2.begin(); it2 != N2.end(); it2++)
             {
-                OLSR_nb2hop_tuple* otherTwoHopNeigh = *it2;
+                Olsr_nb2hop_tuple* otherTwoHopNeigh = *it2;
                 if (otherTwoHopNeigh->nb_main_addr() == twoHopNeigh->nb_main_addr())
                 {
                     coveredTwoHopNeighbors.insert(otherTwoHopNeigh->nb2hop_addr());
@@ -1672,7 +1673,7 @@ OLSR_ETX::qolsr_mpr_computation()
             reachability[r].push_back(nb_tuple);
         }
         // Select a node z from N2
-        OLSR_nb2hop_tuple* t_aux = *(N2.begin());
+        Olsr_nb2hop_tuple* t_aux = *(N2.begin());
         OLSR_ETX_nb2hop_tuple* z = nullptr;
         if (t_aux)
         {
@@ -1719,21 +1720,21 @@ OLSR_ETX::qolsr_mpr_computation()
                         }
                         else
                         {
-                            OLSR_ETX_link_tuple *nb_link_tuple = nullptr, *max_link_tuple = nullptr;
+                            Olsr_Etx_link_tuple *nb_link_tuple = nullptr, *max_link_tuple = nullptr;
                             double now = CURRENT_TIME;
 
 
-                            OLSR_link_tuple *link_tuple_aux = state_.find_sym_link_tuple(nb_tuple->nb_main_addr(), now); /* bug */
+                            Olsr_link_tuple *link_tuple_aux = state_.find_sym_link_tuple(nb_tuple->nb_main_addr(), now); /* bug */
                             if (link_tuple_aux)
                             {
-                                nb_link_tuple = dynamic_cast<OLSR_ETX_link_tuple *>(link_tuple_aux);
+                                nb_link_tuple = dynamic_cast<Olsr_Etx_link_tuple *>(link_tuple_aux);
                                 if (!nb_link_tuple)
                                     throw cRuntimeError("\n Error conversion link tuple");
                             }
                             link_tuple_aux = state_.find_sym_link_tuple(max->nb_main_addr(), now); /* bug */
                             if (link_tuple_aux)
                             {
-                                max_link_tuple = dynamic_cast<OLSR_ETX_link_tuple *>(link_tuple_aux);
+                                max_link_tuple = dynamic_cast<Olsr_Etx_link_tuple *>(link_tuple_aux);
                                 if (!max_link_tuple)
                                     throw cRuntimeError("\n Error conversion link tuple");
                             }
@@ -1854,7 +1855,7 @@ OLSR_ETX::qolsr_mpr_computation()
 /// \brief Computates MPR set of a node.
 ///
 void
-OLSR_ETX::olsrd_mpr_computation()
+Olsr_Etx::olsrd_mpr_computation()
 {
     // MPR computation algorithm according to olsrd project: all nodes will be selected
     // as MPRs, since they have WILLIGNESS different of WILL_NEVER
@@ -1877,7 +1878,7 @@ OLSR_ETX::olsrd_mpr_computation()
 /// \brief Creates the routing table of the node following RFC 3626 hints.
 ///
 void
-OLSR_ETX::rtable_default_computation()
+Olsr_Etx::rtable_default_computation()
 {
     rtable_computation();
     // 1. All the entries from the routing table are removed.
@@ -1890,7 +1891,7 @@ OLSR_ETX::rtable_default_computation()
 /// \brief Creates the routing table of the node using dijkstra algorithm
 ///
 void
-OLSR_ETX::rtable_dijkstra_computation()
+Olsr_Etx::rtable_dijkstra_computation()
 {
     nsaddr_t netmask (Ipv4Address::ALLONES_ADDRESS);
     // Declare a class that will run the dijkstra algorithm
@@ -1917,7 +1918,7 @@ OLSR_ETX::rtable_dijkstra_computation()
         OLSR_ETX_nb_tuple* nb_tuple = *it;
 
         // Get the best link we have to the current neighbor..
-        OLSR_ETX_link_tuple* best_link =
+        Olsr_Etx_link_tuple* best_link =
             state_.find_best_sym_link_tuple(nb_tuple->nb_main_addr(), CURRENT_TIME);
         // Add this edge to the graph we are building
         if (best_link)
@@ -1956,7 +1957,7 @@ OLSR_ETX::rtable_dijkstra_computation()
             continue;
         // Retrieve the link that connect us to this 2 hop neighbor
         OLSR_ETX_nb2hop_tuple* best_link = nullptr;
-        OLSR_nb2hop_tuple * nb2hop_tuple_aux = state_.find_nb2hop_tuple(nb_main_addr, nb2hop_main_addr);
+        Olsr_nb2hop_tuple * nb2hop_tuple_aux = state_.find_nb2hop_tuple(nb_main_addr, nb2hop_main_addr);
         if (nb2hop_tuple_aux)
         {
             best_link = dynamic_cast<OLSR_ETX_nb2hop_tuple *>(nb2hop_tuple_aux);
@@ -2144,7 +2145,7 @@ OLSR_ETX::rtable_dijkstra_computation()
 /// \param sender_iface the address of the interface where the message was sent from.
 ///
 bool
-OLSR_ETX::process_hello(OLSR_msg& msg, const nsaddr_t &receiver_iface, const nsaddr_t &sender_iface, uint16_t pkt_seq_num, const int &index)
+Olsr_Etx::process_hello(OlsrMsg& msg, const nsaddr_t &receiver_iface, const nsaddr_t &sender_iface, uint16_t pkt_seq_num, const int &index)
 {
     assert(msg.msg_type() == OLSR_ETX_HELLO_MSG);
     link_sensing(msg, receiver_iface, sender_iface, pkt_seq_num, index);
@@ -2183,19 +2184,19 @@ OLSR_ETX::process_hello(OLSR_msg& msg, const nsaddr_t &receiver_iface, const nsa
 /// \param sender_iface the address of the interface where the message was sent from.
 ///
 bool
-OLSR_ETX::process_tc(OLSR_msg& msg, const nsaddr_t &sender_iface, const int &index)
+Olsr_Etx::process_tc(OlsrMsg& msg, const nsaddr_t &sender_iface, const int &index)
 {
     assert(msg.msg_type() == OLSR_ETX_TC_MSG);
     double now = CURRENT_TIME;
-    OLSR_tc& tc = msg.tc();
+    Olsr_tc& tc = msg.tc();
 
     // 1. If the sender interface of this message is not in the symmetric
     // 1-hop neighborhood of this node, the message MUST be discarded.
-    OLSR_ETX_link_tuple* link_tuple = nullptr;
-    OLSR_link_tuple *tuple_aux = state_.find_sym_link_tuple(sender_iface, now);
+    Olsr_Etx_link_tuple* link_tuple = nullptr;
+    Olsr_link_tuple *tuple_aux = state_.find_sym_link_tuple(sender_iface, now);
     if (tuple_aux)
     {
-        link_tuple = dynamic_cast<OLSR_ETX_link_tuple*> (tuple_aux);
+        link_tuple = dynamic_cast<Olsr_Etx_link_tuple*> (tuple_aux);
         if (!link_tuple)
             throw cRuntimeError("\n Error conversion link tuple");
     }
@@ -2208,7 +2209,7 @@ OLSR_ETX::process_tc(OLSR_msg& msg, const nsaddr_t &sender_iface, const int &ind
     // then further processing of this TC message MUST NOT be
     // performed. This might be a message received out of order.
     OLSR_ETX_topology_tuple* topology_tuple = nullptr;
-    OLSR_topology_tuple* topology_tuple_aux = state_.find_newer_topology_tuple(msg.orig_addr(), tc.ansn());
+    Olsr_topology_tuple* topology_tuple_aux = state_.find_newer_topology_tuple(msg.orig_addr(), tc.ansn());
     if (topology_tuple_aux)
     {
         topology_tuple = dynamic_cast<OLSR_ETX_topology_tuple*> (topology_tuple_aux);
@@ -2237,7 +2238,7 @@ OLSR_ETX::process_tc(OLSR_msg& msg, const nsaddr_t &sender_iface, const int &ind
         // then the holding time of that tuple MUST be set to:
         //   T_time      =  current time + validity time.
         OLSR_ETX_topology_tuple* topology_tuple = nullptr;
-        OLSR_topology_tuple* topology_tuple_aux = state_.find_topology_tuple(addr, msg.orig_addr());
+        Olsr_topology_tuple* topology_tuple_aux = state_.find_topology_tuple(addr, msg.orig_addr());
         if (topology_tuple_aux)
         {
             topology_tuple = dynamic_cast<OLSR_ETX_topology_tuple*> (topology_tuple_aux);
@@ -2247,7 +2248,7 @@ OLSR_ETX::process_tc(OLSR_msg& msg, const nsaddr_t &sender_iface, const int &ind
 
 
         if (topology_tuple != nullptr)
-            topology_tuple->time() = now + OLSR::emf_to_seconds(msg.vtime());
+            topology_tuple->time() = now + Olsr::emf_to_seconds(msg.vtime());
         // 4.2. Otherwise, a new tuple MUST be recorded in the topology
         // set where:
         //  T_dest_addr = advertised neighbor main address,
@@ -2261,11 +2262,11 @@ OLSR_ETX::process_tc(OLSR_msg& msg, const nsaddr_t &sender_iface, const int &ind
             topology_tuple->last_addr() = msg.orig_addr();
             topology_tuple->seq() = tc.ansn();
             topology_tuple->set_qos_behaviour(parameter_.link_quality());
-            topology_tuple->time() = now + OLSR::emf_to_seconds(msg.vtime());
+            topology_tuple->time() = now + Olsr::emf_to_seconds(msg.vtime());
             add_topology_tuple(topology_tuple);
             // Schedules topology tuple deletion
-            OLSR_TopologyTupleTimer* topology_timer =
-                new OLSR_TopologyTupleTimer(this, topology_tuple);
+            Olsr_TopologyTupleTimer* topology_timer =
+                new Olsr_TopologyTupleTimer(this, topology_tuple);
             topology_timer->resched(DELAY(topology_tuple->time()));
         }
         // Update link quality and link delay information
@@ -2299,7 +2300,7 @@ OLSR_ETX::process_tc(OLSR_msg& msg, const nsaddr_t &sender_iface, const int &ind
 ///
 #if 0
 void
-OLSR::forward_data(Packet* p)
+Olsr::forward_data(Packet* p)
 {
     struct hdr_cmn* ch = HDR_CMN(p);
     struct hdr_ip* ih = HDR_IP(p);
@@ -2318,13 +2319,13 @@ OLSR::forward_data(Packet* p)
             ch->next_hop() = IP_BROADCAST;
         else
         {
-            OLSR_rt_entry* entry = rtable_.lookup(ih->daddr());
+            Olsr_rt_entry* entry = rtable_.lookup(ih->daddr());
             if (entry == nullptr)
             {
                 debug("%f: Node %d can not forward a packet destined to %d\n",
                       CURRENT_TIME,
-                      OLSR::node_id(ra_addr()),
-                      OLSR::node_id(ih->daddr()));
+                      Olsr::node_id(ra_addr()),
+                      Olsr::node_id(ih->daddr()));
                 drop(p, DROP_RTR_NO_ROUTE);
                 return;
             }
@@ -2364,7 +2365,7 @@ OLSR::forward_data(Packet* p)
 /// dictated by OLSR_MAX_MSGS constant.
 ///
 void
-OLSR_ETX::send_pkt()
+Olsr_Etx::send_pkt()
 {
     int num_msgs = msgs_.size();
     if (num_msgs == 0)
@@ -2383,10 +2384,10 @@ OLSR_ETX::send_pkt()
         {
             // We are going to use link delay extension
             // to define routes to be selected
-            const auto& op1 = makeShared<OLSR_pkt>();
+            const auto& op1 = makeShared<OlsrPkt>();
 
             // Duplicated packet...
-            Ptr<OLSR_pkt> op2 = nullptr;
+            Ptr<OlsrPkt> op2 = nullptr;
             op1->setPkt_seq_num( pkt_seq());
             if (i == 0)
             {
@@ -2394,7 +2395,7 @@ OLSR_ETX::send_pkt()
                 op1->setSn(cap_sn());
 
                 // Allocate room for a duplicated packet...
-                op2 = makeShared<OLSR_pkt>();
+                op2 = makeShared<OlsrPkt>();
 
                 op2->setChunkLength(B(OLSR_ETX_CAPPROBE_PACKET_SIZE));
                 // duplicated packet sequence no ...
@@ -2445,7 +2446,7 @@ OLSR_ETX::send_pkt()
         }
         else
         {
-            const auto& op = makeShared<OLSR_pkt>();
+            const auto& op = makeShared<OlsrPkt>();
 
             op->setChunkLength(B(OLSR_ETX_PKT_HDR_SIZE));
             op->setPkt_seq_num( pkt_seq());
@@ -2474,19 +2475,19 @@ OLSR_ETX::send_pkt()
 /// \brief Creates a new %OLSR HELLO message which is buffered to be sent later on.
 ///
 void
-OLSR_ETX::send_hello()
+Olsr_Etx::send_hello()
 {
-    OLSR_msg msg;
+    OlsrMsg msg;
     double now = CURRENT_TIME;
     msg.msg_type() = OLSR_HELLO_MSG;
-    msg.vtime() = OLSR::seconds_to_emf(OLSR_NEIGHB_HOLD_TIME);
+    msg.vtime() = Olsr::seconds_to_emf(OLSR_NEIGHB_HOLD_TIME);
     msg.orig_addr() = ra_addr();
     msg.ttl() = 1;
     msg.hop_count() = 0;
     msg.msg_seq_num() = msg_seq();
 
     msg.hello().reserved() = 0;
-    msg.hello().htime() = OLSR::seconds_to_emf(hello_ival());
+    msg.hello().htime() = Olsr::seconds_to_emf(hello_ival());
     msg.hello().willingness() = willingness();
     msg.hello().count = 0;
 
@@ -2494,7 +2495,7 @@ OLSR_ETX::send_hello()
     std::map<uint8_t, int> linkcodes_count;
     for (auto it = linkset().begin(); it != linkset().end(); it++)
     {
-        OLSR_ETX_link_tuple* link_tuple = dynamic_cast<OLSR_ETX_link_tuple*>(*it);
+        Olsr_Etx_link_tuple* link_tuple = dynamic_cast<Olsr_Etx_link_tuple*>(*it);
         if (!link_tuple)
             throw cRuntimeError("\n Error conversion link tuple");
 
@@ -2522,7 +2523,7 @@ OLSR_ETX::send_hello()
                         nb_it != nbset().end();
                         nb_it++)
                 {
-                    OLSR_nb_tuple* nb_tuple = *nb_it;
+                    Olsr_nb_tuple* nb_tuple = *nb_it;
                     if (nb_tuple->nb_main_addr() == get_main_addr(link_tuple->nb_iface_addr()))
                     {
                         if (nb_tuple->getStatus() == OLSR_STATUS_SYM)
@@ -2602,11 +2603,11 @@ OLSR_ETX::send_hello()
 ///
 /// \brief Creates a new %OLSR_ETX TC message which is buffered to be sent later on.
 ///
-void OLSR_ETX::send_tc()
+void Olsr_Etx::send_tc()
 {
-    OLSR_msg msg;
+    OlsrMsg msg;
     msg.msg_type() = OLSR_ETX_TC_MSG;
-    msg.vtime() = OLSR::seconds_to_emf(OLSR_ETX_TOP_HOLD_TIME);
+    msg.vtime() = Olsr::seconds_to_emf(OLSR_ETX_TOP_HOLD_TIME);
     msg.orig_addr() = ra_addr();
     if (parameter_.fish_eye())
     {
@@ -2633,9 +2634,9 @@ void OLSR_ETX::send_tc()
             // Report all 1 hop neighbors we have
             for (auto it = nbset().begin(); it != nbset().end(); it++)
             {
-                OLSR_nb_tuple* nb_tuple = *it;
+                Olsr_nb_tuple* nb_tuple = *it;
                 int count = msg.tc().count;
-                OLSR_ETX_link_tuple *link_tuple;
+                Olsr_Etx_link_tuple *link_tuple;
 
                 if (nb_tuple->getStatus() == OLSR_STATUS_SYM)
                 {
@@ -2672,7 +2673,7 @@ void OLSR_ETX::send_tc()
                     {
                         OLSR_ETX_mprsel_tuple* mprsel_tuple = *it;
                         int count = msg.tc().count;
-                        OLSR_ETX_link_tuple *link_tuple;
+                        Olsr_Etx_link_tuple *link_tuple;
 
                         assert(count >= 0 && count < OLSR_MAX_ADDRS);
                         link_tuple = state_.find_best_sym_link_tuple(mprsel_tuple->main_addr(), CURRENT_TIME);
@@ -2697,9 +2698,9 @@ void OLSR_ETX::send_tc()
                     // publish nodes in mpr sel set plus nodes in mpr set (RFC 3626)
                     for (auto it = mprselset().begin(); it != mprselset().end(); it++)
                     {
-                        OLSR_mprsel_tuple* mprsel_tuple = *it;
+                        Olsr_mprsel_tuple* mprsel_tuple = *it;
                         int count = msg.tc().count;
-                        OLSR_ETX_link_tuple *link_tuple;
+                        Olsr_Etx_link_tuple *link_tuple;
 
                         assert(count >= 0 && count < OLSR_MAX_ADDRS);
                         link_tuple = state_.find_best_sym_link_tuple(mprsel_tuple->main_addr(), CURRENT_TIME);
@@ -2722,7 +2723,7 @@ void OLSR_ETX::send_tc()
                     {
                         nsaddr_t mpr_addr = *it;
                         int count = msg.tc().count;
-                        OLSR_ETX_link_tuple *link_tuple;
+                        Olsr_Etx_link_tuple *link_tuple;
 
                         assert(count >= 0 && count < OLSR_MAX_ADDRS);
                         link_tuple = state_.find_best_sym_link_tuple(mpr_addr, CURRENT_TIME);
@@ -2749,7 +2750,7 @@ void OLSR_ETX::send_tc()
                     {
                         OLSR_ETX_nb_tuple* nb_tuple = *it;
                         int count = msg.tc().count;
-                        OLSR_ETX_link_tuple *link_tuple;
+                        Olsr_Etx_link_tuple *link_tuple;
 
                         if (nb_tuple->getStatus() == OLSR_STATUS_SYM)
                         {
@@ -2778,7 +2779,7 @@ void OLSR_ETX::send_tc()
                     {
                         nsaddr_t mpr_addr = *it;
                         int count = msg.tc().count;
-                        OLSR_ETX_link_tuple *link_tuple;
+                        Olsr_Etx_link_tuple *link_tuple;
 
                         assert(count >= 0 && count < OLSR_MAX_ADDRS);
                         link_tuple = state_.find_best_sym_link_tuple(mpr_addr, CURRENT_TIME);
@@ -2821,11 +2822,11 @@ void OLSR_ETX::send_tc()
 /// \param sender_iface the address of the interface where the message was sent from.
 ///
 bool
-OLSR_ETX::link_sensing
-(OLSR_msg& msg, const nsaddr_t &receiver_iface, const nsaddr_t &sender_iface,
+Olsr_Etx::link_sensing
+(OlsrMsg& msg, const nsaddr_t &receiver_iface, const nsaddr_t &sender_iface,
  uint16_t pkt_seq_num, const int & index)
 {
-    OLSR_hello& hello = msg.hello();
+    Olsr_hello& hello = msg.hello();
     double now = CURRENT_TIME;
     bool updated = false;
     bool created = false;
@@ -2838,18 +2839,18 @@ OLSR_ETX::link_sensing
     //                                   HELLO message
     //           L_SYM_time            = current time - 1 (expired)
     //           L_time                = current time + validity time
-    OLSR_ETX_link_tuple* link_tuple = nullptr;
-    OLSR_link_tuple* link_tuple_aux = state_.find_link_tuple(sender_iface);
+    Olsr_Etx_link_tuple* link_tuple = nullptr;
+    Olsr_link_tuple* link_tuple_aux = state_.find_link_tuple(sender_iface);
     if (link_tuple_aux)
     {
-        link_tuple = dynamic_cast<OLSR_ETX_link_tuple*>(link_tuple_aux);
+        link_tuple = dynamic_cast<Olsr_Etx_link_tuple*>(link_tuple_aux);
         if (link_tuple == nullptr)
             throw cRuntimeError("\n Error conversion link tuple");
     }
     if (link_tuple == nullptr)
     {
         // We have to create a new tuple
-        link_tuple = new OLSR_ETX_link_tuple;
+        link_tuple = new Olsr_Etx_link_tuple;
 // Omnet
         link_tuple->set_qos_behaviour(parameter_);
         link_tuple->set_owner(this);
@@ -2858,7 +2859,7 @@ OLSR_ETX::link_sensing
         link_tuple->local_iface_addr() = receiver_iface;
         link_tuple->sym_time() = now - 1;
         link_tuple->lost_time() = 0.0;
-        link_tuple->time() = now + OLSR::emf_to_seconds(msg.vtime());
+        link_tuple->time() = now + Olsr::emf_to_seconds(msg.vtime());
         // Init link quality information struct for this link tuple
         link_tuple->link_quality_init(pkt_seq_num, DEFAULT_LOSS_WINDOW_SIZE);
         /// Link delay extension
@@ -2872,14 +2873,14 @@ OLSR_ETX::link_sensing
         updated = true;
 
     // Account link quality information for this link
-    link_tuple->receive(pkt_seq_num, OLSR::emf_to_seconds(hello.htime()));
+    link_tuple->receive(pkt_seq_num, Olsr::emf_to_seconds(hello.htime()));
 
     // 2    The tuple (existing or new) with:
     //           L_neighbor_iface_addr == Source Address
     //      is then modified as follows:
     //      2.1  L_ASYM_time = current time + validity time;
 
-    link_tuple->asym_time() = now + OLSR::emf_to_seconds(msg.vtime());
+    link_tuple->asym_time() = now + Olsr::emf_to_seconds(msg.vtime());
     assert(hello.count >= 0 && hello.count <= OLSR_ETX_MAX_HELLOS);
     for (int i = 0; i < hello.count; i++)
     {
@@ -2915,7 +2916,7 @@ OLSR_ETX::link_sensing
                 else if (lt == OLSR_ETX_SYM_LINK || lt == OLSR_ETX_ASYM_LINK)
                 {
                     link_tuple->sym_time() =
-                        now + OLSR::emf_to_seconds(msg.vtime());
+                        now + Olsr::emf_to_seconds(msg.vtime());
                     link_tuple->time() =
                         link_tuple->sym_time() + OLSR_ETX_NEIGHB_HOLD_TIME;
                     link_tuple->lost_time() = 0.0;
@@ -2939,8 +2940,8 @@ OLSR_ETX::link_sensing
     // Schedules link tuple deletion
     if (created && link_tuple != nullptr)
     {
-        OLSR_LinkTupleTimer* link_timer =
-            new OLSR_LinkTupleTimer(this, link_tuple);
+        Olsr_LinkTupleTimer* link_timer =
+            new Olsr_LinkTupleTimer(this, link_tuple);
         link_timer->resched(DELAY(MIN(link_tuple->time(), link_tuple->sym_time())));
     }
     return false;
@@ -2962,14 +2963,14 @@ OLSR_ETX::link_sensing
 /// \param msg the %OLSR message which contains the HELLO message.
 ///
 bool
-OLSR_ETX::populate_nb2hopset(OLSR_msg& msg)
+Olsr_Etx::populate_nb2hopset(OlsrMsg& msg)
 {
-    OLSR_hello& hello = msg.hello();
+    Olsr_hello& hello = msg.hello();
     double now = CURRENT_TIME;
 
     // Upon receiving a HELLO message, the "validity time" MUST be computed
     // from the Vtime field of the message header (see section 3.3.2).
-    double validity_time = now + OLSR::emf_to_seconds(msg.vtime());
+    double validity_time = now + Olsr::emf_to_seconds(msg.vtime());
 
     //  If the Originator Address is the main address of a
     //  L_neighbor_iface_addr from a link tuple included in the Link Set with
@@ -2977,7 +2978,7 @@ OLSR_ETX::populate_nb2hopset(OLSR_msg& msg)
     //  then the 2-hop Neighbor Set SHOULD be updated as follows:
     for (auto it_lt = linkset().begin(); it_lt != linkset().end(); it_lt++)
     {
-        OLSR_ETX_link_tuple* link_tuple = dynamic_cast<OLSR_ETX_link_tuple*>(*it_lt);
+        Olsr_Etx_link_tuple* link_tuple = dynamic_cast<Olsr_Etx_link_tuple*>(*it_lt);
         if (!link_tuple)
             throw cRuntimeError("\n Error conversion link tuple");
 
@@ -3014,7 +3015,7 @@ OLSR_ETX::populate_nb2hopset(OLSR_msg& msg)
                         // N_2hop_addr          =  main address of the 2-hop neighbor;
                         // N_time               =  current time + validity time.
                         OLSR_ETX_nb2hop_tuple* nb2hop_tuple = nullptr;
-                        OLSR_nb2hop_tuple* nb2hop_tuple_aux =
+                        Olsr_nb2hop_tuple* nb2hop_tuple_aux =
                             state_.find_nb2hop_tuple(msg.orig_addr(), nb2hop_addr);
                         if (nb2hop_tuple_aux)
                         {
@@ -3037,8 +3038,8 @@ OLSR_ETX::populate_nb2hopset(OLSR_msg& msg)
                             add_nb2hop_tuple(nb2hop_tuple);
                             nb2hop_tuple->time() = validity_time;
                             // Schedules nb2hop tuple deletion
-                            OLSR_Nb2hopTupleTimer* nb2hop_timer =
-                                new OLSR_Nb2hopTupleTimer(this, nb2hop_tuple);
+                            Olsr_Nb2hopTupleTimer* nb2hop_timer =
+                                new Olsr_Nb2hopTupleTimer(this, nb2hop_tuple);
                             nb2hop_timer->resched(DELAY(nb2hop_tuple->time()));
                         }
                         else
@@ -3144,7 +3145,7 @@ OLSR_ETX::populate_nb2hopset(OLSR_msg& msg)
 /// \param tuple link tuple with the information of the link to the neighbor which has been lost.
 ///
 void
-OLSR_ETX::nb_loss(OLSR_link_tuple* tuple)
+Olsr_Etx::nb_loss(Olsr_link_tuple* tuple)
 {
     debug("%f: Node %s detects neighbor %s loss\n", CURRENT_TIME,
             getNodeId(ra_addr()), getNodeId(tuple->nb_iface_addr()));
@@ -3313,7 +3314,7 @@ OLSR_ETX::nb_loss(OLSR_link_tuple* tuple)
 // nsaddr_t OLSR::get_main_addr(nsaddr_t iface_addr) {
 
 
-void OLSR_ETX::finish()
+void Olsr_Etx::finish()
 {
     rtable_.clear();
     msgs_.clear();
@@ -3329,8 +3330,8 @@ void OLSR_ETX::finish()
     linkQualityTimer = nullptr;
 }
 
-OLSR_ETX::OLSR_ETX() :
-    OLSR(),
+Olsr_Etx::Olsr_Etx() :
+    Olsr(),
     tc_msg_ttl_(),
     tc_msg_ttl_index_(-1),
     cap_sn_(-1),
@@ -3339,7 +3340,7 @@ OLSR_ETX::OLSR_ETX() :
 {
 }
 
-OLSR_ETX::~OLSR_ETX()
+Olsr_Etx::~Olsr_Etx()
 {
 
     rtable_.clear();
@@ -3374,7 +3375,7 @@ OLSR_ETX::~OLSR_ETX()
     {
         while (getTimerMultimMap()->size()>0)
         {
-            OLSR_Timer * timer = check_and_cast<OLSR_Timer *>(getTimerMultimMap()->begin()->second);
+            Olsr_Timer * timer = check_and_cast<Olsr_Timer *>(getTimerMultimMap()->begin()->second);
             getTimerMultimMap()->erase(getTimerMultimMap()->begin());
             timer->setTuple(nullptr);
             if (helloTimer==timer)
@@ -3416,18 +3417,18 @@ OLSR_ETX::~OLSR_ETX()
 /// \brief Verify if a link tuple has reached a timeout in the expected time to receive a new packet
 ///
 void
-OLSR_ETX::link_quality()
+Olsr_Etx::link_quality()
 {
     double now = CURRENT_TIME;
     for (auto it = state_.linkset_.begin(); it != state_.linkset_.end(); it++)
     {
-        OLSR_ETX_link_tuple* tuple = dynamic_cast<OLSR_ETX_link_tuple*>(*it);
+        Olsr_Etx_link_tuple* tuple = dynamic_cast<Olsr_Etx_link_tuple*>(*it);
         if (tuple->next_hello() < now)
             tuple->packet_timeout();
     }
 }
 
-bool OLSR_ETX::getNextHop(const L3Address &dest, L3Address &add, int &iface, double &cost)
+bool Olsr_Etx::getNextHop(const L3Address &dest, L3Address &add, int &iface, double &cost)
 {
     OLSR_ETX_rt_entry* rt_entry = rtable_.lookup(dest);
     if (!rt_entry)
@@ -3443,7 +3444,7 @@ bool OLSR_ETX::getNextHop(const L3Address &dest, L3Address &add, int &iface, dou
                 add = rt_entry->route[0];
             else
                 add = rt_entry->next_addr();
-            OLSR_rt_entry* rt_entry_aux = rtable_.find_send_entry(rt_entry);
+            Olsr_rt_entry* rt_entry_aux = rtable_.find_send_entry(rt_entry);
             if (rt_entry_aux->next_addr() != add)
                 throw cRuntimeError("OLSR Data base error");
 
@@ -3462,7 +3463,7 @@ bool OLSR_ETX::getNextHop(const L3Address &dest, L3Address &add, int &iface, dou
         add = rt_entry->route[0];
     else
         add = rt_entry->next_addr();
-    OLSR_rt_entry* rt_entry_aux = rtable_.find_send_entry(rt_entry);
+    Olsr_rt_entry* rt_entry_aux = rtable_.find_send_entry(rt_entry);
     if (rt_entry_aux->next_addr() != add)
         throw cRuntimeError("OLSR Data base error");
 

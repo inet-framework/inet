@@ -19,50 +19,52 @@
  ***************************************************************************/
 
 ///
-/// \file   OLSR_printer.h
-/// \brief  Header file which includes all printing functions related to OLSR.
+/// \file   OLSR.h
+/// \brief  Header file for OLSR agent and related classes.
+///
+/// Here are defined all timers used by OLSR, including those for managing internal
+/// state and those for sending messages. Class OLSR is also defined, therefore this
+/// file has signatures for the most important methods. Lots of constants are also
+/// defined.
 ///
 
-#ifndef __OLSR_printer_h__
-#define __OLSR_printer_h__
+#ifndef __OLSROPT_omnet_h__
 
-#include "inet/routing/extras/olsr/OLSR.h"
-#include "inet/routing/extras/olsr/OLSRpkt_m.h"
-#include "inet/routing/extras/olsr/OLSR_repositories.h"
-
-#if 0
-#include <packet.h>
-#include <ip.h>
-#include <trace.h>
-#endif
+#define __OLSROPT_omnet_h__
+#include "inet/routing/extras/olsr/Olrs.h"
 
 namespace inet {
 
 namespace inetmanet {
 
-/// Encapsulates all printing functions for OLSR data structures and messages.
-class OLSR_printer
+class OlsrOpt : public Olsr
 {
-    friend class OLSR;
+  private:
+    friend class Olsr_HelloTimer;
+    friend class Olsr_TcTimer;
+    friend class Olsr_MidTimer;
+    friend class Olsr_DupTupleTimer;
+    friend class Olsr_LinkTupleTimer;
+    friend class Olsr_Nb2hopTupleTimer;
+    friend class Olsr_MprSelTupleTimer;
+    friend class Olsr_TopologyTupleTimer;
+    friend class Olsr_IfaceAssocTupleTimer;
+    friend class Olsr_MsgTimer;
+    friend class Olsr_Timer;
 
   protected:
-    static void print_linkset(Trace*, linkset_t&);
-    static void print_nbset(Trace*, nbset_t&);
-    static void print_nb2hopset(Trace*, nb2hopset_t&);
-    static void print_mprset(Trace*, mprset_t&);
-    static void print_mprselset(Trace*, mprselset_t&);
-    static void print_topologyset(Trace*, topologyset_t&);
 
-    static void print_olsr_pkt(FILE*, OLSR_pkt*);
-    static void print_olsr_msg(FILE*, OLSR_msg&);
-    static void print_olsr_hello(FILE*, OLSR_hello&);
-    static void print_olsr_tc(FILE*, OLSR_tc&);
-    static void print_olsr_mid(FILE*, OLSR_mid&);
-#if 0
-  public:
-    static void print_cmn_hdr(FILE*, struct hdr_cmn*);
-    static void print_ip_hdr(FILE*, struct hdr_ip*);
-#endif
+    virtual bool        link_sensing(OlsrMsg&, const nsaddr_t &, const nsaddr_t &, const int &) override;
+    virtual bool        populate_nbset(OlsrMsg&) override;
+    virtual bool        populate_nb2hopset(OlsrMsg&) override;
+
+    virtual void        recv_olsr(Packet *) override;
+
+    virtual bool        process_hello(OlsrMsg&, const nsaddr_t &, const nsaddr_t &, const int &) override;
+    virtual bool        process_tc(OlsrMsg&, const nsaddr_t &, const int &) override;
+    virtual int         update_topology_tuples(OlsrMsg& msg, int index);
+    virtual void nb_loss(Olsr_link_tuple* tuple) override;
+
 };
 
 } // namespace inetmanet

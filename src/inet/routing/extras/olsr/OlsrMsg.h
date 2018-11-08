@@ -4,7 +4,7 @@
 #include <string.h>
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/routing/extras/olsr/OLSR_ETX_parameter.h"
+#include "inet/routing/extras/olsr/Olrs_Etx_parameter.h"
 
 namespace inet {
 
@@ -84,7 +84,7 @@ class OlsrAddressSize
 #define OLSR_ETX_TC_HDR_SIZE OLSR_TC_HDR_SIZE
 
 
-typedef struct OLSR_ETX_iface_address {
+typedef struct Olsr_Etx_iface_address {
 
   /// Interface Address
   nsaddr_t  iface_address_;
@@ -126,11 +126,11 @@ typedef struct OLSR_ETX_iface_address {
   inline double& link_delay() { return link_delay_; }
   inline double& nb_link_delay() { return nb_link_delay_; }
 
-} OLSR_ETX_iface_address;
+} Olsr_Etx_iface_address;
 
 
 /// Auxiliary struct which is part of the %OLSR_ETX HELLO message (struct OLSR_ETX_hello).
-typedef struct OLSR_hello_msg {
+typedef struct Olsr_hello_msg {
 
   /// Link code.
   uint8_t  link_code_;
@@ -139,14 +139,14 @@ typedef struct OLSR_hello_msg {
   /// Size of this link message.
   uint16_t  link_msg_size_;
   /// List of interface addresses of neighbor nodes.
-  OLSR_ETX_iface_address  nb_iface_addrs_[OLSR_MAX_ADDRS];
+  Olsr_Etx_iface_address  nb_iface_addrs_[OLSR_MAX_ADDRS];
   /// Number of interface addresses contained in nb_iface_addrs_.
   int    count;
 
   inline uint8_t&  link_code()    { return link_code_; }
   inline uint8_t&  reserved()    { return reserved_; }
   inline uint16_t&  link_msg_size()    { return link_msg_size_; }
-  inline OLSR_ETX_iface_address&  nb_etx_iface_addr(int i)  { return nb_iface_addrs_[i]; }
+  inline Olsr_Etx_iface_address&  nb_etx_iface_addr(int i)  { return nb_iface_addrs_[i]; }
   inline nsaddr_t  & nb_iface_addr(int i)  { return nb_iface_addrs_[i].iface_address_;}
   inline void set_qos_behaviour(int bh) {for(int i=0;i<OLSR_MAX_ADDRS;i++) nb_iface_addrs_[i].parameter_qos_=bh;}
 
@@ -156,7 +156,7 @@ typedef struct OLSR_hello_msg {
 
 #if 0
 /// Auxiliary struct which is part of the %OLSR HELLO message (struct OLSR_hello).
-typedef struct OLSR_hello_msg {
+typedef struct Olsr_hello_msg {
 
         /// Link code.
     uint8_t link_code_;
@@ -176,12 +176,12 @@ typedef struct OLSR_hello_msg {
 
     inline uint32_t size() { return OLSR_HELLO_MSG_HDR_SIZE + count*OlsrAddressSize::ADDR_SIZE; }
 
-} OLSR_hello_msg;
+} Olsr_hello_msg;
 #endif
 
 /// %OLSR HELLO message.
 
-typedef struct OLSR_hello :cObject {
+typedef struct Olsr_hello :cObject {
 
     /// Reserved.
     uint16_t    reserved_;
@@ -190,14 +190,14 @@ typedef struct OLSR_hello :cObject {
     /// Willingness of a node for forwarding packets on behalf of other nodes.
     uint8_t willingness_;
     /// List of OLSR_hello_msg.
-    OLSR_hello_msg  hello_body_[OLSR_MAX_HELLOS];
+    Olsr_hello_msg  hello_body_[OLSR_MAX_HELLOS];
     /// Number of OLSR_hello_msg contained in hello_body_.
     int     count;
 
     inline uint16_t&    reserved()      { return reserved_; }
     inline uint8_t& htime()         { return htime_; }
     inline uint8_t& willingness()       { return willingness_; }
-    inline OLSR_hello_msg&  hello_msg(int i)    { return hello_body_[i]; }
+    inline Olsr_hello_msg&  hello_msg(int i)    { return hello_body_[i]; }
 
     inline uint32_t size() {
         uint32_t sz = OLSR_HELLO_HDR_SIZE;
@@ -205,32 +205,32 @@ typedef struct OLSR_hello :cObject {
             sz += hello_msg(i).size();
         return sz;
     }
-} OLSR_hello;
+} Olsr_hello;
 
 
 /// %OLSR TC message.
-typedef struct OLSR_tc :cObject{
+typedef struct Olsr_tc :cObject{
 
         /// Advertised Neighbor Sequence Number.
     uint16_t    ansn_;
     /// Reserved.
     uint16_t    reserved_;
     /// List of neighbors' main addresses.
-    OLSR_ETX_iface_address  nb_main_addrs_[OLSR_MAX_ADDRS];
+    Olsr_Etx_iface_address  nb_main_addrs_[OLSR_MAX_ADDRS];
     /// Number of neighbors' main addresses contained in nb_main_addrs_.
     int     count;
 
     inline  uint16_t&   ansn()          { return ansn_; }
     inline  uint16_t&   reserved()      { return reserved_; }
     inline  nsaddr_t&   nb_main_addr(int i) { return nb_main_addrs_[i].iface_address_; }
-    inline  OLSR_ETX_iface_address& nb_etx_main_addr(int i) { return nb_main_addrs_[i]; }
+    inline  Olsr_Etx_iface_address& nb_etx_main_addr(int i) { return nb_main_addrs_[i]; }
     inline void set_qos_behaviour(int bh) {for(int i=0;i<OLSR_MAX_ADDRS;i++) nb_main_addrs_[i].parameter_qos_=bh;}
     inline  uint32_t size() { return OLSR_TC_HDR_SIZE + count*OlsrAddressSize::ADDR_SIZE; }
-} OLSR_tc;
+} Olsr_tc;
 
 #if 0
 /// %OLSR TC message.
-typedef struct OLSR_tc :cObject{
+typedef struct Olsr_tc :cObject{
 
         /// Advertised Neighbor Sequence Number.
     uint16_t    ansn_;
@@ -247,11 +247,11 @@ typedef struct OLSR_tc :cObject{
 
     inline  uint32_t size() { return OLSR_TC_HDR_SIZE + count*OlsrAddressSize::ADDR_SIZE; }
 
-} OLSR_tc;
+} Olsr_tc;
 #endif
 
 /// %OLSR MID message.
-typedef struct OLSR_mid :cObject{
+typedef struct Olsr_mid :cObject{
 
     /// List of interface addresses.
     nsaddr_t    iface_addrs_[OLSR_MAX_ADDRS];
@@ -263,7 +263,7 @@ typedef struct OLSR_mid :cObject{
 
     inline uint32_t size()          { return count*OlsrAddressSize::ADDR_SIZE; }
 
-} OLSR_mid;
+} Olsr_mid;
 
 #define MidSize sizeof (OLSR_mid)
 #define HelloSize sizeof (OLSR_hello)
@@ -274,38 +274,38 @@ typedef struct OLSR_mid :cObject{
 
 class   MsgBody {
 public:
-    OLSR_hello  hello_;
-    OLSR_tc     tc_;
-    OLSR_mid    mid_;
+    Olsr_hello  hello_;
+    Olsr_tc     tc_;
+    Olsr_mid    mid_;
 
 
     MsgBody(MsgBody &other){
-            memcpy((void*)&hello_,(void*)&other.hello_,sizeof(OLSR_hello));
-            memcpy((void*)&tc_,(void*)&other.tc_,sizeof(OLSR_tc));
-            memcpy((void*)&mid_,(void*)&other.mid_,sizeof(OLSR_mid));
+            memcpy((void*)&hello_,(void*)&other.hello_,sizeof(Olsr_hello));
+            memcpy((void*)&tc_,(void*)&other.tc_,sizeof(Olsr_tc));
+            memcpy((void*)&mid_,(void*)&other.mid_,sizeof(Olsr_mid));
         }
     MsgBody(){
-            memset((void*)&hello_,0,sizeof(OLSR_hello));
-            memset((void*)&tc_,0,sizeof(OLSR_tc));
-            memset((void*)&mid_,0,sizeof(OLSR_mid));
+            memset((void*)&hello_,0,sizeof(Olsr_hello));
+            memset((void*)&tc_,0,sizeof(Olsr_tc));
+            memset((void*)&mid_,0,sizeof(Olsr_mid));
           }
     ~MsgBody(){}
     MsgBody & operator =  (const MsgBody &other){
             if (this==&other) return *this;
-                            memcpy((void*)&hello_,(void*)&other.hello_,sizeof(OLSR_hello));
-                            memcpy((void*)&tc_,(void*)&other.tc_,sizeof(OLSR_tc));
-                            memcpy((void*)&mid_,(void*)&other.mid_,sizeof(OLSR_mid));
+                            memcpy((void*)&hello_,(void*)&other.hello_,sizeof(Olsr_hello));
+                            memcpy((void*)&tc_,(void*)&other.tc_,sizeof(Olsr_tc));
+                            memcpy((void*)&mid_,(void*)&other.mid_,sizeof(Olsr_mid));
                 return *this;
             }
-    OLSR_hello  * hello(){return &hello_;}
-    OLSR_tc * tc(){return &tc_;}
-    OLSR_mid* mid(){return &mid_;}
+    Olsr_hello  * hello(){return &hello_;}
+    Olsr_tc * tc(){return &tc_;}
+    Olsr_mid* mid(){return &mid_;}
 
 
 };
 
 /// %OLSR message.
-class OLSR_msg {
+class OlsrMsg {
 public:
     uint8_t msg_type_;  ///< Message type.
     uint8_t vtime_;     ///< Validity time.
@@ -324,9 +324,9 @@ public:
     inline  uint8_t&    ttl()       { return ttl_; }
     inline  uint8_t&    hop_count() { return hop_count_; }
     inline  uint16_t&   msg_seq_num()   { return msg_seq_num_; }
-    inline  OLSR_hello& hello()     { return *(msg_body_.hello()); }
-    inline  OLSR_tc&    tc()        { return *(msg_body_.tc()); }
-    inline  OLSR_mid&   mid()       { return *(msg_body_.mid()); }
+    inline  Olsr_hello& hello()     { return *(msg_body_.hello()); }
+    inline  Olsr_tc&    tc()        { return *(msg_body_.tc()); }
+    inline  Olsr_mid&   mid()       { return *(msg_body_.mid()); }
 
     std::string str() const {
         std::stringstream out;
@@ -345,8 +345,8 @@ public:
             sz += mid().size();
         return sz;
     }
-    OLSR_msg(){}
-    OLSR_msg(const OLSR_msg &other)
+    OlsrMsg(){}
+    OlsrMsg(const OlsrMsg &other)
     {
         msg_type_=other.msg_type_;  ///< Message type.
         vtime_=other.vtime_;        ///< Validity time.
@@ -358,7 +358,7 @@ public:
         msg_body_=other.msg_body_;          ///< Message body.
     }
 
-    OLSR_msg & operator = (const OLSR_msg &other)
+    OlsrMsg & operator = (const OlsrMsg &other)
     {
         if (this==&other) return *this;
         msg_type_=other.msg_type_;  ///< Message type.

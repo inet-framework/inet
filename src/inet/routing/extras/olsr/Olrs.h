@@ -30,18 +30,15 @@
 
 #ifndef __OLSR_omnet_h__
 #define __OLSR_omnet_h__
-#include "inet/common/INETUtils.h"
-
-#include "inet/routing/extras/base/ManetRoutingBase.h"
-#include "inet/routing/extras/olsr/OLSRpkt_m.h"
-#include "inet/routing/extras/olsr/OLSR_state.h"
-#include "inet/routing/extras/olsr/OLSR_rtable.h"
-#include "inet/routing/extras/olsr/OLSR_repositories.h"
-
 #include <map>
 #include <vector>
-
 #include <assert.h>
+#include "inet/common/INETUtils.h"
+#include "inet/routing/extras/base/ManetRoutingBase.h"
+#include "inet/routing/extras/olsr/Olrs_repositories.h"
+#include "inet/routing/extras/olsr/Olrs_rtable.h"
+#include "inet/routing/extras/olsr/Olrs_state.h"
+#include "inet/routing/extras/olsr/OlrsPkt_m.h"
 
 namespace inet {
 
@@ -155,86 +152,86 @@ namespace inetmanet {
 /// Random number between [0-OLSR_MAXJITTER] used to jitter OLSR packet transmission.
 //#define JITTER            (Random::uniform()*OLSR_MAXJITTER)
 
-class OLSR;         // forward declaration
+class Olsr;         // forward declaration
 
 /********** Timers **********/
 
 /// Basic timer class
 
-class OLSR_Timer :  public ManetTimer /*cMessage*/
+class Olsr_Timer :  public ManetTimer /*cMessage*/
 {
   protected:
     cObject* tuple_ = nullptr;
   public:
-    OLSR_Timer(ManetRoutingBase* agent) : ManetTimer(agent) {}
-    OLSR_Timer() : ManetTimer() {}
+    Olsr_Timer(ManetRoutingBase* agent) : ManetTimer(agent) {}
+    Olsr_Timer() : ManetTimer() {}
     virtual void setTuple(cObject *tuple) {tuple_ = tuple;}
 };
 
 
 /// Timer for sending an enqued message.
-class OLSR_MsgTimer : public OLSR_Timer
+class Olsr_MsgTimer : public Olsr_Timer
 {
   public:
-    OLSR_MsgTimer(ManetRoutingBase* agent) : OLSR_Timer(agent) {}
-    OLSR_MsgTimer():OLSR_Timer() {}
+    Olsr_MsgTimer(ManetRoutingBase* agent) : Olsr_Timer(agent) {}
+    Olsr_MsgTimer():Olsr_Timer() {}
     void expire() override;
 };
 
 /// Timer for sending HELLO messages.
-class OLSR_HelloTimer : public OLSR_Timer
+class Olsr_HelloTimer : public Olsr_Timer
 {
   public:
-    OLSR_HelloTimer(ManetRoutingBase* agent) : OLSR_Timer(agent) {}
-    OLSR_HelloTimer():OLSR_Timer() {}
+    Olsr_HelloTimer(ManetRoutingBase* agent) : Olsr_Timer(agent) {}
+    Olsr_HelloTimer():Olsr_Timer() {}
     void expire() override;
 };
 
 
 /// Timer for sending TC messages.
-class OLSR_TcTimer : public OLSR_Timer
+class Olsr_TcTimer : public Olsr_Timer
 {
   public:
-    OLSR_TcTimer(ManetRoutingBase* agent) : OLSR_Timer(agent) {}
-    OLSR_TcTimer():OLSR_Timer() {}
+    Olsr_TcTimer(ManetRoutingBase* agent) : Olsr_Timer(agent) {}
+    Olsr_TcTimer():Olsr_Timer() {}
     void expire() override;
 };
 
 
 /// Timer for sending MID messages.
-class OLSR_MidTimer : public OLSR_Timer
+class Olsr_MidTimer : public Olsr_Timer
 {
   public:
-    OLSR_MidTimer(ManetRoutingBase* agent) : OLSR_Timer(agent) {}
-    OLSR_MidTimer():OLSR_Timer() {}
+    Olsr_MidTimer(ManetRoutingBase* agent) : Olsr_Timer(agent) {}
+    Olsr_MidTimer():Olsr_Timer() {}
     virtual void expire() override;
 };
 
 
 
 /// Timer for removing duplicate tuples: OLSR_dup_tuple.
-class OLSR_DupTupleTimer : public OLSR_Timer
+class Olsr_DupTupleTimer : public Olsr_Timer
 {
 //  protected:
 //  OLSR_dup_tuple* tuple_;
   public:
-    OLSR_DupTupleTimer(ManetRoutingBase* agent, OLSR_dup_tuple* tuple) : OLSR_Timer(agent)
+    Olsr_DupTupleTimer(ManetRoutingBase* agent, Olsr_dup_tuple* tuple) : Olsr_Timer(agent)
     {
         tuple_ = tuple;
     }
-    void setTuple(OLSR_dup_tuple* tuple) {tuple_ = tuple; tuple->asocTimer = this;}
-    ~OLSR_DupTupleTimer();
+    void setTuple(Olsr_dup_tuple* tuple) {tuple_ = tuple; tuple->asocTimer = this;}
+    ~Olsr_DupTupleTimer();
     virtual void expire() override;
 };
 
 /// Timer for removing link tuples: OLSR_link_tuple.
-class OLSR_LinkTupleTimer : public OLSR_Timer
+class Olsr_LinkTupleTimer : public Olsr_Timer
 {
   public:
-    OLSR_LinkTupleTimer(ManetRoutingBase* agent, OLSR_link_tuple* tuple);
+    Olsr_LinkTupleTimer(ManetRoutingBase* agent, Olsr_link_tuple* tuple);
 
-    void setTuple(OLSR_link_tuple* tuple) {tuple_ = tuple; tuple->asocTimer = this;}
-    ~OLSR_LinkTupleTimer();
+    void setTuple(Olsr_link_tuple* tuple) {tuple_ = tuple; tuple->asocTimer = this;}
+    ~Olsr_LinkTupleTimer();
     virtual void expire() override;
   protected:
     //OLSR_link_tuple*  tuple_; ///< OLSR_link_tuple which must be removed.
@@ -245,16 +242,16 @@ class OLSR_LinkTupleTimer : public OLSR_Timer
 
 /// Timer for removing nb2hop tuples: OLSR_nb2hop_tuple.
 
-class OLSR_Nb2hopTupleTimer : public OLSR_Timer
+class Olsr_Nb2hopTupleTimer : public Olsr_Timer
 {
   public:
-    OLSR_Nb2hopTupleTimer(ManetRoutingBase* agent, OLSR_nb2hop_tuple* tuple) : OLSR_Timer(agent)
+    Olsr_Nb2hopTupleTimer(ManetRoutingBase* agent, Olsr_nb2hop_tuple* tuple) : Olsr_Timer(agent)
     {
         tuple_ = tuple;
     }
 
-    void setTuple(OLSR_nb2hop_tuple* tuple) {tuple_ = tuple; tuple->asocTimer = this;}
-    ~OLSR_Nb2hopTupleTimer();
+    void setTuple(Olsr_nb2hop_tuple* tuple) {tuple_ = tuple; tuple->asocTimer = this;}
+    ~Olsr_Nb2hopTupleTimer();
     virtual void expire() override;
 //  protected:
 //  OLSR_nb2hop_tuple*  tuple_; ///< OLSR_link_tuple which must be removed.
@@ -265,16 +262,16 @@ class OLSR_Nb2hopTupleTimer : public OLSR_Timer
 
 
 /// Timer for removing MPR selector tuples: OLSR_mprsel_tuple.
-class OLSR_MprSelTupleTimer : public OLSR_Timer
+class Olsr_MprSelTupleTimer : public Olsr_Timer
 {
   public:
-    OLSR_MprSelTupleTimer(ManetRoutingBase* agent, OLSR_mprsel_tuple* tuple) : OLSR_Timer(agent)
+    Olsr_MprSelTupleTimer(ManetRoutingBase* agent, Olsr_mprsel_tuple* tuple) : Olsr_Timer(agent)
     {
         tuple_ = tuple;
     }
 
-    void setTuple(OLSR_mprsel_tuple* tuple) {tuple_ = tuple; tuple->asocTimer = this;}
-    ~OLSR_MprSelTupleTimer();
+    void setTuple(Olsr_mprsel_tuple* tuple) {tuple_ = tuple; tuple->asocTimer = this;}
+    ~Olsr_MprSelTupleTimer();
     virtual void expire() override;
 
 //  protected:
@@ -285,16 +282,16 @@ class OLSR_MprSelTupleTimer : public OLSR_Timer
 
 /// Timer for removing topology tuples: OLSR_topology_tuple.
 
-class OLSR_TopologyTupleTimer : public OLSR_Timer
+class Olsr_TopologyTupleTimer : public Olsr_Timer
 {
   public:
-    OLSR_TopologyTupleTimer(ManetRoutingBase* agent, OLSR_topology_tuple* tuple) : OLSR_Timer(agent)
+    Olsr_TopologyTupleTimer(ManetRoutingBase* agent, Olsr_topology_tuple* tuple) : Olsr_Timer(agent)
     {
         tuple_ = tuple;
     }
 
-    void setTuple(OLSR_topology_tuple* tuple) {tuple_ = tuple; tuple->asocTimer = this;}
-    ~OLSR_TopologyTupleTimer();
+    void setTuple(Olsr_topology_tuple* tuple) {tuple_ = tuple; tuple->asocTimer = this;}
+    ~Olsr_TopologyTupleTimer();
     virtual void expire() override;
 //  protected:
 //  OLSR_topology_tuple*    tuple_; ///< OLSR_link_tuple which must be removed.
@@ -302,16 +299,16 @@ class OLSR_TopologyTupleTimer : public OLSR_Timer
 };
 
 /// Timer for removing interface association tuples: OLSR_iface_assoc_tuple.
-class OLSR_IfaceAssocTupleTimer : public OLSR_Timer
+class Olsr_IfaceAssocTupleTimer : public Olsr_Timer
 {
   public:
-    OLSR_IfaceAssocTupleTimer(ManetRoutingBase* agent, OLSR_iface_assoc_tuple* tuple) : OLSR_Timer(agent)
+    Olsr_IfaceAssocTupleTimer(ManetRoutingBase* agent, Olsr_iface_assoc_tuple* tuple) : Olsr_Timer(agent)
     {
         tuple_ = tuple;
     }
 
-    void setTuple(OLSR_iface_assoc_tuple* tuple) {tuple_ = tuple; tuple->asocTimer = this;}
-    ~OLSR_IfaceAssocTupleTimer();
+    void setTuple(Olsr_iface_assoc_tuple* tuple) {tuple_ = tuple; tuple->asocTimer = this;}
+    ~Olsr_IfaceAssocTupleTimer();
     virtual void expire() override;
 //  protected:
 //  OLSR_iface_assoc_tuple* tuple_; ///< OLSR_link_tuple which must be removed.
@@ -329,9 +326,9 @@ class OLSR_IfaceAssocTupleTimer : public OLSR_Timer
 /// internal state.
 ///
 
-typedef std::set<OLSR_Timer *> TimerPendingList;
+typedef std::set<Olsr_Timer *> TimerPendingList;
 
-class OLSR : public ManetRoutingBase
+class Olsr : public ManetRoutingBase
 {
   protected:
     /********** Intervals **********/
@@ -346,17 +343,17 @@ class OLSR : public ManetRoutingBase
 #define JITTER jitter()
 
   private:
-    friend class OLSR_HelloTimer;
-    friend class OLSR_TcTimer;
-    friend class OLSR_MidTimer;
-    friend class OLSR_DupTupleTimer;
-    friend class OLSR_LinkTupleTimer;
-    friend class OLSR_Nb2hopTupleTimer;
-    friend class OLSR_MprSelTupleTimer;
-    friend class OLSR_TopologyTupleTimer;
-    friend class OLSR_IfaceAssocTupleTimer;
-    friend class OLSR_MsgTimer;
-    friend class OLSR_Timer;
+    friend class Olsr_HelloTimer;
+    friend class Olsr_TcTimer;
+    friend class Olsr_MidTimer;
+    friend class Olsr_DupTupleTimer;
+    friend class Olsr_LinkTupleTimer;
+    friend class Olsr_Nb2hopTupleTimer;
+    friend class Olsr_MprSelTupleTimer;
+    friend class Olsr_TopologyTupleTimer;
+    friend class Olsr_IfaceAssocTupleTimer;
+    friend class Olsr_MsgTimer;
+    friend class Olsr_Timer;
   protected:
 
     //std::priority_queue<TimerQueueElem> *timerQueuePtr;
@@ -366,18 +363,18 @@ class OLSR : public ManetRoutingBase
 
 // must be protected and used for dereved class OLSR_ETX
     /// A list of pending messages which are buffered awaiting for being sent.
-    std::vector<OLSR_msg>   msgs_;
+    std::vector<OlsrMsg>   msgs_;
     /// Routing table.
-    OLSR_rtable     rtable_;
+    Olsr_rtable     rtable_;
 
-    typedef std::map<nsaddr_t,OLSR_rtable*> GlobalRtable;
+    typedef std::map<nsaddr_t,Olsr_rtable*> GlobalRtable;
     static GlobalRtable globalRtable;
     typedef std::map<nsaddr_t,std::vector<nsaddr_t> > DistributionPath;
     static DistributionPath distributionPath;
     bool computed = false;
     /// Internal state with all needed data structs.
 
-    OLSR_state      *state_ptr = nullptr;
+    Olsr_state      *state_ptr = nullptr;
 
     /// Packets sequence number counter.
     uint16_t    pkt_seq_ = OLSR_MAX_SEQ_NUM;
@@ -412,9 +409,9 @@ class OLSR : public ManetRoutingBase
     // PortClassifier*  dmux_;      ///< For passing packets up to agents.
     // Trace*       logtarget_; ///< For logging.
 
-    OLSR_HelloTimer *helloTimer = nullptr;    ///< Timer for sending HELLO messages.
-    OLSR_TcTimer    *tcTimer = nullptr;   ///< Timer for sending TC messages.
-    OLSR_MidTimer   *midTimer = nullptr;  ///< Timer for sending MID messages.
+    Olsr_HelloTimer *helloTimer = nullptr;    ///< Timer for sending HELLO messages.
+    Olsr_TcTimer    *tcTimer = nullptr;   ///< Timer for sending TC messages.
+    Olsr_MidTimer   *midTimer = nullptr;  ///< Timer for sending MID messages.
 
 #define hello_timer_  (*helloTimer)
 #define  tc_timer_  (*tcTimer)
@@ -456,48 +453,48 @@ class OLSR : public ManetRoutingBase
     virtual void        mpr_computation();
     virtual void        rtable_computation();
 
-    virtual bool        process_hello(OLSR_msg&, const nsaddr_t &, const nsaddr_t &, const int &);
-    virtual bool        process_tc(OLSR_msg&, const nsaddr_t &, const int &);
-    virtual void        process_mid(OLSR_msg&, const nsaddr_t &, const int &);
+    virtual bool        process_hello(OlsrMsg&, const nsaddr_t &, const nsaddr_t &, const int &);
+    virtual bool        process_tc(OlsrMsg&, const nsaddr_t &, const int &);
+    virtual void        process_mid(OlsrMsg&, const nsaddr_t &, const int &);
 
-    virtual void        forward_default(OLSR_msg&, OLSR_dup_tuple*, const nsaddr_t &, const nsaddr_t &);
+    virtual void        forward_default(OlsrMsg&, Olsr_dup_tuple*, const nsaddr_t &, const nsaddr_t &);
     virtual void        forward_data(cMessage* p) {}
 
-    virtual void        enque_msg(OLSR_msg&, double);
+    virtual void        enque_msg(OlsrMsg&, double);
     virtual void        send_hello();
     virtual void        send_tc();
     virtual void        send_mid();
     virtual void        send_pkt();
 
-    virtual bool        link_sensing(OLSR_msg&, const nsaddr_t &, const nsaddr_t &, const int &);
-    virtual bool        populate_nbset(OLSR_msg&);
-    virtual bool        populate_nb2hopset(OLSR_msg&);
-    virtual void        populate_mprselset(OLSR_msg&);
+    virtual bool        link_sensing(OlsrMsg&, const nsaddr_t &, const nsaddr_t &, const int &);
+    virtual bool        populate_nbset(OlsrMsg&);
+    virtual bool        populate_nb2hopset(OlsrMsg&);
+    virtual void        populate_mprselset(OlsrMsg&);
 
     virtual void        set_hello_timer();
     virtual void        set_tc_timer();
     virtual void        set_mid_timer();
 
-    virtual void        nb_loss(OLSR_link_tuple*);
-    virtual void        add_dup_tuple(OLSR_dup_tuple*);
-    virtual void        rm_dup_tuple(OLSR_dup_tuple*);
-    virtual void        add_link_tuple(OLSR_link_tuple*, uint8_t);
-    virtual void        rm_link_tuple(OLSR_link_tuple*);
-    virtual void        updated_link_tuple(OLSR_link_tuple*, uint8_t willingness);
-    virtual void        add_nb_tuple(OLSR_nb_tuple*);
-    virtual void        rm_nb_tuple(OLSR_nb_tuple*);
-    virtual void        add_nb2hop_tuple(OLSR_nb2hop_tuple*);
-    virtual void        rm_nb2hop_tuple(OLSR_nb2hop_tuple*);
-    virtual void        add_mprsel_tuple(OLSR_mprsel_tuple*);
-    virtual void        rm_mprsel_tuple(OLSR_mprsel_tuple*);
-    virtual void        add_topology_tuple(OLSR_topology_tuple*);
-    virtual void        rm_topology_tuple(OLSR_topology_tuple*);
-    virtual void        add_ifaceassoc_tuple(OLSR_iface_assoc_tuple*);
-    virtual void        rm_ifaceassoc_tuple(OLSR_iface_assoc_tuple*);
-    virtual OLSR_nb_tuple*    find_or_add_nb(OLSR_link_tuple*, uint8_t willingness);
+    virtual void        nb_loss(Olsr_link_tuple*);
+    virtual void        add_dup_tuple(Olsr_dup_tuple*);
+    virtual void        rm_dup_tuple(Olsr_dup_tuple*);
+    virtual void        add_link_tuple(Olsr_link_tuple*, uint8_t);
+    virtual void        rm_link_tuple(Olsr_link_tuple*);
+    virtual void        updated_link_tuple(Olsr_link_tuple*, uint8_t willingness);
+    virtual void        add_nb_tuple(Olsr_nb_tuple*);
+    virtual void        rm_nb_tuple(Olsr_nb_tuple*);
+    virtual void        add_nb2hop_tuple(Olsr_nb2hop_tuple*);
+    virtual void        rm_nb2hop_tuple(Olsr_nb2hop_tuple*);
+    virtual void        add_mprsel_tuple(Olsr_mprsel_tuple*);
+    virtual void        rm_mprsel_tuple(Olsr_mprsel_tuple*);
+    virtual void        add_topology_tuple(Olsr_topology_tuple*);
+    virtual void        rm_topology_tuple(Olsr_topology_tuple*);
+    virtual void        add_ifaceassoc_tuple(Olsr_iface_assoc_tuple*);
+    virtual void        rm_ifaceassoc_tuple(Olsr_iface_assoc_tuple*);
+    virtual Olsr_nb_tuple*    find_or_add_nb(Olsr_link_tuple*, uint8_t willingness);
 
     const nsaddr_t  & get_main_addr(const nsaddr_t&) const;
-    virtual int     degree(OLSR_nb_tuple*);
+    virtual int     degree(Olsr_nb_tuple*);
 
     static bool seq_num_bigger_than(uint16_t, uint16_t);
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -517,8 +514,8 @@ class OLSR : public ManetRoutingBase
     void computeDistributionPath(const nsaddr_t &initNode);
 
   public:
-    OLSR() {}
-    virtual ~OLSR();
+    Olsr() {}
+    virtual ~Olsr();
 
 
     static double       emf_to_seconds(uint8_t);

@@ -35,10 +35,10 @@
 
 #define __OLSR_ETX_h__
 
-#include "inet/routing/extras/olsr/OLSR.h"
-#include "inet/routing/extras/olsr/OLSR_ETX_state.h"
-#include "inet/routing/extras/olsr/OLSR_ETX_repositories.h"
-#include "inet/routing/extras/olsr/OLSR_ETX_parameter.h"
+#include "inet/routing/extras/olsr/Olrs.h"
+#include "inet/routing/extras/olsr/Olrs_Etx_parameter.h"
+#include "inet/routing/extras/olsr/Olrs_Etx_repositories.h"
+#include "inet/routing/extras/olsr/Olrs_Etx_state.h"
 
 namespace inet {
 
@@ -124,20 +124,20 @@ namespace inetmanet {
 /// Used to set status of an OLSR_nb_tuple as "symmetric".
 #define OLSR_ETX_STATUS_SYM     OLSR_STATUS_SYM
 
-class OLSR_ETX;         // forward declaration
+class Olsr_Etx;         // forward declaration
 
 /// Timer for sending MID messages.
-class OLSR_ETX_LinkQualityTimer : public OLSR_Timer
+class Olsr_Etx_LinkQualityTimer : public Olsr_Timer
 {
   public:
-    OLSR_ETX_LinkQualityTimer(ManetRoutingBase* agent) : OLSR_Timer(agent) {}
-    OLSR_ETX_LinkQualityTimer():OLSR_Timer() {}
+    Olsr_Etx_LinkQualityTimer(ManetRoutingBase* agent) : Olsr_Timer(agent) {}
+    Olsr_Etx_LinkQualityTimer():Olsr_Timer() {}
     virtual void expire() override;
 };
 
 
 
-typedef OLSR_msg OLSR_ETX_msg; // OLSR_msg defined in OLSRpkt.msg
+typedef OlsrMsg OLSR_ETX_msg; // OLSR_msg defined in OLSRpkt.msg
 
 ///
 /// \brief Routing agent which implements %OLSR protocol following RFC 3626.
@@ -146,27 +146,27 @@ typedef OLSR_msg OLSR_ETX_msg; // OLSR_msg defined in OLSRpkt.msg
 /// functionalities related to sending and receiving packets and managing
 /// internal state.
 ///
-class OLSR_ETX : public OLSR
+class Olsr_Etx : public Olsr
 {
 
 
     /// Address of the routing agent.
 
-        friend class OLSR_ETX_LinkQualityTimer;
-        friend class OLSR_HelloTimer;
-        friend class OLSR_TcTimer;
-        friend class OLSR_MidTimer;
-        friend class OLSR_DupTupleTimer;
-        friend class OLSR_LinkTupleTimer;
-        friend class OLSR_Nb2hopTupleTimer;
-        friend class OLSR_MprSelTupleTimer;
-        friend class OLSR_TopologyTupleTimer;
-        friend class OLSR_IfaceAssocTupleTimer;
-        friend class OLSR_MsgTimer;
-        friend class OLSR_ETX_state;
+        friend class Olsr_Etx_LinkQualityTimer;
+        friend class Olsr_HelloTimer;
+        friend class Olsr_TcTimer;
+        friend class Olsr_MidTimer;
+        friend class Olsr_DupTupleTimer;
+        friend class Olsr_LinkTupleTimer;
+        friend class Olsr_Nb2hopTupleTimer;
+        friend class Olsr_MprSelTupleTimer;
+        friend class Olsr_TopologyTupleTimer;
+        friend class Olsr_IfaceAssocTupleTimer;
+        friend class Olsr_MsgTimer;
+        friend class Olsr_Etx_state;
         friend class Dijkstra;
 
-        OLSR_ETX_parameter parameter_;
+        Olsr_Etx_parameter parameter_;
 
         /// Fish Eye State Routing...
 #define MAX_TC_MSG_TTL  13
@@ -189,9 +189,9 @@ class OLSR_ETX : public OLSR
 
     protected:
 
-        OLSR_ETX_state *state_etx_ptr;
+        Olsr_Etx_state *state_etx_ptr;
 
-        OLSR_ETX_LinkQualityTimer *linkQualityTimer;
+        Olsr_Etx_LinkQualityTimer *linkQualityTimer;
         /// Link delay extension
         inline long& cap_sn()
         {
@@ -214,8 +214,8 @@ class OLSR_ETX : public OLSR
         virtual void rtable_default_computation();
         virtual void rtable_dijkstra_computation();
 
-        virtual bool process_hello(OLSR_msg&, const nsaddr_t &, const nsaddr_t &, uint16_t, const int &);
-        virtual bool process_tc(OLSR_msg&, const nsaddr_t &, const int &) override;
+        virtual bool process_hello(OlsrMsg&, const nsaddr_t &, const nsaddr_t &, uint16_t, const int &);
+        virtual bool process_tc(OlsrMsg&, const nsaddr_t &, const int &) override;
         // void     process_mid(OLSR_msg&, const nsaddr_t &);
 
         //void      forward_default(OLSR_msg&, OLSR_dup_tuple*, nsaddr_t,nsaddr_t);
@@ -227,16 +227,16 @@ class OLSR_ETX : public OLSR
         //void      send_mid();
         virtual void send_pkt() override;
 
-        virtual bool link_sensing(OLSR_msg&, const nsaddr_t &, const nsaddr_t &, uint16_t, const int &);
+        virtual bool link_sensing(OlsrMsg&, const nsaddr_t &, const nsaddr_t &, uint16_t, const int &);
         //void      populate_nbset(OLSR_msg&);
-        virtual bool populate_nb2hopset(OLSR_msg&) override;
+        virtual bool populate_nb2hopset(OlsrMsg&) override;
         //void      populate_mprselset(OLSR_msg&);
 
         //void      set_hello_timer();
         //void      set_tc_timer();
         //void      set_mid_timer();
 
-        virtual void nb_loss(OLSR_link_tuple*) override;
+        virtual void nb_loss(Olsr_link_tuple*) override;
 
         static bool seq_num_bigger_than(uint16_t, uint16_t);
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -250,8 +250,8 @@ class OLSR_ETX : public OLSR
 
     public:
         bool getNextHop(const L3Address &dest, L3Address &add, int &iface, double &cost) override;
-        OLSR_ETX();
-        ~OLSR_ETX();
+        Olsr_Etx();
+        ~Olsr_Etx();
         static double emf_to_seconds(uint8_t);
         static uint8_t seconds_to_emf(double);
         static int node_id(const nsaddr_t&);

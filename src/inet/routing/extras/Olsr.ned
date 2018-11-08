@@ -32,10 +32,10 @@ import inet.routing.extras.base.BaseRouting;
 //  - IPv4 addresses are assumed in the messages. If you need IPv6 recompile with -DOLSR_IPv6 added to CFLAGS
 //  - Multiple interfaces per OLSR node is supported only with adding -DMULTIPLE_IFACES_SUPPORT to CFLAGS
 //
-simple OLSR extends BaseRouting
+simple Olsr extends BaseRouting
 {
     parameters:
-        @class(OLSR);
+        @class(Olsr);
         UdpPort = default(698);
         int Willingness = default(3); // (0..7) The node's willingness to carry traffic on behalf of other nodes. 0:NEVER .. 7:ALWAYS (section 18.8)
         double Hello_ival @unit(s) = default(2s); // (s) HELLO messages' emission interval. (section 6.2)

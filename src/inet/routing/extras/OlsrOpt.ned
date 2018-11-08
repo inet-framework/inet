@@ -30,10 +30,10 @@ package inet.routing.extras;
 //  - IPv4 addresses are assumed in the messages. If you need IPv6 recompile with -DOLSR_IPv6 added to CFLAGS
 //  - Multiple interfaces per OLSR node is supported only with adding -DMULTIPLE_IFACES_SUPPORT to CFLAGS
 //
-simple OLSROPT extends OLSR
+simple OlsrOpt extends Olsr
 {
     parameters:
-        @class(OLSROPT);
+        @class(OlsrOpt);
 }
 
 

@@ -33,7 +33,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/routing/extras/olsr/OLSR_repositories.h"
+#include "inet/routing/extras/olsr/Olrs_repositories.h"
 
 namespace inet {
 
@@ -45,35 +45,35 @@ namespace inetmanet {
 /// The routing table is thus defined as pairs: [dest address, entry]. Each element
 /// of the pair can be accesed via "first" and "second" members.
 ///
-typedef std::map<nsaddr_t, OLSR_rt_entry*> rtable_t;
+typedef std::map<nsaddr_t, Olsr_rt_entry*> rtable_t;
 
 ///
 /// \brief This class is a representation of the OLSR's Routing Table.
 ///
-class OLSR_rtable : public cObject
+class Olsr_rtable : public cObject
 {
 
   public:
     rtable_t    rt_;    ///< Data structure for the routing table.
 
-    OLSR_rtable(const OLSR_rtable& other);
-    OLSR_rtable();
-    ~OLSR_rtable();
+    Olsr_rtable(const Olsr_rtable& other);
+    Olsr_rtable();
+    ~Olsr_rtable();
     const rtable_t * getInternalTable() const { return &rt_; }
 
 
     void        clear();
     void        rm_entry(const nsaddr_t &dest);
-    OLSR_rt_entry*  add_entry(const nsaddr_t &dest, const nsaddr_t &next, const nsaddr_t &iface, uint32_t dist, const int &, double quality = -1, double delay = -1);
-    OLSR_rt_entry*  add_entry(const nsaddr_t &dest, const nsaddr_t &next, const nsaddr_t &iface, uint32_t dist, const int &, PathVector path, double quality = -1, double delay = -1);
-    OLSR_rt_entry*  add_entry(const nsaddr_t &dest, const nsaddr_t &next, const nsaddr_t &iface, uint32_t dist, const int &, OLSR_rt_entry *entry, double quality = -1, double delay = -1);
-    OLSR_rt_entry*  lookup(const nsaddr_t &dest);
-    OLSR_rt_entry*  find_send_entry(OLSR_rt_entry*);
+    Olsr_rt_entry*  add_entry(const nsaddr_t &dest, const nsaddr_t &next, const nsaddr_t &iface, uint32_t dist, const int &, double quality = -1, double delay = -1);
+    Olsr_rt_entry*  add_entry(const nsaddr_t &dest, const nsaddr_t &next, const nsaddr_t &iface, uint32_t dist, const int &, PathVector path, double quality = -1, double delay = -1);
+    Olsr_rt_entry*  add_entry(const nsaddr_t &dest, const nsaddr_t &next, const nsaddr_t &iface, uint32_t dist, const int &, Olsr_rt_entry *entry, double quality = -1, double delay = -1);
+    Olsr_rt_entry*  lookup(const nsaddr_t &dest);
+    Olsr_rt_entry*  find_send_entry(Olsr_rt_entry*);
     uint32_t    size();
 
     virtual std::string str() const;
 
-    virtual OLSR_rtable *dup() const { return new OLSR_rtable(*this); }
+    virtual Olsr_rtable *dup() const { return new Olsr_rtable(*this); }
 
 //  void        print(Trace*);
 };

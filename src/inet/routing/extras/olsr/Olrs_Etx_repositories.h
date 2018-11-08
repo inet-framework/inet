@@ -33,10 +33,10 @@
 #define __OLSR_ETX_repositories_h__
 
 //#include <OLSRpkt_m.h>
-#include "OLSR_ETX_parameter.h"
-#include "OLSR_repositories.h"
-#include "OLSRpkt_m.h"
 #include <assert.h>
+#include "inet/routing/extras/olsr/Olrs_Etx_parameter.h"
+#include "inet/routing/extras/olsr/Olrs_repositories.h"
+#include "inet/routing/extras/olsr/OlrsPkt_m.h"
 
 namespace inet {
 
@@ -48,10 +48,10 @@ namespace inetmanet {
 
 
 /// An %OLSR_ETX's routing table entry.
-typedef OLSR_rt_entry OLSR_ETX_rt_entry;
+typedef Olsr_rt_entry OLSR_ETX_rt_entry;
 
 /// An Interface Association Tuple.
-typedef OLSR_iface_assoc_tuple OLSR_ETX_iface_assoc_tuple;
+typedef Olsr_iface_assoc_tuple OLSR_ETX_iface_assoc_tuple;
 
 #define DEFAULT_LOSS_WINDOW_SIZE   10
 
@@ -59,7 +59,7 @@ typedef OLSR_iface_assoc_tuple OLSR_ETX_iface_assoc_tuple;
 #define OLSR_ETX_MAX_SEQ_NUM     65535
 
 /// A Link Tuple.
-typedef struct OLSR_ETX_link_tuple : public OLSR_link_tuple
+typedef struct Olsr_Etx_link_tuple : public Olsr_link_tuple
 {
     /// Link quality extension
     cSimpleModule * owner_;
@@ -80,9 +80,9 @@ typedef struct OLSR_ETX_link_tuple : public OLSR_link_tuple
     double          nb_link_quality_;
     double          etx_;
 
-    OLSR_ETX_parameter parameter_;
+    Olsr_Etx_parameter parameter_;
 
-    inline void set_qos_behaviour(OLSR_ETX_parameter parameter) {parameter_ = parameter;}
+    inline void set_qos_behaviour(Olsr_Etx_parameter parameter) {parameter_ = parameter;}
     /// Link Quality extension Methods
     inline void link_quality_init(uint16_t seqno, int loss_window_size)
     {
@@ -315,7 +315,7 @@ typedef struct OLSR_ETX_link_tuple : public OLSR_link_tuple
             recv1_ [i] = recv2_ [i] = -1;
     }
 
-    inline void link_delay_computation(OLSR_pkt* pkt)
+    inline void link_delay_computation(OlsrPkt* pkt)
     {
         double c_alpha = parameter_.c_alpha();
         int i;
@@ -372,21 +372,21 @@ typedef struct OLSR_ETX_link_tuple : public OLSR_link_tuple
         for (int i = 0; i < CAPPROBE_MAX_ARRAY; i++)
             recv1_ [i] = recv2_ [i] = -1;
     }
-    OLSR_ETX_link_tuple() {asocTimer = nullptr;}
-    OLSR_ETX_link_tuple(const OLSR_ETX_link_tuple * e)
+    Olsr_Etx_link_tuple() {asocTimer = nullptr;}
+    Olsr_Etx_link_tuple(const Olsr_Etx_link_tuple * e)
     {
-        memcpy((void*)this, (void*)e, sizeof(OLSR_ETX_link_tuple));
+        memcpy((void*)this, (void*)e, sizeof(Olsr_Etx_link_tuple));
         asocTimer = nullptr;
     }
-    virtual OLSR_ETX_link_tuple *dup() const override {return new OLSR_ETX_link_tuple(this);}
+    virtual Olsr_Etx_link_tuple *dup() const override {return new Olsr_Etx_link_tuple(this);}
 
 } OLSR_ETX_link_tuple;
 
 /// A Neighbor Tuple.
-typedef OLSR_nb_tuple OLSR_ETX_nb_tuple;
+typedef Olsr_nb_tuple OLSR_ETX_nb_tuple;
 
 /// A 2-hop Tuple.
-typedef struct OLSR_ETX_nb2hop_tuple : public OLSR_nb2hop_tuple
+typedef struct OLSR_ETX_nb2hop_tuple : public Olsr_nb2hop_tuple
 {
     /// Link quality extension
     double link_quality_;
@@ -467,13 +467,13 @@ typedef struct OLSR_ETX_nb2hop_tuple : public OLSR_nb2hop_tuple
 } OLSR_ETX_nb2hop_tuple;
 
 /// An MPR-Selector Tuple.
-typedef OLSR_mprsel_tuple OLSR_ETX_mprsel_tuple;
+typedef Olsr_mprsel_tuple OLSR_ETX_mprsel_tuple;
 
 /// A Duplicate Tuple
-typedef OLSR_dup_tuple OLSR_ETX_dup_tuple;
+typedef Olsr_dup_tuple OLSR_ETX_dup_tuple;
 
 /// A Topology Tuple
-typedef struct OLSR_ETX_topology_tuple : public OLSR_topology_tuple
+typedef struct OLSR_ETX_topology_tuple : public Olsr_topology_tuple
 {
     /// Link delay extension
     double  link_quality_;

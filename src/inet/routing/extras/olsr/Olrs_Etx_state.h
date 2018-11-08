@@ -2,6 +2,11 @@
  *   Copyright (C) 2004 by Francisco J. Ros                                *
  *   fjrm@dif.um.es                                                        *
  *                                                                         *
+ *   Modified by Weverton Cordeiro                                         *
+ *   (C) 2007 wevertoncordeiro@gmail.com                                   *
+ *   Adapted for omnetpp                                                   *
+ *   2008 Alfonso Ariza Quintana aarizaq@uma.es                            *
+ *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
  *   the Free Software Foundation; either version 2 of the License, or     *
@@ -19,52 +24,28 @@
  ***************************************************************************/
 
 ///
-/// \file   OLSR.h
-/// \brief  Header file for OLSR agent and related classes.
-///
-/// Here are defined all timers used by OLSR, including those for managing internal
-/// state and those for sending messages. Class OLSR is also defined, therefore this
-/// file has signatures for the most important methods. Lots of constants are also
-/// defined.
+/// \file  OLSR_ETX_state.h
+/// \brief  This header file declares and defines internal state of an OLSR_ETX node.
 ///
 
-#ifndef __OLSROPT_omnet_h__
+#ifndef __OLSR_ETX_state_h__
+#define __OLSR_ETX_state_h__
 
-#define __OLSROPT_omnet_h__
-#include "inet/routing/extras/olsr/OLSR.h"
+#include "inet/routing/extras/olsr/Olrs_Etx_repositories.h"
+#include "inet/routing/extras/olsr/Olrs_state.h"
 
 namespace inet {
 
 namespace inetmanet {
 
-class OLSROPT : public OLSR
+/// This class encapsulates all data structures needed for maintaining internal state of an OLSR_ETX node.
+class Olsr_Etx_state : public Olsr_state
 {
-  private:
-    friend class OLSR_HelloTimer;
-    friend class OLSR_TcTimer;
-    friend class OLSR_MidTimer;
-    friend class OLSR_DupTupleTimer;
-    friend class OLSR_LinkTupleTimer;
-    friend class OLSR_Nb2hopTupleTimer;
-    friend class OLSR_MprSelTupleTimer;
-    friend class OLSR_TopologyTupleTimer;
-    friend class OLSR_IfaceAssocTupleTimer;
-    friend class OLSR_MsgTimer;
-    friend class OLSR_Timer;
-
+    friend class Olsr_Etx;
+    Olsr_Etx_parameter *parameter;
   protected:
-
-    virtual bool        link_sensing(OLSR_msg&, const nsaddr_t &, const nsaddr_t &, const int &) override;
-    virtual bool        populate_nbset(OLSR_msg&) override;
-    virtual bool        populate_nb2hopset(OLSR_msg&) override;
-
-    virtual void        recv_olsr(Packet *) override;
-
-    virtual bool        process_hello(OLSR_msg&, const nsaddr_t &, const nsaddr_t &, const int &) override;
-    virtual bool        process_tc(OLSR_msg&, const nsaddr_t &, const int &) override;
-    virtual int         update_topology_tuples(OLSR_msg& msg, int index);
-    virtual void nb_loss(OLSR_link_tuple* tuple) override;
-
+    Olsr_Etx_link_tuple*  find_best_sym_link_tuple(const nsaddr_t &main_addr, double now);
+    Olsr_Etx_state(Olsr_Etx_parameter *);
 };
 
 } // namespace inetmanet
@@ -72,4 +53,3 @@ class OLSROPT : public OLSR
 } // namespace inet
 
 #endif
-

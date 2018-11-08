@@ -26,8 +26,9 @@
 ///     state of an OLSR node.
 ///
 
-#include "inet/routing/extras/olsr/OLSR_state.h"
-#include "inet/routing/extras/olsr/OLSR.h"
+#include "inet/routing/extras/olsr/Olrs_state.h"
+
+#include "inet/routing/extras/olsr/Olrs.h"
 
 namespace inet {
 
@@ -35,12 +36,12 @@ namespace inetmanet {
 
 /********** MPR Selector Set Manipulation **********/
 
-OLSR_mprsel_tuple*
-OLSR_state::find_mprsel_tuple(const nsaddr_t &main_addr)
+Olsr_mprsel_tuple*
+Olsr_state::find_mprsel_tuple(const nsaddr_t &main_addr)
 {
     for (auto it = mprselset_.begin(); it != mprselset_.end(); it++)
     {
-        OLSR_mprsel_tuple* tuple = *it;
+        Olsr_mprsel_tuple* tuple = *it;
         if (tuple->main_addr() == main_addr)
             return tuple;
     }
@@ -48,7 +49,7 @@ OLSR_state::find_mprsel_tuple(const nsaddr_t &main_addr)
 }
 
 void
-OLSR_state::erase_mprsel_tuple(OLSR_mprsel_tuple* tuple)
+Olsr_state::erase_mprsel_tuple(Olsr_mprsel_tuple* tuple)
 {
     for (auto it = mprselset_.begin(); it != mprselset_.end(); it++)
     {
@@ -61,12 +62,12 @@ OLSR_state::erase_mprsel_tuple(OLSR_mprsel_tuple* tuple)
 }
 
 bool
-OLSR_state::erase_mprsel_tuples(const nsaddr_t & main_addr)
+Olsr_state::erase_mprsel_tuples(const nsaddr_t & main_addr)
 {
     bool topologyChanged = false;
     for (auto it = mprselset_.begin(); it != mprselset_.end();)
     {
-        OLSR_mprsel_tuple* tuple = *it;
+        Olsr_mprsel_tuple* tuple = *it;
         if (tuple->main_addr() == main_addr)
         {
             it = mprselset_.erase(it);
@@ -82,43 +83,43 @@ OLSR_state::erase_mprsel_tuples(const nsaddr_t & main_addr)
 }
 
 void
-OLSR_state::insert_mprsel_tuple(OLSR_mprsel_tuple* tuple)
+Olsr_state::insert_mprsel_tuple(Olsr_mprsel_tuple* tuple)
 {
     mprselset_.push_back(tuple);
 }
 
 /********** Neighbor Set Manipulation **********/
 
-OLSR_nb_tuple*
-OLSR_state::find_nb_tuple(const nsaddr_t & main_addr)
+Olsr_nb_tuple*
+Olsr_state::find_nb_tuple(const nsaddr_t & main_addr)
 {
     for (auto it = nbset_.begin(); it != nbset_.end(); it++)
     {
-        OLSR_nb_tuple* tuple = *it;
+        Olsr_nb_tuple* tuple = *it;
         if (tuple->nb_main_addr() == main_addr)
             return tuple;
     }
     return nullptr;
 }
 
-OLSR_nb_tuple*
-OLSR_state::find_sym_nb_tuple(const nsaddr_t & main_addr)
+Olsr_nb_tuple*
+Olsr_state::find_sym_nb_tuple(const nsaddr_t & main_addr)
 {
     for (auto it = nbset_.begin(); it != nbset_.end(); it++)
     {
-        OLSR_nb_tuple* tuple = *it;
+        Olsr_nb_tuple* tuple = *it;
         if (tuple->nb_main_addr() == main_addr && tuple->getStatus() == OLSR_STATUS_SYM)
             return tuple;
     }
     return nullptr;
 }
 
-OLSR_nb_tuple*
-OLSR_state::find_nb_tuple(const nsaddr_t & main_addr, uint8_t willingness)
+Olsr_nb_tuple*
+Olsr_state::find_nb_tuple(const nsaddr_t & main_addr, uint8_t willingness)
 {
     for (auto it = nbset_.begin(); it != nbset_.end(); it++)
     {
-        OLSR_nb_tuple* tuple = *it;
+        Olsr_nb_tuple* tuple = *it;
         if (tuple->nb_main_addr() == main_addr && tuple->willingness() == willingness)
             return tuple;
     }
@@ -126,7 +127,7 @@ OLSR_state::find_nb_tuple(const nsaddr_t & main_addr, uint8_t willingness)
 }
 
 void
-OLSR_state::erase_nb_tuple(OLSR_nb_tuple* tuple)
+Olsr_state::erase_nb_tuple(Olsr_nb_tuple* tuple)
 {
     for (auto it = nbset_.begin(); it != nbset_.end(); it++)
     {
@@ -139,11 +140,11 @@ OLSR_state::erase_nb_tuple(OLSR_nb_tuple* tuple)
 }
 
 void
-OLSR_state::erase_nb_tuple(const nsaddr_t & main_addr)
+Olsr_state::erase_nb_tuple(const nsaddr_t & main_addr)
 {
     for (auto it = nbset_.begin(); it != nbset_.end(); it++)
     {
-        OLSR_nb_tuple* tuple = *it;
+        Olsr_nb_tuple* tuple = *it;
         if (tuple->nb_main_addr() == main_addr)
         {
             it = nbset_.erase(it);
@@ -153,19 +154,19 @@ OLSR_state::erase_nb_tuple(const nsaddr_t & main_addr)
 }
 
 void
-OLSR_state::insert_nb_tuple(OLSR_nb_tuple* tuple)
+Olsr_state::insert_nb_tuple(Olsr_nb_tuple* tuple)
 {
     nbset_.push_back(tuple);
 }
 
 /********** Neighbor 2 Hop Set Manipulation **********/
 
-OLSR_nb2hop_tuple*
-OLSR_state::find_nb2hop_tuple(const nsaddr_t & nb_main_addr, const nsaddr_t & nb2hop_addr)
+Olsr_nb2hop_tuple*
+Olsr_state::find_nb2hop_tuple(const nsaddr_t & nb_main_addr, const nsaddr_t & nb2hop_addr)
 {
     for (auto it = nb2hopset_.begin(); it != nb2hopset_.end(); it++)
     {
-        OLSR_nb2hop_tuple* tuple = *it;
+        Olsr_nb2hop_tuple* tuple = *it;
         if (tuple->nb_main_addr() == nb_main_addr && tuple->nb2hop_addr() == nb2hop_addr)
             return tuple;
     }
@@ -173,7 +174,7 @@ OLSR_state::find_nb2hop_tuple(const nsaddr_t & nb_main_addr, const nsaddr_t & nb
 }
 
 void
-OLSR_state::erase_nb2hop_tuple(OLSR_nb2hop_tuple* tuple)
+Olsr_state::erase_nb2hop_tuple(Olsr_nb2hop_tuple* tuple)
 {
     for (auto it = nb2hopset_.begin(); it != nb2hopset_.end(); it++)
     {
@@ -186,12 +187,12 @@ OLSR_state::erase_nb2hop_tuple(OLSR_nb2hop_tuple* tuple)
 }
 
 bool
-OLSR_state::erase_nb2hop_tuples(const nsaddr_t & nb_main_addr, const nsaddr_t & nb2hop_addr)
+Olsr_state::erase_nb2hop_tuples(const nsaddr_t & nb_main_addr, const nsaddr_t & nb2hop_addr)
 {
     bool returnValue = false;
     for (auto it = nb2hopset_.begin(); it != nb2hopset_.end();)
     {
-        OLSR_nb2hop_tuple* tuple = *it;
+        Olsr_nb2hop_tuple* tuple = *it;
         if (tuple->nb_main_addr() == nb_main_addr && tuple->nb2hop_addr() == nb2hop_addr)
         {
             it = nb2hopset_.erase(it);
@@ -207,12 +208,12 @@ OLSR_state::erase_nb2hop_tuples(const nsaddr_t & nb_main_addr, const nsaddr_t & 
 }
 
 bool
-OLSR_state::erase_nb2hop_tuples(const nsaddr_t & nb_main_addr)
+Olsr_state::erase_nb2hop_tuples(const nsaddr_t & nb_main_addr)
 {
     bool topologyChanged = false;
     for (auto it = nb2hopset_.begin(); it != nb2hopset_.end();)
     {
-        OLSR_nb2hop_tuple* tuple = *it;
+        Olsr_nb2hop_tuple* tuple = *it;
         if (tuple->nb_main_addr() == nb_main_addr)
         {
             it = nb2hopset_.erase(it);
@@ -228,7 +229,7 @@ OLSR_state::erase_nb2hop_tuples(const nsaddr_t & nb_main_addr)
 }
 
 void
-OLSR_state::insert_nb2hop_tuple(OLSR_nb2hop_tuple* tuple)
+Olsr_state::insert_nb2hop_tuple(Olsr_nb2hop_tuple* tuple)
 {
     nb2hopset_.push_back(tuple);
 }
@@ -236,32 +237,32 @@ OLSR_state::insert_nb2hop_tuple(OLSR_nb2hop_tuple* tuple)
 /********** MPR Set Manipulation **********/
 
 bool
-OLSR_state::find_mpr_addr(const nsaddr_t & addr)
+Olsr_state::find_mpr_addr(const nsaddr_t & addr)
 {
     auto it = mprset_.find(addr);
     return (it != mprset_.end());
 }
 
 void
-OLSR_state::insert_mpr_addr(const nsaddr_t & addr)
+Olsr_state::insert_mpr_addr(const nsaddr_t & addr)
 {
     mprset_.insert(addr);
 }
 
 void
-OLSR_state::clear_mprset()
+Olsr_state::clear_mprset()
 {
     mprset_.clear();
 }
 
 /********** Duplicate Set Manipulation **********/
 
-OLSR_dup_tuple*
-OLSR_state::find_dup_tuple(const nsaddr_t & addr, uint16_t seq_num)
+Olsr_dup_tuple*
+Olsr_state::find_dup_tuple(const nsaddr_t & addr, uint16_t seq_num)
 {
     for (auto it = dupset_.begin(); it != dupset_.end(); it++)
     {
-        OLSR_dup_tuple* tuple = *it;
+        Olsr_dup_tuple* tuple = *it;
         if (tuple->getAddr() == addr && tuple->seq_num() == seq_num)
             return tuple;
     }
@@ -269,7 +270,7 @@ OLSR_state::find_dup_tuple(const nsaddr_t & addr, uint16_t seq_num)
 }
 
 void
-OLSR_state::erase_dup_tuple(OLSR_dup_tuple* tuple)
+Olsr_state::erase_dup_tuple(Olsr_dup_tuple* tuple)
 {
     for (auto it = dupset_.begin(); it != dupset_.end(); it++)
     {
@@ -282,31 +283,31 @@ OLSR_state::erase_dup_tuple(OLSR_dup_tuple* tuple)
 }
 
 void
-OLSR_state::insert_dup_tuple(OLSR_dup_tuple* tuple)
+Olsr_state::insert_dup_tuple(Olsr_dup_tuple* tuple)
 {
     dupset_.push_back(tuple);
 }
 
 /********** Link Set Manipulation **********/
 
-OLSR_link_tuple*
-OLSR_state::find_link_tuple(const nsaddr_t & iface_addr)
+Olsr_link_tuple*
+Olsr_state::find_link_tuple(const nsaddr_t & iface_addr)
 {
     for (auto it = linkset_.begin(); it != linkset_.end(); it++)
     {
-        OLSR_link_tuple* tuple = *it;
+        Olsr_link_tuple* tuple = *it;
         if (tuple->nb_iface_addr() == iface_addr)
             return tuple;
     }
     return nullptr;
 }
 
-OLSR_link_tuple*
-OLSR_state::find_sym_link_tuple(const nsaddr_t & iface_addr, double now)
+Olsr_link_tuple*
+Olsr_state::find_sym_link_tuple(const nsaddr_t & iface_addr, double now)
 {
     for (auto it = linkset_.begin(); it != linkset_.end(); it++)
     {
-        OLSR_link_tuple* tuple = *it;
+        Olsr_link_tuple* tuple = *it;
         if (tuple->nb_iface_addr() == iface_addr)
         {
             if (tuple->sym_time() > now)
@@ -319,7 +320,7 @@ OLSR_state::find_sym_link_tuple(const nsaddr_t & iface_addr, double now)
 }
 
 void
-OLSR_state::erase_link_tuple(OLSR_link_tuple* tuple)
+Olsr_state::erase_link_tuple(Olsr_link_tuple* tuple)
 {
     for (auto it = linkset_.begin(); it != linkset_.end(); it++)
     {
@@ -332,31 +333,31 @@ OLSR_state::erase_link_tuple(OLSR_link_tuple* tuple)
 }
 
 void
-OLSR_state::insert_link_tuple(OLSR_link_tuple* tuple)
+Olsr_state::insert_link_tuple(Olsr_link_tuple* tuple)
 {
     linkset_.push_back(tuple);
 }
 
 /********** Topology Set Manipulation **********/
 
-OLSR_topology_tuple*
-OLSR_state::find_topology_tuple(const nsaddr_t & dest_addr, const nsaddr_t & last_addr)
+Olsr_topology_tuple*
+Olsr_state::find_topology_tuple(const nsaddr_t & dest_addr, const nsaddr_t & last_addr)
 {
     for (auto it = topologyset_.begin(); it != topologyset_.end(); it++)
     {
-        OLSR_topology_tuple* tuple = *it;
+        Olsr_topology_tuple* tuple = *it;
         if (tuple->dest_addr() == dest_addr && tuple->last_addr() == last_addr)
             return tuple;
     }
     return nullptr;
 }
 
-OLSR_topology_tuple*
-OLSR_state::find_newer_topology_tuple(const nsaddr_t &last_addr, uint16_t ansn)
+Olsr_topology_tuple*
+Olsr_state::find_newer_topology_tuple(const nsaddr_t &last_addr, uint16_t ansn)
 {
     for (auto it = topologyset_.begin(); it != topologyset_.end(); it++)
     {
-        OLSR_topology_tuple* tuple = *it;
+        Olsr_topology_tuple* tuple = *it;
         if (tuple->last_addr() == last_addr && tuple->seq() > ansn)
             return tuple;
     }
@@ -364,7 +365,7 @@ OLSR_state::find_newer_topology_tuple(const nsaddr_t &last_addr, uint16_t ansn)
 }
 
 void
-OLSR_state::erase_topology_tuple(OLSR_topology_tuple* tuple)
+Olsr_state::erase_topology_tuple(Olsr_topology_tuple* tuple)
 {
     for (auto it = topologyset_.begin(); it != topologyset_.end(); it++)
     {
@@ -375,7 +376,7 @@ OLSR_state::erase_topology_tuple(OLSR_topology_tuple* tuple)
         }
     }
 }
-std::ostream& operator<<(std::ostream& out, const OLSR_topology_tuple& tuple)
+std::ostream& operator<<(std::ostream& out, const Olsr_topology_tuple& tuple)
 {
     out << "Tuple index: " << tuple.index;
     out << " dest: "<< tuple.dest_addr_;
@@ -386,11 +387,11 @@ std::ostream& operator<<(std::ostream& out, const OLSR_topology_tuple& tuple)
     return out;
 }
 void
-OLSR_state::print_topology_tuples_to(const nsaddr_t & dest_addr)
+Olsr_state::print_topology_tuples_to(const nsaddr_t & dest_addr)
 {
     for (auto it = topologyset_.begin(); it != topologyset_.end(); it++)
     {
-        OLSR_topology_tuple* tuple = *it;
+        Olsr_topology_tuple* tuple = *it;
         if (tuple->dest_addr() == dest_addr)
             std::cout << " -- " << *tuple;
     }
@@ -398,21 +399,21 @@ OLSR_state::print_topology_tuples_to(const nsaddr_t & dest_addr)
 
 
 void
-OLSR_state::print_topology_tuples_across(const nsaddr_t & last_addr)
+Olsr_state::print_topology_tuples_across(const nsaddr_t & last_addr)
 {
     for (auto it = topologyset_.begin(); it != topologyset_.end(); it++)
     {
-        OLSR_topology_tuple* tuple = *it;
+        Olsr_topology_tuple* tuple = *it;
         if (tuple->last_addr() == last_addr)
             std::cout << " -- " << *tuple;
     }
 }
 void
-OLSR_state::erase_older_topology_tuples(const nsaddr_t & last_addr, uint16_t ansn)
+Olsr_state::erase_older_topology_tuples(const nsaddr_t & last_addr, uint16_t ansn)
 {
     for (auto it = topologyset_.begin(); it != topologyset_.end();)
     {
-        OLSR_topology_tuple* tuple = *it;
+        Olsr_topology_tuple* tuple = *it;
         if (tuple->last_addr() == last_addr && tuple->seq() < ansn)
         {
             it = topologyset_.erase(it);
@@ -426,21 +427,21 @@ OLSR_state::erase_older_topology_tuples(const nsaddr_t & last_addr, uint16_t ans
 }
 
 void
-OLSR_state::insert_topology_tuple(OLSR_topology_tuple* tuple)
+Olsr_state::insert_topology_tuple(Olsr_topology_tuple* tuple)
 {
     topologyset_.push_back(tuple);
 }
 
 /********** Interface Association Set Manipulation **********/
 
-OLSR_iface_assoc_tuple*
-OLSR_state::find_ifaceassoc_tuple(const nsaddr_t & iface_addr)
+Olsr_iface_assoc_tuple*
+Olsr_state::find_ifaceassoc_tuple(const nsaddr_t & iface_addr)
 {
     for (auto it = ifaceassocset_.begin();
             it != ifaceassocset_.end();
             it++)
     {
-        OLSR_iface_assoc_tuple* tuple = *it;
+        Olsr_iface_assoc_tuple* tuple = *it;
         if (tuple->iface_addr() == iface_addr)
             return tuple;
     }
@@ -448,7 +449,7 @@ OLSR_state::find_ifaceassoc_tuple(const nsaddr_t & iface_addr)
 }
 
 void
-OLSR_state::erase_ifaceassoc_tuple(OLSR_iface_assoc_tuple* tuple)
+Olsr_state::erase_ifaceassoc_tuple(Olsr_iface_assoc_tuple* tuple)
 {
     for (auto it = ifaceassocset_.begin();
             it != ifaceassocset_.end();
@@ -463,12 +464,12 @@ OLSR_state::erase_ifaceassoc_tuple(OLSR_iface_assoc_tuple* tuple)
 }
 
 void
-OLSR_state::insert_ifaceassoc_tuple(OLSR_iface_assoc_tuple* tuple)
+Olsr_state::insert_ifaceassoc_tuple(Olsr_iface_assoc_tuple* tuple)
 {
     ifaceassocset_.push_back(tuple);
 }
 
-void OLSR_state::clear_all()
+void Olsr_state::clear_all()
 {
 
     for (auto it = linkset_.begin(); it != linkset_.end(); it++)
@@ -499,29 +500,29 @@ void OLSR_state::clear_all()
 
 }
 
-OLSR_state::OLSR_state(const OLSR_state& st)
+Olsr_state::Olsr_state(const Olsr_state& st)
 {
     for (auto it = st.linkset_.begin(); it != st.linkset_.end(); it++)
     {
-        OLSR_link_tuple* tuple = *it;
+        Olsr_link_tuple* tuple = *it;
         linkset_.push_back(tuple->dup());
     }
 
     for (auto it = st.nbset_.begin(); it != st.nbset_.end(); it++)
     {
-        OLSR_nb_tuple* tuple = *it;
+        Olsr_nb_tuple* tuple = *it;
         nbset_.push_back(tuple->dup());
     }
 
     for (auto it = st.nb2hopset_.begin(); it != st.nb2hopset_.end(); it++)
     {
-        OLSR_nb2hop_tuple* tuple = *it;
+        Olsr_nb2hop_tuple* tuple = *it;
         nb2hopset_.push_back(tuple->dup());
     }
 
     for (auto it = st.topologyset_.begin(); it != st.topologyset_.end(); it++)
     {
-        OLSR_topology_tuple* tuple = *it;
+        Olsr_topology_tuple* tuple = *it;
         topologyset_.push_back(tuple->dup());
     }
 
@@ -532,25 +533,25 @@ OLSR_state::OLSR_state(const OLSR_state& st)
 
     for (auto it = st.mprselset_.begin(); it != st.mprselset_.end(); it++)
     {
-        OLSR_mprsel_tuple* tuple = *it;
+        Olsr_mprsel_tuple* tuple = *it;
         mprselset_.push_back(tuple->dup());
     }
 
     for (auto it = st.dupset_.begin(); it != st.dupset_.end(); it++)
     {
-        OLSR_dup_tuple* tuple = *it;
+        Olsr_dup_tuple* tuple = *it;
         dupset_.push_back(tuple->dup());
     }
 
     for (auto it = st.ifaceassocset_.begin(); it != st.ifaceassocset_.end(); it++)
     {
-        OLSR_iface_assoc_tuple* tuple = *it;
+        Olsr_iface_assoc_tuple* tuple = *it;
         ifaceassocset_.push_back(tuple->dup());
     }
 }
 
 
-OLSR_state::~OLSR_state()
+Olsr_state::~Olsr_state()
 {
     clear_all();
 }

@@ -26,14 +26,14 @@
 
 /*** New File Added ***/
 
-#ifndef __OLSR_ETX_dijkstra_h__
-#define __OLSR_ETX_dijkstra_h__
+#ifndef __Olsr_Etx_dijkstra_h__
+#define __Olsr_Etx_dijkstra_h__
 
-#include "OLSR_ETX_parameter.h"
-#include "OLSR_repositories.h"
 #include <vector>
 #include <set>
 #include <map>
+#include "inet/routing/extras/olsr/Olrs_Etx_parameter.h"
+#include "inet/routing/extras/olsr/Olrs_repositories.h"
 
 namespace inet {
 
@@ -76,7 +76,7 @@ class Dijkstra : public cOwnedObject
 
     NodesSet::iterator best_cost();
     edge* get_edge(const nsaddr_t &, const nsaddr_t &);
-    OLSR_ETX_parameter *parameter;
+    Olsr_Etx_parameter *parameter;
 
   public:
     NodesSet *all_nodes_;
