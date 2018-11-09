@@ -269,6 +269,13 @@ void TcpConnection::process_ABORT(TcpEventCode& event, TcpCommand *tcpCommand, c
     }
 }
 
+void TcpConnection::process_DESTROY(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg)
+{
+    delete tcpCommand;
+    delete msg;
+    //TODO should we send a RST or not?
+}
+
 void TcpConnection::process_STATUS(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg)
 {
     delete tcpCommand;    // but reuse msg for reply

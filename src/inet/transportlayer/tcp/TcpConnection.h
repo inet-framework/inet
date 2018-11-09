@@ -89,6 +89,7 @@ enum TcpEventCode {
     TCP_E_SEND,
     TCP_E_CLOSE,
     TCP_E_ABORT,
+    TCP_E_DESTROY,
     TCP_E_STATUS,
     TCP_E_QUEUE_BYTES_LIMIT,
     TCP_E_READ,
@@ -398,6 +399,7 @@ class INET_API TcpConnection : public cObject
     virtual void process_SEND(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg);
     virtual void process_CLOSE(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg);
     virtual void process_ABORT(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg);
+    virtual void process_DESTROY(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg);
     virtual void process_STATUS(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg);
     virtual void process_QUEUE_BYTES_LIMIT(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg);
     virtual void process_READ_REQUEST(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg);

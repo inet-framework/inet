@@ -222,6 +222,12 @@ void Udp::processCommandFromApp(cMessage *msg)
             break;
         }
 
+        case UDP_C_DESTROY: {
+            int socketId = check_and_cast<Request *>(msg)->getTag<SocketReq>()->getSocketId();
+            destroySocket(socketId);
+            break;
+        }
+
         case UDP_C_DATA:
             processPacketFromApp(check_and_cast<Packet *>(msg));
             return;     // prevent delete of msg
@@ -696,10 +702,29 @@ void Udp::close(int sockId)
         EV_ERROR << "socket id=" << sockId << " doesn't exist (already closed?)\n";
         return;
     }
+    EV_INFO << "Closing socket: " << *(it->second) << "\n";
+
+    destroySocket(it);
+}
+
+//TODO refactoring common part of close() and destroySocket()
+void Udp::destroySocket(int sockId)
+{
+    // remove from socketsByIdMap
+    auto it = socketsByIdMap.find(sockId);
+    if (it == socketsByIdMap.end()) {
+        EV_WARN << "socket id=" << sockId << " doesn't exist\n";
+        return;
+    }
+    EV_INFO << "Destroy socket: " << *(it->second) << "\n";
+
+    destroySocket(it);
+}
+
+void Udp::destroySocket(SocketsByIdMap::iterator it)
+{
     SockDesc *sd = it->second;
     socketsByIdMap.erase(it);
-
-    EV_INFO << "Closing socket: " << *sd << "\n";
 
     // remove from socketsByPortMap
     SockDescList& list = socketsByPortMap[sd->localPort];

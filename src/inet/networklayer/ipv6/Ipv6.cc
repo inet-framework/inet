@@ -130,31 +130,50 @@ void Ipv6::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePr
         upperProtocols.insert(&protocol);
 }
 
-void Ipv6::handleMessage(cMessage *msg)
+void Ipv6::handleRequest(Request *request)
 {
-    auto request = dynamic_cast<Request *>(msg);
-    if (auto *command = dynamic_cast<Ipv6SocketBindCommand *>(msg->getControlInfo())) {
+    auto ctrl = request->getControlInfo();
+    if (ctrl == nullptr)
+        throw cRuntimeError("Request '%s' arrived without controlinfo", request->getName());
+    if (auto *command = dynamic_cast<Ipv6SocketBindCommand *>(ctrl)) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
         SocketDescriptor *descriptor = new SocketDescriptor(socketId, command->getProtocol()->getId(), command->getLocalAddress());
         socketIdToSocketDescriptor[socketId] = descriptor;
-        delete msg;
+        delete request;
     }
-    else if (auto *command = dynamic_cast<Ipv6SocketConnectCommand *>(msg->getControlInfo())) {
+    else if (auto *command = dynamic_cast<Ipv6SocketConnectCommand *>(ctrl)) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
         if (socketIdToSocketDescriptor.find(socketId) == socketIdToSocketDescriptor.end())
             throw cRuntimeError("Ipv6Socket: should use bind() before connect()");
         socketIdToSocketDescriptor[socketId]->remoteAddress = command->getRemoteAddress();
-        delete msg;
+        delete request;
     }
-    else if (dynamic_cast<Ipv6SocketCloseCommand *>(msg->getControlInfo()) != nullptr) {
+    else if (dynamic_cast<Ipv6SocketCloseCommand *>(ctrl) != nullptr) {
         int socketId = 0; request->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketDescriptor.find(socketId);
         if (it != socketIdToSocketDescriptor.end()) {
             delete it->second;
             socketIdToSocketDescriptor.erase(it);
         }
-        delete msg;
+        delete request;
     }
+    else if (dynamic_cast<Ipv6SocketDestroyCommand *>(ctrl) != nullptr) {
+        int socketId = 0; request->getTag<SocketReq>()->getSocketId();
+        auto it = socketIdToSocketDescriptor.find(socketId);
+        if (it != socketIdToSocketDescriptor.end()) {
+            delete it->second;
+            socketIdToSocketDescriptor.erase(it);
+        }
+        delete request;
+    }
+    else
+        throw cRuntimeError("Unknown command: '%s' with %s", request->getName(), ctrl->getClassName());
+}
+
+void Ipv6::handleMessage(cMessage *msg)
+{
+    if (auto request = dynamic_cast<Request *>(msg))
+        handleRequest(request);
     else
         QueueBase::handleMessage(msg);
 }

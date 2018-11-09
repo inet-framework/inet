@@ -21,6 +21,7 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
+#include "inet/common/packet/Message.h"
 #include "inet/common/queue/QueueBase.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/INetworkProtocol.h"
@@ -137,6 +138,8 @@ class INET_API Ipv6 : public QueueBase, public NetfilterBase, public LifecycleUn
     virtual void preroutingFinish(Packet *packet, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, Ipv6Address nextHopAddr);
 
     virtual void handleMessage(cMessage *msg) override;
+
+    virtual void handleRequest(Request *request);
 
     /**
      * Handle messages (typically packets to be send in Ipv6) from transport or ICMP.

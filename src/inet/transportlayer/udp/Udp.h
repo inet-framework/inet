@@ -142,6 +142,8 @@ class INET_API Udp : public OperationalBase
     virtual void bind(int sockId, int gateIndex, const L3Address& localAddr, int localPort);
     virtual void connect(int sockId, int gateIndex, const L3Address& remoteAddr, int remotePort);
     virtual void close(int sockId);
+    virtual void destroySocket(int sockId);
+    void destroySocket(SocketsByIdMap::iterator it);
     virtual void clearAllSockets();
     virtual void setTimeToLive(SockDesc *sd, int ttl);
     virtual void setTypeOfService(SockDesc *sd, int typeOfService);

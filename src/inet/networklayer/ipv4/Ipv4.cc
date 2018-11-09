@@ -182,6 +182,15 @@ void Ipv4::handleRequest(Request *request)
         }
         delete request;
     }
+    else if (dynamic_cast<Ipv4SocketDestroyCommand *>(ctrl) != nullptr) {
+        int socketId = request->getTag<SocketReq>()->getSocketId();
+        auto it = socketIdToSocketDescriptor.find(socketId);
+        if (it != socketIdToSocketDescriptor.end()) {
+            delete it->second;
+            socketIdToSocketDescriptor.erase(it);
+        }
+        delete request;
+    }
     else
         throw cRuntimeError("Unknown command: '%s' with %s", request->getName(), ctrl->getClassName());
 }

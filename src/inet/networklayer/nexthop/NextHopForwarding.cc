@@ -142,6 +142,15 @@ void NextHopForwarding::handleCommand(Request *request)
         }
         delete request;
     }
+    else if (dynamic_cast<L3SocketDestroyCommand *>(request->getControlInfo()) != nullptr) {
+        int socketId = request->getTag<SocketReq>()->getSocketId();
+        auto it = socketIdToSocketDescriptor.find(socketId);
+        if (it != socketIdToSocketDescriptor.end()) {
+            delete it->second;
+            socketIdToSocketDescriptor.erase(it);
+        }
+        delete request;
+    }
     else
         throw cRuntimeError("Invalid command: (%s)%s", request->getClassName(), request->getName());
 }
