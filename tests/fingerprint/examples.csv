@@ -119,8 +119,8 @@
 /examples/ieee8021d/,                -f omnetpp.ini -c RSTP-LinkReconnect -r 0,      180s,           4f5d-e6be/tplx, PASS,
 /examples/ieee8021d/,                -f omnetpp.ini -c STP-LinkReconnect -r 0,       180s,           f3d6-f072/tplx, PASS,
 
-/examples/inet/ber/,                 -f omnetpp.ini -c ber-sack-experiment -r 0,    20s,             4d16-5a25/tplx, PASS,
-/examples/inet/ber/,                 -f omnetpp.ini -c ber-flavour-experiment -r 0, 20s,             1a2a-45d6/tplx, PASS,
+/examples/inet/ber/,                 -f omnetpp.ini -c ber-sack-experiment -r 0,    20s,             4967-8343/tplx, PASS,
+/examples/inet/ber/,                 -f omnetpp.ini -c ber-flavour-experiment -r 0, 20s,             a21e-fca6/tplx, PASS,
 
 /examples/inet/broadcast/,           -f omnetpp.ini -c General -r 0,                20s,             9f07-6c81/tplx, PASS,
 
@@ -251,8 +251,8 @@
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-dumb -r 5,              500s,            d88d-cf93/tplx, PASS,
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-dumb -r 6,              500s,            2b0c-dedd/tplx, PASS,
 
-/examples/inet/tcpwindowscale/,      -f omnetpp.ini -c WS_disabled -r 0,            1.5s,            2e8e-2067/tplx, PASS,
-/examples/inet/tcpwindowscale/,      -f omnetpp.ini -c WS_enabled -r 0,             1.5s,            663a-031b/tplx, PASS,
+/examples/inet/tcpwindowscale/,      -f omnetpp.ini -c WS_disabled -r 0,            1.5s,            8d72-8043/tplx, PASS,
+/examples/inet/tcpwindowscale/,      -f omnetpp.ini -c WS_enabled -r 0,             1.5s,            70a8-7c54/tplx, PASS,
 
 /examples/inet/tunnel/,              -f omnetpp.ini -c UDPApp -r 0,                 10s,             f76c-df22/tplx, PASS,
 /examples/inet/tunnel/,              -f omnetpp.ini -c TcpApp -r 0,                 10s,             f5a5-2d27/tplx, PASS,

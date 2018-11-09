@@ -4,14 +4,24 @@
 
 package inet.examples.inet.tcpwindowscale;
 
+import inet.common.misc.ThruputMeteringChannel;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
-import ned.DatarateChannel;
 
 
 network tcpwindowscale
 {
     parameters:
+    types:
+        channel LFNPath extends ThruputMeteringChannel
+        {
+            parameters:
+                datarate = 1Gbps;
+                delay = 565ms;
+                per = 0;
+                ber = 0;
+                thruputDisplayFormat = default("p b u");
+        }
     submodules:
         client: StandardHost {
             parameters:
@@ -32,11 +42,3 @@ network tcpwindowscale
         client.pppg[0] <--> LFNPath <--> server.pppg[0];
 }
 
-channel LFNPath extends DatarateChannel
-{
-    parameters:
-        datarate = 1Gbps;
-        delay = 565ms;
-        per = 0;
-        ber = 0;
-}

@@ -20,7 +20,7 @@ package inet.linklayer.ieee80211.mac;
 import inet.linklayer.ieee80211.mac.contract.IRx;
 
 //
-// The default implementation of IRx.
+// The default implementation of ~IRx.
 //
 simple Rx like IRx
 {

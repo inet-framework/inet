@@ -21,7 +21,7 @@
 #define __INET_MACBASE_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 
 namespace inet {
@@ -31,12 +31,10 @@ class InterfaceEntry;
 /**
  * Base class for MAC modules.
  */
-class INET_API MacBase : public cSimpleModule, public ILifecycle, public cListener
+class INET_API MacBase : public MacProtocolBase
 {
   protected:
     cModule *hostModule = nullptr;
-    bool isOperational = false;    // for use in handleMessage()
-    InterfaceEntry *interfaceEntry = nullptr;    // nullptr if no InterfaceTable or node is down
 
   public:
     MacBase() {}
@@ -46,18 +44,11 @@ class INET_API MacBase : public cSimpleModule, public ILifecycle, public cListen
     using cListener::receiveSignal;
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    void registerInterface();    // do not override! override configureInterfaceEntry()
+    virtual void handleMessageWhenDown(cMessage *msg) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
-    virtual void updateOperationalFlag(bool isNodeUp);
-    virtual bool isNodeUp();
-    virtual void handleMessageWhenDown(cMessage *msg);
-    virtual MacAddress parseMacAddressParameter(const char *addrstr);
-
-    /**
-     * should create InterfaceEntry
-     */
-    virtual void configureInterfaceEntry() = 0;
+    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
+    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
+    virtual void handleNodeCrash() override;
 
     /**
      * should clear queue and emit signal "packetDropped" with entire packets
@@ -68,11 +59,6 @@ class INET_API MacBase : public cSimpleModule, public ILifecycle, public cListen
      * should clear queue silently
      */
     virtual void clearQueue() = 0;
-
-    /**
-     * should return true if the msg arrived from upper layer, else return false
-     */
-    virtual bool isUpperMsg(cMessage *msg) = 0;
 };
 
 } // namespace inet

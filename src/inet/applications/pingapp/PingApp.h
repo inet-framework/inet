@@ -20,8 +20,9 @@
 #define __INET_PINGAPP_H
 
 #include "inet/common/INETDefs.h"
+
+#include "inet/applications/base/ApplicationBase.h"
 #include "inet/common/Protocol.h"
-#include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
@@ -40,7 +41,7 @@ namespace inet {
  *
  * See NED file for detailed description of operation.
  */
-class INET_API PingApp : public cSimpleModule, public ILifecycle, public INetworkSocket::ICallback
+class INET_API PingApp : public ApplicationBase, public INetworkSocket::ICallback
 {
   protected:
     // parameters: for more details, see the corresponding NED parameters' documentation
@@ -88,7 +89,7 @@ class INET_API PingApp : public cSimpleModule, public ILifecycle, public INetwor
   protected:
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void finish() override;
     virtual void refreshDisplay() const override;
 
@@ -97,15 +98,16 @@ class INET_API PingApp : public cSimpleModule, public ILifecycle, public INetwor
     virtual void stopSendingPingRequests();
     virtual void scheduleNextPingRequest(simtime_t previous, bool withSleep);
     virtual void cancelNextPingRequest();
-    virtual bool isNodeUp();
     virtual bool isEnabled();
     virtual std::vector<L3Address> getAllAddresses();
     virtual void sendPingRequest();
     virtual void processPingResponse(int identifier, int seqNumber, Packet *packet);
     virtual void countPingResponse(int bytes, long seqNo, simtime_t rtt, bool isDup);
 
-    //ILifecycle
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    // Lifecycle methods
+    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
+    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override { stopSendingPingRequests(); return true; }
+    virtual void handleNodeCrash() override { stopSendingPingRequests(); }
 
     //INetworkSocket::ICallback:
     virtual void socketDataArrived(INetworkSocket *socket, Packet *packet) override;

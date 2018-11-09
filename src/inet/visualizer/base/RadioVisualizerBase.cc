@@ -60,6 +60,8 @@ void RadioVisualizerBase::initialize(int stage)
         placementPriority = par("placementPriority");
         // antenna lobe
         displayAntennaLobes = par("displayAntennaLobes");
+        antennaLobeNormalize = par("antennaLobeNormalize");
+        antennaLobeRelativeLabels = par("antennaLobeRelativeLabels");
         antennaLobePlaneGlobal = par("antennaLobePlaneGlobal");
         antennaLobePlane = par("antennaLobePlane");
         antennaLobeMode = par("antennaLobeMode");

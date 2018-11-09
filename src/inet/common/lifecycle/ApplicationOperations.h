@@ -15,46 +15,42 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_INTERFACEOPERATIONS_H_
-#define __INET_INTERFACEOPERATIONS_H_
+#ifndef __INET_APPLICATIONOPERATIONS_H_
+#define __INET_APPLICATIONOPERATIONS_H_
 
 #include "inet/common/lifecycle/LifecycleOperation.h"
 
 namespace inet {
 
-class InterfaceEntry;
-
 /**
- * Base class for lifecycle operations that manipulate a network interface.
+ * Base class for lifecycle operations that manipulate a application.
  */
-class INET_API InterfaceOperationBase : public LifecycleOperation
+class INET_API ApplicationOperationBase : public LifecycleOperation
 {
   public:
     enum Stage { STAGE_LOCAL, STAGE_LAST };
-  private:
-    InterfaceEntry *ie; // the interface to be operated on
+
   public:
-    InterfaceOperationBase() : ie(nullptr) {}
+    ApplicationOperationBase() {}
     virtual void initialize(cModule *module, StringMap& params);
-    virtual int getNumStages() const {return STAGE_LAST+1;}
-    InterfaceEntry *getInterface() const {return ie;}
+    virtual int getNumStages() const { return STAGE_LAST + 1; }
 };
 
 /**
- * Lifecycle operation to bring up a network interface.
+ * Lifecycle operation to start an application.
  */
-class INET_API InterfaceUpOperation : public InterfaceOperationBase
+class INET_API ApplicationStartOperation : public ApplicationOperationBase
 {
 };
 
 /**
- * Lifecycle operation to bring down a network interface.
+ * Lifecycle operation to stop an application.
  */
-class INET_API InterfaceDownOperation : public InterfaceOperationBase
+class INET_API ApplicationStopOperation : public ApplicationOperationBase
 {
 };
 
 } // namespace inet
 
-#endif // #ifndef __INET_INTERFACEOPERATIONS_H_
+#endif // #ifndef __INET_APPLICATIONOPERATIONS_H_
 

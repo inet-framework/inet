@@ -33,6 +33,8 @@ Define_Module(MacRelayUnit);
 
 void MacRelayUnit::initialize(int stage)
 {
+    LayeredProtocolBase::initialize(stage);
+
     if (stage == INITSTAGE_LOCAL) {
         numProcessedFrames = numDiscardedFrames = 0;
 
@@ -43,33 +45,14 @@ void MacRelayUnit::initialize(int stage)
         WATCH(numDiscardedFrames);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         registerService(Protocol::ethernetMac, nullptr, gate("ifIn"));
         registerProtocol(Protocol::ethernetMac, gate("ifOut"), nullptr);
     }
 }
 
-void MacRelayUnit::handleMessage(cMessage *msg)
+void MacRelayUnit::handleLowerPacket(Packet *packet)
 {
-    if (!isOperational) {
-        EV_ERROR << "Message '" << msg << "' arrived when module status is down, dropped it." << endl;
-        delete msg;
-        return;
-    }
-    else if (msg->isSelfMessage())
-        throw cRuntimeError("This module doesn't handle self-messages!");
-
-    // messages from network
-    else if (msg->arrivedOn("ifIn")) {
-        Packet *packet = check_and_cast<Packet *>(msg);
-        // Frame received from MAC unit
-        emit(packetReceivedFromLowerSignal, packet);
-        handleAndDispatchFrame(packet);
-    }
-    // unknown gate
-    else
-        throw cRuntimeError("Message arrived on unknown gate");
+    handleAndDispatchFrame(packet);
 }
 
 void MacRelayUnit::broadcast(Packet *packet, int arrivalInterfaceId)
@@ -152,39 +135,11 @@ void MacRelayUnit::handleAndDispatchFrame(Packet *packet)
 void MacRelayUnit::start()
 {
     macTable->clearTable();
-    isOperational = true;
 }
 
 void MacRelayUnit::stop()
 {
     macTable->clearTable();
-    isOperational = false;
-}
-
-bool MacRelayUnit::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-{
-    Enter_Method_Silent();
-
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_LINK_LAYER) {
-            start();
-        }
-    }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_LINK_LAYER) {
-            stop();
-        }
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH) {
-            stop();
-        }
-    }
-    else {
-        throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
-    }
-
-    return true;
 }
 
 void MacRelayUnit::learn(MacAddress srcAddr, int arrivalInterfaceId)

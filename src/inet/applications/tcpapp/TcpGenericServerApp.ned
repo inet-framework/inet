@@ -23,10 +23,6 @@ import inet.applications.contract.IApp;
 // Generic server application for modelling TCP-based request-reply style
 // protocols or applications.
 //
-// Requires message object preserving sendQueue/receiveQueue classes
-// to be used with ~Tcp (that is, TCPMsgBasedSendQueue and TCPMsgBasedRcvQueue;
-// TCPVirtualBytesSendQueue/RcvQueue are not good).
-//
 // The module accepts any number of incoming TCP connections, and expects
 // to receive messages of class ~GenericAppMsg on them. A message should
 // contain how large the reply should be (number of bytes). ~TcpGenericServerApp

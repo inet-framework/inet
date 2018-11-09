@@ -143,7 +143,7 @@ For example, wireless interfaces for hosts are defined like this:
 
    wlan[numWlanInterfaces]: <snip> // wlan interfaces in StandardHost etc al.
 
-Where :ini:``numWlanInterfaces`` is a module parameter that defaults to
+Where :par:`numWlanInterfaces` is a module parameter that defaults to
 either 0 or 1 (this is different for e.g. :ned:`StandardHost` and
 :ned:`WirelessHost`.) To configure a host to have two interfaces, add
 the following line to the ini file:

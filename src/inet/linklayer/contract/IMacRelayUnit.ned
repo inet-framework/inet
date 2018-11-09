@@ -18,7 +18,7 @@
 package inet.linklayer.contract;
 
 //
-// Prototype for modules providing Ethernet switch functionality.
+// Module interface for modules providing Ethernet switch functionality.
 // These modules handle the mapping between ports and MAC addresses,
 // and forward frames (~EtherFrame) to appropriate ports.
 //

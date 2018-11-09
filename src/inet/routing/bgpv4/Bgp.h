@@ -20,18 +20,18 @@
 
 #include "inet/common/INETDefs.h"
 
+#include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/routing/bgpv4/BgpCommon.h"
 #include "inet/routing/bgpv4/BgpRouter.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/routing/bgpv4/bgpmessage/BgpHeader_m.h"
-#include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {
 
 namespace bgp {
 
-class INET_API Bgp : public cSimpleModule, protected cListener, public ILifecycle
+class INET_API Bgp : public cSimpleModule, protected cListener, public LifecycleUnsupported
 {
 private:
     IIpv4RoutingTable *rt = nullptr;
@@ -48,7 +48,6 @@ private:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
     void createBgpRouter();
     void handleTimer(cMessage *timer);
     virtual void finish() override;

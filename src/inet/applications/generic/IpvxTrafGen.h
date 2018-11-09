@@ -21,20 +21,19 @@
 
 #include <vector>
 
+#include "inet/applications/base/ApplicationBase.h"
 #include "inet/common/INETDefs.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/applications/generic/IpvxTrafSink.h"
-#include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/common/lifecycle/NodeStatus.h"
 
 namespace inet {
 
 /**
  * IP traffic generator application. See NED for more info.
  */
-class INET_API IpvxTrafGen : public cSimpleModule, public ILifecycle
+class INET_API IpvxTrafGen : public ApplicationBase
 {
   protected:
     enum Kinds { START = 100, NEXT };
@@ -49,9 +48,7 @@ class INET_API IpvxTrafGen : public cSimpleModule, public ILifecycle
     int numPackets = 0;
 
     // state
-    NodeStatus *nodeStatus = nullptr;
     cMessage *timer = nullptr;
-    bool isOperational = false;
 
     // statistic
     int numSent = 0;
@@ -63,7 +60,6 @@ class INET_API IpvxTrafGen : public cSimpleModule, public ILifecycle
   protected:
     virtual void scheduleNextPacket(simtime_t previous);
     virtual void cancelNextPacket();
-    virtual bool isNodeUp();
     virtual bool isEnabled();
 
     virtual L3Address chooseDestAddr();
@@ -71,13 +67,16 @@ class INET_API IpvxTrafGen : public cSimpleModule, public ILifecycle
 
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void refreshDisplay() const override;
     virtual void startApp();
 
     virtual void printPacket(Packet *msg);
     virtual void processPacket(Packet *msg);
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+
+    virtual bool handleNodeStart(IDoneCallback *doneCallback) override { startApp(); return true; }
+    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override { cancelNextPacket(); return true; }
+    virtual void handleNodeCrash() override { cancelNextPacket(); }
 
   public:
     IpvxTrafGen();

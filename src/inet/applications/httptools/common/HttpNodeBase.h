@@ -25,8 +25,7 @@
 #include <fstream>
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/applications/httptools/configurator/HttpController.h"
 #include "inet/applications/httptools/common/HttpMessages_m.h"
@@ -54,7 +53,7 @@ enum LogFormat { lf_short, lf_long };
  *
  * @author Kristjan V. Jonsson (kristjanvj@gmail.com)
  */
-class INET_API HttpNodeBase : public cSimpleModule, public ILifecycle
+class INET_API HttpNodeBase : public cSimpleModule, public LifecycleUnsupported
 {
   protected:
     double linkSpeed = 0;    // the link speed in bits per second. Only needed for direct message passing transmission delay calculations
@@ -92,8 +91,6 @@ class INET_API HttpNodeBase : public cSimpleModule, public ILifecycle
     std::string formatHttpResponseShort(const Packet *httpResponse);
     std::string formatHttpRequestLong(const Packet *httpRequest);
     std::string formatHttpResponseLong(const Packet *httpResponse);
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override
-    { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
   public:
     HttpNodeBase();

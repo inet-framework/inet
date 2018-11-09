@@ -27,8 +27,7 @@
 #include "inet/common/INETMath.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
-#include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/common/lifecycle/LifecycleUnsupported.h"
 
 namespace inet {
 
@@ -37,7 +36,7 @@ class SimpleVoipPacket;
 /**
  * Implements a simple VoIP source. See the NED file for more information.
  */
-class INET_API SimpleVoipReceiver : public cSimpleModule, public ILifecycle, public UdpSocket::ICallback
+class INET_API SimpleVoipReceiver : public cSimpleModule, public LifecycleUnsupported, public UdpSocket::ICallback
 {
   private:
     class VoipPacketInfo
@@ -105,9 +104,6 @@ class INET_API SimpleVoipReceiver : public cSimpleModule, public ILifecycle, pub
     void initialize(int stage) override;
     void handleMessage(cMessage *msg) override;
     virtual void finish() override;
-
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override
-    { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
     //UdpSocket::ICallback methods
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;

@@ -20,7 +20,7 @@ package inet.physicallayer.contract.packetlevel;
 import inet.physicallayer.contract.packetlevel.IPhysicalLayer;
 
 //
-// Prototype for radio modules. Radio modules deal with the transmission of
+// Module interface for radio modules. Radio modules deal with the transmission of
 // frames over a wireless medium (the radio medium).
 //
 // <b>Transmission</b>

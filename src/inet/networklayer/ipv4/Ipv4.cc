@@ -171,7 +171,7 @@ void Ipv4::handleRequest(Request *request)
         delete request;
     }
     else if (dynamic_cast<Ipv4SocketCloseCommand *>(ctrl) != nullptr) {
-        int socketId = 0; request->getTag<SocketReq>()->getSocketId();
+        int socketId = request->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketDescriptor.find(socketId);
         if (it != socketIdToSocketDescriptor.end()) {
             delete it->second;
@@ -756,7 +756,7 @@ void Ipv4::reassembleAndDeliverFinish(Packet *packet)
         }
     }
     if (upperProtocols.find(protocol) != upperProtocols.end()) {
-        EV_INFO << "Passing up to protocol " << protocol << "\n";
+        EV_INFO << "Passing up to protocol " << *protocol << "\n";
         emit(packetSentToUpperSignal, packet);
         send(packet, "transportOut");
         numLocalDeliver++;

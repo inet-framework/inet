@@ -35,59 +35,43 @@ MacBase::~MacBase()
 {
 }
 
-MacAddress MacBase::parseMacAddressParameter(const char *addrstr)
-{
-    MacAddress address;
-
-    if (!strcmp(addrstr, "auto"))
-        // assign automatic address
-        address = MacAddress::generateAutoAddress();
-    else
-        address.setAddress(addrstr);
-
-    return address;
-}
-
 void MacBase::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    MacProtocolBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
+        lowerLayerInGateId = findGate("phys$i");
+        lowerLayerOutGateId = findGate("phys$o");
         hostModule = findContainingNode(this);
         if (hostModule)
             hostModule->subscribe(interfaceDeletedSignal, this);
     }
-    else if (stage == INITSTAGE_LINK_LAYER) {
-        updateOperationalFlag(isNodeUp());    // needs to be done when interface is already registered (=last stage)
-    }
 }
 
-bool MacBase::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+void MacBase::handleMessageWhenDown(cMessage *msg)
 {
-    Enter_Method_Silent();
+    if (!msg->isSelfMessage() && msg->getArrivalGateId() == lowerLayerInGateId) {
+        EV << "Interface is turned off, dropping packet\n";
+        delete msg;
+    }
+    else
+        MacProtocolBase::handleMessageWhenDown(msg);
+}
 
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_LINK_LAYER) {
-            updateOperationalFlag(true);
-        }
-    }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_LINK_LAYER) {
-            updateOperationalFlag(false);
-            flushQueue();
-        }
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH) {
-            updateOperationalFlag(false);
-            clearQueue();
-        }
-    }
-    else {
-        throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
-    }
-
+bool MacBase::handleNodeStart(IDoneCallback *doneCallback)
+{
     return true;
+}
+
+bool MacBase::handleNodeShutdown(IDoneCallback *doneCallback)
+{
+    flushQueue();
+    return true;
+}
+
+void MacBase::handleNodeCrash()
+{
+    clearQueue();
 }
 
 void MacBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
@@ -95,35 +79,6 @@ void MacBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *o
     if (signalID == interfaceDeletedSignal) {
         if (interfaceEntry == check_and_cast<const InterfaceEntry *>(obj))
             interfaceEntry = nullptr;
-    }
-}
-
-bool MacBase::isNodeUp()
-{
-    NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(hostModule->getSubmodule("status"));
-    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
-}
-
-void MacBase::updateOperationalFlag(bool isNodeUp)
-{
-    isOperational = isNodeUp;    // TODO and interface is up, too
-}
-
-void MacBase::registerInterface()    //XXX registerInterfaceIfInterfaceTableExists() ???
-{
-    ASSERT(interfaceEntry == nullptr);
-    interfaceEntry = getContainingNicModule(this);
-    configureInterfaceEntry();
-}
-
-void MacBase::handleMessageWhenDown(cMessage *msg)
-{
-    if (msg->isSelfMessage()) {
-        throw cRuntimeError("Self message received while interface is off");
-    }
-    else {
-        EV << "Interface is turned off, dropping packet\n";
-        delete msg;
     }
 }
 

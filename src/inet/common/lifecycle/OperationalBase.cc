@@ -31,8 +31,12 @@ OperationalBase::OperationalBase() :
 
 void OperationalBase::initialize(int stage)
 {
+    if (stage == INITSTAGE_LOCAL) {
+        WATCH(isOperational);
+    }
     if (isInitializeStage(stage)) {
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        cModule *node = findContainingNode(this);
+        NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
         setOperational(!nodeStatus || nodeStatus->getState() == NodeStatus::UP);
         if (isOperational)
             handleNodeStart(nullptr);
@@ -70,7 +74,8 @@ bool OperationalBase::handleOperationStage(LifecycleOperation *operation, int st
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
         if (isNodeShutdownStage(stage)) {
             bool done = handleNodeShutdown(doneCallback);
-            setOperational(false);
+            if (done)
+                setOperational(false);
             return done;
         }
     }

@@ -68,9 +68,6 @@ taste of the built-in network nodes.
 -  :ned:`AdhocHost` is a :ned:`WirelessHost` with the network interface
    configured in ad-hoc mode and forwarding enabled.
 
--  :ned:`AodvRouter` is similar to an :ned:`AdhocHost` with an
-   additional :protocol:`AODV` protocol.
-
 Network nodes communicate at the network level by exchanging OMNeT++
 messages which are the abstract representations of physical signals on
 the transmission medium. Signals are either sent through OMNeT++
@@ -130,6 +127,9 @@ Wired network connections, for example :protocol:`Ethernet` cables, are
 represented with standard OMNeT++ connections using the
 :ned:`DatarateChannel` NED type. The channel’s :par:`datarate` and
 :par:`delay` parameters must be provided for all wired connections.
+The number of wired interfaces in a host (or router) usually does
+not need to be manually configured, because it can be automatically
+inferred from the actual number of links to neighbor nodes.
 
 The following example shows how straightforward it is to create a model
 for a simple wired network. This network contains a server connected to
@@ -216,7 +216,7 @@ Mobile Ad hoc Networks
 Frequent Tasks (How To...)
 --------------------------
 
-Quick and somewhat superficial advice to many practical tasks.
+This section contains quick and somewhat superficial advice to many practical tasks.
 
 .. _ug:sec:networks:automatic-wired-interfaces:
 

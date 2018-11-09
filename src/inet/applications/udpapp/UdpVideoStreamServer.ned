@@ -36,7 +36,7 @@ import inet.applications.contract.IApp;
 // Statistics:
 //
 // reqStreamBytes: statistic of bytelength of requested video streams.
-// sentPkBytes: statistic of sent packets and sent bytes.
+// packetSent: statistic of sent packets and sent bytes.
 //
 // @see ~UdpVideoStreamClient
 //

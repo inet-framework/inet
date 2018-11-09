@@ -42,6 +42,7 @@ simple TcpEchoApp extends TcpServerHostApp
         @statistic[endToEndDelay](title="end-to-end delay"; source="dataAge(packetReceived)"; unit=s; record=histogram,vector; interpolationmode=none);
 }
 
+// Thread for ~TcpEchoApp
 simple TcpEchoAppThread
 {
 }

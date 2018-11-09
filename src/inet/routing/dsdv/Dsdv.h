@@ -21,9 +21,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <vector>
+
 #include "inet/common/INETDefs.h"
-#include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
@@ -31,6 +30,7 @@
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
+#include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/routing/dsdv/DsdvHello_m.h"
 
 namespace inet {
@@ -38,7 +38,7 @@ namespace inet {
 /**
  * DSDV protocol implementation.
  */
-class INET_API Dsdv : public cSimpleModule, public ILifecycle
+class INET_API Dsdv : public RoutingProtocolBase
 {
   private:
     struct ForwardEntry
@@ -59,7 +59,6 @@ class INET_API Dsdv : public cSimpleModule, public ILifecycle
     unsigned int sequencenumber = 0;
     simtime_t routeLifetime;
     cModule *host = nullptr;
-    NodeStatus *nodeStatus = nullptr;
 
   protected:
     simtime_t helloInterval;
@@ -73,15 +72,14 @@ class INET_API Dsdv : public cSimpleModule, public ILifecycle
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
 
     void handleSelfMessage(cMessage *msg);
 
-    // configuration
-    bool isNodeUp() const;
-
     // lifecycle
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    virtual bool handleNodeStart(IDoneCallback *) override { start(); return true; }
+    virtual bool handleNodeShutdown(IDoneCallback *) override { stop(); return true; }
+    virtual void handleNodeCrash() override  { stop(); }
     void start();
     void stop();
 };

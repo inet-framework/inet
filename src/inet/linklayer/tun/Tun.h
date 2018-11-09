@@ -33,12 +33,13 @@ class INET_API Tun : public MacBase
         virtual void configureInterfaceEntry() override;
         virtual void flushQueue() override;
         virtual void clearQueue() override;
-        virtual bool isUpperMsg(cMessage *message) override { return message->arrivedOn("upperLayerIn"); }
 
     public:
         virtual int numInitStages() const override { return NUM_INIT_STAGES; }
         virtual void initialize(int stage) override;
-        virtual void handleMessage(cMessage *message) override;
+        virtual void handleUpperMessage(cMessage *message) override;
+        virtual void handleUpperPacket(Packet *packet) override;
+        virtual void handleUpperCommand(cMessage *message) override;
 };
 
 } // namespace inet

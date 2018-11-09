@@ -15,8 +15,7 @@
 #define __INET_SCTPNATPEER_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
 #include "inet/transportlayer/contract/sctp/SctpSocket.h"
 #include "inet/transportlayer/sctp/SctpAssociation.h"
@@ -43,7 +42,7 @@ struct nat_message
  * arrives on them.
  */
 
-class INET_API SctpNatPeer : public cSimpleModule, public SctpSocket::ICallback, public ILifecycle
+class INET_API SctpNatPeer : public cSimpleModule, public SctpSocket::ICallback, public LifecycleUnsupported
 {
   protected:
     //SctpAssociation* assoc;
@@ -150,9 +149,6 @@ class INET_API SctpNatPeer : public cSimpleModule, public SctpSocket::ICallback,
     void sendqueueFullArrived(SctpSocket *socket) override;
     void addressAddedArrived(SctpSocket *socket, L3Address localAddr, L3Address remoteAddr) override;
     void setStatusString(const char *s);
-
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override
-    { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 };
 
 } // namespace inet

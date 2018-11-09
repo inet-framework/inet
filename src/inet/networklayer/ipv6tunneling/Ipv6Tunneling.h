@@ -29,7 +29,7 @@
 
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
-#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/LifecycleUnsupported.h"
 
 namespace inet {
 
@@ -41,7 +41,7 @@ class Ipv6RoutingTable;
 /**
  * Management of IP tunnels.
  */
-class INET_API Ipv6Tunneling : public cSimpleModule, public ILifecycle
+class INET_API Ipv6Tunneling : public cSimpleModule, public LifecycleUnsupported
 {
   public:
     enum TunnelType {
@@ -142,8 +142,6 @@ class INET_API Ipv6Tunneling : public cSimpleModule, public ILifecycle
      * Receive messages from Ipv6 module and encapsulate/decapsulate them.
      */
     virtual void handleMessage(cMessage *msg) override;
-
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
     /**
      * Creates a tunnel with given entry and exit point, which will be used for datagrams

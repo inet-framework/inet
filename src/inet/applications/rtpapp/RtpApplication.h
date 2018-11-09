@@ -18,12 +18,12 @@
 #define __INET_RTPAPPLICATION_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
-#include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {
 
-class INET_API RtpApplication : public cSimpleModule, public ILifecycle
+class INET_API RtpApplication : public cSimpleModule, public LifecycleUnsupported
 {
   protected:
     enum SelfMsgKind {
@@ -54,7 +54,6 @@ class INET_API RtpApplication : public cSimpleModule, public ILifecycle
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msg) override;
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
   public:
     RtpApplication() {}

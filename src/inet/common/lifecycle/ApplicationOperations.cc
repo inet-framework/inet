@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
+// Copyright (C) Opensim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,16 +15,16 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.contract;
+#include "inet/common/lifecycle/ApplicationOperations.h"
 
-//
-// Module interface for wired network interfaces.
-//
-moduleinterface IWiredInterface extends INetworkInterface
+namespace inet {
+
+Register_Class(ApplicationStartOperation);
+Register_Class(ApplicationStopOperation);
+
+void ApplicationOperationBase::initialize(cModule *module, StringMap& params)
 {
-    parameters:
-        @display("i=block/ifcard");
-    gates:
-        inout phys;
+    LifecycleOperation::initialize(module, params);
 }
 
+} // namespace inet

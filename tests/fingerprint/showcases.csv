@@ -51,8 +51,8 @@
 /showcases/visualizer/ieee80211/, -f omnetpp.ini -c VisualizingHandover -r 0,                         250s,            d7d1-bedc/tplx, PASS,
 /showcases/visualizer/ieee80211/,    -f omnetpp.ini -c SignalLevels -r 0,           100s,         ebce-62e1/tplx, PASS,
 
-/showcases/visualizer/info/,         -f omnetpp.ini -c VisualizingSubmoduleInformation -r 0,                    5s,            074a-17ee/tplx, PASS,   # VisualizingSubmoduleInformation extended
-/showcases/visualizer/info/,         -f omnetpp.ini -c MultipleModules -r 0,                                    5s,            074a-17ee/tplx, PASS,
+/showcases/visualizer/submoduleinfo/,         -f omnetpp.ini -c PacketCounts -r 0,                    5s,            074a-17ee/tplx, PASS,   # VisualizingSubmoduleInformation extended
+/showcases/visualizer/submoduleinfo/,         -f omnetpp.ini -c MACStates -r 0,                                    5s,            074a-17ee/tplx, PASS,
 
 /showcases/visualizer/instrumentfigures/,    -f omnetpp.ini -c General -r 0,                                            3s,              9b60-2e32/tplx, PASS,
 

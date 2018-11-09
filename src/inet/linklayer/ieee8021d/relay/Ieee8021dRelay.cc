@@ -16,7 +16,6 @@
 // Author: Benjamin Martin Seregi
 
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -36,15 +35,18 @@ Ieee8021dRelay::Ieee8021dRelay()
 
 void Ieee8021dRelay::initialize(int stage)
 {
+    LayeredProtocolBase::initialize(stage);
+
     if (stage == INITSTAGE_LOCAL) {
         // statistics
         numDispatchedBDPUFrames = numDispatchedNonBPDUFrames = numDeliveredBDPUsToSTP = 0;
         numReceivedBPDUsFromSTP = numReceivedNetworkFrames = numDroppedFrames = 0;
         isStpAware = par("hasStp");
+
+        macTable = getModuleFromPar<IMacAddressTable>(par("macTableModule"), this);
+        ifTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         registerService(Protocol::ethernetMac, gate("upperLayerIn"), gate("ifIn"));
         registerProtocol(Protocol::ethernetMac, gate("ifOut"), gate("upperLayerOut"));
 
@@ -52,20 +54,6 @@ void Ieee8021dRelay::initialize(int stage)
         if(isStpAware) {
             registerAddress(MacAddress::STP_MULTICAST_ADDRESS);
         }
-
-        macTable = getModuleFromPar<IMacAddressTable>(par("macTableModule"), this);
-        ifTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-
-        if (isOperational) {
-            ie = chooseInterface();
-
-            if (ie) {
-                bridgeAddress = ie->getMacAddress(); // get the bridge's MAC address
-                registerAddress(bridgeAddress); // register bridge's MAC address
-            } else
-                throw cRuntimeError("No non-loopback interface found!");
-        }
-
 
         WATCH(bridgeAddress);
         WATCH(numReceivedNetworkFrames);
@@ -87,35 +75,16 @@ void Ieee8021dRelay::registerAddresses(MacAddress startMac, MacAddress endMac)
 
 }
 
-void Ieee8021dRelay::handleMessage(cMessage *msg)
+void Ieee8021dRelay::handleLowerPacket(Packet *packet)
 {
-    if (!isOperational) {
-        EV_ERROR << "Message '" << msg << "' arrived when module status is down, dropped it." << endl;
-        delete msg;
-        return;
-    }
-    else if (msg->isSelfMessage())
-        throw cRuntimeError("This module doesn't handle self-messages!");
-
-    else if (msg->arrivedOn("upperLayerIn"))
-    {
-        handleAndDispatchFrameFromHL(check_and_cast<Packet *>(msg));
-    }
     // messages from network
-    else if (msg->arrivedOn("ifIn")) {
-        Packet *packet = check_and_cast<Packet *>(msg);
-        numReceivedNetworkFrames++;
-        EV_INFO << "Received " << msg << " from network." << endl;
-        delete packet->removeTagIfPresent<DispatchProtocolReq>();
-        emit(packetReceivedFromLowerSignal, packet);
-        handleAndDispatchFrame(packet);
-    }
-    // unknown gate
-    else
-        throw cRuntimeError("Message arrived on unknown gate");
+    numReceivedNetworkFrames++;
+    EV_INFO << "Received " << packet << " from network." << endl;
+    delete packet->removeTagIfPresent<DispatchProtocolReq>();
+    handleAndDispatchFrame(packet);
 }
 
-void Ieee8021dRelay::handleAndDispatchFrameFromHL(Packet *packet)
+void Ieee8021dRelay::handleUpperPacket(Packet *packet)
 {
     const auto& frame = packet->peekAtFront<EthernetMacHeader>();
 
@@ -293,11 +262,11 @@ Ieee8021dInterfaceData *Ieee8021dRelay::getPortInterfaceData(unsigned int interf
 
 void Ieee8021dRelay::start()
 {
-    isOperational = true;
-
     ie = chooseInterface();
-    if (ie)
+    if (ie) {
         bridgeAddress = ie->getMacAddress(); // get the bridge's MAC address
+        registerAddress(bridgeAddress); // register bridge's MAC address
+    }
     else
         throw cRuntimeError("No non-loopback interface found!");
 
@@ -306,8 +275,6 @@ void Ieee8021dRelay::start()
 
 void Ieee8021dRelay::stop()
 {
-    isOperational = false;
-
     macTable->clearTable();
     ie = nullptr;
 }
@@ -334,32 +301,6 @@ void Ieee8021dRelay::finish()
     recordScalar("number of delivered BPDUs to the STP module", numDeliveredBDPUsToSTP);
     recordScalar("number of dispatched BPDU frames to the network", numDispatchedBDPUFrames);
     recordScalar("number of dispatched non-BDPU frames to the network", numDispatchedNonBPDUFrames);
-}
-
-bool Ieee8021dRelay::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-{
-    Enter_Method_Silent();
-
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_LINK_LAYER) {
-            start();
-        }
-    }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_LINK_LAYER) {
-            stop();
-        }
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH) {
-            stop();
-        }
-    }
-    else {
-        throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
-    }
-
-    return true;
 }
 
 } // namespace inet
