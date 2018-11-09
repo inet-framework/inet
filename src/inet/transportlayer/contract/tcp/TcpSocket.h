@@ -316,6 +316,11 @@ class INET_API TcpSocket : public ISocket
     void abort();
 
     /**
+     * Destroy the connection.
+     */
+    virtual void destroy() override;
+
+    /**
      * Causes TCP to reply with a fresh TcpStatusInfo, attached to a dummy
      * message as getControlInfo(). The reply message can be recognized by its
      * message kind TCP_I_STATUS, or (if a callback object is used)

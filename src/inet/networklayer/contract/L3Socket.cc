@@ -97,6 +97,15 @@ void L3Socket::close()
     sendToOutput(request);
 }
 
+void L3Socket::destroy()
+{
+    ASSERT(l3Protocol != nullptr);
+    auto *command = new L3SocketDestroyCommand();
+    auto request = new Request("destroy", L3_C_DESTROY);
+    request->setControlInfo(command);
+    sendToOutput(request);
+}
+
 void L3Socket::sendToOutput(cMessage *message)
 {
     if (!outputGate)

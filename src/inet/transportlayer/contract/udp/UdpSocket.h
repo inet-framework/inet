@@ -262,6 +262,8 @@ class INET_API UdpSocket : public ISocket
     void close();
     //@}
 
+    virtual void destroy() override;
+
     /** @name Handling of messages arriving from UDP */
     //@{
     /**

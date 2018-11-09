@@ -26,6 +26,7 @@ enum Ipv4CommandCode
     IPv4_C_BIND    = 1;
     IPv4_C_CONNECT = 2;
     IPv4_C_CLOSE   = 3;
+    IPv4_C_DESTROY = 4;
 }
 
 class Ipv4SocketCommandBase extends cObject
@@ -44,6 +45,10 @@ class Ipv4SocketConnectCommand extends Ipv4SocketCommandBase
 }
 
 class Ipv4SocketCloseCommand extends Ipv4SocketCommandBase
+{
+}
+
+class Ipv4SocketDestroyCommand extends Ipv4SocketCommandBase
 {
 }
 

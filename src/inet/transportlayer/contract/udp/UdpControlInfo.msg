@@ -35,6 +35,7 @@ enum UdpCommandCode
     UDP_C_CONNECT = 2;   // connect(); see ~UdpConnectCommand
     UDP_C_SETOPTION = 3; // setsockopt(); see ~UdpSetTimeToLiveCommand,...
     UDP_C_CLOSE = 4;     // close(); see ~UdpCloseCommand
+    UDP_C_DESTROY = 5;   // destroy(); see ~UdpDestroyCommand
 }
 
 
@@ -116,6 +117,15 @@ class UdpCloseCommand extends UdpControlInfo
 {
 }
 
+//
+// Control info for destroying an UDP socket. To destroy a socket, send a message
+// to the ~Udp module with kind=UDP_C_DESTROY and an ~UdpDestroyCommand attached.
+//
+// @see ~UdpCommandCode
+//
+class UdpDestroyCommand extends UdpControlInfo
+{
+}
 
 //
 // Control info that is attached to received data packets, sent up from the

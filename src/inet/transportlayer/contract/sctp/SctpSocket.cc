@@ -419,6 +419,17 @@ void SctpSocket::shutdown(int id)
     sendToSctp(msg);
 }
 
+void SctpSocket::destroy()
+{
+    EV << "SctpSocket::destroy()\n";
+
+    Request *msg = new Request("DESTROY", SCTP_C_DESTROY);
+    auto& tags = getTags(msg);
+    SctpCommandReq *cmd = tags.addTagIfAbsent<SctpCommandReq>();
+    cmd->setSocketId(assocId);
+    sendToSctp(msg);
+}
+
 void SctpSocket::abort()
 {
     if (sockstate != NOT_BOUND && sockstate != CLOSED && sockstate != SOCKERROR) {

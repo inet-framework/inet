@@ -77,6 +77,15 @@ void TunSocket::close()
     this->interfaceId = -1;
 }
 
+void TunSocket::destroy()
+{
+    auto request = new Request("DESTROY", TUN_C_DESTROY);
+    auto command = new TunDestroyCommand();
+    request->setControlInfo(command);
+    sendToTun(request);
+    this->interfaceId = -1;
+}
+
 void TunSocket::sendToTun(cMessage *msg)
 {
     if (!outputGate)

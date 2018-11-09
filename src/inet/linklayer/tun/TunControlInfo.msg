@@ -24,6 +24,7 @@ enum TunCommandCode
 {
     TUN_C_OPEN  = 1;
     TUN_C_CLOSE = 2;
+    TUN_C_DESTROY = 3;
 }
 
 class TunControlInfo extends cObject
@@ -35,6 +36,10 @@ class TunOpenCommand extends TunControlInfo
 }
 
 class TunCloseCommand extends TunControlInfo
+{
+}
+
+class TunDestroyCommand extends TunControlInfo
 {
 }
 

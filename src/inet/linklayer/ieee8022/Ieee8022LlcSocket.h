@@ -95,6 +95,7 @@ class INET_API Ieee8022LlcSocket : public ISocket
 
     virtual bool belongsToSocket(cMessage *msg) const override;
     virtual void processMessage(cMessage *msg) override;
+    virtual void destroy() override;
 };
 
 } // namespace inet

@@ -95,6 +95,14 @@ void Ipv6Socket::close()
     sendToOutput(request);
 }
 
+void Ipv6Socket::destroy()
+{
+    auto *command = new Ipv6SocketDestroyCommand();
+    auto request = new Request("destroy", IPv6_C_DESTROY);
+    request->setControlInfo(command);
+    sendToOutput(request);
+}
+
 void Ipv6Socket::sendToOutput(cMessage *message)
 {
     if (!outputGate)

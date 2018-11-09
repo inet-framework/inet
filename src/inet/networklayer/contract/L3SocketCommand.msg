@@ -26,6 +26,7 @@ enum L3CommandCode
     L3_C_BIND    = 1;
     L3_C_CONNECT = 2;
     L3_C_CLOSE   = 3;
+    L3_C_DESTROY = 4;
 }
 
 class L3SocketCommandBase extends cObject
@@ -44,6 +45,10 @@ class L3SocketConnectCommand extends L3SocketCommandBase
 }
 
 class L3SocketCloseCommand extends L3SocketCommandBase
+{
+}
+
+class L3SocketDestroyCommand extends L3SocketCommandBase
 {
 }
 

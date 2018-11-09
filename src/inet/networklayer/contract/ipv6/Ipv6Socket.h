@@ -72,6 +72,7 @@ class INET_API Ipv6Socket : public INetworkSocket
     virtual void send(Packet *packet) override;
     virtual void sendTo(Packet *packet, Ipv6Address destAddress);
     virtual void close() override;
+    virtual void destroy() override;
   protected:
     virtual void bind(const Protocol *protocol, L3Address localAddress) override { bind(protocol, localAddress.toIpv6()); };
     virtual void connect(L3Address remoteAddress) override { connect(remoteAddress.toIpv6()); }

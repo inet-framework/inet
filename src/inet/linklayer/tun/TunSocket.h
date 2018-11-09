@@ -80,6 +80,7 @@ class INET_API TunSocket : public ISocket
     void open(int interfaceId);
     void send(Packet *packet);
     void close();
+    virtual void destroy() override;
 
     virtual bool belongsToSocket(cMessage *msg) const override;
     virtual void processMessage(cMessage *msg) override;

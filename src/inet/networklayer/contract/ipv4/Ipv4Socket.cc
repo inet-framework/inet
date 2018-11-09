@@ -95,6 +95,15 @@ void Ipv4Socket::close()
     sendToOutput(request);
 }
 
+void Ipv4Socket::destroy()
+{
+    ASSERT(bound);
+    auto command = new Ipv4SocketDestroyCommand();
+    auto request = new Request("destroy", IPv4_C_DESTROY);
+    request->setControlInfo(command);
+    sendToOutput(request);
+}
+
 void Ipv4Socket::sendToOutput(cMessage *message)
 {
     if (!outputGate)

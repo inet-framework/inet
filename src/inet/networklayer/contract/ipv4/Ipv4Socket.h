@@ -72,6 +72,8 @@ class INET_API Ipv4Socket : public INetworkSocket
     virtual void send(Packet *packet) override;
     virtual void sendTo(Packet *packet, Ipv4Address destAddress);
     virtual void close() override;
+    virtual void destroy() override;
+
   protected:
     virtual void bind(const Protocol *protocol, L3Address localAddress) override { bind(protocol, localAddress.toIpv4()); }
     virtual void connect(L3Address remoteAddress) override { connect(remoteAddress.toIpv4()); }

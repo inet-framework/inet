@@ -73,6 +73,7 @@ class INET_API L3Socket : public INetworkSocket
     virtual void send(Packet *packet) override;
     virtual void sendTo(Packet *packet, L3Address destAddress) override;
     virtual void close() override;
+    virtual void destroy() override;
 };
 
 } // namespace inet

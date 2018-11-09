@@ -229,6 +229,15 @@ void TcpSocket::abort()
     sockstate = CLOSED;
 }
 
+void TcpSocket::destroy()
+{
+    auto request = new Request("DESTROY", TCP_C_DESTROY);
+    TcpCommand *cmd = new TcpCommand();
+    request->setControlInfo(cmd);
+    sendToTcp(request);
+    sockstate = CLOSED;
+}
+
 void TcpSocket::requestStatus()
 {
     auto request = new Request("STATUS", TCP_C_STATUS);

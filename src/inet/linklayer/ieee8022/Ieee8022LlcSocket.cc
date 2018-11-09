@@ -84,6 +84,16 @@ void Ieee8022LlcSocket::close()
     isOpen = false;
 }
 
+void Ieee8022LlcSocket::destroy()
+{
+    auto request = new Request("LLC_DESTROY", IEEE8022_LLC_C_DESTROY);
+    auto command = new Ieee8022LlcSocketDestroyCommand();
+    request->setControlInfo(command);
+    sendToLlc(request);
+    interfaceId = -1;
+    isOpen = false;
+}
+
 void Ieee8022LlcSocket::sendToLlc(cMessage *msg)
 {
     if (!outputGate)

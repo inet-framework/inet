@@ -119,6 +119,14 @@ void UdpSocket::close()
     sendToUDP(request);
 }
 
+void UdpSocket::destroy()
+{
+    auto request = new Request("destroy", UDP_C_DESTROY);
+    auto ctrl = new UdpDestroyCommand();
+    request->setControlInfo(ctrl);
+    sendToUDP(request);
+}
+
 void UdpSocket::setBroadcast(bool broadcast)
 {
     auto request = new Request("setBroadcast", UDP_C_SETOPTION);
