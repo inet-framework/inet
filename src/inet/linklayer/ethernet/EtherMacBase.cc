@@ -166,7 +166,6 @@ void EtherMacBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         physInGate = gate("phys$i");
         physOutGate = gate("phys$o");
-        upperLayerInGate = gate("upperLayerIn");
         transmissionChannel = nullptr;
         curTxFrame = nullptr;
 
@@ -193,8 +192,6 @@ void EtherMacBase::initialize(int stage)
 
         subscribe(POST_MODEL_CHANGE, this);
     }
-    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION)
-        registerInterface();
     else if (stage == INITSTAGE_LINK_LAYER) {
         initializeQueueModule();
         readChannelParameters(true);
@@ -294,28 +291,26 @@ void EtherMacBase::configureInterfaceEntry()
     interfaceEntry->setBroadcast(true);
 }
 
-bool EtherMacBase::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool EtherMacBase::handleNodeStart(IDoneCallback *doneCallback)
 {
-    Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_LINK_LAYER) {
-            initializeFlags();
-            initializeQueueModule();
-        }
-    }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_LINK_LAYER) {
-            connected = false;
-            processConnectDisconnect();
-        }
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH) {
-            connected = false;
-            processConnectDisconnect();
-        }
-    }
-    return MacBase::handleOperationStage(operation, stage, doneCallback);
+    initializeFlags();
+    initializeQueueModule();
+    return true;
+}
+
+bool EtherMacBase::handleNodeShutdown(IDoneCallback *doneCallback)
+{
+//    flushQueue();
+    connected = false;
+    processConnectDisconnect();
+    return true;
+}
+
+void EtherMacBase::handleNodeCrash()
+{
+//    clearQueue();
+    connected = false;
+    processConnectDisconnect();
 }
 
 void EtherMacBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)

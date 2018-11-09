@@ -15,7 +15,7 @@
 package inet.networklayer.mpls;
 
 //
-// Prototype for ingress packet classifiers for MPLS.
+// Module interface for ingress packet classifiers for MPLS.
 //
 moduleinterface IIngressClassifier
 {

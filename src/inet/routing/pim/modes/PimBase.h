@@ -22,11 +22,10 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/common/lifecycle/NodeOperations.h"
-#include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/routing/pim/PimPacket_m.h"
 #include "inet/routing/pim/tables/PimInterfaceTable.h"
 #include "inet/routing/pim/tables/PimNeighborTable.h"
@@ -36,7 +35,7 @@ namespace inet {
 /**
  * Base class of PimSm and PimDm modules.
  */
-class INET_API PimBase : public OperationalBase
+class INET_API PimBase : public RoutingProtocolBase
 {
   protected:
 
@@ -192,9 +191,6 @@ class INET_API PimBase : public OperationalBase
     void processHelloTimer(cMessage *timer);
     void processHelloPacket(Packet *pk);
 
-    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_ROUTING_PROTOCOLS; }
-    virtual bool isNodeStartStage(int stage) override { return stage == NodeStartOperation::STAGE_ROUTING_PROTOCOLS; }
-    virtual bool isNodeShutdownStage(int stage) override { return stage == NodeShutdownOperation::STAGE_ROUTING_PROTOCOLS; }
     virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
     virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
     virtual void handleNodeCrash() override;

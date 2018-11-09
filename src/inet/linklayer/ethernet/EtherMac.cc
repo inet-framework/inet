@@ -174,13 +174,8 @@ void EtherMac::handleSelfMessage(cMessage *msg)
     }
 }
 
-void EtherMac::handleMessage(cMessage *msg)
+void EtherMac::handleMessageWhenUp(cMessage *msg)
 {
-    if (!isOperational) {
-        handleMessageWhenDown(msg);
-        return;
-    }
-
     if (channelsDiffer)
         readChannelParameters(true);
 
@@ -192,8 +187,8 @@ void EtherMac::handleMessage(cMessage *msg)
 
     if (msg->isSelfMessage())
         handleSelfMessage(msg);
-    else if (msg->getArrivalGate() == upperLayerInGate)
-        processFrameFromUpperLayer(check_and_cast<Packet *>(msg));
+    else if (msg->getArrivalGateId() == upperLayerInGateId)
+        handleUpperPacket(check_and_cast<Packet *>(msg));
     else if (msg->getArrivalGate() == physInGate) {
         if (auto jamSignal = dynamic_cast<EthernetJamSignal *>(msg))
             processJamSignalFromNetwork(jamSignal);
@@ -206,7 +201,7 @@ void EtherMac::handleMessage(cMessage *msg)
     printState();
 }
 
-void EtherMac::processFrameFromUpperLayer(Packet *packet)
+void EtherMac::handleUpperPacket(Packet *packet)
 {
     ASSERT(packet->getDataLength() >= MIN_ETHERNET_FRAME_BYTES);
 

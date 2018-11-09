@@ -18,7 +18,8 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/LayeredProtocolBase.h"
+#include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/switch/IMacAddressTable.h"
@@ -26,7 +27,7 @@
 
 namespace inet {
 
-class INET_API MacRelayUnit : public cSimpleModule, public ILifecycle
+class INET_API MacRelayUnit : public LayeredProtocolBase
 {
   protected:
     IInterfaceTable *ifTable = nullptr;
@@ -35,8 +36,6 @@ class INET_API MacRelayUnit : public cSimpleModule, public ILifecycle
     // Parameters for statistics collection
     long numProcessedFrames = 0;
     long numDiscardedFrames = 0;
-
-    bool isOperational = false;    // for lifecycle
 
   protected:
     virtual void initialize(int stage) override;
@@ -50,6 +49,8 @@ class INET_API MacRelayUnit : public cSimpleModule, public ILifecycle
      */
     virtual void handleAndDispatchFrame(Packet *packet);
 
+    void handleLowerPacket(Packet *packet) override;
+
     /**
      * Utility function: sends the frame on all ports except inputport.
      * The message pointer should not be referenced any more after this call.
@@ -57,22 +58,21 @@ class INET_API MacRelayUnit : public cSimpleModule, public ILifecycle
     virtual void broadcast(Packet *frame, int inputport);
 
     /**
-     * Calls handleIncomingFrame() for frames arrived from outside,
-     * and processFrame() for self messages.
-     */
-    virtual void handleMessage(cMessage *msg) override;
-
-    /**
      * Writes statistics.
      */
     virtual void finish() override;
 
     // for lifecycle:
+    bool handleNodeStart(IDoneCallback *) override { start(); return true; }
+    bool handleNodeShutdown(IDoneCallback *) override { stop(); return true; }
+    void handleNodeCrash() override { stop(); }
+    virtual bool isUpperMessage(cMessage *message) override { return message->arrivedOn("upperLayerIn"); }
+    virtual bool isLowerMessage(cMessage *message) override { return message->arrivedOn("ifIn"); }
 
-  public:
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_LINK_LAYER; }
+    virtual bool isNodeStartStage(int stage) override { return stage == NodeStartOperation::STAGE_LINK_LAYER; }
+    virtual bool isNodeShutdownStage(int stage) override { return stage == NodeShutdownOperation::STAGE_LINK_LAYER; }
 
-  protected:
     virtual void start();
     virtual void stop();
     virtual void learn(MacAddress srcAddr, int arrivalInterfaceId);

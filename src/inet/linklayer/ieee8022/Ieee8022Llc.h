@@ -44,7 +44,6 @@ protected:
 
     friend std::ostream& operator << (std::ostream& o, const SocketDescriptor& t);
 
-    bool isOperational = false;    // for lifecycle
     std::set<const Protocol *> upperProtocols;    // where to send packets after decapsulation
     std::map<int, SocketDescriptor *> socketIdToSocketDescriptor;
 

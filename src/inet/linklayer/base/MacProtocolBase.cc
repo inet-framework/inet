@@ -51,6 +51,8 @@ void MacProtocolBase::initialize(int stage)
         lowerLayerInGateId = findGate("lowerLayerIn");
         lowerLayerOutGateId = findGate("lowerLayerOut");
     }
+    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION)
+        registerInterface();
 }
 
 void MacProtocolBase::registerInterface()

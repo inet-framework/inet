@@ -92,17 +92,9 @@ void Rstp::scheduleNextUpgrade()
         scheduleAt(nextInterfaceData->getNextUpgrade(), upgradeTimer);
 }
 
-void Rstp::handleMessage(cMessage *msg)
+void Rstp::handleMessageWhenUp(cMessage *msg)
 {
     // it can receive BPDU or self messages
-    if (!isOperational) {
-        if (msg->isSelfMessage())
-            throw cRuntimeError("Model error: self msg '%s' received when isOperational is false", msg->getName());
-        EV << "Message '" << msg << "' arrived when module status is down, dropped\n";
-        delete msg;
-        return;
-    }
-
     if (msg->isSelfMessage()) {
         switch (msg->getKind()) {
             case SELF_HELLOTIME:

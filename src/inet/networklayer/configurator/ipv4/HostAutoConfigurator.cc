@@ -36,40 +36,15 @@ Define_Module(HostAutoConfigurator);
 
 void HostAutoConfigurator::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
-
-    if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
-        cModule *node = getContainingNode(this);
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(node->getSubmodule("status"));
-        if (!nodeStatus || nodeStatus->getState() == NodeStatus::UP)
-            setupNetworkLayer();
-    }
+    OperationalBase::initialize(stage);
 }
 
 void HostAutoConfigurator::finish()
 {
 }
 
-void HostAutoConfigurator::handleMessage(cMessage *apMsg)
+void HostAutoConfigurator::handleMessageWhenUp(cMessage *apMsg)
 {
-}
-
-bool HostAutoConfigurator::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-{
-    Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_NETWORK_LAYER)
-            setupNetworkLayer();
-    }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {    /*nothing to do*/
-        ;
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {    /*nothing to do*/
-        ;
-    }
-    else
-        throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
-    return true;
 }
 
 void HostAutoConfigurator::setupNetworkLayer()

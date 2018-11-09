@@ -75,7 +75,7 @@ PimBase::~PimBase()
 
 void PimBase::initialize(int stage)
 {
-    OperationalBase::initialize(stage);
+    RoutingProtocolBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);

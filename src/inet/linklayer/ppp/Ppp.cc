@@ -70,8 +70,6 @@ void Ppp::initialize(int stage)
         // find queueModule
         queueModule = nullptr;
     }
-    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION)
-        registerInterface();
     else if (stage == INITSTAGE_LINK_LAYER) {
         if (par("queueModule").stringValue()[0]) {
             cModule *mod = getModuleFromPar<cModule>(par("queueModule"), this);
@@ -220,14 +218,9 @@ void Ppp::startTransmitting(Packet *msg)
     numSent++;
 }
 
-void Ppp::handleMessage(cMessage *msg)
+void Ppp::handleSelfMessage(cMessage *message)
 {
-    if (!isOperational) {
-        handleMessageWhenDown(msg);
-        return;
-    }
-
-    if (msg == endTransmissionEvent) {
+    if (message == endTransmissionEvent) {
         // Transmission finished, we can start next one.
         EV_INFO << "Transmission successfully completed.\n";
         emit(transmissionStateChangedSignal, 0L);
@@ -240,71 +233,72 @@ void Ppp::handleMessage(cMessage *msg)
             queueModule->requestPacket();
         }
     }
-    else if (msg->arrivedOn("phys$i")) {
-        EV_INFO << "Received " << msg << " from network.\n";
-        //TODO: if incoming gate is not connected now, then the link has benn deleted
-        // during packet transmission --> discard incomplete packet.
+    else
+        throw cRuntimeError("Unknown self message");
+}
 
-        auto packet = check_and_cast<Packet *>(msg);
-        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ppp);
-        emit(packetReceivedFromLowerSignal, msg);
+void Ppp::handleUpperPacket(Packet *packet)
+{
+    EV_INFO << "Received " << packet << " from upper layer.\n";
+    if (datarateChannel == nullptr) {
+        EV_WARN << "Interface is not connected, dropping packet " << packet << endl;
+        numDroppedIfaceDown++;
+        PacketDropDetails details;
+        details.setReason(INTERFACE_DOWN);
+        emit(packetDroppedSignal, packet, &details);
+        delete packet;
 
-        // check for bit errors
-        if (packet->hasBitError()) {
-            EV_WARN << "Bit error in " << msg << endl;
-            PacketDropDetails details;
-            details.setReason(INCORRECTLY_RECEIVED);
-            emit(packetDroppedSignal, msg, &details);
-            numBitErr++;
-            delete msg;
+        if (queueModule && 0 == queueModule->getNumPendingRequests())
+            queueModule->requestPacket();
+    }
+    else {
+        if (endTransmissionEvent->isScheduled()) {
+            // We are currently busy, so just queue up the packet.
+            EV_DETAIL << "Received " << packet << " for transmission but transmitter busy, queueing.\n";
+
+            if (txQueueLimit && txQueue.getLength() > txQueueLimit)
+                throw cRuntimeError("txQueue length exceeds %d -- this is probably due to "
+                                    "a bogus app model generating excessive traffic "
+                                    "(or if this is normal, increase txQueueLimit!)",
+                        txQueueLimit);
+
+            txQueue.insert(packet);
         }
         else {
-            // pass up payload
-            const auto& pppHeader = packet->peekAtFront<PppHeader>();
-            const auto& pppTrailer = packet->peekAtBack<PppTrailer>(PPP_TRAILER_LENGTH);
-            if (pppHeader == nullptr || pppTrailer == nullptr)
-                throw cRuntimeError("Invalid PPP packet: PPP header or Trailer is missing");
-            emit(rxPkOkSignal, packet);
-            cPacket *payload = decapsulate(packet);
-            numRcvdOK++;
-            emit(packetSentToUpperSignal, payload);
-            EV_INFO << "Sending " << payload << " to upper layer.\n";
-            send(payload, "upperLayerOut");
+            // We are idle, so we can start transmitting right away.
+            startTransmitting(packet);
         }
     }
-    else {    // arrived on gate "upperLayerIn"
-        EV_INFO << "Received " << msg << " from upper layer.\n";
-        if (datarateChannel == nullptr) {
-            EV_WARN << "Interface is not connected, dropping packet " << msg << endl;
-            numDroppedIfaceDown++;
-            PacketDropDetails details;
-            details.setReason(INTERFACE_DOWN);
-            emit(packetDroppedSignal, msg, &details);
-            delete msg;
+}
 
-            if (queueModule && 0 == queueModule->getNumPendingRequests())
-                queueModule->requestPacket();
-        }
-        else {
-            emit(packetReceivedFromUpperSignal, msg);
+void Ppp::handleLowerPacket(Packet *packet)
+{
+    //TODO: if incoming gate is not connected now, then the link has been deleted
+    // during packet transmission --> discard incomplete packet.
+    EV_INFO << "Received " << packet << " from network.\n";
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ppp);
 
-            if (endTransmissionEvent->isScheduled()) {
-                // We are currently busy, so just queue up the packet.
-                EV_DETAIL << "Received " << msg << " for transmission but transmitter busy, queueing.\n";
-
-                if (txQueueLimit && txQueue.getLength() > txQueueLimit)
-                    throw cRuntimeError("txQueue length exceeds %d -- this is probably due to "
-                                        "a bogus app model generating excessive traffic "
-                                        "(or if this is normal, increase txQueueLimit!)",
-                            txQueueLimit);
-
-                txQueue.insert(msg);
-            }
-            else {
-                // We are idle, so we can start transmitting right away.
-                startTransmitting(check_and_cast<Packet *>(msg));
-            }
-        }
+    // check for bit errors
+    if (packet->hasBitError()) {
+        EV_WARN << "Bit error in " << packet << endl;
+        PacketDropDetails details;
+        details.setReason(INCORRECTLY_RECEIVED);
+        emit(packetDroppedSignal, packet, &details);
+        numBitErr++;
+        delete packet;
+    }
+    else {
+        // pass up payload
+        const auto& pppHeader = packet->peekAtFront<PppHeader>();
+        const auto& pppTrailer = packet->peekAtBack<PppTrailer>(PPP_TRAILER_LENGTH);
+        if (pppHeader == nullptr || pppTrailer == nullptr)
+            throw cRuntimeError("Invalid PPP packet: PPP header or Trailer is missing");
+        emit(rxPkOkSignal, packet);
+        cPacket *payload = decapsulate(packet);
+        numRcvdOK++;
+        emit(packetSentToUpperSignal, payload);
+        EV_INFO << "Sending " << payload << " to upper layer.\n";
+        send(payload, "upperLayerOut");
     }
 }
 

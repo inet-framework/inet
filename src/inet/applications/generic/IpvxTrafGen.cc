@@ -47,7 +47,7 @@ IpvxTrafGen::~IpvxTrafGen()
 
 void IpvxTrafGen::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    ApplicationBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         int protocolId = par("protocol");
@@ -69,20 +69,16 @@ void IpvxTrafGen::initialize(int stage)
         packetLengthPar = &par("packetLength");
         sendIntervalPar = &par("sendInterval");
 
+        timer = new cMessage("sendTimer");
+
         numSent = 0;
         numReceived = 0;
         WATCH(numSent);
         WATCH(numReceived);
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
-        timer = new cMessage("sendTimer");
-        nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         registerService(*protocol, nullptr, gate("ipIn"));
         registerProtocol(*protocol, gate("ipOut"), nullptr);
-
-        if (isNodeUp())
-            startApp();
     }
 }
 
@@ -92,10 +88,8 @@ void IpvxTrafGen::startApp()
         scheduleNextPacket(-1);
 }
 
-void IpvxTrafGen::handleMessage(cMessage *msg)
+void IpvxTrafGen::handleMessageWhenUp(cMessage *msg)
 {
-    if (!isNodeUp())
-        throw cRuntimeError("Application is not running");
     if (msg == timer) {
         if (msg->getKind() == START) {
             destAddresses.clear();
@@ -128,26 +122,6 @@ void IpvxTrafGen::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-bool IpvxTrafGen::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-{
-    Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_APPLICATION_LAYER)
-            startApp();
-    }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_APPLICATION_LAYER)
-            cancelNextPacket();
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH)
-            cancelNextPacket();
-    }
-    else
-        throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
-    return true;
-}
-
 void IpvxTrafGen::scheduleNextPacket(simtime_t previous)
 {
     simtime_t next;
@@ -166,11 +140,6 @@ void IpvxTrafGen::scheduleNextPacket(simtime_t previous)
 void IpvxTrafGen::cancelNextPacket()
 {
     cancelEvent(timer);
-}
-
-bool IpvxTrafGen::isNodeUp()
-{
-    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
 }
 
 bool IpvxTrafGen::isEnabled()

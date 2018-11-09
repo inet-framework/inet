@@ -26,7 +26,7 @@
 
 #include <sim_interface.h>    // NSC. We need this here to derive from classes
 
-#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/Message.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/common/CrcMode_m.h"
@@ -49,7 +49,7 @@ class TcpNscReceiveQueue;
 /**
  * Encapsulates a Network Simulation Cradle (NSC) instance.
  */
-class INET_API TcpNsc : public cSimpleModule, ISendCallback, IInterruptCallback, public ILifecycle
+class INET_API TcpNsc : public cSimpleModule, ISendCallback, IInterruptCallback, public LifecycleUnsupported
 {
   protected:
     enum { MAX_SEND_BYTES = 500000 };
@@ -147,9 +147,6 @@ class INET_API TcpNsc : public cSimpleModule, ISendCallback, IInterruptCallback,
      * To be called from TcpConnection: create a new receive queue.
      */
     virtual TcpNscReceiveQueue *createReceiveQueue();
-
-    // ILifeCycle:
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
   protected:
     typedef std::map<int, TcpNscConnection> TcpAppConnMap;    // connId-to-TcpNscConnection

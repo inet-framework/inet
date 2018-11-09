@@ -24,7 +24,8 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/common/CrcMode_m.h"
@@ -94,7 +95,7 @@ class TcpReceiveQueue;
  * The concrete TcpAlgorithm class to use can be chosen per connection (in OPEN)
  * or in a module parameter.
  */
-class INET_API Tcp : public cSimpleModule, public ILifecycle
+class INET_API Tcp : public OperationalBase
 {
   public:
     static simsignal_t tcpConnectionAddedSignal;
@@ -156,7 +157,6 @@ class INET_API Tcp : public cSimpleModule, public ILifecycle
     static bool logverbose;    // if !testing, turns on more verbose logging
 
     bool recordStatistics = false;    // output vectors on/off
-    bool isOperational = false;    // lifecycle: node is up/down
 
     bool useDataNotification = false;
     CrcMode crcMode = CRC_MODE_UNDEFINED;
@@ -168,7 +168,7 @@ class INET_API Tcp : public cSimpleModule, public ILifecycle
   protected:
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void finish() override;
 
   public:
@@ -206,7 +206,12 @@ class INET_API Tcp : public cSimpleModule, public ILifecycle
     virtual TcpReceiveQueue *createReceiveQueue();
 
     // ILifeCycle:
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
+    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
+    virtual void handleNodeCrash() override;
+    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_TRANSPORT_LAYER; }
+    virtual bool isNodeStartStage(int stage) override { return stage == NodeStartOperation::STAGE_TRANSPORT_LAYER; }
+    virtual bool isNodeShutdownStage(int stage) override { return stage == NodeShutdownOperation::STAGE_TRANSPORT_LAYER; }
 
     // called at shutdown/crash
     virtual void reset();

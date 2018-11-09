@@ -25,15 +25,14 @@
 #include <omnetpp.h>
 
 #include "inet/routing/dymo/DymoSets.h"
-#include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
-#include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/transportlayer/udp/UdpHeader_m.h"
+#include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/routing/dymo/DymoDefs.h"
 #include "inet/routing/dymo/DymoRouteData.h"
 #include "inet/routing/dymo/Dymo_m.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
 
 namespace inet {
 
@@ -55,7 +54,7 @@ namespace dymo {
  *  - 13.6. Message Aggregation
  *    RFC5148 add jitter to broadcasts
  */
-class INET_API Dymo : public cSimpleModule, public ILifecycle, public cListener, public NetfilterBase::HookBase
+class INET_API Dymo : public RoutingProtocolBase, public cListener, public NetfilterBase::HookBase
 {
   private:
     // Dymo parameters from RFC
@@ -81,7 +80,6 @@ class INET_API Dymo : public cSimpleModule, public ILifecycle, public cListener,
 
     // context
     cModule *host;
-    NodeStatus *nodeStatus;
     IL3AddressType *addressType;
     IInterfaceTable *interfaceTable;
     IRoutingTable *routingTable;
@@ -104,7 +102,7 @@ class INET_API Dymo : public cSimpleModule, public ILifecycle, public cListener,
     // module interface
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     void initialize(int stage) override;
-    void handleMessage(cMessage *message) override;
+    void handleMessageWhenUp(cMessage *message) override;
 
   private:
     // handling messages
@@ -126,33 +124,33 @@ class INET_API Dymo : public cSimpleModule, public ILifecycle, public cListener,
     bool hasDelayedDatagrams(const L3Address& target);
 
     // handling RREQ timers
-    void cancelRREQTimer(const L3Address& target);
-    void deleteRREQTimer(const L3Address& target);
-    void eraseRREQTimer(const L3Address& target);
+    void cancelRreqTimer(const L3Address& target);
+    void deleteRreqTimer(const L3Address& target);
+    void eraseRreqTimer(const L3Address& target);
 
     // handling RREQ wait RREP timer
-    RreqWaitRrepTimer *createRREQWaitRREPTimer(const L3Address& target, int retryCount);
-    void scheduleRREQWaitRREPTimer(RreqWaitRrepTimer *message);
-    void processRREQWaitRREPTimer(RreqWaitRrepTimer *message);
+    RreqWaitRrepTimer *createRreqWaitRrepTimer(const L3Address& target, int retryCount);
+    void scheduleRreqWaitRrepTimer(RreqWaitRrepTimer *message);
+    void processRreqWaitRrepTimer(RreqWaitRrepTimer *message);
 
     // handling RREQ backoff timer
-    RreqBackoffTimer *createRREQBackoffTimer(const L3Address& target, int retryCount);
-    void scheduleRREQBackoffTimer(RreqBackoffTimer *message);
-    void processRREQBackoffTimer(RreqBackoffTimer *message);
-    simtime_t computeRREQBackoffTime(int retryCount);
+    RreqBackoffTimer *createRreqBackoffTimer(const L3Address& target, int retryCount);
+    void scheduleRreqBackoffTimer(RreqBackoffTimer *message);
+    void processRreqBackoffTimer(RreqBackoffTimer *message);
+    simtime_t computeRreqBackoffTime(int retryCount);
 
     // handling RREQ holddown timer
-    RreqHolddownTimer *createRREQHolddownTimer(const L3Address& target);
-    void scheduleRREQHolddownTimer(RreqHolddownTimer *message);
-    void processRREQHolddownTimer(RreqHolddownTimer *message);
+    RreqHolddownTimer *createRreqHolddownTimer(const L3Address& target);
+    void scheduleRreqHolddownTimer(RreqHolddownTimer *message);
+    void processRreqHolddownTimer(RreqHolddownTimer *message);
 
     // handling Udp packets
-    void sendUDPPacket(cPacket *packet, double delay);
-    void processUDPPacket(Packet *packet);
+    void sendUdpPacket(cPacket *packet, double delay);
+    void processUdpPacket(Packet *packet);
 
     // handling Dymo packets
-    void sendDYMOPacket(const Ptr<DymoPacket>& packet, const InterfaceEntry *interfaceEntry, const L3Address& nextHop, double delay);
-    void processDYMOPacket(Packet *packet, const Ptr<const DymoPacket>& dymoPacket);
+    void sendDymoPacket(const Ptr<DymoPacket>& packet, const InterfaceEntry *interfaceEntry, const L3Address& nextHop, double delay);
+    void processDymoPacket(Packet *packet, const Ptr<const DymoPacket>& dymoPacket);
 
     // handling RteMsg packets
     bool permissibleRteMsg(Packet *packet, const Ptr<const RteMsg>& rteMsg);
@@ -160,26 +158,26 @@ class INET_API Dymo : public cSimpleModule, public ILifecycle, public cListener,
     b computeRteMsgLength(const Ptr<RteMsg>& rteMsg);
 
     // handling RREQ packets
-    const Ptr<Rreq> createRREQ(const L3Address& target, int retryCount);
-    void sendRREQ(const Ptr<Rreq>& rreq);
-    void processRREQ(Packet *packet, const Ptr<const Rreq>& rreq);
-    b computeRREQLength(const Ptr<Rreq> &rreq);
+    const Ptr<Rreq> createRreq(const L3Address& target, int retryCount);
+    void sendRreq(const Ptr<Rreq>& rreq);
+    void processRreq(Packet *packet, const Ptr<const Rreq>& rreq);
+    b computeRreqLength(const Ptr<Rreq> &rreq);
 
     // handling RREP packets
-    const Ptr<Rrep> createRREP(const Ptr<const RteMsg>& rteMsg);
-    const Ptr<Rrep> createRREP(const Ptr<const RteMsg>& rteMsg, IRoute *route);
-    void sendRREP(const Ptr<Rrep>& rrep);
-    void sendRREP(const Ptr<Rrep>& rrep, IRoute *route);
-    void processRREP(Packet *packet, const Ptr<const Rrep>& rrep);
-    b computeRREPLength(const Ptr<Rrep> &rrep);
+    const Ptr<Rrep> createRrep(const Ptr<const RteMsg>& rteMsg);
+    const Ptr<Rrep> createRrep(const Ptr<const RteMsg>& rteMsg, IRoute *route);
+    void sendRrep(const Ptr<Rrep>& rrep);
+    void sendRrep(const Ptr<Rrep>& rrep, IRoute *route);
+    void processRrep(Packet *packet, const Ptr<const Rrep>& rrep);
+    b computeRrepLength(const Ptr<Rrep> &rrep);
 
     // handling RERR packets
-    const Ptr<Rerr> createRERR(std::vector<L3Address>& addresses);
-    void sendRERR(const Ptr<Rerr>& rerr);
-    void sendRERRForUndeliverablePacket(const L3Address& destination);
-    void sendRERRForBrokenLink(const InterfaceEntry *interfaceEntry, const L3Address& nextHop);
-    void processRERR(Packet *packet, const Ptr<const Rerr>& rerr);
-    b computeRERRLength(const Ptr<Rerr>& rerr);
+    const Ptr<Rerr> createRerr(std::vector<L3Address>& addresses);
+    void sendRerr(const Ptr<Rerr>& rerr);
+    void sendRerrForUndeliverablePacket(const L3Address& destination);
+    void sendRerrForBrokenLink(const InterfaceEntry *interfaceEntry, const L3Address& nextHop);
+    void processRerr(Packet *packet, const Ptr<const Rerr>& rerr);
+    b computeRerrLength(const Ptr<Rerr>& rerr);
 
     // handling routes
     IRoute *createRoute(Packet *packet, const Ptr<const RteMsg>& rteMsg, const AddressBlock& addressBlock);
@@ -196,7 +194,6 @@ class INET_API Dymo : public cSimpleModule, public ILifecycle, public cListener,
     DymoRouteState getRouteState(DymoRouteData *routeData);
 
     // configuration
-    bool isNodeUp();
     void configureInterfaces();
 
     // address
@@ -221,7 +218,9 @@ class INET_API Dymo : public cSimpleModule, public ILifecycle, public cListener,
     virtual Result datagramLocalOutHook(Packet *datagram) override { Enter_Method("datagramLocalOutHook"); return ensureRouteForDatagram(datagram); }
 
     // lifecycle
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    virtual bool handleNodeStart(IDoneCallback *) override;
+    virtual bool handleNodeShutdown(IDoneCallback *) override;
+    virtual void handleNodeCrash() override;
 
     // notification
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;

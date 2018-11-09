@@ -135,11 +135,6 @@ void Bgp::handleTimer(cMessage *timer)
     }
 }
 
-bool Bgp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-{
-    throw cRuntimeError("Lifecycle operation support not implemented");
-}
-
 } // namespace bgp
 
 } // namespace inet

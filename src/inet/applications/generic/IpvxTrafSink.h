@@ -21,21 +21,20 @@
 
 #include <vector>
 
+#include "inet/applications/base/ApplicationBase.h"
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
-#include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {
 
 /**
  * Consumes and prints packets received from the IP module. See NED for more info.
  */
-class INET_API IpvxTrafSink : public cSimpleModule, public ILifecycle
+class INET_API IpvxTrafSink : public ApplicationBase
 {
   protected:
     int numReceived;
-    bool isOperational;
 
   protected:
     virtual void printPacket(Packet *msg);
@@ -43,10 +42,12 @@ class INET_API IpvxTrafSink : public cSimpleModule, public ILifecycle
 
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void refreshDisplay() const override;
 
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    virtual bool handleNodeStart(IDoneCallback *doneCallback) override { return true; }
+    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override { return true; }
+    virtual void handleNodeCrash() override { }
 };
 
 } // namespace inet

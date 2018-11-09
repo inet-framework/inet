@@ -25,22 +25,20 @@
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/NodeOperations.h"
-
+#include "inet/common/lifecycle/NodeStatus.h"
 namespace inet {
 
 Define_Module(IpvxTrafSink);
 
 void IpvxTrafSink::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    ApplicationBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         numReceived = 0;
         WATCH(numReceived);
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         int protocolId = par("protocol");
         if (protocolId < 143 || protocolId > 254)
             throw cRuntimeError("invalid protocol id %d, accepts only between 143 and 254", protocolId);
@@ -56,13 +54,8 @@ void IpvxTrafSink::initialize(int stage)
     }
 }
 
-void IpvxTrafSink::handleMessage(cMessage *msg)
+void IpvxTrafSink::handleMessageWhenUp(cMessage *msg)
 {
-    if (!isOperational) {
-        EV_ERROR << "Module is down, received " << msg->getName() << " message dropped\n";
-        delete msg;
-        return;
-    }
     processPacket(check_and_cast<Packet *>(msg));
 }
 
@@ -71,20 +64,6 @@ void IpvxTrafSink::refreshDisplay() const
     char buf[32];
     sprintf(buf, "rcvd: %d pks", numReceived);
     getDisplayString().setTagArg("t", 0, buf);
-}
-
-bool IpvxTrafSink::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-{
-    Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation))
-        isOperational = true;
-    else if (dynamic_cast<NodeShutdownOperation *>(operation))
-        isOperational = false;
-    else if (dynamic_cast<NodeCrashOperation *>(operation))
-        isOperational = false;
-    else
-        throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
-    return true;
 }
 
 void IpvxTrafSink::printPacket(Packet *msg)

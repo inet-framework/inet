@@ -19,7 +19,6 @@
 
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
-#include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/transportlayer/rtp/RtpInnerPacket_m.h"
@@ -411,14 +410,6 @@ void Rtp::initializeRTCP()
     int rtcpPort = _port + 1;
     rinp->setInitializeRTCPPkt(_commonName.c_str(), _mtu, _bandwidth, _rtcpPercentage, _destinationAddress, rtcpPort);
     send(rinp, "rtcpOut");
-}
-
-bool Rtp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-{
-    Enter_Method_Silent();
-
-    throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
-    return true;
 }
 
 } // namespace rtp

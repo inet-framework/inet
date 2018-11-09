@@ -78,7 +78,7 @@ static std::ostream& operator<<(std::ostream& os, const TcpConnection& conn)
 
 void Tcp::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    OperationalBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
@@ -91,18 +91,12 @@ void Tcp::initialize(int stage)
         useDataNotification = par("useDataNotification");
 
         const char *crcModeString = par("crcMode");
-        if (!strcmp(crcModeString, "declared"))
-            crcMode = CRC_DECLARED_CORRECT;
-        else if (!strcmp(crcModeString, "computed"))
-            crcMode = CRC_COMPUTED;
-        else
+        crcMode = parseCrcMode(crcModeString);
+        if (crcMode == CRC_DISABLED)
             throw cRuntimeError("Unknown crc mode: '%s'", crcModeString);
         crcInsertion.setCrcMode(crcMode);
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
-        cModule *host = findContainingNode(this);
-        NodeStatus *nodeStatus = check_and_cast_nullable<NodeStatus *>(host ? host->getSubmodule("status") : nullptr);
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         registerService(Protocol::tcp, gate("appIn"), gate("ipIn"));
         registerProtocol(Protocol::tcp, gate("ipOut"), gate("appOut"));
         if (crcMode == CRC_COMPUTED) {
@@ -169,15 +163,9 @@ bool Tcp::checkCrc(const Ptr<const TcpHeader>& tcpHeader, Packet *packet)
     throw cRuntimeError("unknown CRC mode: %d", tcpHeader->getCrcMode());
 }
 
-void Tcp::handleMessage(cMessage *msg)
+void Tcp::handleMessageWhenUp(cMessage *msg)
 {
-    if (!isOperational) {
-        if (msg->isSelfMessage())
-            throw cRuntimeError("Model error: self msg '%s' received when isOperational is false", msg->getName());
-        EV_ERROR << "Tcp is turned off, dropping '" << msg->getName() << "' message\n";
-        delete msg;
-    }
-    else if (msg->isSelfMessage()) {
+    if (msg->isSelfMessage()) {
         TcpConnection *conn = (TcpConnection *)msg->getContextPointer();
         bool ret = conn->processTimer(msg);
         if (!ret)
@@ -548,35 +536,22 @@ TcpReceiveQueue *Tcp::createReceiveQueue()
     return new TcpReceiveQueue();
 }
 
-bool Tcp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool Tcp::handleNodeStart(IDoneCallback *)
 {
-    Enter_Method_Silent();
-
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_TRANSPORT_LAYER) {
-            //FIXME implementation
-            isOperational = true;
-        }
-    }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_TRANSPORT_LAYER) {
-            //FIXME close connections???
-            reset();
-            isOperational = false;
-        }
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH) {
-            //FIXME implementation
-            reset();
-            isOperational = false;
-        }
-    }
-    else {
-        throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
-    }
-
+    //FIXME implementation
     return true;
+}
+
+bool Tcp::handleNodeShutdown(IDoneCallback *)
+{
+    //FIXME close connections???
+    reset();
+    return true;
+}
+
+void Tcp::handleNodeCrash()
+{
+    reset();
 }
 
 void Tcp::reset()

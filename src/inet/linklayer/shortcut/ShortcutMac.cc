@@ -52,8 +52,6 @@ void ShortcutMac::initialize(int stage)
         durationOverhead = &par("durationOverhead");
         packetLoss = &par("packetLoss");
     }
-    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION)
-        registerInterface();
 }
 
 void ShortcutMac::configureInterfaceEntry()

@@ -22,7 +22,8 @@
 #include <map>
 #include <list>
 
-#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/OperationalBase.h"
+#include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/Message.h"
@@ -47,7 +48,7 @@ const bool DEFAULT_MULTICAST_LOOP = true;
  *
  * More info in the NED file.
  */
-class INET_API Udp : public cSimpleModule, public ILifecycle
+class INET_API Udp : public OperationalBase
 {
   public:
     class CrcInsertion : public NetfilterBase::HookBase {
@@ -130,8 +131,6 @@ class INET_API Udp : public cSimpleModule, public ILifecycle
     int numDroppedWrongPort = 0;
     int numDroppedBadChecksum = 0;
 
-    bool isOperational = false;
-
   protected:
     // utility: show current statistics above the icon
     virtual void refreshDisplay() const override;
@@ -187,7 +186,12 @@ class INET_API Udp : public cSimpleModule, public ILifecycle
     virtual UdpHeader *createUDPPacket();
 
     // ILifeCycle:
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
+    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
+    virtual void handleNodeCrash() override;
+    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_TRANSPORT_LAYER; }
+    virtual bool isNodeStartStage(int stage) override { return stage == NodeStartOperation::STAGE_TRANSPORT_LAYER; }
+    virtual bool isNodeShutdownStage(int stage) override { return stage == NodeShutdownOperation::STAGE_TRANSPORT_LAYER; }
 
     // crc
     virtual void insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<UdpHeader>& udpHeader, Packet *packet);
@@ -205,7 +209,7 @@ class INET_API Udp : public cSimpleModule, public ILifecycle
   protected:
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
 };
 
 } // namespace inet

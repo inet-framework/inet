@@ -37,9 +37,10 @@ class INET_API RadioCanvasVisualizer : public RadioVisualizerBase
         IndexedImageFigure *receptionStateFigure = nullptr;
         IndexedImageFigure *transmissionStateFigure = nullptr;
         cPolygonFigure *antennaLobeFigure = nullptr;
+        cOvalFigure *antennaLobeUnitGainFigure = nullptr;
 
       public:
-        RadioCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, IndexedImageFigure *radioModeFigure, IndexedImageFigure *receptionStateFigure, IndexedImageFigure *transmissionStateFigure, cPolygonFigure *antennaLobeFigure, const int radioModuleId);
+        RadioCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, IndexedImageFigure *radioModeFigure, IndexedImageFigure *receptionStateFigure, IndexedImageFigure *transmissionStateFigure, cPolygonFigure *antennaLobeFigure, cOvalFigure *antennaLobeUnitGainFigure, const int radioModuleId);
         virtual ~RadioCanvasVisualization();
     };
 
@@ -56,9 +57,10 @@ class INET_API RadioCanvasVisualizer : public RadioVisualizerBase
     virtual void addRadioVisualization(const RadioVisualization *radioVisualization) override;
     virtual void removeRadioVisualization(const RadioVisualization *radioVisualization) override;
     virtual void refreshRadioVisualization(const RadioVisualization *radioVisualization) const override;
-    virtual void refreshAntennaLobe(const inet::physicallayer::IAntenna *antenna, cPolygonFigure *antennaLobeFigure) const;
+    virtual void refreshAntennaLobe(const inet::physicallayer::IAntenna *antenna, cPolygonFigure *antennaLobeFigure, cOvalFigure *antennaLobeUnitGainFigure) const;
 
     virtual void setImageIndex(IndexedImageFigure *indexedImageFigure, int index) const;
+    virtual double getGainRadius(double gain, double maxGain) const;
 };
 
 } // namespace visualizer

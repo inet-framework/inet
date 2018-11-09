@@ -47,7 +47,7 @@ class INET_API EtherMac : public EtherMacBase
     virtual void initialize(int stage) override;
     virtual void initializeFlags() override;
     virtual void initializeStatistics() override;
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void finish() override;
 
   protected:
@@ -87,7 +87,7 @@ class INET_API EtherMac : public EtherMacBase
 
   protected:
     // event handlers
-    virtual void handleSelfMessage(cMessage *msg);
+    virtual void handleSelfMessage(cMessage *msg) override;
     virtual void handleEndIFGPeriod();
     virtual void handleEndPausePeriod();
     virtual void handleEndTxPeriod();
@@ -98,7 +98,7 @@ class INET_API EtherMac : public EtherMacBase
 
     // helpers
     virtual void readChannelParameters(bool errorWhenAsymmetric) override;
-    virtual void processFrameFromUpperLayer(Packet *msg);
+    virtual void handleUpperPacket(Packet *msg) override;
     virtual void processJamSignalFromNetwork(EthernetSignal *msg);
     virtual void processMsgFromNetwork(EthernetSignal *msg);
     virtual void scheduleEndIFGPeriod();

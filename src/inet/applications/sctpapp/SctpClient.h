@@ -20,8 +20,7 @@
 #define __INET_SCTPCLIENT_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/transportlayer/contract/sctp/SctpSocket.h"
 
 namespace inet {
@@ -35,7 +34,7 @@ class SctpAssociation;
 /**
  * Implements the SctpClient simple module. See the NED file for more info.
  */
-class INET_API SctpClient : public cSimpleModule, public SctpSocket::ICallback, public ILifecycle
+class INET_API SctpClient : public cSimpleModule, public SctpSocket::ICallback, public LifecycleUnsupported
 {
   protected:
     struct PathStatus
@@ -109,9 +108,6 @@ class INET_API SctpClient : public cSimpleModule, public SctpSocket::ICallback, 
     void msgAbandonedArrived(SctpSocket *socket) override;
     void sendStreamResetNotification();
     void sendRequest(bool last = true);
-
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override
-    { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
   public:
     SctpClient();

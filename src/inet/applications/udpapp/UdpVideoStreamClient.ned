@@ -27,7 +27,7 @@ import inet.applications.contract.IApp;
 //
 // Statistics:
 //
-// rcvdPkBytes: statistic of received packets and received bytes.
+// packetReceived: statistic of received packets and received bytes.
 // endToEndDelay: statistic of delays of incoming packets.
 //
 // @see ~UdpVideoStreamServer

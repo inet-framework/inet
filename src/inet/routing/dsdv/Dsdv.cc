@@ -16,7 +16,6 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/routing/dsdv/Dsdv.h"
@@ -46,28 +45,25 @@ Dsdv::~Dsdv()
 
 void Dsdv::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    RoutingProtocolBase::initialize(stage);
 
     //reads from omnetpp.ini
     if (stage == INITSTAGE_LOCAL)
     {
         sequencenumber = 0;
         host = getContainingNode(this);
-        nodeStatus = dynamic_cast<NodeStatus *>(host->getSubmodule("status"));
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
 
         routeLifetime = par("routeLifetime").doubleValue();
         helloInterval = par("helloInterval");
+        forwardList = new std::list<ForwardEntry *>();
+        event = new cMessage("event");
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
     {
         registerService(Protocol::manet, nullptr, gate("ipIn"));
         registerProtocol(Protocol::manet, gate("ipOut"), nullptr);
-        forwardList = new std::list<ForwardEntry *>();
-        event = new cMessage("event");
-        if (isNodeUp())
-            start();
     }
 }
 
@@ -211,16 +207,8 @@ void Dsdv::handleSelfMessage(cMessage *msg)
     }
 }
 
-void Dsdv::handleMessage(cMessage *msg)
+void Dsdv::handleMessageWhenUp(cMessage *msg)
 {
-    if (!isNodeUp()) {
-        if (msg->isSelfMessage())
-            throw cRuntimeError("Model error: self message arrived in node down status");
-        EV_ERROR << "Message " << msg->getName() << "(" << msg->getClassName() << ") arrived in node down status, ignored\n";
-        delete msg;
-        return;
-    }
-
     if (msg->isSelfMessage())
     {
         handleSelfMessage(msg);
@@ -351,40 +339,6 @@ void Dsdv::handleMessage(cMessage *msg)
     }
     else
         throw cRuntimeError("Message not supported %s", msg->getName());
-}
-
-//
-// configuration
-//
-
-bool Dsdv::isNodeUp() const
-{
-    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
-}
-
-//
-// lifecycle
-//
-bool Dsdv::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-{
-    Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_APPLICATION_LAYER)
-            start();
-    }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
-            stop();
-        }
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH) {
-            stop();
-        }
-    }
-    else
-        throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
-    return true;
 }
 
 

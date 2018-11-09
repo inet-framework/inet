@@ -67,13 +67,12 @@ RsvpTe::~RsvpTe()
 
 void RsvpTe::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    RoutingProtocolBase::initialize(stage);
     // TODO: INITSTAGE
-    if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
+    if (stage == INITSTAGE_LOCAL) {
         tedmod = getModuleFromPar<Ted>(par("tedModule"), this);
         rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        routerId = rt->getRouterId();
         lt = getModuleFromPar<LibTable>(par("libTableModule"), this);
         rpct = getModuleFromPar<IRsvpClassifier>(par("classifierModule"), this);
 
@@ -82,14 +81,8 @@ void RsvpTe::initialize(int stage)
         maxSrcInstance = 0;
 
         retryInterval = 1.0;
-
-        // setup hello
-        bool isOperational;
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-        if (isOperational)
-            setupHello();
-
+    }
+    else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         // process traffic configuration
         readTrafficFromXML(par("traffic"));
         registerService(Protocol::rsvpTe, nullptr, gate("ipIn"));
@@ -314,6 +307,8 @@ std::vector<RsvpTe::traffic_path_t>::iterator RsvpTe::findPath(traffic_session_t
 
 void RsvpTe::setupHello()
 {
+    routerId = rt->getRouterId();
+
     helloInterval = par("helloInterval");
     helloTimeout = par("helloTimeout");
 
@@ -1259,7 +1254,7 @@ RsvpTe::ResvStateBlock *RsvpTe::createEgressRSB(PathStateBlock *psb)
     return rsb;
 }
 
-void RsvpTe::handleMessage(cMessage *msg)
+void RsvpTe::handleMessageWhenUp(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
         SignallingMsg *sMsg = check_and_cast<SignallingMsg *>(msg);
@@ -2084,22 +2079,21 @@ void RsvpTe::clear()
         removeHello(&HelloList.front());
 }
 
-bool RsvpTe::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool RsvpTe::handleNodeStart(IDoneCallback *)
 {
-    Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_APPLICATION_LAYER)
-            setupHello();
-    }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_APPLICATION_LAYER)
-            clear();
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH)
-            clear();
-    }
+    setupHello();
     return true;
+}
+
+bool RsvpTe::handleNodeShutdown(IDoneCallback *)
+{
+    clear();
+    return true;
+}
+
+void RsvpTe::handleNodeCrash()
+{
+    clear();
 }
 
 } // namespace inet

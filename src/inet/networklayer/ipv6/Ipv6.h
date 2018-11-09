@@ -20,17 +20,17 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/lifecycle/LifecycleUnsupported.h"
+#include "inet/common/queue/QueueBase.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/INetworkProtocol.h"
-#include "inet/common/queue/QueueBase.h"
-#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 #include "inet/networklayer/icmpv6/Icmpv6.h"
 #include "inet/networklayer/icmpv6/Ipv6NeighbourDiscovery.h"
-
+#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
+#include "inet/networklayer/ipv6/Ipv6FragBuf.h"
+#include "inet/networklayer/ipv6/Ipv6Header.h"
 #include "inet/networklayer/ipv6tunneling/Ipv6Tunneling.h"
 
-#include "inet/networklayer/ipv6/Ipv6Header.h"
-#include "inet/networklayer/ipv6/Ipv6FragBuf.h"
 #include <map>
 #include <set>
 
@@ -41,7 +41,7 @@ class Icmpv6Header;
 /**
  * Ipv6 implementation.
  */
-class INET_API Ipv6 : public QueueBase, public NetfilterBase, public ILifecycle, public INetworkProtocol, public IProtocolRegistrationListener
+class INET_API Ipv6 : public QueueBase, public NetfilterBase, public LifecycleUnsupported, public INetworkProtocol, public IProtocolRegistrationListener
 {
   public:
     /**
@@ -244,8 +244,6 @@ class INET_API Ipv6 : public QueueBase, public NetfilterBase, public ILifecycle,
      * of the queue.
      */
     virtual void endService(cPacket *msg) override;
-
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
     /**
      * Determines the correct interface for the specified destination address.

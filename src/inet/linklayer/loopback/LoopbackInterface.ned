@@ -19,7 +19,6 @@
 
 package inet.linklayer.loopback;
 
-import inet.common.IHook;
 import inet.linklayer.contract.ILoopbackInterface;
 
 //
@@ -31,39 +30,17 @@ module LoopbackInterface like ILoopbackInterface
         @class(InterfaceEntry);
         @display("i=block/ifcard;bgl=53");
         string interfaceTableModule;
-        int numOutputHooks = default(0);
-        int numInputHooks = default(0);
         *.interfaceTableModule = default(absPath(interfaceTableModule));
     gates:
         input upperLayerIn;
         output upperLayerOut;
     submodules:
-        outputHook[numOutputHooks]: <default("Nop")> like IHook if numOutputHooks>0 {
-            @display("p=100,100,row,50;is=s");
-        }
-        inputHook[numInputHooks]: <default("Nop")> like IHook if numInputHooks>0 {
-            @display("p=400,100,row,50;is=s");
-        }
         lo: Loopback {
             parameters:
                 @display("p=250,200");
         }
     connections:
-        upperLayerIn --> { @display("m=n"); } --> outputHook[0].in if numOutputHooks > 0;
-        upperLayerIn --> { @display("m=n"); } --> lo.upperLayerIn if numOutputHooks == 0;
-
-        for i=0..numOutputHooks-2 {
-            outputHook[i].out --> outputHook[i+1].in;
-        }
-        outputHook[numOutputHooks-1].out --> lo.upperLayerIn if numOutputHooks > 0;
-
-        lo.upperLayerOut --> { @display("m=n"); } --> upperLayerOut if numInputHooks == 0;
-
-        lo.upperLayerOut --> inputHook[0].in if numInputHooks > 0;
-
-        for i=0..numInputHooks-2 {
-            inputHook[i].out --> inputHook[i+1].in;
-        }
-        inputHook[numInputHooks-1].out --> { @display("m=n"); } --> upperLayerOut if numInputHooks > 0;
+        upperLayerIn --> { @display("m=n"); } --> lo.upperLayerIn;
+        lo.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
 }
 

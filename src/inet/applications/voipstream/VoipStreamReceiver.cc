@@ -276,12 +276,5 @@ void VoipStreamReceiver::finish()
     closeConnection();
 }
 
-bool VoipStreamReceiver::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-{
-    Enter_Method_Silent();
-    throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
-    //return true;
-}
-
 } // namespace inet
 

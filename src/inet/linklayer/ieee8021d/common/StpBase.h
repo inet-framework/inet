@@ -18,22 +18,22 @@
 #ifndef __INET_STPBASE_H
 #define __INET_STPBASE_H
 
-#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/OperationalBase.h"
+#include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/linklayer/common/MacAddress.h"
+#include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
 #include "inet/linklayer/ethernet/switch/IMacAddressTable.h"
 #include "inet/networklayer/common/InterfaceTable.h"
-#include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
 
 namespace inet {
 
 /**
  * Base class for Stp and Rstp.
  */
-class INET_API StpBase : public cSimpleModule, public ILifecycle, public cListener
+class INET_API StpBase : public OperationalBase, public cListener
 {
   protected:
     bool visualize = false;    // if true it visualize the spanning tree
-    bool isOperational = false;    // for lifecycle
     unsigned int numPorts = 0;    // number of ports
 
     unsigned int bridgePriority = 0;    // bridge's priority
@@ -50,7 +50,13 @@ class INET_API StpBase : public cSimpleModule, public ILifecycle, public cListen
 
   public:
     StpBase();
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_LINK_LAYER; }
+    virtual bool isNodeStartStage(int stage) override { return stage == NodeStartOperation::STAGE_LINK_LAYER; }
+    virtual bool isNodeShutdownStage(int stage) override { return stage == NodeShutdownOperation::STAGE_LINK_LAYER; }
+    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
+    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
+    virtual void handleNodeCrash() override;
+
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override {}
 
   protected:

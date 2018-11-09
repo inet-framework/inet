@@ -19,7 +19,7 @@
 #define __INET_RTP_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/rtp/RtpInnerPacket_m.h"
 #include "inet/transportlayer/rtp/RtpInterfacePacket_m.h"
@@ -35,11 +35,8 @@ namespace rtp {
  * and forwards messages.
  * It also communicates with the application.
  */
-class INET_API Rtp : public cSimpleModule, public ILifecycle
+class INET_API Rtp : public cSimpleModule, public LifecycleUnsupported
 {
-  public:
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
-
   protected:
     /**
      * Initializes variables.

@@ -20,8 +20,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/applications/tcpapp/TcpSessionApp.h"
-#include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/linklayer/tun/TunSocket.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
@@ -41,14 +40,11 @@ class PacketDrillScript;
 /**
  * Implements the packetdrill application simple module. See the NED file for more info.
  */
-class INET_API PacketDrillApp : public TcpSessionApp, public ILifecycle
+class INET_API PacketDrillApp : public TcpSessionApp, public LifecycleUnsupported
 {
     public:
         PacketDrillApp();
         virtual ~PacketDrillApp();
-
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override
-    { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
     int getLocalPort() const { return localPort;};
     int getRemotePort() const { return remotePort;};

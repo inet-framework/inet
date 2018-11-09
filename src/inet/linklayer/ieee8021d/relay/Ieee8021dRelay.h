@@ -19,12 +19,12 @@
 #define __INET_IEEE8021DRELAY_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/LayeredProtocolBase.h"
+#include "inet/common/lifecycle/NodeOperations.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/InterfaceTable.h"
-#include "inet/linklayer/ethernet/switch/IMacAddressTable.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
-#include "inet/common/lifecycle/NodeOperations.h"
-#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/linklayer/ethernet/switch/IMacAddressTable.h"
 
 namespace inet {
 
@@ -32,7 +32,7 @@ namespace inet {
 // This module forward frames (~EtherFrame) based on their destination MAC addresses to appropriate ports.
 // See the NED definition for details.
 //
-class INET_API Ieee8021dRelay : public cSimpleModule, public ILifecycle
+class INET_API Ieee8021dRelay : public LayeredProtocolBase
 {
   public:
     Ieee8021dRelay();
@@ -53,7 +53,6 @@ class INET_API Ieee8021dRelay : public cSimpleModule, public ILifecycle
     IInterfaceTable *ifTable = nullptr;
     IMacAddressTable *macTable = nullptr;
     InterfaceEntry *ie = nullptr;
-    bool isOperational = false;
     bool isStpAware = false;
 
     typedef std::pair<MacAddress, MacAddress> MacAddressPair;
@@ -86,7 +85,6 @@ class INET_API Ieee8021dRelay : public cSimpleModule, public ILifecycle
   protected:
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msg) override;
 
     /**
      * Updates address table (if the port is in learning state)
@@ -98,7 +96,8 @@ class INET_API Ieee8021dRelay : public cSimpleModule, public ILifecycle
      */
     void handleAndDispatchFrame(Packet *packet);
 
-    void handleAndDispatchFrameFromHL(Packet *packet);
+    void handleUpperPacket(Packet *packet) override;
+    void handleLowerPacket(Packet *packet) override;
 
     void dispatch(Packet *packet, InterfaceEntry *ie);
     void learn(MacAddress srcAddr, int arrivalInterfaceId);
@@ -109,7 +108,15 @@ class INET_API Ieee8021dRelay : public cSimpleModule, public ILifecycle
     // For lifecycle
     virtual void start();
     virtual void stop();
-    bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    bool handleNodeStart(IDoneCallback *) override { start(); return true; }
+    bool handleNodeShutdown(IDoneCallback *) override { stop(); return true; }
+    void handleNodeCrash() override { stop(); }
+    virtual bool isUpperMessage(cMessage *message) override { return message->arrivedOn("upperLayerIn"); }
+    virtual bool isLowerMessage(cMessage *message) override { return message->arrivedOn("ifIn"); }
+
+    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_LINK_LAYER; }
+    virtual bool isNodeStartStage(int stage) override { return stage == NodeStartOperation::STAGE_LINK_LAYER; }
+    virtual bool isNodeShutdownStage(int stage) override { return stage == NodeShutdownOperation::STAGE_LINK_LAYER; }
 
     /*
      * Gets port data from the InterfaceTable

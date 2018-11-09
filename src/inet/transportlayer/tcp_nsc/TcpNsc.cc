@@ -33,7 +33,6 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
@@ -1191,14 +1190,6 @@ void TcpNsc::process_STATUS(TcpNscConnection& connP, TcpCommand *tcpCommandP, cM
     msgP->setControlInfo(statusInfo);
     msgP->setKind(TCP_I_STATUS);
     send(msgP, "appOut");
-}
-
-bool TcpNsc::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-{
-    Enter_Method_Silent();
-
-    throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
-    return true;
 }
 
 } // namespace tcp

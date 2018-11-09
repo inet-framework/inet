@@ -22,20 +22,17 @@
 #include "inet/networklayer/ldp/Ldp.h"
 
 #include "inet/applications/common/SocketTag_m.h"
-//#include "inet/networklayer/mpls/ConstType.h"
-#include "inet/networklayer/mpls/LibTable.h"
-#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-#include "inet/common/Simsignals.h"
-#include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
-#include "inet/transportlayer/udp/UdpHeader_m.h"
-#include "inet/transportlayer/tcp_common/TcpHeader.h"
-#include "inet/common/lifecycle/NodeOperations.h"
-#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
-#include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/networklayer/ted/Ted.h"
+#include "inet/common/Simsignals.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/transportlayer/tcp_common/TcpHeader_m.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/mpls/LibTable.h"
+#include "inet/networklayer/ted/Ted.h"
+#include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
+#include "inet/transportlayer/tcp_common/TcpHeader.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
 namespace inet {
 
 Define_Module(Ldp);
@@ -103,7 +100,7 @@ Ldp::~Ldp()
 
 void Ldp::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    RoutingProtocolBase::initialize(stage);
 
     //FIXME move bind() and listen() calls to a new startModule() function, and call it from initialize() and from handleOperationStage()
     //FIXME register to InterfaceEntry changes, for detecting the interface add/delete, and detecting multicast config changes:
@@ -125,14 +122,9 @@ void Ldp::initialize(int stage)
         WATCH_VECTOR(pending);
 
         maxFecid = 0;
+        sendHelloMsg = new cMessage("LDPSendHello");
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
-        // schedule first hello
-        sendHelloMsg = new cMessage("LDPSendHello");
-        nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        if (isNodeUp())
-            scheduleAt(simTime() + exponential(0.1), sendHelloMsg);
-
         // bind UDP socket
         udpSocket.setOutputGate(gate("socketOut"));
         udpSocket.bind(LDP_PORT);
@@ -162,10 +154,8 @@ void Ldp::initialize(int stage)
     }
 }
 
-void Ldp::handleMessage(cMessage *msg)
+void Ldp::handleMessageWhenUp(cMessage *msg)
 {
-    if (!isNodeUp())
-        throw cRuntimeError("LDP is not running");
     EV_INFO << "Received: (" << msg->getClassName() << ")" << msg->getName() << "\n";
     if (msg == sendHelloMsg) {
         ASSERT(msg->isSelfMessage());
@@ -215,33 +205,27 @@ void Ldp::socketErrorArrived(UdpSocket *socket, Indication *indication)
     delete indication;
 }
 
-bool Ldp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool Ldp::handleNodeStart(IDoneCallback *doneCallback)
 {
-    Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_APPLICATION_LAYER)
-            scheduleAt(simTime() + exponential(0.1), sendHelloMsg);
-    }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
-            for (auto & elem : myPeers)
-                cancelAndDelete(elem.timeout);
-            myPeers.clear();
-            cancelEvent(sendHelloMsg);
-        }
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH) {
-        }
-    }
-    else
-        throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    scheduleAt(simTime() + exponential(0.1), sendHelloMsg);
     return true;
 }
 
-bool Ldp::isNodeUp()
+bool Ldp::handleNodeShutdown(IDoneCallback *doneCallback)
 {
-    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
+    for (auto & elem : myPeers)
+        cancelAndDelete(elem.timeout);
+    myPeers.clear();
+    cancelEvent(sendHelloMsg);
+    return true;
+}
+
+void Ldp::handleNodeCrash()
+{
+    for (auto & elem : myPeers)
+        cancelAndDelete(elem.timeout);
+    myPeers.clear();
+    cancelEvent(sendHelloMsg);
 }
 
 void Ldp::sendToPeer(Ipv4Address dest, Packet *msg)

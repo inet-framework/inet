@@ -67,7 +67,7 @@ GlobalArp::~GlobalArp()
 
 void GlobalArp::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    OperationalBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         const char *addressTypeString = par("addressType");
@@ -87,7 +87,6 @@ void GlobalArp::initialize(int stage)
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        isUp = isNodeUp();
         // register our addresses in the global cache
         for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
             InterfaceEntry *interfaceEntry = interfaceTable->getInterface(i);
@@ -123,11 +122,9 @@ void GlobalArp::initialize(int stage)
     }
 }
 
-void GlobalArp::handleMessage(cMessage *msg)
+void GlobalArp::handleMessageWhenUp(cMessage *msg)
 {
-    if (!isUp)
-        handleMessageWhenDown(msg);
-    else if (msg->isSelfMessage())
+    if (msg->isSelfMessage())
         handleSelfMessage(msg);
     else
         handlePacket(check_and_cast<Packet *>(msg));
@@ -144,48 +141,18 @@ void GlobalArp::handlePacket(Packet *packet)
     delete packet;
 }
 
-void GlobalArp::handleMessageWhenDown(cMessage *msg)
+bool GlobalArp::handleNodeStart(IDoneCallback *doneCallback)
 {
-    if (msg->isSelfMessage())
-        throw cRuntimeError("Model error: self msg '%s' received when protocol is down", msg->getName());
-    EV_ERROR << "Protocol is turned off, dropping '" << msg->getName() << "' message\n";
-    delete msg;
-}
-
-bool GlobalArp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-{
-    Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_NETWORK_LAYER)
-            start();
-    }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_NETWORK_LAYER)
-            stop();
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH)
-            stop();
-    }
-    else
-        throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
     return true;
 }
 
-void GlobalArp::start()
+bool GlobalArp::handleNodeShutdown(IDoneCallback *doneCallback)
 {
-    isUp = true;
+    return true;
 }
 
-void GlobalArp::stop()
+void GlobalArp::handleNodeCrash()
 {
-    isUp = false;
-}
-
-bool GlobalArp::isNodeUp()
-{
-    NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
 }
 
 MacAddress GlobalArp::resolveL3Address(const L3Address& address, const InterfaceEntry *interfaceEntry)

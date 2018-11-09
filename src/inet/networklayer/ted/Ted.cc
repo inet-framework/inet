@@ -43,28 +43,23 @@ Ted::~Ted()
 
 void Ted::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    RoutingProtocolBase::initialize(stage);
     // TODO: INITSTAGE
-    if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
+    if (stage == INITSTAGE_LOCAL) {
         maxMessageId = 0;
 
         WATCH_VECTOR(ted);
 
         rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        routerId = rt->getRouterId();
-        ASSERT(!routerId.isUnspecified());
-
-        bool isOperational;
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-        if (isOperational)
-            initializeTED();
     }
 }
 
 void Ted::initializeTED()
 {
+    routerId = rt->getRouterId();
+    ASSERT(!routerId.isUnspecified());
+
     //
     // Extract initial TED contents from the routing table.
     //
@@ -151,9 +146,9 @@ void Ted::initializeTED()
     rebuildRoutingTable();
 }
 
-void Ted::handleMessage(cMessage *msg)
+void Ted::handleMessageWhenUp(cMessage *msg)
 {
-    ASSERT(false);
+    throw cRuntimeError("Message not allowed");
 }
 
 std::ostream& operator<<(std::ostream& os, const TeLinkStateInfo& info)
@@ -485,26 +480,23 @@ Ipv4Address Ted::getPeerByLocalAddress(Ipv4Address localInf)
     return ted[index].linkid;
 }
 
-bool Ted::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool Ted::handleNodeStart(IDoneCallback *)
 {
-    Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_APPLICATION_LAYER)
-            initializeTED();
-    }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
-            ted.clear();
-            interfaceAddrs.clear();
-        }
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH) {
-            ted.clear();
-            interfaceAddrs.clear();
-        }
-    }
+    initializeTED();
     return true;
+}
+
+bool Ted::handleNodeShutdown(IDoneCallback *)
+{
+    ted.clear();
+    interfaceAddrs.clear();
+    return true;
+}
+
+void Ted::handleNodeCrash()
+{
+    ted.clear();
+    interfaceAddrs.clear();
 }
 
 } // namespace inet

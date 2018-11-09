@@ -36,7 +36,6 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -796,14 +795,6 @@ TcpLwipSendQueue *TcpLwip::createSendQueue()
 TcpLwipReceiveQueue *TcpLwip::createReceiveQueue()
 {
     return new TcpLwipReceiveQueue();
-}
-
-bool TcpLwip::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-{
-    Enter_Method_Silent();
-
-    throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
-    return true;
 }
 
 } // namespace tcp

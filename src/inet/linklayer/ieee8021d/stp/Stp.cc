@@ -63,14 +63,8 @@ void Stp::initPortTable()
     }
 }
 
-void Stp::handleMessage(cMessage *msg)
+void Stp::handleMessageWhenUp(cMessage *msg)
 {
-    if (!isOperational) {
-        EV << "Message '" << msg << "' arrived when module status is down, dropped it\n";
-        delete msg;
-        return;
-    }
-
     if (!msg->isSelfMessage()) {
         Packet *packet = check_and_cast<Packet*>(msg);
         const auto& bpdu = packet->peekAtFront<Bpdu>();

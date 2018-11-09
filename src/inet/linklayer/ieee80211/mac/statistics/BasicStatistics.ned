@@ -20,7 +20,7 @@ package inet.linklayer.ieee80211.mac.statistics;
 import inet.linklayer.ieee80211.mac.contract.IStatistics;
 
 //
-// The default implementation of IStatistics
+// The default implementation of ~IStatistics
 //
 simple BasicStatistics like IStatistics
 {

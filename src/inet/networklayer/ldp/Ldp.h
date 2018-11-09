@@ -24,11 +24,10 @@
 
 #include "inet/common/socket/SocketMap.h"
 #include "inet/networklayer/ldp/LdpPacket_m.h"
-#include "inet/transportlayer/contract/udp/UdpSocket.h"
-#include "inet/transportlayer/contract/tcp/TcpSocket.h"
 #include "inet/networklayer/mpls/IIngressClassifier.h"
-#include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/routing/base/RoutingProtocolBase.h"
+#include "inet/transportlayer/contract/tcp/TcpSocket.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {
 
@@ -53,7 +52,7 @@ class Ted;
 /**
  * LDP (rfc 3036) protocol implementation.
  */
-class INET_API Ldp : public cSimpleModule, public TcpSocket::ICallback, public UdpSocket::ICallback, public IIngressClassifier, public cListener, public ILifecycle
+class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::ICallback, public UdpSocket::ICallback, public IIngressClassifier, public cListener
 {
   public:
 
@@ -119,7 +118,6 @@ class INET_API Ldp : public cSimpleModule, public TcpSocket::ICallback, public U
     //
     // other variables:
     //
-    NodeStatus *nodeStatus = nullptr;
     IInterfaceTable *ift = nullptr;
     IIpv4RoutingTable *rt = nullptr;
     LibTable *lt = nullptr;
@@ -178,18 +176,19 @@ class INET_API Ldp : public cSimpleModule, public TcpSocket::ICallback, public U
 
     virtual void announceLinkChange(int tedlinkindex);
 
-    virtual bool isNodeUp();
-
   public:
     Ldp();
     virtual ~Ldp();
 
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    // lifecycle
+    virtual bool handleNodeStart(IDoneCallback *) override;
+    virtual bool handleNodeShutdown(IDoneCallback *) override;
+    virtual void handleNodeCrash() override;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
 
     virtual void sendHelloTo(Ipv4Address dest);
     virtual void openTCPConnectionToPeer(int peerIndex);

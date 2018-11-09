@@ -92,7 +92,7 @@ PingApp::~PingApp()
 
 void PingApp::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    ApplicationBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         // read params
@@ -141,12 +141,6 @@ void PingApp::initialize(int stage)
         // references
         timer = new cMessage("sendPing", PING_FIRST_ADDR);
     }
-    else if (stage == INITSTAGE_APPLICATION_LAYER) {
-        // startup
-        nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        if (isEnabled() && isNodeUp())
-            startSendingPingRequests();
-    }
 }
 
 void PingApp::parseDestAddressesPar()
@@ -167,17 +161,8 @@ void PingApp::parseDestAddressesPar()
     }
 }
 
-void PingApp::handleMessage(cMessage *msg)
+void PingApp::handleMessageWhenUp(cMessage *msg)
 {
-    if (!isNodeUp()) {
-        if (msg->isSelfMessage())
-            throw cRuntimeError("Self message '%s' received when %s is down", msg->getName(), getComponentType()->getName());
-        else {
-            EV_WARN << "PingApp is down, dropping '" << msg->getName() << "' message\n";
-            delete msg;
-            return;
-        }
-    }
     if (msg->isSelfMessage()) {
         if (msg->getKind() == PING_FIRST_ADDR) {
             srcAddr = L3AddressResolver().resolve(par("srcAddr"));
@@ -307,23 +292,10 @@ void PingApp::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-bool PingApp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool PingApp::handleNodeStart(IDoneCallback *doneCallback)
 {
-    Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_APPLICATION_LAYER && isEnabled())
-            startSendingPingRequests();
-    }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_APPLICATION_LAYER)
-            stopSendingPingRequests();
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH)
-            stopSendingPingRequests();
-    }
-    else
-        throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    if (isEnabled())
+        startSendingPingRequests();
     return true;
 }
 
@@ -366,11 +338,6 @@ void PingApp::scheduleNextPingRequest(simtime_t previous, bool withSleep)
 void PingApp::cancelNextPingRequest()
 {
     cancelEvent(timer);
-}
-
-bool PingApp::isNodeUp()
-{
-    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
 }
 
 bool PingApp::isEnabled()
