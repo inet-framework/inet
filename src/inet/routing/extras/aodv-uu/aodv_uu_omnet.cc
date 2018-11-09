@@ -57,7 +57,6 @@ using namespace ieee80211;
 
 namespace inetmanet {
 
-const int UDP_HEADER_BYTES = 8;
 typedef std::vector<Ipv4Address> IPAddressVector;
 
 Define_Module(AODVUU);
@@ -383,15 +382,21 @@ void NS_CLASS packetFailed(const Packet *dgram)
     struct in_addr dest_addr, src_addr, next_hop;
 
 
+    const auto& header80211 = dgram->peekAtFront<Ieee80211DataOrMgmtHeader>();
+    if (header80211 == nullptr)
+        return;
+
+    auto senderAddr = header80211->getTransmitterAddress();
+
     const auto& networkHeader = getNetworkProtocolHeader(const_cast<Packet *>(dgram));
+    if (networkHeader == nullptr)
+        return;
+
     const L3Address& destAddr = networkHeader->getDestinationAddress();
     const L3Address& sourceAddr = networkHeader->getSourceAddress();
 
-
-
     src_addr.s_addr = sourceAddr;
     dest_addr.s_addr = destAddr;
-
 
     DEBUG(LOG_DEBUG, 0, "Got failure callback");
     /* We don't care about link failures for broadcast or non-data packets */
@@ -412,6 +417,39 @@ void NS_CLASS packetFailed(const Packet *dgram)
         packet_queue_add_inject(dgram->dup(), dest_addr);
         scheduleNextEvent();
         return;
+    }
+
+    // check if is aodv
+    auto pkt = dgram->dup();
+//    while (!pkt->hasAtFront<NetworkHeaderBase>()) {
+//        pkt->popAtFront<FieldsChunk>();
+//    }
+
+    auto aux = dynamicPtrCast<NetworkHeaderBase> (constPtrCast<FieldsChunk> (pkt->peekAtFront<FieldsChunk>()));
+    while (aux == nullptr) {
+        pkt->popAtFront<FieldsChunk>();
+        aux = dynamicPtrCast<NetworkHeaderBase> (constPtrCast<FieldsChunk> (pkt->peekAtFront<FieldsChunk>()));
+    }
+
+
+
+    auto header = removeNetworkProtocolHeader<NetworkHeaderBase>(pkt);
+
+//    auto aodvMsg = pkt->hasAtFront<AODV_msg>();
+    auto aodvMsg = dynamicPtrCast<AODV_msg> (constPtrCast<FieldsChunk> (pkt->peekAtFront<FieldsChunk>()));
+    insertNetworkProtocolHeader(pkt, Protocol::ipv4, header);
+    if (aodvMsg == nullptr) {
+        // search interface
+        for (int index = 0; index < getNumInterfaces(); index++)  {
+            if (getInterfaceEntry(index)->getMacAddress() == senderAddr) {
+                pkt->addTagIfAbsent<InterfaceInd>()->setInterfaceId(getInterfaceEntry(index)->getInterfaceId());
+                break;
+            }
+         }
+    }
+    else {
+        delete pkt;
+        pkt = nullptr;
     }
 
 
@@ -436,7 +474,8 @@ void NS_CLASS packetFailed(const Packet *dgram)
         /* && ch->num_forwards() > rt->hcnt */
     {
         /* Buffer the current packet */
-        packet_queue_add_inject(dgram->dup(), dest_addr);
+        if (pkt)
+            packet_queue_add_inject(pkt, dest_addr);
 
         // In omnet++ it's not possible to access to the mac queue
         //  /* Buffer pending packets from interface queue */

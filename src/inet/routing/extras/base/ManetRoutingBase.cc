@@ -182,7 +182,8 @@ std::ostream& operator<<(std::ostream& os, const ManetTimer& e)
 L3Address ManetRoutingBase::getAddress() const {
     if (mac_layer_)
         return L3Address(interfaceVector->front().interfacePtr->getMacAddress());
-    auto addr = interfaceVector->front().interfacePtr->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
+    auto ipv4Data = interfaceVector->front().interfacePtr->getProtocolData<Ipv4InterfaceData>();
+    auto addr = ipv4Data->getIPAddress();
     return L3Address(addr);
 }
 
