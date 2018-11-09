@@ -114,7 +114,7 @@ void EtherTrafGen::handleCrashOperation(LifecycleOperation *operation)
 {
     cancelNextPacket();
     if (operation->getRootModule() == this)     // closes socket when the application crashed only
-        llcSocket.close();         //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
+        llcSocket.destroy();         //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
 }
 
 bool EtherTrafGen::isGenerator()

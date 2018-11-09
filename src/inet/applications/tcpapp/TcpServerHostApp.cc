@@ -65,7 +65,7 @@ void TcpServerHostApp::handleCrashOperation(LifecycleOperation *operation)
         removeThread(thread);
     }
     if (operation->getRootModule() == this)
-        serverSocket.abort(); // TODO: rapid socket close
+        serverSocket.destroy();
 }
 
 void TcpServerHostApp::refreshDisplay() const

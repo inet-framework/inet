@@ -325,9 +325,8 @@ bool PingApp::handleStopOperation(LifecycleOperation *operation, IDoneCallback *
     destAddresses.clear();
     destAddrIdx = -1;
     cancelNextPingRequest();
-    if (l3Socket) {
+    if (l3Socket)
         l3Socket->close();      //TODO doneCallback + selfMessage
-    }
     delete l3Socket;
     l3Socket = nullptr;
     return true;
@@ -342,9 +341,8 @@ void PingApp::handleCrashOperation(LifecycleOperation *operation)
     destAddresses.clear();
     destAddrIdx = -1;
     cancelNextPingRequest();
-    if (l3Socket && operation->getRootModule() == this) {
-        l3Socket->close();
-    }
+    if (l3Socket && operation->getRootModule() == this)
+        l3Socket->destroy();
     delete l3Socket;
     l3Socket = nullptr;
 }

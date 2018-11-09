@@ -86,7 +86,7 @@ void TcpSessionApp::handleCrashOperation(LifecycleOperation *operation)
 {
     cancelEvent(timeoutMsg);
     if (operation->getRootModule() == this)
-        socket.abort(); // TODO: rapid socket close
+        socket.destroy();
 }
 
 void TcpSessionApp::handleTimer(cMessage *msg)

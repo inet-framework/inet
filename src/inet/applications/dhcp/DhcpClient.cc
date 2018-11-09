@@ -717,7 +717,7 @@ void DhcpClient::handleCrashOperation(LifecycleOperation *operation)
     ie = nullptr;
 
     if (operation->getRootModule() == this)     // closes socket when the application crashed only
-        socket.close();         //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
+        socket.destroy();         //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
 }
 
 } // namespace inet

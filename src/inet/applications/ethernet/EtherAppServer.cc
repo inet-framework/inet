@@ -61,12 +61,15 @@ bool EtherAppServer::handleStartOperation(LifecycleOperation *operation, IDoneCa
 bool EtherAppServer::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     EV_INFO << "Stop the application\n";
+    llcSocket.close();
     return true;
 }
 
 void EtherAppServer::handleCrashOperation(LifecycleOperation *operation)
 {
     EV_INFO << "Crash the application\n";
+    if (operation->getRootModule() == this)
+        llcSocket.destroy();
 }
 
 void EtherAppServer::handleMessageWhenUp(cMessage *msg)

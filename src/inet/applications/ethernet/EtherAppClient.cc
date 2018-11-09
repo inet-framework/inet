@@ -99,12 +99,15 @@ bool EtherAppClient::handleStartOperation(LifecycleOperation *operation, IDoneCa
 bool EtherAppClient::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     cancelNextPacket();
+    llcSocket.close();
     return true;
 }
 
 void EtherAppClient::handleCrashOperation(LifecycleOperation *operation)
 {
     cancelNextPacket();
+    if (operation->getRootModule() == this)
+        llcSocket.destroy();
 }
 
 bool EtherAppClient::isGenerator()
