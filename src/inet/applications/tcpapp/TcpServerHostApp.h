@@ -52,7 +52,7 @@ class INET_API TcpServerHostApp : public ApplicationBase, public TcpSocket::ICal
     virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override;
     virtual void socketEstablished(TcpSocket *socket) override {}
     virtual void socketPeerClosed(TcpSocket *socket) override {}
-    virtual void socketClosed(TcpSocket *socket) override {}
+    virtual void socketClosed(TcpSocket *socket) override;
     virtual void socketFailure(TcpSocket *socket, int code) override {}
     virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override { }
     virtual void socketDeleted(TcpSocket *socket) override {}
@@ -60,10 +60,14 @@ class INET_API TcpServerHostApp : public ApplicationBase, public TcpSocket::ICal
     virtual void handleStartOperation(LifecycleOperation *operation) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
+    virtual bool isOperationFinished() override;
 
   public:
     virtual ~TcpServerHostApp() { socketMap.deleteSockets(); }
     virtual void removeThread(TcpServerThreadBase *thread);
+    virtual void threadClosed(TcpServerThreadBase *thread);
+
+    friend class TcpServerThreadBase;
 };
 
 /**
@@ -83,7 +87,7 @@ class INET_API TcpServerThreadBase : public cSimpleModule, public TcpSocket::ICa
     virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override { socket->accept(availableInfo->getNewSocketId()); }
     virtual void socketEstablished(TcpSocket *socket) override { established(); }
     virtual void socketPeerClosed(TcpSocket *socket) override { peerClosed(); }
-    virtual void socketClosed(TcpSocket *socket) override { closed(); }
+    virtual void socketClosed(TcpSocket *socket) override { hostmod->threadClosed(this); }
     virtual void socketFailure(TcpSocket *socket, int code) override { failure(code); }
     virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override { statusArrived(status); }
     virtual void socketDeleted(TcpSocket *socket) override {}
@@ -128,12 +132,6 @@ class INET_API TcpServerThreadBase : public cSimpleModule, public TcpSocket::ICa
      * our side too, but it can be redefined to do something different.
      */
     virtual void peerClosed() { getSocket()->close(); }
-
-    /*
-     * Called when the connection closes (successful TCP teardown). By default
-     * it deletes this thread, but it can be redefined to do something different.
-     */
-    virtual void closed() { hostmod->removeThread(this); }
 
     /*
      * Called when the connection breaks (TCP error). By default it deletes

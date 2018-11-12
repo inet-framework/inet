@@ -86,6 +86,14 @@ void TcpSessionApp::handleCrashOperation(LifecycleOperation *operation)
         socket.destroy();
 }
 
+bool TcpSessionApp::isOperationFinished()
+{
+    if (operational == State::STOPPING_OPERATION)
+        return socket.getState() == TcpSocket::CLOSED;
+    else
+        return true;
+}
+
 void TcpSessionApp::handleTimer(cMessage *msg)
 {
     switch (msg->getKind()) {

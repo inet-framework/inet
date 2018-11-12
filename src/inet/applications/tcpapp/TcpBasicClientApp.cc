@@ -66,7 +66,6 @@ void TcpBasicClientApp::handleStopOperation(LifecycleOperation *operation)
     cancelEvent(timeoutMsg);
     if (socket.getState() == TcpSocket::CONNECTED || socket.getState() == TcpSocket::CONNECTING || socket.getState() == TcpSocket::PEER_CLOSED)
         close();
-    //TODO return false and waiting socket close
 }
 
 void TcpBasicClientApp::handleCrashOperation(LifecycleOperation *operation)

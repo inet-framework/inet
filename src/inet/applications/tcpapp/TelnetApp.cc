@@ -75,15 +75,21 @@ void TelnetApp::handleStopOperation(LifecycleOperation *operation)
     cancelEvent(timeoutMsg);
     if (socket.getState() == TcpSocket::CONNECTED || socket.getState() == TcpSocket::CONNECTING || socket.getState() == TcpSocket::PEER_CLOSED)
         close();
-    //TODO return false and waiting socket close
 }
 
 void TelnetApp::handleCrashOperation(LifecycleOperation *operation)
 {
-    //TODO needed rapid close sockets
     cancelEvent(timeoutMsg);
     if (operation->getRootModule() != getContainingNode(this))
         socket.destroy();
+}
+
+bool TelnetApp::isOperationFinished()
+{
+    if (operational == State::STOPPING_OPERATION)
+        return socket.getState() == TcpSocket::CLOSED;
+    else
+        return true;
 }
 
 void TelnetApp::handleTimer(cMessage *msg)
@@ -183,11 +189,12 @@ void TelnetApp::socketDataArrived(TcpSocket *socket, Packet *msg, bool urgent)
 void TelnetApp::socketClosed(TcpSocket *socket)
 {
     TcpAppBase::socketClosed(socket);
-
-    // start another session after a delay
     cancelEvent(timeoutMsg);
-    timeoutMsg->setKind(MSGKIND_CONNECT);
-    checkedScheduleAt(simTime() + par("idleInterval"), timeoutMsg);
+    if (operational == State::OPERATING) {
+        // start another session after a delay
+        timeoutMsg->setKind(MSGKIND_CONNECT);
+        checkedScheduleAt(simTime() + par("idleInterval"), timeoutMsg);
+    }
 }
 
 void TelnetApp::socketFailure(TcpSocket *socket, int code)

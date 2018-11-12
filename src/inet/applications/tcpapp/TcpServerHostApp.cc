@@ -45,12 +45,11 @@ void TcpServerHostApp::handleStartOperation(LifecycleOperation *operation)
 void TcpServerHostApp::handleStopOperation(LifecycleOperation *operation)
 {
     // remove and delete threads
-    while (!threadSet.empty()) {
-        auto thread = *threadSet.begin();
+    for (auto thread: threadSet) {
         thread->getSocket()->close();
-        removeThread(thread);
     }
-    serverSocket.close();     //TODO return false and waiting socket close
+
+    serverSocket.close();
 }
 
 void TcpServerHostApp::handleCrashOperation(LifecycleOperation *operation)
@@ -63,6 +62,14 @@ void TcpServerHostApp::handleCrashOperation(LifecycleOperation *operation)
     }
     if (operation->getRootModule() != getContainingNode(this))
         serverSocket.destroy();
+}
+
+bool TcpServerHostApp::isOperationFinished()
+{
+    if (operational == State::STOPPING_OPERATION)
+        return (threadSet.empty() && serverSocket.getState() == TcpSocket::CLOSED);
+    else
+        return true;
 }
 
 void TcpServerHostApp::refreshDisplay() const
@@ -126,6 +133,10 @@ void TcpServerHostApp::socketAvailable(TcpSocket *socket, TcpAvailableInfo *avai
     socket->accept(availableInfo->getNewSocketId());
 }
 
+void TcpServerHostApp::socketClosed(TcpSocket *socket)
+{
+}
+
 void TcpServerHostApp::removeThread(TcpServerThreadBase *thread)
 {
     // remove socket
@@ -136,11 +147,22 @@ void TcpServerHostApp::removeThread(TcpServerThreadBase *thread)
     delete thread;
 }
 
+void TcpServerHostApp::threadClosed(TcpServerThreadBase *thread)
+{
+    // remove socket
+    socketMap.removeSocket(thread->getSocket());
+    threadSet.erase(thread);
+
+    socketClosed(thread->getSocket());
+
+    // remove thread object
+    delete thread;
+}
+
 void TcpServerThreadBase::refreshDisplay() const
 {
     getDisplayString().setTagArg("t", 0, TcpSocket::stateName(sock->getState()));
 }
-
 
 } // namespace inet
 

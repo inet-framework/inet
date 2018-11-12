@@ -104,6 +104,7 @@ void TcpAppBase::sendPacket(Packet *msg)
 
 void TcpAppBase::refreshDisplay() const
 {
+    ApplicationBase::refreshDisplay();
     getDisplayString().setTagArg("t", 0, TcpSocket::stateName(socket.getState()));
 }
 
