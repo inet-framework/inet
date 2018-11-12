@@ -78,7 +78,7 @@ bool TcpSessionApp::handleStopOperation(LifecycleOperation *operation, IDoneCall
     cancelEvent(timeoutMsg);
     if (socket.getState() == TcpSocket::CONNECTED || socket.getState() == TcpSocket::CONNECTING || socket.getState() == TcpSocket::PEER_CLOSED)
         close();
-    // TODO: wait until socket is closed
+    //TODO return false and waiting socket close
     return true;
 }
 

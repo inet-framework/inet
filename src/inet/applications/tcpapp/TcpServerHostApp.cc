@@ -52,7 +52,7 @@ bool TcpServerHostApp::handleStopOperation(LifecycleOperation *operation, IDoneC
         thread->getSocket()->close();
         removeThread(thread);
     }
-    serverSocket.close();
+    serverSocket.close();     //TODO return false and waiting socket close
     return true;
 }
 
