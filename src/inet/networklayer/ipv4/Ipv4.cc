@@ -56,8 +56,7 @@ Define_Module(Ipv4);
 // a multicast cimek eseten hianyoznak bizonyos NetFilter hook-ok
 // a local interface-k hasznalata eseten szinten hianyozhatnak bizonyos NetFilter hook-ok
 
-Ipv4::Ipv4() :
-    isUp(true)
+Ipv4::Ipv4()
 {
 }
 
@@ -70,6 +69,8 @@ Ipv4::~Ipv4()
 
 void Ipv4::initialize(int stage)
 {
+    OperationalBase::initialize(stage);
+
     if (stage == INITSTAGE_LOCAL) {
         QueueBase::initialize();
 
@@ -122,9 +123,6 @@ void Ipv4::initialize(int stage)
         WATCH_MAP(pendingPackets);
         WATCH_MAP(socketIdToSocketDescriptor);
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER) {
-        isUp = isNodeUp();
-    }
 }
 
 void Ipv4::handleRegisterService(const Protocol& protocol, cGate *out, ServicePrimitive servicePrimitive)
@@ -141,6 +139,8 @@ void Ipv4::handleRegisterProtocol(const Protocol& protocol, cGate *in, ServicePr
 
 void Ipv4::refreshDisplay() const
 {
+    OperationalBase::refreshDisplay();
+
     char buf[80] = "";
     if (numForwarded > 0)
         sprintf(buf + strlen(buf), "fwd:%d ", numForwarded);
@@ -195,7 +195,7 @@ void Ipv4::handleRequest(Request *request)
         throw cRuntimeError("Unknown command: '%s' with %s", request->getName(), ctrl->getClassName());
 }
 
-void Ipv4::handleMessage(cMessage *msg)
+void Ipv4::handleMessageWhenUp(cMessage *msg)
 {
     if (auto request = dynamic_cast<Request *>(msg))
         handleRequest(request);
@@ -205,11 +205,6 @@ void Ipv4::handleMessage(cMessage *msg)
 
 void Ipv4::endService(cPacket *packet)
 {
-    if (!isUp) {
-        EV_ERROR << "Ipv4 is down -- discarding message\n";
-        delete packet;
-        return;
-    }
     if (packet->getArrivalGate()->isName("transportIn")) {    //TODO packet->getArrivalGate()->getBaseId() == transportInGateBaseId
         handlePacketFromHL(check_and_cast<Packet*>(packet));
     }
@@ -1257,34 +1252,30 @@ INetfilter::IHook::Result Ipv4::datagramPostRoutingHook(Packet *packet)
     return INetfilter::IHook::ACCEPT;
 }
 
-bool Ipv4::handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback)
+bool Ipv4::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
-    Enter_Method_Silent();
-    int stage = operation->getCurrentStage();
-    if (dynamic_cast<ModuleStartOperation *>(operation)) {
-        if (static_cast<ModuleStartOperation::Stage>(stage) == ModuleStartOperation::STAGE_NETWORK_LAYER)
-            start();
-    }
-    else if (dynamic_cast<ModuleStopOperation *>(operation)) {
-        if (static_cast<ModuleStopOperation::Stage>(stage) == ModuleStopOperation::STAGE_NETWORK_LAYER)
-            stop();
-    }
-    else if (dynamic_cast<ModuleCrashOperation *>(operation)) {
-        if (static_cast<ModuleCrashOperation::Stage>(stage) == ModuleCrashOperation::STAGE_CRASH)
-            stop();
-    }
+    start();
     return true;
+}
+
+bool Ipv4::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+{
+    stop();
+    return true;
+}
+
+void Ipv4::handleCrashOperation(LifecycleOperation *operation)
+{
+    stop();
 }
 
 void Ipv4::start()
 {
     ASSERT(queue.isEmpty());
-    isUp = true;
 }
 
 void Ipv4::stop()
 {
-    isUp = false;
     flush();
     for (auto it : socketIdToSocketDescriptor)
         delete it.second;
@@ -1311,13 +1302,6 @@ void Ipv4::flush()
     queuedDatagramsForHooks.clear();
 
     fragbuf.flush();
-}
-
-bool Ipv4::isNodeUp()
-{
-    cModule *node = findContainingNode(this);
-    NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
-    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
 }
 
 INetfilter::IHook::Result Ipv4::datagramLocalInHook(Packet *packet)

@@ -22,7 +22,8 @@
 #include "inet/common/INETDefs.h"
 
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/queue/QueueBase.h"
 #include "inet/networklayer/contract/IArp.h"
@@ -45,7 +46,7 @@ class IIpv4RoutingTable;
 /**
  * Implements the Ipv4 protocol.
  */
-class INET_API Ipv4 : public QueueBase, public NetfilterBase, public ILifecycle, public INetworkProtocol, public IProtocolRegistrationListener, public cListener
+class INET_API Ipv4 : public QueueBase, public NetfilterBase, public OperationalBaseClass, public INetworkProtocol, public IProtocolRegistrationListener, public cListener
 {
   public:
     /**
@@ -93,7 +94,6 @@ class INET_API Ipv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     cPatternMatcher directBroadcastInterfaceMatcher;
 
     // working vars
-    bool isUp = false;
     long curFragmentId = -1;    // counter, used to assign unique fragmentIds to datagrams
     Ipv4FragBuf fragbuf;    // fragmentation reassembly buffer
     simtime_t lastCheckTime;    // when fragbuf was last checked for state fragments
@@ -239,7 +239,7 @@ class INET_API Ipv4 : public QueueBase, public NetfilterBase, public ILifecycle,
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *msg) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
 
     void handleRequest(Request *request);
 
@@ -299,17 +299,21 @@ class INET_API Ipv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     virtual void reinjectQueuedDatagram(const Packet *datagram) override;
 
     /**
-     * ILifecycle method
+     * ILifecycle methods
      */
-    virtual bool handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
+    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_NETWORK_LAYER; }
+    virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOrResumeOperationBase::STAGE_NETWORK_LAYER; }
+    virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOrSuspendOperationBase::STAGE_NETWORK_LAYER; }
+    virtual bool handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
+    virtual bool handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
     /// cListener method
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
   protected:
-    virtual bool isNodeUp();
-    virtual void stop();
     virtual void start();
+    virtual void stop();
     virtual void flush();
 };
 

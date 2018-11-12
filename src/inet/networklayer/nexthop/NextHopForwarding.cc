@@ -62,6 +62,8 @@ NextHopForwarding::~NextHopForwarding()
 
 void NextHopForwarding::initialize(int stage)
 {
+    OperationalBase::initialize(stage);
+
     if (stage == INITSTAGE_LOCAL) {
         QueueBase::initialize();
 
@@ -80,7 +82,6 @@ void NextHopForwarding::initialize(int stage)
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         registerService(Protocol::nextHopForwarding, gate("transportIn"), gate("queueIn"));
         registerProtocol(Protocol::nextHopForwarding, gate("queueOut"), gate("transportOut"));
-        isUp = isNodeUp();
     }
 }
 
@@ -98,6 +99,8 @@ void NextHopForwarding::handleRegisterProtocol(const Protocol& protocol, cGate *
 
 void NextHopForwarding::refreshDisplay() const
 {
+    OperationalBase::refreshDisplay();
+
     char buf[80] = "";
     if (numForwarded > 0)
         sprintf(buf + strlen(buf), "fwd:%d ", numForwarded);
@@ -110,7 +113,7 @@ void NextHopForwarding::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-void NextHopForwarding::handleMessage(cMessage *msg)
+void NextHopForwarding::handleMessageWhenUp(cMessage *msg)
 {
     if (auto request = dynamic_cast<Request *>(msg))
         handleCommand(request);
@@ -157,7 +160,7 @@ void NextHopForwarding::handleCommand(Request *request)
 
 void NextHopForwarding::endService(cPacket *pk)
 {
-    if (!isUp) {
+    if (!isWorking()) {
         EV_ERROR << "NextHopForwarding is down -- discarding message\n";
         delete pk;
         return;
@@ -857,34 +860,30 @@ INetfilter::IHook::Result NextHopForwarding::datagramLocalOutHook(Packet *datagr
     return IHook::ACCEPT;
 }
 
-bool NextHopForwarding::handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback)
+bool NextHopForwarding::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
-    Enter_Method_Silent();
-    int stage = operation->getCurrentStage();
-    if (dynamic_cast<ModuleStartOperation *>(operation)) {
-        if (static_cast<ModuleStartOperation::Stage>(stage) == ModuleStartOperation::STAGE_NETWORK_LAYER)
-            start();
-    }
-    else if (dynamic_cast<ModuleStopOperation *>(operation)) {
-        if (static_cast<ModuleStopOperation::Stage>(stage) == ModuleStopOperation::STAGE_NETWORK_LAYER)
-            stop();
-    }
-    else if (dynamic_cast<ModuleCrashOperation *>(operation)) {
-        if (static_cast<ModuleCrashOperation::Stage>(stage) == ModuleCrashOperation::STAGE_CRASH)
-            stop();
-    }
+    start();
     return true;
+}
+
+bool NextHopForwarding::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+{
+    stop();
+    return true;
+}
+
+void NextHopForwarding::handleCrashOperation(LifecycleOperation *operation)
+{
+    stop();
 }
 
 void NextHopForwarding::start()
 {
     ASSERT(queue.isEmpty());
-    isUp = true;
 }
 
 void NextHopForwarding::stop()
 {
-    isUp = false;
     flush();
     for (auto it : socketIdToSocketDescriptor)
         delete it.second;
@@ -911,13 +910,6 @@ void NextHopForwarding::flush()
     queuedDatagramsForHooks.clear();
 
 //    fragbuf.flush();
-}
-
-bool NextHopForwarding::isNodeUp()
-{
-    cModule *node = findContainingNode(this);
-    NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
-    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
 }
 
 } // namespace inet

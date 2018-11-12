@@ -23,7 +23,7 @@
 #include <map>
 #include <set>
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/common/lifecycle/ILifecycle.h"
+#include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/queue/QueueBase.h"
@@ -43,7 +43,7 @@ namespace inet {
  * interface to allow routing protocols to kick in. It doesn't provide datagram fragmentation
  * and reassembling.
  */
-class INET_API NextHopForwarding : public QueueBase, public NetfilterBase, public INetworkProtocol, public IProtocolRegistrationListener, public ILifecycle
+class INET_API NextHopForwarding : public QueueBase, public NetfilterBase, public INetworkProtocol, public IProtocolRegistrationListener, public OperationalBaseClass
 {
   protected:
     /**
@@ -85,7 +85,6 @@ class INET_API NextHopForwarding : public QueueBase, public NetfilterBase, publi
     // working vars
     std::set<const Protocol *> upperProtocols;    // where to send packets after decapsulation
     std::map<int, SocketDescriptor *> socketIdToSocketDescriptor;
-    bool isUp = false;
 
     // hooks
     typedef std::list<QueuedDatagramForHook> DatagramQueueForHooks;
@@ -177,9 +176,8 @@ class INET_API NextHopForwarding : public QueueBase, public NetfilterBase, publi
      * Initialization
      */
     virtual void initialize(int stage) override;
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void handleMessageWhenUp(cMessage *msg) override;
 
-    virtual void handleMessage(cMessage *msg) override;
     void handleCommand(Request *msg);
 
     /**
@@ -190,10 +188,14 @@ class INET_API NextHopForwarding : public QueueBase, public NetfilterBase, publi
     /**
      * ILifecycle method
      */
-    virtual bool handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
+    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_NETWORK_LAYER; }
+    virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOrResumeOperationBase::STAGE_NETWORK_LAYER; }
+    virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOrSuspendOperationBase::STAGE_NETWORK_LAYER; }
+    virtual bool handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
+    virtual bool handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
   protected:
-    virtual bool isNodeUp();
     virtual void stop();
     virtual void start();
     virtual void flush();
