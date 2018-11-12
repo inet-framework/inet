@@ -84,7 +84,7 @@ void TelnetApp::handleCrashOperation(LifecycleOperation *operation)
 {
     //TODO needed rapid close sockets
     cancelEvent(timeoutMsg);
-    if (operation->getRootModule() == this)
+    if (operation->getRootModule() != getContainingNode(this))
         socket.destroy();
 }
 

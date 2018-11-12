@@ -74,7 +74,7 @@ bool TcpBasicClientApp::handleStopOperation(LifecycleOperation *operation, IDone
 void TcpBasicClientApp::handleCrashOperation(LifecycleOperation *operation)
 {
     cancelEvent(timeoutMsg);
-    if (operation->getRootModule() == this)
+    if (operation->getRootModule() != getContainingNode(this))
         socket.destroy();
 }
 

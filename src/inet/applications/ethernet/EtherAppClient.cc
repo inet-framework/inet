@@ -106,7 +106,7 @@ bool EtherAppClient::handleStopOperation(LifecycleOperation *operation, IDoneCal
 void EtherAppClient::handleCrashOperation(LifecycleOperation *operation)
 {
     cancelNextPacket();
-    if (operation->getRootModule() == this)
+    if (operation->getRootModule() != getContainingNode(this))
         llcSocket.destroy();
 }
 

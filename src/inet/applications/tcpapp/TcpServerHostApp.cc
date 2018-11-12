@@ -64,7 +64,7 @@ void TcpServerHostApp::handleCrashOperation(LifecycleOperation *operation)
         thread->getSocket()->close();
         removeThread(thread);
     }
-    if (operation->getRootModule() == this)
+    if (operation->getRootModule() != getContainingNode(this))
         serverSocket.destroy();
 }
 

@@ -68,7 +68,7 @@ bool EtherAppServer::handleStopOperation(LifecycleOperation *operation, IDoneCal
 void EtherAppServer::handleCrashOperation(LifecycleOperation *operation)
 {
     EV_INFO << "Crash the application\n";
-    if (operation->getRootModule() == this)
+    if (operation->getRootModule() != getContainingNode(this))
         llcSocket.destroy();
 }
 

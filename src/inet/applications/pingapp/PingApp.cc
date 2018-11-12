@@ -341,7 +341,7 @@ void PingApp::handleCrashOperation(LifecycleOperation *operation)
     destAddresses.clear();
     destAddrIdx = -1;
     cancelNextPingRequest();
-    if (l3Socket && operation->getRootModule() == this)
+    if (l3Socket && operation->getRootModule() != getContainingNode(this))
         l3Socket->destroy();
     delete l3Socket;
     l3Socket = nullptr;

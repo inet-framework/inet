@@ -18,10 +18,10 @@
 //
 
 #include "inet/applications/udpapp/UdpVideoStreamClient.h"
-
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
-#include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
+#include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 
 namespace inet {
 
@@ -111,7 +111,7 @@ bool UdpVideoStreamClient::handleStopOperation(LifecycleOperation *operation, ID
 void UdpVideoStreamClient::handleCrashOperation(LifecycleOperation *operation)
 {
     cancelEvent(selfMsg);
-    if (operation->getRootModule() == this)     // closes socket when the application crashed only
+    if (operation->getRootModule() != getContainingNode(this))     // closes socket when the application crashed only
         socket.destroy();    //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
 }
 

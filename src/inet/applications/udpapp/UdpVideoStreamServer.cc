@@ -17,7 +17,7 @@
 //
 
 #include "inet/applications/udpapp/UdpVideoStreamServer.h"
-
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/transportlayer/common/L4PortTag_m.h"
@@ -169,7 +169,7 @@ bool UdpVideoStreamServer::handleStopOperation(LifecycleOperation *operation, ID
 void UdpVideoStreamServer::handleCrashOperation(LifecycleOperation *operation)
 {
     clearStreams();
-    if (operation->getRootModule() == this)     // closes socket when the application crashed only
+    if (operation->getRootModule() != getContainingNode(this))     // closes socket when the application crashed only
         socket.destroy();    //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
     socket.setCallback(nullptr);
 }

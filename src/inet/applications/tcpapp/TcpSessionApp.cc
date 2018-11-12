@@ -85,7 +85,7 @@ bool TcpSessionApp::handleStopOperation(LifecycleOperation *operation, IDoneCall
 void TcpSessionApp::handleCrashOperation(LifecycleOperation *operation)
 {
     cancelEvent(timeoutMsg);
-    if (operation->getRootModule() == this)
+    if (operation->getRootModule() != getContainingNode(this))
         socket.destroy();
 }
 
