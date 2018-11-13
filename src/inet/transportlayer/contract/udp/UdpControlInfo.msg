@@ -48,7 +48,8 @@ enum UdpCommandCode
 enum UdpStatusInd
 {
     UDP_I_DATA = 0;  // ~Udp attaches ~UDPIndication to received data packet
-    UDP_I_ERROR = 1; // ~Udp attaches ~UDPIndication to received data packet
+    UDP_I_ERROR = 1;
+    UDP_I_SOCKET_CLOSED = 2;
 }
 
 
@@ -110,10 +111,21 @@ class UdpConnectCommand extends UdpControlInfo
 //
 // Control info for closing an UDP socket. To close a socket, send a message
 // to the ~Udp module with kind=UDP_C_CLOSE and an ~UdpCloseCommand attached.
+// The Udp module will send an ~UdpSocketClosedIndication answer.
 //
 // @see ~UdpCommandCode
 //
 class UdpCloseCommand extends UdpControlInfo
+{
+}
+
+//
+// Control info for inform app about an UDP socket closed.
+// This is answer to an ~UdpCloseCommand.
+//
+// @see ~UdpCommandCode
+//
+class UdpSocketClosedIndication extends UdpControlInfo
 {
 }
 

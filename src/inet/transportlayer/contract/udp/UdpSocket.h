@@ -79,6 +79,11 @@ class INET_API UdpSocket : public ISocket
          * Notifies about error indication arrival, indication ownership is transferred to the callee.
          */
         virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) = 0;
+
+        /**
+         * Notifies about socket closed, indication ownership is transferred to the callee.
+         */
+        virtual void socketClosed(UdpSocket *socket, Indication *indication) = 0;
     };
   protected:
     int socketId;

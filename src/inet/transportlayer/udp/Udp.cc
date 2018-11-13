@@ -219,6 +219,12 @@ void Udp::processCommandFromApp(cMessage *msg)
         case UDP_C_CLOSE: {
             int socketId = check_and_cast<Request *>(msg)->getTag<SocketReq>()->getSocketId();
             close(socketId);
+            auto indication = new Indication("closed", UDP_I_SOCKET_CLOSED);
+            auto udpCtrl = new UdpSocketClosedIndication();
+            indication->setControlInfo(udpCtrl);
+            indication->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+            send(indication, "appOut");
+
             break;
         }
 
