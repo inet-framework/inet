@@ -61,6 +61,7 @@ class INET_API DhcpServer : public ApplicationBase, public cListener, public Udp
     UdpSocket socket;
     simtime_t startTime;    // application start time
     cMessage *startTimer = nullptr;    // self message to start DHCP server
+    std::list<IDoneCallback*> stopDoneCallbackList;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -111,6 +112,7 @@ class INET_API DhcpServer : public ApplicationBase, public cListener, public Udp
     //UdpSocket::ICallback methods
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
     virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
+    virtual void socketClosed(UdpSocket *socket, Indication *indication) override;
 
     /*
      * Signal handler for cObject, override cListener function.

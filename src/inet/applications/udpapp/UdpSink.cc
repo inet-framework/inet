@@ -83,6 +83,17 @@ void UdpSink::socketErrorArrived(UdpSocket *socket, Indication *indication)
     delete indication;
 }
 
+void UdpSink::socketClosed(UdpSocket *socket, Indication *indication)
+{
+    while (!stopDoneCallbackList.empty()) {
+        auto callback = stopDoneCallbackList.front();
+        callback->invoke();
+        stopDoneCallbackList.pop_front();
+    }
+
+    delete indication;
+}
+
 void UdpSink::refreshDisplay() const
 {
     ApplicationBase::refreshDisplay();
@@ -161,13 +172,15 @@ bool UdpSink::handleStopOperation(LifecycleOperation *operation, IDoneCallback *
     cancelEvent(selfMsg);
     if (!multicastGroup.isUnspecified())
         socket.leaveMulticastGroup(multicastGroup); // FIXME should be done by socket.close()
-    socket.close();     //TODO return false and waiting socket close
-    return true;
+    stopDoneCallbackList.push_back(doneCallback);
+    socket.close();
+    return false;
 }
 
 void UdpSink::handleCrashOperation(LifecycleOperation *operation)
 {
     cancelEvent(selfMsg);
+    stopDoneCallbackList.clear();
     if (operation->getRootModule() != getContainingNode(this)) {     // closes socket when the application crashed only
         if (!multicastGroup.isUnspecified())
             socket.leaveMulticastGroup(multicastGroup); // FIXME should be done by socket.close()

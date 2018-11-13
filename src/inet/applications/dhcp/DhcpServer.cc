@@ -143,6 +143,17 @@ void DhcpServer::socketErrorArrived(UdpSocket *socket, Indication *indication)
     delete indication;
 }
 
+void DhcpServer::socketClosed(UdpSocket *socket, Indication *indication)
+{
+    while (!stopDoneCallbackList.empty()) {
+        auto callback = stopDoneCallbackList.front();
+        callback->invoke();
+        stopDoneCallbackList.pop_front();
+    }
+
+    delete indication;
+}
+
 void DhcpServer::handleSelfMessages(cMessage *msg)
 {
     if (msg->getKind() == START_DHCP) {
@@ -540,8 +551,9 @@ bool DhcpServer::handleStopOperation(LifecycleOperation *operation, IDoneCallbac
     leased.clear();
     ie = nullptr;
     cancelEvent(startTimer);
-    socket.close();     //TODO return false and waiting socket close
-    return true;
+    stopDoneCallbackList.push_back(doneCallback);
+    socket.close();
+    return false;
 }
 
 void DhcpServer::handleCrashOperation(LifecycleOperation *operation)
@@ -549,6 +561,7 @@ void DhcpServer::handleCrashOperation(LifecycleOperation *operation)
     leased.clear();
     ie = nullptr;
     cancelEvent(startTimer);
+    stopDoneCallbackList.clear();
     if (operation->getRootModule() != getContainingNode(this))     // closes socket when the application crashed only
         socket.destroy();         //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
 }

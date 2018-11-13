@@ -55,6 +55,7 @@ class INET_API UdpVideoStreamServer : public ApplicationBase, public UdpSocket::
     // state
     VideoStreamMap streams;
     UdpSocket socket;
+    std::list<IDoneCallback*> stopDoneCallbackList;
 
     // parameters
     int localPort = -1;
@@ -83,6 +84,7 @@ class INET_API UdpVideoStreamServer : public ApplicationBase, public UdpSocket::
 
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
     virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
+    virtual void socketClosed(UdpSocket *socket, Indication *indication) override;
 
   public:
     UdpVideoStreamServer() {}

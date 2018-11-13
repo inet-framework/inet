@@ -209,6 +209,17 @@ void UdpBasicBurst::socketErrorArrived(UdpSocket *socket, Indication *indication
     delete indication;
 }
 
+void UdpBasicBurst::socketClosed(UdpSocket *socket, Indication *indication)
+{
+    while (!stopDoneCallbackList.empty()) {
+        auto callback = stopDoneCallbackList.front();
+        callback->invoke();
+        stopDoneCallbackList.pop_front();
+    }
+
+    delete indication;
+}
+
 void UdpBasicBurst::refreshDisplay() const
 {
     ApplicationBase::refreshDisplay();
@@ -340,8 +351,9 @@ bool UdpBasicBurst::handleStopOperation(LifecycleOperation *operation, IDoneCall
     if (timerNext)
         cancelEvent(timerNext);
     activeBurst = false;
-    socket.close();     //TODO return false and waiting socket close
-    return true;
+    stopDoneCallbackList.push_back(doneCallback);
+    socket.close();
+    return false;
 }
 
 void UdpBasicBurst::handleCrashOperation(LifecycleOperation *operation)

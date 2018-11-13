@@ -208,6 +208,17 @@ void UdpBasicApp::socketErrorArrived(UdpSocket *socket, Indication *indication)
     delete indication;
 }
 
+void UdpBasicApp::socketClosed(UdpSocket *socket, Indication *indication)
+{
+    while (!stopDoneCallbackList.empty()) {
+        auto callback = stopDoneCallbackList.front();
+        callback->invoke();
+        stopDoneCallbackList.pop_front();
+    }
+
+    delete indication;
+}
+
 void UdpBasicApp::refreshDisplay() const
 {
     ApplicationBase::refreshDisplay();
@@ -238,13 +249,15 @@ bool UdpBasicApp::handleStartOperation(LifecycleOperation *operation, IDoneCallb
 bool UdpBasicApp::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     cancelEvent(selfMsg);
-    socket.close();     //TODO return false and waiting socket close
-    return true;
+    stopDoneCallbackList.push_back(doneCallback);
+    socket.close();
+    return false;
 }
 
 void UdpBasicApp::handleCrashOperation(LifecycleOperation *operation)
 {
     cancelEvent(selfMsg);
+    stopDoneCallbackList.clear();
     if (operation->getRootModule() != getContainingNode(this))     // closes socket when the application crashed only
         socket.destroy();         //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
 }

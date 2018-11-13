@@ -41,6 +41,7 @@ class INET_API UdpVideoStreamClient : public ApplicationBase, public UdpSocket::
     // state
     UdpSocket socket;
     cMessage *selfMsg = nullptr;
+    std::list<IDoneCallback*> stopDoneCallbackList;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -58,6 +59,7 @@ class INET_API UdpVideoStreamClient : public ApplicationBase, public UdpSocket::
 
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
     virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
+    virtual void socketClosed(UdpSocket *socket, Indication *indication) override;
 
   public:
     UdpVideoStreamClient() { }

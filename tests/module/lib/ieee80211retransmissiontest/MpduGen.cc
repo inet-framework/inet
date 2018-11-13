@@ -92,6 +92,10 @@ void MpduGen::handleMessageWhenUp(cMessage *msg)
         EV_WARN << "Ignoring UDP error report\n";
         delete msg;
     }
+    else if (msg->getKind() == UDP_I_SOCKET_CLOSED) {
+        EV_WARN << "Ignoring UDP socket closed report\n";
+        delete msg;
+    }
     else {
         throw cRuntimeError("Unrecognized message (%s)%s", msg->getClassName(), msg->getName());
     }

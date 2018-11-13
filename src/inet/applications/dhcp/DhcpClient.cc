@@ -208,6 +208,17 @@ void DhcpClient::socketErrorArrived(UdpSocket *socket, Indication *indication)
     delete indication;
 }
 
+void DhcpClient::socketClosed(UdpSocket *socket, Indication *indication)
+{
+    while (!stopDoneCallbackList.empty()) {
+        auto callback = stopDoneCallbackList.front();
+        callback->invoke();
+        stopDoneCallbackList.pop_front();
+    }
+
+    delete indication;
+}
+
 void DhcpClient::handleTimer(cMessage *msg)
 {
     int category = msg->getKind();
@@ -703,8 +714,9 @@ bool DhcpClient::handleStopOperation(LifecycleOperation *operation, IDoneCallbac
     // TODO: Client should send DHCPRELEASE to the server. However, the correct operation
     // of DHCP does not depend on the transmission of DHCPRELEASE messages.
 
-    socket.close();     //TODO return false and waiting socket close
-    return true;
+    stopDoneCallbackList.push_back(doneCallback);
+    socket.close();
+    return false;
 }
 
 void DhcpClient::handleCrashOperation(LifecycleOperation *operation)
@@ -715,6 +727,7 @@ void DhcpClient::handleCrashOperation(LifecycleOperation *operation)
     cancelEvent(leaseTimer);
     cancelEvent(startTimer);
     ie = nullptr;
+    stopDoneCallbackList.clear();
 
     if (operation->getRootModule() != getContainingNode(this))     // closes socket when the application crashed only
         socket.destroy();         //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.

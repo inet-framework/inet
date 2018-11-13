@@ -40,6 +40,7 @@ class INET_API UdpSink : public ApplicationBase, public UdpSocket::ICallback
     simtime_t startTime;
     simtime_t stopTime;
     cMessage *selfMsg = nullptr;
+    std::list<IDoneCallback*> stopDoneCallbackList;
 
     int numReceived = 0;
 
@@ -60,6 +61,7 @@ class INET_API UdpSink : public ApplicationBase, public UdpSocket::ICallback
 
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
     virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
+    virtual void socketClosed(UdpSocket *socket, Indication *indication) override;
 
     virtual void processStart();
     virtual void processStop();

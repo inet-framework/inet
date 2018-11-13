@@ -66,6 +66,7 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
     unsigned int xid = 0;    // transaction id; to associate messages and responses between a client and a server
     DhcpLease *lease = nullptr;    // leased IP information
     Ipv4Route *route = nullptr;    // last added route
+    std::list<IDoneCallback*> stopDoneCallbackList;
 
     // statistics
     int numSent = 0;    // number of sent DHCP messages
@@ -176,6 +177,7 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
     //UdpSocket::ICallback methods
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
     virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
+    virtual void socketClosed(UdpSocket *socket, Indication *indication) override;
 
     // Lifecycle methods
     virtual bool handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override;

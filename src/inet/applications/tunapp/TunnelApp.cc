@@ -112,6 +112,12 @@ void TunnelApp::socketErrorArrived(UdpSocket *socket, Indication *indication)
     delete indication;
 }
 
+void TunnelApp::socketClosed(UdpSocket *socket, Indication *indication)
+{
+    //TODO processing socket closed at stopOperation
+    delete indication;
+}
+
 // L3Socket::ICallback
 void TunnelApp::socketDataArrived(Ipv4Socket *socket, Packet *packet)
 {

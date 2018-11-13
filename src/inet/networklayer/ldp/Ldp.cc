@@ -205,6 +205,12 @@ void Ldp::socketErrorArrived(UdpSocket *socket, Indication *indication)
     delete indication;
 }
 
+void Ldp::socketClosed(UdpSocket *socket, Indication *indication)
+{
+    //TODO lifecycle stopOperation: should detect close sockets and call doneCallback->invoke() when all socket closed
+    delete indication;
+}
+
 bool Ldp::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     scheduleAt(simTime() + exponential(0.1), sendHelloMsg);
@@ -217,6 +223,7 @@ bool Ldp::handleStopOperation(LifecycleOperation *operation, IDoneCallback *done
         cancelAndDelete(elem.timeout);
     myPeers.clear();
     cancelEvent(sendHelloMsg);
+    //TODO close all sockets
     return true;
 }
 
@@ -226,6 +233,7 @@ void Ldp::handleCrashOperation(LifecycleOperation *operation)
         cancelAndDelete(elem.timeout);
     myPeers.clear();
     cancelEvent(sendHelloMsg);
+    //TODO destroy all sockets
 }
 
 void Ldp::sendToPeer(Ipv4Address dest, Packet *msg)

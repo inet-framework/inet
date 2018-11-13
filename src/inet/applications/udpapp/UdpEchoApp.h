@@ -33,6 +33,7 @@ class INET_API UdpEchoApp : public ApplicationBase, public UdpSocket::ICallback
   protected:
     UdpSocket socket;
     int numEchoed;    // just for WATCH
+    std::list<IDoneCallback*> stopDoneCallbackList;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -47,6 +48,7 @@ class INET_API UdpEchoApp : public ApplicationBase, public UdpSocket::ICallback
 
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
     virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
+    virtual void socketClosed(UdpSocket *socket, Indication *indication) override;
 };
 
 } // namespace inet

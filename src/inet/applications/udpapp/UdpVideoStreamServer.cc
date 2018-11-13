@@ -86,6 +86,17 @@ void UdpVideoStreamServer::socketErrorArrived(UdpSocket *socket, Indication *ind
     delete indication;
 }
 
+void UdpVideoStreamServer::socketClosed(UdpSocket *socket, Indication *indication)
+{
+    while (!stopDoneCallbackList.empty()) {
+        auto callback = stopDoneCallbackList.front();
+        callback->invoke();
+        stopDoneCallbackList.pop_front();
+    }
+
+    delete indication;
+}
+
 void UdpVideoStreamServer::processStreamRequest(Packet *msg)
 {
     // register video stream...
@@ -161,13 +172,15 @@ bool UdpVideoStreamServer::handleStartOperation(LifecycleOperation *operation, I
 bool UdpVideoStreamServer::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     clearStreams();
-    socket.close();     //TODO return false and waiting socket close
+    stopDoneCallbackList.push_back(doneCallback);
     socket.setCallback(nullptr);
-    return true;
+    socket.close();
+    return false;
 }
 
 void UdpVideoStreamServer::handleCrashOperation(LifecycleOperation *operation)
 {
+    stopDoneCallbackList.clear();
     clearStreams();
     if (operation->getRootModule() != getContainingNode(this))     // closes socket when the application crashed only
         socket.destroy();    //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
