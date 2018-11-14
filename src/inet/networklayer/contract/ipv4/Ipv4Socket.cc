@@ -60,14 +60,9 @@ void Ipv4Socket::processMessage(cMessage *msg)
                 delete msg;
             break;
         default:
-            throw cRuntimeError("UdpSocket: invalid msg kind %d, one of the UDP_I_xxx constants expected", msg->getKind());
+            throw cRuntimeError("Ipv4Socket: invalid msg kind %d, one of the IPv4_I_xxx constants expected", msg->getKind());
             break;
     }
-
-    if (callback)
-        callback->socketDataArrived(this, check_and_cast<Packet*>(msg));
-    else
-        delete msg;
 }
 
 void Ipv4Socket::bind(const Protocol *protocol, Ipv4Address localAddress)

@@ -118,7 +118,7 @@ void TunnelApp::socketClosed(UdpSocket *socket, Indication *indication)
     delete indication;
 }
 
-// L3Socket::ICallback
+// Ipv4Socket::ICallback
 void TunnelApp::socketDataArrived(Ipv4Socket *socket, Packet *packet)
 {
     auto packetProtocol = packet->getTag<NetworkProtocolInd>()->getProtocol();
@@ -128,6 +128,11 @@ void TunnelApp::socketDataArrived(Ipv4Socket *socket, Packet *packet)
     }
     else
         throw cRuntimeError("Unknown protocol: %s", packetProtocol->getName());;
+}
+
+void TunnelApp::socketClosed(Ipv4Socket *socket, Indication *indication)
+{
+    //TODO processing socket closed at stopOperation
 }
 
 // TunSocket::ICallback

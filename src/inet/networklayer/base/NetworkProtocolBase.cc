@@ -69,6 +69,7 @@ void NetworkProtocolBase::sendUp(cMessage *message)
                     && (elem.second->localAddress.isUnspecified() || elem.second->localAddress == localAddress)
                     && (elem.second->remoteAddress.isUnspecified() || elem.second->remoteAddress == remoteAddress)) {
                 auto *packetCopy = packet->dup();
+                packetCopy->setKind(L3_I_DATA);
                 packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
                 EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
                 emit(packetSentToUpperSignal, packetCopy);
@@ -151,6 +152,11 @@ void NetworkProtocolBase::handleUpperCommand(cMessage *msg)
         if (it != socketIdToSocketDescriptor.end()) {
             delete it->second;
             socketIdToSocketDescriptor.erase(it);
+            auto indication = new Indication("closed", L3_I_SOCKET_CLOSED);
+            auto ctrl = new L3SocketClosedIndication();
+            indication->setControlInfo(ctrl);
+            indication->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+            send(indication, "transportOut");
         }
         delete msg;
     }

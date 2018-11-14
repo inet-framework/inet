@@ -57,6 +57,7 @@ protected:
 
     // Ipv4Socket::ICallback
     virtual void socketDataArrived(Ipv4Socket *socket, Packet *packet) override;
+    virtual void socketClosed(Ipv4Socket *socket, Indication *indication) override;
 
     // TunSocket::ICallback
     virtual void socketDataArrived(TunSocket *socket, Packet *packet) override;

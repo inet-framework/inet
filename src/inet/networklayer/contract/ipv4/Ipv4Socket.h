@@ -42,7 +42,7 @@ class INET_API Ipv4Socket : public INetworkSocket
          * Notifies about socket closed, indication ownership is transferred to the callee.
          */
         virtual void socketClosed(INetworkSocket *socket, Indication *indication) override { socketClosed(check_and_cast<Ipv4Socket *>(socket), indication); }
-        virtual void socketClosed(Ipv4Socket *socket, Indication *indication) {}; // = 0;
+        virtual void socketClosed(Ipv4Socket *socket, Indication *indication) = 0;
     };
   protected:
     bool bound = false;

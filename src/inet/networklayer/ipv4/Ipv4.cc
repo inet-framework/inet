@@ -177,6 +177,11 @@ void Ipv4::handleRequest(Request *request)
         if (it != socketIdToSocketDescriptor.end()) {
             delete it->second;
             socketIdToSocketDescriptor.erase(it);
+            auto indication = new Indication("closed", IPv4_I_SOCKET_CLOSED);
+            auto ctrl = new Ipv4SocketClosedIndication();
+            indication->setControlInfo(ctrl);
+            indication->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+            send(indication, "transportOut");
         }
         delete request;
     }
@@ -756,6 +761,7 @@ void Ipv4::reassembleAndDeliverFinish(Packet *packet)
                 && (elem.second->localAddress.isUnspecified() || elem.second->localAddress == localAddress)
                 && (elem.second->remoteAddress.isUnspecified() || elem.second->remoteAddress == remoteAddress)) {
             auto *packetCopy = packet->dup();
+            packetCopy->setKind(IPv4_I_DATA);
             packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
             EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
             emit(packetSentToUpperSignal, packetCopy);

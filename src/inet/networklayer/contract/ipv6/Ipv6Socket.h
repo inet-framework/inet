@@ -36,6 +36,12 @@ class INET_API Ipv6Socket : public INetworkSocket
       public:
         virtual void socketDataArrived(INetworkSocket *socket, Packet *packet) override { socketDataArrived(check_and_cast<Ipv6Socket *>(socket), packet); }
         virtual void socketDataArrived(Ipv6Socket *socket, Packet *packet) = 0;
+
+        /**
+         * Notifies about socket closed, indication ownership is transferred to the callee.
+         */
+        virtual void socketClosed(INetworkSocket *socket, Indication *indication) override { socketClosed(check_and_cast<Ipv6Socket *>(socket), indication); }
+        virtual void socketClosed(Ipv6Socket *socket, Indication *indication) = 0;
     };
   protected:
     bool bound = false;

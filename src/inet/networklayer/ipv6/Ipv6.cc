@@ -152,6 +152,11 @@ void Ipv6::handleRequest(Request *request)
         if (it != socketIdToSocketDescriptor.end()) {
             delete it->second;
             socketIdToSocketDescriptor.erase(it);
+            auto indication = new Indication("closed", IPv6_I_SOCKET_CLOSED);
+            auto ctrl = new Ipv6SocketClosedIndication();
+            indication->setControlInfo(ctrl);
+            indication->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+            send(indication, "transportOut");
         }
         delete request;
     }
@@ -688,6 +693,7 @@ void Ipv6::localDeliver(Packet *packet, const InterfaceEntry *fromIE)
                 && (elem.second->localAddress.isUnspecified() || elem.second->localAddress == localAddress)
                 && (elem.second->remoteAddress.isUnspecified() || elem.second->remoteAddress == remoteAddress)) {
             auto *packetCopy = packet->dup();
+            packetCopy->setKind(IPv6_I_DATA);
             packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
             EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
             emit(packetSentToUpperSignal, packetCopy);
