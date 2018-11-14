@@ -26,6 +26,7 @@
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/socket/SocketMap.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/contract/INetworkSocket.h"
 #include "inet/transportlayer/common/CrcMode_m.h"
@@ -61,7 +62,8 @@ class INET_API PingApp : public ApplicationBase, public INetworkSocket::ICallbac
     bool continuous = false;
 
     // state
-    INetworkSocket *l3Socket = nullptr;
+    SocketMap socketMap;
+    INetworkSocket *currentSocket = nullptr;   // current socket stored in socketMap, too
     int pid = 0;    // to determine which hosts are associated with the responses
     cMessage *timer = nullptr;    // to schedule the next Ping request
     NodeStatus *nodeStatus = nullptr;    // lifecycle
@@ -70,6 +72,7 @@ class INET_API PingApp : public ApplicationBase, public INetworkSocket::ICallbac
     long expectedReplySeqNo = 0;
     simtime_t sendTimeHistory[PING_HISTORY_SIZE];    // times of when the requests were sent
     bool pongReceived[PING_HISTORY_SIZE];
+    std::list<IDoneCallback*> stopDoneCallbackList;
 
     static const std::map<const Protocol *, const Protocol *> l3Echo;
 

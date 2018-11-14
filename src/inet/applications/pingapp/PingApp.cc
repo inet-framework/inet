@@ -87,7 +87,7 @@ PingApp::PingApp()
 PingApp::~PingApp()
 {
     cancelAndDelete(timer);
-    delete l3Socket;
+    socketMap.deleteSockets();
 }
 
 void PingApp::initialize(int stage)
@@ -194,20 +194,19 @@ void PingApp::handleSelfMessage(cMessage *msg)
         }
         const Protocol *icmp = l3Echo.at(networkProtocol);
 
-        if (!l3Socket || l3Socket->getNetworkProtocol() != networkProtocol) {
-            if (l3Socket) {
-                l3Socket->close();
-                delete l3Socket;
-            }
-            if (networkProtocol == &Protocol::ipv4)
-                l3Socket = new Ipv4Socket(gate("socketOut"));
-            else if (networkProtocol == &Protocol::ipv6)
-                l3Socket = new Ipv6Socket(gate("socketOut"));
-            else
-                l3Socket = new L3Socket(networkProtocol, gate("socketOut"));
-            l3Socket->bind(icmp, L3Address());
-            l3Socket->setCallback(this);
+        for (auto socket: socketMap.getMap()) {
+            socket.second->close();
         }
+        currentSocket = nullptr;
+        if (networkProtocol == &Protocol::ipv4)
+            currentSocket = new Ipv4Socket(gate("socketOut"));
+        else if (networkProtocol == &Protocol::ipv6)
+            currentSocket = new Ipv6Socket(gate("socketOut"));
+        else
+            currentSocket = new L3Socket(networkProtocol, gate("socketOut"));
+        socketMap.addSocket(currentSocket);
+        currentSocket->bind(icmp, L3Address());
+        currentSocket->setCallback(this);
         msg->setKind(PING_SEND);
     }
 
@@ -235,10 +234,13 @@ void PingApp::handleMessageWhenUp(cMessage *msg)
 {
     if (msg->isSelfMessage())
         handleSelfMessage(msg);
-    else if (l3Socket->belongsToSocket(msg))
-        l3Socket->processMessage(msg);
-    else
-        throw cRuntimeError("Unaccepted message: %s(%s)", msg->getName(), msg->getClassName());
+    else {
+        auto socket = check_and_cast_nullable<INetworkSocket *>(socketMap.findSocketFor(msg));
+        if (socket)
+            socket->processMessage(msg);
+        else
+            throw cRuntimeError("Unaccepted message: %s(%s)", msg->getName(), msg->getClassName());
+    }
 }
 
 void PingApp::socketDataArrived(INetworkSocket *socket, Packet *packet)
@@ -289,9 +291,21 @@ void PingApp::socketDataArrived(INetworkSocket *socket, Packet *packet)
     }
 }
 
-void PingApp::socketClosed(INetworkSocket *socket, Indication *packet)
+void PingApp::socketClosed(INetworkSocket *socket, Indication *indication)
 {
-    //TODO add implementation
+    if (socket == currentSocket)
+        currentSocket = nullptr;
+    delete socketMap.removeSocket(socket);
+
+    if (operational == STOPPING_OPERATION && socketMap.size() == 0) {
+        while (!stopDoneCallbackList.empty()) {
+            auto callback = stopDoneCallbackList.front();
+            callback->invoke();
+            stopDoneCallbackList.pop_front();
+        }
+    }
+
+    delete indication;
 }
 
 void PingApp::refreshDisplay() const
@@ -330,15 +344,20 @@ bool PingApp::handleStopOperation(LifecycleOperation *operation, IDoneCallback *
     destAddresses.clear();
     destAddrIdx = -1;
     cancelNextPingRequest();
-    if (l3Socket)
-        l3Socket->close();      //TODO doneCallback + selfMessage
-    delete l3Socket;
-    l3Socket = nullptr;
-    return true;
+    currentSocket = nullptr;
+    if (socketMap.size() > 0) {
+        stopDoneCallbackList.push_back(doneCallback);
+        for (auto socket: socketMap.getMap())
+            socket.second->close();
+        return false;
+    }
+    else
+        return true;
 }
 
 void PingApp::handleCrashOperation(LifecycleOperation *operation)
 {
+    stopDoneCallbackList.clear();
     pid = -1;
     lastStart = -1;
     sendSeqNo = expectedReplySeqNo = 0;
@@ -346,10 +365,12 @@ void PingApp::handleCrashOperation(LifecycleOperation *operation)
     destAddresses.clear();
     destAddrIdx = -1;
     cancelNextPingRequest();
-    if (l3Socket && operation->getRootModule() != getContainingNode(this))
-        l3Socket->destroy();
-    delete l3Socket;
-    l3Socket = nullptr;
+    currentSocket = nullptr;
+    if (operation->getRootModule() != getContainingNode(this)) {
+        for (auto socket: socketMap.getMap())
+            socket.second->destroy();
+        socketMap.deleteSockets();
+    }
 }
 
 void PingApp::scheduleNextPingRequest(simtime_t previous, bool withSleep)
@@ -442,7 +463,7 @@ void PingApp::sendPingRequest()
     if (hopLimit != -1)
         outPacket->addTagIfAbsent<HopLimitReq>()->setHopLimit(hopLimit);
     EV_INFO << "Sending ping request #" << sendSeqNo << " to lower layer.\n";
-    l3Socket->send(outPacket);
+    currentSocket->send(outPacket);
 
     // store the sending time in a circular buffer so we can compute RTT when the packet returns
     sendTimeHistory[sendSeqNo % PING_HISTORY_SIZE] = simTime();
