@@ -18,6 +18,8 @@
 #ifndef __INET_INETWORKSOCKET_H
 #define __INET_INETWORKSOCKET_H
 
+#include "inet/common/packet/Message.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/common/socket/ISocket.h"
 #include "inet/networklayer/common/L3Address.h"
 
@@ -34,6 +36,7 @@ class INET_API INetworkSocket : public ISocket
       public:
         virtual ~ICallback() {}
         virtual void socketDataArrived(INetworkSocket *socket, Packet *packet) = 0;
+        virtual void socketClosed(INetworkSocket *socket, Indication *packet) = 0;
     };
 
   public:

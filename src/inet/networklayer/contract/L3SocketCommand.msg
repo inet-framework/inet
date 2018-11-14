@@ -29,6 +29,11 @@ enum L3CommandCode
     L3_C_DESTROY = 4;
 }
 
+enum L3StatusInd {
+    L3_I_DATA = 0;
+    L3_I_SOCKET_CLOSED = 1;
+}
+
 class L3SocketCommandBase extends cObject
 {
 }

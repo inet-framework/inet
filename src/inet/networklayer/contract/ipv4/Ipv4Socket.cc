@@ -46,6 +46,23 @@ bool Ipv4Socket::belongsToSocket(cMessage *msg) const
 void Ipv4Socket::processMessage(cMessage *msg)
 {
     ASSERT(belongsToSocket(msg));
+    switch (msg->getKind()) {
+        case IPv4_I_DATA:
+            if (callback)
+                callback->socketDataArrived(this, check_and_cast<Packet *>(msg));
+            else
+                delete msg;
+            break;
+        case IPv4_I_SOCKET_CLOSED:
+            if (callback)
+                callback->socketClosed(this, check_and_cast<Indication *>(msg));
+            else
+                delete msg;
+            break;
+        default:
+            throw cRuntimeError("UdpSocket: invalid msg kind %d, one of the UDP_I_xxx constants expected", msg->getKind());
+            break;
+    }
 
     if (callback)
         callback->socketDataArrived(this, check_and_cast<Packet*>(msg));

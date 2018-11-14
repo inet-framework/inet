@@ -289,6 +289,11 @@ void PingApp::socketDataArrived(INetworkSocket *socket, Packet *packet)
     }
 }
 
+void PingApp::socketClosed(INetworkSocket *socket, Indication *packet)
+{
+    //TODO add implementation
+}
+
 void PingApp::refreshDisplay() const
 {
     ApplicationBase::refreshDisplay();
