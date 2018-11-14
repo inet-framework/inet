@@ -264,7 +264,7 @@ class INET_API UdpSocket : public ISocket
      * Unbinds the socket. Once closed, a closed socket may be bound to another
      * (or the same) port, and reused.
      */
-    void close();
+    void close() override;
     //@}
 
     virtual void destroy() override;

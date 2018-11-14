@@ -308,7 +308,7 @@ class INET_API TcpSocket : public ISocket
      * connection until the remote TCP closes too (or the FIN_WAIT_1 timeout
      * expires)
      */
-    void close();
+    void close() override;
 
     /**
      * Aborts the connection.

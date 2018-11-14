@@ -46,6 +46,11 @@ class INET_API ISocket
     virtual void processMessage(cMessage *msg) = 0;
 
     /**
+     * Close the socket.
+     */
+    virtual void close() = 0;
+
+    /**
      * Notify the protocol that the owner of ISocket has destroyed the socket.
      * Typically used when the owner of ISocket has crashed.
      */

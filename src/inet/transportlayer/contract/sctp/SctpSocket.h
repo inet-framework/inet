@@ -292,7 +292,9 @@ class INET_API SctpSocket : public ISocket
      * connection until the remote SCTP closes too (or the FIN_WAIT_1 timeout
      * expires)
      */
-    void close(int id = -1);
+    void close(int id);
+
+    virtual void close() override { close(-1); }
 
     /**
      * Aborts the association.

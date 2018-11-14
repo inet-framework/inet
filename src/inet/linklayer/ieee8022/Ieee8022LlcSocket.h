@@ -91,7 +91,7 @@ class INET_API Ieee8022LlcSocket : public ISocket
 
     void open(int interfaceId, int localSap);
     void send(Packet *packet);
-    void close();
+    void close() override;
 
     virtual bool belongsToSocket(cMessage *msg) const override;
     virtual void processMessage(cMessage *msg) override;
