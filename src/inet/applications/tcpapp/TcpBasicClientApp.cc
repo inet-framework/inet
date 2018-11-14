@@ -170,6 +170,12 @@ void TcpBasicClientApp::socketDataArrived(TcpSocket *socket, Packet *msg, bool u
     }
 }
 
+void TcpBasicClientApp::close()
+{
+    TcpAppBase::close();
+    cancelEvent(timeoutMsg);
+}
+
 void TcpBasicClientApp::socketClosed(TcpSocket *socket)
 {
     TcpAppBase::socketClosed(socket);

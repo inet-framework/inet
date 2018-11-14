@@ -208,14 +208,16 @@ void TcpSocket::sendCommand(Request *msg)
 
 void TcpSocket::close()
 {
-    if (sockstate != CONNECTED && sockstate != PEER_CLOSED && sockstate != CONNECTING && sockstate != LISTENING)
-        throw cRuntimeError("TcpSocket::close(): not connected or close() already called (sockstate=%s)", stateName(sockstate));
-
-    auto request = new Request("CLOSE", TCP_C_CLOSE);
-    TcpCommand *cmd = new TcpCommand();
-    request->setControlInfo(cmd);
-    sendToTcp(request);
-    sockstate = (sockstate == CONNECTED) ? LOCALLY_CLOSED : CLOSED;
+    if (sockstate != CONNECTED && sockstate != PEER_CLOSED && sockstate != CONNECTING && sockstate != LISTENING) {
+//        throw cRuntimeError("TcpSocket::close(): not connected or close() already called (sockstate=%s)", stateName(sockstate));
+    }
+    else {
+        auto request = new Request("CLOSE", TCP_C_CLOSE);
+        TcpCommand *cmd = new TcpCommand();
+        request->setControlInfo(cmd);
+        sendToTcp(request);
+        sockstate = (sockstate == CONNECTED) ? LOCALLY_CLOSED : CLOSED;
+    }
 }
 
 void TcpSocket::abort()

@@ -54,6 +54,8 @@ class INET_API TcpBasicClientApp : public TcpAppBase
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
+    virtual void close() override;
+
   public:
     TcpBasicClientApp() {}
     virtual ~TcpBasicClientApp();
