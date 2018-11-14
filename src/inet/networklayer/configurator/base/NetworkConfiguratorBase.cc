@@ -502,8 +502,8 @@ const char *NetworkConfiguratorBase::getWirelessId(InterfaceEntry *interfaceEntr
     }
     cModule *agentModule = interfaceModule->getSubmodule("agent");
     if (agentModule != nullptr) {
-        if (agentModule->hasPar("default_ssid") && *agentModule->par("default_ssid").stringValue())
-            return agentModule->par("default_ssid");
+        if (agentModule->hasPar("defaultSsid") && *agentModule->par("defaultSsid").stringValue())
+            return agentModule->par("defaultSsid");
     }
 #ifdef WITH_RADIO
     cModule *radioModule = interfaceModule->getSubmodule("radio");
