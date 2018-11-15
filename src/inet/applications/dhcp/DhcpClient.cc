@@ -74,7 +74,8 @@ void DhcpClient::initialize(int stage)
         // for a wireless interface subscribe the association event to start the DHCP protocol
         host->subscribe(l2AssociatedSignal, this);
         host->subscribe(interfaceDeletedSignal, this);
-
+        socket.setCallback(this);
+        socket.setOutputGate(gate("socketOut"));
     }
 }
 
@@ -686,10 +687,8 @@ void DhcpClient::sendToUdp(Packet *msg, int srcPort, const L3Address& destAddr, 
 
 void DhcpClient::openSocket()
 {
-    socket.setOutputGate(gate("socketOut"));
     socket.bind(clientPort);
     socket.setBroadcast(true);
-    socket.setCallback(this);
     EV_INFO << "DHCP server bound to port " << serverPort << "." << endl;
 }
 

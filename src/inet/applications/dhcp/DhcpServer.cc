@@ -62,6 +62,8 @@ void DhcpServer::initialize(int stage)
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         cModule *host = getContainingNode(this);
         host->subscribe(interfaceDeletedSignal, this);
+        socket.setOutputGate(gate("socketOut"));
+        socket.setCallback(this);
     }
 }
 
@@ -69,10 +71,8 @@ void DhcpServer::openSocket()
 {
     if (!ie)
         throw cRuntimeError("Interface to listen does not exist. aborting");
-    socket.setOutputGate(gate("socketOut"));
     socket.bind(serverPort);
     socket.setBroadcast(true);
-    socket.setCallback(this);
     EV_INFO << "DHCP server bound to port " << serverPort << endl;
 }
 
