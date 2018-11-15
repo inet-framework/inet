@@ -36,12 +36,15 @@ class INET_API RedMarker : public RedDropper
     double *marks;
     bool markNext;
 
+  private:
+    bool packetDropped = false;
+
   protected:
 
     virtual ~RedMarker();
     virtual void initialize() override;
     virtual void handleMessage(cMessage *msg) override;
-    bool shouldMark(cPacket *packet);
+    bool shouldMark(Packet *packet);
     virtual bool shouldDrop(cPacket *packet) override;
     bool markPacket(Packet *packet);
 };
