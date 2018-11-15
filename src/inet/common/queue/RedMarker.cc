@@ -110,6 +110,11 @@ void RedMarker::handleMessage(cMessage *msg)
           if (shouldMark(packet))
           {
             markNext = true;
+            if(packetDropped)
+            {
+              packetDropped = false;
+              return;
+            }
           }
         }
         else
@@ -141,7 +146,7 @@ void RedMarker::handleMessage(cMessage *msg)
  *  Drops when size is bigger then max allowed size.
  *  Returns true when drop or mark occurs, false otherwise.
  * **/
-bool RedMarker::shouldMark(cPacket *packet)
+bool RedMarker::shouldMark(Packet *packet)
 {
     const int i = packet->getArrivalGate()->getIndex();
     ASSERT(i >= 0 && i < numGates);
@@ -188,6 +193,7 @@ bool RedMarker::shouldMark(cPacket *packet)
         EV << "Queue len " << queueLength << " >= maxth, dropping packet.\n";
         count[i] = 0;
         dropPacket(packet);
+        packetDropped = true;
         return true;
     }
     else
