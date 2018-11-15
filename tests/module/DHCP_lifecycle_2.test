@@ -74,7 +74,7 @@ network LifecycleTest
 
 %contains-regex: stdout
 .*
-LifecycleTest.server shut down
+LifecycleTest.server shutting down
 .*
 Sending DHCPDISCOVER.
 .*
