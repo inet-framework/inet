@@ -222,7 +222,12 @@ void Ldp::handleStopOperation(LifecycleOperation *operation)
         cancelAndDelete(elem.timeout);
     myPeers.clear();
     cancelEvent(sendHelloMsg);
-    //TODO close all sockets
+    udpSocket.close();
+    for (auto& s: udpSockets)
+        s.close();
+    serverSocket.close();
+    for (auto s: socketMap.getMap())
+        s.second->close();
 }
 
 void Ldp::handleCrashOperation(LifecycleOperation *operation)
@@ -232,6 +237,12 @@ void Ldp::handleCrashOperation(LifecycleOperation *operation)
     myPeers.clear();
     cancelEvent(sendHelloMsg);
     //TODO destroy all sockets
+    udpSocket.destroy();
+    for (auto& s: udpSockets)
+        s.destroy();
+    serverSocket.destroy();
+    for (auto s: socketMap.getMap())
+        s.second->destroy();
 }
 
 void Ldp::sendToPeer(Ipv4Address dest, Packet *msg)
