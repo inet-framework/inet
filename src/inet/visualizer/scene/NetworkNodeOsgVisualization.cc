@@ -49,12 +49,13 @@ NetworkNodeOsgVisualization::NetworkNodeOsgVisualization(cModule *networkNode, b
         auto font = osgText::Font::getDefaultFont();
         label = new osgText::Text();
         label->setCharacterSize(18);
-        label->setBoundingBoxColor(osg::Vec4(1.0, 1.0, 1.0, 0.5));
+        label->setBoundingBoxColor(osg::Vec4(1.0, 1.0, 1.0, 1.0));
         label->setBoundingBoxMargin(spacing);
         label->setColor(osg::Vec4(0.0, 0.0, 0.0, 1.0));
         label->setAlignment(osgText::Text::CENTER_BOTTOM);
         label->setText(networkNode->getFullName());
         label->setDrawMode(osgText::Text::FILLEDBOUNDINGBOX | osgText::Text::TEXT);
+        label->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
         for (auto texture : font->getGlyphTextureList()) {
             texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
             texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
@@ -131,7 +132,7 @@ NetworkNodeOsgVisualization::NetworkNodeOsgVisualization(cModule *networkNode, b
 //        autoTransform->setPivotPoint(osg::Vec3d(image->s() / 2, image->t() / 2, 0.0));
         autoTransform->setAutoScaleToScreen(true);
         autoTransform->setAutoRotateMode(osg::AutoTransform::ROTATE_TO_SCREEN);
-        autoTransform->setPosition(osg::Vec3d(0.0, 0.0, 0.0));
+        autoTransform->setPosition(osg::Vec3d(0.0, 0.0, 1.0));
         autoTransform->addChild(annotationNode);
         osgNode = autoTransform;
     }
