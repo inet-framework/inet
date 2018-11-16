@@ -160,6 +160,7 @@ class INET_API Tcp : public OperationalBase
 
     bool useDataNotification = false;
     CrcMode crcMode = CRC_MODE_UNDEFINED;
+    int msl;
 
   public:
     Tcp() {}
@@ -217,6 +218,7 @@ class INET_API Tcp : public OperationalBase
     virtual void reset();
 
     bool checkCrc(const Ptr<const TcpHeader>& tcpHeader, Packet *pk);
+    int getMsl() { return msl; }
 };
 
 } // namespace tcp
