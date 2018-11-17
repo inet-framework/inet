@@ -19,14 +19,14 @@
 #ifndef __INET_IGMPV2_H
 #define __INET_IGMPV2_H
 
+#include <set>
+
 #include "inet/common/INETDefs.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/IgmpMessage_m.h"
-
-#include <set>
 
 namespace inet {
 
@@ -149,21 +149,21 @@ class INET_API Igmpv2 : public cSimpleModule, public IProtocolRegistrationListen
     InterfaceToRouterDataMap routerData;
 
     // group counters
-    int numGroups;
-    int numHostGroups;
-    int numRouterGroups;
+    int numGroups = 0;
+    int numHostGroups = 0;
+    int numRouterGroups = 0;
 
     // message counters
-    int numQueriesSent;
-    int numQueriesRecv;
-    int numGeneralQueriesSent;
-    int numGeneralQueriesRecv;
-    int numGroupSpecificQueriesSent;
-    int numGroupSpecificQueriesRecv;
-    int numReportsSent;
-    int numReportsRecv;
-    int numLeavesSent;
-    int numLeavesRecv;
+    int numQueriesSent = 0;
+    int numQueriesRecv = 0;
+    int numGeneralQueriesSent = 0;
+    int numGeneralQueriesRecv = 0;
+    int numGroupSpecificQueriesSent = 0;
+    int numGroupSpecificQueriesRecv = 0;
+    int numReportsSent = 0;
+    int numReportsRecv = 0;
+    int numLeavesSent = 0;
+    int numLeavesRecv = 0;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
