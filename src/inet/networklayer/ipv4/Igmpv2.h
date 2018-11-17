@@ -175,35 +175,20 @@ class INET_API Igmpv2 : public cSimpleModule, public IProtocolRegistrationListen
     virtual ~Igmpv2();
 
   protected:
-    virtual HostInterfaceData *createHostInterfaceData();
-    virtual RouterInterfaceData *createRouterInterfaceData();
-    virtual HostGroupData *createHostGroupData(InterfaceEntry *ie, const Ipv4Address& group);
-    virtual RouterGroupData *createRouterGroupData(InterfaceEntry *ie, const Ipv4Address& group);
-    virtual HostInterfaceData *getHostInterfaceData(InterfaceEntry *ie);
-    virtual RouterInterfaceData *getRouterInterfaceData(InterfaceEntry *ie);
-    virtual HostGroupData *getHostGroupData(InterfaceEntry *ie, const Ipv4Address& group);
-    virtual RouterGroupData *getRouterGroupData(InterfaceEntry *ie, const Ipv4Address& group);
-    virtual void deleteHostInterfaceData(int interfaceId);
-    virtual void deleteRouterInterfaceData(int interfaceId);
-    virtual void deleteHostGroupData(InterfaceEntry *ie, const Ipv4Address& group);
-    virtual void deleteRouterGroupData(InterfaceEntry *ie, const Ipv4Address& group);
-
-    virtual void configureInterface(InterfaceEntry *ie);
     virtual void multicastGroupJoined(InterfaceEntry *ie, const Ipv4Address& groupAddr);
     virtual void multicastGroupLeft(InterfaceEntry *ie, const Ipv4Address& groupAddr);
+    virtual void configureInterface(InterfaceEntry *ie);
 
-    virtual void startTimer(cMessage *timer, double interval);
-    virtual void startHostTimer(InterfaceEntry *ie, HostGroupData *group, double maxRespTime);
-
-    virtual void sendQuery(InterfaceEntry *ie, const Ipv4Address& groupAddr, double maxRespTime);
-    virtual void sendReport(InterfaceEntry *ie, HostGroupData *group);
-    virtual void sendLeave(InterfaceEntry *ie, HostGroupData *group);
-    virtual void sendToIP(Packet *msg, InterfaceEntry *ie, const Ipv4Address& dest);
+    virtual void deleteHostInterfaceData(int interfaceId);
+    virtual void deleteRouterInterfaceData(int interfaceId);
 
     virtual void processQueryTimer(cMessage *msg);
     virtual void processHostGroupTimer(cMessage *msg);
     virtual void processLeaveTimer(cMessage *msg);
     virtual void processRexmtTimer(cMessage *msg);
+
+    virtual void startTimer(cMessage *timer, double interval);
+    virtual void startHostTimer(InterfaceEntry *ie, HostGroupData *group, double maxRespTime);
 
     virtual void processIgmpMessage(Packet *packet, const Ptr<const IgmpMessage>& igmp);
     virtual void processQuery(InterfaceEntry *ie, Packet *packet);
@@ -211,6 +196,23 @@ class INET_API Igmpv2 : public cSimpleModule, public IProtocolRegistrationListen
     //virtual void processV1Report(InterfaceEntry *ie, IgmpMessage *msg);
     virtual void processV2Report(InterfaceEntry *ie, Packet *packet);
     virtual void processLeave(InterfaceEntry *ie, Packet *packet);
+
+    virtual void sendQuery(InterfaceEntry *ie, const Ipv4Address& groupAddr, double maxRespTime);
+    virtual void sendReport(InterfaceEntry *ie, HostGroupData *group);
+    virtual void sendLeave(InterfaceEntry *ie, HostGroupData *group);
+    virtual void sendToIP(Packet *msg, InterfaceEntry *ie, const Ipv4Address& dest);
+
+    virtual RouterGroupData *createRouterGroupData(InterfaceEntry *ie, const Ipv4Address& group);
+    virtual HostGroupData *createHostGroupData(InterfaceEntry *ie, const Ipv4Address& group);
+    virtual RouterGroupData *getRouterGroupData(InterfaceEntry *ie, const Ipv4Address& group);
+    virtual HostGroupData *getHostGroupData(InterfaceEntry *ie, const Ipv4Address& group);
+    virtual void deleteRouterGroupData(InterfaceEntry *ie, const Ipv4Address& group);
+    virtual void deleteHostGroupData(InterfaceEntry *ie, const Ipv4Address& group);
+
+    virtual RouterInterfaceData *getRouterInterfaceData(InterfaceEntry *ie);
+    virtual RouterInterfaceData *createRouterInterfaceData();
+    virtual HostInterfaceData *getHostInterfaceData(InterfaceEntry *ie);
+    virtual HostInterfaceData *createHostInterfaceData();
 };
 
 }    // namespace inet

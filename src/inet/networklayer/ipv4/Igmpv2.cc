@@ -140,191 +140,13 @@ Define_Module(Igmpv2);
 //| (start timer)   |   |    start v1 host timer)  |
 // -----------------     --------------------------
 
-Igmpv2::HostGroupData::HostGroupData(Igmpv2 *owner, const Ipv4Address& group)
-    : owner(owner), groupAddr(group)
+Igmpv2::~Igmpv2()
 {
-    ASSERT(owner);
-    ASSERT(groupAddr.isMulticast());
+    while (!hostData.empty())
+        deleteHostInterfaceData(hostData.begin()->first);
 
-    state = IGMP_HGS_NON_MEMBER;
-    flag = false;
-    timer = nullptr;
-}
-
-Igmpv2::HostGroupData::~HostGroupData()
-{
-    if (timer) {
-        delete (IgmpHostTimerContext *)timer->getContextPointer();
-        owner->cancelAndDelete(timer);
-    }
-}
-
-Igmpv2::RouterGroupData::RouterGroupData(Igmpv2 *owner, const Ipv4Address& group)
-    : owner(owner), groupAddr(group)
-{
-    ASSERT(owner);
-    ASSERT(groupAddr.isMulticast());
-
-    state = IGMP_RGS_NO_MEMBERS_PRESENT;
-    timer = nullptr;
-    rexmtTimer = nullptr;
-    // v1HostTimer = nullptr;
-}
-
-Igmpv2::RouterGroupData::~RouterGroupData()
-{
-    if (timer) {
-        delete (IgmpRouterTimerContext *)timer->getContextPointer();
-        owner->cancelAndDelete(timer);
-    }
-    if (rexmtTimer) {
-        delete (IgmpRouterTimerContext *)rexmtTimer->getContextPointer();
-        owner->cancelAndDelete(rexmtTimer);
-    }
-//    if (v1HostTimer)
-//    {
-//        delete (IgmpRouterTimerContext*)v1HostTimer->getContextPointer();
-//        owner->cancelAndDelete(v1HostTimer);
-//    }
-}
-
-Igmpv2::HostInterfaceData::HostInterfaceData(Igmpv2 *owner)
-    : owner(owner)
-{
-    ASSERT(owner);
-}
-
-Igmpv2::HostInterfaceData::~HostInterfaceData()
-{
-    for (auto & elem : groups)
-        delete elem.second;
-}
-
-Igmpv2::RouterInterfaceData::RouterInterfaceData(Igmpv2 *owner)
-    : owner(owner)
-{
-    ASSERT(owner);
-
-    igmpRouterState = IGMP_RS_INITIAL;
-    igmpQueryTimer = nullptr;
-}
-
-Igmpv2::RouterInterfaceData::~RouterInterfaceData()
-{
-    owner->cancelAndDelete(igmpQueryTimer);
-
-    for (auto & elem : groups)
-        delete elem.second;
-}
-
-Igmpv2::HostInterfaceData *Igmpv2::createHostInterfaceData()
-{
-    return new HostInterfaceData(this);
-}
-
-Igmpv2::RouterInterfaceData *Igmpv2::createRouterInterfaceData()
-{
-    return new RouterInterfaceData(this);
-}
-
-Igmpv2::HostGroupData *Igmpv2::createHostGroupData(InterfaceEntry *ie, const Ipv4Address& group)
-{
-    HostInterfaceData *interfaceData = getHostInterfaceData(ie);
-    ASSERT(interfaceData->groups.find(group) == interfaceData->groups.end());
-    HostGroupData *data = new HostGroupData(this, group);
-    interfaceData->groups[group] = data;
-    return data;
-}
-
-Igmpv2::RouterGroupData *Igmpv2::createRouterGroupData(InterfaceEntry *ie, const Ipv4Address& group)
-{
-    RouterInterfaceData *interfaceData = getRouterInterfaceData(ie);
-    ASSERT(interfaceData->groups.find(group) == interfaceData->groups.end());
-    RouterGroupData *data = new RouterGroupData(this, group);
-    interfaceData->groups[group] = data;
-    return data;
-}
-
-Igmpv2::HostInterfaceData *Igmpv2::getHostInterfaceData(InterfaceEntry *ie)
-{
-    int interfaceId = ie->getInterfaceId();
-    auto it = hostData.find(interfaceId);
-    if (it != hostData.end())
-        return it->second;
-
-    // create one
-    HostInterfaceData *data = createHostInterfaceData();
-    hostData[interfaceId] = data;
-    return data;
-}
-
-Igmpv2::RouterInterfaceData *Igmpv2::getRouterInterfaceData(InterfaceEntry *ie)
-{
-    int interfaceId = ie->getInterfaceId();
-    auto it = routerData.find(interfaceId);
-    if (it != routerData.end())
-        return it->second;
-
-    // create one
-    RouterInterfaceData *data = createRouterInterfaceData();
-    routerData[interfaceId] = data;
-    return data;
-}
-
-Igmpv2::HostGroupData *Igmpv2::getHostGroupData(InterfaceEntry *ie, const Ipv4Address& group)
-{
-    HostInterfaceData *interfaceData = getHostInterfaceData(ie);
-    auto it = interfaceData->groups.find(group);
-    return it != interfaceData->groups.end() ? it->second : nullptr;
-}
-
-Igmpv2::RouterGroupData *Igmpv2::getRouterGroupData(InterfaceEntry *ie, const Ipv4Address& group)
-{
-    RouterInterfaceData *interfaceData = getRouterInterfaceData(ie);
-    auto it = interfaceData->groups.find(group);
-    return it != interfaceData->groups.end() ? it->second : nullptr;
-}
-
-void Igmpv2::deleteHostInterfaceData(int interfaceId)
-{
-    auto interfaceIt = hostData.find(interfaceId);
-    if (interfaceIt != hostData.end()) {
-        HostInterfaceData *interface = interfaceIt->second;
-        hostData.erase(interfaceIt);
-        delete interface;
-    }
-}
-
-void Igmpv2::deleteRouterInterfaceData(int interfaceId)
-{
-    auto interfaceIt = routerData.find(interfaceId);
-    if (interfaceIt != routerData.end()) {
-        RouterInterfaceData *interface = interfaceIt->second;
-        routerData.erase(interfaceIt);
-        delete interface;
-    }
-}
-
-void Igmpv2::deleteHostGroupData(InterfaceEntry *ie, const Ipv4Address& group)
-{
-    HostInterfaceData *interfaceData = getHostInterfaceData(ie);
-    auto it = interfaceData->groups.find(group);
-    if (it != interfaceData->groups.end()) {
-        HostGroupData *data = it->second;
-        interfaceData->groups.erase(it);
-        delete data;
-    }
-}
-
-void Igmpv2::deleteRouterGroupData(InterfaceEntry *ie, const Ipv4Address& group)
-{
-    RouterInterfaceData *interfaceData = getRouterInterfaceData(ie);
-    auto it = interfaceData->groups.find(group);
-    if (it != interfaceData->groups.end()) {
-        RouterGroupData *data = it->second;
-        interfaceData->groups.erase(it);
-        delete data;
-    }
+    while (!routerData.empty())
+        deleteRouterInterfaceData(routerData.begin()->first);
 }
 
 void Igmpv2::initialize(int stage)
@@ -383,14 +205,6 @@ void Igmpv2::initialize(int stage)
     }
 }
 
-Igmpv2::~Igmpv2()
-{
-    while (!hostData.empty())
-        deleteHostInterfaceData(hostData.begin()->first);
-    while (!routerData.empty())
-        deleteRouterInterfaceData(routerData.begin()->first);
-}
-
 void Igmpv2::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method_Silent();
@@ -399,7 +213,15 @@ void Igmpv2::receiveSignal(cComponent *source, simsignal_t signalID, cObject *ob
     int interfaceId;
     const Ipv4MulticastGroupInfo *info;
 
-    if (signalID == interfaceCreatedSignal) {
+    if (signalID == ipv4MulticastGroupJoinedSignal) {
+        info = check_and_cast<const Ipv4MulticastGroupInfo *>(obj);
+        multicastGroupJoined(info->ie, info->groupAddress);
+    }
+    else if (signalID == ipv4MulticastGroupLeftSignal) {
+        info = check_and_cast<const Ipv4MulticastGroupInfo *>(obj);
+        multicastGroupLeft(info->ie, info->groupAddress);
+    }
+    else if (signalID == interfaceCreatedSignal) {
         ie = check_and_cast<InterfaceEntry *>(obj);
         if (ie->isMulticast())
             configureInterface(ie);
@@ -412,13 +234,43 @@ void Igmpv2::receiveSignal(cComponent *source, simsignal_t signalID, cObject *ob
             deleteRouterInterfaceData(interfaceId);
         }
     }
-    else if (signalID == ipv4MulticastGroupJoinedSignal) {
-        info = check_and_cast<const Ipv4MulticastGroupInfo *>(obj);
-        multicastGroupJoined(info->ie, info->groupAddress);
+}
+
+void Igmpv2::multicastGroupJoined(InterfaceEntry *ie, const Ipv4Address& groupAddr)
+{
+    ASSERT(ie && ie->isMulticast());
+    ASSERT(groupAddr.isMulticast());
+
+    if (enabled && !groupAddr.isLinkLocalMulticast()) {
+        HostGroupData *groupData = createHostGroupData(ie, groupAddr);
+        numGroups++;
+        numHostGroups++;
+
+        sendReport(ie, groupData);
+        groupData->flag = true;
+        startHostTimer(ie, groupData, unsolicitedReportInterval);
+        groupData->state = IGMP_HGS_DELAYING_MEMBER;
     }
-    else if (signalID == ipv4MulticastGroupLeftSignal) {
-        info = check_and_cast<const Ipv4MulticastGroupInfo *>(obj);
-        multicastGroupLeft(info->ie, info->groupAddress);
+}
+
+void Igmpv2::multicastGroupLeft(InterfaceEntry *ie, const Ipv4Address& groupAddr)
+{
+    ASSERT(ie && ie->isMulticast());
+    ASSERT(groupAddr.isMulticast());
+
+    if (enabled && !groupAddr.isLinkLocalMulticast()) {
+        HostGroupData *groupData = getHostGroupData(ie, groupAddr);
+        if (groupData) {
+            if (groupData->state == IGMP_HGS_DELAYING_MEMBER)
+                cancelEvent(groupData->timer);
+
+            if (groupData->flag)
+                sendLeave(ie, groupData);
+        }
+
+        deleteHostGroupData(ie, groupAddr);
+        numHostGroups--;
+        numGroups--;
     }
 }
 
@@ -433,6 +285,26 @@ void Igmpv2::configureInterface(InterfaceEntry *ie)
         routerData->igmpRouterState = IGMP_RS_QUERIER;
         sendQuery(ie, Ipv4Address(), queryResponseInterval);    // general query
         startTimer(timer, startupQueryInterval);
+    }
+}
+
+void Igmpv2::deleteHostInterfaceData(int interfaceId)
+{
+    auto interfaceIt = hostData.find(interfaceId);
+    if (interfaceIt != hostData.end()) {
+        HostInterfaceData *interface = interfaceIt->second;
+        hostData.erase(interfaceIt);
+        delete interface;
+    }
+}
+
+void Igmpv2::deleteRouterInterfaceData(int interfaceId)
+{
+    auto interfaceIt = routerData.find(interfaceId);
+    if (interfaceIt != routerData.end()) {
+        RouterInterfaceData *interface = interfaceIt->second;
+        routerData.erase(interfaceIt);
+        delete interface;
     }
 }
 
@@ -490,165 +362,7 @@ void Igmpv2::handleRegisterProtocol(const Protocol& protocol, cGate *in, Service
         externalRouter = true;
 }
 
-void Igmpv2::multicastGroupJoined(InterfaceEntry *ie, const Ipv4Address& groupAddr)
-{
-    ASSERT(ie && ie->isMulticast());
-    ASSERT(groupAddr.isMulticast());
-
-    if (enabled && !groupAddr.isLinkLocalMulticast()) {
-        HostGroupData *groupData = createHostGroupData(ie, groupAddr);
-        numGroups++;
-        numHostGroups++;
-
-        sendReport(ie, groupData);
-        groupData->flag = true;
-        startHostTimer(ie, groupData, unsolicitedReportInterval);
-        groupData->state = IGMP_HGS_DELAYING_MEMBER;
-    }
-}
-
-void Igmpv2::multicastGroupLeft(InterfaceEntry *ie, const Ipv4Address& groupAddr)
-{
-    ASSERT(ie && ie->isMulticast());
-    ASSERT(groupAddr.isMulticast());
-
-    if (enabled && !groupAddr.isLinkLocalMulticast()) {
-        HostGroupData *groupData = getHostGroupData(ie, groupAddr);
-        if (groupData) {
-            if (groupData->state == IGMP_HGS_DELAYING_MEMBER)
-                cancelEvent(groupData->timer);
-
-            if (groupData->flag)
-                sendLeave(ie, groupData);
-        }
-
-        deleteHostGroupData(ie, groupAddr);
-        numHostGroups--;
-        numGroups--;
-    }
-}
-
-void Igmpv2::startTimer(cMessage *timer, double interval)
-{
-    ASSERT(timer);
-    cancelEvent(timer);
-    scheduleAt(simTime() + interval, timer);
-}
-
-void Igmpv2::startHostTimer(InterfaceEntry *ie, HostGroupData *group, double maxRespTime)
-{
-    if (!group->timer) {
-        group->timer = new cMessage("Igmpv2 group timer", IGMP_HOSTGROUP_TIMER);
-        group->timer->setContextPointer(new IgmpHostTimerContext(ie, group));
-    }
-
-    double delay = uniform(0.0, maxRespTime);
-    EV_DEBUG << "setting host timer for " << ie->getInterfaceName() << " and group " << group->groupAddr.str() << " to " << delay << "\n";
-    startTimer(group->timer, delay);
-}
-
-void Igmpv2::sendQuery(InterfaceEntry *ie, const Ipv4Address& groupAddr, double maxRespTime)
-{
-    ASSERT(groupAddr.isUnspecified() || (groupAddr.isMulticast() && !groupAddr.isLinkLocalMulticast()));
-
-    RouterInterfaceData *interfaceData = getRouterInterfaceData(ie);
-
-    if (interfaceData->igmpRouterState == IGMP_RS_QUERIER) {
-        if (groupAddr.isUnspecified())
-            EV_INFO << "Igmpv2: sending General Membership Query on iface=" << ie->getInterfaceName() << "\n";
-        else
-            EV_INFO << "Igmpv2: sending Membership Query for group=" << groupAddr << " on iface=" << ie->getInterfaceName() << "\n";
-
-        Packet *packet = new Packet("Igmpv2 query");
-        const auto& msg = makeShared<Igmpv2Query>();
-        msg->setType(IGMP_MEMBERSHIP_QUERY);
-        msg->setGroupAddress(groupAddr);
-        msg->setMaxRespTime(maxRespTime);
-        msg->setChunkLength(B(8));
-        packet->insertAtFront(msg);
-        sendToIP(packet, ie, groupAddr.isUnspecified() ? Ipv4Address::ALL_HOSTS_MCAST : groupAddr);
-
-        numQueriesSent++;
-        if (groupAddr.isUnspecified())
-            numGeneralQueriesSent++;
-        else
-            numGroupSpecificQueriesSent++;
-    }
-}
-
-void Igmpv2::sendReport(InterfaceEntry *ie, HostGroupData *group)
-{
-    ASSERT(group->groupAddr.isMulticast() && !group->groupAddr.isLinkLocalMulticast());
-
-    EV_INFO << "Igmpv2: sending Membership Report for group=" << group->groupAddr << " on iface=" << ie->getInterfaceName() << "\n";
-    Packet *packet = new Packet("Igmpv2 report");
-    const auto& msg = makeShared<Igmpv2Report>();
-    msg->setGroupAddress(group->groupAddr);
-    msg->setChunkLength(B(8));
-    packet->insertAtFront(msg);
-    sendToIP(packet, ie, group->groupAddr);
-    numReportsSent++;
-}
-
-void Igmpv2::sendLeave(InterfaceEntry *ie, HostGroupData *group)
-{
-    ASSERT(group->groupAddr.isMulticast() && !group->groupAddr.isLinkLocalMulticast());
-
-    EV_INFO << "Igmpv2: sending Leave Group for group=" << group->groupAddr << " on iface=" << ie->getInterfaceName() << "\n";
-    Packet *packet = new Packet("Igmpv2 leave");
-    const auto& msg = makeShared<Igmpv2Leave>();
-    msg->setGroupAddress(group->groupAddr);
-    msg->setChunkLength(B(8));
-    packet->insertAtFront(msg);
-    sendToIP(packet, ie, Ipv4Address::ALL_ROUTERS_MCAST);
-    numLeavesSent++;
-}
-
-// TODO add Router Alert option
-void Igmpv2::sendToIP(Packet *msg, InterfaceEntry *ie, const Ipv4Address& dest)
-{
-    ASSERT(ie->isMulticast());
-
-    msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::igmp);
-    msg->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::igmp);
-    msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
-    msg->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
-    msg->addTagIfAbsent<L3AddressReq>()->setDestAddress(dest);
-    msg->addTagIfAbsent<HopLimitReq>()->setHopLimit(1);
-
-    send(msg, "ipOut");
-}
-
-void Igmpv2::processIgmpMessage(Packet *packet, const Ptr<const IgmpMessage>& igmp)
-{
-    InterfaceEntry *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
-    switch (igmp->getType()) {
-        case IGMP_MEMBERSHIP_QUERY:
-            processQuery(ie, packet);
-            break;
-
-        //case IGMPV1_MEMBERSHIP_REPORT:
-        //    processV1Report(ie, msg);
-        //    delete msg;
-        //    break;
-        case IGMPV2_MEMBERSHIP_REPORT:
-            processV2Report(ie, packet);
-            break;
-
-        case IGMPV2_LEAVE_GROUP:
-            processLeave(ie, packet);
-            break;
-
-        default:
-            if (externalRouter)
-                send(packet, "routerOut");
-            else {
-                //delete msg;
-                throw cRuntimeError("Igmpv2: Unhandled message type (%d) in packet %s", igmp->getType(), packet->getName());
-            }
-            break;
-    }
-}
+// --- Methods for handling self messages ---
 
 void Igmpv2::processQueryTimer(cMessage *msg)
 {
@@ -697,6 +411,58 @@ void Igmpv2::processRexmtTimer(cMessage *msg)
     sendQuery(ctx->ie, ctx->routerGroup->groupAddr, lastMemberQueryInterval);
     startTimer(ctx->routerGroup->rexmtTimer, lastMemberQueryInterval);
     ctx->routerGroup->state = IGMP_RGS_CHECKING_MEMBERSHIP;
+}
+
+void Igmpv2::startTimer(cMessage *timer, double interval)
+{
+    ASSERT(timer);
+    cancelEvent(timer);
+    scheduleAt(simTime() + interval, timer);
+}
+
+void Igmpv2::startHostTimer(InterfaceEntry *ie, HostGroupData *group, double maxRespTime)
+{
+    if (!group->timer) {
+        group->timer = new cMessage("Igmpv2 group timer", IGMP_HOSTGROUP_TIMER);
+        group->timer->setContextPointer(new IgmpHostTimerContext(ie, group));
+    }
+
+    double delay = uniform(0.0, maxRespTime);
+    EV_DEBUG << "setting host timer for " << ie->getInterfaceName() << " and group " << group->groupAddr.str() << " to " << delay << "\n";
+    startTimer(group->timer, delay);
+}
+
+// --- Methods for processing IGMP messages ---
+
+void Igmpv2::processIgmpMessage(Packet *packet, const Ptr<const IgmpMessage>& igmp)
+{
+    InterfaceEntry *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
+    switch (igmp->getType()) {
+        case IGMP_MEMBERSHIP_QUERY:
+            processQuery(ie, packet);
+            break;
+
+        //case IGMPV1_MEMBERSHIP_REPORT:
+        //    processV1Report(ie, msg);
+        //    delete msg;
+        //    break;
+        case IGMPV2_MEMBERSHIP_REPORT:
+            processV2Report(ie, packet);
+            break;
+
+        case IGMPV2_LEAVE_GROUP:
+            processLeave(ie, packet);
+            break;
+
+        default:
+            if (externalRouter)
+                send(packet, "routerOut");
+            else {
+                //delete msg;
+                throw cRuntimeError("Igmpv2: Unhandled message type (%d) in packet %s", igmp->getType(), packet->getName());
+            }
+            break;
+    }
 }
 
 void Igmpv2::processQuery(InterfaceEntry *ie, Packet *packet)
@@ -859,6 +625,259 @@ void Igmpv2::processLeave(InterfaceEntry *ie, Packet *packet)
     }
 
     delete packet;
+}
+
+// --- Methods for sending IGMP messages ---
+
+void Igmpv2::sendQuery(InterfaceEntry *ie, const Ipv4Address& groupAddr, double maxRespTime)
+{
+    ASSERT(groupAddr.isUnspecified() || (groupAddr.isMulticast() && !groupAddr.isLinkLocalMulticast()));
+
+    RouterInterfaceData *interfaceData = getRouterInterfaceData(ie);
+
+    if (interfaceData->igmpRouterState == IGMP_RS_QUERIER) {
+        if (groupAddr.isUnspecified())
+            EV_INFO << "Igmpv2: sending General Membership Query on iface=" << ie->getInterfaceName() << "\n";
+        else
+            EV_INFO << "Igmpv2: sending Membership Query for group=" << groupAddr << " on iface=" << ie->getInterfaceName() << "\n";
+
+        Packet *packet = new Packet("Igmpv2 query");
+        const auto& msg = makeShared<Igmpv2Query>();
+        msg->setType(IGMP_MEMBERSHIP_QUERY);
+        msg->setGroupAddress(groupAddr);
+        msg->setMaxRespTime(maxRespTime);
+        msg->setChunkLength(B(8));
+        packet->insertAtFront(msg);
+        sendToIP(packet, ie, groupAddr.isUnspecified() ? Ipv4Address::ALL_HOSTS_MCAST : groupAddr);
+
+        numQueriesSent++;
+        if (groupAddr.isUnspecified())
+            numGeneralQueriesSent++;
+        else
+            numGroupSpecificQueriesSent++;
+    }
+}
+
+void Igmpv2::sendReport(InterfaceEntry *ie, HostGroupData *group)
+{
+    ASSERT(group->groupAddr.isMulticast() && !group->groupAddr.isLinkLocalMulticast());
+
+    EV_INFO << "Igmpv2: sending Membership Report for group=" << group->groupAddr << " on iface=" << ie->getInterfaceName() << "\n";
+    Packet *packet = new Packet("Igmpv2 report");
+    const auto& msg = makeShared<Igmpv2Report>();
+    msg->setGroupAddress(group->groupAddr);
+    msg->setChunkLength(B(8));
+    packet->insertAtFront(msg);
+    sendToIP(packet, ie, group->groupAddr);
+    numReportsSent++;
+}
+
+void Igmpv2::sendLeave(InterfaceEntry *ie, HostGroupData *group)
+{
+    ASSERT(group->groupAddr.isMulticast() && !group->groupAddr.isLinkLocalMulticast());
+
+    EV_INFO << "Igmpv2: sending Leave Group for group=" << group->groupAddr << " on iface=" << ie->getInterfaceName() << "\n";
+    Packet *packet = new Packet("Igmpv2 leave");
+    const auto& msg = makeShared<Igmpv2Leave>();
+    msg->setGroupAddress(group->groupAddr);
+    msg->setChunkLength(B(8));
+    packet->insertAtFront(msg);
+    sendToIP(packet, ie, Ipv4Address::ALL_ROUTERS_MCAST);
+    numLeavesSent++;
+}
+
+// TODO add Router Alert option
+void Igmpv2::sendToIP(Packet *msg, InterfaceEntry *ie, const Ipv4Address& dest)
+{
+    ASSERT(ie->isMulticast());
+
+    msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::igmp);
+    msg->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::igmp);
+    msg->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
+    msg->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+    msg->addTagIfAbsent<L3AddressReq>()->setDestAddress(dest);
+    msg->addTagIfAbsent<HopLimitReq>()->setHopLimit(1);
+
+    send(msg, "ipOut");
+}
+
+// --- Utility Methods for Group Data ---
+
+Igmpv2::RouterGroupData *Igmpv2::createRouterGroupData(InterfaceEntry *ie, const Ipv4Address& group)
+{
+    RouterInterfaceData *interfaceData = getRouterInterfaceData(ie);
+    ASSERT(interfaceData->groups.find(group) == interfaceData->groups.end());
+    RouterGroupData *data = new RouterGroupData(this, group);
+    interfaceData->groups[group] = data;
+    return data;
+}
+
+Igmpv2::HostGroupData *Igmpv2::createHostGroupData(InterfaceEntry *ie, const Ipv4Address& group)
+{
+    HostInterfaceData *interfaceData = getHostInterfaceData(ie);
+    ASSERT(interfaceData->groups.find(group) == interfaceData->groups.end());
+    HostGroupData *data = new HostGroupData(this, group);
+    interfaceData->groups[group] = data;
+    return data;
+}
+
+Igmpv2::RouterGroupData *Igmpv2::getRouterGroupData(InterfaceEntry *ie, const Ipv4Address& group)
+{
+    RouterInterfaceData *interfaceData = getRouterInterfaceData(ie);
+    auto it = interfaceData->groups.find(group);
+    return it != interfaceData->groups.end() ? it->second : nullptr;
+}
+
+Igmpv2::HostGroupData *Igmpv2::getHostGroupData(InterfaceEntry *ie, const Ipv4Address& group)
+{
+    HostInterfaceData *interfaceData = getHostInterfaceData(ie);
+    auto it = interfaceData->groups.find(group);
+    return it != interfaceData->groups.end() ? it->second : nullptr;
+}
+
+void Igmpv2::deleteRouterGroupData(InterfaceEntry *ie, const Ipv4Address& group)
+{
+    RouterInterfaceData *interfaceData = getRouterInterfaceData(ie);
+    auto it = interfaceData->groups.find(group);
+    if (it != interfaceData->groups.end()) {
+        RouterGroupData *data = it->second;
+        interfaceData->groups.erase(it);
+        delete data;
+    }
+}
+
+void Igmpv2::deleteHostGroupData(InterfaceEntry *ie, const Ipv4Address& group)
+{
+    HostInterfaceData *interfaceData = getHostInterfaceData(ie);
+    auto it = interfaceData->groups.find(group);
+    if (it != interfaceData->groups.end()) {
+        HostGroupData *data = it->second;
+        interfaceData->groups.erase(it);
+        delete data;
+    }
+}
+
+// --- Utility Methods for Interface Data ---
+
+Igmpv2::RouterInterfaceData *Igmpv2::getRouterInterfaceData(InterfaceEntry *ie)
+{
+    int interfaceId = ie->getInterfaceId();
+    auto it = routerData.find(interfaceId);
+    if (it != routerData.end())
+        return it->second;
+
+    // create one
+    RouterInterfaceData *data = createRouterInterfaceData();
+    routerData[interfaceId] = data;
+    return data;
+}
+
+Igmpv2::RouterInterfaceData *Igmpv2::createRouterInterfaceData()
+{
+    return new RouterInterfaceData(this);
+}
+
+Igmpv2::HostInterfaceData *Igmpv2::getHostInterfaceData(InterfaceEntry *ie)
+{
+    int interfaceId = ie->getInterfaceId();
+    auto it = hostData.find(interfaceId);
+    if (it != hostData.end())
+        return it->second;
+
+    // create one
+    HostInterfaceData *data = createHostInterfaceData();
+    hostData[interfaceId] = data;
+    return data;
+}
+
+Igmpv2::HostInterfaceData *Igmpv2::createHostInterfaceData()
+{
+    return new HostInterfaceData(this);
+}
+
+// --- HostGroupData structure implementation ---
+
+Igmpv2::HostGroupData::HostGroupData(Igmpv2 *owner, const Ipv4Address& group)
+    : owner(owner), groupAddr(group)
+{
+    ASSERT(owner);
+    ASSERT(groupAddr.isMulticast());
+
+    state = IGMP_HGS_NON_MEMBER;
+    flag = false;
+    timer = nullptr;
+}
+
+Igmpv2::HostGroupData::~HostGroupData()
+{
+    if (timer) {
+        delete (IgmpHostTimerContext *)timer->getContextPointer();
+        owner->cancelAndDelete(timer);
+    }
+}
+
+// --- RouterGroupData structure implementation ---
+
+Igmpv2::RouterGroupData::RouterGroupData(Igmpv2 *owner, const Ipv4Address& group)
+    : owner(owner), groupAddr(group)
+{
+    ASSERT(owner);
+    ASSERT(groupAddr.isMulticast());
+
+    state = IGMP_RGS_NO_MEMBERS_PRESENT;
+    timer = nullptr;
+    rexmtTimer = nullptr;
+    // v1HostTimer = nullptr;
+}
+
+Igmpv2::RouterGroupData::~RouterGroupData()
+{
+    if (timer) {
+        delete (IgmpRouterTimerContext *)timer->getContextPointer();
+        owner->cancelAndDelete(timer);
+    }
+    if (rexmtTimer) {
+        delete (IgmpRouterTimerContext *)rexmtTimer->getContextPointer();
+        owner->cancelAndDelete(rexmtTimer);
+    }
+//    if (v1HostTimer)
+//    {
+//        delete (IgmpRouterTimerContext*)v1HostTimer->getContextPointer();
+//        owner->cancelAndDelete(v1HostTimer);
+//    }
+}
+
+// --- HostInterfaceData structure implementation ---
+
+Igmpv2::HostInterfaceData::HostInterfaceData(Igmpv2 *owner)
+    : owner(owner)
+{
+    ASSERT(owner);
+}
+
+Igmpv2::HostInterfaceData::~HostInterfaceData()
+{
+    for (auto & elem : groups)
+        delete elem.second;
+}
+
+// --- RouterInterfaceData structure implementation ---
+
+Igmpv2::RouterInterfaceData::RouterInterfaceData(Igmpv2 *owner)
+    : owner(owner)
+{
+    ASSERT(owner);
+
+    igmpRouterState = IGMP_RS_INITIAL;
+    igmpQueryTimer = nullptr;
+}
+
+Igmpv2::RouterInterfaceData::~RouterInterfaceData()
+{
+    owner->cancelAndDelete(igmpQueryTimer);
+
+    for (auto & elem : groups)
+        delete elem.second;
 }
 
 }    // namespace inet
