@@ -16,8 +16,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/networklayer/ipv4/Igmpv2.h"
+#include <algorithm>
 
+#include "inet/networklayer/ipv4/Igmpv2.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
@@ -28,8 +29,6 @@
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
-
-#include <algorithm>
 
 namespace inet {
 
@@ -354,21 +353,6 @@ void Igmpv2::initialize(int stage)
         lastMemberQueryCount = par("lastMemberQueryCount");
         unsolicitedReportInterval = par("unsolicitedReportInterval");
         //version1RouterPresentInterval = par("version1RouterPresentInterval");
-
-        numGroups = 0;
-        numHostGroups = 0;
-        numRouterGroups = 0;
-
-        numQueriesSent = 0;
-        numQueriesRecv = 0;
-        numGeneralQueriesSent = 0;
-        numGeneralQueriesRecv = 0;
-        numGroupSpecificQueriesSent = 0;
-        numGroupSpecificQueriesRecv = 0;
-        numReportsSent = 0;
-        numReportsRecv = 0;
-        numLeavesSent = 0;
-        numLeavesRecv = 0;
 
         WATCH(numGroups);
         WATCH(numHostGroups);
