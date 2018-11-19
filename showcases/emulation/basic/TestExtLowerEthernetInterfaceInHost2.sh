@@ -15,6 +15,7 @@ sudo route add -net 192.168.2.0 netmask 255.255.255.0 dev veth0
 
 # run simulation
 inet -u Cmdenv -c ExtLowerEthernetInterfaceInHost2 --sim-time-limit=2s &> inet.out &
+sleep 1
 
 # ping into simulation
 ping -c 2 -W 2 192.168.2.2 > ping.out
