@@ -11,6 +11,7 @@ sudo ip link set dev tap0 up
 
 # run simulation
 inet -u Cmdenv -c ExtUpperEthernetInterfaceInHost1 --sim-time-limit=2s &> inet.out &
+sleep 1
 
 # ping into simulation
 ping -c 2 -W 2 192.168.2.2 > ping.out
