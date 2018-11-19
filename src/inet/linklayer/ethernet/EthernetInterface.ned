@@ -22,6 +22,7 @@ import inet.common.queue.IOutputQueue;
 import inet.linklayer.contract.IEtherMac;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.contract.ITrafficConditioner;
+import inet.linklayer.ieee8021q.IEtherVlan;
 
 //
 // Ethernet network interface. Complements ~EtherMac and ~EtherEncap
