@@ -73,6 +73,7 @@ void ExtIpv4Socket::handleMessage(cMessage *msg)
     size_t packetLength = bytesChunk->copyToBuffer(buffer, sizeof(buffer));
     ASSERT(packetLength == (size_t)packet->getByteLength());
 
+    //int sent = ::send(fd, buffer, packetLength, 0);
     int sent = sendto(fd, buffer, packetLength, 0, (struct sockaddr *)&ip_addr, sizeof(ip_addr));
     if ((size_t)sent == packetLength)
         EV << "Sent " << sent << " bytes packet.\n";
@@ -98,9 +99,12 @@ void ExtIpv4Socket::finish()
 void ExtIpv4Socket::openSocket()
 {
     NetworkNamespaceContext context(par("namespace"));
-    fd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
+    fd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
     if (fd == INVALID_SOCKET)
         throw cRuntimeError("Cannot open socket");
+    int hdrincl=1;
+    if (setsockopt(fd, IPPROTO_IP, IP_HDRINCL, &hdrincl, sizeof(hdrincl)) == -1)
+        throw cRuntimeError("IP_HDRINCL");
     if (gate("upperLayerOut")->isConnected())
         rtScheduler->addCallback(fd, this);
 }
@@ -127,8 +131,6 @@ bool ExtIpv4Socket::notify(int fd)
         throw cRuntimeError("Calling recvfrom failed: %d", n);
     auto data = makeShared<BytesChunk>(static_cast<const uint8_t *>(buffer), n);
     auto packet = new Packet(nullptr, data);
-    auto interfaceEntry = check_and_cast<InterfaceEntry *>(getContainingNicModule(this));
-    packet->addTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
     packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     packet->setName(packetPrinter.printPacketToString(packet, packetNameFormat).c_str());

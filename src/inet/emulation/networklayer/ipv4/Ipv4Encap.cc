@@ -75,14 +75,14 @@ void Ipv4Encap::handleMessage(cMessage *msg)
                 packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
                 EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
 //                emit(packetSentToUpperSignal, packetCopy);
-                send(packetCopy, "transportOut");
+                send(packetCopy, "upperLayerOut");
                 hasSocket = true;
             }
         }
         if (upperProtocols.find(protocol) != upperProtocols.end()) {
             EV_INFO << "Passing up to protocol " << protocol << "\n";
 //            emit(packetSentToUpperSignal, packet);
-            send(packet, "transportOut");
+            send(packet, "upperLayerOut");
         }
         else if (hasSocket) {
             delete packet;
