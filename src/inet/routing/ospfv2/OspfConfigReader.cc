@@ -20,6 +20,7 @@
 #include <map>
 #include <stdlib.h>
 #include <memory.h>
+#include <algorithm>
 
 #include "inet/routing/ospfv2/OspfConfigReader.h"
 
@@ -90,25 +91,36 @@ bool OspfConfigReader::loadConfigFromXML(cXMLElement *asConfig, Router *ospfRout
         loadAreaFromXML(*asConfig, elem);
     }
 
-    // load interface information
     cXMLElementList routerConfig = routerNode->getChildren();
+
+    // load interface information
+    for (int n = 0; n < ift->getNumInterfaces(); n++) {
+        InterfaceEntry *intf = ift->getInterface(n);
+        cXMLElement *ifConfig = findMatchingConfig(routerConfig, *intf);
+        if(ifConfig) {
+            if(intf->isLoopback())
+                loadLoopbackParameters(*ifConfig, *intf);
+            else
+                loadInterfaceParameters(*ifConfig, *intf);
+        }
+    }
+
+    // load remaining information
     for (auto & elem : routerConfig) {
         std::string nodeName = (elem)->getTagName();
         if ((nodeName == "PointToPointInterface") ||
             (nodeName == "BroadcastInterface") ||
             (nodeName == "NBMAInterface") ||
-            (nodeName == "PointToMultiPointInterface"))
+            (nodeName == "PointToMultiPointInterface") ||
+            (nodeName == "LoopbackInterface"))
         {
-            loadInterfaceParameters(*(elem));
+            continue;
         }
         else if (nodeName == "ExternalInterface") {
             loadExternalRoute(*(elem));
         }
         else if (nodeName == "HostInterface") {
             loadHostRoute(*(elem));
-        }
-        else if (nodeName == "LoopbackInterface") {
-            loadLoopbackParameters(*(elem));
         }
         else if (nodeName == "VirtualLink") {
             loadVirtualLink(*(elem));
@@ -190,136 +202,125 @@ void OspfConfigReader::loadAreaFromXML(const cXMLElement& asConfig, AreaId areaI
     ospfRouter->addArea(area);
 }
 
-void OspfConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig)
+void OspfConfigReader::loadInterfaceParameters(const cXMLElement& ifConfig, InterfaceEntry& ie)
 {
     std::string intfModeStr = getStrAttrOrPar(ifConfig, "interfaceMode");
     if(intfModeStr == "NoOSPF")
         return;
 
     std::string interfaceType = ifConfig.getTagName();
+    int ifIndex = ie.getInterfaceId();
+    std::string ifName = ie.getInterfaceName();
 
-    for(auto &ie : getInterfaceByXMLAttributesOf(ifConfig)) {
-        int ifIndex = ie->getInterfaceId();
-        std::string ifName = ie->getInterfaceName();
+    EV_DEBUG << "        loading " << interfaceType << " " << ifName << " (ifIndex=" << ifIndex << ")\n";
 
-        // making sure the interface has not been added before
-        AreaId areaID = Ipv4Address(getStrAttrOrPar(ifConfig, "areaID"));
-        Area *areaPtr = ospfRouter->getAreaByID(areaID);
-        if (areaPtr != nullptr) {
-            OspfInterface *areaInterface = areaPtr->getInterface(ifIndex);
-            if(areaInterface)
-                continue;
-        }
+    OspfInterface *intf = new OspfInterface;
 
-        EV_DEBUG << "        loading " << interfaceType << " " << ifName << " (ifIndex=" << ifIndex << ")\n";
+    intf->setInterfaceName(ifName);
+    AreaId areaID = Ipv4Address(getStrAttrOrPar(ifConfig, "areaID"));
+    intf->setAreaId(areaID);
+    intf->setIfIndex(ift, ifIndex); // should be called before calling setType()
 
-        OspfInterface *intf = new OspfInterface;
+    if (interfaceType == "PointToPointInterface") {
+        intf->setType(OspfInterface::POINTTOPOINT);
+    }
+    else if (interfaceType == "BroadcastInterface") {
+        intf->setType(OspfInterface::BROADCAST);
+    }
+    else if (interfaceType == "NBMAInterface") {
+        intf->setType(OspfInterface::NBMA);
+    }
+    else if (interfaceType == "PointToMultiPointInterface") {
+        intf->setType(OspfInterface::POINTTOMULTIPOINT);
+    }
+    else {
+        delete intf;
+        throw cRuntimeError("Unknown interface type '%s' for interface %s (ifIndex=%d) at %s",
+                interfaceType.c_str(), ifName.c_str(), ifIndex, ifConfig.getSourceLocation());
+    }
 
-        intf->setInterfaceName(ifName);
-        intf->setAreaId(areaID);
-        intf->setIfIndex(ift, ifIndex); // should be called before calling setType()
+    if(intfModeStr == "Active")
+        intf->setMode(OspfInterface::ACTIVE);
+    else if(intfModeStr == "Passive")
+        intf->setMode(OspfInterface::PASSIVE);
+    else {
+        delete intf;
+        throw cRuntimeError("Unknown interface mode '%s' for interface %s (ifIndex=%d) at %s",
+                interfaceType.c_str(), ifName.c_str(), ifIndex, ifConfig.getSourceLocation());
+    }
 
-        if (interfaceType == "PointToPointInterface") {
-            intf->setType(OspfInterface::POINTTOPOINT);
-        }
-        else if (interfaceType == "BroadcastInterface") {
-            intf->setType(OspfInterface::BROADCAST);
-        }
-        else if (interfaceType == "NBMAInterface") {
-            intf->setType(OspfInterface::NBMA);
-        }
-        else if (interfaceType == "PointToMultiPointInterface") {
-            intf->setType(OspfInterface::POINTTOMULTIPOINT);
-        }
-        else {
-            delete intf;
-            throw cRuntimeError("Unknown interface type '%s' for interface %s (ifIndex=%d) at %s",
-                    interfaceType.c_str(), ifName.c_str(), ifIndex, ifConfig.getSourceLocation());
-        }
+    std::string ospfCrcMode = par("crcMode").stdstringValue();
+    if(ospfCrcMode == "disabled")
+        intf->setCrcMode(CRC_DISABLED);
+    else if(ospfCrcMode == "computed")
+        intf->setCrcMode(CRC_COMPUTED);
+    else {
+        delete intf;
+        throw cRuntimeError("Unknown Ospf CRC mode '%s'", ospfCrcMode.c_str());
+    }
 
-        if(intfModeStr == "Active")
-            intf->setMode(OspfInterface::ACTIVE);
-        else if(intfModeStr == "Passive")
-            intf->setMode(OspfInterface::PASSIVE);
-        else {
-            delete intf;
-            throw cRuntimeError("Unknown interface mode '%s' for interface %s (ifIndex=%d) at %s",
-                    interfaceType.c_str(), ifName.c_str(), ifIndex, ifConfig.getSourceLocation());
-        }
+    Metric cost = getIntAttrOrPar(ifConfig, "interfaceOutputCost");
+    if(cost == 0)
+        intf->setOutputCost(round(par("referenceBandwidth").intValue() / ie.getDatarate()));
+    else
+        intf->setOutputCost(cost);
 
-        std::string ospfCrcMode = par("crcMode").stdstringValue();
-        if(ospfCrcMode == "disabled")
-            intf->setCrcMode(CRC_DISABLED);
-        else if(ospfCrcMode == "computed")
-            intf->setCrcMode(CRC_COMPUTED);
-        else {
-            delete intf;
-            throw cRuntimeError("Unknown Ospf CRC mode '%s'", ospfCrcMode.c_str());
-        }
+    intf->setRetransmissionInterval(getIntAttrOrPar(ifConfig, "retransmissionInterval"));
 
-        Metric cost = getIntAttrOrPar(ifConfig, "interfaceOutputCost");
-        if(cost == 0)
-            intf->setOutputCost(round(par("referenceBandwidth").intValue() / ie->getDatarate()));
-        else
-            intf->setOutputCost(cost);
+    intf->setTransmissionDelay(getIntAttrOrPar(ifConfig, "interfaceTransmissionDelay"));
 
-        intf->setRetransmissionInterval(getIntAttrOrPar(ifConfig, "retransmissionInterval"));
+    if (interfaceType == "BroadcastInterface" || interfaceType == "NBMAInterface")
+        intf->setRouterPriority(getIntAttrOrPar(ifConfig, "routerPriority"));
 
-        intf->setTransmissionDelay(getIntAttrOrPar(ifConfig, "interfaceTransmissionDelay"));
+    intf->setHelloInterval(getIntAttrOrPar(ifConfig, "helloInterval"));
 
-        if (interfaceType == "BroadcastInterface" || interfaceType == "NBMAInterface")
-            intf->setRouterPriority(getIntAttrOrPar(ifConfig, "routerPriority"));
+    intf->setRouterDeadInterval(getIntAttrOrPar(ifConfig, "routerDeadInterval"));
 
-        intf->setHelloInterval(getIntAttrOrPar(ifConfig, "helloInterval"));
+    loadAuthenticationConfig(intf, ifConfig);
 
-        intf->setRouterDeadInterval(getIntAttrOrPar(ifConfig, "routerDeadInterval"));
+    if (interfaceType == "NBMAInterface")
+        intf->setPollInterval(getIntAttrOrPar(ifConfig, "pollInterval"));
 
-        loadAuthenticationConfig(intf, ifConfig);
+    cXMLElementList ifDetails = ifConfig.getChildren();
 
-        if (interfaceType == "NBMAInterface")
-            intf->setPollInterval(getIntAttrOrPar(ifConfig, "pollInterval"));
-
-        cXMLElementList ifDetails = ifConfig.getChildren();
-
-        for (auto & ifDetail : ifDetails) {
-            std::string nodeName = (ifDetail)->getTagName();
-            if ((interfaceType == "NBMAInterface") && (nodeName == "NBMANeighborList")) {
-                cXMLElementList neighborList = (ifDetail)->getChildren();
-                for (auto & elem : neighborList) {
-                    std::string neighborNodeName = (elem)->getTagName();
-                    if (neighborNodeName == "NBMANeighbor") {
-                        Neighbor *neighbor = new Neighbor;
-                        neighbor->setAddress(ipv4AddressFromAddressString(getMandatoryFilledAttribute(*elem, "networkInterfaceAddress")));
-                        neighbor->setPriority(atoi(getMandatoryFilledAttribute(*elem, "neighborPriority")));
-                        intf->addNeighbor(neighbor);
-                    }
-                }
-            }
-            if ((interfaceType == "PointToMultiPointInterface") && (nodeName == "PointToMultiPointNeighborList")) {
-                cXMLElementList neighborList = (ifDetail)->getChildren();
-                for (auto & elem : neighborList) {
-                    std::string neighborNodeName = (elem)->getTagName();
-                    if (neighborNodeName == "PointToMultiPointNeighbor") {
-                        Neighbor *neighbor = new Neighbor;
-                        neighbor->setAddress(ipv4AddressFromAddressString((elem)->getNodeValue()));
-                        intf->addNeighbor(neighbor);
-                    }
+    for (auto & ifDetail : ifDetails) {
+        std::string nodeName = (ifDetail)->getTagName();
+        if ((interfaceType == "NBMAInterface") && (nodeName == "NBMANeighborList")) {
+            cXMLElementList neighborList = (ifDetail)->getChildren();
+            for (auto & elem : neighborList) {
+                std::string neighborNodeName = (elem)->getTagName();
+                if (neighborNodeName == "NBMANeighbor") {
+                    Neighbor *neighbor = new Neighbor;
+                    neighbor->setAddress(ipv4AddressFromAddressString(getMandatoryFilledAttribute(*elem, "networkInterfaceAddress")));
+                    neighbor->setPriority(atoi(getMandatoryFilledAttribute(*elem, "neighborPriority")));
+                    intf->addNeighbor(neighbor);
                 }
             }
         }
-
-        joinMulticastGroups(ifIndex);
-
-        // add the interface to it's Area
-        Area *area = ospfRouter->getAreaByID(areaID);
-        if (area != nullptr) {
-            area->addInterface(intf);
-            intf->processEvent(OspfInterface::INTERFACE_UP);    // notification should come from the blackboard...
+        if ((interfaceType == "PointToMultiPointInterface") && (nodeName == "PointToMultiPointNeighborList")) {
+            cXMLElementList neighborList = (ifDetail)->getChildren();
+            for (auto & elem : neighborList) {
+                std::string neighborNodeName = (elem)->getTagName();
+                if (neighborNodeName == "PointToMultiPointNeighbor") {
+                    Neighbor *neighbor = new Neighbor;
+                    neighbor->setAddress(ipv4AddressFromAddressString((elem)->getNodeValue()));
+                    intf->addNeighbor(neighbor);
+                }
+            }
         }
-        else {
-            delete intf;
-            throw cRuntimeError("Loading %s ifIndex[%d] in Area %s aborted at %s", interfaceType.c_str(), ifIndex, areaID.str(false).c_str(), ifConfig.getSourceLocation());
-        }
+    }
+
+    joinMulticastGroups(ifIndex);
+
+    // add the interface to it's Area
+    Area *area = ospfRouter->getAreaByID(areaID);
+    if (area != nullptr) {
+        area->addInterface(intf);
+        intf->processEvent(OspfInterface::INTERFACE_UP);    // notification should come from the blackboard...
+    }
+    else {
+        delete intf;
+        throw cRuntimeError("Loading %s ifIndex[%d] in Area %s aborted at %s", interfaceType.c_str(), ifIndex, areaID.str(false).c_str(), ifConfig.getSourceLocation());
     }
 }
 
@@ -404,34 +405,14 @@ void OspfConfigReader::loadHostRoute(const cXMLElement& hostRouteConfig)
     }
 }
 
-void OspfConfigReader::loadLoopbackParameters(const cXMLElement& loConfig)
+void OspfConfigReader::loadLoopbackParameters(const cXMLElement& loConfig, InterfaceEntry& ie)
 {
     std::string intfModeStr = getStrAttrOrPar(loConfig, "interfaceMode");
     if(intfModeStr == "NoOSPF")
         return;
 
-    const char *ifName = loConfig.getAttribute("ifName");
-    InterfaceEntry *ie = nullptr;
-    if (ifName && *ifName) {
-        inet::PatternMatcher pattern(ifName, true, true, true);
-        for (int n = 0; n < ift->getNumInterfaces(); n++) {
-            InterfaceEntry *intf = ift->getInterface(n);
-            if (pattern.matches(intf->getFullName()) ||
-                    pattern.matches(intf->getInterfaceFullPath().c_str()) ||
-                    pattern.matches(intf->getInterfaceName())) {
-                ie = intf;
-                break;
-            }
-        }
-        if(!ie)
-            throw cRuntimeError("Error reading XML config: IInterfaceTable contains no ifName '%s' at %s", ifName, loConfig.getSourceLocation());
-    }
-    else
-        throw cRuntimeError("Error reading XML config: IInterfaceTable contains no ifName '%s' at %s", ifName, loConfig.getSourceLocation());
-
-    ASSERT(ie);
-    int ifIndex = ie->getInterfaceId();
-    EV_DEBUG << "        loading LoopbackInterface " << ie->getInterfaceName() << " ifIndex[" << ifIndex << "]\n";
+    int ifIndex = ie.getInterfaceId();
+    EV_DEBUG << "        loading LoopbackInterface " << ie.getInterfaceName() << " ifIndex[" << ifIndex << "]\n";
 
     joinMulticastGroups(ifIndex);
 
@@ -439,7 +420,7 @@ void OspfConfigReader::loadLoopbackParameters(const cXMLElement& loConfig)
     HostRouteParameters hostParameters;
     hostParameters.ifIndex = ifIndex;
     AreaId hostArea = ipv4AddressFromAddressString(getStrAttrOrPar(loConfig, "areaID"));
-    hostParameters.address = ie->getIpv4Address();
+    hostParameters.address = ie.getIpv4Address();
     hostParameters.linkCost = getIntAttrOrPar(loConfig, "linkCost");
 
     // add the host route to the OSPF data structure.
@@ -447,7 +428,7 @@ void OspfConfigReader::loadLoopbackParameters(const cXMLElement& loConfig)
     if (area != nullptr)
         area->addHostRoute(hostParameters);
     else
-        throw cRuntimeError("Loading LoopbackInterface '%s' aborted, unknown area %s at %s", ie->getInterfaceName(), hostArea.str(false).c_str(), loConfig.getSourceLocation());
+        throw cRuntimeError("Loading LoopbackInterface '%s' aborted, unknown area %s at %s", ie.getInterfaceName(), hostArea.str(false).c_str(), loConfig.getSourceLocation());
 }
 
 void OspfConfigReader::loadVirtualLink(const cXMLElement& virtualLinkConfig)
@@ -544,6 +525,48 @@ void OspfConfigReader::initiateDefaultRouteDistribution()
     }
 }
 
+cXMLElement * OspfConfigReader::findMatchingConfig(const cXMLElementList& routerConfig, const InterfaceEntry& intf)
+{
+    for (auto & ifConfig : routerConfig) {
+        std::string nodeName = ifConfig->getTagName();
+        if ((nodeName == "PointToPointInterface") ||
+                (nodeName == "BroadcastInterface") ||
+                (nodeName == "NBMAInterface") ||
+                (nodeName == "PointToMultiPointInterface") ||
+                (nodeName == "LoopbackInterface"))
+        {
+            const char *ifName = (*ifConfig).getAttribute("ifName");
+            if (ifName && *ifName) {
+                inet::PatternMatcher pattern(ifName, true, true, true);
+                if (pattern.matches(intf.getFullName()) ||
+                        pattern.matches(intf.getInterfaceFullPath().c_str()) ||
+                        pattern.matches(intf.getInterfaceName())) {
+                    return ifConfig;
+                }
+
+                continue;
+            }
+
+            const char *toward = getMandatoryFilledAttribute(*ifConfig, "toward");
+            cModule *destnode = getSimulation()->getSystemModule()->getModuleByPath(toward);
+            if (!destnode)
+                throw cRuntimeError("toward module `%s' not found at %s", toward, (*ifConfig).getSourceLocation());
+
+            cModule *host = ift->getHostModule();
+            for (int i = 0; i < ift->getNumInterfaces(); i++) {
+                InterfaceEntry *ie = ift->getInterface(i);
+                if (ie) {
+                    int gateId = ie->getNodeOutputGateId();
+                    if ((gateId != -1) && (host->gate(gateId)->pathContains(destnode)))
+                        return ifConfig;
+                }
+            }
+        }
+    }
+
+    return nullptr;
+}
+
 std::vector<InterfaceEntry *> OspfConfigReader::getInterfaceByXMLAttributesOf(const cXMLElement& ifConfig)
 {
     std::vector<InterfaceEntry *> results;
@@ -558,12 +581,6 @@ std::vector<InterfaceEntry *> OspfConfigReader::getInterfaceByXMLAttributesOf(co
                 results.push_back(intf);
             }
         }
-        if(results.empty()) {
-            const char *searchMode = ifConfig.getAttribute("search");
-            if (!searchMode || (searchMode && std::string(searchMode) == "strict"))
-                throw cRuntimeError("Error reading XML config: IInterfaceTable contains no interface named '%s' at %s", ifName, ifConfig.getSourceLocation());
-        }
-
         return results;
     }
 
