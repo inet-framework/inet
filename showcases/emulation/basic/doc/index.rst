@@ -4,148 +4,186 @@ Connecting the Real and the Simulated World
 Goals
 -----
 
-Ping is a basic Internet program that allows a user to verify that a
-particular IP address exists and can accept requests. Ping is used
-diagnostically to ensure that a host computer the user is trying to
-reach is actually operating. INET features a way to simulate ping
-between hosts.
+Emulation is a fast and cheap method for running experiments in the
+real world. With the help of INET's emulation feature, it is possible
+divide the simulated network into different parts, leaving some of them
+as part of the simulation while extracting others into the real operating
+environment.
 
 This showcase presents the emulation feature of the INET framework by
-performing ping communication in simulated and emulated models.
+performing ping communication in different emulated models.
 
 INET version: ``4.0``
 
 Source files location: `inet/showcases/emulation/pingpong <https://github.com/inet-framework/inet-showcases/tree/master/emulation/pingpong>`__
 
-About ping
-----------
-
-Ping is a computer network administration software utility used to test
-the reachability of a host on an Internet Protocol (IP) network. It
-measures the round-trip time for messages sent from the originating host
-to a destination computer that are echoed back to the source.
-
-Ping operates by sending Internet Control Message Protocol (ICMP) echo
-request packets to the target host and waiting for an ICMP echo reply.
-
 The model
 ---------
 
-The network
-~~~~~~~~~~~
+This showcase presents many different scenarios in order to explain how
+the real world and the simulated environment can be connected at
+different parts of a network.
 
-This showcase presents three different scenarios in order to present how
-an emulated network can be divided at different parts in contrast with a
-fully simulated one.
+All of these examples contain two hosts, one of which - may it be real or simulated -
+pings the other one.
 
-**Fully Simulated Network**
+Using :ned:`ExtEthernetUpperInterface`
+--------------------------------------
 
-The first example presented in this showcase is a fully simulated
-network. The network consist of two hosts (``host1`` and ``host2``) and
-a 100Mbps Ethernet connection between them. The following image shows
-the layout of the first network:
+The :ned:`ExtUpperEthernetInterface` looks like the following when the simulation
+is run in the GUI:
 
-.. figure:: pingpong_layout_1.png
-   :width: 60%
+.. figure:: ExtUpperEthernetInterface.png
+   :scale: 100%
    :align: center
 
-**First Emulated Network**
+The ``Upper`` part in the name of the module means that the upper part of the
+functionality of the interface is external.
+The :ned:`ExtEthernetTapDeviceFileIo` (``tap``) module provides connection to a real TAP
+interface of the host computer which is running the simulation.
 
-The second example presents an emulated network, consisting of one
-simulated node called ``host1``. The other parts of the network, from
-the ``ExtLowerEthernetInterface`` of ``host1`` are not part of the
-simulated environment. The simulated side of the network can be seen in
-the following picture:
+In order for these emulation examples to work, some configuration of the real operating environment
+is needed as well.
+For each configuration, the ``Test<ConfigurationName>.sh`` file contains the commands,
+that we need to execute in the terminal under Linux. Now, we will only look at some of the
+common steps.
 
-.. figure:: pingpong_layout_2.png
-   :width: 60%
+First of all, the above mentioned virtual TAP interface needs to be created with a specific IP
+address:
+
+.. literalinclude:: CreateTap.sh
+   :language: xml
+   :start-at: # create TAP interface
+   :end-at: sudo ip link set dev tap0 up
+
+As soon as the TAP interface (``tap0``) is brought up, a new entry appears
+in the routing table of the OS:
+
+.. figure:: new_entry.png
+   :scale: 100%
    :align: center
 
-**Second Emulated Network**
+When the virtual TAP interface is up and running, the simulation can be run
+as well. This step will be explained later.
 
-In the third example, there is a simulated node, ``host1``, and a a
-simulated connection between ``host1`` and ``host2``. The layout of the
-third network is the same as it was with the fully simulated scenario,
-although ``host2`` is not part of the simulation:
+After the simulation, the TAP interface can be destroyed with
+the following commands:
 
-.. figure:: pingpong_layout_1.png
-   :width: 60%
+.. literalinclude:: CreateTap.sh
+   :language: xml
+   :start-at: # destroy TAP interface
+   :end-at: sudo ip tuntap del mode tap dev tap0
+
+
+ExtUpperEthernetInterfaceInHost1
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The first example uses the ``NoExtHostsEthernetShowcase`` network:
+
+.. figure:: NoExtHostsEthernetShowcase.png
+   :scale: 100%
    :align: center
 
-Configuration and behaviour
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Please make sure to follow the steps on the `previous page <file:///home/marcell/inet/doc/src/_build/html/showcases/emulation/index.html>`__
-to set the application permissions!
-
-
-The showcase involves three different configurations:
-
--  ``Simulated``: A fully simulated model with two nodes and a 100Mbps Ethernet connection
-   between them.
--  ``Emulated1``: One of the nodes is simulated, the other
-   node and the connection is in the real operating environment.
--  ``Emulated2``: One of the nodes and the 100Mbps Ethernet connection is
-   simulated, the other node is in the real operating environment.
-
-In all the three examples the :ned:`PingApp` of the simulated ``host1``
-sends ping packets with the destination address of ``192.168.2.2``.
+This example demonstrates how a real ping application can send echo
+request messages to a simulated host, which then replies. This communication
+between the real and the simulated word can be achieved by using the
+:ned:`ExtUpperEthernetInterface` in ``host1``:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: numApps
-   :end-before: ####
+   :start-at: *.host1.eth[0].typename = "ExtUpperEthernetInterface"
+   :end-at: *.host1.eth[0].copyConfiguration = "copyFromExt"
 
-**Simulated configuration**
-
-There is no need for any other parameter to be set in the ``Simulated``
-configuration.
-
-**Emulated1 configuration**
-
-The ``Emulated1`` configuration uses the ``ExtLowerEthernetInterface``
-provided by INET. This is a socket based external ethernet interface.
-Before running the emulation, there are some preparations that need be
-done. The ``Emulation1`` configuration is run using virtual ethernet
-devices, called ``vetha`` and ``vethb``. These two devices need to be
-created and configured. This is achieved as the following:
-
-.. literalinclude:: ../setup1.sh
-
-.. note::
-
-   veth (virtual ethernet device): they can act as tunnels
-   between network namespaces to create a bridge to a physical network
-   device in another namespace, but can also be used as standalone network
-   devices. The veth devices are always created in interconnected pairs.
-
-We can see that ``vethb`` gets the IP address ``192.168.2.2``, which is
-the same as the destination Address of ``host1``'s :ned:`PingApp`. In this
-emulation ``host1`` pings ``vethb`` through ``vetha``.
+In the simulation, the IP address of ``host2``'s Ethernet interface is set to
+192.168.2.2/24:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: Emulated1
-   :end-before: ####
+   :start-at: *.configurator.config = xml("<config><interface hosts='host2' names='eth0' address='192.168.2.2' netmask='255.255.255.0'
+   :end-at: *.configurator.config = xml("<config><interface hosts='host2' names='eth0' address='192.168.2.2' netmask='255.255.255.0'
 
-It is important that the TAP device used in the ``Emulated2``
-configuration and the veth devices used in the ``Emulated1``
-configuration do not exist at the same time during an emulation. The
-reasun for that is that both ``vethb`` and ``tapa`` have the same IP
-address, which can falsify the results. So it is highly recommended to
-destroy the virtual ethernet link after running the ``Emulated1``
-configuration:
+After creating the TAP interface using the script from the
+``TestExtUpperEthernetInterfaceInHost1.sh`` file, the simulation is run from
+the terminal and the textual results are saved in the ``inte.out`` file:
 
-.. literalinclude:: ../teardown1.sh
+.. literalinclude:: ../TestExtUpperEthernetInterfaceInHost1.sh
+   :language: xml
+   :start-at: # run simulation
+   :end-at: inet -u Cmdenv -c ExtUpperEthernetInterfaceInHost1 --sim-time-limit=2s &> inet.out &
 
-**Emulated2 configuration**
+While the simulation is running, we can ping into it using the computers ping application.
+This can be done by pinging the IP address 192.168.2.2, the IP address
+of the simulated ``host2`` module. The output is saved as ``ping.out`` file for later examination:
 
-The ``Emulated2`` configuration uses the ``ExtUpperEthernetInterface``
-provided by INET. This emulation is with real TAP interface connected to
-the simulation. For this reason the ``tapa`` TAP interface need to be
-created and configured before the ``Emulation2`` configuration is run:
+.. literalinclude:: ../TestExtUpperEthernetInterfaceInHost1.sh
+   :language: xml
+   :start-at: # ping into simulation
+   :end-at: ping -c 2 -W 2 192.168.2.2 > ping.out
 
-.. literalinclude:: ../setup2.sh
+This way the real ping application of the OS generates the ECHO REQUEST messages.
+Because of the above mentioned entry in the routing table, the messages are
+routed through the virtual TAP interface. ``host1``'s Ethernet interface reads
+``tap0`` - this point is the bridge between the real operating environment
+and the simulation. The ECHO REQUEST messages are then forwarded towards ``host2``
+inside the simulation. ``host2`` replies to the requests by sending ECHO REPLY
+messages to ``host1``. The :ned:`ExtUpperEthernetInterface` of ``host1`` writes
+the messages into the ``tap0`` virtual TAP interface. The real ping application
+of the OS receives the ECHO REPLY messages and prints the results into the ``ping.out``
+file.
+
+We can check whether or not the pinging was successful by checking the content
+of the ``ping.out`` file with the following command:
+
+.. literalinclude:: ../TestExtUpperEthernetInterfaceInHost1.sh
+   :language: xml
+   :start-at: # check output
+   :end-at: if grep -q "from 192.168.2.2" "ping.out"; then echo $0 ": PASS"; else echo $0 ": FAIL"; firm *.out
+
+Or we can also open the ``ping.out`` file to see the textual results of the
+ping.
+
+.. literalinclude:: ExtUpperEthernetInterfaceInHost1_ping.out
+   :language: xml
+
+ExtUpperEthernetInterfaceInHost2
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Using :ned:`ExtEthernetLowerInterface`
+--------------------------------------
+
+ExtLowerEthernetInterfaceInHost2
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ExtLowerEthernetInterfaceInHost1
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Using :ned:`ExtUpperIeee80211Interface`
+---------------------------------------
+
+ExtUpperIeee80211InterfaceInHost1
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ExtUpperIeee80211InterfaceInHost2
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Results
+-------
+
+Conclusion
+----------
+
+Further Information
+-------------------
+
+Discussion
+----------
+
+Use `this page <https://github.com/inet-framework/inet-showcases/issues/??>`__ in
+the GitHub issue tracker for commenting on this showcase.
+
+
+
+
 
 .. note::
 
@@ -159,95 +197,124 @@ created and configured before the ``Emulation2`` configuration is run:
    or inject the packets into the regular networking stack as required
    making everything appear as if a real device is being used.
 
-In this configuration we do not need the configurator to set the IP
-address of ``host2``, because ``host2`` uses the ``tapa`` real TAP
-interface, to which the proper IP address was previously assigned.
+.. note::
+
+   veth (virtual ethernet device): they can act as tunnels
+   between network namespaces to create a bridge to a physical network
+   device in another namespace, but can also be used as standalone network
+   devices. The veth devices are always created in interconnected pairs.
+
+
+
+
+**ExtUpperEthernetInterfaceInHost1**
+
+The first example uses the ``NoExtHostsEthernetShowcase`` network:
+
+.. figure:: NoExtHostsEthernetShowcase.png
+   :scale: 100%
+   :align: center
+
+This example demonstrates how a real ping application can send echo
+request messages to a simulated host, which then replies. This communication
+between the real and the simulated word can be achieved by using the
+:ned:`ExtUpperEthernetInterface` in ``host1``:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: Emulated2
-   :end-before: ####
+   :start-at: *.host1.eth[0].typename = "ExtUpperEthernetInterface"
+   :end-at: *.host1.eth[0].copyConfiguration = "copyFromExt"
 
-It is recommended to destroy the TAP interface if the emulation is
-finished and it is not needed anymore:
+The :ned:`ExtUpperEthernetInterface` looks like the following when the simulation
+is run in the GUI:
 
-.. literalinclude:: ../teardown2.sh
+.. figure:: ExtUpperEthernetInterface.png
+   :scale: 100%
+   :align: center
 
-Results
--------
+The ``Upper`` part in the name of the module means that the upper part of the
+functionality of the interface is external.
+The :ned:`ExtEthernetTapDeviceFileIo` (``tap``) module provides connection to a real TAP
+interface of the host computer which is running the simulation.
 
-This time the simulations are run from the terminal in order to show the
-above detailed preparations as well.
+In order for the emulation to work, some configuration of the real operating environment
+is needed as well. The ``TestExtUpperEthernetInterfaceInHost1.sh`` file contains the commands
+that we need to execute in the terminal under Linux.
 
-Simulated configuration
-~~~~~~~~~~~~~~~~~~~~~~~
+First of all, the above mentioned virtual TAP interface needs to be created with a specific IP
+address:
 
-There are no preparations needed for the ``Simulated`` configuration to
-run. As the video confirms, this is a fully simulated model, which runs
-in a simulated environment. No real network interfaces of the computer
-are influenced by the simulation, meaning that no extra traffic appears
-on them:
+.. literalinclude:: ../TestExtUpperEthernetInterfaceInHost1.sh
+   :language: xml
+   :start-at: # create TAP interface
+   :end-at: sudo ip link set dev tap0 up
 
-.. video:: Simulated_EDIT.mp4
-   :width: 100%
-|
+.. note::
 
-Emulated1 configuration
-~~~~~~~~~~~~~~~~~~~~~~~
+   Linux and most other operating systems have the ability to
+   create virtual interfaces which are usually called TUN/TAP devices.
+   Typically a network device in a system, for example eth0, has a physical
+   device associated with it which is used to put packets on the wire. In
+   contrast a TUN or a TAP device is entirely virtual and managed by the
+   kernel. User space applications can interact with TUN and TAP devices as
+   if they were real and behind the scenes the operating system will push
+   or inject the packets into the regular networking stack as required
+   making everything appear as if a real device is being used.
 
-As mentioned above, this configuration uses the
-``ExtLowerEthernetInterface`` offered by INET. This external interface
-acts as a bridge between the simulated and the real world. From this
-module on, the emulation enters the real operation environment of the
-OS. The following video shows how the traffic rate of the virtual
-ethernet devices changes, while the emulation is running. Right at the
-beginning of the video, you can also take a look at the previous
-configurations that needed to be done for the emulation to run without
-errors:
+As soon as the TAP interface (``tap0``) is brought up, a new entry appears
+in the routing table of the OS:
 
-.. video:: Emulated1_EDIT.mp4
-   :width: 100%
-|
+.. figure:: new_entry.png
+   :scale: 100%
+   :align: center
 
-The change in the traffic rate of ``vetha`` and ``vethb`` is conspicuous
-when the emulation is started.
+In the simulation, the IP address of ``host2``'s Ethernet interface is set to
+192.168.2.2/24:
 
-Emulated2 configuration
-~~~~~~~~~~~~~~~~~~~~~~~
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: *.configurator.config = xml("<config><interface hosts='host2' names='eth0' address='192.168.2.2' netmask='255.255.255.0'
+   :end-at: *.configurator.config = xml("<config><interface hosts='host2' names='eth0' address='192.168.2.2' netmask='255.255.255.0'
 
-In this configuration, the ``ExtUpperEthernetInterface`` is used. In a
-sense this interface is similar to the ``ExtLowerEthernetInterface``
-used in the ``Emulated1`` configuration, meaning that it acts as a
-bridge between the simulated and the real world. If we run the
-``Emulated2`` configuration and observe the traffic rate of the ``tapa``
-TAP interface, we can conclude that ``host1`` is indeed pinging the real
-TAP interface:
+The simulation is run from the terminal and the textual results are saved in the ``inte.out`` file:
 
-.. video:: Emulated2_EDIT.mp4
-   :width: 100%
-|
+.. literalinclude:: ../TestExtUpperEthernetInterfaceInHost1.sh
+   :language: xml
+   :start-at: # run simulation
+   :end-at: inet -u Cmdenv -c ExtUpperEthernetInterfaceInHost1 --sim-time-limit=2s &> inet.out &
 
-Conclusion
-----------
+While the simulation is running, we can ping into it using the computers ping application.
+This can be done from the terminal by pinging the IP address 192.168.2.2, the IP address
+of the simulated ``host2`` module. The output is saved as ``ping.out`` file for later examination:
 
-We can clearly see that using the external interfaces, the emulation can
-switch between the real and the simulated environment. This emulation
-feature of INET makes it possible for the user to "cut" the network at
-arbitrary points into many pieces and leave some of them in the
-simulation while extracting the others into the real world.
+.. literalinclude:: ../TestExtUpperEthernetInterfaceInHost1.sh
+   :language: xml
+   :start-at: # ping into simulation
+   :end-at: ping -c 2 -W 2 192.168.2.2 > ping.out
 
-Further Information
--------------------
+This way the real ping application of the OS generates the ECHO REQUEST messages.
+Because of the above mentioned entry in the routing table, the messages are
+routed through the virtual TAP interface. ``host1``'s Ethernet interface reads
+``tap0`` - this point is the bridge between the real operating environment
+and the simulation. The ECHO REQUEST messages are then forwarded towards ``host2``
+inside the simulation. ``host2`` replies to the requests by sending ECHO REPLY
+messages to ``host1``. The :ned:`ExtUpperEthernetInterface` of ``host1`` writes
+the messages into the ``tap0`` virtual TAP interface. The real ping application
+of the OS receives the ECHO REPLY messages and prints the results into the ``ping.out``
+file.
 
-The following link provides more information about ping in general:
-- `ping (networking utility) <https://en.wikipedia.org/wiki/Ping_(networking_utility)>`__
+We can check whether or not the pinging was successful by checking the content
+of the ``ping.out`` file with the following command:
 
-The network traffic is observed using `bmon <https://github.com/tgraf/bmon>`__,
-which is a monitoring and debugging tool to capture networking related statistics
-and prepare them visually in a human friendly way.
+.. literalinclude:: ../TestExtUpperEthernetInterfaceInHost1.sh
+   :language: xml
+   :start-at: # check output
+   :end-at: if grep -q "from 192.168.2.2" "ping.out"; then echo $0 ": PASS"; else echo $0 ": FAIL"; firm *.out
 
-Discussion
-----------
+After the simulation, the TAP interface can be destroyed with
+the following commands:
 
-Use `this page <https://github.com/inet-framework/inet-showcases/issues/??>`__ in
-the GitHub issue tracker for commenting on this showcase.
+.. literalinclude:: ../TestExtUpperEthernetInterfaceInHost1.sh
+   :language: xml
+   :start-at: # destroy TAP interface
+   :end-at: sudo ip tuntap del mode tap dev tap0
