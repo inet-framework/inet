@@ -1,0 +1,1031 @@
+OMNeT++ Discrete Event Simulation  (C) 1992-2018 Andras Varga, OpenSim Ltd.
+Version: 5.4.1, build: 180629-5e28390, edition: Academic Public License -- NOT FOR COMMERCIAL USE
+See the license for distribution terms and warranty disclaimer
+
+Setting up Cmdenv...
+
+Loading NED files from /home/marcell/inet/src:  726
+Loading NED files from /home/marcell/inet/tutorials:  20
+Loading NED files from /home/marcell/inet/showcases:  60
+Loading NED files from /home/marcell/inet/examples:  163
+
+Preparing for running configuration ExtUpperEthernetInterfaceInHost1, run #0...
+Assigned runID=ExtUpperEthernetInterfaceInHost1-0-20181114-16:09:23-9455
+Setting up network "NoExtHostsEthernetShowcase"...
+Initializing...
+Initializing channel NoExtHostsEthernetShowcase.host1.ethg$o[0].channel, stage 0
+Initializing channel NoExtHostsEthernetShowcase.host2.ethg$o[0].channel, stage 0
+Initializing channel NoExtHostsEthernetShowcase.host1.eth[0].phys$o.channel, stage 0
+Initializing channel NoExtHostsEthernetShowcase.host1.ethg$i[0].channel, stage 0
+Initializing channel NoExtHostsEthernetShowcase.host1.lo[0].lo.upperLayerOut.channel, stage 0
+Initializing channel NoExtHostsEthernetShowcase.host1.lo[0].upperLayerIn.channel, stage 0
+Initializing channel NoExtHostsEthernetShowcase.host1.eth[0].tap.lowerLayerOut.channel, stage 0
+Initializing channel NoExtHostsEthernetShowcase.host1.eth[0].mac.upperLayerOut.channel, stage 0
+Initializing channel NoExtHostsEthernetShowcase.host1.eth[0].mac.phys$o.channel, stage 0
+Initializing channel NoExtHostsEthernetShowcase.host1.eth[0].phys$i.channel, stage 0
+Initializing channel NoExtHostsEthernetShowcase.host1.ipv4.up.out[0].channel, stage 0
+Initializing channel NoExtHostsEthernetShowcase.host1.ipv4.lp.out[2].channel, stage 0
+Initializing channel NoExtHostsEthernetShowcase.host1.ipv4.ifIn.channel, stage 0
+Initializing channel NoExtHostsEthernetShowcase.host1.ipv4.transportIn.channel, stage 0
+Initializing channel NoExtHostsEthernetShowcase.host2.eth[0].phys$o.channel, stage 0
+Initializing channel NoExtHostsEthernetShowcase.host2.ethg$i[0].channel, stage 0
+Initializing channel NoExtHostsEthernetShowcase.host2.lo[0].lo.upperLayerOut.channel, stage 0
+Initializing channel NoExtHostsEthernetShowcase.host2.lo[0].upperLayerIn.channel, stage 0
+Initializing channel NoExtHostsEthernetShowcase.host2.eth[0].mac.phys$o.channel, stage 0
+Initializing channel NoExtHostsEthernetShowcase.host2.eth[0].encap.upperLayerOut.channel, stage 0
+Initializing channel NoExtHostsEthernetShowcase.host2.eth[0].upperLayerIn.channel, stage 0
+Initializing channel NoExtHostsEthernetShowcase.host2.eth[0].phys$i.channel, stage 0
+Initializing channel NoExtHostsEthernetShowcase.host2.ipv4.up.out[0].channel, stage 0
+Initializing channel NoExtHostsEthernetShowcase.host2.ipv4.lp.out[2].channel, stage 0
+Initializing channel NoExtHostsEthernetShowcase.host2.ipv4.ifIn.channel, stage 0
+Initializing channel NoExtHostsEthernetShowcase.host2.ipv4.transportIn.channel, stage 0
+Initializing module NoExtHostsEthernetShowcase, stage 0
+Initializing module NoExtHostsEthernetShowcase.configurator, stage 0
+Initializing module NoExtHostsEthernetShowcase.host1, stage 0
+Initializing module NoExtHostsEthernetShowcase.host1.interfaceTable, stage 0
+Initializing module NoExtHostsEthernetShowcase.host1.lo[0], stage 0
+Initializing module NoExtHostsEthernetShowcase.host1.lo[0].lo, stage 0
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0], stage 0
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0].tap, stage 0
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0].mac, stage 0
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4, stage 0
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.configurator, stage 0
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.routingTable, stage 0
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.natTable, stage 0
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.up, stage 0
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.igmp, stage 0
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.icmp, stage 0
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.mp, stage 0
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.ip, stage 0
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.arp, stage 0
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.lp, stage 0
+Initializing module NoExtHostsEthernetShowcase.host1.nl, stage 0
+Initializing module NoExtHostsEthernetShowcase.host1.udp, stage 0
+Initializing module NoExtHostsEthernetShowcase.host1.tcp, stage 0
+Initializing module NoExtHostsEthernetShowcase.host1.tn, stage 0
+Initializing module NoExtHostsEthernetShowcase.host1.at, stage 0
+Initializing module NoExtHostsEthernetShowcase.host2, stage 0
+Initializing module NoExtHostsEthernetShowcase.host2.interfaceTable, stage 0
+Initializing module NoExtHostsEthernetShowcase.host2.lo[0], stage 0
+Initializing module NoExtHostsEthernetShowcase.host2.lo[0].lo, stage 0
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0], stage 0
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0].mac, stage 0
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0].encap, stage 0
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4, stage 0
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.configurator, stage 0
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.routingTable, stage 0
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.natTable, stage 0
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.up, stage 0
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.igmp, stage 0
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.icmp, stage 0
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.mp, stage 0
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.ip, stage 0
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.arp, stage 0
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.lp, stage 0
+Initializing module NoExtHostsEthernetShowcase.host2.nl, stage 0
+Initializing module NoExtHostsEthernetShowcase.host2.udp, stage 0
+Initializing module NoExtHostsEthernetShowcase.host2.tcp, stage 0
+Initializing module NoExtHostsEthernetShowcase.host2.tn, stage 0
+Initializing module NoExtHostsEthernetShowcase.host2.at, stage 0
+Initializing module NoExtHostsEthernetShowcase.configurator, stage 1
+Initializing module NoExtHostsEthernetShowcase.host1.interfaceTable, stage 1
+Initializing module NoExtHostsEthernetShowcase.host1.lo[0], stage 1
+Initializing module NoExtHostsEthernetShowcase.host1.lo[0].lo, stage 1
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0], stage 1
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0].tap, stage 1
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0].mac, stage 1
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.configurator, stage 1
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.routingTable, stage 1
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.natTable, stage 1
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.igmp, stage 1
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.icmp, stage 1
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.ip, stage 1
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.arp, stage 1
+Initializing module NoExtHostsEthernetShowcase.host1.udp, stage 1
+Initializing module NoExtHostsEthernetShowcase.host1.tcp, stage 1
+Initializing module NoExtHostsEthernetShowcase.host2.interfaceTable, stage 1
+Initializing module NoExtHostsEthernetShowcase.host2.lo[0], stage 1
+Initializing module NoExtHostsEthernetShowcase.host2.lo[0].lo, stage 1
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0], stage 1
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0].mac, stage 1
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0].encap, stage 1
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.configurator, stage 1
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.routingTable, stage 1
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.natTable, stage 1
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.igmp, stage 1
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.icmp, stage 1
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.ip, stage 1
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.arp, stage 1
+Initializing module NoExtHostsEthernetShowcase.host2.udp, stage 1
+Initializing module NoExtHostsEthernetShowcase.host2.tcp, stage 1
+Initializing module NoExtHostsEthernetShowcase.configurator, stage 2
+Initializing module NoExtHostsEthernetShowcase.host1.interfaceTable, stage 2
+Initializing module NoExtHostsEthernetShowcase.host1.lo[0], stage 2
+Initializing module NoExtHostsEthernetShowcase.host1.lo[0].lo, stage 2
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0], stage 2
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0].tap, stage 2
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0].mac, stage 2
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.configurator, stage 2
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.routingTable, stage 2
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.natTable, stage 2
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.igmp, stage 2
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.icmp, stage 2
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.ip, stage 2
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.arp, stage 2
+Initializing module NoExtHostsEthernetShowcase.host1.udp, stage 2
+Initializing module NoExtHostsEthernetShowcase.host1.tcp, stage 2
+Initializing module NoExtHostsEthernetShowcase.host2.interfaceTable, stage 2
+Initializing module NoExtHostsEthernetShowcase.host2.lo[0], stage 2
+Initializing module NoExtHostsEthernetShowcase.host2.lo[0].lo, stage 2
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0], stage 2
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0].mac, stage 2
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0].encap, stage 2
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.configurator, stage 2
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.routingTable, stage 2
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.natTable, stage 2
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.igmp, stage 2
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.icmp, stage 2
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.ip, stage 2
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.arp, stage 2
+Initializing module NoExtHostsEthernetShowcase.host2.udp, stage 2
+Initializing module NoExtHostsEthernetShowcase.host2.tcp, stage 2
+Initializing module NoExtHostsEthernetShowcase.configurator, stage 3
+Initializing module NoExtHostsEthernetShowcase.host1.interfaceTable, stage 3
+Initializing module NoExtHostsEthernetShowcase.host1.lo[0], stage 3
+Initializing module NoExtHostsEthernetShowcase.host1.lo[0].lo, stage 3
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0], stage 3
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0].tap, stage 3
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0].mac, stage 3
+[DETAIL]	No more frames to send, transmitter set to idle
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.configurator, stage 3
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.routingTable, stage 3
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.natTable, stage 3
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.igmp, stage 3
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.icmp, stage 3
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.ip, stage 3
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.arp, stage 3
+Initializing module NoExtHostsEthernetShowcase.host1.udp, stage 3
+Initializing module NoExtHostsEthernetShowcase.host1.tcp, stage 3
+Initializing module NoExtHostsEthernetShowcase.host2.interfaceTable, stage 3
+Initializing module NoExtHostsEthernetShowcase.host2.lo[0], stage 3
+Initializing module NoExtHostsEthernetShowcase.host2.lo[0].lo, stage 3
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0], stage 3
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0].mac, stage 3
+[DETAIL]	No more frames to send, transmitter set to idle
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0].encap, stage 3
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.configurator, stage 3
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.routingTable, stage 3
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.natTable, stage 3
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.igmp, stage 3
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.icmp, stage 3
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.ip, stage 3
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.arp, stage 3
+Initializing module NoExtHostsEthernetShowcase.host2.udp, stage 3
+Initializing module NoExtHostsEthernetShowcase.host2.tcp, stage 3
+Initializing module NoExtHostsEthernetShowcase.configurator, stage 4
+[INFO]	Computing static network configuration (addresses and routes).
+Initializing module NoExtHostsEthernetShowcase.host1.interfaceTable, stage 4
+Initializing module NoExtHostsEthernetShowcase.host1.lo[0], stage 4
+Initializing module NoExtHostsEthernetShowcase.host1.lo[0].lo, stage 4
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0], stage 4
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0].tap, stage 4
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0].mac, stage 4
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.configurator, stage 4
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.routingTable, stage 4
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.natTable, stage 4
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.igmp, stage 4
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.icmp, stage 4
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.ip, stage 4
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.arp, stage 4
+Initializing module NoExtHostsEthernetShowcase.host1.udp, stage 4
+Initializing module NoExtHostsEthernetShowcase.host1.tcp, stage 4
+Initializing module NoExtHostsEthernetShowcase.host2.interfaceTable, stage 4
+Initializing module NoExtHostsEthernetShowcase.host2.lo[0], stage 4
+Initializing module NoExtHostsEthernetShowcase.host2.lo[0].lo, stage 4
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0], stage 4
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0].mac, stage 4
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0].encap, stage 4
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.configurator, stage 4
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.routingTable, stage 4
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.natTable, stage 4
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.igmp, stage 4
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.icmp, stage 4
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.ip, stage 4
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.arp, stage 4
+Initializing module NoExtHostsEthernetShowcase.host2.udp, stage 4
+Initializing module NoExtHostsEthernetShowcase.host2.tcp, stage 4
+Initializing module NoExtHostsEthernetShowcase.configurator, stage 5
+Initializing module NoExtHostsEthernetShowcase.host1.interfaceTable, stage 5
+Initializing module NoExtHostsEthernetShowcase.host1.lo[0], stage 5
+Initializing module NoExtHostsEthernetShowcase.host1.lo[0].lo, stage 5
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0], stage 5
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0].tap, stage 5
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0].mac, stage 5
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.configurator, stage 5
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.routingTable, stage 5
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.natTable, stage 5
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.igmp, stage 5
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.icmp, stage 5
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.ip, stage 5
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.arp, stage 5
+Initializing module NoExtHostsEthernetShowcase.host1.udp, stage 5
+Initializing module NoExtHostsEthernetShowcase.host1.tcp, stage 5
+Initializing module NoExtHostsEthernetShowcase.host2.interfaceTable, stage 5
+Initializing module NoExtHostsEthernetShowcase.host2.lo[0], stage 5
+Initializing module NoExtHostsEthernetShowcase.host2.lo[0].lo, stage 5
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0], stage 5
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0].mac, stage 5
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0].encap, stage 5
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.configurator, stage 5
+[DETAIL]	Configuring network interface NoExtHostsEthernetShowcase.host2.eth0.
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.routingTable, stage 5
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.natTable, stage 5
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.igmp, stage 5
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.icmp, stage 5
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.ip, stage 5
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.arp, stage 5
+Initializing module NoExtHostsEthernetShowcase.host2.udp, stage 5
+Initializing module NoExtHostsEthernetShowcase.host2.tcp, stage 5
+Initializing module NoExtHostsEthernetShowcase.configurator, stage 6
+Initializing module NoExtHostsEthernetShowcase.host1.interfaceTable, stage 6
+Initializing module NoExtHostsEthernetShowcase.host1.lo[0], stage 6
+Initializing module NoExtHostsEthernetShowcase.host1.lo[0].lo, stage 6
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0], stage 6
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0].tap, stage 6
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0].mac, stage 6
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.configurator, stage 6
+[DETAIL]	Configuring routing table of NoExtHostsEthernetShowcase.host1.
+[INFO]	add route S 192.168.2.2/32 gw:* metric:0 if:eth0
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.routingTable, stage 6
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.natTable, stage 6
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.igmp, stage 6
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.icmp, stage 6
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.ip, stage 6
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.arp, stage 6
+Initializing module NoExtHostsEthernetShowcase.host1.udp, stage 6
+Initializing module NoExtHostsEthernetShowcase.host1.tcp, stage 6
+Initializing module NoExtHostsEthernetShowcase.host2.interfaceTable, stage 6
+Initializing module NoExtHostsEthernetShowcase.host2.lo[0], stage 6
+Initializing module NoExtHostsEthernetShowcase.host2.lo[0].lo, stage 6
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0], stage 6
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0].mac, stage 6
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0].encap, stage 6
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.configurator, stage 6
+[DETAIL]	Configuring routing table of NoExtHostsEthernetShowcase.host2.
+[INFO]	add route S 192.168.2.3/32 gw:* metric:0 if:eth0
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.routingTable, stage 6
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.natTable, stage 6
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.igmp, stage 6
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.icmp, stage 6
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.ip, stage 6
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.arp, stage 6
+Initializing module NoExtHostsEthernetShowcase.host2.udp, stage 6
+Initializing module NoExtHostsEthernetShowcase.host2.tcp, stage 6
+Initializing module NoExtHostsEthernetShowcase.configurator, stage 7
+Initializing module NoExtHostsEthernetShowcase.host1.interfaceTable, stage 7
+Initializing module NoExtHostsEthernetShowcase.host1.lo[0], stage 7
+Initializing module NoExtHostsEthernetShowcase.host1.lo[0].lo, stage 7
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0], stage 7
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0].tap, stage 7
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0].mac, stage 7
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.configurator, stage 7
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.routingTable, stage 7
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.natTable, stage 7
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.igmp, stage 7
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.icmp, stage 7
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.ip, stage 7
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.arp, stage 7
+Initializing module NoExtHostsEthernetShowcase.host1.udp, stage 7
+Initializing module NoExtHostsEthernetShowcase.host1.tcp, stage 7
+Initializing module NoExtHostsEthernetShowcase.host2.interfaceTable, stage 7
+Initializing module NoExtHostsEthernetShowcase.host2.lo[0], stage 7
+Initializing module NoExtHostsEthernetShowcase.host2.lo[0].lo, stage 7
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0], stage 7
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0].mac, stage 7
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0].encap, stage 7
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.configurator, stage 7
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.routingTable, stage 7
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.natTable, stage 7
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.igmp, stage 7
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.icmp, stage 7
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.ip, stage 7
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.arp, stage 7
+Initializing module NoExtHostsEthernetShowcase.host2.udp, stage 7
+Initializing module NoExtHostsEthernetShowcase.host2.tcp, stage 7
+Initializing module NoExtHostsEthernetShowcase.configurator, stage 8
+Initializing module NoExtHostsEthernetShowcase.host1.interfaceTable, stage 8
+Initializing module NoExtHostsEthernetShowcase.host1.lo[0], stage 8
+Initializing module NoExtHostsEthernetShowcase.host1.lo[0].lo, stage 8
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0], stage 8
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0].tap, stage 8
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0].mac, stage 8
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.configurator, stage 8
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.routingTable, stage 8
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.natTable, stage 8
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.igmp, stage 8
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.icmp, stage 8
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.ip, stage 8
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.arp, stage 8
+Initializing module NoExtHostsEthernetShowcase.host1.udp, stage 8
+Initializing module NoExtHostsEthernetShowcase.host1.tcp, stage 8
+Initializing module NoExtHostsEthernetShowcase.host2.interfaceTable, stage 8
+Initializing module NoExtHostsEthernetShowcase.host2.lo[0], stage 8
+Initializing module NoExtHostsEthernetShowcase.host2.lo[0].lo, stage 8
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0], stage 8
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0].mac, stage 8
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0].encap, stage 8
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.configurator, stage 8
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.routingTable, stage 8
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.natTable, stage 8
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.igmp, stage 8
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.icmp, stage 8
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.ip, stage 8
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.arp, stage 8
+Initializing module NoExtHostsEthernetShowcase.host2.udp, stage 8
+Initializing module NoExtHostsEthernetShowcase.host2.tcp, stage 8
+Initializing module NoExtHostsEthernetShowcase.configurator, stage 9
+Initializing module NoExtHostsEthernetShowcase.host1.interfaceTable, stage 9
+Initializing module NoExtHostsEthernetShowcase.host1.lo[0], stage 9
+Initializing module NoExtHostsEthernetShowcase.host1.lo[0].lo, stage 9
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0], stage 9
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0].tap, stage 9
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0].mac, stage 9
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.configurator, stage 9
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.routingTable, stage 9
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.natTable, stage 9
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.igmp, stage 9
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.icmp, stage 9
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.ip, stage 9
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.arp, stage 9
+Initializing module NoExtHostsEthernetShowcase.host1.udp, stage 9
+Initializing module NoExtHostsEthernetShowcase.host1.tcp, stage 9
+Initializing module NoExtHostsEthernetShowcase.host2.interfaceTable, stage 9
+Initializing module NoExtHostsEthernetShowcase.host2.lo[0], stage 9
+Initializing module NoExtHostsEthernetShowcase.host2.lo[0].lo, stage 9
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0], stage 9
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0].mac, stage 9
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0].encap, stage 9
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.configurator, stage 9
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.routingTable, stage 9
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.natTable, stage 9
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.igmp, stage 9
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.icmp, stage 9
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.ip, stage 9
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.arp, stage 9
+Initializing module NoExtHostsEthernetShowcase.host2.udp, stage 9
+Initializing module NoExtHostsEthernetShowcase.host2.tcp, stage 9
+Initializing module NoExtHostsEthernetShowcase.configurator, stage 10
+Initializing module NoExtHostsEthernetShowcase.host1.interfaceTable, stage 10
+Initializing module NoExtHostsEthernetShowcase.host1.lo[0], stage 10
+Initializing module NoExtHostsEthernetShowcase.host1.lo[0].lo, stage 10
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0], stage 10
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0].tap, stage 10
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0].mac, stage 10
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.configurator, stage 10
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.routingTable, stage 10
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.natTable, stage 10
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.igmp, stage 10
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.icmp, stage 10
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.ip, stage 10
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.arp, stage 10
+Initializing module NoExtHostsEthernetShowcase.host1.udp, stage 10
+Initializing module NoExtHostsEthernetShowcase.host1.tcp, stage 10
+Initializing module NoExtHostsEthernetShowcase.host2.interfaceTable, stage 10
+Initializing module NoExtHostsEthernetShowcase.host2.lo[0], stage 10
+Initializing module NoExtHostsEthernetShowcase.host2.lo[0].lo, stage 10
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0], stage 10
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0].mac, stage 10
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0].encap, stage 10
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.configurator, stage 10
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.routingTable, stage 10
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.natTable, stage 10
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.igmp, stage 10
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.icmp, stage 10
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.ip, stage 10
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.arp, stage 10
+Initializing module NoExtHostsEthernetShowcase.host2.udp, stage 10
+Initializing module NoExtHostsEthernetShowcase.host2.tcp, stage 10
+Initializing module NoExtHostsEthernetShowcase.configurator, stage 11
+Initializing module NoExtHostsEthernetShowcase.host1.interfaceTable, stage 11
+Initializing module NoExtHostsEthernetShowcase.host1.lo[0], stage 11
+Initializing module NoExtHostsEthernetShowcase.host1.lo[0].lo, stage 11
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0], stage 11
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0].tap, stage 11
+Initializing module NoExtHostsEthernetShowcase.host1.eth[0].mac, stage 11
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.configurator, stage 11
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.routingTable, stage 11
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.natTable, stage 11
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.igmp, stage 11
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.icmp, stage 11
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.ip, stage 11
+Initializing module NoExtHostsEthernetShowcase.host1.ipv4.arp, stage 11
+Initializing module NoExtHostsEthernetShowcase.host1.udp, stage 11
+Initializing module NoExtHostsEthernetShowcase.host1.tcp, stage 11
+Initializing module NoExtHostsEthernetShowcase.host2.interfaceTable, stage 11
+Initializing module NoExtHostsEthernetShowcase.host2.lo[0], stage 11
+Initializing module NoExtHostsEthernetShowcase.host2.lo[0].lo, stage 11
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0], stage 11
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0].mac, stage 11
+Initializing module NoExtHostsEthernetShowcase.host2.eth[0].encap, stage 11
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.configurator, stage 11
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.routingTable, stage 11
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.natTable, stage 11
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.igmp, stage 11
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.icmp, stage 11
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.ip, stage 11
+Initializing module NoExtHostsEthernetShowcase.host2.ipv4.arp, stage 11
+Initializing module NoExtHostsEthernetShowcase.host2.udp, stage 11
+Initializing module NoExtHostsEthernetShowcase.host2.tcp, stage 11
+
+Running simulation...
+[INFO]	We are behind: 2.93742 seconds
+** Event #1  t=0  0% completed  (0% total)
+[INFO]	Received a 94 B packet from 82-5D-42-63-4D-A9 to 33-33-00-00-00-16.
+** Event #2  t=0.011460389  0% completed  (0% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Received (inet::Packet)Ext-IPv6--0 (94 bytes) [[BytesChunk, length = 90 B, bytes = {51, 51, 0, 0, 0, 22, 130, 93, 66, 99, 77, 169, 134, 221, 96, 0, 0, 0, 0, 36, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 58, 0, 5, 2, 0, 0, 1, 0, 143, 0, 33, 126, 0, 0, 0, 1, 4, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 99, 77, 169} | inet::EthernetFcs, length = 4 B]] from upper layer.
+[DETAIL]	Frame inet::EthernetMacHeader, length = 14 B arrived from higher layers, enqueueing
+[DETAIL]	Transmitting a copy of frame (inet::Packet)Ext-IPv6--0 (94 bytes) [[BytesChunk, length = 90 B, bytes = {51, 51, 0, 0, 0, 22, 130, 93, 66, 99, 77, 169, 134, 221, 96, 0, 0, 0, 0, 36, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 58, 0, 5, 2, 0, 0, 1, 0, 143, 0, 33, 126, 0, 0, 0, 1, 4, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 99, 77, 169} | inet::EthernetFcs, length = 4 B]]
+[INFO]	Transmission of (inet::Packet)Ext-IPv6--0 (102 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 90 B, bytes = {51, 51, 0, 0, 0, 22, 130, 93, 66, 99, 77, 169, 134, 221, 96, 0, 0, 0, 0, 36, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 58, 0, 5, 2, 0, 0, 1, 0, 143, 0, 33, 126, 0, 0, 0, 1, 4, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 99, 77, 169} | inet::EthernetFcs, length = 4 B]] started.
+[INFO]	We are behind: 0.41771 seconds
+** Event #3  t=0.011468549  0% completed  (0% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Transmission of (inet::Packet)Ext-IPv6--0 (94 bytes) [[BytesChunk, length = 90 B, bytes = {51, 51, 0, 0, 0, 22, 130, 93, 66, 99, 77, 169, 134, 221, 96, 0, 0, 0, 0, 36, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 58, 0, 5, 2, 0, 0, 1, 0, 143, 0, 33, 126, 0, 0, 0, 1, 4, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 99, 77, 169} | inet::EthernetFcs, length = 4 B]] successfully completed.
+[DETAIL]	Start IFG period
+[INFO]	We are behind: 0.461358 seconds
+** Event #4  t=0.011468599  0% completed  (0% total)   NoExtHostsEthernetShowcase.host2.eth[0].mac (EtherMacFullDuplex, id=55)
+[INFO]	(inet::EthernetSignal)Ext-IPv6--0 received.
+[INFO]	Reception of inet::EthernetMacHeader, length = 14 B successfully completed.
+[INFO]	Sending (inet::Packet)Ext-IPv6--0 (94 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 90 B, bytes = {51, 51, 0, 0, 0, 22, 130, 93, 66, 99, 77, 169, 134, 221, 96, 0, 0, 0, 0, 36, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 58, 0, 5, 2, 0, 0, 1, 0, 143, 0, 33, 126, 0, 0, 0, 1, 4, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 99, 77, 169} | inet::EthernetFcs, length = 4 B]] to upper layer.
+[INFO]	We are behind: 0.52554 seconds
+** Event #5  t=0.011468599  0% completed  (0% total)   NoExtHostsEthernetShowcase.host2.eth[0].encap (EtherEncap, id=56)
+[INFO]	Received (inet::Packet)Ext-IPv6--0 from lower layer.
+[WARN]	Unknown protocol, dropping packet
+[INFO]	We are behind: 0.54387 seconds
+** Event #6  t=0.011469509  0% completed  (0% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[DETAIL]	IFG elapsed
+[DETAIL]	No more frames to send, transmitter set to idle
+[INFO]	Received a 90 B packet from 82-5D-42-63-4D-A9 to 33-33-FF-63-4D-A9.
+** Event #7  t=0.323536892  16% completed  (16% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Received (inet::Packet)Ext-ICMPv6--1 (90 bytes) [[BytesChunk, length = 86 B, bytes = {51, 51, 255, 99, 77, 169, 130, 93, 66, 99, 77, 169, 134, 221, 96, 0, 0, 0, 0, 32, 58, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 99, 77, 169, 135, 0, 8, 223, 0, 0, 0, 0, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 14, 1, 251, 157, 22, 160, 245, 138} | inet::EthernetFcs, length = 4 B]] from upper layer.
+[DETAIL]	Frame inet::EthernetMacHeader, length = 14 B arrived from higher layers, enqueueing
+[DETAIL]	Transmitting a copy of frame (inet::Packet)Ext-ICMPv6--1 (90 bytes) [[BytesChunk, length = 86 B, bytes = {51, 51, 255, 99, 77, 169, 130, 93, 66, 99, 77, 169, 134, 221, 96, 0, 0, 0, 0, 32, 58, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 99, 77, 169, 135, 0, 8, 223, 0, 0, 0, 0, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 14, 1, 251, 157, 22, 160, 245, 138} | inet::EthernetFcs, length = 4 B]]
+[INFO]	Transmission of (inet::Packet)Ext-ICMPv6--1 (98 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 86 B, bytes = {51, 51, 255, 99, 77, 169, 130, 93, 66, 99, 77, 169, 134, 221, 96, 0, 0, 0, 0, 32, 58, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 99, 77, 169, 135, 0, 8, 223, 0, 0, 0, 0, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 14, 1, 251, 157, 22, 160, 245, 138} | inet::EthernetFcs, length = 4 B]] started.
+[INFO]	We are behind: 0.525285 seconds
+** Event #8  t=0.323544732  16% completed  (16% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Transmission of (inet::Packet)Ext-ICMPv6--1 (90 bytes) [[BytesChunk, length = 86 B, bytes = {51, 51, 255, 99, 77, 169, 130, 93, 66, 99, 77, 169, 134, 221, 96, 0, 0, 0, 0, 32, 58, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 99, 77, 169, 135, 0, 8, 223, 0, 0, 0, 0, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 14, 1, 251, 157, 22, 160, 245, 138} | inet::EthernetFcs, length = 4 B]] successfully completed.
+[DETAIL]	Start IFG period
+[INFO]	We are behind: 0.602189 seconds
+** Event #9  t=0.323544782  16% completed  (16% total)   NoExtHostsEthernetShowcase.host2.eth[0].mac (EtherMacFullDuplex, id=55)
+[INFO]	(inet::EthernetSignal)Ext-ICMPv6--1 received.
+[INFO]	Reception of inet::EthernetMacHeader, length = 14 B successfully completed.
+[INFO]	Sending (inet::Packet)Ext-ICMPv6--1 (90 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 86 B, bytes = {51, 51, 255, 99, 77, 169, 130, 93, 66, 99, 77, 169, 134, 221, 96, 0, 0, 0, 0, 32, 58, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 99, 77, 169, 135, 0, 8, 223, 0, 0, 0, 0, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 14, 1, 251, 157, 22, 160, 245, 138} | inet::EthernetFcs, length = 4 B]] to upper layer.
+[INFO]	We are behind: 0.695737 seconds
+** Event #10  t=0.323544782  16% completed  (16% total)   NoExtHostsEthernetShowcase.host2.eth[0].encap (EtherEncap, id=56)
+[INFO]	Received (inet::Packet)Ext-ICMPv6--1 from lower layer.
+[WARN]	Unknown protocol, dropping packet
+[INFO]	We are behind: 0.738729 seconds
+** Event #11  t=0.323545692  16% completed  (16% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[DETAIL]	IFG elapsed
+[DETAIL]	No more frames to send, transmitter set to idle
+[INFO]	Received a 218 B packet from 82-5D-42-63-4D-A9 to 01-00-5E-7F-FF-FA.
+** Event #12  t=0.502663346  25% completed  (25% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Received (inet::Packet)Ext-UDP--2 (218 bytes) [[BytesChunk, length = 214 B, bytes = {1, 0, 94, 127, 255, 250, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 200, 156, 59, 64, 0, 1, 17, 42, 70, 192, 168, 2, 1, 239, 255, 255, 250, 165, 108, 7, 108, 0, 180, 254, 206, 77, 45, 83, 69, 65, 82, 67, 72, 32, 42, 32, 72, 84, 84, 80, 47, 49, 46, 49, 13, 10, 72, 79, 83, 84, 58, 32, 50, 51, 57, 46, 50, 53, 53, 46, 50, 53, 53, 46, 50, 53, 48, 58, 49, 57, 48, 48, 13, 10, 77, 65, 78, 58, 32, 34, 115, 115, 100, 112, 58, 100, 105, 115, 99, 111, 118, 101, 114, 34, 13, 10, 77, 88, 58, 32, 49, 13, 10, 83, 84, 58, 32, 117, 114, 110, 58, 100, 105, 97, 108, 45, 109, 117, 108, 116, 105, 115, 99, 114, 101, 101, 110, 45, 111, 114, 103, 58, 115, 101, 114, 118, 105, 99, 101, 58, 100, 105, 97, 108, 58, 49, 13, 10, 85, 83, 69, 82, 45, 65, 71, 69, 78, 84, 58, 32, 71, 111, 111, 103, 108, 101, 32, 67, 104, 114, 111, 109, 101, 47, 54, 57, 46, 48, 46, 51, 52, 57, 55, 46, 49, 48, 48, 32, 76, 105, 110, 117, 120, 13, 10, 13, 10} | inet::EthernetFcs, length = 4 B]] from upper layer.
+[DETAIL]	Frame inet::EthernetMacHeader, length = 14 B arrived from higher layers, enqueueing
+[DETAIL]	Transmitting a copy of frame (inet::Packet)Ext-UDP--2 (218 bytes) [[BytesChunk, length = 214 B, bytes = {1, 0, 94, 127, 255, 250, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 200, 156, 59, 64, 0, 1, 17, 42, 70, 192, 168, 2, 1, 239, 255, 255, 250, 165, 108, 7, 108, 0, 180, 254, 206, 77, 45, 83, 69, 65, 82, 67, 72, 32, 42, 32, 72, 84, 84, 80, 47, 49, 46, 49, 13, 10, 72, 79, 83, 84, 58, 32, 50, 51, 57, 46, 50, 53, 53, 46, 50, 53, 53, 46, 50, 53, 48, 58, 49, 57, 48, 48, 13, 10, 77, 65, 78, 58, 32, 34, 115, 115, 100, 112, 58, 100, 105, 115, 99, 111, 118, 101, 114, 34, 13, 10, 77, 88, 58, 32, 49, 13, 10, 83, 84, 58, 32, 117, 114, 110, 58, 100, 105, 97, 108, 45, 109, 117, 108, 116, 105, 115, 99, 114, 101, 101, 110, 45, 111, 114, 103, 58, 115, 101, 114, 118, 105, 99, 101, 58, 100, 105, 97, 108, 58, 49, 13, 10, 85, 83, 69, 82, 45, 65, 71, 69, 78, 84, 58, 32, 71, 111, 111, 103, 108, 101, 32, 67, 104, 114, 111, 109, 101, 47, 54, 57, 46, 48, 46, 51, 52, 57, 55, 46, 49, 48, 48, 32, 76, 105, 110, 117, 120, 13, 10, 13, 10} | inet::EthernetFcs, length = 4 B]]
+[INFO]	Transmission of (inet::Packet)Ext-UDP--2 (226 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 214 B, bytes = {1, 0, 94, 127, 255, 250, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 200, 156, 59, 64, 0, 1, 17, 42, 70, 192, 168, 2, 1, 239, 255, 255, 250, 165, 108, 7, 108, 0, 180, 254, 206, 77, 45, 83, 69, 65, 82, 67, 72, 32, 42, 32, 72, 84, 84, 80, 47, 49, 46, 49, 13, 10, 72, 79, 83, 84, 58, 32, 50, 51, 57, 46, 50, 53, 53, 46, 50, 53, 53, 46, 50, 53, 48, 58, 49, 57, 48, 48, 13, 10, 77, 65, 78, 58, 32, 34, 115, 115, 100, 112, 58, 100, 105, 115, 99, 111, 118, 101, 114, 34, 13, 10, 77, 88, 58, 32, 49, 13, 10, 83, 84, 58, 32, 117, 114, 110, 58, 100, 105, 97, 108, 45, 109, 117, 108, 116, 105, 115, 99, 114, 101, 101, 110, 45, 111, 114, 103, 58, 115, 101, 114, 118, 105, 99, 101, 58, 100, 105, 97, 108, 58, 49, 13, 10, 85, 83, 69, 82, 45, 65, 71, 69, 78, 84, 58, 32, 71, 111, 111, 103, 108, 101, 32, 67, 104, 114, 111, 109, 101, 47, 54, 57, 46, 48, 46, 51, 52, 57, 55, 46, 49, 48, 48, 32, 76, 105, 110, 117, 120, 13, 10, 13, 10} | inet::EthernetFcs, length = 4 B]] started.
+[INFO]	We are behind: 0.836479 seconds
+** Event #13  t=0.502681426  25% completed  (25% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Transmission of (inet::Packet)Ext-UDP--2 (218 bytes) [[BytesChunk, length = 214 B, bytes = {1, 0, 94, 127, 255, 250, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 200, 156, 59, 64, 0, 1, 17, 42, 70, 192, 168, 2, 1, 239, 255, 255, 250, 165, 108, 7, 108, 0, 180, 254, 206, 77, 45, 83, 69, 65, 82, 67, 72, 32, 42, 32, 72, 84, 84, 80, 47, 49, 46, 49, 13, 10, 72, 79, 83, 84, 58, 32, 50, 51, 57, 46, 50, 53, 53, 46, 50, 53, 53, 46, 50, 53, 48, 58, 49, 57, 48, 48, 13, 10, 77, 65, 78, 58, 32, 34, 115, 115, 100, 112, 58, 100, 105, 115, 99, 111, 118, 101, 114, 34, 13, 10, 77, 88, 58, 32, 49, 13, 10, 83, 84, 58, 32, 117, 114, 110, 58, 100, 105, 97, 108, 45, 109, 117, 108, 116, 105, 115, 99, 114, 101, 101, 110, 45, 111, 114, 103, 58, 115, 101, 114, 118, 105, 99, 101, 58, 100, 105, 97, 108, 58, 49, 13, 10, 85, 83, 69, 82, 45, 65, 71, 69, 78, 84, 58, 32, 71, 111, 111, 103, 108, 101, 32, 67, 104, 114, 111, 109, 101, 47, 54, 57, 46, 48, 46, 51, 52, 57, 55, 46, 49, 48, 48, 32, 76, 105, 110, 117, 120, 13, 10, 13, 10} | inet::EthernetFcs, length = 4 B]] successfully completed.
+[DETAIL]	Start IFG period
+[INFO]	We are behind: 0.952554 seconds
+** Event #14  t=0.502681476  25% completed  (25% total)   NoExtHostsEthernetShowcase.host2.eth[0].mac (EtherMacFullDuplex, id=55)
+[INFO]	(inet::EthernetSignal)Ext-UDP--2 received.
+[INFO]	Reception of inet::EthernetMacHeader, length = 14 B successfully completed.
+[INFO]	Sending (inet::Packet)Ext-UDP--2 (218 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 214 B, bytes = {1, 0, 94, 127, 255, 250, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 200, 156, 59, 64, 0, 1, 17, 42, 70, 192, 168, 2, 1, 239, 255, 255, 250, 165, 108, 7, 108, 0, 180, 254, 206, 77, 45, 83, 69, 65, 82, 67, 72, 32, 42, 32, 72, 84, 84, 80, 47, 49, 46, 49, 13, 10, 72, 79, 83, 84, 58, 32, 50, 51, 57, 46, 50, 53, 53, 46, 50, 53, 53, 46, 50, 53, 48, 58, 49, 57, 48, 48, 13, 10, 77, 65, 78, 58, 32, 34, 115, 115, 100, 112, 58, 100, 105, 115, 99, 111, 118, 101, 114, 34, 13, 10, 77, 88, 58, 32, 49, 13, 10, 83, 84, 58, 32, 117, 114, 110, 58, 100, 105, 97, 108, 45, 109, 117, 108, 116, 105, 115, 99, 114, 101, 101, 110, 45, 111, 114, 103, 58, 115, 101, 114, 118, 105, 99, 101, 58, 100, 105, 97, 108, 58, 49, 13, 10, 85, 83, 69, 82, 45, 65, 71, 69, 78, 84, 58, 32, 71, 111, 111, 103, 108, 101, 32, 67, 104, 114, 111, 109, 101, 47, 54, 57, 46, 48, 46, 51, 52, 57, 55, 46, 49, 48, 48, 32, 76, 105, 110, 117, 120, 13, 10, 13, 10} | inet::EthernetFcs, length = 4 B]] to upper layer.
+[INFO]	We are behind: 1.20781 seconds
+** Event #15  t=0.502681476  25% completed  (25% total)   NoExtHostsEthernetShowcase.host2.eth[0].encap (EtherEncap, id=56)
+[INFO]	Received (inet::Packet)Ext-UDP--2 from lower layer.
+[DETAIL]	Decapsulating frame `Ext-UDP--2', passing up contained packet `Ext-UDP--2' to higher layer
+[INFO]	Sending (inet::Packet)Ext-UDP--2 (200 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 214 B, bytes = {1, 0, 94, 127, 255, 250, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 200, 156, 59, 64, 0, 1, 17, 42, 70, 192, 168, 2, 1, 239, 255, 255, 250, 165, 108, 7, 108, 0, 180, 254, 206, 77, 45, 83, 69, 65, 82, 67, 72, 32, 42, 32, 72, 84, 84, 80, 47, 49, 46, 49, 13, 10, 72, 79, 83, 84, 58, 32, 50, 51, 57, 46, 50, 53, 53, 46, 50, 53, 53, 46, 50, 53, 48, 58, 49, 57, 48, 48, 13, 10, 77, 65, 78, 58, 32, 34, 115, 115, 100, 112, 58, 100, 105, 115, 99, 111, 118, 101, 114, 34, 13, 10, 77, 88, 58, 32, 49, 13, 10, 83, 84, 58, 32, 117, 114, 110, 58, 100, 105, 97, 108, 45, 109, 117, 108, 116, 105, 115, 99, 114, 101, 101, 110, 45, 111, 114, 103, 58, 115, 101, 114, 118, 105, 99, 101, 58, 100, 105, 97, 108, 58, 49, 13, 10, 85, 83, 69, 82, 45, 65, 71, 69, 78, 84, 58, 32, 71, 111, 111, 103, 108, 101, 32, 67, 104, 114, 111, 109, 101, 47, 54, 57, 46, 48, 46, 51, 52, 57, 55, 46, 49, 48, 48, 32, 76, 105, 110, 117, 120, 13, 10, 13, 10} | inet::EthernetFcs, length = 4 B]] to upper layer.
+[INFO]	We are behind: 1.46186 seconds
+** Event #16  t=0.502681476  25% completed  (25% total)   NoExtHostsEthernetShowcase.host2.ipv4.ip (Ipv4, id=68)
+[INFO]	Received (inet::Packet)Ext-UDP--2 from network.
+[DETAIL]	Received datagram `' with dest=239.255.255.250
+[WARN]	Skip local delivery of multicast datagram (input interface not in multicast group)
+[WARN]	Skip forwarding of multicast datagram (forwarding disabled)
+[INFO]	We are behind: 1.5482 seconds
+** Event #17  t=0.502682386  25% completed  (25% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[DETAIL]	IFG elapsed
+[DETAIL]	No more frames to send, transmitter set to idle
+[INFO]	Received a 187 B packet from 82-5D-42-63-4D-A9 to 01-00-5E-00-00-FB.
+** Event #18  t=0.626444385  31% completed  (31% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Received (inet::Packet)Ext-UDP--3 (187 bytes) [[BytesChunk, length = 183 B, bytes = {1, 0, 94, 0, 0, 251, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 169, 164, 16, 64, 0, 255, 17, 51, 142, 192, 168, 2, 1, 224, 0, 0, 251, 20, 233, 20, 233, 0, 149, 165, 176, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 5, 95, 105, 112, 112, 115, 4, 95, 116, 99, 112, 5, 108, 111, 99, 97, 108, 0, 0, 12, 0, 1, 4, 95, 102, 116, 112, 192, 18, 0, 12, 0, 1, 7, 95, 119, 101, 98, 100, 97, 118, 192, 18, 0, 12, 0, 1, 8, 95, 119, 101, 98, 100, 97, 118, 115, 192, 18, 0, 12, 0, 1, 9, 95, 115, 102, 116, 112, 45, 115, 115, 104, 192, 18, 0, 12, 0, 1, 4, 95, 115, 109, 98, 192, 18, 0, 12, 0, 1, 11, 95, 97, 102, 112, 111, 118, 101, 114, 116, 99, 112, 192, 18, 0, 12, 0, 1, 4, 95, 110, 102, 115, 192, 18, 0, 12, 0, 1, 4, 95, 105, 112, 112, 192, 18, 0, 12, 0, 1} | inet::EthernetFcs, length = 4 B]] from upper layer.
+[DETAIL]	Frame inet::EthernetMacHeader, length = 14 B arrived from higher layers, enqueueing
+[DETAIL]	Transmitting a copy of frame (inet::Packet)Ext-UDP--3 (187 bytes) [[BytesChunk, length = 183 B, bytes = {1, 0, 94, 0, 0, 251, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 169, 164, 16, 64, 0, 255, 17, 51, 142, 192, 168, 2, 1, 224, 0, 0, 251, 20, 233, 20, 233, 0, 149, 165, 176, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 5, 95, 105, 112, 112, 115, 4, 95, 116, 99, 112, 5, 108, 111, 99, 97, 108, 0, 0, 12, 0, 1, 4, 95, 102, 116, 112, 192, 18, 0, 12, 0, 1, 7, 95, 119, 101, 98, 100, 97, 118, 192, 18, 0, 12, 0, 1, 8, 95, 119, 101, 98, 100, 97, 118, 115, 192, 18, 0, 12, 0, 1, 9, 95, 115, 102, 116, 112, 45, 115, 115, 104, 192, 18, 0, 12, 0, 1, 4, 95, 115, 109, 98, 192, 18, 0, 12, 0, 1, 11, 95, 97, 102, 112, 111, 118, 101, 114, 116, 99, 112, 192, 18, 0, 12, 0, 1, 4, 95, 110, 102, 115, 192, 18, 0, 12, 0, 1, 4, 95, 105, 112, 112, 192, 18, 0, 12, 0, 1} | inet::EthernetFcs, length = 4 B]]
+[INFO]	Transmission of (inet::Packet)Ext-UDP--3 (195 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 183 B, bytes = {1, 0, 94, 0, 0, 251, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 169, 164, 16, 64, 0, 255, 17, 51, 142, 192, 168, 2, 1, 224, 0, 0, 251, 20, 233, 20, 233, 0, 149, 165, 176, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 5, 95, 105, 112, 112, 115, 4, 95, 116, 99, 112, 5, 108, 111, 99, 97, 108, 0, 0, 12, 0, 1, 4, 95, 102, 116, 112, 192, 18, 0, 12, 0, 1, 7, 95, 119, 101, 98, 100, 97, 118, 192, 18, 0, 12, 0, 1, 8, 95, 119, 101, 98, 100, 97, 118, 115, 192, 18, 0, 12, 0, 1, 9, 95, 115, 102, 116, 112, 45, 115, 115, 104, 192, 18, 0, 12, 0, 1, 4, 95, 115, 109, 98, 192, 18, 0, 12, 0, 1, 11, 95, 97, 102, 112, 111, 118, 101, 114, 116, 99, 112, 192, 18, 0, 12, 0, 1, 4, 95, 110, 102, 115, 192, 18, 0, 12, 0, 1, 4, 95, 105, 112, 112, 192, 18, 0, 12, 0, 1} | inet::EthernetFcs, length = 4 B]] started.
+[INFO]	We are behind: 0.650269 seconds
+** Event #19  t=0.626459985  31% completed  (31% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Transmission of (inet::Packet)Ext-UDP--3 (187 bytes) [[BytesChunk, length = 183 B, bytes = {1, 0, 94, 0, 0, 251, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 169, 164, 16, 64, 0, 255, 17, 51, 142, 192, 168, 2, 1, 224, 0, 0, 251, 20, 233, 20, 233, 0, 149, 165, 176, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 5, 95, 105, 112, 112, 115, 4, 95, 116, 99, 112, 5, 108, 111, 99, 97, 108, 0, 0, 12, 0, 1, 4, 95, 102, 116, 112, 192, 18, 0, 12, 0, 1, 7, 95, 119, 101, 98, 100, 97, 118, 192, 18, 0, 12, 0, 1, 8, 95, 119, 101, 98, 100, 97, 118, 115, 192, 18, 0, 12, 0, 1, 9, 95, 115, 102, 116, 112, 45, 115, 115, 104, 192, 18, 0, 12, 0, 1, 4, 95, 115, 109, 98, 192, 18, 0, 12, 0, 1, 11, 95, 97, 102, 112, 111, 118, 101, 114, 116, 99, 112, 192, 18, 0, 12, 0, 1, 4, 95, 110, 102, 115, 192, 18, 0, 12, 0, 1, 4, 95, 105, 112, 112, 192, 18, 0, 12, 0, 1} | inet::EthernetFcs, length = 4 B]] successfully completed.
+[DETAIL]	Start IFG period
+[INFO]	We are behind: 0.788939 seconds
+** Event #20  t=0.626460035  31% completed  (31% total)   NoExtHostsEthernetShowcase.host2.eth[0].mac (EtherMacFullDuplex, id=55)
+[INFO]	(inet::EthernetSignal)Ext-UDP--3 received.
+[INFO]	Reception of inet::EthernetMacHeader, length = 14 B successfully completed.
+[INFO]	Sending (inet::Packet)Ext-UDP--3 (187 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 183 B, bytes = {1, 0, 94, 0, 0, 251, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 169, 164, 16, 64, 0, 255, 17, 51, 142, 192, 168, 2, 1, 224, 0, 0, 251, 20, 233, 20, 233, 0, 149, 165, 176, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 5, 95, 105, 112, 112, 115, 4, 95, 116, 99, 112, 5, 108, 111, 99, 97, 108, 0, 0, 12, 0, 1, 4, 95, 102, 116, 112, 192, 18, 0, 12, 0, 1, 7, 95, 119, 101, 98, 100, 97, 118, 192, 18, 0, 12, 0, 1, 8, 95, 119, 101, 98, 100, 97, 118, 115, 192, 18, 0, 12, 0, 1, 9, 95, 115, 102, 116, 112, 45, 115, 115, 104, 192, 18, 0, 12, 0, 1, 4, 95, 115, 109, 98, 192, 18, 0, 12, 0, 1, 11, 95, 97, 102, 112, 111, 118, 101, 114, 116, 99, 112, 192, 18, 0, 12, 0, 1, 4, 95, 110, 102, 115, 192, 18, 0, 12, 0, 1, 4, 95, 105, 112, 112, 192, 18, 0, 12, 0, 1} | inet::EthernetFcs, length = 4 B]] to upper layer.
+[INFO]	We are behind: 0.978598 seconds
+** Event #21  t=0.626460035  31% completed  (31% total)   NoExtHostsEthernetShowcase.host2.eth[0].encap (EtherEncap, id=56)
+[INFO]	Received (inet::Packet)Ext-UDP--3 from lower layer.
+[DETAIL]	Decapsulating frame `Ext-UDP--3', passing up contained packet `Ext-UDP--3' to higher layer
+[INFO]	Sending (inet::Packet)Ext-UDP--3 (169 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 183 B, bytes = {1, 0, 94, 0, 0, 251, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 169, 164, 16, 64, 0, 255, 17, 51, 142, 192, 168, 2, 1, 224, 0, 0, 251, 20, 233, 20, 233, 0, 149, 165, 176, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 5, 95, 105, 112, 112, 115, 4, 95, 116, 99, 112, 5, 108, 111, 99, 97, 108, 0, 0, 12, 0, 1, 4, 95, 102, 116, 112, 192, 18, 0, 12, 0, 1, 7, 95, 119, 101, 98, 100, 97, 118, 192, 18, 0, 12, 0, 1, 8, 95, 119, 101, 98, 100, 97, 118, 115, 192, 18, 0, 12, 0, 1, 9, 95, 115, 102, 116, 112, 45, 115, 115, 104, 192, 18, 0, 12, 0, 1, 4, 95, 115, 109, 98, 192, 18, 0, 12, 0, 1, 11, 95, 97, 102, 112, 111, 118, 101, 114, 116, 99, 112, 192, 18, 0, 12, 0, 1, 4, 95, 110, 102, 115, 192, 18, 0, 12, 0, 1, 4, 95, 105, 112, 112, 192, 18, 0, 12, 0, 1} | inet::EthernetFcs, length = 4 B]] to upper layer.
+[INFO]	We are behind: 1.09119 seconds
+** Event #22  t=0.626460035  31% completed  (31% total)   NoExtHostsEthernetShowcase.host2.ipv4.ip (Ipv4, id=68)
+[INFO]	Received (inet::Packet)Ext-UDP--3 from network.
+[DETAIL]	Received datagram `' with dest=224.0.0.251
+[WARN]	Skip local delivery of multicast datagram (input interface not in multicast group)
+[WARN]	Skip forwarding of multicast datagram (forwarding disabled)
+[INFO]	We are behind: 1.16383 seconds
+** Event #23  t=0.626460945  31% completed  (31% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[DETAIL]	IFG elapsed
+[DETAIL]	No more frames to send, transmitter set to idle
+[INFO]	Received a 64 B packet from 82-5D-42-63-4D-A9 to FF-FF-FF-FF-FF-FF.
+** Event #24  t=0.70754568  35% completed  (35% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Received (inet::Packet)Ext-ARP--4 (64 bytes) [[BytesChunk, length = 42 B, bytes = {255, 255, 255, 255, 255, 255, 130, 93, 66, 99, 77, 169, 8, 6, 0, 1, 8, 0, 6, 4, 0, 1, 130, 93, 66, 99, 77, 169, 192, 168, 2, 1, 0, 0, 0, 0, 0, 0, 192, 168, 2, 2} | inet::EthernetPadding, length = 18 B | inet::EthernetFcs, length = 4 B]] from upper layer.
+[DETAIL]	Frame inet::EthernetMacHeader, length = 14 B arrived from higher layers, enqueueing
+[DETAIL]	Transmitting a copy of frame (inet::Packet)Ext-ARP--4 (64 bytes) [[BytesChunk, length = 42 B, bytes = {255, 255, 255, 255, 255, 255, 130, 93, 66, 99, 77, 169, 8, 6, 0, 1, 8, 0, 6, 4, 0, 1, 130, 93, 66, 99, 77, 169, 192, 168, 2, 1, 0, 0, 0, 0, 0, 0, 192, 168, 2, 2} | inet::EthernetPadding, length = 18 B | inet::EthernetFcs, length = 4 B]]
+[INFO]	Transmission of (inet::Packet)Ext-ARP--4 (72 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 42 B, bytes = {255, 255, 255, 255, 255, 255, 130, 93, 66, 99, 77, 169, 8, 6, 0, 1, 8, 0, 6, 4, 0, 1, 130, 93, 66, 99, 77, 169, 192, 168, 2, 1, 0, 0, 0, 0, 0, 0, 192, 168, 2, 2} | inet::EthernetPadding, length = 18 B | inet::EthernetFcs, length = 4 B]] started.
+[INFO]	We are behind: 0.405368 seconds
+** Event #25  t=0.70755144  35% completed  (35% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Transmission of (inet::Packet)Ext-ARP--4 (64 bytes) [[BytesChunk, length = 42 B, bytes = {255, 255, 255, 255, 255, 255, 130, 93, 66, 99, 77, 169, 8, 6, 0, 1, 8, 0, 6, 4, 0, 1, 130, 93, 66, 99, 77, 169, 192, 168, 2, 1, 0, 0, 0, 0, 0, 0, 192, 168, 2, 2} | inet::EthernetPadding, length = 18 B | inet::EthernetFcs, length = 4 B]] successfully completed.
+[DETAIL]	Start IFG period
+[INFO]	We are behind: 0.522024 seconds
+** Event #26  t=0.70755149  35% completed  (35% total)   NoExtHostsEthernetShowcase.host2.eth[0].mac (EtherMacFullDuplex, id=55)
+[INFO]	(inet::EthernetSignal)Ext-ARP--4 received.
+[INFO]	Reception of inet::EthernetMacHeader, length = 14 B successfully completed.
+[INFO]	Sending (inet::Packet)Ext-ARP--4 (64 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 42 B, bytes = {255, 255, 255, 255, 255, 255, 130, 93, 66, 99, 77, 169, 8, 6, 0, 1, 8, 0, 6, 4, 0, 1, 130, 93, 66, 99, 77, 169, 192, 168, 2, 1, 0, 0, 0, 0, 0, 0, 192, 168, 2, 2} | inet::EthernetPadding, length = 18 B | inet::EthernetFcs, length = 4 B]] to upper layer.
+[INFO]	We are behind: 0.617946 seconds
+** Event #27  t=0.70755149  35% completed  (35% total)   NoExtHostsEthernetShowcase.host2.eth[0].encap (EtherEncap, id=56)
+[INFO]	Received (inet::Packet)Ext-ARP--4 from lower layer.
+[DETAIL]	Decapsulating frame `Ext-ARP--4', passing up contained packet `Ext-ARP--4' to higher layer
+[INFO]	Sending (inet::Packet)Ext-ARP--4 (46 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 42 B, bytes = {255, 255, 255, 255, 255, 255, 130, 93, 66, 99, 77, 169, 8, 6, 0, 1, 8, 0, 6, 4, 0, 1, 130, 93, 66, 99, 77, 169, 192, 168, 2, 1, 0, 0, 0, 0, 0, 0, 192, 168, 2, 2} | inet::EthernetPadding, length = 18 B | inet::EthernetFcs, length = 4 B]] to upper layer.
+[INFO]	We are behind: 0.682786 seconds
+** Event #28  t=0.70755149  35% completed  (35% total)   NoExtHostsEthernetShowcase.host2.ipv4.arp (Arp, id=69)
+[INFO]	Received (inet::Packet)Ext-ARP--4 (46 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 42 B, bytes = {255, 255, 255, 255, 255, 255, 130, 93, 66, 99, 77, 169, 8, 6, 0, 1, 8, 0, 6, 4, 0, 1, 130, 93, 66, 99, 77, 169, 192, 168, 2, 1, 0, 0, 0, 0, 0, 0, 192, 168, 2, 2} | inet::EthernetPadding, length = 18 B | inet::EthernetFcs, length = 4 B]] from network protocol.
+[DETAIL]	ARP_REQ  src=192.168.2.1 / 82-5D-42-63-4D-A9  dest=192.168.2.2 / 00-00-00-00-00-00
+[DETAIL]	Updating ARP cache entry: 192.168.2.1 <--> 82-5D-42-63-4D-A9
+[DETAIL]	Packet was ARP REQUEST, sending REPLY
+[INFO]	Sending (inet::Packet)arpREPLY (28 bytes) [ARP reply: 192.168.2.2=0A-AA-00-00-00-02 (d=192.168.2.1(82-5D-42-63-4D-A9))] to network protocol.
+[INFO]	We are behind: 0.865933 seconds
+** Event #29  t=0.70755149  35% completed  (35% total)   NoExtHostsEthernetShowcase.host2.eth[0].encap (EtherEncap, id=56)
+[INFO]	Received (inet::Packet)arpREPLY from upper layer.
+[DETAIL]	Encapsulating higher layer packet `arpREPLY' for MAC
+[INFO]	Sending (inet::Packet)arpREPLY (64 bytes) [[inet::EthernetMacHeader, length = 14 B | ARP reply: 192.168.2.2=0A-AA-00-00-00-02 (d=192.168.2.1(82-5D-42-63-4D-A9)) | inet::EthernetPadding, length = 18 B | inet::EthernetFcs, length = 4 B]] to lower layer.
+[INFO]	We are behind: 0.982653 seconds
+** Event #30  t=0.70755149  35% completed  (35% total)   NoExtHostsEthernetShowcase.host2.eth[0].mac (EtherMacFullDuplex, id=55)
+[INFO]	Received (inet::Packet)arpREPLY (64 bytes) [[inet::EthernetMacHeader, length = 14 B | ARP reply: 192.168.2.2=0A-AA-00-00-00-02 (d=192.168.2.1(82-5D-42-63-4D-A9)) | inet::EthernetPadding, length = 18 B | inet::EthernetFcs, length = 4 B]] from upper layer.
+[DETAIL]	Frame inet::EthernetMacHeader, length = 14 B arrived from higher layers, enqueueing
+[DETAIL]	Transmitting a copy of frame (inet::Packet)arpREPLY (64 bytes) [[inet::EthernetMacHeader, length = 14 B | ARP reply: 192.168.2.2=0A-AA-00-00-00-02 (d=192.168.2.1(82-5D-42-63-4D-A9)) | inet::EthernetPadding, length = 18 B | inet::EthernetFcs, length = 4 B]]
+[INFO]	Transmission of (inet::Packet)arpREPLY (72 bytes) [[inet::EthernetPhyHeader, length = 8 B | inet::EthernetMacHeader, length = 14 B | ARP reply: 192.168.2.2=0A-AA-00-00-00-02 (d=192.168.2.1(82-5D-42-63-4D-A9)) | inet::EthernetPadding, length = 18 B | inet::EthernetFcs, length = 4 B]] started.
+[INFO]	We are behind: 1.18015 seconds
+** Event #31  t=0.7075524  35% completed  (35% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[DETAIL]	IFG elapsed
+[DETAIL]	No more frames to send, transmitter set to idle
+[INFO]	We are behind: 1.20313 seconds
+** Event #32  t=0.70755725  35% completed  (35% total)   NoExtHostsEthernetShowcase.host2.eth[0].mac (EtherMacFullDuplex, id=55)
+[INFO]	Transmission of (inet::Packet)arpREPLY (64 bytes) [[inet::EthernetMacHeader, length = 14 B | ARP reply: 192.168.2.2=0A-AA-00-00-00-02 (d=192.168.2.1(82-5D-42-63-4D-A9)) | inet::EthernetPadding, length = 18 B | inet::EthernetFcs, length = 4 B]] successfully completed.
+[DETAIL]	Start IFG period
+[INFO]	We are behind: 1.29207 seconds
+** Event #33  t=0.7075573  35% completed  (35% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	(inet::EthernetSignal)arpREPLY received.
+[INFO]	Reception of inet::EthernetMacHeader, length = 14 B successfully completed.
+[INFO]	Sending (inet::Packet)arpREPLY (64 bytes) [[inet::EthernetPhyHeader, length = 8 B | inet::EthernetMacHeader, length = 14 B | ARP reply: 192.168.2.2=0A-AA-00-00-00-02 (d=192.168.2.1(82-5D-42-63-4D-A9)) | inet::EthernetPadding, length = 18 B | inet::EthernetFcs, length = 4 B]] to upper layer.
+[INFO]	We are behind: 1.41958 seconds
+** Event #34  t=0.7075573  35% completed  (35% total)   NoExtHostsEthernetShowcase.host1.eth[0].tap (ExtEthernetTapDeviceFileIo, id=21)
+[INFO]	Sent a 72 B packet from 0A-AA-00-00-00-02 to 82-5D-42-63-4D-A9 to TAP device 'tap0'.
+[INFO]	We are behind: 1.54985 seconds
+** Event #35  t=0.70755821  35% completed  (35% total)   NoExtHostsEthernetShowcase.host2.eth[0].mac (EtherMacFullDuplex, id=55)
+[DETAIL]	IFG elapsed
+[DETAIL]	No more frames to send, transmitter set to idle
+[INFO]	Received a 102 B packet from 00-00-00-00-00-00 to 00-00-00-00-00-00.
+** Event #36  t=0.709135734  35% completed  (35% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Received (inet::Packet)Ext-ICMPv4-ECHO-REQ-5 (102 bytes) [[BytesChunk, length = 98 B, bytes = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 69, 0, 0, 84, 254, 136, 64, 0, 64, 1, 182, 204, 192, 168, 2, 1, 192, 168, 2, 2, 8, 0, 60, 107, 36, 236, 0, 1, 163, 58, 236, 91, 0, 0, 0, 0, 64, 62, 8, 0, 0, 0, 0, 0, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55} | inet::EthernetFcs, length = 4 B]] from upper layer.
+[DETAIL]	Frame inet::EthernetMacHeader, length = 14 B arrived from higher layers, enqueueing
+[DETAIL]	Transmitting a copy of frame (inet::Packet)Ext-ICMPv4-ECHO-REQ-5 (102 bytes) [[inet::EthernetMacHeader, length = 14 B | BytesChunk, length = 84 B, bytes = {69, 0, 0, 84, 254, 136, 64, 0, 64, 1, 182, 204, 192, 168, 2, 1, 192, 168, 2, 2, 8, 0, 60, 107, 36, 236, 0, 1, 163, 58, 236, 91, 0, 0, 0, 0, 64, 62, 8, 0, 0, 0, 0, 0, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55} | inet::EthernetFcs, length = 4 B]]
+[INFO]	Transmission of (inet::Packet)Ext-ICMPv4-ECHO-REQ-5 (110 bytes) [[inet::EthernetPhyHeader, length = 8 B | inet::EthernetMacHeader, length = 14 B | BytesChunk, length = 84 B, bytes = {69, 0, 0, 84, 254, 136, 64, 0, 64, 1, 182, 204, 192, 168, 2, 1, 192, 168, 2, 2, 8, 0, 60, 107, 36, 236, 0, 1, 163, 58, 236, 91, 0, 0, 0, 0, 64, 62, 8, 0, 0, 0, 0, 0, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55} | inet::EthernetFcs, length = 4 B]] started.
+[INFO]	We are behind: 0.305443 seconds
+** Event #37  t=0.709144534  35% completed  (35% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Transmission of (inet::Packet)Ext-ICMPv4-ECHO-REQ-5 (102 bytes) [[inet::EthernetMacHeader, length = 14 B | BytesChunk, length = 84 B, bytes = {69, 0, 0, 84, 254, 136, 64, 0, 64, 1, 182, 204, 192, 168, 2, 1, 192, 168, 2, 2, 8, 0, 60, 107, 36, 236, 0, 1, 163, 58, 236, 91, 0, 0, 0, 0, 64, 62, 8, 0, 0, 0, 0, 0, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55} | inet::EthernetFcs, length = 4 B]] successfully completed.
+[DETAIL]	Start IFG period
+[INFO]	We are behind: 0.382247 seconds
+** Event #38  t=0.709144584  35% completed  (35% total)   NoExtHostsEthernetShowcase.host2.eth[0].mac (EtherMacFullDuplex, id=55)
+[INFO]	(inet::EthernetSignal)Ext-ICMPv4-ECHO-REQ-5 received.
+[WARN]	Frame `Ext-ICMPv4-ECHO-REQ-5' not destined to us, discarding
+[INFO]	We are behind: 0.515277 seconds
+** Event #39  t=0.709145494  35% completed  (35% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[DETAIL]	IFG elapsed
+[DETAIL]	No more frames to send, transmitter set to idle
+[INFO]	Received a 102 B packet from 82-5D-42-63-4D-A9 to 0A-AA-00-00-00-02.
+** Event #40  t=0.709692668  35% completed  (35% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Received (inet::Packet)Ext-ICMPv4-ECHO-REQ-6 (102 bytes) [[BytesChunk, length = 98 B, bytes = {10, 170, 0, 0, 0, 2, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 84, 255, 93, 64, 0, 64, 1, 181, 247, 192, 168, 2, 1, 192, 168, 2, 2, 8, 0, 210, 74, 36, 236, 0, 2, 164, 58, 236, 91, 0, 0, 0, 0, 169, 93, 8, 0, 0, 0, 0, 0, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55} | inet::EthernetFcs, length = 4 B]] from upper layer.
+[DETAIL]	Frame inet::EthernetMacHeader, length = 14 B arrived from higher layers, enqueueing
+[DETAIL]	Transmitting a copy of frame (inet::Packet)Ext-ICMPv4-ECHO-REQ-6 (102 bytes) [[BytesChunk, length = 98 B, bytes = {10, 170, 0, 0, 0, 2, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 84, 255, 93, 64, 0, 64, 1, 181, 247, 192, 168, 2, 1, 192, 168, 2, 2, 8, 0, 210, 74, 36, 236, 0, 2, 164, 58, 236, 91, 0, 0, 0, 0, 169, 93, 8, 0, 0, 0, 0, 0, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55} | inet::EthernetFcs, length = 4 B]]
+[INFO]	Transmission of (inet::Packet)Ext-ICMPv4-ECHO-REQ-6 (110 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 98 B, bytes = {10, 170, 0, 0, 0, 2, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 84, 255, 93, 64, 0, 64, 1, 181, 247, 192, 168, 2, 1, 192, 168, 2, 2, 8, 0, 210, 74, 36, 236, 0, 2, 164, 58, 236, 91, 0, 0, 0, 0, 169, 93, 8, 0, 0, 0, 0, 0, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55} | inet::EthernetFcs, length = 4 B]] started.
+[INFO]	We are behind: 0.262895 seconds
+** Event #41  t=0.709701468  35% completed  (35% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Transmission of (inet::Packet)Ext-ICMPv4-ECHO-REQ-6 (102 bytes) [[BytesChunk, length = 98 B, bytes = {10, 170, 0, 0, 0, 2, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 84, 255, 93, 64, 0, 64, 1, 181, 247, 192, 168, 2, 1, 192, 168, 2, 2, 8, 0, 210, 74, 36, 236, 0, 2, 164, 58, 236, 91, 0, 0, 0, 0, 169, 93, 8, 0, 0, 0, 0, 0, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55} | inet::EthernetFcs, length = 4 B]] successfully completed.
+[DETAIL]	Start IFG period
+[INFO]	We are behind: 0.313643 seconds
+** Event #42  t=0.709701518  35% completed  (35% total)   NoExtHostsEthernetShowcase.host2.eth[0].mac (EtherMacFullDuplex, id=55)
+[INFO]	(inet::EthernetSignal)Ext-ICMPv4-ECHO-REQ-6 received.
+[INFO]	Reception of inet::EthernetMacHeader, length = 14 B successfully completed.
+[INFO]	Sending (inet::Packet)Ext-ICMPv4-ECHO-REQ-6 (102 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 98 B, bytes = {10, 170, 0, 0, 0, 2, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 84, 255, 93, 64, 0, 64, 1, 181, 247, 192, 168, 2, 1, 192, 168, 2, 2, 8, 0, 210, 74, 36, 236, 0, 2, 164, 58, 236, 91, 0, 0, 0, 0, 169, 93, 8, 0, 0, 0, 0, 0, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55} | inet::EthernetFcs, length = 4 B]] to upper layer.
+[INFO]	We are behind: 0.40486 seconds
+** Event #43  t=0.709701518  35% completed  (35% total)   NoExtHostsEthernetShowcase.host2.eth[0].encap (EtherEncap, id=56)
+[INFO]	Received (inet::Packet)Ext-ICMPv4-ECHO-REQ-6 from lower layer.
+[DETAIL]	Decapsulating frame `Ext-ICMPv4-ECHO-REQ-6', passing up contained packet `Ext-ICMPv4-ECHO-REQ-6' to higher layer
+[INFO]	Sending (inet::Packet)Ext-ICMPv4-ECHO-REQ-6 (84 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 98 B, bytes = {10, 170, 0, 0, 0, 2, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 84, 255, 93, 64, 0, 64, 1, 181, 247, 192, 168, 2, 1, 192, 168, 2, 2, 8, 0, 210, 74, 36, 236, 0, 2, 164, 58, 236, 91, 0, 0, 0, 0, 169, 93, 8, 0, 0, 0, 0, 0, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55} | inet::EthernetFcs, length = 4 B]] to upper layer.
+[INFO]	We are behind: 0.474147 seconds
+** Event #44  t=0.709701518  35% completed  (35% total)   NoExtHostsEthernetShowcase.host2.ipv4.ip (Ipv4, id=68)
+[INFO]	Received (inet::Packet)Ext-ICMPv4-ECHO-REQ-6 from network.
+[DETAIL]	Received datagram `' with dest=192.168.2.2
+[INFO]	Delivering (inet::Packet)Ext-ICMPv4-ECHO-REQ-6 (84 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 98 B, bytes = {10, 170, 0, 0, 0, 2, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 84, 255, 93, 64, 0, 64, 1, 181, 247, 192, 168, 2, 1, 192, 168, 2, 2, 8, 0, 210, 74, 36, 236, 0, 2, 164, 58, 236, 91, 0, 0, 0, 0, 169, 93, 8, 0, 0, 0, 0, 0, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55} | inet::EthernetFcs, length = 4 B]] locally.
+[INFO]	Passing up to protocol 0x7fa4498be9e0
+[INFO]	We are behind: 0.568562 seconds
+** Event #45  t=0.709701518  35% completed  (35% total)   NoExtHostsEthernetShowcase.host2.ipv4.icmp (Icmp, id=66)
+[INFO]	Received (inet::Packet)Ext-ICMPv4-ECHO-REQ-6 from network protocol.
+[INFO]	Sending (inet::Packet)Ext-ICMPv4-ECHO-REQ-6-reply (64 bytes) [[inet::IcmpEchoReply, length = 8 B | BytesChunk, length = 56 B, bytes = {164, 58, 236, 91, 0, 0, 0, 0, 169, 93, 8, 0, 0, 0, 0, 0, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55}]] to lower layer.
+[INFO]	We are behind: 0.643425 seconds
+** Event #46  t=0.709701518  35% completed  (35% total)   NoExtHostsEthernetShowcase.host2.ipv4.ip (Ipv4, id=68)
+[INFO]	Received (inet::Packet)Ext-ICMPv4-ECHO-REQ-6-reply (64 bytes) [[inet::IcmpEchoReply, length = 8 B | BytesChunk, length = 56 B, bytes = {164, 58, 236, 91, 0, 0, 0, 0, 169, 93, 8, 0, 0, 0, 0, 0, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55}]] from upper layer.
+[DETAIL]	Sending datagram 'Ext-ICMPv4-ECHO-REQ-6-reply' with destination = 192.168.2.1
+[INFO]	Routing (inet::Packet)Ext-ICMPv4-ECHO-REQ-6-reply (84 bytes) [[inet::Ipv4Header, length = 20 B | inet::IcmpEchoReply, length = 8 B | BytesChunk, length = 56 B, bytes = {164, 58, 236, 91, 0, 0, 0, 0, 169, 93, 8, 0, 0, 0, 0, 0, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55}]] with destination = 192.168.2.1, output interface = eth0, next hop address = <unspec>
+[INFO]	Sending (inet::Packet)Ext-ICMPv4-ECHO-REQ-6-reply (84 bytes) [[inet::Ipv4Header, length = 20 B | inet::IcmpEchoReply, length = 8 B | BytesChunk, length = 56 B, bytes = {164, 58, 236, 91, 0, 0, 0, 0, 169, 93, 8, 0, 0, 0, 0, 0, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55}]] to output interface = eth0.
+[INFO]	We are behind: 0.803455 seconds
+** Event #47  t=0.709701518  35% completed  (35% total)   NoExtHostsEthernetShowcase.host2.eth[0].encap (EtherEncap, id=56)
+[INFO]	Received (inet::Packet)Ext-ICMPv4-ECHO-REQ-6-reply from upper layer.
+[DETAIL]	Encapsulating higher layer packet `Ext-ICMPv4-ECHO-REQ-6-reply' for MAC
+[INFO]	Sending (inet::Packet)Ext-ICMPv4-ECHO-REQ-6-reply (102 bytes) [[inet::EthernetMacHeader, length = 14 B | inet::Ipv4Header, length = 20 B | inet::IcmpEchoReply, length = 8 B | BytesChunk, length = 56 B, bytes = {164, 58, 236, 91, 0, 0, 0, 0, 169, 93, 8, 0, 0, 0, 0, 0, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55} | inet::EthernetFcs, length = 4 B]] to lower layer.
+[INFO]	We are behind: 0.878368 seconds
+** Event #48  t=0.709701518  35% completed  (35% total)   NoExtHostsEthernetShowcase.host2.eth[0].mac (EtherMacFullDuplex, id=55)
+[INFO]	Received (inet::Packet)Ext-ICMPv4-ECHO-REQ-6-reply (102 bytes) [[inet::EthernetMacHeader, length = 14 B | inet::Ipv4Header, length = 20 B | inet::IcmpEchoReply, length = 8 B | BytesChunk, length = 56 B, bytes = {164, 58, 236, 91, 0, 0, 0, 0, 169, 93, 8, 0, 0, 0, 0, 0, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55} | inet::EthernetFcs, length = 4 B]] from upper layer.
+[DETAIL]	Frame inet::EthernetMacHeader, length = 14 B arrived from higher layers, enqueueing
+[DETAIL]	Transmitting a copy of frame (inet::Packet)Ext-ICMPv4-ECHO-REQ-6-reply (102 bytes) [[inet::EthernetMacHeader, length = 14 B | inet::Ipv4Header, length = 20 B | inet::IcmpEchoReply, length = 8 B | BytesChunk, length = 56 B, bytes = {164, 58, 236, 91, 0, 0, 0, 0, 169, 93, 8, 0, 0, 0, 0, 0, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55} | inet::EthernetFcs, length = 4 B]]
+[INFO]	Transmission of (inet::Packet)Ext-ICMPv4-ECHO-REQ-6-reply (110 bytes) [[inet::EthernetPhyHeader, length = 8 B | inet::EthernetMacHeader, length = 14 B | inet::Ipv4Header, length = 20 B | inet::IcmpEchoReply, length = 8 B | BytesChunk, length = 56 B, bytes = {164, 58, 236, 91, 0, 0, 0, 0, 169, 93, 8, 0, 0, 0, 0, 0, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55} | inet::EthernetFcs, length = 4 B]] started.
+[INFO]	We are behind: 1.00441 seconds
+** Event #49  t=0.709702428  35% completed  (35% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[DETAIL]	IFG elapsed
+[DETAIL]	No more frames to send, transmitter set to idle
+[INFO]	We are behind: 1.01788 seconds
+** Event #50  t=0.709710318  35% completed  (35% total)   NoExtHostsEthernetShowcase.host2.eth[0].mac (EtherMacFullDuplex, id=55)
+[INFO]	Transmission of (inet::Packet)Ext-ICMPv4-ECHO-REQ-6-reply (102 bytes) [[inet::EthernetMacHeader, length = 14 B | inet::Ipv4Header, length = 20 B | inet::IcmpEchoReply, length = 8 B | BytesChunk, length = 56 B, bytes = {164, 58, 236, 91, 0, 0, 0, 0, 169, 93, 8, 0, 0, 0, 0, 0, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55} | inet::EthernetFcs, length = 4 B]] successfully completed.
+[DETAIL]	Start IFG period
+[INFO]	We are behind: 1.06163 seconds
+** Event #51  t=0.709710368  35% completed  (35% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	(inet::EthernetSignal)Ext-ICMPv4-ECHO-REQ-6-reply received.
+[INFO]	Reception of inet::EthernetMacHeader, length = 14 B successfully completed.
+[INFO]	Sending (inet::Packet)Ext-ICMPv4-ECHO-REQ-6-reply (102 bytes) [[inet::EthernetPhyHeader, length = 8 B | inet::EthernetMacHeader, length = 14 B | inet::Ipv4Header, length = 20 B | inet::IcmpEchoReply, length = 8 B | BytesChunk, length = 56 B, bytes = {164, 58, 236, 91, 0, 0, 0, 0, 169, 93, 8, 0, 0, 0, 0, 0, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55} | inet::EthernetFcs, length = 4 B]] to upper layer.
+[INFO]	We are behind: 1.14704 seconds
+** Event #52  t=0.709710368  35% completed  (35% total)   NoExtHostsEthernetShowcase.host1.eth[0].tap (ExtEthernetTapDeviceFileIo, id=21)
+[INFO]	Sent a 110 B packet from 0A-AA-00-00-00-02 to 82-5D-42-63-4D-A9 to TAP device 'tap0'.
+[INFO]	We are behind: 1.2267 seconds
+** Event #53  t=0.709711278  35% completed  (35% total)   NoExtHostsEthernetShowcase.host2.eth[0].mac (EtherMacFullDuplex, id=55)
+[DETAIL]	IFG elapsed
+[DETAIL]	No more frames to send, transmitter set to idle
+[INFO]	Received a 94 B packet from 82-5D-42-63-4D-A9 to 33-33-00-00-00-16.
+** Event #54  t=1.027566126  51% completed  (51% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Received (inet::Packet)Ext-IPv6--7 (94 bytes) [[BytesChunk, length = 90 B, bytes = {51, 51, 0, 0, 0, 22, 130, 93, 66, 99, 77, 169, 134, 221, 96, 0, 0, 0, 0, 36, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 58, 0, 5, 2, 0, 0, 1, 0, 143, 0, 33, 126, 0, 0, 0, 1, 4, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 99, 77, 169} | inet::EthernetFcs, length = 4 B]] from upper layer.
+[DETAIL]	Frame inet::EthernetMacHeader, length = 14 B arrived from higher layers, enqueueing
+[DETAIL]	Transmitting a copy of frame (inet::Packet)Ext-IPv6--7 (94 bytes) [[BytesChunk, length = 90 B, bytes = {51, 51, 0, 0, 0, 22, 130, 93, 66, 99, 77, 169, 134, 221, 96, 0, 0, 0, 0, 36, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 58, 0, 5, 2, 0, 0, 1, 0, 143, 0, 33, 126, 0, 0, 0, 1, 4, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 99, 77, 169} | inet::EthernetFcs, length = 4 B]]
+[INFO]	Transmission of (inet::Packet)Ext-IPv6--7 (102 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 90 B, bytes = {51, 51, 0, 0, 0, 22, 130, 93, 66, 99, 77, 169, 134, 221, 96, 0, 0, 0, 0, 36, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 58, 0, 5, 2, 0, 0, 1, 0, 143, 0, 33, 126, 0, 0, 0, 1, 4, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 99, 77, 169} | inet::EthernetFcs, length = 4 B]] started.
+[INFO]	We are behind: 0.571174 seconds
+** Event #55  t=1.027574286  51% completed  (51% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Transmission of (inet::Packet)Ext-IPv6--7 (94 bytes) [[BytesChunk, length = 90 B, bytes = {51, 51, 0, 0, 0, 22, 130, 93, 66, 99, 77, 169, 134, 221, 96, 0, 0, 0, 0, 36, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 58, 0, 5, 2, 0, 0, 1, 0, 143, 0, 33, 126, 0, 0, 0, 1, 4, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 99, 77, 169} | inet::EthernetFcs, length = 4 B]] successfully completed.
+[DETAIL]	Start IFG period
+[INFO]	We are behind: 0.669166 seconds
+** Event #56  t=1.027574336  51% completed  (51% total)   NoExtHostsEthernetShowcase.host2.eth[0].mac (EtherMacFullDuplex, id=55)
+[INFO]	(inet::EthernetSignal)Ext-IPv6--7 received.
+[INFO]	Reception of inet::EthernetMacHeader, length = 14 B successfully completed.
+[INFO]	Sending (inet::Packet)Ext-IPv6--7 (94 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 90 B, bytes = {51, 51, 0, 0, 0, 22, 130, 93, 66, 99, 77, 169, 134, 221, 96, 0, 0, 0, 0, 36, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 58, 0, 5, 2, 0, 0, 1, 0, 143, 0, 33, 126, 0, 0, 0, 1, 4, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 99, 77, 169} | inet::EthernetFcs, length = 4 B]] to upper layer.
+[INFO]	We are behind: 0.866688 seconds
+** Event #57  t=1.027574336  51% completed  (51% total)   NoExtHostsEthernetShowcase.host2.eth[0].encap (EtherEncap, id=56)
+[INFO]	Received (inet::Packet)Ext-IPv6--7 from lower layer.
+[WARN]	Unknown protocol, dropping packet
+[INFO]	We are behind: 0.937368 seconds
+** Event #58  t=1.027575246  51% completed  (51% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[DETAIL]	IFG elapsed
+[DETAIL]	No more frames to send, transmitter set to idle
+[INFO]	Received a 94 B packet from 82-5D-42-63-4D-A9 to 33-33-00-00-00-16.
+** Event #59  t=1.347823341  67% completed  (67% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Received (inet::Packet)Ext-IPv6--8 (94 bytes) [[BytesChunk, length = 90 B, bytes = {51, 51, 0, 0, 0, 22, 130, 93, 66, 99, 77, 169, 134, 221, 96, 0, 0, 0, 0, 36, 0, 1, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 58, 0, 5, 2, 0, 0, 1, 0, 143, 0, 19, 147, 0, 0, 0, 1, 4, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 99, 77, 169} | inet::EthernetFcs, length = 4 B]] from upper layer.
+[DETAIL]	Frame inet::EthernetMacHeader, length = 14 B arrived from higher layers, enqueueing
+[DETAIL]	Transmitting a copy of frame (inet::Packet)Ext-IPv6--8 (94 bytes) [[BytesChunk, length = 90 B, bytes = {51, 51, 0, 0, 0, 22, 130, 93, 66, 99, 77, 169, 134, 221, 96, 0, 0, 0, 0, 36, 0, 1, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 58, 0, 5, 2, 0, 0, 1, 0, 143, 0, 19, 147, 0, 0, 0, 1, 4, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 99, 77, 169} | inet::EthernetFcs, length = 4 B]]
+[INFO]	Transmission of (inet::Packet)Ext-IPv6--8 (102 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 90 B, bytes = {51, 51, 0, 0, 0, 22, 130, 93, 66, 99, 77, 169, 134, 221, 96, 0, 0, 0, 0, 36, 0, 1, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 58, 0, 5, 2, 0, 0, 1, 0, 143, 0, 19, 147, 0, 0, 0, 1, 4, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 99, 77, 169} | inet::EthernetFcs, length = 4 B]] started.
+[INFO]	We are behind: 0.873023 seconds
+** Event #60  t=1.347831501  67% completed  (67% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Transmission of (inet::Packet)Ext-IPv6--8 (94 bytes) [[BytesChunk, length = 90 B, bytes = {51, 51, 0, 0, 0, 22, 130, 93, 66, 99, 77, 169, 134, 221, 96, 0, 0, 0, 0, 36, 0, 1, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 58, 0, 5, 2, 0, 0, 1, 0, 143, 0, 19, 147, 0, 0, 0, 1, 4, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 99, 77, 169} | inet::EthernetFcs, length = 4 B]] successfully completed.
+[DETAIL]	Start IFG period
+[INFO]	We are behind: 1.04672 seconds
+** Event #61  t=1.347831551  67% completed  (67% total)   NoExtHostsEthernetShowcase.host2.eth[0].mac (EtherMacFullDuplex, id=55)
+[INFO]	(inet::EthernetSignal)Ext-IPv6--8 received.
+[INFO]	Reception of inet::EthernetMacHeader, length = 14 B successfully completed.
+[INFO]	Sending (inet::Packet)Ext-IPv6--8 (94 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 90 B, bytes = {51, 51, 0, 0, 0, 22, 130, 93, 66, 99, 77, 169, 134, 221, 96, 0, 0, 0, 0, 36, 0, 1, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 58, 0, 5, 2, 0, 0, 1, 0, 143, 0, 19, 147, 0, 0, 0, 1, 4, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 99, 77, 169} | inet::EthernetFcs, length = 4 B]] to upper layer.
+[INFO]	We are behind: 1.26621 seconds
+** Event #62  t=1.347831551  67% completed  (67% total)   NoExtHostsEthernetShowcase.host2.eth[0].encap (EtherEncap, id=56)
+[INFO]	Received (inet::Packet)Ext-IPv6--8 from lower layer.
+[WARN]	Unknown protocol, dropping packet
+[INFO]	We are behind: 1.47231 seconds
+** Event #63  t=1.347832461  67% completed  (67% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[DETAIL]	IFG elapsed
+[DETAIL]	No more frames to send, transmitter set to idle
+[INFO]	Received a 74 B packet from 82-5D-42-63-4D-A9 to 33-33-00-00-00-02.
+** Event #64  t=1.349383684  67% completed  (67% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Received (inet::Packet)Ext-ICMPv6--9 (74 bytes) [[BytesChunk, length = 70 B, bytes = {51, 51, 0, 0, 0, 2, 130, 93, 66, 99, 77, 169, 134, 221, 96, 0, 0, 0, 0, 16, 58, 255, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 133, 0, 90, 90, 0, 0, 0, 0, 1, 1, 130, 93, 66, 99, 77, 169} | inet::EthernetFcs, length = 4 B]] from upper layer.
+[DETAIL]	Frame inet::EthernetMacHeader, length = 14 B arrived from higher layers, enqueueing
+[DETAIL]	Transmitting a copy of frame (inet::Packet)Ext-ICMPv6--9 (74 bytes) [[BytesChunk, length = 70 B, bytes = {51, 51, 0, 0, 0, 2, 130, 93, 66, 99, 77, 169, 134, 221, 96, 0, 0, 0, 0, 16, 58, 255, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 133, 0, 90, 90, 0, 0, 0, 0, 1, 1, 130, 93, 66, 99, 77, 169} | inet::EthernetFcs, length = 4 B]]
+[INFO]	Transmission of (inet::Packet)Ext-ICMPv6--9 (82 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 70 B, bytes = {51, 51, 0, 0, 0, 2, 130, 93, 66, 99, 77, 169, 134, 221, 96, 0, 0, 0, 0, 16, 58, 255, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 133, 0, 90, 90, 0, 0, 0, 0, 1, 1, 130, 93, 66, 99, 77, 169} | inet::EthernetFcs, length = 4 B]] started.
+[INFO]	We are behind: 0.734053 seconds
+** Event #65  t=1.349390244  67% completed  (67% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Transmission of (inet::Packet)Ext-ICMPv6--9 (74 bytes) [[BytesChunk, length = 70 B, bytes = {51, 51, 0, 0, 0, 2, 130, 93, 66, 99, 77, 169, 134, 221, 96, 0, 0, 0, 0, 16, 58, 255, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 133, 0, 90, 90, 0, 0, 0, 0, 1, 1, 130, 93, 66, 99, 77, 169} | inet::EthernetFcs, length = 4 B]] successfully completed.
+[DETAIL]	Start IFG period
+[INFO]	We are behind: 0.878011 seconds
+** Event #66  t=1.349390294  67% completed  (67% total)   NoExtHostsEthernetShowcase.host2.eth[0].mac (EtherMacFullDuplex, id=55)
+[INFO]	(inet::EthernetSignal)Ext-ICMPv6--9 received.
+[INFO]	Reception of inet::EthernetMacHeader, length = 14 B successfully completed.
+[INFO]	Sending (inet::Packet)Ext-ICMPv6--9 (74 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 70 B, bytes = {51, 51, 0, 0, 0, 2, 130, 93, 66, 99, 77, 169, 134, 221, 96, 0, 0, 0, 0, 16, 58, 255, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 133, 0, 90, 90, 0, 0, 0, 0, 1, 1, 130, 93, 66, 99, 77, 169} | inet::EthernetFcs, length = 4 B]] to upper layer.
+[INFO]	We are behind: 1.07257 seconds
+** Event #67  t=1.349390294  67% completed  (67% total)   NoExtHostsEthernetShowcase.host2.eth[0].encap (EtherEncap, id=56)
+[INFO]	Received (inet::Packet)Ext-ICMPv6--9 from lower layer.
+[WARN]	Unknown protocol, dropping packet
+[INFO]	We are behind: 1.16853 seconds
+** Event #68  t=1.349391204  67% completed  (67% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[DETAIL]	IFG elapsed
+[DETAIL]	No more frames to send, transmitter set to idle
+[INFO]	Received a 94 B packet from 82-5D-42-63-4D-A9 to 33-33-00-00-00-16.
+** Event #69  t=1.359467108  67% completed  (67% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Received (inet::Packet)Ext-IPv6--10 (94 bytes) [[BytesChunk, length = 90 B, bytes = {51, 51, 0, 0, 0, 22, 130, 93, 66, 99, 77, 169, 134, 221, 96, 0, 0, 0, 0, 36, 0, 1, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 58, 0, 5, 2, 0, 0, 1, 0, 143, 0, 95, 166, 0, 0, 0, 1, 4, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 251} | inet::EthernetFcs, length = 4 B]] from upper layer.
+[DETAIL]	Frame inet::EthernetMacHeader, length = 14 B arrived from higher layers, enqueueing
+[DETAIL]	Transmitting a copy of frame (inet::Packet)Ext-IPv6--10 (94 bytes) [[BytesChunk, length = 90 B, bytes = {51, 51, 0, 0, 0, 22, 130, 93, 66, 99, 77, 169, 134, 221, 96, 0, 0, 0, 0, 36, 0, 1, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 58, 0, 5, 2, 0, 0, 1, 0, 143, 0, 95, 166, 0, 0, 0, 1, 4, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 251} | inet::EthernetFcs, length = 4 B]]
+[INFO]	Transmission of (inet::Packet)Ext-IPv6--10 (102 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 90 B, bytes = {51, 51, 0, 0, 0, 22, 130, 93, 66, 99, 77, 169, 134, 221, 96, 0, 0, 0, 0, 36, 0, 1, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 58, 0, 5, 2, 0, 0, 1, 0, 143, 0, 95, 166, 0, 0, 0, 1, 4, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 251} | inet::EthernetFcs, length = 4 B]] started.
+[INFO]	We are behind: 0.263528 seconds
+** Event #70  t=1.359475268  67% completed  (67% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Transmission of (inet::Packet)Ext-IPv6--10 (94 bytes) [[BytesChunk, length = 90 B, bytes = {51, 51, 0, 0, 0, 22, 130, 93, 66, 99, 77, 169, 134, 221, 96, 0, 0, 0, 0, 36, 0, 1, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 58, 0, 5, 2, 0, 0, 1, 0, 143, 0, 95, 166, 0, 0, 0, 1, 4, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 251} | inet::EthernetFcs, length = 4 B]] successfully completed.
+[DETAIL]	Start IFG period
+[INFO]	We are behind: 0.29531 seconds
+** Event #71  t=1.359475318  67% completed  (67% total)   NoExtHostsEthernetShowcase.host2.eth[0].mac (EtherMacFullDuplex, id=55)
+[INFO]	(inet::EthernetSignal)Ext-IPv6--10 received.
+[INFO]	Reception of inet::EthernetMacHeader, length = 14 B successfully completed.
+[INFO]	Sending (inet::Packet)Ext-IPv6--10 (94 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 90 B, bytes = {51, 51, 0, 0, 0, 22, 130, 93, 66, 99, 77, 169, 134, 221, 96, 0, 0, 0, 0, 36, 0, 1, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 58, 0, 5, 2, 0, 0, 1, 0, 143, 0, 95, 166, 0, 0, 0, 1, 4, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 251} | inet::EthernetFcs, length = 4 B]] to upper layer.
+[INFO]	We are behind: 0.333305 seconds
+** Event #72  t=1.359475318  67% completed  (67% total)   NoExtHostsEthernetShowcase.host2.eth[0].encap (EtherEncap, id=56)
+[INFO]	Received (inet::Packet)Ext-IPv6--10 from lower layer.
+[WARN]	Unknown protocol, dropping packet
+[INFO]	We are behind: 0.350538 seconds
+** Event #73  t=1.359476228  67% completed  (67% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[DETAIL]	IFG elapsed
+[DETAIL]	No more frames to send, transmitter set to idle
+[INFO]	Received a 207 B packet from 82-5D-42-63-4D-A9 to 33-33-00-00-00-FB.
+** Event #74  t=1.448322711  72% completed  (72% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Received (inet::Packet)Ext-UDP--11 (207 bytes) [[BytesChunk, length = 203 B, bytes = {51, 51, 0, 0, 0, 251, 130, 93, 66, 99, 77, 169, 134, 221, 96, 6, 51, 184, 0, 149, 17, 255, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 251, 20, 233, 20, 233, 0, 149, 59, 109, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 5, 95, 105, 112, 112, 115, 4, 95, 116, 99, 112, 5, 108, 111, 99, 97, 108, 0, 0, 12, 0, 1, 4, 95, 102, 116, 112, 192, 18, 0, 12, 0, 1, 7, 95, 119, 101, 98, 100, 97, 118, 192, 18, 0, 12, 0, 1, 8, 95, 119, 101, 98, 100, 97, 118, 115, 192, 18, 0, 12, 0, 1, 9, 95, 115, 102, 116, 112, 45, 115, 115, 104, 192, 18, 0, 12, 0, 1, 4, 95, 115, 109, 98, 192, 18, 0, 12, 0, 1, 11, 95, 97, 102, 112, 111, 118, 101, 114, 116, 99, 112, 192, 18, 0, 12, 0, 1, 4, 95, 110, 102, 115, 192, 18, 0, 12, 0, 1, 4, 95, 105, 112, 112, 192, 18, 0, 12, 0, 1} | inet::EthernetFcs, length = 4 B]] from upper layer.
+[DETAIL]	Frame inet::EthernetMacHeader, length = 14 B arrived from higher layers, enqueueing
+[DETAIL]	Transmitting a copy of frame (inet::Packet)Ext-UDP--11 (207 bytes) [[BytesChunk, length = 203 B, bytes = {51, 51, 0, 0, 0, 251, 130, 93, 66, 99, 77, 169, 134, 221, 96, 6, 51, 184, 0, 149, 17, 255, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 251, 20, 233, 20, 233, 0, 149, 59, 109, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 5, 95, 105, 112, 112, 115, 4, 95, 116, 99, 112, 5, 108, 111, 99, 97, 108, 0, 0, 12, 0, 1, 4, 95, 102, 116, 112, 192, 18, 0, 12, 0, 1, 7, 95, 119, 101, 98, 100, 97, 118, 192, 18, 0, 12, 0, 1, 8, 95, 119, 101, 98, 100, 97, 118, 115, 192, 18, 0, 12, 0, 1, 9, 95, 115, 102, 116, 112, 45, 115, 115, 104, 192, 18, 0, 12, 0, 1, 4, 95, 115, 109, 98, 192, 18, 0, 12, 0, 1, 11, 95, 97, 102, 112, 111, 118, 101, 114, 116, 99, 112, 192, 18, 0, 12, 0, 1, 4, 95, 110, 102, 115, 192, 18, 0, 12, 0, 1, 4, 95, 105, 112, 112, 192, 18, 0, 12, 0, 1} | inet::EthernetFcs, length = 4 B]]
+[INFO]	Transmission of (inet::Packet)Ext-UDP--11 (215 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 203 B, bytes = {51, 51, 0, 0, 0, 251, 130, 93, 66, 99, 77, 169, 134, 221, 96, 6, 51, 184, 0, 149, 17, 255, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 251, 20, 233, 20, 233, 0, 149, 59, 109, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 5, 95, 105, 112, 112, 115, 4, 95, 116, 99, 112, 5, 108, 111, 99, 97, 108, 0, 0, 12, 0, 1, 4, 95, 102, 116, 112, 192, 18, 0, 12, 0, 1, 7, 95, 119, 101, 98, 100, 97, 118, 192, 18, 0, 12, 0, 1, 8, 95, 119, 101, 98, 100, 97, 118, 115, 192, 18, 0, 12, 0, 1, 9, 95, 115, 102, 116, 112, 45, 115, 115, 104, 192, 18, 0, 12, 0, 1, 4, 95, 115, 109, 98, 192, 18, 0, 12, 0, 1, 11, 95, 97, 102, 112, 111, 118, 101, 114, 116, 99, 112, 192, 18, 0, 12, 0, 1, 4, 95, 110, 102, 115, 192, 18, 0, 12, 0, 1, 4, 95, 105, 112, 112, 192, 18, 0, 12, 0, 1} | inet::EthernetFcs, length = 4 B]] started.
+[INFO]	We are behind: 0.284399 seconds
+** Event #75  t=1.448339911  72% completed  (72% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Transmission of (inet::Packet)Ext-UDP--11 (207 bytes) [[BytesChunk, length = 203 B, bytes = {51, 51, 0, 0, 0, 251, 130, 93, 66, 99, 77, 169, 134, 221, 96, 6, 51, 184, 0, 149, 17, 255, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 251, 20, 233, 20, 233, 0, 149, 59, 109, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 5, 95, 105, 112, 112, 115, 4, 95, 116, 99, 112, 5, 108, 111, 99, 97, 108, 0, 0, 12, 0, 1, 4, 95, 102, 116, 112, 192, 18, 0, 12, 0, 1, 7, 95, 119, 101, 98, 100, 97, 118, 192, 18, 0, 12, 0, 1, 8, 95, 119, 101, 98, 100, 97, 118, 115, 192, 18, 0, 12, 0, 1, 9, 95, 115, 102, 116, 112, 45, 115, 115, 104, 192, 18, 0, 12, 0, 1, 4, 95, 115, 109, 98, 192, 18, 0, 12, 0, 1, 11, 95, 97, 102, 112, 111, 118, 101, 114, 116, 99, 112, 192, 18, 0, 12, 0, 1, 4, 95, 110, 102, 115, 192, 18, 0, 12, 0, 1, 4, 95, 105, 112, 112, 192, 18, 0, 12, 0, 1} | inet::EthernetFcs, length = 4 B]] successfully completed.
+[DETAIL]	Start IFG period
+[INFO]	We are behind: 0.323834 seconds
+** Event #76  t=1.448339961  72% completed  (72% total)   NoExtHostsEthernetShowcase.host2.eth[0].mac (EtherMacFullDuplex, id=55)
+[INFO]	(inet::EthernetSignal)Ext-UDP--11 received.
+[INFO]	Reception of inet::EthernetMacHeader, length = 14 B successfully completed.
+[INFO]	Sending (inet::Packet)Ext-UDP--11 (207 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 203 B, bytes = {51, 51, 0, 0, 0, 251, 130, 93, 66, 99, 77, 169, 134, 221, 96, 6, 51, 184, 0, 149, 17, 255, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 251, 20, 233, 20, 233, 0, 149, 59, 109, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 5, 95, 105, 112, 112, 115, 4, 95, 116, 99, 112, 5, 108, 111, 99, 97, 108, 0, 0, 12, 0, 1, 4, 95, 102, 116, 112, 192, 18, 0, 12, 0, 1, 7, 95, 119, 101, 98, 100, 97, 118, 192, 18, 0, 12, 0, 1, 8, 95, 119, 101, 98, 100, 97, 118, 115, 192, 18, 0, 12, 0, 1, 9, 95, 115, 102, 116, 112, 45, 115, 115, 104, 192, 18, 0, 12, 0, 1, 4, 95, 115, 109, 98, 192, 18, 0, 12, 0, 1, 11, 95, 97, 102, 112, 111, 118, 101, 114, 116, 99, 112, 192, 18, 0, 12, 0, 1, 4, 95, 110, 102, 115, 192, 18, 0, 12, 0, 1, 4, 95, 105, 112, 112, 192, 18, 0, 12, 0, 1} | inet::EthernetFcs, length = 4 B]] to upper layer.
+[INFO]	We are behind: 0.380066 seconds
+** Event #77  t=1.448339961  72% completed  (72% total)   NoExtHostsEthernetShowcase.host2.eth[0].encap (EtherEncap, id=56)
+[INFO]	Received (inet::Packet)Ext-UDP--11 from lower layer.
+[WARN]	Unknown protocol, dropping packet
+[INFO]	We are behind: 0.402769 seconds
+** Event #78  t=1.448340871  72% completed  (72% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[DETAIL]	IFG elapsed
+[DETAIL]	No more frames to send, transmitter set to idle
+[INFO]	Received a 224 B packet from 82-5D-42-63-4D-A9 to 33-33-00-00-00-FB.
+** Event #79  t=1.49859333  74% completed  (74% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Received (inet::Packet)Ext-UDP--12 (224 bytes) [[BytesChunk, length = 220 B, bytes = {51, 51, 0, 0, 0, 251, 130, 93, 66, 99, 77, 169, 134, 221, 96, 6, 51, 184, 0, 166, 17, 255, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 251, 20, 233, 20, 233, 0, 166, 155, 45, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 1, 57, 1, 97, 1, 100, 1, 52, 1, 51, 1, 54, 1, 101, 1, 102, 1, 102, 1, 102, 1, 50, 1, 52, 1, 100, 1, 53, 1, 48, 1, 56, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 56, 1, 101, 1, 102, 3, 105, 112, 54, 4, 97, 114, 112, 97, 0, 0, 255, 0, 1, 14, 109, 97, 114, 99, 101, 108, 108, 45, 88, 53, 53, 48, 74, 88, 5, 108, 111, 99, 97, 108, 0, 0, 255, 0, 1, 192, 90, 0, 28, 0, 1, 0, 0, 0, 120, 0, 16, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 192, 12, 0, 12, 0, 1, 0, 0, 0, 120, 0, 2, 192, 90} | inet::EthernetFcs, length = 4 B]] from upper layer.
+[DETAIL]	Frame inet::EthernetMacHeader, length = 14 B arrived from higher layers, enqueueing
+[DETAIL]	Transmitting a copy of frame (inet::Packet)Ext-UDP--12 (224 bytes) [[BytesChunk, length = 220 B, bytes = {51, 51, 0, 0, 0, 251, 130, 93, 66, 99, 77, 169, 134, 221, 96, 6, 51, 184, 0, 166, 17, 255, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 251, 20, 233, 20, 233, 0, 166, 155, 45, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 1, 57, 1, 97, 1, 100, 1, 52, 1, 51, 1, 54, 1, 101, 1, 102, 1, 102, 1, 102, 1, 50, 1, 52, 1, 100, 1, 53, 1, 48, 1, 56, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 56, 1, 101, 1, 102, 3, 105, 112, 54, 4, 97, 114, 112, 97, 0, 0, 255, 0, 1, 14, 109, 97, 114, 99, 101, 108, 108, 45, 88, 53, 53, 48, 74, 88, 5, 108, 111, 99, 97, 108, 0, 0, 255, 0, 1, 192, 90, 0, 28, 0, 1, 0, 0, 0, 120, 0, 16, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 192, 12, 0, 12, 0, 1, 0, 0, 0, 120, 0, 2, 192, 90} | inet::EthernetFcs, length = 4 B]]
+[INFO]	Transmission of (inet::Packet)Ext-UDP--12 (232 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 220 B, bytes = {51, 51, 0, 0, 0, 251, 130, 93, 66, 99, 77, 169, 134, 221, 96, 6, 51, 184, 0, 166, 17, 255, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 251, 20, 233, 20, 233, 0, 166, 155, 45, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 1, 57, 1, 97, 1, 100, 1, 52, 1, 51, 1, 54, 1, 101, 1, 102, 1, 102, 1, 102, 1, 50, 1, 52, 1, 100, 1, 53, 1, 48, 1, 56, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 56, 1, 101, 1, 102, 3, 105, 112, 54, 4, 97, 114, 112, 97, 0, 0, 255, 0, 1, 14, 109, 97, 114, 99, 101, 108, 108, 45, 88, 53, 53, 48, 74, 88, 5, 108, 111, 99, 97, 108, 0, 0, 255, 0, 1, 192, 90, 0, 28, 0, 1, 0, 0, 0, 120, 0, 16, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 192, 12, 0, 12, 0, 1, 0, 0, 0, 120, 0, 2, 192, 90} | inet::EthernetFcs, length = 4 B]] started.
+[INFO]	We are behind: 0.333347 seconds
+** Event #80  t=1.49861189  74% completed  (74% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Transmission of (inet::Packet)Ext-UDP--12 (224 bytes) [[BytesChunk, length = 220 B, bytes = {51, 51, 0, 0, 0, 251, 130, 93, 66, 99, 77, 169, 134, 221, 96, 6, 51, 184, 0, 166, 17, 255, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 251, 20, 233, 20, 233, 0, 166, 155, 45, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 1, 57, 1, 97, 1, 100, 1, 52, 1, 51, 1, 54, 1, 101, 1, 102, 1, 102, 1, 102, 1, 50, 1, 52, 1, 100, 1, 53, 1, 48, 1, 56, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 56, 1, 101, 1, 102, 3, 105, 112, 54, 4, 97, 114, 112, 97, 0, 0, 255, 0, 1, 14, 109, 97, 114, 99, 101, 108, 108, 45, 88, 53, 53, 48, 74, 88, 5, 108, 111, 99, 97, 108, 0, 0, 255, 0, 1, 192, 90, 0, 28, 0, 1, 0, 0, 0, 120, 0, 16, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 192, 12, 0, 12, 0, 1, 0, 0, 0, 120, 0, 2, 192, 90} | inet::EthernetFcs, length = 4 B]] successfully completed.
+[DETAIL]	Start IFG period
+[INFO]	We are behind: 0.386324 seconds
+** Event #81  t=1.49861194  74% completed  (74% total)   NoExtHostsEthernetShowcase.host2.eth[0].mac (EtherMacFullDuplex, id=55)
+[INFO]	(inet::EthernetSignal)Ext-UDP--12 received.
+[INFO]	Reception of inet::EthernetMacHeader, length = 14 B successfully completed.
+[INFO]	Sending (inet::Packet)Ext-UDP--12 (224 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 220 B, bytes = {51, 51, 0, 0, 0, 251, 130, 93, 66, 99, 77, 169, 134, 221, 96, 6, 51, 184, 0, 166, 17, 255, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 251, 20, 233, 20, 233, 0, 166, 155, 45, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 1, 57, 1, 97, 1, 100, 1, 52, 1, 51, 1, 54, 1, 101, 1, 102, 1, 102, 1, 102, 1, 50, 1, 52, 1, 100, 1, 53, 1, 48, 1, 56, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 56, 1, 101, 1, 102, 3, 105, 112, 54, 4, 97, 114, 112, 97, 0, 0, 255, 0, 1, 14, 109, 97, 114, 99, 101, 108, 108, 45, 88, 53, 53, 48, 74, 88, 5, 108, 111, 99, 97, 108, 0, 0, 255, 0, 1, 192, 90, 0, 28, 0, 1, 0, 0, 0, 120, 0, 16, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 192, 12, 0, 12, 0, 1, 0, 0, 0, 120, 0, 2, 192, 90} | inet::EthernetFcs, length = 4 B]] to upper layer.
+[INFO]	We are behind: 0.445651 seconds
+** Event #82  t=1.49861194  74% completed  (74% total)   NoExtHostsEthernetShowcase.host2.eth[0].encap (EtherEncap, id=56)
+[INFO]	Received (inet::Packet)Ext-UDP--12 from lower layer.
+[WARN]	Unknown protocol, dropping packet
+[INFO]	We are behind: 0.467339 seconds
+** Event #83  t=1.49861285  74% completed  (74% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[DETAIL]	IFG elapsed
+[DETAIL]	No more frames to send, transmitter set to idle
+[INFO]	Received a 204 B packet from 82-5D-42-63-4D-A9 to 01-00-5E-00-00-FB.
+** Event #84  t=1.499094536  74% completed  (74% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Received (inet::Packet)Ext-UDP--13 (204 bytes) [[BytesChunk, length = 200 B, bytes = {1, 0, 94, 0, 0, 251, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 186, 164, 46, 64, 0, 255, 17, 51, 95, 192, 168, 2, 1, 224, 0, 0, 251, 20, 233, 20, 233, 0, 166, 5, 113, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 1, 57, 1, 97, 1, 100, 1, 52, 1, 51, 1, 54, 1, 101, 1, 102, 1, 102, 1, 102, 1, 50, 1, 52, 1, 100, 1, 53, 1, 48, 1, 56, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 56, 1, 101, 1, 102, 3, 105, 112, 54, 4, 97, 114, 112, 97, 0, 0, 255, 0, 1, 14, 109, 97, 114, 99, 101, 108, 108, 45, 88, 53, 53, 48, 74, 88, 5, 108, 111, 99, 97, 108, 0, 0, 255, 0, 1, 192, 90, 0, 28, 0, 1, 0, 0, 0, 120, 0, 16, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 192, 12, 0, 12, 0, 1, 0, 0, 0, 120, 0, 2, 192, 90} | inet::EthernetFcs, length = 4 B]] from upper layer.
+[DETAIL]	Frame inet::EthernetMacHeader, length = 14 B arrived from higher layers, enqueueing
+[DETAIL]	Transmitting a copy of frame (inet::Packet)Ext-UDP--13 (204 bytes) [[BytesChunk, length = 200 B, bytes = {1, 0, 94, 0, 0, 251, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 186, 164, 46, 64, 0, 255, 17, 51, 95, 192, 168, 2, 1, 224, 0, 0, 251, 20, 233, 20, 233, 0, 166, 5, 113, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 1, 57, 1, 97, 1, 100, 1, 52, 1, 51, 1, 54, 1, 101, 1, 102, 1, 102, 1, 102, 1, 50, 1, 52, 1, 100, 1, 53, 1, 48, 1, 56, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 56, 1, 101, 1, 102, 3, 105, 112, 54, 4, 97, 114, 112, 97, 0, 0, 255, 0, 1, 14, 109, 97, 114, 99, 101, 108, 108, 45, 88, 53, 53, 48, 74, 88, 5, 108, 111, 99, 97, 108, 0, 0, 255, 0, 1, 192, 90, 0, 28, 0, 1, 0, 0, 0, 120, 0, 16, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 192, 12, 0, 12, 0, 1, 0, 0, 0, 120, 0, 2, 192, 90} | inet::EthernetFcs, length = 4 B]]
+[INFO]	Transmission of (inet::Packet)Ext-UDP--13 (212 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 200 B, bytes = {1, 0, 94, 0, 0, 251, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 186, 164, 46, 64, 0, 255, 17, 51, 95, 192, 168, 2, 1, 224, 0, 0, 251, 20, 233, 20, 233, 0, 166, 5, 113, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 1, 57, 1, 97, 1, 100, 1, 52, 1, 51, 1, 54, 1, 101, 1, 102, 1, 102, 1, 102, 1, 50, 1, 52, 1, 100, 1, 53, 1, 48, 1, 56, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 56, 1, 101, 1, 102, 3, 105, 112, 54, 4, 97, 114, 112, 97, 0, 0, 255, 0, 1, 14, 109, 97, 114, 99, 101, 108, 108, 45, 88, 53, 53, 48, 74, 88, 5, 108, 111, 99, 97, 108, 0, 0, 255, 0, 1, 192, 90, 0, 28, 0, 1, 0, 0, 0, 120, 0, 16, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 192, 12, 0, 12, 0, 1, 0, 0, 0, 120, 0, 2, 192, 90} | inet::EthernetFcs, length = 4 B]] started.
+[INFO]	We are behind: 0.195237 seconds
+** Event #85  t=1.499111496  74% completed  (74% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Transmission of (inet::Packet)Ext-UDP--13 (204 bytes) [[BytesChunk, length = 200 B, bytes = {1, 0, 94, 0, 0, 251, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 186, 164, 46, 64, 0, 255, 17, 51, 95, 192, 168, 2, 1, 224, 0, 0, 251, 20, 233, 20, 233, 0, 166, 5, 113, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 1, 57, 1, 97, 1, 100, 1, 52, 1, 51, 1, 54, 1, 101, 1, 102, 1, 102, 1, 102, 1, 50, 1, 52, 1, 100, 1, 53, 1, 48, 1, 56, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 56, 1, 101, 1, 102, 3, 105, 112, 54, 4, 97, 114, 112, 97, 0, 0, 255, 0, 1, 14, 109, 97, 114, 99, 101, 108, 108, 45, 88, 53, 53, 48, 74, 88, 5, 108, 111, 99, 97, 108, 0, 0, 255, 0, 1, 192, 90, 0, 28, 0, 1, 0, 0, 0, 120, 0, 16, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 192, 12, 0, 12, 0, 1, 0, 0, 0, 120, 0, 2, 192, 90} | inet::EthernetFcs, length = 4 B]] successfully completed.
+[DETAIL]	Start IFG period
+[INFO]	We are behind: 0.234942 seconds
+** Event #86  t=1.499111546  74% completed  (74% total)   NoExtHostsEthernetShowcase.host2.eth[0].mac (EtherMacFullDuplex, id=55)
+[INFO]	(inet::EthernetSignal)Ext-UDP--13 received.
+[INFO]	Reception of inet::EthernetMacHeader, length = 14 B successfully completed.
+[INFO]	Sending (inet::Packet)Ext-UDP--13 (204 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 200 B, bytes = {1, 0, 94, 0, 0, 251, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 186, 164, 46, 64, 0, 255, 17, 51, 95, 192, 168, 2, 1, 224, 0, 0, 251, 20, 233, 20, 233, 0, 166, 5, 113, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 1, 57, 1, 97, 1, 100, 1, 52, 1, 51, 1, 54, 1, 101, 1, 102, 1, 102, 1, 102, 1, 50, 1, 52, 1, 100, 1, 53, 1, 48, 1, 56, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 56, 1, 101, 1, 102, 3, 105, 112, 54, 4, 97, 114, 112, 97, 0, 0, 255, 0, 1, 14, 109, 97, 114, 99, 101, 108, 108, 45, 88, 53, 53, 48, 74, 88, 5, 108, 111, 99, 97, 108, 0, 0, 255, 0, 1, 192, 90, 0, 28, 0, 1, 0, 0, 0, 120, 0, 16, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 192, 12, 0, 12, 0, 1, 0, 0, 0, 120, 0, 2, 192, 90} | inet::EthernetFcs, length = 4 B]] to upper layer.
+[INFO]	We are behind: 0.307007 seconds
+** Event #87  t=1.499111546  74% completed  (74% total)   NoExtHostsEthernetShowcase.host2.eth[0].encap (EtherEncap, id=56)
+[INFO]	Received (inet::Packet)Ext-UDP--13 from lower layer.
+[DETAIL]	Decapsulating frame `Ext-UDP--13', passing up contained packet `Ext-UDP--13' to higher layer
+[INFO]	Sending (inet::Packet)Ext-UDP--13 (186 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 200 B, bytes = {1, 0, 94, 0, 0, 251, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 186, 164, 46, 64, 0, 255, 17, 51, 95, 192, 168, 2, 1, 224, 0, 0, 251, 20, 233, 20, 233, 0, 166, 5, 113, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 1, 57, 1, 97, 1, 100, 1, 52, 1, 51, 1, 54, 1, 101, 1, 102, 1, 102, 1, 102, 1, 50, 1, 52, 1, 100, 1, 53, 1, 48, 1, 56, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 56, 1, 101, 1, 102, 3, 105, 112, 54, 4, 97, 114, 112, 97, 0, 0, 255, 0, 1, 14, 109, 97, 114, 99, 101, 108, 108, 45, 88, 53, 53, 48, 74, 88, 5, 108, 111, 99, 97, 108, 0, 0, 255, 0, 1, 192, 90, 0, 28, 0, 1, 0, 0, 0, 120, 0, 16, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 192, 12, 0, 12, 0, 1, 0, 0, 0, 120, 0, 2, 192, 90} | inet::EthernetFcs, length = 4 B]] to upper layer.
+[INFO]	We are behind: 0.35897 seconds
+** Event #88  t=1.499111546  74% completed  (74% total)   NoExtHostsEthernetShowcase.host2.ipv4.ip (Ipv4, id=68)
+[INFO]	Received (inet::Packet)Ext-UDP--13 from network.
+[DETAIL]	Received datagram `' with dest=224.0.0.251
+[WARN]	Skip local delivery of multicast datagram (input interface not in multicast group)
+[WARN]	Skip forwarding of multicast datagram (forwarding disabled)
+[INFO]	We are behind: 0.393786 seconds
+** Event #89  t=1.499112456  74% completed  (74% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[DETAIL]	IFG elapsed
+[DETAIL]	No more frames to send, transmitter set to idle
+[INFO]	Received a 94 B packet from 82-5D-42-63-4D-A9 to 01-00-5E-00-00-FB.
+** Event #90  t=1.499519928  74% completed  (74% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Received (inet::Packet)Ext-UDP--14 (94 bytes) [[BytesChunk, length = 90 B, bytes = {1, 0, 94, 0, 0, 251, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 76, 164, 47, 64, 0, 255, 17, 51, 204, 192, 168, 2, 1, 224, 0, 0, 251, 20, 233, 20, 233, 0, 56, 4, 126, 0, 0, 132, 0, 0, 0, 0, 1, 0, 0, 0, 0, 14, 109, 97, 114, 99, 101, 108, 108, 45, 88, 53, 53, 48, 74, 88, 5, 108, 111, 99, 97, 108, 0, 0, 1, 128, 1, 0, 0, 0, 120, 0, 4, 192, 168, 2, 1} | inet::EthernetFcs, length = 4 B]] from upper layer.
+[DETAIL]	Frame inet::EthernetMacHeader, length = 14 B arrived from higher layers, enqueueing
+[DETAIL]	Transmitting a copy of frame (inet::Packet)Ext-UDP--14 (94 bytes) [[BytesChunk, length = 90 B, bytes = {1, 0, 94, 0, 0, 251, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 76, 164, 47, 64, 0, 255, 17, 51, 204, 192, 168, 2, 1, 224, 0, 0, 251, 20, 233, 20, 233, 0, 56, 4, 126, 0, 0, 132, 0, 0, 0, 0, 1, 0, 0, 0, 0, 14, 109, 97, 114, 99, 101, 108, 108, 45, 88, 53, 53, 48, 74, 88, 5, 108, 111, 99, 97, 108, 0, 0, 1, 128, 1, 0, 0, 0, 120, 0, 4, 192, 168, 2, 1} | inet::EthernetFcs, length = 4 B]]
+[INFO]	Transmission of (inet::Packet)Ext-UDP--14 (102 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 90 B, bytes = {1, 0, 94, 0, 0, 251, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 76, 164, 47, 64, 0, 255, 17, 51, 204, 192, 168, 2, 1, 224, 0, 0, 251, 20, 233, 20, 233, 0, 56, 4, 126, 0, 0, 132, 0, 0, 0, 0, 1, 0, 0, 0, 0, 14, 109, 97, 114, 99, 101, 108, 108, 45, 88, 53, 53, 48, 74, 88, 5, 108, 111, 99, 97, 108, 0, 0, 1, 128, 1, 0, 0, 0, 120, 0, 4, 192, 168, 2, 1} | inet::EthernetFcs, length = 4 B]] started.
+[INFO]	We are behind: 0.205686 seconds
+** Event #91  t=1.499528088  74% completed  (74% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Transmission of (inet::Packet)Ext-UDP--14 (94 bytes) [[BytesChunk, length = 90 B, bytes = {1, 0, 94, 0, 0, 251, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 76, 164, 47, 64, 0, 255, 17, 51, 204, 192, 168, 2, 1, 224, 0, 0, 251, 20, 233, 20, 233, 0, 56, 4, 126, 0, 0, 132, 0, 0, 0, 0, 1, 0, 0, 0, 0, 14, 109, 97, 114, 99, 101, 108, 108, 45, 88, 53, 53, 48, 74, 88, 5, 108, 111, 99, 97, 108, 0, 0, 1, 128, 1, 0, 0, 0, 120, 0, 4, 192, 168, 2, 1} | inet::EthernetFcs, length = 4 B]] successfully completed.
+[DETAIL]	Start IFG period
+[INFO]	We are behind: 0.240102 seconds
+** Event #92  t=1.499528138  74% completed  (74% total)   NoExtHostsEthernetShowcase.host2.eth[0].mac (EtherMacFullDuplex, id=55)
+[INFO]	(inet::EthernetSignal)Ext-UDP--14 received.
+[INFO]	Reception of inet::EthernetMacHeader, length = 14 B successfully completed.
+[INFO]	Sending (inet::Packet)Ext-UDP--14 (94 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 90 B, bytes = {1, 0, 94, 0, 0, 251, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 76, 164, 47, 64, 0, 255, 17, 51, 204, 192, 168, 2, 1, 224, 0, 0, 251, 20, 233, 20, 233, 0, 56, 4, 126, 0, 0, 132, 0, 0, 0, 0, 1, 0, 0, 0, 0, 14, 109, 97, 114, 99, 101, 108, 108, 45, 88, 53, 53, 48, 74, 88, 5, 108, 111, 99, 97, 108, 0, 0, 1, 128, 1, 0, 0, 0, 120, 0, 4, 192, 168, 2, 1} | inet::EthernetFcs, length = 4 B]] to upper layer.
+[INFO]	We are behind: 0.279449 seconds
+** Event #93  t=1.499528138  74% completed  (74% total)   NoExtHostsEthernetShowcase.host2.eth[0].encap (EtherEncap, id=56)
+[INFO]	Received (inet::Packet)Ext-UDP--14 from lower layer.
+[DETAIL]	Decapsulating frame `Ext-UDP--14', passing up contained packet `Ext-UDP--14' to higher layer
+[INFO]	Sending (inet::Packet)Ext-UDP--14 (76 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 90 B, bytes = {1, 0, 94, 0, 0, 251, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 76, 164, 47, 64, 0, 255, 17, 51, 204, 192, 168, 2, 1, 224, 0, 0, 251, 20, 233, 20, 233, 0, 56, 4, 126, 0, 0, 132, 0, 0, 0, 0, 1, 0, 0, 0, 0, 14, 109, 97, 114, 99, 101, 108, 108, 45, 88, 53, 53, 48, 74, 88, 5, 108, 111, 99, 97, 108, 0, 0, 1, 128, 1, 0, 0, 0, 120, 0, 4, 192, 168, 2, 1} | inet::EthernetFcs, length = 4 B]] to upper layer.
+[INFO]	We are behind: 0.313128 seconds
+** Event #94  t=1.499528138  74% completed  (74% total)   NoExtHostsEthernetShowcase.host2.ipv4.ip (Ipv4, id=68)
+[INFO]	Received (inet::Packet)Ext-UDP--14 from network.
+[DETAIL]	Received datagram `' with dest=224.0.0.251
+[WARN]	Skip local delivery of multicast datagram (input interface not in multicast group)
+[WARN]	Skip forwarding of multicast datagram (forwarding disabled)
+[INFO]	We are behind: 0.339392 seconds
+** Event #95  t=1.499529048  74% completed  (74% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[DETAIL]	IFG elapsed
+[DETAIL]	No more frames to send, transmitter set to idle
+[INFO]	Received a 114 B packet from 82-5D-42-63-4D-A9 to 33-33-00-00-00-16.
+** Event #96  t=1.503452467  75% completed  (75% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Received (inet::Packet)Ext-IPv6--15 (114 bytes) [[BytesChunk, length = 110 B, bytes = {51, 51, 0, 0, 0, 22, 130, 93, 66, 99, 77, 169, 134, 221, 96, 0, 0, 0, 0, 56, 0, 1, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 58, 0, 5, 2, 0, 0, 1, 0, 143, 0, 15, 128, 0, 0, 0, 2, 4, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 251, 4, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 99, 77, 169} | inet::EthernetFcs, length = 4 B]] from upper layer.
+[DETAIL]	Frame inet::EthernetMacHeader, length = 14 B arrived from higher layers, enqueueing
+[DETAIL]	Transmitting a copy of frame (inet::Packet)Ext-IPv6--15 (114 bytes) [[BytesChunk, length = 110 B, bytes = {51, 51, 0, 0, 0, 22, 130, 93, 66, 99, 77, 169, 134, 221, 96, 0, 0, 0, 0, 56, 0, 1, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 58, 0, 5, 2, 0, 0, 1, 0, 143, 0, 15, 128, 0, 0, 0, 2, 4, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 251, 4, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 99, 77, 169} | inet::EthernetFcs, length = 4 B]]
+[INFO]	Transmission of (inet::Packet)Ext-IPv6--15 (122 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 110 B, bytes = {51, 51, 0, 0, 0, 22, 130, 93, 66, 99, 77, 169, 134, 221, 96, 0, 0, 0, 0, 56, 0, 1, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 58, 0, 5, 2, 0, 0, 1, 0, 143, 0, 15, 128, 0, 0, 0, 2, 4, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 251, 4, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 99, 77, 169} | inet::EthernetFcs, length = 4 B]] started.
+[INFO]	We are behind: 0.340811 seconds
+** Event #97  t=1.503462227  75% completed  (75% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Transmission of (inet::Packet)Ext-IPv6--15 (114 bytes) [[BytesChunk, length = 110 B, bytes = {51, 51, 0, 0, 0, 22, 130, 93, 66, 99, 77, 169, 134, 221, 96, 0, 0, 0, 0, 56, 0, 1, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 58, 0, 5, 2, 0, 0, 1, 0, 143, 0, 15, 128, 0, 0, 0, 2, 4, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 251, 4, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 99, 77, 169} | inet::EthernetFcs, length = 4 B]] successfully completed.
+[DETAIL]	Start IFG period
+[INFO]	We are behind: 0.41278 seconds
+** Event #98  t=1.503462277  75% completed  (75% total)   NoExtHostsEthernetShowcase.host2.eth[0].mac (EtherMacFullDuplex, id=55)
+[INFO]	(inet::EthernetSignal)Ext-IPv6--15 received.
+[INFO]	Reception of inet::EthernetMacHeader, length = 14 B successfully completed.
+[INFO]	Sending (inet::Packet)Ext-IPv6--15 (114 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 110 B, bytes = {51, 51, 0, 0, 0, 22, 130, 93, 66, 99, 77, 169, 134, 221, 96, 0, 0, 0, 0, 56, 0, 1, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 58, 0, 5, 2, 0, 0, 1, 0, 143, 0, 15, 128, 0, 0, 0, 2, 4, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 251, 4, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 99, 77, 169} | inet::EthernetFcs, length = 4 B]] to upper layer.
+[INFO]	We are behind: 0.501855 seconds
+** Event #99  t=1.503462277  75% completed  (75% total)   NoExtHostsEthernetShowcase.host2.eth[0].encap (EtherEncap, id=56)
+[INFO]	Received (inet::Packet)Ext-IPv6--15 from lower layer.
+[WARN]	Unknown protocol, dropping packet
+[INFO]	We are behind: 0.543409 seconds
+** Event #100  t=1.503463187  75% completed  (75% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[DETAIL]	IFG elapsed
+[DETAIL]	No more frames to send, transmitter set to idle
+[INFO]	Received a 218 B packet from 82-5D-42-63-4D-A9 to 01-00-5E-7F-FF-FA.
+** Event #101  t=1.504032015  75% completed  (75% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Received (inet::Packet)Ext-UDP--16 (218 bytes) [[BytesChunk, length = 214 B, bytes = {1, 0, 94, 127, 255, 250, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 200, 157, 36, 64, 0, 1, 17, 41, 93, 192, 168, 2, 1, 239, 255, 255, 250, 165, 108, 7, 108, 0, 180, 254, 206, 77, 45, 83, 69, 65, 82, 67, 72, 32, 42, 32, 72, 84, 84, 80, 47, 49, 46, 49, 13, 10, 72, 79, 83, 84, 58, 32, 50, 51, 57, 46, 50, 53, 53, 46, 50, 53, 53, 46, 50, 53, 48, 58, 49, 57, 48, 48, 13, 10, 77, 65, 78, 58, 32, 34, 115, 115, 100, 112, 58, 100, 105, 115, 99, 111, 118, 101, 114, 34, 13, 10, 77, 88, 58, 32, 49, 13, 10, 83, 84, 58, 32, 117, 114, 110, 58, 100, 105, 97, 108, 45, 109, 117, 108, 116, 105, 115, 99, 114, 101, 101, 110, 45, 111, 114, 103, 58, 115, 101, 114, 118, 105, 99, 101, 58, 100, 105, 97, 108, 58, 49, 13, 10, 85, 83, 69, 82, 45, 65, 71, 69, 78, 84, 58, 32, 71, 111, 111, 103, 108, 101, 32, 67, 104, 114, 111, 109, 101, 47, 54, 57, 46, 48, 46, 51, 52, 57, 55, 46, 49, 48, 48, 32, 76, 105, 110, 117, 120, 13, 10, 13, 10} | inet::EthernetFcs, length = 4 B]] from upper layer.
+[DETAIL]	Frame inet::EthernetMacHeader, length = 14 B arrived from higher layers, enqueueing
+[DETAIL]	Transmitting a copy of frame (inet::Packet)Ext-UDP--16 (218 bytes) [[BytesChunk, length = 214 B, bytes = {1, 0, 94, 127, 255, 250, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 200, 157, 36, 64, 0, 1, 17, 41, 93, 192, 168, 2, 1, 239, 255, 255, 250, 165, 108, 7, 108, 0, 180, 254, 206, 77, 45, 83, 69, 65, 82, 67, 72, 32, 42, 32, 72, 84, 84, 80, 47, 49, 46, 49, 13, 10, 72, 79, 83, 84, 58, 32, 50, 51, 57, 46, 50, 53, 53, 46, 50, 53, 53, 46, 50, 53, 48, 58, 49, 57, 48, 48, 13, 10, 77, 65, 78, 58, 32, 34, 115, 115, 100, 112, 58, 100, 105, 115, 99, 111, 118, 101, 114, 34, 13, 10, 77, 88, 58, 32, 49, 13, 10, 83, 84, 58, 32, 117, 114, 110, 58, 100, 105, 97, 108, 45, 109, 117, 108, 116, 105, 115, 99, 114, 101, 101, 110, 45, 111, 114, 103, 58, 115, 101, 114, 118, 105, 99, 101, 58, 100, 105, 97, 108, 58, 49, 13, 10, 85, 83, 69, 82, 45, 65, 71, 69, 78, 84, 58, 32, 71, 111, 111, 103, 108, 101, 32, 67, 104, 114, 111, 109, 101, 47, 54, 57, 46, 48, 46, 51, 52, 57, 55, 46, 49, 48, 48, 32, 76, 105, 110, 117, 120, 13, 10, 13, 10} | inet::EthernetFcs, length = 4 B]]
+[INFO]	Transmission of (inet::Packet)Ext-UDP--16 (226 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 214 B, bytes = {1, 0, 94, 127, 255, 250, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 200, 157, 36, 64, 0, 1, 17, 41, 93, 192, 168, 2, 1, 239, 255, 255, 250, 165, 108, 7, 108, 0, 180, 254, 206, 77, 45, 83, 69, 65, 82, 67, 72, 32, 42, 32, 72, 84, 84, 80, 47, 49, 46, 49, 13, 10, 72, 79, 83, 84, 58, 32, 50, 51, 57, 46, 50, 53, 53, 46, 50, 53, 53, 46, 50, 53, 48, 58, 49, 57, 48, 48, 13, 10, 77, 65, 78, 58, 32, 34, 115, 115, 100, 112, 58, 100, 105, 115, 99, 111, 118, 101, 114, 34, 13, 10, 77, 88, 58, 32, 49, 13, 10, 83, 84, 58, 32, 117, 114, 110, 58, 100, 105, 97, 108, 45, 109, 117, 108, 116, 105, 115, 99, 114, 101, 101, 110, 45, 111, 114, 103, 58, 115, 101, 114, 118, 105, 99, 101, 58, 100, 105, 97, 108, 58, 49, 13, 10, 85, 83, 69, 82, 45, 65, 71, 69, 78, 84, 58, 32, 71, 111, 111, 103, 108, 101, 32, 67, 104, 114, 111, 109, 101, 47, 54, 57, 46, 48, 46, 51, 52, 57, 55, 46, 49, 48, 48, 32, 76, 105, 110, 117, 120, 13, 10, 13, 10} | inet::EthernetFcs, length = 4 B]] started.
+[INFO]	We are behind: 0.254795 seconds
+** Event #102  t=1.504050095  75% completed  (75% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Transmission of (inet::Packet)Ext-UDP--16 (218 bytes) [[BytesChunk, length = 214 B, bytes = {1, 0, 94, 127, 255, 250, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 200, 157, 36, 64, 0, 1, 17, 41, 93, 192, 168, 2, 1, 239, 255, 255, 250, 165, 108, 7, 108, 0, 180, 254, 206, 77, 45, 83, 69, 65, 82, 67, 72, 32, 42, 32, 72, 84, 84, 80, 47, 49, 46, 49, 13, 10, 72, 79, 83, 84, 58, 32, 50, 51, 57, 46, 50, 53, 53, 46, 50, 53, 53, 46, 50, 53, 48, 58, 49, 57, 48, 48, 13, 10, 77, 65, 78, 58, 32, 34, 115, 115, 100, 112, 58, 100, 105, 115, 99, 111, 118, 101, 114, 34, 13, 10, 77, 88, 58, 32, 49, 13, 10, 83, 84, 58, 32, 117, 114, 110, 58, 100, 105, 97, 108, 45, 109, 117, 108, 116, 105, 115, 99, 114, 101, 101, 110, 45, 111, 114, 103, 58, 115, 101, 114, 118, 105, 99, 101, 58, 100, 105, 97, 108, 58, 49, 13, 10, 85, 83, 69, 82, 45, 65, 71, 69, 78, 84, 58, 32, 71, 111, 111, 103, 108, 101, 32, 67, 104, 114, 111, 109, 101, 47, 54, 57, 46, 48, 46, 51, 52, 57, 55, 46, 49, 48, 48, 32, 76, 105, 110, 117, 120, 13, 10, 13, 10} | inet::EthernetFcs, length = 4 B]] successfully completed.
+[DETAIL]	Start IFG period
+[INFO]	We are behind: 0.3061 seconds
+** Event #103  t=1.504050145  75% completed  (75% total)   NoExtHostsEthernetShowcase.host2.eth[0].mac (EtherMacFullDuplex, id=55)
+[INFO]	(inet::EthernetSignal)Ext-UDP--16 received.
+[INFO]	Reception of inet::EthernetMacHeader, length = 14 B successfully completed.
+[INFO]	Sending (inet::Packet)Ext-UDP--16 (218 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 214 B, bytes = {1, 0, 94, 127, 255, 250, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 200, 157, 36, 64, 0, 1, 17, 41, 93, 192, 168, 2, 1, 239, 255, 255, 250, 165, 108, 7, 108, 0, 180, 254, 206, 77, 45, 83, 69, 65, 82, 67, 72, 32, 42, 32, 72, 84, 84, 80, 47, 49, 46, 49, 13, 10, 72, 79, 83, 84, 58, 32, 50, 51, 57, 46, 50, 53, 53, 46, 50, 53, 53, 46, 50, 53, 48, 58, 49, 57, 48, 48, 13, 10, 77, 65, 78, 58, 32, 34, 115, 115, 100, 112, 58, 100, 105, 115, 99, 111, 118, 101, 114, 34, 13, 10, 77, 88, 58, 32, 49, 13, 10, 83, 84, 58, 32, 117, 114, 110, 58, 100, 105, 97, 108, 45, 109, 117, 108, 116, 105, 115, 99, 114, 101, 101, 110, 45, 111, 114, 103, 58, 115, 101, 114, 118, 105, 99, 101, 58, 100, 105, 97, 108, 58, 49, 13, 10, 85, 83, 69, 82, 45, 65, 71, 69, 78, 84, 58, 32, 71, 111, 111, 103, 108, 101, 32, 67, 104, 114, 111, 109, 101, 47, 54, 57, 46, 48, 46, 51, 52, 57, 55, 46, 49, 48, 48, 32, 76, 105, 110, 117, 120, 13, 10, 13, 10} | inet::EthernetFcs, length = 4 B]] to upper layer.
+[INFO]	We are behind: 0.361893 seconds
+** Event #104  t=1.504050145  75% completed  (75% total)   NoExtHostsEthernetShowcase.host2.eth[0].encap (EtherEncap, id=56)
+[INFO]	Received (inet::Packet)Ext-UDP--16 from lower layer.
+[DETAIL]	Decapsulating frame `Ext-UDP--16', passing up contained packet `Ext-UDP--16' to higher layer
+[INFO]	Sending (inet::Packet)Ext-UDP--16 (200 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 214 B, bytes = {1, 0, 94, 127, 255, 250, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 200, 157, 36, 64, 0, 1, 17, 41, 93, 192, 168, 2, 1, 239, 255, 255, 250, 165, 108, 7, 108, 0, 180, 254, 206, 77, 45, 83, 69, 65, 82, 67, 72, 32, 42, 32, 72, 84, 84, 80, 47, 49, 46, 49, 13, 10, 72, 79, 83, 84, 58, 32, 50, 51, 57, 46, 50, 53, 53, 46, 50, 53, 53, 46, 50, 53, 48, 58, 49, 57, 48, 48, 13, 10, 77, 65, 78, 58, 32, 34, 115, 115, 100, 112, 58, 100, 105, 115, 99, 111, 118, 101, 114, 34, 13, 10, 77, 88, 58, 32, 49, 13, 10, 83, 84, 58, 32, 117, 114, 110, 58, 100, 105, 97, 108, 45, 109, 117, 108, 116, 105, 115, 99, 114, 101, 101, 110, 45, 111, 114, 103, 58, 115, 101, 114, 118, 105, 99, 101, 58, 100, 105, 97, 108, 58, 49, 13, 10, 85, 83, 69, 82, 45, 65, 71, 69, 78, 84, 58, 32, 71, 111, 111, 103, 108, 101, 32, 67, 104, 114, 111, 109, 101, 47, 54, 57, 46, 48, 46, 51, 52, 57, 55, 46, 49, 48, 48, 32, 76, 105, 110, 117, 120, 13, 10, 13, 10} | inet::EthernetFcs, length = 4 B]] to upper layer.
+[INFO]	We are behind: 0.407876 seconds
+** Event #105  t=1.504050145  75% completed  (75% total)   NoExtHostsEthernetShowcase.host2.ipv4.ip (Ipv4, id=68)
+[INFO]	Received (inet::Packet)Ext-UDP--16 from network.
+[DETAIL]	Received datagram `' with dest=239.255.255.250
+[WARN]	Skip local delivery of multicast datagram (input interface not in multicast group)
+[WARN]	Skip forwarding of multicast datagram (forwarding disabled)
+[INFO]	We are behind: 0.441969 seconds
+** Event #106  t=1.504051055  75% completed  (75% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[DETAIL]	IFG elapsed
+[DETAIL]	No more frames to send, transmitter set to idle
+[INFO]	Received a 224 B packet from 82-5D-42-63-4D-A9 to 33-33-00-00-00-FB.
+** Event #107  t=1.748740121  87% completed  (87% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Received (inet::Packet)Ext-UDP--17 (224 bytes) [[BytesChunk, length = 220 B, bytes = {51, 51, 0, 0, 0, 251, 130, 93, 66, 99, 77, 169, 134, 221, 96, 6, 51, 184, 0, 166, 17, 255, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 251, 20, 233, 20, 233, 0, 166, 155, 45, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 1, 57, 1, 97, 1, 100, 1, 52, 1, 51, 1, 54, 1, 101, 1, 102, 1, 102, 1, 102, 1, 50, 1, 52, 1, 100, 1, 53, 1, 48, 1, 56, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 56, 1, 101, 1, 102, 3, 105, 112, 54, 4, 97, 114, 112, 97, 0, 0, 255, 0, 1, 14, 109, 97, 114, 99, 101, 108, 108, 45, 88, 53, 53, 48, 74, 88, 5, 108, 111, 99, 97, 108, 0, 0, 255, 0, 1, 192, 90, 0, 28, 0, 1, 0, 0, 0, 120, 0, 16, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 192, 12, 0, 12, 0, 1, 0, 0, 0, 120, 0, 2, 192, 90} | inet::EthernetFcs, length = 4 B]] from upper layer.
+[DETAIL]	Frame inet::EthernetMacHeader, length = 14 B arrived from higher layers, enqueueing
+[DETAIL]	Transmitting a copy of frame (inet::Packet)Ext-UDP--17 (224 bytes) [[BytesChunk, length = 220 B, bytes = {51, 51, 0, 0, 0, 251, 130, 93, 66, 99, 77, 169, 134, 221, 96, 6, 51, 184, 0, 166, 17, 255, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 251, 20, 233, 20, 233, 0, 166, 155, 45, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 1, 57, 1, 97, 1, 100, 1, 52, 1, 51, 1, 54, 1, 101, 1, 102, 1, 102, 1, 102, 1, 50, 1, 52, 1, 100, 1, 53, 1, 48, 1, 56, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 56, 1, 101, 1, 102, 3, 105, 112, 54, 4, 97, 114, 112, 97, 0, 0, 255, 0, 1, 14, 109, 97, 114, 99, 101, 108, 108, 45, 88, 53, 53, 48, 74, 88, 5, 108, 111, 99, 97, 108, 0, 0, 255, 0, 1, 192, 90, 0, 28, 0, 1, 0, 0, 0, 120, 0, 16, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 192, 12, 0, 12, 0, 1, 0, 0, 0, 120, 0, 2, 192, 90} | inet::EthernetFcs, length = 4 B]]
+[INFO]	Transmission of (inet::Packet)Ext-UDP--17 (232 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 220 B, bytes = {51, 51, 0, 0, 0, 251, 130, 93, 66, 99, 77, 169, 134, 221, 96, 6, 51, 184, 0, 166, 17, 255, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 251, 20, 233, 20, 233, 0, 166, 155, 45, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 1, 57, 1, 97, 1, 100, 1, 52, 1, 51, 1, 54, 1, 101, 1, 102, 1, 102, 1, 102, 1, 50, 1, 52, 1, 100, 1, 53, 1, 48, 1, 56, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 56, 1, 101, 1, 102, 3, 105, 112, 54, 4, 97, 114, 112, 97, 0, 0, 255, 0, 1, 14, 109, 97, 114, 99, 101, 108, 108, 45, 88, 53, 53, 48, 74, 88, 5, 108, 111, 99, 97, 108, 0, 0, 255, 0, 1, 192, 90, 0, 28, 0, 1, 0, 0, 0, 120, 0, 16, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 192, 12, 0, 12, 0, 1, 0, 0, 0, 120, 0, 2, 192, 90} | inet::EthernetFcs, length = 4 B]] started.
+[INFO]	We are behind: 0.380173 seconds
+** Event #108  t=1.748758681  87% completed  (87% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Transmission of (inet::Packet)Ext-UDP--17 (224 bytes) [[BytesChunk, length = 220 B, bytes = {51, 51, 0, 0, 0, 251, 130, 93, 66, 99, 77, 169, 134, 221, 96, 6, 51, 184, 0, 166, 17, 255, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 251, 20, 233, 20, 233, 0, 166, 155, 45, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 1, 57, 1, 97, 1, 100, 1, 52, 1, 51, 1, 54, 1, 101, 1, 102, 1, 102, 1, 102, 1, 50, 1, 52, 1, 100, 1, 53, 1, 48, 1, 56, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 56, 1, 101, 1, 102, 3, 105, 112, 54, 4, 97, 114, 112, 97, 0, 0, 255, 0, 1, 14, 109, 97, 114, 99, 101, 108, 108, 45, 88, 53, 53, 48, 74, 88, 5, 108, 111, 99, 97, 108, 0, 0, 255, 0, 1, 192, 90, 0, 28, 0, 1, 0, 0, 0, 120, 0, 16, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 192, 12, 0, 12, 0, 1, 0, 0, 0, 120, 0, 2, 192, 90} | inet::EthernetFcs, length = 4 B]] successfully completed.
+[DETAIL]	Start IFG period
+[INFO]	We are behind: 0.436293 seconds
+** Event #109  t=1.748758731  87% completed  (87% total)   NoExtHostsEthernetShowcase.host2.eth[0].mac (EtherMacFullDuplex, id=55)
+[INFO]	(inet::EthernetSignal)Ext-UDP--17 received.
+[INFO]	Reception of inet::EthernetMacHeader, length = 14 B successfully completed.
+[INFO]	Sending (inet::Packet)Ext-UDP--17 (224 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 220 B, bytes = {51, 51, 0, 0, 0, 251, 130, 93, 66, 99, 77, 169, 134, 221, 96, 6, 51, 184, 0, 166, 17, 255, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 251, 20, 233, 20, 233, 0, 166, 155, 45, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 1, 57, 1, 97, 1, 100, 1, 52, 1, 51, 1, 54, 1, 101, 1, 102, 1, 102, 1, 102, 1, 50, 1, 52, 1, 100, 1, 53, 1, 48, 1, 56, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 56, 1, 101, 1, 102, 3, 105, 112, 54, 4, 97, 114, 112, 97, 0, 0, 255, 0, 1, 14, 109, 97, 114, 99, 101, 108, 108, 45, 88, 53, 53, 48, 74, 88, 5, 108, 111, 99, 97, 108, 0, 0, 255, 0, 1, 192, 90, 0, 28, 0, 1, 0, 0, 0, 120, 0, 16, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 192, 12, 0, 12, 0, 1, 0, 0, 0, 120, 0, 2, 192, 90} | inet::EthernetFcs, length = 4 B]] to upper layer.
+[INFO]	We are behind: 0.522273 seconds
+** Event #110  t=1.748758731  87% completed  (87% total)   NoExtHostsEthernetShowcase.host2.eth[0].encap (EtherEncap, id=56)
+[INFO]	Received (inet::Packet)Ext-UDP--17 from lower layer.
+[WARN]	Unknown protocol, dropping packet
+[INFO]	We are behind: 0.549192 seconds
+** Event #111  t=1.748759641  87% completed  (87% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[DETAIL]	IFG elapsed
+[DETAIL]	No more frames to send, transmitter set to idle
+[INFO]	Received a 204 B packet from 82-5D-42-63-4D-A9 to 01-00-5E-00-00-FB.
+** Event #112  t=1.749325756  87% completed  (87% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Received (inet::Packet)Ext-UDP--18 (204 bytes) [[BytesChunk, length = 200 B, bytes = {1, 0, 94, 0, 0, 251, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 186, 164, 67, 64, 0, 255, 17, 51, 74, 192, 168, 2, 1, 224, 0, 0, 251, 20, 233, 20, 233, 0, 166, 5, 113, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 1, 57, 1, 97, 1, 100, 1, 52, 1, 51, 1, 54, 1, 101, 1, 102, 1, 102, 1, 102, 1, 50, 1, 52, 1, 100, 1, 53, 1, 48, 1, 56, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 56, 1, 101, 1, 102, 3, 105, 112, 54, 4, 97, 114, 112, 97, 0, 0, 255, 0, 1, 14, 109, 97, 114, 99, 101, 108, 108, 45, 88, 53, 53, 48, 74, 88, 5, 108, 111, 99, 97, 108, 0, 0, 255, 0, 1, 192, 90, 0, 28, 0, 1, 0, 0, 0, 120, 0, 16, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 192, 12, 0, 12, 0, 1, 0, 0, 0, 120, 0, 2, 192, 90} | inet::EthernetFcs, length = 4 B]] from upper layer.
+[DETAIL]	Frame inet::EthernetMacHeader, length = 14 B arrived from higher layers, enqueueing
+[DETAIL]	Transmitting a copy of frame (inet::Packet)Ext-UDP--18 (204 bytes) [[BytesChunk, length = 200 B, bytes = {1, 0, 94, 0, 0, 251, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 186, 164, 67, 64, 0, 255, 17, 51, 74, 192, 168, 2, 1, 224, 0, 0, 251, 20, 233, 20, 233, 0, 166, 5, 113, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 1, 57, 1, 97, 1, 100, 1, 52, 1, 51, 1, 54, 1, 101, 1, 102, 1, 102, 1, 102, 1, 50, 1, 52, 1, 100, 1, 53, 1, 48, 1, 56, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 56, 1, 101, 1, 102, 3, 105, 112, 54, 4, 97, 114, 112, 97, 0, 0, 255, 0, 1, 14, 109, 97, 114, 99, 101, 108, 108, 45, 88, 53, 53, 48, 74, 88, 5, 108, 111, 99, 97, 108, 0, 0, 255, 0, 1, 192, 90, 0, 28, 0, 1, 0, 0, 0, 120, 0, 16, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 192, 12, 0, 12, 0, 1, 0, 0, 0, 120, 0, 2, 192, 90} | inet::EthernetFcs, length = 4 B]]
+[INFO]	Transmission of (inet::Packet)Ext-UDP--18 (212 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 200 B, bytes = {1, 0, 94, 0, 0, 251, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 186, 164, 67, 64, 0, 255, 17, 51, 74, 192, 168, 2, 1, 224, 0, 0, 251, 20, 233, 20, 233, 0, 166, 5, 113, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 1, 57, 1, 97, 1, 100, 1, 52, 1, 51, 1, 54, 1, 101, 1, 102, 1, 102, 1, 102, 1, 50, 1, 52, 1, 100, 1, 53, 1, 48, 1, 56, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 56, 1, 101, 1, 102, 3, 105, 112, 54, 4, 97, 114, 112, 97, 0, 0, 255, 0, 1, 14, 109, 97, 114, 99, 101, 108, 108, 45, 88, 53, 53, 48, 74, 88, 5, 108, 111, 99, 97, 108, 0, 0, 255, 0, 1, 192, 90, 0, 28, 0, 1, 0, 0, 0, 120, 0, 16, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 192, 12, 0, 12, 0, 1, 0, 0, 0, 120, 0, 2, 192, 90} | inet::EthernetFcs, length = 4 B]] started.
+[INFO]	We are behind: 0.216778 seconds
+** Event #113  t=1.749342716  87% completed  (87% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Transmission of (inet::Packet)Ext-UDP--18 (204 bytes) [[BytesChunk, length = 200 B, bytes = {1, 0, 94, 0, 0, 251, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 186, 164, 67, 64, 0, 255, 17, 51, 74, 192, 168, 2, 1, 224, 0, 0, 251, 20, 233, 20, 233, 0, 166, 5, 113, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 1, 57, 1, 97, 1, 100, 1, 52, 1, 51, 1, 54, 1, 101, 1, 102, 1, 102, 1, 102, 1, 50, 1, 52, 1, 100, 1, 53, 1, 48, 1, 56, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 56, 1, 101, 1, 102, 3, 105, 112, 54, 4, 97, 114, 112, 97, 0, 0, 255, 0, 1, 14, 109, 97, 114, 99, 101, 108, 108, 45, 88, 53, 53, 48, 74, 88, 5, 108, 111, 99, 97, 108, 0, 0, 255, 0, 1, 192, 90, 0, 28, 0, 1, 0, 0, 0, 120, 0, 16, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 192, 12, 0, 12, 0, 1, 0, 0, 0, 120, 0, 2, 192, 90} | inet::EthernetFcs, length = 4 B]] successfully completed.
+[DETAIL]	Start IFG period
+[INFO]	We are behind: 0.264398 seconds
+** Event #114  t=1.749342766  87% completed  (87% total)   NoExtHostsEthernetShowcase.host2.eth[0].mac (EtherMacFullDuplex, id=55)
+[INFO]	(inet::EthernetSignal)Ext-UDP--18 received.
+[INFO]	Reception of inet::EthernetMacHeader, length = 14 B successfully completed.
+[INFO]	Sending (inet::Packet)Ext-UDP--18 (204 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 200 B, bytes = {1, 0, 94, 0, 0, 251, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 186, 164, 67, 64, 0, 255, 17, 51, 74, 192, 168, 2, 1, 224, 0, 0, 251, 20, 233, 20, 233, 0, 166, 5, 113, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 1, 57, 1, 97, 1, 100, 1, 52, 1, 51, 1, 54, 1, 101, 1, 102, 1, 102, 1, 102, 1, 50, 1, 52, 1, 100, 1, 53, 1, 48, 1, 56, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 56, 1, 101, 1, 102, 3, 105, 112, 54, 4, 97, 114, 112, 97, 0, 0, 255, 0, 1, 14, 109, 97, 114, 99, 101, 108, 108, 45, 88, 53, 53, 48, 74, 88, 5, 108, 111, 99, 97, 108, 0, 0, 255, 0, 1, 192, 90, 0, 28, 0, 1, 0, 0, 0, 120, 0, 16, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 192, 12, 0, 12, 0, 1, 0, 0, 0, 120, 0, 2, 192, 90} | inet::EthernetFcs, length = 4 B]] to upper layer.
+[INFO]	We are behind: 0.319907 seconds
+** Event #115  t=1.749342766  87% completed  (87% total)   NoExtHostsEthernetShowcase.host2.eth[0].encap (EtherEncap, id=56)
+[INFO]	Received (inet::Packet)Ext-UDP--18 from lower layer.
+[DETAIL]	Decapsulating frame `Ext-UDP--18', passing up contained packet `Ext-UDP--18' to higher layer
+[INFO]	Sending (inet::Packet)Ext-UDP--18 (186 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 200 B, bytes = {1, 0, 94, 0, 0, 251, 130, 93, 66, 99, 77, 169, 8, 0, 69, 0, 0, 186, 164, 67, 64, 0, 255, 17, 51, 74, 192, 168, 2, 1, 224, 0, 0, 251, 20, 233, 20, 233, 0, 166, 5, 113, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 1, 57, 1, 97, 1, 100, 1, 52, 1, 51, 1, 54, 1, 101, 1, 102, 1, 102, 1, 102, 1, 50, 1, 52, 1, 100, 1, 53, 1, 48, 1, 56, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 56, 1, 101, 1, 102, 3, 105, 112, 54, 4, 97, 114, 112, 97, 0, 0, 255, 0, 1, 14, 109, 97, 114, 99, 101, 108, 108, 45, 88, 53, 53, 48, 74, 88, 5, 108, 111, 99, 97, 108, 0, 0, 255, 0, 1, 192, 90, 0, 28, 0, 1, 0, 0, 0, 120, 0, 16, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 192, 12, 0, 12, 0, 1, 0, 0, 0, 120, 0, 2, 192, 90} | inet::EthernetFcs, length = 4 B]] to upper layer.
+[INFO]	We are behind: 0.383224 seconds
+** Event #116  t=1.749342766  87% completed  (87% total)   NoExtHostsEthernetShowcase.host2.ipv4.ip (Ipv4, id=68)
+[INFO]	Received (inet::Packet)Ext-UDP--18 from network.
+[DETAIL]	Received datagram `' with dest=224.0.0.251
+[WARN]	Skip local delivery of multicast datagram (input interface not in multicast group)
+[WARN]	Skip forwarding of multicast datagram (forwarding disabled)
+[INFO]	We are behind: 0.424816 seconds
+** Event #117  t=1.749343676  87% completed  (87% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[DETAIL]	IFG elapsed
+[DETAIL]	No more frames to send, transmitter set to idle
+[INFO]	Received a 224 B packet from 82-5D-42-63-4D-A9 to 33-33-00-00-00-FB.
+** Event #118  t=1.999794311  99% completed  (99% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Received (inet::Packet)Ext-UDP--19 (224 bytes) [[BytesChunk, length = 220 B, bytes = {51, 51, 0, 0, 0, 251, 130, 93, 66, 99, 77, 169, 134, 221, 96, 6, 51, 184, 0, 166, 17, 255, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 251, 20, 233, 20, 233, 0, 166, 155, 45, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 1, 57, 1, 97, 1, 100, 1, 52, 1, 51, 1, 54, 1, 101, 1, 102, 1, 102, 1, 102, 1, 50, 1, 52, 1, 100, 1, 53, 1, 48, 1, 56, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 56, 1, 101, 1, 102, 3, 105, 112, 54, 4, 97, 114, 112, 97, 0, 0, 255, 0, 1, 14, 109, 97, 114, 99, 101, 108, 108, 45, 88, 53, 53, 48, 74, 88, 5, 108, 111, 99, 97, 108, 0, 0, 255, 0, 1, 192, 90, 0, 28, 0, 1, 0, 0, 0, 120, 0, 16, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 192, 12, 0, 12, 0, 1, 0, 0, 0, 120, 0, 2, 192, 90} | inet::EthernetFcs, length = 4 B]] from upper layer.
+[DETAIL]	Frame inet::EthernetMacHeader, length = 14 B arrived from higher layers, enqueueing
+[DETAIL]	Transmitting a copy of frame (inet::Packet)Ext-UDP--19 (224 bytes) [[BytesChunk, length = 220 B, bytes = {51, 51, 0, 0, 0, 251, 130, 93, 66, 99, 77, 169, 134, 221, 96, 6, 51, 184, 0, 166, 17, 255, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 251, 20, 233, 20, 233, 0, 166, 155, 45, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 1, 57, 1, 97, 1, 100, 1, 52, 1, 51, 1, 54, 1, 101, 1, 102, 1, 102, 1, 102, 1, 50, 1, 52, 1, 100, 1, 53, 1, 48, 1, 56, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 56, 1, 101, 1, 102, 3, 105, 112, 54, 4, 97, 114, 112, 97, 0, 0, 255, 0, 1, 14, 109, 97, 114, 99, 101, 108, 108, 45, 88, 53, 53, 48, 74, 88, 5, 108, 111, 99, 97, 108, 0, 0, 255, 0, 1, 192, 90, 0, 28, 0, 1, 0, 0, 0, 120, 0, 16, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 192, 12, 0, 12, 0, 1, 0, 0, 0, 120, 0, 2, 192, 90} | inet::EthernetFcs, length = 4 B]]
+[INFO]	Transmission of (inet::Packet)Ext-UDP--19 (232 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 220 B, bytes = {51, 51, 0, 0, 0, 251, 130, 93, 66, 99, 77, 169, 134, 221, 96, 6, 51, 184, 0, 166, 17, 255, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 251, 20, 233, 20, 233, 0, 166, 155, 45, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 1, 57, 1, 97, 1, 100, 1, 52, 1, 51, 1, 54, 1, 101, 1, 102, 1, 102, 1, 102, 1, 50, 1, 52, 1, 100, 1, 53, 1, 48, 1, 56, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 56, 1, 101, 1, 102, 3, 105, 112, 54, 4, 97, 114, 112, 97, 0, 0, 255, 0, 1, 14, 109, 97, 114, 99, 101, 108, 108, 45, 88, 53, 53, 48, 74, 88, 5, 108, 111, 99, 97, 108, 0, 0, 255, 0, 1, 192, 90, 0, 28, 0, 1, 0, 0, 0, 120, 0, 16, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 192, 12, 0, 12, 0, 1, 0, 0, 0, 120, 0, 2, 192, 90} | inet::EthernetFcs, length = 4 B]] started.
+[INFO]	We are behind: 0.582061 seconds
+** Event #119  t=1.999812871  99% completed  (99% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[INFO]	Transmission of (inet::Packet)Ext-UDP--19 (224 bytes) [[BytesChunk, length = 220 B, bytes = {51, 51, 0, 0, 0, 251, 130, 93, 66, 99, 77, 169, 134, 221, 96, 6, 51, 184, 0, 166, 17, 255, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 251, 20, 233, 20, 233, 0, 166, 155, 45, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 1, 57, 1, 97, 1, 100, 1, 52, 1, 51, 1, 54, 1, 101, 1, 102, 1, 102, 1, 102, 1, 50, 1, 52, 1, 100, 1, 53, 1, 48, 1, 56, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 56, 1, 101, 1, 102, 3, 105, 112, 54, 4, 97, 114, 112, 97, 0, 0, 255, 0, 1, 14, 109, 97, 114, 99, 101, 108, 108, 45, 88, 53, 53, 48, 74, 88, 5, 108, 111, 99, 97, 108, 0, 0, 255, 0, 1, 192, 90, 0, 28, 0, 1, 0, 0, 0, 120, 0, 16, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 192, 12, 0, 12, 0, 1, 0, 0, 0, 120, 0, 2, 192, 90} | inet::EthernetFcs, length = 4 B]] successfully completed.
+[DETAIL]	Start IFG period
+[INFO]	We are behind: 0.753347 seconds
+** Event #120  t=1.999812921  99% completed  (99% total)   NoExtHostsEthernetShowcase.host2.eth[0].mac (EtherMacFullDuplex, id=55)
+[INFO]	(inet::EthernetSignal)Ext-UDP--19 received.
+[INFO]	Reception of inet::EthernetMacHeader, length = 14 B successfully completed.
+[INFO]	Sending (inet::Packet)Ext-UDP--19 (224 bytes) [[inet::EthernetPhyHeader, length = 8 B | BytesChunk, length = 220 B, bytes = {51, 51, 0, 0, 0, 251, 130, 93, 66, 99, 77, 169, 134, 221, 96, 6, 51, 184, 0, 166, 17, 255, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 251, 20, 233, 20, 233, 0, 166, 155, 45, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 1, 57, 1, 97, 1, 100, 1, 52, 1, 51, 1, 54, 1, 101, 1, 102, 1, 102, 1, 102, 1, 50, 1, 52, 1, 100, 1, 53, 1, 48, 1, 56, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 56, 1, 101, 1, 102, 3, 105, 112, 54, 4, 97, 114, 112, 97, 0, 0, 255, 0, 1, 14, 109, 97, 114, 99, 101, 108, 108, 45, 88, 53, 53, 48, 74, 88, 5, 108, 111, 99, 97, 108, 0, 0, 255, 0, 1, 192, 90, 0, 28, 0, 1, 0, 0, 0, 120, 0, 16, 254, 128, 0, 0, 0, 0, 0, 0, 128, 93, 66, 255, 254, 99, 77, 169, 192, 12, 0, 12, 0, 1, 0, 0, 0, 120, 0, 2, 192, 90} | inet::EthernetFcs, length = 4 B]] to upper layer.
+[INFO]	We are behind: 0.87482 seconds
+** Event #121  t=1.999812921  99% completed  (99% total)   NoExtHostsEthernetShowcase.host2.eth[0].encap (EtherEncap, id=56)
+[INFO]	Received (inet::Packet)Ext-UDP--19 from lower layer.
+[WARN]	Unknown protocol, dropping packet
+[INFO]	We are behind: 0.919953 seconds
+** Event #122  t=1.999813831  99% completed  (99% total)   NoExtHostsEthernetShowcase.host1.eth[0].mac (EtherMacFullDuplex, id=22)
+[DETAIL]	IFG elapsed
+[DETAIL]	No more frames to send, transmitter set to idle
+[INFO]	We are behind: 0.756597 seconds
+** Event #123  t=2  100% completed  (100% total)
+
+<!> Simulation time limit reached -- at t=2s, event #123
+
+Calling finish() at end of Run #0...
+[INFO]	2 packets sent, 20 packets received.
+[INFO]	NoExtHostsEthernetShowcase.host1.tcp: finishing with 0 connections open.
+[INFO]	NoExtHostsEthernetShowcase.host2.tcp: finishing with 0 connections open.
+[INFO]	Clear all sockets
+[INFO]	Clear all sockets
+
+End.

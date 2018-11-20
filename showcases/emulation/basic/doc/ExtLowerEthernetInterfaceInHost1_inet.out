@@ -1,0 +1,457 @@
+OMNeT++ Discrete Event Simulation  (C) 1992-2018 Andras Varga, OpenSim Ltd.
+Version: 5.4.1, build: 180629-5e28390, edition: Academic Public License -- NOT FOR COMMERCIAL USE
+See the license for distribution terms and warranty disclaimer
+
+Setting up Cmdenv...
+
+Loading NED files from /home/marcell/inet/src:  726
+Loading NED files from /home/marcell/inet/tutorials:  20
+Loading NED files from /home/marcell/inet/showcases:  60
+Loading NED files from /home/marcell/inet/examples:  163
+
+Preparing for running configuration ExtLowerEthernetInterfaceInHost1, run #0...
+Assigned runID=ExtLowerEthernetInterfaceInHost1-0-20181114-16:07:54-9368
+Setting up network "ExtHost2EthernetShowcase"...
+Initializing...
+Initializing channel ExtHost2EthernetShowcase.host1.eth[0].phys$o.channel, stage 0
+Initializing channel ExtHost2EthernetShowcase.host1.ethg$i[0].channel, stage 0
+Initializing channel ExtHost2EthernetShowcase.host1.lo[0].lo.upperLayerOut.channel, stage 0
+Initializing channel ExtHost2EthernetShowcase.host1.lo[0].upperLayerIn.channel, stage 0
+Initializing channel ExtHost2EthernetShowcase.host1.eth[0].encap.upperLayerOut.channel, stage 0
+Initializing channel ExtHost2EthernetShowcase.host1.eth[0].upperLayerIn.channel, stage 0
+Initializing channel ExtHost2EthernetShowcase.host1.ipv4.up.out[0].channel, stage 0
+Initializing channel ExtHost2EthernetShowcase.host1.ipv4.lp.out[2].channel, stage 0
+Initializing channel ExtHost2EthernetShowcase.host1.ipv4.ifIn.channel, stage 0
+Initializing channel ExtHost2EthernetShowcase.host1.ipv4.transportIn.channel, stage 0
+Initializing module ExtHost2EthernetShowcase, stage 0
+Initializing module ExtHost2EthernetShowcase.configurator, stage 0
+Initializing module ExtHost2EthernetShowcase.host1, stage 0
+Initializing module ExtHost2EthernetShowcase.host1.interfaceTable, stage 0
+Initializing module ExtHost2EthernetShowcase.host1.lo[0], stage 0
+Initializing module ExtHost2EthernetShowcase.host1.lo[0].lo, stage 0
+Initializing module ExtHost2EthernetShowcase.host1.eth[0], stage 0
+Initializing module ExtHost2EthernetShowcase.host1.eth[0].encap, stage 0
+Initializing module ExtHost2EthernetShowcase.host1.eth[0].socket, stage 0
+Initializing module ExtHost2EthernetShowcase.host1.ipv4, stage 0
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.configurator, stage 0
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.routingTable, stage 0
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.natTable, stage 0
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.up, stage 0
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.igmp, stage 0
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.icmp, stage 0
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.mp, stage 0
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.ip, stage 0
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.arp, stage 0
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.lp, stage 0
+Initializing module ExtHost2EthernetShowcase.host1.nl, stage 0
+Initializing module ExtHost2EthernetShowcase.host1.udp, stage 0
+Initializing module ExtHost2EthernetShowcase.host1.tcp, stage 0
+Initializing module ExtHost2EthernetShowcase.host1.tn, stage 0
+Initializing module ExtHost2EthernetShowcase.host1.app[0], stage 0
+Initializing module ExtHost2EthernetShowcase.host1.at, stage 0
+Initializing module ExtHost2EthernetShowcase.configurator, stage 1
+Initializing module ExtHost2EthernetShowcase.host1.interfaceTable, stage 1
+Initializing module ExtHost2EthernetShowcase.host1.lo[0], stage 1
+Initializing module ExtHost2EthernetShowcase.host1.lo[0].lo, stage 1
+Initializing module ExtHost2EthernetShowcase.host1.eth[0], stage 1
+Initializing module ExtHost2EthernetShowcase.host1.eth[0].encap, stage 1
+Initializing module ExtHost2EthernetShowcase.host1.eth[0].socket, stage 1
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.configurator, stage 1
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.routingTable, stage 1
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.natTable, stage 1
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.igmp, stage 1
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.icmp, stage 1
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.ip, stage 1
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.arp, stage 1
+Initializing module ExtHost2EthernetShowcase.host1.udp, stage 1
+Initializing module ExtHost2EthernetShowcase.host1.tcp, stage 1
+Initializing module ExtHost2EthernetShowcase.host1.app[0], stage 1
+Initializing module ExtHost2EthernetShowcase.configurator, stage 2
+Initializing module ExtHost2EthernetShowcase.host1.interfaceTable, stage 2
+Initializing module ExtHost2EthernetShowcase.host1.lo[0], stage 2
+Initializing module ExtHost2EthernetShowcase.host1.lo[0].lo, stage 2
+Initializing module ExtHost2EthernetShowcase.host1.eth[0], stage 2
+Initializing module ExtHost2EthernetShowcase.host1.eth[0].encap, stage 2
+Initializing module ExtHost2EthernetShowcase.host1.eth[0].socket, stage 2
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.configurator, stage 2
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.routingTable, stage 2
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.natTable, stage 2
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.igmp, stage 2
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.icmp, stage 2
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.ip, stage 2
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.arp, stage 2
+Initializing module ExtHost2EthernetShowcase.host1.udp, stage 2
+Initializing module ExtHost2EthernetShowcase.host1.tcp, stage 2
+Initializing module ExtHost2EthernetShowcase.host1.app[0], stage 2
+Initializing module ExtHost2EthernetShowcase.configurator, stage 3
+Initializing module ExtHost2EthernetShowcase.host1.interfaceTable, stage 3
+Initializing module ExtHost2EthernetShowcase.host1.lo[0], stage 3
+Initializing module ExtHost2EthernetShowcase.host1.lo[0].lo, stage 3
+Initializing module ExtHost2EthernetShowcase.host1.eth[0], stage 3
+Initializing module ExtHost2EthernetShowcase.host1.eth[0].encap, stage 3
+Initializing module ExtHost2EthernetShowcase.host1.eth[0].socket, stage 3
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.configurator, stage 3
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.routingTable, stage 3
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.natTable, stage 3
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.igmp, stage 3
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.icmp, stage 3
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.ip, stage 3
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.arp, stage 3
+Initializing module ExtHost2EthernetShowcase.host1.udp, stage 3
+Initializing module ExtHost2EthernetShowcase.host1.tcp, stage 3
+Initializing module ExtHost2EthernetShowcase.host1.app[0], stage 3
+Initializing module ExtHost2EthernetShowcase.configurator, stage 4
+[INFO]	Computing static network configuration (addresses and routes).
+Initializing module ExtHost2EthernetShowcase.host1.interfaceTable, stage 4
+Initializing module ExtHost2EthernetShowcase.host1.lo[0], stage 4
+Initializing module ExtHost2EthernetShowcase.host1.lo[0].lo, stage 4
+Initializing module ExtHost2EthernetShowcase.host1.eth[0], stage 4
+Initializing module ExtHost2EthernetShowcase.host1.eth[0].encap, stage 4
+Initializing module ExtHost2EthernetShowcase.host1.eth[0].socket, stage 4
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.configurator, stage 4
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.routingTable, stage 4
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.natTable, stage 4
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.igmp, stage 4
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.icmp, stage 4
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.ip, stage 4
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.arp, stage 4
+Initializing module ExtHost2EthernetShowcase.host1.udp, stage 4
+Initializing module ExtHost2EthernetShowcase.host1.tcp, stage 4
+Initializing module ExtHost2EthernetShowcase.host1.app[0], stage 4
+Initializing module ExtHost2EthernetShowcase.configurator, stage 5
+Initializing module ExtHost2EthernetShowcase.host1.interfaceTable, stage 5
+Initializing module ExtHost2EthernetShowcase.host1.lo[0], stage 5
+Initializing module ExtHost2EthernetShowcase.host1.lo[0].lo, stage 5
+Initializing module ExtHost2EthernetShowcase.host1.eth[0], stage 5
+Initializing module ExtHost2EthernetShowcase.host1.eth[0].encap, stage 5
+Initializing module ExtHost2EthernetShowcase.host1.eth[0].socket, stage 5
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.configurator, stage 5
+[DETAIL]	Configuring network interface ExtHost2EthernetShowcase.host1.eth0.
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.routingTable, stage 5
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.natTable, stage 5
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.igmp, stage 5
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.icmp, stage 5
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.ip, stage 5
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.arp, stage 5
+Initializing module ExtHost2EthernetShowcase.host1.udp, stage 5
+Initializing module ExtHost2EthernetShowcase.host1.tcp, stage 5
+Initializing module ExtHost2EthernetShowcase.host1.app[0], stage 5
+Initializing module ExtHost2EthernetShowcase.configurator, stage 6
+Initializing module ExtHost2EthernetShowcase.host1.interfaceTable, stage 6
+Initializing module ExtHost2EthernetShowcase.host1.lo[0], stage 6
+Initializing module ExtHost2EthernetShowcase.host1.lo[0].lo, stage 6
+Initializing module ExtHost2EthernetShowcase.host1.eth[0], stage 6
+Initializing module ExtHost2EthernetShowcase.host1.eth[0].encap, stage 6
+Initializing module ExtHost2EthernetShowcase.host1.eth[0].socket, stage 6
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.configurator, stage 6
+[DETAIL]	Configuring routing table of ExtHost2EthernetShowcase.host1.
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.routingTable, stage 6
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.natTable, stage 6
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.igmp, stage 6
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.icmp, stage 6
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.ip, stage 6
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.arp, stage 6
+Initializing module ExtHost2EthernetShowcase.host1.udp, stage 6
+Initializing module ExtHost2EthernetShowcase.host1.tcp, stage 6
+Initializing module ExtHost2EthernetShowcase.host1.app[0], stage 6
+Initializing module ExtHost2EthernetShowcase.configurator, stage 7
+Initializing module ExtHost2EthernetShowcase.host1.interfaceTable, stage 7
+Initializing module ExtHost2EthernetShowcase.host1.lo[0], stage 7
+Initializing module ExtHost2EthernetShowcase.host1.lo[0].lo, stage 7
+Initializing module ExtHost2EthernetShowcase.host1.eth[0], stage 7
+Initializing module ExtHost2EthernetShowcase.host1.eth[0].encap, stage 7
+Initializing module ExtHost2EthernetShowcase.host1.eth[0].socket, stage 7
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.configurator, stage 7
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.routingTable, stage 7
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.natTable, stage 7
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.igmp, stage 7
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.icmp, stage 7
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.ip, stage 7
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.arp, stage 7
+Initializing module ExtHost2EthernetShowcase.host1.udp, stage 7
+Initializing module ExtHost2EthernetShowcase.host1.tcp, stage 7
+Initializing module ExtHost2EthernetShowcase.host1.app[0], stage 7
+Initializing module ExtHost2EthernetShowcase.configurator, stage 8
+Initializing module ExtHost2EthernetShowcase.host1.interfaceTable, stage 8
+Initializing module ExtHost2EthernetShowcase.host1.lo[0], stage 8
+Initializing module ExtHost2EthernetShowcase.host1.lo[0].lo, stage 8
+Initializing module ExtHost2EthernetShowcase.host1.eth[0], stage 8
+Initializing module ExtHost2EthernetShowcase.host1.eth[0].encap, stage 8
+Initializing module ExtHost2EthernetShowcase.host1.eth[0].socket, stage 8
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.configurator, stage 8
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.routingTable, stage 8
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.natTable, stage 8
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.igmp, stage 8
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.icmp, stage 8
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.ip, stage 8
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.arp, stage 8
+Initializing module ExtHost2EthernetShowcase.host1.udp, stage 8
+Initializing module ExtHost2EthernetShowcase.host1.tcp, stage 8
+Initializing module ExtHost2EthernetShowcase.host1.app[0], stage 8
+Initializing module ExtHost2EthernetShowcase.configurator, stage 9
+Initializing module ExtHost2EthernetShowcase.host1.interfaceTable, stage 9
+Initializing module ExtHost2EthernetShowcase.host1.lo[0], stage 9
+Initializing module ExtHost2EthernetShowcase.host1.lo[0].lo, stage 9
+Initializing module ExtHost2EthernetShowcase.host1.eth[0], stage 9
+Initializing module ExtHost2EthernetShowcase.host1.eth[0].encap, stage 9
+Initializing module ExtHost2EthernetShowcase.host1.eth[0].socket, stage 9
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.configurator, stage 9
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.routingTable, stage 9
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.natTable, stage 9
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.igmp, stage 9
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.icmp, stage 9
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.ip, stage 9
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.arp, stage 9
+Initializing module ExtHost2EthernetShowcase.host1.udp, stage 9
+Initializing module ExtHost2EthernetShowcase.host1.tcp, stage 9
+Initializing module ExtHost2EthernetShowcase.host1.app[0], stage 9
+Initializing module ExtHost2EthernetShowcase.configurator, stage 10
+Initializing module ExtHost2EthernetShowcase.host1.interfaceTable, stage 10
+Initializing module ExtHost2EthernetShowcase.host1.lo[0], stage 10
+Initializing module ExtHost2EthernetShowcase.host1.lo[0].lo, stage 10
+Initializing module ExtHost2EthernetShowcase.host1.eth[0], stage 10
+Initializing module ExtHost2EthernetShowcase.host1.eth[0].encap, stage 10
+Initializing module ExtHost2EthernetShowcase.host1.eth[0].socket, stage 10
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.configurator, stage 10
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.routingTable, stage 10
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.natTable, stage 10
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.igmp, stage 10
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.icmp, stage 10
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.ip, stage 10
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.arp, stage 10
+Initializing module ExtHost2EthernetShowcase.host1.udp, stage 10
+Initializing module ExtHost2EthernetShowcase.host1.tcp, stage 10
+Initializing module ExtHost2EthernetShowcase.host1.app[0], stage 10
+Initializing module ExtHost2EthernetShowcase.configurator, stage 11
+Initializing module ExtHost2EthernetShowcase.host1.interfaceTable, stage 11
+Initializing module ExtHost2EthernetShowcase.host1.lo[0], stage 11
+Initializing module ExtHost2EthernetShowcase.host1.lo[0].lo, stage 11
+Initializing module ExtHost2EthernetShowcase.host1.eth[0], stage 11
+Initializing module ExtHost2EthernetShowcase.host1.eth[0].encap, stage 11
+Initializing module ExtHost2EthernetShowcase.host1.eth[0].socket, stage 11
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.configurator, stage 11
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.routingTable, stage 11
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.natTable, stage 11
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.igmp, stage 11
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.icmp, stage 11
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.ip, stage 11
+Initializing module ExtHost2EthernetShowcase.host1.ipv4.arp, stage 11
+Initializing module ExtHost2EthernetShowcase.host1.udp, stage 11
+Initializing module ExtHost2EthernetShowcase.host1.tcp, stage 11
+Initializing module ExtHost2EthernetShowcase.host1.app[0], stage 11
+
+Running simulation...
+[INFO]	We are behind: 27.8825 seconds
+** Event #1  t=0  0% completed  (0% total)
+[INFO]	Received 192 B packet from 'veth0' device.
+** Event #2  t=0.127766354  6% completed  (6% total)   ExtHost2EthernetShowcase.host1.eth[0].encap (EtherEncap, id=19)
+[INFO]	Received (inet::Packet)Ext-UDP--0 from lower layer.
+[DETAIL]	Decapsulating frame `Ext-UDP--0', passing up contained packet `Ext-UDP--0' to higher layer
+[INFO]	Sending (inet::Packet)Ext-UDP--0 (174 bytes) [BytesChunk, length = 192 B, bytes = {1, 0, 94, 0, 0, 251, 146, 152, 112, 113, 203, 236, 8, 0, 69, 0, 0, 174, 156, 44, 64, 0, 255, 17, 59, 108, 192, 168, 2, 2, 224, 0, 0, 251, 20, 233, 20, 233, 0, 154, 164, 81, 0, 0, 132, 0, 0, 0, 0, 2, 0, 0, 0, 0, 1, 99, 1, 101, 1, 98, 1, 99, 1, 49, 1, 55, 1, 101, 1, 102, 1, 102, 1, 102, 1, 48, 1, 55, 1, 56, 1, 57, 1, 48, 1, 57, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 48, 1, 56, 1, 101, 1, 102, 3, 105, 112, 54, 4, 97, 114, 112, 97, 0, 0, 12, 128, 1, 0, 0, 0, 120, 0, 22, 14, 109, 97, 114, 99, 101, 108, 108, 45, 88, 53, 53, 48, 74, 88, 5, 108, 111, 99, 97, 108, 0, 192, 96, 0, 28, 128, 1, 0, 0, 0, 120, 0, 16, 254, 128, 0, 0, 0, 0, 0, 0, 144, 152, 112, 255, 254, 113, 203, 236, 230, 144, 172, 177}] to upper layer.
+[INFO]	We are behind: 0.872257 seconds
+** Event #3  t=0.127766354  6% completed  (6% total)   ExtHost2EthernetShowcase.host1.ipv4.ip (Ipv4, id=30)
+[INFO]	Received (inet::Packet)Ext-UDP--0 from network.
+[DETAIL]	Received datagram `' with dest=224.0.0.251
+[WARN]	Skip local delivery of multicast datagram (input interface not in multicast group)
+[WARN]	Skip forwarding of multicast datagram (forwarding disabled)
+[INFO]	Received 212 B packet from 'veth0' device.
+** Event #4  t=0.128710159  6% completed  (6% total)   ExtHost2EthernetShowcase.host1.eth[0].encap (EtherEncap, id=19)
+[INFO]	Received (inet::Packet)Ext-UDP--1 from lower layer.
+[WARN]	Unknown protocol, dropping packet
+[INFO]	Received 218 B packet from 'veth0' device.
+** Event #5  t=0.162906287  8% completed  (8% total)   ExtHost2EthernetShowcase.host1.eth[0].encap (EtherEncap, id=19)
+[INFO]	Received (inet::Packet)Ext-UDP--2 from lower layer.
+[DETAIL]	Decapsulating frame `Ext-UDP--2', passing up contained packet `Ext-UDP--2' to higher layer
+[INFO]	Sending (inet::Packet)Ext-UDP--2 (200 bytes) [BytesChunk, length = 218 B, bytes = {1, 0, 94, 127, 255, 250, 146, 152, 112, 113, 203, 236, 8, 0, 69, 0, 0, 200, 153, 141, 64, 0, 1, 17, 44, 243, 192, 168, 2, 2, 239, 255, 255, 250, 230, 132, 7, 108, 0, 180, 179, 106, 77, 45, 83, 69, 65, 82, 67, 72, 32, 42, 32, 72, 84, 84, 80, 47, 49, 46, 49, 13, 10, 72, 79, 83, 84, 58, 32, 50, 51, 57, 46, 50, 53, 53, 46, 50, 53, 53, 46, 50, 53, 48, 58, 49, 57, 48, 48, 13, 10, 77, 65, 78, 58, 32, 34, 115, 115, 100, 112, 58, 100, 105, 115, 99, 111, 118, 101, 114, 34, 13, 10, 77, 88, 58, 32, 49, 13, 10, 83, 84, 58, 32, 117, 114, 110, 58, 100, 105, 97, 108, 45, 109, 117, 108, 116, 105, 115, 99, 114, 101, 101, 110, 45, 111, 114, 103, 58, 115, 101, 114, 118, 105, 99, 101, 58, 100, 105, 97, 108, 58, 49, 13, 10, 85, 83, 69, 82, 45, 65, 71, 69, 78, 84, 58, 32, 71, 111, 111, 103, 108, 101, 32, 67, 104, 114, 111, 109, 101, 47, 54, 57, 46, 48, 46, 51, 52, 57, 55, 46, 49, 48, 48, 32, 76, 105, 110, 117, 120, 13, 10, 13, 10, 41, 165, 115, 57}] to upper layer.
+[INFO]	We are behind: 0.387675 seconds
+** Event #6  t=0.162906287  8% completed  (8% total)   ExtHost2EthernetShowcase.host1.ipv4.ip (Ipv4, id=30)
+[INFO]	Received (inet::Packet)Ext-UDP--2 from network.
+[DETAIL]	Received datagram `' with dest=239.255.255.250
+[WARN]	Skip local delivery of multicast datagram (input interface not in multicast group)
+[WARN]	Skip forwarding of multicast datagram (forwarding disabled)
+[INFO]	Received 212 B packet from 'veth0' device.
+** Event #7  t=0.190395351  9% completed  (9% total)   ExtHost2EthernetShowcase.host1.eth[0].encap (EtherEncap, id=19)
+[INFO]	Received (inet::Packet)Ext-UDP--3 from lower layer.
+[WARN]	Unknown protocol, dropping packet
+[INFO]	Received 74 B packet from 'veth0' device.
+** Event #8  t=0.22233025  11% completed  (11% total)   ExtHost2EthernetShowcase.host1.eth[0].encap (EtherEncap, id=19)
+[INFO]	Received (inet::Packet)Ext-ICMPv6--4 from lower layer.
+[WARN]	Unknown protocol, dropping packet
+[INFO]	Received 74 B packet from 'veth0' device.
+** Event #9  t=0.478283365  23% completed  (23% total)   ExtHost2EthernetShowcase.host1.eth[0].encap (EtherEncap, id=19)
+[INFO]	Received (inet::Packet)Ext-ICMPv6--5 from lower layer.
+[WARN]	Unknown protocol, dropping packet
+** Event #10  t=0.548813502304  27% completed  (27% total)   ExtHost2EthernetShowcase.host1.app[0] (PingApp, id=14)
+[INFO]	Starting up: dest=192.168.2.2  src=<none>seqNo=0
+[INFO]	Sending ping request #0 to lower layer.
+[INFO]	We are behind: 30.2015 seconds
+** Event #11  t=0.548813502304  27% completed  (27% total)   ExtHost2EthernetShowcase.host1.ipv4.ip (Ipv4, id=30)
+[INFO]	We are behind: 30.2435 seconds
+** Event #12  t=0.548813502304  27% completed  (27% total)   ExtHost2EthernetShowcase.host1.ipv4.ip (Ipv4, id=30)
+[INFO]	Received (inet::Packet)ping0 (64 bytes) [[inet::IcmpEchoRequest, length = 8 B | ByteCountChunk, length = 56 B]] from upper layer.
+[DETAIL]	Sending datagram 'ping0' with destination = 192.168.2.2
+[INFO]	Routing (inet::Packet)ping0 (84 bytes) [[inet::Ipv4Header, length = 20 B | inet::IcmpEchoRequest, length = 8 B | ByteCountChunk, length = 56 B]] with destination = 192.168.2.2, output interface = eth0, next hop address = <unspec>
+[INFO]	Starting ARP resolution for 192.168.2.2
+[INFO]	Sending (inet::Packet)arpREQ (28 bytes) [ARP req: 192.168.2.2=? (s=192.168.2.1(0A-AA-00-00-00-01))] to network protocol.
+[INFO]	Pending (inet::Packet)ping0 (84 bytes) [[inet::Ipv4Header, length = 20 B | inet::IcmpEchoRequest, length = 8 B | ByteCountChunk, length = 56 B]] to ARP resolution.
+[INFO]	We are behind: 30.5099 seconds
+** Event #13  t=0.548813502304  27% completed  (27% total)   ExtHost2EthernetShowcase.host1.eth[0].encap (EtherEncap, id=19)
+[INFO]	Received (inet::Packet)arpREQ from upper layer.
+[DETAIL]	Encapsulating higher layer packet `arpREQ' for MAC
+[INFO]	Sending (inet::Packet)arpREQ (64 bytes) [[inet::EthernetMacHeader, length = 14 B | ARP req: 192.168.2.2=? (s=192.168.2.1(0A-AA-00-00-00-01)) | inet::EthernetPadding, length = 18 B | inet::EthernetFcs, length = 4 B]] to lower layer.
+[INFO]	We are behind: 30.6476 seconds
+** Event #14  t=0.548813502304  27% completed  (27% total)   ExtHost2EthernetShowcase.host1.eth[0].socket (ExtEthernetDeviceSocket, id=20)
+[INFO]	Sent 64 packet to 'veth0' device.
+[INFO]	Received 64 B packet from 'veth0' device.
+** Event #15  t=0.57963605  28% completed  (28% total)   ExtHost2EthernetShowcase.host1.eth[0].encap (EtherEncap, id=19)
+[INFO]	Received (inet::Packet)Ext-ARP--6 from lower layer.
+[DETAIL]	Decapsulating frame `Ext-ARP--6', passing up contained packet `Ext-ARP--6' to higher layer
+[INFO]	Sending (inet::Packet)Ext-ARP--6 (46 bytes) [BytesChunk, length = 64 B, bytes = {10, 170, 0, 0, 0, 1, 146, 152, 112, 113, 203, 236, 8, 6, 0, 1, 8, 0, 6, 4, 0, 2, 146, 152, 112, 113, 203, 236, 192, 168, 2, 2, 10, 170, 0, 0, 0, 1, 192, 168, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 200, 2, 23, 251}] to upper layer.
+[INFO]	We are behind: 0.260088 seconds
+** Event #16  t=0.57963605  28% completed  (28% total)   ExtHost2EthernetShowcase.host1.ipv4.arp (Arp, id=31)
+[INFO]	Received (inet::Packet)Ext-ARP--6 (46 bytes) [BytesChunk, length = 64 B, bytes = {10, 170, 0, 0, 0, 1, 146, 152, 112, 113, 203, 236, 8, 6, 0, 1, 8, 0, 6, 4, 0, 2, 146, 152, 112, 113, 203, 236, 192, 168, 2, 2, 10, 170, 0, 0, 0, 1, 192, 168, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 200, 2, 23, 251}] from network protocol.
+[DETAIL]	ARP_REPLY  src=192.168.2.2 / 92-98-70-71-CB-EC  dest=192.168.2.1 / 0A-AA-00-00-00-01
+[DETAIL]	Updating ARP cache entry: 192.168.2.2 <--> 92-98-70-71-CB-EC
+[INFO]	ARP resolution completed for 192.168.2.2. Sending 1 waiting packets from the queue
+[INFO]	Sending out queued packet (inet::Packet)ping0 (84 bytes) [[inet::Ipv4Header, length = 20 B | inet::IcmpEchoRequest, length = 8 B | ByteCountChunk, length = 56 B]]
+[INFO]	Sending (inet::Packet)ping0 (84 bytes) [[inet::Ipv4Header, length = 20 B | inet::IcmpEchoRequest, length = 8 B | ByteCountChunk, length = 56 B]] to output interface = eth0.
+[DETAIL]	Discarding packet
+[INFO]	We are behind: 0.46255 seconds
+** Event #17  t=0.57963605  28% completed  (28% total)   ExtHost2EthernetShowcase.host1.eth[0].encap (EtherEncap, id=19)
+[INFO]	Received (inet::Packet)ping0 from upper layer.
+[DETAIL]	Encapsulating higher layer packet `ping0' for MAC
+[INFO]	Sending (inet::Packet)ping0 (102 bytes) [[inet::EthernetMacHeader, length = 14 B | inet::Ipv4Header, length = 20 B | inet::IcmpEchoRequest, length = 8 B | ByteCountChunk, length = 56 B | inet::EthernetFcs, length = 4 B]] to lower layer.
+[INFO]	We are behind: 0.538067 seconds
+** Event #18  t=0.57963605  28% completed  (28% total)   ExtHost2EthernetShowcase.host1.eth[0].socket (ExtEthernetDeviceSocket, id=20)
+[INFO]	Sent 102 packet to 'veth0' device.
+[INFO]	Received 102 B packet from 'veth0' device.
+** Event #19  t=0.580253872  29% completed  (29% total)   ExtHost2EthernetShowcase.host1.eth[0].encap (EtherEncap, id=19)
+[INFO]	Received (inet::Packet)Ext-ICMPv4-ECHO-REPLY-7 from lower layer.
+[DETAIL]	Decapsulating frame `Ext-ICMPv4-ECHO-REPLY-7', passing up contained packet `Ext-ICMPv4-ECHO-REPLY-7' to higher layer
+[INFO]	Sending (inet::Packet)Ext-ICMPv4-ECHO-REPLY-7 (84 bytes) [BytesChunk, length = 102 B, bytes = {10, 170, 0, 0, 0, 1, 146, 152, 112, 113, 203, 236, 8, 0, 69, 0, 0, 84, 175, 115, 0, 0, 64, 1, 69, 226, 192, 168, 2, 2, 192, 168, 2, 1, 0, 0, 21, 21, 0, 0, 0, 0, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 189, 107, 158, 27}] to upper layer.
+[INFO]	We are behind: 0.251381 seconds
+** Event #20  t=0.580253872  29% completed  (29% total)   ExtHost2EthernetShowcase.host1.ipv4.ip (Ipv4, id=30)
+[INFO]	Received (inet::Packet)Ext-ICMPv4-ECHO-REPLY-7 from network.
+[DETAIL]	Received datagram `' with dest=192.168.2.1
+[INFO]	Delivering (inet::Packet)Ext-ICMPv4-ECHO-REPLY-7 (84 bytes) [BytesChunk, length = 102 B, bytes = {10, 170, 0, 0, 0, 1, 146, 152, 112, 113, 203, 236, 8, 0, 69, 0, 0, 84, 175, 115, 0, 0, 64, 1, 69, 226, 192, 168, 2, 2, 192, 168, 2, 1, 0, 0, 21, 21, 0, 0, 0, 0, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 189, 107, 158, 27}] locally.
+[INFO]	Passing up to socket 1
+[INFO]	Passing up to protocol 0x7f96327099e0
+[INFO]	We are behind: 0.382936 seconds
+** Event #21  t=0.580253872  29% completed  (29% total)   ExtHost2EthernetShowcase.host1.app[0] (PingApp, id=14)
+ExtHost2EthernetShowcase.host1.app[0]: reply of 56 bytes from 192.168.2.2 icmp_seq=0 ttl=64 time=31.440369696 msec (Ext-ICMPv4-ECHO-REPLY-7)
+[INFO]	Ping reply #0 arrived, rtt=0.031440369696
+[INFO]	We are behind: 0.492833 seconds
+** Event #22  t=0.580253872  29% completed  (29% total)   ExtHost2EthernetShowcase.host1.ipv4.icmp (Icmp, id=28)
+[INFO]	Received (inet::Packet)Ext-ICMPv4-ECHO-REPLY-7 from network protocol.
+[INFO]	Received 86 B packet from 'veth0' device.
+** Event #23  t=1.161784693  58% completed  (58% total)   ExtHost2EthernetShowcase.host1.eth[0].encap (EtherEncap, id=19)
+[INFO]	Received (inet::Packet)Ext-UDP--8 from lower layer.
+[DETAIL]	Decapsulating frame `Ext-UDP--8', passing up contained packet `Ext-UDP--8' to higher layer
+[INFO]	Sending (inet::Packet)Ext-UDP--8 (68 bytes) [BytesChunk, length = 86 B, bytes = {1, 0, 94, 0, 0, 251, 146, 152, 112, 113, 203, 236, 8, 0, 69, 0, 0, 68, 156, 120, 64, 0, 1, 17, 57, 139, 192, 168, 2, 2, 224, 0, 0, 251, 20, 233, 20, 233, 0, 48, 163, 231, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 11, 95, 103, 111, 111, 103, 108, 101, 99, 97, 115, 116, 4, 95, 116, 99, 112, 5, 108, 111, 99, 97, 108, 0, 0, 12, 0, 1, 42, 229, 223, 115}] to upper layer.
+[INFO]	We are behind: 0.381081 seconds
+** Event #24  t=1.161784693  58% completed  (58% total)   ExtHost2EthernetShowcase.host1.ipv4.ip (Ipv4, id=30)
+[INFO]	Received (inet::Packet)Ext-UDP--8 from network.
+[DETAIL]	Received datagram `' with dest=224.0.0.251
+[WARN]	Skip local delivery of multicast datagram (input interface not in multicast group)
+[WARN]	Skip forwarding of multicast datagram (forwarding disabled)
+[INFO]	Received 106 B packet from 'veth0' device.
+** Event #25  t=1.162284217  58% completed  (58% total)   ExtHost2EthernetShowcase.host1.eth[0].encap (EtherEncap, id=19)
+[INFO]	Received (inet::Packet)Ext-UDP--9 from lower layer.
+[WARN]	Unknown protocol, dropping packet
+[INFO]	Received 106 B packet from 'veth0' device.
+** Event #26  t=1.162494186  58% completed  (58% total)   ExtHost2EthernetShowcase.host1.eth[0].encap (EtherEncap, id=19)
+[INFO]	Received (inet::Packet)Ext-UDP--10 from lower layer.
+[WARN]	Unknown protocol, dropping packet
+[INFO]	Received 86 B packet from 'veth0' device.
+** Event #27  t=1.162663497  58% completed  (58% total)   ExtHost2EthernetShowcase.host1.eth[0].encap (EtherEncap, id=19)
+[INFO]	Received (inet::Packet)Ext-UDP--11 from lower layer.
+[DETAIL]	Decapsulating frame `Ext-UDP--11', passing up contained packet `Ext-UDP--11' to higher layer
+[INFO]	Sending (inet::Packet)Ext-UDP--11 (68 bytes) [BytesChunk, length = 86 B, bytes = {1, 0, 94, 0, 0, 251, 146, 152, 112, 113, 203, 236, 8, 0, 69, 0, 0, 68, 156, 121, 64, 0, 1, 17, 57, 138, 192, 168, 2, 2, 224, 0, 0, 251, 20, 233, 20, 233, 0, 48, 163, 231, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 11, 95, 103, 111, 111, 103, 108, 101, 99, 97, 115, 116, 4, 95, 116, 99, 112, 5, 108, 111, 99, 97, 108, 0, 0, 12, 0, 1, 146, 93, 198, 59}] to upper layer.
+[INFO]	We are behind: 0.183241 seconds
+** Event #28  t=1.162663497  58% completed  (58% total)   ExtHost2EthernetShowcase.host1.ipv4.ip (Ipv4, id=30)
+[INFO]	Received (inet::Packet)Ext-UDP--11 from network.
+[DETAIL]	Received datagram `' with dest=224.0.0.251
+[WARN]	Skip local delivery of multicast datagram (input interface not in multicast group)
+[WARN]	Skip forwarding of multicast datagram (forwarding disabled)
+[INFO]	Received 106 B packet from 'veth0' device.
+** Event #29  t=1.162899589  58% completed  (58% total)   ExtHost2EthernetShowcase.host1.eth[0].encap (EtherEncap, id=19)
+[INFO]	Received (inet::Packet)Ext-UDP--12 from lower layer.
+[WARN]	Unknown protocol, dropping packet
+[INFO]	Received 106 B packet from 'veth0' device.
+** Event #30  t=1.163072159  58% completed  (58% total)   ExtHost2EthernetShowcase.host1.eth[0].encap (EtherEncap, id=19)
+[INFO]	Received (inet::Packet)Ext-UDP--13 from lower layer.
+[WARN]	Unknown protocol, dropping packet
+[INFO]	Received 218 B packet from 'veth0' device.
+** Event #31  t=1.163494412  58% completed  (58% total)   ExtHost2EthernetShowcase.host1.eth[0].encap (EtherEncap, id=19)
+[INFO]	Received (inet::Packet)Ext-UDP--14 from lower layer.
+[DETAIL]	Decapsulating frame `Ext-UDP--14', passing up contained packet `Ext-UDP--14' to higher layer
+[INFO]	Sending (inet::Packet)Ext-UDP--14 (200 bytes) [BytesChunk, length = 218 B, bytes = {1, 0, 94, 127, 255, 250, 146, 152, 112, 113, 203, 236, 8, 0, 69, 0, 0, 200, 154, 113, 64, 0, 1, 17, 44, 15, 192, 168, 2, 2, 239, 255, 255, 250, 230, 132, 7, 108, 0, 180, 179, 106, 77, 45, 83, 69, 65, 82, 67, 72, 32, 42, 32, 72, 84, 84, 80, 47, 49, 46, 49, 13, 10, 72, 79, 83, 84, 58, 32, 50, 51, 57, 46, 50, 53, 53, 46, 50, 53, 53, 46, 50, 53, 48, 58, 49, 57, 48, 48, 13, 10, 77, 65, 78, 58, 32, 34, 115, 115, 100, 112, 58, 100, 105, 115, 99, 111, 118, 101, 114, 34, 13, 10, 77, 88, 58, 32, 49, 13, 10, 83, 84, 58, 32, 117, 114, 110, 58, 100, 105, 97, 108, 45, 109, 117, 108, 116, 105, 115, 99, 114, 101, 101, 110, 45, 111, 114, 103, 58, 115, 101, 114, 118, 105, 99, 101, 58, 100, 105, 97, 108, 58, 49, 13, 10, 85, 83, 69, 82, 45, 65, 71, 69, 78, 84, 58, 32, 71, 111, 111, 103, 108, 101, 32, 67, 104, 114, 111, 109, 101, 47, 54, 57, 46, 48, 46, 51, 52, 57, 55, 46, 49, 48, 48, 32, 76, 105, 110, 117, 120, 13, 10, 13, 10, 192, 19, 138, 249}] to upper layer.
+[INFO]	We are behind: 0.445831 seconds
+** Event #32  t=1.163494412  58% completed  (58% total)   ExtHost2EthernetShowcase.host1.ipv4.ip (Ipv4, id=30)
+[INFO]	Received (inet::Packet)Ext-UDP--14 from network.
+[DETAIL]	Received datagram `' with dest=239.255.255.250
+[WARN]	Skip local delivery of multicast datagram (input interface not in multicast group)
+[WARN]	Skip forwarding of multicast datagram (forwarding disabled)
+[INFO]	Received 187 B packet from 'veth0' device.
+** Event #33  t=1.456765016  72% completed  (72% total)   ExtHost2EthernetShowcase.host1.eth[0].encap (EtherEncap, id=19)
+[INFO]	Received (inet::Packet)Ext-UDP--15 from lower layer.
+[DETAIL]	Decapsulating frame `Ext-UDP--15', passing up contained packet `Ext-UDP--15' to higher layer
+[INFO]	Sending (inet::Packet)Ext-UDP--15 (169 bytes) [BytesChunk, length = 187 B, bytes = {1, 0, 94, 0, 0, 251, 146, 152, 112, 113, 203, 236, 8, 0, 69, 0, 0, 169, 156, 177, 64, 0, 255, 17, 58, 236, 192, 168, 2, 2, 224, 0, 0, 251, 20, 233, 20, 233, 0, 149, 164, 76, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 5, 95, 105, 112, 112, 115, 4, 95, 116, 99, 112, 5, 108, 111, 99, 97, 108, 0, 0, 12, 0, 1, 4, 95, 102, 116, 112, 192, 18, 0, 12, 0, 1, 7, 95, 119, 101, 98, 100, 97, 118, 192, 18, 0, 12, 0, 1, 8, 95, 119, 101, 98, 100, 97, 118, 115, 192, 18, 0, 12, 0, 1, 9, 95, 115, 102, 116, 112, 45, 115, 115, 104, 192, 18, 0, 12, 0, 1, 4, 95, 115, 109, 98, 192, 18, 0, 12, 0, 1, 11, 95, 97, 102, 112, 111, 118, 101, 114, 116, 99, 112, 192, 18, 0, 12, 0, 1, 4, 95, 110, 102, 115, 192, 18, 0, 12, 0, 1, 4, 95, 105, 112, 112, 192, 18, 0, 12, 0, 1, 220, 1, 152, 236}] to upper layer.
+[INFO]	We are behind: 0.223202 seconds
+** Event #34  t=1.456765016  72% completed  (72% total)   ExtHost2EthernetShowcase.host1.ipv4.ip (Ipv4, id=30)
+[INFO]	Received (inet::Packet)Ext-UDP--15 from network.
+[DETAIL]	Received datagram `' with dest=224.0.0.251
+[WARN]	Skip local delivery of multicast datagram (input interface not in multicast group)
+[WARN]	Skip forwarding of multicast datagram (forwarding disabled)
+** Event #35  t=1.548813502304  77% completed  (77% total)   ExtHost2EthernetShowcase.host1.app[0] (PingApp, id=14)
+[INFO]	Sending ping request #1 to lower layer.
+[INFO]	We are behind: 8.49238 seconds
+** Event #36  t=1.548813502304  77% completed  (77% total)   ExtHost2EthernetShowcase.host1.ipv4.ip (Ipv4, id=30)
+[INFO]	Received (inet::Packet)ping1 (64 bytes) [[inet::IcmpEchoRequest, length = 8 B | ByteCountChunk, length = 56 B]] from upper layer.
+[DETAIL]	Sending datagram 'ping1' with destination = 192.168.2.2
+[INFO]	Routing (inet::Packet)ping1 (84 bytes) [[inet::Ipv4Header, length = 20 B | inet::IcmpEchoRequest, length = 8 B | ByteCountChunk, length = 56 B]] with destination = 192.168.2.2, output interface = eth0, next hop address = <unspec>
+[INFO]	Sending (inet::Packet)ping1 (84 bytes) [[inet::Ipv4Header, length = 20 B | inet::IcmpEchoRequest, length = 8 B | ByteCountChunk, length = 56 B]] to output interface = eth0.
+[INFO]	We are behind: 8.63576 seconds
+** Event #37  t=1.548813502304  77% completed  (77% total)   ExtHost2EthernetShowcase.host1.eth[0].encap (EtherEncap, id=19)
+[INFO]	Received (inet::Packet)ping1 from upper layer.
+[DETAIL]	Encapsulating higher layer packet `ping1' for MAC
+[INFO]	Sending (inet::Packet)ping1 (102 bytes) [[inet::EthernetMacHeader, length = 14 B | inet::Ipv4Header, length = 20 B | inet::IcmpEchoRequest, length = 8 B | ByteCountChunk, length = 56 B | inet::EthernetFcs, length = 4 B]] to lower layer.
+[INFO]	We are behind: 8.7499 seconds
+** Event #38  t=1.548813502304  77% completed  (77% total)   ExtHost2EthernetShowcase.host1.eth[0].socket (ExtEthernetDeviceSocket, id=20)
+[INFO]	Sent 102 packet to 'veth0' device.
+[INFO]	Received 102 B packet from 'veth0' device.
+** Event #39  t=1.557634708  77% completed  (77% total)   ExtHost2EthernetShowcase.host1.eth[0].encap (EtherEncap, id=19)
+[INFO]	Received (inet::Packet)Ext-ICMPv4-ECHO-REPLY-16 from lower layer.
+[DETAIL]	Decapsulating frame `Ext-ICMPv4-ECHO-REPLY-16', passing up contained packet `Ext-ICMPv4-ECHO-REPLY-16' to higher layer
+[INFO]	Sending (inet::Packet)Ext-ICMPv4-ECHO-REPLY-16 (84 bytes) [BytesChunk, length = 102 B, bytes = {10, 170, 0, 0, 0, 1, 146, 152, 112, 113, 203, 236, 8, 0, 69, 0, 0, 84, 175, 196, 0, 0, 64, 1, 69, 145, 192, 168, 2, 2, 192, 168, 2, 1, 0, 0, 21, 20, 0, 0, 0, 1, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 213, 52, 62, 4}] to upper layer.
+[INFO]	We are behind: 0.194063 seconds
+** Event #40  t=1.557634708  77% completed  (77% total)   ExtHost2EthernetShowcase.host1.ipv4.ip (Ipv4, id=30)
+[INFO]	Received (inet::Packet)Ext-ICMPv4-ECHO-REPLY-16 from network.
+[DETAIL]	Received datagram `' with dest=192.168.2.1
+[INFO]	Delivering (inet::Packet)Ext-ICMPv4-ECHO-REPLY-16 (84 bytes) [BytesChunk, length = 102 B, bytes = {10, 170, 0, 0, 0, 1, 146, 152, 112, 113, 203, 236, 8, 0, 69, 0, 0, 84, 175, 196, 0, 0, 64, 1, 69, 145, 192, 168, 2, 2, 192, 168, 2, 1, 0, 0, 21, 20, 0, 0, 0, 1, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 213, 52, 62, 4}] locally.
+[INFO]	Passing up to socket 1
+[INFO]	Passing up to protocol 0x7f96327099e0
+[INFO]	We are behind: 0.276246 seconds
+** Event #41  t=1.557634708  77% completed  (77% total)   ExtHost2EthernetShowcase.host1.app[0] (PingApp, id=14)
+ExtHost2EthernetShowcase.host1.app[0]: reply of 56 bytes from 192.168.2.2 icmp_seq=1 ttl=64 time=8.821205696 msec (Ext-ICMPv4-ECHO-REPLY-16)
+[INFO]	Ping reply #1 arrived, rtt=0.008821205696
+[INFO]	We are behind: 0.334361 seconds
+** Event #42  t=1.557634708  77% completed  (77% total)   ExtHost2EthernetShowcase.host1.ipv4.icmp (Icmp, id=28)
+[INFO]	Received (inet::Packet)Ext-ICMPv4-ECHO-REPLY-16 from network protocol.
+** Event #43  t=2  100% completed  (100% total)
+
+<!> Simulation time limit reached -- at t=2s, event #43
+
+Calling finish() at end of Run #0...
+3 packets sent, 17 packets received
+[INFO]	ExtHost2EthernetShowcase.host1.tcp: finishing with 0 connections open.
+--------------------------------------------------------
+	ExtHost2EthernetShowcase.host1.app[0]
+--------------------------------------------------------
+sent: 2   received: 2   loss rate (%): 0
+round-trip min/avg/max (ms): 8.82121/20.1308/31.4404
+stddev (ms): 15.9942   variance:0.000255813
+--------------------------------------------------------
+[INFO]	Clear all sockets
+
+End.
