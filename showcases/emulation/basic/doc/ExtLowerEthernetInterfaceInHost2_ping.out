@@ -1,0 +1,6 @@
+PING 192.168.2.2 (192.168.2.2) 56(84) bytes of data.
+64 bytes from 192.168.2.2: icmp_seq=2 ttl=32 time=2.39 ms
+
+--- 192.168.2.2 ping statistics ---
+2 packets transmitted, 1 received, 50% packet loss, time 1030ms
+rtt min/avg/max/mdev = 2.394/2.394/2.394/0.000 ms
