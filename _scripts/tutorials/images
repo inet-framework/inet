@@ -15,17 +15,18 @@ rm listoffiles
 rm sources.list
 
 # create a list of source files
-ls | grep md >> sources.list
-ls | grep html >> sources.list
+# ls | grep md >> sources.list
+# ls | grep html >> sources.list
+ls | grep rst >> sources.list
 
 # get images in image tags from the source files
 cat sources.list | while read line; do
-    	cat $line | grep -E 'src=".*.mp4"' -o >> listoffiles
-	cat $line | grep -E 'src=".*.png"' -o >> listoffiles
-	cat $line | grep -E 'src=".*.gif"' -o >> listoffiles
-	cat $line | grep -E 'src=".*.mkv"' -o >> listoffiles
-	cat $line | grep -E 'src=".*.m4v"' -o >> listoffiles
-	sed -e s/'src="'//g -i listoffiles
+    	cat $line | grep -E '.. figure:: .*.mp4' -o >> listoffiles
+	cat $line | grep -E '.. figure:: .*.png' -o >> listoffiles
+	cat $line | grep -E '.. figure:: .*.gif' -o >> listoffiles
+	cat $line | grep -E '.. figure:: .*.mkv' -o >> listoffiles
+	cat $line | grep -E '.. figure:: .*.m4v' -o >> listoffiles
+	sed -e s/'.. figure:: '//g -i listoffiles
 	sed -e s/'"'//g -i listoffiles
 done
 
