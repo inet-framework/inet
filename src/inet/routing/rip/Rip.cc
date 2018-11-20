@@ -1124,6 +1124,7 @@ IRoute *Rip::createRoute(const L3Address& dest, int prefixLength, const Interfac
     route->setNextHop(nextHop);
     route->setPrefixLength(prefixLength);
     route->setMetric(metric);
+    route->setAdminDist(IRoute::dRIP);
     route->setInterface(const_cast<InterfaceEntry *>(ie));
     route->setSourceType(IRoute::RIP);
     route->setSource(this);
