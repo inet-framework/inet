@@ -711,6 +711,27 @@ void Router::rebuildRoutingTable()
     EV_INFO << "--> Rebuilding routing table:\n";
 
     for (i = 0; i < areaCount; i++) {
+        // creating a OspfRoutingTableEntry for each existing OspfRoutingTableEntry
+        for(int n = 0; n < ift->getNumInterfaces(); n++) {
+            InterfaceEntry *ifEntry = ift->getInterface(n);
+            int ifId = ifEntry->getInterfaceId();
+            OspfInterface *ospfIfEntry = areas[i]->getInterface(ifId);
+            if(ospfIfEntry) {
+                OspfRoutingTableEntry *entry = new OspfRoutingTableEntry(ift);
+
+                entry->setDestination(ifEntry->getIpv4Address());
+                entry->setNetmask(ifEntry->getNetmask());
+                entry->setLinkStateOrigin(areas[i]->findRouterLSA(areas[i]->getRouter()->getRouterID()));
+                entry->setArea(areas[i]->getAreaID());
+                entry->setPathType(OspfRoutingTableEntry::INTRAAREA);
+                entry->setCost(ospfIfEntry->getOutputCost());
+                entry->setDestinationType(OspfRoutingTableEntry::NETWORK_DESTINATION);
+                NextHop hop = {0, Ipv4Address::UNSPECIFIED_ADDRESS, Ipv4Address::UNSPECIFIED_ADDRESS};
+                entry->addNextHop(hop);
+
+                newTable.push_back(entry);
+            }
+        }
         areas[i]->calculateShortestPathTree(newTable);
         if (areas[i]->getTransitCapability()) {
             hasTransitAreas = true;
