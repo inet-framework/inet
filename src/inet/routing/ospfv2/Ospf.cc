@@ -125,56 +125,8 @@ void Ospf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj,
         change = check_and_cast<const InterfaceEntryChangeDetails *>(obj);
         if (change->getFieldId() == InterfaceEntry::F_CARRIER || change->getFieldId() == InterfaceEntry::F_STATE) {
             ie = change->getInterfaceEntry();
-            if (!ie->isUp()) {
-                EV_DEBUG << "interface " << ie->getInterfaceId() << " went down. \n";
-
-                // Step 1: delete all direct-routes connected to this interface
-
-                // ... from OSPF table
-                for(uint32_t i = 0; i < ospfRouter->getRoutingTableEntryCount(); i++) {
-                    OspfRoutingTableEntry *ospfRoute = ospfRouter->getRoutingTableEntry(i);
-                    if(ospfRoute && ospfRoute->getInterface() == ie && ospfRoute->getNextHopAsGeneric().isUnspecified()) {
-                        EV_DEBUG << "removing route from OSPF routing table: " << ospfRoute << "\n";
-                        ospfRouter->deleteRoute(ospfRoute);
-                    }
-                }
-                // ... from Ipv4 table
-                for(int32_t i = 0; i < rt->getNumRoutes(); i++) {
-                    Ipv4Route *route = rt->getRoute(i);
-                    if(route && route->getInterface() == ie && route->getNextHopAsGeneric().isUnspecified()) {
-                        EV_DEBUG << "removing route from Ipv4 routing table: " << route << "\n";
-                        rt->deleteRoute(route);
-                    }
-                }
-
-                // Step 2: Zero or more remote routes are not reachable any more.
-                // Find all neighbors connected to this interface and reset them
-                std::vector<Neighbor *> neighbors;
-                for(auto &areaId : ospfRouter->getAreaIds()) {
-                    Area *area = ospfRouter->getAreaByID(areaId);
-                    if(area) {
-                        for(auto &ifIndex : area->getInterfaceIndices()) {
-                            OspfInterface *intf = area->getInterface(ifIndex);
-                            if(intf && intf->getIfIndex() == ie->getInterfaceId()) {
-                                int numNeighbors = intf->getNeighborCount();
-                                for(int i = 0; i < numNeighbors; i++) {
-                                    Neighbor *neighbor = intf->getNeighbor(i);
-                                    if(neighbor && neighbor->getState() != Neighbor::DOWN_STATE) {
-                                        neighbor->processEvent(Neighbor::KILL_NEIGHBOR_NO_REBUILD);
-                                        neighbors.push_back(neighbor);
-                                    }
-                                }
-                                // should be called after the above 'for' loop
-                                intf->processEvent(OspfInterface::INTERFACE_DOWN);
-                            }
-                        }
-                    }
-                }
-
-                // Step 3: Rebuild the routing table
-                for(auto &neighbor : neighbors)
-                    neighbor->processEvent(Neighbor::REBUILD);
-            }
+            if (!ie->isUp())
+                handleInterfaceDown(ie);
             else {
                 // interface went back online. Do nothing!
                 // Wait for Hello messages to establish adjacency.
@@ -238,6 +190,68 @@ bool Ospf::checkExternalRoute(const Ipv4Address& route)
             return true;
     }
     return false;
+}
+
+void Ospf::handleInterfaceDown(const InterfaceEntry *ie)
+{
+    EV_DEBUG << "interface " << ie->getInterfaceId() << " went down. \n";
+
+    // Step 1: delete all direct-routes connected to this interface
+
+    // ... from OSPF table
+    for(uint32_t i = 0; i < ospfRouter->getRoutingTableEntryCount(); i++) {
+        OspfRoutingTableEntry *ospfRoute = ospfRouter->getRoutingTableEntry(i);
+        if(ospfRoute && ospfRoute->getInterface() == ie && ospfRoute->getNextHopAsGeneric().isUnspecified()) {
+            EV_DEBUG << "removing route from OSPF routing table: " << ospfRoute << "\n";
+            ospfRouter->deleteRoute(ospfRoute);
+        }
+    }
+    // ... from Ipv4 table
+    for(int32_t i = 0; i < rt->getNumRoutes(); i++) {
+        Ipv4Route *route = rt->getRoute(i);
+        if(route && route->getInterface() == ie && route->getNextHopAsGeneric().isUnspecified()) {
+            EV_DEBUG << "removing route from Ipv4 routing table: " << route << "\n";
+            rt->deleteRoute(route);
+        }
+    }
+
+    // Step 2: find the OspfInterface associated with the ie
+    OspfInterface *foundIntf = nullptr;
+    for(auto &areaId : ospfRouter->getAreaIds()) {
+        Area *area = ospfRouter->getAreaByID(areaId);
+        if(area) {
+            for(auto &ifIndex : area->getInterfaceIndices()) {
+                OspfInterface *intf = area->getInterface(ifIndex);
+                if(intf && intf->getIfIndex() == ie->getInterfaceId()) {
+                    foundIntf = intf;
+                    break;
+                }
+            }
+            if(foundIntf)
+                break;
+        }
+    }
+
+    if(foundIntf) {
+        // Step 3: Zero or more remote routes are not reachable any more.
+        // Find all neighbors connected to this interface and reset them
+        std::vector<Neighbor *> neighbors;
+        int numNeighbors = foundIntf->getNeighborCount();
+        for(int i = 0; i < numNeighbors; i++) {
+            Neighbor *neighbor = foundIntf->getNeighbor(i);
+            if(neighbor && neighbor->getState() != Neighbor::DOWN_STATE) {
+                neighbor->processEvent(Neighbor::KILL_NEIGHBOR_NO_REBUILD);
+                neighbors.push_back(neighbor);
+            }
+        }
+
+        // Step 4: Rebuild the routing table
+        for(auto &neighbor : neighbors)
+            neighbor->processEvent(Neighbor::REBUILD);
+
+        // Step 5: now we can take the interface down
+        foundIntf->processEvent(OspfInterface::INTERFACE_DOWN);
+    }
 }
 
 } // namespace ospf

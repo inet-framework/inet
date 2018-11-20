@@ -74,6 +74,8 @@ class Ospf : public RoutingProtocolBase, protected cListener
     virtual bool handleNodeStart(IDoneCallback *) override;
     virtual bool handleNodeShutdown(IDoneCallback *) override;
     virtual void handleNodeCrash() override;
+
+    void handleInterfaceDown(const InterfaceEntry *ie);
 };
 
 } // namespace ospf
