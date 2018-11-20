@@ -115,3 +115,12 @@ class ErrorRateInd extends SignalTagBase
     double bitErrorRate = NaN;    // bit error rate (probability) in the range [0, 1] or NaN if unknown.
     double symbolErrorRate = NaN; // symbol error rate (probability) in the range [0, 1] or NaN if unknown.
 }
+
+//
+// This indication specifies the timing of the received signal.
+// It may be present on a packet from the phyiscal layer to the application.
+//
+class SignalTimeInd extends SignalTagBase
+{
+    simtime_t arrivalTime;
+}

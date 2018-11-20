@@ -93,6 +93,8 @@ const IReceptionResult *ReceiverBase::computeReceptionResult(const IListening *l
     auto snirInd = packet->addTagIfAbsent<SnirInd>();
     snirInd->setMinimumSnir(snir->getMin());
     snirInd->setMaximumSnir(snir->getMax());
+    auto signalTimeInd = packet->addTagIfAbsent<SignalTimeInd>();
+    signalTimeInd->setArrivalTime(reception->getStartTime());
     return new ReceptionResult(reception, decisions, packet);
 }
 
