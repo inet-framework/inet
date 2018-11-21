@@ -60,18 +60,21 @@ void MacBase::handleMessageWhenDown(cMessage *msg)
 
 bool MacBase::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
+    interfaceEntry->setState(InterfaceEntry::State::UP);
     return true;
 }
 
 bool MacBase::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     flushQueue();
+    interfaceEntry->setState(InterfaceEntry::State::DOWN);
     return true;
 }
 
 void MacBase::handleCrashOperation(LifecycleOperation *operation)
 {
     clearQueue();
+    interfaceEntry->setState(InterfaceEntry::State::DOWN);
 }
 
 void MacBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
