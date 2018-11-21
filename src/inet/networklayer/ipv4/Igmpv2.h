@@ -107,7 +107,6 @@ class INET_API Igmpv2 : public cSimpleModule, public IProtocolRegistrationListen
             return out;
         }
     };
-    typedef std::map<int, HostInterfaceData *> InterfaceToHostDataMap;
 
     struct RouterInterfaceData
     {
@@ -134,7 +133,6 @@ class INET_API Igmpv2 : public cSimpleModule, public IProtocolRegistrationListen
             return out;
         }
     };
-    typedef std::map<int, RouterInterfaceData *> InterfaceToRouterDataMap;
 
     struct IgmpHostTimerContext
     {
@@ -184,6 +182,9 @@ class INET_API Igmpv2 : public cSimpleModule, public IProtocolRegistrationListen
     int numReportsRecv = 0;
     int numLeavesSent = 0;
     int numLeavesRecv = 0;
+
+    typedef std::map<int, HostInterfaceData *> InterfaceToHostDataMap;
+    typedef std::map<int, RouterInterfaceData *> InterfaceToRouterDataMap;
 
     // state variables per interface
     InterfaceToHostDataMap hostData;
