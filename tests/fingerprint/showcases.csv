@@ -177,7 +177,7 @@
 /showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="bit" && $modulation=="QAM-64" && $fecType=="" && $distance==225',                      100s,            8ad4-fcf9/tplx, PASS,
 /showcases/wireless/levelofdetail/,  -f omnetpp.ini -c General -r '$detail=="symbol" && $modulation=="QAM-64" && $fecType=="" && $distance==125',                   100s,            d007-5ea5/tplx, PASS,
 
-/showcases/wireless/multiradio/,     -f omnetpp.ini -c General -r 0,      100s,         7e38-5be6/tplx, PASS,
+/showcases/wireless/multiradio/,     -f omnetpp.ini -c General -r 0,      100s,         cf4a-9de1/tplx, PASS,
 
 /showcases/wireless/pathloss/,       -f omnetpp.ini -c General -r 0,                100s,         c37d-91e0/tplx, PASS,
 
