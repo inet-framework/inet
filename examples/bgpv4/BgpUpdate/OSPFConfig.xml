@@ -12,11 +12,13 @@
 
   <!-- Routers -->
   <Router name="A" RFC1583Compatible="true">
-    <BroadcastInterface ifName="eth0" areaID="0.0.0.1" interfaceOutputCost="0" interfaceMode="Passive" />
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.1" interfaceOutputCost="1" interfaceMode="Passive" />
+    <PointToPointInterface ifName="ppp0" areaID="0.0.0.0" interfaceOutputCost="1" />
   </Router>
 
   <Router name="B" RFC1583Compatible="true">
-    <BroadcastInterface ifName="eth0" areaID="0.0.0.2" interfaceOutputCost="0" interfaceMode="Passive" />
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.2" interfaceOutputCost="1" interfaceMode="Passive" />
+    <PointToPointInterface ifName="ppp0" areaID="0.0.0.0" interfaceOutputCost="1" />
   </Router>
 
 </OSPFASConfig>
