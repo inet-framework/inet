@@ -17,7 +17,8 @@ sudo route add -net 192.168.2.0 netmask 255.255.255.0 dev veth1
 inet -u Cmdenv -c ExtLowerEthernetInterfaceInHost1 --sim-time-limit=2s &> inet.out
 
 # check output
-if grep -q "from 192.168.2.2" "inet.out"; then echo $0 ": PASS"; else echo $0 ": FAIL"; firm *.out
+if grep -q "from 192.168.2.2" "inet.out"; then echo $0 ": PASS"; else echo $0 ": FAIL"; fi
+rm *.out
 
 # destroy virtual ethernet link
 sleep 1

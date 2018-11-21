@@ -17,7 +17,8 @@ sleep 1
 ping -c 2 -W 2 192.168.2.2 > ping.out
 
 # check output
-if grep -q "from 192.168.2.2" "ping.out"; then echo $0 ": PASS"; else echo $0 ": FAIL"; firm *.out
+if grep -q "from 192.168.2.2" "ping.out"; then echo $0 ": PASS"; else echo $0 ": FAIL"; fi
+rm *.out
 
 # destroy TAP interface
 sleep 1
