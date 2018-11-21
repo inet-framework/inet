@@ -559,9 +559,9 @@ void Hcf::originatorProcessReceivedControlFrame(Packet *packet, const Ptr<const 
                     retryCount = edcaDataRecoveryProcedures[ac]->getRetryCount(lastTransmittedPacket, dataHeader);
                 else
                     retryCount = 0;
-                edcaDataRecoveryProcedures[ac]->ackFrameReceived(lastTransmittedPacket, dataHeader);
                 dataAndMgmtRateControl->frameTransmitted(lastTransmittedPacket, retryCount, true, false);
             }
+            edcaDataRecoveryProcedures[ac]->ackFrameReceived(lastTransmittedPacket, dataHeader);
         }
         else if (auto mgmtHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(lastTransmittedHeader)) {
             if (dataAndMgmtRateControl) {
