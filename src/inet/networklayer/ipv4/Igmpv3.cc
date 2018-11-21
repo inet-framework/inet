@@ -20,8 +20,10 @@
  * @date 12.5.2013
  */
 
-#include "inet/networklayer/ipv4/Igmpv3.h"
+#include <algorithm>
+#include <bitset>
 
+#include "inet/networklayer/ipv4/Igmpv3.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -30,9 +32,6 @@
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
-
-#include <algorithm>
-#include <bitset>
 
 namespace inet {
 
@@ -403,21 +402,6 @@ void Igmpv3::initialize(int stage)
         lastMemberQueryCount = par("lastMemberQueryCount");
         lastMemberQueryTime = lastMemberQueryInterval * lastMemberQueryCount;    //todo checknut ci je to takto..
         unsolicitedReportInterval = par("unsolicitedReportInterval");
-
-        numGroups = 0;
-        numHostGroups = 0;
-        numRouterGroups = 0;
-
-        numQueriesSent = 0;
-        numQueriesRecv = 0;
-        numGeneralQueriesSent = 0;
-        numGeneralQueriesRecv = 0;
-        numGroupSpecificQueriesSent = 0;
-        numGroupSpecificQueriesRecv = 0;
-        numGroupAndSourceSpecificQueriesSent = 0;
-        numGroupAndSourceSpecificQueriesRecv = 0;
-        numReportsSent = 0;
-        numReportsRecv = 0;
 
         WATCH(numGroups);
         WATCH(numHostGroups);
