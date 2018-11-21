@@ -34,14 +34,6 @@ namespace inet {
 // since that would create dependence on Ipv4 and Ipv6 stuff!
 class InterfaceEntry;
 class IInterfaceTable;
-class InterfaceProtocolData;
-class NextHopInterfaceData;
-class Ipv4InterfaceData;
-class Ipv6InterfaceData;
-class TrillInterfaceData;
-class IsisInterfaceData;
-class Ieee8021dInterfaceData;
-class CLNSInterfaceData;
 
 enum McastSourceFilterMode { MCAST_INCLUDE_SOURCES, MCAST_EXCLUDE_SOURCES };
 

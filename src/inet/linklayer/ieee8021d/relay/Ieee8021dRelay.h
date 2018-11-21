@@ -23,6 +23,7 @@
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/InterfaceTable.h"
+#include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
 #include "inet/linklayer/ethernet/switch/IMacAddressTable.h"
 
