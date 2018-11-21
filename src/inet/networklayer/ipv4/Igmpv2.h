@@ -55,6 +55,13 @@ class INET_API Igmpv2 : public cSimpleModule, public IProtocolRegistrationListen
         IGMP_HGS_IDLE_MEMBER,
     };
 
+    enum IgmpTimerKind {
+        IGMP_QUERY_TIMER,
+        IGMP_HOSTGROUP_TIMER,
+        IGMP_LEAVE_TIMER,
+        IGMP_REXMT_TIMER
+    };
+
     struct HostGroupData
     {
         Igmpv2 *owner;
@@ -89,6 +96,16 @@ class INET_API Igmpv2 : public cSimpleModule, public IProtocolRegistrationListen
 
         HostInterfaceData(Igmpv2 *owner);
         virtual ~HostInterfaceData();
+        friend inline std::ostream& operator<<(std::ostream& out, const Igmpv2::HostInterfaceData& entry)
+        {
+            for(auto& g : entry.groups) {
+                out << "groupAddress: " << g.second->groupAddr << " ";
+                out << "hostGroupState: " << Igmpv2::getHostGroupStateString(g.second->state) << " ";
+                out << "lastHost: " << g.second->flag << ", ";
+            }
+
+            return out;
+        }
     };
     typedef std::map<int, HostInterfaceData *> InterfaceToHostDataMap;
 
@@ -101,16 +118,23 @@ class INET_API Igmpv2 : public cSimpleModule, public IProtocolRegistrationListen
 
         RouterInterfaceData(Igmpv2 *owner);
         virtual ~RouterInterfaceData();
+        friend inline std::ostream& operator<<(std::ostream& out, const Igmpv2::RouterInterfaceData& entry)
+        {
+            out << "routerState: " << Igmpv2::getRouterStateString(entry.igmpRouterState) << " (";
+            if(entry.groups.empty())
+                out << "empty)";
+            else {
+                for(auto& g : entry.groups) {
+                    out << "groupAddress: " << g.second->groupAddr << " ";
+                    out << "routerGroupState: " << Igmpv2::getRouterGroupStateString(g.second->state) << ", ";
+                }
+                out << ") ";
+            }
+
+            return out;
+        }
     };
     typedef std::map<int, RouterInterfaceData *> InterfaceToRouterDataMap;
-
-    // Timers
-    enum IgmpTimerKind {
-        IGMP_QUERY_TIMER,
-        IGMP_HOSTGROUP_TIMER,
-        IGMP_LEAVE_TIMER,
-        IGMP_REXMT_TIMER
-    };
 
     struct IgmpHostTimerContext
     {
@@ -144,10 +168,6 @@ class INET_API Igmpv2 : public cSimpleModule, public IProtocolRegistrationListen
     double unsolicitedReportInterval;    // RFC 2236: Section 8.10
     //double version1RouterPresentInterval;  // RFC 2236: Section 8.11
 
-    // state variables per interface
-    InterfaceToHostDataMap hostData;
-    InterfaceToRouterDataMap routerData;
-
     // group counters
     int numGroups = 0;
     int numHostGroups = 0;
@@ -165,6 +185,15 @@ class INET_API Igmpv2 : public cSimpleModule, public IProtocolRegistrationListen
     int numLeavesSent = 0;
     int numLeavesRecv = 0;
 
+    // state variables per interface
+    InterfaceToHostDataMap hostData;
+    InterfaceToRouterDataMap routerData;
+
+  public:
+    static const std::string getRouterStateString(RouterState rs);
+    static const std::string getRouterGroupStateString(RouterGroupState rgs);
+    static const std::string getHostGroupStateString(HostGroupState hgs);
+
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
@@ -175,6 +204,8 @@ class INET_API Igmpv2 : public cSimpleModule, public IProtocolRegistrationListen
     virtual ~Igmpv2();
 
   protected:
+    void addWatches();
+
     virtual void multicastGroupJoined(InterfaceEntry *ie, const Ipv4Address& groupAddr);
     virtual void multicastGroupLeft(InterfaceEntry *ie, const Ipv4Address& groupAddr);
     virtual void configureInterface(InterfaceEntry *ie);

@@ -176,20 +176,7 @@ void Igmpv2::initialize(int stage)
         unsolicitedReportInterval = par("unsolicitedReportInterval");
         //version1RouterPresentInterval = par("version1RouterPresentInterval");
 
-        WATCH(numGroups);
-        WATCH(numHostGroups);
-        WATCH(numRouterGroups);
-
-        WATCH(numQueriesSent);
-        WATCH(numQueriesRecv);
-        WATCH(numGeneralQueriesSent);
-        WATCH(numGeneralQueriesRecv);
-        WATCH(numGroupSpecificQueriesSent);
-        WATCH(numGroupSpecificQueriesRecv);
-        WATCH(numReportsSent);
-        WATCH(numReportsRecv);
-        WATCH(numLeavesSent);
-        WATCH(numLeavesRecv);
+        addWatches();
     }
     // TODO: INITSTAGE
     else if (stage == INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT) {
@@ -203,6 +190,27 @@ void Igmpv2::initialize(int stage)
                 configureInterface(ie);
         }
     }
+}
+
+void Igmpv2::addWatches()
+{
+    WATCH(numGroups);
+    WATCH(numHostGroups);
+    WATCH(numRouterGroups);
+
+    WATCH(numQueriesSent);
+    WATCH(numQueriesRecv);
+    WATCH(numGeneralQueriesSent);
+    WATCH(numGeneralQueriesRecv);
+    WATCH(numGroupSpecificQueriesSent);
+    WATCH(numGroupSpecificQueriesRecv);
+    WATCH(numReportsSent);
+    WATCH(numReportsRecv);
+    WATCH(numLeavesSent);
+    WATCH(numLeavesRecv);
+
+    WATCH_PTRMAP(hostData);
+    WATCH_PTRMAP(routerData);
 }
 
 void Igmpv2::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
@@ -878,6 +886,46 @@ Igmpv2::RouterInterfaceData::~RouterInterfaceData()
 
     for (auto & elem : groups)
         delete elem.second;
+}
+
+// Miscellaneous
+
+const std::string Igmpv2::getRouterStateString(Igmpv2::RouterState rs)
+{
+    if(rs == IGMP_RS_INITIAL)
+        return "INITIAL";
+    else if(rs == IGMP_RS_QUERIER)
+        return "QUERIER";
+    else if(rs == IGMP_RS_NON_QUERIER)
+        return "NON_QUERIER";
+
+    return "UNKNOWN";
+}
+
+const std::string Igmpv2::getRouterGroupStateString(Igmpv2::RouterGroupState rgs)
+{
+    if(rgs == IGMP_RGS_NO_MEMBERS_PRESENT)
+        return "NO_MEMBERS_PRESENT";
+    else if(rgs == IGMP_RGS_MEMBERS_PRESENT)
+        return "MEMBERS_PRESENT";
+    else if(rgs == IGMP_RGS_V1_MEMBERS_PRESENT)
+        return "V1_MEMBERS_PRESENT";
+    else if(rgs == IGMP_RGS_CHECKING_MEMBERSHIP)
+        return "CHECKING_MEMBERSHIP";
+
+    return "UNKNOWN";
+}
+
+const std::string Igmpv2::getHostGroupStateString(Igmpv2::HostGroupState hgs)
+{
+    if(hgs == IGMP_HGS_NON_MEMBER)
+        return "NON_MEMBER";
+    else if(hgs == IGMP_HGS_DELAYING_MEMBER)
+        return "DELAYING_MEMBER";
+    else if(hgs == IGMP_HGS_IDLE_MEMBER)
+        return "IDLE_MEMBER";
+
+    return "UNKNOWN";
 }
 
 }    // namespace inet
