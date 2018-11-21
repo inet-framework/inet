@@ -23,14 +23,14 @@
 #ifndef __INET_IGMPV3_H
 #define __INET_IGMPV3_H
 
+#include <set>
+
 #include "inet/common/INETDefs.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/IgmpMessage.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-
-#include <set>
 
 namespace inet {
 
@@ -72,6 +72,14 @@ class INET_API Igmpv3 : public cSimpleModule, protected cListener
         IGMPV3_RT_TO_EX = 4,
         IGMPV3_RT_ALLOW = 5,
         IGMPV3_RT_BLOCK = 6,
+    };
+
+    enum IgmpTimerKind {
+        IGMPV3_R_GENERAL_QUERY_TIMER,
+        IGMPV3_R_GROUP_TIMER,
+        IGMPV3_R_SOURCE_TIMER,
+        IGMPV3_H_GENERAL_QUERY_TIMER,
+        IGMPV3_H_GROUP_TIMER,
     };
 
     struct HostInterfaceData;
@@ -162,14 +170,6 @@ class INET_API Igmpv3 : public cSimpleModule, protected cListener
         void deleteGroupData(Ipv4Address group);
     };
 
-    enum IgmpTimerKind {
-        IGMPV3_R_GENERAL_QUERY_TIMER,
-        IGMPV3_R_GROUP_TIMER,
-        IGMPV3_R_SOURCE_TIMER,
-        IGMPV3_H_GENERAL_QUERY_TIMER,
-        IGMPV3_H_GROUP_TIMER,
-    };
-
   protected:
     IRoutingTable *rt;
     IInterfaceTable *ift;
@@ -192,20 +192,20 @@ class INET_API Igmpv3 : public cSimpleModule, protected cListener
     InterfaceToHostDataMap hostData;
     InterfaceToRouterDataMap routerData;
 
-    int numGroups;
-    int numHostGroups;
-    int numRouterGroups;
+    int numGroups = 0;
+    int numHostGroups  = 0;
+    int numRouterGroups  = 0;
 
-    int numQueriesSent;
-    int numQueriesRecv;
-    int numGeneralQueriesSent;
-    int numGeneralQueriesRecv;
-    int numGroupSpecificQueriesSent;
-    int numGroupSpecificQueriesRecv;
-    int numGroupAndSourceSpecificQueriesSent;
-    int numGroupAndSourceSpecificQueriesRecv;
-    int numReportsSent;
-    int numReportsRecv;
+    int numQueriesSent  = 0;
+    int numQueriesRecv  = 0;
+    int numGeneralQueriesSent = 0;
+    int numGeneralQueriesRecv = 0;
+    int numGroupSpecificQueriesSent = 0;
+    int numGroupSpecificQueriesRecv = 0;
+    int numGroupAndSourceSpecificQueriesSent = 0;
+    int numGroupAndSourceSpecificQueriesRecv = 0;
+    int numReportsSent = 0;
+    int numReportsRecv = 0;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
