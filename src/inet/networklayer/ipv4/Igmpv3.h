@@ -39,8 +39,10 @@ class IRoutingTable;
 
 class INET_API Igmpv3 : public cSimpleModule, protected cListener
 {
-  protected:
+public:
     typedef std::vector<Ipv4Address> Ipv4AddressVector;
+
+  protected:
 
     enum RouterState {
         IGMPV3_RS_INITIAL,
@@ -187,15 +189,12 @@ class INET_API Igmpv3 : public cSimpleModule, protected cListener
     double lastMemberQueryTime;
     double unsolicitedReportInterval;
 
-    typedef std::map<int, HostInterfaceData *> InterfaceToHostDataMap;
-    typedef std::map<int, RouterInterfaceData *> InterfaceToRouterDataMap;
-    InterfaceToHostDataMap hostData;
-    InterfaceToRouterDataMap routerData;
-
+    // group counters
     int numGroups = 0;
     int numHostGroups  = 0;
     int numRouterGroups  = 0;
 
+    // message counters
     int numQueriesSent  = 0;
     int numQueriesRecv  = 0;
     int numGeneralQueriesSent = 0;
@@ -207,6 +206,18 @@ class INET_API Igmpv3 : public cSimpleModule, protected cListener
     int numReportsSent = 0;
     int numReportsRecv = 0;
 
+    typedef std::map<int, HostInterfaceData *> InterfaceToHostDataMap;
+    typedef std::map<int, RouterInterfaceData *> InterfaceToRouterDataMap;
+
+    // state variables per interface
+    InterfaceToHostDataMap hostData;
+    InterfaceToRouterDataMap routerData;
+
+  public:
+    static Ipv4AddressVector set_complement(const Ipv4AddressVector& first, const Ipv4AddressVector& second);
+    static Ipv4AddressVector set_intersection(const Ipv4AddressVector& first, const Ipv4AddressVector& second);
+    static Ipv4AddressVector set_union(const Ipv4AddressVector& first, const Ipv4AddressVector& second);
+
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
@@ -215,6 +226,8 @@ class INET_API Igmpv3 : public cSimpleModule, protected cListener
     virtual ~Igmpv3();
 
   protected:
+    void addWatches();
+
     virtual HostInterfaceData *createHostInterfaceData(InterfaceEntry *ie);
     virtual RouterInterfaceData *createRouterInterfaceData(InterfaceEntry *ie);
     virtual HostInterfaceData *getHostInterfaceData(InterfaceEntry *ie);
@@ -253,6 +266,8 @@ class INET_API Igmpv3 : public cSimpleModule, protected cListener
      */
     virtual double decodeTime(unsigned char code);
 };
+
+std::ostream& operator<<(std::ostream& out, const Ipv4AddressVector addresses);
 
 }    // namespace inet
 
