@@ -3,20 +3,21 @@ package inet.examples.bgpv4.BgpAndOspfSimple;
 
 import inet.common.misc.ThruputMeteringChannel;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 import inet.node.bgp.BgpRouter;
 import inet.node.inet.StandardHost;
 import inet.node.ospfv2.OspfRouter;
+import ned.DatarateChannel;
 
 
 network BGPNet
 {
     types:
-        channel LINK_100 extends ThruputMeteringChannel
+        channel LINK_100 extends DatarateChannel
         {
             parameters:
-                delay = 0s;
+                delay = 50us;
                 datarate = 100Mbps;
-                thruputDisplayFormat = "#N";
         }
 
     submodules:
@@ -66,6 +67,9 @@ network BGPNet
             addStaticRoutes = false;
             addDefaultRoutes = false;
             addSubnetRoutes = false;
+        }
+        visualizer: IntegratedCanvasVisualizer {
+            @display("p=100,38");
         }
     connections:
         //LAN A1 et A2
