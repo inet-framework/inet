@@ -56,10 +56,11 @@ class Ospf : public RoutingProtocolBase, protected cListener
     void insertExternalRoute(int ifIndex, const Ipv4AddressRange& netAddr);
 
     /**
-     * Return true if the route is in OSPF external LSA Table, false else.
+     * Checks if the route is in OSPF external LSA Table.
+     * 0: not external, 1: type 1 external, 2: type 2 external
      * Used by the Bgp module.
      */
-    bool checkExternalRoute(const Ipv4Address& route);
+    int checkExternalRoute(const Ipv4Address& route);
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -83,4 +84,3 @@ class Ospf : public RoutingProtocolBase, protected cListener
 } // namespace inet
 
 #endif // ifndef __INET_OSPFROUTING_H
-

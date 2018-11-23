@@ -180,16 +180,20 @@ void Ospf::insertExternalRoute(int ifIndex, const Ipv4AddressRange& netAddr)
     ospfRouter->updateExternalRoute(netAddr.address, newExternalContents, ifIndex);
 }
 
-bool Ospf::checkExternalRoute(const Ipv4Address& route)
+int Ospf::checkExternalRoute(const Ipv4Address& route)
 {
     Enter_Method_Silent();
     for (uint32_t i = 0; i < ospfRouter->getASExternalLSACount(); i++) {
         AsExternalLsa *externalLSA = ospfRouter->getASExternalLSA(i);
         Ipv4Address externalAddr = externalLSA->getHeader().getLinkStateID();
-        if (externalAddr == route) //FIXME was this meant???
-            return true;
+        if (externalAddr == route) { //FIXME was this meant???
+            if(externalLSA->getContents().getE_ExternalMetricType())
+                return 2;
+            else
+                return 1;
+        }
     }
-    return false;
+    return 0;
 }
 
 void Ospf::handleInterfaceDown(const InterfaceEntry *ie)
@@ -238,4 +242,3 @@ void Ospf::handleInterfaceDown(const InterfaceEntry *ie)
 } // namespace ospf
 
 } // namespace inet
-
