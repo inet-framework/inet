@@ -1,16 +1,19 @@
 package inet.examples.bgpv4.BgpOpen;
 
+import inet.common.misc.ThruputMeteringChannel;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 
 network Net
 {
     types:
-        channel LINK_100 extends ned.DatarateChannel
+        channel LINK_100 extends ThruputMeteringChannel
         {
             parameters:
                 delay = 50us;
                 datarate = 100Mbps;
+                displayAsTooltip = true;
+                thruputDisplayFormat = "#N";
         }
     submodules:
         visualizer: IntegratedCanvasVisualizer {

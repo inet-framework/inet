@@ -7,18 +7,18 @@ import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 import inet.node.bgp.BgpRouter;
 import inet.node.inet.StandardHost;
 import inet.node.ospfv2.OspfRouter;
-import ned.DatarateChannel;
 
 network BGPNet
 {
     types:
-        channel LINK_100 extends DatarateChannel
+        channel LINK_100 extends ThruputMeteringChannel
         {
             parameters:
                 delay = 50us;
                 datarate = 100Mbps;
+                displayAsTooltip = true;
+                thruputDisplayFormat = "#N";
         }
-
     submodules:
         visualizer: IntegratedCanvasVisualizer {
             parameters:

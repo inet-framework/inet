@@ -1,4 +1,3 @@
-
 package inet.examples.bgpv4.BgpAndOspf;
 
 import inet.common.misc.ThruputMeteringChannel;
@@ -17,9 +16,9 @@ network BGPTest
             parameters:
                 delay = 50us;
                 datarate = 100Mbps;
+                displayAsTooltip = true;
                 thruputDisplayFormat = "#N";
         }
-
     submodules:
         visualizer: IntegratedCanvasVisualizer {
             parameters:

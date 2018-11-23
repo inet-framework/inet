@@ -4,18 +4,18 @@ import inet.common.misc.ThruputMeteringChannel;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 import inet.node.inet.StandardHost;
-import ned.DatarateChannel;
 
 network BGPTest
 {
     types:
-        channel LINK_100 extends DatarateChannel
+        channel LINK_100 extends ThruputMeteringChannel
         {
             parameters:
                 delay = 50us;
                 datarate = 100Mbps;
+                displayAsTooltip = true;
+                thruputDisplayFormat = "#N";
         }
-
     submodules:
         visualizer: IntegratedCanvasVisualizer {
             parameters:

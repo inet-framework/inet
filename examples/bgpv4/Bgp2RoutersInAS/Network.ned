@@ -16,6 +16,7 @@ network BGPTest
             parameters:
                 delay = 50us;
                 datarate = 100Mbps;
+                displayAsTooltip = true;
                 thruputDisplayFormat = "#N";
         }
     submodules:
