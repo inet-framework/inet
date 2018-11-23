@@ -19,6 +19,7 @@
 #include "inet/routing/bgpv4/BgpRouter.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/routing/bgpv4/BgpSession.h"
+//#include "inet/routing/ospfv2/router/OspfRoutingTableEntry.h"
 
 namespace inet {
 
@@ -160,7 +161,7 @@ void BgpRouter::setDefaultConfig()
 {
     // per router params
     bool redistributeInternal = bgpModule->par("redistributeInternal").boolValue();
-    bool redistributeOspf = bgpModule->par("redistributeOspf").boolValue();
+    std::string redistributeOspf = bgpModule->par("redistributeOspf").stdstringValue();
     bool redistributeRip = bgpModule->par("redistributeRip").boolValue();
     setRedistributeInternal(redistributeInternal);
     setRedistributeOspf(redistributeOspf);
@@ -259,6 +260,31 @@ void BgpRouter::setLocalPreference(Ipv4Address peer, int localPref)
     }
     if(!found)
         throw cRuntimeError("Neighbor address '%s' cannot be found in BGP router %s", peer.str(false).c_str(), bgpModule->getOwner()->getFullName());
+}
+
+void BgpRouter::setRedistributeOspf(std::string str)
+{
+    if(str == "") {
+        redistributeOspf = false;
+        return;
+    }
+
+    redistributeOspf = true;
+    std::vector<std::string> tokens = cStringTokenizer(str.c_str()).asVector();
+
+    for(auto& OspfRouteType : tokens) {
+        std::transform(OspfRouteType.begin(), OspfRouteType.end(), OspfRouteType.begin(), ::tolower);
+        if(OspfRouteType == "o")
+            redistributeOspfType.intraArea = true;
+        else if(OspfRouteType == "ia")
+            redistributeOspfType.interArea = true;
+        else if(OspfRouteType == "e1")
+            redistributeOspfType.externalType1 = true;
+        else if(OspfRouteType == "e2")
+            redistributeOspfType.externalType2 = true;
+        else
+            throw cRuntimeError("Unknown OSPF redistribute type '%s' in BGP router %s", OspfRouteType.c_str(), bgpModule->getOwner()->getFullName());
+    }
 }
 
 void BgpRouter::processMessageFromTCP(cMessage *msg)
@@ -936,13 +962,42 @@ bool BgpRouter::isRouteExcluded(const Ipv4Route &rtEntry)
         // all OSPF routes are excluded when redistributeOspf is false
         if(!redistributeOspf)
             return true;
-        else {
-            // all OSPF external routes are excluded
-            if(checkExternalRoute(&rtEntry))
-                return true;
-            else
+
+        auto entry = static_cast<const ospf::OspfRoutingTableEntry *>(&rtEntry);
+        ASSERT(entry);
+
+        if(entry->getPathType() == ospf::OspfRoutingTableEntry::INTRAAREA) {
+            if(redistributeOspfType.intraArea)
                 return false;
+            else
+                return true;
         }
+
+        if(entry->getPathType() == ospf::OspfRoutingTableEntry::INTERAREA) {
+            if(redistributeOspfType.interArea)
+                return false;
+            else
+                return true;
+        }
+
+        int externalType = checkExternalRoute(&rtEntry);
+
+        if(externalType == 1) {
+            if(redistributeOspfType.externalType1)
+                return false;
+            else
+                return true;
+        }
+
+        if(externalType == 2) {
+            if(redistributeOspfType.externalType2)
+                return false;
+            else
+                return true;
+        }
+
+        // exclude all other OSPF route types
+        return true;
     }
 
     if (rtEntry.getSourceType() == IRoute::IFACENETMASK) {

@@ -24,9 +24,9 @@
 
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/routing/ospfv2/OspfPacket_m.h"
 #include "inet/routing/ospfv2/router/OspfRouter.h"
-#include "inet/common/lifecycle/ILifecycle.h"
 
 namespace inet {
 
@@ -35,13 +35,14 @@ namespace ospf {
 /**
  * Implements the OSPFv2 routing protocol. See the NED file for more information.
  */
-class Ospf : public cSimpleModule, public ILifecycle
+class Ospf : public RoutingProtocolBase, protected cListener
 {
   private:
+    cModule *host = nullptr;    // the host module that owns this module
     IIpv4RoutingTable *rt = nullptr;
     IInterfaceTable *ift = nullptr;
-    bool isUp = false;
     Router *ospfRouter = nullptr;    // root object of the OSPF data structure
+    cMessage *startupTimer = nullptr;    // timer for delayed startup
 
   public:
     Ospf();
@@ -55,19 +56,26 @@ class Ospf : public cSimpleModule, public ILifecycle
     void insertExternalRoute(int ifIndex, const Ipv4AddressRange& netAddr);
 
     /**
-     * Return true if the route is in OSPF external LSA Table, false else.
+     * Checks if the route is in OSPF external LSA Table.
+     * 0: not external, 1: type 1 external, 2: type 2 external
      * Used by the Bgp module.
      */
-    bool checkExternalRoute(const Ipv4Address& route);
+    int checkExternalRoute(const Ipv4Address& route);
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *msg) override;
-    virtual void handleMessageWhenDown(cMessage *msg);
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+    virtual void handleMessageWhenUp(cMessage *msg) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
+    virtual void subscribe();
+    virtual void unsubscribe();
     virtual void createOspfRouter();
-    virtual bool isNodeUp();
+    void handleInterfaceDown(const InterfaceEntry *ie);
+
+    // lifecycle
+    virtual bool handleNodeStart(IDoneCallback *) override;
+    virtual bool handleNodeShutdown(IDoneCallback *) override;
+    virtual void handleNodeCrash() override;
 };
 
 } // namespace ospf
@@ -75,4 +83,3 @@ class Ospf : public cSimpleModule, public ILifecycle
 } // namespace inet
 
 #endif // ifndef __INET_OSPFROUTING_H
-

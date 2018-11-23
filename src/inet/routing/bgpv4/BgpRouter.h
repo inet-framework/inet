@@ -47,6 +47,13 @@ private:
     bool redistributeInternal = false;
     bool redistributeRip = false;
     bool redistributeOspf = false;
+    struct redistributeOspfType_t {
+        bool interArea;
+        bool intraArea;
+        bool externalType1;
+        bool externalType2;
+    };
+    redistributeOspfType_t redistributeOspfType = {};
     SocketMap _socketMap;
     SessionId _currSessionId = 0;
     std::map<SessionId, BgpSession *> _BGPSessions;
@@ -81,7 +88,7 @@ private:
     bool getRedistributeRip() { return redistributeRip; }
     void setRedistributeRip(bool x) { this->redistributeRip = x; }
     bool getRedistributeOspf() { return redistributeOspf; }
-    void setRedistributeOspf(bool x) { this->redistributeOspf = x; }
+    void setRedistributeOspf(std::string x);
     void printSessionSummary();
     void addWatches();
     void recordStatistics();
@@ -168,7 +175,7 @@ private:
 
     bool ospfExist(IIpv4RoutingTable *rtTable);
     // check if the route is in OSPF external Ipv4RoutingTable
-    bool checkExternalRoute(const Ipv4Route *ospfRoute) { return ospfModule->checkExternalRoute(ospfRoute->getDestination()); }
+    int checkExternalRoute(const Ipv4Route *ospfRoute) { return ospfModule->checkExternalRoute(ospfRoute->getDestination()); }
     unsigned char asLoopDetection(BgpRoutingTableEntry *entry, AsId myAS);
     int isInRoutingTable(IIpv4RoutingTable *rtTable, Ipv4Address addr);
     SessionId findIdFromPeerAddr(std::map<SessionId, BgpSession *> sessions, Ipv4Address peerAddr);

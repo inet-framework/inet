@@ -42,27 +42,40 @@ Ospf::Ospf()
 
 Ospf::~Ospf()
 {
+    cancelAndDelete(startupTimer);
     delete ospfRouter;
 }
 
 void Ospf::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    RoutingProtocolBase::initialize(stage);
 
-    if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
+    if (stage == INITSTAGE_LOCAL) {
+        host = getContainingNode(this);
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
-        isUp = isNodeUp();
-        if (isUp)
-            createOspfRouter();
+        startupTimer = new cMessage("OSPF-startup");
+    }
+    else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {  // interfaces and static routes are already initialized
         registerService(Protocol::ospf, nullptr, gate("ipIn"));
         registerProtocol(Protocol::ospf, gate("ipOut"), nullptr);
     }
 }
 
+void Ospf::handleMessageWhenUp(cMessage *msg)
+{
+    if (msg == startupTimer) {
+        createOspfRouter();
+        subscribe();
+    }
+    else
+        ospfRouter->getMessageHandler()->messageReceived(msg);
+
+}
+
 void Ospf::createOspfRouter()
 {
-    ospfRouter = new Router(rt->getRouterId(), this, ift, rt);
+    ospfRouter = new Router(this, ift, rt);
 
     // read the OSPF AS configuration
     cXMLElement *ospfConfig = par("ospfConfig");
@@ -73,59 +86,130 @@ void Ospf::createOspfRouter()
     ospfRouter->addWatches();
 }
 
-void Ospf::handleMessage(cMessage *msg)
+void Ospf::subscribe()
 {
-    if (!isUp)
-        handleMessageWhenDown(msg);
+    host->subscribe(interfaceCreatedSignal, this);
+    host->subscribe(interfaceDeletedSignal, this);
+    host->subscribe(interfaceStateChangedSignal, this);
+}
+
+void Ospf::unsubscribe()
+{
+    host->unsubscribe(interfaceCreatedSignal, this);
+    host->unsubscribe(interfaceDeletedSignal, this);
+    host->unsubscribe(interfaceStateChangedSignal, this);
+}
+
+/**
+ * Listen on interface changes and update private data structures.
+ */
+void Ospf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+{
+    Enter_Method_Silent("Ospf::receiveChangeNotification(%s)", cComponent::getSignalName(signalID));
+
+    const InterfaceEntry *ie;
+    const InterfaceEntryChangeDetails *change;
+
+    if (signalID == interfaceCreatedSignal) {
+        // configure interface for RIP
+        ie = check_and_cast<const InterfaceEntry *>(obj);
+        if (ie->isMulticast() && !ie->isLoopback()) {
+            // TODO
+        }
+    }
+    else if (signalID == interfaceDeletedSignal) {
+        ie = check_and_cast<const InterfaceEntry *>(obj);
+        // TODO
+    }
+    else if (signalID == interfaceStateChangedSignal) {
+        change = check_and_cast<const InterfaceEntryChangeDetails *>(obj);
+        if (change->getFieldId() == InterfaceEntry::F_CARRIER || change->getFieldId() == InterfaceEntry::F_STATE) {
+            ie = change->getInterfaceEntry();
+            if (!ie->isUp())
+                handleInterfaceDown(ie);
+            else {
+                // interface went back online. Do nothing!
+                // Wait for Hello messages to establish adjacency.
+            }
+        }
+    }
     else
-        ospfRouter->getMessageHandler()->messageReceived(msg);
+        throw cRuntimeError("Unexpected signal: %s", getSignalName(signalID));
 }
 
-void Ospf::handleMessageWhenDown(cMessage *msg)
+bool Ospf::handleNodeStart(IDoneCallback *)
 {
-    if (msg->isSelfMessage())
-        throw cRuntimeError("Model error: self msg '%s' received when protocol is down", msg->getName());
-    EV_ERROR << "Protocol is turned off, dropping '" << msg->getName() << "' message\n";
-    delete msg;
-}
-
-bool Ospf::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-{
-    Enter_Method_Silent();
-
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_ROUTING_PROTOCOLS) {
-            ASSERT(ospfRouter == nullptr);
-            isUp = true;
-            createOspfRouter();
-        }
+    ASSERT(ospfRouter == nullptr);
+    simtime_t startupTime = par("startupTime");
+    if (startupTime <= simTime()) {
+        createOspfRouter();
+        subscribe();
     }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_ROUTING_PROTOCOLS) {
-            ASSERT(ospfRouter);
-            isUp = false;
-            delete ospfRouter;
-            ospfRouter = nullptr;
-        }
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH) {
-            ASSERT(ospfRouter);
-            isUp = false;
-            delete ospfRouter;
-            ospfRouter = nullptr;
-        }
-    }
-    else {
-        throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
-    }
+    else
+        scheduleAt(simTime() + startupTime, startupTimer);
     return true;
 }
 
-bool Ospf::isNodeUp()
+bool Ospf::handleNodeShutdown(IDoneCallback *)
 {
-    NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
+    ASSERT(ospfRouter);
+    delete ospfRouter;
+    cancelEvent(startupTimer);
+    ospfRouter = nullptr;
+    unsubscribe();
+    return true;
+}
+
+void Ospf::handleNodeCrash()
+{
+    ASSERT(ospfRouter);
+    delete ospfRouter;
+    cancelEvent(startupTimer);
+    ospfRouter = nullptr;
+    unsubscribe();
+}
+
+void Ospf::handleInterfaceDown(const InterfaceEntry *ie)
+{
+    EV_DEBUG << "interface " << ie->getInterfaceId() << " went down. \n";
+
+    // Step 1: delete all direct-routes connected to this interface
+
+    // ... from OSPF table
+    for(uint32_t i = 0; i < ospfRouter->getRoutingTableEntryCount(); i++) {
+        OspfRoutingTableEntry *ospfRoute = ospfRouter->getRoutingTableEntry(i);
+        if(ospfRoute && ospfRoute->getInterface() == ie && ospfRoute->getNextHopAsGeneric().isUnspecified()) {
+            EV_DEBUG << "removing route from OSPF routing table: " << ospfRoute << "\n";
+            ospfRouter->deleteRoute(ospfRoute);
+        }
+    }
+    // ... from Ipv4 table
+    for(int32_t i = 0; i < rt->getNumRoutes(); i++) {
+        Ipv4Route *route = rt->getRoute(i);
+        if(route && route->getInterface() == ie && route->getNextHopAsGeneric().isUnspecified()) {
+            EV_DEBUG << "removing route from Ipv4 routing table: " << route << "\n";
+            rt->deleteRoute(route);
+        }
+    }
+
+    // Step 2: find the OspfInterface associated with the ie and take it down
+    OspfInterface *foundIntf = nullptr;
+    for(auto &areaId : ospfRouter->getAreaIds()) {
+        Area *area = ospfRouter->getAreaByID(areaId);
+        if(area) {
+            for(auto &ifIndex : area->getInterfaceIndices()) {
+                OspfInterface *intf = area->getInterface(ifIndex);
+                if(intf && intf->getIfIndex() == ie->getInterfaceId()) {
+                    foundIntf = intf;
+                    break;
+                }
+            }
+            if(foundIntf) {
+                foundIntf->processEvent(OspfInterface::INTERFACE_DOWN);
+                break;
+            }
+        }
+    }
 }
 
 void Ospf::insertExternalRoute(int ifIndex, const Ipv4AddressRange& netAddr)
@@ -139,19 +223,22 @@ void Ospf::insertExternalRoute(int ifIndex, const Ipv4AddressRange& netAddr)
     ospfRouter->updateExternalRoute(netAddr.address, newExternalContents, ifIndex);
 }
 
-bool Ospf::checkExternalRoute(const Ipv4Address& route)
+int Ospf::checkExternalRoute(const Ipv4Address& route)
 {
     Enter_Method_Silent();
     for (uint32_t i = 0; i < ospfRouter->getASExternalLSACount(); i++) {
         AsExternalLsa *externalLSA = ospfRouter->getASExternalLSA(i);
         Ipv4Address externalAddr = externalLSA->getHeader().getLinkStateID();
-        if (externalAddr == route) //FIXME was this meant???
-            return true;
+        if (externalAddr == route) { //FIXME was this meant???
+            if(externalLSA->getContents().getE_ExternalMetricType())
+                return 2;
+            else
+                return 1;
+        }
     }
-    return false;
+    return 0;
 }
 
 } // namespace ospf
 
 } // namespace inet
-
