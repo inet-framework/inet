@@ -1,8 +1,7 @@
 package inet.examples.bgpv4.BgpOpen;
 
-
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-
+import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 
 network Net
 {
@@ -13,8 +12,19 @@ network Net
                 delay = 0s;
                 datarate = 100Mbps;
         }
-
     submodules:
+        visualizer: IntegratedCanvasVisualizer {
+            parameters:
+                @display("p=100,100;is=s");
+        }
+        configurator: Ipv4NetworkConfigurator {
+            parameters:
+                @display("p=100,200;is=s");
+                config = xmldoc("IPv4Config.xml");
+                addStaticRoutes = false;
+                addDefaultRoutes = false;
+                addSubnetRoutes = false;
+        }
         A: BGPRouterSimple {
             parameters:
                 @display("p=250,100");
@@ -22,15 +32,6 @@ network Net
         B: BGPRouterSimple {
             parameters:
                 @display("p=400,100");
-        }
-        configurator: Ipv4NetworkConfigurator {
-            @display("p=100,100;is=s");
-            config = xmldoc("IPv4Config.xml");
-            //assignAddresses = false;
-            //assignDisjunctSubnetAddresses = false;
-            addStaticRoutes = false;
-            addDefaultRoutes = false;
-            addSubnetRoutes = false;
         }
     connections:
         A.pppg++ <--> LINK_100 <--> B.pppg++;

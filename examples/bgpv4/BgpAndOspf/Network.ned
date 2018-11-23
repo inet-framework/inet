@@ -7,7 +7,7 @@ import inet.node.bgp.BgpRouter;
 import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.StandardHost;
 import inet.node.ospfv2.OspfRouter;
-
+import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 
 network BGPTest
 {
@@ -21,6 +21,18 @@ network BGPTest
         }
 
     submodules:
+        visualizer: IntegratedCanvasVisualizer {
+            parameters:
+                @display("p=100,100;is=s");
+        }
+        configurator: Ipv4NetworkConfigurator {
+            parameters:
+                @display("p=100,200;is=s");
+                config = xmldoc("IPv4Config.xml");
+                addStaticRoutes = false;
+                addDefaultRoutes = false;
+                addSubnetRoutes = false;
+        }
         A: BgpRouter {
             parameters:
                 @display("p=700,230");
@@ -132,15 +144,6 @@ network BGPTest
                 @display("p=1300,380;i=device/pc");
             gates:
                 ethg[1];
-        }
-        configurator: Ipv4NetworkConfigurator {
-            @display("p=100,100;is=s");
-            config = xmldoc("IPv4Config.xml");
-            //assignAddresses = false;
-            //assignDisjunctSubnetAddresses = false;
-            addStaticRoutes = false;
-            addDefaultRoutes = false;
-            addSubnetRoutes = false;
         }
     connections:
         //LAN A1 et A2

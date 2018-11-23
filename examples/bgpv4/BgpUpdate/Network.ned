@@ -17,6 +17,18 @@ network BGPTest
         }
 
     submodules:
+        visualizer: IntegratedCanvasVisualizer {
+            parameters:
+                @display("p=100,100;is=s");
+        }
+        configurator: Ipv4NetworkConfigurator {
+            parameters:
+                @display("p=100,200;is=s");
+                config = xmldoc("IPv4Config.xml");
+                addStaticRoutes = false;
+                addDefaultRoutes = false;
+                addSubnetRoutes = false;
+        }
         A: BGPRouterEx {
             parameters:
                 @display("p=400,100");
@@ -43,17 +55,6 @@ network BGPTest
             gates:
                 ethg[1];
         }
-        configurator: Ipv4NetworkConfigurator {
-            @display("p=100,100");
-            config = xmldoc("IPv4Config.xml");
-            addStaticRoutes = false;
-            addDefaultRoutes = false;
-            addSubnetRoutes = false;
-        }
-        visualizer: IntegratedCanvasVisualizer {
-            @display("p=100,38");
-        }
-
     connections:
         H1.ethg[0] <--> LINK_100 <--> A.ethg[0];
         A.pppg[0] <--> LINK_100 <--> B.pppg[0];
