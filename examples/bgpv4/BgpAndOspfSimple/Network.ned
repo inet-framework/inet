@@ -1,12 +1,11 @@
-//
 package inet.examples.bgpv4.BgpAndOspfSimple;
 
 import inet.common.misc.ThruputMeteringChannel;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 import inet.node.bgp.BgpRouter;
 import inet.node.inet.StandardHost;
 import inet.node.ospfv2.OspfRouter;
+import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 
 network BGPNet
 {
@@ -22,7 +21,7 @@ network BGPNet
     submodules:
         visualizer: IntegratedCanvasVisualizer {
             parameters:
-	            @display("p=100,100;is=s");
+                @display("p=100,100;is=s");
         }
         configurator: Ipv4NetworkConfigurator {
             parameters:

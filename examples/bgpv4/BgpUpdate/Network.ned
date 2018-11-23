@@ -2,8 +2,8 @@ package inet.examples.bgpv4.BgpUpdate;
 
 import inet.common.misc.ThruputMeteringChannel;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 import inet.node.inet.StandardHost;
+import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 
 network BGPTest
 {
