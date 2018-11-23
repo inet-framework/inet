@@ -7,12 +7,11 @@ Testing OSPF routing
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
+import inet.common.misc.ThruputMeteringChannel;
 import inet.linklayer.ethernet.EtherHub;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.inet.StandardHost;
-import inet.nodes.ospfv2.OSPFRouter;
-import inet.util.ThruputMeteringChannel;
-
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.StandardHost;
+import inet.node.ospfv2.OspfRouter;
 
 channel C extends ThruputMeteringChannel
 {
@@ -25,7 +24,7 @@ module OspfLan
 {
     parameters:
         int h; // number of hosts on the hub
-        @display("i=cloud");
+        @display("i=misc/cloud");
     gates:
         inout ethg[];
     submodules:
@@ -49,31 +48,31 @@ network Fig6
     parameters:
         @display("p=10,10;b=704,560");
     submodules:
-        RT5: OSPFRouter {
+        RT5: OspfRouter {
             parameters:
                 @display("p=496,144");
             gates:
                 ethg[6];
         }
-        RT6: OSPFRouter {
+        RT6: OspfRouter {
             parameters:
                 @display("p=424,208");
             gates:
                 ethg[3];
         }
-        RT7: OSPFRouter {
+        RT7: OspfRouter {
             parameters:
                 @display("p=496,328");
             gates:
                 ethg[4];
         }
-        RT10: OSPFRouter {
+        RT10: OspfRouter {
             parameters:
                 @display("p=424,328");
             gates:
                 ethg[3];
         }
-        RT11: OSPFRouter {
+        RT11: OspfRouter {
             parameters:
                 @display("p=282,404");
             gates:
@@ -97,7 +96,7 @@ network Fig6
             parameters:
                 @display("p=411,467");
         }
-        Area3_RT12: OSPFRouter {
+        Area3_RT12: OspfRouter {
             parameters:
                 @display("p=148,360");
             gates:
@@ -116,7 +115,7 @@ network Fig6
             parameters:
                 @display("p=64,360;i=device/pc_s");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 config = xml("<config>"+"\n"+
                             "<interface among='Area2_N8.* RT10 RT11' address='10.2.21.x' netmask='255.255.255.0' />"+"\n"+
@@ -182,25 +181,25 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 *.usenew = true
 
-**.Area3_N10.host[0].numUdpApps = 2
-**.N15.host[0].numUdpApps = 2
-**.N12.host[0].numUdpApps = 2
-**.Area3_H1.numUdpApps = 2
+**.Area3_N10.host[0].numApps = 2
+**.N15.host[0].numApps = 2
+**.N12.host[0].numApps = 2
+**.Area3_H1.numApps = 2
 
-**.udpApp[0].typename = "UDPEchoApp"
-**.udpApp[0].localPort = 1234
+**.app[0].typename = "UdpEchoApp"
+**.app[0].localPort = 1234
 
-**.udpApp[1..].typename = "UDPBasicApp"
-**.udpApp[1..].destPort = 1234
-**.udpApp[1..].messageLength = 32 bytes
-**.udpApp[1..].sendInterval = 1s
-**.udpApp[1..].startTime = 100s
-**.udpApp[1..].stopTime = this.startTime + 100s
+**.app[1..].typename = "UdpBasicApp"
+**.app[1..].destPort = 1234
+**.app[1..].messageLength = 32 bytes
+**.app[1..].sendInterval = 1s
+**.app[1..].startTime = 100s
+**.app[1..].stopTime = this.startTime + 100s
 
-**.Area3_N10.host[0].udpApp[1].destAddresses = "N15.host[0]"
-**.N15.host[0].udpApp[1].destAddresses = "Area3_N10.host[0]"
-**.N12.host[0].udpApp[1].destAddresses =  "Area3_H1"
-**.Area3_H1.udpApp[1].destAddresses =  "N12.host[0]"
+**.Area3_N10.host[0].app[1].destAddresses = "N15.host[0]"
+**.N15.host[0].app[1].destAddresses = "Area3_N10.host[0]"
+**.N12.host[0].app[1].destAddresses =  "Area3_H1"
+**.Area3_H1.app[1].destAddresses =  "N12.host[0]"
 
 %#--------------------------------------------------------------------------------------------------------------
 %file: ASConfig.xml
@@ -273,29 +272,29 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 %#--------------------------------------------------------------------------------------------------------------
 %contains: results/General-0.sca
-scalar Fig6.N12.host[0].udpApp[0] echoedPk:count 100
+scalar Fig6.N12.host[0].app[0] echoedPk:count 100
 %contains: results/General-0.sca
-scalar Fig6.N12.host[0].udpApp[1] sentPk:count 100
+scalar Fig6.N12.host[0].app[1] packetSent:count 100
 %contains: results/General-0.sca
-scalar Fig6.N12.host[0].udpApp[1] rcvdPk:count 100
+scalar Fig6.N12.host[0].app[1] packetReceived:count 100
 %contains: results/General-0.sca
-scalar Fig6.N15.host[0].udpApp[0] echoedPk:count 100
+scalar Fig6.N15.host[0].app[0] echoedPk:count 100
 %contains: results/General-0.sca
-scalar Fig6.N15.host[0].udpApp[1] sentPk:count 100
+scalar Fig6.N15.host[0].app[1] packetSent:count 100
 %contains: results/General-0.sca
-scalar Fig6.N15.host[0].udpApp[1] rcvdPk:count 100
+scalar Fig6.N15.host[0].app[1] packetReceived:count 100
 %contains: results/General-0.sca
-scalar Fig6.Area3_N10.host[0].udpApp[0] echoedPk:count 100
+scalar Fig6.Area3_N10.host[0].app[0] echoedPk:count 100
 %contains: results/General-0.sca
-scalar Fig6.Area3_N10.host[0].udpApp[1] sentPk:count 100
+scalar Fig6.Area3_N10.host[0].app[1] packetSent:count 100
 %contains: results/General-0.sca
-scalar Fig6.Area3_N10.host[0].udpApp[1] rcvdPk:count 100
+scalar Fig6.Area3_N10.host[0].app[1] packetReceived:count 100
 %contains: results/General-0.sca
-scalar Fig6.Area3_H1.udpApp[0] echoedPk:count 100
+scalar Fig6.Area3_H1.app[0] echoedPk:count 100
 %contains: results/General-0.sca
-scalar Fig6.Area3_H1.udpApp[1] sentPk:count 100
+scalar Fig6.Area3_H1.app[1] packetSent:count 100
 %contains: results/General-0.sca
-scalar Fig6.Area3_H1.udpApp[1] rcvdPk:count 100
+scalar Fig6.Area3_H1.app[1] packetReceived:count 100
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:
