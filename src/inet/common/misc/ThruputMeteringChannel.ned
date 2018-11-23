@@ -7,7 +7,7 @@ package inet.common.misc;
 //
 // This channels adds suport for thruput meternig to the datarate channel
 // A cDatarateChannel extended with throughput calculation. Values
-// get displayed on the link, using the connection's "t=" display
+// get displayed on the link, using the connection's "t=" or "tt=" display
 // string tag.
 //
 // The display can be customized with the "format" attribute.
@@ -28,6 +28,7 @@ package inet.common.misc;
 channel ThruputMeteringChannel extends ned.DatarateChannel
 {
     @class(ThruputMeteringChannel);
+    bool displayAsTooltip = default(false);
     string thruputDisplayFormat = default("");  // the format string for display on the link. Leave empty to disable display
 }
 
