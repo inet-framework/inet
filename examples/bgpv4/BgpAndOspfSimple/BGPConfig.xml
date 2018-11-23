@@ -10,7 +10,7 @@
     </TimerParams>
 
     <AS id="65324">
-        <Router interAddr="10.10.10.1"/> <!--router A-->
+        <Router interAddr="10.10.1.2"/> <!--router A-->
     </AS>
 
     <AS id="65248">
