@@ -8,7 +8,7 @@ import inet.node.inet.StandardHost;
 import inet.node.ospfv2.OspfRouter;
 import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 
-network BGPTest
+network BgpNetwork
 {
     types:
         channel LINK_100 extends ThruputMeteringChannel

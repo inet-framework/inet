@@ -5,7 +5,7 @@ import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
 import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 
-network BGPTest
+network BgpNetwork
 {
     types:
         channel LINK_100 extends ThruputMeteringChannel

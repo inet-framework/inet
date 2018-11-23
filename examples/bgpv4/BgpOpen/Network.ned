@@ -4,7 +4,7 @@ import inet.common.misc.ThruputMeteringChannel;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 
-network Net
+network BgpNetwork
 {
     types:
         channel LINK_100 extends ThruputMeteringChannel
