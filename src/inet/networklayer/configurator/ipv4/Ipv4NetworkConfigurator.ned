@@ -283,6 +283,14 @@ import inet.networklayer.configurator.base.NetworkConfiguratorBase;
 //      of multicast addresses.
 //      e.g. "224.0.0.1 224.0.1.33"
 //
+//    - @joinTime
+//      Optional selector attribute that specifies the join time.
+//      If missing, the joinTime is zero by default.
+//
+//    - @leaveTime
+//      Optional selector attribute that specifies the leave time.
+//      If missing, the leaveTime is infinity by default.
+//
 //  - <route>
 //    The route element provides routing table entries for multiple nodes
 //    in the network. The selector attributes limit the scope where the route

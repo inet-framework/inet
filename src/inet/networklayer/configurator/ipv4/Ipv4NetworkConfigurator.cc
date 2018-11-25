@@ -80,6 +80,32 @@ void Ipv4NetworkConfigurator::initialize(int stage)
         dumpConfiguration();
 }
 
+void Ipv4NetworkConfigurator::handleMessage(cMessage *msg)
+{
+    if(msg->isSelfMessage()) {
+        if(msg->getKind() == MCAST_JOIN_TIMER) {
+            InterfaceInfo::contextPtr_t *joinContextPtr = (InterfaceInfo::contextPtr_t *)msg->getContextPointer();
+            ASSERT(joinContextPtr);
+            if(joinContextPtr->interfaceData)
+                joinContextPtr->interfaceData->joinMulticastGroup(joinContextPtr->multicastGroup);
+            free(joinContextPtr);
+            cancelEvent(msg);
+        }
+        else if(msg->getKind() == MCAST_LEAVE_TIMER) {
+            InterfaceInfo::contextPtr_t *leaveContextPtr = (InterfaceInfo::contextPtr_t *)msg->getContextPointer();
+            ASSERT(leaveContextPtr);
+            if(leaveContextPtr->interfaceData)
+                leaveContextPtr->interfaceData->leaveMulticastGroup(leaveContextPtr->multicastGroup);
+            free(leaveContextPtr);
+            cancelEvent(msg);
+        }
+        else
+            throw cRuntimeError("unsupported self message in Ipv4NetworkConfigurator.");
+    }
+    else
+        throw cRuntimeError("Ipv4NetworkConfigurator does not receive any external msg.");
+}
+
 void Ipv4NetworkConfigurator::computeConfiguration()
 {
     EV_INFO << "Computing static network configuration (addresses and routes).\n";
@@ -187,6 +213,8 @@ void Ipv4NetworkConfigurator::configureRoutingTable(IIpv4RoutingTable *routingTa
 
 void Ipv4NetworkConfigurator::configureInterface(InterfaceInfo *interfaceInfo)
 {
+    Enter_Method("Ipv4NetworkConfigurator::configureInterface");
+
     EV_DETAIL << "Configuring network interface " << interfaceInfo->getFullPath() << ".\n";
     InterfaceEntry *interfaceEntry = interfaceInfo->interfaceEntry;
     Ipv4InterfaceData *interfaceData = interfaceEntry->getProtocolData<Ipv4InterfaceData>();
@@ -199,8 +227,23 @@ void Ipv4NetworkConfigurator::configureInterface(InterfaceInfo *interfaceInfo)
         interfaceData->setNetmask(Ipv4Address(interfaceInfo->netmask));
     }
     // TODO: should we leave joined multicast groups first?
-    for (auto & multicastGroup : interfaceInfo->multicastGroups)
-        interfaceData->joinMulticastGroup(multicastGroup);
+    for (auto & entry : interfaceInfo->multicastGroups) {
+        if(entry.joinTime == 0)
+            interfaceData->joinMulticastGroup(entry.multicastGroup);
+        else {
+            cMessage *timer = new cMessage("multicast group join", MCAST_JOIN_TIMER);
+            InterfaceInfo::contextPtr_t* cnxPtr = new InterfaceInfo::contextPtr_t(interfaceData, entry.multicastGroup);
+            timer->setContextPointer(cnxPtr);
+            scheduleAt(simTime() + entry.joinTime, timer);
+        }
+
+        if(entry.leaveTime > 0) {
+            cMessage *timer = new cMessage("multicast group leave", MCAST_LEAVE_TIMER);
+            InterfaceInfo::contextPtr_t* cnxPtr = new InterfaceInfo::contextPtr_t(interfaceData, entry.multicastGroup);
+            timer->setContextPointer(cnxPtr);
+            scheduleAt(simTime() + entry.leaveTime, timer);
+        }
+    }
 }
 
 void Ipv4NetworkConfigurator::configureRoutingTable(Node *node)
@@ -663,8 +706,10 @@ void Ipv4NetworkConfigurator::readInterfaceConfiguration(Topology& topology)
                             // groups
                             if (isNotEmpty(groupsAttr)) {
                                 cStringTokenizer tokenizer(groupsAttr);
-                                while (tokenizer.hasMoreTokens())
-                                    interfaceInfo->multicastGroups.push_back(Ipv4Address(tokenizer.nextToken()));
+                                while (tokenizer.hasMoreTokens()) {
+                                    InterfaceInfo::multicastGroupTuple_t var = {Ipv4Address(tokenizer.nextToken()), 0, 0};
+                                    interfaceInfo->multicastGroups.push_back(var);
+                                }
                             }
 
                             interfacesSeen.insert(interfaceInfo);
@@ -908,6 +953,8 @@ void Ipv4NetworkConfigurator::readMulticastGroupConfiguration(Topology& topology
         const char *hostAttr = multicastGroupElement->getAttribute("hosts");
         const char *interfaceAttr = multicastGroupElement->getAttribute("interfaces");
         const char *addressAttr = multicastGroupElement->getAttribute("address");
+        const char *joinTimeAttr = multicastGroupElement->getAttribute("joinTime");
+        const char *leaveTimeAttr = multicastGroupElement->getAttribute("leaveTime");
         const char *towardsAttr = multicastGroupElement->getAttribute("towards");    // neighbor host names, like "ap switch"
         const char *amongAttr = multicastGroupElement->getAttribute("among");
 
@@ -932,6 +979,18 @@ void Ipv4NetworkConfigurator::readMulticastGroupConfiguration(Topology& topology
                 multicastGroups.push_back(addr);
             }
 
+            simtime_t joinTime = 0;
+            if(joinTimeAttr && *joinTimeAttr) {
+                std::string::size_type sz;
+                joinTime = std::stod (joinTimeAttr, &sz);
+            }
+
+            simtime_t leaveTime = 0;
+            if(leaveTimeAttr && *leaveTimeAttr) {
+                std::string::size_type sz;
+                leaveTime = std::stod (leaveTimeAttr, &sz);
+            }
+
             for (auto & linkInfo : topology.linkInfos) {
                 for (size_t k = 0; k < linkInfo->interfaceInfos.size(); k++) {
                     InterfaceInfo *interfaceInfo = static_cast<InterfaceInfo *>(linkInfo->interfaceInfos[k]);
@@ -943,8 +1002,10 @@ void Ipv4NetworkConfigurator::readMulticastGroupConfiguration(Topology& topology
                         (interfaceMatcher.matchesAny() || interfaceMatcher.matches(interfaceInfo->interfaceEntry->getInterfaceName())) &&
                         (towardsMatcher.matchesAny() || linkContainsMatchingHostExcept(linkInfo, &towardsMatcher, hostModule)))
                     {
-                        for (auto & multicastGroup : multicastGroups)
-                            interfaceInfo->multicastGroups.push_back(multicastGroup);
+                        for (auto & multicastGroup : multicastGroups) {
+                            InterfaceInfo::multicastGroupTuple_t var = {multicastGroup, joinTime, leaveTime};
+                            interfaceInfo->multicastGroups.push_back(var);
+                        }
                     }
                 }
             }

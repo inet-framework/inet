@@ -73,7 +73,20 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
         uint32 addressSpecifiedBits;    // 1 means the bit is specified, 0 means the bit is unspecified
         uint32 netmask;    // the bits
         uint32 netmaskSpecifiedBits;    // 1 means the bit is specified, 0 means the bit is unspecified
-        std::vector<Ipv4Address> multicastGroups;
+        struct multicastGroupTuple_t {
+            Ipv4Address multicastGroup;
+            simtime_t joinTime;
+            simtime_t leaveTime;
+        };
+        std::vector<multicastGroupTuple_t> multicastGroups;
+        struct contextPtr_t {
+            Ipv4InterfaceData *interfaceData;
+            Ipv4Address multicastGroup;
+            contextPtr_t(Ipv4InterfaceData *interfaceData, Ipv4Address multicastGroup) {
+                this->interfaceData = interfaceData;
+                this->multicastGroup = multicastGroup;
+            }
+        };
 
       public:
         InterfaceInfo(Node *node, LinkInfo *linkInfo, InterfaceEntry *interfaceEntry);
@@ -133,6 +146,11 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
     // internal state
     Topology topology;
 
+    enum Ipv4NetworkConfiguratorTimerKind {
+        MCAST_JOIN_TIMER,
+        MCAST_LEAVE_TIMER
+    };
+
   public:
     /**
      * Computes the Ipv4 network configuration for all nodes in the network.
@@ -162,7 +180,7 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msg) override { throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()"); }
+    virtual void handleMessage(cMessage *msg) override;
     virtual void initialize(int stage) override;
 
     /**
