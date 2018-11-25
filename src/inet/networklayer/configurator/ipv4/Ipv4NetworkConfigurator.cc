@@ -991,6 +991,9 @@ void Ipv4NetworkConfigurator::readMulticastGroupConfiguration(Topology& topology
                 leaveTime = std::stod (leaveTimeAttr, &sz);
             }
 
+            if(leaveTime != 0 && leaveTime <= joinTime)
+                throw cRuntimeError("The 'leaveTime' from multicast address %s should be after 'joinTime' at %s", addressAttr, multicastGroupElement->getSourceLocation());
+
             for (auto & linkInfo : topology.linkInfos) {
                 for (size_t k = 0; k < linkInfo->interfaceInfos.size(); k++) {
                     InterfaceInfo *interfaceInfo = static_cast<InterfaceInfo *>(linkInfo->interfaceInfos[k]);
