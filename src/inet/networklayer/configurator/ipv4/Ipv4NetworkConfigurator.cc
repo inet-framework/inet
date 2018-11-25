@@ -88,16 +88,16 @@ void Ipv4NetworkConfigurator::handleMessage(cMessage *msg)
             ASSERT(joinContextPtr);
             if(joinContextPtr->interfaceData)
                 joinContextPtr->interfaceData->joinMulticastGroup(joinContextPtr->multicastGroup);
-            free(joinContextPtr);
-            cancelEvent(msg);
+            delete(joinContextPtr);
+            cancelAndDelete(msg);
         }
         else if(msg->getKind() == MCAST_LEAVE_TIMER) {
             InterfaceInfo::contextPtr_t *leaveContextPtr = (InterfaceInfo::contextPtr_t *)msg->getContextPointer();
             ASSERT(leaveContextPtr);
             if(leaveContextPtr->interfaceData)
                 leaveContextPtr->interfaceData->leaveMulticastGroup(leaveContextPtr->multicastGroup);
-            free(leaveContextPtr);
-            cancelEvent(msg);
+            delete(leaveContextPtr);
+            cancelAndDelete(msg);
         }
         else
             throw cRuntimeError("unsupported self message in Ipv4NetworkConfigurator.");
