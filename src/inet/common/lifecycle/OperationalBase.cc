@@ -24,22 +24,6 @@
 
 namespace inet {
 
-void OperationalBase::DoneCallback::init(IDoneCallback *orig, State state)
-{
-    this->orig = orig;
-    this->state = state;
-}
-
-void OperationalBase::DoneCallback::done()
-{
-    module->setOperational(state);
-}
-void OperationalBase::DoneCallback::invoke()
-{
-    done();
-    module->operationalInvoked(this);
-}
-
 OperationalBase::OperationalBase() :
     operational(NOT_OPERATING)
 {
@@ -47,26 +31,6 @@ OperationalBase::OperationalBase() :
 
 OperationalBase::~OperationalBase()
 {
-    delete spareCallback;
-}
-
-OperationalBase::DoneCallback *OperationalBase::newDoneCallback(OperationalBase *module)
-{
-    if (spareCallback != nullptr) {
-        auto callback = spareCallback;
-        spareCallback = nullptr;
-        return callback;
-    }
-    else
-        return new DoneCallback(this);
-}
-
-void OperationalBase::deleteDoneCallback(OperationalBase::DoneCallback *callback)
-{
-    if (spareCallback != nullptr)
-        delete callback;
-    else
-        spareCallback = callback;
 }
 
 void OperationalBase::initialize(int stage)
@@ -79,37 +43,33 @@ void OperationalBase::initialize(int stage)
         NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
         setOperational((!nodeStatus || nodeStatus->getState() == NodeStatus::UP) ? OPERATING : NOT_OPERATING);
         if (operational != NOT_OPERATING)
-            handleStartOperation(nullptr, nullptr);     //TODO use an InitializeOperation with current stage value
+            handleStartOperation(nullptr);     //TODO use an InitializeOperation with current stage value
     }
-}
-
-void OperationalBase::operationalInvoked(OperationalBase::DoneCallback *callback)
-{
-    IDoneCallback *origCallback = callback->getOrig();
-    deleteDoneCallback(callback);
-    origCallback->invoke();
 }
 
 void OperationalBase::handleMessage(cMessage *message)
 {
     if (isOperationTimeout(message))
         handleOperationTimeout(message);
-    else if (isDelayedOperation(message))
-        handleDelayedOperation(message);
     else {
         switch (operational) {
             case STARTING_OPERATION:
             case OPERATING:
             case STOPPING_OPERATION:
-            case CRASHING_OPERATION:
             case SUSPENDING_OPERATION:
             case RESUMING_OPERATION:
                 handleMessageWhenUp(message);
+                if (operational != OPERATING) {
+                    ASSERT(activeOperation.isPending);
+                    if (isOperationFinished())
+                        operationCompleted();
+                }
                 break;
             case OPERATION_SUSPENDED:
             case NOT_OPERATING:
                 handleMessageWhenDown(message);
                 break;
+            case CRASHING_OPERATION:
             default:
                 throw cRuntimeError("invalid operational status: %d", (int)operational);
         }
@@ -134,103 +94,121 @@ bool OperationalBase::handleOperationStage(LifecycleOperation *operation, IDoneC
     if (dynamic_cast<ModuleStartOperation *>(operation)) {
         if (isModuleStartStage(stage)) {
             operational = STARTING_OPERATION;
-            DoneCallback *callback = newDoneCallback(this);
-            callback->init(doneCallback, OPERATING);
-            bool done = handleStartOperation(operation, callback);
-            if (done) {
-                callback->done();
-                deleteDoneCallback(callback);
-            }
+            operationStarted(operation, doneCallback, OPERATING);
+            handleStartOperation(operation);
+            bool done = isOperationFinished();
+            if (done)
+                operationCompleted();
+            else
+                operationPending();
             return done;
         }
     }
     else if (dynamic_cast<ModuleStopOperation *>(operation)) {
         if (isModuleStopStage(stage)) {
             operational = STOPPING_OPERATION;
-            DoneCallback *callback = newDoneCallback(this);
-            callback->init(doneCallback, NOT_OPERATING);
-            bool done = handleStopOperation(operation, callback);
-            if (done) {
-                callback->done();
-                deleteDoneCallback(callback);
-            }
+            operationStarted(operation, doneCallback, NOT_OPERATING);
+            handleStopOperation(operation);
+            bool done = isOperationFinished();
+            if (done)
+                operationCompleted();
+            else
+                operationPending();
             return done;
         }
     }
     else if (dynamic_cast<ModuleCrashOperation *>(operation)) {
         if (stage == ModuleCrashOperation::STAGE_CRASH) {
             operational = CRASHING_OPERATION;
+            operationStarted(operation, doneCallback, NOT_OPERATING);
             handleCrashOperation(operation);
-            setOperational(NOT_OPERATING);
+            operationCompleted();   // set operational, doesn't call invoke
             return true;
         }
     }
+    else
+        throw cRuntimeError("unaccepted Lifecycle operation: (%s)%s", operation->getClassName(), operation->getName());
     return true;
 }
 
-bool OperationalBase::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
-{
-    return true;
-}
-
-bool OperationalBase::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
-{
-    return true;
-}
-
-bool OperationalBase::handleSuspendOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
-{
-    return true;
-}
-
-bool OperationalBase::handleResumeOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
-{
-    return true;
-}
-
-void OperationalBase::handleCrashOperation(LifecycleOperation *operation)
+void OperationalBase::handleSuspendOperation(LifecycleOperation *operation)
 {
 }
 
-void OperationalBase::scheduleOperationTimeout(simtime_t timeout, LifecycleOperation *operation, IDoneCallback *doneCallback)
+void OperationalBase::handleResumeOperation(LifecycleOperation *operation)
 {
+}
+
+void OperationalBase::scheduleOperationTimeout(simtime_t timeout)
+{
+    ASSERT(activeOperation.isPending);
+    ASSERT(operationTimeoutMsg == nullptr);
+    operationTimeoutMsg = new cMessage("OperationTimeout");
+    operationTimeoutMsg->setContextPointer(activeOperation.operation);
+    scheduleAt(simTime() + timeout, operationTimeoutMsg);
     // TODO: schedule timer and use module parameter
 }
 
 bool OperationalBase::isOperationTimeout(cMessage *message)
 {
-    // TOOD: dynamic_cast or kind?
-    return false;
+    return message == operationTimeoutMsg;
 }
 
 void OperationalBase::handleOperationTimeout(cMessage *message)
 {
     handleCrashOperation(nullptr);
-    // TODO: doneCallback.invoke()
+    operationCompleted();
 }
 
 bool OperationalBase::hasMessageScheduledForNow()
 {
-    // TODO: check FES
+    cFutureEventSet *fes = getSimulation()->getFES();
+    int fesLen = fes->getLength();
+    auto myModuleId = this->getId();
+    auto now = simTime();
+    for (int i = 0; i < fesLen; i++) {
+        cEvent *event = fes->get(i);
+        if (cMessage *msg = dynamic_cast<cMessage *>(event)) {
+            if (msg->getArrivalModuleId() == myModuleId && msg->getArrivalTime() == now)
+                return true;
+        }
+    }
     return false;
 }
 
-void OperationalBase::delayOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void OperationalBase::operationStarted(LifecycleOperation *operation, IDoneCallback *doneCallback, State endOperation)
 {
-    // TODO: schedule message
+    ASSERT(activeOperation.operation == nullptr);
+    activeOperation.set(operation, doneCallback, endOperation);
 }
 
-bool OperationalBase::isDelayedOperation(cMessage *message)
+void OperationalBase::operationPending()
 {
-    // TODO: dynamic_cast or kind check?
-    return false;
+    ASSERT(activeOperation.operation != nullptr);
+    activeOperation.pending();
+    scheduleOperationTimeout(2.0); //TODO timeout parameter instead of 2.0s
 }
 
-void OperationalBase::handleDelayedOperation(cMessage *message)
+bool OperationalBase::isOperationFinished()
 {
-    // TODO: dispatch on message kind
-    if (handleStopOperation(nullptr, nullptr))
-        ; // TODO: doneCallback.invoke()
+    switch (operational) {
+        case STOPPING_OPERATION:
+        case SUSPENDING_OPERATION:
+            return ! hasMessageScheduledForNow();
+        default:
+            return true;
+    }
+}
+
+void OperationalBase::operationCompleted()
+{
+    setOperational(activeOperation.endOperation);
+    if (activeOperation.isPending) {
+        cancelAndDelete(operationTimeoutMsg);
+        operationTimeoutMsg = nullptr;
+        activeOperation.doneCallback->invoke();
+    }
+    activeOperation.clear();
 }
 
 void OperationalBase::setOperational(State newState)

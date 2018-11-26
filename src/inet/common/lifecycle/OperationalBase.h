@@ -26,21 +26,22 @@ class INET_API OperationalBase : public cSimpleModule, public ILifecycle
 {
   protected:
     enum State { STARTING_OPERATION, OPERATING, STOPPING_OPERATION, CRASHING_OPERATION, NOT_OPERATING, SUSPENDING_OPERATION, OPERATION_SUSPENDED, RESUMING_OPERATION };
-    class DoneCallback : public IDoneCallback
-    {
-        OperationalBase *module = nullptr;
-        IDoneCallback *orig = nullptr;
-        State state = static_cast<State>(-1);
-      public:
-        DoneCallback(OperationalBase *module) : module(module) { }
-        void init(IDoneCallback *newOrig, State newState);
-        void done();
-        IDoneCallback * getOrig() { return orig; }
-        virtual void invoke() override;
-    };
     State operational = static_cast<State>(-1);
     simtime_t lastChange;
-    DoneCallback *spareCallback = nullptr;
+
+    class INET_API Operation
+    {
+      public:
+        LifecycleOperation *operation = nullptr;
+        IDoneCallback *doneCallback = nullptr;
+        State endOperation = (State)(-1);
+        bool isPending = false;
+        void set(LifecycleOperation *operation_, IDoneCallback *doneCallback_, State endOperation_) { operation = operation_; doneCallback = doneCallback_; endOperation = endOperation_; isPending = false; }
+        void clear() { operation = nullptr; doneCallback = nullptr; endOperation = (State)(-1); isPending = false; }
+        void pending() { isPending = true; }
+    };
+    Operation activeOperation;
+    cMessage *operationTimeoutMsg = nullptr;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -52,20 +53,17 @@ class INET_API OperationalBase : public cSimpleModule, public ILifecycle
     virtual void handleMessageWhenUp(cMessage *msg) = 0;
 
     virtual bool handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
-    virtual bool handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback);
-    virtual bool handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback);
-    virtual void handleCrashOperation(LifecycleOperation *operation);
-    virtual bool handleSuspendOperation(LifecycleOperation *operation, IDoneCallback *doneCallback);
-    virtual bool handleResumeOperation(LifecycleOperation *operation, IDoneCallback *doneCallback);
+    virtual void handleStartOperation(LifecycleOperation *operation) = 0;
+    virtual void handleStopOperation(LifecycleOperation *operation) = 0;
+    virtual void handleCrashOperation(LifecycleOperation *operation) = 0;
+    virtual void handleSuspendOperation(LifecycleOperation *operation);
+    virtual void handleResumeOperation(LifecycleOperation *operation);
 
     virtual bool isOperationTimeout(cMessage *message);
     virtual void handleOperationTimeout(cMessage *message);
-    virtual void scheduleOperationTimeout(simtime_t timeout, LifecycleOperation *operation, IDoneCallback *doneCallback);
+    virtual void scheduleOperationTimeout(simtime_t timeout);
 
     virtual bool hasMessageScheduledForNow();
-    virtual void delayOperation(LifecycleOperation *operation, IDoneCallback *doneCallback);
-    virtual bool isDelayedOperation(cMessage *message);
-    virtual void handleDelayedOperation(cMessage *message);
 
     virtual bool isInitializeStage(int stage) = 0;
     virtual bool isModuleStartStage(int stage) = 0;
@@ -74,10 +72,11 @@ class INET_API OperationalBase : public cSimpleModule, public ILifecycle
     virtual bool isWorking() const { return operational != NOT_OPERATING && operational != OPERATION_SUSPENDED; }
 
     virtual void setOperational(State newState);
-    virtual void operationalInvoked(DoneCallback *callback);
 
-    DoneCallback *newDoneCallback(OperationalBase *module);
-    void deleteDoneCallback(DoneCallback *callback);
+    virtual void operationStarted(LifecycleOperation *operation, IDoneCallback *doneCallback, State);
+    virtual void operationPending();
+    virtual bool isOperationFinished();
+    virtual void operationCompleted();
 
   public:
     OperationalBase();
