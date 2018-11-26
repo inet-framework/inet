@@ -73,6 +73,8 @@ void Ipv4::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         QueueBase::initialize();
+        if (delay != SIMTIME_ZERO)
+            throw cRuntimeError("delay is not 0s");
 
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);

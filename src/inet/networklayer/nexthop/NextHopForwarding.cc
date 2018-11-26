@@ -66,6 +66,8 @@ void NextHopForwarding::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         QueueBase::initialize();
+        if (delay != SIMTIME_ZERO)
+            throw cRuntimeError("delay is not 0s");
 
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         routingTable = getModuleFromPar<NextHopRoutingTable>(par("routingTableModule"), this);
