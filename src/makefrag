@@ -34,6 +34,12 @@ ifeq ($(WITH_TCP_NSC), enabled)
   endif
 endif
 
+WITH_PYTHON_SCRIPTING := $(shell (cd .. && ./bin/inet_featuretool -q isenabled PythonScripting && echo enabled) )
+ifeq ($(WITH_PYTHON_SCRIPTING), enabled)
+  INCLUDE_PATH += $(shell pkg-config --cflags python3)
+  LIBS += $(shell pkg-config --libs python3)
+endif
+
 #
 # TCP implementation using the lwIP stack
 #

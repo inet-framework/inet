@@ -151,6 +151,18 @@
         compileFlags = ""
         linkerFlags = ""
         />
+      <feature
+        id="PythonScripting"
+        name="Python scripting"
+        description = "Python scripting"
+        initiallyEnabled = "false"
+        requires = ""
+        labels = "python scripting"
+        nedPackages = ""
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
     <feature
         id="Nexthop"
         name="Next hop forwarding protocol"

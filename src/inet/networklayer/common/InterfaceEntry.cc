@@ -45,6 +45,16 @@
 #include "inet/networklayer/nexthop/NextHopInterfaceData.h"
 #endif // ifdef WITH_NEXTHOP
 
+/*
+Register_Python_Scripting_Function(find_network_interface, "InterfaceEntry *findNetworkInterface(cModule *networkNode, const char *interfaceName)",
+    auto interfaceTable = L3AddressResolver().interfaceTableOf(networkNode);
+    return interfaceTable->findInterfaceByName(interfaceName);
+);
+Register_Python_Scripting_Function(join_multicast_group, "void joinMulticastGroup(InterfaceEntry *interfaceEntry, const char *groupAddress)",
+    interfaceEntry->getProtocolData<Ipv4InterfaceData>()->joinMulticastGroup(Ipv4Address(groupAddress));
+);
+*/
+
 namespace inet {
 
 Register_Abstract_Class(InterfaceEntryChangeDetails);
