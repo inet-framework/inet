@@ -27,5 +27,5 @@ simple RedMarker extends RedDropper
 
         string marks = default("0");  // average packet rate for calculations when queue is empty
         @signal[markingProb](type=double);
-        @statistic[marked](title="marking Prob"; source="markingProb"; record=mean; interpolationmode=none);
+        @statistic[marked](title="marking Prob"; source="markingProb"; record=mean,vector(count); interpolationmode=none);
 }
