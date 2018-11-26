@@ -26,7 +26,6 @@
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/common/queue/QueueBase.h"
 #include "inet/networklayer/contract/IArp.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/INetfilter.h"
@@ -43,7 +42,7 @@ namespace inet {
  * interface to allow routing protocols to kick in. It doesn't provide datagram fragmentation
  * and reassembling.
  */
-class INET_API NextHopForwarding : public QueueBase, public NetfilterBase, public INetworkProtocol, public IProtocolRegistrationListener, public OperationalBaseClass
+class INET_API NextHopForwarding : public OperationalBase, public NetfilterBase, public INetworkProtocol, public IProtocolRegistrationListener
 {
   protected:
     /**
@@ -179,11 +178,6 @@ class INET_API NextHopForwarding : public QueueBase, public NetfilterBase, publi
     virtual void handleMessageWhenUp(cMessage *msg) override;
 
     void handleCommand(Request *msg);
-
-    /**
-     * Processing of datagrams. Called when a datagram reaches the front of the queue.
-     */
-    virtual void endService(cPacket *packet) override;
 
     /**
      * ILifecycle method

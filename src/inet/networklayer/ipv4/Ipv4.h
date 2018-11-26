@@ -25,7 +25,6 @@
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/packet/Message.h"
-#include "inet/common/queue/QueueBase.h"
 #include "inet/networklayer/contract/IArp.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/INetworkProtocol.h"
@@ -46,7 +45,7 @@ class IIpv4RoutingTable;
 /**
  * Implements the Ipv4 protocol.
  */
-class INET_API Ipv4 : public QueueBase, public NetfilterBase, public OperationalBaseClass, public INetworkProtocol, public IProtocolRegistrationListener, public cListener
+class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetworkProtocol, public IProtocolRegistrationListener, public cListener
 {
   public:
     /**
@@ -242,12 +241,6 @@ class INET_API Ipv4 : public QueueBase, public NetfilterBase, public Operational
     virtual void handleMessageWhenUp(cMessage *msg) override;
 
     void handleRequest(Request *request);
-
-    /**
-     * Processing of Ipv4 datagrams. Called when a datagram reaches the front
-     * of the queue.
-     */
-    virtual void endService(cPacket *packet) override;
 
     // NetFilter functions:
 

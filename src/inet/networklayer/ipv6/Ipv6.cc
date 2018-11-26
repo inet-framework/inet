@@ -82,10 +82,6 @@ Ipv6::ScheduledDatagram::~ScheduledDatagram()
 void Ipv6::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        QueueBase::initialize();
-        if (delay != SIMTIME_ZERO)
-            throw cRuntimeError("delay is not 0s");
-
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         rt = getModuleFromPar<Ipv6RoutingTable>(par("routingTableModule"), this);
         nd = getModuleFromPar<Ipv6NeighbourDiscovery>(par("ipv6NeighbourDiscoveryModule"), this);
@@ -172,14 +168,6 @@ void Ipv6::handleRequest(Request *request)
         throw cRuntimeError("Unknown command: '%s' with %s", request->getName(), ctrl->getClassName());
 }
 
-void Ipv6::handleMessage(cMessage *msg)
-{
-    if (auto request = dynamic_cast<Request *>(msg))
-        handleRequest(request);
-    else
-        QueueBase::handleMessage(msg);
-}
-
 void Ipv6::refreshDisplay() const
 {
     char buf[80] = "";
@@ -196,9 +184,9 @@ void Ipv6::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-void Ipv6::endService(cPacket *msg)
+void Ipv6::handleMessage(cMessage *msg)
 {
-    Packet *packet = dynamic_cast<Packet *>(msg);
+    auto& tags = getTags(msg);
 
 #ifdef WITH_xMIPv6
     // 28.09.07 - CB
@@ -223,18 +211,21 @@ void Ipv6::endService(cPacket *msg)
     else
 #endif /* WITH_xMIPv6 */
 
+    if (auto request = dynamic_cast<Request *>(msg))
+        handleRequest(request);
+    else
     if (msg->getArrivalGate()->isName("transportIn")
-        || (msg->getArrivalGate()->isName("ndIn") && packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv6)
-        || (msg->getArrivalGate()->isName("upperTunnelingIn"))    // for tunneling support-CB
+        || (msg->arrivedOn("ndIn") && tags.getTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv6)
+        || (msg->arrivedOn("upperTunnelingIn"))    // for tunneling support-CB
 #ifdef WITH_xMIPv6
-        || (msg->getArrivalGate()->isName("xMIPv6In") && packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::mobileipv6)
+        || (msg->arrivedOn("xMIPv6In") && tags.getTag<PacketProtocolTag>()->getProtocol() == &Protocol::mobileipv6)
 #endif /* WITH_xMIPv6 */
         )
     {
         // packet from upper layers, tunnel link-layer output or ND: encapsulate and send out
-        handleMessageFromHL(packet);
+        handleMessageFromHL(check_and_cast<Packet *>(msg));
     }
-    else if (msg->getArrivalGate()->isName("ndIn") && packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv6) {
+    else if (msg->arrivedOn("ndIn") && tags.getTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv6) {
         auto packet = check_and_cast<Packet *>(msg);
         Ipv6NdControlInfo *ctrl = check_and_cast<Ipv6NdControlInfo *>(msg->removeControlInfo());
         bool fromHL = ctrl->getFromHL();

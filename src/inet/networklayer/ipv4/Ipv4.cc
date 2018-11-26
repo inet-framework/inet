@@ -72,10 +72,6 @@ void Ipv4::initialize(int stage)
     OperationalBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        QueueBase::initialize();
-        if (delay != SIMTIME_ZERO)
-            throw cRuntimeError("delay is not 0s");
-
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
         arp = getModuleFromPar<IArp>(par("arpModule"), this);
@@ -199,21 +195,18 @@ void Ipv4::handleRequest(Request *request)
 
 void Ipv4::handleMessageWhenUp(cMessage *msg)
 {
-    if (auto request = dynamic_cast<Request *>(msg))
-        handleRequest(request);
+    if (msg->arrivedOn("transportIn")) {    //TODO packet->getArrivalGate()->getBaseId() == transportInGateBaseId
+        if (auto request = dynamic_cast<Request *>(msg))
+            handleRequest(request);
+        else
+            handlePacketFromHL(check_and_cast<Packet*>(msg));
+    }
+    else if (msg->arrivedOn("queueIn")) {    // from network
+        EV_INFO << "Received " << msg << " from network.\n";
+        handleIncomingDatagram(check_and_cast<Packet*>(msg));
+    }
     else
-        QueueBase::handleMessage(msg);
-}
-
-void Ipv4::endService(cPacket *packet)
-{
-    if (packet->getArrivalGate()->isName("transportIn")) {    //TODO packet->getArrivalGate()->getBaseId() == transportInGateBaseId
-        handlePacketFromHL(check_and_cast<Packet*>(packet));
-    }
-    else {    // from network
-        EV_INFO << "Received " << packet << " from network.\n";
-        handleIncomingDatagram(check_and_cast<Packet*>(packet));
-    }
+        throw cRuntimeError("message arrived on unknown gate '%s'", msg->getArrivalGate()->getName());
 }
 
 bool Ipv4::verifyCrc(const Ptr<const Ipv4Header>& ipv4Header)
@@ -1273,7 +1266,6 @@ void Ipv4::handleCrashOperation(LifecycleOperation *operation)
 
 void Ipv4::start()
 {
-    ASSERT(queue.isEmpty());
 }
 
 void Ipv4::stop()
@@ -1286,10 +1278,6 @@ void Ipv4::stop()
 
 void Ipv4::flush()
 {
-    delete cancelService();
-    EV_DEBUG << "Ipv4::flush(): packets in queue: " << queue.str() << endl;
-    queue.clear();
-
     EV_DEBUG << "Ipv4::flush(): pending packets:\n";
     for (auto & elem : pendingPackets) {
         EV_DEBUG << "Ipv4::flush():    " << elem.first << ": " << elem.second.str() << endl;

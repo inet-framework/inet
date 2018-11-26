@@ -65,10 +65,6 @@ void NextHopForwarding::initialize(int stage)
     OperationalBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        QueueBase::initialize();
-        if (delay != SIMTIME_ZERO)
-            throw cRuntimeError("delay is not 0s");
-
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         routingTable = getModuleFromPar<NextHopRoutingTable>(par("routingTableModule"), this);
         arp = getModuleFromPar<IArp>(par("arpModule"), this);
@@ -117,10 +113,18 @@ void NextHopForwarding::refreshDisplay() const
 
 void NextHopForwarding::handleMessageWhenUp(cMessage *msg)
 {
-    if (auto request = dynamic_cast<Request *>(msg))
-        handleCommand(request);
+    if (msg->arrivedOn("transportIn")) {    //TODO packet->getArrivalGate()->getBaseId() == transportInGateBaseId
+        if (auto request = dynamic_cast<Request *>(msg))
+            handleCommand(request);
+        else
+            handlePacketFromHL(check_and_cast<Packet*>(msg));
+    }
+    else if (msg->arrivedOn("queueIn")) {    // from network
+        EV_INFO << "Received " << msg << " from network.\n";
+        handlePacketFromNetwork(check_and_cast<Packet*>(msg));
+    }
     else
-        QueueBase::handleMessage(msg);
+        throw cRuntimeError("message arrived on unknown gate '%s'", msg->getArrivalGate()->getName());
 }
 
 void NextHopForwarding::handleCommand(Request *request)
@@ -158,20 +162,6 @@ void NextHopForwarding::handleCommand(Request *request)
     }
     else
         throw cRuntimeError("Invalid command: (%s)%s", request->getClassName(), request->getName());
-}
-
-void NextHopForwarding::endService(cPacket *pk)
-{
-    if (!isWorking()) {
-        EV_ERROR << "NextHopForwarding is down -- discarding message\n";
-        delete pk;
-        return;
-    }
-    if (pk->getArrivalGate()->isName("transportIn"))
-        handlePacketFromHL(check_and_cast<Packet *>(pk));
-    else {
-        handlePacketFromNetwork(check_and_cast<Packet *>(pk));
-    }
 }
 
 const InterfaceEntry *NextHopForwarding::getSourceInterfaceFrom(Packet *packet)
@@ -881,7 +871,6 @@ void NextHopForwarding::handleCrashOperation(LifecycleOperation *operation)
 
 void NextHopForwarding::start()
 {
-    ASSERT(queue.isEmpty());
 }
 
 void NextHopForwarding::stop()
@@ -894,18 +883,7 @@ void NextHopForwarding::stop()
 
 void NextHopForwarding::flush()
 {
-    delete cancelService();
-    EV_DEBUG << "Ipv4::flush(): packets in queue: " << queue.str() << endl;
-    queue.clear();
-
-//    EV_DEBUG << "Ipv4::flush(): pending packets:\n";
-//    for (auto & elem : pendingPackets) {
-//        EV_DEBUG << "Ipv4::flush():    " << elem.first << ": " << elem.second.str() << endl;
-//        elem.second.clear();
-//    }
-//    pendingPackets.clear();
-
-    EV_DEBUG << "Ipv4::flush(): packets in hooks: " << queuedDatagramsForHooks.size() << endl;
+    EV_DEBUG << "NextHopForwarding::flush(): packets in hooks: " << queuedDatagramsForHooks.size() << endl;
     for (auto & elem : queuedDatagramsForHooks) {
         delete elem.datagram;
     }
