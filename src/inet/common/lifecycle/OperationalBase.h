@@ -58,6 +58,15 @@ class INET_API OperationalBase : public cSimpleModule, public ILifecycle
     virtual bool handleSuspendOperation(LifecycleOperation *operation, IDoneCallback *doneCallback);
     virtual bool handleResumeOperation(LifecycleOperation *operation, IDoneCallback *doneCallback);
 
+    virtual bool isOperationTimeout(cMessage *message);
+    virtual void handleOperationTimeout(cMessage *message);
+    virtual void scheduleOperationTimeout(simtime_t timeout, LifecycleOperation *operation, IDoneCallback *doneCallback);
+
+    virtual bool hasMessageScheduledForNow();
+    virtual void delayOperation(LifecycleOperation *operation, IDoneCallback *doneCallback);
+    virtual bool isDelayedOperation(cMessage *message);
+    virtual void handleDelayedOperation(cMessage *message);
+
     virtual bool isInitializeStage(int stage) = 0;
     virtual bool isModuleStartStage(int stage) = 0;
     virtual bool isModuleStopStage(int stage) = 0;

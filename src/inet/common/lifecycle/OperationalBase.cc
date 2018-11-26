@@ -92,21 +92,27 @@ void OperationalBase::operationalInvoked(OperationalBase::DoneCallback *callback
 
 void OperationalBase::handleMessage(cMessage *message)
 {
-    switch (operational) {
-        case STARTING_OPERATION:
-        case OPERATING:
-        case STOPPING_OPERATION:
-        case CRASHING_OPERATION:
-        case SUSPENDING_OPERATION:
-        case RESUMING_OPERATION:
-            handleMessageWhenUp(message);
-            break;
-        case OPERATION_SUSPENDED:
-        case NOT_OPERATING:
-            handleMessageWhenDown(message);
-            break;
-        default:
-            throw cRuntimeError("invalid operational status: %d", (int)operational);
+    if (isOperationTimeout(message))
+        handleOperationTimeout(message);
+    else if (isDelayedOperation(message))
+        handleDelayedOperation(message);
+    else {
+        switch (operational) {
+            case STARTING_OPERATION:
+            case OPERATING:
+            case STOPPING_OPERATION:
+            case CRASHING_OPERATION:
+            case SUSPENDING_OPERATION:
+            case RESUMING_OPERATION:
+                handleMessageWhenUp(message);
+                break;
+            case OPERATION_SUSPENDED:
+            case NOT_OPERATING:
+                handleMessageWhenDown(message);
+                break;
+            default:
+                throw cRuntimeError("invalid operational status: %d", (int)operational);
+        }
     }
 }
 
@@ -184,6 +190,47 @@ bool OperationalBase::handleResumeOperation(LifecycleOperation *operation, IDone
 
 void OperationalBase::handleCrashOperation(LifecycleOperation *operation)
 {
+}
+
+void OperationalBase::scheduleOperationTimeout(simtime_t timeout, LifecycleOperation *operation, IDoneCallback *doneCallback)
+{
+    // TODO: schedule timer and use module parameter
+}
+
+bool OperationalBase::isOperationTimeout(cMessage *message)
+{
+    // TOOD: dynamic_cast or kind?
+    return false;
+}
+
+void OperationalBase::handleOperationTimeout(cMessage *message)
+{
+    handleCrashOperation(nullptr);
+    // TODO: doneCallback.invoke()
+}
+
+bool OperationalBase::hasMessageScheduledForNow()
+{
+    // TODO: check FES
+    return false;
+}
+
+void OperationalBase::delayOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+{
+    // TODO: schedule message
+}
+
+bool OperationalBase::isDelayedOperation(cMessage *message)
+{
+    // TODO: dynamic_cast or kind check?
+    return false;
+}
+
+void OperationalBase::handleDelayedOperation(cMessage *message)
+{
+    // TODO: dispatch on message kind
+    if (handleStopOperation(nullptr, nullptr))
+        ; // TODO: doneCallback.invoke()
 }
 
 void OperationalBase::setOperational(State newState)
