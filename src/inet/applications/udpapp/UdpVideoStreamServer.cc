@@ -88,12 +88,6 @@ void UdpVideoStreamServer::socketErrorArrived(UdpSocket *socket, Indication *ind
 
 void UdpVideoStreamServer::socketClosed(UdpSocket *socket, Indication *indication)
 {
-    while (!stopDoneCallbackList.empty()) {
-        auto callback = stopDoneCallbackList.front();
-        callback->invoke();
-        stopDoneCallbackList.pop_front();
-    }
-
     delete indication;
 }
 
@@ -160,31 +154,34 @@ void UdpVideoStreamServer::clearStreams()
     streams.clear();
 }
 
-bool UdpVideoStreamServer::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void UdpVideoStreamServer::handleStartOperation(LifecycleOperation *operation)
 {
     socket.setOutputGate(gate("socketOut"));
     socket.bind(localPort);
     socket.setCallback(this);
-
-    return true;
 }
 
-bool UdpVideoStreamServer::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void UdpVideoStreamServer::handleStopOperation(LifecycleOperation *operation)
 {
     clearStreams();
-    stopDoneCallbackList.push_back(doneCallback);
     socket.setCallback(nullptr);
     socket.close();
-    return false;
 }
 
 void UdpVideoStreamServer::handleCrashOperation(LifecycleOperation *operation)
 {
-    stopDoneCallbackList.clear();
     clearStreams();
     if (operation->getRootModule() != getContainingNode(this))     // closes socket when the application crashed only
         socket.destroy();    //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
     socket.setCallback(nullptr);
+}
+
+bool UdpVideoStreamServer::isOperationFinished()
+{
+    if (operational == State::STOPPING_OPERATION)
+        return socket.getState() == UdpSocket::CLOSED;
+    else
+        return true;
 }
 
 } // namespace inet

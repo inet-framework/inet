@@ -210,12 +210,6 @@ void UdpBasicApp::socketErrorArrived(UdpSocket *socket, Indication *indication)
 
 void UdpBasicApp::socketClosed(UdpSocket *socket, Indication *indication)
 {
-    while (!stopDoneCallbackList.empty()) {
-        auto callback = stopDoneCallbackList.front();
-        callback->invoke();
-        stopDoneCallbackList.pop_front();
-    }
-
     delete indication;
 }
 
@@ -236,30 +230,34 @@ void UdpBasicApp::processPacket(Packet *pk)
     numReceived++;
 }
 
-bool UdpBasicApp::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void UdpBasicApp::handleStartOperation(LifecycleOperation *operation)
 {
     simtime_t start = std::max(startTime, simTime());
     if ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime)) {
         selfMsg->setKind(START);
         scheduleAt(start, selfMsg);
     }
-    return true;
 }
 
-bool UdpBasicApp::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void UdpBasicApp::handleStopOperation(LifecycleOperation *operation)
 {
     cancelEvent(selfMsg);
-    stopDoneCallbackList.push_back(doneCallback);
     socket.close();
-    return false;
 }
 
 void UdpBasicApp::handleCrashOperation(LifecycleOperation *operation)
 {
     cancelEvent(selfMsg);
-    stopDoneCallbackList.clear();
     if (operation->getRootModule() != getContainingNode(this))     // closes socket when the application crashed only
         socket.destroy();         //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
+}
+
+bool UdpBasicApp::isOperationFinished()
+{
+    if (operational == State::STOPPING_OPERATION)
+        return socket.getState() == UdpSocket::CLOSED;
+    else
+        return true;
 }
 
 } // namespace inet

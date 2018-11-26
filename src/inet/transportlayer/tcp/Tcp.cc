@@ -531,17 +531,15 @@ TcpReceiveQueue *Tcp::createReceiveQueue()
     return new TcpReceiveQueue();
 }
 
-bool Tcp::handleStartOperation(LifecycleOperation *operation, IDoneCallback *)
+void Tcp::handleStartOperation(LifecycleOperation *operation)
 {
     //FIXME implementation
-    return true;
 }
 
-bool Tcp::handleStopOperation(LifecycleOperation *operation, IDoneCallback *)
+void Tcp::handleStopOperation(LifecycleOperation *operation)
 {
     //FIXME close connections???
     reset();
-    return true;
 }
 
 void Tcp::handleCrashOperation(LifecycleOperation *operation)

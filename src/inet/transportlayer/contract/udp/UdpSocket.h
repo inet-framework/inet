@@ -85,11 +85,14 @@ class INET_API UdpSocket : public ISocket
          */
         virtual void socketClosed(UdpSocket *socket, Indication *indication) = 0;
     };
+    enum State { CONNECTED, CLOSED};
+
   protected:
     int socketId;
     ICallback *cb = nullptr;
     void *userData = nullptr;
-    cGate *gateToUdp;
+    cGate *gateToUdp = nullptr;
+    State sockState = CLOSED;
 
   protected:
     void sendToUDP(cMessage *msg);
@@ -108,6 +111,7 @@ class INET_API UdpSocket : public ISocket
 
     void *getUserData() const { return userData; }
     void setUserData(void *userData) { this->userData = userData; }
+    State getState() const { return sockState; }
 
     /**
      * Returns the internal socket Id.

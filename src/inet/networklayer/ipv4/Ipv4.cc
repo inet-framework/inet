@@ -1253,16 +1253,14 @@ INetfilter::IHook::Result Ipv4::datagramPostRoutingHook(Packet *packet)
     return INetfilter::IHook::ACCEPT;
 }
 
-bool Ipv4::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void Ipv4::handleStartOperation(LifecycleOperation *operation)
 {
     start();
-    return true;
 }
 
-bool Ipv4::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void Ipv4::handleStopOperation(LifecycleOperation *operation)
 {
     stop();
-    return true;
 }
 
 void Ipv4::handleCrashOperation(LifecycleOperation *operation)

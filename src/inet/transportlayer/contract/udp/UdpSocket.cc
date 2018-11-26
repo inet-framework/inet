@@ -37,7 +37,6 @@ UdpSocket::UdpSocket()
     // don't allow user-specified socketIds because they may conflict with
     // automatically assigned ones.
     socketId = generateSocketId();
-    gateToUdp = nullptr;
 }
 
 int UdpSocket::generateSocketId()
@@ -78,6 +77,7 @@ void UdpSocket::bind(L3Address localAddr, int localPort)
     auto request = new Request("bind", UDP_C_BIND);
     request->setControlInfo(ctrl);
     sendToUDP(request);
+    sockState = CONNECTED;
 }
 
 void UdpSocket::connect(L3Address addr, int port)
@@ -93,6 +93,7 @@ void UdpSocket::connect(L3Address addr, int port)
     auto request = new Request("connect", UDP_C_CONNECT);
     request->setControlInfo(ctrl);
     sendToUDP(request);
+    sockState = CONNECTED;
 }
 
 void UdpSocket::sendTo(Packet *pk, L3Address destAddr, int destPort)
@@ -103,12 +104,14 @@ void UdpSocket::sendTo(Packet *pk, L3Address destAddr, int destPort)
     if (destPort != -1)
         pk->addTagIfAbsent<L4PortReq>()->setDestPort(destPort);
     sendToUDP(pk);
+    sockState = CONNECTED;
 }
 
 void UdpSocket::send(Packet *pk)
 {
     pk->setKind(UDP_C_DATA);
     sendToUDP(pk);
+    sockState = CONNECTED;
 }
 
 void UdpSocket::close()
@@ -117,6 +120,7 @@ void UdpSocket::close()
     UdpCloseCommand *ctrl = new UdpCloseCommand();
     request->setControlInfo(ctrl);
     sendToUDP(request);
+    sockState = CONNECTED;
 }
 
 void UdpSocket::destroy()
@@ -359,6 +363,7 @@ void UdpSocket::processMessage(cMessage *msg)
                 cb->socketClosed(this, check_and_cast<Indication *>(msg));
             else
                 delete msg;
+            sockState = CLOSED;
             break;
         default:
             throw cRuntimeError("UdpSocket: invalid msg kind %d, one of the UDP_I_xxx constants expected", msg->getKind());

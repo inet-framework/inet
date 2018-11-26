@@ -72,7 +72,6 @@ class INET_API PingApp : public ApplicationBase, public INetworkSocket::ICallbac
     long expectedReplySeqNo = 0;
     simtime_t sendTimeHistory[PING_HISTORY_SIZE];    // times of when the requests were sent
     bool pongReceived[PING_HISTORY_SIZE];
-    std::list<IDoneCallback*> stopDoneCallbackList;
 
     static const std::map<const Protocol *, const Protocol *> l3Echo;
 
@@ -108,9 +107,10 @@ class INET_API PingApp : public ApplicationBase, public INetworkSocket::ICallbac
     virtual void countPingResponse(int bytes, long seqNo, simtime_t rtt, bool isDup);
 
     // Lifecycle methods
-    virtual bool handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
-    virtual bool handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
+    virtual bool isOperationFinished() override;
 
     //INetworkSocket::ICallback:
     virtual void socketDataArrived(INetworkSocket *socket, Packet *packet) override;

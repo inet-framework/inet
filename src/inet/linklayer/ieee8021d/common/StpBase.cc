@@ -182,16 +182,14 @@ InterfaceEntry *StpBase::chooseInterface()
     return nullptr;
 }
 
-bool StpBase::handleStartOperation(LifecycleOperation *operation, IDoneCallback *)
+void StpBase::handleStartOperation(LifecycleOperation *operation)
 {
     start();
-    return true;
 }
 
-bool StpBase::handleStopOperation(LifecycleOperation *operation, IDoneCallback *)
+void StpBase::handleStopOperation(LifecycleOperation *operation)
 {
     stop();
-    return true;
 }
 
 void StpBase::handleCrashOperation(LifecycleOperation *operation)

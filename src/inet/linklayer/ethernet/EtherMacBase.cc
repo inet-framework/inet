@@ -282,19 +282,17 @@ void EtherMacBase::configureInterfaceEntry()
     interfaceEntry->setBroadcast(true);
 }
 
-bool EtherMacBase::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void EtherMacBase::handleStartOperation(LifecycleOperation *operation)
 {
     initializeFlags();
     initializeQueueModule();
-    return true;
 }
 
-bool EtherMacBase::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void EtherMacBase::handleStopOperation(LifecycleOperation *operation)
 {
 //    flushQueue();
     connected = false;
     processConnectDisconnect();
-    return true;
 }
 
 void EtherMacBase::handleCrashOperation(LifecycleOperation *operation)

@@ -58,17 +58,15 @@ void MacBase::handleMessageWhenDown(cMessage *msg)
         MacProtocolBase::handleMessageWhenDown(msg);
 }
 
-bool MacBase::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void MacBase::handleStartOperation(LifecycleOperation *operation)
 {
     interfaceEntry->setState(InterfaceEntry::State::UP);
-    return true;
 }
 
-bool MacBase::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void MacBase::handleStopOperation(LifecycleOperation *operation)
 {
     flushQueue();
     interfaceEntry->setState(InterfaceEntry::State::DOWN);
-    return true;
 }
 
 void MacBase::handleCrashOperation(LifecycleOperation *operation)

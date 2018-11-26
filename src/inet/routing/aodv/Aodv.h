@@ -206,8 +206,8 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     void clearState();
 
     /* Lifecycle */
-    virtual bool handleStartOperation(LifecycleOperation *operation, IDoneCallback *) override;
-    virtual bool handleStopOperation(LifecycleOperation *operation, IDoneCallback *) override;
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
   public:

@@ -55,7 +55,6 @@ class INET_API UdpVideoStreamServer : public ApplicationBase, public UdpSocket::
     // state
     VideoStreamMap streams;
     UdpSocket socket;
-    std::list<IDoneCallback*> stopDoneCallbackList;
 
     // parameters
     int localPort = -1;
@@ -78,9 +77,10 @@ class INET_API UdpVideoStreamServer : public ApplicationBase, public UdpSocket::
 
     virtual void clearStreams();
 
-    virtual bool handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
-    virtual bool handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
+    virtual bool isOperationFinished() override;
 
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
     virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;

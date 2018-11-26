@@ -91,8 +91,8 @@ class INET_API Ieee80211MgmtBase : public OperationalBase
     virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOrResumeOperationBase::STAGE_PHYSICAL_LAYER; }
     virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOrSuspendOperationBase::STAGE_PHYSICAL_LAYER; }
 
-    virtual bool handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override { start(); return true; }
-    virtual bool handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override { stop(); return true; }
+    virtual void handleStartOperation(LifecycleOperation *operation) override { start(); }
+    virtual void handleStopOperation(LifecycleOperation *operation) override { stop(); }
     virtual void handleCrashOperation(LifecycleOperation *operation) override { stop(); }
 
   protected:

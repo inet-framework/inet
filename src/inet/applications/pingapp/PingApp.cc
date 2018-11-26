@@ -296,15 +296,6 @@ void PingApp::socketClosed(INetworkSocket *socket, Indication *indication)
     if (socket == currentSocket)
         currentSocket = nullptr;
     delete socketMap.removeSocket(socket);
-
-    if (operational == STOPPING_OPERATION && socketMap.size() == 0) {
-        while (!stopDoneCallbackList.empty()) {
-            auto callback = stopDoneCallbackList.front();
-            callback->invoke();
-            stopDoneCallbackList.pop_front();
-        }
-    }
-
     delete indication;
 }
 
@@ -317,11 +308,10 @@ void PingApp::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-bool PingApp::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void PingApp::handleStartOperation(LifecycleOperation *operation)
 {
     if (isEnabled())
         startSendingPingRequests();
-    return true;
 }
 
 void PingApp::startSendingPingRequests()
@@ -335,7 +325,7 @@ void PingApp::startSendingPingRequests()
     scheduleNextPingRequest(-1, false);
 }
 
-bool PingApp::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void PingApp::handleStopOperation(LifecycleOperation *operation)
 {
     pid = -1;
     lastStart = -1;
@@ -346,18 +336,13 @@ bool PingApp::handleStopOperation(LifecycleOperation *operation, IDoneCallback *
     cancelNextPingRequest();
     currentSocket = nullptr;
     if (socketMap.size() > 0) {
-        stopDoneCallbackList.push_back(doneCallback);
         for (auto socket: socketMap.getMap())
             socket.second->close();
-        return false;
     }
-    else
-        return true;
 }
 
 void PingApp::handleCrashOperation(LifecycleOperation *operation)
 {
-    stopDoneCallbackList.clear();
     pid = -1;
     lastStart = -1;
     sendSeqNo = expectedReplySeqNo = 0;
@@ -371,6 +356,16 @@ void PingApp::handleCrashOperation(LifecycleOperation *operation)
             socket.second->destroy();
         socketMap.deleteSockets();
     }
+}
+
+bool PingApp::isOperationFinished()
+{
+    if (! OperationalBase::isOperationFinished())
+        return false;
+    if (operational == State::STOPPING_OPERATION)
+        return socketMap.size() == 0;
+    else
+        return true;
 }
 
 void PingApp::scheduleNextPingRequest(simtime_t previous, bool withSleep)

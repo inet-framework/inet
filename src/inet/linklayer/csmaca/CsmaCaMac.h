@@ -204,6 +204,11 @@ class INET_API CsmaCaMac : public MacProtocolBase
 
     virtual uint32_t computeFcs(const Ptr<const BytesChunk>& bytes);
     //@}
+
+    // OperationalBase:
+    virtual void handleStartOperation(LifecycleOperation *operation) override {}    //TODO implementation
+    virtual void handleStopOperation(LifecycleOperation *operation) override {}    //TODO implementation
+    virtual void handleCrashOperation(LifecycleOperation *operation) override {}    //TODO implementation
 };
 
 } // namespace inet

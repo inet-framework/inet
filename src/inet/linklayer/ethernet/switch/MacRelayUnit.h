@@ -63,9 +63,9 @@ class INET_API MacRelayUnit : public LayeredProtocolBase
     virtual void finish() override;
 
     // for lifecycle:
-    bool handleStartOperation(LifecycleOperation *operation, IDoneCallback *) override { start(); return true; }
-    bool handleStopOperation(LifecycleOperation *operation, IDoneCallback *) override { stop(); return true; }
-    void handleCrashOperation(LifecycleOperation *operation) override { stop(); }
+    virtual void handleStartOperation(LifecycleOperation *operation) override { start(); }
+    virtual void handleStopOperation(LifecycleOperation *operation) override { stop(); }
+    virtual void handleCrashOperation(LifecycleOperation *operation) override { stop(); }
     virtual bool isUpperMessage(cMessage *message) override { return message->arrivedOn("upperLayerIn"); }
     virtual bool isLowerMessage(cMessage *message) override { return message->arrivedOn("ifIn"); }
 

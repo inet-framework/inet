@@ -786,21 +786,19 @@ INetfilter::IHook::Result Gpsr::datagramLocalOutHook(Packet *packet)
 // lifecycle
 //
 
-bool Gpsr::handleStartOperation(LifecycleOperation *operation, IDoneCallback *)
+void Gpsr::handleStartOperation(LifecycleOperation *operation)
 {
     configureInterfaces();
     storeSelfPositionInGlobalRegistry();
     scheduleBeaconTimer();
-    return true;
 }
 
-bool Gpsr::handleStopOperation(LifecycleOperation *operation, IDoneCallback *)
+void Gpsr::handleStopOperation(LifecycleOperation *operation)
 {
     // TODO: send a beacon to remove ourself from peers neighbor position table
     neighborPositionTable.clear();
     cancelEvent(beaconTimer);
     cancelEvent(purgeNeighborsTimer);
-    return true;
 }
 
 void Gpsr::handleCrashOperation(LifecycleOperation *operation)

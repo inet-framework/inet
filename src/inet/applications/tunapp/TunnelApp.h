@@ -61,6 +61,11 @@ protected:
 
     // TunSocket::ICallback
     virtual void socketDataArrived(TunSocket *socket, Packet *packet) override;
+
+    // OperationalBase:
+    virtual void handleStartOperation(LifecycleOperation *operation) override {}    //TODO implementation
+    virtual void handleStopOperation(LifecycleOperation *operation) override {}    //TODO implementation
+    virtual void handleCrashOperation(LifecycleOperation *operation) override {}    //TODO implementation
 };
 
 } // namespace inet

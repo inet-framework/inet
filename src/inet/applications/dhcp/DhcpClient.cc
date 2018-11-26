@@ -211,12 +211,6 @@ void DhcpClient::socketErrorArrived(UdpSocket *socket, Indication *indication)
 
 void DhcpClient::socketClosed(UdpSocket *socket, Indication *indication)
 {
-    while (!stopDoneCallbackList.empty()) {
-        auto callback = stopDoneCallbackList.front();
-        callback->invoke();
-        stopDoneCallbackList.pop_front();
-    }
-
     delete indication;
 }
 
@@ -692,16 +686,15 @@ void DhcpClient::openSocket()
     EV_INFO << "DHCP server bound to port " << serverPort << "." << endl;
 }
 
-bool DhcpClient::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void DhcpClient::handleStartOperation(LifecycleOperation *operation)
 {
     simtime_t start = std::max(startTime, simTime());
     ie = chooseInterface();
     macAddress = ie->getMacAddress();
     scheduleAt(start, startTimer);
-    return true;
 }
 
-bool DhcpClient::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void DhcpClient::handleStopOperation(LifecycleOperation *operation)
 {
     cancelEvent(timerT1);
     cancelEvent(timerT2);
@@ -713,9 +706,7 @@ bool DhcpClient::handleStopOperation(LifecycleOperation *operation, IDoneCallbac
     // TODO: Client should send DHCPRELEASE to the server. However, the correct operation
     // of DHCP does not depend on the transmission of DHCPRELEASE messages.
 
-    stopDoneCallbackList.push_back(doneCallback);
     socket.close();
-    return false;
 }
 
 void DhcpClient::handleCrashOperation(LifecycleOperation *operation)
@@ -726,10 +717,17 @@ void DhcpClient::handleCrashOperation(LifecycleOperation *operation)
     cancelEvent(leaseTimer);
     cancelEvent(startTimer);
     ie = nullptr;
-    stopDoneCallbackList.clear();
 
     if (operation->getRootModule() != getContainingNode(this))     // closes socket when the application crashed only
         socket.destroy();         //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
+}
+
+bool DhcpClient::isOperationFinished()
+{
+    if (operational == State::STOPPING_OPERATION)
+        return socket.getState() == UdpSocket::CLOSED;
+    else
+        return true;
 }
 
 } // namespace inet

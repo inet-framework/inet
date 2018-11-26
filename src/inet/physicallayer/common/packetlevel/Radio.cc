@@ -296,21 +296,19 @@ void Radio::handleSignal(Signal *signal)
         startReception(receptionTimer, IRadioSignal::SIGNAL_PART_WHOLE);
 }
 
-bool Radio::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void Radio::handleStartOperation(LifecycleOperation *operation)
 {
     // NOTE: we ignore radio mode switching during start
     initializeRadioMode();
-    return PhysicalLayerBase::handleStartOperation(operation, doneCallback);
 }
 
-bool Radio::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void Radio::handleStopOperation(LifecycleOperation *operation)
 {
     // NOTE: we ignore radio mode switching and ongoing transmission during shutdown
     cancelEvent(switchTimer);
     if (transmissionTimer->isScheduled())
         abortTransmission();
     completeRadioModeSwitch(RADIO_MODE_OFF);
-    return PhysicalLayerBase::handleStopOperation(operation, doneCallback);
 }
 
 void Radio::handleCrashOperation(LifecycleOperation *operation)
@@ -319,7 +317,6 @@ void Radio::handleCrashOperation(LifecycleOperation *operation)
     if (transmissionTimer->isScheduled())
         abortTransmission();
     completeRadioModeSwitch(RADIO_MODE_OFF);
-    PhysicalLayerBase::handleCrashOperation(operation);
 }
 
 void Radio::startTransmission(Packet *macFrame, IRadioSignal::SignalPart part)

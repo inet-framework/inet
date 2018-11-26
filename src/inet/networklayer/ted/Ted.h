@@ -93,8 +93,8 @@ class INET_API Ted : public RoutingProtocolBase
     virtual void rebuildRoutingTable();
     //@}
 
-    virtual bool handleStartOperation(LifecycleOperation *operation, IDoneCallback *) override;
-    virtual bool handleStopOperation(LifecycleOperation *operation, IDoneCallback *) override;
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
   protected:

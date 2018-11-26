@@ -95,19 +95,17 @@ void EtherTrafGen::handleMessageWhenUp(cMessage *msg)
         receivePacket(check_and_cast<Packet *>(msg));
 }
 
-bool EtherTrafGen::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void EtherTrafGen::handleStartOperation(LifecycleOperation *operation)
 {
     if (isGenerator()) {
         scheduleNextPacket(-1);
     }
-    return true;
 }
 
-bool EtherTrafGen::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void EtherTrafGen::handleStopOperation(LifecycleOperation *operation)
 {
     cancelNextPacket();
     llcSocket.close();     //TODO return false and waiting socket close
-    return true;
 }
 
 void EtherTrafGen::handleCrashOperation(LifecycleOperation *operation)

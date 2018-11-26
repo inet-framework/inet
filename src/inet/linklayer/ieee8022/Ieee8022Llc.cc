@@ -251,16 +251,14 @@ void Ieee8022Llc::clearSockets()
     socketIdToSocketDescriptor.clear();
 }
 
-bool Ieee8022Llc::handleStartOperation(LifecycleOperation *operation, IDoneCallback *)
+void Ieee8022Llc::handleStartOperation(LifecycleOperation *operation)
 {
     clearSockets();
-    return true;
 }
 
-bool Ieee8022Llc::handleStopOperation(LifecycleOperation *operation, IDoneCallback *)
+void Ieee8022Llc::handleStopOperation(LifecycleOperation *operation)
 {
     clearSockets();
-    return true;
 }
 
 void Ieee8022Llc::handleCrashOperation(LifecycleOperation *operation)

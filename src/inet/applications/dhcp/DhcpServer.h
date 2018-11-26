@@ -61,7 +61,6 @@ class INET_API DhcpServer : public ApplicationBase, public cListener, public Udp
     UdpSocket socket;
     simtime_t startTime;    // application start time
     cMessage *startTimer = nullptr;    // self message to start DHCP server
-    std::list<IDoneCallback*> stopDoneCallbackList;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -120,9 +119,10 @@ class INET_API DhcpServer : public ApplicationBase, public cListener, public Udp
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
     // Lifecycle methods
-    virtual bool handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
-    virtual bool handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
+    virtual bool isOperationFinished() override;
 
   public:
     DhcpServer();

@@ -149,11 +149,9 @@ void Rip::handleMessageWhenUp(cMessage *msg)
             startRIPRouting();
         }
         else if (msg == shutdownTimer) {
-            IDoneCallback *doneCallback = (IDoneCallback *)msg->getContextPointer();
-            msg->setContextPointer(nullptr);
-            if (doneCallback)
-                doneCallback->invoke();
         }
+        else
+            throw cRuntimeError("unknown self message");
     }
     else if (msg->getKind() == UDP_I_DATA) {
         Packet *pk = check_and_cast<Packet *>(msg);
@@ -409,14 +407,13 @@ void Rip::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
         throw cRuntimeError("Unexpected signal: %s", getSignalName(signalID));
 }
 
-bool Rip::handleStartOperation(LifecycleOperation *operation, IDoneCallback *)
+void Rip::handleStartOperation(LifecycleOperation *operation)
 {
     cancelEvent(startupTimer);
     scheduleAt(simTime() + par("startupTime"), startupTimer);
-    return true;
 }
 
-bool Rip::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void Rip::handleStopOperation(LifecycleOperation *operation)
 {
     // invalidate routes
     for (auto & elem : ripRoutingTable)
@@ -428,15 +425,20 @@ bool Rip::handleStopOperation(LifecycleOperation *operation, IDoneCallback *done
     stopRIPRouting();
 
     // wait a few seconds before calling doneCallback, so that UDP can send the messages
-    shutdownTimer->setContextPointer(doneCallback);
     scheduleAt(simTime() + shutdownTime, shutdownTimer);
-
-    return false;
 }
 
 void Rip::handleCrashOperation(LifecycleOperation *operation)
 {
     stopRIPRouting();
+}
+
+bool Rip::isOperationFinished()
+{
+    if (operational == State::STOPPING_OPERATION)
+        return !shutdownTimer->isScheduled();
+    else
+        return true;
 }
 
 /**

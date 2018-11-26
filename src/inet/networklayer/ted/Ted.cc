@@ -480,17 +480,15 @@ Ipv4Address Ted::getPeerByLocalAddress(Ipv4Address localInf)
     return ted[index].linkid;
 }
 
-bool Ted::handleStartOperation(LifecycleOperation *operation, IDoneCallback *)
+void Ted::handleStartOperation(LifecycleOperation *operation)
 {
     initializeTED();
-    return true;
 }
 
-bool Ted::handleStopOperation(LifecycleOperation *operation, IDoneCallback *)
+void Ted::handleStopOperation(LifecycleOperation *operation)
 {
     ted.clear();
     interfaceAddrs.clear();
-    return true;
 }
 
 void Ted::handleCrashOperation(LifecycleOperation *operation)

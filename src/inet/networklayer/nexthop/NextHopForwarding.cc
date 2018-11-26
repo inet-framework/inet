@@ -858,16 +858,14 @@ INetfilter::IHook::Result NextHopForwarding::datagramLocalOutHook(Packet *datagr
     return IHook::ACCEPT;
 }
 
-bool NextHopForwarding::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void NextHopForwarding::handleStartOperation(LifecycleOperation *operation)
 {
     start();
-    return true;
 }
 
-bool NextHopForwarding::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void NextHopForwarding::handleStopOperation(LifecycleOperation *operation)
 {
     stop();
-    return true;
 }
 
 void NextHopForwarding::handleCrashOperation(LifecycleOperation *operation)

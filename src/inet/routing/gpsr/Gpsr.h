@@ -160,8 +160,8 @@ class INET_API Gpsr : public RoutingProtocolBase, public cListener, public Netfi
     virtual Result datagramLocalOutHook(Packet *datagram) override;
 
     // lifecycle
-    virtual bool handleStartOperation(LifecycleOperation *operation, IDoneCallback *) override;
-    virtual bool handleStopOperation(LifecycleOperation *operation, IDoneCallback *) override;
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
     // notification

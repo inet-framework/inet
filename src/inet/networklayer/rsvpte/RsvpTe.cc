@@ -2079,16 +2079,14 @@ void RsvpTe::clear()
         removeHello(&HelloList.front());
 }
 
-bool RsvpTe::handleStartOperation(LifecycleOperation *operation, IDoneCallback *)
+void RsvpTe::handleStartOperation(LifecycleOperation *operation)
 {
     setupHello();
-    return true;
 }
 
-bool RsvpTe::handleStopOperation(LifecycleOperation *operation, IDoneCallback *)
+void RsvpTe::handleStopOperation(LifecycleOperation *operation)
 {
     clear();
-    return true;
 }
 
 void RsvpTe::handleCrashOperation(LifecycleOperation *operation)

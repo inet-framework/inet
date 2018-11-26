@@ -47,7 +47,6 @@ class INET_API UdpBasicApp : public ApplicationBase, public UdpSocket::ICallback
     // state
     UdpSocket socket;
     cMessage *selfMsg = nullptr;
-    std::list<IDoneCallback*> stopDoneCallbackList;
 
     // statistics
     int numSent = 0;
@@ -70,9 +69,10 @@ class INET_API UdpBasicApp : public ApplicationBase, public UdpSocket::ICallback
     virtual void processSend();
     virtual void processStop();
 
-    virtual bool handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
-    virtual bool handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
+    virtual bool isOperationFinished() override;
 
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
     virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;

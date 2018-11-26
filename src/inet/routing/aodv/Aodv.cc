@@ -1173,7 +1173,7 @@ void Aodv::handleRERR(const Ptr<const Rerr>& rerr, const L3Address& sourceAddr)
     }
 }
 
-bool Aodv::handleStartOperation(LifecycleOperation *operation, IDoneCallback *)
+void Aodv::handleStartOperation(LifecycleOperation *operation)
 {
     rebootTime = simTime();
 
@@ -1185,13 +1185,11 @@ bool Aodv::handleStartOperation(LifecycleOperation *operation, IDoneCallback *)
         scheduleAt(simTime() + helloInterval - *periodicJitter, helloMsgTimer);
 
     scheduleAt(simTime() + 1, counterTimer);
-    return true;
 }
 
-bool Aodv::handleStopOperation(LifecycleOperation *operation, IDoneCallback *)
+void Aodv::handleStopOperation(LifecycleOperation *operation)
 {
     clearState();
-    return true;
 }
 
 void Aodv::handleCrashOperation(LifecycleOperation *operation)

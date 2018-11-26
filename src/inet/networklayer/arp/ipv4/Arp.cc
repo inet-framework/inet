@@ -102,16 +102,14 @@ void Arp::handleMessageWhenUp(cMessage *msg)
     }
 }
 
-bool Arp::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void Arp::handleStartOperation(LifecycleOperation *operation)
 {
     ASSERT(arpCache.empty());
-    return true;
 }
 
-bool Arp::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void Arp::handleStopOperation(LifecycleOperation *operation)
 {
     flush();
-    return true;
 }
 
 void Arp::handleCrashOperation(LifecycleOperation *operation)

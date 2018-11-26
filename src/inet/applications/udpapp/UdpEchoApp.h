@@ -33,7 +33,6 @@ class INET_API UdpEchoApp : public ApplicationBase, public UdpSocket::ICallback
   protected:
     UdpSocket socket;
     int numEchoed;    // just for WATCH
-    std::list<IDoneCallback*> stopDoneCallbackList;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -42,9 +41,10 @@ class INET_API UdpEchoApp : public ApplicationBase, public UdpSocket::ICallback
     virtual void finish() override;
     virtual void refreshDisplay() const override;
 
-    virtual bool handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
-    virtual bool handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
+    virtual bool isOperationFinished() override;
 
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
     virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;

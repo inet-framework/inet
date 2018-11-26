@@ -51,18 +51,16 @@ void EtherAppServer::initialize(int stage)
     }
 }
 
-bool EtherAppServer::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void EtherAppServer::handleStartOperation(LifecycleOperation *operation)
 {
     EV_INFO << "Starting application\n";
     registerDsap(localSap);
-    return true;
 }
 
-bool EtherAppServer::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void EtherAppServer::handleStopOperation(LifecycleOperation *operation)
 {
     EV_INFO << "Stop the application\n";
     llcSocket.close();
-    return true;
 }
 
 void EtherAppServer::handleCrashOperation(LifecycleOperation *operation)

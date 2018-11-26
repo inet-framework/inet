@@ -334,7 +334,7 @@ void UdpBasicBurst::finish()
     ApplicationBase::finish();
 }
 
-bool UdpBasicBurst::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void UdpBasicBurst::handleStartOperation(LifecycleOperation *operation)
 {
     simtime_t start = std::max(startTime, simTime());
 
@@ -342,18 +342,14 @@ bool UdpBasicBurst::handleStartOperation(LifecycleOperation *operation, IDoneCal
         timerNext->setKind(START);
         scheduleAt(start, timerNext);
     }
-
-    return true;
 }
 
-bool UdpBasicBurst::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void UdpBasicBurst::handleStopOperation(LifecycleOperation *operation)
 {
     if (timerNext)
         cancelEvent(timerNext);
     activeBurst = false;
-    stopDoneCallbackList.push_back(doneCallback);
     socket.close();
-    return false;
 }
 
 void UdpBasicBurst::handleCrashOperation(LifecycleOperation *operation)
@@ -363,6 +359,14 @@ void UdpBasicBurst::handleCrashOperation(LifecycleOperation *operation)
     activeBurst = false;
     if (operation->getRootModule() != getContainingNode(this))     // closes socket when the application crashed only
         socket.destroy();         //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
+}
+
+bool UdpBasicBurst::isOperationFinished()
+{
+    if (operational == State::STOPPING_OPERATION)
+        return socket.getState() == UdpSocket::CLOSED;
+    else
+        return true;
 }
 
 } // namespace inet

@@ -44,8 +44,8 @@ class INET_API HostAutoConfigurator : public OperationalBase
 
   protected:
     // lifecycle
-    virtual bool handleStartOperation(LifecycleOperation *operation, IDoneCallback *) override { setupNetworkLayer(); return true; }
-    virtual bool handleStopOperation(LifecycleOperation *operation, IDoneCallback *) override { return true; }
+    virtual void handleStartOperation(LifecycleOperation *operation) override { setupNetworkLayer(); }
+    virtual void handleStopOperation(LifecycleOperation *operation) override { }
     virtual void handleCrashOperation(LifecycleOperation *operation) override {}
     virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_NETWORK_CONFIGURATION; }
     virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOrResumeOperationBase::STAGE_NETWORK_LAYER; }

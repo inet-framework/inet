@@ -1396,18 +1396,16 @@ INetfilter::IHook::Result Dymo::ensureRouteForDatagram(Packet *datagram)
 // lifecycle
 //
 
-bool Dymo::handleStartOperation(LifecycleOperation *operation, IDoneCallback *)
+void Dymo::handleStartOperation(LifecycleOperation *operation)
 {
     configureInterfaces();
-    return true;
 }
 
-bool Dymo::handleStopOperation(LifecycleOperation *operation, IDoneCallback *)
+void Dymo::handleStopOperation(LifecycleOperation *operation)
 {
     // TODO: send a RERR to notify peers about broken routes
     for (auto & elem : targetAddressToRREQTimer)
         cancelRouteDiscovery(elem.first);
-    return true;
 }
 
 void Dymo::handleCrashOperation(LifecycleOperation *operation)

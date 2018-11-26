@@ -65,6 +65,11 @@ class INET_API ShortcutRadio : public PhysicalLayerBase, public virtual IRadio
     virtual const ITransmission *getReceptionInProgress() const override { return nullptr; }
     virtual IRadioSignal::SignalPart getTransmittedSignalPart() const override { return IRadioSignal::SIGNAL_PART_WHOLE; }
     virtual IRadioSignal::SignalPart getReceivedSignalPart() const override { return IRadioSignal::SIGNAL_PART_WHOLE; }
+
+    // OperationalBase:
+    virtual void handleStartOperation(LifecycleOperation *operation) override {}    //TODO implementation
+    virtual void handleStopOperation(LifecycleOperation *operation) override {}    //TODO implementation
+    virtual void handleCrashOperation(LifecycleOperation *operation) override {}    //TODO implementation
 };
 
 } // namespace physicallayer

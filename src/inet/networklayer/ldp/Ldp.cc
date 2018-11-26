@@ -211,20 +211,18 @@ void Ldp::socketClosed(UdpSocket *socket, Indication *indication)
     delete indication;
 }
 
-bool Ldp::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void Ldp::handleStartOperation(LifecycleOperation *operation)
 {
     scheduleAt(simTime() + exponential(0.1), sendHelloMsg);
-    return true;
 }
 
-bool Ldp::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void Ldp::handleStopOperation(LifecycleOperation *operation)
 {
     for (auto & elem : myPeers)
         cancelAndDelete(elem.timeout);
     myPeers.clear();
     cancelEvent(sendHelloMsg);
     //TODO close all sockets
-    return true;
 }
 
 void Ldp::handleCrashOperation(LifecycleOperation *operation)

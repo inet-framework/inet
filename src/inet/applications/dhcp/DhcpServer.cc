@@ -145,12 +145,6 @@ void DhcpServer::socketErrorArrived(UdpSocket *socket, Indication *indication)
 
 void DhcpServer::socketClosed(UdpSocket *socket, Indication *indication)
 {
-    while (!stopDoneCallbackList.empty()) {
-        auto callback = stopDoneCallbackList.front();
-        callback->invoke();
-        stopDoneCallbackList.pop_front();
-    }
-
     delete indication;
 }
 
@@ -521,9 +515,8 @@ void DhcpServer::sendToUDP(Packet *msg, int srcPort, const L3Address& destAddr, 
     socket.sendTo(msg, destAddr, destPort);
 }
 
-bool DhcpServer::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void DhcpServer::handleStartOperation(LifecycleOperation *operation)
 {
-    (void)doneCallback; // unused variable
     maxNumOfClients = par("maxNumClients");
     leaseTime = par("leaseTime");
 
@@ -543,17 +536,14 @@ bool DhcpServer::handleStartOperation(LifecycleOperation *operation, IDoneCallba
     if (!Ipv4Address::maskedAddrAreEqual(ipv4data->getIPAddress(), Ipv4Address(ipAddressStart.getInt() + maxNumOfClients - 1), subnetMask))
         throw cRuntimeError("Not enough IP addresses in subnet for %d clients", maxNumOfClients);
     scheduleAt(start, startTimer);
-    return true;
 }
 
-bool DhcpServer::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void DhcpServer::handleStopOperation(LifecycleOperation *operation)
 {
     leased.clear();
     ie = nullptr;
     cancelEvent(startTimer);
-    stopDoneCallbackList.push_back(doneCallback);
     socket.close();
-    return false;
 }
 
 void DhcpServer::handleCrashOperation(LifecycleOperation *operation)
@@ -561,9 +551,16 @@ void DhcpServer::handleCrashOperation(LifecycleOperation *operation)
     leased.clear();
     ie = nullptr;
     cancelEvent(startTimer);
-    stopDoneCallbackList.clear();
     if (operation->getRootModule() != getContainingNode(this))     // closes socket when the application crashed only
         socket.destroy();         //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
+}
+
+bool DhcpServer::isOperationFinished()
+{
+    if (operational == State::STOPPING_OPERATION)
+        return socket.getState() == UdpSocket::CLOSED;
+    else
+        return true;
 }
 
 } // namespace inet

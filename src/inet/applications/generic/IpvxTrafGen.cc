@@ -208,16 +208,14 @@ void IpvxTrafGen::processPacket(Packet *msg)
     numReceived++;
 }
 
-bool IpvxTrafGen::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void IpvxTrafGen::handleStartOperation(LifecycleOperation *operation)
 {
     startApp();
-    return true;
 }
 
-bool IpvxTrafGen::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void IpvxTrafGen::handleStopOperation(LifecycleOperation *operation)
 {
     cancelNextPacket();
-    return true;
 }
 
 void IpvxTrafGen::handleCrashOperation(LifecycleOperation *operation)

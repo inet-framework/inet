@@ -397,27 +397,22 @@ void Ieee80211Mac::processLowerFrame(Packet *packet, const Ptr<const Ieee80211Ma
 }
 
 // FIXME
-bool Ieee80211Mac::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void Ieee80211Mac::handleStartOperation(LifecycleOperation *operation)
 {
-    if (!doneCallback)
-        return true;    // do nothing when called from initialize()
+    if (!operation)
+        return;    // do nothing when called from initialize()
 
-    bool ret = MacProtocolBase::handleStartOperation(operation, doneCallback);
     initializeRadioMode();
-    return ret;
 }
 
 // FIXME
-bool Ieee80211Mac::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void Ieee80211Mac::handleStopOperation(LifecycleOperation *operation)
 {
-    bool ret = MacProtocolBase::handleStopOperation(operation, doneCallback);
-    return ret;
 }
 
 // FIXME
 void Ieee80211Mac::handleCrashOperation(LifecycleOperation *operation)
 {
-    MacProtocolBase::handleCrashOperation(operation);
 }
 
 } // namespace ieee80211

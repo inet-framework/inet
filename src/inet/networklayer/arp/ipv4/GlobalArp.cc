@@ -141,14 +141,12 @@ void GlobalArp::handlePacket(Packet *packet)
     delete packet;
 }
 
-bool GlobalArp::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void GlobalArp::handleStartOperation(LifecycleOperation *operation)
 {
-    return true;
 }
 
-bool GlobalArp::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void GlobalArp::handleStopOperation(LifecycleOperation *operation)
 {
-    return true;
 }
 
 void GlobalArp::handleCrashOperation(LifecycleOperation *operation)

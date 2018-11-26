@@ -65,12 +65,6 @@ void UdpEchoApp::socketErrorArrived(UdpSocket *socket, Indication *indication)
 
 void UdpEchoApp::socketClosed(UdpSocket *socket, Indication *indication)
 {
-    while (!stopDoneCallbackList.empty()) {
-        auto callback = stopDoneCallbackList.front();
-        callback->invoke();
-        stopDoneCallbackList.pop_front();
-    }
-
     delete indication;
 }
 
@@ -86,7 +80,7 @@ void UdpEchoApp::finish()
     ApplicationBase::finish();
 }
 
-bool UdpEchoApp::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void UdpEchoApp::handleStartOperation(LifecycleOperation *operation)
 {
     socket.setOutputGate(gate("socketOut"));
     int localPort = par("localPort");
@@ -94,22 +88,26 @@ bool UdpEchoApp::handleStartOperation(LifecycleOperation *operation, IDoneCallba
     MulticastGroupList mgl = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this)->collectMulticastGroups();
     socket.joinLocalMulticastGroups(mgl);
     socket.setCallback(this);
-    return true;
 }
 
-bool UdpEchoApp::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void UdpEchoApp::handleStopOperation(LifecycleOperation *operation)
 {
-    stopDoneCallbackList.push_back(doneCallback);
     socket.close();
-    return false;
 }
 
 void UdpEchoApp::handleCrashOperation(LifecycleOperation *operation)
 {
-    stopDoneCallbackList.clear();
     if (operation->getRootModule() != getContainingNode(this))     // closes socket when the application crashed only
         socket.destroy();         //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
     socket.setCallback(nullptr);
+}
+
+bool UdpEchoApp::isOperationFinished()
+{
+    if (operational == State::STOPPING_OPERATION)
+        return socket.getState() == UdpSocket::CLOSED;
+    else
+        return true;
 }
 
 } // namespace inet

@@ -85,12 +85,6 @@ void UdpSink::socketErrorArrived(UdpSocket *socket, Indication *indication)
 
 void UdpSink::socketClosed(UdpSocket *socket, Indication *indication)
 {
-    while (!stopDoneCallbackList.empty()) {
-        auto callback = stopDoneCallbackList.front();
-        callback->invoke();
-        stopDoneCallbackList.pop_front();
-    }
-
     delete indication;
 }
 
@@ -157,35 +151,39 @@ void UdpSink::processPacket(Packet *pk)
     numReceived++;
 }
 
-bool UdpSink::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void UdpSink::handleStartOperation(LifecycleOperation *operation)
 {
     simtime_t start = std::max(startTime, simTime());
     if ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime)) {
         selfMsg->setKind(START);
         scheduleAt(start, selfMsg);
     }
-    return true;
 }
 
-bool UdpSink::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
+void UdpSink::handleStopOperation(LifecycleOperation *operation)
 {
     cancelEvent(selfMsg);
     if (!multicastGroup.isUnspecified())
         socket.leaveMulticastGroup(multicastGroup); // FIXME should be done by socket.close()
-    stopDoneCallbackList.push_back(doneCallback);
     socket.close();
-    return false;
 }
 
 void UdpSink::handleCrashOperation(LifecycleOperation *operation)
 {
     cancelEvent(selfMsg);
-    stopDoneCallbackList.clear();
     if (operation->getRootModule() != getContainingNode(this)) {     // closes socket when the application crashed only
         if (!multicastGroup.isUnspecified())
             socket.leaveMulticastGroup(multicastGroup); // FIXME should be done by socket.close()
         socket.destroy();    //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
     }
+}
+
+bool UdpSink::isOperationFinished()
+{
+    if (operational == State::STOPPING_OPERATION)
+        return socket.getState() == UdpSocket::CLOSED;
+    else
+        return true;
 }
 
 } // namespace inet

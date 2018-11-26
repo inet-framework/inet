@@ -31,7 +31,7 @@ void TcpServerHostApp::initialize(int stage)
     ApplicationBase::initialize(stage);
 }
 
-bool TcpServerHostApp::handleStartOperation(LifecycleOperation *operation, IDoneCallback *)
+void TcpServerHostApp::handleStartOperation(LifecycleOperation *operation)
 {
     const char *localAddress = par("localAddress");
     int localPort = par("localPort");
@@ -40,11 +40,9 @@ bool TcpServerHostApp::handleStartOperation(LifecycleOperation *operation, IDone
     serverSocket.setCallback(this);
     serverSocket.bind(localAddress[0] ? L3Address(localAddress) : L3Address(), localPort);
     serverSocket.listen();
-
-    return true;
 }
 
-bool TcpServerHostApp::handleStopOperation(LifecycleOperation *operation, IDoneCallback *)
+void TcpServerHostApp::handleStopOperation(LifecycleOperation *operation)
 {
     // remove and delete threads
     while (!threadSet.empty()) {
@@ -53,7 +51,6 @@ bool TcpServerHostApp::handleStopOperation(LifecycleOperation *operation, IDoneC
         removeThread(thread);
     }
     serverSocket.close();     //TODO return false and waiting socket close
-    return true;
 }
 
 void TcpServerHostApp::handleCrashOperation(LifecycleOperation *operation)
