@@ -115,6 +115,23 @@ public:
         virtual ~HostInterfaceData();
         HostGroupData *getOrCreateGroupData(Ipv4Address group);
         void deleteGroupData(Ipv4Address group);
+        friend inline std::ostream& operator<<(std::ostream& out, const Igmpv3::HostInterfaceData& entry)
+        {
+            for(auto& g : entry.groups) {
+                out << "(groupAddress: " << g.second->groupAddr << " ";
+                out << "hostGroupState: " << Igmpv3::getHostGroupStateString(g.second->state) << " ";
+                out << "groupTimer: " << g.second->timer->getArrivalTime() << " ";
+                out << "queriedSources: ";
+                for(auto &entry : g.second->queriedSources)
+                    out << entry << ", ";
+                out << "sourceAddressList: ";
+                for(auto &entry : g.second->sourceAddressList)
+                    out << entry << ", ";
+                out << "filter: " << Igmpv3::getFilterModeString(g.second->filter) << ") ";
+            }
+
+            return out;
+        }
     };
 
     struct RouterInterfaceData;
@@ -148,7 +165,6 @@ public:
         SourceRecord *createSourceRecord(Ipv4Address source);
         SourceRecord *getOrCreateSourceRecord(Ipv4Address source);
         void deleteSourceRecord(Ipv4Address source);
-
         std::string getStateInfo() const;
         void collectForwardedSources(Ipv4MulticastSourceList& result) const;
 
@@ -170,6 +186,23 @@ public:
         virtual ~RouterInterfaceData();
         RouterGroupData *getOrCreateGroupData(Ipv4Address group);
         void deleteGroupData(Ipv4Address group);
+        friend inline std::ostream& operator<<(std::ostream& out, const Igmpv3::RouterInterfaceData& entry)
+        {
+            out << "routerState: " << Igmpv3::getRouterStateString(entry.state) << " ";
+            out << "queryTimer: " << entry.generalQueryTimer->getArrivalTime() << " ";
+            if(entry.groups.empty())
+                out << "(empty)";
+            else {
+                for(auto& g : entry.groups) {
+                    out << "(groupAddress: " << g.second->groupAddr << " ";
+                    out << "routerGroupState: " << Igmpv3::getRouterGroupStateString(g.second->state) << " ";
+                    out << "timer: " << g.second->timer->getArrivalTime() << " ";
+                    out << "filter: " << Igmpv3::getFilterModeString(g.second->filter) << ") ";
+                }
+            }
+
+            return out;
+        }
     };
 
   protected:
@@ -217,6 +250,11 @@ public:
     static Ipv4AddressVector set_complement(const Ipv4AddressVector& first, const Ipv4AddressVector& second);
     static Ipv4AddressVector set_intersection(const Ipv4AddressVector& first, const Ipv4AddressVector& second);
     static Ipv4AddressVector set_union(const Ipv4AddressVector& first, const Ipv4AddressVector& second);
+
+    static const std::string getRouterStateString(RouterState rs);
+    static const std::string getRouterGroupStateString(RouterGroupState rgs);
+    static const std::string getHostGroupStateString(HostGroupState hgs);
+    static const std::string getFilterModeString(FilterMode fm);
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -267,7 +305,14 @@ public:
     virtual double decodeTime(unsigned char code);
 };
 
-std::ostream& operator<<(std::ostream& out, const Ipv4AddressVector addresses);
+inline std::ostream& operator<<(std::ostream& out, const Igmpv3::Ipv4AddressVector addresses)
+{
+    out << "(";
+    for (size_t i = 0; i < addresses.size(); i++)
+        out << (i > 0 ? "," : "") << addresses[i];
+    out << ")";
+    return out;
+}
 
 }    // namespace inet
 
