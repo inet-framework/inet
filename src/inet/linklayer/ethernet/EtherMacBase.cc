@@ -628,6 +628,8 @@ void EtherMacBase::finish()
 
 void EtherMacBase::refreshDisplay() const
 {
+    MacBase::refreshDisplay();
+
     // icon coloring
     const char *color;
 

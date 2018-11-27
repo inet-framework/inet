@@ -89,6 +89,8 @@ void Loopback::clearQueue()
 
 void Loopback::refreshDisplay() const
 {
+    MacBase::refreshDisplay();
+
     /* TBD find solution for displaying IPv4 address without dependence on IPv4 or IPv6
             Ipv4Address addr = interfaceEntry->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
             sprintf(buf, "%s / %s\nrcv:%ld snt:%ld", addr.isUnspecified()?"-":addr.str().c_str(), datarateText, numRcvdOK, numSent);

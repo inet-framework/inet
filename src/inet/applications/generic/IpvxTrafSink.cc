@@ -61,6 +61,8 @@ void IpvxTrafSink::handleMessageWhenUp(cMessage *msg)
 
 void IpvxTrafSink::refreshDisplay() const
 {
+    ApplicationBase::refreshDisplay();
+
     char buf[32];
     sprintf(buf, "rcvd: %d pks", numReceived);
     getDisplayString().setTagArg("t", 0, buf);

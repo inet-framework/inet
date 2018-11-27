@@ -117,6 +117,8 @@ void IpvxTrafGen::handleMessageWhenUp(cMessage *msg)
 
 void IpvxTrafGen::refreshDisplay() const
 {
+    ApplicationBase::refreshDisplay();
+
     char buf[40];
     sprintf(buf, "rcvd: %d pks\nsent: %d pks", numReceived, numSent);
     getDisplayString().setTagArg("t", 0, buf);

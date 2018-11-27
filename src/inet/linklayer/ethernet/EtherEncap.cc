@@ -117,6 +117,7 @@ void EtherEncap::processCommandFromHigherLayer(Request *msg)
 
 void EtherEncap::refreshDisplay() const
 {
+    Ieee8022Llc::refreshDisplay();
     char buf[80];
     sprintf(buf, "passed up: %ld\nsent: %ld", totalFromMAC, totalFromHigherLayer);
     getDisplayString().setTagArg("t", 0, buf);

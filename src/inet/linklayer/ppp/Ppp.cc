@@ -302,6 +302,8 @@ void Ppp::handleLowerPacket(Packet *packet)
 
 void Ppp::refreshDisplay() const
 {
+    MacBase::refreshDisplay();
+
     std::ostringstream buf;
     const char *color = "";
 

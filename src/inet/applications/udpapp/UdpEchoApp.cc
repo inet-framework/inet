@@ -70,6 +70,8 @@ void UdpEchoApp::socketClosed(UdpSocket *socket, Indication *indication)
 
 void UdpEchoApp::refreshDisplay() const
 {
+    ApplicationBase::refreshDisplay();
+
     char buf[40];
     sprintf(buf, "echoed: %d pks", numEchoed);
     getDisplayString().setTagArg("t", 0, buf);
