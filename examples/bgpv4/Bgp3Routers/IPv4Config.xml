@@ -42,4 +42,5 @@
   <interface hosts='HC21' names='eth0' address='192.173.1.1' netmask='255.255.255.0' mtu='1500' metric='1'/>
   <interface hosts='HC22' names='eth0' address='192.173.1.2' netmask='255.255.255.0' mtu='1500' metric='1'/>
   <route hosts='H*' destination='*' netmask='*' interface='eth0'/>
+  <route hosts='R*' destination='*' netmask='0.0.0.0' interface='ppp0'/>
 </config>
