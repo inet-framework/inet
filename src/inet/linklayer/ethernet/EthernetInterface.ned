@@ -82,6 +82,7 @@ module EthernetInterface like IEthernetInterface
         encap.lowerLayerIn <-- vlan.upperLayerOut if exists(vlan);
 
         vlan.lowerLayerOut --> queue.in if exists(vlan) && exists(queue);
+        encap.lowerLayerOut --> queue.in if !exists(vlan) && exists(queue);
 
         mac.phys <--> { @display("m=s"); } <--> phys;
 
