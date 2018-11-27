@@ -523,6 +523,8 @@ void Igmpv2::processQuery(InterfaceEntry *ie, Packet *packet)
             }
         }
     }
+    else
+        EV_INFO << "Igmpv2: multicast forwarding is not enabled on this node. \n";
 
     delete packet;
 }
@@ -599,6 +601,8 @@ void Igmpv2::processV2Report(InterfaceEntry *ie, Packet *packet)
         startTimer(routerGroupData->timer, groupMembershipInterval);
         routerGroupData->state = IGMP_RGS_MEMBERS_PRESENT;
     }
+    else
+        EV_INFO << "Igmpv2: multicast forwarding is not enabled on this node. \n";
 
     delete packet;
 }
