@@ -99,9 +99,10 @@ class INET_API Igmpv2 : public cSimpleModule, public IProtocolRegistrationListen
         friend inline std::ostream& operator<<(std::ostream& out, const Igmpv2::HostInterfaceData& entry)
         {
             for(auto& g : entry.groups) {
-                out << "groupAddress: " << g.second->groupAddr << " ";
+                out << "(groupAddress: " << g.second->groupAddr << " ";
                 out << "hostGroupState: " << Igmpv2::getHostGroupStateString(g.second->state) << " ";
-                out << "lastHost: " << g.second->flag << ", ";
+                out << "groupTimer: " << g.second->timer->getArrivalTime() << " ";
+                out << "lastHost: " << g.second->flag << ") ";
             }
 
             return out;
@@ -119,15 +120,17 @@ class INET_API Igmpv2 : public cSimpleModule, public IProtocolRegistrationListen
         virtual ~RouterInterfaceData();
         friend inline std::ostream& operator<<(std::ostream& out, const Igmpv2::RouterInterfaceData& entry)
         {
-            out << "routerState: " << Igmpv2::getRouterStateString(entry.igmpRouterState) << " (";
+            out << "routerState: " << Igmpv2::getRouterStateString(entry.igmpRouterState) << " ";
+            out << "queryTimer: " << entry.igmpQueryTimer->getArrivalTime() << " ";
             if(entry.groups.empty())
-                out << "empty)";
+                out << "(empty)";
             else {
                 for(auto& g : entry.groups) {
-                    out << "groupAddress: " << g.second->groupAddr << " ";
-                    out << "routerGroupState: " << Igmpv2::getRouterGroupStateString(g.second->state) << ", ";
+                    out << "(groupAddress: " << g.second->groupAddr << " ";
+                    out << "routerGroupState: " << Igmpv2::getRouterGroupStateString(g.second->state) << " ";
+                    out << "timer: " << g.second->timer->getArrivalTime() << " ";
+                    out << "rexmtTimer: " << g.second->rexmtTimer->getArrivalTime() << ") ";
                 }
-                out << ") ";
             }
 
             return out;
