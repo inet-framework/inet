@@ -290,9 +290,6 @@ void EtherMacBase::handleStartOperation(LifecycleOperation *operation)
 
 void EtherMacBase::handleStopOperation(LifecycleOperation *operation)
 {
-//    flushQueue();
-    connected = false;
-    processConnectDisconnect();
 }
 
 void EtherMacBase::handleCrashOperation(LifecycleOperation *operation)
@@ -300,6 +297,21 @@ void EtherMacBase::handleCrashOperation(LifecycleOperation *operation)
 //    clearQueue();
     connected = false;
     processConnectDisconnect();
+}
+
+bool EtherMacBase::isOperationFinished()
+{
+    if (operational == State::STOPPING_OPERATION) {
+        if (txQueue.isEmpty()) {
+            connected = false;
+            processConnectDisconnect();
+            return true;
+        }
+        else
+            return false;
+    }
+    else
+        return true;
 }
 
 void EtherMacBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
