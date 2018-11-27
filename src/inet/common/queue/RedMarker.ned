@@ -24,8 +24,8 @@ simple RedMarker extends RedDropper
 {
     parameters:
         @class(RedMarker);
-
-        string marks = default("0");  // average packet rate for calculations when queue is empty
+		int frameQueueCapacity = default(120);
+        string marks = default("0");  
         @signal[markingProb](type=double);
         @statistic[marked](title="marking Prob"; source="markingProb"; record=mean,vector(count); interpolationmode=none);
 }
