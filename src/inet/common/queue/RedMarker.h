@@ -38,6 +38,7 @@ class INET_API RedMarker : public RedDropper
 
   private:
     bool packetDropped = false;
+    int frameQueueCapacity;
 
   protected:
 
