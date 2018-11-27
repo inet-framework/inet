@@ -127,6 +127,9 @@ void Igmpv3::addWatches()
     WATCH(numGroupAndSourceSpecificQueriesRecv);
     WATCH(numReportsSent);
     WATCH(numReportsRecv);
+
+    WATCH_PTRMAP(hostData);
+    WATCH_PTRMAP(routerData);
 }
 
 void Igmpv3::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
@@ -1321,16 +1324,6 @@ Ipv4AddressVector Igmpv3::set_union(const Ipv4AddressVector& first, const Ipv4Ad
     return result;
 }
 
-// handy definition for logging
-std::ostream& operator<<(std::ostream& out, const Ipv4AddressVector addresses)
-{
-    out << "(";
-    for (size_t i = 0; i < addresses.size(); i++)
-        out << (i > 0 ? "," : "") << addresses[i];
-    out << ")";
-    return out;
-}
-
 // Miscellaneous
 
 double Igmpv3::decodeTime(unsigned char code)
@@ -1345,6 +1338,52 @@ double Igmpv3::decodeTime(unsigned char code)
     }
 
     return (double)time / 10.0;
+}
+
+const std::string Igmpv3::getRouterStateString(Igmpv3::RouterState rs)
+{
+    if(rs == IGMPV3_RS_INITIAL)
+        return "INITIAL";
+    else if(rs == IGMPV3_RS_QUERIER)
+        return "QUERIER";
+    else if(rs == IGMPV3_RS_NON_QUERIER)
+        return "NON_QUERIER";
+
+    return "UNKNOWN";
+}
+
+const std::string Igmpv3::getRouterGroupStateString(Igmpv3::RouterGroupState rgs)
+{
+    if(rgs == IGMPV3_RGS_NO_MEMBERS_PRESENT)
+        return "NO_MEMBERS_PRESENT";
+    else if(rgs == IGMPV3_RGS_MEMBERS_PRESENT)
+        return "MEMBERS_PRESENT";
+    else if(rgs == IGMPV3_RGS_CHECKING_MEMBERSHIP)
+        return "CHECKING_MEMBERSHIP";
+
+    return "UNKNOWN";
+}
+
+const std::string Igmpv3::getHostGroupStateString(Igmpv3::HostGroupState hgs)
+{
+    if(hgs == IGMPV3_HGS_NON_MEMBER)
+        return "NON_MEMBER";
+    else if(hgs == IGMPV3_HGS_DELAYING_MEMBER)
+        return "DELAYING_MEMBER";
+    else if(hgs == IGMPV3_HGS_IDLE_MEMBER)
+        return "IDLE_MEMBER";
+
+    return "UNKNOWN";
+}
+
+const std::string Igmpv3::getFilterModeString(Igmpv3::FilterMode fm)
+{
+    if(fm == IGMPV3_FM_INCLUDE)
+        return "INCLUDE";
+    else if(fm == IGMPV3_FM_EXCLUDE)
+        return "EXCLUDE";
+
+    return "UNKNOWN";
 }
 
 }    // namespace inet
