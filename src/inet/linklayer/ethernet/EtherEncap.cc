@@ -82,8 +82,7 @@ void EtherEncap::processCommandFromHigherLayer(Request *msg)
     auto ctrl = msg->getControlInfo();
     if (dynamic_cast<Ieee802PauseCommand *>(ctrl) != nullptr)
         handleSendPause(msg);
-    else if (msg->getKind() == ETHERNET_C_BIND) {
-        auto bindCommand = dynamic_cast<EthernetBindCommand *>(ctrl);
+    else if (auto bindCommand = dynamic_cast<EthernetBindCommand *>(ctrl)) {
         int socketId = check_and_cast<Request *>(msg)->getTag<SocketReq>()->getSocketId();
         Socket *socket = new Socket(socketId);
         socket->sourceAddress = bindCommand->getSourceAddress();
@@ -93,7 +92,7 @@ void EtherEncap::processCommandFromHigherLayer(Request *msg)
         socketIdToSocketMap[socketId] = socket;
         delete msg;
     }
-    else if (msg->getKind() == ETHERNET_C_CLOSE) {
+    else if (dynamic_cast<EthernetCloseCommand *>(ctrl) != nullptr) {
         int socketId = check_and_cast<Request *>(msg)->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketMap.find(socketId);
         delete it->second;
