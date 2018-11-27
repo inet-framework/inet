@@ -187,8 +187,6 @@ void TcpConnection::process_CLOSE(TcpEventCode& event, TcpCommand *tcpCommand, c
 
     switch (fsm.getState()) {
         case TCP_S_INIT:
-            throw cRuntimeError(tcpMain, "Error processing command CLOSE: connection not open");
-
         case TCP_S_LISTEN:
             // Nothing to do here
             break;
