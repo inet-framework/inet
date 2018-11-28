@@ -53,9 +53,9 @@ class INET_API TcpSessionApp : public TcpAppBase
     cMessage *timeoutMsg = nullptr;
 
   protected:
-    virtual bool handleStartOperation(IDoneCallback *doneCallback) override;
-    virtual bool handleStopOperation(IDoneCallback *doneCallback) override;
-    virtual void handleCrashOperation() override;
+    virtual bool handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
+    virtual bool handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;

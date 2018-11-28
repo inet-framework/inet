@@ -323,7 +323,7 @@ void UdpBasicBurst::finish()
     ApplicationBase::finish();
 }
 
-bool UdpBasicBurst::handleStartOperation(IDoneCallback *doneCallback)
+bool UdpBasicBurst::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     simtime_t start = std::max(startTime, simTime());
 
@@ -335,7 +335,7 @@ bool UdpBasicBurst::handleStartOperation(IDoneCallback *doneCallback)
     return true;
 }
 
-bool UdpBasicBurst::handleStopOperation(IDoneCallback *doneCallback)
+bool UdpBasicBurst::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     if (timerNext)
         cancelEvent(timerNext);
@@ -344,7 +344,7 @@ bool UdpBasicBurst::handleStopOperation(IDoneCallback *doneCallback)
     return true;
 }
 
-void UdpBasicBurst::handleCrashOperation()
+void UdpBasicBurst::handleCrashOperation(LifecycleOperation *operation)
 {
     if (timerNext)
         cancelEvent(timerNext);

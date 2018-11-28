@@ -146,7 +146,7 @@ void UdpSink::processPacket(Packet *pk)
     numReceived++;
 }
 
-bool UdpSink::handleStartOperation(IDoneCallback *doneCallback)
+bool UdpSink::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     simtime_t start = std::max(startTime, simTime());
     if ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime)) {
@@ -156,14 +156,14 @@ bool UdpSink::handleStartOperation(IDoneCallback *doneCallback)
     return true;
 }
 
-bool UdpSink::handleStopOperation(IDoneCallback *doneCallback)
+bool UdpSink::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     cancelEvent(selfMsg);
     processStop();
     return true;
 }
 
-void UdpSink::handleCrashOperation()
+void UdpSink::handleCrashOperation(LifecycleOperation *operation)
 {
     cancelEvent(selfMsg);
     processStop();

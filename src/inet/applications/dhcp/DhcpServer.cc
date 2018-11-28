@@ -510,7 +510,7 @@ void DhcpServer::sendToUDP(Packet *msg, int srcPort, const L3Address& destAddr, 
     socket.sendTo(msg, destAddr, destPort);
 }
 
-bool DhcpServer::handleStartOperation(IDoneCallback *doneCallback)
+bool DhcpServer::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     (void)doneCallback; // unused variable
     maxNumOfClients = par("maxNumClients");

@@ -59,7 +59,7 @@ void TelnetApp::initialize(int stage)
     }
 }
 
-bool TelnetApp::handleStartOperation(IDoneCallback *doneCallback)
+bool TelnetApp::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     simtime_t now = simTime();
     simtime_t startTime = par("startTime");
@@ -71,7 +71,7 @@ bool TelnetApp::handleStartOperation(IDoneCallback *doneCallback)
     return true;
 }
 
-bool TelnetApp::handleStopOperation(IDoneCallback *doneCallback)
+bool TelnetApp::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     cancelEvent(timeoutMsg);
     if (socket.getState() == TcpSocket::CONNECTED || socket.getState() == TcpSocket::CONNECTING || socket.getState() == TcpSocket::PEER_CLOSED)
@@ -80,7 +80,7 @@ bool TelnetApp::handleStopOperation(IDoneCallback *doneCallback)
     return true;
 }
 
-void TelnetApp::handleCrashOperation()
+void TelnetApp::handleCrashOperation(LifecycleOperation *operation)
 {
     //TODO needed rapid close sockets
     cancelEvent(timeoutMsg);

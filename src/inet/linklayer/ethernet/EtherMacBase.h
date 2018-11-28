@@ -192,9 +192,9 @@ class INET_API EtherMacBase : public MacBase
     MacTransmitState getTransmitState(){ return transmitState; }
     MacReceiveState getReceiveState(){ return receiveState; }
 
-    virtual bool handleStartOperation(IDoneCallback *doneCallback) override;
-    virtual bool handleStopOperation(IDoneCallback *doneCallback) override;
-    virtual void handleCrashOperation() override;
+    virtual bool handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
+    virtual bool handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
   protected:
     //  initialization

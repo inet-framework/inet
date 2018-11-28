@@ -108,9 +108,9 @@ class INET_API Ieee8021dRelay : public LayeredProtocolBase
     // For lifecycle
     virtual void start();
     virtual void stop();
-    bool handleStartOperation(IDoneCallback *) override { start(); return true; }
-    bool handleStopOperation(IDoneCallback *) override { stop(); return true; }
-    void handleCrashOperation() override { stop(); }
+    bool handleStartOperation(LifecycleOperation *operation, IDoneCallback *) override { start(); return true; }
+    bool handleStopOperation(LifecycleOperation *operation, IDoneCallback *) override { stop(); return true; }
+    void handleCrashOperation(LifecycleOperation *operation) override { stop(); }
     virtual bool isUpperMessage(cMessage *message) override { return message->arrivedOn("upperLayerIn"); }
     virtual bool isLowerMessage(cMessage *message) override { return message->arrivedOn("ifIn"); }
 

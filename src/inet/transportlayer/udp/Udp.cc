@@ -1156,14 +1156,14 @@ void Udp::setMulticastSourceFilter(SockDesc *sd, InterfaceEntry *ie, L3Address m
     }
 }
 
-bool Udp::handleStartOperation(IDoneCallback *)
+bool Udp::handleStartOperation(LifecycleOperation *operation, IDoneCallback *)
 {
     icmp = nullptr;
     icmpv6 = nullptr;
     return true;
 }
 
-bool Udp::handleStopOperation(IDoneCallback *)
+bool Udp::handleStopOperation(LifecycleOperation *operation, IDoneCallback *)
 {
     clearAllSockets();
     icmp = nullptr;
@@ -1171,7 +1171,7 @@ bool Udp::handleStopOperation(IDoneCallback *)
     return true;
 }
 
-void Udp::handleCrashOperation()
+void Udp::handleCrashOperation(LifecycleOperation *operation)
 {
     clearAllSockets();
     icmp = nullptr;

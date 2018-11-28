@@ -178,9 +178,9 @@ class INET_API DhcpClient : public ApplicationBase, public cListener, public Udp
     virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
 
     // Lifecycle methods
-    virtual bool handleStartOperation(IDoneCallback *doneCallback) override;
-    virtual bool handleStopOperation(IDoneCallback *doneCallback) override { stopApp(); return true; }
-    virtual void handleCrashOperation() override { stopApp(); }
+    virtual bool handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
+    virtual bool handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override { stopApp(); return true; }
+    virtual void handleCrashOperation(LifecycleOperation *operation) override { stopApp(); }
     virtual void stopApp();
 
   public:

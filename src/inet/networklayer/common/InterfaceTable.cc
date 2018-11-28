@@ -501,18 +501,18 @@ InterfaceEntry *InterfaceTable::getFirstMulticastInterface() const
     return nullptr;
 }
 
-bool InterfaceTable::handleStartOperation(IDoneCallback *)
+bool InterfaceTable::handleStartOperation(LifecycleOperation *operation, IDoneCallback *)
 {
     return true;
 }
 
-bool InterfaceTable::handleStopOperation(IDoneCallback *)
+bool InterfaceTable::handleStopOperation(LifecycleOperation *operation, IDoneCallback *)
 {
     resetInterfaces();
     return true;
 }
 
-void InterfaceTable::handleCrashOperation()
+void InterfaceTable::handleCrashOperation(LifecycleOperation *operation)
 {
     resetInterfaces();
 }

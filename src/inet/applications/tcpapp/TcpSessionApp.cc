@@ -64,7 +64,7 @@ void TcpSessionApp::initialize(int stage)
     }
 }
 
-bool TcpSessionApp::handleStartOperation(IDoneCallback *doneCallback)
+bool TcpSessionApp::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     if (simTime() <= tOpen) {
         timeoutMsg->setKind(MSGKIND_CONNECT);
@@ -73,7 +73,7 @@ bool TcpSessionApp::handleStartOperation(IDoneCallback *doneCallback)
     return true;
 }
 
-bool TcpSessionApp::handleStopOperation(IDoneCallback *doneCallback)
+bool TcpSessionApp::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     cancelEvent(timeoutMsg);
     if (socket.getState() == TcpSocket::CONNECTED || socket.getState() == TcpSocket::CONNECTING || socket.getState() == TcpSocket::PEER_CLOSED)
@@ -82,7 +82,7 @@ bool TcpSessionApp::handleStopOperation(IDoneCallback *doneCallback)
     return true;
 }
 
-void TcpSessionApp::handleCrashOperation()
+void TcpSessionApp::handleCrashOperation(LifecycleOperation *operation)
 {
     cancelEvent(timeoutMsg);
 }

@@ -53,9 +53,9 @@ class INET_API StpBase : public OperationalBase, public cListener
     virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_LINK_LAYER; }
     virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOrResumeOperationBase::STAGE_LINK_LAYER; }
     virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOrSuspendOperationBase::STAGE_LINK_LAYER; }
-    virtual bool handleStartOperation(IDoneCallback *doneCallback) override;
-    virtual bool handleStopOperation(IDoneCallback *doneCallback) override;
-    virtual void handleCrashOperation() override;
+    virtual bool handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
+    virtual bool handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override {}
 

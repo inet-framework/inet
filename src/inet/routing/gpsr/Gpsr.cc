@@ -786,7 +786,7 @@ INetfilter::IHook::Result Gpsr::datagramLocalOutHook(Packet *packet)
 // lifecycle
 //
 
-bool Gpsr::handleStartOperation(IDoneCallback *)
+bool Gpsr::handleStartOperation(LifecycleOperation *operation, IDoneCallback *)
 {
     configureInterfaces();
     storeSelfPositionInGlobalRegistry();
@@ -794,7 +794,7 @@ bool Gpsr::handleStartOperation(IDoneCallback *)
     return true;
 }
 
-bool Gpsr::handleStopOperation(IDoneCallback *)
+bool Gpsr::handleStopOperation(LifecycleOperation *operation, IDoneCallback *)
 {
     // TODO: send a beacon to remove ourself from peers neighbor position table
     neighborPositionTable.clear();
@@ -803,7 +803,7 @@ bool Gpsr::handleStopOperation(IDoneCallback *)
     return true;
 }
 
-void Gpsr::handleCrashOperation()
+void Gpsr::handleCrashOperation(LifecycleOperation *operation)
 {
     neighborPositionTable.clear();
     cancelEvent(beaconTimer);

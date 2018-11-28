@@ -137,7 +137,7 @@ void Ospf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj,
         throw cRuntimeError("Unexpected signal: %s", getSignalName(signalID));
 }
 
-bool Ospf::handleStartOperation(IDoneCallback *)
+bool Ospf::handleStartOperation(LifecycleOperation *operation, IDoneCallback *)
 {
     ASSERT(ospfRouter == nullptr);
     simtime_t startupTime = par("startupTime");
@@ -150,7 +150,7 @@ bool Ospf::handleStartOperation(IDoneCallback *)
     return true;
 }
 
-bool Ospf::handleStopOperation(IDoneCallback *)
+bool Ospf::handleStopOperation(LifecycleOperation *operation, IDoneCallback *)
 {
     ASSERT(ospfRouter);
     delete ospfRouter;
@@ -160,7 +160,7 @@ bool Ospf::handleStopOperation(IDoneCallback *)
     return true;
 }
 
-void Ospf::handleCrashOperation()
+void Ospf::handleCrashOperation(LifecycleOperation *operation)
 {
     ASSERT(ospfRouter);
     delete ospfRouter;

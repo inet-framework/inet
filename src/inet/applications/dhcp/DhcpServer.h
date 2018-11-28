@@ -118,9 +118,9 @@ class INET_API DhcpServer : public ApplicationBase, public cListener, public Udp
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
     // Lifecycle methods
-    virtual bool handleStartOperation(IDoneCallback *doneCallback) override;
-    virtual bool handleStopOperation(IDoneCallback *doneCallback) override { stopApp(); return true; }
-    virtual void handleCrashOperation() override { stopApp(); }
+    virtual bool handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
+    virtual bool handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override { stopApp(); return true; }
+    virtual void handleCrashOperation(LifecycleOperation *operation) override { stopApp(); }
     virtual void stopApp();
 
   public:

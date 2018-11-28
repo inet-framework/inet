@@ -51,7 +51,7 @@ void TcpBasicClientApp::initialize(int stage)
     }
 }
 
-bool TcpBasicClientApp::handleStartOperation(IDoneCallback *)
+bool TcpBasicClientApp::handleStartOperation(LifecycleOperation *operation, IDoneCallback *)
 {
     simtime_t now = simTime();
     simtime_t start = std::max(startTime, now);
@@ -62,7 +62,7 @@ bool TcpBasicClientApp::handleStartOperation(IDoneCallback *)
     return true;
 }
 
-bool TcpBasicClientApp::handleStopOperation(IDoneCallback *)
+bool TcpBasicClientApp::handleStopOperation(LifecycleOperation *operation, IDoneCallback *)
 {
     cancelEvent(timeoutMsg);
     if (socket.getState() == TcpSocket::CONNECTED || socket.getState() == TcpSocket::CONNECTING || socket.getState() == TcpSocket::PEER_CLOSED)
@@ -71,7 +71,7 @@ bool TcpBasicClientApp::handleStopOperation(IDoneCallback *)
     return true;
 }
 
-void TcpBasicClientApp::handleCrashOperation()
+void TcpBasicClientApp::handleCrashOperation(LifecycleOperation *operation)
 {
     cancelEvent(timeoutMsg);
     // TODO: rapid socket close

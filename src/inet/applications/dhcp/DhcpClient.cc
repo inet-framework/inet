@@ -682,7 +682,7 @@ void DhcpClient::openSocket()
     EV_INFO << "DHCP server bound to port " << serverPort << "." << endl;
 }
 
-bool DhcpClient::handleStartOperation(IDoneCallback *doneCallback)
+bool DhcpClient::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     simtime_t start = std::max(startTime, simTime());
     ie = chooseInterface();

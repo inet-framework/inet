@@ -480,20 +480,20 @@ Ipv4Address Ted::getPeerByLocalAddress(Ipv4Address localInf)
     return ted[index].linkid;
 }
 
-bool Ted::handleStartOperation(IDoneCallback *)
+bool Ted::handleStartOperation(LifecycleOperation *operation, IDoneCallback *)
 {
     initializeTED();
     return true;
 }
 
-bool Ted::handleStopOperation(IDoneCallback *)
+bool Ted::handleStopOperation(LifecycleOperation *operation, IDoneCallback *)
 {
     ted.clear();
     interfaceAddrs.clear();
     return true;
 }
 
-void Ted::handleCrashOperation()
+void Ted::handleCrashOperation(LifecycleOperation *operation)
 {
     ted.clear();
     interfaceAddrs.clear();

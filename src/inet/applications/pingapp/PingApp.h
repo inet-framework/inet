@@ -106,9 +106,9 @@ class INET_API PingApp : public ApplicationBase, public INetworkSocket::ICallbac
     virtual void countPingResponse(int bytes, long seqNo, simtime_t rtt, bool isDup);
 
     // Lifecycle methods
-    virtual bool handleStartOperation(IDoneCallback *doneCallback) override;
-    virtual bool handleStopOperation(IDoneCallback *doneCallback) override { stopSendingPingRequests(); return true; }
-    virtual void handleCrashOperation() override { stopSendingPingRequests(); }
+    virtual bool handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override;
+    virtual bool handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback) override { stopSendingPingRequests(); return true; }
+    virtual void handleCrashOperation(LifecycleOperation *operation) override { stopSendingPingRequests(); }
 
     //INetworkSocket::ICallback:
     virtual void socketDataArrived(INetworkSocket *socket, Packet *packet) override;

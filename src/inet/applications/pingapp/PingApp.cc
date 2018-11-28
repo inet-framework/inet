@@ -298,7 +298,7 @@ void PingApp::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-bool PingApp::handleStartOperation(IDoneCallback *doneCallback)
+bool PingApp::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     if (isEnabled())
         startSendingPingRequests();

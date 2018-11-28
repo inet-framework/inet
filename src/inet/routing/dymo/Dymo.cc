@@ -1396,13 +1396,13 @@ INetfilter::IHook::Result Dymo::ensureRouteForDatagram(Packet *datagram)
 // lifecycle
 //
 
-bool Dymo::handleStartOperation(IDoneCallback *)
+bool Dymo::handleStartOperation(LifecycleOperation *operation, IDoneCallback *)
 {
     configureInterfaces();
     return true;
 }
 
-bool Dymo::handleStopOperation(IDoneCallback *)
+bool Dymo::handleStopOperation(LifecycleOperation *operation, IDoneCallback *)
 {
     // TODO: send a RERR to notify peers about broken routes
     for (auto & elem : targetAddressToRREQTimer)
@@ -1410,7 +1410,7 @@ bool Dymo::handleStopOperation(IDoneCallback *)
     return true;
 }
 
-void Dymo::handleCrashOperation()
+void Dymo::handleCrashOperation(LifecycleOperation *operation)
 {
     targetAddressToSequenceNumber.clear();
     targetAddressToRREQTimer.clear();

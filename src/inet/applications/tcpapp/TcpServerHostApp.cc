@@ -31,7 +31,7 @@ void TcpServerHostApp::initialize(int stage)
     ApplicationBase::initialize(stage);
 }
 
-bool TcpServerHostApp::handleStartOperation(IDoneCallback *)
+bool TcpServerHostApp::handleStartOperation(LifecycleOperation *operation, IDoneCallback *)
 {
     const char *localAddress = par("localAddress");
     int localPort = par("localPort");
@@ -44,7 +44,7 @@ bool TcpServerHostApp::handleStartOperation(IDoneCallback *)
     return true;
 }
 
-bool TcpServerHostApp::handleStopOperation(IDoneCallback *)
+bool TcpServerHostApp::handleStopOperation(LifecycleOperation *operation, IDoneCallback *)
 {
     //FIXME close sockets?
 
@@ -54,7 +54,7 @@ bool TcpServerHostApp::handleStopOperation(IDoneCallback *)
     return true;
 }
 
-void TcpServerHostApp::handleCrashOperation()
+void TcpServerHostApp::handleCrashOperation(LifecycleOperation *operation)
 {
     // remove and delete threads
     while (!threadSet.empty())

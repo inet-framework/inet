@@ -66,9 +66,9 @@ protected:
     virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_LINK_LAYER; }
     virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOrResumeOperationBase::STAGE_LINK_LAYER; }
     virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOrSuspendOperationBase::STAGE_LINK_LAYER; }
-    virtual bool handleStartOperation(IDoneCallback *) override;
-    virtual bool handleStopOperation(IDoneCallback *) override;
-    virtual void handleCrashOperation() override;
+    virtual bool handleStartOperation(LifecycleOperation *operation, IDoneCallback *) override;
+    virtual bool handleStopOperation(LifecycleOperation *operation, IDoneCallback *) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
   public:
     virtual ~Ieee8022Llc();

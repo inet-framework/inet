@@ -93,7 +93,7 @@ void UdpVideoStreamClient::receiveStream(Packet *pk)
     delete pk;
 }
 
-bool UdpVideoStreamClient::handleStartOperation(IDoneCallback *doneCallback)
+bool UdpVideoStreamClient::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     simtime_t startTimePar = par("startTime");
     simtime_t startTime = std::max(startTimePar, simTime());
@@ -101,14 +101,14 @@ bool UdpVideoStreamClient::handleStartOperation(IDoneCallback *doneCallback)
     return true;
 }
 
-bool UdpVideoStreamClient::handleStopOperation(IDoneCallback *doneCallback)
+bool UdpVideoStreamClient::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     cancelEvent(selfMsg);
     //TODO if(socket.isOpened()) socket.close();
     return true;
 }
 
-void UdpVideoStreamClient::handleCrashOperation()
+void UdpVideoStreamClient::handleCrashOperation(LifecycleOperation *operation)
 {
     cancelEvent(selfMsg);
 }

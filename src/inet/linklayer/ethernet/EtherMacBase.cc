@@ -283,14 +283,14 @@ void EtherMacBase::configureInterfaceEntry()
     interfaceEntry->setBroadcast(true);
 }
 
-bool EtherMacBase::handleStartOperation(IDoneCallback *doneCallback)
+bool EtherMacBase::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     initializeFlags();
     initializeQueueModule();
     return true;
 }
 
-bool EtherMacBase::handleStopOperation(IDoneCallback *doneCallback)
+bool EtherMacBase::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
 //    flushQueue();
     connected = false;
@@ -298,7 +298,7 @@ bool EtherMacBase::handleStopOperation(IDoneCallback *doneCallback)
     return true;
 }
 
-void EtherMacBase::handleCrashOperation()
+void EtherMacBase::handleCrashOperation(LifecycleOperation *operation)
 {
 //    clearQueue();
     connected = false;

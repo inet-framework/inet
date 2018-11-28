@@ -225,7 +225,7 @@ void UdpBasicApp::processPacket(Packet *pk)
     numReceived++;
 }
 
-bool UdpBasicApp::handleStartOperation(IDoneCallback *doneCallback)
+bool UdpBasicApp::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     simtime_t start = std::max(startTime, simTime());
     if ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime)) {
@@ -235,14 +235,14 @@ bool UdpBasicApp::handleStartOperation(IDoneCallback *doneCallback)
     return true;
 }
 
-bool UdpBasicApp::handleStopOperation(IDoneCallback *doneCallback)
+bool UdpBasicApp::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     cancelEvent(selfMsg);
     socket.close();
     return true;
 }
 
-void UdpBasicApp::handleCrashOperation()
+void UdpBasicApp::handleCrashOperation(LifecycleOperation *operation)
 {
     cancelEvent(selfMsg);
     socket.close();

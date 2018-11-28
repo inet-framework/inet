@@ -205,13 +205,13 @@ void Ldp::socketErrorArrived(UdpSocket *socket, Indication *indication)
     delete indication;
 }
 
-bool Ldp::handleStartOperation(IDoneCallback *doneCallback)
+bool Ldp::handleStartOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     scheduleAt(simTime() + exponential(0.1), sendHelloMsg);
     return true;
 }
 
-bool Ldp::handleStopOperation(IDoneCallback *doneCallback)
+bool Ldp::handleStopOperation(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     for (auto & elem : myPeers)
         cancelAndDelete(elem.timeout);
@@ -220,7 +220,7 @@ bool Ldp::handleStopOperation(IDoneCallback *doneCallback)
     return true;
 }
 
-void Ldp::handleCrashOperation()
+void Ldp::handleCrashOperation(LifecycleOperation *operation)
 {
     for (auto & elem : myPeers)
         cancelAndDelete(elem.timeout);
