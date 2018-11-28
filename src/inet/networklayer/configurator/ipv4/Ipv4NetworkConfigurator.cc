@@ -1693,7 +1693,6 @@ void Ipv4NetworkConfigurator::optimizeRoutes(std::vector<Ipv4Route *>& originalR
         // create a copy of the original route that can be destructively optimized later
         RouteInfo *optimizedRouteInfo = new RouteInfo(*originalRouteInfo);
         optimizedRouteInfo->originalRouteInfos.push_back(originalRouteInfo);
-        routingTableInfo.originalRouteInfos.push_back(originalRouteInfo);
         routingTableInfo.addRouteInfo(optimizedRouteInfo);
     }
 

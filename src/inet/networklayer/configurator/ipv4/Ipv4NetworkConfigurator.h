@@ -112,12 +112,11 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
     class RoutingTableInfo
     {
       public:
-        std::vector<RouteInfo *> originalRouteInfos;    // keep track of the original routes
         std::vector<RouteInfo *> routeInfos;    // list of routes in the routing table
 
       public:
         RoutingTableInfo() {}
-        ~RoutingTableInfo() { for (size_t i = 0; i < originalRouteInfos.size(); i++) delete originalRouteInfos[i]; }
+        ~RoutingTableInfo() {}
 
         int addRouteInfo(RouteInfo *routeInfo);
         void removeRouteInfo(const RouteInfo *routeInfo) { routeInfos.erase(std::find(routeInfos.begin(), routeInfos.end(), routeInfo)); }
