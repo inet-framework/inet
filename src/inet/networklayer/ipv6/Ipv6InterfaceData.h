@@ -448,7 +448,7 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
     Ipv6InterfaceData();
     virtual ~Ipv6InterfaceData();
     std::string str() const override;
-    std::string detailedInfo() const override;
+    std::string detailedInfo() const OMNETPP5_CODE(override);
 
     /** @name Addresses */
     //@{
