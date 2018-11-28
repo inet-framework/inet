@@ -26,7 +26,7 @@ namespace inet {
 
 Register_Protocol_Dissector(&Protocol::ipv6, Ipv6ProtocolDissector);
 
-void Ipv6ProtocolDissector::dissect(Packet *packet, ICallback& callback) const
+void Ipv6ProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
     auto trailerPopOffset = packet->getBackOffset();
     const auto& header = packet->popAtFront<Ipv6Header>();

@@ -22,6 +22,7 @@ import inet.common.queue.IOutputQueue;
 import inet.linklayer.contract.IEtherMac;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.contract.ITrafficConditioner;
+import inet.linklayer.ieee8021q.IIeee8021QVlan;
 
 //
 // Ethernet network interface. Complements ~EtherMac and ~EtherEncap
@@ -32,6 +33,9 @@ module EthernetInterface like IEthernetInterface
     parameters:
         @class(InterfaceEntry);
         string interfaceTableModule;
+        string address = default("auto");   // MAC address as hex string (12 hex digits), or
+                                            // "auto". "auto" values will be replaced by
+                                            // a generated MAC address in init stage 0.
         bool csmacdSupport = default(false);  // by default CSMA/CD is turned off, so only point-to-point duplex links are supported.
         string fcsMode @enum("declared", "computed") = default("declared");
         @display("i=block/ifcard;bgl=2");
@@ -62,16 +66,25 @@ module EthernetInterface like IEthernetInterface
             parameters:
                 @display("p=250,300");
         }
-    connections:
-        mac.upperLayerOut --> encap.lowerLayerIn;
-        mac.phys <--> { @display("m=s"); } <--> phys;
-
-        if exists(queue) {
-            encap.lowerLayerOut --> queue.in;
-            queue.out --> mac.upperLayerIn;
+        vlan: <default("")> like IIeee8021QVlan if typename != "" {
+            parameters:
+                @display("p=250,400");
         }
+    connections:
+        mac.upperLayerOut --> vlan.lowerLayerIn if exists(vlan);
+        mac.upperLayerOut --> encap.lowerLayerIn if !exists(vlan);
 
-        encap.lowerLayerOut --> mac.upperLayerIn if !exists(queue);
+        mac.upperLayerIn <-- queue.out if exists(queue);
+        mac.upperLayerIn <-- vlan.lowerLayerOut if !exists(queue) && exists(vlan);
+        mac.upperLayerIn <-- encap.lowerLayerOut if !exists(queue) && !exists(vlan);
+
+        encap.lowerLayerOut --> vlan.upperLayerIn if exists(vlan);
+        encap.lowerLayerIn <-- vlan.upperLayerOut if exists(vlan);
+
+        vlan.lowerLayerOut --> queue.in if exists(vlan) && exists(queue);
+        encap.lowerLayerOut --> queue.in if !exists(vlan) && exists(queue);
+
+        mac.phys <--> { @display("m=s"); } <--> phys;
 
         // no ingressTC
         encap.upperLayerOut --> { @display("m=n"); } --> upperLayerOut if !exists(ingressTC);

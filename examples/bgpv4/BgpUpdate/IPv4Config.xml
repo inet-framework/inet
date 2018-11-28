@@ -7,3 +7,4 @@
   <interface hosts='H2' names='eth0' address='192.168.2.1' netmask='255.255.255.0' mtu='1500' metric='1'/>
   <route hosts='H*' destination='*' netmask='*' interface='eth0'/>
 </config>
+

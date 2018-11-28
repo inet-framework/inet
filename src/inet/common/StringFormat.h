@@ -22,8 +22,6 @@
 
 namespace inet {
 
-namespace visualizer {
-
 class INET_API StringFormat
 {
   public:
@@ -41,8 +39,6 @@ class INET_API StringFormat
     void parseFormat(const char *format);
     const char *formatString(IDirectiveResolver *resolver) const;
 };
-
-} // namespace visualizer
 
 } // namespace inet
 

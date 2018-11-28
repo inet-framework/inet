@@ -273,14 +273,6 @@ void EtherMacBase::initializeStatistics()
 void EtherMacBase::configureInterfaceEntry()
 {
     InterfaceEntry *interfaceEntry = getContainingNicModule(this);
-    MacAddress address = parseMacAddressParameter(par("address"));
-
-    interfaceEntry->setMacAddress(address);
-
-    // generate a link-layer address to be used as interface token for IPv6
-    interfaceEntry->setInterfaceToken(address.formInterfaceIdentifier());
-    //InterfaceToken token(0, getSimulation()->getUniqueNumber(), 64);
-    //interfaceEntry->setInterfaceToken(token);
 
     // MTU: typical values are 576 (Internet de facto), 1500 (Ethernet-friendly),
     // 4000 (on some point-to-point links), 4470 (Cisco routers default, FDDI compatible)

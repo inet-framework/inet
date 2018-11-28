@@ -20,6 +20,7 @@ package inet.node.ethernet;
 
 import inet.common.MessageDispatcher;
 import inet.common.lifecycle.NodeStatus;
+import inet.common.packet.recorder.PcapRecorder;
 import inet.linklayer.configurator.L2NodeConfigurator;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.contract.IExternalInterface;
@@ -44,6 +45,7 @@ module EtherSwitch
         @networkNode();
         @labels(node,ethernet-node);
         @display("i=device/switch");
+        int numPcapRecorders = default(0);
         bool hasStatus = default(false);
         bool hasStp = default(false);
         bool csmacdSupport = default(true);  // by default use CSMA/CD --FIXME remove
@@ -74,6 +76,9 @@ module EtherSwitch
         }
         interfaceTable: InterfaceTable {
             @display("p=100,200;is=s");
+        }
+        pcapRecorder[numPcapRecorders]: PcapRecorder {
+            @display("p=100,500;is=s");
         }
         macTable: <default("MacAddressTable")> like IMacAddressTable {
             @display("p=100,100;is=s");

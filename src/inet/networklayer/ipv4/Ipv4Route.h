@@ -35,28 +35,6 @@ class IIpv4RoutingTable;
  */
 class INET_API Ipv4Route : public cObject, public IRoute
 {
-  public:
-    /** Cisco like administrative distances */
-    enum RouteAdminDist {
-        dDirectlyConnected = 0,
-        dStatic = 1,
-        dEIGRPSummary = 5,
-        dBGPExternal = 20,
-        dEIGRPInternal = 90,
-        dIGRP = 100,
-        dOSPF = 110,
-        dISIS = 115,
-        dRIP = 120,
-        dEGP = 140,
-        dODR = 160,
-        dEIGRPExternal = 170,
-        dBGPInternal = 200,
-        dDHCPlearned = 254,
-        dBABEL = 125,
-        dLISP = 210,
-        dUnknown = 255
-    };
-
   private:
     IIpv4RoutingTable *rt;    ///< the routing table in which this route is inserted, or nullptr
     Ipv4Address dest;    ///< Destination
@@ -101,7 +79,7 @@ class INET_API Ipv4Route : public cObject, public IRoute
     virtual void setInterface(InterfaceEntry *_interfacePtr) override { if (interfacePtr != _interfacePtr) { interfacePtr = _interfacePtr; changed(F_IFACE); } }
     virtual void setSourceType(SourceType _source) override { if (sourceType != _source) { sourceType = _source; changed(F_SOURCE); } }
     const char* getSourceTypeAbbreviation() const;
-    virtual void setAdminDist(unsigned int _adminDist) { if (adminDist != _adminDist) { adminDist = _adminDist; changed(F_ADMINDIST); } }
+    virtual void setAdminDist(unsigned int _adminDist) override { if (adminDist != _adminDist) { adminDist = _adminDist; changed(F_ADMINDIST); } }
     virtual void setMetric(int _metric) override { if (metric != _metric) { metric = _metric; changed(F_METRIC); } }
 
     /** Destination address prefix to match */

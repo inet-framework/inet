@@ -7,12 +7,11 @@ Testing OSPF routing
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
+import inet.common.misc.ThruputMeteringChannel;
 import inet.linklayer.ethernet.EtherHub;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.inet.StandardHost;
-import inet.nodes.ospfv2.OSPFRouter;
-import inet.util.ThruputMeteringChannel;
-
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.StandardHost;
+import inet.node.ospfv2.OspfRouter;
 
 channel C extends ThruputMeteringChannel
 {
@@ -25,7 +24,7 @@ module OspfLan
 {
     parameters:
         int h; // number of hosts on the hub
-        @display("i=cloud");
+        @display("i=misc/cloud");
     gates:
         inout ethg[];
     submodules:
@@ -44,116 +43,275 @@ module OspfLan
         }
 }
 
-network Fig6
+module OSPF_Area1
+{
+    parameters:
+        @display("p=10,42;b=432,504");
+    gates:
+        inout ethg[3];
+    submodules:
+        RT1: OspfRouter {
+            parameters:
+                @display("p=250,100");
+            gates:
+                ethg[2];
+        }
+        RT2: OspfRouter {
+            parameters:
+                @display("p=250,300");
+            gates:
+                ethg[2];
+        }
+        N1: OspfLan {
+            parameters:
+                h = 2;
+                @display("p=100,100;is=l");
+        }
+        N2: OspfLan {
+            parameters:
+                h = 2;
+                @display("p=100,300;is=l");
+        }
+        N3: OspfLan {
+            parameters:
+                h = 1;
+                @display("p=400,200;is=l");
+        }
+        N4: OspfLan {
+            parameters:
+                h = 2;
+                @display("p=400,400;is=l");
+        }
+    connections:
+        N1.ethg++ <--> C <--> RT1.ethg[0];
+        RT1.ethg[1] <--> C <--> N3.ethg++;
+        N2.ethg++ <--> C <--> RT2.ethg[0];
+        RT2.ethg[1] <--> C <--> N3.ethg++;
+
+        // towards other areas
+        N3.ethg++ <--> { @display("m=n"); } <--> ethg[0];
+        N3.ethg++ <--> { @display("m=e"); } <--> ethg[1];
+        N4.ethg++ <--> { @display("m=e"); } <--> ethg[2];
+}
+
+module OSPF_Area2
+{
+    parameters:
+        @display("p=10,10;b=424,400");
+    gates:
+        inout ethg[4];
+    submodules:
+        RT8: OspfRouter {
+            parameters:
+                @display("p=300,200");
+            gates:
+                ethg[2];
+        }
+        N6: OspfLan {
+            parameters:
+                h = 1;
+                @display("p=300,100;is=l");
+        }
+        N7: OspfLan {
+            parameters:
+                h = 2;
+                @display("p=300,300;is=l");
+        }
+        N8: OspfLan {
+            parameters:
+                h = 1;
+                @display("p=100,100;is=l");
+        }
+    connections:
+        N6.ethg++ <--> C <--> RT8.ethg[0];
+        RT8.ethg[1] <--> C <--> N7.ethg++;
+
+        // towards other areas
+        N8.ethg++ <--> ethg[0];
+        N8.ethg++ <--> { @display("m=n"); } <--> ethg[1];
+        N6.ethg++ <--> { @display("m=e"); } <--> ethg[2];
+        N6.ethg++ <--> ethg[3];
+}
+
+module OSPF_Area3
+{
+    parameters:
+        @display("p=10,10;b=264,528");
+    gates:
+        inout ethg[1];
+    submodules:
+        RT9: OspfRouter {
+            parameters:
+                @display("p=250,200");
+            gates:
+                ethg[2];
+        }
+        RT12: OspfRouter {
+            parameters:
+                @display("p=250,400");
+            gates:
+                ethg[3];
+        }
+        N9: OspfLan {
+            parameters:
+                h = 1;
+                @display("p=250,300;is=l");
+        }
+        N10: OspfLan {
+            parameters:
+                h = 2;
+                @display("p=250,500;is=l");
+        }
+        N11: OspfLan {
+            parameters:
+                h = 2;
+                @display("p=250,100;is=l");
+        }
+        H1: StandardHost {
+            parameters:
+                @display("p=100,400;i=device/pc");
+        }
+    connections:
+        RT9.ethg[1] <--> C <--> N9.ethg++;
+        RT9.ethg[0] <--> C <--> N11.ethg++;
+        RT12.ethg[1] <--> C <--> H1.ethg++;
+        RT12.ethg[0] <--> C <--> N9.ethg++;
+        RT12.ethg[2] <--> C <--> N10.ethg++;
+
+        // towards other areas
+        ethg[0] <--> { @display("m=e"); } <--> N9.ethg++;
+}
+
+network OSPF_RFC2328_Fig6
 {
     parameters:
         @display("p=10,10;b=704,560");
     submodules:
-        RT5: OSPFRouter {
+        Area1: OSPF_Area1 {
             parameters:
-                @display("p=496,144");
+                @display("p=250,235;b=150,150");
+        }
+        Area2: OSPF_Area2 {
+            parameters:
+                @display("p=650,530;b=150,150");
+        }
+        Area3: OSPF_Area3 {
+            parameters:
+                @display("p=250,530;b=150,150");
+        }
+        RT3: OspfRouter {
+            parameters:
+                @display("p=450,280");
+            gates:
+                ethg[3];
+        }
+        RT4: OspfRouter {
+            parameters:
+                @display("p=450,190");
+            gates:
+                ethg[2];
+        }
+        RT5: OspfRouter {
+            parameters:
+                @display("p=700,190");
             gates:
                 ethg[6];
         }
-        RT6: OSPFRouter {
+        RT6: OspfRouter {
             parameters:
-                @display("p=424,208");
+                @display("p=600,280");
             gates:
                 ethg[3];
         }
-        RT7: OSPFRouter {
+        RT7: OspfRouter {
             parameters:
-                @display("p=496,328");
+                @display("p=700,370");
             gates:
                 ethg[4];
         }
-        RT10: OSPFRouter {
+        RT10: OspfRouter {
             parameters:
-                @display("p=424,328");
+                @display("p=600,370");
             gates:
                 ethg[3];
         }
-        RT11: OSPFRouter {
+        RT11: OspfRouter {
             parameters:
-                @display("p=282,404");
+                @display("p=450,530");
             gates:
                 ethg[2];
         }
         N12: OspfLan {
             parameters:
                 h = 1;
-                @display("p=620,277");
+                @display("p=850,280;is=l");
+        }
+        N13: OspfLan {
+            parameters:
+                h = 1;
+                @display("p=850,100;is=l");
+        }
+        N14: OspfLan {
+            parameters:
+                h = 1;
+                @display("p=550,100;is=l");
         }
         N15: OspfLan {
             parameters:
                 h = 1;
-                @display("p=608,356");
+                @display("p=850,450;is=l");
         }
-        Area2_N6: EtherHub {
-            parameters:
-                @display("p=504,467");
-        }
-        Area2_N8: EtherHub {
-            parameters:
-                @display("p=411,467");
-        }
-        Area3_RT12: OSPFRouter {
-            parameters:
-                @display("p=148,360");
-            gates:
-                ethg[3];
-        }
-        Area3_N9: EtherHub {
-            parameters:
-                @display("p=148,284");
-        }
-        Area3_N10: OspfLan {
-            parameters:
-                h = 1;
-                @display("p=148,452");
-        }
-        Area3_H1: StandardHost {
-            parameters:
-                @display("p=64,360;i=device/pc_s");
-        }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             parameters:
                 config = xml("<config>"+"\n"+
-                            "<interface among='Area2_N8.* RT10 RT11' address='10.2.21.x' netmask='255.255.255.0' />"+"\n"+
-                            "<interface hosts='Area2_N6.*' address='10.2.22.x' netmask='255.255.255.0' />"+"\n"+
-                            "<interface hosts='RT7 RT10' towards='Area2_N6.*' address='10.2.22.x' netmask='255.255.255.0' />"+"\n"+
+                            "<interface among='Area1.N1.* Area1.RT1' address='10.1.11.x' netmask='255.255.255.0' />"+"\n"+
+                            "<interface among='Area1.N2.* Area1.RT2' address='10.1.12.x' netmask='255.255.255.0' />"+"\n"+
+                            "<interface among='Area1.N3.* Area1.RT1 Area1.RT2 RT3 RT4' address='10.1.13.x' netmask='255.255.255.0' metric='1' />"+"\n"+
+                            "<interface among='Area1.N4.* RT3' address='10.1.14.x' netmask='255.255.255.0' metric='1' />"+"\n"+
+                            "<interface among='Area1.N2.* Area1.RT2' address='10.1.15.x' netmask='255.255.255.0' />"+"\n"+
 
-                            "<interface among='Area3_N10.* Area3_RT12' address='10.3.31.x' netmask='255.255.255.0' />"+"\n"+
-                            "<interface among='Area3_H1 Area3_RT12' address='10.3.33.x' netmask='255.255.255.0' />"+"\n"+
-                            "<interface among='Area3_N9 Area3_N9.* Area3_RT* RT11' address='10.3.34.x' netmask='255.255.255.0' />"+"\n"+
+                            "<interface among='Area2.N8.* RT10 RT11' address='10.2.21.x' netmask='255.255.255.0' />"+"\n"+
+                            "<interface hosts='Area2.N6.*' address='10.2.22.x' netmask='255.255.255.0' />"+"\n"+
+                            "<interface hosts='RT7 RT10 Area2.RT8' towards='Area2.N6.*' address='10.2.22.x' netmask='255.255.255.0' />"+"\n"+
+                            "<interface among='Area2.N7.* Area2.RT8' address='10.2.23.x' netmask='255.255.255.0' />"+"\n"+
+
+                            "<interface among='Area3.N10.* Area3.RT12' address='10.3.31.x' netmask='255.255.255.0' />"+"\n"+
+                            "<interface among='Area3.N11.* Area3.RT9' address='10.3.32.x' netmask='255.255.255.0' />"+"\n"+
+                            "<interface among='Area3.H1 Area3.RT12' address='10.3.33.x' netmask='255.255.255.0' />"+"\n"+
+                            "<interface among='Area3.N9 Area3.N9.* Area3.RT* RT11' address='10.3.34.x' netmask='255.255.255.0' />"+"\n"+
 
                             "<interface hosts='RT5 RT7' towards='N12.*' address='10.99.12.x' netmask='255.255.255.0' />"+"\n"+
                             "<interface hosts='N12.*' address='10.99.12.x' netmask='255.255.255.0' />"+"\n"+
-                            "<interface among='RT5 RT6 RT7 RT10' address='10.0.104.x' netmask='255.255.255.x' />"+"\n"+
+                            "<interface among='RT5 N13.*' address='10.99.13.x' netmask='255.255.255.0' />"+"\n"+
+                            "<interface among='RT5 N14.*' address='10.99.14.x' netmask='255.255.255.0' />"+"\n"+
+                            "<interface among='RT3 RT4 RT5 RT6 RT7 RT10' address='10.0.104.x' netmask='255.255.255.x' />"+"\n"+
                             "<interface among='RT7 N15.*' address='10.99.15.x' netmask='255.255.255.0' />"+"\n"+
 
-                            "<route hosts='Area3_H1 Area*_N*.host[*] N*.host[*]' destination='*' netmask='0.0.0.0' interface='eth0' />"+"\n"+
+                            "<route hosts='Area*.H* Area*.N*.host[*] N*.host[*]' destination='*' netmask='0.0.0.0' interface='eth0' />"+"\n"+
                             "</config>"+"\n");
                 addStaticRoutes = false;
                 addDefaultRoutes = false;
-                @display("p=120,43");
+                @display("p=100,100;is=s");
         }
-    connections allowunconnected:
-        Area3_RT12.ethg[1] <--> C <--> Area3_H1.ethg++;
-        Area3_RT12.ethg[0] <--> C <--> Area3_N9.ethg++;
-        Area3_RT12.ethg[2] <--> C <--> Area3_N10.ethg++;
-        RT11.ethg[0] <--> C <--> Area3_N9.ethg++;
-        Area2_N8.ethg++ <--> C <--> RT11.ethg[1];
-        Area2_N8.ethg++ <--> C <--> RT10.ethg[1];
-        Area2_N6.ethg++ <--> C <--> RT10.ethg[2];
-        Area2_N6.ethg++ <--> C <--> RT7.ethg[1];
-
+    connections:
+        RT3.ethg[0] <--> C <--> Area1.ethg[1];
+        RT3.ethg[1] <--> C <--> Area1.ethg[2];
+        RT3.ethg[2] <--> C <--> RT6.ethg[0];
+        RT4.ethg[0] <--> C <--> Area1.ethg[0];
+        RT4.ethg[1] <--> C <--> RT5.ethg[1];
+        RT5.ethg[5] <--> C <--> N14.ethg++;
         RT5.ethg[3] <--> C <--> RT7.ethg[0];
         RT5.ethg[2] <--> C <--> RT6.ethg[2];
         RT5.ethg[4] <--> C <--> N12.ethg++;
+        RT5.ethg[0] <--> C <--> N13.ethg++;
         RT6.ethg[1] <--> C <--> RT10.ethg[0];
+        RT7.ethg[1] <--> C <--> Area2.ethg[3];
         RT7.ethg[3] <--> C <--> N12.ethg++;
         RT7.ethg[2] <--> C <--> N15.ethg++;
+        RT10.ethg[1] <--> C <--> Area2.ethg[1];
+        RT10.ethg[2] <--> C <--> Area2.ethg[2];
+        RT11.ethg[1] <--> C <--> Area2.ethg[0];
+        RT11.ethg[0] <--> C <--> Area3.ethg[0];
 }
 
 
@@ -162,7 +320,7 @@ network Fig6
 
 [General]
 description = "Full network test"
-network = Fig6
+network = OSPF_RFC2328_Fig6
 ned-path = .;../../../../src;../../lib
 
 tkenv-plugin-path = ../../../etc/plugins
@@ -182,26 +340,39 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 *.usenew = true
 
-**.Area3_N10.host[0].numUdpApps = 2
-**.N15.host[0].numUdpApps = 2
-**.N12.host[0].numUdpApps = 2
-**.Area3_H1.numUdpApps = 2
+**.H1.numApps = 2
+**.host[0].numApps = 2
+**.N7.host[1].numApps = 2
+**.app[0].typename = "UdpEchoApp"
+**.app[0].localPort = 1234
+**.app[1..].typename = "UdpBasicApp"
+**.app[1..].destPort = 1234
+**.app[1..].messageLength = 32 bytes
+**.app[1..].sendInterval = 1s
+**.app[1..].startTime = 100s
+**.app[1..].stopTime = this.startTime + 100s
 
-**.udpApp[0].typename = "UDPEchoApp"
-**.udpApp[0].localPort = 1234
+**.Area1.N1.host[0].app[1].destAddresses = "Area1.N4.host[0]"
+**.Area1.N2.host[0].app[1].destAddresses = "Area2.N6.host[0]"
+**.Area1.N3.host[0].app[1].destAddresses = "Area3.N10.host[0]"
+**.Area1.N4.host[0].app[1].destAddresses = "N12.host[0]"
 
-**.udpApp[1..].typename = "UDPBasicApp"
-**.udpApp[1..].destPort = 1234
-**.udpApp[1..].messageLength = 32 bytes
-**.udpApp[1..].sendInterval = 1s
-**.udpApp[1..].startTime = 100s
-**.udpApp[1..].stopTime = this.startTime + 100s
+**.Area2.N6.host[0].app[1].destAddresses = "Area1.N1.host[0]"
+**.Area2.N7.host[0].app[1].destAddresses = "Area2.N8.host[0]"
+**.Area2.N7.host[1].app[1].destAddresses = "N13.host[0]"
+**.Area2.N8.host[0].app[1].destAddresses = "Area3.N9.host[0]"
 
-**.Area3_N10.host[0].udpApp[1].destAddresses = "N15.host[0]"
-**.N15.host[0].udpApp[1].destAddresses = "Area3_N10.host[0]"
-**.N12.host[0].udpApp[1].destAddresses =  "Area3_H1"
-**.Area3_H1.udpApp[1].destAddresses =  "N12.host[0]"
+**.Area3.N11.host[0].app[1].destAddresses = "Area1.N2.host[0]"
+**.Area3.N9.host[0].app[1].destAddresses =  "Area2.N7.host[0]"
+**.Area3.H1.app[1].destAddresses =          "Area3.N11.host[0]"
+**.Area3.N10.host[0].app[1].destAddresses = "N15.host[0]"
 
+**.N13.host[0].app[1].destAddresses = "Area1.N3.host[0]"
+**.N14.host[0].app[1].destAddresses = "Area2.N7.host[1]"
+**.N12.host[0].app[1].destAddresses =  "Area3.H1"
+**.N15.host[0].app[1].destAddresses = "N14.host[0]"
+
+**.H1.app[1].destAddresses = "Area1.N3.host[0]"
 %#--------------------------------------------------------------------------------------------------------------
 %file: ASConfig.xml
 <?xml version="1.0"?>
@@ -209,93 +380,142 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
   <!-- Areas -->
   <Area id="0.0.0.0">
-    <AddressRange address="RT5>RT6" mask="RT5>RT6" status="Advertise" />
-    <AddressRange address="RT5>RT7" mask="RT5>RT7" status="Advertise" />
-    <AddressRange address="RT6>RT10" mask="RT6>RT10" status="Advertise" />
-    <AddressRange address="RT6>RT5" mask="RT6>RT5" status="Advertise" />
-    <AddressRange address="RT7>RT5" mask="RT7>RT5" status="Advertise" />
-    <AddressRange address="RT10>RT6" mask="RT10>RT6" status="Advertise" />
+    <AddressRange address="RT3>RT6" mask="RT3>RT6" />
+    <AddressRange address="RT4>RT5" mask="RT4>RT5" />
+    <AddressRange address="RT5>RT4" mask="RT5>RT4" />
+    <AddressRange address="RT5>RT6" mask="RT5>RT6" />
+    <AddressRange address="RT5>RT7" mask="RT5>RT7" />
+    <AddressRange address="RT6>RT3" mask="RT6>RT3" />
+    <AddressRange address="RT6>RT10" mask="RT6>RT10" />
+    <AddressRange address="RT6>RT5" mask="RT6>RT5" />
+    <AddressRange address="RT7>RT5" mask="RT7>RT5" />
+    <AddressRange address="RT10>RT6" mask="RT10>RT6" />
+  </Area>
+
+  <Area id="0.0.0.1">
+    <AddressRange address="Area1.RT1>Area1.N1" mask="Area1.RT1>Area1.N1" />
+    <AddressRange address="Area1.RT2>Area1.N2" mask="Area1.RT2>Area1.N2" />
+    <AddressRange address="Area1.N3.host[0]" mask="Area1.N3.host[0]" />
+    <AddressRange address="RT3>Area1.N4" mask="RT3>Area1.N4" />
   </Area>
 
   <Area id="0.0.0.2">
-    <AddressRange address="RT7>Area2_N6" mask="RT7>Area2_N6" status="Advertise" />
-    <AddressRange address="RT10>Area2_N6" mask="RT10>Area2_N6" status="Advertise" />
-    <AddressRange address="RT10>Area2_N8" mask="RT10>Area2_N8" status="Advertise" />
-    <AddressRange address="RT11>Area2_N8" mask="RT11>Area2_N8" status="Advertise" />
+    <AddressRange address="Area2.RT8>Area2.N6" mask="Area2.RT8>Area2.N6" />
+    <AddressRange address="Area2.RT8>Area2.N7" mask="Area2.RT8>Area2.N7" />
+    <AddressRange address="RT10>Area2.N8" mask="RT10>Area2.N8" />
+    <AddressRange address="RT11>Area2.N8" mask="RT11>Area2.N8" />
   </Area>
 
   <Area id="0.0.0.3">
-    <AddressRange address="RT11>Area3_N9" mask="RT11>Area3_N9" status="Advertise" />
-    <AddressRange address="Area3_RT12>Area3_N9" mask="Area3_RT12>Area3_N9" status="Advertise" />
-    <AddressRange address="Area3_RT12>Area3_H1" mask="Area3_RT12>Area3_H1" status="Advertise" />
-    <AddressRange address="Area3_RT12>Area3_N10" mask="Area3_RT12>Area3_N10" status="Advertise" />
+    <AddressRange address="RT11>Area3.N9" mask="RT11>Area3.N9" />
+    <AddressRange address="Area3.RT9>Area3.N9" mask="Area3.RT9>Area3.N9" />
+    <AddressRange address="Area3.RT9>Area3.N11" mask="Area3.RT9>Area3.N11" />
+    <AddressRange address="Area3.RT12>Area3.N9" mask="Area3.RT12>Area3.N9" />
+    <AddressRange address="Area3.RT12>Area3.H1" mask="Area3.RT12>Area3.H1" />
+    <AddressRange address="Area3.RT12>Area3.N10" mask="Area3.RT12>Area3.N10" />
   </Area>
 
   <!-- Routers -->
+  <Router name="Area1.RT1" RFC1583Compatible="true">
+    <BroadcastInterface toward="Area1.N1" areaID="0.0.0.1" interfaceOutputCost="3" routerPriority="1" />
+    <BroadcastInterface toward="Area1.N3" areaID="0.0.0.1" interfaceOutputCost="1" routerPriority="1" />
+  </Router>
+
+  <Router name="Area1.RT2" RFC1583Compatible="true">
+    <BroadcastInterface toward="Area1.N2" areaID="0.0.0.1" interfaceOutputCost="3" routerPriority="1" />
+    <BroadcastInterface toward="Area1.N3" areaID="0.0.0.1" interfaceOutputCost="1" routerPriority="1" />
+  </Router>
+
+  <Router name="RT3" RFC1583Compatible="true">
+    <BroadcastInterface toward="Area1.N3" areaID="0.0.0.1" interfaceOutputCost="1" routerPriority="1" />
+    <BroadcastInterface toward="Area1.N4" areaID="0.0.0.1" interfaceOutputCost="2" routerPriority="1" />
+    <PointToPointInterface toward="RT6" areaID="0.0.0.0" interfaceOutputCost="8" />
+  </Router>
+
+  <Router name="RT4" RFC1583Compatible="true">
+    <BroadcastInterface toward="Area1.N3" areaID="0.0.0.1" interfaceOutputCost="1" routerPriority="1" />
+    <PointToPointInterface toward="RT5" areaID="0.0.0.0" interfaceOutputCost="8" />
+  </Router>
+
   <Router name="RT5" RFC1583Compatible="true">
-    <BroadcastInterface toward="RT6" areaID="0.0.0.0" interfaceOutputCost="7" />
-    <BroadcastInterface toward="RT7" areaID="0.0.0.0" interfaceOutputCost="6" />
+    <ExternalInterface toward="N13" advertisedExternalNetworkAddress="RT5>N13" advertisedExternalNetworkMask="RT5>N13" externalInterfaceOutputCost="8" externalInterfaceOutputType="Type2" forwardingAddress="0.0.0.0" externalRouteTag="0x00" />
+    <PointToPointInterface toward="RT4" areaID="0.0.0.0" interfaceOutputCost="8" />
+    <PointToPointInterface toward="RT6" areaID="0.0.0.0" interfaceOutputCost="7" />
+    <PointToPointInterface toward="RT7" areaID="0.0.0.0" interfaceOutputCost="6" />
     <ExternalInterface toward="N12" advertisedExternalNetworkAddress="RT5>N12" advertisedExternalNetworkMask="RT5>N12" externalInterfaceOutputCost="8" externalInterfaceOutputType="Type2" forwardingAddress="0.0.0.0" externalRouteTag="0x00" />
+    <ExternalInterface toward="N14" advertisedExternalNetworkAddress="RT5>N14" advertisedExternalNetworkMask="RT5>N14" externalInterfaceOutputCost="8" externalInterfaceOutputType="Type2" forwardingAddress="0.0.0.0" externalRouteTag="0x00" />
   </Router>
 
   <Router name="RT6" RFC1583Compatible="true">
-    <BroadcastInterface toward="RT10" areaID="0.0.0.0" interfaceOutputCost="7" />
-    <BroadcastInterface toward="RT5" areaID="0.0.0.0" interfaceOutputCost="6" />
+    <PointToPointInterface toward="RT3" areaID="0.0.0.0" interfaceOutputCost="6" />
+    <PointToPointInterface toward="RT10" areaID="0.0.0.0" interfaceOutputCost="7" />
+    <PointToPointInterface toward="RT5" areaID="0.0.0.0" interfaceOutputCost="6" />
   </Router>
 
   <Router name="RT7" RFC1583Compatible="true">
-    <BroadcastInterface toward="RT5" areaID="0.0.0.0" interfaceOutputCost="6" />
-    <BroadcastInterface toward="Area2_N6" areaID="0.0.0.2" interfaceOutputCost="1" routerPriority="1" />
+    <PointToPointInterface toward="RT5" areaID="0.0.0.0" interfaceOutputCost="6" />
+    <BroadcastInterface toward="Area2.N6" areaID="0.0.0.2" interfaceOutputCost="1" routerPriority="1" />
     <ExternalInterface toward="N15" advertisedExternalNetworkAddress="RT7>N15" advertisedExternalNetworkMask="RT7>N15" externalInterfaceOutputCost="9" externalInterfaceOutputType="Type2" forwardingAddress="0.0.0.0" externalRouteTag="0x00" />
     <ExternalInterface toward="N12" advertisedExternalNetworkAddress="RT7>N12" advertisedExternalNetworkMask="RT7>N12" externalInterfaceOutputCost="2" externalInterfaceOutputType="Type2" forwardingAddress="0.0.0.0" externalRouteTag="0x00" />
   </Router>
 
+  <Router name="Area2.RT8" RFC1583Compatible="true">
+    <BroadcastInterface toward="Area2.N6" areaID="0.0.0.2" interfaceOutputCost="1" routerPriority="1" />
+    <BroadcastInterface toward="Area2.N7" areaID="0.0.0.2" interfaceOutputCost="4" routerPriority="1" />
+  </Router>
+
+  <Router name="Area3.RT9" RFC1583Compatible="true">
+    <BroadcastInterface toward="Area3.N11" areaID="0.0.0.3" interfaceOutputCost="3" routerPriority="1" />
+    <BroadcastInterface toward="Area3.N9" areaID="0.0.0.3" interfaceOutputCost="1" routerPriority="1" />
+  </Router>
+
   <Router name="RT10" RFC1583Compatible="true">
-    <BroadcastInterface toward="RT6" areaID="0.0.0.0" interfaceOutputCost="5" />
-    <BroadcastInterface toward="Area2_N8" areaID="0.0.0.2" interfaceOutputCost="3" routerPriority="1" />
-    <BroadcastInterface toward="Area2_N6" areaID="0.0.0.2" interfaceOutputCost="1" routerPriority="1" />
+    <PointToPointInterface toward="RT6" areaID="0.0.0.0" interfaceOutputCost="5" />
+    <BroadcastInterface toward="Area2.N8" areaID="0.0.0.2" interfaceOutputCost="3" routerPriority="1" />
+    <BroadcastInterface toward="Area2.N6" areaID="0.0.0.2" interfaceOutputCost="1" routerPriority="1" />
     <VirtualLink endPointRouterID="RT11%routerId" transitAreaID="0.0.0.2" />
   </Router>
 
   <Router name="RT11" RFC1583Compatible="true">
-    <BroadcastInterface toward="Area3_N9" areaID="0.0.0.3" interfaceOutputCost="1" routerPriority="1" />
-    <BroadcastInterface toward="Area2_N8" areaID="0.0.0.2" interfaceOutputCost="2" routerPriority="1" />
+    <BroadcastInterface toward="Area3" areaID="0.0.0.3" interfaceOutputCost="1" routerPriority="1" />
+    <BroadcastInterface toward="Area2" areaID="0.0.0.2" interfaceOutputCost="2" routerPriority="1" />
     <VirtualLink endPointRouterID="RT10%routerId" transitAreaID="0.0.0.2" />
   </Router>
 
-  <Router name="Area3_RT12" RFC1583Compatible="true">
-    <BroadcastInterface toward="Area3_N9" areaID="0.0.0.3" interfaceOutputCost="1" routerPriority="1" />
-    <HostInterface toward="Area3_H1" areaID="0.0.0.3" attachedHost="Area3_H1" linkCost="10" />
-    <BroadcastInterface toward="Area3_N10" areaID="0.0.0.3" interfaceOutputCost="2" routerPriority="1" />
+  <Router name="Area3.RT12" RFC1583Compatible="true">
+    <BroadcastInterface toward="Area3.N9" areaID="0.0.0.3" interfaceOutputCost="1" routerPriority="1" />
+<!--    <BroadcastInterface toward="Area3.H1" areaID="0.0.0.3" linkCost="10"/> -->
+    <HostInterface toward="Area3.H1" areaID="0.0.0.3" attachedHost="Area3.H1" linkCost="10" />
+    <BroadcastInterface toward="Area3.N10" areaID="0.0.0.3" interfaceOutputCost="2" routerPriority="1" />
   </Router>
 
 </OSPFASConfig>
 
 %#--------------------------------------------------------------------------------------------------------------
 %contains: results/General-0.sca
-scalar Fig6.N12.host[0].udpApp[0] echoedPk:count 100
+scalar OSPF_RFC2328_Fig6.N12.host[0].app[0] echoedPk:count 100
 %contains: results/General-0.sca
-scalar Fig6.N12.host[0].udpApp[1] sentPk:count 100
+scalar OSPF_RFC2328_Fig6.N12.host[0].app[1] packetSent:count 100
 %contains: results/General-0.sca
-scalar Fig6.N12.host[0].udpApp[1] rcvdPk:count 100
+scalar OSPF_RFC2328_Fig6.N12.host[0].app[1] packetReceived:count 100
 %contains: results/General-0.sca
-scalar Fig6.N15.host[0].udpApp[0] echoedPk:count 100
+scalar OSPF_RFC2328_Fig6.N15.host[0].app[0] echoedPk:count 100
 %contains: results/General-0.sca
-scalar Fig6.N15.host[0].udpApp[1] sentPk:count 100
+scalar OSPF_RFC2328_Fig6.N15.host[0].app[1] packetSent:count 100
 %contains: results/General-0.sca
-scalar Fig6.N15.host[0].udpApp[1] rcvdPk:count 100
+scalar OSPF_RFC2328_Fig6.N15.host[0].app[1] packetReceived:count 100
 %contains: results/General-0.sca
-scalar Fig6.Area3_N10.host[0].udpApp[0] echoedPk:count 100
+scalar OSPF_RFC2328_Fig6.Area3.N10.host[0].app[0] echoedPk:count 100
 %contains: results/General-0.sca
-scalar Fig6.Area3_N10.host[0].udpApp[1] sentPk:count 100
+scalar OSPF_RFC2328_Fig6.Area3.N10.host[0].app[1] packetSent:count 100
 %contains: results/General-0.sca
-scalar Fig6.Area3_N10.host[0].udpApp[1] rcvdPk:count 100
+scalar OSPF_RFC2328_Fig6.Area3.N10.host[0].app[1] packetReceived:count 100
 %contains: results/General-0.sca
-scalar Fig6.Area3_H1.udpApp[0] echoedPk:count 100
+scalar OSPF_RFC2328_Fig6.Area3.H1.app[0] echoedPk:count 100
 %contains: results/General-0.sca
-scalar Fig6.Area3_H1.udpApp[1] sentPk:count 100
+scalar OSPF_RFC2328_Fig6.Area3.H1.app[1] packetSent:count 100
 %contains: results/General-0.sca
-scalar Fig6.Area3_H1.udpApp[1] rcvdPk:count 100
+scalar OSPF_RFC2328_Fig6.Area3.H1.app[1] packetReceived:count 100
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:

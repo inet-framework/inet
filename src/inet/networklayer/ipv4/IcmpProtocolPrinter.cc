@@ -32,24 +32,29 @@ void IcmpProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *p
     if (auto header = dynamicPtrCast<const IcmpHeader>(chunk)) {
         switch (header->getType()) {
             case ICMP_DESTINATION_UNREACHABLE:
+                context.typeColumn << "DEST-UN";
                 //TODO packet contains a complete Ipv4Header and the first 8 bytes of transport header (or icmp). (protocol specified in Ipv4Header.)
-                context.infoColumn << "ICMP-DEST-UN code=" << header->getCode();
+                context.infoColumn << "code=" << header->getCode();
                 break;
             case ICMP_TIME_EXCEEDED:
+                context.typeColumn << "TIME-EX";
                 //TODO packet contains a complete Ipv4Header and the first 8 bytes of transport header (or icmp). (protocol specified in Ipv4Header.)
-                context.infoColumn << "ICMP-TIME-EX code=" << header->getCode();
+                context.infoColumn << "code=" << header->getCode();
                 break;
             case ICMP_PARAMETER_PROBLEM:
+                context.typeColumn << "PAR-PROB";
                 //TODO packet contains a complete Ipv4Header and the first 8 bytes of transport header (or icmp). (protocol specified in Ipv4Header.)
-                context.infoColumn << "ICMP-PAR-PROB code=" << header->getCode();
+                context.infoColumn << "code=" << header->getCode();
                 break;
             case ICMP_ECHO_REQUEST:
-                context.infoColumn << "ICMP-ECHO-REQ code=" << header->getCode();
+                context.typeColumn << "ECHO-REQ";
+                context.infoColumn << "code=" << header->getCode();
                 if (auto echoHeader = dynamicPtrCast<const IcmpEchoRequest>(header))
                     context.infoColumn << " id=" << echoHeader->getIdentifier() << " seq=" << echoHeader->getSeqNumber();
                 break;
             case ICMP_ECHO_REPLY:
-                context.infoColumn << "ICMP-ECHO-REPLY code=" << header->getCode();
+                context.typeColumn << "ECHO-REPLY";
+                context.infoColumn << "code=" << header->getCode();
                 if (auto echoHeader = dynamicPtrCast<const IcmpEchoReply>(header))
                     context.infoColumn << " id=" << echoHeader->getIdentifier() << " seq=" << echoHeader->getSeqNumber();
                 break;

@@ -27,7 +27,7 @@ namespace inet {
 
 Register_Protocol_Dissector(&Protocol::mpls, MplsProtocolDissector);
 
-void MplsProtocolDissector::dissect(Packet *packet, ICallback& callback) const
+void MplsProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
     auto header = packet->popAtFront<MplsHeader>();
     callback.startProtocolDataUnit(&Protocol::mpls);

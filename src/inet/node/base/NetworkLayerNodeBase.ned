@@ -90,5 +90,10 @@ module NetworkLayerNodeBase extends LinkLayerNodeBase
             tun[i].upperLayerOut --> nl.in++;
             tun[i].upperLayerIn <-- nl.out++;
         }
+
+        for i=0..numVlanInterfaces-1 {
+            vlan[i].upperLayerOut --> nl.in++;
+            vlan[i].upperLayerIn <-- nl.out++;
+        }
 }
 

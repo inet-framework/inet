@@ -53,6 +53,8 @@ class INET_API OspfConfigReader
      */
     std::vector<InterfaceEntry *> getInterfaceByXMLAttributesOf(const cXMLElement& ifConfig);
 
+    cXMLElement * findMatchingConfig(const cXMLElementList& routerConfig, const InterfaceEntry& intf);
+
     /**
      * Loads a list of OSPF Areas connected to this router from the config XML.
      * @param routerNode [in]  XML node describing this router.
@@ -75,7 +77,7 @@ class INET_API OspfConfigReader
      * Loads OSPF configuration information for a router interface.
      * Handles POINTTOPOINT, BROADCAST, NBMA and POINTTOMULTIPOINT interfaces.
      */
-    void loadInterfaceParameters(const cXMLElement& ifConfig);
+    void loadInterfaceParameters(const cXMLElement& ifConfig, InterfaceEntry& intf);
 
     /**
      * Loads the configuration information of a route outside of the Autonomous System (external route).
@@ -88,9 +90,19 @@ class INET_API OspfConfigReader
     void loadHostRoute(const cXMLElement& hostRouteConfig);
 
     /**
+     * Loads the configuration of a loopback interface.
+     */
+    void loadLoopbackParameters(const cXMLElement& loConfig, InterfaceEntry& intf);
+
+    /**
      * Loads the configuration of an OSPf virtual link (virtual connection between two backbone routers).
      */
-    void loadVirtualLink(const cXMLElement& virtualLinkConfig);
+    void loadVirtualLink(const cXMLElement& virtualLinkConfig, cXMLElement& asConfig);
+
+    /**
+     * Distributes the configure default route on this router with AS-External LSAs to other OSPF routers.
+     */
+    void initiateDefaultRouteDistribution();
 
     void joinMulticastGroups(int interfaceId);
 

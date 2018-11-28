@@ -405,18 +405,11 @@ void Established::entry()
     //if it's an IGP Session, send update message with only the BGP routes learned by EGP
 
     if (session.getType() == EGP) {
-        IIpv4RoutingTable *IPRoutingTable = session.getIPRoutingTable();
+        auto IPRoutingTable = session.getIPRoutingTable();
         for (int i = 0; i < IPRoutingTable->getNumRoutes(); i++) {
             const Ipv4Route *rtEntry = IPRoutingTable->getRoute(i);
-            if (rtEntry->getNetmask() == Ipv4Address::ALLONES_ADDRESS ||
-                    rtEntry->getSourceType() == IRoute::IFACENETMASK ||
-                    rtEntry->getSourceType() == IRoute::MANUAL ||
-                    rtEntry->getSourceType() == IRoute::BGP ||
-                    (rtEntry->getSourceType() == IRoute::OSPF && session.checkExternalRoute(rtEntry)))
-            {
+            if(session.isRouteExcluded(*rtEntry))
                 continue;
-            }
-
             BgpRoutingTableEntry *BGPEntry = new BgpRoutingTableEntry(rtEntry);
             BGPEntry->addAS(session._info.ASValue);
             session.updateSendProcess(BGPEntry);
@@ -425,11 +418,12 @@ void Established::entry()
     }
 
     for (auto & elem : session.getBGPRoutingTable())
-        session.updateSendProcess((elem));
+        session.updateSendProcess(elem);
 
     //when all EGP Sessions are in established state, start IGP Session(s)
     SessionId nextSession = session.findAndStartNextSession(EGP);
     if (nextSession == static_cast<SessionId>(-1)) {
+        EV_DEBUG << ">>> all EGP session are established. Starting IGP sessions(s). \n";
         session.findAndStartNextSession(IGP);
     }
 }

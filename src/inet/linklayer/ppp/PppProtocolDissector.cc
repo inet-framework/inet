@@ -28,7 +28,7 @@ namespace inet {
 
 Register_Protocol_Dissector(&Protocol::ppp, PppProtocolDissector);
 
-void PppProtocolDissector::dissect(Packet *packet, ICallback& callback) const
+void PppProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
     callback.startProtocolDataUnit(&Protocol::ppp);
     const auto& header = packet->popAtFront<PppHeader>();

@@ -36,5 +36,6 @@ simple SimpleEpEnergyManagement like IEpEnergyManagement
         double nodeShutdownCapacity @unit(J) = default(nan J); // initiates node shutdown when the residual energy capacity decreases below this value
         double nodeStartCapacity @unit(J) = default(nan J); // initiates node start when the residual energy capacity increases above this value
         @class(SimpleEpEnergyManagement);
+        @display("i=block/plug");
 }
 

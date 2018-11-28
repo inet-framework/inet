@@ -28,7 +28,7 @@ namespace ospf {
 class INET_API NeighborState
 {
   protected:
-    void changeStateAndRebuild(Neighbor *neighbor, NeighborState *newState, NeighborState *currentState);
+    void changeState(Neighbor *neighbor, NeighborState *newState, NeighborState *currentState);
     bool updateLsa(Neighbor *neighbor);
 
   public:

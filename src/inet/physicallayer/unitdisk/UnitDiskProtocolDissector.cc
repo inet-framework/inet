@@ -28,7 +28,7 @@ namespace inet {
 
 Register_Protocol_Dissector(&Protocol::unitDisk, UnitDiskProtocolDissector);
 
-void UnitDiskProtocolDissector::dissect(Packet *packet, ICallback& callback) const
+void UnitDiskProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
     auto header = packet->popAtFront<UnitDiskPhyHeader>();
     callback.startProtocolDataUnit(&Protocol::unitDisk);

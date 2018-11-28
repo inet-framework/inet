@@ -27,7 +27,7 @@ namespace sctp {
 class INET_API SctpProtocolDissector : public ProtocolDissector
 {
   public:
-    virtual void dissect(Packet *packet, ICallback& callback) const override;
+    virtual void dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const override;
 };
 
 } // namespace sctp

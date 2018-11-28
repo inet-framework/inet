@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2018 OpenSim Ltd.
+// Copyright (C) OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -14,23 +14,23 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-// Author: Zoltan Bojthe
-//
 
 package inet.emulation.linklayer.ethernet;
 
 //
-// Tap bridge for connect real tap interface to simulation
+// This module provides connection to a real TAP interface of the host computer
+// which is running the simulation.
 //
-// This module writes the packets arrived on 'lowerLayerIn' gate to the
-// specified real tap device, and send out packets arrived from real tap
-// device on 'lowerLayerOut' gate.
+// This module writes the packets arrived on 'lowerLayerIn' gate to the specified
+// real TAP device, and sends out packets arrived from real TAP device on
+// 'lowerLayerOut' gate.
 //
 simple ExtEthernetTapDeviceFileIo
 {
     parameters:
         string device; // name of existing real tap interface
-        string packetName = default("Ext");
+        string namespace = default("");
+        string packetNameFormat = default("Ext-%p-%t-%n");
         @display("i=block/rxtx");
         @signal[packetSentToLower](type=Packet);
         @signal[packetReceivedFromLower](type=Packet);

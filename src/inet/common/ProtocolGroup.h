@@ -47,6 +47,8 @@ class INET_API ProtocolGroup
     static ProtocolGroup ipprotocol;
     static ProtocolGroup ieee8022protocol;
     static ProtocolGroup snapOui;
+    static ProtocolGroup udpprotocol;
+    static ProtocolGroup tcpprotocol;
 };
 
 } // namespace inet

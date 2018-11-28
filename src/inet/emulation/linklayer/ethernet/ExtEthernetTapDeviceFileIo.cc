@@ -29,6 +29,7 @@
 #include <omnetpp/platdep/sockets.h>
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/NetworkNamespaceContext.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/emulation/linklayer/ethernet/ExtEthernetTapDeviceFileIo.h"
@@ -49,7 +50,7 @@ void ExtEthernetTapDeviceFileIo::initialize(int stage)
     cSimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         device = par("device").stdstringValue();
-        packetName = par("packetName").stdstringValue();
+        packetNameFormat = par("packetNameFormat");
         rtScheduler = check_and_cast<RealTimeScheduler *>(getSimulation()->getScheduler());
         openTap(device);
         numSent = numReceived = 0;
@@ -71,7 +72,7 @@ void ExtEthernetTapDeviceFileIo::handleMessage(cMessage *msg)
     uint8_t buffer[packet->getByteLength() + 4];
     buffer[0] = 0;
     buffer[1] = 0;
-    buffer[2] = 0x86; // ethernet
+    buffer[2] = 0x86; // Ethernet
     buffer[3] = 0xdd;
     size_t packetLength = bytesChunk->copyToBuffer(buffer + 4, packet->getByteLength());
     ASSERT(packetLength == (size_t)packet->getByteLength());
@@ -79,18 +80,18 @@ void ExtEthernetTapDeviceFileIo::handleMessage(cMessage *msg)
     ssize_t nwrite = write(fd, buffer, packetLength);
     if ((size_t)nwrite == packetLength) {
         emit(packetSentSignal, packet);
-        EV_INFO << "Sent a " << packet->getTotalLength() << " packet from " << ethHeader->getSrc() << " to " << ethHeader->getDest() << " to tap device '" << device << "'.\n";
+        EV_INFO << "Sent a " << packet->getTotalLength() << " packet from " << ethHeader->getSrc() << " to " << ethHeader->getDest() << " to TAP device '" << device << "'.\n";
         numSent++;
     }
     else
-        EV_ERROR << "Sending of an ethernet packet FAILED! (sendto returned " << nwrite << " (" << strerror(errno) << ") instead of " << packetLength << ").\n";
+        EV_ERROR << "Sending Ethernet packet FAILED! (sendto returned " << nwrite << " (" << strerror(errno) << ") instead of " << packetLength << ").\n";
     delete packet;
 }
 
 void ExtEthernetTapDeviceFileIo::refreshDisplay() const
 {
     char buf[180];
-    sprintf(buf, "tap device: %s\nrcv:%d snt:%d", device.c_str(), numReceived, numSent);
+    sprintf(buf, "TAP device: %s\nrcv:%d snt:%d", device.c_str(), numReceived, numSent);
     getDisplayString().setTagArg("t", 0, buf);
 }
 
@@ -102,6 +103,7 @@ void ExtEthernetTapDeviceFileIo::finish()
 
 void ExtEthernetTapDeviceFileIo::openTap(std::string dev)
 {
+    NetworkNamespaceContext context(par("namespace"));
     if ((fd = open("/dev/net/tun", O_RDWR)) < 0)
         throw cRuntimeError("Cannot open TAP device: %s", strerror(errno));
 
@@ -148,12 +150,12 @@ bool ExtEthernetTapDeviceFileIo::notify(int fd)
     }
     else if (nread > 0) {
         ASSERT (nread > 4);
-        std::string completePacketName = packetName + std::to_string(numReceived);
         // buffer[0..1]: flags, buffer[2..3]: ethertype
-        Packet *packet = new Packet(completePacketName.c_str(), makeShared<BytesChunk>(buffer + 4, nread - 4));
+        Packet *packet = new Packet(nullptr, makeShared<BytesChunk>(buffer + 4, nread - 4));
         EtherEncap::addPaddingAndFcs(packet, FCS_COMPUTED);
         packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
         packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
+        packet->setName(packetPrinter.printPacketToString(packet, packetNameFormat).c_str());
         emit(packetReceivedSignal, packet);
         const auto& macHeader = packet->peekAtFront<EthernetMacHeader>();
         EV_INFO << "Received a " << packet->getTotalLength() << " packet from " << macHeader->getSrc() << " to " << macHeader->getDest() << ".\n";

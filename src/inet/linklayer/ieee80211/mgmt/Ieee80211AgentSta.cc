@@ -54,7 +54,7 @@ void Ieee80211AgentSta::initialize(int stage)
         host->subscribe(l2BeaconLostSignal, this);
 
         // JcM add: get the default ssid, if there is one.
-        default_ssid = par("default_ssid").stdstringValue();
+        defaultSsid = par("defaultSsid").stdstringValue();
 
         // start up: send scan request
         simtime_t startingTime = par("startingTime");
@@ -209,16 +209,16 @@ void Ieee80211AgentSta::processScanConfirm(Ieee80211Prim_ScanConfirm *resp)
     // choose best AP
 
     int bssIndex = -1;
-    if (this->default_ssid == "") {
+    if (this->defaultSsid == "") {
         // no default ssid, so pick the best one
         bssIndex = chooseBSS(resp);
     }
     else {
-        // search if the default_ssid is in the list, otherwise
+        // search if the defaultSsid is in the list, otherwise
         // keep searching.
         for (size_t i = 0; i < resp->getBssListArraySize(); i++) {
             std::string resp_ssid = resp->getBssList(i).getSSID();
-            if (resp_ssid == this->default_ssid) {
+            if (resp_ssid == this->defaultSsid) {
                 EV << "found default SSID " << resp_ssid << endl;
                 bssIndex = i;
                 break;

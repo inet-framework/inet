@@ -18,15 +18,19 @@
 package inet.emulation.linklayer.ethernet;
 
 //
-// This module writes the packets arrived on 'upperLayerIn' gate to the
-// specified real socket, and send out packets arrived from real socket
-// on 'upperLayerOut' gate.
+// This module provides a connection to an ethernet socket of the host computer
+// which is running to the simulation.
+//
+// This module writes the packets arrived on 'upperLayerIn' gate to the specified
+// real socket, and sends out packets arrived from the real socket on
+// 'upperLayerOut' gate.
 //
 simple ExtEthernetDeviceSocket
 {
     parameters:
         string device; // name of existing real ethernet device
-        string packetName = default("Ext"); // name of received packets
+        string namespace = default("");
+        string packetNameFormat = default("Ext-%p-%t-%n"); // name of received packets
         @display("i=block/rxtx");
         @signal[packetSentToUpper](type=Packet);
         @signal[packetReceivedFromUpper](type=Packet);

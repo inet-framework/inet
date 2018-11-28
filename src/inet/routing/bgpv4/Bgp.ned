@@ -35,6 +35,14 @@ simple Bgp like IBgp
         string ospfRoutingModule;
         volatile double startupTime @unit(s) = default(0s); // delay before starting BGP
         xml bgpConfig;
+        double ExternalPeerStartDelayOffset @unit(s) = default(0.5s);
+        bool redistributeRip = default(false);        // redistribute routes learned by RIP into BGP
+        string redistributeOspf = default("");        // redistribute routes learned by OSPF into BGP (O IA E1 E2)
+        bool redistributeInternal = default(false);   // redistribute BGP routes into OSPF (as external routes)
+        bool nextHopSelf = default(false);
+        int localPreference = default(100);
+        bool connectedCheck = default(true);
+        int ebgpMultihop = default(1);
         @display("i=block/network2");
     gates:
         input socketIn;

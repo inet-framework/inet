@@ -19,16 +19,24 @@ package inet.emulation.common;
 
 import inet.linklayer.contract.IExternalInterface;
 
+//
+// This module provides a base module for external network interfaces.
+//
 module ExtInterface like IExternalInterface
 {
     parameters:
         string interfaceTableModule;
         string device;
+        string namespace = default("");
         string copyConfiguration @enum("", "copyToExt", "copyFromExt") = default("");
         string address = default("auto");
+        bool broadcast = default(true);
+        bool multicast = default(true);
+        bool pointToPoint = default(false);
         int mtu @unit(B) = default(4470B);
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         *.device = default(device);
+        *.namespace = default(namespace);
         @class(ExtInterface);
     gates:
         input upperLayerIn @loose;

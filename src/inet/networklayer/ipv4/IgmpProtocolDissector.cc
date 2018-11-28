@@ -27,7 +27,7 @@ namespace inet {
 
 Register_Protocol_Dissector(&Protocol::igmp, IgmpProtocolDissector);
 
-void IgmpProtocolDissector::dissect(Packet *packet, ICallback& callback) const
+void IgmpProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
     auto igmpPacket = packet->popAtFront<IgmpMessage>();
     callback.startProtocolDataUnit(&Protocol::igmp);

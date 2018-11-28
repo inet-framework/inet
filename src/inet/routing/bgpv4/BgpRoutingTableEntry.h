@@ -33,6 +33,8 @@ private:
     // addressMask is RoutingEntry::netmask
     RoutingPathType _pathType = INCOMPLETE;
     std::vector<AsId> _ASList;
+    int localPreference = 0;
+    bool IBGP_learned = false;
 
   public:
     BgpRoutingTableEntry(void);
@@ -45,6 +47,10 @@ private:
     void addAS(AsId newAS) { _ASList.push_back(newAS); }
     unsigned int getASCount(void) const { return _ASList.size(); }
     AsId getAS(unsigned int index) const { return _ASList[index]; }
+    int getLocalPreference(void) const { return localPreference; }
+    void setLocalPreference(int l) { localPreference = l; }
+    bool isIBgpLearned(void) { return IBGP_learned; }
+    void setIBgpLearned(bool i) { IBGP_learned = i;}
     virtual std::string str() const;
 };
 
@@ -63,6 +69,7 @@ inline BgpRoutingTableEntry::BgpRoutingTableEntry(const Ipv4Route *entry)
     setInterface(entry->getInterface());
     setMetric(DEFAULT_COST);
     setSourceType(IRoute::BGP);
+    setAdminDist(dBGPExternal);
 }
 
 inline const std::string BgpRoutingTableEntry::getPathTypeString(RoutingPathType type)
@@ -91,8 +98,10 @@ inline std::ostream& operator<<(std::ostream& out, BgpRoutingTableEntry& entry)
     out << " nextHop: " << entry.getGateway().str(false)
         << " cost: " << entry.getMetric()
         << " if: " << entry.getInterfaceName()
-        << " pathType: " << BgpRoutingTableEntry::getPathTypeString(entry.getPathType())
-        << " ASlist: ";
+        << " origin: " << BgpRoutingTableEntry::getPathTypeString(entry.getPathType());
+    if(entry.isIBgpLearned())
+        out << " localPref: " << entry.getLocalPreference();
+    out << " ASlist: ";
     for (uint32_t i = 0; i < entry.getASCount(); i++)
         out << entry.getAS(i) << ' ';
 
@@ -127,8 +136,10 @@ inline std::string BgpRoutingTableEntry::str() const
     else
         out << getInterfaceName();
 
-    out << " pathType: " << BgpRoutingTableEntry::getPathTypeString(_pathType)
-    << " ASlist: ";
+    out << " origin: " << BgpRoutingTableEntry::getPathTypeString(_pathType);
+    if(IBGP_learned)
+        out << " localPref: " << getLocalPreference();
+    out << " ASlist: ";
     for (auto &element : _ASList)
         out << element << ' ';
 

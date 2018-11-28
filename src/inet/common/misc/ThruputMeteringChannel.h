@@ -49,6 +49,7 @@ class INET_API ThruputMeteringChannel : public cDatarateChannel
 {
   protected:
     // configuration
+    bool displayAsTooltip;
     const char *fmt;    // display format
     unsigned int batchSize;    // number of packets in a batch
     simtime_t maxInterval;    // max length of measurement interval (measurement ends

@@ -95,8 +95,10 @@ class INET_API Area : public cObject
     void addWatches();
     Ipv4AddressRange getContainingAddressRange(Ipv4AddressRange addressRange, bool *advertise = nullptr) const;
     void addInterface(OspfInterface *intf);
+    int getInterfaceCount() const {return associatedInterfaces.size();}
     OspfInterface *getInterface(unsigned char ifIndex);
     OspfInterface *getInterface(Ipv4Address address);
+    std::vector<int> getInterfaceIndices();
     bool hasVirtualLink(AreaId withTransitArea) const;
     OspfInterface *findVirtualLink(RouterId routerID);
 
@@ -117,12 +119,13 @@ class INET_API Area : public cObject
     bool isLocalAddress(Ipv4Address address) const;
     RouterLsa *originateRouterLSA();
     NetworkLsa *originateNetworkLSA(const OspfInterface *intf);
-    SummaryLsa *originateSummaryLSA(const RoutingTableEntry *entry,
+    SummaryLsa *originateSummaryLSA(const OspfRoutingTableEntry *entry,
             const std::map<LsaKeyType, bool, LsaKeyType_Less>& originatedLSAs,
             SummaryLsa *& lsaToReoriginate);
-    void calculateShortestPathTree(std::vector<RoutingTableEntry *>& newRoutingTable);
-    void calculateInterAreaRoutes(std::vector<RoutingTableEntry *>& newRoutingTable);
-    void recheckSummaryLSAs(std::vector<RoutingTableEntry *>& newRoutingTable);
+    SummaryLsa *originateSummaryLSA_Stub();
+    void calculateShortestPathTree(std::vector<OspfRoutingTableEntry *>& newRoutingTable);
+    void calculateInterAreaRoutes(std::vector<OspfRoutingTableEntry *>& newRoutingTable);
+    void recheckSummaryLSAs(std::vector<OspfRoutingTableEntry *>& newRoutingTable);
 
     std::string str() const override;
     std::string info() const override;
@@ -138,16 +141,19 @@ class INET_API Area : public cObject
             Metric destinationCost,
             SummaryLsa *& lsaToReoriginate) const;
 
-    bool findSameOrWorseCostRoute(const std::vector<RoutingTableEntry *>& newRoutingTable,
+    bool findSameOrWorseCostRoute(const std::vector<OspfRoutingTableEntry *>& newRoutingTable,
             const SummaryLsa& currentLSA,
             unsigned short currentCost,
             bool& destinationInRoutingTable,
-            std::list<RoutingTableEntry *>& sameOrWorseCost) const;
+            std::list<OspfRoutingTableEntry *>& sameOrWorseCost) const;
 
-    RoutingTableEntry *createRoutingTableEntryFromSummaryLSA(const SummaryLsa& summaryLSA,
+    OspfRoutingTableEntry *createRoutingTableEntryFromSummaryLSA(const SummaryLsa& summaryLSA,
             unsigned short entryCost,
-            const RoutingTableEntry& borderRouterEntry) const;
+            const OspfRoutingTableEntry& borderRouterEntry) const;
     void printLSDB();
+    void printSummaryLsa();
+    bool isDefaultRoute(OspfRoutingTableEntry *entry) const;
+    bool isAllZero(Ipv4AddressRange entry) const;
 };
 
 inline std::ostream& operator<<(std::ostream& ostr, Area& area)

@@ -105,7 +105,7 @@ class INET_API Ipv6Route : public cObject, public IRoute
     void setNextHop(const Ipv6Address& nextHop) { if (_nextHop != nextHop) { _nextHop = nextHop; changed(F_NEXTHOP); } }
     void setExpiryTime(simtime_t expiryTime) { if (expiryTime != _expiryTime) { _expiryTime = expiryTime; changed(F_EXPIRYTIME); } }
     void setMetric(int metric) override { if (_metric != metric) { _metric = metric; changed(F_METRIC); } }
-    void setAdminDist(unsigned int adminDist) { if (_adminDist != adminDist) { _adminDist = adminDist; changed(F_ADMINDIST); } }
+    void setAdminDist(unsigned int adminDist) override { if (_adminDist != adminDist) { _adminDist = adminDist; changed(F_ADMINDIST); } }
 
     const Ipv6Address& getDestPrefix() const { return _destPrefix; }
     virtual int getPrefixLength() const override { return _prefixLength; }

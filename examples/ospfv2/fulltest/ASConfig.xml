@@ -3,39 +3,39 @@
 
   <!-- Areas -->
   <Area id="0.0.0.0">
-    <AddressRange address="RT3>RT6" mask="RT3>RT6" status="Advertise" />
-    <AddressRange address="RT4>RT5" mask="RT4>RT5" status="Advertise" />
-    <AddressRange address="RT5>RT4" mask="RT5>RT4" status="Advertise" />
-    <AddressRange address="RT5>RT6" mask="RT5>RT6" status="Advertise" />
-    <AddressRange address="RT5>RT7" mask="RT5>RT7" status="Advertise" />
-    <AddressRange address="RT6>RT3" mask="RT6>RT3" status="Advertise" />
-    <AddressRange address="RT6>RT10" mask="RT6>RT10" status="Advertise" />
-    <AddressRange address="RT6>RT5" mask="RT6>RT5" status="Advertise" />
-    <AddressRange address="RT7>RT5" mask="RT7>RT5" status="Advertise" />
-    <AddressRange address="RT10>RT6" mask="RT10>RT6" status="Advertise" />
+    <AddressRange address="RT3>RT6" mask="RT3>RT6" />
+    <AddressRange address="RT4>RT5" mask="RT4>RT5" />
+    <AddressRange address="RT5>RT4" mask="RT5>RT4" />
+    <AddressRange address="RT5>RT6" mask="RT5>RT6" />
+    <AddressRange address="RT5>RT7" mask="RT5>RT7" />
+    <AddressRange address="RT6>RT3" mask="RT6>RT3" />
+    <AddressRange address="RT6>RT10" mask="RT6>RT10" />
+    <AddressRange address="RT6>RT5" mask="RT6>RT5" />
+    <AddressRange address="RT7>RT5" mask="RT7>RT5" />
+    <AddressRange address="RT10>RT6" mask="RT10>RT6" />
   </Area>
 
   <Area id="0.0.0.1">
-    <AddressRange address="Area1.RT1>Area1.N1" mask="Area1.RT1>Area1.N1" status="Advertise" />
-    <AddressRange address="Area1.RT2>Area1.N2" mask="Area1.RT2>Area1.N2" status="Advertise" />
-    <AddressRange address="Area1.N3.host[0]" mask="Area1.N3.host[0]" status="Advertise" />
-    <AddressRange address="RT3>Area1.N4" mask="RT3>Area1.N4" status="Advertise" />
+    <AddressRange address="Area1.RT1>Area1.N1" mask="Area1.RT1>Area1.N1" />
+    <AddressRange address="Area1.RT2>Area1.N2" mask="Area1.RT2>Area1.N2" />
+    <AddressRange address="Area1.N3.host[0]" mask="Area1.N3.host[0]" />
+    <AddressRange address="RT3>Area1.N4" mask="RT3>Area1.N4" />
   </Area>
 
   <Area id="0.0.0.2">
-    <AddressRange address="Area2.RT8>Area2.N6" mask="Area2.RT8>Area2.N6" status="Advertise" />
-    <AddressRange address="Area2.RT8>Area2.N7" mask="Area2.RT8>Area2.N7" status="Advertise" />
-    <AddressRange address="RT10>Area2.N8" mask="RT10>Area2.N8" status="Advertise" />
-    <AddressRange address="RT11>Area2.N8" mask="RT11>Area2.N8" status="Advertise" />
+    <AddressRange address="Area2.RT8>Area2.N6" mask="Area2.RT8>Area2.N6" />
+    <AddressRange address="Area2.RT8>Area2.N7" mask="Area2.RT8>Area2.N7" />
+    <AddressRange address="RT10>Area2.N8" mask="RT10>Area2.N8" />
+    <AddressRange address="RT11>Area2.N8" mask="RT11>Area2.N8" />
   </Area>
 
   <Area id="0.0.0.3">
-    <AddressRange address="RT11>Area3.N9" mask="RT11>Area3.N9" status="Advertise" />
-    <AddressRange address="Area3.RT9>Area3.N9" mask="Area3.RT9>Area3.N9" status="Advertise" />
-    <AddressRange address="Area3.RT9>Area3.N11" mask="Area3.RT9>Area3.N11" status="Advertise" />
-    <AddressRange address="Area3.RT12>Area3.N9" mask="Area3.RT12>Area3.N9" status="Advertise" />
-    <AddressRange address="Area3.RT12>Area3.H1" mask="Area3.RT12>Area3.H1" status="Advertise" />
-    <AddressRange address="Area3.RT12>Area3.N10" mask="Area3.RT12>Area3.N10" status="Advertise" />
+    <AddressRange address="RT11>Area3.N9" mask="RT11>Area3.N9" />
+    <AddressRange address="Area3.RT9>Area3.N9" mask="Area3.RT9>Area3.N9" />
+    <AddressRange address="Area3.RT9>Area3.N11" mask="Area3.RT9>Area3.N11" />
+    <AddressRange address="Area3.RT12>Area3.N9" mask="Area3.RT12>Area3.N9" />
+    <AddressRange address="Area3.RT12>Area3.H1" mask="Area3.RT12>Area3.H1" />
+    <AddressRange address="Area3.RT12>Area3.N10" mask="Area3.RT12>Area3.N10" />
   </Area>
 
   <!-- Routers -->

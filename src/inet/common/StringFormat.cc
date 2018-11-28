@@ -19,8 +19,6 @@
 
 namespace inet {
 
-namespace visualizer {
-
 void StringFormat::parseFormat(const char *format)
 {
     this->format = format;
@@ -54,8 +52,6 @@ const char *StringFormat::formatString(IDirectiveResolver *directiveResolver) co
     }
     return result.c_str();
 }
-
-} // namespace visualizer
 
 } // namespace inet
 

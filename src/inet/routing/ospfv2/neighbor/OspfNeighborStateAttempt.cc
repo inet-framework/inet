@@ -34,7 +34,7 @@ void NeighborStateAttempt::processEvent(Neighbor *neighbor, Neighbor::NeighborEv
         MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
         neighbor->reset();
         messageHandler->clearTimer(neighbor->getInactivityTimer());
-        changeStateAndRebuild(neighbor, new NeighborStateDown, this);
+        changeState(neighbor, new NeighborStateDown, this);
     }
     else if (event == Neighbor::INACTIVITY_TIMER) {
         neighbor->reset();
@@ -42,13 +42,13 @@ void NeighborStateAttempt::processEvent(Neighbor *neighbor, Neighbor::NeighborEv
             MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
             messageHandler->startTimer(neighbor->getPollTimer(), neighbor->getInterface()->getPollInterval());
         }
-        changeStateAndRebuild(neighbor, new NeighborStateDown, this);
+        changeState(neighbor, new NeighborStateDown, this);
     }
     else if (event == Neighbor::HELLO_RECEIVED) {
         MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
         messageHandler->clearTimer(neighbor->getInactivityTimer());
         messageHandler->startTimer(neighbor->getInactivityTimer(), neighbor->getRouterDeadInterval());
-        changeStateAndRebuild(neighbor, new NeighborStateInit, this);
+        changeState(neighbor, new NeighborStateInit, this);
     }
 }
 

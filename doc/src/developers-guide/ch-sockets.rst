@@ -890,7 +890,7 @@ as tunneling, or virtual private networking.
 Callback Interface
 ~~~~~~~~~~~~~~~~~~
 
-Messages received from the :ned:`Tunq` module must be processed by the
+Messages received from the :ned:`Tun` module must be processed by the
 socket where they belong as shown in the general section. The
 :cpp:`TunSocket` deconstructs the message and uses the
 :cpp:`TunSocket::ICallback` interface to notify the application about

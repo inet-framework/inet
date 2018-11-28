@@ -15,12 +15,12 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h>
-
+#include "inet/applications/common/SocketTag_m.h"
+#include "inet/common/checksum/EthernetCRC.h"
 #include "inet/common/INETUtils.h"
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/checksum/EthernetCRC.h"
 #include "inet/linklayer/common/FcsMode_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
@@ -28,11 +28,10 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ethernet/EtherEncap.h"
 #include "inet/linklayer/ethernet/EtherFrame_m.h"
+#include "inet/linklayer/ethernet/EthernetCommand_m.h"
 #include "inet/linklayer/ethernet/EtherPhyFrame_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-
-#include "inet/common/IProtocolRegistrationListener.h"
 
 namespace inet {
 
@@ -41,6 +40,19 @@ Define_Module(EtherEncap);
 simsignal_t EtherEncap::encapPkSignal = registerSignal("encapPk");
 simsignal_t EtherEncap::decapPkSignal = registerSignal("decapPk");
 simsignal_t EtherEncap::pauseSentSignal = registerSignal("pauseSent");
+
+bool EtherEncap::Socket::matches(Packet *packet, const Ptr<const EthernetMacHeader>& ethernetMacHeader)
+{
+    if (!sourceAddress.isUnspecified() && !ethernetMacHeader->getSrc().isBroadcast() && ethernetMacHeader->getSrc() != sourceAddress)
+        return false;
+    if (!destinationAddress.isUnspecified() && !ethernetMacHeader->getDest().isBroadcast() && ethernetMacHeader->getDest() != destinationAddress)
+        return false;
+    if (protocol != nullptr && packet->getTag<PacketProtocolTag>()->getProtocol() != protocol)
+        return false;
+    if (vlanId != -1 && packet->getTag<Ieee8021QInd>()->getVid() != vlanId)
+        return false;
+    return true;
+}
 
 void EtherEncap::initialize(int stage)
 {
@@ -67,8 +79,26 @@ void EtherEncap::initialize(int stage)
 
 void EtherEncap::processCommandFromHigherLayer(Request *msg)
 {
-    if (dynamic_cast<Ieee802PauseCommand *>(msg->getControlInfo()) != nullptr)
+    auto ctrl = msg->getControlInfo();
+    if (dynamic_cast<Ieee802PauseCommand *>(ctrl) != nullptr)
         handleSendPause(msg);
+    else if (auto bindCommand = dynamic_cast<EthernetBindCommand *>(ctrl)) {
+        int socketId = check_and_cast<Request *>(msg)->getTag<SocketReq>()->getSocketId();
+        Socket *socket = new Socket(socketId);
+        socket->sourceAddress = bindCommand->getSourceAddress();
+        socket->destinationAddress = bindCommand->getDestinationAddress();
+        socket->protocol = bindCommand->getProtocol();
+        socket->vlanId = bindCommand->getVlanId();
+        socketIdToSocketMap[socketId] = socket;
+        delete msg;
+    }
+    else if (dynamic_cast<EthernetCloseCommand *>(ctrl) != nullptr) {
+        int socketId = check_and_cast<Request *>(msg)->getTag<SocketReq>()->getSocketId();
+        auto it = socketIdToSocketMap.find(socketId);
+        delete it->second;
+        socketIdToSocketMap.erase(it);
+        delete msg;
+    }
     else
         Ieee8022Llc::processCommandFromHigherLayer(msg);
 }
@@ -196,7 +226,20 @@ void EtherEncap::processPacketFromMac(Packet *packet)
         packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
         packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
 
-        if (upperProtocols.find(payloadProtocol) != upperProtocols.end()) {
+        bool stealPacket = false;
+        for (auto it : socketIdToSocketMap) {
+            auto socket = it.second;
+            if (socket->matches(packet, ethHeader)) {
+                auto packetCopy = packet->dup();
+                packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(it.first);
+                send(packetCopy, "upperLayerOut");
+                stealPacket |= socket->vlanId != -1;
+            }
+        }
+        // TODO: should the socket configure if it steals packets or not?
+        if (stealPacket)
+            delete packet;
+        else if (upperProtocols.find(payloadProtocol) != upperProtocols.end()) {
             EV_DETAIL << "Decapsulating frame `" << packet->getName() << "', passing up contained packet `"
                       << packet->getName() << "' to higher layer\n";
 

@@ -27,7 +27,7 @@ namespace inet {
 
 Register_Protocol_Dissector(&Protocol::icmpv4, IcmpProtocolDissector);
 
-void IcmpProtocolDissector::dissect(Packet *packet, ICallback& callback) const
+void IcmpProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
     const auto& header = packet->popAtFront<IcmpHeader>();
     callback.startProtocolDataUnit(&Protocol::icmpv4);

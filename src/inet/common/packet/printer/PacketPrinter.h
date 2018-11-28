@@ -18,6 +18,7 @@
 
 #include "inet/common/packet/dissector/PacketDissector.h"
 #include "inet/common/packet/printer/ProtocolPrinter.h"
+#include "inet/common/StringFormat.h"
 
 #ifdef WITH_RADIO
 #include "inet/physicallayer/common/packetlevel/Signal.h"
@@ -37,8 +38,24 @@ class INET_API PacketPrinter : public cMessagePrinter
         std::stringstream destinationColumn;
         std::stringstream protocolColumn;
         std::stringstream lengthColumn;
+        std::stringstream typeColumn;
         std::stringstream infoColumn;
     };
+
+    class DirectiveResolver : public inet::StringFormat::IDirectiveResolver {
+      protected:
+        const Context& context;
+        const int numPacket;
+        std::string result;
+
+      public:
+        DirectiveResolver(const Context& context, const int numPacket) : context(context), numPacket(numPacket) { }
+
+        virtual const char *resolveDirective(char directive) override;
+    };
+
+  protected:
+    mutable int numPacket = 0;
 
   protected:
     virtual bool isEnabledOption(const Options *options, const char *name) const;
@@ -71,8 +88,11 @@ class INET_API PacketPrinter : public cMessagePrinter
     virtual void printSignal(std::ostream& stream, inet::physicallayer::Signal *signal, const Options *options) const;
 #endif // WITH_RADIO
 
-    virtual void printPacket(std::ostream& stream, Packet *packet) const;
-    virtual void printPacket(std::ostream& stream, Packet *packet, const Options *options) const;
+    virtual void printPacket(std::ostream& stream, Packet *packet, const char *format = nullptr) const;
+    virtual void printPacket(std::ostream& stream, Packet *packet, const Options *options, const char *format = nullptr) const;
+
+    virtual std::string printPacketToString(Packet *packet, const char *format = nullptr) const;
+    virtual std::string printPacketToString(Packet *packet, const Options *options, const char *format = nullptr) const;
 };
 
 } // namespace

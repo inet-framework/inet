@@ -46,12 +46,17 @@ private:
     void loadConfigFromXML(cXMLElement *bgpConfig, BgpRouter *bgpRouter);
 
   private:
-    std::vector<const char *> loadASConfig(cXMLElementList& ASConfig);
-    void loadSessionConfig(cXMLElementList& sessionList, simtime_t *delayTab);
+    std::vector<const char *> findInternalPeers(cXMLElementList& ASConfig);
+    void loadASConfig(cXMLElementList& ASConfig);
+    void loadEbgpSessionConfig(cXMLElementList& ASConfig, cXMLElementList& sessionList, simtime_t *delayTab);
     AsId findMyAS(cXMLElementList& ASList, int& outRouterPosition);
     void loadTimerConfig(cXMLElementList& timerConfig, simtime_t *delayTab);
-    int isInInterfaceTable(IInterfaceTable *rtTable, Ipv4Address addr);
+    int isInInterfaceTable(IInterfaceTable *ifTable, Ipv4Address addr);
+    int isInInterfaceTable(IInterfaceTable *ifTable, std::string ifName);
     unsigned int calculateStartDelay(int rtListSize, unsigned char rtPosition, unsigned char rtPeerPosition);
+    bool getBoolAttrOrPar(const cXMLElement& ifConfig, const char *name) const;
+    int getIntAttrOrPar(const cXMLElement& ifConfig, const char *name) const;
+    const char *getStrAttrOrPar(const cXMLElement& ifConfig, const char *name) const;
 };
 
 } // namespace bgp

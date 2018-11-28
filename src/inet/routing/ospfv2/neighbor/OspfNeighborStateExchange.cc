@@ -38,7 +38,7 @@ void NeighborStateExchange::processEvent(Neighbor *neighbor, Neighbor::NeighborE
         MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
         neighbor->reset();
         messageHandler->clearTimer(neighbor->getInactivityTimer());
-        changeStateAndRebuild(neighbor, new NeighborStateDown, this);
+        changeState(neighbor, new NeighborStateDown, this);
     }
     else if (event == Neighbor::INACTIVITY_TIMER) {
         neighbor->reset();
@@ -46,11 +46,11 @@ void NeighborStateExchange::processEvent(Neighbor *neighbor, Neighbor::NeighborE
             MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
             messageHandler->startTimer(neighbor->getPollTimer(), neighbor->getInterface()->getPollInterval());
         }
-        changeStateAndRebuild(neighbor, new NeighborStateDown, this);
+        changeState(neighbor, new NeighborStateDown, this);
     }
     else if (event == Neighbor::ONEWAY_RECEIVED) {
         neighbor->reset();
-        changeStateAndRebuild(neighbor, new NeighborStateInit, this);
+        changeState(neighbor, new NeighborStateInit, this);
     }
     else if (event == Neighbor::HELLO_RECEIVED) {
         MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
@@ -60,7 +60,7 @@ void NeighborStateExchange::processEvent(Neighbor *neighbor, Neighbor::NeighborE
     else if (event == Neighbor::IS_ADJACENCY_OK) {
         if (!neighbor->needAdjacency()) {
             neighbor->reset();
-            changeStateAndRebuild(neighbor, new NeighborStateTwoWay, this);
+            changeState(neighbor, new NeighborStateTwoWay, this);
         }
     }
     else if ((event == Neighbor::SEQUENCE_NUMBER_MISMATCH) || (event == Neighbor::BAD_LINK_STATE_REQUEST)) {
@@ -69,19 +69,19 @@ void NeighborStateExchange::processEvent(Neighbor *neighbor, Neighbor::NeighborE
         neighbor->incrementDDSequenceNumber();
         neighbor->sendDatabaseDescriptionPacket(true);
         messageHandler->startTimer(neighbor->getDDRetransmissionTimer(), neighbor->getInterface()->getRetransmissionInterval());
-        changeStateAndRebuild(neighbor, new NeighborStateExchangeStart, this);
+        changeState(neighbor, new NeighborStateExchangeStart, this);
     }
     else if (event == Neighbor::EXCHANGE_DONE) {
         if (neighbor->isLinkStateRequestListEmpty()) {
             MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
             messageHandler->startTimer(neighbor->getDDRetransmissionTimer(), neighbor->getRouterDeadInterval());
             neighbor->clearRequestRetransmissionTimer();
-            changeStateAndRebuild(neighbor, new NeighborStateFull, this);
+            changeState(neighbor, new NeighborStateFull, this);
         }
         else {
             MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
             messageHandler->startTimer(neighbor->getDDRetransmissionTimer(), neighbor->getRouterDeadInterval());
-            changeStateAndRebuild(neighbor, new NeighborStateLoading, this);
+            changeState(neighbor, new NeighborStateLoading, this);
         }
     }
     else if (event == Neighbor::UPDATE_RETRANSMISSION_TIMER) {

@@ -23,9 +23,10 @@ import inet.linklayer.contract.IEtherMac;
 import inet.linklayer.contract.IEthernetInterface;
 
 //
-// Provides an Ethernet network interface suitable for emulation. The upper part
-// of the network interface is realized in the real world using an real TAP device
-// of the computer which is running the simulation.
+// This module provides an Ethernet network interface suitable for emulation.
+//
+// The upper part of the network interface is realized in the real world using
+// a real TAP device of the host computer which is running the simulation.
 //
 module ExtUpperEthernetInterface extends ExtInterface like IEthernetInterface
 {

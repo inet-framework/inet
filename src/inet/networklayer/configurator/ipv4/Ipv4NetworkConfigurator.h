@@ -98,6 +98,12 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
       public:
         RouteInfo(int color, uint32 destination, uint32 netmask) { this->color = color; this->enabled = true; this->destination = destination; this->netmask = netmask; }
         ~RouteInfo() {} // don't delete originalRouteInfos elements, they are not exclusively owned
+
+        std::string str() const {
+            std::stringstream out;
+            out << "color = " << color << ", destination = " << Ipv4Address(destination) << ", netmask = " << Ipv4Address(netmask);
+            return out.str();
+        }
     };
 
     /**
@@ -106,17 +112,16 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
     class RoutingTableInfo
     {
       public:
-        std::vector<RouteInfo *> originalRouteInfos;    // keep track of the original routes
         std::vector<RouteInfo *> routeInfos;    // list of routes in the routing table
 
       public:
         RoutingTableInfo() {}
-        ~RoutingTableInfo() { for (size_t i = 0; i < originalRouteInfos.size(); i++) delete originalRouteInfos[i]; }
+        ~RoutingTableInfo() {}
 
         int addRouteInfo(RouteInfo *routeInfo);
         void removeRouteInfo(const RouteInfo *routeInfo) { routeInfos.erase(std::find(routeInfos.begin(), routeInfos.end(), routeInfo)); }
-        RouteInfo *findBestMatchingRouteInfo(const uint32 destination) const { return findBestMatchingRouteInfo(destination, 0, routeInfos.size()); }
-        RouteInfo *findBestMatchingRouteInfo(const uint32 destination, int begin, int end) const;
+        RouteInfo *findBestMatchingRouteInfo(const uint32 destination, int begin = 0, int end = -1) const { return findBestMatchingRouteInfo(routeInfos, destination, 0, end == -1 ? routeInfos.size() : end); }
+        static RouteInfo *findBestMatchingRouteInfo(const std::vector<RouteInfo *>& routeInfos, const uint32 destination, int begin, int end);
         static bool routeInfoLessThan(const RouteInfo *a, const RouteInfo *b) { return a->netmask != b->netmask ? a->netmask > b->netmask : a->destination < b->destination; }
     };
 
@@ -247,7 +252,7 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
     bool interruptsOriginalRoute(const RoutingTableInfo& routingTableInfo, int begin, int end, RouteInfo *originalRouteInfo);
     bool interruptsAnyOriginalRoute(const RoutingTableInfo& routingTableInfo, int begin, int end, const std::vector<RouteInfo *>& originalRouteInfos);
     bool interruptsSubsequentOriginalRoutes(const RoutingTableInfo& routingTableInfo, int index);
-    void checkOriginalRoutes(const RoutingTableInfo& routingTableInfo, const std::vector<RouteInfo *>& originalRouteInfos);
+    void checkOriginalRoutes(const RoutingTableInfo& routingTableInfo, const RoutingTableInfo& originalRoutingTableInfo);
     void findLongestCommonDestinationPrefix(uint32 destination1, uint32 netmask1, uint32 destination2, uint32 netmask2, uint32& destinationOut, uint32& netmaskOut);
     void addOriginalRouteInfos(RoutingTableInfo& routingTableInfo, int begin, int end, const std::vector<RouteInfo *>& originalRouteInfos);
     bool tryToMergeTwoRoutes(RoutingTableInfo& routingTableInfo, int i, int j, RouteInfo *routeInfoI, RouteInfo *routeInfoJ);

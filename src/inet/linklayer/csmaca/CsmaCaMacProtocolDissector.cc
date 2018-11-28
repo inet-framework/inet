@@ -28,7 +28,7 @@ namespace inet {
 
 Register_Protocol_Dissector(&Protocol::csmaCaMac, CsmaCaMacProtocolDissector);
 
-void CsmaCaMacProtocolDissector::dissect(Packet *packet, ICallback& callback) const
+void CsmaCaMacProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
     auto header = packet->popAtFront<CsmaCaMacHeader>();
     auto trailer = packet->popAtBack<CsmaCaMacTrailer>(B(4));

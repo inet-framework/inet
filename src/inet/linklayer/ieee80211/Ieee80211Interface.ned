@@ -42,6 +42,9 @@ module Ieee80211Interface like IWirelessInterface
         string interfaceTableModule;
         string energySourceModule = default("");
         string opMode @enum("a", "b", "g(erp)", "g(mixed)", "n(mixed-2.4Ghz)", "p", "ac") = default("g(mixed)");
+        string address = default("auto"); // MAC address as hex string (12 hex digits), or
+                                          // "auto". "auto" values will be replaced by
+                                          // a generated MAC address in init stage 0.
         double bitrate @unit(bps) = default(-1bps);
         **.opMode = opMode;
         **.bitrate = bitrate;

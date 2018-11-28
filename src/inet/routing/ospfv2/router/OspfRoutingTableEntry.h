@@ -32,7 +32,7 @@ namespace inet {
 
 namespace ospf {
 
-class INET_API RoutingTableEntry : public Ipv4Route
+class INET_API OspfRoutingTableEntry : public Ipv4Route
 {
   public:
     enum RoutingPathType {
@@ -63,24 +63,26 @@ class INET_API RoutingTableEntry : public Ipv4Route
     // Ipv4Route::gateway is nextHops[0].hopAddress
 
   public:
-    RoutingTableEntry(IInterfaceTable *ift);
-    RoutingTableEntry(const RoutingTableEntry& entry);
-    virtual ~RoutingTableEntry() {}
+    OspfRoutingTableEntry(IInterfaceTable *ift);
+    OspfRoutingTableEntry(const OspfRoutingTableEntry& entry);
+    virtual ~OspfRoutingTableEntry() {}
 
-    bool operator==(const RoutingTableEntry& entry) const;
-    bool operator!=(const RoutingTableEntry& entry) const { return !((*this) == entry); }
+    bool operator==(const OspfRoutingTableEntry& entry) const;
+    bool operator!=(const OspfRoutingTableEntry& entry) const { return !((*this) == entry); }
 
     void setDestinationType(RoutingDestinationType type) { destinationType = type; }
     RoutingDestinationType getDestinationType() const { return destinationType; }
+    static const std::string getDestinationTypeString(RoutingDestinationType destType);
     void setOptionalCapabilities(OspfOptions options) { optionalCapabilities = options; }
     OspfOptions getOptionalCapabilities() const { return optionalCapabilities; }
     void setArea(AreaId source) { area = source; }
     AreaId getArea() const { return area; }
-    void setPathType(RoutingPathType type);
+    void setPathType(RoutingPathType type) { pathType = type; }
     RoutingPathType getPathType() const { return pathType; }
-    void setCost(Metric pathCost);
+    static const std::string getPathTypeString(RoutingPathType pathType);
     Metric getCost() const { return cost; }
-    void setType2Cost(Metric pathCost);
+    void setCost(Metric cost) { this->cost = cost; setMetric(cost); }
+    void setType2Cost(Metric type2Cost) { this->type2Cost = type2Cost; setMetric(type2Cost); }
     Metric getType2Cost() const { return type2Cost; }
     void setLinkStateOrigin(const OspfLsa *lsa) { linkStateOrigin = lsa; }
     const OspfLsa *getLinkStateOrigin() const { return linkStateOrigin; }
@@ -88,9 +90,10 @@ class INET_API RoutingTableEntry : public Ipv4Route
     void clearNextHops() { nextHops.clear(); }
     unsigned int getNextHopCount() const { return nextHops.size(); }
     NextHop getNextHop(unsigned int index) const { return nextHops[index]; }
+    virtual std::string str() const;
 };
 
-std::ostream& operator<<(std::ostream& out, const RoutingTableEntry& entry);
+std::ostream& operator<<(std::ostream& out, const OspfRoutingTableEntry& entry);
 
 } // namespace ospf
 

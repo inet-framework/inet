@@ -74,21 +74,20 @@ OspfInterface::OspfInterface(OspfInterface::OspfInterfaceType ifType) :
 
 OspfInterface::~OspfInterface()
 {
-    MessageHandler *messageHandler = parentArea->getRouter()->getMessageHandler();
-    messageHandler->clearTimer(helloTimer);
+    if(parentArea) {
+        MessageHandler *messageHandler = parentArea->getRouter()->getMessageHandler();
+        messageHandler->clearTimer(helloTimer);
+        messageHandler->clearTimer(waitTimer);
+        messageHandler->clearTimer(acknowledgementTimer);
+    }
     delete helloTimer;
-    messageHandler->clearTimer(waitTimer);
     delete waitTimer;
-    messageHandler->clearTimer(acknowledgementTimer);
     delete acknowledgementTimer;
-    if (previousState != nullptr) {
+    if (previousState)
         delete previousState;
-    }
     delete state;
-    long neighborCount = neighboringRouters.size();
-    for (long i = 0; i < neighborCount; i++) {
+    for (uint32_t i = 0; i < neighboringRouters.size(); i++)
         delete neighboringRouters[i];
-    }
 }
 
 const char *OspfInterface::getTypeString(OspfInterfaceType intfType)
@@ -283,25 +282,19 @@ void OspfInterface::sendLsAcknowledgement(const OspfLsaHeader *lsaHeader, Ipv4Ad
 Neighbor *OspfInterface::getNeighborById(RouterId neighborID)
 {
     auto neighborIt = neighboringRoutersByID.find(neighborID);
-    if (neighborIt != neighboringRoutersByID.end()) {
+    if (neighborIt != neighboringRoutersByID.end())
         return neighborIt->second;
-    }
-    else {
+    else
         return nullptr;
-    }
 }
 
 Neighbor *OspfInterface::getNeighborByAddress(Ipv4Address address)
 {
-    auto neighborIt =
-        neighboringRoutersByAddress.find(address);
-
-    if (neighborIt != neighboringRoutersByAddress.end()) {
+    auto neighborIt = neighboringRoutersByAddress.find(address);
+    if (neighborIt != neighboringRoutersByAddress.end())
         return neighborIt->second;
-    }
-    else {
+    else
         return nullptr;
-    }
 }
 
 void OspfInterface::addNeighbor(Neighbor *neighbor)
@@ -350,31 +343,25 @@ const char *OspfInterface::getStateString(OspfInterface::OspfInterfaceStateType 
 
 bool OspfInterface::hasAnyNeighborInStates(int states) const
 {
-    long neighborCount = neighboringRouters.size();
-    for (long i = 0; i < neighborCount; i++) {
+    for (uint32_t i = 0; i < neighboringRouters.size(); i++) {
         Neighbor::NeighborStateType neighborState = neighboringRouters[i]->getState();
-        if (neighborState & states) {
+        if (neighborState & states)
             return true;
-        }
     }
     return false;
 }
 
 void OspfInterface::removeFromAllRetransmissionLists(LsaKeyType lsaKey)
 {
-    long neighborCount = neighboringRouters.size();
-    for (long i = 0; i < neighborCount; i++) {
+    for (uint32_t i = 0; i < neighboringRouters.size(); i++)
         neighboringRouters[i]->removeFromRetransmissionList(lsaKey);
-    }
 }
 
 bool OspfInterface::isOnAnyRetransmissionList(LsaKeyType lsaKey) const
 {
-    long neighborCount = neighboringRouters.size();
-    for (long i = 0; i < neighborCount; i++) {
-        if (neighboringRouters[i]->isLinkStateRequestListEmpty(lsaKey)) {
+    for (uint32_t i = 0; i < neighboringRouters.size(); i++) {
+        if (neighboringRouters[i]->isLinkStateRequestListEmpty(lsaKey))
             return true;
-        }
     }
     return false;
 }

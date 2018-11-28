@@ -28,7 +28,7 @@ namespace inet {
 
 Register_Protocol_Dissector(&Protocol::ackingMac, AckingMacProtocolDissector);
 
-void AckingMacProtocolDissector::dissect(Packet *packet, ICallback& callback) const
+void AckingMacProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
     auto header = packet->popAtFront<AckingMacHeader>();
     callback.startProtocolDataUnit(&Protocol::ackingMac);

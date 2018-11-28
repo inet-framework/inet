@@ -24,6 +24,7 @@ import inet.linklayer.contract.ILoopbackInterface;
 import inet.linklayer.contract.IPppInterface;
 import inet.linklayer.contract.ITunnelInterface;
 import inet.linklayer.contract.IWirelessInterface;
+import inet.linklayer.vlan.IVlanInterface;
 import inet.networklayer.common.InterfaceTable;
 
 module LinkLayerNodeBase extends NodeBase
@@ -36,6 +37,7 @@ module LinkLayerNodeBase extends NodeBase
         int numExtInterfaces = default(0);
         int numPppInterfaces = default(0);  // minimum number of PPP interfaces
         int numTunInterfaces = default(0);
+        int numVlanInterfaces = default(0);
         mobility.typename = default(numWlanInterfaces > 0 ? "StationaryMobility" : "");
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         wlan[*].radio.antenna.mobilityModule = default("^.^.^.mobility");
@@ -78,6 +80,10 @@ module LinkLayerNodeBase extends NodeBase
                 @display("p=1125,616,row,150;q=txQueue");
         }
         tun[numTunInterfaces]: <default("TunInterface")> like ITunnelInterface {
+            parameters:
+                @display("p=975,616,row,150;q=txQueue");
+        }
+        vlan[numVlanInterfaces]: <default("VlanInterface")> like IVlanInterface {
             parameters:
                 @display("p=975,616,row,150;q=txQueue");
         }

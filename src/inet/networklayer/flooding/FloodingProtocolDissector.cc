@@ -25,7 +25,7 @@ namespace inet {
 
 Register_Protocol_Dissector(&Protocol::flooding, FloodingProtocolDissector);
 
-void FloodingProtocolDissector::dissect(Packet *packet, ICallback& callback) const
+void FloodingProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
     auto header = packet->popAtFront<FloodingHeader>();
     auto trailerPopOffset = packet->getBackOffset();

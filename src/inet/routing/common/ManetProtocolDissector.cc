@@ -25,7 +25,7 @@ namespace inet {
 
 Register_Protocol_Dissector(&Protocol::manet, ManetProtocolDissector);
 
-void ManetProtocolDissector::dissect(Packet *packet, ICallback& callback) const
+void ManetProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
     callback.startProtocolDataUnit(&Protocol::manet);
 //    callback.visitChunk(header, &Protocol::manet);

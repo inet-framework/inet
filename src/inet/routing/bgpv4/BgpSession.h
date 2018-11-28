@@ -19,9 +19,7 @@
 #define __INET_BGPSESSION_H
 
 #include <vector>
-
 #include "inet/common/INETDefs.h"
-
 #include "inet/routing/bgpv4/BgpCommon.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 #include "inet/routing/bgpv4/Bgp.h"
@@ -91,6 +89,8 @@ private:
     void setInfo(SessionInfo info);
     void setTimers(simtime_t *delayTab);
     void setlinkIntf(InterfaceEntry *intf) { _info.linkIntf = intf; }
+    void setNextHopSelf(bool nextHopSelf) { _info.nextHopSelf = nextHopSelf; }
+    void setLocalPreference(int localPreference) { _info.localPreference = localPreference; }
     void setSocket(TcpSocket *socket) { delete _info.socket; _info.socket = socket; }
     void setSocketListen(TcpSocket *socket) { delete _info.socketListen; _info.socketListen = socket; }
 
@@ -105,14 +105,17 @@ private:
     BgpSessionType getType() const { return _info.sessionType; }
     static const std::string getTypeString(BgpSessionType sessionType);
     InterfaceEntry *getLinkIntf() const { return _info.linkIntf; }
+    bool getCheckConnection() const { return _info.checkConnection; }
     Ipv4Address getPeerAddr() const { return _info.peerAddr; }
+    bool getNextHopSelf() const { return _info.nextHopSelf; }
+    int getLocalPreference() const { return _info.localPreference; }
     TcpSocket *getSocket() const { return _info.socket; }
     TcpSocket *getSocketListen() const { return _info.socketListen; }
     IIpv4RoutingTable *getIPRoutingTable() const { return bgpRouter.getIPRoutingTable(); }
     std::vector<BgpRoutingTableEntry *> getBGPRoutingTable() const { return bgpRouter.getBGPRoutingTable(); }
     Macho::Machine<fsm::TopState>& getFSM() const { return *_fsm; }
-    bool checkExternalRoute(const Ipv4Route *ospfRoute) const { return bgpRouter.checkExternalRoute(ospfRoute); }
     void updateSendProcess(BgpRoutingTableEntry *entry) const { return bgpRouter.updateSendProcess(NEW_SESSION_ESTABLISHED, _info.sessionID, entry); }
+    bool isRouteExcluded(const Ipv4Route &rtEntry) const { return bgpRouter.isRouteExcluded(rtEntry); }
 };
 
 std::ostream& operator<<(std::ostream& out, const BgpSession& entry);

@@ -59,6 +59,12 @@ void BgpSession::setTimers(simtime_t *delayTab)
     _keepAliveTime = delayTab[2];
     if (_info.sessionType == IGP) {
         _StartEventTime = delayTab[3];
+        // if this BGP router does not establish any EGP connection, then start this IGP session
+        if(bgpRouter.getNumEgpSessions() == 0) {
+            _ptrStartEvent = new cMessage("BGP Start", START_EVENT_KIND);
+            bgpRouter.getScheduleAt(simTime() + _StartEventTime, _ptrStartEvent);
+            _ptrStartEvent->setContextPointer(this);
+        }
     }
     else if (delayTab[3] != SIMTIME_ZERO) {
         _StartEventTime = delayTab[3];
@@ -77,14 +83,14 @@ void BgpSession::setTimers(simtime_t *delayTab)
 
 void BgpSession::startConnection()
 {
-    if (_ptrStartEvent == nullptr) {
+    if (_ptrStartEvent == nullptr)
         _ptrStartEvent = new cMessage("BGP Start", START_EVENT_KIND);
-    }
+
     if (_info.sessionType == IGP) {
-        if (simTime() > _StartEventTime) {
+        if (simTime() > _StartEventTime)
             _StartEventTime = simTime();
-        }
-        bgpRouter.getScheduleAt(_StartEventTime, _ptrStartEvent);
+        if(!_ptrStartEvent->isScheduled())
+            bgpRouter.getScheduleAt(_StartEventTime, _ptrStartEvent);
         _ptrStartEvent->setContextPointer(this);
     }
 }
@@ -209,7 +215,9 @@ std::ostream& operator<<(std::ostream& out, const BgpSession& entry)
     out << "sessionId: " << entry.getSessionID() << " "
             << "sessionType: " << entry.getTypeString(entry.getType()) << " "
             << "established: " << (entry.isEstablished() == true ? "true" : "false") << " "
+            << "state: " << entry.getFSM().currentState().name() << " "
             << "peer: " << entry.getPeerAddr().str(false) << " "
+            << "nextHopSelf: " << (entry.getNextHopSelf() == true ? "true" : "false") << " "
             << "startEventTime: " << entry.getStartEventTime() << " "
             << "connectionRetryTime: " << entry.getConnectionRetryTime() << " "
             << "holdTime: " << entry.getHoldTime() << " "

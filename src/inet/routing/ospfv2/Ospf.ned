@@ -42,7 +42,8 @@ import inet.routing.contract.IOspf;
 //   identified by its Router ID, which is given as an IPv4 address (but isn't necessarily one).
 //   It may contain various child elements.
 //   - @name - A required string containing a node path specifying the router to which this configuration belongs to.
-//   - @RFC1583Compatible - optional true or false value
+//   - @RFC1583Compatible - optional true or false value (defined in RFC 3101)
+//   - @DistributeDefaultRoute - optional true or false value (distribute the default route, if exists, using AS-External LSA)
 //
 //   - <PointToPointInterface> - Describes the parameters of a point-to-point interface. It is identified
 //     in the router by its ifName value, or name of toward module.
@@ -95,6 +96,11 @@ import inet.routing.contract.IOspf;
 //     - @areaID - An optional attribute containing the area ID in dotted decimal notation
 //     - @attachedHost - IPv4 address of attached host
 //     - @linkCost - An optional attribute specifying the associated cost (>=0 and <1000)
+
+//   - <LoopbackInterface>
+//     - @ifName - A unique name of the loopback interface (e.g. lo1)
+//     - @areaID - An optional attribute containing the area ID in dotted decimal notation
+//     - @linkCost - An optional attribute specifying the associated cost (>=0 and <1000)
 //
 //   - <NBMAInterface>
 //     - @ifName - A unique name of the interface (e.g. eth0) or ...
@@ -145,30 +151,32 @@ simple Ospf like IOspf
         // xml containing the full OSPF AS configuration
         xml ospfConfig = default(xml("<OSPFASConfig> \
                 <Router name='**' RFC1583Compatible='true'> \
-    				<BroadcastInterface ifName='eth[*]' areaID='0.0.0.0' interfaceOutputCost='0' search='relax' /> \
-    				<PointToPointInterface ifName='ppp[*]' areaID='0.0.0.0' interfaceOutputCost='0' search='relax' /> \
-    			</Router> </OSPFASConfig>"));
-        
+                    <BroadcastInterface ifName='eth[*]' areaID='0.0.0.0' interfaceOutputCost='0' /> \
+                    <PointToPointInterface ifName='ppp[*]' areaID='0.0.0.0' interfaceOutputCost='0' /> \
+                </Router> </OSPFASConfig>"));
+
         // default values for attributes of interface xml entries:
-        
+
         int routerPriority = default(1);  // Priority in DR/BDR election (Specify 0 to exclude the router from the election)
         string areaID = default("0.0.0.0");
-        bool RFC1583Compatible = default(false);
-        
+        bool RFC1583Compatible = default(false); // if 'false', prune the set of routing table entries for the ASBR (RFC 3101)
+        bool DistributeDefaultRoute = default(false); // distribute the default route (if exists) using AS-External LSA
+
         int helloInterval @unit(s) = default(10s);  // specifies the time in seconds between hello packets that the other router sends on an interface
         int pollInterval @unit(s) = default(120s);  // specifies the length of time, in seconds, between OSPF packets that the router send before adjacency is established with a neighbor
         int routerDeadInterval @unit(s) = default(40s);  // the interval during which at least one hello packet must be received from a neighbor before the router declares that neighbor as down
         int retransmissionInterval @unit(s) = default(5s);  // The time between OSPF LSA retransmissions for adjacencies that belongs to the interface
         int interfaceTransmissionDelay @unit(s) = default(1s);  // The number of seconds required to transmit a link state update packet. Valid values are 1 to 65535
         string interfaceMode @enum("Active","Passive","NoOSPF") = default("Active"); // NoOSPF: the interface is not advertized by OSPF
-        																			 // Passive: the interface is advertised, but no OSPF message is send out
-                
+                                                                                     // Passive: the interface is advertised, but no OSPF message is send out
+
         int referenceBandwidth @unit(bps) = default(1e8bps);   // reference bandwidth for cost calculation
-        int interfaceOutputCost = default(1);  // cost of link on the interface (1-1000), 0 means use reference bandwidth
-        int linkCost = default(1);  // cost of link (1-1000)
+        int interfaceOutputCost = default(0);  // cost of link on the interface (1-1000), 0 means use reference bandwidth
         int externalInterfaceOutputCost = default(1);  // cost of link (1-1000)
-        string externalInterfaceOutputType = default("");  // Type1|Type2        
-                
+        string externalInterfaceOutputType = default("Type2");  // Type1|Type2 
+        string forwardingAddress = default("0.0.0.0");
+        int linkCost = default(1);  // cost of link (1-1000) for HostInterface and LoopbackInterface only      
+
         string authenticationType @enum("SimplePasswordType","CrytographicType","NullType") = default("NullType");
         string authenticationKey = default("0x00");  // 0xnn..nn
 

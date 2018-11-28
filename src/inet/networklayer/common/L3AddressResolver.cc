@@ -510,6 +510,7 @@ cModule *L3AddressResolver::findHostWithAddress(const L3Address& add)
     if (add.isUnspecified() || add.isMulticast())
         return nullptr;
 
+    // TODO: FIXME: this is a very bad idea, because it can be very slow for a large network
     cTopology topo("topo");
     topo.extractByProperty("networkNode");
 

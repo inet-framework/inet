@@ -26,6 +26,7 @@
 
 #include "inet/common/checksum/EthernetCRC.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/NetworkNamespaceContext.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/emulation/linklayer/ethernet/ExtEthernetDeviceSocket.h"
@@ -46,7 +47,7 @@ void ExtEthernetDeviceSocket::initialize(int stage)
     cSimpleModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         device = par("device");
-        packetName = par("packetName").stdstringValue();
+        packetNameFormat = par("packetNameFormat");
         rtScheduler = check_and_cast<RealTimeScheduler *>(getSimulation()->getScheduler());
         openSocket();
         numSent = numReceived = 0;
@@ -103,6 +104,7 @@ void ExtEthernetDeviceSocket::finish()
 
 void ExtEthernetDeviceSocket::openSocket()
 {
+    NetworkNamespaceContext context(par("namespace"));
     // open socket
     struct ifreq if_mac;
     struct ifreq if_idx;
@@ -163,12 +165,12 @@ bool ExtEthernetDeviceSocket::notify(int fd)
     uint32_t checksum = htonl(ethernetCRC(buffer, n));
     memcpy(&buffer[n], &checksum, sizeof(checksum));
     auto data = makeShared<BytesChunk>(static_cast<const uint8_t *>(buffer), n + 4);
-    std::string completePacketName = packetName + std::to_string(numReceived);
-    auto packet = new Packet(completePacketName.c_str(), data);
+    auto packet = new Packet(nullptr, data);
     auto interfaceEntry = check_and_cast<InterfaceEntry *>(getContainingNicModule(this));
     packet->addTag<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
     packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
     packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
+    packet->setName(packetPrinter.printPacketToString(packet, packetNameFormat).c_str());
     emit(packetReceivedSignal, packet);
     numReceived++;
     EV_INFO << "Received " << packet->getTotalLength() << " packet from '" << device << "' device.\n";

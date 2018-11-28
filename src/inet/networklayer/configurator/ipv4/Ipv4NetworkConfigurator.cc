@@ -52,7 +52,7 @@ int Ipv4NetworkConfigurator::RoutingTableInfo::addRouteInfo(RouteInfo *routeInfo
     return index;
 }
 
-Ipv4NetworkConfigurator::RouteInfo *Ipv4NetworkConfigurator::RoutingTableInfo::findBestMatchingRouteInfo(const uint32 destination, int begin, int end) const
+Ipv4NetworkConfigurator::RouteInfo *Ipv4NetworkConfigurator::RoutingTableInfo::findBestMatchingRouteInfo(const std::vector<RouteInfo *>& routeInfos, const uint32 destination, int begin, int end)
 {
     for (int index = begin; index < end; index++) {
         RouteInfo *routeInfo = routeInfos.at(index);
@@ -1512,13 +1512,13 @@ bool Ipv4NetworkConfigurator::interruptsSubsequentOriginalRoutes(const RoutingTa
 /**
  * Asserts that all original routes are still routed the same way as by the original routing table.
  */
-void Ipv4NetworkConfigurator::checkOriginalRoutes(const RoutingTableInfo& routingTableInfo, const std::vector<RouteInfo *>& originalRouteInfos)
+void Ipv4NetworkConfigurator::checkOriginalRoutes(const RoutingTableInfo& routingTableInfo, const RoutingTableInfo& originalRoutingTableInfo)
 {
     // assert that all original routes are routed with the same color
-    for (auto & originalRouteInfo : originalRouteInfos) {
+    for (auto & originalRouteInfo : originalRoutingTableInfo.routeInfos) {
         Ipv4NetworkConfigurator::RouteInfo *matchingRouteInfo = routingTableInfo.findBestMatchingRouteInfo(originalRouteInfo->destination);
-        if (!(matchingRouteInfo && matchingRouteInfo->color == originalRouteInfo->color))
-            ASSERT(false);
+        Ipv4NetworkConfigurator::RouteInfo *matchingOriginalRouteInfo = originalRoutingTableInfo.findBestMatchingRouteInfo(originalRouteInfo->destination);
+        ASSERT(matchingRouteInfo && matchingRouteInfo->color == matchingOriginalRouteInfo->color);
     }
 }
 
@@ -1570,6 +1570,7 @@ bool Ipv4NetworkConfigurator::tryToMergeTwoRoutes(RoutingTableInfo& routingTable
     findLongestCommonDestinationPrefix(routeInfoI->destination, routeInfoI->netmask, routeInfoJ->destination, routeInfoJ->netmask, destination, netmask);
 
     // create the merged route
+    ASSERT(routeInfoI->color == routeInfoJ->color);
     RouteInfo *mergedRouteInfo = new RouteInfo(routeInfoI->color, destination, netmask);
     routeInfoI->enabled = false;
     routeInfoJ->enabled = false;
@@ -1611,7 +1612,7 @@ bool Ipv4NetworkConfigurator::tryToMergeTwoRoutes(RoutingTableInfo& routingTable
         routingTableInfo.removeRouteInfo(routeInfoI);
         routingTableInfo.removeRouteInfo(routeInfoJ);
 #ifndef NDEBUG
-        //checkOriginalRoutes(routingTableInfo, originalRouteInfos);
+        //checkOriginalRoutes(routingTableInfo, originalRoutingTableInfos);
 #endif // ifndef NDEBUG
         delete routeInfoI;
         delete routeInfoJ;
@@ -1672,10 +1673,10 @@ void Ipv4NetworkConfigurator::optimizeRoutes(std::vector<Ipv4Route *>& originalR
     RoutingTableInfo routingTableInfo;
     std::vector<Ipv4Route *> colorToRoute;    // a mapping from color to route action (interface, gateway, metric, etc.)
 #ifndef NDEBUG
-    std::vector<RouteInfo *> originalRouteInfos;    // a copy of the original routes in the optimizer's format
+    RoutingTableInfo originalRoutingTableInfo;    // a copy of the original routes in the optimizer's format
 #endif // ifndef NDEBUG
 
-    // build colorToRouteColor, originalRouteInfos and initial routeInfos in routingTableInfo
+    // build colorToRouteColor, originalRoutingTableInfo and initial routeInfos in routingTableInfo
     for (auto & originalRoute : originalRoutes) {
         int color = findRouteIndexWithSameColor(colorToRoute, originalRoute);
         if (color == -1) {
@@ -1686,18 +1687,17 @@ void Ipv4NetworkConfigurator::optimizeRoutes(std::vector<Ipv4Route *>& originalR
         // create original route and determine its color
         RouteInfo *originalRouteInfo = new RouteInfo(color, originalRoute->getDestination().getInt(), originalRoute->getNetmask().getInt());
 #ifndef NDEBUG
-        originalRouteInfos.push_back(originalRouteInfo);
+        originalRoutingTableInfo.addRouteInfo(originalRouteInfo);
 #endif // ifndef NDEBUG
 
         // create a copy of the original route that can be destructively optimized later
         RouteInfo *optimizedRouteInfo = new RouteInfo(*originalRouteInfo);
         optimizedRouteInfo->originalRouteInfos.push_back(originalRouteInfo);
-        routingTableInfo.originalRouteInfos.push_back(originalRouteInfo);
         routingTableInfo.addRouteInfo(optimizedRouteInfo);
     }
 
 #ifndef NDEBUG
-    checkOriginalRoutes(routingTableInfo, originalRouteInfos);
+    checkOriginalRoutes(routingTableInfo, originalRoutingTableInfo);
 #endif // ifndef NDEBUG
 
     // STEP 2.
@@ -1707,7 +1707,7 @@ void Ipv4NetworkConfigurator::optimizeRoutes(std::vector<Ipv4Route *>& originalR
         ;
 
 #ifndef NDEBUG
-    checkOriginalRoutes(routingTableInfo, originalRouteInfos);
+    checkOriginalRoutes(routingTableInfo, originalRoutingTableInfo);
 #endif // ifndef NDEBUG
 
     // STEP 3.

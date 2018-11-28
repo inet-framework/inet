@@ -10,4 +10,5 @@
   <interface hosts='HA11' names='eth0' address='192.168.1.1' netmask='255.255.255.0' mtu='1500' metric='1'/>
   <interface hosts='HB11' names='eth0' address='192.170.1.1' netmask='255.255.255.0' mtu='1500' metric='1'/>
   <route hosts='H*' destination='*' netmask='*' interface='eth0'/>
+  <route hosts='R*' destination='*' netmask='0.0.0.0' interface='ppp0'/>
 </config>

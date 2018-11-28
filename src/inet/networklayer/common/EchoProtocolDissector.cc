@@ -27,7 +27,7 @@ namespace inet {
 
 Register_Protocol_Dissector(&Protocol::echo, EchoProtocolDissector);
 
-void EchoProtocolDissector::dissect(Packet *packet, ICallback& callback) const
+void EchoProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
     auto header = packet->popAtFront<EchoPacket>();
     callback.startProtocolDataUnit(&Protocol::echo);

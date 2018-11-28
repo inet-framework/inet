@@ -29,7 +29,7 @@ namespace ospf {
 
 Register_Protocol_Dissector(&Protocol::ospf, OspfProtocolDissector);
 
-void OspfProtocolDissector::dissect(Packet *packet, ICallback& callback) const
+void OspfProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
     auto header = packet->popAtFront<OspfPacket>();
     callback.startProtocolDataUnit(&Protocol::ospf);

@@ -29,7 +29,7 @@ namespace inet {
 
 Register_Protocol_Dissector(&Protocol::apskPhy, ApskProtocolDissector);
 
-void ApskProtocolDissector::dissect(Packet *packet, ICallback& callback) const
+void ApskProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
     auto header = packet->popAtFront<ApskPhyHeader>();
     callback.startProtocolDataUnit(&Protocol::apskPhy);

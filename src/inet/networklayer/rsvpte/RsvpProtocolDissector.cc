@@ -27,7 +27,7 @@ namespace inet {
 
 Register_Protocol_Dissector(&Protocol::rsvpTe, RsvpProtocolDissector);
 
-void RsvpProtocolDissector::dissect(Packet *packet, ICallback& callback) const
+void RsvpProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
     auto header = packet->popAtFront<RsvpMessage>();
     callback.startProtocolDataUnit(&Protocol::rsvpTe);

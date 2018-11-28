@@ -17,6 +17,10 @@
 
 package inet.emulation.common;
 
+//
+// This module provides a way of capturing real network packets from the network
+// interfaces of the host computer which is running the simulation.
+//
 simple PcapCapturer
 {
     parameters:

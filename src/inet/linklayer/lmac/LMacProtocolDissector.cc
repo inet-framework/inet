@@ -28,7 +28,7 @@ namespace inet {
 
 Register_Protocol_Dissector(&Protocol::lmac, LMacProtocolDissector);
 
-void LMacProtocolDissector::dissect(Packet *packet, ICallback& callback) const
+void LMacProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
     auto header = packet->popAtFront<LMacHeader>();
     callback.startProtocolDataUnit(&Protocol::lmac);

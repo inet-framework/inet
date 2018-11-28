@@ -20,6 +20,8 @@
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/socket/SocketMap.h"
+#include "inet/transportlayer/contract/udp/UdpSocket.h"
+#include "inet/transportlayer/contract/tcp/TcpSocket.h"
 
 namespace inet {
 
@@ -51,6 +53,29 @@ void SocketMap::deleteSockets()
     for (auto & elem : socketMap)
         delete elem.second;
     socketMap.clear();
+}
+
+void SocketMap::addWatch()
+{
+    WATCH_PTRMAP(socketMap);
+}
+
+std::ostream& operator<<(std::ostream& out, const ISocket& entry)
+{
+    const UdpSocket *udp = dynamic_cast<const UdpSocket *>(&entry);
+    if(udp) {
+        out << "UDPConnectionId: " << udp->getSocketId();
+    }
+
+    const TcpSocket *tcp = dynamic_cast<const TcpSocket *>(&entry);
+    if(tcp) {
+        out << "TCPConnectionId: " << tcp->getSocketId() << " "
+                << " local: " << tcp->getLocalAddress() << ":" << tcp->getLocalPort() << " "
+                << " remote: " << tcp->getRemoteAddress() << ":" << tcp->getRemotePort() << " "
+                << " status: " << TcpSocket::stateName(tcp->getState());
+    }
+
+    return out;
 }
 
 } // namespace inet

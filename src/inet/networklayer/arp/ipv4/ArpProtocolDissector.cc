@@ -27,7 +27,7 @@ namespace inet {
 
 Register_Protocol_Dissector(&Protocol::arp, ArpProtocolDissector);
 
-void ArpProtocolDissector::dissect(Packet *packet, ICallback& callback) const
+void ArpProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
     const auto& arpPacket = packet->popAtFront<ArpPacket>();
     callback.startProtocolDataUnit(&Protocol::arp);

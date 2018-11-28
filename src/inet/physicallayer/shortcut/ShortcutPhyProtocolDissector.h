@@ -25,7 +25,7 @@ namespace inet {
 class INET_API ShortcutPhyProtocolDissector : public ProtocolDissector
 {
   public:
-    virtual void dissect(Packet *packet, ICallback& callback) const override;
+    virtual void dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const override;
 };
 
 

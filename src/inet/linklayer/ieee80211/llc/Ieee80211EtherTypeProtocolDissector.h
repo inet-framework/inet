@@ -27,7 +27,7 @@ namespace ieee80211 {
 class INET_API Ieee80211EtherTypeProtocolDissector : public ProtocolDissector
 {
   public:
-    virtual void dissect(Packet *packet, ICallback& callback) const override;
+    virtual void dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const override;
 };
 
 } // namespace ieee80211

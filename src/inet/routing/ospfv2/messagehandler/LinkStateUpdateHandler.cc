@@ -196,16 +196,6 @@ void LinkStateUpdateHandler::processPacket(Packet *packet, OspfInterface *intf, 
                     }
                     shouldRebuildRoutingTable |= router->installLSA(currentLSA, areaID);
 
-                    // Add externalIPRoute in IPRoutingTable if this route is learned by BGP
-                    if (currentType == AS_EXTERNAL_LSA_TYPE) {
-                        const OspfAsExternalLsa *externalLSA = &(lsUpdatePacket->getAsExternalLSAs(0));
-                        if (externalLSA->getContents().getExternalRouteTag() == OSPF_EXTERNAL_ROUTES_LEARNED_BY_BGP) {
-                            Ipv4Address externalAddr = currentLSA->getHeader().getLinkStateID();
-                            int ifName = intf->getIfIndex();
-                            router->addExternalRouteInIPTable(externalAddr, externalLSA->getContents(), ifName);
-                        }
-                    }
-
                     EV_INFO << "    (update installed)\n";
 
                     acknowledgeLSA(currentLSA->getHeader(), intf, ackFlags, lsUpdatePacket->getRouterID());
@@ -285,9 +275,8 @@ void LinkStateUpdateHandler::processPacket(Packet *packet, OspfInterface *intf, 
         }
     }
 
-    if (shouldRebuildRoutingTable) {
+    if (shouldRebuildRoutingTable)
         router->rebuildRoutingTable();
-    }
 }
 
 void LinkStateUpdateHandler::acknowledgeLSA(const OspfLsaHeader& lsaHeader,

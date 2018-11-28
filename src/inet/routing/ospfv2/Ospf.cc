@@ -105,7 +105,7 @@ void Ospf::unsubscribe()
  */
 void Ospf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    Enter_Method_Silent("Ospf::receiveChangeNotification(%s)", cComponent::getSignalName(signalID));
+    Enter_Method("Ospf::receiveSignal");
 
     const InterfaceEntry *ie;
     const InterfaceEntryChangeDetails *change;
@@ -125,11 +125,11 @@ void Ospf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj,
         change = check_and_cast<const InterfaceEntryChangeDetails *>(obj);
         if (change->getFieldId() == InterfaceEntry::F_CARRIER || change->getFieldId() == InterfaceEntry::F_STATE) {
             ie = change->getInterfaceEntry();
-            if (!ie->isUp()) {
-                // TODO
-            }
+            if (!ie->isUp())
+                handleInterfaceDown(ie);
             else {
-                // TODO
+                // interface went back online. Do nothing!
+                // Wait for Hello messages to establish adjacency.
             }
         }
     }
@@ -180,19 +180,65 @@ void Ospf::insertExternalRoute(int ifIndex, const Ipv4AddressRange& netAddr)
     ospfRouter->updateExternalRoute(netAddr.address, newExternalContents, ifIndex);
 }
 
-bool Ospf::checkExternalRoute(const Ipv4Address& route)
+int Ospf::checkExternalRoute(const Ipv4Address& route)
 {
     Enter_Method_Silent();
-    for (unsigned long i = 1; i < ospfRouter->getASExternalLSACount(); i++) {
+    for (uint32_t i = 0; i < ospfRouter->getASExternalLSACount(); i++) {
         AsExternalLsa *externalLSA = ospfRouter->getASExternalLSA(i);
         Ipv4Address externalAddr = externalLSA->getHeader().getLinkStateID();
-        if (externalAddr == route) //FIXME was this meant???
-            return true;
+        if (externalAddr == route) { //FIXME was this meant???
+            if(externalLSA->getContents().getE_ExternalMetricType())
+                return 2;
+            else
+                return 1;
+        }
     }
-    return false;
+    return 0;
+}
+
+void Ospf::handleInterfaceDown(const InterfaceEntry *ie)
+{
+    EV_DEBUG << "interface " << ie->getInterfaceId() << " went down. \n";
+
+    // Step 1: delete all direct-routes connected to this interface
+
+    // ... from OSPF table
+    for(uint32_t i = 0; i < ospfRouter->getRoutingTableEntryCount(); i++) {
+        OspfRoutingTableEntry *ospfRoute = ospfRouter->getRoutingTableEntry(i);
+        if(ospfRoute && ospfRoute->getInterface() == ie && ospfRoute->getNextHopAsGeneric().isUnspecified()) {
+            EV_DEBUG << "removing route from OSPF routing table: " << ospfRoute << "\n";
+            ospfRouter->deleteRoute(ospfRoute);
+        }
+    }
+    // ... from Ipv4 table
+    for(int32_t i = 0; i < rt->getNumRoutes(); i++) {
+        Ipv4Route *route = rt->getRoute(i);
+        if(route && route->getInterface() == ie && route->getNextHopAsGeneric().isUnspecified()) {
+            EV_DEBUG << "removing route from Ipv4 routing table: " << route << "\n";
+            rt->deleteRoute(route);
+        }
+    }
+
+    // Step 2: find the OspfInterface associated with the ie and take it down
+    OspfInterface *foundIntf = nullptr;
+    for(auto &areaId : ospfRouter->getAreaIds()) {
+        Area *area = ospfRouter->getAreaByID(areaId);
+        if(area) {
+            for(auto &ifIndex : area->getInterfaceIndices()) {
+                OspfInterface *intf = area->getInterface(ifIndex);
+                if(intf && intf->getIfIndex() == ie->getInterfaceId()) {
+                    foundIntf = intf;
+                    break;
+                }
+            }
+            if(foundIntf) {
+                foundIntf->processEvent(OspfInterface::INTERFACE_DOWN);
+                break;
+            }
+        }
+    }
 }
 
 } // namespace ospf
 
 } // namespace inet
-

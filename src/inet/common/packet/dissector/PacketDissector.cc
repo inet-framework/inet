@@ -115,7 +115,7 @@ void PacketDissector::doDissectPacket(Packet *packet, const Protocol *protocol) 
     if (protocolDissector == nullptr)
         protocolDissector = protocolDissectorRegistry.getProtocolDissector(nullptr);
     ProtocolDissectorCallback callback(*this);
-    protocolDissector->dissect(packet, callback);
+    protocolDissector->dissect(packet, protocol, callback);
 }
 
 void PacketDissector::dissectPacket(Packet *packet, const Protocol *protocol) const
