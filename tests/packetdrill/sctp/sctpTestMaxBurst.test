@@ -13,7 +13,6 @@ SACK chunk is expected before the last fragment may be sent.
 [General]
 network = PacketDrillSctp
 debug-on-errors = true
-tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../../src;../../lib
 
 **.scriptFile="../../sctptests/sctpTestMaxBurst.pkt"

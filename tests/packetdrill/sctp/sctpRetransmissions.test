@@ -12,7 +12,6 @@ Five Data chunks are sent and the first and third one get lost. It is expected t
 
 network = PacketDrillSctp
 debug-on-errors = true
-tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../../src;../../lib
 
 **.scriptFile="../../sctptests/sctpRetransmissions.pkt"

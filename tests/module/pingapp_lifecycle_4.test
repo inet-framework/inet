@@ -6,7 +6,6 @@ Test ping stop followed by node shutdown.
 
 [General]
 network = Test
-tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../src;../../lib
 cmdenv-express-mode = false
 

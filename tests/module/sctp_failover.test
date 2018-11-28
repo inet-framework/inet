@@ -12,7 +12,6 @@ retransmissions, but still the expected amount of data.
 network=failover
 cmdenv-event-banners=false
 cmdenv-express-mode = false
-tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../src;../../lib
 
 #omnetpp 5.0 - 5.1 compatibility:

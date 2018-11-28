@@ -102,7 +102,6 @@ network Test1
 description = "Simple test"
 network = Test1
 ned-path = .;../../../../src;../../lib
-tkenv-plugin-path = ../../../etc/plugins
 cmdenv-express-mode = false
 
 sim-time-limit = 200s

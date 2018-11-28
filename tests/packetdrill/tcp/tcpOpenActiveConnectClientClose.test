@@ -9,7 +9,6 @@ SUT is a client, i.e. it opens a socket and connects to the peer. Afterwards it 
 [General]
 network = PacketDrillTcp
 debug-on-errors = true
-tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../../src;../../lib
 
 **.scriptFile="../../tcptests/tcpOpenActiveConnectClientClose.pkt"

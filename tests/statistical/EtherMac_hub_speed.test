@@ -100,7 +100,6 @@ network SpeedTest
 [General]
 sim-time-limit = 5s
 
-tkenv-plugin-path = ../../../etc/plugins
 #record-eventlog = true
 **.vector-recording = false
 

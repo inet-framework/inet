@@ -14,7 +14,6 @@ A fast retransmission is expected.
 [General]
 network = PacketDrillTcp
 debug-on-errors = true
-tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../../src;../../lib
 
 **.scriptFile="../../tcptests/tcpFastRtx.pkt"

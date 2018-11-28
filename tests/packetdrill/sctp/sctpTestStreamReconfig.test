@@ -12,7 +12,6 @@ Incoming stream 0 is requested to be resetted. A second request is sent to encur
 [General]
 network = PacketDrillSctp
 debug-on-errors = true
-tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../../src;../../lib
 
 **.scriptFile="../../sctptests/sctpTestStreamReconfig.pkt"

@@ -28,7 +28,6 @@ network Test
 
 [General]
 network = Test
-tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../src;../../lib
 sim-time-limit = 100s
 cmdenv-express-mode = false

@@ -13,7 +13,6 @@ Problem is solved when tcp.increasedIWEnabled is set to true.
 [General]
 network = PacketDrillTcp
 debug-on-errors = true
-tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../../src;../../lib
 
 **.scriptFile="../../tcptests/tcpSend2AckSecond.pkt"
