@@ -42,6 +42,7 @@ class INET_API OperationalBase : public cSimpleModule, public ILifecycle
     };
     Operation activeOperation;
     cMessage *operationTimeoutMsg = nullptr;
+    cMessage *delayedOperationDoneMsg = nullptr;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -58,10 +59,7 @@ class INET_API OperationalBase : public cSimpleModule, public ILifecycle
     virtual void handleCrashOperation(LifecycleOperation *operation) = 0;
     virtual void handleSuspendOperation(LifecycleOperation *operation);
     virtual void handleResumeOperation(LifecycleOperation *operation);
-
-    virtual bool isOperationTimeout(cMessage *message);
-    virtual void handleOperationTimeout(cMessage *message);
-    virtual void scheduleOperationTimeout(simtime_t timeout);
+    virtual bool isOperationFinished();
 
     virtual bool hasMessageScheduledForNow();
 
@@ -69,14 +67,19 @@ class INET_API OperationalBase : public cSimpleModule, public ILifecycle
     virtual bool isModuleStartStage(int stage) = 0;
     virtual bool isModuleStopStage(int stage) = 0;
 
+    virtual void handleOperationTimeout(cMessage *message);
+
+    /// @{ utility functions
     virtual bool isWorking() const { return operational != NOT_OPERATING && operational != OPERATION_SUSPENDED; }
-
     virtual void setOperational(State newState);
-
+    virtual void scheduleOperationTimeout(simtime_t timeout);
+    virtual bool checkOperationFinished();
+    virtual bool isOperationTimeout(cMessage *message);
     virtual void operationStarted(LifecycleOperation *operation, IDoneCallback *doneCallback, State);
     virtual void operationPending();
-    virtual bool isOperationFinished();
     virtual void operationCompleted();
+    virtual void delayDoneCallbackInvocation(simtime_t delay = SIMTIME_ZERO);
+    /// }@
 
   public:
     OperationalBase();

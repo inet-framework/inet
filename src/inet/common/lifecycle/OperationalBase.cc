@@ -31,12 +31,15 @@ OperationalBase::OperationalBase() :
 
 OperationalBase::~OperationalBase()
 {
+    cancelAndDelete(delayedOperationDoneMsg);
+    cancelAndDelete(operationTimeoutMsg);
 }
 
 void OperationalBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         WATCH(operational);
+        delayedOperationDoneMsg = new cMessage("doneOp");
     }
     if (isInitializeStage(stage)) {
         cModule *node = findContainingNode(this);
@@ -49,7 +52,10 @@ void OperationalBase::initialize(int stage)
 
 void OperationalBase::handleMessage(cMessage *message)
 {
-    if (isOperationTimeout(message))
+    if (message == delayedOperationDoneMsg) {
+        operationCompleted();
+    }
+    else if (isOperationTimeout(message))
         handleOperationTimeout(message);
     else {
         switch (operational) {
@@ -75,7 +81,7 @@ void OperationalBase::handleMessage(cMessage *message)
             case SUSPENDING_OPERATION:
             case RESUMING_OPERATION:
                 ASSERT(activeOperation.isPending);
-                if (isOperationFinished())
+                if (checkOperationFinished())
                     operationCompleted();
                 break;
             case OPERATING:
@@ -87,6 +93,13 @@ void OperationalBase::handleMessage(cMessage *message)
                 throw cRuntimeError("invalid operational status: %d", (int)operational);
         }
     }
+}
+
+void OperationalBase::delayDoneCallbackInvocation(simtime_t delay)
+{
+    ASSERT(!delayedOperationDoneMsg->isScheduled());
+    delayedOperationDoneMsg->setSchedulingPriority(std::numeric_limits<short>::max());
+    scheduleAt(simTime()+delay, delayedOperationDoneMsg);
 }
 
 void OperationalBase::handleMessageWhenDown(cMessage *message)
@@ -109,7 +122,7 @@ bool OperationalBase::handleOperationStage(LifecycleOperation *operation, IDoneC
             operational = STARTING_OPERATION;
             operationStarted(operation, doneCallback, OPERATING);
             handleStartOperation(operation);
-            bool done = isOperationFinished();
+            bool done = checkOperationFinished();
             if (done)
                 operationCompleted();
             else
@@ -122,7 +135,7 @@ bool OperationalBase::handleOperationStage(LifecycleOperation *operation, IDoneC
             operational = STOPPING_OPERATION;
             operationStarted(operation, doneCallback, NOT_OPERATING);
             handleStopOperation(operation);
-            bool done = isOperationFinished();
+            bool done = checkOperationFinished();
             if (done)
                 operationCompleted();
             else
@@ -199,6 +212,12 @@ void OperationalBase::operationPending()
 {
     ASSERT(activeOperation.operation != nullptr);
     activeOperation.pending();
+    simtime_t timeout(2, SIMTIME_S);
+    if (hasPar("operationTimeout")) {
+        cPar& operationTimeoutPar = par("operationTimeout");
+        ASSERT(strcmp(operationTimeoutPar.getUnit(), "s") == 0);
+        timeout = operationTimeoutPar;
+    }
     scheduleOperationTimeout(2.0); //TODO timeout parameter instead of 2.0s
 }
 
@@ -210,6 +229,30 @@ bool OperationalBase::isOperationFinished()
             return ! hasMessageScheduledForNow();
         default:
             return true;
+    }
+}
+
+bool OperationalBase::checkOperationFinished()
+{
+    if (!isOperationFinished())
+        return false;
+    switch(operational) {
+    case STOPPING_OPERATION:
+    case SUSPENDING_OPERATION:
+    {
+        simtime_t extraStopTime = -1.0;
+        if (hasPar("extraStopTime")) {
+            cPar& extraStopTimePar = par("extraStopTime");
+            ASSERT(strcmp(extraStopTimePar.getUnit(), "s") == 0);
+            extraStopTime = extraStopTimePar;
+        }
+        if (extraStopTime < SIMTIME_ZERO)
+            return true;
+        delayDoneCallbackInvocation(extraStopTime);
+        return false;
+    }
+    default:
+        return true;
     }
 }
 
