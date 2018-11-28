@@ -98,6 +98,12 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
       public:
         RouteInfo(int color, uint32 destination, uint32 netmask) { this->color = color; this->enabled = true; this->destination = destination; this->netmask = netmask; }
         ~RouteInfo() {} // don't delete originalRouteInfos elements, they are not exclusively owned
+
+        std::string str() const {
+            std::stringstream out;
+            out << "color = " << color << ", destination = " << Ipv4Address(destination) << ", netmask = " << Ipv4Address(netmask);
+            return out.str();
+        }
     };
 
     /**
@@ -247,7 +253,7 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
     bool interruptsOriginalRoute(const RoutingTableInfo& routingTableInfo, int begin, int end, RouteInfo *originalRouteInfo);
     bool interruptsAnyOriginalRoute(const RoutingTableInfo& routingTableInfo, int begin, int end, const std::vector<RouteInfo *>& originalRouteInfos);
     bool interruptsSubsequentOriginalRoutes(const RoutingTableInfo& routingTableInfo, int index);
-    void checkOriginalRoutes(const RoutingTableInfo& routingTableInfo, const std::vector<RouteInfo *>& originalRouteInfos);
+    void checkOriginalRoutes(const RoutingTableInfo& routingTableInfo, const RoutingTableInfo& originalRoutingTableInfo);
     void findLongestCommonDestinationPrefix(uint32 destination1, uint32 netmask1, uint32 destination2, uint32 netmask2, uint32& destinationOut, uint32& netmaskOut);
     void addOriginalRouteInfos(RoutingTableInfo& routingTableInfo, int begin, int end, const std::vector<RouteInfo *>& originalRouteInfos);
     bool tryToMergeTwoRoutes(RoutingTableInfo& routingTableInfo, int i, int j, RouteInfo *routeInfoI, RouteInfo *routeInfoJ);
