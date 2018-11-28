@@ -130,11 +130,16 @@ ProtocolGroup ProtocolGroup::ieee8022protocol("ieee8022protocol", {
 });
 
 ProtocolGroup ProtocolGroup::udpprotocol("udpprotocol", {
+    { 554, &Protocol::rtsp },
     { 6696, &Protocol::babel },
 });
 
 ProtocolGroup ProtocolGroup::tcpprotocol("tcpprotocol", {
+    { 21, &Protocol::ftp },
+    { 22, &Protocol::ssh },
+    { 23, &Protocol::telnet },
     { 80, &Protocol::http },
+    { 554, &Protocol::rtsp },
 });
 
 } // namespace inet
