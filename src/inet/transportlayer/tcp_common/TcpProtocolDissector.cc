@@ -33,6 +33,8 @@ void TcpProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICa
     callback.visitChunk(header, &Protocol::tcp);
     if (packet->getDataLength() != b(0)) {
         auto dataProtocol = ProtocolGroup::tcpprotocol.findProtocol(header->getDestPort());
+        if (dataProtocol == nullptr)
+            dataProtocol = ProtocolGroup::tcpprotocol.findProtocol(header->getSrcPort());
         callback.dissectPacket(packet, dataProtocol);
     }
     callback.endProtocolDataUnit(&Protocol::tcp);
