@@ -398,6 +398,7 @@ void Ieee80211Mac::processLowerFrame(Packet *packet, const Ptr<const Ieee80211Ma
     if (mib->qos)
         hcf->processLowerFrame(packet, header);
     else
+        // TODO: what if the received frame is ST_DATA_WITH_QOS? drop?
         dcf->processLowerFrame(packet, header);
 }
 
