@@ -81,7 +81,7 @@ void DhcpServer::receiveSignal(cComponent *source, int signalID, cObject *obj, c
     Enter_Method_Silent();
 
     if (signalID == interfaceDeletedSignal) {
-        if (operational != DOWN) {
+        if (isWorking()) {
             InterfaceEntry *nie = check_and_cast<InterfaceEntry *>(obj);
             if (ie == nie)
                 throw cRuntimeError("Reacting to interface deletions is not implemented in this module");
@@ -154,7 +154,7 @@ void DhcpServer::handleSelfMessages(cMessage *msg)
 
 void DhcpServer::processDhcpMessage(Packet *packet)
 {
-    ASSERT(operational != DOWN && ie != nullptr);
+    ASSERT(isWorking() && ie != nullptr);
 
     const auto& dhcpMsg = packet->peekAtFront<DhcpMessage>();
 
@@ -510,7 +510,7 @@ void DhcpServer::sendToUDP(Packet *msg, int srcPort, const L3Address& destAddr, 
     socket.sendTo(msg, destAddr, destPort);
 }
 
-bool DhcpServer::handleNodeStart(IDoneCallback *doneCallback)
+bool DhcpServer::handleStartOperation(IDoneCallback *doneCallback)
 {
     (void)doneCallback; // unused variable
     maxNumOfClients = par("maxNumClients");

@@ -16,7 +16,7 @@
 #include "inet/linklayer/configurator/L2NodeConfigurator.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 
 namespace inet {
 
@@ -43,15 +43,15 @@ void L2NodeConfigurator::initialize(int stage)
 bool L2NodeConfigurator::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_LINK_LAYER) {
+    if (dynamic_cast<ModuleStartOperation *>(operation)) {
+        if (static_cast<ModuleStartOperation::Stage>(stage) == ModuleStartOperation::STAGE_LINK_LAYER) {
             prepareNode();
             configureNode();
         }
     }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation))
+    else if (dynamic_cast<ModuleStopOperation *>(operation))
         /*nothing to do*/;
-    else if (dynamic_cast<NodeCrashOperation *>(operation))
+    else if (dynamic_cast<ModuleCrashOperation *>(operation))
         /*nothing to do*/;
     else
         throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());

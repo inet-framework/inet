@@ -193,9 +193,9 @@ class INET_API PimBase : public RoutingProtocolBase
     void processHelloTimer(cMessage *timer);
     void processHelloPacket(Packet *pk);
 
-    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
-    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
-    virtual void handleNodeCrash() override;
+    virtual bool handleStartOperation(IDoneCallback *doneCallback) override;
+    virtual bool handleStopOperation(IDoneCallback *doneCallback) override;
+    virtual void handleCrashOperation() override;
 };
 
 }    // namespace inet

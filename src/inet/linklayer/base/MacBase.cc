@@ -26,7 +26,7 @@
 #include "inet/common/IInterfaceRegistrationListener.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/ModuleAccess.h"
 
 namespace inet {
@@ -58,18 +58,18 @@ void MacBase::handleMessageWhenDown(cMessage *msg)
         MacProtocolBase::handleMessageWhenDown(msg);
 }
 
-bool MacBase::handleNodeStart(IDoneCallback *doneCallback)
+bool MacBase::handleStartOperation(IDoneCallback *doneCallback)
 {
     return true;
 }
 
-bool MacBase::handleNodeShutdown(IDoneCallback *doneCallback)
+bool MacBase::handleStopOperation(IDoneCallback *doneCallback)
 {
     flushQueue();
     return true;
 }
 
-void MacBase::handleNodeCrash()
+void MacBase::handleCrashOperation()
 {
     clearQueue();
 }

@@ -19,7 +19,7 @@
 #define __INET_NETWORKPROTOCOLBASE_H
 
 #include "inet/common/LayeredProtocolBase.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include <map>
@@ -59,8 +59,8 @@ class INET_API NetworkProtocolBase : public LayeredProtocolBase, public IProtoco
     virtual bool isLowerMessage(cMessage *message) override;
 
     virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_NETWORK_LAYER; }
-    virtual bool isNodeStartStage(int stage) override { return stage == NodeStartOperation::STAGE_NETWORK_LAYER; }
-    virtual bool isNodeShutdownStage(int stage) override { return stage == NodeShutdownOperation::STAGE_NETWORK_LAYER; }
+    virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOrResumeOperationBase::STAGE_NETWORK_LAYER; }
+    virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOrSuspendOperationBase::STAGE_NETWORK_LAYER; }
 
     virtual void handleUpperCommand(cMessage *msg) override;
 

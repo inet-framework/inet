@@ -99,9 +99,9 @@ class INET_API UdpBasicBurst : public ApplicationBase, public UdpSocket::ICallba
     virtual void processSend();
     virtual void processStop();
 
-    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
-    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
-    virtual void handleNodeCrash() override;
+    virtual bool handleStartOperation(IDoneCallback *doneCallback) override;
+    virtual bool handleStopOperation(IDoneCallback *doneCallback) override;
+    virtual void handleCrashOperation() override;
 
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
     virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;

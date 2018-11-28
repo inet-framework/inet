@@ -20,7 +20,7 @@
 #include <algorithm>
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 
 namespace inet {
 
@@ -54,11 +54,11 @@ bool NodeStatus::handleOperationStage(LifecycleOperation *operation, int opStage
 {
     Enter_Method_Silent();
     cModule *node = getContainingNode(this);
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
+    if (dynamic_cast<ModuleStartOperation *>(operation)) {
         if (opStage == 0) {
             EV << node->getFullPath() << " starting up" << endl;
             if (getState() != DOWN)
-                throw cRuntimeError("Current node status is not 'down' at NodeStartOperation");
+                throw cRuntimeError("Current node status is not 'down' at ModuleStartOperation");
             setState(GOING_UP);
         }
         // NOTE: this is not an 'else if' so that it works if there's only 1 stage
@@ -69,11 +69,11 @@ bool NodeStatus::handleOperationStage(LifecycleOperation *operation, int opStage
             node->bubble("Node started");
         }
     }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
+    else if (dynamic_cast<ModuleStopOperation *>(operation)) {
         if (opStage == 0) {
             EV << node->getFullPath() << " shutting down" << endl;
             if (getState() != UP)
-                throw cRuntimeError("Current node status is not 'up' at NodeShutdownOperation");
+                throw cRuntimeError("Current node status is not 'up' at ModuleStopOperation");
             setState(GOING_DOWN);
         }
         // NOTE: this is not an 'else if' so that it works if there's only 1 stage
@@ -84,11 +84,11 @@ bool NodeStatus::handleOperationStage(LifecycleOperation *operation, int opStage
             node->bubble("Node shut down");
         }
     }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
+    else if (dynamic_cast<ModuleCrashOperation *>(operation)) {
         if (opStage == 0) {
             EV << node->getFullPath() << " crashing" << endl;
             if (getState() != UP)
-                throw cRuntimeError("Current node status is not 'up' at NodeCrashOperation");
+                throw cRuntimeError("Current node status is not 'up' at ModuleCrashOperation");
             setState(GOING_DOWN);
         }
         // NOTE: this is not an 'else if' so that it works if there's only 1 stage

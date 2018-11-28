@@ -18,7 +18,7 @@
 #include "inet/applications/tcpapp/TcpBasicClientApp.h"
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/applications/tcpapp/GenericAppMsg_m.h"
 
@@ -67,8 +67,8 @@ bool TcpBasicClientApp::isNodeUp()
 bool TcpBasicClientApp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_APPLICATION_LAYER) {
+    if (dynamic_cast<ModuleStartOperation *>(operation)) {
+        if (static_cast<ModuleStartOperation::Stage>(stage) == ModuleStartOperation::STAGE_APPLICATION_LAYER) {
             simtime_t now = simTime();
             simtime_t start = std::max(startTime, now);
             if (timeoutMsg && ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime))) {
@@ -77,16 +77,16 @@ bool TcpBasicClientApp::handleOperationStage(LifecycleOperation *operation, int 
             }
         }
     }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
+    else if (dynamic_cast<ModuleStopOperation *>(operation)) {
+        if (static_cast<ModuleStopOperation::Stage>(stage) == ModuleStopOperation::STAGE_APPLICATION_LAYER) {
             cancelEvent(timeoutMsg);
             if (socket.getState() == TcpSocket::CONNECTED || socket.getState() == TcpSocket::CONNECTING || socket.getState() == TcpSocket::PEER_CLOSED)
                 close();
             // TODO: wait until socket is closed
         }
     }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH)
+    else if (dynamic_cast<ModuleCrashOperation *>(operation)) {
+        if (static_cast<ModuleCrashOperation::Stage>(stage) == ModuleCrashOperation::STAGE_CRASH)
             cancelEvent(timeoutMsg);
     }
     else

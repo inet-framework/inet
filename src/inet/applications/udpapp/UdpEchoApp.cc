@@ -75,7 +75,7 @@ void UdpEchoApp::finish()
     ApplicationBase::finish();
 }
 
-bool UdpEchoApp::handleNodeStart(IDoneCallback *doneCallback)
+bool UdpEchoApp::handleStartOperation(IDoneCallback *doneCallback)
 {
     socket.setOutputGate(gate("socketOut"));
     int localPort = par("localPort");
@@ -86,14 +86,14 @@ bool UdpEchoApp::handleNodeStart(IDoneCallback *doneCallback)
     return true;
 }
 
-bool UdpEchoApp::handleNodeShutdown(IDoneCallback *doneCallback)
+bool UdpEchoApp::handleStopOperation(IDoneCallback *doneCallback)
 {
     //TODO if(socket.isOpened()) socket.close();
     socket.setCallback(nullptr);
     return true;
 }
 
-void UdpEchoApp::handleNodeCrash()
+void UdpEchoApp::handleCrashOperation()
 {
 }
 

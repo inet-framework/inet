@@ -21,7 +21,7 @@
 #include "inet/networklayer/configurator/ipv4/Ipv4NodeConfigurator.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 
 namespace inet {
 
@@ -72,18 +72,18 @@ void Ipv4NodeConfigurator::initialize(int stage)
 bool Ipv4NodeConfigurator::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_LINK_LAYER)
+    if (dynamic_cast<ModuleStartOperation *>(operation)) {
+        if (static_cast<ModuleStartOperation::Stage>(stage) == ModuleStartOperation::STAGE_LINK_LAYER)
             prepareAllInterfaces();
-        else if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_NETWORK_LAYER && networkConfigurator) {
+        else if (static_cast<ModuleStartOperation::Stage>(stage) == ModuleStartOperation::STAGE_NETWORK_LAYER && networkConfigurator) {
             configureAllInterfaces();
             configureRoutingTable();
         }
     }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {    /*nothing to do*/
+    else if (dynamic_cast<ModuleStopOperation *>(operation)) {    /*nothing to do*/
         ;
     }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {    /*nothing to do*/
+    else if (dynamic_cast<ModuleCrashOperation *>(operation)) {    /*nothing to do*/
         ;
     }
     else

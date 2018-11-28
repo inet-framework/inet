@@ -18,7 +18,7 @@
 #include "inet/linklayer/ieee8021d/common/StpBase.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 
 namespace inet {
@@ -107,11 +107,11 @@ void StpBase::refreshDisplay() const
         for (unsigned int i = 0; i < numPorts; i++) {
             InterfaceEntry *ie = ifTable->getInterface(i);
             cModule *nicModule = ie;
-            if (operational != DOWN) {
+            if (isWorking()) {
                 const Ieee8021dInterfaceData *port = getPortInterfaceData(ie->getInterfaceId());
 
                 // color link
-                colorLink(ie, (operational != DOWN) && (port->getState() == Ieee8021dInterfaceData::FORWARDING));
+                colorLink(ie, isWorking() && (port->getState() == Ieee8021dInterfaceData::FORWARDING));
 
                 // label ethernet interface with port status and role
                 if (nicModule != nullptr) {
@@ -132,7 +132,7 @@ void StpBase::refreshDisplay() const
         }
 
         // mark root switch
-        if (operational != DOWN && getRootInterfaceId() == -1)
+        if (isWorking() && getRootInterfaceId() == -1)
             switchModule->getDisplayString().setTagArg("i", 1, ROOT_SWITCH_COLOR);
         else
             switchModule->getDisplayString().setTagArg("i", 1, "");
@@ -182,19 +182,19 @@ InterfaceEntry *StpBase::chooseInterface()
     return nullptr;
 }
 
-bool StpBase::handleNodeStart(IDoneCallback *)
+bool StpBase::handleStartOperation(IDoneCallback *)
 {
     start();
     return true;
 }
 
-bool StpBase::handleNodeShutdown(IDoneCallback *)
+bool StpBase::handleStopOperation(IDoneCallback *)
 {
     stop();
     return true;
 }
 
-void StpBase::handleNodeCrash()
+void StpBase::handleCrashOperation()
 {
     stop();
 }

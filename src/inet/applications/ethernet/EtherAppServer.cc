@@ -51,20 +51,20 @@ void EtherAppServer::initialize(int stage)
     }
 }
 
-bool EtherAppServer::handleNodeStart(IDoneCallback *doneCallback)
+bool EtherAppServer::handleStartOperation(IDoneCallback *doneCallback)
 {
     EV_INFO << "Starting application\n";
     registerDsap(localSap);
     return true;
 }
 
-bool EtherAppServer::handleNodeShutdown(IDoneCallback *doneCallback)
+bool EtherAppServer::handleStopOperation(IDoneCallback *doneCallback)
 {
     EV_INFO << "Stop the application\n";
     return true;
 }
 
-void EtherAppServer::handleNodeCrash()
+void EtherAppServer::handleCrashOperation()
 {
     EV_INFO << "Crash the application\n";
 }

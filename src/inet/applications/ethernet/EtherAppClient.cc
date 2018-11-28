@@ -89,20 +89,20 @@ void EtherAppClient::handleMessageWhenUp(cMessage *msg)
         llcSocket.processMessage(msg);
 }
 
-bool EtherAppClient::handleNodeStart(IDoneCallback *doneCallback)
+bool EtherAppClient::handleStartOperation(IDoneCallback *doneCallback)
 {
     if (isGenerator())
         scheduleNextPacket(true);
     return true;
 }
 
-bool EtherAppClient::handleNodeShutdown(IDoneCallback *doneCallback)
+bool EtherAppClient::handleStopOperation(IDoneCallback *doneCallback)
 {
     cancelNextPacket();
     return true;
 }
 
-void EtherAppClient::handleNodeCrash()
+void EtherAppClient::handleCrashOperation()
 {
     cancelNextPacket();
 }

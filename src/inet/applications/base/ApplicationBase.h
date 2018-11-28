@@ -19,7 +19,7 @@
 #define __INET_APPLICATIONBASE_H
 
 #include "inet/common/lifecycle/OperationalBase.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 
 namespace inet {
 
@@ -30,8 +30,8 @@ class INET_API ApplicationBase : public OperationalBase
 
   protected:
     virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_APPLICATION_LAYER; }
-    virtual bool isNodeStartStage(int stage) override { return stage == NodeStartOperation::STAGE_APPLICATION_LAYER; }
-    virtual bool isNodeShutdownStage(int stage) override { return stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER; }
+    virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOrResumeOperationBase::STAGE_APPLICATION_LAYER; }
+    virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOrSuspendOperationBase::STAGE_APPLICATION_LAYER; }
 };
 
 } // namespace inet

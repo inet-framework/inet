@@ -24,7 +24,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3Address.h"
@@ -207,12 +207,12 @@ class INET_API Tcp : public OperationalBase
     virtual TcpReceiveQueue *createReceiveQueue();
 
     // ILifeCycle:
-    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
-    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
-    virtual void handleNodeCrash() override;
+    virtual bool handleStartOperation(IDoneCallback *doneCallback) override;
+    virtual bool handleStopOperation(IDoneCallback *doneCallback) override;
+    virtual void handleCrashOperation() override;
     virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_TRANSPORT_LAYER; }
-    virtual bool isNodeStartStage(int stage) override { return stage == NodeStartOperation::STAGE_TRANSPORT_LAYER; }
-    virtual bool isNodeShutdownStage(int stage) override { return stage == NodeShutdownOperation::STAGE_TRANSPORT_LAYER; }
+    virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOrResumeOperationBase::STAGE_TRANSPORT_LAYER; }
+    virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOrSuspendOperationBase::STAGE_TRANSPORT_LAYER; }
 
     // called at shutdown/crash
     virtual void reset();

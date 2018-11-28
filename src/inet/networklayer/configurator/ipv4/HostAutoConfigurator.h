@@ -21,7 +21,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/lifecycle/OperationalBase.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 
 namespace inet {
 
@@ -44,12 +44,12 @@ class INET_API HostAutoConfigurator : public OperationalBase
 
   protected:
     // lifecycle
-    virtual bool handleNodeStart(IDoneCallback *) override { setupNetworkLayer(); return true; }
-    virtual bool handleNodeShutdown(IDoneCallback *) override { return true; }
-    virtual void handleNodeCrash() override {}
+    virtual bool handleStartOperation(IDoneCallback *) override { setupNetworkLayer(); return true; }
+    virtual bool handleStopOperation(IDoneCallback *) override { return true; }
+    virtual void handleCrashOperation() override {}
     virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_NETWORK_CONFIGURATION; }
-    virtual bool isNodeStartStage(int stage) override { return stage == NodeStartOperation::STAGE_NETWORK_LAYER; }
-    virtual bool isNodeShutdownStage(int stage) override { return stage == NodeShutdownOperation::STAGE_NETWORK_LAYER; }
+    virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOrResumeOperationBase::STAGE_NETWORK_LAYER; }
+    virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOrSuspendOperationBase::STAGE_NETWORK_LAYER; }
 
     virtual void setupNetworkLayer();
 };

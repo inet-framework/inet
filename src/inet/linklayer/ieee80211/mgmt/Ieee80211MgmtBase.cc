@@ -17,7 +17,7 @@
 
 #include "inet/common/INETUtils.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -154,16 +154,16 @@ void Ieee80211MgmtBase::processFrame(Packet *packet, const Ptr<const Ieee80211Da
 bool Ieee80211MgmtBase::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_PHYSICAL_LAYER)
+    if (dynamic_cast<ModuleStartOperation *>(operation)) {
+        if (static_cast<ModuleStartOperation::Stage>(stage) == ModuleStartOperation::STAGE_PHYSICAL_LAYER)
             start();
     }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_PHYSICAL_LAYER)
+    else if (dynamic_cast<ModuleStopOperation *>(operation)) {
+        if (static_cast<ModuleStopOperation::Stage>(stage) == ModuleStopOperation::STAGE_PHYSICAL_LAYER)
             stop();
     }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH) // crash is immediate
+    else if (dynamic_cast<ModuleCrashOperation *>(operation)) {
+        if (static_cast<ModuleCrashOperation::Stage>(stage) == ModuleCrashOperation::STAGE_CRASH) // crash is immediate
             stop();
     }
     else

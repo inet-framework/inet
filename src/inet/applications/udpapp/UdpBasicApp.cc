@@ -18,7 +18,7 @@
 
 #include "inet/applications/base/ApplicationPacket_m.h"
 #include "inet/applications/udpapp/UdpBasicApp.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/TagBase_m.h"
@@ -223,7 +223,7 @@ void UdpBasicApp::processPacket(Packet *pk)
     numReceived++;
 }
 
-bool UdpBasicApp::handleNodeStart(IDoneCallback *doneCallback)
+bool UdpBasicApp::handleStartOperation(IDoneCallback *doneCallback)
 {
     simtime_t start = std::max(startTime, simTime());
     if ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime)) {
@@ -233,7 +233,7 @@ bool UdpBasicApp::handleNodeStart(IDoneCallback *doneCallback)
     return true;
 }
 
-bool UdpBasicApp::handleNodeShutdown(IDoneCallback *doneCallback)
+bool UdpBasicApp::handleStopOperation(IDoneCallback *doneCallback)
 {
     if (selfMsg)
         cancelEvent(selfMsg);
@@ -241,7 +241,7 @@ bool UdpBasicApp::handleNodeShutdown(IDoneCallback *doneCallback)
     return true;
 }
 
-void UdpBasicApp::handleNodeCrash()
+void UdpBasicApp::handleCrashOperation()
 {
     if (selfMsg)
         cancelEvent(selfMsg);

@@ -181,9 +181,9 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::ICallback, pu
     virtual ~Ldp();
 
     // lifecycle
-    virtual bool handleNodeStart(IDoneCallback *) override;
-    virtual bool handleNodeShutdown(IDoneCallback *) override;
-    virtual void handleNodeCrash() override;
+    virtual bool handleStartOperation(IDoneCallback *) override;
+    virtual bool handleStopOperation(IDoneCallback *) override;
+    virtual void handleCrashOperation() override;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

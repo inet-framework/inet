@@ -28,7 +28,7 @@
 #include "inet/networklayer/ipv4/Ipv4Route.h"
 #include "inet/common/Simsignals.h"
 #include "inet/networklayer/ipv4/RoutingTableParser.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
@@ -764,29 +764,29 @@ void Ipv4RoutingTable::updateNetmaskRoutes()
 bool Ipv4RoutingTable::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_NETWORK_LAYER) {
+    if (dynamic_cast<ModuleStartOperation *>(operation)) {
+        if (static_cast<ModuleStartOperation::Stage>(stage) == ModuleStartOperation::STAGE_NETWORK_LAYER) {
             // read routing table file (and interface configuration)
             const char *filename = par("routingFile");
             RoutingTableParser parser(ift, this);
             if (*filename && parser.readRoutingTableFromFile(filename) == -1)
                 throw cRuntimeError("Error reading routing table file %s", filename);
         }
-        else if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_TRANSPORT_LAYER) {
+        else if (static_cast<ModuleStartOperation::Stage>(stage) == ModuleStartOperation::STAGE_TRANSPORT_LAYER) {
             configureRouterId();
             updateNetmaskRoutes();
             isNodeUp = true;
         }
     }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_NETWORK_LAYER) {
+    else if (dynamic_cast<ModuleStopOperation *>(operation)) {
+        if (static_cast<ModuleStopOperation::Stage>(stage) == ModuleStopOperation::STAGE_NETWORK_LAYER) {
             while (!routes.empty())
                 delete removeRoute(routes[0]);
             isNodeUp = false;
         }
     }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH) {
+    else if (dynamic_cast<ModuleCrashOperation *>(operation)) {
+        if (static_cast<ModuleCrashOperation::Stage>(stage) == ModuleCrashOperation::STAGE_CRASH) {
             while (!routes.empty())
                 delete removeRoute(routes[0]);
             isNodeUp = false;

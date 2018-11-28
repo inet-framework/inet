@@ -64,9 +64,9 @@ void PimDm::initialize(int stage)
     }
 }
 
-bool PimDm::handleNodeStart(IDoneCallback *doneCallback)
+bool PimDm::handleStartOperation(IDoneCallback *doneCallback)
 {
-    bool done = PimBase::handleNodeStart(doneCallback);
+    bool done = PimBase::handleStartOperation(doneCallback);
 
     // subscribe for notifications
     if (isEnabled) {
@@ -87,17 +87,17 @@ bool PimDm::handleNodeStart(IDoneCallback *doneCallback)
     return done;
 }
 
-bool PimDm::handleNodeShutdown(IDoneCallback *doneCallback)
+bool PimDm::handleStopOperation(IDoneCallback *doneCallback)
 {
     // TODO send PIM Hellos to neighbors with 0 HoldTime
     stopPIMRouting();
-    return PimBase::handleNodeShutdown(doneCallback);
+    return PimBase::handleStopOperation(doneCallback);
 }
 
-void PimDm::handleNodeCrash()
+void PimDm::handleCrashOperation()
 {
     stopPIMRouting();
-    PimBase::handleNodeCrash();
+    PimBase::handleCrashOperation();
 }
 
 void PimDm::stopPIMRouting()

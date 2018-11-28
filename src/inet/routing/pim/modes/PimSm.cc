@@ -72,9 +72,9 @@ void PimSm::initialize(int stage)
     }
 }
 
-bool PimSm::handleNodeStart(IDoneCallback *doneCallback)
+bool PimSm::handleStartOperation(IDoneCallback *doneCallback)
 {
-    bool done = PimBase::handleNodeStart(doneCallback);
+    bool done = PimBase::handleStartOperation(doneCallback);
 
     if (isEnabled) {
         if (rpAddr.isUnspecified())
@@ -101,17 +101,17 @@ bool PimSm::handleNodeStart(IDoneCallback *doneCallback)
     return done;
 }
 
-bool PimSm::handleNodeShutdown(IDoneCallback *doneCallback)
+bool PimSm::handleStopOperation(IDoneCallback *doneCallback)
 {
     // TODO send PIM Hellos to neighbors with 0 HoldTime
     stopPIMRouting();
-    return PimBase::handleNodeShutdown(doneCallback);
+    return PimBase::handleStopOperation(doneCallback);
 }
 
-void PimSm::handleNodeCrash()
+void PimSm::handleCrashOperation()
 {
     stopPIMRouting();
-    PimBase::handleNodeCrash();
+    PimBase::handleCrashOperation();
 }
 
 void PimSm::stopPIMRouting()

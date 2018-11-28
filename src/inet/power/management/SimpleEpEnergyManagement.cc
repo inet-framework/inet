@@ -16,7 +16,7 @@
 //
 
 #include "inet/common/lifecycle/LifecycleController.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/power/management/SimpleEpEnergyManagement.h"
 
@@ -63,14 +63,14 @@ void SimpleEpEnergyManagement::executeNodeOperation(J estimatedEnergyCapacity)
     if (!std::isnan(nodeShutdownCapacity.get()) && estimatedEnergyCapacity <= nodeShutdownCapacity && nodeStatus->getState() == NodeStatus::UP) {
         EV_WARN << "Capacity reached node shutdown threshold" << endl;
         LifecycleOperation::StringMap params;
-        NodeShutdownOperation *operation = new NodeShutdownOperation();
+        ModuleStopOperation *operation = new ModuleStopOperation();
         operation->initialize(networkNode, params);
         lifecycleController.initiateOperation(operation);
     }
     else if (!std::isnan(nodeStartCapacity.get()) && estimatedEnergyCapacity >= nodeStartCapacity && nodeStatus->getState() == NodeStatus::DOWN) {
         EV_INFO << "Capacity reached node start threshold" << endl;
         LifecycleOperation::StringMap params;
-        NodeStartOperation *operation = new NodeStartOperation();
+        ModuleStartOperation *operation = new ModuleStartOperation();
         operation->initialize(networkNode, params);
         lifecycleController.initiateOperation(operation);
     }

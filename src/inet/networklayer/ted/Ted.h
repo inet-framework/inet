@@ -93,9 +93,9 @@ class INET_API Ted : public RoutingProtocolBase
     virtual void rebuildRoutingTable();
     //@}
 
-    virtual bool handleNodeStart(IDoneCallback *) override;
-    virtual bool handleNodeShutdown(IDoneCallback *) override;
-    virtual void handleNodeCrash() override;
+    virtual bool handleStartOperation(IDoneCallback *) override;
+    virtual bool handleStopOperation(IDoneCallback *) override;
+    virtual void handleCrashOperation() override;
 
   protected:
     IIpv4RoutingTable *rt = nullptr;

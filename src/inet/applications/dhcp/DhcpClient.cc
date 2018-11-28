@@ -19,7 +19,7 @@
 
 #include "inet/applications/dhcp/DhcpClient.h"
 #include "inet/common/Simsignals.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
@@ -385,7 +385,7 @@ void DhcpClient::initRebootedClient()
 
 void DhcpClient::handleDhcpMessage(Packet *packet)
 {
-    ASSERT(operational != DOWN && ie != nullptr);
+    ASSERT(isWorking() && ie != nullptr);
 
     const auto& msg = packet->peekAtFront<DhcpMessage>();
     if (msg->getOp() != BOOTREPLY) {
@@ -506,7 +506,7 @@ void DhcpClient::receiveSignal(cComponent *source, int signalID, cObject *obj, c
         }
     }
     else if (signalID == interfaceDeletedSignal) {
-        if (operational != DOWN)
+        if (isWorking())
             throw cRuntimeError("Reacting to interface deletions is not implemented in this module");
     }
 }
@@ -680,7 +680,7 @@ void DhcpClient::openSocket()
     EV_INFO << "DHCP server bound to port " << serverPort << "." << endl;
 }
 
-bool DhcpClient::handleNodeStart(IDoneCallback *doneCallback)
+bool DhcpClient::handleStartOperation(IDoneCallback *doneCallback)
 {
     simtime_t start = std::max(startTime, simTime());
     ie = chooseInterface();

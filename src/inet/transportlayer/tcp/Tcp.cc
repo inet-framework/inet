@@ -22,7 +22,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/checksum/TcpIpChecksum.h"
@@ -537,20 +537,20 @@ TcpReceiveQueue *Tcp::createReceiveQueue()
     return new TcpReceiveQueue();
 }
 
-bool Tcp::handleNodeStart(IDoneCallback *)
+bool Tcp::handleStartOperation(IDoneCallback *)
 {
     //FIXME implementation
     return true;
 }
 
-bool Tcp::handleNodeShutdown(IDoneCallback *)
+bool Tcp::handleStopOperation(IDoneCallback *)
 {
     //FIXME close connections???
     reset();
     return true;
 }
 
-void Tcp::handleNodeCrash()
+void Tcp::handleCrashOperation()
 {
     reset();
 }

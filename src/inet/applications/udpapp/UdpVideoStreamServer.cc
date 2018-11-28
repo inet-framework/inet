@@ -149,7 +149,7 @@ void UdpVideoStreamServer::clearStreams()
     streams.clear();
 }
 
-bool UdpVideoStreamServer::handleNodeStart(IDoneCallback *doneCallback)
+bool UdpVideoStreamServer::handleStartOperation(IDoneCallback *doneCallback)
 {
     socket.setOutputGate(gate("socketOut"));
     socket.bind(localPort);
@@ -158,7 +158,7 @@ bool UdpVideoStreamServer::handleNodeStart(IDoneCallback *doneCallback)
     return true;
 }
 
-bool UdpVideoStreamServer::handleNodeShutdown(IDoneCallback *doneCallback)
+bool UdpVideoStreamServer::handleStopOperation(IDoneCallback *doneCallback)
 {
     clearStreams();
     //TODO if(socket.isOpened()) socket.close();
@@ -166,7 +166,7 @@ bool UdpVideoStreamServer::handleNodeShutdown(IDoneCallback *doneCallback)
     return true;
 }
 
-void UdpVideoStreamServer::handleNodeCrash()
+void UdpVideoStreamServer::handleCrashOperation()
 {
     clearStreams();
     socket.setCallback(nullptr);

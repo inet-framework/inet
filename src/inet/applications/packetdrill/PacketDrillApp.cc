@@ -32,7 +32,7 @@
 #include "inet/transportlayer/sctp/SctpAssociation.h"
 #include "inet/common/TimeTag_m.h"
 #include "inet/networklayer/configurator/ipv4/Ipv4NodeConfigurator.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 
 
 namespace inet {

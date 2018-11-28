@@ -26,7 +26,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 
 #ifdef WITH_NEXTHOP
 #include "inet/networklayer/nexthop/NextHopInterfaceData.h"
@@ -503,14 +503,14 @@ InterfaceEntry *InterfaceTable::getFirstMulticastInterface() const
 bool InterfaceTable::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
+    if (dynamic_cast<ModuleStartOperation *>(operation)) {
     }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_LINK_LAYER)
+    else if (dynamic_cast<ModuleStopOperation *>(operation)) {
+        if (static_cast<ModuleStopOperation::Stage>(stage) == ModuleStopOperation::STAGE_LINK_LAYER)
             resetInterfaces();
     }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH)
+    else if (dynamic_cast<ModuleCrashOperation *>(operation)) {
+        if (static_cast<ModuleCrashOperation::Stage>(stage) == ModuleCrashOperation::STAGE_CRASH)
             resetInterfaces();
     }
     return true;

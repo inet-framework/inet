@@ -26,7 +26,7 @@
 #include "inet/networklayer/ipv6tunneling/Ipv6Tunneling.h"
 
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 
 namespace inet {
 
@@ -877,18 +877,18 @@ void Ipv6RoutingTable::deleteInterfaceRoutes(const InterfaceEntry *entry)
 bool Ipv6RoutingTable::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (static_cast<NodeStartOperation::Stage>(stage) == NodeStartOperation::STAGE_NETWORK_LAYER)
+    if (dynamic_cast<ModuleStartOperation *>(operation)) {
+        if (static_cast<ModuleStartOperation::Stage>(stage) == ModuleStartOperation::STAGE_NETWORK_LAYER)
             ; // TODO:
     }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (static_cast<NodeShutdownOperation::Stage>(stage) == NodeShutdownOperation::STAGE_NETWORK_LAYER)
+    else if (dynamic_cast<ModuleStopOperation *>(operation)) {
+        if (static_cast<ModuleStopOperation::Stage>(stage) == ModuleStopOperation::STAGE_NETWORK_LAYER)
             while (!routeList.empty())
                 delete removeRoute(routeList[0]);
 
     }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (static_cast<NodeCrashOperation::Stage>(stage) == NodeCrashOperation::STAGE_CRASH)
+    else if (dynamic_cast<ModuleCrashOperation *>(operation)) {
+        if (static_cast<ModuleCrashOperation::Stage>(stage) == ModuleCrashOperation::STAGE_CRASH)
             while (!routeList.empty())
                 delete removeRoute(routeList[0]);
 

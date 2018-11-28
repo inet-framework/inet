@@ -28,7 +28,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
 #include "inet/common/queue/IPassiveQueue.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/INETUtils.h"
 
 namespace inet {
@@ -283,14 +283,14 @@ void EtherMacBase::configureInterfaceEntry()
     interfaceEntry->setBroadcast(true);
 }
 
-bool EtherMacBase::handleNodeStart(IDoneCallback *doneCallback)
+bool EtherMacBase::handleStartOperation(IDoneCallback *doneCallback)
 {
     initializeFlags();
     initializeQueueModule();
     return true;
 }
 
-bool EtherMacBase::handleNodeShutdown(IDoneCallback *doneCallback)
+bool EtherMacBase::handleStopOperation(IDoneCallback *doneCallback)
 {
 //    flushQueue();
     connected = false;
@@ -298,7 +298,7 @@ bool EtherMacBase::handleNodeShutdown(IDoneCallback *doneCallback)
     return true;
 }
 
-void EtherMacBase::handleNodeCrash()
+void EtherMacBase::handleCrashOperation()
 {
 //    clearQueue();
     connected = false;

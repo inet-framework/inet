@@ -18,7 +18,7 @@
  */
 
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/dissector/ProtocolDissector.h"
@@ -102,19 +102,19 @@ void Arp::handleMessageWhenUp(cMessage *msg)
     }
 }
 
-bool Arp::handleNodeStart(IDoneCallback *doneCallback)
+bool Arp::handleStartOperation(IDoneCallback *doneCallback)
 {
     ASSERT(arpCache.empty());
     return true;
 }
 
-bool Arp::handleNodeShutdown(IDoneCallback *doneCallback)
+bool Arp::handleStopOperation(IDoneCallback *doneCallback)
 {
     flush();
     return true;
 }
 
-void Arp::handleNodeCrash()
+void Arp::handleCrashOperation()
 {
     flush();
 }

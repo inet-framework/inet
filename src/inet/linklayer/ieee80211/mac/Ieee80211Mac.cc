@@ -78,7 +78,7 @@ void Ieee80211Mac::initialize(int stage)
         rx = check_and_cast<IRx *>(getSubmodule("rx"));
         tx = check_and_cast<ITx *>(getSubmodule("tx"));
         emit(modesetChangedSignal, modeSet);
-        if (operational != DOWN)
+        if (isWorking())
             initializeRadioMode();
         rx = check_and_cast<IRx *>(getSubmodule("rx"));
         tx = check_and_cast<ITx *>(getSubmodule("tx"));
@@ -398,26 +398,26 @@ void Ieee80211Mac::processLowerFrame(Packet *packet, const Ptr<const Ieee80211Ma
 }
 
 // FIXME
-bool Ieee80211Mac::handleNodeStart(IDoneCallback *doneCallback)
+bool Ieee80211Mac::handleStartOperation(IDoneCallback *doneCallback)
 {
     if (!doneCallback)
         return true;    // do nothing when called from initialize()
 
-    bool ret = MacProtocolBase::handleNodeStart(doneCallback);
+    bool ret = MacProtocolBase::handleStartOperation(doneCallback);
     initializeRadioMode();
     return ret;
 }
 
 // FIXME
-bool Ieee80211Mac::handleNodeShutdown(IDoneCallback *doneCallback)
+bool Ieee80211Mac::handleStopOperation(IDoneCallback *doneCallback)
 {
-    bool ret = MacProtocolBase::handleNodeStart(doneCallback);
-    handleNodeCrash();
+    bool ret = MacProtocolBase::handleStartOperation(doneCallback);
+    handleCrashOperation();
     return ret;
 }
 
 // FIXME
-void Ieee80211Mac::handleNodeCrash()
+void Ieee80211Mac::handleCrashOperation()
 {
 }
 

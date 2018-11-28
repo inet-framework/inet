@@ -26,7 +26,7 @@
 
 #include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
 #include "inet/routing/ospfv2/OspfConfigReader.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/ModuleAccess.h"
 
@@ -137,7 +137,7 @@ void Ospf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj,
         throw cRuntimeError("Unexpected signal: %s", getSignalName(signalID));
 }
 
-bool Ospf::handleNodeStart(IDoneCallback *)
+bool Ospf::handleStartOperation(IDoneCallback *)
 {
     ASSERT(ospfRouter == nullptr);
     simtime_t startupTime = par("startupTime");
@@ -150,7 +150,7 @@ bool Ospf::handleNodeStart(IDoneCallback *)
     return true;
 }
 
-bool Ospf::handleNodeShutdown(IDoneCallback *)
+bool Ospf::handleStopOperation(IDoneCallback *)
 {
     ASSERT(ospfRouter);
     delete ospfRouter;
@@ -160,7 +160,7 @@ bool Ospf::handleNodeShutdown(IDoneCallback *)
     return true;
 }
 
-void Ospf::handleNodeCrash()
+void Ospf::handleCrashOperation()
 {
     ASSERT(ospfRouter);
     delete ospfRouter;

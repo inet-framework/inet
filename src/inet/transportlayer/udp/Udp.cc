@@ -27,7 +27,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -1154,14 +1154,14 @@ void Udp::setMulticastSourceFilter(SockDesc *sd, InterfaceEntry *ie, L3Address m
     }
 }
 
-bool Udp::handleNodeStart(IDoneCallback *)
+bool Udp::handleStartOperation(IDoneCallback *)
 {
     icmp = nullptr;
     icmpv6 = nullptr;
     return true;
 }
 
-bool Udp::handleNodeShutdown(IDoneCallback *)
+bool Udp::handleStopOperation(IDoneCallback *)
 {
     clearAllSockets();
     icmp = nullptr;
@@ -1169,7 +1169,7 @@ bool Udp::handleNodeShutdown(IDoneCallback *)
     return true;
 }
 
-void Udp::handleNodeCrash()
+void Udp::handleCrashOperation()
 {
     clearAllSockets();
     icmp = nullptr;

@@ -50,9 +50,9 @@ class INET_API EtherAppServer : public ApplicationBase, public Ieee8022LlcSocket
     virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void finish() override;
 
-    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
-    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
-    virtual void handleNodeCrash() override;
+    virtual bool handleStartOperation(IDoneCallback *doneCallback) override;
+    virtual bool handleStopOperation(IDoneCallback *doneCallback) override;
+    virtual void handleCrashOperation() override;
 
     void registerDsap(int dsap);
     void sendPacket(Packet *datapacket, const MacAddress& destAddr, int destSap);

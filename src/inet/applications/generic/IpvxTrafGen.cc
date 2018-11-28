@@ -22,7 +22,7 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/L3AddressResolver.h"

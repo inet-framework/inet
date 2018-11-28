@@ -23,7 +23,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
@@ -95,7 +95,7 @@ void EtherTrafGen::handleMessageWhenUp(cMessage *msg)
         receivePacket(check_and_cast<Packet *>(msg));
 }
 
-bool EtherTrafGen::handleNodeStart(IDoneCallback *doneCallback)
+bool EtherTrafGen::handleStartOperation(IDoneCallback *doneCallback)
 {
     if (isGenerator()) {
         scheduleNextPacket(-1);
@@ -103,13 +103,13 @@ bool EtherTrafGen::handleNodeStart(IDoneCallback *doneCallback)
     return true;
 }
 
-bool EtherTrafGen::handleNodeShutdown(IDoneCallback *doneCallback)
+bool EtherTrafGen::handleStopOperation(IDoneCallback *doneCallback)
 {
     cancelNextPacket();
     return true;
 }
 
-void EtherTrafGen::handleNodeCrash()
+void EtherTrafGen::handleCrashOperation()
 {
     cancelNextPacket();
 }

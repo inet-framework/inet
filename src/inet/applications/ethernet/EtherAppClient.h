@@ -72,9 +72,9 @@ class INET_API EtherAppClient : public ApplicationBase, public Ieee8022LlcSocket
     virtual void sendPacket();
     virtual void socketDataArrived(Ieee8022LlcSocket*, Packet *msg) override;
 
-    virtual bool handleNodeStart(IDoneCallback *doneCallback) override;
-    virtual bool handleNodeShutdown(IDoneCallback *doneCallback) override;
-    virtual void handleNodeCrash() override;
+    virtual bool handleStartOperation(IDoneCallback *doneCallback) override;
+    virtual bool handleStopOperation(IDoneCallback *doneCallback) override;
+    virtual void handleCrashOperation() override;
 
   public:
     EtherAppClient() {}

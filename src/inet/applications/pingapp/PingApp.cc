@@ -29,7 +29,7 @@
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/networklayer/common/InterfaceEntry.h"
@@ -292,7 +292,7 @@ void PingApp::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-bool PingApp::handleNodeStart(IDoneCallback *doneCallback)
+bool PingApp::handleStartOperation(IDoneCallback *doneCallback)
 {
     if (isEnabled())
         startSendingPingRequests();

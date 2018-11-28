@@ -70,7 +70,7 @@ void PimBase::initialize(int stage)
     }
 }
 
-bool PimBase::handleNodeStart(IDoneCallback *doneCallback)
+bool PimBase::handleStartOperation(IDoneCallback *doneCallback)
 {
     generationID = intrand(UINT32_MAX);
 
@@ -93,7 +93,7 @@ bool PimBase::handleNodeStart(IDoneCallback *doneCallback)
     return true;
 }
 
-bool PimBase::handleNodeShutdown(IDoneCallback *doneCallback)
+bool PimBase::handleStopOperation(IDoneCallback *doneCallback)
 {
     // TODO unregister IP_PROT_PIM
     cancelAndDelete(helloTimer);
@@ -101,7 +101,7 @@ bool PimBase::handleNodeShutdown(IDoneCallback *doneCallback)
     return true;
 }
 
-void PimBase::handleNodeCrash()
+void PimBase::handleCrashOperation()
 {
     // TODO unregister IP_PROT_PIM
     cancelAndDelete(helloTimer);

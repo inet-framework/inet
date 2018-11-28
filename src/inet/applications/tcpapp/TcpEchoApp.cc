@@ -19,7 +19,7 @@
 #include "inet/applications/tcpapp/TcpEchoApp.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/common/lifecycle/NodeOperations.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/Packet_m.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 
