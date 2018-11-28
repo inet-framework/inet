@@ -547,6 +547,18 @@ void Tcp::handleCrashOperation(LifecycleOperation *operation)
     reset();
 }
 
+bool Tcp::isOperationFinished()
+{
+    switch(operational) {
+    case STOPPING_OPERATION:
+    case SUSPENDING_OPERATION:
+        delayDoneCallbackInvocation();
+        return false;
+    default:
+        return true;
+    }
+}
+
 void Tcp::reset()
 {
     for (auto & elem : tcpAppConnMap)
