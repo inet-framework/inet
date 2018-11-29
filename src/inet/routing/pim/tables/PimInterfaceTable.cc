@@ -22,28 +22,9 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/routing/pim/tables/PimInterfaceTable.h"
 
-using namespace std;
-
 namespace inet {
+
 Define_Module(PimInterfaceTable);
-
-// for WATCH_VECTOR
-std::ostream& operator<<(std::ostream& os, const PimInterface *e)
-{
-    os << "name = " << e->getInterfacePtr()->getInterfaceName() << "; mode = ";
-    if (e->getMode() == PimInterface::DenseMode)
-        os << "Dense";
-    else if (e->getMode() == PimInterface::SparseMode)
-        os << "Sparse; DR = " << e->getDRAddress();
-    return os;
-};
-
-std::string PimInterface::str() const
-{
-    std::stringstream out;
-    out << this;
-    return out.str();
-}
 
 PimInterfaceTable::~PimInterfaceTable()
 {
@@ -171,5 +152,26 @@ void PimInterfaceTable::removeInterface(InterfaceEntry *ie)
     if (it != pimInterfaces.end())
         pimInterfaces.erase(it);
 }
+
+// for WATCH_VECTOR
+std::ostream& operator<<(std::ostream& os, const PimInterface *e)
+{
+    os << "name: " << e->getInterfacePtr()->getInterfaceName() << " ";
+    os << "mode: ";
+    if (e->getMode() == PimInterface::DenseMode)
+        os << "Dense" << " ";
+    else if (e->getMode() == PimInterface::SparseMode)
+        os << "Sparse DR: " << e->getDRAddress() << " ";
+    os << "stateRefreshFlag: " << e->getSR() << " ";
+    return os;
+};
+
+std::string PimInterface::str() const
+{
+    std::stringstream out;
+    out << this;
+    return out.str();
+}
+
 }    //namespace inet
 

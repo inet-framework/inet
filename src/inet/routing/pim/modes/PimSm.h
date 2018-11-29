@@ -53,8 +53,6 @@ class INET_API PimSm : public PimBase, protected cListener
 {
   private:
     struct Route;
-    friend std::ostream& operator<<(std::ostream& out, const SourceAndGroup& sourceGroup);
-    friend std::ostream& operator<<(std::ostream& out, const Route& sourceGroup);
 
     struct PimsmInterface : public Interface
     {
@@ -200,6 +198,8 @@ class INET_API PimSm : public PimBase, protected cListener
         void startRegisterStopTimer(double interval);
         void startJoinTimer(double joinPrunePeriod);
     };
+
+    friend std::ostream& operator<<(std::ostream& out, const PimSm::Route& sourceGroup);
 
     typedef std::map<SourceAndGroup, Route *> RoutingTable;
 
