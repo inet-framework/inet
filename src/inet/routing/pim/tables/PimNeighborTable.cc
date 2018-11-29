@@ -22,10 +22,9 @@
 #include "inet/routing/pim/tables/PimNeighborTable.h"
 
 namespace inet {
+
 Register_Abstract_Class(PimNeighbor);
 Define_Module(PimNeighborTable);
-
-using namespace std;
 
 PimNeighbor::PimNeighbor(InterfaceEntry *ie, Ipv4Address address, int version)
     : nt(nullptr), ie(ie), address(address), version(version), generationId(0), drPriority(-1L)
@@ -48,8 +47,8 @@ std::ostream& operator<<(std::ostream& os, const PimNeighborTable::PimNeighborVe
     for (unsigned int i = 0; i < v.size(); i++) {
         PimNeighbor *e = v[i];
         os << "[" << i << "]: "
-           << "{ If = " << e->getInterfacePtr()->getInterfaceName() << "; Addr = " << e->getAddress() << "; Ver = " << e->getVersion()
-           << "; GenID = " << e->getGenerationId() << "; Pr = " << e->getDRPriority() << "}; ";
+           << "{ If: " << e->getInterfacePtr()->getInterfaceName() << " Addr: " << e->getAddress() << " Ver: " << e->getVersion()
+           << " GenID: " << e->getGenerationId() << " DrPriority: " << e->getDRPriority() << " livenessTimer: " << e->getLivenessTimer()->getArrivalTime() << " }; ";
     }
     return os;
 };
@@ -184,5 +183,6 @@ PimNeighbor *PimNeighborTable::getNeighbor(int interfaceId, int index)
     auto it = neighbors.find(interfaceId);
     return it != neighbors.end() ? it->second.at(index) : nullptr;
 }
+
 }    // namespace inet
 

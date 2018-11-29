@@ -30,60 +30,17 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 
 namespace inet {
+
 Define_Module(PimSm);
 
-simsignal_t PimSm::sentRegisterPkSignal = registerSignal("sentRegisterPk");
-simsignal_t PimSm::rcvdRegisterPkSignal = registerSignal("rcvdRegisterPk");
+simsignal_t PimSm::sentRegisterPkSignal     = registerSignal("sentRegisterPk");
+simsignal_t PimSm::rcvdRegisterPkSignal     = registerSignal("rcvdRegisterPk");
 simsignal_t PimSm::sentRegisterStopPkSignal = registerSignal("sentRegisterStopPk");
 simsignal_t PimSm::rcvdRegisterStopPkSignal = registerSignal("rcvdRegisterStopPk");
-simsignal_t PimSm::sentJoinPrunePkSignal = registerSignal("sentJoinPrunePk");
-simsignal_t PimSm::rcvdJoinPrunePkSignal = registerSignal("rcvdJoinPrunePk");
-simsignal_t PimSm::sentAssertPkSignal = registerSignal("sentAssertPk");
-simsignal_t PimSm::rcvdAssertPkSignal = registerSignal("rcvdAssertPk");
-
-std::ostream& operator<<(std::ostream& out, const PimSm::SourceAndGroup& sourceGroup)
-{
-    out << "(" << (sourceGroup.source.isUnspecified() ? "*" : sourceGroup.source.str()) << ", "
-        << (sourceGroup.group.isUnspecified() ? "*" : sourceGroup.group.str()) << ")";
-    return out;
-}
-
-std::ostream& operator<<(std::ostream& out, const PimSm::Route& route)
-{
-    out << "(" << (route.source.isUnspecified() ? "*" : route.source.str()) << ", "
-        << (route.group.isUnspecified() ? "*" : route.group.str()) << "), ";
-    out << "RP is " << route.rpAddr << ", ";
-
-    out << "Incoming interface: ";
-    if (route.upstreamInterface) {
-        out << route.upstreamInterface->ie->getInterfaceName() << ", ";
-        out << "RPF neighbor: " << route.upstreamInterface->rpfNeighbor() << ", ";
-    }
-    else
-        out << "nullptr, ";
-
-    out << "Downstream interfaces: ";
-    for (unsigned int i = 0; i < route.downstreamInterfaces.size(); ++i) {
-        if (i > 0)
-            out << ", ";
-        out << route.downstreamInterfaces[i]->ie->getInterfaceName() << " ";
-        switch (route.downstreamInterfaces[i]->joinPruneState) {
-            case PimSm::DownstreamInterface::NO_INFO:
-                out << "(NI)";
-                break;
-
-            case PimSm::DownstreamInterface::JOIN:
-                out << "(J)";
-                break;
-
-            case PimSm::DownstreamInterface::PRUNE_PENDING:
-                out << "(PP)";
-                break;
-        }
-    }
-
-    return out;
-}
+simsignal_t PimSm::sentJoinPrunePkSignal    = registerSignal("sentJoinPrunePk");
+simsignal_t PimSm::rcvdJoinPrunePkSignal    = registerSignal("rcvdJoinPrunePk");
+simsignal_t PimSm::sentAssertPkSignal       = registerSignal("sentAssertPk");
+simsignal_t PimSm::rcvdAssertPkSignal       = registerSignal("rcvdAssertPk");
 
 PimSm::~PimSm()
 {
@@ -112,9 +69,6 @@ void PimSm::initialize(int stage)
         registerProbeTime = par("registerProbeTime");
         assertTime = par("assertTime");
         assertOverrideInterval = par("assertOverrideInterval");
-
-        WATCH_PTRMAP(gRoutes);
-        WATCH_PTRMAP(sgRoutes);
     }
 }
 
@@ -139,6 +93,9 @@ bool PimSm::handleNodeStart(IDoneCallback *doneCallback)
         host->subscribe(pimNeighborAddedSignal, this);
         host->subscribe(pimNeighborDeletedSignal, this);
         host->subscribe(pimNeighborChangedSignal, this);
+
+        WATCH_PTRMAP(gRoutes);
+        WATCH_PTRMAP(sgRoutes);
     }
 
     return done;
@@ -2190,5 +2147,43 @@ void PimSm::DownstreamInterface::startPrunePendingTimer(double joinPruneOverride
     prunePendingTimer->setContextPointer(this);
     pimsm()->scheduleAt(simTime() + joinPruneOverrideInterval, prunePendingTimer);
 }
+
+std::ostream& operator<<(std::ostream& out, const PimSm::Route& route)
+{
+    out << "(" << (route.source.isUnspecified() ? "*" : route.source.str()) << ", "
+        << (route.group.isUnspecified() ? "*" : route.group.str()) << "), ";
+    out << "RP is " << route.rpAddr << ", ";
+
+    out << "Incoming interface: ";
+    if (route.upstreamInterface) {
+        out << route.upstreamInterface->ie->getInterfaceName() << ", ";
+        out << "RPF neighbor: " << route.upstreamInterface->rpfNeighbor() << ", ";
+    }
+    else
+        out << "nullptr, ";
+
+    out << "Downstream interfaces: ";
+    for (unsigned int i = 0; i < route.downstreamInterfaces.size(); ++i) {
+        if (i > 0)
+            out << ", ";
+        out << route.downstreamInterfaces[i]->ie->getInterfaceName() << " ";
+        switch (route.downstreamInterfaces[i]->joinPruneState) {
+            case PimSm::DownstreamInterface::NO_INFO:
+                out << "(NI)";
+                break;
+
+            case PimSm::DownstreamInterface::JOIN:
+                out << "(J)";
+                break;
+
+            case PimSm::DownstreamInterface::PRUNE_PENDING:
+                out << "(PP)";
+                break;
+        }
+    }
+
+    return out;
+}
+
 }    // namespace inet
 

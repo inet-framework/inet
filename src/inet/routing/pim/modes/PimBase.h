@@ -129,6 +129,8 @@ class INET_API PimBase : public RoutingProtocolBase
         bool operator<(const SourceAndGroup& other) const { return source < other.source || (source == other.source && group < other.group); }
     };
 
+    friend std::ostream& operator<<(std::ostream& out, const SourceAndGroup& sourceGroup);
+
     enum PimTimerKind {
         // global timers
         HelloTimer = 1,
