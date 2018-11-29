@@ -80,6 +80,9 @@ const char *IMulticastRoute::sourceTypeName(SourceType sourceType)
         case DVMRP:
             return "DVRMP";
 
+        case PIM_DM:
+            return "PIM-DM";
+
         case PIM_SM:
             return "PIM-SM";
 
