@@ -25,8 +25,42 @@ different parts of a network.
 All of these examples contain two hosts, one of which - may it be real or simulated -
 pings the other one.
 
+%TODO: instead of first describing what is ExtUpperEthernetInterface and how it works, we should first describe how is the conceptual network divided between the real world and the simulation
+%TODO: suggested document structure
+% 1 the conceptual network: two nodes, one pings the other
+% 2.1 scenario 1: where is the separation between the simulation and the real world: in the ethernet interface of the sender host, simulation is used below the ethernet interface, host is used above the ethernet interface
+% 2.2 scenario 1: what component is used (e.g. ExtUpperEthernetInterface) to configure scenario 1 and how does this component operate?
+% 2.3 what configuration is used in the simulation, explain why, etc.
+% 2.4 what configuration is necessary in the host computer, explain why, etc.
+% 2.5 follow the ping requests/replies in scenario 1, explain how it works
+% 3.1 scenario 2: where is the separation between the simulation and the real world: in the ethernet interface of the receiver host...
+% etc.
+
 Using :ned:`ExtUpperEthernetInterface`
 --------------------------------------
+
+%TODO: add a short description how ExtUpperEthernetInterface operates wrt. connecting the simulation and the real world, see the following from the INET section of the OMNeT++ ecosystem book:
+%TODO: this should be reworded, shortened, I don't know, but don't take this over verbatim
+%
+%ExtLowerEthernetInterface represents an Ethernet network interface which has
+%its upper part in the simulation and its lower part in the real world. This interface
+%allows, for example, using a real network interface in a simulation. Packets
+%received by the simulated network interface from above will be sent out on the
+%underlying real network interface. Packets received by the real network interface
+%(or rather, the appropriate subset of them) from the network will be received on
+%the simulated network interface. This module requires a real or a virtual Ethernet
+%interface on the host OS. The simulation sends and receives packets through this
+%network interface using the OS Socket API.
+%
+%ExtUpperEthernetInterface represents an Ethernet network interface which has
+%its upper part in the real world and its lower part in the simulation. This interface
+%allows, for example, using a real routing protocol in a simulation. Basically, this
+%interface works the opposite way as ExtLowerEthernetInterface. Packets received
+%by the simulated network interface from the network will be received on the real
+%interface. Packets received by the real network interface from above will be sent
+%out on the underlying simulated network interface. This module requires a TAP
+%device in the host OS. The simulation sends and receives packets through the TAP
+%device using the OS file API.
 
 The :ned:`ExtUpperEthernetInterface` looks like the following when the simulation
 is run in the GUI:
@@ -35,13 +69,18 @@ is run in the GUI:
    :scale: 100%
    :align: center
 
-The ``Upper`` part in the name of the module means that the upper part of the
+The ``ExtUpper`` part in the name of the module means that the upper part of the
 functionality of the interface is external.
 The :ned:`ExtEthernetTapDeviceFileIo` (``tap``) module provides connection to a real TAP
 interface of the host computer which is running the simulation.
+%TODO: it's not entirely clear what is the purpose of the TAP interface, see above
 
+%TODO: this is a too generic sentence and not too informative, should be replaced with a more specific one or removed
 In order for these emulation examples to work, some configuration of the real operating environment
 is needed as well.
+
+%TODO: the shell scripts should only be mentioned at the end, that they contain all the necessary commands, and that they are self contained and ready to be run
+%TODO: while you are explaining the operation, it's not important to mention them, just explain the individual parts
 For each configuration, the ``Test<ConfigurationName>.sh`` file contains the commands,
 that we need to execute in the terminal under Linux. Now, we will only look at some of the
 common steps.
@@ -102,7 +141,7 @@ In the simulation, the IP address of ``host2``'s Ethernet interface is set to
 
 After creating the TAP interface using the script from the
 ``TestExtUpperEthernetInterfaceInHost1.sh`` file, the simulation is run from
-the terminal and the textual results are saved in the ``inte.out`` file:
+the terminal and the textual results are saved in the ``inet.out`` file:
 
 .. literalinclude:: ../TestExtUpperEthernetInterfaceInHost1.sh
    :language: xml
