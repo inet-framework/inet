@@ -1,21 +1,19 @@
-Connecting the Real and the Simulated World
-===========================================
+Emulation basics
+================
 
 Goals
 -----
 
-Emulation is a fast and cheap method for running experiments in the
-real world. With the help of INET's emulation feature, it is possible
-divide the simulated network into different parts, leaving some of them
-as part of the simulation while extracting others into the real operating
-environment.
+This showcase demonstrates the basic features of the emulation support in INET using
+a simple network which contains two network nodes. Each configuration represents the
+same conceptual network but they divide the network (or network nodes) into simulated
+and real-world parts in a different way. The focus is on the different possibilities
+of this division of the conceptual network, the required simulation and real-world
+configuration, and the operation.
 
-This showcase presents the emulation feature of the INET framework by
-performing ping communication in different emulated models.
+INET version: ``4.1``
 
-INET version: ``4.0``
-
-Source files location: `inet/showcases/emulation/pingpong <https://github.com/inet-framework/inet-showcases/tree/master/emulation/pingpong>`__
+Source files location: `inet/showcases/emulation/basic <https://github.com/inet-framework/inet-showcases/tree/master/emulation/basic>`__
 
 The model
 ---------
