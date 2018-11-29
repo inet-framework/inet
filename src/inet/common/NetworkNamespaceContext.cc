@@ -24,6 +24,7 @@ namespace inet {
 NetworkNamespaceContext::NetworkNamespaceContext(const char *networkNamespace)
 {
     if (networkNamespace != nullptr && *networkNamespace != '\0') {
+#ifdef __linux__
         oldNs = open("/proc/self/ns/net", O_RDONLY);
         std::string namespaceAsString = "/var/run/netns/";
         namespaceAsString += networkNamespace;
@@ -32,17 +33,22 @@ NetworkNamespaceContext::NetworkNamespaceContext(const char *networkNamespace)
             throw cRuntimeError("Cannot open network namespace");
         if (setns(newNs, 0) == -1)
             throw cRuntimeError("Cannot change network namespace");
+#else
+    throw cRuntimeError("Network namespaces are only supported on Linux");
+#endif
     }
 }
 
 NetworkNamespaceContext::~NetworkNamespaceContext()
 {
     if (newNs != -1) {
+#ifdef __linux__
         setns(oldNs, 0);
         close(oldNs);
         close(newNs);
         oldNs = -1;
         newNs = -1;
+#endif
     }
 }
 
