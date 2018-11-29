@@ -25,7 +25,7 @@ different parts of a network.
 All of these examples contain two hosts, one of which - may it be real or simulated -
 pings the other one.
 
-Using :ned:`ExtEthernetUpperInterface`
+Using :ned:`ExtUpperEthernetInterface`
 --------------------------------------
 
 The :ned:`ExtUpperEthernetInterface` looks like the following when the simulation
