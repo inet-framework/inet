@@ -45,6 +45,8 @@
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/common/L3Tools.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
+#include "inet/common/packet/dissector/PacketDissector.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 
 
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -408,56 +410,106 @@ void NS_CLASS packetFailed(const Packet *dgram)
         return;
     }
 
+    PacketDissector::PduTreeBuilder pduTreeBuilder;
+    auto packetProtocolTag = dgram->findTag<PacketProtocolTag>();
+    auto protocol = packetProtocolTag != nullptr ? packetProtocolTag->getProtocol() : nullptr;
+    PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, pduTreeBuilder);
+    packetDissector.dissectPacket(const_cast<Packet *> (dgram), protocol);
+
+    auto& protocolDataUnit = pduTreeBuilder.getTopLevelPdu();
+
+    bool isIpv4 = false;
+    bool isAodv = false;
+
+    for (const auto& chunk : protocolDataUnit->getChunks()) {
+        if (auto childLevel = dynamicPtrCast<const PacketDissector::ProtocolDataUnit>(chunk)) {
+            for (const auto& chunkAux : childLevel->getChunks()) {
+                if (chunkAux->getChunkType() == Chunk::CT_SEQUENCE) {
+                    for (const auto& elementChunk : staticPtrCast<const SequenceChunk>(chunkAux)->getChunks()) {
+                        if (dynamic_cast<const Ipv4Header *>(elementChunk.get()))
+                            isIpv4 = true;
+                        if (dynamic_cast<const AODV_msg *>(elementChunk.get()))
+                            isAodv = true;
+                    }
+                }
+            }
+        }
+        else if (chunk->getChunkType() == Chunk::CT_SEQUENCE) {
+            for (const auto& elementChunk : staticPtrCast<const SequenceChunk>(chunk)->getChunks()) {
+                if (dynamic_cast<const Ipv4Header *>(elementChunk.get()))
+                    isIpv4 = true;
+                if (dynamic_cast<const AODV_msg *>(elementChunk.get()))
+                    isAodv = true;
+            }
+        }
+    }
+
+    if (!isIpv4)
+        return; // nothing more to do
 
     DEBUG(LOG_DEBUG, 0, "LINK FAILURE for next_hop=%s dest=%s ",ip_to_str(next_hop), ip_to_str(dest_addr));
 
+    // create a copy of this packet
+    auto pkt = new Packet(dgram->getName());
+
+    for (const auto& chunk : protocolDataUnit->getChunks()) {
+        if (auto childLevel = dynamicPtrCast<const PacketDissector::ProtocolDataUnit>(chunk)) {
+            for (const auto& chunkAux : childLevel->getChunks()) {
+                if (chunkAux->getChunkType() == Chunk::CT_SEQUENCE) {
+                    // remove previous headers to ipv4
+                    bool removed = false;
+                    for (const auto& elementChunk : staticPtrCast<const SequenceChunk>(chunkAux)->getChunks()) {
+                        if (elementChunk == networkHeader) {
+                            removed = true;
+                            insertNetworkProtocolHeader(pkt, Protocol::ipv4, dynamicPtrCast<NetworkHeaderBase> (networkHeader->dupShared()));
+                        }
+                        else if (removed)
+                            pkt->insertAtBack(elementChunk->dupShared());
+                    }
+                }
+            }
+        }
+        else if (chunk->getChunkType() == Chunk::CT_SEQUENCE) {
+            if (staticPtrCast<const SequenceChunk>(chunk)->getChunks().front() != networkHeader){
+                delete pkt;
+                return;
+            }
+            for (const auto& elementChunk : staticPtrCast<const SequenceChunk>(chunk)->getChunks()) {
+                if (elementChunk == networkHeader) {
+                    insertNetworkProtocolHeader(pkt, Protocol::ipv4, dynamicPtrCast<NetworkHeaderBase> (networkHeader->dupShared()));
+                }
+                else
+                    pkt->insertAtBack(elementChunk->dupShared());
+            }
+        }
+    }
+    pkt->copyTags(*dgram);
+    pkt->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+    for (int index = 0; index < getNumInterfaces(); index++)  {
+        if (getInterfaceEntry(index)->getMacAddress() == senderAddr) {
+            pkt->addTagIfAbsent<InterfaceInd>()->setInterfaceId(getInterfaceEntry(index)->getInterfaceId());
+            break;
+        }
+    }
+
     if (seek_list_find(dest_addr))
     {
-        DEBUG(LOG_DEBUG, 0, "Ongoing route discovery, buffering packet...");
-        packet_queue_add_inject(dgram->dup(), dest_addr);
+        if (isAodv) {
+            DEBUG(LOG_DEBUG, 0, "Ongoing route discovery, buffering packet...");
+            packet_queue_add_inject(pkt, dest_addr);
+        }
+        else
+            delete pkt;
         scheduleNextEvent();
         return;
     }
-
-    // check if is aodv
-    auto pkt = dgram->dup();
-//    while (!pkt->hasAtFront<NetworkHeaderBase>()) {
-//        pkt->popAtFront<FieldsChunk>();
-//    }
-
-    auto aux = dynamicPtrCast<NetworkHeaderBase> (constPtrCast<FieldsChunk> (pkt->peekAtFront<FieldsChunk>()));
-    while (aux == nullptr) {
-        pkt->popAtFront<FieldsChunk>();
-        aux = dynamicPtrCast<NetworkHeaderBase> (constPtrCast<FieldsChunk> (pkt->peekAtFront<FieldsChunk>()));
-    }
-
-
-
-    auto header = removeNetworkProtocolHeader<NetworkHeaderBase>(pkt);
-
-//    auto aodvMsg = pkt->hasAtFront<AODV_msg>();
-    auto aodvMsg = dynamicPtrCast<AODV_msg> (constPtrCast<FieldsChunk> (pkt->peekAtFront<FieldsChunk>()));
-    insertNetworkProtocolHeader(pkt, Protocol::ipv4, header);
-    if (aodvMsg == nullptr) {
-        // search interface
-        for (int index = 0; index < getNumInterfaces(); index++)  {
-            if (getInterfaceEntry(index)->getMacAddress() == senderAddr) {
-                pkt->addTagIfAbsent<InterfaceInd>()->setInterfaceId(getInterfaceEntry(index)->getInterfaceId());
-                break;
-            }
-         }
-    }
-    else {
-        delete pkt;
-        pkt = nullptr;
-    }
-
 
     rt = rt_table_find(dest_addr);
 
     if (!rt || rt->state == INVALID)
     {
         scheduleNextEvent();
+        delete pkt;
         return;
     }
     next_hop.s_addr = rt->next_hop.s_addr;
@@ -466,6 +518,7 @@ void NS_CLASS packetFailed(const Packet *dgram)
     if (!rt_next_hop || rt_next_hop->state == INVALID)
     {
         scheduleNextEvent();
+        delete pkt;
         return;
     }
 
@@ -474,8 +527,10 @@ void NS_CLASS packetFailed(const Packet *dgram)
         /* && ch->num_forwards() > rt->hcnt */
     {
         /* Buffer the current packet */
-        if (pkt)
+        if (!isAodv)
             packet_queue_add_inject(pkt, dest_addr);
+        else
+            delete pkt;
 
         // In omnet++ it's not possible to access to the mac queue
         //  /* Buffer pending packets from interface queue */
@@ -488,6 +543,7 @@ void NS_CLASS packetFailed(const Packet *dgram)
     else
     {
         /* No local repair - just force timeout of link and drop packets */
+        delete pkt;
         neighbor_link_break(rt_next_hop);
 // In omnet++ it's not possible to access to the mac queue
 //  interfaceQueue((nsaddr_t) next_hop.s_addr, IFQ_DROP);

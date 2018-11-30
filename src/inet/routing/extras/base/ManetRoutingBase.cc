@@ -33,6 +33,7 @@
 #include "inet/networklayer/common/L3Tools.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/common/ProtocolTag_m.h"
 
 namespace inet {
 
@@ -546,6 +547,7 @@ void ManetRoutingBase::sendToIpOnIface(Packet *msg, int srcPort, const L3Address
     }
 
     msg->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
+    msg->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::manet);
     // if delay
     if (delay > 0) {
         DelayTimer * delayTimer =  new DelayTimer(msg, destAddr, destPort, this);
