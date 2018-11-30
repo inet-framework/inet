@@ -46,6 +46,11 @@ protected:
     void processPacket(Packet *pk);
     virtual void handleMessageWhenUp(cMessage* msg) override;
 
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
+    virtual bool isOperationFinished() override;
+
   public:
     MpduGen() {}
     ~MpduGen() { cancelAndDelete(selfMsg); }

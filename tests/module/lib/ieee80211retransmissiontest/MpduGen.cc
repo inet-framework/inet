@@ -33,10 +33,7 @@ void MpduGen::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         localPort = par("localPort");
         destPort = par("destPort");
-    }
-    else if (stage == INITSTAGE_LAST) {
         selfMsg = new cMessage("Self msg");
-        scheduleAt(simTime() + par("startTime"), selfMsg);
     }
 }
 
@@ -103,6 +100,34 @@ void MpduGen::handleMessageWhenUp(cMessage *msg)
         char buf[40];
         sprintf(buf, "rcvd: %d pks\nsent: %d pks", numReceived, numSent);
         getDisplayString().setTagArg("t", 0, buf);
+    }
+}
+
+void MpduGen::handleStartOperation(LifecycleOperation *operation)
+{
+    scheduleAt(simTime() + par("startTime"), selfMsg);
+}
+
+void MpduGen::handleStopOperation(LifecycleOperation *operation)
+{
+    cancelEvent(selfMsg);
+    socket.close();
+}
+
+void MpduGen::handleCrashOperation(LifecycleOperation *operation)
+{
+    cancelEvent(selfMsg);
+    socket.destroy();
+}
+
+bool MpduGen::isOperationFinished()
+{
+    switch (operational) {
+        case STOPPING_OPERATION:
+        case SUSPENDING_OPERATION:
+            return socket.getState() == UdpSocket::CLOSED;
+        default:
+            return true;
     }
 }
 
