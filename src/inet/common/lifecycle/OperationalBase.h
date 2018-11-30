@@ -61,8 +61,6 @@ class INET_API OperationalBase : public cSimpleModule, public ILifecycle
     virtual void handleResumeOperation(LifecycleOperation *operation);
     virtual bool isOperationFinished();
 
-    virtual bool hasMessageScheduledForNow();
-
     virtual bool isInitializeStage(int stage) = 0;
     virtual bool isModuleStartStage(int stage) = 0;
     virtual bool isModuleStopStage(int stage) = 0;

@@ -186,22 +186,6 @@ void OperationalBase::handleOperationTimeout(cMessage *message)
     operationCompleted();
 }
 
-bool OperationalBase::hasMessageScheduledForNow()
-{
-    cFutureEventSet *fes = getSimulation()->getFES();
-    int fesLen = fes->getLength();
-    auto myModuleId = this->getId();
-    auto now = simTime();
-    for (int i = 0; i < fesLen; i++) {
-        cEvent *event = fes->get(i);
-        if (cMessage *msg = dynamic_cast<cMessage *>(event)) {
-            if (msg->getArrivalModuleId() == myModuleId && msg->getArrivalTime() == now)
-                return true;
-        }
-    }
-    return false;
-}
-
 void OperationalBase::operationStarted(LifecycleOperation *operation, IDoneCallback *doneCallback, State endOperation)
 {
     ASSERT(activeOperation.operation == nullptr);
@@ -223,13 +207,7 @@ void OperationalBase::operationPending()
 
 bool OperationalBase::isOperationFinished()
 {
-    switch (operational) {
-        case STOPPING_OPERATION:
-        case SUSPENDING_OPERATION:
-            return ! hasMessageScheduledForNow();
-        default:
-            return true;
-    }
+    return true;
 }
 
 bool OperationalBase::checkOperationFinished()
