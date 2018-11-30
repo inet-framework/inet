@@ -83,7 +83,7 @@ Its parameters include:
 -  :par:`fragmentTimeout` the maximum duration until fragments are kept
    in the fragment buffer.
 
--  :par:`forceBroadcast` if ``true``, then link-local broadcast
+-  :par:`limitedBroadcast` if ``true``, then link-local broadcast
    datagrams are sent out through each interface, if the higher layer
    did not specify the outgoing interface.
 

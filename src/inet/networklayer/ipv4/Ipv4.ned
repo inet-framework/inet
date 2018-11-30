@@ -100,7 +100,8 @@ simple Ipv4 like IIpv4
         int timeToLive = default(32);
         int multicastTimeToLive = default(32);
         double fragmentTimeout @unit(s) = default(60s);
-        bool forceBroadcast = default(false);
+        bool limitedBroadcast = default(false); // send out limited broadcast packets comming from higher layer
+        string directBroadcast = default("");   // list of interfaces that direct broadcast is enabled (by default direct broadcast is disabled on all interfaces)
         bool useProxyARP = default(true);
         @display("i=block/routing");
         @signal[packetSentToUpper](type=cPacket);

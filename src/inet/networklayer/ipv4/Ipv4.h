@@ -86,8 +86,11 @@ class INET_API Ipv4 : public QueueBase, public NetfilterBase, public ILifecycle,
     int defaultTimeToLive = -1;
     int defaultMCTimeToLive = -1;
     simtime_t fragmentTimeoutTime;
-    bool forceBroadcast = false;
+    bool limitedBroadcast = false;
+    std::string directBroadcast = "";
     bool useProxyARP = false;
+
+    cPatternMatcher interfaceMatcher;
 
     // working vars
     bool isUp = false;
