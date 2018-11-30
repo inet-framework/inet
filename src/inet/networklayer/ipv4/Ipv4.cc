@@ -92,10 +92,10 @@ void Ipv4::initialize(int stage)
         defaultMCTimeToLive = par("multicastTimeToLive");
         fragmentTimeoutTime = par("fragmentTimeout");
         limitedBroadcast = par("limitedBroadcast");
-        directBroadcast = par("directBroadcast").stdstringValue();
+        directBroadcastInterfaces = par("directBroadcastInterfaces").stdstringValue();
         useProxyARP = par("useProxyARP");
 
-        interfaceMatcher.setPattern(directBroadcast.c_str(), false, true, false);
+        directBroadcastInterfaceMatcher.setPattern(directBroadcastInterfaces.c_str(), false, true, false);
 
         curFragmentId = 0;
         lastCheckTime = 0;
@@ -365,8 +365,9 @@ void Ipv4::preroutingFinish(Packet *packet)
         else if (destAddr.isLimitedBroadcastAddress() || (broadcastIE = rt->findInterfaceByLocalBroadcastAddress(destAddr))) {
             // broadcast datagram on the target subnet if we are a router
             if (broadcastIE && fromIE != broadcastIE && rt->isForwardingEnabled()) {
-                if(interfaceMatcher.matches(broadcastIE->getInterfaceName()) ||
-                        interfaceMatcher.matches(broadcastIE->getInterfaceFullPath().c_str())) {
+                if (directBroadcastInterfaceMatcher.matches(broadcastIE->getInterfaceName()) ||
+                    directBroadcastInterfaceMatcher.matches(broadcastIE->getInterfaceFullPath().c_str()))
+                {
                     auto packetCopy = prepareForForwarding(packet->dup());
                     packetCopy->addTagIfAbsent<InterfaceReq>()->setInterfaceId(broadcastIE->getInterfaceId());
                     packetCopy->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(Ipv4Address::ALLONES_ADDRESS);
