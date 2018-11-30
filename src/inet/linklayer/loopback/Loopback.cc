@@ -51,15 +51,13 @@ void Loopback::initialize(int stage)
 
 void Loopback::configureInterfaceEntry()
 {
-    InterfaceEntry *ie = getContainingNicModule(this);
-
 //    // generate a link-layer address to be used as interface token for IPv6
 //    InterfaceToken token(0, getSimulation()->getUniqueNumber(), 64);
 //    ie->setInterfaceToken(token);
 
     // capabilities
-    ie->setMtu(par("mtu"));
-    ie->setLoopback(true);
+    interfaceEntry->setMtu(par("mtu"));
+    interfaceEntry->setLoopback(true);
 }
 
 void Loopback::handleUpperPacket(Packet *packet)

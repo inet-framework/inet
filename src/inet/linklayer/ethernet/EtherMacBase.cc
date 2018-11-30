@@ -272,7 +272,6 @@ void EtherMacBase::initializeStatistics()
 
 void EtherMacBase::configureInterfaceEntry()
 {
-    InterfaceEntry *interfaceEntry = getContainingNicModule(this);
 
     // MTU: typical values are 576 (Internet de facto), 1500 (Ethernet-friendly),
     // 4000 (on some point-to-point links), 4470 (Cisco routers default, FDDI compatible)

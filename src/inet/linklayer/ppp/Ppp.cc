@@ -91,25 +91,23 @@ void Ppp::initialize(int stage)
 
 void Ppp::configureInterfaceEntry()
 {
-    InterfaceEntry *e = getContainingNicModule(this);
-
     // data rate
     bool connected = datarateChannel != nullptr;
     double datarate = connected ? datarateChannel->getNominalDatarate() : 0;
-    e->setDatarate(datarate);
-    e->setCarrier(connected);
+    interfaceEntry->setDatarate(datarate);
+    interfaceEntry->setCarrier(connected);
 
     // generate a link-layer address to be used as interface token for IPv6
     InterfaceToken token(0, getSimulation()->getUniqueNumber(), 64);
-    e->setInterfaceToken(token);
+    interfaceEntry->setInterfaceToken(token);
 
     // MTU: typical values are 576 (Internet de facto), 1500 (Ethernet-friendly),
     // 4000 (on some point-to-point links), 4470 (Cisco routers default, FDDI compatible)
-    e->setMtu(par("mtu"));
+    interfaceEntry->setMtu(par("mtu"));
 
     // capabilities
-    e->setMulticast(true);
-    e->setPointToPoint(true);
+    interfaceEntry->setMulticast(true);
+    interfaceEntry->setPointToPoint(true);
 }
 
 void Ppp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
