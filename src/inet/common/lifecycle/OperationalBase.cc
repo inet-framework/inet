@@ -59,15 +59,28 @@ void OperationalBase::handleMessage(cMessage *message)
             case SUSPENDING_OPERATION:
             case RESUMING_OPERATION:
                 handleMessageWhenUp(message);
-                if (operational != OPERATING) {
-                    ASSERT(activeOperation.isPending);
-                    if (isOperationFinished())
-                        operationCompleted();
-                }
                 break;
             case OPERATION_SUSPENDED:
             case NOT_OPERATING:
                 handleMessageWhenDown(message);
+                break;
+            case CRASHING_OPERATION:
+            default:
+                throw cRuntimeError("invalid operational status: %d", (int)operational);
+        }
+        // do not merge switches. the handleMessageWhenUp/Down() maybe start a lifecycle operation
+        switch (operational) {
+            case STARTING_OPERATION:
+            case STOPPING_OPERATION:
+            case SUSPENDING_OPERATION:
+            case RESUMING_OPERATION:
+                ASSERT(activeOperation.isPending);
+                if (isOperationFinished())
+                    operationCompleted();
+                break;
+            case OPERATING:
+            case OPERATION_SUSPENDED:
+            case NOT_OPERATING:
                 break;
             case CRASHING_OPERATION:
             default:
