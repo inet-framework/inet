@@ -91,8 +91,11 @@ void Ipv4::initialize(int stage)
         defaultTimeToLive = par("timeToLive");
         defaultMCTimeToLive = par("multicastTimeToLive");
         fragmentTimeoutTime = par("fragmentTimeout");
-        forceBroadcast = par("forceBroadcast");
+        limitedBroadcast = par("limitedBroadcast");
+        directBroadcast = par("directBroadcast").stdstringValue();
         useProxyARP = par("useProxyARP");
+
+        interfaceMatcher.setPattern(directBroadcast.c_str(), false, true, false);
 
         curFragmentId = 0;
         lastCheckTime = 0;
@@ -362,10 +365,15 @@ void Ipv4::preroutingFinish(Packet *packet)
         else if (destAddr.isLimitedBroadcastAddress() || (broadcastIE = rt->findInterfaceByLocalBroadcastAddress(destAddr))) {
             // broadcast datagram on the target subnet if we are a router
             if (broadcastIE && fromIE != broadcastIE && rt->isForwardingEnabled()) {
-                auto packetCopy = prepareForForwarding(packet->dup());
-                packetCopy->addTagIfAbsent<InterfaceReq>()->setInterfaceId(broadcastIE->getInterfaceId());
-                packetCopy->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(Ipv4Address::ALLONES_ADDRESS);
-                fragmentPostRouting(packetCopy);
+                if(interfaceMatcher.matches(broadcastIE->getInterfaceName()) ||
+                        interfaceMatcher.matches(broadcastIE->getInterfaceFullPath().c_str())) {
+                    auto packetCopy = prepareForForwarding(packet->dup());
+                    packetCopy->addTagIfAbsent<InterfaceReq>()->setInterfaceId(broadcastIE->getInterfaceId());
+                    packetCopy->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(Ipv4Address::ALLONES_ADDRESS);
+                    fragmentPostRouting(packetCopy);
+                }
+                else
+                    EV_INFO << "Forwarding of direct broadcast packets is disabled on interface " << broadcastIE->getInterfaceName() << std::endl;
             }
 
             EV_INFO << "Broadcast received\n";
@@ -590,7 +598,7 @@ void Ipv4::routeLocalBroadcastPacket(Packet *packet)
         packet->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(Ipv4Address::ALLONES_ADDRESS);
         fragmentPostRouting(packet);
     }
-    else if (forceBroadcast) {
+    else if (limitedBroadcast) {
         // forward to each interface including loopback
         for (int i = 0; i < ift->getNumInterfaces(); i++) {
             const InterfaceEntry *ie = ift->getInterface(i);
