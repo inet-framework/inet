@@ -70,7 +70,15 @@ void EthernetSocket::send(Packet *packet)
 void EthernetSocket::close()
 {
     auto request = new Request("CLOSE", ETHERNET_C_CLOSE);
-    EthernetCloseCommand *ctrl = new EthernetCloseCommand();
+    auto *ctrl = new EthernetCloseCommand();
+    request->setControlInfo(ctrl);
+    sendToEthernet(request);
+}
+
+void EthernetSocket::destroy()
+{
+    auto request = new Request("destroy", ETHERNET_C_DESTROY);
+    auto *ctrl = new EthernetDestroyCommand();
     request->setControlInfo(ctrl);
     sendToEthernet(request);
 }

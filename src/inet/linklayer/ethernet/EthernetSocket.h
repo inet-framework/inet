@@ -110,6 +110,12 @@ class INET_API EthernetSocket : public ISocket
     virtual void close() override;
     //@}
 
+    /**
+     * Notify the protocol that the owner of ISocket has destroyed the socket.
+     * Typically used when the owner of ISocket has crashed.
+     */
+    virtual void destroy() override;
+
     /** @name Handling of messages arriving from Ethernet */
     //@{
     /**

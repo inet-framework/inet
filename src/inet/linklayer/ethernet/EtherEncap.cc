@@ -98,6 +98,18 @@ void EtherEncap::processCommandFromHigherLayer(Request *msg)
         delete it->second;
         socketIdToSocketMap.erase(it);
         delete msg;
+        auto indication = new Indication("closed", ETHERNET_I_SOCKET_CLOSED);
+        auto ctrl = new EthernetSocketClosedIndication();
+        indication->setControlInfo(ctrl);
+        indication->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+        send(indication, "transportOut");
+    }
+    else if (dynamic_cast<EthernetDestroyCommand *>(ctrl) != nullptr) {
+        int socketId = check_and_cast<Request *>(msg)->getTag<SocketReq>()->getSocketId();
+        auto it = socketIdToSocketMap.find(socketId);
+        delete it->second;
+        socketIdToSocketMap.erase(it);
+        delete msg;
     }
     else
         Ieee8022Llc::processCommandFromHigherLayer(msg);
