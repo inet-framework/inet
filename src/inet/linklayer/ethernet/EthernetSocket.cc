@@ -91,7 +91,7 @@ void EthernetSocket::processMessage(cMessage *msg)
 {
     ASSERT(belongsToSocket(msg));
     switch (msg->getKind()) {
-        case ETHERNET_C_DATA:
+        case ETHERNET_I_DATA:
             if (callback)
                 callback->socketDataArrived(this, check_and_cast<Packet *>(msg));
             else

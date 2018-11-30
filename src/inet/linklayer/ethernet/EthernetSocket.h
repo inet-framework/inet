@@ -107,7 +107,7 @@ class INET_API EthernetSocket : public ISocket
      * Unbinds the socket. Once closed, a closed socket may be bound to another
      * (or the same) port, and reused.
      */
-    void close();
+    virtual void close() override;
     //@}
 
     /** @name Handling of messages arriving from Ethernet */

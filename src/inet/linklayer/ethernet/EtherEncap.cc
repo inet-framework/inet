@@ -231,6 +231,7 @@ void EtherEncap::processPacketFromMac(Packet *packet)
             auto socket = it.second;
             if (socket->matches(packet, ethHeader)) {
                 auto packetCopy = packet->dup();
+                packetCopy->setKind(ETHERNET_I_DATA);
                 packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(it.first);
                 send(packetCopy, "upperLayerOut");
                 stealPacket |= socket->vlanId != -1;

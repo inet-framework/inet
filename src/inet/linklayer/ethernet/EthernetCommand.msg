@@ -29,6 +29,11 @@ enum EthernetCommandCode
     ETHERNET_C_CLOSE = 2;
 }
 
+enum EthernetStatusInd
+{
+    ETHERNET_I_DATA = 0;
+}
+
 class EthernetCommandBase extends cObject
 {
 }
@@ -44,3 +49,4 @@ class EthernetBindCommand extends EthernetCommandBase
 class EthernetCloseCommand extends EthernetCommandBase
 {
 }
+
