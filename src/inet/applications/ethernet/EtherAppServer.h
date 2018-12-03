@@ -57,6 +57,7 @@ class INET_API EtherAppServer : public ApplicationBase, public Ieee8022LlcSocket
     void registerDsap(int dsap);
     void sendPacket(Packet *datapacket, const MacAddress& destAddr, int destSap);
     virtual void socketDataArrived(Ieee8022LlcSocket*, Packet *msg) override;
+    virtual void socketClosed(Ieee8022LlcSocket*) override {};
 };
 
 } // namespace inet
