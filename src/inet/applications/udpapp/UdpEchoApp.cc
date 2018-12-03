@@ -63,9 +63,8 @@ void UdpEchoApp::socketErrorArrived(UdpSocket *socket, Indication *indication)
     delete indication;
 }
 
-void UdpEchoApp::socketClosed(UdpSocket *socket, Indication *indication)
+void UdpEchoApp::socketClosed(UdpSocket *socket)
 {
-    delete indication;
 }
 
 void UdpEchoApp::refreshDisplay() const

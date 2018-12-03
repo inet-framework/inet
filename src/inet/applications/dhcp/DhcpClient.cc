@@ -209,9 +209,8 @@ void DhcpClient::socketErrorArrived(UdpSocket *socket, Indication *indication)
     delete indication;
 }
 
-void DhcpClient::socketClosed(UdpSocket *socket, Indication *indication)
+void DhcpClient::socketClosed(UdpSocket *socket)
 {
-    delete indication;
 }
 
 void DhcpClient::handleTimer(cMessage *msg)

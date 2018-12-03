@@ -73,7 +73,7 @@ class INET_API EtherAppClient : public ApplicationBase, public Ieee8022LlcSocket
 
     // Ieee8022LlcSocket::ICallback
     virtual void socketDataArrived(Ieee8022LlcSocket*, Packet *msg) override;
-    virtual void socketClosed(Ieee8022LlcSocket*) override {};
+    virtual void socketClosed(Ieee8022LlcSocket*) override {}
 
     // ApplicationBase:
     virtual void handleStartOperation(LifecycleOperation *operation) override;

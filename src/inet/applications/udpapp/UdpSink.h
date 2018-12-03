@@ -59,7 +59,7 @@ class INET_API UdpSink : public ApplicationBase, public UdpSocket::ICallback
 
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
     virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
-    virtual void socketClosed(UdpSocket *socket, Indication *indication) override;
+    virtual void socketClosed(UdpSocket *socket) override;
 
     virtual void processStart();
     virtual void processStop();

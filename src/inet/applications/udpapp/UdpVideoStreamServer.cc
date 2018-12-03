@@ -86,9 +86,8 @@ void UdpVideoStreamServer::socketErrorArrived(UdpSocket *socket, Indication *ind
     delete indication;
 }
 
-void UdpVideoStreamServer::socketClosed(UdpSocket *socket, Indication *indication)
+void UdpVideoStreamServer::socketClosed(UdpSocket *socket)
 {
-    delete indication;
 }
 
 void UdpVideoStreamServer::processStreamRequest(Packet *msg)

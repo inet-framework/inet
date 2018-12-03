@@ -144,11 +144,12 @@ void HttpServer::socketClosed(TcpSocket *socket)
     SockData *sockdata = (SockData *)socket->getUserData();
     if (sockdata == nullptr) {
         EV_ERROR << "Socket establish failure. Null pointer" << endl;
-        return;
     }
-    ASSERT(socket == sockdata->socket);
-    // Cleanup
-    sockCollection.removeSocket(socket);
+    else {
+        ASSERT(socket == sockdata->socket);
+        // Cleanup
+        sockCollection.removeSocket(socket);
+    }
     delete socket;
 }
 

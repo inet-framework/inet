@@ -205,10 +205,9 @@ void Ldp::socketErrorArrived(UdpSocket *socket, Indication *indication)
     delete indication;
 }
 
-void Ldp::socketClosed(UdpSocket *socket, Indication *indication)
+void Ldp::socketClosed(UdpSocket *socket)
 {
     //TODO lifecycle stopOperation: should detect close sockets and call doneCallback->invoke() when all socket closed
-    delete indication;
 }
 
 void Ldp::handleStartOperation(LifecycleOperation *operation)

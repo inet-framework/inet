@@ -208,9 +208,8 @@ void UdpBasicApp::socketErrorArrived(UdpSocket *socket, Indication *indication)
     delete indication;
 }
 
-void UdpBasicApp::socketClosed(UdpSocket *socket, Indication *indication)
+void UdpBasicApp::socketClosed(UdpSocket *socket)
 {
-    delete indication;
 }
 
 void UdpBasicApp::refreshDisplay() const

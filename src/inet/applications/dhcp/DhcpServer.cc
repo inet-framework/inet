@@ -143,9 +143,8 @@ void DhcpServer::socketErrorArrived(UdpSocket *socket, Indication *indication)
     delete indication;
 }
 
-void DhcpServer::socketClosed(UdpSocket *socket, Indication *indication)
+void DhcpServer::socketClosed(UdpSocket *socket)
 {
-    delete indication;
 }
 
 void DhcpServer::handleSelfMessages(cMessage *msg)

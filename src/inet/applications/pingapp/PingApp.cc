@@ -291,12 +291,11 @@ void PingApp::socketDataArrived(INetworkSocket *socket, Packet *packet)
     }
 }
 
-void PingApp::socketClosed(INetworkSocket *socket, Indication *indication)
+void PingApp::socketClosed(INetworkSocket *socket)
 {
     if (socket == currentSocket)
         currentSocket = nullptr;
     delete socketMap.removeSocket(socket);
-    delete indication;
 }
 
 void PingApp::refreshDisplay() const

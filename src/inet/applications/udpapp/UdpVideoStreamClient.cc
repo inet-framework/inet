@@ -62,9 +62,8 @@ void UdpVideoStreamClient::socketErrorArrived(UdpSocket *socket, Indication *ind
     delete indication;
 }
 
-void UdpVideoStreamClient::socketClosed(UdpSocket *socket, Indication *indication)
+void UdpVideoStreamClient::socketClosed(UdpSocket *socket)
 {
-    delete indication;
 }
 
 void UdpVideoStreamClient::requestStream()

@@ -111,7 +111,7 @@ class INET_API DhcpServer : public ApplicationBase, public cListener, public Udp
     //UdpSocket::ICallback methods
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
     virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
-    virtual void socketClosed(UdpSocket *socket, Indication *indication) override;
+    virtual void socketClosed(UdpSocket *socket) override;
 
     /*
      * Signal handler for cObject, override cListener function.

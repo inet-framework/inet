@@ -83,9 +83,8 @@ void UdpSink::socketErrorArrived(UdpSocket *socket, Indication *indication)
     delete indication;
 }
 
-void UdpSink::socketClosed(UdpSocket *socket, Indication *indication)
+void UdpSink::socketClosed(UdpSocket *socket)
 {
-    delete indication;
 }
 
 void UdpSink::refreshDisplay() const

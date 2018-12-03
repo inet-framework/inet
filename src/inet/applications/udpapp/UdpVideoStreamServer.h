@@ -84,7 +84,7 @@ class INET_API UdpVideoStreamServer : public ApplicationBase, public UdpSocket::
 
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
     virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
-    virtual void socketClosed(UdpSocket *socket, Indication *indication) override;
+    virtual void socketClosed(UdpSocket *socket) override;
 
   public:
     UdpVideoStreamServer() {}

@@ -53,11 +53,11 @@ protected:
     // UdpSocket::ICallback
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
     virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
-    virtual void socketClosed(UdpSocket *socket, Indication *indication) override;
+    virtual void socketClosed(UdpSocket *socket) override;
 
     // Ipv4Socket::ICallback
     virtual void socketDataArrived(Ipv4Socket *socket, Packet *packet) override;
-    virtual void socketClosed(Ipv4Socket *socket, Indication *indication) override;
+    virtual void socketClosed(Ipv4Socket *socket) override;
 
     // TunSocket::ICallback
     virtual void socketDataArrived(TunSocket *socket, Packet *packet) override;

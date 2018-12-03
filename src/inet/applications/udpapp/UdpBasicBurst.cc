@@ -209,15 +209,13 @@ void UdpBasicBurst::socketErrorArrived(UdpSocket *socket, Indication *indication
     delete indication;
 }
 
-void UdpBasicBurst::socketClosed(UdpSocket *socket, Indication *indication)
+void UdpBasicBurst::socketClosed(UdpSocket *socket)
 {
     while (!stopDoneCallbackList.empty()) {
         auto callback = stopDoneCallbackList.front();
         callback->invoke();
         stopDoneCallbackList.pop_front();
     }
-
-    delete indication;
 }
 
 void UdpBasicBurst::refreshDisplay() const
