@@ -181,7 +181,7 @@
 
 /showcases/wireless/pathloss/,       -f omnetpp.ini -c General -r 0,                100s,         c37d-91e0/tplx, PASS,
 
-/showcases/wireless/power/,          -f omnetpp.ini -c General -r 0,                                            100s,            4db0-aedb/tplx, PASS,
+/showcases/wireless/power/,          -f omnetpp.ini -c General -r 0,                                            100s,            a890-eb5a/tplx, PASS,
 
 /showcases/wireless/ratecontrol/,    -f omnetpp.ini -c General -r '$rateControl==""',                           25s,            e1f1-e8c6/tplx, PASS,
 /showcases/wireless/ratecontrol/,    -f omnetpp.ini -c General -r '$rateControl=="AarfRateControl"',            25s,            e71a-6ae8/tplx, PASS,
