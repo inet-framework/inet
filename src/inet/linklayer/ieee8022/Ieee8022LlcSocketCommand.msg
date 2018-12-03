@@ -24,6 +24,13 @@ enum Ieee8022LlcSocketCommandCode
     IEEE8022_LLC_C_OPEN  = 1;
     IEEE8022_LLC_C_CLOSE = 2;
     IEEE8022_LLC_C_DESTROY = 3;
+    IEEE8022_LLC_C_DATA = 4;
+}
+
+enum Ieee8022LlcSocketIndicationCode
+{
+    IEEE8022_LLC_I_SOCKET_CLOSED = 2;
+    IEEE8022_LLC_I_DATA = 4;
 }
 
 class Ieee8022LlcSocketCommand extends cObject
@@ -40,6 +47,10 @@ class Ieee8022LlcSocketCloseCommand extends Ieee8022LlcSocketCommand
 }
 
 class Ieee8022LlcSocketDestroyCommand extends Ieee8022LlcSocketCommand
+{
+}
+
+class Ieee8022LlcSocketClosedIndication extends Ieee8022LlcSocketCommand
 {
 }
 

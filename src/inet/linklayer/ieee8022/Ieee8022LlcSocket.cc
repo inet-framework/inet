@@ -46,11 +46,23 @@ bool Ieee8022LlcSocket::belongsToSocket(cMessage *msg) const
 void Ieee8022LlcSocket::processMessage(cMessage *msg)
 {
     ASSERT(belongsToSocket(msg));
-
-    if (callback)
-        callback->socketDataArrived(this, check_and_cast<Packet*>(msg));
-    else
-        delete msg;
+    switch (msg->getKind()) {
+        case IEEE8022_LLC_I_DATA:
+            if (callback)
+                callback->socketDataArrived(this, check_and_cast<Packet*>(msg));
+            else
+                delete msg;
+            break;
+        case IEEE8022_LLC_I_SOCKET_CLOSED:
+            if (callback)
+                callback->socketClosed(this);
+            isOpened = false;
+            delete msg;
+            break;
+        default:
+            throw cRuntimeError("Ieee8022LlcSocket: invalid msg kind %d, one of the IEEE8022_LLC_I_xxx constants expected", msg->getKind());
+            break;
+    }
 }
 
 void Ieee8022LlcSocket::open(int interfaceId, int localSap)
@@ -63,13 +75,13 @@ void Ieee8022LlcSocket::open(int interfaceId, int localSap)
     Ieee8022LlcSocketOpenCommand *command = new Ieee8022LlcSocketOpenCommand();
     command->setLocalSap(localSap);
     request->setControlInfo(command);
-    isOpen = true;
+    isOpened = true;
     sendToLlc(request);
 }
 
 void Ieee8022LlcSocket::send(Packet *packet)
 {
-    if (! isOpen)
+    if (! isOpened)
         throw cRuntimeError("Socket is closed");
     sendToLlc(packet);
 }
@@ -81,7 +93,6 @@ void Ieee8022LlcSocket::close()
     request->setControlInfo(command);
     sendToLlc(request);
     interfaceId = -1;
-    isOpen = false;
 }
 
 void Ieee8022LlcSocket::destroy()
@@ -91,7 +102,7 @@ void Ieee8022LlcSocket::destroy()
     request->setControlInfo(command);
     sendToLlc(request);
     interfaceId = -1;
-    isOpen = false;
+    isOpened = false;
 }
 
 void Ieee8022LlcSocket::sendToLlc(cMessage *msg)
