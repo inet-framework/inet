@@ -108,6 +108,14 @@ void EtherAppClient::handleCrashOperation(LifecycleOperation *operation)
         llcSocket.destroy();
 }
 
+bool EtherAppClient::isOperationFinished()
+{
+    if (operational == State::STOPPING_OPERATION)
+        return !llcSocket.isOpen();
+    else
+        return true;
+}
+
 bool EtherAppClient::isGenerator()
 {
     return par("destAddress").stringValue()[0];
