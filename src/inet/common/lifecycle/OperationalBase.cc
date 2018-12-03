@@ -55,8 +55,10 @@ void OperationalBase::handleMessage(cMessage *message)
     if (message == delayedOperationDoneMsg) {
         operationCompleted();
     }
-    else if (isOperationTimeout(message))
+    else if (isOperationTimeout(message)) {
+        cancelEvent(delayedOperationDoneMsg);
         handleOperationTimeout(message);
+    }
     else {
         switch (operational) {
             case STARTING_OPERATION:
@@ -182,7 +184,7 @@ bool OperationalBase::isOperationTimeout(cMessage *message)
 
 void OperationalBase::handleOperationTimeout(cMessage *message)
 {
-    handleCrashOperation(nullptr);
+    handleCrashOperation(activeOperation.operation);
     operationCompleted();
 }
 
@@ -218,25 +220,33 @@ bool OperationalBase::checkOperationFinished()
     case STOPPING_OPERATION:
     case SUSPENDING_OPERATION:
     {
-        simtime_t extraStopTime = -1.0;
-        if (hasPar("extraStopTime")) {
-            cPar& extraStopTimePar = par("extraStopTime");
-            ASSERT(strcmp(extraStopTimePar.getUnit(), "s") == 0);
-            extraStopTime = extraStopTimePar;
+        if (! activeOperation.isExtraPending) {
+            simtime_t extraStopTime = -1.0;
+            if (hasPar("extraStopTime")) {
+                cPar& extraStopTimePar = par("extraStopTime");
+                ASSERT(strcmp(extraStopTimePar.getUnit(), "s") == 0);
+                extraStopTime = extraStopTimePar;
+            }
+            if (extraStopTime < SIMTIME_ZERO)
+                return true;
+            delayDoneCallbackInvocation(extraStopTime);
+            activeOperation.extraPending();
+            return false;
         }
-        if (extraStopTime < SIMTIME_ZERO)
-            return true;
-        delayDoneCallbackInvocation(extraStopTime);
         return false;
     }
     default:
-        return true;
+        break;
     }
+    return true;
 }
 
 void OperationalBase::operationCompleted()
 {
     setOperational(activeOperation.endOperation);
+    if (activeOperation.isExtraPending) {
+        ASSERT(this->delayedOperationDoneMsg->isScheduled() == false);
+    }
     if (activeOperation.isPending) {
         cancelAndDelete(operationTimeoutMsg);
         operationTimeoutMsg = nullptr;

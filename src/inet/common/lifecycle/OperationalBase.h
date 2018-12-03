@@ -36,9 +36,11 @@ class INET_API OperationalBase : public cSimpleModule, public ILifecycle
         IDoneCallback *doneCallback = nullptr;
         State endOperation = (State)(-1);
         bool isPending = false;
-        void set(LifecycleOperation *operation_, IDoneCallback *doneCallback_, State endOperation_) { operation = operation_; doneCallback = doneCallback_; endOperation = endOperation_; isPending = false; }
-        void clear() { operation = nullptr; doneCallback = nullptr; endOperation = (State)(-1); isPending = false; }
+        bool isExtraPending = false;
+        void set(LifecycleOperation *operation_, IDoneCallback *doneCallback_, State endOperation_) { operation = operation_; doneCallback = doneCallback_; endOperation = endOperation_; isPending = false; isExtraPending = false; }
+        void clear() { operation = nullptr; doneCallback = nullptr; endOperation = (State)(-1); isPending = false; isExtraPending = false; }
         void pending() { isPending = true; }
+        void extraPending() { isPending = true; isExtraPending = true; }
     };
     Operation activeOperation;
     cMessage *operationTimeoutMsg = nullptr;
