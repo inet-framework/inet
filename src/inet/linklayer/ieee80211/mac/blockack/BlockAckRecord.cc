@@ -51,5 +51,16 @@ bool BlockAckRecord::getAckState(SequenceNumber sequenceNumber, FragmentNumber f
     }
 }
 
+void BlockAckRecord::removeAckStates(SequenceNumber sequenceNumber)
+{
+    auto it = acknowledgmentState.begin();
+    while (it != acknowledgmentState.end()) {
+        if (isSequenceNumberLess(it->first.first, sequenceNumber, sequenceNumber, acknowledgmentState.size()))
+            it = acknowledgmentState.erase(it);
+        else
+            it++;
+    }
+}
+
 } /* namespace ieee80211 */
 } /* namespace inet */
