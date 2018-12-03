@@ -54,7 +54,22 @@ bool ReceiveBuffer::insertFrame(Packet *dataPacket, const Ptr<const Ieee80211Dat
     return false;
 }
 
-void ReceiveBuffer::remove(int sequenceNumber)
+void ReceiveBuffer::dropFramesUntil(SequenceNumber sequenceNumber)
+{
+    auto it = buffer.begin();
+    while (it != buffer.end()) {
+        if (isSequenceNumberLess(it->first, sequenceNumber, nextExpectedSequenceNumber, length)) {
+            length -= it->second.size();
+            for (auto fragment : it->second)
+                delete fragment;
+            it = buffer.erase(it);
+        }
+        else
+            it++;
+    }
+}
+
+void ReceiveBuffer::removeFrame(SequenceNumber sequenceNumber)
 {
     auto it = buffer.find(sequenceNumber);
     if (it != buffer.end()) {
