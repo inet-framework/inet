@@ -40,14 +40,14 @@ BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedQoSFrame(Re
             // If, after an MPDU is received, the receive buffer is full, the complete MSDU or A-MSDU with the earliest
             // sequence number shall be passed up to the next MAC process.
             if (receiveBuffer->isFull()) {
-                passedUp(receiveBuffer, earliestSequenceNumber);
+                passedUp(agreement, receiveBuffer, earliestSequenceNumber);
                 return ReorderBuffer({std::make_pair(earliestSequenceNumber, Fragments(earliestCompleteMsduOrAMsdu))});
             }
             // If, after an MPDU is received, the receive buffer is not full, but the sequence number of the complete MSDU or
             // A-MSDU in the buffer with the lowest sequence number is equal to the NextExpectedSequenceNumber for
             // that Block Ack agreement, then the MPDU shall be passed up to the next MAC process.
             else if (earliestSequenceNumber == receiveBuffer->getNextExpectedSequenceNumber()) {
-                passedUp(receiveBuffer, earliestSequenceNumber);
+                passedUp(agreement, receiveBuffer, earliestSequenceNumber);
                 return ReorderBuffer({std::make_pair(earliestSequenceNumber, Fragments(earliestCompleteMsduOrAMsdu))});
             }
         }
@@ -60,7 +60,7 @@ BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedQoSFrame(Re
 //
 // The recipient flushes received MSDUs from its receive buffer as described in this subclause. [...]
 //
-BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedBlockAckReq(const Ptr<const Ieee80211BlockAckReq>& blockAckReq)
+BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedBlockAckReq(RecipientBlockAckAgreement *agreement, const Ptr<const Ieee80211BlockAckReq>& blockAckReq)
 {
     // The originator shall use the Block Ack starting sequence control to signal the first MPDU in the block for
     // which an acknowledgment is expected.
@@ -98,8 +98,8 @@ BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedBlockAckReq
         if (numOfMsdusToPassUp == 0  && isSequenceNumberLess(receiveBuffer->getNextExpectedSequenceNumber(), startingSequenceNumber, receiveBuffer->getNextExpectedSequenceNumber(), receiveBuffer->getBufferSize()))
             receiveBuffer->setNextExpectedSequenceNumber(startingSequenceNumber);
         // The recipient shall then release any buffers held by preceding MPDUs.
-        releaseReceiveBuffer(receiveBuffer, completePrecedingMpdus);
-        releaseReceiveBuffer(receiveBuffer, consecutiveCompleteFollowingMpdus);
+        releaseReceiveBuffer(agreement, receiveBuffer, completePrecedingMpdus);
+        releaseReceiveBuffer(agreement, receiveBuffer, consecutiveCompleteFollowingMpdus);
         // The recipient shall pass MSDUs and A-MSDUs up to the next MAC process in order of increasing sequence
         // number.
         completePrecedingMpdus.insert(consecutiveCompleteFollowingMpdus.begin(), consecutiveCompleteFollowingMpdus.end());
@@ -170,11 +170,11 @@ bool BlockAckReordering::addMsduIfComplete(ReceiveBuffer *receiveBuffer, Reorder
     return false;
 }
 
-void BlockAckReordering::releaseReceiveBuffer(ReceiveBuffer *receiveBuffer, const ReorderBuffer& reorderBuffer)
+void BlockAckReordering::releaseReceiveBuffer(RecipientBlockAckAgreement *agreement, ReceiveBuffer *receiveBuffer, const ReorderBuffer& reorderBuffer)
 {
     for (auto it : reorderBuffer) {
         int sequenceNumber = it.first;
-        passedUp(receiveBuffer, sequenceNumber);
+        passedUp(agreement, receiveBuffer, sequenceNumber);
     }
 }
 
@@ -223,7 +223,7 @@ void BlockAckReordering::processReceivedDelba(const Ptr<const Ieee80211Delba>& d
         EV_DETAIL << "Receive buffer is not found" << endl;
 }
 
-void BlockAckReordering::passedUp(ReceiveBuffer *receiveBuffer, int sequenceNumber)
+void BlockAckReordering::passedUp(RecipientBlockAckAgreement *agreement, ReceiveBuffer *receiveBuffer, int sequenceNumber)
 {
     // Each time that the recipient passes an MSDU or A-MSDU for a Block Ack agreement up to the next MAC
     // process, the NextExpectedSequenceNumber for that Block Ack agreement is set to the sequence number of the

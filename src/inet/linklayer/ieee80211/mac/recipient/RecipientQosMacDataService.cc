@@ -132,7 +132,7 @@ std::vector<Packet *> RecipientQosMacDataService::controlFrameReceived(Packet *c
             MacAddress originatorAddr = blockAckReq->getTransmitterAddress();
             RecipientBlockAckAgreement *agreement = blockAckAgreementHandler->getAgreement(tid, originatorAddr);
             if (agreement)
-                frames = blockAckReordering->processReceivedBlockAckReq(blockAckReq);
+                frames = blockAckReordering->processReceivedBlockAckReq(agreement, blockAckReq);
             else
                 return std::vector<Packet *>();
         }
