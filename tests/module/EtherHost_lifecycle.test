@@ -176,11 +176,11 @@ Doing stage 0/8 of operation inet::ModuleStopOperation on Test.sender\[0\]
 Test\.sender\[0\] shutting down
 Doing stage 1/8 of operation inet::ModuleStopOperation on Test\.sender\[0\]
 Stop the application
+.*
 Doing stage 2/8 of operation inet::ModuleStopOperation on Test\.sender\[0\]
 Doing stage 3/8 of operation inet::ModuleStopOperation on Test\.sender\[0\]
 Doing stage 4/8 of operation inet::ModuleStopOperation on Test\.sender\[0\]
 Doing stage 5/8 of operation inet::ModuleStopOperation on Test\.sender\[0\]
-.*
 Doing stage 6/8 of operation inet::ModuleStopOperation on Test\.sender\[0\]
 Doing stage 7/8 of operation inet::ModuleStopOperation on Test\.sender\[0\]
 Test\.sender\[0\] shut down
@@ -232,11 +232,11 @@ Doing stage 0/8 of operation inet::ModuleStopOperation on Test.sender\[1\]
 Test\.sender\[1\] shutting down
 Doing stage 1/8 of operation inet::ModuleStopOperation on Test\.sender\[1\]
 Stop the application
+.*
 Doing stage 2/8 of operation inet::ModuleStopOperation on Test\.sender\[1\]
 Doing stage 3/8 of operation inet::ModuleStopOperation on Test\.sender\[1\]
 Doing stage 4/8 of operation inet::ModuleStopOperation on Test\.sender\[1\]
 Doing stage 5/8 of operation inet::ModuleStopOperation on Test\.sender\[1\]
-.*
 Doing stage 6/8 of operation inet::ModuleStopOperation on Test\.sender\[1\]
 Doing stage 7/8 of operation inet::ModuleStopOperation on Test\.sender\[1\]
 Test\.sender\[1\] shut down
@@ -294,11 +294,11 @@ Doing stage 0/8 of operation inet::ModuleStopOperation on Test.sender\[1\]
 Test\.sender\[1\] shutting down
 Doing stage 1/8 of operation inet::ModuleStopOperation on Test\.sender\[1\]
 Stop the application
+.*
 Doing stage 2/8 of operation inet::ModuleStopOperation on Test\.sender\[1\]
 Doing stage 3/8 of operation inet::ModuleStopOperation on Test\.sender\[1\]
 Doing stage 4/8 of operation inet::ModuleStopOperation on Test\.sender\[1\]
 Doing stage 5/8 of operation inet::ModuleStopOperation on Test\.sender\[1\]
-.*
 Doing stage 6/8 of operation inet::ModuleStopOperation on Test\.sender\[1\]
 Doing stage 7/8 of operation inet::ModuleStopOperation on Test\.sender\[1\]
 Test\.sender\[1\] shut down
@@ -330,11 +330,11 @@ Doing stage 0/8 of operation inet::ModuleStopOperation on Test.recip
 Test\.recip shutting down
 Doing stage 1/8 of operation inet::ModuleStopOperation on Test\.recip
 Stop the application
+.*
 Doing stage 2/8 of operation inet::ModuleStopOperation on Test\.recip
 Doing stage 3/8 of operation inet::ModuleStopOperation on Test\.recip
 Doing stage 4/8 of operation inet::ModuleStopOperation on Test\.recip
 Doing stage 5/8 of operation inet::ModuleStopOperation on Test\.recip
-.*
 Doing stage 6/8 of operation inet::ModuleStopOperation on Test\.recip
 Doing stage 7/8 of operation inet::ModuleStopOperation on Test\.recip
 Test\.recip shut down
