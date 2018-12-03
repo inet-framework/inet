@@ -43,6 +43,11 @@ class INET_API EthernetSocket : public ISocket
          * Notifies about error indication arrival, indication ownership is transferred to the callee.
          */
         virtual void socketErrorArrived(EthernetSocket *socket, Indication *indication) = 0;
+
+        /**
+         * Notifies about the socket closed.
+         */
+        virtual void socketClosed(EthernetSocket *socket) = 0;
     };
   protected:
     int socketId;
@@ -50,6 +55,7 @@ class INET_API EthernetSocket : public ISocket
     void *userData = nullptr;
     InterfaceEntry *interfaceEntry = nullptr;
     cGate *gateToEthernet = nullptr;
+    bool isOpened = false;
 
   protected:
     void sendToEthernet(cMessage *msg);
@@ -103,6 +109,7 @@ class INET_API EthernetSocket : public ISocket
      */
     void send(Packet *packet);
 
+    bool isOpen() { return isOpened; }
     /**
      * Unbinds the socket. Once closed, a closed socket may be bound to another
      * (or the same) port, and reused.

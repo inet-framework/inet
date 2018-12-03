@@ -58,12 +58,14 @@ void EthernetSocket::bind(const MacAddress& sourceAddress, const MacAddress& des
     ctrl->setProtocol(protocol);
     ctrl->setVlanId(vlanId);
     request->setControlInfo(ctrl);
+    isOpened = true;
     sendToEthernet(request);
 }
 
 void EthernetSocket::send(Packet *packet)
 {
     packet->setKind(ETHERNET_C_DATA);
+    isOpened = true;
     sendToEthernet(packet);
 }
 
@@ -72,6 +74,7 @@ void EthernetSocket::close()
     auto request = new Request("CLOSE", ETHERNET_C_CLOSE);
     auto *ctrl = new EthernetCloseCommand();
     request->setControlInfo(ctrl);
+    isOpened = true;
     sendToEthernet(request);
 }
 
@@ -81,6 +84,7 @@ void EthernetSocket::destroy()
     auto *ctrl = new EthernetDestroyCommand();
     request->setControlInfo(ctrl);
     sendToEthernet(request);
+    isOpened = false;
 }
 
 void EthernetSocket::setCallback(ICallback *callback)
@@ -105,8 +109,14 @@ void EthernetSocket::processMessage(cMessage *msg)
             else
                 delete msg;
             break;
+        case ETHERNET_I_SOCKET_CLOSED:
+            if (callback)
+                callback->socketClosed(this);
+            isOpened = false;
+            delete msg;
+            break;
         default:
-            throw cRuntimeError("EthernetSocket: invalid msg kind %d, one of the UDP_I_xxx constants expected", msg->getKind());
+            throw cRuntimeError("EthernetSocket: invalid msg kind %d, one of the ETHERNNET_I_xxx constants expected", msg->getKind());
             break;
     }
 }
