@@ -38,6 +38,7 @@ class Vlan : public cSimpleModule, public EthernetSocket::ICallback
 
     virtual void socketDataArrived(EthernetSocket *socket, Packet *packet) override;
     virtual void socketErrorArrived(EthernetSocket *socket, Indication *indication) override;
+    virtual void socketClosed(EthernetSocket *socket) override {}
 };
 
 } // namespace inet
