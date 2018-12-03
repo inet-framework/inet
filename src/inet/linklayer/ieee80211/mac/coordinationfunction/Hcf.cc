@@ -504,6 +504,7 @@ void Hcf::originatorProcessFailedFrame(Packet *failedPacket)
             throw cRuntimeError("Unknown frame"); // TODO: qos, nonqos
         edcaAckHandlers[ac]->processFailedFrame(failedHeader);
         if (retryLimitReached) {
+            edcaAckHandlers[ac]->dropFrame(failedHeader);
             if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(failedHeader))
                 edcaDataRecoveryProcedures[ac]->retryLimitReached(failedPacket, dataHeader);
             else if (auto mgmtHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(failedHeader))

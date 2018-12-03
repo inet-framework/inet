@@ -336,6 +336,7 @@ void Dcf::originatorProcessFailedFrame(Packet *failedPacket)
     if (retryLimitReached) {
         recoveryProcedure->retryLimitReached(failedPacket, failedHeader);
         inProgressFrames->dropFrame(failedPacket);
+        ackHandler->dropFrame(failedHeader);
         PacketDropDetails details;
         details.setReason(RETRY_LIMIT_REACHED);
         details.setLimit(-1); // TODO:
