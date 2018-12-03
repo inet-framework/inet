@@ -359,10 +359,10 @@ void UdpSocket::processMessage(cMessage *msg)
                 delete msg;
             break;
         case UDP_I_SOCKET_CLOSED:
+            check_and_cast<Indication *>(msg);
             if (cb)
-                cb->socketClosed(this, check_and_cast<Indication *>(msg));
-            else
-                delete msg;
+                cb->socketClosed(this);
+            delete msg;
             sockState = CLOSED;
             break;
         default:

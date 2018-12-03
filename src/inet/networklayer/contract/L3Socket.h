@@ -41,8 +41,8 @@ class INET_API L3Socket : public INetworkSocket
         /**
          * Notifies about socket closed, indication ownership is transferred to the callee.
          */
-        virtual void socketClosed(INetworkSocket *socket, Indication *indication) override { socketClosed(check_and_cast<L3Socket *>(socket), indication); }
-        virtual void socketClosed(L3Socket *socket, Indication *indication) = 0;
+        virtual void socketClosed(INetworkSocket *socket) override { socketClosed(check_and_cast<L3Socket *>(socket)); }
+        virtual void socketClosed(L3Socket *socket) = 0;
     };
   protected:
     bool bound = false;

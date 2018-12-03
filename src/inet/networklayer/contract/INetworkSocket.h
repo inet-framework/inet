@@ -36,7 +36,7 @@ class INET_API INetworkSocket : public ISocket
       public:
         virtual ~ICallback() {}
         virtual void socketDataArrived(INetworkSocket *socket, Packet *packet) = 0;
-        virtual void socketClosed(INetworkSocket *socket, Indication *packet) = 0;
+        virtual void socketClosed(INetworkSocket *socket) = 0;
     };
 
   public:

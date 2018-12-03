@@ -83,7 +83,7 @@ class INET_API UdpSocket : public ISocket
         /**
          * Notifies about socket closed, indication ownership is transferred to the callee.
          */
-        virtual void socketClosed(UdpSocket *socket, Indication *indication) = 0;
+        virtual void socketClosed(UdpSocket *socket) = 0;
     };
     enum State { CONNECTED, CLOSED};
 
