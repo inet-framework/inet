@@ -46,6 +46,7 @@ class INET_API L3Socket : public INetworkSocket
     };
   protected:
     bool bound = false;
+    bool isOpened = false;
     const Protocol *l3Protocol = nullptr;
     int socketId = -1;
     INetworkSocket::ICallback *callback = nullptr;
@@ -81,6 +82,7 @@ class INET_API L3Socket : public INetworkSocket
     virtual void sendTo(Packet *packet, L3Address destAddress) override;
     virtual void close() override;
     virtual void destroy() override;
+    virtual bool isOpen() const override { return isOpened; }
 };
 
 } // namespace inet

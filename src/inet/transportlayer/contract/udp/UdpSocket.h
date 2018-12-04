@@ -300,6 +300,8 @@ class INET_API UdpSocket : public ISocket
 
     virtual void processMessage(cMessage *msg) override;
 
+    virtual bool isOpen() const override { return sockState != CLOSED; }
+
     /**
      * Utility function: returns a line of information about a packet received via UDP.
      */

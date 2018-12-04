@@ -58,6 +58,8 @@ void Ipv4Socket::processMessage(cMessage *msg)
             if (callback)
                 callback->socketClosed(this);
             delete msg;
+            isOpened = false;
+            bound = false;
             break;
         default:
             throw cRuntimeError("Ipv4Socket: invalid msg kind %d, one of the IPv4_I_xxx constants expected", msg->getKind());
@@ -75,6 +77,7 @@ void Ipv4Socket::bind(const Protocol *protocol, Ipv4Address localAddress)
     request->setControlInfo(command);
     sendToOutput(request);
     bound = true;
+    isOpened = true;
 }
 
 void Ipv4Socket::connect(Ipv4Address remoteAddress)
@@ -84,6 +87,7 @@ void Ipv4Socket::connect(Ipv4Address remoteAddress)
     auto request = new Request("connect", IPv4_C_CONNECT);
     request->setControlInfo(command);
     sendToOutput(request);
+    isOpened = true;
 }
 
 void Ipv4Socket::send(Packet *packet)

@@ -59,6 +59,7 @@ void L3Socket::processMessage(cMessage *msg)
             if (callback)
                 callback->socketClosed(this);
             delete msg;
+            bound = isOpened = false;
             break;
         default:
             throw cRuntimeError("L3Socket: invalid msg kind %d, one of the L3_I_xxx constants expected", msg->getKind());
@@ -76,10 +77,12 @@ void L3Socket::bind(const Protocol *protocol, L3Address localAddress)
     request->setControlInfo(command);
     sendToOutput(request);
     bound = true;
+    isOpened = true;
 }
 
 void L3Socket::connect(L3Address remoteAddress)
 {
+    isOpened = true;
     auto *command = new L3SocketConnectCommand();
     command->setRemoteAddress(remoteAddress);
     auto request = new Request("connect", L3_C_CONNECT);

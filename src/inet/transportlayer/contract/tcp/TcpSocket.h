@@ -347,6 +347,8 @@ class INET_API TcpSocket : public ISocket
      * after it reported "connection closed" to us.
      */
     void renewSocket();
+
+    virtual bool isOpen() const override;
     //@}
 
     /** @name Handling of messages arriving from TCP */

@@ -361,6 +361,8 @@ class INET_API SctpSocket : public ISocket
     int getTunInterface() { return interfaceIdToTun; };
 
     virtual void destroy() override;
+
+    virtual bool isOpen() const override;
 };
 
 } // namespace inet

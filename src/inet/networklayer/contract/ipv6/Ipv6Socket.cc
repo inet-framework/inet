@@ -58,6 +58,7 @@ void Ipv6Socket::processMessage(cMessage *msg)
             if (callback)
                 callback->socketClosed(this);
             delete msg;
+            bound = isOpened = false;
             break;
         default:
             throw cRuntimeError("Ipv6Socket: invalid msg kind %d, one of the IPv6_I_xxx constants expected", msg->getKind());
@@ -75,10 +76,12 @@ void Ipv6Socket::bind(const Protocol *protocol, Ipv6Address localAddress)
     request->setControlInfo(command);
     sendToOutput(request);
     bound = true;
+    isOpened = true;
 }
 
 void Ipv6Socket::connect(Ipv6Address remoteAddress)
 {
+    isOpened = true;
     auto *command = new Ipv6SocketConnectCommand();
     command->setRemoteAddress(remoteAddress);
     auto request = new Request("connect", IPv6_C_CONNECT);

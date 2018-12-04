@@ -109,7 +109,7 @@ class INET_API EthernetSocket : public ISocket
      */
     void send(Packet *packet);
 
-    bool isOpen() { return isOpened; }
+    bool isOpen() const { return isOpened; }
     /**
      * Unbinds the socket. Once closed, a closed socket may be bound to another
      * (or the same) port, and reused.

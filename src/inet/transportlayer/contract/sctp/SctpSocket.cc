@@ -632,4 +632,22 @@ void SctpSocket::setRtoInfo(double initial, double max, double min)
     }
 }
 
+bool SctpSocket::isOpen() const
+{
+    switch (sockstate) {
+    case LISTENING:
+    case CONNECTING:
+    case CONNECTED:
+    case PEER_CLOSED:
+    case LOCALLY_CLOSED:
+    case SOCKERROR: //TODO check SOCKERROR is opened or is closed socket
+        return true;
+    case NOT_BOUND:
+    case CLOSED:
+        return false;
+    default:
+        throw cRuntimeError("invalid SctpSocket state: %d", sockstate);
+    }
+}
+
 } // namespace inet

@@ -55,6 +55,8 @@ class INET_API ISocket
      * Typically used when the owner of ISocket has crashed.
      */
     virtual void destroy() = 0;
+
+    virtual bool isOpen() const = 0;
 };
 
 } // namespace inet
