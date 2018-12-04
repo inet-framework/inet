@@ -81,6 +81,8 @@ class INET_API Ppp : public MacBase
     virtual void handleSelfMessage(cMessage *message) override;
     virtual void handleUpperPacket(Packet *packet) override;
     virtual void handleLowerPacket(Packet *packet) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
+    virtual bool isOperationFinished() override;
 };
 
 } // namespace inet
