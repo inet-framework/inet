@@ -40,7 +40,8 @@ class INET_API QosAckHandler : public IAckHandler
             NORMAL_ACK_NOT_ARRIVED,
             NORMAL_ACK_ARRIVED,
             BLOCK_ACK_ARRIVED_UNACKED,
-            BLOCK_ACK_ARRIVED_ACKED
+            BLOCK_ACK_ARRIVED_ACKED,
+            BLOCK_ACK_NOT_ARRIVED
         };
     protected:
         typedef std::pair<MacAddress, std::pair<Tid, SequenceControlField>> QoSKey;
