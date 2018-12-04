@@ -229,13 +229,32 @@ void Ldp::handleStopOperation(LifecycleOperation *operation)
         s.second->close();
 }
 
+bool Ldp::isOperationFinished()
+{
+    if (operational == State::STOPPING_OPERATION) {
+        if (udpSocket.isOpen() || serverSocket.isOpen())
+            return false;
+        for (auto& s: udpSockets)
+            if (s.isOpen())
+                return false;
+        for (auto s: socketMap.getMap())
+            if (s.second->isOpen())
+                return false;
+        udpSockets.clear();
+        socketMap.deleteSockets();
+        return true;
+    }
+    else
+        return true;
+}
+
 void Ldp::handleCrashOperation(LifecycleOperation *operation)
 {
     for (auto & elem : myPeers)
         cancelAndDelete(elem.timeout);
     myPeers.clear();
     cancelEvent(sendHelloMsg);
-    //TODO destroy all sockets
+
     udpSocket.destroy();
     for (auto& s: udpSockets)
         s.destroy();
