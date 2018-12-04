@@ -44,14 +44,28 @@ void TunSocket::processMessage(cMessage *msg)
 {
     ASSERT(belongsToSocket(msg));
 
-    if (callback)
-        callback->socketDataArrived(this, check_and_cast<Packet*>(msg));
-    else
-        delete msg;
+    switch (msg->getKind()) {
+        case TUN_I_DATA:
+            if (callback)
+                callback->socketDataArrived(this, check_and_cast<Packet*>(msg));
+            else
+                delete msg;
+            break;
+        case TUN_I_CLOSED:
+            if (callback)
+                callback->socketClosed(this);
+            isOpened = false;
+            delete msg;
+            break;
+        default:
+            throw cRuntimeError("TunSocket: invalid msg kind %d, one of the TUN_I_xxx constants expected",
+                msg->getKind());
+    }
 }
 
 void TunSocket::open(int interfaceId)
 {
+    isOpened = true;
     this->interfaceId = interfaceId;
     auto request = new Request("OPEN", TUN_C_OPEN);
     TunOpenCommand *command = new TunOpenCommand();
@@ -65,6 +79,7 @@ void TunSocket::send(Packet *packet)
         throw cRuntimeError("Socket is closed");
 //    TunSendCommand *command = new TunSendCommand();
 //    packet->setControlInfo(command);
+    packet->setKind(TUN_C_DATA);
     sendToTun(packet);
 }
 

@@ -69,6 +69,7 @@ void Tun::handleUpperPacket(Packet *packet)
         emit(packetReceivedFromUpperSignal, packet);
         for (int socketId : socketIds) {
             Packet *copy = packet->dup();
+            copy->setKind(TUN_I_DATA);
             copy->clearTags();
             copy->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
             copy->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceEntry->getInterfaceId());
@@ -95,9 +96,19 @@ void Tun::handleUpperCommand(cMessage *message)
     }
     else if (dynamic_cast<TunCloseCommand *>(controlInfo) != nullptr) {
         auto it = std::find(socketIds.begin(), socketIds.end(), socketId);
-        if (it == socketIds.end())
-            throw cRuntimeError("Socket is already closed: %d", socketId);
-        socketIds.erase(it);
+        if (it != socketIds.end())
+            socketIds.erase(it);
+        delete message;
+        auto indication = new Indication("closed", TUN_I_CLOSED);
+        auto ctrl = new TunSocketClosedIndication();
+        indication->setControlInfo(ctrl);
+        indication->addTagIfAbsent<SocketInd>()->setSocketId(socketId);
+        send(indication, "upperLayerOut");
+    }
+    else if (dynamic_cast<TunDestroyCommand *>(controlInfo) != nullptr) {
+        auto it = std::find(socketIds.begin(), socketIds.end(), socketId);
+        if (it != socketIds.end())
+            socketIds.erase(it);
         delete message;
     }
     else
